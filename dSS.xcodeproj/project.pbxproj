@@ -28,6 +28,7 @@
 		82532C030DA3907E0030CC6A /* thread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82532C020DA3907E0030CC6A /* thread.cpp */; };
 		82532C770DA3ADB60030CC6A /* base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82532C760DA3ADB60030CC6A /* base.cpp */; };
 		825330130DA529CD0030CC6A /* xmlwrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 825330120DA529CD0030CC6A /* xmlwrapper.cpp */; };
+		82B6B4550DA6636E006C51B6 /* cppunit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82B6B4540DA6636E006C51B6 /* cppunit.framework */; };
 		8DD76F650486A84900D96B5E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 08FB7796FE84155DC02AAC07 /* main.cpp */; settings = {ATTRIBUTES = (); }; };
 		8DD76F6A0486A84900D96B5E /* dSS.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* dSS.1 */; };
 /* End PBXBuildFile section */
@@ -73,6 +74,7 @@
 		82532C760DA3ADB60030CC6A /* base.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = base.cpp; path = core/base.cpp; sourceTree = "<group>"; };
 		825330110DA529CD0030CC6A /* xmlwrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xmlwrapper.h; path = core/xmlwrapper.h; sourceTree = "<group>"; };
 		825330120DA529CD0030CC6A /* xmlwrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xmlwrapper.cpp; path = core/xmlwrapper.cpp; sourceTree = "<group>"; };
+		82B6B4540DA6636E006C51B6 /* cppunit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = cppunit.framework; sourceTree = "<group>"; };
 		8DD76F6C0486A84900D96B5E /* dSS */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = dSS; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6859E8B029090EE04C91782 /* dSS.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = dSS.1; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -83,6 +85,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				82532AC00DA286C20030CC6A /* libxml.framework in Frameworks */,
+				82B6B4550DA6636E006C51B6 /* cppunit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,6 +95,7 @@
 		08FB7794FE84155DC02AAC07 /* dSS */ = {
 			isa = PBXGroup;
 			children = (
+				82B6B4540DA6636E006C51B6 /* cppunit.framework */,
 				82532ABF0DA286C20030CC6A /* libxml.framework */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
@@ -223,6 +227,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
@@ -241,6 +249,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = dSS;

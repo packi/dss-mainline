@@ -132,12 +132,12 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 229004086;
-			PBXWorkspaceStateSaveDate = 229004086;
+			PBXPerProjectTemplateStateSaveDate = 229005173;
+			PBXWorkspaceStateSaveDate = 229005173;
 		};
 		perUserProjectItems = {
-			82869EF90DA653B5004CAD97 /* PBXTextBookmark */ = 82869EF90DA653B5004CAD97 /* PBXTextBookmark */;
-			82869EFC0DA653B5004CAD97 /* PBXTextBookmark */ = 82869EFC0DA653B5004CAD97 /* PBXTextBookmark */;
+			82869EF90DA653B5004CAD97 = 82869EF90DA653B5004CAD97 /* PBXTextBookmark */;
+			82869EFC0DA653B5004CAD97 = 82869EFC0DA653B5004CAD97 /* PBXTextBookmark */;
 		};
 		sourceControlManager = 82532A4C0DA27E1C0030CC6A /* Source Control */;
 		userBuildSettings = {
@@ -145,9 +145,9 @@
 	};
 	08FB7796FE84155DC02AAC07 /* main.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {910, 1878}}";
-			sepNavSelRange = "{2497, 0}";
-			sepNavVisRange = "{2448, 357}";
+			sepNavIntBoundsRect = "{{0, 0}, {1071, 2018}}";
+			sepNavSelRange = "{2490, 0}";
+			sepNavVisRange = "{2005, 956}";
 			sepNavWindowFrame = "{{31, 170}, {750, 558}}";
 		};
 	};
@@ -201,8 +201,8 @@
 	82532AFC0DA374250030CC6A /* dss.cpp */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {1071, 2394}}";
-			sepNavSelRange = "{3086, 0}";
-			sepNavVisRange = "{1605, 1539}";
+			sepNavSelRange = "{4846, 0}";
+			sepNavVisRange = "{1611, 1454}";
 			sepNavWindowFrame = "{{110, 155}, {1069, 605}}";
 		};
 	};
@@ -273,7 +273,7 @@
 		hitCount = 0;
 		ignoreCount = 0;
 		isThrow = 1;
-		modificationTime = 228997560.593704;
+		modificationTime = 229005611.939587;
 		state = 1;
 	};
 	82532F650DA514770030CC6A /* XCCPPCondition */ = {
@@ -282,16 +282,16 @@
 	};
 	825330110DA529CD0030CC6A /* xmlwrapper.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {910, 1344}}";
-			sepNavSelRange = "{266, 0}";
-			sepNavVisRange = "{582, 477}";
+			sepNavIntBoundsRect = "{{0, 0}, {1071, 1330}}";
+			sepNavSelRange = "{935, 0}";
+			sepNavVisRange = "{295, 1022}";
 		};
 	};
 	825330120DA529CD0030CC6A /* xmlwrapper.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {672, 2296}}";
-			sepNavSelRange = "{2177, 22}";
-			sepNavVisRange = "{1865, 255}";
+			sepNavIntBoundsRect = "{{0, 0}, {910, 2422}}";
+			sepNavSelRange = "{3796, 0}";
+			sepNavVisRange = "{3521, 472}";
 		};
 	};
 	82869EF90DA653B5004CAD97 /* PBXTextBookmark */ = {

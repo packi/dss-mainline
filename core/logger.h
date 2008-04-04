@@ -3,8 +3,19 @@
  *  dSS
  *
  *  Created by Patrick Stählin on 4/2/08.
- *  Copyright 2008 __MyCompanyName__. All rights reserved.
+ *  Copyright:
+ *  (c) 2008 by
+ *  futureLAB AG
+ *  Schwalmenackerstrasse 4
+ *  CH-8400 Winterthur / Schweiz
+ *  Alle Rechte vorbehalten.
+ *  Jede Art der Vervielfaeltigung, Verbreitung,
+ *  Auswertung oder Veraenderung - auch auszugsweise -
+ *  ist ohne vorgaengige schriftliche Genehmigung durch
+ *  die futureLAB AG untersagt.
  *
+ * Last change $Date: 2007/11/09 13:18:55 $
+ * by $Author: pstaehlin $
  */
 
 #ifndef LOGGER_H_INLUDED

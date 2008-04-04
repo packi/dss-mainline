@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2006 by Patrick Stählin <me@packi.ch>
+ *
+ */
+
+
 #ifndef THREAD_H_INCLUDED
 #define THREAD_H_INCLUDED
 

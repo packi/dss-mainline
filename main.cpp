@@ -1,3 +1,21 @@
+/*
+ *  Copyright:
+ *  (c) 2008 by
+ *  futureLAB AG
+ *  Schwalmenackerstrasse 4
+ *  CH-8400 Winterthur / Schweiz
+ *  Alle Rechte vorbehalten.
+ *  Jede Art der Vervielfaeltigung, Verbreitung,
+ *  Auswertung oder Veraenderung - auch auszugsweise -
+ *  ist ohne vorgaengige schriftliche Genehmigung durch
+ *  die futureLAB AG untersagt.
+ *
+ * Last change $Date: 2007/11/09 13:18:55 $
+ * by $Author: pstaehlin $
+ */
+
+
+
 #include <iostream>
 
 #include "base.h"
@@ -16,6 +34,7 @@ void testConfig();
 
 
 void cppTest();
+int runTests();
 
 int main (int argc, char * const argv[]) {
   
@@ -29,14 +48,62 @@ int main (int argc, char * const argv[]) {
 	signal(SIGPIPE, SIG_IGN);
 #endif  
   xmlInitParser();
-  
-  testConfig();
+
+  //runTests();
+  //testConfig();
   //cppTest();
   //testXMLReader();
  // testMBCS();
   // start DSS
   dss::DSS::GetInstance()->Run();
   return 0;
+}
+
+
+#include <cppunit/TestRunner.h>
+#include <cppunit/TestResult.h>
+#include <cppunit/TestResultCollector.h>
+#include <cppunit/extensions/HelperMacros.h>
+#include <cppunit/BriefTestProgressListener.h>
+#include <cppunit/extensions/TestFactoryRegistry.h>
+
+class Test : public CPPUNIT_NS::TestCase
+{
+  CPPUNIT_TEST_SUITE(Test);
+  CPPUNIT_TEST(testHelloWorld);
+  CPPUNIT_TEST_SUITE_END();
+  
+public:
+  void setUp(void) {}
+  void tearDown(void) {} 
+  
+protected:
+  void testHelloWorld(void) { 
+    CPPUNIT_ASSERT_EQUAL( 1, 2 );
+    std::cout << "Hello, world!" << std::endl; 
+  }
+};
+
+CPPUNIT_TEST_SUITE_REGISTRATION(Test);
+
+int runTests() {
+  //--- Create the event manager and test controller
+  CPPUNIT_NS::TestResult controller;
+  
+  //--- Add a listener that colllects test result
+  CPPUNIT_NS::TestResultCollector result;
+  controller.addListener( &result );        
+  
+  //--- Add a listener that print dots as test run.
+  CPPUNIT_NS::BriefTestProgressListener progress;
+  controller.addListener( &progress );      
+  
+  //--- Add the top suite to the test runner
+  CPPUNIT_NS::TestRunner runner;
+  runner.addTest( CPPUNIT_NS::TestFactoryRegistry::getRegistry().makeTest() );
+  runner.run( controller );
+  
+  return result.wasSuccessful() ? 0 : 1;
 }
 
 void testMBCS() {
@@ -81,7 +148,7 @@ void testXMLReader() {
 
 void testConfig() {
   Config conf;
-  conf.ReadFromXML(wstring(L"/Users/packi/sources/dss/data/testconfig.xml"));
+  conf.ReadFromXML(wstring(L"/Users/packi/sources/dss/trunk/data/testconfig.xml"));
   int bla = conf.GetOptionAs<int>(L"serverport");
   assert(bla == 8080);
   

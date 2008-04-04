@@ -45,7 +45,7 @@ namespace dss {
   
   void DSS::LoadConfig() {
     Logger::GetInstance()->Log(L"Loading config");
-    m_Config.ReadFromXML(L"/Users/packi/sources/dss/data/config.xml");
+    m_Config.ReadFromXML(L"/Users/packi/sources/dss/trunk/data/config.xml");
   } // LoadConfig
 
   //============================================= DSS
@@ -76,8 +76,7 @@ namespace dss {
   
   void WebServer::HTTPListOptions(struct shttpd_arg *arg) {
     shttpd_printf(arg, "%s", "HTTP/1.1 200 OK\r\n");
-//    shttpd_printf(arg, "%s", "Content-Encoding: UTF8\r\n");
-    shttpd_printf(arg, "%s", "Content-Type: text/html; character-set=utf8\r\n\r\n");
+    shttpd_printf(arg, "%s", "Content-Type: text/html; charset=utf-8\r\n\r\n");
     shttpd_printf(arg, "%s", "<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><body>");
     shttpd_printf(arg, "%s", "<h1>Configuration</h1>");
     
@@ -88,7 +87,7 @@ namespace dss {
     for(HashMapConstWStringWString::const_iterator iOption = options.begin(); iOption != options.end(); ++iOption) {
       stream << L"<li>" << iOption->first << L" = " << iOption->second << L"</li>";
     }
-    stream << L"</ul>";
+    stream << L"</ul></body></html>";
     wstring data = stream.str();
     string sdata = ToUTF8(data.c_str(), data.size());
     shttpd_printf(arg, "%s", sdata.c_str());

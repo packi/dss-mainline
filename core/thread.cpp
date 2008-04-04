@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2006 by Patrick Stählin <me@packi.ch>
+ *
+ */
+
 #include "thread.h"
 
 #include <cassert>

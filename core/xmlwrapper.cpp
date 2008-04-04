@@ -3,8 +3,19 @@
  *  dSS
  *
  *  Created by Patrick Stählin on 4/3/08.
- *  Copyright 2008 __MyCompanyName__. All rights reserved.
+ *  Copyright:
+ *  (c) 2008 by
+ *  futureLAB AG
+ *  Schwalmenackerstrasse 4
+ *  CH-8400 Winterthur / Schweiz
+ *  Alle Rechte vorbehalten.
+ *  Jede Art der Vervielfaeltigung, Verbreitung,
+ *  Auswertung oder Veraenderung - auch auszugsweise -
+ *  ist ohne vorgaengige schriftliche Genehmigung durch
+ *  die futureLAB AG untersagt.
  *
+ * Last change $Date: 2007/11/09 13:18:55 $
+ * by $Author: pstaehlin $
  */
 
 #include "xmlwrapper.h"
@@ -86,6 +97,15 @@ namespace dss {
     throw new XMLException("Could not find node");
   } // GetChildByName
   
+  void XMLNode::AddChildNode(const wstring& _name, const wstring& _content) {
+    string name = ToUTF8(_name);
+    string content = ToUTF8(_content);
+    
+    if(name.size() == 0) {
+      throw new XMLException("XMLNode::AddChildNode: parameter _name must not be empty");
+    }
+  } // AddChildNode
+
   HashMapConstWStringWString& XMLNode::GetAttributes() {
     AssertHasNode("Can't return children without node");
     
@@ -105,11 +125,10 @@ namespace dss {
     return m_Attributes;
   }
   
-  //============================================= XMLDocumentFileReader
+  //============================================= XMLDocument
   
   XMLDocument::XMLDocument(xmlDoc* _pDocument) 
-  : ResourceHolder<xmlDoc>(_pDocument),
-  m_OwnsDocument(true)
+  : ResourceHolder<xmlDoc>(_pDocument)
   {
     if(m_Resource != NULL) {
       m_RootNode = XMLNode(xmlDocGetRootElement(m_Resource));
@@ -118,8 +137,7 @@ namespace dss {
   
   XMLDocument::XMLDocument(XMLDocument& _other) 
   : ResourceHolder<xmlDoc>(_other),
-  m_RootNode(_other.m_RootNode),
-  m_OwnsDocument(false)
+  m_RootNode(_other.m_RootNode)
   {
   } // ctor(copy)
   
@@ -135,6 +153,17 @@ namespace dss {
   } // GetRootNode
   
   
+  void XMLDocument::SaveToFile(const wstring& _fileName) {
+    string fileName = ToUTF8(_fileName.c_str(), _fileName.size());
+    FILE* out = fopen(fileName.c_str(), "w");
+    if(out == NULL) {
+      throw new XMLException(string("XMLDocumen::SaveToFile: Could not open file ") + fileName);
+    }
+    if(xmlDocDump(out, m_Resource) < 0) {
+      throw new XMLException(string("XMLDocumen::SaveToFile: xmlDocDump failed for file:") + fileName);
+    }
+  }
+  
   //============================================= XMLDocumentFileReader
   
   XMLDocumentFileReader::XMLDocumentFileReader(const wstring& _fileURI) 
@@ -143,11 +172,14 @@ namespace dss {
   } // ctor
   
   XMLDocumentReader::~XMLDocumentReader() {
-    m_Document.FreeDocument();
   }
   
   XMLDocument& XMLDocumentFileReader::GetDocument() {
     const string fileName = ToUTF8(m_URI.c_str(), m_URI.size());
+    
+    if(!FileExists(fileName.c_str())) {
+      throw new XMLException(string("XMLDocumentFileReader::GetDocument: File '") + fileName + "' does not exist");
+    }
     
     xmlDoc* doc = xmlParseFile(fileName.c_str());
     if(doc == NULL) {

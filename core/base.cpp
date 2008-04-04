@@ -3,13 +3,28 @@
  *  dSS
  *
  *  Created by Patrick Stählin on 4/2/08.
- *  Copyright 2008 __MyCompanyName__. All rights reserved.
+ *  Copyright:
+ *  (c) 2008 by
+ *  futureLAB AG
+ *  Schwalmenackerstrasse 4
+ *  CH-8400 Winterthur / Schweiz
+ *  Alle Rechte vorbehalten.
+ *  Jede Art der Vervielfaeltigung, Verbreitung,
+ *  Auswertung oder Veraenderung - auch auszugsweise -
+ *  ist ohne vorgaengige schriftliche Genehmigung durch
+ *  die futureLAB AG untersagt.
  *
+ * Last change $Date: 2007/11/09 13:18:55 $
+ * by $Author: pstaehlin $
  */
 
 #include "base.h"
 
+#include <sys/stat.h>
+
 namespace dss {
+  
+  //============================================= Utils
   
   template<>
   int StrToInt(const wstring& _strValue) {
@@ -21,10 +36,6 @@ namespace dss {
     return wcstol(_strValue, NULL, 10);
   }
   
-  
-  
-
-  //============================================= Utils
   
   const int ConversionBufferSize = 1024;
 
@@ -70,6 +81,37 @@ namespace dss {
       result.append(buffer, len);
     }
     return result;
+  } // ToUTF8
+  
+  const wstring FromUTFF8(const string& _utf8string) {
+    return FromUTFF8(_utf8string, _utf8string.size());
   }
+  
+  const string ToUTF8(const wstring& _wcharString) {
+    return ToUTF8(_wcharString, _wcharString.size());
+  }
+
+  
+  bool FileExists( const string& _fileName ) {
+    return FileExists(_fileName.c_str());
+  } // FileExists
+  
+  bool FileExists( const char* _fileName ) {
+    #ifdef WIN32
+      return (FileAge( _fileName ) != -1);
+    #else
+      #ifdef __GNU__
+        return euidaccess( _fileName, F_OK ) == 0;
+      #else
+        struct stat buf;
+        if( lstat( _fileName, &buf ) != -1 ) {
+          int fileType = (buf.st_mode & S_IFMT);
+          return fileType  == S_IFREG;
+        } else {
+          return false;
+        }
+      #endif
+    #endif
+  } // FileExists
   
 }

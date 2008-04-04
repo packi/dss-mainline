@@ -3,8 +3,19 @@
  *  dSS
  *
  *  Created by Patrick Stählin on 4/3/08.
- *  Copyright 2008 __MyCompanyName__. All rights reserved.
+ *  Copyright:
+ *  (c) 2008 by
+ *  futureLAB AG
+ *  Schwalmenackerstrasse 4
+ *  CH-8400 Winterthur / Schweiz
+ *  Alle Rechte vorbehalten.
+ *  Jede Art der Vervielfaeltigung, Verbreitung,
+ *  Auswertung oder Veraenderung - auch auszugsweise -
+ *  ist ohne vorgaengige schriftliche Genehmigung durch
+ *  die futureLAB AG untersagt.
  *
+ * Last change $Date: 2007/11/09 13:18:55 $
+ * by $Author: pstaehlin $
  */
 
 #include "base.h"
@@ -37,6 +48,12 @@ namespace dss {
     const wstring GetName();
     const wstring GetContent();
     
+    void SetContent(const wstring& _value);
+    void SetName(const wstring& _value);
+    
+    XMLNode& AddTextNode();
+    XMLNode& AddChildNode(const wstring& _name, const wstring& _content = "");
+    
     XMLNode& GetChildByName(const wstring& _name);
     
     XMLNodeList& GetChildren();
@@ -45,16 +62,14 @@ namespace dss {
   
   class XMLDocument : ResourceHolder<xmlDoc> {
   private:
-    bool m_OwnsDocument;
     XMLNode m_RootNode;
   public:
     explicit XMLDocument(xmlDoc* _pDocument = NULL);
     XMLDocument(XMLDocument& _other);
     ~XMLDocument();
     
-    void FreeDocument() {
-      //xmlFreeDoc(m_pDocument);
-    }
+    void SaveToFile(const wstring& _fileName);
+    
     XMLNode& GetRootNode();
   }; // XMLDocument
   
