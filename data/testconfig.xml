@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config version="1">
+  <item><name>serverport</name><value>8080</value></item>
+  <item><name>serverroot</name><value>/Users/packi/sources/dss/data/</value></item>
+  <item><name>japanese thingies</name><value>02日22時更新</value></item>
+</config>
