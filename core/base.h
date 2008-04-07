@@ -14,8 +14,8 @@
  *  ist ohne vorgaengige schriftliche Genehmigung durch
  *  die futureLAB AG untersagt.
  *
- * Last change $Date: 2007/11/09 13:18:55 $
- * by $Author: pstaehlin $
+ * Last change $Date$
+ * by $Author$
  */
 
 #ifndef BASE_H_INCLUDED
@@ -85,13 +85,16 @@ namespace dss {
   
   template<typename strclass>
   int StrToInt(const strclass* _strValue);
+  
+  template <class t>
+  t DateToISOString( struct tm* _dateTime );
 
   //============================================= Encoding helpers
   const wstring FromUTF8(const char* _utf8string, int _len);
   const string ToUTF8(const wchar_t* _wcharString, int _len);
   
-  const wstring FromUTfF8(const string& _utf8string);
-  const string ToUTF8(const wstring&
+  const wstring FromUTF8(const string& _utf8string);
+  const string ToUTF8(const wstring& _wcharString);
   
   bool FileExists( const char* _fileName );
   bool FileExists( const string& _fileName );

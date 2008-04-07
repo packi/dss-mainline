@@ -14,8 +14,8 @@
  *  ist ohne vorgaengige schriftliche Genehmigung durch
  *  die futureLAB AG untersagt.
  *
- * Last change $Date: 2007/11/09 13:18:55 $
- * by $Author: pstaehlin $
+ * Last change $Date$
+ * by $Author$
  */
 
 #include "xmlwrapper.h"
@@ -97,13 +97,14 @@ namespace dss {
     throw new XMLException("Could not find node");
   } // GetChildByName
   
-  void XMLNode::AddChildNode(const wstring& _name, const wstring& _content) {
+  XMLNode& XMLNode::AddChildNode(const wstring& _name, const wstring& _content) {
     string name = ToUTF8(_name);
     string content = ToUTF8(_content);
     
     if(name.size() == 0) {
       throw new XMLException("XMLNode::AddChildNode: parameter _name must not be empty");
     }
+    
   } // AddChildNode
 
   HashMapConstWStringWString& XMLNode::GetAttributes() {

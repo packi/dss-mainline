@@ -10,9 +10,9 @@
  *  ist ohne vorgaengige schriftliche Genehmigung durch
  *  die futureLAB AG untersagt.
  *
- * Last change $Date: 2007/11/09 13:18:55 $
- * by $Author: pstaehlin $
- */
+ * Last change $Date$
+ * by $Author$
+*/
 
 
 

@@ -14,8 +14,8 @@
  *  ist ohne vorgaengige schriftliche Genehmigung durch
  *  die futureLAB AG untersagt.
  *
- * Last change $Date: 2007/11/09 13:18:55 $
- * by $Author: pstaehlin $
+ * Last change $Date$
+ * by $Author$
  */
 
 #include "base.h"
@@ -36,6 +36,27 @@ namespace dss {
     return wcstol(_strValue, NULL, 10);
   }
   
+  const char* theISOFormatString = "%Y-%m-%d %H:%M:%S";
+  
+  template <>
+  string DateToISOString( struct tm* _dateTime ) {
+    char buf[ 20 ];
+    strftime( buf, 20, theISOFormatString, _dateTime );
+    string result = buf;
+    return result;
+  } // DateToISOString
+  
+  struct tm DateFromISOString( const char* _dateTimeAsString ) {
+    struct tm result;
+    strptime( _dateTimeAsString, theISOFormatString, &result );
+    return result;
+  } // DateFromISOString
+ 
+  
+  template <>
+  wstring DateToISOString( struct tm* _dateTime ) {
+    return FromUTF8(DateToISOString<string>(_dateTime));
+  } // DateToISOString
   
   const int ConversionBufferSize = 1024;
 
@@ -83,12 +104,12 @@ namespace dss {
     return result;
   } // ToUTF8
   
-  const wstring FromUTFF8(const string& _utf8string) {
-    return FromUTFF8(_utf8string, _utf8string.size());
+  const wstring FromUTF8(const string& _utf8string) {
+    return FromUTF8(_utf8string.c_str(), _utf8string.size());
   }
   
   const string ToUTF8(const wstring& _wcharString) {
-    return ToUTF8(_wcharString, _wcharString.size());
+    return ToUTF8(_wcharString.c_str(), _wcharString.size());
   }
 
   

@@ -8,7 +8,7 @@
  *
  *  DESCRIPTION : Defines the interface functions to the shttp daemon
  *
- *  REVISION    : $Id: compat_rtems.c,v 1.2 2006/11/12 03:29:17 infidel Exp $
+ *  REVISION    : $Id$
  *
  *  COMMENTS    :
  *

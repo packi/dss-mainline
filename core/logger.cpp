@@ -14,11 +14,12 @@
  *  ist ohne vorgaengige schriftliche Genehmigung durch
  *  die futureLAB AG untersagt.
  *
- * Last change $Date: 2007/11/09 13:18:55 $
- * by $Author: pstaehlin $
+ * Last change $Date$
+ * by $Author$
  */
 
 #include "logger.h"
+#include "base.h"
 
 #include <cassert>
 #include <iostream>
@@ -29,6 +30,56 @@ namespace dss {
   
   Logger* Logger::m_Instance = NULL;
   
+  template <class t>
+  t SeverityToString(const aLogSeverity _severity);
+  
+  template <>
+  const char* SeverityToString(const aLogSeverity _severity) {
+    switch(_severity) {
+      case lsDebug:
+        return "[Debug]";
+      case lsInfo:
+        return "[Info]";
+      case lsWarning:
+        return "[Warning]";
+      case lsError:
+        return "[Error]";
+      case lsFatal:
+        return "[Fatal]";
+      default:
+        return "[unknown severity]";
+    }
+  } // SeverityToString<const char*>
+  
+  template <>
+  const string SeverityToString(const aLogSeverity _severity) {
+    return string(SeverityToString<const char*>(_severity));
+  } // SeverityToString<const string>
+  
+  template <>
+  const wchar_t* SeverityToString(const aLogSeverity _severity) {
+    switch(_severity) {
+      case lsDebug:
+        return L"[Debug]";
+      case lsInfo:
+        return L"[Info]";
+      case lsWarning:
+        return L"[Warning]";
+      case lsError:
+        return L"[Error]";
+      case lsFatal:
+        return L"[Fatal]";
+      default:
+        return L"[unknown severity]";
+    }
+  } // SeverityToString<const wchar_t*>
+  
+  template <>
+  const wstring SeverityToString(const aLogSeverity _severity) {
+    return wstring(SeverityToString<const wchar_t*>(_severity));
+  } // SeverityToString<const wstring>
+  
+  
   Logger* Logger::GetInstance() {
     if(m_Instance == NULL) {
       m_Instance = new Logger();
@@ -37,21 +88,35 @@ namespace dss {
     return m_Instance;
   }
   
-  void Logger::Log(const string& _message) {
-    cout << _message << endl;
+  void Logger::Log(const string& _message, const aLogSeverity _severity) {  
+    time_t now = time( NULL );
+    struct tm t;
+#ifdef WIN32
+    localtime_s( &t, &now );
+#else
+    localtime_r( &now, &t );
+#endif
+    cout << "[" << DateToISOString<string>(&t) << "]" << SeverityToString<const string>(_severity) << " " << _message << endl;
   } // Log
   
-  void Logger::Log(const char* _message) {
-    Log(string(_message));
+  void Logger::Log(const char* _message, const aLogSeverity _severity) {
+    Log(string(_message), _severity);
   } // Log
   
-  void Logger::Log(const wchar_t* _message) {
-    Log(wstring(_message));
+  void Logger::Log(const wchar_t* _message, const aLogSeverity _severity) {
+    Log(wstring(_message), _severity);
   } // Log
   
-  void Logger::Log(const wstring& _message) {
-    wcout << _message << endl;
+  void Logger::Log(const wstring& _message, const aLogSeverity _severity) {
+    time_t now = time( NULL );
+    struct tm t;
+#ifdef WIN32
+    localtime_s( &t, &now );
+#else
+    localtime_r( &now, &t );
+#endif
+    wcout << L"[" << DateToISOString<wstring>(&t) << L"]" << SeverityToString<const wstring>(_severity) << L" " << _message << endl;
   } // Log
-
+  
   
 }

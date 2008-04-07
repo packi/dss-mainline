@@ -33,7 +33,8 @@ namespace dss {
   private:
     struct shttpd_ctx* m_SHttpdContext;
   protected:
-    static void HTTPListOptions(struct shttpd_arg *arg);    
+    static void HTTPListOptions(struct shttpd_arg* _arg);
+    static void EmitHTTPHeader(int _code, struct shttpd_arg* _arg);
   public:
     WebServer();
     ~WebServer();

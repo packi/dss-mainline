@@ -10,7 +10,7 @@
 
 /*
  * Small and portable HTTP server, http://shttpd.sourceforge.net
- * $Id: shttpd.c,v 1.28 2008/02/17 21:45:09 drozd Exp $
+ * $Id$
  */
 
 #include "defs.h"

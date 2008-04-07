@@ -14,8 +14,8 @@
  *  ist ohne vorgaengige schriftliche Genehmigung durch
  *  die futureLAB AG untersagt.
  *
- * Last change $Date: 2007/11/09 13:18:55 $
- * by $Author: pstaehlin $
+ * Last change $Date$
+ * by $Author$
  */
 
 #ifndef LOGGER_H_INLUDED
@@ -24,6 +24,14 @@
 #include <string>
 
 using namespace std;
+
+typedef enum {
+  lsDebug,
+  lsInfo,
+  lsWarning,
+  lsError,
+  lsFatal
+} aLogSeverity;
 
 namespace dss {
   
@@ -35,10 +43,10 @@ namespace dss {
   public:
     static Logger* GetInstance();
     
-    void Log(const string& _message);
-    void Log(const char* _message);
-    void Log(const wchar_t* _message);
-    void Log(const wstring& _message);
+    void Log(const string& _message, const aLogSeverity _severity = lsDebug);
+    void Log(const char* _message, const aLogSeverity _severity = lsDebug);
+    void Log(const wchar_t* _message, const aLogSeverity _severity = lsDebug);
+    void Log(const wstring& _message, const aLogSeverity _severity = lsDebug);
   }; // Logger
 }
 

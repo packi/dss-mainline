@@ -34,7 +34,7 @@ namespace dss {
   } // GetInstance
   
   void DSS::Run() {
-    Logger::GetInstance()->Log(L"DSS stating up....");
+    Logger::GetInstance()->Log(L"DSS stating up....", lsInfo);
     LoadConfig();
     m_WebServer.Initialize(m_Config);
     m_WebServer.Run();
@@ -44,7 +44,7 @@ namespace dss {
   } // Run
   
   void DSS::LoadConfig() {
-    Logger::GetInstance()->Log(L"Loading config");
+    Logger::GetInstance()->Log(L"Loading config", lsInfo);
     m_Config.ReadFromXML(L"/Users/packi/sources/dss/trunk/data/config.xml");
   } // LoadConfig
 
@@ -60,25 +60,36 @@ namespace dss {
     shttpd_fini(m_SHttpdContext);
   }
   
-  void WebServer::Initialize(Config& _config) {    
-    shttpd_set_option(m_SHttpdContext, "ports", _config.GetOptionAs(L"webserverport", "8080"));
+  void WebServer::Initialize(Config& _config) {
+    string ports = _config.GetOptionAs(L"webserverport", "8080");
+    Logger::GetInstance()->Log(string("Webserver: Listening on port(s) ") + ports);
+    shttpd_set_option(m_SHttpdContext, "ports", ports.c_str());
+
     string aliases = string("/=") + _config.GetOptionAs<string>(L"webserverroot", "/Users/packi/sources/dss/data/");
+    Logger::GetInstance()->Log(string("Webserver: Configured aliases: ") + aliases);
     shttpd_set_option(m_SHttpdContext, "aliases", aliases.c_str());    
 
     shttpd_register_uri(m_SHttpdContext, "/config", &HTTPListOptions, NULL);    
   } // Initialize
   
   void WebServer::Execute() {
+    Logger::GetInstance()->Log("Webserver started", lsInfo);
     while(!m_Terminated) {
       shttpd_poll(m_SHttpdContext, 1000);
     }
   }
   
-  void WebServer::HTTPListOptions(struct shttpd_arg *arg) {
-    shttpd_printf(arg, "%s", "HTTP/1.1 200 OK\r\n");
-    shttpd_printf(arg, "%s", "Content-Type: text/html; charset=utf-8\r\n\r\n");
-    shttpd_printf(arg, "%s", "<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><body>");
-    shttpd_printf(arg, "%s", "<h1>Configuration</h1>");
+  void WebServer::EmitHTTPHeader(int _code, struct shttpd_arg* _arg) {
+    stringstream sstream;
+    sstream << "HTTP/1.1 " << _code << " OK\r\n";
+    sstream << "Content-Type: text/html; charset=utf-8\r\n\r\n";
+    shttpd_printf(_arg, sstream.str().c_str());
+  } // EmitHTTPHeader
+  
+  void WebServer::HTTPListOptions(struct shttpd_arg* _arg) {
+    EmitHTTPHeader(200, _arg);
+    shttpd_printf(_arg, "%s", "<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><body>");
+    shttpd_printf(_arg, "%s", "<h1>Configuration</h1>");
     
     wstringstream stream;
     stream << L"<ul>";
@@ -88,11 +99,9 @@ namespace dss {
       stream << L"<li>" << iOption->first << L" = " << iOption->second << L"</li>";
     }
     stream << L"</ul></body></html>";
-    wstring data = stream.str();
-    string sdata = ToUTF8(data.c_str(), data.size());
-    shttpd_printf(arg, "%s", sdata.c_str());
+    shttpd_printf(_arg, ToUTF8(stream.str()).c_str());
     
-    arg->flags |= SHTTPD_END_OF_OUTPUT;
+    _arg->flags |= SHTTPD_END_OF_OUTPUT;
   } // HTTPListOptions
   
   //============================================= Config
@@ -119,7 +128,6 @@ namespace dss {
         XMLNodeList items = rootNode.GetChildren();
         for(XMLNodeList::iterator it = items.begin(); it != items.end(); ++it) {
           if(it->GetName() == L"item") {
-            cout << "found item" << endl;
             try {
               XMLNode& nameNode = it->GetChildByName(L"name");
               if(nameNode.GetChildren().size() == 0) {
@@ -133,7 +141,8 @@ namespace dss {
               }
               valueNode = (valueNode.GetChildren())[0];
               m_OptionsByName[nameNode.GetContent()] = valueNode.GetContent();
-            } catch(XMLException) {
+            } catch(XMLException& _e) {
+              Logger::GetInstance()->Log(string("Error loading XML-File: ") + _e.what(), lsError);
             }
           }
         }
