@@ -21,6 +21,7 @@
 #include "base.h"
 #include "dss.h"
 #include "core/xmlwrapper.h"
+#include "core/jshandler.h"
 
 #include <libxml/tree.h>
 #include <libxml/encoding.h>
@@ -31,6 +32,29 @@ using namespace dss;
 void testMBCS();
 void testXMLReader();
 void testConfig();
+int testJS();
+
+void testJS2() {
+  ScriptEnvironment env;
+  env.Initialize();
+  ScriptContext* ctx = env.GetContext();
+  ctx->LoadFromMemory("x = 10; print(x); x = x * x;");
+  double result = ctx->Evaluate<double>();
+  assert(result == 100.0);  
+  delete ctx;
+  
+  ctx = env.GetContext();
+  ctx->LoadFromFile("/Users/packi/sources/dss/trunk/data/test.js");
+  result = ctx->Evaluate<double>();
+  assert(result == 100.0);
+  delete ctx;
+  
+  ctx = env.GetContext();
+  ctx->LoadFromMemory("x = 'bla'; x = x + 'bla';");
+  string sres = ctx->Evaluate<string>();
+  assert(sres == "blabla");
+  delete ctx;
+}
 
 
 void cppTest();
@@ -48,6 +72,8 @@ int main (int argc, char * const argv[]) {
 	signal(SIGPIPE, SIG_IGN);
 #endif  
   xmlInitParser();
+  
+  testJS2();
 
   //runTests();
   //testConfig();
@@ -56,6 +82,159 @@ int main (int argc, char * const argv[]) {
  // testMBCS();
   // start DSS
   dss::DSS::GetInstance()->Run();
+  return 0;
+}
+
+#include <js/jsapi.h>
+
+JSBool
+global_newresolve(JSContext *cx, JSObject *obj, jsval id,
+                  uintN flags, JSObject **objp)
+{
+  /* taken from js.c - I don't understand the flags yet */
+  if ((flags & JSRESOLVE_ASSIGNING) == 0) {
+    JSBool resolved;
+    if (!JS_ResolveStandardClass(cx, obj, id, &resolved))
+      return JS_FALSE;
+    if (resolved)
+      *objp = obj;
+  }
+  return JS_TRUE;
+}
+
+
+static void js_error_handler(JSContext *ctx, const char *msg, JSErrorReport *er){
+  char *pointer=NULL;
+  char *line=NULL;
+  int len;
+  
+  if (er->linebuf != NULL){
+    len = er->tokenptr - er->linebuf + 1;
+    pointer = (char*)malloc(len);
+    memset(pointer, '-', len);
+    pointer[len-1]='\0';
+    pointer[len-2]='^';
+    
+    len = strlen(er->linebuf)+1;
+    line = (char*)malloc(len);
+    strncpy(line, er->linebuf, len);
+    line[len-1] = '\0';
+  }
+  else {
+    len=0;
+    pointer = (char*)malloc(1);
+    line = (char*)malloc(1);
+    pointer[0]='\0';
+    line[0] = '\0';
+  }
+  
+  while (len > 0 && (line[len-1] == '\r' || line[len-1] == '\n')){ line[len-1]='\0'; len--; }
+  
+  printf("JS Error: %s\nFile: %s:%u\n", msg, er->filename, er->lineno);
+  if (line[0]){
+    printf("%s\n%s\n", line, pointer);
+  }
+  
+  free(pointer);
+  free(line);
+}
+
+static JSClass global_class = {
+  "global", JSCLASS_NEW_RESOLVE, /* use the new resolve hook */
+  JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
+  /* todo: explain */
+  JS_EnumerateStandardClasses,
+  JS_ResolveStub,
+  JS_ConvertStub,  JS_FinalizeStub, JSCLASS_NO_OPTIONAL_MEMBERS
+};
+
+JSBool global_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
+  if (argc < 1){
+    /* No arguments passed in, so do nothing. */
+    /* We still want to return JS_TRUE though, other wise an exception will be thrown by the engine. */
+    *rval = INT_TO_JSVAL(0); /* Send back a return value of 0. */
+  } else {
+    int i;
+    size_t amountWritten=0;
+    for (i=0; i<argc; i++){
+      JSString *val = JS_ValueToString(cx, argv[i]); /* Convert the value to a javascript string. */
+      char *str = JS_GetStringBytes(val); /* Then convert it to a C-style string. */
+      size_t length = JS_GetStringLength(val); /* Get the length of the string, # of chars. */
+      amountWritten = fwrite(str, sizeof(*str), length, stdout); /* write the string to stdout. */
+    }
+    *rval = INT_TO_JSVAL(amountWritten); /* Set the return value to be the number of bytes/chars written */
+  }
+  fwrite("\n", 1, 1, stdout);
+  return JS_TRUE;
+}
+
+JSFunctionSpec global_methods[] = {
+  {"print", global_print, 1, 0, 0},
+  {NULL},
+};
+
+
+int testJS() { 
+  JSRuntime *rt;
+  JSContext *cx;
+  
+  JSObject  *global;
+
+  /* Create a JS runtime. */
+  rt = JS_NewRuntime(8L * 1024L * 1024L);
+  if (rt == NULL)
+    return 1;
+  
+  /* Create a context. */
+  cx = JS_NewContext(rt, 8192);
+  if (cx == NULL)
+    return 1;
+  JS_SetOptions(cx, JSOPTION_VAROBJFIX);
+  JS_SetErrorReporter(cx, js_error_handler);
+  
+  /* Create the global object. */
+  global = JS_NewObject(cx, &global_class, NULL, NULL);
+  if (global == NULL)
+    return 1;
+  
+  JS_DefineFunctions(cx, global, global_methods);
+  
+  /* Populate the global object with the standard globals,
+   like Object and Array. */
+  if (!JS_InitStandardClasses(cx, global))
+    return 1;
+  
+  
+  
+  /*
+   * The return value comes back here -- if it could be a GC thing, you must
+   * add it to the GC's "root set" with JS_AddRoot(cx, &thing) where thing
+   * is a JSString *, JSObject *, or jsdouble *, and remove the root before
+   * rval goes out of scope, or when rval is no longer needed.
+   */
+  jsval rval;
+  JSBool ok;
+  
+  /*
+   * Some example source in a C string.  Larger, non-null-terminated buffers
+   * can be used, if you pass the buffer length to JS_EvaluateScript.
+   */
+  char *source = /*"var bla = {};\
+  bla.xy = 1;\
+  return true;";*/ 
+  "var x=10.0;print(x);x = Math.sqrt(x*x*x*x);print(x);x;";
+  
+  ok = JS_EvaluateScript(cx, global, source, strlen(source),
+                         "test", 1, &rval);
+  
+  if (ok) {
+    /* Should get a number back from the example source. */
+    jsdouble d;
+    
+    ok = JS_ValueToNumber(cx, rval, &d);
+    cout << d << endl;
+    
+  }
   return 0;
 }
 

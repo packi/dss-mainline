@@ -28,6 +28,9 @@
 		82532C030DA3907E0030CC6A /* thread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82532C020DA3907E0030CC6A /* thread.cpp */; };
 		82532C770DA3ADB60030CC6A /* base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82532C760DA3ADB60030CC6A /* base.cpp */; };
 		825330130DA529CD0030CC6A /* xmlwrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 825330120DA529CD0030CC6A /* xmlwrapper.cpp */; };
+		82B161100DAE42080005FB71 /* libjs.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82B1610F0DAE42080005FB71 /* libjs.dylib */; };
+		82B161730DAEBABA0005FB71 /* jshandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B161720DAEBABA0005FB71 /* jshandler.cpp */; };
+		82B161FB0DAF6CC10005FB71 /* tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B161FA0DAF6CC10005FB71 /* tests.cpp */; };
 		82B6B4550DA6636E006C51B6 /* cppunit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82B6B4540DA6636E006C51B6 /* cppunit.framework */; };
 		82B6B5B70DAA3134006C51B6 /* model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */; };
 		8DD76F650486A84900D96B5E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 08FB7796FE84155DC02AAC07 /* main.cpp */; settings = {ATTRIBUTES = (); }; };
@@ -75,6 +78,11 @@
 		82532C760DA3ADB60030CC6A /* base.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = base.cpp; path = core/base.cpp; sourceTree = "<group>"; };
 		825330110DA529CD0030CC6A /* xmlwrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xmlwrapper.h; path = core/xmlwrapper.h; sourceTree = "<group>"; };
 		825330120DA529CD0030CC6A /* xmlwrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xmlwrapper.cpp; path = core/xmlwrapper.cpp; sourceTree = "<group>"; };
+		82B1610F0DAE42080005FB71 /* libjs.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjs.dylib; path = /opt/local/lib/libjs.dylib; sourceTree = "<absolute>"; };
+		82B161710DAEBABA0005FB71 /* jshandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = jshandler.h; path = core/jshandler.h; sourceTree = "<group>"; };
+		82B161720DAEBABA0005FB71 /* jshandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = jshandler.cpp; path = core/jshandler.cpp; sourceTree = "<group>"; };
+		82B161F90DAF6CC10005FB71 /* tests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tests.h; path = tests/tests.h; sourceTree = "<group>"; };
+		82B161FA0DAF6CC10005FB71 /* tests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tests.cpp; path = tests/tests.cpp; sourceTree = "<group>"; };
 		82B6B4540DA6636E006C51B6 /* cppunit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = cppunit.framework; sourceTree = "<group>"; };
 		82B6B5B50DAA3134006C51B6 /* model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = model.h; path = core/model.h; sourceTree = "<group>"; };
 		82B6B5B60DAA3134006C51B6 /* model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = model.cpp; path = core/model.cpp; sourceTree = "<group>"; };
@@ -89,6 +97,7 @@
 			files = (
 				82532AC00DA286C20030CC6A /* libxml.framework in Frameworks */,
 				82B6B4550DA6636E006C51B6 /* cppunit.framework in Frameworks */,
+				82B161100DAE42080005FB71 /* libjs.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,6 +107,7 @@
 		08FB7794FE84155DC02AAC07 /* dSS */ = {
 			isa = PBXGroup;
 			children = (
+				82B1610F0DAE42080005FB71 /* libjs.dylib */,
 				82B6B4540DA6636E006C51B6 /* cppunit.framework */,
 				82532ABF0DA286C20030CC6A /* libxml.framework */,
 				08FB7795FE84155DC02AAC07 /* Source */,
@@ -110,6 +120,10 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				82B161F90DAF6CC10005FB71 /* tests.h */,
+				82B161FA0DAF6CC10005FB71 /* tests.cpp */,
+				82B161710DAEBABA0005FB71 /* jshandler.h */,
+				82B161720DAEBABA0005FB71 /* jshandler.cpp */,
 				82B6B5B50DAA3134006C51B6 /* model.h */,
 				82B6B5B60DAA3134006C51B6 /* model.cpp */,
 				825330110DA529CD0030CC6A /* xmlwrapper.h */,
@@ -223,6 +237,8 @@
 				82532C770DA3ADB60030CC6A /* base.cpp in Sources */,
 				825330130DA529CD0030CC6A /* xmlwrapper.cpp in Sources */,
 				82B6B5B70DAA3134006C51B6 /* model.cpp in Sources */,
+				82B161730DAEBABA0005FB71 /* jshandler.cpp in Sources */,
+				82B161FB0DAF6CC10005FB71 /* tests.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,6 +262,10 @@
 					"_GLIBCXX_DEBUG_PEDANTIC=1",
 				);
 				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
 				PRODUCT_NAME = dSS;
 				ZERO_LINK = YES;
 			};
@@ -261,6 +281,10 @@
 				);
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
 				PRODUCT_NAME = dSS;
 			};
 			name = Release;
@@ -271,7 +295,15 @@
 				GCC_OPTIMIZATION_LEVEL = 1;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = /usr/include/libxml2;
+				HEADER_SEARCH_PATHS = (
+					/opt/local/include/,
+					/usr/include/libxml2,
+				);
+				OTHER_CFLAGS = "-DXP_UNIX";
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-DXP_UNIX",
+				);
 				PREBINDING = NO;
 				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 			};
@@ -286,7 +318,15 @@
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = /usr/include/libxml2;
+				HEADER_SEARCH_PATHS = (
+					/opt/local/include/,
+					/usr/include/libxml2,
+				);
+				OTHER_CFLAGS = "-DXP_UNIX";
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-DXP_UNIX",
+				);
 				PREBINDING = NO;
 				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 			};
