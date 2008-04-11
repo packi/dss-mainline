@@ -1,5 +1,5 @@
 /*
- *  tests.h
+ *  scriptstest.h
  *  dSS
  *
  *  Created by Patrick Stählin on 4/11/08.
@@ -7,9 +7,3 @@
  *
  */
 
-namespace dss {
-  class Tests {
-  public:
-    static bool Run();
-  };
-}

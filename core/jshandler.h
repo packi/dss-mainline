@@ -7,6 +7,9 @@
  *
  */
 
+#ifndef JSHANDLER_H_INCLUDED
+#define JSHANDLER_H_INCLUDED
+
 #include "base.h"
 #include <js/jsapi.h>
 
@@ -18,6 +21,9 @@ namespace dss {
   private:
     JSRuntime* m_pRuntime;
   public:
+    ScriptEnvironment();
+    ~ScriptEnvironment();
+    
     void Initialize();
     
     ScriptContext* GetContext();
@@ -48,5 +54,23 @@ namespace dss {
     : DSSException(_what)
     {
     }
+    
+    virtual ~ScriptException() throw() {}
+  };
+  
+  class ScriptRuntimeException : public ScriptException {
+  private:
+    const string m_ExceptionMessage;
+  public:
+    ScriptRuntimeException(const string& _what, const string& _exceptionMessage) throw()
+    : ScriptException(_what),
+      m_ExceptionMessage(_exceptionMessage)
+    { }
+    
+    virtual ~ScriptRuntimeException() throw() {};
+    
+    const string& GetExceptionMessage() const { return m_ExceptionMessage; };
   };
 }
+
+#endif

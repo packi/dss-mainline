@@ -151,6 +151,8 @@ namespace dss {
     DSSException(const string& _message) 
       : runtime_error( _message )
     { }
+    
+    virtual ~DSSException() throw() {};
   }; // DSSException
   
 }

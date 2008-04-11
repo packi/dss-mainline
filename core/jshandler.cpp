@@ -13,6 +13,16 @@ namespace dss {
   
   //============================================= ScriptEnvironment
   
+  ScriptEnvironment::ScriptEnvironment() 
+  : m_pRuntime(NULL)
+  {
+  } // ctor
+  
+  ScriptEnvironment::~ScriptEnvironment() {
+    JS_DestroyRuntime(m_pRuntime);
+  } // dtor
+  
+  
   void ScriptEnvironment::Initialize() {
     m_pRuntime = JS_NewRuntime(8L * 1024L * 1024L);
     if (m_pRuntime == NULL) {
@@ -98,13 +108,11 @@ namespace dss {
     {"print", global_print, 1, 0, 0},
     {NULL},
   };
-  
-  
 
   ScriptContext::ScriptContext(JSContext* _pContext) 
   : m_pContext(_pContext)
   {
-    JS_SetOptions(m_pContext, JSOPTION_VAROBJFIX);
+    JS_SetOptions(m_pContext, JSOPTION_VAROBJFIX | JSOPTION_DONT_REPORT_UNCAUGHT);
     JS_SetErrorReporter(m_pContext, JsErrorHandler);
     
     /* Create the global object. */
@@ -125,7 +133,7 @@ namespace dss {
   
   ScriptContext::~ScriptContext() {
     JS_RemoveRoot(m_pContext, m_pSourceObject);
-    JS_DestroyScript(m_pContext, m_pScriptToExecute);
+ //   JS_DestroyScript(m_pContext, m_pScriptToExecute);
     JS_DestroyContext(m_pContext);
   } // dtor
   
@@ -155,8 +163,7 @@ namespace dss {
       throw new ScriptException(string("Could not parse in-memory script"));
     }
   } // LoadFromMemory
-  
-  
+
   template <>
   jsval ScriptContext::Evaluate() {
     jsval rval;
@@ -164,7 +171,20 @@ namespace dss {
     if(ok) {
       return rval;
     } else {
-      throw new ScriptException("Error executing script");
+      if(JS_IsExceptionPending(m_pContext)) {
+        jsval exval;
+        if(JS_GetPendingException(m_pContext, &exval)) {
+          JS_ClearPendingException(m_pContext);
+          JSString* errstr = JS_ValueToString(m_pContext, exval);
+          if(errstr != NULL) {
+            const char* errmsgBytes = JS_GetStringBytes(errstr);
+            throw new ScriptRuntimeException(string("Caught Exception while executing script: ") + errmsgBytes, string(errmsgBytes));
+          }
+        } 
+        throw new ScriptException("Exception was pending after script execution, but couldnt get it from the vm");
+      } else {
+        throw new ScriptException("Error executing script");
+      }
     }
   } // Evaluate<jsval>
   
