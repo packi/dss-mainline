@@ -17,6 +17,8 @@
  * by $Author: pstaehlin $
  */
 
+#include "datetools.h"
+
 #include <vector>
 #include <string>
 
@@ -169,12 +171,15 @@ namespace dss {
     void RemoveGroup(UserGroup& _group);
   }; // Room
 
+  
+  /** Arguments to be passed to an argument / event */
   class Arguments {
   public:
     string GetValue(const string& _name);
     void SetValue(const string& _name, const string& _value);
   };
   
+  /** Abstract Action to be executed with a list of Arguments */
   class Action {
   private:
     string m_Name;
@@ -186,6 +191,9 @@ namespace dss {
     virtual void Perform(Arguments& _args) = 0;
   };
   
+  /** Event that's been raise by either a hardware or a software component.
+    * Hardware-Events shall have unique id's where as user-defined software-events shall be above a certain number (e.g. 1024)
+    */
   class Event {
   private:
     string m_Name;
@@ -194,9 +202,10 @@ namespace dss {
     devid_t m_Source;
     Arguments m_Arguments;
   public:
-    Event();
+    Event(int _id);
   };
   
+  /** Subscription to one or many event-ids which may be restricted by one or many source-ids */
   class Subscription {
   private:
     vector<int> m_SourceIDs;
@@ -204,7 +213,7 @@ namespace dss {
     Action& m_ActionToExecute;
     Arguments m_ActionArguments;
   public:
-    virtual void OnEvent(const Event& _event);
+    virtual void OnEvent(const Event& _event) = 0;
   };
   
   /** Represents an Apartment 
@@ -238,34 +247,13 @@ namespace dss {
     // Event stuff
     void Subscribe(const Subscription& _subscription);
     void Unsubscribe(const Subscription& _subscription);
+    
   }; // Apartment
   
-  class Schedule {
-  public:
-    virtual struct tm GetNextOccurence(struct tm* _from);
-    virtual vector<struct tm> GetOccurencesBetween(struct tm* _from, struct tm* _to);
-  };
-  
-  class StaticSchedule : public Schedule {
-  private:
-    struct tm m_Date;
-  };
-  
-  class RepeatingSchedule : public Schedule {
-  private:
-    /** Repetition mode */
-    enum { Minutely = 1, Hourly, Daily, Weekly, Monthly, Yearly } m_RepetitionMode;
-    /** Interval in which to repeat. 
-     * If the Mode is Minutely and m_RepeatingInterval is 5, we're scheduled every 5 minutes from m_BeginningAt through m_EndingAt.
-     * Equaly, if the Mode is Hourly and the interval is 12, we're scheduled every 12 hours.
-     */
-    int m_RepeatingInterval;
-    /** If the Mode is Weekly, the m_Weekdays represents a bit-set of the days, when we're being scheduled */
-    int m_Weekdays;
-    struct tm m_BeginingAt;
-    struct tm m_EndingAt;
-  };
-  
+
+  /** Combines an Event with a Schedule
+    * These events get raised according to their Schedule
+   */
   class ScheduledEvent {
   private:
     Event& m_Event;
@@ -273,6 +261,7 @@ namespace dss {
   public:
     ScheduledEvent(Event& _evt, Schedule& _schedule);
   };
+
   
   //============================================= Helper definitions
   typedef bool (*DeviceSelectorFun)(const Device& _device); 
@@ -281,7 +270,7 @@ namespace dss {
   private:
     DeviceSelectorFun m_SelectorFunction;
   public:
-    DeviceSelector(DeviceSelectorFun _selectorFun) : m_SelectorFunction(_selectorFun) {}
+    DeviceSelector(DeviceSelectorFun& _selectorFun) : m_SelectorFunction(_selectorFun) {}
     virtual bool SelectDevice(const Device& _device) { return m_SelectorFunction(_device); }    
   }; // DeviceSelector   
   
