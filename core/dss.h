@@ -19,6 +19,7 @@
 
 #include "shttpd.h"
 #include "defs.h"
+#include "ds485proxy.h"
 
 
 using namespace std;
@@ -80,6 +81,7 @@ namespace dss {
     static DSS* m_Instance;
     WebServer m_WebServer;
     Config m_Config;
+    DS485Proxy m_DS485Proxy;
     
     DSS() { };
     
@@ -89,6 +91,7 @@ namespace dss {
     
     static DSS* GetInstance();
     Config& GetConfig() { return m_Config; };
+    DS485Proxy GetDS485Proxy() { return m_DS485Proxy; };
   }; // DSS
   
   class NoSuchOptionException : DSSException {

@@ -18,6 +18,9 @@
 
 using namespace dss;
 
+#undef CPPUNIT_ASSERT
+#define CPPUNIT_ASSERT(condition) CPPUNIT_ASSERT_EQUAL(true, (condition))
+
 class ScriptsTest : public CPPUNIT_NS::TestCase
 {
   CPPUNIT_TEST_SUITE(ScriptsTest);

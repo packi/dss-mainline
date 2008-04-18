@@ -86,6 +86,8 @@ namespace dss {
   template<typename strclass>
   int StrToInt(const strclass* _strValue);
   
+  string IntToString(const int _int);
+  
   template <class t>
   t DateToISOString( struct tm* _dateTime );
 

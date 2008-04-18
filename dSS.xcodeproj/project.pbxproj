@@ -28,14 +28,15 @@
 		82532C030DA3907E0030CC6A /* thread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82532C020DA3907E0030CC6A /* thread.cpp */; };
 		82532C770DA3ADB60030CC6A /* base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82532C760DA3ADB60030CC6A /* base.cpp */; };
 		825330130DA529CD0030CC6A /* xmlwrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 825330120DA529CD0030CC6A /* xmlwrapper.cpp */; };
+		826DBB160DB8E2900034ADFB /* ds485proxy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */; };
 		82B161100DAE42080005FB71 /* libjs.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82B1610F0DAE42080005FB71 /* libjs.dylib */; };
 		82B161730DAEBABA0005FB71 /* jshandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B161720DAEBABA0005FB71 /* jshandler.cpp */; };
 		82B161FB0DAF6CC10005FB71 /* tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B161FA0DAF6CC10005FB71 /* tests.cpp */; };
-		82B6B4550DA6636E006C51B6 /* cppunit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82B6B4540DA6636E006C51B6 /* cppunit.framework */; };
 		82B6B5B70DAA3134006C51B6 /* model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */; };
 		82E3D10D0DAF730E00FDEE16 /* scriptstest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82E3D10C0DAF730E00FDEE16 /* scriptstest.cpp */; };
 		82E3D2790DB77E0E00FDEE16 /* datetools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */; };
 		82E3D2DB0DB795EA00FDEE16 /* datetoolstests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */; };
+		82E3D4010DB8AD4D00FDEE16 /* libcppunit.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82E3D4000DB8AD4D00FDEE16 /* libcppunit.dylib */; };
 		8DD76F650486A84900D96B5E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 08FB7796FE84155DC02AAC07 /* main.cpp */; settings = {ATTRIBUTES = (); }; };
 		8DD76F6A0486A84900D96B5E /* dSS.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* dSS.1 */; };
 /* End PBXBuildFile section */
@@ -81,12 +82,14 @@
 		82532C760DA3ADB60030CC6A /* base.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = base.cpp; path = core/base.cpp; sourceTree = "<group>"; };
 		825330110DA529CD0030CC6A /* xmlwrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xmlwrapper.h; path = core/xmlwrapper.h; sourceTree = "<group>"; };
 		825330120DA529CD0030CC6A /* xmlwrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xmlwrapper.cpp; path = core/xmlwrapper.cpp; sourceTree = "<group>"; };
+		826DBB140DB8E2900034ADFB /* ds485proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ds485proxy.h; path = core/ds485proxy.h; sourceTree = "<group>"; };
+		826DBB150DB8E2900034ADFB /* ds485proxy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ds485proxy.cpp; path = core/ds485proxy.cpp; sourceTree = "<group>"; };
+		826DBB170DB8E2D30034ADFB /* ds485types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ds485types.h; sourceTree = "<group>"; };
 		82B1610F0DAE42080005FB71 /* libjs.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjs.dylib; path = /opt/local/lib/libjs.dylib; sourceTree = "<absolute>"; };
 		82B161710DAEBABA0005FB71 /* jshandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = jshandler.h; path = core/jshandler.h; sourceTree = "<group>"; };
 		82B161720DAEBABA0005FB71 /* jshandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = jshandler.cpp; path = core/jshandler.cpp; sourceTree = "<group>"; };
 		82B161F90DAF6CC10005FB71 /* tests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tests.h; path = tests/tests.h; sourceTree = "<group>"; };
 		82B161FA0DAF6CC10005FB71 /* tests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tests.cpp; path = tests/tests.cpp; sourceTree = "<group>"; };
-		82B6B4540DA6636E006C51B6 /* cppunit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = cppunit.framework; sourceTree = "<group>"; };
 		82B6B5B50DAA3134006C51B6 /* model.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = model.h; path = core/model.h; sourceTree = "<group>"; };
 		82B6B5B60DAA3134006C51B6 /* model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = model.cpp; path = core/model.cpp; sourceTree = "<group>"; };
 		82E3D10B0DAF730E00FDEE16 /* scriptstest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scriptstest.h; path = tests/scriptstest.h; sourceTree = "<group>"; };
@@ -94,6 +97,7 @@
 		82E3D2770DB77E0E00FDEE16 /* datetools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = datetools.h; path = core/datetools.h; sourceTree = "<group>"; };
 		82E3D2780DB77E0E00FDEE16 /* datetools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = datetools.cpp; path = core/datetools.cpp; sourceTree = "<group>"; };
 		82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = datetoolstests.cpp; path = tests/datetoolstests.cpp; sourceTree = "<group>"; };
+		82E3D4000DB8AD4D00FDEE16 /* libcppunit.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcppunit.dylib; path = /opt/local/lib/libcppunit.dylib; sourceTree = "<absolute>"; };
 		8DD76F6C0486A84900D96B5E /* dSS */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = dSS; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6859E8B029090EE04C91782 /* dSS.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = dSS.1; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -104,8 +108,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				82532AC00DA286C20030CC6A /* libxml.framework in Frameworks */,
-				82B6B4550DA6636E006C51B6 /* cppunit.framework in Frameworks */,
 				82B161100DAE42080005FB71 /* libjs.dylib in Frameworks */,
+				82E3D4010DB8AD4D00FDEE16 /* libcppunit.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -115,9 +119,9 @@
 		08FB7794FE84155DC02AAC07 /* dSS */ = {
 			isa = PBXGroup;
 			children = (
+				82E3D4000DB8AD4D00FDEE16 /* libcppunit.dylib */,
 				82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */,
 				82B1610F0DAE42080005FB71 /* libjs.dylib */,
-				82B6B4540DA6636E006C51B6 /* cppunit.framework */,
 				82532ABF0DA286C20030CC6A /* libxml.framework */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
@@ -129,6 +133,9 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				826DBB170DB8E2D30034ADFB /* ds485types.h */,
+				826DBB140DB8E2900034ADFB /* ds485proxy.h */,
+				826DBB150DB8E2900034ADFB /* ds485proxy.cpp */,
 				82E3D2770DB77E0E00FDEE16 /* datetools.h */,
 				82E3D2780DB77E0E00FDEE16 /* datetools.cpp */,
 				82E3D10B0DAF730E00FDEE16 /* scriptstest.h */,
@@ -255,6 +262,7 @@
 				82E3D10D0DAF730E00FDEE16 /* scriptstest.cpp in Sources */,
 				82E3D2790DB77E0E00FDEE16 /* datetools.cpp in Sources */,
 				82E3D2DB0DB795EA00FDEE16 /* datetoolstests.cpp in Sources */,
+				826DBB160DB8E2900034ADFB /* ds485proxy.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

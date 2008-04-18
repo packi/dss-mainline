@@ -21,6 +21,7 @@
 #include "base.h"
 
 #include <sys/stat.h>
+#include <sstream>
 
 namespace dss {
   
@@ -35,6 +36,12 @@ namespace dss {
   int StrToInt(const wchar_t* _strValue) {
     return wcstol(_strValue, NULL, 10);
   }
+  
+  string IntToString(const int _int) {
+    stringstream sstream;
+    sstream << _int;
+    return sstream.str();
+  } // IntToString
   
   const char* theISOFormatString = "%Y-%m-%d %H:%M:%S";
   

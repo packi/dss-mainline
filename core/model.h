@@ -17,7 +17,12 @@
  * by $Author: pstaehlin $
  */
 
+#ifndef _MODEL_H_INCLUDED
+#define _MODEL_H_INCLUDED
+
+#include "base.h"
 #include "datetools.h"
+#include "ds485types.h"
 
 #include <vector>
 #include <string>
@@ -25,20 +30,20 @@
 using namespace std;
 
 namespace dss {
-
-  typedef long devid_t;
   
   class Device;
   class Set;
   class DeviceContainer;
   
   typedef vector<Device> DeviceVector;
+  typedef DeviceVector::iterator DeviceIterator;
   
   /** Represents a dsID */
   class Device {
   private:
     string m_Name;
     devid_t m_ID;
+    int m_GroupBitmask;
   public:
     Device(devid_t _id);
     
@@ -56,8 +61,12 @@ namespace dss {
     void SetValue(const double _value, const int _parameterNr = -1);
     double GetValue(const int _parameterNr = -1);
     
-    string GetName();
+    string GetName() const;
     void SetName(const string& _name);
+    
+    devid_t GetID() const;
+    
+    bool operator==(const Device& _other) const;
   };
   
   /** Abstract interface to select certain Devices from a set */
@@ -80,6 +89,8 @@ namespace dss {
   private:
     DeviceVector m_ContainedDevices;
   public:
+    Set();
+    Set(Device _device);
     Set(DeviceVector _devices);
     
     void TurnOn();
@@ -108,18 +119,23 @@ namespace dss {
     Set Combine(Set& _other) const;
     Set Remove(Set& _other) const;
     
-    void AddDevice(Device& _device);
-    void RemoveDevice(Device& _device);
+    void AddDevice(const Device& _device);
+    void RemoveDevice(const Device& _device);
   }; // Set
   
   
   /** A class derived from DeviceContainer can deliver a Set of its Devices */
   class DeviceContainer {
+  private:
+    string m_Name;
   public:
     virtual Set GetDevices() = 0;
     virtual Set GetDevices(const IDeviceSelector& _selector) {
       return GetDevices().GetSubset(_selector);
     }
+    
+    void SetName(const string& _name) { m_Name = _name; };
+    string GetName() { return m_Name; };
   }; // DeviceContainer
   
   /** Represents a Modulator */
@@ -247,7 +263,6 @@ namespace dss {
     // Event stuff
     void Subscribe(const Subscription& _subscription);
     void Unsubscribe(const Subscription& _subscription);
-    
   }; // Apartment
   
 
@@ -272,6 +287,14 @@ namespace dss {
   public:
     DeviceSelector(DeviceSelectorFun& _selectorFun) : m_SelectorFunction(_selectorFun) {}
     virtual bool SelectDevice(const Device& _device) { return m_SelectorFunction(_device); }    
-  }; // DeviceSelector   
+  }; // DeviceSelector  
+  
+  class ItemNotFoundException : public DSSException {
+  public:
+    ItemNotFoundException(const string& _name) : DSSException(string("Could not find item ") + _name) {};
+    ~ItemNotFoundException() throw() {};
+  };
   
 }
+
+#endif
