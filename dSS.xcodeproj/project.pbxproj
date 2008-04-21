@@ -29,6 +29,7 @@
 		82532C770DA3ADB60030CC6A /* base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82532C760DA3ADB60030CC6A /* base.cpp */; };
 		825330130DA529CD0030CC6A /* xmlwrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 825330120DA529CD0030CC6A /* xmlwrapper.cpp */; };
 		826DBB160DB8E2900034ADFB /* ds485proxy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */; };
+		826DBC9C0DBCC9500034ADFB /* modeltests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 826DBC9B0DBCC9500034ADFB /* modeltests.cpp */; };
 		82B161100DAE42080005FB71 /* libjs.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82B1610F0DAE42080005FB71 /* libjs.dylib */; };
 		82B161730DAEBABA0005FB71 /* jshandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B161720DAEBABA0005FB71 /* jshandler.cpp */; };
 		82B161FB0DAF6CC10005FB71 /* tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B161FA0DAF6CC10005FB71 /* tests.cpp */; };
@@ -84,7 +85,7 @@
 		825330120DA529CD0030CC6A /* xmlwrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xmlwrapper.cpp; path = core/xmlwrapper.cpp; sourceTree = "<group>"; };
 		826DBB140DB8E2900034ADFB /* ds485proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ds485proxy.h; path = core/ds485proxy.h; sourceTree = "<group>"; };
 		826DBB150DB8E2900034ADFB /* ds485proxy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ds485proxy.cpp; path = core/ds485proxy.cpp; sourceTree = "<group>"; };
-		826DBB170DB8E2D30034ADFB /* ds485types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ds485types.h; sourceTree = "<group>"; };
+		826DBC9B0DBCC9500034ADFB /* modeltests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = modeltests.cpp; path = tests/modeltests.cpp; sourceTree = "<group>"; };
 		82B1610F0DAE42080005FB71 /* libjs.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjs.dylib; path = /opt/local/lib/libjs.dylib; sourceTree = "<absolute>"; };
 		82B161710DAEBABA0005FB71 /* jshandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = jshandler.h; path = core/jshandler.h; sourceTree = "<group>"; };
 		82B161720DAEBABA0005FB71 /* jshandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = jshandler.cpp; path = core/jshandler.cpp; sourceTree = "<group>"; };
@@ -119,6 +120,7 @@
 		08FB7794FE84155DC02AAC07 /* dSS */ = {
 			isa = PBXGroup;
 			children = (
+				826DBC9B0DBCC9500034ADFB /* modeltests.cpp */,
 				82E3D4000DB8AD4D00FDEE16 /* libcppunit.dylib */,
 				82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */,
 				82B1610F0DAE42080005FB71 /* libjs.dylib */,
@@ -133,7 +135,6 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				826DBB170DB8E2D30034ADFB /* ds485types.h */,
 				826DBB140DB8E2900034ADFB /* ds485proxy.h */,
 				826DBB150DB8E2900034ADFB /* ds485proxy.cpp */,
 				82E3D2770DB77E0E00FDEE16 /* datetools.h */,
@@ -263,6 +264,7 @@
 				82E3D2790DB77E0E00FDEE16 /* datetools.cpp in Sources */,
 				82E3D2DB0DB795EA00FDEE16 /* datetoolstests.cpp in Sources */,
 				826DBB160DB8E2900034ADFB /* ds485proxy.cpp in Sources */,
+				826DBC9C0DBCC9500034ADFB /* modeltests.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

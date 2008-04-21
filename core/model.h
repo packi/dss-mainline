@@ -43,7 +43,7 @@ namespace dss {
   private:
     string m_Name;
     devid_t m_ID;
-    int m_GroupBitmask;
+    long long m_GroupBitmask;
   public:
     Device(devid_t _id);
     
@@ -64,6 +64,8 @@ namespace dss {
     string GetName() const;
     void SetName(const string& _name);
     
+    long long GetGroupBitmask() const;
+    
     devid_t GetID() const;
     
     bool operator==(const Device& _other) const;
@@ -78,7 +80,7 @@ namespace dss {
   /** Abstract interface to perform an Action on each device of a set */
   class IDeviceAction {
   public:
-    virtual bool Perform(const Device& _device) = 0;
+    virtual bool Perform(Device& _device) = 0;
   };
   
   /** A set holds an arbitrary list of devices.
@@ -107,7 +109,7 @@ namespace dss {
     void SetValue(const double _value, int _parameterNr = -1);
     //HashMapDeviceDouble GetValue(const int _parameterNr = -1);
     
-    void Perform(const IDeviceAction& _deviceAction);
+    void Perform(IDeviceAction& _deviceAction);
     
     Set GetSubset(const IDeviceSelector& _selector); 
     Set GetByGroup(int _groupNr);
@@ -146,7 +148,9 @@ namespace dss {
   public:
     virtual Set GetDevices();
 
-    void SendDS485Frame(const char* _frame, int _len);
+  //  void SendDS485Frame(const char* _frame, int _len);
+    
+    int GetID() const;
   }; // Modulator
   
   /** Represents a predefined group */
@@ -173,7 +177,7 @@ namespace dss {
   class Room : public DeviceContainer {
   private:
     int m_RoomID;
-    vector<Device> m_Devices;
+    DeviceVector m_Devices;
   public:
     virtual Set GetDevices();
     
@@ -185,12 +189,17 @@ namespace dss {
     
     void AddGroup(UserGroup& _group);
     void RemoveGroup(UserGroup& _group);
+    
+    int GetRoomID() const;
   }; // Room
 
   
-  /** Arguments to be passed to an argument / event */
+  /** Arguments to be passed to an action / event */
   class Arguments {
+  private:
+    HashMapConstStringString m_ArgumentList;
   public:
+    bool HasValue(const string& _name);
     string GetValue(const string& _name);
     void SetValue(const string& _name, const string& _value);
   };
@@ -202,8 +211,6 @@ namespace dss {
     string m_NameForUser;
     int m_ID;
   public:
-    Action();
-    
     virtual void Perform(Arguments& _args) = 0;
   };
   
@@ -218,7 +225,10 @@ namespace dss {
     devid_t m_Source;
     Arguments m_Arguments;
   public:
-    Event(int _id);
+    Event(int _id) : m_ID(_id) {};
+    
+    int GetID() const { return m_ID; };
+    devid_t GetSource() const { return m_ID; };
   };
   
   /** Subscription to one or many event-ids which may be restricted by one or many source-ids */
@@ -228,8 +238,16 @@ namespace dss {
     vector<int> m_EventIDs;
     Action& m_ActionToExecute;
     Arguments m_ActionArguments;
+    int m_ID;
   public:
-    virtual void OnEvent(const Event& _event) = 0;
+    Subscription(const int _id, Action& _action, vector<int> _eventIDs, vector<int> _sourceIDs)
+    : m_ID(_id), m_ActionToExecute(_action), m_SourceIDs(_sourceIDs), m_EventIDs(_eventIDs) {};
+    
+    virtual void OnEvent(const Event& _event) { m_ActionToExecute.Perform(m_ActionArguments); };
+    
+    int GetID() const { return m_ID; };
+    
+    bool HandlesEvent(const Event& _event) const;
   };
   
   /** Represents an Apartment 
@@ -240,20 +258,25 @@ namespace dss {
   private:
     vector<Room> m_Rooms;
     vector<Modulator> m_Modulators;
-    vector<Device> m_Devices;
-    vector<Subscription> m_Subscriptions;
+    DeviceVector m_Devices;
+    vector<Subscription*> m_Subscriptions;
+  private:
+    int m_NextSubscriptionNumber;
   public:
+    Apartment();
+    ~Apartment();
+    
     virtual Set GetDevices();
     
     // Room queries
-    Room GetRoom(const string& _roomName);
-    Room GetRoom(const int _id);
-    vector<Room> GetRooms();
+    Room& GetRoom(const string& _roomName);
+    Room& GetRoom(const int _id);
+    vector<Room>& GetRooms();
     
     // Modulator queries
-    Modulator GetModulator(const string& _modName);
-    Modulator GetModulator(const int _id);
-    vector<Modulator> GetModulators();
+    Modulator& GetModulator(const string& _modName);
+    Modulator& GetModulator(const int _id);
+    vector<Modulator>& GetModulators();
     
     // Group queries
     Group GetGroup(const string& _name);
@@ -261,8 +284,10 @@ namespace dss {
     vector<Group> GetGroups();
     
     // Event stuff
-    void Subscribe(const Subscription& _subscription);
-    void Unsubscribe(const Subscription& _subscription);
+    Subscription& Subscribe(Action& _action, vector<int> _eventIDs, vector<int> _sourceIDs = vector<int>());
+    void Unsubscribe(const int _subscriptionID);
+    
+    void OnEvent(const Event& _event);
   }; // Apartment
   
 

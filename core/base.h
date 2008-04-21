@@ -53,20 +53,26 @@ namespace __gnu_cxx
     }
   };
                                                                                 
-  template<> struct hash< std::wstring >                                                       
-  {                                                                                           
-    size_t operator()( const std::wstring& x ) const                                           
-    {                                                                                         
+  template<> 
+  struct hash< std::wstring >  {                                                                                           
+    size_t operator()( const std::wstring& x ) const  {                                                                                         
       return hash< const wchar_t* >()( x.c_str() );                                              
     }                                                                                         
-  };                                                                                          
-  template<> struct hash< const std::wstring >                                                       
-  {                                                                                           
-    size_t operator()( const std::wstring& x ) const                                           
-    {                                                                                         
+  };                                 
+  
+  template<> 
+  struct hash< const std::wstring > {                                                                                           
+    size_t operator()( const std::wstring& x ) const {                                                                                         
       return hash< const wchar_t* >()( x.c_str() );                                              
     }                                                                                         
-  };          
+  };  
+  
+  template<> 
+  struct hash<const std::string> {
+    size_t operator()(const std::string& x) const {
+      return hash<const char*>()(x.c_str());
+    }
+  };
 }      
 
 
@@ -75,10 +81,18 @@ using namespace std;
 namespace dss {
   
   
+  template<class t>
+  bool Contains(const vector<t>& _v, const t _item) {
+    return find(_v.begin(), _v.end(), _item) != _v.end();
+  }
+    
+  
   //============================================= Common types
   typedef hash_map<wstring, wstring> HashMapWStringWString;
   typedef hash_map<const wstring, wstring> HashMapConstWStringWString;
   
+  typedef hash_map<string, string> HashMapStringString;
+  typedef hash_map<const string, string> HashMapConstStringString;
   //============================================= Conversion helpers
   template<class strclass>
   int StrToInt(const strclass& _strValue);
