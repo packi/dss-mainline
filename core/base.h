@@ -103,8 +103,10 @@ namespace dss {
   string IntToString(const int _int);
   
   template <class t>
-  t DateToISOString( struct tm* _dateTime );
-
+  t DateToISOString( const struct tm* _dateTime );
+  
+  extern const char* theISOFormatString;
+  
   //============================================= Encoding helpers
   const wstring FromUTF8(const char* _utf8string, int _len);
   const string ToUTF8(const wchar_t* _wcharString, int _len);
@@ -170,6 +172,8 @@ namespace dss {
     
     virtual ~DSSException() throw() {};
   }; // DSSException
+  
+  
   
 }
 

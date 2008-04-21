@@ -46,12 +46,13 @@ namespace dss {
   const char* theISOFormatString = "%Y-%m-%d %H:%M:%S";
   
   template <>
-  string DateToISOString( struct tm* _dateTime ) {
+  string DateToISOString( const struct tm* _dateTime ) {
     char buf[ 20 ];
     strftime( buf, 20, theISOFormatString, _dateTime );
     string result = buf;
     return result;
   } // DateToISOString
+  
   
   struct tm DateFromISOString( const char* _dateTimeAsString ) {
     struct tm result;
@@ -61,7 +62,7 @@ namespace dss {
  
   
   template <>
-  wstring DateToISOString( struct tm* _dateTime ) {
+  wstring DateToISOString(const struct tm* _dateTime) {
     return FromUTF8(DateToISOString<string>(_dateTime));
   } // DateToISOString
   

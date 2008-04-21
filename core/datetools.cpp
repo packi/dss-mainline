@@ -20,6 +20,11 @@ namespace dss {
     mktime(&m_DateTime);
   } // ctor
   
+  DateTime::DateTime(time_t _time) {
+    localtime_r(&_time, &m_DateTime);
+    mktime(&m_DateTime);
+  } // ctor(time_t)
+  
   DateTime::DateTime(const DateTime& _copy) 
   : m_DateTime(_copy.m_DateTime)
   { } // ctor(copy)
@@ -41,6 +46,13 @@ namespace dss {
     mktime(&result.m_DateTime);
     return result;
   } // AddMinute
+  
+  DateTime DateTime::AddSeconds(const int _seconds) const {
+    DateTime result(*this);
+    result.m_DateTime.tm_sec += _seconds;
+    mktime(&result.m_DateTime);
+    return result;    
+  } // AddSeconds
   
   DateTime DateTime::AddMonth(const int _month) const {
     DateTime result(*this);
@@ -168,10 +180,112 @@ namespace dss {
   } // After
   
   bool DateTime::operator==(const DateTime& _other) const {
-    struct tm self = m_DateTime;
-    struct tm other = _other.m_DateTime;
-    return difftime(mktime(&self), mktime(&other)) == 0;    
+    return Difference(_other) == 0;
   } // operator==
   
+  bool DateTime::operator!=(const DateTime& _other) const {
+    return Difference(_other) != 0;
+  }
+  
+  int DateTime::Difference(const DateTime& _other) const {
+    struct tm self = m_DateTime;
+    struct tm other = _other.m_DateTime;
+    return difftime(mktime(&self), mktime(&other));    
+  }
+  
+  ostream& DateTime::operator<<(ostream& out) const {
+    string bla = DateToISOString<string>(&m_DateTime);
+    out << bla;
+    return out;
+  }
+
+  ostream& operator<<(ostream& out, const DateTime& _dt) {
+    out << _dt;
+    return out;
+  }
+    
+  DateTime DateTime::NullDate(0);
+  
+  //================================================== StaticSchedule
+  
+  DateTime StaticSchedule::GetNextOccurence(const DateTime& _from) {
+    if(_from.Before(m_When)) {
+      return m_When;
+    }
+    return DateTime::NullDate;
+  } // GetNextOccurence
+  
+  vector<DateTime> StaticSchedule::GetOccurencesBetween(const DateTime& _from, const DateTime& _to) {
+    vector<DateTime> result;
+    if(_from.Before(m_When) && _to.After(m_When)) {
+      result.push_back(m_When);
+    }
+    return result;
+  } // GetOccurencesBetween
+  
+  //================================================== RepeatingSchedule
+  
+  RepeatingSchedule::RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt)
+  : m_RepetitionMode(_mode),
+    m_RepeatingInterval(_interval),
+    m_BeginingAt(_beginingAt),
+    m_EndingAt(DateTime::NullDate)
+  {
+  } // ctor
+  
+  RepeatingSchedule::RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt, DateTime _endingAt) 
+  : m_RepetitionMode(_mode),
+    m_RepeatingInterval(_interval),
+    m_BeginingAt(_beginingAt),
+    m_EndingAt(_endingAt)
+  {
+  } // ctor
+
+  DateTime RepeatingSchedule::GetNextOccurence(const DateTime& _from)  {
+    bool hasEndDate = m_EndingAt != DateTime::NullDate;
+    
+    if(_from.Before(m_BeginingAt)) {
+      return m_BeginingAt;
+    } else if(hasEndDate && _from.After(m_EndingAt)) {
+      return DateTime::NullDate;
+    }
+    int intervalInSeconds = GetIntervalInSeconds();
+    int diffInSeconds = _from.Difference(m_BeginingAt);
+    int numIntervals = diffInSeconds / intervalInSeconds;
+    if(diffInSeconds % intervalInSeconds != 0) {
+      numIntervals++;
+    }
+    
+    return m_BeginingAt.AddSeconds(numIntervals * intervalInSeconds);
+  } // GetNextOccurence
+           
+  int RepeatingSchedule::GetIntervalInSeconds() {
+    switch(m_RepetitionMode) {
+      case Weekly:
+        return 60 /*sec*/ * 60 /* minutes */ * 24 /*hours*/ * 7 /*days*/ * m_RepeatingInterval;
+      case Daily:
+        return 60 * 60 * 24 * m_RepeatingInterval;
+      case Minutely:
+        return 60 * m_RepeatingInterval;
+      case Monthly:
+        // TODO: a month has 30 days for now... other repetition schemes would allow for "every 1st monday" etc
+        return 30 * 60 /*sec*/ * 60 /* minutes */ * 24 /*hours*/ * 7 /*days*/ * m_RepeatingInterval;
+      default:
+        throw new invalid_argument("m_RepetitionMode must be one of the given enum values");
+    }             
+  }
+  
+  vector<DateTime> RepeatingSchedule::GetOccurencesBetween(const DateTime& _from, const DateTime& _to) {
+    vector<DateTime> result;
+    
+    int intervalInSeconds = GetIntervalInSeconds();
+    DateTime currentDate = GetNextOccurence(_from);
+    while(currentDate != DateTime::NullDate && currentDate.Before(_to)) {
+      result.push_back(currentDate);
+      currentDate.AddSeconds(intervalInSeconds);
+    }
+    return result;
+  } // GetOccurencesBetween
+
   
 }

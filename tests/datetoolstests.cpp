@@ -25,6 +25,8 @@ class DateToolsTest : public CPPUNIT_NS::TestCase
   CPPUNIT_TEST_SUITE(DateToolsTest);
   CPPUNIT_TEST(testSimpleDates);
   CPPUNIT_TEST(testAddingComparing);
+  CPPUNIT_TEST(testStaticSchedule);
+  CPPUNIT_TEST(testDynamicSchedule);
   CPPUNIT_TEST_SUITE_END();
   
 public:
@@ -50,6 +52,11 @@ protected:
     DateTime dt2 = dt.AddDay(1);
 
     CPPUNIT_ASSERT_EQUAL(dt2.GetWeekday(), Wednesday);
+    
+    DateTime dt3 = dt2.AddDay(-2);
+    
+    CPPUNIT_ASSERT_EQUAL(dt3.GetWeekday(), Monday);
+    CPPUNIT_ASSERT_EQUAL(dt3.GetYear(), 2007);
   }
   
   void testAddingComparing(void) {
@@ -65,6 +72,35 @@ protected:
     CPPUNIT_ASSERT(!dt2.Before(dt));
     CPPUNIT_ASSERT(dt.Before(dt2));
     CPPUNIT_ASSERT(!dt.After(dt2)); 
+  }
+  
+  void testStaticSchedule() {
+    DateTime when;
+    when.SetDate(15, April, 2008);
+    when.SetTime(10, 00, 00);
+    
+    StaticSchedule schedule(when);
+    
+    CPPUNIT_ASSERT_EQUAL(when, schedule.GetNextOccurence(when.AddMinute(-1)));
+    CPPUNIT_ASSERT_EQUAL(DateTime::NullDate, schedule.GetNextOccurence(when.AddMinute(1)));
+    
+    vector<DateTime> schedList = schedule.GetOccurencesBetween(when.AddMinute(-1), when.AddMinute(1));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), schedList.size());
+    
+    schedList = schedule.GetOccurencesBetween(when.AddMinute(1), when.AddMinute(2));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), schedList.size());
+  }
+  
+  void testDynamicSchedule() {
+    DateTime when;
+    when.SetDate(15, April, 2008);
+    when.SetTime(10, 00, 00);
+    
+    RepeatingSchedule schedule(Minutely, 5, when);
+    
+    CPPUNIT_ASSERT_EQUAL(when,              schedule.GetNextOccurence(when.AddSeconds(-1)));
+    CPPUNIT_ASSERT_EQUAL(when.AddMinute(5), schedule.GetNextOccurence(when.AddSeconds(1)));
+    
   }
 };
 

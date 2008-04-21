@@ -10,7 +10,10 @@
 #ifndef _DATE_TOOLS_H_INCLUDED
 #define _DATE_TOOLS_H_INCLUDED
 
+#include "base.h"
+
 #include <vector>
+#include <ostream>
 
 using namespace std;
 
@@ -29,10 +32,12 @@ namespace dss {
     struct tm m_DateTime;
   public:
     DateTime();
+    DateTime(time_t _time);
     DateTime(const DateTime& _copy);
     
     DateTime AddHour(const int _hours) const;
     DateTime AddMinute(const int _minutes) const;
+    DateTime AddSeconds(const int _seconds) const;
     DateTime AddMonth(const int _month) const;
     DateTime AddYear(const int _years) const;    
     DateTime AddDay(const int _days) const; 
@@ -68,18 +73,31 @@ namespace dss {
     bool Before(const DateTime& _other) const;
     bool After(const DateTime& _other) const;
     bool operator==(const DateTime& _other) const;
+    bool operator!=(const DateTime& _other) const;
+    
+    int Difference(const DateTime& _other) const;
+    
+    ostream& operator<<(ostream& out) const;
+    
+    static DateTime NullDate;
   }; // DateTime
   
+  ostream& operator<<(ostream& out, const DateTime& _dt);
   
   class Schedule {
   public:
     virtual DateTime GetNextOccurence(const DateTime& _from) = 0;
-    virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
+    virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to) = 0;
   };
   
   class StaticSchedule : public Schedule {
   private:
     DateTime m_When;
+  public:
+    StaticSchedule(const DateTime& _when) : m_When(_when) {}
+    
+    virtual DateTime GetNextOccurence(const DateTime& _from) ;
+    virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
   };
   
   typedef enum {
@@ -99,6 +117,14 @@ namespace dss {
     int m_Weekdays;
     DateTime m_BeginingAt;
     DateTime m_EndingAt;
+  private:
+    int GetIntervalInSeconds();
+  public:
+    RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt);
+    RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt, DateTime _endingAt);
+
+    virtual DateTime GetNextOccurence(const DateTime& _from) ;
+    virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
   };
   
 }
