@@ -116,7 +116,6 @@ namespace dss {
   static JSClass global_class = {
     "global", JSCLASS_NEW_RESOLVE, /* use the new resolve hook */
     JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
-    /* todo: explain */
     JS_EnumerateStandardClasses,
     JS_ResolveStub,
     JS_ConvertStub,  JS_FinalizeStub, JSCLASS_NO_OPTIONAL_MEMBERS
@@ -153,7 +152,7 @@ namespace dss {
   ScriptContext::~ScriptContext() {
     JS_SetContextPrivate(m_pContext, NULL);
     JS_RemoveRoot(m_pContext, m_pSourceObject);
-    JS_DestroyScript(m_pContext, m_pScriptToExecute);
+//    JS_DestroyScript(m_pContext, m_pScriptToExecute);
     JS_DestroyContext(m_pContext);
   } // dtor
   
@@ -218,6 +217,19 @@ namespace dss {
        
     return result;
   } // Evaluate<double>
+
+  
+  template <>
+  int ScriptContext::Evaluate() {
+    jsval rval = Evaluate<jsval>();
+    int result;
+    if( JS_ValueToInt32(m_pContext, rval, &result) != JS_TRUE) {
+      throw new ScriptException("Could not convert jsval to int");
+    }
+    
+    return result;
+  } // Evaluate<int>
+  
   
   template <>
   void ScriptContext::Evaluate() {
@@ -237,5 +249,41 @@ namespace dss {
   } // Evaluate<string>
   
   //================================================== ScriptExtension
+  
+  //================================================== ScriptObject
+  
+  ScriptObject::ScriptObject(JSObject* _pObject, ScriptContext& _context)
+  : m_pObject(_pObject),
+    m_Context(_context)
+  {
+  } // ctor
+  
+  template<>
+  jsval ScriptObject::GetProperty(const string& _name) {
+    JSBool found;
+    if(!JS_HasProperty(m_Context.GetJSContext(), m_pObject, _name.c_str(), &found)) {
+      throw new ScriptException("Could not enumerate property");
+    }
+    if(found) {
+      jsval result;
+      if(JS_GetProperty(m_Context.GetJSContext(), m_pObject, _name.c_str(), &result)) {
+        return result;
+      } else {
+        throw new ScriptException(string("Could not retrieve value of property ") + _name);
+      }
+    } else {
+      throw new ScriptException(string("Could not find property ") + _name);
+    }
+  } // GetProperty<jsval>
+  
+  template<>
+  string ScriptObject::GetProperty(const string& _name) {
+    jsval value = GetProperty<jsval>(_name);
+    if(JSVAL_IS_STRING(value)) {
+      return string(JS_GetStringBytes(JSVAL_TO_STRING(value)));
+    }
+    throw new ScriptException(string("Property is not of string type: ") + _name);
+  } // GetProperty<string>
+  
   
 }

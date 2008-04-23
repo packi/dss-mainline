@@ -62,9 +62,10 @@ namespace dss {
   private:
     string m_Name;
     devid_t m_ID;
+    Apartment* m_pApartment;
     long long m_GroupBitmask;
   public:
-    Device(devid_t _id);
+    Device(devid_t _id, Apartment* _pApartment);
     
     void TurnOn();
     void TurnOff();
@@ -86,9 +87,12 @@ namespace dss {
     long long GetGroupBitmask() const;
     
     devid_t GetID() const;
+    Apartment& GetApartment() const;
     
     bool operator==(const Device& _other) const;
   };
+  
+  ostream& operator<<(ostream& out, const Device& _dt);
   
   /** Abstract interface to select certain Devices from a set */
   class IDeviceSelector {
@@ -141,8 +145,13 @@ namespace dss {
     Set Combine(Set& _other) const;
     Set Remove(Set& _other) const;
     
+    bool Contains(const DeviceReference& _device) const;
+    
     void AddDevice(const DeviceReference& _device);
+    void AddDevice(const Device& _device);
+    
     void RemoveDevice(const DeviceReference& _device);
+    void RemoveDevice(const Device& _device);
   }; // Set
   
   
@@ -292,6 +301,7 @@ namespace dss {
     virtual Set GetDevices();
     
     Device& GetDeviceByID(const devid_t _id) const;
+    Device& AllocateDevice(const devid_t _id);
     
     // Room queries
     Room& GetRoom(const string& _roomName);

@@ -24,6 +24,14 @@ namespace dss {
     virtual void ExtendContext(ScriptContext& _context);
     
     Apartment& GetApartment() const { return m_Apartment; };
+    
+    JSObject* CreateJSSet(ScriptContext& _ctx, Set& _set);
+    
+    template<class t>
+    t ConvertTo(ScriptContext& _context, jsval val);
+    
+    template<class t>
+    t ConvertTo(ScriptContext& _context, JSObject* _obj);
   };
 }
 

@@ -95,6 +95,17 @@ namespace dss {
     
     const string& GetName() const { return m_Name; };
   }; // ScriptExtension
+  
+  class ScriptObject {
+  private:
+    JSObject* m_pObject;
+    ScriptContext& m_Context;
+  public:
+    ScriptObject(JSObject* _pObject, ScriptContext& _context);
+    
+    template<class t>
+    t GetProperty(const string& _name);
+  }; // ScriptObject
 }
 
 #endif

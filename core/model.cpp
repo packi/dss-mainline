@@ -49,8 +49,9 @@ namespace dss {
   
   //================================================== Device
   
-  Device::Device(devid_t _id)
-  : m_ID(_id)
+  Device::Device(devid_t _id, Apartment* _pApartment)
+  : m_ID(_id),
+    m_pApartment(_pApartment)
   {
   }
   
@@ -107,15 +108,21 @@ namespace dss {
     return m_GroupBitmask;
   } // GetGroupBitmask
   
+  Apartment& Device::GetApartment() const {
+    return *m_pApartment;
+  }
+  
   //================================================== Set
   
   Set::Set() {
   } // ctor
   
   Set::Set(Device& _device) {
+    m_ContainedDevices.push_back(DeviceReference(_device, _device.GetApartment()));
   } // ctor(Device)
   
   Set::Set(DeviceVector _devices) {
+    m_ContainedDevices = _devices;
   } // ctor(DeviceVector)
   
   void Set::TurnOn() {
@@ -227,7 +234,9 @@ namespace dss {
   Set Set::Combine(Set& _other) const {
     Set resultSet(_other);
     for(DeviceVector::const_iterator iDevice = m_ContainedDevices.begin(); iDevice != m_ContainedDevices.end(); ++iDevice) {
-      resultSet.AddDevice(*iDevice);
+      if(!resultSet.Contains(*iDevice)) {
+        resultSet.AddDevice(*iDevice);
+      }
     }
     return resultSet;
   } // Combine
@@ -240,8 +249,19 @@ namespace dss {
     return resultSet;
   } // Remove
   
+  bool Set::Contains(const DeviceReference& _device) const {
+    DeviceVector::const_iterator pos = find(m_ContainedDevices.begin(), m_ContainedDevices.end(), _device);
+    return pos != m_ContainedDevices.end();
+  } // Contains
+  
   void Set::AddDevice(const DeviceReference& _device) {
-    m_ContainedDevices.push_back(_device);
+    if(!Contains(_device)) {
+      m_ContainedDevices.push_back(_device);
+    }
+  } // AddDevice
+  
+  void Set::AddDevice(const Device& _device) {
+    AddDevice(DeviceReference(_device, _device.GetApartment()));
   } // AddDevice
   
   void Set::RemoveDevice(const DeviceReference& _device) {
@@ -250,6 +270,18 @@ namespace dss {
       m_ContainedDevices.erase(pos);
     }
   } // RemoveDevice
+  
+  void Set::RemoveDevice(const Device& _device) {
+    RemoveDevice(DeviceReference(_device, _device.GetApartment()));
+  } // AddDevice
+  
+  ostream& operator<<(ostream& out, const Device& _dt) {
+    out << "Device ID " << _dt.GetID();
+    if(_dt.GetName().size() > 0) {
+      out << " name: " << _dt.GetName();
+    }
+    return out;
+  }
  
   //================================================== Arguments
   
@@ -280,6 +312,11 @@ namespace dss {
       Subscription* elem = *m_Subscriptions.begin();
       m_Subscriptions.erase(m_Subscriptions.begin());
       delete elem;
+    }
+    while(!m_Devices.empty()) {
+      Device* dev = *m_Devices.begin();
+      m_Devices.erase(m_Devices.begin());
+      delete dev;
     }
   } // dtor
   
@@ -366,8 +403,7 @@ namespace dss {
   vector<Group*>& Apartment::GetGroups() {
     return m_Groups;
   } // GetGroups
-  
-  
+    
   Subscription& Apartment::Subscribe(Action& _action, vector<int> _eventIDs, vector<int> _sourceIDs) {
     Subscription* pResult = new Subscription(m_NextSubscriptionNumber++, _action, _eventIDs, _sourceIDs);
     m_Subscriptions.push_back(pResult);
@@ -408,6 +444,12 @@ namespace dss {
   void Apartment::OnEvent(const Event& _event) {
     for_each(m_Subscriptions.begin(), m_Subscriptions.end(), handle_event(_event));
   } // OnEvent
+  
+  Device& Apartment::AllocateDevice(const devid_t _id) {
+    Device* pResult = new Device(_id, this);
+    m_Devices.push_back(pResult);
+    return *pResult;
+  } 
   
   //================================================== Modulator
   
