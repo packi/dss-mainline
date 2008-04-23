@@ -22,7 +22,32 @@
 
 namespace dss {
   
-  //============================================= Device
+  //================================================== DeviceReference
+  
+  
+  DeviceReference::DeviceReference(const DeviceReference& _copy) 
+  : m_DeviceID(_copy.m_DeviceID),
+    m_Apartment(_copy.m_Apartment)
+  {
+  }
+  
+  DeviceReference::DeviceReference(const devid_t _deviceID, const Apartment& _apartment) 
+  : m_DeviceID(_deviceID),
+    m_Apartment(&_apartment)
+  {
+  } // ctor
+  
+  DeviceReference::DeviceReference(const Device& _device, const Apartment& _apartment) 
+  : m_DeviceID(_device.GetID()),
+    m_Apartment(&_apartment)
+  {
+  } // ctor
+  
+  Device& DeviceReference::GetDevice() {
+    return m_Apartment->GetDeviceByID(m_DeviceID);
+  } // GetDevice$
+  
+  //================================================== Device
   
   Device::Device(devid_t _id)
   : m_ID(_id)
@@ -30,10 +55,11 @@ namespace dss {
   }
   
   void Device::TurnOn() {
-    //DSS::GetInstance()->GetDS485Proxy().TurnOn( *this );
+//    DSS::GetInstance()->GetDS485Proxy().TurnOn( *this );
   } // TurnOn
   
   void Device::TurnOff() {
+//    DSS::GetInstance()->GetDS485Proxy().TurnOff( *this );
   } // TurnOff
   
   void Device::IncreaseValue(const int _parameterNr) {
@@ -86,7 +112,7 @@ namespace dss {
   Set::Set() {
   } // ctor
   
-  Set::Set(Device _device) {
+  Set::Set(Device& _device) {
   } // ctor(Device)
   
   Set::Set(DeviceVector _devices) {
@@ -122,14 +148,14 @@ namespace dss {
   
   void Set::Perform(IDeviceAction& _deviceAction) {
     for(DeviceIterator iDevice = m_ContainedDevices.begin(); iDevice != m_ContainedDevices.end(); ++iDevice) {
-      _deviceAction.Perform(*iDevice);
+      _deviceAction.Perform(iDevice->GetDevice());
     }
   } // Perform
   
   Set Set::GetSubset(const IDeviceSelector& _selector) {
     Set result;
     for(DeviceIterator iDevice = m_ContainedDevices.begin(); iDevice != m_ContainedDevices.end(); ++iDevice) {
-      if(_selector.SelectDevice(*iDevice)) {
+      if(_selector.SelectDevice(iDevice->GetDevice())) {
         result.AddDevice(*iDevice);
       }
     }
@@ -166,7 +192,7 @@ namespace dss {
     }
   };
   
-  Device Set::GetByName(const string& _name) {
+  DeviceReference Set::GetByName(const string& _name) {
     Set resultSet = GetSubset(ByNameSelector(_name));
     if(resultSet.Length() == 0) {
       throw ItemNotFoundException(_name);
@@ -186,7 +212,7 @@ namespace dss {
     }
   };
   
-  Device Set::GetByID(const int _id) {
+  DeviceReference Set::GetByID(const int _id) {
     Set resultSet = GetSubset(ByIDSelector(_id));
     if(resultSet.Length() == 0) {
       throw ItemNotFoundException(string("with id ") + IntToString(_id));
@@ -214,11 +240,11 @@ namespace dss {
     return resultSet;
   } // Remove
   
-  void Set::AddDevice(const Device& _device) {
+  void Set::AddDevice(const DeviceReference& _device) {
     m_ContainedDevices.push_back(_device);
   } // AddDevice
   
-  void Set::RemoveDevice(const Device& _device) {
+  void Set::RemoveDevice(const DeviceReference& _device) {
     DeviceVector::iterator pos = find(m_ContainedDevices.begin(), m_ContainedDevices.end(), _device);
     if(pos != m_ContainedDevices.end()) {
       m_ContainedDevices.erase(pos);
@@ -257,61 +283,88 @@ namespace dss {
     }
   } // dtor
   
+  Device& Apartment::GetDeviceByID(const devid_t _id) const {
+    for(vector<Device*>::const_iterator ipDevice = m_Devices.begin(); ipDevice != m_Devices.end(); ++ipDevice) {
+      if((*ipDevice)->GetID() == _id) {
+        return **ipDevice;
+      }
+    }
+    throw new ItemNotFoundException(IntToString(_id));
+  } // GetDeviceByID
+  
   Set Apartment::GetDevices() {
-    return Set(m_Devices);
+    DeviceVector devs;
+    for(vector<Device*>::iterator ipDevice = m_Devices.begin(); ipDevice != m_Devices.end(); ++ipDevice) {
+      devs.push_back(DeviceReference(**ipDevice, *this));
+    }
+    
+    return Set(devs);
   } // GetDevices
   
   Room& Apartment::GetRoom(const string& _roomName) {
-    for(vector<Room>::iterator iRoom = m_Rooms.begin(); iRoom != m_Rooms.end(); ++iRoom) {
-      if(iRoom->GetName() == _roomName) {
-        return *iRoom;
+    for(vector<Room*>::iterator iRoom = m_Rooms.begin(); iRoom != m_Rooms.end(); ++iRoom) {
+      if((*iRoom)->GetName() == _roomName) {
+        return **iRoom;
       }
     }
     throw new ItemNotFoundException(_roomName);
   } // GetRoom(name)
   
   Room& Apartment::GetRoom(const int _id) {
-    for(vector<Room>::iterator iRoom = m_Rooms.begin(); iRoom != m_Rooms.end(); ++iRoom) {
-      if(iRoom->GetRoomID() == _id) {
-        return *iRoom;
+    for(vector<Room*>::iterator iRoom = m_Rooms.begin(); iRoom != m_Rooms.end(); ++iRoom) {
+      if((*iRoom)->GetRoomID() == _id) {
+        return **iRoom;
       }
     }
     throw new ItemNotFoundException(IntToString(_id));
   } // GetRoom(id)
   
-  vector<Room>& Apartment::GetRooms() {
+  vector<Room*>& Apartment::GetRooms() {
     return m_Rooms;
   } // GetRooms
   
   Modulator& Apartment::GetModulator(const string& _modName) {
-    for(vector<Modulator>::iterator iModulator = m_Modulators.begin(); iModulator != m_Modulators.end(); ++iModulator) {
-      if(iModulator->GetName() == _modName) {
-        return *iModulator;
+    for(vector<Modulator*>::iterator iModulator = m_Modulators.begin(); iModulator != m_Modulators.end(); ++iModulator) {
+      if((*iModulator)->GetName() == _modName) {
+        return **iModulator;
       }
     }
     throw new ItemNotFoundException(_modName);
   } // GetModulator(name)
     
   Modulator& Apartment::GetModulator(const int _id) {
-    for(vector<Modulator>::iterator iModulator = m_Modulators.begin(); iModulator != m_Modulators.end(); ++iModulator) {
-      if(iModulator->GetID() == _id) {
-        return *iModulator;
+    for(vector<Modulator*>::iterator iModulator = m_Modulators.begin(); iModulator != m_Modulators.end(); ++iModulator) {
+      if((*iModulator)->GetID() == _id) {
+        return **iModulator;
       }
     }
     throw new ItemNotFoundException(IntToString(_id));
   } // GetModulator(id)
   
-  vector<Modulator>& Apartment::GetModulators() {
+  vector<Modulator*>& Apartment::GetModulators() {
     return m_Modulators;
   } // GetModulators
   
   // Group queries
-  Group Apartment::GetGroup(const string& _name) {
+  Group& Apartment::GetGroup(const string& _name) {
+    for(vector<Group*>::iterator ipGroup = m_Groups.begin(); ipGroup != m_Groups.end(); ++ipGroup) {
+      if((*ipGroup)->GetName() == _name) {
+        return **ipGroup;
+      }
+    }
+    throw new ItemNotFoundException(_name);
   } // GetGroup(name)
   
-  Group Apartment::GetGroup(const int _id) {
+  Group& Apartment::GetGroup(const int _id) {
+    for(vector<Group*>::iterator ipGroup = m_Groups.begin(); ipGroup != m_Groups.end(); ++ipGroup) {
+      if((*ipGroup)->GetID() == _id) {
+        return **ipGroup;
+      }
+    }
+    throw new ItemNotFoundException(IntToString(_id));
   } // GetGroup(id)
-  vector<Group> Apartment::GetGroups() {
+  vector<Group*>& Apartment::GetGroups() {
+    return m_Groups;
   } // GetGroups
   
   
@@ -372,11 +425,11 @@ namespace dss {
     return Set(m_Devices);
   } // GetDevices
   
-  void Room::AddDevice(const Device& _device) {
+  void Room::AddDevice(const DeviceReference& _device) {
     m_Devices.push_back(_device);
   } // AddDevice
   
-  void Room::RemoveDevice(const Device& _device) {
+  void Room::RemoveDevice(const DeviceReference& _device) {
     DeviceIterator pos = find(m_Devices.begin(), m_Devices.end(), _device);
     if(pos != m_Devices.end()) {
       m_Devices.erase(pos);
@@ -392,6 +445,12 @@ namespace dss {
   int Room::GetRoomID() const {
     return m_RoomID;
   }
+  
+  //============================================= Group
+  
+  int Group::GetID() const {
+    return m_GroupID;
+  } // GetID
   
   //============================================= Subscription
   

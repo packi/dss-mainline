@@ -101,6 +101,12 @@ protected:
     CPPUNIT_ASSERT_EQUAL(when,              schedule.GetNextOccurence(when.AddSeconds(-1)));
     CPPUNIT_ASSERT_EQUAL(when.AddMinute(5), schedule.GetNextOccurence(when.AddSeconds(1)));
     
+    vector<DateTime> v = schedule.GetOccurencesBetween(when, when.AddMinute(10));
+    
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3), v.size());
+    CPPUNIT_ASSERT_EQUAL(when, v[0]);
+    CPPUNIT_ASSERT_EQUAL(when.AddMinute(5), v[1]);
+    CPPUNIT_ASSERT_EQUAL(when.AddMinute(10), v[2]);
   }
 };
 

@@ -280,9 +280,9 @@ namespace dss {
     
     int intervalInSeconds = GetIntervalInSeconds();
     DateTime currentDate = GetNextOccurence(_from);
-    while(currentDate != DateTime::NullDate && currentDate.Before(_to)) {
+    while(currentDate != DateTime::NullDate && (currentDate.Before(_to) || currentDate == _to)) {
       result.push_back(currentDate);
-      currentDate.AddSeconds(intervalInSeconds);
+      currentDate = currentDate.AddSeconds(intervalInSeconds);
     }
     return result;
   } // GetOccurencesBetween

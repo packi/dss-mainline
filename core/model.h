@@ -34,8 +34,27 @@ namespace dss {
   class Device;
   class Set;
   class DeviceContainer;
+  class Apartment;
   
-  typedef vector<Device> DeviceVector;
+  
+  class DeviceReference {
+  private:
+    devid_t m_DeviceID;
+    const Apartment* m_Apartment;
+  public:
+    DeviceReference(const DeviceReference& _copy);
+    DeviceReference(const devid_t _deviceID, const Apartment& _apartment);
+    DeviceReference(const Device& _device, const Apartment& _apartment);
+    
+    Device& GetDevice();
+    
+    bool operator==(const DeviceReference& _other) const {
+      return m_DeviceID == _other.m_DeviceID;
+    }
+    
+  };
+  
+  typedef vector<DeviceReference> DeviceVector;
   typedef DeviceVector::iterator DeviceIterator;
   
   /** Represents a dsID */
@@ -92,7 +111,8 @@ namespace dss {
     DeviceVector m_ContainedDevices;
   public:
     Set();
-    Set(Device _device);
+    Set(Device& _device);
+    Set(DeviceReference& _reference);
     Set(DeviceVector _devices);
     
     void TurnOn();
@@ -113,16 +133,16 @@ namespace dss {
     
     Set GetSubset(const IDeviceSelector& _selector); 
     Set GetByGroup(int _groupNr);
-    Device GetByName(const string& _name);
-    Device GetByID(const int _id);
+    DeviceReference GetByName(const string& _name);
+    DeviceReference GetByID(const int _id);
     
     int Length() const;
     
     Set Combine(Set& _other) const;
     Set Remove(Set& _other) const;
     
-    void AddDevice(const Device& _device);
-    void RemoveDevice(const Device& _device);
+    void AddDevice(const DeviceReference& _device);
+    void RemoveDevice(const DeviceReference& _device);
   }; // Set
   
   
@@ -136,7 +156,7 @@ namespace dss {
       return GetDevices().GetSubset(_selector);
     }
     
-    void SetName(const string& _name) { m_Name = _name; };
+    virtual void SetName(const string& _name) { m_Name = _name; };
     string GetName() { return m_Name; };
   }; // DeviceContainer
   
@@ -144,7 +164,7 @@ namespace dss {
   class Modulator : public DeviceContainer {
   private:
     int m_LocalID;
-    vector<Device> m_ConnectedDevices;
+    DeviceVector m_ConnectedDevices;
   public:
     virtual Set GetDevices();
 
@@ -157,12 +177,14 @@ namespace dss {
   class Group : public DeviceContainer {
   protected:
     int m_GroupID;
-    vector<Device> m_Devices;
+    DeviceVector m_Devices;
   public:
     virtual Set GetDevices();
+    
+    int GetID() const;
 
-    virtual void AddDevice(const Device& _device) { /* do nothing or throw? */ };
-    virtual void RemoveDevice(const Device& _device) { /* do nothing or throw? */ };
+    virtual void AddDevice(const DeviceReference& _device) { /* do nothing or throw? */ };
+    virtual void RemoveDevice(const DeviceReference& _device) { /* do nothing or throw? */ };
   }; // Group
   
   
@@ -181,8 +203,8 @@ namespace dss {
   public:
     virtual Set GetDevices();
     
-    void AddDevice(const Device& _device);
-    void RemoveDevice(const Device& _device);
+    void AddDevice(const DeviceReference& _device);
+    void RemoveDevice(const DeviceReference& _device);
     
     Group GetGroup(const string& _name);
     Group GetGroup(const int _id);
@@ -256,10 +278,11 @@ namespace dss {
     */
   class Apartment : public DeviceContainer {
   private:
-    vector<Room> m_Rooms;
-    vector<Modulator> m_Modulators;
-    DeviceVector m_Devices;
+    vector<Room*> m_Rooms;
+    vector<Modulator*> m_Modulators;
+    vector<Device*> m_Devices;
     vector<Subscription*> m_Subscriptions;
+    vector<Group*> m_Groups;
   private:
     int m_NextSubscriptionNumber;
   public:
@@ -268,20 +291,22 @@ namespace dss {
     
     virtual Set GetDevices();
     
+    Device& GetDeviceByID(const devid_t _id) const;
+    
     // Room queries
     Room& GetRoom(const string& _roomName);
     Room& GetRoom(const int _id);
-    vector<Room>& GetRooms();
+    vector<Room*>& GetRooms();
     
     // Modulator queries
     Modulator& GetModulator(const string& _modName);
     Modulator& GetModulator(const int _id);
-    vector<Modulator>& GetModulators();
+    vector<Modulator*>& GetModulators();
     
     // Group queries
-    Group GetGroup(const string& _name);
-    Group GetGroup(const int _id);
-    vector<Group> GetGroups();
+    Group& GetGroup(const string& _name);
+    Group& GetGroup(const int _id);
+    vector<Group*>& GetGroups();
     
     // Event stuff
     Subscription& Subscribe(Action& _action, vector<int> _eventIDs, vector<int> _sourceIDs = vector<int>());

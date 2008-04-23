@@ -28,14 +28,32 @@ namespace dss {
     if (m_pRuntime == NULL) {
       throw new ScriptException("Error creating environment");
     }
-
   } // Initialize
+  
+  void ScriptEnvironment::AddExtension(ScriptExtension* _pExtension) {
+    m_Extensions.push_back(_pExtension);
+  } // AddExtension
   
   ScriptContext* ScriptEnvironment::GetContext() {
     JSContext* context = JS_NewContext(m_pRuntime, 8192);
-    return new ScriptContext(context);
+    
+    ScriptContext* pResult = new ScriptContext(*this, context);
+    JS_SetContextPrivate(context, pResult);
+    for(vector<ScriptExtension*>::iterator ipExtension = m_Extensions.begin(); ipExtension != m_Extensions.end(); ++ipExtension) {
+      (*ipExtension)->ExtendContext(*pResult);
+    }
+    return pResult;
   } // GetContext
 
+  ScriptExtension* ScriptEnvironment::GetExtension(const string& _name) const {
+    for(vector<ScriptExtension*>::const_iterator ipExtension = m_Extensions.begin(); ipExtension != m_Extensions.end(); ++ipExtension) {
+      if((*ipExtension)->GetName() == _name) {
+        return *ipExtension;
+      }
+    }
+    return NULL;
+  } // GetExtension
+  
   //============================================= ScriptContext
   
   void ScriptContext::JsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er) {
@@ -109,8 +127,9 @@ namespace dss {
     {NULL},
   };
 
-  ScriptContext::ScriptContext(JSContext* _pContext) 
-  : m_pContext(_pContext)
+  ScriptContext::ScriptContext(ScriptEnvironment& _env, JSContext* _pContext) 
+  : m_Environment(_env),
+    m_pContext(_pContext)
   {
     JS_SetOptions(m_pContext, JSOPTION_VAROBJFIX | JSOPTION_DONT_REPORT_UNCAUGHT);
     JS_SetErrorReporter(m_pContext, JsErrorHandler);
@@ -132,8 +151,9 @@ namespace dss {
   } // ctor
   
   ScriptContext::~ScriptContext() {
+    JS_SetContextPrivate(m_pContext, NULL);
     JS_RemoveRoot(m_pContext, m_pSourceObject);
- //   JS_DestroyScript(m_pContext, m_pScriptToExecute);
+    JS_DestroyScript(m_pContext, m_pScriptToExecute);
     JS_DestroyContext(m_pContext);
   } // dtor
   
@@ -215,5 +235,7 @@ namespace dss {
     
     return string(JS_GetStringBytes(result));
   } // Evaluate<string>
+  
+  //================================================== ScriptExtension
   
 }

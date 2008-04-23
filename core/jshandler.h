@@ -13,18 +13,27 @@
 #include "base.h"
 #include <js/jsapi.h>
 
+#include <vector>
+
+using namespace std;
+
 namespace dss {
   
   class ScriptContext;
+  class ScriptExtension;
   
   class ScriptEnvironment {
   private:
     JSRuntime* m_pRuntime;
+    vector<ScriptExtension*> m_Extensions;
   public:
     ScriptEnvironment();
     ~ScriptEnvironment();
     
     void Initialize();
+    
+    void AddExtension(ScriptExtension* _pExtension);
+    ScriptExtension* GetExtension(const string& _name) const;
     
     ScriptContext* GetContext();
   };
@@ -36,9 +45,10 @@ namespace dss {
     JSContext* m_pContext;
     JSObject* m_pRootObject;
     JSObject* m_pSourceObject;
+    ScriptEnvironment& m_Environment;
     static void JsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er);
   public:
-    ScriptContext(JSContext* _pContext);
+    ScriptContext(ScriptEnvironment& _env, JSContext* _pContext);
     ~ScriptContext();
     
     void LoadFromFile(const string& _fileName);
@@ -46,6 +56,9 @@ namespace dss {
     
     template <class t>
     t Evaluate();
+    
+    JSContext* GetJSContext() { return m_pContext; };
+    const ScriptEnvironment& GetEnvironment() { return m_Environment; };
   };
   
   class ScriptException : public DSSException {
@@ -71,6 +84,17 @@ namespace dss {
     
     const string& GetExceptionMessage() const { return m_ExceptionMessage; };
   };
+  
+  class ScriptExtension {
+  private:
+    const string m_Name;
+  public:
+    ScriptExtension(const string& _name) : m_Name(_name) {};
+    
+    virtual void ExtendContext(ScriptContext& _context) = 0;
+    
+    const string& GetName() const { return m_Name; };
+  }; // ScriptExtension
 }
 
 #endif
