@@ -182,7 +182,51 @@ namespace dss {
       throw new ScriptException(string("Could not parse in-memory script"));
     }
   } // LoadFromMemory
-
+  
+  template<>
+  int ScriptContext::ConvertTo(const jsval& _val) {
+    if(JSVAL_IS_NUMBER(_val)) {
+      int result;
+      if(JS_ValueToInt32(m_pContext, _val, &result)) {
+        return result;
+      }
+    }
+    throw new ScriptException("Value is not of type int");
+  }
+  
+  template<>
+  string ScriptContext::ConvertTo(const jsval& _val) {
+    JSString* result;
+    result = JS_ValueToString(m_pContext, _val);
+    if( result == NULL) {
+      throw new ScriptException("Could not convert jsval to JSString");
+    }
+    
+    return string(JS_GetStringBytes(result));
+  }
+  
+  template<>
+  bool ScriptContext::ConvertTo(const jsval& _val) {
+    if(JSVAL_IS_BOOLEAN(_val)) {
+      JSBool result;
+      if(JS_ValueToBoolean(m_pContext, _val, &result)) {
+        return result;
+      }
+    }
+    throw new ScriptException("Value is not of type boolean");
+  }  
+  
+  template<>
+  double ScriptContext::ConvertTo(const jsval& _val) {
+    if(JSVAL_IS_NUMBER(_val)) {
+      jsdouble result;
+      if(JS_ValueToNumber(m_pContext, _val, &result)) {
+        return result; 
+      }
+    }
+    throw new ScriptException("Value is not of type double");
+  }  
+  
   template <>
   jsval ScriptContext::Evaluate() {
     jsval rval;
@@ -209,25 +253,13 @@ namespace dss {
   
   template <>
   double ScriptContext::Evaluate() {
-    jsval rval = Evaluate<jsval>();
-    jsdouble result;
-    if( JS_ValueToNumber(m_pContext, rval, &result) != JS_TRUE) {
-      throw new ScriptException("Could not convert jsval to double");
-    }
-       
-    return result;
+    return ConvertTo<double>(Evaluate<jsval>());
   } // Evaluate<double>
 
   
   template <>
   int ScriptContext::Evaluate() {
-    jsval rval = Evaluate<jsval>();
-    int result;
-    if( JS_ValueToInt32(m_pContext, rval, &result) != JS_TRUE) {
-      throw new ScriptException("Could not convert jsval to int");
-    }
-    
-    return result;
+    return ConvertTo<int>(Evaluate<jsval>());
   } // Evaluate<int>
   
   
@@ -238,16 +270,9 @@ namespace dss {
   
   template <>
   string ScriptContext::Evaluate() {
-    jsval rval = Evaluate<jsval>();
-    JSString* result;
-    result = JS_ValueToString(m_pContext, rval);
-    if( result == NULL) {
-      throw new ScriptException("Could not convert jsval to JSString");
-    }
-    
-    return string(JS_GetStringBytes(result));
+    return ConvertTo<string>(Evaluate<jsval>());
   } // Evaluate<string>
-  
+    
   //================================================== ScriptExtension
   
   //================================================== ScriptObject
@@ -285,5 +310,11 @@ namespace dss {
     throw new ScriptException(string("Property is not of string type: ") + _name);
   } // GetProperty<string>
   
+  bool ScriptObject::Is(const string& _className) {
+    return GetClassName() == _className;
+  }
   
+  const string ScriptObject::GetClassName() {
+    return GetProperty<string>("className");
+  } // GetClassName
 }

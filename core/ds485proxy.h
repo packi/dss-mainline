@@ -15,6 +15,8 @@
 namespace dss {
   
   class DS485Proxy {
+  private:
+    void BestFit(const Set& _set, vector<DeviceReference>& _devices, vector<Group>& _groups);
   public:
     double GetValue(const int _parameterID = -1);
     

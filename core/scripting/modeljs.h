@@ -26,6 +26,8 @@ namespace dss {
     Apartment& GetApartment() const { return m_Apartment; };
     
     JSObject* CreateJSSet(ScriptContext& _ctx, Set& _set);
+    JSObject* CreateJSDevice(ScriptContext& _ctx, Device& _ref);
+    JSObject* CreateJSDevice(ScriptContext& _ctx, DeviceReference& _ref);
     
     template<class t>
     t ConvertTo(ScriptContext& _context, jsval val);

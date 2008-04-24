@@ -58,7 +58,11 @@ namespace dss {
     t Evaluate();
     
     JSContext* GetJSContext() { return m_pContext; };
-    const ScriptEnvironment& GetEnvironment() { return m_Environment; };
+    const ScriptEnvironment& GetEnvironment() { return m_Environment; };    
+  public:
+    
+    template<class t>
+    t ConvertTo(const jsval& _val);
   };
   
   class ScriptException : public DSSException {
@@ -102,6 +106,9 @@ namespace dss {
     ScriptContext& m_Context;
   public:
     ScriptObject(JSObject* _pObject, ScriptContext& _context);
+    
+    const string GetClassName();
+    bool Is(const string& _className);
     
     template<class t>
     t GetProperty(const string& _name);

@@ -231,6 +231,10 @@ namespace dss {
     return m_ContainedDevices.size();
   } // Length
   
+  bool Set::IsEmpty() const {
+    return Length() == 0;
+  }
+  
   Set Set::Combine(Set& _other) const {
     Set resultSet(_other);
     for(DeviceVector::const_iterator iDevice = m_ContainedDevices.begin(); iDevice != m_ContainedDevices.end(); ++iDevice) {
@@ -275,6 +279,15 @@ namespace dss {
     RemoveDevice(DeviceReference(_device, _device.GetApartment()));
   } // AddDevice
   
+  DeviceReference& Set::Get(int _index) {
+    return m_ContainedDevices.at(_index);
+  } // Get
+  
+  DeviceReference& Set::operator[](const int _index) {
+    return Get(_index);
+  } // operator[]
+  
+  
   ostream& operator<<(ostream& out, const Device& _dt) {
     out << "Device ID " << _dt.GetID();
     if(_dt.GetName().size() > 0) {
@@ -305,6 +318,30 @@ namespace dss {
   Apartment::Apartment() 
   : m_NextSubscriptionNumber(1)
   {  
+    Group* grp = new Group(0, *this);
+    grp->SetName("black");
+    m_Groups.push_back(grp);
+    grp = new Group(1, *this);
+    grp->SetName("blue");
+    m_Groups.push_back(grp);
+    grp = new Group(2, *this);
+    grp->SetName("green");
+    m_Groups.push_back(grp);
+    grp = new Group(3, *this);
+    grp->SetName("cyan");
+    m_Groups.push_back(grp);
+    grp = new Group(4, *this);
+    grp->SetName("red");
+    m_Groups.push_back(grp);
+    grp = new Group(5, *this);
+    grp->SetName("violet");
+    m_Groups.push_back(grp);
+    grp = new Group(6, *this);
+    grp->SetName("yellow");
+    m_Groups.push_back(grp);
+    grp = new Group(7, *this);
+    grp->SetName("gray");
+    m_Groups.push_back(grp);
   } // ctor
   
   Apartment::~Apartment() {
@@ -317,6 +354,21 @@ namespace dss {
       Device* dev = *m_Devices.begin();
       m_Devices.erase(m_Devices.begin());
       delete dev;
+    }
+    while(!m_Groups.empty()) {
+      Group* grp = *m_Groups.begin();
+      m_Groups.erase(m_Groups.begin());
+      delete grp;
+    }
+    while(!m_Rooms.empty()) {
+      Room* room = *m_Rooms.begin();
+      m_Rooms.erase(m_Rooms.begin());
+      delete room;
+    }
+    while(!m_Modulators.empty()) {
+      Modulator* mod = *m_Modulators.begin();
+      m_Modulators.erase(m_Modulators.begin());
+      delete mod;
     }
   } // dtor
   
@@ -489,10 +541,24 @@ namespace dss {
   }
   
   //============================================= Group
-  
+
+  Group::Group(const int _id, Apartment& _apartment) 
+  : m_Apartment(_apartment),
+    m_GroupID(_id)
+  {
+  }
+
   int Group::GetID() const {
     return m_GroupID;
   } // GetID
+  
+  Set Group::GetDevices() {
+    return m_Apartment.GetDevices().GetByGroup(m_GroupID);
+  }
+  
+  void Group::AddDevice(const DeviceReference& _device) { /* do nothing or throw? */ };
+  void Group::RemoveDevice(const DeviceReference& _device) { /* do nothing or throw? */ };
+
   
   //============================================= Subscription
   

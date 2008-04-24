@@ -9,3 +9,13 @@
 
 #include "ds485proxy.h"
 
+namespace dss {
+
+  void DS485Proxy::BestFit(const Set& _set, vector<DeviceReference>& _devices, vector<Group>& _groups) {
+    Set workingCopy = _set;
+   
+    while(!workingCopy.IsEmpty()) {
+    }
+  }
+
+}

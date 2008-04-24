@@ -54,11 +54,27 @@ namespace dss {
     
   };
   
+  class IDeviceInterface {
+  public:
+    virtual void TurnOn() = 0;
+    virtual void TurnOff() = 0;
+    
+    virtual void IncreaseValue(const int _parameterNr = -1) = 0;
+    virtual void DecreaseValue(const int _parameterNr = -1) = 0;
+    
+    virtual void Enable() = 0;
+    virtual void Disable() = 0;
+    
+    virtual void StartDim(bool _directionUp, const int _parameterNr = -1) = 0;
+    virtual void EndDim(const int _parameterNr = -1)= 0;
+    virtual void SetValue(const double _value, int _parameterNr = -1) = 0;
+  };
+  
   typedef vector<DeviceReference> DeviceVector;
   typedef DeviceVector::iterator DeviceIterator;
   
   /** Represents a dsID */
-  class Device {
+  class Device : public IDeviceInterface {
   private:
     string m_Name;
     devid_t m_ID;
@@ -67,18 +83,18 @@ namespace dss {
   public:
     Device(devid_t _id, Apartment* _pApartment);
     
-    void TurnOn();
-    void TurnOff();
+    virtual void TurnOn();
+    virtual void TurnOff();
     
-    void IncreaseValue(const int _parameterNr = -1);
-    void DecreaseValue(const int _parameterNr = -1);
+    virtual void IncreaseValue(const int _parameterNr = -1);
+    virtual void DecreaseValue(const int _parameterNr = -1);
     
-    void Enable();
-    void Disable();
+    virtual void Enable();
+    virtual void Disable();
     
-    void StartDim(const bool _directionUp, const int _parameterNr = -1);
-    void EndDim(const int _parameterNr = -1);
-    void SetValue(const double _value, const int _parameterNr = -1);
+    virtual void StartDim(const bool _directionUp, const int _parameterNr = -1);
+    virtual void EndDim(const int _parameterNr = -1);
+    virtual void SetValue(const double _value, const int _parameterNr = -1);
     double GetValue(const int _parameterNr = -1);
     
     string GetName() const;
@@ -110,7 +126,7 @@ namespace dss {
     * A Command sent to an instance of this class will replicate the command to all
     * contained devices.
    */
-  class Set {
+  class Set : public IDeviceInterface {
   private:
     DeviceVector m_ContainedDevices;
   public:
@@ -119,18 +135,18 @@ namespace dss {
     Set(DeviceReference& _reference);
     Set(DeviceVector _devices);
     
-    void TurnOn();
-    void TurnOff();
+    virtual void TurnOn();
+    virtual void TurnOff();
     
-    void IncreaseValue(const int _parameterNr = -1);
-    void DecreaseValue(const int _parameterNr = -1);
+    virtual void IncreaseValue(const int _parameterNr = -1);
+    virtual void DecreaseValue(const int _parameterNr = -1);
     
-    void Enable();
-    void Disable();
+    virtual void Enable();
+    virtual void Disable();
     
-    void StartDim(bool _directionUp, const int _parameterNr = -1);
-    void EndDim(const int _parameterNr = -1);
-    void SetValue(const double _value, int _parameterNr = -1);
+    virtual void StartDim(bool _directionUp, const int _parameterNr = -1);
+    virtual void EndDim(const int _parameterNr = -1);
+    virtual void SetValue(const double _value, int _parameterNr = -1);
     //HashMapDeviceDouble GetValue(const int _parameterNr = -1);
     
     void Perform(IDeviceAction& _deviceAction);
@@ -141,9 +157,14 @@ namespace dss {
     DeviceReference GetByID(const int _id);
     
     int Length() const;
+    bool IsEmpty() const;
     
     Set Combine(Set& _other) const;
     Set Remove(Set& _other) const;
+    
+    DeviceReference& Get(int _index);
+    
+    DeviceReference& operator[](const int _index);
     
     bool Contains(const DeviceReference& _device) const;
     
@@ -185,15 +206,18 @@ namespace dss {
   /** Represents a predefined group */
   class Group : public DeviceContainer {
   protected:
-    int m_GroupID;
+    const int m_GroupID;
     DeviceVector m_Devices;
+    Apartment& m_Apartment;
   public:
+    Group(const int _id, Apartment& _apartment);
+    virtual ~Group() {};
     virtual Set GetDevices();
     
     int GetID() const;
 
-    virtual void AddDevice(const DeviceReference& _device) { /* do nothing or throw? */ };
-    virtual void RemoveDevice(const DeviceReference& _device) { /* do nothing or throw? */ };
+    virtual void AddDevice(const DeviceReference& _device);
+    virtual void RemoveDevice(const DeviceReference& _device);
   }; // Group
   
   
@@ -317,6 +341,8 @@ namespace dss {
     Group& GetGroup(const string& _name);
     Group& GetGroup(const int _id);
     vector<Group*>& GetGroups();
+    
+    UserGroup& AllocateGroup(const int _id);
     
     // Event stuff
     Subscription& Subscribe(Action& _action, vector<int> _eventIDs, vector<int> _sourceIDs = vector<int>());
