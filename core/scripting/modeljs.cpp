@@ -379,7 +379,7 @@ namespace dss {
   
   
   JSBool dev_JSGet(JSContext *cx, JSObject *obj, jsval id, jsval *rval) {
-    Device* dev = static_cast<Device*>(JS_GetPrivate(cx, obj));
+    DeviceReference* dev = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
     
     if(dev != NULL) {
       int opt = JSVAL_TO_INT(id);
@@ -391,7 +391,7 @@ namespace dss {
           *rval = INT_TO_JSVAL(dev->GetID());
           return JS_TRUE;
         case 2:
-          *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, dev->GetName().c_str()));
+          *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, dev->GetDevice().GetName().c_str()));
           return JS_TRUE;
       }
     }
@@ -399,7 +399,7 @@ namespace dss {
   }
   
   void finalize_dev(JSContext *cx, JSObject *obj) {
-    Device* pDevice = static_cast<Device*>(JS_GetPrivate(cx, obj));
+    DeviceReference* pDevice = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
     JS_SetPrivate(cx, obj, NULL);
     delete pDevice;
   } // finalize_dev
@@ -419,20 +419,20 @@ namespace dss {
     {NULL}
   };
   
+  JSObject* ModelScriptContextExtension::CreateJSDevice(ScriptContext& _ctx, Device& _dev) {
+    DeviceReference ref(_dev.GetID(), m_Apartment);
+    return CreateJSDevice(_ctx, ref);
+  } // CreateJSDevice
   
-  JSObject* ModelScriptContextExtension::CreateJSDevice(ScriptContext& _ctx, Device& _ref) {
+  JSObject* ModelScriptContextExtension::CreateJSDevice(ScriptContext& _ctx, DeviceReference& _ref) {
     JSObject* result = JS_NewObject(_ctx.GetJSContext(), &dev_class, NULL, NULL);
     JS_DefineFunctions(_ctx.GetJSContext(), result, device_interface_methods);
     JS_DefineProperties(_ctx.GetJSContext(), result, dev_properties);
-    Device* innerObj = new Device(_ref.GetID(), &_ref.GetApartment());
+    DeviceReference* innerObj = new DeviceReference(_ref.GetID(), _ref.GetDevice().GetApartment());
     // make an explicit copy
     *innerObj = _ref;
     JS_SetPrivate(_ctx.GetJSContext(), result, innerObj);
     return result;
-  } // CreateJSDevice
-  
-  JSObject* ModelScriptContextExtension::CreateJSDevice(ScriptContext& _ctx, DeviceReference& _ref) {
-    return CreateJSDevice(_ctx, _ref.GetDevice());
   } // CreateJSDevice
 
   

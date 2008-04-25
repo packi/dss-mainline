@@ -18,6 +18,9 @@
  * by $Author$
  */
 
+#ifndef _XML_WRAPPER_H_INCLUDED
+#define _XML_WRAPPER_H_INCLUDED
+
 #include "base.h"
 
 #include <libxml/tree.h>
@@ -35,7 +38,7 @@ namespace dss {
   protected:
     xmlNode* m_pNode;
     XMLNodeList m_Children;
-    HashMapConstWStringWString m_Attributes;
+    HashMapConstStringString m_Attributes;
     
     void AssertHasNode(const string& _reason);
     void Initialize();
@@ -45,19 +48,19 @@ namespace dss {
     XMLNode(const XMLNode& _other);
     XMLNode(xmlNode* _node);
     
-    const wstring GetName();
-    const wstring GetContent();
+    const string GetName();
+    const string GetContent();
     
-    void SetContent(const wstring& _value);
-    void SetName(const wstring& _value);
+    void SetContent(const string& _value);
+    void SetName(const string& _value);
     
     XMLNode& AddTextNode();
-    XMLNode& AddChildNode(const wstring& _name, const wstring& _content = "");
+    XMLNode& AddChildNode(const string& _name, const string& _content = "");
     
-    XMLNode& GetChildByName(const wstring& _name);
+    XMLNode& GetChildByName(const string& _name);
     
     XMLNodeList& GetChildren();
-    HashMapConstWStringWString& GetAttributes();
+    HashMapConstStringString& GetAttributes();
   }; // XMLNode
   
   class XMLDocument : ResourceHolder<xmlDoc> {
@@ -86,6 +89,7 @@ namespace dss {
     const wstring m_URI;
   public:
     XMLDocumentFileReader(const wstring& _uri);
+    XMLDocumentFileReader(const string& _uri);
     virtual XMLDocument& GetDocument();
   };
   
@@ -106,3 +110,5 @@ namespace dss {
   
   
 }
+
+#endif

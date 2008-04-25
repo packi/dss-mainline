@@ -18,6 +18,23 @@ namespace dss {
   private:
     void BestFit(const Set& _set, vector<DeviceReference>& _devices, vector<Group>& _groups);
   public:
+    //------------------------------------------------ Enumeration
+    vector<int> GetModulators();
+    vector<int> GetDevices(const int _modulatorID);
+    int GetGroupCount(const int _modulatorID);
+    vector<int> GetDevicesInGroup(const int _modulatorID, const int _modulatorID);
+    
+    vector<int> GetRooms(const int _modulatorID);
+    int GetRoomCount(const int _modulatorID);
+    vector<int> GetDevicesInRoom(const int _modulatorID, const int _roomID);
+    
+    void AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID);
+    void RemoveFromGroup(const int _modulatorID, const int _groupID, const int _deviceID);
+    
+    int AddUserGroup(const int _modulatorID);
+    void RemoveUserGroup(const int _modulatorID, const int _groupID);
+    
+    //------------------------------------------------ Device manipulation
     double GetValue(const int _parameterID = -1);
     
     void IncrementValue(const Group& _group, const int _parameterID = -1);
@@ -56,6 +73,8 @@ namespace dss {
     void UndoScene(const Group& _group);
     void UndoScene(const Device& _device);
     void UndoScene(const Set& _set);
+    
+    bool GetState(const Device& _device);
   };
 }
 

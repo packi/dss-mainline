@@ -18,7 +18,9 @@
  */
 
 #include "model.h"
+
 #include "dss.h"
+#include "logger.h"
 
 namespace dss {
   
@@ -319,13 +321,13 @@ namespace dss {
   : m_NextSubscriptionNumber(1)
   {  
     Group* grp = new Group(0, *this);
-    grp->SetName("black");
+    grp->SetName("yellow");
     m_Groups.push_back(grp);
     grp = new Group(1, *this);
-    grp->SetName("blue");
+    grp->SetName("gray");
     m_Groups.push_back(grp);
     grp = new Group(2, *this);
-    grp->SetName("green");
+    grp->SetName("blue");
     m_Groups.push_back(grp);
     grp = new Group(3, *this);
     grp->SetName("cyan");
@@ -337,40 +339,117 @@ namespace dss {
     grp->SetName("violet");
     m_Groups.push_back(grp);
     grp = new Group(6, *this);
-    grp->SetName("yellow");
+    grp->SetName("green");
     m_Groups.push_back(grp);
     grp = new Group(7, *this);
-    grp->SetName("gray");
+    grp->SetName("black");
+    m_Groups.push_back(grp);
+    grp = new Group(7, *this);
+    grp->SetName("white");
     m_Groups.push_back(grp);
   } // ctor
-  
-  Apartment::~Apartment() {
-    while(!m_Subscriptions.empty()) {
-      Subscription* elem = *m_Subscriptions.begin();
-      m_Subscriptions.erase(m_Subscriptions.begin());
+
+  // TODO: move to base.h
+  template<class t>
+  void ScrubVector(vector<t*>& _vector) {
+    while(!_vector.empty()) {
+      t* elem = *_vector.begin();
+      _vector.erase(_vector.begin());
       delete elem;
     }
-    while(!m_Devices.empty()) {
-      Device* dev = *m_Devices.begin();
-      m_Devices.erase(m_Devices.begin());
-      delete dev;
-    }
-    while(!m_Groups.empty()) {
-      Group* grp = *m_Groups.begin();
-      m_Groups.erase(m_Groups.begin());
-      delete grp;
-    }
-    while(!m_Rooms.empty()) {
-      Room* room = *m_Rooms.begin();
-      m_Rooms.erase(m_Rooms.begin());
-      delete room;
-    }
-    while(!m_Modulators.empty()) {
-      Modulator* mod = *m_Modulators.begin();
-      m_Modulators.erase(m_Modulators.begin());
-      delete mod;
-    }
+  } // ScrubVector
+  
+  Apartment::~Apartment() {
+    ScrubVector(m_Subscriptions);
+    ScrubVector(m_Devices);
+    ScrubVector(m_Groups);
+    ScrubVector(m_Rooms);
+    ScrubVector(m_Modulators);
+    
+    ScrubVector(m_StaleDevices);
+    ScrubVector(m_StaleGroups);
+    ScrubVector(m_StaleModulators);
+    ScrubVector(m_StaleRooms);
   } // dtor
+  
+  void Apartment::Run() {
+    // Load devices/modulators/etc. from a config-file
+    string configFileName = DSS::GetInstance()->GetConfig().GetOptionAs<string>("apartment_config", "/Users/packi/sources/dss/trunk/data/apartment.xml");
+    if(!FileExists(configFileName)) {
+      Logger::GetInstance()->Log(string("Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
+    } else {
+      ReadConfigurationFromXML(configFileName);
+    }
+    
+  } // Run
+    
+  void Apartment::ReadConfigurationFromXML(const string& _fileName) {
+    const int apartmentConfigVersion = 1;
+    XMLDocumentFileReader reader(_fileName);
+    
+    XMLNode rootNode = reader.GetDocument().GetRootNode();
+    if(rootNode.GetName() == "config") {
+      if(StrToInt(rootNode.GetAttributes()["version"]) == apartmentConfigVersion) {
+        XMLNodeList nodes = rootNode.GetChildren();
+        for(XMLNodeList::iterator iNode = nodes.begin(); iNode != nodes.end(); ++iNode) {
+          string nodeName = iNode->GetName();
+          if(nodeName == "devices") {
+            LoadDevices(*iNode);
+          } else if(nodeName == "modulators") {
+            LoadModulators(*iNode);
+          } else if(nodeName == "rooms") {
+            LoadRooms(*iNode);
+          }
+        }
+      } else {
+        Logger::GetInstance()->Log("Log file has the wrong version");
+      }
+    }
+  } // ReadConfigurationFromXML
+  
+  void Apartment::LoadDevices(XMLNode& _node) {
+    XMLNodeList devices = _node.GetChildren();
+    for(XMLNodeList::iterator iNode = devices.begin(); iNode != devices.end(); ++iNode) {
+      if(iNode->GetName() == "device") {
+        int id = StrToInt(iNode->GetAttributes()["id"]);
+        string name;
+        try {
+          XMLNode& nameNode = iNode->GetChildByName("name");
+          if(nameNode.GetChildren().size() > 0) {
+            name = (nameNode.GetChildren()[0]).GetContent();
+          }
+        } catch(XMLException* e) {
+        }
+        Device* newDevice = new Device(id, this);
+        if(name.size() > 0) {
+          newDevice->SetName(name);
+        }
+        m_StaleDevices.push_back(newDevice);
+      }
+    }
+  } // LoadDevices
+  
+  void Apartment::LoadModulators(XMLNode& _node) {
+    XMLNodeList modulators = _node.GetChildren();
+    for(XMLNodeList::iterator iModulator = modulators.begin(); iModulator != modulators.end(); ++iModulator) {
+      if(iModulator->GetName() == "modulator") {
+        int id = StrToInt(iModulator->GetAttributes()["id"]);
+        string name;
+        XMLNode& nameNode = iModulator->GetChildByName("name");
+        if(nameNode.GetChildren().size() > 0) {
+          name = (nameNode.GetChildren()[0]).GetContent();
+        }
+        Modulator* newModulator = new Modulator(id);
+        if(name.size() > 0) {
+          newModulator->SetName(name);
+        }
+        m_StaleModulators.push_back(newModulator);
+      }
+    }
+  } // LoadModulators
+  
+  void Apartment::LoadRooms(XMLNode& _node) {
+  } // LoadRooms
   
   Device& Apartment::GetDeviceByID(const devid_t _id) const {
     for(vector<Device*>::const_iterator ipDevice = m_Devices.begin(); ipDevice != m_Devices.end(); ++ipDevice) {
@@ -498,12 +577,24 @@ namespace dss {
   } // OnEvent
   
   Device& Apartment::AllocateDevice(const devid_t _id) {
+    // search in the stale devices first
+    for(vector<Device*>::iterator iDevice = m_StaleDevices.begin(); iDevice != m_StaleDevices.end(); ++iDevice) {
+      if((*iDevice)->GetID() == _id) {
+        return **iDevice;
+      }
+    }
+    
     Device* pResult = new Device(_id, this);
     m_Devices.push_back(pResult);
     return *pResult;
   } 
   
   //================================================== Modulator
+  
+  Modulator::Modulator(const int _id) 
+  : m_LocalID(_id)
+  {
+  } // ctor
   
   Set Modulator::GetDevices() {
     return m_ConnectedDevices;
@@ -568,5 +659,47 @@ namespace dss {
     }
     return false;
   } // HandlesEvent
+  
+  //================================================== DeviceReference
+  
+  devid_t DeviceReference::GetID() const {
+    return m_DeviceID;
+  } // GetID
+  
+  void DeviceReference::TurnOn() {
+    GetDevice(),TurnOn(); 
+  } // TurnOn
+  
+  void DeviceReference::TurnOff() {
+    GetDevice().TurnOff();
+  } // TurnOff
+  
+  void DeviceReference::IncreaseValue(const int _parameterNr) {
+    GetDevice().IncreaseValue(_parameterNr);
+  } // IncreaseValue
+  
+  void DeviceReference::DecreaseValue(const int _parameterNr) {
+    GetDevice().DecreaseValue(_parameterNr);
+  } // DecreaseValue
+    
+  void DeviceReference::Enable() {
+    GetDevice().Enable();
+  } // Enable
+  
+  void DeviceReference::Disable() {
+    GetDevice().Disable();
+  } // Disable
+  
+  void DeviceReference::StartDim(const bool _directionUp, const int _parameterNr) {
+    GetDevice().StartDim(_directionUp, _parameterNr);
+  } // StartDim
+  
+  void DeviceReference::EndDim(const int _parameterNr) {
+    GetDevice().EndDim(_parameterNr);
+  } // EndDim
+  
+  void DeviceReference::SetValue(const double _value, const int _parameterNr) {
+    GetDevice().SetValue(_value, _parameterNr);
+  } // SetValue
   
 }

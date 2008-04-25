@@ -23,6 +23,7 @@
 #include "base.h"
 #include "datetools.h"
 #include "ds485types.h"
+#include "xmlwrapper.h"
 
 #include <vector>
 #include <string>
@@ -35,24 +36,6 @@ namespace dss {
   class Set;
   class DeviceContainer;
   class Apartment;
-  
-  
-  class DeviceReference {
-  private:
-    devid_t m_DeviceID;
-    const Apartment* m_Apartment;
-  public:
-    DeviceReference(const DeviceReference& _copy);
-    DeviceReference(const devid_t _deviceID, const Apartment& _apartment);
-    DeviceReference(const Device& _device, const Apartment& _apartment);
-    
-    Device& GetDevice();
-    
-    bool operator==(const DeviceReference& _other) const {
-      return m_DeviceID == _other.m_DeviceID;
-    }
-    
-  };
   
   class IDeviceInterface {
   public:
@@ -68,6 +51,36 @@ namespace dss {
     virtual void StartDim(bool _directionUp, const int _parameterNr = -1) = 0;
     virtual void EndDim(const int _parameterNr = -1)= 0;
     virtual void SetValue(const double _value, int _parameterNr = -1) = 0;
+  };
+  
+  class DeviceReference : public IDeviceInterface {
+  private:
+    devid_t m_DeviceID;
+    const Apartment* m_Apartment;
+  public:
+    DeviceReference(const DeviceReference& _copy);
+    DeviceReference(const devid_t _deviceID, const Apartment& _apartment);
+    DeviceReference(const Device& _device, const Apartment& _apartment);
+    
+    Device& GetDevice();
+    devid_t GetID() const;
+    
+    bool operator==(const DeviceReference& _other) const {
+      return m_DeviceID == _other.m_DeviceID;
+    }
+    
+    virtual void TurnOn();
+    virtual void TurnOff();
+    
+    virtual void IncreaseValue(const int _parameterNr = -1);
+    virtual void DecreaseValue(const int _parameterNr = -1);
+    
+    virtual void Enable();
+    virtual void Disable();
+    
+    virtual void StartDim(const bool _directionUp, const int _parameterNr = -1);
+    virtual void EndDim(const int _parameterNr = -1);
+    virtual void SetValue(const double _value, const int _parameterNr = -1);    
   };
   
   typedef vector<DeviceReference> DeviceVector;
@@ -196,6 +209,7 @@ namespace dss {
     int m_LocalID;
     DeviceVector m_ConnectedDevices;
   public:
+    Modulator(const int _id);
     virtual Set GetDevices();
 
   //  void SendDS485Frame(const char* _frame, int _len);
@@ -311,6 +325,11 @@ namespace dss {
     */
   class Apartment : public DeviceContainer {
   private:
+    vector<Device*> m_StaleDevices;
+    vector<Modulator*> m_StaleModulators;
+    vector<Room*> m_StaleRooms;
+    vector<Group*> m_StaleGroups;
+    
     vector<Room*> m_Rooms;
     vector<Modulator*> m_Modulators;
     vector<Device*> m_Devices;
@@ -318,11 +337,18 @@ namespace dss {
     vector<Group*> m_Groups;
   private:
     int m_NextSubscriptionNumber;
+  private:
+    void LoadDevices(XMLNode& _node);
+    void LoadModulators(XMLNode& _node);
+    void LoadRooms(XMLNode& _node);
   public:
     Apartment();
     ~Apartment();
     
     virtual Set GetDevices();
+    
+    virtual void Run();
+    void ReadConfigurationFromXML(const string& _fileName);
     
     Device& GetDeviceByID(const devid_t _id) const;
     Device& AllocateDevice(const devid_t _id);

@@ -52,33 +52,20 @@ int main (int argc, char * const argv[]) {
   return 0;
 }
 
-void testXMLReader() {
-  XMLDocumentFileReader reader(L"/Users/packi/sources/dss/data/test.xml");
-  XMLDocument& doc = reader.GetDocument();
-  XMLNode& rootNode = doc.GetRootNode();
-  wcout << rootNode.GetName() << endl;
-  wcout << rootNode.GetChildren().size() << endl;
-  vector<XMLNode> children = rootNode.GetChildren();
-  wcout << children[0].GetName() << endl;
-  wcout << children[0].GetContent() << endl;
-  wcout << children[0].GetChildren().size() << endl;
-//  assert(L"02日22時更新" == children[0].GetContent());
-} // testXMLReader
-
 void testConfig() {
   Config conf;
-  conf.ReadFromXML(wstring(L"/Users/packi/sources/dss/trunk/data/testconfig.xml"));
-  int bla = conf.GetOptionAs<int>(L"serverport");
+  conf.ReadFromXML("/Users/packi/sources/dss/trunk/data/testconfig.xml");
+  int bla = conf.GetOptionAs<int>("serverport");
   assert(bla == 8080);
   
-  wstring serverRoot = conf.GetOptionAs<wstring>(L"serverroot");
-  wcout << serverRoot << endl;
+  string serverRoot = conf.GetOptionAs<string>("serverroot");
+  cout << serverRoot << endl;
   
-  assert(conf.GetOptionAs(L"bla", 1234) == 1234);
+  assert(conf.GetOptionAs("bla", 1234) == 1234);
   
-  conf.SetOptionAs(L"bla", 1234);
+  conf.SetOptionAs("bla", 1234);
   
-  assert(conf.HasOption(L"bla"));
-  assert(conf.GetOptionAs<int>(L"bla") == 1234);
-  assert(conf.GetOptionAs(L"bla", 4321) == 1234);
+  assert(conf.HasOption("bla"));
+  assert(conf.GetOptionAs<int>("bla") == 1234);
+  assert(conf.GetOptionAs("bla", 4321) == 1234);
 }

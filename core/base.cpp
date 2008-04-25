@@ -37,6 +37,16 @@ namespace dss {
     return wcstol(_strValue, NULL, 10);
   }
   
+  template<>
+  int StrToInt(const string& _strValue) {
+    return atoi(_strValue.c_str());
+  } 
+  
+  template<>
+  int StrToInt(const char* _strValue) {
+    return atoi(_strValue);
+  }
+  
   string IntToString(const int _int) {
     stringstream sstream;
     sstream << _int;

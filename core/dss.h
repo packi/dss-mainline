@@ -34,8 +34,9 @@ namespace dss {
   private:
     struct shttpd_ctx* m_SHttpdContext;
   protected:
+    static void JSONHandler(struct shttpd_arg* _arg);
     static void HTTPListOptions(struct shttpd_arg* _arg);
-    static void EmitHTTPHeader(int _code, struct shttpd_arg* _arg);
+    static void EmitHTTPHeader(int _code, struct shttpd_arg* _arg, const string _contentType = "text/html");
   public:
     WebServer();
     ~WebServer();
@@ -48,18 +49,18 @@ namespace dss {
   class Config {
   private:
     // this field has to be mutable because accessing it by operator[] is non-constw
-    mutable HashMapConstWStringWString m_OptionsByName; 
+    mutable HashMapConstStringString m_OptionsByName; 
   public:
-    bool HasOption(const wstring& _name) const;
-    void ReadFromXML(const wstring& _fileName);
+    bool HasOption(const string& _name) const;
+    void ReadFromXML(const string& _fileName);
     
-    void AssertHasOption(const wstring& _name) const;
+    void AssertHasOption(const string& _name) const;
 
     template <class t>
-    t GetOptionAs(const wstring& _name) const;
+    t GetOptionAs(const string& _name) const;
 
     template <class t>
-    t GetOptionAs(const wstring& _name, const t _defaultValue) const {
+    t GetOptionAs(const string& _name, const t _defaultValue) const {
       if(HasOption(_name)) {
         return GetOptionAs<t>(_name);
       }
@@ -67,13 +68,13 @@ namespace dss {
     }    
     
     template <class t>
-    void SetOptionAs(const wstring& _name, const t& _value) {
-      wstringstream strstream;
+    void SetOptionAs(const string& _name, const t& _value) {
+      stringstream strstream;
       strstream << _value;
       m_OptionsByName[_name] = strstream.str();
     } // SetOptionAs<t>
     
-    const HashMapConstWStringWString& GetOptions() { return m_OptionsByName; };
+    const HashMapConstStringString& GetOptions() { return m_OptionsByName; };
   }; // Config
 
   class DSS {
@@ -82,6 +83,7 @@ namespace dss {
     WebServer m_WebServer;
     Config m_Config;
     DS485Proxy m_DS485Proxy;
+    Apartment m_Apartment;
     
     DSS() { };
     
@@ -91,21 +93,22 @@ namespace dss {
     
     static DSS* GetInstance();
     Config& GetConfig() { return m_Config; };
-    DS485Proxy GetDS485Proxy() { return m_DS485Proxy; };
+    DS485Proxy& GetDS485Proxy() { return m_DS485Proxy; };
+    Apartment& GetApartment() { return m_Apartment; };
   }; // DSS
   
   class NoSuchOptionException : DSSException {
   private:
-    const wstring m_OptionName;
+    const string m_OptionName;
   public:
-    NoSuchOptionException(const wstring& _optionName) 
+    NoSuchOptionException(const string& _optionName) 
     : DSSException( string("Item not found:") ),
       m_OptionName(_optionName)
     {};
     
     ~NoSuchOptionException() throw() {};
     
-    const wstring& GetOptionName() {
+    const string& GetOptionName() {
       return m_OptionName;
     } // GetOptionName
   }; // NoSuchOptionException

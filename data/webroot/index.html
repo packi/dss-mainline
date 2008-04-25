@@ -1,8 +1,22 @@
 <html>
+  <head>
+    <title>digitalStrom - Server</title>
+	<script src="prototype.js" language="JavaScript" type="text/javascript"></script>
+	<script type="text/javascript" language="JavaScript">
+	new Ajax.Request('/json/getdevices', { method:'get',
+  onComplete: function(transport, json) {
+	  $('numDevs').innerHTML = transport.responseJSON.devices.length;
+    }
+  });
+</script>
+  </head>
   <body>
     <h1>Welcome to the dSS!</h1>
 	<ul>
 	  <li><a href="config">Config</a></li>
 	</ul>
+	<form>
+	Connected devices: <span id="numDevs">(...loading...)</span>
+	</form>
   </body>	
 </html>

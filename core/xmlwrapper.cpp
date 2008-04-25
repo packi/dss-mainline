@@ -54,16 +54,16 @@ namespace dss {
     m_AttributesRead = _other.m_AttributesRead;
   } // CopyFrom
   
-  const wstring XMLNode::GetName() {
+  const string XMLNode::GetName() {
     AssertHasNode("Can't get name without node");
     const char* content = (const char*)m_pNode->name; 
-    return FromUTF8(content, strlen(content));
+    return content;
   }
   
-  const wstring XMLNode::GetContent() {
+  const string XMLNode::GetContent() {
     AssertHasNode("Can't get content without node");
     const char* content = (const char*)m_pNode->content;
-    return FromUTF8(content, strlen(content));
+    return content;
   }
   
   void XMLNode::AssertHasNode(const string& _reason) {
@@ -87,7 +87,7 @@ namespace dss {
     return m_Children;
   }
   
-  XMLNode& XMLNode::GetChildByName(const wstring& _name) {
+  XMLNode& XMLNode::GetChildByName(const string& _name) {
     XMLNodeList& children = GetChildren();
     for(XMLNodeList::iterator it = children.begin(); it != children.end(); ++it) {
       if(it->GetName() == _name) {
@@ -97,17 +97,14 @@ namespace dss {
     throw new XMLException("Could not find node");
   } // GetChildByName
   
-  XMLNode& XMLNode::AddChildNode(const wstring& _name, const wstring& _content) {
-    string name = ToUTF8(_name);
-    string content = ToUTF8(_content);
-    
-    if(name.size() == 0) {
+  XMLNode& XMLNode::AddChildNode(const string& _name, const string& _content) {
+    if(_name.size() == 0) {
       throw new XMLException("XMLNode::AddChildNode: parameter _name must not be empty");
     }
-    
+    throw new XMLException("Not yet implemented");
   } // AddChildNode
 
-  HashMapConstWStringWString& XMLNode::GetAttributes() {
+  HashMapConstStringString& XMLNode::GetAttributes() {
     AssertHasNode("Can't return children without node");
     
     if(!m_AttributesRead) {
@@ -117,7 +114,7 @@ namespace dss {
           const char* name = (const char*)currAttr->name;
           const char* value = (const char*)currAttr->children->content;
           
-          m_Attributes[FromUTF8(name, strlen(name))] = FromUTF8(value, strlen(value));
+          m_Attributes[name] = value;
         }
         currAttr = currAttr->next;
       }
@@ -171,6 +168,12 @@ namespace dss {
   : m_URI(_fileURI)
   {    
   } // ctor
+  
+  XMLDocumentFileReader::XMLDocumentFileReader(const string& _uri) 
+  : m_URI(FromUTF8(_uri))
+  {
+  }
+
   
   XMLDocumentReader::~XMLDocumentReader() {
   }
