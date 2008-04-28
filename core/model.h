@@ -36,6 +36,7 @@ namespace dss {
   class Set;
   class DeviceContainer;
   class Apartment;
+  class Group;
   
   class IDeviceInterface {
   public:
@@ -91,8 +92,10 @@ namespace dss {
   private:
     string m_Name;
     devid_t m_ID;
+    int m_ModulatorID;
     Apartment* m_pApartment;
     long long m_GroupBitmask;
+    vector<int> m_Groups;
   public:
     Device(devid_t _id, Apartment* _pApartment);
     
@@ -115,7 +118,12 @@ namespace dss {
     
     long long GetGroupBitmask() const;
     
+    int GetGroupIdByIndex(const int _index) const;
+    Group& GetGroupByIndex(const int _index);
+    int GetGroupsCount() const;
+    
     devid_t GetID() const;
+    int GetModulatorID() const;
     Apartment& GetApartment() const;
     
     bool operator==(const Device& _other) const;
@@ -166,6 +174,8 @@ namespace dss {
     
     Set GetSubset(const IDeviceSelector& _selector); 
     Set GetByGroup(int _groupNr);
+    Set GetByGroup(const Group& _group);
+    Set GetByGroup(const string& _name);
     DeviceReference GetByName(const string& _name);
     DeviceReference GetByID(const int _id);
     
@@ -175,11 +185,11 @@ namespace dss {
     Set Combine(Set& _other) const;
     Set Remove(Set& _other) const;
     
-    DeviceReference& Get(int _index);
-    
+    DeviceReference& Get(int _index);    
     DeviceReference& operator[](const int _index);
     
     bool Contains(const DeviceReference& _device) const;
+    bool Contains(const Device& _device) const;
     
     void AddDevice(const DeviceReference& _device);
     void AddDevice(const Device& _device);
@@ -194,8 +204,8 @@ namespace dss {
   private:
     string m_Name;
   public:
-    virtual Set GetDevices() = 0;
-    virtual Set GetDevices(const IDeviceSelector& _selector) {
+    virtual Set GetDevices() const = 0;
+    virtual Set GetDevices(const IDeviceSelector& _selector) const {
       return GetDevices().GetSubset(_selector);
     }
     
@@ -210,7 +220,7 @@ namespace dss {
     DeviceVector m_ConnectedDevices;
   public:
     Modulator(const int _id);
-    virtual Set GetDevices();
+    virtual Set GetDevices() const;
 
   //  void SendDS485Frame(const char* _frame, int _len);
     
@@ -226,7 +236,7 @@ namespace dss {
   public:
     Group(const int _id, Apartment& _apartment);
     virtual ~Group() {};
-    virtual Set GetDevices();
+    virtual Set GetDevices() const;
     
     int GetID() const;
 
@@ -248,7 +258,7 @@ namespace dss {
     int m_RoomID;
     DeviceVector m_Devices;
   public:
-    virtual Set GetDevices();
+    virtual Set GetDevices() const;
     
     void AddDevice(const DeviceReference& _device);
     void RemoveDevice(const DeviceReference& _device);
@@ -345,7 +355,7 @@ namespace dss {
     Apartment();
     ~Apartment();
     
-    virtual Set GetDevices();
+    virtual Set GetDevices() const;
     
     virtual void Run();
     void ReadConfigurationFromXML(const string& _fileName);
@@ -406,6 +416,30 @@ namespace dss {
     ItemNotFoundException(const string& _name) : DSSException(string("Could not find item ") + _name) {};
     ~ItemNotFoundException() throw() {};
   };
+  
+}
+
+#ifndef WIN32
+#include <ext/hash_map>
+#else
+#include <hash_map>
+#endif
+#include <stdexcept>
+
+#ifndef WIN32
+using namespace __gnu_cxx;
+#else
+using namespace stdext;
+#endif
+
+namespace __gnu_cxx  
+{
+  template<> 
+  struct hash< const dss::Modulator* >  {                                                                                           
+    size_t operator()( const dss::Modulator* x ) const  {                                                                                         
+      return x->GetID();                                              
+    }                                                                                         
+  };                                 
   
 }
 

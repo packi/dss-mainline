@@ -58,29 +58,47 @@ namespace dss {
   }
   
   void Device::TurnOn() {
-//    DSS::GetInstance()->GetDS485Proxy().TurnOn( *this );
+    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdTurnOn, *this);
   } // TurnOn
   
   void Device::TurnOff() {
-//    DSS::GetInstance()->GetDS485Proxy().TurnOff( *this );
+    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdTurnOff, *this);
   } // TurnOff
   
   void Device::IncreaseValue(const int _parameterNr) {
+    if(_parameterNr == -1) {
+      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdIncreaseValue, *this);
+    } else {
+      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdIncreaseParam, *this);
+    }
   } // IncreaseValue
   
   void Device::DecreaseValue(const int _parameterNr) {
+    if(_parameterNr == -1) {
+      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdDecreaseValue, *this);
+    } else {
+      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdDecreaseParam, *this);
+    }
   } // DecreaseValue
   
   void Device::Enable() {
+    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdEnable, *this);
   } // Enable
   
   void Device::Disable() {
+    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdDisable, *this);
   } // Disable
   
   void Device::StartDim(const bool _directionUp, const int _parameterNr) {
+    if(_directionUp) {
+      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdStartDimUp, *this);
+    } else {
+      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdStartDimDown, *this);
+    }
   } // StartDim
   
   void Device::EndDim(const int _parameterNr) {
+    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdStopDim, *this);
   } // EndDim
   
   void Device::SetValue(const double _value, const int _parameterNr) {
@@ -106,6 +124,22 @@ namespace dss {
     return m_ID;
   } // GetID
   
+  int Device::GetModulatorID() const {
+    return m_ModulatorID;
+  } // GetModulatorID
+  
+  int Device:: GetGroupIdByIndex(const int _index) const {
+    return m_Groups[_index];
+  } // GetGroupIdByIndex
+  
+  Group& Device::GetGroupByIndex(const int _index) {
+    return m_pApartment->GetGroup(GetGroupIdByIndex(_index));
+  } // GetGroupByIndex
+  
+  int Device::GetGroupsCount() const {
+    return m_Groups.size();
+  } // GetGroupsCount
+  
   long long Device::GetGroupBitmask() const {
     return m_GroupBitmask;
   } // GetGroupBitmask
@@ -128,27 +162,47 @@ namespace dss {
   } // ctor(DeviceVector)
   
   void Set::TurnOn() {
+    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdTurnOn, *this);
   } // TurnOn
   
   void Set::TurnOff() {
+    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdTurnOff, *this);
   } // TurnOff
   
   void Set::IncreaseValue(const int _parameterNr) {
+    if(_parameterNr == -1) {
+      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdIncreaseValue, *this);
+    } else {
+      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdIncreaseParam, *this);
+    }
   } // IncreaseValue
   
   void Set::DecreaseValue(const int _parameterNr) {
+    if(_parameterNr == -1) {
+      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdDecreaseValue, *this);
+    } else {
+      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdDecreaseParam, *this);
+    }
   } // DecreaseValue
   
   void Set::Enable() {
+    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdEnable, *this);
   } // Enable
   
   void Set::Disable() {
+    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdDisable, *this);
   } // Disable
   
   void Set::StartDim(bool _directionUp, const int _parameterNr) {
+    if(_directionUp) {
+      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdStartDimUp, *this);
+    } else {
+      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdStartDimDown, *this);
+    }
   } // StartDim
   
   void Set::EndDim(const int _parameterNr) {
+    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdStopDim, *this);
   } // EndDim
   
   void Set::SetValue(const double _value, int _parameterNr) {
@@ -189,6 +243,20 @@ namespace dss {
   Set Set::GetByGroup(int _groupNr) {
     return GetSubset(ByGroupSelector(_groupNr));
   } // GetByGroup
+  
+  Set Set::GetByGroup(const Group& _group) {
+    return GetByGroup(_group.GetID());
+  }
+  
+  Set Set::GetByGroup(const string& _name) {
+    Set result;
+    if(IsEmpty()) {
+      return result;
+    } else {
+      Group& g = Get(0).GetDevice().GetApartment().GetGroup(_name);
+      return GetByGroup(g.GetID());
+    }
+  }
   
   class ByNameSelector : public IDeviceSelector {
   private:
@@ -259,6 +327,10 @@ namespace dss {
     DeviceVector::const_iterator pos = find(m_ContainedDevices.begin(), m_ContainedDevices.end(), _device);
     return pos != m_ContainedDevices.end();
   } // Contains
+  
+  bool Set::Contains(const Device& _device) const {
+    return Contains(DeviceReference(_device, _device.GetApartment()));
+  }
   
   void Set::AddDevice(const DeviceReference& _device) {
     if(!Contains(_device)) {
@@ -460,9 +532,9 @@ namespace dss {
     throw new ItemNotFoundException(IntToString(_id));
   } // GetDeviceByID
   
-  Set Apartment::GetDevices() {
+  Set Apartment::GetDevices() const {
     DeviceVector devs;
-    for(vector<Device*>::iterator ipDevice = m_Devices.begin(); ipDevice != m_Devices.end(); ++ipDevice) {
+    for(vector<Device*>::const_iterator ipDevice = m_Devices.begin(); ipDevice != m_Devices.end(); ++ipDevice) {
       devs.push_back(DeviceReference(**ipDevice, *this));
     }
     
@@ -596,7 +668,7 @@ namespace dss {
   {
   } // ctor
   
-  Set Modulator::GetDevices() {
+  Set Modulator::GetDevices() const {
     return m_ConnectedDevices;
   } // GetDevices
   
@@ -606,7 +678,7 @@ namespace dss {
   
   //================================================== Room
   
-  Set Room::GetDevices() {
+  Set Room::GetDevices() const {
     return Set(m_Devices);
   } // GetDevices
   
@@ -643,7 +715,7 @@ namespace dss {
     return m_GroupID;
   } // GetID
   
-  Set Group::GetDevices() {
+  Set Group::GetDevices() const {
     return m_Apartment.GetDevices().GetByGroup(m_GroupID);
   }
   

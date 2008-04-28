@@ -14,11 +14,106 @@
 
 namespace dss {
   
+  typedef hash_map<const Modulator*, pair< vector<Group*>, Set> > FittingResult;
+  
+  
+  template<class t>
+  class DS485Parameter {
+  private:
+    t _data;
+  };
+
+  
+  class DS485Header {
+  private:
+    unsigned int m_Destination;
+    bool m_Broadcast;
+    unsigned int m_Source;
+    unsigned int m_Counter;
+    int m_Type;
+  };
+  
+  class DS485Frame {
+  private:
+    DS485Header m_Header;
+  public:
+  }; // DS485Frame
+  
+  class DS485CommandFrame {
+  private:
+    //vector<DS485Parameter*> m_Parameters;
+    unsigned short m_Command;
+    unsigned short m_Length;
+  };
+  
+  typedef enum {
+    cmdTurnOn,
+    cmdTurnOff,
+    cmdStartDimUp,
+    cmdStartDimDown,
+    cmdStopDim,
+    cmdCallScene,
+    cmdSaveScene,
+    cmdUndoScene,
+    cmdIncreaseValue,
+    cmdDecreaseValue,
+    cmdEnable,
+    cmdDisable,
+    cmdIncreaseParam,
+    cmdDecreaseParam
+  } DS485Command;
+  
+  class DS485Interface {
+  public:
+    virtual void Send(DS485Frame& _frame) = 0;
+    virtual DS485Frame& Receive() = 0;
+  };
+  
+  //================================================== Simulation stuff ahead
+  
+  class DSIDSim;
+  
+  class DSModulatorSim : public DS485Interface {
+  private:
+    Apartment& m_Apartment;
+    vector<DSIDSim*> m_SimulatedDevices;
+  public:
+    DSModulatorSim(Apartment& _apartment, const string& _configFile);
+
+    virtual void Send(DS485Frame& _frame) ;
+    virtual DS485Frame& Receive();
+  };
+  
+  class DSIDSim : public IDeviceInterface {
+  private:
+    devid_t m_DSId;
+    bool m_On;
+    bool m_Enabled;
+    vector<int> m_Parameters;
+    DSModulatorSim* m_Modulator;
+  public:
+    DSIDSim(const devid_t _DSId);
+    
+    virtual void TurnOn();
+    virtual void TurnOff();
+    
+    virtual void IncreaseValue(const int _parameterNr = -1);
+    virtual void DecreaseValue(const int _parameterNr = -1);
+    
+    virtual void Enable();
+    virtual void Disable();
+    
+    virtual void StartDim(bool _directionUp, const int _parameterNr = -1);
+    virtual void EndDim(const int _parameterNr = -1);
+    virtual void SetValue(const double _value, int _parameterNr = -1);
+  };
+  
   class DS485Proxy {
   private:
-    void BestFit(const Set& _set, vector<DeviceReference>& _devices, vector<Group>& _groups);
+    FittingResult BestFit(Set& _set);
+    bool IsSimAddress(devid_t _addr);
   public:
-    //------------------------------------------------ Enumeration
+    //------------------------------------------------ Specialized Commands (system)
     vector<int> GetModulators();
     vector<int> GetDevices(const int _modulatorID);
     int GetGroupCount(const int _modulatorID);
@@ -34,47 +129,10 @@ namespace dss {
     int AddUserGroup(const int _modulatorID);
     void RemoveUserGroup(const int _modulatorID, const int _groupID);
     
-    //------------------------------------------------ Device manipulation
-    double GetValue(const int _parameterID = -1);
-    
-    void IncrementValue(const Group& _group, const int _parameterID = -1);
-    void IncrementValue(const Device& _device, const int _parameterID = -1);
-    void IncrementValue(const Set& _set, const int _parameterID = -1);
-
-    void DecrementValue(const Group& _group, const int _parameterID = -1);
-    void DecrementValue(const Device& _device, const int _parameterID = -1);
-    void DecrementValue(const Set& _set, const int _parameterID = -1);
-    
-    void StartDim(const Group& _group, const bool _up);
-    void StartDim(const Device& _device, const bool _up);
-    void StartDim(const Set& _set, const bool _up);
-    
-    void StopDim(const Group& _group);
-    void StopDim(const Device& _device);
-    void StopDim(const Set& _set);
-    
-    void TurnOn(const Group& _group);
-    void TurnOn(const Device& _device);
-    void TurnOn(const Set& _set);
-
-    void TurnOff(const Group& _group);
-    void TurnOff(const Device& _device);
-    void TurnOff(const Set& _set);
-
-    void CallScene(const Group& _group);
-    void CallScene(const Device& _device);
-    
-    void CallScene(const Set& _set);
-
-    void SaveScene(const Group& _group);
-    void SaveScene(const Device& _device);
-    void SaveScene(const Set& _set);
-
-    void UndoScene(const Group& _group);
-    void UndoScene(const Device& _device);
-    void UndoScene(const Set& _set);
-    
-    bool GetState(const Device& _device);
+    //------------------------------------------------ Device manipulation    
+    void SendCommand(DS485Command _cmd, Set& _set);
+    void SendCommand(DS485Command _cmd, Device& _device);
+    void SendCommand(DS485Command _cmd, devid_t _id);
   };
 }
 
