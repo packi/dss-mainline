@@ -39,6 +39,7 @@ namespace dss {
     m_WebServer.Initialize(m_Config);
     m_WebServer.Run();
     
+    m_ModulatorSim.Initialize();
     m_Apartment.Run();
     
     while(true) {

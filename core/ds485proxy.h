@@ -12,6 +12,13 @@
 
 #include "model.h"
 
+#include "ds485types.h"
+#include "ds485.h"
+
+#include <map>
+
+using namespace std;
+
 namespace dss {
   
   typedef hash_map<const Modulator*, pair< vector<Group*>, Set> > FittingResult;
@@ -22,31 +29,7 @@ namespace dss {
   private:
     t _data;
   };
-
-  
-  class DS485Header {
-  private:
-    unsigned int m_Destination;
-    bool m_Broadcast;
-    unsigned int m_Source;
-    unsigned int m_Counter;
-    int m_Type;
-  };
-  
-  class DS485Frame {
-  private:
-    DS485Header m_Header;
-  public:
-  }; // DS485Frame
-  
-  class DS485CommandFrame {
-  private:
-    //vector<DS485Parameter*> m_Parameters;
-    unsigned short m_Command;
-    unsigned short m_Length;
-  };
-  
-  typedef enum {
+    typedef enum {
     cmdTurnOn,
     cmdTurnOff,
     cmdStartDimUp,
@@ -75,53 +58,67 @@ namespace dss {
   
   class DSModulatorSim : public DS485Interface {
   private:
-    Apartment& m_Apartment;
+    int m_ID;
     vector<DSIDSim*> m_SimulatedDevices;
+    multimap<const int, DSIDSim*> m_Groups;
+    multimap<const int, DSIDSim*> m_Rooms;
+  private:  
+    DSIDSim& LookupDevice(int _id);
   public:
-    DSModulatorSim(Apartment& _apartment, const string& _configFile);
+    DSModulatorSim();
+    void Initialize();
+    
+    int GetID() const;
 
-    virtual void Send(DS485Frame& _frame) ;
+    virtual void Send(DS485Frame& _frame);
     virtual DS485Frame& Receive();
   };
   
-  class DSIDSim : public IDeviceInterface {
+  class DSIDSim {
   private:
-    devid_t m_DSId;
+    const int m_Id;
     bool m_On;
     bool m_Enabled;
     vector<int> m_Parameters;
     DSModulatorSim* m_Modulator;
+    vector<uint8> m_ValuesForScene;
+    uint8 m_CurrentValue;
+    int m_DimTimeMS;
   public:
-    DSIDSim(const devid_t _DSId);
+    DSIDSim(const int _id);
     
-    virtual void TurnOn();
-    virtual void TurnOff();
+    int GetID();
     
-    virtual void IncreaseValue(const int _parameterNr = -1);
-    virtual void DecreaseValue(const int _parameterNr = -1);
+    void CallScene(const int _sceneNr);
+    void SaveScene(const int _sceneNr);
+    void UndoScene(const int _sceneNr);
     
-    virtual void Enable();
-    virtual void Disable();
+    void IncreaseValue(const int _parameterNr = -1);
+    void DecreaseValue(const int _parameterNr = -1);
     
-    virtual void StartDim(bool _directionUp, const int _parameterNr = -1);
-    virtual void EndDim(const int _parameterNr = -1);
-    virtual void SetValue(const double _value, int _parameterNr = -1);
+    void Enable();
+    void Disable();
+    
+    void StartDim(bool _directionUp, const int _parameterNr = -1);
+    void EndDim(const int _parameterNr = -1);
+    void SetValue(const double _value, int _parameterNr = -1);
   };
   
   class DS485Proxy {
   private:
     FittingResult BestFit(Set& _set);
-    bool IsSimAddress(devid_t _addr);
+    bool IsSimAddress(const uint8 _addr);
   public:
     //------------------------------------------------ Specialized Commands (system)
     vector<int> GetModulators();
-    vector<int> GetDevices(const int _modulatorID);
     int GetGroupCount(const int _modulatorID);
-    vector<int> GetDevicesInGroup(const int _modulatorID, const int _modulatorID);
+    vector<int> GetDevicesInGroup(const int _modulatorID, const int _groupID);
     
     vector<int> GetRooms(const int _modulatorID);
     int GetRoomCount(const int _modulatorID);
     vector<int> GetDevicesInRoom(const int _modulatorID, const int _roomID);
+
+    ///vector<int> GetDevices(const int _modulatorID);
     
     void AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID);
     void RemoveFromGroup(const int _modulatorID, const int _groupID, const int _deviceID);
@@ -132,7 +129,11 @@ namespace dss {
     //------------------------------------------------ Device manipulation    
     void SendCommand(DS485Command _cmd, Set& _set);
     void SendCommand(DS485Command _cmd, Device& _device);
-    void SendCommand(DS485Command _cmd, devid_t _id);
+    void SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID);
+    void SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group);
+    
+    void SendFrame(DS485Frame& _frame);
+    vector<DS485Frame> Receive(uint8 _functionID);
   };
 }
 

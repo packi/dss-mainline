@@ -13,6 +13,8 @@
 namespace dss {
   
   typedef long devid_t;
+  typedef short int8;
+  typedef unsigned short uint8;
 
 }
 

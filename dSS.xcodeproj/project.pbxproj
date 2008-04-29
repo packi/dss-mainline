@@ -32,6 +32,7 @@
 		826DBC9C0DBCC9500034ADFB /* modeltests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 826DBC9B0DBCC9500034ADFB /* modeltests.cpp */; };
 		826DBEC80DBE1C170034ADFB /* modeljs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 826DBEC70DBE1C170034ADFB /* modeljs.cpp */; };
 		826DBF590DBF1DD70034ADFB /* modeljstests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 826DBF580DBF1DD70034ADFB /* modeljstests.cpp */; };
+		828C7C800DC7156700D34901 /* ds485.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 828C7C7F0DC7156700D34901 /* ds485.cpp */; };
 		82B161100DAE42080005FB71 /* libjs.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82B1610F0DAE42080005FB71 /* libjs.dylib */; };
 		82B161730DAEBABA0005FB71 /* jshandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B161720DAEBABA0005FB71 /* jshandler.cpp */; };
 		82B161FB0DAF6CC10005FB71 /* tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B161FA0DAF6CC10005FB71 /* tests.cpp */; };
@@ -91,6 +92,8 @@
 		826DBEC60DBE1C170034ADFB /* modeljs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = modeljs.h; path = core/scripting/modeljs.h; sourceTree = "<group>"; };
 		826DBEC70DBE1C170034ADFB /* modeljs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = modeljs.cpp; path = core/scripting/modeljs.cpp; sourceTree = "<group>"; };
 		826DBF580DBF1DD70034ADFB /* modeljstests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = modeljstests.cpp; path = tests/modeljstests.cpp; sourceTree = "<group>"; };
+		828C7C7E0DC7156700D34901 /* ds485.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ds485.h; path = core/ds485.h; sourceTree = "<group>"; };
+		828C7C7F0DC7156700D34901 /* ds485.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ds485.cpp; path = core/ds485.cpp; sourceTree = "<group>"; };
 		82B1610F0DAE42080005FB71 /* libjs.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjs.dylib; path = /opt/local/lib/libjs.dylib; sourceTree = "<absolute>"; };
 		82B161710DAEBABA0005FB71 /* jshandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = jshandler.h; path = core/jshandler.h; sourceTree = "<group>"; };
 		82B161720DAEBABA0005FB71 /* jshandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = jshandler.cpp; path = core/jshandler.cpp; sourceTree = "<group>"; };
@@ -140,6 +143,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				828C7C7E0DC7156700D34901 /* ds485.h */,
+				828C7C7F0DC7156700D34901 /* ds485.cpp */,
 				826DBF580DBF1DD70034ADFB /* modeljstests.cpp */,
 				826DBEC60DBE1C170034ADFB /* modeljs.h */,
 				826DBEC70DBE1C170034ADFB /* modeljs.cpp */,
@@ -275,6 +280,7 @@
 				826DBC9C0DBCC9500034ADFB /* modeltests.cpp in Sources */,
 				826DBEC80DBE1C170034ADFB /* modeljs.cpp in Sources */,
 				826DBF590DBF1DD70034ADFB /* modeljstests.cpp in Sources */,
+				828C7C800DC7156700D34901 /* ds485.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

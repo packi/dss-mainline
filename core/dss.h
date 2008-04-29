@@ -84,6 +84,7 @@ namespace dss {
     Config m_Config;
     DS485Proxy m_DS485Proxy;
     Apartment m_Apartment;
+    DSModulatorSim m_ModulatorSim;
     
     DSS() { };
     
@@ -95,6 +96,7 @@ namespace dss {
     Config& GetConfig() { return m_Config; };
     DS485Proxy& GetDS485Proxy() { return m_DS485Proxy; };
     Apartment& GetApartment() { return m_Apartment; };
+    DSModulatorSim& GetModulatorSim() { return m_ModulatorSim; }
   }; // DSS
   
   class NoSuchOptionException : DSSException {
