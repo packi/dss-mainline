@@ -16,6 +16,7 @@
 #include "ds485.h"
 
 #include <map>
+#include <vector>
 
 using namespace std;
 
@@ -60,10 +61,14 @@ namespace dss {
   private:
     int m_ID;
     vector<DSIDSim*> m_SimulatedDevices;
-    multimap<const int, DSIDSim*> m_Groups;
-    multimap<const int, DSIDSim*> m_Rooms;
+    map< const int, vector<DSIDSim*> > m_Groups;
+    map< const int, vector<DSIDSim*> > m_Rooms;
+    vector<DS485Frame> m_PendingFrames;
   private:  
     DSIDSim& LookupDevice(int _id);
+    DS485CommandFrame CreateResponse(DS485CommandFrame& _request, uint8 _functionID);
+    DS485CommandFrame CreateAck(DS485CommandFrame& _request, uint8 _functionID);
+    DS485CommandFrame CreateReply(DS485CommandFrame& _request);
   public:
     DSModulatorSim();
     void Initialize();
@@ -71,6 +76,7 @@ namespace dss {
     int GetID() const;
 
     virtual void Send(DS485Frame& _frame);
+    bool HasPendingFrame();
     virtual DS485Frame& Receive();
   };
   
@@ -108,6 +114,10 @@ namespace dss {
   private:
     FittingResult BestFit(Set& _set);
     bool IsSimAddress(const uint8 _addr);
+
+    void SendFrame(DS485Frame& _frame);
+    vector<DS485Frame> Receive(uint8 _functionID);
+    uint8 ReceiveSingleResult(uint8 _functionID);
   public:
     //------------------------------------------------ Specialized Commands (system)
     vector<int> GetModulators();
@@ -117,6 +127,7 @@ namespace dss {
     vector<int> GetRooms(const int _modulatorID);
     int GetRoomCount(const int _modulatorID);
     vector<int> GetDevicesInRoom(const int _modulatorID, const int _roomID);
+    int GetDevicesCountInRoom(const int _modulatorID, const int _roomID);
 
     ///vector<int> GetDevices(const int _modulatorID);
     
@@ -132,8 +143,6 @@ namespace dss {
     void SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID);
     void SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group);
     
-    void SendFrame(DS485Frame& _frame);
-    vector<DS485Frame> Receive(uint8 _functionID);
   };
 }
 

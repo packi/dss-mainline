@@ -77,6 +77,9 @@ namespace dss {
     const HashMapConstStringString& GetOptions() { return m_OptionsByName; };
   }; // Config
 
+  /** Main class
+    * 
+    */
   class DSS {
   private:
     static DSS* m_Instance;

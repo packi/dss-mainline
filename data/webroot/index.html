@@ -3,9 +3,29 @@
     <title>digitalStrom - Server</title>
 	<script src="prototype.js" language="JavaScript" type="text/javascript"></script>
 	<script type="text/javascript" language="JavaScript">
+	
+	function turnOn(devid) {
+	  new Ajax.Request('/json/turnon', 
+	    {
+	      method:'get', 
+	      parameters: {device: devid} 
+	    } 
+	  );
+	}
+	
 	new Ajax.Request('/json/getdevices', { method:'get',
   onComplete: function(transport, json) {
 	  $('numDevs').innerHTML = transport.responseJSON.devices.length;
+	  var devs = transport.responseJSON.devices;
+	  var devslist = "<ul>";
+	  for(i = 0; i < devs.length; i++) {
+	    devslist += "<li>" + devs[i].name;
+	    devslist += '<a href="#" onclick="turnOn(' + devs[i].id + ')">Turn On</a>';
+	    devslist += "</li>";
+	    
+	  }
+	  devslist += "</ul>";
+	  $('devList').innerHTML = devslist;
     }
   });
 </script>
@@ -17,6 +37,8 @@
 	</ul>
 	<form>
 	Connected devices: <span id="numDevs">(...loading...)</span>
+	<div id="devList">
+	</div>
 	</form>
   </body>	
 </html>

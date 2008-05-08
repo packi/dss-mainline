@@ -128,6 +128,10 @@ namespace dss {
     return m_ModulatorID;
   } // GetModulatorID
   
+  void Device::SetModulatorID(const int _modulatorID) {
+    m_ModulatorID;
+  } // SetModulatorID
+  
   int Device:: GetGroupIdByIndex(const int _index) const {
     return m_Groups[_index];
   } // GetGroupIdByIndex
@@ -453,6 +457,27 @@ namespace dss {
       ReadConfigurationFromXML(configFileName);
     }
     
+    DS485Proxy& proxy = DSS::GetInstance()->GetDS485Proxy();
+    
+    vector<int> modIDs = proxy.GetModulators();
+    for(vector<int>::iterator iModulatorID = modIDs.begin(); iModulatorID != modIDs.end(); ++iModulatorID) {
+      int modID = *iModulatorID;
+      //Modulator& mod = AllocateModulator(modID);
+      vector<int> roomIDs = proxy.GetRooms(modID);
+      for(vector<int>::iterator iRoomID = roomIDs.begin(); iRoomID != roomIDs.end(); ++iRoomID) {
+        int roomID = *iRoomID;
+        vector<int> devices = proxy.GetDevicesInRoom(modID, roomID);
+        for(vector<int>::iterator iDevice = devices.begin(); iDevice != devices.end(); ++iDevice) {
+          int devID = *iDevice;
+          Device& dev = AllocateDevice(devID);
+          dev.SetModulatorID(modID);
+        }
+      }
+      int numGroups = proxy.GetGroupCount(modID);
+      for(int iGroup = 0; iGroup < numGroups; iGroup++) {
+        //proxy.GetDevicesInGroup(<#const int _modulatorID#>, <#const int _groupID#>)
+      }
+    }
   } // Run
     
   void Apartment::ReadConfigurationFromXML(const string& _fileName) {
@@ -649,17 +674,43 @@ namespace dss {
   } // OnEvent
   
   Device& Apartment::AllocateDevice(const devid_t _id) {
-    // search in the stale devices first
-    for(vector<Device*>::iterator iDevice = m_StaleDevices.begin(); iDevice != m_StaleDevices.end(); ++iDevice) {
+    // search for existing device
+    for(vector<Device*>::iterator iDevice = m_Devices.begin(); iDevice != m_Devices.end(); ++iDevice) {
       if((*iDevice)->GetID() == _id) {
         return **iDevice;
       }
     }
     
+    // search for stale devices
+    for(vector<Device*>::iterator iDevice = m_StaleDevices.begin(); iDevice != m_StaleDevices.end(); ++iDevice) {
+      if((*iDevice)->GetID() == _id) {
+        Device* pResult = *iDevice;
+        m_Devices.push_back(pResult);
+        m_StaleDevices.erase(iDevice);
+        return *pResult;
+      }
+    }
+        
     Device* pResult = new Device(_id, this);
     m_Devices.push_back(pResult);
     return *pResult;
   } 
+  
+  Modulator& Apartment::AllocateModulator(const int _id) {
+    // searth in the stale modulators first
+    for(vector<Modulator*>::iterator iModulator = m_StaleModulators.begin(); iModulator != m_StaleModulators.end(); ++iModulator) {
+      if((*iModulator)->GetID() == _id) {
+        m_Modulators.push_back(*iModulator);
+        m_StaleModulators.erase(iModulator);
+        return **iModulator;
+      }
+    }
+    
+    // TODO: check for existing Modulator?
+    Modulator* pResult = new Modulator(_id);
+    m_Modulators.push_back(pResult);
+    return *pResult;                       
+  } // AllocateModulator
   
   //================================================== Modulator
   

@@ -96,8 +96,18 @@ namespace dss {
     string uri = shttpd_get_env(_arg, "REQUEST_URI");
     const char* paramsC = shttpd_get_env(_arg, "QUERY_STRING");
     string params;
+    HashMapConstStringString paramMap;
     if(paramsC != NULL) {
       params = paramsC;
+      vector<string> paramList = SplitString(params, '&');
+      for(vector<string>::iterator iParam = paramList.begin(); iParam < paramList.end(); ++iParam) {
+        vector<string> nameValue = SplitString(*iParam, '=');
+        if(nameValue.size() != 2) {
+          paramMap[*iParam] = "";
+        } else {
+          paramMap[nameValue.at(0)] = nameValue.at(1);
+        }
+      }
     }
         
     string method = uri.substr(uri.find(urlid) + urlid.size());
@@ -108,13 +118,30 @@ namespace dss {
       
       stringstream sstream;
       sstream << "{\"devices\":[";
+      bool first = true;
       for(int iDevice = 0; iDevice < devices.Length(); iDevice++) {
         DeviceReference& d = devices.Get(iDevice);
+        if(first) {
+          first = false;
+        } else {
+          sstream << ",";
+        }
         sstream << "{ \"id\": " << d.GetID() << ", \"name\": \"" << d.GetDevice().GetName() << "\" }";        
       }
       sstream << "]}";
         
       shttpd_printf(_arg, sstream.str().c_str());
+    } else if(method == "turnon") {
+      EmitHTTPHeader(200, _arg, "application/json");
+      
+      string devidStr = paramMap["device"];
+      if(!devidStr.empty()) {
+        int devid = StrToInt(devidStr);
+        DSS::GetInstance()->GetApartment().GetDeviceByID(devid).TurnOn();
+        shttpd_printf(_arg, "{ok:1}");
+      } else {
+        shttpd_printf(_arg, "{ok:0}");
+      }
     } else {
       shttpd_printf(_arg, "hello %s, method %s, params %s", uri.c_str(), method.c_str(), params.c_str());
     }
