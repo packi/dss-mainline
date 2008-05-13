@@ -74,6 +74,7 @@ namespace dss {
     bool After(const DateTime& _other) const;
     bool operator==(const DateTime& _other) const;
     bool operator!=(const DateTime& _other) const;
+    bool operator<(const DateTime& _other) const;
     
     int Difference(const DateTime& _other) const;
     

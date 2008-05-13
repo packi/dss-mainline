@@ -187,6 +187,10 @@ namespace dss {
     return Difference(_other) != 0;
   }
   
+  bool DateTime::operator<(const DateTime& _other) const {
+    return Difference(_other) < 0;
+  }
+  
   int DateTime::Difference(const DateTime& _other) const {
     struct tm self = m_DateTime;
     struct tm other = _other.m_DateTime;

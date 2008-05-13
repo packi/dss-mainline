@@ -38,6 +38,8 @@ namespace dss {
   const uint8 FunctionDeviceIncValue  = 0x40;
   const uint8 FunctionDeviceDecValue  = 0x41;
   
+  const uint8 FunctionDeviceGetOnOff = 0x61;
+  
   const uint8 SceneOff = 0x00;
   const uint8 Scene1 = 0x01;
   const uint8 Scene2 = 0x02;
@@ -141,7 +143,8 @@ namespace dss {
     return result;
   }
   
-  void DS485Proxy::SendCommand(DS485Command _cmd, Set& _set) {
+  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, Set& _set) {
+    vector<int> result;
     FittingResult fittedResult = BestFit(_set);
     for(FittingResult::iterator iResult = fittedResult.begin(); iResult != fittedResult.end(); ++iResult) {
       const Modulator* modulator = iResult->first;
@@ -155,16 +158,19 @@ namespace dss {
         SendCommand(_cmd, set.Get(iDevice).GetDevice());
       }
     }
+    return result;
   } // SendCommand
   
-  void DS485Proxy::SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group) {
+  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group) {
+    return vector<int>();
   } // SendCommand
  
-  void DS485Proxy::SendCommand(DS485Command _cmd, Device& _device) {
-    SendCommand(_cmd, _device.GetID(), _device.GetModulatorID());
+  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, Device& _device) {
+    return SendCommand(_cmd, _device.GetID(), _device.GetModulatorID());
   } // SendCommand
   
-  void DS485Proxy::SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID) {
+  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID) {
+    vector<int> result;
     DS485CommandFrame frame;
     frame.GetHeader().SetDestination(_modulatorID);
     frame.GetHeader().SetBroadcast(false);
@@ -175,12 +181,21 @@ namespace dss {
       frame.GetPayload().Add<uint8>(_id);
       frame.GetPayload().Add<uint8>(Scene1);
       SendFrame(frame);
+      ReceiveAck(FunctionDeviceCallScene);
     } else if(_cmd == cmdTurnOff) {
       frame.GetPayload().Add<uint8>(FunctionDeviceCallScene);
       frame.GetPayload().Add<uint8>(_id);
       frame.GetPayload().Add<uint8>(SceneOff);
       SendFrame(frame);
+      ReceiveAck(FunctionDeviceCallScene);
+    } else if(_cmd == cmdGetOnOff) {
+      frame.GetPayload().Add<uint8>(FunctionDeviceGetOnOff);
+      frame.GetPayload().Add<uint8>(_id);
+      SendFrame(frame);
+      uint8 res = ReceiveSingleResult(FunctionDeviceGetOnOff);
+      result.push_back(res);
     }
+    return result;
   } // SendCommand
   
   void DS485Proxy::SendFrame(DS485Frame& _frame) {
@@ -294,8 +309,8 @@ namespace dss {
     return result;    
   } // GetDevicesInRoom
   
-  vector<DS485Frame> DS485Proxy::Receive(uint8 _functionID) {
-    vector<DS485Frame> result;
+  vector<DS485Frame*> DS485Proxy::Receive(uint8 _functionID) {
+    vector<DS485Frame*> result;
     while(DSS::GetInstance()->GetModulatorSim().HasPendingFrame()) {
       result.push_back(DSS::GetInstance()->GetModulatorSim().Receive());
     }
@@ -303,25 +318,47 @@ namespace dss {
   } // Receive  
   
   uint8 DS485Proxy::ReceiveSingleResult(uint8 _functionID) {
-    vector<DS485Frame> results = Receive(_functionID);
+    vector<DS485Frame*> results = Receive(_functionID);
     
     if(results.size() > 1 || results.size() < 1) {
       throw runtime_error("received multiple or none results for request");
     }
     
-    DS485Frame& frame = results.at(0);
+    DS485Frame* frame = results.at(0);
     
-    PayloadDissector pd(frame.GetPayload());
+    PayloadDissector pd(frame->GetPayload());
     uint8 functionID = pd.Get<uint8>();
     if(functionID != _functionID) {
       Logger::GetInstance()->Log("function ids are different");
     }
     uint8 result = pd.Get<uint8>();
     
-    return result;
+    ScrubVector(results);
     
+    return result;    
   } // ReceiveSingleResult
 
+  void DS485Proxy::ReceiveAck(uint8 _functionID) {
+    vector<DS485Frame*> results = Receive(_functionID);
+    if(results.size() > 1 || results.size() < 1) {
+      throw runtime_error("received multiple or none results for request");
+    }
+    
+    DS485Frame* frame = results.at(0);
+    
+    DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(results.at(0));
+    if(cmdFrame->GetCommand() != CommandAck) {
+      throw runtime_error("Command is not ack");
+    }
+    
+    PayloadDissector pd(frame->GetPayload());
+    uint8 functionID = pd.Get<uint8>();
+    if(functionID != _functionID) {
+      Logger::GetInstance()->Log("function ids are different");
+    }
+    
+    ScrubVector(results);
+  } // ReceiveAck
  
   
   //================================================== DSModulatorSim
@@ -340,6 +377,10 @@ namespace dss {
     m_Rooms[1].push_back(m_SimulatedDevices[1]);
   }
   
+  void DSModulatorSim::AddToReplyQueue(DS485Frame* _frame) {
+    m_PendingFrames.push_back(_frame);
+  }
+  
   const uint8 HeaderTypeToken = 0;
   const uint8 HeaderTypeCommand = 1;
   
@@ -352,16 +393,20 @@ namespace dss {
       PayloadDissector pd(cmdFrame.GetPayload());
       if(cmdFrame.GetCommand() == CommandRequest) {
         int cmdNr = pd.Get<uint8>();
-        DS485CommandFrame response;
+        DS485CommandFrame* response;
         switch(cmdNr) {
           case FunctionDeviceCallScene:
-            LookupDevice(pd.Get<uint8>()).CallScene(pd.Get<uint8>());
-            m_PendingFrames.push_back(CreateAck(cmdFrame, cmdNr)); 
+            {
+              int devID = pd.Get<uint8>();
+              int sceneID = pd.Get<uint8>();
+              LookupDevice(devID).CallScene(sceneID);
+              AddToReplyQueue(CreateAck(cmdFrame, cmdNr)); 
+            }
             break;
           case FunctionModulatorGetRoomsSize:
             response = CreateResponse(cmdFrame, cmdNr);
-            response.GetPayload().Add<uint8>(m_Rooms.size());
-            m_PendingFrames.push_back(response);
+            response->GetPayload().Add<uint8>(m_Rooms.size());
+            AddToReplyQueue(response);
             break;
           case FunctionModulatorGetRoomIdForInd:
             {
@@ -369,16 +414,16 @@ namespace dss {
               map< const int, vector<DSIDSim*> >::iterator it = m_Rooms.begin();
               advance(it, index);
               response = CreateResponse(cmdFrame, cmdNr);
-              response.GetPayload().Add<uint8>(it->first);   
-              m_PendingFrames.push_back(response);
+              response->GetPayload().Add<uint8>(it->first);   
+              AddToReplyQueue(response);
             }
             break;
           case FunctionModulatorCountDevInRoom:
             {
               uint8 index = pd.Get<uint8>();
               response = CreateResponse(cmdFrame, cmdNr);
-              response.GetPayload().Add<uint8>(m_Rooms[index].size());
-              m_PendingFrames.push_back(response);
+              response->GetPayload().Add<uint8>(m_Rooms[index].size());
+              AddToReplyQueue(response);
             }
             break;
           case FunctionModulatorDevKeyInRoom:
@@ -386,22 +431,31 @@ namespace dss {
               uint8 roomID = pd.Get<uint8>();
               uint8 deviceIndex = pd.Get<uint8>();
               response = CreateResponse(cmdFrame, cmdNr);
-              response.GetPayload().Add<uint8>(m_Rooms[roomID].at(deviceIndex)->GetID());
-              m_PendingFrames.push_back(response);
+              response->GetPayload().Add<uint8>(m_Rooms[roomID].at(deviceIndex)->GetID());
+              AddToReplyQueue(response);
             }
             break;
           case FunctionModulatorGetGroupsSize:
             response = CreateResponse(cmdFrame, cmdNr);
-            response.GetPayload().Add<uint8>(m_DevicesOfGroupInRoom.size());
-            m_PendingFrames.push_back(response); 
+            response->GetPayload().Add<uint8>(m_DevicesOfGroupInRoom.size());
+            AddToReplyQueue(response); 
             break;
           case FunctionGroupGetDeviceCount:
             response = CreateResponse(cmdFrame, cmdNr);
             int roomID = pd.Get<uint8>();
             int groupID = pd.Get<uint8>();
             int result = m_DevicesOfGroupInRoom[pair<const int, const int>(roomID, groupID)].size();
-            response.GetPayload().Add<uint8>(result);
-            m_PendingFrames.push_back(response);
+            response->GetPayload().Add<uint8>(result);
+            AddToReplyQueue(response);
+            break;
+          case FunctionDeviceGetOnOff:
+            {
+              response = CreateResponse(cmdFrame, cmdNr);
+              int devID = pd.Get<uint8>();
+              DSIDSim& dev = LookupDevice(devID);
+              response->GetPayload().Add<uint8>(dev.IsTurnedOn());
+              AddToReplyQueue(response);
+            }
             break;
           default:
             throw new runtime_error(string("DSModulatorSim: Invalid function id: ") + IntToString(cmdNr));
@@ -411,27 +465,27 @@ namespace dss {
   } // Send
 
   
-  DS485CommandFrame DSModulatorSim::CreateReply(DS485CommandFrame& _request) {
-    DS485CommandFrame result;
-    result.GetHeader().SetDestination(_request.GetHeader().GetSource());
-    result.GetHeader().SetSource(_request.GetHeader().GetDestination());
-    result.GetHeader().SetBroadcast(false);
-    result.GetHeader().SetCounter(_request.GetHeader().GetCounter());
+  DS485CommandFrame* DSModulatorSim::CreateReply(DS485CommandFrame& _request) {
+    DS485CommandFrame* result = new DS485CommandFrame();
+    result->GetHeader().SetDestination(_request.GetHeader().GetSource());
+    result->GetHeader().SetSource(_request.GetHeader().GetDestination());
+    result->GetHeader().SetBroadcast(false);
+    result->GetHeader().SetCounter(_request.GetHeader().GetCounter());
     return result;
   } // CreateReply
 
   
-  DS485CommandFrame DSModulatorSim::CreateAck(DS485CommandFrame& _request, uint8 _functionID) {
-    DS485CommandFrame result = CreateReply(_request);
-    result.SetCommand(CommandAck);
-    result.GetPayload().Add(_functionID);
+  DS485CommandFrame* DSModulatorSim::CreateAck(DS485CommandFrame& _request, uint8 _functionID) {
+    DS485CommandFrame* result = CreateReply(_request);
+    result->SetCommand(CommandAck);
+    result->GetPayload().Add(_functionID);
     return result;
   }
 
-  DS485CommandFrame DSModulatorSim::CreateResponse(DS485CommandFrame& _request, uint8 _functionID) {
-    DS485CommandFrame result = CreateReply(_request);
-    result.SetCommand(CommandResponse);
-    result.GetPayload().Add(_functionID);
+  DS485CommandFrame* DSModulatorSim::CreateResponse(DS485CommandFrame& _request, uint8 _functionID) {
+    DS485CommandFrame* result = CreateReply(_request);
+    result->SetCommand(CommandResponse);
+    result->GetPayload().Add(_functionID);
     return result;
   } // CreateResponse
 
@@ -446,8 +500,8 @@ namespace dss {
 
   } // LookupDevice
   
-  DS485Frame& DSModulatorSim::Receive() {
-    DS485Frame& result = m_PendingFrames.front();
+  DS485Frame* DSModulatorSim::Receive() {
+    DS485Frame* result = m_PendingFrames.front();
     m_PendingFrames.erase(m_PendingFrames.begin());
     return result;
   } // Receive
@@ -464,7 +518,8 @@ namespace dss {
   
   DSIDSim::DSIDSim(const int _id) 
   : m_Id(_id),
-    m_Enabled(true)
+    m_Enabled(true),
+    m_CurrentValue(0)
   {
     m_ValuesForScene.push_back(0);   // OFF
     m_ValuesForScene.push_back(255); // Scene1
@@ -542,5 +597,9 @@ namespace dss {
       m_CurrentValue = _value;
     }
   } // SetValue
+  
+  bool DSIDSim::IsTurnedOn() {
+    return m_CurrentValue > 0;
+  } // IsTurnedOn
    
 }

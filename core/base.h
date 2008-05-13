@@ -164,6 +164,18 @@ namespace dss {
     }
   };
   
+  template<class t>
+  void ScrubVector(vector<t*>& _vector) {
+    while(!_vector.empty()) {
+      t* elem = *_vector.begin();
+      _vector.erase(_vector.begin());
+      delete elem;
+    }
+  } // ScrubVector
+  
+  void SleepSeconds( const unsigned int _seconds );  
+  void SleepMS( const unsigned int _ms );
+  
   //============================================= Exception
   
   class DSSException : public runtime_error {

@@ -8,26 +8,58 @@
 	  new Ajax.Request('/json/turnon', 
 	    {
 	      method:'get', 
-	      parameters: {device: devid} 
+	      parameters: {device: devid},
+          onComplete: function(transport, json) {
+            doUpdate();
+          }
 	    } 
 	  );
 	}
 	
-	new Ajax.Request('/json/getdevices', { method:'get',
-  onComplete: function(transport, json) {
-	  $('numDevs').innerHTML = transport.responseJSON.devices.length;
-	  var devs = transport.responseJSON.devices;
+	function turnOff(devid) {
+	  new Ajax.Request('/json/turnoff',
+	    {
+	      method:'get', 
+	      parameters: {device: devid},
+          onComplete: function(transport, json) {
+            doUpdate();
+          }
+	    } 
+	  );
+	}
+	
+	function update(devices) {
+	  $('numDevs').innerHTML = devices.length;
 	  var devslist = "<ul>";
-	  for(i = 0; i < devs.length; i++) {
-	    devslist += "<li>" + devs[i].name;
-	    devslist += '<a href="#" onclick="turnOn(' + devs[i].id + ')">Turn On</a>';
+	  for(i = 0; i < devices.length; i++) {
+	    var dev = devices[i];
+	    devslist += "<li>" + dev.name;
+		if(dev.on) {
+		  devslist += "&nbsp; On";
+		} else {
+		  devslist += "&nbsp; Off";
+		}
+	    devslist += '&nbsp;<a href="#" onclick="turnOn(' + dev.id + ')">Turn On</a>';
+	    devslist += '&nbsp;<a href="#" onclick="turnOff(' + dev.id + ')">Turn Off</a>';
 	    devslist += "</li>";
 	    
 	  }
 	  devslist += "</ul>";
 	  $('devList').innerHTML = devslist;
-    }
-  });
+	}
+	
+	function doUpdate() {
+  	  new Ajax.Request(
+	    '/json/getdevices', 
+	    { method:'get',
+          onComplete: function(transport, json) {
+            update(transport.responseJSON.devices);
+          }
+        }
+	  );
+	}
+  
+	doUpdate();	
 </script>
   </head>
   <body>

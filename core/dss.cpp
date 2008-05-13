@@ -20,6 +20,44 @@
 using namespace std;
 
 namespace dss {
+  
+  //============================================ EventRunner
+  
+  class EventRunner : Thread {
+  private:
+    vector<ScheduledEvent*> m_ScheduledEvents;
+    
+    DateTime GetNextOccurence();
+    DateTime m_WakeTime;
+  public:
+    void AddEvent(ScheduledEvent* _scheduledEvent);
+    
+    virtual void Execute();
+  }; // EventRunner
+  
+  void EventRunner::AddEvent(ScheduledEvent* _scheduledEvent) {
+    m_ScheduledEvents.push_back(_scheduledEvent);
+  } // AddEvent
+  
+  DateTime EventRunner::GetNextOccurence() {
+    DateTime now;
+    DateTime result;
+    for(vector<ScheduledEvent*>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
+        ipSchedEvt != e; ++ipSchedEvt) 
+    {
+      result = min(result, (*ipSchedEvt)->GetSchedule().GetNextOccurence(now));
+    }
+    return result;
+  }
+  
+  void EventRunner::Execute() {
+    while(!m_Terminated) {
+      if(m_ScheduledEvents.empty()) {
+        SleepMS(500);
+      } else {
+      }
+    }
+  } // Execute
 
   //============================================= DSS
   
@@ -52,7 +90,7 @@ namespace dss {
     m_Config.ReadFromXML("/Users/packi/sources/dss/trunk/data/config.xml");
   } // LoadConfig
 
-  //============================================= DSS
+  //============================================= WebServer
   
   WebServer::WebServer() 
   : Thread(true, "WebServer")
@@ -126,7 +164,9 @@ namespace dss {
         } else {
           sstream << ",";
         }
-        sstream << "{ \"id\": " << d.GetID() << ", \"name\": \"" << d.GetDevice().GetName() << "\" }";        
+        sstream << "{ \"id\": " << d.GetID() 
+                << ", \"name\": \"" << d.GetDevice().GetName() 
+                << "\", \"on\": " << (d.IsOn() ? "true" : "false") << " }";        
       }
       sstream << "]}";
         
@@ -138,6 +178,17 @@ namespace dss {
       if(!devidStr.empty()) {
         int devid = StrToInt(devidStr);
         DSS::GetInstance()->GetApartment().GetDeviceByID(devid).TurnOn();
+        shttpd_printf(_arg, "{ok:1}");
+      } else {
+        shttpd_printf(_arg, "{ok:0}");
+      }
+    } else if(method == "turnoff") {
+      EmitHTTPHeader(200, _arg, "application/json");
+      
+      string devidStr = paramMap["device"];
+      if(!devidStr.empty()) {
+        int devid = StrToInt(devidStr);
+        DSS::GetInstance()->GetApartment().GetDeviceByID(devid).TurnOff();
         shttpd_printf(_arg, "{ok:1}");
       } else {
         shttpd_printf(_arg, "{ok:0}");

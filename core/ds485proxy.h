@@ -30,7 +30,8 @@ namespace dss {
   private:
     t _data;
   };
-    typedef enum {
+  
+  typedef enum {
     cmdTurnOn,
     cmdTurnOff,
     cmdStartDimUp,
@@ -44,13 +45,14 @@ namespace dss {
     cmdEnable,
     cmdDisable,
     cmdIncreaseParam,
-    cmdDecreaseParam
+    cmdDecreaseParam,
+    cmdGetOnOff
   } DS485Command;
   
   class DS485Interface {
   public:
     virtual void Send(DS485Frame& _frame) = 0;
-    virtual DS485Frame& Receive() = 0;
+    virtual DS485Frame* Receive() = 0;
   };
   
   //================================================== Simulation stuff ahead
@@ -63,12 +65,13 @@ namespace dss {
     vector<DSIDSim*> m_SimulatedDevices;
     map< const int, vector<DSIDSim*> > m_Rooms;
     map< const pair<const int, const int>,  vector<DSIDSim*> > m_DevicesOfGroupInRoom;
-    vector<DS485Frame> m_PendingFrames;
+    vector<DS485Frame*> m_PendingFrames;
   private:  
     DSIDSim& LookupDevice(int _id);
-    DS485CommandFrame CreateResponse(DS485CommandFrame& _request, uint8 _functionID);
-    DS485CommandFrame CreateAck(DS485CommandFrame& _request, uint8 _functionID);
-    DS485CommandFrame CreateReply(DS485CommandFrame& _request);
+    DS485CommandFrame* CreateResponse(DS485CommandFrame& _request, uint8 _functionID);
+    DS485CommandFrame* CreateAck(DS485CommandFrame& _request, uint8 _functionID);
+    DS485CommandFrame* CreateReply(DS485CommandFrame& _request);
+    void AddToReplyQueue(DS485Frame* _frame);
   public:
     DSModulatorSim();
     void Initialize();
@@ -77,7 +80,7 @@ namespace dss {
 
     virtual void Send(DS485Frame& _frame);
     bool HasPendingFrame();
-    virtual DS485Frame& Receive();
+    virtual DS485Frame* Receive();
   };
   
   class DSIDSim {
@@ -105,6 +108,8 @@ namespace dss {
     void IncreaseValue(const int _parameterNr = -1);
     void DecreaseValue(const int _parameterNr = -1);
     
+    bool IsTurnedOn();
+    
     void Enable();
     void Disable();
     
@@ -119,8 +124,9 @@ namespace dss {
     bool IsSimAddress(const uint8 _addr);
 
     void SendFrame(DS485Frame& _frame);
-    vector<DS485Frame> Receive(uint8 _functionID);
+    vector<DS485Frame*> Receive(uint8 _functionID);
     uint8 ReceiveSingleResult(uint8 _functionID);
+    void ReceiveAck(uint8 _functionID);
   public:
     //------------------------------------------------ Specialized Commands (system)
     vector<int> GetModulators();
@@ -142,11 +148,10 @@ namespace dss {
     void RemoveUserGroup(const int _modulatorID, const int _groupID);
     
     //------------------------------------------------ Device manipulation    
-    void SendCommand(DS485Command _cmd, Set& _set);
-    void SendCommand(DS485Command _cmd, Device& _device);
-    void SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID);
-    void SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group);
-    
+    vector<int> SendCommand(DS485Command _cmd, Set& _set);
+    vector<int> SendCommand(DS485Command _cmd, Device& _device);
+    vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID);
+    vector<int> SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group);    
   };
 }
 

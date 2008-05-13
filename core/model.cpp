@@ -101,6 +101,11 @@ namespace dss {
     DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdStopDim, *this);
   } // EndDim
   
+  bool Device::IsOn() {
+    vector<int> res = DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdGetOnOff, *this);
+    return res.front() != 0;
+  } // IsOn
+  
   void Device::SetValue(const double _value, const int _parameterNr) {
   } // SetValue
   
@@ -427,16 +432,6 @@ namespace dss {
     m_Groups.push_back(grp);
   } // ctor
 
-  // TODO: move to base.h
-  template<class t>
-  void ScrubVector(vector<t*>& _vector) {
-    while(!_vector.empty()) {
-      t* elem = *_vector.begin();
-      _vector.erase(_vector.begin());
-      delete elem;
-    }
-  } // ScrubVector
-  
   Apartment::~Apartment() {
     ScrubVector(m_Subscriptions);
     ScrubVector(m_Devices);
@@ -833,5 +828,9 @@ namespace dss {
   void DeviceReference::SetValue(const double _value, const int _parameterNr) {
     GetDevice().SetValue(_value, _parameterNr);
   } // SetValue
+  
+  bool DeviceReference::IsOn() {
+    return GetDevice().IsOn();
+  }
   
 }

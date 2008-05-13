@@ -167,6 +167,21 @@ namespace dss {
     #endif
   } // FileExists
   
+  void SleepSeconds( const unsigned int _seconds ) {
+#ifdef WIN32
+    Sleep( _seconds * 1000 );
+#else
+    sleep( _seconds );
+#endif
+  } // SleepSeconds
+  
+  void SleepMS( const unsigned int _ms ) {
+#ifdef WIN32
+    Sleep( _ms );
+#else
+    usleep( _ms * 1000 );
+#endif
+  }
   
   
 }

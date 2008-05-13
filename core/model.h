@@ -110,6 +110,8 @@ namespace dss {
     virtual void Enable();
     virtual void Disable();
     
+    virtual bool IsOn();
+    
     virtual void StartDim(const bool _directionUp, const int _parameterNr = -1);
     virtual void EndDim(const int _parameterNr = -1);
     virtual void SetValue(const double _value, const int _parameterNr = -1);    
@@ -138,6 +140,8 @@ namespace dss {
     
     virtual void Enable();
     virtual void Disable();
+    
+    virtual bool IsOn();
     
     virtual void StartDim(const bool _directionUp, const int _parameterNr = -1);
     virtual void EndDim(const int _parameterNr = -1);
@@ -203,7 +207,7 @@ namespace dss {
     
     virtual void Enable();
     virtual void Disable();
-    
+
     virtual void StartDim(bool _directionUp, const int _parameterNr = -1);
     virtual void EndDim(const int _parameterNr = -1);
     virtual void SetValue(const double _value, int _parameterNr = -1);
@@ -515,6 +519,9 @@ namespace dss {
     Schedule& m_Schedule;
   public:
     ScheduledEvent(Event& _evt, Schedule& _schedule);
+    
+    Event& GetEvent() { return m_Event; };
+    Schedule& GetSchedule() { return m_Schedule; };
   };
 
   

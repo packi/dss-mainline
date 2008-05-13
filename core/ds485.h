@@ -56,6 +56,8 @@ namespace dss {
     DS485Header m_Header;
     DS485Payload m_Payload;
   public:
+    DS485Frame() {};
+    virtual ~DS485Frame() {};
     DS485Header& GetHeader() { return m_Header; };
     
     virtual vector<unsigned char> ToChar();
@@ -69,6 +71,7 @@ namespace dss {
     uint8 m_Length;
   public:
     DS485CommandFrame();
+    virtual ~DS485CommandFrame() {};
     
     uint8 GetCommand() const { return m_Command; };
     uint8 GetLength() const { return m_Length; };
