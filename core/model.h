@@ -20,10 +20,14 @@
 #ifndef _MODEL_H_INCLUDED
 #define _MODEL_H_INCLUDED
 
+#include <bitset>
+
 #include "base.h"
 #include "datetools.h"
 #include "ds485types.h"
 #include "xmlwrapper.h"
+
+//using namespace __gnu_cxx;
 
 #include <vector>
 #include <string>
@@ -121,7 +125,7 @@ namespace dss {
     devid_t m_ID;
     int m_ModulatorID;
     Apartment* m_pApartment;
-    long long m_GroupBitmask;
+    bitset<63> m_GroupBitmask;
     vector<int> m_Groups;
   public:
     Device(devid_t _id, Apartment* _pApartment);
@@ -143,7 +147,8 @@ namespace dss {
     string GetName() const;
     void SetName(const string& _name);
     
-    long long GetGroupBitmask() const;
+    bitset<63>& GetGroupBitmask();
+    bool IsInGroup(const int _groupID) const;    
     
     /** Returns the group id of the _index'th group */
     int GetGroupIdByIndex(const int _index) const;

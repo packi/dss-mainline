@@ -14,11 +14,12 @@
  * by $Author$
 */
 
+#include <bitset>
 
-
-#include <iostream>
+#include <string>
 
 #include "base.h"
+#include "model.h"
 #include "dss.h"
 #include "core/xmlwrapper.h"
 #include "core/jshandler.h"
@@ -26,6 +27,8 @@
 
 #include <libxml/tree.h>
 #include <libxml/encoding.h>
+
+#include <iostream>
 
 using namespace std;
 using namespace dss;

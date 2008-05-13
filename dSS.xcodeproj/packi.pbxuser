@@ -286,6 +286,123 @@
 			8262B3EE0DD1FD900080EA9A = 8262B3EE0DD1FD900080EA9A /* PBXTextBookmark */;
 			8262B3EF0DD1FD900080EA9A = 8262B3EF0DD1FD900080EA9A /* PBXTextBookmark */;
 			8262B3F40DD2D1450080EA9A = 8262B3F40DD2D1450080EA9A /* PBXTextBookmark */;
+			827F8D2F0DD451410082CC87 /* PBXTextBookmark */ = 827F8D2F0DD451410082CC87 /* PBXTextBookmark */;
+			827F8D300DD451410082CC87 /* PBXTextBookmark */ = 827F8D300DD451410082CC87 /* PBXTextBookmark */;
+			827F8D310DD451410082CC87 /* PBXTextBookmark */ = 827F8D310DD451410082CC87 /* PBXTextBookmark */;
+			827F8D320DD451410082CC87 /* PBXTextBookmark */ = 827F8D320DD451410082CC87 /* PBXTextBookmark */;
+			827F8D330DD451410082CC87 /* PBXTextBookmark */ = 827F8D330DD451410082CC87 /* PBXTextBookmark */;
+			827F8D340DD451410082CC87 /* PBXTextBookmark */ = 827F8D340DD451410082CC87 /* PBXTextBookmark */;
+			827F8D350DD451410082CC87 /* PBXTextBookmark */ = 827F8D350DD451410082CC87 /* PBXTextBookmark */;
+			827F8D360DD451410082CC87 /* PBXTextBookmark */ = 827F8D360DD451410082CC87 /* PBXTextBookmark */;
+			827F8D370DD451410082CC87 /* PBXTextBookmark */ = 827F8D370DD451410082CC87 /* PBXTextBookmark */;
+			827F8D380DD451410082CC87 /* PBXTextBookmark */ = 827F8D380DD451410082CC87 /* PBXTextBookmark */;
+			827F8D390DD451410082CC87 /* PBXTextBookmark */ = 827F8D390DD451410082CC87 /* PBXTextBookmark */;
+			827F8D3A0DD451410082CC87 /* PBXTextBookmark */ = 827F8D3A0DD451410082CC87 /* PBXTextBookmark */;
+			827F8D3B0DD451410082CC87 /* PBXTextBookmark */ = 827F8D3B0DD451410082CC87 /* PBXTextBookmark */;
+			827F8D3C0DD451410082CC87 /* PBXTextBookmark */ = 827F8D3C0DD451410082CC87 /* PBXTextBookmark */;
+			827F8D3D0DD451410082CC87 /* PBXTextBookmark */ = 827F8D3D0DD451410082CC87 /* PBXTextBookmark */;
+			827F8D3E0DD451410082CC87 /* PBXTextBookmark */ = 827F8D3E0DD451410082CC87 /* PBXTextBookmark */;
+			827F8D3F0DD451410082CC87 /* PBXTextBookmark */ = 827F8D3F0DD451410082CC87 /* PBXTextBookmark */;
+			827F8D400DD451410082CC87 /* PBXTextBookmark */ = 827F8D400DD451410082CC87 /* PBXTextBookmark */;
+			827F8D410DD451410082CC87 /* PBXTextBookmark */ = 827F8D410DD451410082CC87 /* PBXTextBookmark */;
+			827F8D420DD451410082CC87 /* PBXTextBookmark */ = 827F8D420DD451410082CC87 /* PBXTextBookmark */;
+			827F8D4A0DD452F80082CC87 /* PBXTextBookmark */ = 827F8D4A0DD452F80082CC87 /* PBXTextBookmark */;
+			827F8D4B0DD452F80082CC87 /* PBXTextBookmark */ = 827F8D4B0DD452F80082CC87 /* PBXTextBookmark */;
+			827F8D4C0DD452F80082CC87 /* PBXTextBookmark */ = 827F8D4C0DD452F80082CC87 /* PBXTextBookmark */;
+			827F8D4D0DD452F80082CC87 /* PBXTextBookmark */ = 827F8D4D0DD452F80082CC87 /* PBXTextBookmark */;
+			827F8D4E0DD452F80082CC87 /* PBXTextBookmark */ = 827F8D4E0DD452F80082CC87 /* PBXTextBookmark */;
+			827F8D4F0DD453920082CC87 /* PBXTextBookmark */ = 827F8D4F0DD453920082CC87 /* PBXTextBookmark */;
+			827F8D520DD4727B0082CC87 /* PBXTextBookmark */ = 827F8D520DD4727B0082CC87 /* PBXTextBookmark */;
+			827F8D560DD486430082CC87 /* PBXTextBookmark */ = 827F8D560DD486430082CC87 /* PBXTextBookmark */;
+			827F8D570DD486430082CC87 /* PBXTextBookmark */ = 827F8D570DD486430082CC87 /* PBXTextBookmark */;
+			827F8D580DD486430082CC87 /* PBXTextBookmark */ = 827F8D580DD486430082CC87 /* PBXTextBookmark */;
+			827F8D590DD486430082CC87 /* PBXTextBookmark */ = 827F8D590DD486430082CC87 /* PBXTextBookmark */;
+			827F8D5A0DD486430082CC87 /* PBXTextBookmark */ = 827F8D5A0DD486430082CC87 /* PBXTextBookmark */;
+			827F8D5B0DD486430082CC87 /* PBXTextBookmark */ = 827F8D5B0DD486430082CC87 /* PBXTextBookmark */;
+			827F8D5C0DD486430082CC87 /* PBXTextBookmark */ = 827F8D5C0DD486430082CC87 /* PBXTextBookmark */;
+			827F8D5D0DD486430082CC87 /* PBXTextBookmark */ = 827F8D5D0DD486430082CC87 /* PBXTextBookmark */;
+			827F8D5E0DD486430082CC87 /* PBXTextBookmark */ = 827F8D5E0DD486430082CC87 /* PBXTextBookmark */;
+			827F8D620DD489330082CC87 /* PBXTextBookmark */ = 827F8D620DD489330082CC87 /* PBXTextBookmark */;
+			827F8D680DD492620082CC87 /* PBXTextBookmark */ = 827F8D680DD492620082CC87 /* PBXTextBookmark */;
+			827F8D690DD498D50082CC87 /* PBXTextBookmark */ = 827F8D690DD498D50082CC87 /* PBXTextBookmark */;
+			827F8D6A0DD49AE20082CC87 /* PBXTextBookmark */ = 827F8D6A0DD49AE20082CC87 /* PBXTextBookmark */;
+			827F8D6B0DD49AE20082CC87 /* PBXTextBookmark */ = 827F8D6B0DD49AE20082CC87 /* PBXTextBookmark */;
+			827F8D6C0DD49AE20082CC87 /* PBXTextBookmark */ = 827F8D6C0DD49AE20082CC87 /* PBXTextBookmark */;
+			827F8D6D0DD49AE20082CC87 /* PBXTextBookmark */ = 827F8D6D0DD49AE20082CC87 /* PBXTextBookmark */;
+			827F8D6E0DD49AE20082CC87 /* PBXTextBookmark */ = 827F8D6E0DD49AE20082CC87 /* PBXTextBookmark */;
+			827F8D6F0DD49AE20082CC87 /* PBXTextBookmark */ = 827F8D6F0DD49AE20082CC87 /* PBXTextBookmark */;
+			827F8D700DD49AE20082CC87 /* PBXTextBookmark */ = 827F8D700DD49AE20082CC87 /* PBXTextBookmark */;
+			827F8D710DD49AE20082CC87 /* PBXTextBookmark */ = 827F8D710DD49AE20082CC87 /* PBXTextBookmark */;
+			827F8D720DD49AE20082CC87 /* PBXTextBookmark */ = 827F8D720DD49AE20082CC87 /* PBXTextBookmark */;
+			827F8D730DD49AE20082CC87 /* PBXTextBookmark */ = 827F8D730DD49AE20082CC87 /* PBXTextBookmark */;
+			827F8D740DD49CFB0082CC87 /* PBXTextBookmark */ = 827F8D740DD49CFB0082CC87 /* PBXTextBookmark */;
+			827F8D750DD49E3C0082CC87 /* PBXTextBookmark */ = 827F8D750DD49E3C0082CC87 /* PBXTextBookmark */;
+			827F8D760DD49E3C0082CC87 /* PBXTextBookmark */ = 827F8D760DD49E3C0082CC87 /* PBXTextBookmark */;
+			827F8D770DD49E3C0082CC87 /* PBXTextBookmark */ = 827F8D770DD49E3C0082CC87 /* PBXTextBookmark */;
+			827F8D780DD49FFB0082CC87 /* PBXTextBookmark */ = 827F8D780DD49FFB0082CC87 /* PBXTextBookmark */;
+			827F8D7B0DD4A0480082CC87 /* PBXTextBookmark */ = 827F8D7B0DD4A0480082CC87 /* PBXTextBookmark */;
+			827F8D7C0DD4A0620082CC87 /* PBXTextBookmark */ = 827F8D7C0DD4A0620082CC87 /* PBXTextBookmark */;
+			827F8D7D0DD4A0620082CC87 /* PBXTextBookmark */ = 827F8D7D0DD4A0620082CC87 /* PBXTextBookmark */;
+			827F8D7E0DD4A0620082CC87 /* PBXTextBookmark */ = 827F8D7E0DD4A0620082CC87 /* PBXTextBookmark */;
+			827F8D7F0DD4A0620082CC87 /* PBXTextBookmark */ = 827F8D7F0DD4A0620082CC87 /* PBXTextBookmark */;
+			827F8D800DD4A0620082CC87 /* PBXTextBookmark */ = 827F8D800DD4A0620082CC87 /* PBXTextBookmark */;
+			827F8D820DD4A1430082CC87 /* PBXTextBookmark */ = 827F8D820DD4A1430082CC87 /* PBXTextBookmark */;
+			827F8D830DD4A1430082CC87 /* PBXTextBookmark */ = 827F8D830DD4A1430082CC87 /* PBXTextBookmark */;
+			827F8D840DD4A1430082CC87 /* PBXTextBookmark */ = 827F8D840DD4A1430082CC87 /* PBXTextBookmark */;
+			827F8D880DD4A1FB0082CC87 /* PBXTextBookmark */ = 827F8D880DD4A1FB0082CC87 /* PBXTextBookmark */;
+			827F8D890DD4A1FB0082CC87 /* PBXTextBookmark */ = 827F8D890DD4A1FB0082CC87 /* PBXTextBookmark */;
+			827F8D8A0DD4A1FB0082CC87 /* PBXTextBookmark */ = 827F8D8A0DD4A1FB0082CC87 /* PBXTextBookmark */;
+			827F8D8B0DD4A1FB0082CC87 /* PBXTextBookmark */ = 827F8D8B0DD4A1FB0082CC87 /* PBXTextBookmark */;
+			827F8D8C0DD4A1FB0082CC87 /* PBXTextBookmark */ = 827F8D8C0DD4A1FB0082CC87 /* PBXTextBookmark */;
+			827F8D8D0DD4A1FB0082CC87 /* PBXTextBookmark */ = 827F8D8D0DD4A1FB0082CC87 /* PBXTextBookmark */;
+			827F8D8E0DD4A1FB0082CC87 /* PBXTextBookmark */ = 827F8D8E0DD4A1FB0082CC87 /* PBXTextBookmark */;
+			827F8D8F0DD4A1FB0082CC87 /* PBXTextBookmark */ = 827F8D8F0DD4A1FB0082CC87 /* PBXTextBookmark */;
+			827F8D900DD4A1FB0082CC87 /* PBXTextBookmark */ = 827F8D900DD4A1FB0082CC87 /* PBXTextBookmark */;
+			827F8D960DD4A2F00082CC87 /* PBXTextBookmark */ = 827F8D960DD4A2F00082CC87 /* PBXTextBookmark */;
+			827F8D970DD4A2F00082CC87 /* PBXTextBookmark */ = 827F8D970DD4A2F00082CC87 /* PBXTextBookmark */;
+			827F8D990DD4A2F00082CC87 /* PBXTextBookmark */ = 827F8D990DD4A2F00082CC87 /* PBXTextBookmark */;
+			827F8D9A0DD4A2F00082CC87 /* PBXTextBookmark */ = 827F8D9A0DD4A2F00082CC87 /* PBXTextBookmark */;
+			827F8D9B0DD4A2F00082CC87 /* PBXTextBookmark */ = 827F8D9B0DD4A2F00082CC87 /* PBXTextBookmark */;
+			827F8D9C0DD4A2F00082CC87 /* PBXTextBookmark */ = 827F8D9C0DD4A2F00082CC87 /* PBXTextBookmark */;
+			827F8D9E0DD4A2F00082CC87 /* PBXTextBookmark */ = 827F8D9E0DD4A2F00082CC87 /* PBXTextBookmark */;
+			827F8DA10DD96A6B0082CC87 /* PBXTextBookmark */ = 827F8DA10DD96A6B0082CC87 /* PBXTextBookmark */;
+			827F8DA60DD96C0A0082CC87 /* PBXTextBookmark */ = 827F8DA60DD96C0A0082CC87 /* PBXTextBookmark */;
+			827F8DA80DD96C290082CC87 /* PBXTextBookmark */ = 827F8DA80DD96C290082CC87 /* PBXTextBookmark */;
+			827F8DA90DD96C290082CC87 /* PBXTextBookmark */ = 827F8DA90DD96C290082CC87 /* PBXTextBookmark */;
+			827F8DAA0DD96C290082CC87 /* PBXTextBookmark */ = 827F8DAA0DD96C290082CC87 /* PBXTextBookmark */;
+			827F8DAB0DD96C290082CC87 /* PBXTextBookmark */ = 827F8DAB0DD96C290082CC87 /* PBXTextBookmark */;
+			827F8DAC0DD96C290082CC87 /* PBXTextBookmark */ = 827F8DAC0DD96C290082CC87 /* PBXTextBookmark */;
+			827F8DAD0DD96C290082CC87 /* PBXTextBookmark */ = 827F8DAD0DD96C290082CC87 /* PBXTextBookmark */;
+			827F8DAE0DD96C290082CC87 /* PBXTextBookmark */ = 827F8DAE0DD96C290082CC87 /* PBXTextBookmark */;
+			827F8DAF0DD96C290082CC87 /* PBXTextBookmark */ = 827F8DAF0DD96C290082CC87 /* PBXTextBookmark */;
+			827F8DB10DD96CFD0082CC87 /* PBXTextBookmark */ = 827F8DB10DD96CFD0082CC87 /* PBXTextBookmark */;
+			827F8DB20DD96CFD0082CC87 /* PBXTextBookmark */ = 827F8DB20DD96CFD0082CC87 /* PBXTextBookmark */;
+			827F8DB30DD96CFD0082CC87 /* PBXTextBookmark */ = 827F8DB30DD96CFD0082CC87 /* PBXTextBookmark */;
+			827F8DB50DD96D180082CC87 /* PBXTextBookmark */ = 827F8DB50DD96D180082CC87 /* PBXTextBookmark */;
+			827F8DB60DD96D180082CC87 /* PBXTextBookmark */ = 827F8DB60DD96D180082CC87 /* PBXTextBookmark */;
+			827F8DB70DD96D180082CC87 /* PBXTextBookmark */ = 827F8DB70DD96D180082CC87 /* PBXTextBookmark */;
+			827F8DC70DD970440082CC87 /* PBXTextBookmark */ = 827F8DC70DD970440082CC87 /* PBXTextBookmark */;
+			827F8DC90DD970600082CC87 /* PBXTextBookmark */ = 827F8DC90DD970600082CC87 /* PBXTextBookmark */;
+			827F8DCA0DD970600082CC87 /* PBXTextBookmark */ = 827F8DCA0DD970600082CC87 /* PBXTextBookmark */;
+			827F8DCB0DD970600082CC87 /* PBXTextBookmark */ = 827F8DCB0DD970600082CC87 /* PBXTextBookmark */;
+			827F8DCC0DD970600082CC87 /* PBXTextBookmark */ = 827F8DCC0DD970600082CC87 /* PBXTextBookmark */;
+			827F8DCD0DD970600082CC87 /* PBXTextBookmark */ = 827F8DCD0DD970600082CC87 /* PBXTextBookmark */;
+			827F8DCE0DD970600082CC87 /* PBXTextBookmark */ = 827F8DCE0DD970600082CC87 /* PBXTextBookmark */;
+			827F8DCF0DD970600082CC87 /* PBXTextBookmark */ = 827F8DCF0DD970600082CC87 /* PBXTextBookmark */;
+			827F8DD00DD970600082CC87 /* PBXTextBookmark */ = 827F8DD00DD970600082CC87 /* PBXTextBookmark */;
+			827F8DD10DD970600082CC87 /* PBXTextBookmark */ = 827F8DD10DD970600082CC87 /* PBXTextBookmark */;
+			827F8DD20DD970600082CC87 /* PBXTextBookmark */ = 827F8DD20DD970600082CC87 /* PBXTextBookmark */;
+			827F8DD30DD970600082CC87 /* PBXTextBookmark */ = 827F8DD30DD970600082CC87 /* PBXTextBookmark */;
+			827F8DD40DD970600082CC87 /* PBXTextBookmark */ = 827F8DD40DD970600082CC87 /* PBXTextBookmark */;
+			827F8DD50DD970600082CC87 /* PBXTextBookmark */ = 827F8DD50DD970600082CC87 /* PBXTextBookmark */;
+			827F8DD60DD970600082CC87 /* PBXTextBookmark */ = 827F8DD60DD970600082CC87 /* PBXTextBookmark */;
+			827F8DD70DD970600082CC87 /* PBXTextBookmark */ = 827F8DD70DD970600082CC87 /* PBXTextBookmark */;
+			827F8DD80DD970600082CC87 /* PBXTextBookmark */ = 827F8DD80DD970600082CC87 /* PBXTextBookmark */;
+			827F8DD90DD970600082CC87 /* PBXTextBookmark */ = 827F8DD90DD970600082CC87 /* PBXTextBookmark */;
+			827F8DDA0DD970600082CC87 /* PBXTextBookmark */ = 827F8DDA0DD970600082CC87 /* PBXTextBookmark */;
+			827F8DDB0DD970600082CC87 /* PBXTextBookmark */ = 827F8DDB0DD970600082CC87 /* PBXTextBookmark */;
+			827F8DDC0DD970600082CC87 /* PBXTextBookmark */ = 827F8DDC0DD970600082CC87 /* PBXTextBookmark */;
+			827F8DDD0DD970600082CC87 /* PBXTextBookmark */ = 827F8DDD0DD970600082CC87 /* PBXTextBookmark */;
 			828C7D900DC8A52800D34901 = 828C7D900DC8A52800D34901 /* PBXTextBookmark */;
 			828C7D910DC8A52800D34901 = 828C7D910DC8A52800D34901 /* PBXTextBookmark */;
 			828C7D940DC8A52800D34901 = 828C7D940DC8A52800D34901 /* PBXTextBookmark */;
@@ -308,9 +425,9 @@
 	};
 	08FB7796FE84155DC02AAC07 /* main.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1071, 1008}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRange = "{0, 950}";
+			sepNavIntBoundsRect = "{{0, 0}, {1071, 1050}}";
+			sepNavSelRange = "{453, 0}";
+			sepNavVisRange = "{0, 955}";
 			sepNavWindowFrame = "{{31, 170}, {750, 558}}";
 		};
 	};
@@ -355,9 +472,9 @@
 	};
 	82532AFB0DA374250030CC6A /* dss.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1071, 1722}}";
-			sepNavSelRange = "{2295, 0}";
-			sepNavVisRange = "{1373, 1060}";
+			sepNavIntBoundsRect = "{{0, 0}, {1071, 1834}}";
+			sepNavSelRange = "{197, 0}";
+			sepNavVisRange = "{0, 817}";
 			sepNavWindowFrame = "{{96, 103}, {1130, 667}}";
 		};
 	};
@@ -412,7 +529,7 @@
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {1071, 2422}}";
 			sepNavSelRange = "{3312, 72}";
-			sepNavVisRange = "{2488, 1454}";
+			sepNavVisRange = "{25, 970}";
 			sepNavWindowFrame = "{{61, 173}, {750, 558}}";
 		};
 	};
@@ -436,7 +553,7 @@
 		hitCount = 0;
 		ignoreCount = 0;
 		isThrow = 1;
-		modificationTime = 231865886.589672;
+		modificationTime = 232032557.473282;
 		state = 1;
 	};
 	82532F650DA514770030CC6A /* XCCPPCondition */ = {
@@ -482,7 +599,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 276";
 		rLen = 0;
-		rLoc = 10865;
+		rLoc = 12306;
 		rType = 0;
 		vrLen = 1366;
 		vrLoc = 7856;
@@ -492,7 +609,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 67";
 		rLen = 231;
-		rLoc = 1336;
+		rLoc = 1374;
 		rType = 0;
 		vrLen = 998;
 		vrLoc = 630;
@@ -502,7 +619,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 276";
 		rLen = 0;
-		rLoc = 10865;
+		rLoc = 12306;
 		rType = 0;
 		vrLen = 1366;
 		vrLoc = 7856;
@@ -512,7 +629,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 67";
 		rLen = 231;
-		rLoc = 1336;
+		rLoc = 1374;
 		rType = 0;
 		vrLen = 998;
 		vrLoc = 630;
@@ -522,7 +639,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 276";
 		rLen = 0;
-		rLoc = 10865;
+		rLoc = 12306;
 		rType = 0;
 		vrLen = 1366;
 		vrLoc = 7856;
@@ -532,7 +649,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 67";
 		rLen = 231;
-		rLoc = 1336;
+		rLoc = 1374;
 		rType = 0;
 		vrLen = 998;
 		vrLoc = 630;
@@ -542,7 +659,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 285";
 		rLen = 0;
-		rLoc = 13482;
+		rLoc = 15471;
 		rType = 0;
 		vrLen = 1506;
 		vrLoc = 7856;
@@ -582,7 +699,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 286";
 		rLen = 0;
-		rLoc = 13482;
+		rLoc = 15471;
 		rType = 0;
 		vrLen = 1700;
 		vrLoc = 8040;
@@ -592,7 +709,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 68";
 		rLen = 145;
-		rLoc = 1422;
+		rLoc = 1460;
 		rType = 0;
 		vrLen = 1059;
 		vrLoc = 630;
@@ -602,7 +719,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 285";
 		rLen = 0;
-		rLoc = 13321;
+		rLoc = 15310;
 		rType = 0;
 		vrLen = 1690;
 		vrLoc = 8040;
@@ -612,7 +729,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 69";
 		rLen = 0;
-		rLoc = 1536;
+		rLoc = 1574;
 		rType = 0;
 		vrLen = 1108;
 		vrLoc = 630;
@@ -622,7 +739,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 285";
 		rLen = 0;
-		rLoc = 13321;
+		rLoc = 15310;
 		rType = 0;
 		vrLen = 1690;
 		vrLoc = 8040;
@@ -632,7 +749,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 69";
 		rLen = 64;
-		rLoc = 1503;
+		rLoc = 1541;
 		rType = 0;
 		vrLen = 1108;
 		vrLoc = 630;
@@ -652,7 +769,7 @@
 		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
 		name = "model.h: 410";
 		rLen = 0;
-		rLoc = 12842;
+		rLoc = 12938;
 		rType = 0;
 		vrLen = 1477;
 		vrLoc = 12518;
@@ -662,7 +779,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 205";
 		rLen = 0;
-		rLoc = 5809;
+		rLoc = 5911;
 		rType = 0;
 		vrLen = 1516;
 		vrLoc = 4786;
@@ -672,7 +789,7 @@
 		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
 		name = "model.h: 410";
 		rLen = 0;
-		rLoc = 12842;
+		rLoc = 12938;
 		rType = 0;
 		vrLen = 1477;
 		vrLoc = 12518;
@@ -682,7 +799,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 299";
 		rLen = 0;
-		rLoc = 13321;
+		rLoc = 15310;
 		rType = 0;
 		vrLen = 1350;
 		vrLoc = 8873;
@@ -692,7 +809,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 77";
 		rLen = 0;
-		rLoc = 1756;
+		rLoc = 1794;
 		rType = 0;
 		vrLen = 1125;
 		vrLoc = 784;
@@ -702,7 +819,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 299";
 		rLen = 0;
-		rLoc = 13321;
+		rLoc = 15310;
 		rType = 0;
 		vrLen = 1324;
 		vrLoc = 9019;
@@ -712,7 +829,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 70";
 		rLen = 0;
-		rLoc = 1525;
+		rLoc = 1563;
 		rType = 0;
 		vrLen = 1130;
 		vrLoc = 994;
@@ -722,7 +839,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 281";
 		rLen = 0;
-		rLoc = 11186;
+		rLoc = 12627;
 		rType = 0;
 		vrLen = 1413;
 		vrLoc = 7734;
@@ -732,7 +849,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 65";
 		rLen = 0;
-		rLoc = 1208;
+		rLoc = 1285;
 		rType = 0;
 		vrLen = 1127;
 		vrLoc = 695;
@@ -742,7 +859,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 281";
 		rLen = 0;
-		rLoc = 12625;
+		rLoc = 14614;
 		rType = 0;
 		vrLen = 1155;
 		vrLoc = 0;
@@ -752,7 +869,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 65";
 		rLen = 0;
-		rLoc = 1206;
+		rLoc = 1285;
 		rType = 0;
 		vrLen = 1113;
 		vrLoc = 688;
@@ -762,7 +879,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 284";
 		rLen = 0;
-		rLoc = 11362;
+		rLoc = 12803;
 		rType = 0;
 		vrLen = 1794;
 		vrLoc = 8057;
@@ -772,7 +889,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 65";
 		rLen = 0;
-		rLoc = 1235;
+		rLoc = 1285;
 		rType = 0;
 		vrLen = 1113;
 		vrLoc = 688;
@@ -799,7 +916,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 347";
 		rLen = 0;
-		rLoc = 14653;
+		rLoc = 16643;
 		rType = 0;
 		vrLen = 1500;
 		vrLoc = 7734;
@@ -809,7 +926,7 @@
 		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
 		name = "model.h: 410";
 		rLen = 0;
-		rLoc = 12842;
+		rLoc = 12938;
 		rType = 0;
 		vrLen = 1477;
 		vrLoc = 12518;
@@ -819,7 +936,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 449";
 		rLen = 0;
-		rLoc = 12830;
+		rLoc = 12839;
 		rType = 0;
 		vrLen = 1319;
 		vrLoc = 11889;
@@ -829,7 +946,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 286";
 		rLen = 0;
-		rLoc = 11362;
+		rLoc = 12803;
 		rType = 0;
 		vrLen = 1666;
 		vrLoc = 7979;
@@ -849,7 +966,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 288";
 		rLen = 0;
-		rLoc = 11535;
+		rLoc = 12976;
 		rType = 0;
 		vrLen = 1598;
 		vrLoc = 8415;
@@ -869,7 +986,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 289";
 		rLen = 0;
-		rLoc = 11535;
+		rLoc = 12976;
 		rType = 0;
 		vrLen = 1749;
 		vrLoc = 8057;
@@ -889,7 +1006,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 288";
 		rLen = 0;
-		rLoc = 11467;
+		rLoc = 12908;
 		rType = 0;
 		vrLen = 1108;
 		vrLoc = 10522;
@@ -899,7 +1016,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 455";
 		rLen = 0;
-		rLoc = 13201;
+		rLoc = 13210;
 		rType = 0;
 		vrLen = 1323;
 		vrLoc = 11889;
@@ -909,7 +1026,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 195";
 		rLen = 8;
-		rLoc = 6146;
+		rLoc = 6302;
 		rType = 0;
 		vrLen = 1323;
 		vrLoc = 5415;
@@ -919,7 +1036,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 65";
 		rLen = 0;
-		rLoc = 1235;
+		rLoc = 1285;
 		rType = 0;
 		vrLen = 1113;
 		vrLoc = 688;
@@ -929,7 +1046,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 195";
 		rLen = 8;
-		rLoc = 6146;
+		rLoc = 6302;
 		rType = 0;
 		vrLen = 1323;
 		vrLoc = 5415;
@@ -939,7 +1056,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 458";
 		rLen = 0;
-		rLoc = 14081;
+		rLoc = 14442;
 		rType = 0;
 		vrLen = 1386;
 		vrLoc = 11889;
@@ -948,7 +1065,7 @@
 		isa = PBXTextBookmark;
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 1";
-		rLen = 11253;
+		rLen = 12694;
 		rLoc = 0;
 		rType = 0;
 		vrLen = 1155;
@@ -959,7 +1076,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 79";
 		rLen = 22;
-		rLoc = 1698;
+		rLoc = 1736;
 		rType = 0;
 		vrLen = 1193;
 		vrLoc = 840;
@@ -969,7 +1086,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 342";
 		rLen = 0;
-		rLoc = 14250;
+		rLoc = 16240;
 		rType = 0;
 		vrLen = 1118;
 		vrLoc = 10617;
@@ -979,7 +1096,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 80";
 		rLen = 0;
-		rLoc = 1726;
+		rLoc = 1764;
 		rType = 0;
 		vrLen = 1193;
 		vrLoc = 840;
@@ -989,7 +1106,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 227";
 		rLen = 0;
-		rLoc = 9137;
+		rLoc = 10578;
 		rType = 0;
 		vrLen = 1110;
 		vrLoc = 6616;
@@ -999,7 +1116,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 459";
 		rLen = 0;
-		rLoc = 14081;
+		rLoc = 14442;
 		rType = 0;
 		vrLen = 1428;
 		vrLoc = 11916;
@@ -1009,7 +1126,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 227";
 		rLen = 0;
-		rLoc = 9137;
+		rLoc = 10578;
 		rType = 0;
 		vrLen = 1110;
 		vrLoc = 6616;
@@ -1019,7 +1136,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 128";
 		rLen = 12;
-		rLoc = 3095;
+		rLoc = 3077;
 		rType = 0;
 		vrLen = 1607;
 		vrLoc = 2335;
@@ -1029,7 +1146,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 459";
 		rLen = 0;
-		rLoc = 14081;
+		rLoc = 14442;
 		rType = 0;
 		vrLen = 1463;
 		vrLoc = 11916;
@@ -1039,7 +1156,7 @@
 		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
 		name = "model.h: 418";
 		rLen = 0;
-		rLoc = 13237;
+		rLoc = 13333;
 		rType = 0;
 		vrLen = 1483;
 		vrLoc = 12422;
@@ -1049,7 +1166,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 459";
 		rLen = 0;
-		rLoc = 14081;
+		rLoc = 14442;
 		rType = 0;
 		vrLen = 1463;
 		vrLoc = 11916;
@@ -1059,7 +1176,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 216";
 		rLen = 0;
-		rLoc = 7408;
+		rLoc = 8849;
 		rType = 0;
 		vrLen = 1220;
 		vrLoc = 6372;
@@ -1069,7 +1186,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 128";
 		rLen = 0;
-		rLoc = 3106;
+		rLoc = 3088;
 		rType = 0;
 		vrLen = 1607;
 		vrLoc = 2335;
@@ -1079,7 +1196,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 216";
 		rLen = 0;
-		rLoc = 7408;
+		rLoc = 8849;
 		rType = 0;
 		vrLen = 1220;
 		vrLoc = 6372;
@@ -1089,7 +1206,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 463";
 		rLen = 0;
-		rLoc = 13871;
+		rLoc = 14434;
 		rType = 0;
 		vrLen = 1692;
 		vrLoc = 12439;
@@ -1099,7 +1216,7 @@
 		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
 		name = "model.h: 418";
 		rLen = 0;
-		rLoc = 13237;
+		rLoc = 13333;
 		rType = 0;
 		vrLen = 1483;
 		vrLoc = 12422;
@@ -1109,7 +1226,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 463";
 		rLen = 0;
-		rLoc = 13871;
+		rLoc = 14434;
 		rType = 0;
 		vrLen = 1692;
 		vrLoc = 12439;
@@ -1119,7 +1236,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 216";
 		rLen = 0;
-		rLoc = 7408;
+		rLoc = 8849;
 		rType = 0;
 		vrLen = 1220;
 		vrLoc = 6372;
@@ -1128,8 +1245,8 @@
 		isa = PBXTextBookmark;
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 124";
-		rLen = 13;
-		rLoc = 2914;
+		rLen = 0;
+		rLoc = 3014;
 		rType = 0;
 		vrLen = 1607;
 		vrLoc = 2335;
@@ -1139,7 +1256,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 216";
 		rLen = 0;
-		rLoc = 7408;
+		rLoc = 8849;
 		rType = 0;
 		vrLen = 1220;
 		vrLoc = 6372;
@@ -1149,7 +1266,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 124";
 		rLen = 0;
-		rLoc = 2912;
+		rLoc = 3014;
 		rType = 0;
 		vrLen = 1607;
 		vrLoc = 2335;
@@ -1159,7 +1276,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 461";
 		rLen = 0;
-		rLoc = 13395;
+		rLoc = 13404;
 		rType = 0;
 		vrLen = 1829;
 		vrLoc = 12374;
@@ -1169,7 +1286,7 @@
 		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
 		name = "model.h: 445";
 		rLen = 43;
-		rLoc = 14084;
+		rLoc = 14180;
 		rType = 0;
 		vrLen = 1427;
 		vrLoc = 13264;
@@ -1179,7 +1296,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 466";
 		rLen = 0;
-		rLoc = 13622;
+		rLoc = 13631;
 		rType = 0;
 		vrLen = 1571;
 		vrLoc = 13103;
@@ -1189,7 +1306,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 252";
 		rLen = 0;
-		rLoc = 8906;
+		rLoc = 10347;
 		rType = 0;
 		vrLen = 1531;
 		vrLoc = 7436;
@@ -1199,7 +1316,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 129";
 		rLen = 151;
-		rLoc = 3133;
+		rLoc = 3115;
 		rType = 0;
 		vrLen = 1607;
 		vrLoc = 2335;
@@ -1209,7 +1326,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 252";
 		rLen = 0;
-		rLoc = 8906;
+		rLoc = 10347;
 		rType = 0;
 		vrLen = 1544;
 		vrLoc = 7468;
@@ -1219,7 +1336,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 129";
 		rLen = 0;
-		rLoc = 3283;
+		rLoc = 3265;
 		rType = 0;
 		vrLen = 1607;
 		vrLoc = 2335;
@@ -1229,7 +1346,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 252";
 		rLen = 0;
-		rLoc = 8906;
+		rLoc = 10347;
 		rType = 0;
 		vrLen = 1529;
 		vrLoc = 7523;
@@ -1239,7 +1356,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 129";
 		rLen = 0;
-		rLoc = 3283;
+		rLoc = 3265;
 		rType = 0;
 		vrLen = 1607;
 		vrLoc = 2335;
@@ -1249,7 +1366,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 252";
 		rLen = 0;
-		rLoc = 8906;
+		rLoc = 10347;
 		rType = 0;
 		vrLen = 1488;
 		vrLoc = 7564;
@@ -1259,7 +1376,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 130";
 		rLen = 68;
-		rLoc = 3214;
+		rLoc = 3196;
 		rType = 0;
 		vrLen = 1681;
 		vrLoc = 2335;
@@ -1289,7 +1406,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 284";
 		rLen = 0;
-		rLoc = 9654;
+		rLoc = 11095;
 		rType = 0;
 		vrLen = 1142;
 		vrLoc = 8672;
@@ -1349,7 +1466,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 212";
 		rLen = 0;
-		rLoc = 6735;
+		rLoc = 7489;
 		rType = 0;
 		vrLen = 1461;
 		vrLoc = 6027;
@@ -1359,7 +1476,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 460";
 		rLen = 0;
-		rLoc = 13312;
+		rLoc = 13321;
 		rType = 0;
 		vrLen = 1515;
 		vrLoc = 12369;
@@ -1369,7 +1486,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 342";
 		rLen = 0;
-		rLoc = 12625;
+		rLoc = 14614;
 		rType = 0;
 		vrLen = 1746;
 		vrLoc = 10529;
@@ -1379,7 +1496,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 130";
 		rLen = 68;
-		rLoc = 3214;
+		rLoc = 3196;
 		rType = 0;
 		vrLen = 1681;
 		vrLoc = 2335;
@@ -1389,7 +1506,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 253";
 		rLen = 0;
-		rLoc = 8461;
+		rLoc = 9902;
 		rType = 0;
 		vrLen = 1626;
 		vrLoc = 7201;
@@ -1399,7 +1516,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 458";
 		rLen = 0;
-		rLoc = 13155;
+		rLoc = 13164;
 		rType = 0;
 		vrLen = 1563;
 		vrLoc = 12547;
@@ -1409,7 +1526,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 216";
 		rLen = 0;
-		rLoc = 6875;
+		rLoc = 8316;
 		rType = 0;
 		vrLen = 1457;
 		vrLoc = 5126;
@@ -1429,7 +1546,7 @@
 		fRef = 82532AFB0DA374250030CC6A /* dss.h */;
 		name = "dss.h: 102";
 		rLen = 0;
-		rLoc = 2295;
+		rLoc = 2312;
 		rType = 0;
 		vrLen = 1020;
 		vrLoc = 1402;
@@ -1439,7 +1556,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 272";
 		rLen = 0;
-		rLoc = 9217;
+		rLoc = 10658;
 		rType = 0;
 		vrLen = 1605;
 		vrLoc = 7777;
@@ -1449,7 +1566,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 458";
 		rLen = 0;
-		rLoc = 13155;
+		rLoc = 13164;
 		rType = 0;
 		vrLen = 1563;
 		vrLoc = 12547;
@@ -1459,7 +1576,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 216";
 		rLen = 0;
-		rLoc = 6875;
+		rLoc = 8316;
 		rType = 0;
 		vrLen = 1581;
 		vrLoc = 6693;
@@ -1469,7 +1586,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 463";
 		rLen = 0;
-		rLoc = 13447;
+		rLoc = 13456;
 		rType = 0;
 		vrLen = 1563;
 		vrLoc = 12547;
@@ -1479,7 +1596,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 311";
 		rLen = 0;
-		rLoc = 10368;
+		rLoc = 11809;
 		rType = 0;
 		vrLen = 1374;
 		vrLoc = 6022;
@@ -1489,7 +1606,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 464";
 		rLen = 0;
-		rLoc = 13447;
+		rLoc = 13456;
 		rType = 0;
 		vrLen = 1549;
 		vrLoc = 12602;
@@ -1509,7 +1626,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 306";
 		rLen = 0;
-		rLoc = 10159;
+		rLoc = 11600;
 		rType = 0;
 		vrLen = 921;
 		vrLoc = 9103;
@@ -1519,7 +1636,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 85";
 		rLen = 0;
-		rLoc = 1813;
+		rLoc = 1851;
 		rType = 0;
 		vrLen = 1203;
 		vrLoc = 1035;
@@ -1529,7 +1646,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 306";
 		rLen = 0;
-		rLoc = 10185;
+		rLoc = 11626;
 		rType = 0;
 		vrLen = 1054;
 		vrLoc = 9120;
@@ -1539,7 +1656,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 458";
 		rLen = 0;
-		rLoc = 13155;
+		rLoc = 13164;
 		rType = 0;
 		vrLen = 1493;
 		vrLoc = 12794;
@@ -1549,7 +1666,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 352";
 		rLen = 30;
-		rLoc = 12405;
+		rLoc = 13846;
 		rType = 0;
 		vrLen = 1694;
 		vrLoc = 11060;
@@ -1559,7 +1676,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 462";
 		rLen = 8;
-		rLoc = 13430;
+		rLoc = 13439;
 		rType = 0;
 		vrLen = 1574;
 		vrLoc = 12285;
@@ -1569,7 +1686,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 218";
 		rLen = 0;
-		rLoc = 6937;
+		rLoc = 8378;
 		rType = 0;
 		vrLen = 1110;
 		vrLoc = 9243;
@@ -1579,7 +1696,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 458";
 		rLen = 0;
-		rLoc = 13155;
+		rLoc = 13164;
 		rType = 0;
 		vrLen = 1450;
 		vrLoc = 12439;
@@ -1589,7 +1706,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 85";
 		rLen = 0;
-		rLoc = 1813;
+		rLoc = 1851;
 		rType = 0;
 		vrLen = 1143;
 		vrLoc = 1095;
@@ -1599,7 +1716,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 245";
 		rLen = 0;
-		rLoc = 8109;
+		rLoc = 9550;
 		rType = 0;
 		vrLen = 1110;
 		vrLoc = 9290;
@@ -1609,7 +1726,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 458";
 		rLen = 0;
-		rLoc = 13155;
+		rLoc = 13164;
 		rType = 0;
 		vrLen = 1484;
 		vrLoc = 12475;
@@ -1619,7 +1736,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 315";
 		rLen = 0;
-		rLoc = 10368;
+		rLoc = 11809;
 		rType = 0;
 		vrLen = 1574;
 		vrLoc = 7992;
@@ -1649,7 +1766,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 458";
 		rLen = 0;
-		rLoc = 13155;
+		rLoc = 13164;
 		rType = 0;
 		vrLen = 1519;
 		vrLoc = 14856;
@@ -1739,7 +1856,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 468";
 		rLen = 0;
-		rLoc = 13777;
+		rLoc = 13786;
 		rType = 0;
 		vrLen = 1460;
 		vrLoc = 12917;
@@ -1749,7 +1866,7 @@
 		fRef = 82532AFB0DA374250030CC6A /* dss.h */;
 		name = "dss.h: 102";
 		rLen = 0;
-		rLoc = 2295;
+		rLoc = 2312;
 		rType = 0;
 		vrLen = 1060;
 		vrLoc = 1373;
@@ -1769,7 +1886,7 @@
 		fRef = 82532AFB0DA374250030CC6A /* dss.h */;
 		name = "dss.h: 102";
 		rLen = 0;
-		rLoc = 2295;
+		rLoc = 2312;
 		rType = 0;
 		vrLen = 1060;
 		vrLoc = 1373;
@@ -1779,7 +1896,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 477";
 		rLen = 0;
-		rLoc = 14098;
+		rLoc = 14459;
 		rType = 0;
 		vrLen = 1629;
 		vrLoc = 12794;
@@ -1789,7 +1906,7 @@
 		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
 		name = "model.h: 446";
 		rLen = 0;
-		rLoc = 14138;
+		rLoc = 14234;
 		rType = 0;
 		vrLen = 1541;
 		vrLoc = 15648;
@@ -1799,7 +1916,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 85";
 		rLen = 0;
-		rLoc = 1813;
+		rLoc = 1851;
 		rType = 0;
 		vrLen = 1186;
 		vrLoc = 1150;
@@ -1809,7 +1926,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 310";
 		rLen = 0;
-		rLoc = 10232;
+		rLoc = 11673;
 		rType = 0;
 		vrLen = 1555;
 		vrLoc = 9807;
@@ -1819,7 +1936,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 310";
 		rLen = 0;
-		rLoc = 10232;
+		rLoc = 11673;
 		rType = 0;
 		vrLen = 1555;
 		vrLoc = 9807;
@@ -1829,7 +1946,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 85";
 		rLen = 0;
-		rLoc = 1804;
+		rLoc = 1842;
 		rType = 0;
 		vrLen = 1026;
 		vrLoc = 1651;
@@ -1839,7 +1956,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 85";
 		rLen = 0;
-		rLoc = 1804;
+		rLoc = 1842;
 		rType = 0;
 		vrLen = 1026;
 		vrLoc = 1651;
@@ -1869,7 +1986,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 469";
 		rLen = 0;
-		rLoc = 13858;
+		rLoc = 13867;
 		rType = 0;
 		vrLen = 1477;
 		vrLoc = 12930;
@@ -1879,7 +1996,7 @@
 		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
 		name = "model.h: 159";
 		rLen = 43;
-		rLoc = 4836;
+		rLoc = 4932;
 		rType = 0;
 		vrLen = 1504;
 		vrLoc = 3756;
@@ -1909,7 +2026,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 478";
 		rLen = 0;
-		rLoc = 13987;
+		rLoc = 14442;
 		rType = 0;
 		vrLen = 1816;
 		vrLoc = 12647;
@@ -1919,7 +2036,7 @@
 		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
 		name = "model.h: 159";
 		rLen = 43;
-		rLoc = 4836;
+		rLoc = 4932;
 		rType = 0;
 		vrLen = 1504;
 		vrLoc = 3756;
@@ -1929,7 +2046,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 478";
 		rLen = 0;
-		rLoc = 13987;
+		rLoc = 14442;
 		rType = 0;
 		vrLen = 1816;
 		vrLoc = 12647;
@@ -1959,23 +2076,23 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 478";
 		rLen = 0;
-		rLoc = 13987;
+		rLoc = 14442;
 		rType = 0;
 		vrLen = 1849;
 		vrLoc = 13017;
 	};
 	826DBB140DB8E2900034ADFB /* ds485proxy.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1208, 2100}}";
-			sepNavSelRange = "{1813, 0}";
-			sepNavVisRange = "{1722, 226}";
+			sepNavIntBoundsRect = "{{0, 0}, {1071, 2450}}";
+			sepNavSelRange = "{1956, 0}";
+			sepNavVisRange = "{1084, 1204}";
 		};
 	};
 	826DBB150DB8E2900034ADFB /* ds485proxy.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {910, 7182}}";
-			sepNavSelRange = "{13922, 0}";
-			sepNavVisRange = "{14422, 539}";
+			sepNavIntBoundsRect = "{{0, 0}, {1071, 7910}}";
+			sepNavSelRange = "{18078, 0}";
+			sepNavVisRange = "{17391, 971}";
 		};
 	};
 	826DBC9B0DBCC9500034ADFB /* modeltests.cpp */ = {
@@ -1994,9 +2111,9 @@
 	};
 	826DBEC70DBE1C170034ADFB /* modeljs.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1208, 6272}}";
-			sepNavSelRange = "{15014, 0}";
-			sepNavVisRange = "{14755, 389}";
+			sepNavIntBoundsRect = "{{0, 0}, {1071, 6258}}";
+			sepNavSelRange = "{160, 0}";
+			sepNavVisRange = "{0, 1412}";
 		};
 	};
 	826DBF580DBF1DD70034ADFB /* modeljstests.cpp */ = {
@@ -2006,6 +2123,1194 @@
 			sepNavVisRange = "{1733, 1122}";
 			sepNavWindowFrame = "{{1, 61}, {1130, 717}}";
 		};
+	};
+	827F8D2F0DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 87";
+		rLen = 0;
+		rLoc = 2529;
+		rType = 0;
+		vrLen = 1509;
+		vrLoc = 1878;
+	};
+	827F8D300DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 477";
+		rLen = 0;
+		rLoc = 14090;
+		rType = 0;
+		vrLen = 1840;
+		vrLoc = 13203;
+	};
+	827F8D310DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
+		name = "ds485proxy.h: 132";
+		rLen = 0;
+		rLoc = 3575;
+		rType = 0;
+		vrLen = 1816;
+		vrLoc = 2238;
+	};
+	827F8D320DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 213";
+		rLen = 0;
+		rLoc = 7552;
+		rType = 0;
+		vrLen = 1374;
+		vrLoc = 5644;
+	};
+	827F8D330DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 463";
+		rLen = 0;
+		rLoc = 13242;
+		rType = 0;
+		vrLen = 1822;
+		vrLoc = 12438;
+	};
+	827F8D340DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 249";
+		rLen = 0;
+		rLoc = 9672;
+		rType = 0;
+		vrLen = 1480;
+		vrLoc = 4967;
+	};
+	827F8D350DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 446";
+		rLen = 0;
+		rLoc = 14224;
+		rType = 0;
+		vrLen = 1481;
+		vrLoc = 14828;
+	};
+	827F8D360DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 463";
+		rLen = 0;
+		rLoc = 13242;
+		rType = 0;
+		vrLen = 1792;
+		vrLoc = 12295;
+	};
+	827F8D370DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 87";
+		rLen = 0;
+		rLoc = 2529;
+		rType = 0;
+		vrLen = 1509;
+		vrLoc = 1878;
+	};
+	827F8D380DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 477";
+		rLen = 0;
+		rLoc = 14423;
+		rType = 0;
+		vrLen = 1864;
+		vrLoc = 13017;
+	};
+	827F8D390DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 249";
+		rLen = 0;
+		rLoc = 9672;
+		rType = 0;
+		vrLen = 1480;
+		vrLoc = 4967;
+	};
+	827F8D3A0DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
+		name = "ds485proxy.h: 85";
+		rLen = 0;
+		rLoc = 1851;
+		rType = 0;
+		vrLen = 1078;
+		vrLoc = 1650;
+	};
+	827F8D3B0DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 121";
+		rLen = 0;
+		rLoc = 3726;
+		rType = 0;
+		vrLen = 1674;
+		vrLoc = 6558;
+	};
+	827F8D3C0DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
+		name = "ds485proxy.h: 133";
+		rLen = 0;
+		rLoc = 3596;
+		rType = 0;
+		vrLen = 1808;
+		vrLoc = 2238;
+	};
+	827F8D3D0DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 121";
+		rLen = 0;
+		rLoc = 3726;
+		rType = 0;
+		vrLen = 1475;
+		vrLoc = 2992;
+	};
+	827F8D3E0DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
+		name = "ds485proxy.h: 132";
+		rLen = 0;
+		rLoc = 3575;
+		rType = 0;
+		vrLen = 1797;
+		vrLoc = 2238;
+	};
+	827F8D3F0DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 477";
+		rLen = 0;
+		rLoc = 14090;
+		rType = 0;
+		vrLen = 1840;
+		vrLoc = 13203;
+	};
+	827F8D400DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 213";
+		rLen = 0;
+		rLoc = 7552;
+		rType = 0;
+		vrLen = 1374;
+		vrLoc = 5644;
+	};
+	827F8D410DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
+		name = "ds485proxy.h: 132";
+		rLen = 0;
+		rLoc = 3575;
+		rType = 0;
+		vrLen = 1816;
+		vrLoc = 2238;
+	};
+	827F8D420DD451410082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 216";
+		rLen = 0;
+		rLoc = 8226;
+		rType = 0;
+		vrLen = 1393;
+		vrLoc = 5644;
+	};
+	827F8D4A0DD452F80082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
+		name = "ds485proxy.h: 132";
+		rLen = 95;
+		rLoc = 3403;
+		rType = 0;
+		vrLen = 1906;
+		vrLoc = 2238;
+	};
+	827F8D4B0DD452F80082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 216";
+		rLen = 0;
+		rLoc = 8202;
+		rType = 0;
+		vrLen = 1367;
+		vrLoc = 5644;
+	};
+	827F8D4C0DD452F80082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 216";
+		rLen = 0;
+		rLoc = 8202;
+		rType = 0;
+		vrLen = 1367;
+		vrLoc = 5644;
+	};
+	827F8D4D0DD452F80082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
+		name = "ds485proxy.h: 132";
+		rLen = 95;
+		rLoc = 3403;
+		rType = 0;
+		vrLen = 1906;
+		vrLoc = 2238;
+	};
+	827F8D4E0DD452F80082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 227";
+		rLen = 0;
+		rLoc = 7449;
+		rType = 0;
+		vrLen = 1743;
+		vrLoc = 6456;
+	};
+	827F8D4F0DD453920082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 239";
+		rLen = 0;
+		rLoc = 8072;
+		rType = 0;
+		vrLen = 1799;
+		vrLoc = 6456;
+	};
+	827F8D520DD4727B0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 407";
+		rLen = 0;
+		rLoc = 14604;
+		rType = 0;
+		vrLen = 1637;
+		vrLoc = 13491;
+	};
+	827F8D560DD486430082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
+		name = "ds485proxy.h: 63";
+		rLen = 0;
+		rLoc = 1149;
+		rType = 0;
+		vrLen = 1231;
+		vrLoc = 840;
+	};
+	827F8D570DD486430082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 398";
+		rLen = 22;
+		rLoc = 13979;
+		rType = 0;
+		vrLen = 1742;
+		vrLoc = 12979;
+	};
+	827F8D580DD486430082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 406";
+		rLen = 0;
+		rLoc = 14506;
+		rType = 0;
+		vrLen = 1820;
+		vrLoc = 6256;
+	};
+	827F8D590DD486430082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
+		name = "ds485proxy.h: 65";
+		rLen = 0;
+		rLoc = 1283;
+		rType = 0;
+		vrLen = 1227;
+		vrLoc = 840;
+	};
+	827F8D5A0DD486430082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 340";
+		rLen = 0;
+		rLoc = 11541;
+		rType = 0;
+		vrLen = 1223;
+		vrLoc = 11086;
+	};
+	827F8D5B0DD486430082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
+		name = "ds485proxy.h: 65";
+		rLen = 22;
+		rLoc = 1261;
+		rType = 0;
+		vrLen = 1231;
+		vrLoc = 840;
+	};
+	827F8D5C0DD486430082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 398";
+		rLen = 22;
+		rLoc = 13979;
+		rType = 0;
+		vrLen = 1742;
+		vrLoc = 12979;
+	};
+	827F8D5D0DD486430082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
+		name = "ds485proxy.h: 63";
+		rLen = 0;
+		rLoc = 1149;
+		rType = 0;
+		vrLen = 1231;
+		vrLoc = 840;
+	};
+	827F8D5E0DD486430082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 406";
+		rLen = 0;
+		rLoc = 14417;
+		rType = 0;
+		vrLen = 1644;
+		vrLoc = 13092;
+	};
+	827F8D620DD489330082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 409";
+		rLen = 0;
+		rLoc = 14488;
+		rType = 0;
+		vrLen = 1217;
+		vrLoc = 1075;
+	};
+	827F8D680DD492620082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 186";
+		rLen = 0;
+		rLoc = 5980;
+		rType = 0;
+		vrLen = 1463;
+		vrLoc = 5107;
+	};
+	827F8D690DD498D50082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 37";
+		rLen = 0;
+		rLoc = 1074;
+		rType = 0;
+		vrLen = 1398;
+		vrLoc = 167;
+	};
+	827F8D6A0DD49AE20082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
+		name = "ds485proxy.h: 90";
+		rLen = 0;
+		rLoc = 1956;
+		rType = 0;
+		vrLen = 1204;
+		vrLoc = 1084;
+	};
+	827F8D6B0DD49AE20082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 536";
+		rLen = 0;
+		rLoc = 18193;
+		rType = 0;
+		vrLen = 988;
+		vrLoc = 17370;
+	};
+	827F8D6C0DD49AE20082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 523";
+		rLen = 0;
+		rLoc = 17842;
+		rType = 0;
+		vrLen = 869;
+		vrLoc = 17164;
+	};
+	827F8D6D0DD49AE20082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
+		name = "ds485proxy.h: 88";
+		rLen = 9;
+		rLoc = 1896;
+		rType = 0;
+		vrLen = 1212;
+		vrLoc = 1084;
+	};
+	827F8D6E0DD49AE20082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 523";
+		rLen = 0;
+		rLoc = 17836;
+		rType = 0;
+		vrLen = 895;
+		vrLoc = 17164;
+	};
+	827F8D6F0DD49AE20082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
+		name = "ds485proxy.h: 89";
+		rLen = 22;
+		rLoc = 1911;
+		rType = 0;
+		vrLen = 1187;
+		vrLoc = 1084;
+	};
+	827F8D700DD49AE20082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 531";
+		rLen = 0;
+		rLoc = 18194;
+		rType = 0;
+		vrLen = 967;
+		vrLoc = 17164;
+	};
+	827F8D710DD49AE20082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
+		name = "ds485proxy.h: 90";
+		rLen = 0;
+		rLoc = 1956;
+		rType = 0;
+		vrLen = 1204;
+		vrLoc = 1084;
+	};
+	827F8D720DD49AE20082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
+		name = "ds485proxy.cpp: 536";
+		rLen = 0;
+		rLoc = 18193;
+		rType = 0;
+		vrLen = 988;
+		vrLoc = 17370;
+	};
+	827F8D730DD49AE20082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 477";
+		rLen = 0;
+		rLoc = 14090;
+		rType = 0;
+		vrLen = 1840;
+		vrLoc = 13203;
+	};
+	827F8D740DD49CFB0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 479";
+		rLen = 0;
+		rLoc = 14232;
+		rType = 0;
+		vrLen = 1960;
+		vrLoc = 13089;
+	};
+	827F8D750DD49E3C0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 483";
+		rLen = 0;
+		rLoc = 14411;
+		rType = 0;
+		vrLen = 1923;
+		vrLoc = 12894;
+	};
+	827F8D760DD49E3C0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 483";
+		rLen = 0;
+		rLoc = 14411;
+		rType = 0;
+		vrLen = 1923;
+		vrLoc = 12894;
+	};
+	827F8D770DD49E3C0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 30";
+		rLen = 0;
+		rLoc = 688;
+		rType = 0;
+		vrLen = 929;
+		vrLoc = 324;
+	};
+	827F8D780DD49FFB0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 125";
+		rLen = 0;
+		rLoc = 3663;
+		rType = 0;
+		vrLen = 1407;
+		vrLoc = 3128;
+	};
+	827F8D7A0DD4A0480082CC87 /* bitset */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.cpp.h;
+		name = bitset;
+		path = "/Developer/SDKs/MacOSX10.5.sdk/usr/include/c++/4.0.0/bitset";
+		sourceTree = "<absolute>";
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1071, 17206}}";
+			sepNavSelRange = "{27302, 0}";
+			sepNavVisRange = "{27006, 1375}";
+		};
+	};
+	827F8D7B0DD4A0480082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "error: 'char_traits' was not declared in this scope";
+		fRef = 827F8D7A0DD4A0480082CC87 /* bitset */;
+		rLen = 1;
+		rLoc = 1032;
+		rType = 1;
+	};
+	827F8D7C0DD4A0620082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 147";
+		rLen = 0;
+		rLoc = 4398;
+		rType = 0;
+		vrLen = 1456;
+		vrLoc = 3538;
+	};
+	827F8D7D0DD4A0620082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 483";
+		rLen = 0;
+		rLoc = 14411;
+		rType = 0;
+		vrLen = 1959;
+		vrLoc = 12894;
+	};
+	827F8D7E0DD4A0620082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 147";
+		rLen = 0;
+		rLoc = 4398;
+		rType = 0;
+		vrLen = 1456;
+		vrLoc = 3538;
+	};
+	827F8D7F0DD4A0620082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 483";
+		rLen = 0;
+		rLoc = 14411;
+		rType = 0;
+		vrLen = 1959;
+		vrLoc = 12894;
+	};
+	827F8D800DD4A0620082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 827F8D7A0DD4A0480082CC87 /* bitset */;
+		name = "bitset: 1033";
+		rLen = 63;
+		rLoc = 27556;
+		rType = 0;
+		vrLen = 1340;
+		vrLoc = 27638;
+	};
+	827F8D820DD4A1430082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 827F8D7A0DD4A0480082CC87 /* bitset */;
+		name = "bitset: 1033";
+		rLen = 63;
+		rLoc = 27556;
+		rType = 0;
+		vrLen = 1447;
+		vrLoc = 1309;
+	};
+	827F8D830DD4A1430082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 827F8D7A0DD4A0480082CC87 /* bitset */;
+		name = "bitset: 1033";
+		rLen = 63;
+		rLoc = 27556;
+		rType = 0;
+		vrLen = 1447;
+		vrLoc = 1309;
+	};
+	827F8D840DD4A1430082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 30";
+		rLen = 0;
+		rLoc = 670;
+		rType = 0;
+		vrLen = 845;
+		vrLoc = 0;
+	};
+	827F8D880DD4A1FB0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 827F8D7A0DD4A0480082CC87 /* bitset */;
+		name = "bitset: 1033";
+		rLen = 11;
+		rLoc = 27578;
+		rType = 0;
+		vrLen = 1482;
+		vrLoc = 26854;
+	};
+	827F8D890DD4A1FB0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82532C750DA3ADB60030CC6A /* base.h */;
+		name = "base.h: 110";
+		rLen = 72;
+		rLoc = 3312;
+		rType = 0;
+		vrLen = 970;
+		vrLoc = 25;
+	};
+	827F8D8A0DD4A1FB0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 1048;
+		vrLoc = 0;
+	};
+	827F8D8B0DD4A1FB0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 30";
+		rLen = 0;
+		rLoc = 670;
+		rType = 0;
+		vrLen = 845;
+		vrLoc = 0;
+	};
+	827F8D8C0DD4A1FB0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 30";
+		rLen = 0;
+		rLoc = 670;
+		rType = 0;
+		vrLen = 845;
+		vrLoc = 0;
+	};
+	827F8D8D0DD4A1FB0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 827F8D7A0DD4A0480082CC87 /* bitset */;
+		name = "bitset: 1033";
+		rLen = 11;
+		rLoc = 27578;
+		rType = 0;
+		vrLen = 1482;
+		vrLoc = 26854;
+	};
+	827F8D8E0DD4A1FB0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82532C750DA3ADB60030CC6A /* base.h */;
+		name = "base.h: 110";
+		rLen = 72;
+		rLoc = 3312;
+		rType = 0;
+		vrLen = 970;
+		vrLoc = 25;
+	};
+	827F8D8F0DD4A1FB0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 1048;
+		vrLoc = 0;
+	};
+	827F8D900DD4A1FB0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 28";
+		rLen = 0;
+		rLoc = 652;
+		rType = 0;
+		vrLen = 864;
+		vrLoc = 0;
+	};
+	827F8D960DD4A2F00082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 827F8D7A0DD4A0480082CC87 /* bitset */;
+		name = "bitset: 1033";
+		rLen = 11;
+		rLoc = 27578;
+		rType = 0;
+		vrLen = 1482;
+		vrLoc = 26854;
+	};
+	827F8D970DD4A2F00082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 827F8D980DD4A2F00082CC87 /* char_traits.h */;
+		name = "char_traits.h: 21";
+		rLen = 0;
+		rLoc = 939;
+		rType = 0;
+		vrLen = 1764;
+		vrLoc = 0;
+	};
+	827F8D980DD4A2F00082CC87 /* char_traits.h */ = {
+		isa = PBXFileReference;
+		name = char_traits.h;
+		path = "/Developer/SDKs/MacOSX10.5.sdk/usr/include/c++/4.0.0/bits/char_traits.h";
+		sourceTree = "<absolute>";
+	};
+	827F8D990DD4A2F00082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 28";
+		rLen = 0;
+		rLoc = 652;
+		rType = 0;
+		vrLen = 862;
+		vrLoc = 0;
+	};
+	827F8D9A0DD4A2F00082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 28";
+		rLen = 0;
+		rLoc = 652;
+		rType = 0;
+		vrLen = 862;
+		vrLoc = 0;
+	};
+	827F8D9B0DD4A2F00082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 827F8D7A0DD4A0480082CC87 /* bitset */;
+		name = "bitset: 1033";
+		rLen = 11;
+		rLoc = 27578;
+		rType = 0;
+		vrLen = 1482;
+		vrLoc = 26854;
+	};
+	827F8D9C0DD4A2F00082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 827F8D9D0DD4A2F00082CC87 /* char_traits.h */;
+		name = "char_traits.h: 21";
+		rLen = 0;
+		rLoc = 939;
+		rType = 0;
+		vrLen = 1764;
+		vrLoc = 0;
+	};
+	827F8D9D0DD4A2F00082CC87 /* char_traits.h */ = {
+		isa = PBXFileReference;
+		name = char_traits.h;
+		path = "/Developer/SDKs/MacOSX10.5.sdk/usr/include/c++/4.0.0/bits/char_traits.h";
+		sourceTree = "<absolute>";
+	};
+	827F8D9E0DD4A2F00082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 30";
+		rLen = 0;
+		rLoc = 652;
+		rType = 0;
+		vrLen = 840;
+		vrLoc = 0;
+	};
+	827F8DA10DD96A6B0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 33";
+		rLen = 0;
+		rLoc = 670;
+		rType = 0;
+		vrLen = 851;
+		vrLoc = 0;
+	};
+	827F8DA60DD96C0A0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "Compiling /Users/packi/sources/dss/trunk/main.cpp";
+		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
+		rLen = 0;
+		rLoc = 20;
+		rType = 1;
+	};
+	827F8DA80DD96C290082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 2";
+		rLen = 0;
+		rLoc = 3;
+		rType = 0;
+		vrLen = 1048;
+		vrLoc = 0;
+	};
+	827F8DA90DD96C290082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 32";
+		rLen = 0;
+		rLoc = 652;
+		rType = 0;
+		vrLen = 818;
+		vrLoc = 0;
+	};
+	827F8DAA0DD96C290082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 23";
+		rLen = 0;
+		rLoc = 531;
+		rType = 0;
+		vrLen = 825;
+		vrLoc = 0;
+	};
+	827F8DAB0DD96C290082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
+		name = "main.cpp: 19";
+		rLen = 0;
+		rLoc = 474;
+		rType = 0;
+		vrLen = 950;
+		vrLoc = 0;
+	};
+	827F8DAC0DD96C290082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 32";
+		rLen = 0;
+		rLoc = 652;
+		rType = 0;
+		vrLen = 818;
+		vrLoc = 0;
+	};
+	827F8DAD0DD96C290082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 2";
+		rLen = 0;
+		rLoc = 3;
+		rType = 0;
+		vrLen = 1048;
+		vrLoc = 0;
+	};
+	827F8DAE0DD96C290082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 32";
+		rLen = 0;
+		rLoc = 652;
+		rType = 0;
+		vrLen = 818;
+		vrLoc = 0;
+	};
+	827F8DAF0DD96C290082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
+		name = "main.cpp: 19";
+		rLen = 0;
+		rLoc = 510;
+		rType = 0;
+		vrLen = 968;
+		vrLoc = 0;
+	};
+	827F8DB10DD96CFD0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
+		name = "main.cpp: 19";
+		rLen = 0;
+		rLoc = 510;
+		rType = 0;
+		vrLen = 968;
+		vrLoc = 0;
+	};
+	827F8DB20DD96CFD0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
+		name = "main.cpp: 19";
+		rLen = 0;
+		rLoc = 510;
+		rType = 0;
+		vrLen = 968;
+		vrLoc = 0;
+	};
+	827F8DB30DD96CFD0082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 34";
+		rLen = 0;
+		rLoc = 688;
+		rType = 0;
+		vrLen = 818;
+		vrLoc = 0;
+	};
+	827F8DB50DD96D180082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 34";
+		rLen = 0;
+		rLoc = 688;
+		rType = 0;
+		vrLen = 818;
+		vrLoc = 0;
+	};
+	827F8DB60DD96D180082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 34";
+		rLen = 0;
+		rLoc = 688;
+		rType = 0;
+		vrLen = 818;
+		vrLoc = 0;
+	};
+	827F8DB70DD96D180082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
+		name = "main.cpp: 17";
+		rLen = 0;
+		rLoc = 472;
+		rType = 0;
+		vrLen = 954;
+		vrLoc = 0;
+	};
+	827F8DC70DD970440082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "error: expected initializer before '&' token";
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		rLen = 1;
+		rLoc = 483;
+		rType = 1;
+	};
+	827F8DC90DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
+		name = "main.cpp: 17";
+		rLen = 0;
+		rLoc = 453;
+		rType = 0;
+		vrLen = 955;
+		vrLoc = 0;
+	};
+	827F8DCA0DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82532AFB0DA374250030CC6A /* dss.h */;
+		name = "dss.h: 13";
+		rLen = 0;
+		rLoc = 197;
+		rType = 0;
+		vrLen = 817;
+		vrLoc = 0;
+	};
+	827F8DCB0DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 827F8D7A0DD4A0480082CC87 /* bitset */;
+		name = "bitset: 1025";
+		rLen = 0;
+		rLoc = 27302;
+		rType = 0;
+		vrLen = 1375;
+		vrLoc = 27006;
+	};
+	827F8DCC0DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 151";
+		rLen = 40;
+		rLoc = 4404;
+		rType = 0;
+		vrLen = 1499;
+		vrLoc = 3689;
+	};
+	827F8DCD0DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
+		name = "main.cpp: 17";
+		rLen = 0;
+		rLoc = 472;
+		rType = 0;
+		vrLen = 954;
+		vrLoc = 0;
+	};
+	827F8DCE0DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 827F8D7A0DD4A0480082CC87 /* bitset */;
+		name = "bitset: 1033";
+		rLen = 0;
+		rLoc = 27578;
+		rType = 0;
+		vrLen = 1364;
+		vrLoc = 27158;
+	};
+	827F8DCF0DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
+		name = "main.cpp: 17";
+		rLen = 0;
+		rLoc = 453;
+		rType = 0;
+		vrLen = 955;
+		vrLoc = 0;
+	};
+	827F8DD00DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 827F8D7A0DD4A0480082CC87 /* bitset */;
+		name = "bitset: 932";
+		rLen = 0;
+		rLoc = 24386;
+		rType = 0;
+		vrLen = 1052;
+		vrLoc = 24141;
+	};
+	827F8DD10DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82532AFB0DA374250030CC6A /* dss.h */;
+		name = "dss.h: 13";
+		rLen = 0;
+		rLoc = 197;
+		rType = 0;
+		vrLen = 817;
+		vrLoc = 0;
+	};
+	827F8DD20DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 487";
+		rLen = 0;
+		rLoc = 14442;
+		rType = 0;
+		vrLen = 1878;
+		vrLoc = 12647;
+	};
+	827F8DD30DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 827F8D7A0DD4A0480082CC87 /* bitset */;
+		name = "bitset: 1025";
+		rLen = 0;
+		rLoc = 27302;
+		rType = 0;
+		vrLen = 1375;
+		vrLoc = 27006;
+	};
+	827F8DD40DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 25";
+		rLen = 0;
+		rLoc = 532;
+		rType = 0;
+		vrLen = 818;
+		vrLoc = 0;
+	};
+	827F8DD50DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 147";
+		rLen = 0;
+		rLoc = 3898;
+		rType = 0;
+		vrLen = 988;
+		vrLoc = 3290;
+	};
+	827F8DD60DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 25";
+		rLen = 0;
+		rLoc = 532;
+		rType = 0;
+		vrLen = 1456;
+		vrLoc = 3569;
+	};
+	827F8DD70DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 147";
+		rLen = 0;
+		rLoc = 3909;
+		rType = 0;
+		vrLen = 990;
+		vrLoc = 3290;
+	};
+	827F8DD80DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 25";
+		rLen = 0;
+		rLoc = 532;
+		rType = 0;
+		vrLen = 1456;
+		vrLoc = 3569;
+	};
+	827F8DD90DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 147";
+		rLen = 0;
+		rLoc = 3909;
+		rType = 0;
+		vrLen = 990;
+		vrLoc = 3290;
+	};
+	827F8DDA0DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 150";
+		rLen = 29;
+		rLoc = 4369;
+		rType = 0;
+		vrLen = 1452;
+		vrLoc = 3689;
+	};
+	827F8DDB0DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 243";
+		rLen = 0;
+		rLoc = 6927;
+		rType = 0;
+		vrLen = 1041;
+		vrLoc = 6190;
+	};
+	827F8DDC0DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
+		name = "model.h: 151";
+		rLen = 40;
+		rLoc = 4404;
+		rType = 0;
+		vrLen = 1499;
+		vrLoc = 3689;
+	};
+	827F8DDD0DD970600082CC87 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
+		name = "model.cpp: 484";
+		rLen = 0;
+		rLoc = 14332;
+		rType = 0;
+		vrLen = 1726;
+		vrLoc = 13654;
 	};
 	828C7C7E0DC7156700D34901 /* ds485.h */ = {
 		uiCtxt = {
@@ -2053,7 +3358,7 @@
 		fRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */;
 		name = "model.cpp: 205";
 		rLen = 0;
-		rLoc = 5809;
+		rLoc = 5911;
 		rType = 0;
 		vrLen = 1516;
 		vrLoc = 4786;
@@ -2090,7 +3395,7 @@
 		fRef = 82B6B5B50DAA3134006C51B6 /* model.h */;
 		name = "model.h: 381";
 		rLen = 0;
-		rLoc = 12005;
+		rLoc = 12101;
 		rType = 0;
 		vrLen = 1348;
 		vrLoc = 11735;
@@ -2100,7 +3405,7 @@
 		fRef = 82532AFB0DA374250030CC6A /* dss.h */;
 		name = "dss.h: 114";
 		rLen = 0;
-		rLoc = 2661;
+		rLoc = 2678;
 		rType = 0;
 		vrLen = 1119;
 		vrLoc = 1303;
@@ -2130,7 +3435,7 @@
 		fRef = 826DBB150DB8E2900034ADFB /* ds485proxy.cpp */;
 		name = "ds485proxy.cpp: 186";
 		rLen = 0;
-		rLoc = 6692;
+		rLoc = 6914;
 		rType = 0;
 		vrLen = 1237;
 		vrLoc = 138;
@@ -2194,7 +3499,7 @@
 		fRef = 826DBB140DB8E2900034ADFB /* ds485proxy.h */;
 		name = "ds485proxy.h: 110";
 		rLen = 0;
-		rLoc = 2635;
+		rLoc = 2743;
 		rType = 0;
 		vrLen = 1595;
 		vrLoc = 1969;
@@ -2229,16 +3534,16 @@
 	};
 	82B6B5B50DAA3134006C51B6 /* model.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1071, 8022}}";
-			sepNavSelRange = "{4836, 43}";
-			sepNavVisRange = "{3756, 1504}";
+			sepNavIntBoundsRect = "{{0, 0}, {1071, 8106}}";
+			sepNavSelRange = "{4404, 40}";
+			sepNavVisRange = "{3689, 1499}";
 		};
 	};
 	82B6B5B60DAA3134006C51B6 /* model.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1071, 11480}}";
-			sepNavSelRange = "{13987, 0}";
-			sepNavVisRange = "{13017, 1849}";
+			sepNavIntBoundsRect = "{{0, 0}, {1071, 11816}}";
+			sepNavSelRange = "{14332, 0}";
+			sepNavVisRange = "{13654, 1726}";
 		};
 	};
 	82E3D10B0DAF730E00FDEE16 /* scriptstest.h */ = {

@@ -19,7 +19,6 @@ namespace dss {
   const uint8 CommandResponse = 0x0a;
   const uint8 CommandAck = 0x0b;
   const uint8 CommandBusy = 0x0c;
-
   
   const uint8 FunctionModulatorAddRoom = 0x00;
   const uint8 FunctionModulatorRemoveRoom = 0x01;
@@ -31,8 +30,9 @@ namespace dss {
   const uint8 FunctionModulatorGetRoomIdForInd = 0x07;
   const uint8 FunctionModulatorAddToGroup = 0x08;
   const uint8 FunctionModulatorRemoveFromGroup = 0x09;
-
-
+  const uint8 FunctionGroupAddDeviceToGroup = 0x10;
+  const uint8 FunctionGroupRemoveDeviceFromGroup = 0x11;
+  const uint8 FunctionGroupGetDeviceCount = 0x12;
   
   const uint8 FunctionDeviceCallScene = 0x42;
   const uint8 FunctionDeviceIncValue  = 0x40;
@@ -199,17 +199,47 @@ namespace dss {
     return result;
   } // GetModulators
   
-  int DS485Proxy::GetGroupCount(const int _modulatorID) {  
+  int DS485Proxy::GetGroupCount(const int _modulatorID, const int _roomID) {  
     DS485CommandFrame cmdFrame;
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
     cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetGroupsSize);
+    cmdFrame.GetPayload().Add<uint8>(_roomID);
     SendFrame(cmdFrame);
     uint8 res = ReceiveSingleResult(FunctionModulatorGetGroupsSize);
     return res;    
   } // GetGroupCount
-  
-  vector<int> DS485Proxy::GetDevicesInGroup(const int _modulatorID, const int _groupID) {
+
+  int DS485Proxy::GetDevicesInGroupCount(const int _modulatorID, const int _roomID, const int _groupID) {
+    DS485CommandFrame cmdFrame;
+    cmdFrame.GetHeader().SetDestination(_modulatorID);
+    cmdFrame.SetCommand(CommandRequest);
+    cmdFrame.GetPayload().Add<uint8>(FunctionGroupGetDeviceCount);
+    cmdFrame.GetPayload().Add<uint8>(_roomID);
+    cmdFrame.GetPayload().Add<uint8>(_groupID);
+    SendFrame(cmdFrame);
+    uint8 res = ReceiveSingleResult(FunctionGroupGetDeviceCount);
+    return res;
+  } // GetDevicesInGroupCount
+
+  vector<int> DS485Proxy::GetDevicesInGroup(const int _modulatorID, const int _roomID, const int _groupID) {
+    vector<int> result;
+
+    int numDevices = GetDevicesInGroupCount(_modulatorID, _roomID, _groupID);
+    for(int iDevice = 0; iDevice < numDevices; iDevice++) {
+      DS485CommandFrame cmdFrame;
+      cmdFrame.GetHeader().SetDestination(_modulatorID);
+      cmdFrame.SetCommand(CommandRequest);
+      cmdFrame.GetPayload().Add<uint8>(FunctionGroupGetDeviceCount);
+      cmdFrame.GetPayload().Add<uint8>(_roomID);
+      cmdFrame.GetPayload().Add<uint8>(_groupID);
+      cmdFrame.GetPayload().Add<uint8>(iDevice);
+      SendFrame(cmdFrame);
+      uint8 res = ReceiveSingleResult(FunctionGroupGetDeviceCount);
+      result.push_back(res);
+    }
+    
+    return result;
   } // GetDevicesInGroup
   
   vector<int> DS485Proxy::GetRooms(const int _modulatorID) {
@@ -362,9 +392,19 @@ namespace dss {
             break;
           case FunctionModulatorGetGroupsSize:
             response = CreateResponse(cmdFrame, cmdNr);
-            response.GetPayload().Add<uint8>(m_Groups.size());
+            response.GetPayload().Add<uint8>(m_DevicesOfGroupInRoom.size());
             m_PendingFrames.push_back(response); 
             break;
+          case FunctionGroupGetDeviceCount:
+            response = CreateResponse(cmdFrame, cmdNr);
+            int roomID = pd.Get<uint8>();
+            int groupID = pd.Get<uint8>();
+            int result = m_DevicesOfGroupInRoom[pair<const int, const int>(roomID, groupID)].size();
+            response.GetPayload().Add<uint8>(result);
+            m_PendingFrames.push_back(response);
+            break;
+          default:
+            throw new runtime_error(string("DSModulatorSim: Invalid function id: ") + IntToString(cmdNr));
         }
       }
     }
@@ -403,6 +443,7 @@ namespace dss {
       }
     }
     throw new runtime_error("could not find device");
+
   } // LookupDevice
   
   DS485Frame& DSModulatorSim::Receive() {
@@ -478,13 +519,21 @@ namespace dss {
   
   void DSIDSim::StartDim(bool _directionUp, const int _parameterNr) {
     if(m_Enabled) {
-      //...
+      m_DimmingUp = _directionUp;
+      m_Dimming = true;
+      time(&m_DimmStartTime);
     }
   } // StartDim
   
   void DSIDSim::EndDim(const int _parameterNr) {
     if(m_Enabled) {
-      //...
+      time_t now;
+      time(&now);
+      if(m_DimmingUp) {
+        m_CurrentValue = max(m_CurrentValue + difftime(m_DimmStartTime, now) * 5, 255.0);
+      } else {
+        m_CurrentValue = min(m_CurrentValue - difftime(m_DimmStartTime, now) * 5, 255.0);
+      }
     }
   } // EndDim
   

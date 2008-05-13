@@ -10,6 +10,8 @@
 #ifndef _MODEL_JS_INCLUDED
 #define _MODEL_JS_INCLUDED
 
+#include <bitset>
+
 #include "../jshandler.h"
 #include "../model.h"
 

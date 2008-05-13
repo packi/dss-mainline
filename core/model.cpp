@@ -144,9 +144,13 @@ namespace dss {
     return m_Groups.size();
   } // GetGroupsCount
   
-  long long Device::GetGroupBitmask() const {
+  bitset<63>& Device::GetGroupBitmask() {
     return m_GroupBitmask;
   } // GetGroupBitmask
+  
+  bool Device::IsInGroup(const int _groupID) const {
+    return m_GroupBitmask.test(_groupID - 1);
+  }
   
   Apartment& Device::GetApartment() const {
     return *m_pApartment;
@@ -232,15 +236,13 @@ namespace dss {
   class ByGroupSelector : public IDeviceSelector {
   private:
     const int m_GroupNr;
-    const long long m_GroupMask;
   public:
     ByGroupSelector(const int _groupNr)
-    : m_GroupNr(_groupNr),
-      m_GroupMask(1 << _groupNr)
+    : m_GroupNr(_groupNr)
     {}
     
     virtual bool SelectDevice(const Device& _device) const {
-      return _device.GetGroupBitmask() & m_GroupMask == m_GroupMask;
+      return _device.IsInGroup(m_GroupNr);
     }
   };
   
@@ -472,10 +474,17 @@ namespace dss {
           Device& dev = AllocateDevice(devID);
           dev.SetModulatorID(modID);
         }
-      }
-      int numGroups = proxy.GetGroupCount(modID);
-      for(int iGroup = 0; iGroup < numGroups; iGroup++) {
-        //proxy.GetDevicesInGroup(<#const int _modulatorID#>, <#const int _groupID#>)
+        int numGroups = proxy.GetGroupCount(modID, roomID);
+        for(int iGroup = 0; iGroup < numGroups; iGroup++) {
+          // TODO: I'm still waiting on a call to translate the group index to a group id
+          vector<int> devingroup = proxy.GetDevicesInGroup(modID, roomID, iGroup);
+          for(vector<int>::iterator iDevice = devingroup.begin(), e = devingroup.end();
+              iDevice != e; ++iDevice) 
+          {
+            Device& dev = AllocateDevice(*iDevice);
+            dev.GetGroupBitmask().set(iGroup);
+          }
+        }
       }
     }
   } // Run

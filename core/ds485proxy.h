@@ -61,8 +61,8 @@ namespace dss {
   private:
     int m_ID;
     vector<DSIDSim*> m_SimulatedDevices;
-    map< const int, vector<DSIDSim*> > m_Groups;
     map< const int, vector<DSIDSim*> > m_Rooms;
+    map< const pair<const int, const int>,  vector<DSIDSim*> > m_DevicesOfGroupInRoom;
     vector<DS485Frame> m_PendingFrames;
   private:  
     DSIDSim& LookupDevice(int _id);
@@ -85,6 +85,9 @@ namespace dss {
     const int m_Id;
     bool m_On;
     bool m_Enabled;
+    bool m_Dimming;
+    time_t m_DimmStartTime;
+    bool m_DimmingUp;
     vector<int> m_Parameters;
     DSModulatorSim* m_Modulator;
     vector<uint8> m_ValuesForScene;
@@ -121,15 +124,16 @@ namespace dss {
   public:
     //------------------------------------------------ Specialized Commands (system)
     vector<int> GetModulators();
-    int GetGroupCount(const int _modulatorID);
-    vector<int> GetDevicesInGroup(const int _modulatorID, const int _groupID);
     
     vector<int> GetRooms(const int _modulatorID);
     int GetRoomCount(const int _modulatorID);
     vector<int> GetDevicesInRoom(const int _modulatorID, const int _roomID);
     int GetDevicesCountInRoom(const int _modulatorID, const int _roomID);
 
-    ///vector<int> GetDevices(const int _modulatorID);
+    int GetGroupCount(const int _modulatorID, const int _roomID);
+    vector<int> GetGroups(const int _modulatorID, const int _roomID);
+    int GetDevicesInGroupCount(const int _modulatorID, const int _roomID, const int _groupID);
+    vector<int> GetDevicesInGroup(const int _modulatorID, const int _roomID, const int _groupID);
     
     void AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID);
     void RemoveFromGroup(const int _modulatorID, const int _groupID, const int _deviceID);

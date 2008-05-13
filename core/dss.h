@@ -10,17 +10,17 @@
 #ifndef DSS_H_INCLUDED
 #define DSS_H_INCLUDED
 
+#include <bitset>
+
 #include "base.h"
 #include "thread.h"
-
-#include <cstdio>
-#include <string>
-#include <sstream>
-
 #include "shttpd.h"
 #include "defs.h"
 #include "ds485proxy.h"
 
+#include <cstdio>
+#include <string>
+#include <sstream>
 
 using namespace std;
 
