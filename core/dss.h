@@ -17,6 +17,7 @@
 #include "shttpd.h"
 #include "defs.h"
 #include "ds485proxy.h"
+#include "syncevent.h"
 
 #include <cstdio>
 #include <string>
@@ -24,11 +25,14 @@
 
 using namespace std;
 
+#include <boost/ptr_container/ptr_vector.hpp>
+
 namespace dss {
 
   class DSS;
   class WebServer;
   class Config;
+  class EventRunner;
   
   class WebServer : public Thread {
   private:
@@ -76,6 +80,22 @@ namespace dss {
     
     const HashMapConstStringString& GetOptions() { return m_OptionsByName; };
   }; // Config
+  
+  class EventRunner : Thread {
+  private:
+    boost::ptr_vector<ScheduledEvent> m_ScheduledEvents;
+    
+    DateTime GetNextOccurence();
+    DateTime m_WakeTime;
+    SyncEvent m_NewItem;
+  public:
+    void AddEvent(ScheduledEvent* _scheduledEvent);
+    
+    void RaisePendingEvents(DateTime& _from, int _deltaSeconds);
+    
+    virtual void Execute();
+  }; // EventRunner
+    
 
   /** Main class
     * 
@@ -88,6 +108,7 @@ namespace dss {
     DS485Proxy m_DS485Proxy;
     Apartment m_Apartment;
     DSModulatorSim m_ModulatorSim;
+    EventRunner m_EventRunner;
     
     DSS() { };
     
@@ -99,7 +120,8 @@ namespace dss {
     Config& GetConfig() { return m_Config; };
     DS485Proxy& GetDS485Proxy() { return m_DS485Proxy; };
     Apartment& GetApartment() { return m_Apartment; };
-    DSModulatorSim& GetModulatorSim() { return m_ModulatorSim; }
+    DSModulatorSim& GetModulatorSim() { return m_ModulatorSim; };
+    EventRunner& GetEventRunner() { return m_EventRunner; };
   }; // DSS
   
   class NoSuchOptionException : DSSException {

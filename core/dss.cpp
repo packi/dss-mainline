@@ -10,8 +10,7 @@
 #include "dss.h"
 #include "logger.h"
 #include "xmlwrapper.h"
-
-#include "shttpd.h"
+#include "modeljs.h"
 
 #include <cassert>
 #include <string>
@@ -23,29 +22,31 @@ namespace dss {
   
   //============================================ EventRunner
   
-  class EventRunner : Thread {
-  private:
-    vector<ScheduledEvent*> m_ScheduledEvents;
-    
-    DateTime GetNextOccurence();
-    DateTime m_WakeTime;
-  public:
-    void AddEvent(ScheduledEvent* _scheduledEvent);
-    
-    virtual void Execute();
-  }; // EventRunner
+  const bool DebugEventRunner = false;
   
   void EventRunner::AddEvent(ScheduledEvent* _scheduledEvent) {
     m_ScheduledEvents.push_back(_scheduledEvent);
+    m_NewItem.Signal();
   } // AddEvent
   
   DateTime EventRunner::GetNextOccurence() {
     DateTime now;
-    DateTime result;
-    for(vector<ScheduledEvent*>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
+    DateTime result = now.AddYear(10);
+    if(DebugEventRunner) {
+      cout << "*********" << endl;
+    }
+    for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
         ipSchedEvt != e; ++ipSchedEvt) 
     {
-      result = min(result, (*ipSchedEvt)->GetSchedule().GetNextOccurence(now));
+      DateTime next = ipSchedEvt->GetSchedule().GetNextOccurence(now);
+      if(DebugEventRunner) {
+        cout << "next:   " << next << endl;
+        cout << "result: " << result << endl;
+      }
+      result = min(result, next);
+      if(DebugEventRunner) {
+        cout << "chosen: " << result << endl;
+      }
     }
     return result;
   }
@@ -53,11 +54,44 @@ namespace dss {
   void EventRunner::Execute() {
     while(!m_Terminated) {
       if(m_ScheduledEvents.empty()) {
-        SleepMS(500);
+        m_NewItem.WaitFor(1000);
       } else {
+        DateTime now;
+        m_WakeTime = GetNextOccurence();
+        int sleepSeconds = m_WakeTime.Difference(now);
+       
+        // Prevent loops when a cycle takes less than 1s
+        if(sleepSeconds == 0) {
+          m_NewItem.WaitFor(1000);
+          continue;
+        }
+          
+        if(!m_NewItem.WaitFor(sleepSeconds * 1000)) {
+          RaisePendingEvents(m_WakeTime, 10);
+        }
       }
     }
   } // Execute
+  
+  
+  void EventRunner::RaisePendingEvents(DateTime& _from, int _deltaSeconds) {
+    DateTime virtualNow = _from.AddSeconds(-_deltaSeconds/2);
+    if(DebugEventRunner) {
+      cout << "vNow:    " << virtualNow << endl;
+    }
+    for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
+        ipSchedEvt != e; ++ipSchedEvt) 
+    {
+      DateTime nextOccurence = ipSchedEvt->GetSchedule().GetNextOccurence(virtualNow);
+      if(DebugEventRunner) {
+        cout << "nextOcc: " << nextOccurence << endl;
+        cout << "diff:    " << nextOccurence.Difference(virtualNow) << endl;
+      }
+      if(abs(nextOccurence.Difference(virtualNow)) <= _deltaSeconds/2) {
+        DSS::GetInstance()->GetApartment().OnEvent(ipSchedEvt->GetEvent());
+      }
+    }    
+  } // RaisePendingEvents
 
   //============================================= DSS
   
@@ -79,6 +113,23 @@ namespace dss {
     
     m_ModulatorSim.Initialize();
     m_Apartment.Run();
+    
+    Event* evt = new Event(1003);
+    DateTime startingTime;
+    startingTime.SetSecond(0);
+    RepeatingSchedule* sch = new RepeatingSchedule(Minutely, 1, startingTime);
+    
+    
+    ScheduledEvent* schEvt = new ScheduledEvent(*evt, *sch);
+    m_EventRunner.AddEvent(schEvt);
+    
+    ActionJS jsAction;
+    Arguments args;
+    args.SetValue("script", "/Users/packi/sources/dss/trunk/data/test2.js");
+    vector<int> eventIDs;
+    eventIDs.push_back(1003);
+    m_Apartment.Subscribe(jsAction, args, eventIDs);
+    
     
     while(true) {
       sleep(1000);

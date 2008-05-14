@@ -8,6 +8,12 @@
  */
 
 #include "modeljs.h"
+#include "dss.h"
+#include "logger.h"
+
+#include <iostream>
+
+#include <boost/scoped_ptr.hpp>
 
 namespace dss {
   const string ModelScriptcontextExtensionName = "modelextension";
@@ -81,10 +87,29 @@ namespace dss {
     return JS_FALSE;
   }
 
+  JSBool global_log(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
+    if (argc < 1){
+      *rval = INT_TO_JSVAL(0); /* Send back a return value of 0. */
+      Logger::GetInstance()->Log("JS: (empty string)");
+    } else {
+      stringstream sstr;
+      int i;
+      for (i=0; i<argc; i++){
+        JSString *val = JS_ValueToString(cx, argv[i]); /* Convert the value to a javascript string. */
+        char *str = JS_GetStringBytes(val); /* Then convert it to a C-style string. */
+        sstr << str;
+      }
+      Logger::GetInstance()->Log(sstr.str());
+      *rval = INT_TO_JSVAL(0); /* Set the return value to be the number of bytes/chars written */
+    }
+    return JS_TRUE;
+  }
+  
   JSFunctionSpec model_global_methods[] = {
     {"getName", global_get_name, 0, 0, 0},
     {"setName", global_set_name, 1, 0, 0},
     {"getDevices", global_get_devices, 0, 0, 0},
+    {"log", global_log, 1, 0, 0},
     {NULL},
   };
   
@@ -436,6 +461,23 @@ namespace dss {
   } // CreateJSDevice
 
   
+  //================================================== ActionJS
   
+  void ActionJS::Perform(const Arguments& _args) {
+    if(!_args.HasValue("script")) {
+      throw new runtime_error("ActionJS::Perform: missing argument _script");
+    }
+    string scriptName = _args.GetValue("script");
+    
+    if(!m_Environment.IsInitialized()) {
+      m_Environment.Initialize();
+      ModelScriptContextExtension* ext = new ModelScriptContextExtension(DSS::GetInstance()->GetApartment());
+      m_Environment.AddExtension(ext);
+    }
+        
+    boost::scoped_ptr<ScriptContext> ctx(m_Environment.GetContext());
+    ctx->LoadFromFile(scriptName);
+    ctx->Evaluate<void>();
+  }
   
 }

@@ -20,6 +20,7 @@ namespace dss {
   
   ScriptEnvironment::~ScriptEnvironment() {
     JS_DestroyRuntime(m_pRuntime);
+    m_pRuntime = NULL;
   } // dtor
   
   
@@ -29,6 +30,10 @@ namespace dss {
       throw new ScriptException("Error creating environment");
     }
   } // Initialize
+  
+  bool ScriptEnvironment::IsInitialized() {
+    return m_pRuntime != NULL;
+  } // IsInitialized
   
   void ScriptEnvironment::AddExtension(ScriptExtension* _pExtension) {
     m_Extensions.push_back(_pExtension);
@@ -151,8 +156,8 @@ namespace dss {
   
   ScriptContext::~ScriptContext() {
     JS_SetContextPrivate(m_pContext, NULL);
-    JS_RemoveRoot(m_pContext, m_pSourceObject);
-//    JS_DestroyScript(m_pContext, m_pScriptToExecute);
+//    JS_RemoveRoot(m_pContext, m_pSourceObject);
+    JS_DestroyScript(m_pContext, m_pScriptToExecute);
     JS_DestroyContext(m_pContext);
   } // dtor
   
@@ -166,14 +171,14 @@ namespace dss {
     if(m_pScriptToExecute == NULL) {
       throw new ScriptException(string("Could not parse file \"") + _fileName + "\"");
     }
-    
+    /*
     // protect newly allocated script from garbage-collection
     m_pSourceObject = JS_NewScriptObject(m_pContext, m_pScriptToExecute);
     if (m_pSourceObject == NULL
         || !JS_AddNamedRoot(m_pContext, &m_pSourceObject, "scrobj")) {
       throw new ScriptException("Could not add named root for script");
     }
-    
+    */
   } // LoadFromFile
   
   void ScriptContext::LoadFromMemory(const char* _script) {
@@ -232,6 +237,7 @@ namespace dss {
     jsval rval;
     JSBool ok = JS_ExecuteScript(m_pContext, m_pRootObject, m_pScriptToExecute, &rval);
     if(ok) {
+      //JS_GC(m_pContext);
       return rval;
     } else {
       if(JS_IsExceptionPending(m_pContext)) {

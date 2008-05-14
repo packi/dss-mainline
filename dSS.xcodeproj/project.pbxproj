@@ -32,6 +32,9 @@
 		826DBC9C0DBCC9500034ADFB /* modeltests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 826DBC9B0DBCC9500034ADFB /* modeltests.cpp */; };
 		826DBEC80DBE1C170034ADFB /* modeljs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 826DBEC70DBE1C170034ADFB /* modeljs.cpp */; };
 		826DBF590DBF1DD70034ADFB /* modeljstests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 826DBF580DBF1DD70034ADFB /* modeljstests.cpp */; };
+		82784A300DDAC07C00858784 /* syncevent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82784A2E0DDAC07C00858784 /* syncevent.cpp */; };
+		82784A350DDAC10E00858784 /* mutex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82784A330DDAC10E00858784 /* mutex.cpp */; };
+		82784A990DDADC2400858784 /* libboost_system-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82784A980DDADC2400858784 /* libboost_system-mt.dylib */; };
 		828C7C800DC7156700D34901 /* ds485.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 828C7C7F0DC7156700D34901 /* ds485.cpp */; };
 		82B161100DAE42080005FB71 /* libjs.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82B1610F0DAE42080005FB71 /* libjs.dylib */; };
 		82B161730DAEBABA0005FB71 /* jshandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B161720DAEBABA0005FB71 /* jshandler.cpp */; };
@@ -92,6 +95,11 @@
 		826DBEC60DBE1C170034ADFB /* modeljs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = modeljs.h; path = core/scripting/modeljs.h; sourceTree = "<group>"; };
 		826DBEC70DBE1C170034ADFB /* modeljs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = modeljs.cpp; path = core/scripting/modeljs.cpp; sourceTree = "<group>"; };
 		826DBF580DBF1DD70034ADFB /* modeljstests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = modeljstests.cpp; path = tests/modeljstests.cpp; sourceTree = "<group>"; };
+		82784A2E0DDAC07C00858784 /* syncevent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = syncevent.cpp; path = core/syncevent.cpp; sourceTree = "<group>"; };
+		82784A2F0DDAC07C00858784 /* syncevent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = syncevent.h; path = core/syncevent.h; sourceTree = "<group>"; };
+		82784A330DDAC10E00858784 /* mutex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mutex.cpp; path = core/mutex.cpp; sourceTree = "<group>"; };
+		82784A340DDAC10E00858784 /* mutex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mutex.h; path = core/mutex.h; sourceTree = "<group>"; };
+		82784A980DDADC2400858784 /* libboost_system-mt.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libboost_system-mt.dylib"; path = "/opt/local/lib/libboost_system-mt.dylib"; sourceTree = "<absolute>"; };
 		828C7C7E0DC7156700D34901 /* ds485.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ds485.h; path = core/ds485.h; sourceTree = "<group>"; };
 		828C7C7F0DC7156700D34901 /* ds485.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ds485.cpp; path = core/ds485.cpp; sourceTree = "<group>"; };
 		82B1610F0DAE42080005FB71 /* libjs.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjs.dylib; path = /opt/local/lib/libjs.dylib; sourceTree = "<absolute>"; };
@@ -119,6 +127,7 @@
 				82532AC00DA286C20030CC6A /* libxml.framework in Frameworks */,
 				82B161100DAE42080005FB71 /* libjs.dylib in Frameworks */,
 				82E3D4010DB8AD4D00FDEE16 /* libcppunit.dylib in Frameworks */,
+				82784A990DDADC2400858784 /* libboost_system-mt.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -128,6 +137,7 @@
 		08FB7794FE84155DC02AAC07 /* dSS */ = {
 			isa = PBXGroup;
 			children = (
+				82784A980DDADC2400858784 /* libboost_system-mt.dylib */,
 				826DBC9B0DBCC9500034ADFB /* modeltests.cpp */,
 				82E3D4000DB8AD4D00FDEE16 /* libcppunit.dylib */,
 				82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */,
@@ -183,6 +193,10 @@
 				82532B380DA380B90030CC6A /* logger.cpp */,
 				82532AFB0DA374250030CC6A /* dss.h */,
 				82532AFC0DA374250030CC6A /* dss.cpp */,
+				82784A2E0DDAC07C00858784 /* syncevent.cpp */,
+				82784A2F0DDAC07C00858784 /* syncevent.h */,
+				82784A330DDAC10E00858784 /* mutex.cpp */,
+				82784A340DDAC10E00858784 /* mutex.h */,
 				82532B870DA388130030CC6A /* external */,
 				08FB7796FE84155DC02AAC07 /* main.cpp */,
 				82532C020DA3907E0030CC6A /* thread.cpp */,
@@ -281,6 +295,8 @@
 				826DBEC80DBE1C170034ADFB /* modeljs.cpp in Sources */,
 				826DBF590DBF1DD70034ADFB /* modeljstests.cpp in Sources */,
 				828C7C800DC7156700D34901 /* ds485.cpp in Sources */,
+				82784A300DDAC07C00858784 /* syncevent.cpp in Sources */,
+				82784A350DDAC10E00858784 /* mutex.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

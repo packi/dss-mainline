@@ -204,7 +204,7 @@ namespace dss {
   }
 
   ostream& operator<<(ostream& out, const DateTime& _dt) {
-    out << _dt;
+    _dt << out;
     return out;
   }
     

@@ -383,20 +383,21 @@ namespace dss {
  
   //================================================== Arguments
   
-  bool Arguments::HasValue(const string& _name) {
+  bool Arguments::HasValue(const string& _name) const {
     return m_ArgumentList.find(_name) != m_ArgumentList.end();
   } // HasValue
   
-  string Arguments::GetValue(const string& _name) {
+  string Arguments::GetValue(const string& _name) const {
     if(HasValue(_name)) {
-      return m_ArgumentList[_name];
+      HashMapConstStringString::const_iterator it = m_ArgumentList.find(_name);
+      return it->second;
     }
     throw new ItemNotFoundException(_name);
   } // GetValue
   
   void Arguments::SetValue(const string& _name, const string& _value) {
+    m_ArgumentList[_name] = _value;
   } // SetValue
-
   
   //================================================== Apartment
   
@@ -636,8 +637,8 @@ namespace dss {
     return m_Groups;
   } // GetGroups
     
-  Subscription& Apartment::Subscribe(Action& _action, vector<int> _eventIDs, vector<int> _sourceIDs) {
-    Subscription* pResult = new Subscription(m_NextSubscriptionNumber++, _action, _eventIDs, _sourceIDs);
+  Subscription& Apartment::Subscribe(Action& _action, Arguments& _actionArgs, vector<int> _eventIDs, vector<int> _sourceIDs) {
+    Subscription* pResult = new Subscription(m_NextSubscriptionNumber++, _action, _actionArgs, _eventIDs, _sourceIDs);
     m_Subscriptions.push_back(pResult);
     return *pResult;
   } // Subscribe

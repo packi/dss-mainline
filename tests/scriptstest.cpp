@@ -25,6 +25,7 @@ class ScriptsTest : public CPPUNIT_NS::TestCase
 {
   CPPUNIT_TEST_SUITE(ScriptsTest);
   CPPUNIT_TEST(testSimpleScripts);
+  CPPUNIT_TEST(testMultipleIterations);
 //  CPPUNIT_TEST(testExceptionHandling);
   CPPUNIT_TEST_SUITE_END();
   
@@ -53,6 +54,20 @@ protected:
     string sres = ctx->Evaluate<string>();
     CPPUNIT_ASSERT_EQUAL(sres, string("blabla"));
     delete ctx;
+  }
+  
+  void testMultipleIterations() {
+    ScriptEnvironment env;
+    env.Initialize();
+    for(int i = 0; i < 100; i++) {
+      ScriptContext* ctx = env.GetContext();
+//      ctx->LoadFromMemory("x = 10; x = x * x;");
+      ctx->LoadFromFile("/Users/packi/sources/dss/trunk/data/test2.js");
+      ctx->Evaluate<void>();
+      cout << ".";
+      delete ctx;
+    }
+    cout << endl;
   }
   
   void testExceptionHandling(void) {

@@ -37,6 +37,14 @@ namespace dss {
     template<class t>
     t ConvertTo(ScriptContext& _context, JSObject* _obj);
   };
+  
+  class ActionJS : public Action {
+  private:
+    ScriptEnvironment m_Environment;
+  public:
+   
+    virtual void Perform(const Arguments& _args);
+  };
 }
 
 #endif

@@ -28,7 +28,7 @@ namespace dss {
     vector<ScriptExtension*> m_Extensions;
   public:
     ScriptEnvironment();
-    ~ScriptEnvironment();
+    virtual ~ScriptEnvironment();
     
     void Initialize();
     
@@ -36,6 +36,8 @@ namespace dss {
     ScriptExtension* GetExtension(const string& _name) const;
     
     ScriptContext* GetContext();
+    
+    bool IsInitialized();
   };
   
   class ScriptContext {
@@ -49,7 +51,7 @@ namespace dss {
     static void JsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er);
   public:
     ScriptContext(ScriptEnvironment& _env, JSContext* _pContext);
-    ~ScriptContext();
+    virtual ~ScriptContext();
     
     void LoadFromFile(const string& _fileName);
     void LoadFromMemory(const char* _script);

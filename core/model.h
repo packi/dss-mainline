@@ -34,6 +34,8 @@
 
 using namespace std;
 
+#include <boost/ptr_container/ptr_vector.hpp>
+
 namespace dss {
   
   class Device;
@@ -371,9 +373,9 @@ namespace dss {
     HashMapConstStringString m_ArgumentList;
   public:
     /** Returns true if the argument list contains a value named _name */
-    bool HasValue(const string& _name);
+    bool HasValue(const string& _name) const;
     /** Returns the value of _name */
-    string GetValue(const string& _name);
+    string GetValue(const string& _name) const;
     /** Sets the value of _name to _value */
     void SetValue(const string& _name, const string& _value);
   };
@@ -386,7 +388,7 @@ namespace dss {
     int m_ID;
   public:
     /** Performs the action with _args */
-    virtual void Perform(Arguments& _args) = 0;
+    virtual void Perform(const Arguments& _args) = 0;
   };
   
   /** 
@@ -418,8 +420,8 @@ namespace dss {
     Arguments m_ActionArguments;
     const int m_ID;
   public:
-    Subscription(const int _id, Action& _action, vector<int> _eventIDs, vector<int> _sourceIDs)
-    : m_ID(_id), m_ActionToExecute(_action), m_SourceIDs(_sourceIDs), m_EventIDs(_eventIDs) {};
+    Subscription(const int _id, Action& _action, Arguments& _actionArgs, vector<int> _eventIDs, vector<int> _sourceIDs)
+    : m_ID(_id), m_ActionArguments(_actionArgs), m_ActionToExecute(_action), m_SourceIDs(_sourceIDs), m_EventIDs(_eventIDs) {};
     
     virtual void OnEvent(const Event& _event) { m_ActionToExecute.Perform(m_ActionArguments); };
     
@@ -501,7 +503,7 @@ namespace dss {
      * @param _eventIDs Ids to subscribe to
      * @_sourceIDs If non-empty only events from these ids will execute _action
      */
-    Subscription& Subscribe(Action& _action, vector<int> _eventIDs, vector<int> _sourceIDs = vector<int>());
+    Subscription& Subscribe(Action& _action, Arguments& _argsForAction, vector<int> _eventIDs, vector<int> _sourceIDs = vector<int>());
     /** Cancels a subscription for a event */
     void Unsubscribe(const int _subscriptionID);
     
@@ -518,7 +520,8 @@ namespace dss {
     Event& m_Event;
     Schedule& m_Schedule;
   public:
-    ScheduledEvent(Event& _evt, Schedule& _schedule);
+    ScheduledEvent(Event& _evt, Schedule& _schedule) 
+    : m_Event(_evt), m_Schedule(_schedule) {};
     
     Event& GetEvent() { return m_Event; };
     Schedule& GetSchedule() { return m_Schedule; };

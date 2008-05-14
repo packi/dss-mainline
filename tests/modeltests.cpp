@@ -24,7 +24,7 @@ private:
 public:
   TestAction(int& _toModify) : m_ToModify(_toModify) { };
   
-  virtual void Perform(Arguments& args) {
+  virtual void Perform(const Arguments& args) {
     m_ToModify++;
   };
 };
@@ -49,7 +49,8 @@ protected:
     TestAction act(testActionCalled);
     vector<int> ids;
     ids.push_back(1);    
-    Subscription& subs = appt.Subscribe(act, ids);
+    Arguments args;
+    Subscription& subs = appt.Subscribe(act, args,ids);
     
     Event evtOne(1);
     Event evtTwo(2);
