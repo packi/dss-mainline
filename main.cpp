@@ -25,6 +25,8 @@
 #include "core/jshandler.h"
 #include "tests/tests.h"
 
+#include <ctime>
+
 #include <libxml/tree.h>
 #include <libxml/encoding.h>
 
@@ -35,6 +37,7 @@ using namespace dss;
 
 void testXMLReader();
 void testConfig();
+void testISO();
 
 int main (int argc, char * const argv[]) {
   
@@ -43,6 +46,9 @@ int main (int argc, char * const argv[]) {
             "Check LANG, LC_CTYPE, LC_ALL.\n");
     return 1;
   }
+  // make sure timezone gets set
+  tzset();
+  
   // disable broken pipe signal
 #ifndef _WIN32
 	signal(SIGPIPE, SIG_IGN);
@@ -53,6 +59,13 @@ int main (int argc, char * const argv[]) {
   // start DSS
   dss::DSS::GetInstance()->Run();
   return 0;
+}
+
+void testISO() {
+  cout << DateTime::FromISO("20080515T120000Z") << endl;
+  cout << DateTime::FromISO("20080515T000000Z") << endl;
+  cout << DateTime::FromISO("20080101T000000Z") << endl;
+  cout << DateTime::FromISO("20080101T120000Z") << endl;
 }
 
 void testConfig() {

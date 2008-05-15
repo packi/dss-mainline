@@ -10,6 +10,8 @@
 #ifndef _DATE_TOOLS_H_INCLUDED
 #define _DATE_TOOLS_H_INCLUDED
 
+#include <bitset>
+
 #include "base.h"
 
 #include <vector>
@@ -81,6 +83,8 @@ namespace dss {
     ostream& operator<<(ostream& out) const;
     
     static DateTime NullDate;
+    
+    static DateTime FromISO(const string& _isoStr);
   }; // DateTime
   
   ostream& operator<<(ostream& out, const DateTime& _dt);
@@ -102,7 +106,7 @@ namespace dss {
   };
   
   typedef enum {
-    Minutely = 0, Hourly, Daily, Weekly, Monthly, Yearly
+    Secondly = 0, Minutely, Hourly, Daily, Weekly, Monthly, Yearly
   } RepetitionMode;
   
   class RepeatingSchedule : public Schedule {
@@ -121,6 +125,7 @@ namespace dss {
   private:
     int GetIntervalInSeconds();
   public:
+    RepeatingSchedule(const string& _rule);
     RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt);
     RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt, DateTime _endingAt);
 

@@ -129,8 +129,7 @@ namespace dss {
     vector<int> eventIDs;
     eventIDs.push_back(1003);
     m_Apartment.Subscribe(jsAction, args, eventIDs);
-    
-    
+
     while(true) {
       sleep(1000);
     }

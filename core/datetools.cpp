@@ -207,6 +207,55 @@ namespace dss {
     _dt << out;
     return out;
   }
+
+  /** Creates an instance from an ISO date
+   * Format: yyyymmddThhmmssZ
+   */
+  DateTime DateTime::FromISO(const string& _isoStr) {
+    
+    
+    DateTime result;
+    
+    if(_isoStr.size() < 8 /*date*/ + 6 /*time*/ + 2 /* 'T', 'Z' */) {
+      throw new invalid_argument("_isoStr is shorter than expected");
+    }
+    
+    int year = StrToInt(_isoStr.substr(0, 4));
+    int month = StrToInt(_isoStr.substr(4, 2));
+    if(month > 12 || month == 0) {
+      throw new invalid_argument("month should be between 1 and 12");
+    }
+    int day = StrToInt(_isoStr.substr(6, 2));
+    
+    if(_isoStr.at(8) != 'T') {
+      throw new invalid_argument("_isoStr should have a 'T' at position 8");
+    }
+    
+    int hour = StrToInt(_isoStr.substr(9,2));
+    if(hour > 23) {
+      throw new invalid_argument("hour should be between 0 and 24");
+    }
+    int min = StrToInt(_isoStr.substr(11,2));
+    if(min > 59) {
+      throw new invalid_argument("minute should be between 0 and 59");
+    }
+    int sec = StrToInt(_isoStr.substr(13, 2));
+    if(sec > 59) {
+      throw new invalid_argument("second should be between 0 and 59");
+    }
+    
+    
+    struct tm tm;
+    tm.tm_year = year - 1900;
+    tm.tm_mon = month;
+    tm.tm_mday = day;
+    tm.tm_hour = hour;
+    tm.tm_min = min;
+    tm.tm_sec = sec;
+   
+    long timelc = mktime(&tm) - timezone;
+    return DateTime(timelc);
+  } // FromISO
     
   DateTime DateTime::NullDate(0);
   
@@ -228,6 +277,77 @@ namespace dss {
   } // GetOccurencesBetween
   
   //================================================== RepeatingSchedule
+  
+  RepeatingSchedule::RepeatingSchedule(const string& _rule) {
+    vector<string> nameValue = SplitString(_rule, ':');
+    if(nameValue.size() != 2) {
+      throw new runtime_error("expected a string in the form of name:value");
+    }
+    string bla;
+    if(nameValue[0] != "RECUR") {
+      throw new invalid_argument("_rule must start with RECUR");
+    }
+    vector<string> parts = SplitString(nameValue[1], ';');
+
+    int count = 0;
+    bitset<59> bysecond;
+    bitset<59> byminute;
+    bitset<23> byhour;
+
+    
+    for(vector<string>::iterator iPart = parts.begin(), e = parts.end();
+        iPart != e; ++iPart)
+    {
+      nameValue = SplitString(*iPart, '=');
+      if(nameValue.size() != 2) {
+        throw new invalid_argument(string("expected part to have form of name=value: ") + *iPart);
+      }
+      
+      
+      string name = nameValue[0];
+      string value = nameValue[1];
+      if(name == "FREQ") {
+        if(value == "SECONDLY") {
+          m_RepetitionMode = Secondly;
+        } else if(value == "MINUTELY") {
+          m_RepetitionMode = Minutely;
+        } else if(value == "HOURLY") {
+          m_RepetitionMode = Hourly;
+        } else if(value == "DAILY") {
+          m_RepetitionMode = Daily;
+        } else if(value == "WEEKLY") {
+          m_RepetitionMode = Weekly;
+        } else if(value == "MONTHLY") {
+          m_RepetitionMode = Monthly;
+        } else if(value == "YEARLY") {
+          m_RepetitionMode = Yearly;
+        } else {
+          throw new invalid_argument(string("invalid value for FREQ: '") + value);
+        }
+      } else if(name == "INTERVAL") {
+        m_RepeatingInterval = StrToInt(value);
+      } else if(name == "UNTIL") {
+        m_EndingAt = DateTime::FromISO(value);
+      } else if(name == "COUNT") {
+        count = StrToInt(value);
+      } else if(name == "BYSECOND") {
+        vector<string> secs = SplitString(value, ',');
+        for(vector<string>::iterator iSec = secs.begin(); iSec != secs.end(); ++iSec) {
+          bysecond.set(StrToInt(*iSec), true);
+        }
+      } else if(name == "BYMINUTE") {
+        vector<string> mins = SplitString(value, ',');
+        for(vector<string>::iterator iMin = mins.begin(); iMin != mins.end(); ++iMin) {
+          byminute.set(StrToInt(*iMin), true);
+        }
+      } else if(name == "BYHOUR") {
+        vector<string> hours = SplitString(value, ',');
+        for(vector<string>::iterator iHour = hours.begin(); iHour != hours.end(); ++iHour) {
+          byhour.set(StrToInt(*iHour), true);
+        }
+      }
+    }
+  } // ctor(ical)
   
   RepeatingSchedule::RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt)
   : m_RepetitionMode(_mode),
