@@ -39,6 +39,7 @@ namespace dss {
     struct shttpd_ctx* m_SHttpdContext;
   protected:
     static void JSONHandler(struct shttpd_arg* _arg);
+    static void AddEvent(struct shttpd_arg* _arg);
     static void HTTPListOptions(struct shttpd_arg* _arg);
     static void EmitHTTPHeader(int _code, struct shttpd_arg* _arg, const string _contentType = "text/html");
   public:

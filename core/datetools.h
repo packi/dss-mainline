@@ -13,7 +13,12 @@
 #include <bitset>
 
 #include "base.h"
+/*
+#include <icalrecur.h>
+#include <icaltime.h>
+*/
 
+#include <ical.h>
 #include <vector>
 #include <ostream>
 
@@ -125,13 +130,23 @@ namespace dss {
   private:
     int GetIntervalInSeconds();
   public:
-    RepeatingSchedule(const string& _rule);
     RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt);
     RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt, DateTime _endingAt);
 
     virtual DateTime GetNextOccurence(const DateTime& _from) ;
     virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
-  };
+  }; // RepeatingSchedule
+  
+  class ICalSchedule : public Schedule {
+  private:
+    struct icalrecurrencetype m_Recurrence;
+    struct icaltimetype m_StartDate;
+  public:
+    ICalSchedule(const string& _rrule, const string _startDateISO);
+    
+    virtual DateTime GetNextOccurence(const DateTime& _from) ;
+    virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
+  }; // ICalSchedule
   
 }
 

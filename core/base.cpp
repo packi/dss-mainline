@@ -143,6 +143,41 @@ namespace dss {
       }
     }
     return result;
+  } // SplitString
+  
+  void ReplaceAll(string& s, const string& a, const string& b) {
+    for (string::size_type i = s.find(a);
+         i != string::npos;
+         i = s.find(a, i + b.size()))
+      s.replace(i, a.size(), b);
+  } // ReplaceAll
+  
+  string URLDecode(const string& _in) {
+    string result = "";
+    
+    string::size_type lastPos = 0;
+    string::size_type pos = _in.find('%', 0);
+    while(pos != string::npos && _in.length() > (pos + 2)) {
+      if(lastPos == 0) {
+        result = _in.substr(lastPos, pos);
+        ReplaceAll(result, "+", " ");
+      }
+      string hex = _in.substr(pos+1, 2);
+      char* ptr;
+      char tmp = (char)strtol(hex.c_str(), &ptr, 16);
+      if(*ptr != '\0') {
+        return _in;
+      }
+      result += tmp;
+      lastPos = pos + 3;
+      pos = _in.find('%', lastPos);
+    }
+    if(lastPos < _in.length()) {
+      string end = _in.substr(lastPos, string::npos);
+      ReplaceAll(end, "+", " ");
+      result += end;
+    }
+    return result;
   }
   
   bool FileExists( const string& _fileName ) {

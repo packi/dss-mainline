@@ -9,6 +9,8 @@
 
 #include "datetools.h"
 
+#include <iostream>
+
 namespace dss {
   
   //================================================== DateTime
@@ -208,12 +210,10 @@ namespace dss {
     return out;
   }
 
-  /** Creates an instance from an ISO date
+    /** Creates an instance from an ISO date
    * Format: yyyymmddThhmmssZ
    */
   DateTime DateTime::FromISO(const string& _isoStr) {
-    
-    
     DateTime result;
     
     if(_isoStr.size() < 8 /*date*/ + 6 /*time*/ + 2 /* 'T', 'Z' */) {
@@ -276,78 +276,64 @@ namespace dss {
     return result;
   } // GetOccurencesBetween
   
-  //================================================== RepeatingSchedule
+
+  //================================================== ICalSchedule
   
-  RepeatingSchedule::RepeatingSchedule(const string& _rule) {
-    vector<string> nameValue = SplitString(_rule, ':');
-    if(nameValue.size() != 2) {
-      throw new runtime_error("expected a string in the form of name:value");
-    }
-    string bla;
-    if(nameValue[0] != "RECUR") {
-      throw new invalid_argument("_rule must start with RECUR");
-    }
-    vector<string> parts = SplitString(nameValue[1], ';');
-
-    int count = 0;
-    bitset<59> bysecond;
-    bitset<59> byminute;
-    bitset<23> byhour;
-
+  ICalSchedule::ICalSchedule(const string& _rrule, const string _startDateISO) {
+    m_Recurrence = icalrecurrencetype_from_string(_rrule.c_str());
+    m_StartDate = icaltime_from_string(_startDateISO.c_str());
+  } // ctor
+  
+  DateTime ICalSchedule::GetNextOccurence(const DateTime& _from) {
+    DateTime result;
+    DateTime current;
     
-    for(vector<string>::iterator iPart = parts.begin(), e = parts.end();
-        iPart != e; ++iPart)
-    {
-      nameValue = SplitString(*iPart, '=');
-      if(nameValue.size() != 2) {
-        throw new invalid_argument(string("expected part to have form of name=value: ") + *iPart);
+    icalrecur_iterator* it = icalrecur_iterator_new(m_Recurrence, m_StartDate);
+    do {
+      result = current;
+      struct icaltimetype icalTime = icalrecur_iterator_next(it);
+      current = DateTime(icaltime_as_timet(icalTime));      
+    } while(current.Before(_from));
+    
+    return result;
+  } // GetNextOccurence
+  
+  vector<DateTime> ICalSchedule::GetOccurencesBetween(const DateTime& _from, const DateTime& _to) {
+    vector<DateTime> result;
+
+    DateTime current;
+    DateTime last;
+    icalrecur_iterator* it = icalrecur_iterator_new(m_Recurrence, m_StartDate);
+    
+    // skip instances before "_from"
+    do {
+      last = current;
+      struct icaltimetype icalTime = icalrecur_iterator_next(it);
+      if(!icaltime_is_null_time(icalTime)) {
+        current = DateTime(icaltime_as_timet(icalTime));      
+      } else {
+        break;
       }
+    } while(current.Before(_from));
+       
+    if(last.Before(_to)) {
       
-      
-      string name = nameValue[0];
-      string value = nameValue[1];
-      if(name == "FREQ") {
-        if(value == "SECONDLY") {
-          m_RepetitionMode = Secondly;
-        } else if(value == "MINUTELY") {
-          m_RepetitionMode = Minutely;
-        } else if(value == "HOURLY") {
-          m_RepetitionMode = Hourly;
-        } else if(value == "DAILY") {
-          m_RepetitionMode = Daily;
-        } else if(value == "WEEKLY") {
-          m_RepetitionMode = Weekly;
-        } else if(value == "MONTHLY") {
-          m_RepetitionMode = Monthly;
-        } else if(value == "YEARLY") {
-          m_RepetitionMode = Yearly;
+      do {
+        result.push_back(last);
+        struct icaltimetype icalTime = icalrecur_iterator_next(it);
+        if(!icaltime_is_null_time(icalTime)) {
+          last = DateTime(icaltime_as_timet(icalTime));      
         } else {
-          throw new invalid_argument(string("invalid value for FREQ: '") + value);
+          break;
         }
-      } else if(name == "INTERVAL") {
-        m_RepeatingInterval = StrToInt(value);
-      } else if(name == "UNTIL") {
-        m_EndingAt = DateTime::FromISO(value);
-      } else if(name == "COUNT") {
-        count = StrToInt(value);
-      } else if(name == "BYSECOND") {
-        vector<string> secs = SplitString(value, ',');
-        for(vector<string>::iterator iSec = secs.begin(); iSec != secs.end(); ++iSec) {
-          bysecond.set(StrToInt(*iSec), true);
-        }
-      } else if(name == "BYMINUTE") {
-        vector<string> mins = SplitString(value, ',');
-        for(vector<string>::iterator iMin = mins.begin(); iMin != mins.end(); ++iMin) {
-          byminute.set(StrToInt(*iMin), true);
-        }
-      } else if(name == "BYHOUR") {
-        vector<string> hours = SplitString(value, ',');
-        for(vector<string>::iterator iHour = hours.begin(); iHour != hours.end(); ++iHour) {
-          byhour.set(StrToInt(*iHour), true);
-        }
-      }
+      } while(last.Before(_to));      
     }
-  } // ctor(ical)
+    
+    return result;
+  } // GetOccurencesBetween
+   
+  
+  //================================================== RepeatingSchedule
   
   RepeatingSchedule::RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt)
   : m_RepetitionMode(_mode),

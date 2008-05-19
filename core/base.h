@@ -108,6 +108,9 @@ namespace dss {
   extern const char* theISOFormatString;
   
   vector<string> SplitString(const string& _source, const char _delimiter);
+  void ReplaceAll(string& s, const string& a, const string& b);
+  
+  string URLDecode(const string& _in);
   
   //============================================= Encoding helpers
   const wstring FromUTF8(const char* _utf8string, int _len);

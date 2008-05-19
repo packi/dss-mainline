@@ -38,6 +38,7 @@ using namespace dss;
 void testXMLReader();
 void testConfig();
 void testISO();
+void testICal();
 
 int main (int argc, char * const argv[]) {
   
@@ -48,6 +49,8 @@ int main (int argc, char * const argv[]) {
   }
   // make sure timezone gets set
   tzset();
+  
+  testICal();
   
   // disable broken pipe signal
 #ifndef _WIN32
@@ -60,6 +63,11 @@ int main (int argc, char * const argv[]) {
   dss::DSS::GetInstance()->Run();
   return 0;
 }
+
+
+void testICal() {
+  ICalSchedule s("FREQ=DAILY;INTERVAL=2", "20080505T120000Z");
+} // testICal
 
 void testISO() {
   cout << DateTime::FromISO("20080515T120000Z") << endl;

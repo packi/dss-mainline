@@ -118,8 +118,7 @@ namespace dss {
     DateTime startingTime;
     startingTime.SetSecond(0);
     RepeatingSchedule* sch = new RepeatingSchedule(Minutely, 1, startingTime);
-    
-    
+        
     ScheduledEvent* schEvt = new ScheduledEvent(*evt, *sch);
     m_EventRunner.AddEvent(schEvt);
     
@@ -163,6 +162,7 @@ namespace dss {
 
     shttpd_register_uri(m_SHttpdContext, "/config", &HTTPListOptions, NULL);    
     shttpd_register_uri(m_SHttpdContext, "/json/*", &JSONHandler, NULL);
+    shttpd_register_uri(m_SHttpdContext, "/addevent", &AddEvent, NULL);
   } // Initialize
   
   void WebServer::Execute() {
@@ -178,26 +178,45 @@ namespace dss {
     sstream << "Content-Type: " << _contentType << "; charset=utf-8\r\n\r\n";
     shttpd_printf(_arg, sstream.str().c_str());
   } // EmitHTTPHeader
+
   
-  void WebServer::JSONHandler(struct shttpd_arg* _arg) {
-    string urlid = "/json/";
-    string uri = shttpd_get_env(_arg, "REQUEST_URI");
-    const char* paramsC = shttpd_get_env(_arg, "QUERY_STRING");
-    string params;
-    HashMapConstStringString paramMap;
-    if(paramsC != NULL) {
-      params = paramsC;
-      vector<string> paramList = SplitString(params, '&');
+  HashMapConstStringString ParseParameter(const char* _params) {
+    HashMapConstStringString result;
+    if(_params != NULL) {
+      vector<string> paramList = SplitString(_params, '&');
       for(vector<string>::iterator iParam = paramList.begin(); iParam < paramList.end(); ++iParam) {
         vector<string> nameValue = SplitString(*iParam, '=');
         if(nameValue.size() != 2) {
-          paramMap[*iParam] = "";
+          result[*iParam] = "";
         } else {
-          paramMap[nameValue.at(0)] = nameValue.at(1);
+          result[URLDecode(nameValue.at(0))] = URLDecode(nameValue.at(1));
         }
       }
     }
-        
+    return result;
+  }
+  
+  void WebServer::AddEvent(struct shttpd_arg* _arg) {
+    HashMapConstStringString paramMap = ParseParameter(_arg->in.buf);
+    
+    string file = paramMap["file"];
+    string schedule = paramMap["schedule"];
+    EmitHTTPHeader(200, _arg, "text/plain");
+    
+    
+    ScheduledEvent* scheduledEvent = new ScheduledEvent();
+    
+    DSS::GetInstance()->GetEventRunner().AddEvent();;
+    shttpd_printf(_arg, "file: %s, schedule %s", file.c_str(), schedule.c_str());
+    _arg->flags |= SHTTPD_END_OF_OUTPUT;    
+  }
+
+  
+  void WebServer::JSONHandler(struct shttpd_arg* _arg) {
+    const string urlid = "/json/";
+    string uri = shttpd_get_env(_arg, "REQUEST_URI");
+    HashMapConstStringString paramMap = ParseParameter(shttpd_get_env(_arg, "QUERY_STRING"));
+
     string method = uri.substr(uri.find(urlid) + urlid.size());
     
     if(method == "getdevices") {
@@ -244,7 +263,7 @@ namespace dss {
         shttpd_printf(_arg, "{ok:0}");
       }
     } else {
-      shttpd_printf(_arg, "hello %s, method %s, params %s", uri.c_str(), method.c_str(), params.c_str());
+     // shttpd_printf(_arg, "hello %s, method %s, params %s", uri.c_str(), method.c_str(), params.c_str());
     }
     _arg->flags |= SHTTPD_END_OF_OUTPUT;
   } // JSONHandler

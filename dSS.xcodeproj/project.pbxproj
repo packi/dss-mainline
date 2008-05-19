@@ -40,6 +40,8 @@
 		82B161730DAEBABA0005FB71 /* jshandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B161720DAEBABA0005FB71 /* jshandler.cpp */; };
 		82B161FB0DAF6CC10005FB71 /* tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B161FA0DAF6CC10005FB71 /* tests.cpp */; };
 		82B6B5B70DAA3134006C51B6 /* model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B6B5B60DAA3134006C51B6 /* model.cpp */; };
+		82BCF1CC0DDD8450007B923A /* libical.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82BCF1CB0DDD8450007B923A /* libical.dylib */; };
+		82BCF2CB0DE19BD8007B923A /* basetests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82BCF2CA0DE19BD8007B923A /* basetests.cpp */; };
 		82E3D10D0DAF730E00FDEE16 /* scriptstest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82E3D10C0DAF730E00FDEE16 /* scriptstest.cpp */; };
 		82E3D2790DB77E0E00FDEE16 /* datetools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */; };
 		82E3D2DB0DB795EA00FDEE16 /* datetoolstests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */; };
@@ -109,6 +111,8 @@
 		82B161FA0DAF6CC10005FB71 /* tests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tests.cpp; path = tests/tests.cpp; sourceTree = "<group>"; };
 		82B6B5B50DAA3134006C51B6 /* model.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = model.h; path = core/model.h; sourceTree = "<group>"; };
 		82B6B5B60DAA3134006C51B6 /* model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = model.cpp; path = core/model.cpp; sourceTree = "<group>"; };
+		82BCF1CB0DDD8450007B923A /* libical.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libical.dylib; path = /usr/local/lib/libical.dylib; sourceTree = "<absolute>"; };
+		82BCF2CA0DE19BD8007B923A /* basetests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = basetests.cpp; path = tests/basetests.cpp; sourceTree = "<group>"; };
 		82E3D10B0DAF730E00FDEE16 /* scriptstest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scriptstest.h; path = tests/scriptstest.h; sourceTree = "<group>"; };
 		82E3D10C0DAF730E00FDEE16 /* scriptstest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scriptstest.cpp; path = tests/scriptstest.cpp; sourceTree = "<group>"; };
 		82E3D2770DB77E0E00FDEE16 /* datetools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = datetools.h; path = core/datetools.h; sourceTree = "<group>"; };
@@ -128,6 +132,7 @@
 				82B161100DAE42080005FB71 /* libjs.dylib in Frameworks */,
 				82E3D4010DB8AD4D00FDEE16 /* libcppunit.dylib in Frameworks */,
 				82784A990DDADC2400858784 /* libboost_system-mt.dylib in Frameworks */,
+				82BCF1CC0DDD8450007B923A /* libical.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,6 +142,7 @@
 		08FB7794FE84155DC02AAC07 /* dSS */ = {
 			isa = PBXGroup;
 			children = (
+				82BCF1CB0DDD8450007B923A /* libical.dylib */,
 				82784A980DDADC2400858784 /* libboost_system-mt.dylib */,
 				826DBC9B0DBCC9500034ADFB /* modeltests.cpp */,
 				82E3D4000DB8AD4D00FDEE16 /* libcppunit.dylib */,
@@ -153,6 +159,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				82BCF2CA0DE19BD8007B923A /* basetests.cpp */,
 				828C7C7E0DC7156700D34901 /* ds485.h */,
 				828C7C7F0DC7156700D34901 /* ds485.cpp */,
 				826DBF580DBF1DD70034ADFB /* modeljstests.cpp */,
@@ -297,6 +304,7 @@
 				828C7C800DC7156700D34901 /* ds485.cpp in Sources */,
 				82784A300DDAC07C00858784 /* syncevent.cpp in Sources */,
 				82784A350DDAC10E00858784 /* mutex.cpp in Sources */,
+				82BCF2CB0DE19BD8007B923A /* basetests.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -354,6 +362,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					/usr/local/include/,
 					/opt/local/include/,
 					/usr/include/libxml2,
 				);
@@ -377,6 +386,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					/usr/local/include/,
 					/opt/local/include/,
 					/usr/include/libxml2,
 				);
