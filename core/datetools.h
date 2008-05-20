@@ -90,6 +90,7 @@ namespace dss {
     static DateTime NullDate;
     
     static DateTime FromISO(const string& _isoStr);
+    static DateTime FromUTC(const time_t& _time);
   }; // DateTime
   
   ostream& operator<<(ostream& out, const DateTime& _dt);

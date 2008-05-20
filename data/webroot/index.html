@@ -58,6 +58,34 @@
         }
 	  );
 	}
+	
+	function raiseEvent() {
+	  new Ajax.Request('/json/event/raise',
+	    {
+	      method:'get', 
+	      parameters: 
+	        { 
+	          evtid: $F('evtid'),
+	          sourceid: $F('eventsrc')
+	        }
+	    } 
+	  );
+	}
+	
+	function scheduleEvent() {
+	  new Ajax.Request('/json/event/schedule',
+	    {
+	      method:'get', 
+	      parameters: 
+	        { 
+	          evtid: $F('evtid'),
+	          sourceid: $F('eventsrc'),
+	          schedule: $F('eventsched'),
+	          start: $F('eventstart')
+	        }
+	    } 
+	  );
+	}
   
 	doUpdate();	
 </script>
@@ -70,6 +98,15 @@
 	  <li><a href="scripts">Scripts</a></li>
 	<!--  <li><a href="events">Events</a></li> -->
 	</ul>
+	<form>
+	<h2>Event Raising / Scheduling</h2>
+	  Event ID: <input type="text" id="evtid" value="1001"/><br />
+	  Event Source: <input type="text" id="eventsrc" value="1"/><br />
+	  Event Schedule: <input type="text" id="eventsched" value="FREQ=MINUTELY;INTERVAL=2"/><br />
+	  Event Start: <input type="text" id="eventstart" value="20080520T080000"/><br />
+	  <a href="#" onclick="raiseEvent()">Raise</a>
+	  <a href="#" onclick="scheduleEvent()">Schedule</a>
+	</form>
 	<form>
 	Connected devices: <span id="numDevs">(...loading...)</span>
 	<div id="devList">

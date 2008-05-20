@@ -398,7 +398,7 @@ namespace dss {
   void Arguments::SetValue(const string& _name, const string& _value) {
     m_ArgumentList[_name] = _value;
   } // SetValue
-  
+    
   //================================================== Apartment
   
   Apartment::Apartment() 
@@ -675,6 +675,9 @@ namespace dss {
   };
   
   void Apartment::OnEvent(const Event& _event) {
+    stringstream sstream;
+    sstream << "Raised event: " << _event.GetID() << " from source " << _event.GetSource();
+    Logger::GetInstance()->Log(sstream.str());
     for_each(m_Subscriptions.begin(), m_Subscriptions.end(), handle_event(_event));
   } // OnEvent
   
@@ -716,6 +719,21 @@ namespace dss {
     m_Modulators.push_back(pResult);
     return *pResult;                       
   } // AllocateModulator
+  
+  void Apartment::AddAction(Action* _action) {
+    m_Actions.push_back(_action);
+  } // AddAction
+  
+  Action& Apartment::GetAction(const string& _name) {
+    for(boost::ptr_vector<Action>::iterator iAction = m_Actions.begin(), e = m_Actions.end();
+        iAction != e; ++iAction) 
+    {
+      if(iAction->GetName() == _name) {
+        return *iAction;
+      }
+    }
+    throw ItemNotFoundException(string("Could not find action: ") + _name);
+  } // GetAction
   
   //================================================== Modulator
   

@@ -114,12 +114,12 @@ namespace dss {
     m_ModulatorSim.Initialize();
     m_Apartment.Run();
     
-    Event* evt = new Event(1003);
+    boost::shared_ptr<Event> evt(new Event(1003, 0));
     DateTime startingTime;
     startingTime.SetSecond(0);
-    RepeatingSchedule* sch = new RepeatingSchedule(Minutely, 1, startingTime);
+    boost::shared_ptr<RepeatingSchedule> sch(new RepeatingSchedule(Minutely, 1, startingTime));
         
-    ScheduledEvent* schEvt = new ScheduledEvent(*evt, *sch);
+    ScheduledEvent* schEvt = new ScheduledEvent(evt, sch);
     m_EventRunner.AddEvent(schEvt);
     
     ActionJS jsAction;
@@ -203,10 +203,10 @@ namespace dss {
     string schedule = paramMap["schedule"];
     EmitHTTPHeader(200, _arg, "text/plain");
     
+//    Action& act = DSS::GetInstance()->GetApartment().GetAction("ActionJS");
+//    ScheduledEvent* scheduledEvent = new ScheduledEvent();
     
-    ScheduledEvent* scheduledEvent = new ScheduledEvent();
-    
-    DSS::GetInstance()->GetEventRunner().AddEvent();;
+  //  DSS::GetInstance()->GetEventRunner().AddEvent();;
     shttpd_printf(_arg, "file: %s, schedule %s", file.c_str(), schedule.c_str());
     _arg->flags |= SHTTPD_END_OF_OUTPUT;    
   }
@@ -261,6 +261,36 @@ namespace dss {
         shttpd_printf(_arg, "{ok:1}");
       } else {
         shttpd_printf(_arg, "{ok:0}");
+      }
+    } else if(BeginsWith(method, "event/")) {
+      EmitHTTPHeader(200, _arg, "application/json");
+      if(paramMap["evtid"].empty() || paramMap["sourceid"].empty()) {
+        shttpd_printf(_arg, "{ok:0}");
+      } else {
+        int eventID = StrToInt(paramMap["evtid"]);
+        int sourceID = StrToInt(paramMap["sourceid"]);
+        if(method == "event/raise") {
+          Event evt(eventID, sourceID);
+          DSS::GetInstance()->GetApartment().OnEvent(evt);
+          shttpd_printf(_arg, "{ok:1}");
+        } else if(method == "event/schedule") {
+          if(paramMap["schedule"].empty() || paramMap["start"].empty()) {
+            shttpd_printf(_arg, "{ok:0}");
+          } else {
+            string schedule = paramMap["schedule"];
+            string startTimeISO = paramMap["start"];
+            
+            boost::shared_ptr<Event> evt(new Event(eventID, sourceID));
+            boost::shared_ptr<Schedule> sch(new ICalSchedule(schedule, startTimeISO));
+            
+            ScheduledEvent* scheduledEvent = new ScheduledEvent(evt, sch);
+            
+            DSS::GetInstance()->GetEventRunner().AddEvent(scheduledEvent);
+            shttpd_printf(_arg, "{ok:1}");
+          }          
+        } else {
+          shttpd_printf(_arg, "{ok:0}");
+        }
       }
     } else {
      // shttpd_printf(_arg, "hello %s, method %s, params %s", uri.c_str(), method.c_str(), params.c_str());

@@ -25,7 +25,7 @@
 
 namespace dss {
   
-  //============================================= Utils
+  //============================================= String parsing/formatting/conversion
   
   template<>
   int StrToInt(const wstring& _strValue) {
@@ -158,9 +158,10 @@ namespace dss {
     string::size_type lastPos = 0;
     string::size_type pos = _in.find('%', 0);
     while(pos != string::npos && _in.length() > (pos + 2)) {
-      if(lastPos == 0) {
-        result = _in.substr(lastPos, pos);
-        ReplaceAll(result, "+", " ");
+      if(lastPos != pos) {
+        string add = _in.substr(lastPos, pos - lastPos);
+        ReplaceAll(add, "+", " ");
+        result += add;
       }
       string hex = _in.substr(pos+1, 2);
       char* ptr;
@@ -179,6 +180,23 @@ namespace dss {
     }
     return result;
   }
+  
+  bool EndsWith( const string& str, const string& searchString ) {
+    string::size_type lenStr = str.length();
+    string::size_type lenSearch = searchString.length();
+    return (lenStr >= lenSearch) &&
+    (str.compare( lenStr - lenSearch, lenSearch, searchString ) == 0);
+  } // EndsWith
+  
+  
+  bool BeginsWith( const string& str, const string& searchString ) {
+    string::size_type lenStr = str.length();
+    string::size_type lenSearch = searchString.length();
+    return (lenStr >= lenSearch) &&
+    (str.compare( 0, lenSearch, searchString ) == 0);
+  } // BeginsWith
+
+  //================================================== File utilities
   
   bool FileExists( const string& _fileName ) {
     return FileExists(_fileName.c_str());
@@ -201,6 +219,8 @@ namespace dss {
       #endif
     #endif
   } // FileExists
+  
+  //================================================== System utilities
   
   void SleepSeconds( const unsigned int _seconds ) {
 #ifdef WIN32

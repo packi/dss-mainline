@@ -35,6 +35,7 @@
 using namespace std;
 
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace dss {
   
@@ -387,8 +388,14 @@ namespace dss {
     string m_NameForUser;
     int m_ID;
   public:
+    Action(const string& _name, const string& _nameForUser) 
+    : m_Name(_name), m_NameForUser(_nameForUser) {};
+    
     /** Performs the action with _args */
     virtual void Perform(const Arguments& _args) = 0;
+    
+    const string& GetName() { return m_Name; };
+    const string& GetNameForUser() { return m_NameForUser; };
   };
   
   /** 
@@ -403,12 +410,13 @@ namespace dss {
     devid_t m_Source;
     Arguments m_Arguments;
   public:
-    Event(int _id) : m_ID(_id) {};
+    Event(int _id, int _sourceID) 
+    : m_ID(_id), m_Source(_sourceID) {};
     
     /** Returns the id of the event */
     int GetID() const { return m_ID; };
     /** Returns the source of the event */
-    devid_t GetSource() const { return m_ID; };
+    devid_t GetSource() const { return m_Source; };
   };
   
   /** Subscription to one or many event-ids which may be restricted by one or many source-ids */
@@ -448,6 +456,7 @@ namespace dss {
     vector<Device*> m_Devices;
     vector<Subscription*> m_Subscriptions;
     vector<Group*> m_Groups;
+    boost::ptr_vector<Action> m_Actions;
   private:
     int m_NextSubscriptionNumber;
   private:
@@ -498,6 +507,10 @@ namespace dss {
     /** Allocates a group */
     UserGroup& AllocateGroup(const int _id);
     
+  public:
+    void AddAction(Action* _action);
+    Action& GetAction(const string& _name);
+    
     /** Adds a subscription.
      * @param _action Action to be executed if a matching event gets raised
      * @param _eventIDs Ids to subscribe to
@@ -517,14 +530,14 @@ namespace dss {
    */
   class ScheduledEvent {
   private:
-    Event& m_Event;
-    Schedule& m_Schedule;
+    boost::shared_ptr<Event> m_Event;
+    boost::shared_ptr<Schedule> m_Schedule;
   public:
-    ScheduledEvent(Event& _evt, Schedule& _schedule) 
+    ScheduledEvent(boost::shared_ptr<Event> _evt, boost::shared_ptr<Schedule> _schedule) 
     : m_Event(_evt), m_Schedule(_schedule) {};
     
-    Event& GetEvent() { return m_Event; };
-    Schedule& GetSchedule() { return m_Schedule; };
+    Event& GetEvent() { return *m_Event; };
+    Schedule& GetSchedule() { return *m_Schedule; };
   };
 
   

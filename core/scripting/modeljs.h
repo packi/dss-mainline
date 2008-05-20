@@ -42,6 +42,7 @@ namespace dss {
   private:
     ScriptEnvironment m_Environment;
   public:
+    ActionJS();
    
     virtual void Perform(const Arguments& _args);
   };

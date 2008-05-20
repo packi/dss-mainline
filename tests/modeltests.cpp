@@ -22,7 +22,9 @@ class TestAction : public Action {
 private:
   int& m_ToModify;
 public:
-  TestAction(int& _toModify) : m_ToModify(_toModify) { };
+  TestAction(int& _toModify) 
+  : Action("test", "Test Action"), 
+  m_ToModify(_toModify) { };
   
   virtual void Perform(const Arguments& args) {
     m_ToModify++;
@@ -52,8 +54,8 @@ protected:
     Arguments args;
     Subscription& subs = appt.Subscribe(act, args,ids);
     
-    Event evtOne(1);
-    Event evtTwo(2);
+    Event evtOne(1, 1);
+    Event evtTwo(2, 1);
     
     appt.OnEvent(evtOne);
     CPPUNIT_ASSERT_EQUAL(1, testActionCalled);

@@ -256,6 +256,10 @@ namespace dss {
     long timelc = mktime(&tm) - timezone;
     return DateTime(timelc);
   } // FromISO
+  
+  DateTime DateTime::FromUTC(const time_t& _time) {
+    return DateTime(_time - timezone);
+  }
     
   DateTime DateTime::NullDate(0);
   
@@ -288,12 +292,17 @@ namespace dss {
     DateTime result;
     DateTime current;
     
+    cout << "in get next occurence";
+    
     icalrecur_iterator* it = icalrecur_iterator_new(m_Recurrence, m_StartDate);
     do {
+      cout << ".";
       result = current;
       struct icaltimetype icalTime = icalrecur_iterator_next(it);
       current = DateTime(icaltime_as_timet(icalTime));      
     } while(current.Before(_from));
+    
+    cout << endl;
     
     return result;
   } // GetNextOccurence

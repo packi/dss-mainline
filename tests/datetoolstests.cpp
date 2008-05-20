@@ -27,6 +27,7 @@ class DateToolsTest : public CPPUNIT_NS::TestCase
   CPPUNIT_TEST(testAddingComparing);
   CPPUNIT_TEST(testStaticSchedule);
   CPPUNIT_TEST(testDynamicSchedule);
+  CPPUNIT_TEST(testDynamicScheduleICal);
   CPPUNIT_TEST_SUITE_END();
   
 public:
@@ -108,6 +109,16 @@ protected:
     CPPUNIT_ASSERT_EQUAL(when.AddMinute(5), v[1]);
     CPPUNIT_ASSERT_EQUAL(when.AddMinute(10), v[2]);
   }
+  
+  void testDynamicScheduleICal() {
+    ICalSchedule sched("FREQ=MINUTELY;INTERVAL=2", "20080505T080000Z");
+    
+    DateTime startTime = DateTime::FromISO("20080505T080000Z");
+    
+    DateTime firstRecurr = sched.GetNextOccurence(startTime);
+    
+  }
+  
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(DateToolsTest);
