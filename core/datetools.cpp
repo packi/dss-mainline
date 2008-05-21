@@ -244,22 +244,25 @@ namespace dss {
       throw new invalid_argument("second should be between 0 and 59");
     }
     
-    
     struct tm tm;
+    memset(&tm, '\0', sizeof(tm));
     tm.tm_year = year - 1900;
-    tm.tm_mon = month;
+    tm.tm_mon = month - 1; // month is zero based "*ç"*!
     tm.tm_mday = day;
     tm.tm_hour = hour;
     tm.tm_min = min;
     tm.tm_sec = sec;
    
-    long timelc = mktime(&tm) - timezone;
-    return DateTime(timelc);
+    return DateTime::FromUTC(mktime(&tm));
   } // FromISO
   
   DateTime DateTime::FromUTC(const time_t& _time) {
     return DateTime(_time - timezone);
-  }
+  } // FromUTC
+  
+  DateTime DateTime::ToUTC(const time_t& _time) {
+    return DateTime(_time + timezone);
+  } // ToUTC
     
   DateTime DateTime::NullDate(0);
   
@@ -279,7 +282,6 @@ namespace dss {
     }
     return result;
   } // GetOccurencesBetween
-  
 
   //================================================== ICalSchedule
   
@@ -288,22 +290,40 @@ namespace dss {
     m_StartDate = icaltime_from_string(_startDateISO.c_str());
   } // ctor
   
+  void ical_to_tm(const icaltimetype& icalTime, struct tm& tm) {
+    memset(&tm, '\0', sizeof(tm));
+    if(!icalTime.is_date) {
+      tm.tm_sec = icalTime.second;
+      tm.tm_min = icalTime.minute;
+      tm.tm_hour = icalTime.hour;
+    }
+    tm.tm_mday = icalTime.day;
+    tm.tm_mon = icalTime.month - 1;
+    tm.tm_year = icalTime.year - 1900;
+  }
+  
   DateTime ICalSchedule::GetNextOccurence(const DateTime& _from) {
     DateTime result;
     DateTime current;
     
-    cout << "in get next occurence";
-    
     icalrecur_iterator* it = icalrecur_iterator_new(m_Recurrence, m_StartDate);
     do {
-      cout << ".";
-      result = current;
       struct icaltimetype icalTime = icalrecur_iterator_next(it);
-      current = DateTime(icaltime_as_timet(icalTime));      
+      if(icaltime_is_null_time(icalTime)) {
+        break;
+      }
+      
+      struct tm tm;
+      ical_to_tm(icalTime, tm);
+      current = DateTime::FromUTC(mktime(&tm));      
     } while(current.Before(_from));
     
-    cout << endl;
-    
+    if(current.After(_from) || current == _from) {
+      result = current;
+    } else {
+      result = DateTime::NullDate;
+    }
+   
     return result;
   } // GetNextOccurence
   

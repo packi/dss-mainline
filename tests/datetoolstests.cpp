@@ -114,9 +114,13 @@ protected:
     ICalSchedule sched("FREQ=MINUTELY;INTERVAL=2", "20080505T080000Z");
     
     DateTime startTime = DateTime::FromISO("20080505T080000Z");
-    
+
     DateTime firstRecurr = sched.GetNextOccurence(startTime);
+    CPPUNIT_ASSERT_EQUAL(startTime, firstRecurr);
     
+    DateTime startPlusOneSec = startTime.AddSeconds(1);
+    DateTime nextRecurr = sched.GetNextOccurence(startPlusOneSec);
+    CPPUNIT_ASSERT_EQUAL(startTime.AddMinute(2), nextRecurr);
   }
   
 };

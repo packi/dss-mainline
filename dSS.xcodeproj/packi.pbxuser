@@ -11,6 +11,7 @@
 		breakpoints = (
 			82532F4B0DA514490030CC6A /* PBXCPPExceptionBreakpoint */,
 			82BCF1E60DDD8D6B007B923A /* icaltimezone.c:1624 */,
+			82BCF4660DE3FA87007B923A /* datetoolstests.cpp:117 */,
 		);
 		codeSenseManager = 82532A4D0DA27E1C0030CC6A /* Code sense */;
 		executables = (
@@ -779,6 +780,51 @@
 			82BCF4550DE30AE6007B923A /* PBXTextBookmark */ = 82BCF4550DE30AE6007B923A /* PBXTextBookmark */;
 			82BCF4560DE30AE6007B923A /* PBXTextBookmark */ = 82BCF4560DE30AE6007B923A /* PBXTextBookmark */;
 			82BCF4570DE30E90007B923A /* PBXTextBookmark */ = 82BCF4570DE30E90007B923A /* PBXTextBookmark */;
+			82BCF4590DE3F974007B923A /* PBXTextBookmark */ = 82BCF4590DE3F974007B923A /* PBXTextBookmark */;
+			82BCF45A0DE3F974007B923A /* PBXTextBookmark */ = 82BCF45A0DE3F974007B923A /* PBXTextBookmark */;
+			82BCF45B0DE3F974007B923A /* PBXTextBookmark */ = 82BCF45B0DE3F974007B923A /* PBXTextBookmark */;
+			82BCF45C0DE3F974007B923A /* PBXTextBookmark */ = 82BCF45C0DE3F974007B923A /* PBXTextBookmark */;
+			82BCF45D0DE3F974007B923A /* PBXTextBookmark */ = 82BCF45D0DE3F974007B923A /* PBXTextBookmark */;
+			82BCF45E0DE3F974007B923A /* PBXTextBookmark */ = 82BCF45E0DE3F974007B923A /* PBXTextBookmark */;
+			82BCF45F0DE3F974007B923A /* PBXTextBookmark */ = 82BCF45F0DE3F974007B923A /* PBXTextBookmark */;
+			82BCF4600DE3F974007B923A /* PBXTextBookmark */ = 82BCF4600DE3F974007B923A /* PBXTextBookmark */;
+			82BCF4610DE3F974007B923A /* PBXTextBookmark */ = 82BCF4610DE3F974007B923A /* PBXTextBookmark */;
+			82BCF4620DE3F974007B923A /* PBXTextBookmark */ = 82BCF4620DE3F974007B923A /* PBXTextBookmark */;
+			82BCF4630DE3F974007B923A /* PBXTextBookmark */ = 82BCF4630DE3F974007B923A /* PBXTextBookmark */;
+			82BCF4640DE3F974007B923A /* PBXTextBookmark */ = 82BCF4640DE3F974007B923A /* PBXTextBookmark */;
+			82BCF46E0DE3FD2C007B923A /* PBXTextBookmark */ = 82BCF46E0DE3FD2C007B923A /* PBXTextBookmark */;
+			82BCF46F0DE3FD2C007B923A /* PBXTextBookmark */ = 82BCF46F0DE3FD2C007B923A /* PBXTextBookmark */;
+			82BCF4700DE3FD2C007B923A /* PBXTextBookmark */ = 82BCF4700DE3FD2C007B923A /* PBXTextBookmark */;
+			82BCF4710DE3FD2C007B923A /* PBXTextBookmark */ = 82BCF4710DE3FD2C007B923A /* PBXTextBookmark */;
+			82BCF4720DE3FD2C007B923A /* PBXTextBookmark */ = 82BCF4720DE3FD2C007B923A /* PBXTextBookmark */;
+			82BCF4730DE3FD2C007B923A /* PBXTextBookmark */ = 82BCF4730DE3FD2C007B923A /* PBXTextBookmark */;
+			82BCF4780DE3FE3D007B923A /* PBXTextBookmark */ = 82BCF4780DE3FE3D007B923A /* PBXTextBookmark */;
+			82BCF4800DE40026007B923A /* PBXTextBookmark */ = 82BCF4800DE40026007B923A /* PBXTextBookmark */;
+			82BCF4810DE40026007B923A /* PBXTextBookmark */ = 82BCF4810DE40026007B923A /* PBXTextBookmark */;
+			82BCF4820DE40026007B923A /* PBXTextBookmark */ = 82BCF4820DE40026007B923A /* PBXTextBookmark */;
+			82BCF4830DE40026007B923A /* PBXTextBookmark */ = 82BCF4830DE40026007B923A /* PBXTextBookmark */;
+			82BCF48A0DE40826007B923A /* PBXTextBookmark */ = 82BCF48A0DE40826007B923A /* PBXTextBookmark */;
+			82BCF48B0DE40826007B923A /* PBXTextBookmark */ = 82BCF48B0DE40826007B923A /* PBXTextBookmark */;
+			82BCF48C0DE40826007B923A /* PBXTextBookmark */ = 82BCF48C0DE40826007B923A /* PBXTextBookmark */;
+			82BCF4B40DE41DCA007B923A /* PBXTextBookmark */ = 82BCF4B40DE41DCA007B923A /* PBXTextBookmark */;
+			82BCF4B50DE41DCA007B923A /* PBXTextBookmark */ = 82BCF4B50DE41DCA007B923A /* PBXTextBookmark */;
+			82BCF4B60DE41DCA007B923A /* PBXTextBookmark */ = 82BCF4B60DE41DCA007B923A /* PBXTextBookmark */;
+			82BCF4B70DE41DCA007B923A /* PBXTextBookmark */ = 82BCF4B70DE41DCA007B923A /* PBXTextBookmark */;
+			82BCF4B80DE41DCA007B923A /* PBXTextBookmark */ = 82BCF4B80DE41DCA007B923A /* PBXTextBookmark */;
+			82BCF4B90DE41DCA007B923A /* PBXTextBookmark */ = 82BCF4B90DE41DCA007B923A /* PBXTextBookmark */;
+			82BCF4BA0DE41DCA007B923A /* PBXTextBookmark */ = 82BCF4BA0DE41DCA007B923A /* PBXTextBookmark */;
+			82BCF4BB0DE41DCA007B923A /* PBXTextBookmark */ = 82BCF4BB0DE41DCA007B923A /* PBXTextBookmark */;
+			82BCF4BC0DE41DCA007B923A /* PBXTextBookmark */ = 82BCF4BC0DE41DCA007B923A /* PBXTextBookmark */;
+			82BCF4C80DE42011007B923A /* PBXTextBookmark */ = 82BCF4C80DE42011007B923A /* PBXTextBookmark */;
+			82BCF4C90DE42011007B923A /* PBXTextBookmark */ = 82BCF4C90DE42011007B923A /* PBXTextBookmark */;
+			82BCF4CA0DE42011007B923A /* PBXTextBookmark */ = 82BCF4CA0DE42011007B923A /* PBXTextBookmark */;
+			82BCF4CB0DE42011007B923A /* PBXTextBookmark */ = 82BCF4CB0DE42011007B923A /* PBXTextBookmark */;
+			82BCF4CC0DE42011007B923A /* PBXTextBookmark */ = 82BCF4CC0DE42011007B923A /* PBXTextBookmark */;
+			82BCF4CD0DE42011007B923A /* PBXTextBookmark */ = 82BCF4CD0DE42011007B923A /* PBXTextBookmark */;
+			82BCF4CE0DE42011007B923A /* PBXTextBookmark */ = 82BCF4CE0DE42011007B923A /* PBXTextBookmark */;
+			82BCF4CF0DE42011007B923A /* PBXTextBookmark */ = 82BCF4CF0DE42011007B923A /* PBXTextBookmark */;
+			82BCF4D00DE42011007B923A /* PBXTextBookmark */ = 82BCF4D00DE42011007B923A /* PBXTextBookmark */;
+			82BCF4D10DE42011007B923A /* PBXTextBookmark */ = 82BCF4D10DE42011007B923A /* PBXTextBookmark */;
 		};
 		sourceControlManager = 82532A4C0DA27E1C0030CC6A /* Source Control */;
 		userBuildSettings = {
@@ -786,9 +832,9 @@
 	};
 	08FB7796FE84155DC02AAC07 /* main.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1018, 1358}}";
-			sepNavSelRange = "{1351, 0}";
-			sepNavVisRange = "{869, 933}";
+			sepNavIntBoundsRect = "{{0, 0}, {1018, 1386}}";
+			sepNavSelRange = "{1098, 0}";
+			sepNavVisRange = "{610, 691}";
 			sepNavWindowFrame = "{{31, 170}, {750, 558}}";
 		};
 	};
@@ -841,9 +887,9 @@
 	};
 	82532AFC0DA374250030CC6A /* dss.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1018, 5474}}";
-			sepNavSelRange = "{3551, 0}";
-			sepNavVisRange = "{3081, 1125}";
+			sepNavIntBoundsRect = "{{0, 0}, {1208, 5530}}";
+			sepNavSelRange = "{6315, 76}";
+			sepNavVisRange = "{6183, 412}";
 			sepNavWindowFrame = "{{110, 155}, {1069, 605}}";
 		};
 	};
@@ -914,7 +960,7 @@
 		hitCount = 0;
 		ignoreCount = 0;
 		isThrow = 1;
-		modificationTime = 232973654.613011;
+		modificationTime = 233054390.704731;
 		state = 1;
 	};
 	82532F650DA514770030CC6A /* XCCPPCondition */ = {
@@ -1077,7 +1123,7 @@
 		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
 		name = "datetools.h: 87";
 		rLen = 0;
-		rLoc = 2349;
+		rLoc = 2397;
 		rType = 0;
 		vrLen = 1429;
 		vrLoc = 1665;
@@ -2675,7 +2721,7 @@
 		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
 		name = "datetools.h: 125";
 		rLen = 17;
-		rLoc = 3699;
+		rLoc = 3747;
 		rType = 0;
 		vrLen = 1597;
 		vrLoc = 2165;
@@ -2695,7 +2741,7 @@
 		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
 		name = "datetools.h: 125";
 		rLen = 17;
-		rLoc = 3699;
+		rLoc = 3747;
 		rType = 0;
 		vrLen = 1597;
 		vrLoc = 2165;
@@ -2745,7 +2791,7 @@
 		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
 		name = "datetools.h: 125";
 		rLen = 17;
-		rLoc = 3699;
+		rLoc = 3747;
 		rType = 0;
 		vrLen = 1597;
 		vrLoc = 2165;
@@ -2765,7 +2811,7 @@
 		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
 		name = "datetools.h: 125";
 		rLen = 17;
-		rLoc = 3699;
+		rLoc = 3747;
 		rType = 0;
 		vrLen = 1597;
 		vrLoc = 2165;
@@ -3396,7 +3442,7 @@
 		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
 		name = "datetools.h: 124";
 		rLen = 0;
-		rLoc = 3613;
+		rLoc = 3661;
 		rType = 0;
 		vrLen = 1582;
 		vrLoc = 2231;
@@ -3406,7 +3452,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 270";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1345;
 		vrLoc = 5968;
@@ -3436,7 +3482,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 274";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1441;
 		vrLoc = 6345;
@@ -3445,7 +3491,7 @@
 		isa = PBXTextBookmark;
 		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
 		name = "datetools.h: 85";
-		rLen = 102;
+		rLen = 150;
 		rLoc = 2148;
 		rType = 0;
 		vrLen = 1175;
@@ -3456,7 +3502,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 240";
 		rLen = 0;
-		rLoc = 6443;
+		rLoc = 6465;
 		rType = 0;
 		vrLen = 1112;
 		vrLoc = 5073;
@@ -3476,7 +3522,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 244";
 		rLen = 0;
-		rLoc = 6443;
+		rLoc = 6465;
 		rType = 0;
 		vrLen = 1054;
 		vrLoc = 5089;
@@ -3496,7 +3542,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 235";
 		rLen = 0;
-		rLoc = 6400;
+		rLoc = 6464;
 		rType = 0;
 		vrLen = 1144;
 		vrLoc = 4715;
@@ -3506,7 +3552,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 70";
 		rLen = 0;
-		rLoc = 1598;
+		rLoc = 1629;
 		rType = 0;
 		vrLen = 928;
 		vrLoc = 684;
@@ -3516,7 +3562,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 240";
 		rLen = 0;
-		rLoc = 6443;
+		rLoc = 6465;
 		rType = 0;
 		vrLen = 1207;
 		vrLoc = 5260;
@@ -3526,7 +3572,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 67";
 		rLen = 0;
-		rLoc = 1387;
+		rLoc = 1418;
 		rType = 0;
 		vrLen = 907;
 		vrLoc = 705;
@@ -3546,7 +3592,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 68";
 		rLen = 0;
-		rLoc = 1444;
+		rLoc = 1475;
 		rType = 0;
 		vrLen = 907;
 		vrLoc = 705;
@@ -3556,7 +3602,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 240";
 		rLen = 0;
-		rLoc = 6443;
+		rLoc = 6465;
 		rType = 0;
 		vrLen = 1259;
 		vrLoc = 5800;
@@ -3576,7 +3622,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 241";
 		rLen = 0;
-		rLoc = 6443;
+		rLoc = 6465;
 		rType = 0;
 		vrLen = 1194;
 		vrLoc = 5800;
@@ -3596,7 +3642,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 67";
 		rLen = 0;
-		rLoc = 1387;
+		rLoc = 1418;
 		rType = 0;
 		vrLen = 994;
 		vrLoc = 705;
@@ -3606,7 +3652,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 241";
 		rLen = 0;
-		rLoc = 6443;
+		rLoc = 6465;
 		rType = 0;
 		vrLen = 1160;
 		vrLoc = 5260;
@@ -3616,7 +3662,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 65";
 		rLen = 0;
-		rLoc = 1370;
+		rLoc = 1401;
 		rType = 0;
 		vrLen = 952;
 		vrLoc = 747;
@@ -3656,7 +3702,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 78";
 		rLen = 0;
-		rLoc = 1370;
+		rLoc = 1401;
 		rType = 0;
 		vrLen = 1067;
 		vrLoc = 1040;
@@ -3666,7 +3712,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 238";
 		rLen = 0;
-		rLoc = 6443;
+		rLoc = 6465;
 		rType = 0;
 		vrLen = 1338;
 		vrLoc = 5265;
@@ -3676,7 +3722,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 74";
 		rLen = 0;
-		rLoc = 1370;
+		rLoc = 1401;
 		rType = 0;
 		vrLen = 1093;
 		vrLoc = 1007;
@@ -3696,7 +3742,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 198";
 		rLen = 0;
-		rLoc = 1387;
+		rLoc = 1418;
 		rType = 0;
 		vrLen = 0;
 		vrLoc = 2107;
@@ -3706,7 +3752,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 356";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1184;
 		vrLoc = 7428;
@@ -3766,7 +3812,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 79";
 		rLen = 0;
-		rLoc = 1896;
+		rLoc = 1927;
 		rType = 0;
 		vrLen = 1099;
 		vrLoc = 886;
@@ -3786,7 +3832,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 295";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1380;
 		vrLoc = 6763;
@@ -3796,7 +3842,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1354;
+		rLoc = 1385;
 		rType = 0;
 		vrLen = 947;
 		vrLoc = 770;
@@ -3816,7 +3862,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1310;
+		rLoc = 1341;
 		rType = 0;
 		vrLen = 862;
 		vrLoc = 747;
@@ -3826,7 +3872,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1292;
+		rLoc = 1323;
 		rType = 0;
 		vrLen = 861;
 		vrLoc = 747;
@@ -3835,7 +3881,7 @@
 		isa = PBXTextBookmark;
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		rLen = 0;
-		rLoc = 346;
+		rLoc = 366;
 		rType = 1;
 	};
 	82784CBF0DDD81FD00858784 /* PBXTextBookmark */ = {
@@ -3843,7 +3889,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 288";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1304;
 		vrLoc = 6529;
@@ -3853,7 +3899,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1292;
+		rLoc = 1323;
 		rType = 0;
 		vrLen = 861;
 		vrLoc = 747;
@@ -3863,7 +3909,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 384";
 		rLen = 0;
-		rLoc = 9231;
+		rLoc = 9875;
 		rType = 0;
 		vrLen = 1289;
 		vrLoc = 9796;
@@ -4158,9 +4204,9 @@
 	};
 	82B6B5B60DAA3134006C51B6 /* model.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1018, 11816}}";
-			sepNavSelRange = "{21097, 0}";
-			sepNavVisRange = "{22474, 1111}";
+			sepNavIntBoundsRect = "{{0, 0}, {1164, 12096}}";
+			sepNavSelRange = "{8461, 0}";
+			sepNavVisRange = "{8216, 505}";
 		};
 	};
 	82BCF1C20DDD8431007B923A /* PBXTextBookmark */ = {
@@ -4168,7 +4214,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 384";
 		rLen = 0;
-		rLoc = 9231;
+		rLoc = 9875;
 		rType = 0;
 		vrLen = 1289;
 		vrLoc = 9796;
@@ -4178,7 +4224,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 383";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1225;
 		vrLoc = 9690;
@@ -4188,7 +4234,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 388";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1341;
 		vrLoc = 10037;
@@ -4198,7 +4244,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 384";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 851;
 		vrLoc = 10037;
@@ -4218,7 +4264,7 @@
 		comments = "error: 'start' was not declared in this scope";
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		rLen = 0;
-		rLoc = 346;
+		rLoc = 366;
 		rType = 1;
 	};
 	82BCF1DC0DDD8AF6007B923A /* PBXTextBookmark */ = {
@@ -4226,7 +4272,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 392";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1384;
 		vrLoc = 10042;
@@ -4256,15 +4302,15 @@
 		hitCount = 0;
 		ignoreCount = 0;
 		lineNumber = 1624;
-		modificationTime = 232973795.830312;
-		state = 1;
+		modificationTime = 233054364.047149;
+		state = 0;
 	};
 	82BCF1EE0DDD8F56007B923A /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1292;
+		rLoc = 1323;
 		rType = 0;
 		vrLen = 986;
 		vrLoc = 869;
@@ -4273,7 +4319,7 @@
 		isa = PBXTextBookmark;
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		rLen = 0;
-		rLoc = 346;
+		rLoc = 366;
 		rType = 1;
 	};
 	82BCF1F00DDD8F56007B923A /* PBXTextBookmark */ = {
@@ -4281,7 +4327,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 397";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1374;
 		vrLoc = 10079;
@@ -4291,7 +4337,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1292;
+		rLoc = 1323;
 		rType = 0;
 		vrLen = 986;
 		vrLoc = 869;
@@ -4301,7 +4347,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 383";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1266;
 		vrLoc = 10079;
@@ -4311,7 +4357,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1292;
+		rLoc = 1323;
 		rType = 0;
 		vrLen = 927;
 		vrLoc = 866;
@@ -4320,7 +4366,7 @@
 		isa = PBXTextBookmark;
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		rLen = 0;
-		rLoc = 346;
+		rLoc = 366;
 		rType = 1;
 	};
 	82BCF1FE0DDD8FC5007B923A /* PBXTextBookmark */ = {
@@ -4328,7 +4374,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 284";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1171;
 		vrLoc = 6306;
@@ -4338,7 +4384,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1292;
+		rLoc = 1323;
 		rType = 0;
 		vrLen = 927;
 		vrLoc = 866;
@@ -4348,7 +4394,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 405";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1183;
 		vrLoc = 10015;
@@ -4358,7 +4404,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 394";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1284;
 		vrLoc = 10015;
@@ -4368,7 +4414,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1292;
+		rLoc = 1323;
 		rType = 0;
 		vrLen = 927;
 		vrLoc = 866;
@@ -4420,7 +4466,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 405";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1244;
 		vrLoc = 10120;
@@ -4430,7 +4476,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 408";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1183;
 		vrLoc = 10015;
@@ -4440,7 +4486,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1292;
+		rLoc = 1323;
 		rType = 0;
 		vrLen = 927;
 		vrLoc = 866;
@@ -4450,7 +4496,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 405";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1228;
 		vrLoc = 10071;
@@ -4460,7 +4506,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1292;
+		rLoc = 1323;
 		rType = 0;
 		vrLen = 927;
 		vrLoc = 866;
@@ -4470,7 +4516,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 405";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1244;
 		vrLoc = 10120;
@@ -4509,13 +4555,14 @@
 	};
 	82BCF2230DDD9214007B923A /* icaltime.c */ = {
 		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.c;
 		name = icaltime.c;
 		path = "/Users/packi/Downloads/libical-0.31/src/libical/icaltime.c";
 		sourceTree = "<absolute>";
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1164, 16520}}";
-			sepNavSelRange = "{15348, 0}";
-			sepNavVisRange = "{14565, 640}";
+			sepNavIntBoundsRect = "{{0, 0}, {1164, 16534}}";
+			sepNavSelRange = "{7375, 0}";
+			sepNavVisRange = "{7717, 635}";
 		};
 	};
 	82BCF2240DDD9214007B923A /* PBXTextBookmark */ = {
@@ -4533,7 +4580,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 387";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1309;
 		vrLoc = 9882;
@@ -4543,7 +4590,7 @@
 		comments = "error: invalid conversion from 'const char*' to 'char*'";
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		rLen = 0;
-		rLoc = 346;
+		rLoc = 366;
 		rType = 1;
 	};
 	82BCF22C0DDD9603007B923A /* PBXTextBookmark */ = {
@@ -4551,7 +4598,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 288";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 308;
 		vrLoc = 9909;
@@ -4587,7 +4634,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1292;
+		rLoc = 1323;
 		rType = 0;
 		vrLen = 927;
 		vrLoc = 866;
@@ -4597,7 +4644,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 387";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1311;
 		vrLoc = 9882;
@@ -4607,7 +4654,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 387";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1309;
 		vrLoc = 9882;
@@ -4669,7 +4716,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 387";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1311;
 		vrLoc = 9882;
@@ -4679,7 +4726,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1292;
+		rLoc = 1323;
 		rType = 0;
 		vrLen = 927;
 		vrLoc = 866;
@@ -4689,7 +4736,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 288";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1351;
 		vrLoc = 7027;
@@ -4699,7 +4746,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1292;
+		rLoc = 1323;
 		rType = 0;
 		vrLen = 927;
 		vrLoc = 866;
@@ -4708,7 +4755,7 @@
 		isa = PBXTextBookmark;
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		rLen = 0;
-		rLoc = 346;
+		rLoc = 366;
 		rType = 1;
 	};
 	82BCF2410DDD96FA007B923A /* PBXTextBookmark */ = {
@@ -4716,7 +4763,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 292";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1341;
 		vrLoc = 7027;
@@ -4726,7 +4773,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1292;
+		rLoc = 1323;
 		rType = 0;
 		vrLen = 927;
 		vrLoc = 866;
@@ -4736,7 +4783,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 303";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1354;
 		vrLoc = 7027;
@@ -4746,7 +4793,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 294";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1354;
 		vrLoc = 7027;
@@ -4756,7 +4803,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1315;
+		rLoc = 1346;
 		rType = 0;
 		vrLen = 930;
 		vrLoc = 958;
@@ -4766,7 +4813,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 294";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1341;
 		vrLoc = 7027;
@@ -4776,7 +4823,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 294";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1341;
 		vrLoc = 7027;
@@ -4786,7 +4833,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1315;
+		rLoc = 1346;
 		rType = 0;
 		vrLen = 930;
 		vrLoc = 958;
@@ -4796,7 +4843,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 283";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1467;
 		vrLoc = 7286;
@@ -4806,7 +4853,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 347";
 		rLen = 0;
-		rLoc = 10690;
+		rLoc = 11334;
 		rType = 0;
 		vrLen = 1782;
 		vrLoc = 8294;
@@ -4816,7 +4863,7 @@
 		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
 		name = "datetools.h: 143";
 		rLen = 231;
-		rLoc = 4128;
+		rLoc = 4176;
 		rType = 0;
 		vrLen = 1545;
 		vrLoc = 2747;
@@ -4836,7 +4883,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 301";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1488;
 		vrLoc = 6806;
@@ -4846,7 +4893,7 @@
 		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
 		name = "datetools.h: 138";
 		rLen = 0;
-		rLoc = 4132;
+		rLoc = 4180;
 		rType = 0;
 		vrLen = 1722;
 		vrLoc = 2499;
@@ -4856,7 +4903,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 284";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1488;
 		vrLoc = 6806;
@@ -4866,7 +4913,7 @@
 		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
 		name = "datetools.h: 139";
 		rLen = 0;
-		rLoc = 4118;
+		rLoc = 4166;
 		rType = 0;
 		vrLen = 1684;
 		vrLoc = 2499;
@@ -4876,7 +4923,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 289";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1488;
 		vrLoc = 6806;
@@ -4886,7 +4933,7 @@
 		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
 		name = "datetools.h: 138";
 		rLen = 0;
-		rLoc = 4079;
+		rLoc = 4127;
 		rType = 0;
 		vrLen = 1695;
 		vrLoc = 2499;
@@ -4926,7 +4973,7 @@
 		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
 		name = "datetools.h: 143";
 		rLen = 231;
-		rLoc = 4128;
+		rLoc = 4176;
 		rType = 0;
 		vrLen = 1545;
 		vrLoc = 2747;
@@ -4936,7 +4983,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 282";
 		rLen = 0;
-		rLoc = 7255;
+		rLoc = 7404;
 		rType = 0;
 		vrLen = 1398;
 		vrLoc = 6472;
@@ -4946,7 +4993,7 @@
 		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
 		name = "datetools.h: 143";
 		rLen = 231;
-		rLoc = 4128;
+		rLoc = 4176;
 		rType = 0;
 		vrLen = 1545;
 		vrLoc = 2747;
@@ -4956,7 +5003,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 284";
 		rLen = 0;
-		rLoc = 7438;
+		rLoc = 7587;
 		rType = 0;
 		vrLen = 1461;
 		vrLoc = 7008;
@@ -4966,7 +5013,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 284";
 		rLen = 0;
-		rLoc = 7438;
+		rLoc = 7587;
 		rType = 0;
 		vrLen = 1461;
 		vrLoc = 7008;
@@ -4976,7 +5023,7 @@
 		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
 		name = "datetools.h: 143";
 		rLen = 231;
-		rLoc = 4128;
+		rLoc = 4176;
 		rType = 0;
 		vrLen = 1545;
 		vrLoc = 2747;
@@ -4986,7 +5033,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 285";
 		rLen = 0;
-		rLoc = 7443;
+		rLoc = 7592;
 		rType = 0;
 		vrLen = 1487;
 		vrLoc = 7008;
@@ -4996,7 +5043,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 287";
 		rLen = 0;
-		rLoc = 7952;
+		rLoc = 8596;
 		rType = 0;
 		vrLen = 1515;
 		vrLoc = 6760;
@@ -5006,7 +5053,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 295";
 		rLen = 0;
-		rLoc = 7863;
+		rLoc = 8397;
 		rType = 0;
 		vrLen = 1559;
 		vrLoc = 7058;
@@ -5016,7 +5063,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 325";
 		rLen = 0;
-		rLoc = 8890;
+		rLoc = 9534;
 		rType = 0;
 		vrLen = 1387;
 		vrLoc = 7747;
@@ -5026,7 +5073,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 306";
 		rLen = 0;
-		rLoc = 8272;
+		rLoc = 8916;
 		rType = 0;
 		vrLen = 1330;
 		vrLoc = 8642;
@@ -5057,7 +5104,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 336";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1300;
 		vrLoc = 8381;
@@ -5067,7 +5114,7 @@
 		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
 		name = "datetools.h: 130";
 		rLen = 0;
-		rLoc = 3613;
+		rLoc = 3661;
 		rType = 0;
 		vrLen = 1550;
 		vrLoc = 2742;
@@ -5077,7 +5124,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1335;
+		rLoc = 1366;
 		rType = 0;
 		vrLen = 1049;
 		vrLoc = 903;
@@ -5087,7 +5134,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 336";
 		rLen = 0;
-		rLoc = 9038;
+		rLoc = 9682;
 		rType = 0;
 		vrLen = 1300;
 		vrLoc = 8381;
@@ -5097,7 +5144,7 @@
 		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
 		name = "datetools.h: 130";
 		rLen = 0;
-		rLoc = 3613;
+		rLoc = 3661;
 		rType = 0;
 		vrLen = 1550;
 		vrLoc = 2742;
@@ -5107,7 +5154,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1335;
+		rLoc = 1366;
 		rType = 0;
 		vrLen = 1049;
 		vrLoc = 903;
@@ -5141,7 +5188,7 @@
 		comments = "warning: control reaches end of non-void function";
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		rLen = 1;
-		rLoc = 307;
+		rLoc = 327;
 		rType = 1;
 	};
 	82BCF2820DE17C9D007B923A /* PBXTextBookmark */ = {
@@ -5149,7 +5196,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 64";
 		rLen = 0;
-		rLoc = 1269;
+		rLoc = 1300;
 		rType = 0;
 		vrLen = 665;
 		vrLoc = 958;
@@ -5159,7 +5206,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 64";
 		rLen = 0;
-		rLoc = 1269;
+		rLoc = 1300;
 		rType = 0;
 		vrLen = 665;
 		vrLoc = 958;
@@ -5169,7 +5216,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 297";
 		rLen = 0;
-		rLoc = 7933;
+		rLoc = 8577;
 		rType = 0;
 		vrLen = 992;
 		vrLoc = 7130;
@@ -5179,7 +5226,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 297";
 		rLen = 0;
-		rLoc = 7933;
+		rLoc = 8577;
 		rType = 0;
 		vrLen = 1279;
 		vrLoc = 7466;
@@ -5189,7 +5236,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 285";
 		rLen = 0;
-		rLoc = 7450;
+		rLoc = 7950;
 		rType = 0;
 		vrLen = 1447;
 		vrLoc = 6602;
@@ -5219,7 +5266,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 285";
 		rLen = 0;
-		rLoc = 7450;
+		rLoc = 7950;
 		rType = 0;
 		vrLen = 1447;
 		vrLoc = 6602;
@@ -5299,7 +5346,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1351;
+		rLoc = 1382;
 		rType = 0;
 		vrLen = 995;
 		vrLoc = 869;
@@ -5309,7 +5356,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1351;
+		rLoc = 1382;
 		rType = 0;
 		vrLen = 995;
 		vrLoc = 869;
@@ -5319,7 +5366,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1351;
+		rLoc = 1382;
 		rType = 0;
 		vrLen = 995;
 		vrLoc = 869;
@@ -5470,7 +5517,7 @@
 		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
 		name = "datetoolstests.cpp: 113";
 		rLen = 48;
-		rLoc = 3455;
+		rLoc = 3686;
 		rType = 0;
 		vrLen = 1426;
 		vrLoc = 1779;
@@ -5537,7 +5584,7 @@
 		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
 		name = "datetoolstests.cpp: 113";
 		rLen = 48;
-		rLoc = 3455;
+		rLoc = 3686;
 		rType = 0;
 		vrLen = 1426;
 		vrLoc = 1779;
@@ -5567,7 +5614,7 @@
 		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
 		name = "datetoolstests.cpp: 113";
 		rLen = 48;
-		rLoc = 3455;
+		rLoc = 3686;
 		rType = 0;
 		vrLen = 1426;
 		vrLoc = 1779;
@@ -7027,7 +7074,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1351;
+		rLoc = 1382;
 		rType = 0;
 		vrLen = 995;
 		vrLoc = 869;
@@ -7037,7 +7084,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1351;
+		rLoc = 1382;
 		rType = 0;
 		vrLen = 933;
 		vrLoc = 869;
@@ -7047,7 +7094,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1351;
+		rLoc = 1382;
 		rType = 0;
 		vrLen = 933;
 		vrLoc = 869;
@@ -7064,7 +7111,7 @@
 		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
 		name = "main.cpp: 69";
 		rLen = 0;
-		rLoc = 1351;
+		rLoc = 1382;
 		rType = 0;
 		vrLen = 933;
 		vrLoc = 869;
@@ -7365,7 +7412,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 287";
 		rLen = 12;
-		rLoc = 7465;
+		rLoc = 7965;
 		rType = 0;
 		vrLen = 1264;
 		vrLoc = 7008;
@@ -7395,7 +7442,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 283";
 		rLen = 0;
-		rLoc = 7309;
+		rLoc = 7458;
 		rType = 0;
 		vrLen = 1378;
 		vrLoc = 6918;
@@ -7415,7 +7462,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 291";
 		rLen = 0;
-		rLoc = 7605;
+		rLoc = 8064;
 		rType = 0;
 		vrLen = 1337;
 		vrLoc = 7058;
@@ -7435,7 +7482,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 296";
 		rLen = 0;
-		rLoc = 7719;
+		rLoc = 8158;
 		rType = 0;
 		vrLen = 1264;
 		vrLoc = 7008;
@@ -7455,7 +7502,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 287";
 		rLen = 0;
-		rLoc = 7454;
+		rLoc = 7954;
 		rType = 0;
 		vrLen = 1264;
 		vrLoc = 7008;
@@ -7475,7 +7522,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 287";
 		rLen = 12;
-		rLoc = 7465;
+		rLoc = 7965;
 		rType = 0;
 		vrLen = 1264;
 		vrLoc = 7008;
@@ -7485,7 +7532,7 @@
 		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
 		name = "datetoolstests.cpp: 114";
 		rLen = 0;
-		rLoc = 3443;
+		rLoc = 3674;
 		rType = 0;
 		vrLen = 1453;
 		vrLoc = 1857;
@@ -7505,7 +7552,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 261";
 		rLen = 0;
-		rLoc = 6580;
+		rLoc = 6616;
 		rType = 0;
 		vrLen = 1121;
 		vrLoc = 5679;
@@ -7515,7 +7562,7 @@
 		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
 		name = "datetoolstests.cpp: 114";
 		rLen = 0;
-		rLoc = 3443;
+		rLoc = 3674;
 		rType = 0;
 		vrLen = 1469;
 		vrLoc = 1894;
@@ -7525,7 +7572,7 @@
 		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
 		name = "datetoolstests.cpp: 114";
 		rLen = 0;
-		rLoc = 3443;
+		rLoc = 3674;
 		rType = 0;
 		vrLen = 1469;
 		vrLoc = 1894;
@@ -7535,7 +7582,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 258";
 		rLen = 0;
-		rLoc = 6584;
+		rLoc = 6736;
 		rType = 0;
 		vrLen = 1201;
 		vrLoc = 5522;
@@ -7555,7 +7602,7 @@
 		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
 		name = "datetools.cpp: 261";
 		rLen = 0;
-		rLoc = 6580;
+		rLoc = 6616;
 		rType = 0;
 		vrLen = 1121;
 		vrLoc = 5679;
@@ -7575,10 +7622,468 @@
 		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
 		name = "datetoolstests.cpp: 119";
 		rLen = 0;
-		rLoc = 3443;
+		rLoc = 3674;
 		rType = 0;
 		vrLen = 1472;
 		vrLoc = 1983;
+	};
+	82BCF4590DE3F974007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
+		name = "datetools.h: 94";
+		rLen = 35;
+		rLoc = 2261;
+		rType = 0;
+		vrLen = 1276;
+		vrLoc = 1297;
+	};
+	82BCF45A0DE3F974007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 299";
+		rLen = 0;
+		rLoc = 8157;
+		rType = 0;
+		vrLen = 1261;
+		vrLoc = 5196;
+	};
+	82BCF45B0DE3F974007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 116";
+		rLen = 0;
+		rLoc = 3312;
+		rType = 0;
+		vrLen = 1476;
+		vrLoc = 1978;
+	};
+	82BCF45C0DE3F974007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 119";
+		rLen = 0;
+		rLoc = 3674;
+		rType = 0;
+		vrLen = 1472;
+		vrLoc = 1983;
+	};
+	82BCF45D0DE3F974007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 261";
+		rLen = 0;
+		rLoc = 6616;
+		rType = 0;
+		vrLen = 1092;
+		vrLoc = 7870;
+	};
+	82BCF45E0DE3F974007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 119";
+		rLen = 0;
+		rLoc = 3674;
+		rType = 0;
+		vrLen = 1477;
+		vrLoc = 1978;
+	};
+	82BCF45F0DE3F974007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 261";
+		rLen = 0;
+		rLoc = 6616;
+		rType = 0;
+		vrLen = 1116;
+		vrLoc = 6009;
+	};
+	82BCF4600DE3F974007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 116";
+		rLen = 0;
+		rLoc = 3312;
+		rType = 0;
+		vrLen = 1476;
+		vrLoc = 1978;
+	};
+	82BCF4610DE3F974007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 292";
+		rLen = 0;
+		rLoc = 8042;
+		rType = 0;
+		vrLen = 1135;
+		vrLoc = 5990;
+	};
+	82BCF4620DE3F974007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2770DB77E0E00FDEE16 /* datetools.h */;
+		name = "datetools.h: 94";
+		rLen = 35;
+		rLoc = 2261;
+		rType = 0;
+		vrLen = 1276;
+		vrLoc = 1297;
+	};
+	82BCF4630DE3F974007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 299";
+		rLen = 0;
+		rLoc = 8157;
+		rType = 0;
+		vrLen = 1261;
+		vrLoc = 5196;
+	};
+	82BCF4640DE3F974007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 120";
+		rLen = 0;
+		rLoc = 3439;
+		rType = 0;
+		vrLen = 1527;
+		vrLoc = 2018;
+	};
+	82BCF4660DE3FA87007B923A /* datetoolstests.cpp:117 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		functionName = "testDynamicScheduleICal()";
+		hitCount = 1;
+		ignoreCount = 0;
+		lineNumber = 117;
+		location = dSS;
+		modificationTime = 233054370.224958;
+		state = 1;
+	};
+	82BCF46E0DE3FD2C007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 114";
+		rLen = 0;
+		rLoc = 3231;
+		rType = 0;
+		vrLen = 1486;
+		vrLoc = 2102;
+	};
+	82BCF46F0DE3FD2C007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		rLen = 0;
+		rLoc = 216;
+		rType = 1;
+	};
+	82BCF4700DE3FD2C007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 118";
+		rLen = 0;
+		rLoc = 3372;
+		rType = 0;
+		vrLen = 1487;
+		vrLoc = 2102;
+	};
+	82BCF4710DE3FD2C007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 304";
+		rLen = 0;
+		rLoc = 8437;
+		rType = 0;
+		vrLen = 1290;
+		vrLoc = 7189;
+	};
+	82BCF4720DE3FD2C007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 114";
+		rLen = 0;
+		rLoc = 3231;
+		rType = 0;
+		vrLen = 1486;
+		vrLoc = 2102;
+	};
+	82BCF4730DE3FD2C007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 217";
+		rLen = 0;
+		rLoc = 5250;
+		rType = 0;
+		vrLen = 1195;
+		vrLoc = 4674;
+	};
+	82BCF4780DE3FE3D007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 217";
+		rLen = 0;
+		rLoc = 5250;
+		rType = 0;
+		vrLen = 1264;
+		vrLoc = 4674;
+	};
+	82BCF4800DE40026007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 26";
+		rLen = 0;
+		rLoc = 458;
+		rType = 0;
+		vrLen = 890;
+		vrLoc = 137;
+	};
+	82BCF4810DE40026007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		rLen = 0;
+		rLoc = 113;
+		rType = 1;
+	};
+	82BCF4820DE40026007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 26";
+		rLen = 0;
+		rLoc = 458;
+		rType = 0;
+		vrLen = 890;
+		vrLoc = 137;
+	};
+	82BCF4830DE40026007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 115";
+		rLen = 0;
+		rLoc = 3231;
+		rType = 0;
+		vrLen = 1457;
+		vrLoc = 2194;
+	};
+	82BCF48A0DE40826007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 121";
+		rLen = 0;
+		rLoc = 3260;
+		rType = 0;
+		vrLen = 1224;
+		vrLoc = 2532;
+	};
+	82BCF48B0DE40826007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 121";
+		rLen = 0;
+		rLoc = 3260;
+		rType = 0;
+		vrLen = 1224;
+		vrLoc = 2532;
+	};
+	82BCF48C0DE40826007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 300";
+		rLen = 0;
+		rLoc = 8069;
+		rType = 0;
+		vrLen = 1079;
+		vrLoc = 7600;
+	};
+	82BCF4B40DE41DCA007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
+		name = "main.cpp: 53";
+		rLen = 0;
+		rLoc = 1098;
+		rType = 0;
+		vrLen = 691;
+		vrLoc = 610;
+	};
+	82BCF4B50DE41DCA007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 121";
+		rLen = 0;
+		rLoc = 3231;
+		rType = 0;
+		vrLen = 1540;
+		vrLoc = 2375;
+	};
+	82BCF4B60DE41DCA007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 294";
+		rLen = 0;
+		rLoc = 8021;
+		rType = 0;
+		vrLen = 1080;
+		vrLoc = 7600;
+	};
+	82BCF4B70DE41DCA007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 302";
+		rLen = 0;
+		rLoc = 8086;
+		rType = 0;
+		vrLen = 1079;
+		vrLoc = 7600;
+	};
+	82BCF4B80DE41DCA007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 121";
+		rLen = 0;
+		rLoc = 3231;
+		rType = 0;
+		vrLen = 1247;
+		vrLoc = 2460;
+	};
+	82BCF4B90DE41DCA007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 294";
+		rLen = 0;
+		rLoc = 8021;
+		rType = 0;
+		vrLen = 1080;
+		vrLoc = 7600;
+	};
+	82BCF4BA0DE41DCA007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 08FB7796FE84155DC02AAC07 /* main.cpp */;
+		name = "main.cpp: 53";
+		rLen = 0;
+		rLoc = 1098;
+		rType = 0;
+		vrLen = 691;
+		vrLoc = 610;
+	};
+	82BCF4BB0DE41DCA007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 121";
+		rLen = 0;
+		rLoc = 3231;
+		rType = 0;
+		vrLen = 1540;
+		vrLoc = 2375;
+	};
+	82BCF4BC0DE41DCA007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 299";
+		rLen = 0;
+		rLoc = 8064;
+		rType = 0;
+		vrLen = 1225;
+		vrLoc = 7675;
+	};
+	82BCF4C80DE42011007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 306";
+		rLen = 0;
+		rLoc = 8021;
+		rType = 0;
+		vrLen = 1154;
+		vrLoc = 7600;
+	};
+	82BCF4C90DE42011007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		rLen = 0;
+		rLoc = 118;
+		rType = 1;
+	};
+	82BCF4CA0DE42011007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 302";
+		rLen = 0;
+		rLoc = 7915;
+		rType = 0;
+		vrLen = 1172;
+		vrLoc = 7600;
+	};
+	82BCF4CB0DE42011007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 129";
+		rLen = 0;
+		rLoc = 3490;
+		rType = 0;
+		vrLen = 1325;
+		vrLoc = 2650;
+	};
+	82BCF4CC0DE42011007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 318";
+		rLen = 0;
+		rLoc = 8363;
+		rType = 0;
+		vrLen = 1119;
+		vrLoc = 7525;
+	};
+	82BCF4CD0DE42011007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 126";
+		rLen = 0;
+		rLoc = 3373;
+		rType = 0;
+		vrLen = 1355;
+		vrLoc = 2620;
+	};
+	82BCF4CE0DE42011007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 319";
+		rLen = 0;
+		rLoc = 8437;
+		rType = 0;
+		vrLen = 1151;
+		vrLoc = 7603;
+	};
+	82BCF4CF0DE42011007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 126";
+		rLen = 0;
+		rLoc = 3373;
+		rType = 0;
+		vrLen = 1320;
+		vrLoc = 2655;
+	};
+	82BCF4D00DE42011007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2780DB77E0E00FDEE16 /* datetools.cpp */;
+		name = "datetools.cpp: 306";
+		rLen = 0;
+		rLoc = 8021;
+		rType = 0;
+		vrLen = 1154;
+		vrLoc = 7600;
+	};
+	82BCF4D10DE42011007B923A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */;
+		name = "datetoolstests.cpp: 126";
+		rLen = 0;
+		rLoc = 3484;
+		rType = 0;
+		vrLen = 1359;
+		vrLoc = 2585;
 	};
 	82E3D10B0DAF730E00FDEE16 /* scriptstest.h */ = {
 		uiCtxt = {
@@ -7596,23 +8101,23 @@
 	};
 	82E3D2770DB77E0E00FDEE16 /* datetools.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1018, 2380}}";
-			sepNavSelRange = "{2204, 44}";
-			sepNavVisRange = "{1262, 1268}";
+			sepNavIntBoundsRect = "{{0, 0}, {1018, 2366}}";
+			sepNavSelRange = "{2261, 35}";
+			sepNavVisRange = "{1297, 1276}";
 		};
 	};
 	82E3D2780DB77E0E00FDEE16 /* datetools.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1018, 5894}}";
-			sepNavSelRange = "{6580, 0}";
-			sepNavVisRange = "{5679, 1121}";
+			sepNavIntBoundsRect = "{{0, 0}, {1018, 6076}}";
+			sepNavSelRange = "{8021, 0}";
+			sepNavVisRange = "{7600, 1154}";
 		};
 	};
 	82E3D2DA0DB795EA00FDEE16 /* datetoolstests.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1018, 1764}}";
-			sepNavSelRange = "{3443, 0}";
-			sepNavVisRange = "{1983, 1472}";
+			sepNavIntBoundsRect = "{{0, 0}, {1164, 1750}}";
+			sepNavSelRange = "{3546, 0}";
+			sepNavVisRange = "{3196, 539}";
 		};
 	};
 	8DD76F620486A84900D96B5E /* dSS */ = {

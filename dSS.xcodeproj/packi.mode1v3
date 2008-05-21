@@ -216,7 +216,7 @@
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>82BCF4570DE30E90007B923A</string>
+						<string>82BCF4D10DE42011007B923A</string>
 						<key>history</key>
 						<array>
 							<string>82BCF37A0DE2ADB6007B923A</string>
@@ -225,15 +225,15 @@
 							<string>82BCF3B10DE2B9AC007B923A</string>
 							<string>82BCF3C70DE2BFFB007B923A</string>
 							<string>82BCF3E10DE2C72C007B923A</string>
-							<string>82BCF3EE0DE2C79F007B923A</string>
 							<string>82BCF3FB0DE2C83E007B923A</string>
 							<string>82BCF4030DE2CBFF007B923A</string>
 							<string>82BCF4290DE2D953007B923A</string>
 							<string>82BCF4400DE2E964007B923A</string>
 							<string>82BCF4410DE2E964007B923A</string>
-							<string>82BCF44F0DE30AE6007B923A</string>
-							<string>82BCF4500DE30AE6007B923A</string>
-							<string>82BCF4510DE30AE6007B923A</string>
+							<string>82BCF4590DE3F974007B923A</string>
+							<string>82BCF4B40DE41DCA007B923A</string>
+							<string>82BCF4C80DE42011007B923A</string>
+							<string>82BCF4C90DE42011007B923A</string>
 						</array>
 						<key>prevStack</key>
 						<array>
@@ -294,6 +294,31 @@
 							<string>82BCF4530DE30AE6007B923A</string>
 							<string>82BCF4540DE30AE6007B923A</string>
 							<string>82BCF4550DE30AE6007B923A</string>
+							<string>82BCF45C0DE3F974007B923A</string>
+							<string>82BCF45D0DE3F974007B923A</string>
+							<string>82BCF45E0DE3F974007B923A</string>
+							<string>82BCF45F0DE3F974007B923A</string>
+							<string>82BCF4600DE3F974007B923A</string>
+							<string>82BCF4610DE3F974007B923A</string>
+							<string>82BCF4620DE3F974007B923A</string>
+							<string>82BCF4630DE3F974007B923A</string>
+							<string>82BCF4700DE3FD2C007B923A</string>
+							<string>82BCF4710DE3FD2C007B923A</string>
+							<string>82BCF4720DE3FD2C007B923A</string>
+							<string>82BCF4820DE40026007B923A</string>
+							<string>82BCF48B0DE40826007B923A</string>
+							<string>82BCF4B70DE41DCA007B923A</string>
+							<string>82BCF4B80DE41DCA007B923A</string>
+							<string>82BCF4B90DE41DCA007B923A</string>
+							<string>82BCF4BA0DE41DCA007B923A</string>
+							<string>82BCF4BB0DE41DCA007B923A</string>
+							<string>82BCF4CA0DE42011007B923A</string>
+							<string>82BCF4CB0DE42011007B923A</string>
+							<string>82BCF4CC0DE42011007B923A</string>
+							<string>82BCF4CD0DE42011007B923A</string>
+							<string>82BCF4CE0DE42011007B923A</string>
+							<string>82BCF4CF0DE42011007B923A</string>
+							<string>82BCF4D00DE42011007B923A</string>
 						</array>
 					</dict>
 					<key>SplitCount</key>
@@ -638,8 +663,8 @@
 		<string>82BCF1F60DDD8F56007B923A</string>
 		<string>/Users/packi/sources/dss/trunk/dSS.xcodeproj</string>
 		<string>82532A610DA280250030CC6A</string>
-		<string>1C78EAAD065D492600B07095</string>
 		<string>1CD10A99069EF8BA00B06720</string>
+		<string>1C78EAAD065D492600B07095</string>
 		<string>82BCF3670DE2A74C007B923A</string>
 	</array>
 	<key>WindowString</key>
