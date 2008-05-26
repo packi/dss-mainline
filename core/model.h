@@ -427,6 +427,7 @@ namespace dss {
     Action& m_ActionToExecute;
     Arguments m_ActionArguments;
     const int m_ID;
+    string m_Name;
   public:
     Subscription(const int _id, Action& _action, Arguments& _actionArgs, vector<int> _eventIDs, vector<int> _sourceIDs)
     : m_ID(_id), m_ActionArguments(_actionArgs), m_ActionToExecute(_action), m_SourceIDs(_sourceIDs), m_EventIDs(_eventIDs) {};
@@ -435,6 +436,12 @@ namespace dss {
     
     /** Returns the id of the subscription */
     int GetID() const { return m_ID; };
+    
+    const string& GetName() const;
+    void SetName(const string& _value);
+    
+    const vector<int>& GetSourceIDs() const;
+    const vector<int>& GetEventIDs() const;
     
     /** Returns true if the subscription is subscribed to the event */
     bool HandlesEvent(const Event& _event) const;
@@ -519,6 +526,8 @@ namespace dss {
     Subscription& Subscribe(Action& _action, Arguments& _argsForAction, vector<int> _eventIDs, vector<int> _sourceIDs = vector<int>());
     /** Cancels a subscription for a event */
     void Unsubscribe(const int _subscriptionID);
+    int GetSubscriptionCount();
+    Subscription& GetSubscription(const int _index);
     
     /** Feeds an event to the processing-queue */
     void OnEvent(const Event& _event);
@@ -532,12 +541,15 @@ namespace dss {
   private:
     boost::shared_ptr<Event> m_Event;
     boost::shared_ptr<Schedule> m_Schedule;
+    string m_Name;
   public:
     ScheduledEvent(boost::shared_ptr<Event> _evt, boost::shared_ptr<Schedule> _schedule) 
     : m_Event(_evt), m_Schedule(_schedule) {};
     
-    Event& GetEvent() { return *m_Event; };
-    Schedule& GetSchedule() { return *m_Schedule; };
+    Event& GetEvent() const { return *m_Event; };
+    Schedule& GetSchedule() const { return *m_Schedule; };
+    const string& GetName() const { return m_Name; };
+    void SetName(const string& _value) { m_Name = _value; };
   };
 
   

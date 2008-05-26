@@ -662,6 +662,13 @@ namespace dss {
     }
   } // Unsubscribe
   
+  int Apartment::GetSubscriptionCount() {
+    return m_Subscriptions.size();
+  } // GetSubscriptionCount
+    
+  Subscription& Apartment::GetSubscription(const int _index) {
+    return *m_Subscriptions.at(_index);
+  } // GetSubscription
 
   struct handle_event : public unary_function<Subscription*, void>
   {
@@ -805,6 +812,22 @@ namespace dss {
     }
     return false;
   } // HandlesEvent
+  
+  const vector<int>& Subscription::GetSourceIDs() const {
+    return m_SourceIDs;
+  } // GetSourceIDs
+  
+  const vector<int>& Subscription::GetEventIDs() const {
+    return m_EventIDs;
+  } // GetEventIDs
+
+  const string& Subscription::GetName() const {
+    return m_Name;
+  } // GetName
+    
+  void Subscription::SetName(const string& _value) {
+    m_Name = _value;
+  } // SetName
   
   //================================================== DeviceReference
   

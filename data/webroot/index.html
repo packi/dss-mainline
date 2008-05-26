@@ -30,21 +30,21 @@
 	
 	function update(devices) {
 	  $('numDevs').innerHTML = devices.length;
-	  var devslist = "<ul>";
-	  for(i = 0; i < devices.length; i++) {
-	    var dev = devices[i];
-	    devslist += "<li>" + dev.name;
+	  var devslist = "<table>";
+	  devslist += "<tr><th>Name</th><th>State</th><th>Actions</th></tr>"
+	  devices.each(function(dev) {
+	    devslist += "<tr><td>" + dev.name + "</td>";
 		if(dev.on) {
-		  devslist += "&nbsp; On";
+		  devslist += "<td>On</td>";
 		} else {
-		  devslist += "&nbsp; Off";
+		  devslist += "<td>Off</td>";
 		}
-	    devslist += '&nbsp;<a href="#" onclick="turnOn(' + dev.id + ')">Turn On</a>';
-	    devslist += '&nbsp;<a href="#" onclick="turnOff(' + dev.id + ')">Turn Off</a>';
-	    devslist += "</li>";
-	    
-	  }
-	  devslist += "</ul>";
+	    devslist += '<td><a href="#" onclick="turnOn(' + dev.id + ')">Turn On</a>';
+	    devslist += '&nbsp;<a href="#" onclick="turnOff(' + dev.id + ')">Turn Off</a></td>';
+	    devslist += "</tr>";	    
+	  });
+	  
+	  devslist += "</table>";
 	  $('devList').innerHTML = devslist;
 	}
 	
@@ -81,36 +81,144 @@
 	          evtid: $F('evtid'),
 	          sourceid: $F('eventsrc'),
 	          schedule: $F('eventsched'),
-	          start: $F('eventstart')
-	        }
+	          start: $F('eventstart'),
+	          name: $F('evtname')
+	        },
+	      onComplete: function(transport, json) {
+	        updateEvents();
+	      }
 	    } 
+	  );
+	}
+	
+	function deleteEvent(id) {
+	  new Ajax.Request('/json/event/remove',
+	    {
+	      method: 'get',
+	      parameters:
+	        {
+	          id: id
+	        },
+	      onComplete: function(transport, json) {
+	        updateEvents();
+	      }
+	    }
+	  );
+	}
+	
+	function updateEventList(events) {
+	  var eventlist = "<ol>";
+	  events.each(
+	    function(event) {
+	      eventlist += "<li>" +  event.name + ' <a href="#" onclick="deleteEvent(' + event.id + ')">Remove</a></li>';
+	    }
+	  );
+	  eventlist += "</ol>";
+	  $('evt_div').innerHTML = eventlist;
+	}
+	
+	function updateEvents() {
+	  new Ajax.Request('/json/event/getlist',
+	    {
+	       method: 'get',
+	       onComplete: function(transport, json) {
+	         updateEventList(transport.responseJSON.events);
+	       }
+	    }
+	  ); 
+	}
+	
+	function unsubscribeFrom(id) {
+	  new Ajax.Request('/json/subscription/unsubscribe',
+	    {
+	      method: 'get',
+	      parameters:
+	        {
+	          id: id
+	        },
+	      onComplete: function(transport, json) {
+	        updateSubscriptions();
+	      }
+	    }
+	  );
+	}
+	
+    function updateSubscriptionsList(subscriptions) {
+	  var subscriptionlist = "<table>";
+	  subscriptionlist += "<tr><th>Name</th><th>ID</th><th>Action</th></tr>";
+	  subscriptions.each(
+	    function(subscription) {
+	      subscriptionlist += "<tr><td>" + subscription.name + "</td><td>" + subscription.id + '</td><td><a href="#" onclick="unsubscribeFrom(' + subscription.id + ')">Unsubscribe</a></td></tr>';
+	    }
+	  );
+	  subscriptionlist += "</table>";
+	  $('sub_div').innerHTML = subscriptionlist;
+	}
+	
+	
+	function updateSubscriptions() {
+	  new Ajax.Request('/json/subscription/getlist',
+	    {
+	      method: 'get',
+	      onComplete: function(transport, json) {
+	        updateSubscriptionsList(transport.responseJSON.subscriptions);
+	      }
+	    }
 	  );
 	}
   
 	doUpdate();	
+	updateEvents();
+	updateSubscriptions();
 </script>
   </head>
   <body>
     <h1>Welcome to the dSS!</h1>
 	<ul>
 	  <li><a href="config">Config</a></li>
-	  <li><a href="addevent.html">Add Event</a></li>
 	  <li><a href="scripts">Scripts</a></li>
-	<!--  <li><a href="events">Events</a></li> -->
 	</ul>
 	<form>
 	<h2>Event Raising / Scheduling</h2>
-	  Event ID: <input type="text" id="evtid" value="1001"/><br />
-	  Event Source: <input type="text" id="eventsrc" value="1"/><br />
-	  Event Schedule: <input type="text" id="eventsched" value="FREQ=MINUTELY;INTERVAL=2"/><br />
-	  Event Start: <input type="text" id="eventstart" value="20080520T080000"/><br />
-	  <a href="#" onclick="raiseEvent()">Raise</a>
-	  <a href="#" onclick="scheduleEvent()">Schedule</a>
+	<table>
+	  <tr><td>Event ID:</td><td><input type="text" id="evtid" value="1001"/></td></tr>
+	  <tr><td>Event Source:</td><td><input type="text" id="eventsrc" value="1"/></td></tr>
+	  <tr><td>Event Schedule:</td><td><input type="text" id="eventsched" value="FREQ=MINUTELY;INTERVAL=2"/></td></tr>
+	  <tr><td>Event Start:</td><td><input type="text" id="eventstart" value="20080520T080000"/></td></tr>
+	  <tr><td>Event Name:</td><td><input type="text" id="evtname" value="testing..."/></td></tr>
+	  <tr><td><a href="#" onclick="raiseEvent()">Raise</a>
+	  <a href="#" onclick="scheduleEvent()">Schedule</a></td></tr>
+	  </table>
 	</form>
 	<form>
 	Connected devices: <span id="numDevs">(...loading...)</span>
 	<div id="devList">
+	(...loading...)
 	</div>
+	<div id="evt_div">
+	(...loading...)
+	</div>
+	<div id="sub_div">
+	(...loading...)
+	</div>	
+	</form>
+	<form>
+	  <h2>Subscription</h2>
+	  <table>
+	    <tr><td>Event IDs</td><td><input type="text" id="sub_evtids" value="1001"/></td></tr>
+	    <tr><td>Source IDs</td><td><input type="text" id="sub_sourceid" value=""/></td></tr>
+	    <tr>
+	      <td>Action</td>
+	      <td>
+	        <select id="action_name">
+	          <option value="none">(please choose)</option>
+	          <option value="actionJS">Execute JavaScript</option>
+	        </select>
+	      </td>
+	    </tr>
+	    <tr><td>Parameter[file]</td><td><input type="text" id="param_file"></td></tr>
+	    <tr><td><a href="#" onclick="subscribe()">Subscribe</td><td></td></tr>
+      </table>
 	</form>
   </body>	
 </html>

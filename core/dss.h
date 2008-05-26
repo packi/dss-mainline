@@ -39,7 +39,6 @@ namespace dss {
     struct shttpd_ctx* m_SHttpdContext;
   protected:
     static void JSONHandler(struct shttpd_arg* _arg);
-    static void AddEvent(struct shttpd_arg* _arg);
     static void HTTPListOptions(struct shttpd_arg* _arg);
     static void EmitHTTPHeader(int _code, struct shttpd_arg* _arg, const string _contentType = "text/html");
   public:
@@ -93,6 +92,10 @@ namespace dss {
     void AddEvent(ScheduledEvent* _scheduledEvent);
     
     void RaisePendingEvents(DateTime& _from, int _deltaSeconds);
+    
+    int GetSize() const;
+    const ScheduledEvent& GetEvent(const int _idx) const;
+    void RemoveEvent(const int _idx);    
     
     virtual void Execute();
   }; // EventRunner

@@ -23,6 +23,20 @@ namespace dss {
   //============================================ EventRunner
   
   const bool DebugEventRunner = false;
+   
+  int EventRunner::GetSize() const {
+    return m_ScheduledEvents.size();
+  } // GetSize
+  
+  const ScheduledEvent& EventRunner::GetEvent(const int _idx) const {
+    return m_ScheduledEvents.at(_idx);
+  } // GetEvent
+  
+  void EventRunner::RemoveEvent(const int _idx) {
+    boost::ptr_vector<ScheduledEvent>::iterator it = m_ScheduledEvents.begin();
+    advance(it, _idx);
+    m_ScheduledEvents.erase(it);    
+  } // RemoveEvent
   
   void EventRunner::AddEvent(ScheduledEvent* _scheduledEvent) {
     m_ScheduledEvents.push_back(_scheduledEvent);
@@ -120,6 +134,7 @@ namespace dss {
     boost::shared_ptr<RepeatingSchedule> sch(new RepeatingSchedule(Minutely, 1, startingTime));
         
     ScheduledEvent* schEvt = new ScheduledEvent(evt, sch);
+    schEvt->SetName("Run test2.js every minute");
     m_EventRunner.AddEvent(schEvt);
     
     ActionJS jsAction;
@@ -127,7 +142,8 @@ namespace dss {
     args.SetValue("script", "/Users/packi/sources/dss/trunk/data/test2.js");
     vector<int> eventIDs;
     eventIDs.push_back(1003);
-    m_Apartment.Subscribe(jsAction, args, eventIDs);
+    Subscription& sub = m_Apartment.Subscribe(jsAction, args, eventIDs);
+    sub.SetName("I'm a subscription");
 
     while(true) {
       sleep(1000);
@@ -162,7 +178,6 @@ namespace dss {
 
     shttpd_register_uri(m_SHttpdContext, "/config", &HTTPListOptions, NULL);    
     shttpd_register_uri(m_SHttpdContext, "/json/*", &JSONHandler, NULL);
-    shttpd_register_uri(m_SHttpdContext, "/addevent", &AddEvent, NULL);
   } // Initialize
   
   void WebServer::Execute() {
@@ -194,22 +209,43 @@ namespace dss {
       }
     }
     return result;
-  }
+  } // ParseParameter
+    
+  template<class t>
+  string ToJSONValue(const t& _value);
   
-  void WebServer::AddEvent(struct shttpd_arg* _arg) {
-    HashMapConstStringString paramMap = ParseParameter(_arg->in.buf);
-    
-    string file = paramMap["file"];
-    string schedule = paramMap["schedule"];
-    EmitHTTPHeader(200, _arg, "text/plain");
-    
-//    Action& act = DSS::GetInstance()->GetApartment().GetAction("ActionJS");
-//    ScheduledEvent* scheduledEvent = new ScheduledEvent();
-    
-  //  DSS::GetInstance()->GetEventRunner().AddEvent();;
-    shttpd_printf(_arg, "file: %s, schedule %s", file.c_str(), schedule.c_str());
-    _arg->flags |= SHTTPD_END_OF_OUTPUT;    
-  }
+  template<>
+  string ToJSONValue(const int& _value) {
+    return IntToString(_value);
+  } // ToJSONValue
+  
+  template<>
+  string ToJSONValue(const string& _value) {
+    return string("\"") + _value + '"';
+  } // ToJSONValue
+
+  template<class t>
+  string ToJSONArray(const vector<t>& _v);
+  
+  template<>
+  string ToJSONArray(const vector<int>& _v) {
+    stringstream arr;
+    arr << "[";
+    bool first = true;
+    vector<int>::const_iterator iV;
+    vector<int>::const_iterator e;
+    for(iV = _v.begin(), e = _v.end();
+        iV != e; ++iV)
+    {
+      if(!first) {
+        arr << ",";
+      }
+      arr << ToJSONValue(*iV);
+      first = false;
+    }
+    arr << "]";
+    return arr.str();
+  } // ToJSONArray<int>
 
   
   void WebServer::JSONHandler(struct shttpd_arg* _arg) {
@@ -252,7 +288,6 @@ namespace dss {
         shttpd_printf(_arg, "{ok:0}");
       }
     } else if(method == "turnoff") {
-      EmitHTTPHeader(200, _arg, "application/json");
       
       string devidStr = paramMap["device"];
       if(!devidStr.empty()) {
@@ -262,9 +297,73 @@ namespace dss {
       } else {
         shttpd_printf(_arg, "{ok:0}");
       }
+    } else if(BeginsWith(method, "subscription/")) {
+      if(method == "subscription/getlist") {
+        EmitHTTPHeader(200, _arg, "application/json");
+
+        stringstream response;
+        response << "{ \"subscriptions\":[";
+        
+        bool first = true;
+        int numSubscriptions = DSS::GetInstance()->GetApartment().GetSubscriptionCount();
+        for(int iSubscription = 0; iSubscription < numSubscriptions; iSubscription++) {
+          Subscription& sub = DSS::GetInstance()->GetApartment().GetSubscription(iSubscription);
+          if(!first) {
+            response << ",";
+          }
+          response << "{ \"id\":" << sub.GetID() << "," 
+                   <<   "\"name\":" << ToJSONValue(sub.GetName()) << ","
+                   <<   "\"evtids\":" << ToJSONArray<int>(sub.GetEventIDs()) << ","
+                   <<   "\"srcids\":" << ToJSONArray<int>(sub.GetSourceIDs())
+                   << "}";
+          first = false;
+        }
+        response << "]}";
+        
+        shttpd_printf(_arg, response.str().c_str());
+      } else if(method == "subscription/unsubscribe") {
+        EmitHTTPHeader(200, _arg, "application/json");
+        
+        if(!paramMap["id"].empty()) {
+          int subscriptionID = StrToInt(paramMap["id"]);
+          
+          DSS::GetInstance()->GetApartment().Unsubscribe(subscriptionID);
+          
+          shttpd_printf(_arg, "{ok:1}");        
+        } else {
+          shttpd_printf(_arg, "{ok:0}");        
+        }
+        
+      }
     } else if(BeginsWith(method, "event/")) {
       EmitHTTPHeader(200, _arg, "application/json");
-      if(paramMap["evtid"].empty() || paramMap["sourceid"].empty()) {
+      
+      
+      if(method == "event/getlist") {
+        stringstream response;
+        response << "{ \"events\":[";
+        bool first = true;
+        int numEvents = DSS::GetInstance()->GetEventRunner().GetSize();
+        for(int iEvent = 0; iEvent < numEvents; iEvent++) {
+          const ScheduledEvent& schedEvt = DSS::GetInstance()->GetEventRunner().GetEvent(iEvent);
+          if(!first) {
+            response << ",";
+          }
+          response << "{ id: " << iEvent << "," 
+                   <<   "\"evtid\":" << schedEvt.GetEvent().GetID() << ","
+                   <<   "\"sourceid\":" << schedEvt.GetEvent().GetSource() << ","
+                   <<   "\"name\": \"" << schedEvt.GetName() << "\""
+                   << "}";
+          first = false;
+        }
+        response << "]}";
+        
+        shttpd_printf(_arg, response.str().c_str());
+      } else if(method == "event/remove") {
+        int eventID = StrToInt(paramMap["id"]);
+        DSS::GetInstance()->GetEventRunner().RemoveEvent(eventID);
+        shttpd_printf(_arg, "{ok:1}");        
+      } else if(paramMap["evtid"].empty() || paramMap["sourceid"].empty()) {
         shttpd_printf(_arg, "{ok:0}");
       } else {
         int eventID = StrToInt(paramMap["evtid"]);
@@ -279,11 +378,15 @@ namespace dss {
           } else {
             string schedule = paramMap["schedule"];
             string startTimeISO = paramMap["start"];
+            string name = paramMap["name"];
             
             boost::shared_ptr<Event> evt(new Event(eventID, sourceID));
             boost::shared_ptr<Schedule> sch(new ICalSchedule(schedule, startTimeISO));
             
             ScheduledEvent* scheduledEvent = new ScheduledEvent(evt, sch);
+            if(!name.empty()) {
+              scheduledEvent->SetName(name);
+            }
             
             DSS::GetInstance()->GetEventRunner().AddEvent(scheduledEvent);
             shttpd_printf(_arg, "{ok:1}");
