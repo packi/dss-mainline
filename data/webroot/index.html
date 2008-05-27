@@ -2,6 +2,7 @@
   <head>
     <title>digitalStrom - Server</title>
 	<script src="prototype.js" language="JavaScript" type="text/javascript"></script>
+	<link rel="stylesheet" type="text/css" href="main.css"/>
 	<script type="text/javascript" language="JavaScript">
 	
 	function turnOn(devid) {
@@ -30,7 +31,7 @@
 	
 	function update(devices) {
 	  $('numDevs').innerHTML = devices.length;
-	  var devslist = "<table>";
+	  var devslist = "<h2>Devices</h2><table>";
 	  devslist += "<tr><th>Name</th><th>State</th><th>Actions</th></tr>"
 	  devices.each(function(dev) {
 	    devslist += "<tr><td>" + dev.name + "</td>";
@@ -107,7 +108,7 @@
 	}
 	
 	function updateEventList(events) {
-	  var eventlist = "<ol>";
+	  var eventlist = "<h2>Scheduled events</h2><ol>";
 	  events.each(
 	    function(event) {
 	      eventlist += "<li>" +  event.name + ' <a href="#" onclick="deleteEvent(' + event.id + ')">Remove</a></li>';
@@ -144,7 +145,7 @@
 	}
 	
     function updateSubscriptionsList(subscriptions) {
-	  var subscriptionlist = "<table>";
+	  var subscriptionlist = "<h2>Subscriptions</h2><table>";
 	  subscriptionlist += "<tr><th>Name</th><th>ID</th><th>Action</th></tr>";
 	  subscriptions.each(
 	    function(subscription) {
@@ -166,6 +167,24 @@
 	    }
 	  );
 	}
+	
+	function subscribe() {
+	  new Ajax.Request('/json/subscription/subscribe',
+	    {
+	      method: 'get',
+	      parameters:
+	        {
+	          evtids: $F('sub_evtids'),
+	          sourceids: $F('sub_sourceid'),
+	          action: $F('action_name'),
+	          file: $F('param_file')
+	        },
+	      onComplete: function(transport, json) {
+	        updateSubscriptions();
+	      }
+	    }
+	  );
+	}
   
 	doUpdate();	
 	updateEvents();
@@ -174,10 +193,11 @@
   </head>
   <body>
     <h1>Welcome to the dSS!</h1>
-	<ul>
-	  <li><a href="config">Config</a></li>
-	  <li><a href="scripts">Scripts</a></li>
-	</ul>
+    <div class="container">
+		<div class="item"><a href="config">Config</a></div>
+		<div class="item">Connected devices: <span id="numDevs">(...loading...)</span></div>
+	</div>
+	<div class="container fl">
 	<form>
 	<h2>Event Raising / Scheduling</h2>
 	<table>
@@ -190,18 +210,19 @@
 	  <a href="#" onclick="scheduleEvent()">Schedule</a></td></tr>
 	  </table>
 	</form>
-	<form>
-	Connected devices: <span id="numDevs">(...loading...)</span>
-	<div id="devList">
+	</div>
+
+	<div id="devList" class="container fl">
 	(...loading...)
 	</div>
-	<div id="evt_div">
+	<div id="evt_div" class="container fl">
 	(...loading...)
 	</div>
-	<div id="sub_div">
+	<div id="sub_div" class="container fl">
 	(...loading...)
 	</div>	
-	</form>
+	
+	<div class="container fl">
 	<form>
 	  <h2>Subscription</h2>
 	  <table>
@@ -220,5 +241,6 @@
 	    <tr><td><a href="#" onclick="subscribe()">Subscribe</td><td></td></tr>
       </table>
 	</form>
+	</div>
   </body>	
 </html>

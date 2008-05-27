@@ -334,6 +334,13 @@ namespace dss {
           shttpd_printf(_arg, "{ok:0}");        
         }
         
+      } else if(method == "subscription/subscribe") {
+        EmitHTTPHeader(200, _arg, "application/json");
+        
+        string evtIDsString = paramMap["evtids"];
+        string sourceIDsString = paramMap["sourceids"];
+        string actionName = paramMap["action"];
+        string fileParam = paramMap["file"];
       }
     } else if(BeginsWith(method, "event/")) {
       EmitHTTPHeader(200, _arg, "application/json");

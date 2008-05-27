@@ -1,0 +1,41 @@
+body , td{
+	font-family : Helvetica;
+	background-color:#CCCCCC;
+	font-size:8pt;
+}
+
+h1 {
+	font-size: 15pt;
+}
+
+h2 {
+	font-size:12pt;
+}
+
+
+.container {
+	border:1px solid #888888;
+	padding:10px;
+	background-color:#DDDDDD;
+}
+
+td {
+	background-color:#DDDDDD;
+}
+
+.fl {
+	float:left;
+	margin-top:10px;
+	margin-right:10px;
+	height:225px;
+	/*width:250px;*/
+}
+
+.item {
+	padding:5px;
+}
+
+th {
+	font-size:10pt;
+	text-align:left;
+}

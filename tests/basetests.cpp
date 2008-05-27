@@ -31,8 +31,6 @@ public:
   
 protected:
   void testURLDecode(void) { 
-    CPPUNIT_ASSERT_EQUAL(string("sourceid=1&schedule=FREQ=MINUTELY;INTERVAL=1&start=20080520T080000Z"),
-                         URLDecode("sourceid=1&schedule=FREQ%3DMINUTELY%3BINTERVAL%3D1&start=20080520T080000Z"));
     CPPUNIT_ASSERT_EQUAL(string(" "), URLDecode("%20"));
     CPPUNIT_ASSERT_EQUAL(string("a "), URLDecode("a%20"));
     CPPUNIT_ASSERT_EQUAL(string(" a"), URLDecode("%20a"));
@@ -46,6 +44,8 @@ protected:
     CPPUNIT_ASSERT_EQUAL(string("  a"), URLDecode("++a"));
     CPPUNIT_ASSERT_EQUAL(string("a  "), URLDecode("a++"));
     CPPUNIT_ASSERT_EQUAL(string("  b"), URLDecode("+%20b"));
+    CPPUNIT_ASSERT_EQUAL(string("sourceid=1&schedule=FREQ=MINUTELY;INTERVAL=1&start=20080520T080000Z"),
+                         URLDecode("sourceid=1&schedule=FREQ%3DMINUTELY%3BINTERVAL%3D1&start=20080520T080000Z"));
   }
 };
 
