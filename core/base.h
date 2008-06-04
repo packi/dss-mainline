@@ -124,6 +124,8 @@ namespace dss {
   bool FileExists( const char* _fileName );
   bool FileExists( const string& _fileName );
   
+  uint16_t CRC16(unsigned const char* _data, const int _size);
+  
   //============================================= Helper classes
   
   template <typename resCls>

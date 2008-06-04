@@ -468,6 +468,7 @@ namespace dss {
   {
   }
   
+  
   void ActionJS::Perform(const Arguments& _args) {
     if(!_args.HasValue("script")) {
       throw new runtime_error("ActionJS::Perform: missing argument _script");

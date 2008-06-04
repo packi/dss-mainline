@@ -32,6 +32,9 @@
 
 #include <iostream>
 
+#include <boost/scoped_ptr.hpp>
+
+
 using namespace std;
 using namespace dss;
 
@@ -39,6 +42,7 @@ void testXMLReader();
 void testConfig();
 void testISO();
 void testICal();
+void testSerial();
 
 int main (int argc, char * const argv[]) {
   
@@ -49,6 +53,8 @@ int main (int argc, char * const argv[]) {
   }
   // make sure timezone gets set
   tzset();
+  
+  //testSerial();
   
   testICal();
   
@@ -64,6 +70,18 @@ int main (int argc, char * const argv[]) {
   return 0;
 }
 
+#include "core/ds485.h"
+
+void testSerial() {
+  boost::scoped_ptr<SerialCom> ser(new SerialCom());
+  ser->Open("/dev/tty.usbserial-FTCV05XN");
+  while(true) {
+    cout << ".";
+    flush(cout);
+    ser->PutChar('E');
+    //SleepMS(100);
+  }
+} // testSerial
 
 void testICal() {
   ICalSchedule s("FREQ=DAILY;INTERVAL=2", "20080505T120000Z");

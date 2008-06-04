@@ -10,9 +10,14 @@
 #ifndef _DS485_H_INCLUDED
 #define _DS485_H_INCLUDED
 
+#include "thread.h"
+#include "serialcom.h"
 #include "ds485types.h"
 
 #include <vector>
+
+#include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/shared_ptr.hpp>
 
 using namespace std;
 
@@ -101,6 +106,59 @@ namespace dss {
   private:
     DS485Transport m_Transport; 
   };
+
+  typedef enum {
+    csInitial,
+    csSensing,
+    csBroadcastingDSID,
+    csMaster,
+    csSlave,
+    csWaitingForToken,
+    cs
+  } aControllerState;
+  
+  class DS485FrameReader : public Thread {
+  private:
+    int m_Handle;
+    boost::ptr_vector<DS485Frame> m_IncomingFrames;
+    bool m_Traffic;
+    boost::shared_ptr<SerialComBase> m_SerialCom;
+  private:
+    bool GetCharTimeout(char& _charOut, const int _timeoutSec);
+  public:
+    DS485FrameReader();
+    virtual ~DS485FrameReader();
+    
+    void SetSerialCom(boost::shared_ptr<SerialComBase> _serialCom);
+    
+    bool HasFrame();
+    DS485Frame* GetFrame();
+    
+    virtual void Execute();
+    bool GetAndResetTraffic();
+  }; // FrameReader
+  
+  class DS485Controller : public Thread {
+  private:
+    aControllerState m_State;
+    
+    boost::ptr_vector<DS485Frame*> m_PendingFrames;
+    boost::ptr_vector<DS485Frame*> m_IncomingFrames;
+    
+    char GetChar();
+    
+    
+    DS485Frame* GetFrameFromWire();
+    bool PutFrameOnWire(const DS485Frame* _pFrame);
+  public:
+    DS485Controller();
+    virtual ~DS485Controller();
+        
+    virtual void Execute();
+  }; // DS485Controller
+  
+  class DS485ResultsAccumulator : public Thread {
+  }; // DS485ResultsAccumulator
   
 }
 

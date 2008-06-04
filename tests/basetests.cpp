@@ -22,6 +22,7 @@ using namespace dss;
 class BaseTest : public CPPUNIT_NS::TestCase
 {
   CPPUNIT_TEST_SUITE(BaseTest);
+  CPPUNIT_TEST(testCRC);
   CPPUNIT_TEST(testURLDecode);
   CPPUNIT_TEST_SUITE_END();
   
@@ -30,6 +31,14 @@ public:
   void tearDown(void) {} 
   
 protected:
+  
+  void testCRC() {
+    const char testStr[] = "123456789";
+    
+    uint16_t crc = CRC16((unsigned const char*)&testStr, sizeof(testStr)-1);
+    CPPUNIT_ASSERT_EQUAL((uint16_t)0x29b1, crc);
+  }
+  
   void testURLDecode(void) { 
     CPPUNIT_ASSERT_EQUAL(string(" "), URLDecode("%20"));
     CPPUNIT_ASSERT_EQUAL(string("a "), URLDecode("a%20"));

@@ -196,6 +196,78 @@ namespace dss {
     (str.compare( 0, lenSearch, searchString ) == 0);
   } // BeginsWith
 
+  
+  
+#define                 P_CCITT     0x1021
+  static int              crc_tabccitt_init       = false;
+  static unsigned short   crc_tabccitt[256];
+  static void             init_crcccitt_tab( void );
+  
+  unsigned short update_crc_ccitt( unsigned short crc, char c ) {
+    
+    unsigned short tmp, short_c;
+    
+    short_c  = 0x00ff & (unsigned short) c;
+    
+    if ( ! crc_tabccitt_init ) init_crcccitt_tab();
+    
+    tmp = (crc >> 8) ^ short_c;
+    crc = (crc << 8) ^ crc_tabccitt[tmp];
+    
+    return crc;
+    
+  }  /* update_crc_ccitt */
+  
+  static void init_crcccitt_tab( void ) {
+    
+    int i, j;
+    unsigned short crc, c;
+    
+    for (i=0; i<256; i++) {
+      
+      crc = 0;
+      c   = ((unsigned short) i) << 8;
+      
+      for (j=0; j<8; j++) {
+        
+        if ( (crc ^ c) & 0x8000 ) crc = ( crc << 1 ) ^ P_CCITT;
+        else                      crc =   crc << 1;
+        
+        c = c << 1;
+      }
+      
+      crc_tabccitt[i] = crc;
+    }
+    
+    crc_tabccitt_init = true;
+    
+  }  /* init_crcccitt_tab */
+  /*
+  uint16_t CRC16(uint16_t _crc, unsigned const char _data) {
+    const uint16_t CRC_CCIT_16 = 0x1021;
+    uint16_t crcResult = _crc;
+    
+    uint16_t tmp = (uint16_t)_data << 8;
+    for(int iBit = 0; iBit < 8; iBit++) {
+      if(tmp & 0x8000 == 0) {
+        crcResult <<= 1;
+      } else {
+        crcResult = (crcResult << 1)^CRC_CCIT_16;
+      }
+      tmp <<= 1;
+      
+    }
+    return crcResult;
+  }
+  */
+  uint16_t CRC16(unsigned const char* _data, const int _size) {
+    uint16_t result = 0xFFFF;
+    for(int iByte = 0; iByte < _size; iByte++) {
+      result = update_crc_ccitt(result, _data[iByte]);
+    }
+    return result;
+  } // CRC16
+
   //================================================== File utilities
   
   bool FileExists( const string& _fileName ) {

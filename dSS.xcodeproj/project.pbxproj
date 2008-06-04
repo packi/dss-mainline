@@ -36,6 +36,8 @@
 		82784A350DDAC10E00858784 /* mutex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82784A330DDAC10E00858784 /* mutex.cpp */; };
 		82784A990DDADC2400858784 /* libboost_system-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82784A980DDADC2400858784 /* libboost_system-mt.dylib */; };
 		828C7C800DC7156700D34901 /* ds485.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 828C7C7F0DC7156700D34901 /* ds485.cpp */; };
+		82A7DE110DF6E9360017932C /* ds485tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A7DE100DF6E9360017932C /* ds485tests.cpp */; };
+		82A7DE960DF6F8B90017932C /* serialcom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A7DE950DF6F8B90017932C /* serialcom.cpp */; };
 		82B161100DAE42080005FB71 /* libjs.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82B1610F0DAE42080005FB71 /* libjs.dylib */; };
 		82B161730DAEBABA0005FB71 /* jshandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B161720DAEBABA0005FB71 /* jshandler.cpp */; };
 		82B161FB0DAF6CC10005FB71 /* tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B161FA0DAF6CC10005FB71 /* tests.cpp */; };
@@ -104,6 +106,9 @@
 		82784A980DDADC2400858784 /* libboost_system-mt.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libboost_system-mt.dylib"; path = "/opt/local/lib/libboost_system-mt.dylib"; sourceTree = "<absolute>"; };
 		828C7C7E0DC7156700D34901 /* ds485.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ds485.h; path = core/ds485.h; sourceTree = "<group>"; };
 		828C7C7F0DC7156700D34901 /* ds485.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ds485.cpp; path = core/ds485.cpp; sourceTree = "<group>"; };
+		82A7DE100DF6E9360017932C /* ds485tests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ds485tests.cpp; path = tests/ds485tests.cpp; sourceTree = "<group>"; };
+		82A7DE940DF6F8B90017932C /* serialcom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = serialcom.h; path = core/serialcom.h; sourceTree = "<group>"; };
+		82A7DE950DF6F8B90017932C /* serialcom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = serialcom.cpp; path = core/serialcom.cpp; sourceTree = "<group>"; };
 		82B1610F0DAE42080005FB71 /* libjs.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjs.dylib; path = /opt/local/lib/libjs.dylib; sourceTree = "<absolute>"; };
 		82B161710DAEBABA0005FB71 /* jshandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = jshandler.h; path = core/jshandler.h; sourceTree = "<group>"; };
 		82B161720DAEBABA0005FB71 /* jshandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = jshandler.cpp; path = core/jshandler.cpp; sourceTree = "<group>"; };
@@ -159,6 +164,9 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				82A7DE940DF6F8B90017932C /* serialcom.h */,
+				82A7DE950DF6F8B90017932C /* serialcom.cpp */,
+				82A7DE100DF6E9360017932C /* ds485tests.cpp */,
 				82BCF2CA0DE19BD8007B923A /* basetests.cpp */,
 				828C7C7E0DC7156700D34901 /* ds485.h */,
 				828C7C7F0DC7156700D34901 /* ds485.cpp */,
@@ -305,6 +313,8 @@
 				82784A300DDAC07C00858784 /* syncevent.cpp in Sources */,
 				82784A350DDAC10E00858784 /* mutex.cpp in Sources */,
 				82BCF2CB0DE19BD8007B923A /* basetests.cpp in Sources */,
+				82A7DE110DF6E9360017932C /* ds485tests.cpp in Sources */,
+				82A7DE960DF6F8B90017932C /* serialcom.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
