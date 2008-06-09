@@ -36,25 +36,40 @@ namespace dss {
       perror("serial");
       throw new runtime_error(string("could not open port ") + m_PortDevName);
     }
+    
+    
     tcgetattr(m_Handle, &m_CommSettings);
     
     // 8-N-1
+/*
     m_CommSettings.c_cflag = CREAD|CLOCAL|CS8;
     m_CommSettings.c_lflag = 0;
     m_CommSettings.c_iflag = IGNPAR;
     m_CommSettings.c_oflag = 0;
     m_CommSettings.c_cc[VMIN] = 0;
     m_CommSettings.c_cc[VTIME] = 0;
+*/
+    //cfmakeraw(&m_CommSettings);
     
-    cfsetispeed(&m_CommSettings, 115200);
-    cfsetospeed(&m_CommSettings, 115200);
+    m_CommSettings.c_iflag &= ~( IGNBRK | BRKINT | PARMRK | ISTRIP
+                         | INLCR | IGNCR | ICRNL | IXON );
+		m_CommSettings.c_oflag &= ~OPOST;
+		m_CommSettings.c_lflag &= ~( ECHO | ECHONL | ICANON | ISIG | IEXTEN );
+		m_CommSettings.c_cflag &= ~( CSIZE | PARENB | CRTSCTS );
+		m_CommSettings.c_cflag |= CS8 | CREAD | CLOCAL ;
+		m_CommSettings.c_cc[VMIN] = 0;
+		m_CommSettings.c_cc[VTIME] = 0;
+    
+    speed_t rate = B115200;
+    cfsetispeed(&m_CommSettings, rate);
+    cfsetospeed(&m_CommSettings, rate);
     
     tcflush(m_Handle, TCIOFLUSH); // flush remaining characters
     
     if(tcsetattr(m_Handle, TCSANOW, &m_CommSettings) == -1) {
       perror("tcsetattr");
       throw new runtime_error(string("could not set attributes of port ") + m_PortDevName);
-    }
+    }    
     return true;    
   } // Open
   
@@ -77,6 +92,9 @@ namespace dss {
     if(res == 1) {
       read(m_Handle, &_chOut, 1);
       return true;
+    } else if(res == 0) {
+      // timeout
+      return false;
     } else {
       perror("SerialCom::GetCharTimeout() select");
       throw new runtime_error("select failed");

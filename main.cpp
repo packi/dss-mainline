@@ -54,7 +54,7 @@ int main (int argc, char * const argv[]) {
   // make sure timezone gets set
   tzset();
   
-  //testSerial();
+  testSerial();
   
   testICal();
   
@@ -75,10 +75,19 @@ int main (int argc, char * const argv[]) {
 void testSerial() {
   boost::scoped_ptr<SerialCom> ser(new SerialCom());
   ser->Open("/dev/tty.usbserial-FTCV05XN");
+  int iChar = 0;
   while(true) {
-    cout << ".";
-    flush(cout);
-    ser->PutChar('E');
+    //cout << ".";
+    //flush(cout);
+    //ser->PutChar('E');
+    char c;
+    if(ser->GetCharTimeout(c, 10)) {
+      printf("0x%02X ", (unsigned char)c);
+      iChar++;
+      if(iChar % 10 == 0) {
+        printf("\n");
+      }
+    }
     //SleepMS(100);
   }
 } // testSerial

@@ -37,6 +37,7 @@ protected:
     boost::scoped_ptr<DS485FrameReader> reader(new DS485FrameReader());
     boost::shared_ptr<SerialComSim> simPort(new SerialComSim());
     string frame;
+/*
     frame.push_back('\xFD'); 
     frame.push_back('\x05'); 
     frame.push_back('\x00'); 
@@ -44,6 +45,84 @@ protected:
     frame.push_back('\x00'); 
     frame.push_back('\x99'); 
     frame.push_back('\x64');
+ */
+    /* Working frame
+     
+    frame.push_back('\xFD'); 
+    frame.push_back('\x01'); 
+    frame.push_back('\x00'); 
+    frame.push_back('\x14'); 
+    frame.push_back('\xce'); 
+    frame.push_back('\x01'); 
+    frame.push_back('\x00');
+    frame.push_back('\x00'); 
+    frame.push_back('\x39'); 
+    frame.push_back('\x24'); 
+     */
+    
+    /* Captured frames */
+    frame.push_back('\xFD'); 
+    frame.push_back('\x3F'); 
+    frame.push_back('\x7E'); 
+    frame.push_back('\xD7'); 
+    frame.push_back('\x7E'); 
+    frame.push_back('\x88'); 
+    frame.push_back('\xFD'); 
+    frame.push_back('\xF7'); 
+    frame.push_back('\xF7'); 
+    frame.push_back('\xB7'); 
+    frame.push_back('\x78'); 
+    frame.push_back('\x50'); 
+    frame.push_back('\x05'); 
+    frame.push_back('\x5E'); 
+    frame.push_back('\xF7'); 
+    frame.push_back('\x77'); 
+    frame.push_back('\xF7'); 
+    frame.push_back('\x87'); 
+    frame.push_back('\xD6'); 
+    frame.push_back('\xF7'); 
+    frame.push_back('\xF7'); 
+    frame.push_back('\x17'); 
+    frame.push_back('\x72'); 
+    frame.push_back('\x56'); 
+    frame.push_back('\x05'); 
+    frame.push_back('\xD6'); 
+    frame.push_back('\xD7'); 
+    frame.push_back('\x77'); 
+    frame.push_back('\x77'); 
+    frame.push_back('\xC8'); 
+    frame.push_back('\xFD'); 
+    frame.push_back('\xF7'); 
+    frame.push_back('\xF7'); 
+    frame.push_back('\x77'); 
+    frame.push_back('\x63'); 
+    frame.push_back('\x54'); 
+    frame.push_back('\xFF'); 
+    frame.push_back('\x05'); 
+    frame.push_back('\xF8'); 
+    frame.push_back('\x7F'); 
+    frame.push_back('\x7F'); 
+    frame.push_back('\x3F'); 
+    frame.push_back('\xAE'); 
+    frame.push_back('\x7E'); 
+    frame.push_back('\x88'); 
+    frame.push_back('\xFD'); 
+    frame.push_back('\x7E'); 
+    frame.push_back('\xFE'); 
+    frame.push_back('\xFF'); 
+    frame.push_back('\x7F'); 
+    frame.push_back('\x0F'); 
+    frame.push_back('\xD2'); 
+    frame.push_back('\xFE'); 
+    frame.push_back('\x05'); 
+    frame.push_back('\xFC'); 
+    frame.push_back('\x7F'); 
+    frame.push_back('\xF2'); 
+    frame.push_back('\xFE'); 
+    frame.push_back('\xDF'); 
+    frame.push_back('\x7E'); 
+    frame.push_back('\x88');
+    
     simPort->PutSimData(frame);
     reader->SetSerialCom(simPort);
     reader->Execute();

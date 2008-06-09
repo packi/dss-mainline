@@ -206,8 +206,10 @@ namespace dss {
               if(received[1] & 0x01 == 0x01) {
                 Logger::GetInstance()->Log("Packet is a Frame");
                 state = rsReadingPacket;
+                messageLen = -1;
               } else {
                 Logger::GetInstance()->Log("Packet is a Token");
+                state = rsSynchronizing;
               }
             }
             break;
@@ -229,15 +231,16 @@ namespace dss {
           case rsReadingCRC:
           {
             if(validBytes == messageLen + 4 /* header */ + 2 /* CRC */) {
-              uint16_t receivedCRC = (uint16_t)received[validBytes - 2] << 8 | received[validBytes - 1];
-              uint16_t dataCRC = CRC16(received, validBytes - 2 /* CRC */);
-              if(receivedCRC != dataCRC) {
+              uint16_t dataCRC = CRC16(received, validBytes);
+              if(dataCRC != 0) {
                 stringstream s;
-                s << "crc missmatch. in packet: " << receivedCRC << " calculated: " << dataCRC << endl;
+                s << "crc missmatch.";
                 Logger::GetInstance()->Log(s.str(), lsError);
               } else {
                 Logger::GetInstance()->Log("received packet, crc ok");
               }
+              messageLen = -1;
+              state = rsSynchronizing;
             }
           }
         }

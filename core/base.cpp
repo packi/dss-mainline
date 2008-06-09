@@ -197,7 +197,7 @@ namespace dss {
   } // BeginsWith
 
   
-  
+//#define                 P_CCITT  0x8408
 #define                 P_CCITT     0x1021
   static int              crc_tabccitt_init       = false;
   static unsigned short   crc_tabccitt[256];
