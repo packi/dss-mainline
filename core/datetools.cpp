@@ -196,7 +196,7 @@ namespace dss {
   int DateTime::Difference(const DateTime& _other) const {
     struct tm self = m_DateTime;
     struct tm other = _other.m_DateTime;
-    return difftime(mktime(&self), mktime(&other));    
+    return static_cast<int>(difftime(mktime(&self), mktime(&other)));    
   }
   
   ostream& DateTime::operator<<(ostream& out) const {

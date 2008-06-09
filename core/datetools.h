@@ -98,6 +98,7 @@ namespace dss {
   
   class Schedule {
   public:
+	virtual ~Schedule() {};
     virtual DateTime GetNextOccurence(const DateTime& _from) = 0;
     virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to) = 0;
   };
@@ -106,7 +107,8 @@ namespace dss {
   private:
     DateTime m_When;
   public:
-    StaticSchedule(const DateTime& _when) : m_When(_when) {}
+    StaticSchedule(const DateTime& _when) : m_When(_when) {};
+    virtual ~StaticSchedule() {};
     
     virtual DateTime GetNextOccurence(const DateTime& _from) ;
     virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
@@ -134,6 +136,7 @@ namespace dss {
   public:
     RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt);
     RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt, DateTime _endingAt);
+    virtual ~RepeatingSchedule() {};
 
     virtual DateTime GetNextOccurence(const DateTime& _from) ;
     virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
@@ -145,6 +148,7 @@ namespace dss {
     struct icaltimetype m_StartDate;
   public:
     ICalSchedule(const string& _rrule, const string _startDateISO);
+    virtual ~ICalSchedule() {};
     
     virtual DateTime GetNextOccurence(const DateTime& _from) ;
     virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);

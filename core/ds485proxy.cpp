@@ -591,16 +591,16 @@ namespace dss {
       time_t now;
       time(&now);
       if(m_DimmingUp) {
-        m_CurrentValue = max(m_CurrentValue + difftime(m_DimmStartTime, now) * 5, 255.0);
+        m_CurrentValue = static_cast<int>(max(m_CurrentValue + difftime(m_DimmStartTime, now) * 5, 255.0));
       } else {
-        m_CurrentValue = min(m_CurrentValue - difftime(m_DimmStartTime, now) * 5, 255.0);
+        m_CurrentValue = static_cast<int>(min(m_CurrentValue - difftime(m_DimmStartTime, now) * 5, 255.0));
       }
     }
   } // EndDim
   
   void DSIDSim::SetValue(const double _value, int _parameterNr) {
     if(m_Enabled) {
-      m_CurrentValue = _value;
+      m_CurrentValue = static_cast<int>(_value);
     }
   } // SetValue
   

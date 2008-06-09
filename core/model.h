@@ -82,6 +82,8 @@ namespace dss {
     virtual void EndDim(const int _parameterNr = -1)= 0;
     /** Sets the value of the given parameter */
     virtual void SetValue(const double _value, int _parameterNr = -1) = 0;
+    
+    virtual ~IDeviceInterface() {};
   };
   
   /** Internal reference to a device.
@@ -96,6 +98,7 @@ namespace dss {
     DeviceReference(const DeviceReference& _copy);
     DeviceReference(const devid_t _deviceID, const Apartment& _apartment);
     DeviceReference(const Device& _device, const Apartment& _apartment);
+    virtual ~DeviceReference() {};
     
     Device& GetDevice();
     devid_t GetID() const;
@@ -134,6 +137,7 @@ namespace dss {
     vector<int> m_Groups;
   public:
     Device(devid_t _id, Apartment* _pApartment);
+    virtual ~Device() {};
     
     virtual void TurnOn();
     virtual void TurnOff();
@@ -181,12 +185,14 @@ namespace dss {
   class IDeviceSelector {
   public:
     virtual bool SelectDevice(const Device& _device) const = 0;
+    virtual ~IDeviceSelector() {};
   };
   
   /** Abstract interface to perform an Action on each device of a set */
   class IDeviceAction {
   public:
     virtual bool Perform(Device& _device) = 0;
+    virtual ~IDeviceAction() {};
   };
   
   /** A set holds an arbitrary list of devices.
@@ -201,6 +207,7 @@ namespace dss {
     Set(Device& _device);
     Set(DeviceReference& _reference);
     Set(DeviceVector _devices);
+    virtual ~Set() {};
     
     virtual void TurnOn();
     virtual void TurnOff();
@@ -287,6 +294,8 @@ namespace dss {
     
     virtual void SetName(const string& _name) { m_Name = _name; };
     string GetName() { return m_Name; };
+    
+    virtual ~DeviceContainer() {};
   }; // DeviceContainer
   
   /** Represents a Modulator */
@@ -296,6 +305,7 @@ namespace dss {
     DeviceVector m_ConnectedDevices;
   public:
     Modulator(const int _id);
+    virtual ~Modulator() {};
     virtual Set GetDevices() const;
 
     int GetID() const;
@@ -304,9 +314,9 @@ namespace dss {
   /** Represents a predefined group */
   class Group : public DeviceContainer {
   protected:
-    const int m_GroupID;
     DeviceVector m_Devices;
     Apartment& m_Apartment;
+    const int m_GroupID;
   public:
     Group(const int _id, Apartment& _apartment);
     virtual ~Group() {};
@@ -342,6 +352,7 @@ namespace dss {
     int m_RoomID;
     DeviceVector m_Devices;
   public:
+	virtual ~Room() {};
     virtual Set GetDevices() const;
     
     /** Adds a device to the room.
@@ -391,6 +402,8 @@ namespace dss {
     Action(const string& _name, const string& _nameForUser) 
     : m_Name(_name), m_NameForUser(_nameForUser) {};
     
+    virtual ~Action() {};
+    
     /** Performs the action with _args */
     virtual void Perform(const Arguments& _args) = 0;
     
@@ -422,15 +435,16 @@ namespace dss {
   /** Subscription to one or many event-ids which may be restricted by one or many source-ids */
   class Subscription {
   private:
+    const int m_ID;
+    Arguments m_ActionArguments;
+    Action& m_ActionToExecute;
     vector<int> m_SourceIDs;
     vector<int> m_EventIDs;
-    Action& m_ActionToExecute;
-    Arguments m_ActionArguments;
-    const int m_ID;
     string m_Name;
   public:
     Subscription(const int _id, Action& _action, Arguments& _actionArgs, vector<int> _eventIDs, vector<int> _sourceIDs)
     : m_ID(_id), m_ActionArguments(_actionArgs), m_ActionToExecute(_action), m_SourceIDs(_sourceIDs), m_EventIDs(_eventIDs) {};
+    virtual ~Subscription() {};
     
     virtual void OnEvent(const Event& _event) { m_ActionToExecute.Perform(m_ActionArguments); };
     
@@ -473,7 +487,7 @@ namespace dss {
     Modulator& AllocateModulator(const int _id);
   public:
     Apartment();
-    ~Apartment();
+    virtual ~Apartment();
     
     /** Returns a set containing all devices of the set */
     virtual Set GetDevices() const;
@@ -562,7 +576,9 @@ namespace dss {
     DeviceSelectorFun m_SelectorFunction;
   public:
     DeviceSelector(DeviceSelectorFun& _selectorFun) : m_SelectorFunction(_selectorFun) {}
-    virtual bool SelectDevice(const Device& _device) { return m_SelectorFunction(_device); }    
+    virtual bool SelectDevice(const Device& _device) { return m_SelectorFunction(_device); }
+    
+    virtual ~DeviceSelector() {};
   }; // DeviceSelector  
   
   /** Exception that will be thrown if a given item could not be found */

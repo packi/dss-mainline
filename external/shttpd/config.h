@@ -11,7 +11,7 @@
 #ifndef CONFIG_HEADER_DEFINED
 #define	CONFIG_HEADER_DEFINED
 
-#define	VERSION		"1.39"		/* Version			*/
+#define	SHTTPD_VERSION		"1.39"		/* Version			*/
 #define	CONFIG_FILE	"shttpd.conf"	/* Configuration file		*/
 #define	HTPASSWD	".htpasswd"	/* Passwords file name		*/
 #define	URI_MAX		16384		/* Default max request size	*/

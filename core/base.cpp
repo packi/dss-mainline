@@ -197,8 +197,8 @@ namespace dss {
   } // BeginsWith
 
   
-//#define                 P_CCITT  0x8408
-#define                 P_CCITT     0x1021
+#define                 P_CCITT  0x8408
+//#define                 P_CCITT     0x1021
   static int              crc_tabccitt_init       = false;
   static unsigned short   crc_tabccitt[256];
   static void             init_crcccitt_tab( void );
@@ -260,10 +260,21 @@ namespace dss {
     return crcResult;
   }
   */
+  
+  uint16_t update_crc(uint16_t _crc, const unsigned char& c) {
+	int i;
+    uint16_t result = _crc ^ c;
+  
+    for( i=8;i;i--){
+	  result = (result >> 1) ^ ((result & 1) ? 0x8408 : 0 );
+    }
+    return result;
+  } // update_crc
+  
   uint16_t CRC16(unsigned const char* _data, const int _size) {
     uint16_t result = 0xFFFF;
     for(int iByte = 0; iByte < _size; iByte++) {
-      result = update_crc_ccitt(result, _data[iByte]);
+      result = update_crc(result, _data[iByte]);
     }
     return result;
   } // CRC16

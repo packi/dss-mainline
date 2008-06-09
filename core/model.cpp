@@ -134,7 +134,7 @@ namespace dss {
   } // GetModulatorID
   
   void Device::SetModulatorID(const int _modulatorID) {
-    m_ModulatorID;
+    m_ModulatorID = _modulatorID;
   } // SetModulatorID
   
   int Device:: GetGroupIdByIndex(const int _index) const {
@@ -246,6 +246,8 @@ namespace dss {
     : m_GroupNr(_groupNr)
     {}
     
+    virtual ~ByGroupSelector() {}
+    
     virtual bool SelectDevice(const Device& _device) const {
       return _device.IsInGroup(m_GroupNr);
     }
@@ -274,6 +276,7 @@ namespace dss {
     const string m_Name;
   public:
     ByNameSelector(const string& _name) : m_Name(_name) {};
+    virtual ~ByNameSelector() {};
     
     virtual bool SelectDevice(const Device& _device) const {
       return _device.GetName() == m_Name;
@@ -294,6 +297,7 @@ namespace dss {
     const int m_ID;
   public:
     ByIDSelector(const int _id) : m_ID(_id) {}
+    virtual ~ByIDSelector() {};
     
     virtual bool SelectDevice(const Device& _device) const {
       return _device.GetID() == m_ID;

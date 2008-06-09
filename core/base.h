@@ -156,6 +156,7 @@ namespace dss {
   class Finalizable {
   public:
     virtual void Finalize() = 0;
+    virtual ~Finalizable() {};
   }; // Finalizable
   
   class Finalizer {
@@ -166,7 +167,7 @@ namespace dss {
     : m_Finalizable(_finalizable)
     {}
     
-    ~Finalizer() {
+    virtual ~Finalizer() {
       m_Finalizable.Finalize();
     }
   };

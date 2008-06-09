@@ -104,7 +104,7 @@ namespace dss {
       /* We still want to return JS_TRUE though, other wise an exception will be thrown by the engine. */
       *rval = INT_TO_JSVAL(0); /* Send back a return value of 0. */
     } else {
-      int i;
+      unsigned int i;
       size_t amountWritten=0;
       for (i=0; i<argc; i++){
         JSString *val = JS_ValueToString(cx, argv[i]); /* Convert the value to a javascript string. */

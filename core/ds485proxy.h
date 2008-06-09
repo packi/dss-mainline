@@ -53,6 +53,8 @@ namespace dss {
   public:
     virtual void Send(DS485Frame& _frame) = 0;
     virtual DS485Frame* Receive() = 0;
+    
+    virtual ~DS485Interface() {};
   };
   
   //================================================== Simulation stuff ahead
@@ -74,6 +76,7 @@ namespace dss {
     void AddToReplyQueue(DS485Frame* _frame);
   public:
     DSModulatorSim();
+    virtual ~DSModulatorSim() {};
     void Initialize();
     
     int GetID() const;

@@ -31,7 +31,7 @@ namespace dss {
   
   bool SerialCom::Open(const char* _serialPort) {
     m_PortDevName = _serialPort;
-    m_Handle = open(_serialPort, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
+    m_Handle = open(_serialPort, O_RDWR | O_NOCTTY | O_NDELAY);
     if(m_Handle == -1) {
       perror("serial");
       throw new runtime_error(string("could not open port ") + m_PortDevName);
@@ -75,7 +75,15 @@ namespace dss {
   
   char SerialCom::GetChar() {
     char result;
-    read(m_Handle, &result, 1);
+    
+    int count;
+    do {
+     count = read(m_Handle, &result, 1);
+     if(count < 0 && count != EAGAIN) {
+       perror("read failed");
+     }
+    } while(count != 1);
+
     return result;
   } // GetChar
   

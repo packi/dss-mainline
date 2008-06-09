@@ -93,7 +93,7 @@ namespace dss {
       Logger::GetInstance()->Log("JS: (empty string)");
     } else {
       stringstream sstr;
-      int i;
+      unsigned int i;
       for (i=0; i<argc; i++){
         JSString *val = JS_ValueToString(cx, argv[i]); /* Convert the value to a javascript string. */
         char *str = JS_GetStringBytes(val); /* Then convert it to a C-style string. */
@@ -345,11 +345,13 @@ namespace dss {
   class JSDeviceAction : public IDeviceAction {
   private:
     jsval m_Function;
-    ModelScriptContextExtension& m_Extension;
     ScriptContext& m_Context;
+    ModelScriptContextExtension& m_Extension;
   public:
     JSDeviceAction(jsval _function, ScriptContext& _ctx, ModelScriptContextExtension& _ext)
     : m_Function(_function), m_Context(_ctx), m_Extension(_ext) {}
+    
+    virtual ~JSDeviceAction() {};
     
     virtual bool Perform(Device& _device) {
       jsval rval;

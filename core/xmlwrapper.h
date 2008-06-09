@@ -80,7 +80,7 @@ namespace dss {
   protected:
     XMLDocument m_Document;
   public:
-    ~XMLDocumentReader();
+    virtual ~XMLDocumentReader();
     virtual XMLDocument& GetDocument() = 0;
   }; // XMLReader
   
@@ -90,6 +90,8 @@ namespace dss {
   public:
     XMLDocumentFileReader(const wstring& _uri);
     XMLDocumentFileReader(const string& _uri);
+    virtual ~XMLDocumentFileReader() {};
+    
     virtual XMLDocument& GetDocument();
   };
   
@@ -98,6 +100,7 @@ namespace dss {
     const string m_XMLData;
   public:
     XMLDocumentMemoryReader(const char* _xmlData);
+    virtual ~XMLDocumentMemoryReader() {};
     virtual XMLDocument& GetDocument();
   }; // XMLDocumentMemoryReaders
   

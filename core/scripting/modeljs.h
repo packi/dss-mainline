@@ -22,6 +22,7 @@ namespace dss {
     Apartment& m_Apartment;
   public:
     ModelScriptContextExtension(Apartment& _apartment);
+    virtual ~ModelScriptContextExtension() {};
     
     virtual void ExtendContext(ScriptContext& _context);
     
@@ -43,6 +44,7 @@ namespace dss {
     ScriptEnvironment m_Environment;
   public:
     ActionJS();
+    virtual ~ActionJS() {};
    
     virtual void Perform(const Arguments& _args);
   };

@@ -24,6 +24,8 @@ namespace dss {
     virtual char GetChar() = 0;
     virtual bool GetCharTimeout(char& _charOut, const int _timeoutSec) = 0;
     virtual void PutChar(const char& _char) = 0;
+    
+    virtual ~SerialComBase() {};
   }; // SerialComBase
   
   class SerialCom : public SerialComBase {
@@ -49,6 +51,8 @@ namespace dss {
     /** Data that has ben written by the user of SerialComBase */
     deque<char> m_OutgoingData;
   public:
+	virtual ~SerialComSim() {};
+	  
     virtual bool Open(const char* _serialPort);
     
     deque<char>& GetWrittenData();

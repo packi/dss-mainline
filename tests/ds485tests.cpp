@@ -125,7 +125,7 @@ protected:
     
     simPort->PutSimData(frame);
     reader->SetSerialCom(simPort);
-    reader->Execute();
+    //reader->Execute();
   }
   
 };

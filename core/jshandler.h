@@ -44,10 +44,10 @@ namespace dss {
   private:
     JSScript* m_pScriptToExecute;
     string m_FileName;
-    JSContext* m_pContext;
     JSObject* m_pRootObject;
     JSObject* m_pSourceObject;
     ScriptEnvironment& m_Environment;
+    JSContext* m_pContext;
     static void JsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er);
   public:
     ScriptContext(ScriptEnvironment& _env, JSContext* _pContext);
@@ -96,6 +96,7 @@ namespace dss {
     const string m_Name;
   public:
     ScriptExtension(const string& _name) : m_Name(_name) {};
+    virtual ~ScriptExtension() {};
     
     virtual void ExtendContext(ScriptContext& _context) = 0;
     
