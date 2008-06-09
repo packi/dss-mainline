@@ -7,7 +7,7 @@
  *
  */
 
-#include "modeljs.h"
+#include "../core/scripting/modeljs.h"
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/BriefTestProgressListener.h>

@@ -18,14 +18,15 @@
 
 #include <string>
 
-#include "base.h"
-#include "model.h"
-#include "dss.h"
+#include "core/base.h"
+#include "core/model.h"
+#include "core/dss.h"
 #include "core/xmlwrapper.h"
 #include "core/jshandler.h"
 #include "tests/tests.h"
 
 #include <ctime>
+#include <csignal>
 
 #include <libxml/tree.h>
 #include <libxml/encoding.h>

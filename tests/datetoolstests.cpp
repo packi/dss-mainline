@@ -7,6 +7,7 @@
  *
  */
 
+#include <cassert>
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/BriefTestProgressListener.h>

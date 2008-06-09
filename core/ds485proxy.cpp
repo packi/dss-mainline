@@ -404,9 +404,11 @@ namespace dss {
             }
             break;
           case FunctionModulatorGetRoomsSize:
-            response = CreateResponse(cmdFrame, cmdNr);
-            response->GetPayload().Add<uint8>(m_Rooms.size());
-            AddToReplyQueue(response);
+            {
+              response = CreateResponse(cmdFrame, cmdNr);
+              response->GetPayload().Add<uint8>(m_Rooms.size());
+              AddToReplyQueue(response);
+            }
             break;
           case FunctionModulatorGetRoomIdForInd:
             {
@@ -436,17 +438,21 @@ namespace dss {
             }
             break;
           case FunctionModulatorGetGroupsSize:
-            response = CreateResponse(cmdFrame, cmdNr);
-            response->GetPayload().Add<uint8>(m_DevicesOfGroupInRoom.size());
-            AddToReplyQueue(response); 
+		    {
+		      response = CreateResponse(cmdFrame, cmdNr);
+		      response->GetPayload().Add<uint8>(m_DevicesOfGroupInRoom.size());
+		      AddToReplyQueue(response); 
+		    }
             break;
           case FunctionGroupGetDeviceCount:
-            response = CreateResponse(cmdFrame, cmdNr);
-            int roomID = pd.Get<uint8>();
-            int groupID = pd.Get<uint8>();
-            int result = m_DevicesOfGroupInRoom[pair<const int, const int>(roomID, groupID)].size();
-            response->GetPayload().Add<uint8>(result);
-            AddToReplyQueue(response);
+            {
+              response = CreateResponse(cmdFrame, cmdNr);
+              int roomID = pd.Get<uint8>();
+              int groupID = pd.Get<uint8>();
+              int result = m_DevicesOfGroupInRoom[pair<const int, const int>(roomID, groupID)].size();
+              response->GetPayload().Add<uint8>(result);
+              AddToReplyQueue(response);
+            }
             break;
           case FunctionDeviceGetOnOff:
             {

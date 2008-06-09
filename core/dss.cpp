@@ -10,7 +10,7 @@
 #include "dss.h"
 #include "logger.h"
 #include "xmlwrapper.h"
-#include "modeljs.h"
+#include "scripting/modeljs.h"
 
 #include <cassert>
 #include <string>

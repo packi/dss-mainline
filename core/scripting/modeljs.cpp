@@ -8,8 +8,8 @@
  */
 
 #include "modeljs.h"
-#include "dss.h"
-#include "logger.h"
+#include "../dss.h"
+#include "../logger.h"
 
 #include <iostream>
 
