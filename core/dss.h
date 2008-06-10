@@ -81,7 +81,7 @@ namespace dss {
     const HashMapConstStringString& GetOptions() { return m_OptionsByName; };
   }; // Config
   
-  class EventRunner : Thread {
+  class EventRunner : public Thread {
   private:
     boost::ptr_vector<ScheduledEvent> m_ScheduledEvents;
     
@@ -89,6 +89,9 @@ namespace dss {
     DateTime m_WakeTime;
     SyncEvent m_NewItem;
   public:
+    EventRunner();
+    virtual ~EventRunner() {};
+    
     void AddEvent(ScheduledEvent* _scheduledEvent);
     
     void RaisePendingEvents(DateTime& _from, int _deltaSeconds);
@@ -128,7 +131,7 @@ namespace dss {
     EventRunner& GetEventRunner() { return m_EventRunner; };
   }; // DSS
   
-  class NoSuchOptionException : DSSException {
+  class NoSuchOptionException : public DSSException {
   private:
     const string m_OptionName;
   public:

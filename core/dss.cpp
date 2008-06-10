@@ -23,6 +23,12 @@ namespace dss {
   //============================================ EventRunner
   
   const bool DebugEventRunner = false;
+  
+  EventRunner::EventRunner()
+  : Thread(true, "EventRunner")
+  {  
+  } // ctor
+
    
   int EventRunner::GetSize() const {
     return m_ScheduledEvents.size();
@@ -126,6 +132,7 @@ namespace dss {
     m_WebServer.Run();
     
     m_ModulatorSim.Initialize();
+    m_DS485Proxy.Start();
     m_Apartment.Run();
     
     boost::shared_ptr<Event> evt(new Event(1003, 0));
@@ -139,11 +146,13 @@ namespace dss {
     
     ActionJS jsAction;
     Arguments args;
-    args.SetValue("script", "/Users/packi/sources/dss/trunk/data/test2.js");
+    args.SetValue("script", "/home/patrick/sources/digitalstrom/dss/trunk/data/test2.js");
     vector<int> eventIDs;
     eventIDs.push_back(1003);
     Subscription& sub = m_Apartment.Subscribe(jsAction, args, eventIDs);
     sub.SetName("I'm a subscription");
+    
+   // m_EventRunner.Run();
 
     while(true) {
       sleep(1000);
@@ -152,7 +161,7 @@ namespace dss {
   
   void DSS::LoadConfig() {
     Logger::GetInstance()->Log("Loading config", lsInfo);
-    m_Config.ReadFromXML("/Users/packi/sources/dss/trunk/data/config.xml");
+    m_Config.ReadFromXML("/home/patrick/sources/digitalstrom/dss/trunk/data/config.xml");
   } // LoadConfig
 
   //============================================= WebServer
@@ -172,7 +181,7 @@ namespace dss {
     Logger::GetInstance()->Log(string("Webserver: Listening on port(s) ") + ports);
     shttpd_set_option(m_SHttpdContext, "ports", ports.c_str());
 
-    string aliases = string("/=") + _config.GetOptionAs<string>("webserverroot", "/Users/packi/sources/dss/data/");
+    string aliases = string("/=") + _config.GetOptionAs<string>("webserverroot", "/home/patrick/sources/digitalstrom/dss/data/");
     Logger::GetInstance()->Log(string("Webserver: Configured aliases: ") + aliases);
     shttpd_set_option(m_SHttpdContext, "aliases", aliases.c_str());    
 
@@ -455,13 +464,14 @@ namespace dss {
               if(nameNode.GetChildren().size() == 0) {
                 continue;
               }
-              nameNode = (nameNode.GetChildren())[0];
+              (nameNode.GetChildren()).at(0);
+              nameNode = (nameNode.GetChildren()).at(0);
               
               XMLNode& valueNode = it->GetChildByName("value");
               if(valueNode.GetChildren().size() == 0) {
                 continue;
               }
-              valueNode = (valueNode.GetChildren())[0];
+              valueNode = (valueNode.GetChildren()).at(0);
               m_OptionsByName[nameNode.GetContent()] = valueNode.GetContent();
             } catch(XMLException& _e) {
               Logger::GetInstance()->Log(string("Error loading XML-File: ") + _e.what(), lsError);

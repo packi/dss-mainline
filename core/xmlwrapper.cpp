@@ -30,6 +30,7 @@ namespace dss {
   
   XMLNode::XMLNode(const XMLNode& _other) 
   {
+	Initialize();
     CopyFrom(_other);
   } // ctor(copy)
   
@@ -50,7 +51,11 @@ namespace dss {
     m_pNode = _other.m_pNode;
     m_Children = _other.m_Children;
     m_ChildrenRead = _other.m_ChildrenRead;
-    m_Attributes = _other.m_Attributes;
+    if(_other.m_Attributes.size() > 0) {
+      m_Attributes = _other.m_Attributes;
+    } else {
+      m_Attributes.clear();
+    }
     m_AttributesRead = _other.m_AttributesRead;
   } // CopyFrom
   

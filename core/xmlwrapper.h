@@ -47,6 +47,10 @@ namespace dss {
     XMLNode();
     XMLNode(const XMLNode& _other);
     XMLNode(xmlNode* _node);
+    XMLNode& operator=(const XMLNode& _rhs) {
+      CopyFrom(_rhs);
+      return *this;
+    }
     
     const string GetName();
     const string GetContent();

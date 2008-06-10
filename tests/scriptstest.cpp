@@ -62,7 +62,7 @@ protected:
     for(int i = 0; i < 100; i++) {
       ScriptContext* ctx = env.GetContext();
 //      ctx->LoadFromMemory("x = 10; x = x * x;");
-      ctx->LoadFromFile("/Users/packi/sources/dss/trunk/data/test2.js");
+      ctx->LoadFromFile("/home/patrick/sources/digitalstrom/dss/trunk/data/test2.js");
       ctx->Evaluate<void>();
       cout << ".";
       delete ctx;

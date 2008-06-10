@@ -14,11 +14,6 @@
 #include "logger.h"
 
 namespace dss {
-
-  const uint8 CommandRequest = 0x09;
-  const uint8 CommandResponse = 0x0a;
-  const uint8 CommandAck = 0x0b;
-  const uint8 CommandBusy = 0x0c;
   
   const uint8 FunctionModulatorAddRoom = 0x00;
   const uint8 FunctionModulatorRemoveRoom = 0x01;
@@ -360,6 +355,9 @@ namespace dss {
     ScrubVector(results);
   } // ReceiveAck
  
+  void DS485Proxy::Start() {
+    m_DS485Controller.Run();
+  } // Start
   
   //================================================== DSModulatorSim
   

@@ -31,7 +31,7 @@ namespace dss {
   
   bool SerialCom::Open(const char* _serialPort) {
     m_PortDevName = _serialPort;
-    m_Handle = open(_serialPort, O_RDWR | O_NOCTTY | O_NDELAY);
+    m_Handle = open(_serialPort, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
     if(m_Handle == -1) {
       perror("serial");
       throw new runtime_error(string("could not open port ") + m_PortDevName);

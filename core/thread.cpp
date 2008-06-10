@@ -22,7 +22,8 @@ void*
 DWORD WINAPI
 #endif
 ThreadStarterHelperFunc( void* _pThreadObj ) {
-  static_cast<Thread*>(_pThreadObj)->Execute();
+	Thread* thObj = static_cast<Thread*>(_pThreadObj);
+	thObj->Execute();
   //pthread_exit( NULL );
   cout << "*** exiting thread" << endl;
   if( static_cast<Thread*>(_pThreadObj)->GetFreeAtTerimnation() ) {

@@ -30,7 +30,7 @@ namespace dss {
     template<class t>
     void Add(t _data);
     
-    vector<unsigned char> ToChar();
+    vector<unsigned char> ToChar() const;
   }; // DS485Payload
   
   class DS485Header {
@@ -53,7 +53,8 @@ namespace dss {
     void SetCounter(const uint8 _value) { m_Counter = _value; };
     void SetType(const uint8 _value) { m_Type = _value; };
     
-    vector<unsigned char> ToChar();
+    vector<unsigned char> ToChar() const;
+    void FromChar(const unsigned char* _data, const int _len);
   };
   
   class DS485Frame {
@@ -65,7 +66,7 @@ namespace dss {
     virtual ~DS485Frame() {};
     DS485Header& GetHeader() { return m_Header; };
     
-    virtual vector<unsigned char> ToChar();
+    virtual vector<unsigned char> ToChar() const;
     
     DS485Payload& GetPayload();
   }; // DS485Frame
@@ -84,7 +85,7 @@ namespace dss {
     void SetCommand(const uint8 _value) { m_Command = _value; };
     void SetLength(const uint8 _value) { m_Length = _value; };
     
-    virtual vector<unsigned char> ToChar();
+    virtual vector<unsigned char> ToChar() const;
   };
   
   class DS485Transport {
@@ -112,15 +113,16 @@ namespace dss {
     csSensing,
     csBroadcastingDSID,
     csMaster,
+    csSlaveWaitingToJoin,
+    csSlaveJoining,
     csSlave,
-    csWaitingForToken,
-    cs
+    csWaitingForToken
   } aControllerState;
   
   class DS485FrameReader : public Thread {
   private:
     int m_Handle;
-    boost::ptr_vector<DS485Frame> m_IncomingFrames;
+    std::vector<DS485Frame*> m_IncomingFrames;
     bool m_Traffic;
     boost::shared_ptr<SerialComBase> m_SerialCom;
   private:
@@ -141,13 +143,13 @@ namespace dss {
   class DS485Controller : public Thread {
   private:
     aControllerState m_State;
+    DS485FrameReader m_FrameReader;
+    int m_StationID;
+    int m_NextStationID;
     
     boost::ptr_vector<DS485Frame*> m_PendingFrames;
-    boost::ptr_vector<DS485Frame*> m_IncomingFrames;
-    
-    char GetChar();
-    
-    
+    boost::shared_ptr<SerialCom> m_SerialCom;
+  private:
     DS485Frame* GetFrameFromWire();
     bool PutFrameOnWire(const DS485Frame* _pFrame);
   public:
@@ -159,6 +161,20 @@ namespace dss {
   
   class DS485ResultsAccumulator : public Thread {
   }; // DS485ResultsAccumulator
+  
+  
+  const uint8 CommandSolicitSuccessorRequest = 0x01;
+  const uint8 CommandSolicitSuccessorResponse = 0x02;
+  const uint8 CommandGetAddressRequest = 0x03;
+  const uint8 CommandGetAddressResponse = 0x04;
+  const uint8 CommandSetDeviceAddressRequest = 0x05;
+  const uint8 CommandSetSuccessorAddressRequest = 0x06;
+  const uint8 CommandRequest = 0x09;
+  const uint8 CommandResponse = 0x0a;
+  const uint8 CommandAck = 0x0b;
+  const uint8 CommandBusy = 0x0c;
+  
+  const char* CommandToString(const uint8 _command);
   
 }
 

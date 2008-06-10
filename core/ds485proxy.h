@@ -130,7 +130,11 @@ namespace dss {
     vector<DS485Frame*> Receive(uint8 _functionID);
     uint8 ReceiveSingleResult(uint8 _functionID);
     void ReceiveAck(uint8 _functionID);
+    
+    DS485Controller m_DS485Controller;
   public:
+    void Start();
+    
     //------------------------------------------------ Specialized Commands (system)
     vector<int> GetModulators();
     
