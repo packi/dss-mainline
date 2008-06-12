@@ -37,6 +37,11 @@ protected:
     
     uint16_t crc = CRC16((unsigned const char*)&testStr, sizeof(testStr)-1);
 //    CPPUNIT_ASSERT_EQUAL((uint16_t)0x29b1, crc);
+    
+    
+    const char testStr2[] = "\xfd\x01\x03\x14\xbb\x01\x00\x00";//\xeb\x08";
+    crc = CRC16((unsigned const char*)&testStr2, sizeof(testStr2)-1);
+    printf("%2x\n", crc );
   }
   
   void testURLDecode(void) { 

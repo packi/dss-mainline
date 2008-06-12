@@ -69,6 +69,7 @@ namespace dss {
     virtual vector<unsigned char> ToChar() const;
     
     DS485Payload& GetPayload();
+    const DS485Payload& GetPayload() const;
   }; // DS485Frame
   
   class DS485CommandFrame : public DS485Frame {
@@ -151,7 +152,7 @@ namespace dss {
     boost::shared_ptr<SerialCom> m_SerialCom;
   private:
     DS485Frame* GetFrameFromWire();
-    bool PutFrameOnWire(const DS485Frame* _pFrame);
+    bool PutFrameOnWire(const DS485Frame* _pFrame, bool _freeFrame = true);
   public:
     DS485Controller();
     virtual ~DS485Controller();
@@ -168,7 +169,9 @@ namespace dss {
   const uint8 CommandGetAddressRequest = 0x03;
   const uint8 CommandGetAddressResponse = 0x04;
   const uint8 CommandSetDeviceAddressRequest = 0x05;
-  const uint8 CommandSetSuccessorAddressRequest = 0x06;
+  const uint8 CommandSetDeviceAddressResponse = 0x06;
+  const uint8 CommandSetSuccessorAddressRequest = 0x07;
+  const uint8 CommandSetSuccessorAddressResponse = 0x08;
   const uint8 CommandRequest = 0x09;
   const uint8 CommandResponse = 0x0a;
   const uint8 CommandAck = 0x0b;

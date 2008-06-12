@@ -65,7 +65,7 @@ int main (int argc, char * const argv[]) {
 #endif  
   xmlInitParser();
   
-  //Tests::Run();
+  Tests::Run();
   // start DSS
   dss::DSS::GetInstance()->Run();
   return 0;

@@ -14,6 +14,7 @@
 
 #include <stdexcept>
 #include <sstream>
+#include <iostream>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -21,7 +22,8 @@ using namespace std;
 
 namespace dss {
   
-  const char FrameStart = 0xFD;
+  const unsigned char FrameStart = 0xFD;
+  const unsigned char EscapeCharacter = 0xFC;
   
   //================================================== DS485Payload
   
@@ -62,10 +64,10 @@ namespace dss {
     if(_len < 3) {
       throw new invalid_argument("_len must be > 3");
     }
+    SetDestination((_data[1] >> 2) & 0x3F);
     SetBroadcast(_data[1] & 0x02 == 0x02);
+    SetSource((_data[2] >> 2) & 0x3F);
     SetCounter(_data[2] & 0x03);
-    SetSource((_data[1] >> 2) & 0x3F);
-    SetDestination((_data[2] >> 2) & 0x3F);
   } // FromChar
 
   
@@ -77,6 +79,10 @@ namespace dss {
   } // ToChar
   
   DS485Payload& DS485Frame::GetPayload() {
+    return m_Payload;
+  } // GetPayload
+  
+  const DS485Payload& DS485Frame::GetPayload() const {
     return m_Payload;
   } // GetPayload
 
@@ -104,22 +110,46 @@ namespace dss {
     DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(result);
     if(cmdFrame != NULL) {
      // Logger::GetInstance()->Log("Command received");
-      Logger::GetInstance()->Log(string("command: ") + CommandToString(cmdFrame->GetCommand()));
+      //Logger::GetInstance()->Log(string("command: ") + CommandToString(cmdFrame->GetCommand()));
       //Logger::GetInstance()->Log(string("length:  ") + IntToString((cmdFrame->GetLength())));
       //Logger::GetInstance()->Log(string("msg nr:  ") + IntToString(cmdFrame->GetHeader().GetCounter()));
     } else {
-      Logger::GetInstance()->Log("token received");
+      cout << "+";
+      flush(cout);
+      //Logger::GetInstance()->Log("token received");
     }
     return result;
   } // GetFrameFromWire
   
-  bool DS485Controller::PutFrameOnWire(const DS485Frame* _pFrame) {
+  bool DS485Controller::PutFrameOnWire(const DS485Frame* _pFrame, bool _freeFrame) {
     vector<unsigned char> chars = _pFrame->ToChar();
+    uint16_t crc = 0x0000;
+    bool first = true;
     for(vector<unsigned char>::iterator iChar = chars.begin(), e = chars.end();
         iChar != e; ++iChar)
     {
-      m_SerialCom->PutChar(*iChar);
+      unsigned char c = *iChar;
+      crc = update_crc(crc, c);
+      // escape if it's a reserved character and not the first (frame start)
+      if(((c == FrameStart) || (c == EscapeCharacter)) && !first) {
+        m_SerialCom->PutChar(0xFC);
+        // mask out the msb
+        m_SerialCom->PutChar(c & 0x7F);
+      } else {
+        m_SerialCom->PutChar(c);
+      }
+      first = false;
     }
+    
+    if(dynamic_cast<const DS485CommandFrame*>(_pFrame) != NULL) {
+      // send crc
+      m_SerialCom->PutChar(static_cast<unsigned char>(crc & 0xFF));
+      m_SerialCom->PutChar(static_cast<unsigned char>((crc >> 8) & 0xFF));
+    }
+    if(_freeFrame) {
+      delete _pFrame;
+    }
+    return true;
   } // PutFrameOnWire
   
   DS485Controller::DS485Controller()
@@ -140,6 +170,8 @@ namespace dss {
     m_State = csInitial;
     m_StationID = 0xFF;
     m_NextStationID = 0xFF;
+    time_t responseSentAt;
+    boost::scoped_ptr<DS485Frame> token(new DS485Frame());
     
     uint32_t dsid = 0xdeadbeef;
     
@@ -149,7 +181,7 @@ namespace dss {
     while(!m_Terminated) {
       
       if(m_State == csInitial) {
-        senseTimeMS = rand() % 100 + 1;
+        senseTimeMS = rand() % 1000 + 1;
         m_State = csSensing;
         continue;
       } else if(m_State == csSensing) {
@@ -167,11 +199,41 @@ namespace dss {
       
       if(m_FrameReader.HasFrame()) {
         boost::scoped_ptr<DS485Frame> frame(GetFrameFromWire());
-        DS485Header& header = frame->GetHeader(); 
+        DS485Header& header = frame->GetHeader();
+        DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(frame.get());
+        
+        // discard packets which are not adressed to us
         if(!header.IsBroadcast() && header.GetDestination() != m_StationID) {
           Logger::GetInstance()->Log("packet not for me, discarding");
+          cout << "dest: " << header.GetDestination() << endl;
+          cout << "src:  " << header.GetSource() << endl;
+          if(cmdFrame != NULL) {
+            cout << "cmd:  " << CommandToString(cmdFrame->GetCommand()) << endl;
+          }
+          continue;
         }
-        DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(cmdFrame);
+        
+        // handle cases in which we're obliged to act on disregarding our current state
+        if(cmdFrame != NULL) {
+          if(cmdFrame->GetCommand() == CommandGetAddressRequest) {
+            if(header.GetDestination() == m_StationID) {
+              DS485CommandFrame* frameToSend = new DS485CommandFrame();
+              frameToSend->GetHeader().SetDestination(header.GetSource());
+              frameToSend->GetHeader().SetSource(m_StationID);
+              frameToSend->SetCommand(CommandGetAddressResponse);
+              frameToSend->SetLength(0);
+              PutFrameOnWire(frameToSend);
+              if(header.IsBroadcast()) {
+                cerr << "Get address request with bc-flag set" << endl;
+              } else {
+                cout << "sent response to get address thingie" << endl;
+              }
+            } else {
+              //cout << "not my address " << header.GetDestination() << endl; 
+            }
+          }
+        }        
+        
         switch(m_State) {
         case csInitial:
           break;
@@ -183,7 +245,8 @@ namespace dss {
               if(cmdFrame->GetCommand() == CommandSolicitSuccessorRequest) {
                 // if it's the first of it's kind, determine how many we've got to skip
                 if(numberOfJoinPacketsToWait == -1) {
-                  numberOfJoinPacketsToWait = rand() % 100 + 1;
+                  numberOfJoinPacketsToWait = rand() % 100 + 10;
+                  cout << "** Waiting for " << numberOfJoinPacketsToWait << endl;
                 } else {
                   numberOfJoinPacketsToWait--;
                   if(numberOfJoinPacketsToWait == 0) {
@@ -198,10 +261,15 @@ namespace dss {
                     frameToSend->GetPayload().Add<uint8>(static_cast<uint8>((dsid >> 18) & 0x000000FF));
                     frameToSend->GetPayload().Add<uint8>(static_cast<uint8>((dsid >>  0) & 0x000000FF));
                     PutFrameOnWire(frameToSend);
+                    cout << "******* FRAME AWAY ******" << endl;
                     m_State = csSlaveJoining;
+                    time(&responseSentAt);
                   }
+                  cout << numberOfJoinPacketsToWait << endl;
                 }
               }
+            } else {
+              cerr << "not a cmdframe" << endl;
             }
           }
           break;
@@ -210,10 +278,34 @@ namespace dss {
             DS485Payload& payload = cmdFrame->GetPayload(); 
             if(cmdFrame->GetCommand() == CommandSetDeviceAddressRequest) {
               m_StationID = payload.ToChar().at(0);
+              DS485CommandFrame* frameToSend = new DS485CommandFrame();
+              frameToSend->GetHeader().SetDestination(0);
+              frameToSend->GetHeader().SetSource(m_StationID);
+              frameToSend->SetCommand(CommandSetDeviceAddressResponse);
+              frameToSend->SetLength(0);
+              PutFrameOnWire(frameToSend);
+              cout << "### new address " << m_StationID << endl;
             } else if(cmdFrame->GetCommand() == CommandSetSuccessorAddressRequest) {
               m_NextStationID = payload.ToChar().at(0);
+              DS485CommandFrame* frameToSend = new DS485CommandFrame();
+              frameToSend->GetHeader().SetDestination(0);
+              frameToSend->GetHeader().SetSource(m_StationID);
+              frameToSend->SetCommand(CommandSetSuccessorAddressResponse);
+              frameToSend->SetLength(0);
+              PutFrameOnWire(frameToSend);
+            } else {
+              // check if our response has timed-out
+              time_t now;
+              time(&now);
+              if((now - responseSentAt) > 3) {
+                m_State = csSlaveWaitingToJoin;
+                cerr << "çççççççççç haven't received my adress" << endl;
+              }
             }
             if(m_StationID != 0x3F && m_NextStationID != 0xFF) {
+              Logger::GetInstance()->Log("######### sucessfully joined the network", lsInfo);
+              token->GetHeader().SetDestination(m_NextStationID);
+              token->GetHeader().SetSource(m_StationID);
               m_State = csSlave;
             }
           }
@@ -223,6 +315,19 @@ namespace dss {
         case csMaster:
           break;
         case csSlave:
+          if(cmdFrame == NULL) {
+            // it's a token
+            if(m_PendingFrames.empty()) {
+              //SleepMS(500);
+              PutFrameOnWire(token.get(), false);
+              //cout << "%%%%%%%%%%% Token away" << endl;
+              cout << ".";
+              flush(cout);
+            }
+          } else {
+            cout << "f";
+            flush(cout);
+          }
           break;
         case csWaitingForToken:
           break;
@@ -297,12 +402,12 @@ namespace dss {
       if(GetCharTimeout(currentChar, 1)) {
         m_Traffic = true;
         
-        if((unsigned char)currentChar == 0xFC) {
+        if((unsigned char)currentChar == EscapeCharacter) {
           escapeNext = true;
           continue;
         }
         
-        if(currentChar == FrameStart) {
+        if((unsigned char)currentChar == FrameStart) {
           state = rsSynchronizing;
           validBytes = 0;
         }
@@ -327,7 +432,7 @@ namespace dss {
         switch(state) {
           case rsSynchronizing:
           {
-            if((currentChar == FrameStart) && !escaped) {
+            if(((unsigned char)currentChar == FrameStart) && !escaped) {
               state = rsReadingHeader;
             }
             break;
@@ -342,7 +447,9 @@ namespace dss {
             // attempt to parse the header
             if(validBytes == TheHeaderSize) {
               if(received[1] & 0x02 == 0x02) {
-                Logger::GetInstance()->Log("Packet is a broadcast");
+                //Logger::GetInstance()->Log("Packet is a broadcast");
+              } else {
+                //Logger::GetInstance()->Log("*Packet is adressed");
               }
               // check if it's a token or not
               if(received[1] & 0x01 == 0x01) {
@@ -354,6 +461,13 @@ namespace dss {
                 DS485Frame* frame = new DS485Frame();
                 frame->GetHeader().FromChar(received, validBytes);
                 m_IncomingFrames.push_back(frame);
+                /*
+                DS485Frame* token = new DS485Frame();
+                token->GetHeader().SetDestination(0);
+                token->GetHeader().SetSource(1);
+                */
+                cout << "-";
+                //flush(cout);
                 state = rsSynchronizing;
               }
             }
@@ -378,9 +492,7 @@ namespace dss {
             if(validBytes == (messageLen + TheFrameHeaderSize + TheCRCSize)) {
               uint16_t dataCRC = CRC16(received, validBytes);
               if(dataCRC != 0) {
-                //stringstream s;
-                //s << "crc missmatch.";
-                //Logger::GetInstance()->Log(s.str(), lsError);
+                Logger::GetInstance()->Log("*********** crc mismatch.", lsError);
               } else {
                // Logger::GetInstance()->Log("received packet, crc ok");
               }
@@ -391,6 +503,8 @@ namespace dss {
               for(int iByte = 0; iByte < messageLen; iByte++) {
                 frame->GetPayload().Add<uint8>(static_cast<uint8>(received[iByte + 4]));
               }
+              cout << "*" << frame->GetCommand() << "*";
+              //flush(cout);
               m_IncomingFrames.push_back(frame);
 
               // the show must go on...
@@ -417,8 +531,12 @@ namespace dss {
       return "get address response";
     case CommandSetDeviceAddressRequest: 
       return "set device address request";
+    case CommandSetDeviceAddressResponse:
+      return "set device address response";
     case CommandSetSuccessorAddressRequest: 
       return "set successor address request";
+    case CommandSetSuccessorAddressResponse:
+      return "set successor address response";
     case CommandRequest: 
       return "request";
     case CommandResponse: 

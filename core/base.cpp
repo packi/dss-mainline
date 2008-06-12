@@ -272,7 +272,7 @@ namespace dss {
   } // update_crc
   
   uint16_t CRC16(unsigned const char* _data, const int _size) {
-    uint16_t result = 0xFFFF;
+    uint16_t result = 0x0000;
     for(int iByte = 0; iByte < _size; iByte++) {
       result = update_crc(result, _data[iByte]);
     }
