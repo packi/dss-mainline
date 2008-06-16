@@ -117,7 +117,7 @@ namespace dss {
     csSlaveWaitingToJoin,
     csSlaveJoining,
     csSlave,
-    csWaitingForToken
+    csSlaveWaitingForFirstToken
   } aControllerState;
   
   class DS485FrameReader : public Thread {

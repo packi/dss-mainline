@@ -171,6 +171,7 @@ namespace dss {
     m_StationID = 0xFF;
     m_NextStationID = 0xFF;
     time_t responseSentAt;
+    time_t tokenReceivedAt;
     boost::scoped_ptr<DS485Frame> token(new DS485Frame());
     
     uint32_t dsid = 0xdeadbeef;
@@ -265,7 +266,7 @@ namespace dss {
                     m_State = csSlaveJoining;
                     time(&responseSentAt);
                   }
-                  cout << numberOfJoinPacketsToWait << endl;
+                  //cout << numberOfJoinPacketsToWait << endl;
                 }
               }
             } else {
@@ -306,7 +307,7 @@ namespace dss {
               Logger::GetInstance()->Log("######### sucessfully joined the network", lsInfo);
               token->GetHeader().SetDestination(m_NextStationID);
               token->GetHeader().SetSource(m_StationID);
-              m_State = csSlave;
+              m_State = csSlaveWaitingForFirstToken;
             }
           }
           break;
@@ -318,24 +319,38 @@ namespace dss {
           if(cmdFrame == NULL) {
             // it's a token
             if(m_PendingFrames.empty()) {
-              //SleepMS(500);
               PutFrameOnWire(token.get(), false);
-              //cout << "%%%%%%%%%%% Token away" << endl;
               cout << ".";
               flush(cout);
+              time(&tokenReceivedAt);
             }
           } else {
+            time_t now;
+            time(&now);
+            if(now - tokenReceivedAt > 1) {
+              cerr << "restarting" << endl;
+              m_State = csInitial;
+              m_NextStationID = 0xFF;
+              m_StationID = 0xFF;
+            }
             cout << "f";
             flush(cout);
           }
           break;
-        case csWaitingForToken:
+        case csSlaveWaitingForFirstToken:
+          if(cmdFrame == NULL) {
+            PutFrameOnWire(token.get(), false);
+            m_State = csSlave;
+            time(&tokenReceivedAt);
+            cout << ".";
+            flush(cout);
+          }
           break;
         default:
           throw new runtime_error("invalid value for m_State");
         }
       } else {
-        SleepMS(10);
+        SleepMS(5);
       }
     }
   } // Execute
@@ -503,7 +518,7 @@ namespace dss {
               for(int iByte = 0; iByte < messageLen; iByte++) {
                 frame->GetPayload().Add<uint8>(static_cast<uint8>(received[iByte + 4]));
               }
-              cout << "*" << frame->GetCommand() << "*";
+              //cout << "*" << frame->GetCommand() << "*";
               //flush(cout);
               m_IncomingFrames.push_back(frame);
 
