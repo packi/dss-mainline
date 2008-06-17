@@ -167,7 +167,7 @@ namespace dss {
     }
     m_FrameReader.SetSerialCom(m_SerialCom);
     m_FrameReader.Run();
-    m_State = csInitial;
+    DoChangeState(csInitial);
     m_StationID = 0xFF;
     m_NextStationID = 0xFF;
     time_t responseSentAt;
@@ -183,12 +183,12 @@ namespace dss {
       
       if(m_State == csInitial) {
         senseTimeMS = rand() % 1000 + 1;
-        m_State = csSensing;
+        DoChangeState(csSensing);
         continue;
       } else if(m_State == csSensing) {
         if(m_FrameReader.GetAndResetTraffic()) {
           Logger::GetInstance()->Log("Sensed traffic on the line, changing to csSlaveWaitingToJoin");
-          m_State = csSlaveWaitingToJoin;
+          DoChangeState(csSlaveWaitingToJoin);
         }
         if(senseTimeMS == 0) {
           Logger::GetInstance()->Log("No traffic on line, I'll be your master today");
@@ -198,7 +198,7 @@ namespace dss {
         continue;
       }
       
-      if(m_FrameReader.HasFrame()) {
+      if(m_FrameReader.WaitForFrame()) {
         boost::scoped_ptr<DS485Frame> frame(GetFrameFromWire());
         DS485Header& header = frame->GetHeader();
         DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(frame.get());
@@ -263,7 +263,7 @@ namespace dss {
                     frameToSend->GetPayload().Add<uint8>(static_cast<uint8>((dsid >>  0) & 0x000000FF));
                     PutFrameOnWire(frameToSend);
                     cout << "******* FRAME AWAY ******" << endl;
-                    m_State = csSlaveJoining;
+                    DoChangeState(csSlaveJoining);
                     time(&responseSentAt);
                   }
                   //cout << numberOfJoinPacketsToWait << endl;
@@ -299,7 +299,7 @@ namespace dss {
               time_t now;
               time(&now);
               if((now - responseSentAt) > 3) {
-                m_State = csSlaveWaitingToJoin;
+                DoChangeState(csSlaveWaitingToJoin);
                 cerr << "çççççççççç haven't received my adress" << endl;
               }
             }
@@ -307,7 +307,7 @@ namespace dss {
               Logger::GetInstance()->Log("######### sucessfully joined the network", lsInfo);
               token->GetHeader().SetDestination(m_NextStationID);
               token->GetHeader().SetSource(m_StationID);
-              m_State = csSlaveWaitingForFirstToken;
+              DoChangeState(csSlaveWaitingForFirstToken);
             }
           }
           break;
@@ -323,24 +323,33 @@ namespace dss {
               cout << ".";
               flush(cout);
               time(&tokenReceivedAt);
+              m_TokenEvent.Signal();
             }
           } else {
             time_t now;
             time(&now);
             if(now - tokenReceivedAt > 1) {
               cerr << "restarting" << endl;
-              m_State = csInitial;
+              DoChangeState(csInitial);
               m_NextStationID = 0xFF;
               m_StationID = 0xFF;
             }
             cout << "f";
             flush(cout);
+            // send ack if it's a response and not a broadcasted one
+            if(cmdFrame->GetCommand() == CommandResponse && !cmdFrame.GetHeader().IsBroadcast()) {
+              DS485CommandFrame* ack = new DS485CommandFrame();
+              ack->GetHeader().SetSource(m_StationID);
+              ack->GetHeader().SetDestination(cmdFrame->GetHeader().GetSource());
+              ack->SetCommand(CommandAck);
+              PutFrameOnWire(ack);
+            }
           }
           break;
         case csSlaveWaitingForFirstToken:
           if(cmdFrame == NULL) {
             PutFrameOnWire(token.get(), false);
-            m_State = csSlave;
+            DoChangeState(csSlave);
             time(&tokenReceivedAt);
             cout << ".";
             flush(cout);
@@ -349,12 +358,39 @@ namespace dss {
         default:
           throw new runtime_error("invalid value for m_State");
         }
-      } else {
-        SleepMS(5);
       }
     }
   } // Execute
   
+  void DS485Controller::DoChangeState(aControllerState _newState) {
+    if(_newState != m_State) {
+      m_State = _newState;
+      m_ControllerEvent.Signal();
+    }
+  } // DoChangeState
+
+  void DS485Controller::EnqueueFrame(DS485Frame* _frame) {
+    _frame->GetHeader().SetSource(m_StationID);
+    m_PendingFrames.push_back(_frame);
+  } // EnqueueFrame
+  
+  void DS485Controller::WaitForEvent() {
+    m_ControllerEvent.WaitFor();
+  } // WaitForEvent
+  
+  aControllerState DS485Controller::GetState() const {
+    return m_State;
+  } // GetState
+  
+  void DS485Controller::WaitForCommandFrame() {
+    m_CommandFrameEvent.WaitFor();
+  } // WaitForCommandFrame
+  
+  void DS485Controller::WaitForToken() {
+    m_TokenEvent.WaitFor();
+  } // WaitForToken
+
+
   //================================================== DS485FrameReader
   
   DS485FrameReader::DS485FrameReader()
@@ -476,6 +512,7 @@ namespace dss {
                 DS485Frame* frame = new DS485Frame();
                 frame->GetHeader().FromChar(received, validBytes);
                 m_IncomingFrames.push_back(frame);
+                m_PacketReceivedEvent.Signal();
                 /*
                 DS485Frame* token = new DS485Frame();
                 token->GetHeader().SetDestination(0);
@@ -521,6 +558,7 @@ namespace dss {
               //cout << "*" << frame->GetCommand() << "*";
               //flush(cout);
               m_IncomingFrames.push_back(frame);
+              m_PacketReceivedEvent.Signal();
 
               // the show must go on...
               messageLen = -1;
@@ -531,6 +569,13 @@ namespace dss {
       }
     }
   } // Execute
+  
+  bool DS485FrameReader::WaitForFrame() {
+    if(!HasFrame()) {
+      m_PacketReceivedEvent.WaitFor();
+    }
+    return true;
+  }
   
   //================================================== Global helpers
   

@@ -26,6 +26,7 @@
 #include "datetools.h"
 #include "ds485types.h"
 #include "xmlwrapper.h"
+#include "thread.h"
 
 //using namespace __gnu_cxx;
 
@@ -465,7 +466,9 @@ namespace dss {
     * This is the root of the datamodel of the dss. The Apartment is responsible for delivering
     * and loading all subitems.
     */
-  class Apartment : public DeviceContainer {
+  class Apartment : public DeviceContainer,
+                    public Thread
+  {
   private:
     vector<Device*> m_StaleDevices;
     vector<Modulator*> m_StaleModulators;
@@ -493,7 +496,7 @@ namespace dss {
     virtual Set GetDevices() const;
     
     /** Starts the event-processing */
-    virtual void Run();
+    virtual void Execute();
     /** Loads the datamodel and marks the contained items as "stale" */
     void ReadConfigurationFromXML(const string& _fileName);
     

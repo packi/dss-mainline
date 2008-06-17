@@ -13,6 +13,7 @@
 #include "thread.h"
 #include "serialcom.h"
 #include "ds485types.h"
+#include "syncevent.h"
 
 #include <vector>
 
@@ -126,6 +127,7 @@ namespace dss {
     std::vector<DS485Frame*> m_IncomingFrames;
     bool m_Traffic;
     boost::shared_ptr<SerialComBase> m_SerialCom;
+    SyncEvent m_PacketReceivedEvent;
   private:
     bool GetCharTimeout(char& _charOut, const int _timeoutSec);
   public:
@@ -139,6 +141,7 @@ namespace dss {
     
     virtual void Execute();
     bool GetAndResetTraffic();
+    bool WaitForFrame();
   }; // FrameReader
   
   class DS485Controller : public Thread {
@@ -148,14 +151,26 @@ namespace dss {
     int m_StationID;
     int m_NextStationID;
     
-    boost::ptr_vector<DS485Frame*> m_PendingFrames;
+    boost::ptr_vector<DS485Frame> m_PendingFrames;
     boost::shared_ptr<SerialCom> m_SerialCom;
+    SyncEvent m_ControllerEvent;
+    SyncEvent m_CommandFrameEvent;
+    SyncEvent m_TokenEvent;
   private:
     DS485Frame* GetFrameFromWire();
     bool PutFrameOnWire(const DS485Frame* _pFrame, bool _freeFrame = true);
+    
+    void DoChangeState(aControllerState _newState);
   public:
     DS485Controller();
     virtual ~DS485Controller();
+    
+    void EnqueueFrame(DS485Frame* _frame);
+    void WaitForEvent();
+    void WaitForCommandFrame();
+    void WaitForToken();
+    
+    aControllerState GetState() const;
         
     virtual void Execute();
   }; // DS485Controller

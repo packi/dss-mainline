@@ -15,6 +15,7 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 
+#include <iostream>
 #include <stdexcept>
 
 namespace dss {
@@ -116,7 +117,9 @@ namespace dss {
       ret = write(m_Handle, &_char, 1);
       
       if(ret != 1) {
-        SleepMS(10);
+        cout << "%";
+        flush(cout);
+        SleepMS(1);
       }
     }
     if(ret != 1) {

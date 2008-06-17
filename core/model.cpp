@@ -405,8 +405,9 @@ namespace dss {
     
   //================================================== Apartment
   
-  Apartment::Apartment() 
-  : m_NextSubscriptionNumber(1)
+  Apartment::Apartment()
+  : Thread(true, "Apartment"),
+    m_NextSubscriptionNumber(1)
   {  
     Group* grp = new Group(0, *this);
     grp->SetName("yellow");
@@ -450,7 +451,7 @@ namespace dss {
     ScrubVector(m_StaleRooms);
   } // dtor
   
-  void Apartment::Run() {
+  void Apartment::Execute() {
     // Load devices/modulators/etc. from a config-file
     string configFileName = DSS::GetInstance()->GetConfig().GetOptionAs<string>("apartment_config", "/Users/packi/sources/dss/trunk/data/apartment.xml");
     if(!FileExists(configFileName)) {
@@ -461,28 +462,32 @@ namespace dss {
     
     DS485Proxy& proxy = DSS::GetInstance()->GetDS485Proxy();
     
-    vector<int> modIDs = proxy.GetModulators();
-    for(vector<int>::iterator iModulatorID = modIDs.begin(); iModulatorID != modIDs.end(); ++iModulatorID) {
-      int modID = *iModulatorID;
-      //Modulator& mod = AllocateModulator(modID);
-      vector<int> roomIDs = proxy.GetRooms(modID);
-      for(vector<int>::iterator iRoomID = roomIDs.begin(); iRoomID != roomIDs.end(); ++iRoomID) {
-        int roomID = *iRoomID;
-        vector<int> devices = proxy.GetDevicesInRoom(modID, roomID);
-        for(vector<int>::iterator iDevice = devices.begin(); iDevice != devices.end(); ++iDevice) {
-          int devID = *iDevice;
-          Device& dev = AllocateDevice(devID);
-          dev.SetModulatorID(modID);
-        }
-        int numGroups = proxy.GetGroupCount(modID, roomID);
-        for(int iGroup = 0; iGroup < numGroups; iGroup++) {
-          // TODO: I'm still waiting on a call to translate the group index to a group id
-          vector<int> devingroup = proxy.GetDevicesInGroup(modID, roomID, iGroup);
-          for(vector<int>::iterator iDevice = devingroup.begin(), e = devingroup.end();
-              iDevice != e; ++iDevice) 
-          {
-            Device& dev = AllocateDevice(*iDevice);
-            dev.GetGroupBitmask().set(iGroup);
+    while(!m_Terminated) {
+      proxy.WaitForProxyEvent();
+    
+      vector<int> modIDs = proxy.GetModulators();
+      for(vector<int>::iterator iModulatorID = modIDs.begin(); iModulatorID != modIDs.end(); ++iModulatorID) {
+        int modID = *iModulatorID;
+  
+        vector<int> roomIDs = proxy.GetRooms(modID);
+        for(vector<int>::iterator iRoomID = roomIDs.begin(); iRoomID != roomIDs.end(); ++iRoomID) {
+          int roomID = *iRoomID;
+          vector<int> devices = proxy.GetDevicesInRoom(modID, roomID);
+          for(vector<int>::iterator iDevice = devices.begin(); iDevice != devices.end(); ++iDevice) {
+            int devID = *iDevice;
+            Device& dev = AllocateDevice(devID);
+            dev.SetModulatorID(modID);
+          }
+          int numGroups = proxy.GetGroupCount(modID, roomID);
+          for(int iGroup = 0; iGroup < numGroups; iGroup++) {
+            // TODO: I'm still waiting on a call to translate the group index to a group id
+            vector<int> devingroup = proxy.GetDevicesInGroup(modID, roomID, iGroup);
+            for(vector<int>::iterator iDevice = devingroup.begin(), e = devingroup.end();
+                iDevice != e; ++iDevice) 
+            {
+              Device& dev = AllocateDevice(*iDevice);
+              dev.GetGroupBitmask().set(iGroup);
+            }
           }
         }
       }

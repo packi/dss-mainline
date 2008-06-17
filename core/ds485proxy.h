@@ -14,6 +14,7 @@
 
 #include "ds485types.h"
 #include "ds485.h"
+#include "syncevent.h"
 
 #include <map>
 #include <vector>
@@ -121,7 +122,7 @@ namespace dss {
     void SetValue(const double _value, int _parameterNr = -1);
   };
   
-  class DS485Proxy {
+  class DS485Proxy : protected Thread {
   private:
     FittingResult BestFit(Set& _set);
     bool IsSimAddress(const uint8 _addr);
@@ -131,9 +132,16 @@ namespace dss {
     uint8 ReceiveSingleResult(uint8 _functionID);
     void ReceiveAck(uint8 _functionID);
     
+    void SignalEvent();
+    
     DS485Controller m_DS485Controller;
+    SyncEvent m_ProxyEvent;
+  protected:
+    virtual void Execute();
   public:
+    //------------------------------------------------ Handling
     void Start();
+    void WaitForProxyEvent();
     
     //------------------------------------------------ Specialized Commands (system)
     vector<int> GetModulators();
@@ -147,7 +155,7 @@ namespace dss {
     vector<int> GetGroups(const int _modulatorID, const int _roomID);
     int GetDevicesInGroupCount(const int _modulatorID, const int _roomID, const int _groupID);
     vector<int> GetDevicesInGroup(const int _modulatorID, const int _roomID, const int _groupID);
-    
+
     void AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID);
     void RemoveFromGroup(const int _modulatorID, const int _groupID, const int _deviceID);
     

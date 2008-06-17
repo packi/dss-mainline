@@ -357,7 +357,31 @@ namespace dss {
  
   void DS485Proxy::Start() {
     m_DS485Controller.Run();
+    Run();
   } // Start
+  
+  void DS485Proxy::WaitForProxyEvent() {
+    m_ProxyEvent.WaitFor();
+  } // WaitForProxyEvent
+  
+  void DS485Proxy::SignalEvent() {
+    m_ProxyEvent.Signal();
+  } // SignalEvent
+  
+  void DS485Proxy::Execute() {
+    aControllerState oldState = m_DS485Controller.GetState();
+    while(!m_Terminated) {
+      m_DS485Controller.WaitForEvent();
+      aControllerState newState = m_DS485Controller.GetState();
+      if(newState != oldState) {
+        if(newState == csSlave) {
+          SignalEvent();
+        } else if(newState == csMaster) {
+          SignalEvent();
+        }
+      }
+    }
+  } // Execute
   
   //================================================== DSModulatorSim
   
