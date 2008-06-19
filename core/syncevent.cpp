@@ -41,6 +41,18 @@ void SyncEvent::Signal() {
 #endif
 } // Signal
 
+void SyncEvent::Broadcast() {
+#ifndef WIN32
+  m_ConditionMutex.Lock();
+  
+  assert(pthread_cond_broadcast(&m_Condition) == 0);
+  
+  m_ConditionMutex.Unlock();
+#else
+  #error SyncEvent::Broadcast is not yet implemented
+#endif
+}
+
 
 int SyncEvent::WaitFor() {
 #ifndef WIN32
@@ -59,12 +71,12 @@ int SyncEvent::WaitFor() {
 } // WaitFor
 
 
-bool SyncEvent::WaitFor( int _timeout ) {
+bool SyncEvent::WaitFor( int _timeoutMS ) {
 #ifndef WIN32
   struct timeval now;
   struct timespec timeout;
-  int timeoutSec = _timeout / 1000;
-  int timeoutMSec = _timeout - 1000 * timeoutSec;
+  int timeoutSec = _timeoutMS / 1000;
+  int timeoutMSec = _timeoutMS - 1000 * timeoutSec;
 
   m_ConditionMutex.Lock();
   gettimeofday( &now, NULL );
@@ -74,7 +86,7 @@ bool SyncEvent::WaitFor( int _timeout ) {
   m_ConditionMutex.Unlock();
   return !(result == ETIMEDOUT);
 #else
-  return WaitForSingleObject( m_EventHandle, _timeout ) == WAIT_OBJECT_0;
+  return WaitForSingleObject( m_EventHandle, _timeoutMS ) == WAIT_OBJECT_0;
 #endif
 } // WaitFor
 

@@ -170,6 +170,7 @@ namespace dss {
     DoChangeState(csInitial);
     m_StationID = 0xFF;
     m_NextStationID = 0xFF;
+    m_TokenCounter = 0;
     time_t responseSentAt;
     time_t tokenReceivedAt;
     boost::scoped_ptr<DS485Frame> token(new DS485Frame());
@@ -287,6 +288,7 @@ namespace dss {
               PutFrameOnWire(frameToSend);
               cout << "### new address " << m_StationID << endl;
             } else if(cmdFrame->GetCommand() == CommandSetSuccessorAddressRequest) {
+              // TODO: handle these in slave and master mode too
               m_NextStationID = payload.ToChar().at(0);
               DS485CommandFrame* frameToSend = new DS485CommandFrame();
               frameToSend->GetHeader().SetDestination(0);
@@ -318,14 +320,36 @@ namespace dss {
         case csSlave:
           if(cmdFrame == NULL) {
             // it's a token
-            if(m_PendingFrames.empty()) {
-              PutFrameOnWire(token.get(), false);
-              cout << ".";
-              flush(cout);
-              time(&tokenReceivedAt);
-              m_TokenEvent.Signal();
+            if(!m_PendingFrames.empty() && (m_TokenCounter > 10)) {
+              
+              // send frame
+              DS485CommandFrame& frameToSend = m_PendingFrames.front();
+              PutFrameOnWire(&frameToSend, false);
+              cout << "p";
+              
+              // if not a broadcast, wait for ack, etc
+              if(frameToSend.GetHeader().IsBroadcast()) {
+                m_PendingFrames.erase(m_PendingFrames.begin());
+              } else {
+               // if(!m_FrameReader.HasFrame()) {
+               //   m_FrameReader.WaitForFrame();
+               // }
+                m_PendingFrames.erase(m_PendingFrames.begin());
+                /*
+                boost::scoped_ptr<DS485Frame> respFrame(GetFrameFromWire());                
+                DS485CommandFrame* respFrameCmd = dynamic_cast<DS485CommandFrame*>(respFrame.get());
+                if()*/
+              }
             }
+            PutFrameOnWire(token.get(), false);
+            cout << ".";
+            flush(cout);
+            time(&tokenReceivedAt);
+            m_TokenEvent.Broadcast();
+            m_TokenCounter++;            
           } else {
+            
+            // Handle token timeout
             time_t now;
             time(&now);
             if(now - tokenReceivedAt > 1) {
@@ -335,20 +359,41 @@ namespace dss {
               m_StationID = 0xFF;
             }
             cout << "f";
-            flush(cout);
+
+            bool keep = false;
+            
             // send ack if it's a response and not a broadcasted one
-            if(cmdFrame->GetCommand() == CommandResponse && !cmdFrame.GetHeader().IsBroadcast()) {
+            if(cmdFrame->GetCommand() == CommandResponse && !cmdFrame->GetHeader().IsBroadcast()) {
               DS485CommandFrame* ack = new DS485CommandFrame();
               ack->GetHeader().SetSource(m_StationID);
               ack->GetHeader().SetDestination(cmdFrame->GetHeader().GetSource());
               ack->SetCommand(CommandAck);
               PutFrameOnWire(ack);
+              keep = true;              
+            } else if(cmdFrame->GetCommand() == CommandRequest) {
+              if(!cmdFrame->GetHeader().IsBroadcast()) {
+                DS485CommandFrame* ack = new DS485CommandFrame();
+                ack->GetHeader().SetSource(m_StationID);
+                ack->GetHeader().SetDestination(cmdFrame->GetHeader().GetSource());
+                ack->SetCommand(CommandAck);
+                PutFrameOnWire(ack);
+              }
+              keep = true;
             }
+            if(keep) {
+              // put in into the received queue
+              AddToReceivedQueue(cmdFrame);
+              // release frame from scoped_ptr
+              frame.reset(NULL);
+              cout << "k";
+            }
+            flush(cout);
           }
           break;
         case csSlaveWaitingForFirstToken:
           if(cmdFrame == NULL) {
             PutFrameOnWire(token.get(), false);
+            m_TokenCounter = 0;
             DoChangeState(csSlave);
             time(&tokenReceivedAt);
             cout << ".";
@@ -362,6 +407,12 @@ namespace dss {
     }
   } // Execute
   
+  void DS485Controller::AddToReceivedQueue(DS485CommandFrame* _frame) {
+    // Signal our listeners
+    DistributeFrame(boost::shared_ptr<DS485CommandFrame>(_frame));
+    m_CommandFrameEvent.Signal();
+  } // AddToReceivedQueue
+  
   void DS485Controller::DoChangeState(aControllerState _newState) {
     if(_newState != m_State) {
       m_State = _newState;
@@ -369,7 +420,8 @@ namespace dss {
     }
   } // DoChangeState
 
-  void DS485Controller::EnqueueFrame(DS485Frame* _frame) {
+  void DS485Controller::EnqueueFrame(DS485CommandFrame* _frame) {
+    Logger::GetInstance()->Log("Frame queued");
     _frame->GetHeader().SetSource(m_StationID);
     m_PendingFrames.push_back(_frame);
   } // EnqueueFrame
@@ -576,6 +628,31 @@ namespace dss {
     }
     return true;
   }
+  
+  //==================================================
+  
+  void DS485FrameProvider::AddFrameCollector(IDS485FrameCollector* _collector) {
+    m_FrameCollectors.push_back(_collector);
+  } // AddFrameCollector
+  
+  void DS485FrameProvider::RemoveFrameCollector(IDS485FrameCollector* _collector) {
+    vector<IDS485FrameCollector*>::iterator iCollector = find(m_FrameCollectors.begin(), m_FrameCollectors.end(), _collector);
+    if(iCollector != m_FrameCollectors.end()) {
+      m_FrameCollectors.erase(iCollector);
+    }
+  } // RemoveFrameCollector
+  
+  void DS485FrameProvider::DistributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
+    for(vector<IDS485FrameCollector*>::iterator iCollector = m_FrameCollectors.begin(), e = m_FrameCollectors.end();
+        iCollector != e; ++iCollector) 
+    {
+      (*iCollector)->CollectFrame(_frame);
+    }
+  } // DistributeFrame
+  
+  void DS485FrameProvider::DistributeFrame(DS485CommandFrame* _pFrame) {
+    DistributeFrame(boost::shared_ptr<DS485CommandFrame>(_pFrame));
+  } // DistributeFrame
   
   //================================================== Global helpers
   

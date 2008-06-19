@@ -464,6 +464,7 @@ namespace dss {
     
     while(!m_Terminated) {
       proxy.WaitForProxyEvent();
+      Logger::GetInstance()->Log("Apartment::Execute received proxy event, enumerating apartment / dSMs");
     
       vector<int> modIDs = proxy.GetModulators();
       for(vector<int>::iterator iModulatorID = modIDs.begin(); iModulatorID != modIDs.end(); ++iModulatorID) {

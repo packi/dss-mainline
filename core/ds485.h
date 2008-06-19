@@ -90,26 +90,24 @@ namespace dss {
     virtual vector<unsigned char> ToChar() const;
   };
   
-  class DS485Transport {
+  class IDS485FrameCollector;
+  
+  /** A frame provider receives frames from somewhere */
+  class DS485FrameProvider {
   private:
-    int m_LogicalID;
-    int m_LogicalSuccessorID;
-    devid_t m_DSID;
+    vector<IDS485FrameCollector*> m_FrameCollectors;
+  protected:
+    /** Distributes the frame to the collectors */
+    void DistributeFrame(boost::shared_ptr<DS485CommandFrame> _frame);
+    /** Distributes the frame to the collectors.
+     * NOTE: the ownership of the frame is tranfered to the frame provider
+     */
+    void DistributeFrame(DS485CommandFrame* _pFrame);
   public:
-    void Transmit(const DS485Frame& _frame);
-    DS485Frame Receive();
+    void AddFrameCollector(IDS485FrameCollector* _collector);
+    void RemoveFrameCollector(IDS485FrameCollector* _collector);
   };
   
-  
-  typedef enum {
-    
-  } DS485ComState;
-  
-  class DS485Endpoint {
-  private:
-    DS485Transport m_Transport; 
-  };
-
   typedef enum {
     csInitial,
     csSensing,
@@ -144,14 +142,16 @@ namespace dss {
     bool WaitForFrame();
   }; // FrameReader
   
-  class DS485Controller : public Thread {
+  class DS485Controller : public Thread,
+                          public DS485FrameProvider {
   private:
     aControllerState m_State;
     DS485FrameReader m_FrameReader;
     int m_StationID;
     int m_NextStationID;
-    
-    boost::ptr_vector<DS485Frame> m_PendingFrames;
+    int m_TokenCounter;
+
+    boost::ptr_vector<DS485CommandFrame> m_PendingFrames;
     boost::shared_ptr<SerialCom> m_SerialCom;
     SyncEvent m_ControllerEvent;
     SyncEvent m_CommandFrameEvent;
@@ -161,22 +161,27 @@ namespace dss {
     bool PutFrameOnWire(const DS485Frame* _pFrame, bool _freeFrame = true);
     
     void DoChangeState(aControllerState _newState);
+    void AddToReceivedQueue(DS485CommandFrame* _frame);
   public:
     DS485Controller();
     virtual ~DS485Controller();
     
-    void EnqueueFrame(DS485Frame* _frame);
+    void EnqueueFrame(DS485CommandFrame* _frame);
     void WaitForEvent();
     void WaitForCommandFrame();
     void WaitForToken();
     
     aControllerState GetState() const;
+    int GetTokenCount() const { return m_TokenCounter; };
         
     virtual void Execute();
   }; // DS485Controller
   
-  class DS485ResultsAccumulator : public Thread {
-  }; // DS485ResultsAccumulator
+  class IDS485FrameCollector {
+  public:
+    virtual void CollectFrame(boost::shared_ptr<DS485CommandFrame> _frame) = 0;
+    virtual ~IDS485FrameCollector() {};
+  }; // DS485FrameCollector
   
   
   const uint8 CommandSolicitSuccessorRequest = 0x01;

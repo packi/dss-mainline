@@ -19,6 +19,22 @@
 #include <map>
 #include <vector>
 
+#ifndef WIN32
+  #include <ext/hash_map>
+#else
+  #include <hash_map>
+#endif
+
+#ifndef WIN32
+using namespace __gnu_cxx;
+#else
+using namespace stdext;
+#endif
+
+#include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/ptr_container/ptr_map.hpp>
+#include <boost/shared_ptr.hpp>
+
 using namespace std;
 
 namespace dss {
@@ -50,19 +66,11 @@ namespace dss {
     cmdGetOnOff
   } DS485Command;
   
-  class DS485Interface {
-  public:
-    virtual void Send(DS485Frame& _frame) = 0;
-    virtual DS485Frame* Receive() = 0;
-    
-    virtual ~DS485Interface() {};
-  };
-  
   //================================================== Simulation stuff ahead
   
   class DSIDSim;
   
-  class DSModulatorSim : public DS485Interface {
+  class DSModulatorSim : public DS485FrameProvider {
   private:
     int m_ID;
     vector<DSIDSim*> m_SimulatedDevices;
@@ -74,7 +82,6 @@ namespace dss {
     DS485CommandFrame* CreateResponse(DS485CommandFrame& _request, uint8 _functionID);
     DS485CommandFrame* CreateAck(DS485CommandFrame& _request, uint8 _functionID);
     DS485CommandFrame* CreateReply(DS485CommandFrame& _request);
-    void AddToReplyQueue(DS485Frame* _frame);
   public:
     DSModulatorSim();
     virtual ~DSModulatorSim() {};
@@ -82,9 +89,7 @@ namespace dss {
     
     int GetID() const;
 
-    virtual void Send(DS485Frame& _frame);
-    bool HasPendingFrame();
-    virtual DS485Frame* Receive();
+    void Send(DS485Frame& _frame);
   };
   
   class DSIDSim {
@@ -122,7 +127,21 @@ namespace dss {
     void SetValue(const double _value, int _parameterNr = -1);
   };
   
-  class DS485Proxy : protected Thread {
+  class ReceivedFrame {
+  private:
+    int m_ReceivedAtToken;
+    boost::shared_ptr<DS485CommandFrame> m_Frame;
+  public:
+    ReceivedFrame(const int _receivedAt, DS485CommandFrame* _frame);
+    DS485CommandFrame& GetFrame() { return *m_Frame.get(); };
+    int GetReceivedAt() const { return m_ReceivedAtToken; };
+  };
+  
+  typedef map<int, boost::ptr_vector<ReceivedFrame> > FramesByID;
+  typedef vector<boost::shared_ptr<DS485CommandFrame> > CommandFrameSharedPtrVector;
+  
+  class DS485Proxy : protected Thread,
+                     public    IDS485FrameCollector {
   private:
     FittingResult BestFit(Set& _set);
     bool IsSimAddress(const uint8 _addr);
@@ -130,18 +149,26 @@ namespace dss {
     void SendFrame(DS485Frame& _frame);
     vector<DS485Frame*> Receive(uint8 _functionID);
     uint8 ReceiveSingleResult(uint8 _functionID);
-    void ReceiveAck(uint8 _functionID);
     
     void SignalEvent();
     
     DS485Controller m_DS485Controller;
     SyncEvent m_ProxyEvent;
+    
+    SyncEvent m_PacketHere;
+    FramesByID m_ReceivedFramesByFunctionID;
+    CommandFrameSharedPtrVector m_IncomingFrames;
   protected:
     virtual void Execute();
   public:
+    DS485Proxy();
+    virtual ~DS485Proxy() {};
+    
     //------------------------------------------------ Handling
     void Start();
     void WaitForProxyEvent();
+    
+    virtual void CollectFrame(boost::shared_ptr<DS485CommandFrame> _frame);
     
     //------------------------------------------------ Specialized Commands (system)
     vector<int> GetModulators();
