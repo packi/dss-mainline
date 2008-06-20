@@ -124,6 +124,21 @@ namespace dss {
   bool DS485Controller::PutFrameOnWire(const DS485Frame* _pFrame, bool _freeFrame) {
     vector<unsigned char> chars = _pFrame->ToChar();
     uint16_t crc = 0x0000;
+    
+    unsigned int numChars = chars.size();
+    for(unsigned int iChar = 0; iChar < numChars; iChar++) {
+      unsigned char c = chars[iChar];
+      crc = update_crc(crc, c);
+      // escape if it's a reserved character and not the first (frame start)
+      if(((c == FrameStart) || (c == EscapeCharacter)) && iChar) {
+        m_SerialCom->PutChar(0xFC);
+        // mask out the msb
+        m_SerialCom->PutChar(c & 0x7F);
+      } else {
+        m_SerialCom->PutChar(c);
+      }
+    }
+/*    
     bool first = true;
     for(vector<unsigned char>::iterator iChar = chars.begin(), e = chars.end();
         iChar != e; ++iChar)
@@ -140,11 +155,25 @@ namespace dss {
       }
       first = false;
     }
-    
+ */   
     if(dynamic_cast<const DS485CommandFrame*>(_pFrame) != NULL) {
       // send crc
-      m_SerialCom->PutChar(static_cast<unsigned char>(crc & 0xFF));
-      m_SerialCom->PutChar(static_cast<unsigned char>((crc >> 8) & 0xFF));
+      unsigned char c = static_cast<unsigned char>(crc & 0xFF);
+      if(((c == FrameStart) || (c == EscapeCharacter))) {
+        m_SerialCom->PutChar(0xFC);
+        // mask out the msb
+        m_SerialCom->PutChar(c & 0x7F);
+      } else {
+        m_SerialCom->PutChar(c);
+      }
+      c = static_cast<unsigned char>((crc >> 8) & 0xFF);
+      if(((c == FrameStart) || (c == EscapeCharacter))) {
+        m_SerialCom->PutChar(0xFC);
+        // mask out the msb
+        m_SerialCom->PutChar(c & 0x7F);
+      } else {
+        m_SerialCom->PutChar(c);
+      }
     }
     if(_freeFrame) {
       delete _pFrame;
@@ -173,9 +202,19 @@ namespace dss {
     m_TokenCounter = 0;
     time_t responseSentAt;
     time_t tokenReceivedAt;
-    boost::scoped_ptr<DS485Frame> token(new DS485Frame());
-    
     uint32_t dsid = 0xdeadbeef;
+    boost::scoped_ptr<DS485Frame> token(new DS485Frame());
+    boost::scoped_ptr<DS485CommandFrame> solicitSuccessorResponseFrame(new DS485CommandFrame());
+    solicitSuccessorResponseFrame->GetHeader().SetDestination(0);
+    solicitSuccessorResponseFrame->GetHeader().SetSource(0x3F);
+    solicitSuccessorResponseFrame->SetCommand(CommandSolicitSuccessorResponse);
+    solicitSuccessorResponseFrame->SetLength(4);
+    solicitSuccessorResponseFrame->GetPayload().Add<uint8>(static_cast<uint8>((dsid >> 24) & 0x000000FF));
+    solicitSuccessorResponseFrame->GetPayload().Add<uint8>(static_cast<uint8>((dsid >> 16) & 0x000000FF));
+    solicitSuccessorResponseFrame->GetPayload().Add<uint8>(static_cast<uint8>((dsid >> 18) & 0x000000FF));
+    solicitSuccessorResponseFrame->GetPayload().Add<uint8>(static_cast<uint8>((dsid >>  0) & 0x000000FF));
+
+    
     
     int senseTimeMS = 0;
     int numberOfJoinPacketsToWait = -1;
@@ -253,17 +292,8 @@ namespace dss {
                   numberOfJoinPacketsToWait--;
                   if(numberOfJoinPacketsToWait == 0) {
                     m_StationID = 0x3F;
-                    DS485CommandFrame* frameToSend = new DS485CommandFrame();
-                    frameToSend->GetHeader().SetDestination(0);
-                    frameToSend->GetHeader().SetSource(m_StationID);
-                    frameToSend->SetCommand(CommandSolicitSuccessorResponse);
-                    frameToSend->SetLength(4);
-                    frameToSend->GetPayload().Add<uint8>(static_cast<uint8>((dsid >> 24) & 0x000000FF));
-                    frameToSend->GetPayload().Add<uint8>(static_cast<uint8>((dsid >> 16) & 0x000000FF));
-                    frameToSend->GetPayload().Add<uint8>(static_cast<uint8>((dsid >> 18) & 0x000000FF));
-                    frameToSend->GetPayload().Add<uint8>(static_cast<uint8>((dsid >>  0) & 0x000000FF));
-                    PutFrameOnWire(frameToSend);
-                    cout << "******* FRAME AWAY ******" << endl;
+                    PutFrameOnWire(solicitSuccessorResponseFrame.get(), false);
+                    //cout << "******* FRAME AWAY ******" << endl;
                     DoChangeState(csSlaveJoining);
                     time(&responseSentAt);
                   }
@@ -300,7 +330,7 @@ namespace dss {
               // check if our response has timed-out
               time_t now;
               time(&now);
-              if((now - responseSentAt) > 3) {
+              if((now - responseSentAt) > 1) {
                 DoChangeState(csSlaveWaitingToJoin);
                 cerr << "çççççççççç haven't received my adress" << endl;
               }
@@ -421,7 +451,7 @@ namespace dss {
   } // DoChangeState
 
   void DS485Controller::EnqueueFrame(DS485CommandFrame* _frame) {
-    Logger::GetInstance()->Log("Frame queued");
+    //Logger::GetInstance()->Log("Frame queued");
     _frame->GetHeader().SetSource(m_StationID);
     m_PendingFrames.push_back(_frame);
   } // EnqueueFrame

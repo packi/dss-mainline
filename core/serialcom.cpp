@@ -99,7 +99,9 @@ namespace dss {
     
     int res = select(m_Handle + 1, &fdRead, NULL, NULL, &timeout );
     if(res == 1) {
+      m_ReadWriteLock.Lock();
       read(m_Handle, &_chOut, 1);
+      m_ReadWriteLock.Unlock();
       return true;
     } else if(res == 0) {
       // timeout
@@ -114,7 +116,9 @@ namespace dss {
   void SerialCom::PutChar(const char& _char) {
     int ret = 0;
     while(ret == 0 || ret == EAGAIN) {
+      m_ReadWriteLock.Lock();
       ret = write(m_Handle, &_char, 1);
+      m_ReadWriteLock.Unlock();
       
       if(ret != 1) {
         cout << "%";

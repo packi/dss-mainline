@@ -137,7 +137,7 @@ namespace dss {
     int GetReceivedAt() const { return m_ReceivedAtToken; };
   };
   
-  typedef map<int, boost::ptr_vector<ReceivedFrame> > FramesByID;
+  typedef map<int, vector<ReceivedFrame*> > FramesByID;
   typedef vector<boost::shared_ptr<DS485CommandFrame> > CommandFrameSharedPtrVector;
   
   class DS485Proxy : protected Thread,

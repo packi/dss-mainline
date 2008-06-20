@@ -13,6 +13,8 @@
 #include <deque>
 #include <string>
 
+#include "mutex.h"
+
 using namespace std;
 
 namespace dss {
@@ -33,6 +35,7 @@ namespace dss {
     struct termios m_CommSettings;
     int m_Handle;
     string m_PortDevName;
+    Mutex m_ReadWriteLock;
   public:
     SerialCom();
     virtual ~SerialCom();

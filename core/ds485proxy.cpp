@@ -238,8 +238,8 @@ namespace dss {
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
     cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetGroupsSize);
-    cmdFrame.GetPayload().Add<uint8>(_roomID);
     SendFrame(cmdFrame);
+    cmdFrame.GetPayload().Add<uint8>(_roomID);
     uint8 res = ReceiveSingleResult(FunctionModulatorGetGroupsSize);
     return res;    
   } // GetGroupCount
@@ -330,8 +330,11 @@ namespace dss {
   
   vector<DS485Frame*> DS485Proxy::Receive(uint8 _functionID) {
     vector<DS485Frame*> result;
+
+    // Wait for two tokens
+    m_DS485Controller->WaitForToken();
+    m_DS485Controller->WaitForToken();
     //TODO: check packets in bin for _functionID
-    
     
     return result;
   } // Receive  
