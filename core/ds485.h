@@ -183,6 +183,15 @@ namespace dss {
     virtual ~IDS485FrameCollector() {};
   }; // DS485FrameCollector
   
+  class DS485FrameSniffer : public Thread {
+  private:
+    DS485FrameReader m_FrameReader;
+    boost::shared_ptr<SerialCom> m_SerialCom;
+  public:
+    DS485FrameSniffer(const string& _deviceName);
+    
+    virtual void Execute();
+  };
   
   const uint8 CommandSolicitSuccessorRequest = 0x01;
   const uint8 CommandSolicitSuccessorResponse = 0x02;

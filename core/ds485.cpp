@@ -16,6 +16,8 @@
 #include <sstream>
 #include <iostream>
 
+#include <time.h>
+
 #include <boost/scoped_ptr.hpp>
 
 using namespace std;
@@ -138,24 +140,7 @@ namespace dss {
         m_SerialCom->PutChar(c);
       }
     }
-/*    
-    bool first = true;
-    for(vector<unsigned char>::iterator iChar = chars.begin(), e = chars.end();
-        iChar != e; ++iChar)
-    {
-      unsigned char c = *iChar;
-      crc = update_crc(crc, c);
-      // escape if it's a reserved character and not the first (frame start)
-      if(((c == FrameStart) || (c == EscapeCharacter)) && !first) {
-        m_SerialCom->PutChar(0xFC);
-        // mask out the msb
-        m_SerialCom->PutChar(c & 0x7F);
-      } else {
-        m_SerialCom->PutChar(c);
-      }
-      first = false;
-    }
- */   
+   
     if(dynamic_cast<const DS485CommandFrame*>(_pFrame) != NULL) {
       // send crc
       unsigned char c = static_cast<unsigned char>(crc & 0xFF);
@@ -202,8 +187,13 @@ namespace dss {
     m_TokenCounter = 0;
     time_t responseSentAt;
     time_t tokenReceivedAt;
+    
+    // TODO: read from somewhere
     uint32_t dsid = 0xdeadbeef;
+    
+    // prepare token frame
     boost::scoped_ptr<DS485Frame> token(new DS485Frame());
+    // prepare solicit successor response frame
     boost::scoped_ptr<DS485CommandFrame> solicitSuccessorResponseFrame(new DS485CommandFrame());
     solicitSuccessorResponseFrame->GetHeader().SetDestination(0);
     solicitSuccessorResponseFrame->GetHeader().SetSource(0x3F);
@@ -214,15 +204,13 @@ namespace dss {
     solicitSuccessorResponseFrame->GetPayload().Add<uint8>(static_cast<uint8>((dsid >> 18) & 0x000000FF));
     solicitSuccessorResponseFrame->GetPayload().Add<uint8>(static_cast<uint8>((dsid >>  0) & 0x000000FF));
 
-    
-    
     int senseTimeMS = 0;
     int numberOfJoinPacketsToWait = -1;
     
     while(!m_Terminated) {
       
       if(m_State == csInitial) {
-        senseTimeMS = rand() % 1000 + 1;
+        senseTimeMS = rand() % 100 + 1;
         DoChangeState(csSensing);
         continue;
       } else if(m_State == csSensing) {
@@ -286,7 +274,7 @@ namespace dss {
               if(cmdFrame->GetCommand() == CommandSolicitSuccessorRequest) {
                 // if it's the first of it's kind, determine how many we've got to skip
                 if(numberOfJoinPacketsToWait == -1) {
-                  numberOfJoinPacketsToWait = rand() % 100 + 10;
+                  numberOfJoinPacketsToWait = rand() % 10 + 10;
                   cout << "** Waiting for " << numberOfJoinPacketsToWait << endl;
                 } else {
                   numberOfJoinPacketsToWait--;
@@ -356,7 +344,9 @@ namespace dss {
               DS485CommandFrame& frameToSend = m_PendingFrames.front();
               PutFrameOnWire(&frameToSend, false);
               cout << "p";
-              
+              m_PendingFrames.erase(m_PendingFrames.begin());
+
+              /*
               // if not a broadcast, wait for ack, etc
               if(frameToSend.GetHeader().IsBroadcast()) {
                 m_PendingFrames.erase(m_PendingFrames.begin());
@@ -365,11 +355,12 @@ namespace dss {
                //   m_FrameReader.WaitForFrame();
                // }
                 m_PendingFrames.erase(m_PendingFrames.begin());
-                /*
-                boost::scoped_ptr<DS485Frame> respFrame(GetFrameFromWire());                
-                DS485CommandFrame* respFrameCmd = dynamic_cast<DS485CommandFrame*>(respFrame.get());
-                if()*/
+                
+                //boost::scoped_ptr<DS485Frame> respFrame(GetFrameFromWire());                
+                //DS485CommandFrame* respFrameCmd = dynamic_cast<DS485CommandFrame*>(respFrame.get());
+                //if()
               }
+              */
             }
             PutFrameOnWire(token.get(), false);
             cout << ".";
@@ -567,6 +558,8 @@ namespace dss {
           {
             if(((unsigned char)currentChar == FrameStart) && !escaped) {
               state = rsReadingHeader;
+            } else {
+              cout << "?";
             }
             break;
           }
@@ -629,6 +622,7 @@ namespace dss {
                 Logger::GetInstance()->Log("*********** crc mismatch.", lsError);
               } else {
                // Logger::GetInstance()->Log("received packet, crc ok");
+               // cout << "#";
               }
               DS485CommandFrame* frame = new DS485CommandFrame();
               frame->GetHeader().FromChar(received, validBytes);
@@ -659,7 +653,7 @@ namespace dss {
     return true;
   }
   
-  //==================================================
+  //================================================== DS485FrameProvider
   
   void DS485FrameProvider::AddFrameCollector(IDS485FrameCollector* _collector) {
     m_FrameCollectors.push_back(_collector);
@@ -683,6 +677,47 @@ namespace dss {
   void DS485FrameProvider::DistributeFrame(DS485CommandFrame* _pFrame) {
     DistributeFrame(boost::shared_ptr<DS485CommandFrame>(_pFrame));
   } // DistributeFrame
+  
+  //================================================== DS485FrameSniffer  
+  
+  DS485FrameSniffer::DS485FrameSniffer(const string& _deviceName) 
+  : Thread(true, "DS485FrameSniffer")
+  {
+     m_SerialCom.reset(new SerialCom());
+     m_SerialCom->Open(_deviceName.c_str());
+     m_FrameReader.SetSerialCom(m_SerialCom);
+  }
+
+  void DS485FrameSniffer::Execute() {
+    m_FrameReader.Run();
+    struct timespec lastFrame;
+    struct timespec thisFrame;
+    clock_gettime(CLOCK_REALTIME, &lastFrame);
+    while(!m_Terminated) {
+      if(m_FrameReader.WaitForFrame()){
+        clock_gettime(CLOCK_REALTIME, &thisFrame);
+        boost::scoped_ptr<DS485Frame> frame(m_FrameReader.GetFrame());
+        if(frame.get() != NULL) {
+
+          double diffMS = ((thisFrame.tv_sec*1000.0 + thisFrame.tv_nsec/1000.0/1000.0) - 
+                           (lastFrame.tv_sec*1000.0 + lastFrame.tv_nsec/1000.0/1000.0));
+
+          cout << "+" << diffMS << endl;
+
+          DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(frame.get());
+          if(cmdFrame != NULL) {
+            cout << "Command Frame: " << CommandToString(cmdFrame->GetCommand()) << endl;
+          } else {
+            cout << "token " << frame->GetHeader().GetSource() << " -> " << frame->GetHeader().GetDestination()  << endl;
+          }
+          cout << "seq: " << frame->GetHeader().GetCounter() << endl; 
+
+          lastFrame = thisFrame;
+        }
+      }
+    }
+  }
+
   
   //================================================== Global helpers
   

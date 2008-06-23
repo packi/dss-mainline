@@ -23,10 +23,13 @@
 #include "core/dss.h"
 #include "core/xmlwrapper.h"
 #include "core/jshandler.h"
+#include "core/ds485.h"
+#include "core/logger.h"
 #include "tests/tests.h"
 
 #include <ctime>
 #include <csignal>
+#include <getopt.h>
 
 #include <libxml/tree.h>
 #include <libxml/encoding.h>
@@ -52,26 +55,82 @@ int main (int argc, char * const argv[]) {
             "Check LANG, LC_CTYPE, LC_ALL.\n");
     return 1;
   }
+
   // make sure timezone gets set
   tzset();
-  
-//  testSerial();
   
   testICal();
   
   // disable broken pipe signal
-#ifndef _WIN32
-	signal(SIGPIPE, SIG_IGN);
+#ifndef WIN32
+  srand((getpid() << 16) ^ getuid() ^ time(0));
+  signal(SIGPIPE, SIG_IGN);
+#else
+  srand( (int)time( (time_t)NULL ) );
+  WSAData dat;
+  WSAStartup( 0x1010, &dat );
 #endif  
-  xmlInitParser();
   
-  Tests::Run();
-  // start DSS
-  dss::DSS::GetInstance()->Run();
+  // let libXML initialize it's parser
+  xmlInitParser();
+
+  int testFlag = 0;
+  string snifferDev;
+  bool startSniffer = false;
+  int c;
+  while(1) {
+    static struct option long_options[] =
+      {
+        // These options set a flag.
+        {"dont-runtest", no_argument, &testFlag, 1},
+        // These options don't set a flag.
+        // We distinguish them by their indices.
+        {"sniff",  required_argument,    0, 's'},
+        {0, 0, 0, 0}
+      };
+    // getopt_long stores the option index here.
+    int option_index = 0;
+
+    c = getopt_long (argc, argv, "s:",
+                    long_options, &option_index);
+
+    if (c == -1) {
+      break;
+    }
+
+    switch(c)
+    {
+      case 0:
+        break;
+
+      case 's':
+        snifferDev = optarg;
+        startSniffer = true;
+        break;
+      default:
+        abort();
+        break;
+    }
+
+  }
+
+  if(testFlag != 1) {
+    Tests::Run();
+  }
+  
+  if(startSniffer) {
+    DS485FrameSniffer sniffer(snifferDev);
+    sniffer.Run();
+    while(true) {
+      SleepSeconds(10);
+    }
+  } else {  
+    // start DSS
+    dss::DSS::GetInstance()->Run();
+  }
   return 0;
 }
 
-#include "core/ds485.h"
 
 void testSerial() {
   boost::scoped_ptr<SerialCom> ser(new SerialCom());

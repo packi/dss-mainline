@@ -36,6 +36,7 @@ namespace dss {
   const uint8 FunctionDeviceDecValue  = 0x41;
   
   const uint8 FunctionDeviceGetOnOff = 0x61;
+  const uint8 FunctionDeviceGetDSID = 0x65;
   
   const uint8 FunctionGetTypeRequest = 0xFD;
   
@@ -215,7 +216,8 @@ namespace dss {
     cmdFrame->GetHeader().SetDestination(0);
     cmdFrame->GetHeader().SetBroadcast(true);
     cmdFrame->SetCommand(CommandRequest);
-    cmdFrame->GetPayload().Add<uint8>(FunctionGetTypeRequest);
+    cmdFrame->GetPayload().Add<uint8>(/*FunctionGetTypeRequest*/0x65);
+    cmdFrame->GetPayload().Add<uint8>(0x00);
     SendFrame(*cmdFrame);
     m_DS485Controller.EnqueueFrame(cmdFrame);
 
@@ -332,8 +334,8 @@ namespace dss {
     vector<DS485Frame*> result;
 
     // Wait for two tokens
-    m_DS485Controller->WaitForToken();
-    m_DS485Controller->WaitForToken();
+    m_DS485Controller.WaitForToken();
+    m_DS485Controller.WaitForToken();
     //TODO: check packets in bin for _functionID
     
     return result;
@@ -521,6 +523,12 @@ namespace dss {
               response->GetPayload().Add<uint8>(dev.IsTurnedOn());
               DistributeFrame(response);
             }
+            break;
+          case FunctionDeviceGetDSID:
+            {
+              //TODO: implement getting dsid from device
+            }
+            break;
           case FunctionGetTypeRequest:
             {
               response = CreateResponse(cmdFrame, cmdNr);
