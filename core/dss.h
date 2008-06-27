@@ -50,6 +50,16 @@ namespace dss {
     virtual void Execute();
   };
   
+  class WebServices : public Thread {
+  private:
+    dssService m_Service;
+  public:
+    WebServices();
+    ~WebServices();
+    
+    virtual void Execute();
+  };
+  
   class Config {
   private:
     // this field has to be mutable because accessing it by operator[] is non-constw

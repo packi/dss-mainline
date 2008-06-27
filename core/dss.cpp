@@ -11,6 +11,7 @@
 #include "logger.h"
 #include "xmlwrapper.h"
 #include "scripting/modeljs.h"
+#include "../webservices/soapdssObject.h"
 
 #include <cassert>
 #include <string>
