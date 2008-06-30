@@ -18,6 +18,7 @@
 #include "defs.h"
 #include "ds485proxy.h"
 #include "syncevent.h"
+#include "../webservices/webservices.h"
 
 #include <cstdio>
 #include <string>
@@ -46,16 +47,6 @@ namespace dss {
     ~WebServer();
     
     void Initialize(Config& _config);
-    
-    virtual void Execute();
-  };
-  
-  class WebServices : public Thread {
-  private:
-    dssService m_Service;
-  public:
-    WebServices();
-    ~WebServices();
     
     virtual void Execute();
   };
@@ -126,6 +117,7 @@ namespace dss {
     Apartment m_Apartment;
     DSModulatorSim m_ModulatorSim;
     EventRunner m_EventRunner;
+    WebServices m_WebServices;
     
     DSS() { };
     

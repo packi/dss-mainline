@@ -11,7 +11,6 @@
 #include "logger.h"
 #include "xmlwrapper.h"
 #include "scripting/modeljs.h"
-#include "../webservices/soapdssObject.h"
 
 #include <cassert>
 #include <string>
@@ -131,6 +130,8 @@ namespace dss {
     LoadConfig();
     m_WebServer.Initialize(m_Config);
     m_WebServer.Run();
+    
+    m_WebServices.Run();
     
     m_ModulatorSim.Initialize();
     m_DS485Proxy.Start();
@@ -501,5 +502,5 @@ namespace dss {
   const char* Config::GetOptionAs(const string& _name) const {
     return GetOptionAs<string>(_name).c_str();
   } // GetOptionAs<const char*>
-  
+    
 }
