@@ -6,12 +6,7 @@
 */
 #include "soapH.h"
 
-#ifndef WITH_NOGLOBAL
-//#define WITH_NOGLOBAL
-#endif
-//#define SOAP_FMAC3 static
-
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2008-06-26 15:12:34 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2008-07-01 12:04:29 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -98,16 +93,14 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__Set_AddDeviceByName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Set-AddDeviceByID"))
 		return soap_serve_dss__Set_AddDeviceByID(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Set-RemoveDevice"))
+		return soap_serve_dss__Set_RemoveDevice(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Set-Combine"))
 		return soap_serve_dss__Set_Combine(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Set-Remove"))
 		return soap_serve_dss__Set_Remove(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Set-ByGroup"))
 		return soap_serve_dss__Set_ByGroup(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Set-RemoveDevice"))
-		return soap_serve_dss__Set_RemoveDevice(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Set-AddDevice"))
-		return soap_serve_dss__Set_AddDevice(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Apartment-GetGroupByName"))
 		return soap_serve_dss__Apartment_GetGroupByName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Apartment-GetRoomByName"))
@@ -290,7 +283,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_CreateSetFromGroup(struct so
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Apartment_CreateSetFromGroup(soap, soap_tmp_dss__Apartment_CreateSetFromGroup._groupName, soap_tmp_dss__Apartment_CreateSetFromGroupResponse.setID);
+	soap->error = dss__Apartment_CreateSetFromGroup(soap, soap_tmp_dss__Apartment_CreateSetFromGroup._token, soap_tmp_dss__Apartment_CreateSetFromGroup._groupName, soap_tmp_dss__Apartment_CreateSetFromGroupResponse.setID);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -331,7 +324,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_CreateSetFromDeviceIDs(struc
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Apartment_CreateSetFromDeviceIDs(soap, soap_tmp_dss__Apartment_CreateSetFromDeviceIDs._ids, soap_tmp_dss__Apartment_CreateSetFromDeviceIDsResponse.setID);
+	soap->error = dss__Apartment_CreateSetFromDeviceIDs(soap, soap_tmp_dss__Apartment_CreateSetFromDeviceIDs._token, soap_tmp_dss__Apartment_CreateSetFromDeviceIDs._ids, soap_tmp_dss__Apartment_CreateSetFromDeviceIDsResponse.setID);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -372,7 +365,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_CreateSetFromDeviceNames(str
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Apartment_CreateSetFromDeviceNames(soap, soap_tmp_dss__Apartment_CreateSetFromDeviceNames._names, soap_tmp_dss__Apartment_CreateSetFromDeviceNamesResponse.setID);
+	soap->error = dss__Apartment_CreateSetFromDeviceNames(soap, soap_tmp_dss__Apartment_CreateSetFromDeviceNames._token, soap_tmp_dss__Apartment_CreateSetFromDeviceNames._names, soap_tmp_dss__Apartment_CreateSetFromDeviceNamesResponse.setID);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -413,7 +406,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_CreateEmptySet(struct soap *
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Apartment_CreateEmptySet(soap, soap_tmp_dss__Apartment_CreateEmptySetResponse.setID);
+	soap->error = dss__Apartment_CreateEmptySet(soap, soap_tmp_dss__Apartment_CreateEmptySet._token, soap_tmp_dss__Apartment_CreateEmptySetResponse.setID);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -454,7 +447,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetDevices(struct soap *soap
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Apartment_GetDevices(soap, soap_tmp_dss__Apartment_GetDevicesResponse.setID);
+	soap->error = dss__Apartment_GetDevices(soap, soap_tmp_dss__Apartment_GetDevices._token, soap_tmp_dss__Apartment_GetDevicesResponse.setID);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -495,7 +488,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetDeviceIDByName(struct soa
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Apartment_GetDeviceIDByName(soap, soap_tmp_dss__Apartment_GetDeviceIDByName._deviceName, soap_tmp_dss__Apartment_GetDeviceIDByNameResponse.deviceID);
+	soap->error = dss__Apartment_GetDeviceIDByName(soap, soap_tmp_dss__Apartment_GetDeviceIDByName._token, soap_tmp_dss__Apartment_GetDeviceIDByName._deviceName, soap_tmp_dss__Apartment_GetDeviceIDByNameResponse.deviceID);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -536,7 +529,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_AddDeviceByName(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Set_AddDeviceByName(soap, soap_tmp_dss__Set_AddDeviceByName._setID, soap_tmp_dss__Set_AddDeviceByName._name, soap_tmp_dss__Set_AddDeviceByNameResponse.setID);
+	soap->error = dss__Set_AddDeviceByName(soap, soap_tmp_dss__Set_AddDeviceByName._token, soap_tmp_dss__Set_AddDeviceByName._setID, soap_tmp_dss__Set_AddDeviceByName._name, soap_tmp_dss__Set_AddDeviceByNameResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -577,7 +570,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_AddDeviceByID(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Set_AddDeviceByID(soap, soap_tmp_dss__Set_AddDeviceByID._setID, soap_tmp_dss__Set_AddDeviceByID._deviceID, soap_tmp_dss__Set_AddDeviceByIDResponse.setID);
+	soap->error = dss__Set_AddDeviceByID(soap, soap_tmp_dss__Set_AddDeviceByID._token, soap_tmp_dss__Set_AddDeviceByID._setID, soap_tmp_dss__Set_AddDeviceByID._deviceID, soap_tmp_dss__Set_AddDeviceByIDResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -606,6 +599,47 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_AddDeviceByID(struct soap *soap)
 	return soap_closesock(soap);
 }
 
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_RemoveDevice(struct soap *soap)
+{	struct dss__Set_RemoveDevice soap_tmp_dss__Set_RemoveDevice;
+	struct dss__Set_RemoveDeviceResponse soap_tmp_dss__Set_RemoveDeviceResponse;
+	soap_default_dss__Set_RemoveDeviceResponse(soap, &soap_tmp_dss__Set_RemoveDeviceResponse);
+	soap_default_dss__Set_RemoveDevice(soap, &soap_tmp_dss__Set_RemoveDevice);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Set_RemoveDevice(soap, &soap_tmp_dss__Set_RemoveDevice, "dss:Set-RemoveDevice", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Set_RemoveDevice(soap, soap_tmp_dss__Set_RemoveDevice._token, soap_tmp_dss__Set_RemoveDevice._setID, soap_tmp_dss__Set_RemoveDevice._deviceID, soap_tmp_dss__Set_RemoveDeviceResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Set_RemoveDeviceResponse(soap, &soap_tmp_dss__Set_RemoveDeviceResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Set_RemoveDeviceResponse(soap, &soap_tmp_dss__Set_RemoveDeviceResponse, "dss:Set-RemoveDeviceResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Set_RemoveDeviceResponse(soap, &soap_tmp_dss__Set_RemoveDeviceResponse, "dss:Set-RemoveDeviceResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_Combine(struct soap *soap)
 {	struct dss__Set_Combine soap_tmp_dss__Set_Combine;
 	struct dss__Set_CombineResponse soap_tmp_dss__Set_CombineResponse;
@@ -618,7 +652,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_Combine(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Set_Combine(soap, soap_tmp_dss__Set_Combine._setID1, soap_tmp_dss__Set_Combine._setID2, soap_tmp_dss__Set_CombineResponse.setID);
+	soap->error = dss__Set_Combine(soap, soap_tmp_dss__Set_Combine._token, soap_tmp_dss__Set_Combine._setID1, soap_tmp_dss__Set_Combine._setID2, soap_tmp_dss__Set_CombineResponse.setID);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -659,7 +693,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_Remove(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Set_Remove(soap, soap_tmp_dss__Set_Remove._setID, soap_tmp_dss__Set_Remove._setIDToRemove, soap_tmp_dss__Set_RemoveResponse.setID);
+	soap->error = dss__Set_Remove(soap, soap_tmp_dss__Set_Remove._token, soap_tmp_dss__Set_Remove._setID, soap_tmp_dss__Set_Remove._setIDToRemove, soap_tmp_dss__Set_RemoveResponse.setID);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -700,7 +734,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_ByGroup(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Set_ByGroup(soap, soap_tmp_dss__Set_ByGroup._setID, soap_tmp_dss__Set_ByGroup._groupID, soap_tmp_dss__Set_ByGroupResponse.setID);
+	soap->error = dss__Set_ByGroup(soap, soap_tmp_dss__Set_ByGroup._token, soap_tmp_dss__Set_ByGroup._setID, soap_tmp_dss__Set_ByGroup._groupID, soap_tmp_dss__Set_ByGroupResponse.setID);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -729,88 +763,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_ByGroup(struct soap *soap)
 	return soap_closesock(soap);
 }
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_RemoveDevice(struct soap *soap)
-{	struct dss__Set_RemoveDevice soap_tmp_dss__Set_RemoveDevice;
-	struct dss__Set_RemoveDeviceResponse soap_tmp_dss__Set_RemoveDeviceResponse;
-	soap_default_dss__Set_RemoveDeviceResponse(soap, &soap_tmp_dss__Set_RemoveDeviceResponse);
-	soap_default_dss__Set_RemoveDevice(soap, &soap_tmp_dss__Set_RemoveDevice);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Set_RemoveDevice(soap, &soap_tmp_dss__Set_RemoveDevice, "dss:Set-RemoveDevice", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Set_RemoveDevice(soap, soap_tmp_dss__Set_RemoveDevice._setID, soap_tmp_dss__Set_RemoveDevice._deviceID, soap_tmp_dss__Set_RemoveDeviceResponse.setID);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Set_RemoveDeviceResponse(soap, &soap_tmp_dss__Set_RemoveDeviceResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Set_RemoveDeviceResponse(soap, &soap_tmp_dss__Set_RemoveDeviceResponse, "dss:Set-RemoveDeviceResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Set_RemoveDeviceResponse(soap, &soap_tmp_dss__Set_RemoveDeviceResponse, "dss:Set-RemoveDeviceResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_AddDevice(struct soap *soap)
-{	struct dss__Set_AddDevice soap_tmp_dss__Set_AddDevice;
-	struct dss__Set_AddDeviceResponse soap_tmp_dss__Set_AddDeviceResponse;
-	soap_default_dss__Set_AddDeviceResponse(soap, &soap_tmp_dss__Set_AddDeviceResponse);
-	soap_default_dss__Set_AddDevice(soap, &soap_tmp_dss__Set_AddDevice);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Set_AddDevice(soap, &soap_tmp_dss__Set_AddDevice, "dss:Set-AddDevice", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Set_AddDevice(soap, soap_tmp_dss__Set_AddDevice._setID, soap_tmp_dss__Set_AddDevice._deviceID, soap_tmp_dss__Set_AddDeviceResponse.setID);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Set_AddDeviceResponse(soap, &soap_tmp_dss__Set_AddDeviceResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Set_AddDeviceResponse(soap, &soap_tmp_dss__Set_AddDeviceResponse, "dss:Set-AddDeviceResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Set_AddDeviceResponse(soap, &soap_tmp_dss__Set_AddDeviceResponse, "dss:Set-AddDeviceResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetGroupByName(struct soap *soap)
 {	struct dss__Apartment_GetGroupByName soap_tmp_dss__Apartment_GetGroupByName;
 	struct dss__Apartment_GetGroupByNameResponse soap_tmp_dss__Apartment_GetGroupByNameResponse;
@@ -823,7 +775,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetGroupByName(struct soap *
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Apartment_GetGroupByName(soap, soap_tmp_dss__Apartment_GetGroupByName._groupName, soap_tmp_dss__Apartment_GetGroupByNameResponse.groupID);
+	soap->error = dss__Apartment_GetGroupByName(soap, soap_tmp_dss__Apartment_GetGroupByName._token, soap_tmp_dss__Apartment_GetGroupByName._groupName, soap_tmp_dss__Apartment_GetGroupByNameResponse.groupID);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -864,7 +816,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetRoomByName(struct soap *s
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Apartment_GetRoomByName(soap, soap_tmp_dss__Apartment_GetRoomByName._roomName, soap_tmp_dss__Apartment_GetRoomByNameResponse.roomID);
+	soap->error = dss__Apartment_GetRoomByName(soap, soap_tmp_dss__Apartment_GetRoomByName._token, soap_tmp_dss__Apartment_GetRoomByName._roomName, soap_tmp_dss__Apartment_GetRoomByNameResponse.roomID);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -905,7 +857,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetRoomIDs(struct soap *soap
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Apartment_GetRoomIDs(soap, soap_tmp_dss__Apartment_GetRoomIDsResponse.roomIDs);
+	soap->error = dss__Apartment_GetRoomIDs(soap, soap_tmp_dss__Apartment_GetRoomIDs._token, soap_tmp_dss__Apartment_GetRoomIDsResponse.roomIDs);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -946,7 +898,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_TurnOn(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Set_TurnOn(soap, soap_tmp_dss__Set_TurnOn._setID, soap_tmp_dss__Set_TurnOnResponse.result);
+	soap->error = dss__Set_TurnOn(soap, soap_tmp_dss__Set_TurnOn._token, soap_tmp_dss__Set_TurnOn._setID, soap_tmp_dss__Set_TurnOnResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -987,7 +939,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_TurnOff(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Set_TurnOff(soap, soap_tmp_dss__Set_TurnOff._setID, soap_tmp_dss__Set_TurnOffResponse.result);
+	soap->error = dss__Set_TurnOff(soap, soap_tmp_dss__Set_TurnOff._token, soap_tmp_dss__Set_TurnOff._setID, soap_tmp_dss__Set_TurnOffResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1028,7 +980,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_IncreaseValue(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Set_IncreaseValue(soap, soap_tmp_dss__Set_IncreaseValue._setID, soap_tmp_dss__Set_IncreaseValue._paramID, soap_tmp_dss__Set_IncreaseValueResponse.result);
+	soap->error = dss__Set_IncreaseValue(soap, soap_tmp_dss__Set_IncreaseValue._token, soap_tmp_dss__Set_IncreaseValue._setID, soap_tmp_dss__Set_IncreaseValue._paramID, soap_tmp_dss__Set_IncreaseValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1069,7 +1021,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_DecreaseValue(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Set_DecreaseValue(soap, soap_tmp_dss__Set_DecreaseValue._setID, soap_tmp_dss__Set_DecreaseValue._paramID, soap_tmp_dss__Set_DecreaseValueResponse.result);
+	soap->error = dss__Set_DecreaseValue(soap, soap_tmp_dss__Set_DecreaseValue._token, soap_tmp_dss__Set_DecreaseValue._setID, soap_tmp_dss__Set_DecreaseValue._paramID, soap_tmp_dss__Set_DecreaseValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1110,7 +1062,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_Enable(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Set_Enable(soap, soap_tmp_dss__Set_Enable._setID, soap_tmp_dss__Set_EnableResponse.result);
+	soap->error = dss__Set_Enable(soap, soap_tmp_dss__Set_Enable._token, soap_tmp_dss__Set_Enable._setID, soap_tmp_dss__Set_EnableResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1151,7 +1103,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_Disable(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Set_Disable(soap, soap_tmp_dss__Set_Disable._setID, soap_tmp_dss__Set_DisableResponse.result);
+	soap->error = dss__Set_Disable(soap, soap_tmp_dss__Set_Disable._token, soap_tmp_dss__Set_Disable._setID, soap_tmp_dss__Set_DisableResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1192,7 +1144,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_StartDim(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Set_StartDim(soap, soap_tmp_dss__Set_StartDim._setID, soap_tmp_dss__Set_StartDim._directionUp, soap_tmp_dss__Set_StartDim._paramID, soap_tmp_dss__Set_StartDimResponse.result);
+	soap->error = dss__Set_StartDim(soap, soap_tmp_dss__Set_StartDim._token, soap_tmp_dss__Set_StartDim._setID, soap_tmp_dss__Set_StartDim._directionUp, soap_tmp_dss__Set_StartDim._paramID, soap_tmp_dss__Set_StartDimResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1233,7 +1185,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_EndDim(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Set_EndDim(soap, soap_tmp_dss__Set_EndDim._setID, soap_tmp_dss__Set_EndDim._paramID, soap_tmp_dss__Set_EndDimResponse.result);
+	soap->error = dss__Set_EndDim(soap, soap_tmp_dss__Set_EndDim._token, soap_tmp_dss__Set_EndDim._setID, soap_tmp_dss__Set_EndDim._paramID, soap_tmp_dss__Set_EndDimResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1274,7 +1226,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_SetValue(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Set_SetValue(soap, soap_tmp_dss__Set_SetValue._setID, soap_tmp_dss__Set_SetValue._value, soap_tmp_dss__Set_SetValue._paramID, soap_tmp_dss__Set_SetValueResponse.result);
+	soap->error = dss__Set_SetValue(soap, soap_tmp_dss__Set_SetValue._token, soap_tmp_dss__Set_SetValue._setID, soap_tmp_dss__Set_SetValue._value, soap_tmp_dss__Set_SetValue._paramID, soap_tmp_dss__Set_SetValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1315,7 +1267,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_TurnOn(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Device_TurnOn(soap, soap_tmp_dss__Device_TurnOn._deviceID, soap_tmp_dss__Device_TurnOnResponse.result);
+	soap->error = dss__Device_TurnOn(soap, soap_tmp_dss__Device_TurnOn._token, soap_tmp_dss__Device_TurnOn._deviceID, soap_tmp_dss__Device_TurnOnResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1356,7 +1308,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_TurnOff(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Device_TurnOff(soap, soap_tmp_dss__Device_TurnOff._deviceID, soap_tmp_dss__Device_TurnOffResponse.result);
+	soap->error = dss__Device_TurnOff(soap, soap_tmp_dss__Device_TurnOff._token, soap_tmp_dss__Device_TurnOff._deviceID, soap_tmp_dss__Device_TurnOffResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1397,7 +1349,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_IncreaseValue(struct soap *soap
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Device_IncreaseValue(soap, soap_tmp_dss__Device_IncreaseValue._deviceID, soap_tmp_dss__Device_IncreaseValue._paramID, soap_tmp_dss__Device_IncreaseValueResponse.result);
+	soap->error = dss__Device_IncreaseValue(soap, soap_tmp_dss__Device_IncreaseValue._token, soap_tmp_dss__Device_IncreaseValue._deviceID, soap_tmp_dss__Device_IncreaseValue._paramID, soap_tmp_dss__Device_IncreaseValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1438,7 +1390,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_DecreaseValue(struct soap *soap
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Device_DecreaseValue(soap, soap_tmp_dss__Device_DecreaseValue._deviceID, soap_tmp_dss__Device_DecreaseValue._paramID, soap_tmp_dss__Device_DecreaseValueResponse.result);
+	soap->error = dss__Device_DecreaseValue(soap, soap_tmp_dss__Device_DecreaseValue._token, soap_tmp_dss__Device_DecreaseValue._deviceID, soap_tmp_dss__Device_DecreaseValue._paramID, soap_tmp_dss__Device_DecreaseValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1479,7 +1431,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_Enable(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Device_Enable(soap, soap_tmp_dss__Device_Enable._deviceID, soap_tmp_dss__Device_EnableResponse.result);
+	soap->error = dss__Device_Enable(soap, soap_tmp_dss__Device_Enable._token, soap_tmp_dss__Device_Enable._deviceID, soap_tmp_dss__Device_EnableResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1520,7 +1472,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_Disable(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Device_Disable(soap, soap_tmp_dss__Device_Disable._deviceID, soap_tmp_dss__Device_DisableResponse.result);
+	soap->error = dss__Device_Disable(soap, soap_tmp_dss__Device_Disable._token, soap_tmp_dss__Device_Disable._deviceID, soap_tmp_dss__Device_DisableResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1561,7 +1513,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_StartDim(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Device_StartDim(soap, soap_tmp_dss__Device_StartDim._deviceID, soap_tmp_dss__Device_StartDim._directionUp, soap_tmp_dss__Device_StartDim._paramID, soap_tmp_dss__Device_StartDimResponse.result);
+	soap->error = dss__Device_StartDim(soap, soap_tmp_dss__Device_StartDim._token, soap_tmp_dss__Device_StartDim._deviceID, soap_tmp_dss__Device_StartDim._directionUp, soap_tmp_dss__Device_StartDim._paramID, soap_tmp_dss__Device_StartDimResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1602,7 +1554,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_EndDim(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Device_EndDim(soap, soap_tmp_dss__Device_EndDim._deviceID, soap_tmp_dss__Device_EndDim._paramID, soap_tmp_dss__Device_EndDimResponse.result);
+	soap->error = dss__Device_EndDim(soap, soap_tmp_dss__Device_EndDim._token, soap_tmp_dss__Device_EndDim._deviceID, soap_tmp_dss__Device_EndDim._paramID, soap_tmp_dss__Device_EndDimResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1643,7 +1595,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_SetValue(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Device_SetValue(soap, soap_tmp_dss__Device_SetValue._deviceID, soap_tmp_dss__Device_SetValue._value, soap_tmp_dss__Device_SetValue._paramID, soap_tmp_dss__Device_SetValueResponse.result);
+	soap->error = dss__Device_SetValue(soap, soap_tmp_dss__Device_SetValue._token, soap_tmp_dss__Device_SetValue._deviceID, soap_tmp_dss__Device_SetValue._value, soap_tmp_dss__Device_SetValue._paramID, soap_tmp_dss__Device_SetValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1684,7 +1636,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetValue(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Device_GetValue(soap, soap_tmp_dss__Device_GetValue._deviceID, soap_tmp_dss__Device_GetValueResponse.result);
+	soap->error = dss__Device_GetValue(soap, soap_tmp_dss__Device_GetValue._token, soap_tmp_dss__Device_GetValue._deviceID, soap_tmp_dss__Device_GetValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1725,7 +1677,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetDSID(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Device_GetDSID(soap, soap_tmp_dss__Device_GetDSID._deviceID, soap_tmp_dss__Device_GetDSIDResponse.result);
+	soap->error = dss__Device_GetDSID(soap, soap_tmp_dss__Device_GetDSID._token, soap_tmp_dss__Device_GetDSID._deviceID, soap_tmp_dss__Device_GetDSIDResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1766,7 +1718,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetModulatorIDs(struct soap 
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Apartment_GetModulatorIDs(soap, soap_tmp_dss__Apartment_GetModulatorIDsResponse.ids);
+	soap->error = dss__Apartment_GetModulatorIDs(soap, soap_tmp_dss__Apartment_GetModulatorIDs._token, soap_tmp_dss__Apartment_GetModulatorIDsResponse.ids);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1807,7 +1759,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Modulator_GetDSID(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Modulator_GetDSID(soap, soap_tmp_dss__Modulator_GetDSID._modulatorID, soap_tmp_dss__Modulator_GetDSIDResponse.dsid);
+	soap->error = dss__Modulator_GetDSID(soap, soap_tmp_dss__Modulator_GetDSID._token, soap_tmp_dss__Modulator_GetDSID._modulatorID, soap_tmp_dss__Modulator_GetDSIDResponse.dsid);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1851,7 +1803,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Modulator_GetName(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Modulator_GetName(soap, soap_tmp_dss__Modulator_GetName._modulatorID, &soap_tmp_string);
+	soap->error = dss__Modulator_GetName(soap, soap_tmp_dss__Modulator_GetName._token, soap_tmp_dss__Modulator_GetName._modulatorID, &soap_tmp_string);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1892,7 +1844,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_AllocateRoom(struct soap *so
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Apartment_AllocateRoom(soap, soap_tmp_dss__Apartment_AllocateRoomResponse.roomID);
+	soap->error = dss__Apartment_AllocateRoom(soap, soap_tmp_dss__Apartment_AllocateRoom._token, soap_tmp_dss__Apartment_AllocateRoomResponse.roomID);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1933,7 +1885,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_DeleteRoom(struct soap *soap
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Apartment_DeleteRoom(soap, soap_tmp_dss__Apartment_DeleteRoom._roomID, soap_tmp_dss__Apartment_DeleteRoomResponse.result);
+	soap->error = dss__Apartment_DeleteRoom(soap, soap_tmp_dss__Apartment_DeleteRoom._token, soap_tmp_dss__Apartment_DeleteRoom._roomID, soap_tmp_dss__Apartment_DeleteRoomResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1974,7 +1926,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Room_AddDevice(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Room_AddDevice(soap, soap_tmp_dss__Room_AddDevice._roomID, soap_tmp_dss__Room_AddDevice._deviceID, soap_tmp_dss__Room_AddDeviceResponse.result);
+	soap->error = dss__Room_AddDevice(soap, soap_tmp_dss__Room_AddDevice._token, soap_tmp_dss__Room_AddDevice._roomID, soap_tmp_dss__Room_AddDevice._deviceID, soap_tmp_dss__Room_AddDeviceResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2015,7 +1967,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Room_RemoveDevice(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Room_RemoveDevice(soap, soap_tmp_dss__Room_RemoveDevice._roomID, soap_tmp_dss__Room_RemoveDevice._deviceID, soap_tmp_dss__Room_RemoveDeviceResponse.result);
+	soap->error = dss__Room_RemoveDevice(soap, soap_tmp_dss__Room_RemoveDevice._token, soap_tmp_dss__Room_RemoveDevice._roomID, soap_tmp_dss__Room_RemoveDevice._deviceID, soap_tmp_dss__Room_RemoveDeviceResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2056,7 +2008,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Room_SetName(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Room_SetName(soap, soap_tmp_dss__Room_SetName._roomID, soap_tmp_dss__Room_SetName._name, soap_tmp_dss__Room_SetNameResponse.result);
+	soap->error = dss__Room_SetName(soap, soap_tmp_dss__Room_SetName._token, soap_tmp_dss__Room_SetName._roomID, soap_tmp_dss__Room_SetName._name, soap_tmp_dss__Room_SetNameResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2097,7 +2049,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_AllocateUserGroup(struct soa
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Apartment_AllocateUserGroup(soap, soap_tmp_dss__Apartment_AllocateUserGroupResponse.groupID);
+	soap->error = dss__Apartment_AllocateUserGroup(soap, soap_tmp_dss__Apartment_AllocateUserGroup._token, soap_tmp_dss__Apartment_AllocateUserGroupResponse.groupID);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2138,7 +2090,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_RemoveUserGroup(struct soap *soa
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Group_RemoveUserGroup(soap, soap_tmp_dss__Group_RemoveUserGroup._groupID, soap_tmp_dss__Group_RemoveUserGroupResponse.result);
+	soap->error = dss__Group_RemoveUserGroup(soap, soap_tmp_dss__Group_RemoveUserGroup._token, soap_tmp_dss__Group_RemoveUserGroup._groupID, soap_tmp_dss__Group_RemoveUserGroupResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2179,7 +2131,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_AddDevice(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Group_AddDevice(soap, soap_tmp_dss__Group_AddDevice._groupID, soap_tmp_dss__Group_AddDevice._deviceID, soap_tmp_dss__Group_AddDeviceResponse.result);
+	soap->error = dss__Group_AddDevice(soap, soap_tmp_dss__Group_AddDevice._token, soap_tmp_dss__Group_AddDevice._groupID, soap_tmp_dss__Group_AddDevice._deviceID, soap_tmp_dss__Group_AddDeviceResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2220,7 +2172,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_RemoveDevice(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Group_RemoveDevice(soap, soap_tmp_dss__Group_RemoveDevice._groupID, soap_tmp_dss__Group_RemoveDevice._deviceID, soap_tmp_dss__Group_RemoveDeviceResponse.result);
+	soap->error = dss__Group_RemoveDevice(soap, soap_tmp_dss__Group_RemoveDevice._token, soap_tmp_dss__Group_RemoveDevice._groupID, soap_tmp_dss__Group_RemoveDevice._deviceID, soap_tmp_dss__Group_RemoveDeviceResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2261,7 +2213,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_Raise(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Event_Raise(soap, soap_tmp_dss__Event_Raise._eventID, soap_tmp_dss__Event_Raise._sourceID, soap_tmp_dss__Event_Raise._params, soap_tmp_dss__Event_RaiseResponse.result);
+	soap->error = dss__Event_Raise(soap, soap_tmp_dss__Event_Raise._token, soap_tmp_dss__Event_Raise._eventID, soap_tmp_dss__Event_Raise._sourceID, soap_tmp_dss__Event_Raise._params, soap_tmp_dss__Event_RaiseResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2302,7 +2254,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_GetActionNames(struct soap *soap
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Event_GetActionNames(soap, soap_tmp_dss__Event_GetActionNamesResponse.names);
+	soap->error = dss__Event_GetActionNames(soap, soap_tmp_dss__Event_GetActionNames._token, soap_tmp_dss__Event_GetActionNamesResponse.names);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2343,7 +2295,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_GetActionParamsTemplate(struct s
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Event_GetActionParamsTemplate(soap, soap_tmp_dss__Event_GetActionParamsTemplate._name, paramsTemplate);
+	soap->error = dss__Event_GetActionParamsTemplate(soap, soap_tmp_dss__Event_GetActionParamsTemplate._token, soap_tmp_dss__Event_GetActionParamsTemplate._name, paramsTemplate);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2384,7 +2336,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_Subscribe(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Event_Subscribe(soap, soap_tmp_dss__Event_Subscribe._eventIDs, soap_tmp_dss__Event_Subscribe._sourceIDs, soap_tmp_dss__Event_Subscribe._actionName, soap_tmp_dss__Event_Subscribe._params, soap_tmp_dss__Event_SubscribeResponse.subscriptionID);
+	soap->error = dss__Event_Subscribe(soap, soap_tmp_dss__Event_Subscribe._token, soap_tmp_dss__Event_Subscribe._eventIDs, soap_tmp_dss__Event_Subscribe._sourceIDs, soap_tmp_dss__Event_Subscribe._actionName, soap_tmp_dss__Event_Subscribe._params, soap_tmp_dss__Event_SubscribeResponse.subscriptionID);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2425,7 +2377,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_Unsubscribe(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Event_Unsubscribe(soap, soap_tmp_dss__Event_Unsubscribe._subscriptionID, soap_tmp_dss__Event_UnsubscribeResponse.result);
+	soap->error = dss__Event_Unsubscribe(soap, soap_tmp_dss__Event_Unsubscribe._token, soap_tmp_dss__Event_Unsubscribe._subscriptionID, soap_tmp_dss__Event_UnsubscribeResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2466,7 +2418,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_Schedule(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Event_Schedule(soap, soap_tmp_dss__Event_Schedule._icalString, soap_tmp_dss__Event_Schedule._eventID, soap_tmp_dss__Event_Schedule._params, soap_tmp_dss__Event_ScheduleResponse.scheduledEventID);
+	soap->error = dss__Event_Schedule(soap, soap_tmp_dss__Event_Schedule._token, soap_tmp_dss__Event_Schedule._icalString, soap_tmp_dss__Event_Schedule._eventID, soap_tmp_dss__Event_Schedule._params, soap_tmp_dss__Event_ScheduleResponse.scheduledEventID);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2507,7 +2459,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_DeleteSchedule(struct soap *soap
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Event_DeleteSchedule(soap, soap_tmp_dss__Event_DeleteSchedule._scheduleEventID, soap_tmp_dss__Event_DeleteScheduleResponse.result);
+	soap->error = dss__Event_DeleteSchedule(soap, soap_tmp_dss__Event_DeleteSchedule._token, soap_tmp_dss__Event_DeleteSchedule._scheduleEventID, soap_tmp_dss__Event_DeleteScheduleResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);

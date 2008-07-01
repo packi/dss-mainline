@@ -131,6 +131,7 @@ namespace dss {
     Apartment& GetApartment() { return m_Apartment; };
     DSModulatorSim& GetModulatorSim() { return m_ModulatorSim; };
     EventRunner& GetEventRunner() { return m_EventRunner; };
+    WebServices& GetWebServices() { return m_WebServices; };
   }; // DSS
   
   class NoSuchOptionException : public DSSException {
