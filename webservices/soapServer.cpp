@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2008-07-01 12:04:29 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2008-07-02 12:17:56 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -1636,7 +1636,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetValue(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Device_GetValue(soap, soap_tmp_dss__Device_GetValue._token, soap_tmp_dss__Device_GetValue._deviceID, soap_tmp_dss__Device_GetValueResponse.result);
+	soap->error = dss__Device_GetValue(soap, soap_tmp_dss__Device_GetValue._token, soap_tmp_dss__Device_GetValue._deviceID, soap_tmp_dss__Device_GetValue._paramID, soap_tmp_dss__Device_GetValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);

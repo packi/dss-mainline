@@ -255,7 +255,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="groupName" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupName" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
@@ -313,7 +313,7 @@
   <element name="Set-TurnOnResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -330,7 +330,7 @@
   <element name="Set-TurnOffResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -348,7 +348,7 @@
   <element name="Set-IncreaseValueResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -366,7 +366,7 @@
   <element name="Set-DecreaseValueResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -383,7 +383,7 @@
   <element name="Set-EnableResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -400,7 +400,7 @@
   <element name="Set-DisableResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -419,7 +419,7 @@
   <element name="Set-StartDimResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -437,7 +437,7 @@
   <element name="Set-EndDimResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -447,7 +447,7 @@
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="value" type="xsd:float" minOccurs="1" maxOccurs="1"/>
+     <element name="value" type="xsd:double" minOccurs="1" maxOccurs="1"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
@@ -456,7 +456,7 @@
   <element name="Set-SetValueResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -473,7 +473,7 @@
   <element name="Device-TurnOnResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -490,7 +490,7 @@
   <element name="Device-TurnOffResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -508,7 +508,7 @@
   <element name="Device-IncreaseValueResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -526,7 +526,7 @@
   <element name="Device-DecreaseValueResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -543,7 +543,7 @@
   <element name="Device-EnableResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -560,7 +560,7 @@
   <element name="Device-DisableResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -579,7 +579,7 @@
   <element name="Device-StartDimResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -597,7 +597,7 @@
   <element name="Device-EndDimResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -607,7 +607,7 @@
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="deviceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="value" type="xsd:float" minOccurs="1" maxOccurs="1"/>
+     <element name="value" type="xsd:double" minOccurs="1" maxOccurs="1"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
@@ -616,7 +616,7 @@
   <element name="Device-SetValueResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -626,6 +626,7 @@
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="deviceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -633,7 +634,7 @@
   <element name="Device-GetValueResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:float" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:double" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>

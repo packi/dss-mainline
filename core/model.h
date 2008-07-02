@@ -501,7 +501,10 @@ namespace dss {
     void ReadConfigurationFromXML(const string& _fileName);
     
     /** Returns a reference to the device with the id _id*/
-    Device& GetDeviceByID(const devid_t _id) const;
+    Device& GetDeviceByID(const devid_t _id) const;    
+    /** Returns a reference to the device with the name _name*/
+    Device& GetDeviceByName(const string& _name);
+    
     /** Allocates a device and returns a reference to it. 
      *  If there is a stale device with the same id, this device gets "activated"
      */

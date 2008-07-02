@@ -35,33 +35,33 @@ int dss__Set_Combine(int _token, int _setID1, int _setID2, int& setID);
 int dss__Set_Remove(int _token, int _setID, int _setIDToRemove, int& setID);
 int dss__Set_ByGroup(int _token, int _setID, int _groupID, int& setID);
 
-int dss__Apartment_GetGroupByName(int _token, int _groupName, int& groupID);
+int dss__Apartment_GetGroupByName(int _token, char* _groupName, int& groupID);
 int dss__Apartment_GetRoomByName(int _token, char* _roomName, int& roomID);
 int dss__Apartment_GetRoomIDs(int _token, IntArray& roomIDs);
 
 //==================================================== Manipulation
 
-int dss__Set_TurnOn(int _token, int _setID, int& result);
-int dss__Set_TurnOff(int _token, int _setID, int& result);
-int dss__Set_IncreaseValue(int _token, int _setID, int _paramID, int& result);
-int dss__Set_DecreaseValue(int _token, int _setID, int _paramID, int& result);
+int dss__Set_TurnOn(int _token, int _setID, bool& result);
+int dss__Set_TurnOff(int _token, int _setID, bool& result);
+int dss__Set_IncreaseValue(int _token, int _setID, int _paramID, bool& result);
+int dss__Set_DecreaseValue(int _token, int _setID, int _paramID, bool& result);
 
-int dss__Set_Enable(int _token, int _setID, int& result);
-int dss__Set_Disable(int _token, int _setID, int& result);
-int dss__Set_StartDim(int _token, int _setID, bool _directionUp, int _paramID, int& result);
-int dss__Set_EndDim(int _token, int _setID, int _paramID, int& result);
-int dss__Set_SetValue(int _token, int _setID, float _value, int _paramID, int& result);
+int dss__Set_Enable(int _token, int _setID, bool& result);
+int dss__Set_Disable(int _token, int _setID, bool& result);
+int dss__Set_StartDim(int _token, int _setID, bool _directionUp, int _paramID, bool& result);
+int dss__Set_EndDim(int _token, int _setID, int _paramID, bool& result);
+int dss__Set_SetValue(int _token, int _setID, double _value, int _paramID, bool& result);
 
-int dss__Device_TurnOn(int _token, int _deviceID, int& result);
-int dss__Device_TurnOff(int _token, int _deviceID, int& result);
-int dss__Device_IncreaseValue(int _token, int _deviceID, int _paramID, int& result);
-int dss__Device_DecreaseValue(int _token, int _deviceID, int _paramID, int& result);
-int dss__Device_Enable(int _token, int _deviceID, int& result);
-int dss__Device_Disable(int _token, int _deviceID, int& result);
-int dss__Device_StartDim(int _token, int _deviceID, bool _directionUp, int _paramID, int& result);
-int dss__Device_EndDim(int _token, int _deviceID, int _paramID, int& result);
-int dss__Device_SetValue(int _token, int _deviceID, float _value, int _paramID, int& result);
-int dss__Device_GetValue(int _token, int _deviceID, float& result);
+int dss__Device_TurnOn(int _token, int _deviceID, bool& result);
+int dss__Device_TurnOff(int _token, int _deviceID, bool& result);
+int dss__Device_IncreaseValue(int _token, int _deviceID, int _paramID, bool& result);
+int dss__Device_DecreaseValue(int _token, int _deviceID, int _paramID, bool& result);
+int dss__Device_Enable(int _token, int _deviceID, bool& result);
+int dss__Device_Disable(int _token, int _deviceID, bool& result);
+int dss__Device_StartDim(int _token, int _deviceID, bool _directionUp, int _paramID, bool& result);
+int dss__Device_EndDim(int _token, int _deviceID, int _paramID, bool& result);
+int dss__Device_SetValue(int _token, int _deviceID, double _value, int _paramID, bool& result);
+int dss__Device_GetValue(int _token, int _deviceID, int _paramID, double& result);
 
 //==================================================== Information
 
@@ -90,7 +90,9 @@ public:
   StringArray* values;
   StringArray* names;
 };
-  
+
+//==================================================== Events
+
 int dss__Event_Raise(int _token, int _eventID, int _sourceID, Parameter _params, int& result);
 int dss__Event_GetActionNames(int _token, StringArray& names);
 int dss__Event_GetActionParamsTemplate(int _token, char* _name, Parameter& paramsTemplate);

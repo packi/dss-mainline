@@ -572,6 +572,15 @@ namespace dss {
     throw new ItemNotFoundException(IntToString(_id));
   } // GetDeviceByID
   
+  Device& Apartment::GetDeviceByName(const string& _name) {
+    for(vector<Device*>::const_iterator ipDevice = m_Devices.begin(); ipDevice != m_Devices.end(); ++ipDevice) {
+      if((*ipDevice)->GetName() == _name) {
+        return **ipDevice;
+      }
+    }
+    throw new ItemNotFoundException(_name);
+  } // GetDeviceByName
+  
   Set Apartment::GetDevices() const {
     DeviceVector devs;
     for(vector<Device*>::const_iterator ipDevice = m_Devices.begin(); ipDevice != m_Devices.end(); ++ipDevice) {

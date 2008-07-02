@@ -383,7 +383,7 @@ struct dss__Apartment_GetGroupByName
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	int _groupName;	/* required element of type xsd:int */
+	char *_groupName;	/* optional element of type xsd:string */
 };
 #endif
 
@@ -434,7 +434,7 @@ public:
 struct dss__Set_TurnOnResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -455,7 +455,7 @@ public:
 struct dss__Set_TurnOffResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -476,7 +476,7 @@ public:
 struct dss__Set_IncreaseValueResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -498,7 +498,7 @@ public:
 struct dss__Set_DecreaseValueResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -520,7 +520,7 @@ public:
 struct dss__Set_EnableResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -541,7 +541,7 @@ public:
 struct dss__Set_DisableResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -562,7 +562,7 @@ public:
 struct dss__Set_StartDimResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -585,7 +585,7 @@ public:
 struct dss__Set_EndDimResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -607,7 +607,7 @@ public:
 struct dss__Set_SetValueResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -619,7 +619,7 @@ struct dss__Set_SetValue
 public:
 	int _token;	/* required element of type xsd:int */
 	int _setID;	/* required element of type xsd:int */
-	float _value;	/* required element of type xsd:float */
+	double _value;	/* required element of type xsd:double */
 	int _paramID;	/* required element of type xsd:int */
 };
 #endif
@@ -630,7 +630,7 @@ public:
 struct dss__Device_TurnOnResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -651,7 +651,7 @@ public:
 struct dss__Device_TurnOffResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -672,7 +672,7 @@ public:
 struct dss__Device_IncreaseValueResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -694,7 +694,7 @@ public:
 struct dss__Device_DecreaseValueResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -716,7 +716,7 @@ public:
 struct dss__Device_EnableResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -737,7 +737,7 @@ public:
 struct dss__Device_DisableResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -758,7 +758,7 @@ public:
 struct dss__Device_StartDimResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -781,7 +781,7 @@ public:
 struct dss__Device_EndDimResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -803,7 +803,7 @@ public:
 struct dss__Device_SetValueResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -815,7 +815,7 @@ struct dss__Device_SetValue
 public:
 	int _token;	/* required element of type xsd:int */
 	int _deviceID;	/* required element of type xsd:int */
-	float _value;	/* required element of type xsd:float */
+	double _value;	/* required element of type xsd:double */
 	int _paramID;	/* required element of type xsd:int */
 };
 #endif
@@ -826,7 +826,7 @@ public:
 struct dss__Device_GetValueResponse
 {
 public:
-	float result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:float */
+	double result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:double */
 };
 #endif
 
@@ -838,6 +838,7 @@ struct dss__Device_GetValue
 public:
 	int _token;	/* required element of type xsd:int */
 	int _deviceID;	/* required element of type xsd:int */
+	int _paramID;	/* required element of type xsd:int */
 };
 #endif
 
@@ -1421,49 +1422,49 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Set_Remove(struct soap*, int _token, int _setID, 
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Set_ByGroup(struct soap*, int _token, int _setID, int _groupID, int &setID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetGroupByName(struct soap*, int _token, int _groupName, int &groupID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetGroupByName(struct soap*, int _token, char *_groupName, int &groupID);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetRoomByName(struct soap*, int _token, char *_roomName, int &roomID);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetRoomIDs(struct soap*, int _token, IntArray &roomIDs);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_TurnOn(struct soap*, int _token, int _setID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_TurnOn(struct soap*, int _token, int _setID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_TurnOff(struct soap*, int _token, int _setID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_TurnOff(struct soap*, int _token, int _setID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_IncreaseValue(struct soap*, int _token, int _setID, int _paramID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_IncreaseValue(struct soap*, int _token, int _setID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_DecreaseValue(struct soap*, int _token, int _setID, int _paramID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_DecreaseValue(struct soap*, int _token, int _setID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_Enable(struct soap*, int _token, int _setID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_Enable(struct soap*, int _token, int _setID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_Disable(struct soap*, int _token, int _setID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_Disable(struct soap*, int _token, int _setID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_StartDim(struct soap*, int _token, int _setID, bool _directionUp, int _paramID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_StartDim(struct soap*, int _token, int _setID, bool _directionUp, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_EndDim(struct soap*, int _token, int _setID, int _paramID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_EndDim(struct soap*, int _token, int _setID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_SetValue(struct soap*, int _token, int _setID, float _value, int _paramID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_SetValue(struct soap*, int _token, int _setID, double _value, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_TurnOn(struct soap*, int _token, int _deviceID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_TurnOn(struct soap*, int _token, int _deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_TurnOff(struct soap*, int _token, int _deviceID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_TurnOff(struct soap*, int _token, int _deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_IncreaseValue(struct soap*, int _token, int _deviceID, int _paramID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_IncreaseValue(struct soap*, int _token, int _deviceID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_DecreaseValue(struct soap*, int _token, int _deviceID, int _paramID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_DecreaseValue(struct soap*, int _token, int _deviceID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_Enable(struct soap*, int _token, int _deviceID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_Enable(struct soap*, int _token, int _deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_Disable(struct soap*, int _token, int _deviceID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_Disable(struct soap*, int _token, int _deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_StartDim(struct soap*, int _token, int _deviceID, bool _directionUp, int _paramID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_StartDim(struct soap*, int _token, int _deviceID, bool _directionUp, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_EndDim(struct soap*, int _token, int _deviceID, int _paramID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_EndDim(struct soap*, int _token, int _deviceID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_SetValue(struct soap*, int _token, int _deviceID, float _value, int _paramID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_SetValue(struct soap*, int _token, int _deviceID, double _value, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetValue(struct soap*, int _token, int _deviceID, float &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetValue(struct soap*, int _token, int _deviceID, int _paramID, double &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetDSID(struct soap*, int _token, int _deviceID, LONG64 &result);
 
