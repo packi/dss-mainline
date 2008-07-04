@@ -18,20 +18,41 @@ public:
 
 typedef long long DSID;
 
+/** Authenticates your ip to the system.
+ * The token received will be used in any subsequent call. The ip/token pair
+ * identifies a session. A Session will time out after n minutes of no activity (default 5).*/
 int dss__Authenticate(char* _userName, char* _password, int& token);
+/** Terminates a session. All resources allocate by the session (e.g. sets) will be 
+ * released. */
 int dss__SignOff(int _token, int& result);
+/** Frees the set (_setID) on the server. */
+int dss__FreeSet(int _token, int _setID, bool& result);
 
+/** Creates a set containing all devices which are contained in a group named _groupName.
+ * @see dss__CreateEmptySet */
 int dss__Apartment_CreateSetFromGroup(int _token, char* _groupName, int& setID);
+/** Creates a set containing all devices in the given array 
+ * @see dss__CreateEmptySet*/
 int dss__Apartment_CreateSetFromDeviceIDs(int _token, IntArray _ids, int& setID);
+/** Creates a set containing all devices in the given array */
 int dss__Apartment_CreateSetFromDeviceNames(int _token, StringArray _names, int& setID);
+/** Creates an empty set.
+ * The set is allocated on the server and must be freed either by a SignOff or a call to FreeSet.*/
 int dss__Apartment_CreateEmptySet(int _token, int& setID);
+/** Creates a set containing all devices */
 int dss__Apartment_GetDevices(int _token, int& setID);
+/** Returns the device ID for the given _deviceName */
 int dss__Apartment_GetDeviceIDByName(int _token, char* _deviceName, int& deviceID);
 
+/** Adds the given device to the set */ 
 int dss__Set_AddDeviceByName(int _token, int _setID, char* _name, bool& result);
+/** Adds the given device to the set */
 int dss__Set_AddDeviceByID(int _token, int _setID, int _deviceID, bool& result);
+/** Removes the device from the set */
 int dss__Set_RemoveDevice(int _token, int _setID, int _deviceID, bool& result);
+/** Combines two sets into another set */
 int dss__Set_Combine(int _token, int _setID1, int _setID2, int& setID);
+/** Removes all devices contained in _SetIDToRemove from _setID and copies those into setID */
 int dss__Set_Remove(int _token, int _setID, int _setIDToRemove, int& setID);
 int dss__Set_ByGroup(int _token, int _setID, int _groupID, int& setID);
 

@@ -600,7 +600,25 @@ int dss__Group_RemoveDevice(struct soap *soap, int _token, int _groupID, int _de
 //==================================================== Events
 
 int dss__Event_Raise(struct soap *soap, int _token, int _eventID, int _sourceID, Parameter _params, int& result) {
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+  int numNames = 0;
+  int numValues = 0;
+  if(_params.names != NULL) {
+    numNames = _params.names->__size;
+  }
+  if(_params.values != NULL) {
+    numValues = _params.values->__size;
+  }
+  if(numNames != numValues) {
+    soap_receiver_fault(soap, "Names and values of _params must have the same number of items", NULL);
+  }
+  
+  
+  dss::Event evt(_eventID, _sourceID);
+  dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
+  apt.OnEvent();
 }
 
 int dss__Event_GetActionNames(struct soap *soap, int _token,  StringArray& names) {
