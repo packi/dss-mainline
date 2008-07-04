@@ -54,10 +54,14 @@ int dss__Set_RemoveDevice(int _token, int _setID, int _deviceID, bool& result);
 int dss__Set_Combine(int _token, int _setID1, int _setID2, int& setID);
 /** Removes all devices contained in _SetIDToRemove from _setID and copies those into setID */
 int dss__Set_Remove(int _token, int _setID, int _setIDToRemove, int& setID);
+/** Removes all devices which don't belong to the specified group */
 int dss__Set_ByGroup(int _token, int _setID, int _groupID, int& setID);
 
+/** Looks up the group id for the given group name */
 int dss__Apartment_GetGroupByName(int _token, char* _groupName, int& groupID);
+/** Looks up the room id for the given room */
 int dss__Apartment_GetRoomByName(int _token, char* _roomName, int& roomID);
+/** Returns an array containing all room ids */
 int dss__Apartment_GetRoomIDs(int _token, IntArray& roomIDs);
 
 //==================================================== Manipulation
