@@ -338,6 +338,8 @@ namespace dss {
     m_DS485Controller.WaitForToken();
     //TODO: check packets in bin for _functionID
     
+    FramesByID::iterator iRecvFrame = m_ReceivedFramesByFunctionID.find(_functionID);
+    
     return result;
   } // Receive  
   

@@ -44,7 +44,7 @@ protected:
     delete ctx;
     
     ctx = env.GetContext();
-    ctx->LoadFromFile("/Users/packi/sources/dss/trunk/data/test.js");
+    ctx->LoadFromFile("data/test.js");
     result = ctx->Evaluate<double>();
     CPPUNIT_ASSERT_EQUAL(result, 100.0);
     delete ctx;
@@ -62,7 +62,7 @@ protected:
     for(int i = 0; i < 100; i++) {
       ScriptContext* ctx = env.GetContext();
 //      ctx->LoadFromMemory("x = 10; x = x * x;");
-      ctx->LoadFromFile("/home/patrick/sources/digitalstrom/dss/trunk/data/test2.js");
+      ctx->LoadFromFile("data/test3.js");
       ctx->Evaluate<void>();
       cout << ".";
       delete ctx;

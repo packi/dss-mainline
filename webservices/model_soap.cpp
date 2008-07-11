@@ -617,8 +617,9 @@ int dss__Event_Raise(struct soap *soap, int _token, int _eventID, int _sourceID,
   
   
   dss::Event evt(_eventID, _sourceID);
-  dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
+  //dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
  // apt.OnEvent();
+  return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
 int dss__Event_GetActionNames(struct soap *soap, int _token,  StringArray& names) {
