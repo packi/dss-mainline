@@ -135,17 +135,8 @@ namespace dss {
     
     m_ModulatorSim.Initialize();
     m_DS485Proxy.Start();
-    m_Apartment.Run();
-    
-    boost::shared_ptr<Event> evt(new Event(1003, 0));
-    DateTime startingTime;
-    startingTime.SetSecond(0);
-    boost::shared_ptr<RepeatingSchedule> sch(new RepeatingSchedule(Minutely, 1, startingTime));
-        
-    ScheduledEvent* schEvt = new ScheduledEvent(evt, sch);
-    schEvt->SetName("Run test2.js every minute");
-    m_EventRunner.AddEvent(schEvt);    
-   // m_EventRunner.Run();
+    m_Apartment.Run();    
+    m_EventRunner.Run();
 
     while(true) {
       sleep(1000);

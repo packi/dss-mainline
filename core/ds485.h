@@ -111,6 +111,7 @@ namespace dss {
   typedef enum {
     csInitial,
     csSensing,
+    csDesignatedMaster,
     csBroadcastingDSID,
     csMaster,
     csSlaveWaitingToJoin,
@@ -167,7 +168,7 @@ namespace dss {
     virtual ~DS485Controller();
     
     void EnqueueFrame(DS485CommandFrame* _frame);
-    void WaitForEvent();
+    bool WaitForEvent(const int _timeoutMS);
     void WaitForCommandFrame();
     void WaitForToken();
     

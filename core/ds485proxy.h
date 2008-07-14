@@ -133,7 +133,7 @@ namespace dss {
     boost::shared_ptr<DS485CommandFrame> m_Frame;
   public:
     ReceivedFrame(const int _receivedAt, DS485CommandFrame* _frame);
-    DS485CommandFrame& GetFrame() { return *m_Frame.get(); };
+    boost::shared_ptr<DS485CommandFrame> GetFrame() { return m_Frame; };
     int GetReceivedAt() const { return m_ReceivedAtToken; };
   };
   
@@ -146,8 +146,8 @@ namespace dss {
     FittingResult BestFit(Set& _set);
     bool IsSimAddress(const uint8 _addr);
 
-    void SendFrame(DS485Frame& _frame);
-    vector<DS485Frame*> Receive(uint8 _functionID);
+    void SendFrame(DS485CommandFrame& _frame);
+    vector<boost::shared_ptr<DS485CommandFrame> > Receive(uint8 _functionID);
     uint8 ReceiveSingleResult(uint8 _functionID);
     
     void SignalEvent();

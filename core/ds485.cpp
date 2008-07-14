@@ -220,6 +220,7 @@ namespace dss {
         }
         if(senseTimeMS == 0) {
           Logger::GetInstance()->Log("No traffic on line, I'll be your master today");
+          DoChangeState(csDesignatedMaster);
         }
         SleepMS(senseTimeMS);
         senseTimeMS = 0;
@@ -421,6 +422,9 @@ namespace dss {
             flush(cout);
           }
           break;
+        case csDesignatedMaster:
+          SleepMS(1000);
+          break;
         default:
           throw new runtime_error("invalid value for m_State");
         }
@@ -447,8 +451,8 @@ namespace dss {
     m_PendingFrames.push_back(_frame);
   } // EnqueueFrame
   
-  void DS485Controller::WaitForEvent() {
-    m_ControllerEvent.WaitFor();
+  bool DS485Controller::WaitForEvent(const int _timeoutMS) {
+    return m_ControllerEvent.WaitFor(_timeoutMS);
   } // WaitForEvent
   
   aControllerState DS485Controller::GetState() const {
