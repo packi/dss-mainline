@@ -47,6 +47,12 @@ namespace dss {
     return atoi(_strValue);
   }
   
+  unsigned int StrToUInt(const string _strValue) {
+    char* endp;
+    unsigned int result = strtoul(_strValue.c_str(), &endp, 10);
+    return result;
+  }
+  
   string IntToString(const int _int) {
     stringstream sstream;
     sstream << _int;

@@ -68,6 +68,16 @@ namespace dss {
     return result;
   }
   
+  template<>
+  dsid_t PayloadDissector::Get() {
+    dsid_t result;
+    result = (Get<uint8>() << 24) |
+             (Get<uint8>() << 16) |
+             (Get<uint8>() << 8)  |
+             (Get<uint8>());
+    return result;
+  }
+  
   
   typedef hash_map<const Modulator*, Set> HashMapModulatorSet;
   
@@ -171,7 +181,7 @@ namespace dss {
   } // SendCommand
  
   vector<int> DS485Proxy::SendCommand(DS485Command _cmd, Device& _device) {
-    return SendCommand(_cmd, _device.GetID(), _device.GetModulatorID());
+    return SendCommand(_cmd, _device.GetShortAddress(), _device.GetModulatorID());
   } // SendCommand
   
   vector<int> DS485Proxy::SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID) {
@@ -335,6 +345,23 @@ namespace dss {
     return result;    
   } // GetDevicesInRoom
   
+  dsid_t DS485Proxy::GetDSIDOfDevice(const int _modulatorID, const int _deviceID) {
+    DS485CommandFrame cmdFrame;
+    cmdFrame.GetHeader().SetDestination(_modulatorID);
+    cmdFrame.SetCommand(CommandRequest);
+    cmdFrame.GetPayload().Add<uint8>(FunctionDeviceGetDSID);
+    cmdFrame.GetPayload().Add<uint8>(_deviceID);
+    SendFrame(cmdFrame);
+    vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionDeviceGetDSID);
+    if(results.size() != 1) {
+      Logger::GetInstance()->Log("DS485Proxy::GetDSIDOfDevice: received multiple results", lsError);
+      return 0;
+    }
+    PayloadDissector pd(results.at(0)->GetPayload());
+    pd.Get<uint8>(); // discard the function id
+    return pd.Get<dsid_t>();
+  }
+  
   vector<boost::shared_ptr<DS485CommandFrame> > DS485Proxy::Receive(uint8 _functionID) {
     vector<boost::shared_ptr<DS485CommandFrame> > result;
 
@@ -461,8 +488,10 @@ namespace dss {
   
   void DSModulatorSim::Initialize() {
     m_ID = 70;
-    m_SimulatedDevices.push_back(new DSIDSim(1));
-    m_SimulatedDevices.push_back(new DSIDSim(2));
+    m_SimulatedDevices.push_back(new DSIDSim(SimulationPrefix | 0x01));
+    m_SimulatedDevices.push_back(new DSIDSim(SimulationPrefix | 0x02));
+    m_SimulatedDevices[0]->SetShortAddress(1);
+    m_SimulatedDevices[1]->SetShortAddress(2);
     m_Rooms[1] = vector<DSIDSim*>();
     m_Rooms[1].push_back(m_SimulatedDevices[0]);
     m_Rooms[1].push_back(m_SimulatedDevices[1]);
@@ -520,7 +549,7 @@ namespace dss {
               uint8 roomID = pd.Get<uint8>();
               uint8 deviceIndex = pd.Get<uint8>();
               response = CreateResponse(cmdFrame, cmdNr);
-              response->GetPayload().Add<uint8>(m_Rooms[roomID].at(deviceIndex)->GetID());
+              response->GetPayload().Add<uint8>(m_Rooms[roomID].at(deviceIndex)->GetShortAddress());
               DistributeFrame(response);
             }
             break;
@@ -552,7 +581,11 @@ namespace dss {
             break;
           case FunctionDeviceGetDSID:
             {
-              //TODO: implement getting dsid from device
+              response = CreateResponse(cmdFrame, cmdNr);
+              int devID = pd.Get<uint8>();
+              DSIDSim& dev = LookupDevice(devID);
+              response->GetPayload().Add<dsid_t>(dev.GetDSID());
+              DistributeFrame(response);
             }
             break;
           case FunctionGetTypeRequest:
@@ -613,9 +646,9 @@ namespace dss {
   } // CreateResponse
 
   
-  DSIDSim& DSModulatorSim::LookupDevice(int _id) {
+  DSIDSim& DSModulatorSim::LookupDevice(const devid_t _shortAddress) {
     for(vector<DSIDSim*>::iterator ipSimDev = m_SimulatedDevices.begin(); ipSimDev != m_SimulatedDevices.end(); ++ipSimDev) {
-      if((*ipSimDev)->GetID() == _id)  {
+      if((*ipSimDev)->GetShortAddress() == _shortAddress)  {
         return **ipSimDev;
       }
     }
@@ -629,8 +662,9 @@ namespace dss {
 
   //================================================== DSIDSim
   
-  DSIDSim::DSIDSim(const int _id) 
-  : m_Id(_id),
+  DSIDSim::DSIDSim(const dsid_t _dsid) 
+  : m_DSID(_dsid),
+    m_ShortAddress(0xFF),
     m_Enabled(true),
     m_CurrentValue(0)
   {
@@ -643,9 +677,17 @@ namespace dss {
     m_ValuesForScene.push_back(0);   // SceneDeepOff
   } // ctor
   
-  int DSIDSim::GetID() {
-    return m_Id;
-  } // GetID
+  dsid_t DSIDSim::GetDSID() const {
+    return m_DSID;
+  } // GetDSID
+  
+  devid_t DSIDSim::GetShortAddress() const {
+    return m_ShortAddress;
+  } // GetShortAddress
+  
+  void DSIDSim::SetShortAddress(const devid_t _shortAddress) {
+    m_ShortAddress = _shortAddress;
+  }
   
   void DSIDSim::CallScene(const int _sceneNr) {
     if(m_Enabled) {
@@ -711,7 +753,7 @@ namespace dss {
     }
   } // SetValue
   
-  bool DSIDSim::IsTurnedOn() {
+  bool DSIDSim::IsTurnedOn() const {
     return m_CurrentValue > 0;
   } // IsTurnedOn
   

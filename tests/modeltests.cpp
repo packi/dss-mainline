@@ -75,9 +75,13 @@ protected:
     Apartment apt;
     
     Device& dev1 = apt.AllocateDevice(1);
+    dev1.SetShortAddress(1);
     Device& dev2 = apt.AllocateDevice(2);
+    dev2.SetShortAddress(2);
     Device& dev3 = apt.AllocateDevice(3);
+    dev3.SetShortAddress(3);
     Device& dev4 = apt.AllocateDevice(4);
+    dev4.SetShortAddress(4);
     
     Set allDevices = apt.GetDevices();
     

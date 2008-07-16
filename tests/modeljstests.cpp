@@ -67,8 +67,10 @@ protected:
   void testSets() {
     Apartment apt;
     
-    Device dev1 = apt.AllocateDevice(1);
-    Device dev2 = apt.AllocateDevice(2);
+    Device& dev1 = apt.AllocateDevice(1);
+    dev1.SetShortAddress(1);
+    Device& dev2 = apt.AllocateDevice(2);
+    dev2.SetShortAddress(2);
     
     boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
     env->Initialize();
@@ -90,8 +92,10 @@ protected:
     Apartment apt;
     
     Device& dev1 = apt.AllocateDevice(1);
+    dev1.SetShortAddress(1);
     dev1.SetName("dev1");
     Device& dev2 = apt.AllocateDevice(2);
+    dev2.SetShortAddress(2);
     dev2.SetName("dev2");
     
     boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());

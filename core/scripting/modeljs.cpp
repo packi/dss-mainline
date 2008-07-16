@@ -415,7 +415,7 @@ namespace dss {
           *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, "device"));
           return JS_TRUE;
         case 1:
-          *rval = INT_TO_JSVAL(dev->GetID());
+          *rval = INT_TO_JSVAL(dev->GetDSID());
           return JS_TRUE;
         case 2:
           *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, dev->GetDevice().GetName().c_str()));
@@ -447,7 +447,7 @@ namespace dss {
   };
   
   JSObject* ModelScriptContextExtension::CreateJSDevice(ScriptContext& _ctx, Device& _dev) {
-    DeviceReference ref(_dev.GetID(), m_Apartment);
+    DeviceReference ref(_dev.GetShortAddress(), m_Apartment);
     return CreateJSDevice(_ctx, ref);
   } // CreateJSDevice
   
@@ -455,7 +455,7 @@ namespace dss {
     JSObject* result = JS_NewObject(_ctx.GetJSContext(), &dev_class, NULL, NULL);
     JS_DefineFunctions(_ctx.GetJSContext(), result, device_interface_methods);
     JS_DefineProperties(_ctx.GetJSContext(), result, dev_properties);
-    DeviceReference* innerObj = new DeviceReference(_ref.GetID(), _ref.GetDevice().GetApartment());
+    DeviceReference* innerObj = new DeviceReference(_ref.GetDSID(), _ref.GetDevice().GetApartment());
     // make an explicit copy
     *innerObj = _ref;
     JS_SetPrivate(_ctx.GetJSContext(), result, innerObj);

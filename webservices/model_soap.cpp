@@ -33,7 +33,7 @@ int AuthorizeAndGetDevice(struct soap *soap, const int _token, const int _devID,
   }
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   try {
-    result = apt.GetDeviceByID(_devID);
+    result = apt.GetDeviceByDSID(_devID);
   } catch(dss::ItemNotFoundException* _ex) {
     return soap_receiver_fault(soap, "Device not found", NULL);
   }
@@ -91,7 +91,7 @@ int dss__Apartment_CreateSetFromDeviceIDs(struct soap *soap, int _token, IntArra
   try {
     dss::Set set;
     for(int iID = 0; iID < _ids.__size; iID++) {
-      dss::Device& dev = apt.GetDeviceByID(_ids.__ptr[iID]);
+      dss::Device& dev = apt.GetDeviceByDSID(_ids.__ptr[iID]);
       set.AddDevice(dev);
     }
     sess.AddSet(set, setID);
@@ -144,7 +144,7 @@ int dss__Apartment_GetDeviceIDByName(struct soap *soap, int _token,  char* _devi
   }
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   try {
-    deviceID = apt.GetDevices().GetByName(_deviceName).GetID();
+    deviceID = apt.GetDevices().GetByName(_deviceName).GetDSID();
   } catch(dss::ItemNotFoundException* _ex) {
     return soap_receiver_fault(soap, "Could not find device", NULL);
   }

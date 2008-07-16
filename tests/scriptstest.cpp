@@ -61,7 +61,6 @@ protected:
     env.Initialize();
     for(int i = 0; i < 100; i++) {
       ScriptContext* ctx = env.GetContext();
-//      ctx->LoadFromMemory("x = 10; x = x * x;");
       ctx->LoadFromFile("data/test3.js");
       ctx->Evaluate<void>();
       cout << ".";

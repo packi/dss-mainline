@@ -28,8 +28,6 @@
 #include "xmlwrapper.h"
 #include "thread.h"
 
-//using namespace __gnu_cxx;
-
 #include <vector>
 #include <string>
 
@@ -93,19 +91,19 @@ namespace dss {
    */
   class DeviceReference : public IDeviceInterface {
   private:
-    devid_t m_DeviceID;
+    dsid_t m_DSID;
     const Apartment* m_Apartment;
   public:
     DeviceReference(const DeviceReference& _copy);
-    DeviceReference(const devid_t _deviceID, const Apartment& _apartment);
+    DeviceReference(const dsid_t _dsid, const Apartment& _apartment);
     DeviceReference(const Device& _device, const Apartment& _apartment);
     virtual ~DeviceReference() {};
     
     Device& GetDevice();
-    devid_t GetID() const;
+    devid_t GetDSID() const;
     
     bool operator==(const DeviceReference& _other) const {
-      return m_DeviceID == _other.m_DeviceID;
+      return m_DSID == _other.m_DSID;
     }
     
     virtual void TurnOn();
@@ -131,13 +129,14 @@ namespace dss {
   class Device : public IDeviceInterface {
   private:
     string m_Name;
-    devid_t m_ID;
+    dsid_t m_DSID;
+    devid_t m_ShortAddress;
     int m_ModulatorID;
     Apartment* m_pApartment;
     bitset<63> m_GroupBitmask;
     vector<int> m_Groups;
   public:
-    Device(devid_t _id, Apartment* _pApartment);
+    Device(const dsid_t _dsid, Apartment* _pApartment);
     virtual ~Device() {};
     
     virtual void TurnOn();
@@ -169,8 +168,12 @@ namespace dss {
     /** Returns the number of groups the device is a member of */
     int GetGroupsCount() const;
     
-    /** Returns the id of the device */
-    devid_t GetID() const;
+    /** Returns the short address of the device. This is the address 
+     * the device got from the dSM. */
+    devid_t GetShortAddress() const;
+    void SetShortAddress(const devid_t _shortAddress);
+    /** Returns the DSID of the device */
+    dsid_t GetDSID() const;
     /** Returns the id of the modulator the device is connected to */
     int GetModulatorID() const;
     void SetModulatorID(const int _modulatorID);
@@ -500,15 +503,15 @@ namespace dss {
     /** Loads the datamodel and marks the contained items as "stale" */
     void ReadConfigurationFromXML(const string& _fileName);
     
-    /** Returns a reference to the device with the id _id*/
-    Device& GetDeviceByID(const devid_t _id) const;    
+    /** Returns a reference to the device with the DSID _dsid */
+    Device& GetDeviceByDSID(const dsid_t _dsid) const;    
     /** Returns a reference to the device with the name _name*/
     Device& GetDeviceByName(const string& _name);
     
     /** Allocates a device and returns a reference to it. 
-     *  If there is a stale device with the same id, this device gets "activated"
+     *  If there is a stale device with the same dsid, this device gets "activated"
      */
-    Device& AllocateDevice(const devid_t _id);
+    Device& AllocateDevice(const dsid_t _dsid);
     
     /** Returns the Room by name */
     Room& GetRoom(const string& _roomName);

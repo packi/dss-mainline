@@ -209,6 +209,11 @@ namespace dss {
   
   const char* CommandToString(const uint8 _command);
   
+  const dsid_t SimulationPrefix = 0xFFC00000;
+  inline bool IsSimulationDSID(const dsid_t _dsid) {
+    return _dsid & SimulationPrefix == SimulationPrefix;
+  }
+  
 }
 
 #endif

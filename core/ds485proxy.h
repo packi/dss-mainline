@@ -78,7 +78,7 @@ namespace dss {
     map< const pair<const int, const int>,  vector<DSIDSim*> > m_DevicesOfGroupInRoom;
     vector<DS485Frame*> m_PendingFrames;
   private:  
-    DSIDSim& LookupDevice(int _id);
+    DSIDSim& LookupDevice(const devid_t _id);
     DS485CommandFrame* CreateResponse(DS485CommandFrame& _request, uint8 _functionID);
     DS485CommandFrame* CreateAck(DS485CommandFrame& _request, uint8 _functionID);
     DS485CommandFrame* CreateReply(DS485CommandFrame& _request);
@@ -94,7 +94,8 @@ namespace dss {
   
   class DSIDSim {
   private:
-    const int m_Id;
+    const dsid_t m_DSID;
+    int m_ShortAddress;
     bool m_On;
     bool m_Enabled;
     bool m_Dimming;
@@ -106,9 +107,11 @@ namespace dss {
     uint8 m_CurrentValue;
     int m_DimTimeMS;
   public:
-    DSIDSim(const int _id);
+    DSIDSim(const dsid_t _dsid);
     
-    int GetID();
+    dsid_t GetDSID() const;
+    devid_t GetShortAddress() const;
+    void SetShortAddress(const devid_t _shortAddress);
     
     void CallScene(const int _sceneNr);
     void SaveScene(const int _sceneNr);
@@ -117,7 +120,7 @@ namespace dss {
     void IncreaseValue(const int _parameterNr = -1);
     void DecreaseValue(const int _parameterNr = -1);
     
-    bool IsTurnedOn();
+    bool IsTurnedOn() const;
     
     void Enable();
     void Disable();
@@ -188,6 +191,8 @@ namespace dss {
     
     int AddUserGroup(const int _modulatorID);
     void RemoveUserGroup(const int _modulatorID, const int _groupID);
+    
+    dsid_t GetDSIDOfDevice(const int _modulatorID, const int _deviceID);
     
     //------------------------------------------------ Device manipulation    
     vector<int> SendCommand(DS485Command _cmd, Set& _set);

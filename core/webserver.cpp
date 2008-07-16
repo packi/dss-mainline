@@ -121,7 +121,7 @@ namespace dss {
         } else {
           sstream << ",";
         }
-        sstream << "{ \"id\": " << d.GetID() 
+        sstream << "{ \"id\": " << d.GetDSID() 
                 << ", \"name\": \"" << d.GetDevice().GetName() 
                 << "\", \"on\": " << (d.IsOn() ? "true" : "false") << " }";        
       }
@@ -133,8 +133,8 @@ namespace dss {
       
       string devidStr = paramMap["device"];
       if(!devidStr.empty()) {
-        int devid = StrToInt(devidStr);
-        DSS::GetInstance()->GetApartment().GetDeviceByID(devid).TurnOn();
+        int devid = StrToUInt(devidStr);
+        DSS::GetInstance()->GetApartment().GetDeviceByDSID(devid).TurnOn();
         shttpd_printf(_arg, "{ok:1}");
       } else {
         shttpd_printf(_arg, "{ok:0}");
@@ -143,8 +143,8 @@ namespace dss {
       
       string devidStr = paramMap["device"];
       if(!devidStr.empty()) {
-        int devid = StrToInt(devidStr);
-        DSS::GetInstance()->GetApartment().GetDeviceByID(devid).TurnOff();
+        int devid = StrToUInt(devidStr);
+        DSS::GetInstance()->GetApartment().GetDeviceByDSID(devid).TurnOff();
         shttpd_printf(_arg, "{ok:1}");
       } else {
         shttpd_printf(_arg, "{ok:0}");

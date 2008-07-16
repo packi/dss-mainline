@@ -24,35 +24,11 @@
 
 namespace dss {
   
-  //================================================== DeviceReference
-  
-  
-  DeviceReference::DeviceReference(const DeviceReference& _copy) 
-  : m_DeviceID(_copy.m_DeviceID),
-    m_Apartment(_copy.m_Apartment)
-  {
-  }
-  
-  DeviceReference::DeviceReference(const devid_t _deviceID, const Apartment& _apartment) 
-  : m_DeviceID(_deviceID),
-    m_Apartment(&_apartment)
-  {
-  } // ctor
-  
-  DeviceReference::DeviceReference(const Device& _device, const Apartment& _apartment) 
-  : m_DeviceID(_device.GetID()),
-    m_Apartment(&_apartment)
-  {
-  } // ctor
-  
-  Device& DeviceReference::GetDevice() {
-    return m_Apartment->GetDeviceByID(m_DeviceID);
-  } // GetDevice$
-  
   //================================================== Device
   
-  Device::Device(devid_t _id, Apartment* _pApartment)
-  : m_ID(_id),
+  Device::Device(dsid_t _dsid, Apartment* _pApartment)
+  : m_DSID(_dsid),
+    m_ShortAddress(0xFF),
     m_pApartment(_pApartment)
   {
   }
@@ -122,12 +98,20 @@ namespace dss {
   } // SetName
   
   bool Device::operator==(const Device& _other) const {
-    return _other.m_ID == m_ID;
+    return _other.m_ShortAddress == m_ShortAddress;
   } // operator==
   
-  devid_t Device::GetID() const {
-    return m_ID;
+  devid_t Device::GetShortAddress() const {
+    return m_ShortAddress;
   } // GetID
+  
+  void Device::SetShortAddress(const devid_t _shortAddress) {
+    m_ShortAddress = _shortAddress;
+  } // SetShortAddress
+  
+  dsid_t Device::GetDSID() const {
+    return m_DSID;
+  } // GetDSID;
   
   int Device::GetModulatorID() const {
     return m_ModulatorID;
@@ -300,7 +284,7 @@ namespace dss {
     virtual ~ByIDSelector() {};
     
     virtual bool SelectDevice(const Device& _device) const {
-      return _device.GetID() == m_ID;
+      return _device.GetShortAddress() == m_ID;
     }
   };
   
@@ -378,7 +362,7 @@ namespace dss {
   
   
   ostream& operator<<(ostream& out, const Device& _dt) {
-    out << "Device ID " << _dt.GetID();
+    out << "Device ID " << _dt.GetShortAddress();
     if(_dt.GetName().size() > 0) {
       out << " name: " << _dt.GetName();
     }
@@ -464,7 +448,7 @@ namespace dss {
     
     while(!m_Terminated) {
       proxy.WaitForProxyEvent();
-//      Logger::GetInstance()->Log("Apartment::Execute received proxy event, enumerating apartment / dSMs");
+      Logger::GetInstance()->Log("Apartment::Execute received proxy event, enumerating apartment / dSMs");
     
       vector<int> modIDs = proxy.GetModulators();
       for(vector<int>::iterator iModulatorID = modIDs.begin(); iModulatorID != modIDs.end(); ++iModulatorID) {
@@ -476,7 +460,9 @@ namespace dss {
           vector<int> devices = proxy.GetDevicesInRoom(modID, roomID);
           for(vector<int>::iterator iDevice = devices.begin(); iDevice != devices.end(); ++iDevice) {
             int devID = *iDevice;
-            Device& dev = AllocateDevice(devID);
+            dsid_t dsid = proxy.GetDSIDOfDevice(modID, devID);
+            Device& dev = AllocateDevice(dsid);
+            dev.SetShortAddress(devID);
             dev.SetModulatorID(modID);
           }
           int numGroups = proxy.GetGroupCount(modID, roomID);
@@ -486,7 +472,10 @@ namespace dss {
             for(vector<int>::iterator iDevice = devingroup.begin(), e = devingroup.end();
                 iDevice != e; ++iDevice) 
             {
-              Device& dev = AllocateDevice(*iDevice);
+              int devID = *iDevice;
+              dsid_t dsid = proxy.GetDSIDOfDevice(modID, devID);
+              Device& dev = AllocateDevice(dsid);
+              dev.SetShortAddress(devID);
               dev.GetGroupBitmask().set(iGroup);
             }
           }
@@ -523,7 +512,7 @@ namespace dss {
     XMLNodeList devices = _node.GetChildren();
     for(XMLNodeList::iterator iNode = devices.begin(); iNode != devices.end(); ++iNode) {
       if(iNode->GetName() == "device") {
-        int id = StrToInt(iNode->GetAttributes()["id"]);
+        dsid_t dsid = StrToUInt(iNode->GetAttributes()["dsid"]);
         string name;
         try {
           XMLNode& nameNode = iNode->GetChildByName("name");
@@ -531,8 +520,9 @@ namespace dss {
             name = (nameNode.GetChildren()[0]).GetContent();
           }
         } catch(XMLException* e) {
+          /* discard node not found exceptions */
         }
-        Device* newDevice = new Device(id, this);
+        Device* newDevice = new Device(dsid, this);
         if(name.size() > 0) {
           newDevice->SetName(name);
         }
@@ -563,14 +553,14 @@ namespace dss {
   void Apartment::LoadRooms(XMLNode& _node) {
   } // LoadRooms
   
-  Device& Apartment::GetDeviceByID(const devid_t _id) const {
+  Device& Apartment::GetDeviceByDSID(const dsid_t _dsid) const {
     for(vector<Device*>::const_iterator ipDevice = m_Devices.begin(); ipDevice != m_Devices.end(); ++ipDevice) {
-      if((*ipDevice)->GetID() == _id) {
+      if((*ipDevice)->GetDSID() == _dsid) {
         return **ipDevice;
       }
     }
-    throw new ItemNotFoundException(IntToString(_id));
-  } // GetDeviceByID
+    throw new ItemNotFoundException(IntToString(_dsid));
+  } // GetDeviceByShortAddress
   
   Device& Apartment::GetDeviceByName(const string& _name) {
     for(vector<Device*>::const_iterator ipDevice = m_Devices.begin(); ipDevice != m_Devices.end(); ++ipDevice) {
@@ -707,17 +697,17 @@ namespace dss {
     for_each(m_Subscriptions.begin(), m_Subscriptions.end(), handle_event(_event));
   } // OnEvent
   
-  Device& Apartment::AllocateDevice(const devid_t _id) {
+  Device& Apartment::AllocateDevice(const dsid_t _dsid) {
     // search for existing device
     for(vector<Device*>::iterator iDevice = m_Devices.begin(); iDevice != m_Devices.end(); ++iDevice) {
-      if((*iDevice)->GetID() == _id) {
+      if((*iDevice)->GetDSID() == _dsid) {
         return **iDevice;
       }
     }
     
     // search for stale devices
     for(vector<Device*>::iterator iDevice = m_StaleDevices.begin(); iDevice != m_StaleDevices.end(); ++iDevice) {
-      if((*iDevice)->GetID() == _id) {
+      if((*iDevice)->GetDSID() == _dsid) {
         Device* pResult = *iDevice;
         m_Devices.push_back(pResult);
         m_StaleDevices.erase(iDevice);
@@ -725,10 +715,10 @@ namespace dss {
       }
     }
         
-    Device* pResult = new Device(_id, this);
+    Device* pResult = new Device(_dsid, this);
     m_Devices.push_back(pResult);
     return *pResult;
-  } 
+  } // AllocateDevice
   
   Modulator& Apartment::AllocateModulator(const int _id) {
     // searth in the stale modulators first
@@ -848,14 +838,36 @@ namespace dss {
     m_Name = _value;
   } // SetName
   
-  //================================================== DeviceReference
+  //================================================== DeviceReference  
   
-  devid_t DeviceReference::GetID() const {
-    return m_DeviceID;
+  DeviceReference::DeviceReference(const DeviceReference& _copy) 
+  : m_DSID(_copy.m_DSID),
+    m_Apartment(_copy.m_Apartment)
+  {
+  } // ctor(copy)
+  
+  DeviceReference::DeviceReference(const dsid_t _dsid, const Apartment& _apartment) 
+  : m_DSID(_dsid),
+    m_Apartment(&_apartment)
+  {
+  } // ctor(dsid)
+  
+  DeviceReference::DeviceReference(const Device& _device, const Apartment& _apartment) 
+  : m_DSID(_device.GetDSID()),
+    m_Apartment(&_apartment)
+  {
+  } // ctor(device)
+  
+  Device& DeviceReference::GetDevice() {
+    return m_Apartment->GetDeviceByDSID(m_DSID);
+  } // GetDevice
+  
+  devid_t DeviceReference::GetDSID() const {
+    return m_DSID;
   } // GetID
   
   void DeviceReference::TurnOn() {
-    GetDevice(),TurnOn(); 
+    GetDevice().TurnOn(); 
   } // TurnOn
   
   void DeviceReference::TurnOff() {

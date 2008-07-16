@@ -44,6 +44,14 @@ namespace dss {
     m_Data.push_back(_data);
   }
   
+  template<>
+  void DS485Payload::Add(dsid_t _data) {
+    m_Data.push_back((_data & 0xFF000000) >> 24);
+    m_Data.push_back((_data & 0x00FF0000) >> 16);
+    m_Data.push_back((_data & 0x0000FF00) >> 8);
+    m_Data.push_back((_data & 0x000000FF) >> 0);
+  }
+  
   vector<unsigned char> DS485Payload::ToChar() const {
     return m_Data;
   } // GetData
