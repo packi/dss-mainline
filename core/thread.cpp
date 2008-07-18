@@ -33,7 +33,7 @@ ThreadStarterHelperFunc( void* _pThreadObj ) {
 } // ThreadStarterHelpFunc
 
 
-Thread::Thread( bool _createSuspended, char* _name )
+Thread::Thread( bool _createSuspended, const char* _name )
   : m_ThreadHandle( 0 ),
     m_Name( _name ),
     m_FreeAtTermination( false ),

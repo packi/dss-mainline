@@ -25,13 +25,13 @@ private:
 #else
   HANDLE m_ThreadHandle;
 #endif
-  char* m_Name;
+  const char* m_Name;
   bool m_FreeAtTermination;
   bool m_Running;
 protected:
   bool m_Terminated;
 public:
-    Thread( bool _createSuspended = false, char* _name = NULL );
+    Thread( bool _createSuspended = false, const char* _name = NULL );
 
     virtual ~Thread();
 
