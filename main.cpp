@@ -82,7 +82,6 @@ int main (int argc, char * const argv[]) {
     {
       case 0:
         break;
-
       case 's':
         snifferDev = optarg;
         startSniffer = true;
