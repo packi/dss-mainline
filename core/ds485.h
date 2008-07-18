@@ -192,20 +192,20 @@ namespace dss {
     DS485FrameSniffer(const string& _deviceName);
     
     virtual void Execute();
-  };
-  
-  const uint8 CommandSolicitSuccessorRequest = 0x01;
-  const uint8 CommandSolicitSuccessorResponse = 0x02;
-  const uint8 CommandGetAddressRequest = 0x03;
-  const uint8 CommandGetAddressResponse = 0x04;
-  const uint8 CommandSetDeviceAddressRequest = 0x05;
-  const uint8 CommandSetDeviceAddressResponse = 0x06;
-  const uint8 CommandSetSuccessorAddressRequest = 0x07;
-  const uint8 CommandSetSuccessorAddressResponse = 0x08;
-  const uint8 CommandRequest = 0x09;
-  const uint8 CommandResponse = 0x0a;
-  const uint8 CommandAck = 0x0b;
-  const uint8 CommandBusy = 0x0c;
+  }; // IDS485FrameSniffer
+    
+  class PayloadDissector {
+  private:
+    vector<unsigned char> m_Payload;
+  public:
+    PayloadDissector(DS485Payload& _payload) {
+      vector<unsigned char> payload =_payload.ToChar();
+      m_Payload.insert(m_Payload.begin(), payload.rbegin(), payload.rend());
+    }
+    
+    template<class t>
+    t Get();
+  }; // PayloadDissector
   
   const char* CommandToString(const uint8 _command);
   

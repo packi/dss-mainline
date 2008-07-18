@@ -11,6 +11,7 @@
 
 #include "base.h"
 #include "logger.h"
+#include "ds485const.h"
 
 #include <stdexcept>
 #include <sstream>
@@ -730,6 +731,24 @@ namespace dss {
     }
   }
 
+  //================================================== PayloadDissector
+  
+  template<>
+  uint8 PayloadDissector::Get() {
+    uint8 result = m_Payload.back();
+    m_Payload.pop_back();
+    return result;
+  }
+  
+  template<>
+  dsid_t PayloadDissector::Get() {
+    dsid_t result;
+    result = (Get<uint8>() << 24) |
+             (Get<uint8>() << 16) |
+             (Get<uint8>() << 8)  |
+             (Get<uint8>());
+    return result;
+  }
   
   //================================================== Global helpers
   

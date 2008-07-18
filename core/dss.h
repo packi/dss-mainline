@@ -16,6 +16,7 @@
 #include "thread.h"
 #include "defs.h"
 #include "ds485proxy.h"
+#include "dssim.h"
 #include "syncevent.h"
 #include "webserver.h"
 #include "../webservices/webservices.h"
