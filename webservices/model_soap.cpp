@@ -40,18 +40,18 @@ int AuthorizeAndGetDevice(struct soap *soap, const int _token, const int _devID,
   return SOAP_OK;
 } // AuthorizeAndGetDevice
 
-int AuthorizeAndGetModulator(struct soap *soap, const int _token, const int _modulatorID, dss::Modulator& result) {
+int AuthorizeAndGetModulator(struct soap *soap, const int _token, const unsigned long _modulatorDSID, dss::Modulator& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   try {
-    result = apt.GetModulator(_modulatorID);
+    result = apt.GetModulatorByDSID(_modulatorDSID);
   } catch(dss::ItemNotFoundException* _ex) {
     return soap_receiver_fault(soap, "Modulator not found", NULL);
   }
   return SOAP_OK;
-}
+} // AuthorizeAndGetModulator
 
 //==================================================== Callbacks
 
@@ -538,7 +538,7 @@ int dss__Apartment_GetModulatorIDs(struct soap *soap, int _token, IntArray& ids)
   ids.__size = modulators.size();
   
   for(int iModulator = 0; iModulator < ids.__size; iModulator++) {
-    ids.__ptr[iModulator] = modulators[iModulator]->GetID();
+    ids.__ptr[iModulator] = modulators[iModulator]->GetDSID();
   }
   
   return SOAP_OK;  

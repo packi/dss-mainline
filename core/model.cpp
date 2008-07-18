@@ -103,7 +103,7 @@ namespace dss {
   
   devid_t Device::GetShortAddress() const {
     return m_ShortAddress;
-  } // GetID
+  } // GetShortAddress
   
   void Device::SetShortAddress(const devid_t _shortAddress) {
     m_ShortAddress = _shortAddress;
@@ -204,7 +204,6 @@ namespace dss {
   
   void Set::SetValue(const double _value, int _parameterNr) {
   } // SetValue
-  //HashMapDeviceDouble Set::GetValue(const int _parameterNr);
   
   void Set::Perform(IDeviceAction& _deviceAction) {
     for(DeviceIterator iDevice = m_ContainedDevices.begin(); iDevice != m_ContainedDevices.end(); ++iDevice) {
@@ -453,6 +452,9 @@ namespace dss {
       vector<int> modIDs = proxy.GetModulators();
       for(vector<int>::iterator iModulatorID = modIDs.begin(); iModulatorID != modIDs.end(); ++iModulatorID) {
         int modID = *iModulatorID;
+        dsid_t modDSID = proxy.GetDSIDOfModulator(modID);
+        Modulator& modulator = AllocateModulator(modDSID);
+        modulator.SetBusID(modID);
   
         vector<int> roomIDs = proxy.GetRooms(modID);
         for(vector<int>::iterator iRoomID = roomIDs.begin(); iRoomID != roomIDs.end(); ++iRoomID) {
@@ -465,10 +467,12 @@ namespace dss {
             dev.SetShortAddress(devID);
             dev.SetModulatorID(modID);
           }
-          int numGroups = proxy.GetGroupCount(modID, roomID);
-          for(int iGroup = 0; iGroup < numGroups; iGroup++) {
-            // TODO: I'm still waiting on a call to translate the group index to a group id
-            vector<int> devingroup = proxy.GetDevicesInGroup(modID, roomID, iGroup);
+          vector<int> groupIDs = proxy.GetGroups(modID, roomID);
+          for(vector<int>::iterator iGroup = groupIDs.begin(), e = groupIDs.end(); 
+              iGroup != e; ++iGroup) 
+          {
+            int groupID = *iGroup;
+            vector<int> devingroup = proxy.GetDevicesInGroup(modID, roomID, groupID);
             for(vector<int>::iterator iDevice = devingroup.begin(), e = devingroup.end();
                 iDevice != e; ++iDevice) 
             {
@@ -476,7 +480,7 @@ namespace dss {
               dsid_t dsid = proxy.GetDSIDOfDevice(modID, devID);
               Device& dev = AllocateDevice(dsid);
               dev.SetShortAddress(devID);
-              dev.GetGroupBitmask().set(iGroup);
+              dev.GetGroupBitmask().set(groupID);
             }
           }
         }
@@ -611,14 +615,23 @@ namespace dss {
     throw new ItemNotFoundException(_modName);
   } // GetModulator(name)
     
-  Modulator& Apartment::GetModulator(const int _id) {
+  Modulator& Apartment::GetModulatorByBusID(const int _busId) {
     for(vector<Modulator*>::iterator iModulator = m_Modulators.begin(); iModulator != m_Modulators.end(); ++iModulator) {
-      if((*iModulator)->GetID() == _id) {
+      if((*iModulator)->GetBusID() == _busId) {
         return **iModulator;
       }
     }
-    throw new ItemNotFoundException(IntToString(_id));
-  } // GetModulator(id)
+    throw new ItemNotFoundException(IntToString(_busId));
+  } // GetModulatorByBusID
+  
+  Modulator& Apartment::GetModulatorByDSID(const dsid_t _dsid) {
+    for(vector<Modulator*>::iterator iModulator = m_Modulators.begin(); iModulator != m_Modulators.end(); ++iModulator) {
+      if((*iModulator)->GetDSID() == _dsid) {
+        return **iModulator;
+      }
+    }
+    throw new ItemNotFoundException(IntToString(_dsid));
+  } // GetModulatorByDSID
   
   vector<Modulator*>& Apartment::GetModulators() {
     return m_Modulators;
@@ -642,6 +655,7 @@ namespace dss {
     }
     throw new ItemNotFoundException(IntToString(_id));
   } // GetGroup(id)
+  
   vector<Group*>& Apartment::GetGroups() {
     return m_Groups;
   } // GetGroups
@@ -720,18 +734,28 @@ namespace dss {
     return *pResult;
   } // AllocateDevice
   
-  Modulator& Apartment::AllocateModulator(const int _id) {
+  Modulator& Apartment::AllocateModulator(const dsid_t _dsid) {
     // searth in the stale modulators first
-    for(vector<Modulator*>::iterator iModulator = m_StaleModulators.begin(); iModulator != m_StaleModulators.end(); ++iModulator) {
-      if((*iModulator)->GetID() == _id) {
+    for(vector<Modulator*>::iterator iModulator = m_StaleModulators.begin(), e = m_StaleModulators.end(); 
+        iModulator != e; ++iModulator) 
+    {
+      if((*iModulator)->GetDSID() == _dsid) {
         m_Modulators.push_back(*iModulator);
         m_StaleModulators.erase(iModulator);
         return **iModulator;
       }
     }
+
+    for(vector<Modulator*>::iterator iModulator = m_Modulators.begin(), e = m_Modulators.end(); 
+        iModulator != e; ++iModulator) 
+    {
+      if((*iModulator)->GetDSID() == _dsid) {
+        return **iModulator;
+      }
+    }
     
     // TODO: check for existing Modulator?
-    Modulator* pResult = new Modulator(_id);
+    Modulator* pResult = new Modulator(_dsid);
     m_Modulators.push_back(pResult);
     return *pResult;                       
   } // AllocateModulator
@@ -753,8 +777,9 @@ namespace dss {
   
   //================================================== Modulator
   
-  Modulator::Modulator(const int _id) 
-  : m_LocalID(_id)
+  Modulator::Modulator(const dsid_t _dsid) 
+  : m_DSID(_dsid),
+    m_BusID(0xFF)
   {
   } // ctor
   
@@ -762,9 +787,17 @@ namespace dss {
     return m_ConnectedDevices;
   } // GetDevices
   
-  int Modulator::GetID() const {
-    return m_LocalID;
-  } // GetID
+  dsid_t Modulator::GetDSID() const {
+    return m_DSID;
+  } // GetDSID
+  
+  int Modulator::GetBusID() const {
+    return m_BusID;
+  } // GetBusID
+  
+  void Modulator::SetBusID(const int _busID) {
+    m_BusID = _busID;
+  } // SetBusID
   
   //================================================== Room
   

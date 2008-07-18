@@ -305,14 +305,17 @@ namespace dss {
   /** Represents a Modulator */
   class Modulator : public DeviceContainer {
   private:
-    int m_LocalID;
+    dsid_t m_DSID;
+    int m_BusID;
     DeviceVector m_ConnectedDevices;
   public:
-    Modulator(const int _id);
+    Modulator(const dsid_t _dsid);
     virtual ~Modulator() {};
     virtual Set GetDevices() const;
 
-    int GetID() const;
+    dsid_t GetDSID() const;
+    int GetBusID() const;
+    void SetBusID(const int _busID);
   }; // Modulator
   
   /** Represents a predefined group */
@@ -490,7 +493,7 @@ namespace dss {
     void LoadDevices(XMLNode& _node);
     void LoadModulators(XMLNode& _node);
     void LoadRooms(XMLNode& _node);
-    Modulator& AllocateModulator(const int _id);
+    Modulator& AllocateModulator(const dsid_t _dsid);
   public:
     Apartment();
     virtual ~Apartment();
@@ -522,8 +525,10 @@ namespace dss {
     
     /** Returns a Modulator by name */
     Modulator& GetModulator(const string& _modName);
-    /** Returns a Modulator by id  */
-    Modulator& GetModulator(const int _id);
+    /** Returns a Modulator by DSID  */
+    Modulator& GetModulatorByDSID(const dsid_t _dsid);
+    /** Returns a Modulator by bus-id */
+    Modulator& GetModulatorByBusID(const int _busID);
     /** Returns a vector of all modulators */
     vector<Modulator*>& GetModulators();
     
@@ -619,7 +624,7 @@ namespace __gnu_cxx
   template<> 
   struct hash< const dss::Modulator* >  {                                                                                           
     size_t operator()( const dss::Modulator* x ) const  {                                                                                         
-      return x->GetID();                                              
+      return x->GetDSID();                                              
     }                                                                                         
   };                                 
   

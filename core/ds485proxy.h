@@ -70,12 +70,15 @@ namespace dss {
   
   class DSIDSim;
   
+  typedef map< const pair<const int, const int>,  vector<DSIDSim*> > IntPairToDSIDSimVector; 
+  
   class DSModulatorSim : public DS485FrameProvider {
   private:
     int m_ID;
+    dsid_t m_ModulatorDSID;
     vector<DSIDSim*> m_SimulatedDevices;
     map< const int, vector<DSIDSim*> > m_Rooms;
-    map< const pair<const int, const int>,  vector<DSIDSim*> > m_DevicesOfGroupInRoom;
+    IntPairToDSIDSimVector m_DevicesOfGroupInRoom;
     vector<DS485Frame*> m_PendingFrames;
   private:  
     DSIDSim& LookupDevice(const devid_t _id);
@@ -193,6 +196,7 @@ namespace dss {
     void RemoveUserGroup(const int _modulatorID, const int _groupID);
     
     dsid_t GetDSIDOfDevice(const int _modulatorID, const int _deviceID);
+    dsid_t GetDSIDOfModulator(const int _modulatorID);
     
     //------------------------------------------------ Device manipulation    
     vector<int> SendCommand(DS485Command _cmd, Set& _set);

@@ -30,6 +30,9 @@ namespace dss {
   const uint8 FunctionGroupAddDeviceToGroup = 0x10;
   const uint8 FunctionGroupRemoveDeviceFromGroup = 0x11;
   const uint8 FunctionGroupGetDeviceCount = 0x12;
+  const uint8 FunctionGroupGetDevKeyForInd = 0x13;
+  
+  const uint8 FunctionRoomGetGroupIdForInd = 0x17;
   
   const uint8 FunctionDeviceCallScene = 0x42;
   const uint8 FunctionDeviceIncValue  = 0x40;
@@ -37,6 +40,8 @@ namespace dss {
   
   const uint8 FunctionDeviceGetOnOff = 0x61;
   const uint8 FunctionDeviceGetDSID = 0x65;
+  
+  const uint8 FunctionModulatorGetDSID = 0xFA;
   
   const uint8 FunctionGetTypeRequest = 0xFD;
   
@@ -85,7 +90,7 @@ namespace dss {
     HashMapModulatorSet result;
     for(int iDevice = 0; iDevice < _set.Length(); iDevice++) {
       DeviceReference& dev = _set.Get(iDevice);
-      Modulator& mod = dev.GetDevice().GetApartment().GetModulator(dev.GetDevice().GetModulatorID());
+      Modulator& mod = dev.GetDevice().GetApartment().GetModulatorByBusID(dev.GetDevice().GetModulatorID());
       result[&mod].AddDevice(dev);
     }
     return result;
@@ -260,6 +265,25 @@ namespace dss {
     uint8 res = ReceiveSingleResult(FunctionModulatorGetGroupsSize);
     return res;    
   } // GetGroupCount
+  
+  vector<int> DS485Proxy::GetGroups(const int _modulatorID, const int _roomID) {
+    vector<int> result;
+
+    int numGroups = GetGroupCount(_modulatorID, _roomID);
+    for(int iGroup = 0; iGroup < numGroups; iGroup++) {
+      DS485CommandFrame cmdFrame;
+      cmdFrame.GetHeader().SetDestination(_modulatorID);
+      cmdFrame.SetCommand(CommandRequest);
+      cmdFrame.GetPayload().Add<uint8>(FunctionRoomGetGroupIdForInd);
+      cmdFrame.GetPayload().Add<uint8>(_roomID);
+      cmdFrame.GetPayload().Add<uint8>(iGroup);
+      SendFrame(cmdFrame);
+      uint8 res = ReceiveSingleResult(FunctionRoomGetGroupIdForInd);
+      result.push_back(res);
+    }
+    
+    return result;
+  } // GetGroups
 
   int DS485Proxy::GetDevicesInGroupCount(const int _modulatorID, const int _roomID, const int _groupID) {
     DS485CommandFrame cmdFrame;
@@ -281,12 +305,12 @@ namespace dss {
       DS485CommandFrame cmdFrame;
       cmdFrame.GetHeader().SetDestination(_modulatorID);
       cmdFrame.SetCommand(CommandRequest);
-      cmdFrame.GetPayload().Add<uint8>(FunctionGroupGetDeviceCount);
+      cmdFrame.GetPayload().Add<uint8>(FunctionGroupGetDevKeyForInd);
       cmdFrame.GetPayload().Add<uint8>(_roomID);
       cmdFrame.GetPayload().Add<uint8>(_groupID);
       cmdFrame.GetPayload().Add<uint8>(iDevice);
       SendFrame(cmdFrame);
-      uint8 res = ReceiveSingleResult(FunctionGroupGetDeviceCount);
+      uint8 res = ReceiveSingleResult(FunctionGroupGetDevKeyForInd);
       result.push_back(res);
     }
     
@@ -355,6 +379,22 @@ namespace dss {
     vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionDeviceGetDSID);
     if(results.size() != 1) {
       Logger::GetInstance()->Log("DS485Proxy::GetDSIDOfDevice: received multiple results", lsError);
+      return 0;
+    }
+    PayloadDissector pd(results.at(0)->GetPayload());
+    pd.Get<uint8>(); // discard the function id
+    return pd.Get<dsid_t>();
+  }
+  
+  dsid_t DS485Proxy::GetDSIDOfModulator(const int _modulatorID) {
+    DS485CommandFrame cmdFrame;
+    cmdFrame.GetHeader().SetDestination(_modulatorID);
+    cmdFrame.SetCommand(CommandRequest);
+    cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetDSID);
+    SendFrame(cmdFrame);
+    vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionModulatorGetDSID);
+    if(results.size() != 1) {
+      Logger::GetInstance()->Log("DS485Proxy::GetDSIDOfModulator: received multiple results", lsError);
       return 0;
     }
     PayloadDissector pd(results.at(0)->GetPayload());
@@ -483,6 +523,7 @@ namespace dss {
   
   DSModulatorSim::DSModulatorSim() 
   {
+    m_ModulatorDSID = SimulationPrefix | 0x0000FFFF;
   } // DSModulatorSim
 
   
@@ -560,12 +601,53 @@ namespace dss {
     		      DistributeFrame(response); 
     		    }
             break;
+          case FunctionModulatorGetDSID:
+            {
+              response = CreateResponse(cmdFrame, cmdNr);
+              response->GetPayload().Add<dsid_t>(m_ModulatorDSID);
+              DistributeFrame(response);
+            }
+            break;
           case FunctionGroupGetDeviceCount:
             {
               response = CreateResponse(cmdFrame, cmdNr);
               int roomID = pd.Get<uint8>();
               int groupID = pd.Get<uint8>();
               int result = m_DevicesOfGroupInRoom[pair<const int, const int>(roomID, groupID)].size();
+              response->GetPayload().Add<uint8>(result);
+              DistributeFrame(response);
+            }
+            break;
+          case FunctionGroupGetDevKeyForInd:
+            {
+              response = CreateResponse(cmdFrame, cmdNr);
+              int roomID = pd.Get<uint8>();
+              int groupID = pd.Get<uint8>();
+              int index = pd.Get<uint8>();
+              int result = m_DevicesOfGroupInRoom[pair<const int, const int>(roomID, groupID)].at(index)->GetShortAddress();
+              response->GetPayload().Add<uint8>(result);
+              DistributeFrame(response);
+            }
+            break;
+          case FunctionRoomGetGroupIdForInd:
+            {
+              response = CreateResponse(cmdFrame, cmdNr);
+              int roomID = pd.Get<uint8>();
+              int groupIndex= pd.Get<uint8>();
+              
+              IntPairToDSIDSimVector::iterator it = m_DevicesOfGroupInRoom.begin();
+              IntPairToDSIDSimVector::iterator end = m_DevicesOfGroupInRoom.end();
+              int result = -1;
+              while(it != end) {
+                if(it->first.first == roomID) { 
+                  groupIndex--;
+                  if(groupIndex == 0) {
+                    result = it->first.second; // yes, that's the group id
+                    break;
+                  }
+                }
+                it++;
+              }
               response->GetPayload().Add<uint8>(result);
               DistributeFrame(response);
             }
