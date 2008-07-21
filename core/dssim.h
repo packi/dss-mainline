@@ -3,6 +3,8 @@
 
 #include "ds485types.h"
 #include "ds485.h"
+#include "xmlwrapper.h"
+
 
 #include <map>
 #include <vector>
@@ -23,6 +25,10 @@ namespace dss {
     IntPairToDSIDSimVector m_DevicesOfGroupInRoom;
     vector<DS485Frame*> m_PendingFrames;
   private:  
+    void LoadFromConfig();
+    void LoadDevices(XMLNodeList& _nodes, const int _roomID);
+    void LoadRooms(XMLNodeList& _nodes);
+    
     DSIDSim& LookupDevice(const devid_t _id);
     DS485CommandFrame* CreateResponse(DS485CommandFrame& _request, uint8 _functionID);
     DS485CommandFrame* CreateAck(DS485CommandFrame& _request, uint8 _functionID);

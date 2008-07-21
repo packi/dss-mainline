@@ -24,7 +24,7 @@ namespace dss {
     Logger::GetInstance()->Log(string("Webserver: Listening on port(s) ") + ports);
     shttpd_set_option(m_SHttpdContext, "ports", ports.c_str());
 
-    string aliases = string("/=") + _config.GetOptionAs<string>("webserverroot", "data/");
+    string aliases = string("/=") + _config.GetOptionAs<string>("webserverroot", "data/webroot");
     Logger::GetInstance()->Log(string("Webserver: Configured aliases: ") + aliases);
     shttpd_set_option(m_SHttpdContext, "aliases", aliases.c_str());    
 
