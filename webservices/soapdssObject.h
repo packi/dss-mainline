@@ -24,7 +24,7 @@ class dssService : public soap
 	{"SOAP-ENC", "http://schemas.xmlsoap.org/soap/encoding/", "http://www.w3.org/*/soap-encoding", NULL},
 	{"xsi", "http://www.w3.org/2001/XMLSchema-instance", "http://www.w3.org/*/XMLSchema-instance", NULL},
 	{"xsd", "http://www.w3.org/2001/XMLSchema", "http://www.w3.org/*/XMLSchema", NULL},
-	{"dss", "urn:copy", NULL, NULL},
+	{"dss", "urn:dss:1.0", NULL, NULL},
 	{NULL, NULL, NULL, NULL}
 };
 	if (!this->namespaces) this->namespaces = namespaces; };
@@ -47,6 +47,8 @@ class dssService : public soap
 SOAP_FMAC5 int SOAP_FMAC6 dss__Authenticate(struct soap*, char *_userName, char *_password, int &token);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__SignOff(struct soap*, int _token, int &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__FreeSet(struct soap*, int _token, int _setID, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_CreateSetFromGroup(struct soap*, int _token, char *_groupName, int &setID);
 
@@ -116,11 +118,11 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Device_SetValue(struct soap*, int _token, int _de
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetValue(struct soap*, int _token, int _deviceID, int _paramID, double &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetDSID(struct soap*, int _token, int _deviceID, LONG64 &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetDSID(struct soap*, int _token, int _deviceID, unsigned long &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetModulatorIDs(struct soap*, int _token, IntArray &ids);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Modulator_GetDSID(struct soap*, int _token, int _modulatorID, LONG64 &dsid);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Modulator_GetDSID(struct soap*, int _token, int _modulatorID, unsigned long &dsid);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Modulator_GetName(struct soap*, int _token, int _modulatorID, char **name);
 
@@ -142,17 +144,17 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Group_AddDevice(struct soap*, int _token, int _gr
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Group_RemoveDevice(struct soap*, int _token, int _groupID, int _deviceID, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Raise(struct soap*, int _token, int _eventID, int _sourceID, Parameter _params, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Raise(struct soap*, int _token, int _eventID, int _sourceID, dss__inParameter _params, int &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Event_GetActionNames(struct soap*, int _token, StringArray &names);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_GetActionParamsTemplate(struct soap*, int _token, char *_name, Parameter &paramsTemplate);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Event_GetActionParamsTemplate(struct soap*, int _token, char *_name, dss__outParameter &paramsTemplate);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Subscribe(struct soap*, int _token, IntArray _eventIDs, IntArray _sourceIDs, char *_actionName, Parameter _params, int &subscriptionID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Subscribe(struct soap*, int _token, IntArray _eventIDs, IntArray _sourceIDs, char *_actionName, dss__inParameter _params, int &subscriptionID);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Unsubscribe(struct soap*, int _token, int _subscriptionID, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Schedule(struct soap*, int _token, char *_icalString, int _eventID, Parameter _params, int &scheduledEventID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Schedule(struct soap*, int _token, char *_icalString, int _eventID, dss__inParameter _params, int &scheduledEventID);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Event_DeleteSchedule(struct soap*, int _token, int _scheduleEventID, int &result);
 

@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2008-07-02 12:17:56 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2008-07-24 09:19:13 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -77,6 +77,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__Authenticate(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:SignOff"))
 		return soap_serve_dss__SignOff(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:FreeSet"))
+		return soap_serve_dss__FreeSet(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Apartment-CreateSetFromGroup"))
 		return soap_serve_dss__Apartment_CreateSetFromGroup(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Apartment-CreateSetFromDeviceIDs"))
@@ -264,6 +266,47 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SignOff(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__SignOffResponse(soap, &soap_tmp_dss__SignOffResponse, "dss:SignOffResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__FreeSet(struct soap *soap)
+{	struct dss__FreeSet soap_tmp_dss__FreeSet;
+	struct dss__FreeSetResponse soap_tmp_dss__FreeSetResponse;
+	soap_default_dss__FreeSetResponse(soap, &soap_tmp_dss__FreeSetResponse);
+	soap_default_dss__FreeSet(soap, &soap_tmp_dss__FreeSet);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__FreeSet(soap, &soap_tmp_dss__FreeSet, "dss:FreeSet", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__FreeSet(soap, soap_tmp_dss__FreeSet._token, soap_tmp_dss__FreeSet._setID, soap_tmp_dss__FreeSetResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__FreeSetResponse(soap, &soap_tmp_dss__FreeSetResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__FreeSetResponse(soap, &soap_tmp_dss__FreeSetResponse, "dss:FreeSetResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__FreeSetResponse(soap, &soap_tmp_dss__FreeSetResponse, "dss:FreeSetResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -2285,7 +2328,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_GetActionNames(struct soap *soap
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_GetActionParamsTemplate(struct soap *soap)
 {	struct dss__Event_GetActionParamsTemplate soap_tmp_dss__Event_GetActionParamsTemplate;
-	Parameter paramsTemplate;
+	dss__outParameter paramsTemplate;
 	paramsTemplate.soap_default(soap);
 	soap_default_dss__Event_GetActionParamsTemplate(soap, &soap_tmp_dss__Event_GetActionParamsTemplate);
 	soap->encodingStyle = NULL;
@@ -2306,7 +2349,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_GetActionParamsTemplate(struct s
 	{	if (soap_envelope_begin_out(soap)
 		 || soap_putheader(soap)
 		 || soap_body_begin_out(soap)
-		 || paramsTemplate.soap_put(soap, "Parameter", "")
+		 || paramsTemplate.soap_put(soap, "dss:outParameter", "")
 		 || soap_body_end_out(soap)
 		 || soap_envelope_end_out(soap))
 			 return soap->error;
@@ -2316,7 +2359,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_GetActionParamsTemplate(struct s
 	 || soap_envelope_begin_out(soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
-	 || paramsTemplate.soap_put(soap, "Parameter", "")
+	 || paramsTemplate.soap_put(soap, "dss:outParameter", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

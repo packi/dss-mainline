@@ -7,7 +7,7 @@
 
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2008-07-02 12:17:56 GMT")
+SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2008-07-24 09:19:13 GMT")
 
 
 #ifndef WITH_NOGLOBAL
@@ -161,16 +161,20 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_int(soap, NULL, NULL, "xsd:int");
 	case SOAP_TYPE_long:
 		return soap_in_long(soap, NULL, NULL, "xsd:long");
-	case SOAP_TYPE_DSID:
-		return soap_in_DSID(soap, NULL, NULL, "DSID");
-	case SOAP_TYPE_LONG64:
-		return soap_in_LONG64(soap, NULL, NULL, "xsd:long");
 	case SOAP_TYPE_double:
 		return soap_in_double(soap, NULL, NULL, "xsd:double");
+	case SOAP_TYPE_unsignedInt:
+		return soap_in_unsignedInt(soap, NULL, NULL, "xsd:unsignedInt");
+	case SOAP_TYPE_xsd__unsignedInt:
+		return soap_in_xsd__unsignedInt(soap, NULL, NULL, "xsd:unsignedInt");
+	case SOAP_TYPE_unsignedLong:
+		return soap_in_unsignedLong(soap, NULL, NULL, "xsd:unsignedLong");
 	case SOAP_TYPE_bool:
 		return soap_in_bool(soap, NULL, NULL, "xsd:boolean");
-	case SOAP_TYPE_Parameter:
-		return soap_in_Parameter(soap, NULL, NULL, "Parameter");
+	case SOAP_TYPE_dss__outParameter:
+		return soap_in_dss__outParameter(soap, NULL, NULL, "dss:outParameter");
+	case SOAP_TYPE_dss__inParameter:
+		return soap_in_dss__inParameter(soap, NULL, NULL, "dss:inParameter");
 	case SOAP_TYPE_StringArray:
 		return soap_in_StringArray(soap, NULL, NULL, "xsd:string");
 	case SOAP_TYPE_IntArray:
@@ -389,6 +393,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_dss__Apartment_CreateSetFromGroup(soap, NULL, NULL, "dss:Apartment-CreateSetFromGroup");
 	case SOAP_TYPE_dss__Apartment_CreateSetFromGroupResponse:
 		return soap_in_dss__Apartment_CreateSetFromGroupResponse(soap, NULL, NULL, "dss:Apartment-CreateSetFromGroupResponse");
+	case SOAP_TYPE_dss__FreeSet:
+		return soap_in_dss__FreeSet(soap, NULL, NULL, "dss:FreeSet");
+	case SOAP_TYPE_dss__FreeSetResponse:
+		return soap_in_dss__FreeSetResponse(soap, NULL, NULL, "dss:FreeSetResponse");
 	case SOAP_TYPE_dss__SignOff:
 		return soap_in_dss__SignOff(soap, NULL, NULL, "dss:SignOff");
 	case SOAP_TYPE_dss__SignOffResponse:
@@ -412,9 +420,13 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 	{	const char *t = soap->type;
 		if (!*t)
 			t = soap->tag;
-		if (!soap_match_tag(soap, t, "Parameter"))
-		{	*type = SOAP_TYPE_Parameter;
-			return soap_in_Parameter(soap, NULL, NULL, NULL);
+		if (!soap_match_tag(soap, t, "dss:outParameter"))
+		{	*type = SOAP_TYPE_dss__outParameter;
+			return soap_in_dss__outParameter(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:inParameter"))
+		{	*type = SOAP_TYPE_dss__inParameter;
+			return soap_in_dss__inParameter(soap, NULL, NULL, NULL);
 		}
 		if (*soap->arrayType && !soap_match_array(soap, "xsd:string"))
 		{	*type = SOAP_TYPE_StringArray;
@@ -436,17 +448,21 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		{	*type = SOAP_TYPE_long;
 			return soap_in_long(soap, NULL, NULL, NULL);
 		}
-		if (!soap_match_tag(soap, t, "DSID"))
-		{	*type = SOAP_TYPE_DSID;
-			return soap_in_DSID(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "xsd:long"))
-		{	*type = SOAP_TYPE_LONG64;
-			return soap_in_LONG64(soap, NULL, NULL, NULL);
-		}
 		if (!soap_match_tag(soap, t, "xsd:double"))
 		{	*type = SOAP_TYPE_double;
 			return soap_in_double(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "xsd:unsignedInt"))
+		{	*type = SOAP_TYPE_unsignedInt;
+			return soap_in_unsignedInt(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "xsd:unsignedInt"))
+		{	*type = SOAP_TYPE_xsd__unsignedInt;
+			return soap_in_xsd__unsignedInt(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "xsd:unsignedLong"))
+		{	*type = SOAP_TYPE_unsignedLong;
+			return soap_in_unsignedLong(soap, NULL, NULL, NULL);
 		}
 		if (!soap_match_tag(soap, t, "xsd:boolean"))
 		{	*type = SOAP_TYPE_bool;
@@ -880,6 +896,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		{	*type = SOAP_TYPE_dss__Apartment_CreateSetFromGroupResponse;
 			return soap_in_dss__Apartment_CreateSetFromGroupResponse(soap, NULL, NULL, NULL);
 		}
+		if (!soap_match_tag(soap, t, "dss:FreeSet"))
+		{	*type = SOAP_TYPE_dss__FreeSet;
+			return soap_in_dss__FreeSet(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:FreeSetResponse"))
+		{	*type = SOAP_TYPE_dss__FreeSetResponse;
+			return soap_in_dss__FreeSetResponse(soap, NULL, NULL, NULL);
+		}
 		if (!soap_match_tag(soap, t, "dss:SignOff"))
 		{	*type = SOAP_TYPE_dss__SignOff;
 			return soap_in_dss__SignOff(soap, NULL, NULL, NULL);
@@ -980,16 +1004,20 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_int(soap, tag, id, (const int *)ptr, "xsd:int");
 	case SOAP_TYPE_long:
 		return soap_out_long(soap, tag, id, (const long *)ptr, "xsd:long");
-	case SOAP_TYPE_DSID:
-		return soap_out_DSID(soap, tag, id, (const LONG64 *)ptr, "DSID");
-	case SOAP_TYPE_LONG64:
-		return soap_out_LONG64(soap, tag, id, (const LONG64 *)ptr, "xsd:long");
 	case SOAP_TYPE_double:
 		return soap_out_double(soap, tag, id, (const double *)ptr, "xsd:double");
+	case SOAP_TYPE_unsignedInt:
+		return soap_out_unsignedInt(soap, tag, id, (const unsigned int *)ptr, "xsd:unsignedInt");
+	case SOAP_TYPE_xsd__unsignedInt:
+		return soap_out_xsd__unsignedInt(soap, tag, id, (const unsigned long *)ptr, "xsd:unsignedInt");
+	case SOAP_TYPE_unsignedLong:
+		return soap_out_unsignedLong(soap, tag, id, (const unsigned long *)ptr, "xsd:unsignedLong");
 	case SOAP_TYPE_bool:
 		return soap_out_bool(soap, tag, id, (const bool *)ptr, "xsd:boolean");
-	case SOAP_TYPE_Parameter:
-		return ((Parameter *)ptr)->soap_out(soap, tag, id, "Parameter");
+	case SOAP_TYPE_dss__outParameter:
+		return ((dss__outParameter *)ptr)->soap_out(soap, tag, id, "dss:outParameter");
+	case SOAP_TYPE_dss__inParameter:
+		return ((dss__inParameter *)ptr)->soap_out(soap, tag, id, "dss:inParameter");
 	case SOAP_TYPE_StringArray:
 		return ((StringArray *)ptr)->soap_out(soap, tag, id, "xsd:string");
 	case SOAP_TYPE_IntArray:
@@ -1208,6 +1236,10 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_dss__Apartment_CreateSetFromGroup(soap, tag, id, (const struct dss__Apartment_CreateSetFromGroup *)ptr, "dss:Apartment-CreateSetFromGroup");
 	case SOAP_TYPE_dss__Apartment_CreateSetFromGroupResponse:
 		return soap_out_dss__Apartment_CreateSetFromGroupResponse(soap, tag, id, (const struct dss__Apartment_CreateSetFromGroupResponse *)ptr, "dss:Apartment-CreateSetFromGroupResponse");
+	case SOAP_TYPE_dss__FreeSet:
+		return soap_out_dss__FreeSet(soap, tag, id, (const struct dss__FreeSet *)ptr, "dss:FreeSet");
+	case SOAP_TYPE_dss__FreeSetResponse:
+		return soap_out_dss__FreeSetResponse(soap, tag, id, (const struct dss__FreeSetResponse *)ptr, "dss:FreeSetResponse");
 	case SOAP_TYPE_dss__SignOff:
 		return soap_out_dss__SignOff(soap, tag, id, (const struct dss__SignOff *)ptr, "dss:SignOff");
 	case SOAP_TYPE_dss__SignOffResponse:
@@ -1245,8 +1277,11 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 	(void)soap; (void)ptr; (void)type; /* appease -Wall -Werror */
 	switch (type)
 	{
-	case SOAP_TYPE_Parameter:
-		((Parameter *)ptr)->soap_serialize(soap);
+	case SOAP_TYPE_dss__outParameter:
+		((dss__outParameter *)ptr)->soap_serialize(soap);
+		break;
+	case SOAP_TYPE_dss__inParameter:
+		((dss__inParameter *)ptr)->soap_serialize(soap);
 		break;
 	case SOAP_TYPE_StringArray:
 		((StringArray *)ptr)->soap_serialize(soap);
@@ -1575,6 +1610,12 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 	case SOAP_TYPE_dss__Apartment_CreateSetFromGroupResponse:
 		soap_serialize_dss__Apartment_CreateSetFromGroupResponse(soap, (const struct dss__Apartment_CreateSetFromGroupResponse *)ptr);
 		break;
+	case SOAP_TYPE_dss__FreeSet:
+		soap_serialize_dss__FreeSet(soap, (const struct dss__FreeSet *)ptr);
+		break;
+	case SOAP_TYPE_dss__FreeSetResponse:
+		soap_serialize_dss__FreeSetResponse(soap, (const struct dss__FreeSetResponse *)ptr);
+		break;
 	case SOAP_TYPE_dss__SignOff:
 		soap_serialize_dss__SignOff(soap, (const struct dss__SignOff *)ptr);
 		break;
@@ -1626,6 +1667,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_dss__SignOffResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__SignOff:
 		return (void*)soap_instantiate_dss__SignOff(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__FreeSetResponse:
+		return (void*)soap_instantiate_dss__FreeSetResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__FreeSet:
+		return (void*)soap_instantiate_dss__FreeSet(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Apartment_CreateSetFromGroupResponse:
 		return (void*)soap_instantiate_dss__Apartment_CreateSetFromGroupResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Apartment_CreateSetFromGroup:
@@ -1814,8 +1859,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_dss__Group_RemoveDeviceResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Group_RemoveDevice:
 		return (void*)soap_instantiate_dss__Group_RemoveDevice(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_Parameter:
-		return (void*)soap_instantiate_Parameter(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__inParameter:
+		return (void*)soap_instantiate_dss__inParameter(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__outParameter:
+		return (void*)soap_instantiate_dss__outParameter(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Event_RaiseResponse:
 		return (void*)soap_instantiate_dss__Event_RaiseResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Event_Raise:
@@ -1904,6 +1951,18 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 			delete (struct dss__SignOff*)p->ptr;
 		else
 			delete[] (struct dss__SignOff*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__FreeSetResponse:
+		if (p->size < 0)
+			delete (struct dss__FreeSetResponse*)p->ptr;
+		else
+			delete[] (struct dss__FreeSetResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__FreeSet:
+		if (p->size < 0)
+			delete (struct dss__FreeSet*)p->ptr;
+		else
+			delete[] (struct dss__FreeSet*)p->ptr;
 		break;
 	case SOAP_TYPE_dss__Apartment_CreateSetFromGroupResponse:
 		if (p->size < 0)
@@ -2469,11 +2528,17 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 		else
 			delete[] (struct dss__Group_RemoveDevice*)p->ptr;
 		break;
-	case SOAP_TYPE_Parameter:
+	case SOAP_TYPE_dss__inParameter:
 		if (p->size < 0)
-			delete (Parameter*)p->ptr;
+			delete (dss__inParameter*)p->ptr;
 		else
-			delete[] (Parameter*)p->ptr;
+			delete[] (dss__inParameter*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__outParameter:
+		if (p->size < 0)
+			delete (dss__outParameter*)p->ptr;
+		else
+			delete[] (dss__outParameter*)p->ptr;
 		break;
 	case SOAP_TYPE_dss__Event_RaiseResponse:
 		if (p->size < 0)
@@ -2697,71 +2762,6 @@ SOAP_FMAC3 long * SOAP_FMAC4 soap_in_long(struct soap *soap, const char *tag, lo
 	return soap_inlong(soap, tag, a, type, SOAP_TYPE_long);
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_DSID(struct soap *soap, LONG64 *a)
-{	soap_default_LONG64(soap, a);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_DSID(struct soap *soap, const LONG64 *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_DSID);
-	if (soap_out_DSID(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_DSID(struct soap *soap, const char *tag, int id, const LONG64 *a, const char *type)
-{
-	return soap_outLONG64(soap, tag, id, a, type, SOAP_TYPE_DSID);
-}
-
-SOAP_FMAC3 LONG64 * SOAP_FMAC4 soap_get_DSID(struct soap *soap, LONG64 *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_DSID(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 LONG64 * SOAP_FMAC4 soap_in_DSID(struct soap *soap, const char *tag, LONG64 *a, const char *type)
-{
-	return soap_inLONG64(soap, tag, a, type, SOAP_TYPE_DSID);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_LONG64(struct soap *soap, LONG64 *a)
-{	(void)soap; /* appease -Wall -Werror */
-#ifdef SOAP_DEFAULT_LONG64
-	*a = SOAP_DEFAULT_LONG64;
-#else
-	*a = (LONG64)0;
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_LONG64(struct soap *soap, const LONG64 *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_LONG64);
-	if (soap_out_LONG64(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_LONG64(struct soap *soap, const char *tag, int id, const LONG64 *a, const char *type)
-{
-	return soap_outLONG64(soap, tag, id, a, type, SOAP_TYPE_LONG64);
-}
-
-SOAP_FMAC3 LONG64 * SOAP_FMAC4 soap_get_LONG64(struct soap *soap, LONG64 *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_LONG64(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 LONG64 * SOAP_FMAC4 soap_in_LONG64(struct soap *soap, const char *tag, LONG64 *a, const char *type)
-{
-	return soap_inLONG64(soap, tag, a, type, SOAP_TYPE_LONG64);
-}
-
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_double(struct soap *soap, double *a)
 {	(void)soap; /* appease -Wall -Werror */
 #ifdef SOAP_DEFAULT_double
@@ -2795,6 +2795,106 @@ SOAP_FMAC3 double * SOAP_FMAC4 soap_get_double(struct soap *soap, double *p, con
 SOAP_FMAC3 double * SOAP_FMAC4 soap_in_double(struct soap *soap, const char *tag, double *a, const char *type)
 {
 	return soap_indouble(soap, tag, a, type, SOAP_TYPE_double);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_unsignedInt(struct soap *soap, unsigned int *a)
+{	(void)soap; /* appease -Wall -Werror */
+#ifdef SOAP_DEFAULT_unsignedInt
+	*a = SOAP_DEFAULT_unsignedInt;
+#else
+	*a = (unsigned int)0;
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_unsignedInt(struct soap *soap, const unsigned int *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_unsignedInt);
+	if (soap_out_unsignedInt(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_unsignedInt(struct soap *soap, const char *tag, int id, const unsigned int *a, const char *type)
+{
+	return soap_outunsignedInt(soap, tag, id, a, type, SOAP_TYPE_unsignedInt);
+}
+
+SOAP_FMAC3 unsigned int * SOAP_FMAC4 soap_get_unsignedInt(struct soap *soap, unsigned int *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_unsignedInt(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 unsigned int * SOAP_FMAC4 soap_in_unsignedInt(struct soap *soap, const char *tag, unsigned int *a, const char *type)
+{
+	return soap_inunsignedInt(soap, tag, a, type, SOAP_TYPE_unsignedInt);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_xsd__unsignedInt(struct soap *soap, unsigned long *a)
+{	soap_default_unsignedLong(soap, a);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_xsd__unsignedInt(struct soap *soap, const unsigned long *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_xsd__unsignedInt);
+	if (soap_out_xsd__unsignedInt(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_xsd__unsignedInt(struct soap *soap, const char *tag, int id, const unsigned long *a, const char *type)
+{
+	return soap_outunsignedLong(soap, tag, id, a, type, SOAP_TYPE_xsd__unsignedInt);
+}
+
+SOAP_FMAC3 unsigned long * SOAP_FMAC4 soap_get_xsd__unsignedInt(struct soap *soap, unsigned long *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_xsd__unsignedInt(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 unsigned long * SOAP_FMAC4 soap_in_xsd__unsignedInt(struct soap *soap, const char *tag, unsigned long *a, const char *type)
+{
+	return soap_inunsignedLong(soap, tag, a, type, SOAP_TYPE_xsd__unsignedInt);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_unsignedLong(struct soap *soap, unsigned long *a)
+{	(void)soap; /* appease -Wall -Werror */
+#ifdef SOAP_DEFAULT_unsignedLong
+	*a = SOAP_DEFAULT_unsignedLong;
+#else
+	*a = (unsigned long)0;
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_unsignedLong(struct soap *soap, const unsigned long *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_unsignedLong);
+	if (soap_out_unsignedLong(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_unsignedLong(struct soap *soap, const char *tag, int id, const unsigned long *a, const char *type)
+{
+	return soap_outunsignedLong(soap, tag, id, a, type, SOAP_TYPE_unsignedLong);
+}
+
+SOAP_FMAC3 unsigned long * SOAP_FMAC4 soap_get_unsignedLong(struct soap *soap, unsigned long *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_unsignedLong(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 unsigned long * SOAP_FMAC4 soap_in_unsignedLong(struct soap *soap, const char *tag, unsigned long *a, const char *type)
+{
+	return soap_inunsignedLong(soap, tag, a, type, SOAP_TYPE_unsignedLong);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_bool(struct soap *soap, bool *a)
@@ -2878,74 +2978,74 @@ SOAP_FMAC3 bool * SOAP_FMAC4 soap_in_bool(struct soap *soap, const char *tag, bo
 	return a;
 }
 
-void Parameter::soap_default(struct soap *soap)
+void dss__outParameter::soap_default(struct soap *soap)
 {
 	(void)soap; /* appease -Wall -Werror */
-	this->Parameter::values = NULL;
-	this->Parameter::names = NULL;
+	this->dss__outParameter::values = NULL;
+	this->dss__outParameter::names = NULL;
 }
 
-void Parameter::soap_serialize(struct soap *soap) const
+void dss__outParameter::soap_serialize(struct soap *soap) const
 {
 	(void)soap; /* appease -Wall -Werror */
-	soap_serialize_PointerToStringArray(soap, &this->Parameter::values);
-	soap_serialize_PointerToStringArray(soap, &this->Parameter::names);
+	soap_serialize_PointerToStringArray(soap, &this->dss__outParameter::values);
+	soap_serialize_PointerToStringArray(soap, &this->dss__outParameter::names);
 }
 
-int Parameter::soap_put(struct soap *soap, const char *tag, const  char *type) const
+int dss__outParameter::soap_put(struct soap *soap, const char *tag, const  char *type) const
 {
-	register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_Parameter);
+	register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_dss__outParameter);
 	if (this->soap_out(soap, tag, id, type))
 		return soap->error;
 	return soap_putindependent(soap);
 }
 
-int Parameter::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+int dss__outParameter::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
 {
-	return soap_out_Parameter(soap, tag, id, this, type);
+	return soap_out_dss__outParameter(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_Parameter(struct soap *soap, const char *tag, int id, const Parameter *a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__outParameter(struct soap *soap, const char *tag, int id, const dss__outParameter *a, const char *type)
 {
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_Parameter), type))
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__outParameter), type))
 		return soap->error;
-	if (soap_out_PointerToStringArray(soap, "values", -1, &(a->Parameter::values), ""))
+	if (soap_out_PointerToStringArray(soap, "values", -1, &(a->dss__outParameter::values), ""))
 		return soap->error;
-	if (soap_out_PointerToStringArray(soap, "names", -1, &(a->Parameter::names), ""))
+	if (soap_out_PointerToStringArray(soap, "names", -1, &(a->dss__outParameter::names), ""))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
 
-void *Parameter::soap_get(struct soap *soap, const char *tag, const char *type)
+void *dss__outParameter::soap_get(struct soap *soap, const char *tag, const char *type)
 {
-	return soap_get_Parameter(soap, this, tag, type);
+	return soap_get_dss__outParameter(soap, this, tag, type);
 }
 
-SOAP_FMAC3 Parameter * SOAP_FMAC4 soap_get_Parameter(struct soap *soap, Parameter *p, const char *tag, const char *type)
+SOAP_FMAC3 dss__outParameter * SOAP_FMAC4 soap_get_dss__outParameter(struct soap *soap, dss__outParameter *p, const char *tag, const char *type)
 {
-	if ((p = soap_in_Parameter(soap, tag, p, type)))
+	if ((p = soap_in_dss__outParameter(soap, tag, p, type)))
 		if (soap_getindependent(soap))
 			return NULL;
 	return p;
 }
 
-void *Parameter::soap_in(struct soap *soap, const char *tag, const char *type)
-{	return soap_in_Parameter(soap, tag, this, type);
+void *dss__outParameter::soap_in(struct soap *soap, const char *tag, const char *type)
+{	return soap_in_dss__outParameter(soap, tag, this, type);
 }
 
-SOAP_FMAC3 Parameter * SOAP_FMAC4 soap_in_Parameter(struct soap *soap, const char *tag, Parameter *a, const char *type)
+SOAP_FMAC3 dss__outParameter * SOAP_FMAC4 soap_in_dss__outParameter(struct soap *soap, const char *tag, dss__outParameter *a, const char *type)
 {
 	if (soap_element_begin_in(soap, tag, 0, NULL))
 		return NULL;
-	a = (Parameter *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_Parameter, sizeof(Parameter), soap->type, soap->arrayType);
+	a = (dss__outParameter *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_dss__outParameter, sizeof(dss__outParameter), soap->type, soap->arrayType);
 	if (!a)
 		return NULL;
 	if (soap->alloced)
 	{	a->soap_default(soap);
-		if (soap->clist->type != SOAP_TYPE_Parameter)
+		if (soap->clist->type != SOAP_TYPE_dss__outParameter)
 		{	soap_revert(soap);
 			*soap->id = '\0';
-			return (Parameter *)a->soap_in(soap, tag, type);
+			return (dss__outParameter *)a->soap_in(soap, tag, type);
 		}
 	}
 	short soap_flag_values1 = 1, soap_flag_names1 = 1;
@@ -2954,12 +3054,12 @@ SOAP_FMAC3 Parameter * SOAP_FMAC4 soap_in_Parameter(struct soap *soap, const cha
 		for (;;)
 		{	soap->error = SOAP_TAG_MISMATCH;
 			if (soap_flag_values1 && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_PointerToStringArray(soap, "values", &(a->Parameter::values), "xsd:string"))
+				if (soap_in_PointerToStringArray(soap, "values", &(a->dss__outParameter::values), "xsd:string"))
 				{	soap_flag_values1--;
 					continue;
 				}
 			if (soap_flag_names1 && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_PointerToStringArray(soap, "names", &(a->Parameter::names), "xsd:string"))
+				if (soap_in_PointerToStringArray(soap, "names", &(a->dss__outParameter::names), "xsd:string"))
 				{	soap_flag_names1--;
 					continue;
 				}
@@ -2974,48 +3074,188 @@ SOAP_FMAC3 Parameter * SOAP_FMAC4 soap_in_Parameter(struct soap *soap, const cha
 			return NULL;
 	}
 	else
-	{	a = (Parameter *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_Parameter, 0, sizeof(Parameter), 0, soap_copy_Parameter);
+	{	a = (dss__outParameter *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__outParameter, 0, sizeof(dss__outParameter), 0, soap_copy_dss__outParameter);
 		if (soap->body && soap_element_end_in(soap, tag))
 			return NULL;
 	}
 	return a;
 }
 
-SOAP_FMAC5 Parameter * SOAP_FMAC6 soap_new_Parameter(struct soap *soap, int n)
-{	return soap_instantiate_Parameter(soap, n, NULL, NULL, NULL);
+SOAP_FMAC5 dss__outParameter * SOAP_FMAC6 soap_new_dss__outParameter(struct soap *soap, int n)
+{	return soap_instantiate_dss__outParameter(soap, n, NULL, NULL, NULL);
 }
 
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_Parameter(struct soap *soap, Parameter *p)
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__outParameter(struct soap *soap, dss__outParameter *p)
 {	soap_delete(soap, p);
 }
 
-SOAP_FMAC3 Parameter * SOAP_FMAC4 soap_instantiate_Parameter(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+SOAP_FMAC3 dss__outParameter * SOAP_FMAC4 soap_instantiate_dss__outParameter(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_Parameter(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_Parameter, n, soap_fdelete);
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__outParameter(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__outParameter, n, soap_fdelete);
 	if (!cp)
 		return NULL;
 	if (n < 0)
-	{	cp->ptr = (void*)new Parameter;
+	{	cp->ptr = (void*)new dss__outParameter;
 		if (size)
-			*size = sizeof(Parameter);
+			*size = sizeof(dss__outParameter);
 	}
 	else
-	{	cp->ptr = (void*)new Parameter[n];
+	{	cp->ptr = (void*)new dss__outParameter[n];
 		if (!cp->ptr)
 		{	soap->error = SOAP_EOM;
 			return NULL;
 		}
 		if (size)
-			*size = n * sizeof(Parameter);
+			*size = n * sizeof(dss__outParameter);
 	}
 		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (Parameter*)cp->ptr;
+	return (dss__outParameter*)cp->ptr;
 }
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_Parameter(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__outParameter(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying Parameter %p -> %p\n", q, p));
-	*(Parameter*)p = *(Parameter*)q;
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying dss__outParameter %p -> %p\n", q, p));
+	*(dss__outParameter*)p = *(dss__outParameter*)q;
+}
+
+void dss__inParameter::soap_default(struct soap *soap)
+{
+	(void)soap; /* appease -Wall -Werror */
+	this->dss__inParameter::values = NULL;
+	this->dss__inParameter::names = NULL;
+}
+
+void dss__inParameter::soap_serialize(struct soap *soap) const
+{
+	(void)soap; /* appease -Wall -Werror */
+	soap_serialize_PointerToStringArray(soap, &this->dss__inParameter::values);
+	soap_serialize_PointerToStringArray(soap, &this->dss__inParameter::names);
+}
+
+int dss__inParameter::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+	register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_dss__inParameter);
+	if (this->soap_out(soap, tag, id, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+int dss__inParameter::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+	return soap_out_dss__inParameter(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__inParameter(struct soap *soap, const char *tag, int id, const dss__inParameter *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__inParameter), type))
+		return soap->error;
+	if (soap_out_PointerToStringArray(soap, "values", -1, &(a->dss__inParameter::values), ""))
+		return soap->error;
+	if (soap_out_PointerToStringArray(soap, "names", -1, &(a->dss__inParameter::names), ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+void *dss__inParameter::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+	return soap_get_dss__inParameter(soap, this, tag, type);
+}
+
+SOAP_FMAC3 dss__inParameter * SOAP_FMAC4 soap_get_dss__inParameter(struct soap *soap, dss__inParameter *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__inParameter(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+void *dss__inParameter::soap_in(struct soap *soap, const char *tag, const char *type)
+{	return soap_in_dss__inParameter(soap, tag, this, type);
+}
+
+SOAP_FMAC3 dss__inParameter * SOAP_FMAC4 soap_in_dss__inParameter(struct soap *soap, const char *tag, dss__inParameter *a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 0, NULL))
+		return NULL;
+	a = (dss__inParameter *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_dss__inParameter, sizeof(dss__inParameter), soap->type, soap->arrayType);
+	if (!a)
+		return NULL;
+	if (soap->alloced)
+	{	a->soap_default(soap);
+		if (soap->clist->type != SOAP_TYPE_dss__inParameter)
+		{	soap_revert(soap);
+			*soap->id = '\0';
+			return (dss__inParameter *)a->soap_in(soap, tag, type);
+		}
+	}
+	short soap_flag_values1 = 1, soap_flag_names1 = 1;
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_values1 && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_PointerToStringArray(soap, "values", &(a->dss__inParameter::values), "xsd:string"))
+				{	soap_flag_values1--;
+					continue;
+				}
+			if (soap_flag_names1 && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_PointerToStringArray(soap, "names", &(a->dss__inParameter::names), "xsd:string"))
+				{	soap_flag_names1--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (dss__inParameter *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__inParameter, 0, sizeof(dss__inParameter), 0, soap_copy_dss__inParameter);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 dss__inParameter * SOAP_FMAC6 soap_new_dss__inParameter(struct soap *soap, int n)
+{	return soap_instantiate_dss__inParameter(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__inParameter(struct soap *soap, dss__inParameter *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 dss__inParameter * SOAP_FMAC4 soap_instantiate_dss__inParameter(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__inParameter(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__inParameter, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new dss__inParameter;
+		if (size)
+			*size = sizeof(dss__inParameter);
+	}
+	else
+	{	cp->ptr = (void*)new dss__inParameter[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(dss__inParameter);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (dss__inParameter*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__inParameter(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying dss__inParameter %p -> %p\n", q, p));
+	*(dss__inParameter*)p = *(dss__inParameter*)q;
 }
 
 void StringArray::soap_default(struct soap *soap)
@@ -4245,7 +4485,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Event_Schedule(struct soap *soap, s
 	soap_default_int(soap, &a->_token);
 	soap_default_string(soap, &a->_icalString);
 	soap_default_int(soap, &a->_eventID);
-	a->_params.Parameter::soap_default(soap);
+	a->_params.dss__inParameter::soap_default(soap);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Event_Schedule(struct soap *soap, const struct dss__Event_Schedule *a)
@@ -4317,7 +4557,7 @@ SOAP_FMAC3 struct dss__Event_Schedule * SOAP_FMAC4 soap_in_dss__Event_Schedule(s
 					continue;
 				}
 			if (soap_flag__params && soap->error == SOAP_TAG_MISMATCH)
-				if (a->_params.soap_in(soap, NULL, "Parameter"))
+				if (a->_params.soap_in(soap, NULL, "dss:inParameter"))
 				{	soap_flag__params--;
 					continue;
 				}
@@ -4738,7 +4978,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Event_Subscribe(struct soap *soap, 
 	a->_eventIDs.IntArray::soap_default(soap);
 	a->_sourceIDs.IntArray::soap_default(soap);
 	soap_default_string(soap, &a->_actionName);
-	a->_params.Parameter::soap_default(soap);
+	a->_params.dss__inParameter::soap_default(soap);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Event_Subscribe(struct soap *soap, const struct dss__Event_Subscribe *a)
@@ -4818,7 +5058,7 @@ SOAP_FMAC3 struct dss__Event_Subscribe * SOAP_FMAC4 soap_in_dss__Event_Subscribe
 					continue;
 				}
 			if (soap_flag__params && soap->error == SOAP_TAG_MISMATCH)
-				if (a->_params.soap_in(soap, NULL, "Parameter"))
+				if (a->_params.soap_in(soap, NULL, "dss:inParameter"))
 				{	soap_flag__params--;
 					continue;
 				}
@@ -5353,7 +5593,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Event_Raise(struct soap *soap, stru
 	soap_default_int(soap, &a->_token);
 	soap_default_int(soap, &a->_eventID);
 	soap_default_int(soap, &a->_sourceID);
-	a->_params.Parameter::soap_default(soap);
+	a->_params.dss__inParameter::soap_default(soap);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Event_Raise(struct soap *soap, const struct dss__Event_Raise *a)
@@ -5425,7 +5665,7 @@ SOAP_FMAC3 struct dss__Event_Raise * SOAP_FMAC4 soap_in_dss__Event_Raise(struct 
 					continue;
 				}
 			if (soap_flag__params && soap->error == SOAP_TAG_MISMATCH)
-				if (a->_params.soap_in(soap, NULL, "Parameter"))
+				if (a->_params.soap_in(soap, NULL, "dss:inParameter"))
 				{	soap_flag__params--;
 					continue;
 				}
@@ -8121,7 +8361,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Modulator_GetDSID(struct soap *soap, i
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Modulator_GetDSIDResponse(struct soap *soap, struct dss__Modulator_GetDSIDResponse *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_DSID(soap, &a->dsid);
+	soap_default_xsd__unsignedInt(soap, &a->dsid);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Modulator_GetDSIDResponse(struct soap *soap, const struct dss__Modulator_GetDSIDResponse *a)
@@ -8141,7 +8381,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Modulator_GetDSIDResponse(struct soap *s
 {
 	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Modulator_GetDSIDResponse), type))
 		return soap->error;
-	if (soap_out_DSID(soap, "dsid", -1, &a->dsid, ""))
+	if (soap_out_xsd__unsignedInt(soap, "dsid", -1, &a->dsid, ""))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
@@ -8168,7 +8408,7 @@ SOAP_FMAC3 struct dss__Modulator_GetDSIDResponse * SOAP_FMAC4 soap_in_dss__Modul
 		for (;;)
 		{	soap->error = SOAP_TAG_MISMATCH;
 			if (soap_flag_dsid && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_DSID(soap, "dsid", &a->dsid, "DSID"))
+				if (soap_in_xsd__unsignedInt(soap, "dsid", &a->dsid, "xsd:unsignedInt"))
 				{	soap_flag_dsid--;
 					continue;
 				}
@@ -8585,7 +8825,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Device_GetDSID(struct soap *soap, int 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_GetDSIDResponse(struct soap *soap, struct dss__Device_GetDSIDResponse *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_DSID(soap, &a->result);
+	soap_default_xsd__unsignedInt(soap, &a->result);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_GetDSIDResponse(struct soap *soap, const struct dss__Device_GetDSIDResponse *a)
@@ -8605,7 +8845,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_GetDSIDResponse(struct soap *soap
 {
 	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Device_GetDSIDResponse), type))
 		return soap->error;
-	if (soap_out_DSID(soap, "result", -1, &a->result, ""))
+	if (soap_out_xsd__unsignedInt(soap, "result", -1, &a->result, ""))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
@@ -8632,7 +8872,7 @@ SOAP_FMAC3 struct dss__Device_GetDSIDResponse * SOAP_FMAC4 soap_in_dss__Device_G
 		for (;;)
 		{	soap->error = SOAP_TAG_MISMATCH;
 			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_DSID(soap, "result", &a->result, "DSID"))
+				if (soap_in_xsd__unsignedInt(soap, "result", &a->result, "xsd:unsignedInt"))
 				{	soap_flag_result--;
 					continue;
 				}
@@ -16888,6 +17128,242 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Apartment_CreateSetFromGroupResponse(s
 {
 	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Apartment_CreateSetFromGroupResponse %p -> %p\n", q, p));
 	*(struct dss__Apartment_CreateSetFromGroupResponse*)p = *(struct dss__Apartment_CreateSetFromGroupResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__FreeSet(struct soap *soap, struct dss__FreeSet *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_int(soap, &a->_setID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__FreeSet(struct soap *soap, const struct dss__FreeSet *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->_token, SOAP_TYPE_int);
+	soap_embedded(soap, &a->_setID, SOAP_TYPE_int);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__FreeSet(struct soap *soap, const struct dss__FreeSet *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__FreeSet);
+	if (soap_out_dss__FreeSet(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__FreeSet(struct soap *soap, const char *tag, int id, const struct dss__FreeSet *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__FreeSet), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__FreeSet * SOAP_FMAC4 soap_get_dss__FreeSet(struct soap *soap, struct dss__FreeSet *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__FreeSet(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__FreeSet * SOAP_FMAC4 soap_in_dss__FreeSet(struct soap *soap, const char *tag, struct dss__FreeSet *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__setID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__FreeSet *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__FreeSet, sizeof(struct dss__FreeSet), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__FreeSet(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
+				{	soap_flag__setID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__FreeSet *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__FreeSet, 0, sizeof(struct dss__FreeSet), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__FreeSet * SOAP_FMAC6 soap_new_dss__FreeSet(struct soap *soap, int n)
+{	return soap_instantiate_dss__FreeSet(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__FreeSet(struct soap *soap, struct dss__FreeSet *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__FreeSet * SOAP_FMAC4 soap_instantiate_dss__FreeSet(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__FreeSet(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__FreeSet, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__FreeSet;
+		if (size)
+			*size = sizeof(struct dss__FreeSet);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__FreeSet[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__FreeSet);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__FreeSet*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__FreeSet(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__FreeSet %p -> %p\n", q, p));
+	*(struct dss__FreeSet*)p = *(struct dss__FreeSet*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__FreeSetResponse(struct soap *soap, struct dss__FreeSetResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__FreeSetResponse(struct soap *soap, const struct dss__FreeSetResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__FreeSetResponse(struct soap *soap, const struct dss__FreeSetResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__FreeSetResponse);
+	if (soap_out_dss__FreeSetResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__FreeSetResponse(struct soap *soap, const char *tag, int id, const struct dss__FreeSetResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__FreeSetResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__FreeSetResponse * SOAP_FMAC4 soap_get_dss__FreeSetResponse(struct soap *soap, struct dss__FreeSetResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__FreeSetResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__FreeSetResponse * SOAP_FMAC4 soap_in_dss__FreeSetResponse(struct soap *soap, const char *tag, struct dss__FreeSetResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__FreeSetResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__FreeSetResponse, sizeof(struct dss__FreeSetResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__FreeSetResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__FreeSetResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__FreeSetResponse, 0, sizeof(struct dss__FreeSetResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__FreeSetResponse * SOAP_FMAC6 soap_new_dss__FreeSetResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__FreeSetResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__FreeSetResponse(struct soap *soap, struct dss__FreeSetResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__FreeSetResponse * SOAP_FMAC4 soap_instantiate_dss__FreeSetResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__FreeSetResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__FreeSetResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__FreeSetResponse;
+		if (size)
+			*size = sizeof(struct dss__FreeSetResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__FreeSetResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__FreeSetResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__FreeSetResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__FreeSetResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__FreeSetResponse %p -> %p\n", q, p));
+	*(struct dss__FreeSetResponse*)p = *(struct dss__FreeSetResponse*)q;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__SignOff(struct soap *soap, struct dss__SignOff *a)

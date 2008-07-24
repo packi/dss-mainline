@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions name="dss"
- targetNamespace="http://localhost/dss.wsdl"
- xmlns:tns="http://localhost/dss.wsdl"
+ targetNamespace="http://localhost:8080/dss.wsdl"
+ xmlns:tns="http://localhost:8080/dss.wsdl"
  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
- xmlns:dss="urn:copy"
+ xmlns:dss="urn:dss:1.0"
  xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
  xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
  xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
@@ -15,12 +15,12 @@
 
 <types>
 
- <schema targetNamespace="urn:copy"
+ <schema targetNamespace="urn:dss:1.0"
   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
   xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-  xmlns:dss="urn:copy"
+  xmlns:dss="urn:dss:1.0"
   xmlns="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="unqualified"
   attributeFormDefault="unqualified">
@@ -44,6 +44,12 @@
      <attribute ref="SOAP-ENC:arrayType" WSDL:arrayType="xsd:string[]"/>
     </restriction>
    </complexContent>
+  </complexType>
+  <complexType name="inParameter">
+   <sequence>
+     <element name="values" type="dss:ArrayOfstring" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="names" type="dss:ArrayOfstring" minOccurs="0" maxOccurs="1" nillable="true"/>
+   </sequence>
   </complexType>
   <!-- operation request element -->
   <element name="Authenticate">
@@ -75,6 +81,23 @@
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="FreeSet">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="FreeSetResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -687,7 +710,7 @@
   <element name="Device-GetDSIDResponse">
    <complexType>
     <sequence>
-     <element name="result" type="DSID" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -720,7 +743,7 @@
   <element name="Modulator-GetDSIDResponse">
    <complexType>
     <sequence>
-     <element name="dsid" type="DSID" minOccurs="1" maxOccurs="1"/>
+     <element name="dsid" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -904,7 +927,7 @@
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="eventID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="sourceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="params" type="dss:Parameter" minOccurs="1" maxOccurs="1"/>
+     <element name="params" type="dss:inParameter" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -942,7 +965,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Parameter">
+  <element name="outParameter">
    <complexType>
     <sequence>
      <element name="values" type="dss:ArrayOfstring" minOccurs="0" maxOccurs="1" nillable="true"/>
@@ -958,7 +981,7 @@
      <element name="eventIDs" type="dss:ArrayOfint" minOccurs="1" maxOccurs="1" nillable="false"/>
      <element name="sourceIDs" type="dss:ArrayOfint" minOccurs="1" maxOccurs="1" nillable="false"/>
      <element name="actionName" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="params" type="dss:Parameter" minOccurs="1" maxOccurs="1"/>
+     <element name="params" type="dss:inParameter" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -994,7 +1017,7 @@
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="icalString" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="eventID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="params" type="dss:Parameter" minOccurs="1" maxOccurs="1"/>
+     <element name="params" type="dss:inParameter" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -1041,6 +1064,14 @@
 
 <message name="SignOffResponse">
  <part name="parameters" element="dss:SignOffResponse"/>
+</message>
+
+<message name="FreeSetRequest">
+ <part name="parameters" element="dss:FreeSet"/>
+</message>
+
+<message name="FreeSetResponse">
+ <part name="parameters" element="dss:FreeSetResponse"/>
 </message>
 
 <message name="Apartment-CreateSetFromGroupRequest">
@@ -1439,8 +1470,8 @@
  <part name="parameters" element="dss:Event-GetActionParamsTemplate"/>
 </message>
 
-<message name="Parameter">
- <part name="parameters" element="Parameter"/>
+<message name="outParameter">
+ <part name="parameters" element="dss:outParameter"/>
 </message>
 
 <message name="Event-SubscribeRequest">
@@ -1475,7 +1506,7 @@
  <part name="parameters" element="dss:Event-DeleteScheduleResponse"/>
 </message>
 
-<portType name="dssPortType">
+<portType name="MyType">
  <operation name="Authenticate">
   <documentation>Service definition of function dss__Authenticate</documentation>
   <input message="tns:AuthenticateRequest"/>
@@ -1485,6 +1516,11 @@
   <documentation>Service definition of function dss__SignOff</documentation>
   <input message="tns:SignOffRequest"/>
   <output message="tns:SignOffResponse"/>
+ </operation>
+ <operation name="FreeSet">
+  <documentation>Service definition of function dss__FreeSet</documentation>
+  <input message="tns:FreeSetRequest"/>
+  <output message="tns:FreeSetResponse"/>
  </operation>
  <operation name="Apartment-CreateSetFromGroup">
   <documentation>Service definition of function dss__Apartment_CreateSetFromGroup</documentation>
@@ -1734,7 +1770,7 @@
  <operation name="Event-GetActionParamsTemplate">
   <documentation>Service definition of function dss__Event_GetActionParamsTemplate</documentation>
   <input message="tns:Event-GetActionParamsTemplate"/>
-  <output message="tns:Parameter"/>
+  <output message="tns:outParameter"/>
  </operation>
  <operation name="Event-Subscribe">
   <documentation>Service definition of function dss__Event_Subscribe</documentation>
@@ -1758,7 +1794,7 @@
  </operation>
 </portType>
 
-<binding name="dss" type="tns:dssPortType">
+<binding name="dss" type="tns:MyType">
  <SOAP:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
  <operation name="Authenticate">
   <SOAP:operation soapAction=""/>
@@ -1770,6 +1806,15 @@
   </output>
  </operation>
  <operation name="SignOff">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="FreeSet">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -2269,7 +2314,7 @@
 <service name="dss">
  <documentation>gSOAP 2.7.10 generated service definition</documentation>
  <port name="dss" binding="tns:dss">
-  <SOAP:address location="http://localhost:8081//"/>
+  <SOAP:address location="http://localhost:8081"/>
  </port>
 </service>
 

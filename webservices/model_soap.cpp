@@ -68,6 +68,19 @@ int dss__SignOff(struct soap *soap, int _token, int& result) {
   return SOAP_OK;
 }
 
+int dss__FreeSet(struct soap *soap, int _token, int _setID, bool& result) {
+  dss::Set set;
+  int res = AuthorizeAndGetSet(soap, _token, _setID, set);
+  if(res != SOAP_OK) {
+    return res;
+  }
+
+  dss::WebServiceSession& sess = dss::DSS::GetInstance()->GetWebServices().GetSession(soap, _token);
+  sess.FreeSet(_setID);
+  result = true;
+  return SOAP_OK;
+} // dss__FreeSet
+
 int dss__Apartment_CreateSetFromGroup(struct soap *soap, int _token,  char* _groupName, int& setID) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
@@ -159,7 +172,7 @@ int dss__Set_AddDeviceByName(struct soap *soap, int _token, int _setID, char* _n
   if(!sess.HasSetWithID(_setID)) {
     return soap_receiver_fault(soap, "The Set with the given id does not exist",  NULL);
   }
-  dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();  
+  dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   dss::Set& origSet = sess.GetSetByID(_setID);
   try {
     dss::DeviceReference devRef = apt.GetDevices().GetByName(_name);
@@ -179,7 +192,7 @@ int dss__Set_AddDeviceByID(struct soap *soap, int _token, int _setID, int _devic
   if(!sess.HasSetWithID(_setID)) {
     return soap_receiver_fault(soap, "The Set with the given id does not exist",  NULL);
   }
-  dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();  
+  dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   dss::Set& origSet = sess.GetSetByID(_setID);
   try {
     dss::DeviceReference devRef = apt.GetDevices().GetByID(_deviceID);
@@ -199,7 +212,7 @@ int dss__Set_RemoveDevice(struct soap *soap, int _token, int _setID, int _device
   if(!sess.HasSetWithID(_setID)) {
     return soap_receiver_fault(soap, "The Set with the given id does not exist",  NULL);
   }
-  dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();  
+  dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   dss::Set& origSet = sess.GetSetByID(_setID);
   try {
     dss::DeviceReference devRef = apt.GetDevices().GetByID(_deviceID);
@@ -223,7 +236,7 @@ int dss__Set_Combine(struct soap *soap, int _token, int _setID1, int _setID2, in
     return soap_receiver_fault(soap, "Set2 with the given id does not exist",  NULL);
   }
   dss::Set& set1 = sess.GetSetByID(_setID1);
-  dss::Set& set2 = sess.GetSetByID(_setID2);  
+  dss::Set& set2 = sess.GetSetByID(_setID2);
   try {
     dss::Set resultingSet = set1.Combine(set2);
     sess.AddSet(resultingSet, setID);
@@ -245,7 +258,7 @@ int dss__Set_Remove(struct soap *soap, int _token, int _setID, int _setIDToRemov
     return soap_receiver_fault(soap, "Set to remove with the given id does not exist",  NULL);
   }
   dss::Set& set1 = sess.GetSetByID(_setID);
-  dss::Set& set2 = sess.GetSetByID(_setIDToRemove);  
+  dss::Set& set2 = sess.GetSetByID(_setIDToRemove);
   try {
     dss::Set resultingSet = set1.Remove(set2);
     sess.AddSet(resultingSet, setID);
@@ -279,7 +292,7 @@ int dss__Apartment_GetGroupByName(struct soap *soap, int _token, char* _groupNam
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
-  dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();  
+  dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   try {
     groupID = apt.GetGroup(_groupName).GetID();
   } catch(dss::ItemNotFoundException* _ex) {
@@ -292,7 +305,7 @@ int dss__Apartment_GetRoomByName(struct soap *soap, int _token,  char* _roomName
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
-  dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();  
+  dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   try {
     roomID = apt.GetRoom(_roomName).GetRoomID();
   } catch(dss::ItemNotFoundException* _ex) {
@@ -517,7 +530,7 @@ int dss__Device_GetValue(struct soap *soap, int _token, int _deviceID, int _para
 
 //==================================================== Information
 
-int dss__Device_GetDSID(struct soap *soap, int _token, int _deviceID, DSID& result) {
+int dss__Device_GetDSID(struct soap *soap, int _token, int _deviceID, unsigned long& result) {
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
@@ -530,21 +543,21 @@ int dss__Apartment_GetModulatorIDs(struct soap *soap, int _token, IntArray& ids)
     return NotAuthorized(soap);
   }
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
-  
+
   std::vector<dss::Modulator*>& modulators = apt.GetModulators();
-  
-  // apparently gSOAP is handling the memory 
+
+  // apparently gSOAP is handling the memory
   ids.__ptr = (int*)malloc(sizeof(int) * modulators.size());
   ids.__size = modulators.size();
-  
+
   for(int iModulator = 0; iModulator < ids.__size; iModulator++) {
     ids.__ptr[iModulator] = modulators[iModulator]->GetDSID();
   }
-  
-  return SOAP_OK;  
+
+  return SOAP_OK;
 }
 
-int dss__Modulator_GetDSID(struct soap *soap, int _token, int _modulatorID, DSID& dsid) {
+int dss__Modulator_GetDSID(struct soap *soap, int _token, int _modulatorID, unsigned long& dsid) {
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
@@ -554,8 +567,8 @@ int dss__Modulator_GetName(struct soap *soap, int _token, int _modulatorID, char
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  
-  std::string tmpName = mod.GetName(); 
+
+  std::string tmpName = mod.GetName();
   *name = (char*)malloc(tmpName.length() * sizeof(char));
   strncpy(*name, tmpName.c_str(), tmpName.length());
   return SOAP_OK;
@@ -599,7 +612,7 @@ int dss__Group_RemoveDevice(struct soap *soap, int _token, int _groupID, int _de
 
 //==================================================== Events
 
-int dss__Event_Raise(struct soap *soap, int _token, int _eventID, int _sourceID, Parameter _params, int& result) {
+int dss__Event_Raise(struct soap *soap, int _token, int _eventID, int _sourceID, dss__inParameter _params, int& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -614,8 +627,8 @@ int dss__Event_Raise(struct soap *soap, int _token, int _eventID, int _sourceID,
   if(numNames != numValues) {
     soap_receiver_fault(soap, "Names and values of _params must have the same number of items", NULL);
   }
-  
-  
+
+
   dss::Event evt(_eventID, _sourceID);
   //dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
  // apt.OnEvent();
@@ -626,11 +639,11 @@ int dss__Event_GetActionNames(struct soap *soap, int _token,  StringArray& names
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
-int dss__Event_GetActionParamsTemplate(struct soap *soap, int _token,  char* _name, Parameter& paramsTemplate) {
+int dss__Event_GetActionParamsTemplate(struct soap *soap, int _token,  char* _name, dss__outParameter& paramsTemplate) {
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
-int dss__Event_Subscribe(struct soap *soap, int _token, IntArray _eventIDs, IntArray _sourceIDs, char* _actionName, Parameter _params, int& subscriptionID) {
+int dss__Event_Subscribe(struct soap *soap, int _token, IntArray _eventIDs, IntArray _sourceIDs, char* _actionName, dss__inParameter _params, int& subscriptionID) {
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
@@ -638,7 +651,7 @@ int dss__Event_Unsubscribe(struct soap *soap, int _token, int _subscriptionID, i
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
-int dss__Event_Schedule(struct soap *soap, int _token,  char* _icalString, int _eventID, Parameter _params, int& scheduledEventID) {
+int dss__Event_Schedule(struct soap *soap, int _token,  char* _icalString, int _eventID, dss__inParameter _params, int& scheduledEventID) {
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 

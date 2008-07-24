@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
- <schema targetNamespace="urn:copy"
+ <schema targetNamespace="urn:dss:1.0"
   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
   xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-  xmlns:dss="urn:copy"
+  xmlns:dss="urn:dss:1.0"
   xmlns="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="unqualified"
   attributeFormDefault="unqualified">
   <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+  <complexType name="inParameter">
+   <sequence>
+     <element name="values" type="dss:ArrayOfstring" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="names" type="dss:ArrayOfstring" minOccurs="0" maxOccurs="1" nillable="true"/>
+   </sequence>
+  </complexType>
   <!-- operation request element -->
   <element name="Authenticate">
    <complexType>
@@ -39,6 +45,23 @@
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="FreeSet">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="FreeSetResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -651,7 +674,7 @@
   <element name="Device-GetDSIDResponse">
    <complexType>
     <sequence>
-     <element name="result" type="DSID" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -684,7 +707,7 @@
   <element name="Modulator-GetDSIDResponse">
    <complexType>
     <sequence>
-     <element name="dsid" type="DSID" minOccurs="1" maxOccurs="1"/>
+     <element name="dsid" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -868,7 +891,7 @@
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="eventID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="sourceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="params" type="dss:Parameter" minOccurs="1" maxOccurs="1"/>
+     <element name="params" type="dss:inParameter" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -906,7 +929,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Parameter">
+  <element name="outParameter">
    <complexType>
     <sequence>
      <element name="values" type="dss:ArrayOfstring" minOccurs="0" maxOccurs="1" nillable="true"/>
@@ -922,7 +945,7 @@
      <element name="eventIDs" type="dss:ArrayOfint" minOccurs="1" maxOccurs="1" nillable="false"/>
      <element name="sourceIDs" type="dss:ArrayOfint" minOccurs="1" maxOccurs="1" nillable="false"/>
      <element name="actionName" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="params" type="dss:Parameter" minOccurs="1" maxOccurs="1"/>
+     <element name="params" type="dss:inParameter" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -958,7 +981,7 @@
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="icalString" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="eventID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="params" type="dss:Parameter" minOccurs="1" maxOccurs="1"/>
+     <element name="params" type="dss:inParameter" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>

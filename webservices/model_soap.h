@@ -1,8 +1,8 @@
 //gsoap dss service name: dss
-//gsoap dss service namespace: http://localhost/dss.wsdl
-//gsoap dss service location: http://localhost:8081/
-//gsoap dss service executable: 
-//gsoap dss schema namespace: urn:copy
+//gsoap dss service namespace: http://localhost:8080/dss.wsdl
+//gsoap dss service port: http://localhost:8081
+//gsoap dss schema namespace:  urn:dss:1.0
+//gsoap dss service type: MyType
 
 /** \file */
 
@@ -18,13 +18,13 @@ public:
   int __size;
 };
 
-typedef long long DSID;
+typedef unsigned long xsd__unsignedInt;
 
 /** Authenticates your ip to the system.
  * The token received will be used in any subsequent call. The ip/token pair
  * identifies a session. A Session will time out after n minutes of no activity (default 5).*/
 int dss__Authenticate(char* _userName, char* _password, int& token);
-/** Terminates a session. All resources allocate by the session (e.g. sets) will be 
+/** Terminates a session. All resources allocate by the session (e.g. sets) will be
  * released. */
 int dss__SignOff(int _token, int& result);
 /** Frees the set (_setID) on the server. */
@@ -33,7 +33,7 @@ int dss__FreeSet(int _token, int _setID, bool& result);
 /** Creates a set containing all devices which are contained in a group named _groupName.
  * @see dss__CreateEmptySet */
 int dss__Apartment_CreateSetFromGroup(int _token, char* _groupName, int& setID);
-/** Creates a set containing all devices in the given array 
+/** Creates a set containing all devices in the given array
  * @see dss__CreateEmptySet*/
 int dss__Apartment_CreateSetFromDeviceIDs(int _token, IntArray _ids, int& setID);
 /** Creates a set containing all devices in the given array */
@@ -46,7 +46,7 @@ int dss__Apartment_GetDevices(int _token, int& setID);
 /** Returns the device ID for the given _deviceName */
 int dss__Apartment_GetDeviceIDByName(int _token, char* _deviceName, int& deviceID);
 
-/** Adds the given device to the set */ 
+/** Adds the given device to the set */
 int dss__Set_AddDeviceByName(int _token, int _setID, char* _name, bool& result);
 /** Adds the given device to the set */
 int dss__Set_AddDeviceByID(int _token, int _setID, int _deviceID, bool& result);
@@ -83,13 +83,13 @@ int dss__Set_DecreaseValue(int _token, int _setID, int _paramID, bool& result);
 int dss__Set_Enable(int _token, int _setID, bool& result);
 /** Disables all devices in the set. */
 int dss__Set_Disable(int _token, int _setID, bool& result);
-/** Starts dimming the given parameter on all devices contained in the set. If _directionUp is 
- * true, the dimming will increase the parameter specified by _paramID. If _paramID == -1 the 
+/** Starts dimming the given parameter on all devices contained in the set. If _directionUp is
+ * true, the dimming will increase the parameter specified by _paramID. If _paramID == -1 the
  * default parameter will be dimmed */
 int dss__Set_StartDim(int _token, int _setID, bool _directionUp, int _paramID, bool& result);
 /** Stops dimming the given parameter on all devices contained in the set. */
 int dss__Set_EndDim(int _token, int _setID, int _paramID, bool& result);
-/** Sets the parameter specified by _paramID to _value. If _paramID == -1 the default parameter 
+/** Sets the parameter specified by _paramID to _value. If _paramID == -1 the default parameter
  * will be set. */
 int dss__Set_SetValue(int _token, int _setID, double _value, int _paramID, bool& result);
 
@@ -124,7 +124,7 @@ int dss__Device_GetValue(int _token, int _deviceID, int _paramID, double& result
 //==================================================== Information
 
 /** Returns the DSID of the given device */
-int dss__Device_GetDSID(int _token, int _deviceID, DSID& result);
+int dss__Device_GetDSID(int _token, int _deviceID, xsd__unsignedInt& result);
 
 //==================================================== Organization
 
@@ -133,7 +133,7 @@ int dss__Device_GetDSID(int _token, int _deviceID, DSID& result);
 /** Returns an integer array of modulators known to the dss. */
 int dss__Apartment_GetModulatorIDs(int _token, IntArray& ids);
 /** Returns the DSID of the given modulator. */
-int dss__Modulator_GetDSID(int _token, int _modulatorID, DSID& dsid);
+int dss__Modulator_GetDSID(int _token, int _modulatorID, xsd__unsignedInt& dsid);
 /** Retuns the name of the given modulator. */
 int dss__Modulator_GetName(int _token, int _modulatorID, char** name);
 /** Allocates a room */
@@ -155,7 +155,13 @@ int dss__Group_AddDevice(int _token, int _groupID, int _deviceID, int& result);
 /** Removes a device from the given group. */
 int dss__Group_RemoveDevice(int _token, int _groupID, int _deviceID, int& result);
 
-class Parameter {
+class dss__inParameter {
+public:
+  StringArray* values;
+  StringArray* names;
+};
+
+class dss__outParameter {
 public:
   StringArray* values;
   StringArray* names;
@@ -164,17 +170,17 @@ public:
 //==================================================== Events
 
 /** Raises an event with the given _eventID from _sourceID with _params */
-int dss__Event_Raise(int _token, int _eventID, int _sourceID, Parameter _params, int& result);
+int dss__Event_Raise(int _token, int _eventID, int _sourceID, dss__inParameter _params, int& result);
 /** Returns an array of the names of all registered actions */
 int dss__Event_GetActionNames(int _token, StringArray& names);
 /** Returns a parameter template for the given action _name. */
-int dss__Event_GetActionParamsTemplate(int _token, char* _name, Parameter& paramsTemplate);
-/** Adds a subscriptions to the events specified in _eventIDs if risen from one of _sourceIDs. If an 
+int dss__Event_GetActionParamsTemplate(int _token, char* _name, dss__outParameter& paramsTemplate);
+/** Adds a subscriptions to the events specified in _eventIDs if risen from one of _sourceIDs. If an
  * event with said properties occurs, the action identified by _actionName will be executed with the given _params. */
-int dss__Event_Subscribe(int _token, IntArray _eventIDs, IntArray _sourceIDs, char* _actionName, Parameter _params, int& subscriptionID);
+int dss__Event_Subscribe(int _token, IntArray _eventIDs, IntArray _sourceIDs, char* _actionName, dss__inParameter _params, int& subscriptionID);
 /** Cancels a subscription. */
 int dss__Event_Unsubscribe(int _token, int _subscriptionID, int& result);
 /** Schedules an event. */
-int dss__Event_Schedule(int _token, char* _icalString, int _eventID, Parameter _params, int& scheduledEventID);
+int dss__Event_Schedule(int _token, char* _icalString, int _eventID, dss__inParameter _params, int& scheduledEventID);
 /** Cancels a scheduled event. */
 int dss__Event_DeleteSchedule(int _token, int _scheduleEventID, int& result);
