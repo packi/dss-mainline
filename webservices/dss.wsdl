@@ -24,14 +24,14 @@
   xmlns="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="unqualified"
   attributeFormDefault="unqualified">
-  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
-  <complexType name="ArrayOfint">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
+  <complexType name="ArrayOfunsignedInt">
    <complexContent>
     <restriction base="SOAP-ENC:Array">
      <sequence>
-      <element name="item" type="xsd:int" minOccurs="0" maxOccurs="unbounded"/>
+      <element name="item" type="xsd:unsignedInt" minOccurs="0" maxOccurs="unbounded"/>
      </sequence>
-     <attribute ref="SOAP-ENC:arrayType" WSDL:arrayType="xsd:int[]"/>
+     <attribute ref="SOAP-ENC:arrayType" WSDL:arrayType="xsd:unsignedInt[]"/>
     </restriction>
    </complexContent>
   </complexType>
@@ -123,7 +123,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="ids" type="dss:ArrayOfint" minOccurs="1" maxOccurs="1" nillable="false"/>
+     <element name="ids" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1" nillable="false"/>
     </sequence>
    </complexType>
   </element>
@@ -310,6 +310,23 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="Set-GetContainedDevices">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Set-GetContainedDevicesResponse">
+   <complexType>
+    <sequence>
+     <element name="deviceIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="Apartment-GetGroupByName">
    <complexType>
     <sequence>
@@ -355,7 +372,7 @@
   <element name="Apartment-GetRoomIDsResponse">
    <complexType>
     <sequence>
-     <element name="roomIDs" type="dss:ArrayOfint" minOccurs="1" maxOccurs="1"/>
+     <element name="roomIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -698,6 +715,23 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="Device-GetName">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Device-GetNameResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="Device-GetDSID">
    <complexType>
     <sequence>
@@ -726,7 +760,7 @@
   <element name="Apartment-GetModulatorIDsResponse">
    <complexType>
     <sequence>
-     <element name="ids" type="dss:ArrayOfint" minOccurs="1" maxOccurs="1"/>
+     <element name="ids" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -978,8 +1012,8 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="eventIDs" type="dss:ArrayOfint" minOccurs="1" maxOccurs="1" nillable="false"/>
-     <element name="sourceIDs" type="dss:ArrayOfint" minOccurs="1" maxOccurs="1" nillable="false"/>
+     <element name="eventIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1" nillable="false"/>
+     <element name="sourceIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1" nillable="false"/>
      <element name="actionName" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="params" type="dss:inParameter" minOccurs="1" maxOccurs="1"/>
     </sequence>
@@ -1170,6 +1204,14 @@
  <part name="parameters" element="dss:Set-ByGroupResponse"/>
 </message>
 
+<message name="Set-GetContainedDevicesRequest">
+ <part name="parameters" element="dss:Set-GetContainedDevices"/>
+</message>
+
+<message name="Set-GetContainedDevicesResponse">
+ <part name="parameters" element="dss:Set-GetContainedDevicesResponse"/>
+</message>
+
 <message name="Apartment-GetGroupByNameRequest">
  <part name="parameters" element="dss:Apartment-GetGroupByName"/>
 </message>
@@ -1344,6 +1386,14 @@
 
 <message name="Device-GetValueResponse">
  <part name="parameters" element="dss:Device-GetValueResponse"/>
+</message>
+
+<message name="Device-GetNameRequest">
+ <part name="parameters" element="dss:Device-GetName"/>
+</message>
+
+<message name="Device-GetNameResponse">
+ <part name="parameters" element="dss:Device-GetNameResponse"/>
 </message>
 
 <message name="Device-GetDSIDRequest">
@@ -1582,6 +1632,11 @@
   <input message="tns:Set-ByGroupRequest"/>
   <output message="tns:Set-ByGroupResponse"/>
  </operation>
+ <operation name="Set-GetContainedDevices">
+  <documentation>Service definition of function dss__Set_GetContainedDevices</documentation>
+  <input message="tns:Set-GetContainedDevicesRequest"/>
+  <output message="tns:Set-GetContainedDevicesResponse"/>
+ </operation>
  <operation name="Apartment-GetGroupByName">
   <documentation>Service definition of function dss__Apartment_GetGroupByName</documentation>
   <input message="tns:Apartment-GetGroupByNameRequest"/>
@@ -1691,6 +1746,11 @@
   <documentation>Service definition of function dss__Device_GetValue</documentation>
   <input message="tns:Device-GetValueRequest"/>
   <output message="tns:Device-GetValueResponse"/>
+ </operation>
+ <operation name="Device-GetName">
+  <documentation>Service definition of function dss__Device_GetName</documentation>
+  <input message="tns:Device-GetNameRequest"/>
+  <output message="tns:Device-GetNameResponse"/>
  </operation>
  <operation name="Device-GetDSID">
   <documentation>Service definition of function dss__Device_GetDSID</documentation>
@@ -1931,6 +1991,15 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
+ <operation name="Set-GetContainedDevices">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
  <operation name="Apartment-GetGroupByName">
   <SOAP:operation soapAction=""/>
   <input>
@@ -2121,6 +2190,15 @@
   </output>
  </operation>
  <operation name="Device-GetValue">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Device-GetName">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

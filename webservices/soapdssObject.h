@@ -74,6 +74,8 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Set_Remove(struct soap*, int _token, int _setID, 
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Set_ByGroup(struct soap*, int _token, int _setID, int _groupID, int &setID);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_GetContainedDevices(struct soap*, int _token, int _setID, IntArray &deviceIDs);
+
 SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetGroupByName(struct soap*, int _token, char *_groupName, int &groupID);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetRoomByName(struct soap*, int _token, char *_roomName, int &roomID);
@@ -117,6 +119,8 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Device_EndDim(struct soap*, int _token, int _devi
 SOAP_FMAC5 int SOAP_FMAC6 dss__Device_SetValue(struct soap*, int _token, int _deviceID, double _value, int _paramID, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetValue(struct soap*, int _token, int _deviceID, int _paramID, double &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetName(struct soap*, int _token, int _deviceID, char **result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetDSID(struct soap*, int _token, int _deviceID, unsigned long &result);
 

@@ -6,9 +6,11 @@
 
 /** \file */
 
+typedef unsigned long xsd__unsignedInt;
+
 class IntArray {
 public:
-  int* __ptr;
+  xsd__unsignedInt* __ptr;
   int __size;
 };
 
@@ -18,7 +20,7 @@ public:
   int __size;
 };
 
-typedef unsigned long xsd__unsignedInt;
+
 
 /** Authenticates your ip to the system.
  * The token received will be used in any subsequent call. The ip/token pair
@@ -58,6 +60,8 @@ int dss__Set_Combine(int _token, int _setID1, int _setID2, int& setID);
 int dss__Set_Remove(int _token, int _setID, int _setIDToRemove, int& setID);
 /** Removes all devices which don't belong to the specified group */
 int dss__Set_ByGroup(int _token, int _setID, int _groupID, int& setID);
+/** Returns an array containing all device ids contained in the given set */
+int dss__Set_GetContainedDevices(int _token, int _setID, IntArray& deviceIDs);
 
 /** Looks up the group id for the given group name */
 int dss__Apartment_GetGroupByName(int _token, char* _groupName, int& groupID);
@@ -120,6 +124,8 @@ int dss__Device_SetValue(int _token, int _deviceID, double _value, int _paramID,
 /** Returns the value of the parameter _paramID. If _paramID == -1 the value of the default parameter
  * will be returned. */
 int dss__Device_GetValue(int _token, int _deviceID, int _paramID, double& result);
+/** Returns the name of a device */
+int dss__Device_GetName(int _token, int _deviceID, char** result);
 
 //==================================================== Information
 

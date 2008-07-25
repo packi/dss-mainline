@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2008-07-24 09:19:13 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2008-07-25 13:07:25 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -103,6 +103,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__Set_Remove(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Set-ByGroup"))
 		return soap_serve_dss__Set_ByGroup(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Set-GetContainedDevices"))
+		return soap_serve_dss__Set_GetContainedDevices(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Apartment-GetGroupByName"))
 		return soap_serve_dss__Apartment_GetGroupByName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Apartment-GetRoomByName"))
@@ -147,6 +149,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__Device_SetValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Device-GetValue"))
 		return soap_serve_dss__Device_GetValue(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Device-GetName"))
+		return soap_serve_dss__Device_GetName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Device-GetDSID"))
 		return soap_serve_dss__Device_GetDSID(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Apartment-GetModulatorIDs"))
@@ -799,6 +803,47 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_ByGroup(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__Set_ByGroupResponse(soap, &soap_tmp_dss__Set_ByGroupResponse, "dss:Set-ByGroupResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_GetContainedDevices(struct soap *soap)
+{	struct dss__Set_GetContainedDevices soap_tmp_dss__Set_GetContainedDevices;
+	struct dss__Set_GetContainedDevicesResponse soap_tmp_dss__Set_GetContainedDevicesResponse;
+	soap_default_dss__Set_GetContainedDevicesResponse(soap, &soap_tmp_dss__Set_GetContainedDevicesResponse);
+	soap_default_dss__Set_GetContainedDevices(soap, &soap_tmp_dss__Set_GetContainedDevices);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Set_GetContainedDevices(soap, &soap_tmp_dss__Set_GetContainedDevices, "dss:Set-GetContainedDevices", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Set_GetContainedDevices(soap, soap_tmp_dss__Set_GetContainedDevices._token, soap_tmp_dss__Set_GetContainedDevices._setID, soap_tmp_dss__Set_GetContainedDevicesResponse.deviceIDs);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Set_GetContainedDevicesResponse(soap, &soap_tmp_dss__Set_GetContainedDevicesResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Set_GetContainedDevicesResponse(soap, &soap_tmp_dss__Set_GetContainedDevicesResponse, "dss:Set-GetContainedDevicesResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Set_GetContainedDevicesResponse(soap, &soap_tmp_dss__Set_GetContainedDevicesResponse, "dss:Set-GetContainedDevicesResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -1701,6 +1746,50 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetValue(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__Device_GetValueResponse(soap, &soap_tmp_dss__Device_GetValueResponse, "dss:Device-GetValueResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetName(struct soap *soap)
+{	struct dss__Device_GetName soap_tmp_dss__Device_GetName;
+	struct dss__Device_GetNameResponse soap_tmp_dss__Device_GetNameResponse;
+	char * soap_tmp_string;
+	soap_default_dss__Device_GetNameResponse(soap, &soap_tmp_dss__Device_GetNameResponse);
+	soap_tmp_string = NULL;
+	soap_tmp_dss__Device_GetNameResponse.result = &soap_tmp_string;
+	soap_default_dss__Device_GetName(soap, &soap_tmp_dss__Device_GetName);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Device_GetName(soap, &soap_tmp_dss__Device_GetName, "dss:Device-GetName", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Device_GetName(soap, soap_tmp_dss__Device_GetName._token, soap_tmp_dss__Device_GetName._deviceID, &soap_tmp_string);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Device_GetNameResponse(soap, &soap_tmp_dss__Device_GetNameResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Device_GetNameResponse(soap, &soap_tmp_dss__Device_GetNameResponse, "dss:Device-GetNameResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Device_GetNameResponse(soap, &soap_tmp_dss__Device_GetNameResponse, "dss:Device-GetNameResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

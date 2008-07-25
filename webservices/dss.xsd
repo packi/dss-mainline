@@ -8,7 +8,7 @@
   xmlns="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="unqualified"
   attributeFormDefault="unqualified">
-  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
   <complexType name="inParameter">
    <sequence>
      <element name="values" type="dss:ArrayOfstring" minOccurs="0" maxOccurs="1" nillable="true"/>
@@ -87,7 +87,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="ids" type="dss:ArrayOfint" minOccurs="1" maxOccurs="1" nillable="false"/>
+     <element name="ids" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1" nillable="false"/>
     </sequence>
    </complexType>
   </element>
@@ -274,6 +274,23 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="Set-GetContainedDevices">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Set-GetContainedDevicesResponse">
+   <complexType>
+    <sequence>
+     <element name="deviceIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="Apartment-GetGroupByName">
    <complexType>
     <sequence>
@@ -319,7 +336,7 @@
   <element name="Apartment-GetRoomIDsResponse">
    <complexType>
     <sequence>
-     <element name="roomIDs" type="dss:ArrayOfint" minOccurs="1" maxOccurs="1"/>
+     <element name="roomIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -662,6 +679,23 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="Device-GetName">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Device-GetNameResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="Device-GetDSID">
    <complexType>
     <sequence>
@@ -690,7 +724,7 @@
   <element name="Apartment-GetModulatorIDsResponse">
    <complexType>
     <sequence>
-     <element name="ids" type="dss:ArrayOfint" minOccurs="1" maxOccurs="1"/>
+     <element name="ids" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -942,8 +976,8 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="eventIDs" type="dss:ArrayOfint" minOccurs="1" maxOccurs="1" nillable="false"/>
-     <element name="sourceIDs" type="dss:ArrayOfint" minOccurs="1" maxOccurs="1" nillable="false"/>
+     <element name="eventIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1" nillable="false"/>
+     <element name="sourceIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1" nillable="false"/>
      <element name="actionName" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="params" type="dss:inParameter" minOccurs="1" maxOccurs="1"/>
     </sequence>

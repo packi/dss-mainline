@@ -284,7 +284,24 @@ int dss__Set_ByGroup(struct soap *soap, int _token, int _setID, int _groupID, in
     return soap_receiver_fault(soap, "Could not find device", NULL);
   }
   return SOAP_OK;
-}
+} // dss__Set_ByGroup
+
+int dss__Set_GetContainedDevices(struct soap* soap, int _token, int _setID, IntArray& deviceIDs) {
+  dss::Set set;
+  int res = AuthorizeAndGetSet(soap, _token, _setID, set);
+  if(res != SOAP_OK) {
+    return res;
+  }
+
+  int numDevices = set.Length();
+  deviceIDs.__size = numDevices;
+  deviceIDs.__ptr = (long unsigned int*)soap_malloc(soap, numDevices * sizeof(long unsigned int));
+  for(int iDeviceID = 0; iDeviceID < numDevices; iDeviceID++) {
+    deviceIDs.__ptr[iDeviceID] = set.Get(iDeviceID).GetDSID();
+  }
+
+  return SOAP_OK;
+} // dss__Set_GetContainerDevices
 
 //==================================================== Apartment
 
@@ -528,6 +545,19 @@ int dss__Device_GetValue(struct soap *soap, int _token, int _deviceID, int _para
   return SOAP_OK;
 }
 
+int dss__Device_GetName(struct soap *soap, int _token, int _deviceID, char** result) {
+  dss::Device dev(-1, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  const char* devname = dev.GetName().c_str();
+  char* resMem = (char*)soap_malloc(soap, dev.GetName().size()+1);
+  strcpy(resMem, devname);
+  result[0] = resMem;
+  return SOAP_OK;
+} // dss__Device_GetName
+
 //==================================================== Information
 
 int dss__Device_GetDSID(struct soap *soap, int _token, int _deviceID, unsigned long& result) {
@@ -547,7 +577,7 @@ int dss__Apartment_GetModulatorIDs(struct soap *soap, int _token, IntArray& ids)
   std::vector<dss::Modulator*>& modulators = apt.GetModulators();
 
   // apparently gSOAP is handling the memory
-  ids.__ptr = (int*)malloc(sizeof(int) * modulators.size());
+  ids.__ptr = (long unsigned int*)soap_malloc(soap, sizeof(long unsigned int) * modulators.size());
   ids.__size = modulators.size();
 
   for(int iModulator = 0; iModulator < ids.__size; iModulator++) {
