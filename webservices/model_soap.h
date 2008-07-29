@@ -98,39 +98,39 @@ int dss__Set_EndDim(int _token, int _setID, int _paramID, bool& result);
 int dss__Set_SetValue(int _token, int _setID, double _value, int _paramID, bool& result);
 
 /** Sends a turn on command to the device. */
-int dss__Device_TurnOn(int _token, int _deviceID, bool& result);
+int dss__Device_TurnOn(int _token, xsd__unsignedInt _deviceID, bool& result);
 /** Sends a turn off command to the device. */
-int dss__Device_TurnOff(int _token, int _deviceID, bool& result);
+int dss__Device_TurnOff(int _token, xsd__unsignedInt _deviceID, bool& result);
 /** Increases the parameter specified by _paramID on the device. If _paramID == -1
  * the default parameter will be increased */
-int dss__Device_IncreaseValue(int _token, int _deviceID, int _paramID, bool& result);
+int dss__Device_IncreaseValue(int _token, xsd__unsignedInt _deviceID, int _paramID, bool& result);
 /** Decreases the parameter specified by _paramID on the device. If _paramID == -1
  * the default parameter will be decreased */
-int dss__Device_DecreaseValue(int _token, int _deviceID, int _paramID, bool& result);
+int dss__Device_DecreaseValue(int _token, xsd__unsignedInt _deviceID, int _paramID, bool& result);
 /** Enables the device. */
-int dss__Device_Enable(int _token, int _deviceID, bool& result);
+int dss__Device_Enable(int _token, xsd__unsignedInt _deviceID, bool& result);
 /** Disables the device. */
-int dss__Device_Disable(int _token, int _deviceID, bool& result);
+int dss__Device_Disable(int _token, xsd__unsignedInt _deviceID, bool& result);
 /** Starts dimming the given parameter. If _directionUp is true, the dimming will increase
  * the parameter specified by _paramID. If _paramID == -1 the default parameter will be
  * dimmed. */
-int dss__Device_StartDim(int _token, int _deviceID, bool _directionUp, int _paramID, bool& result);
+int dss__Device_StartDim(int _token, xsd__unsignedInt _deviceID, bool _directionUp, int _paramID, bool& result);
 /** Stops dimming the given parameter. If _parameterID == -1 dimming the default parameter
  * will be stopped. */
-int dss__Device_EndDim(int _token, int _deviceID, int _paramID, bool& result);
+int dss__Device_EndDim(int _token, xsd__unsignedInt _deviceID, int _paramID, bool& result);
 /** Sets the value of the parameter _paramID to _value. If _paramID == -1 the default parameter
  * will be set. */
-int dss__Device_SetValue(int _token, int _deviceID, double _value, int _paramID, bool& result);
+int dss__Device_SetValue(int _token, xsd__unsignedInt _deviceID, double _value, int _paramID, bool& result);
 /** Returns the value of the parameter _paramID. If _paramID == -1 the value of the default parameter
  * will be returned. */
-int dss__Device_GetValue(int _token, int _deviceID, int _paramID, double& result);
+int dss__Device_GetValue(int _token, xsd__unsignedInt _deviceID, int _paramID, double& result);
 /** Returns the name of a device */
-int dss__Device_GetName(int _token, int _deviceID, char** result);
+int dss__Device_GetName(int _token, xsd__unsignedInt _deviceID, char** result);
 
 //==================================================== Information
 
 /** Returns the DSID of the given device */
-int dss__Device_GetDSID(int _token, int _deviceID, xsd__unsignedInt& result);
+int dss__Device_GetDSID(int _token, xsd__unsignedInt _deviceID, xsd__unsignedInt& result);
 
 //==================================================== Organization
 

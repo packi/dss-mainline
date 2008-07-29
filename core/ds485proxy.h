@@ -38,16 +38,16 @@ using namespace stdext;
 using namespace std;
 
 namespace dss {
-  
+
   typedef hash_map<const Modulator*, pair< vector<Group*>, Set> > FittingResult;
-  
-  
+
+
   template<class t>
   class DS485Parameter {
   private:
     t _data;
   };
-  
+
   typedef enum {
     cmdTurnOn,
     cmdTurnOff,
@@ -65,7 +65,7 @@ namespace dss {
     cmdDecreaseParam,
     cmdGetOnOff
   } DS485Command;
-  
+
   class ReceivedFrame {
   private:
     int m_ReceivedAtToken;
@@ -75,10 +75,10 @@ namespace dss {
     boost::shared_ptr<DS485CommandFrame> GetFrame() { return m_Frame; };
     int GetReceivedAt() const { return m_ReceivedAtToken; };
   };
-  
+
   typedef map<int, vector<ReceivedFrame*> > FramesByID;
   typedef vector<boost::shared_ptr<DS485CommandFrame> > CommandFrameSharedPtrVector;
-  
+
   class DS485Proxy : protected Thread,
                      public    IDS485FrameCollector {
   private:
@@ -88,12 +88,12 @@ namespace dss {
     void SendFrame(DS485CommandFrame& _frame);
     vector<boost::shared_ptr<DS485CommandFrame> > Receive(uint8 _functionID);
     uint8 ReceiveSingleResult(uint8 _functionID);
-    
+
     void SignalEvent();
-    
+
     DS485Controller m_DS485Controller;
     SyncEvent m_ProxyEvent;
-    
+
     SyncEvent m_PacketHere;
     FramesByID m_ReceivedFramesByFunctionID;
     CommandFrameSharedPtrVector m_IncomingFrames;
@@ -102,16 +102,16 @@ namespace dss {
   public:
     DS485Proxy();
     virtual ~DS485Proxy() {};
-    
+
     //------------------------------------------------ Handling
     void Start();
     void WaitForProxyEvent();
-    
-    virtual void CollectFrame(boost::shared_ptr<DS485CommandFrame> _frame);
-    
+
+    virtual void CollectFrame(boost::shared_ptr<DS485CommandFrame>& _frame);
+
     //------------------------------------------------ Specialized Commands (system)
     vector<int> GetModulators();
-    
+
     vector<int> GetRooms(const int _modulatorID);
     int GetRoomCount(const int _modulatorID);
     vector<int> GetDevicesInRoom(const int _modulatorID, const int _roomID);
@@ -124,18 +124,18 @@ namespace dss {
 
     void AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID);
     void RemoveFromGroup(const int _modulatorID, const int _groupID, const int _deviceID);
-    
+
     int AddUserGroup(const int _modulatorID);
     void RemoveUserGroup(const int _modulatorID, const int _groupID);
-    
+
     dsid_t GetDSIDOfDevice(const int _modulatorID, const int _deviceID);
     dsid_t GetDSIDOfModulator(const int _modulatorID);
-    
-    //------------------------------------------------ Device manipulation    
+
+    //------------------------------------------------ Device manipulation
     vector<int> SendCommand(DS485Command _cmd, Set& _set);
     vector<int> SendCommand(DS485Command _cmd, Device& _device);
     vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID);
-    vector<int> SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group);    
+    vector<int> SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group);
   };
 }
 

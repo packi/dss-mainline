@@ -2,7 +2,7 @@
 #define DS485CONST_H_
 
 namespace dss {
-  
+
   // DS485 comands
   const uint8 CommandSolicitSuccessorRequest = 0x01;
   const uint8 CommandSolicitSuccessorResponse = 0x02;
@@ -16,7 +16,7 @@ namespace dss {
   const uint8 CommandResponse = 0x0a;
   const uint8 CommandAck = 0x0b;
   const uint8 CommandBusy = 0x0c;
-  
+
   // dSS => dSM function constants
   const uint8 FunctionModulatorAddRoom = 0x00;
   const uint8 FunctionModulatorRemoveRoom = 0x01;
@@ -32,20 +32,20 @@ namespace dss {
   const uint8 FunctionGroupRemoveDeviceFromGroup = 0x11;
   const uint8 FunctionGroupGetDeviceCount = 0x12;
   const uint8 FunctionGroupGetDevKeyForInd = 0x13;
-  
+
   const uint8 FunctionRoomGetGroupIdForInd = 0x17;
-  
+
   const uint8 FunctionDeviceCallScene = 0x42;
   const uint8 FunctionDeviceIncValue  = 0x40;
   const uint8 FunctionDeviceDecValue  = 0x41;
-  
+
   const uint8 FunctionDeviceGetOnOff = 0x61;
   const uint8 FunctionDeviceGetDSID = 0x65;
-  
-  const uint8 FunctionModulatorGetDSID = 0xFA;
-  
-  const uint8 FunctionGetTypeRequest = 0xFD;
-  
+
+  const uint8 FunctionModulatorGetDSID = 0xF1;
+
+  const uint8 FunctionGetTypeRequest = 0xF0;
+
   // Scene constants for devices
   const uint8 SceneOff = 0x00;
   const uint8 Scene1 = 0x01;

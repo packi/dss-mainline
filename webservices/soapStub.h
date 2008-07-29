@@ -683,7 +683,7 @@ struct dss__Device_TurnOn
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	int _deviceID;	/* required element of type xsd:int */
+	unsigned long _deviceID;	/* required element of type xsd:unsignedInt */
 };
 #endif
 
@@ -704,7 +704,7 @@ struct dss__Device_TurnOff
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	int _deviceID;	/* required element of type xsd:int */
+	unsigned long _deviceID;	/* required element of type xsd:unsignedInt */
 };
 #endif
 
@@ -725,7 +725,7 @@ struct dss__Device_IncreaseValue
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	int _deviceID;	/* required element of type xsd:int */
+	unsigned long _deviceID;	/* required element of type xsd:unsignedInt */
 	int _paramID;	/* required element of type xsd:int */
 };
 #endif
@@ -747,7 +747,7 @@ struct dss__Device_DecreaseValue
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	int _deviceID;	/* required element of type xsd:int */
+	unsigned long _deviceID;	/* required element of type xsd:unsignedInt */
 	int _paramID;	/* required element of type xsd:int */
 };
 #endif
@@ -769,7 +769,7 @@ struct dss__Device_Enable
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	int _deviceID;	/* required element of type xsd:int */
+	unsigned long _deviceID;	/* required element of type xsd:unsignedInt */
 };
 #endif
 
@@ -790,7 +790,7 @@ struct dss__Device_Disable
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	int _deviceID;	/* required element of type xsd:int */
+	unsigned long _deviceID;	/* required element of type xsd:unsignedInt */
 };
 #endif
 
@@ -811,7 +811,7 @@ struct dss__Device_StartDim
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	int _deviceID;	/* required element of type xsd:int */
+	unsigned long _deviceID;	/* required element of type xsd:unsignedInt */
 	bool _directionUp;	/* required element of type xsd:boolean */
 	int _paramID;	/* required element of type xsd:int */
 };
@@ -834,7 +834,7 @@ struct dss__Device_EndDim
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	int _deviceID;	/* required element of type xsd:int */
+	unsigned long _deviceID;	/* required element of type xsd:unsignedInt */
 	int _paramID;	/* required element of type xsd:int */
 };
 #endif
@@ -856,7 +856,7 @@ struct dss__Device_SetValue
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	int _deviceID;	/* required element of type xsd:int */
+	unsigned long _deviceID;	/* required element of type xsd:unsignedInt */
 	double _value;	/* required element of type xsd:double */
 	int _paramID;	/* required element of type xsd:int */
 };
@@ -879,7 +879,7 @@ struct dss__Device_GetValue
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	int _deviceID;	/* required element of type xsd:int */
+	unsigned long _deviceID;	/* required element of type xsd:unsignedInt */
 	int _paramID;	/* required element of type xsd:int */
 };
 #endif
@@ -901,7 +901,7 @@ struct dss__Device_GetName
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	int _deviceID;	/* required element of type xsd:int */
+	unsigned long _deviceID;	/* required element of type xsd:unsignedInt */
 };
 #endif
 
@@ -922,7 +922,7 @@ struct dss__Device_GetDSID
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	int _deviceID;	/* required element of type xsd:int */
+	unsigned long _deviceID;	/* required element of type xsd:unsignedInt */
 };
 #endif
 
@@ -1534,29 +1534,29 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Set_EndDim(struct soap*, int _token, int _setID, 
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Set_SetValue(struct soap*, int _token, int _setID, double _value, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_TurnOn(struct soap*, int _token, int _deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_TurnOn(struct soap*, int _token, unsigned long _deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_TurnOff(struct soap*, int _token, int _deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_TurnOff(struct soap*, int _token, unsigned long _deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_IncreaseValue(struct soap*, int _token, int _deviceID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_IncreaseValue(struct soap*, int _token, unsigned long _deviceID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_DecreaseValue(struct soap*, int _token, int _deviceID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_DecreaseValue(struct soap*, int _token, unsigned long _deviceID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_Enable(struct soap*, int _token, int _deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_Enable(struct soap*, int _token, unsigned long _deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_Disable(struct soap*, int _token, int _deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_Disable(struct soap*, int _token, unsigned long _deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_StartDim(struct soap*, int _token, int _deviceID, bool _directionUp, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_StartDim(struct soap*, int _token, unsigned long _deviceID, bool _directionUp, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_EndDim(struct soap*, int _token, int _deviceID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_EndDim(struct soap*, int _token, unsigned long _deviceID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_SetValue(struct soap*, int _token, int _deviceID, double _value, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_SetValue(struct soap*, int _token, unsigned long _deviceID, double _value, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetValue(struct soap*, int _token, int _deviceID, int _paramID, double &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetValue(struct soap*, int _token, unsigned long _deviceID, int _paramID, double &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetName(struct soap*, int _token, int _deviceID, char **result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetName(struct soap*, int _token, unsigned long _deviceID, char **result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetDSID(struct soap*, int _token, int _deviceID, unsigned long &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetDSID(struct soap*, int _token, unsigned long _deviceID, unsigned long &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetModulatorIDs(struct soap*, int _token, IntArray &ids);
 

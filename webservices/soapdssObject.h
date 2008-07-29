@@ -100,29 +100,29 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Set_EndDim(struct soap*, int _token, int _setID, 
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Set_SetValue(struct soap*, int _token, int _setID, double _value, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_TurnOn(struct soap*, int _token, int _deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_TurnOn(struct soap*, int _token, unsigned long _deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_TurnOff(struct soap*, int _token, int _deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_TurnOff(struct soap*, int _token, unsigned long _deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_IncreaseValue(struct soap*, int _token, int _deviceID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_IncreaseValue(struct soap*, int _token, unsigned long _deviceID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_DecreaseValue(struct soap*, int _token, int _deviceID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_DecreaseValue(struct soap*, int _token, unsigned long _deviceID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_Enable(struct soap*, int _token, int _deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_Enable(struct soap*, int _token, unsigned long _deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_Disable(struct soap*, int _token, int _deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_Disable(struct soap*, int _token, unsigned long _deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_StartDim(struct soap*, int _token, int _deviceID, bool _directionUp, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_StartDim(struct soap*, int _token, unsigned long _deviceID, bool _directionUp, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_EndDim(struct soap*, int _token, int _deviceID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_EndDim(struct soap*, int _token, unsigned long _deviceID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_SetValue(struct soap*, int _token, int _deviceID, double _value, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_SetValue(struct soap*, int _token, unsigned long _deviceID, double _value, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetValue(struct soap*, int _token, int _deviceID, int _paramID, double &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetValue(struct soap*, int _token, unsigned long _deviceID, int _paramID, double &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetName(struct soap*, int _token, int _deviceID, char **result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetName(struct soap*, int _token, unsigned long _deviceID, char **result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetDSID(struct soap*, int _token, int _deviceID, unsigned long &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetDSID(struct soap*, int _token, unsigned long _deviceID, unsigned long &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetModulatorIDs(struct soap*, int _token, IntArray &ids);
 

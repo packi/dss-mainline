@@ -7,7 +7,7 @@
 
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2008-07-25 13:07:25 GMT")
+SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2008-07-29 08:15:01 GMT")
 
 
 #ifndef WITH_NOGLOBAL
@@ -8729,12 +8729,13 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_GetDSID(struct soap *soap, s
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_deviceID);
+	soap_default_xsd__unsignedInt(soap, &a->_deviceID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_GetDSID(struct soap *soap, const struct dss__Device_GetDSID *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->_deviceID, SOAP_TYPE_xsd__unsignedInt);
 }
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Device_GetDSID(struct soap *soap, const struct dss__Device_GetDSID *a, const char *tag, const char *type)
@@ -8751,7 +8752,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_GetDSID(struct soap *soap, const 
 		return soap->error;
 	if (soap_out_int(soap, "token", -1, &a->_token, ""))
 		return soap->error;
-	if (soap_out_int(soap, "deviceID", -1, &a->_deviceID, ""))
+	if (soap_out_xsd__unsignedInt(soap, "deviceID", -1, &a->_deviceID, ""))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
@@ -8783,7 +8784,7 @@ SOAP_FMAC3 struct dss__Device_GetDSID * SOAP_FMAC4 soap_in_dss__Device_GetDSID(s
 					continue;
 				}
 			if (soap_flag__deviceID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_deviceID, "xsd:int"))
+				if (soap_in_xsd__unsignedInt(soap, NULL, &a->_deviceID, "xsd:unsignedInt"))
 				{	soap_flag__deviceID--;
 					continue;
 				}
@@ -8964,12 +8965,13 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_GetName(struct soap *soap, s
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_deviceID);
+	soap_default_xsd__unsignedInt(soap, &a->_deviceID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_GetName(struct soap *soap, const struct dss__Device_GetName *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->_deviceID, SOAP_TYPE_xsd__unsignedInt);
 }
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Device_GetName(struct soap *soap, const struct dss__Device_GetName *a, const char *tag, const char *type)
@@ -8986,7 +8988,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_GetName(struct soap *soap, const 
 		return soap->error;
 	if (soap_out_int(soap, "token", -1, &a->_token, ""))
 		return soap->error;
-	if (soap_out_int(soap, "deviceID", -1, &a->_deviceID, ""))
+	if (soap_out_xsd__unsignedInt(soap, "deviceID", -1, &a->_deviceID, ""))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
@@ -9018,7 +9020,7 @@ SOAP_FMAC3 struct dss__Device_GetName * SOAP_FMAC4 soap_in_dss__Device_GetName(s
 					continue;
 				}
 			if (soap_flag__deviceID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_deviceID, "xsd:int"))
+				if (soap_in_xsd__unsignedInt(soap, NULL, &a->_deviceID, "xsd:unsignedInt"))
 				{	soap_flag__deviceID--;
 					continue;
 				}
@@ -9195,13 +9197,14 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_GetValue(struct soap *soap, 
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_deviceID);
+	soap_default_xsd__unsignedInt(soap, &a->_deviceID);
 	soap_default_int(soap, &a->_paramID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_GetValue(struct soap *soap, const struct dss__Device_GetValue *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->_deviceID, SOAP_TYPE_xsd__unsignedInt);
 }
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Device_GetValue(struct soap *soap, const struct dss__Device_GetValue *a, const char *tag, const char *type)
@@ -9218,7 +9221,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_GetValue(struct soap *soap, const
 		return soap->error;
 	if (soap_out_int(soap, "token", -1, &a->_token, ""))
 		return soap->error;
-	if (soap_out_int(soap, "deviceID", -1, &a->_deviceID, ""))
+	if (soap_out_xsd__unsignedInt(soap, "deviceID", -1, &a->_deviceID, ""))
 		return soap->error;
 	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
 		return soap->error;
@@ -9252,7 +9255,7 @@ SOAP_FMAC3 struct dss__Device_GetValue * SOAP_FMAC4 soap_in_dss__Device_GetValue
 					continue;
 				}
 			if (soap_flag__deviceID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_deviceID, "xsd:int"))
+				if (soap_in_xsd__unsignedInt(soap, NULL, &a->_deviceID, "xsd:unsignedInt"))
 				{	soap_flag__deviceID--;
 					continue;
 				}
@@ -9437,7 +9440,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_SetValue(struct soap *soap, 
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_deviceID);
+	soap_default_xsd__unsignedInt(soap, &a->_deviceID);
 	soap_default_double(soap, &a->_value);
 	soap_default_int(soap, &a->_paramID);
 }
@@ -9445,6 +9448,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_SetValue(struct soap *soap, 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_SetValue(struct soap *soap, const struct dss__Device_SetValue *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->_deviceID, SOAP_TYPE_xsd__unsignedInt);
 }
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Device_SetValue(struct soap *soap, const struct dss__Device_SetValue *a, const char *tag, const char *type)
@@ -9461,7 +9465,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_SetValue(struct soap *soap, const
 		return soap->error;
 	if (soap_out_int(soap, "token", -1, &a->_token, ""))
 		return soap->error;
-	if (soap_out_int(soap, "deviceID", -1, &a->_deviceID, ""))
+	if (soap_out_xsd__unsignedInt(soap, "deviceID", -1, &a->_deviceID, ""))
 		return soap->error;
 	if (soap_out_double(soap, "value", -1, &a->_value, ""))
 		return soap->error;
@@ -9497,7 +9501,7 @@ SOAP_FMAC3 struct dss__Device_SetValue * SOAP_FMAC4 soap_in_dss__Device_SetValue
 					continue;
 				}
 			if (soap_flag__deviceID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_deviceID, "xsd:int"))
+				if (soap_in_xsd__unsignedInt(soap, NULL, &a->_deviceID, "xsd:unsignedInt"))
 				{	soap_flag__deviceID--;
 					continue;
 				}
@@ -9687,13 +9691,14 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_EndDim(struct soap *soap, st
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_deviceID);
+	soap_default_xsd__unsignedInt(soap, &a->_deviceID);
 	soap_default_int(soap, &a->_paramID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_EndDim(struct soap *soap, const struct dss__Device_EndDim *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->_deviceID, SOAP_TYPE_xsd__unsignedInt);
 }
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Device_EndDim(struct soap *soap, const struct dss__Device_EndDim *a, const char *tag, const char *type)
@@ -9710,7 +9715,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_EndDim(struct soap *soap, const c
 		return soap->error;
 	if (soap_out_int(soap, "token", -1, &a->_token, ""))
 		return soap->error;
-	if (soap_out_int(soap, "deviceID", -1, &a->_deviceID, ""))
+	if (soap_out_xsd__unsignedInt(soap, "deviceID", -1, &a->_deviceID, ""))
 		return soap->error;
 	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
 		return soap->error;
@@ -9744,7 +9749,7 @@ SOAP_FMAC3 struct dss__Device_EndDim * SOAP_FMAC4 soap_in_dss__Device_EndDim(str
 					continue;
 				}
 			if (soap_flag__deviceID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_deviceID, "xsd:int"))
+				if (soap_in_xsd__unsignedInt(soap, NULL, &a->_deviceID, "xsd:unsignedInt"))
 				{	soap_flag__deviceID--;
 					continue;
 				}
@@ -9929,7 +9934,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_StartDim(struct soap *soap, 
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_deviceID);
+	soap_default_xsd__unsignedInt(soap, &a->_deviceID);
 	soap_default_bool(soap, &a->_directionUp);
 	soap_default_int(soap, &a->_paramID);
 }
@@ -9937,6 +9942,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_StartDim(struct soap *soap, 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_StartDim(struct soap *soap, const struct dss__Device_StartDim *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->_deviceID, SOAP_TYPE_xsd__unsignedInt);
 }
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Device_StartDim(struct soap *soap, const struct dss__Device_StartDim *a, const char *tag, const char *type)
@@ -9953,7 +9959,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_StartDim(struct soap *soap, const
 		return soap->error;
 	if (soap_out_int(soap, "token", -1, &a->_token, ""))
 		return soap->error;
-	if (soap_out_int(soap, "deviceID", -1, &a->_deviceID, ""))
+	if (soap_out_xsd__unsignedInt(soap, "deviceID", -1, &a->_deviceID, ""))
 		return soap->error;
 	if (soap_out_bool(soap, "directionUp", -1, &a->_directionUp, ""))
 		return soap->error;
@@ -9989,7 +9995,7 @@ SOAP_FMAC3 struct dss__Device_StartDim * SOAP_FMAC4 soap_in_dss__Device_StartDim
 					continue;
 				}
 			if (soap_flag__deviceID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_deviceID, "xsd:int"))
+				if (soap_in_xsd__unsignedInt(soap, NULL, &a->_deviceID, "xsd:unsignedInt"))
 				{	soap_flag__deviceID--;
 					continue;
 				}
@@ -10179,12 +10185,13 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_Disable(struct soap *soap, s
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_deviceID);
+	soap_default_xsd__unsignedInt(soap, &a->_deviceID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_Disable(struct soap *soap, const struct dss__Device_Disable *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->_deviceID, SOAP_TYPE_xsd__unsignedInt);
 }
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Device_Disable(struct soap *soap, const struct dss__Device_Disable *a, const char *tag, const char *type)
@@ -10201,7 +10208,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_Disable(struct soap *soap, const 
 		return soap->error;
 	if (soap_out_int(soap, "token", -1, &a->_token, ""))
 		return soap->error;
-	if (soap_out_int(soap, "deviceID", -1, &a->_deviceID, ""))
+	if (soap_out_xsd__unsignedInt(soap, "deviceID", -1, &a->_deviceID, ""))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
@@ -10233,7 +10240,7 @@ SOAP_FMAC3 struct dss__Device_Disable * SOAP_FMAC4 soap_in_dss__Device_Disable(s
 					continue;
 				}
 			if (soap_flag__deviceID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_deviceID, "xsd:int"))
+				if (soap_in_xsd__unsignedInt(soap, NULL, &a->_deviceID, "xsd:unsignedInt"))
 				{	soap_flag__deviceID--;
 					continue;
 				}
@@ -10413,12 +10420,13 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_Enable(struct soap *soap, st
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_deviceID);
+	soap_default_xsd__unsignedInt(soap, &a->_deviceID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_Enable(struct soap *soap, const struct dss__Device_Enable *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->_deviceID, SOAP_TYPE_xsd__unsignedInt);
 }
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Device_Enable(struct soap *soap, const struct dss__Device_Enable *a, const char *tag, const char *type)
@@ -10435,7 +10443,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_Enable(struct soap *soap, const c
 		return soap->error;
 	if (soap_out_int(soap, "token", -1, &a->_token, ""))
 		return soap->error;
-	if (soap_out_int(soap, "deviceID", -1, &a->_deviceID, ""))
+	if (soap_out_xsd__unsignedInt(soap, "deviceID", -1, &a->_deviceID, ""))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
@@ -10467,7 +10475,7 @@ SOAP_FMAC3 struct dss__Device_Enable * SOAP_FMAC4 soap_in_dss__Device_Enable(str
 					continue;
 				}
 			if (soap_flag__deviceID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_deviceID, "xsd:int"))
+				if (soap_in_xsd__unsignedInt(soap, NULL, &a->_deviceID, "xsd:unsignedInt"))
 				{	soap_flag__deviceID--;
 					continue;
 				}
@@ -10647,13 +10655,14 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_DecreaseValue(struct soap *s
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_deviceID);
+	soap_default_xsd__unsignedInt(soap, &a->_deviceID);
 	soap_default_int(soap, &a->_paramID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_DecreaseValue(struct soap *soap, const struct dss__Device_DecreaseValue *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->_deviceID, SOAP_TYPE_xsd__unsignedInt);
 }
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Device_DecreaseValue(struct soap *soap, const struct dss__Device_DecreaseValue *a, const char *tag, const char *type)
@@ -10670,7 +10679,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_DecreaseValue(struct soap *soap, 
 		return soap->error;
 	if (soap_out_int(soap, "token", -1, &a->_token, ""))
 		return soap->error;
-	if (soap_out_int(soap, "deviceID", -1, &a->_deviceID, ""))
+	if (soap_out_xsd__unsignedInt(soap, "deviceID", -1, &a->_deviceID, ""))
 		return soap->error;
 	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
 		return soap->error;
@@ -10704,7 +10713,7 @@ SOAP_FMAC3 struct dss__Device_DecreaseValue * SOAP_FMAC4 soap_in_dss__Device_Dec
 					continue;
 				}
 			if (soap_flag__deviceID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_deviceID, "xsd:int"))
+				if (soap_in_xsd__unsignedInt(soap, NULL, &a->_deviceID, "xsd:unsignedInt"))
 				{	soap_flag__deviceID--;
 					continue;
 				}
@@ -10889,13 +10898,14 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_IncreaseValue(struct soap *s
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_deviceID);
+	soap_default_xsd__unsignedInt(soap, &a->_deviceID);
 	soap_default_int(soap, &a->_paramID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_IncreaseValue(struct soap *soap, const struct dss__Device_IncreaseValue *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->_deviceID, SOAP_TYPE_xsd__unsignedInt);
 }
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Device_IncreaseValue(struct soap *soap, const struct dss__Device_IncreaseValue *a, const char *tag, const char *type)
@@ -10912,7 +10922,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_IncreaseValue(struct soap *soap, 
 		return soap->error;
 	if (soap_out_int(soap, "token", -1, &a->_token, ""))
 		return soap->error;
-	if (soap_out_int(soap, "deviceID", -1, &a->_deviceID, ""))
+	if (soap_out_xsd__unsignedInt(soap, "deviceID", -1, &a->_deviceID, ""))
 		return soap->error;
 	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
 		return soap->error;
@@ -10946,7 +10956,7 @@ SOAP_FMAC3 struct dss__Device_IncreaseValue * SOAP_FMAC4 soap_in_dss__Device_Inc
 					continue;
 				}
 			if (soap_flag__deviceID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_deviceID, "xsd:int"))
+				if (soap_in_xsd__unsignedInt(soap, NULL, &a->_deviceID, "xsd:unsignedInt"))
 				{	soap_flag__deviceID--;
 					continue;
 				}
@@ -11131,12 +11141,13 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_TurnOff(struct soap *soap, s
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_deviceID);
+	soap_default_xsd__unsignedInt(soap, &a->_deviceID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_TurnOff(struct soap *soap, const struct dss__Device_TurnOff *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->_deviceID, SOAP_TYPE_xsd__unsignedInt);
 }
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Device_TurnOff(struct soap *soap, const struct dss__Device_TurnOff *a, const char *tag, const char *type)
@@ -11153,7 +11164,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_TurnOff(struct soap *soap, const 
 		return soap->error;
 	if (soap_out_int(soap, "token", -1, &a->_token, ""))
 		return soap->error;
-	if (soap_out_int(soap, "deviceID", -1, &a->_deviceID, ""))
+	if (soap_out_xsd__unsignedInt(soap, "deviceID", -1, &a->_deviceID, ""))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
@@ -11185,7 +11196,7 @@ SOAP_FMAC3 struct dss__Device_TurnOff * SOAP_FMAC4 soap_in_dss__Device_TurnOff(s
 					continue;
 				}
 			if (soap_flag__deviceID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_deviceID, "xsd:int"))
+				if (soap_in_xsd__unsignedInt(soap, NULL, &a->_deviceID, "xsd:unsignedInt"))
 				{	soap_flag__deviceID--;
 					continue;
 				}
@@ -11365,12 +11376,13 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_TurnOn(struct soap *soap, st
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_deviceID);
+	soap_default_xsd__unsignedInt(soap, &a->_deviceID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_TurnOn(struct soap *soap, const struct dss__Device_TurnOn *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->_deviceID, SOAP_TYPE_xsd__unsignedInt);
 }
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Device_TurnOn(struct soap *soap, const struct dss__Device_TurnOn *a, const char *tag, const char *type)
@@ -11387,7 +11399,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_TurnOn(struct soap *soap, const c
 		return soap->error;
 	if (soap_out_int(soap, "token", -1, &a->_token, ""))
 		return soap->error;
-	if (soap_out_int(soap, "deviceID", -1, &a->_deviceID, ""))
+	if (soap_out_xsd__unsignedInt(soap, "deviceID", -1, &a->_deviceID, ""))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
@@ -11419,7 +11431,7 @@ SOAP_FMAC3 struct dss__Device_TurnOn * SOAP_FMAC4 soap_in_dss__Device_TurnOn(str
 					continue;
 				}
 			if (soap_flag__deviceID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_deviceID, "xsd:int"))
+				if (soap_in_xsd__unsignedInt(soap, NULL, &a->_deviceID, "xsd:unsignedInt"))
 				{	soap_flag__deviceID--;
 					continue;
 				}
