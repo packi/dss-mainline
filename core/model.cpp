@@ -379,7 +379,7 @@ namespace dss {
       HashMapConstStringString::const_iterator it = m_ArgumentList.find(_name);
       return it->second;
     }
-    throw new ItemNotFoundException(_name);
+    throw ItemNotFoundException(_name);
   } // GetValue
 
   void Arguments::SetValue(const string& _name, const string& _value) {
@@ -528,7 +528,7 @@ namespace dss {
           if(nameNode.GetChildren().size() > 0) {
             name = (nameNode.GetChildren()[0]).GetContent();
           }
-        } catch(XMLException* e) {
+        } catch(XMLException& e) {
           /* discard node not found exceptions */
         }
         Device* newDevice = new Device(dsid, this);
@@ -568,7 +568,7 @@ namespace dss {
         return **ipDevice;
       }
     }
-    throw new ItemNotFoundException(IntToString(_dsid));
+    throw ItemNotFoundException(IntToString(_dsid));
   } // GetDeviceByShortAddress
 
   Device& Apartment::GetDeviceByName(const string& _name) {
@@ -577,7 +577,7 @@ namespace dss {
         return **ipDevice;
       }
     }
-    throw new ItemNotFoundException(_name);
+    throw ItemNotFoundException(_name);
   } // GetDeviceByName
 
   Set Apartment::GetDevices() const {
@@ -595,7 +595,7 @@ namespace dss {
         return **iRoom;
       }
     }
-    throw new ItemNotFoundException(_roomName);
+    throw ItemNotFoundException(_roomName);
   } // GetRoom(name)
 
   Room& Apartment::GetRoom(const int _id) {
@@ -604,7 +604,7 @@ namespace dss {
         return **iRoom;
       }
     }
-    throw new ItemNotFoundException(IntToString(_id));
+    throw ItemNotFoundException(IntToString(_id));
   } // GetRoom(id)
 
   vector<Room*>& Apartment::GetRooms() {
@@ -617,7 +617,7 @@ namespace dss {
         return **iModulator;
       }
     }
-    throw new ItemNotFoundException(_modName);
+    throw ItemNotFoundException(_modName);
   } // GetModulator(name)
 
   Modulator& Apartment::GetModulatorByBusID(const int _busId) {
@@ -626,7 +626,7 @@ namespace dss {
         return **iModulator;
       }
     }
-    throw new ItemNotFoundException(IntToString(_busId));
+    throw ItemNotFoundException(IntToString(_busId));
   } // GetModulatorByBusID
 
   Modulator& Apartment::GetModulatorByDSID(const dsid_t _dsid) {
@@ -635,7 +635,7 @@ namespace dss {
         return **iModulator;
       }
     }
-    throw new ItemNotFoundException(IntToString(_dsid));
+    throw ItemNotFoundException(IntToString(_dsid));
   } // GetModulatorByDSID
 
   vector<Modulator*>& Apartment::GetModulators() {
@@ -649,7 +649,7 @@ namespace dss {
         return **ipGroup;
       }
     }
-    throw new ItemNotFoundException(_name);
+    throw ItemNotFoundException(_name);
   } // GetGroup(name)
 
   Group& Apartment::GetGroup(const int _id) {
@@ -658,7 +658,7 @@ namespace dss {
         return **ipGroup;
       }
     }
-    throw new ItemNotFoundException(IntToString(_id));
+    throw ItemNotFoundException(IntToString(_id));
   } // GetGroup(id)
 
   vector<Group*>& Apartment::GetGroups() {

@@ -108,7 +108,7 @@ namespace dss {
                                ConversionBufferSize,  // max chars to return
                                &state);
       if(wlen < 0) {
-        throw new DSSException("FromUTF8: Illegal sequence encountered");
+        throw DSSException("FromUTF8: Illegal sequence encountered");
       } else if(wlen == 0 ) {
         break;
       }
@@ -128,7 +128,7 @@ namespace dss {
     while(true) {
       size_t len = wcsnrtombs(buffer, &ptr, _len, ConversionBufferSize, &state);
       if(len < 0) {
-        throw new DSSException("ToUF8: Error");
+        throw DSSException("ToUF8: Error");
       } else if(len == 0) {
         break;
       }

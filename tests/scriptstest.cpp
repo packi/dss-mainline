@@ -28,34 +28,34 @@ class ScriptsTest : public CPPUNIT_NS::TestCase
   CPPUNIT_TEST(testMultipleIterations);
 //  CPPUNIT_TEST(testExceptionHandling);
   CPPUNIT_TEST_SUITE_END();
-  
+
 public:
   void setUp(void) {}
-  void tearDown(void) {} 
-  
+  void tearDown(void) {}
+
 protected:
-  void testSimpleScripts(void) { 
+  void testSimpleScripts(void) {
     ScriptEnvironment env;
     env.Initialize();
     ScriptContext* ctx = env.GetContext();
     ctx->LoadFromMemory("x = 10; print(x); x = x * x;");
     double result = ctx->Evaluate<double>();
-    CPPUNIT_ASSERT_EQUAL(result, 100.0);  
+    CPPUNIT_ASSERT_EQUAL(result, 100.0);
     delete ctx;
-    
+
     ctx = env.GetContext();
     ctx->LoadFromFile("data/test.js");
     result = ctx->Evaluate<double>();
     CPPUNIT_ASSERT_EQUAL(result, 100.0);
     delete ctx;
-    
+
     ctx = env.GetContext();
     ctx->LoadFromMemory("x = 'bla'; x = x + 'bla';");
     string sres = ctx->Evaluate<string>();
     CPPUNIT_ASSERT_EQUAL(sres, string("blabla"));
     delete ctx;
   }
-  
+
   void testMultipleIterations() {
     ScriptEnvironment env;
     env.Initialize();
@@ -68,7 +68,7 @@ protected:
     }
     cout << endl;
   }
-  
+
   void testExceptionHandling(void) {
     ScriptEnvironment* env = new ScriptEnvironment();
     env->Initialize();
@@ -77,7 +77,7 @@ protected:
     try {
       ctx->Evaluate<double>();
       CPPUNIT_ASSERT(false);
-    } catch(const ScriptRuntimeException& _ex) {
+    } catch(ScriptRuntimeException& _ex) {
       CPPUNIT_ASSERT_EQUAL(_ex.GetExceptionMessage(), string("bla"));
     }
   }

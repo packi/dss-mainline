@@ -248,7 +248,7 @@ namespace dss {
             }
             break;
           default:
-            throw new runtime_error(string("DSModulatorSim: Invalid function id: ") + IntToString(cmdNr));
+            throw runtime_error(string("DSModulatorSim: Invalid function id: ") + IntToString(cmdNr));
         }
       }
     }
@@ -286,7 +286,7 @@ namespace dss {
         return **ipSimDev;
       }
     }
-    throw new runtime_error("could not find device");
+    throw runtime_error("could not find device");
 
   } // LookupDevice
 

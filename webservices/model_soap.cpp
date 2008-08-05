@@ -1,5 +1,6 @@
 #include "soapH.h"
 #include "../core/dss.h"
+#include "../core/logger.h"
 
 #include <vector>
 #include <string>
@@ -12,7 +13,13 @@ int NotAuthorized(struct soap *soap) {
 } // NotAuthorized
 
 bool IsAuthorized(struct soap *soap, const int _token) {
-  return dss::DSS::GetInstance()->GetWebServices().IsAuthorized(soap, _token);
+  bool result = dss::DSS::GetInstance()->GetWebServices().IsAuthorized(soap, _token);
+  if(result) {
+    dss::Logger::GetInstance()->Log(string("User with token '") + dss::IntToString(_token) + "' is authorized");
+  } else {
+    dss::Logger::GetInstance()->Log(string("User with token '") + dss::IntToString(_token) + "' is *not* authorized", lsWarning);
+  }
+  return result;
 } // IsAuthorized
 
 int AuthorizeAndGetSet(struct soap *soap, const int _token, const int _setID, dss::Set& result) {
@@ -34,7 +41,7 @@ int AuthorizeAndGetDevice(struct soap *soap, const int _token, const int _devID,
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   try {
     result = apt.GetDeviceByDSID(_devID);
-  } catch(dss::ItemNotFoundException* _ex) {
+  } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Device not found", NULL);
   }
   return SOAP_OK;
@@ -47,7 +54,7 @@ int AuthorizeAndGetModulator(struct soap *soap, const int _token, const unsigned
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   try {
     result = apt.GetModulatorByDSID(_modulatorDSID);
-  } catch(dss::ItemNotFoundException* _ex) {
+  } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Modulator not found", NULL);
   }
   return SOAP_OK;
@@ -89,7 +96,7 @@ int dss__Apartment_CreateSetFromGroup(struct soap *soap, int _token,  char* _gro
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   try {
     sess.AddSet(apt.GetDevices().GetByGroup(_groupName), setID);
-  } catch(dss::ItemNotFoundException* _ex) {
+  } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Unknown group", NULL);
   }
   return SOAP_OK;
@@ -108,7 +115,7 @@ int dss__Apartment_CreateSetFromDeviceIDs(struct soap *soap, int _token, IntArra
       set.AddDevice(dev);
     }
     sess.AddSet(set, setID);
-  } catch(dss::ItemNotFoundException* _ex) {
+  } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Unknown device", NULL);
   }
   return SOAP_OK;
@@ -127,7 +134,7 @@ int dss__Apartment_CreateSetFromDeviceNames(struct soap *soap, int _token,  Stri
       set.AddDevice(dev);
     }
     sess.AddSet(set, setID);
-  } catch(dss::ItemNotFoundException* _ex) {
+  } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Unknown device", NULL);
   }
   return SOAP_OK;
@@ -158,7 +165,7 @@ int dss__Apartment_GetDeviceIDByName(struct soap *soap, int _token,  char* _devi
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   try {
     deviceID = apt.GetDevices().GetByName(_deviceName).GetDSID();
-  } catch(dss::ItemNotFoundException* _ex) {
+  } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Could not find device", NULL);
   }
   return SOAP_OK;
@@ -178,7 +185,7 @@ int dss__Set_AddDeviceByName(struct soap *soap, int _token, int _setID, char* _n
     dss::DeviceReference devRef = apt.GetDevices().GetByName(_name);
     origSet.AddDevice(devRef);
     result = true;
-  } catch(dss::ItemNotFoundException* _ex) {
+  } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Could not find device", NULL);
   }
   return SOAP_OK;
@@ -198,7 +205,7 @@ int dss__Set_AddDeviceByID(struct soap *soap, int _token, int _setID, int _devic
     dss::DeviceReference devRef = apt.GetDevices().GetByID(_deviceID);
     origSet.AddDevice(devRef);
     result = true;
-  } catch(dss::ItemNotFoundException* _ex) {
+  } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Could not find device", NULL);
   }
   return SOAP_OK;
@@ -218,7 +225,7 @@ int dss__Set_RemoveDevice(struct soap *soap, int _token, int _setID, int _device
     dss::DeviceReference devRef = apt.GetDevices().GetByID(_deviceID);
     origSet.RemoveDevice(devRef);
     result = true;
-  } catch(dss::ItemNotFoundException* _ex) {
+  } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Could not find device", NULL);
   }
   return SOAP_OK;
@@ -240,7 +247,7 @@ int dss__Set_Combine(struct soap *soap, int _token, int _setID1, int _setID2, in
   try {
     dss::Set resultingSet = set1.Combine(set2);
     sess.AddSet(resultingSet, setID);
-  } catch(dss::ItemNotFoundException* _ex) {
+  } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Could not find device", NULL);
   }
   return SOAP_OK;
@@ -262,7 +269,7 @@ int dss__Set_Remove(struct soap *soap, int _token, int _setID, int _setIDToRemov
   try {
     dss::Set resultingSet = set1.Remove(set2);
     sess.AddSet(resultingSet, setID);
-  } catch(dss::ItemNotFoundException* _ex) {
+  } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Could not find device", NULL);
   }
   return SOAP_OK;
@@ -280,7 +287,7 @@ int dss__Set_ByGroup(struct soap *soap, int _token, int _setID, int _groupID, in
   try {
     dss::Set newSet = origSet.GetByGroup(_groupID);
     sess.AddSet(newSet, setID);
-  } catch(dss::ItemNotFoundException* _ex) {
+  } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Could not find device", NULL);
   }
   return SOAP_OK;
@@ -312,7 +319,7 @@ int dss__Apartment_GetGroupByName(struct soap *soap, int _token, char* _groupNam
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   try {
     groupID = apt.GetGroup(_groupName).GetID();
-  } catch(dss::ItemNotFoundException* _ex) {
+  } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Could not find group", NULL);
   }
   return SOAP_OK;
@@ -325,7 +332,7 @@ int dss__Apartment_GetRoomByName(struct soap *soap, int _token,  char* _roomName
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   try {
     roomID = apt.GetRoom(_roomName).GetRoomID();
-  } catch(dss::ItemNotFoundException* _ex) {
+  } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Could not find room", NULL);
   }
   return SOAP_OK;

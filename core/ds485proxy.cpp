@@ -517,7 +517,7 @@ namespace dss {
     uint8 commandID = _frame->GetCommand();
     if(commandID != CommandResponse) {
       Logger::GetInstance()->Log("discarded non response frame", lsInfo);
-      Logger::GetInstance()->Log(string("frame type") + CommandToString(commandID));
+      Logger::GetInstance()->Log(string("frame type ") + CommandToString(commandID));
     } else {
       m_IncomingFrames.push_back(_frame);
       m_PacketHere.Signal();

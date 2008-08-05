@@ -77,7 +77,7 @@ namespace dss {
 
   void DS485Header::FromChar(const unsigned char* _data, const int _len) {
     if(_len < 3) {
-      throw new invalid_argument("_len must be > 3");
+      throw invalid_argument("_len must be > 3");
     }
     SetDestination((_data[1] >> 2) & 0x3F);
     SetBroadcast(_data[1] & 0x02 == 0x02);
@@ -202,7 +202,7 @@ namespace dss {
   void DS485Controller::Execute() {
     m_SerialCom.reset(new SerialCom());
     if(!m_SerialCom->Open("/dev/ttyUSB0")) {
-      throw new runtime_error("could not open serial port");
+      throw runtime_error("could not open serial port");
     }
     m_FrameReader.SetSerialCom(m_SerialCom);
     m_FrameReader.Run();
@@ -449,7 +449,7 @@ namespace dss {
           SleepMS(1000);
           break;
         default:
-          throw new runtime_error("invalid value for m_State");
+          throw runtime_error("invalid value for m_State");
         }
       }
     }

@@ -17,71 +17,71 @@
 
 namespace dss {
   const string ModelScriptcontextExtensionName = "modelextension";
-  
-  ModelScriptContextExtension::ModelScriptContextExtension(Apartment& _apartment) 
+
+  ModelScriptContextExtension::ModelScriptContextExtension(Apartment& _apartment)
   : ScriptExtension(ModelScriptcontextExtensionName),
     m_Apartment(_apartment)
   {
   } // ctor
-  
+
   template<>
   Set& ModelScriptContextExtension::ConvertTo(ScriptContext& _context, JSObject* _obj) {
     ScriptObject obj(_obj, _context);
     if(obj.Is("set")) {
       return *static_cast<Set*>(JS_GetPrivate(_context.GetJSContext(), _obj));
     }
-    throw new ScriptException("Wrong classname for set");
+    throw ScriptException("Wrong classname for set");
   }
-  
+
   template<>
   Set& ModelScriptContextExtension::ConvertTo(ScriptContext& _context, jsval _val) {
     if(JSVAL_IS_OBJECT(_val)) {
       return ConvertTo<Set&>(_context, JSVAL_TO_OBJECT(_val));
     }
-    throw new ScriptException("JSVal is no object");
+    throw ScriptException("JSVal is no object");
   }
-  
+
   JSBool global_get_name(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    
+
     ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->GetEnvironment().GetExtension(ModelScriptcontextExtensionName));
     if(ext != NULL) {
       string aptName = ext->GetApartment().GetName();
       JSString* str = JS_NewStringCopyN(cx, aptName.c_str(), aptName.size());
-      
+
       *rval = STRING_TO_JSVAL(str);
       return JS_TRUE;
     }
     return JS_FALSE;
   }
-  
+
   JSBool global_set_name(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    
+
     ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->GetEnvironment().GetExtension(ModelScriptcontextExtensionName));
     if(ext != NULL && argc >= 1) {
       JSString* str = JS_ValueToString(cx, argv[0]);
       if(str != NULL) {
         string aptName = JS_GetStringBytes(str);
         ext->GetApartment().SetName(aptName);
-        
+
         *rval = INT_TO_JSVAL(0);
         return JS_TRUE;
       }
     }
     return JS_FALSE;
   }
-  
+
   JSBool global_get_devices(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    
+
     ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->GetEnvironment().GetExtension(ModelScriptcontextExtensionName));
     if(ext != NULL) {
       Set devices = ext->GetApartment().GetDevices();
       JSObject* obj = ext->CreateJSSet(*ctx, devices);
-      
+
       *rval = OBJECT_TO_JSVAL(obj);
-      
+
       return JS_TRUE;
     }
     return JS_FALSE;
@@ -104,7 +104,7 @@ namespace dss {
     }
     return JS_TRUE;
   }
-  
+
   JSFunctionSpec model_global_methods[] = {
     {"getName", global_get_name, 0, 0, 0},
     {"setName", global_set_name, 1, 0, 0},
@@ -112,21 +112,21 @@ namespace dss {
     {"log", global_log, 1, 0, 0},
     {NULL},
   };
-  
+
   void ModelScriptContextExtension::ExtendContext(ScriptContext& _context) {
     JS_DefineFunctions(_context.GetJSContext(), JS_GetGlobalObject(_context.GetJSContext()), model_global_methods);
   } // ExtendedJSContext
-  
+
   void finalize_set(JSContext *cx, JSObject *obj) {
     Set* pSet = static_cast<Set*>(JS_GetPrivate(cx, obj));
     JS_SetPrivate(cx, obj, NULL);
     delete pSet;
   } // finalize_set
-  
+
   JSBool set_length(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
-        
+
     ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->GetEnvironment().GetExtension(ModelScriptcontextExtensionName));
     if(ext != NULL && set != NULL) {
       *rval = INT_TO_JSVAL(set->Length());
@@ -134,11 +134,11 @@ namespace dss {
     }
     return JS_FALSE;
   }
-  
+
   JSBool set_combine(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
-    
+
     ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->GetEnvironment().GetExtension(ModelScriptcontextExtensionName));
     if(ext != NULL && set != NULL && argc >= 1) {
       Set& otherSet = ext->ConvertTo<Set&>(*ctx, argv[0]);
@@ -149,11 +149,11 @@ namespace dss {
     }
     return JS_FALSE;
   }
-  
+
   JSBool set_remove(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
-    
+
     ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->GetEnvironment().GetExtension(ModelScriptcontextExtensionName));
     if(ext != NULL && set != NULL && argc >= 1) {
       Set& otherSet = ext->ConvertTo<Set&>(*ctx, argv[0]);
@@ -167,7 +167,7 @@ namespace dss {
 
   JSBool set_JSGet(JSContext *cx, JSObject *obj, jsval id, jsval *rval) {
     Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
-    
+
     if(set != NULL) {
       int opt = JSVAL_TO_INT(id);
       if(opt == 0) {
@@ -179,20 +179,20 @@ namespace dss {
   }
 
   static JSClass set_class = {
-    "set", JSCLASS_HAS_PRIVATE, 
+    "set", JSCLASS_HAS_PRIVATE,
     JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
     JS_EnumerateStandardClasses,
     JS_ResolveStub,
     JS_ConvertStub,  finalize_set, JSCLASS_NO_OPTIONAL_MEMBERS
   };
-  
+
   JSFunctionSpec set_methods[] = {
-    {"length", set_length, 0, 0, 0},    
-    {"combine", set_combine, 1, 0, 0},    
-    {"remove", set_remove, 1, 0, 0},    
+    {"length", set_length, 0, 0, 0},
+    {"combine", set_combine, 1, 0, 0},
+    {"remove", set_remove, 1, 0, 0},
     {NULL},
   };
-  
+
   static JSPropertySpec set_properties[] = {
     {"className", 0, 0, set_JSGet},
     {NULL}
@@ -200,7 +200,7 @@ namespace dss {
 
   JSBool dev_turn_on(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    
+
     ScriptObject self(obj, *ctx);
     if(self.Is("set") || self.Is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
@@ -210,10 +210,10 @@ namespace dss {
     }
     return JS_FALSE;
   }
-  
+
   JSBool dev_turn_off(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    
+
     ScriptObject self(obj, *ctx);
     if(self.Is("set") || self.Is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
@@ -223,10 +223,10 @@ namespace dss {
     }
     return JS_FALSE;
   }
-  
+
   JSBool dev_enable(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    
+
     ScriptObject self(obj, *ctx);
     if(self.Is("set") || self.Is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
@@ -236,10 +236,10 @@ namespace dss {
     }
     return JS_FALSE;
   }
-  
+
   JSBool dev_disable(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    
+
     ScriptObject self(obj, *ctx);
     if(self.Is("set") || self.Is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
@@ -249,10 +249,10 @@ namespace dss {
     }
     return JS_FALSE;
   }
-  
+
   JSBool dev_increase_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    
+
     ScriptObject self(obj, *ctx);
     if(self.Is("set") || self.Is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
@@ -267,10 +267,10 @@ namespace dss {
     }
     return JS_FALSE;
   }
-  
+
   JSBool dev_decrease_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    
+
     ScriptObject self(obj, *ctx);
     if(self.Is("set") || self.Is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
@@ -285,10 +285,10 @@ namespace dss {
     }
     return JS_FALSE;
   }
-  
+
   JSBool dev_start_dim(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    
+
     ScriptObject self(obj, *ctx);
     if(self.Is("set") || self.Is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
@@ -304,10 +304,10 @@ namespace dss {
     }
     return JS_FALSE;
   }
-  
+
   JSBool dev_end_dim(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    
+
     ScriptObject self(obj, *ctx);
     if(self.Is("set") || self.Is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
@@ -322,10 +322,10 @@ namespace dss {
     }
     return JS_FALSE;
   }
-  
+
   JSBool dev_set_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    
+
     ScriptObject self(obj, *ctx);
     if(self.Is("set") || self.Is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
@@ -341,7 +341,7 @@ namespace dss {
     }
     return JS_FALSE;
   }
-  
+
   class JSDeviceAction : public IDeviceAction {
   private:
     jsval m_Function;
@@ -350,9 +350,9 @@ namespace dss {
   public:
     JSDeviceAction(jsval _function, ScriptContext& _ctx, ModelScriptContextExtension& _ext)
     : m_Function(_function), m_Context(_ctx), m_Extension(_ext) {}
-    
+
     virtual ~JSDeviceAction() {};
-    
+
     virtual bool Perform(Device& _device) {
       jsval rval;
       JSObject* device = m_Extension.CreateJSDevice(m_Context, _device);
@@ -361,11 +361,11 @@ namespace dss {
       return true;
     }
   };
-  
+
   JSBool dev_perform(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    ScriptObject self(obj, *ctx);    
-    
+    ScriptObject self(obj, *ctx);
+
     ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->GetEnvironment().GetExtension(ModelScriptcontextExtensionName));
     if(self.Is("set")) {
       Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
@@ -378,7 +378,7 @@ namespace dss {
     }
     return JS_FALSE;
   }
-  
+
   JSFunctionSpec device_interface_methods[] = {
     {"turnOn", dev_turn_on, 0, 0, 0},
     {"turnOff", dev_turn_on, 0, 0, 0},
@@ -393,7 +393,7 @@ namespace dss {
     {"decreaseValue", dev_decrease_value, 0, 0, 0},
     {NULL}
   };
-  
+
   JSObject* ModelScriptContextExtension::CreateJSSet(ScriptContext& _ctx, Set& _set) {
     JSObject* result = JS_NewObject(_ctx.GetJSContext(), &set_class, NULL, NULL);
     JS_DefineFunctions(_ctx.GetJSContext(), result, set_methods);
@@ -403,11 +403,11 @@ namespace dss {
     JS_SetPrivate(_ctx.GetJSContext(), result, innerObj);
     return result;
   } // CreateJSSet
-  
-  
+
+
   JSBool dev_JSGet(JSContext *cx, JSObject *obj, jsval id, jsval *rval) {
     DeviceReference* dev = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
-    
+
     if(dev != NULL) {
       int opt = JSVAL_TO_INT(id);
       switch(opt) {
@@ -424,33 +424,33 @@ namespace dss {
     }
     return JS_FALSE;
   }
-  
+
   void finalize_dev(JSContext *cx, JSObject *obj) {
     DeviceReference* pDevice = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
     JS_SetPrivate(cx, obj, NULL);
     delete pDevice;
   } // finalize_dev
-  
+
   static JSClass dev_class = {
-    "dev", JSCLASS_HAS_PRIVATE, 
+    "dev", JSCLASS_HAS_PRIVATE,
     JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
     JS_EnumerateStandardClasses,
     JS_ResolveStub,
     JS_ConvertStub,  finalize_dev, JSCLASS_NO_OPTIONAL_MEMBERS
   };
-  
+
   static JSPropertySpec dev_properties[] = {
     {"className", 0, 0, dev_JSGet},
     {"id", 1, 0, dev_JSGet},
     {"name", 2, 0, dev_JSGet},
     {NULL}
   };
-  
+
   JSObject* ModelScriptContextExtension::CreateJSDevice(ScriptContext& _ctx, Device& _dev) {
     DeviceReference ref(_dev.GetShortAddress(), m_Apartment);
     return CreateJSDevice(_ctx, ref);
   } // CreateJSDevice
-  
+
   JSObject* ModelScriptContextExtension::CreateJSDevice(ScriptContext& _ctx, DeviceReference& _ref) {
     JSObject* result = JS_NewObject(_ctx.GetJSContext(), &dev_class, NULL, NULL);
     JS_DefineFunctions(_ctx.GetJSContext(), result, device_interface_methods);
@@ -462,30 +462,30 @@ namespace dss {
     return result;
   } // CreateJSDevice
 
-  
+
   //================================================== ActionJS
-  
-  ActionJS::ActionJS() 
+
+  ActionJS::ActionJS()
   : Action("ActionJS", "JavaScript Action")
   {
   }
-  
-  
+
+
   void ActionJS::Perform(const Arguments& _args) {
     if(!_args.HasValue("script")) {
-      throw new runtime_error("ActionJS::Perform: missing argument _script");
+      throw runtime_error("ActionJS::Perform: missing argument _script");
     }
     string scriptName = _args.GetValue("script");
-    
+
     if(!m_Environment.IsInitialized()) {
       m_Environment.Initialize();
       ModelScriptContextExtension* ext = new ModelScriptContextExtension(DSS::GetInstance()->GetApartment());
       m_Environment.AddExtension(ext);
     }
-        
+
     boost::scoped_ptr<ScriptContext> ctx(m_Environment.GetContext());
     ctx->LoadFromFile(scriptName);
     ctx->Evaluate<void>();
   }
-  
+
 }
