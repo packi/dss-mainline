@@ -63,7 +63,8 @@ namespace dss {
     cmdDisable,
     cmdIncreaseParam,
     cmdDecreaseParam,
-    cmdGetOnOff
+    cmdGetOnOff,
+    cmdGetValue
   } DS485Command;
 
   class ReceivedFrame {

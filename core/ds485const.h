@@ -40,6 +40,7 @@ namespace dss {
   const uint8 FunctionDeviceDecValue  = 0x41;
 
   const uint8 FunctionDeviceGetOnOff = 0x61;
+  const uint8 FunctionDeviceGetParameterValue = 0x62;
   const uint8 FunctionDeviceGetDSID = 0x65;
 
   const uint8 FunctionModulatorGetDSID = 0xF1;

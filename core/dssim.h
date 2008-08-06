@@ -13,9 +13,9 @@ using namespace std;
 
 namespace dss {
   class DSIDSim;
-  
-  typedef map< const pair<const int, const int>,  vector<DSIDSim*> > IntPairToDSIDSimVector; 
-  
+
+  typedef map< const pair<const int, const int>,  vector<DSIDSim*> > IntPairToDSIDSimVector;
+
   class DSModulatorSim : public DS485FrameProvider {
   private:
     int m_ID;
@@ -24,11 +24,11 @@ namespace dss {
     map< const int, vector<DSIDSim*> > m_Rooms;
     IntPairToDSIDSimVector m_DevicesOfGroupInRoom;
     vector<DS485Frame*> m_PendingFrames;
-  private:  
+  private:
     void LoadFromConfig();
     void LoadDevices(XMLNodeList& _nodes, const int _roomID);
     void LoadRooms(XMLNodeList& _nodes);
-    
+
     DSIDSim& LookupDevice(const devid_t _id);
     DS485CommandFrame* CreateResponse(DS485CommandFrame& _request, uint8 _functionID);
     DS485CommandFrame* CreateAck(DS485CommandFrame& _request, uint8 _functionID);
@@ -37,12 +37,12 @@ namespace dss {
     DSModulatorSim();
     virtual ~DSModulatorSim() {};
     void Initialize();
-    
+
     int GetID() const;
 
     void Send(DS485Frame& _frame);
   }; // DSModulatorSim
-  
+
   class DSIDSim {
   private:
     const dsid_t m_DSID;
@@ -59,28 +59,30 @@ namespace dss {
     int m_DimTimeMS;
   public:
     DSIDSim(const dsid_t _dsid);
-    
+
     dsid_t GetDSID() const;
     devid_t GetShortAddress() const;
     void SetShortAddress(const devid_t _shortAddress);
-    
+
     void CallScene(const int _sceneNr);
     void SaveScene(const int _sceneNr);
     void UndoScene(const int _sceneNr);
-    
+
     void IncreaseValue(const int _parameterNr = -1);
     void DecreaseValue(const int _parameterNr = -1);
-    
+
     bool IsTurnedOn() const;
-    
+
     void Enable();
     void Disable();
-    
+
     void StartDim(bool _directionUp, const int _parameterNr = -1);
     void EndDim(const int _parameterNr = -1);
     void SetValue(const double _value, int _parameterNr = -1);
+
+    double GetValue(int _parameterNr = -1);
   }; // DSIDSim
-  
+
 
 }
 

@@ -112,6 +112,15 @@ namespace dss {
               DistributeFrame(boost::shared_ptr<DS485CommandFrame>(CreateAck(cmdFrame, cmdNr)));
             }
             break;
+          case FunctionDeviceGetParameterValue:
+            {
+              int devID = pd.Get<uint8>();
+              double result = LookupDevice(devID).GetValue(-1);
+              response = CreateResponse(cmdFrame, cmdNr);
+              response->GetPayload().Add<uint8>(static_cast<uint8>(result));
+              DistributeFrame(response);
+            }
+            break;
           case FunctionModulatorGetRoomsSize:
             {
               response = CreateResponse(cmdFrame, cmdNr);
@@ -386,6 +395,10 @@ namespace dss {
       m_CurrentValue = static_cast<int>(_value);
     }
   } // SetValue
+
+  double DSIDSim::GetValue(int _parameterNr) {
+    return static_cast<double>(m_CurrentValue);
+  } // GetValue
 
   bool DSIDSim::IsTurnedOn() const {
     return m_CurrentValue > 0;

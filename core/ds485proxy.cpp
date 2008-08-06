@@ -146,6 +146,12 @@ namespace dss {
       SendFrame(frame);
       uint8 res = ReceiveSingleResult(FunctionDeviceGetOnOff);
       result.push_back(res);
+    } else if(_cmd == cmdGetValue) {
+      frame.GetPayload().Add<uint8>(FunctionDeviceGetParameterValue);
+      frame.GetPayload().Add<uint8>(_id);
+      SendFrame(frame);
+      uint8 res = ReceiveSingleResult(FunctionDeviceGetParameterValue);
+      result.push_back(res);
     }
     return result;
   } // SendCommand
@@ -455,6 +461,8 @@ namespace dss {
 
     case  FunctionDeviceGetOnOff:
       return "Function Device Get On Off";
+    case  FunctionDeviceGetParameterValue:
+      return "Function Device Get Parameter Value";
     case  FunctionDeviceGetDSID:
       return "Function Device Get DSID";
 

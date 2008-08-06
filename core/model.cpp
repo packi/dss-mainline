@@ -86,7 +86,8 @@ namespace dss {
   } // SetValue
 
   double Device::GetValue(const int _parameterNr) {
-    return -1;
+    vector<int> res = DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdGetValue, *this);
+    return res.front();
   } // GetValue
 
   string Device::GetName() const {
