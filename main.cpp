@@ -98,11 +98,13 @@ int main (int argc, char * const argv[]) {
   }
   
   if(startSniffer) {
+#ifndef __APPLE__
     dss::DS485FrameSniffer sniffer(snifferDev);
     sniffer.Run();
     while(true) {
       dss::SleepSeconds(10);
     }
+#endif
   } else {  
     // start DSS
     dss::DSS::GetInstance()->Run();

@@ -10,13 +10,7 @@
 #ifndef _DATE_TOOLS_H_INCLUDED
 #define _DATE_TOOLS_H_INCLUDED
 
-#include <bitset>
-
 #include "base.h"
-/*
-#include <icalrecur.h>
-#include <icaltime.h>
-*/
 
 #include <ical.h>
 #include <vector>

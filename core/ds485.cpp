@@ -712,7 +712,7 @@ namespace dss {
   } // DistributeFrame
 
   //================================================== DS485FrameSniffer
-
+#ifndef __APPLE__
   DS485FrameSniffer::DS485FrameSniffer(const string& _deviceName)
   : Thread(true, "DS485FrameSniffer")
   {
@@ -750,7 +750,7 @@ namespace dss {
       }
     }
   }
-
+#endif
   //================================================== PayloadDissector
 
   template<>

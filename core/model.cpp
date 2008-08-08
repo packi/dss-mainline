@@ -437,7 +437,7 @@ namespace dss {
 
   void Apartment::Execute() {
     // Load devices/modulators/etc. from a config-file
-    string configFileName = DSS::GetInstance()->GetConfig().GetOptionAs<string>("apartment_config", "/Users/packi/sources/dss/trunk/data/apartment.xml");
+    string configFileName = DSS::GetInstance()->GetConfig().GetOptionAs<string>("apartment_config", "data/apartment.xml");
     if(!FileExists(configFileName)) {
       Logger::GetInstance()->Log(string("Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
     } else {

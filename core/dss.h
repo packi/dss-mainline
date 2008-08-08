@@ -14,12 +14,12 @@
 
 #include "base.h"
 #include "thread.h"
-#include "defs.h"
 #include "ds485proxy.h"
 #include "dssim.h"
 #include "syncevent.h"
 #include "webserver.h"
 #include "../webservices/webservices.h"
+#include "model.h"
 
 #include <cstdio>
 #include <string>
@@ -35,32 +35,32 @@ namespace dss {
   class WebServer;
   class Config;
   class EventRunner;
-  
+
   class EventRunner : public Thread {
   private:
     boost::ptr_vector<ScheduledEvent> m_ScheduledEvents;
-    
+
     DateTime GetNextOccurence();
     DateTime m_WakeTime;
     SyncEvent m_NewItem;
   public:
     EventRunner();
     virtual ~EventRunner() {};
-    
+
     void AddEvent(ScheduledEvent* _scheduledEvent);
-    
+
     void RaisePendingEvents(DateTime& _from, int _deltaSeconds);
-    
+
     int GetSize() const;
     const ScheduledEvent& GetEvent(const int _idx) const;
-    void RemoveEvent(const int _idx);    
-    
+    void RemoveEvent(const int _idx);
+
     virtual void Execute();
   }; // EventRunner
-    
+
 
   /** Main class
-    * 
+    *
     */
   class DSS {
   private:
@@ -72,13 +72,13 @@ namespace dss {
     DSModulatorSim m_ModulatorSim;
     EventRunner m_EventRunner;
     WebServices m_WebServices;
-    
+
     DSS() { };
-    
+
     void LoadConfig();
   public:
     void Run();
-    
+
     static DSS* GetInstance();
     Config& GetConfig() { return m_Config; };
     DS485Proxy& GetDS485Proxy() { return m_DS485Proxy; };
@@ -87,7 +87,7 @@ namespace dss {
     EventRunner& GetEventRunner() { return m_EventRunner; };
     WebServices& GetWebServices() { return m_WebServices; };
   }; // DSS
-  
+
 }
 
 #endif // DSS_H_INLUDED
