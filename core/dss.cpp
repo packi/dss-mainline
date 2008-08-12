@@ -19,36 +19,36 @@
 using namespace std;
 
 namespace dss {
-  
+
   //============================================ EventRunner
-  
+
   const bool DebugEventRunner = false;
-  
+
   EventRunner::EventRunner()
   : Thread(true, "EventRunner")
-  {  
+  {
   } // ctor
 
-   
+
   int EventRunner::GetSize() const {
     return m_ScheduledEvents.size();
   } // GetSize
-  
+
   const ScheduledEvent& EventRunner::GetEvent(const int _idx) const {
     return m_ScheduledEvents.at(_idx);
   } // GetEvent
-  
+
   void EventRunner::RemoveEvent(const int _idx) {
     boost::ptr_vector<ScheduledEvent>::iterator it = m_ScheduledEvents.begin();
     advance(it, _idx);
-    m_ScheduledEvents.erase(it);    
+    m_ScheduledEvents.erase(it);
   } // RemoveEvent
-  
+
   void EventRunner::AddEvent(ScheduledEvent* _scheduledEvent) {
     m_ScheduledEvents.push_back(_scheduledEvent);
     m_NewItem.Signal();
   } // AddEvent
-  
+
   DateTime EventRunner::GetNextOccurence() {
     DateTime now;
     DateTime result = now.AddYear(10);
@@ -56,7 +56,7 @@ namespace dss {
       cout << "*********" << endl;
     }
     for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
-        ipSchedEvt != e; ++ipSchedEvt) 
+        ipSchedEvt != e; ++ipSchedEvt)
     {
       DateTime next = ipSchedEvt->GetSchedule().GetNextOccurence(now);
       if(DebugEventRunner) {
@@ -70,7 +70,7 @@ namespace dss {
     }
     return result;
   }
-  
+
   void EventRunner::Execute() {
     while(!m_Terminated) {
       if(m_ScheduledEvents.empty()) {
@@ -79,28 +79,28 @@ namespace dss {
         DateTime now;
         m_WakeTime = GetNextOccurence();
         int sleepSeconds = m_WakeTime.Difference(now);
-       
+
         // Prevent loops when a cycle takes less than 1s
         if(sleepSeconds == 0) {
           m_NewItem.WaitFor(1000);
           continue;
         }
-          
+
         if(!m_NewItem.WaitFor(sleepSeconds * 1000)) {
           RaisePendingEvents(m_WakeTime, 10);
         }
       }
     }
   } // Execute
-  
-  
+
+
   void EventRunner::RaisePendingEvents(DateTime& _from, int _deltaSeconds) {
     DateTime virtualNow = _from.AddSeconds(-_deltaSeconds/2);
     if(DebugEventRunner) {
       cout << "vNow:    " << virtualNow << endl;
     }
     for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
-        ipSchedEvt != e; ++ipSchedEvt) 
+        ipSchedEvt != e; ++ipSchedEvt)
     {
       DateTime nextOccurence = ipSchedEvt->GetSchedule().GetNextOccurence(virtualNow);
       if(DebugEventRunner) {
@@ -110,13 +110,13 @@ namespace dss {
       if(abs(nextOccurence.Difference(virtualNow)) <= _deltaSeconds/2) {
         DSS::GetInstance()->GetApartment().OnEvent(ipSchedEvt->GetEvent());
       }
-    }    
+    }
   } // RaisePendingEvents
 
   //============================================= DSS
-  
+
   DSS* DSS::m_Instance = NULL;
-  
+
   DSS* DSS::GetInstance() {
     if(m_Instance == NULL) {
       m_Instance = new DSS();
@@ -124,28 +124,31 @@ namespace dss {
     assert(m_Instance != NULL);
     return m_Instance;
   } // GetInstance
-  
+
   void DSS::Run() {
     Logger::GetInstance()->Log("DSS stating up....", lsInfo);
     LoadConfig();
     m_WebServer.Initialize(m_Config);
     m_WebServer.Run();
-    
+
     m_WebServices.Run();
-    
+
     m_ModulatorSim.Initialize();
-    m_DS485Proxy.Start();
-    m_Apartment.Run();    
+#ifndef __PARADIGM__
+    m_DS485Interface = new DS485Proxy();
+    (static_cast<DS485Proxy*>(m_DS485Interface))->Start();
+#endif
+    m_Apartment.Run();
     m_EventRunner.Run();
 
     while(true) {
       sleep(1000);
     }
   } // Run
-  
+
   void DSS::LoadConfig() {
     Logger::GetInstance()->Log("Loading config", lsInfo);
     m_Config.ReadFromXML("data/config.xml");
   } // LoadConfig
-    
+
 }

@@ -15,6 +15,7 @@
 #include "ds485types.h"
 #include "ds485.h"
 #include "syncevent.h"
+#include "ds485interface.h"
 
 #include <map>
 #include <vector>
@@ -48,25 +49,6 @@ namespace dss {
     t _data;
   };
 
-  typedef enum {
-    cmdTurnOn,
-    cmdTurnOff,
-    cmdStartDimUp,
-    cmdStartDimDown,
-    cmdStopDim,
-    cmdCallScene,
-    cmdSaveScene,
-    cmdUndoScene,
-    cmdIncreaseValue,
-    cmdDecreaseValue,
-    cmdEnable,
-    cmdDisable,
-    cmdIncreaseParam,
-    cmdDecreaseParam,
-    cmdGetOnOff,
-    cmdGetValue
-  } DS485Command;
-
   class ReceivedFrame {
   private:
     int m_ReceivedAtToken;
@@ -81,6 +63,7 @@ namespace dss {
   typedef vector<boost::shared_ptr<DS485CommandFrame> > CommandFrameSharedPtrVector;
 
   class DS485Proxy : protected Thread,
+                     public    DS485Interface,
                      public    IDS485FrameCollector {
   private:
     FittingResult BestFit(Set& _set);
@@ -111,32 +94,32 @@ namespace dss {
     virtual void CollectFrame(boost::shared_ptr<DS485CommandFrame>& _frame);
 
     //------------------------------------------------ Specialized Commands (system)
-    vector<int> GetModulators();
+    virtual vector<int> GetModulators();
 
-    vector<int> GetRooms(const int _modulatorID);
-    int GetRoomCount(const int _modulatorID);
-    vector<int> GetDevicesInRoom(const int _modulatorID, const int _roomID);
-    int GetDevicesCountInRoom(const int _modulatorID, const int _roomID);
+    virtual vector<int> GetRooms(const int _modulatorID);
+    virtual int GetRoomCount(const int _modulatorID);
+    virtual vector<int> GetDevicesInRoom(const int _modulatorID, const int _roomID);
+    virtual int GetDevicesCountInRoom(const int _modulatorID, const int _roomID);
 
-    int GetGroupCount(const int _modulatorID, const int _roomID);
-    vector<int> GetGroups(const int _modulatorID, const int _roomID);
-    int GetDevicesInGroupCount(const int _modulatorID, const int _roomID, const int _groupID);
-    vector<int> GetDevicesInGroup(const int _modulatorID, const int _roomID, const int _groupID);
+    virtual int GetGroupCount(const int _modulatorID, const int _roomID);
+    virtual vector<int> GetGroups(const int _modulatorID, const int _roomID);
+    virtual int GetDevicesInGroupCount(const int _modulatorID, const int _roomID, const int _groupID);
+    virtual vector<int> GetDevicesInGroup(const int _modulatorID, const int _roomID, const int _groupID);
 
-    void AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID);
-    void RemoveFromGroup(const int _modulatorID, const int _groupID, const int _deviceID);
+    virtual void AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID);
+    virtual void RemoveFromGroup(const int _modulatorID, const int _groupID, const int _deviceID);
 
-    int AddUserGroup(const int _modulatorID);
-    void RemoveUserGroup(const int _modulatorID, const int _groupID);
+    virtual int AddUserGroup(const int _modulatorID);
+    virtual void RemoveUserGroup(const int _modulatorID, const int _groupID);
 
-    dsid_t GetDSIDOfDevice(const int _modulatorID, const int _deviceID);
-    dsid_t GetDSIDOfModulator(const int _modulatorID);
+    virtual dsid_t GetDSIDOfDevice(const int _modulatorID, const int _deviceID);
+    virtual dsid_t GetDSIDOfModulator(const int _modulatorID);
 
     //------------------------------------------------ Device manipulation
-    vector<int> SendCommand(DS485Command _cmd, Set& _set);
-    vector<int> SendCommand(DS485Command _cmd, Device& _device);
-    vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID);
-    vector<int> SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group);
+    virtual vector<int> SendCommand(DS485Command _cmd, Set& _set);
+    virtual vector<int> SendCommand(DS485Command _cmd, Device& _device);
+    virtual vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID);
+    virtual vector<int> SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group);
   };
 }
 

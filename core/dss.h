@@ -67,7 +67,7 @@ namespace dss {
     static DSS* m_Instance;
     WebServer m_WebServer;
     Config m_Config;
-    DS485Proxy m_DS485Proxy;
+    DS485Interface* m_DS485Interface;
     Apartment m_Apartment;
     DSModulatorSim m_ModulatorSim;
     EventRunner m_EventRunner;
@@ -81,7 +81,7 @@ namespace dss {
 
     static DSS* GetInstance();
     Config& GetConfig() { return m_Config; };
-    DS485Proxy& GetDS485Proxy() { return m_DS485Proxy; };
+    DS485Interface& GetDS485Interface() { return *m_DS485Interface; };
     Apartment& GetApartment() { return m_Apartment; };
     DSModulatorSim& GetModulatorSim() { return m_ModulatorSim; };
     EventRunner& GetEventRunner() { return m_EventRunner; };

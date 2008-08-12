@@ -34,51 +34,51 @@ namespace dss {
   }
 
   void Device::TurnOn() {
-    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdTurnOn, *this);
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdTurnOn, *this);
   } // TurnOn
 
   void Device::TurnOff() {
-    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdTurnOff, *this);
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdTurnOff, *this);
   } // TurnOff
 
   void Device::IncreaseValue(const int _parameterNr) {
     if(_parameterNr == -1) {
-      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdIncreaseValue, *this);
+      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdIncreaseValue, *this);
     } else {
-      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdIncreaseParam, *this);
+      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdIncreaseParam, *this);
     }
   } // IncreaseValue
 
   void Device::DecreaseValue(const int _parameterNr) {
     if(_parameterNr == -1) {
-      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdDecreaseValue, *this);
+      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdDecreaseValue, *this);
     } else {
-      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdDecreaseParam, *this);
+      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdDecreaseParam, *this);
     }
   } // DecreaseValue
 
   void Device::Enable() {
-    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdEnable, *this);
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdEnable, *this);
   } // Enable
 
   void Device::Disable() {
-    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdDisable, *this);
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdDisable, *this);
   } // Disable
 
   void Device::StartDim(const bool _directionUp, const int _parameterNr) {
     if(_directionUp) {
-      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdStartDimUp, *this);
+      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStartDimUp, *this);
     } else {
-      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdStartDimDown, *this);
+      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStartDimDown, *this);
     }
   } // StartDim
 
   void Device::EndDim(const int _parameterNr) {
-    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdStopDim, *this);
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStopDim, *this);
   } // EndDim
 
   bool Device::IsOn() {
-    vector<int> res = DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdGetOnOff, *this);
+    vector<int> res = DSS::GetInstance()->GetDS485Interface().SendCommand(cmdGetOnOff, *this);
     return res.front() != 0;
   } // IsOn
 
@@ -86,7 +86,7 @@ namespace dss {
   } // SetValue
 
   double Device::GetValue(const int _parameterNr) {
-    vector<int> res = DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdGetValue, *this);
+    vector<int> res = DSS::GetInstance()->GetDS485Interface().SendCommand(cmdGetValue, *this);
     return res.front();
   } // GetValue
 
@@ -160,47 +160,47 @@ namespace dss {
   } // ctor(DeviceVector)
 
   void Set::TurnOn() {
-    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdTurnOn, *this);
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdTurnOn, *this);
   } // TurnOn
 
   void Set::TurnOff() {
-    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdTurnOff, *this);
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdTurnOff, *this);
   } // TurnOff
 
   void Set::IncreaseValue(const int _parameterNr) {
     if(_parameterNr == -1) {
-      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdIncreaseValue, *this);
+      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdIncreaseValue, *this);
     } else {
-      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdIncreaseParam, *this);
+      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdIncreaseParam, *this);
     }
   } // IncreaseValue
 
   void Set::DecreaseValue(const int _parameterNr) {
     if(_parameterNr == -1) {
-      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdDecreaseValue, *this);
+      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdDecreaseValue, *this);
     } else {
-      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdDecreaseParam, *this);
+      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdDecreaseParam, *this);
     }
   } // DecreaseValue
 
   void Set::Enable() {
-    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdEnable, *this);
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdEnable, *this);
   } // Enable
 
   void Set::Disable() {
-    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdDisable, *this);
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdDisable, *this);
   } // Disable
 
   void Set::StartDim(bool _directionUp, const int _parameterNr) {
     if(_directionUp) {
-      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdStartDimUp, *this);
+      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStartDimUp, *this);
     } else {
-      DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdStartDimDown, *this);
+      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStartDimDown, *this);
     }
   } // StartDim
 
   void Set::EndDim(const int _parameterNr) {
-    DSS::GetInstance()->GetDS485Proxy().SendCommand(cmdStopDim, *this);
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStopDim, *this);
   } // EndDim
 
   void Set::SetValue(const double _value, int _parameterNr) {
@@ -444,10 +444,10 @@ namespace dss {
       ReadConfigurationFromXML(configFileName);
     }
 
-    DS485Proxy& proxy = DSS::GetInstance()->GetDS485Proxy();
+    DS485Interface& proxy = DSS::GetInstance()->GetDS485Interface();
 
     while(!m_Terminated) {
-      proxy.WaitForProxyEvent();
+     // TODO: reimplement proxy.WaitForProxyEvent();
       Logger::GetInstance()->Log("Apartment::Execute received proxy event, enumerating apartment / dSMs");
 
       vector<int> modIDs = proxy.GetModulators();
