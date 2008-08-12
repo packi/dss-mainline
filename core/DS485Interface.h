@@ -2,7 +2,7 @@
  * DS485Interface.h
  *
  *  Created on: Aug 12, 2008
- *      Author: Patrick StŠhlin
+ *      Author: Patrick Stï¿½hlin
  */
 
 #ifndef DS485INTERFACE_H_
@@ -39,8 +39,7 @@ namespace dss {
 
   class DS485Interface {
   public:
-	DS485Interface();
-	virtual ~DS485Interface();
+    virtual ~DS485Interface() {};
 
     //------------------------------------------------ Specialized Commands (system)
     virtual vector<int> GetModulators() = 0;

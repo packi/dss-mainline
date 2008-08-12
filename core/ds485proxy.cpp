@@ -353,6 +353,23 @@ namespace dss {
     return pd.Get<dsid_t>();
   }
 
+  void DS485Proxy::AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID) {
+
+  } // AddToGroup
+
+  void DS485Proxy::RemoveFromGroup(const int _modulatorID, const int _groupID, const int _deviceID) {
+
+  } // RemoveFromGroup
+
+  int DS485Proxy::AddUserGroup(const int _modulatorID) {
+    return 0;
+  } // AddUserGroup
+
+  void DS485Proxy::RemoveUserGroup(const int _modulatorID, const int _groupID) {
+
+  } // RemoveUserGroup
+
+
   vector<boost::shared_ptr<DS485CommandFrame> > DS485Proxy::Receive(uint8 _functionID) {
     vector<boost::shared_ptr<DS485CommandFrame> > result;
 

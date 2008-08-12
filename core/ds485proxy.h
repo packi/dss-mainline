@@ -15,7 +15,7 @@
 #include "ds485types.h"
 #include "ds485.h"
 #include "syncevent.h"
-#include "ds485interface.h"
+#include "DS485Interface.h"
 
 #include <map>
 #include <vector>
