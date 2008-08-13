@@ -2,7 +2,7 @@
 #define DSSIM_H_
 
 #include "ds485types.h"
-#include "ds485.h"
+#include "../unix/ds485.h"
 #include "xmlwrapper.h"
 
 
@@ -13,6 +13,7 @@ using namespace std;
 
 namespace dss {
   class DSIDSim;
+  class DS485Frame;
 
   typedef map< const pair<const int, const int>,  vector<DSIDSim*> > IntPairToDSIDSimVector;
 

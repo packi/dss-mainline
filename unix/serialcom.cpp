@@ -9,7 +9,7 @@
 
 #include "serialcom.h"
 
-#include "base.h"
+#include "../core/base.h"
 
 #include <fcntl.h>
 #include <sys/ioctl.h>

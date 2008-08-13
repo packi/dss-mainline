@@ -11,6 +11,9 @@
 #include "logger.h"
 #include "xmlwrapper.h"
 #include "scripting/modeljs.h"
+#ifdef __GNUC__
+#include "../unix/ds485proxy.h"
+#endif
 
 #include <cassert>
 #include <string>

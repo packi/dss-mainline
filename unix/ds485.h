@@ -10,10 +10,10 @@
 #ifndef _DS485_H_INCLUDED
 #define _DS485_H_INCLUDED
 
-#include "thread.h"
+#include "../core/thread.h"
 #include "serialcom.h"
-#include "ds485types.h"
-#include "syncevent.h"
+#include "../core/ds485types.h"
+#include "../core/syncevent.h"
 
 #include <vector>
 

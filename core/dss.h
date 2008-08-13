@@ -14,8 +14,9 @@
 
 #include "base.h"
 #include "thread.h"
-#include "ds485proxy.h"
-#include "dssim.h"
+#ifdef __GNUC__
+  #include "dssim.h"
+#endif
 #include "syncevent.h"
 #include "webserver.h"
 #include "../webservices/webservices.h"
@@ -35,6 +36,7 @@ namespace dss {
   class WebServer;
   class Config;
   class EventRunner;
+  class DS485Interface;
 
   class EventRunner : public Thread {
   private:
@@ -69,7 +71,9 @@ namespace dss {
     Config m_Config;
     DS485Interface* m_DS485Interface;
     Apartment m_Apartment;
+#ifdef __GNUC__
     DSModulatorSim m_ModulatorSim;
+#endif
     EventRunner m_EventRunner;
     WebServices m_WebServices;
 
@@ -83,7 +87,9 @@ namespace dss {
     Config& GetConfig() { return m_Config; };
     DS485Interface& GetDS485Interface() { return *m_DS485Interface; };
     Apartment& GetApartment() { return m_Apartment; };
+#ifdef __GNUC__
     DSModulatorSim& GetModulatorSim() { return m_ModulatorSim; };
+#endif
     EventRunner& GetEventRunner() { return m_EventRunner; };
     WebServices& GetWebServices() { return m_WebServices; };
   }; // DSS

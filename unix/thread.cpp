@@ -3,7 +3,7 @@
  *
  */
 
-#include "thread.h"
+#include "../core/thread.h"
 
 #include <cassert>
 #include <iostream>

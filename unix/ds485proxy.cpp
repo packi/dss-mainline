@@ -9,10 +9,10 @@
 
 #include "ds485proxy.h"
 
-#include "model.h"
-#include "dss.h"
-#include "logger.h"
-#include "ds485const.h"
+#include "../core/model.h"
+#include "../core/dss.h"
+#include "../core/logger.h"
+#include "../core/ds485const.h"
 
 #include <boost/scoped_ptr.hpp>
 

@@ -10,12 +10,12 @@
 #ifndef _DS485_PROXY_H_INCLUDED
 #define _DS485_PROXY_H_INCLUDED
 
-#include "model.h"
+#include "../core/model.h"
 
-#include "ds485types.h"
+#include "../core/ds485types.h"
 #include "ds485.h"
-#include "syncevent.h"
-#include "DS485Interface.h"
+#include "../core/syncevent.h"
+#include "../core/DS485Interface.h"
 
 #include <map>
 #include <vector>

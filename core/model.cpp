@@ -18,6 +18,7 @@
  */
 
 #include "model.h"
+#include "DS485Interface.h"
 
 #include "dss.h"
 #include "logger.h"
@@ -444,46 +445,46 @@ namespace dss {
       ReadConfigurationFromXML(configFileName);
     }
 
-    DS485Interface& proxy = DSS::GetInstance()->GetDS485Interface();
+    DS485Interface& interface = DSS::GetInstance()->GetDS485Interface();
 
     while(!m_Terminated) {
      // TODO: reimplement proxy.WaitForProxyEvent();
       Logger::GetInstance()->Log("Apartment::Execute received proxy event, enumerating apartment / dSMs");
 
-      vector<int> modIDs = proxy.GetModulators();
+      vector<int> modIDs = interface.GetModulators();
       for(vector<int>::iterator iModulatorID = modIDs.begin(); iModulatorID != modIDs.end(); ++iModulatorID) {
         int modID = *iModulatorID;
         Logger::GetInstance()->Log(string("Found modulator with id: ") + IntToString(modID));
-        dsid_t modDSID = proxy.GetDSIDOfModulator(modID);
+        dsid_t modDSID = interface.GetDSIDOfModulator(modID);
         Modulator& modulator = AllocateModulator(modDSID);
         modulator.SetBusID(modID);
 
-        vector<int> roomIDs = proxy.GetRooms(modID);
+        vector<int> roomIDs = interface.GetRooms(modID);
         for(vector<int>::iterator iRoomID = roomIDs.begin(); iRoomID != roomIDs.end(); ++iRoomID) {
           int roomID = *iRoomID;
           Logger::GetInstance()->Log(string("  Found room with id: ") + IntToString(roomID));
 
-          vector<int> devices = proxy.GetDevicesInRoom(modID, roomID);
+          vector<int> devices = interface.GetDevicesInRoom(modID, roomID);
           for(vector<int>::iterator iDevice = devices.begin(); iDevice != devices.end(); ++iDevice) {
             int devID = *iDevice;
             Logger::GetInstance()->Log(string("    Found device with id: ") + IntToString(devID));
-            dsid_t dsid = proxy.GetDSIDOfDevice(modID, devID);
+            dsid_t dsid = interface.GetDSIDOfDevice(modID, devID);
             Device& dev = AllocateDevice(dsid);
             dev.SetShortAddress(devID);
             dev.SetModulatorID(modID);
           }
-          vector<int> groupIDs = proxy.GetGroups(modID, roomID);
+          vector<int> groupIDs = interface.GetGroups(modID, roomID);
           for(vector<int>::iterator iGroup = groupIDs.begin(), e = groupIDs.end();
               iGroup != e; ++iGroup)
           {
             int groupID = *iGroup;
             Logger::GetInstance()->Log(string("    Found group with id: ") + IntToString(groupID));
-            vector<int> devingroup = proxy.GetDevicesInGroup(modID, roomID, groupID);
+            vector<int> devingroup = interface.GetDevicesInGroup(modID, roomID, groupID);
             for(vector<int>::iterator iDevice = devingroup.begin(), e = devingroup.end();
                 iDevice != e; ++iDevice)
             {
               int devID = *iDevice;
-              dsid_t dsid = proxy.GetDSIDOfDevice(modID, devID);
+              dsid_t dsid = interface.GetDSIDOfDevice(modID, devID);
               Device& dev = AllocateDevice(dsid);
               dev.SetShortAddress(devID);
               dev.GetGroupBitmask().set(groupID);
