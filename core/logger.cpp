@@ -27,12 +27,12 @@
 using namespace std;
 
 namespace dss {
-  
+
   Logger* Logger::m_Instance = NULL;
-  
+
   template <class t>
   t SeverityToString(const aLogSeverity _severity);
-  
+
   template <>
   const char* SeverityToString(const aLogSeverity _severity) {
     switch(_severity) {
@@ -50,12 +50,12 @@ namespace dss {
         return "[unknown severity]";
     }
   } // SeverityToString<const char*>
-  
+
   template <>
   const string SeverityToString(const aLogSeverity _severity) {
     return string(SeverityToString<const char*>(_severity));
   } // SeverityToString<const string>
-  
+
   template <>
   const wchar_t* SeverityToString(const aLogSeverity _severity) {
     switch(_severity) {
@@ -73,13 +73,13 @@ namespace dss {
         return L"[unknown severity]";
     }
   } // SeverityToString<const wchar_t*>
-  
+
   template <>
   const wstring SeverityToString(const aLogSeverity _severity) {
     return wstring(SeverityToString<const wchar_t*>(_severity));
   } // SeverityToString<const wstring>
-  
-  
+
+
   Logger* Logger::GetInstance() {
     if(m_Instance == NULL) {
       m_Instance = new Logger();
@@ -87,8 +87,8 @@ namespace dss {
     assert(m_Instance != NULL);
     return m_Instance;
   }
-  
-  void Logger::Log(const string& _message, const aLogSeverity _severity) {  
+
+  void Logger::Log(const string& _message, const aLogSeverity _severity) {
     time_t now = time( NULL );
     struct tm t;
 #ifdef WIN32
@@ -98,15 +98,15 @@ namespace dss {
 #endif
     cout << "[" << DateToISOString<string>(&t) << "]" << SeverityToString<const string>(_severity) << " " << _message << endl;
   } // Log
-  
+
   void Logger::Log(const char* _message, const aLogSeverity _severity) {
     Log(string(_message), _severity);
   } // Log
-  
+
   void Logger::Log(const wchar_t* _message, const aLogSeverity _severity) {
     Log(wstring(_message), _severity);
   } // Log
-  
+
   void Logger::Log(const wstring& _message, const aLogSeverity _severity) {
     time_t now = time( NULL );
     struct tm t;
@@ -117,6 +117,6 @@ namespace dss {
 #endif
     wcout << L"[" << DateToISOString<wstring>(&t) << L"]" << SeverityToString<const wstring>(_severity) << L" " << _message << endl;
   } // Log
-  
-  
+
+
 }

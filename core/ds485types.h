@@ -11,10 +11,10 @@
 #define _DS485_TYPES_H_INCLUDED
 
 namespace dss {
-  
-  typedef long devid_t;
-  typedef short int8;
-  typedef unsigned short uint8;
+
+  typedef unsigned short devid_t;
+  typedef char int8;
+  typedef unsigned char uint8;
   typedef unsigned long dsid_t;
 
 }

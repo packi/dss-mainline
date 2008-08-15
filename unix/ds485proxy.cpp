@@ -160,8 +160,10 @@ namespace dss {
     bool broadcast = _frame.GetHeader().IsBroadcast();
     bool sim = IsSimAddress(_frame.GetHeader().GetDestination());
     if(broadcast || sim) {
+      /*
       cout << "sim" << endl;
       DSS::GetInstance()->GetModulatorSim().Send(_frame);
+      */
     }
     if(broadcast || !sim) {
       if(m_DS485Controller.GetState() == csSlave || m_DS485Controller.GetState() == csMaster) {
@@ -192,6 +194,27 @@ namespace dss {
     {
       PayloadDissector pd((*iFrame)->GetPayload());
       pd.Get<uint8>();
+      uint16_t devID = pd.Get<uint16_t>();
+      devID &= 0x00FF;
+      if(devID == 0) {
+        cout << "Found dSS" << endl;
+      } else if(devID == 1) {
+        cout << "Found dSM" << endl;
+      } else {
+        cout << "Found unknown device" << endl;
+      }
+      uint16_t hwVersion = pd.Get<uint16_t>();
+      uint16_t swVersion = pd.Get<uint16_t>();
+
+      cout << "Name: \"";
+      for(int i = 0; i < 6; i++) {
+        char c = static_cast<char>(pd.Get<uint8>());
+        if(c != '\0') {
+          cout << c;
+        }
+      }
+      cout << "\"" << endl;
+
       result.push_back((*iFrame)->GetHeader().GetSource());
     }
 
@@ -203,8 +226,8 @@ namespace dss {
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
     cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetGroupsSize);
-    SendFrame(cmdFrame);
     cmdFrame.GetPayload().Add<uint8>(_roomID);
+    SendFrame(cmdFrame);
     uint8 res = ReceiveSingleResult(FunctionModulatorGetGroupsSize);
     return res;
   } // GetGroupCount
@@ -213,6 +236,7 @@ namespace dss {
     vector<int> result;
 
     int numGroups = GetGroupCount(_modulatorID, _roomID);
+    Logger::GetInstance()->Log(string("Modulator has ") + IntToString(numGroups) + " groups");
     for(int iGroup = 0; iGroup < numGroups; iGroup++) {
       DS485CommandFrame cmdFrame;
       cmdFrame.GetHeader().SetDestination(_modulatorID);
@@ -285,7 +309,29 @@ namespace dss {
     cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetRoomsSize);
     Logger::GetInstance()->Log("Proxy: GetRoomCount");
     SendFrame(cmdFrame);
-    return ReceiveSingleResult(FunctionModulatorGetRoomsSize);
+
+    vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionModulatorGetRoomsSize);
+    cout << results.size();
+    DS485CommandFrame* frame = results.at(0).get();
+
+    PayloadDissector pd(frame->GetPayload());
+    uint8 functionID = pd.Get<uint8>();
+    if(functionID != FunctionModulatorGetRoomsSize) {
+      Logger::GetInstance()->Log("function ids are different");
+    }
+    uint8 result = pd.Get<uint8>();
+
+    if(!pd.IsEmpty()) {
+      cout << "haven't used all of the packet" << endl;
+      while(!pd.IsEmpty()) {
+        printf("%x\n", result);
+        result = pd.Get<uint8>();
+      }
+      printf("%x\n", result);
+      result = 1;
+    }
+
+    return result;
   } // GetRoomCount
 
   int DS485Proxy::GetDevicesCountInRoom(const int _modulatorID, const int _roomID) {
@@ -296,20 +342,43 @@ namespace dss {
     cmdFrame.GetPayload().Add<uint8>(_roomID);
     Logger::GetInstance()->Log("Proxy: GetDevicesCountInRoom");
     SendFrame(cmdFrame);
-    return ReceiveSingleResult(FunctionModulatorCountDevInRoom);
+
+    vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionModulatorCountDevInRoom);
+    cout << results.size();
+    DS485CommandFrame* frame = results.at(0).get();
+
+    PayloadDissector pd(frame->GetPayload());
+    uint16_t functionID = pd.Get<uint16_t>();
+    if(functionID != FunctionModulatorCountDevInRoom) {
+      Logger::GetInstance()->Log("function ids are different");
+    }
+    uint16_t result = pd.Get<uint16_t>();
+
+    if(!pd.IsEmpty()) {
+      cout << "haven't used all of the packet" << endl;
+      while(!pd.IsEmpty()) {
+        printf("%x\n", result);
+        result = pd.Get<uint16_t>();
+      }
+      printf("%x\n", result);
+      result = 1;
+    }
+
+    return result;
   } // GetDevicesCountInRoom
 
   vector<int> DS485Proxy::GetDevicesInRoom(const int _modulatorID, const int _roomID) {
     vector<int> result;
 
     int numDevices = GetDevicesCountInRoom(_modulatorID, _roomID);
+    Logger::GetInstance()->Log(string("Proxy: Found ") + IntToString(numDevices) + " in room.");
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
       DS485CommandFrame cmdFrame;
       cmdFrame.GetHeader().SetDestination(_modulatorID);
       cmdFrame.SetCommand(CommandRequest);
       cmdFrame.GetPayload().Add<uint8>(FunctionModulatorDevKeyInRoom);
       cmdFrame.GetPayload().Add<uint8>(_roomID);
-      cmdFrame.GetPayload().Add<uint8>(iDevice);
+      cmdFrame.GetPayload().Add<devid_t>(iDevice);
       SendFrame(cmdFrame);
       result.push_back(ReceiveSingleResult(FunctionModulatorDevKeyInRoom));
     }

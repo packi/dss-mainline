@@ -68,6 +68,12 @@ namespace dss {
     return sstream.str();
   } // IntToString
 
+  string UIntToString(unsigned long int _int) {
+    stringstream sstream;
+    sstream << _int;
+    return sstream.str();
+  } // UIntToString
+
   const char* theISOFormatString = "%Y-%m-%d %H:%M:%S";
 
   template <>

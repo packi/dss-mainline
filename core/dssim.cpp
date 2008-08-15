@@ -241,18 +241,15 @@ namespace dss {
               response->GetPayload().Add<uint8>(0x00);
               response->GetPayload().Add<uint8>(0x01);
               // SW-Version 2 bytes (high, low)
-              // HW-Version 2 bytes (high, low)
               response->GetPayload().Add<uint8>(0x00);
               response->GetPayload().Add<uint8>(0x01);
               // free text
               response->GetPayload().Add<uint8>('d');
               response->GetPayload().Add<uint8>('S');
               response->GetPayload().Add<uint8>('M');
-              response->GetPayload().Add<uint8>(' ');
               response->GetPayload().Add<uint8>('S');
               response->GetPayload().Add<uint8>('i');
               response->GetPayload().Add<uint8>('m');
-              response->GetPayload().Add<uint8>(0x00);
               DistributeFrame(response);
             }
             break;

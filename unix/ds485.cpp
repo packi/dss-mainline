@@ -37,7 +37,8 @@ namespace dss {
 
   template<>
   void DS485Payload::Add(devid_t _data) {
-    m_Data.push_back(_data);
+    m_Data.push_back((_data >> 8) & 0x00FF);
+    m_Data.push_back((_data >> 0) & 0x00FF);
   }
 
   template<>
@@ -241,13 +242,13 @@ namespace dss {
         if(m_FrameReader.GetAndResetTraffic()) {
           Logger::GetInstance()->Log("Sensed traffic on the line, changing to csSlaveWaitingToJoin");
           DoChangeState(csSlaveWaitingToJoin);
-        }
-        if(senseTimeMS == 0) {
+        } else if(senseTimeMS == 0) {
           Logger::GetInstance()->Log("No traffic on line, I'll be your master today");
           DoChangeState(csDesignatedMaster);
+        } else {
+          SleepMS(senseTimeMS);
+          senseTimeMS = 0;
         }
-        SleepMS(senseTimeMS);
-        senseTimeMS = 0;
         continue;
       }
 
@@ -365,7 +366,7 @@ namespace dss {
               // send frame
               DS485CommandFrame& frameToSend = m_PendingFrames.front();
               PutFrameOnWire(&frameToSend, false);
-              cout << "p%" << frameToSend.GetCommand() << "%";
+              cout << "p%" << (int)frameToSend.GetCommand() << "%";
               //m_PendingFrames.erase(m_PendingFrames.begin());
 
 
@@ -401,7 +402,7 @@ namespace dss {
               m_NextStationID = 0xFF;
               m_StationID = 0xFF;
             }
-            cout << "f*" << cmdFrame->GetCommand() << "*";
+            cout << "f*" << (int)cmdFrame->GetCommand() << "*";
 
             bool keep = false;
 
@@ -414,6 +415,8 @@ namespace dss {
                 ack->SetCommand(CommandAck);
                 PutFrameOnWire(ack);
                 cout << "a(r)";
+              } else {
+                cout << "b";
               }
               keep = true;
             } else if(cmdFrame->GetCommand() == CommandRequest) {
@@ -770,6 +773,23 @@ namespace dss {
     return result;
   }
 
+  template<>
+  uint32_t PayloadDissector::Get() {
+    uint32_t result;
+    result = (Get<uint8>() << 24) |
+             (Get<uint8>() << 16) |
+             (Get<uint8>() << 8)  |
+             (Get<uint8>());
+    return result;
+  }
+
+  template<>
+  uint16_t PayloadDissector::Get() {
+    uint16_t result;
+    result = (Get<uint8>() << 8)  |
+             (Get<uint8>());
+    return result;
+  }
   //================================================== Global helpers
 
   const char* CommandToString(const uint8 _command) {

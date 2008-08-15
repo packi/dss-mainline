@@ -104,6 +104,7 @@ namespace dss {
   int StrToIntDef(const string _strValue, const int _default);
 
   string IntToString(const int _int);
+  string UIntToString(unsigned long int _int);
 
   template <class t>
   t DateToISOString( const struct tm* _dateTime );

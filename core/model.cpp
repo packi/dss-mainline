@@ -447,6 +447,7 @@ namespace dss {
 
     DS485Interface& interface = DSS::GetInstance()->GetDS485Interface();
 
+    SleepMS(10000);
     while(!m_Terminated) {
      // TODO: reimplement proxy.WaitForProxyEvent();
       Logger::GetInstance()->Log("Apartment::Execute received proxy event, enumerating apartment / dSMs");
@@ -456,6 +457,7 @@ namespace dss {
         int modID = *iModulatorID;
         Logger::GetInstance()->Log(string("Found modulator with id: ") + IntToString(modID));
         dsid_t modDSID = interface.GetDSIDOfModulator(modID);
+        Logger::GetInstance()->Log(string("  DSID: ") + UIntToString(modDSID));
         Modulator& modulator = AllocateModulator(modDSID);
         modulator.SetBusID(modID);
 

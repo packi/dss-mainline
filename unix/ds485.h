@@ -213,6 +213,8 @@ namespace dss {
       m_Payload.insert(m_Payload.begin(), payload.rbegin(), payload.rend());
     }
 
+    bool IsEmpty() { return m_Payload.empty(); };
+
     template<class t>
     t Get();
   }; // PayloadDissector
