@@ -23,8 +23,10 @@
 #include <csignal>
 #include <getopt.h>
 
-#include <libxml/tree.h>
-#include <libxml/encoding.h>
+#ifdef USE_LIBXML
+  #include <libxml/tree.h>
+  #include <libxml/encoding.h>
+#endif
 
 #include <iostream>
 
@@ -32,7 +34,7 @@
 using namespace std;
 
 int main (int argc, char * const argv[]) {
-  
+
   if (!setlocale(LC_CTYPE, "")) {
     cerr << "Can't set the specified locale! Check LANG, LC_CTYPE, LC_ALL." << endl;
     return 1;
@@ -40,7 +42,7 @@ int main (int argc, char * const argv[]) {
 
   // make sure timezone gets set
   tzset();
-  
+
   // disable broken pipe signal
 #ifndef WIN32
   srand((getpid() << 16) ^ getuid() ^ time(0));
@@ -49,10 +51,12 @@ int main (int argc, char * const argv[]) {
   srand( (int)time( (time_t)NULL ) );
   WSAData dat;
   WSAStartup( 0x1010, &dat );
-#endif  
-  
+#endif
+
+#ifdef USE_LIBXML
   // let libXML initialize it's parser
   xmlInitParser();
+#endif
 
   int testFlag = 0;
   string snifferDev;
@@ -96,7 +100,7 @@ int main (int argc, char * const argv[]) {
   if(testFlag != 1) {
     dss::Tests::Run();
   }
-  
+
   if(startSniffer) {
 #ifndef __APPLE__
     dss::DS485FrameSniffer sniffer(snifferDev);
@@ -105,7 +109,7 @@ int main (int argc, char * const argv[]) {
       dss::SleepSeconds(10);
     }
 #endif
-  } else {  
+  } else {
     // start DSS
     dss::DSS::GetInstance()->Run();
   }

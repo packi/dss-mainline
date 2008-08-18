@@ -20,6 +20,9 @@
 
 #include "xmlwrapper.h"
 
+#include <iostream>
+#include <fstream>
+
 namespace dss {
   //============================================= XMLNode
 
@@ -61,13 +64,21 @@ namespace dss {
 
   const string XMLNode::GetName() {
     AssertHasNode("Can't get name without node");
-    const char* content = (const char*)m_pNode->name;
-    return content;
+#ifdef USE_LIBXML
+    const char* name = (const char*)m_pNode->name;
+#else
+    const char* name = m_pNode->pName;
+#endif
+    return name;
   }
 
   const string XMLNode::GetContent() {
     AssertHasNode("Can't get content without node");
+#ifdef USE_LIBXML
     const char* content = (const char*)m_pNode->content;
+#else
+    const char* content = (const char*)m_pNode->pValue;
+#endif
     return content;
   }
 
@@ -81,12 +92,24 @@ namespace dss {
     AssertHasNode("Can't return children without node");
 
     if(!m_ChildrenRead) {
+#ifdef USE_LIBXML
       xmlNode* child = m_pNode->children;
       while(child != NULL) {
         XMLNode childObj(child);
         m_Children.push_back(childObj);
         child = child->next;
       }
+#else
+      lstSeek(m_pNode->subElementList, 0);
+      PElement elem = static_cast<PElement>(lstGet(m_pNode->subElementList));
+      while(elem != NULL) {
+        XMLNode childObj(elem);
+        m_Children.push_back(childObj);
+
+        lstNext(m_pNode->subElementList);
+        elem = static_cast<PElement>(lstGet(m_pNode->subElementList));
+      }
+#endif
       m_ChildrenRead = true;
     }
     return m_Children;
@@ -113,6 +136,7 @@ namespace dss {
     AssertHasNode("Can't return children without node");
 
     if(!m_AttributesRead) {
+#ifdef USE_LIBXML
       xmlAttr* currAttr = m_pNode->properties;
       while(currAttr != NULL) {
         if(currAttr->type == XML_ATTRIBUTE_NODE) {
@@ -123,6 +147,18 @@ namespace dss {
         }
         currAttr = currAttr->next;
       }
+#else
+      lstSeek(m_pNode->attributeList, 0);
+      PAttribute attr = static_cast<PAttribute>(lstGet(m_pNode->attributeList));
+      while(attr != NULL) {
+        const char* name = attr->pName;
+        const char* value = attr->pValue;
+
+        m_Attributes[name] = value;
+        lstNext(m_pNode->attributeList);
+        attr = static_cast<PAttribute>(lstGet(m_pNode->attributeList));
+      }
+#endif
       m_AttributesRead = true;
     }
     return m_Attributes;
@@ -134,7 +170,12 @@ namespace dss {
   : ResourceHolder<xmlDoc>(_pDocument)
   {
     if(m_Resource != NULL) {
+#ifdef USE_LIBXML
       m_RootNode = XMLNode(xmlDocGetRootElement(m_Resource));
+#else
+      lstSeek(_pDocument, 0);
+      m_RootNode = XMLNode(static_cast<PElement>(lstGet(_pDocument)));
+#endif
     }
   } // ctor(xmlDoc*)
 
@@ -146,7 +187,11 @@ namespace dss {
 
   XMLDocument::~XMLDocument() {
     if(m_Resource != NULL) {
+#ifdef USE_LIBXML
       xmlFreeDoc(m_Resource);
+#else
+      lstDeinit(m_Resource);
+#endif
       m_Resource = NULL;
     }
   }
@@ -156,47 +201,53 @@ namespace dss {
   } // GetRootNode
 
 
-  void XMLDocument::SaveToFile(const wstring& _fileName) {
-    string fileName = ToUTF8(_fileName.c_str(), _fileName.size());
-    FILE* out = fopen(fileName.c_str(), "w");
+  void XMLDocument::SaveToFile(const string& _fileName) {
+    FILE* out = fopen(_fileName.c_str(), "w");
     if(out == NULL) {
-      throw XMLException(string("XMLDocumen::SaveToFile: Could not open file ") + fileName);
+      throw XMLException(string("XMLDocumen::SaveToFile: Could not open file ") + _fileName);
     }
+#ifdef USE_LIBXML
     if(xmlDocDump(out, m_Resource) < 0) {
-      throw XMLException(string("XMLDocumen::SaveToFile: xmlDocDump failed for file:") + fileName);
+      throw XMLException(string("XMLDocumen::SaveToFile: xmlDocDump failed for file:") + _fileName);
     }
+#endif
   }
 
   //============================================= XMLDocumentFileReader
 
-  XMLDocumentFileReader::XMLDocumentFileReader(const wstring& _fileURI)
-  : m_URI(_fileURI)
-  {
-  } // ctor
-
   XMLDocumentFileReader::XMLDocumentFileReader(const string& _uri)
-  : m_URI(FromUTF8(_uri))
+  : m_URI(_uri)
   {
   }
-
 
   XMLDocumentReader::~XMLDocumentReader() {
   }
 
   XMLDocument& XMLDocumentFileReader::GetDocument() {
-    const string fileName = ToUTF8(m_URI.c_str(), m_URI.size());
-
-    if(!FileExists(fileName.c_str())) {
-      throw XMLException(string("XMLDocumentFileReader::GetDocument: File '") + fileName + "' does not exist");
+    if(!FileExists(m_URI.c_str())) {
+      throw XMLException(string("XMLDocumentFileReader::GetDocument: File '") + m_URI + "' does not exist");
     }
 
-    xmlDoc* doc = xmlParseFile(fileName.c_str());
+#ifdef USE_LIBXML
+    xmlDoc* doc = xmlParseFile(m_URI.c_str());
     if(doc == NULL) {
-      throw XMLException(string("Could not parse file: ") + fileName);
+      throw XMLException(string("Could not parse file: ") + m_URI);
     }
 
     XMLDocument docObj(doc);
     m_Document = docObj;
+#else
+    ifstream f(m_URI.c_str());
+    string str((istreambuf_iterator<char>(f)), istreambuf_iterator<char>());
+
+    PScanner scanner;
+    scanner = scnInit();
+    scanner->buf = str.c_str();
+    scanner->bufLength = str.size();
+    xmlDoc* doc = xmlParseXML(scanner);
+    XMLDocument docObj(doc);
+    m_Document = docObj;
+#endif
     return m_Document;
   }
 
