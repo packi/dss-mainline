@@ -110,7 +110,7 @@ namespace dss {
     /** Distributes the frame to the collectors */
     void DistributeFrame(boost::shared_ptr<DS485CommandFrame> _frame);
     /** Distributes the frame to the collectors.
-     * NOTE: the ownership of the frame is tranfered to the frame provider
+     * NOTE: the ownership of the frame is transfered to the frame provider
      */
     void DistributeFrame(DS485CommandFrame* _pFrame);
   public:
@@ -160,9 +160,8 @@ namespace dss {
 
     void SetSerialCom(boost::shared_ptr<SerialComBase> _serialCom);
 
-    //bool HasFrame();
-    DS485Frame* GetFrame(const int _timeoutMS);
 
+    DS485Frame* GetFrame(const int _timeoutMS);
     bool SenseTraffic(const int _timeoutMS);
   }; // FrameReader
 

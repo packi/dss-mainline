@@ -23,11 +23,11 @@ namespace dss {
   typedef enum {
     Sunday = 0, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
   } Weekday;
-  
+
   typedef enum {
     January = 0, February, March, April, May, June, July, August, September, October, November, December
   } Month;
-  
+
   class DateTime {
   private:
     struct tm m_DateTime;
@@ -35,88 +35,89 @@ namespace dss {
     DateTime();
     DateTime(time_t _time);
     DateTime(const DateTime& _copy);
-    
+
     DateTime AddHour(const int _hours) const;
     DateTime AddMinute(const int _minutes) const;
     DateTime AddSeconds(const int _seconds) const;
     DateTime AddMonth(const int _month) const;
-    DateTime AddYear(const int _years) const;    
-    DateTime AddDay(const int _days) const; 
-    
+    DateTime AddYear(const int _years) const;
+    DateTime AddDay(const int _days) const;
+
     int GetDay() const;
     int GetWeek() const;
     int GetMonth() const;
     int GetYear() const;
-    
+
     int GetHour() const;
     int GetMinute() const;
     int GetSecond() const;
-    
+
     void SetDay(const int _value);
     void SetMonth(const int _value);
     void SetYear(const int _value);
     void SetHour(const int _value);
     void SetMinute(const int _value);
     void SetSecond(const int _value);
-    
+
     void SetDate(int _day, int _month, int _year);
     void SetTime(int _hour, int _minute, int _second);
-    
+
     void ClearDate();
     void ClearTime();
     void Clear();
-    
+
     void Validate();
-    
+
     int GetDayOfYear() const;
     Weekday GetWeekday() const;
-    
+
     bool Before(const DateTime& _other) const;
     bool After(const DateTime& _other) const;
     bool operator==(const DateTime& _other) const;
     bool operator!=(const DateTime& _other) const;
     bool operator<(const DateTime& _other) const;
-    
+
     int Difference(const DateTime& _other) const;
-    
+
     ostream& operator<<(ostream& out) const;
-    
+    operator string() const;
+
     static DateTime NullDate;
-    
+
     static DateTime FromISO(const string& _isoStr);
     static DateTime FromUTC(const time_t& _time);
     static DateTime ToUTC(const time_t& _time);
   }; // DateTime
-  
+
   ostream& operator<<(ostream& out, const DateTime& _dt);
-  
+
   class Schedule {
   public:
 	virtual ~Schedule() {};
     virtual DateTime GetNextOccurence(const DateTime& _from) = 0;
     virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to) = 0;
   };
-  
+
   class StaticSchedule : public Schedule {
   private:
     DateTime m_When;
   public:
     StaticSchedule(const DateTime& _when) : m_When(_when) {};
     virtual ~StaticSchedule() {};
-    
+
     virtual DateTime GetNextOccurence(const DateTime& _from) ;
     virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
   };
-  
+
   typedef enum {
     Secondly = 0, Minutely, Hourly, Daily, Weekly, Monthly, Yearly
   } RepetitionMode;
-  
+
   class RepeatingSchedule : public Schedule {
   private:
     /** Repetition mode */
     RepetitionMode m_RepetitionMode;
-    /** Interval in which to repeat. 
+    /** Interval in which to repeat.
      * If the Mode is Minutely and m_RepeatingInterval is 5, we're scheduled every 5 minutes from m_BeginningAt through m_EndingAt.
      * Equaly, if the Mode is Hourly and the interval is 12, we're scheduled every 12 hours.
      */
@@ -135,7 +136,7 @@ namespace dss {
     virtual DateTime GetNextOccurence(const DateTime& _from) ;
     virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
   }; // RepeatingSchedule
-  
+
   class ICalSchedule : public Schedule {
   private:
     struct icalrecurrencetype m_Recurrence;
@@ -143,11 +144,11 @@ namespace dss {
   public:
     ICalSchedule(const string& _rrule, const string _startDateISO);
     virtual ~ICalSchedule() {};
-    
+
     virtual DateTime GetNextOccurence(const DateTime& _from) ;
     virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
   }; // ICalSchedule
-  
+
 }
 
 #endif

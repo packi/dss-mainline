@@ -20,7 +20,6 @@
 
 #include "xmlwrapper.h"
 
-#include <iostream>
 #include <fstream>
 
 namespace dss {

@@ -17,7 +17,6 @@
 
 #include <cassert>
 #include <string>
-#include <iostream>
 
 using namespace std;
 
@@ -50,19 +49,19 @@ namespace dss {
     DateTime now;
     DateTime result = now.AddYear(10);
     if(DebugEventRunner) {
-      cout << "*********" << endl;
+      Logger::GetInstance()->Log("EventRunner: *********");
     }
     for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
         ipSchedEvt != e; ++ipSchedEvt)
     {
       DateTime next = ipSchedEvt->GetSchedule().GetNextOccurence(now);
       if(DebugEventRunner) {
-        cout << "next:   " << next << endl;
-        cout << "result: " << result << endl;
+        Logger::GetInstance()->Log(string("next:   ") + (string)next);
+        Logger::GetInstance()->Log(string("result: ") + (string)result);
       }
       result = min(result, next);
       if(DebugEventRunner) {
-        cout << "chosen: " << result << endl;
+        Logger::GetInstance()->Log(string("chosen: ") + (string)result);
       }
     }
     return result;

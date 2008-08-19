@@ -9,8 +9,6 @@
 
 #include "datetools.h"
 
-#include <iostream>
-
 namespace dss {
 
   //================================================== DateTime
@@ -78,7 +76,6 @@ namespace dss {
     return result;
   } // AddDay
 
-
   int DateTime::GetDay() const {
     return m_DateTime.tm_mday;
   } // GetDay
@@ -139,7 +136,6 @@ namespace dss {
     m_DateTime.tm_sec = _value;
   } // SetSecond
 
-
   void DateTime::SetDate(int _day, int _month, int _year) {
     m_DateTime.tm_mday = _day;
     m_DateTime.tm_mon = _month;
@@ -187,30 +183,34 @@ namespace dss {
 
   bool DateTime::operator!=(const DateTime& _other) const {
     return Difference(_other) != 0;
-  }
+  } // operator!=
 
   bool DateTime::operator<(const DateTime& _other) const {
     return Difference(_other) < 0;
-  }
+  } // operator<
 
   int DateTime::Difference(const DateTime& _other) const {
     struct tm self = m_DateTime;
     struct tm other = _other.m_DateTime;
     return static_cast<int>(difftime(mktime(&self), mktime(&other)));
-  }
+  } // Difference
 
   ostream& DateTime::operator<<(ostream& out) const {
     string bla = DateToISOString<string>(&m_DateTime);
     out << bla;
     return out;
-  }
+  } // operator<<
+
+  DateTime::operator string() const {
+    return DateToISOString<string>(&m_DateTime);
+  } // operator string()
 
   ostream& operator<<(ostream& out, const DateTime& _dt) {
     _dt << out;
     return out;
-  }
+  } // operator<<
 
-    /** Creates an instance from an ISO date
+ /** Creates an instance from an ISO date
    * Format: yyyymmddThhmmssZ
    */
   DateTime DateTime::FromISO(const string& _isoStr) {
@@ -300,7 +300,7 @@ namespace dss {
     tm.tm_mday = icalTime.day;
     tm.tm_mon = icalTime.month - 1;
     tm.tm_year = icalTime.year - 1900;
-  }
+  } // ical_to_tm
 
   DateTime ICalSchedule::GetNextOccurence(const DateTime& _from) {
     DateTime result;
@@ -412,7 +412,7 @@ namespace dss {
       default:
         throw invalid_argument("m_RepetitionMode must be one of the given enum values");
     }
-  }
+  } // GetIntervalInSeconds
 
   vector<DateTime> RepeatingSchedule::GetOccurencesBetween(const DateTime& _from, const DateTime& _to) {
     vector<DateTime> result;
@@ -425,6 +425,5 @@ namespace dss {
     }
     return result;
   } // GetOccurencesBetween
-
 
 }

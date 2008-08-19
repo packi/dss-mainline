@@ -15,7 +15,6 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 
-#include <iostream>
 #include <stdexcept>
 
 namespace dss {
@@ -111,8 +110,6 @@ namespace dss {
       m_ReadWriteLock.Unlock();
 
       if(ret != 1) {
-        cout << "%";
-        flush(cout);
         SleepMS(1);
       }
     }

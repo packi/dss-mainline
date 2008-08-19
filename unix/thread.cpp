@@ -4,9 +4,9 @@
  */
 
 #include "../core/thread.h"
+#include "../core/logger.h"
 
 #include <cassert>
-#include <iostream>
 
 #ifndef WIN32
 #include <signal.h>
@@ -24,8 +24,6 @@ DWORD WINAPI
 ThreadStarterHelperFunc( void* _pThreadObj ) {
 	Thread* thObj = static_cast<Thread*>(_pThreadObj);
 	thObj->Execute();
-  //pthread_exit( NULL );
-  cout << "*** exiting thread" << endl;
   if( static_cast<Thread*>(_pThreadObj)->GetFreeAtTerimnation() ) {
     delete static_cast<Thread*>(_pThreadObj);
   }
@@ -42,9 +40,10 @@ Thread::Thread(const char* _name )
 { } // ctor
 
 Thread::~Thread() {
-  cout << "~Thread" << endl;
   if( m_Name != NULL  ) {
-    cout << "  Thread: " << m_Name << endl;
+    Logger::GetInstance()->Log(string("Destroying thread: ") + m_Name);
+  } else {
+    Logger::GetInstance()->Log("Destroying thread: (no name)");
   }
   if( !m_Terminated && (m_ThreadHandle != 0) ) {
     m_Terminated = true;
@@ -60,7 +59,7 @@ bool Thread::Run() {
   assert( !m_Running );
   m_Running = true;
   if( m_Name != NULL ) {
-    cout << "creating thread for \"" << m_Name << "\" @" << this <<endl;
+    Logger::GetInstance()->Log(string("creating thread for \"") + m_Name + "\"");
   }
 #ifndef WIN32
   pthread_create( &m_ThreadHandle, NULL, ThreadStarterHelperFunc, this );
@@ -82,10 +81,6 @@ bool Thread::Stop() {
 
 
 bool Thread::Terminate() {
-  cout << "Thread::Terminate()" << endl;
-  if( m_Name != NULL ) {
-    cout << " Thread: " << m_Name << endl;
-  }
   if( !m_Terminated && (m_ThreadHandle != 0) ) {
     m_Terminated = true;
 #ifndef WIN32

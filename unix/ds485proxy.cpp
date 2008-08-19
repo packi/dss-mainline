@@ -558,7 +558,7 @@ namespace dss {
       return "Function Get Type";
     }
     return "";
-  }
+  } // FunctionIDToString
 
   void DS485Proxy::Execute() {
     SleepSeconds(1);
@@ -615,7 +615,7 @@ namespace dss {
       m_IncomingFrames.push_back(_frame);
       m_PacketHere.Signal();
     }
-  }
+  } // CollectFrame
 
   //================================================== ReceivedPacket
 

@@ -11,8 +11,6 @@
 #include "../dss.h"
 #include "../logger.h"
 
-#include <iostream>
-
 #include <boost/scoped_ptr.hpp>
 
 namespace dss {
