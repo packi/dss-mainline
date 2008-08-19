@@ -42,18 +42,8 @@ namespace dss {
     tcgetattr(m_Handle, &m_CommSettings);
 
     // 8-N-1
-/*
-    m_CommSettings.c_cflag = CREAD|CLOCAL|CS8;
-    m_CommSettings.c_lflag = 0;
-    m_CommSettings.c_iflag = IGNPAR;
-    m_CommSettings.c_oflag = 0;
-    m_CommSettings.c_cc[VMIN] = 0;
-    m_CommSettings.c_cc[VTIME] = 0;
-*/
-    //cfmakeraw(&m_CommSettings);
-
-    m_CommSettings.c_iflag &= ~( IGNBRK | BRKINT | PARMRK | ISTRIP
-                         | INLCR | IGNCR | ICRNL | IXON );
+    m_CommSettings.c_iflag &= ~( IGNBRK | BRKINT | PARMRK | ISTRIP |
+                                 INLCR | IGNCR | ICRNL | IXON );
 		m_CommSettings.c_oflag &= ~OPOST;
 		m_CommSettings.c_lflag &= ~( ECHO | ECHONL | ICANON | ISIG | IEXTEN );
 		m_CommSettings.c_cflag &= ~( CSIZE | PARENB | CRTSCTS );
@@ -88,14 +78,14 @@ namespace dss {
     return result;
   } // GetChar
 
-  bool SerialCom::GetCharTimeout(char& _chOut, int _timeoutSec) {
+  bool SerialCom::GetCharTimeout(char& _chOut, int _timeoutMS) {
     fd_set  fdRead;
     FD_ZERO(&fdRead);
     FD_SET(m_Handle, &fdRead);
 
     struct timeval timeout;
-    timeout.tv_sec = _timeoutSec;
-    timeout.tv_usec = 0;
+    timeout.tv_sec = 0;
+    timeout.tv_usec = _timeoutMS * 1000;
 
     int res = select(m_Handle + 1, &fdRead, NULL, NULL, &timeout );
     if(res == 1) {
@@ -159,13 +149,13 @@ namespace dss {
     return result;
   }
 
-  bool SerialComSim::GetCharTimeout(char& _charOut, const int _timeoutSec) {
+  bool SerialComSim::GetCharTimeout(char& _charOut, const int _timeoutMS) {
     // TODO: we could/should/want to use an event to wait on incoming data
     if(m_IncomingData.size() != 0) {
       _charOut = GetChar();
       return true;
     } else {
-      SleepSeconds(_timeoutSec);
+      SleepMS(_timeoutMS);
       if(m_IncomingData.size() != 0) {
         _charOut = GetChar();
         return true;

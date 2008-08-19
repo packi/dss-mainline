@@ -24,7 +24,7 @@ namespace dss {
     virtual bool Open(const char* _serialPort) =  0;
 
     virtual char GetChar() = 0;
-    virtual bool GetCharTimeout(char& _charOut, const int _timeoutSec) = 0;
+    virtual bool GetCharTimeout(char& _charOut, const int _timeoutMS) = 0;
     virtual void PutChar(const char& _char) = 0;
 
     virtual ~SerialComBase() {};
@@ -43,7 +43,7 @@ namespace dss {
     virtual bool Open(const char* _serialPort);
 
     virtual char GetChar();
-    virtual bool GetCharTimeout(char& _charOut, const int _timeoutSec);
+    virtual bool GetCharTimeout(char& _charOut, const int _timeoutMS);
     virtual void PutChar(const char& _char);
   }; // SerialCom
 
@@ -62,7 +62,7 @@ namespace dss {
     void PutSimData(const string& _data);
 
     virtual char GetChar();
-    virtual bool GetCharTimeout(char& _charOut, const int _timeoutSec);
+    virtual bool GetCharTimeout(char& _charOut, const int _timeoutMS);
     virtual void PutChar(const char& _char);
   }; // SerialComSim
 

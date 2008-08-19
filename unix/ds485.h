@@ -130,27 +130,40 @@ namespace dss {
     csSlaveWaitingForFirstToken
   } aControllerState;
 
-  class DS485FrameReader : public Thread {
+  typedef enum {
+    rsSynchronizing,
+    rsReadingHeader,
+    rsReadingPacket,
+    rsReadingCRC
+  } aReaderState;
+
+  const int TheReceiveBufferSizeBytes = 50;
+
+  class DS485FrameReader {
+  private:
+    // receive functions's state
+    int m_ValidBytes;
+    unsigned char m_ReceiveBuffer[TheReceiveBufferSizeBytes];
+    aReaderState m_State;
+    int m_MessageLength;
+
+    bool m_EscapeNext;
+    bool m_IsEscaped;
   private:
     int m_Handle;
-    std::vector<DS485Frame*> m_IncomingFrames;
-    bool m_Traffic;
     boost::shared_ptr<SerialComBase> m_SerialCom;
-    SyncEvent m_PacketReceivedEvent;
   private:
-    bool GetCharTimeout(char& _charOut, const int _timeoutSec);
+    bool GetCharTimeout(char& _charOut, const int _timeoutMS);
   public:
     DS485FrameReader();
     virtual ~DS485FrameReader();
 
     void SetSerialCom(boost::shared_ptr<SerialComBase> _serialCom);
 
-    bool HasFrame();
-    DS485Frame* GetFrame();
+    //bool HasFrame();
+    DS485Frame* GetFrame(const int _timeoutMS);
 
-    virtual void Execute();
-    bool GetAndResetTraffic();
-    bool WaitForFrame();
+    bool SenseTraffic(const int _timeoutMS);
   }; // FrameReader
 
   class DS485Controller : public Thread,
@@ -170,6 +183,8 @@ namespace dss {
   private:
     DS485Frame* GetFrameFromWire();
     bool PutFrameOnWire(const DS485Frame* _pFrame, bool _freeFrame = true);
+
+    inline void PutCharOnWire(const unsigned char _ch);
 
     void DoChangeState(aControllerState _newState);
     void AddToReceivedQueue(DS485CommandFrame* _frame);
@@ -194,14 +209,14 @@ namespace dss {
     virtual ~IDS485FrameCollector() {};
   }; // DS485FrameCollector
 
-  class DS485FrameSniffer : public Thread {
+  class DS485FrameSniffer {
   private:
     DS485FrameReader m_FrameReader;
     boost::shared_ptr<SerialCom> m_SerialCom;
   public:
     DS485FrameSniffer(const string& _deviceName);
 
-    virtual void Execute();
+    void Run();
   }; // IDS485FrameSniffer
 
   class PayloadDissector {

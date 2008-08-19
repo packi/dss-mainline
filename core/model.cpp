@@ -391,7 +391,7 @@ namespace dss {
   //================================================== Apartment
 
   Apartment::Apartment()
-  : Thread(true, "Apartment"),
+  : Thread("Apartment"),
     m_NextSubscriptionNumber(1)
   {
     Group* grp = new Group(0, *this);

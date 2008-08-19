@@ -38,7 +38,7 @@ namespace dss {
   class EventRunner;
   class DS485Interface;
 
-  class EventRunner : public Thread {
+  class EventRunner {
   private:
     boost::ptr_vector<ScheduledEvent> m_ScheduledEvents;
 
@@ -46,9 +46,6 @@ namespace dss {
     DateTime m_WakeTime;
     SyncEvent m_NewItem;
   public:
-    EventRunner();
-    virtual ~EventRunner() {};
-
     void AddEvent(ScheduledEvent* _scheduledEvent);
 
     void RaisePendingEvents(DateTime& _from, int _deltaSeconds);
@@ -57,7 +54,7 @@ namespace dss {
     const ScheduledEvent& GetEvent(const int _idx) const;
     void RemoveEvent(const int _idx);
 
-    virtual void Execute();
+    void Run();
   }; // EventRunner
 
 

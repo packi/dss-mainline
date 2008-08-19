@@ -82,9 +82,8 @@ namespace dss {
   }
 
   DS485Proxy::DS485Proxy()
-  : Thread(true, "DS485Proxy")
-  {
-  } // ctor
+  : Thread("DS485Proxy")
+  { } // ctor
 
   FittingResult DS485Proxy::BestFit(Set& _set) {
     FittingResult result;

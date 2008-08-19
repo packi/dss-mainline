@@ -31,7 +31,7 @@ private:
 protected:
   bool m_Terminated;
 public:
-    Thread( bool _createSuspended = false, const char* _name = NULL );
+    Thread(const char* _name = NULL);
 
     virtual ~Thread();
 

@@ -27,12 +27,6 @@ namespace dss {
 
   const bool DebugEventRunner = false;
 
-  EventRunner::EventRunner()
-  : Thread(true, "EventRunner")
-  {
-  } // ctor
-
-
   int EventRunner::GetSize() const {
     return m_ScheduledEvents.size();
   } // GetSize
@@ -74,8 +68,8 @@ namespace dss {
     return result;
   }
 
-  void EventRunner::Execute() {
-    while(!m_Terminated) {
+  void EventRunner::Run() {
+    while(true) {
       if(m_ScheduledEvents.empty()) {
         m_NewItem.WaitFor(1000);
       } else {
@@ -142,11 +136,9 @@ namespace dss {
     (static_cast<DS485Proxy*>(m_DS485Interface))->Start();
 #endif
     m_Apartment.Run();
-    m_EventRunner.Run();
 
-    while(true) {
-      sleep(1000);
-    }
+    // pass control to the eventrunner
+    m_EventRunner.Run();
   } // Run
 
   void DSS::LoadConfig() {

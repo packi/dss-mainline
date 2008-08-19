@@ -8,17 +8,17 @@
 
 namespace dss {
   //============================================= WebServer
-  
-  WebServer::WebServer() 
-  : Thread(true, "WebServer")
+
+  WebServer::WebServer()
+  : Thread("WebServer")
   {
     m_SHttpdContext = shttpd_init();
   } // ctor
-  
+
   WebServer::~WebServer() {
     shttpd_fini(m_SHttpdContext);
   } // dtor
-  
+
   void WebServer::Initialize(Config& _config) {
     string ports = _config.GetOptionAs("webserverport", "8080");
     Logger::GetInstance()->Log(string("Webserver: Listening on port(s) ") + ports);
@@ -26,19 +26,19 @@ namespace dss {
 
     string aliases = string("/=") + _config.GetOptionAs<string>("webserverroot", "data/webroot");
     Logger::GetInstance()->Log(string("Webserver: Configured aliases: ") + aliases);
-    shttpd_set_option(m_SHttpdContext, "aliases", aliases.c_str());    
+    shttpd_set_option(m_SHttpdContext, "aliases", aliases.c_str());
 
-    shttpd_register_uri(m_SHttpdContext, "/config", &HTTPListOptions, NULL);    
+    shttpd_register_uri(m_SHttpdContext, "/config", &HTTPListOptions, NULL);
     shttpd_register_uri(m_SHttpdContext, "/json/*", &JSONHandler, NULL);
   } // Initialize
-  
+
   void WebServer::Execute() {
     Logger::GetInstance()->Log("Webserver started", lsInfo);
     while(!m_Terminated) {
       shttpd_poll(m_SHttpdContext, 1000);
     }
   } // Execute
-  
+
   void WebServer::EmitHTTPHeader(int _code, struct shttpd_arg* _arg, string _contentType) {
     stringstream sstream;
     sstream << "HTTP/1.1 " << _code << " OK\r\n";
@@ -46,7 +46,7 @@ namespace dss {
     shttpd_printf(_arg, sstream.str().c_str());
   } // EmitHTTPHeader
 
-  
+
   HashMapConstStringString ParseParameter(const char* _params) {
     HashMapConstStringString result;
     if(_params != NULL) {
@@ -62,15 +62,15 @@ namespace dss {
     }
     return result;
   } // ParseParameter
-    
+
   template<class t>
   string ToJSONValue(const t& _value);
-  
+
   template<>
   string ToJSONValue(const int& _value) {
     return IntToString(_value);
   } // ToJSONValue
-  
+
   template<>
   string ToJSONValue(const string& _value) {
     return string("\"") + _value + '"';
@@ -78,7 +78,7 @@ namespace dss {
 
   template<class t>
   string ToJSONArray(const vector<t>& _v);
-  
+
   template<>
   string ToJSONArray(const vector<int>& _v) {
     stringstream arr;
@@ -99,18 +99,18 @@ namespace dss {
     return arr.str();
   } // ToJSONArray<int>
 
-  
+
   void WebServer::JSONHandler(struct shttpd_arg* _arg) {
     const string urlid = "/json/";
     string uri = shttpd_get_env(_arg, "REQUEST_URI");
     HashMapConstStringString paramMap = ParseParameter(shttpd_get_env(_arg, "QUERY_STRING"));
 
     string method = uri.substr(uri.find(urlid) + urlid.size());
-    
+
     if(method == "getdevices") {
       EmitHTTPHeader(200, _arg, "application/json");
       Set devices = DSS::GetInstance()->GetApartment().GetDevices();
-      
+
       stringstream sstream;
       sstream << "{\"devices\":[";
       bool first = true;
@@ -121,16 +121,16 @@ namespace dss {
         } else {
           sstream << ",";
         }
-        sstream << "{ \"id\": " << d.GetDSID() 
-                << ", \"name\": \"" << d.GetDevice().GetName() 
-                << "\", \"on\": " << (d.IsOn() ? "true" : "false") << " }";        
+        sstream << "{ \"id\": " << d.GetDSID()
+                << ", \"name\": \"" << d.GetDevice().GetName()
+                << "\", \"on\": " << (d.IsOn() ? "true" : "false") << " }";
       }
       sstream << "]}";
-        
+
       shttpd_printf(_arg, sstream.str().c_str());
     } else if(method == "turnon") {
       EmitHTTPHeader(200, _arg, "application/json");
-      
+
       string devidStr = paramMap["device"];
       if(!devidStr.empty()) {
         int devid = StrToUInt(devidStr);
@@ -140,7 +140,7 @@ namespace dss {
         shttpd_printf(_arg, "{ok:0}");
       }
     } else if(method == "turnoff") {
-      
+
       string devidStr = paramMap["device"];
       if(!devidStr.empty()) {
         int devid = StrToUInt(devidStr);
@@ -155,7 +155,7 @@ namespace dss {
 
         stringstream response;
         response << "{ \"subscriptions\":[";
-        
+
         bool first = true;
         int numSubscriptions = DSS::GetInstance()->GetApartment().GetSubscriptionCount();
         for(int iSubscription = 0; iSubscription < numSubscriptions; iSubscription++) {
@@ -163,7 +163,7 @@ namespace dss {
           if(!first) {
             response << ",";
           }
-          response << "{ \"id\":" << sub.GetID() << "," 
+          response << "{ \"id\":" << sub.GetID() << ","
                    <<   "\"name\":" << ToJSONValue(sub.GetName()) << ","
                    <<   "\"evtids\":" << ToJSONArray<int>(sub.GetEventIDs()) << ","
                    <<   "\"srcids\":" << ToJSONArray<int>(sub.GetSourceIDs())
@@ -171,24 +171,24 @@ namespace dss {
           first = false;
         }
         response << "]}";
-        
+
         shttpd_printf(_arg, response.str().c_str());
       } else if(method == "subscription/unsubscribe") {
         EmitHTTPHeader(200, _arg, "application/json");
-        
+
         if(!paramMap["id"].empty()) {
           int subscriptionID = StrToInt(paramMap["id"]);
-          
+
           DSS::GetInstance()->GetApartment().Unsubscribe(subscriptionID);
-          
-          shttpd_printf(_arg, "{ok:1}");        
+
+          shttpd_printf(_arg, "{ok:1}");
         } else {
-          shttpd_printf(_arg, "{ok:0}");        
+          shttpd_printf(_arg, "{ok:0}");
         }
-        
+
       } else if(method == "subscription/subscribe") {
         EmitHTTPHeader(200, _arg, "application/json");
-        
+
         string evtIDsString = paramMap["evtids"];
         string sourceIDsString = paramMap["sourceids"];
         string actionName = paramMap["action"];
@@ -196,8 +196,8 @@ namespace dss {
       }
     } else if(BeginsWith(method, "event/")) {
       EmitHTTPHeader(200, _arg, "application/json");
-      
-      
+
+
       if(method == "event/getlist") {
         stringstream response;
         response << "{ \"events\":[";
@@ -208,7 +208,7 @@ namespace dss {
           if(!first) {
             response << ",";
           }
-          response << "{ id: " << iEvent << "," 
+          response << "{ id: " << iEvent << ","
                    <<   "\"evtid\":" << schedEvt.GetEvent().GetID() << ","
                    <<   "\"sourceid\":" << schedEvt.GetEvent().GetSource() << ","
                    <<   "\"name\": \"" << schedEvt.GetName() << "\""
@@ -216,12 +216,12 @@ namespace dss {
           first = false;
         }
         response << "]}";
-        
+
         shttpd_printf(_arg, response.str().c_str());
       } else if(method == "event/remove") {
         int eventID = StrToInt(paramMap["id"]);
         DSS::GetInstance()->GetEventRunner().RemoveEvent(eventID);
-        shttpd_printf(_arg, "{ok:1}");        
+        shttpd_printf(_arg, "{ok:1}");
       } else if(paramMap["evtid"].empty() || paramMap["sourceid"].empty()) {
         shttpd_printf(_arg, "{ok:0}");
       } else {
@@ -238,18 +238,18 @@ namespace dss {
             string schedule = paramMap["schedule"];
             string startTimeISO = paramMap["start"];
             string name = paramMap["name"];
-            
+
             boost::shared_ptr<Event> evt(new Event(eventID, sourceID));
             boost::shared_ptr<Schedule> sch(new ICalSchedule(schedule, startTimeISO));
-            
+
             ScheduledEvent* scheduledEvent = new ScheduledEvent(evt, sch);
             if(!name.empty()) {
               scheduledEvent->SetName(name);
             }
-            
+
             DSS::GetInstance()->GetEventRunner().AddEvent(scheduledEvent);
             shttpd_printf(_arg, "{ok:1}");
-          }          
+          }
         } else {
           shttpd_printf(_arg, "{ok:0}");
         }
@@ -259,23 +259,23 @@ namespace dss {
     }
     _arg->flags |= SHTTPD_END_OF_OUTPUT;
   } // JSONHandler
-  
+
   void WebServer::HTTPListOptions(struct shttpd_arg* _arg) {
     EmitHTTPHeader(200, _arg);
     shttpd_printf(_arg, "%s", "<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><body>");
     shttpd_printf(_arg, "%s", "<h1>Configuration</h1>");
-    
+
     stringstream stream;
     stream << "<ul>";
-    
+
     const HashMapConstStringString& options = DSS::GetInstance()->GetConfig().GetOptions();
     for(HashMapConstStringString::const_iterator iOption = options.begin(); iOption != options.end(); ++iOption) {
       stream << "<li>" << iOption->first << " = " << iOption->second << "</li>";
     }
     stream << "</ul></body></html>";
     shttpd_printf(_arg, stream.str().c_str());
-    
+
     _arg->flags |= SHTTPD_END_OF_OUTPUT;
   } // HTTPListOptions
-  
+
 }

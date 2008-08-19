@@ -33,21 +33,15 @@ ThreadStarterHelperFunc( void* _pThreadObj ) {
 } // ThreadStarterHelpFunc
 
 
-Thread::Thread( bool _createSuspended, const char* _name )
+Thread::Thread(const char* _name )
   : m_ThreadHandle( 0 ),
     m_Name( _name ),
     m_FreeAtTermination( false ),
     m_Running( false ),
     m_Terminated( false )
-{
-  if( !_createSuspended ) {
-    Run();
-  }
-}
+{ } // ctor
 
-
-Thread::~Thread()
-{
+Thread::~Thread() {
   cout << "~Thread" << endl;
   if( m_Name != NULL  ) {
     cout << "  Thread: " << m_Name << endl;
@@ -60,7 +54,7 @@ Thread::~Thread()
     WaitForSingleObject( m_ThreadHandle, INFINITE );
 #endif
   }
-}
+} // dtor
 
 bool Thread::Run() {
   assert( !m_Running );
@@ -75,7 +69,6 @@ bool Thread::Run() {
 #endif
   return true;
 } // Run
-
 
 bool Thread::Stop() {
 #ifdef WIN32
