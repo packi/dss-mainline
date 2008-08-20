@@ -5,16 +5,37 @@
 #include "../../unix/ds485.h"
 #include "../xmlwrapper.h"
 
-
 #include <map>
 #include <vector>
 
 using namespace std;
 
+#include <boost/ptr_container/ptr_vector.hpp>
+
 namespace dss {
   class DSIDSim;
   class DS485Frame;
   class DSIDInterface;
+
+  class DSIDCreator {
+  private:
+    string m_Identifier;
+  public:
+    DSIDCreator(const string _identifier);
+    virtual ~DSIDCreator() {};
+
+    const string& GetIdentifier() { return m_Identifier; };
+    virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress) = 0;
+  };
+
+  class DSIDFactory {
+  private:
+    boost::ptr_vector<DSIDCreator> m_RegisteredCreators;
+  public:
+    DSIDInterface* CreateDSID(const string& _identifier, const dsid_t _dsid, const devid_t _shortAddress);
+
+    void RegisterCreator(DSIDCreator* _creator);
+  };
 
   typedef map< const pair<const int, const int>,  vector<DSIDInterface*> > IntPairToDSIDSimVector;
 
@@ -26,10 +47,13 @@ namespace dss {
     map< const int, vector<DSIDInterface*> > m_Rooms;
     IntPairToDSIDSimVector m_DevicesOfGroupInRoom;
     vector<DS485Frame*> m_PendingFrames;
+    DSIDFactory m_DSIDFactory;
   private:
     void LoadFromConfig();
     void LoadDevices(XMLNodeList& _nodes, const int _roomID);
     void LoadRooms(XMLNodeList& _nodes);
+
+    void LoadPlugins();
 
     DSIDInterface& LookupDevice(const devid_t _id);
     DS485CommandFrame* CreateResponse(DS485CommandFrame& _request, uint8 _functionID);
@@ -46,12 +70,18 @@ namespace dss {
   }; // DSModulatorSim
 
   class DSIDInterface {
+  private:
+    dsid_t m_DSID;
+    devid_t m_ShortAddress;
   public:
+    DSIDInterface(dsid_t _dsid, devid_t _shortAddress)
+    : m_DSID(_dsid), m_ShortAddress(_shortAddress) {};
+
     virtual ~DSIDInterface() {};
 
-    virtual dsid_t GetDSID() const = 0;
-    virtual devid_t GetShortAddress() const = 0;
-    virtual void SetShortAddress(const devid_t _shortAddress) = 0;
+    virtual dsid_t GetDSID() const { return m_DSID; };
+    virtual devid_t GetShortAddress() const { return m_ShortAddress; };
+    virtual void SetShortAddress(const devid_t _value) { m_ShortAddress = _value; };
 
     virtual void CallScene(const int _sceneNr) = 0;
     virtual void SaveScene(const int _sceneNr) = 0;
@@ -76,8 +106,6 @@ namespace dss {
 
   class DSIDSim : public DSIDInterface {
   private:
-    const dsid_t m_DSID;
-    int m_ShortAddress;
     bool m_On;
     bool m_Enabled;
     bool m_Dimming;
@@ -89,12 +117,8 @@ namespace dss {
     uint8 m_CurrentValue;
     int m_DimTimeMS;
   public:
-    DSIDSim(const dsid_t _dsid);
+    DSIDSim(const dsid_t _dsid, const devid_t _shortAddress);
     virtual ~DSIDSim() {};
-
-    virtual dsid_t GetDSID() const;
-    virtual devid_t GetShortAddress() const;
-    virtual void SetShortAddress(const devid_t _shortAddress);
 
     virtual void CallScene(const int _sceneNr);
     virtual void SaveScene(const int _sceneNr);

@@ -9,6 +9,19 @@
 
 namespace dss {
 
+  class DSIDSimCreator : public DSIDCreator {
+  public:
+    DSIDSimCreator()
+    : DSIDCreator("standard.simple")
+    {}
+
+    virtual ~DSIDSimCreator() {};
+
+    virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress) {
+      return new DSIDSim(_dsid, _shortAddress);
+    }
+  };
+
   //================================================== DSModulatorSim
 
   DSModulatorSim::DSModulatorSim()
@@ -16,12 +29,17 @@ namespace dss {
     m_ModulatorDSID = SimulationPrefix | 0x0000FFFF;
   } // DSModulatorSim
 
-
   void DSModulatorSim::Initialize() {
     m_ID = 70;
+    m_DSIDFactory.RegisterCreator(new DSIDSimCreator());
+    LoadPlugins();
 
     LoadFromConfig();
-  }
+  } // Initialize
+
+  void DSModulatorSim::LoadPlugins() {
+
+  } // LoadPlugins
 
   void DSModulatorSim::LoadFromConfig() {
     XMLDocumentFileReader reader("data/sim.xml");
@@ -61,11 +79,19 @@ namespace dss {
           Logger::GetInstance()->Log("Sim: missing dsid or busid of device");
           continue;
         }
-        DSIDSim* newDSID = new DSIDSim(dsid);
-        newDSID->SetShortAddress(busid);
-        m_SimulatedDevices.push_back(newDSID);
-        m_Rooms[_roomID].push_back(newDSID);
-        Logger::GetInstance()->Log("Sim: found device");
+        string type = "standard.simple";
+        if(attrs["type"].size() != 0) {
+          type = attrs["type"];
+        }
+
+        DSIDInterface* newDSID = m_DSIDFactory.CreateDSID(type, dsid, busid);
+        if(newDSID != NULL) {
+          m_SimulatedDevices.push_back(newDSID);
+          m_Rooms[_roomID].push_back(newDSID);
+          Logger::GetInstance()->Log("Sim: found device");
+        } else {
+          Logger::GetInstance()->Log(string("Sim: could not create instance for type \"") + type + "\"");
+        }
       }
     }
   } // LoadDevices
@@ -302,9 +328,8 @@ namespace dss {
 
   //================================================== DSIDSim
 
-  DSIDSim::DSIDSim(const dsid_t _dsid)
-  : m_DSID(_dsid),
-    m_ShortAddress(0xFF),
+  DSIDSim::DSIDSim(const dsid_t _dsid, const devid_t _shortAddress)
+  : DSIDInterface(_dsid, _shortAddress),
     m_Enabled(true),
     m_CurrentValue(0)
   {
@@ -316,18 +341,6 @@ namespace dss {
     m_ValuesForScene.push_back(0);   // SceneStandby
     m_ValuesForScene.push_back(0);   // SceneDeepOff
   } // ctor
-
-  dsid_t DSIDSim::GetDSID() const {
-    return m_DSID;
-  } // GetDSID
-
-  devid_t DSIDSim::GetShortAddress() const {
-    return m_ShortAddress;
-  } // GetShortAddress
-
-  void DSIDSim::SetShortAddress(const devid_t _shortAddress) {
-    m_ShortAddress = _shortAddress;
-  }
 
   void DSIDSim::CallScene(const int _sceneNr) {
     if(m_Enabled) {
@@ -396,5 +409,30 @@ namespace dss {
   double DSIDSim::GetValue(int _parameterNr) const {
     return static_cast<double>(m_CurrentValue);
   } // GetValue
+
+  //================================================== DSIDCreator
+
+  DSIDCreator::DSIDCreator(const string _identifier)
+  : m_Identifier(_identifier)
+  {} // ctor
+
+  //================================================== DSIDFactory
+
+  DSIDInterface* DSIDFactory::CreateDSID(const string& _identifier, const dsid_t _dsid, const devid_t _shortAddress) {
+    boost::ptr_vector<DSIDCreator>::iterator
+      iCreator = m_RegisteredCreators.begin(),
+      e = m_RegisteredCreators.end();
+    while(iCreator != e) {
+      if(iCreator->GetIdentifier() == _identifier) {
+        return iCreator->CreateDSID(_dsid, _shortAddress);
+      }
+      ++iCreator;
+    }
+    return NULL;
+  }
+
+  void DSIDFactory::RegisterCreator(DSIDCreator* _creator) {
+    m_RegisteredCreators.push_back(_creator);
+  }
 
 }
