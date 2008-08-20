@@ -131,7 +131,7 @@ namespace dss {
           case FunctionModulatorGetRoomIdForInd:
             {
               uint8 index = pd.Get<uint8>();
-              map< const int, vector<DSIDSim*> >::iterator it = m_Rooms.begin();
+              map< const int, vector<DSIDInterface*> >::iterator it = m_Rooms.begin();
               advance(it, index);
               response = CreateResponse(cmdFrame, cmdNr);
               response->GetPayload().Add<uint8>(it->first);
@@ -217,7 +217,7 @@ namespace dss {
             {
               response = CreateResponse(cmdFrame, cmdNr);
               int devID = pd.Get<uint8>();
-              DSIDSim& dev = LookupDevice(devID);
+              DSIDInterface& dev = LookupDevice(devID);
               response->GetPayload().Add<uint8>(dev.IsTurnedOn());
               DistributeFrame(response);
             }
@@ -226,7 +226,7 @@ namespace dss {
             {
               response = CreateResponse(cmdFrame, cmdNr);
               int devID = pd.Get<uint8>();
-              DSIDSim& dev = LookupDevice(devID);
+              DSIDInterface& dev = LookupDevice(devID);
               response->GetPayload().Add<dsid_t>(dev.GetDSID());
               DistributeFrame(response);
             }
@@ -286,8 +286,8 @@ namespace dss {
   } // CreateResponse
 
 
-  DSIDSim& DSModulatorSim::LookupDevice(const devid_t _shortAddress) {
-    for(vector<DSIDSim*>::iterator ipSimDev = m_SimulatedDevices.begin(); ipSimDev != m_SimulatedDevices.end(); ++ipSimDev) {
+  DSIDInterface& DSModulatorSim::LookupDevice(const devid_t _shortAddress) {
+    for(vector<DSIDInterface*>::iterator ipSimDev = m_SimulatedDevices.begin(); ipSimDev != m_SimulatedDevices.end(); ++ipSimDev) {
       if((*ipSimDev)->GetShortAddress() == _shortAddress)  {
         return **ipSimDev;
       }
@@ -393,12 +393,8 @@ namespace dss {
     }
   } // SetValue
 
-  double DSIDSim::GetValue(int _parameterNr) {
+  double DSIDSim::GetValue(int _parameterNr) const {
     return static_cast<double>(m_CurrentValue);
   } // GetValue
-
-  bool DSIDSim::IsTurnedOn() const {
-    return m_CurrentValue > 0;
-  } // IsTurnedOn
 
 }

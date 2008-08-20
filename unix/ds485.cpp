@@ -33,18 +33,18 @@ namespace dss {
   template<>
   void DS485Payload::Add(uint8 _data) {
     m_Data.push_back(_data);
-  }
+  } // Add<uint8>
 
   template<>
   void DS485Payload::Add(devid_t _data) {
     m_Data.push_back((_data >> 8) & 0x00FF);
     m_Data.push_back((_data >> 0) & 0x00FF);
-  }
+  } // Add<devid_t>
 
   template<>
   void DS485Payload::Add(bool _data) {
     m_Data.push_back(_data);
-  }
+  } // Add<bool>
 
   template<>
   void DS485Payload::Add(dsid_t _data) {
@@ -52,11 +52,11 @@ namespace dss {
     m_Data.push_back((_data & 0x00FF0000) >> 16);
     m_Data.push_back((_data & 0x0000FF00) >> 8);
     m_Data.push_back((_data & 0x000000FF) >> 0);
-  }
+  } // Add<dsid_t>
 
   int DS485Payload::Size() const {
     return m_Data.size();
-  }
+  } // Size
 
   vector<unsigned char> DS485Payload::ToChar() const {
     return m_Data;
@@ -126,6 +126,7 @@ namespace dss {
     return result;
   } // ToChar
 
+
   //================================================== DS485Controller
 
   DS485Controller::DS485Controller()
@@ -162,7 +163,7 @@ namespace dss {
     } else {
       m_SerialCom->PutChar(_ch);
     }
-  }
+  } // PutCharOnWire
 
   bool DS485Controller::PutFrameOnWire(const DS485Frame* _pFrame, bool _freeFrame) {
     vector<unsigned char> chars = _pFrame->ToChar();
@@ -193,12 +194,9 @@ namespace dss {
     return true;
   } // PutFrameOnWire
 
-  struct null_deleter {
-        void operator()(const void *) {} // Do-nothing operator()
-  };
-
   void DS485Controller::Execute() {
     m_SerialCom.reset(new SerialCom());
+    //TODO: read from config
     if(!m_SerialCom->Open("/dev/ttyUSB0")) {
       throw runtime_error("could not open serial port");
     }
@@ -744,6 +742,7 @@ namespace dss {
              (Get<uint8>());
     return result;
   }
+
   //================================================== Global helpers
 
   const char* CommandToString(const uint8 _command) {
