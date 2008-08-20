@@ -15,7 +15,7 @@
 #include "base.h"
 #include "thread.h"
 #ifdef __GNUC__
-  #include "dssim.h"
+  #include "sim/dssim.h"
 #endif
 #include "syncevent.h"
 #include "webserver.h"

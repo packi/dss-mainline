@@ -1,9 +1,9 @@
 #ifndef DSSIM_H_
 #define DSSIM_H_
 
-#include "ds485types.h"
-#include "../unix/ds485.h"
-#include "xmlwrapper.h"
+#include "../ds485types.h"
+#include "../../unix/ds485.h"
+#include "../xmlwrapper.h"
 
 
 #include <map>

@@ -1,8 +1,8 @@
 #include "dssim.h"
 
-#include "ds485const.h"
-#include "base.h"
-#include "logger.h"
+#include "../ds485const.h"
+#include "../base.h"
+#include "../logger.h"
 
 #include <string>
 #include <stdexcept>
