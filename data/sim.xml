@@ -1,20 +1,14 @@
 <?xml version="1.0"?>
 <modulator busid="70" dsid="10">
   <room id="0"> <!-- id can be omitted, in fact room may be omitted if there's only one room -->
-    <device dsid="1" busid="1">
-      <type>builtin.simple</type>
-    </device>
-    <device dsid="2" busid="2">
-      <type>builtin.simple</type>
-    </device>
+    <device dsid="1" busid="1" type="standard.simple" />
+    <device dsid="2" busid="2" type="standard.simple" />
     <group id="15">
       <device busid="1" />
       <device busid="2" />
     </group>
   </room>
   <room id="1">
-    <device dsid="3" busid="3">
-       <type>builtin.simple</type>
-    </device>
+    <device dsid="3" busid="3" />
   </room>  
 </modulator>
