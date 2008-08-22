@@ -8,7 +8,7 @@
 #ifndef DSID_PLUGIN_H_
 #define DSID_PLUGIN_H_
 
-#define DSID_PLUGIN_VERSION 1
+#define DSID_PLUGIN_API_VERSION 1
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,7 +27,7 @@ extern "C" {
     void (*disable)(int _handle);
     void (*get_group)(int _handle);
 
-    void (*start_dim)(int _handle, int _directionUp, int _stopDim, int _parameterNumber);
+    void (*start_dim)(int _handle, int _directionUp, int _parameterNumber);
     void (*end_dim)(int _handle, int _parameterNumber);
     int (*get_group_id)(int _handle);
     int (*get_function_id)(int _handle);

@@ -159,10 +159,8 @@ namespace dss {
     bool broadcast = _frame.GetHeader().IsBroadcast();
     bool sim = IsSimAddress(_frame.GetHeader().GetDestination());
     if(broadcast || sim) {
-      /*
       cout << "sim" << endl;
       DSS::GetInstance()->GetModulatorSim().Send(_frame);
-      */
     }
     if(broadcast || !sim) {
       if(m_DS485Controller.GetState() == csSlave || m_DS485Controller.GetState() == csMaster) {
@@ -347,12 +345,12 @@ namespace dss {
     DS485CommandFrame* frame = results.at(0).get();
 
     PayloadDissector pd(frame->GetPayload());
-    uint16_t functionID = pd.Get<uint16_t>();
+    uint8_t functionID = pd.Get<uint8_t>();
     if(functionID != FunctionModulatorCountDevInRoom) {
       Logger::GetInstance()->Log("function ids are different");
     }
     uint16_t result = pd.Get<uint16_t>();
-
+/*
     if(!pd.IsEmpty()) {
       cout << "haven't used all of the packet" << endl;
       while(!pd.IsEmpty()) {
@@ -362,7 +360,7 @@ namespace dss {
       printf("%x\n", result);
       result = 1;
     }
-
+*/
     return result;
   } // GetDevicesCountInRoom
 

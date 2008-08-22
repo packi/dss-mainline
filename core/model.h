@@ -37,13 +37,13 @@ using namespace std;
 #include <boost/shared_ptr.hpp>
 
 namespace dss {
-  
+
   class Device;
   class Set;
   class DeviceContainer;
   class Apartment;
   class Group;
-  
+
   /** Interface to a single or multiple devices.
    */
   class IDeviceInterface {
@@ -55,7 +55,7 @@ namespace dss {
     /** Turns the device off.
       */
     virtual void TurnOff() = 0;
-    
+
     /** Increases the value of the given parameter by one,
      * If no parameter gets passed, it will increase the default value of the device(s).
      */
@@ -64,7 +64,7 @@ namespace dss {
      * If no parameter gets passed, it will decrease the default value of the device(s).
      */
     virtual void DecreaseValue(const int _parameterNr = -1) = 0;
-    
+
     /** Enables a previously disabled device.
      */
     virtual void Enable() = 0;
@@ -72,7 +72,7 @@ namespace dss {
       * A disabled device does only react to Enable().
       */
     virtual void Disable() = 0;
-    
+
     /** Starts dimming the given parameter.
      * If _directionUp is true, the value gets increased over time. Else its getting decreased
      */
@@ -81,10 +81,10 @@ namespace dss {
     virtual void EndDim(const int _parameterNr = -1)= 0;
     /** Sets the value of the given parameter */
     virtual void SetValue(const double _value, int _parameterNr = -1) = 0;
-    
+
     virtual ~IDeviceInterface() {};
   };
-  
+
   /** Internal reference to a device.
    * A DeviceReference is virtually interchangable with a device. It is used in places
      where a reference to a device is needed.
@@ -98,33 +98,33 @@ namespace dss {
     DeviceReference(const dsid_t _dsid, const Apartment& _apartment);
     DeviceReference(const Device& _device, const Apartment& _apartment);
     virtual ~DeviceReference() {};
-    
+
     Device& GetDevice();
-    devid_t GetDSID() const;
-    
+    dsid_t GetDSID() const;
+
     bool operator==(const DeviceReference& _other) const {
       return m_DSID == _other.m_DSID;
     }
-    
+
     virtual void TurnOn();
     virtual void TurnOff();
-    
+
     virtual void IncreaseValue(const int _parameterNr = -1);
     virtual void DecreaseValue(const int _parameterNr = -1);
-    
+
     virtual void Enable();
     virtual void Disable();
-    
+
     virtual bool IsOn();
-    
+
     virtual void StartDim(const bool _directionUp, const int _parameterNr = -1);
     virtual void EndDim(const int _parameterNr = -1);
-    virtual void SetValue(const double _value, const int _parameterNr = -1);    
+    virtual void SetValue(const double _value, const int _parameterNr = -1);
   };
-  
+
   typedef vector<DeviceReference> DeviceVector;
   typedef DeviceVector::iterator DeviceIterator;
-  
+
   /** Represents a dsID */
   class Device : public IDeviceInterface {
   private:
@@ -138,37 +138,37 @@ namespace dss {
   public:
     Device(const dsid_t _dsid, Apartment* _pApartment);
     virtual ~Device() {};
-    
+
     virtual void TurnOn();
     virtual void TurnOff();
-    
+
     virtual void IncreaseValue(const int _parameterNr = -1);
     virtual void DecreaseValue(const int _parameterNr = -1);
-    
+
     virtual void Enable();
     virtual void Disable();
-    
+
     virtual bool IsOn();
-    
+
     virtual void StartDim(const bool _directionUp, const int _parameterNr = -1);
     virtual void EndDim(const int _parameterNr = -1);
     virtual void SetValue(const double _value, const int _parameterNr = -1);
     double GetValue(const int _parameterNr = -1);
-    
+
     string GetName() const;
     void SetName(const string& _name);
-    
+
     bitset<63>& GetGroupBitmask();
-    bool IsInGroup(const int _groupID) const;    
-    
+    bool IsInGroup(const int _groupID) const;
+
     /** Returns the group id of the _index'th group */
     int GetGroupIdByIndex(const int _index) const;
     /** Returns _index'th group of the device */
     Group& GetGroupByIndex(const int _index);
     /** Returns the number of groups the device is a member of */
     int GetGroupsCount() const;
-    
-    /** Returns the short address of the device. This is the address 
+
+    /** Returns the short address of the device. This is the address
      * the device got from the dSM. */
     devid_t GetShortAddress() const;
     void SetShortAddress(const devid_t _shortAddress);
@@ -179,26 +179,26 @@ namespace dss {
     void SetModulatorID(const int _modulatorID);
     /** Returns the apartment the device resides in. */
     Apartment& GetApartment() const;
-    
+
     bool operator==(const Device& _other) const;
   };
-  
+
   ostream& operator<<(ostream& out, const Device& _dt);
-  
+
   /** Abstract interface to select certain Devices from a set */
   class IDeviceSelector {
   public:
     virtual bool SelectDevice(const Device& _device) const = 0;
     virtual ~IDeviceSelector() {};
   };
-  
+
   /** Abstract interface to perform an Action on each device of a set */
   class IDeviceAction {
   public:
     virtual bool Perform(Device& _device) = 0;
     virtual ~IDeviceAction() {};
   };
-  
+
   /** A set holds an arbitrary list of devices.
     * A Command sent to an instance of this class will replicate the command to all
     * contained devices.
@@ -212,13 +212,13 @@ namespace dss {
     Set(DeviceReference& _reference);
     Set(DeviceVector _devices);
     virtual ~Set() {};
-    
+
     virtual void TurnOn();
     virtual void TurnOff();
-    
+
     virtual void IncreaseValue(const int _parameterNr = -1);
     virtual void DecreaseValue(const int _parameterNr = -1);
-    
+
     virtual void Enable();
     virtual void Disable();
 
@@ -226,48 +226,48 @@ namespace dss {
     virtual void EndDim(const int _parameterNr = -1);
     virtual void SetValue(const double _value, int _parameterNr = -1);
     //HashMapDeviceDouble GetValue(const int _parameterNr = -1);
-    
+
     /** Performs the given action on all contained devices */
     void Perform(IDeviceAction& _deviceAction);
-    
-    /** Returns a subset selected by the given selector 
+
+    /** Returns a subset selected by the given selector
      * A device will be included in the resulting set if _selector.SelectDevice(...) return true.
      */
-    Set GetSubset(const IDeviceSelector& _selector); 
-    /** Returns a subset of the devices which are member of the given group 
+    Set GetSubset(const IDeviceSelector& _selector);
+    /** Returns a subset of the devices which are member of the given group
     * Note that these groups could be spanned over multiple modulators.
      */
     Set GetByGroup(int _groupNr);
-    /** Returns a subset of the devices which are member of the given group 
+    /** Returns a subset of the devices which are member of the given group
      * Note that these groups could be spanned over multiple modulators.
      */
     Set GetByGroup(const Group& _group);
-    /** Returns a subset of the devices which are member of the given group 
+    /** Returns a subset of the devices which are member of the given group
      * Note that these groups could be spanned over multiple modulators.
      */
     Set GetByGroup(const string& _name);
     /** Returns the device indicated by _name
-     */    
+     */
     DeviceReference GetByName(const string& _name);
     /** Returns the device indicated by _id */
     DeviceReference GetByID(const int _id);
-    
+
     /* Returns the number of devices contained in this set */
     int Length() const;
     /* Returns true if the set is empty */
     bool IsEmpty() const;
-    
+
     /* Returns a set that's combined with the set _other.
      * Duplicates get filtered out.
      */
     Set Combine(Set& _other) const;
     /* Returns a set with all device in _other removed */
     Set Remove(Set& _other) const;
-    
+
     /** Returns the _index'th device */
-    DeviceReference& Get(int _index);    
+    DeviceReference& Get(int _index);
     DeviceReference& operator[](const int _index);
-    
+
     /** Returns true if the set contains _device */
     bool Contains(const DeviceReference& _device) const;
     /** Returns true if the set contains _device */
@@ -283,8 +283,8 @@ namespace dss {
     /** Removes the device _device from the set */
     void RemoveDevice(const Device& _device);
   }; // Set
-  
-  
+
+
   /** A class derived from DeviceContainer can deliver a Set of its Devices */
   class DeviceContainer {
   private:
@@ -295,13 +295,13 @@ namespace dss {
     virtual Set GetDevices(const IDeviceSelector& _selector) const {
       return GetDevices().GetSubset(_selector);
     }
-    
+
     virtual void SetName(const string& _name) { m_Name = _name; };
     string GetName() { return m_Name; };
-    
+
     virtual ~DeviceContainer() {};
   }; // DeviceContainer
-  
+
   /** Represents a Modulator */
   class Modulator : public DeviceContainer {
   private:
@@ -317,7 +317,7 @@ namespace dss {
     int GetBusID() const;
     void SetBusID(const int _busID);
   }; // Modulator
-  
+
   /** Represents a predefined group */
   class Group : public DeviceContainer {
   protected:
@@ -328,7 +328,7 @@ namespace dss {
     Group(const int _id, Apartment& _apartment);
     virtual ~Group() {};
     virtual Set GetDevices() const;
-    
+
     /** Returns the id of the group */
     int GetID() const;
 
@@ -336,8 +336,8 @@ namespace dss {
     virtual void AddDevice(const DeviceReference& _device);
     virtual void RemoveDevice(const DeviceReference& _device);
   }; // Group
-  
-  
+
+
   /** Represents a user-defined-group */
   class UserGroup : public Group {
   private:
@@ -351,7 +351,7 @@ namespace dss {
      */
     virtual void RemoveDevice(const Device& _device);
   }; // UserGroup
-  
+
   /** Represents a Room
     */
   class Room : public DeviceContainer {
@@ -361,7 +361,7 @@ namespace dss {
   public:
 	virtual ~Room() {};
     virtual Set GetDevices() const;
-    
+
     /** Adds a device to the room.
      * This will permanently add the device to the room.
      */
@@ -370,22 +370,22 @@ namespace dss {
      * This will permanently remove the device from the room.
      */
     void RemoveDevice(const DeviceReference& _device);
-    
+
     /** Returns the group with the name _name */
     Group GetGroup(const string& _name);
     /** Returns the group with the id _id */
     Group GetGroup(const int _id);
-    
+
     /** Adds a group to the room */
     void AddGroup(UserGroup& _group);
     /** Removes a group from the room */
     void RemoveGroup(UserGroup& _group);
-    
+
     /** Returns the rooms id */
     int GetRoomID() const;
   }; // Room
 
-  
+
   /** Arguments to be passed to an action / event */
   class Arguments {
   private:
@@ -398,7 +398,7 @@ namespace dss {
     /** Sets the value of _name to _value */
     void SetValue(const string& _name, const string& _value);
   };
-  
+
   /** Abstract Action to be executed with a list of Arguments */
   class Action {
   private:
@@ -406,19 +406,19 @@ namespace dss {
     string m_NameForUser;
     int m_ID;
   public:
-    Action(const string& _name, const string& _nameForUser) 
+    Action(const string& _name, const string& _nameForUser)
     : m_Name(_name), m_NameForUser(_nameForUser) {};
-    
+
     virtual ~Action() {};
-    
+
     /** Performs the action with _args */
     virtual void Perform(const Arguments& _args) = 0;
-    
+
     const string& GetName() { return m_Name; };
     const string& GetNameForUser() { return m_NameForUser; };
   };
-  
-  /** 
+
+  /**
    * Event that's been raise by either a hardware or a software component.
    * Hardware-Events shall have unique id's where as user-defined software-events shall be above a certain number (e.g. 1024)
    */
@@ -430,15 +430,15 @@ namespace dss {
     devid_t m_Source;
     Arguments m_Arguments;
   public:
-    Event(int _id, int _sourceID) 
+    Event(int _id, int _sourceID)
     : m_ID(_id), m_Source(_sourceID) {};
-    
+
     /** Returns the id of the event */
     int GetID() const { return m_ID; };
     /** Returns the source of the event */
     devid_t GetSource() const { return m_Source; };
   };
-  
+
   /** Subscription to one or many event-ids which may be restricted by one or many source-ids */
   class Subscription {
   private:
@@ -452,23 +452,23 @@ namespace dss {
     Subscription(const int _id, Action& _action, Arguments& _actionArgs, vector<int> _eventIDs, vector<int> _sourceIDs)
     : m_ID(_id), m_ActionArguments(_actionArgs), m_ActionToExecute(_action), m_SourceIDs(_sourceIDs), m_EventIDs(_eventIDs) {};
     virtual ~Subscription() {};
-    
+
     virtual void OnEvent(const Event& _event) { m_ActionToExecute.Perform(m_ActionArguments); };
-    
+
     /** Returns the id of the subscription */
     int GetID() const { return m_ID; };
-    
+
     const string& GetName() const;
     void SetName(const string& _value);
-    
+
     const vector<int>& GetSourceIDs() const;
     const vector<int>& GetEventIDs() const;
-    
+
     /** Returns true if the subscription is subscribed to the event */
     bool HandlesEvent(const Event& _event) const;
   };
-  
-  /** Represents an Apartment 
+
+  /** Represents an Apartment
     * This is the root of the datamodel of the dss. The Apartment is responsible for delivering
     * and loading all subitems.
     */
@@ -480,7 +480,7 @@ namespace dss {
     vector<Modulator*> m_StaleModulators;
     vector<Room*> m_StaleRooms;
     vector<Group*> m_StaleGroups;
-    
+
     vector<Room*> m_Rooms;
     vector<Modulator*> m_Modulators;
     vector<Device*> m_Devices;
@@ -497,32 +497,32 @@ namespace dss {
   public:
     Apartment();
     virtual ~Apartment();
-    
+
     /** Returns a set containing all devices of the set */
     virtual Set GetDevices() const;
-    
+
     /** Starts the event-processing */
     virtual void Execute();
     /** Loads the datamodel and marks the contained items as "stale" */
     void ReadConfigurationFromXML(const string& _fileName);
-    
+
     /** Returns a reference to the device with the DSID _dsid */
-    Device& GetDeviceByDSID(const dsid_t _dsid) const;    
+    Device& GetDeviceByDSID(const dsid_t _dsid) const;
     /** Returns a reference to the device with the name _name*/
     Device& GetDeviceByName(const string& _name);
-    
-    /** Allocates a device and returns a reference to it. 
+
+    /** Allocates a device and returns a reference to it.
      *  If there is a stale device with the same dsid, this device gets "activated"
      */
     Device& AllocateDevice(const dsid_t _dsid);
-    
+
     /** Returns the Room by name */
     Room& GetRoom(const string& _roomName);
     /** Returns the Room by its id */
     Room& GetRoom(const int _id);
     /** Returns a vector of all rooms */
     vector<Room*>& GetRooms();
-    
+
     /** Returns a Modulator by name */
     Modulator& GetModulator(const string& _modName);
     /** Returns a Modulator by DSID  */
@@ -531,21 +531,21 @@ namespace dss {
     Modulator& GetModulatorByBusID(const int _busID);
     /** Returns a vector of all modulators */
     vector<Modulator*>& GetModulators();
-    
+
     /** Returns a Group by name */
     Group& GetGroup(const string& _name);
     /** Returns a Group by id */
     Group& GetGroup(const int _id);
     /** Returns a vector of all groups */
     vector<Group*>& GetGroups();
-    
+
     /** Allocates a group */
     UserGroup& AllocateGroup(const int _id);
-    
+
   public:
     void AddAction(Action* _action);
     Action& GetAction(const string& _name);
-    
+
     /** Adds a subscription.
      * @param _action Action to be executed if a matching event gets raised
      * @param _eventIDs Ids to subscribe to
@@ -556,11 +556,11 @@ namespace dss {
     void Unsubscribe(const int _subscriptionID);
     int GetSubscriptionCount();
     Subscription& GetSubscription(const int _index);
-    
+
     /** Feeds an event to the processing-queue */
     void OnEvent(const Event& _event);
   }; // Apartment
-  
+
 
   /** Combines an Event with a Schedule
     * These events get raised according to their Schedule
@@ -571,41 +571,41 @@ namespace dss {
     boost::shared_ptr<Schedule> m_Schedule;
     string m_Name;
   public:
-    ScheduledEvent(boost::shared_ptr<Event> _evt, boost::shared_ptr<Schedule> _schedule) 
+    ScheduledEvent(boost::shared_ptr<Event> _evt, boost::shared_ptr<Schedule> _schedule)
     : m_Event(_evt), m_Schedule(_schedule) {};
-    
+
     Event& GetEvent() const { return *m_Event; };
     Schedule& GetSchedule() const { return *m_Schedule; };
     const string& GetName() const { return m_Name; };
     void SetName(const string& _value) { m_Name = _value; };
   };
 
-  
+
   //============================================= Helper definitions
-  typedef bool (*DeviceSelectorFun)(const Device& _device); 
-  
-  /** Device selector that works on simple function instead of classes */  
+  typedef bool (*DeviceSelectorFun)(const Device& _device);
+
+  /** Device selector that works on simple function instead of classes */
   class DeviceSelector : public IDeviceSelector {
   private:
     DeviceSelectorFun m_SelectorFunction;
   public:
     DeviceSelector(DeviceSelectorFun& _selectorFun) : m_SelectorFunction(_selectorFun) {}
     virtual bool SelectDevice(const Device& _device) { return m_SelectorFunction(_device); }
-    
+
     virtual ~DeviceSelector() {};
-  }; // DeviceSelector  
-  
+  }; // DeviceSelector
+
   /** Exception that will be thrown if a given item could not be found */
   class ItemNotFoundException : public DSSException {
   public:
     ItemNotFoundException(const string& _name) : DSSException(string("Could not find item ") + _name) {};
     ~ItemNotFoundException() throw() {};
   };
-  
+
 }
 
 //#ifdef DOC
-  
+
 #ifndef WIN32
 #include <ext/hash_map>
 #else
@@ -619,15 +619,15 @@ using namespace __gnu_cxx;
 using namespace stdext;
 #endif
 
-namespace __gnu_cxx  
+namespace __gnu_cxx
 {
-  template<> 
-  struct hash< const dss::Modulator* >  {                                                                                           
-    size_t operator()( const dss::Modulator* x ) const  {                                                                                         
-      return x->GetDSID();                                              
-    }                                                                                         
-  };                                 
-  
+  template<>
+  struct hash< const dss::Modulator* >  {
+    size_t operator()( const dss::Modulator* x ) const  {
+      return x->GetDSID();
+    }
+  };
+
 }
 
 //#endif // DOC

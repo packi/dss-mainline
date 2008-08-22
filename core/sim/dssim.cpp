@@ -3,9 +3,18 @@
 #include "../ds485const.h"
 #include "../base.h"
 #include "../logger.h"
+#include "include/dsid_plugin.h"
+
+#include <dlfcn.h>
+
+#include <iostream>
 
 #include <string>
 #include <stdexcept>
+
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
 
 namespace dss {
 
@@ -21,6 +30,98 @@ namespace dss {
       return new DSIDSim(_dsid, _shortAddress);
     }
   };
+
+  class DSIDPlugin : public DSIDInterface {
+  private:
+    void* m_SOHandle;
+    const int m_Handle;
+    struct dsid_interface* m_Interface;
+  public:
+    DSIDPlugin(const dsid_t _dsid, const devid_t _shortAddress, void* _soHandle, const int _handle)
+    : DSIDInterface(_dsid, _shortAddress),
+      m_SOHandle(_soHandle),
+      m_Handle(_handle)
+    {
+      struct dsid_interface* (*get_interface)();
+      *(void**)(&get_interface) = dlsym(m_SOHandle, "dsid_get_interface");
+      char* error;
+      if((error = dlerror()) != NULL) {
+        Logger::GetInstance()->Log("sim: error getting interface");
+      }
+
+      m_Interface = (*get_interface)();
+      if(m_Interface == NULL) {
+        Logger::GetInstance()->Log("sim: got a null interface");
+      }
+    }
+
+    virtual void CallScene(const int _sceneNr) {
+      (*m_Interface->call_scene)(m_Handle, _sceneNr);
+    }
+
+    virtual void SaveScene(const int _sceneNr) {
+      (*m_Interface->save_scene)(m_Handle, _sceneNr);
+    }
+
+    virtual void UndoScene(const int _sceneNr) {
+      (*m_Interface->undo_scene)(m_Handle, _sceneNr);
+    }
+
+    virtual void IncreaseValue(const int _parameterNr = -1) {
+      (*m_Interface->increase_value)(m_Handle, _parameterNr);
+    }
+
+    virtual void DecreaseValue(const int _parameterNr = -1) {
+      (*m_Interface->decrease_value)(m_Handle, _parameterNr);
+    }
+
+    virtual void Enable() {
+      (*m_Interface->enable)(m_Handle);
+    }
+
+    virtual void Disable() {
+      (*m_Interface->disable)(m_Handle);
+    }
+
+    virtual void StartDim(bool _directionUp, const int _parameterNr = -1) {
+      (*m_Interface->start_dim)(m_Handle, _directionUp, _parameterNr);
+    }
+
+    virtual void EndDim(const int _parameterNr = -1) {
+      (*m_Interface->end_dim)(m_Handle, _parameterNr);
+    }
+
+    virtual void SetValue(const double _value, int _parameterNr = -1) {
+      (*m_Interface->set_value)(m_Handle, _parameterNr, _value);
+    }
+
+    virtual double GetValue(int _parameterNr = -1) const {
+      return (*m_Interface->get_value)(m_Handle, _parameterNr);
+    }
+
+  }; // DSIDPlugin
+
+  class DSIDPluginCreator : public DSIDCreator {
+  private:
+    void* m_SOHandle;
+    int (*createInstance)();
+  public:
+    DSIDPluginCreator(void* _soHandle, const char* _pluginName)
+    : DSIDCreator(_pluginName),
+      m_SOHandle(_soHandle)
+    {
+      *(void**)(&createInstance) = dlsym(m_SOHandle, "dsid_create_instance");
+      char* error;
+      if((error = dlerror()) != NULL) {
+        Logger::GetInstance()->Log("sim: error getting pointer to dsid_create_instance");
+      }
+    }
+
+    virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress) {
+      int handle = (*createInstance)();
+      return new DSIDPlugin(_dsid, _shortAddress, m_SOHandle, handle);
+    }
+  }; // DSIDPluginCreator
 
   //================================================== DSModulatorSim
 
@@ -38,8 +139,55 @@ namespace dss {
   } // Initialize
 
   void DSModulatorSim::LoadPlugins() {
+    fs::directory_iterator end_iter;
+     for ( fs::directory_iterator dir_itr("data/plugins");
+           dir_itr != end_iter;
+           ++dir_itr )
+     {
+       try {
+         if (fs::is_regular(dir_itr->status())) {
+           if(EndsWith(dir_itr->leaf(), ".so")) {
+             void* handle = dlopen(dir_itr->string().c_str(), RTLD_LAZY);
+             if(handle == NULL) {
+               Logger::GetInstance()->Log(string("Sim: Could not load plugin \"") + dir_itr->leaf() + "\" message: " + dlerror());
+               continue;
+             }
 
-  } // LoadPlugins
+             dlerror();
+             int (*version)();
+             *(void**) (&version) = dlsym(handle, "dsid_getversion");
+             char* error;
+             if((error = dlerror()) != NULL) {
+                Logger::GetInstance()->Log(string("Sim: could get version from \"") + dir_itr->leaf() + "\":" + error);
+                continue;
+             }
+
+             int ver = (*version)();
+             if(ver != DSID_PLUGIN_API_VERSION) {
+               Logger::GetInstance()->Log(string("Sim: Versionmismatch (plugin: ") + IntToString(ver) + " api:" + IntToString(DSID_PLUGIN_API_VERSION) + ")");
+               continue;
+             }
+
+             const char* (*get_name)();
+             *(void**)(&get_name) = dlsym(handle, "dsid_get_plugin_name");
+             if((error = dlerror()) != NULL) {
+                Logger::GetInstance()->Log(string("Sim: could get name from \"") + dir_itr->leaf() + "\":" + error);
+                continue;
+             }
+             const char* pluginName = (*get_name)();
+             if(pluginName == NULL) {
+               Logger::GetInstance()->Log(string("Sim: could get name from \"") + dir_itr->leaf() + "\":" + error);
+               continue;
+             }
+             Logger::GetInstance()->Log(string("Sim: Plugin provides ") + pluginName);
+             m_DSIDFactory.RegisterCreator(new DSIDPluginCreator(handle, pluginName));
+           }
+         }
+       } catch (const std::exception & ex) {
+         Logger::GetInstance()->Log(dir_itr->leaf() + " " + ex.what());
+       }
+     }
+    } // LoadPlugins
 
   void DSModulatorSim::LoadFromConfig() {
     XMLDocumentFileReader reader("data/sim.xml");
@@ -168,14 +316,14 @@ namespace dss {
             {
               uint8 index = pd.Get<uint8>();
               response = CreateResponse(cmdFrame, cmdNr);
-              response->GetPayload().Add<uint8>(m_Rooms[index].size());
+              response->GetPayload().Add<uint16_t>(m_Rooms[index].size());
               DistributeFrame(response);
             }
             break;
           case FunctionModulatorDevKeyInRoom:
             {
               uint8 roomID = pd.Get<uint8>();
-              uint8 deviceIndex = pd.Get<uint8>();
+              uint8 deviceIndex = pd.Get<devid_t>();
               response = CreateResponse(cmdFrame, cmdNr);
               response->GetPayload().Add<uint8>(m_Rooms[roomID].at(deviceIndex)->GetShortAddress());
               DistributeFrame(response);

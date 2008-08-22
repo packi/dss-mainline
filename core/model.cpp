@@ -494,6 +494,7 @@ namespace dss {
           }
         }
       }
+      break;
     }
   } // Run
 
@@ -904,7 +905,7 @@ namespace dss {
     return m_Apartment->GetDeviceByDSID(m_DSID);
   } // GetDevice
 
-  devid_t DeviceReference::GetDSID() const {
+  dsid_t DeviceReference::GetDSID() const {
     return m_DSID;
   } // GetID
 
