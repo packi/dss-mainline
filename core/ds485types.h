@@ -17,6 +17,15 @@ namespace dss {
   typedef unsigned char uint8;
   typedef unsigned long dsid_t;
 
+  typedef enum  {
+    Click,
+    Hold,
+    HoldEnd,
+    ShortClick,
+    DoubleClick,
+    ProgrammClick
+  } ButtonPressKind;
+
 }
 
 #endif

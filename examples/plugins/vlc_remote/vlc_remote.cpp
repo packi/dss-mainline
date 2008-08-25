@@ -3,6 +3,12 @@
 #include <iostream>
 #include <map>
 
+#include <Poco/Net/StreamSocket.h>
+#include <Poco/Net/SocketStream.h>
+#include <Poco/Net/SocketAddress.h>
+#include <Poco/StreamCopier.h>
+#include <Poco/Exception.h>
+
 #include "../../../core/sim/include/dsid_plugin.h"
 
 class DSID {
@@ -22,18 +28,37 @@ class DSID {
     virtual void EndDim(const int _parameterNr = -1) = 0;
     virtual void SetValue(const double _value, int _parameterNr = -1) = 0;
 
-    virtual double GetValue(int _parameterNr = -1) const = 0;    
+    virtual double GetValue(int _parameterNr = -1) const = 0;
 };
 
 class DSIDVLCRemote : public DSID {
     virtual void CallScene(const int _sceneNr) {
-      std::cout << "call scene " << _sceneNr << "\n";  
+      std::cout << "call scene " << _sceneNr << "\n";
+       try
+        {
+                Poco::Net::SocketAddress sa("localhost", 1500);
+                Poco::Net::StreamSocket sock(sa);
+                Poco::Net::SocketStream str(sock);
+
+                std::cout << "before sending" << std::endl;
+                str << "pause\r\n" << std::flush;
+                //Poco::StreamCopier::copyStream(str, std::cout);
+                str << "logout\r\n" << std::flush;
+                std::cout << "done sending" << std::endl;
+
+                sock.close();
+        }
+        catch (Poco::Exception& exc)
+        {
+                std::cerr << exc.displayText() << std::endl;
+        }
+        std::cout << "end call scene" << std::endl;
     }
     virtual void SaveScene(const int _sceneNr) {
-      std::cout << "save scene " << _sceneNr << "\n";  
+      std::cout << "save scene " << _sceneNr << "\n";
     }
     virtual void UndoScene(const int _sceneNr) {
-      std::cout << "undo scene " << _sceneNr << "\n";  
+      std::cout << "undo scene " << _sceneNr << "\n";
     }
 
     virtual void IncreaseValue(const int _parameterNr = -1) {
@@ -73,7 +98,7 @@ private:
   int m_NextHandle;
 
 private:
-  DSIDFactory() 
+  DSIDFactory()
   : m_NextHandle(1)
   { }
 public:
@@ -131,7 +156,7 @@ void set_value(int _handle, int _parameterNumber, double _value) {
 void increase_value(int _handle, int _parameterNumber) {
   DSIDFactory::GetInstance().GetDSID(_handle)->IncreaseValue(_parameterNumber);
 } // increase_value
- 
+
 void decrease_value(int _handle, int _parameterNumber) {
   DSIDFactory::GetInstance().GetDSID(_handle)->DecreaseValue(_parameterNumber);
 } // decrease_value
@@ -152,7 +177,7 @@ void enable(int _handle) {
   DSIDFactory::GetInstance().GetDSID(_handle)->Enable();
 } // enable
 
-void disable(int _handle) { 
+void disable(int _handle) {
   DSIDFactory::GetInstance().GetDSID(_handle)->Disable();
 } // disable
 

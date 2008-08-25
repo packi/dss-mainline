@@ -18,6 +18,8 @@ namespace fs = boost::filesystem;
 
 namespace dss {
 
+  //================================================== DSIDSimCreator
+
   class DSIDSimCreator : public DSIDCreator {
   public:
     DSIDSimCreator()
@@ -30,6 +32,23 @@ namespace dss {
       return new DSIDSim(_dsid, _shortAddress);
     }
   };
+
+  //================================================== DSIDSimCreator
+
+  class DSIDSimSwitchCreator : public DSIDCreator {
+  public:
+    DSIDSimSwitchCreator()
+    : DSIDCreator("standard.switch")
+    {}
+
+    virtual ~DSIDSimSwitchCreator() {};
+
+    virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress) {
+      return new DSIDSimSwitch(_dsid, _shortAddress, 9);
+    }
+  };
+
+  //================================================== DSIDPlugin
 
   class DSIDPlugin : public DSIDInterface {
   private:
@@ -101,6 +120,9 @@ namespace dss {
 
   }; // DSIDPlugin
 
+
+  //================================================== DSIDPluginCreator
+
   class DSIDPluginCreator : public DSIDCreator {
   private:
     void* m_SOHandle;
@@ -133,6 +155,7 @@ namespace dss {
   void DSModulatorSim::Initialize() {
     m_ID = 70;
     m_DSIDFactory.RegisterCreator(new DSIDSimCreator());
+    m_DSIDFactory.RegisterCreator(new DSIDSimSwitchCreator());
     LoadPlugins();
 
     LoadFromConfig();

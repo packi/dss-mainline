@@ -138,6 +138,19 @@ namespace dss {
   }; // DSIDSim
 
 
+
+  class DSIDSimSwitch : public DSIDSim {
+  private:
+    const int m_NumberOfButtons;
+  public:
+    DSIDSimSwitch(const dsid_t _dsid, const devid_t _shortAddress, const int _numButtons)
+    : DSIDSim(_dsid, _shortAddress),
+      m_NumberOfButtons(_numButtons)
+    {};
+    ~DSIDSimSwitch() {};
+
+    void PressKey(const ButtonPressKind _kind, const int _buttonNr);
+  };
 }
 
 #endif /*DSSIM_H_*/
