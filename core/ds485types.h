@@ -19,8 +19,8 @@ namespace dss {
 
   typedef enum  {
     Click,
-    Hold,
-    HoldEnd,
+    Touch,
+    TouchEnd,
     ShortClick,
     DoubleClick,
     ProgrammClick

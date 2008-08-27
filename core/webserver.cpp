@@ -72,6 +72,15 @@ namespace dss {
   } // ToJSONValue
 
   template<>
+  string ToJSONValue(const bool& _value) {
+    if(_value) {
+      return "true";
+    } else {
+      return "false";
+    }
+  }
+
+  template<>
   string ToJSONValue(const string& _value) {
     return string("\"") + _value + '"';
   } // ToJSONValue
@@ -122,8 +131,9 @@ namespace dss {
           sstream << ",";
         }
         sstream << "{ \"id\": " << d.GetDSID()
+                << ", \"isSwitch\": " << ToJSONValue(d.IsSwitch())
                 << ", \"name\": \"" << d.GetDevice().GetName()
-                << "\", \"on\": " << (d.IsOn() ? "true" : "false") << " }";
+                << "\", \"on\": " << ToJSONValue(d.IsOn()) << " }";
       }
       sstream << "]}";
 
@@ -147,6 +157,47 @@ namespace dss {
         DSS::GetInstance()->GetApartment().GetDeviceByDSID(devid).TurnOff();
         shttpd_printf(_arg, "{ok:1}");
       } else {
+        shttpd_printf(_arg, "{ok:0}");
+      }
+    } else if(BeginsWith(method, "sim/switch/")) {
+      EmitHTTPHeader(200, _arg, "application/json");
+
+      bool fail = true;
+      string devidStr = paramMap["device"];
+      if(method == "sim/switch/getstate") {
+        if(!devidStr.empty()) {
+          dsid_t devid = StrToUInt(devidStr);
+          DSIDInterface* dev = DSS::GetInstance()->GetModulatorSim().GetSimulatedDevice(devid);
+          DSIDSimSwitch* sw = NULL;
+          if(dev != NULL && (sw = dynamic_cast<DSIDSimSwitch*>(dev)) != NULL) {
+            stringstream sstream;
+            sstream << "{ groupid: " << DSS::GetInstance()->GetModulatorSim().GetGroupForSwitch(sw)
+                    << " }";
+            shttpd_printf(_arg, sstream.str().c_str());
+            fail = false;
+          }
+        }
+      } else if(method == "sim/switch/pressed") {
+        if(!devidStr.empty()) {
+          int devid = StrToUInt(devidStr);
+          int buttonNr = StrToIntDef(paramMap["buttonnr"], 1);
+          DSIDInterface* dev = DSS::GetInstance()->GetModulatorSim().GetSimulatedDevice(devid);
+          DSIDSimSwitch* sw = NULL;
+          if(dev != NULL && (sw = dynamic_cast<DSIDSimSwitch*>(dev)) != NULL) {
+            ButtonPressKind kind = Click;
+            string kindStr = paramMap["kind"];
+            if(kindStr == "touch") {
+              kind = Touch;
+            } else if(kindStr == "touchend") {
+              kind = TouchEnd;
+            }
+            DSS::GetInstance()->GetModulatorSim().ProcessButtonPress(*sw, buttonNr, kind);
+            shttpd_printf(_arg, "{ok:1}");
+            fail = false;
+          }
+        }
+      }
+      if(fail) {
         shttpd_printf(_arg, "{ok:0}");
       }
     } else if(BeginsWith(method, "subscription/")) {

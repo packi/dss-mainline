@@ -22,14 +22,14 @@ namespace dss {
 
   class DSIDSimCreator : public DSIDCreator {
   public:
-    DSIDSimCreator()
-    : DSIDCreator("standard.simple")
+    DSIDSimCreator(const DSModulatorSim& _simulator)
+    : DSIDCreator(_simulator, "standard.simple")
     {}
 
     virtual ~DSIDSimCreator() {};
 
     virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress) {
-      return new DSIDSim(_dsid, _shortAddress);
+      return new DSIDSim(GetSimulator(), _dsid, _shortAddress);
     }
   };
 
@@ -37,14 +37,14 @@ namespace dss {
 
   class DSIDSimSwitchCreator : public DSIDCreator {
   public:
-    DSIDSimSwitchCreator()
-    : DSIDCreator("standard.switch")
+    DSIDSimSwitchCreator(const DSModulatorSim& _simulator)
+    : DSIDCreator(_simulator, "standard.switch")
     {}
 
     virtual ~DSIDSimSwitchCreator() {};
 
     virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress) {
-      return new DSIDSimSwitch(_dsid, _shortAddress, 9);
+      return new DSIDSimSwitch(GetSimulator(), _dsid, _shortAddress, 9);
     }
   };
 
@@ -56,8 +56,8 @@ namespace dss {
     const int m_Handle;
     struct dsid_interface* m_Interface;
   public:
-    DSIDPlugin(const dsid_t _dsid, const devid_t _shortAddress, void* _soHandle, const int _handle)
-    : DSIDInterface(_dsid, _shortAddress),
+    DSIDPlugin(const DSModulatorSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress, void* _soHandle, const int _handle)
+    : DSIDInterface(_simulator, _dsid, _shortAddress),
       m_SOHandle(_soHandle),
       m_Handle(_handle)
     {
@@ -118,6 +118,11 @@ namespace dss {
       return (*m_Interface->get_value)(m_Handle, _parameterNr);
     }
 
+    virtual uint8 GetFunctionID() {
+      // TODO: implement get function id for plugins
+      return 0;
+    }
+
   }; // DSIDPlugin
 
 
@@ -128,8 +133,8 @@ namespace dss {
     void* m_SOHandle;
     int (*createInstance)();
   public:
-    DSIDPluginCreator(void* _soHandle, const char* _pluginName)
-    : DSIDCreator(_pluginName),
+    DSIDPluginCreator(const DSModulatorSim& _simulator, void* _soHandle, const char* _pluginName)
+    : DSIDCreator(_simulator, _pluginName),
       m_SOHandle(_soHandle)
     {
       *(void**)(&createInstance) = dlsym(m_SOHandle, "dsid_create_instance");
@@ -141,7 +146,7 @@ namespace dss {
 
     virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress) {
       int handle = (*createInstance)();
-      return new DSIDPlugin(_dsid, _shortAddress, m_SOHandle, handle);
+      return new DSIDPlugin(GetSimulator(), _dsid, _shortAddress, m_SOHandle, handle);
     }
   }; // DSIDPluginCreator
 
@@ -154,8 +159,8 @@ namespace dss {
 
   void DSModulatorSim::Initialize() {
     m_ID = 70;
-    m_DSIDFactory.RegisterCreator(new DSIDSimCreator());
-    m_DSIDFactory.RegisterCreator(new DSIDSimSwitchCreator());
+    m_DSIDFactory.RegisterCreator(new DSIDSimCreator(*this));
+    m_DSIDFactory.RegisterCreator(new DSIDSimSwitchCreator(*this));
     LoadPlugins();
 
     LoadFromConfig();
@@ -203,7 +208,7 @@ namespace dss {
                continue;
              }
              Logger::GetInstance()->Log(string("Sim: Plugin provides ") + pluginName);
-             m_DSIDFactory.RegisterCreator(new DSIDPluginCreator(handle, pluginName));
+             m_DSIDFactory.RegisterCreator(new DSIDPluginCreator(*this, handle, pluginName));
            }
          }
        } catch (const std::exception & ex) {
@@ -227,6 +232,7 @@ namespace dss {
 
       XMLNodeList& nodes = rootNode.GetChildren();
       LoadDevices(nodes, 0);
+      LoadGroups(nodes, 0);
       LoadRooms(nodes);
     }
 
@@ -267,6 +273,33 @@ namespace dss {
     }
   } // LoadDevices
 
+  void DSModulatorSim::LoadGroups(XMLNodeList& _nodes, const int _roomID) {
+    for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
+        iNode != e; ++iNode)
+    {
+      if(iNode->GetName() == "group") {
+        HashMapConstStringString& attrs = iNode->GetAttributes();
+        if(attrs["id"].size() > 0) {
+          int groupID = StrToIntDef(attrs["id"], -1);
+          XMLNodeList& children = iNode->GetChildren();
+          for(XMLNodeList::iterator iChildNode = children.begin(), e = children.end();
+              iChildNode != e; ++iChildNode)
+          {
+            if(iChildNode->GetName() == "device") {
+              attrs = iChildNode->GetAttributes();
+              if(attrs["busid"].size() > 0) {
+                DSIDInterface& dev = LookupDevice(StrToUInt(attrs["busid"]));
+                m_DevicesOfGroupInRoom[pair<const int, const int>(_roomID, groupID)].push_back(&dev);
+              }
+            }
+          }
+        } else {
+          Logger::GetInstance()->Log("Sim: Could not find attribute id of group, skipping entry", lsError);
+        }
+      }
+    }
+  } // LoadGroups
+
   void DSModulatorSim::LoadRooms(XMLNodeList& _nodes) {
     for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
         iNode != e; ++iNode)
@@ -280,6 +313,7 @@ namespace dss {
         if(roomID != -1) {
           Logger::GetInstance()->Log("Sim: found room");
           LoadDevices(iNode->GetChildren(), roomID);
+          LoadGroups(iNode->GetChildren(), roomID);
         } else {
           Logger::GetInstance()->Log("Sim: could not find/parse id for room");
         }
@@ -287,10 +321,74 @@ namespace dss {
     }
   } // LoadRooms
 
-  const uint8 HeaderTypeToken = 0;
-  const uint8 HeaderTypeCommand = 1;
+  void DSModulatorSim::DeviceCallScene(int _deviceID, const int _sceneID) {
+    LookupDevice(_deviceID).CallScene(_sceneID);
+  }
 
-  void DSModulatorSim::Send(DS485Frame& _frame) {
+  void DSModulatorSim::GroupCallScene(const int _roomID, const int _groupID, const int _sceneID) {
+    pair<const int, const int> roomsGroup(_roomID, _groupID);
+    if(m_DevicesOfGroupInRoom.find(roomsGroup) != m_DevicesOfGroupInRoom.end()) {
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom.at(roomsGroup);
+      for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
+          iDSID != e; ++iDSID)
+      {
+        (*iDSID)->CallScene(_sceneID);
+      }
+    }
+  }
+
+  void DSModulatorSim::GroupStartDim(const int _roomID, const int _groupID, bool _up, int _parameterNr) {
+    pair<const int, const int> roomsGroup(_roomID, _groupID);
+    if(m_DevicesOfGroupInRoom.find(roomsGroup) != m_DevicesOfGroupInRoom.end()) {
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom.at(roomsGroup);
+      for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
+          iDSID != e; ++iDSID)
+      {
+        (*iDSID)->StartDim(_up, _parameterNr);
+      }
+    }
+  } // GroupStartDim
+
+  void DSModulatorSim::GroupEndDim(const int _roomID, const int _groupID, const int _parameterNr) {
+    pair<const int, const int> roomsGroup(_roomID, _groupID);
+    if(m_DevicesOfGroupInRoom.find(roomsGroup) != m_DevicesOfGroupInRoom.end()) {
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom.at(roomsGroup);
+      for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
+          iDSID != e; ++iDSID)
+      {
+        (*iDSID)->EndDim(_parameterNr);
+      }
+    }
+  } // GroupEndDim
+
+  void DSModulatorSim::GroupDecValue(const int _roomID, const int _groupID, const int _parameterNr) {
+    pair<const int, const int> roomsGroup(_roomID, _groupID);
+    if(m_DevicesOfGroupInRoom.find(roomsGroup) != m_DevicesOfGroupInRoom.end()) {
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom.at(roomsGroup);
+      for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
+          iDSID != e; ++iDSID)
+      {
+        (*iDSID)->DecreaseValue(_parameterNr);
+      }
+    }
+  } // GroupDecValue
+
+  void DSModulatorSim::GroupIncValue(const int _roomID, const int _groupID, const int _parameterNr) {
+    pair<const int, const int> roomsGroup(_roomID, _groupID);
+    if(m_DevicesOfGroupInRoom.find(roomsGroup) != m_DevicesOfGroupInRoom.end()) {
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom.at(roomsGroup);
+      for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
+          iDSID != e; ++iDSID)
+      {
+        (*iDSID)->IncreaseValue(_parameterNr);
+      }
+    }
+  } // GroupIncValue
+
+  void DSModulatorSim::Process(DS485Frame& _frame) {
+    const uint8 HeaderTypeToken = 0;
+    const uint8 HeaderTypeCommand = 1;
+
     DS485Header& header = _frame.GetHeader();
     if(header.GetType() == HeaderTypeToken) {
       // Transmit pending things
@@ -303,10 +401,18 @@ namespace dss {
         switch(cmdNr) {
           case FunctionDeviceCallScene:
             {
-              int devID = pd.Get<uint8>();
+              devid_t devID = pd.Get<devid_t>();
               int sceneID = pd.Get<uint8>();
-              LookupDevice(devID).CallScene(sceneID);
+              DeviceCallScene(devID, sceneID);
               DistributeFrame(boost::shared_ptr<DS485CommandFrame>(CreateAck(cmdFrame, cmdNr)));
+            }
+            break;
+          case FunctionDeviceGetFunctionID:
+            {
+              devid_t devID = pd.Get<devid_t>();
+              response = CreateResponse(cmdFrame, cmdNr);
+              response->GetPayload().Add<uint8>(LookupDevice(devID).GetFunctionID());
+              DistributeFrame(response);
             }
             break;
           case FunctionDeviceGetParameterValue:
@@ -455,7 +561,7 @@ namespace dss {
         }
       }
     }
-  } // Send
+  } // Process
 
 
   DS485CommandFrame* DSModulatorSim::CreateReply(DS485CommandFrame& _request) {
@@ -497,10 +603,106 @@ namespace dss {
     return m_ID;
   } // GetID
 
+  void DSModulatorSim::ProcessButtonPress(const DSIDSimSwitch& _switch, int _buttonNr, const ButtonPressKind _kind) {
+     // if we have subscriptions, notify the listeners
+    if(m_ButtonSubscriptionFlag.find(&_switch) != m_ButtonSubscriptionFlag.end()) {
+      // send keypress frame
+    } else {
+      // redistribute according to the selected color, etc...
+      int groupToControl = GetGroupForSwitch(&_switch);
+      if(_switch.GetNumberOfButtons() == 9) {
+        // for 9 button switches we'll need to track the groups ourselves
+        // 1 2 3
+        // 4 5 6
+        // 7 8 9
+        // 1 sets the group to light, 3 is security
+        // 7 is for audio and 9 toggles between the others
+        // 9 toggles between on and off
+        // click: 2 Scene(1) on, 8 Scene(0) off,
+        //
+        if(_buttonNr == 1) {
+          if(_kind == Click || _kind == TouchEnd) {
+            m_ButtonToGroupMapping[&_switch] = GroupIDYellow;
+          }
+        } else if(_buttonNr == 3) {
+          if(_kind == Click || _kind == TouchEnd) {
+            m_ButtonToGroupMapping[&_switch] = GroupIDRed;
+          }
+        } else if(_buttonNr == 7) {
+          if(_kind == Click || _kind == TouchEnd) {
+            m_ButtonToGroupMapping[&_switch] = GroupIDCyan;
+          }
+        } else if(_buttonNr == 9) {
+          if(_kind == Click || _kind == TouchEnd) {
+            if((groupToControl + 1) > GroupIDMax) {
+              m_ButtonToGroupMapping[&_switch] = GroupIDYellow;
+            } else {
+              m_ButtonToGroupMapping[&_switch] = groupToControl + 1;
+            }
+          }
+        } else if(_buttonNr == 2) {
+          // TODO: select correct room
+          if(_kind == Click) {
+            //GroupCallScene(0, groupToControl, Scene1);
+            GroupIncValue(0, groupToControl, 1);
+          } else if(_kind == Touch) {
+            GroupStartDim(0, groupToControl, true, 0);
+          } else if(_kind == TouchEnd) {
+            GroupEndDim(0, groupToControl, 0);
+          }
+        } else if(_buttonNr == 8) {
+          // TODO: select correct room
+          if(_kind == Click) {
+//            GroupCallScene(0, groupToControl, SceneOff);
+            GroupDecValue(0, groupToControl, 1);
+          } else if(_kind == Touch) {
+            GroupStartDim(0, groupToControl, false, 0);
+          } else if(_kind == TouchEnd) {
+            GroupEndDim(0, groupToControl, 0);
+          }
+        } else if(_buttonNr == 4) {
+          if(_kind == Click) {
+            GroupDecValue(0, groupToControl, 0);
+          }
+        } else if(_buttonNr == 6) {
+          if(_kind == Click) {
+            GroupIncValue(0, groupToControl, 0);
+          }
+        } else if(_buttonNr == 5) {
+          if(_kind == Click) {
+            GroupCallScene(0, groupToControl, Scene2);
+          } else if(_kind == Touch) {
+            GroupCallScene(0, groupToControl, SceneOff);
+          }
+        }
+      } else if(_switch.GetNumberOfButtons() == 5) {
+      }
+    }
+  } // ProcessButtonPress
+
+  DSIDInterface* DSModulatorSim::GetSimulatedDevice(const dsid_t _dsid) {
+    for(vector<DSIDInterface*>::iterator iDSID = m_SimulatedDevices.begin(), e = m_SimulatedDevices.end();
+        iDSID != e; ++iDSID)
+    {
+      if((*iDSID)->GetDSID() == _dsid) {
+        return *iDSID;
+      }
+    }
+    return NULL;
+  } // GetSimulatedDevice
+
+  int DSModulatorSim::GetGroupForSwitch(const DSIDSimSwitch* _switch) {
+    if(m_ButtonToGroupMapping.find(_switch) != m_ButtonToGroupMapping.end()) {
+      return m_ButtonToGroupMapping.at(_switch);
+    }
+    return _switch->GetDefaultColor();
+  } // GetGroupForSwitch
+
+
   //================================================== DSIDSim
 
-  DSIDSim::DSIDSim(const dsid_t _dsid, const devid_t _shortAddress)
-  : DSIDInterface(_dsid, _shortAddress),
+  DSIDSim::DSIDSim(const DSModulatorSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress)
+  : DSIDInterface(_simulator, _dsid, _shortAddress),
     m_Enabled(true),
     m_CurrentValue(0)
   {
@@ -581,10 +783,15 @@ namespace dss {
     return static_cast<double>(m_CurrentValue);
   } // GetValue
 
+  uint8 DSIDSim::GetFunctionID() {
+    return FunctionIDDevice;
+  }
+
   //================================================== DSIDCreator
 
-  DSIDCreator::DSIDCreator(const string _identifier)
-  : m_Identifier(_identifier)
+  DSIDCreator::DSIDCreator(const DSModulatorSim& _simulator, const string& _identifier)
+  : m_Identifier(_identifier),
+    m_DSSim(_simulator)
   {} // ctor
 
   //================================================== DSIDFactory

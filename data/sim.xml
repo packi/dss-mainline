@@ -3,8 +3,7 @@
   <room id="0"> <!-- id can be omitted, in fact room may be omitted if there's only one room -->
     <device dsid="1" busid="1" type="standard.switch" />
     <device dsid="2" busid="2" type="example.vlc_remote" />
-    <group id="15">
-      <device busid="1" />
+    <group id="3">
       <device busid="2" />
     </group>
   </room>

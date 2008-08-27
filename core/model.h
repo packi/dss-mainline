@@ -102,6 +102,9 @@ namespace dss {
     Device& GetDevice();
     dsid_t GetDSID() const;
 
+    int GetFunctionID();
+    bool IsSwitch();
+
     bool operator==(const DeviceReference& _other) const {
       return m_DSID == _other.m_DSID;
     }
@@ -154,6 +157,9 @@ namespace dss {
     virtual void EndDim(const int _parameterNr = -1);
     virtual void SetValue(const double _value, const int _parameterNr = -1);
     double GetValue(const int _parameterNr = -1);
+
+    int GetFunctionID();
+    bool IsSwitch();
 
     string GetName() const;
     void SetName(const string& _name);

@@ -35,6 +35,15 @@ namespace dss {
 
   const uint8 FunctionRoomGetGroupIdForInd = 0x17;
 
+  const uint8 FunctionGroupIncreaseValue = 0x20;
+  const uint8 FunctionGroupDecreaseValue = 0x21;
+  const uint8 FunctionGroupStartDimInc = 0x22;
+  const uint8 FunctionGroupStartDimDec = 0x23;
+  const uint8 FunctionGroupEndDim = 0x24;
+  const uint8 FunctionGroupCallScene = 0x25;
+  const uint8 FunctionGroupSaveScene = 0x26;
+  const uint8 FunctionGroupUndoScene = 0x27;
+
   const uint8 FunctionDeviceCallScene = 0x42;
   const uint8 FunctionDeviceIncValue  = 0x40;
   const uint8 FunctionDeviceDecValue  = 0x41;
@@ -44,6 +53,8 @@ namespace dss {
   const uint8 FunctionDeviceGetDSID = 0x65;
 
   const uint8 FunctionModulatorGetDSID = 0xF1;
+
+  const uint8 FunctionDeviceGetFunctionID = 0xF2;
 
   const uint8 FunctionGetTypeRequest = 0xF0;
 
@@ -56,6 +67,19 @@ namespace dss {
   const uint8 SceneStandBy = 0x05;
   const uint8 SceneDeepOff = 0x06;
 
+  const int GroupIDYellow = 0;
+  const int GroupIDGray = 1;
+  const int GroupIDBlue = 2;
+  const int GroupIDCyan = 3;
+  const int GroupIDRed = 4;
+  const int GroupIDViolet = 5;
+  const int GroupIDGreen = 6;
+  const int GroupIDBlack = 7;
+  const int GroupIDWhite = 8;
+  const int GroupIDMax = GroupIDWhite;
+
+  const int FunctionIDDevice = 0;
+  const int FunctionIDSwitch = 1;
 }
 
 #endif /*DS485CONST_H_*/

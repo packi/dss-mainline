@@ -2,6 +2,7 @@
   <head>
     <title>digitalStrom - Server</title>
 	<script src="prototype.js" language="JavaScript" type="text/javascript"></script>
+	<script src="switch.js" language="JavaScript" type="text/javascript"></script>
 	<link rel="stylesheet" type="text/css" href="main.css"/>
 	<script type="text/javascript" language="JavaScript">
 	
@@ -33,20 +34,32 @@
 	  $('numDevs').innerHTML = devices.length;
 	  var devslist = "<h2>Devices</h2><table>";
 	  devslist += "<tr><th>Name</th><th>State</th><th>Actions</th></tr>"
+	  var iSwitch = 0;
+	  var switchIDs = [];
 	  devices.each(function(dev) {
 	    devslist += "<tr><td>" + dev.name + "</td>";
-		if(dev.on) {
-		  devslist += "<td>On</td>";
+		if(dev.isSwitch) {
+			devslist += "<td>switch</td>";
+			devslist += '<td id="switch_' + dev.id + '">'
+			switchIDs[switchIDs.length] = dev.id;
 		} else {
-		  devslist += "<td>Off</td>";
+			if(dev.on) {
+				devslist += "<td>On</td>";
+			} else {
+				devslist += "<td>Off</td>";
+			}
+			devslist += '<td><a href="#" onclick="turnOn(' + dev.id + ')">Turn On</a>';
+			devslist += '&nbsp;<a href="#" onclick="turnOff(' + dev.id + ')">Turn Off</a></td>';
 		}
-	    devslist += '<td><a href="#" onclick="turnOn(' + dev.id + ')">Turn On</a>';
-	    devslist += '&nbsp;<a href="#" onclick="turnOff(' + dev.id + ')">Turn Off</a></td>';
 	    devslist += "</tr>";	    
 	  });
 	  
 	  devslist += "</table>";
 	  $('devList').innerHTML = devslist;
+	  
+	  switchIDs.each(function(switchID) {
+	    var sw = new Switch('switch_' + switchID, switchID);
+	  });
 	}
 	
 	function doUpdate() {

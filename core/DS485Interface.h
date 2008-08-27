@@ -34,7 +34,8 @@ namespace dss {
 	  cmdIncreaseParam,
 	  cmdDecreaseParam,
 	  cmdGetOnOff,
-	  cmdGetValue
+	  cmdGetValue,
+	  cmdGetFunctionID
 	} DS485Command;
 
   class DS485Interface {

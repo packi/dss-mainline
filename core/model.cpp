@@ -83,6 +83,14 @@ namespace dss {
     return res.front() != 0;
   } // IsOn
 
+  int Device::GetFunctionID() {
+    return DSS::GetInstance()->GetDS485Interface().SendCommand(cmdGetFunctionID, *this).front();
+  } // GetFunctionID
+
+  bool Device::IsSwitch() {
+    return GetFunctionID() == FunctionIDSwitch;
+  } // IsSwitch
+
   void Device::SetValue(const double _value, const int _parameterNr) {
   } // SetValue
 
@@ -418,7 +426,7 @@ namespace dss {
     grp = new Group(7, *this);
     grp->SetName("black");
     m_Groups.push_back(grp);
-    grp = new Group(7, *this);
+    grp = new Group(8, *this);
     grp->SetName("white");
     m_Groups.push_back(grp);
   } // ctor
@@ -947,6 +955,10 @@ namespace dss {
 
   bool DeviceReference::IsOn() {
     return GetDevice().IsOn();
+  }
+
+  bool DeviceReference::IsSwitch() {
+    return GetDevice().IsSwitch();
   }
 
 }

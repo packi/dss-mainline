@@ -32,28 +32,37 @@ class DSID {
 };
 
 class DSIDVLCRemote : public DSID {
+
+    void SendCommand(const std::string& _command) {
+      try
+       {
+               Poco::Net::SocketAddress sa("localhost", 1500);
+               Poco::Net::StreamSocket sock(sa);
+               Poco::Net::SocketStream str(sock);
+
+               std::cout << "before sending" << std::endl;
+               str << _command << "\r\n" << std::flush;
+               str << "logout\r\n" << std::flush;
+               std::cout << "done sending" << std::endl;
+
+               sock.close();
+       }
+       catch (Poco::Exception& exc)
+       {
+               std::cerr << exc.displayText() << std::endl;
+       }
+    }
+
     virtual void CallScene(const int _sceneNr) {
       std::cout << "call scene " << _sceneNr << "\n";
-       try
-        {
-                Poco::Net::SocketAddress sa("localhost", 1500);
-                Poco::Net::StreamSocket sock(sa);
-                Poco::Net::SocketStream str(sock);
-
-                std::cout << "before sending" << std::endl;
-                str << "pause\r\n" << std::flush;
-                //Poco::StreamCopier::copyStream(str, std::cout);
-                str << "logout\r\n" << std::flush;
-                std::cout << "done sending" << std::endl;
-
-                sock.close();
-        }
-        catch (Poco::Exception& exc)
-        {
-                std::cerr << exc.displayText() << std::endl;
-        }
-        std::cout << "end call scene" << std::endl;
+      if(_sceneNr == 0) {
+        SendCommand("stop");
+      } else if(_sceneNr == 2) {
+        SendCommand("pause");
+      }
+      std::cout << "end call scene" << std::endl;
     }
+
     virtual void SaveScene(const int _sceneNr) {
       std::cout << "save scene " << _sceneNr << "\n";
     }
@@ -63,10 +72,24 @@ class DSIDVLCRemote : public DSID {
 
     virtual void IncreaseValue(const int _parameterNr = -1) {
       std::cout << "increase value of parameter " << _parameterNr << "\n";
+      // param 0 is the track
+      // param 1 is the volume
+      if(_parameterNr == 0) {
+        SendCommand("next");
+      } else if(_parameterNr == 1) {
+        SendCommand("volup 200");
+      }
     }
 
     virtual void DecreaseValue(const int _parameterNr = -1) {
       std::cout << "decrease value of parameter " << _parameterNr << "\n";
+      // param 0 is the track
+      // param 1 is the volume
+      if(_parameterNr == 0) {
+        SendCommand("prev");
+      } else if(_parameterNr == 1) {
+        SendCommand("voldown 200");
+      }
     }
 
     virtual void Enable() {

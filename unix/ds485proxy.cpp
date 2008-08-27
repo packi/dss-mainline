@@ -131,12 +131,12 @@ namespace dss {
     frame.SetCommand(CommandRequest);
     if(_cmd == cmdTurnOn) {
       frame.GetPayload().Add<uint8>(FunctionDeviceCallScene);
-      frame.GetPayload().Add<uint8>(_id);
+      frame.GetPayload().Add<devid_t>(_id);
       frame.GetPayload().Add<uint8>(Scene1);
       SendFrame(frame);
     } else if(_cmd == cmdTurnOff) {
       frame.GetPayload().Add<uint8>(FunctionDeviceCallScene);
-      frame.GetPayload().Add<uint8>(_id);
+      frame.GetPayload().Add<devid_t>(_id);
       frame.GetPayload().Add<uint8>(SceneOff);
       SendFrame(frame);
     } else if(_cmd == cmdGetOnOff) {
@@ -151,6 +151,12 @@ namespace dss {
       SendFrame(frame);
       uint8 res = ReceiveSingleResult(FunctionDeviceGetParameterValue);
       result.push_back(res);
+    } else if(_cmd == cmdGetFunctionID) {
+      frame.GetPayload().Add<uint8>(FunctionDeviceGetFunctionID);
+      frame.GetPayload().Add<devid_t>(_id);
+      SendFrame(frame);
+      uint8 res = ReceiveSingleResult(FunctionDeviceGetFunctionID);
+      result.push_back(res);
     }
     return result;
   } // SendCommand
@@ -160,7 +166,7 @@ namespace dss {
     bool sim = IsSimAddress(_frame.GetHeader().GetDestination());
     if(broadcast || sim) {
       cout << "sim" << endl;
-      DSS::GetInstance()->GetModulatorSim().Send(_frame);
+      DSS::GetInstance()->GetModulatorSim().Process(_frame);
     }
     if(broadcast || !sim) {
       if(m_DS485Controller.GetState() == csSlave || m_DS485Controller.GetState() == csMaster) {
