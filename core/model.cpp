@@ -30,7 +30,8 @@ namespace dss {
   Device::Device(dsid_t _dsid, Apartment* _pApartment)
   : m_DSID(_dsid),
     m_ShortAddress(0xFF),
-    m_pApartment(_pApartment)
+    m_pApartment(_pApartment),
+    m_SubscriptionEventID(-1)
   {
   }
 
@@ -106,6 +107,18 @@ namespace dss {
   void Device::SetName(const string& _name) {
     m_Name = _name;
   } // SetName
+
+  bool Device::HasSubscription() const {
+    return m_SubscriptionEventID != -1;
+  } // HasSubscription
+
+  int Device::GetSubscriptionEventID() const {
+    return m_SubscriptionEventID;
+  } // GetSubscriptionEventID
+
+  void Device::SetSubscriptionEventID(const int _value) {
+    m_SubscriptionEventID = _value;
+  } // SetSubscriptionEventID
 
   bool Device::operator==(const Device& _other) const {
     return _other.m_ShortAddress == m_ShortAddress;
@@ -287,9 +300,9 @@ namespace dss {
 
   class ByIDSelector : public IDeviceSelector {
   private:
-    const int m_ID;
+    const devid_t m_ID;
   public:
-    ByIDSelector(const int _id) : m_ID(_id) {}
+    ByIDSelector(const devid_t _id) : m_ID(_id) {}
     virtual ~ByIDSelector() {};
 
     virtual bool SelectDevice(const Device& _device) const {
@@ -297,13 +310,33 @@ namespace dss {
     }
   };
 
-  DeviceReference Set::GetByID(const int _id) {
+  DeviceReference Set::GetByBusID(const devid_t _id) {
     Set resultSet = GetSubset(ByIDSelector(_id));
     if(resultSet.Length() == 0) {
-      throw ItemNotFoundException(string("with id ") + IntToString(_id));
+      throw ItemNotFoundException(string("with busid ") + IntToString(_id));
     }
     return resultSet.m_ContainedDevices.front();
-  } // GetByID
+  } // GetByBusID
+
+  class ByDSIDSelector : public IDeviceSelector {
+  private:
+    const dsid_t m_ID;
+  public:
+    ByDSIDSelector(const dsid_t _id) : m_ID(_id) {}
+    virtual ~ByDSIDSelector() {};
+
+    virtual bool SelectDevice(const Device& _device) const {
+      return _device.GetDSID() == m_ID;
+    }
+  };
+
+  DeviceReference Set::GetByDSID(const dsid_t _dsid) {
+    Set resultSet = GetSubset(ByDSIDSelector(_dsid));
+    if(resultSet.Length() == 0) {
+      throw ItemNotFoundException(string("with dsid ") + IntToString(_dsid));
+    }
+    return resultSet.m_ContainedDevices.front();
+  } // GetByDSID
 
   int Set::Length() const {
     return m_ContainedDevices.size();
@@ -402,31 +435,31 @@ namespace dss {
   : Thread("Apartment"),
     m_NextSubscriptionNumber(1)
   {
-    Group* grp = new Group(0, *this);
+    Group* grp = new Group(1, *this);
     grp->SetName("yellow");
     m_Groups.push_back(grp);
-    grp = new Group(1, *this);
+    grp = new Group(2, *this);
     grp->SetName("gray");
     m_Groups.push_back(grp);
-    grp = new Group(2, *this);
+    grp = new Group(3, *this);
     grp->SetName("blue");
     m_Groups.push_back(grp);
-    grp = new Group(3, *this);
+    grp = new Group(4, *this);
     grp->SetName("cyan");
     m_Groups.push_back(grp);
-    grp = new Group(4, *this);
+    grp = new Group(5, *this);
     grp->SetName("red");
     m_Groups.push_back(grp);
-    grp = new Group(5, *this);
-    grp->SetName("violet");
-    m_Groups.push_back(grp);
     grp = new Group(6, *this);
-    grp->SetName("green");
+    grp->SetName("magenta");
     m_Groups.push_back(grp);
     grp = new Group(7, *this);
-    grp->SetName("black");
+    grp->SetName("green");
     m_Groups.push_back(grp);
     grp = new Group(8, *this);
+    grp->SetName("black");
+    m_Groups.push_back(grp);
+    grp = new Group(9, *this);
     grp->SetName("white");
     m_Groups.push_back(grp);
   } // ctor
@@ -502,6 +535,13 @@ namespace dss {
           }
         }
       }
+      for(vector<Device*>::iterator ipDevice = m_Devices.begin(), e = m_Devices.end();
+          ipDevice != e; ++ipDevice) {
+        Device* dev = *ipDevice;
+        if(dev->HasSubscription()) {
+          interface.Subscribe(dev->GetModulatorID(), 0, dev->GetShortAddress());
+        }
+      }
       break;
     }
   } // Run
@@ -544,9 +584,21 @@ namespace dss {
         } catch(XMLException& e) {
           /* discard node not found exceptions */
         }
+        int eventid = -1;
+        try {
+          XMLNode& nameNode = iNode->GetChildByName("event");
+          if(nameNode.GetChildren().size() > 0) {
+            eventid = StrToIntDef((nameNode.GetChildren()[0]).GetContent(), -1);
+          }
+        } catch(XMLException& e) {
+          /* discard node not found exceptions */
+        }
         Device* newDevice = new Device(dsid, this);
         if(name.size() > 0) {
           newDevice->SetName(name);
+        }
+        if(eventid != -1) {
+          newDevice->SetSubscriptionEventID(eventid);
         }
         m_StaleDevices.push_back(newDevice);
       }
@@ -792,6 +844,14 @@ namespace dss {
     }
     throw ItemNotFoundException(string("Could not find action: ") + _name);
   } // GetAction
+
+  void Apartment::OnKeypress(const dsid_t& _dsid, const ButtonPressKind _kind, const int _number) {
+    Device& dev = GetDeviceByDSID(_dsid);
+    if(dev.HasSubscription()) {
+      Event evt(dev.GetSubscriptionEventID(), _dsid);
+      OnEvent(evt);
+    }
+  } // OnKeypress
 
   //================================================== Modulator
 

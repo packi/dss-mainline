@@ -52,9 +52,13 @@ namespace dss {
   const uint8 FunctionDeviceGetParameterValue = 0x62;
   const uint8 FunctionDeviceGetDSID = 0x65;
 
+  const uint8 FunctionKeyPressed = 0x80;
+
   const uint8 FunctionModulatorGetDSID = 0xF1;
 
   const uint8 FunctionDeviceGetFunctionID = 0xF2;
+
+  const uint8 FunctionDeviceSubscribe = 0xF3;
 
   const uint8 FunctionGetTypeRequest = 0xF0;
 
@@ -67,15 +71,16 @@ namespace dss {
   const uint8 SceneStandBy = 0x05;
   const uint8 SceneDeepOff = 0x06;
 
-  const int GroupIDYellow = 0;
-  const int GroupIDGray = 1;
-  const int GroupIDBlue = 2;
-  const int GroupIDCyan = 3;
-  const int GroupIDRed = 4;
-  const int GroupIDViolet = 5;
-  const int GroupIDGreen = 6;
-  const int GroupIDBlack = 7;
-  const int GroupIDWhite = 8;
+  const int GroupIDBroadcast = 0;
+  const int GroupIDYellow = 1;
+  const int GroupIDGray = 2;
+  const int GroupIDBlue = 3;
+  const int GroupIDCyan = 4;
+  const int GroupIDRed = 5;
+  const int GroupIDViolet = 6;
+  const int GroupIDGreen = 7;
+  const int GroupIDBlack = 8;
+  const int GroupIDWhite = 9;
   const int GroupIDMax = GroupIDWhite;
 
   const int FunctionIDDevice = 0;

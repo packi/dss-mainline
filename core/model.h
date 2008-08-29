@@ -138,6 +138,7 @@ namespace dss {
     Apartment* m_pApartment;
     bitset<63> m_GroupBitmask;
     vector<int> m_Groups;
+    int m_SubscriptionEventID;
   public:
     Device(const dsid_t _dsid, Apartment* _pApartment);
     virtual ~Device() {};
@@ -185,6 +186,10 @@ namespace dss {
     void SetModulatorID(const int _modulatorID);
     /** Returns the apartment the device resides in. */
     Apartment& GetApartment() const;
+
+    bool HasSubscription() const;
+    int GetSubscriptionEventID() const;
+    void SetSubscriptionEventID(const int _value);
 
     bool operator==(const Device& _other) const;
   };
@@ -255,8 +260,11 @@ namespace dss {
     /** Returns the device indicated by _name
      */
     DeviceReference GetByName(const string& _name);
-    /** Returns the device indicated by _id */
-    DeviceReference GetByID(const int _id);
+    /** Returns the device indicated by _busid */
+    DeviceReference GetByBusID(const devid_t _busid);
+
+    /** Returns the device indicated by _dsid */
+    DeviceReference GetByDSID(const dsid_t _dsid);
 
     /* Returns the number of devices contained in this set */
     int Length() const;
@@ -565,6 +573,8 @@ namespace dss {
 
     /** Feeds an event to the processing-queue */
     void OnEvent(const Event& _event);
+
+    void OnKeypress(const dsid_t& _dsid, const ButtonPressKind _kind, const int _number);
   }; // Apartment
 
 

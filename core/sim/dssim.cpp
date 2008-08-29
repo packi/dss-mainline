@@ -534,6 +534,14 @@ namespace dss {
               DistributeFrame(response);
             }
             break;
+          case FunctionDeviceSubscribe:
+            {
+              uint8 groupID = pd.Get<uint8>();
+              devid_t devID = pd.Get<devid_t>();
+              DSIDInterface& dev = LookupDevice(devID);
+              m_ButtonSubscriptionFlag[&dev] = 70;
+            }
+            break;
           case FunctionGetTypeRequest:
             {
               response = CreateResponse(cmdFrame, cmdNr);
@@ -596,7 +604,6 @@ namespace dss {
       }
     }
     throw runtime_error("could not find device");
-
   } // LookupDevice
 
   int DSModulatorSim::GetID() const {
@@ -605,8 +612,23 @@ namespace dss {
 
   void DSModulatorSim::ProcessButtonPress(const DSIDSimSwitch& _switch, int _buttonNr, const ButtonPressKind _kind) {
      // if we have subscriptions, notify the listeners
-    if(m_ButtonSubscriptionFlag.find(&_switch) != m_ButtonSubscriptionFlag.end()) {
+    if(m_ButtonSubscriptionFlag.find(&_switch) != m_ButtonSubscriptionFlag.end() && m_ButtonSubscriptionFlag[&_switch] != -1) {
       // send keypress frame
+      DS485CommandFrame* frame = new DS485CommandFrame();
+      frame->SetCommand(CommandRequest);
+      frame->GetHeader().SetDestination(m_ButtonSubscriptionFlag[&_switch]);
+      frame->GetHeader().SetSource(m_ID);
+      frame->GetHeader().SetBroadcast(false);
+
+      frame->GetPayload().Add<uint8>(FunctionKeyPressed);
+                          /* room */          /* group */      /* short message */
+      uint16_t param = ((0 & 0xFF) << 8) | ((0 & 0x7F) << 1) | 0x0001;
+      frame->GetPayload().Add<uint16_t>(param);
+               /* from switch */   /* switch address */
+      param = (0x80 << 8) | ((_switch.GetShortAddress() & 0x7F) << 8) | ((_buttonNr & 0x0F) << 4) | (_kind & 0x0F);
+      frame->GetPayload().Add<uint16_t>(param);
+
+      DistributeFrame(frame);
     } else {
       // redistribute according to the selected color, etc...
       int groupToControl = GetGroupForSwitch(&_switch);
@@ -692,10 +714,13 @@ namespace dss {
   } // GetSimulatedDevice
 
   int DSModulatorSim::GetGroupForSwitch(const DSIDSimSwitch* _switch) {
-    if(m_ButtonToGroupMapping.find(_switch) != m_ButtonToGroupMapping.end()) {
-      return m_ButtonToGroupMapping.at(_switch);
+    if(_switch != NULL) {
+      if(m_ButtonToGroupMapping.find(_switch) != m_ButtonToGroupMapping.end()) {
+        return m_ButtonToGroupMapping.at(_switch);
+      }
+      return _switch->GetDefaultColor();
     }
-    return _switch->GetDefaultColor();
+    return GroupIDYellow;
   } // GetGroupForSwitch
 
 

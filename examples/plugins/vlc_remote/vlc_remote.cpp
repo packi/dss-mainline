@@ -40,7 +40,7 @@ class DSIDVLCRemote : public DSID {
                Poco::Net::StreamSocket sock(sa);
                Poco::Net::SocketStream str(sock);
 
-               std::cout << "before sending" << std::endl;
+               std::cout << "before sending: " << _command << std::endl;
                str << _command << "\r\n" << std::flush;
                str << "logout\r\n" << std::flush;
                std::cout << "done sending" << std::endl;
@@ -49,7 +49,7 @@ class DSIDVLCRemote : public DSID {
        }
        catch (Poco::Exception& exc)
        {
-               std::cerr << exc.displayText() << std::endl;
+               std::cerr << "******** [vlc_remote.so] exception caught: " << exc.displayText() << std::endl;
        }
     }
 
@@ -77,7 +77,7 @@ class DSIDVLCRemote : public DSID {
       if(_parameterNr == 0) {
         SendCommand("next");
       } else if(_parameterNr == 1) {
-        SendCommand("volup 200");
+        SendCommand("volup");
       }
     }
 
@@ -88,7 +88,7 @@ class DSIDVLCRemote : public DSID {
       if(_parameterNr == 0) {
         SendCommand("prev");
       } else if(_parameterNr == 1) {
-        SendCommand("voldown 200");
+        SendCommand("voldown");
       }
     }
 

@@ -64,6 +64,8 @@ namespace dss {
     virtual dsid_t GetDSIDOfDevice(const int _modulatorID, const int _deviceID) = 0;
     virtual dsid_t GetDSIDOfModulator(const int _modulatorID) = 0;
 
+    virtual void Subscribe(const int _moduatorID, const int _groupID, const int _deviceID) = 0;
+
     //------------------------------------------------ Device manipulation
     virtual vector<int> SendCommand(DS485Command _cmd, Set& _set) = 0;
     virtual vector<int> SendCommand(DS485Command _cmd, Device& _device) = 0;

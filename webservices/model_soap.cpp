@@ -202,7 +202,7 @@ int dss__Set_AddDeviceByID(struct soap *soap, int _token, int _setID, int _devic
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   dss::Set& origSet = sess.GetSetByID(_setID);
   try {
-    dss::DeviceReference devRef = apt.GetDevices().GetByID(_deviceID);
+    dss::DeviceReference devRef = apt.GetDevices().GetByBusID(_deviceID);
     origSet.AddDevice(devRef);
     result = true;
   } catch(dss::ItemNotFoundException& _ex) {
@@ -222,7 +222,7 @@ int dss__Set_RemoveDevice(struct soap *soap, int _token, int _setID, int _device
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   dss::Set& origSet = sess.GetSetByID(_setID);
   try {
-    dss::DeviceReference devRef = apt.GetDevices().GetByID(_deviceID);
+    dss::DeviceReference devRef = apt.GetDevices().GetByBusID(_deviceID);
     origSet.RemoveDevice(devRef);
     result = true;
   } catch(dss::ItemNotFoundException& _ex) {

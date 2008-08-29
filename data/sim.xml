@@ -3,11 +3,13 @@
   <room id="0"> <!-- id can be omitted, in fact room may be omitted if there's only one room -->
     <device dsid="1" busid="1" type="standard.switch" />
     <device dsid="2" busid="2" type="example.vlc_remote" />
+    <device dsid="4" busid="4" type="standard.simple"/>
     <group id="3">
       <device busid="2" />
     </group>
   </room>
   <room id="1">
-    <device dsid="3" busid="3" type="standard.simple"/>
+    <device dsid="3" busid="3" type="standard.switch"/>
+    <device dsid="5" busid="5" type="standard.simple" />
   </room>  
 </modulator>

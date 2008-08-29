@@ -85,10 +85,10 @@ protected:
 
     Set allDevices = apt.GetDevices();
 
-    CPPUNIT_ASSERT_EQUAL(dev1, allDevices.GetByID(1).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev2, allDevices.GetByID(2).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev3, allDevices.GetByID(3).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev4, allDevices.GetByID(4).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev1, allDevices.GetByBusID(1).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev2, allDevices.GetByBusID(2).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev3, allDevices.GetByBusID(3).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev4, allDevices.GetByBusID(4).GetDevice());
 
     Set setdev1 = Set(dev1);
 
@@ -97,36 +97,36 @@ protected:
     CPPUNIT_ASSERT_EQUAL(3, allMinusDev1.Length());
 
     try {
-      allMinusDev1.GetByID(1);
+      allMinusDev1.GetByBusID(1);
       CPPUNIT_ASSERT(false);
     } catch(ItemNotFoundException& e) {
       CPPUNIT_ASSERT(true);
     }
 
-    CPPUNIT_ASSERT_EQUAL(dev2, allMinusDev1.GetByID(2).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev3, allMinusDev1.GetByID(3).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev4, allMinusDev1.GetByID(4).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev2, allMinusDev1.GetByBusID(2).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev3, allMinusDev1.GetByBusID(3).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev4, allMinusDev1.GetByBusID(4).GetDevice());
 
     // check that the other sets are not afected by our operation
     CPPUNIT_ASSERT_EQUAL(1, setdev1.Length());
-    CPPUNIT_ASSERT_EQUAL(dev1, setdev1.GetByID(1).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev1, setdev1.GetByBusID(1).GetDevice());
 
     CPPUNIT_ASSERT_EQUAL(4, allDevices.Length());
-    CPPUNIT_ASSERT_EQUAL(dev1, allDevices.GetByID(1).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev2, allDevices.GetByID(2).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev3, allDevices.GetByID(3).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev4, allDevices.GetByID(4).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev1, allDevices.GetByBusID(1).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev2, allDevices.GetByBusID(2).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev3, allDevices.GetByBusID(3).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev4, allDevices.GetByBusID(4).GetDevice());
 
     Set allRecombined = allMinusDev1.Combine(setdev1);
 
     CPPUNIT_ASSERT_EQUAL(4, allRecombined.Length());
-    CPPUNIT_ASSERT_EQUAL(dev1, allRecombined.GetByID(1).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev2, allRecombined.GetByID(2).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev3, allRecombined.GetByID(3).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev4, allRecombined.GetByID(4).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev1, allRecombined.GetByBusID(1).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev2, allRecombined.GetByBusID(2).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev3, allRecombined.GetByBusID(3).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev4, allRecombined.GetByBusID(4).GetDevice());
 
     CPPUNIT_ASSERT_EQUAL(1, setdev1.Length());
-    CPPUNIT_ASSERT_EQUAL(dev1, setdev1.GetByID(1).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev1, setdev1.GetByBusID(1).GetDevice());
 
     allRecombined = allRecombined.Combine(setdev1);
     CPPUNIT_ASSERT_EQUAL(4, allRecombined.Length());
@@ -136,17 +136,17 @@ protected:
 
     allRecombined = allRecombined.Combine(allRecombined);
     CPPUNIT_ASSERT_EQUAL(4, allRecombined.Length());
-    CPPUNIT_ASSERT_EQUAL(dev1, allRecombined.GetByID(1).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev2, allRecombined.GetByID(2).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev3, allRecombined.GetByID(3).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev4, allRecombined.GetByID(4).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev1, allRecombined.GetByBusID(1).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev2, allRecombined.GetByBusID(2).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev3, allRecombined.GetByBusID(3).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev4, allRecombined.GetByBusID(4).GetDevice());
 
     allMinusDev1 = allRecombined;
     allMinusDev1.RemoveDevice(dev1);
     CPPUNIT_ASSERT_EQUAL(3, allMinusDev1.Length());
-    CPPUNIT_ASSERT_EQUAL(dev2, allMinusDev1.GetByID(2).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev3, allMinusDev1.GetByID(3).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev4, allMinusDev1.GetByID(4).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev2, allMinusDev1.GetByBusID(2).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev3, allMinusDev1.GetByBusID(3).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev4, allMinusDev1.GetByBusID(4).GetDevice());
   } // testSet
 };
 

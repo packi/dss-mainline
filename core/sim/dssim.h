@@ -55,7 +55,7 @@ namespace dss {
     vector<DS485Frame*> m_PendingFrames;
     DSIDFactory m_DSIDFactory;
     map<const DSIDInterface*, int> m_ButtonToGroupMapping;
-    map<const DSIDInterface*, bool> m_ButtonSubscriptionFlag;
+    map<const DSIDInterface*, int> m_ButtonSubscriptionFlag;
   private:
     void LoadFromConfig();
     void LoadDevices(XMLNodeList& _nodes, const int _roomID);
@@ -162,7 +162,6 @@ namespace dss {
 
     virtual uint8 GetFunctionID();
   }; // DSIDSim
-
 
 
   class DSIDSimSwitch : public DSIDSim {

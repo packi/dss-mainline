@@ -206,8 +206,8 @@ namespace dss {
       } else {
         cout << "Found unknown device" << endl;
       }
-      uint16_t hwVersion = pd.Get<uint16_t>();
-      uint16_t swVersion = pd.Get<uint16_t>();
+      /*uint16_t hwVersion =*/ pd.Get<uint16_t>();
+      /*uint16_t swVersion =*/ pd.Get<uint16_t>();
 
       cout << "Name: \"";
       for(int i = 0; i < 6; i++) {
@@ -423,7 +423,18 @@ namespace dss {
     PayloadDissector pd(results.at(0)->GetPayload());
     pd.Get<uint8>(); // discard the function id
     return pd.Get<dsid_t>();
-  }
+  } // GetDSIDOfModulator
+
+  void DS485Proxy::Subscribe(const int _modulatorID, const int _groupID, const int _deviceID) {
+    DS485CommandFrame cmdFrame;
+    cmdFrame.GetHeader().SetDestination(_modulatorID);
+    cmdFrame.SetCommand(CommandRequest);
+    cmdFrame.GetPayload().Add<uint8>(FunctionDeviceSubscribe);
+    cmdFrame.GetPayload().Add<uint8>(_groupID);
+    cmdFrame.GetPayload().Add<devid_t>(_deviceID);
+    Logger::GetInstance()->Log(string("Proxy: Subscribe ") + IntToString(_modulatorID));
+    SendFrame(cmdFrame);
+  } // Subscribe
 
   void DS485Proxy::AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID) {
 
@@ -560,6 +571,12 @@ namespace dss {
 
     case FunctionGetTypeRequest:
       return "Function Get Type";
+
+    case FunctionKeyPressed:
+      return "Function Key Pressed";
+
+    case FunctionDeviceSubscribe:
+      return "Function Device Subscribe";
     }
     return "";
   } // FunctionIDToString
@@ -588,22 +605,40 @@ namespace dss {
             boost::shared_ptr<DS485CommandFrame> frame = m_IncomingFrames.front();
             m_IncomingFrames.erase(m_IncomingFrames.begin());
 
-            // create an explicit copy since frame is a shared ptr and would free the contained
-            // frame if going out of scope
-            DS485CommandFrame* pFrame = new DS485CommandFrame();
-            *pFrame = *frame.get();
-
-            vector<unsigned char> ch = pFrame->GetPayload().ToChar();
+            vector<unsigned char> ch = frame->GetPayload().ToChar();
             if(ch.size() < 1) {
               Logger::GetInstance()->Log("Received Command Frame w/o function identifier");
-              delete pFrame;
               continue;
             }
 
             uint8 functionID = ch.front();
-            Logger::GetInstance()->Log(string("Response for: ") + FunctionIDToString(functionID));
-            ReceivedFrame* rf = new ReceivedFrame(m_DS485Controller.GetTokenCount(), pFrame);
-            m_ReceivedFramesByFunctionID[functionID].push_back(rf);
+            if(frame->GetCommand() == CommandRequest) {
+              if(functionID == FunctionKeyPressed) {
+                PayloadDissector pd(frame->GetPayload());
+                pd.Get<uint8>();
+                uint16_t param = pd.Get<uint16_t>();
+                param = pd.Get<uint16_t>();
+                if((param & 0x8000) == 0x8000) {
+                  devid_t shortAddress = (param & 0x7F00) >> 8;
+                  int buttonNumber = (param & 0x00F0) >> 4;
+                  ButtonPressKind kind = static_cast<ButtonPressKind>(param & 0x000F);
+
+                  Modulator& mod = DSS::GetInstance()->GetApartment().GetModulatorByBusID(frame->GetHeader().GetSource());
+                  DeviceReference devRef = mod.GetDevices().GetByBusID(shortAddress);
+
+                  DSS::GetInstance()->GetApartment().OnKeypress(devRef.GetDSID(), kind, buttonNumber);
+                }
+              }
+            } else {
+              // create an explicit copy since frame is a shared ptr and would free the contained
+              // frame if going out of scope
+              DS485CommandFrame* pFrame = new DS485CommandFrame();
+              *pFrame = *frame.get();
+
+              Logger::GetInstance()->Log(string("Response for: ") + FunctionIDToString(functionID));
+              ReceivedFrame* rf = new ReceivedFrame(m_DS485Controller.GetTokenCount(), pFrame);
+              m_ReceivedFramesByFunctionID[functionID].push_back(rf);
+            }
           }
         }
       }
@@ -612,8 +647,8 @@ namespace dss {
 
   void DS485Proxy::CollectFrame(boost::shared_ptr<DS485CommandFrame>& _frame) {
     uint8 commandID = _frame->GetCommand();
-    if(commandID != CommandResponse) {
-      Logger::GetInstance()->Log("discarded non response frame", lsInfo);
+    if(commandID != CommandResponse && commandID != CommandRequest) {
+      Logger::GetInstance()->Log("discarded non response/request frame", lsInfo);
       Logger::GetInstance()->Log(string("frame type ") + CommandToString(commandID));
     } else {
       m_IncomingFrames.push_back(_frame);
