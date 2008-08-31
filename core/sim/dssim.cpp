@@ -461,7 +461,17 @@ namespace dss {
           case FunctionModulatorGetGroupsSize:
             {
               response = CreateResponse(cmdFrame, cmdNr);
-              response->GetPayload().Add<uint8>(m_DevicesOfGroupInRoom.size());
+              int roomID = pd.Get<uint8>();
+              IntPairToDSIDSimVector::iterator it = m_DevicesOfGroupInRoom.begin();
+							IntPairToDSIDSimVector::iterator end = m_DevicesOfGroupInRoom.end();
+							int result = 0;
+							while(it != end) {
+								if(it->first.first == roomID) {
+									result++;
+								}
+								it++;
+							}
+              response->GetPayload().Add<uint8>(result);
               DistributeFrame(response);
             }
             break;
@@ -504,11 +514,11 @@ namespace dss {
               int result = -1;
               while(it != end) {
                 if(it->first.first == roomID) {
-                  groupIndex--;
                   if(groupIndex == 0) {
                     result = it->first.second; // yes, that's the group id
                     break;
                   }
+                  groupIndex--;
                 }
                 it++;
               }

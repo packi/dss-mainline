@@ -161,6 +161,9 @@ int dss__Group_AddDevice(int _token, int _groupID, int _deviceID, int& result);
 /** Removes a device from the given group. */
 int dss__Group_RemoveDevice(int _token, int _groupID, int _deviceID, int& result);
 
+int dss__Device_GetFunctionID(int _token, xsd__unsignedInt _deviceID, int& result);
+int dss__Switch_GetGroupID(int _token, xsd__unsignedInt _deviceID, int& result);
+
 class dss__inParameter {
 public:
   StringArray* values;

@@ -12,6 +12,7 @@ namespace dss {
   WebServer::WebServer()
   : Thread("WebServer")
   {
+	Logger::GetInstance()->Log("Starting Webserver...");
     m_SHttpdContext = shttpd_init();
   } // ctor
 
@@ -63,15 +64,10 @@ namespace dss {
     return result;
   } // ParseParameter
 
-  template<class t>
-  string ToJSONValue(const t& _value);
-
-  template<>
   string ToJSONValue(const int& _value) {
     return IntToString(_value);
   } // ToJSONValue
 
-  template<>
   string ToJSONValue(const bool& _value) {
     if(_value) {
       return "true";
@@ -80,10 +76,55 @@ namespace dss {
     }
   }
 
-  template<>
   string ToJSONValue(const string& _value) {
     return string("\"") + _value + '"';
   } // ToJSONValue
+
+  string ToJSONValue(Apartment& _apartment) {
+  	stringstream sstream;
+  	sstream << "{ apartment: { rooms: [";
+	  vector<Room*>& rooms = _apartment.GetRooms();
+	  bool first = true;
+	  for(vector<Room*>::iterator ipRoom = rooms.begin(), e = rooms.end();
+	      ipRoom != e; ++ipRoom)
+	  {
+	  	Room* pRoom = *ipRoom;
+	  	pRoom->GetRoomID();
+	  	if(!first) {
+	  	  sstream << ", ";
+	  	} else {
+	  		first = false;
+	  	}
+	  	sstream << "{ id: " << pRoom->GetRoomID() << ",";
+	  	string name = pRoom->GetName();
+	  	if(name.size() == 0) {
+	  		name = string("Room ") + IntToString(distance(rooms.begin(), ipRoom) + 1);
+	  	}
+	  	sstream << "name: " << ToJSONValue(name) << ", ";
+
+	  	Set devices = pRoom->GetDevices();
+      sstream << "\"devices\":[";
+      bool firstDevice = true;
+      for(int iDevice = 0; iDevice < devices.Length(); iDevice++) {
+        DeviceReference& d = devices.Get(iDevice);
+        if(firstDevice) {
+          firstDevice = false;
+        } else {
+          sstream << ",";
+        }
+        sstream << "{ \"id\": \"" << d.GetDSID() << "\""
+                << ", \"isSwitch\": " << ToJSONValue(d.IsSwitch())
+                << ", \"name\": \"" << d.GetDevice().GetName()
+                << "\", \"on\": " << ToJSONValue(d.IsOn()) << " }";
+      }
+      sstream << "]";
+
+
+	  	sstream << "} ";
+	  }
+    sstream << "]} }";
+	  return sstream.str();
+  }
 
   template<class t>
   string ToJSONArray(const vector<t>& _v);
@@ -130,7 +171,7 @@ namespace dss {
         } else {
           sstream << ",";
         }
-        sstream << "{ \"id\": " << d.GetDSID()
+        sstream << "{ \"id\": \"" << d.GetDSID() << "\""
                 << ", \"isSwitch\": " << ToJSONValue(d.IsSwitch())
                 << ", \"name\": \"" << d.GetDevice().GetName()
                 << "\", \"on\": " << ToJSONValue(d.IsOn()) << " }";
@@ -159,6 +200,10 @@ namespace dss {
       } else {
         shttpd_printf(_arg, "{ok:0}");
       }
+    } else if(method == "getapartment") {
+    	EmitHTTPHeader(200, _arg, "application/json");
+
+    	shttpd_printf(_arg, ToJSONValue(DSS::GetInstance()->GetApartment()).c_str());
     } else if(BeginsWith(method, "sim/switch/")) {
       EmitHTTPHeader(200, _arg, "application/json");
 
@@ -179,7 +224,7 @@ namespace dss {
         }
       } else if(method == "sim/switch/pressed") {
         if(!devidStr.empty()) {
-          int devid = StrToUInt(devidStr);
+          dsid_t devid = StrToUInt(devidStr);
           int buttonNr = StrToIntDef(paramMap["buttonnr"], 1);
           DSIDInterface* dev = DSS::GetInstance()->GetModulatorSim().GetSimulatedDevice(devid);
           DSIDSimSwitch* sw = NULL;
@@ -214,7 +259,7 @@ namespace dss {
           if(!first) {
             response << ",";
           }
-          response << "{ \"id\":" << sub.GetID() << ","
+          response << "{ \"id\": " << sub.GetID() << ","
                    <<   "\"name\":" << ToJSONValue(sub.GetName()) << ","
                    <<   "\"evtids\":" << ToJSONArray<int>(sub.GetEventIDs()) << ","
                    <<   "\"srcids\":" << ToJSONArray<int>(sub.GetSourceIDs())

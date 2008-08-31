@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <config version="1">
   <item><name>webserverport</name><value>8080</value></item>
-  <item><name>webserverroot</name><value>/home/patrick/sources/digitalstrom/dss/trunk/data/webroot/</value></item>
+ <item><name>webserverroot</name><value>/home/patrick/sources/dss/trunk/data/webroot/</value></item> -
   <item><name>japanese thingies</name><value>02日22時更新</value></item>
 <!--  <item><name>apartment_config</name><value>/home/patrick/sources/digitalstrom/dss/trunk/data/apartment.xml</value></item> -->
 </config>

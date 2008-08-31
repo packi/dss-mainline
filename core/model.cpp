@@ -144,6 +144,14 @@ namespace dss {
     m_ModulatorID = _modulatorID;
   } // SetModulatorID
 
+  int Device::GetRoomID() const {
+  	return m_RoomID;
+  } // GetRoomID
+
+  void Device::SetRoomID(const int _value) {
+  	m_RoomID = _value;
+  } // SetRoomID
+
   int Device:: GetGroupIdByIndex(const int _index) const {
     return m_Groups[_index];
   } // GetGroupIdByIndex
@@ -488,7 +496,7 @@ namespace dss {
 
     DS485Interface& interface = DSS::GetInstance()->GetDS485Interface();
 
-    SleepMS(10000);
+    SleepMS(1000);
     while(!m_Terminated) {
      // TODO: reimplement proxy.WaitForProxyEvent();
       Logger::GetInstance()->Log("Apartment::Execute received proxy event, enumerating apartment / dSMs");
@@ -506,6 +514,7 @@ namespace dss {
         for(vector<int>::iterator iRoomID = roomIDs.begin(); iRoomID != roomIDs.end(); ++iRoomID) {
           int roomID = *iRoomID;
           Logger::GetInstance()->Log(string("  Found room with id: ") + IntToString(roomID));
+          Room& room = AllocateRoom(modulator, roomID);
 
           vector<int> devices = interface.GetDevicesInRoom(modID, roomID);
           for(vector<int>::iterator iDevice = devices.begin(); iDevice != devices.end(); ++iDevice) {
@@ -515,6 +524,9 @@ namespace dss {
             Device& dev = AllocateDevice(dsid);
             dev.SetShortAddress(devID);
             dev.SetModulatorID(modID);
+            dev.SetRoomID(roomID);
+            room.AddDevice(DeviceReference(dev, *this));
+            modulator.AddDevice(DeviceReference(dev, *this));
           }
           vector<int> groupIDs = interface.GetGroups(modID, roomID);
           for(vector<int>::iterator iGroup = groupIDs.begin(), e = groupIDs.end();
@@ -560,8 +572,6 @@ namespace dss {
             LoadDevices(*iNode);
           } else if(nodeName == "modulators") {
             LoadModulators(*iNode);
-          } else if(nodeName == "rooms") {
-            LoadRooms(*iNode);
           }
         }
       } else {
@@ -620,11 +630,28 @@ namespace dss {
           newModulator->SetName(name);
         }
         m_StaleModulators.push_back(newModulator);
+        LoadRooms(*iModulator, *newModulator);
       }
     }
   } // LoadModulators
 
-  void Apartment::LoadRooms(XMLNode& _node) {
+  void Apartment::LoadRooms(XMLNode& _node, Modulator& _modulator) {
+    XMLNodeList rooms = _node.GetChildren();
+    for(XMLNodeList::iterator iRoom = rooms.begin(); iRoom != rooms.end(); ++iRoom) {
+      if(iRoom->GetName() == "room") {
+        int id = StrToInt(iRoom->GetAttributes()["id"]);
+        string name;
+        XMLNode& nameNode = iRoom->GetChildByName("name");
+        if(nameNode.GetChildren().size() > 0) {
+          name = (nameNode.GetChildren()[0]).GetContent();
+        }
+        Room* newRoom = new Room(_modulator, id);
+        if(name.size() > 0) {
+          newRoom->SetName(name);
+        }
+        m_StaleRooms.push_back(newRoom);
+      }
+    }
   } // LoadRooms
 
   Device& Apartment::GetDeviceByDSID(const dsid_t _dsid) const {
@@ -805,7 +832,7 @@ namespace dss {
   } // AllocateDevice
 
   Modulator& Apartment::AllocateModulator(const dsid_t _dsid) {
-    // searth in the stale modulators first
+    // search in the stale modulators first
     for(vector<Modulator*>::iterator iModulator = m_StaleModulators.begin(), e = m_StaleModulators.end();
         iModulator != e; ++iModulator)
     {
@@ -829,6 +856,30 @@ namespace dss {
     m_Modulators.push_back(pResult);
     return *pResult;
   } // AllocateModulator
+
+  Room& Apartment::AllocateRoom(Modulator& _modulator, int _roomID) {
+  	for(vector<Room*>::iterator ipRoom = m_StaleRooms.begin(), e = m_StaleRooms.end();
+  	   ipRoom != e; ++ipRoom)
+  	{
+  		if((*ipRoom)->GetRoomID() == _roomID) {
+  			m_Rooms.push_back(*ipRoom);
+  			m_StaleRooms.erase(ipRoom);
+  			return **ipRoom;
+  		}
+  	}
+
+  	for(vector<Room*>::iterator ipRoom = m_Rooms.begin(), e = m_Rooms.end();
+  	   ipRoom != e; ++ipRoom)
+  	{
+  		if((*ipRoom)->GetRoomID() == _roomID) {
+  			return **ipRoom;
+  		}
+  	}
+
+  	Room* room = new Room(_modulator, _roomID);
+  	m_Rooms.push_back(room);
+  	return *room;
+  } // AllocateRoom
 
   void Apartment::AddAction(Action* _action) {
     m_Actions.push_back(_action);
@@ -864,6 +915,10 @@ namespace dss {
   Set Modulator::GetDevices() const {
     return m_ConnectedDevices;
   } // GetDevices
+
+  void Modulator::AddDevice(const DeviceReference& _device) {
+  	m_ConnectedDevices.push_back(_device);
+  } // AddDevice
 
   dsid_t Modulator::GetDSID() const {
     return m_DSID;
@@ -902,7 +957,11 @@ namespace dss {
 
   int Room::GetRoomID() const {
     return m_RoomID;
-  }
+  } // GetRoomID
+
+  void Room::SetRoomID(const int _value) {
+    m_RoomID = _value;
+  } // SetRoomID
 
   //============================================= Group
 

@@ -24,7 +24,7 @@
   xmlns="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="unqualified"
   attributeFormDefault="unqualified">
-  <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
   <complexType name="ArrayOfunsignedInt">
    <complexContent>
     <restriction base="SOAP-ENC:Array">
@@ -955,6 +955,40 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="Device-GetFunctionID">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Device-GetFunctionIDResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="Switch-GetGroupID">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Switch-GetGroupIDResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="Event-Raise">
    <complexType>
     <sequence>
@@ -1500,6 +1534,22 @@
  <part name="parameters" element="dss:Group-RemoveDeviceResponse"/>
 </message>
 
+<message name="Device-GetFunctionIDRequest">
+ <part name="parameters" element="dss:Device-GetFunctionID"/>
+</message>
+
+<message name="Device-GetFunctionIDResponse">
+ <part name="parameters" element="dss:Device-GetFunctionIDResponse"/>
+</message>
+
+<message name="Switch-GetGroupIDRequest">
+ <part name="parameters" element="dss:Switch-GetGroupID"/>
+</message>
+
+<message name="Switch-GetGroupIDResponse">
+ <part name="parameters" element="dss:Switch-GetGroupIDResponse"/>
+</message>
+
 <message name="Event-RaiseRequest">
  <part name="parameters" element="dss:Event-Raise"/>
 </message>
@@ -1816,6 +1866,16 @@
   <documentation>Service definition of function dss__Group_RemoveDevice</documentation>
   <input message="tns:Group-RemoveDeviceRequest"/>
   <output message="tns:Group-RemoveDeviceResponse"/>
+ </operation>
+ <operation name="Device-GetFunctionID">
+  <documentation>Service definition of function dss__Device_GetFunctionID</documentation>
+  <input message="tns:Device-GetFunctionIDRequest"/>
+  <output message="tns:Device-GetFunctionIDResponse"/>
+ </operation>
+ <operation name="Switch-GetGroupID">
+  <documentation>Service definition of function dss__Switch_GetGroupID</documentation>
+  <input message="tns:Switch-GetGroupIDRequest"/>
+  <output message="tns:Switch-GetGroupIDResponse"/>
  </operation>
  <operation name="Event-Raise">
   <documentation>Service definition of function dss__Event_Raise</documentation>
@@ -2324,6 +2384,24 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
+ <operation name="Device-GetFunctionID">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Switch-GetGroupID">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
  <operation name="Event-Raise">
   <SOAP:operation soapAction=""/>
   <input>
@@ -2390,7 +2468,7 @@
 </binding>
 
 <service name="dss">
- <documentation>gSOAP 2.7.10 generated service definition</documentation>
+ <documentation>gSOAP 2.7.11 generated service definition</documentation>
  <port name="dss" binding="tns:dss">
   <SOAP:address location="http://localhost:8081"/>
  </port>

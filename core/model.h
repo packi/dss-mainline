@@ -135,6 +135,7 @@ namespace dss {
     dsid_t m_DSID;
     devid_t m_ShortAddress;
     int m_ModulatorID;
+    int m_RoomID;
     Apartment* m_pApartment;
     bitset<63> m_GroupBitmask;
     vector<int> m_Groups;
@@ -184,6 +185,9 @@ namespace dss {
     /** Returns the id of the modulator the device is connected to */
     int GetModulatorID() const;
     void SetModulatorID(const int _modulatorID);
+
+    int GetRoomID() const;
+    void SetRoomID(const int _value);
     /** Returns the apartment the device resides in. */
     Apartment& GetApartment() const;
 
@@ -330,6 +334,8 @@ namespace dss {
     dsid_t GetDSID() const;
     int GetBusID() const;
     void SetBusID(const int _busID);
+
+    void AddDevice(const DeviceReference& _device);
   }; // Modulator
 
   /** Represents a predefined group */
@@ -372,8 +378,12 @@ namespace dss {
   private:
     int m_RoomID;
     DeviceVector m_Devices;
+    Modulator& m_Modulator;
   public:
-	virtual ~Room() {};
+  	Room(Modulator& _modulator, const int _id)
+  	: m_RoomID(_id), m_Modulator(_modulator)
+  	{}
+    virtual ~Room() {};
     virtual Set GetDevices() const;
 
     /** Adds a device to the room.
@@ -397,6 +407,7 @@ namespace dss {
 
     /** Returns the rooms id */
     int GetRoomID() const;
+    void SetRoomID(const int _value);
   }; // Room
 
 
@@ -506,7 +517,7 @@ namespace dss {
   private:
     void LoadDevices(XMLNode& _node);
     void LoadModulators(XMLNode& _node);
-    void LoadRooms(XMLNode& _node);
+    void LoadRooms(XMLNode& _node, Modulator& _modulator);
     Modulator& AllocateModulator(const dsid_t _dsid);
   public:
     Apartment();
@@ -536,6 +547,8 @@ namespace dss {
     Room& GetRoom(const int _id);
     /** Returns a vector of all rooms */
     vector<Room*>& GetRooms();
+
+    Room& AllocateRoom(Modulator& _modulator, int _roomID);
 
     /** Returns a Modulator by name */
     Modulator& GetModulator(const string& _modName);

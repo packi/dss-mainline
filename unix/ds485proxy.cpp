@@ -506,7 +506,11 @@ namespace dss {
   void DS485Proxy::Start() {
     m_DS485Controller.AddFrameCollector(this);
     DSS::GetInstance()->GetModulatorSim().AddFrameCollector(this);
-    m_DS485Controller.Run();
+    try {
+      m_DS485Controller.Run();
+    } catch (const runtime_error& _ex) {
+    	Logger::GetInstance()->Log(string("Caught exception while starting DS485Controlle: ") + _ex.what());
+    }
     Run();
   } // Start
 

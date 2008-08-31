@@ -5,6 +5,63 @@
 	<script src="switch.js" language="JavaScript" type="text/javascript"></script>
 	<link rel="stylesheet" type="text/css" href="main.css"/>
 	<script type="text/javascript" language="JavaScript">
+
+function Apartment(into) {
+  var self = this;
+
+  this.devices = [];
+  this.rooms = [];
+
+  new Ajax.Request('/json/getapartment', 
+    {
+      method:'get', 
+      onComplete: function(transport, json) {
+        self.doUpdate(transport.responseJSON.apartment.rooms);
+      }
+    } 
+  );
+
+  this.doUpdate = function(rooms) {
+    var iSwitch = 0;
+    var switchIDs = [];
+    var devNum = 0;
+
+    var roomlist = "<ul>"
+    rooms.each(
+      function(room) {
+        roomlist += "<li>" + room.name + "</li><ul>";
+        room.devices.each(function(device) {
+          roomlist += "<li>" + device.name;
+          devNum++;
+          if(device.isSwitch == false) {
+            if(device.on) {
+              roomlist += " On ";
+            } else {
+              roomlist += " Off ";
+            }
+            roomlist += '[<a href="#" onclick="turnOn(' + device.id + ')">Turn On</a>';
+            roomlist += '&nbsp;|&nbsp;<a href="#" onclick="turnOff(' + device.id + ')">Turn Off</a>]';
+          } else {
+            roomlist += '<div id="switch_' + device.id + '"/>';
+            switchIDs[switchIDs.length] = device.id;
+          }
+
+          roomlist += "</li>";
+        });
+        roomlist += "</ul>";
+      }
+    );
+    roomlist += "</ul>";
+    $(into).innerHTML = roomlist;
+
+
+    switchIDs.each(function(switchID) {
+      var sw = new Switch('switch_' + switchID, switchID);
+    });
+    $('numDevs').innerHTML = devNum;
+  }
+
+}
 	
 	function turnOn(devid) {
 	  new Ajax.Request('/json/turnon', 
@@ -199,18 +256,24 @@
 	  );
 	}
   
-	doUpdate();	
-	updateEvents();
-	updateSubscriptions();
+//	doUpdate();	
+//	updateEvents();
+//	updateSubscriptions();
+
+function doOnload() {
+  var apt = new Apartment("bla");
+}
 </script>
   </head>
-  <body>
+  <body onload="doOnload()">
     <h1>Welcome to the dSS!</h1>
     <div class="container">
 		<div class="item"><a href="config">Config</a></div>
 		<div class="item">Connected devices: <span id="numDevs">(...loading...)</span></div>
 	</div>
 	<div class="container fl">
+        <div id="bla">(loading...)</div>
+<!--
 	<form>
 	<h2>Event Raising / Scheduling</h2>
 	<table>
@@ -223,18 +286,23 @@
 	  <a href="#" onclick="scheduleEvent()">Schedule</a></td></tr>
 	  </table>
 	</form>
+-->
 	</div>
-
+<!--
 	<div id="devList" class="container fl">
 	(...loading...)
 	</div>
+-->
+<!--
 	<div id="evt_div" class="container fl">
 	(...loading...)
 	</div>
 	<div id="sub_div" class="container fl">
 	(...loading...)
 	</div>	
-	
+-->
+
+<!--
 	<div class="container fl">
 	<form>
 	  <h2>Subscription</h2>
@@ -255,5 +323,6 @@
       </table>
 	</form>
 	</div>
+-->
   </body>	
 </html>

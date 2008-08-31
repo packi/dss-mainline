@@ -565,6 +565,30 @@ int dss__Device_GetName(struct soap *soap, int _token, unsigned long _deviceID, 
   return SOAP_OK;
 } // dss__Device_GetName
 
+int dss__Device_GetFunctionID(struct soap *soap, int _token, unsigned long _deviceID, int& result) {
+  dss::Device dev(-1, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+	return getResult;
+  }
+  result = dev.GetFunctionID();
+  return SOAP_OK;
+} // dss__Device_GetFunctionID
+
+int dss__Switch_GetGroupID(struct soap *soap, int _token, unsigned long _deviceID, int& result) {
+  dss::Device dev(-1, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  dss::DSIDInterface* simDev = dss::DSS::GetInstance()->GetModulatorSim().GetSimulatedDevice(_deviceID);
+  dss::DSIDSimSwitch* sw = NULL;
+  if(simDev != NULL && (sw = dynamic_cast<dss::DSIDSimSwitch*>(simDev)) != NULL) {
+  	result = dss::DSS::GetInstance()->GetModulatorSim().GetGroupForSwitch(sw);
+  }
+  return SOAP_OK;
+} // dss__Switch_GetGroupID
+
 //==================================================== Information
 
 int dss__Device_GetDSID(struct soap *soap, int _token, unsigned long _deviceID, unsigned long& result) {

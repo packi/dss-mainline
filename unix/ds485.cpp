@@ -196,9 +196,12 @@ namespace dss {
 
   void DS485Controller::Execute() {
     m_SerialCom.reset(new SerialCom());
-    //TODO: read from config
-    if(!m_SerialCom->Open("/dev/ttyUSB0")) {
-      throw runtime_error("could not open serial port");
+    try {
+      //TODO: read from config
+      m_SerialCom->Open("/dev/ttyUSB0");
+    } catch(const runtime_error& _ex) {
+      Logger::GetInstance()->Log(string("Caught exception while opening serial port: ") + _ex.what());
+      return;
     }
     m_FrameReader.SetSerialCom(m_SerialCom);
     DoChangeState(csInitial);
@@ -714,7 +717,7 @@ namespace dss {
     m_Payload.pop_back();
     return result;
   }
-
+/*
   template<>
   dsid_t PayloadDissector::Get() {
     dsid_t result;
@@ -724,7 +727,7 @@ namespace dss {
              (Get<uint8>());
     return result;
   }
-
+*/
   template<>
   uint32_t PayloadDissector::Get() {
     uint32_t result;
