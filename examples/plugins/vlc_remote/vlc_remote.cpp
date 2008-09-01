@@ -36,7 +36,7 @@ class DSIDVLCRemote : public DSID {
     void SendCommand(const std::string& _command) {
       try
        {
-               Poco::Net::SocketAddress sa("localhost", 1500);
+               Poco::Net::SocketAddress sa("localhost", 4212);
                Poco::Net::StreamSocket sock(sa);
                Poco::Net::SocketStream str(sock);
 
