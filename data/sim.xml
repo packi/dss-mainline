@@ -7,7 +7,7 @@
     <group id="1">
       <device busid="4" />
     </group>
-    <group id="3">
+    <group id="4">
       <device busid="2" />
     </group>
   </room>

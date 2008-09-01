@@ -24,7 +24,7 @@
   xmlns="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="unqualified"
   attributeFormDefault="unqualified">
-  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
   <complexType name="ArrayOfunsignedInt">
    <complexContent>
     <restriction base="SOAP-ENC:Array">
@@ -732,6 +732,23 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="Device-GetRoomID">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Device-GetRoomIDResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="Device-GetDSID">
    <complexType>
     <sequence>
@@ -1430,6 +1447,14 @@
  <part name="parameters" element="dss:Device-GetNameResponse"/>
 </message>
 
+<message name="Device-GetRoomIDRequest">
+ <part name="parameters" element="dss:Device-GetRoomID"/>
+</message>
+
+<message name="Device-GetRoomIDResponse">
+ <part name="parameters" element="dss:Device-GetRoomIDResponse"/>
+</message>
+
 <message name="Device-GetDSIDRequest">
  <part name="parameters" element="dss:Device-GetDSID"/>
 </message>
@@ -1801,6 +1826,11 @@
   <documentation>Service definition of function dss__Device_GetName</documentation>
   <input message="tns:Device-GetNameRequest"/>
   <output message="tns:Device-GetNameResponse"/>
+ </operation>
+ <operation name="Device-GetRoomID">
+  <documentation>Service definition of function dss__Device_GetRoomID</documentation>
+  <input message="tns:Device-GetRoomIDRequest"/>
+  <output message="tns:Device-GetRoomIDResponse"/>
  </operation>
  <operation name="Device-GetDSID">
   <documentation>Service definition of function dss__Device_GetDSID</documentation>
@@ -2267,6 +2297,15 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
+ <operation name="Device-GetRoomID">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
  <operation name="Device-GetDSID">
   <SOAP:operation soapAction=""/>
   <input>
@@ -2468,7 +2507,7 @@
 </binding>
 
 <service name="dss">
- <documentation>gSOAP 2.7.11 generated service definition</documentation>
+ <documentation>gSOAP 2.7.10 generated service definition</documentation>
  <port name="dss" binding="tns:dss">
   <SOAP:address location="http://localhost:8081"/>
  </port>

@@ -137,7 +137,7 @@ function Switch(intoID, switchID, groupID) {
 	    newColor = "#FFFF00";
 	  } else if(gid == 2 /* gray */) {
 	    newColor = "#AAAAAA";
-	  } else if(gid == 3 /* gray */) {
+	  } else if(gid == 3 /* blue */) {
 	    newColor = "#0000FF";
 	  } else if(gid == 4 /* cyan */) {
 	    newColor = "#00FFFF";

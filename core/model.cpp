@@ -542,7 +542,7 @@ namespace dss {
               dsid_t dsid = interface.GetDSIDOfDevice(modID, devID);
               Device& dev = AllocateDevice(dsid);
               dev.SetShortAddress(devID);
-              dev.GetGroupBitmask().set(groupID);
+              dev.GetGroupBitmask().set(groupID-1);
             }
           }
         }

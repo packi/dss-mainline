@@ -717,7 +717,7 @@ namespace dss {
     m_Payload.pop_back();
     return result;
   }
-/*
+
   template<>
   dsid_t PayloadDissector::Get() {
     dsid_t result;
@@ -727,7 +727,7 @@ namespace dss {
              (Get<uint8>());
     return result;
   }
-*/
+
   template<>
   uint32_t PayloadDissector::Get() {
     uint32_t result;

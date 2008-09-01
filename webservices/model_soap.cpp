@@ -339,7 +339,21 @@ int dss__Apartment_GetRoomByName(struct soap *soap, int _token,  char* _roomName
 }
 
 int dss__Apartment_GetRoomIDs(struct soap *soap, int _token, IntArray& roomIDs) {
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+
+  dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
+  std::vector<dss::Room*>& rooms = apt.GetRooms();
+
+  int numRooms = rooms.size();
+  roomIDs.__size = numRooms;
+  roomIDs.__ptr = (long unsigned int*)soap_malloc(soap, numRooms * sizeof(long unsigned int));
+  for(int iRoomID = 0; iRoomID < numRooms; iRoomID++) {
+    roomIDs.__ptr[iRoomID] = rooms[iRoomID]->GetRoomID();
+  }
+
+  return SOAP_OK;
 }
 
 //==================================================== Manipulation
@@ -585,9 +599,27 @@ int dss__Switch_GetGroupID(struct soap *soap, int _token, unsigned long _deviceI
   dss::DSIDSimSwitch* sw = NULL;
   if(simDev != NULL && (sw = dynamic_cast<dss::DSIDSimSwitch*>(simDev)) != NULL) {
   	result = dss::DSS::GetInstance()->GetModulatorSim().GetGroupForSwitch(sw);
+  } else {
+    for(int iGroup = 1; iGroup < 9; iGroup++) {
+      if(dev.IsInGroup(iGroup)) {
+        result = iGroup;
+        break;
+      }
+    }
   }
   return SOAP_OK;
 } // dss__Switch_GetGroupID
+
+int dss__Device_GetRoomID(struct soap *soap, int _token, unsigned long _deviceID, int& result) {
+  dss::Device dev(-1, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  result = dev.GetRoomID();
+  return SOAP_OK;
+} // dss__Device_GetRoomID
 
 //==================================================== Information
 

@@ -127,6 +127,8 @@ int dss__Device_GetValue(int _token, xsd__unsignedInt _deviceID, int _paramID, d
 /** Returns the name of a device */
 int dss__Device_GetName(int _token, xsd__unsignedInt _deviceID, char** result);
 
+int dss__Device_GetRoomID(int _token, xsd__unsignedInt _deviceID, int& result);
+
 //==================================================== Information
 
 /** Returns the DSID of the given device */
