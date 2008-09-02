@@ -328,7 +328,7 @@ namespace dss {
   void DSModulatorSim::GroupCallScene(const int _roomID, const int _groupID, const int _sceneID) {
     pair<const int, const int> roomsGroup(_roomID, _groupID);
     if(m_DevicesOfGroupInRoom.find(roomsGroup) != m_DevicesOfGroupInRoom.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom.at(roomsGroup);
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom[roomsGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
@@ -340,7 +340,7 @@ namespace dss {
   void DSModulatorSim::GroupStartDim(const int _roomID, const int _groupID, bool _up, int _parameterNr) {
     pair<const int, const int> roomsGroup(_roomID, _groupID);
     if(m_DevicesOfGroupInRoom.find(roomsGroup) != m_DevicesOfGroupInRoom.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom.at(roomsGroup);
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom[roomsGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
@@ -352,7 +352,7 @@ namespace dss {
   void DSModulatorSim::GroupEndDim(const int _roomID, const int _groupID, const int _parameterNr) {
     pair<const int, const int> roomsGroup(_roomID, _groupID);
     if(m_DevicesOfGroupInRoom.find(roomsGroup) != m_DevicesOfGroupInRoom.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom.at(roomsGroup);
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom[roomsGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
@@ -364,7 +364,7 @@ namespace dss {
   void DSModulatorSim::GroupDecValue(const int _roomID, const int _groupID, const int _parameterNr) {
     pair<const int, const int> roomsGroup(_roomID, _groupID);
     if(m_DevicesOfGroupInRoom.find(roomsGroup) != m_DevicesOfGroupInRoom.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom.at(roomsGroup);
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom[roomsGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
@@ -376,7 +376,7 @@ namespace dss {
   void DSModulatorSim::GroupIncValue(const int _roomID, const int _groupID, const int _parameterNr) {
     pair<const int, const int> roomsGroup(_roomID, _groupID);
     if(m_DevicesOfGroupInRoom.find(roomsGroup) != m_DevicesOfGroupInRoom.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom.at(roomsGroup);
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom[roomsGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
@@ -613,6 +613,7 @@ namespace dss {
         return **ipSimDev;
       }
     }
+    cerr << "id: " << _shortAddress << endl;
     throw runtime_error("could not find device");
   } // LookupDevice
 
@@ -726,7 +727,7 @@ namespace dss {
   int DSModulatorSim::GetGroupForSwitch(const DSIDSimSwitch* _switch) {
     if(_switch != NULL) {
       if(m_ButtonToGroupMapping.find(_switch) != m_ButtonToGroupMapping.end()) {
-        return m_ButtonToGroupMapping.at(_switch);
+        return m_ButtonToGroupMapping[_switch];
       }
       return _switch->GetDefaultColor();
     }
