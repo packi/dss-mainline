@@ -14,7 +14,7 @@
 
 #include "base.h"
 #include "thread.h"
-#ifdef __GNUC__
+#ifdef USE_SIM
   #include "sim/dssim.h"
 #endif
 #include "syncevent.h"
@@ -68,7 +68,7 @@ namespace dss {
     Config m_Config;
     DS485Interface* m_DS485Interface;
     Apartment m_Apartment;
-#ifdef __GNUC__
+#ifdef USE_SIM
     DSModulatorSim m_ModulatorSim;
 #endif
     EventRunner m_EventRunner;
@@ -84,7 +84,7 @@ namespace dss {
     Config& GetConfig() { return m_Config; };
     DS485Interface& GetDS485Interface() { return *m_DS485Interface; };
     Apartment& GetApartment() { return m_Apartment; };
-#ifdef __GNUC__
+#ifdef USE_SIM
     DSModulatorSim& GetModulatorSim() { return m_ModulatorSim; };
 #endif
     EventRunner& GetEventRunner() { return m_EventRunner; };

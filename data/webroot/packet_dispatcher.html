@@ -1,0 +1,89 @@
+<html>
+  <head>
+    <title>digitalStrom - Server</title>
+	<script src="prototype.js" language="JavaScript" type="text/javascript"></script>
+	<link rel="stylesheet" type="text/css" href="main.css"/>
+	<script type="text/javascript" language="JavaScript">
+	
+        function log(str) {
+          var logDiv = $('log');
+          logDiv.innerHTML += str + '<br/>';
+        }
+
+function SendPanel(container) {
+  var self = this;
+  this.container = $(container);
+  
+  this.setup = function() {
+    var html = '<form id="send_form"><table id="send_table">';
+    function addLine(first, second) {
+      html += '<tr><td width="100px">' + first + '</td><td>' + second + '</td></tr>';
+    }
+
+    addLine('Destination', '<input id="destination" type="text" value="0"/>');
+    addLine('Broadcast', '<input id="broadcast" type="checkbox" value="0"/>');
+    addLine('Counter', '<input id="counter" type="text" value="0"/>');
+    addLine('Command', '<input id="command" type="text" value="0x09"/>');
+    addLine('Length', '<input id="length" type="text" value = "0"/>');
+    [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].each(function(val) {
+      addLine('Payload byte ' + val, '<input id="payload_' + val + '" value="0x00" />');
+    });
+    
+    html += '</table><a id="submit" href="#">send</a></form>';
+    self.container.innerHTML = html;
+    $('submit').onclick = function() {
+      self.send();
+    }
+  }
+  this.send = function() {
+    new Ajax.Request(
+      '/json/sendframe', 
+      { method:'get',
+	parameters: 
+	  { 
+	    destination: $F('destination'),
+            broadcast: $('broadcast').checked,
+            counter: $F('counter'),
+            command: $F('command'),
+            length: $F('length'),
+            payload_1: $F('payload_1'),
+            payload_2: $F('payload_2'),
+            payload_3: $F('payload_3'),
+            payload_4: $F('payload_4'),
+            payload_5: $F('payload_5'),
+            payload_6: $F('payload_6'),
+            payload_7: $F('payload_7'),
+            payload_8: $F('payload_8'),
+            payload_9: $F('payload_9'),
+            payload_10: $F('payload_10'),
+            payload_11: $F('payload_11'),
+            payload_12: $F('payload_12'),
+            payload_13: $F('payload_13'),
+            payload_14: $F('payload_14'),
+            payload_15: $F('payload_15'),
+            payload_16: $F('payload_16')
+	  },
+      
+	onComplete: function(transport, json) {
+          log('sent');
+        }
+      }
+    );
+  }
+  
+  this.setup();
+}
+
+function doOnLoad() {
+  new SendPanel("send_panel");
+}
+
+        </script>
+  </head>
+  <body onload="doOnLoad()">
+    <h1>Packet dispatcher</h1>
+    <div id="send_panel">
+    </div>
+    Log: <div id="log">Log</div>
+  </body>	
+</html>

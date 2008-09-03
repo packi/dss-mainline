@@ -49,7 +49,7 @@ namespace dss {
 
   int StrToIntDef(const string _strValue, const int _default) {
     char* endp;
-    int result = strtol(_strValue.c_str(), &endp, 10);
+    int result = strtol(_strValue.c_str(), &endp, 0);
     if(*endp != '\0') {
       return _default;
     }

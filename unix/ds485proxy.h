@@ -122,6 +122,9 @@ namespace dss {
     virtual vector<int> SendCommand(DS485Command _cmd, Device& _device);
     virtual vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID);
     virtual vector<int> SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group);
+
+    //------------------------------------------------ Helpers
+    DS485Controller& GetController() { return m_DS485Controller; }
   };
 }
 

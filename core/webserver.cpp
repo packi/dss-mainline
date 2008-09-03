@@ -3,6 +3,9 @@
 #include "model.h"
 #include "dss.h"
 #include "shttpd.h"
+#ifndef __PARADIGM__
+#include "../../unix/ds485proxy.h"
+#endif
 
 #include <boost/shared_ptr.hpp>
 
@@ -200,6 +203,40 @@ namespace dss {
       } else {
         shttpd_printf(_arg, "{ok:0}");
       }
+    } else if(method == "sendframe") {
+#ifndef __PARADIGM__
+      int destination = StrToIntDef(paramMap["destination"],0) & 0x3F;
+      bool broadcast = paramMap["broadcast"] == "true";
+      int counter = StrToIntDef(paramMap["counter"], 0x00) & 0x03;
+      int command = StrToIntDef(paramMap["command"], 0x09 /* request */) & 0x00FF;
+      int length = StrToIntDef(paramMap["length"], 0x00) & 0x0F;
+
+      cout << "sending frame: "
+           << "\ndest:    " << destination
+           << "\nbcst:    " << broadcast
+           << "\ncntr:    " << counter
+           << "\ncmd :    " << command
+           << "\nlen :    " << length << endl;
+
+      DS485CommandFrame* frame = new DS485CommandFrame();
+      frame->GetHeader().SetBroadcast(broadcast);
+      frame->GetHeader().SetDestination(destination);
+      frame->GetHeader().SetCounter(counter);
+      frame->SetCommand(command);
+      for(int iByte = 0; iByte < length; iByte++) {
+        uint8 byte = StrToIntDef(paramMap[string("payload_") + IntToString(iByte+1)], 0xFF);
+        cout << "b1: " << (int)byte << "\n";
+        frame->GetPayload().Add<uint8>(byte);
+      }
+      cout << "done" << endl;
+      DS485Interface* intf = &DSS::GetInstance()->GetDS485Interface();
+      DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
+      if(proxy != NULL) {
+        proxy->GetController().EnqueueFrame(*frame);
+      } else {
+        delete frame;
+      }
+#endif
     } else if(method == "getapartment") {
     	EmitHTTPHeader(200, _arg, "application/json");
 

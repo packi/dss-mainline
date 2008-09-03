@@ -171,7 +171,7 @@ namespace dss {
     if(broadcast || !sim) {
       if(m_DS485Controller.GetState() == csSlave || m_DS485Controller.GetState() == csMaster) {
         cout << "hw" << endl;
-        m_DS485Controller.EnqueueFrame(_frame);
+        //m_DS485Controller.EnqueueFrame(_frame);
       }
     }
   }
@@ -618,19 +618,47 @@ namespace dss {
             uint8 functionID = ch.front();
             if(frame->GetCommand() == CommandRequest) {
               if(functionID == FunctionKeyPressed) {
+                Logger::GetInstance()->Log("Got keypress");
                 PayloadDissector pd(frame->GetPayload());
                 pd.Get<uint8>();
                 uint16_t param = pd.Get<uint16_t>();
-                param = pd.Get<uint16_t>();
-                if((param & 0x8000) == 0x8000) {
-                  devid_t shortAddress = (param & 0x7F00) >> 8;
-                  int buttonNumber = (param & 0x00F0) >> 4;
-                  ButtonPressKind kind = static_cast<ButtonPressKind>(param & 0x000F);
+                Logger::GetInstance()->Log("Room: " + IntToString((param >> 8) & 0x00FF));
+                if(param & 0x0001 == 0x0001) {
+                  param = pd.Get<uint16_t>();
+                  Logger::GetInstance()->Log("Short version");
+                  if((param & 0x8000) == 0x8000) {
+                    Logger::GetInstance()->Log("From switch");
+                    devid_t shortAddress = (param & 0x7F00) >> 8;
+                    Logger::GetInstance()->Log(string("Device: ") + IntToString(shortAddress));
+                    int buttonNumber = (param & 0x00F0) >> 4;
+                    Logger::GetInstance()->Log(string("Button: ") + IntToString(buttonNumber));
+                    ButtonPressKind kind = static_cast<ButtonPressKind>(param & 0x000F);
 
-                  Modulator& mod = DSS::GetInstance()->GetApartment().GetModulatorByBusID(frame->GetHeader().GetSource());
-                  DeviceReference devRef = mod.GetDevices().GetByBusID(shortAddress);
+                    Modulator& mod = DSS::GetInstance()->GetApartment().GetModulatorByBusID(frame->GetHeader().GetSource());
+                    DeviceReference devRef = mod.GetDevices().GetByBusID(shortAddress);
 
-                  DSS::GetInstance()->GetApartment().OnKeypress(devRef.GetDSID(), kind, buttonNumber);
+                    DSS::GetInstance()->GetApartment().OnKeypress(devRef.GetDSID(), kind, buttonNumber);
+                  } else {
+                    Logger::GetInstance()->Log("From sensor");
+                  }
+                } else {
+                  Logger::GetInstance()->Log("Long version");
+                  uint16_t param2 = pd.Get<uint16_t>();
+                  uint16_t param3 = pd.Get<uint16_t>();
+                  uint16_t param4 = pd.Get<uint16_t>();
+
+                  cout << hex << "p2: " << param2 << "\np3: " << param3 << "\np4: " << param4 << endl;
+
+                  uint16_t subqualifier = ((param2 & 0x000F) << 4) | ((param3 & 0xF000) >> 12);
+                  uint16_t databits = ((param3 & 0x0FF0) >> 4);
+                  uint16_t addr = ((param3 & 0x000F) << 6) | ((param4 & 0xFC00) >> 10);
+                  uint16_t subqualifier2 = ((param4 & 0x03F0) >> 4);
+                  uint16_t mainqualifier = (param4 & 0x000F);
+                  cout << "subqualifier: " << subqualifier << "\n"
+                       << "databits    : " << databits << "\n"
+                       << "addr        : " << addr << "\n"
+                       << "subqual2    : " << subqualifier2 << "\n"
+                       << "mainqualif  : " << mainqualifier << endl;
                 }
               }
             } else {

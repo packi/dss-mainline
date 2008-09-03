@@ -671,44 +671,7 @@ namespace dss {
     DistributeFrame(boost::shared_ptr<DS485CommandFrame>(_pFrame));
   } // DistributeFrame
 
-  //================================================== DS485FrameSniffer
-#ifndef __APPLE__
-  DS485FrameSniffer::DS485FrameSniffer(const string& _deviceName)
-  {
-     m_SerialCom.reset(new SerialCom());
-     m_SerialCom->Open(_deviceName.c_str());
-     m_FrameReader.SetSerialCom(m_SerialCom);
-  }
 
-  void DS485FrameSniffer::Run() {
-    struct timespec lastFrame;
-    struct timespec thisFrame;
-    clock_gettime(CLOCK_REALTIME, &lastFrame);
-    while(true) {
-      boost::scoped_ptr<DS485Frame> frame(m_FrameReader.GetFrame(500));
-      if(frame.get() != NULL){
-        clock_gettime(CLOCK_REALTIME, &thisFrame);
-        if(frame.get() != NULL) {
-
-          double diffMS = ((thisFrame.tv_sec*1000.0 + thisFrame.tv_nsec/1000.0/1000.0) -
-                           (lastFrame.tv_sec*1000.0 + lastFrame.tv_nsec/1000.0/1000.0));
-
-          cout << "+" << diffMS << endl;
-
-          DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(frame.get());
-          if(cmdFrame != NULL) {
-            cout << "Command Frame: " << CommandToString(cmdFrame->GetCommand()) << endl;
-          } else {
-            cout << "token " << frame->GetHeader().GetSource() << " -> " << frame->GetHeader().GetDestination()  << endl;
-          }
-          cout << "seq: " << frame->GetHeader().GetCounter() << endl;
-
-          lastFrame = thisFrame;
-        }
-      }
-    }
-  }
-#endif
   //================================================== PayloadDissector
 
   template<>
@@ -745,6 +708,50 @@ namespace dss {
              (Get<uint8>());
     return result;
   }
+
+  //================================================== DS485FrameSniffer
+#ifndef __APPLE__
+  DS485FrameSniffer::DS485FrameSniffer(const string& _deviceName)
+  {
+     m_SerialCom.reset(new SerialCom());
+     m_SerialCom->Open(_deviceName.c_str());
+     m_FrameReader.SetSerialCom(m_SerialCom);
+  }
+
+  void DS485FrameSniffer::Run() {
+    struct timespec lastFrame;
+    struct timespec thisFrame;
+    clock_gettime(CLOCK_REALTIME, &lastFrame);
+    while(true) {
+      boost::scoped_ptr<DS485Frame> frame(m_FrameReader.GetFrame(500));
+      if(frame.get() != NULL){
+        clock_gettime(CLOCK_REALTIME, &thisFrame);
+        if(frame.get() != NULL) {
+
+          double diffMS = ((thisFrame.tv_sec*1000.0 + thisFrame.tv_nsec/1000.0/1000.0) -
+                           (lastFrame.tv_sec*1000.0 + lastFrame.tv_nsec/1000.0/1000.0));
+
+          cout << "+" << diffMS << "\n";
+
+          DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(frame.get());
+          if(cmdFrame != NULL) {
+            uint8 cmd = cmdFrame->GetCommand();
+            cout << "Command Frame: " << CommandToString(cmdFrame->GetCommand()) << "\n";
+            if(cmd == CommandRequest || cmd == CommandResponse) {
+              PayloadDissector pd(cmdFrame->GetPayload());
+              cout << (int)pd.Get<uint8>() << "\n";
+            }
+          } else {
+            cout << "token " << frame->GetHeader().GetSource() << " -> " << frame->GetHeader().GetDestination()  << "\n";
+          }
+          cout << "seq: " << frame->GetHeader().GetCounter() << endl;
+
+          lastFrame = thisFrame;
+        }
+      }
+    }
+  }
+#endif
 
   //================================================== Global helpers
 
