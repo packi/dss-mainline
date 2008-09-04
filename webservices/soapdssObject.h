@@ -154,6 +154,8 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetFunctionID(struct soap*, int _token, un
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Switch_GetGroupID(struct soap*, int _token, unsigned long _deviceID, int &result);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__Switch_SimulateKeypress(struct soap*, int _token, unsigned long _deviceID, int _buttonNr, char *_kind, bool &result);
+
 SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Raise(struct soap*, int _token, int _eventID, int _sourceID, dss__inParameter _params, int &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Event_GetActionNames(struct soap*, int _token, StringArray &names);

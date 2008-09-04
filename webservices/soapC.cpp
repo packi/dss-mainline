@@ -7,7 +7,7 @@
 
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2008-09-01 09:52:41 GMT")
+SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2008-09-04 14:06:22 GMT")
 
 
 #ifndef WITH_NOGLOBAL
@@ -205,6 +205,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_dss__Event_Raise(soap, NULL, NULL, "dss:Event-Raise");
 	case SOAP_TYPE_dss__Event_RaiseResponse:
 		return soap_in_dss__Event_RaiseResponse(soap, NULL, NULL, "dss:Event-RaiseResponse");
+	case SOAP_TYPE_dss__Switch_SimulateKeypress:
+		return soap_in_dss__Switch_SimulateKeypress(soap, NULL, NULL, "dss:Switch-SimulateKeypress");
+	case SOAP_TYPE_dss__Switch_SimulateKeypressResponse:
+		return soap_in_dss__Switch_SimulateKeypressResponse(soap, NULL, NULL, "dss:Switch-SimulateKeypressResponse");
 	case SOAP_TYPE_dss__Switch_GetGroupID:
 		return soap_in_dss__Switch_GetGroupID(soap, NULL, NULL, "dss:Switch-GetGroupID");
 	case SOAP_TYPE_dss__Switch_GetGroupIDResponse:
@@ -539,6 +543,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		if (!soap_match_tag(soap, t, "dss:Event-RaiseResponse"))
 		{	*type = SOAP_TYPE_dss__Event_RaiseResponse;
 			return soap_in_dss__Event_RaiseResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Switch-SimulateKeypress"))
+		{	*type = SOAP_TYPE_dss__Switch_SimulateKeypress;
+			return soap_in_dss__Switch_SimulateKeypress(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Switch-SimulateKeypressResponse"))
+		{	*type = SOAP_TYPE_dss__Switch_SimulateKeypressResponse;
+			return soap_in_dss__Switch_SimulateKeypressResponse(soap, NULL, NULL, NULL);
 		}
 		if (!soap_match_tag(soap, t, "dss:Switch-GetGroupID"))
 		{	*type = SOAP_TYPE_dss__Switch_GetGroupID;
@@ -1108,6 +1120,10 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_dss__Event_Raise(soap, tag, id, (const struct dss__Event_Raise *)ptr, "dss:Event-Raise");
 	case SOAP_TYPE_dss__Event_RaiseResponse:
 		return soap_out_dss__Event_RaiseResponse(soap, tag, id, (const struct dss__Event_RaiseResponse *)ptr, "dss:Event-RaiseResponse");
+	case SOAP_TYPE_dss__Switch_SimulateKeypress:
+		return soap_out_dss__Switch_SimulateKeypress(soap, tag, id, (const struct dss__Switch_SimulateKeypress *)ptr, "dss:Switch-SimulateKeypress");
+	case SOAP_TYPE_dss__Switch_SimulateKeypressResponse:
+		return soap_out_dss__Switch_SimulateKeypressResponse(soap, tag, id, (const struct dss__Switch_SimulateKeypressResponse *)ptr, "dss:Switch-SimulateKeypressResponse");
 	case SOAP_TYPE_dss__Switch_GetGroupID:
 		return soap_out_dss__Switch_GetGroupID(soap, tag, id, (const struct dss__Switch_GetGroupID *)ptr, "dss:Switch-GetGroupID");
 	case SOAP_TYPE_dss__Switch_GetGroupIDResponse:
@@ -1407,6 +1423,12 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 		break;
 	case SOAP_TYPE_dss__Event_RaiseResponse:
 		soap_serialize_dss__Event_RaiseResponse(soap, (const struct dss__Event_RaiseResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__Switch_SimulateKeypress:
+		soap_serialize_dss__Switch_SimulateKeypress(soap, (const struct dss__Switch_SimulateKeypress *)ptr);
+		break;
+	case SOAP_TYPE_dss__Switch_SimulateKeypressResponse:
+		soap_serialize_dss__Switch_SimulateKeypressResponse(soap, (const struct dss__Switch_SimulateKeypressResponse *)ptr);
 		break;
 	case SOAP_TYPE_dss__Switch_GetGroupID:
 		soap_serialize_dss__Switch_GetGroupID(soap, (const struct dss__Switch_GetGroupID *)ptr);
@@ -1989,6 +2011,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_dss__Switch_GetGroupIDResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Switch_GetGroupID:
 		return (void*)soap_instantiate_dss__Switch_GetGroupID(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Switch_SimulateKeypressResponse:
+		return (void*)soap_instantiate_dss__Switch_SimulateKeypressResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Switch_SimulateKeypress:
+		return (void*)soap_instantiate_dss__Switch_SimulateKeypress(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__inParameter:
 		return (void*)soap_instantiate_dss__inParameter(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__outParameter:
@@ -2717,6 +2743,18 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 			delete (struct dss__Switch_GetGroupID*)p->ptr;
 		else
 			delete[] (struct dss__Switch_GetGroupID*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Switch_SimulateKeypressResponse:
+		if (p->size < 0)
+			delete (struct dss__Switch_SimulateKeypressResponse*)p->ptr;
+		else
+			delete[] (struct dss__Switch_SimulateKeypressResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Switch_SimulateKeypress:
+		if (p->size < 0)
+			delete (struct dss__Switch_SimulateKeypress*)p->ptr;
+		else
+			delete[] (struct dss__Switch_SimulateKeypress*)p->ptr;
 		break;
 	case SOAP_TYPE_dss__inParameter:
 		if (p->size < 0)
@@ -6013,6 +6051,258 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Event_RaiseResponse(struct soap *soap,
 {
 	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Event_RaiseResponse %p -> %p\n", q, p));
 	*(struct dss__Event_RaiseResponse*)p = *(struct dss__Event_RaiseResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Switch_SimulateKeypress(struct soap *soap, struct dss__Switch_SimulateKeypress *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_xsd__unsignedInt(soap, &a->_deviceID);
+	soap_default_int(soap, &a->_buttonNr);
+	soap_default_string(soap, &a->_kind);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Switch_SimulateKeypress(struct soap *soap, const struct dss__Switch_SimulateKeypress *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->_deviceID, SOAP_TYPE_xsd__unsignedInt);
+	soap_serialize_string(soap, &a->_kind);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Switch_SimulateKeypress(struct soap *soap, const struct dss__Switch_SimulateKeypress *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Switch_SimulateKeypress);
+	if (soap_out_dss__Switch_SimulateKeypress(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Switch_SimulateKeypress(struct soap *soap, const char *tag, int id, const struct dss__Switch_SimulateKeypress *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Switch_SimulateKeypress), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_xsd__unsignedInt(soap, "deviceID", -1, &a->_deviceID, ""))
+		return soap->error;
+	if (soap_out_int(soap, "buttonNr", -1, &a->_buttonNr, ""))
+		return soap->error;
+	if (soap_out_string(soap, "kind", -1, &a->_kind, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Switch_SimulateKeypress * SOAP_FMAC4 soap_get_dss__Switch_SimulateKeypress(struct soap *soap, struct dss__Switch_SimulateKeypress *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Switch_SimulateKeypress(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Switch_SimulateKeypress * SOAP_FMAC4 soap_in_dss__Switch_SimulateKeypress(struct soap *soap, const char *tag, struct dss__Switch_SimulateKeypress *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__deviceID = 1, soap_flag__buttonNr = 1, soap_flag__kind = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Switch_SimulateKeypress *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Switch_SimulateKeypress, sizeof(struct dss__Switch_SimulateKeypress), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Switch_SimulateKeypress(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__deviceID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_xsd__unsignedInt(soap, NULL, &a->_deviceID, "xsd:unsignedInt"))
+				{	soap_flag__deviceID--;
+					continue;
+				}
+			if (soap_flag__buttonNr && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_buttonNr, "xsd:int"))
+				{	soap_flag__buttonNr--;
+					continue;
+				}
+			if (soap_flag__kind && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_kind, "xsd:string"))
+				{	soap_flag__kind--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Switch_SimulateKeypress *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Switch_SimulateKeypress, 0, sizeof(struct dss__Switch_SimulateKeypress), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__deviceID > 0 || soap_flag__buttonNr > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Switch_SimulateKeypress * SOAP_FMAC6 soap_new_dss__Switch_SimulateKeypress(struct soap *soap, int n)
+{	return soap_instantiate_dss__Switch_SimulateKeypress(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Switch_SimulateKeypress(struct soap *soap, struct dss__Switch_SimulateKeypress *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Switch_SimulateKeypress * SOAP_FMAC4 soap_instantiate_dss__Switch_SimulateKeypress(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Switch_SimulateKeypress(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Switch_SimulateKeypress, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Switch_SimulateKeypress;
+		if (size)
+			*size = sizeof(struct dss__Switch_SimulateKeypress);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Switch_SimulateKeypress[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Switch_SimulateKeypress);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Switch_SimulateKeypress*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Switch_SimulateKeypress(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Switch_SimulateKeypress %p -> %p\n", q, p));
+	*(struct dss__Switch_SimulateKeypress*)p = *(struct dss__Switch_SimulateKeypress*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Switch_SimulateKeypressResponse(struct soap *soap, struct dss__Switch_SimulateKeypressResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Switch_SimulateKeypressResponse(struct soap *soap, const struct dss__Switch_SimulateKeypressResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Switch_SimulateKeypressResponse(struct soap *soap, const struct dss__Switch_SimulateKeypressResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Switch_SimulateKeypressResponse);
+	if (soap_out_dss__Switch_SimulateKeypressResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Switch_SimulateKeypressResponse(struct soap *soap, const char *tag, int id, const struct dss__Switch_SimulateKeypressResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Switch_SimulateKeypressResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Switch_SimulateKeypressResponse * SOAP_FMAC4 soap_get_dss__Switch_SimulateKeypressResponse(struct soap *soap, struct dss__Switch_SimulateKeypressResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Switch_SimulateKeypressResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Switch_SimulateKeypressResponse * SOAP_FMAC4 soap_in_dss__Switch_SimulateKeypressResponse(struct soap *soap, const char *tag, struct dss__Switch_SimulateKeypressResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Switch_SimulateKeypressResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Switch_SimulateKeypressResponse, sizeof(struct dss__Switch_SimulateKeypressResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Switch_SimulateKeypressResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Switch_SimulateKeypressResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Switch_SimulateKeypressResponse, 0, sizeof(struct dss__Switch_SimulateKeypressResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Switch_SimulateKeypressResponse * SOAP_FMAC6 soap_new_dss__Switch_SimulateKeypressResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Switch_SimulateKeypressResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Switch_SimulateKeypressResponse(struct soap *soap, struct dss__Switch_SimulateKeypressResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Switch_SimulateKeypressResponse * SOAP_FMAC4 soap_instantiate_dss__Switch_SimulateKeypressResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Switch_SimulateKeypressResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Switch_SimulateKeypressResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Switch_SimulateKeypressResponse;
+		if (size)
+			*size = sizeof(struct dss__Switch_SimulateKeypressResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Switch_SimulateKeypressResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Switch_SimulateKeypressResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Switch_SimulateKeypressResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Switch_SimulateKeypressResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Switch_SimulateKeypressResponse %p -> %p\n", q, p));
+	*(struct dss__Switch_SimulateKeypressResponse*)p = *(struct dss__Switch_SimulateKeypressResponse*)q;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Switch_GetGroupID(struct soap *soap, struct dss__Switch_GetGroupID *a)

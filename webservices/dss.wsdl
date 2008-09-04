@@ -1006,6 +1006,25 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="Switch-SimulateKeypress">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="buttonNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="kind" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Switch-SimulateKeypressResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="Event-Raise">
    <complexType>
     <sequence>
@@ -1575,6 +1594,14 @@
  <part name="parameters" element="dss:Switch-GetGroupIDResponse"/>
 </message>
 
+<message name="Switch-SimulateKeypressRequest">
+ <part name="parameters" element="dss:Switch-SimulateKeypress"/>
+</message>
+
+<message name="Switch-SimulateKeypressResponse">
+ <part name="parameters" element="dss:Switch-SimulateKeypressResponse"/>
+</message>
+
 <message name="Event-RaiseRequest">
  <part name="parameters" element="dss:Event-Raise"/>
 </message>
@@ -1906,6 +1933,11 @@
   <documentation>Service definition of function dss__Switch_GetGroupID</documentation>
   <input message="tns:Switch-GetGroupIDRequest"/>
   <output message="tns:Switch-GetGroupIDResponse"/>
+ </operation>
+ <operation name="Switch-SimulateKeypress">
+  <documentation>Service definition of function dss__Switch_SimulateKeypress</documentation>
+  <input message="tns:Switch-SimulateKeypressRequest"/>
+  <output message="tns:Switch-SimulateKeypressResponse"/>
  </operation>
  <operation name="Event-Raise">
   <documentation>Service definition of function dss__Event_Raise</documentation>
@@ -2433,6 +2465,15 @@
   </output>
  </operation>
  <operation name="Switch-GetGroupID">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Switch-SimulateKeypress">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

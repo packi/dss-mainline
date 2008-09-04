@@ -165,6 +165,7 @@ int dss__Group_RemoveDevice(int _token, int _groupID, int _deviceID, int& result
 
 int dss__Device_GetFunctionID(int _token, xsd__unsignedInt _deviceID, int& result);
 int dss__Switch_GetGroupID(int _token, xsd__unsignedInt _deviceID, int& result);
+int dss__Switch_SimulateKeypress(int _token, xsd__unsignedInt _deviceID, int _buttonNr, char* _kind, bool& result);
 
 class dss__inParameter {
 public:

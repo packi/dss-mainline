@@ -1243,8 +1243,31 @@ public:
 };
 #endif
 
+#ifndef SOAP_TYPE_dss__Switch_SimulateKeypressResponse
+#define SOAP_TYPE_dss__Switch_SimulateKeypressResponse (188)
+/* dss:Switch-SimulateKeypressResponse */
+struct dss__Switch_SimulateKeypressResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__Switch_SimulateKeypress
+#define SOAP_TYPE_dss__Switch_SimulateKeypress (189)
+/* dss:Switch-SimulateKeypress */
+struct dss__Switch_SimulateKeypress
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	unsigned long _deviceID;	/* required element of type xsd:unsignedInt */
+	int _buttonNr;	/* required element of type xsd:int */
+	char *_kind;	/* optional element of type xsd:string */
+};
+#endif
+
 #ifndef SOAP_TYPE_dss__inParameter
-#define SOAP_TYPE_dss__inParameter (187)
+#define SOAP_TYPE_dss__inParameter (190)
 /* dss:inParameter */
 class SOAP_CMAC dss__inParameter
 {
@@ -1252,7 +1275,7 @@ public:
 	StringArray *values;	/* optional element of type ArrayOfstring */
 	StringArray *names;	/* optional element of type ArrayOfstring */
 public:
-	virtual int soap_type() const { return 187; } /* = unique id SOAP_TYPE_dss__inParameter */
+	virtual int soap_type() const { return 190; } /* = unique id SOAP_TYPE_dss__inParameter */
 	virtual void soap_default(struct soap*);
 	virtual void soap_serialize(struct soap*) const;
 	virtual int soap_put(struct soap*, const char*, const char*) const;
@@ -1265,7 +1288,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__outParameter
-#define SOAP_TYPE_dss__outParameter (189)
+#define SOAP_TYPE_dss__outParameter (192)
 /* dss:outParameter */
 class SOAP_CMAC dss__outParameter
 {
@@ -1273,7 +1296,7 @@ public:
 	StringArray *values;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* optional element of type ArrayOfstring */
 	StringArray *names;	/* optional element of type ArrayOfstring */
 public:
-	virtual int soap_type() const { return 189; } /* = unique id SOAP_TYPE_dss__outParameter */
+	virtual int soap_type() const { return 192; } /* = unique id SOAP_TYPE_dss__outParameter */
 	virtual void soap_default(struct soap*);
 	virtual void soap_serialize(struct soap*) const;
 	virtual int soap_put(struct soap*, const char*, const char*) const;
@@ -1286,7 +1309,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Event_RaiseResponse
-#define SOAP_TYPE_dss__Event_RaiseResponse (191)
+#define SOAP_TYPE_dss__Event_RaiseResponse (194)
 /* dss:Event-RaiseResponse */
 struct dss__Event_RaiseResponse
 {
@@ -1296,7 +1319,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Event_Raise
-#define SOAP_TYPE_dss__Event_Raise (192)
+#define SOAP_TYPE_dss__Event_Raise (195)
 /* dss:Event-Raise */
 struct dss__Event_Raise
 {
@@ -1309,7 +1332,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Event_GetActionNamesResponse
-#define SOAP_TYPE_dss__Event_GetActionNamesResponse (195)
+#define SOAP_TYPE_dss__Event_GetActionNamesResponse (198)
 /* dss:Event-GetActionNamesResponse */
 struct dss__Event_GetActionNamesResponse
 {
@@ -1319,7 +1342,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Event_GetActionNames
-#define SOAP_TYPE_dss__Event_GetActionNames (196)
+#define SOAP_TYPE_dss__Event_GetActionNames (199)
 /* dss:Event-GetActionNames */
 struct dss__Event_GetActionNames
 {
@@ -1329,7 +1352,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Event_GetActionParamsTemplate
-#define SOAP_TYPE_dss__Event_GetActionParamsTemplate (199)
+#define SOAP_TYPE_dss__Event_GetActionParamsTemplate (202)
 /* dss:Event-GetActionParamsTemplate */
 struct dss__Event_GetActionParamsTemplate
 {
@@ -1340,7 +1363,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Event_SubscribeResponse
-#define SOAP_TYPE_dss__Event_SubscribeResponse (201)
+#define SOAP_TYPE_dss__Event_SubscribeResponse (204)
 /* dss:Event-SubscribeResponse */
 struct dss__Event_SubscribeResponse
 {
@@ -1350,7 +1373,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Event_Subscribe
-#define SOAP_TYPE_dss__Event_Subscribe (202)
+#define SOAP_TYPE_dss__Event_Subscribe (205)
 /* dss:Event-Subscribe */
 struct dss__Event_Subscribe
 {
@@ -1364,7 +1387,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Event_UnsubscribeResponse
-#define SOAP_TYPE_dss__Event_UnsubscribeResponse (204)
+#define SOAP_TYPE_dss__Event_UnsubscribeResponse (207)
 /* dss:Event-UnsubscribeResponse */
 struct dss__Event_UnsubscribeResponse
 {
@@ -1374,7 +1397,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Event_Unsubscribe
-#define SOAP_TYPE_dss__Event_Unsubscribe (205)
+#define SOAP_TYPE_dss__Event_Unsubscribe (208)
 /* dss:Event-Unsubscribe */
 struct dss__Event_Unsubscribe
 {
@@ -1385,7 +1408,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Event_ScheduleResponse
-#define SOAP_TYPE_dss__Event_ScheduleResponse (207)
+#define SOAP_TYPE_dss__Event_ScheduleResponse (210)
 /* dss:Event-ScheduleResponse */
 struct dss__Event_ScheduleResponse
 {
@@ -1395,7 +1418,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Event_Schedule
-#define SOAP_TYPE_dss__Event_Schedule (208)
+#define SOAP_TYPE_dss__Event_Schedule (211)
 /* dss:Event-Schedule */
 struct dss__Event_Schedule
 {
@@ -1408,7 +1431,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Event_DeleteScheduleResponse
-#define SOAP_TYPE_dss__Event_DeleteScheduleResponse (210)
+#define SOAP_TYPE_dss__Event_DeleteScheduleResponse (213)
 /* dss:Event-DeleteScheduleResponse */
 struct dss__Event_DeleteScheduleResponse
 {
@@ -1418,7 +1441,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Event_DeleteSchedule
-#define SOAP_TYPE_dss__Event_DeleteSchedule (211)
+#define SOAP_TYPE_dss__Event_DeleteSchedule (214)
 /* dss:Event-DeleteSchedule */
 struct dss__Event_DeleteSchedule
 {
@@ -1429,7 +1452,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Header
-#define SOAP_TYPE_SOAP_ENV__Header (212)
+#define SOAP_TYPE_SOAP_ENV__Header (215)
 /* SOAP Header: */
 struct SOAP_ENV__Header
 {
@@ -1441,7 +1464,7 @@ private:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Code
-#define SOAP_TYPE_SOAP_ENV__Code (213)
+#define SOAP_TYPE_SOAP_ENV__Code (216)
 /* SOAP Fault Code: */
 struct SOAP_ENV__Code
 {
@@ -1452,7 +1475,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Detail
-#define SOAP_TYPE_SOAP_ENV__Detail (215)
+#define SOAP_TYPE_SOAP_ENV__Detail (218)
 /* SOAP-ENV:Detail */
 struct SOAP_ENV__Detail
 {
@@ -1464,7 +1487,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Reason
-#define SOAP_TYPE_SOAP_ENV__Reason (218)
+#define SOAP_TYPE_SOAP_ENV__Reason (221)
 /* SOAP-ENV:Reason */
 struct SOAP_ENV__Reason
 {
@@ -1474,7 +1497,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Fault
-#define SOAP_TYPE_SOAP_ENV__Fault (219)
+#define SOAP_TYPE_SOAP_ENV__Fault (222)
 /* SOAP Fault: */
 struct SOAP_ENV__Fault
 {
@@ -1651,6 +1674,8 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetFunctionID(struct soap*, int _token, un
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Switch_GetGroupID(struct soap*, int _token, unsigned long _deviceID, int &result);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__Switch_SimulateKeypress(struct soap*, int _token, unsigned long _deviceID, int _buttonNr, char *_kind, bool &result);
+
 SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Raise(struct soap*, int _token, int _eventID, int _sourceID, dss__inParameter _params, int &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Event_GetActionNames(struct soap*, int _token, StringArray &names);
@@ -1784,6 +1809,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_RemoveDevice(struct soap*);
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetFunctionID(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Switch_GetGroupID(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Switch_SimulateKeypress(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_Raise(struct soap*);
 

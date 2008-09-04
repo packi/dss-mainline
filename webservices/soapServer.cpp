@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2008-09-01 09:52:41 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2008-09-04 14:06:22 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -183,6 +183,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__Device_GetFunctionID(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Switch-GetGroupID"))
 		return soap_serve_dss__Switch_GetGroupID(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Switch-SimulateKeypress"))
+		return soap_serve_dss__Switch_SimulateKeypress(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Event-Raise"))
 		return soap_serve_dss__Event_Raise(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Event-GetActionNames"))
@@ -2455,6 +2457,47 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Switch_GetGroupID(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__Switch_GetGroupIDResponse(soap, &soap_tmp_dss__Switch_GetGroupIDResponse, "dss:Switch-GetGroupIDResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Switch_SimulateKeypress(struct soap *soap)
+{	struct dss__Switch_SimulateKeypress soap_tmp_dss__Switch_SimulateKeypress;
+	struct dss__Switch_SimulateKeypressResponse soap_tmp_dss__Switch_SimulateKeypressResponse;
+	soap_default_dss__Switch_SimulateKeypressResponse(soap, &soap_tmp_dss__Switch_SimulateKeypressResponse);
+	soap_default_dss__Switch_SimulateKeypress(soap, &soap_tmp_dss__Switch_SimulateKeypress);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Switch_SimulateKeypress(soap, &soap_tmp_dss__Switch_SimulateKeypress, "dss:Switch-SimulateKeypress", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Switch_SimulateKeypress(soap, soap_tmp_dss__Switch_SimulateKeypress._token, soap_tmp_dss__Switch_SimulateKeypress._deviceID, soap_tmp_dss__Switch_SimulateKeypress._buttonNr, soap_tmp_dss__Switch_SimulateKeypress._kind, soap_tmp_dss__Switch_SimulateKeypressResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Switch_SimulateKeypressResponse(soap, &soap_tmp_dss__Switch_SimulateKeypressResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Switch_SimulateKeypressResponse(soap, &soap_tmp_dss__Switch_SimulateKeypressResponse, "dss:Switch-SimulateKeypressResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Switch_SimulateKeypressResponse(soap, &soap_tmp_dss__Switch_SimulateKeypressResponse, "dss:Switch-SimulateKeypressResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

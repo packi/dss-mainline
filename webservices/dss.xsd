@@ -970,6 +970,25 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="Switch-SimulateKeypress">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="buttonNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="kind" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Switch-SimulateKeypressResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="Event-Raise">
    <complexType>
     <sequence>
