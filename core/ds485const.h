@@ -56,7 +56,7 @@ namespace dss {
 
   const uint8 FunctionModulatorGetDSID = 0xF1;
 
-  const uint8 FunctionDeviceGetFunctionID = 0xF2;
+  const uint8 FunctionDeviceGetFunctionID = 0xF4;
 
   const uint8 FunctionDeviceSubscribe = 0xF3;
 

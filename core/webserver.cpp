@@ -225,14 +225,14 @@ namespace dss {
       frame->SetCommand(command);
       for(int iByte = 0; iByte < length; iByte++) {
         uint8 byte = StrToIntDef(paramMap[string("payload_") + IntToString(iByte+1)], 0xFF);
-        cout << "b1: " << (int)byte << "\n";
+        cout << "b" << dec << iByte << ": " << hex << (int)byte << "\n";
         frame->GetPayload().Add<uint8>(byte);
       }
-      cout << "done" << endl;
+      cout << dec <<"done" << endl;
       DS485Interface* intf = &DSS::GetInstance()->GetDS485Interface();
       DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
       if(proxy != NULL) {
-        proxy->GetController().EnqueueFrame(*frame);
+        proxy->SendFrame(*frame, true);
       } else {
         delete frame;
       }

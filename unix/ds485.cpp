@@ -147,8 +147,8 @@ namespace dss {
         //Logger::GetInstance()->Log(string("length:  ") + IntToString((cmdFrame->GetLength())));
         //Logger::GetInstance()->Log(string("msg nr:  ") + IntToString(cmdFrame->GetHeader().GetCounter()));
       } else {
-        cout << "+";
-        flush(cout);
+        //cout << "+";
+        //flush(cout);
         //Logger::GetInstance()->Log("token received");
       }
     }
@@ -381,8 +381,8 @@ namespace dss {
 
             }
             PutFrameOnWire(token.get(), false);
-            cout << ".";
-            flush(cout);
+            //cout << ".";
+            //flush(cout);
             time(&tokenReceivedAt);
             m_TokenEvent.Broadcast();
             m_TokenCounter++;
@@ -592,7 +592,7 @@ namespace dss {
                 DS485Frame* frame = new DS485Frame();
                 frame->GetHeader().FromChar(m_ReceiveBuffer, m_ValidBytes);
 
-                cout << "-";
+                //cout << "-";
                 //flush(cout);
                 m_State = rsSynchronizing;
                 return frame;

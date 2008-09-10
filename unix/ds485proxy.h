@@ -69,7 +69,6 @@ namespace dss {
     FittingResult BestFit(Set& _set);
     bool IsSimAddress(const uint8 _addr);
 
-    void SendFrame(DS485CommandFrame& _frame);
     vector<boost::shared_ptr<DS485CommandFrame> > Receive(uint8 _functionID);
     uint8 ReceiveSingleResult(uint8 _functionID);
 
@@ -86,6 +85,8 @@ namespace dss {
   public:
     DS485Proxy();
     virtual ~DS485Proxy() {};
+
+    void SendFrame(DS485CommandFrame& _frame, bool _force = false);
 
     //------------------------------------------------ Handling
     void Start();

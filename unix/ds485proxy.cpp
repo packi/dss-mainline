@@ -161,7 +161,7 @@ namespace dss {
     return result;
   } // SendCommand
 
-  void DS485Proxy::SendFrame(DS485CommandFrame& _frame) {
+  void DS485Proxy::SendFrame(DS485CommandFrame& _frame, bool _force) {
     bool broadcast = _frame.GetHeader().IsBroadcast();
     bool sim = IsSimAddress(_frame.GetHeader().GetDestination());
     if(broadcast || sim) {
@@ -171,7 +171,11 @@ namespace dss {
     if(broadcast || !sim) {
       if(m_DS485Controller.GetState() == csSlave || m_DS485Controller.GetState() == csMaster) {
         cout << "hw" << endl;
-        //m_DS485Controller.EnqueueFrame(_frame);
+        // Note: At the moment we're discarding all but the "forced" frames. This is because the
+        // firmware in the dSM returns gibberish in it's current state.
+        if(_force) {
+        	m_DS485Controller.EnqueueFrame(_frame);
+        }
       }
     }
   }
@@ -486,7 +490,9 @@ namespace dss {
 
     if(results.size() > 1 || results.size() < 1) {
       cout << results.size() << endl;
-      throw runtime_error("received multiple or none results for request");
+      Logger::GetInstance()->Log("received multiple or none results for request");
+      return 0;
+      //throw runtime_error("received multiple or none results for request");
     }
 
     DS485CommandFrame* frame = results.at(0).get();

@@ -575,7 +575,8 @@ namespace dss {
             }
             break;
           default:
-            throw runtime_error(string("DSModulatorSim: Invalid function id: ") + IntToString(cmdNr));
+        	  Logger::GetInstance()->Log(string("Invalid function id for sim: " + IntToString(cmdNr)), lsError);
+            //throw runtime_error(string("DSModulatorSim: Invalid function id: ") + IntToString(cmdNr));
         }
       }
     }
