@@ -65,7 +65,7 @@ namespace dss {
       }
     }
     return result;
-  }
+  } // GetNextOccurence
 
   void EventRunner::Run() {
     while(true) {

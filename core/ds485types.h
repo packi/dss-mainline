@@ -12,9 +12,11 @@
 
 namespace dss {
 
+  /** Bus id of a device */
   typedef unsigned short devid_t;
   typedef char int8;
   typedef unsigned char uint8;
+  /** DSID of a device/modulator */
   typedef unsigned long dsid_t;
 
   typedef enum  {

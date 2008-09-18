@@ -17,17 +17,24 @@
 
 namespace dss {
   
+  /** This class extends a ScriptContext to contain the JS-API of the Apartment */
   class ModelScriptContextExtension : public ScriptExtension {
   private:
     Apartment& m_Apartment;
   public:
+    /** Creates an instance that interfaces with \a _apartment */
     ModelScriptContextExtension(Apartment& _apartment);
     virtual ~ModelScriptContextExtension() {};
     
     virtual void ExtendContext(ScriptContext& _context);
     
+    /** Returns a reference to the wrapped apartment */
     Apartment& GetApartment() const { return m_Apartment; };
     
+    /** Creates a JSObject that wrapps a Set.
+      * @param _ctx Context in which to create the object
+      * @param _set Reference to the \a Set being wrapped
+      */
     JSObject* CreateJSSet(ScriptContext& _ctx, Set& _set);
     JSObject* CreateJSDevice(ScriptContext& _ctx, Device& _ref);
     JSObject* CreateJSDevice(ScriptContext& _ctx, DeviceReference& _ref);
@@ -39,6 +46,7 @@ namespace dss {
     t ConvertTo(ScriptContext& _context, JSObject* _obj);
   };
   
+  /** Action that is capable of executing a JavaScript. */
   class ActionJS : public Action {
   private:
     ScriptEnvironment m_Environment;

@@ -331,10 +331,14 @@ namespace dss {
     virtual ~Modulator() {};
     virtual Set GetDevices() const;
 
+    /** Returns the DSID of the Modulator */
     dsid_t GetDSID() const;
+    /** Returns the bus id of the Modulator */
     int GetBusID() const;
+    /** Sets the bus id of the Modulator */
     void SetBusID(const int _busID);
 
+    /** Adds a DeviceReference to the modulators devices list */
     void AddDevice(const DeviceReference& _device);
   }; // Modulator
 
@@ -352,8 +356,9 @@ namespace dss {
     /** Returns the id of the group */
     int GetID() const;
 
-    /** This function throws an error */
+    /** As of now, this function throws an error */
     virtual void AddDevice(const DeviceReference& _device);
+    /** As of now, this function throws an error */
     virtual void RemoveDevice(const DeviceReference& _device);
   }; // Group
 
@@ -407,6 +412,7 @@ namespace dss {
 
     /** Returns the rooms id */
     int GetRoomID() const;
+    /** Sets the rooms id */
     void SetRoomID(const int _value);
   }; // Room
 
@@ -439,7 +445,9 @@ namespace dss {
     /** Performs the action with _args */
     virtual void Perform(const Arguments& _args) = 0;
 
+    /** Returns the actions name */
     const string& GetName() { return m_Name; };
+    /** Returns the actions readable name */
     const string& GetNameForUser() { return m_NameForUser; };
   };
 
@@ -483,10 +491,14 @@ namespace dss {
     /** Returns the id of the subscription */
     int GetID() const { return m_ID; };
 
+    /** Returns the name of the subscription */
     const string& GetName() const;
+    /** Sets the name of the subscription */
     void SetName(const string& _value);
 
+    /** Returns a vector containing all source id's the subscription acts on */
     const vector<int>& GetSourceIDs() const;
+    /** Returns a vector containing all event id's the subscription acts on */
     const vector<int>& GetEventIDs() const;
 
     /** Returns true if the subscription is subscribed to the event */
@@ -548,6 +560,10 @@ namespace dss {
     /** Returns a vector of all rooms */
     vector<Room*>& GetRooms();
 
+    /** Allocates a room and returns a reference to it. Should a room with
+      * the given _roomID already exist, a reference to the existing room will
+      * be returned.
+      */
     Room& AllocateRoom(Modulator& _modulator, int _roomID);
 
     /** Returns a Modulator by name */
@@ -581,12 +597,17 @@ namespace dss {
     Subscription& Subscribe(Action& _action, Arguments& _argsForAction, vector<int> _eventIDs, vector<int> _sourceIDs = vector<int>());
     /** Cancels a subscription for a event */
     void Unsubscribe(const int _subscriptionID);
+    /** Returns the count of subscriptions */
     int GetSubscriptionCount();
+    /** Returns a reference to the _index'th subscription */
     Subscription& GetSubscription(const int _index);
 
     /** Feeds an event to the processing-queue */
     void OnEvent(const Event& _event);
 
+    /** Processes a keypress on the given dsid.
+      * @param _number The button number that was pressed starting with 1
+      */
     void OnKeypress(const dsid_t& _dsid, const ButtonPressKind _kind, const int _number);
   }; // Apartment
 
@@ -603,9 +624,13 @@ namespace dss {
     ScheduledEvent(boost::shared_ptr<Event> _evt, boost::shared_ptr<Schedule> _schedule)
     : m_Event(_evt), m_Schedule(_schedule) {};
 
+    /** Returns the event that will be raised */
     Event& GetEvent() const { return *m_Event; };
+    /** Returns the associated Schedule */
     Schedule& GetSchedule() const { return *m_Schedule; };
+    /** Returns the name of this ScheduledEvent */
     const string& GetName() const { return m_Name; };
+    /** Sets the name of this ScheduledEvent */
     void SetName(const string& _value) { m_Name = _value; };
   };
 

@@ -210,9 +210,6 @@ namespace dss {
     return out;
   } // operator<<
 
- /** Creates an instance from an ISO date
-   * Format: yyyymmddThhmmssZ
-   */
   DateTime DateTime::FromISO(const string& _isoStr) {
     DateTime result;
 
