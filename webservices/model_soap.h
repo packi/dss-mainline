@@ -20,8 +20,6 @@ public:
   int __size;
 };
 
-
-
 /** Authenticates your ip to the system.
  * The token received will be used in any subsequent call. The ip/token pair
  * identifies a session. A Session will time out after n minutes of no activity (default 5).*/
@@ -127,6 +125,7 @@ int dss__Device_GetValue(int _token, xsd__unsignedInt _deviceID, int _paramID, d
 /** Returns the name of a device */
 int dss__Device_GetName(int _token, xsd__unsignedInt _deviceID, char** result);
 
+/** Returns the room id of the specified device */
 int dss__Device_GetRoomID(int _token, xsd__unsignedInt _deviceID, int& result);
 
 //==================================================== Information
@@ -163,8 +162,13 @@ int dss__Group_AddDevice(int _token, int _groupID, int _deviceID, int& result);
 /** Removes a device from the given group. */
 int dss__Group_RemoveDevice(int _token, int _groupID, int _deviceID, int& result);
 
+/** Returns the function id of the specified device */
 int dss__Device_GetFunctionID(int _token, xsd__unsignedInt _deviceID, int& result);
+/** Returns the group id of the specified switch */
 int dss__Switch_GetGroupID(int _token, xsd__unsignedInt _deviceID, int& result);
+/** Simulates a key press on the specified switch and button
+  * @param _kind One of ("click", "touch", "touchend")
+  */
 int dss__Switch_SimulateKeypress(int _token, xsd__unsignedInt _deviceID, int _buttonNr, char* _kind, bool& result);
 
 class dss__inParameter {

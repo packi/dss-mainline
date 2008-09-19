@@ -36,6 +36,10 @@ namespace dss {
       * @param _set Reference to the \a Set being wrapped
       */
     JSObject* CreateJSSet(ScriptContext& _ctx, Set& _set);
+    /** Creates a JSObject that wrapps a Set.
+      * @param _ctx Context in which to create the object
+      * @param _set Reference to the \a Set being wrapped
+      */
     JSObject* CreateJSDevice(ScriptContext& _ctx, Device& _ref);
     JSObject* CreateJSDevice(ScriptContext& _ctx, DeviceReference& _ref);
     
