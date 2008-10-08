@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>dss</name>
+	<name>dss_tmp</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -74,16 +74,16 @@
 		</buildCommand>
 	</buildSpec>
 	<natures>
-		<nature>org.eclipse.cdt.core.cnature</nature>
-		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 		<nature>org.eclipse.cdt.core.ccnature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
+		<nature>org.eclipse.cdt.core.cnature</nature>
 	</natures>
 	<linkedResources>
 		<link>
 			<name>trunk</name>
 			<type>2</type>
-			<location>/Users/packi/sources/dss/trunk</location>
+			<location>/home/patrick/sources/digitalstrom/dss/trunk</location>
 		</link>
 	</linkedResources>
 </projectDescription>
