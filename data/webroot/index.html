@@ -20,6 +20,13 @@ function Apartment(into) {
         }
       } 
     );
+    new Ajax.Request('/json/getunassigneddevices', 
+      {
+        method:'get', 
+        onComplete: function(transport, json) {
+        }
+      } 
+    );
   };
   
   this.doUpdate = function(rooms) {
@@ -31,6 +38,9 @@ function Apartment(into) {
     var roomlist = "<ul>"
     rooms.each(
       function(room) {
+        if(room.id == 0) { 
+          return;
+        }
         roomlist += "<li>" + room.name + "</li><ul>";
         room.devices.each(function(device) {
           roomlist += "<li>" + device.name;

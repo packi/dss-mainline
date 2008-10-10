@@ -15,7 +15,7 @@ namespace dss {
   WebServer::WebServer()
   : Thread("WebServer")
   {
-	Logger::GetInstance()->Log("Starting Webserver...");
+    Logger::GetInstance()->Log("Starting Webserver...");
     m_SHttpdContext = shttpd_init();
   } // ctor
 
@@ -83,6 +83,32 @@ namespace dss {
     return string("\"") + _value + '"';
   } // ToJSONValue
 
+  string ToJSONValue(const DeviceReference& _device) {
+    stringstream sstream;
+    sstream << "{ \"id\": \"" << _device.GetDSID() << "\""
+            << ", \"isSwitch\": " << ToJSONValue(_device.IsSwitch())
+            << ", \"name\": \"" << _device.GetDevice().GetName()
+            << "\", \"on\": " << ToJSONValue(_device.IsOn()) << " }";
+    return sstream.str();
+  }
+
+  string ToJSONValue(const Set& _set, const string& _arrayName) {
+    stringstream sstream;
+    sstream << "\"" << _arrayName << "\":[";
+    bool firstDevice = true;
+    for(int iDevice = 0; iDevice < _set.Length(); iDevice++) {
+      const DeviceReference& d = _set.Get(iDevice);
+      if(firstDevice) {
+        firstDevice = false;
+      } else {
+        sstream << ",";
+      }
+      sstream << ToJSONValue(d);
+    }
+    sstream << "]";
+    return sstream.str();
+  }
+
   string ToJSONValue(Apartment& _apartment) {
   	stringstream sstream;
   	sstream << "{ apartment: { rooms: [";
@@ -92,7 +118,6 @@ namespace dss {
 	      ipRoom != e; ++ipRoom)
 	  {
 	  	Room* pRoom = *ipRoom;
-	  	pRoom->GetRoomID();
 	  	if(!first) {
 	  	  sstream << ", ";
 	  	} else {
@@ -101,32 +126,37 @@ namespace dss {
 	  	sstream << "{ id: " << pRoom->GetRoomID() << ",";
 	  	string name = pRoom->GetName();
 	  	if(name.size() == 0) {
-	  		name = string("Room ") + IntToString(distance(rooms.begin(), ipRoom) + 1);
+	  		name = string("Room ") + IntToString(distance(rooms.begin(), ipRoom));
 	  	}
 	  	sstream << "name: " << ToJSONValue(name) << ", ";
 
 	  	Set devices = pRoom->GetDevices();
-      sstream << "\"devices\":[";
-      bool firstDevice = true;
-      for(int iDevice = 0; iDevice < devices.Length(); iDevice++) {
-        DeviceReference& d = devices.Get(iDevice);
-        if(firstDevice) {
-          firstDevice = false;
-        } else {
-          sstream << ",";
-        }
-        sstream << "{ \"id\": \"" << d.GetDSID() << "\""
-                << ", \"isSwitch\": " << ToJSONValue(d.IsSwitch())
-                << ", \"name\": \"" << d.GetDevice().GetName()
-                << "\", \"on\": " << ToJSONValue(d.IsOn()) << " }";
-      }
-      sstream << "]";
-
+      sstream << ToJSONValue(devices, "devices");
 
 	  	sstream << "} ";
 	  }
     sstream << "]} }";
 	  return sstream.str();
+  }
+
+  Set GetUnassignedDevices() {
+    Apartment& apt = DSS::GetInstance()->GetApartment();
+    Set devices = apt.GetRoom(0).GetDevices();
+
+    vector<Room*>& rooms = apt.GetRooms();
+    for(vector<Room*>::iterator ipRoom = rooms.begin(), e = rooms.end();
+        ipRoom != e; ++ipRoom)
+    {
+      Room* pRoom = *ipRoom;
+      if(pRoom->GetRoomID() == 0) {
+        // room 0 holds all devices, so we're going to skip it
+        continue;
+      }
+
+      devices = devices.Remove(pRoom->GetDevices());
+    }
+
+    return devices;
   }
 
   template<class t>
@@ -182,6 +212,10 @@ namespace dss {
       sstream << "]}";
 
       shttpd_printf(_arg, sstream.str().c_str());
+    } else if(method == "getunassigneddevices") {
+      EmitHTTPHeader(200, _arg, "application/json");
+
+      shttpd_printf(_arg, ToJSONValue(GetUnassignedDevices(), "devices").c_str());
     } else if(method == "turnon") {
       EmitHTTPHeader(200, _arg, "application/json");
 

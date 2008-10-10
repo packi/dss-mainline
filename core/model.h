@@ -100,10 +100,11 @@ namespace dss {
     virtual ~DeviceReference() {};
 
     Device& GetDevice();
+    const Device& GetDevice() const;
     dsid_t GetDSID() const;
 
-    int GetFunctionID();
-    bool IsSwitch();
+    int GetFunctionID() const;
+    bool IsSwitch() const;
 
     bool operator==(const DeviceReference& _other) const {
       return m_DSID == _other.m_DSID;
@@ -118,7 +119,7 @@ namespace dss {
     virtual void Enable();
     virtual void Disable();
 
-    virtual bool IsOn();
+    virtual bool IsOn() const;
 
     virtual void StartDim(const bool _directionUp, const int _parameterNr = -1);
     virtual void EndDim(const int _parameterNr = -1);
@@ -127,6 +128,7 @@ namespace dss {
 
   typedef vector<DeviceReference> DeviceVector;
   typedef DeviceVector::iterator DeviceIterator;
+  typedef DeviceVector::const_iterator DeviceConstIterator;
 
   /** Represents a dsID */
   class Device : public IDeviceInterface {
@@ -153,15 +155,15 @@ namespace dss {
     virtual void Enable();
     virtual void Disable();
 
-    virtual bool IsOn();
+    virtual bool IsOn() const;
 
     virtual void StartDim(const bool _directionUp, const int _parameterNr = -1);
     virtual void EndDim(const int _parameterNr = -1);
     virtual void SetValue(const double _value, const int _parameterNr = -1);
     double GetValue(const int _parameterNr = -1);
 
-    int GetFunctionID();
-    bool IsSwitch();
+    int GetFunctionID() const;
+    bool IsSwitch() const;
 
     string GetName() const;
     void SetName(const string& _name);
@@ -280,9 +282,12 @@ namespace dss {
      */
     Set Combine(Set& _other) const;
     /* Returns a set with all device in _other removed */
-    Set Remove(Set& _other) const;
+    Set Remove(const Set& _other) const;
 
     /** Returns the _index'th device */
+    const DeviceReference& Get(int _index) const;
+    const DeviceReference& operator[](const int _index) const;
+
     DeviceReference& Get(int _index);
     DeviceReference& operator[](const int _index);
 

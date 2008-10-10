@@ -79,16 +79,16 @@ namespace dss {
     DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStopDim, *this);
   } // EndDim
 
-  bool Device::IsOn() {
+  bool Device::IsOn() const {
     vector<int> res = DSS::GetInstance()->GetDS485Interface().SendCommand(cmdGetOnOff, *this);
     return res.front() != 0;
   } // IsOn
 
-  int Device::GetFunctionID() {
+  int Device::GetFunctionID() const {
     return DSS::GetInstance()->GetDS485Interface().SendCommand(cmdGetFunctionID, *this).front();
   } // GetFunctionID
 
-  bool Device::IsSwitch() {
+  bool Device::IsSwitch() const {
     return GetFunctionID() == FunctionIDSwitch;
   } // IsSwitch
 
@@ -364,9 +364,9 @@ namespace dss {
     return resultSet;
   } // Combine
 
-  Set Set::Remove(Set& _other) const {
+  Set Set::Remove(const Set& _other) const {
     Set resultSet(*this);
-    for(DeviceIterator iDevice = _other.m_ContainedDevices.begin(); iDevice != _other.m_ContainedDevices.end(); ++iDevice) {
+    for(DeviceConstIterator iDevice = _other.m_ContainedDevices.begin(); iDevice != _other.m_ContainedDevices.end(); ++iDevice) {
       resultSet.RemoveDevice(*iDevice);
     }
     return resultSet;
@@ -402,6 +402,14 @@ namespace dss {
     RemoveDevice(DeviceReference(_device, _device.GetApartment()));
   } // AddDevice
 
+  const DeviceReference& Set::Get(int _index) const {
+    return m_ContainedDevices.at(_index);
+  } // Get
+
+  const DeviceReference& Set::operator[](const int _index) const {
+    return Get(_index);
+  } // operator[]
+
   DeviceReference& Set::Get(int _index) {
     return m_ContainedDevices.at(_index);
   } // Get
@@ -409,7 +417,6 @@ namespace dss {
   DeviceReference& Set::operator[](const int _index) {
     return Get(_index);
   } // operator[]
-
 
   ostream& operator<<(ostream& out, const Device& _dt) {
     out << "Device ID " << _dt.GetShortAddress();
@@ -979,8 +986,8 @@ namespace dss {
     return m_Apartment.GetDevices().GetByGroup(m_GroupID);
   }
 
-  void Group::AddDevice(const DeviceReference& _device) { /* do nothing or throw? */ };
-  void Group::RemoveDevice(const DeviceReference& _device) { /* do nothing or throw? */ };
+  void Group::AddDevice(const DeviceReference& _device) { /* do nothing or throw? */ }
+  void Group::RemoveDevice(const DeviceReference& _device) { /* do nothing or throw? */ }
 
 
   //============================================= Subscription
@@ -1032,6 +1039,10 @@ namespace dss {
     return m_Apartment->GetDeviceByDSID(m_DSID);
   } // GetDevice
 
+  const Device& DeviceReference::GetDevice() const {
+    return m_Apartment->GetDeviceByDSID(m_DSID);
+  } // GetDevice
+
   dsid_t DeviceReference::GetDSID() const {
     return m_DSID;
   } // GetID
@@ -1072,11 +1083,11 @@ namespace dss {
     GetDevice().SetValue(_value, _parameterNr);
   } // SetValue
 
-  bool DeviceReference::IsOn() {
+  bool DeviceReference::IsOn() const {
     return GetDevice().IsOn();
   }
 
-  bool DeviceReference::IsSwitch() {
+  bool DeviceReference::IsSwitch() const {
     return GetDevice().IsSwitch();
   }
 

@@ -20,10 +20,10 @@ namespace dss {
 
   typedef hash_map<const Modulator*, Set> HashMapModulatorSet;
 
-  HashMapModulatorSet SplitByModulator(Set& _set) {
+  HashMapModulatorSet SplitByModulator(const Set& _set) {
     HashMapModulatorSet result;
     for(int iDevice = 0; iDevice < _set.Length(); iDevice++) {
-      DeviceReference& dev = _set.Get(iDevice);
+      const DeviceReference& dev = _set.Get(iDevice);
       Modulator& mod = dev.GetDevice().GetApartment().GetModulatorByBusID(dev.GetDevice().GetModulatorID());
       result[&mod].AddDevice(dev);
     }
@@ -33,7 +33,7 @@ namespace dss {
   typedef pair<vector<Group*>, Set> FittingResultPerModulator;
 
 
-  FittingResultPerModulator BestFit(const Modulator& _modulator, Set& _set) {
+  FittingResultPerModulator BestFit(const Modulator& _modulator, const Set& _set) {
     Set workingCopy = _set;
 
     vector<Group*> unsuitableGroups;
@@ -85,7 +85,7 @@ namespace dss {
   : Thread("DS485Proxy")
   { } // ctor
 
-  FittingResult DS485Proxy::BestFit(Set& _set) {
+  FittingResult DS485Proxy::BestFit(const Set& _set) {
     FittingResult result;
     HashMapModulatorSet modulatorToSet = SplitByModulator(_set);
 
@@ -96,7 +96,7 @@ namespace dss {
     return result;
   }
 
-  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, Set& _set) {
+  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, const Set& _set) {
     vector<int> result;
     FittingResult fittedResult = BestFit(_set);
     for(FittingResult::iterator iResult = fittedResult.begin(); iResult != fittedResult.end(); ++iResult) {
@@ -118,7 +118,7 @@ namespace dss {
     return vector<int>();
   } // SendCommand
 
-  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, Device& _device) {
+  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, const Device& _device) {
     return SendCommand(_cmd, _device.GetShortAddress(), _device.GetModulatorID());
   } // SendCommand
 

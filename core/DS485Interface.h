@@ -84,8 +84,8 @@ namespace dss {
     virtual void Subscribe(const int _moduatorID, const int _groupID, const int _deviceID) = 0;
 
     //------------------------------------------------ Device manipulation
-    virtual vector<int> SendCommand(DS485Command _cmd, Set& _set) = 0;
-    virtual vector<int> SendCommand(DS485Command _cmd, Device& _device) = 0;
+    virtual vector<int> SendCommand(DS485Command _cmd, const Set& _set) = 0;
+    virtual vector<int> SendCommand(DS485Command _cmd, const Device& _device) = 0;
     virtual vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID) = 0;
     virtual vector<int> SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group) = 0;
   };

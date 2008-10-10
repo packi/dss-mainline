@@ -265,6 +265,10 @@ namespace dss {
         if(newDSID != NULL) {
           m_SimulatedDevices.push_back(newDSID);
           m_Rooms[_roomID].push_back(newDSID);
+          // every device is contained in room 0 (broadcast room)
+          if(_roomID != 0) {
+            m_Rooms[0].push_back(newDSID);
+          }
           Logger::GetInstance()->Log("Sim: found device");
         } else {
           Logger::GetInstance()->Log(string("Sim: could not create instance for type \"") + type + "\"");
@@ -546,7 +550,7 @@ namespace dss {
             break;
           case FunctionDeviceSubscribe:
             {
-              uint8 groupID = pd.Get<uint8>();
+              /*uint8 groupID =*/ pd.Get<uint8>();
               devid_t devID = pd.Get<devid_t>();
               DSIDInterface& dev = LookupDevice(devID);
               m_ButtonSubscriptionFlag[&dev] = 70;
