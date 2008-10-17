@@ -63,12 +63,14 @@ int dss__Set_GetContainedDevices(int _token, int _setID, IntArray& deviceIDs);
 
 /** Looks up the group id for the given group name */
 int dss__Apartment_GetGroupByName(int _token, char* _groupName, int& groupID);
-/** Looks up the room id for the given room */
-int dss__Apartment_GetRoomByName(int _token, char* _roomName, int& roomID);
-/** Returns an array containing all room ids */
-int dss__Apartment_GetRoomIDs(int _token, IntArray& roomIDs);
+/** Looks up the zone id for the given zone */
+int dss__Apartment_GetZoneByName(int _token, char* _zoneName, int& zoneID);
+/** Returns an array containing all zone ids */
+int dss__Apartment_GetZoneIDs(int _token, IntArray& zoneIDs);
 
 //==================================================== Manipulation
+
+//--------------------------- Set
 
 /** Sends a turn on command to all devices contained in the set */
 int dss__Set_TurnOn(int _token, int _setID, bool& result);
@@ -94,6 +96,46 @@ int dss__Set_EndDim(int _token, int _setID, int _paramID, bool& result);
 /** Sets the parameter specified by _paramID to _value. If _paramID == -1 the default parameter
  * will be set. */
 int dss__Set_SetValue(int _token, int _setID, double _value, int _paramID, bool& result);
+
+/** Calls the scene _sceneNr on all devices contained int the set _setID. */
+int dss_Set_CallScene(int _token, int _setID, int _sceneNr, bool& result);
+/** Saves the scene _sceneNr on all devices contained int the set _setID. */
+int dss_Set_SaveScene(int _token, int _setID, int _sceneNr, bool& result);
+
+//--------------------------- Group
+
+/** Sends a turn on command to all devices contained in the group */
+int dss__Group_TurnOn(int _token, int _groupID, bool& result);
+/** Sends a turn off command to all devices contained in the group */
+int dss__Group_TurnOff(int _token, int _groupID, bool& result);
+/** Increases the param described by _paramID for each device contained in the group. If _paramID
+ *  == -1 the default parameter will be increased. */
+int dss__Group_IncreaseValue(int _token, int _groupID, int _paramID, bool& result);
+/** Decreases the param described by _paramID for each device contained in the group. If _paramID
+ *  == -1 the default parameter will be decreased. */
+int dss__Group_DecreaseValue(int _token, int _groupID, int _paramID, bool& result);
+
+/** Enables all previously disabled devices in the group. */
+int dss__Group_Enable(int _token, int _groupID, bool& result);
+/** Disables all devices in the group. */
+int dss__Group_Disable(int _token, int _groupID, bool& result);
+/** Starts dimming the given parameter on all devices contained in the group. If _directionUp is
+ * true, the dimming will increase the parameter specified by _paramID. If _paramID == -1 the
+ * default parameter will be dimmed */
+int dss__Group_StartDim(int _token, int _groupID, bool _directionUp, int _paramID, bool& result);
+/** Stops dimming the given parameter on all devices contained in the group. */
+int dss__Group_EndDim(int _token, int _groupID, int _paramID, bool& result);
+/** Sets the parameter specified by _paramID to _value. If _paramID == -1 the default parameter
+ * will be set. */
+int dss__Group_SetValue(int _token, int _groupID, double _value, int _paramID, bool& result);
+
+/** Calls the scene _sceneNr on all devices contained int the group _groupID. */
+int dss_Group_CallScene(int _token, int _groupID, int _sceneNr, bool& result);
+/** Saves the scene _sceneNr on all devices contained int the group _groupID. */
+int dss_Group_SaveScene(int _token, int _groupID, int _sceneNr, bool& result);
+
+
+//--------------------------- Device
 
 /** Sends a turn on command to the device. */
 int dss__Device_TurnOn(int _token, xsd__unsignedInt _deviceID, bool& result);
@@ -122,11 +164,18 @@ int dss__Device_SetValue(int _token, xsd__unsignedInt _deviceID, double _value, 
 /** Returns the value of the parameter _paramID. If _paramID == -1 the value of the default parameter
  * will be returned. */
 int dss__Device_GetValue(int _token, xsd__unsignedInt _deviceID, int _paramID, double& result);
+
+
+/** Calls the scene _sceneNr on the device identified by _deviceID. */
+int dss_Device_CallScene(int _token, xsd__unsignedInt _deviceID, int _sceneNr, bool& result);
+/** Saves the scene _sceneNr on the device identified by _devicdID. */
+int dss_Device_SaveScene(int _token, xsd__unsignedInt _deviceID, int _sceneNr, bool& result);
+
 /** Returns the name of a device */
 int dss__Device_GetName(int _token, xsd__unsignedInt _deviceID, char** result);
 
-/** Returns the room id of the specified device */
-int dss__Device_GetRoomID(int _token, xsd__unsignedInt _deviceID, int& result);
+/** Returns the zone id of the specified device */
+int dss__Device_GetZoneID(int _token, xsd__unsignedInt _deviceID, int& result);
 
 //==================================================== Information
 
@@ -143,16 +192,16 @@ int dss__Apartment_GetModulatorIDs(int _token, IntArray& ids);
 int dss__Modulator_GetDSID(int _token, int _modulatorID, xsd__unsignedInt& dsid);
 /** Retuns the name of the given modulator. */
 int dss__Modulator_GetName(int _token, int _modulatorID, char** name);
-/** Allocates a room */
-int dss__Apartment_AllocateRoom(int _token, int& roomID);
-/** Deletes a previously allocated room. */
-int dss__Apartment_DeleteRoom(int _token, int _roomID, int& result);
-/** Adds a device to a room */
-int dss__Room_AddDevice(int _token, int _roomID, int _deviceID, int& result);
-/** Removes a device from a room */
-int dss__Room_RemoveDevice(int _token, int _roomID, int _deviceID, int& result);
-/** Sets the name of a room to _name */
-int dss__Room_SetName(int _token, int _roomID, char* _name, int& result);
+/** Allocates a zone */
+int dss__Apartment_AllocateZone(int _token, int& zoneID);
+/** Deletes a previously allocated zone. */
+int dss__Apartment_DeleteZone(int _token, int _zoneID, int& result);
+/** Adds a device to a zone */
+int dss__Zone_AddDevice(int _token, int _zoneID, int _deviceID, int& result);
+/** Removes a device from a zone */
+int dss__Zone_RemoveDevice(int _token, int _zoneID, int _deviceID, int& result);
+/** Sets the name of a zone to _name */
+int dss__Zone_SetName(int _token, int _zoneID, char* _name, int& result);
 /** Allocates a user-defined group. */
 int dss__Apartment_AllocateUserGroup(int _token, int& groupID);
 /** Revmoes a previously allocated group. */

@@ -111,26 +111,26 @@ namespace dss {
 
   string ToJSONValue(Apartment& _apartment) {
   	stringstream sstream;
-  	sstream << "{ apartment: { rooms: [";
-	  vector<Room*>& rooms = _apartment.GetRooms();
+  	sstream << "{ apartment: { zones: [";
+	  vector<Zone*>& zones = _apartment.GetZones();
 	  bool first = true;
-	  for(vector<Room*>::iterator ipRoom = rooms.begin(), e = rooms.end();
-	      ipRoom != e; ++ipRoom)
+	  for(vector<Zone*>::iterator ipZone = zones.begin(), e = zones.end();
+	      ipZone != e; ++ipZone)
 	  {
-	  	Room* pRoom = *ipRoom;
+	  	Zone* pZone = *ipZone;
 	  	if(!first) {
 	  	  sstream << ", ";
 	  	} else {
 	  		first = false;
 	  	}
-	  	sstream << "{ id: " << pRoom->GetRoomID() << ",";
-	  	string name = pRoom->GetName();
+	  	sstream << "{ id: " << pZone->GetZoneID() << ",";
+	  	string name = pZone->GetName();
 	  	if(name.size() == 0) {
-	  		name = string("Room ") + IntToString(distance(rooms.begin(), ipRoom));
+	  		name = string("Zone ") + IntToString(distance(zones.begin(), ipZone));
 	  	}
 	  	sstream << "name: " << ToJSONValue(name) << ", ";
 
-	  	Set devices = pRoom->GetDevices();
+	  	Set devices = pZone->GetDevices();
       sstream << ToJSONValue(devices, "devices");
 
 	  	sstream << "} ";
@@ -141,19 +141,19 @@ namespace dss {
 
   Set GetUnassignedDevices() {
     Apartment& apt = DSS::GetInstance()->GetApartment();
-    Set devices = apt.GetRoom(0).GetDevices();
+    Set devices = apt.GetZone(0).GetDevices();
 
-    vector<Room*>& rooms = apt.GetRooms();
-    for(vector<Room*>::iterator ipRoom = rooms.begin(), e = rooms.end();
-        ipRoom != e; ++ipRoom)
+    vector<Zone*>& zones = apt.GetZones();
+    for(vector<Zone*>::iterator ipZone = zones.begin(), e = zones.end();
+        ipZone != e; ++ipZone)
     {
-      Room* pRoom = *ipRoom;
-      if(pRoom->GetRoomID() == 0) {
-        // room 0 holds all devices, so we're going to skip it
+      Zone* pZone = *ipZone;
+      if(pZone->GetZoneID() == 0) {
+        // zone 0 holds all devices, so we're going to skip it
         continue;
       }
 
-      devices = devices.Remove(pRoom->GetDevices());
+      devices = devices.Remove(pZone->GetDevices());
     }
 
     return devices;
@@ -204,10 +204,7 @@ namespace dss {
         } else {
           sstream << ",";
         }
-        sstream << "{ \"id\": \"" << d.GetDSID() << "\""
-                << ", \"isSwitch\": " << ToJSONValue(d.IsSwitch())
-                << ", \"name\": \"" << d.GetDevice().GetName()
-                << "\", \"on\": " << ToJSONValue(d.IsOn()) << " }";
+        sstream << ToJSONValue(d);
       }
       sstream << "]}";
 
@@ -215,7 +212,8 @@ namespace dss {
     } else if(method == "getunassigneddevices") {
       EmitHTTPHeader(200, _arg, "application/json");
 
-      shttpd_printf(_arg, ToJSONValue(GetUnassignedDevices(), "devices").c_str());
+      string result = "{" + ToJSONValue(GetUnassignedDevices(), "devices") + "}";
+      shttpd_printf(_arg, result.c_str());
     } else if(method == "turnon") {
       EmitHTTPHeader(200, _arg, "application/json");
 
@@ -417,6 +415,27 @@ namespace dss {
             DSS::GetInstance()->GetEventRunner().AddEvent(scheduledEvent);
             shttpd_printf(_arg, "{ok:1}");
           }
+        } else {
+          shttpd_printf(_arg, "{ok:0}");
+        }
+      }
+    } else if(BeginsWith(method, "structure/")) {
+      if(method == "structure/zoneAddDevice") {
+        EmitHTTPHeader(200, _arg, "application/json");
+
+        string devidStr = paramMap["devid"];
+        if(!devidStr.empty()) {
+          dsid_t devid = StrToUInt(devidStr);
+
+          Device& dev = DSS::GetInstance()->GetApartment().GetDeviceByDSID(devid);
+
+          string zoneIDStr = paramMap["zone"];
+          if(!zoneIDStr.empty()) {
+            int zoneID = StrToInt(zoneIDStr);
+
+          }
+          DSS::GetInstance()->GetApartment().GetDeviceByDSID(devid).TurnOn();
+          shttpd_printf(_arg, "{ok:1}");
         } else {
           shttpd_printf(_arg, "{ok:0}");
         }

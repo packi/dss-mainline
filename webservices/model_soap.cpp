@@ -60,6 +60,20 @@ int AuthorizeAndGetModulator(struct soap *soap, const int _token, const unsigned
   return SOAP_OK;
 } // AuthorizeAndGetModulator
 
+
+int AuthorizeAndGetGroup(struct soap *soap, const int _token, const int _groupID, dss::Group& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+  dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
+  try {
+    result = apt.GetGroup(_groupID);
+  } catch(dss::ItemNotFoundException& _ex) {
+    return soap_receiver_fault(soap, "Group not found", NULL);
+  }
+  return SOAP_OK;
+ } // AuthorizeAndGetGroup
+
 //==================================================== Callbacks
 
 int dss__Authenticate(struct soap *soap, char* _userName, char* _password, int& token) {
@@ -325,38 +339,40 @@ int dss__Apartment_GetGroupByName(struct soap *soap, int _token, char* _groupNam
   return SOAP_OK;
 }
 
-int dss__Apartment_GetRoomByName(struct soap *soap, int _token,  char* _roomName, int& roomID) {
+int dss__Apartment_GetZoneByName(struct soap *soap, int _token,  char* _zoneName, int& zoneID) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   try {
-    roomID = apt.GetRoom(_roomName).GetRoomID();
+    zoneID = apt.GetZone(_zoneName).GetZoneID();
   } catch(dss::ItemNotFoundException& _ex) {
-    return soap_receiver_fault(soap, "Could not find room", NULL);
+    return soap_receiver_fault(soap, "Could not find zone", NULL);
   }
   return SOAP_OK;
 }
 
-int dss__Apartment_GetRoomIDs(struct soap *soap, int _token, IntArray& roomIDs) {
+int dss__Apartment_GetZoneIDs(struct soap *soap, int _token, IntArray& zoneIDs) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
 
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
-  std::vector<dss::Room*>& rooms = apt.GetRooms();
+  std::vector<dss::Zone*>& zones = apt.GetZones();
 
-  int numRooms = rooms.size();
-  roomIDs.__size = numRooms;
-  roomIDs.__ptr = (long unsigned int*)soap_malloc(soap, numRooms * sizeof(long unsigned int));
-  for(int iRoomID = 0; iRoomID < numRooms; iRoomID++) {
-    roomIDs.__ptr[iRoomID] = rooms[iRoomID]->GetRoomID();
+  int numZones = zones.size();
+  zoneIDs.__size = numZones;
+  zoneIDs.__ptr = (long unsigned int*)soap_malloc(soap, numZones * sizeof(long unsigned int));
+  for(int iZoneID = 0; iZoneID < numZones; iZoneID++) {
+    zoneIDs.__ptr[iZoneID] = zones[iZoneID]->GetZoneID();
   }
 
   return SOAP_OK;
 }
 
 //==================================================== Manipulation
+
+//--------------------------- Set
 
 int dss__Set_TurnOn(struct soap *soap, int _token, int _setID, bool& result) {
   dss::Set set;
@@ -457,6 +473,175 @@ int dss__Set_SetValue(struct soap *soap, int _token, int _setID, double _value, 
   return SOAP_OK;
 }
 
+int dss__Set_CallScene(struct soap *soap, int _token, int _setID, int _sceneID, bool& result) {
+  dss::Set set;
+  int getResult = AuthorizeAndGetSet(soap, _token, _setID, set);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  set.CallScene(_sceneID);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__Set_SaveScene(struct soap *soap, int _token, int _setID, int _sceneID, bool& result) {
+  dss::Set set;
+  int getResult = AuthorizeAndGetSet(soap, _token, _setID, set);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  set.SaveScene(_sceneID);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__Set_UndoScene(struct soap *soap, int _token, int _setID, int _sceneID, bool& result) {
+  dss::Set set;
+  int getResult = AuthorizeAndGetSet(soap, _token, _setID, set);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  set.UndoScene(_sceneID);
+  result = true;
+  return SOAP_OK;
+}
+
+//---------------------------------- Group
+
+int dss__Group_TurnOn(struct soap *soap, int _token, int _groupID, bool& result) {
+  dss::Group group(-1, 0, dss::DSS::GetInstance()->GetApartment());
+  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group.TurnOn();
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__Group_TurnOff(struct soap *soap, int _token, int _groupID, bool& result) {
+  dss::Group group(-1, 0, dss::DSS::GetInstance()->GetApartment());
+  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group.TurnOff();
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__Group_IncreaseValue(struct soap *soap, int _token, int _groupID, int _paramID, bool& result) {
+  dss::Group group(-1, 0, dss::DSS::GetInstance()->GetApartment());
+  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group.IncreaseValue(_paramID);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__Group_DecreaseValue(struct soap *soap, int _token, int _groupID, int _paramID, bool& result) {
+  dss::Group group(-1, 0, dss::DSS::GetInstance()->GetApartment());
+  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group.DecreaseValue(_paramID);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__Group_Enable(struct soap *soap, int _token, int _groupID, bool& result) {
+  dss::Group group(-1, 0, dss::DSS::GetInstance()->GetApartment());
+  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group.Enable();
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__Group_Disable(struct soap *soap, int _token, int _groupID, bool& result) {
+  dss::Group group(-1, 0, dss::DSS::GetInstance()->GetApartment());
+  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group.Disable();
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__Group_StartDim(struct soap *soap, int _token, int _groupID, bool _directionUp, int _paramID, bool& result) {
+  dss::Group group(-1, 0, dss::DSS::GetInstance()->GetApartment());
+  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group.StartDim(_directionUp, _paramID);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__Group_EndDim(struct soap *soap, int _token, int _groupID, int _paramID, bool& result) {
+  dss::Group group(-1, 0, dss::DSS::GetInstance()->GetApartment());
+  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group.EndDim(_paramID);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__Group_SetValue(struct soap *soap, int _token, int _groupID, double _value, int _paramID, bool& result) {
+  dss::Group group(-1, 0, dss::DSS::GetInstance()->GetApartment());
+  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group.SetValue(_value, _paramID);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__Group_CallScene(struct soap *soap, int _token, int _groupID, int _sceneID, bool& result) {
+  dss::Group group(-1, 0, dss::DSS::GetInstance()->GetApartment());
+  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group.CallScene(_sceneID);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__Group_SaveScene(struct soap *soap, int _token, int _groupID, int _sceneID, bool& result) {
+  dss::Group group(-1, 0, dss::DSS::GetInstance()->GetApartment());
+  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group.SaveScene(_sceneID);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__Group_UndoScene(struct soap *soap, int _token, int _groupID, int _sceneID, bool& result) {
+  dss::Group group(-1, 0, dss::DSS::GetInstance()->GetApartment());
+  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group.UndoScene(_sceneID);
+  result = true;
+  return SOAP_OK;
+}
+
+//---------------------------------- Device
+
 int dss__Device_TurnOn(struct soap *soap, int _token, unsigned long _deviceID, bool& result) {
   dss::Device dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
@@ -556,6 +741,39 @@ int dss__Device_SetValue(struct soap *soap, int _token, unsigned long _deviceID,
   return SOAP_OK;
 }
 
+int dss__Device_CallScene(struct soap *soap, int _token, int _deviceID, int _sceneID, bool& result) {
+  dss::Device device(-1, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  device.CallScene(_sceneID);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__Device_SaveScene(struct soap *soap, int _token, int _deviceID, int _sceneID, bool& result) {
+  dss::Device device(-1, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  device.SaveScene(_sceneID);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__Device_UndoScene(struct soap *soap, int _token, int _deviceID, int _sceneID, bool& result) {
+  dss::Device device(-1, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  device.UndoScene(_sceneID);
+  result = true;
+  return SOAP_OK;
+}
+
 int dss__Device_GetValue(struct soap *soap, int _token, unsigned long _deviceID, int _paramID, double& result) {
   dss::Device dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
@@ -631,16 +849,16 @@ int dss__Switch_SimulateKeypress(struct soap *soap, int _token, unsigned long _d
   return soap_sender_fault(soap, "Could not find switch", NULL);
 } // dss__Switch_SimulateKeypress
 
-int dss__Device_GetRoomID(struct soap *soap, int _token, unsigned long _deviceID, int& result) {
+int dss__Device_GetZoneID(struct soap *soap, int _token, unsigned long _deviceID, int& result) {
   dss::Device dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
   }
 
-  result = dev.GetRoomID();
+  result = dev.GetZoneID();
   return SOAP_OK;
-} // dss__Device_GetRoomID
+} // dss__Device_GetZoneID
 
 //==================================================== Information
 
@@ -688,23 +906,23 @@ int dss__Modulator_GetName(struct soap *soap, int _token, int _modulatorID, char
   return SOAP_OK;
 }
 
-int dss__Apartment_AllocateRoom(struct soap *soap, int _token, int& roomID) {
+int dss__Apartment_AllocateZone(struct soap *soap, int _token, int& zoneID) {
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
-int dss__Apartment_DeleteRoom(struct soap *soap, int _token, int _roomID, int& result) {
+int dss__Apartment_DeleteZone(struct soap *soap, int _token, int _zoneID, int& result) {
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
-int dss__Room_AddDevice(struct soap *soap, int _token, int _roomID, int _deviceID, int& result) {
+int dss__Zone_AddDevice(struct soap *soap, int _token, int _zoneID, int _deviceID, int& result) {
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
-int dss__Room_RemoveDevice(struct soap *soap, int _token, int _roomID, int _deviceID, int& result) {
+int dss__Zone_RemoveDevice(struct soap *soap, int _token, int _zoneID, int _deviceID, int& result) {
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
-int dss__Room_SetName(struct soap *soap, int _token, int _roomID, char* _name, int& result) {
+int dss__Zone_SetName(struct soap *soap, int _token, int _zoneID, char* _name, int& result) {
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 

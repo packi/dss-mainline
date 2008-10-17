@@ -338,7 +338,55 @@ namespace dss {
       return JS_TRUE;
     }
     return JS_FALSE;
-  }
+  } // dev_set_value
+
+  JSBool dev_call_scene(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ScriptObject self(obj, *ctx);
+    if(self.Is("set") || self.Is("device")) {
+      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+      int sceneNr = ctx->ConvertTo<int>(argv[0]);
+      if(argc == 1) {
+        intf->CallScene(sceneNr);
+      }
+      *rval = INT_TO_JSVAL(0);
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // dev_call_scene
+
+  JSBool dev_undo_scene(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ScriptObject self(obj, *ctx);
+    if(self.Is("set") || self.Is("device")) {
+      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+      int sceneNr = ctx->ConvertTo<int>(argv[0]);
+      if(argc == 1) {
+        intf->UndoScene(sceneNr);
+      }
+      *rval = INT_TO_JSVAL(0);
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // dev_undo_scene
+
+  JSBool dev_save_scene(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ScriptObject self(obj, *ctx);
+    if(self.Is("set") || self.Is("device")) {
+      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+      int sceneNr = ctx->ConvertTo<int>(argv[0]);
+      if(argc == 1) {
+        intf->SaveScene(sceneNr);
+      }
+      *rval = INT_TO_JSVAL(0);
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // dev_save_scene
 
   class JSDeviceAction : public IDeviceAction {
   private:
@@ -389,6 +437,9 @@ namespace dss {
     {"perform", dev_perform, 1, 0, 0},
     {"increaseValue", dev_increase_value, 0, 0, 0},
     {"decreaseValue", dev_decrease_value, 0, 0, 0},
+    {"callScene", dev_call_scene, 1, 0, 0},
+    {"saveScene", dev_save_scene, 1, 0, 0},
+    {"undoScene", dev_undo_scene, 1, 0, 0},
     {NULL}
   };
 

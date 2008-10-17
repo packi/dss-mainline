@@ -18,14 +18,14 @@ namespace dss {
   const uint8 CommandBusy = 0x0c;
 
   // dSS => dSM function constants
-  const uint8 FunctionModulatorAddRoom = 0x00;
-  const uint8 FunctionModulatorRemoveRoom = 0x01;
-  const uint8 FunctionModulatorRemoveAllRooms = 0x02;
-  const uint8 FunctionModulatorCountDevInRoom = 0x03;
-  const uint8 FunctionModulatorDevKeyInRoom = 0x04;
+  const uint8 FunctionModulatorAddZone = 0x00;
+  const uint8 FunctionModulatorRemoveZone = 0x01;
+  const uint8 FunctionModulatorRemoveAllZones = 0x02;
+  const uint8 FunctionModulatorCountDevInZone = 0x03;
+  const uint8 FunctionModulatorDevKeyInZone = 0x04;
   const uint8 FunctionModulatorGetGroupsSize = 0x05;
-  const uint8 FunctionModulatorGetRoomsSize  = 0x06;
-  const uint8 FunctionModulatorGetRoomIdForInd = 0x07;
+  const uint8 FunctionModulatorGetZonesSize  = 0x06;
+  const uint8 FunctionModulatorGetZoneIdForInd = 0x07;
   const uint8 FunctionModulatorAddToGroup = 0x08;
   const uint8 FunctionModulatorRemoveFromGroup = 0x09;
   const uint8 FunctionGroupAddDeviceToGroup = 0x10;
@@ -33,7 +33,7 @@ namespace dss {
   const uint8 FunctionGroupGetDeviceCount = 0x12;
   const uint8 FunctionGroupGetDevKeyForInd = 0x13;
 
-  const uint8 FunctionRoomGetGroupIdForInd = 0x17;
+  const uint8 FunctionZoneGetGroupIdForInd = 0x17;
 
   const uint8 FunctionGroupIncreaseValue = 0x20;
   const uint8 FunctionGroupDecreaseValue = 0x21;
@@ -45,8 +45,12 @@ namespace dss {
   const uint8 FunctionGroupUndoScene = 0x27;
 
   const uint8 FunctionDeviceCallScene = 0x42;
-  const uint8 FunctionDeviceIncValue  = 0x40;
-  const uint8 FunctionDeviceDecValue  = 0x41;
+  const uint8 FunctionDeviceSaveScene = 0x43;
+  const uint8 FunctionDeviceUndoScene = 0x44;
+
+  const uint8 FunctionDeviceSetParameterValue = 0x4B;
+  const uint8 FunctionDeviceIncValue  = 0x4C;
+  const uint8 FunctionDeviceDecValue  = 0x4D;
 
   const uint8 FunctionDeviceGetOnOff = 0x61;
   const uint8 FunctionDeviceGetParameterValue = 0x62;

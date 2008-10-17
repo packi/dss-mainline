@@ -35,6 +35,7 @@ namespace dss {
 	  cmdDecreaseParam,
 	  cmdGetOnOff,
 	  cmdGetValue,
+	  cmdSetValue,
 	  cmdGetFunctionID
 	} DS485Command;
 
@@ -47,23 +48,23 @@ namespace dss {
     /** Returns an vector containing the bus-ids of all modulators present. */
     virtual vector<int> GetModulators() = 0;
 
-    /** Returns a vector conatining the room-ids of the specified modulator */
-    virtual vector<int> GetRooms(const int _modulatorID) = 0;
-    /** Returns the count of the rooms of the specified modulator */
-    virtual int GetRoomCount(const int _modulatorID) = 0;
-    /** Returns the bus-ids of the devices present in the given room of the specified modulator */
-    virtual vector<int> GetDevicesInRoom(const int _modulatorID, const int _roomID) = 0;
-    /** Returns the count of devices present in the given room of the specified modulator */
-    virtual int GetDevicesCountInRoom(const int _modulatorID, const int _roomID) = 0;
+    /** Returns a vector conatining the zone-ids of the specified modulator */
+    virtual vector<int> GetZones(const int _modulatorID) = 0;
+    /** Returns the count of the zones of the specified modulator */
+    virtual int GetZoneCount(const int _modulatorID) = 0;
+    /** Returns the bus-ids of the devices present in the given zone of the specified modulator */
+    virtual vector<int> GetDevicesInZone(const int _modulatorID, const int _zoneID) = 0;
+    /** Returns the count of devices present in the given zone of the specified modulator */
+    virtual int GetDevicesCountInZone(const int _modulatorID, const int _zoneID) = 0;
 
-    /** Returns the count of groups present in the given room of the specifid modulator */
-    virtual int GetGroupCount(const int _modulatorID, const int _roomID) = 0;
-    /** Returns the a vector containing the group-ids of the given room on the specified modulator */
-    virtual vector<int> GetGroups(const int _modulatorID, const int _roomID) = 0;
+    /** Returns the count of groups present in the given zone of the specifid modulator */
+    virtual int GetGroupCount(const int _modulatorID, const int _zoneID) = 0;
+    /** Returns the a vector containing the group-ids of the given zone on the specified modulator */
+    virtual vector<int> GetGroups(const int _modulatorID, const int _zoneID) = 0;
     /** Returns the count of devices present in the given group */
-    virtual int GetDevicesInGroupCount(const int _modulatorID, const int _roomID, const int _groupID) = 0;
+    virtual int GetDevicesInGroupCount(const int _modulatorID, const int _zoneID, const int _groupID) = 0;
     /** Returns a vector containing the bus-ids of the devices present in the given group */
-    virtual vector<int> GetDevicesInGroup(const int _modulatorID, const int _roomID, const int _groupID) = 0;
+    virtual vector<int> GetDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID) = 0;
 
     /** Adds a device to a given group */
     virtual void AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID) = 0;
@@ -84,10 +85,10 @@ namespace dss {
     virtual void Subscribe(const int _moduatorID, const int _groupID, const int _deviceID) = 0;
 
     //------------------------------------------------ Device manipulation
-    virtual vector<int> SendCommand(DS485Command _cmd, const Set& _set) = 0;
-    virtual vector<int> SendCommand(DS485Command _cmd, const Device& _device) = 0;
-    virtual vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID) = 0;
-    virtual vector<int> SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group) = 0;
+    virtual vector<int> SendCommand(DS485Command _cmd, const Set& _set, int _param = -1) = 0;
+    virtual vector<int> SendCommand(DS485Command _cmd, const Device& _device, int _param = -1) = 0;
+    virtual vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID, int _param = -1) = 0;
+    virtual vector<int> SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group, int _param = -1) = 0;
   };
 }
 #endif /* DS485INTERFACE_H_ */

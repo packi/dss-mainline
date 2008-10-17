@@ -50,17 +50,17 @@ namespace dss {
     int m_ID;
     dsid_t m_ModulatorDSID;
     vector<DSIDInterface*> m_SimulatedDevices;
-    map< const int, vector<DSIDInterface*> > m_Rooms;
-    IntPairToDSIDSimVector m_DevicesOfGroupInRoom;
+    map< const int, vector<DSIDInterface*> > m_Zones;
+    IntPairToDSIDSimVector m_DevicesOfGroupInZone;
     vector<DS485Frame*> m_PendingFrames;
     DSIDFactory m_DSIDFactory;
     map<const DSIDInterface*, int> m_ButtonToGroupMapping;
     map<const DSIDInterface*, int> m_ButtonSubscriptionFlag;
   private:
     void LoadFromConfig();
-    void LoadDevices(XMLNodeList& _nodes, const int _roomID);
-    void LoadGroups(XMLNodeList& _nodes, const int _roomID);
-    void LoadRooms(XMLNodeList& _nodes);
+    void LoadDevices(XMLNodeList& _nodes, const int _zoneID);
+    void LoadGroups(XMLNodeList& _nodes, const int _zoneID);
+    void LoadZones(XMLNodeList& _nodes);
 
     void LoadPlugins();
 
@@ -70,11 +70,15 @@ namespace dss {
     DS485CommandFrame* CreateReply(DS485CommandFrame& _request);
   private:
     void DeviceCallScene(const int _deviceID, const int _sceneID);
-    void GroupCallScene(const int _roomID, const int _groupID, const int _sceneID);
-    void GroupStartDim(const int _roomID, const int _groupID, bool _up, const int _parameterNr);
-    void GroupEndDim(const int _roomID, const int _groupID, const int _parameterNr);
-    void GroupDecValue(const int _roomID, const int _groupID, const int _parameterNr);
-    void GroupIncValue(const int _roomID, const int _groupID, const int _parameterNr);
+    void GroupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
+    void DeviceSaveScene(const int _deviceID, const int _sceneID);
+    void GroupSaveScene(const int _zoneID, const int _groupID, const int _sceneID);
+    void DeviceUndoScene(const int _deviceID, const int _sceneID);
+    void GroupUndoScene(const int _zoneID, const int _groupID, const int _sceneID);
+    void GroupStartDim(const int _zoneID, const int _groupID, bool _up, const int _parameterNr);
+    void GroupEndDim(const int _zoneID, const int _groupID, const int _parameterNr);
+    void GroupDecValue(const int _zoneID, const int _groupID, const int _parameterNr);
+    void GroupIncValue(const int _zoneID, const int _groupID, const int _parameterNr);
   public:
     DSModulatorSim();
     virtual ~DSModulatorSim() {}

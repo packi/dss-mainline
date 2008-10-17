@@ -233,12 +233,12 @@ namespace dss {
       XMLNodeList& nodes = rootNode.GetChildren();
       LoadDevices(nodes, 0);
       LoadGroups(nodes, 0);
-      LoadRooms(nodes);
+      LoadZones(nodes);
     }
 
   } // LoadFromConfig
 
-  void DSModulatorSim::LoadDevices(XMLNodeList& _nodes, const int _roomID) {
+  void DSModulatorSim::LoadDevices(XMLNodeList& _nodes, const int _zoneID) {
     for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
         iNode != e; ++iNode)
     {
@@ -264,10 +264,10 @@ namespace dss {
         DSIDInterface* newDSID = m_DSIDFactory.CreateDSID(type, dsid, busid);
         if(newDSID != NULL) {
           m_SimulatedDevices.push_back(newDSID);
-          m_Rooms[_roomID].push_back(newDSID);
-          // every device is contained in room 0 (broadcast room)
-          if(_roomID != 0) {
-            m_Rooms[0].push_back(newDSID);
+          m_Zones[_zoneID].push_back(newDSID);
+          // every device is contained in zone 0 (broadcast zone)
+          if(_zoneID != 0) {
+            m_Zones[0].push_back(newDSID);
           }
           Logger::GetInstance()->Log("Sim: found device");
         } else {
@@ -277,7 +277,7 @@ namespace dss {
     }
   } // LoadDevices
 
-  void DSModulatorSim::LoadGroups(XMLNodeList& _nodes, const int _roomID) {
+  void DSModulatorSim::LoadGroups(XMLNodeList& _nodes, const int _zoneID) {
     for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
         iNode != e; ++iNode)
     {
@@ -293,7 +293,7 @@ namespace dss {
               attrs = iChildNode->GetAttributes();
               if(attrs["busid"].size() > 0) {
                 DSIDInterface& dev = LookupDevice(StrToUInt(attrs["busid"]));
-                m_DevicesOfGroupInRoom[pair<const int, const int>(_roomID, groupID)].push_back(&dev);
+                m_DevicesOfGroupInZone[pair<const int, const int>(_zoneID, groupID)].push_back(&dev);
               }
             }
           }
@@ -304,47 +304,79 @@ namespace dss {
     }
   } // LoadGroups
 
-  void DSModulatorSim::LoadRooms(XMLNodeList& _nodes) {
+  void DSModulatorSim::LoadZones(XMLNodeList& _nodes) {
     for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
         iNode != e; ++iNode)
     {
-      if(iNode->GetName() == "room") {
+      if(iNode->GetName() == "zone") {
         HashMapConstStringString& attrs = iNode->GetAttributes();
-        int roomID = -1;
+        int zoneID = -1;
         if(attrs["id"].size() > 0) {
-          roomID = StrToIntDef(attrs["id"], -1);
+          zoneID = StrToIntDef(attrs["id"], -1);
         }
-        if(roomID != -1) {
-          Logger::GetInstance()->Log("Sim: found room");
-          LoadDevices(iNode->GetChildren(), roomID);
-          LoadGroups(iNode->GetChildren(), roomID);
+        if(zoneID != -1) {
+          Logger::GetInstance()->Log("Sim: found zone");
+          LoadDevices(iNode->GetChildren(), zoneID);
+          LoadGroups(iNode->GetChildren(), zoneID);
         } else {
-          Logger::GetInstance()->Log("Sim: could not find/parse id for room");
+          Logger::GetInstance()->Log("Sim: could not find/parse id for zone");
         }
       }
     }
-  } // LoadRooms
+  } // LoadZones
 
   void DSModulatorSim::DeviceCallScene(int _deviceID, const int _sceneID) {
     LookupDevice(_deviceID).CallScene(_sceneID);
-  }
+  } // DeviceCallScene
 
-  void DSModulatorSim::GroupCallScene(const int _roomID, const int _groupID, const int _sceneID) {
-    pair<const int, const int> roomsGroup(_roomID, _groupID);
-    if(m_DevicesOfGroupInRoom.find(roomsGroup) != m_DevicesOfGroupInRoom.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom[roomsGroup];
+  void DSModulatorSim::GroupCallScene(const int _zoneID, const int _groupID, const int _sceneID) {
+    pair<const int, const int> zonesGroup(_zoneID, _groupID);
+    if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
         (*iDSID)->CallScene(_sceneID);
       }
     }
-  }
+  } // GroupCallScene
 
-  void DSModulatorSim::GroupStartDim(const int _roomID, const int _groupID, bool _up, int _parameterNr) {
-    pair<const int, const int> roomsGroup(_roomID, _groupID);
-    if(m_DevicesOfGroupInRoom.find(roomsGroup) != m_DevicesOfGroupInRoom.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom[roomsGroup];
+  void DSModulatorSim::DeviceSaveScene(int _deviceID, const int _sceneID) {
+    LookupDevice(_deviceID).SaveScene(_sceneID);
+  } // DeviceSaveScene
+
+  void DSModulatorSim::GroupSaveScene(const int _zoneID, const int _groupID, const int _sceneID) {
+    pair<const int, const int> zonesGroup(_zoneID, _groupID);
+    if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
+      for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
+          iDSID != e; ++iDSID)
+      {
+        (*iDSID)->SaveScene(_sceneID);
+      }
+    }
+  } // GroupSaveScene
+
+  void DSModulatorSim::DeviceUndoScene(int _deviceID, const int _sceneID) {
+    LookupDevice(_deviceID).UndoScene(_sceneID);
+  } // DeviceUndoScene
+
+  void DSModulatorSim::GroupUndoScene(const int _zoneID, const int _groupID, const int _sceneID) {
+    pair<const int, const int> zonesGroup(_zoneID, _groupID);
+    if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
+      for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
+          iDSID != e; ++iDSID)
+      {
+        (*iDSID)->UndoScene(_sceneID);
+      }
+    }
+  } // GroupUndoScene
+
+  void DSModulatorSim::GroupStartDim(const int _zoneID, const int _groupID, bool _up, int _parameterNr) {
+    pair<const int, const int> zonesGroup(_zoneID, _groupID);
+    if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
@@ -353,10 +385,10 @@ namespace dss {
     }
   } // GroupStartDim
 
-  void DSModulatorSim::GroupEndDim(const int _roomID, const int _groupID, const int _parameterNr) {
-    pair<const int, const int> roomsGroup(_roomID, _groupID);
-    if(m_DevicesOfGroupInRoom.find(roomsGroup) != m_DevicesOfGroupInRoom.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom[roomsGroup];
+  void DSModulatorSim::GroupEndDim(const int _zoneID, const int _groupID, const int _parameterNr) {
+    pair<const int, const int> zonesGroup(_zoneID, _groupID);
+    if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
@@ -365,10 +397,10 @@ namespace dss {
     }
   } // GroupEndDim
 
-  void DSModulatorSim::GroupDecValue(const int _roomID, const int _groupID, const int _parameterNr) {
-    pair<const int, const int> roomsGroup(_roomID, _groupID);
-    if(m_DevicesOfGroupInRoom.find(roomsGroup) != m_DevicesOfGroupInRoom.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom[roomsGroup];
+  void DSModulatorSim::GroupDecValue(const int _zoneID, const int _groupID, const int _parameterNr) {
+    pair<const int, const int> zonesGroup(_zoneID, _groupID);
+    if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
@@ -377,10 +409,10 @@ namespace dss {
     }
   } // GroupDecValue
 
-  void DSModulatorSim::GroupIncValue(const int _roomID, const int _groupID, const int _parameterNr) {
-    pair<const int, const int> roomsGroup(_roomID, _groupID);
-    if(m_DevicesOfGroupInRoom.find(roomsGroup) != m_DevicesOfGroupInRoom.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInRoom[roomsGroup];
+  void DSModulatorSim::GroupIncValue(const int _zoneID, const int _groupID, const int _parameterNr) {
+    pair<const int, const int> zonesGroup(_zoneID, _groupID);
+    if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
@@ -411,6 +443,22 @@ namespace dss {
               DistributeFrame(boost::shared_ptr<DS485CommandFrame>(CreateAck(cmdFrame, cmdNr)));
             }
             break;
+          case FunctionDeviceSaveScene:
+            {
+              devid_t devID = pd.Get<devid_t>();
+              int sceneID = pd.Get<uint8>();
+              DeviceSaveScene(devID, sceneID);
+              DistributeFrame(boost::shared_ptr<DS485CommandFrame>(CreateAck(cmdFrame, cmdNr)));
+            }
+            break;
+          case FunctionDeviceUndoScene:
+            {
+              devid_t devID = pd.Get<devid_t>();
+              int sceneID = pd.Get<uint8>();
+              DeviceUndoScene(devID, sceneID);
+              DistributeFrame(boost::shared_ptr<DS485CommandFrame>(CreateAck(cmdFrame, cmdNr)));
+            }
+            break;
           case FunctionDeviceGetFunctionID:
             {
               devid_t devID = pd.Get<devid_t>();
@@ -422,55 +470,65 @@ namespace dss {
           case FunctionDeviceGetParameterValue:
             {
               int devID = pd.Get<uint8>();
-              double result = LookupDevice(devID).GetValue(-1);
+              int paramID = pd.Get<uint8>();
+              double result = LookupDevice(devID).GetValue(paramID);
               response = CreateResponse(cmdFrame, cmdNr);
               response->GetPayload().Add<uint8>(static_cast<uint8>(result));
               DistributeFrame(response);
             }
             break;
-          case FunctionModulatorGetRoomsSize:
+          case FunctionDeviceSetParameterValue:
+            {
+              int devID = pd.Get<uint8>();
+              int paramID = pd.Get<uint8>();
+              uint8 value = pd.Get<uint8>();
+              LookupDevice(devID).SetValue(value, paramID);
+              DistributeFrame(boost::shared_ptr<DS485CommandFrame>(CreateAck(cmdFrame, cmdNr)));
+            }
+            break;
+          case FunctionModulatorGetZonesSize:
             {
               response = CreateResponse(cmdFrame, cmdNr);
-              response->GetPayload().Add<uint8>(m_Rooms.size());
+              response->GetPayload().Add<uint8>(m_Zones.size());
               DistributeFrame(response);
             }
             break;
-          case FunctionModulatorGetRoomIdForInd:
+          case FunctionModulatorGetZoneIdForInd:
             {
               uint8 index = pd.Get<uint8>();
-              map< const int, vector<DSIDInterface*> >::iterator it = m_Rooms.begin();
+              map< const int, vector<DSIDInterface*> >::iterator it = m_Zones.begin();
               advance(it, index);
               response = CreateResponse(cmdFrame, cmdNr);
               response->GetPayload().Add<uint8>(it->first);
               DistributeFrame(response);
             }
             break;
-          case FunctionModulatorCountDevInRoom:
+          case FunctionModulatorCountDevInZone:
             {
               uint8 index = pd.Get<uint8>();
               response = CreateResponse(cmdFrame, cmdNr);
-              response->GetPayload().Add<uint16_t>(m_Rooms[index].size());
+              response->GetPayload().Add<uint16_t>(m_Zones[index].size());
               DistributeFrame(response);
             }
             break;
-          case FunctionModulatorDevKeyInRoom:
+          case FunctionModulatorDevKeyInZone:
             {
-              uint8 roomID = pd.Get<uint8>();
+              uint8 zoneID = pd.Get<uint8>();
               uint8 deviceIndex = pd.Get<devid_t>();
               response = CreateResponse(cmdFrame, cmdNr);
-              response->GetPayload().Add<uint8>(m_Rooms[roomID].at(deviceIndex)->GetShortAddress());
+              response->GetPayload().Add<uint8>(m_Zones[zoneID].at(deviceIndex)->GetShortAddress());
               DistributeFrame(response);
             }
             break;
           case FunctionModulatorGetGroupsSize:
             {
               response = CreateResponse(cmdFrame, cmdNr);
-              int roomID = pd.Get<uint8>();
-              IntPairToDSIDSimVector::iterator it = m_DevicesOfGroupInRoom.begin();
-							IntPairToDSIDSimVector::iterator end = m_DevicesOfGroupInRoom.end();
+              int zoneID = pd.Get<uint8>();
+              IntPairToDSIDSimVector::iterator it = m_DevicesOfGroupInZone.begin();
+							IntPairToDSIDSimVector::iterator end = m_DevicesOfGroupInZone.end();
 							int result = 0;
 							while(it != end) {
-								if(it->first.first == roomID) {
+								if(it->first.first == zoneID) {
 									result++;
 								}
 								it++;
@@ -489,9 +547,9 @@ namespace dss {
           case FunctionGroupGetDeviceCount:
             {
               response = CreateResponse(cmdFrame, cmdNr);
-              int roomID = pd.Get<uint8>();
+              int zoneID = pd.Get<uint8>();
               int groupID = pd.Get<uint8>();
-              int result = m_DevicesOfGroupInRoom[pair<const int, const int>(roomID, groupID)].size();
+              int result = m_DevicesOfGroupInZone[pair<const int, const int>(zoneID, groupID)].size();
               response->GetPayload().Add<uint8>(result);
               DistributeFrame(response);
             }
@@ -499,25 +557,25 @@ namespace dss {
           case FunctionGroupGetDevKeyForInd:
             {
               response = CreateResponse(cmdFrame, cmdNr);
-              int roomID = pd.Get<uint8>();
+              int zoneID = pd.Get<uint8>();
               int groupID = pd.Get<uint8>();
               int index = pd.Get<uint8>();
-              int result = m_DevicesOfGroupInRoom[pair<const int, const int>(roomID, groupID)].at(index)->GetShortAddress();
+              int result = m_DevicesOfGroupInZone[pair<const int, const int>(zoneID, groupID)].at(index)->GetShortAddress();
               response->GetPayload().Add<uint8>(result);
               DistributeFrame(response);
             }
             break;
-          case FunctionRoomGetGroupIdForInd:
+          case FunctionZoneGetGroupIdForInd:
             {
               response = CreateResponse(cmdFrame, cmdNr);
-              int roomID = pd.Get<uint8>();
+              int zoneID = pd.Get<uint8>();
               int groupIndex= pd.Get<uint8>();
 
-              IntPairToDSIDSimVector::iterator it = m_DevicesOfGroupInRoom.begin();
-              IntPairToDSIDSimVector::iterator end = m_DevicesOfGroupInRoom.end();
+              IntPairToDSIDSimVector::iterator it = m_DevicesOfGroupInZone.begin();
+              IntPairToDSIDSimVector::iterator end = m_DevicesOfGroupInZone.end();
               int result = -1;
               while(it != end) {
-                if(it->first.first == roomID) {
+                if(it->first.first == zoneID) {
                   if(groupIndex == 0) {
                     result = it->first.second; // yes, that's the group id
                     break;
@@ -637,7 +695,7 @@ namespace dss {
       frame->GetHeader().SetBroadcast(false);
 
       frame->GetPayload().Add<uint8>(FunctionKeyPressed);
-                          /* room */          /* group */      /* short message */
+                          /* zone */          /* group */      /* short message */
       uint16_t param = ((0 & 0xFF) << 8) | ((0 & 0x7F) << 1) | 0x0001;
       frame->GetPayload().Add<uint16_t>(param);
                /* from switch */   /* switch address */
@@ -679,7 +737,7 @@ namespace dss {
             }
           }
         } else if(_buttonNr == 2) {
-          // TODO: select correct room
+          // TODO: select correct zone
           if(_kind == Click) {
             //GroupCallScene(0, groupToControl, Scene1);
             GroupIncValue(0, groupToControl, 1);
@@ -689,7 +747,7 @@ namespace dss {
             GroupEndDim(0, groupToControl, 0);
           }
         } else if(_buttonNr == 8) {
-          // TODO: select correct room
+          // TODO: select correct zone
           if(_kind == Click) {
 //            GroupCallScene(0, groupToControl, SceneOff);
             GroupDecValue(0, groupToControl, 1);

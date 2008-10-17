@@ -10,13 +10,13 @@ function Apartment(into) {
   var self = this;
 
   this.devices = [];
-  this.rooms = [];
+  this.zones = [];
   this.fetchApartment = function() {
     new Ajax.Request('/json/getapartment', 
       {
         method:'get', 
         onComplete: function(transport, json) {
-          self.doUpdate(transport.responseJSON.apartment.rooms);
+          self.doUpdate(transport.responseJSON.apartment.zones);
         }
       } 
     );
@@ -29,42 +29,42 @@ function Apartment(into) {
     );
   };
   
-  this.doUpdate = function(rooms) {
+  this.doUpdate = function(zones) {
     var iSwitch = 0;
     var switchIDs = [];
     var devNum = 0;
-    self.rooms = rooms;
+    self.zones = zones;
 
-    var roomlist = "<ul>"
-    rooms.each(
-      function(room) {
-        if(room.id == 0) { 
+    var zonelist = "<ul>"
+    zones.each(
+      function(zone) {
+        if(zone.id == 0) { 
           return;
         }
-        roomlist += "<li>" + room.name + "</li><ul>";
-        room.devices.each(function(device) {
-          roomlist += "<li>" + device.name;
+        zonelist += "<li>" + zone.name + "</li><ul>";
+        zone.devices.each(function(device) {
+          zonelist += "<li>" + device.name;
           devNum++;
           if(device.isSwitch == false) {
             if(device.on) {
-              roomlist += " On ";
+              zonelist += " On ";
             } else {
-              roomlist += " Off ";
+              zonelist += " Off ";
             }
-            roomlist += '[<a href="#" onclick="turnOn(' + device.id + ')">Turn On</a>';
-            roomlist += '&nbsp;|&nbsp;<a href="#" onclick="turnOff(' + device.id + ')">Turn Off</a>]';
+            zonelist += '[<a href="#" onclick="turnOn(' + device.id + ')">Turn On</a>';
+            zonelist += '&nbsp;|&nbsp;<a href="#" onclick="turnOff(' + device.id + ')">Turn Off</a>]';
           } else {
-            roomlist += '<div id="switch_' + device.id + '"/>';
+            zonelist += '<div id="switch_' + device.id + '"/>';
             switchIDs[switchIDs.length] = device.id;
           }
 
-          roomlist += "</li>";
+          zonelist += "</li>";
         });
-        roomlist += "</ul>";
+        zonelist += "</ul>";
       }
     );
-    roomlist += "</ul>";
-    $(into).innerHTML = roomlist;
+    zonelist += "</ul>";
+    $(into).innerHTML = zonelist;
 
 
     switchIDs.each(function(switchID) {

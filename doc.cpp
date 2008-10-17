@@ -10,7 +10,7 @@ The dSS consists of several modules as shown in the following image:
 \image html block.png "System overview"
 \image latex block.eps "System overview" height=10cm
 
-The center piece of the dSS is its DataModel. It provides the API that allows a developer manipulate as well as rearrange devices, rooms and groups.
+The center piece of the dSS is its DataModel. It provides the API that allows a developer manipulate as well as rearrange devices, zones and groups.
 Built on that foundation there is a SOAP interface to make the API accessible to the outside world. In addition to the SOAP interface there is a JSON interface that interacts with JavaScript running in a webbrowser.
 
 The DS485Proxy is responsible of controlling the physical and simulated devices. It converts abstract commands from the DataModel an converts them to one or several DS485 frames. These frames will then be sent either to a simulated dSM or put on the wire depending on the frame's destination.
@@ -60,7 +60,7 @@ The Apartment config resides in data/apartment.xml. It contains everything that 
 </config>
 \endverbatim
 
-All items are bound to a dsid so if a user moves a bulb from one room to another it will still be named "Bulb 1". The event tag specifies which event should be raised if a button press is detected from the given dSID.
+All items are bound to a dsid so if a user moves a bulb from one zone to another it will still be named "Bulb 1". The event tag specifies which event should be raised if a button press is detected from the given dSID.
 
 \subsection config_sim Simulation
 
@@ -69,7 +69,7 @@ The structure inside the simulated dSM is contained in data/sim.xml.
 \verbatim
 <?xml version="1.0"?>
 <modulator busid="70" dsid="10">
-  <room id="0"> <!-- id can be omitted, in fact room may be omitted if there's only one room -->
+  <zone id="0"> <!-- id can be omitted, in fact zone may be omitted if there's only one zone -->
     <device dsid="1" busid="1" type="standard.switch" />
     <device dsid="2" busid="2" type="example.vlc_remote" />
     <device dsid="4" busid="4" type="standard.simple"/>
@@ -79,14 +79,14 @@ The structure inside the simulated dSM is contained in data/sim.xml.
     <group id="4">
       <device busid="2" />
     </group>
-  </room>
-  <room id="1">
+  </zone>
+  <zone id="1">
     <device dsid="3" busid="3" type="standard.switch"/>
     <device dsid="5" busid="5" type="standard.simple" />
     <group id="1">
       <device busid="5" />
     </group>
-  </room>  
+  </zone>  
 </modulator>
 \endverbatim
 
@@ -97,7 +97,7 @@ If the type of a device is not specified it defaults to "standard.simple".
 
 It's possible to write custom dSIDs with the use of the plugin API. The standard location of the plugins is at "data/plugins". For each file there a couple of checks (such as comparing the API version) are performed to ensure the stability of the dSS. The plugin is then asked for it's name and registered in the plugin factory, ready to use.
 
-To form groups inside a room a group tag containing references to the devices must be inserted. At the moment it's not possible to define devices inside a group tag.
+To form groups inside a zone a group tag containing references to the devices must be inserted. At the moment it's not possible to define devices inside a group tag.
 
 \section sets Sets
 

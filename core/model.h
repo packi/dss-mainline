@@ -82,6 +82,10 @@ namespace dss {
     /** Sets the value of the given parameter */
     virtual void SetValue(const double _value, int _parameterNr = -1) = 0;
 
+    virtual void CallScene(const int _sceneNr) = 0;
+    virtual void SaveScene(const int _sceneNr) = 0;
+    virtual void UndoScene(const int _sceneNr) = 0;
+
     virtual ~IDeviceInterface() {};
   };
 
@@ -124,7 +128,11 @@ namespace dss {
     virtual void StartDim(const bool _directionUp, const int _parameterNr = -1);
     virtual void EndDim(const int _parameterNr = -1);
     virtual void SetValue(const double _value, const int _parameterNr = -1);
-  };
+
+    virtual void CallScene(const int _sceneNr);
+    virtual void SaveScene(const int _sceneNr);
+    virtual void UndoScene(const int _sceneNr);
+ };
 
   typedef vector<DeviceReference> DeviceVector;
   typedef DeviceVector::iterator DeviceIterator;
@@ -137,7 +145,7 @@ namespace dss {
     dsid_t m_DSID;
     devid_t m_ShortAddress;
     int m_ModulatorID;
-    int m_RoomID;
+    int m_ZoneID;
     Apartment* m_pApartment;
     bitset<63> m_GroupBitmask;
     vector<int> m_Groups;
@@ -161,6 +169,10 @@ namespace dss {
     virtual void EndDim(const int _parameterNr = -1);
     virtual void SetValue(const double _value, const int _parameterNr = -1);
     double GetValue(const int _parameterNr = -1);
+
+    virtual void CallScene(const int _sceneNr);
+    virtual void SaveScene(const int _sceneNr);
+    virtual void UndoScene(const int _sceneNr);
 
     int GetFunctionID() const;
     bool IsSwitch() const;
@@ -188,8 +200,8 @@ namespace dss {
     int GetModulatorID() const;
     void SetModulatorID(const int _modulatorID);
 
-    int GetRoomID() const;
-    void SetRoomID(const int _value);
+    int GetZoneID() const;
+    void SetZoneID(const int _value);
     /** Returns the apartment the device resides in. */
     Apartment& GetApartment() const;
 
@@ -242,7 +254,10 @@ namespace dss {
     virtual void StartDim(bool _directionUp, const int _parameterNr = -1);
     virtual void EndDim(const int _parameterNr = -1);
     virtual void SetValue(const double _value, int _parameterNr = -1);
-    //HashMapDeviceDouble GetValue(const int _parameterNr = -1);
+
+    virtual void CallScene(const int _sceneNr);
+    virtual void SaveScene(const int _sceneNr);
+    virtual void UndoScene(const int _sceneNr);
 
     /** Performs the given action on all contained devices */
     void Perform(IDeviceAction& _deviceAction);
@@ -348,13 +363,15 @@ namespace dss {
   }; // Modulator
 
   /** Represents a predefined group */
-  class Group : public DeviceContainer {
+  class Group : public DeviceContainer,
+                public IDeviceInterface {
   protected:
     DeviceVector m_Devices;
     Apartment& m_Apartment;
-    const int m_GroupID;
+    int m_ZoneID;
+    int m_GroupID;
   public:
-    Group(const int _id, Apartment& _apartment);
+    Group(const int _id, const int _zoneID, Apartment& _apartment);
     virtual ~Group() {};
     virtual Set GetDevices() const;
 
@@ -365,6 +382,26 @@ namespace dss {
     virtual void AddDevice(const DeviceReference& _device);
     /** As of now, this function throws an error */
     virtual void RemoveDevice(const DeviceReference& _device);
+
+
+    virtual void TurnOn();
+    virtual void TurnOff();
+
+    virtual void IncreaseValue(const int _parameterNr = -1);
+    virtual void DecreaseValue(const int _parameterNr = -1);
+
+    virtual void Enable();
+    virtual void Disable();
+
+    virtual void StartDim(bool _directionUp, const int _parameterNr = -1);
+    virtual void EndDim(const int _parameterNr = -1);
+    virtual void SetValue(const double _value, int _parameterNr = -1);
+
+    virtual void CallScene(const int _sceneNr);
+    virtual void SaveScene(const int _sceneNr);
+    virtual void UndoScene(const int _sceneNr);
+
+    Group& operator=(const Group& _other);
   }; // Group
 
 
@@ -382,26 +419,29 @@ namespace dss {
     virtual void RemoveDevice(const Device& _device);
   }; // UserGroup
 
-  /** Represents a Room
+  /** Represents a Zone
     */
-  class Room : public DeviceContainer {
+  class Zone : public DeviceContainer {
   private:
-    int m_RoomID;
+    int m_ZoneID;
     DeviceVector m_Devices;
-    Modulator& m_Modulator;
+    vector<Modulator*> m_Modulators;
   public:
-  	Room(Modulator& _modulator, const int _id)
-  	: m_RoomID(_id), m_Modulator(_modulator)
+  	Zone(const int _id)
+  	: m_ZoneID(_id)
   	{}
-    virtual ~Room() {};
+    virtual ~Zone() {};
     virtual Set GetDevices() const;
 
-    /** Adds a device to the room.
-     * This will permanently add the device to the room.
+    void AddToModulator(Modulator& _modulator);
+    void RemoveFromModulator(Modulator& _modulator);
+
+    /** Adds a device to the zone.
+     * This will permanently add the device to the zone.
      */
     void AddDevice(const DeviceReference& _device);
-    /** Removes a device from the room.
-     * This will permanently remove the device from the room.
+    /** Removes a device from the zone.
+     * This will permanently remove the device from the zone.
      */
     void RemoveDevice(const DeviceReference& _device);
 
@@ -410,16 +450,16 @@ namespace dss {
     /** Returns the group with the id _id */
     Group GetGroup(const int _id);
 
-    /** Adds a group to the room */
+    /** Adds a group to the zone */
     void AddGroup(UserGroup& _group);
-    /** Removes a group from the room */
+    /** Removes a group from the zone */
     void RemoveGroup(UserGroup& _group);
 
-    /** Returns the rooms id */
-    int GetRoomID() const;
-    /** Sets the rooms id */
-    void SetRoomID(const int _value);
-  }; // Room
+    /** Returns the zones id */
+    int GetZoneID() const;
+    /** Sets the zones id */
+    void SetZoneID(const int _value);
+  }; // Zone
 
 
   /** Arguments to be passed to an action / event */
@@ -520,10 +560,10 @@ namespace dss {
   private:
     vector<Device*> m_StaleDevices;
     vector<Modulator*> m_StaleModulators;
-    vector<Room*> m_StaleRooms;
+    vector<Zone*> m_StaleZones;
     vector<Group*> m_StaleGroups;
 
-    vector<Room*> m_Rooms;
+    vector<Zone*> m_Zones;
     vector<Modulator*> m_Modulators;
     vector<Device*> m_Devices;
     vector<Subscription*> m_Subscriptions;
@@ -534,8 +574,10 @@ namespace dss {
   private:
     void LoadDevices(XMLNode& _node);
     void LoadModulators(XMLNode& _node);
-    void LoadRooms(XMLNode& _node, Modulator& _modulator);
+    void LoadZones(XMLNode& _node, Modulator& _modulator);
     Modulator& AllocateModulator(const dsid_t _dsid);
+
+    void AddDefaultGroupsToZone(Zone& _zone);
   public:
     Apartment();
     virtual ~Apartment();
@@ -558,18 +600,18 @@ namespace dss {
      */
     Device& AllocateDevice(const dsid_t _dsid);
 
-    /** Returns the Room by name */
-    Room& GetRoom(const string& _roomName);
-    /** Returns the Room by its id */
-    Room& GetRoom(const int _id);
-    /** Returns a vector of all rooms */
-    vector<Room*>& GetRooms();
+    /** Returns the Zone by name */
+    Zone& GetZone(const string& _zoneName);
+    /** Returns the Zone by its id */
+    Zone& GetZone(const int _id);
+    /** Returns a vector of all zones */
+    vector<Zone*>& GetZones();
 
-    /** Allocates a room and returns a reference to it. Should a room with
-      * the given _roomID already exist, a reference to the existing room will
+    /** Allocates a zone and returns a reference to it. Should a zone with
+      * the given _zoneID already exist, a reference to the existing zone will
       * be returned.
       */
-    Room& AllocateRoom(Modulator& _modulator, int _roomID);
+    Zone& AllocateZone(Modulator& _modulator, int _zoneID);
 
     /** Returns a Modulator by name */
     Modulator& GetModulator(const string& _modName);

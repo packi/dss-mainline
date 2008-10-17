@@ -100,6 +100,18 @@ namespace dss {
     return res.front();
   } // GetValue
 
+  void Device::CallScene(const int _sceneNr) {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdCallScene, *this, _sceneNr);
+  } // CallScene
+
+  void Device::SaveScene(const int _sceneNr) {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdSaveScene, *this, _sceneNr);
+  } // SaveScene
+
+  void Device::UndoScene(const int _sceneNr) {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdUndoScene, *this, _sceneNr);
+  } // UndoScene
+
   string Device::GetName() const {
     return m_Name;
   } // GetName
@@ -144,13 +156,13 @@ namespace dss {
     m_ModulatorID = _modulatorID;
   } // SetModulatorID
 
-  int Device::GetRoomID() const {
-  	return m_RoomID;
-  } // GetRoomID
+  int Device::GetZoneID() const {
+  	return m_ZoneID;
+  } // GetZoneID
 
-  void Device::SetRoomID(const int _value) {
-  	m_RoomID = _value;
-  } // SetRoomID
+  void Device::SetZoneID(const int _value) {
+  	m_ZoneID = _value;
+  } // SetZoneID
 
   int Device:: GetGroupIdByIndex(const int _index) const {
     return m_Groups[_index];
@@ -170,11 +182,11 @@ namespace dss {
 
   bool Device::IsInGroup(const int _groupID) const {
     return m_GroupBitmask.test(_groupID - 1);
-  }
+  } // IsInGroup
 
   Apartment& Device::GetApartment() const {
     return *m_pApartment;
-  }
+  } // GetApartment
 
   //================================================== Set
 
@@ -236,6 +248,18 @@ namespace dss {
   void Set::SetValue(const double _value, int _parameterNr) {
   } // SetValue
 
+  void Set::CallScene(const int _sceneNr) {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdCallScene, *this, _sceneNr);
+  } // CallScene
+
+  void Set::SaveScene(const int _sceneNr) {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdSaveScene, *this, _sceneNr);
+  } // SaveScene
+
+  void Set::UndoScene(const int _sceneNr) {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdUndoScene, *this, _sceneNr);
+  } // UndoScene
+
   void Set::Perform(IDeviceAction& _deviceAction) {
     for(DeviceIterator iDevice = m_ContainedDevices.begin(); iDevice != m_ContainedDevices.end(); ++iDevice) {
       _deviceAction.Perform(iDevice->GetDevice());
@@ -269,11 +293,11 @@ namespace dss {
 
   Set Set::GetByGroup(int _groupNr) {
     return GetSubset(ByGroupSelector(_groupNr));
-  } // GetByGroup
+  } // GetByGroup(id)
 
   Set Set::GetByGroup(const Group& _group) {
     return GetByGroup(_group.GetID());
-  }
+  } // GetByGroup(ref)
 
   Set Set::GetByGroup(const string& _name) {
     Set result;
@@ -283,7 +307,7 @@ namespace dss {
       Group& g = Get(0).GetDevice().GetApartment().GetGroup(_name);
       return GetByGroup(g.GetID());
     }
-  }
+  } // GetByGroup(name)
 
   class ByNameSelector : public IDeviceSelector {
   private:
@@ -352,7 +376,7 @@ namespace dss {
 
   bool Set::IsEmpty() const {
     return Length() == 0;
-  }
+  } // IsEmpty
 
   Set Set::Combine(Set& _other) const {
     Set resultSet(_other);
@@ -379,7 +403,7 @@ namespace dss {
 
   bool Set::Contains(const Device& _device) const {
     return Contains(DeviceReference(_device, _device.GetApartment()));
-  }
+  } // Contains
 
   void Set::AddDevice(const DeviceReference& _device) {
     if(!Contains(_device)) {
@@ -424,7 +448,7 @@ namespace dss {
       out << " name: " << _dt.GetName();
     }
     return out;
-  }
+  } // operator<<
 
   //================================================== Arguments
 
@@ -450,47 +474,55 @@ namespace dss {
   : Thread("Apartment"),
     m_NextSubscriptionNumber(1)
   {
-    Group* grp = new Group(1, *this);
-    grp->SetName("yellow");
-    m_Groups.push_back(grp);
-    grp = new Group(2, *this);
-    grp->SetName("gray");
-    m_Groups.push_back(grp);
-    grp = new Group(3, *this);
-    grp->SetName("blue");
-    m_Groups.push_back(grp);
-    grp = new Group(4, *this);
-    grp->SetName("cyan");
-    m_Groups.push_back(grp);
-    grp = new Group(5, *this);
-    grp->SetName("red");
-    m_Groups.push_back(grp);
-    grp = new Group(6, *this);
-    grp->SetName("magenta");
-    m_Groups.push_back(grp);
-    grp = new Group(7, *this);
-    grp->SetName("green");
-    m_Groups.push_back(grp);
-    grp = new Group(8, *this);
-    grp->SetName("black");
-    m_Groups.push_back(grp);
-    grp = new Group(9, *this);
-    grp->SetName("white");
-    m_Groups.push_back(grp);
+    Zone* zoneZero = new Zone(0);
+    AddDefaultGroupsToZone(*zoneZero);
+    m_Zones.push_back(zoneZero);
   } // ctor
 
   Apartment::~Apartment() {
     ScrubVector(m_Subscriptions);
     ScrubVector(m_Devices);
     ScrubVector(m_Groups);
-    ScrubVector(m_Rooms);
+    ScrubVector(m_Zones);
     ScrubVector(m_Modulators);
 
     ScrubVector(m_StaleDevices);
     ScrubVector(m_StaleGroups);
     ScrubVector(m_StaleModulators);
-    ScrubVector(m_StaleRooms);
+    ScrubVector(m_StaleZones);
   } // dtor
+
+  void Apartment::AddDefaultGroupsToZone(Zone& _zone) {
+    int zoneID = _zone.GetZoneID();
+
+    Group* grp = new Group(1, zoneID, *this);
+    grp->SetName("yellow");
+    m_Groups.push_back(grp);
+    grp = new Group(2, zoneID, *this);
+    grp->SetName("gray");
+    m_Groups.push_back(grp);
+    grp = new Group(3, zoneID, *this);
+    grp->SetName("blue");
+    m_Groups.push_back(grp);
+    grp = new Group(4, zoneID, *this);
+    grp->SetName("cyan");
+    m_Groups.push_back(grp);
+    grp = new Group(5, zoneID, *this);
+    grp->SetName("red");
+    m_Groups.push_back(grp);
+    grp = new Group(6, zoneID, *this);
+    grp->SetName("magenta");
+    m_Groups.push_back(grp);
+    grp = new Group(7, zoneID, *this);
+    grp->SetName("green");
+    m_Groups.push_back(grp);
+    grp = new Group(8, zoneID, *this);
+    grp->SetName("black");
+    m_Groups.push_back(grp);
+    grp = new Group(9, zoneID, *this);
+    grp->SetName("white");
+    m_Groups.push_back(grp);
+  } // AddDefaultGroupsToZone
 
   void Apartment::Execute() {
     // Load devices/modulators/etc. from a config-file
@@ -517,13 +549,13 @@ namespace dss {
         Modulator& modulator = AllocateModulator(modDSID);
         modulator.SetBusID(modID);
 
-        vector<int> roomIDs = interface.GetRooms(modID);
-        for(vector<int>::iterator iRoomID = roomIDs.begin(); iRoomID != roomIDs.end(); ++iRoomID) {
-          int roomID = *iRoomID;
-          Logger::GetInstance()->Log(string("  Found room with id: ") + IntToString(roomID));
-          Room& room = AllocateRoom(modulator, roomID);
+        vector<int> zoneIDs = interface.GetZones(modID);
+        for(vector<int>::iterator iZoneID = zoneIDs.begin(); iZoneID != zoneIDs.end(); ++iZoneID) {
+          int zoneID = *iZoneID;
+          Logger::GetInstance()->Log(string("  Found zone with id: ") + IntToString(zoneID));
+          Zone& zone = AllocateZone(modulator, zoneID);
 
-          vector<int> devices = interface.GetDevicesInRoom(modID, roomID);
+          vector<int> devices = interface.GetDevicesInZone(modID, zoneID);
           for(vector<int>::iterator iDevice = devices.begin(); iDevice != devices.end(); ++iDevice) {
             int devID = *iDevice;
             Logger::GetInstance()->Log(string("    Found device with id: ") + IntToString(devID));
@@ -531,17 +563,17 @@ namespace dss {
             Device& dev = AllocateDevice(dsid);
             dev.SetShortAddress(devID);
             dev.SetModulatorID(modID);
-            dev.SetRoomID(roomID);
-            room.AddDevice(DeviceReference(dev, *this));
+            dev.SetZoneID(zoneID);
+            zone.AddDevice(DeviceReference(dev, *this));
             modulator.AddDevice(DeviceReference(dev, *this));
           }
-          vector<int> groupIDs = interface.GetGroups(modID, roomID);
+          vector<int> groupIDs = interface.GetGroups(modID, zoneID);
           for(vector<int>::iterator iGroup = groupIDs.begin(), e = groupIDs.end();
               iGroup != e; ++iGroup)
           {
             int groupID = *iGroup;
             Logger::GetInstance()->Log(string("    Found group with id: ") + IntToString(groupID));
-            vector<int> devingroup = interface.GetDevicesInGroup(modID, roomID, groupID);
+            vector<int> devingroup = interface.GetDevicesInGroup(modID, zoneID, groupID);
             for(vector<int>::iterator iDevice = devingroup.begin(), e = devingroup.end();
                 iDevice != e; ++iDevice)
             {
@@ -637,29 +669,31 @@ namespace dss {
           newModulator->SetName(name);
         }
         m_StaleModulators.push_back(newModulator);
-        LoadRooms(*iModulator, *newModulator);
+        LoadZones(*iModulator, *newModulator);
       }
     }
   } // LoadModulators
 
-  void Apartment::LoadRooms(XMLNode& _node, Modulator& _modulator) {
-    XMLNodeList rooms = _node.GetChildren();
-    for(XMLNodeList::iterator iRoom = rooms.begin(); iRoom != rooms.end(); ++iRoom) {
-      if(iRoom->GetName() == "room") {
-        int id = StrToInt(iRoom->GetAttributes()["id"]);
+  void Apartment::LoadZones(XMLNode& _node, Modulator& _modulator) {
+    // TODO: A Zone can span over multiple modulators
+    XMLNodeList zones = _node.GetChildren();
+    for(XMLNodeList::iterator iZone = zones.begin(); iZone != zones.end(); ++iZone) {
+      if(iZone->GetName() == "zone") {
+        int id = StrToInt(iZone->GetAttributes()["id"]);
         string name;
-        XMLNode& nameNode = iRoom->GetChildByName("name");
+        XMLNode& nameNode = iZone->GetChildByName("name");
         if(nameNode.GetChildren().size() > 0) {
           name = (nameNode.GetChildren()[0]).GetContent();
         }
-        Room* newRoom = new Room(_modulator, id);
+        Zone* newZone = new Zone(id);
         if(name.size() > 0) {
-          newRoom->SetName(name);
+          newZone->SetName(name);
         }
-        m_StaleRooms.push_back(newRoom);
+        newZone->AddToModulator(_modulator);
+        m_StaleZones.push_back(newZone);
       }
     }
-  } // LoadRooms
+  } // LoadZones
 
   Device& Apartment::GetDeviceByDSID(const dsid_t _dsid) const {
     for(vector<Device*>::const_iterator ipDevice = m_Devices.begin(); ipDevice != m_Devices.end(); ++ipDevice) {
@@ -688,27 +722,27 @@ namespace dss {
     return Set(devs);
   } // GetDevices
 
-  Room& Apartment::GetRoom(const string& _roomName) {
-    for(vector<Room*>::iterator iRoom = m_Rooms.begin(); iRoom != m_Rooms.end(); ++iRoom) {
-      if((*iRoom)->GetName() == _roomName) {
-        return **iRoom;
+  Zone& Apartment::GetZone(const string& _zoneName) {
+    for(vector<Zone*>::iterator iZone = m_Zones.begin(); iZone != m_Zones.end(); ++iZone) {
+      if((*iZone)->GetName() == _zoneName) {
+        return **iZone;
       }
     }
-    throw ItemNotFoundException(_roomName);
-  } // GetRoom(name)
+    throw ItemNotFoundException(_zoneName);
+  } // GetZone(name)
 
-  Room& Apartment::GetRoom(const int _id) {
-    for(vector<Room*>::iterator iRoom = m_Rooms.begin(); iRoom != m_Rooms.end(); ++iRoom) {
-      if((*iRoom)->GetRoomID() == _id) {
-        return **iRoom;
+  Zone& Apartment::GetZone(const int _id) {
+    for(vector<Zone*>::iterator iZone = m_Zones.begin(); iZone != m_Zones.end(); ++iZone) {
+      if((*iZone)->GetZoneID() == _id) {
+        return **iZone;
       }
     }
     throw ItemNotFoundException(IntToString(_id));
-  } // GetRoom(id)
+  } // GetZone(id)
 
-  vector<Room*>& Apartment::GetRooms() {
-    return m_Rooms;
-  } // GetRooms
+  vector<Zone*>& Apartment::GetZones() {
+    return m_Zones;
+  } // GetZones
 
   Modulator& Apartment::GetModulator(const string& _modName) {
     for(vector<Modulator*>::iterator iModulator = m_Modulators.begin(); iModulator != m_Modulators.end(); ++iModulator) {
@@ -864,29 +898,30 @@ namespace dss {
     return *pResult;
   } // AllocateModulator
 
-  Room& Apartment::AllocateRoom(Modulator& _modulator, int _roomID) {
-  	for(vector<Room*>::iterator ipRoom = m_StaleRooms.begin(), e = m_StaleRooms.end();
-  	   ipRoom != e; ++ipRoom)
+  Zone& Apartment::AllocateZone(Modulator& _modulator, int _zoneID) {
+  	for(vector<Zone*>::iterator ipZone = m_StaleZones.begin(), e = m_StaleZones.end();
+  	   ipZone != e; ++ipZone)
   	{
-  		if((*ipRoom)->GetRoomID() == _roomID) {
-  			m_Rooms.push_back(*ipRoom);
-  			m_StaleRooms.erase(ipRoom);
-  			return **ipRoom;
+  		if((*ipZone)->GetZoneID() == _zoneID) {
+  			m_Zones.push_back(*ipZone);
+  			m_StaleZones.erase(ipZone);
+  			return **ipZone;
   		}
   	}
 
-  	for(vector<Room*>::iterator ipRoom = m_Rooms.begin(), e = m_Rooms.end();
-  	   ipRoom != e; ++ipRoom)
+  	for(vector<Zone*>::iterator ipZone = m_Zones.begin(), e = m_Zones.end();
+  	   ipZone != e; ++ipZone)
   	{
-  		if((*ipRoom)->GetRoomID() == _roomID) {
-  			return **ipRoom;
+  		if((*ipZone)->GetZoneID() == _zoneID) {
+  			return **ipZone;
   		}
   	}
 
-  	Room* room = new Room(_modulator, _roomID);
-  	m_Rooms.push_back(room);
-  	return *room;
-  } // AllocateRoom
+  	Zone* zone = new Zone(_zoneID);
+  	m_Zones.push_back(zone);
+  	zone->AddToModulator(_modulator);
+  	return *zone;
+  } // AllocateZone
 
   void Apartment::AddAction(Action* _action) {
     m_Actions.push_back(_action);
@@ -939,17 +974,17 @@ namespace dss {
     m_BusID = _busID;
   } // SetBusID
 
-  //================================================== Room
+  //================================================== Zone
 
-  Set Room::GetDevices() const {
+  Set Zone::GetDevices() const {
     return Set(m_Devices);
   } // GetDevices
 
-  void Room::AddDevice(const DeviceReference& _device) {
+  void Zone::AddDevice(const DeviceReference& _device) {
     m_Devices.push_back(_device);
   } // AddDevice
 
-  void Room::RemoveDevice(const DeviceReference& _device) {
+  void Zone::RemoveDevice(const DeviceReference& _device) {
     DeviceIterator pos = find(m_Devices.begin(), m_Devices.end(), _device);
     if(pos != m_Devices.end()) {
       m_Devices.erase(pos);
@@ -962,18 +997,27 @@ namespace dss {
   void AddGroup(UserGroup& _group);
   void RemoveGroup(UserGroup& _group);
 
-  int Room::GetRoomID() const {
-    return m_RoomID;
-  } // GetRoomID
+  int Zone::GetZoneID() const {
+    return m_ZoneID;
+  } // GetZoneID
 
-  void Room::SetRoomID(const int _value) {
-    m_RoomID = _value;
-  } // SetRoomID
+  void Zone::SetZoneID(const int _value) {
+    m_ZoneID = _value;
+  } // SetZoneID
+
+  void Zone::AddToModulator(Modulator& _modulator) {
+    m_Modulators.push_back(&_modulator);
+  } // AddToModulator
+
+  void Zone::RemoveFromModulator(Modulator& _modulator) {
+    m_Modulators.erase(find(m_Modulators.begin(), m_Modulators.end(), &_modulator));
+  } // RemoveFromModulator
 
   //============================================= Group
 
-  Group::Group(const int _id, Apartment& _apartment)
+  Group::Group(const int _id, const int _zoneID, Apartment& _apartment)
   : m_Apartment(_apartment),
+    m_ZoneID(_zoneID),
     m_GroupID(_id)
   {
   }
@@ -989,6 +1033,61 @@ namespace dss {
   void Group::AddDevice(const DeviceReference& _device) { /* do nothing or throw? */ }
   void Group::RemoveDevice(const DeviceReference& _device) { /* do nothing or throw? */ }
 
+  void Group::TurnOn() {
+    GetDevices().TurnOn();
+  } // TurnOn
+
+  void Group::TurnOff() {
+    GetDevices().TurnOff();
+  } // TurnOff
+
+  void Group::IncreaseValue(const int _parameterNr) {
+    GetDevices().IncreaseValue(_parameterNr);
+  } // IncreaseValue
+
+  void Group::DecreaseValue(const int _parameterNr) {
+    GetDevices().DecreaseValue(_parameterNr);
+  } // DecreaseValue
+
+  void Group::Enable() {
+    GetDevices().Enable();
+  } // Enable
+
+  void Group::Disable() {
+    GetDevices().Disable();
+  } // Disable
+
+  void Group::StartDim(bool _directionUp, const int _parameterNr)  {
+    GetDevices().StartDim(_directionUp, _parameterNr);
+  } // StartDim
+
+  void Group::EndDim(const int _parameterNr) {
+    GetDevices().EndDim(_parameterNr);
+  } // EndDim
+
+  void Group::SetValue(const double _value, int _parameterNr) {
+    GetDevices().SetValue(_value, _parameterNr);
+  } // SetValue
+
+  Group& Group::operator=(const Group& _other) {
+    m_Devices = _other.m_Devices;
+    //m_Apartment = _other.m_Apartment;
+    m_GroupID = _other.m_GroupID;
+    m_ZoneID = _other.m_ZoneID;
+    return *this;
+  } // operator=
+
+  void Group::CallScene(const int _sceneNr) {
+    GetDevices().CallScene(_sceneNr);
+  } // CallScene
+
+  void Group::SaveScene(const int _sceneNr) {
+    GetDevices().SaveScene(_sceneNr);
+  } // SaveScene
+
+  void Group::UndoScene(const int _sceneNr) {
+    GetDevices().UndoScene(_sceneNr);
+  } // UndoScene
 
   //============================================= Subscription
 
@@ -1090,5 +1189,18 @@ namespace dss {
   bool DeviceReference::IsSwitch() const {
     return GetDevice().IsSwitch();
   }
+
+  void DeviceReference::CallScene(const int _sceneNr) {
+    GetDevice().CallScene(_sceneNr);
+  } // CallScene
+
+  void DeviceReference::SaveScene(const int _sceneNr) {
+    GetDevice().SaveScene(_sceneNr);
+  } // SaveScene
+
+  void DeviceReference::UndoScene(const int _sceneNr) {
+    GetDevice().UndoScene(_sceneNr);
+  } // UndoScene
+
 
 }

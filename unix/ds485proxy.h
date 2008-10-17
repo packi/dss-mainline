@@ -97,15 +97,15 @@ namespace dss {
     //------------------------------------------------ Specialized Commands (system)
     virtual vector<int> GetModulators();
 
-    virtual vector<int> GetRooms(const int _modulatorID);
-    virtual int GetRoomCount(const int _modulatorID);
-    virtual vector<int> GetDevicesInRoom(const int _modulatorID, const int _roomID);
-    virtual int GetDevicesCountInRoom(const int _modulatorID, const int _roomID);
+    virtual vector<int> GetZones(const int _modulatorID);
+    virtual int GetZoneCount(const int _modulatorID);
+    virtual vector<int> GetDevicesInZone(const int _modulatorID, const int _zoneID);
+    virtual int GetDevicesCountInZone(const int _modulatorID, const int _zoneID);
 
-    virtual int GetGroupCount(const int _modulatorID, const int _roomID);
-    virtual vector<int> GetGroups(const int _modulatorID, const int _roomID);
-    virtual int GetDevicesInGroupCount(const int _modulatorID, const int _roomID, const int _groupID);
-    virtual vector<int> GetDevicesInGroup(const int _modulatorID, const int _roomID, const int _groupID);
+    virtual int GetGroupCount(const int _modulatorID, const int _zoneID);
+    virtual vector<int> GetGroups(const int _modulatorID, const int _zoneID);
+    virtual int GetDevicesInGroupCount(const int _modulatorID, const int _zoneID, const int _groupID);
+    virtual vector<int> GetDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID);
 
     virtual void AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID);
     virtual void RemoveFromGroup(const int _modulatorID, const int _groupID, const int _deviceID);
@@ -119,10 +119,10 @@ namespace dss {
     virtual void Subscribe(const int _moduatorID, const int _groupID, const int _deviceID);
 
     //------------------------------------------------ Device manipulation
-    virtual vector<int> SendCommand(DS485Command _cmd, const Set& _set);
-    virtual vector<int> SendCommand(DS485Command _cmd, const Device& _device);
-    virtual vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID);
-    virtual vector<int> SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group);
+    virtual vector<int> SendCommand(DS485Command _cmd, const Set& _set, int _param);
+    virtual vector<int> SendCommand(DS485Command _cmd, const Device& _device, int _param);
+    virtual vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID, int _param);
+    virtual vector<int> SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group, int _param);
 
     //------------------------------------------------ Helpers
     DS485Controller& GetController() { return m_DS485Controller; }
