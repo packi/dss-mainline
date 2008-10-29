@@ -104,7 +104,7 @@ namespace dss {
         cout << "diff:    " << nextOccurence.Difference(virtualNow) << endl;
       }
       if(abs(nextOccurence.Difference(virtualNow)) <= _deltaSeconds/2) {
-        DSS::GetInstance()->GetApartment().OnEvent(ipSchedEvt->GetEvent());
+        //DSS::GetInstance()->GetApartment().OnEvent(ipSchedEvt->GetEvent());
       }
     }
   } // RaisePendingEvents

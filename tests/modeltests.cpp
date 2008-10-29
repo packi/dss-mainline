@@ -34,7 +34,7 @@ public:
 class ModelTest : public CPPUNIT_NS::TestCase
 {
   CPPUNIT_TEST_SUITE(ModelTest);
-  CPPUNIT_TEST(testSubscriptions);
+  //CPPUNIT_TEST(testSubscriptions);
   CPPUNIT_TEST(testSet);
   CPPUNIT_TEST_SUITE_END();
 
@@ -44,6 +44,7 @@ public:
 
 
 protected:
+  /*
   void testSubscriptions(void) {
     int testActionCalled = 0;
 
@@ -70,7 +71,7 @@ protected:
     appt.OnEvent(evtTwo);
     CPPUNIT_ASSERT_EQUAL(2, testActionCalled);
   } // testSubscriptions
-
+*/
   void testSet() {
     Apartment apt;
 

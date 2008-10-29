@@ -21,6 +21,7 @@
 #include "webserver.h"
 #include "../webservices/webservices.h"
 #include "model.h"
+#include "event.h"
 
 #include <cstdio>
 #include <string>

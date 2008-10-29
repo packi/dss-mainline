@@ -44,6 +44,10 @@ namespace dss {
   const uint8 FunctionGroupSaveScene = 0x26;
   const uint8 FunctionGroupUndoScene = 0x27;
 
+  const uint8 FunctionZoneAddDevice = 0x30;
+  const uint8 FunctionZoneRemoveDevice = 0x31;
+  const uint8 FunctionZoneRemoveAllDevices = 0x35;
+
   const uint8 FunctionDeviceCallScene = 0x42;
   const uint8 FunctionDeviceSaveScene = 0x43;
   const uint8 FunctionDeviceUndoScene = 0x44;

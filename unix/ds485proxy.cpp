@@ -30,8 +30,68 @@ namespace dss {
     return result;
   } // SplitByModulator
 
+
+  typedef map<const Zone*, Set> HashMapZoneSet;
+
+  HashMapZoneSet SplitByZone(const Set& _set) {
+    HashMapZoneSet result;
+    for(int iDevice = 0; iDevice < _set.Length(); iDevice++) {
+      const DeviceReference& dev = _set.Get(iDevice);
+      Zone& zone = dev.GetDevice().GetApartment().GetZone(dev.GetDevice().GetZoneID());
+      result[&zone].AddDevice(dev);
+    }
+    return result;
+  } // SplitByZone
+
   typedef pair<vector<Group*>, Set> FittingResultPerModulator;
 
+  FittingResultPerModulator BestFit(const Zone& _zone, const Set& _set) {
+    Set workingCopy = _set;
+
+    vector<Group*> unsuitableGroups;
+    vector<Group*> fittingGroups;
+    Set singleDevices;
+
+    while(!workingCopy.IsEmpty()) {
+      DeviceReference& ref = workingCopy.Get(0);
+      workingCopy.RemoveDevice(ref);
+
+      bool foundGroup = false;
+      for(int iGroup = 0; iGroup < ref.GetDevice().GetGroupsCount(); iGroup++) {
+        Group& g = ref.GetDevice().GetGroupByIndex(iGroup);
+
+        // continue if already found unsuitable
+        if(find(unsuitableGroups.begin(), unsuitableGroups.end(), &g) != unsuitableGroups.end()) {
+          continue;
+        }
+
+        // see if we've got a fit
+        bool groupFits = true;
+        Set devicesInGroup = _zone.GetDevices().GetByGroup(g);
+        for(int iDevice = 0; iDevice < devicesInGroup.Length(); iDevice++) {
+          if(!_set.Contains(devicesInGroup.Get(iDevice))) {
+            unsuitableGroups.push_back(&g);
+            groupFits = false;
+            break;
+          }
+        }
+        if(groupFits) {
+          foundGroup = true;
+          fittingGroups.push_back(&g);
+          while(!devicesInGroup.IsEmpty()) {
+            workingCopy.RemoveDevice(devicesInGroup.Get(0));
+          }
+          break;
+        }
+      }
+
+      // if no fitting group found
+      if(!foundGroup) {
+        singleDevices.AddDevice(ref);
+      }
+    }
+    return FittingResultPerModulator(fittingGroups, singleDevices);
+  }
 
   FittingResultPerModulator BestFit(const Modulator& _modulator, const Set& _set) {
     Set workingCopy = _set;
@@ -87,9 +147,9 @@ namespace dss {
 
   FittingResult DS485Proxy::BestFit(const Set& _set) {
     FittingResult result;
-    HashMapModulatorSet modulatorToSet = SplitByModulator(_set);
+    HashMapZoneSet zoneToSet = SplitByZone(_set);
 
-    for(HashMapModulatorSet::iterator it = modulatorToSet.begin(); it != modulatorToSet.end(); ++it) {
+    for(HashMapZoneSet::iterator it = zoneToSet.begin(); it != zoneToSet.end(); ++it) {
       result[it->first] = dss::BestFit(*(it->first), it->second);
     }
 
@@ -100,11 +160,11 @@ namespace dss {
     vector<int> result;
     FittingResult fittedResult = BestFit(_set);
     for(FittingResult::iterator iResult = fittedResult.begin(); iResult != fittedResult.end(); ++iResult) {
-      const Modulator* modulator = iResult->first;
+      const Zone* zone = iResult->first;
       FittingResultPerModulator res = iResult->second;
       vector<Group*> groups = res.first;
       for(vector<Group*>::iterator ipGroup = groups.begin(); ipGroup != groups.end(); ++ipGroup) {
-        SendCommand(_cmd, *modulator, **ipGroup, _param);
+        SendCommand(_cmd, *zone, **ipGroup, _param);
       }
       Set& set = res.second;
       for(int iDevice = 0; iDevice < set.Length(); iDevice++) {
@@ -114,7 +174,7 @@ namespace dss {
     return result;
   } // SendCommand
 
-  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group, int _param) {
+  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param) {
     vector<int> result;/*
     DS485CommandFrame frame;
     frame.GetHeader().SetDestination(_modulatorID);

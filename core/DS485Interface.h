@@ -88,7 +88,7 @@ namespace dss {
     virtual vector<int> SendCommand(DS485Command _cmd, const Set& _set, int _param = -1) = 0;
     virtual vector<int> SendCommand(DS485Command _cmd, const Device& _device, int _param = -1) = 0;
     virtual vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID, int _param = -1) = 0;
-    virtual vector<int> SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group, int _param = -1) = 0;
+    virtual vector<int> SendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param = -1) = 0;
   };
 }
 #endif /* DS485INTERFACE_H_ */

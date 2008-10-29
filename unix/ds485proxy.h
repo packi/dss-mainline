@@ -40,7 +40,7 @@ using namespace std;
 
 namespace dss {
 
-  typedef hash_map<const Modulator*, pair< vector<Group*>, Set> > FittingResult;
+  typedef hash_map<const Zone*, pair< vector<Group*>, Set> > FittingResult;
 
 
   template<class t>
@@ -122,7 +122,7 @@ namespace dss {
     virtual vector<int> SendCommand(DS485Command _cmd, const Set& _set, int _param);
     virtual vector<int> SendCommand(DS485Command _cmd, const Device& _device, int _param);
     virtual vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID, int _param);
-    virtual vector<int> SendCommand(DS485Command _cmd, const Modulator& _modulator, Group& _group, int _param);
+    virtual vector<int> SendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param);
 
     //------------------------------------------------ Helpers
     DS485Controller& GetController() { return m_DS485Controller; }

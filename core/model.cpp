@@ -266,9 +266,9 @@ namespace dss {
     }
   } // Perform
 
-  Set Set::GetSubset(const IDeviceSelector& _selector) {
+  Set Set::GetSubset(const IDeviceSelector& _selector) const {
     Set result;
-    for(DeviceIterator iDevice = m_ContainedDevices.begin(); iDevice != m_ContainedDevices.end(); ++iDevice) {
+    for(DeviceConstIterator iDevice = m_ContainedDevices.begin(); iDevice != m_ContainedDevices.end(); ++iDevice) {
       if(_selector.SelectDevice(iDevice->GetDevice())) {
         result.AddDevice(*iDevice);
       }
@@ -291,15 +291,15 @@ namespace dss {
     }
   };
 
-  Set Set::GetByGroup(int _groupNr) {
+  Set Set::GetByGroup(int _groupNr) const {
     return GetSubset(ByGroupSelector(_groupNr));
   } // GetByGroup(id)
 
-  Set Set::GetByGroup(const Group& _group) {
+  Set Set::GetByGroup(const Group& _group) const {
     return GetByGroup(_group.GetID());
   } // GetByGroup(ref)
 
-  Set Set::GetByGroup(const string& _name) {
+  Set Set::GetByGroup(const string& _name) const {
     Set result;
     if(IsEmpty()) {
       return result;
@@ -480,7 +480,6 @@ namespace dss {
   } // ctor
 
   Apartment::~Apartment() {
-    ScrubVector(m_Subscriptions);
     ScrubVector(m_Devices);
     ScrubVector(m_Groups);
     ScrubVector(m_Zones);
@@ -797,40 +796,7 @@ namespace dss {
   vector<Group*>& Apartment::GetGroups() {
     return m_Groups;
   } // GetGroups
-
-  Subscription& Apartment::Subscribe(Action& _action, Arguments& _actionArgs, vector<int> _eventIDs, vector<int> _sourceIDs) {
-    Subscription* pResult = new Subscription(m_NextSubscriptionNumber++, _action, _actionArgs, _eventIDs, _sourceIDs);
-    m_Subscriptions.push_back(pResult);
-    return *pResult;
-  } // Subscribe
-
-  class BySubscriptionID {
-  private:
-    const int m_ID;
-  public:
-    BySubscriptionID(const int _id) : m_ID(_id) {}
-    bool operator()(const Subscription* _other) {
-      return m_ID == _other->GetID();
-    }
-  };
-
-  void Apartment::Unsubscribe(const int _subscriptionID) {
-    vector<Subscription*>::iterator pos = find_if(m_Subscriptions.begin(), m_Subscriptions.end(), BySubscriptionID(_subscriptionID));
-    if(pos != m_Subscriptions.end()) {
-      Subscription* elem = *pos;
-      m_Subscriptions.erase(pos);
-      delete elem;
-    }
-  } // Unsubscribe
-
-  int Apartment::GetSubscriptionCount() {
-    return m_Subscriptions.size();
-  } // GetSubscriptionCount
-
-  Subscription& Apartment::GetSubscription(const int _index) {
-    return *m_Subscriptions.at(_index);
-  } // GetSubscription
-
+/*
   struct handle_event : public unary_function<Subscription*, void>
   {
     handle_event(const Event& _event) : m_Event(_event) {};
@@ -848,7 +814,7 @@ namespace dss {
     Logger::GetInstance()->Log(sstream.str());
     for_each(m_Subscriptions.begin(), m_Subscriptions.end(), handle_event(_event));
   } // OnEvent
-
+*/
   Device& Apartment::AllocateDevice(const dsid_t _dsid) {
     // search for existing device
     for(vector<Device*>::iterator iDevice = m_Devices.begin(); iDevice != m_Devices.end(); ++iDevice) {
@@ -922,7 +888,7 @@ namespace dss {
   	zone->AddToModulator(_modulator);
   	return *zone;
   } // AllocateZone
-
+/*
   void Apartment::AddAction(Action* _action) {
     m_Actions.push_back(_action);
   } // AddAction
@@ -937,12 +903,14 @@ namespace dss {
     }
     throw ItemNotFoundException(string("Could not find action: ") + _name);
   } // GetAction
-
+*/
   void Apartment::OnKeypress(const dsid_t& _dsid, const ButtonPressKind _kind, const int _number) {
     Device& dev = GetDeviceByDSID(_dsid);
     if(dev.HasSubscription()) {
+  /*
       Event evt(dev.GetSubscriptionEventID(), _dsid);
       OnEvent(evt);
+      */
     }
   } // OnKeypress
 
@@ -991,8 +959,27 @@ namespace dss {
     }
   } // RemoveDevice
 
-  Group GetGroup(const string& _name);
-  Group GetGroup(const int _id);
+  Group* Zone::GetGroup(const string& _name) const {
+    for(vector<Group*>::const_iterator ipGroup = m_Groups.begin(), e = m_Groups.end();
+        ipGroup != e; ++ipGroup)
+    {
+        if((*ipGroup)->GetName() == _name) {
+          return *ipGroup;
+        }
+    }
+    return NULL;
+  } // GetGroup
+
+  Group* Zone::GetGroup(const int _id) const {
+    for(vector<Group*>::const_iterator ipGroup = m_Groups.begin(), e = m_Groups.end();
+        ipGroup != e; ++ipGroup)
+    {
+        if((*ipGroup)->GetID() == _id) {
+          return *ipGroup;
+        }
+    }
+    return NULL;
+  } // GetGroup
 
   void AddGroup(UserGroup& _group);
   void RemoveGroup(UserGroup& _group);
@@ -1090,7 +1077,7 @@ namespace dss {
   } // UndoScene
 
   //============================================= Subscription
-
+/*
   bool Subscription::HandlesEvent(const Event& _event) const {
     if(Contains(m_EventIDs, _event.GetID())) {
       return m_SourceIDs.empty() || Contains(m_SourceIDs, static_cast<int>(_event.GetSource()));
@@ -1113,7 +1100,7 @@ namespace dss {
   void Subscription::SetName(const string& _value) {
     m_Name = _value;
   } // SetName
-
+*/
   //================================================== DeviceReference
 
   DeviceReference::DeviceReference(const DeviceReference& _copy)

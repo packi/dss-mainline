@@ -314,6 +314,7 @@ namespace dss {
       if(fail) {
         shttpd_printf(_arg, "{ok:0}");
       }
+/*
     } else if(BeginsWith(method, "subscription/")) {
       if(method == "subscription/getlist") {
         EmitHTTPHeader(200, _arg, "application/json");
@@ -419,6 +420,7 @@ namespace dss {
           shttpd_printf(_arg, "{ok:0}");
         }
       }
+      */
     } else if(BeginsWith(method, "structure/")) {
       if(method == "structure/zoneAddDevice") {
         EmitHTTPHeader(200, _arg, "application/json");

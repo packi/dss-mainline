@@ -265,19 +265,19 @@ namespace dss {
     /** Returns a subset selected by the given selector
      * A device will be included in the resulting set if _selector.SelectDevice(...) return true.
      */
-    Set GetSubset(const IDeviceSelector& _selector);
+    Set GetSubset(const IDeviceSelector& _selector) const;
     /** Returns a subset of the devices which are member of the given group
     * Note that these groups could be spanned over multiple modulators.
      */
-    Set GetByGroup(int _groupNr);
+    Set GetByGroup(int _groupNr) const;
     /** Returns a subset of the devices which are member of the given group
      * Note that these groups could be spanned over multiple modulators.
      */
-    Set GetByGroup(const Group& _group);
+    Set GetByGroup(const Group& _group) const;
     /** Returns a subset of the devices which are member of the given group
      * Note that these groups could be spanned over multiple modulators.
      */
-    Set GetByGroup(const string& _name);
+    Set GetByGroup(const string& _name) const;
     /** Returns the device indicated by _name
      */
     DeviceReference GetByName(const string& _name);
@@ -426,6 +426,7 @@ namespace dss {
     int m_ZoneID;
     DeviceVector m_Devices;
     vector<Modulator*> m_Modulators;
+    vector<Group*> m_Groups;
   public:
   	Zone(const int _id)
   	: m_ZoneID(_id)
@@ -446,14 +447,14 @@ namespace dss {
     void RemoveDevice(const DeviceReference& _device);
 
     /** Returns the group with the name _name */
-    Group GetGroup(const string& _name);
+    Group* GetGroup(const string& _name) const;
     /** Returns the group with the id _id */
-    Group GetGroup(const int _id);
+    Group* GetGroup(const int _id) const;
 
     /** Adds a group to the zone */
-    void AddGroup(UserGroup& _group);
+    void AddGroup(UserGroup* _group);
     /** Removes a group from the zone */
-    void RemoveGroup(UserGroup& _group);
+    void RemoveGroup(UserGroup* _group);
 
     /** Returns the zones id */
     int GetZoneID() const;
@@ -500,56 +501,51 @@ namespace dss {
    * Event that's been raise by either a hardware or a software component.
    * Hardware-Events shall have unique id's where as user-defined software-events shall be above a certain number (e.g. 1024)
    */
+  /*
   class Event {
   private:
     string m_Name;
     string m_NameForUser;
-    int m_ID;
     devid_t m_Source;
     Arguments m_Arguments;
   public:
-    Event(int _id, int _sourceID)
-    : m_ID(_id), m_Source(_sourceID) {};
+    Event(const string& _name, int _sourceID)
+    : m_Name(_name), m_Source(_sourceID) {};
 
-    /** Returns the id of the event */
-    int GetID() const { return m_ID; };
-    /** Returns the source of the event */
-    devid_t GetSource() const { return m_Source; };
+
+    const string& GetName() { return m_Name; }
+    const string& GetNameForUser() { return m_NameForUser; }
+    void SetNameForUser(const string& _value) { m_NameForUser = _value; }
+
+    // Returns the source of the event
+    devid_t GetSource() const { return m_Source; }
   };
-
+*/
   /** Subscription to one or many event-ids which may be restricted by one or many source-ids */
+  /*
   class Subscription {
   private:
-    const int m_ID;
-    Arguments m_ActionArguments;
-    Action& m_ActionToExecute;
-    vector<int> m_SourceIDs;
-    vector<int> m_EventIDs;
     string m_Name;
+    string m_HandlerName;
+    string m_EventName;
   public:
-    Subscription(const int _id, Action& _action, Arguments& _actionArgs, vector<int> _eventIDs, vector<int> _sourceIDs)
-    : m_ID(_id), m_ActionArguments(_actionArgs), m_ActionToExecute(_action), m_SourceIDs(_sourceIDs), m_EventIDs(_eventIDs) {};
+    Subscription(const string& _eventName, const string& _handlerName, const string& _name)
+    : m_Name(_name), m_HandlerName(_handlerName), m_EventName(_eventName) {};
     virtual ~Subscription() {};
 
-    virtual void OnEvent(const Event& _event) { m_ActionToExecute.Perform(m_ActionArguments); };
-
-    /** Returns the id of the subscription */
-    int GetID() const { return m_ID; };
-
-    /** Returns the name of the subscription */
+    /** Returns the name of the subscription
     const string& GetName() const;
-    /** Sets the name of the subscription */
+    /** Sets the name of the subscription
     void SetName(const string& _value);
 
-    /** Returns a vector containing all source id's the subscription acts on */
-    const vector<int>& GetSourceIDs() const;
-    /** Returns a vector containing all event id's the subscription acts on */
-    const vector<int>& GetEventIDs() const;
+    const string& GetEventName() const { return m_EventName; };
 
-    /** Returns true if the subscription is subscribed to the event */
+    const string& GetHandlerName() const { return m_HandlerName; };
+
+    /** Returns true if the subscription is subscribed to the event
     bool HandlesEvent(const Event& _event) const;
   };
-
+*/
   /** Represents an Apartment
     * This is the root of the datamodel of the dss. The Apartment is responsible for delivering
     * and loading all subitems.
@@ -566,7 +562,6 @@ namespace dss {
     vector<Zone*> m_Zones;
     vector<Modulator*> m_Modulators;
     vector<Device*> m_Devices;
-    vector<Subscription*> m_Subscriptions;
     vector<Group*> m_Groups;
     boost::ptr_vector<Action> m_Actions;
   private:
@@ -633,54 +628,14 @@ namespace dss {
     UserGroup& AllocateGroup(const int _id);
 
   public:
-    void AddAction(Action* _action);
-    Action& GetAction(const string& _name);
-
-    /** Adds a subscription.
-     * @param _action Action to be executed if a matching event gets raised
-     * @param _eventIDs Ids to subscribe to
-     * @_sourceIDs If non-empty only events from these ids will execute _action
-     */
-    Subscription& Subscribe(Action& _action, Arguments& _argsForAction, vector<int> _eventIDs, vector<int> _sourceIDs = vector<int>());
-    /** Cancels a subscription for a event */
-    void Unsubscribe(const int _subscriptionID);
-    /** Returns the count of subscriptions */
-    int GetSubscriptionCount();
-    /** Returns a reference to the _index'th subscription */
-    Subscription& GetSubscription(const int _index);
-
-    /** Feeds an event to the processing-queue */
-    void OnEvent(const Event& _event);
+    ///** Feeds an event to the processing-queue */
+    //void OnEvent(const Event& _event);
 
     /** Processes a keypress on the given dsid.
       * @param _number The button number that was pressed starting with 1
       */
     void OnKeypress(const dsid_t& _dsid, const ButtonPressKind _kind, const int _number);
   }; // Apartment
-
-
-  /** Combines an Event with a Schedule
-    * These events get raised according to their Schedule
-   */
-  class ScheduledEvent {
-  private:
-    boost::shared_ptr<Event> m_Event;
-    boost::shared_ptr<Schedule> m_Schedule;
-    string m_Name;
-  public:
-    ScheduledEvent(boost::shared_ptr<Event> _evt, boost::shared_ptr<Schedule> _schedule)
-    : m_Event(_evt), m_Schedule(_schedule) {};
-
-    /** Returns the event that will be raised */
-    Event& GetEvent() const { return *m_Event; };
-    /** Returns the associated Schedule */
-    Schedule& GetSchedule() const { return *m_Schedule; };
-    /** Returns the name of this ScheduledEvent */
-    const string& GetName() const { return m_Name; };
-    /** Sets the name of this ScheduledEvent */
-    void SetName(const string& _value) { m_Name = _value; };
-  };
-
 
   //============================================= Helper definitions
   typedef bool (*DeviceSelectorFun)(const Device& _device);
@@ -723,12 +678,18 @@ using namespace stdext;
 namespace __gnu_cxx
 {
   template<>
-  struct hash< const dss::Modulator* >  {
-    size_t operator()( const dss::Modulator* x ) const  {
+  struct hash<const dss::Modulator*>  {
+    size_t operator()(const dss::Modulator* x) const  {
       return x->GetDSID();
     }
   };
 
+  template<>
+  struct hash<const dss::Zone*>  {
+    size_t operator()(const dss::Zone* x) const  {
+      return x->GetZoneID();
+    }
+  };
 }
 
 //#endif // DOC
