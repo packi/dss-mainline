@@ -497,55 +497,6 @@ namespace dss {
     const string& GetNameForUser() { return m_NameForUser; };
   };
 
-  /**
-   * Event that's been raise by either a hardware or a software component.
-   * Hardware-Events shall have unique id's where as user-defined software-events shall be above a certain number (e.g. 1024)
-   */
-  /*
-  class Event {
-  private:
-    string m_Name;
-    string m_NameForUser;
-    devid_t m_Source;
-    Arguments m_Arguments;
-  public:
-    Event(const string& _name, int _sourceID)
-    : m_Name(_name), m_Source(_sourceID) {};
-
-
-    const string& GetName() { return m_Name; }
-    const string& GetNameForUser() { return m_NameForUser; }
-    void SetNameForUser(const string& _value) { m_NameForUser = _value; }
-
-    // Returns the source of the event
-    devid_t GetSource() const { return m_Source; }
-  };
-*/
-  /** Subscription to one or many event-ids which may be restricted by one or many source-ids */
-  /*
-  class Subscription {
-  private:
-    string m_Name;
-    string m_HandlerName;
-    string m_EventName;
-  public:
-    Subscription(const string& _eventName, const string& _handlerName, const string& _name)
-    : m_Name(_name), m_HandlerName(_handlerName), m_EventName(_eventName) {};
-    virtual ~Subscription() {};
-
-    /** Returns the name of the subscription
-    const string& GetName() const;
-    /** Sets the name of the subscription
-    void SetName(const string& _value);
-
-    const string& GetEventName() const { return m_EventName; };
-
-    const string& GetHandlerName() const { return m_HandlerName; };
-
-    /** Returns true if the subscription is subscribed to the event
-    bool HandlesEvent(const Event& _event) const;
-  };
-*/
   /** Represents an Apartment
     * This is the root of the datamodel of the dss. The Apartment is responsible for delivering
     * and loading all subitems.

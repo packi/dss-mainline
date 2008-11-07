@@ -332,14 +332,17 @@ namespace dss {
       uint16_t devID = pd.Get<uint16_t>();
       devID &= 0x00FF;
       if(devID == 0) {
-        cout << "Found dSS" << endl;
+        cout << "Found dSS\n";
       } else if(devID == 1) {
-        cout << "Found dSM" << endl;
+        cout << "Found dSM\n";
       } else {
-        cout << "Found unknown device" << endl;
+        cout << "Found unknown device\n";
       }
-      /*uint16_t hwVersion =*/ pd.Get<uint16_t>();
-      /*uint16_t swVersion =*/ pd.Get<uint16_t>();
+      uint16_t hwVersion = pd.Get<uint16_t>();
+      uint16_t swVersion = pd.Get<uint16_t>();
+
+      cout << "HW: " << (hwVersion >> 8) << "." << (hwVersion && 0xFF00) << "\n";
+      cout << "SW: " << (swVersion >> 8) << "." << (swVersion && 0xFF00) << "\n";
 
       cout << "Name: \"";
       for(int i = 0; i < 6; i++) {
@@ -432,7 +435,9 @@ namespace dss {
       cmdFrame.GetPayload().Add<uint8>(iGroup);
       Logger::GetInstance()->Log("Proxy: GetZoneID");
       SendFrame(cmdFrame);
-      result.push_back(ReceiveSingleResult(FunctionModulatorGetZoneIdForInd));
+      uint8 tempResult = ReceiveSingleResult(FunctionModulatorGetZoneIdForInd);
+      result.push_back(tempResult);
+      cout << "Zone ID: " << (unsigned int)tempResult << endl;
     }
     return result;
   } // GetZones
@@ -457,13 +462,13 @@ namespace dss {
     uint8 result = pd.Get<uint8>();
 
     if(!pd.IsEmpty()) {
+      uint8 additional = result;
       cout << "haven't used all of the packet" << endl;
       while(!pd.IsEmpty()) {
-        printf("%x\n", result);
-        result = pd.Get<uint8>();
+        printf("=> %x\n", additional);
+        additional = pd.Get<uint8>();
       }
-      printf("%x\n", result);
-      result = 1;
+      printf("=> %x\n", additional);
     }
 
     return result;
@@ -796,6 +801,14 @@ namespace dss {
                 }
               }
             } else {
+              cout << "Response: \n";
+              PayloadDissector pd(frame->GetPayload());
+              while(!pd.IsEmpty()) {
+                uint8 data = pd.Get<uint8>();
+                cout << hex << (unsigned int)data << " " << dec << (int)data << "i ";
+              }
+              cout << dec << endl;
+
               // create an explicit copy since frame is a shared ptr and would free the contained
               // frame if going out of scope
               DS485CommandFrame* pFrame = new DS485CommandFrame();
