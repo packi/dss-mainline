@@ -11,6 +11,7 @@
 
 
 #include "../core/event.h"
+#include "../core/eventinterpreterplugins.h"
 
 using namespace dss;
 
@@ -21,6 +22,7 @@ class EventTest : public CPPUNIT_NS::TestCase
 {
   CPPUNIT_TEST_SUITE(EventTest);
   CPPUNIT_TEST(testSimpleEvent);
+  CPPUNIT_TEST(testSubscription);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -31,34 +33,59 @@ protected:
   void testSimpleEvent(void) {
     EventQueue queue;
     EventInterpreter interpreter(&queue);
-    interpreter.Execute();
+    interpreter.Run();
 
     Event* pEvent = new Event("event1");
 
     queue.PushEvent(pEvent);
 
+    sleep(1);
 
-/*
-    ScriptEnvironment env;
-    env.Initialize();
-    ScriptContext* ctx = env.GetContext();
-    ctx->LoadFromMemory("x = 10; print(x); x = x * x;");
-    double result = ctx->Evaluate<double>();
-    CPPUNIT_ASSERT_EQUAL(result, 100.0);
-    delete ctx;
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetEventsProcessed(), 1);
 
-    ctx = env.GetContext();
-    ctx->LoadFromFile("data/test.js");
-    result = ctx->Evaluate<double>();
-    CPPUNIT_ASSERT_EQUAL(result, 100.0);
-    delete ctx;
+    pEvent = new Event("event2");
 
-    ctx = env.GetContext();
-    ctx->LoadFromMemory("x = 'bla'; x = x + 'bla';");
-    string sres = ctx->Evaluate<string>();
-    CPPUNIT_ASSERT_EQUAL(sres, string("blabla"));
-    delete ctx;
-    */
+    queue.PushEvent(pEvent);
+
+    sleep(1);
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetEventsProcessed(), 2);
+
+    queue.Shutdown();
+    interpreter.Terminate();
+    sleep(2);
+  }
+
+  void testSubscription() {
+    EventQueue queue;
+    EventInterpreter interpreter(&queue);
+    EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
+    interpreter.AddPlugin(plugin);
+
+    interpreter.Run();
+
+    Event* pEvent = new Event("my_event");
+
+    SubscriptionOptions* opts = new SubscriptionOptions();
+    opts->SetParameter("event_name", "event1");
+    EventSubscription* subscription = new EventSubscription("my_event", "raise_event", opts);
+    interpreter.Subscribe(subscription);
+
+    queue.PushEvent(pEvent);
+
+    sleep(1);
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetEventsProcessed(), 2);
+
+    pEvent = new Event("event2");
+
+    queue.PushEvent(pEvent);
+
+    sleep(1);
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetEventsProcessed(), 3);
+
+    queue.Shutdown();
     interpreter.Terminate();
     sleep(2);
   }
