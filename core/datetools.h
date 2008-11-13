@@ -36,7 +36,7 @@ namespace dss {
     /** Initializes the instance to be equal to \a DateTime::NullDate */
     DateTime();
     /** Initializes the instance to be equal to \a _time.
-      * @param _time Time as localtime 
+      * @param _time Time as localtime
       */
     DateTime(time_t _time);
     /** Copy constuctor */
@@ -63,7 +63,7 @@ namespace dss {
     int GetMonth() const;
     /** Returns the year */
     int GetYear() const;
- 
+
     /** Returns the hour */
     int GetHour() const;
     /** Returns the minute */
@@ -93,10 +93,10 @@ namespace dss {
     void ClearDate();
     /** Clears the time part as in settin it to zero */
     void ClearTime();
-    /** Clears the date and time part 
+    /** Clears the date and time part
       * @see ClearDate
       * @see ClearTime
-      */ 
+      */
     void Clear();
 
     /** Normalizes the date/time information */
@@ -143,12 +143,12 @@ namespace dss {
 
   ostream& operator<<(ostream& out, const DateTime& _dt);
 
-  /** A Schedule is an abstract construct that's able to determine the 
+  /** A Schedule is an abstract construct that's able to determine the
     * next occurence or even the next occurences. */
   class Schedule {
   public:
-     virtual ~Schedule() {};
-    /** Returns the date of the next occurence. 
+     virtual ~Schedule() {}
+    /** Returns the date of the next occurence.
       * @return \a DateTime::NullDate or a \a DateTime value after \a _from
       */
     virtual DateTime GetNextOccurence(const DateTime& _from) = 0;
@@ -163,8 +163,8 @@ namespace dss {
   private:
     DateTime m_When;
   public:
-    StaticSchedule(const DateTime& _when) : m_When(_when) {};
-    virtual ~StaticSchedule() {};
+    StaticSchedule(const DateTime& _when) : m_When(_when) {}
+    virtual ~StaticSchedule() {}
 
     virtual DateTime GetNextOccurence(const DateTime& _from) ;
     virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
@@ -194,7 +194,7 @@ namespace dss {
   public:
     RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt);
     RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt, DateTime _endingAt);
-    virtual ~RepeatingSchedule() {};
+    virtual ~RepeatingSchedule() {}
 
     virtual DateTime GetNextOccurence(const DateTime& _from) ;
     virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
@@ -207,7 +207,7 @@ namespace dss {
     struct icaltimetype m_StartDate;
   public:
     ICalSchedule(const string& _rrule, const string _startDateISO);
-    virtual ~ICalSchedule() {};
+    virtual ~ICalSchedule() {}
 
     virtual DateTime GetNextOccurence(const DateTime& _from) ;
     virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);

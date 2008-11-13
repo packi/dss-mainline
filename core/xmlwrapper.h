@@ -98,7 +98,7 @@ namespace dss {
     const string m_URI;
   public:
     XMLDocumentFileReader(const string& _uri);
-    virtual ~XMLDocumentFileReader() {};
+    virtual ~XMLDocumentFileReader() {}
 
     virtual XMLDocument& GetDocument();
   };
@@ -108,7 +108,7 @@ namespace dss {
     const string m_XMLData;
   public:
     XMLDocumentMemoryReader(const char* _xmlData);
-    virtual ~XMLDocumentMemoryReader() {};
+    virtual ~XMLDocumentMemoryReader() {}
     virtual XMLDocument& GetDocument();
   }; // XMLDocumentMemoryReaders
 

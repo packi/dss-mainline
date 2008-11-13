@@ -431,7 +431,7 @@ namespace dss {
   	Zone(const int _id)
   	: m_ZoneID(_id)
   	{}
-    virtual ~Zone() {};
+    virtual ~Zone() {}
     virtual Set GetDevices() const;
 
     void AddToModulator(Modulator& _modulator);
@@ -484,17 +484,17 @@ namespace dss {
     int m_ID;
   public:
     Action(const string& _name, const string& _nameForUser)
-    : m_Name(_name), m_NameForUser(_nameForUser) {};
+    : m_Name(_name), m_NameForUser(_nameForUser) {}
 
-    virtual ~Action() {};
+    virtual ~Action() {}
 
     /** Performs the action with _args */
     virtual void Perform(const Arguments& _args) = 0;
 
     /** Returns the actions name */
-    const string& GetName() { return m_Name; };
+    const string& GetName() { return m_Name; }
     /** Returns the actions readable name */
-    const string& GetNameForUser() { return m_NameForUser; };
+    const string& GetNameForUser() { return m_NameForUser; }
   };
 
   /** Represents an Apartment
@@ -599,14 +599,14 @@ namespace dss {
     DeviceSelector(DeviceSelectorFun& _selectorFun) : m_SelectorFunction(_selectorFun) {}
     virtual bool SelectDevice(const Device& _device) { return m_SelectorFunction(_device); }
 
-    virtual ~DeviceSelector() {};
+    virtual ~DeviceSelector() {}
   }; // DeviceSelector
 
   /** Exception that will be thrown if a given item could not be found */
   class ItemNotFoundException : public DSSException {
   public:
     ItemNotFoundException(const string& _name) : DSSException(string("Could not find item ") + _name) {};
-    ~ItemNotFoundException() throw() {};
+    ~ItemNotFoundException() throw() {}
   };
 
 }

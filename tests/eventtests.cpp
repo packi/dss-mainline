@@ -23,6 +23,9 @@ class EventTest : public CPPUNIT_NS::TestCase
   CPPUNIT_TEST_SUITE(EventTest);
   CPPUNIT_TEST(testSimpleEvent);
   CPPUNIT_TEST(testSubscription);
+  CPPUNIT_TEST(testEmptySubscriptionXML);
+  CPPUNIT_TEST(testNonExistingXML);
+  CPPUNIT_TEST(testSubscriptionXML);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -32,7 +35,9 @@ public:
 protected:
   void testSimpleEvent(void) {
     EventQueue queue;
+    EventRunner runner;
     EventInterpreter interpreter(&queue);
+    interpreter.SetEventRunner(&runner);
     interpreter.Run();
 
     Event* pEvent = new Event("event1");
@@ -54,11 +59,13 @@ protected:
     queue.Shutdown();
     interpreter.Terminate();
     sleep(2);
-  }
+  } // testSimpleEvent
 
   void testSubscription() {
     EventQueue queue;
+    EventRunner runner;
     EventInterpreter interpreter(&queue);
+    interpreter.SetEventRunner(&runner);
     EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
     interpreter.AddPlugin(plugin);
 
@@ -88,7 +95,75 @@ protected:
     queue.Shutdown();
     interpreter.Terminate();
     sleep(2);
-  }
+  } // testSubscription
+
+  void testEmptySubscriptionXML() {
+    EventQueue queue;
+    EventInterpreter interpreter(&queue);
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetNumberOfSubscriptions(), 0);
+
+    interpreter.LoadFromXML("data/testsubscriptions_empty.xml");
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetNumberOfSubscriptions(), 0);
+  } // testEmptySubscriptionXML
+
+  void testNonExistingXML() {
+    EventInterpreter interpreter;
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetNumberOfSubscriptions(), 0);
+
+    try {
+      interpreter.LoadFromXML("data/iwillnever_be_a_subscription.xml");
+    } catch(runtime_error& e) {
+    }
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetNumberOfSubscriptions(), 0);
+  } // testNonExistingXML
+
+  void testSubscriptionXML() {
+    EventQueue queue;
+    EventRunner runner;
+    EventInterpreter interpreter(&queue);
+    interpreter.SetEventRunner(&runner);
+    queue.SetEventRunner(&runner);
+    runner.SetEventQueue(&queue);
+    EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
+    interpreter.AddPlugin(plugin);
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetNumberOfSubscriptions(), 0);
+
+    try {
+      interpreter.LoadFromXML("data/testsubscriptions.xml");
+    } catch(runtime_error& e) {
+    }
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetNumberOfSubscriptions(), 2);
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetEventsProcessed(), 0);
+
+    interpreter.Run();
+
+    sleep(1);
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetEventsProcessed(), 0);
+
+    Event* evt = new Event("event1");
+    queue.PushEvent(evt);
+
+    sleep(1);
+
+    runner.RunOnce();
+
+    sleep(12);
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetEventsProcessed(), 2);
+
+    queue.Shutdown();
+    interpreter.Terminate();
+    sleep(1);
+  } // testSubscriptionXML
+
 
 };
 

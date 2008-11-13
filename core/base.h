@@ -144,7 +144,7 @@ namespace dss {
       return result;
     }
   public:
-    explicit ResourceHolder(resCls* _resource = NULL) : m_Resource(_resource) {};
+    explicit ResourceHolder(resCls* _resource = NULL) : m_Resource(_resource) {}
 
     ResourceHolder(ResourceHolder<resCls>& _other)
     : m_Resource(_other.Release())
@@ -161,7 +161,7 @@ namespace dss {
   class Finalizable {
   public:
     virtual void Finalize() = 0;
-    virtual ~Finalizable() {};
+    virtual ~Finalizable() {}
   }; // Finalizable
 
   class Finalizer {
@@ -197,7 +197,7 @@ namespace dss {
       : runtime_error( _message )
     { }
 
-    virtual ~DSSException() throw() {};
+    virtual ~DSSException() throw() {}
   }; // DSSException
 
 

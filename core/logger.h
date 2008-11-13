@@ -34,15 +34,15 @@ typedef enum {
 } aLogSeverity;
 
 namespace dss {
-  
+
   class Logger {
   private:
     static Logger* m_Instance;
-    
-    Logger() {};
+
+    Logger() {}
   public:
     static Logger* GetInstance();
-    
+
     void Log(const string& _message, const aLogSeverity _severity = lsDebug);
     void Log(const char* _message, const aLogSeverity _severity = lsDebug);
     void Log(const wchar_t* _message, const aLogSeverity _severity = lsDebug);

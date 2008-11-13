@@ -19,6 +19,8 @@ namespace dss {
     virtual void HandleEvent(Event& _event, const EventSubscription& _subscription);
   };
 
+  class EventInterpreterPluginJavascript : public EventInterpreterPlugin {
+  };
 } // namespace dss
 
 #endif /* EVENTINTERPRETERPLUGINS_H_ */

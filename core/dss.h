@@ -36,28 +36,7 @@ namespace dss {
   class DSS;
   class WebServer;
   class Config;
-  class EventRunner;
   class DS485Interface;
-
-  class EventRunner {
-  private:
-    boost::ptr_vector<ScheduledEvent> m_ScheduledEvents;
-
-    DateTime GetNextOccurence();
-    DateTime m_WakeTime;
-    SyncEvent m_NewItem;
-  public:
-    void AddEvent(ScheduledEvent* _scheduledEvent);
-
-    void RaisePendingEvents(DateTime& _from, int _deltaSeconds);
-
-    int GetSize() const;
-    const ScheduledEvent& GetEvent(const int _idx) const;
-    void RemoveEvent(const int _idx);
-
-    void Run();
-  }; // EventRunner
-
 
   /** Main class
     *
@@ -74,22 +53,25 @@ namespace dss {
 #endif
     EventRunner m_EventRunner;
     WebServices m_WebServices;
+    EventInterpreter m_EventInterpreter;
+    EventQueue m_EventQueue;
 
-    DSS() { };
+    DSS();
 
     void LoadConfig();
   public:
     void Run();
 
     static DSS* GetInstance();
-    Config& GetConfig() { return m_Config; };
-    DS485Interface& GetDS485Interface() { return *m_DS485Interface; };
-    Apartment& GetApartment() { return m_Apartment; };
+    Config& GetConfig() { return m_Config; }
+    DS485Interface& GetDS485Interface() { return *m_DS485Interface; }
+    Apartment& GetApartment() { return m_Apartment; }
 #ifdef USE_SIM
-    DSModulatorSim& GetModulatorSim() { return m_ModulatorSim; };
+    DSModulatorSim& GetModulatorSim() { return m_ModulatorSim; }
 #endif
-    EventRunner& GetEventRunner() { return m_EventRunner; };
-    WebServices& GetWebServices() { return m_WebServices; };
+    EventRunner& GetEventRunner() { return m_EventRunner; }
+    WebServices& GetWebServices() { return m_WebServices; }
+    EventQueue& GetEventQueue() { return m_EventQueue; }
   }; // DSS
 
 }

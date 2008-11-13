@@ -40,10 +40,10 @@ public:
     bool Run();
     bool Stop();
     bool Terminate();
-    void SetFreeAtTermination( bool _value ) { m_FreeAtTermination = _value; };
-    bool GetFreeAtTerimnation() { return m_FreeAtTermination; };
+    void SetFreeAtTermination( bool _value ) { m_FreeAtTermination = _value; }
+    bool GetFreeAtTerimnation() { return m_FreeAtTermination; }
 
-    bool IsRunning() const { return m_Running; };
+    bool IsRunning() const { return m_Running; }
 
 }; //  Thread
 

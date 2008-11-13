@@ -25,7 +25,8 @@ namespace dss {
   //================================================== Forward declarations
 
   class EventInterpreter;
-
+  class ScheduledEvent;
+  class EventRunner;
 
   //================================================== Class definitions
 
@@ -38,6 +39,8 @@ namespace dss {
     bool m_LocationSet;
     string m_Context;
     bool m_ContextSet;
+    string m_Time;
+    bool m_TimeSet;
   public:
     Event(const string& _name);
 
@@ -45,9 +48,11 @@ namespace dss {
 
     string GetPropertyByName(const string& _name) const;
     bool HasPropertySet(const string& _name) const;
+    bool UnsetProperty(const string& _name);
 
     void SetLocation(const string& _value) { m_Location = _value; m_LocationSet = true; }
     void SetContext(const string& _value) { m_Context = _value; m_ContextSet = true; }
+    void SetTime(const string& _value) { m_Time = _value; m_TimeSet = true; }
   }; // Event
 
 
@@ -62,6 +67,9 @@ namespace dss {
 
     const string& GetParameter(const string& _name) const;
     void SetParameter(const string& _name, const string& _value);
+    bool HasParameter(const string& _name) const;
+
+    void LoadParameterFromXML(XMLNode& _node);
   }; // SubscriptionOptions
 
 
@@ -179,13 +187,46 @@ namespace dss {
     queue<Event*> m_EventQueue;
     SyncEvent m_EntryInQueueEvt;
     Mutex m_QueueMutex;
+
+    EventRunner* m_EventRunner;
   public:
+    EventQueue();
     void PushEvent(Event* _event);
     Event* PopEvent();
     bool WaitForEvent();
 
     void Shutdown();
+
+    void SetEventRunner(EventRunner* _value) { m_EventRunner = _value; }
   };
+
+
+  //-------------------------------------------------- EventRunner
+
+  class EventRunner {
+  private:
+    boost::ptr_vector<ScheduledEvent> m_ScheduledEvents;
+
+    DateTime GetNextOccurence();
+    DateTime m_WakeTime;
+    SyncEvent m_NewItem;
+    EventQueue* m_EventQueue;
+  public:
+    EventRunner();
+
+    void AddEvent(ScheduledEvent* _scheduledEvent);
+
+    bool RaisePendingEvents(DateTime& _from, int _deltaSeconds);
+
+    int GetSize() const;
+    const ScheduledEvent& GetEvent(const int _idx) const;
+    void RemoveEvent(const int _idx);
+
+    void Run();
+    bool RunOnce();
+
+    void SetEventQueue(EventQueue* _value) { m_EventQueue = _value; }
+  }; // EventRunner
 
 
   //-------------------------------------------------- EventInterpreter
@@ -195,12 +236,14 @@ namespace dss {
     vector<EventSubscription*> m_Subscriptions;
     vector<EventInterpreterPlugin*> m_Plugins;
     EventQueue* m_Queue;
+    EventRunner* m_EventRunner;
     int m_EventsProcessed;
   private:
     void LoadSubscription(XMLNode& _node);
     EventInterpreterPlugin* GetPluginByName(const string& _name);
   public:
     EventInterpreter(EventQueue* _queue);
+    EventInterpreter();
     virtual ~EventInterpreter();
 
     void AddPlugin(EventInterpreterPlugin* _plugin);
@@ -214,6 +257,10 @@ namespace dss {
 
     int GetEventsProcessed() const { return m_EventsProcessed; }
     EventQueue& GetQueue() { return *m_Queue; }
+    void SetEventQueue(EventQueue* _queue) { m_Queue = _queue; }
+    EventRunner& GetEventRunner() { return *m_EventRunner; }
+    void SetEventRunner(EventRunner* _runner) { m_EventRunner = _runner; }
+    int GetNumberOfSubscriptions() { return m_Subscriptions.size(); }
   }; // EventInterpreter
 
 
@@ -224,21 +271,25 @@ namespace dss {
    */
   class ScheduledEvent {
   private:
-    boost::shared_ptr<Event> m_Event;
-    boost::shared_ptr<Schedule> m_Schedule;
+    Event* m_Event;
+    Schedule* m_Schedule;
     string m_Name;
+    bool m_OwnsEvent;
   public:
-    ScheduledEvent(boost::shared_ptr<Event> _evt, boost::shared_ptr<Schedule> _schedule)
-    : m_Event(_evt), m_Schedule(_schedule) {};
+    ScheduledEvent(Event* _pEvt, Schedule* _pSchedule)
+    : m_Event(_pEvt), m_Schedule(_pSchedule), m_OwnsEvent(true) {};
+    ~ScheduledEvent();
 
     /** Returns the event that will be raised */
-    Event& GetEvent() const { return *m_Event; };
+    Event* GetEvent() { return m_Event; };
     /** Returns the associated Schedule */
     Schedule& GetSchedule() const { return *m_Schedule; };
     /** Returns the name of this ScheduledEvent */
     const string& GetName() const { return m_Name; };
     /** Sets the name of this ScheduledEvent */
     void SetName(const string& _value) { m_Name = _value; };
+
+    void SetOwnsEvent(const bool _value) { m_OwnsEvent = _value; }
   };
 
 
@@ -247,6 +298,7 @@ namespace dss {
   extern const char* EventPropertyName;
   extern const char* EventPropertyLocation;
   extern const char* EventPropertyContext;
+  extern const char* EventPropertyTime;
 
 } // namespace dss
 

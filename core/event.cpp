@@ -22,7 +22,10 @@ namespace dss {
   //================================================== Event
 
   Event::Event(const string& _name)
-  : m_Name(_name)
+  : m_Name(_name),
+    m_LocationSet(false),
+    m_ContextSet(false),
+    m_TimeSet(false)
   {} // ctor
 
   string Event::GetPropertyByName(const string& _name) const {
@@ -32,9 +35,11 @@ namespace dss {
       return m_Location;
     } else if(_name == EventPropertyContext) {
       return m_Context;
+    } else if(_name == EventPropertyTime) {
+      return m_Time;
     }
     return string();
-  }
+  } // GetPropertyByName
 
   bool Event::HasPropertySet(const string& _name) const {
     if(_name == EventPropertyName) {
@@ -43,9 +48,27 @@ namespace dss {
       return m_LocationSet;
     } else if(_name == EventPropertyContext) {
       return m_ContextSet;
+    } else if(_name == EventPropertyTime) {
+      return m_TimeSet;
     }
     return false;
-  }
+  } // HasPropertySet
+
+  bool Event::UnsetProperty(const string& _name) {
+    if(_name == EventPropertyLocation) {
+      m_LocationSet = false;
+      m_Location = "";
+    } else if(_name == EventPropertyContext) {
+      m_ContextSet = false;
+      m_Context = "";
+    } else if(_name == EventPropertyTime) {
+      m_TimeSet = false;
+      m_Time = "";
+    } else {
+      return false;
+    }
+    return true;
+  } // UnsetProperty
 
 
   //================================================== EventInterpreter
@@ -53,7 +76,12 @@ namespace dss {
   EventInterpreter::EventInterpreter(EventQueue* _queue)
   : m_Queue(_queue),
     m_EventsProcessed(0)
-  { } // ctor
+  { } // ctor(EventQueue)
+
+  EventInterpreter::EventInterpreter()
+  : m_Queue(NULL),
+    m_EventsProcessed(0)
+  { } // ctor()
 
   EventInterpreter::~EventInterpreter() {
     ScrubVector(m_Plugins);
@@ -65,37 +93,48 @@ namespace dss {
   } // AddPlugin
 
   void EventInterpreter::Execute() {
-    while(!m_Terminated && m_Queue->WaitForEvent()) {
-      Event* toProcess = m_Queue->PopEvent();
-      if(toProcess != NULL) {
+    if(m_Queue == NULL) {
+      Logger::GetInstance()->Log("EventInterpreter: No queue set. Can't work like that... exiting...", lsFatal);
+      return;
+    }
 
-        Logger::GetInstance()->Log(string("EventInterpreter: Got event from queue: '") + toProcess->GetName() + "'");
+    if(m_EventRunner == NULL) {
+      Logger::GetInstance()->Log("EventInterpreter: No runner set. exiting...", lsFatal);
+      return;
+    }
+    while(!m_Terminated) {
+      if(m_Queue->WaitForEvent()) {
+        Event* toProcess = m_Queue->PopEvent();
+        if(toProcess != NULL) {
 
-        for(vector<EventSubscription*>::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
-            ipSubscription != e; ++ipSubscription)
-        {
-          if((*ipSubscription)->Matches(*toProcess)) {
-            bool called = false;
-            Logger::GetInstance()->Log(string("EventInterpreter: Subscription'") + (*ipSubscription)->GetID() + "' matches event");
+          Logger::GetInstance()->Log(string("EventInterpreter: Got event from queue: '") + toProcess->GetName() + "'");
 
-            EventInterpreterPlugin* plugin = GetPluginByName((*ipSubscription)->GetHandlerName());
-            if(plugin != NULL) {
-              Logger::GetInstance()->Log(string("EventInterpreter: Found handler '") + plugin->GetName() + "' calling...");
-              plugin->HandleEvent(*toProcess, **ipSubscription);
-              called = true;
-              Logger::GetInstance()->Log("EventInterpreter: called.");
-              break;
+          for(vector<EventSubscription*>::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
+              ipSubscription != e; ++ipSubscription)
+          {
+            if((*ipSubscription)->Matches(*toProcess)) {
+              bool called = false;
+              Logger::GetInstance()->Log(string("EventInterpreter: Subscription'") + (*ipSubscription)->GetID() + "' matches event");
+
+              EventInterpreterPlugin* plugin = GetPluginByName((*ipSubscription)->GetHandlerName());
+              if(plugin != NULL) {
+                Logger::GetInstance()->Log(string("EventInterpreter: Found handler '") + plugin->GetName() + "' calling...");
+                plugin->HandleEvent(*toProcess, **ipSubscription);
+                called = true;
+                Logger::GetInstance()->Log("EventInterpreter: called.");
+                break;
+              }
+              if(!called) {
+                Logger::GetInstance()->Log(string("EventInterpreter: Could not find handler '") + (*ipSubscription)->GetHandlerName());
+              }
+
             }
-            if(!called) {
-              Logger::GetInstance()->Log(string("EventInterpreter: Could not find handler '") + (*ipSubscription)->GetHandlerName());
-            }
-
           }
-        }
 
-        m_EventsProcessed++;
-        Logger::GetInstance()->Log(string("EventInterpreter: Done processing event '") + toProcess->GetName() + "'");
-        delete toProcess;
+          m_EventsProcessed++;
+          Logger::GetInstance()->Log(string("EventInterpreter: Done processing event '") + toProcess->GetName() + "'");
+          delete toProcess;
+        }
       }
     }
   } // Execute
@@ -130,16 +169,18 @@ namespace dss {
     const int apartmentConfigVersion = 1;
     Logger::GetInstance()->Log(string("EventInterpreter: Loading subscriptions from '") + _fileName + "'");
 
-    XMLDocumentFileReader reader(_fileName);
+    if(FileExists(_fileName)) {
+      XMLDocumentFileReader reader(_fileName);
 
-    XMLNode rootNode = reader.GetDocument().GetRootNode();
-    if(rootNode.GetName() == "subscriptions") {
-      if(StrToIntDef(rootNode.GetAttributes()["version"], -1) == apartmentConfigVersion) {
-        XMLNodeList nodes = rootNode.GetChildren();
-        for(XMLNodeList::iterator iNode = nodes.begin(); iNode != nodes.end(); ++iNode) {
-          string nodeName = iNode->GetName();
-          if(nodeName == "subscription") {
-            LoadSubscription(*iNode);
+      XMLNode rootNode = reader.GetDocument().GetRootNode();
+      if(rootNode.GetName() == "subscriptions") {
+        if(StrToIntDef(rootNode.GetAttributes()["version"], -1) == apartmentConfigVersion) {
+          XMLNodeList nodes = rootNode.GetChildren();
+          for(XMLNodeList::iterator iNode = nodes.begin(); iNode != nodes.end(); ++iNode) {
+            string nodeName = iNode->GetName();
+            if(nodeName == "subscription") {
+              LoadSubscription(*iNode);
+            }
           }
         }
       }
@@ -164,10 +205,20 @@ namespace dss {
 
     EventInterpreterPlugin* plugin = GetPluginByName(handlerName);
     if(plugin == NULL) {
-      Logger::GetInstance()->Log(string("EventInterpreter::LoadSubscription: could not find plugin for handler-name '") + handlerName + "'");
-      Logger::GetInstance()->Log(       "EventInterpreter::LoadSubscription: Still generating a subscription but w/o inner parameter");
+      Logger::GetInstance()->Log(string("EventInterpreter::LoadSubscription: could not find plugin for handler-name '") + handlerName + "'", lsWarning);
+      Logger::GetInstance()->Log(       "EventInterpreter::LoadSubscription: Still generating a subscription but w/o inner parameter", lsWarning);
     } else {
       opts = plugin->CreateOptionsFromXML(_node.GetChildren());
+    }
+    try {
+      XMLNode& paramNode = _node.GetChildByName("parameter");
+      if(opts == NULL) {
+        opts = new SubscriptionOptions();
+        opts->LoadParameterFromXML(paramNode);
+      }
+    } catch(runtime_error& e) {
+      delete opts;
+      opts = NULL;
     }
 
     EventSubscription* subscription = new EventSubscription(evtName, handlerName, opts);
@@ -177,12 +228,52 @@ namespace dss {
 
   //================================================== EventQueue
 
+  EventQueue::EventQueue()
+  : m_EventRunner(NULL)
+  { } // ctor
+
   void EventQueue::PushEvent(Event* _event) {
     Logger::GetInstance()->Log(string("EventQueue: New event '") + _event->GetName() + "' in queue...");
-    m_QueueMutex.Lock();
-    m_EventQueue.push(_event);
-    m_QueueMutex.Unlock();
-    m_EntryInQueueEvt.Signal();
+    if(_event->HasPropertySet(EventPropertyTime)) {
+      DateTime when;
+      bool validDate = false;
+      string timeStr = _event->GetPropertyByName(EventPropertyTime);
+      if(timeStr.size() > 2) {
+        // relative time
+        if(timeStr[0] == '+') {
+          string timeOffset = timeStr.substr(1, string::npos);
+          int offset = StrToIntDef(timeOffset, -1);
+          if(offset >= 0) {
+            when = when.AddSeconds(offset);
+            validDate = true;
+          } else {
+            Logger::GetInstance()->Log(string("EventQueue::PushEvent: Could not parse offset or offset is below zero '") + timeOffset + "'", lsError);
+          }
+        } else {
+          try {
+            when = DateTime::FromISO(timeStr);
+            validDate = true;
+          } catch(runtime_error& e) {
+            Logger::GetInstance()->Log(string("EventQueue::PushEvent: Invalid time specified '") + timeStr + "' error: " + e.what(), lsError);
+          }
+        }
+      }
+      if(validDate) {
+        Logger::GetInstance()->Log(string("EventQueue::PushEvent: Event has a valid time, rescheduling at ") + (string)when);
+        Schedule* sched = new StaticSchedule(when);
+        ScheduledEvent* scheduledEvent = new ScheduledEvent(_event, sched);
+        scheduledEvent->SetOwnsEvent(false);
+        m_EventRunner->AddEvent(scheduledEvent);
+      } else {
+        Logger::GetInstance()->Log("EventQueue::PushEvent: Dropping event with invalid time", lsError);
+        delete _event;
+      }
+    } else {
+      m_QueueMutex.Lock();
+      m_EventQueue.push(_event);
+      m_QueueMutex.Unlock();
+      m_EntryInQueueEvt.Signal();
+    }
   } // PushEvent
 
   Event* EventQueue::PopEvent() {
@@ -190,15 +281,15 @@ namespace dss {
     Event* result = NULL;
     if(!m_EventQueue.empty()) {
       result = m_EventQueue.front();
+      m_EventQueue.pop();
     }
-    m_EventQueue.pop();
     m_QueueMutex.Unlock();
     return result;
   } // PopEvent
 
   bool EventQueue::WaitForEvent() {
     if(m_EventQueue.empty()) {
-      m_EntryInQueueEvt.WaitFor();
+      m_EntryInQueueEvt.WaitFor(1000);
     }
     return !m_EventQueue.empty();
   } // WaitForEvent
@@ -206,6 +297,126 @@ namespace dss {
   void EventQueue::Shutdown() {
     m_EntryInQueueEvt.Broadcast();
   } // Shutdown
+
+
+  //================================================== EventRunner
+
+  const bool DebugEventRunner = true;
+
+  EventRunner::EventRunner()
+  : m_EventQueue(NULL)
+  { } // ctor
+
+  int EventRunner::GetSize() const {
+    return m_ScheduledEvents.size();
+  } // GetSize
+
+  const ScheduledEvent& EventRunner::GetEvent(const int _idx) const {
+    return m_ScheduledEvents.at(_idx);
+  } // GetEvent
+
+  void EventRunner::RemoveEvent(const int _idx) {
+    boost::ptr_vector<ScheduledEvent>::iterator it = m_ScheduledEvents.begin();
+    advance(it, _idx);
+    m_ScheduledEvents.erase(it);
+  } // RemoveEvent
+
+  void EventRunner::AddEvent(ScheduledEvent* _scheduledEvent) {
+    m_ScheduledEvents.push_back(_scheduledEvent);
+    m_NewItem.Signal();
+  } // AddEvent
+
+  DateTime EventRunner::GetNextOccurence() {
+    DateTime now;
+    DateTime result = now.AddYear(10);
+    if(DebugEventRunner) {
+      Logger::GetInstance()->Log("EventRunner: *********");
+    }
+    for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
+        ipSchedEvt != e; ++ipSchedEvt)
+    {
+      DateTime next = ipSchedEvt->GetSchedule().GetNextOccurence(now);
+      if(DebugEventRunner) {
+        Logger::GetInstance()->Log(string("next:   ") + (string)next);
+        Logger::GetInstance()->Log(string("result: ") + (string)result);
+      }
+      result = min(result, next);
+      if(DebugEventRunner) {
+        Logger::GetInstance()->Log(string("chosen: ") + (string)result);
+      }
+    }
+    return result;
+  } // GetNextOccurence
+
+  void EventRunner::Run() {
+    while(true) {
+      RunOnce();
+    }
+  } // Run
+
+  bool EventRunner::RunOnce() {
+    if(m_ScheduledEvents.empty()) {
+      m_NewItem.WaitFor(1000);
+      return false;
+    } else {
+      DateTime now;
+      m_WakeTime = GetNextOccurence();
+      int sleepSeconds = m_WakeTime.Difference(now);
+
+      // Prevent loops when a cycle takes less than 1s
+      if(sleepSeconds == 0) {
+        m_NewItem.WaitFor(1000);
+        return false;
+      }
+
+      if(!m_NewItem.WaitFor(sleepSeconds * 1000)) {
+        return RaisePendingEvents(m_WakeTime, 10);
+      }
+    }
+    return false;
+  }
+
+  bool EventRunner::RaisePendingEvents(DateTime& _from, int _deltaSeconds) {
+    bool result = false;
+    DateTime virtualNow = _from.AddSeconds(-_deltaSeconds/2);
+    if(DebugEventRunner) {
+      cout << "vNow:    " << virtualNow << endl;
+    }
+    for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
+        ipSchedEvt != e; ++ipSchedEvt)
+    {
+      DateTime nextOccurence = ipSchedEvt->GetSchedule().GetNextOccurence(virtualNow);
+      if(DebugEventRunner) {
+        cout << "nextOcc: " << nextOccurence << endl;
+        cout << "diff:    " << nextOccurence.Difference(virtualNow) << endl;
+      }
+      if(abs(nextOccurence.Difference(virtualNow)) <= _deltaSeconds/2) {
+        result = true;
+        if(m_EventQueue != NULL) {
+          Event* evt = ipSchedEvt->GetEvent();
+          if(evt->HasPropertySet(EventPropertyTime)) {
+            evt->UnsetProperty(EventPropertyTime);
+          }
+          m_EventQueue->PushEvent(evt);
+        } else {
+          Logger::GetInstance()->Log("EventRunner: Cannot push event back to queue because the Queue is NULL", lsFatal);
+        }
+      }
+    }
+    return result;
+  } // RaisePendingEvents
+
+
+  //================================================== ScheduledEvent
+
+  ScheduledEvent::~ScheduledEvent() {
+    delete m_Schedule;
+    m_Schedule = NULL;
+    if(m_OwnsEvent) {
+      delete m_Event;
+    }
+    m_Event = NULL;
+  } // dtor
 
 
   //================================================== EventSubscription
@@ -276,9 +487,32 @@ namespace dss {
     throw runtime_error(string("no value for parameter found: ") + _name);
   } // GetParameter
 
+  bool SubscriptionOptions::HasParameter(const string& _name) const {
+    HashMapConstStringString::const_iterator it = m_Parameters.find(_name);
+    return it != m_Parameters.end();
+  } // HasParameter
+
   void SubscriptionOptions::SetParameter(const string& _name, const string& _value) {
     m_Parameters[_name] = _value;
   } // SetParameter
+
+  void SubscriptionOptions::LoadParameterFromXML(XMLNode& _node) {
+    XMLNodeList nodes = _node.GetChildren();
+    for(XMLNodeList::iterator iNode = nodes.begin(); iNode != nodes.end(); ++iNode) {
+      string nodeName = iNode->GetName();
+      if(nodeName == "parameter") {
+        string value;
+        string name;
+        if(iNode->GetChildren().size() > 0) {
+          value = iNode->GetChildren()[0].GetContent();
+        }
+        name = iNode->GetAttributes()["name"];
+        if(name.size() > 0) {
+          SetParameter(name, value);
+        }
+      }
+    }
+  } // LoadParameterFromXML
 
 
   //================================================== EventInterpreterPlugin
@@ -320,5 +554,6 @@ namespace dss {
   const char* EventPropertyName = "name";
   const char* EventPropertyLocation = "location";
   const char* EventPropertyContext = "context";
+  const char* EventPropertyTime = "time";
 
 } // namespace dss

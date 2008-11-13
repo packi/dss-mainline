@@ -5,6 +5,7 @@
 #include <sys/time.h>
 #endif
 #include <errno.h>
+#include <cstdio>
 
 namespace dss {
 
@@ -44,9 +45,9 @@ void SyncEvent::Signal() {
 void SyncEvent::Broadcast() {
 #ifndef WIN32
   m_ConditionMutex.Lock();
-  
+
   assert(pthread_cond_broadcast(&m_Condition) == 0);
-  
+
   m_ConditionMutex.Unlock();
 #else
   #error SyncEvent::Broadcast is not yet implemented
@@ -84,6 +85,9 @@ bool SyncEvent::WaitFor( int _timeoutMS ) {
   timeout.tv_nsec = (now.tv_usec + timeoutMSec * 1000) * 1000;
   int result = pthread_cond_timedwait( &m_Condition, m_ConditionMutex.GetMutex(), &timeout );
   m_ConditionMutex.Unlock();
+  if(result != ETIMEDOUT && result != 0) {
+    //perror("SyncEvent::WaitFor");
+  }
   return !(result == ETIMEDOUT);
 #else
   return WaitForSingleObject( m_EventHandle, _timeoutMS ) == WAIT_OBJECT_0;

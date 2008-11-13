@@ -28,7 +28,7 @@ public:
     virtual bool Unlock();
 
 #ifndef WIN32
-	pthread_mutex_t* GetMutex() { return &m_Mutex; };
+	pthread_mutex_t* GetMutex() { return &m_Mutex; }
 #endif
 }; //  Mutex
 

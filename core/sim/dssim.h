@@ -101,13 +101,13 @@ namespace dss {
     const DSModulatorSim& m_Simulator;
   public:
     DSIDInterface(const DSModulatorSim& _simulator, dsid_t _dsid, devid_t _shortAddress)
-    : m_DSID(_dsid), m_ShortAddress(_shortAddress), m_Simulator(_simulator) {};
+    : m_DSID(_dsid), m_ShortAddress(_shortAddress), m_Simulator(_simulator) {}
 
-    virtual ~DSIDInterface() {};
+    virtual ~DSIDInterface() {}
 
-    virtual dsid_t GetDSID() const { return m_DSID; };
-    virtual devid_t GetShortAddress() const { return m_ShortAddress; };
-    virtual void SetShortAddress(const devid_t _value) { m_ShortAddress = _value; };
+    virtual dsid_t GetDSID() const { return m_DSID; }
+    virtual devid_t GetShortAddress() const { return m_ShortAddress; }
+    virtual void SetShortAddress(const devid_t _value) { m_ShortAddress = _value; }
 
     virtual void CallScene(const int _sceneNr) = 0;
     virtual void SaveScene(const int _sceneNr) = 0;
@@ -146,7 +146,7 @@ namespace dss {
     int m_DimTimeMS;
   public:
     DSIDSim(const DSModulatorSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress);
-    virtual ~DSIDSim() {};
+    virtual ~DSIDSim() {}
 
     virtual void CallScene(const int _sceneNr);
     virtual void SaveScene(const int _sceneNr);
@@ -178,7 +178,7 @@ namespace dss {
       m_NumberOfButtons(_numButtons),
       m_DefaultColor(GroupIDYellow)
     {};
-    ~DSIDSimSwitch() {};
+    ~DSIDSimSwitch() {}
 
     void PressKey(const ButtonPressKind _kind, const int _buttonNr);
 

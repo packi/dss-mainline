@@ -10,7 +10,7 @@ namespace dss {
   class Config {
   private:
     // this field has to be mutable because accessing it by operator[] is non-const
-    mutable HashMapConstStringString m_OptionsByName; 
+    mutable HashMapConstStringString m_OptionsByName;
 
     void AssertHasOption(const string& _name) const;
   public:
@@ -25,8 +25,8 @@ namespace dss {
     template <class t>
     t GetOptionAs(const string& _name) const;
 
-    /** Returns the option converted to the type of t if present. Else 
-      * _defaultValue will be returned. 
+    /** Returns the option converted to the type of t if present. Else
+      * _defaultValue will be returned.
       */
     template <class t>
     t GetOptionAs(const string& _name, const t _defaultValue) const {
@@ -34,8 +34,8 @@ namespace dss {
         return GetOptionAs<t>(_name);
       }
       return _defaultValue;
-    }    
-    
+    }
+
     /** Sets the option named _name to _value */
     template <class t>
     void SetOptionAs(const string& _name, const t& _value) {
@@ -43,27 +43,27 @@ namespace dss {
       strstream << _value;
       m_OptionsByName[_name] = strstream.str();
     } // SetOptionAs<t>
- 
-    /** Returns all options in a const hash */ 
-    const HashMapConstStringString& GetOptions() { return m_OptionsByName; };
+
+    /** Returns all options in a const hash */
+    const HashMapConstStringString& GetOptions() { return m_OptionsByName; }
   }; // Config
-  
+
   class NoSuchOptionException : public DSSException {
   private:
     const string m_OptionName;
   public:
-    NoSuchOptionException(const string& _optionName) 
+    NoSuchOptionException(const string& _optionName)
     : DSSException( string("Item not found:") ),
       m_OptionName(_optionName)
-    {};
-    
-    ~NoSuchOptionException() throw() {};
-    
+    {}
+
+    ~NoSuchOptionException() throw() {}
+
     const string& GetOptionName() {
       return m_OptionName;
     } // GetOptionName
   }; // NoSuchOptionException
-  
+
 
 }
 
