@@ -32,6 +32,12 @@ namespace dss {
 
   //-------------------------------------------------- Event
 
+  typedef enum EventRaiseLocation {
+    erlZone,
+    erlDevice,
+    erlApartment
+  };
+
   class Event {
   private:
     string m_Name;
@@ -41,7 +47,12 @@ namespace dss {
     bool m_ContextSet;
     string m_Time;
     bool m_TimeSet;
+    EventRaiseLocation m_RaiseLocation;
+    Zone* m_RaisedAtZone;
+    DeviceReference* m_RaisedAtDevice;
   public:
+    Event(const string& _name, Zone* _context);
+    Event(const string& _name, DeviceReference* _ref);
     Event(const string& _name);
 
     const string& GetName() const { return m_Name; }
@@ -53,6 +64,9 @@ namespace dss {
     void SetLocation(const string& _value) { m_Location = _value; m_LocationSet = true; }
     void SetContext(const string& _value) { m_Context = _value; m_ContextSet = true; }
     void SetTime(const string& _value) { m_Time = _value; m_TimeSet = true; }
+
+    const Zone& GetRaisedAtZone() const;
+    const DeviceReference& GetRaisedAtDevice() const { return *m_RaisedAtDevice; }
   }; // Event
 
 
@@ -176,7 +190,7 @@ namespace dss {
     const string& GetName() const { return m_Name; }
     virtual void HandleEvent(Event& _event, const EventSubscription& _subscription) = 0;
 
-    virtual SubscriptionOptions* CreateOptionsFromXML(XMLNodeList& _node);
+    virtual SubscriptionOptions* CreateOptionsFromXML(XMLNodeList& _nodes);
   }; // EventInterpreterPlugin
 
 

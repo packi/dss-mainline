@@ -301,9 +301,9 @@ namespace dss {
         cout << "hw" << endl;
         // Note: At the moment we're discarding all but the "forced" frames. This is because the
         // firmware in the dSM returns gibberish in it's current state.
-        if(_force) {
+        //if(_force) {
         	m_DS485Controller.EnqueueFrame(_frame);
-        }
+        //}
       }
     }
   }

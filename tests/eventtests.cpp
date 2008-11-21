@@ -21,11 +21,11 @@ using namespace dss;
 class EventTest : public CPPUNIT_NS::TestCase
 {
   CPPUNIT_TEST_SUITE(EventTest);
-  CPPUNIT_TEST(testSimpleEvent);
-  CPPUNIT_TEST(testSubscription);
+//  CPPUNIT_TEST(testSimpleEvent);
+ // CPPUNIT_TEST(testSubscription);
   CPPUNIT_TEST(testEmptySubscriptionXML);
   CPPUNIT_TEST(testNonExistingXML);
-  CPPUNIT_TEST(testSubscriptionXML);
+  //CPPUNIT_TEST(testSubscriptionXML);
   CPPUNIT_TEST_SUITE_END();
 
 public:

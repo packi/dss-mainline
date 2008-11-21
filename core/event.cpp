@@ -10,6 +10,7 @@
 #include "base.h"
 #include "logger.h"
 #include "xmlwrapper.h"
+#include "dss.h"
 
 #include <set>
 #include <iostream>
@@ -70,6 +71,15 @@ namespace dss {
     return true;
   } // UnsetProperty
 
+  const Zone& Event::GetRaisedAtZone() const {
+    if(m_RaiseLocation == erlZone) {
+      return *m_RaisedAtZone;
+    } else if(m_RaiseLocation == erlDevice) {
+      return DSS::GetInstance()->GetApartment().GetZone(m_RaisedAtDevice->GetDevice().GetZoneID());
+    } else {
+      return DSS::GetInstance()->GetApartment().GetZone(0);
+    }
+  }
 
   //================================================== EventInterpreter
 
@@ -522,7 +532,7 @@ namespace dss {
     m_pInterpreter(_interpreter)
   { } // ctor
 
-  SubscriptionOptions* EventInterpreterPlugin::CreateOptionsFromXML(XMLNodeList& _node) {
+  SubscriptionOptions* EventInterpreterPlugin::CreateOptionsFromXML(XMLNodeList& _nodes) {
     return NULL;
   }
 
