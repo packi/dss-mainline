@@ -33,6 +33,11 @@ public:
   void tearDown(void) {}
 
 protected:
+
+  void testSetBuilder() {
+
+  } // testSetBuilder
+
   void testSimpleEvent(void) {
     EventQueue queue;
     EventRunner runner;

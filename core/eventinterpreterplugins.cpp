@@ -12,6 +12,7 @@
 #include "logger.h"
 #include "DS485Interface.h"
 #include "setbuilder.h"
+#include "dss.h"
 
 namespace dss {
 
@@ -52,6 +53,10 @@ namespace dss {
     string m_To;
     string m_Context;
   public:
+    SubscriptionOptionsDS485()
+    : m_ParameterIndex(-1), m_SceneIndex(-1)
+    { }
+
     void SetCommand(const DS485Command _value) { m_Command = _value; }
     DS485Command GetCommand() const { return m_Command; }
 
@@ -160,12 +165,31 @@ namespace dss {
     if(options != NULL) {
       DS485Command cmd = options->GetCommand();
 
+
+      // determine location
+      // if a location is given
+      //   evaluate relative to context
+      // else
+      //   send to context's parent-entity (zone)
+
       SetBuilder builder;
-      /*
-      Set to = builder.BuildSet()
+      Set to = DSS::GetInstance()->GetApartment().GetDevices();
+      if(_event.HasPropertySet(EventPropertyLocation)) {
+        to = builder.BuildSet(_event.GetPropertyByName(EventPropertyLocation), &_event.GetRaisedAtZone());
+      } else {
+        to = _event.GetRaisedAtZone().GetDevices();
+      }
+
       if(cmd == cmdCallScene || cmd == cmdSaveScene || cmd == cmdUndoScene) {
-        m_pInterface->SendCommand(cmd, to, options->GetScene());
-      }*/
+        m_pInterface->SendCommand(cmd, to, options->GetSceneIndex());
+      } else if(cmd == cmdIncreaseParam || cmd == cmdDecreaseParam ||
+                cmd == cmdIncreaseValue || cmd == cmdDecreaseValue ||
+                cmd == cmdStartDimUp || cmd == cmdStartDimDown || cmd == cmdStopDim)
+      {
+        m_pInterface->SendCommand(cmd, to, options->GetParameterIndex());
+      } else {
+        m_pInterface->SendCommand(cmd, to, 0);
+      }
     } else {
       Logger::GetInstance()->Log("EventInterpreterPluginDS485::HandleEvent: Options are not of type SubscriptionOptionsDS485, ignoring", lsError);
     }
