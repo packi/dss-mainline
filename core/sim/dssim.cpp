@@ -265,6 +265,7 @@ namespace dss {
         if(newDSID != NULL) {
           m_SimulatedDevices.push_back(newDSID);
           m_Zones[_zoneID].push_back(newDSID);
+          m_DeviceZoneMapping[newDSID] = _zoneID;
           // every device is contained in zone 0 (broadcast zone)
           if(_zoneID != 0) {
             m_Zones[0].push_back(newDSID);
@@ -716,6 +717,7 @@ namespace dss {
         // 9 toggles between on and off
         // click: 2 Scene(1) on, 8 Scene(0) off,
         //
+        int zoneID = m_DeviceZoneMapping[&_switch];
         if(_buttonNr == 1) {
           if(_kind == Click || _kind == TouchEnd) {
             m_ButtonToGroupMapping[&_switch] = GroupIDYellow;
@@ -737,38 +739,36 @@ namespace dss {
             }
           }
         } else if(_buttonNr == 2) {
-          // TODO: select correct zone
           if(_kind == Click) {
             //GroupCallScene(0, groupToControl, Scene1);
-            GroupIncValue(0, groupToControl, 1);
+            GroupIncValue(zoneID, groupToControl, 1);
           } else if(_kind == Touch) {
-            GroupStartDim(0, groupToControl, true, 0);
+            GroupStartDim(zoneID, groupToControl, true, 0);
           } else if(_kind == TouchEnd) {
-            GroupEndDim(0, groupToControl, 0);
+            GroupEndDim(zoneID, groupToControl, 0);
           }
         } else if(_buttonNr == 8) {
-          // TODO: select correct zone
           if(_kind == Click) {
 //            GroupCallScene(0, groupToControl, SceneOff);
-            GroupDecValue(0, groupToControl, 1);
+            GroupDecValue(zoneID, groupToControl, 1);
           } else if(_kind == Touch) {
-            GroupStartDim(0, groupToControl, false, 0);
+            GroupStartDim(zoneID, groupToControl, false, 0);
           } else if(_kind == TouchEnd) {
-            GroupEndDim(0, groupToControl, 0);
+            GroupEndDim(zoneID, groupToControl, 0);
           }
         } else if(_buttonNr == 4) {
           if(_kind == Click) {
-            GroupDecValue(0, groupToControl, 0);
+            GroupDecValue(zoneID, groupToControl, 0);
           }
         } else if(_buttonNr == 6) {
           if(_kind == Click) {
-            GroupIncValue(0, groupToControl, 0);
+            GroupIncValue(zoneID, groupToControl, 0);
           }
         } else if(_buttonNr == 5) {
           if(_kind == Click) {
-            GroupCallScene(0, groupToControl, Scene2);
+            GroupCallScene(zoneID, groupToControl, Scene2);
           } else if(_kind == Touch) {
-            GroupCallScene(0, groupToControl, SceneOff);
+            GroupCallScene(zoneID, groupToControl, SceneOff);
           }
         }
       } else if(_switch.GetNumberOfButtons() == 5) {

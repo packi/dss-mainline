@@ -56,6 +56,7 @@ namespace dss {
     DSIDFactory m_DSIDFactory;
     map<const DSIDInterface*, int> m_ButtonToGroupMapping;
     map<const DSIDInterface*, int> m_ButtonSubscriptionFlag;
+    map<const DSIDInterface*, int> m_DeviceZoneMapping;
   private:
     void LoadFromConfig();
     void LoadDevices(XMLNodeList& _nodes, const int _zoneID);
