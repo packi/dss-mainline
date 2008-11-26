@@ -741,7 +741,7 @@ int dss__Device_SetValue(struct soap *soap, int _token, unsigned long _deviceID,
   return SOAP_OK;
 }
 
-int dss__Device_CallScene(struct soap *soap, int _token, int _deviceID, int _sceneID, bool& result) {
+int dss__Device_CallScene(struct soap *soap, int _token, unsigned long _deviceID, int _sceneID, bool& result) {
   dss::Device device(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
   if(getResult != SOAP_OK) {
@@ -752,7 +752,7 @@ int dss__Device_CallScene(struct soap *soap, int _token, int _deviceID, int _sce
   return SOAP_OK;
 }
 
-int dss__Device_SaveScene(struct soap *soap, int _token, int _deviceID, int _sceneID, bool& result) {
+int dss__Device_SaveScene(struct soap *soap, int _token, unsigned long _deviceID, int _sceneID, bool& result) {
   dss::Device device(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
   if(getResult != SOAP_OK) {
@@ -763,7 +763,7 @@ int dss__Device_SaveScene(struct soap *soap, int _token, int _deviceID, int _sce
   return SOAP_OK;
 }
 
-int dss__Device_UndoScene(struct soap *soap, int _token, int _deviceID, int _sceneID, bool& result) {
+int dss__Device_UndoScene(struct soap *soap, int _token, unsigned long _deviceID, int _sceneID, bool& result) {
   dss::Device device(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
   if(getResult != SOAP_OK) {

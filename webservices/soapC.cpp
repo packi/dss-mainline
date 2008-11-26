@@ -7,7 +7,7 @@
 
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2008-10-15 12:33:28 GMT")
+SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2008-11-26 10:23:55 GMT")
 
 
 #ifndef WITH_NOGLOBAL
@@ -277,6 +277,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_dss__Device_GetName(soap, NULL, NULL, "dss:Device-GetName");
 	case SOAP_TYPE_dss__Device_GetNameResponse:
 		return soap_in_dss__Device_GetNameResponse(soap, NULL, NULL, "dss:Device-GetNameResponse");
+	case SOAP_TYPE_dss__Device_SaveScene:
+		return soap_in_dss__Device_SaveScene(soap, NULL, NULL, "dss:Device-SaveScene");
+	case SOAP_TYPE_dss__Device_SaveSceneResponse:
+		return soap_in_dss__Device_SaveSceneResponse(soap, NULL, NULL, "dss:Device-SaveSceneResponse");
+	case SOAP_TYPE_dss__Device_CallScene:
+		return soap_in_dss__Device_CallScene(soap, NULL, NULL, "dss:Device-CallScene");
+	case SOAP_TYPE_dss__Device_CallSceneResponse:
+		return soap_in_dss__Device_CallSceneResponse(soap, NULL, NULL, "dss:Device-CallSceneResponse");
 	case SOAP_TYPE_dss__Device_GetValue:
 		return soap_in_dss__Device_GetValue(soap, NULL, NULL, "dss:Device-GetValue");
 	case SOAP_TYPE_dss__Device_GetValueResponse:
@@ -317,42 +325,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_dss__Device_TurnOn(soap, NULL, NULL, "dss:Device-TurnOn");
 	case SOAP_TYPE_dss__Device_TurnOnResponse:
 		return soap_in_dss__Device_TurnOnResponse(soap, NULL, NULL, "dss:Device-TurnOnResponse");
-	case SOAP_TYPE_dss__Set_SetValue:
-		return soap_in_dss__Set_SetValue(soap, NULL, NULL, "dss:Set-SetValue");
-	case SOAP_TYPE_dss__Set_SetValueResponse:
-		return soap_in_dss__Set_SetValueResponse(soap, NULL, NULL, "dss:Set-SetValueResponse");
-	case SOAP_TYPE_dss__Set_EndDim:
-		return soap_in_dss__Set_EndDim(soap, NULL, NULL, "dss:Set-EndDim");
-	case SOAP_TYPE_dss__Set_EndDimResponse:
-		return soap_in_dss__Set_EndDimResponse(soap, NULL, NULL, "dss:Set-EndDimResponse");
-	case SOAP_TYPE_dss__Set_StartDim:
-		return soap_in_dss__Set_StartDim(soap, NULL, NULL, "dss:Set-StartDim");
-	case SOAP_TYPE_dss__Set_StartDimResponse:
-		return soap_in_dss__Set_StartDimResponse(soap, NULL, NULL, "dss:Set-StartDimResponse");
-	case SOAP_TYPE_dss__Set_Disable:
-		return soap_in_dss__Set_Disable(soap, NULL, NULL, "dss:Set-Disable");
-	case SOAP_TYPE_dss__Set_DisableResponse:
-		return soap_in_dss__Set_DisableResponse(soap, NULL, NULL, "dss:Set-DisableResponse");
-	case SOAP_TYPE_dss__Set_Enable:
-		return soap_in_dss__Set_Enable(soap, NULL, NULL, "dss:Set-Enable");
-	case SOAP_TYPE_dss__Set_EnableResponse:
-		return soap_in_dss__Set_EnableResponse(soap, NULL, NULL, "dss:Set-EnableResponse");
-	case SOAP_TYPE_dss__Set_DecreaseValue:
-		return soap_in_dss__Set_DecreaseValue(soap, NULL, NULL, "dss:Set-DecreaseValue");
-	case SOAP_TYPE_dss__Set_DecreaseValueResponse:
-		return soap_in_dss__Set_DecreaseValueResponse(soap, NULL, NULL, "dss:Set-DecreaseValueResponse");
-	case SOAP_TYPE_dss__Set_IncreaseValue:
-		return soap_in_dss__Set_IncreaseValue(soap, NULL, NULL, "dss:Set-IncreaseValue");
-	case SOAP_TYPE_dss__Set_IncreaseValueResponse:
-		return soap_in_dss__Set_IncreaseValueResponse(soap, NULL, NULL, "dss:Set-IncreaseValueResponse");
-	case SOAP_TYPE_dss__Set_TurnOff:
-		return soap_in_dss__Set_TurnOff(soap, NULL, NULL, "dss:Set-TurnOff");
-	case SOAP_TYPE_dss__Set_TurnOffResponse:
-		return soap_in_dss__Set_TurnOffResponse(soap, NULL, NULL, "dss:Set-TurnOffResponse");
-	case SOAP_TYPE_dss__Set_TurnOn:
-		return soap_in_dss__Set_TurnOn(soap, NULL, NULL, "dss:Set-TurnOn");
-	case SOAP_TYPE_dss__Set_TurnOnResponse:
-		return soap_in_dss__Set_TurnOnResponse(soap, NULL, NULL, "dss:Set-TurnOnResponse");
+	case SOAP_TYPE_dss__Group_SaveScene:
+		return soap_in_dss__Group_SaveScene(soap, NULL, NULL, "dss:Group-SaveScene");
+	case SOAP_TYPE_dss__Group_SaveSceneResponse:
+		return soap_in_dss__Group_SaveSceneResponse(soap, NULL, NULL, "dss:Group-SaveSceneResponse");
+	case SOAP_TYPE_dss__Group_CallScene:
+		return soap_in_dss__Group_CallScene(soap, NULL, NULL, "dss:Group-CallScene");
+	case SOAP_TYPE_dss__Group_CallSceneResponse:
+		return soap_in_dss__Group_CallSceneResponse(soap, NULL, NULL, "dss:Group-CallSceneResponse");
 	case SOAP_TYPE_dss__Group_SetValue:
 		return soap_in_dss__Group_SetValue(soap, NULL, NULL, "dss:Group-SetValue");
 	case SOAP_TYPE_dss__Group_SetValueResponse:
@@ -389,6 +369,50 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_dss__Group_TurnOn(soap, NULL, NULL, "dss:Group-TurnOn");
 	case SOAP_TYPE_dss__Group_TurnOnResponse:
 		return soap_in_dss__Group_TurnOnResponse(soap, NULL, NULL, "dss:Group-TurnOnResponse");
+	case SOAP_TYPE_dss__Set_SaveScene:
+		return soap_in_dss__Set_SaveScene(soap, NULL, NULL, "dss:Set-SaveScene");
+	case SOAP_TYPE_dss__Set_SaveSceneResponse:
+		return soap_in_dss__Set_SaveSceneResponse(soap, NULL, NULL, "dss:Set-SaveSceneResponse");
+	case SOAP_TYPE_dss__Set_CallScene:
+		return soap_in_dss__Set_CallScene(soap, NULL, NULL, "dss:Set-CallScene");
+	case SOAP_TYPE_dss__Set_CallSceneResponse:
+		return soap_in_dss__Set_CallSceneResponse(soap, NULL, NULL, "dss:Set-CallSceneResponse");
+	case SOAP_TYPE_dss__Set_SetValue:
+		return soap_in_dss__Set_SetValue(soap, NULL, NULL, "dss:Set-SetValue");
+	case SOAP_TYPE_dss__Set_SetValueResponse:
+		return soap_in_dss__Set_SetValueResponse(soap, NULL, NULL, "dss:Set-SetValueResponse");
+	case SOAP_TYPE_dss__Set_EndDim:
+		return soap_in_dss__Set_EndDim(soap, NULL, NULL, "dss:Set-EndDim");
+	case SOAP_TYPE_dss__Set_EndDimResponse:
+		return soap_in_dss__Set_EndDimResponse(soap, NULL, NULL, "dss:Set-EndDimResponse");
+	case SOAP_TYPE_dss__Set_StartDim:
+		return soap_in_dss__Set_StartDim(soap, NULL, NULL, "dss:Set-StartDim");
+	case SOAP_TYPE_dss__Set_StartDimResponse:
+		return soap_in_dss__Set_StartDimResponse(soap, NULL, NULL, "dss:Set-StartDimResponse");
+	case SOAP_TYPE_dss__Set_Disable:
+		return soap_in_dss__Set_Disable(soap, NULL, NULL, "dss:Set-Disable");
+	case SOAP_TYPE_dss__Set_DisableResponse:
+		return soap_in_dss__Set_DisableResponse(soap, NULL, NULL, "dss:Set-DisableResponse");
+	case SOAP_TYPE_dss__Set_Enable:
+		return soap_in_dss__Set_Enable(soap, NULL, NULL, "dss:Set-Enable");
+	case SOAP_TYPE_dss__Set_EnableResponse:
+		return soap_in_dss__Set_EnableResponse(soap, NULL, NULL, "dss:Set-EnableResponse");
+	case SOAP_TYPE_dss__Set_DecreaseValue:
+		return soap_in_dss__Set_DecreaseValue(soap, NULL, NULL, "dss:Set-DecreaseValue");
+	case SOAP_TYPE_dss__Set_DecreaseValueResponse:
+		return soap_in_dss__Set_DecreaseValueResponse(soap, NULL, NULL, "dss:Set-DecreaseValueResponse");
+	case SOAP_TYPE_dss__Set_IncreaseValue:
+		return soap_in_dss__Set_IncreaseValue(soap, NULL, NULL, "dss:Set-IncreaseValue");
+	case SOAP_TYPE_dss__Set_IncreaseValueResponse:
+		return soap_in_dss__Set_IncreaseValueResponse(soap, NULL, NULL, "dss:Set-IncreaseValueResponse");
+	case SOAP_TYPE_dss__Set_TurnOff:
+		return soap_in_dss__Set_TurnOff(soap, NULL, NULL, "dss:Set-TurnOff");
+	case SOAP_TYPE_dss__Set_TurnOffResponse:
+		return soap_in_dss__Set_TurnOffResponse(soap, NULL, NULL, "dss:Set-TurnOffResponse");
+	case SOAP_TYPE_dss__Set_TurnOn:
+		return soap_in_dss__Set_TurnOn(soap, NULL, NULL, "dss:Set-TurnOn");
+	case SOAP_TYPE_dss__Set_TurnOnResponse:
+		return soap_in_dss__Set_TurnOnResponse(soap, NULL, NULL, "dss:Set-TurnOnResponse");
 	case SOAP_TYPE_dss__Apartment_GetZoneIDs:
 		return soap_in_dss__Apartment_GetZoneIDs(soap, NULL, NULL, "dss:Apartment-GetZoneIDs");
 	case SOAP_TYPE_dss__Apartment_GetZoneIDsResponse:
@@ -724,6 +748,22 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		{	*type = SOAP_TYPE_dss__Device_GetNameResponse;
 			return soap_in_dss__Device_GetNameResponse(soap, NULL, NULL, NULL);
 		}
+		if (!soap_match_tag(soap, t, "dss:Device-SaveScene"))
+		{	*type = SOAP_TYPE_dss__Device_SaveScene;
+			return soap_in_dss__Device_SaveScene(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Device-SaveSceneResponse"))
+		{	*type = SOAP_TYPE_dss__Device_SaveSceneResponse;
+			return soap_in_dss__Device_SaveSceneResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Device-CallScene"))
+		{	*type = SOAP_TYPE_dss__Device_CallScene;
+			return soap_in_dss__Device_CallScene(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Device-CallSceneResponse"))
+		{	*type = SOAP_TYPE_dss__Device_CallSceneResponse;
+			return soap_in_dss__Device_CallSceneResponse(soap, NULL, NULL, NULL);
+		}
 		if (!soap_match_tag(soap, t, "dss:Device-GetValue"))
 		{	*type = SOAP_TYPE_dss__Device_GetValue;
 			return soap_in_dss__Device_GetValue(soap, NULL, NULL, NULL);
@@ -804,77 +844,21 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		{	*type = SOAP_TYPE_dss__Device_TurnOnResponse;
 			return soap_in_dss__Device_TurnOnResponse(soap, NULL, NULL, NULL);
 		}
-		if (!soap_match_tag(soap, t, "dss:Set-SetValue"))
-		{	*type = SOAP_TYPE_dss__Set_SetValue;
-			return soap_in_dss__Set_SetValue(soap, NULL, NULL, NULL);
+		if (!soap_match_tag(soap, t, "dss:Group-SaveScene"))
+		{	*type = SOAP_TYPE_dss__Group_SaveScene;
+			return soap_in_dss__Group_SaveScene(soap, NULL, NULL, NULL);
 		}
-		if (!soap_match_tag(soap, t, "dss:Set-SetValueResponse"))
-		{	*type = SOAP_TYPE_dss__Set_SetValueResponse;
-			return soap_in_dss__Set_SetValueResponse(soap, NULL, NULL, NULL);
+		if (!soap_match_tag(soap, t, "dss:Group-SaveSceneResponse"))
+		{	*type = SOAP_TYPE_dss__Group_SaveSceneResponse;
+			return soap_in_dss__Group_SaveSceneResponse(soap, NULL, NULL, NULL);
 		}
-		if (!soap_match_tag(soap, t, "dss:Set-EndDim"))
-		{	*type = SOAP_TYPE_dss__Set_EndDim;
-			return soap_in_dss__Set_EndDim(soap, NULL, NULL, NULL);
+		if (!soap_match_tag(soap, t, "dss:Group-CallScene"))
+		{	*type = SOAP_TYPE_dss__Group_CallScene;
+			return soap_in_dss__Group_CallScene(soap, NULL, NULL, NULL);
 		}
-		if (!soap_match_tag(soap, t, "dss:Set-EndDimResponse"))
-		{	*type = SOAP_TYPE_dss__Set_EndDimResponse;
-			return soap_in_dss__Set_EndDimResponse(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Set-StartDim"))
-		{	*type = SOAP_TYPE_dss__Set_StartDim;
-			return soap_in_dss__Set_StartDim(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Set-StartDimResponse"))
-		{	*type = SOAP_TYPE_dss__Set_StartDimResponse;
-			return soap_in_dss__Set_StartDimResponse(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Set-Disable"))
-		{	*type = SOAP_TYPE_dss__Set_Disable;
-			return soap_in_dss__Set_Disable(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Set-DisableResponse"))
-		{	*type = SOAP_TYPE_dss__Set_DisableResponse;
-			return soap_in_dss__Set_DisableResponse(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Set-Enable"))
-		{	*type = SOAP_TYPE_dss__Set_Enable;
-			return soap_in_dss__Set_Enable(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Set-EnableResponse"))
-		{	*type = SOAP_TYPE_dss__Set_EnableResponse;
-			return soap_in_dss__Set_EnableResponse(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Set-DecreaseValue"))
-		{	*type = SOAP_TYPE_dss__Set_DecreaseValue;
-			return soap_in_dss__Set_DecreaseValue(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Set-DecreaseValueResponse"))
-		{	*type = SOAP_TYPE_dss__Set_DecreaseValueResponse;
-			return soap_in_dss__Set_DecreaseValueResponse(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Set-IncreaseValue"))
-		{	*type = SOAP_TYPE_dss__Set_IncreaseValue;
-			return soap_in_dss__Set_IncreaseValue(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Set-IncreaseValueResponse"))
-		{	*type = SOAP_TYPE_dss__Set_IncreaseValueResponse;
-			return soap_in_dss__Set_IncreaseValueResponse(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Set-TurnOff"))
-		{	*type = SOAP_TYPE_dss__Set_TurnOff;
-			return soap_in_dss__Set_TurnOff(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Set-TurnOffResponse"))
-		{	*type = SOAP_TYPE_dss__Set_TurnOffResponse;
-			return soap_in_dss__Set_TurnOffResponse(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Set-TurnOn"))
-		{	*type = SOAP_TYPE_dss__Set_TurnOn;
-			return soap_in_dss__Set_TurnOn(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Set-TurnOnResponse"))
-		{	*type = SOAP_TYPE_dss__Set_TurnOnResponse;
-			return soap_in_dss__Set_TurnOnResponse(soap, NULL, NULL, NULL);
+		if (!soap_match_tag(soap, t, "dss:Group-CallSceneResponse"))
+		{	*type = SOAP_TYPE_dss__Group_CallSceneResponse;
+			return soap_in_dss__Group_CallSceneResponse(soap, NULL, NULL, NULL);
 		}
 		if (!soap_match_tag(soap, t, "dss:Group-SetValue"))
 		{	*type = SOAP_TYPE_dss__Group_SetValue;
@@ -947,6 +931,94 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		if (!soap_match_tag(soap, t, "dss:Group-TurnOnResponse"))
 		{	*type = SOAP_TYPE_dss__Group_TurnOnResponse;
 			return soap_in_dss__Group_TurnOnResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-SaveScene"))
+		{	*type = SOAP_TYPE_dss__Set_SaveScene;
+			return soap_in_dss__Set_SaveScene(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-SaveSceneResponse"))
+		{	*type = SOAP_TYPE_dss__Set_SaveSceneResponse;
+			return soap_in_dss__Set_SaveSceneResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-CallScene"))
+		{	*type = SOAP_TYPE_dss__Set_CallScene;
+			return soap_in_dss__Set_CallScene(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-CallSceneResponse"))
+		{	*type = SOAP_TYPE_dss__Set_CallSceneResponse;
+			return soap_in_dss__Set_CallSceneResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-SetValue"))
+		{	*type = SOAP_TYPE_dss__Set_SetValue;
+			return soap_in_dss__Set_SetValue(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-SetValueResponse"))
+		{	*type = SOAP_TYPE_dss__Set_SetValueResponse;
+			return soap_in_dss__Set_SetValueResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-EndDim"))
+		{	*type = SOAP_TYPE_dss__Set_EndDim;
+			return soap_in_dss__Set_EndDim(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-EndDimResponse"))
+		{	*type = SOAP_TYPE_dss__Set_EndDimResponse;
+			return soap_in_dss__Set_EndDimResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-StartDim"))
+		{	*type = SOAP_TYPE_dss__Set_StartDim;
+			return soap_in_dss__Set_StartDim(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-StartDimResponse"))
+		{	*type = SOAP_TYPE_dss__Set_StartDimResponse;
+			return soap_in_dss__Set_StartDimResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-Disable"))
+		{	*type = SOAP_TYPE_dss__Set_Disable;
+			return soap_in_dss__Set_Disable(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-DisableResponse"))
+		{	*type = SOAP_TYPE_dss__Set_DisableResponse;
+			return soap_in_dss__Set_DisableResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-Enable"))
+		{	*type = SOAP_TYPE_dss__Set_Enable;
+			return soap_in_dss__Set_Enable(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-EnableResponse"))
+		{	*type = SOAP_TYPE_dss__Set_EnableResponse;
+			return soap_in_dss__Set_EnableResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-DecreaseValue"))
+		{	*type = SOAP_TYPE_dss__Set_DecreaseValue;
+			return soap_in_dss__Set_DecreaseValue(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-DecreaseValueResponse"))
+		{	*type = SOAP_TYPE_dss__Set_DecreaseValueResponse;
+			return soap_in_dss__Set_DecreaseValueResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-IncreaseValue"))
+		{	*type = SOAP_TYPE_dss__Set_IncreaseValue;
+			return soap_in_dss__Set_IncreaseValue(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-IncreaseValueResponse"))
+		{	*type = SOAP_TYPE_dss__Set_IncreaseValueResponse;
+			return soap_in_dss__Set_IncreaseValueResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-TurnOff"))
+		{	*type = SOAP_TYPE_dss__Set_TurnOff;
+			return soap_in_dss__Set_TurnOff(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-TurnOffResponse"))
+		{	*type = SOAP_TYPE_dss__Set_TurnOffResponse;
+			return soap_in_dss__Set_TurnOffResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-TurnOn"))
+		{	*type = SOAP_TYPE_dss__Set_TurnOn;
+			return soap_in_dss__Set_TurnOn(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Set-TurnOnResponse"))
+		{	*type = SOAP_TYPE_dss__Set_TurnOnResponse;
+			return soap_in_dss__Set_TurnOnResponse(soap, NULL, NULL, NULL);
 		}
 		if (!soap_match_tag(soap, t, "dss:Apartment-GetZoneIDs"))
 		{	*type = SOAP_TYPE_dss__Apartment_GetZoneIDs;
@@ -1300,6 +1372,14 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_dss__Device_GetName(soap, tag, id, (const struct dss__Device_GetName *)ptr, "dss:Device-GetName");
 	case SOAP_TYPE_dss__Device_GetNameResponse:
 		return soap_out_dss__Device_GetNameResponse(soap, tag, id, (const struct dss__Device_GetNameResponse *)ptr, "dss:Device-GetNameResponse");
+	case SOAP_TYPE_dss__Device_SaveScene:
+		return soap_out_dss__Device_SaveScene(soap, tag, id, (const struct dss__Device_SaveScene *)ptr, "dss:Device-SaveScene");
+	case SOAP_TYPE_dss__Device_SaveSceneResponse:
+		return soap_out_dss__Device_SaveSceneResponse(soap, tag, id, (const struct dss__Device_SaveSceneResponse *)ptr, "dss:Device-SaveSceneResponse");
+	case SOAP_TYPE_dss__Device_CallScene:
+		return soap_out_dss__Device_CallScene(soap, tag, id, (const struct dss__Device_CallScene *)ptr, "dss:Device-CallScene");
+	case SOAP_TYPE_dss__Device_CallSceneResponse:
+		return soap_out_dss__Device_CallSceneResponse(soap, tag, id, (const struct dss__Device_CallSceneResponse *)ptr, "dss:Device-CallSceneResponse");
 	case SOAP_TYPE_dss__Device_GetValue:
 		return soap_out_dss__Device_GetValue(soap, tag, id, (const struct dss__Device_GetValue *)ptr, "dss:Device-GetValue");
 	case SOAP_TYPE_dss__Device_GetValueResponse:
@@ -1340,42 +1420,14 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_dss__Device_TurnOn(soap, tag, id, (const struct dss__Device_TurnOn *)ptr, "dss:Device-TurnOn");
 	case SOAP_TYPE_dss__Device_TurnOnResponse:
 		return soap_out_dss__Device_TurnOnResponse(soap, tag, id, (const struct dss__Device_TurnOnResponse *)ptr, "dss:Device-TurnOnResponse");
-	case SOAP_TYPE_dss__Set_SetValue:
-		return soap_out_dss__Set_SetValue(soap, tag, id, (const struct dss__Set_SetValue *)ptr, "dss:Set-SetValue");
-	case SOAP_TYPE_dss__Set_SetValueResponse:
-		return soap_out_dss__Set_SetValueResponse(soap, tag, id, (const struct dss__Set_SetValueResponse *)ptr, "dss:Set-SetValueResponse");
-	case SOAP_TYPE_dss__Set_EndDim:
-		return soap_out_dss__Set_EndDim(soap, tag, id, (const struct dss__Set_EndDim *)ptr, "dss:Set-EndDim");
-	case SOAP_TYPE_dss__Set_EndDimResponse:
-		return soap_out_dss__Set_EndDimResponse(soap, tag, id, (const struct dss__Set_EndDimResponse *)ptr, "dss:Set-EndDimResponse");
-	case SOAP_TYPE_dss__Set_StartDim:
-		return soap_out_dss__Set_StartDim(soap, tag, id, (const struct dss__Set_StartDim *)ptr, "dss:Set-StartDim");
-	case SOAP_TYPE_dss__Set_StartDimResponse:
-		return soap_out_dss__Set_StartDimResponse(soap, tag, id, (const struct dss__Set_StartDimResponse *)ptr, "dss:Set-StartDimResponse");
-	case SOAP_TYPE_dss__Set_Disable:
-		return soap_out_dss__Set_Disable(soap, tag, id, (const struct dss__Set_Disable *)ptr, "dss:Set-Disable");
-	case SOAP_TYPE_dss__Set_DisableResponse:
-		return soap_out_dss__Set_DisableResponse(soap, tag, id, (const struct dss__Set_DisableResponse *)ptr, "dss:Set-DisableResponse");
-	case SOAP_TYPE_dss__Set_Enable:
-		return soap_out_dss__Set_Enable(soap, tag, id, (const struct dss__Set_Enable *)ptr, "dss:Set-Enable");
-	case SOAP_TYPE_dss__Set_EnableResponse:
-		return soap_out_dss__Set_EnableResponse(soap, tag, id, (const struct dss__Set_EnableResponse *)ptr, "dss:Set-EnableResponse");
-	case SOAP_TYPE_dss__Set_DecreaseValue:
-		return soap_out_dss__Set_DecreaseValue(soap, tag, id, (const struct dss__Set_DecreaseValue *)ptr, "dss:Set-DecreaseValue");
-	case SOAP_TYPE_dss__Set_DecreaseValueResponse:
-		return soap_out_dss__Set_DecreaseValueResponse(soap, tag, id, (const struct dss__Set_DecreaseValueResponse *)ptr, "dss:Set-DecreaseValueResponse");
-	case SOAP_TYPE_dss__Set_IncreaseValue:
-		return soap_out_dss__Set_IncreaseValue(soap, tag, id, (const struct dss__Set_IncreaseValue *)ptr, "dss:Set-IncreaseValue");
-	case SOAP_TYPE_dss__Set_IncreaseValueResponse:
-		return soap_out_dss__Set_IncreaseValueResponse(soap, tag, id, (const struct dss__Set_IncreaseValueResponse *)ptr, "dss:Set-IncreaseValueResponse");
-	case SOAP_TYPE_dss__Set_TurnOff:
-		return soap_out_dss__Set_TurnOff(soap, tag, id, (const struct dss__Set_TurnOff *)ptr, "dss:Set-TurnOff");
-	case SOAP_TYPE_dss__Set_TurnOffResponse:
-		return soap_out_dss__Set_TurnOffResponse(soap, tag, id, (const struct dss__Set_TurnOffResponse *)ptr, "dss:Set-TurnOffResponse");
-	case SOAP_TYPE_dss__Set_TurnOn:
-		return soap_out_dss__Set_TurnOn(soap, tag, id, (const struct dss__Set_TurnOn *)ptr, "dss:Set-TurnOn");
-	case SOAP_TYPE_dss__Set_TurnOnResponse:
-		return soap_out_dss__Set_TurnOnResponse(soap, tag, id, (const struct dss__Set_TurnOnResponse *)ptr, "dss:Set-TurnOnResponse");
+	case SOAP_TYPE_dss__Group_SaveScene:
+		return soap_out_dss__Group_SaveScene(soap, tag, id, (const struct dss__Group_SaveScene *)ptr, "dss:Group-SaveScene");
+	case SOAP_TYPE_dss__Group_SaveSceneResponse:
+		return soap_out_dss__Group_SaveSceneResponse(soap, tag, id, (const struct dss__Group_SaveSceneResponse *)ptr, "dss:Group-SaveSceneResponse");
+	case SOAP_TYPE_dss__Group_CallScene:
+		return soap_out_dss__Group_CallScene(soap, tag, id, (const struct dss__Group_CallScene *)ptr, "dss:Group-CallScene");
+	case SOAP_TYPE_dss__Group_CallSceneResponse:
+		return soap_out_dss__Group_CallSceneResponse(soap, tag, id, (const struct dss__Group_CallSceneResponse *)ptr, "dss:Group-CallSceneResponse");
 	case SOAP_TYPE_dss__Group_SetValue:
 		return soap_out_dss__Group_SetValue(soap, tag, id, (const struct dss__Group_SetValue *)ptr, "dss:Group-SetValue");
 	case SOAP_TYPE_dss__Group_SetValueResponse:
@@ -1412,6 +1464,50 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_dss__Group_TurnOn(soap, tag, id, (const struct dss__Group_TurnOn *)ptr, "dss:Group-TurnOn");
 	case SOAP_TYPE_dss__Group_TurnOnResponse:
 		return soap_out_dss__Group_TurnOnResponse(soap, tag, id, (const struct dss__Group_TurnOnResponse *)ptr, "dss:Group-TurnOnResponse");
+	case SOAP_TYPE_dss__Set_SaveScene:
+		return soap_out_dss__Set_SaveScene(soap, tag, id, (const struct dss__Set_SaveScene *)ptr, "dss:Set-SaveScene");
+	case SOAP_TYPE_dss__Set_SaveSceneResponse:
+		return soap_out_dss__Set_SaveSceneResponse(soap, tag, id, (const struct dss__Set_SaveSceneResponse *)ptr, "dss:Set-SaveSceneResponse");
+	case SOAP_TYPE_dss__Set_CallScene:
+		return soap_out_dss__Set_CallScene(soap, tag, id, (const struct dss__Set_CallScene *)ptr, "dss:Set-CallScene");
+	case SOAP_TYPE_dss__Set_CallSceneResponse:
+		return soap_out_dss__Set_CallSceneResponse(soap, tag, id, (const struct dss__Set_CallSceneResponse *)ptr, "dss:Set-CallSceneResponse");
+	case SOAP_TYPE_dss__Set_SetValue:
+		return soap_out_dss__Set_SetValue(soap, tag, id, (const struct dss__Set_SetValue *)ptr, "dss:Set-SetValue");
+	case SOAP_TYPE_dss__Set_SetValueResponse:
+		return soap_out_dss__Set_SetValueResponse(soap, tag, id, (const struct dss__Set_SetValueResponse *)ptr, "dss:Set-SetValueResponse");
+	case SOAP_TYPE_dss__Set_EndDim:
+		return soap_out_dss__Set_EndDim(soap, tag, id, (const struct dss__Set_EndDim *)ptr, "dss:Set-EndDim");
+	case SOAP_TYPE_dss__Set_EndDimResponse:
+		return soap_out_dss__Set_EndDimResponse(soap, tag, id, (const struct dss__Set_EndDimResponse *)ptr, "dss:Set-EndDimResponse");
+	case SOAP_TYPE_dss__Set_StartDim:
+		return soap_out_dss__Set_StartDim(soap, tag, id, (const struct dss__Set_StartDim *)ptr, "dss:Set-StartDim");
+	case SOAP_TYPE_dss__Set_StartDimResponse:
+		return soap_out_dss__Set_StartDimResponse(soap, tag, id, (const struct dss__Set_StartDimResponse *)ptr, "dss:Set-StartDimResponse");
+	case SOAP_TYPE_dss__Set_Disable:
+		return soap_out_dss__Set_Disable(soap, tag, id, (const struct dss__Set_Disable *)ptr, "dss:Set-Disable");
+	case SOAP_TYPE_dss__Set_DisableResponse:
+		return soap_out_dss__Set_DisableResponse(soap, tag, id, (const struct dss__Set_DisableResponse *)ptr, "dss:Set-DisableResponse");
+	case SOAP_TYPE_dss__Set_Enable:
+		return soap_out_dss__Set_Enable(soap, tag, id, (const struct dss__Set_Enable *)ptr, "dss:Set-Enable");
+	case SOAP_TYPE_dss__Set_EnableResponse:
+		return soap_out_dss__Set_EnableResponse(soap, tag, id, (const struct dss__Set_EnableResponse *)ptr, "dss:Set-EnableResponse");
+	case SOAP_TYPE_dss__Set_DecreaseValue:
+		return soap_out_dss__Set_DecreaseValue(soap, tag, id, (const struct dss__Set_DecreaseValue *)ptr, "dss:Set-DecreaseValue");
+	case SOAP_TYPE_dss__Set_DecreaseValueResponse:
+		return soap_out_dss__Set_DecreaseValueResponse(soap, tag, id, (const struct dss__Set_DecreaseValueResponse *)ptr, "dss:Set-DecreaseValueResponse");
+	case SOAP_TYPE_dss__Set_IncreaseValue:
+		return soap_out_dss__Set_IncreaseValue(soap, tag, id, (const struct dss__Set_IncreaseValue *)ptr, "dss:Set-IncreaseValue");
+	case SOAP_TYPE_dss__Set_IncreaseValueResponse:
+		return soap_out_dss__Set_IncreaseValueResponse(soap, tag, id, (const struct dss__Set_IncreaseValueResponse *)ptr, "dss:Set-IncreaseValueResponse");
+	case SOAP_TYPE_dss__Set_TurnOff:
+		return soap_out_dss__Set_TurnOff(soap, tag, id, (const struct dss__Set_TurnOff *)ptr, "dss:Set-TurnOff");
+	case SOAP_TYPE_dss__Set_TurnOffResponse:
+		return soap_out_dss__Set_TurnOffResponse(soap, tag, id, (const struct dss__Set_TurnOffResponse *)ptr, "dss:Set-TurnOffResponse");
+	case SOAP_TYPE_dss__Set_TurnOn:
+		return soap_out_dss__Set_TurnOn(soap, tag, id, (const struct dss__Set_TurnOn *)ptr, "dss:Set-TurnOn");
+	case SOAP_TYPE_dss__Set_TurnOnResponse:
+		return soap_out_dss__Set_TurnOnResponse(soap, tag, id, (const struct dss__Set_TurnOnResponse *)ptr, "dss:Set-TurnOnResponse");
 	case SOAP_TYPE_dss__Apartment_GetZoneIDs:
 		return soap_out_dss__Apartment_GetZoneIDs(soap, tag, id, (const struct dss__Apartment_GetZoneIDs *)ptr, "dss:Apartment-GetZoneIDs");
 	case SOAP_TYPE_dss__Apartment_GetZoneIDsResponse:
@@ -1676,6 +1772,18 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 	case SOAP_TYPE_dss__Device_GetNameResponse:
 		soap_serialize_dss__Device_GetNameResponse(soap, (const struct dss__Device_GetNameResponse *)ptr);
 		break;
+	case SOAP_TYPE_dss__Device_SaveScene:
+		soap_serialize_dss__Device_SaveScene(soap, (const struct dss__Device_SaveScene *)ptr);
+		break;
+	case SOAP_TYPE_dss__Device_SaveSceneResponse:
+		soap_serialize_dss__Device_SaveSceneResponse(soap, (const struct dss__Device_SaveSceneResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__Device_CallScene:
+		soap_serialize_dss__Device_CallScene(soap, (const struct dss__Device_CallScene *)ptr);
+		break;
+	case SOAP_TYPE_dss__Device_CallSceneResponse:
+		soap_serialize_dss__Device_CallSceneResponse(soap, (const struct dss__Device_CallSceneResponse *)ptr);
+		break;
 	case SOAP_TYPE_dss__Device_GetValue:
 		soap_serialize_dss__Device_GetValue(soap, (const struct dss__Device_GetValue *)ptr);
 		break;
@@ -1736,59 +1844,17 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 	case SOAP_TYPE_dss__Device_TurnOnResponse:
 		soap_serialize_dss__Device_TurnOnResponse(soap, (const struct dss__Device_TurnOnResponse *)ptr);
 		break;
-	case SOAP_TYPE_dss__Set_SetValue:
-		soap_serialize_dss__Set_SetValue(soap, (const struct dss__Set_SetValue *)ptr);
+	case SOAP_TYPE_dss__Group_SaveScene:
+		soap_serialize_dss__Group_SaveScene(soap, (const struct dss__Group_SaveScene *)ptr);
 		break;
-	case SOAP_TYPE_dss__Set_SetValueResponse:
-		soap_serialize_dss__Set_SetValueResponse(soap, (const struct dss__Set_SetValueResponse *)ptr);
+	case SOAP_TYPE_dss__Group_SaveSceneResponse:
+		soap_serialize_dss__Group_SaveSceneResponse(soap, (const struct dss__Group_SaveSceneResponse *)ptr);
 		break;
-	case SOAP_TYPE_dss__Set_EndDim:
-		soap_serialize_dss__Set_EndDim(soap, (const struct dss__Set_EndDim *)ptr);
+	case SOAP_TYPE_dss__Group_CallScene:
+		soap_serialize_dss__Group_CallScene(soap, (const struct dss__Group_CallScene *)ptr);
 		break;
-	case SOAP_TYPE_dss__Set_EndDimResponse:
-		soap_serialize_dss__Set_EndDimResponse(soap, (const struct dss__Set_EndDimResponse *)ptr);
-		break;
-	case SOAP_TYPE_dss__Set_StartDim:
-		soap_serialize_dss__Set_StartDim(soap, (const struct dss__Set_StartDim *)ptr);
-		break;
-	case SOAP_TYPE_dss__Set_StartDimResponse:
-		soap_serialize_dss__Set_StartDimResponse(soap, (const struct dss__Set_StartDimResponse *)ptr);
-		break;
-	case SOAP_TYPE_dss__Set_Disable:
-		soap_serialize_dss__Set_Disable(soap, (const struct dss__Set_Disable *)ptr);
-		break;
-	case SOAP_TYPE_dss__Set_DisableResponse:
-		soap_serialize_dss__Set_DisableResponse(soap, (const struct dss__Set_DisableResponse *)ptr);
-		break;
-	case SOAP_TYPE_dss__Set_Enable:
-		soap_serialize_dss__Set_Enable(soap, (const struct dss__Set_Enable *)ptr);
-		break;
-	case SOAP_TYPE_dss__Set_EnableResponse:
-		soap_serialize_dss__Set_EnableResponse(soap, (const struct dss__Set_EnableResponse *)ptr);
-		break;
-	case SOAP_TYPE_dss__Set_DecreaseValue:
-		soap_serialize_dss__Set_DecreaseValue(soap, (const struct dss__Set_DecreaseValue *)ptr);
-		break;
-	case SOAP_TYPE_dss__Set_DecreaseValueResponse:
-		soap_serialize_dss__Set_DecreaseValueResponse(soap, (const struct dss__Set_DecreaseValueResponse *)ptr);
-		break;
-	case SOAP_TYPE_dss__Set_IncreaseValue:
-		soap_serialize_dss__Set_IncreaseValue(soap, (const struct dss__Set_IncreaseValue *)ptr);
-		break;
-	case SOAP_TYPE_dss__Set_IncreaseValueResponse:
-		soap_serialize_dss__Set_IncreaseValueResponse(soap, (const struct dss__Set_IncreaseValueResponse *)ptr);
-		break;
-	case SOAP_TYPE_dss__Set_TurnOff:
-		soap_serialize_dss__Set_TurnOff(soap, (const struct dss__Set_TurnOff *)ptr);
-		break;
-	case SOAP_TYPE_dss__Set_TurnOffResponse:
-		soap_serialize_dss__Set_TurnOffResponse(soap, (const struct dss__Set_TurnOffResponse *)ptr);
-		break;
-	case SOAP_TYPE_dss__Set_TurnOn:
-		soap_serialize_dss__Set_TurnOn(soap, (const struct dss__Set_TurnOn *)ptr);
-		break;
-	case SOAP_TYPE_dss__Set_TurnOnResponse:
-		soap_serialize_dss__Set_TurnOnResponse(soap, (const struct dss__Set_TurnOnResponse *)ptr);
+	case SOAP_TYPE_dss__Group_CallSceneResponse:
+		soap_serialize_dss__Group_CallSceneResponse(soap, (const struct dss__Group_CallSceneResponse *)ptr);
 		break;
 	case SOAP_TYPE_dss__Group_SetValue:
 		soap_serialize_dss__Group_SetValue(soap, (const struct dss__Group_SetValue *)ptr);
@@ -1843,6 +1909,72 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 		break;
 	case SOAP_TYPE_dss__Group_TurnOnResponse:
 		soap_serialize_dss__Group_TurnOnResponse(soap, (const struct dss__Group_TurnOnResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_SaveScene:
+		soap_serialize_dss__Set_SaveScene(soap, (const struct dss__Set_SaveScene *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_SaveSceneResponse:
+		soap_serialize_dss__Set_SaveSceneResponse(soap, (const struct dss__Set_SaveSceneResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_CallScene:
+		soap_serialize_dss__Set_CallScene(soap, (const struct dss__Set_CallScene *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_CallSceneResponse:
+		soap_serialize_dss__Set_CallSceneResponse(soap, (const struct dss__Set_CallSceneResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_SetValue:
+		soap_serialize_dss__Set_SetValue(soap, (const struct dss__Set_SetValue *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_SetValueResponse:
+		soap_serialize_dss__Set_SetValueResponse(soap, (const struct dss__Set_SetValueResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_EndDim:
+		soap_serialize_dss__Set_EndDim(soap, (const struct dss__Set_EndDim *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_EndDimResponse:
+		soap_serialize_dss__Set_EndDimResponse(soap, (const struct dss__Set_EndDimResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_StartDim:
+		soap_serialize_dss__Set_StartDim(soap, (const struct dss__Set_StartDim *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_StartDimResponse:
+		soap_serialize_dss__Set_StartDimResponse(soap, (const struct dss__Set_StartDimResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_Disable:
+		soap_serialize_dss__Set_Disable(soap, (const struct dss__Set_Disable *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_DisableResponse:
+		soap_serialize_dss__Set_DisableResponse(soap, (const struct dss__Set_DisableResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_Enable:
+		soap_serialize_dss__Set_Enable(soap, (const struct dss__Set_Enable *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_EnableResponse:
+		soap_serialize_dss__Set_EnableResponse(soap, (const struct dss__Set_EnableResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_DecreaseValue:
+		soap_serialize_dss__Set_DecreaseValue(soap, (const struct dss__Set_DecreaseValue *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_DecreaseValueResponse:
+		soap_serialize_dss__Set_DecreaseValueResponse(soap, (const struct dss__Set_DecreaseValueResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_IncreaseValue:
+		soap_serialize_dss__Set_IncreaseValue(soap, (const struct dss__Set_IncreaseValue *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_IncreaseValueResponse:
+		soap_serialize_dss__Set_IncreaseValueResponse(soap, (const struct dss__Set_IncreaseValueResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_TurnOff:
+		soap_serialize_dss__Set_TurnOff(soap, (const struct dss__Set_TurnOff *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_TurnOffResponse:
+		soap_serialize_dss__Set_TurnOffResponse(soap, (const struct dss__Set_TurnOffResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_TurnOn:
+		soap_serialize_dss__Set_TurnOn(soap, (const struct dss__Set_TurnOn *)ptr);
+		break;
+	case SOAP_TYPE_dss__Set_TurnOnResponse:
+		soap_serialize_dss__Set_TurnOnResponse(soap, (const struct dss__Set_TurnOnResponse *)ptr);
 		break;
 	case SOAP_TYPE_dss__Apartment_GetZoneIDs:
 		soap_serialize_dss__Apartment_GetZoneIDs(soap, (const struct dss__Apartment_GetZoneIDs *)ptr);
@@ -2065,42 +2197,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_dss__Apartment_GetZoneIDsResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Apartment_GetZoneIDs:
 		return (void*)soap_instantiate_dss__Apartment_GetZoneIDs(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_TurnOnResponse:
-		return (void*)soap_instantiate_dss__Group_TurnOnResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_TurnOn:
-		return (void*)soap_instantiate_dss__Group_TurnOn(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_TurnOffResponse:
-		return (void*)soap_instantiate_dss__Group_TurnOffResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_TurnOff:
-		return (void*)soap_instantiate_dss__Group_TurnOff(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_IncreaseValueResponse:
-		return (void*)soap_instantiate_dss__Group_IncreaseValueResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_IncreaseValue:
-		return (void*)soap_instantiate_dss__Group_IncreaseValue(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_DecreaseValueResponse:
-		return (void*)soap_instantiate_dss__Group_DecreaseValueResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_DecreaseValue:
-		return (void*)soap_instantiate_dss__Group_DecreaseValue(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_EnableResponse:
-		return (void*)soap_instantiate_dss__Group_EnableResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_Enable:
-		return (void*)soap_instantiate_dss__Group_Enable(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_DisableResponse:
-		return (void*)soap_instantiate_dss__Group_DisableResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_Disable:
-		return (void*)soap_instantiate_dss__Group_Disable(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_StartDimResponse:
-		return (void*)soap_instantiate_dss__Group_StartDimResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_StartDim:
-		return (void*)soap_instantiate_dss__Group_StartDim(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_EndDimResponse:
-		return (void*)soap_instantiate_dss__Group_EndDimResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_EndDim:
-		return (void*)soap_instantiate_dss__Group_EndDim(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_SetValueResponse:
-		return (void*)soap_instantiate_dss__Group_SetValueResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Group_SetValue:
-		return (void*)soap_instantiate_dss__Group_SetValue(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Set_TurnOnResponse:
 		return (void*)soap_instantiate_dss__Set_TurnOnResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Set_TurnOn:
@@ -2137,6 +2233,58 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_dss__Set_SetValueResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Set_SetValue:
 		return (void*)soap_instantiate_dss__Set_SetValue(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Set_CallSceneResponse:
+		return (void*)soap_instantiate_dss__Set_CallSceneResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Set_CallScene:
+		return (void*)soap_instantiate_dss__Set_CallScene(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Set_SaveSceneResponse:
+		return (void*)soap_instantiate_dss__Set_SaveSceneResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Set_SaveScene:
+		return (void*)soap_instantiate_dss__Set_SaveScene(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_TurnOnResponse:
+		return (void*)soap_instantiate_dss__Group_TurnOnResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_TurnOn:
+		return (void*)soap_instantiate_dss__Group_TurnOn(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_TurnOffResponse:
+		return (void*)soap_instantiate_dss__Group_TurnOffResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_TurnOff:
+		return (void*)soap_instantiate_dss__Group_TurnOff(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_IncreaseValueResponse:
+		return (void*)soap_instantiate_dss__Group_IncreaseValueResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_IncreaseValue:
+		return (void*)soap_instantiate_dss__Group_IncreaseValue(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_DecreaseValueResponse:
+		return (void*)soap_instantiate_dss__Group_DecreaseValueResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_DecreaseValue:
+		return (void*)soap_instantiate_dss__Group_DecreaseValue(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_EnableResponse:
+		return (void*)soap_instantiate_dss__Group_EnableResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_Enable:
+		return (void*)soap_instantiate_dss__Group_Enable(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_DisableResponse:
+		return (void*)soap_instantiate_dss__Group_DisableResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_Disable:
+		return (void*)soap_instantiate_dss__Group_Disable(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_StartDimResponse:
+		return (void*)soap_instantiate_dss__Group_StartDimResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_StartDim:
+		return (void*)soap_instantiate_dss__Group_StartDim(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_EndDimResponse:
+		return (void*)soap_instantiate_dss__Group_EndDimResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_EndDim:
+		return (void*)soap_instantiate_dss__Group_EndDim(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_SetValueResponse:
+		return (void*)soap_instantiate_dss__Group_SetValueResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_SetValue:
+		return (void*)soap_instantiate_dss__Group_SetValue(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_CallSceneResponse:
+		return (void*)soap_instantiate_dss__Group_CallSceneResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_CallScene:
+		return (void*)soap_instantiate_dss__Group_CallScene(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_SaveSceneResponse:
+		return (void*)soap_instantiate_dss__Group_SaveSceneResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Group_SaveScene:
+		return (void*)soap_instantiate_dss__Group_SaveScene(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Device_TurnOnResponse:
 		return (void*)soap_instantiate_dss__Device_TurnOnResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Device_TurnOn:
@@ -2177,6 +2325,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_dss__Device_GetValueResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Device_GetValue:
 		return (void*)soap_instantiate_dss__Device_GetValue(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Device_CallSceneResponse:
+		return (void*)soap_instantiate_dss__Device_CallSceneResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Device_CallScene:
+		return (void*)soap_instantiate_dss__Device_CallScene(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Device_SaveSceneResponse:
+		return (void*)soap_instantiate_dss__Device_SaveSceneResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Device_SaveScene:
+		return (void*)soap_instantiate_dss__Device_SaveScene(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Device_GetNameResponse:
 		return (void*)soap_instantiate_dss__Device_GetNameResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Device_GetName:
@@ -2546,6 +2702,138 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 		else
 			delete[] (struct dss__Apartment_GetZoneIDs*)p->ptr;
 		break;
+	case SOAP_TYPE_dss__Set_TurnOnResponse:
+		if (p->size < 0)
+			delete (struct dss__Set_TurnOnResponse*)p->ptr;
+		else
+			delete[] (struct dss__Set_TurnOnResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_TurnOn:
+		if (p->size < 0)
+			delete (struct dss__Set_TurnOn*)p->ptr;
+		else
+			delete[] (struct dss__Set_TurnOn*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_TurnOffResponse:
+		if (p->size < 0)
+			delete (struct dss__Set_TurnOffResponse*)p->ptr;
+		else
+			delete[] (struct dss__Set_TurnOffResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_TurnOff:
+		if (p->size < 0)
+			delete (struct dss__Set_TurnOff*)p->ptr;
+		else
+			delete[] (struct dss__Set_TurnOff*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_IncreaseValueResponse:
+		if (p->size < 0)
+			delete (struct dss__Set_IncreaseValueResponse*)p->ptr;
+		else
+			delete[] (struct dss__Set_IncreaseValueResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_IncreaseValue:
+		if (p->size < 0)
+			delete (struct dss__Set_IncreaseValue*)p->ptr;
+		else
+			delete[] (struct dss__Set_IncreaseValue*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_DecreaseValueResponse:
+		if (p->size < 0)
+			delete (struct dss__Set_DecreaseValueResponse*)p->ptr;
+		else
+			delete[] (struct dss__Set_DecreaseValueResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_DecreaseValue:
+		if (p->size < 0)
+			delete (struct dss__Set_DecreaseValue*)p->ptr;
+		else
+			delete[] (struct dss__Set_DecreaseValue*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_EnableResponse:
+		if (p->size < 0)
+			delete (struct dss__Set_EnableResponse*)p->ptr;
+		else
+			delete[] (struct dss__Set_EnableResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_Enable:
+		if (p->size < 0)
+			delete (struct dss__Set_Enable*)p->ptr;
+		else
+			delete[] (struct dss__Set_Enable*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_DisableResponse:
+		if (p->size < 0)
+			delete (struct dss__Set_DisableResponse*)p->ptr;
+		else
+			delete[] (struct dss__Set_DisableResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_Disable:
+		if (p->size < 0)
+			delete (struct dss__Set_Disable*)p->ptr;
+		else
+			delete[] (struct dss__Set_Disable*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_StartDimResponse:
+		if (p->size < 0)
+			delete (struct dss__Set_StartDimResponse*)p->ptr;
+		else
+			delete[] (struct dss__Set_StartDimResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_StartDim:
+		if (p->size < 0)
+			delete (struct dss__Set_StartDim*)p->ptr;
+		else
+			delete[] (struct dss__Set_StartDim*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_EndDimResponse:
+		if (p->size < 0)
+			delete (struct dss__Set_EndDimResponse*)p->ptr;
+		else
+			delete[] (struct dss__Set_EndDimResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_EndDim:
+		if (p->size < 0)
+			delete (struct dss__Set_EndDim*)p->ptr;
+		else
+			delete[] (struct dss__Set_EndDim*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_SetValueResponse:
+		if (p->size < 0)
+			delete (struct dss__Set_SetValueResponse*)p->ptr;
+		else
+			delete[] (struct dss__Set_SetValueResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_SetValue:
+		if (p->size < 0)
+			delete (struct dss__Set_SetValue*)p->ptr;
+		else
+			delete[] (struct dss__Set_SetValue*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_CallSceneResponse:
+		if (p->size < 0)
+			delete (struct dss__Set_CallSceneResponse*)p->ptr;
+		else
+			delete[] (struct dss__Set_CallSceneResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_CallScene:
+		if (p->size < 0)
+			delete (struct dss__Set_CallScene*)p->ptr;
+		else
+			delete[] (struct dss__Set_CallScene*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_SaveSceneResponse:
+		if (p->size < 0)
+			delete (struct dss__Set_SaveSceneResponse*)p->ptr;
+		else
+			delete[] (struct dss__Set_SaveSceneResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Set_SaveScene:
+		if (p->size < 0)
+			delete (struct dss__Set_SaveScene*)p->ptr;
+		else
+			delete[] (struct dss__Set_SaveScene*)p->ptr;
+		break;
 	case SOAP_TYPE_dss__Group_TurnOnResponse:
 		if (p->size < 0)
 			delete (struct dss__Group_TurnOnResponse*)p->ptr;
@@ -2654,113 +2942,29 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 		else
 			delete[] (struct dss__Group_SetValue*)p->ptr;
 		break;
-	case SOAP_TYPE_dss__Set_TurnOnResponse:
+	case SOAP_TYPE_dss__Group_CallSceneResponse:
 		if (p->size < 0)
-			delete (struct dss__Set_TurnOnResponse*)p->ptr;
+			delete (struct dss__Group_CallSceneResponse*)p->ptr;
 		else
-			delete[] (struct dss__Set_TurnOnResponse*)p->ptr;
+			delete[] (struct dss__Group_CallSceneResponse*)p->ptr;
 		break;
-	case SOAP_TYPE_dss__Set_TurnOn:
+	case SOAP_TYPE_dss__Group_CallScene:
 		if (p->size < 0)
-			delete (struct dss__Set_TurnOn*)p->ptr;
+			delete (struct dss__Group_CallScene*)p->ptr;
 		else
-			delete[] (struct dss__Set_TurnOn*)p->ptr;
+			delete[] (struct dss__Group_CallScene*)p->ptr;
 		break;
-	case SOAP_TYPE_dss__Set_TurnOffResponse:
+	case SOAP_TYPE_dss__Group_SaveSceneResponse:
 		if (p->size < 0)
-			delete (struct dss__Set_TurnOffResponse*)p->ptr;
+			delete (struct dss__Group_SaveSceneResponse*)p->ptr;
 		else
-			delete[] (struct dss__Set_TurnOffResponse*)p->ptr;
+			delete[] (struct dss__Group_SaveSceneResponse*)p->ptr;
 		break;
-	case SOAP_TYPE_dss__Set_TurnOff:
+	case SOAP_TYPE_dss__Group_SaveScene:
 		if (p->size < 0)
-			delete (struct dss__Set_TurnOff*)p->ptr;
+			delete (struct dss__Group_SaveScene*)p->ptr;
 		else
-			delete[] (struct dss__Set_TurnOff*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Set_IncreaseValueResponse:
-		if (p->size < 0)
-			delete (struct dss__Set_IncreaseValueResponse*)p->ptr;
-		else
-			delete[] (struct dss__Set_IncreaseValueResponse*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Set_IncreaseValue:
-		if (p->size < 0)
-			delete (struct dss__Set_IncreaseValue*)p->ptr;
-		else
-			delete[] (struct dss__Set_IncreaseValue*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Set_DecreaseValueResponse:
-		if (p->size < 0)
-			delete (struct dss__Set_DecreaseValueResponse*)p->ptr;
-		else
-			delete[] (struct dss__Set_DecreaseValueResponse*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Set_DecreaseValue:
-		if (p->size < 0)
-			delete (struct dss__Set_DecreaseValue*)p->ptr;
-		else
-			delete[] (struct dss__Set_DecreaseValue*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Set_EnableResponse:
-		if (p->size < 0)
-			delete (struct dss__Set_EnableResponse*)p->ptr;
-		else
-			delete[] (struct dss__Set_EnableResponse*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Set_Enable:
-		if (p->size < 0)
-			delete (struct dss__Set_Enable*)p->ptr;
-		else
-			delete[] (struct dss__Set_Enable*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Set_DisableResponse:
-		if (p->size < 0)
-			delete (struct dss__Set_DisableResponse*)p->ptr;
-		else
-			delete[] (struct dss__Set_DisableResponse*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Set_Disable:
-		if (p->size < 0)
-			delete (struct dss__Set_Disable*)p->ptr;
-		else
-			delete[] (struct dss__Set_Disable*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Set_StartDimResponse:
-		if (p->size < 0)
-			delete (struct dss__Set_StartDimResponse*)p->ptr;
-		else
-			delete[] (struct dss__Set_StartDimResponse*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Set_StartDim:
-		if (p->size < 0)
-			delete (struct dss__Set_StartDim*)p->ptr;
-		else
-			delete[] (struct dss__Set_StartDim*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Set_EndDimResponse:
-		if (p->size < 0)
-			delete (struct dss__Set_EndDimResponse*)p->ptr;
-		else
-			delete[] (struct dss__Set_EndDimResponse*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Set_EndDim:
-		if (p->size < 0)
-			delete (struct dss__Set_EndDim*)p->ptr;
-		else
-			delete[] (struct dss__Set_EndDim*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Set_SetValueResponse:
-		if (p->size < 0)
-			delete (struct dss__Set_SetValueResponse*)p->ptr;
-		else
-			delete[] (struct dss__Set_SetValueResponse*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Set_SetValue:
-		if (p->size < 0)
-			delete (struct dss__Set_SetValue*)p->ptr;
-		else
-			delete[] (struct dss__Set_SetValue*)p->ptr;
+			delete[] (struct dss__Group_SaveScene*)p->ptr;
 		break;
 	case SOAP_TYPE_dss__Device_TurnOnResponse:
 		if (p->size < 0)
@@ -2881,6 +3085,30 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 			delete (struct dss__Device_GetValue*)p->ptr;
 		else
 			delete[] (struct dss__Device_GetValue*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Device_CallSceneResponse:
+		if (p->size < 0)
+			delete (struct dss__Device_CallSceneResponse*)p->ptr;
+		else
+			delete[] (struct dss__Device_CallSceneResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Device_CallScene:
+		if (p->size < 0)
+			delete (struct dss__Device_CallScene*)p->ptr;
+		else
+			delete[] (struct dss__Device_CallScene*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Device_SaveSceneResponse:
+		if (p->size < 0)
+			delete (struct dss__Device_SaveSceneResponse*)p->ptr;
+		else
+			delete[] (struct dss__Device_SaveSceneResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Device_SaveScene:
+		if (p->size < 0)
+			delete (struct dss__Device_SaveScene*)p->ptr;
+		else
+			delete[] (struct dss__Device_SaveScene*)p->ptr;
 		break;
 	case SOAP_TYPE_dss__Device_GetNameResponse:
 		if (p->size < 0)
@@ -10644,6 +10872,492 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Device_GetNameResponse(struct soap *so
 	*(struct dss__Device_GetNameResponse*)p = *(struct dss__Device_GetNameResponse*)q;
 }
 
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_SaveScene(struct soap *soap, struct dss__Device_SaveScene *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_xsd__unsignedInt(soap, &a->_deviceID);
+	soap_default_int(soap, &a->_sceneNr);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_SaveScene(struct soap *soap, const struct dss__Device_SaveScene *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->_deviceID, SOAP_TYPE_xsd__unsignedInt);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Device_SaveScene(struct soap *soap, const struct dss__Device_SaveScene *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Device_SaveScene);
+	if (soap_out_dss__Device_SaveScene(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_SaveScene(struct soap *soap, const char *tag, int id, const struct dss__Device_SaveScene *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Device_SaveScene), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_xsd__unsignedInt(soap, "deviceID", -1, &a->_deviceID, ""))
+		return soap->error;
+	if (soap_out_int(soap, "sceneNr", -1, &a->_sceneNr, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Device_SaveScene * SOAP_FMAC4 soap_get_dss__Device_SaveScene(struct soap *soap, struct dss__Device_SaveScene *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Device_SaveScene(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Device_SaveScene * SOAP_FMAC4 soap_in_dss__Device_SaveScene(struct soap *soap, const char *tag, struct dss__Device_SaveScene *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__deviceID = 1, soap_flag__sceneNr = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Device_SaveScene *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Device_SaveScene, sizeof(struct dss__Device_SaveScene), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Device_SaveScene(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__deviceID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_xsd__unsignedInt(soap, NULL, &a->_deviceID, "xsd:unsignedInt"))
+				{	soap_flag__deviceID--;
+					continue;
+				}
+			if (soap_flag__sceneNr && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_sceneNr, "xsd:int"))
+				{	soap_flag__sceneNr--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Device_SaveScene *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Device_SaveScene, 0, sizeof(struct dss__Device_SaveScene), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__deviceID > 0 || soap_flag__sceneNr > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Device_SaveScene * SOAP_FMAC6 soap_new_dss__Device_SaveScene(struct soap *soap, int n)
+{	return soap_instantiate_dss__Device_SaveScene(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Device_SaveScene(struct soap *soap, struct dss__Device_SaveScene *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Device_SaveScene * SOAP_FMAC4 soap_instantiate_dss__Device_SaveScene(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Device_SaveScene(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Device_SaveScene, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Device_SaveScene;
+		if (size)
+			*size = sizeof(struct dss__Device_SaveScene);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Device_SaveScene[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Device_SaveScene);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Device_SaveScene*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Device_SaveScene(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Device_SaveScene %p -> %p\n", q, p));
+	*(struct dss__Device_SaveScene*)p = *(struct dss__Device_SaveScene*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_SaveSceneResponse(struct soap *soap, struct dss__Device_SaveSceneResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_SaveSceneResponse(struct soap *soap, const struct dss__Device_SaveSceneResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Device_SaveSceneResponse(struct soap *soap, const struct dss__Device_SaveSceneResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Device_SaveSceneResponse);
+	if (soap_out_dss__Device_SaveSceneResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_SaveSceneResponse(struct soap *soap, const char *tag, int id, const struct dss__Device_SaveSceneResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Device_SaveSceneResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Device_SaveSceneResponse * SOAP_FMAC4 soap_get_dss__Device_SaveSceneResponse(struct soap *soap, struct dss__Device_SaveSceneResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Device_SaveSceneResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Device_SaveSceneResponse * SOAP_FMAC4 soap_in_dss__Device_SaveSceneResponse(struct soap *soap, const char *tag, struct dss__Device_SaveSceneResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Device_SaveSceneResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Device_SaveSceneResponse, sizeof(struct dss__Device_SaveSceneResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Device_SaveSceneResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Device_SaveSceneResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Device_SaveSceneResponse, 0, sizeof(struct dss__Device_SaveSceneResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Device_SaveSceneResponse * SOAP_FMAC6 soap_new_dss__Device_SaveSceneResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Device_SaveSceneResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Device_SaveSceneResponse(struct soap *soap, struct dss__Device_SaveSceneResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Device_SaveSceneResponse * SOAP_FMAC4 soap_instantiate_dss__Device_SaveSceneResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Device_SaveSceneResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Device_SaveSceneResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Device_SaveSceneResponse;
+		if (size)
+			*size = sizeof(struct dss__Device_SaveSceneResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Device_SaveSceneResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Device_SaveSceneResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Device_SaveSceneResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Device_SaveSceneResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Device_SaveSceneResponse %p -> %p\n", q, p));
+	*(struct dss__Device_SaveSceneResponse*)p = *(struct dss__Device_SaveSceneResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_CallScene(struct soap *soap, struct dss__Device_CallScene *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_xsd__unsignedInt(soap, &a->_deviceID);
+	soap_default_int(soap, &a->_sceneNr);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_CallScene(struct soap *soap, const struct dss__Device_CallScene *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->_deviceID, SOAP_TYPE_xsd__unsignedInt);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Device_CallScene(struct soap *soap, const struct dss__Device_CallScene *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Device_CallScene);
+	if (soap_out_dss__Device_CallScene(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_CallScene(struct soap *soap, const char *tag, int id, const struct dss__Device_CallScene *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Device_CallScene), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_xsd__unsignedInt(soap, "deviceID", -1, &a->_deviceID, ""))
+		return soap->error;
+	if (soap_out_int(soap, "sceneNr", -1, &a->_sceneNr, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Device_CallScene * SOAP_FMAC4 soap_get_dss__Device_CallScene(struct soap *soap, struct dss__Device_CallScene *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Device_CallScene(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Device_CallScene * SOAP_FMAC4 soap_in_dss__Device_CallScene(struct soap *soap, const char *tag, struct dss__Device_CallScene *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__deviceID = 1, soap_flag__sceneNr = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Device_CallScene *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Device_CallScene, sizeof(struct dss__Device_CallScene), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Device_CallScene(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__deviceID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_xsd__unsignedInt(soap, NULL, &a->_deviceID, "xsd:unsignedInt"))
+				{	soap_flag__deviceID--;
+					continue;
+				}
+			if (soap_flag__sceneNr && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_sceneNr, "xsd:int"))
+				{	soap_flag__sceneNr--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Device_CallScene *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Device_CallScene, 0, sizeof(struct dss__Device_CallScene), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__deviceID > 0 || soap_flag__sceneNr > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Device_CallScene * SOAP_FMAC6 soap_new_dss__Device_CallScene(struct soap *soap, int n)
+{	return soap_instantiate_dss__Device_CallScene(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Device_CallScene(struct soap *soap, struct dss__Device_CallScene *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Device_CallScene * SOAP_FMAC4 soap_instantiate_dss__Device_CallScene(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Device_CallScene(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Device_CallScene, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Device_CallScene;
+		if (size)
+			*size = sizeof(struct dss__Device_CallScene);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Device_CallScene[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Device_CallScene);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Device_CallScene*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Device_CallScene(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Device_CallScene %p -> %p\n", q, p));
+	*(struct dss__Device_CallScene*)p = *(struct dss__Device_CallScene*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_CallSceneResponse(struct soap *soap, struct dss__Device_CallSceneResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Device_CallSceneResponse(struct soap *soap, const struct dss__Device_CallSceneResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Device_CallSceneResponse(struct soap *soap, const struct dss__Device_CallSceneResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Device_CallSceneResponse);
+	if (soap_out_dss__Device_CallSceneResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Device_CallSceneResponse(struct soap *soap, const char *tag, int id, const struct dss__Device_CallSceneResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Device_CallSceneResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Device_CallSceneResponse * SOAP_FMAC4 soap_get_dss__Device_CallSceneResponse(struct soap *soap, struct dss__Device_CallSceneResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Device_CallSceneResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Device_CallSceneResponse * SOAP_FMAC4 soap_in_dss__Device_CallSceneResponse(struct soap *soap, const char *tag, struct dss__Device_CallSceneResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Device_CallSceneResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Device_CallSceneResponse, sizeof(struct dss__Device_CallSceneResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Device_CallSceneResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Device_CallSceneResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Device_CallSceneResponse, 0, sizeof(struct dss__Device_CallSceneResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Device_CallSceneResponse * SOAP_FMAC6 soap_new_dss__Device_CallSceneResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Device_CallSceneResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Device_CallSceneResponse(struct soap *soap, struct dss__Device_CallSceneResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Device_CallSceneResponse * SOAP_FMAC4 soap_instantiate_dss__Device_CallSceneResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Device_CallSceneResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Device_CallSceneResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Device_CallSceneResponse;
+		if (size)
+			*size = sizeof(struct dss__Device_CallSceneResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Device_CallSceneResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Device_CallSceneResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Device_CallSceneResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Device_CallSceneResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Device_CallSceneResponse %p -> %p\n", q, p));
+	*(struct dss__Device_CallSceneResponse*)p = *(struct dss__Device_CallSceneResponse*)q;
+}
+
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_GetValue(struct soap *soap, struct dss__Device_GetValue *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
@@ -13058,60 +13772,57 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Device_TurnOnResponse(struct soap *soa
 	*(struct dss__Device_TurnOnResponse*)p = *(struct dss__Device_TurnOnResponse*)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_SetValue(struct soap *soap, struct dss__Set_SetValue *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Group_SaveScene(struct soap *soap, struct dss__Group_SaveScene *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_setID);
-	soap_default_double(soap, &a->_value);
-	soap_default_int(soap, &a->_paramID);
+	soap_default_int(soap, &a->_groupID);
+	soap_default_int(soap, &a->_sceneNr);
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_SetValue(struct soap *soap, const struct dss__Set_SetValue *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Group_SaveScene(struct soap *soap, const struct dss__Group_SaveScene *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_SetValue(struct soap *soap, const struct dss__Set_SetValue *a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Group_SaveScene(struct soap *soap, const struct dss__Group_SaveScene *a, const char *tag, const char *type)
 {
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_SetValue);
-	if (soap_out_dss__Set_SetValue(soap, tag, id, a, type))
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Group_SaveScene);
+	if (soap_out_dss__Group_SaveScene(soap, tag, id, a, type))
 		return soap->error;
 	return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_SetValue(struct soap *soap, const char *tag, int id, const struct dss__Set_SetValue *a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Group_SaveScene(struct soap *soap, const char *tag, int id, const struct dss__Group_SaveScene *a, const char *type)
 {
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_SetValue), type))
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Group_SaveScene), type))
 		return soap->error;
 	if (soap_out_int(soap, "token", -1, &a->_token, ""))
 		return soap->error;
-	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
+	if (soap_out_int(soap, "groupID", -1, &a->_groupID, ""))
 		return soap->error;
-	if (soap_out_double(soap, "value", -1, &a->_value, ""))
-		return soap->error;
-	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
+	if (soap_out_int(soap, "sceneNr", -1, &a->_sceneNr, ""))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
 
-SOAP_FMAC3 struct dss__Set_SetValue * SOAP_FMAC4 soap_get_dss__Set_SetValue(struct soap *soap, struct dss__Set_SetValue *p, const char *tag, const char *type)
+SOAP_FMAC3 struct dss__Group_SaveScene * SOAP_FMAC4 soap_get_dss__Group_SaveScene(struct soap *soap, struct dss__Group_SaveScene *p, const char *tag, const char *type)
 {
-	if ((p = soap_in_dss__Set_SetValue(soap, tag, p, type)))
+	if ((p = soap_in_dss__Group_SaveScene(soap, tag, p, type)))
 		if (soap_getindependent(soap))
 			return NULL;
 	return p;
 }
 
-SOAP_FMAC3 struct dss__Set_SetValue * SOAP_FMAC4 soap_in_dss__Set_SetValue(struct soap *soap, const char *tag, struct dss__Set_SetValue *a, const char *type)
+SOAP_FMAC3 struct dss__Group_SaveScene * SOAP_FMAC4 soap_in_dss__Group_SaveScene(struct soap *soap, const char *tag, struct dss__Group_SaveScene *a, const char *type)
 {
-	short soap_flag__token = 1, soap_flag__setID = 1, soap_flag__value = 1, soap_flag__paramID = 1;
+	short soap_flag__token = 1, soap_flag__groupID = 1, soap_flag__sceneNr = 1;
 	if (soap_element_begin_in(soap, tag, 0, type))
 		return NULL;
-	a = (struct dss__Set_SetValue *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_SetValue, sizeof(struct dss__Set_SetValue), 0, NULL, NULL, NULL);
+	a = (struct dss__Group_SaveScene *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Group_SaveScene, sizeof(struct dss__Group_SaveScene), 0, NULL, NULL, NULL);
 	if (!a)
 		return NULL;
-	soap_default_dss__Set_SetValue(soap, a);
+	soap_default_dss__Group_SaveScene(soap, a);
 	if (soap->body && !*soap->href)
 	{
 		for (;;)
@@ -13121,19 +13832,14 @@ SOAP_FMAC3 struct dss__Set_SetValue * SOAP_FMAC4 soap_in_dss__Set_SetValue(struc
 				{	soap_flag__token--;
 					continue;
 				}
-			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
-				{	soap_flag__setID--;
+			if (soap_flag__groupID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_groupID, "xsd:int"))
+				{	soap_flag__groupID--;
 					continue;
 				}
-			if (soap_flag__value && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_double(soap, NULL, &a->_value, "xsd:double"))
-				{	soap_flag__value--;
-					continue;
-				}
-			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
-				{	soap_flag__paramID--;
+			if (soap_flag__sceneNr && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_sceneNr, "xsd:int"))
+				{	soap_flag__sceneNr--;
 					continue;
 				}
 			if (soap->error == SOAP_TAG_MISMATCH)
@@ -13147,99 +13853,99 @@ SOAP_FMAC3 struct dss__Set_SetValue * SOAP_FMAC4 soap_in_dss__Set_SetValue(struc
 			return NULL;
 	}
 	else
-	{	a = (struct dss__Set_SetValue *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_SetValue, 0, sizeof(struct dss__Set_SetValue), 0, NULL);
+	{	a = (struct dss__Group_SaveScene *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Group_SaveScene, 0, sizeof(struct dss__Group_SaveScene), 0, NULL);
 		if (soap->body && soap_element_end_in(soap, tag))
 			return NULL;
 	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0 || soap_flag__value > 0 || soap_flag__paramID > 0))
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__groupID > 0 || soap_flag__sceneNr > 0))
 	{	soap->error = SOAP_OCCURS;
 		return NULL;
 	}
 	return a;
 }
 
-SOAP_FMAC5 struct dss__Set_SetValue * SOAP_FMAC6 soap_new_dss__Set_SetValue(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_SetValue(soap, n, NULL, NULL, NULL);
+SOAP_FMAC5 struct dss__Group_SaveScene * SOAP_FMAC6 soap_new_dss__Group_SaveScene(struct soap *soap, int n)
+{	return soap_instantiate_dss__Group_SaveScene(soap, n, NULL, NULL, NULL);
 }
 
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_SetValue(struct soap *soap, struct dss__Set_SetValue *p)
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Group_SaveScene(struct soap *soap, struct dss__Group_SaveScene *p)
 {	soap_delete(soap, p);
 }
 
-SOAP_FMAC3 struct dss__Set_SetValue * SOAP_FMAC4 soap_instantiate_dss__Set_SetValue(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+SOAP_FMAC3 struct dss__Group_SaveScene * SOAP_FMAC4 soap_instantiate_dss__Group_SaveScene(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_SetValue(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_SetValue, n, soap_fdelete);
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Group_SaveScene(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Group_SaveScene, n, soap_fdelete);
 	if (!cp)
 		return NULL;
 	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_SetValue;
+	{	cp->ptr = (void*)new struct dss__Group_SaveScene;
 		if (size)
-			*size = sizeof(struct dss__Set_SetValue);
+			*size = sizeof(struct dss__Group_SaveScene);
 	}
 	else
-	{	cp->ptr = (void*)new struct dss__Set_SetValue[n];
+	{	cp->ptr = (void*)new struct dss__Group_SaveScene[n];
 		if (!cp->ptr)
 		{	soap->error = SOAP_EOM;
 			return NULL;
 		}
 		if (size)
-			*size = n * sizeof(struct dss__Set_SetValue);
+			*size = n * sizeof(struct dss__Group_SaveScene);
 	}
 		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_SetValue*)cp->ptr;
+	return (struct dss__Group_SaveScene*)cp->ptr;
 }
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_SetValue(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Group_SaveScene(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_SetValue %p -> %p\n", q, p));
-	*(struct dss__Set_SetValue*)p = *(struct dss__Set_SetValue*)q;
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Group_SaveScene %p -> %p\n", q, p));
+	*(struct dss__Group_SaveScene*)p = *(struct dss__Group_SaveScene*)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_SetValueResponse(struct soap *soap, struct dss__Set_SetValueResponse *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Group_SaveSceneResponse(struct soap *soap, struct dss__Group_SaveSceneResponse *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_bool(soap, &a->result);
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_SetValueResponse(struct soap *soap, const struct dss__Set_SetValueResponse *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Group_SaveSceneResponse(struct soap *soap, const struct dss__Group_SaveSceneResponse *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_SetValueResponse(struct soap *soap, const struct dss__Set_SetValueResponse *a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Group_SaveSceneResponse(struct soap *soap, const struct dss__Group_SaveSceneResponse *a, const char *tag, const char *type)
 {
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_SetValueResponse);
-	if (soap_out_dss__Set_SetValueResponse(soap, tag, id, a, type))
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Group_SaveSceneResponse);
+	if (soap_out_dss__Group_SaveSceneResponse(soap, tag, id, a, type))
 		return soap->error;
 	return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_SetValueResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_SetValueResponse *a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Group_SaveSceneResponse(struct soap *soap, const char *tag, int id, const struct dss__Group_SaveSceneResponse *a, const char *type)
 {
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_SetValueResponse), type))
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Group_SaveSceneResponse), type))
 		return soap->error;
 	if (soap_out_bool(soap, "result", -1, &a->result, ""))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
 
-SOAP_FMAC3 struct dss__Set_SetValueResponse * SOAP_FMAC4 soap_get_dss__Set_SetValueResponse(struct soap *soap, struct dss__Set_SetValueResponse *p, const char *tag, const char *type)
+SOAP_FMAC3 struct dss__Group_SaveSceneResponse * SOAP_FMAC4 soap_get_dss__Group_SaveSceneResponse(struct soap *soap, struct dss__Group_SaveSceneResponse *p, const char *tag, const char *type)
 {
-	if ((p = soap_in_dss__Set_SetValueResponse(soap, tag, p, type)))
+	if ((p = soap_in_dss__Group_SaveSceneResponse(soap, tag, p, type)))
 		if (soap_getindependent(soap))
 			return NULL;
 	return p;
 }
 
-SOAP_FMAC3 struct dss__Set_SetValueResponse * SOAP_FMAC4 soap_in_dss__Set_SetValueResponse(struct soap *soap, const char *tag, struct dss__Set_SetValueResponse *a, const char *type)
+SOAP_FMAC3 struct dss__Group_SaveSceneResponse * SOAP_FMAC4 soap_in_dss__Group_SaveSceneResponse(struct soap *soap, const char *tag, struct dss__Group_SaveSceneResponse *a, const char *type)
 {
 	short soap_flag_result = 1;
 	if (soap_element_begin_in(soap, tag, 0, type))
 		return NULL;
-	a = (struct dss__Set_SetValueResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_SetValueResponse, sizeof(struct dss__Set_SetValueResponse), 0, NULL, NULL, NULL);
+	a = (struct dss__Group_SaveSceneResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Group_SaveSceneResponse, sizeof(struct dss__Group_SaveSceneResponse), 0, NULL, NULL, NULL);
 	if (!a)
 		return NULL;
-	soap_default_dss__Set_SetValueResponse(soap, a);
+	soap_default_dss__Group_SaveSceneResponse(soap, a);
 	if (soap->body && !*soap->href)
 	{
 		for (;;)
@@ -13260,7 +13966,7 @@ SOAP_FMAC3 struct dss__Set_SetValueResponse * SOAP_FMAC4 soap_in_dss__Set_SetVal
 			return NULL;
 	}
 	else
-	{	a = (struct dss__Set_SetValueResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_SetValueResponse, 0, sizeof(struct dss__Set_SetValueResponse), 0, NULL);
+	{	a = (struct dss__Group_SaveSceneResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Group_SaveSceneResponse, 0, sizeof(struct dss__Group_SaveSceneResponse), 0, NULL);
 		if (soap->body && soap_element_end_in(soap, tag))
 			return NULL;
 	}
@@ -13271,94 +13977,94 @@ SOAP_FMAC3 struct dss__Set_SetValueResponse * SOAP_FMAC4 soap_in_dss__Set_SetVal
 	return a;
 }
 
-SOAP_FMAC5 struct dss__Set_SetValueResponse * SOAP_FMAC6 soap_new_dss__Set_SetValueResponse(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_SetValueResponse(soap, n, NULL, NULL, NULL);
+SOAP_FMAC5 struct dss__Group_SaveSceneResponse * SOAP_FMAC6 soap_new_dss__Group_SaveSceneResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Group_SaveSceneResponse(soap, n, NULL, NULL, NULL);
 }
 
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_SetValueResponse(struct soap *soap, struct dss__Set_SetValueResponse *p)
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Group_SaveSceneResponse(struct soap *soap, struct dss__Group_SaveSceneResponse *p)
 {	soap_delete(soap, p);
 }
 
-SOAP_FMAC3 struct dss__Set_SetValueResponse * SOAP_FMAC4 soap_instantiate_dss__Set_SetValueResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+SOAP_FMAC3 struct dss__Group_SaveSceneResponse * SOAP_FMAC4 soap_instantiate_dss__Group_SaveSceneResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_SetValueResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_SetValueResponse, n, soap_fdelete);
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Group_SaveSceneResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Group_SaveSceneResponse, n, soap_fdelete);
 	if (!cp)
 		return NULL;
 	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_SetValueResponse;
+	{	cp->ptr = (void*)new struct dss__Group_SaveSceneResponse;
 		if (size)
-			*size = sizeof(struct dss__Set_SetValueResponse);
+			*size = sizeof(struct dss__Group_SaveSceneResponse);
 	}
 	else
-	{	cp->ptr = (void*)new struct dss__Set_SetValueResponse[n];
+	{	cp->ptr = (void*)new struct dss__Group_SaveSceneResponse[n];
 		if (!cp->ptr)
 		{	soap->error = SOAP_EOM;
 			return NULL;
 		}
 		if (size)
-			*size = n * sizeof(struct dss__Set_SetValueResponse);
+			*size = n * sizeof(struct dss__Group_SaveSceneResponse);
 	}
 		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_SetValueResponse*)cp->ptr;
+	return (struct dss__Group_SaveSceneResponse*)cp->ptr;
 }
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_SetValueResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Group_SaveSceneResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_SetValueResponse %p -> %p\n", q, p));
-	*(struct dss__Set_SetValueResponse*)p = *(struct dss__Set_SetValueResponse*)q;
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Group_SaveSceneResponse %p -> %p\n", q, p));
+	*(struct dss__Group_SaveSceneResponse*)p = *(struct dss__Group_SaveSceneResponse*)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_EndDim(struct soap *soap, struct dss__Set_EndDim *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Group_CallScene(struct soap *soap, struct dss__Group_CallScene *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_setID);
-	soap_default_int(soap, &a->_paramID);
+	soap_default_int(soap, &a->_groupID);
+	soap_default_int(soap, &a->_sceneNr);
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_EndDim(struct soap *soap, const struct dss__Set_EndDim *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Group_CallScene(struct soap *soap, const struct dss__Group_CallScene *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_EndDim(struct soap *soap, const struct dss__Set_EndDim *a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Group_CallScene(struct soap *soap, const struct dss__Group_CallScene *a, const char *tag, const char *type)
 {
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_EndDim);
-	if (soap_out_dss__Set_EndDim(soap, tag, id, a, type))
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Group_CallScene);
+	if (soap_out_dss__Group_CallScene(soap, tag, id, a, type))
 		return soap->error;
 	return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_EndDim(struct soap *soap, const char *tag, int id, const struct dss__Set_EndDim *a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Group_CallScene(struct soap *soap, const char *tag, int id, const struct dss__Group_CallScene *a, const char *type)
 {
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_EndDim), type))
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Group_CallScene), type))
 		return soap->error;
 	if (soap_out_int(soap, "token", -1, &a->_token, ""))
 		return soap->error;
-	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
+	if (soap_out_int(soap, "groupID", -1, &a->_groupID, ""))
 		return soap->error;
-	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
+	if (soap_out_int(soap, "sceneNr", -1, &a->_sceneNr, ""))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
 
-SOAP_FMAC3 struct dss__Set_EndDim * SOAP_FMAC4 soap_get_dss__Set_EndDim(struct soap *soap, struct dss__Set_EndDim *p, const char *tag, const char *type)
+SOAP_FMAC3 struct dss__Group_CallScene * SOAP_FMAC4 soap_get_dss__Group_CallScene(struct soap *soap, struct dss__Group_CallScene *p, const char *tag, const char *type)
 {
-	if ((p = soap_in_dss__Set_EndDim(soap, tag, p, type)))
+	if ((p = soap_in_dss__Group_CallScene(soap, tag, p, type)))
 		if (soap_getindependent(soap))
 			return NULL;
 	return p;
 }
 
-SOAP_FMAC3 struct dss__Set_EndDim * SOAP_FMAC4 soap_in_dss__Set_EndDim(struct soap *soap, const char *tag, struct dss__Set_EndDim *a, const char *type)
+SOAP_FMAC3 struct dss__Group_CallScene * SOAP_FMAC4 soap_in_dss__Group_CallScene(struct soap *soap, const char *tag, struct dss__Group_CallScene *a, const char *type)
 {
-	short soap_flag__token = 1, soap_flag__setID = 1, soap_flag__paramID = 1;
+	short soap_flag__token = 1, soap_flag__groupID = 1, soap_flag__sceneNr = 1;
 	if (soap_element_begin_in(soap, tag, 0, type))
 		return NULL;
-	a = (struct dss__Set_EndDim *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_EndDim, sizeof(struct dss__Set_EndDim), 0, NULL, NULL, NULL);
+	a = (struct dss__Group_CallScene *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Group_CallScene, sizeof(struct dss__Group_CallScene), 0, NULL, NULL, NULL);
 	if (!a)
 		return NULL;
-	soap_default_dss__Set_EndDim(soap, a);
+	soap_default_dss__Group_CallScene(soap, a);
 	if (soap->body && !*soap->href)
 	{
 		for (;;)
@@ -13368,14 +14074,14 @@ SOAP_FMAC3 struct dss__Set_EndDim * SOAP_FMAC4 soap_in_dss__Set_EndDim(struct so
 				{	soap_flag__token--;
 					continue;
 				}
-			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
-				{	soap_flag__setID--;
+			if (soap_flag__groupID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_groupID, "xsd:int"))
+				{	soap_flag__groupID--;
 					continue;
 				}
-			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
-				{	soap_flag__paramID--;
+			if (soap_flag__sceneNr && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_sceneNr, "xsd:int"))
+				{	soap_flag__sceneNr--;
 					continue;
 				}
 			if (soap->error == SOAP_TAG_MISMATCH)
@@ -13389,99 +14095,99 @@ SOAP_FMAC3 struct dss__Set_EndDim * SOAP_FMAC4 soap_in_dss__Set_EndDim(struct so
 			return NULL;
 	}
 	else
-	{	a = (struct dss__Set_EndDim *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_EndDim, 0, sizeof(struct dss__Set_EndDim), 0, NULL);
+	{	a = (struct dss__Group_CallScene *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Group_CallScene, 0, sizeof(struct dss__Group_CallScene), 0, NULL);
 		if (soap->body && soap_element_end_in(soap, tag))
 			return NULL;
 	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0 || soap_flag__paramID > 0))
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__groupID > 0 || soap_flag__sceneNr > 0))
 	{	soap->error = SOAP_OCCURS;
 		return NULL;
 	}
 	return a;
 }
 
-SOAP_FMAC5 struct dss__Set_EndDim * SOAP_FMAC6 soap_new_dss__Set_EndDim(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_EndDim(soap, n, NULL, NULL, NULL);
+SOAP_FMAC5 struct dss__Group_CallScene * SOAP_FMAC6 soap_new_dss__Group_CallScene(struct soap *soap, int n)
+{	return soap_instantiate_dss__Group_CallScene(soap, n, NULL, NULL, NULL);
 }
 
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_EndDim(struct soap *soap, struct dss__Set_EndDim *p)
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Group_CallScene(struct soap *soap, struct dss__Group_CallScene *p)
 {	soap_delete(soap, p);
 }
 
-SOAP_FMAC3 struct dss__Set_EndDim * SOAP_FMAC4 soap_instantiate_dss__Set_EndDim(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+SOAP_FMAC3 struct dss__Group_CallScene * SOAP_FMAC4 soap_instantiate_dss__Group_CallScene(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_EndDim(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_EndDim, n, soap_fdelete);
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Group_CallScene(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Group_CallScene, n, soap_fdelete);
 	if (!cp)
 		return NULL;
 	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_EndDim;
+	{	cp->ptr = (void*)new struct dss__Group_CallScene;
 		if (size)
-			*size = sizeof(struct dss__Set_EndDim);
+			*size = sizeof(struct dss__Group_CallScene);
 	}
 	else
-	{	cp->ptr = (void*)new struct dss__Set_EndDim[n];
+	{	cp->ptr = (void*)new struct dss__Group_CallScene[n];
 		if (!cp->ptr)
 		{	soap->error = SOAP_EOM;
 			return NULL;
 		}
 		if (size)
-			*size = n * sizeof(struct dss__Set_EndDim);
+			*size = n * sizeof(struct dss__Group_CallScene);
 	}
 		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_EndDim*)cp->ptr;
+	return (struct dss__Group_CallScene*)cp->ptr;
 }
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_EndDim(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Group_CallScene(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_EndDim %p -> %p\n", q, p));
-	*(struct dss__Set_EndDim*)p = *(struct dss__Set_EndDim*)q;
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Group_CallScene %p -> %p\n", q, p));
+	*(struct dss__Group_CallScene*)p = *(struct dss__Group_CallScene*)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_EndDimResponse(struct soap *soap, struct dss__Set_EndDimResponse *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Group_CallSceneResponse(struct soap *soap, struct dss__Group_CallSceneResponse *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_bool(soap, &a->result);
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_EndDimResponse(struct soap *soap, const struct dss__Set_EndDimResponse *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Group_CallSceneResponse(struct soap *soap, const struct dss__Group_CallSceneResponse *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_EndDimResponse(struct soap *soap, const struct dss__Set_EndDimResponse *a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Group_CallSceneResponse(struct soap *soap, const struct dss__Group_CallSceneResponse *a, const char *tag, const char *type)
 {
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_EndDimResponse);
-	if (soap_out_dss__Set_EndDimResponse(soap, tag, id, a, type))
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Group_CallSceneResponse);
+	if (soap_out_dss__Group_CallSceneResponse(soap, tag, id, a, type))
 		return soap->error;
 	return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_EndDimResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_EndDimResponse *a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Group_CallSceneResponse(struct soap *soap, const char *tag, int id, const struct dss__Group_CallSceneResponse *a, const char *type)
 {
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_EndDimResponse), type))
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Group_CallSceneResponse), type))
 		return soap->error;
 	if (soap_out_bool(soap, "result", -1, &a->result, ""))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
 
-SOAP_FMAC3 struct dss__Set_EndDimResponse * SOAP_FMAC4 soap_get_dss__Set_EndDimResponse(struct soap *soap, struct dss__Set_EndDimResponse *p, const char *tag, const char *type)
+SOAP_FMAC3 struct dss__Group_CallSceneResponse * SOAP_FMAC4 soap_get_dss__Group_CallSceneResponse(struct soap *soap, struct dss__Group_CallSceneResponse *p, const char *tag, const char *type)
 {
-	if ((p = soap_in_dss__Set_EndDimResponse(soap, tag, p, type)))
+	if ((p = soap_in_dss__Group_CallSceneResponse(soap, tag, p, type)))
 		if (soap_getindependent(soap))
 			return NULL;
 	return p;
 }
 
-SOAP_FMAC3 struct dss__Set_EndDimResponse * SOAP_FMAC4 soap_in_dss__Set_EndDimResponse(struct soap *soap, const char *tag, struct dss__Set_EndDimResponse *a, const char *type)
+SOAP_FMAC3 struct dss__Group_CallSceneResponse * SOAP_FMAC4 soap_in_dss__Group_CallSceneResponse(struct soap *soap, const char *tag, struct dss__Group_CallSceneResponse *a, const char *type)
 {
 	short soap_flag_result = 1;
 	if (soap_element_begin_in(soap, tag, 0, type))
 		return NULL;
-	a = (struct dss__Set_EndDimResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_EndDimResponse, sizeof(struct dss__Set_EndDimResponse), 0, NULL, NULL, NULL);
+	a = (struct dss__Group_CallSceneResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Group_CallSceneResponse, sizeof(struct dss__Group_CallSceneResponse), 0, NULL, NULL, NULL);
 	if (!a)
 		return NULL;
-	soap_default_dss__Set_EndDimResponse(soap, a);
+	soap_default_dss__Group_CallSceneResponse(soap, a);
 	if (soap->body && !*soap->href)
 	{
 		for (;;)
@@ -13502,7 +14208,7 @@ SOAP_FMAC3 struct dss__Set_EndDimResponse * SOAP_FMAC4 soap_in_dss__Set_EndDimRe
 			return NULL;
 	}
 	else
-	{	a = (struct dss__Set_EndDimResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_EndDimResponse, 0, sizeof(struct dss__Set_EndDimResponse), 0, NULL);
+	{	a = (struct dss__Group_CallSceneResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Group_CallSceneResponse, 0, sizeof(struct dss__Group_CallSceneResponse), 0, NULL);
 		if (soap->body && soap_element_end_in(soap, tag))
 			return NULL;
 	}
@@ -13513,1711 +14219,41 @@ SOAP_FMAC3 struct dss__Set_EndDimResponse * SOAP_FMAC4 soap_in_dss__Set_EndDimRe
 	return a;
 }
 
-SOAP_FMAC5 struct dss__Set_EndDimResponse * SOAP_FMAC6 soap_new_dss__Set_EndDimResponse(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_EndDimResponse(soap, n, NULL, NULL, NULL);
+SOAP_FMAC5 struct dss__Group_CallSceneResponse * SOAP_FMAC6 soap_new_dss__Group_CallSceneResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Group_CallSceneResponse(soap, n, NULL, NULL, NULL);
 }
 
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_EndDimResponse(struct soap *soap, struct dss__Set_EndDimResponse *p)
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Group_CallSceneResponse(struct soap *soap, struct dss__Group_CallSceneResponse *p)
 {	soap_delete(soap, p);
 }
 
-SOAP_FMAC3 struct dss__Set_EndDimResponse * SOAP_FMAC4 soap_instantiate_dss__Set_EndDimResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+SOAP_FMAC3 struct dss__Group_CallSceneResponse * SOAP_FMAC4 soap_instantiate_dss__Group_CallSceneResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_EndDimResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_EndDimResponse, n, soap_fdelete);
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Group_CallSceneResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Group_CallSceneResponse, n, soap_fdelete);
 	if (!cp)
 		return NULL;
 	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_EndDimResponse;
+	{	cp->ptr = (void*)new struct dss__Group_CallSceneResponse;
 		if (size)
-			*size = sizeof(struct dss__Set_EndDimResponse);
+			*size = sizeof(struct dss__Group_CallSceneResponse);
 	}
 	else
-	{	cp->ptr = (void*)new struct dss__Set_EndDimResponse[n];
+	{	cp->ptr = (void*)new struct dss__Group_CallSceneResponse[n];
 		if (!cp->ptr)
 		{	soap->error = SOAP_EOM;
 			return NULL;
 		}
 		if (size)
-			*size = n * sizeof(struct dss__Set_EndDimResponse);
+			*size = n * sizeof(struct dss__Group_CallSceneResponse);
 	}
 		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_EndDimResponse*)cp->ptr;
+	return (struct dss__Group_CallSceneResponse*)cp->ptr;
 }
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_EndDimResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Group_CallSceneResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_EndDimResponse %p -> %p\n", q, p));
-	*(struct dss__Set_EndDimResponse*)p = *(struct dss__Set_EndDimResponse*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_StartDim(struct soap *soap, struct dss__Set_StartDim *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_setID);
-	soap_default_bool(soap, &a->_directionUp);
-	soap_default_int(soap, &a->_paramID);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_StartDim(struct soap *soap, const struct dss__Set_StartDim *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_StartDim(struct soap *soap, const struct dss__Set_StartDim *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_StartDim);
-	if (soap_out_dss__Set_StartDim(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_StartDim(struct soap *soap, const char *tag, int id, const struct dss__Set_StartDim *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_StartDim), type))
-		return soap->error;
-	if (soap_out_int(soap, "token", -1, &a->_token, ""))
-		return soap->error;
-	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
-		return soap->error;
-	if (soap_out_bool(soap, "directionUp", -1, &a->_directionUp, ""))
-		return soap->error;
-	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Set_StartDim * SOAP_FMAC4 soap_get_dss__Set_StartDim(struct soap *soap, struct dss__Set_StartDim *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Set_StartDim(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Set_StartDim * SOAP_FMAC4 soap_in_dss__Set_StartDim(struct soap *soap, const char *tag, struct dss__Set_StartDim *a, const char *type)
-{
-	short soap_flag__token = 1, soap_flag__setID = 1, soap_flag__directionUp = 1, soap_flag__paramID = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Set_StartDim *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_StartDim, sizeof(struct dss__Set_StartDim), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Set_StartDim(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
-				{	soap_flag__token--;
-					continue;
-				}
-			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
-				{	soap_flag__setID--;
-					continue;
-				}
-			if (soap_flag__directionUp && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_bool(soap, NULL, &a->_directionUp, "xsd:boolean"))
-				{	soap_flag__directionUp--;
-					continue;
-				}
-			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
-				{	soap_flag__paramID--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Set_StartDim *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_StartDim, 0, sizeof(struct dss__Set_StartDim), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0 || soap_flag__directionUp > 0 || soap_flag__paramID > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Set_StartDim * SOAP_FMAC6 soap_new_dss__Set_StartDim(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_StartDim(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_StartDim(struct soap *soap, struct dss__Set_StartDim *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Set_StartDim * SOAP_FMAC4 soap_instantiate_dss__Set_StartDim(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_StartDim(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_StartDim, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_StartDim;
-		if (size)
-			*size = sizeof(struct dss__Set_StartDim);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Set_StartDim[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Set_StartDim);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_StartDim*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_StartDim(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_StartDim %p -> %p\n", q, p));
-	*(struct dss__Set_StartDim*)p = *(struct dss__Set_StartDim*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_StartDimResponse(struct soap *soap, struct dss__Set_StartDimResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_bool(soap, &a->result);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_StartDimResponse(struct soap *soap, const struct dss__Set_StartDimResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_StartDimResponse(struct soap *soap, const struct dss__Set_StartDimResponse *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_StartDimResponse);
-	if (soap_out_dss__Set_StartDimResponse(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_StartDimResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_StartDimResponse *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_StartDimResponse), type))
-		return soap->error;
-	if (soap_out_bool(soap, "result", -1, &a->result, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Set_StartDimResponse * SOAP_FMAC4 soap_get_dss__Set_StartDimResponse(struct soap *soap, struct dss__Set_StartDimResponse *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Set_StartDimResponse(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Set_StartDimResponse * SOAP_FMAC4 soap_in_dss__Set_StartDimResponse(struct soap *soap, const char *tag, struct dss__Set_StartDimResponse *a, const char *type)
-{
-	short soap_flag_result = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Set_StartDimResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_StartDimResponse, sizeof(struct dss__Set_StartDimResponse), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Set_StartDimResponse(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
-				{	soap_flag_result--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Set_StartDimResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_StartDimResponse, 0, sizeof(struct dss__Set_StartDimResponse), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Set_StartDimResponse * SOAP_FMAC6 soap_new_dss__Set_StartDimResponse(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_StartDimResponse(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_StartDimResponse(struct soap *soap, struct dss__Set_StartDimResponse *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Set_StartDimResponse * SOAP_FMAC4 soap_instantiate_dss__Set_StartDimResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_StartDimResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_StartDimResponse, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_StartDimResponse;
-		if (size)
-			*size = sizeof(struct dss__Set_StartDimResponse);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Set_StartDimResponse[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Set_StartDimResponse);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_StartDimResponse*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_StartDimResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_StartDimResponse %p -> %p\n", q, p));
-	*(struct dss__Set_StartDimResponse*)p = *(struct dss__Set_StartDimResponse*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_Disable(struct soap *soap, struct dss__Set_Disable *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_setID);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_Disable(struct soap *soap, const struct dss__Set_Disable *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_Disable(struct soap *soap, const struct dss__Set_Disable *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_Disable);
-	if (soap_out_dss__Set_Disable(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_Disable(struct soap *soap, const char *tag, int id, const struct dss__Set_Disable *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_Disable), type))
-		return soap->error;
-	if (soap_out_int(soap, "token", -1, &a->_token, ""))
-		return soap->error;
-	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Set_Disable * SOAP_FMAC4 soap_get_dss__Set_Disable(struct soap *soap, struct dss__Set_Disable *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Set_Disable(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Set_Disable * SOAP_FMAC4 soap_in_dss__Set_Disable(struct soap *soap, const char *tag, struct dss__Set_Disable *a, const char *type)
-{
-	short soap_flag__token = 1, soap_flag__setID = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Set_Disable *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_Disable, sizeof(struct dss__Set_Disable), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Set_Disable(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
-				{	soap_flag__token--;
-					continue;
-				}
-			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
-				{	soap_flag__setID--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Set_Disable *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_Disable, 0, sizeof(struct dss__Set_Disable), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Set_Disable * SOAP_FMAC6 soap_new_dss__Set_Disable(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_Disable(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_Disable(struct soap *soap, struct dss__Set_Disable *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Set_Disable * SOAP_FMAC4 soap_instantiate_dss__Set_Disable(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_Disable(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_Disable, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_Disable;
-		if (size)
-			*size = sizeof(struct dss__Set_Disable);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Set_Disable[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Set_Disable);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_Disable*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_Disable(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_Disable %p -> %p\n", q, p));
-	*(struct dss__Set_Disable*)p = *(struct dss__Set_Disable*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_DisableResponse(struct soap *soap, struct dss__Set_DisableResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_bool(soap, &a->result);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_DisableResponse(struct soap *soap, const struct dss__Set_DisableResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_DisableResponse(struct soap *soap, const struct dss__Set_DisableResponse *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_DisableResponse);
-	if (soap_out_dss__Set_DisableResponse(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_DisableResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_DisableResponse *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_DisableResponse), type))
-		return soap->error;
-	if (soap_out_bool(soap, "result", -1, &a->result, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Set_DisableResponse * SOAP_FMAC4 soap_get_dss__Set_DisableResponse(struct soap *soap, struct dss__Set_DisableResponse *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Set_DisableResponse(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Set_DisableResponse * SOAP_FMAC4 soap_in_dss__Set_DisableResponse(struct soap *soap, const char *tag, struct dss__Set_DisableResponse *a, const char *type)
-{
-	short soap_flag_result = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Set_DisableResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_DisableResponse, sizeof(struct dss__Set_DisableResponse), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Set_DisableResponse(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
-				{	soap_flag_result--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Set_DisableResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_DisableResponse, 0, sizeof(struct dss__Set_DisableResponse), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Set_DisableResponse * SOAP_FMAC6 soap_new_dss__Set_DisableResponse(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_DisableResponse(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_DisableResponse(struct soap *soap, struct dss__Set_DisableResponse *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Set_DisableResponse * SOAP_FMAC4 soap_instantiate_dss__Set_DisableResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_DisableResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_DisableResponse, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_DisableResponse;
-		if (size)
-			*size = sizeof(struct dss__Set_DisableResponse);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Set_DisableResponse[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Set_DisableResponse);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_DisableResponse*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_DisableResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_DisableResponse %p -> %p\n", q, p));
-	*(struct dss__Set_DisableResponse*)p = *(struct dss__Set_DisableResponse*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_Enable(struct soap *soap, struct dss__Set_Enable *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_setID);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_Enable(struct soap *soap, const struct dss__Set_Enable *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_Enable(struct soap *soap, const struct dss__Set_Enable *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_Enable);
-	if (soap_out_dss__Set_Enable(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_Enable(struct soap *soap, const char *tag, int id, const struct dss__Set_Enable *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_Enable), type))
-		return soap->error;
-	if (soap_out_int(soap, "token", -1, &a->_token, ""))
-		return soap->error;
-	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Set_Enable * SOAP_FMAC4 soap_get_dss__Set_Enable(struct soap *soap, struct dss__Set_Enable *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Set_Enable(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Set_Enable * SOAP_FMAC4 soap_in_dss__Set_Enable(struct soap *soap, const char *tag, struct dss__Set_Enable *a, const char *type)
-{
-	short soap_flag__token = 1, soap_flag__setID = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Set_Enable *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_Enable, sizeof(struct dss__Set_Enable), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Set_Enable(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
-				{	soap_flag__token--;
-					continue;
-				}
-			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
-				{	soap_flag__setID--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Set_Enable *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_Enable, 0, sizeof(struct dss__Set_Enable), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Set_Enable * SOAP_FMAC6 soap_new_dss__Set_Enable(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_Enable(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_Enable(struct soap *soap, struct dss__Set_Enable *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Set_Enable * SOAP_FMAC4 soap_instantiate_dss__Set_Enable(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_Enable(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_Enable, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_Enable;
-		if (size)
-			*size = sizeof(struct dss__Set_Enable);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Set_Enable[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Set_Enable);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_Enable*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_Enable(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_Enable %p -> %p\n", q, p));
-	*(struct dss__Set_Enable*)p = *(struct dss__Set_Enable*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_EnableResponse(struct soap *soap, struct dss__Set_EnableResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_bool(soap, &a->result);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_EnableResponse(struct soap *soap, const struct dss__Set_EnableResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_EnableResponse(struct soap *soap, const struct dss__Set_EnableResponse *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_EnableResponse);
-	if (soap_out_dss__Set_EnableResponse(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_EnableResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_EnableResponse *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_EnableResponse), type))
-		return soap->error;
-	if (soap_out_bool(soap, "result", -1, &a->result, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Set_EnableResponse * SOAP_FMAC4 soap_get_dss__Set_EnableResponse(struct soap *soap, struct dss__Set_EnableResponse *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Set_EnableResponse(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Set_EnableResponse * SOAP_FMAC4 soap_in_dss__Set_EnableResponse(struct soap *soap, const char *tag, struct dss__Set_EnableResponse *a, const char *type)
-{
-	short soap_flag_result = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Set_EnableResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_EnableResponse, sizeof(struct dss__Set_EnableResponse), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Set_EnableResponse(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
-				{	soap_flag_result--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Set_EnableResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_EnableResponse, 0, sizeof(struct dss__Set_EnableResponse), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Set_EnableResponse * SOAP_FMAC6 soap_new_dss__Set_EnableResponse(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_EnableResponse(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_EnableResponse(struct soap *soap, struct dss__Set_EnableResponse *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Set_EnableResponse * SOAP_FMAC4 soap_instantiate_dss__Set_EnableResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_EnableResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_EnableResponse, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_EnableResponse;
-		if (size)
-			*size = sizeof(struct dss__Set_EnableResponse);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Set_EnableResponse[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Set_EnableResponse);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_EnableResponse*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_EnableResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_EnableResponse %p -> %p\n", q, p));
-	*(struct dss__Set_EnableResponse*)p = *(struct dss__Set_EnableResponse*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_DecreaseValue(struct soap *soap, struct dss__Set_DecreaseValue *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_setID);
-	soap_default_int(soap, &a->_paramID);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_DecreaseValue(struct soap *soap, const struct dss__Set_DecreaseValue *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_DecreaseValue(struct soap *soap, const struct dss__Set_DecreaseValue *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_DecreaseValue);
-	if (soap_out_dss__Set_DecreaseValue(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_DecreaseValue(struct soap *soap, const char *tag, int id, const struct dss__Set_DecreaseValue *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_DecreaseValue), type))
-		return soap->error;
-	if (soap_out_int(soap, "token", -1, &a->_token, ""))
-		return soap->error;
-	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
-		return soap->error;
-	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Set_DecreaseValue * SOAP_FMAC4 soap_get_dss__Set_DecreaseValue(struct soap *soap, struct dss__Set_DecreaseValue *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Set_DecreaseValue(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Set_DecreaseValue * SOAP_FMAC4 soap_in_dss__Set_DecreaseValue(struct soap *soap, const char *tag, struct dss__Set_DecreaseValue *a, const char *type)
-{
-	short soap_flag__token = 1, soap_flag__setID = 1, soap_flag__paramID = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Set_DecreaseValue *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_DecreaseValue, sizeof(struct dss__Set_DecreaseValue), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Set_DecreaseValue(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
-				{	soap_flag__token--;
-					continue;
-				}
-			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
-				{	soap_flag__setID--;
-					continue;
-				}
-			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
-				{	soap_flag__paramID--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Set_DecreaseValue *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_DecreaseValue, 0, sizeof(struct dss__Set_DecreaseValue), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0 || soap_flag__paramID > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Set_DecreaseValue * SOAP_FMAC6 soap_new_dss__Set_DecreaseValue(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_DecreaseValue(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_DecreaseValue(struct soap *soap, struct dss__Set_DecreaseValue *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Set_DecreaseValue * SOAP_FMAC4 soap_instantiate_dss__Set_DecreaseValue(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_DecreaseValue(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_DecreaseValue, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_DecreaseValue;
-		if (size)
-			*size = sizeof(struct dss__Set_DecreaseValue);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Set_DecreaseValue[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Set_DecreaseValue);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_DecreaseValue*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_DecreaseValue(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_DecreaseValue %p -> %p\n", q, p));
-	*(struct dss__Set_DecreaseValue*)p = *(struct dss__Set_DecreaseValue*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_DecreaseValueResponse(struct soap *soap, struct dss__Set_DecreaseValueResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_bool(soap, &a->result);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_DecreaseValueResponse(struct soap *soap, const struct dss__Set_DecreaseValueResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_DecreaseValueResponse(struct soap *soap, const struct dss__Set_DecreaseValueResponse *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_DecreaseValueResponse);
-	if (soap_out_dss__Set_DecreaseValueResponse(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_DecreaseValueResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_DecreaseValueResponse *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_DecreaseValueResponse), type))
-		return soap->error;
-	if (soap_out_bool(soap, "result", -1, &a->result, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Set_DecreaseValueResponse * SOAP_FMAC4 soap_get_dss__Set_DecreaseValueResponse(struct soap *soap, struct dss__Set_DecreaseValueResponse *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Set_DecreaseValueResponse(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Set_DecreaseValueResponse * SOAP_FMAC4 soap_in_dss__Set_DecreaseValueResponse(struct soap *soap, const char *tag, struct dss__Set_DecreaseValueResponse *a, const char *type)
-{
-	short soap_flag_result = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Set_DecreaseValueResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_DecreaseValueResponse, sizeof(struct dss__Set_DecreaseValueResponse), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Set_DecreaseValueResponse(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
-				{	soap_flag_result--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Set_DecreaseValueResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_DecreaseValueResponse, 0, sizeof(struct dss__Set_DecreaseValueResponse), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Set_DecreaseValueResponse * SOAP_FMAC6 soap_new_dss__Set_DecreaseValueResponse(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_DecreaseValueResponse(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_DecreaseValueResponse(struct soap *soap, struct dss__Set_DecreaseValueResponse *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Set_DecreaseValueResponse * SOAP_FMAC4 soap_instantiate_dss__Set_DecreaseValueResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_DecreaseValueResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_DecreaseValueResponse, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_DecreaseValueResponse;
-		if (size)
-			*size = sizeof(struct dss__Set_DecreaseValueResponse);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Set_DecreaseValueResponse[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Set_DecreaseValueResponse);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_DecreaseValueResponse*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_DecreaseValueResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_DecreaseValueResponse %p -> %p\n", q, p));
-	*(struct dss__Set_DecreaseValueResponse*)p = *(struct dss__Set_DecreaseValueResponse*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_IncreaseValue(struct soap *soap, struct dss__Set_IncreaseValue *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_setID);
-	soap_default_int(soap, &a->_paramID);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_IncreaseValue(struct soap *soap, const struct dss__Set_IncreaseValue *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_IncreaseValue(struct soap *soap, const struct dss__Set_IncreaseValue *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_IncreaseValue);
-	if (soap_out_dss__Set_IncreaseValue(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_IncreaseValue(struct soap *soap, const char *tag, int id, const struct dss__Set_IncreaseValue *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_IncreaseValue), type))
-		return soap->error;
-	if (soap_out_int(soap, "token", -1, &a->_token, ""))
-		return soap->error;
-	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
-		return soap->error;
-	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Set_IncreaseValue * SOAP_FMAC4 soap_get_dss__Set_IncreaseValue(struct soap *soap, struct dss__Set_IncreaseValue *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Set_IncreaseValue(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Set_IncreaseValue * SOAP_FMAC4 soap_in_dss__Set_IncreaseValue(struct soap *soap, const char *tag, struct dss__Set_IncreaseValue *a, const char *type)
-{
-	short soap_flag__token = 1, soap_flag__setID = 1, soap_flag__paramID = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Set_IncreaseValue *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_IncreaseValue, sizeof(struct dss__Set_IncreaseValue), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Set_IncreaseValue(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
-				{	soap_flag__token--;
-					continue;
-				}
-			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
-				{	soap_flag__setID--;
-					continue;
-				}
-			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
-				{	soap_flag__paramID--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Set_IncreaseValue *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_IncreaseValue, 0, sizeof(struct dss__Set_IncreaseValue), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0 || soap_flag__paramID > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Set_IncreaseValue * SOAP_FMAC6 soap_new_dss__Set_IncreaseValue(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_IncreaseValue(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_IncreaseValue(struct soap *soap, struct dss__Set_IncreaseValue *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Set_IncreaseValue * SOAP_FMAC4 soap_instantiate_dss__Set_IncreaseValue(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_IncreaseValue(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_IncreaseValue, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_IncreaseValue;
-		if (size)
-			*size = sizeof(struct dss__Set_IncreaseValue);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Set_IncreaseValue[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Set_IncreaseValue);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_IncreaseValue*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_IncreaseValue(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_IncreaseValue %p -> %p\n", q, p));
-	*(struct dss__Set_IncreaseValue*)p = *(struct dss__Set_IncreaseValue*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_IncreaseValueResponse(struct soap *soap, struct dss__Set_IncreaseValueResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_bool(soap, &a->result);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_IncreaseValueResponse(struct soap *soap, const struct dss__Set_IncreaseValueResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_IncreaseValueResponse(struct soap *soap, const struct dss__Set_IncreaseValueResponse *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_IncreaseValueResponse);
-	if (soap_out_dss__Set_IncreaseValueResponse(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_IncreaseValueResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_IncreaseValueResponse *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_IncreaseValueResponse), type))
-		return soap->error;
-	if (soap_out_bool(soap, "result", -1, &a->result, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Set_IncreaseValueResponse * SOAP_FMAC4 soap_get_dss__Set_IncreaseValueResponse(struct soap *soap, struct dss__Set_IncreaseValueResponse *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Set_IncreaseValueResponse(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Set_IncreaseValueResponse * SOAP_FMAC4 soap_in_dss__Set_IncreaseValueResponse(struct soap *soap, const char *tag, struct dss__Set_IncreaseValueResponse *a, const char *type)
-{
-	short soap_flag_result = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Set_IncreaseValueResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_IncreaseValueResponse, sizeof(struct dss__Set_IncreaseValueResponse), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Set_IncreaseValueResponse(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
-				{	soap_flag_result--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Set_IncreaseValueResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_IncreaseValueResponse, 0, sizeof(struct dss__Set_IncreaseValueResponse), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Set_IncreaseValueResponse * SOAP_FMAC6 soap_new_dss__Set_IncreaseValueResponse(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_IncreaseValueResponse(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_IncreaseValueResponse(struct soap *soap, struct dss__Set_IncreaseValueResponse *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Set_IncreaseValueResponse * SOAP_FMAC4 soap_instantiate_dss__Set_IncreaseValueResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_IncreaseValueResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_IncreaseValueResponse, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_IncreaseValueResponse;
-		if (size)
-			*size = sizeof(struct dss__Set_IncreaseValueResponse);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Set_IncreaseValueResponse[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Set_IncreaseValueResponse);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_IncreaseValueResponse*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_IncreaseValueResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_IncreaseValueResponse %p -> %p\n", q, p));
-	*(struct dss__Set_IncreaseValueResponse*)p = *(struct dss__Set_IncreaseValueResponse*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_TurnOff(struct soap *soap, struct dss__Set_TurnOff *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_setID);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_TurnOff(struct soap *soap, const struct dss__Set_TurnOff *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_TurnOff(struct soap *soap, const struct dss__Set_TurnOff *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_TurnOff);
-	if (soap_out_dss__Set_TurnOff(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_TurnOff(struct soap *soap, const char *tag, int id, const struct dss__Set_TurnOff *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_TurnOff), type))
-		return soap->error;
-	if (soap_out_int(soap, "token", -1, &a->_token, ""))
-		return soap->error;
-	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Set_TurnOff * SOAP_FMAC4 soap_get_dss__Set_TurnOff(struct soap *soap, struct dss__Set_TurnOff *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Set_TurnOff(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Set_TurnOff * SOAP_FMAC4 soap_in_dss__Set_TurnOff(struct soap *soap, const char *tag, struct dss__Set_TurnOff *a, const char *type)
-{
-	short soap_flag__token = 1, soap_flag__setID = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Set_TurnOff *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_TurnOff, sizeof(struct dss__Set_TurnOff), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Set_TurnOff(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
-				{	soap_flag__token--;
-					continue;
-				}
-			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
-				{	soap_flag__setID--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Set_TurnOff *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_TurnOff, 0, sizeof(struct dss__Set_TurnOff), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Set_TurnOff * SOAP_FMAC6 soap_new_dss__Set_TurnOff(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_TurnOff(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_TurnOff(struct soap *soap, struct dss__Set_TurnOff *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Set_TurnOff * SOAP_FMAC4 soap_instantiate_dss__Set_TurnOff(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_TurnOff(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_TurnOff, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_TurnOff;
-		if (size)
-			*size = sizeof(struct dss__Set_TurnOff);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Set_TurnOff[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Set_TurnOff);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_TurnOff*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_TurnOff(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_TurnOff %p -> %p\n", q, p));
-	*(struct dss__Set_TurnOff*)p = *(struct dss__Set_TurnOff*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_TurnOffResponse(struct soap *soap, struct dss__Set_TurnOffResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_bool(soap, &a->result);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_TurnOffResponse(struct soap *soap, const struct dss__Set_TurnOffResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_TurnOffResponse(struct soap *soap, const struct dss__Set_TurnOffResponse *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_TurnOffResponse);
-	if (soap_out_dss__Set_TurnOffResponse(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_TurnOffResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_TurnOffResponse *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_TurnOffResponse), type))
-		return soap->error;
-	if (soap_out_bool(soap, "result", -1, &a->result, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Set_TurnOffResponse * SOAP_FMAC4 soap_get_dss__Set_TurnOffResponse(struct soap *soap, struct dss__Set_TurnOffResponse *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Set_TurnOffResponse(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Set_TurnOffResponse * SOAP_FMAC4 soap_in_dss__Set_TurnOffResponse(struct soap *soap, const char *tag, struct dss__Set_TurnOffResponse *a, const char *type)
-{
-	short soap_flag_result = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Set_TurnOffResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_TurnOffResponse, sizeof(struct dss__Set_TurnOffResponse), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Set_TurnOffResponse(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
-				{	soap_flag_result--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Set_TurnOffResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_TurnOffResponse, 0, sizeof(struct dss__Set_TurnOffResponse), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Set_TurnOffResponse * SOAP_FMAC6 soap_new_dss__Set_TurnOffResponse(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_TurnOffResponse(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_TurnOffResponse(struct soap *soap, struct dss__Set_TurnOffResponse *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Set_TurnOffResponse * SOAP_FMAC4 soap_instantiate_dss__Set_TurnOffResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_TurnOffResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_TurnOffResponse, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_TurnOffResponse;
-		if (size)
-			*size = sizeof(struct dss__Set_TurnOffResponse);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Set_TurnOffResponse[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Set_TurnOffResponse);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_TurnOffResponse*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_TurnOffResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_TurnOffResponse %p -> %p\n", q, p));
-	*(struct dss__Set_TurnOffResponse*)p = *(struct dss__Set_TurnOffResponse*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_TurnOn(struct soap *soap, struct dss__Set_TurnOn *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_setID);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_TurnOn(struct soap *soap, const struct dss__Set_TurnOn *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_TurnOn(struct soap *soap, const struct dss__Set_TurnOn *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_TurnOn);
-	if (soap_out_dss__Set_TurnOn(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_TurnOn(struct soap *soap, const char *tag, int id, const struct dss__Set_TurnOn *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_TurnOn), type))
-		return soap->error;
-	if (soap_out_int(soap, "token", -1, &a->_token, ""))
-		return soap->error;
-	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Set_TurnOn * SOAP_FMAC4 soap_get_dss__Set_TurnOn(struct soap *soap, struct dss__Set_TurnOn *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Set_TurnOn(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Set_TurnOn * SOAP_FMAC4 soap_in_dss__Set_TurnOn(struct soap *soap, const char *tag, struct dss__Set_TurnOn *a, const char *type)
-{
-	short soap_flag__token = 1, soap_flag__setID = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Set_TurnOn *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_TurnOn, sizeof(struct dss__Set_TurnOn), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Set_TurnOn(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
-				{	soap_flag__token--;
-					continue;
-				}
-			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
-				{	soap_flag__setID--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Set_TurnOn *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_TurnOn, 0, sizeof(struct dss__Set_TurnOn), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Set_TurnOn * SOAP_FMAC6 soap_new_dss__Set_TurnOn(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_TurnOn(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_TurnOn(struct soap *soap, struct dss__Set_TurnOn *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Set_TurnOn * SOAP_FMAC4 soap_instantiate_dss__Set_TurnOn(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_TurnOn(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_TurnOn, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_TurnOn;
-		if (size)
-			*size = sizeof(struct dss__Set_TurnOn);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Set_TurnOn[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Set_TurnOn);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_TurnOn*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_TurnOn(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_TurnOn %p -> %p\n", q, p));
-	*(struct dss__Set_TurnOn*)p = *(struct dss__Set_TurnOn*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_TurnOnResponse(struct soap *soap, struct dss__Set_TurnOnResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_bool(soap, &a->result);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_TurnOnResponse(struct soap *soap, const struct dss__Set_TurnOnResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_TurnOnResponse(struct soap *soap, const struct dss__Set_TurnOnResponse *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_TurnOnResponse);
-	if (soap_out_dss__Set_TurnOnResponse(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_TurnOnResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_TurnOnResponse *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_TurnOnResponse), type))
-		return soap->error;
-	if (soap_out_bool(soap, "result", -1, &a->result, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Set_TurnOnResponse * SOAP_FMAC4 soap_get_dss__Set_TurnOnResponse(struct soap *soap, struct dss__Set_TurnOnResponse *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Set_TurnOnResponse(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Set_TurnOnResponse * SOAP_FMAC4 soap_in_dss__Set_TurnOnResponse(struct soap *soap, const char *tag, struct dss__Set_TurnOnResponse *a, const char *type)
-{
-	short soap_flag_result = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Set_TurnOnResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_TurnOnResponse, sizeof(struct dss__Set_TurnOnResponse), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Set_TurnOnResponse(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
-				{	soap_flag_result--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Set_TurnOnResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_TurnOnResponse, 0, sizeof(struct dss__Set_TurnOnResponse), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Set_TurnOnResponse * SOAP_FMAC6 soap_new_dss__Set_TurnOnResponse(struct soap *soap, int n)
-{	return soap_instantiate_dss__Set_TurnOnResponse(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_TurnOnResponse(struct soap *soap, struct dss__Set_TurnOnResponse *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Set_TurnOnResponse * SOAP_FMAC4 soap_instantiate_dss__Set_TurnOnResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_TurnOnResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_TurnOnResponse, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Set_TurnOnResponse;
-		if (size)
-			*size = sizeof(struct dss__Set_TurnOnResponse);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Set_TurnOnResponse[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Set_TurnOnResponse);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Set_TurnOnResponse*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_TurnOnResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_TurnOnResponse %p -> %p\n", q, p));
-	*(struct dss__Set_TurnOnResponse*)p = *(struct dss__Set_TurnOnResponse*)q;
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Group_CallSceneResponse %p -> %p\n", q, p));
+	*(struct dss__Group_CallSceneResponse*)p = *(struct dss__Group_CallSceneResponse*)q;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Group_SetValue(struct soap *soap, struct dss__Group_SetValue *a)
@@ -17380,6 +16416,2652 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Group_TurnOnResponse(struct soap *soap
 {
 	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Group_TurnOnResponse %p -> %p\n", q, p));
 	*(struct dss__Group_TurnOnResponse*)p = *(struct dss__Group_TurnOnResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_SaveScene(struct soap *soap, struct dss__Set_SaveScene *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_int(soap, &a->_setID);
+	soap_default_int(soap, &a->_sceneNr);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_SaveScene(struct soap *soap, const struct dss__Set_SaveScene *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_SaveScene(struct soap *soap, const struct dss__Set_SaveScene *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_SaveScene);
+	if (soap_out_dss__Set_SaveScene(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_SaveScene(struct soap *soap, const char *tag, int id, const struct dss__Set_SaveScene *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_SaveScene), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
+		return soap->error;
+	if (soap_out_int(soap, "sceneNr", -1, &a->_sceneNr, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_SaveScene * SOAP_FMAC4 soap_get_dss__Set_SaveScene(struct soap *soap, struct dss__Set_SaveScene *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_SaveScene(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_SaveScene * SOAP_FMAC4 soap_in_dss__Set_SaveScene(struct soap *soap, const char *tag, struct dss__Set_SaveScene *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__setID = 1, soap_flag__sceneNr = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_SaveScene *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_SaveScene, sizeof(struct dss__Set_SaveScene), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_SaveScene(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
+				{	soap_flag__setID--;
+					continue;
+				}
+			if (soap_flag__sceneNr && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_sceneNr, "xsd:int"))
+				{	soap_flag__sceneNr--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_SaveScene *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_SaveScene, 0, sizeof(struct dss__Set_SaveScene), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0 || soap_flag__sceneNr > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_SaveScene * SOAP_FMAC6 soap_new_dss__Set_SaveScene(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_SaveScene(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_SaveScene(struct soap *soap, struct dss__Set_SaveScene *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_SaveScene * SOAP_FMAC4 soap_instantiate_dss__Set_SaveScene(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_SaveScene(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_SaveScene, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_SaveScene;
+		if (size)
+			*size = sizeof(struct dss__Set_SaveScene);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_SaveScene[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_SaveScene);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_SaveScene*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_SaveScene(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_SaveScene %p -> %p\n", q, p));
+	*(struct dss__Set_SaveScene*)p = *(struct dss__Set_SaveScene*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_SaveSceneResponse(struct soap *soap, struct dss__Set_SaveSceneResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_SaveSceneResponse(struct soap *soap, const struct dss__Set_SaveSceneResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_SaveSceneResponse(struct soap *soap, const struct dss__Set_SaveSceneResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_SaveSceneResponse);
+	if (soap_out_dss__Set_SaveSceneResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_SaveSceneResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_SaveSceneResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_SaveSceneResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_SaveSceneResponse * SOAP_FMAC4 soap_get_dss__Set_SaveSceneResponse(struct soap *soap, struct dss__Set_SaveSceneResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_SaveSceneResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_SaveSceneResponse * SOAP_FMAC4 soap_in_dss__Set_SaveSceneResponse(struct soap *soap, const char *tag, struct dss__Set_SaveSceneResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_SaveSceneResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_SaveSceneResponse, sizeof(struct dss__Set_SaveSceneResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_SaveSceneResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_SaveSceneResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_SaveSceneResponse, 0, sizeof(struct dss__Set_SaveSceneResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_SaveSceneResponse * SOAP_FMAC6 soap_new_dss__Set_SaveSceneResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_SaveSceneResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_SaveSceneResponse(struct soap *soap, struct dss__Set_SaveSceneResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_SaveSceneResponse * SOAP_FMAC4 soap_instantiate_dss__Set_SaveSceneResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_SaveSceneResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_SaveSceneResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_SaveSceneResponse;
+		if (size)
+			*size = sizeof(struct dss__Set_SaveSceneResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_SaveSceneResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_SaveSceneResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_SaveSceneResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_SaveSceneResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_SaveSceneResponse %p -> %p\n", q, p));
+	*(struct dss__Set_SaveSceneResponse*)p = *(struct dss__Set_SaveSceneResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_CallScene(struct soap *soap, struct dss__Set_CallScene *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_int(soap, &a->_setID);
+	soap_default_int(soap, &a->_sceneNr);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_CallScene(struct soap *soap, const struct dss__Set_CallScene *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_CallScene(struct soap *soap, const struct dss__Set_CallScene *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_CallScene);
+	if (soap_out_dss__Set_CallScene(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_CallScene(struct soap *soap, const char *tag, int id, const struct dss__Set_CallScene *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_CallScene), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
+		return soap->error;
+	if (soap_out_int(soap, "sceneNr", -1, &a->_sceneNr, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_CallScene * SOAP_FMAC4 soap_get_dss__Set_CallScene(struct soap *soap, struct dss__Set_CallScene *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_CallScene(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_CallScene * SOAP_FMAC4 soap_in_dss__Set_CallScene(struct soap *soap, const char *tag, struct dss__Set_CallScene *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__setID = 1, soap_flag__sceneNr = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_CallScene *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_CallScene, sizeof(struct dss__Set_CallScene), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_CallScene(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
+				{	soap_flag__setID--;
+					continue;
+				}
+			if (soap_flag__sceneNr && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_sceneNr, "xsd:int"))
+				{	soap_flag__sceneNr--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_CallScene *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_CallScene, 0, sizeof(struct dss__Set_CallScene), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0 || soap_flag__sceneNr > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_CallScene * SOAP_FMAC6 soap_new_dss__Set_CallScene(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_CallScene(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_CallScene(struct soap *soap, struct dss__Set_CallScene *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_CallScene * SOAP_FMAC4 soap_instantiate_dss__Set_CallScene(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_CallScene(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_CallScene, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_CallScene;
+		if (size)
+			*size = sizeof(struct dss__Set_CallScene);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_CallScene[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_CallScene);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_CallScene*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_CallScene(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_CallScene %p -> %p\n", q, p));
+	*(struct dss__Set_CallScene*)p = *(struct dss__Set_CallScene*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_CallSceneResponse(struct soap *soap, struct dss__Set_CallSceneResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_CallSceneResponse(struct soap *soap, const struct dss__Set_CallSceneResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_CallSceneResponse(struct soap *soap, const struct dss__Set_CallSceneResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_CallSceneResponse);
+	if (soap_out_dss__Set_CallSceneResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_CallSceneResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_CallSceneResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_CallSceneResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_CallSceneResponse * SOAP_FMAC4 soap_get_dss__Set_CallSceneResponse(struct soap *soap, struct dss__Set_CallSceneResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_CallSceneResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_CallSceneResponse * SOAP_FMAC4 soap_in_dss__Set_CallSceneResponse(struct soap *soap, const char *tag, struct dss__Set_CallSceneResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_CallSceneResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_CallSceneResponse, sizeof(struct dss__Set_CallSceneResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_CallSceneResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_CallSceneResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_CallSceneResponse, 0, sizeof(struct dss__Set_CallSceneResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_CallSceneResponse * SOAP_FMAC6 soap_new_dss__Set_CallSceneResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_CallSceneResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_CallSceneResponse(struct soap *soap, struct dss__Set_CallSceneResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_CallSceneResponse * SOAP_FMAC4 soap_instantiate_dss__Set_CallSceneResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_CallSceneResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_CallSceneResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_CallSceneResponse;
+		if (size)
+			*size = sizeof(struct dss__Set_CallSceneResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_CallSceneResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_CallSceneResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_CallSceneResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_CallSceneResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_CallSceneResponse %p -> %p\n", q, p));
+	*(struct dss__Set_CallSceneResponse*)p = *(struct dss__Set_CallSceneResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_SetValue(struct soap *soap, struct dss__Set_SetValue *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_int(soap, &a->_setID);
+	soap_default_double(soap, &a->_value);
+	soap_default_int(soap, &a->_paramID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_SetValue(struct soap *soap, const struct dss__Set_SetValue *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_SetValue(struct soap *soap, const struct dss__Set_SetValue *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_SetValue);
+	if (soap_out_dss__Set_SetValue(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_SetValue(struct soap *soap, const char *tag, int id, const struct dss__Set_SetValue *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_SetValue), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
+		return soap->error;
+	if (soap_out_double(soap, "value", -1, &a->_value, ""))
+		return soap->error;
+	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_SetValue * SOAP_FMAC4 soap_get_dss__Set_SetValue(struct soap *soap, struct dss__Set_SetValue *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_SetValue(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_SetValue * SOAP_FMAC4 soap_in_dss__Set_SetValue(struct soap *soap, const char *tag, struct dss__Set_SetValue *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__setID = 1, soap_flag__value = 1, soap_flag__paramID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_SetValue *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_SetValue, sizeof(struct dss__Set_SetValue), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_SetValue(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
+				{	soap_flag__setID--;
+					continue;
+				}
+			if (soap_flag__value && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_double(soap, NULL, &a->_value, "xsd:double"))
+				{	soap_flag__value--;
+					continue;
+				}
+			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
+				{	soap_flag__paramID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_SetValue *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_SetValue, 0, sizeof(struct dss__Set_SetValue), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0 || soap_flag__value > 0 || soap_flag__paramID > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_SetValue * SOAP_FMAC6 soap_new_dss__Set_SetValue(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_SetValue(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_SetValue(struct soap *soap, struct dss__Set_SetValue *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_SetValue * SOAP_FMAC4 soap_instantiate_dss__Set_SetValue(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_SetValue(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_SetValue, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_SetValue;
+		if (size)
+			*size = sizeof(struct dss__Set_SetValue);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_SetValue[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_SetValue);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_SetValue*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_SetValue(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_SetValue %p -> %p\n", q, p));
+	*(struct dss__Set_SetValue*)p = *(struct dss__Set_SetValue*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_SetValueResponse(struct soap *soap, struct dss__Set_SetValueResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_SetValueResponse(struct soap *soap, const struct dss__Set_SetValueResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_SetValueResponse(struct soap *soap, const struct dss__Set_SetValueResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_SetValueResponse);
+	if (soap_out_dss__Set_SetValueResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_SetValueResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_SetValueResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_SetValueResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_SetValueResponse * SOAP_FMAC4 soap_get_dss__Set_SetValueResponse(struct soap *soap, struct dss__Set_SetValueResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_SetValueResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_SetValueResponse * SOAP_FMAC4 soap_in_dss__Set_SetValueResponse(struct soap *soap, const char *tag, struct dss__Set_SetValueResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_SetValueResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_SetValueResponse, sizeof(struct dss__Set_SetValueResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_SetValueResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_SetValueResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_SetValueResponse, 0, sizeof(struct dss__Set_SetValueResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_SetValueResponse * SOAP_FMAC6 soap_new_dss__Set_SetValueResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_SetValueResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_SetValueResponse(struct soap *soap, struct dss__Set_SetValueResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_SetValueResponse * SOAP_FMAC4 soap_instantiate_dss__Set_SetValueResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_SetValueResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_SetValueResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_SetValueResponse;
+		if (size)
+			*size = sizeof(struct dss__Set_SetValueResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_SetValueResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_SetValueResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_SetValueResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_SetValueResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_SetValueResponse %p -> %p\n", q, p));
+	*(struct dss__Set_SetValueResponse*)p = *(struct dss__Set_SetValueResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_EndDim(struct soap *soap, struct dss__Set_EndDim *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_int(soap, &a->_setID);
+	soap_default_int(soap, &a->_paramID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_EndDim(struct soap *soap, const struct dss__Set_EndDim *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_EndDim(struct soap *soap, const struct dss__Set_EndDim *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_EndDim);
+	if (soap_out_dss__Set_EndDim(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_EndDim(struct soap *soap, const char *tag, int id, const struct dss__Set_EndDim *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_EndDim), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
+		return soap->error;
+	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_EndDim * SOAP_FMAC4 soap_get_dss__Set_EndDim(struct soap *soap, struct dss__Set_EndDim *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_EndDim(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_EndDim * SOAP_FMAC4 soap_in_dss__Set_EndDim(struct soap *soap, const char *tag, struct dss__Set_EndDim *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__setID = 1, soap_flag__paramID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_EndDim *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_EndDim, sizeof(struct dss__Set_EndDim), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_EndDim(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
+				{	soap_flag__setID--;
+					continue;
+				}
+			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
+				{	soap_flag__paramID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_EndDim *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_EndDim, 0, sizeof(struct dss__Set_EndDim), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0 || soap_flag__paramID > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_EndDim * SOAP_FMAC6 soap_new_dss__Set_EndDim(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_EndDim(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_EndDim(struct soap *soap, struct dss__Set_EndDim *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_EndDim * SOAP_FMAC4 soap_instantiate_dss__Set_EndDim(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_EndDim(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_EndDim, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_EndDim;
+		if (size)
+			*size = sizeof(struct dss__Set_EndDim);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_EndDim[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_EndDim);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_EndDim*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_EndDim(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_EndDim %p -> %p\n", q, p));
+	*(struct dss__Set_EndDim*)p = *(struct dss__Set_EndDim*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_EndDimResponse(struct soap *soap, struct dss__Set_EndDimResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_EndDimResponse(struct soap *soap, const struct dss__Set_EndDimResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_EndDimResponse(struct soap *soap, const struct dss__Set_EndDimResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_EndDimResponse);
+	if (soap_out_dss__Set_EndDimResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_EndDimResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_EndDimResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_EndDimResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_EndDimResponse * SOAP_FMAC4 soap_get_dss__Set_EndDimResponse(struct soap *soap, struct dss__Set_EndDimResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_EndDimResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_EndDimResponse * SOAP_FMAC4 soap_in_dss__Set_EndDimResponse(struct soap *soap, const char *tag, struct dss__Set_EndDimResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_EndDimResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_EndDimResponse, sizeof(struct dss__Set_EndDimResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_EndDimResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_EndDimResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_EndDimResponse, 0, sizeof(struct dss__Set_EndDimResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_EndDimResponse * SOAP_FMAC6 soap_new_dss__Set_EndDimResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_EndDimResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_EndDimResponse(struct soap *soap, struct dss__Set_EndDimResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_EndDimResponse * SOAP_FMAC4 soap_instantiate_dss__Set_EndDimResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_EndDimResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_EndDimResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_EndDimResponse;
+		if (size)
+			*size = sizeof(struct dss__Set_EndDimResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_EndDimResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_EndDimResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_EndDimResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_EndDimResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_EndDimResponse %p -> %p\n", q, p));
+	*(struct dss__Set_EndDimResponse*)p = *(struct dss__Set_EndDimResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_StartDim(struct soap *soap, struct dss__Set_StartDim *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_int(soap, &a->_setID);
+	soap_default_bool(soap, &a->_directionUp);
+	soap_default_int(soap, &a->_paramID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_StartDim(struct soap *soap, const struct dss__Set_StartDim *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_StartDim(struct soap *soap, const struct dss__Set_StartDim *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_StartDim);
+	if (soap_out_dss__Set_StartDim(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_StartDim(struct soap *soap, const char *tag, int id, const struct dss__Set_StartDim *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_StartDim), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
+		return soap->error;
+	if (soap_out_bool(soap, "directionUp", -1, &a->_directionUp, ""))
+		return soap->error;
+	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_StartDim * SOAP_FMAC4 soap_get_dss__Set_StartDim(struct soap *soap, struct dss__Set_StartDim *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_StartDim(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_StartDim * SOAP_FMAC4 soap_in_dss__Set_StartDim(struct soap *soap, const char *tag, struct dss__Set_StartDim *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__setID = 1, soap_flag__directionUp = 1, soap_flag__paramID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_StartDim *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_StartDim, sizeof(struct dss__Set_StartDim), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_StartDim(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
+				{	soap_flag__setID--;
+					continue;
+				}
+			if (soap_flag__directionUp && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, NULL, &a->_directionUp, "xsd:boolean"))
+				{	soap_flag__directionUp--;
+					continue;
+				}
+			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
+				{	soap_flag__paramID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_StartDim *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_StartDim, 0, sizeof(struct dss__Set_StartDim), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0 || soap_flag__directionUp > 0 || soap_flag__paramID > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_StartDim * SOAP_FMAC6 soap_new_dss__Set_StartDim(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_StartDim(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_StartDim(struct soap *soap, struct dss__Set_StartDim *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_StartDim * SOAP_FMAC4 soap_instantiate_dss__Set_StartDim(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_StartDim(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_StartDim, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_StartDim;
+		if (size)
+			*size = sizeof(struct dss__Set_StartDim);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_StartDim[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_StartDim);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_StartDim*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_StartDim(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_StartDim %p -> %p\n", q, p));
+	*(struct dss__Set_StartDim*)p = *(struct dss__Set_StartDim*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_StartDimResponse(struct soap *soap, struct dss__Set_StartDimResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_StartDimResponse(struct soap *soap, const struct dss__Set_StartDimResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_StartDimResponse(struct soap *soap, const struct dss__Set_StartDimResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_StartDimResponse);
+	if (soap_out_dss__Set_StartDimResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_StartDimResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_StartDimResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_StartDimResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_StartDimResponse * SOAP_FMAC4 soap_get_dss__Set_StartDimResponse(struct soap *soap, struct dss__Set_StartDimResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_StartDimResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_StartDimResponse * SOAP_FMAC4 soap_in_dss__Set_StartDimResponse(struct soap *soap, const char *tag, struct dss__Set_StartDimResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_StartDimResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_StartDimResponse, sizeof(struct dss__Set_StartDimResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_StartDimResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_StartDimResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_StartDimResponse, 0, sizeof(struct dss__Set_StartDimResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_StartDimResponse * SOAP_FMAC6 soap_new_dss__Set_StartDimResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_StartDimResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_StartDimResponse(struct soap *soap, struct dss__Set_StartDimResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_StartDimResponse * SOAP_FMAC4 soap_instantiate_dss__Set_StartDimResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_StartDimResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_StartDimResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_StartDimResponse;
+		if (size)
+			*size = sizeof(struct dss__Set_StartDimResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_StartDimResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_StartDimResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_StartDimResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_StartDimResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_StartDimResponse %p -> %p\n", q, p));
+	*(struct dss__Set_StartDimResponse*)p = *(struct dss__Set_StartDimResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_Disable(struct soap *soap, struct dss__Set_Disable *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_int(soap, &a->_setID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_Disable(struct soap *soap, const struct dss__Set_Disable *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_Disable(struct soap *soap, const struct dss__Set_Disable *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_Disable);
+	if (soap_out_dss__Set_Disable(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_Disable(struct soap *soap, const char *tag, int id, const struct dss__Set_Disable *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_Disable), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_Disable * SOAP_FMAC4 soap_get_dss__Set_Disable(struct soap *soap, struct dss__Set_Disable *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_Disable(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_Disable * SOAP_FMAC4 soap_in_dss__Set_Disable(struct soap *soap, const char *tag, struct dss__Set_Disable *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__setID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_Disable *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_Disable, sizeof(struct dss__Set_Disable), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_Disable(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
+				{	soap_flag__setID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_Disable *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_Disable, 0, sizeof(struct dss__Set_Disable), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_Disable * SOAP_FMAC6 soap_new_dss__Set_Disable(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_Disable(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_Disable(struct soap *soap, struct dss__Set_Disable *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_Disable * SOAP_FMAC4 soap_instantiate_dss__Set_Disable(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_Disable(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_Disable, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_Disable;
+		if (size)
+			*size = sizeof(struct dss__Set_Disable);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_Disable[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_Disable);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_Disable*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_Disable(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_Disable %p -> %p\n", q, p));
+	*(struct dss__Set_Disable*)p = *(struct dss__Set_Disable*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_DisableResponse(struct soap *soap, struct dss__Set_DisableResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_DisableResponse(struct soap *soap, const struct dss__Set_DisableResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_DisableResponse(struct soap *soap, const struct dss__Set_DisableResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_DisableResponse);
+	if (soap_out_dss__Set_DisableResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_DisableResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_DisableResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_DisableResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_DisableResponse * SOAP_FMAC4 soap_get_dss__Set_DisableResponse(struct soap *soap, struct dss__Set_DisableResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_DisableResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_DisableResponse * SOAP_FMAC4 soap_in_dss__Set_DisableResponse(struct soap *soap, const char *tag, struct dss__Set_DisableResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_DisableResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_DisableResponse, sizeof(struct dss__Set_DisableResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_DisableResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_DisableResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_DisableResponse, 0, sizeof(struct dss__Set_DisableResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_DisableResponse * SOAP_FMAC6 soap_new_dss__Set_DisableResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_DisableResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_DisableResponse(struct soap *soap, struct dss__Set_DisableResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_DisableResponse * SOAP_FMAC4 soap_instantiate_dss__Set_DisableResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_DisableResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_DisableResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_DisableResponse;
+		if (size)
+			*size = sizeof(struct dss__Set_DisableResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_DisableResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_DisableResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_DisableResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_DisableResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_DisableResponse %p -> %p\n", q, p));
+	*(struct dss__Set_DisableResponse*)p = *(struct dss__Set_DisableResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_Enable(struct soap *soap, struct dss__Set_Enable *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_int(soap, &a->_setID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_Enable(struct soap *soap, const struct dss__Set_Enable *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_Enable(struct soap *soap, const struct dss__Set_Enable *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_Enable);
+	if (soap_out_dss__Set_Enable(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_Enable(struct soap *soap, const char *tag, int id, const struct dss__Set_Enable *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_Enable), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_Enable * SOAP_FMAC4 soap_get_dss__Set_Enable(struct soap *soap, struct dss__Set_Enable *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_Enable(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_Enable * SOAP_FMAC4 soap_in_dss__Set_Enable(struct soap *soap, const char *tag, struct dss__Set_Enable *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__setID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_Enable *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_Enable, sizeof(struct dss__Set_Enable), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_Enable(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
+				{	soap_flag__setID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_Enable *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_Enable, 0, sizeof(struct dss__Set_Enable), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_Enable * SOAP_FMAC6 soap_new_dss__Set_Enable(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_Enable(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_Enable(struct soap *soap, struct dss__Set_Enable *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_Enable * SOAP_FMAC4 soap_instantiate_dss__Set_Enable(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_Enable(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_Enable, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_Enable;
+		if (size)
+			*size = sizeof(struct dss__Set_Enable);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_Enable[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_Enable);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_Enable*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_Enable(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_Enable %p -> %p\n", q, p));
+	*(struct dss__Set_Enable*)p = *(struct dss__Set_Enable*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_EnableResponse(struct soap *soap, struct dss__Set_EnableResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_EnableResponse(struct soap *soap, const struct dss__Set_EnableResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_EnableResponse(struct soap *soap, const struct dss__Set_EnableResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_EnableResponse);
+	if (soap_out_dss__Set_EnableResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_EnableResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_EnableResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_EnableResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_EnableResponse * SOAP_FMAC4 soap_get_dss__Set_EnableResponse(struct soap *soap, struct dss__Set_EnableResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_EnableResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_EnableResponse * SOAP_FMAC4 soap_in_dss__Set_EnableResponse(struct soap *soap, const char *tag, struct dss__Set_EnableResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_EnableResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_EnableResponse, sizeof(struct dss__Set_EnableResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_EnableResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_EnableResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_EnableResponse, 0, sizeof(struct dss__Set_EnableResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_EnableResponse * SOAP_FMAC6 soap_new_dss__Set_EnableResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_EnableResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_EnableResponse(struct soap *soap, struct dss__Set_EnableResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_EnableResponse * SOAP_FMAC4 soap_instantiate_dss__Set_EnableResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_EnableResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_EnableResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_EnableResponse;
+		if (size)
+			*size = sizeof(struct dss__Set_EnableResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_EnableResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_EnableResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_EnableResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_EnableResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_EnableResponse %p -> %p\n", q, p));
+	*(struct dss__Set_EnableResponse*)p = *(struct dss__Set_EnableResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_DecreaseValue(struct soap *soap, struct dss__Set_DecreaseValue *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_int(soap, &a->_setID);
+	soap_default_int(soap, &a->_paramID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_DecreaseValue(struct soap *soap, const struct dss__Set_DecreaseValue *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_DecreaseValue(struct soap *soap, const struct dss__Set_DecreaseValue *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_DecreaseValue);
+	if (soap_out_dss__Set_DecreaseValue(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_DecreaseValue(struct soap *soap, const char *tag, int id, const struct dss__Set_DecreaseValue *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_DecreaseValue), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
+		return soap->error;
+	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_DecreaseValue * SOAP_FMAC4 soap_get_dss__Set_DecreaseValue(struct soap *soap, struct dss__Set_DecreaseValue *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_DecreaseValue(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_DecreaseValue * SOAP_FMAC4 soap_in_dss__Set_DecreaseValue(struct soap *soap, const char *tag, struct dss__Set_DecreaseValue *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__setID = 1, soap_flag__paramID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_DecreaseValue *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_DecreaseValue, sizeof(struct dss__Set_DecreaseValue), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_DecreaseValue(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
+				{	soap_flag__setID--;
+					continue;
+				}
+			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
+				{	soap_flag__paramID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_DecreaseValue *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_DecreaseValue, 0, sizeof(struct dss__Set_DecreaseValue), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0 || soap_flag__paramID > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_DecreaseValue * SOAP_FMAC6 soap_new_dss__Set_DecreaseValue(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_DecreaseValue(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_DecreaseValue(struct soap *soap, struct dss__Set_DecreaseValue *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_DecreaseValue * SOAP_FMAC4 soap_instantiate_dss__Set_DecreaseValue(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_DecreaseValue(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_DecreaseValue, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_DecreaseValue;
+		if (size)
+			*size = sizeof(struct dss__Set_DecreaseValue);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_DecreaseValue[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_DecreaseValue);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_DecreaseValue*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_DecreaseValue(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_DecreaseValue %p -> %p\n", q, p));
+	*(struct dss__Set_DecreaseValue*)p = *(struct dss__Set_DecreaseValue*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_DecreaseValueResponse(struct soap *soap, struct dss__Set_DecreaseValueResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_DecreaseValueResponse(struct soap *soap, const struct dss__Set_DecreaseValueResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_DecreaseValueResponse(struct soap *soap, const struct dss__Set_DecreaseValueResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_DecreaseValueResponse);
+	if (soap_out_dss__Set_DecreaseValueResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_DecreaseValueResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_DecreaseValueResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_DecreaseValueResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_DecreaseValueResponse * SOAP_FMAC4 soap_get_dss__Set_DecreaseValueResponse(struct soap *soap, struct dss__Set_DecreaseValueResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_DecreaseValueResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_DecreaseValueResponse * SOAP_FMAC4 soap_in_dss__Set_DecreaseValueResponse(struct soap *soap, const char *tag, struct dss__Set_DecreaseValueResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_DecreaseValueResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_DecreaseValueResponse, sizeof(struct dss__Set_DecreaseValueResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_DecreaseValueResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_DecreaseValueResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_DecreaseValueResponse, 0, sizeof(struct dss__Set_DecreaseValueResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_DecreaseValueResponse * SOAP_FMAC6 soap_new_dss__Set_DecreaseValueResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_DecreaseValueResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_DecreaseValueResponse(struct soap *soap, struct dss__Set_DecreaseValueResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_DecreaseValueResponse * SOAP_FMAC4 soap_instantiate_dss__Set_DecreaseValueResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_DecreaseValueResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_DecreaseValueResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_DecreaseValueResponse;
+		if (size)
+			*size = sizeof(struct dss__Set_DecreaseValueResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_DecreaseValueResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_DecreaseValueResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_DecreaseValueResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_DecreaseValueResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_DecreaseValueResponse %p -> %p\n", q, p));
+	*(struct dss__Set_DecreaseValueResponse*)p = *(struct dss__Set_DecreaseValueResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_IncreaseValue(struct soap *soap, struct dss__Set_IncreaseValue *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_int(soap, &a->_setID);
+	soap_default_int(soap, &a->_paramID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_IncreaseValue(struct soap *soap, const struct dss__Set_IncreaseValue *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_IncreaseValue(struct soap *soap, const struct dss__Set_IncreaseValue *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_IncreaseValue);
+	if (soap_out_dss__Set_IncreaseValue(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_IncreaseValue(struct soap *soap, const char *tag, int id, const struct dss__Set_IncreaseValue *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_IncreaseValue), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
+		return soap->error;
+	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_IncreaseValue * SOAP_FMAC4 soap_get_dss__Set_IncreaseValue(struct soap *soap, struct dss__Set_IncreaseValue *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_IncreaseValue(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_IncreaseValue * SOAP_FMAC4 soap_in_dss__Set_IncreaseValue(struct soap *soap, const char *tag, struct dss__Set_IncreaseValue *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__setID = 1, soap_flag__paramID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_IncreaseValue *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_IncreaseValue, sizeof(struct dss__Set_IncreaseValue), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_IncreaseValue(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
+				{	soap_flag__setID--;
+					continue;
+				}
+			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
+				{	soap_flag__paramID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_IncreaseValue *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_IncreaseValue, 0, sizeof(struct dss__Set_IncreaseValue), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0 || soap_flag__paramID > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_IncreaseValue * SOAP_FMAC6 soap_new_dss__Set_IncreaseValue(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_IncreaseValue(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_IncreaseValue(struct soap *soap, struct dss__Set_IncreaseValue *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_IncreaseValue * SOAP_FMAC4 soap_instantiate_dss__Set_IncreaseValue(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_IncreaseValue(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_IncreaseValue, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_IncreaseValue;
+		if (size)
+			*size = sizeof(struct dss__Set_IncreaseValue);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_IncreaseValue[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_IncreaseValue);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_IncreaseValue*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_IncreaseValue(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_IncreaseValue %p -> %p\n", q, p));
+	*(struct dss__Set_IncreaseValue*)p = *(struct dss__Set_IncreaseValue*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_IncreaseValueResponse(struct soap *soap, struct dss__Set_IncreaseValueResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_IncreaseValueResponse(struct soap *soap, const struct dss__Set_IncreaseValueResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_IncreaseValueResponse(struct soap *soap, const struct dss__Set_IncreaseValueResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_IncreaseValueResponse);
+	if (soap_out_dss__Set_IncreaseValueResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_IncreaseValueResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_IncreaseValueResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_IncreaseValueResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_IncreaseValueResponse * SOAP_FMAC4 soap_get_dss__Set_IncreaseValueResponse(struct soap *soap, struct dss__Set_IncreaseValueResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_IncreaseValueResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_IncreaseValueResponse * SOAP_FMAC4 soap_in_dss__Set_IncreaseValueResponse(struct soap *soap, const char *tag, struct dss__Set_IncreaseValueResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_IncreaseValueResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_IncreaseValueResponse, sizeof(struct dss__Set_IncreaseValueResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_IncreaseValueResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_IncreaseValueResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_IncreaseValueResponse, 0, sizeof(struct dss__Set_IncreaseValueResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_IncreaseValueResponse * SOAP_FMAC6 soap_new_dss__Set_IncreaseValueResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_IncreaseValueResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_IncreaseValueResponse(struct soap *soap, struct dss__Set_IncreaseValueResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_IncreaseValueResponse * SOAP_FMAC4 soap_instantiate_dss__Set_IncreaseValueResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_IncreaseValueResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_IncreaseValueResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_IncreaseValueResponse;
+		if (size)
+			*size = sizeof(struct dss__Set_IncreaseValueResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_IncreaseValueResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_IncreaseValueResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_IncreaseValueResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_IncreaseValueResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_IncreaseValueResponse %p -> %p\n", q, p));
+	*(struct dss__Set_IncreaseValueResponse*)p = *(struct dss__Set_IncreaseValueResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_TurnOff(struct soap *soap, struct dss__Set_TurnOff *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_int(soap, &a->_setID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_TurnOff(struct soap *soap, const struct dss__Set_TurnOff *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_TurnOff(struct soap *soap, const struct dss__Set_TurnOff *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_TurnOff);
+	if (soap_out_dss__Set_TurnOff(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_TurnOff(struct soap *soap, const char *tag, int id, const struct dss__Set_TurnOff *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_TurnOff), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_TurnOff * SOAP_FMAC4 soap_get_dss__Set_TurnOff(struct soap *soap, struct dss__Set_TurnOff *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_TurnOff(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_TurnOff * SOAP_FMAC4 soap_in_dss__Set_TurnOff(struct soap *soap, const char *tag, struct dss__Set_TurnOff *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__setID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_TurnOff *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_TurnOff, sizeof(struct dss__Set_TurnOff), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_TurnOff(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
+				{	soap_flag__setID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_TurnOff *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_TurnOff, 0, sizeof(struct dss__Set_TurnOff), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_TurnOff * SOAP_FMAC6 soap_new_dss__Set_TurnOff(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_TurnOff(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_TurnOff(struct soap *soap, struct dss__Set_TurnOff *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_TurnOff * SOAP_FMAC4 soap_instantiate_dss__Set_TurnOff(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_TurnOff(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_TurnOff, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_TurnOff;
+		if (size)
+			*size = sizeof(struct dss__Set_TurnOff);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_TurnOff[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_TurnOff);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_TurnOff*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_TurnOff(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_TurnOff %p -> %p\n", q, p));
+	*(struct dss__Set_TurnOff*)p = *(struct dss__Set_TurnOff*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_TurnOffResponse(struct soap *soap, struct dss__Set_TurnOffResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_TurnOffResponse(struct soap *soap, const struct dss__Set_TurnOffResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_TurnOffResponse(struct soap *soap, const struct dss__Set_TurnOffResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_TurnOffResponse);
+	if (soap_out_dss__Set_TurnOffResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_TurnOffResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_TurnOffResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_TurnOffResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_TurnOffResponse * SOAP_FMAC4 soap_get_dss__Set_TurnOffResponse(struct soap *soap, struct dss__Set_TurnOffResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_TurnOffResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_TurnOffResponse * SOAP_FMAC4 soap_in_dss__Set_TurnOffResponse(struct soap *soap, const char *tag, struct dss__Set_TurnOffResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_TurnOffResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_TurnOffResponse, sizeof(struct dss__Set_TurnOffResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_TurnOffResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_TurnOffResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_TurnOffResponse, 0, sizeof(struct dss__Set_TurnOffResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_TurnOffResponse * SOAP_FMAC6 soap_new_dss__Set_TurnOffResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_TurnOffResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_TurnOffResponse(struct soap *soap, struct dss__Set_TurnOffResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_TurnOffResponse * SOAP_FMAC4 soap_instantiate_dss__Set_TurnOffResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_TurnOffResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_TurnOffResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_TurnOffResponse;
+		if (size)
+			*size = sizeof(struct dss__Set_TurnOffResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_TurnOffResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_TurnOffResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_TurnOffResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_TurnOffResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_TurnOffResponse %p -> %p\n", q, p));
+	*(struct dss__Set_TurnOffResponse*)p = *(struct dss__Set_TurnOffResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_TurnOn(struct soap *soap, struct dss__Set_TurnOn *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_int(soap, &a->_setID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_TurnOn(struct soap *soap, const struct dss__Set_TurnOn *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_TurnOn(struct soap *soap, const struct dss__Set_TurnOn *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_TurnOn);
+	if (soap_out_dss__Set_TurnOn(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_TurnOn(struct soap *soap, const char *tag, int id, const struct dss__Set_TurnOn *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_TurnOn), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_int(soap, "setID", -1, &a->_setID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_TurnOn * SOAP_FMAC4 soap_get_dss__Set_TurnOn(struct soap *soap, struct dss__Set_TurnOn *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_TurnOn(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_TurnOn * SOAP_FMAC4 soap_in_dss__Set_TurnOn(struct soap *soap, const char *tag, struct dss__Set_TurnOn *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__setID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_TurnOn *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_TurnOn, sizeof(struct dss__Set_TurnOn), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_TurnOn(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__setID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_setID, "xsd:int"))
+				{	soap_flag__setID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_TurnOn *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_TurnOn, 0, sizeof(struct dss__Set_TurnOn), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__setID > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_TurnOn * SOAP_FMAC6 soap_new_dss__Set_TurnOn(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_TurnOn(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_TurnOn(struct soap *soap, struct dss__Set_TurnOn *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_TurnOn * SOAP_FMAC4 soap_instantiate_dss__Set_TurnOn(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_TurnOn(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_TurnOn, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_TurnOn;
+		if (size)
+			*size = sizeof(struct dss__Set_TurnOn);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_TurnOn[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_TurnOn);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_TurnOn*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_TurnOn(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_TurnOn %p -> %p\n", q, p));
+	*(struct dss__Set_TurnOn*)p = *(struct dss__Set_TurnOn*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Set_TurnOnResponse(struct soap *soap, struct dss__Set_TurnOnResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Set_TurnOnResponse(struct soap *soap, const struct dss__Set_TurnOnResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Set_TurnOnResponse(struct soap *soap, const struct dss__Set_TurnOnResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Set_TurnOnResponse);
+	if (soap_out_dss__Set_TurnOnResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Set_TurnOnResponse(struct soap *soap, const char *tag, int id, const struct dss__Set_TurnOnResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Set_TurnOnResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Set_TurnOnResponse * SOAP_FMAC4 soap_get_dss__Set_TurnOnResponse(struct soap *soap, struct dss__Set_TurnOnResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Set_TurnOnResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Set_TurnOnResponse * SOAP_FMAC4 soap_in_dss__Set_TurnOnResponse(struct soap *soap, const char *tag, struct dss__Set_TurnOnResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Set_TurnOnResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Set_TurnOnResponse, sizeof(struct dss__Set_TurnOnResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Set_TurnOnResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Set_TurnOnResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Set_TurnOnResponse, 0, sizeof(struct dss__Set_TurnOnResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Set_TurnOnResponse * SOAP_FMAC6 soap_new_dss__Set_TurnOnResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Set_TurnOnResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Set_TurnOnResponse(struct soap *soap, struct dss__Set_TurnOnResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Set_TurnOnResponse * SOAP_FMAC4 soap_instantiate_dss__Set_TurnOnResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Set_TurnOnResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Set_TurnOnResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Set_TurnOnResponse;
+		if (size)
+			*size = sizeof(struct dss__Set_TurnOnResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Set_TurnOnResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Set_TurnOnResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Set_TurnOnResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Set_TurnOnResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Set_TurnOnResponse %p -> %p\n", q, p));
+	*(struct dss__Set_TurnOnResponse*)p = *(struct dss__Set_TurnOnResponse*)q;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Apartment_GetZoneIDs(struct soap *soap, struct dss__Apartment_GetZoneIDs *a)

@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2008-10-15 12:33:28 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2008-11-26 10:23:55 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -111,24 +111,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__Apartment_GetZoneByName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Apartment-GetZoneIDs"))
 		return soap_serve_dss__Apartment_GetZoneIDs(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Group-TurnOn"))
-		return soap_serve_dss__Group_TurnOn(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Group-TurnOff"))
-		return soap_serve_dss__Group_TurnOff(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Group-IncreaseValue"))
-		return soap_serve_dss__Group_IncreaseValue(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Group-DecreaseValue"))
-		return soap_serve_dss__Group_DecreaseValue(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Group-Enable"))
-		return soap_serve_dss__Group_Enable(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Group-Disable"))
-		return soap_serve_dss__Group_Disable(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Group-StartDim"))
-		return soap_serve_dss__Group_StartDim(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Group-EndDim"))
-		return soap_serve_dss__Group_EndDim(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Group-SetValue"))
-		return soap_serve_dss__Group_SetValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Set-TurnOn"))
 		return soap_serve_dss__Set_TurnOn(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Set-TurnOff"))
@@ -147,6 +129,32 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__Set_EndDim(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Set-SetValue"))
 		return soap_serve_dss__Set_SetValue(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Set-CallScene"))
+		return soap_serve_dss__Set_CallScene(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Set-SaveScene"))
+		return soap_serve_dss__Set_SaveScene(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Group-TurnOn"))
+		return soap_serve_dss__Group_TurnOn(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Group-TurnOff"))
+		return soap_serve_dss__Group_TurnOff(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Group-IncreaseValue"))
+		return soap_serve_dss__Group_IncreaseValue(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Group-DecreaseValue"))
+		return soap_serve_dss__Group_DecreaseValue(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Group-Enable"))
+		return soap_serve_dss__Group_Enable(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Group-Disable"))
+		return soap_serve_dss__Group_Disable(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Group-StartDim"))
+		return soap_serve_dss__Group_StartDim(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Group-EndDim"))
+		return soap_serve_dss__Group_EndDim(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Group-SetValue"))
+		return soap_serve_dss__Group_SetValue(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Group-CallScene"))
+		return soap_serve_dss__Group_CallScene(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Group-SaveScene"))
+		return soap_serve_dss__Group_SaveScene(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Device-TurnOn"))
 		return soap_serve_dss__Device_TurnOn(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Device-TurnOff"))
@@ -167,6 +175,10 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__Device_SetValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Device-GetValue"))
 		return soap_serve_dss__Device_GetValue(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Device-CallScene"))
+		return soap_serve_dss__Device_CallScene(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Device-SaveScene"))
+		return soap_serve_dss__Device_SaveScene(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Device-GetName"))
 		return soap_serve_dss__Device_GetName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Device-GetZoneID"))
@@ -1000,6 +1012,457 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetZoneIDs(struct soap *soap
 	return soap_closesock(soap);
 }
 
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_TurnOn(struct soap *soap)
+{	struct dss__Set_TurnOn soap_tmp_dss__Set_TurnOn;
+	struct dss__Set_TurnOnResponse soap_tmp_dss__Set_TurnOnResponse;
+	soap_default_dss__Set_TurnOnResponse(soap, &soap_tmp_dss__Set_TurnOnResponse);
+	soap_default_dss__Set_TurnOn(soap, &soap_tmp_dss__Set_TurnOn);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Set_TurnOn(soap, &soap_tmp_dss__Set_TurnOn, "dss:Set-TurnOn", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Set_TurnOn(soap, soap_tmp_dss__Set_TurnOn._token, soap_tmp_dss__Set_TurnOn._setID, soap_tmp_dss__Set_TurnOnResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Set_TurnOnResponse(soap, &soap_tmp_dss__Set_TurnOnResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Set_TurnOnResponse(soap, &soap_tmp_dss__Set_TurnOnResponse, "dss:Set-TurnOnResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Set_TurnOnResponse(soap, &soap_tmp_dss__Set_TurnOnResponse, "dss:Set-TurnOnResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_TurnOff(struct soap *soap)
+{	struct dss__Set_TurnOff soap_tmp_dss__Set_TurnOff;
+	struct dss__Set_TurnOffResponse soap_tmp_dss__Set_TurnOffResponse;
+	soap_default_dss__Set_TurnOffResponse(soap, &soap_tmp_dss__Set_TurnOffResponse);
+	soap_default_dss__Set_TurnOff(soap, &soap_tmp_dss__Set_TurnOff);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Set_TurnOff(soap, &soap_tmp_dss__Set_TurnOff, "dss:Set-TurnOff", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Set_TurnOff(soap, soap_tmp_dss__Set_TurnOff._token, soap_tmp_dss__Set_TurnOff._setID, soap_tmp_dss__Set_TurnOffResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Set_TurnOffResponse(soap, &soap_tmp_dss__Set_TurnOffResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Set_TurnOffResponse(soap, &soap_tmp_dss__Set_TurnOffResponse, "dss:Set-TurnOffResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Set_TurnOffResponse(soap, &soap_tmp_dss__Set_TurnOffResponse, "dss:Set-TurnOffResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_IncreaseValue(struct soap *soap)
+{	struct dss__Set_IncreaseValue soap_tmp_dss__Set_IncreaseValue;
+	struct dss__Set_IncreaseValueResponse soap_tmp_dss__Set_IncreaseValueResponse;
+	soap_default_dss__Set_IncreaseValueResponse(soap, &soap_tmp_dss__Set_IncreaseValueResponse);
+	soap_default_dss__Set_IncreaseValue(soap, &soap_tmp_dss__Set_IncreaseValue);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Set_IncreaseValue(soap, &soap_tmp_dss__Set_IncreaseValue, "dss:Set-IncreaseValue", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Set_IncreaseValue(soap, soap_tmp_dss__Set_IncreaseValue._token, soap_tmp_dss__Set_IncreaseValue._setID, soap_tmp_dss__Set_IncreaseValue._paramID, soap_tmp_dss__Set_IncreaseValueResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Set_IncreaseValueResponse(soap, &soap_tmp_dss__Set_IncreaseValueResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Set_IncreaseValueResponse(soap, &soap_tmp_dss__Set_IncreaseValueResponse, "dss:Set-IncreaseValueResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Set_IncreaseValueResponse(soap, &soap_tmp_dss__Set_IncreaseValueResponse, "dss:Set-IncreaseValueResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_DecreaseValue(struct soap *soap)
+{	struct dss__Set_DecreaseValue soap_tmp_dss__Set_DecreaseValue;
+	struct dss__Set_DecreaseValueResponse soap_tmp_dss__Set_DecreaseValueResponse;
+	soap_default_dss__Set_DecreaseValueResponse(soap, &soap_tmp_dss__Set_DecreaseValueResponse);
+	soap_default_dss__Set_DecreaseValue(soap, &soap_tmp_dss__Set_DecreaseValue);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Set_DecreaseValue(soap, &soap_tmp_dss__Set_DecreaseValue, "dss:Set-DecreaseValue", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Set_DecreaseValue(soap, soap_tmp_dss__Set_DecreaseValue._token, soap_tmp_dss__Set_DecreaseValue._setID, soap_tmp_dss__Set_DecreaseValue._paramID, soap_tmp_dss__Set_DecreaseValueResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Set_DecreaseValueResponse(soap, &soap_tmp_dss__Set_DecreaseValueResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Set_DecreaseValueResponse(soap, &soap_tmp_dss__Set_DecreaseValueResponse, "dss:Set-DecreaseValueResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Set_DecreaseValueResponse(soap, &soap_tmp_dss__Set_DecreaseValueResponse, "dss:Set-DecreaseValueResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_Enable(struct soap *soap)
+{	struct dss__Set_Enable soap_tmp_dss__Set_Enable;
+	struct dss__Set_EnableResponse soap_tmp_dss__Set_EnableResponse;
+	soap_default_dss__Set_EnableResponse(soap, &soap_tmp_dss__Set_EnableResponse);
+	soap_default_dss__Set_Enable(soap, &soap_tmp_dss__Set_Enable);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Set_Enable(soap, &soap_tmp_dss__Set_Enable, "dss:Set-Enable", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Set_Enable(soap, soap_tmp_dss__Set_Enable._token, soap_tmp_dss__Set_Enable._setID, soap_tmp_dss__Set_EnableResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Set_EnableResponse(soap, &soap_tmp_dss__Set_EnableResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Set_EnableResponse(soap, &soap_tmp_dss__Set_EnableResponse, "dss:Set-EnableResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Set_EnableResponse(soap, &soap_tmp_dss__Set_EnableResponse, "dss:Set-EnableResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_Disable(struct soap *soap)
+{	struct dss__Set_Disable soap_tmp_dss__Set_Disable;
+	struct dss__Set_DisableResponse soap_tmp_dss__Set_DisableResponse;
+	soap_default_dss__Set_DisableResponse(soap, &soap_tmp_dss__Set_DisableResponse);
+	soap_default_dss__Set_Disable(soap, &soap_tmp_dss__Set_Disable);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Set_Disable(soap, &soap_tmp_dss__Set_Disable, "dss:Set-Disable", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Set_Disable(soap, soap_tmp_dss__Set_Disable._token, soap_tmp_dss__Set_Disable._setID, soap_tmp_dss__Set_DisableResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Set_DisableResponse(soap, &soap_tmp_dss__Set_DisableResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Set_DisableResponse(soap, &soap_tmp_dss__Set_DisableResponse, "dss:Set-DisableResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Set_DisableResponse(soap, &soap_tmp_dss__Set_DisableResponse, "dss:Set-DisableResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_StartDim(struct soap *soap)
+{	struct dss__Set_StartDim soap_tmp_dss__Set_StartDim;
+	struct dss__Set_StartDimResponse soap_tmp_dss__Set_StartDimResponse;
+	soap_default_dss__Set_StartDimResponse(soap, &soap_tmp_dss__Set_StartDimResponse);
+	soap_default_dss__Set_StartDim(soap, &soap_tmp_dss__Set_StartDim);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Set_StartDim(soap, &soap_tmp_dss__Set_StartDim, "dss:Set-StartDim", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Set_StartDim(soap, soap_tmp_dss__Set_StartDim._token, soap_tmp_dss__Set_StartDim._setID, soap_tmp_dss__Set_StartDim._directionUp, soap_tmp_dss__Set_StartDim._paramID, soap_tmp_dss__Set_StartDimResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Set_StartDimResponse(soap, &soap_tmp_dss__Set_StartDimResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Set_StartDimResponse(soap, &soap_tmp_dss__Set_StartDimResponse, "dss:Set-StartDimResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Set_StartDimResponse(soap, &soap_tmp_dss__Set_StartDimResponse, "dss:Set-StartDimResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_EndDim(struct soap *soap)
+{	struct dss__Set_EndDim soap_tmp_dss__Set_EndDim;
+	struct dss__Set_EndDimResponse soap_tmp_dss__Set_EndDimResponse;
+	soap_default_dss__Set_EndDimResponse(soap, &soap_tmp_dss__Set_EndDimResponse);
+	soap_default_dss__Set_EndDim(soap, &soap_tmp_dss__Set_EndDim);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Set_EndDim(soap, &soap_tmp_dss__Set_EndDim, "dss:Set-EndDim", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Set_EndDim(soap, soap_tmp_dss__Set_EndDim._token, soap_tmp_dss__Set_EndDim._setID, soap_tmp_dss__Set_EndDim._paramID, soap_tmp_dss__Set_EndDimResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Set_EndDimResponse(soap, &soap_tmp_dss__Set_EndDimResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Set_EndDimResponse(soap, &soap_tmp_dss__Set_EndDimResponse, "dss:Set-EndDimResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Set_EndDimResponse(soap, &soap_tmp_dss__Set_EndDimResponse, "dss:Set-EndDimResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_SetValue(struct soap *soap)
+{	struct dss__Set_SetValue soap_tmp_dss__Set_SetValue;
+	struct dss__Set_SetValueResponse soap_tmp_dss__Set_SetValueResponse;
+	soap_default_dss__Set_SetValueResponse(soap, &soap_tmp_dss__Set_SetValueResponse);
+	soap_default_dss__Set_SetValue(soap, &soap_tmp_dss__Set_SetValue);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Set_SetValue(soap, &soap_tmp_dss__Set_SetValue, "dss:Set-SetValue", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Set_SetValue(soap, soap_tmp_dss__Set_SetValue._token, soap_tmp_dss__Set_SetValue._setID, soap_tmp_dss__Set_SetValue._value, soap_tmp_dss__Set_SetValue._paramID, soap_tmp_dss__Set_SetValueResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Set_SetValueResponse(soap, &soap_tmp_dss__Set_SetValueResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Set_SetValueResponse(soap, &soap_tmp_dss__Set_SetValueResponse, "dss:Set-SetValueResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Set_SetValueResponse(soap, &soap_tmp_dss__Set_SetValueResponse, "dss:Set-SetValueResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_CallScene(struct soap *soap)
+{	struct dss__Set_CallScene soap_tmp_dss__Set_CallScene;
+	struct dss__Set_CallSceneResponse soap_tmp_dss__Set_CallSceneResponse;
+	soap_default_dss__Set_CallSceneResponse(soap, &soap_tmp_dss__Set_CallSceneResponse);
+	soap_default_dss__Set_CallScene(soap, &soap_tmp_dss__Set_CallScene);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Set_CallScene(soap, &soap_tmp_dss__Set_CallScene, "dss:Set-CallScene", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Set_CallScene(soap, soap_tmp_dss__Set_CallScene._token, soap_tmp_dss__Set_CallScene._setID, soap_tmp_dss__Set_CallScene._sceneNr, soap_tmp_dss__Set_CallSceneResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Set_CallSceneResponse(soap, &soap_tmp_dss__Set_CallSceneResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Set_CallSceneResponse(soap, &soap_tmp_dss__Set_CallSceneResponse, "dss:Set-CallSceneResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Set_CallSceneResponse(soap, &soap_tmp_dss__Set_CallSceneResponse, "dss:Set-CallSceneResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_SaveScene(struct soap *soap)
+{	struct dss__Set_SaveScene soap_tmp_dss__Set_SaveScene;
+	struct dss__Set_SaveSceneResponse soap_tmp_dss__Set_SaveSceneResponse;
+	soap_default_dss__Set_SaveSceneResponse(soap, &soap_tmp_dss__Set_SaveSceneResponse);
+	soap_default_dss__Set_SaveScene(soap, &soap_tmp_dss__Set_SaveScene);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Set_SaveScene(soap, &soap_tmp_dss__Set_SaveScene, "dss:Set-SaveScene", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Set_SaveScene(soap, soap_tmp_dss__Set_SaveScene._token, soap_tmp_dss__Set_SaveScene._setID, soap_tmp_dss__Set_SaveScene._sceneNr, soap_tmp_dss__Set_SaveSceneResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Set_SaveSceneResponse(soap, &soap_tmp_dss__Set_SaveSceneResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Set_SaveSceneResponse(soap, &soap_tmp_dss__Set_SaveSceneResponse, "dss:Set-SaveSceneResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Set_SaveSceneResponse(soap, &soap_tmp_dss__Set_SaveSceneResponse, "dss:Set-SaveSceneResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_TurnOn(struct soap *soap)
 {	struct dss__Group_TurnOn soap_tmp_dss__Group_TurnOn;
 	struct dss__Group_TurnOnResponse soap_tmp_dss__Group_TurnOnResponse;
@@ -1369,30 +1832,30 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_SetValue(struct soap *soap)
 	return soap_closesock(soap);
 }
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_TurnOn(struct soap *soap)
-{	struct dss__Set_TurnOn soap_tmp_dss__Set_TurnOn;
-	struct dss__Set_TurnOnResponse soap_tmp_dss__Set_TurnOnResponse;
-	soap_default_dss__Set_TurnOnResponse(soap, &soap_tmp_dss__Set_TurnOnResponse);
-	soap_default_dss__Set_TurnOn(soap, &soap_tmp_dss__Set_TurnOn);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_CallScene(struct soap *soap)
+{	struct dss__Group_CallScene soap_tmp_dss__Group_CallScene;
+	struct dss__Group_CallSceneResponse soap_tmp_dss__Group_CallSceneResponse;
+	soap_default_dss__Group_CallSceneResponse(soap, &soap_tmp_dss__Group_CallSceneResponse);
+	soap_default_dss__Group_CallScene(soap, &soap_tmp_dss__Group_CallScene);
 	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Set_TurnOn(soap, &soap_tmp_dss__Set_TurnOn, "dss:Set-TurnOn", NULL))
+	if (!soap_get_dss__Group_CallScene(soap, &soap_tmp_dss__Group_CallScene, "dss:Group-CallScene", NULL))
 		return soap->error;
 	if (soap_body_end_in(soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Set_TurnOn(soap, soap_tmp_dss__Set_TurnOn._token, soap_tmp_dss__Set_TurnOn._setID, soap_tmp_dss__Set_TurnOnResponse.result);
+	soap->error = dss__Group_CallScene(soap, soap_tmp_dss__Group_CallScene._token, soap_tmp_dss__Group_CallScene._groupID, soap_tmp_dss__Group_CallScene._sceneNr, soap_tmp_dss__Group_CallSceneResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
-	soap_serialize_dss__Set_TurnOnResponse(soap, &soap_tmp_dss__Set_TurnOnResponse);
+	soap_serialize_dss__Group_CallSceneResponse(soap, &soap_tmp_dss__Group_CallSceneResponse);
 	if (soap_begin_count(soap))
 		return soap->error;
 	if (soap->mode & SOAP_IO_LENGTH)
 	{	if (soap_envelope_begin_out(soap)
 		 || soap_putheader(soap)
 		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Set_TurnOnResponse(soap, &soap_tmp_dss__Set_TurnOnResponse, "dss:Set-TurnOnResponse", "")
+		 || soap_put_dss__Group_CallSceneResponse(soap, &soap_tmp_dss__Group_CallSceneResponse, "dss:Group-CallSceneResponse", "")
 		 || soap_body_end_out(soap)
 		 || soap_envelope_end_out(soap))
 			 return soap->error;
@@ -1402,7 +1865,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_TurnOn(struct soap *soap)
 	 || soap_envelope_begin_out(soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Set_TurnOnResponse(soap, &soap_tmp_dss__Set_TurnOnResponse, "dss:Set-TurnOnResponse", "")
+	 || soap_put_dss__Group_CallSceneResponse(soap, &soap_tmp_dss__Group_CallSceneResponse, "dss:Group-CallSceneResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -1410,30 +1873,30 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_TurnOn(struct soap *soap)
 	return soap_closesock(soap);
 }
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_TurnOff(struct soap *soap)
-{	struct dss__Set_TurnOff soap_tmp_dss__Set_TurnOff;
-	struct dss__Set_TurnOffResponse soap_tmp_dss__Set_TurnOffResponse;
-	soap_default_dss__Set_TurnOffResponse(soap, &soap_tmp_dss__Set_TurnOffResponse);
-	soap_default_dss__Set_TurnOff(soap, &soap_tmp_dss__Set_TurnOff);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_SaveScene(struct soap *soap)
+{	struct dss__Group_SaveScene soap_tmp_dss__Group_SaveScene;
+	struct dss__Group_SaveSceneResponse soap_tmp_dss__Group_SaveSceneResponse;
+	soap_default_dss__Group_SaveSceneResponse(soap, &soap_tmp_dss__Group_SaveSceneResponse);
+	soap_default_dss__Group_SaveScene(soap, &soap_tmp_dss__Group_SaveScene);
 	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Set_TurnOff(soap, &soap_tmp_dss__Set_TurnOff, "dss:Set-TurnOff", NULL))
+	if (!soap_get_dss__Group_SaveScene(soap, &soap_tmp_dss__Group_SaveScene, "dss:Group-SaveScene", NULL))
 		return soap->error;
 	if (soap_body_end_in(soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Set_TurnOff(soap, soap_tmp_dss__Set_TurnOff._token, soap_tmp_dss__Set_TurnOff._setID, soap_tmp_dss__Set_TurnOffResponse.result);
+	soap->error = dss__Group_SaveScene(soap, soap_tmp_dss__Group_SaveScene._token, soap_tmp_dss__Group_SaveScene._groupID, soap_tmp_dss__Group_SaveScene._sceneNr, soap_tmp_dss__Group_SaveSceneResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
-	soap_serialize_dss__Set_TurnOffResponse(soap, &soap_tmp_dss__Set_TurnOffResponse);
+	soap_serialize_dss__Group_SaveSceneResponse(soap, &soap_tmp_dss__Group_SaveSceneResponse);
 	if (soap_begin_count(soap))
 		return soap->error;
 	if (soap->mode & SOAP_IO_LENGTH)
 	{	if (soap_envelope_begin_out(soap)
 		 || soap_putheader(soap)
 		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Set_TurnOffResponse(soap, &soap_tmp_dss__Set_TurnOffResponse, "dss:Set-TurnOffResponse", "")
+		 || soap_put_dss__Group_SaveSceneResponse(soap, &soap_tmp_dss__Group_SaveSceneResponse, "dss:Group-SaveSceneResponse", "")
 		 || soap_body_end_out(soap)
 		 || soap_envelope_end_out(soap))
 			 return soap->error;
@@ -1443,294 +1906,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_TurnOff(struct soap *soap)
 	 || soap_envelope_begin_out(soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Set_TurnOffResponse(soap, &soap_tmp_dss__Set_TurnOffResponse, "dss:Set-TurnOffResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_IncreaseValue(struct soap *soap)
-{	struct dss__Set_IncreaseValue soap_tmp_dss__Set_IncreaseValue;
-	struct dss__Set_IncreaseValueResponse soap_tmp_dss__Set_IncreaseValueResponse;
-	soap_default_dss__Set_IncreaseValueResponse(soap, &soap_tmp_dss__Set_IncreaseValueResponse);
-	soap_default_dss__Set_IncreaseValue(soap, &soap_tmp_dss__Set_IncreaseValue);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Set_IncreaseValue(soap, &soap_tmp_dss__Set_IncreaseValue, "dss:Set-IncreaseValue", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Set_IncreaseValue(soap, soap_tmp_dss__Set_IncreaseValue._token, soap_tmp_dss__Set_IncreaseValue._setID, soap_tmp_dss__Set_IncreaseValue._paramID, soap_tmp_dss__Set_IncreaseValueResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Set_IncreaseValueResponse(soap, &soap_tmp_dss__Set_IncreaseValueResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Set_IncreaseValueResponse(soap, &soap_tmp_dss__Set_IncreaseValueResponse, "dss:Set-IncreaseValueResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Set_IncreaseValueResponse(soap, &soap_tmp_dss__Set_IncreaseValueResponse, "dss:Set-IncreaseValueResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_DecreaseValue(struct soap *soap)
-{	struct dss__Set_DecreaseValue soap_tmp_dss__Set_DecreaseValue;
-	struct dss__Set_DecreaseValueResponse soap_tmp_dss__Set_DecreaseValueResponse;
-	soap_default_dss__Set_DecreaseValueResponse(soap, &soap_tmp_dss__Set_DecreaseValueResponse);
-	soap_default_dss__Set_DecreaseValue(soap, &soap_tmp_dss__Set_DecreaseValue);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Set_DecreaseValue(soap, &soap_tmp_dss__Set_DecreaseValue, "dss:Set-DecreaseValue", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Set_DecreaseValue(soap, soap_tmp_dss__Set_DecreaseValue._token, soap_tmp_dss__Set_DecreaseValue._setID, soap_tmp_dss__Set_DecreaseValue._paramID, soap_tmp_dss__Set_DecreaseValueResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Set_DecreaseValueResponse(soap, &soap_tmp_dss__Set_DecreaseValueResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Set_DecreaseValueResponse(soap, &soap_tmp_dss__Set_DecreaseValueResponse, "dss:Set-DecreaseValueResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Set_DecreaseValueResponse(soap, &soap_tmp_dss__Set_DecreaseValueResponse, "dss:Set-DecreaseValueResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_Enable(struct soap *soap)
-{	struct dss__Set_Enable soap_tmp_dss__Set_Enable;
-	struct dss__Set_EnableResponse soap_tmp_dss__Set_EnableResponse;
-	soap_default_dss__Set_EnableResponse(soap, &soap_tmp_dss__Set_EnableResponse);
-	soap_default_dss__Set_Enable(soap, &soap_tmp_dss__Set_Enable);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Set_Enable(soap, &soap_tmp_dss__Set_Enable, "dss:Set-Enable", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Set_Enable(soap, soap_tmp_dss__Set_Enable._token, soap_tmp_dss__Set_Enable._setID, soap_tmp_dss__Set_EnableResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Set_EnableResponse(soap, &soap_tmp_dss__Set_EnableResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Set_EnableResponse(soap, &soap_tmp_dss__Set_EnableResponse, "dss:Set-EnableResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Set_EnableResponse(soap, &soap_tmp_dss__Set_EnableResponse, "dss:Set-EnableResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_Disable(struct soap *soap)
-{	struct dss__Set_Disable soap_tmp_dss__Set_Disable;
-	struct dss__Set_DisableResponse soap_tmp_dss__Set_DisableResponse;
-	soap_default_dss__Set_DisableResponse(soap, &soap_tmp_dss__Set_DisableResponse);
-	soap_default_dss__Set_Disable(soap, &soap_tmp_dss__Set_Disable);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Set_Disable(soap, &soap_tmp_dss__Set_Disable, "dss:Set-Disable", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Set_Disable(soap, soap_tmp_dss__Set_Disable._token, soap_tmp_dss__Set_Disable._setID, soap_tmp_dss__Set_DisableResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Set_DisableResponse(soap, &soap_tmp_dss__Set_DisableResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Set_DisableResponse(soap, &soap_tmp_dss__Set_DisableResponse, "dss:Set-DisableResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Set_DisableResponse(soap, &soap_tmp_dss__Set_DisableResponse, "dss:Set-DisableResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_StartDim(struct soap *soap)
-{	struct dss__Set_StartDim soap_tmp_dss__Set_StartDim;
-	struct dss__Set_StartDimResponse soap_tmp_dss__Set_StartDimResponse;
-	soap_default_dss__Set_StartDimResponse(soap, &soap_tmp_dss__Set_StartDimResponse);
-	soap_default_dss__Set_StartDim(soap, &soap_tmp_dss__Set_StartDim);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Set_StartDim(soap, &soap_tmp_dss__Set_StartDim, "dss:Set-StartDim", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Set_StartDim(soap, soap_tmp_dss__Set_StartDim._token, soap_tmp_dss__Set_StartDim._setID, soap_tmp_dss__Set_StartDim._directionUp, soap_tmp_dss__Set_StartDim._paramID, soap_tmp_dss__Set_StartDimResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Set_StartDimResponse(soap, &soap_tmp_dss__Set_StartDimResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Set_StartDimResponse(soap, &soap_tmp_dss__Set_StartDimResponse, "dss:Set-StartDimResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Set_StartDimResponse(soap, &soap_tmp_dss__Set_StartDimResponse, "dss:Set-StartDimResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_EndDim(struct soap *soap)
-{	struct dss__Set_EndDim soap_tmp_dss__Set_EndDim;
-	struct dss__Set_EndDimResponse soap_tmp_dss__Set_EndDimResponse;
-	soap_default_dss__Set_EndDimResponse(soap, &soap_tmp_dss__Set_EndDimResponse);
-	soap_default_dss__Set_EndDim(soap, &soap_tmp_dss__Set_EndDim);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Set_EndDim(soap, &soap_tmp_dss__Set_EndDim, "dss:Set-EndDim", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Set_EndDim(soap, soap_tmp_dss__Set_EndDim._token, soap_tmp_dss__Set_EndDim._setID, soap_tmp_dss__Set_EndDim._paramID, soap_tmp_dss__Set_EndDimResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Set_EndDimResponse(soap, &soap_tmp_dss__Set_EndDimResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Set_EndDimResponse(soap, &soap_tmp_dss__Set_EndDimResponse, "dss:Set-EndDimResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Set_EndDimResponse(soap, &soap_tmp_dss__Set_EndDimResponse, "dss:Set-EndDimResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_SetValue(struct soap *soap)
-{	struct dss__Set_SetValue soap_tmp_dss__Set_SetValue;
-	struct dss__Set_SetValueResponse soap_tmp_dss__Set_SetValueResponse;
-	soap_default_dss__Set_SetValueResponse(soap, &soap_tmp_dss__Set_SetValueResponse);
-	soap_default_dss__Set_SetValue(soap, &soap_tmp_dss__Set_SetValue);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Set_SetValue(soap, &soap_tmp_dss__Set_SetValue, "dss:Set-SetValue", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Set_SetValue(soap, soap_tmp_dss__Set_SetValue._token, soap_tmp_dss__Set_SetValue._setID, soap_tmp_dss__Set_SetValue._value, soap_tmp_dss__Set_SetValue._paramID, soap_tmp_dss__Set_SetValueResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Set_SetValueResponse(soap, &soap_tmp_dss__Set_SetValueResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Set_SetValueResponse(soap, &soap_tmp_dss__Set_SetValueResponse, "dss:Set-SetValueResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Set_SetValueResponse(soap, &soap_tmp_dss__Set_SetValueResponse, "dss:Set-SetValueResponse", "")
+	 || soap_put_dss__Group_SaveSceneResponse(soap, &soap_tmp_dss__Group_SaveSceneResponse, "dss:Group-SaveSceneResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -2141,6 +2317,88 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetValue(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__Device_GetValueResponse(soap, &soap_tmp_dss__Device_GetValueResponse, "dss:Device-GetValueResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_CallScene(struct soap *soap)
+{	struct dss__Device_CallScene soap_tmp_dss__Device_CallScene;
+	struct dss__Device_CallSceneResponse soap_tmp_dss__Device_CallSceneResponse;
+	soap_default_dss__Device_CallSceneResponse(soap, &soap_tmp_dss__Device_CallSceneResponse);
+	soap_default_dss__Device_CallScene(soap, &soap_tmp_dss__Device_CallScene);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Device_CallScene(soap, &soap_tmp_dss__Device_CallScene, "dss:Device-CallScene", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Device_CallScene(soap, soap_tmp_dss__Device_CallScene._token, soap_tmp_dss__Device_CallScene._deviceID, soap_tmp_dss__Device_CallScene._sceneNr, soap_tmp_dss__Device_CallSceneResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Device_CallSceneResponse(soap, &soap_tmp_dss__Device_CallSceneResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Device_CallSceneResponse(soap, &soap_tmp_dss__Device_CallSceneResponse, "dss:Device-CallSceneResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Device_CallSceneResponse(soap, &soap_tmp_dss__Device_CallSceneResponse, "dss:Device-CallSceneResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_SaveScene(struct soap *soap)
+{	struct dss__Device_SaveScene soap_tmp_dss__Device_SaveScene;
+	struct dss__Device_SaveSceneResponse soap_tmp_dss__Device_SaveSceneResponse;
+	soap_default_dss__Device_SaveSceneResponse(soap, &soap_tmp_dss__Device_SaveSceneResponse);
+	soap_default_dss__Device_SaveScene(soap, &soap_tmp_dss__Device_SaveScene);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Device_SaveScene(soap, &soap_tmp_dss__Device_SaveScene, "dss:Device-SaveScene", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Device_SaveScene(soap, soap_tmp_dss__Device_SaveScene._token, soap_tmp_dss__Device_SaveScene._deviceID, soap_tmp_dss__Device_SaveScene._sceneNr, soap_tmp_dss__Device_SaveSceneResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Device_SaveSceneResponse(soap, &soap_tmp_dss__Device_SaveSceneResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Device_SaveSceneResponse(soap, &soap_tmp_dss__Device_SaveSceneResponse, "dss:Device-SaveSceneResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Device_SaveSceneResponse(soap, &soap_tmp_dss__Device_SaveSceneResponse, "dss:Device-SaveSceneResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

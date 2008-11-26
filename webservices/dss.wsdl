@@ -344,24 +344,24 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-GetRoomByName">
+  <element name="Apartment-GetZoneByName">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="roomName" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="zoneName" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-GetRoomByNameResponse">
+  <element name="Apartment-GetZoneByNameResponse">
    <complexType>
     <sequence>
-     <element name="roomID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-GetRoomIDs">
+  <element name="Apartment-GetZoneIDs">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -369,10 +369,10 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-GetRoomIDsResponse">
+  <element name="Apartment-GetZoneIDsResponse">
    <complexType>
     <sequence>
-     <element name="roomIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -530,6 +530,238 @@
   </element>
   <!-- operation response element -->
   <element name="Set-SetValueResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="Set-CallScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Set-CallSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="Set-SaveScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Set-SaveSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="Group-TurnOn">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Group-TurnOnResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="Group-TurnOff">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Group-TurnOffResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="Group-IncreaseValue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Group-IncreaseValueResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="Group-DecreaseValue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Group-DecreaseValueResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="Group-Enable">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Group-EnableResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="Group-Disable">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Group-DisableResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="Group-StartDim">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="directionUp" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Group-StartDimResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="Group-EndDim">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Group-EndDimResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="Group-SetValue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="value" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Group-SetValueResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="Group-CallScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Group-CallSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="Group-SaveScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Group-SaveSceneResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -715,6 +947,42 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="Device-CallScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Device-CallSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="Device-SaveScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Device-SaveSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="Device-GetName">
    <complexType>
     <sequence>
@@ -732,7 +1000,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-GetRoomID">
+  <element name="Device-GetZoneID">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -741,7 +1009,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Device-GetRoomIDResponse">
+  <element name="Device-GetZoneIDResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -816,7 +1084,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-AllocateRoom">
+  <element name="Apartment-AllocateZone">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -824,24 +1092,24 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-AllocateRoomResponse">
+  <element name="Apartment-AllocateZoneResponse">
    <complexType>
     <sequence>
-     <element name="roomID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-DeleteRoom">
+  <element name="Apartment-DeleteZone">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="roomID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-DeleteRoomResponse">
+  <element name="Apartment-DeleteZoneResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -849,17 +1117,17 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Room-AddDevice">
+  <element name="Zone-AddDevice">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="roomID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="deviceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Room-AddDeviceResponse">
+  <element name="Zone-AddDeviceResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -867,17 +1135,17 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Room-RemoveDevice">
+  <element name="Zone-RemoveDevice">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="roomID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="deviceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Room-RemoveDeviceResponse">
+  <element name="Zone-RemoveDeviceResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -885,17 +1153,17 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Room-SetName">
+  <element name="Zone-SetName">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="roomID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="name" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Room-SetNameResponse">
+  <element name="Zone-SetNameResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1290,20 +1558,20 @@
  <part name="parameters" element="dss:Apartment-GetGroupByNameResponse"/>
 </message>
 
-<message name="Apartment-GetRoomByNameRequest">
- <part name="parameters" element="dss:Apartment-GetRoomByName"/>
+<message name="Apartment-GetZoneByNameRequest">
+ <part name="parameters" element="dss:Apartment-GetZoneByName"/>
 </message>
 
-<message name="Apartment-GetRoomByNameResponse">
- <part name="parameters" element="dss:Apartment-GetRoomByNameResponse"/>
+<message name="Apartment-GetZoneByNameResponse">
+ <part name="parameters" element="dss:Apartment-GetZoneByNameResponse"/>
 </message>
 
-<message name="Apartment-GetRoomIDsRequest">
- <part name="parameters" element="dss:Apartment-GetRoomIDs"/>
+<message name="Apartment-GetZoneIDsRequest">
+ <part name="parameters" element="dss:Apartment-GetZoneIDs"/>
 </message>
 
-<message name="Apartment-GetRoomIDsResponse">
- <part name="parameters" element="dss:Apartment-GetRoomIDsResponse"/>
+<message name="Apartment-GetZoneIDsResponse">
+ <part name="parameters" element="dss:Apartment-GetZoneIDsResponse"/>
 </message>
 
 <message name="Set-TurnOnRequest">
@@ -1376,6 +1644,110 @@
 
 <message name="Set-SetValueResponse">
  <part name="parameters" element="dss:Set-SetValueResponse"/>
+</message>
+
+<message name="Set-CallSceneRequest">
+ <part name="parameters" element="dss:Set-CallScene"/>
+</message>
+
+<message name="Set-CallSceneResponse">
+ <part name="parameters" element="dss:Set-CallSceneResponse"/>
+</message>
+
+<message name="Set-SaveSceneRequest">
+ <part name="parameters" element="dss:Set-SaveScene"/>
+</message>
+
+<message name="Set-SaveSceneResponse">
+ <part name="parameters" element="dss:Set-SaveSceneResponse"/>
+</message>
+
+<message name="Group-TurnOnRequest">
+ <part name="parameters" element="dss:Group-TurnOn"/>
+</message>
+
+<message name="Group-TurnOnResponse">
+ <part name="parameters" element="dss:Group-TurnOnResponse"/>
+</message>
+
+<message name="Group-TurnOffRequest">
+ <part name="parameters" element="dss:Group-TurnOff"/>
+</message>
+
+<message name="Group-TurnOffResponse">
+ <part name="parameters" element="dss:Group-TurnOffResponse"/>
+</message>
+
+<message name="Group-IncreaseValueRequest">
+ <part name="parameters" element="dss:Group-IncreaseValue"/>
+</message>
+
+<message name="Group-IncreaseValueResponse">
+ <part name="parameters" element="dss:Group-IncreaseValueResponse"/>
+</message>
+
+<message name="Group-DecreaseValueRequest">
+ <part name="parameters" element="dss:Group-DecreaseValue"/>
+</message>
+
+<message name="Group-DecreaseValueResponse">
+ <part name="parameters" element="dss:Group-DecreaseValueResponse"/>
+</message>
+
+<message name="Group-EnableRequest">
+ <part name="parameters" element="dss:Group-Enable"/>
+</message>
+
+<message name="Group-EnableResponse">
+ <part name="parameters" element="dss:Group-EnableResponse"/>
+</message>
+
+<message name="Group-DisableRequest">
+ <part name="parameters" element="dss:Group-Disable"/>
+</message>
+
+<message name="Group-DisableResponse">
+ <part name="parameters" element="dss:Group-DisableResponse"/>
+</message>
+
+<message name="Group-StartDimRequest">
+ <part name="parameters" element="dss:Group-StartDim"/>
+</message>
+
+<message name="Group-StartDimResponse">
+ <part name="parameters" element="dss:Group-StartDimResponse"/>
+</message>
+
+<message name="Group-EndDimRequest">
+ <part name="parameters" element="dss:Group-EndDim"/>
+</message>
+
+<message name="Group-EndDimResponse">
+ <part name="parameters" element="dss:Group-EndDimResponse"/>
+</message>
+
+<message name="Group-SetValueRequest">
+ <part name="parameters" element="dss:Group-SetValue"/>
+</message>
+
+<message name="Group-SetValueResponse">
+ <part name="parameters" element="dss:Group-SetValueResponse"/>
+</message>
+
+<message name="Group-CallSceneRequest">
+ <part name="parameters" element="dss:Group-CallScene"/>
+</message>
+
+<message name="Group-CallSceneResponse">
+ <part name="parameters" element="dss:Group-CallSceneResponse"/>
+</message>
+
+<message name="Group-SaveSceneRequest">
+ <part name="parameters" element="dss:Group-SaveScene"/>
+</message>
+
+<message name="Group-SaveSceneResponse">
+ <part name="parameters" element="dss:Group-SaveSceneResponse"/>
 </message>
 
 <message name="Device-TurnOnRequest">
@@ -1458,6 +1830,22 @@
  <part name="parameters" element="dss:Device-GetValueResponse"/>
 </message>
 
+<message name="Device-CallSceneRequest">
+ <part name="parameters" element="dss:Device-CallScene"/>
+</message>
+
+<message name="Device-CallSceneResponse">
+ <part name="parameters" element="dss:Device-CallSceneResponse"/>
+</message>
+
+<message name="Device-SaveSceneRequest">
+ <part name="parameters" element="dss:Device-SaveScene"/>
+</message>
+
+<message name="Device-SaveSceneResponse">
+ <part name="parameters" element="dss:Device-SaveSceneResponse"/>
+</message>
+
 <message name="Device-GetNameRequest">
  <part name="parameters" element="dss:Device-GetName"/>
 </message>
@@ -1466,12 +1854,12 @@
  <part name="parameters" element="dss:Device-GetNameResponse"/>
 </message>
 
-<message name="Device-GetRoomIDRequest">
- <part name="parameters" element="dss:Device-GetRoomID"/>
+<message name="Device-GetZoneIDRequest">
+ <part name="parameters" element="dss:Device-GetZoneID"/>
 </message>
 
-<message name="Device-GetRoomIDResponse">
- <part name="parameters" element="dss:Device-GetRoomIDResponse"/>
+<message name="Device-GetZoneIDResponse">
+ <part name="parameters" element="dss:Device-GetZoneIDResponse"/>
 </message>
 
 <message name="Device-GetDSIDRequest">
@@ -1506,44 +1894,44 @@
  <part name="parameters" element="dss:Modulator-GetNameResponse"/>
 </message>
 
-<message name="Apartment-AllocateRoomRequest">
- <part name="parameters" element="dss:Apartment-AllocateRoom"/>
+<message name="Apartment-AllocateZoneRequest">
+ <part name="parameters" element="dss:Apartment-AllocateZone"/>
 </message>
 
-<message name="Apartment-AllocateRoomResponse">
- <part name="parameters" element="dss:Apartment-AllocateRoomResponse"/>
+<message name="Apartment-AllocateZoneResponse">
+ <part name="parameters" element="dss:Apartment-AllocateZoneResponse"/>
 </message>
 
-<message name="Apartment-DeleteRoomRequest">
- <part name="parameters" element="dss:Apartment-DeleteRoom"/>
+<message name="Apartment-DeleteZoneRequest">
+ <part name="parameters" element="dss:Apartment-DeleteZone"/>
 </message>
 
-<message name="Apartment-DeleteRoomResponse">
- <part name="parameters" element="dss:Apartment-DeleteRoomResponse"/>
+<message name="Apartment-DeleteZoneResponse">
+ <part name="parameters" element="dss:Apartment-DeleteZoneResponse"/>
 </message>
 
-<message name="Room-AddDeviceRequest">
- <part name="parameters" element="dss:Room-AddDevice"/>
+<message name="Zone-AddDeviceRequest">
+ <part name="parameters" element="dss:Zone-AddDevice"/>
 </message>
 
-<message name="Room-AddDeviceResponse">
- <part name="parameters" element="dss:Room-AddDeviceResponse"/>
+<message name="Zone-AddDeviceResponse">
+ <part name="parameters" element="dss:Zone-AddDeviceResponse"/>
 </message>
 
-<message name="Room-RemoveDeviceRequest">
- <part name="parameters" element="dss:Room-RemoveDevice"/>
+<message name="Zone-RemoveDeviceRequest">
+ <part name="parameters" element="dss:Zone-RemoveDevice"/>
 </message>
 
-<message name="Room-RemoveDeviceResponse">
- <part name="parameters" element="dss:Room-RemoveDeviceResponse"/>
+<message name="Zone-RemoveDeviceResponse">
+ <part name="parameters" element="dss:Zone-RemoveDeviceResponse"/>
 </message>
 
-<message name="Room-SetNameRequest">
- <part name="parameters" element="dss:Room-SetName"/>
+<message name="Zone-SetNameRequest">
+ <part name="parameters" element="dss:Zone-SetName"/>
 </message>
 
-<message name="Room-SetNameResponse">
- <part name="parameters" element="dss:Room-SetNameResponse"/>
+<message name="Zone-SetNameResponse">
+ <part name="parameters" element="dss:Zone-SetNameResponse"/>
 </message>
 
 <message name="Apartment-AllocateUserGroupRequest">
@@ -1744,15 +2132,15 @@
   <input message="tns:Apartment-GetGroupByNameRequest"/>
   <output message="tns:Apartment-GetGroupByNameResponse"/>
  </operation>
- <operation name="Apartment-GetRoomByName">
-  <documentation>Service definition of function dss__Apartment_GetRoomByName</documentation>
-  <input message="tns:Apartment-GetRoomByNameRequest"/>
-  <output message="tns:Apartment-GetRoomByNameResponse"/>
+ <operation name="Apartment-GetZoneByName">
+  <documentation>Service definition of function dss__Apartment_GetZoneByName</documentation>
+  <input message="tns:Apartment-GetZoneByNameRequest"/>
+  <output message="tns:Apartment-GetZoneByNameResponse"/>
  </operation>
- <operation name="Apartment-GetRoomIDs">
-  <documentation>Service definition of function dss__Apartment_GetRoomIDs</documentation>
-  <input message="tns:Apartment-GetRoomIDsRequest"/>
-  <output message="tns:Apartment-GetRoomIDsResponse"/>
+ <operation name="Apartment-GetZoneIDs">
+  <documentation>Service definition of function dss__Apartment_GetZoneIDs</documentation>
+  <input message="tns:Apartment-GetZoneIDsRequest"/>
+  <output message="tns:Apartment-GetZoneIDsResponse"/>
  </operation>
  <operation name="Set-TurnOn">
   <documentation>Service definition of function dss__Set_TurnOn</documentation>
@@ -1798,6 +2186,71 @@
   <documentation>Service definition of function dss__Set_SetValue</documentation>
   <input message="tns:Set-SetValueRequest"/>
   <output message="tns:Set-SetValueResponse"/>
+ </operation>
+ <operation name="Set-CallScene">
+  <documentation>Service definition of function dss__Set_CallScene</documentation>
+  <input message="tns:Set-CallSceneRequest"/>
+  <output message="tns:Set-CallSceneResponse"/>
+ </operation>
+ <operation name="Set-SaveScene">
+  <documentation>Service definition of function dss__Set_SaveScene</documentation>
+  <input message="tns:Set-SaveSceneRequest"/>
+  <output message="tns:Set-SaveSceneResponse"/>
+ </operation>
+ <operation name="Group-TurnOn">
+  <documentation>Service definition of function dss__Group_TurnOn</documentation>
+  <input message="tns:Group-TurnOnRequest"/>
+  <output message="tns:Group-TurnOnResponse"/>
+ </operation>
+ <operation name="Group-TurnOff">
+  <documentation>Service definition of function dss__Group_TurnOff</documentation>
+  <input message="tns:Group-TurnOffRequest"/>
+  <output message="tns:Group-TurnOffResponse"/>
+ </operation>
+ <operation name="Group-IncreaseValue">
+  <documentation>Service definition of function dss__Group_IncreaseValue</documentation>
+  <input message="tns:Group-IncreaseValueRequest"/>
+  <output message="tns:Group-IncreaseValueResponse"/>
+ </operation>
+ <operation name="Group-DecreaseValue">
+  <documentation>Service definition of function dss__Group_DecreaseValue</documentation>
+  <input message="tns:Group-DecreaseValueRequest"/>
+  <output message="tns:Group-DecreaseValueResponse"/>
+ </operation>
+ <operation name="Group-Enable">
+  <documentation>Service definition of function dss__Group_Enable</documentation>
+  <input message="tns:Group-EnableRequest"/>
+  <output message="tns:Group-EnableResponse"/>
+ </operation>
+ <operation name="Group-Disable">
+  <documentation>Service definition of function dss__Group_Disable</documentation>
+  <input message="tns:Group-DisableRequest"/>
+  <output message="tns:Group-DisableResponse"/>
+ </operation>
+ <operation name="Group-StartDim">
+  <documentation>Service definition of function dss__Group_StartDim</documentation>
+  <input message="tns:Group-StartDimRequest"/>
+  <output message="tns:Group-StartDimResponse"/>
+ </operation>
+ <operation name="Group-EndDim">
+  <documentation>Service definition of function dss__Group_EndDim</documentation>
+  <input message="tns:Group-EndDimRequest"/>
+  <output message="tns:Group-EndDimResponse"/>
+ </operation>
+ <operation name="Group-SetValue">
+  <documentation>Service definition of function dss__Group_SetValue</documentation>
+  <input message="tns:Group-SetValueRequest"/>
+  <output message="tns:Group-SetValueResponse"/>
+ </operation>
+ <operation name="Group-CallScene">
+  <documentation>Service definition of function dss__Group_CallScene</documentation>
+  <input message="tns:Group-CallSceneRequest"/>
+  <output message="tns:Group-CallSceneResponse"/>
+ </operation>
+ <operation name="Group-SaveScene">
+  <documentation>Service definition of function dss__Group_SaveScene</documentation>
+  <input message="tns:Group-SaveSceneRequest"/>
+  <output message="tns:Group-SaveSceneResponse"/>
  </operation>
  <operation name="Device-TurnOn">
   <documentation>Service definition of function dss__Device_TurnOn</documentation>
@@ -1849,15 +2302,25 @@
   <input message="tns:Device-GetValueRequest"/>
   <output message="tns:Device-GetValueResponse"/>
  </operation>
+ <operation name="Device-CallScene">
+  <documentation>Service definition of function dss__Device_CallScene</documentation>
+  <input message="tns:Device-CallSceneRequest"/>
+  <output message="tns:Device-CallSceneResponse"/>
+ </operation>
+ <operation name="Device-SaveScene">
+  <documentation>Service definition of function dss__Device_SaveScene</documentation>
+  <input message="tns:Device-SaveSceneRequest"/>
+  <output message="tns:Device-SaveSceneResponse"/>
+ </operation>
  <operation name="Device-GetName">
   <documentation>Service definition of function dss__Device_GetName</documentation>
   <input message="tns:Device-GetNameRequest"/>
   <output message="tns:Device-GetNameResponse"/>
  </operation>
- <operation name="Device-GetRoomID">
-  <documentation>Service definition of function dss__Device_GetRoomID</documentation>
-  <input message="tns:Device-GetRoomIDRequest"/>
-  <output message="tns:Device-GetRoomIDResponse"/>
+ <operation name="Device-GetZoneID">
+  <documentation>Service definition of function dss__Device_GetZoneID</documentation>
+  <input message="tns:Device-GetZoneIDRequest"/>
+  <output message="tns:Device-GetZoneIDResponse"/>
  </operation>
  <operation name="Device-GetDSID">
   <documentation>Service definition of function dss__Device_GetDSID</documentation>
@@ -1879,30 +2342,30 @@
   <input message="tns:Modulator-GetNameRequest"/>
   <output message="tns:Modulator-GetNameResponse"/>
  </operation>
- <operation name="Apartment-AllocateRoom">
-  <documentation>Service definition of function dss__Apartment_AllocateRoom</documentation>
-  <input message="tns:Apartment-AllocateRoomRequest"/>
-  <output message="tns:Apartment-AllocateRoomResponse"/>
+ <operation name="Apartment-AllocateZone">
+  <documentation>Service definition of function dss__Apartment_AllocateZone</documentation>
+  <input message="tns:Apartment-AllocateZoneRequest"/>
+  <output message="tns:Apartment-AllocateZoneResponse"/>
  </operation>
- <operation name="Apartment-DeleteRoom">
-  <documentation>Service definition of function dss__Apartment_DeleteRoom</documentation>
-  <input message="tns:Apartment-DeleteRoomRequest"/>
-  <output message="tns:Apartment-DeleteRoomResponse"/>
+ <operation name="Apartment-DeleteZone">
+  <documentation>Service definition of function dss__Apartment_DeleteZone</documentation>
+  <input message="tns:Apartment-DeleteZoneRequest"/>
+  <output message="tns:Apartment-DeleteZoneResponse"/>
  </operation>
- <operation name="Room-AddDevice">
-  <documentation>Service definition of function dss__Room_AddDevice</documentation>
-  <input message="tns:Room-AddDeviceRequest"/>
-  <output message="tns:Room-AddDeviceResponse"/>
+ <operation name="Zone-AddDevice">
+  <documentation>Service definition of function dss__Zone_AddDevice</documentation>
+  <input message="tns:Zone-AddDeviceRequest"/>
+  <output message="tns:Zone-AddDeviceResponse"/>
  </operation>
- <operation name="Room-RemoveDevice">
-  <documentation>Service definition of function dss__Room_RemoveDevice</documentation>
-  <input message="tns:Room-RemoveDeviceRequest"/>
-  <output message="tns:Room-RemoveDeviceResponse"/>
+ <operation name="Zone-RemoveDevice">
+  <documentation>Service definition of function dss__Zone_RemoveDevice</documentation>
+  <input message="tns:Zone-RemoveDeviceRequest"/>
+  <output message="tns:Zone-RemoveDeviceResponse"/>
  </operation>
- <operation name="Room-SetName">
-  <documentation>Service definition of function dss__Room_SetName</documentation>
-  <input message="tns:Room-SetNameRequest"/>
-  <output message="tns:Room-SetNameResponse"/>
+ <operation name="Zone-SetName">
+  <documentation>Service definition of function dss__Zone_SetName</documentation>
+  <input message="tns:Zone-SetNameRequest"/>
+  <output message="tns:Zone-SetNameResponse"/>
  </operation>
  <operation name="Apartment-AllocateUserGroup">
   <documentation>Service definition of function dss__Apartment_AllocateUserGroup</documentation>
@@ -2131,7 +2594,7 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="Apartment-GetRoomByName">
+ <operation name="Apartment-GetZoneByName">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -2140,7 +2603,7 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="Apartment-GetRoomIDs">
+ <operation name="Apartment-GetZoneIDs">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -2222,6 +2685,123 @@
   </output>
  </operation>
  <operation name="Set-SetValue">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Set-CallScene">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Set-SaveScene">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Group-TurnOn">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Group-TurnOff">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Group-IncreaseValue">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Group-DecreaseValue">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Group-Enable">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Group-Disable">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Group-StartDim">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Group-EndDim">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Group-SetValue">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Group-CallScene">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Group-SaveScene">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -2320,6 +2900,24 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
+ <operation name="Device-CallScene">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Device-SaveScene">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
  <operation name="Device-GetName">
   <SOAP:operation soapAction=""/>
   <input>
@@ -2329,7 +2927,7 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="Device-GetRoomID">
+ <operation name="Device-GetZoneID">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -2374,7 +2972,7 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="Apartment-AllocateRoom">
+ <operation name="Apartment-AllocateZone">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -2383,7 +2981,7 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="Apartment-DeleteRoom">
+ <operation name="Apartment-DeleteZone">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -2392,7 +2990,7 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="Room-AddDevice">
+ <operation name="Zone-AddDevice">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -2401,7 +2999,7 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="Room-RemoveDevice">
+ <operation name="Zone-RemoveDevice">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -2410,7 +3008,7 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="Room-SetName">
+ <operation name="Zone-SetName">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

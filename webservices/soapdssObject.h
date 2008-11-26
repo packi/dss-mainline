@@ -82,6 +82,28 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetZoneByName(struct soap*, int _token,
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetZoneIDs(struct soap*, int _token, IntArray &zoneIDs);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_TurnOn(struct soap*, int _token, int _setID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_TurnOff(struct soap*, int _token, int _setID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_IncreaseValue(struct soap*, int _token, int _setID, int _paramID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_DecreaseValue(struct soap*, int _token, int _setID, int _paramID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_Enable(struct soap*, int _token, int _setID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_Disable(struct soap*, int _token, int _setID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_StartDim(struct soap*, int _token, int _setID, bool _directionUp, int _paramID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_EndDim(struct soap*, int _token, int _setID, int _paramID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_SetValue(struct soap*, int _token, int _setID, double _value, int _paramID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_CallScene(struct soap*, int _token, int _setID, int _sceneNr, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_SaveScene(struct soap*, int _token, int _setID, int _sceneNr, bool &result);
+
 SOAP_FMAC5 int SOAP_FMAC6 dss__Group_TurnOn(struct soap*, int _token, int _groupID, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Group_TurnOff(struct soap*, int _token, int _groupID, bool &result);
@@ -100,23 +122,9 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Group_EndDim(struct soap*, int _token, int _group
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Group_SetValue(struct soap*, int _token, int _groupID, double _value, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_TurnOn(struct soap*, int _token, int _setID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Group_CallScene(struct soap*, int _token, int _groupID, int _sceneNr, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_TurnOff(struct soap*, int _token, int _setID, bool &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_IncreaseValue(struct soap*, int _token, int _setID, int _paramID, bool &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_DecreaseValue(struct soap*, int _token, int _setID, int _paramID, bool &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_Enable(struct soap*, int _token, int _setID, bool &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_Disable(struct soap*, int _token, int _setID, bool &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_StartDim(struct soap*, int _token, int _setID, bool _directionUp, int _paramID, bool &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_EndDim(struct soap*, int _token, int _setID, int _paramID, bool &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_SetValue(struct soap*, int _token, int _setID, double _value, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Group_SaveScene(struct soap*, int _token, int _groupID, int _sceneNr, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Device_TurnOn(struct soap*, int _token, unsigned long _deviceID, bool &result);
 
@@ -137,6 +145,10 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Device_EndDim(struct soap*, int _token, unsigned 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Device_SetValue(struct soap*, int _token, unsigned long _deviceID, double _value, int _paramID, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetValue(struct soap*, int _token, unsigned long _deviceID, int _paramID, double &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_CallScene(struct soap*, int _token, unsigned long _deviceID, int _sceneNr, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__Device_SaveScene(struct soap*, int _token, unsigned long _deviceID, int _sceneNr, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetName(struct soap*, int _token, unsigned long _deviceID, char **result);
 

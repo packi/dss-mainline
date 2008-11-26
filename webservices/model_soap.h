@@ -98,9 +98,9 @@ int dss__Set_EndDim(int _token, int _setID, int _paramID, bool& result);
 int dss__Set_SetValue(int _token, int _setID, double _value, int _paramID, bool& result);
 
 /** Calls the scene _sceneNr on all devices contained int the set _setID. */
-int dss_Set_CallScene(int _token, int _setID, int _sceneNr, bool& result);
+int dss__Set_CallScene(int _token, int _setID, int _sceneNr, bool& result);
 /** Saves the scene _sceneNr on all devices contained int the set _setID. */
-int dss_Set_SaveScene(int _token, int _setID, int _sceneNr, bool& result);
+int dss__Set_SaveScene(int _token, int _setID, int _sceneNr, bool& result);
 
 //--------------------------- Group
 
@@ -130,9 +130,9 @@ int dss__Group_EndDim(int _token, int _groupID, int _paramID, bool& result);
 int dss__Group_SetValue(int _token, int _groupID, double _value, int _paramID, bool& result);
 
 /** Calls the scene _sceneNr on all devices contained int the group _groupID. */
-int dss_Group_CallScene(int _token, int _groupID, int _sceneNr, bool& result);
+int dss__Group_CallScene(int _token, int _groupID, int _sceneNr, bool& result);
 /** Saves the scene _sceneNr on all devices contained int the group _groupID. */
-int dss_Group_SaveScene(int _token, int _groupID, int _sceneNr, bool& result);
+int dss__Group_SaveScene(int _token, int _groupID, int _sceneNr, bool& result);
 
 
 //--------------------------- Device
@@ -167,9 +167,9 @@ int dss__Device_GetValue(int _token, xsd__unsignedInt _deviceID, int _paramID, d
 
 
 /** Calls the scene _sceneNr on the device identified by _deviceID. */
-int dss_Device_CallScene(int _token, xsd__unsignedInt _deviceID, int _sceneNr, bool& result);
+int dss__Device_CallScene(int _token, xsd__unsignedInt _deviceID, int _sceneNr, bool& result);
 /** Saves the scene _sceneNr on the device identified by _devicdID. */
-int dss_Device_SaveScene(int _token, xsd__unsignedInt _deviceID, int _sceneNr, bool& result);
+int dss__Device_SaveScene(int _token, xsd__unsignedInt _deviceID, int _sceneNr, bool& result);
 
 /** Returns the name of a device */
 int dss__Device_GetName(int _token, xsd__unsignedInt _deviceID, char** result);
