@@ -63,8 +63,9 @@ namespace dss {
   const uint8 FunctionKeyPressed = 0x80;
 
   const uint8 FunctionModulatorGetDSID = 0xF1;
+  const uint8 FunctionModulatorGetPowerConsumption = 0x52;
 
-  const uint8 FunctionDeviceGetFunctionID = 0xF4;
+  const uint8 FunctionDeviceGetFunctionID = 0x66;
 
   const uint8 FunctionDeviceSubscribe = 0xF3;
 

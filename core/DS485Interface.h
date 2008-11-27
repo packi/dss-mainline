@@ -81,6 +81,9 @@ namespace dss {
     /** Returns the DSID of a given modulator */
     virtual dsid_t GetDSIDOfModulator(const int _modulatorID) = 0;
 
+    /** Returns the current powerconsumption in mW */
+    virtual unsigned long GetPowerConsumption(const int _modulatorID) = 0;
+
     /** Subscribes to all events raised by the given device */
     virtual void Subscribe(const int _moduatorID, const int _groupID, const int _deviceID) = 0;
 

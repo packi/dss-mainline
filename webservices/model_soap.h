@@ -182,6 +182,8 @@ int dss__Device_GetZoneID(int _token, xsd__unsignedInt _deviceID, int& result);
 /** Returns the DSID of the given device */
 int dss__Device_GetDSID(int _token, xsd__unsignedInt _deviceID, xsd__unsignedInt& result);
 
+int dss__Modulator_GetPowerConsumption(int _token, int _modulatorID, xsd__unsignedInt& result);
+
 //==================================================== Organization
 
 //These calls may be restricted to privileged users.

@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2008-11-26 10:23:55 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2008-11-27 15:48:42 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -185,6 +185,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__Device_GetZoneID(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Device-GetDSID"))
 		return soap_serve_dss__Device_GetDSID(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:Modulator-GetPowerConsumption"))
+		return soap_serve_dss__Modulator_GetPowerConsumption(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Apartment-GetModulatorIDs"))
 		return soap_serve_dss__Apartment_GetModulatorIDs(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Modulator-GetDSID"))
@@ -2525,6 +2527,47 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetDSID(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__Device_GetDSIDResponse(soap, &soap_tmp_dss__Device_GetDSIDResponse, "dss:Device-GetDSIDResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Modulator_GetPowerConsumption(struct soap *soap)
+{	struct dss__Modulator_GetPowerConsumption soap_tmp_dss__Modulator_GetPowerConsumption;
+	struct dss__Modulator_GetPowerConsumptionResponse soap_tmp_dss__Modulator_GetPowerConsumptionResponse;
+	soap_default_dss__Modulator_GetPowerConsumptionResponse(soap, &soap_tmp_dss__Modulator_GetPowerConsumptionResponse);
+	soap_default_dss__Modulator_GetPowerConsumption(soap, &soap_tmp_dss__Modulator_GetPowerConsumption);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__Modulator_GetPowerConsumption(soap, &soap_tmp_dss__Modulator_GetPowerConsumption, "dss:Modulator-GetPowerConsumption", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__Modulator_GetPowerConsumption(soap, soap_tmp_dss__Modulator_GetPowerConsumption._token, soap_tmp_dss__Modulator_GetPowerConsumption._modulatorID, soap_tmp_dss__Modulator_GetPowerConsumptionResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__Modulator_GetPowerConsumptionResponse(soap, &soap_tmp_dss__Modulator_GetPowerConsumptionResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__Modulator_GetPowerConsumptionResponse(soap, &soap_tmp_dss__Modulator_GetPowerConsumptionResponse, "dss:Modulator-GetPowerConsumptionResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__Modulator_GetPowerConsumptionResponse(soap, &soap_tmp_dss__Modulator_GetPowerConsumptionResponse, "dss:Modulator-GetPowerConsumptionResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

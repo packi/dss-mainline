@@ -942,6 +942,10 @@ namespace dss {
     m_BusID = _busID;
   } // SetBusID
 
+  unsigned long Modulator::GetPowerConsumption() {
+    return DSS::GetInstance()->GetDS485Interface().GetPowerConsumption(m_BusID);
+  } // GetPowerConsumption
+
   //================================================== Zone
 
   Set Zone::GetDevices() const {
@@ -1076,31 +1080,6 @@ namespace dss {
     GetDevices().UndoScene(_sceneNr);
   } // UndoScene
 
-  //============================================= Subscription
-/*
-  bool Subscription::HandlesEvent(const Event& _event) const {
-    if(Contains(m_EventIDs, _event.GetID())) {
-      return m_SourceIDs.empty() || Contains(m_SourceIDs, static_cast<int>(_event.GetSource()));
-    }
-    return false;
-  } // HandlesEvent
-
-  const vector<int>& Subscription::GetSourceIDs() const {
-    return m_SourceIDs;
-  } // GetSourceIDs
-
-  const vector<int>& Subscription::GetEventIDs() const {
-    return m_EventIDs;
-  } // GetEventIDs
-
-  const string& Subscription::GetName() const {
-    return m_Name;
-  } // GetName
-
-  void Subscription::SetName(const string& _value) {
-    m_Name = _value;
-  } // SetName
-*/
   //================================================== DeviceReference
 
   DeviceReference::DeviceReference(const DeviceReference& _copy)

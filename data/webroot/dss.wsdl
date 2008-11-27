@@ -1034,23 +1034,6 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Modulator-GetPowerConsumption">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="modulatorID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Modulator-GetPowerConsumptionResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
   <element name="Apartment-GetModulatorIDs">
    <complexType>
     <sequence>
@@ -1887,14 +1870,6 @@
  <part name="parameters" element="dss:Device-GetDSIDResponse"/>
 </message>
 
-<message name="Modulator-GetPowerConsumptionRequest">
- <part name="parameters" element="dss:Modulator-GetPowerConsumption"/>
-</message>
-
-<message name="Modulator-GetPowerConsumptionResponse">
- <part name="parameters" element="dss:Modulator-GetPowerConsumptionResponse"/>
-</message>
-
 <message name="Apartment-GetModulatorIDsRequest">
  <part name="parameters" element="dss:Apartment-GetModulatorIDs"/>
 </message>
@@ -2351,11 +2326,6 @@
   <documentation>Service definition of function dss__Device_GetDSID</documentation>
   <input message="tns:Device-GetDSIDRequest"/>
   <output message="tns:Device-GetDSIDResponse"/>
- </operation>
- <operation name="Modulator-GetPowerConsumption">
-  <documentation>Service definition of function dss__Modulator_GetPowerConsumption</documentation>
-  <input message="tns:Modulator-GetPowerConsumptionRequest"/>
-  <output message="tns:Modulator-GetPowerConsumptionResponse"/>
  </operation>
  <operation name="Apartment-GetModulatorIDs">
   <documentation>Service definition of function dss__Apartment_GetModulatorIDs</documentation>
@@ -2967,15 +2937,6 @@
   </output>
  </operation>
  <operation name="Device-GetDSID">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="Modulator-GetPowerConsumption">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

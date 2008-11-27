@@ -360,6 +360,8 @@ namespace dss {
 
     /** Adds a DeviceReference to the modulators devices list */
     void AddDevice(const DeviceReference& _device);
+
+    unsigned long GetPowerConsumption();
   }; // Modulator
 
   /** Represents a predefined group */

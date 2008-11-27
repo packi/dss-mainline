@@ -60,6 +60,18 @@ int AuthorizeAndGetModulator(struct soap *soap, const int _token, const unsigned
   return SOAP_OK;
 } // AuthorizeAndGetModulator
 
+int AuthorizeAndGetModulatorByBusID(struct soap *soap, const int _token, int _modulatorID, dss::Modulator& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+  dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
+  try {
+    result = apt.GetModulatorByBusID(_modulatorID);
+  } catch(dss::ItemNotFoundException& _ex) {
+    return soap_receiver_fault(soap, "Modulator not found", NULL);
+  }
+  return SOAP_OK;
+} // AuthorizeAndGetModulatorID
 
 int AuthorizeAndGetGroup(struct soap *soap, const int _token, const int _groupID, dss::Group& result) {
   if(!IsAuthorized(soap, _token)) {
@@ -863,8 +875,26 @@ int dss__Device_GetZoneID(struct soap *soap, int _token, unsigned long _deviceID
 //==================================================== Information
 
 int dss__Device_GetDSID(struct soap *soap, int _token, unsigned long _deviceID, unsigned long& result) {
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
-}
+  dss::Device dev(-1, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  result = dev.GetDSID();
+  return SOAP_OK;
+} // dss__Device_GetDSID
+
+int dss__Modulator_GetPowerConsumption(struct soap *soap, int _token, int _modulatorID, unsigned long& result) {
+  dss::Modulator mod(0xFFFF);
+  int getResult = AuthorizeAndGetModulatorByBusID(soap, _token, _modulatorID, mod);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  result = mod.GetPowerConsumption();
+  return SOAP_OK;
+} // dss__Modulator_GetPowerConsumption
 
 //==================================================== Organization
 

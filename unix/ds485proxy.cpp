@@ -562,6 +562,24 @@ namespace dss {
     return pd.Get<dsid_t>();
   } // GetDSIDOfModulator
 
+  unsigned long DS485Proxy::GetPowerConsumption(const int _modulatorID) {
+    DS485CommandFrame cmdFrame;
+    cmdFrame.GetHeader().SetDestination(_modulatorID);
+    cmdFrame.SetCommand(CommandRequest);
+    cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetPowerConsumption);
+    Logger::GetInstance()->Log(string("Proxy: GetPowerConsumption ") + IntToString(_modulatorID));
+    SendFrame(cmdFrame);
+
+    vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionModulatorGetPowerConsumption);
+    if(results.size() != 1) {
+      Logger::GetInstance()->Log(string("DS485Proxy::GetPowerConsumption: received multiple results ") + IntToString(results.size()), lsError);
+      return 0;
+    }
+    PayloadDissector pd(results.at(0)->GetPayload());
+    pd.Get<uint8>(); // discard the function id
+    return pd.Get<unsigned long>();
+  } // GetPowerConsumption
+
   void DS485Proxy::Subscribe(const int _modulatorID, const int _groupID, const int _deviceID) {
     DS485CommandFrame cmdFrame;
     cmdFrame.GetHeader().SetDestination(_modulatorID);

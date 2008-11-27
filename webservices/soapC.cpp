@@ -7,7 +7,7 @@
 
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2008-11-26 10:23:55 GMT")
+SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2008-11-27 15:48:42 GMT")
 
 
 #ifndef WITH_NOGLOBAL
@@ -265,6 +265,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_dss__Apartment_GetModulatorIDs(soap, NULL, NULL, "dss:Apartment-GetModulatorIDs");
 	case SOAP_TYPE_dss__Apartment_GetModulatorIDsResponse:
 		return soap_in_dss__Apartment_GetModulatorIDsResponse(soap, NULL, NULL, "dss:Apartment-GetModulatorIDsResponse");
+	case SOAP_TYPE_dss__Modulator_GetPowerConsumption:
+		return soap_in_dss__Modulator_GetPowerConsumption(soap, NULL, NULL, "dss:Modulator-GetPowerConsumption");
+	case SOAP_TYPE_dss__Modulator_GetPowerConsumptionResponse:
+		return soap_in_dss__Modulator_GetPowerConsumptionResponse(soap, NULL, NULL, "dss:Modulator-GetPowerConsumptionResponse");
 	case SOAP_TYPE_dss__Device_GetDSID:
 		return soap_in_dss__Device_GetDSID(soap, NULL, NULL, "dss:Device-GetDSID");
 	case SOAP_TYPE_dss__Device_GetDSIDResponse:
@@ -723,6 +727,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		if (!soap_match_tag(soap, t, "dss:Apartment-GetModulatorIDsResponse"))
 		{	*type = SOAP_TYPE_dss__Apartment_GetModulatorIDsResponse;
 			return soap_in_dss__Apartment_GetModulatorIDsResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Modulator-GetPowerConsumption"))
+		{	*type = SOAP_TYPE_dss__Modulator_GetPowerConsumption;
+			return soap_in_dss__Modulator_GetPowerConsumption(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:Modulator-GetPowerConsumptionResponse"))
+		{	*type = SOAP_TYPE_dss__Modulator_GetPowerConsumptionResponse;
+			return soap_in_dss__Modulator_GetPowerConsumptionResponse(soap, NULL, NULL, NULL);
 		}
 		if (!soap_match_tag(soap, t, "dss:Device-GetDSID"))
 		{	*type = SOAP_TYPE_dss__Device_GetDSID;
@@ -1360,6 +1372,10 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_dss__Apartment_GetModulatorIDs(soap, tag, id, (const struct dss__Apartment_GetModulatorIDs *)ptr, "dss:Apartment-GetModulatorIDs");
 	case SOAP_TYPE_dss__Apartment_GetModulatorIDsResponse:
 		return soap_out_dss__Apartment_GetModulatorIDsResponse(soap, tag, id, (const struct dss__Apartment_GetModulatorIDsResponse *)ptr, "dss:Apartment-GetModulatorIDsResponse");
+	case SOAP_TYPE_dss__Modulator_GetPowerConsumption:
+		return soap_out_dss__Modulator_GetPowerConsumption(soap, tag, id, (const struct dss__Modulator_GetPowerConsumption *)ptr, "dss:Modulator-GetPowerConsumption");
+	case SOAP_TYPE_dss__Modulator_GetPowerConsumptionResponse:
+		return soap_out_dss__Modulator_GetPowerConsumptionResponse(soap, tag, id, (const struct dss__Modulator_GetPowerConsumptionResponse *)ptr, "dss:Modulator-GetPowerConsumptionResponse");
 	case SOAP_TYPE_dss__Device_GetDSID:
 		return soap_out_dss__Device_GetDSID(soap, tag, id, (const struct dss__Device_GetDSID *)ptr, "dss:Device-GetDSID");
 	case SOAP_TYPE_dss__Device_GetDSIDResponse:
@@ -1753,6 +1769,12 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 		break;
 	case SOAP_TYPE_dss__Apartment_GetModulatorIDsResponse:
 		soap_serialize_dss__Apartment_GetModulatorIDsResponse(soap, (const struct dss__Apartment_GetModulatorIDsResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__Modulator_GetPowerConsumption:
+		soap_serialize_dss__Modulator_GetPowerConsumption(soap, (const struct dss__Modulator_GetPowerConsumption *)ptr);
+		break;
+	case SOAP_TYPE_dss__Modulator_GetPowerConsumptionResponse:
+		soap_serialize_dss__Modulator_GetPowerConsumptionResponse(soap, (const struct dss__Modulator_GetPowerConsumptionResponse *)ptr);
 		break;
 	case SOAP_TYPE_dss__Device_GetDSID:
 		soap_serialize_dss__Device_GetDSID(soap, (const struct dss__Device_GetDSID *)ptr);
@@ -2345,6 +2367,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_dss__Device_GetDSIDResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Device_GetDSID:
 		return (void*)soap_instantiate_dss__Device_GetDSID(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Modulator_GetPowerConsumptionResponse:
+		return (void*)soap_instantiate_dss__Modulator_GetPowerConsumptionResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__Modulator_GetPowerConsumption:
+		return (void*)soap_instantiate_dss__Modulator_GetPowerConsumption(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Apartment_GetModulatorIDsResponse:
 		return (void*)soap_instantiate_dss__Apartment_GetModulatorIDsResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Apartment_GetModulatorIDs:
@@ -3145,6 +3171,18 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 			delete (struct dss__Device_GetDSID*)p->ptr;
 		else
 			delete[] (struct dss__Device_GetDSID*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Modulator_GetPowerConsumptionResponse:
+		if (p->size < 0)
+			delete (struct dss__Modulator_GetPowerConsumptionResponse*)p->ptr;
+		else
+			delete[] (struct dss__Modulator_GetPowerConsumptionResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__Modulator_GetPowerConsumption:
+		if (p->size < 0)
+			delete (struct dss__Modulator_GetPowerConsumption*)p->ptr;
+		else
+			delete[] (struct dss__Modulator_GetPowerConsumption*)p->ptr;
 		break;
 	case SOAP_TYPE_dss__Apartment_GetModulatorIDsResponse:
 		if (p->size < 0)
@@ -10167,6 +10205,241 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Apartment_GetModulatorIDsResponse(stru
 {
 	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Apartment_GetModulatorIDsResponse %p -> %p\n", q, p));
 	*(struct dss__Apartment_GetModulatorIDsResponse*)p = *(struct dss__Apartment_GetModulatorIDsResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Modulator_GetPowerConsumption(struct soap *soap, struct dss__Modulator_GetPowerConsumption *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_int(soap, &a->_modulatorID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Modulator_GetPowerConsumption(struct soap *soap, const struct dss__Modulator_GetPowerConsumption *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Modulator_GetPowerConsumption(struct soap *soap, const struct dss__Modulator_GetPowerConsumption *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Modulator_GetPowerConsumption);
+	if (soap_out_dss__Modulator_GetPowerConsumption(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Modulator_GetPowerConsumption(struct soap *soap, const char *tag, int id, const struct dss__Modulator_GetPowerConsumption *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Modulator_GetPowerConsumption), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_int(soap, "modulatorID", -1, &a->_modulatorID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Modulator_GetPowerConsumption * SOAP_FMAC4 soap_get_dss__Modulator_GetPowerConsumption(struct soap *soap, struct dss__Modulator_GetPowerConsumption *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Modulator_GetPowerConsumption(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Modulator_GetPowerConsumption * SOAP_FMAC4 soap_in_dss__Modulator_GetPowerConsumption(struct soap *soap, const char *tag, struct dss__Modulator_GetPowerConsumption *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__modulatorID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Modulator_GetPowerConsumption *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Modulator_GetPowerConsumption, sizeof(struct dss__Modulator_GetPowerConsumption), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Modulator_GetPowerConsumption(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__modulatorID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_modulatorID, "xsd:int"))
+				{	soap_flag__modulatorID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Modulator_GetPowerConsumption *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Modulator_GetPowerConsumption, 0, sizeof(struct dss__Modulator_GetPowerConsumption), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__modulatorID > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Modulator_GetPowerConsumption * SOAP_FMAC6 soap_new_dss__Modulator_GetPowerConsumption(struct soap *soap, int n)
+{	return soap_instantiate_dss__Modulator_GetPowerConsumption(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Modulator_GetPowerConsumption(struct soap *soap, struct dss__Modulator_GetPowerConsumption *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Modulator_GetPowerConsumption * SOAP_FMAC4 soap_instantiate_dss__Modulator_GetPowerConsumption(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Modulator_GetPowerConsumption(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Modulator_GetPowerConsumption, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Modulator_GetPowerConsumption;
+		if (size)
+			*size = sizeof(struct dss__Modulator_GetPowerConsumption);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Modulator_GetPowerConsumption[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Modulator_GetPowerConsumption);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Modulator_GetPowerConsumption*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Modulator_GetPowerConsumption(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Modulator_GetPowerConsumption %p -> %p\n", q, p));
+	*(struct dss__Modulator_GetPowerConsumption*)p = *(struct dss__Modulator_GetPowerConsumption*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Modulator_GetPowerConsumptionResponse(struct soap *soap, struct dss__Modulator_GetPowerConsumptionResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_xsd__unsignedInt(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Modulator_GetPowerConsumptionResponse(struct soap *soap, const struct dss__Modulator_GetPowerConsumptionResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_embedded(soap, &a->result, SOAP_TYPE_xsd__unsignedInt);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Modulator_GetPowerConsumptionResponse(struct soap *soap, const struct dss__Modulator_GetPowerConsumptionResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Modulator_GetPowerConsumptionResponse);
+	if (soap_out_dss__Modulator_GetPowerConsumptionResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Modulator_GetPowerConsumptionResponse(struct soap *soap, const char *tag, int id, const struct dss__Modulator_GetPowerConsumptionResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Modulator_GetPowerConsumptionResponse), type))
+		return soap->error;
+	if (soap_out_xsd__unsignedInt(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__Modulator_GetPowerConsumptionResponse * SOAP_FMAC4 soap_get_dss__Modulator_GetPowerConsumptionResponse(struct soap *soap, struct dss__Modulator_GetPowerConsumptionResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__Modulator_GetPowerConsumptionResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__Modulator_GetPowerConsumptionResponse * SOAP_FMAC4 soap_in_dss__Modulator_GetPowerConsumptionResponse(struct soap *soap, const char *tag, struct dss__Modulator_GetPowerConsumptionResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__Modulator_GetPowerConsumptionResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Modulator_GetPowerConsumptionResponse, sizeof(struct dss__Modulator_GetPowerConsumptionResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__Modulator_GetPowerConsumptionResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_xsd__unsignedInt(soap, "result", &a->result, "xsd:unsignedInt"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__Modulator_GetPowerConsumptionResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Modulator_GetPowerConsumptionResponse, 0, sizeof(struct dss__Modulator_GetPowerConsumptionResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__Modulator_GetPowerConsumptionResponse * SOAP_FMAC6 soap_new_dss__Modulator_GetPowerConsumptionResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__Modulator_GetPowerConsumptionResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Modulator_GetPowerConsumptionResponse(struct soap *soap, struct dss__Modulator_GetPowerConsumptionResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__Modulator_GetPowerConsumptionResponse * SOAP_FMAC4 soap_instantiate_dss__Modulator_GetPowerConsumptionResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Modulator_GetPowerConsumptionResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Modulator_GetPowerConsumptionResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__Modulator_GetPowerConsumptionResponse;
+		if (size)
+			*size = sizeof(struct dss__Modulator_GetPowerConsumptionResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__Modulator_GetPowerConsumptionResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__Modulator_GetPowerConsumptionResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__Modulator_GetPowerConsumptionResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Modulator_GetPowerConsumptionResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Modulator_GetPowerConsumptionResponse %p -> %p\n", q, p));
+	*(struct dss__Modulator_GetPowerConsumptionResponse*)p = *(struct dss__Modulator_GetPowerConsumptionResponse*)q;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Device_GetDSID(struct soap *soap, struct dss__Device_GetDSID *a)

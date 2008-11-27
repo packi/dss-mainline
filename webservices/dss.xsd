@@ -998,6 +998,23 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="Modulator-GetPowerConsumption">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="modulatorID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Modulator-GetPowerConsumptionResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="Apartment-GetModulatorIDs">
    <complexType>
     <sequence>
