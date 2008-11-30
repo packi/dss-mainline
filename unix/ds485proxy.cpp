@@ -175,50 +175,64 @@ namespace dss {
   } // SendCommand
 
   vector<int> DS485Proxy::SendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param) {
-    vector<int> result;/*
-    DS485CommandFrame frame;
-    frame.GetHeader().SetDestination(_modulatorID);
-    frame.GetHeader().SetBroadcast(false);
-    frame.GetHeader().SetType(1);
-    frame.SetCommand(CommandRequest);
-    if(_cmd == cmdTurnOn) {
-      frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
-      frame.GetPayload().Add<uint8>(_id);
-      frame.GetPayload().Add<uint8>(Scene1);
-      SendFrame(frame);
-    } else if(_cmd == cmdTurnOff) {
-      frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
-      frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<uint8>(SceneOff);
-      SendFrame(frame);
-    } else if(_cmd == cmdCallScene) {
-      frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
-      frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<uint8>(_param);
-      SendFrame(frame);
-    } else if(_cmd == cmdSaveScene) {
-      frame.GetPayload().Add<uint8>(FunctionGroupSaveScene);
-      frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<uint8>(_param);
-      SendFrame(frame);
-    } else if(_cmd == cmdUndoScene) {
-      frame.GetPayload().Add<uint8>(FunctionGroupUndoScene);
-      frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<uint8>(_param);
-      SendFrame(frame);
-    } else if(_cmd == cmdStartDimUp) {
-      frame.GetPayload().Add<uint8>(FunctionGroupStartDimInc);
-      frame.GetPayload().Add<devid_t>(_id);
-      SendFrame(frame);
-    } else if(_cmd == cmdStartDimDown) {
-      frame.GetPayload().Add<uint8>(FunctionGroupStartDimDec);
-      frame.GetPayload().Add<devid_t>(_id);
-      SendFrame(frame);
-    } else if(_cmd == cmdStopDim) {
-      frame.GetPayload().Add<uint8>(FunctionGroupEndDim);
-      frame.GetPayload().Add<devid_t>(_id);
-      SendFrame(frame);
-    }*/
+    vector<int> result;
+
+    vector<int> modulators = _zone.GetModulators();
+    for(vector<int>::iterator iModulator = modulators.begin(), e = modulators.end();
+        iModulator != e; ++iModulator)
+    {
+      DS485CommandFrame frame;
+			frame.GetHeader().SetDestination(*iModulator);
+			frame.GetHeader().SetBroadcast(false);
+			frame.GetHeader().SetType(1);
+			frame.SetCommand(CommandRequest);
+			if(_cmd == cmdTurnOn) {
+				frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
+				frame.GetPayload().Add<uint8>(_zone.GetZoneID());
+				frame.GetPayload().Add<uint8>(_group.GetID());
+				frame.GetPayload().Add<uint8>(Scene1);
+				SendFrame(frame);
+			} else if(_cmd == cmdTurnOff) {
+				frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
+				frame.GetPayload().Add<uint8>(_zone.GetZoneID());
+				frame.GetPayload().Add<uint8>(_group.GetID());
+				frame.GetPayload().Add<uint8>(SceneOff);
+				SendFrame(frame);
+			} else if(_cmd == cmdCallScene) {
+				frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
+				frame.GetPayload().Add<uint8>(_zone.GetZoneID());
+				frame.GetPayload().Add<uint8>(_group.GetID());
+				frame.GetPayload().Add<uint8>(_param);
+				SendFrame(frame);
+			} else if(_cmd == cmdSaveScene) {
+				frame.GetPayload().Add<uint8>(FunctionGroupSaveScene);
+				frame.GetPayload().Add<uint8>(_zone.GetZoneID());
+				frame.GetPayload().Add<uint8>(_group.GetID());
+				frame.GetPayload().Add<uint8>(_param);
+				SendFrame(frame);
+			} else if(_cmd == cmdUndoScene) {
+				frame.GetPayload().Add<uint8>(FunctionGroupUndoScene);
+				frame.GetPayload().Add<uint8>(_zone.GetZoneID());
+				frame.GetPayload().Add<uint8>(_group.GetID());
+				frame.GetPayload().Add<uint8>(_param);
+				SendFrame(frame);
+			} else if(_cmd == cmdStartDimUp) {
+				frame.GetPayload().Add<uint8>(FunctionGroupStartDimInc);
+				frame.GetPayload().Add<uint8>(_zone.GetZoneID());
+				frame.GetPayload().Add<uint8>(_group.GetID());
+				SendFrame(frame);
+			} else if(_cmd == cmdStartDimDown) {
+				frame.GetPayload().Add<uint8>(FunctionGroupStartDimDec);
+				frame.GetPayload().Add<uint8>(_zone.GetZoneID());
+				frame.GetPayload().Add<uint8>(_group.GetID());
+				SendFrame(frame);
+			} else if(_cmd == cmdStopDim) {
+				frame.GetPayload().Add<uint8>(FunctionGroupEndDim);
+				frame.GetPayload().Add<uint8>(_zone.GetZoneID());
+				frame.GetPayload().Add<uint8>(_group.GetID());
+				SendFrame(frame);
+			}
+    }
     return result;
   } // SendCommand
 
@@ -525,6 +539,27 @@ namespace dss {
     return result;
   } // GetDevicesInZone
 
+  void DS485Proxy::SetZoneID(const int _modulatorID, const devid_t _deviceID, const int _zoneID) {
+    DS485CommandFrame cmdFrame;
+    cmdFrame.GetHeader().SetDestination(_modulatorID);
+    cmdFrame.SetCommand(CommandRequest);
+    cmdFrame.GetPayload().Add<uint8>(FunctionDeviceSetZoneID);
+    cmdFrame.GetPayload().Add<uint8>(_zoneID);
+    cmdFrame.GetPayload().Add<devid_t>(_deviceID);
+    SendFrame(cmdFrame);
+    ReceiveSingleResult(FunctionDeviceSetZoneID);
+  } // SetZoneID
+
+  void DS485Proxy::CreateZone(const int _modulatorID, const int _zoneID) {
+    DS485CommandFrame cmdFrame;
+    cmdFrame.GetHeader().SetDestination(_modulatorID);
+    cmdFrame.SetCommand(CommandRequest);
+    cmdFrame.GetPayload().Add<uint8>(FunctionModulatorAddZone);
+    cmdFrame.GetPayload().Add<uint8>(_zoneID);
+    SendFrame(cmdFrame);
+    ReceiveSingleResult(FunctionModulatorAddZone);
+  } // CreateZone
+
   dsid_t DS485Proxy::GetDSIDOfDevice(const int _modulatorID, const int _deviceID) {
     DS485CommandFrame cmdFrame;
     cmdFrame.GetHeader().SetDestination(_modulatorID);
@@ -577,7 +612,7 @@ namespace dss {
     }
     PayloadDissector pd(results.at(0)->GetPayload());
     pd.Get<uint8>(); // discard the function id
-    return pd.Get<unsigned long>();
+    return pd.Get<uint32_t>();
   } // GetPowerConsumption
 
   void DS485Proxy::Subscribe(const int _modulatorID, const int _groupID, const int _deviceID) {
@@ -612,7 +647,7 @@ namespace dss {
     vector<boost::shared_ptr<DS485CommandFrame> > result;
 
     if(m_DS485Controller.GetState() == csSlave || m_DS485Controller.GetState() == csMaster) {
-      // Wait for two tokens
+      // Wait for four tokens
       m_DS485Controller.WaitForToken();
       m_DS485Controller.WaitForToken();
       m_DS485Controller.WaitForToken();
@@ -715,10 +750,43 @@ namespace dss {
 
     case  FunctionDeviceCallScene:
       return "Device Call Scene";
-    case  FunctionDeviceIncValue:
-      return "Device Inc Value";
-    case  FunctionDeviceDecValue:
-      return "Device Dec Value";
+    case  FunctionDeviceSaveScene:
+      return "Device Save Scene";
+    case  FunctionDeviceUndoScene:
+      return "Device Undo Scene";
+
+    case FunctionDeviceIncreaseValue:
+    	return "Function Device Increase Value";
+    case FunctionDeviceDecreaseValue:
+    	return "Function Device Decrease Value";
+    case FunctionDeviceStartDimInc:
+    	return "Function Device Start Dim Inc";
+    case FunctionDeviceStartDimDec:
+    	return "Function Device Start Dim Dec";
+    case FunctionDeviceEndDim:
+    	return "Function Device End Dim";
+
+    case  FunctionGroupCallScene:
+      return "Group Call Scene";
+    case  FunctionGroupSaveScene:
+      return "Group Save Scene";
+    case  FunctionGroupUndoScene:
+      return "Group Undo Scene";
+
+    case FunctionGroupIncreaseValue:
+    	return "Function Group Increase Value";
+    case FunctionGroupDecreaseValue:
+    	return "Function Group Decrease Value";
+    case FunctionGroupStartDimInc:
+    	return "Function Group Start Dim Inc";
+    case FunctionGroupStartDimDec:
+    	return "Function Group Start Dim Dec";
+    case FunctionGroupEndDim:
+    	return "Function Group End Dim";
+
+
+    case FunctionDeviceSetZoneID:
+    	return "Device Set ZoneID";
 
     case  FunctionDeviceGetOnOff:
       return "Function Device Get On Off";
@@ -729,6 +797,9 @@ namespace dss {
 
     case FunctionModulatorGetDSID:
       return "Function Modulator Get DSID";
+
+    case FunctionModulatorGetPowerConsumption:
+    	return "Function Modulator Get PowerConsumption";
 
     case FunctionGetTypeRequest:
       return "Function Get Type";

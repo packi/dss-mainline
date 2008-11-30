@@ -186,6 +186,7 @@ var DDM = YAHOO.util.DragDropMgr;
 YAHOO.example.DDApp = {
     init: function() {
         Event.on("saveButton", "click", this.doSave);
+        Event.on("addZoneButton", "click", this.doAddZone);
     },
 
 
@@ -204,6 +205,20 @@ YAHOO.example.DDApp = {
 	  );
     },
 
+    doAddZone: function() {
+	  new Ajax.Request('/json/structure/addZone',
+	    {
+	      method:'get', 
+	      parameters: 
+	        { 
+	          zoneID: $F('zoneID'),
+	          modulatorID: $F('modulatorID')
+	        },
+	      onComplete: function(transport, json) {
+	      }
+	    } 
+	  );
+    },
 
     doSave: function() {
         var parseList = function(ul, number) {
@@ -365,6 +380,10 @@ Event.onDOMReady(YAHOO.example.DDApp.init, YAHOO.example.DDApp, true);
 		<div class="item">Connected devices: <span id="numDevs">(...loading...)</span></div>
 	</div>
   <input type="button" id="saveButton" value="Save..." />
+  <input type="button" id="addZoneButton" value="Add Zone..." />
+  &nbsp; ZoneID: <input type="text" id="zoneID" value="3" />
+  &nbsp; Modulator Bus-ID:
+  <input type="text" id="modulatorID" value="0" />
 	<div class="container fl">
           <div id="unassigned_zones">(loading...)</div>
 	</div>

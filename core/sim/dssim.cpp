@@ -444,6 +444,14 @@ namespace dss {
               DistributeFrame(boost::shared_ptr<DS485CommandFrame>(CreateAck(cmdFrame, cmdNr)));
             }
             break;
+          case FunctionGroupCallScene:
+            {
+            	uint8 zoneID = pd.Get<uint8>();
+          	  uint8 groupID = pd.Get<uint8>();
+          	  uint8 sceneID = pd.Get<uint8>();
+          	  GroupCallScene(zoneID, groupID, sceneID);
+            }
+            break;
           case FunctionDeviceSaveScene:
             {
               devid_t devID = pd.Get<devid_t>();
@@ -452,12 +460,28 @@ namespace dss {
               DistributeFrame(boost::shared_ptr<DS485CommandFrame>(CreateAck(cmdFrame, cmdNr)));
             }
             break;
+          case FunctionGroupSaveScene:
+            {
+            	uint8 zoneID = pd.Get<uint8>();
+          	  uint8 groupID = pd.Get<uint8>();
+          	  uint8 sceneID = pd.Get<uint8>();
+          	  GroupSaveScene(zoneID, groupID, sceneID);
+            }
+            break;
           case FunctionDeviceUndoScene:
             {
               devid_t devID = pd.Get<devid_t>();
               int sceneID = pd.Get<uint8>();
               DeviceUndoScene(devID, sceneID);
               DistributeFrame(boost::shared_ptr<DS485CommandFrame>(CreateAck(cmdFrame, cmdNr)));
+            }
+            break;
+          case FunctionGroupUndoScene:
+            {
+            	uint8 zoneID = pd.Get<uint8>();
+          	  uint8 groupID = pd.Get<uint8>();
+          	  uint8 sceneID = pd.Get<uint8>();
+          	  GroupUndoScene(zoneID, groupID, sceneID);
             }
             break;
           case FunctionDeviceGetFunctionID:
@@ -635,6 +659,48 @@ namespace dss {
               response->GetPayload().Add<uint8>('i');
               response->GetPayload().Add<uint8>('m');
               DistributeFrame(response);
+            }
+            break;
+          case FunctionModulatorGetPowerConsumption:
+            {
+          	  response = CreateResponse(cmdFrame, cmdNr);
+          	  response->GetPayload().Add<uint32_t>(0);
+          	  DistributeFrame(response);
+            }
+            break;
+          case FunctionModulatorAddZone:
+            {
+            	uint8 zoneID = pd.Get<uint8>();
+            	response = CreateResponse(cmdFrame, cmdNr);
+            	bool isValid = true;
+            	for(map< const int, vector<DSIDInterface*> >::iterator iZoneEntry = m_Zones.begin(), e = m_Zones.end();
+            	    iZoneEntry != e; ++iZoneEntry)
+            	{
+            		if(iZoneEntry->first == zoneID) {
+            			response->GetPayload().Add<unsigned char>(-7);
+            			isValid = false;
+            			break;
+            		}
+            	}
+            	if(isValid) {
+            		// make the zone visible in the map
+            		m_Zones[zoneID].size();
+            		response->GetPayload().Add<unsigned char>(1);
+            	}
+            	DistributeFrame(response);
+            }
+            break;
+          case FunctionDeviceSetZoneID:
+            {
+          	  uint8 zoneID = pd.Get<uint8>();
+              devid_t devID = pd.Get<devid_t>();
+              DSIDInterface& dev = LookupDevice(devID);
+
+              int oldZoneID = m_DeviceZoneMapping[&dev];
+              vector<DSIDInterface*>::iterator oldEntry = find(m_Zones[oldZoneID].begin(), m_Zones[oldZoneID].end(), &dev);
+              m_Zones[oldZoneID].erase(oldEntry);
+              m_Zones[zoneID].push_back(&dev);
+              m_DeviceZoneMapping[&dev] = zoneID;
             }
             break;
           default:

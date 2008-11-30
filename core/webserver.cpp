@@ -423,6 +423,7 @@ namespace dss {
       */
     } else if(BeginsWith(method, "structure/")) {
       if(method == "structure/zoneAddDevice") {
+      	bool ok = true;
         EmitHTTPHeader(200, _arg, "application/json");
 
         string devidStr = paramMap["devid"];
@@ -433,13 +434,41 @@ namespace dss {
 
           string zoneIDStr = paramMap["zone"];
           if(!zoneIDStr.empty()) {
-            int zoneID = StrToInt(zoneIDStr);
-
+          	try {
+              int zoneID = StrToInt(zoneIDStr);
+              DSS::GetInstance()->GetApartment().GetZone(zoneID).AddDevice(DeviceReference(dev, DSS::GetInstance()->GetApartment()));
+          	} catch(runtime_error&) {
+          		ok = false;
+          	}
           }
-          DSS::GetInstance()->GetApartment().GetDeviceByDSID(devid).TurnOn();
-          shttpd_printf(_arg, "{ok:1}");
+          if(ok) {
+            shttpd_printf(_arg, "{ok:1}");
+          } else {
+          	shttpd_printf(_arg, "{ok:0}");
+          }
         } else {
           shttpd_printf(_arg, "{ok:0}");
+        }
+      } else if(method == "structure/addZone") {
+        bool ok = false;
+        EmitHTTPHeader(200, _arg, "application/json");
+        int zoneID = -1;
+        int modulatorID = -1;
+        string zoneIDStr = paramMap["zoneID"];
+        if(!zoneIDStr.empty()) {
+          zoneID = StrToIntDef(zoneIDStr, -1);
+        }
+        string modIDStr = paramMap["modulatorID"];
+        if(!modIDStr.empty()) {
+          modulatorID = StrToIntDef(modIDStr, -1);
+        }
+        if(zoneID != -1 && modulatorID != -1) {
+          try {
+            Modulator& modulator = DSS::GetInstance()->GetApartment().GetModulatorByBusID(modulatorID);
+            DSS::GetInstance()->GetApartment().AllocateZone(modulator, zoneID);
+            ok = true;
+          } catch(runtime_error&) {
+          }
         }
       }
     } else {

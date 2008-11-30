@@ -52,9 +52,16 @@ namespace dss {
   const uint8 FunctionDeviceSaveScene = 0x43;
   const uint8 FunctionDeviceUndoScene = 0x44;
 
+  const uint8 FunctionDeviceStartDimInc = 0x45;
+  const uint8 FunctionDeviceStartDimDec = 0x46;
+  const uint8 FunctionDeviceEndDim = 0x47;
+
+
   const uint8 FunctionDeviceSetParameterValue = 0x4B;
-  const uint8 FunctionDeviceIncValue  = 0x4C;
-  const uint8 FunctionDeviceDecValue  = 0x4D;
+  const uint8 FunctionDeviceIncreaseValue  = 0x4C;
+  const uint8 FunctionDeviceDecreaseValue  = 0x4D;
+
+  const uint8 FunctionDeviceSetZoneID = 0x4F;
 
   const uint8 FunctionDeviceGetOnOff = 0x61;
   const uint8 FunctionDeviceGetParameterValue = 0x62;

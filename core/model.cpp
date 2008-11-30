@@ -424,7 +424,7 @@ namespace dss {
 
   void Set::RemoveDevice(const Device& _device) {
     RemoveDevice(DeviceReference(_device, _device.GetApartment()));
-  } // AddDevice
+  } // RemoveDevice
 
   const DeviceReference& Set::Get(int _index) const {
     return m_ContainedDevices.at(_index);
@@ -477,6 +477,7 @@ namespace dss {
     Zone* zoneZero = new Zone(0);
     AddDefaultGroupsToZone(*zoneZero);
     m_Zones.push_back(zoneZero);
+    m_IsInitializing = true;
   } // ctor
 
   Apartment::~Apartment() {
@@ -594,6 +595,7 @@ namespace dss {
       }
       break;
     }
+    m_IsInitializing = false;
   } // Run
 
   void Apartment::ReadConfigurationFromXML(const string& _fileName) {
@@ -871,6 +873,9 @@ namespace dss {
   		if((*ipZone)->GetZoneID() == _zoneID) {
   			m_Zones.push_back(*ipZone);
   			m_StaleZones.erase(ipZone);
+  	    if(!IsInitializing()) {
+  	      DSS::GetInstance()->GetDS485Interface().CreateZone(_modulator.GetBusID(), _zoneID);
+  	    }
   			return **ipZone;
   		}
   	}
@@ -886,6 +891,9 @@ namespace dss {
   	Zone* zone = new Zone(_zoneID);
   	m_Zones.push_back(zone);
   	zone->AddToModulator(_modulator);
+    if(!IsInitializing()) {
+      DSS::GetInstance()->GetDS485Interface().CreateZone(_modulator.GetBusID(), _zoneID);
+    }
   	return *zone;
   } // AllocateZone
 /*
@@ -953,7 +961,18 @@ namespace dss {
   } // GetDevices
 
   void Zone::AddDevice(const DeviceReference& _device) {
+  	int oldZoneID = _device.GetDevice().GetZoneID();
+  	if(oldZoneID != -1) {
+  		try {
+  		  Zone& oldZone = DSS::GetInstance()->GetApartment().GetZone(oldZoneID);
+  		  oldZone.RemoveDevice(_device);
+  		} catch(runtime_error&) {
+  		}
+  	}
     m_Devices.push_back(_device);
+  	if(!DSS::GetInstance()->GetApartment().IsInitializing()) {
+  		DSS::GetInstance()->GetDS485Interface().SetZoneID(_device.GetDevice().GetModulatorID(), _device.GetDevice().GetShortAddress(), m_ZoneID);
+  	}
   } // AddDevice
 
   void Zone::RemoveDevice(const DeviceReference& _device) {
@@ -1003,6 +1022,15 @@ namespace dss {
   void Zone::RemoveFromModulator(Modulator& _modulator) {
     m_Modulators.erase(find(m_Modulators.begin(), m_Modulators.end(), &_modulator));
   } // RemoveFromModulator
+
+  vector<int> Zone::GetModulators() const {
+  	vector<int> result;
+  	for(vector<Modulator*>::const_iterator iModulator = m_Modulators.begin(), e = m_Modulators.end();
+  	    iModulator != e; ++iModulator) {
+  		result.push_back((*iModulator)->GetBusID());
+  	}
+  	return result;
+  }
 
   //============================================= Group
 

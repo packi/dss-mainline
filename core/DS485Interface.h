@@ -57,6 +57,12 @@ namespace dss {
     /** Returns the count of devices present in the given zone of the specified modulator */
     virtual int GetDevicesCountInZone(const int _modulatorID, const int _zoneID) = 0;
 
+    /** Adds the given device to the specified zone. */
+    virtual void SetZoneID(const int _modulatorID, const devid_t _deviceID, const int _zoneID) = 0;
+
+    /** Creates a new Zone on the given modulator */
+    virtual void CreateZone(const int _modulatorID, const int _zoneID) = 0;
+
     /** Returns the count of groups present in the given zone of the specifid modulator */
     virtual int GetGroupCount(const int _modulatorID, const int _zoneID) = 0;
     /** Returns the a vector containing the group-ids of the given zone on the specified modulator */

@@ -443,6 +443,7 @@ namespace dss {
      * This will permanently add the device to the zone.
      */
     void AddDevice(const DeviceReference& _device);
+
     /** Removes a device from the zone.
      * This will permanently remove the device from the zone.
      */
@@ -462,6 +463,8 @@ namespace dss {
     int GetZoneID() const;
     /** Sets the zones id */
     void SetZoneID(const int _value);
+
+    vector<int> GetModulators() const;
   }; // Zone
 
 
@@ -517,6 +520,7 @@ namespace dss {
     vector<Device*> m_Devices;
     vector<Group*> m_Groups;
     boost::ptr_vector<Action> m_Actions;
+    bool m_IsInitializing;
   private:
     int m_NextSubscriptionNumber;
   private:
@@ -579,6 +583,8 @@ namespace dss {
 
     /** Allocates a group */
     UserGroup& AllocateGroup(const int _id);
+
+    bool IsInitializing() const { return m_IsInitializing; }
 
   public:
     ///** Feeds an event to the processing-queue */
