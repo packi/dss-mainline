@@ -664,7 +664,7 @@ namespace dss {
           case FunctionModulatorGetPowerConsumption:
             {
           	  response = CreateResponse(cmdFrame, cmdNr);
-          	  response->GetPayload().Add<uint32_t>(0);
+          	  response->GetPayload().Add<dsid_t>(0);
           	  DistributeFrame(response);
             }
             break;
