@@ -2,12 +2,13 @@
  * dss_string.cpp
  *
  *  Created on: Aug 13, 2008
- *      Author: Patrick StŠhlin
+ *      Author: Patrick Stï¿½hlin
  */
 
 #include <string.h>
 
 #include <string>
+#include <algorithm>
 
 using namespace std;
 

@@ -21,6 +21,7 @@
 #include "base.h"
 
 #include <sys/stat.h>
+#include <cstring>
 #include <sstream>
 
 namespace dss {

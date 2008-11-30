@@ -11,7 +11,7 @@
 #define JSHANDLER_H_INCLUDED
 
 #include "base.h"
-#include <js/jsapi.h>
+#include <mozjs/jsapi.h>
 
 #include <vector>
 

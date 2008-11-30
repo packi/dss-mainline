@@ -9,6 +9,8 @@
 
 #include "datetools.h"
 
+#include <cstring>
+
 namespace dss {
 
   //================================================== DateTime

@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <errno.h>
+#include <cstring>
 
 #include <stdexcept>
 

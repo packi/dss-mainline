@@ -85,7 +85,7 @@
 <listOptionValue builtIn="false" value="boost_filesystem"/>
 <listOptionValue builtIn="false" value="gsoap++"/>
 <listOptionValue builtIn="false" value="rt"/>
-<listOptionValue builtIn="false" value="js"/>
+<listOptionValue builtIn="false" value="mozjs"/>
 <listOptionValue builtIn="false" value="ical"/>
 <listOptionValue builtIn="false" value="cppunit"/>
 </option>

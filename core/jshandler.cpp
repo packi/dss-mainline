@@ -9,6 +9,8 @@
 
 #include "jshandler.h"
 
+#include <cstring>
+
 namespace dss {
 
   //============================================= ScriptEnvironment
