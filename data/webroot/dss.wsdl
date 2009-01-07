@@ -25,32 +25,28 @@
   elementFormDefault="unqualified"
   attributeFormDefault="unqualified">
   <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
-  <complexType name="ArrayOfunsignedInt">
-   <complexContent>
-    <restriction base="SOAP-ENC:Array">
-     <sequence>
-      <element name="item" type="xsd:unsignedInt" minOccurs="0" maxOccurs="unbounded"/>
-     </sequence>
-     <attribute ref="SOAP-ENC:arrayType" WSDL:arrayType="xsd:unsignedInt[]"/>
-    </restriction>
-   </complexContent>
-  </complexType>
-  <complexType name="ArrayOfstring">
-   <complexContent>
-    <restriction base="SOAP-ENC:Array">
-     <sequence>
-      <element name="item" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
-     </sequence>
-     <attribute ref="SOAP-ENC:arrayType" WSDL:arrayType="xsd:string[]"/>
-    </restriction>
-   </complexContent>
-  </complexType>
   <complexType name="inParameter">
    <sequence>
-     <element name="values" type="dss:ArrayOfstring" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="names" type="dss:ArrayOfstring" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="values" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+     <element name="names" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
    </sequence>
   </complexType>
+  <!-- operation request element -->
+  <element name="Test">
+   <complexType>
+    <sequence>
+     <element name="bla" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="TestResponse">
+   <complexType>
+    <sequence>
+     <element name="ints" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
+    </sequence>
+   </complexType>
+  </element>
   <!-- operation request element -->
   <element name="Authenticate">
    <complexType>
@@ -123,7 +119,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="ids" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1" nillable="false"/>
+     <element name="ids" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -140,7 +136,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="names" type="dss:ArrayOfstring" minOccurs="1" maxOccurs="1" nillable="false"/>
+     <element name="names" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -322,7 +318,7 @@
   <element name="Set-GetContainedDevicesResponse">
    <complexType>
     <sequence>
-     <element name="deviceIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceIDs" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -372,7 +368,7 @@
   <element name="Apartment-GetZoneIDsResponse">
    <complexType>
     <sequence>
-     <element name="zoneIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneIDs" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -1034,6 +1030,23 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="Modulator-GetPowerConsumption">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="modulatorID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="Modulator-GetPowerConsumptionResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="Apartment-GetModulatorIDs">
    <complexType>
     <sequence>
@@ -1045,7 +1058,7 @@
   <element name="Apartment-GetModulatorIDsResponse">
    <complexType>
     <sequence>
-     <element name="ids" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="ids" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -1323,7 +1336,7 @@
   <element name="Event-GetActionNamesResponse">
    <complexType>
     <sequence>
-     <element name="names" type="dss:ArrayOfstring" minOccurs="1" maxOccurs="1"/>
+     <element name="names" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -1340,8 +1353,8 @@
   <element name="outParameter">
    <complexType>
     <sequence>
-     <element name="values" type="dss:ArrayOfstring" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="names" type="dss:ArrayOfstring" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="values" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+     <element name="names" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -1350,8 +1363,8 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="eventIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1" nillable="false"/>
-     <element name="sourceIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1" nillable="false"/>
+     <element name="eventIDs" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
+     <element name="sourceIDs" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
      <element name="actionName" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="params" type="dss:inParameter" minOccurs="1" maxOccurs="1"/>
     </sequence>
@@ -1421,6 +1434,14 @@
  </schema>
 
 </types>
+
+<message name="TestRequest">
+ <part name="parameters" element="dss:Test"/>
+</message>
+
+<message name="TestResponse">
+ <part name="parameters" element="dss:TestResponse"/>
+</message>
 
 <message name="AuthenticateRequest">
  <part name="parameters" element="dss:Authenticate"/>
@@ -1870,6 +1891,14 @@
  <part name="parameters" element="dss:Device-GetDSIDResponse"/>
 </message>
 
+<message name="Modulator-GetPowerConsumptionRequest">
+ <part name="parameters" element="dss:Modulator-GetPowerConsumption"/>
+</message>
+
+<message name="Modulator-GetPowerConsumptionResponse">
+ <part name="parameters" element="dss:Modulator-GetPowerConsumptionResponse"/>
+</message>
+
 <message name="Apartment-GetModulatorIDsRequest">
  <part name="parameters" element="dss:Apartment-GetModulatorIDs"/>
 </message>
@@ -2047,6 +2076,11 @@
 </message>
 
 <portType name="MyType">
+ <operation name="Test">
+  <documentation>Service definition of function dss__Test</documentation>
+  <input message="tns:TestRequest"/>
+  <output message="tns:TestResponse"/>
+ </operation>
  <operation name="Authenticate">
   <documentation>Service definition of function dss__Authenticate</documentation>
   <input message="tns:AuthenticateRequest"/>
@@ -2327,6 +2361,11 @@
   <input message="tns:Device-GetDSIDRequest"/>
   <output message="tns:Device-GetDSIDResponse"/>
  </operation>
+ <operation name="Modulator-GetPowerConsumption">
+  <documentation>Service definition of function dss__Modulator_GetPowerConsumption</documentation>
+  <input message="tns:Modulator-GetPowerConsumptionRequest"/>
+  <output message="tns:Modulator-GetPowerConsumptionResponse"/>
+ </operation>
  <operation name="Apartment-GetModulatorIDs">
   <documentation>Service definition of function dss__Apartment_GetModulatorIDs</documentation>
   <input message="tns:Apartment-GetModulatorIDsRequest"/>
@@ -2441,6 +2480,15 @@
 
 <binding name="dss" type="tns:MyType">
  <SOAP:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="Test">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
  <operation name="Authenticate">
   <SOAP:operation soapAction=""/>
   <input>
@@ -2937,6 +2985,15 @@
   </output>
  </operation>
  <operation name="Device-GetDSID">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="Modulator-GetPowerConsumption">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

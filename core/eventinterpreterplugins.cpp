@@ -193,6 +193,6 @@ namespace dss {
     } else {
       Logger::GetInstance()->Log("EventInterpreterPluginDS485::HandleEvent: Options are not of type SubscriptionOptionsDS485, ignoring", lsError);
     }
-  }
+  } // HandleEvent
 
 } // namespace dss

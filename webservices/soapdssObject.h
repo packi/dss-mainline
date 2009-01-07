@@ -44,6 +44,8 @@ class dssService : public soap
 \******************************************************************************/
 
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__Test(struct soap*, char *bla, std::vector<int >&ints);
+
 SOAP_FMAC5 int SOAP_FMAC6 dss__Authenticate(struct soap*, char *_userName, char *_password, int &token);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__SignOff(struct soap*, int _token, int &result);
@@ -52,9 +54,9 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__FreeSet(struct soap*, int _token, int _setID, boo
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_CreateSetFromGroup(struct soap*, int _token, char *_groupName, int &setID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_CreateSetFromDeviceIDs(struct soap*, int _token, IntArray _ids, int &setID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_CreateSetFromDeviceIDs(struct soap*, int _token, std::vector<int >_ids, int &setID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_CreateSetFromDeviceNames(struct soap*, int _token, StringArray _names, int &setID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_CreateSetFromDeviceNames(struct soap*, int _token, std::vector<std::string >_names, int &setID);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_CreateEmptySet(struct soap*, int _token, int &setID);
 
@@ -74,13 +76,13 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Set_Remove(struct soap*, int _token, int _setID, 
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Set_ByGroup(struct soap*, int _token, int _setID, int _groupID, int &setID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_GetContainedDevices(struct soap*, int _token, int _setID, IntArray &deviceIDs);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Set_GetContainedDevices(struct soap*, int _token, int _setID, std::vector<int >&deviceIDs);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetGroupByName(struct soap*, int _token, char *_groupName, int &groupID);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetZoneByName(struct soap*, int _token, char *_zoneName, int &zoneID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetZoneIDs(struct soap*, int _token, IntArray &zoneIDs);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetZoneIDs(struct soap*, int _token, std::vector<int >&zoneIDs);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Set_TurnOn(struct soap*, int _token, int _setID, bool &result);
 
@@ -158,7 +160,7 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetDSID(struct soap*, int _token, unsigned
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Modulator_GetPowerConsumption(struct soap*, int _token, int _modulatorID, unsigned long &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetModulatorIDs(struct soap*, int _token, IntArray &ids);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetModulatorIDs(struct soap*, int _token, std::vector<int >&ids);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Modulator_GetDSID(struct soap*, int _token, int _modulatorID, unsigned long &dsid);
 
@@ -190,11 +192,11 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Switch_SimulateKeypress(struct soap*, int _token,
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Raise(struct soap*, int _token, int _eventID, int _sourceID, dss__inParameter _params, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_GetActionNames(struct soap*, int _token, StringArray &names);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Event_GetActionNames(struct soap*, int _token, std::vector<std::string >&names);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Event_GetActionParamsTemplate(struct soap*, int _token, char *_name, dss__outParameter &paramsTemplate);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Subscribe(struct soap*, int _token, IntArray _eventIDs, IntArray _sourceIDs, char *_actionName, dss__inParameter _params, int &subscriptionID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Subscribe(struct soap*, int _token, std::vector<int >_eventIDs, std::vector<int >_sourceIDs, char *_actionName, dss__inParameter _params, int &subscriptionID);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Unsubscribe(struct soap*, int _token, int _subscriptionID, int &result);
 

@@ -12,6 +12,7 @@
 
 #include "../core/event.h"
 #include "../core/eventinterpreterplugins.h"
+#include "../core/setbuilder.h"
 
 using namespace dss;
 
@@ -25,7 +26,8 @@ class EventTest : public CPPUNIT_NS::TestCase
  // CPPUNIT_TEST(testSubscription);
   CPPUNIT_TEST(testEmptySubscriptionXML);
   CPPUNIT_TEST(testNonExistingXML);
-  //CPPUNIT_TEST(testSubscriptionXML);
+  CPPUNIT_TEST(testSubscriptionXML);
+  CPPUNIT_TEST(testSetBuilder);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -33,10 +35,6 @@ public:
   void tearDown(void) {}
 
 protected:
-
-  void testSetBuilder() {
-
-  } // testSetBuilder
 
   void testSimpleEvent(void) {
     EventQueue queue;
@@ -169,6 +167,36 @@ protected:
     sleep(1);
   } // testSubscriptionXML
 
+
+  void testSetBuilder() {
+    SetBuilder setBuilder;
+
+    Apartment apt;
+
+    Device& dev1 = apt.AllocateDevice(1);
+    dev1.SetName("dev1");
+    dev1.SetShortAddress(1);
+    Device& dev2 = apt.AllocateDevice(2);
+    dev2.SetName("dev2");
+    dev2.SetShortAddress(2);
+    Device& dev3 = apt.AllocateDevice(3);
+    dev3.SetName("dev3");
+    dev3.SetShortAddress(3);
+    Device& dev4 = apt.AllocateDevice(4);
+    dev4.SetName("dev4");
+    dev4.SetShortAddress(4);
+
+    Set res = setBuilder.BuildSet("", &apt.GetZone(0));
+    CPPUNIT_ASSERT_EQUAL(res.Length(), 4);
+
+    res = setBuilder.BuildSet("dev1", &apt.GetZone(0));
+    CPPUNIT_ASSERT_EQUAL(res.Length(), 1);
+    CPPUNIT_ASSERT_EQUAL(res.Get(0).GetDevice().GetName(), string("dev1"));
+
+    res = setBuilder.BuildSet("dev2", &apt.GetZone(0));
+    CPPUNIT_ASSERT_EQUAL(res.Length(), 1);
+    CPPUNIT_ASSERT_EQUAL(res.Get(0).GetDevice().GetName(), string("dev2"));
+} // testSetBuilder
 
 };
 

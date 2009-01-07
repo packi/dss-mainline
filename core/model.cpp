@@ -821,6 +821,7 @@ namespace dss {
     // search for existing device
     for(vector<Device*>::iterator iDevice = m_Devices.begin(); iDevice != m_Devices.end(); ++iDevice) {
       if((*iDevice)->GetDSID() == _dsid) {
+        GetZone(0).AddDevice(DeviceReference(**iDevice, *this));
         return **iDevice;
       }
     }
@@ -831,12 +832,14 @@ namespace dss {
         Device* pResult = *iDevice;
         m_Devices.push_back(pResult);
         m_StaleDevices.erase(iDevice);
+        GetZone(0).AddDevice(DeviceReference(*pResult, *this));
         return *pResult;
       }
     }
 
     Device* pResult = new Device(_dsid, this);
     m_Devices.push_back(pResult);
+    GetZone(0).AddDevice(DeviceReference(*pResult, *this));
     return *pResult;
   } // AllocateDevice
 

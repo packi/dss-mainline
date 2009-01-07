@@ -4,10 +4,12 @@
 //gsoap dss schema namespace:  urn:dss:1.0
 //gsoap dss service type: MyType
 
+#import "stl.h"
+
 /** \file */
 
 typedef unsigned long xsd__unsignedInt;
-
+/*
 class IntArray {
 public:
   xsd__unsignedInt* __ptr;
@@ -19,6 +21,9 @@ public:
   char** __ptr;
   int __size;
 };
+*/
+
+int dss__Test(char* bla, std::vector<int>& ints);
 
 /** Authenticates your ip to the system.
  * The token received will be used in any subsequent call. The ip/token pair
@@ -35,9 +40,9 @@ int dss__FreeSet(int _token, int _setID, bool& result);
 int dss__Apartment_CreateSetFromGroup(int _token, char* _groupName, int& setID);
 /** Creates a set containing all devices in the given array
  * @see dss__CreateEmptySet*/
-int dss__Apartment_CreateSetFromDeviceIDs(int _token, IntArray _ids, int& setID);
+int dss__Apartment_CreateSetFromDeviceIDs(int _token, std::vector<int> _ids, int& setID);
 /** Creates a set containing all devices in the given array */
-int dss__Apartment_CreateSetFromDeviceNames(int _token, StringArray _names, int& setID);
+int dss__Apartment_CreateSetFromDeviceNames(int _token, std::vector<std::string> _names, int& setID);
 /** Creates an empty set.
  * The set is allocated on the server and must be freed either by a SignOff or a call to FreeSet.*/
 int dss__Apartment_CreateEmptySet(int _token, int& setID);
@@ -59,14 +64,14 @@ int dss__Set_Remove(int _token, int _setID, int _setIDToRemove, int& setID);
 /** Removes all devices which don't belong to the specified group */
 int dss__Set_ByGroup(int _token, int _setID, int _groupID, int& setID);
 /** Returns an array containing all device ids contained in the given set */
-int dss__Set_GetContainedDevices(int _token, int _setID, IntArray& deviceIDs);
+int dss__Set_GetContainedDevices(int _token, int _setID, std::vector<int>& deviceIDs);
 
 /** Looks up the group id for the given group name */
 int dss__Apartment_GetGroupByName(int _token, char* _groupName, int& groupID);
 /** Looks up the zone id for the given zone */
 int dss__Apartment_GetZoneByName(int _token, char* _zoneName, int& zoneID);
 /** Returns an array containing all zone ids */
-int dss__Apartment_GetZoneIDs(int _token, IntArray& zoneIDs);
+int dss__Apartment_GetZoneIDs(int _token, std::vector<int>& zoneIDs);
 
 //==================================================== Manipulation
 
@@ -189,7 +194,7 @@ int dss__Modulator_GetPowerConsumption(int _token, int _modulatorID, xsd__unsign
 //These calls may be restricted to privileged users.
 
 /** Returns an integer array of modulators known to the dss. */
-int dss__Apartment_GetModulatorIDs(int _token, IntArray& ids);
+int dss__Apartment_GetModulatorIDs(int _token, std::vector<int>& ids);
 /** Returns the DSID of the given modulator. */
 int dss__Modulator_GetDSID(int _token, int _modulatorID, xsd__unsignedInt& dsid);
 /** Retuns the name of the given modulator. */
@@ -224,27 +229,29 @@ int dss__Switch_SimulateKeypress(int _token, xsd__unsignedInt _deviceID, int _bu
 
 class dss__inParameter {
 public:
-  StringArray* values;
-  StringArray* names;
+  std::vector<std::string> values;
+  std::vector<std::string> names;
 };
 
 class dss__outParameter {
 public:
-  StringArray* values;
-  StringArray* names;
+  std::vector<std::string> values;
+  std::vector<std::string> names;
 };
 
 //==================================================== Events
 
+//int dss__Event_Raise(int _token, char* _eventName, char* _parameter);
+
 /** Raises an event with the given _eventID from _sourceID with _params */
 int dss__Event_Raise(int _token, int _eventID, int _sourceID, dss__inParameter _params, int& result);
 /** Returns an array of the names of all registered actions */
-int dss__Event_GetActionNames(int _token, StringArray& names);
+int dss__Event_GetActionNames(int _token, std::vector<std::string>& names);
 /** Returns a parameter template for the given action _name. */
 int dss__Event_GetActionParamsTemplate(int _token, char* _name, dss__outParameter& paramsTemplate);
 /** Adds a subscriptions to the events specified in _eventIDs if risen from one of _sourceIDs. If an
  * event with said properties occurs, the action identified by _actionName will be executed with the given _params. */
-int dss__Event_Subscribe(int _token, IntArray _eventIDs, IntArray _sourceIDs, char* _actionName, dss__inParameter _params, int& subscriptionID);
+int dss__Event_Subscribe(int _token, std::vector<int> _eventIDs, std::vector<int> _sourceIDs, char* _actionName, dss__inParameter _params, int& subscriptionID);
 /** Cancels a subscription. */
 int dss__Event_Unsubscribe(int _token, int _subscriptionID, int& result);
 /** Schedules an event. */

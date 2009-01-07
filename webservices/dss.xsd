@@ -11,10 +11,26 @@
   <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
   <complexType name="inParameter">
    <sequence>
-     <element name="values" type="dss:ArrayOfstring" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="names" type="dss:ArrayOfstring" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="values" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+     <element name="names" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
    </sequence>
   </complexType>
+  <!-- operation request element -->
+  <element name="Test">
+   <complexType>
+    <sequence>
+     <element name="bla" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="TestResponse">
+   <complexType>
+    <sequence>
+     <element name="ints" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
+    </sequence>
+   </complexType>
+  </element>
   <!-- operation request element -->
   <element name="Authenticate">
    <complexType>
@@ -87,7 +103,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="ids" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1" nillable="false"/>
+     <element name="ids" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -104,7 +120,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="names" type="dss:ArrayOfstring" minOccurs="1" maxOccurs="1" nillable="false"/>
+     <element name="names" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -286,7 +302,7 @@
   <element name="Set-GetContainedDevicesResponse">
    <complexType>
     <sequence>
-     <element name="deviceIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceIDs" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -336,7 +352,7 @@
   <element name="Apartment-GetZoneIDsResponse">
    <complexType>
     <sequence>
-     <element name="zoneIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneIDs" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -1026,7 +1042,7 @@
   <element name="Apartment-GetModulatorIDsResponse">
    <complexType>
     <sequence>
-     <element name="ids" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="ids" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -1304,7 +1320,7 @@
   <element name="Event-GetActionNamesResponse">
    <complexType>
     <sequence>
-     <element name="names" type="dss:ArrayOfstring" minOccurs="1" maxOccurs="1"/>
+     <element name="names" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -1321,8 +1337,8 @@
   <element name="outParameter">
    <complexType>
     <sequence>
-     <element name="values" type="dss:ArrayOfstring" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="names" type="dss:ArrayOfstring" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="values" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+     <element name="names" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -1331,8 +1347,8 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="eventIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1" nillable="false"/>
-     <element name="sourceIDs" type="dss:ArrayOfunsignedInt" minOccurs="1" maxOccurs="1" nillable="false"/>
+     <element name="eventIDs" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
+     <element name="sourceIDs" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
      <element name="actionName" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="params" type="dss:inParameter" minOccurs="1" maxOccurs="1"/>
     </sequence>

@@ -79,7 +79,7 @@ namespace dss {
     } else {
       return DSS::GetInstance()->GetApartment().GetZone(0);
     }
-  }
+  } // GetRaisedAtZone
 
   //================================================== EventInterpreter
 
@@ -197,6 +197,45 @@ namespace dss {
     }
   } // LoadFromXML
 
+  void EventInterpreter::LoadFilter(XMLNode& _node, EventSubscription& _subscription) {
+    string matchType = _node.GetAttributes()["match"];
+    if(matchType == "all") {
+      _subscription.SetFilterOption(EventSubscription::foMatchAll);
+    } else if(matchType == "none") {
+      _subscription.SetFilterOption(EventSubscription::foMatchNone);
+    } else if(matchType == "one") {
+      _subscription.SetFilterOption(EventSubscription::foMatchOne);
+    } else {
+      Logger::GetInstance()->Log(string("EventInterpreter::LoadFilter: Could not determine the match-type (\"") + matchType + "\", reverting to 'all'", lsError);
+    }
+    XMLNodeList nodes = _node.GetChildren();
+    for(XMLNodeList::iterator iNode = nodes.begin(); iNode != nodes.end(); ++iNode) {
+      string nodeName = iNode->GetName();
+      if(nodeName == "property-filter") {
+        EventPropertyFilter* filter = NULL;
+        string filterType = iNode->GetAttributes()["type"];
+        string propertyName = iNode->GetAttributes()["property"];
+        if(filterType.empty() || propertyName.empty()) {
+          Logger::GetInstance()->Log("EventInterpreter::LoadFilter: Missing type and/or property-name", lsFatal);
+        } else {
+          if(filterType == "exists") {
+            filter = new EventPropertyExistsFilter(propertyName);
+          } else if(filterType == "missing") {
+            filter = new EventPropertyMissingFilter(propertyName);
+          } else if(filterType == "matches") {
+            string matchValue = iNode->GetAttributes()["value"];
+            filter = new EventPropertyMatchFilter(propertyName, matchValue);
+          } else {
+            Logger::GetInstance()->Log("Unknown property-filter type", lsError);
+          }
+        }
+        if(filter != NULL) {
+          _subscription.AddPropertyFilter(filter);
+        }
+      }
+    }
+  } // LoadFilter
+
   void EventInterpreter::LoadSubscription(XMLNode& _node) {
     string evtName = _node.GetAttributes()["event-name"];
     string handlerName = _node.GetAttributes()["handler-name"];
@@ -232,6 +271,12 @@ namespace dss {
     }
 
     EventSubscription* subscription = new EventSubscription(evtName, handlerName, opts);
+    try {
+      XMLNode& filterNode = _node.GetChildByName("filter");
+      LoadFilter(filterNode, *subscription);
+    } catch(runtime_error& e) {
+    }
+
     Subscribe(subscription);
   } // LoadSubsription
 
@@ -534,7 +579,14 @@ namespace dss {
 
   SubscriptionOptions* EventInterpreterPlugin::CreateOptionsFromXML(XMLNodeList& _nodes) {
     return NULL;
-  }
+  } // CreateOptionsFromXML
+
+  //================================================== EventPropertyFilter
+
+  EventPropertyFilter::EventPropertyFilter(const string& _propertyName)
+  : m_PropertyName(_propertyName)
+  { } // ctor
+
 
   //================================================== EventPropertyMatchFilter
 
@@ -548,6 +600,10 @@ namespace dss {
 
   //================================================== EventPropertyExistsFilter
 
+  EventPropertyExistsFilter::EventPropertyExistsFilter(const string& _propertyName)
+  : EventPropertyFilter(_propertyName)
+  { } // ctor
+
   bool EventPropertyExistsFilter::Matches(const Event& _event) {
     return _event.HasPropertySet(GetPropertyName());
   } // Matches
@@ -555,9 +611,14 @@ namespace dss {
 
   //================================================= EventPropertyMissingFilter
 
+  EventPropertyMissingFilter::EventPropertyMissingFilter(const string& _propertyName)
+  : EventPropertyFilter(_propertyName)
+  { } // ctor
+
   bool EventPropertyMissingFilter::Matches(const Event& _event) {
     return !_event.HasPropertySet(GetPropertyName());
-  }
+  } // Matches
+
 
   //================================================== External consts
 

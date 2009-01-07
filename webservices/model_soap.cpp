@@ -6,6 +6,13 @@
 #include <string>
 #include <boost/foreach.hpp>
 
+int dss__Test(struct soap *soap, char*, std::vector<int>& res) {
+  res.push_back(1);
+  res.push_back(2);
+  return SOAP_OK;
+}
+
+
 //==================================================== Helpers
 
 int NotAuthorized(struct soap *soap) {
@@ -86,6 +93,7 @@ int AuthorizeAndGetGroup(struct soap *soap, const int _token, const int _groupID
   return SOAP_OK;
  } // AuthorizeAndGetGroup
 
+
 //==================================================== Callbacks
 
 int dss__Authenticate(struct soap *soap, char* _userName, char* _password, int& token) {
@@ -128,7 +136,7 @@ int dss__Apartment_CreateSetFromGroup(struct soap *soap, int _token,  char* _gro
   return SOAP_OK;
 }
 
-int dss__Apartment_CreateSetFromDeviceIDs(struct soap *soap, int _token, IntArray _ids, int& setID) {
+int dss__Apartment_CreateSetFromDeviceIDs(struct soap *soap, int _token, std::vector<int> _ids, int& setID) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -136,8 +144,8 @@ int dss__Apartment_CreateSetFromDeviceIDs(struct soap *soap, int _token, IntArra
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   try {
     dss::Set set;
-    for(int iID = 0; iID < _ids.__size; iID++) {
-      dss::Device& dev = apt.GetDeviceByDSID(_ids.__ptr[iID]);
+    for(unsigned int iID = 0; iID < _ids.size(); iID++) {
+      dss::Device& dev = apt.GetDeviceByDSID(_ids[iID]);
       set.AddDevice(dev);
     }
     sess.AddSet(set, setID);
@@ -147,7 +155,7 @@ int dss__Apartment_CreateSetFromDeviceIDs(struct soap *soap, int _token, IntArra
   return SOAP_OK;
 }
 
-int dss__Apartment_CreateSetFromDeviceNames(struct soap *soap, int _token,  StringArray _names, int& setID) {
+int dss__Apartment_CreateSetFromDeviceNames(struct soap *soap, int _token,  std::vector<std::string> _names, int& setID) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -155,8 +163,8 @@ int dss__Apartment_CreateSetFromDeviceNames(struct soap *soap, int _token,  Stri
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
   try {
     dss::Set set;
-    for(int iName = 0; iName < _names.__size; iName++) {
-      dss::Device& dev = apt.GetDeviceByName(_names.__ptr[iName]);
+    for(unsigned int iName = 0; iName < _names.size(); iName++) {
+      dss::Device& dev = apt.GetDeviceByName(_names[iName]);
       set.AddDevice(dev);
     }
     sess.AddSet(set, setID);
@@ -319,7 +327,7 @@ int dss__Set_ByGroup(struct soap *soap, int _token, int _setID, int _groupID, in
   return SOAP_OK;
 } // dss__Set_ByGroup
 
-int dss__Set_GetContainedDevices(struct soap* soap, int _token, int _setID, IntArray& deviceIDs) {
+int dss__Set_GetContainedDevices(struct soap* soap, int _token, int _setID, std::vector<int>& deviceIDs) {
   dss::Set set;
   int res = AuthorizeAndGetSet(soap, _token, _setID, set);
   if(res != SOAP_OK) {
@@ -327,10 +335,10 @@ int dss__Set_GetContainedDevices(struct soap* soap, int _token, int _setID, IntA
   }
 
   int numDevices = set.Length();
-  deviceIDs.__size = numDevices;
-  deviceIDs.__ptr = (long unsigned int*)soap_malloc(soap, numDevices * sizeof(long unsigned int));
+//  deviceIDs.__size = numDevices;
+  //deviceIDs.__ptr = (long unsigned int*)soap_malloc(soap, numDevices * sizeof(long unsigned int));
   for(int iDeviceID = 0; iDeviceID < numDevices; iDeviceID++) {
-    deviceIDs.__ptr[iDeviceID] = set.Get(iDeviceID).GetDSID();
+    deviceIDs.push_back(set.Get(iDeviceID).GetDSID());
   }
 
   return SOAP_OK;
@@ -364,7 +372,7 @@ int dss__Apartment_GetZoneByName(struct soap *soap, int _token,  char* _zoneName
   return SOAP_OK;
 }
 
-int dss__Apartment_GetZoneIDs(struct soap *soap, int _token, IntArray& zoneIDs) {
+int dss__Apartment_GetZoneIDs(struct soap *soap, int _token, std::vector<int>& zoneIDs) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -373,14 +381,15 @@ int dss__Apartment_GetZoneIDs(struct soap *soap, int _token, IntArray& zoneIDs) 
   std::vector<dss::Zone*>& zones = apt.GetZones();
 
   int numZones = zones.size();
-  zoneIDs.__size = numZones;
-  zoneIDs.__ptr = (long unsigned int*)soap_malloc(soap, numZones * sizeof(long unsigned int));
+//  zoneIDs.__size = numZones;
+  //zoneIDs.__ptr = (long unsigned int*)soap_malloc(soap, numZones * sizeof(long unsigned int));
   for(int iZoneID = 0; iZoneID < numZones; iZoneID++) {
-    zoneIDs.__ptr[iZoneID] = zones[iZoneID]->GetZoneID();
+    zoneIDs.push_back(zones[iZoneID]->GetZoneID());
   }
 
   return SOAP_OK;
 }
+
 
 //==================================================== Manipulation
 
@@ -896,11 +905,12 @@ int dss__Modulator_GetPowerConsumption(struct soap *soap, int _token, int _modul
   return SOAP_OK;
 } // dss__Modulator_GetPowerConsumption
 
+
 //==================================================== Organization
 
 //These calls may be restricted to privileged users.
 
-int dss__Apartment_GetModulatorIDs(struct soap *soap, int _token, IntArray& ids) {
+int dss__Apartment_GetModulatorIDs(struct soap *soap, int _token, std::vector<int>& ids) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -909,11 +919,11 @@ int dss__Apartment_GetModulatorIDs(struct soap *soap, int _token, IntArray& ids)
   std::vector<dss::Modulator*>& modulators = apt.GetModulators();
 
   // apparently gSOAP is handling the memory
-  ids.__ptr = (long unsigned int*)soap_malloc(soap, sizeof(long unsigned int) * modulators.size());
-  ids.__size = modulators.size();
+//  ids.__ptr = (long unsigned int*)soap_malloc(soap, sizeof(long unsigned int) * modulators.size());
+//  ids.__size = modulators.size();
 
-  for(int iModulator = 0; iModulator < ids.__size; iModulator++) {
-    ids.__ptr[iModulator] = modulators[iModulator]->GetDSID();
+  for(unsigned int iModulator = 0; iModulator < ids.size(); iModulator++) {
+    ids.push_back(modulators[iModulator]->GetDSID());
   }
 
   return SOAP_OK;
@@ -978,6 +988,7 @@ int dss__Event_Raise(struct soap *soap, int _token, int _eventID, int _sourceID,
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
+  /*
   int numNames = 0;
   int numValues = 0;
   if(_params.names != NULL) {
@@ -994,10 +1005,11 @@ int dss__Event_Raise(struct soap *soap, int _token, int _eventID, int _sourceID,
   //dss::Event evt(_eventID, _sourceID);
   //dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
  // apt.OnEvent();
+  */
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
-int dss__Event_GetActionNames(struct soap *soap, int _token,  StringArray& names) {
+int dss__Event_GetActionNames(struct soap *soap, int _token,  std::vector<std::string>& names) {
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
@@ -1005,7 +1017,7 @@ int dss__Event_GetActionParamsTemplate(struct soap *soap, int _token,  char* _na
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
-int dss__Event_Subscribe(struct soap *soap, int _token, IntArray _eventIDs, IntArray _sourceIDs, char* _actionName, dss__inParameter _params, int& subscriptionID) {
+int dss__Event_Subscribe(struct soap *soap, int _token, std::vector<int> _eventIDs, std::vector<int> _sourceIDs, char* _actionName, dss__inParameter _params, int& subscriptionID) {
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 

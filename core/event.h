@@ -93,8 +93,7 @@ namespace dss {
   private:
     string m_PropertyName;
   public:
-    EventPropertyFilter(const string& _propertyName)
-    : m_PropertyName(_propertyName) {}
+    EventPropertyFilter(const string& _propertyName);
     virtual ~EventPropertyFilter() {}
 
     const string& GetPropertyName() const { return m_PropertyName; }
@@ -122,7 +121,9 @@ namespace dss {
 
   class EventPropertyExistsFilter : public EventPropertyFilter {
   public:
-    virtual ~EventPropertyExistsFilter() {}
+    EventPropertyExistsFilter(const string& _propertyName);
+    virtual ~EventPropertyExistsFilter() {};
+
     virtual bool Matches(const Event& _event);
   }; // EventPropertyExistsFilter
 
@@ -131,7 +132,9 @@ namespace dss {
 
   class EventPropertyMissingFilter : public EventPropertyFilter {
   public:
-    virtual ~EventPropertyMissingFilter() {}
+    EventPropertyMissingFilter(const string& _propertyName);
+    virtual ~EventPropertyMissingFilter() {};
+
     virtual bool Matches(const Event& _event);
   }; // EventPropertyMissingFilter
 
@@ -139,17 +142,18 @@ namespace dss {
   //-------------------------------------------------- EventSubscription
 
   class EventSubscription {
+  public:
+    typedef enum {
+      foMatchNone,
+      foMatchAll,
+      foMatchOne
+    } EventPropertyFilterOption;
   private:
     string m_EventName;
     string m_HandlerName;
     string m_ID;
     SubscriptionOptions* m_SubscriptionOptions;
     vector<EventPropertyFilter*> m_Filter;
-    typedef enum {
-      foMatchNone,
-      foMatchAll,
-      foMatchOne
-    } EventPropertyFilterOption;
     EventPropertyFilterOption m_FilterOption;
   protected:
     void Initialize();
@@ -254,6 +258,7 @@ namespace dss {
     int m_EventsProcessed;
   private:
     void LoadSubscription(XMLNode& _node);
+    void LoadFilter(XMLNode& _node, EventSubscription& _subscription);
     EventInterpreterPlugin* GetPluginByName(const string& _name);
   public:
     EventInterpreter(EventQueue* _queue);

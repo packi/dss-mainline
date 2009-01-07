@@ -7,5 +7,8 @@
     </parameter>
   </subscription>
   <subscription event-name="event2" handler-name="nonexisting">
+    <filter match="all">
+      <property-filter type="exists" property="remote" />
+    </filter>
   </subscription>
 </subscriptions> 
