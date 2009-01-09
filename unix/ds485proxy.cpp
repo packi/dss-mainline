@@ -36,8 +36,9 @@ namespace dss {
   HashMapZoneSet SplitByZone(const Set& _set) {
     HashMapZoneSet result;
     for(int iDevice = 0; iDevice < _set.Length(); iDevice++) {
-      const DeviceReference& dev = _set.Get(iDevice);
-      Zone& zone = dev.GetDevice().GetApartment().GetZone(dev.GetDevice().GetZoneID());
+      const DeviceReference& devRef = _set.Get(iDevice);
+      const Device& dev = devRef.GetDevice();
+      Zone& zone = dev.GetApartment().GetZone(dev.GetZoneID());
       result[&zone].AddDevice(dev);
     }
     return result;

@@ -1,4 +1,4 @@
-/*
+ /*
  * eventtests.cpp
  *
  *  Created on: Nov 7, 2008
@@ -13,6 +13,8 @@
 #include "../core/event.h"
 #include "../core/eventinterpreterplugins.h"
 #include "../core/setbuilder.h"
+#include "../core/sim/dssim.h"
+#include "../unix/ds485proxy.h"
 
 using namespace dss;
 
@@ -23,11 +25,12 @@ class EventTest : public CPPUNIT_NS::TestCase
 {
   CPPUNIT_TEST_SUITE(EventTest);
 //  CPPUNIT_TEST(testSimpleEvent);
- // CPPUNIT_TEST(testSubscription);
-  CPPUNIT_TEST(testEmptySubscriptionXML);
-  CPPUNIT_TEST(testNonExistingXML);
-  CPPUNIT_TEST(testSubscriptionXML);
-  CPPUNIT_TEST(testSetBuilder);
+//  CPPUNIT_TEST(testSubscription);
+//  CPPUNIT_TEST(testEmptySubscriptionXML);
+//  CPPUNIT_TEST(testNonExistingXML);
+//  CPPUNIT_TEST(testSubscriptionXML);
+//  CPPUNIT_TEST(testSetBuilder);
+//  CPPUNIT_TEST(testDS485Events);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -197,6 +200,73 @@ protected:
     CPPUNIT_ASSERT_EQUAL(res.Length(), 1);
     CPPUNIT_ASSERT_EQUAL(res.Get(0).GetDevice().GetName(), string("dev2"));
 } // testSetBuilder
+
+  void testDS485Events() {
+    EventQueue queue;
+    EventRunner runner;
+    EventInterpreter interpreter(&queue);
+    interpreter.SetEventRunner(&runner);
+    queue.SetEventRunner(&runner);
+    runner.SetEventQueue(&queue);
+
+    DSModulatorSim modSim;
+    modSim.Initialize();
+    DS485Proxy proxy;
+
+    Apartment apt;
+
+    Device& dev1 = apt.AllocateDevice(1);
+    dev1.SetName("dev1");
+    dev1.SetShortAddress(1);
+    Device& dev2 = apt.AllocateDevice(2);
+    dev2.SetName("dev2");
+    dev2.SetShortAddress(2);
+    Device& dev3 = apt.AllocateDevice(3);
+    dev3.SetName("dev3");
+    dev3.SetShortAddress(3);
+    Device& dev4 = apt.AllocateDevice(4);
+    dev4.SetName("dev4");
+    dev4.SetShortAddress(4);
+
+
+    EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
+    interpreter.AddPlugin(plugin);
+    plugin = new EventInterpreterPluginDS485(&proxy, &interpreter);
+    interpreter.AddPlugin(plugin);
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetNumberOfSubscriptions(), 0);
+
+    try {
+      interpreter.LoadFromXML("data/testsubscriptions_DS485.xml");
+    } catch(runtime_error& e) {
+    }
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetNumberOfSubscriptions(), 3);
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetEventsProcessed(), 0);
+
+    interpreter.Run();
+
+    sleep(1);
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetEventsProcessed(), 0);
+
+    Event* evt = new Event("brighter", &apt.GetZone(0));
+    evt->SetLocation("dev1");
+    queue.PushEvent(evt);
+
+    sleep(1);
+
+    runner.RunOnce();
+
+    sleep(600);
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetEventsProcessed(), 2);
+
+    queue.Shutdown();
+    interpreter.Terminate();
+    sleep(1);
+  } // testDS485Events
 
 };
 

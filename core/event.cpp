@@ -23,13 +23,26 @@ namespace dss {
   //================================================== Event
 
   Event::Event(const string& _name)
-  : m_Name(_name),
-    m_LocationSet(false),
-    m_ContextSet(false),
-    m_TimeSet(false)
-  {} // ctor
+  : m_Name(_name)
+  {
+    Reset();
+  } // ctor
 
-  string Event::GetPropertyByName(const string& _name) const {
+  Event::Event(const string& _name, Zone* _zone)
+  : m_Name(_name),
+    m_RaiseLocation(erlZone),
+    m_RaisedAtZone(_zone)
+  {
+    Reset();
+  } // ctor
+
+  void Event::Reset() {
+    m_LocationSet = false;
+    m_ContextSet = false;
+    m_TimeSet = false;
+  } // Reset
+
+  const string& Event::GetPropertyByName(const string& _name) const {
     if(_name == EventPropertyName) {
       return m_Name;
     } else if(_name == EventPropertyLocation) {
@@ -39,7 +52,7 @@ namespace dss {
     } else if(_name == EventPropertyTime) {
       return m_Time;
     }
-    return string();
+    return m_Properties.Get(_name, "");
   } // GetPropertyByName
 
   bool Event::HasPropertySet(const string& _name) const {
@@ -52,10 +65,10 @@ namespace dss {
     } else if(_name == EventPropertyTime) {
       return m_TimeSet;
     }
-    return false;
+    return m_Properties.Has(_name);
   } // HasPropertySet
 
-  bool Event::UnsetProperty(const string& _name) {
+  void Event::UnsetProperty(const string& _name) {
     if(_name == EventPropertyLocation) {
       m_LocationSet = false;
       m_Location = "";
@@ -66,17 +79,18 @@ namespace dss {
       m_TimeSet = false;
       m_Time = "";
     } else {
-      return false;
+      m_Properties.Unset(_name);
     }
-    return true;
   } // UnsetProperty
 
   const Zone& Event::GetRaisedAtZone() const {
     if(m_RaiseLocation == erlZone) {
       return *m_RaisedAtZone;
     } else if(m_RaiseLocation == erlDevice) {
-      return DSS::GetInstance()->GetApartment().GetZone(m_RaisedAtDevice->GetDevice().GetZoneID());
+      const Device& dev = m_RaisedAtDevice->GetDevice();
+      return dev.GetApartment().GetZone(dev.GetZoneID());
     } else {
+      // TODO: We should really try to get the apartment from elsewhere...
       return DSS::GetInstance()->GetApartment().GetZone(0);
     }
   } // GetRaisedAtZone
@@ -251,6 +265,7 @@ namespace dss {
     }
 
     SubscriptionOptions* opts = NULL;
+    bool hadOpts = false;
 
     EventInterpreterPlugin* plugin = GetPluginByName(handlerName);
     if(plugin == NULL) {
@@ -258,16 +273,20 @@ namespace dss {
       Logger::GetInstance()->Log(       "EventInterpreter::LoadSubscription: Still generating a subscription but w/o inner parameter", lsWarning);
     } else {
       opts = plugin->CreateOptionsFromXML(_node.GetChildren());
+      hadOpts = true;
     }
     try {
       XMLNode& paramNode = _node.GetChildByName("parameter");
       if(opts == NULL) {
         opts = new SubscriptionOptions();
-        opts->LoadParameterFromXML(paramNode);
       }
+      opts->LoadParameterFromXML(paramNode);
     } catch(runtime_error& e) {
-      delete opts;
-      opts = NULL;
+      // only delete options created in the try-part...
+      if(!hadOpts) {
+        delete opts;
+        opts = NULL;
+      }
     }
 
     EventSubscription* subscription = new EventSubscription(evtName, handlerName, opts);
@@ -534,21 +553,15 @@ namespace dss {
   { } // dtor
 
   const string& SubscriptionOptions::GetParameter(const string& _name) const {
-    HashMapConstStringString::const_iterator it = m_Parameters.find(_name);
-    if(it != m_Parameters.end()) {
-      return it->second;
-    }
-
-    throw runtime_error(string("no value for parameter found: ") + _name);
+    return m_Parameters.Get(_name);
   } // GetParameter
 
   bool SubscriptionOptions::HasParameter(const string& _name) const {
-    HashMapConstStringString::const_iterator it = m_Parameters.find(_name);
-    return it != m_Parameters.end();
+    return m_Parameters.Has(_name);
   } // HasParameter
 
   void SubscriptionOptions::SetParameter(const string& _name, const string& _value) {
-    m_Parameters[_name] = _value;
+    m_Parameters.Set(_name, _value);
   } // SetParameter
 
   void SubscriptionOptions::LoadParameterFromXML(XMLNode& _node) {

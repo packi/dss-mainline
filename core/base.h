@@ -133,6 +133,20 @@ namespace dss {
 
   //============================================= Helper classes
 
+  class Properties {
+  private:
+    HashMapConstStringString m_Container;
+  public:
+    bool Has(const string& _key) const;
+    void Set(const string& _key, const string& _value);
+    const string& Get(const string& _key) const;
+    const string& Get(const string& _key, const string& _default) const;
+
+    bool Unset(const string& _key);
+
+    const HashMapConstStringString GetContainer() const { return m_Container; }
+  };
+
   template <typename resCls>
   class ResourceHolder {
   protected:

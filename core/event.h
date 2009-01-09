@@ -50,6 +50,10 @@ namespace dss {
     EventRaiseLocation m_RaiseLocation;
     Zone* m_RaisedAtZone;
     DeviceReference* m_RaisedAtDevice;
+
+    Properties m_Properties;
+  private:
+    void Reset();
   public:
     Event(const string& _name, Zone* _context);
     Event(const string& _name, DeviceReference* _ref);
@@ -57,9 +61,9 @@ namespace dss {
 
     const string& GetName() const { return m_Name; }
 
-    string GetPropertyByName(const string& _name) const;
+    const string& GetPropertyByName(const string& _name) const;
     bool HasPropertySet(const string& _name) const;
-    bool UnsetProperty(const string& _name);
+    void UnsetProperty(const string& _name);
 
     void SetLocation(const string& _value) { m_Location = _value; m_LocationSet = true; }
     void SetContext(const string& _value) { m_Context = _value; m_ContextSet = true; }
@@ -67,6 +71,9 @@ namespace dss {
 
     const Zone& GetRaisedAtZone() const;
     const DeviceReference& GetRaisedAtDevice() const { return *m_RaisedAtDevice; }
+
+    const Properties& GetProperties() const { return m_Properties; }
+    void SetProperties(const Properties& _value) { m_Properties = _value; }
   }; // Event
 
 
@@ -74,7 +81,7 @@ namespace dss {
 
   class SubscriptionOptions {
   private:
-    HashMapConstStringString m_Parameters;
+    Properties m_Parameters;
   public:
     SubscriptionOptions();
     virtual ~SubscriptionOptions();

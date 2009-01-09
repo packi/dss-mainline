@@ -35,6 +35,7 @@ namespace dss {
         newEvent->SetTime(timeParam);
       }
     }
+    newEvent->SetProperties(_event.GetProperties());
     GetEventInterpreter().GetQueue().PushEvent(newEvent);
   } // HandleEvent
 
@@ -173,7 +174,7 @@ namespace dss {
       //   send to context's parent-entity (zone)
 
       SetBuilder builder;
-      Set to = DSS::GetInstance()->GetApartment().GetDevices();
+      Set to;
       if(_event.HasPropertySet(EventPropertyLocation)) {
         to = builder.BuildSet(_event.GetPropertyByName(EventPropertyLocation), &_event.GetRaisedAtZone());
       } else {

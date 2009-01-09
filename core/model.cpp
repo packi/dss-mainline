@@ -30,6 +30,7 @@ namespace dss {
   Device::Device(dsid_t _dsid, Apartment* _pApartment)
   : m_DSID(_dsid),
     m_ShortAddress(0xFF),
+    m_ZoneID(0),
     m_pApartment(_pApartment),
     m_SubscriptionEventID(-1)
   {
@@ -964,17 +965,18 @@ namespace dss {
   } // GetDevices
 
   void Zone::AddDevice(const DeviceReference& _device) {
-  	int oldZoneID = _device.GetDevice().GetZoneID();
+    const Device& dev = _device.GetDevice();
+  	int oldZoneID = dev.GetZoneID();
   	if(oldZoneID != -1) {
   		try {
-  		  Zone& oldZone = DSS::GetInstance()->GetApartment().GetZone(oldZoneID);
+  		  Zone& oldZone = dev.GetApartment().GetZone(oldZoneID);
   		  oldZone.RemoveDevice(_device);
   		} catch(runtime_error&) {
   		}
   	}
     m_Devices.push_back(_device);
-  	if(!DSS::GetInstance()->GetApartment().IsInitializing()) {
-  		DSS::GetInstance()->GetDS485Interface().SetZoneID(_device.GetDevice().GetModulatorID(), _device.GetDevice().GetShortAddress(), m_ZoneID);
+  	if(!dev.GetApartment().IsInitializing()) {
+  		DSS::GetInstance()->GetDS485Interface().SetZoneID(dev.GetModulatorID(), dev.GetShortAddress(), m_ZoneID);
   	}
   } // AddDevice
 

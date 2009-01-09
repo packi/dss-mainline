@@ -343,5 +343,45 @@ namespace dss {
 #endif
   }
 
+  //================================================== Properties
+
+  bool Properties::Has(const string& _key) const {
+    HashMapConstStringString::const_iterator iEntry = m_Container.find(_key);
+    return iEntry != m_Container.end();
+  } // Has
+
+  void Properties::Set(const string& _key, const string& _value) {
+    m_Container[_key] = _value;
+  } // Set
+
+  const string& Properties::Get(const string& _key) const {
+    if(!Has(_key)) {
+      throw runtime_error(string("could not find value for '") + _key + "' in properties");
+    } else {
+      // not using operator[] here because its non-const
+      HashMapConstStringString::const_iterator iEntry = m_Container.find(_key);
+      return iEntry->second;
+    }
+  } // Get
+
+  const string& Properties::Get(const string& _key, const string& _default) const {
+    if(Has(_key)) {
+      // not using operator[] here because its non-const
+      HashMapConstStringString::const_iterator iEntry = m_Container.find(_key);
+      return iEntry->second;
+    } else {
+      return _default;
+    }
+  } // Get(with default)
+
+  bool Properties::Unset(const string& _key) {
+    HashMapConstStringString::iterator iEntry = m_Container.find(_key);
+    if(iEntry != m_Container.end()) {
+      m_Container.erase(iEntry);
+      return true;
+    }
+    return false;
+  } // Unset
+
 
 }
