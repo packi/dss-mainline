@@ -536,7 +536,7 @@ namespace dss {
 
     DS485Interface& interface = DSS::GetInstance()->GetDS485Interface();
 
-    SleepMS(25000);
+    SleepMS(10000);
     while(!m_Terminated) {
      // TODO: reimplement proxy.WaitForProxyEvent();
       Logger::GetInstance()->Log("Apartment::Execute received proxy event, enumerating apartment / dSMs");

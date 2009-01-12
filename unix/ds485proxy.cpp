@@ -191,9 +191,9 @@ namespace dss {
 			frame.SetCommand(CommandRequest);
 			if(_cmd == cmdTurnOn) {
 				frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
-				frame.GetPayload().Add<uint8>(_zone.GetZoneID());
-				frame.GetPayload().Add<uint8>(_group.GetID());
-				frame.GetPayload().Add<uint8>(Scene1);
+				frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+				frame.GetPayload().Add<uint16_t>(_group.GetID());
+				frame.GetPayload().Add<uint16_t>(Scene1);
 				SendFrame(frame);
 			} else if(_cmd == cmdTurnOff) {
 				frame.GetPayload().Add<uint8>(FunctionGroupCallScene);

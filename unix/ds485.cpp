@@ -142,7 +142,7 @@ namespace dss {
     if(result != NULL) {
       DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(result);
       if(cmdFrame != NULL) {
-       // Logger::GetInstance()->Log("Command received");
+        //Logger::GetInstance()->Log("Command received");
         //Logger::GetInstance()->Log(string("command: ") + CommandToString(cmdFrame->GetCommand()));
         //Logger::GetInstance()->Log(string("length:  ") + IntToString((cmdFrame->GetLength())));
         //Logger::GetInstance()->Log(string("msg nr:  ") + IntToString(cmdFrame->GetHeader().GetCounter()));
@@ -293,11 +293,11 @@ namespace dss {
         case csSlaveWaitingToJoin:
           {
             if(cmdFrame != NULL) {
-              if(cmdFrame->GetCommand() == CommandSolicitSuccessorRequest ||
-                 cmdFrame->GetCommand() == CommandSolicitSuccessorRequestLong) {
+              if((cmdFrame->GetCommand() == CommandSolicitSuccessorRequest) ||
+                 (cmdFrame->GetCommand() == CommandSolicitSuccessorRequestLong)) {
                 // if it's the first of it's kind, determine how many we've got to skip
                 if(numberOfJoinPacketsToWait == -1) {
-                  numberOfJoinPacketsToWait = rand() % 10 + 2;
+                  numberOfJoinPacketsToWait = rand() % 10 + 10;
                   cout << "** Waiting for " << numberOfJoinPacketsToWait << endl;
                 } else {
                   numberOfJoinPacketsToWait--;
@@ -335,6 +335,7 @@ namespace dss {
                 frameToSend->GetHeader().SetDestination(0);
                 frameToSend->GetHeader().SetSource(m_StationID);
                 frameToSend->SetCommand(CommandSetSuccessorAddressResponse);
+                PutFrameOnWire(frameToSend);
                 cout << "### successor " << m_NextStationID << "\n";
               } else {
                 cout << "****** not for me" << endl;
