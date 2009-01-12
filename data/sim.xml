@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <modulator busid="70" dsid="10">
+<!--
   <device dsid="11" busid="10" type="standard.simple" />
-  <zone id="1"> <!-- id can be omitted, in fact zone may be omitted if there's only one zone -->
+  <zone id="1"> 
     <device dsid="1" busid="1" type="standard.switch" />
     <device dsid="2" busid="2" type="example.vlc_remote" />
     <device dsid="4" busid="4" type="standard.simple"/>
@@ -18,5 +19,5 @@
     <group id="1">
       <device busid="5" />
     </group>
-  </zone>  
+  </zone> -->  
 </modulator>

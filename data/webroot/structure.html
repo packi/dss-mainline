@@ -85,8 +85,8 @@ function StructureModifier(containerForOthers, containerForUnassigned) {
         if(device.name.length != 0) {
           devlist += device.name;
         } else {
-          devlist += "(no name)";
-          device.name = "(no name)";
+          devlist += "(no name) " + device.id;
+          device.name = "(no name) " + device.id;
         }
         self.devNum++;
         devlist += "</li>";
@@ -136,8 +136,8 @@ function StructureModifier(containerForOthers, containerForUnassigned) {
           if(device.name.length != 0) {
             zonelist += device.name;
           } else {
-            zonelist += "(no name)";
-            device.name = "(no name)";
+            zonelist += "(no name) " + device.id;
+            device.name = "(no name) " + device.id;
           }
           self.devNum++;
           zonelist += "</li>";

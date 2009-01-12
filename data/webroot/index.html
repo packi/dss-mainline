@@ -41,7 +41,8 @@ function Apartment(into) {
         if(zone.id == 0) { 
           return;
         }
-        zonelist += "<li>" + zone.name + "</li><ul>";
+        zonelist += "<li>" + zone.name + '[<a href="#" onclick="turnOnZone(' + zone.id + ')">Turn On</a>';
+        zonelist += '&nbsp;|&nbsp;<a href="#" onclick="turnOffZone(' + zone.id + ')">Turn Off</a>]</li><ul>';
         zone.devices.each(function(device) {
           zonelist += "<li>" + device.name;
           devNum++;
@@ -85,9 +86,9 @@ var apt = null;
 	    {
 	      method:'get', 
 	      parameters: {device: devid},
-          onComplete: function(transport, json) {
-            apt.fetchApartment();
-          }
+          //onComplete: function(transport, json) {
+          //  apt.fetchApartment();
+          //}
 	    } 
 	  );
 	}
@@ -97,9 +98,33 @@ var apt = null;
 	    {
 	      method:'get', 
 	      parameters: {device: devid},
-          onComplete: function(transport, json) {
-            apt.fetchApartment();
-          }
+          //onComplete: function(transport, json) {
+          //  apt.fetchApartment();
+          //}
+	    } 
+	  );
+	}
+
+	function turnOnZone(zoneid) {
+	  new Ajax.Request('/json/turnon', 
+	    {
+	      method:'get', 
+	      parameters: {zone: zoneid},
+          //onComplete: function(transport, json) {
+          //  apt.fetchApartment();
+          //}
+	    } 
+	  );
+	}
+	
+	function turnOffZone(zoneid) {
+	  new Ajax.Request('/json/turnoff',
+	    {
+	      method:'get', 
+	      parameters: {zone: zoneid},
+          //onComplete: function(transport, json) {
+          //  apt.fetchApartment();
+          //}
 	    } 
 	  );
 	}

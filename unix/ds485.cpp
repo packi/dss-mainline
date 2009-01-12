@@ -37,8 +37,8 @@ namespace dss {
 
   template<>
   void DS485Payload::Add(devid_t _data) {
-    m_Data.push_back((_data >> 8) & 0x00FF);
     m_Data.push_back((_data >> 0) & 0x00FF);
+    m_Data.push_back((_data >> 8) & 0x00FF);
   } // Add<devid_t>
 
   template<>
@@ -48,10 +48,10 @@ namespace dss {
 
   template<>
   void DS485Payload::Add(dsid_t _data) {
-    m_Data.push_back((_data & 0xFF000000) >> 24);
-    m_Data.push_back((_data & 0x00FF0000) >> 16);
-    m_Data.push_back((_data & 0x0000FF00) >> 8);
-    m_Data.push_back((_data & 0x000000FF) >> 0);
+    m_Data.push_back((_data & 0xFF000000) >> 0);
+    m_Data.push_back((_data & 0x00FF0000) >> 8);
+    m_Data.push_back((_data & 0x0000FF00) >> 16);
+    m_Data.push_back((_data & 0x000000FF) >> 24);
   } // Add<dsid_t>
 
   int DS485Payload::Size() const {
@@ -254,12 +254,14 @@ namespace dss {
 
         // discard packets which are not addressed to us
         if(!header.IsBroadcast() && header.GetDestination() != m_StationID) {
+/*
           Logger::GetInstance()->Log("packet not for me, discarding");
           cout << "dest: " << header.GetDestination() << endl;
           cout << "src:  " << header.GetSource() << endl;
           if(cmdFrame != NULL) {
             cout << "cmd:  " << CommandToString(cmdFrame->GetCommand()) << endl;
           }
+*/
           continue;
         }
 
@@ -291,10 +293,11 @@ namespace dss {
         case csSlaveWaitingToJoin:
           {
             if(cmdFrame != NULL) {
-              if(cmdFrame->GetCommand() == CommandSolicitSuccessorRequest) {
+              if(cmdFrame->GetCommand() == CommandSolicitSuccessorRequest ||
+                 cmdFrame->GetCommand() == CommandSolicitSuccessorRequestLong) {
                 // if it's the first of it's kind, determine how many we've got to skip
                 if(numberOfJoinPacketsToWait == -1) {
-                  numberOfJoinPacketsToWait = rand() % 10 + 10;
+                  numberOfJoinPacketsToWait = rand() % 10 + 2;
                   cout << "** Waiting for " << numberOfJoinPacketsToWait << endl;
                 } else {
                   numberOfJoinPacketsToWait--;
@@ -323,15 +326,19 @@ namespace dss {
               frameToSend->GetHeader().SetSource(m_StationID);
               frameToSend->SetCommand(CommandSetDeviceAddressResponse);
               PutFrameOnWire(frameToSend);
-              cout << "### new address " << m_StationID << endl;
+              cout << "### new address " << m_StationID << "\n";
             } else if(cmdFrame->GetCommand() == CommandSetSuccessorAddressRequest) {
               // TODO: handle these in slave and master mode too
-              m_NextStationID = payload.ToChar().at(0);
-              DS485CommandFrame* frameToSend = new DS485CommandFrame();
-              frameToSend->GetHeader().SetDestination(0);
-              frameToSend->GetHeader().SetSource(m_StationID);
-              frameToSend->SetCommand(CommandSetSuccessorAddressResponse);
-              PutFrameOnWire(frameToSend);
+              if(header.GetDestination() == m_StationID) {
+                m_NextStationID = payload.ToChar().at(0);
+                DS485CommandFrame* frameToSend = new DS485CommandFrame();
+                frameToSend->GetHeader().SetDestination(0);
+                frameToSend->GetHeader().SetSource(m_StationID);
+                frameToSend->SetCommand(CommandSetSuccessorAddressResponse);
+                cout << "### successor " << m_NextStationID << "\n";
+              } else {
+                cout << "****** not for me" << endl;
+              }
             } else {
               // check if our response has timed-out
               time_t now;
@@ -360,8 +367,9 @@ namespace dss {
 
               // send frame
               DS485CommandFrame& frameToSend = m_PendingFrames.front();
+              cout << "s" << endl;
               PutFrameOnWire(&frameToSend, false);
-              cout << "p%" << (int)frameToSend.GetCommand() << "%";
+              cout << "p%" << (int)frameToSend.GetCommand() << "%e" << endl;
               //m_PendingFrames.erase(m_PendingFrames.begin());
 
 
@@ -684,28 +692,28 @@ namespace dss {
   template<>
   dsid_t PayloadDissector::Get() {
     dsid_t result;
-    result = (Get<uint8>() << 24) |
+    result = (Get<uint8>() <<  0) |
+             (Get<uint8>() <<  8) |
              (Get<uint8>() << 16) |
-             (Get<uint8>() << 8)  |
-             (Get<uint8>());
+             (Get<uint8>() << 24);
     return result;
   }
 
   template<>
   uint32_t PayloadDissector::Get() {
     uint32_t result;
-    result = (Get<uint8>() << 24) |
+    result = (Get<uint8>() <<  0) |
+             (Get<uint8>() <<  8) |
              (Get<uint8>() << 16) |
-             (Get<uint8>() << 8)  |
-             (Get<uint8>());
+             (Get<uint8>() << 24);
     return result;
   }
 
   template<>
   uint16_t PayloadDissector::Get() {
     uint16_t result;
-    result = (Get<uint8>() << 8)  |
-             (Get<uint8>());
+    result = (Get<uint8>() << 0)  |
+             (Get<uint8>() << 8);
     return result;
   }
 
@@ -742,7 +750,7 @@ namespace dss {
               cout << (int)pd.Get<uint8>() << "\n";
             }
           } else {
-            cout << "token " << frame->GetHeader().GetSource() << " -> " << frame->GetHeader().GetDestination()  << "\n";
+            cout << "token " << (int)frame->GetHeader().GetSource() << " -> " << (int)frame->GetHeader().GetDestination()  << "\n";
           }
           cout << "seq: " << frame->GetHeader().GetCounter() << endl;
 
@@ -757,6 +765,8 @@ namespace dss {
 
   const char* CommandToString(const uint8 _command) {
     switch(_command) {
+    case CommandSolicitSuccessorRequestLong:
+      return "solicit successor request long";
     case CommandSolicitSuccessorRequest:
       return "solicit successor request";
     case CommandSolicitSuccessorResponse:

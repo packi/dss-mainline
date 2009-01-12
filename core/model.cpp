@@ -90,7 +90,7 @@ namespace dss {
   } // GetFunctionID
 
   bool Device::IsSwitch() const {
-    return GetFunctionID() == FunctionIDSwitch;
+    return false; //GetFunctionID() == FunctionIDSwitch;
   } // IsSwitch
 
   void Device::SetValue(const double _value, const int _parameterNr) {
@@ -536,7 +536,7 @@ namespace dss {
 
     DS485Interface& interface = DSS::GetInstance()->GetDS485Interface();
 
-    SleepMS(5000);
+    SleepMS(25000);
     while(!m_Terminated) {
      // TODO: reimplement proxy.WaitForProxyEvent();
       Logger::GetInstance()->Log("Apartment::Execute received proxy event, enumerating apartment / dSMs");
@@ -579,10 +579,13 @@ namespace dss {
                 iDevice != e; ++iDevice)
             {
               int devID = *iDevice;
-              dsid_t dsid = interface.GetDSIDOfDevice(modID, devID);
-              Device& dev = AllocateDevice(dsid);
-              dev.SetShortAddress(devID);
-              dev.GetGroupBitmask().set(groupID-1);
+              try {
+                Device& dev = GetDeviceByShortAddress(modulator, devID);
+                dev.SetShortAddress(devID);
+                dev.GetGroupBitmask().set(groupID-1);
+              } catch(ItemNotFoundException& e) {
+                Logger::GetInstance()->Log(string("Could not find device with short-address ") + IntToString(devID));
+              }
             }
           }
         }
@@ -704,6 +707,16 @@ namespace dss {
       }
     }
     throw ItemNotFoundException(IntToString(_dsid));
+  } // GetDeviceByShortAddress
+
+  Device& Apartment::GetDeviceByShortAddress(const Modulator& _modulator, const devid_t _deviceID) const {
+    for(vector<Device*>::const_iterator ipDevice = m_Devices.begin(); ipDevice != m_Devices.end(); ++ipDevice) {
+      if(((*ipDevice)->GetShortAddress() == _deviceID) &&
+          (_modulator.GetBusID() == (*ipDevice)->GetModulatorID())) {
+        return **ipDevice;
+      }
+    }
+    throw ItemNotFoundException(IntToString(_deviceID));
   } // GetDeviceByShortAddress
 
   Device& Apartment::GetDeviceByName(const string& _name) {

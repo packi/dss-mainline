@@ -218,9 +218,14 @@ namespace dss {
       EmitHTTPHeader(200, _arg, "application/json");
 
       string devidStr = paramMap["device"];
+      string zoneIDStr = paramMap["zone"];
       if(!devidStr.empty()) {
         int devid = StrToUInt(devidStr);
         DSS::GetInstance()->GetApartment().GetDeviceByDSID(devid).TurnOn();
+        shttpd_printf(_arg, "{ok:1}");
+      } else if(!zoneIDStr.empty()) {
+        int zoneID = StrToUInt(zoneIDStr);
+        DSS::GetInstance()->GetApartment().GetZone(zoneID).GetDevices().TurnOn();
         shttpd_printf(_arg, "{ok:1}");
       } else {
         shttpd_printf(_arg, "{ok:0}");
@@ -228,9 +233,14 @@ namespace dss {
     } else if(method == "turnoff") {
 
       string devidStr = paramMap["device"];
+      string zoneIDStr = paramMap["zone"];
       if(!devidStr.empty()) {
         int devid = StrToUInt(devidStr);
         DSS::GetInstance()->GetApartment().GetDeviceByDSID(devid).TurnOff();
+        shttpd_printf(_arg, "{ok:1}");
+      } else if(!zoneIDStr.empty()) {
+        int zoneID = StrToUInt(zoneIDStr);
+        DSS::GetInstance()->GetApartment().GetZone(zoneID).GetDevices().TurnOff();
         shttpd_printf(_arg, "{ok:1}");
       } else {
         shttpd_printf(_arg, "{ok:0}");

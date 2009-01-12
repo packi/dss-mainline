@@ -4,6 +4,7 @@
 namespace dss {
 
   // DS485 comands
+  const uint8 CommandSolicitSuccessorRequestLong = 0x00;
   const uint8 CommandSolicitSuccessorRequest = 0x01;
   const uint8 CommandSolicitSuccessorResponse = 0x02;
   const uint8 CommandGetAddressRequest = 0x03;
@@ -80,7 +81,7 @@ namespace dss {
 
   // Scene constants for devices
   const uint8 SceneOff = 0x00;
-  const uint8 Scene1 = 0x01;
+  const uint8 Scene1 = 0x05;
   const uint8 Scene2 = 0x02;
   const uint8 Scene3 = 0x03;
   const uint8 Scene4 = 0x04;

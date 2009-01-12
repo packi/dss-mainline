@@ -70,7 +70,8 @@ namespace dss {
     bool IsSimAddress(const uint8 _addr);
 
     vector<boost::shared_ptr<DS485CommandFrame> > Receive(uint8 _functionID);
-    uint8 ReceiveSingleResult(uint8 _functionID);
+    uint8 ReceiveSingleResult(const uint8 _functionID);
+    uint16_t ReceiveSingleResult16(const uint8 _functionID);
 
     void SignalEvent();
 

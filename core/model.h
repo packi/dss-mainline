@@ -546,6 +546,8 @@ namespace dss {
     Device& GetDeviceByDSID(const dsid_t _dsid) const;
     /** Returns a reference to the device with the name _name*/
     Device& GetDeviceByName(const string& _name);
+    /** Returns a device by it's short-address and modulator */
+    Device& GetDeviceByShortAddress(const Modulator& _modulator, const devid_t _deviceID) const;
 
     /** Allocates a device and returns a reference to it.
      *  If there is a stale device with the same dsid, this device gets "activated"
