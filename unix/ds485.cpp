@@ -18,6 +18,7 @@
 #include <iostream>
 
 #include <time.h>
+#include <sys/time.h>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -228,6 +229,7 @@ namespace dss {
 
     int senseTimeMS = 0;
     int numberOfJoinPacketsToWait = -1;
+    bool lastSentWasToken = false;
 
     while(!m_Terminated) {
 
@@ -248,9 +250,19 @@ namespace dss {
 
 
       boost::scoped_ptr<DS485Frame> frame(GetFrameFromWire());
-      if(frame.get() != NULL) {
+      if(frame.get() == NULL) {
+        cout << "§";
+        // resend token after timeout
+        if(lastSentWasToken) {
+          PutFrameOnWire(token.get(), false);
+          lastSentWasToken = false;
+          cout << "t(#)";
+        }
+        flush(cout);
+      } else {
         DS485Header& header = frame->GetHeader();
         DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(frame.get());
+        lastSentWasToken = false;
 
         // discard packets which are not addressed to us
         if(!header.IsBroadcast() && header.GetDestination() != m_StationID) {
@@ -368,12 +380,11 @@ namespace dss {
 
               // send frame
               DS485CommandFrame& frameToSend = m_PendingFrames.front();
-              cout << "s" << endl;
               PutFrameOnWire(&frameToSend, false);
               cout << "p%" << (int)frameToSend.GetCommand() << "%e" << endl;
-              //m_PendingFrames.erase(m_PendingFrames.begin());
+              m_PendingFrames.erase(m_PendingFrames.begin());
 
-
+/*
               // if not a broadcast, wait for ack, etc
               if(frameToSend.GetHeader().IsBroadcast()) {
                 m_PendingFrames.erase(m_PendingFrames.begin());
@@ -387,20 +398,21 @@ namespace dss {
                 //DS485CommandFrame* respFrameCmd = dynamic_cast<DS485CommandFrame*>(respFrame.get());
                 //if()
               }
-
+*/
             }
             PutFrameOnWire(token.get(), false);
-            //cout << ".";
-            //flush(cout);
+//            cout << ".";
+//            flush(cout);
             time(&tokenReceivedAt);
             m_TokenEvent.Broadcast();
             m_TokenCounter++;
+            lastSentWasToken = true;
           } else {
 
             // Handle token timeout
             time_t now;
             time(&now);
-            if(now - tokenReceivedAt > 1) {
+            if(now - tokenReceivedAt > 15) {
               cerr << "restarting" << endl;
               DoChangeState(csInitial);
               m_NextStationID = 0xFF;
@@ -418,7 +430,7 @@ namespace dss {
                 ack->GetHeader().SetDestination(cmdFrame->GetHeader().GetSource());
                 ack->SetCommand(CommandAck);
                 PutFrameOnWire(ack);
-                cout << "a(r)";
+                cout << "a(res)";
               } else {
                 cout << "b";
               }
@@ -430,7 +442,7 @@ namespace dss {
                 ack->GetHeader().SetDestination(cmdFrame->GetHeader().GetSource());
                 ack->SetCommand(CommandAck);
                 PutFrameOnWire(ack);
-                cout << "<sid>";
+                cout << "a(req)";
               }
               keep = true;
             }
@@ -535,8 +547,19 @@ namespace dss {
   const int TheCRCSize = 2;
 
   DS485Frame* DS485FrameReader::GetFrame(const int _timeoutMS) {
-    time_t timeStartet = time(NULL);
-    while(!((time(NULL) - timeStartet) > _timeoutMS)){
+    struct timeval timeStarted;
+    gettimeofday(&timeStarted, 0);
+    while(true) {
+      struct timeval now;
+      gettimeofday(&now, 0);
+      int diffMS = (now.tv_sec - timeStarted.tv_sec) * 1000 + (now.tv_usec - timeStarted.tv_usec) / 1000;
+      if(diffMS > _timeoutMS) {
+        flush(cout);
+        if(m_State == rsSynchronizing || m_ValidBytes == 0) {
+          break;
+        }
+      }
+
       char currentChar;
       if(GetCharTimeout(currentChar, 1)) {
 

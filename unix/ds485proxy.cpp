@@ -197,42 +197,42 @@ namespace dss {
 				SendFrame(frame);
 			} else if(_cmd == cmdTurnOff) {
 				frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
-				frame.GetPayload().Add<uint8>(_zone.GetZoneID());
-				frame.GetPayload().Add<uint8>(_group.GetID());
-				frame.GetPayload().Add<uint8>(SceneOff);
+				frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+				frame.GetPayload().Add<uint16_t>(_group.GetID());
+				frame.GetPayload().Add<uint16_t>(SceneOff);
 				SendFrame(frame);
 			} else if(_cmd == cmdCallScene) {
 				frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
-				frame.GetPayload().Add<uint8>(_zone.GetZoneID());
-				frame.GetPayload().Add<uint8>(_group.GetID());
-				frame.GetPayload().Add<uint8>(_param);
+				frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+				frame.GetPayload().Add<uint16_t>(_group.GetID());
+				frame.GetPayload().Add<uint16_t>(_param);
 				SendFrame(frame);
 			} else if(_cmd == cmdSaveScene) {
 				frame.GetPayload().Add<uint8>(FunctionGroupSaveScene);
-				frame.GetPayload().Add<uint8>(_zone.GetZoneID());
-				frame.GetPayload().Add<uint8>(_group.GetID());
-				frame.GetPayload().Add<uint8>(_param);
+				frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+				frame.GetPayload().Add<uint16_t>(_group.GetID());
+				frame.GetPayload().Add<uint16_t>(_param);
 				SendFrame(frame);
 			} else if(_cmd == cmdUndoScene) {
 				frame.GetPayload().Add<uint8>(FunctionGroupUndoScene);
-				frame.GetPayload().Add<uint8>(_zone.GetZoneID());
-				frame.GetPayload().Add<uint8>(_group.GetID());
-				frame.GetPayload().Add<uint8>(_param);
+				frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+				frame.GetPayload().Add<uint16_t>(_group.GetID());
+				frame.GetPayload().Add<uint16_t>(_param);
 				SendFrame(frame);
 			} else if(_cmd == cmdStartDimUp) {
 				frame.GetPayload().Add<uint8>(FunctionGroupStartDimInc);
-				frame.GetPayload().Add<uint8>(_zone.GetZoneID());
-				frame.GetPayload().Add<uint8>(_group.GetID());
+				frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+				frame.GetPayload().Add<uint16_t>(_group.GetID());
 				SendFrame(frame);
 			} else if(_cmd == cmdStartDimDown) {
 				frame.GetPayload().Add<uint8>(FunctionGroupStartDimDec);
-				frame.GetPayload().Add<uint8>(_zone.GetZoneID());
-				frame.GetPayload().Add<uint8>(_group.GetID());
+				frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+				frame.GetPayload().Add<uint16_t>(_group.GetID());
 				SendFrame(frame);
 			} else if(_cmd == cmdStopDim) {
 				frame.GetPayload().Add<uint8>(FunctionGroupEndDim);
-				frame.GetPayload().Add<uint8>(_zone.GetZoneID());
-				frame.GetPayload().Add<uint8>(_group.GetID());
+				frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+				frame.GetPayload().Add<uint16_t>(_group.GetID());
 				SendFrame(frame);
 			}
     }
@@ -253,12 +253,12 @@ namespace dss {
     if(_cmd == cmdTurnOn) {
       frame.GetPayload().Add<uint8>(FunctionDeviceCallScene);
       frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<uint8>(Scene1);
+      frame.GetPayload().Add<uint16_t>(Scene1);
       SendFrame(frame);
     } else if(_cmd == cmdTurnOff) {
       frame.GetPayload().Add<uint8>(FunctionDeviceCallScene);
       frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<uint8>(SceneOff);
+      frame.GetPayload().Add<uint16_t>(SceneOff);
       SendFrame(frame);
     } else if(_cmd == cmdGetOnOff) {
       frame.GetPayload().Add<uint8>(FunctionDeviceGetOnOff);
@@ -268,16 +268,16 @@ namespace dss {
       result.push_back(res);
     } else if(_cmd == cmdGetValue) {
       frame.GetPayload().Add<uint8>(FunctionDeviceGetParameterValue);
-      frame.GetPayload().Add<uint8>(_id);
-      frame.GetPayload().Add<uint8>(_param);
+      frame.GetPayload().Add<uint16_t>(_id);
+      frame.GetPayload().Add<uint16_t>(_param);
       SendFrame(frame);
       uint8 res = ReceiveSingleResult(FunctionDeviceGetParameterValue);
       result.push_back(res);
     } else if(_cmd == cmdSetValue) {
       frame.GetPayload().Add<uint8>(FunctionDeviceSetParameterValue);
-      frame.GetPayload().Add<uint8>(_id);
-      frame.GetPayload().Add<uint8>(_param);
-      frame.GetPayload().Add<uint8>(_param); // TODO: introduce a second parameter for the value itself
+      frame.GetPayload().Add<uint16_t>(_id);
+      frame.GetPayload().Add<uint16_t>(_param);
+      frame.GetPayload().Add<uint16_t>(_param); // TODO: introduce a second parameter for the value itself
       SendFrame(frame);
       uint8 res = ReceiveSingleResult(FunctionDeviceSetParameterValue);
       result.push_back(res);
@@ -290,17 +290,17 @@ namespace dss {
     } else if(_cmd == cmdCallScene) {
       frame.GetPayload().Add<uint8>(FunctionDeviceCallScene);
       frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<uint8>(_param);
+      frame.GetPayload().Add<uint16_t>(_param);
       SendFrame(frame);
     } else if(_cmd == cmdSaveScene) {
       frame.GetPayload().Add<uint8>(FunctionDeviceSaveScene);
       frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<uint8>(_param);
+      frame.GetPayload().Add<uint16_t>(_param);
       SendFrame(frame);
     } else if(_cmd == cmdUndoScene) {
       frame.GetPayload().Add<uint8>(FunctionDeviceUndoScene);
       frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<uint8>(_param);
+      frame.GetPayload().Add<uint16_t>(_param);
       SendFrame(frame);
     }
     return result;
@@ -407,7 +407,7 @@ namespace dss {
       cmdFrame.SetCommand(CommandRequest);
       cmdFrame.GetPayload().Add<uint8>(FunctionZoneGetGroupIdForInd);
       cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
-      cmdFrame.GetPayload().Add<uint8>(iGroup);
+      cmdFrame.GetPayload().Add<uint16_t>(iGroup);
       SendFrame(cmdFrame);
       uint8 res = ReceiveSingleResult(FunctionZoneGetGroupIdForInd);
       result.push_back(res);
@@ -422,7 +422,7 @@ namespace dss {
     cmdFrame.SetCommand(CommandRequest);
     cmdFrame.GetPayload().Add<uint8>(FunctionGroupGetDeviceCount);
     cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
-    cmdFrame.GetPayload().Add<uint8>(_groupID);
+    cmdFrame.GetPayload().Add<uint16_t>(_groupID);
     SendFrame(cmdFrame);
     uint8 res = ReceiveSingleResult(FunctionGroupGetDeviceCount);
     return res;
@@ -438,7 +438,7 @@ namespace dss {
       cmdFrame.SetCommand(CommandRequest);
       cmdFrame.GetPayload().Add<uint8>(FunctionGroupGetDevKeyForInd);
       cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
-      cmdFrame.GetPayload().Add<uint8>(_groupID);
+      cmdFrame.GetPayload().Add<uint16_t>(_groupID);
       // TODO: lower and upper bytes are swapped in the dsm
       cmdFrame.GetPayload().Add<uint16_t>(((iDevice >> 8) & 0x00FF) | ((iDevice << 8) & 0xFF00));
       SendFrame(cmdFrame);
@@ -459,7 +459,7 @@ namespace dss {
       cmdFrame.GetHeader().SetDestination(_modulatorID);
       cmdFrame.SetCommand(CommandRequest);
       cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetZoneIdForInd);
-      cmdFrame.GetPayload().Add<uint8>(iGroup);
+      cmdFrame.GetPayload().Add<uint16_t>(iGroup);
       Logger::GetInstance()->Log("Proxy: GetZoneID");
       SendFrame(cmdFrame);
       uint8 tempResult = ReceiveSingleResult(FunctionModulatorGetZoneIdForInd);
@@ -519,7 +519,7 @@ namespace dss {
     cmdFrame.SetCommand(CommandRequest);
     cmdFrame.GetPayload().Add<uint8>(FunctionDeviceSetZoneID);
     cmdFrame.GetPayload().Add<devid_t>(_deviceID);
-    cmdFrame.GetPayload().Add<uint8>(_zoneID); // TODO: shouldn't that be uint16_t?
+    cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
     SendFrame(cmdFrame);
     ReceiveSingleResult(FunctionDeviceSetZoneID);
   } // SetZoneID
@@ -539,7 +539,7 @@ namespace dss {
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
     cmdFrame.GetPayload().Add<uint8>(FunctionDeviceGetDSID);
-    cmdFrame.GetPayload().Add<uint8>(_deviceID);
+    cmdFrame.GetPayload().Add<uint16_t>(_deviceID);
     SendFrame(cmdFrame);
     Logger::GetInstance()->Log("Proxy: GetDSIDOfDevice");
 
@@ -594,7 +594,7 @@ namespace dss {
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
     cmdFrame.GetPayload().Add<uint8>(FunctionDeviceSubscribe);
-    cmdFrame.GetPayload().Add<uint8>(_groupID);
+    cmdFrame.GetPayload().Add<uint16_t>(_groupID);
     cmdFrame.GetPayload().Add<devid_t>(_deviceID);
     Logger::GetInstance()->Log(string("Proxy: Subscribe ") + IntToString(_modulatorID));
     SendFrame(cmdFrame);
