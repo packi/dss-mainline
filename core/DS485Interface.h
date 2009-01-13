@@ -44,6 +44,9 @@ namespace dss {
   public:
     virtual ~DS485Interface() {};
 
+    /** Returns true when the interface is ready to transmit user generated DS485Packets */
+    virtual bool IsReady() = 0;
+
     //------------------------------------------------ Specialized Commands (system)
     /** Returns an vector containing the bus-ids of all modulators present. */
     virtual vector<int> GetModulators() = 0;

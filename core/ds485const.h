@@ -85,8 +85,13 @@ namespace dss {
   const uint8 Scene2 = 0x02;
   const uint8 Scene3 = 0x03;
   const uint8 Scene4 = 0x04;
-  const uint8 SceneStandBy = 0x05;
-  const uint8 SceneDeepOff = 0x06;
+  const uint8 SceneStandBy = 0x30;
+  const uint8 SceneDeepOff = 0x31;
+  const uint8 SceneInc = 0x0B;
+  const uint8 SchenDec = 0x0C;
+  const uint8 SceneMin = 0x0D;
+  const uint8 SceneMax = 0x0E;
+  const uint8 SceneStop = 0x0F;
 
   const int GroupIDBroadcast = 0;
   const int GroupIDYellow = 1;

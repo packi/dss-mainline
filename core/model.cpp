@@ -496,31 +496,34 @@ namespace dss {
   void Apartment::AddDefaultGroupsToZone(Zone& _zone) {
     int zoneID = _zone.GetZoneID();
 
-    Group* grp = new Group(1, zoneID, *this);
+    Group* grp = new Group(GroupIDBroadcast, zoneID, *this);
+    grp->SetName("broadcast");
+    m_Groups.push_back(grp);
+    grp = new Group(GroupIDYellow, zoneID, *this);
     grp->SetName("yellow");
     m_Groups.push_back(grp);
-    grp = new Group(2, zoneID, *this);
+    grp = new Group(GroupIDGray, zoneID, *this);
     grp->SetName("gray");
     m_Groups.push_back(grp);
-    grp = new Group(3, zoneID, *this);
+    grp = new Group(GroupIDBlue, zoneID, *this);
     grp->SetName("blue");
     m_Groups.push_back(grp);
-    grp = new Group(4, zoneID, *this);
+    grp = new Group(GroupIDCyan, zoneID, *this);
     grp->SetName("cyan");
     m_Groups.push_back(grp);
-    grp = new Group(5, zoneID, *this);
+    grp = new Group(GroupIDRed, zoneID, *this);
     grp->SetName("red");
     m_Groups.push_back(grp);
-    grp = new Group(6, zoneID, *this);
+    grp = new Group(GroupIDViolet, zoneID, *this);
     grp->SetName("magenta");
     m_Groups.push_back(grp);
-    grp = new Group(7, zoneID, *this);
+    grp = new Group(GroupIDGreen, zoneID, *this);
     grp->SetName("green");
     m_Groups.push_back(grp);
-    grp = new Group(8, zoneID, *this);
+    grp = new Group(GroupIDBlack, zoneID, *this);
     grp->SetName("black");
     m_Groups.push_back(grp);
-    grp = new Group(9, zoneID, *this);
+    grp = new Group(GroupIDWhite, zoneID, *this);
     grp->SetName("white");
     m_Groups.push_back(grp);
   } // AddDefaultGroupsToZone
@@ -536,9 +539,10 @@ namespace dss {
 
     DS485Interface& interface = DSS::GetInstance()->GetDS485Interface();
 
-    SleepMS(10000);
+    while(!interface.IsReady() && !m_Terminated) {
+      SleepMS(1000);
+    }
     while(!m_Terminated) {
-     // TODO: reimplement proxy.WaitForProxyEvent();
       Logger::GetInstance()->Log("Apartment::Execute received proxy event, enumerating apartment / dSMs");
 
       vector<int> modIDs = interface.GetModulators();
@@ -910,6 +914,7 @@ namespace dss {
   	Zone* zone = new Zone(_zoneID);
   	m_Zones.push_back(zone);
   	zone->AddToModulator(_modulator);
+  	AddDefaultGroupsToZone(*zone);
     if(!IsInitializing()) {
       DSS::GetInstance()->GetDS485Interface().CreateZone(_modulator.GetBusID(), _zoneID);
     }

@@ -49,6 +49,7 @@ namespace dss {
   private:
     int m_ID;
     dsid_t m_ModulatorDSID;
+    bool m_Initialized;
     vector<DSIDInterface*> m_SimulatedDevices;
     map< const int, vector<DSIDInterface*> > m_Zones;
     IntPairToDSIDSimVector m_DevicesOfGroupInZone;
@@ -84,6 +85,8 @@ namespace dss {
     DSModulatorSim();
     virtual ~DSModulatorSim() {}
     void Initialize();
+
+    bool Ready();
 
     int GetID() const;
 

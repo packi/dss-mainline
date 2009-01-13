@@ -49,10 +49,10 @@ namespace dss {
 
   template<>
   void DS485Payload::Add(dsid_t _data) {
-    m_Data.push_back((_data & 0xFF000000) >> 0);
-    m_Data.push_back((_data & 0x00FF0000) >> 8);
-    m_Data.push_back((_data & 0x0000FF00) >> 16);
-    m_Data.push_back((_data & 0x000000FF) >> 24);
+    m_Data.push_back((_data & 0x000000FF) >> 0);
+    m_Data.push_back((_data & 0x0000FF00) >> 8);
+    m_Data.push_back((_data & 0x00FF0000) >> 16);
+    m_Data.push_back((_data & 0xFF000000) >> 24);
   } // Add<dsid_t>
 
   int DS485Payload::Size() const {
@@ -202,6 +202,7 @@ namespace dss {
       m_SerialCom->Open("/dev/ttyUSB0");
     } catch(const runtime_error& _ex) {
       Logger::GetInstance()->Log(string("Caught exception while opening serial port: ") + _ex.what());
+      DoChangeState(csError);
       return;
     }
     m_FrameReader.SetSerialCom(m_SerialCom);

@@ -48,51 +48,60 @@ namespace dss {
 
   typedef pair<vector<Group*>, Set> FittingResultPerModulator;
 
+  /** Precondition: _set contains only devices of _zone */
   FittingResultPerModulator BestFit(const Zone& _zone, const Set& _set) {
     Set workingCopy = _set;
 
-    vector<Group*> unsuitableGroups;
     vector<Group*> fittingGroups;
     Set singleDevices;
 
-    while(!workingCopy.IsEmpty()) {
-      DeviceReference& ref = workingCopy.Get(0);
-      workingCopy.RemoveDevice(ref);
+	if(_zone.GetDevices().Length() == _set.Length()) {
+	  // TODO: use the group of the zone...
+	  fittingGroups.push_back(&DSS::GetInstance()->GetApartment().GetGroup(GroupIDBroadcast));
+	  Logger::GetInstance()->Log("Optimization: Set contains all devices of zone");
+	} else {
+	    vector<Group*> unsuitableGroups;
+	    Set workingCopy = _set;
 
-      bool foundGroup = false;
-      for(int iGroup = 0; iGroup < ref.GetDevice().GetGroupsCount(); iGroup++) {
-        Group& g = ref.GetDevice().GetGroupByIndex(iGroup);
+		while(!workingCopy.IsEmpty()) {
+		  DeviceReference& ref = workingCopy.Get(0);
+		  workingCopy.RemoveDevice(ref);
 
-        // continue if already found unsuitable
-        if(find(unsuitableGroups.begin(), unsuitableGroups.end(), &g) != unsuitableGroups.end()) {
-          continue;
-        }
+		  bool foundGroup = false;
+		  for(int iGroup = 0; iGroup < ref.GetDevice().GetGroupsCount(); iGroup++) {
+			Group& g = ref.GetDevice().GetGroupByIndex(iGroup);
 
-        // see if we've got a fit
-        bool groupFits = true;
-        Set devicesInGroup = _zone.GetDevices().GetByGroup(g);
-        for(int iDevice = 0; iDevice < devicesInGroup.Length(); iDevice++) {
-          if(!_set.Contains(devicesInGroup.Get(iDevice))) {
-            unsuitableGroups.push_back(&g);
-            groupFits = false;
-            break;
-          }
-        }
-        if(groupFits) {
-          foundGroup = true;
-          fittingGroups.push_back(&g);
-          while(!devicesInGroup.IsEmpty()) {
-            workingCopy.RemoveDevice(devicesInGroup.Get(0));
-          }
-          break;
-        }
-      }
+			// continue if already found unsuitable
+			if(find(unsuitableGroups.begin(), unsuitableGroups.end(), &g) != unsuitableGroups.end()) {
+			  continue;
+			}
 
-      // if no fitting group found
-      if(!foundGroup) {
-        singleDevices.AddDevice(ref);
-      }
-    }
+			// see if we've got a fit
+			bool groupFits = true;
+			Set devicesInGroup = _zone.GetDevices().GetByGroup(g);
+			for(int iDevice = 0; iDevice < devicesInGroup.Length(); iDevice++) {
+			  if(!_set.Contains(devicesInGroup.Get(iDevice))) {
+				unsuitableGroups.push_back(&g);
+				groupFits = false;
+				break;
+			  }
+			}
+			if(groupFits) {
+			  foundGroup = true;
+			  fittingGroups.push_back(&g);
+			  while(!devicesInGroup.IsEmpty()) {
+				workingCopy.RemoveDevice(devicesInGroup.Get(0));
+			  }
+			  break;
+			}
+		  }
+
+		  // if no fitting group found
+		  if(!foundGroup) {
+			singleDevices.AddDevice(ref);
+		  }
+		}
+	}
     return FittingResultPerModulator(fittingGroups, singleDevices);
   }
 
@@ -148,6 +157,14 @@ namespace dss {
   : Thread("DS485Proxy")
   { } // ctor
 
+  bool DS485Proxy::IsReady() {
+	  return IsRunning()
+	         && ((m_DS485Controller.GetState() == csSlave) ||
+	             (m_DS485Controller.GetState() == csMaster) ||
+	             (m_DS485Controller.GetState() == csError)) // allow the simulation to run on it's own
+	         &&  DSS::GetInstance()->GetModulatorSim().Ready();
+  } // IsReady
+
   FittingResult DS485Proxy::BestFit(const Set& _set) {
     FittingResult result;
     HashMapZoneSet zoneToSet = SplitByZone(_set);
@@ -160,82 +177,88 @@ namespace dss {
   }
 
   vector<int> DS485Proxy::SendCommand(DS485Command _cmd, const Set& _set, int _param) {
-    vector<int> result;
-    FittingResult fittedResult = BestFit(_set);
-    for(FittingResult::iterator iResult = fittedResult.begin(); iResult != fittedResult.end(); ++iResult) {
-      const Zone* zone = iResult->first;
-      FittingResultPerModulator res = iResult->second;
-      vector<Group*> groups = res.first;
-      for(vector<Group*>::iterator ipGroup = groups.begin(); ipGroup != groups.end(); ++ipGroup) {
-        SendCommand(_cmd, *zone, **ipGroup, _param);
-      }
-      Set& set = res.second;
-      for(int iDevice = 0; iDevice < set.Length(); iDevice++) {
-        SendCommand(_cmd, set.Get(iDevice).GetDevice(), _param);
-      }
-    }
-    return result;
+	if(_set.Length() == 1) {
+		Logger::GetInstance()->Log("Optimization: Set contains only one device");
+		return SendCommand(_cmd, _set.Get(0).GetDevice(), _param);
+	} else if(_set.Length() > 0) {
+		Apartment& apt = _set.Get(0).GetDevice().GetApartment();
+		if(_set.Length() == apt.GetDevices().Length()) {
+		  Logger::GetInstance()->Log("Optimization: Set contains all devices of apartment");
+		  return SendCommand(_cmd, apt.GetZone(0), *apt.GetZone(0).GetGroup(GroupIDBroadcast), _param);
+		}
+	}
+
+	vector<int> result;
+	FittingResult fittedResult = BestFit(_set);
+	for(FittingResult::iterator iResult = fittedResult.begin(); iResult != fittedResult.end(); ++iResult) {
+	  const Zone* zone = iResult->first;
+	  FittingResultPerModulator res = iResult->second;
+	  vector<Group*> groups = res.first;
+	  for(vector<Group*>::iterator ipGroup = groups.begin(); ipGroup != groups.end(); ++ipGroup) {
+		SendCommand(_cmd, *zone, **ipGroup, _param);
+	  }
+	  Set& set = res.second;
+	  for(int iDevice = 0; iDevice < set.Length(); iDevice++) {
+		SendCommand(_cmd, set.Get(iDevice).GetDevice(), _param);
+	  }
+	}
+	return result;
   } // SendCommand
 
   vector<int> DS485Proxy::SendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param) {
     vector<int> result;
 
-    vector<int> modulators = _zone.GetModulators();
-    for(vector<int>::iterator iModulator = modulators.begin(), e = modulators.end();
-        iModulator != e; ++iModulator)
-    {
       DS485CommandFrame frame;
-			frame.GetHeader().SetDestination(*iModulator);
-			frame.GetHeader().SetBroadcast(false);
-			frame.GetHeader().SetType(1);
-			frame.SetCommand(CommandRequest);
-			if(_cmd == cmdTurnOn) {
-				frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
-				frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
-				frame.GetPayload().Add<uint16_t>(_group.GetID());
-				frame.GetPayload().Add<uint16_t>(Scene1);
-				SendFrame(frame);
-			} else if(_cmd == cmdTurnOff) {
-				frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
-				frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
-				frame.GetPayload().Add<uint16_t>(_group.GetID());
-				frame.GetPayload().Add<uint16_t>(SceneOff);
-				SendFrame(frame);
-			} else if(_cmd == cmdCallScene) {
-				frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
-				frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
-				frame.GetPayload().Add<uint16_t>(_group.GetID());
-				frame.GetPayload().Add<uint16_t>(_param);
-				SendFrame(frame);
-			} else if(_cmd == cmdSaveScene) {
-				frame.GetPayload().Add<uint8>(FunctionGroupSaveScene);
-				frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
-				frame.GetPayload().Add<uint16_t>(_group.GetID());
-				frame.GetPayload().Add<uint16_t>(_param);
-				SendFrame(frame);
-			} else if(_cmd == cmdUndoScene) {
-				frame.GetPayload().Add<uint8>(FunctionGroupUndoScene);
-				frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
-				frame.GetPayload().Add<uint16_t>(_group.GetID());
-				frame.GetPayload().Add<uint16_t>(_param);
-				SendFrame(frame);
-			} else if(_cmd == cmdStartDimUp) {
-				frame.GetPayload().Add<uint8>(FunctionGroupStartDimInc);
-				frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
-				frame.GetPayload().Add<uint16_t>(_group.GetID());
-				SendFrame(frame);
-			} else if(_cmd == cmdStartDimDown) {
-				frame.GetPayload().Add<uint8>(FunctionGroupStartDimDec);
-				frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
-				frame.GetPayload().Add<uint16_t>(_group.GetID());
-				SendFrame(frame);
-			} else if(_cmd == cmdStopDim) {
-				frame.GetPayload().Add<uint8>(FunctionGroupEndDim);
-				frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
-				frame.GetPayload().Add<uint16_t>(_group.GetID());
-				SendFrame(frame);
-			}
-    }
+	frame.GetHeader().SetDestination(0);
+	frame.GetHeader().SetBroadcast(true);
+	frame.GetHeader().SetType(1);
+	frame.SetCommand(CommandRequest);
+	if(_cmd == cmdTurnOn) {
+		frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
+		frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+		frame.GetPayload().Add<uint16_t>(_group.GetID());
+		frame.GetPayload().Add<uint16_t>(SceneMax);
+		SendFrame(frame);
+	} else if(_cmd == cmdTurnOff) {
+		frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
+		frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+		frame.GetPayload().Add<uint16_t>(_group.GetID());
+		frame.GetPayload().Add<uint16_t>(SceneOff);
+		SendFrame(frame);
+	} else if(_cmd == cmdCallScene) {
+		frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
+		frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+		frame.GetPayload().Add<uint16_t>(_group.GetID());
+		frame.GetPayload().Add<uint16_t>(_param);
+		SendFrame(frame);
+	} else if(_cmd == cmdSaveScene) {
+		frame.GetPayload().Add<uint8>(FunctionGroupSaveScene);
+		frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+		frame.GetPayload().Add<uint16_t>(_group.GetID());
+		frame.GetPayload().Add<uint16_t>(_param);
+		SendFrame(frame);
+	} else if(_cmd == cmdUndoScene) {
+		frame.GetPayload().Add<uint8>(FunctionGroupUndoScene);
+		frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+		frame.GetPayload().Add<uint16_t>(_group.GetID());
+		frame.GetPayload().Add<uint16_t>(_param);
+		SendFrame(frame);
+	} else if(_cmd == cmdStartDimUp) {
+		frame.GetPayload().Add<uint8>(FunctionGroupStartDimInc);
+		frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+		frame.GetPayload().Add<uint16_t>(_group.GetID());
+		SendFrame(frame);
+	} else if(_cmd == cmdStartDimDown) {
+		frame.GetPayload().Add<uint8>(FunctionGroupStartDimDec);
+		frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+		frame.GetPayload().Add<uint16_t>(_group.GetID());
+		SendFrame(frame);
+	} else if(_cmd == cmdStopDim) {
+		frame.GetPayload().Add<uint8>(FunctionGroupEndDim);
+		frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+		frame.GetPayload().Add<uint16_t>(_group.GetID());
+		SendFrame(frame);
+	}
     return result;
   } // SendCommand
 
@@ -253,7 +276,7 @@ namespace dss {
     if(_cmd == cmdTurnOn) {
       frame.GetPayload().Add<uint8>(FunctionDeviceCallScene);
       frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<uint16_t>(Scene1);
+      frame.GetPayload().Add<uint16_t>(SceneMax);
       SendFrame(frame);
     } else if(_cmd == cmdTurnOff) {
       frame.GetPayload().Add<uint8>(FunctionDeviceCallScene);
@@ -262,7 +285,7 @@ namespace dss {
       SendFrame(frame);
     } else if(_cmd == cmdGetOnOff) {
       frame.GetPayload().Add<uint8>(FunctionDeviceGetOnOff);
-      frame.GetPayload().Add<uint8>(_id);
+      frame.GetPayload().Add<uint16_t>(_id);
       SendFrame(frame);
       uint8 res = ReceiveSingleResult(FunctionDeviceGetOnOff);
       result.push_back(res);
@@ -314,10 +337,8 @@ namespace dss {
       DSS::GetInstance()->GetModulatorSim().Process(_frame);
     }
     if(broadcast || !sim) {
-      if(m_DS485Controller.GetState() == csSlave || m_DS485Controller.GetState() == csMaster) {
+      if((m_DS485Controller.GetState() == csSlave) || (m_DS485Controller.GetState() == csMaster)) {
         cout << "hw" << endl;
-        // Note: At the moment we're discarding all but the "forced" frames. This is because the
-        // firmware in the dSM returns gibberish in it's current state.
         //if(_force) {
         	m_DS485Controller.EnqueueFrame(_frame);
         //}
@@ -817,102 +838,87 @@ namespace dss {
   } // FunctionIDToString
 
   void DS485Proxy::Execute() {
-    SleepSeconds(1);
     SignalEvent();
 
-    aControllerState oldState = m_DS485Controller.GetState();
     while(!m_Terminated) {
-      if(m_DS485Controller.GetState() != csSlave || m_DS485Controller.GetState() != csMaster) {
-        if(m_DS485Controller.WaitForEvent(50)) {
-          aControllerState newState = m_DS485Controller.GetState();
-          if(newState != oldState) {
-            if(newState == csSlave) {
-              SignalEvent();
-            } else if(newState == csMaster) {
-              SignalEvent();
-            }
-          }
-        }
+		if(!m_IncomingFrames.empty() || m_PacketHere.WaitFor(50)) {
+		  while(!m_IncomingFrames.empty()) {
+			// process packets and put them into a functionID-hash
+			boost::shared_ptr<DS485CommandFrame> frame = m_IncomingFrames.front();
+			m_IncomingFrames.erase(m_IncomingFrames.begin());
 
-        if(!m_IncomingFrames.empty() || m_PacketHere.WaitFor(50)) {
-          while(!m_IncomingFrames.empty()) {
-            // process packets and put them into a functionID-hash
-            boost::shared_ptr<DS485CommandFrame> frame = m_IncomingFrames.front();
-            m_IncomingFrames.erase(m_IncomingFrames.begin());
+			vector<unsigned char> ch = frame->GetPayload().ToChar();
+			if(ch.size() < 1) {
+			  Logger::GetInstance()->Log("Received Command Frame w/o function identifier");
+			  continue;
+			}
 
-            vector<unsigned char> ch = frame->GetPayload().ToChar();
-            if(ch.size() < 1) {
-              Logger::GetInstance()->Log("Received Command Frame w/o function identifier");
-              continue;
-            }
+			uint8 functionID = ch.front();
+			if(frame->GetCommand() == CommandRequest) {
+			  if(functionID == FunctionKeyPressed) {
+				Logger::GetInstance()->Log("Got keypress");
+				PayloadDissector pd(frame->GetPayload());
+				pd.Get<uint8>();
+				uint16_t param = pd.Get<uint16_t>();
+				Logger::GetInstance()->Log("Zone: " + IntToString((param >> 8) & 0x00FF));
+				if(param & 0x0001 == 0x0001) {
+				  param = pd.Get<uint16_t>();
+				  Logger::GetInstance()->Log("Short version");
+				  if((param & 0x8000) == 0x8000) {
+					Logger::GetInstance()->Log("From switch");
+					devid_t shortAddress = (param & 0x7F00) >> 8;
+					Logger::GetInstance()->Log(string("Device: ") + IntToString(shortAddress));
+					int buttonNumber = (param & 0x00F0) >> 4;
+					Logger::GetInstance()->Log(string("Button: ") + IntToString(buttonNumber));
+					ButtonPressKind kind = static_cast<ButtonPressKind>(param & 0x000F);
 
-            uint8 functionID = ch.front();
-            if(frame->GetCommand() == CommandRequest) {
-              if(functionID == FunctionKeyPressed) {
-                Logger::GetInstance()->Log("Got keypress");
-                PayloadDissector pd(frame->GetPayload());
-                pd.Get<uint8>();
-                uint16_t param = pd.Get<uint16_t>();
-                Logger::GetInstance()->Log("Zone: " + IntToString((param >> 8) & 0x00FF));
-                if(param & 0x0001 == 0x0001) {
-                  param = pd.Get<uint16_t>();
-                  Logger::GetInstance()->Log("Short version");
-                  if((param & 0x8000) == 0x8000) {
-                    Logger::GetInstance()->Log("From switch");
-                    devid_t shortAddress = (param & 0x7F00) >> 8;
-                    Logger::GetInstance()->Log(string("Device: ") + IntToString(shortAddress));
-                    int buttonNumber = (param & 0x00F0) >> 4;
-                    Logger::GetInstance()->Log(string("Button: ") + IntToString(buttonNumber));
-                    ButtonPressKind kind = static_cast<ButtonPressKind>(param & 0x000F);
+					Modulator& mod = DSS::GetInstance()->GetApartment().GetModulatorByBusID(frame->GetHeader().GetSource());
+					DeviceReference devRef = mod.GetDevices().GetByBusID(shortAddress);
 
-                    Modulator& mod = DSS::GetInstance()->GetApartment().GetModulatorByBusID(frame->GetHeader().GetSource());
-                    DeviceReference devRef = mod.GetDevices().GetByBusID(shortAddress);
+					DSS::GetInstance()->GetApartment().OnKeypress(devRef.GetDSID(), kind, buttonNumber);
+				  } else {
+					Logger::GetInstance()->Log("From sensor");
+				  }
+				} else {
+				  Logger::GetInstance()->Log("Long version");
+				  uint16_t param2 = pd.Get<uint16_t>();
+				  uint16_t param3 = pd.Get<uint16_t>();
+				  uint16_t param4 = pd.Get<uint16_t>();
 
-                    DSS::GetInstance()->GetApartment().OnKeypress(devRef.GetDSID(), kind, buttonNumber);
-                  } else {
-                    Logger::GetInstance()->Log("From sensor");
-                  }
-                } else {
-                  Logger::GetInstance()->Log("Long version");
-                  uint16_t param2 = pd.Get<uint16_t>();
-                  uint16_t param3 = pd.Get<uint16_t>();
-                  uint16_t param4 = pd.Get<uint16_t>();
+				  cout << hex << "p2: " << param2 << "\np3: " << param3 << "\np4: " << param4 << endl;
 
-                  cout << hex << "p2: " << param2 << "\np3: " << param3 << "\np4: " << param4 << endl;
+				  uint16_t subqualifier = ((param2 & 0x000F) << 4) | ((param3 & 0xF000) >> 12);
+				  uint16_t databits = ((param3 & 0x0FF0) >> 4);
+				  uint16_t addr = ((param3 & 0x000F) << 6) | ((param4 & 0xFC00) >> 10);
+				  uint16_t subqualifier2 = ((param4 & 0x03F0) >> 4);
+				  uint16_t mainqualifier = (param4 & 0x000F);
+				  cout << "subqualifier: " << subqualifier << "\n"
+					   << "databits    : " << databits << "\n"
+					   << "addr        : " << addr << "\n"
+					   << "subqual2    : " << subqualifier2 << "\n"
+					   << "mainqualif  : " << mainqualifier << endl;
+				}
+			  }
+			} else {
+			  cout << "Response: \n";
+			  PayloadDissector pd(frame->GetPayload());
+			  while(!pd.IsEmpty()) {
+				uint8 data = pd.Get<uint8>();
+				cout << hex << (unsigned int)data << " " << dec << (int)data << "i ";
+			  }
+			  cout << dec << endl;
 
-                  uint16_t subqualifier = ((param2 & 0x000F) << 4) | ((param3 & 0xF000) >> 12);
-                  uint16_t databits = ((param3 & 0x0FF0) >> 4);
-                  uint16_t addr = ((param3 & 0x000F) << 6) | ((param4 & 0xFC00) >> 10);
-                  uint16_t subqualifier2 = ((param4 & 0x03F0) >> 4);
-                  uint16_t mainqualifier = (param4 & 0x000F);
-                  cout << "subqualifier: " << subqualifier << "\n"
-                       << "databits    : " << databits << "\n"
-                       << "addr        : " << addr << "\n"
-                       << "subqual2    : " << subqualifier2 << "\n"
-                       << "mainqualif  : " << mainqualifier << endl;
-                }
-              }
-            } else {
-              cout << "Response: \n";
-              PayloadDissector pd(frame->GetPayload());
-              while(!pd.IsEmpty()) {
-                uint8 data = pd.Get<uint8>();
-                cout << hex << (unsigned int)data << " " << dec << (int)data << "i ";
-              }
-              cout << dec << endl;
+			  // create an explicit copy since frame is a shared ptr and would free the contained
+			  // frame if going out of scope
+			  DS485CommandFrame* pFrame = new DS485CommandFrame();
+			  *pFrame = *frame.get();
 
-              // create an explicit copy since frame is a shared ptr and would free the contained
-              // frame if going out of scope
-              DS485CommandFrame* pFrame = new DS485CommandFrame();
-              *pFrame = *frame.get();
-
-              Logger::GetInstance()->Log(string("Response for: ") + FunctionIDToString(functionID));
-              ReceivedFrame* rf = new ReceivedFrame(m_DS485Controller.GetTokenCount(), pFrame);
-              m_ReceivedFramesByFunctionID[functionID].push_back(rf);
-            }
-          }
-        }
-      }
+			  Logger::GetInstance()->Log(string("Response for: ") + FunctionIDToString(functionID));
+			  ReceivedFrame* rf = new ReceivedFrame(m_DS485Controller.GetTokenCount(), pFrame);
+			  m_ReceivedFramesByFunctionID[functionID].push_back(rf);
+			}
+		  }
+		}
     }
   } // Execute
 

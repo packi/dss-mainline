@@ -127,7 +127,8 @@ namespace dss {
     csSlaveWaitingToJoin,
     csSlaveJoining,
     csSlave,
-    csSlaveWaitingForFirstToken
+    csSlaveWaitingForFirstToken,
+    csError
   } aControllerState;
 
   typedef enum {

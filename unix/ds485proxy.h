@@ -87,6 +87,8 @@ namespace dss {
     DS485Proxy();
     virtual ~DS485Proxy() {};
 
+    virtual bool IsReady();
+
     void SendFrame(DS485CommandFrame& _frame, bool _force = false);
 
     //------------------------------------------------ Handling
