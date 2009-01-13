@@ -561,6 +561,7 @@ namespace dss {
             int devID = *iDevice;
             Logger::GetInstance()->Log(string("    Found device with id: ") + IntToString(devID));
             dsid_t dsid = interface.GetDSIDOfDevice(modID, devID);
+            Logger::GetInstance()->Log(string("    DSID: ") + UIntToString(dsid));
             Device& dev = AllocateDevice(dsid);
             dev.SetShortAddress(devID);
             dev.SetModulatorID(modID);
@@ -599,6 +600,7 @@ namespace dss {
       }
       break;
     }
+    Logger::GetInstance()->Log("******** Finished loading model from dSM(s)...", lsInfo);
     m_IsInitializing = false;
   } // Run
 

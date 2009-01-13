@@ -82,7 +82,7 @@ namespace dss {
       throw invalid_argument("_len must be > 3");
     }
     SetDestination((_data[1] >> 2) & 0x3F);
-    SetBroadcast(_data[1] & 0x02 == 0x02);
+    SetBroadcast((_data[1] & 0x02) == 0x02);
     SetSource((_data[2] >> 2) & 0x3F);
     SetCounter(_data[2] & 0x03);
   } // FromChar
@@ -240,6 +240,8 @@ namespace dss {
       } else if(m_State == csSensing) {
         if(m_FrameReader.SenseTraffic(senseTimeMS)) {
           Logger::GetInstance()->Log("Sensed traffic on the line, changing to csSlaveWaitingToJoin");
+          // wait some time for the first frame and skip it...
+          delete m_FrameReader.GetFrame(1000);
           DoChangeState(csSlaveWaitingToJoin);
         } else {
           Logger::GetInstance()->Log("No traffic on line, I'll be your master today");
@@ -265,11 +267,16 @@ namespace dss {
         lastSentWasToken = false;
 
         // discard packets which are not addressed to us
-        if(!header.IsBroadcast() && header.GetDestination() != m_StationID) {
+        if(!header.IsBroadcast() &&
+            header.GetDestination() != m_StationID &&
+              (m_State == csSlave ||
+               m_State == csMaster)
+          )
+        {
 /*
           Logger::GetInstance()->Log("packet not for me, discarding");
-          cout << "dest: " << header.GetDestination() << endl;
-          cout << "src:  " << header.GetSource() << endl;
+          cout << "dest: " << (int)header.GetDestination() << endl;
+          cout << "src:  " << (int)header.GetSource() << endl;
           if(cmdFrame != NULL) {
             cout << "cmd:  " << CommandToString(cmdFrame->GetCommand()) << endl;
           }
@@ -382,23 +389,22 @@ namespace dss {
               DS485CommandFrame& frameToSend = m_PendingFrames.front();
               PutFrameOnWire(&frameToSend, false);
               cout << "p%" << (int)frameToSend.GetCommand() << "%e" << endl;
-              m_PendingFrames.erase(m_PendingFrames.begin());
 
-/*
               // if not a broadcast, wait for ack, etc
               if(frameToSend.GetHeader().IsBroadcast()) {
                 m_PendingFrames.erase(m_PendingFrames.begin());
               } else {
-               // if(!m_FrameReader.HasFrame()) {
-               //   m_FrameReader.WaitForFrame();
-               // }
-                m_PendingFrames.erase(m_PendingFrames.begin());
-
-                //boost::scoped_ptr<DS485Frame> respFrame(GetFrameFromWire());
-                //DS485CommandFrame* respFrameCmd = dynamic_cast<DS485CommandFrame*>(respFrame.get());
-                //if()
+                boost::shared_ptr<DS485Frame> ackFrame(m_FrameReader.GetFrame(50));
+                DS485CommandFrame* cmdAckFrame = dynamic_cast<DS485CommandFrame*>(ackFrame.get());
+                if(cmdAckFrame != NULL) {
+                  if(cmdAckFrame->GetCommand() == CommandAck) {
+                    m_PendingFrames.erase(m_PendingFrames.begin());
+                  } else {
+                    cout << "\n&&&&got other" << endl;
+                    AddToReceivedQueue(cmdFrame);
+                  }
+                }
               }
-*/
             }
             PutFrameOnWire(token.get(), false);
 //            cout << ".";

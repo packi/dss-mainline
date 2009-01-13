@@ -439,8 +439,7 @@ namespace dss {
       cmdFrame.GetPayload().Add<uint8>(FunctionGroupGetDevKeyForInd);
       cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
       cmdFrame.GetPayload().Add<uint16_t>(_groupID);
-      // TODO: lower and upper bytes are swapped in the dsm
-      cmdFrame.GetPayload().Add<uint16_t>(((iDevice >> 8) & 0x00FF) | ((iDevice << 8) & 0xFF00));
+      cmdFrame.GetPayload().Add<uint16_t>(iDevice);
       SendFrame(cmdFrame);
       uint16_t res = ReceiveSingleResult16(FunctionGroupGetDevKeyForInd);
       result.push_back(res);
@@ -550,6 +549,7 @@ namespace dss {
     }
     PayloadDissector pd(results.at(0)->GetPayload());
     pd.Get<uint8>(); // discard the function id
+    pd.Get<uint8>(); // function result
     return pd.Get<dsid_t>();
   }
 
