@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<subscriptions version="1">
+  <subscription event-name="turnOn" handler-name="bus_handler">
+    <send type="turnOn" />
+  </subscription>
+  <subscription event-name="brighter" handler-name="bus_handler">
+    <send type="increaseValue" />
+  </subscription>
+</subscriptions> 
