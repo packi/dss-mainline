@@ -46,16 +46,25 @@ namespace dss {
 
     ScriptContext* pResult = new ScriptContext(*this, context);
     JS_SetContextPrivate(context, pResult);
-    for(vector<ScriptExtension*>::iterator ipExtension = m_Extensions.begin(); ipExtension != m_Extensions.end(); ++ipExtension) {
-      (*ipExtension)->ExtendContext(*pResult);
+    for(boost::ptr_vector<ScriptExtension>::iterator ipExtension = m_Extensions.begin(); ipExtension != m_Extensions.end(); ++ipExtension) {
+      ipExtension->ExtendContext(*pResult);
     }
     return pResult;
   } // GetContext
 
-  ScriptExtension* ScriptEnvironment::GetExtension(const string& _name) const {
-    for(vector<ScriptExtension*>::const_iterator ipExtension = m_Extensions.begin(); ipExtension != m_Extensions.end(); ++ipExtension) {
-      if((*ipExtension)->GetName() == _name) {
-        return *ipExtension;
+  ScriptExtension* ScriptEnvironment::GetExtension(const string& _name) {
+    for(boost::ptr_vector<ScriptExtension>::iterator ipExtension = m_Extensions.begin(); ipExtension != m_Extensions.end(); ++ipExtension) {
+      if(ipExtension->GetName() == _name) {
+        return &*ipExtension;
+      }
+    }
+    return NULL;
+  } // GetExtension
+
+  const ScriptExtension* ScriptEnvironment::GetExtension(const string& _name) const {
+    for(boost::ptr_vector<ScriptExtension>::const_iterator ipExtension = m_Extensions.begin(); ipExtension != m_Extensions.end(); ++ipExtension) {
+      if(ipExtension->GetName() == _name) {
+        return &*ipExtension;
       }
     }
     return NULL;

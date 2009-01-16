@@ -58,7 +58,7 @@ namespace dss {
 	if(_zone.GetDevices().Length() == _set.Length()) {
 	  // TODO: use the group of the zone...
 	  fittingGroups.push_back(&DSS::GetInstance()->GetApartment().GetGroup(GroupIDBroadcast));
-	  Logger::GetInstance()->Log("Optimization: Set contains all devices of zone");
+	  Logger::GetInstance()->Log(string("Optimization: Set contains all devices of zone ") + IntToString(_zone.GetZoneID()));
 	} else {
 	    vector<Group*> unsuitableGroups;
 	    Set workingCopy = _set;
@@ -177,88 +177,99 @@ namespace dss {
   }
 
   vector<int> DS485Proxy::SendCommand(DS485Command _cmd, const Set& _set, int _param) {
-	if(_set.Length() == 1) {
-		Logger::GetInstance()->Log("Optimization: Set contains only one device");
-		return SendCommand(_cmd, _set.Get(0).GetDevice(), _param);
-	} else if(_set.Length() > 0) {
-		Apartment& apt = _set.Get(0).GetDevice().GetApartment();
-		if(_set.Length() == apt.GetDevices().Length()) {
-		  Logger::GetInstance()->Log("Optimization: Set contains all devices of apartment");
-		  return SendCommand(_cmd, apt.GetZone(0), *apt.GetZone(0).GetGroup(GroupIDBroadcast), _param);
-		}
-	}
+    if(_set.Length() == 1) {
+      Logger::GetInstance()->Log("Optimization: Set contains only one device");
+      return SendCommand(_cmd, _set.Get(0).GetDevice(), _param);
+    } else if(_set.Length() > 0) {
+      Apartment& apt = _set.Get(0).GetDevice().GetApartment();
+      if(_set.Length() == apt.GetDevices().Length()) {
+        Logger::GetInstance()->Log("Optimization: Set contains all devices of apartment");
+        // TODO: Get the group from the zone
+        return SendCommand(_cmd, apt.GetZone(0), apt.GetGroup(GroupIDBroadcast), _param);
+      }
+    }
 
-	vector<int> result;
-	FittingResult fittedResult = BestFit(_set);
-	for(FittingResult::iterator iResult = fittedResult.begin(); iResult != fittedResult.end(); ++iResult) {
-	  const Zone* zone = iResult->first;
-	  FittingResultPerModulator res = iResult->second;
-	  vector<Group*> groups = res.first;
-	  for(vector<Group*>::iterator ipGroup = groups.begin(); ipGroup != groups.end(); ++ipGroup) {
-		SendCommand(_cmd, *zone, **ipGroup, _param);
-	  }
-	  Set& set = res.second;
-	  for(int iDevice = 0; iDevice < set.Length(); iDevice++) {
-		SendCommand(_cmd, set.Get(iDevice).GetDevice(), _param);
-	  }
-	}
-	return result;
+    vector<int> result;
+    FittingResult fittedResult = BestFit(_set);
+    for(FittingResult::iterator iResult = fittedResult.begin(); iResult != fittedResult.end(); ++iResult) {
+      const Zone* zone = iResult->first;
+      FittingResultPerModulator res = iResult->second;
+      vector<Group*> groups = res.first;
+      for(vector<Group*>::iterator ipGroup = groups.begin(); ipGroup != groups.end(); ++ipGroup) {
+        SendCommand(_cmd, *zone, **ipGroup, _param);
+      }
+      Set& set = res.second;
+      for(int iDevice = 0; iDevice < set.Length(); iDevice++) {
+        SendCommand(_cmd, set.Get(iDevice).GetDevice(), _param);
+      }
+    }
+    return result;
   } // SendCommand
 
   vector<int> DS485Proxy::SendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param) {
     vector<int> result;
 
-      DS485CommandFrame frame;
-	frame.GetHeader().SetDestination(0);
-	frame.GetHeader().SetBroadcast(true);
-	frame.GetHeader().SetType(1);
-	frame.SetCommand(CommandRequest);
-	if(_cmd == cmdTurnOn) {
-		frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
-		frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
-		frame.GetPayload().Add<uint16_t>(_group.GetID());
-		frame.GetPayload().Add<uint16_t>(SceneMax);
-		SendFrame(frame);
-	} else if(_cmd == cmdTurnOff) {
-		frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
-		frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
-		frame.GetPayload().Add<uint16_t>(_group.GetID());
-		frame.GetPayload().Add<uint16_t>(SceneOff);
-		SendFrame(frame);
-	} else if(_cmd == cmdCallScene) {
-		frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
-		frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
-		frame.GetPayload().Add<uint16_t>(_group.GetID());
-		frame.GetPayload().Add<uint16_t>(_param);
-		SendFrame(frame);
-	} else if(_cmd == cmdSaveScene) {
-		frame.GetPayload().Add<uint8>(FunctionGroupSaveScene);
-		frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
-		frame.GetPayload().Add<uint16_t>(_group.GetID());
-		frame.GetPayload().Add<uint16_t>(_param);
-		SendFrame(frame);
-	} else if(_cmd == cmdUndoScene) {
-		frame.GetPayload().Add<uint8>(FunctionGroupUndoScene);
-		frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
-		frame.GetPayload().Add<uint16_t>(_group.GetID());
-		frame.GetPayload().Add<uint16_t>(_param);
-		SendFrame(frame);
-	} else if(_cmd == cmdStartDimUp) {
-		frame.GetPayload().Add<uint8>(FunctionGroupStartDimInc);
-		frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
-		frame.GetPayload().Add<uint16_t>(_group.GetID());
-		SendFrame(frame);
-	} else if(_cmd == cmdStartDimDown) {
-		frame.GetPayload().Add<uint8>(FunctionGroupStartDimDec);
-		frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
-		frame.GetPayload().Add<uint16_t>(_group.GetID());
-		SendFrame(frame);
-	} else if(_cmd == cmdStopDim) {
-		frame.GetPayload().Add<uint8>(FunctionGroupEndDim);
-		frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
-		frame.GetPayload().Add<uint16_t>(_group.GetID());
-		SendFrame(frame);
-	}
+    DS485CommandFrame frame;
+    frame.GetHeader().SetDestination(0);
+    frame.GetHeader().SetBroadcast(true);
+    frame.GetHeader().SetType(1);
+    frame.SetCommand(CommandRequest);
+    if(_cmd == cmdTurnOn) {
+      frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
+      frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+      frame.GetPayload().Add<uint16_t>(_group.GetID());
+      frame.GetPayload().Add<uint16_t>(SceneMax);
+      SendFrame(frame);
+    } else if(_cmd == cmdTurnOff) {
+      frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
+      frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+      frame.GetPayload().Add<uint16_t>(_group.GetID());
+      frame.GetPayload().Add<uint16_t>(SceneOff);
+      SendFrame(frame);
+    } else if(_cmd == cmdCallScene) {
+      frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
+      frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+      frame.GetPayload().Add<uint16_t>(_group.GetID());
+      frame.GetPayload().Add<uint16_t>(_param);
+      SendFrame(frame);
+    } else if(_cmd == cmdSaveScene) {
+      frame.GetPayload().Add<uint8>(FunctionGroupSaveScene);
+      frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+      frame.GetPayload().Add<uint16_t>(_group.GetID());
+      frame.GetPayload().Add<uint16_t>(_param);
+      SendFrame(frame);
+    } else if(_cmd == cmdUndoScene) {
+      frame.GetPayload().Add<uint8>(FunctionGroupUndoScene);
+      frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+      frame.GetPayload().Add<uint16_t>(_group.GetID());
+      frame.GetPayload().Add<uint16_t>(_param);
+      SendFrame(frame);
+    } else if(_cmd == cmdStartDimUp) {
+      frame.GetPayload().Add<uint8>(FunctionGroupStartDimInc);
+      frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+      frame.GetPayload().Add<uint16_t>(_group.GetID());
+      SendFrame(frame);
+    } else if(_cmd == cmdStartDimDown) {
+      frame.GetPayload().Add<uint8>(FunctionGroupStartDimDec);
+      frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+      frame.GetPayload().Add<uint16_t>(_group.GetID());
+      SendFrame(frame);
+    } else if(_cmd == cmdStopDim) {
+      frame.GetPayload().Add<uint8>(FunctionGroupEndDim);
+      frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+      frame.GetPayload().Add<uint16_t>(_group.GetID());
+      SendFrame(frame);
+    } else if(_cmd == cmdIncreaseValue) {
+      frame.GetPayload().Add<uint8>(FunctionGroupIncreaseValue);
+      frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+      frame.GetPayload().Add<uint16_t>(_group.GetID());
+      SendFrame(frame);
+    } else if(_cmd == cmdDecreaseValue) {
+      frame.GetPayload().Add<uint8>(FunctionGroupDecreaseValue);
+      frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
+      frame.GetPayload().Add<uint16_t>(_group.GetID());
+      SendFrame(frame);
+    }
     return result;
   } // SendCommand
 
@@ -325,6 +336,14 @@ namespace dss {
       frame.GetPayload().Add<devid_t>(_id);
       frame.GetPayload().Add<uint16_t>(_param);
       SendFrame(frame);
+    } else if(_cmd == cmdIncreaseValue) {
+      frame.GetPayload().Add<uint8>(FunctionDeviceIncreaseValue);
+      frame.GetPayload().Add<devid_t>(_id);
+      SendFrame(frame);
+    } else if(_cmd == cmdDecreaseValue) {
+      frame.GetPayload().Add<uint8>(FunctionDeviceDecreaseValue);
+      frame.GetPayload().Add<devid_t>(_id);
+      SendFrame(frame);
     }
     return result;
   } // SendCommand
@@ -351,13 +370,13 @@ namespace dss {
   } // IsSimAddress
 
   vector<int> DS485Proxy::GetModulators() {
-    DS485CommandFrame* cmdFrame = new DS485CommandFrame();
-    cmdFrame->GetHeader().SetDestination(0);
-    cmdFrame->GetHeader().SetBroadcast(true);
-    cmdFrame->SetCommand(CommandRequest);
-    cmdFrame->GetPayload().Add<uint8>(FunctionGetTypeRequest);
+    DS485CommandFrame cmdFrame;
+    cmdFrame.GetHeader().SetDestination(0);
+    cmdFrame.GetHeader().SetBroadcast(true);
+    cmdFrame.SetCommand(CommandRequest);
+    cmdFrame.GetPayload().Add<uint8>(FunctionGetTypeRequest);
     Logger::GetInstance()->Log("Proxy: GetModulators");
-    SendFrame(*cmdFrame);
+    SendFrame(cmdFrame);
 
     vector<int> result;
 

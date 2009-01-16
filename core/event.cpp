@@ -23,7 +23,8 @@ namespace dss {
   //================================================== Event
 
   Event::Event(const string& _name)
-  : m_Name(_name)
+  : m_Name(_name),
+    m_RaiseLocation(erlApartment)
   {
     Reset();
   } // ctor

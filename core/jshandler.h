@@ -15,6 +15,8 @@
 
 #include <vector>
 
+#include <boost/ptr_container/ptr_vector.hpp>
+
 using namespace std;
 
 namespace dss {
@@ -28,7 +30,7 @@ namespace dss {
   class ScriptEnvironment {
   private:
     JSRuntime* m_pRuntime;
-    vector<ScriptExtension*> m_Extensions;
+    boost::ptr_vector<ScriptExtension> m_Extensions;
   public:
     ScriptEnvironment();
     virtual ~ScriptEnvironment();
@@ -40,7 +42,8 @@ namespace dss {
     void AddExtension(ScriptExtension* _pExtension);
     /** Returns a pointer to the extension named _name.
       * @return Pointer to the instance or NULL if not found */
-    ScriptExtension* GetExtension(const string& _name) const;
+    const ScriptExtension* GetExtension(const string& _name) const;
+    ScriptExtension* GetExtension(const string& _name);
 
     /** Creates a new ScriptContext with all registered extensions present */
     ScriptContext* GetContext();
@@ -85,7 +88,8 @@ namespace dss {
     /** Returns a pointer to the JSContext */
     JSContext* GetJSContext() { return m_pContext; }
     /** Returns a const reference to the ScriptEnvironment */
-    const ScriptEnvironment& GetEnvironment() { return m_Environment; }
+    const ScriptEnvironment& GetEnvironment() const { return m_Environment; }
+    ScriptEnvironment& GetEnvironment() { return m_Environment; }
   public:
 
     /** Helper function to convert a jsval to a t. */

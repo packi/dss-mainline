@@ -131,7 +131,8 @@ namespace dss {
   //================================================== DS485Controller
 
   DS485Controller::DS485Controller()
-  : Thread("DS485Controller")
+  : Thread("DS485Controller"),
+    m_State(csInitial)
   {
   } // ctor
 

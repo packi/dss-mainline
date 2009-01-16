@@ -907,7 +907,12 @@ namespace dss {
   	   ipZone != e; ++ipZone)
   	{
   		if((*ipZone)->GetZoneID() == _zoneID) {
-  			return **ipZone;
+  		  Zone* zone = *ipZone;
+  		  vector<int> modsOfZone = zone->GetModulators();
+  		  if(find(modsOfZone.begin(), modsOfZone.end(), _modulator.GetBusID()) == modsOfZone.end()) {
+          DSS::GetInstance()->GetDS485Interface().CreateZone(_modulator.GetBusID(), _zoneID);
+  		  }
+  			return *zone;
   		}
   	}
 

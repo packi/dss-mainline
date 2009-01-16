@@ -14,6 +14,7 @@
 class DSID {
   private:
   public:
+    virtual ~DSID() {}
     virtual void CallScene(const int _sceneNr) = 0;
     virtual void SaveScene(const int _sceneNr) = 0;
     virtual void UndoScene(const int _sceneNr) = 0;
@@ -32,6 +33,8 @@ class DSID {
 };
 
 class DSIDVLCRemote : public DSID {
+
+    virtual ~DSIDVLCRemote() {}
 
     void SendCommand(const std::string& _command) {
       try
@@ -214,12 +217,15 @@ void end_dim(int _handle, int _parameterNumber) {
 } // end_dim
 
 int get_group_id(int _handle) {
+  return -1;
 } // get_group_id
 
 int get_function_id(int _handle) {
+  return -1;
 } // get_function_id
 
 const char* get_parameter_name(int _handle, int _parameterNumber) {
+  return NULL;
 } // get_parameter_name
 
 static struct dsid_interface intf_description = {

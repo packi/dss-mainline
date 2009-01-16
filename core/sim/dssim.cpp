@@ -270,12 +270,16 @@ namespace dss {
         DSIDInterface* newDSID = m_DSIDFactory.CreateDSID(type, dsid, busid);
         if(newDSID != NULL) {
           m_SimulatedDevices.push_back(newDSID);
-          m_Zones[_zoneID].push_back(newDSID);
+          if(_zoneID != 0) {
+            m_Zones[_zoneID].push_back(newDSID);
+          }
           m_DeviceZoneMapping[newDSID] = _zoneID;
+          /*
           // every device is contained in zone 0 (broadcast zone)
           if(_zoneID != 0) {
             m_Zones[0].push_back(newDSID);
           }
+          */
           Logger::GetInstance()->Log("Sim: found device");
         } else {
           Logger::GetInstance()->Log(string("Sim: could not create instance for type \"") + type + "\"");

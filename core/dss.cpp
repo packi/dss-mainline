@@ -11,6 +11,7 @@
 #include "logger.h"
 #include "xmlwrapper.h"
 #include "scripting/modeljs.h"
+#include "eventinterpreterplugins.h"
 #ifdef __GNUC__
 #include "../unix/ds485proxy.h"
 #endif
@@ -52,6 +53,11 @@ namespace dss {
     (static_cast<DS485Proxy*>(m_DS485Interface))->Start();
 #endif
     m_Apartment.Run();
+
+    EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&m_EventInterpreter);
+    m_EventInterpreter.AddPlugin(plugin);
+    plugin = new EventInterpreterPluginDS485(m_DS485Interface, &m_EventInterpreter);
+    m_EventInterpreter.AddPlugin(plugin);
 
     m_EventInterpreter.LoadFromXML(m_Config.GetOptionAs<string>("subscription_file", "data/subscriptions.xml"));
 

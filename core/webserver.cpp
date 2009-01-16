@@ -43,9 +43,21 @@ namespace dss {
     }
   } // Execute
 
+  const char* HTTPCodeToMessage(const int _code) {
+    if(_code == 400) {
+      return "Bad Request";
+    } else if(_code == 401) {
+      return "Unauthorized\r\nWWW-Authenticate: Basic realm=\"dSS\"";
+    } else if(_code == 403) {
+      return "Forbidden";
+    } else {
+      return "OK";
+    }
+  }
+
   void WebServer::EmitHTTPHeader(int _code, struct shttpd_arg* _arg, string _contentType) {
     stringstream sstream;
-    sstream << "HTTP/1.1 " << _code << " OK\r\n";
+    sstream << "HTTP/1.1 " << _code << ' ' << HTTPCodeToMessage(_code) << "\r\n";
     sstream << "Content-Type: " << _contentType << "; charset=utf-8\r\n\r\n";
     shttpd_printf(_arg, sstream.str().c_str());
   } // EmitHTTPHeader
@@ -126,7 +138,7 @@ namespace dss {
 	  	sstream << "{ id: " << pZone->GetZoneID() << ",";
 	  	string name = pZone->GetName();
 	  	if(name.size() == 0) {
-	  		name = string("Zone ") + IntToString(distance(zones.begin(), ipZone));
+	  		name = string("Zone ") + IntToString(pZone->GetZoneID());
 	  	}
 	  	sstream << "name: " << ToJSONValue(name) << ", ";
 
@@ -214,6 +226,21 @@ namespace dss {
 
       string result = "{" + ToJSONValue(GetUnassignedDevices(), "devices") + "}";
       shttpd_printf(_arg, result.c_str());
+    } else if(method == "event/raise") {
+      EmitHTTPHeader(200, _arg, "application/json");
+      string name = paramMap["name"];
+      string location = paramMap["location"];
+      string context = paramMap["context"];
+
+      Event* e = new Event(name);
+      if(!context.empty()) {
+        e->SetContext(context);
+      }
+      if(!location.empty()) {
+        e->SetLocation(location);
+      }
+      DSS::GetInstance()->GetEventQueue().PushEvent(e);
+      shttpd_printf(_arg, "{ok:1}");
     } else if(method == "turnon") {
       EmitHTTPHeader(200, _arg, "application/json");
 
@@ -246,7 +273,6 @@ namespace dss {
         shttpd_printf(_arg, "{ok:0}");
       }
     } else if(method == "sendframe") {
-#ifndef __PARADIGM__
       int destination = StrToIntDef(paramMap["destination"],0) & 0x3F;
       bool broadcast = paramMap["broadcast"] == "true";
       int counter = StrToIntDef(paramMap["counter"], 0x00) & 0x03;
@@ -278,7 +304,6 @@ namespace dss {
       } else {
         delete frame;
       }
-#endif
     } else if(method == "getapartment") {
     	EmitHTTPHeader(200, _arg, "application/json");
 

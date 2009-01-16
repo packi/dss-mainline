@@ -3,7 +3,13 @@
   <subscription event-name="turnOn" handler-name="bus_handler">
     <send type="turnOn" />
   </subscription>
+  <subscription event-name="turnOff" handler-name="bus_handler">
+    <send type="turnOff" />
+  </subscription>
   <subscription event-name="brighter" handler-name="bus_handler">
     <send type="increaseValue" />
+  </subscription>
+  <subscription event-name="darker" handler-name="bus_handler">
+    <send type="decreaseValue" />
   </subscription>
 </subscriptions> 

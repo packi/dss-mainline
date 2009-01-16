@@ -357,6 +357,9 @@ namespace dss {
       } while(last.Before(_to));
     }
 
+    icalrecur_iterator_free(it);
+    it = NULL;
+
     return result;
   } // GetOccurencesBetween
 
