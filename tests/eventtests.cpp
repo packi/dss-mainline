@@ -46,7 +46,7 @@ protected:
     interpreter.SetEventRunner(&runner);
     interpreter.Run();
 
-    Event* pEvent = new Event("event1");
+    boost::shared_ptr<Event> pEvent(new Event("event1"));
 
     queue.PushEvent(pEvent);
 
@@ -54,7 +54,7 @@ protected:
 
     CPPUNIT_ASSERT_EQUAL(interpreter.GetEventsProcessed(), 1);
 
-    pEvent = new Event("event2");
+    pEvent.reset(new Event("event2"));
 
     queue.PushEvent(pEvent);
 
@@ -77,7 +77,7 @@ protected:
 
     interpreter.Run();
 
-    Event* pEvent = new Event("my_event");
+    boost::shared_ptr<Event> pEvent(new Event("my_event"));
 
     SubscriptionOptions* opts = new SubscriptionOptions();
     opts->SetParameter("event_name", "event1");
@@ -90,7 +90,7 @@ protected:
 
     CPPUNIT_ASSERT_EQUAL(interpreter.GetEventsProcessed(), 2);
 
-    pEvent = new Event("event2");
+    pEvent.reset(new Event("event2"));
 
     queue.PushEvent(pEvent);
 
@@ -154,7 +154,7 @@ protected:
 
     CPPUNIT_ASSERT_EQUAL(interpreter.GetEventsProcessed(), 0);
 
-    Event* evt = new Event("event1");
+    boost::shared_ptr<Event> evt(new Event("event1"));
     queue.PushEvent(evt);
 
     sleep(1);
@@ -251,7 +251,7 @@ protected:
 
     CPPUNIT_ASSERT_EQUAL(interpreter.GetEventsProcessed(), 0);
 
-    Event* evt = new Event("brighter", &apt.GetZone(0));
+    boost::shared_ptr<Event> evt(new Event("brighter", &apt.GetZone(0)));
     evt->SetLocation("dev1");
     queue.PushEvent(evt);
 

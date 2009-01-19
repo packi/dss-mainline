@@ -209,15 +209,15 @@ namespace dss {
 
   class EventQueue {
   private:
-    queue<Event*> m_EventQueue;
+    queue< boost::shared_ptr<Event> > m_EventQueue;
     SyncEvent m_EntryInQueueEvt;
     Mutex m_QueueMutex;
 
     EventRunner* m_EventRunner;
   public:
     EventQueue();
-    void PushEvent(Event* _event);
-    Event* PopEvent();
+    void PushEvent(boost::shared_ptr<Event> _event);
+    boost::shared_ptr<Event> PopEvent();
     bool WaitForEvent();
 
     void Shutdown();
@@ -297,17 +297,17 @@ namespace dss {
    */
   class ScheduledEvent {
   private:
-    Event* m_Event;
+    boost::shared_ptr<Event> m_Event;
     Schedule* m_Schedule;
     string m_Name;
     bool m_OwnsEvent;
   public:
-    ScheduledEvent(Event* _pEvt, Schedule* _pSchedule)
+    ScheduledEvent(boost::shared_ptr<Event> _pEvt, Schedule* _pSchedule)
     : m_Event(_pEvt), m_Schedule(_pSchedule), m_OwnsEvent(true) {};
     ~ScheduledEvent();
 
     /** Returns the event that will be raised */
-    Event* GetEvent() { return m_Event; };
+    boost::shared_ptr<Event> GetEvent() { return m_Event; };
     /** Returns the associated Schedule */
     Schedule& GetSchedule() const { return *m_Schedule; };
     /** Returns the name of this ScheduledEvent */

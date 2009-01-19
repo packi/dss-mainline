@@ -27,7 +27,7 @@ namespace dss {
   { } // dtor
 
   void EventInterpreterPluginRaiseEvent::HandleEvent(Event& _event, const EventSubscription& _subscription) {
-    Event* newEvent = new Event(_subscription.GetOptions().GetParameter("event_name"));
+    boost::shared_ptr<Event> newEvent(new Event(_subscription.GetOptions().GetParameter("event_name")));
     if(_subscription.GetOptions().HasParameter("time")) {
       string timeParam = _subscription.GetOptions().GetParameter("time");
       if(timeParam.size() > 0) {

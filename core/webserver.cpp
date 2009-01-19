@@ -232,7 +232,7 @@ namespace dss {
       string location = paramMap["location"];
       string context = paramMap["context"];
 
-      Event* e = new Event(name);
+      boost::shared_ptr<Event> e(new Event(name));
       if(!context.empty()) {
         e->SetContext(context);
       }

@@ -511,6 +511,63 @@ namespace dss {
     return result;
   } // CreateJSDevice
 
+  struct event_wrapper {
+    boost::shared_ptr<Event> event;
+  };
+
+  JSBool event_JSGet(JSContext *cx, JSObject *obj, jsval id, jsval *rval) {
+    event_wrapper* eventWrapper = static_cast<event_wrapper*>(JS_GetPrivate(cx, obj));
+
+    if(eventWrapper != NULL) {
+      int opt = JSVAL_TO_INT(id);
+      switch(opt) {
+        case 0:
+          *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, "event"));
+          return JS_TRUE;
+        case 1:
+          *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, eventWrapper->event->GetName().c_str()));
+          return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  }
+
+  void finalize_event(JSContext *cx, JSObject *obj) {
+    event_wrapper* eventWrapper = static_cast<event_wrapper*>(JS_GetPrivate(cx, obj));
+    JS_SetPrivate(cx, obj, NULL);
+    delete eventWrapper;
+  } // finalize_dev
+
+  static JSClass event_class = {
+    "event", JSCLASS_HAS_PRIVATE,
+    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
+    JS_EnumerateStandardClasses,
+    JS_ResolveStub,
+    JS_ConvertStub,  finalize_event, JSCLASS_NO_OPTIONAL_MEMBERS
+  };
+
+  static JSPropertySpec event_properties[] = {
+    {"className", 0, 0, dev_JSGet},
+    {"name", 1, 0, dev_JSGet},
+    {NULL}
+  };
+
+  JSFunctionSpec event_methods[] = {
+   // {"undoScene", dev_undo_scene, 1, 0, 0},
+    {NULL}
+  };
+
+  JSObject* ModelScriptContextExtension::CreateJSEvent(ScriptContext& _ctx, boost::shared_ptr<Event> _event) {
+    JSObject* result = JS_NewObject(_ctx.GetJSContext(), &event_class, NULL, NULL);
+    JS_DefineFunctions(_ctx.GetJSContext(), result, event_methods);
+    JS_DefineProperties(_ctx.GetJSContext(), result, event_properties);
+
+    event_wrapper* evtWrapper = new event_wrapper();
+    evtWrapper->event = _event;
+    JS_SetPrivate(_ctx.GetJSContext(), result, evtWrapper);
+    return result;
+  } // CreateJSEvent
+
 
   //================================================== ActionJS
 

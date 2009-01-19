@@ -129,8 +129,8 @@ namespace dss {
     }
     while(!m_Terminated) {
       if(m_Queue->WaitForEvent()) {
-        Event* toProcess = m_Queue->PopEvent();
-        if(toProcess != NULL) {
+        boost::shared_ptr<Event> toProcess = m_Queue->PopEvent();
+        if(toProcess.get() != NULL) {
 
           Logger::GetInstance()->Log(string("EventInterpreter: Got event from queue: '") + toProcess->GetName() + "'");
 
@@ -158,7 +158,6 @@ namespace dss {
 
           m_EventsProcessed++;
           Logger::GetInstance()->Log(string("EventInterpreter: Done processing event '") + toProcess->GetName() + "'");
-          delete toProcess;
         }
       }
     }
@@ -307,7 +306,7 @@ namespace dss {
   : m_EventRunner(NULL)
   { } // ctor
 
-  void EventQueue::PushEvent(Event* _event) {
+  void EventQueue::PushEvent(boost::shared_ptr<Event> _event) {
     Logger::GetInstance()->Log(string("EventQueue: New event '") + _event->GetName() + "' in queue...");
     if(_event->HasPropertySet(EventPropertyTime)) {
       DateTime when;
@@ -341,7 +340,6 @@ namespace dss {
         m_EventRunner->AddEvent(scheduledEvent);
       } else {
         Logger::GetInstance()->Log("EventQueue::PushEvent: Dropping event with invalid time", lsError);
-        delete _event;
       }
     } else {
       m_QueueMutex.Lock();
@@ -351,9 +349,9 @@ namespace dss {
     }
   } // PushEvent
 
-  Event* EventQueue::PopEvent() {
+  boost::shared_ptr<Event> EventQueue::PopEvent() {
     m_QueueMutex.Lock();
-    Event* result = NULL;
+    boost::shared_ptr<Event> result;
     if(!m_EventQueue.empty()) {
       result = m_EventQueue.front();
       m_EventQueue.pop();
@@ -468,7 +466,7 @@ namespace dss {
       if(abs(nextOccurence.Difference(virtualNow)) <= _deltaSeconds/2) {
         result = true;
         if(m_EventQueue != NULL) {
-          Event* evt = ipSchedEvt->GetEvent();
+          boost::shared_ptr<Event> evt = ipSchedEvt->GetEvent();
           if(evt->HasPropertySet(EventPropertyTime)) {
             evt->UnsetProperty(EventPropertyTime);
           }
@@ -487,10 +485,6 @@ namespace dss {
   ScheduledEvent::~ScheduledEvent() {
     delete m_Schedule;
     m_Schedule = NULL;
-    if(m_OwnsEvent) {
-      delete m_Event;
-    }
-    m_Event = NULL;
   } // dtor
 
 
