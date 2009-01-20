@@ -29,7 +29,7 @@ namespace dss {
       return *static_cast<Set*>(JS_GetPrivate(_context.GetJSContext(), _obj));
     }
     throw ScriptException("Wrong classname for set");
-  }
+  } // ConvertTo<Set>
 
   template<>
   Set& ModelScriptContextExtension::ConvertTo(ScriptContext& _context, jsval _val) {
@@ -37,7 +37,7 @@ namespace dss {
       return ConvertTo<Set&>(_context, JSVAL_TO_OBJECT(_val));
     }
     throw ScriptException("JSVal is no object");
-  }
+  } // ConvertTo<Set>
 
   JSBool global_get_name(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -51,7 +51,7 @@ namespace dss {
       return JS_TRUE;
     }
     return JS_FALSE;
-  }
+  } // global_get_name
 
   JSBool global_set_name(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -68,7 +68,7 @@ namespace dss {
       }
     }
     return JS_FALSE;
-  }
+  } // global_set_name
 
   JSBool global_get_devices(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -83,12 +83,12 @@ namespace dss {
       return JS_TRUE;
     }
     return JS_FALSE;
-  }
+  } // global_get_devices
 
   JSBool global_log(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
-    if (argc < 1){
+    if (argc < 1) {
       *rval = INT_TO_JSVAL(0); /* Send back a return value of 0. */
-      Logger::GetInstance()->Log("JS: (empty string)");
+      Logger::GetInstance()->Log("JS: global_log: (empty string)");
     } else {
       stringstream sstr;
       unsigned int i;
@@ -101,13 +101,35 @@ namespace dss {
       *rval = INT_TO_JSVAL(0); /* Set the return value to be the number of bytes/chars written */
     }
     return JS_TRUE;
-  }
+  } // global_log
+
+  JSBool global_event(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    if (argc < 1) {
+      *rval = INT_TO_JSVAL(0); /* Send back a return value of 0. */
+      Logger::GetInstance()->Log("JS: global_event: (empty name)");
+    } else {
+      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->GetEnvironment().GetExtension(ModelScriptcontextExtensionName));
+      if(ext != NULL) {
+        JSString *val = JS_ValueToString(cx, argv[0]);
+        char* name = JS_GetStringBytes(val);
+
+        boost::shared_ptr<Event> newEvent(new Event(name));
+        JSObject* obj = ext->CreateJSEvent(*ctx, newEvent);
+
+        *rval = OBJECT_TO_JSVAL(obj);
+      }
+    }
+    return JS_TRUE;
+  } // global_event
 
   JSFunctionSpec model_global_methods[] = {
     {"getName", global_get_name, 0, 0, 0},
     {"setName", global_set_name, 1, 0, 0},
     {"getDevices", global_get_devices, 0, 0, 0},
     {"log", global_log, 1, 0, 0},
+    {"event", global_event, 1, 0, 0},
     {NULL},
   };
 
@@ -515,6 +537,19 @@ namespace dss {
     boost::shared_ptr<Event> event;
   };
 
+  JSBool event_raise(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    ScriptObject self(obj, *ctx);
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->GetEnvironment().GetExtension(ModelScriptcontextExtensionName));
+    if(self.Is("event")) {
+      event_wrapper* eventWrapper = static_cast<event_wrapper*>(JS_GetPrivate(cx, obj));
+      *rval = INT_TO_JSVAL(0);
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // event_raise
+
   JSBool event_JSGet(JSContext *cx, JSObject *obj, jsval id, jsval *rval) {
     event_wrapper* eventWrapper = static_cast<event_wrapper*>(JS_GetPrivate(cx, obj));
 
@@ -553,7 +588,7 @@ namespace dss {
   };
 
   JSFunctionSpec event_methods[] = {
-   // {"undoScene", dev_undo_scene, 1, 0, 0},
+    {"raise", event_raise, 1, 0, 0},
     {NULL}
   };
 
@@ -568,30 +603,4 @@ namespace dss {
     return result;
   } // CreateJSEvent
 
-
-  //================================================== ActionJS
-
-  ActionJS::ActionJS()
-  : Action("ActionJS", "JavaScript Action")
-  {
-  }
-
-
-  void ActionJS::Perform(const Arguments& _args) {
-    if(!_args.HasValue("script")) {
-      throw runtime_error("ActionJS::Perform: missing argument _script");
-    }
-    string scriptName = _args.GetValue("script");
-
-    if(!m_Environment.IsInitialized()) {
-      m_Environment.Initialize();
-      ModelScriptContextExtension* ext = new ModelScriptContextExtension(DSS::GetInstance()->GetApartment());
-      m_Environment.AddExtension(ext);
-    }
-
-    boost::scoped_ptr<ScriptContext> ctx(m_Environment.GetContext());
-    ctx->LoadFromFile(scriptName);
-    ctx->Evaluate<void>();
-  }
-
-}
+} // namespace

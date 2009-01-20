@@ -39,6 +39,34 @@ namespace dss {
     GetEventInterpreter().GetQueue().PushEvent(newEvent);
   } // HandleEvent
 
+
+  //================================================== EventInterpreterPluginJavascript
+
+  EventInterpreterPluginJavascript::EventInterpreterPluginJavascript(EventInterpreter* _pInterpreter)
+  : EventInterpreterPlugin("javascript", _pInterpreter)
+  { } // ctor
+
+  void EventInterpreterPluginJavascript::HandleEvent(Event& _event, const EventSubscription& _subscription) {
+    if(_subscription.GetOptions().HasParameter("filename")) {
+      /*
+      string scriptName = _args.GetValue("script");
+
+      if(!m_Environment.IsInitialized()) {
+        m_Environment.Initialize();
+        ModelScriptContextExtension* ext = new ModelScriptContextExtension(DSS::GetInstance()->GetApartment());
+        m_Environment.AddExtension(ext);
+      }
+
+      boost::scoped_ptr<ScriptContext> ctx(m_Environment.GetContext());
+      ctx->LoadFromFile(scriptName);
+      ctx->Evaluate<void>();
+*/
+    } else {
+      throw runtime_error("EventInterpreteRPluginJavascript::HAndleEvent: missing argument filename");
+    }
+  } // HandleEvent
+
+
   //================================================== EventInterpreterPluginDS485
 
   EventInterpreterPluginDS485::EventInterpreterPluginDS485(DS485Interface* _pInterface, EventInterpreter* _pInterpreter)

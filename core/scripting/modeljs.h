@@ -44,25 +44,15 @@ namespace dss {
     JSObject* CreateJSDevice(ScriptContext& _ctx, Device& _ref);
     JSObject* CreateJSDevice(ScriptContext& _ctx, DeviceReference& _ref);
 
-    JSObject* CreateJSEvent(ScriptContext&, boost::shared_ptr<Event> _event);
+    JSObject* CreateJSEvent(ScriptContext& _ctx, boost::shared_ptr<Event> _event);
 
     template<class t>
     t ConvertTo(ScriptContext& _context, jsval val);
 
     template<class t>
     t ConvertTo(ScriptContext& _context, JSObject* _obj);
-  };
+  }; // ModelScriptContextExtension
 
-  /** Action that is capable of executing a JavaScript. */
-  class ActionJS : public Action {
-  private:
-    ScriptEnvironment m_Environment;
-  public:
-    ActionJS();
-    virtual ~ActionJS() {}
-
-    virtual void Perform(const Arguments& _args);
-  };
 }
 
 #endif

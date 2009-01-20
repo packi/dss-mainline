@@ -21,6 +21,10 @@ namespace dss {
   }; // EventInterpreterPluginRaiseEvent
 
   class EventInterpreterPluginJavascript : public EventInterpreterPlugin {
+  public:
+    EventInterpreterPluginJavascript(EventInterpreter* _pInterpreter);
+
+    virtual void HandleEvent(Event& _event, const EventSubscription& _subscription);
   }; // EventInterpreterPluginJavascript
 
   class EventInterpreterPluginDS485 : public EventInterpreterPlugin {
