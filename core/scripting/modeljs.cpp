@@ -103,33 +103,11 @@ namespace dss {
     return JS_TRUE;
   } // global_log
 
-  JSBool global_event(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    if (argc < 1) {
-      *rval = INT_TO_JSVAL(0); /* Send back a return value of 0. */
-      Logger::GetInstance()->Log("JS: global_event: (empty name)");
-    } else {
-      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-
-      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->GetEnvironment().GetExtension(ModelScriptcontextExtensionName));
-      if(ext != NULL) {
-        JSString *val = JS_ValueToString(cx, argv[0]);
-        char* name = JS_GetStringBytes(val);
-
-        boost::shared_ptr<Event> newEvent(new Event(name));
-        JSObject* obj = ext->CreateJSEvent(*ctx, newEvent);
-
-        *rval = OBJECT_TO_JSVAL(obj);
-      }
-    }
-    return JS_TRUE;
-  } // global_event
-
   JSFunctionSpec model_global_methods[] = {
     {"getName", global_get_name, 0, 0, 0},
     {"setName", global_set_name, 1, 0, 0},
     {"getDevices", global_get_devices, 0, 0, 0},
     {"log", global_log, 1, 0, 0},
-    {"event", global_event, 1, 0, 0},
     {NULL},
   };
 
@@ -533,6 +511,97 @@ namespace dss {
     return result;
   } // CreateJSDevice
 
+  //================================================== EventScriptExtension
+
+  const string EventScriptExtensionName = "eventextension";
+
+  EventScriptExtension::EventScriptExtension(EventQueue& _queue)
+  : ScriptExtension(EventScriptExtensionName),
+    m_Queue(_queue)
+  { } // ctor
+
+  JSBool global_event(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    if (argc < 1) {
+      *rval = JSVAL_NULL;
+      Logger::GetInstance()->Log("JS: global_event: (empty name)");
+    } else {
+      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+      EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->GetEnvironment().GetExtension(EventScriptExtensionName));
+      if(ext != NULL) {
+        JSString *val = JS_ValueToString(cx, argv[0]);
+        char* name = JS_GetStringBytes(val);
+
+        boost::shared_ptr<Event> newEvent(new Event(name));
+        JSObject* obj = ext->CreateJSEvent(*ctx, newEvent);
+
+        *rval = OBJECT_TO_JSVAL(obj);
+      }
+    }
+    return JS_TRUE;
+  } // global_event
+
+  JSBool global_subscription(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    if (argc < 3) {
+      *rval = JSVAL_NULL;
+      Logger::GetInstance()->Log("JS: global_subscription: need three arguments: event-name, handler-name & parameter");
+    } else {
+      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+      EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->GetEnvironment().GetExtension(EventScriptExtensionName));
+      if(ext != NULL) {
+        JSString *val = JS_ValueToString(cx, argv[0]);
+        char* eventName = JS_GetStringBytes(val);
+
+        val = JS_ValueToString(cx, argv[1]);
+        char* handlerName = JS_GetStringBytes(val);
+
+        JSObject* paramObj;
+
+        SubscriptionOptions* opts = new SubscriptionOptions();
+
+        if(JS_ValueToObject(cx, argv[2], &paramObj) == JS_TRUE) {
+          JSObject* propIter = JS_NewPropertyIterator(cx, paramObj);
+          jsid propID;
+          while(JS_NextProperty(cx, propIter, &propID) == JSVAL_TRUE) {
+            JSObject* obj;
+            jsval vp;
+            JS_GetMethodById(cx, paramObj, propID, &obj, &vp);
+
+            jsval vp2;
+
+            val = JS_ValueToString(cx, vp);
+            char* propName = JS_GetStringBytes(val);
+
+            JS_IdToValue(cx, propID, &vp2);
+            val = JS_ValueToString(cx, vp2);
+            char* propValue = JS_GetStringBytes(val);
+
+            opts->SetParameter(propName, propValue);
+
+          }
+
+        }
+
+        boost::shared_ptr<EventSubscription> subscription(new EventSubscription(eventName, handlerName, opts));
+
+        JSObject* obj = ext->CreateJSSubscription(*ctx, subscription);
+        *rval = OBJECT_TO_JSVAL(obj);
+      }
+    }
+    return JS_TRUE;
+  } // global_subscription
+
+  JSFunctionSpec event_global_methods[] = {
+    {"event", global_event, 1, 0, 0},
+    {"subscription", global_subscription},
+    {NULL},
+  };
+
+  void EventScriptExtension::ExtendContext(ScriptContext& _context) {
+    JS_DefineFunctions(_context.GetJSContext(), JS_GetGlobalObject(_context.GetJSContext()), event_global_methods);
+  } // ExtendContext
+
   struct event_wrapper {
     boost::shared_ptr<Event> event;
   };
@@ -541,9 +610,10 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     ScriptObject self(obj, *ctx);
 
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->GetEnvironment().GetExtension(ModelScriptcontextExtensionName));
+    EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->GetEnvironment().GetExtension(EventScriptExtensionName));
     if(self.Is("event")) {
       event_wrapper* eventWrapper = static_cast<event_wrapper*>(JS_GetPrivate(cx, obj));
+      ext->GetEventQueue().PushEvent(eventWrapper->event);
       *rval = INT_TO_JSVAL(0);
       return JS_TRUE;
     }
@@ -582,8 +652,8 @@ namespace dss {
   };
 
   static JSPropertySpec event_properties[] = {
-    {"className", 0, 0, dev_JSGet},
-    {"name", 1, 0, dev_JSGet},
+    {"className", 0, 0, event_JSGet},
+    {"name", 1, 0, event_JSGet},
     {NULL}
   };
 
@@ -592,7 +662,7 @@ namespace dss {
     {NULL}
   };
 
-  JSObject* ModelScriptContextExtension::CreateJSEvent(ScriptContext& _ctx, boost::shared_ptr<Event> _event) {
+  JSObject* EventScriptExtension::CreateJSEvent(ScriptContext& _ctx, boost::shared_ptr<Event> _event) {
     JSObject* result = JS_NewObject(_ctx.GetJSContext(), &event_class, NULL, NULL);
     JS_DefineFunctions(_ctx.GetJSContext(), result, event_methods);
     JS_DefineProperties(_ctx.GetJSContext(), result, event_properties);
@@ -602,5 +672,10 @@ namespace dss {
     JS_SetPrivate(_ctx.GetJSContext(), result, evtWrapper);
     return result;
   } // CreateJSEvent
+
+  JSObject* EventScriptExtension::CreateJSSubscription(ScriptContext& _ctx, boost::shared_ptr<EventSubscription> _subscription) {
+    JSObject* result = JS_NewObject(_ctx.GetJSContext(), &event_class, NULL, NULL);
+    return result;
+  }
 
 } // namespace

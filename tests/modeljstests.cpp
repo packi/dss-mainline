@@ -32,6 +32,7 @@ class ModelTestJS : public CPPUNIT_NS::TestCase
   CPPUNIT_TEST(testBasics);
   CPPUNIT_TEST(testSets);
   CPPUNIT_TEST(testDevices);
+  CPPUNIT_TEST(testEvents);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -119,11 +120,6 @@ protected:
     dev.SetShortAddress(1);
     dev.SetName("dev");
 
-    boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
-    env->Initialize();
-    ModelScriptContextExtension* ext = new ModelScriptContextExtension(apt);
-    env->AddExtension(ext);
-
     EventQueue queue;
     EventRunner runner;
     EventInterpreter interpreter(&queue);
@@ -131,15 +127,22 @@ protected:
     queue.SetEventRunner(&runner);
     runner.SetEventQueue(&queue);
 
+    boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+    env->Initialize();
+    ScriptExtension* ext = new ModelScriptContextExtension(apt);
+    env->AddExtension(ext);
+    ext = new EventScriptExtension(queue);
+    env->AddExtension(ext);
+
     EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
     interpreter.AddPlugin(plugin);
 
     CPPUNIT_ASSERT_EQUAL(interpreter.GetNumberOfSubscriptions(), 0);
 
     boost::scoped_ptr<ScriptContext> ctx(env->GetContext());
-    ctx->LoadFromMemory("var devs = getDevices();\n"
-                        "var f = function(dev) { print(dev.name); }\n"
-                        "devs.perform(f)\n");
+    ctx->LoadFromMemory("var evt = new event('test');\n"
+                        "evt.raise()\n"
+                        "\n");
     ctx->Evaluate<void>();
   } // testEvents
 };

@@ -44,14 +44,28 @@ namespace dss {
     JSObject* CreateJSDevice(ScriptContext& _ctx, Device& _ref);
     JSObject* CreateJSDevice(ScriptContext& _ctx, DeviceReference& _ref);
 
-    JSObject* CreateJSEvent(ScriptContext& _ctx, boost::shared_ptr<Event> _event);
-
     template<class t>
     t ConvertTo(ScriptContext& _context, jsval val);
 
     template<class t>
     t ConvertTo(ScriptContext& _context, JSObject* _obj);
   }; // ModelScriptContextExtension
+
+  class EventScriptExtension : public ScriptExtension {
+  private:
+    EventQueue& m_Queue;
+  public:
+    EventScriptExtension(EventQueue& _queue);
+    virtual ~EventScriptExtension() {}
+
+    virtual void ExtendContext(ScriptContext& _context);
+
+    EventQueue& GetEventQueue() { return m_Queue; }
+    const EventQueue& GetEventQueue() const { return m_Queue; }
+
+    JSObject* CreateJSEvent(ScriptContext& _ctx, boost::shared_ptr<Event> _event);
+    JSObject* CreateJSSubscription(ScriptContext& _ctx, boost::shared_ptr<EventSubscription> _subscription);
+  };
 
 }
 
