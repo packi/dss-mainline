@@ -2,10 +2,10 @@
 #include "logger.h"
 #include "model.h"
 #include "dss.h"
-#include "shttpd.h"
 #ifndef __PARADIGM__
-#include "../../unix/ds485proxy.h"
+#include "unix/ds485proxy.h"
 #endif
+#include "sim/dssim.h"
 
 #include <boost/shared_ptr.hpp>
 

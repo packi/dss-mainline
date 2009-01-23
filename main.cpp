@@ -17,7 +17,9 @@
 
 #include "core/dss.h"
 #include "core/logger.h"
+#ifdef WITH_TESTS
 #include "tests/tests.h"
+#endif
 
 #include <ctime>
 #include <csignal>
@@ -97,9 +99,11 @@ int main (int argc, char * const argv[]) {
 
   }
 
+#ifdef WITH_TESTS
   if(testFlag != 1) {
     dss::Tests::Run();
   }
+#endif
 
   if(startSniffer) {
 #ifndef __APPLE__

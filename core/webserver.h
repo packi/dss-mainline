@@ -1,12 +1,12 @@
 #ifndef WEBSERVER_H_
 #define WEBSERVER_H_
 
-#include "shttpd.h"
+#include <shttpd/shttpd.h>
 #include "thread.h"
 #include "configuration.h"
 
 namespace dss {
-  
+
   class WebServer : public Thread {
   private:
     struct shttpd_ctx* m_SHttpdContext;
@@ -17,12 +17,12 @@ namespace dss {
   public:
     WebServer();
     ~WebServer();
-    
+
     void Initialize(Config& _config);
-    
+
     virtual void Execute();
   }; // WebServer
-  
+
 }
 
 #endif /*WEBSERVER_H_*/
