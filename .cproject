@@ -109,7 +109,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="doc.cpp|examples|win32|SC23|webservices/soapServerLib.cpp|external/shttpd/standalone.c|external/shttpd/compat_wince.c|external/shttpd/compat_win32.c|external/shttpd/compat_rtems.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+<entry excluding="webservices/CMakeFiles|external/shttpd/CMakeFiles|external/CMakeFiles|core/CMakeFiles|CMakeFiles|doc.cpp|examples|win32|SC23|webservices/soapServerLib.cpp|external/shttpd/standalone.c|external/shttpd/compat_wince.c|external/shttpd/compat_win32.c|external/shttpd/compat_rtems.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 </sourceEntries>
 </configuration>
 </storageModule>
@@ -577,7 +577,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="doc.cpp|examples|win32|SC23|webservices/soapServerLib.cpp|webservices/soapServer.cpp|webservices/soapC.cpp|external/shttpd/standalone.c|external/shttpd/compat_wince.c|external/shttpd/compat_win32.c|external/shttpd/compat_rtems.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+<entry excluding="webservices/CMakeFiles|external/shttpd/CMakeFiles|external/CMakeFiles|core/CMakeFiles|CMakeFiles|doc.cpp|examples|win32|SC23|webservices/soapServerLib.cpp|webservices/soapServer.cpp|webservices/soapC.cpp|external/shttpd/standalone.c|external/shttpd/compat_wince.c|external/shttpd/compat_win32.c|external/shttpd/compat_rtems.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 </sourceEntries>
 </configuration>
 </storageModule>
