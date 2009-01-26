@@ -1,6 +1,6 @@
 // Do not remove the following define as it takes out the previous definition of namespaces
 #define WITH_NONAMESPACES
-#include "soapH.h"
+#include "webservices/soapH.h"
 #undef WITH_NONAMESPACES
 
 

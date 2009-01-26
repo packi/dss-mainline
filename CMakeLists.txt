@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.4)
+cmake_minimum_required (VERSION 2.6)
 project(DSS)
 
 INCLUDE (${CMAKE_ROOT}/Modules/FindLibXml2.cmake)
@@ -9,8 +9,6 @@ ELSE (LIBXML2_FOUND)
 	MESSAGE (FATAL_ERROR "Cannot build without LibXML2. Please install
 	LibXML2.")
 ENDIF (LIBXML2_FOUND)
-
-
 
 add_definitions(-DXP_UNIX -DUSE_SIM -DUSE_LIBXML -DNO_CGI)
 
@@ -25,9 +23,9 @@ add_subdirectory(external)
 
 link_directories(${DSS_BINARY_DIR}/core ${DSS_BINARY_DIR}/unix)
 
-add_executable(dss main.cpp)
+add_executable(dss main.cpp namespaces.cpp)
 
 link_libraries(gsoap++)
 
 target_link_libraries(dss core unix webservices pthread shttpd
-	boost_filesystem ical rt)
+	boost_filesystem ical rt dl)
