@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2009-01-23 19:03:30 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2009-01-27 11:01:32 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -221,18 +221,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__Switch_SimulateKeypress(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Event-Raise"))
 		return soap_serve_dss__Event_Raise(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Event-GetActionNames"))
-		return soap_serve_dss__Event_GetActionNames(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Event-GetActionParamsTemplate"))
-		return soap_serve_dss__Event_GetActionParamsTemplate(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Event-Subscribe"))
-		return soap_serve_dss__Event_Subscribe(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Event-Unsubscribe"))
-		return soap_serve_dss__Event_Unsubscribe(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Event-Schedule"))
-		return soap_serve_dss__Event_Schedule(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Event-DeleteSchedule"))
-		return soap_serve_dss__Event_DeleteSchedule(soap);
 	return soap->error = SOAP_NO_METHOD;
 }
 #endif
@@ -3248,7 +3236,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_Raise(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Event_Raise(soap, soap_tmp_dss__Event_Raise._token, soap_tmp_dss__Event_Raise._eventID, soap_tmp_dss__Event_Raise._sourceID, soap_tmp_dss__Event_Raise._params, soap_tmp_dss__Event_RaiseResponse.result);
+	soap->error = dss__Event_Raise(soap, soap_tmp_dss__Event_Raise._token, soap_tmp_dss__Event_Raise._eventName, soap_tmp_dss__Event_Raise._context, soap_tmp_dss__Event_Raise._parameter, soap_tmp_dss__Event_Raise._location, soap_tmp_dss__Event_RaiseResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -3270,252 +3258,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_Raise(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__Event_RaiseResponse(soap, &soap_tmp_dss__Event_RaiseResponse, "dss:Event-RaiseResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_GetActionNames(struct soap *soap)
-{	struct dss__Event_GetActionNames soap_tmp_dss__Event_GetActionNames;
-	struct dss__Event_GetActionNamesResponse soap_tmp_dss__Event_GetActionNamesResponse;
-	soap_default_dss__Event_GetActionNamesResponse(soap, &soap_tmp_dss__Event_GetActionNamesResponse);
-	soap_default_dss__Event_GetActionNames(soap, &soap_tmp_dss__Event_GetActionNames);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Event_GetActionNames(soap, &soap_tmp_dss__Event_GetActionNames, "dss:Event-GetActionNames", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Event_GetActionNames(soap, soap_tmp_dss__Event_GetActionNames._token, soap_tmp_dss__Event_GetActionNamesResponse.names);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Event_GetActionNamesResponse(soap, &soap_tmp_dss__Event_GetActionNamesResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Event_GetActionNamesResponse(soap, &soap_tmp_dss__Event_GetActionNamesResponse, "dss:Event-GetActionNamesResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Event_GetActionNamesResponse(soap, &soap_tmp_dss__Event_GetActionNamesResponse, "dss:Event-GetActionNamesResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_GetActionParamsTemplate(struct soap *soap)
-{	struct dss__Event_GetActionParamsTemplate soap_tmp_dss__Event_GetActionParamsTemplate;
-	dss__outParameter paramsTemplate;
-	paramsTemplate.soap_default(soap);
-	soap_default_dss__Event_GetActionParamsTemplate(soap, &soap_tmp_dss__Event_GetActionParamsTemplate);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Event_GetActionParamsTemplate(soap, &soap_tmp_dss__Event_GetActionParamsTemplate, "dss:Event-GetActionParamsTemplate", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Event_GetActionParamsTemplate(soap, soap_tmp_dss__Event_GetActionParamsTemplate._token, soap_tmp_dss__Event_GetActionParamsTemplate._name, paramsTemplate);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	paramsTemplate.soap_serialize(soap);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || paramsTemplate.soap_put(soap, "dss:outParameter", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || paramsTemplate.soap_put(soap, "dss:outParameter", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_Subscribe(struct soap *soap)
-{	struct dss__Event_Subscribe soap_tmp_dss__Event_Subscribe;
-	struct dss__Event_SubscribeResponse soap_tmp_dss__Event_SubscribeResponse;
-	soap_default_dss__Event_SubscribeResponse(soap, &soap_tmp_dss__Event_SubscribeResponse);
-	soap_default_dss__Event_Subscribe(soap, &soap_tmp_dss__Event_Subscribe);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Event_Subscribe(soap, &soap_tmp_dss__Event_Subscribe, "dss:Event-Subscribe", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Event_Subscribe(soap, soap_tmp_dss__Event_Subscribe._token, soap_tmp_dss__Event_Subscribe._eventIDs, soap_tmp_dss__Event_Subscribe._sourceIDs, soap_tmp_dss__Event_Subscribe._actionName, soap_tmp_dss__Event_Subscribe._params, soap_tmp_dss__Event_SubscribeResponse.subscriptionID);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Event_SubscribeResponse(soap, &soap_tmp_dss__Event_SubscribeResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Event_SubscribeResponse(soap, &soap_tmp_dss__Event_SubscribeResponse, "dss:Event-SubscribeResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Event_SubscribeResponse(soap, &soap_tmp_dss__Event_SubscribeResponse, "dss:Event-SubscribeResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_Unsubscribe(struct soap *soap)
-{	struct dss__Event_Unsubscribe soap_tmp_dss__Event_Unsubscribe;
-	struct dss__Event_UnsubscribeResponse soap_tmp_dss__Event_UnsubscribeResponse;
-	soap_default_dss__Event_UnsubscribeResponse(soap, &soap_tmp_dss__Event_UnsubscribeResponse);
-	soap_default_dss__Event_Unsubscribe(soap, &soap_tmp_dss__Event_Unsubscribe);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Event_Unsubscribe(soap, &soap_tmp_dss__Event_Unsubscribe, "dss:Event-Unsubscribe", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Event_Unsubscribe(soap, soap_tmp_dss__Event_Unsubscribe._token, soap_tmp_dss__Event_Unsubscribe._subscriptionID, soap_tmp_dss__Event_UnsubscribeResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Event_UnsubscribeResponse(soap, &soap_tmp_dss__Event_UnsubscribeResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Event_UnsubscribeResponse(soap, &soap_tmp_dss__Event_UnsubscribeResponse, "dss:Event-UnsubscribeResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Event_UnsubscribeResponse(soap, &soap_tmp_dss__Event_UnsubscribeResponse, "dss:Event-UnsubscribeResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_Schedule(struct soap *soap)
-{	struct dss__Event_Schedule soap_tmp_dss__Event_Schedule;
-	struct dss__Event_ScheduleResponse soap_tmp_dss__Event_ScheduleResponse;
-	soap_default_dss__Event_ScheduleResponse(soap, &soap_tmp_dss__Event_ScheduleResponse);
-	soap_default_dss__Event_Schedule(soap, &soap_tmp_dss__Event_Schedule);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Event_Schedule(soap, &soap_tmp_dss__Event_Schedule, "dss:Event-Schedule", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Event_Schedule(soap, soap_tmp_dss__Event_Schedule._token, soap_tmp_dss__Event_Schedule._icalString, soap_tmp_dss__Event_Schedule._eventID, soap_tmp_dss__Event_Schedule._params, soap_tmp_dss__Event_ScheduleResponse.scheduledEventID);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Event_ScheduleResponse(soap, &soap_tmp_dss__Event_ScheduleResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Event_ScheduleResponse(soap, &soap_tmp_dss__Event_ScheduleResponse, "dss:Event-ScheduleResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Event_ScheduleResponse(soap, &soap_tmp_dss__Event_ScheduleResponse, "dss:Event-ScheduleResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_DeleteSchedule(struct soap *soap)
-{	struct dss__Event_DeleteSchedule soap_tmp_dss__Event_DeleteSchedule;
-	struct dss__Event_DeleteScheduleResponse soap_tmp_dss__Event_DeleteScheduleResponse;
-	soap_default_dss__Event_DeleteScheduleResponse(soap, &soap_tmp_dss__Event_DeleteScheduleResponse);
-	soap_default_dss__Event_DeleteSchedule(soap, &soap_tmp_dss__Event_DeleteSchedule);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Event_DeleteSchedule(soap, &soap_tmp_dss__Event_DeleteSchedule, "dss:Event-DeleteSchedule", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Event_DeleteSchedule(soap, soap_tmp_dss__Event_DeleteSchedule._token, soap_tmp_dss__Event_DeleteSchedule._scheduleEventID, soap_tmp_dss__Event_DeleteScheduleResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Event_DeleteScheduleResponse(soap, &soap_tmp_dss__Event_DeleteScheduleResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Event_DeleteScheduleResponse(soap, &soap_tmp_dss__Event_DeleteScheduleResponse, "dss:Event-DeleteScheduleResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Event_DeleteScheduleResponse(soap, &soap_tmp_dss__Event_DeleteScheduleResponse, "dss:Event-DeleteScheduleResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

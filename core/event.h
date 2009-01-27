@@ -17,6 +17,9 @@
 #include <string>
 #include <queue>
 
+#include <boost/shared_ptr.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
+
 using std::string;
 using std::queue;
 
@@ -64,6 +67,7 @@ namespace dss {
     const string& GetPropertyByName(const string& _name) const;
     bool HasPropertySet(const string& _name) const;
     void UnsetProperty(const string& _name);
+    bool SetProperty(const string& _name, const string& _value);
 
     void SetLocation(const string& _value) { m_Location = _value; m_LocationSet = true; }
     void SetContext(const string& _value) { m_Context = _value; m_ContextSet = true; }
@@ -159,14 +163,14 @@ namespace dss {
     string m_EventName;
     string m_HandlerName;
     string m_ID;
-    SubscriptionOptions* m_SubscriptionOptions;
-    vector<EventPropertyFilter*> m_Filter;
+    boost::shared_ptr<SubscriptionOptions> m_SubscriptionOptions;
+    boost::ptr_vector<EventPropertyFilter> m_Filter;
     EventPropertyFilterOption m_FilterOption;
   protected:
     void Initialize();
   public:
-    EventSubscription(const string& _eventName, const string& _handlerName, SubscriptionOptions* _options);
-    EventSubscription(const string& _eventName, const string& _handlerName, const string& _id, SubscriptionOptions* _options);
+    EventSubscription(const string& _eventName, const string& _handlerName, boost::shared_ptr<SubscriptionOptions> _options);
+    EventSubscription(const string& _eventName, const string& _handlerName, const string& _id, boost::shared_ptr<SubscriptionOptions> _options);
 
     ~EventSubscription();
 
@@ -176,8 +180,8 @@ namespace dss {
     const string& GetHandlerName() const { return m_HandlerName; }
     const string& GetID() const { return m_ID; }
 
-    SubscriptionOptions& GetOptions() { return *m_SubscriptionOptions; }
-    const SubscriptionOptions& GetOptions() const { return *m_SubscriptionOptions; }
+    SubscriptionOptions& GetOptions() { return *m_SubscriptionOptions.get(); }
+    const SubscriptionOptions& GetOptions() const { return *m_SubscriptionOptions.get(); }
 
     void AddPropertyFilter(EventPropertyFilter* _pPropertyFilter);
 
@@ -258,7 +262,7 @@ namespace dss {
 
   class EventInterpreter : public Thread {
   private:
-    vector<EventSubscription*> m_Subscriptions;
+    vector< boost::shared_ptr<EventSubscription> > m_Subscriptions;
     vector<EventInterpreterPlugin*> m_Plugins;
     EventQueue* m_Queue;
     EventRunner* m_EventRunner;
@@ -274,7 +278,7 @@ namespace dss {
 
     void AddPlugin(EventInterpreterPlugin* _plugin);
 
-    void Subscribe(EventSubscription* _subscription);
+    void Subscribe(boost::shared_ptr<EventSubscription> _subscription);
     void Unsubscribe(const string& _subscriptionID);
 
     virtual void Execute();

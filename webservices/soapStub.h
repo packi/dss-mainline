@@ -1628,7 +1628,7 @@ public:
 class SOAP_CMAC dss__outParameter
 {
 public:
-	std::vector<std::string >values;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* optional element of type xsd:string */
+	std::vector<std::string >values;	/* optional element of type xsd:string */
 	std::vector<std::string >names;	/* optional element of type xsd:string */
 public:
 	virtual int soap_type() const { return 246; } /* = unique id SOAP_TYPE_dss__outParameter */
@@ -1649,7 +1649,7 @@ public:
 struct dss__Event_RaiseResponse
 {
 public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
@@ -1660,134 +1660,15 @@ struct dss__Event_Raise
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	int _eventID;	/* required element of type xsd:int */
-	int _sourceID;	/* required element of type xsd:int */
-	dss__inParameter _params;	/* required element of type dss:inParameter */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Event_GetActionNamesResponse
-#define SOAP_TYPE_dss__Event_GetActionNamesResponse (252)
-/* dss:Event-GetActionNamesResponse */
-struct dss__Event_GetActionNamesResponse
-{
-public:
-	std::vector<std::string >names;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:string */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Event_GetActionNames
-#define SOAP_TYPE_dss__Event_GetActionNames (253)
-/* dss:Event-GetActionNames */
-struct dss__Event_GetActionNames
-{
-public:
-	int _token;	/* required element of type xsd:int */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Event_GetActionParamsTemplate
-#define SOAP_TYPE_dss__Event_GetActionParamsTemplate (256)
-/* dss:Event-GetActionParamsTemplate */
-struct dss__Event_GetActionParamsTemplate
-{
-public:
-	int _token;	/* required element of type xsd:int */
-	char *_name;	/* optional element of type xsd:string */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Event_SubscribeResponse
-#define SOAP_TYPE_dss__Event_SubscribeResponse (258)
-/* dss:Event-SubscribeResponse */
-struct dss__Event_SubscribeResponse
-{
-public:
-	int subscriptionID;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Event_Subscribe
-#define SOAP_TYPE_dss__Event_Subscribe (259)
-/* dss:Event-Subscribe */
-struct dss__Event_Subscribe
-{
-public:
-	int _token;	/* required element of type xsd:int */
-	std::vector<int >_eventIDs;	/* required element of type xsd:int */
-	std::vector<int >_sourceIDs;	/* required element of type xsd:int */
-	char *_actionName;	/* optional element of type xsd:string */
-	dss__inParameter _params;	/* required element of type dss:inParameter */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Event_UnsubscribeResponse
-#define SOAP_TYPE_dss__Event_UnsubscribeResponse (261)
-/* dss:Event-UnsubscribeResponse */
-struct dss__Event_UnsubscribeResponse
-{
-public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Event_Unsubscribe
-#define SOAP_TYPE_dss__Event_Unsubscribe (262)
-/* dss:Event-Unsubscribe */
-struct dss__Event_Unsubscribe
-{
-public:
-	int _token;	/* required element of type xsd:int */
-	int _subscriptionID;	/* required element of type xsd:int */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Event_ScheduleResponse
-#define SOAP_TYPE_dss__Event_ScheduleResponse (264)
-/* dss:Event-ScheduleResponse */
-struct dss__Event_ScheduleResponse
-{
-public:
-	int scheduledEventID;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Event_Schedule
-#define SOAP_TYPE_dss__Event_Schedule (265)
-/* dss:Event-Schedule */
-struct dss__Event_Schedule
-{
-public:
-	int _token;	/* required element of type xsd:int */
-	char *_icalString;	/* optional element of type xsd:string */
-	int _eventID;	/* required element of type xsd:int */
-	dss__inParameter _params;	/* required element of type dss:inParameter */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Event_DeleteScheduleResponse
-#define SOAP_TYPE_dss__Event_DeleteScheduleResponse (267)
-/* dss:Event-DeleteScheduleResponse */
-struct dss__Event_DeleteScheduleResponse
-{
-public:
-	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Event_DeleteSchedule
-#define SOAP_TYPE_dss__Event_DeleteSchedule (268)
-/* dss:Event-DeleteSchedule */
-struct dss__Event_DeleteSchedule
-{
-public:
-	int _token;	/* required element of type xsd:int */
-	int _scheduleEventID;	/* required element of type xsd:int */
+	char *_eventName;	/* optional element of type xsd:string */
+	char *_context;	/* optional element of type xsd:string */
+	char *_parameter;	/* optional element of type xsd:string */
+	char *_location;	/* optional element of type xsd:string */
 };
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Header
-#define SOAP_TYPE_SOAP_ENV__Header (269)
+#define SOAP_TYPE_SOAP_ENV__Header (250)
 /* SOAP Header: */
 struct SOAP_ENV__Header
 {
@@ -1799,7 +1680,7 @@ private:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Code
-#define SOAP_TYPE_SOAP_ENV__Code (270)
+#define SOAP_TYPE_SOAP_ENV__Code (251)
 /* SOAP Fault Code: */
 struct SOAP_ENV__Code
 {
@@ -1810,7 +1691,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Detail
-#define SOAP_TYPE_SOAP_ENV__Detail (272)
+#define SOAP_TYPE_SOAP_ENV__Detail (253)
 /* SOAP-ENV:Detail */
 struct SOAP_ENV__Detail
 {
@@ -1822,7 +1703,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Reason
-#define SOAP_TYPE_SOAP_ENV__Reason (275)
+#define SOAP_TYPE_SOAP_ENV__Reason (256)
 /* SOAP-ENV:Reason */
 struct SOAP_ENV__Reason
 {
@@ -1832,7 +1713,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Fault
-#define SOAP_TYPE_SOAP_ENV__Fault (276)
+#define SOAP_TYPE_SOAP_ENV__Fault (257)
 /* SOAP Fault: */
 struct SOAP_ENV__Fault
 {
@@ -2045,19 +1926,7 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Switch_GetGroupID(struct soap*, int _token, unsig
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Switch_SimulateKeypress(struct soap*, int _token, unsigned long _deviceID, int _buttonNr, char *_kind, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Raise(struct soap*, int _token, int _eventID, int _sourceID, dss__inParameter _params, int &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_GetActionNames(struct soap*, int _token, std::vector<std::string >&names);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_GetActionParamsTemplate(struct soap*, int _token, char *_name, dss__outParameter &paramsTemplate);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Subscribe(struct soap*, int _token, std::vector<int >_eventIDs, std::vector<int >_sourceIDs, char *_actionName, dss__inParameter _params, int &subscriptionID);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Unsubscribe(struct soap*, int _token, int _subscriptionID, int &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Schedule(struct soap*, int _token, char *_icalString, int _eventID, dss__inParameter _params, int &scheduledEventID);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_DeleteSchedule(struct soap*, int _token, int _scheduleEventID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Raise(struct soap*, int _token, char *_eventName, char *_context, char *_parameter, char *_location, bool &result);
 
 /******************************************************************************\
  *                                                                            *
@@ -2216,18 +2085,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Switch_GetGroupID(struct soap*);
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Switch_SimulateKeypress(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_Raise(struct soap*);
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_GetActionNames(struct soap*);
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_GetActionParamsTemplate(struct soap*);
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_Subscribe(struct soap*);
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_Unsubscribe(struct soap*);
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_Schedule(struct soap*);
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_DeleteSchedule(struct soap*);
 
 #endif
 

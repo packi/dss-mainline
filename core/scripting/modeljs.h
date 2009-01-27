@@ -54,14 +54,18 @@ namespace dss {
   class EventScriptExtension : public ScriptExtension {
   private:
     EventQueue& m_Queue;
+    EventInterpreter& m_Interpreter;
   public:
-    EventScriptExtension(EventQueue& _queue);
+    EventScriptExtension(EventQueue& _queue, EventInterpreter& _interpreter);
     virtual ~EventScriptExtension() {}
 
     virtual void ExtendContext(ScriptContext& _context);
 
     EventQueue& GetEventQueue() { return m_Queue; }
     const EventQueue& GetEventQueue() const { return m_Queue; }
+
+    EventInterpreter& GetEventInterpreter() { return m_Interpreter; }
+    const EventInterpreter& GetEventInterpreter() const { return m_Interpreter; }
 
     JSObject* CreateJSEvent(ScriptContext& _ctx, boost::shared_ptr<Event> _event);
     JSObject* CreateJSSubscription(ScriptContext& _ctx, boost::shared_ptr<EventSubscription> _subscription);

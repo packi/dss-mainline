@@ -515,9 +515,10 @@ namespace dss {
 
   const string EventScriptExtensionName = "eventextension";
 
-  EventScriptExtension::EventScriptExtension(EventQueue& _queue)
+  EventScriptExtension::EventScriptExtension(EventQueue& _queue, EventInterpreter& _interpreter)
   : ScriptExtension(EventScriptExtensionName),
-    m_Queue(_queue)
+    m_Queue(_queue),
+    m_Interpreter(_interpreter)
   { } // ctor
 
   JSBool global_event(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
@@ -558,12 +559,15 @@ namespace dss {
 
         JSObject* paramObj;
 
-        SubscriptionOptions* opts = new SubscriptionOptions();
+        boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
 
         if(JS_ValueToObject(cx, argv[2], &paramObj) == JS_TRUE) {
           JSObject* propIter = JS_NewPropertyIterator(cx, paramObj);
           jsid propID;
-          while(JS_NextProperty(cx, propIter, &propID) == JSVAL_TRUE) {
+          while(JS_NextProperty(cx, propIter, &propID) == JS_TRUE) {
+            if(propID == JSVAL_VOID) {
+              break;
+            }
             JSObject* obj;
             jsval vp;
             JS_GetMethodById(cx, paramObj, propID, &obj, &vp);
@@ -571,14 +575,13 @@ namespace dss {
             jsval vp2;
 
             val = JS_ValueToString(cx, vp);
-            char* propName = JS_GetStringBytes(val);
+            char* propValue = JS_GetStringBytes(val);
 
             JS_IdToValue(cx, propID, &vp2);
             val = JS_ValueToString(cx, vp2);
-            char* propValue = JS_GetStringBytes(val);
+            char* propName = JS_GetStringBytes(val);
 
             opts->SetParameter(propName, propValue);
-
           }
 
         }
@@ -673,8 +676,79 @@ namespace dss {
     return result;
   } // CreateJSEvent
 
+  struct subscription_wrapper {
+    boost::shared_ptr<EventSubscription> subscription;
+  };
+
+  JSBool subscription_JSGet(JSContext *cx, JSObject *obj, jsval id, jsval *rval) {
+    subscription_wrapper* subscriptionWrapper = static_cast<subscription_wrapper*>(JS_GetPrivate(cx, obj));
+
+    if(subscriptionWrapper != NULL) {
+      int opt = JSVAL_TO_INT(id);
+      switch(opt) {
+        case 0:
+          *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, "subscription"));
+          return JS_TRUE;
+        case 1:
+          *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, subscriptionWrapper->subscription->GetEventName().c_str()));
+          return JS_TRUE;
+        case 2:
+          *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, subscriptionWrapper->subscription->GetHandlerName().c_str()));
+          return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  }
+
+  JSBool subscription_subscribe(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    ScriptObject self(obj, *ctx);
+
+    EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->GetEnvironment().GetExtension(EventScriptExtensionName));
+    if(self.Is("subscription")) {
+      subscription_wrapper* subscriptionWrapper = static_cast<subscription_wrapper*>(JS_GetPrivate(cx, obj));
+      ext->GetEventInterpreter().Subscribe(subscriptionWrapper->subscription);
+      *rval = INT_TO_JSVAL(0);
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // subscription_subscribe
+
+  void finalize_subscription(JSContext *cx, JSObject *obj) {
+    subscription_wrapper* subscriptionWrapper = static_cast<subscription_wrapper*>(JS_GetPrivate(cx, obj));
+    JS_SetPrivate(cx, obj, NULL);
+    delete subscriptionWrapper;
+  } // finalize_dev
+
+  static JSClass subscription_class = {
+    "subscription", JSCLASS_HAS_PRIVATE,
+    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
+    JS_EnumerateStandardClasses,
+    JS_ResolveStub,
+    JS_ConvertStub,  finalize_subscription, JSCLASS_NO_OPTIONAL_MEMBERS
+  };
+
+  static JSPropertySpec subscription_properties[] = {
+    {"className", 0, 0, subscription_JSGet},
+    {"eventName", 1, 0, subscription_JSGet},
+    {"handlerName", 2, 0, subscription_JSGet},
+    {NULL}
+  };
+
+  JSFunctionSpec subscription_methods[] = {
+    {"subscribe", subscription_subscribe, 0, 0, 0},
+    {NULL}
+  };
+
+
   JSObject* EventScriptExtension::CreateJSSubscription(ScriptContext& _ctx, boost::shared_ptr<EventSubscription> _subscription) {
-    JSObject* result = JS_NewObject(_ctx.GetJSContext(), &event_class, NULL, NULL);
+    JSObject* result = JS_NewObject(_ctx.GetJSContext(), &subscription_class, NULL, NULL);
+    JS_DefineFunctions(_ctx.GetJSContext(), result, subscription_methods);
+    JS_DefineProperties(_ctx.GetJSContext(), result, subscription_properties);
+
+    subscription_wrapper* subscriptionWrapper = new subscription_wrapper();
+    subscriptionWrapper->subscription = _subscription;
+    JS_SetPrivate(_ctx.GetJSContext(), result, subscriptionWrapper);
     return result;
   }
 

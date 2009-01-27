@@ -79,9 +79,9 @@ protected:
 
     boost::shared_ptr<Event> pEvent(new Event("my_event"));
 
-    SubscriptionOptions* opts = new SubscriptionOptions();
+    boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
     opts->SetParameter("event_name", "event1");
-    EventSubscription* subscription = new EventSubscription("my_event", "raise_event", opts);
+    boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", opts));
     interpreter.Subscribe(subscription);
 
     queue.PushEvent(pEvent);

@@ -13,6 +13,9 @@
 #include "DS485Interface.h"
 #include "setbuilder.h"
 #include "dss.h"
+#include "scripting/modeljs.h"
+
+#include <boost/scoped_ptr.hpp>
 
 namespace dss {
 
@@ -48,21 +51,30 @@ namespace dss {
 
   void EventInterpreterPluginJavascript::HandleEvent(Event& _event, const EventSubscription& _subscription) {
     if(_subscription.GetOptions().HasParameter("filename")) {
-      /*
-      string scriptName = _args.GetValue("script");
+      string scriptName = _subscription.GetOptions().GetParameter("filename");
+      if(FileExists(scriptName)) {
 
-      if(!m_Environment.IsInitialized()) {
-        m_Environment.Initialize();
-        ModelScriptContextExtension* ext = new ModelScriptContextExtension(DSS::GetInstance()->GetApartment());
-        m_Environment.AddExtension(ext);
+        if(!m_Environment.IsInitialized()) {
+          m_Environment.Initialize();
+          ScriptExtension* ext = new ModelScriptContextExtension(DSS::GetInstance()->GetApartment());
+          m_Environment.AddExtension(ext);
+          ext = new EventScriptExtension(DSS::GetInstance()->GetEventQueue(), GetEventInterpreter());
+          m_Environment.AddExtension(ext);
+        }
+
+        try {
+          boost::scoped_ptr<ScriptContext> ctx(m_Environment.GetContext());
+          ctx->LoadFromFile(_subscription.GetOptions().GetParameter("filename"));
+          ctx->Evaluate<void>();
+        } catch(ScriptException& e) {
+          Logger::GetInstance()->Log(string("EventInterpreterPluginJavascript::HandleEvent: Cought event while running/parsing script '")
+                              + scriptName + "'. Message: " + e.what(), lsError);
+        }
+      } else {
+        Logger::GetInstance()->Log(string("EventInterpreterPluginJavascript::HandleEvent: Could not find script: '") + scriptName + "'", lsError);
       }
-
-      boost::scoped_ptr<ScriptContext> ctx(m_Environment.GetContext());
-      ctx->LoadFromFile(scriptName);
-      ctx->Evaluate<void>();
-*/
     } else {
-      throw runtime_error("EventInterpreteRPluginJavascript::HAndleEvent: missing argument filename");
+      throw runtime_error("EventInterpreteRPluginJavascript::HandleEvent: missing argument filename");
     }
   } // HandleEvent
 

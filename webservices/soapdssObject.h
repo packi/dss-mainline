@@ -190,18 +190,6 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Switch_GetGroupID(struct soap*, int _token, unsig
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Switch_SimulateKeypress(struct soap*, int _token, unsigned long _deviceID, int _buttonNr, char *_kind, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Raise(struct soap*, int _token, int _eventID, int _sourceID, dss__inParameter _params, int &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_GetActionNames(struct soap*, int _token, std::vector<std::string >&names);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_GetActionParamsTemplate(struct soap*, int _token, char *_name, dss__outParameter &paramsTemplate);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Subscribe(struct soap*, int _token, std::vector<int >_eventIDs, std::vector<int >_sourceIDs, char *_actionName, dss__inParameter _params, int &subscriptionID);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Unsubscribe(struct soap*, int _token, int _subscriptionID, int &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Schedule(struct soap*, int _token, char *_icalString, int _eventID, dss__inParameter _params, int &scheduledEventID);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_DeleteSchedule(struct soap*, int _token, int _scheduleEventID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Raise(struct soap*, int _token, char *_eventName, char *_context, char *_parameter, char *_location, bool &result);
 
 #endif

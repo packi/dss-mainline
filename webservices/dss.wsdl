@@ -31,6 +31,12 @@
      <element name="names" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
    </sequence>
   </complexType>
+  <complexType name="outParameter">
+   <sequence>
+     <element name="values" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+     <element name="names" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+   </sequence>
+  </complexType>
   <!-- operation request element -->
   <element name="Test">
    <complexType>
@@ -1310,9 +1316,10 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="eventID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="sourceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="params" type="dss:inParameter" minOccurs="1" maxOccurs="1"/>
+     <element name="eventName" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="context" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="parameter" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="location" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
@@ -1320,114 +1327,7 @@
   <element name="Event-RaiseResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Event-GetActionNames">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Event-GetActionNamesResponse">
-   <complexType>
-    <sequence>
-     <element name="names" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Event-GetActionParamsTemplate">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="name" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="outParameter">
-   <complexType>
-    <sequence>
-     <element name="values" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
-     <element name="names" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Event-Subscribe">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="eventIDs" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
-     <element name="sourceIDs" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
-     <element name="actionName" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="params" type="dss:inParameter" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Event-SubscribeResponse">
-   <complexType>
-    <sequence>
-     <element name="subscriptionID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Event-Unsubscribe">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="subscriptionID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Event-UnsubscribeResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Event-Schedule">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="icalString" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="eventID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="params" type="dss:inParameter" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Event-ScheduleResponse">
-   <complexType>
-    <sequence>
-     <element name="scheduledEventID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Event-DeleteSchedule">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="scheduleEventID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Event-DeleteScheduleResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -2027,54 +1927,6 @@
  <part name="parameters" element="dss:Event-RaiseResponse"/>
 </message>
 
-<message name="Event-GetActionNamesRequest">
- <part name="parameters" element="dss:Event-GetActionNames"/>
-</message>
-
-<message name="Event-GetActionNamesResponse">
- <part name="parameters" element="dss:Event-GetActionNamesResponse"/>
-</message>
-
-<message name="Event-GetActionParamsTemplate">
- <part name="parameters" element="dss:Event-GetActionParamsTemplate"/>
-</message>
-
-<message name="outParameter">
- <part name="parameters" element="dss:outParameter"/>
-</message>
-
-<message name="Event-SubscribeRequest">
- <part name="parameters" element="dss:Event-Subscribe"/>
-</message>
-
-<message name="Event-SubscribeResponse">
- <part name="parameters" element="dss:Event-SubscribeResponse"/>
-</message>
-
-<message name="Event-UnsubscribeRequest">
- <part name="parameters" element="dss:Event-Unsubscribe"/>
-</message>
-
-<message name="Event-UnsubscribeResponse">
- <part name="parameters" element="dss:Event-UnsubscribeResponse"/>
-</message>
-
-<message name="Event-ScheduleRequest">
- <part name="parameters" element="dss:Event-Schedule"/>
-</message>
-
-<message name="Event-ScheduleResponse">
- <part name="parameters" element="dss:Event-ScheduleResponse"/>
-</message>
-
-<message name="Event-DeleteScheduleRequest">
- <part name="parameters" element="dss:Event-DeleteSchedule"/>
-</message>
-
-<message name="Event-DeleteScheduleResponse">
- <part name="parameters" element="dss:Event-DeleteScheduleResponse"/>
-</message>
-
 <portType name="MyType">
  <operation name="Test">
   <documentation>Service definition of function dss__Test</documentation>
@@ -2445,36 +2297,6 @@
   <documentation>Service definition of function dss__Event_Raise</documentation>
   <input message="tns:Event-RaiseRequest"/>
   <output message="tns:Event-RaiseResponse"/>
- </operation>
- <operation name="Event-GetActionNames">
-  <documentation>Service definition of function dss__Event_GetActionNames</documentation>
-  <input message="tns:Event-GetActionNamesRequest"/>
-  <output message="tns:Event-GetActionNamesResponse"/>
- </operation>
- <operation name="Event-GetActionParamsTemplate">
-  <documentation>Service definition of function dss__Event_GetActionParamsTemplate</documentation>
-  <input message="tns:Event-GetActionParamsTemplate"/>
-  <output message="tns:outParameter"/>
- </operation>
- <operation name="Event-Subscribe">
-  <documentation>Service definition of function dss__Event_Subscribe</documentation>
-  <input message="tns:Event-SubscribeRequest"/>
-  <output message="tns:Event-SubscribeResponse"/>
- </operation>
- <operation name="Event-Unsubscribe">
-  <documentation>Service definition of function dss__Event_Unsubscribe</documentation>
-  <input message="tns:Event-UnsubscribeRequest"/>
-  <output message="tns:Event-UnsubscribeResponse"/>
- </operation>
- <operation name="Event-Schedule">
-  <documentation>Service definition of function dss__Event_Schedule</documentation>
-  <input message="tns:Event-ScheduleRequest"/>
-  <output message="tns:Event-ScheduleResponse"/>
- </operation>
- <operation name="Event-DeleteSchedule">
-  <documentation>Service definition of function dss__Event_DeleteSchedule</documentation>
-  <input message="tns:Event-DeleteScheduleRequest"/>
-  <output message="tns:Event-DeleteScheduleResponse"/>
  </operation>
 </portType>
 
@@ -3138,60 +2960,6 @@
   </output>
  </operation>
  <operation name="Event-Raise">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="Event-GetActionNames">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="Event-GetActionParamsTemplate">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="Event-Subscribe">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="Event-Unsubscribe">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="Event-Schedule">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="Event-DeleteSchedule">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

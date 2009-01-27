@@ -1,10 +1,11 @@
 #include "soapH.h"
-#include "../core/dss.h"
-#include "../core/logger.h"
+#include "core/dss.h"
+#include "core/logger.h"
+#include "core/event.h"
 
 #include <vector>
 #include <string>
-#include <boost/foreach.hpp>
+#include <boost/shared_ptr.hpp>
 
 int dss__Test(struct soap *soap, char*, std::vector<int>& res) {
   res.push_back(1);
@@ -984,52 +985,27 @@ int dss__Group_RemoveDevice(struct soap *soap, int _token, int _groupID, int _de
 
 //==================================================== Events
 
-int dss__Event_Raise(struct soap *soap, int _token, int _eventID, int _sourceID, dss__inParameter _params, int& result) {
+int dss__Event_Raise(struct soap *soap, int _token, char* _eventName, char* _context, char* _parameter, char* _location, bool& result) {
   if(!IsAuthorized(soap, _token)) {
+    result = false;
     return NotAuthorized(soap);
   }
-  /*
-  int numNames = 0;
-  int numValues = 0;
-  if(_params.names != NULL) {
-    numNames = _params.names->__size;
+
+  boost::shared_ptr<dss::Event> evt(new dss::Event(_eventName));
+  evt->SetLocation(_location);
+  evt->SetContext(_context);
+  vector<string> params = dss::SplitString(_context, ';');
+  for(vector<string>::iterator iParam = params.begin(), e = params.end();
+      iParam != e; ++iParam)
+  {
+    vector<string> nameValue = dss::SplitString(*iParam, ',');
+    if(nameValue.size() == 2) {
+      evt->SetProperty(nameValue[0], nameValue[1]);
+    } else {
+      dss::Logger::GetInstance()->Log(string("Invalid parameter found SOAP::Event_Raise: ") + *iParam );
+    }
   }
-  if(_params.values != NULL) {
-    numValues = _params.values->__size;
-  }
-  if(numNames != numValues) {
-    soap_receiver_fault(soap, "Names and values of _params must have the same number of items", NULL);
-  }
+  dss::DSS::GetInstance()->GetEventQueue().PushEvent(evt);
 
-
-  //dss::Event evt(_eventID, _sourceID);
-  //dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
- // apt.OnEvent();
-  */
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
-}
-
-int dss__Event_GetActionNames(struct soap *soap, int _token,  std::vector<std::string>& names) {
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
-}
-
-int dss__Event_GetActionParamsTemplate(struct soap *soap, int _token,  char* _name, dss__outParameter& paramsTemplate) {
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
-}
-
-int dss__Event_Subscribe(struct soap *soap, int _token, std::vector<int> _eventIDs, std::vector<int> _sourceIDs, char* _actionName, dss__inParameter _params, int& subscriptionID) {
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
-}
-
-int dss__Event_Unsubscribe(struct soap *soap, int _token, int _subscriptionID, int& result) {
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
-}
-
-int dss__Event_Schedule(struct soap *soap, int _token,  char* _icalString, int _eventID, dss__inParameter _params, int& scheduledEventID) {
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
-}
-
-int dss__Event_DeleteSchedule(struct soap *soap, int _token, int _scheduleEventID, int& result) {
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
-}
-
+  return SOAP_OK;
+} // dss__Event_Raise

@@ -84,6 +84,14 @@ namespace dss {
     }
   } // UnsetProperty
 
+  bool Event::SetProperty(const string& _name, const string& _value) {
+    if(!_name.empty()) {
+      m_Properties.Set(_name, _value);
+      return true;
+    }
+    return false;
+  }
+
   const Zone& Event::GetRaisedAtZone() const {
     if(m_RaiseLocation == erlZone) {
       return *m_RaisedAtZone;
@@ -110,7 +118,6 @@ namespace dss {
 
   EventInterpreter::~EventInterpreter() {
     ScrubVector(m_Plugins);
-    ScrubVector(m_Subscriptions);
   } // dtor
 
   void EventInterpreter::AddPlugin(EventInterpreterPlugin* _plugin) {
@@ -134,7 +141,7 @@ namespace dss {
 
           Logger::GetInstance()->Log(string("EventInterpreter: Got event from queue: '") + toProcess->GetName() + "'");
 
-          for(vector<EventSubscription*>::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
+          for(vector< boost::shared_ptr<EventSubscription> >::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
               ipSubscription != e; ++ipSubscription)
           {
             if((*ipSubscription)->Matches(*toProcess)) {
@@ -174,12 +181,12 @@ namespace dss {
     return NULL;
   } // GetPluginByName
 
-  void EventInterpreter::Subscribe(EventSubscription* _subscription) {
+  void EventInterpreter::Subscribe(boost::shared_ptr<EventSubscription> _subscription) {
     m_Subscriptions.push_back(_subscription);
   } // Subscribe
 
   void EventInterpreter::Unsubscribe(const string& _subscriptionID) {
-    for(vector<EventSubscription*>::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
+    for(vector< boost::shared_ptr<EventSubscription> >::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
         ipSubscription != e; ++ipSubscription)
     {
       if((*ipSubscription)->GetID() == _subscriptionID) {
@@ -264,7 +271,7 @@ namespace dss {
       return;
     }
 
-    SubscriptionOptions* opts = NULL;
+    boost::shared_ptr<SubscriptionOptions> opts;
     bool hadOpts = false;
 
     EventInterpreterPlugin* plugin = GetPluginByName(handlerName);
@@ -272,24 +279,23 @@ namespace dss {
       Logger::GetInstance()->Log(string("EventInterpreter::LoadSubscription: could not find plugin for handler-name '") + handlerName + "'", lsWarning);
       Logger::GetInstance()->Log(       "EventInterpreter::LoadSubscription: Still generating a subscription but w/o inner parameter", lsWarning);
     } else {
-      opts = plugin->CreateOptionsFromXML(_node.GetChildren());
+      opts.reset(plugin->CreateOptionsFromXML(_node.GetChildren()));
       hadOpts = true;
     }
     try {
       XMLNode& paramNode = _node.GetChildByName("parameter");
-      if(opts == NULL) {
-        opts = new SubscriptionOptions();
+      if(opts.get() == NULL) {
+        opts.reset(new SubscriptionOptions());
       }
       opts->LoadParameterFromXML(paramNode);
     } catch(runtime_error& e) {
       // only delete options created in the try-part...
       if(!hadOpts) {
-        delete opts;
-        opts = NULL;
+        opts.reset();
       }
     }
 
-    EventSubscription* subscription = new EventSubscription(evtName, handlerName, opts);
+    boost::shared_ptr<EventSubscription> subscription(new EventSubscription(evtName, handlerName, opts));
     try {
       XMLNode& filterNode = _node.GetChildByName("filter");
       LoadFilter(filterNode, *subscription);
@@ -490,7 +496,7 @@ namespace dss {
 
   //================================================== EventSubscription
 
-  EventSubscription::EventSubscription(const string& _eventName, const string& _handlerName, SubscriptionOptions* _options)
+  EventSubscription::EventSubscription(const string& _eventName, const string& _handlerName, boost::shared_ptr<SubscriptionOptions> _options)
   : m_EventName(_eventName),
     m_HandlerName(_handlerName),
     m_ID(_eventName + _handlerName),
@@ -499,7 +505,7 @@ namespace dss {
     Initialize();
   } // ctor
 
-  EventSubscription::EventSubscription(const string& _eventName, const string& _handlerName, const string& _id, SubscriptionOptions* _options)
+  EventSubscription::EventSubscription(const string& _eventName, const string& _handlerName, const string& _id, boost::shared_ptr<SubscriptionOptions> _options)
   : m_EventName(_eventName),
     m_HandlerName(_handlerName),
     m_ID(_id),
@@ -509,7 +515,6 @@ namespace dss {
   } // ctor(with id)
 
   EventSubscription::~EventSubscription() {
-    delete m_SubscriptionOptions;
   } // dtor
 
   void EventSubscription::Initialize() {
@@ -522,7 +527,7 @@ namespace dss {
   } // AddPropertyFilter
 
   bool EventSubscription::Matches(Event& _event) {
-    for(vector<EventPropertyFilter*>::iterator ipFilter = m_Filter.begin(), e = m_Filter.end();
+    for(boost::ptr_vector<EventPropertyFilter*>::iterator ipFilter = m_Filter.begin(), e = m_Filter.end();
         ipFilter != e; ++ipFilter)
     {
       if((*ipFilter)->Matches(_event)) {

@@ -241,20 +241,4 @@ public:
 
 //==================================================== Events
 
-//int dss__Event_Raise(int _token, char* _eventName, char* _parameter);
-
-/** Raises an event with the given _eventID from _sourceID with _params */
-int dss__Event_Raise(int _token, int _eventID, int _sourceID, dss__inParameter _params, int& result);
-/** Returns an array of the names of all registered actions */
-int dss__Event_GetActionNames(int _token, std::vector<std::string>& names);
-/** Returns a parameter template for the given action _name. */
-int dss__Event_GetActionParamsTemplate(int _token, char* _name, dss__outParameter& paramsTemplate);
-/** Adds a subscriptions to the events specified in _eventIDs if risen from one of _sourceIDs. If an
- * event with said properties occurs, the action identified by _actionName will be executed with the given _params. */
-int dss__Event_Subscribe(int _token, std::vector<int> _eventIDs, std::vector<int> _sourceIDs, char* _actionName, dss__inParameter _params, int& subscriptionID);
-/** Cancels a subscription. */
-int dss__Event_Unsubscribe(int _token, int _subscriptionID, int& result);
-/** Schedules an event. */
-int dss__Event_Schedule(int _token, char* _icalString, int _eventID, dss__inParameter _params, int& scheduledEventID);
-/** Cancels a scheduled event. */
-int dss__Event_DeleteSchedule(int _token, int _scheduleEventID, int& result);
+int dss__Event_Raise(int _token, char* _eventName, char* _context, char* _parameter, char* _location, bool& result);

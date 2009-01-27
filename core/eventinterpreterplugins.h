@@ -9,7 +9,7 @@
 #define EVENTINTERPRETERPLUGINS_H_
 
 #include "event.h"
-#include "DS485Interface.h"
+#include "jshandler.h"
 
 namespace dss {
   class EventInterpreterPluginRaiseEvent : public EventInterpreterPlugin {
@@ -21,11 +21,15 @@ namespace dss {
   }; // EventInterpreterPluginRaiseEvent
 
   class EventInterpreterPluginJavascript : public EventInterpreterPlugin {
+  private:
+    ScriptEnvironment m_Environment;
   public:
     EventInterpreterPluginJavascript(EventInterpreter* _pInterpreter);
 
     virtual void HandleEvent(Event& _event, const EventSubscription& _subscription);
   }; // EventInterpreterPluginJavascript
+
+  class DS485Interface;
 
   class EventInterpreterPluginDS485 : public EventInterpreterPlugin {
   private:

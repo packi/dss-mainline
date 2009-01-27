@@ -15,6 +15,12 @@
      <element name="names" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
    </sequence>
   </complexType>
+  <complexType name="outParameter">
+   <sequence>
+     <element name="values" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+     <element name="names" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+   </sequence>
+  </complexType>
   <!-- operation request element -->
   <element name="Test">
    <complexType>
@@ -1294,9 +1300,10 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="eventID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="sourceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="params" type="dss:inParameter" minOccurs="1" maxOccurs="1"/>
+     <element name="eventName" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="context" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="parameter" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="location" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
@@ -1304,114 +1311,7 @@
   <element name="Event-RaiseResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Event-GetActionNames">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Event-GetActionNamesResponse">
-   <complexType>
-    <sequence>
-     <element name="names" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Event-GetActionParamsTemplate">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="name" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="outParameter">
-   <complexType>
-    <sequence>
-     <element name="values" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
-     <element name="names" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Event-Subscribe">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="eventIDs" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
-     <element name="sourceIDs" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
-     <element name="actionName" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="params" type="dss:inParameter" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Event-SubscribeResponse">
-   <complexType>
-    <sequence>
-     <element name="subscriptionID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Event-Unsubscribe">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="subscriptionID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Event-UnsubscribeResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Event-Schedule">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="icalString" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="eventID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="params" type="dss:inParameter" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Event-ScheduleResponse">
-   <complexType>
-    <sequence>
-     <element name="scheduledEventID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Event-DeleteSchedule">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="scheduleEventID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Event-DeleteScheduleResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>

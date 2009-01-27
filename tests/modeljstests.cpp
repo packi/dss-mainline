@@ -33,6 +33,7 @@ class ModelTestJS : public CPPUNIT_NS::TestCase
   CPPUNIT_TEST(testSets);
   CPPUNIT_TEST(testDevices);
   CPPUNIT_TEST(testEvents);
+  CPPUNIT_TEST(testSubscriptions);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -131,7 +132,7 @@ protected:
     env->Initialize();
     ScriptExtension* ext = new ModelScriptContextExtension(apt);
     env->AddExtension(ext);
-    ext = new EventScriptExtension(queue);
+    ext = new EventScriptExtension(queue, interpreter);
     env->AddExtension(ext);
 
     EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
@@ -145,6 +146,40 @@ protected:
                         "\n");
     ctx->Evaluate<void>();
   } // testEvents
+
+  void testSubscriptions() {
+    Apartment apt;
+
+    Device& dev = apt.AllocateDevice(1);
+    dev.SetShortAddress(1);
+    dev.SetName("dev");
+
+    EventQueue queue;
+    EventRunner runner;
+    EventInterpreter interpreter(&queue);
+    interpreter.SetEventRunner(&runner);
+    queue.SetEventRunner(&runner);
+    runner.SetEventQueue(&queue);
+
+    boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+    env->Initialize();
+    ScriptExtension* ext = new ModelScriptContextExtension(apt);
+    env->AddExtension(ext);
+    ext = new EventScriptExtension(queue, interpreter);
+    env->AddExtension(ext);
+
+    EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
+    interpreter.AddPlugin(plugin);
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetNumberOfSubscriptions(), 0);
+
+    boost::scoped_ptr<ScriptContext> ctx(env->GetContext());
+    ctx->LoadFromMemory("var s = new subscription('test', 'test', { 'param1': 1, 'param2': 2, 'string': 'string'} );\n"
+                        "s.subscribe();\n"
+                        "\n");
+    ctx->Evaluate<void>();
+  } // testSubscriptions
+
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(ModelTestJS);
