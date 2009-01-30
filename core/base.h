@@ -94,20 +94,25 @@ namespace dss {
   typedef hash_map<string, string> HashMapStringString;
   typedef hash_map<const string, string> HashMapConstStringString;
   //============================================= Conversion helpers
-  template<class strclass>
-  int StrToInt(const strclass& _strValue);
 
-  template<typename strclass>
-  int StrToInt(const strclass* _strValue);
+  int StrToInt(const string& _strValue);
+  int StrToInt(const char* _strValue);
 
-  unsigned int StrToUInt(const string _strValue);
-  int StrToIntDef(const string _strValue, const int _default);
+  unsigned int StrToUInt(const string& _strValue);
+  int StrToIntDef(const string& _strValue, const int _default);
 
   string IntToString(const int _int);
   string UIntToString(unsigned long int _int);
 
+  double StrToDouble(const string& _strValue);
+  double StrToDouble(const string& _strValue, const double _default);
+
+  string UnsignedLongIntToHexString(const unsigned long long _value);
+
+  string DoubleToString(const double _value);
+
   template <class t>
-  t DateToISOString( const struct tm* _dateTime );
+  t DateToISOString(const struct tm* _dateTime);
 
   extern const char* theISOFormatString;
 

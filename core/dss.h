@@ -22,6 +22,7 @@
 #include "../webservices/webservices.h"
 #include "model.h"
 #include "event.h"
+#include "metering/metering.h"
 
 #include <cstdio>
 #include <string>
@@ -55,6 +56,7 @@ namespace dss {
     WebServices m_WebServices;
     EventInterpreter m_EventInterpreter;
     EventQueue m_EventQueue;
+    Metering m_Metering;
 
     DSS();
 
@@ -72,6 +74,7 @@ namespace dss {
     EventRunner& GetEventRunner() { return m_EventRunner; }
     WebServices& GetWebServices() { return m_WebServices; }
     EventQueue& GetEventQueue() { return m_EventQueue; }
+    Metering& GetMetering() { return m_Metering; }
   }; // DSS
 
 }

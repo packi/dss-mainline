@@ -2,6 +2,7 @@
 #define SERIES_H_INCLUDED
 
 #include "core/datetools.h"
+#include "core/xmlwrapper.h"
 
 #include <boost/shared_ptr.hpp>
 #include <queue>
@@ -39,6 +40,13 @@ namespace dss {
       }
     } // MergeWith
 
+    virtual void ReadFromXMLNode(XMLNode& _node) {
+      m_Value = StrToDouble(_node.GetAttributes()["value"]);
+      m_Min = StrToDouble(_node.GetAttributes()["min"]);
+      m_Max = StrToDouble(_node.GetAttributes()["max"]);
+      m_TimeStamp = DateTime::FromISO(_node.GetAttributes()["timestamp"]);
+    } // ReadFromXMLNode
+
     const DateTime& GetTimeStamp() const { return m_TimeStamp; }
     void SetTimeStamp(const DateTime& _value) { m_TimeStamp = _value; }
     double GetMin() const { return m_Min; }
@@ -55,6 +63,10 @@ namespace dss {
     AdderValue(double _value)
     : Value(_value)
     {}
+
+    virtual void ReadFromXMLNode(XMLNode& _node) {
+      Value::ReadFromXMLNode(_node);
+    }
 
     virtual void MergeWith(const Value& _other)
     {
@@ -129,6 +141,10 @@ namespace dss {
       AddValue(value_type(_value, _timestamp));
     } // AddValue
 
+    std::deque<value_type>& GetValues() { return m_Values; }
+    const std::deque<value_type>& GetValues() const { return m_Values; }
+
+    void SetNextSeries(Series<T>* _value) { m_NextSeries = _value; }
     int GetNumberOfValues() const { return m_NumberOfValues; }
     int GetResolution() const { return m_Resolution; }
   }; // Series

@@ -28,27 +28,20 @@ namespace dss {
 
   //============================================= String parsing/formatting/conversion
 
-  template<>
-  int StrToInt(const wstring& _strValue) {
-    return wcstol(_strValue.c_str(), NULL, 10);
-  }
-
-  template<>
-  int StrToInt(const wchar_t* _strValue) {
-    return wcstol(_strValue, NULL, 10);
-  }
-
-  template<>
   int StrToInt(const string& _strValue) {
-    return atoi(_strValue.c_str());
-  }
+    return StrToInt(_strValue.c_str());
+  } // StrToInt
 
-  template<>
   int StrToInt(const char* _strValue) {
-    return atoi(_strValue);
-  }
+    char* endp;
+    int result = strtol(_strValue, &endp, 0);
+    if(*endp != '\0') {
+      throw invalid_argument(string("StrToInt: Could not parse value: '") + _strValue + "'");
+    }
+    return result;
+  } // StrToInt
 
-  int StrToIntDef(const string _strValue, const int _default) {
+  int StrToIntDef(const string& _strValue, const int _default) {
     char* endp;
     int result = strtol(_strValue.c_str(), &endp, 0);
     if(*endp != '\0') {
@@ -57,11 +50,38 @@ namespace dss {
     return result;
   } // StrToIntDef
 
-  unsigned int StrToUInt(const string _strValue) {
+  unsigned int StrToUInt(const string& _strValue) {
     char* endp;
     unsigned int result = strtoul(_strValue.c_str(), &endp, 10);
+    if(*endp != '\0') {
+      throw invalid_argument(string("StrToUInt: Could not parse value: '") + _strValue + "'");
+    }
     return result;
-  }
+  } // StrToUInt
+
+  double StrToDouble(const string& _strValue) {
+    char* endp;
+    double result = strtod(_strValue.c_str(), &endp);
+    if(*endp != '\0') {
+      throw invalid_argument(string("StrToDouble: Could not parse value: '") + _strValue + "'");
+    }
+    return result;
+  } // StrToDouble
+
+  double StrToDouble(const string& _strValue, const double _default) {
+    char* endp;
+    double result = strtod(_strValue.c_str(), &endp);
+    if(*endp != '\0') {
+      return _default;
+    }
+    return result;
+  } // StrToDouble
+
+  string DoubleToString(const double _value) {
+    stringstream sstream;
+    sstream << _value;
+    return sstream.str();
+  } // DoubleToString
 
   string IntToString(const int _int) {
     stringstream sstream;
@@ -74,6 +94,12 @@ namespace dss {
     sstream << _int;
     return sstream.str();
   } // UIntToString
+
+  string UnsignedLongIntToHexString(const unsigned long long _value) {
+    stringstream sstream;
+    sstream << hex << _value;
+    return sstream.str();
+  }
 
   const char* theISOFormatString = "%Y-%m-%d %H:%M:%S";
 
