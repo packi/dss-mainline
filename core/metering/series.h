@@ -4,8 +4,16 @@
 #include "core/datetools.h"
 #include "core/xmlwrapper.h"
 
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/AutoPtr.h>
+
 #include <boost/shared_ptr.hpp>
 #include <queue>
+
+using Poco::XML::Document;
+using Poco::XML::Element;
+using Poco::XML::AutoPtr;
 
 namespace dss {
 
@@ -46,6 +54,13 @@ namespace dss {
       m_Max = StrToDouble(_node.GetAttributes()["max"]);
       m_TimeStamp = DateTime::FromISO(_node.GetAttributes()["timestamp"]);
     } // ReadFromXMLNode
+
+    virtual void WriteToXMLNode(AutoPtr<Element>& _elem) const {
+      _elem->setAttribute("value", DoubleToString(m_Value));
+      _elem->setAttribute("min", DoubleToString(m_Min));
+      _elem->setAttribute("max", DoubleToString(m_Max));
+      _elem->setAttribute("timestamp", (string)m_TimeStamp);
+    } // WriteToXMLNode
 
     const DateTime& GetTimeStamp() const { return m_TimeStamp; }
     void SetTimeStamp(const DateTime& _value) { m_TimeStamp = _value; }

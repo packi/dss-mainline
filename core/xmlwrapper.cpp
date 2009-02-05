@@ -125,10 +125,16 @@ namespace dss {
   } // GetChildByName
 
   XMLNode& XMLNode::AddChildNode(const string& _name, const string& _content) {
+    AssertHasNode("Need a node to append a child to");
+
     if(_name.size() == 0) {
       throw XMLException("XMLNode::AddChildNode: parameter _name must not be empty");
     }
-    throw XMLException("Not yet implemented");
+   /* XMLNode result(xmlNewChild(m_pNode, NULL, _name.c_str(), _content.c_str()));
+    m_Children.push_back(result);
+    return m_Children[m_Children.size()];
+    */
+    throw XMLException("XMLNode::AddChildNode: parameter _name must not be empty");
   } // AddChildNode
 
   HashMapConstStringString& XMLNode::GetAttributes() {

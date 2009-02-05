@@ -7,8 +7,8 @@
           <xsl:attribute name="points">
             <xsl:for-each select="value">
               <xsl:if test="not(position() = 1)"><xsl:text> </xsl:text></xsl:if>
-              <xsl:variable name="val" select="."/>
-              <xsl:value-of select="concat(position() * 10, ',', $val*10)"/>
+              <!--<xsl:variable name="val" select="@value"/>-->
+              <xsl:value-of select="concat(position() * 20, ',', @value*2)"/>
             </xsl:for-each>
           </xsl:attribute>
         </polyline>

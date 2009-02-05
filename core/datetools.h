@@ -12,7 +12,7 @@
 
 #include "base.h"
 
-#include <ical.h>
+#include <libical/ical.h>
 #include <vector>
 #include <ostream>
 

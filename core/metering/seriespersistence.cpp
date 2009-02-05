@@ -10,6 +10,29 @@
 #include "core/xmlwrapper.h"
 #include "core/logger.h"
 
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Attr.h>
+#include <Poco/DOM/ProcessingInstruction.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/XML/XMLWriter.h>
+
+#include <iostream>
+#include <fstream>
+
+
+using Poco::XML::Document;
+using Poco::XML::Element;
+using Poco::XML::Attr;
+using Poco::XML::ProcessingInstruction;
+using Poco::XML::Text;
+using Poco::XML::AutoPtr;
+using Poco::XML::DOMWriter;
+using Poco::XML::XMLWriter;
+
+
 namespace dss {
 
   const int SeriesXMLFileVersion = 1;
@@ -48,8 +71,8 @@ namespace dss {
         if(iNode->GetName() == "value") {
           try {
             T value(0);
-            value.LoadFromXMLNode(*iNode);
-            result.AddValue(value);
+            value.ReadFromXMLNode(*iNode);
+            result->AddValue(value);
           } catch(runtime_error& e) {
             Logger::GetInstance()->Log(string("SeriesReader::ReadFromXML: Error while reading value: ") + e.what());
           }
@@ -60,7 +83,48 @@ namespace dss {
     return NULL;
   }
 
+  //================================================== SeriesWriter
+
+  template<class T>
+  bool SeriesWriter<T>::WriteToXML(const Series<T>& _series, const string& _path) {
+    AutoPtr<Document> pDoc = new Document;
+
+    AutoPtr<ProcessingInstruction> pXMLHeader = pDoc->createProcessingInstruction("xml", "version='1.0' encoding='utf-8'");
+    pDoc->appendChild(pXMLHeader);
+    AutoPtr<ProcessingInstruction> pProcessing = pDoc->createProcessingInstruction("xml-stylesheet", "href='value_graph.xslt' type='text/xsl'");
+    pDoc->appendChild(pProcessing);
+    AutoPtr<Element> pRoot = pDoc->createElement("values");
+    pRoot->setAttribute("version", IntToString(SeriesXMLFileVersion));
+    pDoc->appendChild(pRoot);
+
+    const std::deque<T> values = _series.GetValues();
+    for(typename std::deque<T>::const_iterator iValue = values.begin(), e = values.end();
+        iValue != e; ++iValue)
+    {
+      AutoPtr<Element> elem = pDoc->createElement("value");
+      iValue->WriteToXMLNode(elem);
+      pRoot->appendChild(elem);
+    }
+
+    std::ofstream ofs(_path.c_str() );
+
+    if(ofs) {
+      DOMWriter writer;
+      writer.setNewLine("\n");
+      writer.setOptions(XMLWriter::PRETTY_PRINT);
+      writer.writeNode(ofs, pDoc);
+
+      ofs.close();
+    } else {
+      Logger::GetInstance()->Log("Could not open file for writing");
+    }
+
+    return true;
+
+  }
+
   //================================================== Explicit instantiations
   template class SeriesReader<AdderValue>;
+  template class SeriesWriter<AdderValue>;
 
 } // namespace dss

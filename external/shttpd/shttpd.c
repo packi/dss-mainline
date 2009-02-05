@@ -124,7 +124,7 @@ stop_stream(struct stream *stream)
 	stream->flags &= ~(FLAG_R | FLAG_W | FLAG_ALWAYS_READY);
 
 	DBG(("%d %s stopped. %lu of content data, %d now in a buffer",
-	    stream->conn->rem.chan.sock, 
+	    stream->conn->rem.chan.sock,
 	    stream->io_class ? stream->io_class->name : "(null)",
 	    (unsigned long) stream->io.total, io_data_len(&stream->io)));
 }
@@ -360,6 +360,8 @@ static const struct {
 	{"htm",		3,	"text/html"			},
 	{"txt",		3,	"text/plain"			},
 	{"css",		3,	"text/css"			},
+	{"xml",   3,  "text/xml"      },
+  {"xslt",  4,  "application/xml"  },
 	{"ico",		3,	"image/x-icon"			},
 	{"gif",		3,	"image/gif"			},
 	{"jpg",		3,	"image/jpeg"			},
@@ -468,7 +470,7 @@ get_path_info(struct conn *c, char *path, struct stat *stp)
 
 	p = path + strlen(path);
 	e = path + strlen(c->ctx->options[OPT_ROOT]) + 2;
-	
+
 	/* Strip directory parts of the path one by one */
 	for (; p > e; p--)
 		if (*p == '/') {
@@ -501,7 +503,7 @@ decide_what_to_do(struct conn *c)
 
 	url_decode(c->uri, strlen(c->uri), c->uri, strlen(c->uri) + 1);
 	remove_double_dots(c->uri);
-	
+
 	root = c->ctx->options[OPT_ROOT];
 	if (strlen(c->uri) + strlen(root) >= sizeof(path)) {
 		send_server_error(c, 400, "URI is too long");
@@ -750,7 +752,7 @@ shttpd_add_socket(struct shttpd_ctx *ctx, int sock, int is_ssl)
 		set_close_on_exec(sock);
 
 		c->loc.io_class	= NULL;
-	
+
 		c->rem.io_class	= &io_socket;
 		c->rem.chan.sock = sock;
 
@@ -772,7 +774,7 @@ shttpd_add_socket(struct shttpd_ctx *ctx, int sock, int is_ssl)
 		LL_TAIL(&ctx->connections, &c->link);
 		ctx->nactive++;
 		LeaveCriticalSection(&ctx->mutex);
-		
+
 		DBG(("%s:%hu connected (socket %d)",
 		    inet_ntoa(* (struct in_addr *) &sa.u.sin.sin_addr.s_addr),
 		    ntohs(sa.u.sin.sin_port), sock));
@@ -821,13 +823,13 @@ shttpd_accept(int lsn_sock, int milliseconds)
 	struct usa	sa;
 	fd_set		read_set;
 	int		sock = -1;
-	
+
 	tv.tv_sec	= milliseconds / 1000;
 	tv.tv_usec	= milliseconds % 1000;
 	sa.len		= sizeof(sa.u.sin);
 	FD_ZERO(&read_set);
 	FD_SET(lsn_sock, &read_set);
-	
+
 	if (select(lsn_sock + 1, &read_set, NULL, NULL, &tv) == 1)
 		sock = accept(lsn_sock, &sa.u.sa, &sa.len);
 
@@ -1014,7 +1016,7 @@ process_connection(struct conn *c, int remote_ready, int local_ready)
 		write_stream(&c->rem, &c->loc);
 
 	if (io_data_len(&c->loc.io) > 0 && c->rem.io_class != NULL)
-		write_stream(&c->loc, &c->rem); 
+		write_stream(&c->loc, &c->rem);
 
 	if (c->rem.nread_last > 0)
 		c->ctx->in += c->rem.nread_last;
@@ -1058,7 +1060,7 @@ shttpd_poll(struct shttpd_ctx *ctx, int milliseconds)
 	/* Multiplex streams */
 	LL_FOREACH(&ctx->connections, lp) {
 		c = LL_ENTRY(lp, struct conn, link);
-		
+
 		/* If there is a space in remote IO, check remote socket */
 		if (io_space_len(&c->rem.io))
 			add_to_set(c->rem.chan.fd, &read_set, &max_fd);
@@ -1091,7 +1093,7 @@ shttpd_poll(struct shttpd_ctx *ctx, int milliseconds)
 		if (io_space_len(&c->loc.io) && (c->loc.flags & FLAG_R) &&
 		    (c->loc.flags & FLAG_ALWAYS_READY))
 			msec = 0;
-		
+
 		if (io_data_len(&c->rem.io) && (c->loc.flags & FLAG_W) &&
 		    (c->loc.flags & FLAG_ALWAYS_READY))
 			msec = 0;

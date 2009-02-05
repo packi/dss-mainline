@@ -84,6 +84,7 @@
 <option id="gnu.cpp.link.option.strip.411759775" name="Omit all symbol information (-s)" superClass="gnu.cpp.link.option.strip"/>
 <option id="gnu.cpp.link.option.libs.226478544" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="xml2"/>
+<listOptionValue builtIn="false" value="PocoXML"/>
 <listOptionValue builtIn="false" value="boost_filesystem"/>
 <listOptionValue builtIn="false" value="gsoap++"/>
 <listOptionValue builtIn="false" value="rt"/>

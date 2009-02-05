@@ -20,7 +20,8 @@ namespace dss {
 
   template<class T>
   class SeriesWriter {
-    static bool WriteToXML(const Series<T>& _series, const string& _path);
+  public:
+    bool WriteToXML(const Series<T>& _series, const string& _path);
   }; // SeriesWriter
 } // namespace dss
 
