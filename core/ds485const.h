@@ -72,6 +72,7 @@ namespace dss {
 
   const uint8 FunctionModulatorGetDSID = 0xF1;
   const uint8 FunctionModulatorGetPowerConsumption = 0x52;
+  const uint8 FunctionModulatorGetEnergyMeterValue = 0x53;
 
   const uint8 FunctionDeviceGetFunctionID = 0x66;
 

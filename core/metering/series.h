@@ -3,6 +3,7 @@
 
 #include "core/datetools.h"
 #include "core/xmlwrapper.h"
+#include "core/datetools.h"
 
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
@@ -10,6 +11,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <queue>
+#include <iostream>
 
 using Poco::XML::Document;
 using Poco::XML::Element;
@@ -52,7 +54,7 @@ namespace dss {
       m_Value = StrToDouble(_node.GetAttributes()["value"]);
       m_Min = StrToDouble(_node.GetAttributes()["min"]);
       m_Max = StrToDouble(_node.GetAttributes()["max"]);
-      m_TimeStamp = DateTime::FromISO(_node.GetAttributes()["timestamp"]);
+      m_TimeStamp = DateTime(DateFromISOString(_node.GetAttributes()["timestamp"].c_str()));
     } // ReadFromXMLNode
 
     virtual void WriteToXMLNode(AutoPtr<Element>& _elem) const {
@@ -113,6 +115,9 @@ namespace dss {
     { } // ctor
 
     void AddValue(const value_type& _value) {
+      if(m_Resolution == 0) {
+        throw runtime_error("Series::AddValue: m_Resolution is Zero. This will lead to an infinite loop");
+      }
       if(!m_Values.empty()) {
         Value& lastVal = m_Values.front();
         DateTime lastValStamp = lastVal.GetTimeStamp();

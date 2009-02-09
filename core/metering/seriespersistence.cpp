@@ -95,6 +95,8 @@ namespace dss {
     pDoc->appendChild(pProcessing);
     AutoPtr<Element> pRoot = pDoc->createElement("values");
     pRoot->setAttribute("version", IntToString(SeriesXMLFileVersion));
+    pRoot->setAttribute("resolution", IntToString(_series.GetResolution()));
+    pRoot->setAttribute("numberOfValues", IntToString(_series.GetNumberOfValues()));
     pDoc->appendChild(pRoot);
 
     const std::deque<T> values = _series.GetValues();

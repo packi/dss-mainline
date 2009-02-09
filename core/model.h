@@ -362,6 +362,7 @@ namespace dss {
     void AddDevice(const DeviceReference& _device);
 
     unsigned long GetPowerConsumption();
+    unsigned long GetEnergyMeterValue();
   }; // Modulator
 
   /** Represents a predefined group */

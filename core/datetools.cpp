@@ -31,6 +31,11 @@ namespace dss {
   : m_DateTime(_copy.m_DateTime)
   { } // ctor(copy)
 
+  DateTime::DateTime(const struct tm& _tm) {
+    m_DateTime = _tm;
+    Validate();
+  }
+
   void DateTime::Validate() {
     mktime(&m_DateTime);
   } // Validate

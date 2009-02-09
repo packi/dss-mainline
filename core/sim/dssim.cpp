@@ -681,7 +681,14 @@ namespace dss {
             case FunctionModulatorGetPowerConsumption:
               {
                 response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<dsid_t>(0);
+                response->GetPayload().Add<devid_t>(0);
+                DistributeFrame(response);
+              }
+              break;
+            case FunctionModulatorGetEnergyMeterValue:
+              {
+                response = CreateResponse(cmdFrame, cmdNr);
+                response->GetPayload().Add<devid_t>(0);
                 DistributeFrame(response);
               }
               break;

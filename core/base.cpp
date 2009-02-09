@@ -29,52 +29,58 @@ namespace dss {
   //============================================= String parsing/formatting/conversion
 
   int StrToInt(const string& _strValue) {
-    return StrToInt(_strValue.c_str());
-  } // StrToInt
-
-  int StrToInt(const char* _strValue) {
-    char* endp;
-    int result = strtol(_strValue, &endp, 0);
-    if(*endp != '\0') {
-      throw invalid_argument(string("StrToInt: Could not parse value: '") + _strValue + "'");
+    if(!_strValue.empty()) {
+      char* endp;
+      int result = strtol(_strValue.c_str(), &endp, 0);
+      if(*endp == '\0') {
+        return result;
+      }
     }
-    return result;
+    throw invalid_argument(string("StrToInt: Could not parse value: '") + _strValue + "'");
   } // StrToInt
 
   int StrToIntDef(const string& _strValue, const int _default) {
-    char* endp;
-    int result = strtol(_strValue.c_str(), &endp, 0);
-    if(*endp != '\0') {
-      return _default;
+    if(!_strValue.empty()) {
+      char* endp;
+      int result = strtol(_strValue.c_str(), &endp, 0);
+      if(*endp == '\0') {
+        return result;
+      }
     }
-    return result;
+    return _default;
   } // StrToIntDef
 
   unsigned int StrToUInt(const string& _strValue) {
-    char* endp;
-    unsigned int result = strtoul(_strValue.c_str(), &endp, 10);
-    if(*endp != '\0') {
-      throw invalid_argument(string("StrToUInt: Could not parse value: '") + _strValue + "'");
+    if(!_strValue.empty()) {
+      char* endp;
+      unsigned int result = strtoul(_strValue.c_str(), &endp, 0);
+      if(*endp == '\0') {
+        return result;
+      }
     }
-    return result;
+    throw invalid_argument(string("StrToUInt: Could not parse value: '") + _strValue + "'");
   } // StrToUInt
 
   double StrToDouble(const string& _strValue) {
-    char* endp;
-    double result = strtod(_strValue.c_str(), &endp);
-    if(*endp != '\0') {
-      throw invalid_argument(string("StrToDouble: Could not parse value: '") + _strValue + "'");
+    if(!_strValue.empty()) {
+      char* endp;
+      double result = strtod(_strValue.c_str(), &endp);
+      if(*endp == '\0') {
+        return result;
+      }
     }
-    return result;
+    throw invalid_argument(string("StrToDouble: Could not parse value: '") + _strValue + "'");
   } // StrToDouble
 
   double StrToDouble(const string& _strValue, const double _default) {
-    char* endp;
-    double result = strtod(_strValue.c_str(), &endp);
-    if(*endp != '\0') {
-      return _default;
+    if(!_strValue.empty()) {
+      char* endp;
+      double result = strtod(_strValue.c_str(), &endp);
+      if(*endp == '\0') {
+        return result;
+      }
     }
-    return result;
+    return _default;
   } // StrToDouble
 
   string DoubleToString(const double _value) {

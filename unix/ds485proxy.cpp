@@ -626,8 +626,26 @@ namespace dss {
     }
     PayloadDissector pd(results.at(0)->GetPayload());
     pd.Get<uint8>(); // discard the function id
-    return pd.Get<uint32_t>();
+    return pd.Get<devid_t>();
   } // GetPowerConsumption
+
+  unsigned long DS485Proxy::GetEnergyMeterValue(const int _modulatorID) {
+    DS485CommandFrame cmdFrame;
+    cmdFrame.GetHeader().SetDestination(_modulatorID);
+    cmdFrame.SetCommand(CommandRequest);
+    cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetEnergyMeterValue);
+    Logger::GetInstance()->Log(string("Proxy: GetEnergyMeterValue ") + IntToString(_modulatorID));
+    SendFrame(cmdFrame);
+
+    vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionModulatorGetEnergyMeterValue);
+    if(results.size() != 1) {
+      Logger::GetInstance()->Log(string("DS485Proxy::GetEnergyMeterValue: received multiple results ") + IntToString(results.size()), lsError);
+      return 0;
+    }
+    PayloadDissector pd(results.at(0)->GetPayload());
+    pd.Get<uint8>(); // discard the function id
+    return pd.Get<devid_t>();
+  } // GetEnergyMeterValue
 
   void DS485Proxy::Subscribe(const int _modulatorID, const int _groupID, const int _deviceID) {
     DS485CommandFrame cmdFrame;
@@ -662,6 +680,8 @@ namespace dss {
 
     if(m_DS485Controller.GetState() == csSlave || m_DS485Controller.GetState() == csMaster) {
       // Wait for four tokens
+      m_DS485Controller.WaitForToken();
+      m_DS485Controller.WaitForToken();
       m_DS485Controller.WaitForToken();
       m_DS485Controller.WaitForToken();
       m_DS485Controller.WaitForToken();
@@ -843,6 +863,9 @@ namespace dss {
 
     case FunctionModulatorGetPowerConsumption:
     	return "Function Modulator Get PowerConsumption";
+
+    case FunctionModulatorGetEnergyMeterValue:
+      return "Function Modulator Get Energy-Meter Value";
 
     case FunctionGetTypeRequest:
       return "Function Get Type";

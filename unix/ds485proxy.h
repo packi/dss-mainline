@@ -123,6 +123,7 @@ namespace dss {
     virtual dsid_t GetDSIDOfModulator(const int _modulatorID);
 
     virtual unsigned long GetPowerConsumption(const int _modulatorID);
+    virtual unsigned long GetEnergyMeterValue(const int _modulatorID);
 
     virtual void Subscribe(const int _moduatorID, const int _groupID, const int _deviceID);
 

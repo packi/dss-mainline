@@ -96,7 +96,6 @@ namespace dss {
   //============================================= Conversion helpers
 
   int StrToInt(const string& _strValue);
-  int StrToInt(const char* _strValue);
 
   unsigned int StrToUInt(const string& _strValue);
   int StrToIntDef(const string& _strValue, const int _default);
@@ -113,6 +112,7 @@ namespace dss {
 
   template <class t>
   t DateToISOString(const struct tm* _dateTime);
+  struct tm DateFromISOString(const char* _dateTimeAsString);
 
   extern const char* theISOFormatString;
 

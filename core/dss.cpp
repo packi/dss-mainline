@@ -54,7 +54,7 @@ namespace dss {
 #endif
     m_Apartment.Run();
 
-    m_Metering.Run();
+//    m_Metering.Run();
 
     EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&m_EventInterpreter);
     m_EventInterpreter.AddPlugin(plugin);

@@ -24,34 +24,35 @@ class BaseTest : public CPPUNIT_NS::TestCase
   CPPUNIT_TEST_SUITE(BaseTest);
   CPPUNIT_TEST(testCRC);
   CPPUNIT_TEST(testURLDecode);
+  CPPUNIT_TEST(testConversions);
   CPPUNIT_TEST_SUITE_END();
-  
+
 public:
   void setUp(void) {}
-  void tearDown(void) {} 
-  
+  void tearDown(void) {}
+
 protected:
-  
+
   void testCRC() {
     const char testStr[] = "123456789";
-    
+
     uint16_t crc = CRC16((unsigned const char*)&testStr, sizeof(testStr)-1);
 //    CPPUNIT_ASSERT_EQUAL((uint16_t)0x29b1, crc);
-    
-    
+
+
     const char testStr2[] = "\xfd\x01\x03\x14\xbb\x01\x00\x00";//\xeb\x08";
     crc = CRC16((unsigned const char*)&testStr2, sizeof(testStr2)-1);
     printf("%2x\n", crc );
   }
-  
-  void testURLDecode(void) { 
+
+  void testURLDecode(void) {
     CPPUNIT_ASSERT_EQUAL(string(" "), URLDecode("%20"));
     CPPUNIT_ASSERT_EQUAL(string("a "), URLDecode("a%20"));
     CPPUNIT_ASSERT_EQUAL(string(" a"), URLDecode("%20a"));
     CPPUNIT_ASSERT_EQUAL(string("v a"), URLDecode("v%20a"));
     CPPUNIT_ASSERT_EQUAL(string("  "), URLDecode("%20%20"));
     CPPUNIT_ASSERT_EQUAL(string("   "), URLDecode("%20%20%20"));
-    
+
     CPPUNIT_ASSERT_EQUAL(string(" "), URLDecode("+"));
     CPPUNIT_ASSERT_EQUAL(string("  "), URLDecode("++"));
     CPPUNIT_ASSERT_EQUAL(string(" a "), URLDecode("+a+"));
@@ -61,6 +62,17 @@ protected:
     CPPUNIT_ASSERT_EQUAL(string("sourceid=1&schedule=FREQ=MINUTELY;INTERVAL=1&start=20080520T080000Z"),
                          URLDecode("sourceid=1&schedule=FREQ%3DMINUTELY%3BINTERVAL%3D1&start=20080520T080000Z"));
   }
+
+  void testConversions() {
+    CPPUNIT_ASSERT_EQUAL(1, StrToInt("1"));
+    CPPUNIT_ASSERT_EQUAL(1, StrToInt("0x1"));
+    CPPUNIT_ASSERT_EQUAL(10, StrToInt("0xa"));
+
+    CPPUNIT_ASSERT_EQUAL(-1, StrToIntDef("", -1));
+    CPPUNIT_ASSERT_EQUAL(-1, StrToIntDef(" ", -1));
+    CPPUNIT_ASSERT_EQUAL(-1, StrToIntDef("gfdfg", -1));
+    CPPUNIT_ASSERT_EQUAL(1, StrToIntDef("1", -1));
+  } // testConversions
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(BaseTest);

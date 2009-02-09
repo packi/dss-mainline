@@ -983,6 +983,11 @@ namespace dss {
     return DSS::GetInstance()->GetDS485Interface().GetPowerConsumption(m_BusID);
   } // GetPowerConsumption
 
+  unsigned long Modulator::GetEnergyMeterValue() {
+    return DSS::GetInstance()->GetDS485Interface().GetEnergyMeterValue(m_BusID);
+  } // GetEnergyMeterValue
+
+
   //================================================== Zone
 
   Set Zone::GetDevices() const {
