@@ -136,6 +136,8 @@ namespace dss {
   uint16_t CRC16(unsigned const char* _data, const int _size);
   uint16_t update_crc(uint16_t _crc, const unsigned char& c);
 
+  string Trim(const string& _str);
+
   //============================================= Helper classes
 
   class Properties {

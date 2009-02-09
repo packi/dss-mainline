@@ -10,6 +10,7 @@
 #include "dss.h"
 #include "logger.h"
 #include "xmlwrapper.h"
+#include "propertysystem.h"
 #include "scripting/modeljs.h"
 #include "eventinterpreterplugins.h"
 #ifdef __GNUC__
@@ -27,6 +28,7 @@ namespace dss {
 
   DSS::DSS() {
     m_EventInterpreter.SetEventQueue(&m_EventQueue);
+    m_PropertySystem = boost::shared_ptr<PropertySystem>(new PropertySystem);
   } // ctor
 
   DSS* DSS::m_Instance = NULL;

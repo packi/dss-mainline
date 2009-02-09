@@ -28,6 +28,15 @@ namespace dss {
 
   //============================================= String parsing/formatting/conversion
 
+  string Trim(const string& _str) {
+    string result = _str;
+    string::size_type notwhite = result.find_first_not_of( " \t\n\r" );
+    result.erase(0,notwhite);
+    notwhite = result.find_last_not_of( " \t\n\r" );
+    result.erase( notwhite + 1 );
+    return result;
+  } // Trim
+
   int StrToInt(const string& _strValue) {
     if(!_strValue.empty()) {
       char* endp;

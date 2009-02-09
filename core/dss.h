@@ -31,6 +31,7 @@
 using namespace std;
 
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace dss {
 
@@ -38,6 +39,7 @@ namespace dss {
   class WebServer;
   class Config;
   class DS485Interface;
+  class PropertySystem;
 
   /** Main class
     *
@@ -48,6 +50,7 @@ namespace dss {
     WebServer m_WebServer;
     Config m_Config;
     DS485Interface* m_DS485Interface;
+    boost::shared_ptr<PropertySystem> m_PropertySystem;
     Apartment m_Apartment;
 #ifdef USE_SIM
     DSModulatorSim m_ModulatorSim;
@@ -75,6 +78,7 @@ namespace dss {
     WebServices& GetWebServices() { return m_WebServices; }
     EventQueue& GetEventQueue() { return m_EventQueue; }
     Metering& GetMetering() { return m_Metering; }
+    PropertySystem& GetPropertySystem() { return *m_PropertySystem; }
   }; // DSS
 
 }
