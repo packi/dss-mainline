@@ -22,18 +22,19 @@
 #define LOGGER_H_INLUDED
 
 #include <string>
-
-using namespace std;
+#include <boost/shared_ptr.hpp>
 
 typedef enum {
-  lsDebug,
-  lsInfo,
-  lsWarning,
-  lsError,
-  lsFatal
+  lsDebug = 0,
+  lsInfo = 1,
+  lsWarning = 2,
+  lsError = 3,
+  lsFatal = 4
 } aLogSeverity;
 
 namespace dss {
+
+  class LogChannel;
 
   class Logger {
   private:
@@ -43,11 +44,30 @@ namespace dss {
   public:
     static Logger* GetInstance();
 
-    void Log(const string& _message, const aLogSeverity _severity = lsDebug);
+    void Log(const std::string& _message, const aLogSeverity _severity = lsDebug);
     void Log(const char* _message, const aLogSeverity _severity = lsDebug);
-    void Log(const wchar_t* _message, const aLogSeverity _severity = lsDebug);
-    void Log(const wstring& _message, const aLogSeverity _severity = lsDebug);
+
+    void Log(const LogChannel& _channel, const std::string& _message, const aLogSeverity _severity = lsDebug);
   }; // Logger
+
+  class LogChannel {
+  private:
+    const std::string m_Name;
+    aLogSeverity m_MinimumSeverity;
+  public:
+    LogChannel(const std::string& _name, aLogSeverity _minimumSeverity = lsDebug)
+    : m_Name(_name), m_MinimumSeverity(_minimumSeverity)
+    {
+      Logger::GetInstance()->Log(*this, "Logchannel created", lsInfo);
+    }
+
+    aLogSeverity GetMinimumSeverity() const { return m_MinimumSeverity; }
+    void SetMinimumSeverity(aLogSeverity _value) { m_MinimumSeverity = _value; }
+    const std::string& GetName() const { return m_Name; }
+    bool MayLog(aLogSeverity _severity) const { return _severity >= m_MinimumSeverity; }
+  }; // LogChannel
+
+
 }
 
 #endif

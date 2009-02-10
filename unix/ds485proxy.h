@@ -10,12 +10,13 @@
 #ifndef _DS485_PROXY_H_INCLUDED
 #define _DS485_PROXY_H_INCLUDED
 
-#include "../core/model.h"
+#include "core/model.h"
 
-#include "../core/ds485types.h"
+#include "core/ds485types.h"
 #include "ds485.h"
-#include "../core/syncevent.h"
-#include "../core/DS485Interface.h"
+#include "core/syncevent.h"
+#include "core/DS485Interface.h"
+#include "core/subsystem.h"
 
 #include <map>
 #include <vector>
@@ -63,6 +64,7 @@ namespace dss {
   typedef vector<boost::shared_ptr<DS485CommandFrame> > CommandFrameSharedPtrVector;
 
   class DS485Proxy : protected Thread,
+                     public    Subsystem,
                      public    DS485Interface,
                      public    IDS485FrameCollector {
   private:
@@ -84,7 +86,7 @@ namespace dss {
   protected:
     virtual void Execute();
   public:
-    DS485Proxy();
+    DS485Proxy(DSS* _pDSS);
     virtual ~DS485Proxy() {};
 
     virtual bool IsReady();
@@ -92,7 +94,8 @@ namespace dss {
     void SendFrame(DS485CommandFrame& _frame, bool _force = false);
 
     //------------------------------------------------ Handling
-    void Start();
+    virtual void Initialize();
+    virtual void Start();
     void WaitForProxyEvent();
 
     virtual void CollectFrame(boost::shared_ptr<DS485CommandFrame>& _frame);

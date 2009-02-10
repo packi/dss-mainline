@@ -5,8 +5,9 @@
 namespace dss {
   //================================================== WebServices
 
-  WebServices::WebServices()
-  : Thread("WebServices")
+  WebServices::WebServices(DSS* _pDSS)
+  : Subsystem(_pDSS, "WebServices"),
+    Thread("WebServices")
   {
 
   } // ctor
@@ -14,6 +15,11 @@ namespace dss {
   WebServices::~WebServices() {
 
   } // dtor
+
+  void WebServices::Start() {
+    Subsystem::Start();
+    Run();
+  }
 
   void WebServices::Execute() {
     m_Service.bind(NULL, 8081, 10);

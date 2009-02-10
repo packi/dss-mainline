@@ -9,10 +9,11 @@
 
 #include "ds485proxy.h"
 
-#include "../core/model.h"
-#include "../core/dss.h"
-#include "../core/logger.h"
-#include "../core/ds485const.h"
+#include "core/model.h"
+#include "core/dss.h"
+#include "core/logger.h"
+#include "core/ds485const.h"
+#include "core/sim/dssim.h"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -153,8 +154,9 @@ namespace dss {
     return FittingResultPerModulator(fittingGroups, singleDevices);
   }
 
-  DS485Proxy::DS485Proxy()
-  : Thread("DS485Proxy")
+  DS485Proxy::DS485Proxy(DSS* _pDSS)
+  : Thread("DS485Proxy"),
+    Subsystem(_pDSS, "DS485Proxy")
   { } // ctor
 
   bool DS485Proxy::IsReady() {
@@ -178,12 +180,12 @@ namespace dss {
 
   vector<int> DS485Proxy::SendCommand(DS485Command _cmd, const Set& _set, int _param) {
     if(_set.Length() == 1) {
-      Logger::GetInstance()->Log("Optimization: Set contains only one device");
+      Log("Optimization: Set contains only one device");
       return SendCommand(_cmd, _set.Get(0).GetDevice(), _param);
     } else if(_set.Length() > 0) {
       Apartment& apt = _set.Get(0).GetDevice().GetApartment();
       if(_set.Length() == apt.GetDevices().Length()) {
-        Logger::GetInstance()->Log("Optimization: Set contains all devices of apartment");
+        Log("Optimization: Set contains all devices of apartment");
         // TODO: Get the group from the zone
         return SendCommand(_cmd, apt.GetZone(0), apt.GetGroup(GroupIDBroadcast), _param);
       }
@@ -352,12 +354,12 @@ namespace dss {
     bool broadcast = _frame.GetHeader().IsBroadcast();
     bool sim = IsSimAddress(_frame.GetHeader().GetDestination());
     if(broadcast || sim) {
-      cout << "sim" << endl;
+      Log("Sending packet to sim");
       DSS::GetInstance()->GetModulatorSim().Process(_frame);
     }
     if(broadcast || !sim) {
       if((m_DS485Controller.GetState() == csSlave) || (m_DS485Controller.GetState() == csMaster)) {
-        cout << "hw" << endl;
+        Log("Sending packet to hardware");
         //if(_force) {
         	m_DS485Controller.EnqueueFrame(_frame);
         //}
@@ -375,7 +377,7 @@ namespace dss {
     cmdFrame.GetHeader().SetBroadcast(true);
     cmdFrame.SetCommand(CommandRequest);
     cmdFrame.GetPayload().Add<uint8>(FunctionGetTypeRequest);
-    Logger::GetInstance()->Log("Proxy: GetModulators");
+    Log("Proxy: GetModulators");
     SendFrame(cmdFrame);
 
     vector<int> result;
@@ -388,7 +390,7 @@ namespace dss {
     {
       int source = (*iFrame)->GetHeader().GetSource();
       if(resultFrom[source]) {
-        cout << "already received result from " << source << endl;
+        Log(string("already received result from ") + IntToString(source));
         continue;
       }
       resultFrom[source] = true;
@@ -398,26 +400,26 @@ namespace dss {
       uint16_t devID = pd.Get<uint16_t>();
       devID &= 0x00FF;
       if(devID == 0) {
-        cout << "Found dSS\n";
+        Log("Found dSS");
       } else if(devID == 1) {
-        cout << "Found dSM\n";
+        Log("Found dSM");
       } else {
-        cout << "Found unknown device (" << devID << ")\n";
+        Log(string("Found unknown device (") + IntToString(devID) + ")");
       }
       uint16_t hwVersion = pd.Get<uint16_t>();
       uint16_t swVersion = pd.Get<uint16_t>();
 
-      cout << "HW: " << (hwVersion >> 8) << "." << (hwVersion && 0xFF00) << "\n";
-      cout << "SW: " << (swVersion >> 8) << "." << (swVersion && 0xFF00) << "\n";
+      Log(string("  HW-Version: ") + IntToString(hwVersion >> 8) + "." + IntToString(hwVersion && 0xFF00));
+      Log(string("  SW-Version: ") + IntToString(swVersion >> 8) + "." + IntToString(swVersion && 0xFF00));
 
-      cout << "Name: \"";
+      string name;
       for(int i = 0; i < 6; i++) {
         char c = static_cast<char>(pd.Get<uint8>());
         if(c != '\0') {
-          cout << c;
+          name += c;
         }
       }
-      cout << "\"" << endl;
+      Log(string("  Name:      \"") + name + "\"");
 
       result.push_back(source);
     }
@@ -440,7 +442,7 @@ namespace dss {
     vector<int> result;
 
     int numGroups = GetGroupCount(_modulatorID, _zoneID);
-    Logger::GetInstance()->Log(string("Modulator has ") + IntToString(numGroups) + " groups");
+    Log(string("Modulator has ") + IntToString(numGroups) + " groups");
     for(int iGroup = 0; iGroup < numGroups; iGroup++) {
       DS485CommandFrame cmdFrame;
       cmdFrame.GetHeader().SetDestination(_modulatorID);
@@ -492,18 +494,18 @@ namespace dss {
     vector<int> result;
 
     int numZones = GetZoneCount(_modulatorID);
-    Logger::GetInstance()->Log(string("Proxy: Modulator has ") + IntToString(numZones) + " zones");
+    Log(string("Modulator has ") + IntToString(numZones) + " zones");
     for(int iGroup = 0; iGroup < numZones; iGroup++) {
       DS485CommandFrame cmdFrame;
       cmdFrame.GetHeader().SetDestination(_modulatorID);
       cmdFrame.SetCommand(CommandRequest);
       cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetZoneIdForInd);
       cmdFrame.GetPayload().Add<uint16_t>(iGroup);
-      Logger::GetInstance()->Log("Proxy: GetZoneID");
+      Log("GetZoneID");
       SendFrame(cmdFrame);
       uint8 tempResult = ReceiveSingleResult(FunctionModulatorGetZoneIdForInd);
       result.push_back(tempResult);
-      cout << "Zone ID: " << (unsigned int)tempResult << endl;
+      Log("Receive ZoneID: " + UIntToString((unsigned int)tempResult));
     }
     return result;
   } // GetZones
@@ -513,7 +515,7 @@ namespace dss {
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
     cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetZonesSize);
-    Logger::GetInstance()->Log("Proxy: GetZoneCount");
+    Log("GetZoneCount");
     SendFrame(cmdFrame);
 
     uint8 result = ReceiveSingleResult(FunctionModulatorGetZonesSize);
@@ -526,7 +528,7 @@ namespace dss {
     cmdFrame.SetCommand(CommandRequest);
     cmdFrame.GetPayload().Add<uint8>(FunctionModulatorCountDevInZone);
     cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
-    Logger::GetInstance()->Log("Proxy: GetDevicesCountInZone");
+    Log("GetDevicesCountInZone");
     SendFrame(cmdFrame);
 
     uint8_t result = ReceiveSingleResult(FunctionModulatorCountDevInZone);
@@ -537,7 +539,7 @@ namespace dss {
     vector<int> result;
 
     int numDevices = GetDevicesCountInZone(_modulatorID, _zoneID);
-    Logger::GetInstance()->Log(string("Proxy: Found ") + IntToString(numDevices) + " in zone.");
+    Log(string("Found ") + IntToString(numDevices) + " in zone.");
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
       DS485CommandFrame cmdFrame;
       cmdFrame.GetHeader().SetDestination(_modulatorID);
@@ -580,11 +582,11 @@ namespace dss {
     cmdFrame.GetPayload().Add<uint8>(FunctionDeviceGetDSID);
     cmdFrame.GetPayload().Add<uint16_t>(_deviceID);
     SendFrame(cmdFrame);
-    Logger::GetInstance()->Log("Proxy: GetDSIDOfDevice");
+    Log("Proxy: GetDSIDOfDevice");
 
     vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionDeviceGetDSID);
     if(results.size() != 1) {
-      Logger::GetInstance()->Log(string("DS485Proxy::GetDSIDOfDevice: received multiple or 0 results: ") + IntToString(results.size()), lsError);
+      Log(string("DS485Proxy::GetDSIDOfDevice: received multiple or 0 results: ") + IntToString(results.size()), lsError);
       return 0;
     }
     PayloadDissector pd(results.at(0)->GetPayload());
@@ -598,12 +600,12 @@ namespace dss {
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
     cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetDSID);
-    Logger::GetInstance()->Log(string("Proxy: GetDSIDOfModulator ") + IntToString(_modulatorID));
+    Log(string("Proxy: GetDSIDOfModulator ") + IntToString(_modulatorID));
     SendFrame(cmdFrame);
 
     vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionModulatorGetDSID);
     if(results.size() != 1) {
-      Logger::GetInstance()->Log(string("DS485Proxy::GetDSIDOfModulator: received multiple results ") + IntToString(results.size()), lsError);
+      Log(string("DS485Proxy::GetDSIDOfModulator: received multiple results ") + IntToString(results.size()), lsError);
       return 0;
     }
     PayloadDissector pd(results.at(0)->GetPayload());
@@ -616,12 +618,12 @@ namespace dss {
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
     cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetPowerConsumption);
-    Logger::GetInstance()->Log(string("Proxy: GetPowerConsumption ") + IntToString(_modulatorID));
+    Log(string("Proxy: GetPowerConsumption ") + IntToString(_modulatorID));
     SendFrame(cmdFrame);
 
     vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionModulatorGetPowerConsumption);
     if(results.size() != 1) {
-      Logger::GetInstance()->Log(string("DS485Proxy::GetPowerConsumption: received multiple results ") + IntToString(results.size()), lsError);
+      Log(string("DS485Proxy::GetPowerConsumption: received multiple results ") + IntToString(results.size()), lsError);
       return 0;
     }
     PayloadDissector pd(results.at(0)->GetPayload());
@@ -634,12 +636,12 @@ namespace dss {
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
     cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetEnergyMeterValue);
-    Logger::GetInstance()->Log(string("Proxy: GetEnergyMeterValue ") + IntToString(_modulatorID));
+    Log(string("Proxy: GetEnergyMeterValue ") + IntToString(_modulatorID));
     SendFrame(cmdFrame);
 
     vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionModulatorGetEnergyMeterValue);
     if(results.size() != 1) {
-      Logger::GetInstance()->Log(string("DS485Proxy::GetEnergyMeterValue: received multiple results ") + IntToString(results.size()), lsError);
+      Log(string("DS485Proxy::GetEnergyMeterValue: received multiple results ") + IntToString(results.size()), lsError);
       return 0;
     }
     PayloadDissector pd(results.at(0)->GetPayload());
@@ -654,7 +656,7 @@ namespace dss {
     cmdFrame.GetPayload().Add<uint8>(FunctionDeviceSubscribe);
     cmdFrame.GetPayload().Add<uint16_t>(_groupID);
     cmdFrame.GetPayload().Add<devid_t>(_deviceID);
-    Logger::GetInstance()->Log(string("Proxy: Subscribe ") + IntToString(_modulatorID));
+    Log(string("Proxy: Subscribe ") + IntToString(_modulatorID));
     SendFrame(cmdFrame);
   } // Subscribe
 
@@ -684,8 +686,6 @@ namespace dss {
       m_DS485Controller.WaitForToken();
       m_DS485Controller.WaitForToken();
       m_DS485Controller.WaitForToken();
-      m_DS485Controller.WaitForToken();
-      m_DS485Controller.WaitForToken();
     } else {
       SleepMS(100);
     }
@@ -708,11 +708,12 @@ namespace dss {
   uint8 DS485Proxy::ReceiveSingleResult(const uint8 _functionID) {
     vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(_functionID);
 
-    if(results.size() > 1 || results.size() < 1) {
-      cout << results.size() << endl;
-      Logger::GetInstance()->Log(string("received multiple or none results for request (") + FunctionIDToString(_functionID) + ")");
-      return 0;
-      //throw runtime_error("received multiple or none results for request");
+    if(results.empty()) {
+      Log(string("received no results for request (") + FunctionIDToString(_functionID) + ")");
+      return 0; // TODO: rewrite
+    } else if(results.size() > 1) {
+      Log(string("received multiple results (") + IntToString(results.size()) + ") for request (" + FunctionIDToString(_functionID) + ")");
+      return 0; // TODO: rewrite
     }
 
     DS485CommandFrame* frame = results.at(0).get();
@@ -720,7 +721,7 @@ namespace dss {
     PayloadDissector pd(frame->GetPayload());
     uint8 functionID = pd.Get<uint8>();
     if(functionID != _functionID) {
-      Logger::GetInstance()->Log("function ids are different");
+      Log("function ids are different");
     }
     uint8 result = pd.Get<uint8>();
 
@@ -732,11 +733,12 @@ namespace dss {
   uint16_t DS485Proxy::ReceiveSingleResult16(const uint8 _functionID) {
     vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(_functionID);
 
-    if(results.size() > 1 || results.size() < 1) {
-      cout << results.size() << endl;
-      Logger::GetInstance()->Log(string("received multiple or none results for request (") + FunctionIDToString(_functionID) + ")");
-      return 0;
-      //throw runtime_error("received multiple or none results for request");
+    if(results.empty()) {
+      Log(string("received no results for request (") + FunctionIDToString(_functionID) + ")");
+      return 0; // TODO: rewrite
+    } else if(results.size() > 1) {
+      Log(string("received multiple results (") + IntToString(results.size()) + ") for request (" + FunctionIDToString(_functionID) + ")");
+      return 0; // TODO: rewrite
     }
 
     DS485CommandFrame* frame = results.at(0).get();
@@ -744,13 +746,13 @@ namespace dss {
     PayloadDissector pd(frame->GetPayload());
     uint8 functionID = pd.Get<uint8>();
     if(functionID != _functionID) {
-      Logger::GetInstance()->Log("function ids are different");
+      Log("function ids are different");
     }
     uint16_t result = pd.Get<uint8>();
     if(!pd.IsEmpty()) {
       result |= (pd.Get<uint8>() << 8);
     } else {
-      Logger::GetInstance()->Log("ReceiveSingleResult16: only received half of the data (8bit)");
+      Log("ReceiveSingleResult16: only received half of the data (8bit)");
     }
 
     results.clear();
@@ -758,16 +760,22 @@ namespace dss {
     return result;
   } // ReceiveSingleResult16
 
-  void DS485Proxy::Start() {
+  void DS485Proxy::Initialize() {
+    Subsystem::Initialize();
     m_DS485Controller.AddFrameCollector(this);
     DSS::GetInstance()->GetModulatorSim().AddFrameCollector(this);
+  }
+
+  void DS485Proxy::Start() {
+    Subsystem::Start();
     try {
       m_DS485Controller.Run();
     } catch (const runtime_error& _ex) {
-    	Logger::GetInstance()->Log(string("Caught exception while starting DS485Controlle: ") + _ex.what());
+    	Log(string("Caught exception while starting DS485Controlle: ") + _ex.what());
     }
+    // call Thread::Run()
     Run();
-  } // Start
+  } // Run
 
   void DS485Proxy::WaitForProxyEvent() {
     m_ProxyEvent.WaitFor();
@@ -891,27 +899,28 @@ namespace dss {
 
 			vector<unsigned char> ch = frame->GetPayload().ToChar();
 			if(ch.size() < 1) {
-			  Logger::GetInstance()->Log("Received Command Frame w/o function identifier");
+			  Log("Received Command Frame w/o function identifier");
 			  continue;
 			}
 
 			uint8 functionID = ch.front();
 			if(frame->GetCommand() == CommandRequest) {
+/*
 			  if(functionID == FunctionKeyPressed) {
-				Logger::GetInstance()->Log("Got keypress");
+				Log("Got keypress");
 				PayloadDissector pd(frame->GetPayload());
 				pd.Get<uint8>();
 				uint16_t param = pd.Get<uint16_t>();
-				Logger::GetInstance()->Log("Zone: " + IntToString((param >> 8) & 0x00FF));
+				Log("Zone: " + IntToString((param >> 8) & 0x00FF));
 				if(param & 0x0001 == 0x0001) {
 				  param = pd.Get<uint16_t>();
-				  Logger::GetInstance()->Log("Short version");
+				  Log("Short version");
 				  if((param & 0x8000) == 0x8000) {
-					Logger::GetInstance()->Log("From switch");
+					Log("From switch");
 					devid_t shortAddress = (param & 0x7F00) >> 8;
-					Logger::GetInstance()->Log(string("Device: ") + IntToString(shortAddress));
+					Log(string("Device: ") + IntToString(shortAddress));
 					int buttonNumber = (param & 0x00F0) >> 4;
-					Logger::GetInstance()->Log(string("Button: ") + IntToString(buttonNumber));
+					Log(string("Button: ") + IntToString(buttonNumber));
 					ButtonPressKind kind = static_cast<ButtonPressKind>(param & 0x000F);
 
 					Modulator& mod = DSS::GetInstance()->GetApartment().GetModulatorByBusID(frame->GetHeader().GetSource());
@@ -919,10 +928,10 @@ namespace dss {
 
 					DSS::GetInstance()->GetApartment().OnKeypress(devRef.GetDSID(), kind, buttonNumber);
 				  } else {
-					Logger::GetInstance()->Log("From sensor");
+					Log("From sensor");
 				  }
 				} else {
-				  Logger::GetInstance()->Log("Long version");
+				  Log("Long version");
 				  uint16_t param2 = pd.Get<uint16_t>();
 				  uint16_t param3 = pd.Get<uint16_t>();
 				  uint16_t param4 = pd.Get<uint16_t>();
@@ -941,21 +950,24 @@ namespace dss {
 					   << "mainqualif  : " << mainqualifier << endl;
 				}
 			  }
+*/
 			} else {
-			  cout << "Response: \n";
+			  std::ostringstream sstream;
+			  sstream << "Response: ";
 			  PayloadDissector pd(frame->GetPayload());
 			  while(!pd.IsEmpty()) {
-				uint8 data = pd.Get<uint8>();
-				cout << hex << (unsigned int)data << " " << dec << (int)data << "i ";
+				  uint8 data = pd.Get<uint8>();
+				  sstream << "(0x" << std::hex << (unsigned int)data << ", " << std::dec << (int)data << "d)";
 			  }
-			  cout << dec << endl;
+			  sstream << std::dec;
+			  Log(sstream.str());
 
 			  // create an explicit copy since frame is a shared ptr and would free the contained
 			  // frame if going out of scope
 			  DS485CommandFrame* pFrame = new DS485CommandFrame();
 			  *pFrame = *frame.get();
 
-			  Logger::GetInstance()->Log(string("Response for: ") + FunctionIDToString(functionID));
+			  Log(string("Response for: ") + FunctionIDToString(functionID));
 			  ReceivedFrame* rf = new ReceivedFrame(m_DS485Controller.GetTokenCount(), pFrame);
 			  m_ReceivedFramesByFunctionID[functionID].push_back(rf);
 			}
@@ -967,8 +979,8 @@ namespace dss {
   void DS485Proxy::CollectFrame(boost::shared_ptr<DS485CommandFrame>& _frame) {
     uint8 commandID = _frame->GetCommand();
     if(commandID != CommandResponse && commandID != CommandRequest) {
-      Logger::GetInstance()->Log("discarded non response/request frame", lsInfo);
-      Logger::GetInstance()->Log(string("frame type ") + CommandToString(commandID));
+      Log("discarded non response/request frame", lsInfo);
+      Log(string("frame type ") + CommandToString(commandID));
     } else {
       m_IncomingFrames.push_back(_frame);
       m_PacketHere.Signal();

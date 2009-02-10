@@ -2,42 +2,53 @@
 #include "logger.h"
 #include "model.h"
 #include "dss.h"
-#ifndef __PARADIGM__
+#include "event.h"
 #include "unix/ds485proxy.h"
-#endif
 #include "sim/dssim.h"
+#include "propertysystem.h"
 
+#include <iostream>
 #include <boost/shared_ptr.hpp>
 
 namespace dss {
   //============================================= WebServer
 
-  WebServer::WebServer()
-  : Thread("WebServer")
+  WebServer::WebServer(DSS* _pDSS)
+  : Subsystem(_pDSS, "WebServer"),
+    Thread("WebServer")
   {
     Logger::GetInstance()->Log("Starting Webserver...");
     m_SHttpdContext = shttpd_init();
+    DSS::GetInstance()->GetPropertySystem().SetStringValue("/config/webserver/ports", "8080", true);
+    DSS::GetInstance()->GetPropertySystem().SetStringValue("/config/webserver/webroot", "data/webroot", true);
   } // ctor
 
   WebServer::~WebServer() {
     shttpd_fini(m_SHttpdContext);
   } // dtor
 
-  void WebServer::Initialize(Config& _config) {
-    string ports = _config.GetOptionAs("webserverport", "8080");
-    Logger::GetInstance()->Log(string("Webserver: Listening on port(s) ") + ports);
+  void WebServer::Initialize() {
+    Subsystem::Initialize();
+
+    string ports = DSS::GetInstance()->GetPropertySystem().GetStringValue("/config/webserver/ports");
+    Log("Webserver: Listening on port(s) " + ports);
     shttpd_set_option(m_SHttpdContext, "ports", ports.c_str());
 
-    string aliases = string("/=") + _config.GetOptionAs<string>("webserverroot", "data/webroot");
-    Logger::GetInstance()->Log(string("Webserver: Configured aliases: ") + aliases);
+    string aliases = string("/=") + DSS::GetInstance()->GetPropertySystem().GetStringValue("/config/webserver/webroot");
+    Log("Webserver: Configured aliases: " + aliases);
     shttpd_set_option(m_SHttpdContext, "aliases", aliases.c_str());
 
     shttpd_register_uri(m_SHttpdContext, "/config", &HTTPListOptions, NULL);
     shttpd_register_uri(m_SHttpdContext, "/json/*", &JSONHandler, NULL);
   } // Initialize
 
+  void WebServer::Start() {
+    Subsystem::Start();
+    Run();
+  } // Start
+
   void WebServer::Execute() {
-    Logger::GetInstance()->Log("Webserver started", lsInfo);
+    Log("Webserver started", lsInfo);
     while(!m_Terminated) {
       shttpd_poll(m_SHttpdContext, 1000);
     }
@@ -55,7 +66,7 @@ namespace dss {
     }
   }
 
-  void WebServer::EmitHTTPHeader(int _code, struct shttpd_arg* _arg, string _contentType) {
+  void WebServer::EmitHTTPHeader(int _code, struct shttpd_arg* _arg, const std::string& _contentType) {
     stringstream sstream;
     sstream << "HTTP/1.1 " << _code << ' ' << HTTPCodeToMessage(_code) << "\r\n";
     sstream << "Content-Type: " << _contentType << "; charset=utf-8\r\n\r\n";
@@ -279,12 +290,13 @@ namespace dss {
       int command = StrToIntDef(paramMap["command"], 0x09 /* request */) & 0x00FF;
       int length = StrToIntDef(paramMap["length"], 0x00) & 0x0F;
 
-      cout << "sending frame: "
+      std::cout
+           << "sending frame: "
            << "\ndest:    " << destination
            << "\nbcst:    " << broadcast
            << "\ncntr:    " << counter
            << "\ncmd :    " << command
-           << "\nlen :    " << length << endl;
+           << "\nlen :    " << length << std::endl;
 
       DS485CommandFrame* frame = new DS485CommandFrame();
       frame->GetHeader().SetBroadcast(broadcast);
@@ -519,11 +531,13 @@ namespace dss {
 
     stringstream stream;
     stream << "<ul>";
-
+    // TODO: dump config tree into xml with a nice stylesheet
+/*
     const HashMapConstStringString& options = DSS::GetInstance()->GetConfig().GetOptions();
     for(HashMapConstStringString::const_iterator iOption = options.begin(); iOption != options.end(); ++iOption) {
       stream << "<li>" << iOption->first << " = " << iOption->second << "</li>";
     }
+*/
     stream << "</ul></body></html>";
     shttpd_printf(_arg, stream.str().c_str());
 

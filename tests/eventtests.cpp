@@ -42,7 +42,8 @@ protected:
   void testSimpleEvent(void) {
     EventQueue queue;
     EventRunner runner;
-    EventInterpreter interpreter(&queue);
+    EventInterpreter interpreter(NULL);
+    interpreter.SetEventQueue(&queue);
     interpreter.SetEventRunner(&runner);
     interpreter.Run();
 
@@ -70,7 +71,8 @@ protected:
   void testSubscription() {
     EventQueue queue;
     EventRunner runner;
-    EventInterpreter interpreter(&queue);
+    EventInterpreter interpreter(NULL);
+    interpreter.SetEventQueue(&queue);
     interpreter.SetEventRunner(&runner);
     EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
     interpreter.AddPlugin(plugin);
@@ -105,7 +107,8 @@ protected:
 
   void testEmptySubscriptionXML() {
     EventQueue queue;
-    EventInterpreter interpreter(&queue);
+    EventInterpreter interpreter(NULL);
+    interpreter.SetEventQueue(&queue);
 
     CPPUNIT_ASSERT_EQUAL(interpreter.GetNumberOfSubscriptions(), 0);
 
@@ -115,7 +118,7 @@ protected:
   } // testEmptySubscriptionXML
 
   void testNonExistingXML() {
-    EventInterpreter interpreter;
+    EventInterpreter interpreter(NULL);
 
     CPPUNIT_ASSERT_EQUAL(interpreter.GetNumberOfSubscriptions(), 0);
 
@@ -130,7 +133,8 @@ protected:
   void testSubscriptionXML() {
     EventQueue queue;
     EventRunner runner;
-    EventInterpreter interpreter(&queue);
+    EventInterpreter interpreter(NULL);
+    interpreter.SetEventQueue(&queue);
     interpreter.SetEventRunner(&runner);
     queue.SetEventRunner(&runner);
     runner.SetEventQueue(&queue);
@@ -174,7 +178,7 @@ protected:
   void testSetBuilder() {
     SetBuilder setBuilder;
 
-    Apartment apt;
+    Apartment apt(NULL);
 
     Device& dev1 = apt.AllocateDevice(1);
     dev1.SetName("dev1");
@@ -204,16 +208,17 @@ protected:
   void testDS485Events() {
     EventQueue queue;
     EventRunner runner;
-    EventInterpreter interpreter(&queue);
+    EventInterpreter interpreter(NULL);
+    interpreter.SetEventQueue(&queue);
     interpreter.SetEventRunner(&runner);
     queue.SetEventRunner(&runner);
     runner.SetEventQueue(&queue);
 
-    DSModulatorSim modSim;
+    DSModulatorSim modSim(NULL);
     modSim.Initialize();
-    DS485Proxy proxy;
+    DS485Proxy proxy(NULL);
 
-    Apartment apt;
+    Apartment apt(NULL);
 
     Device& dev1 = apt.AllocateDevice(1);
     dev1.SetName("dev1");

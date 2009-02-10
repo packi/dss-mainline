@@ -17,6 +17,7 @@
 
 #include "core/dss.h"
 #include "core/logger.h"
+#include "unix/ds485.h"
 #ifdef WITH_TESTS
 #include "tests/tests.h"
 #endif
@@ -115,6 +116,7 @@ int main (int argc, char * const argv[]) {
 #endif
   } else {
     // start DSS
+    dss::DSS::GetInstance()->Initialize();
     dss::DSS::GetInstance()->Run();
   }
   return 0;

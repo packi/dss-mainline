@@ -106,19 +106,29 @@ namespace dss {
 
   //================================================== EventInterpreter
 
-  EventInterpreter::EventInterpreter(EventQueue* _queue)
+/*
+
+   EventInterpreter::EventInterpreter(EventQueue* _queue)
   : m_Queue(_queue),
     m_EventsProcessed(0)
   { } // ctor(EventQueue)
-
-  EventInterpreter::EventInterpreter()
-  : m_Queue(NULL),
+*/
+  EventInterpreter::EventInterpreter(DSS* _pDSS)
+  : Subsystem(_pDSS, "EventInterpreter"),
+    Thread("EventInterpreter"),
+    m_Queue(NULL),
+    m_EventRunner(NULL),
     m_EventsProcessed(0)
   { } // ctor()
 
   EventInterpreter::~EventInterpreter() {
     ScrubVector(m_Plugins);
   } // dtor
+
+  void EventInterpreter::Start() {
+    Subsystem::Start();
+    Run();
+  }
 
   void EventInterpreter::AddPlugin(EventInterpreterPlugin* _plugin) {
     m_Plugins.push_back(_plugin);

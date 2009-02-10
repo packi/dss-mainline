@@ -17,6 +17,14 @@
 #include "../unix/ds485proxy.h"
 #endif
 
+#include "webserver.h"
+#ifdef USE_SIM
+  #include "sim/dssim.h"
+#endif
+#include "webservices/webservices.h"
+#include "event.h"
+#include "metering/metering.h"
+
 #include <cassert>
 #include <string>
 
@@ -26,10 +34,49 @@ namespace dss {
 
   //============================================= DSS
 
-  DSS::DSS() {
-    m_EventInterpreter.SetEventQueue(&m_EventQueue);
-    m_PropertySystem = boost::shared_ptr<PropertySystem>(new PropertySystem);
+  DSS::DSS()
+  {
+    m_State = ssInvalid;
+    m_pPropertySystem = boost::shared_ptr<PropertySystem>(new PropertySystem);
   } // ctor
+
+  void DSS::Initialize() {
+    m_State = ssCreatingSubsystems;
+
+    m_pDS485Interface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this));
+    m_Subsystems.push_back(dynamic_cast<DS485Proxy*>(m_pDS485Interface.get()));
+
+    m_pApartment = boost::shared_ptr<Apartment>(new Apartment(this));
+    m_Subsystems.push_back(m_pApartment.get());
+
+    m_pWebServer = boost::shared_ptr<WebServer>(new WebServer(this));
+    m_Subsystems.push_back(m_pWebServer.get());
+
+    m_pWebServices = boost::shared_ptr<WebServices>(new WebServices(this));
+    m_Subsystems.push_back(m_pWebServices.get());
+
+#ifdef USE_SIM
+    m_pModulatorSim = boost::shared_ptr<DSModulatorSim>(new DSModulatorSim(this));
+    m_Subsystems.push_back(m_pModulatorSim.get());
+#endif
+
+    m_pEventInterpreter = boost::shared_ptr<EventInterpreter>(new EventInterpreter(this));
+    m_Subsystems.push_back(m_pEventInterpreter.get());
+
+    m_pMetering = boost::shared_ptr<Metering>(new Metering(this));
+    m_Subsystems.push_back(m_pMetering.get());
+
+    m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner);
+    m_pEventQueue = boost::shared_ptr<EventQueue>(new EventQueue);
+  }
+
+#ifdef WITH_TESTS
+  void DSS::Teardown() {
+    DSS* instance = m_Instance;
+    m_Instance = NULL;
+    delete instance;
+  }
+#endif
 
   DSS* DSS::m_Instance = NULL;
 
@@ -41,43 +88,53 @@ namespace dss {
     return m_Instance;
   } // GetInstance
 
+  void DSS::AddDefaultInterpreterPlugins() {
+    EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
+    m_pEventInterpreter->AddPlugin(plugin);
+    plugin = new EventInterpreterPluginDS485(m_pDS485Interface.get(), m_pEventInterpreter.get());
+    m_pEventInterpreter->AddPlugin(plugin);
+
+    m_pEventInterpreter->LoadFromXML(GetPropertySystem().GetStringValue("/config/eventinterpreter/subscriptionfile"));
+
+    m_pEventRunner->SetEventQueue(m_pEventQueue.get());
+    m_pEventInterpreter->SetEventRunner(m_pEventRunner.get());
+    m_pEventQueue->SetEventRunner(m_pEventRunner.get());
+    m_pEventInterpreter->SetEventQueue(m_pEventQueue.get());
+  }
+
+  void InitializeSubsystem(Subsystem* _pSubsystem) {
+    _pSubsystem->Initialize();
+  } // InitializeSubsystem
+
+  void StartSubsystem(Subsystem* _pSubsystem) {
+    _pSubsystem->Start();
+  }
+
   void DSS::Run() {
     Logger::GetInstance()->Log("DSS stating up....", lsInfo);
     LoadConfig();
-    m_WebServer.Initialize(m_Config);
-    m_WebServer.Run();
 
-    m_WebServices.Run();
+    m_State = ssInitializingSubsystems;
+    std::for_each(m_Subsystems.begin(), m_Subsystems.end(), InitializeSubsystem);
 
-    m_ModulatorSim.Initialize();
-#ifndef __PARADIGM__
-    m_DS485Interface = new DS485Proxy();
-    (static_cast<DS485Proxy*>(m_DS485Interface))->Start();
-#endif
-    m_Apartment.Run();
+    AddDefaultInterpreterPlugins();
 
-//    m_Metering.Run();
+    m_State = ssStarting;
+    std::for_each(m_Subsystems.begin(), m_Subsystems.end(), StartSubsystem);
 
-    EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&m_EventInterpreter);
-    m_EventInterpreter.AddPlugin(plugin);
-    plugin = new EventInterpreterPluginDS485(m_DS485Interface, &m_EventInterpreter);
-    m_EventInterpreter.AddPlugin(plugin);
-
-    m_EventInterpreter.LoadFromXML(m_Config.GetOptionAs<string>("subscription_file", "data/subscriptions.xml"));
-
-    m_EventRunner.SetEventQueue(&m_EventQueue);
-    m_EventInterpreter.SetEventRunner(&m_EventRunner);
-    m_EventQueue.SetEventRunner(&m_EventRunner);
-
-    m_EventInterpreter.Run();
+    m_State = ssRunning;
 
     // pass control to the eventrunner
-    m_EventRunner.Run();
+    m_pEventRunner->Run();
   } // Run
 
   void DSS::LoadConfig() {
+    m_State = ssLoadingConfig;
+    // define defaults
+    GetPropertySystem().SetStringValue("/config/eventinterpreter/subscriptionfile", "data/subscriptions.xml", true);
+
     Logger::GetInstance()->Log("Loading config", lsInfo);
-    m_Config.ReadFromXML("data/config.xml");
+    GetPropertySystem().LoadFromXML("data/config.xml", GetPropertySystem().GetProperty("/config"));
   } // LoadConfig
 
 }

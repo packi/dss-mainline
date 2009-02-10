@@ -1,8 +1,8 @@
 #include "dssim.h"
 
-#include "../ds485const.h"
-#include "../base.h"
-#include "../logger.h"
+#include "core/ds485const.h"
+#include "core/base.h"
+#include "core/logger.h"
 #include "include/dsid_plugin.h"
 
 #include <dlfcn.h>
@@ -152,13 +152,15 @@ namespace dss {
 
   //================================================== DSModulatorSim
 
-  DSModulatorSim::DSModulatorSim()
+  DSModulatorSim::DSModulatorSim(DSS* _pDSS)
+  : Subsystem(_pDSS, "DSModulatorSim")
   {
     m_ModulatorDSID = SimulationPrefix | 0x0000FFFF;
     m_Initialized = false;
   } // DSModulatorSim
 
   void DSModulatorSim::Initialize() {
+    Subsystem::Initialize();
     m_ID = 70;
     m_DSIDFactory.RegisterCreator(new DSIDSimCreator(*this));
     m_DSIDFactory.RegisterCreator(new DSIDSimSwitchCreator(*this));
@@ -181,9 +183,10 @@ namespace dss {
        try {
          if (fs::is_regular(dir_itr->status())) {
            if(EndsWith(dir_itr->leaf(), ".so")) {
+             Log("LoadPlugins: Trying to load '" + dir_itr->string() + "'", lsInfo);
              void* handle = dlopen(dir_itr->string().c_str(), RTLD_LAZY);
              if(handle == NULL) {
-               Logger::GetInstance()->Log(string("Sim: Could not load plugin \"") + dir_itr->leaf() + "\" message: " + dlerror());
+               Log("LoadPlugins: Could not load plugin \"" + dir_itr->leaf() + "\" message: " + dlerror(), lsError);
                continue;
              }
 
@@ -192,33 +195,33 @@ namespace dss {
              *(void**) (&version) = dlsym(handle, "dsid_getversion");
              char* error;
              if((error = dlerror()) != NULL) {
-                Logger::GetInstance()->Log(string("Sim: could get version from \"") + dir_itr->leaf() + "\":" + error);
+                Log("LoadPlugins: could get version from \"" + dir_itr->leaf() + "\":" + error, lsError);
                 continue;
              }
 
              int ver = (*version)();
              if(ver != DSID_PLUGIN_API_VERSION) {
-               Logger::GetInstance()->Log(string("Sim: Versionmismatch (plugin: ") + IntToString(ver) + " api:" + IntToString(DSID_PLUGIN_API_VERSION) + ")");
+               Log("LoadPlugins: Versionmismatch (plugin: " + IntToString(ver) + " api:" + IntToString(DSID_PLUGIN_API_VERSION) + ")", lsError);
                continue;
              }
 
              const char* (*get_name)();
              *(void**)(&get_name) = dlsym(handle, "dsid_get_plugin_name");
              if((error = dlerror()) != NULL) {
-                Logger::GetInstance()->Log(string("Sim: could get name from \"") + dir_itr->leaf() + "\":" + error);
+                Log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
                 continue;
              }
              const char* pluginName = (*get_name)();
              if(pluginName == NULL) {
-               Logger::GetInstance()->Log(string("Sim: could get name from \"") + dir_itr->leaf() + "\":" + error);
+               Log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
                continue;
              }
-             Logger::GetInstance()->Log(string("Sim: Plugin provides ") + pluginName);
+             Log("LoadPlugins: Plugin provides " + string(pluginName), lsInfo);
              m_DSIDFactory.RegisterCreator(new DSIDPluginCreator(*this, handle, pluginName));
            }
          }
        } catch (const std::exception & ex) {
-         Logger::GetInstance()->Log(dir_itr->leaf() + " " + ex.what());
+         Log("LoadPlugins: Cought exception while loading " + dir_itr->leaf() + " '" + ex.what() + "'", lsError);
        }
      }
     } // LoadPlugins
@@ -280,9 +283,9 @@ namespace dss {
             m_Zones[0].push_back(newDSID);
           }
           */
-          Logger::GetInstance()->Log("Sim: found device");
+          Log("LoadDevices: found device");
         } else {
-          Logger::GetInstance()->Log(string("Sim: could not create instance for type \"") + type + "\"");
+          Log("LoadDevices: could not create instance for type \"" + type + "\"");
         }
       }
     }
@@ -309,7 +312,7 @@ namespace dss {
             }
           }
         } else {
-          Logger::GetInstance()->Log("Sim: Could not find attribute id of group, skipping entry", lsError);
+          Log("LoadGroups: Could not find attribute id of group, skipping entry", lsError);
         }
       }
     }
@@ -326,11 +329,11 @@ namespace dss {
           zoneID = StrToIntDef(attrs["id"], -1);
         }
         if(zoneID != -1) {
-          Logger::GetInstance()->Log("Sim: found zone");
+          Log("LoadZones: found zone (" + IntToString(zoneID) + ")");
           LoadDevices(iNode->GetChildren(), zoneID);
           LoadGroups(iNode->GetChildren(), zoneID);
         } else {
-          Logger::GetInstance()->Log("Sim: could not find/parse id for zone");
+          Log("LoadZones: could not find/parse id for zone");
         }
       }
     }

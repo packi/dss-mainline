@@ -1,10 +1,11 @@
 #ifndef DSSIM_H_
 #define DSSIM_H_
 
-#include "../ds485types.h"
-#include "../ds485const.h"
-#include "../../unix/ds485.h"
-#include "../xmlwrapper.h"
+#include "core/ds485types.h"
+#include "core/ds485const.h"
+#include "unix/ds485.h"
+#include "core/xmlwrapper.h"
+#include "core/subsystem.h"
 
 #include <map>
 #include <vector>
@@ -45,7 +46,8 @@ namespace dss {
 
   typedef map< const pair<const int, const int>,  vector<DSIDInterface*> > IntPairToDSIDSimVector;
 
-  class DSModulatorSim : public DS485FrameProvider {
+  class DSModulatorSim : public DS485FrameProvider,
+                         public Subsystem {
   private:
     int m_ID;
     dsid_t m_ModulatorDSID;
@@ -82,9 +84,9 @@ namespace dss {
     void GroupDecValue(const int _zoneID, const int _groupID, const int _parameterNr);
     void GroupIncValue(const int _zoneID, const int _groupID, const int _parameterNr);
   public:
-    DSModulatorSim();
+    DSModulatorSim(DSS* _pDSS);
     virtual ~DSModulatorSim() {}
-    void Initialize();
+    virtual void Initialize();
 
     bool Ready();
 

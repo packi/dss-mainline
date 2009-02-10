@@ -3,24 +3,29 @@
 
 #include <shttpd/shttpd.h>
 #include "thread.h"
-#include "configuration.h"
+#include "subsystem.h"
+
+#include <string>
 
 namespace dss {
 
-  class WebServer : public Thread {
+  class WebServer : public Subsystem,
+                    private Thread {
   private:
     struct shttpd_ctx* m_SHttpdContext;
+  private:
+    virtual void Execute();
   protected:
     static void JSONHandler(struct shttpd_arg* _arg);
     static void HTTPListOptions(struct shttpd_arg* _arg);
-    static void EmitHTTPHeader(int _code, struct shttpd_arg* _arg, const string _contentType = "text/html");
+    static void EmitHTTPHeader(int _code, struct shttpd_arg* _arg, const std::string& _contentType = "text/html");
   public:
-    WebServer();
+    WebServer(DSS* _pDSS);
     ~WebServer();
 
-    void Initialize(Config& _config);
+    virtual void Initialize();
+    virtual void Start();
 
-    virtual void Execute();
   }; // WebServer
 
 }

@@ -16,8 +16,9 @@ namespace dss {
 
   //================================================== Metering
 
-  Metering::Metering()
-  : Thread("Metering"),
+  Metering::Metering(DSS* _pDSS)
+  : Subsystem(_pDSS, "Metering"),
+    Thread("Metering"),
     m_MeterCheckIntervalSeconds(60)
   {
     m_Config.push_back(boost::shared_ptr<MeteringConfig>(new MeteringConfig("minutely", 1 * 60, 400)));
@@ -25,6 +26,11 @@ namespace dss {
     m_Config.push_back(boost::shared_ptr<MeteringConfig>(new MeteringConfig("hourly", 60 * 60, 400)));
     m_Config.push_back(boost::shared_ptr<MeteringConfig>(new MeteringConfig("daily", 24 * 60*60, 400)));
   } // Metering
+
+  void Metering::Start() {
+    Subsystem::Start();
+    Run();
+  } // Start
 
   void Metering::CheckModulators() {
 

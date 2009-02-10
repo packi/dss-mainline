@@ -27,6 +27,7 @@
 #include "ds485types.h"
 #include "xmlwrapper.h"
 #include "thread.h"
+#include "subsystem.h"
 
 #include <vector>
 #include <string>
@@ -508,7 +509,8 @@ namespace dss {
     * and loading all subitems.
     */
   class Apartment : public DeviceContainer,
-                    public Thread
+                    public Subsystem,
+                    private Thread
   {
   private:
     vector<Device*> m_StaleDevices;
@@ -523,23 +525,24 @@ namespace dss {
     boost::ptr_vector<Action> m_Actions;
     bool m_IsInitializing;
   private:
-    int m_NextSubscriptionNumber;
-  private:
     void LoadDevices(XMLNode& _node);
     void LoadModulators(XMLNode& _node);
     void LoadZones(XMLNode& _node, Modulator& _modulator);
     Modulator& AllocateModulator(const dsid_t _dsid);
 
     void AddDefaultGroupsToZone(Zone& _zone);
+    /** Starts the event-processing */
+    virtual void Execute();
   public:
-    Apartment();
+    Apartment(DSS* _pDSS);
     virtual ~Apartment();
+
+    virtual void Initialize();
+    virtual void Start();
 
     /** Returns a set containing all devices of the set */
     virtual Set GetDevices() const;
 
-    /** Starts the event-processing */
-    virtual void Execute();
     /** Loads the datamodel and marks the contained items as "stale" */
     void ReadConfigurationFromXML(const string& _fileName);
 
@@ -590,8 +593,6 @@ namespace dss {
     bool IsInitializing() const { return m_IsInitializing; }
 
   public:
-    ///** Feeds an event to the processing-queue */
-    //void OnEvent(const Event& _event);
 
     /** Processes a keypress on the given dsid.
       * @param _number The button number that was pressed starting with 1

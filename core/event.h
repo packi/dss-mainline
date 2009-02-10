@@ -260,7 +260,8 @@ namespace dss {
 
   //-------------------------------------------------- EventInterpreter
 
-  class EventInterpreter : public Thread {
+  class EventInterpreter : public Subsystem,
+                           public Thread {
   private:
     vector< boost::shared_ptr<EventSubscription> > m_Subscriptions;
     vector<EventInterpreterPlugin*> m_Plugins;
@@ -272,16 +273,17 @@ namespace dss {
     void LoadFilter(XMLNode& _node, EventSubscription& _subscription);
     EventInterpreterPlugin* GetPluginByName(const string& _name);
   public:
-    EventInterpreter(EventQueue* _queue);
-    EventInterpreter();
+    EventInterpreter(DSS* _pDSS);
     virtual ~EventInterpreter();
+
+    virtual void Start();
+
+    virtual void Execute();
 
     void AddPlugin(EventInterpreterPlugin* _plugin);
 
     void Subscribe(boost::shared_ptr<EventSubscription> _subscription);
     void Unsubscribe(const string& _subscriptionID);
-
-    virtual void Execute();
 
     void LoadFromXML(const string& _fileName);
 

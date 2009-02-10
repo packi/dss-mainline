@@ -103,20 +103,10 @@ namespace dss {
     Log(string(_message), _severity);
   } // Log
 
-  void Logger::Log(const wchar_t* _message, const aLogSeverity _severity) {
-    Log(wstring(_message), _severity);
+  void Logger::Log(const LogChannel& _channel, const std::string& _message, const aLogSeverity _severity) {
+    if(_channel.MayLog(_severity)) {
+      Log(string("[") + _channel.GetName() + "] " + _message, _severity);
+    }
   } // Log
-
-  void Logger::Log(const wstring& _message, const aLogSeverity _severity) {
-    time_t now = time( NULL );
-    struct tm t;
-#ifdef WIN32
-    localtime_s( &t, &now );
-#else
-    localtime_r( &now, &t );
-#endif
-    wcout << L"[" << DateToISOString<wstring>(&t) << L"]" << SeverityToString<const wstring>(_severity) << L" " << _message << endl;
-  } // Log
-
 
 }

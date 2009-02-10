@@ -73,7 +73,7 @@ protected:
   } // testSubscriptions
 */
   void testSet() {
-    Apartment apt;
+    Apartment apt(NULL);
 
     Device& dev1 = apt.AllocateDevice(1);
     dev1.SetShortAddress(1);

@@ -43,7 +43,7 @@ public:
 
 protected:
   void testBasics(void) {
-    Apartment apt;
+    Apartment apt(NULL);
     apt.SetName("my apartment");
 
 
@@ -69,7 +69,7 @@ protected:
   } // testBasics
 
   void testSets() {
-    Apartment apt;
+    Apartment apt(NULL);
 
     Device& dev1 = apt.AllocateDevice(1);
     dev1.SetShortAddress(1);
@@ -93,7 +93,7 @@ protected:
   } // testSets
 
   void testDevices() {
-    Apartment apt;
+    Apartment apt(NULL);
 
     Device& dev1 = apt.AllocateDevice(1);
     dev1.SetShortAddress(1);
@@ -115,7 +115,7 @@ protected:
   }
 
   void testEvents() {
-    Apartment apt;
+    Apartment apt(NULL);
 
     Device& dev = apt.AllocateDevice(1);
     dev.SetShortAddress(1);
@@ -123,7 +123,8 @@ protected:
 
     EventQueue queue;
     EventRunner runner;
-    EventInterpreter interpreter(&queue);
+    EventInterpreter interpreter(NULL);
+    interpreter.SetEventQueue(&queue);
     interpreter.SetEventRunner(&runner);
     queue.SetEventRunner(&runner);
     runner.SetEventQueue(&queue);
@@ -148,7 +149,7 @@ protected:
   } // testEvents
 
   void testSubscriptions() {
-    Apartment apt;
+    Apartment apt(NULL);
 
     Device& dev = apt.AllocateDevice(1);
     dev.SetShortAddress(1);
@@ -156,7 +157,8 @@ protected:
 
     EventQueue queue;
     EventRunner runner;
-    EventInterpreter interpreter(&queue);
+    EventInterpreter interpreter(NULL);
+    interpreter.SetEventQueue(&queue);
     interpreter.SetEventRunner(&runner);
     queue.SetEventRunner(&runner);
     runner.SetEventQueue(&queue);

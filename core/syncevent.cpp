@@ -4,7 +4,7 @@
 #ifndef WIN32
 #include <sys/time.h>
 #endif
-#include <errno.h>
+#include <cerrno>
 #include <cstdio>
 
 namespace dss {

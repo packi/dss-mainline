@@ -20,8 +20,10 @@
 #include "model.h"
 #include "DS485Interface.h"
 
+#include "ds485const.h"
 #include "dss.h"
 #include "logger.h"
+#include "propertysystem.h"
 
 namespace dss {
 
@@ -471,9 +473,9 @@ namespace dss {
 
   //================================================== Apartment
 
-  Apartment::Apartment()
-  : Thread("Apartment"),
-    m_NextSubscriptionNumber(1)
+  Apartment::Apartment(DSS* _pDSS)
+  : Subsystem(_pDSS, "Apartment"),
+    Thread("Apartment")
   {
     Zone* zoneZero = new Zone(0);
     AddDefaultGroupsToZone(*zoneZero);
@@ -492,6 +494,16 @@ namespace dss {
     ScrubVector(m_StaleModulators);
     ScrubVector(m_StaleZones);
   } // dtor
+
+  void Apartment::Initialize() {
+    Subsystem::Initialize();
+    DSS::GetInstance()->GetPropertySystem().SetStringValue("/config/apartment/configfile", "data/apartment.xml", true);
+  } // Initialize
+
+  void Apartment::Start() {
+    Subsystem::Start();
+    Run();
+  } // Start
 
   void Apartment::AddDefaultGroupsToZone(Zone& _zone) {
     int zoneID = _zone.GetZoneID();
@@ -530,7 +542,7 @@ namespace dss {
 
   void Apartment::Execute() {
     // Load devices/modulators/etc. from a config-file
-    string configFileName = DSS::GetInstance()->GetConfig().GetOptionAs<string>("apartment_config", "data/apartment.xml");
+    string configFileName = DSS::GetInstance()->GetPropertySystem().GetStringValue("/config/apartment/configfile");
     if(!FileExists(configFileName)) {
       Logger::GetInstance()->Log(string("Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
     } else {

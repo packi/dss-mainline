@@ -9,6 +9,7 @@
 #define METERING_H_
 
 #include "core/thread.h"
+#include "core/subsystem.h"
 
 #include <string>
 #include <vector>
@@ -18,18 +19,21 @@ namespace dss {
 
   class MeteringConfig;
 
-  class Metering : public Thread {
+  class Metering : public Subsystem,
+                   private Thread {
   private:
     int m_MeterCheckIntervalSeconds;
     std::string m_MeteringStorageLocation;
     std::vector<boost::shared_ptr<MeteringConfig> > m_Config;
   private:
     void CheckModulators();
-  public:
-    Metering();
-    virtual ~Metering() {};
 
     virtual void Execute();
+  public:
+    Metering(DSS* _pDSS);
+    virtual ~Metering() {};
+
+    virtual void Start();
   };
 
   class MeteringConfig {

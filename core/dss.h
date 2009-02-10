@@ -14,15 +14,7 @@
 
 #include "base.h"
 #include "thread.h"
-#ifdef USE_SIM
-  #include "sim/dssim.h"
-#endif
 #include "syncevent.h"
-#include "webserver.h"
-#include "../webservices/webservices.h"
-#include "model.h"
-#include "event.h"
-#include "metering/metering.h"
 
 #include <cstdio>
 #include <string>
@@ -36,10 +28,28 @@ using namespace std;
 namespace dss {
 
   class DSS;
+  class Subsystem;
   class WebServer;
-  class Config;
   class DS485Interface;
   class PropertySystem;
+  class Metering;
+  class EventRunner;
+  class EventQueue;
+  class EventInterpreter;
+  class Apartment;
+  class WebServices;
+#ifdef USE_SIM
+  class DSModulatorSim;
+#endif
+
+  typedef enum {
+    ssInvalid,
+    ssCreatingSubsystems,
+    ssLoadingConfig,
+    ssInitializingSubsystems,
+    ssStarting,
+    ssRunning
+  } aDSSState;
 
   /** Main class
     *
@@ -47,38 +57,48 @@ namespace dss {
   class DSS {
   private:
     static DSS* m_Instance;
-    WebServer m_WebServer;
-    Config m_Config;
-    DS485Interface* m_DS485Interface;
-    boost::shared_ptr<PropertySystem> m_PropertySystem;
-    Apartment m_Apartment;
+    std::vector<Subsystem*> m_Subsystems;
+    boost::shared_ptr<WebServer> m_pWebServer;
+    boost::shared_ptr<DS485Interface> m_pDS485Interface;
+    boost::shared_ptr<PropertySystem> m_pPropertySystem;
+    boost::shared_ptr<Apartment> m_pApartment;
 #ifdef USE_SIM
-    DSModulatorSim m_ModulatorSim;
+    boost::shared_ptr<DSModulatorSim> m_pModulatorSim;
 #endif
-    EventRunner m_EventRunner;
-    WebServices m_WebServices;
-    EventInterpreter m_EventInterpreter;
-    EventQueue m_EventQueue;
-    Metering m_Metering;
+    boost::shared_ptr<EventRunner> m_pEventRunner;
+    boost::shared_ptr<WebServices> m_pWebServices;
+    boost::shared_ptr<EventInterpreter> m_pEventInterpreter;
+    boost::shared_ptr<EventQueue> m_pEventQueue;
+    boost::shared_ptr<Metering> m_pMetering;
 
+    aDSSState m_State;
+
+    /// Private constructor for singleton
     DSS();
 
     void LoadConfig();
+    void AddDefaultInterpreterPlugins();
   public:
+    void Initialize();
     void Run();
 
     static DSS* GetInstance();
-    Config& GetConfig() { return m_Config; }
-    DS485Interface& GetDS485Interface() { return *m_DS485Interface; }
-    Apartment& GetApartment() { return m_Apartment; }
-#ifdef USE_SIM
-    DSModulatorSim& GetModulatorSim() { return m_ModulatorSim; }
+#ifdef WITH_TESTS
+    static void Teardown();
 #endif
-    EventRunner& GetEventRunner() { return m_EventRunner; }
-    WebServices& GetWebServices() { return m_WebServices; }
-    EventQueue& GetEventQueue() { return m_EventQueue; }
-    Metering& GetMetering() { return m_Metering; }
-    PropertySystem& GetPropertySystem() { return *m_PropertySystem; }
+
+    aDSSState GetState() const { return m_State; }
+
+    DS485Interface& GetDS485Interface() { return *m_pDS485Interface; }
+    Apartment& GetApartment() { return *m_pApartment; }
+#ifdef USE_SIM
+    DSModulatorSim& GetModulatorSim() { return *m_pModulatorSim; }
+#endif
+    EventRunner& GetEventRunner() { return *m_pEventRunner; }
+    WebServices& GetWebServices() { return *m_pWebServices; }
+    EventQueue& GetEventQueue() { return *m_pEventQueue; }
+    Metering& GetMetering() { return *m_pMetering; }
+    PropertySystem& GetPropertySystem() { return *m_pPropertySystem; }
   }; // DSS
 
 }

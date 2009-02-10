@@ -2,6 +2,8 @@
 #include "core/dss.h"
 #include "core/logger.h"
 #include "core/event.h"
+#include "webservices/webservices.h"
+#include "core/sim/dssim.h"
 
 #include <vector>
 #include <string>
