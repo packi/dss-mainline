@@ -38,7 +38,15 @@ namespace dss {
   {
     m_State = ssInvalid;
     m_pPropertySystem = boost::shared_ptr<PropertySystem>(new PropertySystem);
+
+    m_TimeStarted = time(NULL);
+    m_pPropertySystem->CreateProperty("/system/uptime")->LinkToProxy(
+        PropertyProxyMemberFunction<DSS,int>(*this, &DSS::GetUptime));
   } // ctor
+
+  int DSS::GetUptime() const {
+    return (int)difftime( time( NULL ), m_TimeStarted );
+  } // GetUptime
 
   void DSS::Initialize() {
     m_State = ssCreatingSubsystems;

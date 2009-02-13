@@ -15,6 +15,8 @@
 #include "core/ds485const.h"
 #include "core/sim/dssim.h"
 
+#include <sstream>
+
 #include <boost/scoped_ptr.hpp>
 
 namespace dss {

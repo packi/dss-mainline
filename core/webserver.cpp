@@ -8,6 +8,8 @@
 #include "propertysystem.h"
 
 #include <iostream>
+#include <sstream>
+
 #include <boost/shared_ptr.hpp>
 
 namespace dss {
@@ -20,7 +22,7 @@ namespace dss {
     Logger::GetInstance()->Log("Starting Webserver...");
     m_SHttpdContext = shttpd_init();
     DSS::GetInstance()->GetPropertySystem().SetStringValue("/config/webserver/ports", "8080", true);
-    DSS::GetInstance()->GetPropertySystem().SetStringValue("/config/webserver/webroot", "data/webroot", true);
+    DSS::GetInstance()->GetPropertySystem().SetStringValue("/config/webserver/webroot", "data/webroot/", true);
   } // ctor
 
   WebServer::~WebServer() {
@@ -38,7 +40,7 @@ namespace dss {
     Log("Webserver: Configured aliases: " + aliases);
     shttpd_set_option(m_SHttpdContext, "aliases", aliases.c_str());
 
-    shttpd_register_uri(m_SHttpdContext, "/config", &HTTPListOptions, NULL);
+    shttpd_register_uri(m_SHttpdContext, "/browse/*", &HTTPListOptions, NULL);
     shttpd_register_uri(m_SHttpdContext, "/json/*", &JSONHandler, NULL);
   } // Initialize
 
@@ -67,7 +69,7 @@ namespace dss {
   }
 
   void WebServer::EmitHTTPHeader(int _code, struct shttpd_arg* _arg, const std::string& _contentType) {
-    stringstream sstream;
+    std::stringstream sstream;
     sstream << "HTTP/1.1 " << _code << ' ' << HTTPCodeToMessage(_code) << "\r\n";
     sstream << "Content-Type: " << _contentType << "; charset=utf-8\r\n\r\n";
     shttpd_printf(_arg, sstream.str().c_str());
@@ -107,7 +109,7 @@ namespace dss {
   } // ToJSONValue
 
   string ToJSONValue(const DeviceReference& _device) {
-    stringstream sstream;
+    std::stringstream sstream;
     sstream << "{ \"id\": \"" << _device.GetDSID() << "\""
             << ", \"isSwitch\": " << ToJSONValue(_device.IsSwitch())
             << ", \"name\": \"" << _device.GetDevice().GetName()
@@ -116,7 +118,7 @@ namespace dss {
   }
 
   string ToJSONValue(const Set& _set, const string& _arrayName) {
-    stringstream sstream;
+    std::stringstream sstream;
     sstream << "\"" << _arrayName << "\":[";
     bool firstDevice = true;
     for(int iDevice = 0; iDevice < _set.Length(); iDevice++) {
@@ -133,7 +135,7 @@ namespace dss {
   }
 
   string ToJSONValue(Apartment& _apartment) {
-  	stringstream sstream;
+  	std::stringstream sstream;
   	sstream << "{ apartment: { zones: [";
 	  vector<Zone*>& zones = _apartment.GetZones();
 	  bool first = true;
@@ -187,7 +189,7 @@ namespace dss {
 
   template<>
   string ToJSONArray(const vector<int>& _v) {
-    stringstream arr;
+    std::stringstream arr;
     arr << "[";
     bool first = true;
     vector<int>::const_iterator iV;
@@ -217,7 +219,7 @@ namespace dss {
       EmitHTTPHeader(200, _arg, "application/json");
       Set devices = DSS::GetInstance()->GetApartment().GetDevices();
 
-      stringstream sstream;
+      std::stringstream sstream;
       sstream << "{\"devices\":[";
       bool first = true;
       for(int iDevice = 0; iDevice < devices.Length(); iDevice++) {
@@ -331,7 +333,7 @@ namespace dss {
           DSIDInterface* dev = DSS::GetInstance()->GetModulatorSim().GetSimulatedDevice(devid);
           DSIDSimSwitch* sw = NULL;
           if(dev != NULL && (sw = dynamic_cast<DSIDSimSwitch*>(dev)) != NULL) {
-            stringstream sstream;
+            std::stringstream sstream;
             sstream << "{ groupid: " << DSS::GetInstance()->GetModulatorSim().GetGroupForSwitch(sw)
                     << " }";
             shttpd_printf(_arg, sstream.str().c_str());
@@ -526,18 +528,49 @@ namespace dss {
 
   void WebServer::HTTPListOptions(struct shttpd_arg* _arg) {
     EmitHTTPHeader(200, _arg);
-    shttpd_printf(_arg, "%s", "<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><body>");
-    shttpd_printf(_arg, "%s", "<h1>Configuration</h1>");
 
-    stringstream stream;
+    const string urlid = "/browse";
+    string uri = shttpd_get_env(_arg, "REQUEST_URI");
+    uri = URLDecode(uri);
+    HashMapConstStringString paramMap = ParseParameter(shttpd_get_env(_arg, "QUERY_STRING"));
+
+    string path = uri.substr(uri.find(urlid) + urlid.size());
+    shttpd_printf(_arg, "<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><body>");
+
+    std::stringstream stream;
+    stream << "<h1>" << path << "</h1>";
     stream << "<ul>";
-    // TODO: dump config tree into xml with a nice stylesheet
-/*
-    const HashMapConstStringString& options = DSS::GetInstance()->GetConfig().GetOptions();
-    for(HashMapConstStringString::const_iterator iOption = options.begin(); iOption != options.end(); ++iOption) {
-      stream << "<li>" << iOption->first << " = " << iOption->second << "</li>";
+    PropertyNode* node = DSS::GetInstance()->GetPropertySystem().GetProperty(path);
+    if(node != NULL) {
+      for(int iNode = 0; iNode < node->GetChildCount(); iNode++) {
+        PropertyNode* cnode = node->GetChild(iNode);
+
+        stream << "<li>";
+        if(cnode->GetChildCount() != 0) {
+          stream << "<a href=\"/browse" << path << "/" << cnode->GetDisplayName() << "\">" << cnode->GetDisplayName() << "</a>";
+        } else {
+          stream << cnode->GetDisplayName();
+        }
+        stream << " : ";
+        stream << GetValueTypeAsString(cnode->GetValueType()) << " : ";
+        switch(cnode->GetValueType()) {
+        case vTypeBoolean:
+          stream << cnode->GetBoolValue();
+          break;
+        case vTypeInteger:
+          stream << cnode->GetIntegerValue();
+          break;
+        case vTypeNone:
+          break;
+        case vTypeString:
+          stream << cnode->GetStringValue();
+          break;
+        default:
+          stream << "unknown value";
+        }
+      }
     }
-*/
+
     stream << "</ul></body></html>";
     shttpd_printf(_arg, stream.str().c_str());
 

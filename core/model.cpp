@@ -25,6 +25,8 @@
 #include "logger.h"
 #include "propertysystem.h"
 
+#include "foreach.h"
+
 namespace dss {
 
   //================================================== Device
@@ -271,9 +273,9 @@ namespace dss {
 
   Set Set::GetSubset(const IDeviceSelector& _selector) const {
     Set result;
-    for(DeviceConstIterator iDevice = m_ContainedDevices.begin(); iDevice != m_ContainedDevices.end(); ++iDevice) {
-      if(_selector.SelectDevice(iDevice->GetDevice())) {
-        result.AddDevice(*iDevice);
+    foreach(DeviceReference iDevice, m_ContainedDevices) {
+      if(_selector.SelectDevice(iDevice.GetDevice())) {
+        result.AddDevice(iDevice);
       }
     }
     return result;
@@ -383,9 +385,9 @@ namespace dss {
 
   Set Set::Combine(Set& _other) const {
     Set resultSet(_other);
-    for(DeviceVector::const_iterator iDevice = m_ContainedDevices.begin(); iDevice != m_ContainedDevices.end(); ++iDevice) {
-      if(!resultSet.Contains(*iDevice)) {
-        resultSet.AddDevice(*iDevice);
+    foreach(const DeviceReference& iDevice, m_ContainedDevices) {
+      if(!resultSet.Contains(iDevice)) {
+        resultSet.AddDevice(iDevice);
       }
     }
     return resultSet;
@@ -393,8 +395,8 @@ namespace dss {
 
   Set Set::Remove(const Set& _other) const {
     Set resultSet(*this);
-    for(DeviceConstIterator iDevice = _other.m_ContainedDevices.begin(); iDevice != _other.m_ContainedDevices.end(); ++iDevice) {
-      resultSet.RemoveDevice(*iDevice);
+    foreach(const DeviceReference& iDevice, m_ContainedDevices) {
+      resultSet.RemoveDevice(iDevice);
     }
     return resultSet;
   } // Remove
@@ -497,7 +499,7 @@ namespace dss {
 
   void Apartment::Initialize() {
     Subsystem::Initialize();
-    DSS::GetInstance()->GetPropertySystem().SetStringValue("/config/apartment/configfile", "data/apartment.xml", true);
+    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetPropertyBasePath() + "configfile", "data/apartment.xml", true);
   } // Initialize
 
   void Apartment::Start() {
@@ -542,7 +544,7 @@ namespace dss {
 
   void Apartment::Execute() {
     // Load devices/modulators/etc. from a config-file
-    string configFileName = DSS::GetInstance()->GetPropertySystem().GetStringValue("/config/apartment/configfile");
+    string configFileName = DSS::GetInstance()->GetPropertySystem().GetStringValue(GetPropertyBasePath() + "configfile");
     if(!FileExists(configFileName)) {
       Logger::GetInstance()->Log(string("Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
     } else {
@@ -558,44 +560,39 @@ namespace dss {
       Logger::GetInstance()->Log("Apartment::Execute received proxy event, enumerating apartment / dSMs");
 
       vector<int> modIDs = interface.GetModulators();
-      for(vector<int>::iterator iModulatorID = modIDs.begin(); iModulatorID != modIDs.end(); ++iModulatorID) {
-        int modID = *iModulatorID;
-        Logger::GetInstance()->Log(string("Found modulator with id: ") + IntToString(modID));
-        dsid_t modDSID = interface.GetDSIDOfModulator(modID);
+      foreach(int modulatorID, modIDs) {
+        Log("Found modulator with id: " + IntToString(modulatorID));
+        dsid_t modDSID = interface.GetDSIDOfModulator(modulatorID);
         Logger::GetInstance()->Log(string("  DSID: ") + UIntToString(modDSID));
         Modulator& modulator = AllocateModulator(modDSID);
-        modulator.SetBusID(modID);
+        modulator.SetBusID(modulatorID);
 
-        vector<int> zoneIDs = interface.GetZones(modID);
-        for(vector<int>::iterator iZoneID = zoneIDs.begin(); iZoneID != zoneIDs.end(); ++iZoneID) {
-          int zoneID = *iZoneID;
-          Logger::GetInstance()->Log(string("  Found zone with id: ") + IntToString(zoneID));
+        vector<int> zoneIDs = interface.GetZones(modulatorID);
+//        for(vector<int>::iterator iZoneID = zoneIDs.begin(); iZoneID != zoneIDs.end(); ++iZoneID) {
+        foreach(int zoneID, zoneIDs) {
+//          int zoneID = *iZoneID;
+          Log("  Found zone with id: " + IntToString(zoneID));
           Zone& zone = AllocateZone(modulator, zoneID);
 
-          vector<int> devices = interface.GetDevicesInZone(modID, zoneID);
-          for(vector<int>::iterator iDevice = devices.begin(); iDevice != devices.end(); ++iDevice) {
-            int devID = *iDevice;
-            Logger::GetInstance()->Log(string("    Found device with id: ") + IntToString(devID));
-            dsid_t dsid = interface.GetDSIDOfDevice(modID, devID);
-            Logger::GetInstance()->Log(string("    DSID: ") + UIntToString(dsid));
+          vector<int> devices = interface.GetDevicesInZone(modulatorID, zoneID);
+          foreach(int devID, devices) {
+  //        for(vector<int>::iterator iDevice = devices.begin(); iDevice != devices.end(); ++iDevice) {
+//            int devID = *iDevice;
+            Log("    Found device with id: " + IntToString(devID));
+            dsid_t dsid = interface.GetDSIDOfDevice(modulatorID, devID);
+            Log("    DSID: " + UIntToString(dsid));
             Device& dev = AllocateDevice(dsid);
             dev.SetShortAddress(devID);
-            dev.SetModulatorID(modID);
+            dev.SetModulatorID(modulatorID);
             dev.SetZoneID(zoneID);
             zone.AddDevice(DeviceReference(dev, *this));
             modulator.AddDevice(DeviceReference(dev, *this));
           }
-          vector<int> groupIDs = interface.GetGroups(modID, zoneID);
-          for(vector<int>::iterator iGroup = groupIDs.begin(), e = groupIDs.end();
-              iGroup != e; ++iGroup)
-          {
-            int groupID = *iGroup;
-            Logger::GetInstance()->Log(string("    Found group with id: ") + IntToString(groupID));
-            vector<int> devingroup = interface.GetDevicesInGroup(modID, zoneID, groupID);
-            for(vector<int>::iterator iDevice = devingroup.begin(), e = devingroup.end();
-                iDevice != e; ++iDevice)
-            {
-              int devID = *iDevice;
+          vector<int> groupIDs = interface.GetGroups(modulatorID, zoneID);
+          foreach(int groupID, groupIDs) {
+            Log("    Found group with id: " + IntToString(groupID));
+            vector<int> devingroup = interface.GetDevicesInGroup(modulatorID, zoneID, groupID);
+            foreach(int devID, devingroup) {
               try {
                 Device& dev = GetDeviceByShortAddress(modulator, devID);
                 dev.SetShortAddress(devID);
@@ -607,9 +604,7 @@ namespace dss {
           }
         }
       }
-      for(vector<Device*>::iterator ipDevice = m_Devices.begin(), e = m_Devices.end();
-          ipDevice != e; ++ipDevice) {
-        Device* dev = *ipDevice;
+      foreach(Device* dev, m_Devices) {
         if(dev->HasSubscription()) {
           interface.Subscribe(dev->GetModulatorID(), 0, dev->GetShortAddress());
         }
@@ -719,28 +714,37 @@ namespace dss {
   } // LoadZones
 
   Device& Apartment::GetDeviceByDSID(const dsid_t _dsid) const {
-    for(vector<Device*>::const_iterator ipDevice = m_Devices.begin(); ipDevice != m_Devices.end(); ++ipDevice) {
-      if((*ipDevice)->GetDSID() == _dsid) {
-        return **ipDevice;
+    foreach(Device* dev, m_Devices) {
+      if(dev->GetDSID() == _dsid) {
+        return *dev;
+      }
+    }
+    throw ItemNotFoundException(IntToString(_dsid));
+  } // GetDeviceByShortAddress const
+
+  Device& Apartment::GetDeviceByDSID(const dsid_t _dsid) {
+    foreach(Device* dev, m_Devices) {
+      if(dev->GetDSID() == _dsid) {
+        return *dev;
       }
     }
     throw ItemNotFoundException(IntToString(_dsid));
   } // GetDeviceByShortAddress
 
   Device& Apartment::GetDeviceByShortAddress(const Modulator& _modulator, const devid_t _deviceID) const {
-    for(vector<Device*>::const_iterator ipDevice = m_Devices.begin(); ipDevice != m_Devices.end(); ++ipDevice) {
-      if(((*ipDevice)->GetShortAddress() == _deviceID) &&
-          (_modulator.GetBusID() == (*ipDevice)->GetModulatorID())) {
-        return **ipDevice;
+    foreach(Device* dev, m_Devices) {
+      if((dev->GetShortAddress() == _deviceID) &&
+          (_modulator.GetBusID() == dev->GetModulatorID())) {
+        return *dev;
       }
     }
     throw ItemNotFoundException(IntToString(_deviceID));
   } // GetDeviceByShortAddress
 
   Device& Apartment::GetDeviceByName(const string& _name) {
-    for(vector<Device*>::const_iterator ipDevice = m_Devices.begin(); ipDevice != m_Devices.end(); ++ipDevice) {
-      if((*ipDevice)->GetName() == _name) {
-        return **ipDevice;
+    foreach(Device* dev, m_Devices) {
+      if(dev->GetName() == _name) {
+        return *dev;
       }
     }
     throw ItemNotFoundException(_name);
@@ -748,26 +752,26 @@ namespace dss {
 
   Set Apartment::GetDevices() const {
     DeviceVector devs;
-    for(vector<Device*>::const_iterator ipDevice = m_Devices.begin(); ipDevice != m_Devices.end(); ++ipDevice) {
-      devs.push_back(DeviceReference(**ipDevice, *this));
+    foreach(Device* dev, m_Devices) {
+      devs.push_back(DeviceReference(*dev, *this));
     }
 
     return Set(devs);
   } // GetDevices
 
   Zone& Apartment::GetZone(const string& _zoneName) {
-    for(vector<Zone*>::iterator iZone = m_Zones.begin(); iZone != m_Zones.end(); ++iZone) {
-      if((*iZone)->GetName() == _zoneName) {
-        return **iZone;
+    foreach(Zone* zone, m_Zones) {
+      if(zone->GetName() == _zoneName) {
+        return *zone;
       }
     }
     throw ItemNotFoundException(_zoneName);
   } // GetZone(name)
 
   Zone& Apartment::GetZone(const int _id) {
-    for(vector<Zone*>::iterator iZone = m_Zones.begin(); iZone != m_Zones.end(); ++iZone) {
-      if((*iZone)->GetZoneID() == _id) {
-        return **iZone;
+    foreach(Zone* zone, m_Zones) {
+      if(zone->GetZoneID() == _id) {
+        return *zone;
       }
     }
     throw ItemNotFoundException(IntToString(_id));
@@ -778,27 +782,27 @@ namespace dss {
   } // GetZones
 
   Modulator& Apartment::GetModulator(const string& _modName) {
-    for(vector<Modulator*>::iterator iModulator = m_Modulators.begin(); iModulator != m_Modulators.end(); ++iModulator) {
-      if((*iModulator)->GetName() == _modName) {
-        return **iModulator;
+    foreach(Modulator* modulator, m_Modulators) {
+      if(modulator->GetName() == _modName) {
+        return *modulator;
       }
     }
     throw ItemNotFoundException(_modName);
   } // GetModulator(name)
 
   Modulator& Apartment::GetModulatorByBusID(const int _busId) {
-    for(vector<Modulator*>::iterator iModulator = m_Modulators.begin(); iModulator != m_Modulators.end(); ++iModulator) {
-      if((*iModulator)->GetBusID() == _busId) {
-        return **iModulator;
+    foreach(Modulator* modulator, m_Modulators) {
+      if(modulator->GetBusID() == _busId) {
+        return *modulator;
       }
     }
     throw ItemNotFoundException(IntToString(_busId));
   } // GetModulatorByBusID
 
   Modulator& Apartment::GetModulatorByDSID(const dsid_t _dsid) {
-    for(vector<Modulator*>::iterator iModulator = m_Modulators.begin(); iModulator != m_Modulators.end(); ++iModulator) {
-      if((*iModulator)->GetDSID() == _dsid) {
-        return **iModulator;
+    foreach(Modulator* modulator, m_Modulators) {
+      if(modulator->GetDSID() == _dsid) {
+        return *modulator;
       }
     }
     throw ItemNotFoundException(IntToString(_dsid));
@@ -810,18 +814,18 @@ namespace dss {
 
   // Group queries
   Group& Apartment::GetGroup(const string& _name) {
-    for(vector<Group*>::iterator ipGroup = m_Groups.begin(); ipGroup != m_Groups.end(); ++ipGroup) {
-      if((*ipGroup)->GetName() == _name) {
-        return **ipGroup;
+    foreach(Group* group, m_Groups) {
+      if(group->GetName() == _name) {
+        return *group;
       }
     }
     throw ItemNotFoundException(_name);
   } // GetGroup(name)
 
   Group& Apartment::GetGroup(const int _id) {
-    for(vector<Group*>::iterator ipGroup = m_Groups.begin(); ipGroup != m_Groups.end(); ++ipGroup) {
-      if((*ipGroup)->GetID() == _id) {
-        return **ipGroup;
+    foreach(Group* group, m_Groups) {
+      if(group->GetID() == _id) {
+        return *group;
       }
     }
     throw ItemNotFoundException(IntToString(_id));
@@ -830,40 +834,22 @@ namespace dss {
   vector<Group*>& Apartment::GetGroups() {
     return m_Groups;
   } // GetGroups
-/*
-  struct handle_event : public unary_function<Subscription*, void>
-  {
-    handle_event(const Event& _event) : m_Event(_event) {};
-    void operator()(Subscription* _subscription) {
-      if(_subscription->HandlesEvent(m_Event)) {
-        _subscription->OnEvent(m_Event);
-      }
-    }
-    const Event& m_Event;
-  };
 
-  void Apartment::OnEvent(const Event& _event) {
-    stringstream sstream;
-    sstream << "Raised event: " << _event.GetID() << " from source " << _event.GetSource();
-    Logger::GetInstance()->Log(sstream.str());
-    for_each(m_Subscriptions.begin(), m_Subscriptions.end(), handle_event(_event));
-  } // OnEvent
-*/
   Device& Apartment::AllocateDevice(const dsid_t _dsid) {
     // search for existing device
-    for(vector<Device*>::iterator iDevice = m_Devices.begin(); iDevice != m_Devices.end(); ++iDevice) {
-      if((*iDevice)->GetDSID() == _dsid) {
-        GetZone(0).AddDevice(DeviceReference(**iDevice, *this));
-        return **iDevice;
+    foreach(Device* device, m_Devices) {
+      if(device->GetDSID() == _dsid) {
+        GetZone(0).AddDevice(DeviceReference(*device, *this));
+        return *device;
       }
     }
 
     // search for stale devices
-    for(vector<Device*>::iterator iDevice = m_StaleDevices.begin(); iDevice != m_StaleDevices.end(); ++iDevice) {
-      if((*iDevice)->GetDSID() == _dsid) {
-        Device* pResult = *iDevice;
+    foreach(Device* device, m_StaleDevices) {
+      if(device->GetDSID() == _dsid) {
+        Device* pResult = device;
         m_Devices.push_back(pResult);
-        m_StaleDevices.erase(iDevice);
+        m_StaleDevices.erase(std::find(m_StaleDevices.begin(), m_StaleDevices.end(),device));
         GetZone(0).AddDevice(DeviceReference(*pResult, *this));
         return *pResult;
       }
@@ -876,50 +862,39 @@ namespace dss {
   } // AllocateDevice
 
   Modulator& Apartment::AllocateModulator(const dsid_t _dsid) {
-    // search in the stale modulators first
-    for(vector<Modulator*>::iterator iModulator = m_StaleModulators.begin(), e = m_StaleModulators.end();
-        iModulator != e; ++iModulator)
-    {
-      if((*iModulator)->GetDSID() == _dsid) {
-        m_Modulators.push_back(*iModulator);
-        m_StaleModulators.erase(iModulator);
-        return **iModulator;
+    foreach(Modulator* modulator, m_StaleModulators) {
+      if((modulator)->GetDSID() == _dsid) {
+        return *modulator;
       }
     }
 
-    for(vector<Modulator*>::iterator iModulator = m_Modulators.begin(), e = m_Modulators.end();
-        iModulator != e; ++iModulator)
-    {
-      if((*iModulator)->GetDSID() == _dsid) {
-        return **iModulator;
+    foreach(Modulator* modulator, m_StaleModulators) {
+      if(modulator->GetDSID() == _dsid) {
+        m_Modulators.push_back(modulator);
+        m_StaleModulators.erase(std::find(m_StaleModulators.begin(), m_StaleModulators.end(), modulator));
+        return *modulator;
       }
     }
 
-    // TODO: check for existing Modulator?
     Modulator* pResult = new Modulator(_dsid);
     m_Modulators.push_back(pResult);
     return *pResult;
   } // AllocateModulator
 
   Zone& Apartment::AllocateZone(Modulator& _modulator, int _zoneID) {
-  	for(vector<Zone*>::iterator ipZone = m_StaleZones.begin(), e = m_StaleZones.end();
-  	   ipZone != e; ++ipZone)
-  	{
-  		if((*ipZone)->GetZoneID() == _zoneID) {
-  			m_Zones.push_back(*ipZone);
-  			m_StaleZones.erase(ipZone);
+    foreach(Zone* zone, m_StaleZones) {
+  		if(zone->GetZoneID() == _zoneID) {
+  			m_Zones.push_back(zone);
+  			m_StaleZones.erase(std::find(m_StaleZones.begin(), m_StaleZones.end(), zone));
   	    if(!IsInitializing()) {
   	      DSS::GetInstance()->GetDS485Interface().CreateZone(_modulator.GetBusID(), _zoneID);
   	    }
-  			return **ipZone;
+  			return *zone;
   		}
   	}
 
-  	for(vector<Zone*>::iterator ipZone = m_Zones.begin(), e = m_Zones.end();
-  	   ipZone != e; ++ipZone)
-  	{
-  		if((*ipZone)->GetZoneID() == _zoneID) {
-  		  Zone* zone = *ipZone;
+    foreach(Zone* zone, m_Zones) {
+  		if(zone->GetZoneID() == _zoneID) {
   		  vector<int> modsOfZone = zone->GetModulators();
   		  if(find(modsOfZone.begin(), modsOfZone.end(), _modulator.GetBusID()) == modsOfZone.end()) {
           DSS::GetInstance()->GetDS485Interface().CreateZone(_modulator.GetBusID(), _zoneID);
@@ -937,22 +912,7 @@ namespace dss {
     }
   	return *zone;
   } // AllocateZone
-/*
-  void Apartment::AddAction(Action* _action) {
-    m_Actions.push_back(_action);
-  } // AddAction
 
-  Action& Apartment::GetAction(const string& _name) {
-    for(boost::ptr_vector<Action>::iterator iAction = m_Actions.begin(), e = m_Actions.end();
-        iAction != e; ++iAction)
-    {
-      if(iAction->GetName() == _name) {
-        return *iAction;
-      }
-    }
-    throw ItemNotFoundException(string("Could not find action: ") + _name);
-  } // GetAction
-*/
   void Apartment::OnKeypress(const dsid_t& _dsid, const ButtonPressKind _kind, const int _number) {
     Device& dev = GetDeviceByDSID(_dsid);
     if(dev.HasSubscription()) {
@@ -1186,6 +1146,10 @@ namespace dss {
   dsid_t DeviceReference::GetDSID() const {
     return m_DSID;
   } // GetID
+
+  string DeviceReference::GetName() const {
+    return GetDevice().GetName();
+  } //GetName
 
   void DeviceReference::TurnOn() {
     GetDevice().TurnOn();

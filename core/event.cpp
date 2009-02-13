@@ -537,10 +537,10 @@ namespace dss {
   } // AddPropertyFilter
 
   bool EventSubscription::Matches(Event& _event) {
-    for(boost::ptr_vector<EventPropertyFilter*>::iterator ipFilter = m_Filter.begin(), e = m_Filter.end();
+    for(boost::ptr_vector<EventPropertyFilter>::iterator ipFilter = m_Filter.begin(), e = m_Filter.end();
         ipFilter != e; ++ipFilter)
     {
-      if((*ipFilter)->Matches(_event)) {
+      if(ipFilter->Matches(_event)) {
         if(m_FilterOption == foMatchOne) {
           return true;
         } else if(m_FilterOption == foMatchNone) {

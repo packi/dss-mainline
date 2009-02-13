@@ -9,6 +9,8 @@
 #include "dss.h"
 #include "propertysystem.h"
 
+#include <stdexcept>
+
 namespace dss {
 
   //================================================== Subsystem
@@ -18,7 +20,7 @@ namespace dss {
   {
     if(m_pDSS != NULL) {
       if(GetDSS().GetState() < ssCreatingSubsystems) {
-        throw runtime_error("creating subsystem way too early");
+        throw std::runtime_error("creating subsystem way too early");
       }
       GetDSS().GetPropertySystem().SetIntValue(GetPropertyBasePath() + "loglevel", 0, true);
     }
@@ -28,7 +30,7 @@ namespace dss {
     aLogSeverity severity = lsDebug;
     if(m_pDSS != NULL) {
       if(GetDSS().GetState() < ssInitializingSubsystems) {
-        throw runtime_error("you shouldn't initialize your subsystem at this phase");
+        throw std::runtime_error("you shouldn't initialize your subsystem at this phase");
       }
       severity = static_cast<aLogSeverity>(GetDSS().GetPropertySystem().GetIntValue(GetPropertyBasePath() + "loglevel"));
     }
@@ -38,7 +40,7 @@ namespace dss {
 
   void Subsystem::Start() {
     if(m_State != ssInitialized) {
-      throw new runtime_error(string("Subsystem::Start: Subsystem '") + m_Name + "' was not initialized.");
+      throw new std::runtime_error("Subsystem::Start: Subsystem '" + m_Name + "' was not initialized.");
     }
   } // Start
 

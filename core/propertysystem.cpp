@@ -60,13 +60,7 @@ namespace dss {
   } // dtor
 
 
-  bool PropertySystem::LoadFromXML(const string& _fileName,
-                                   PropertyNode* _rootNode) {
-    return LoadFromXML(_fileName.c_str(), _rootNode);
-  } // LoadFromXML
-
-
-  bool PropertySystem::LoadFromXML(const char* _fileName,
+  bool PropertySystem::LoadFromXML(const std::string& _fileName,
                                    PropertyNode* _rootNode) {
     xmlDoc* doc = NULL;
     xmlNode *rootElem = NULL;
@@ -78,7 +72,7 @@ namespace dss {
 
     xmlInitParser();
 
-    doc = xmlParseFile(_fileName);
+    doc = xmlParseFile(_fileName.c_str());
     if (doc == NULL) {
       cerr << "Error loading properties from \"" << _fileName << "\"" << endl;
       return false;
@@ -118,7 +112,7 @@ namespace dss {
   } // LoadFromXML
 
 
-  bool PropertySystem::SaveToXML(const string& _fileName,
+  bool PropertySystem::SaveToXML(const std::string& _fileName,
                                  PropertyNode* _rootNode) const {
     return SaveToXML(_fileName.c_str(), _rootNode);
   } // SaveToXML
@@ -175,7 +169,7 @@ namespace dss {
   } // GetProperty
 
 
-  PropertyNode* PropertySystem::GetProperty( const string _propPath ) const {
+  PropertyNode* PropertySystem::GetProperty( const std::string& _propPath ) const {
     if( _propPath[ 0 ] != '/' ) {
       return NULL;
     }
@@ -188,7 +182,7 @@ namespace dss {
   } // GetProperty
 
 
-  PropertyNode* PropertySystem::CreateProperty( const string _propPath ) {
+  PropertyNode* PropertySystem::CreateProperty( const std::string& _propPath ) {
     if( _propPath[ 0 ] != '/' ) {
       return NULL;
     }
@@ -211,7 +205,7 @@ namespace dss {
   } // GetIntValue
 
 
-  int PropertySystem::GetIntValue( const string& _propPath ) const {
+  int PropertySystem::GetIntValue( const std::string& _propPath ) const {
     return GetIntValue( _propPath.c_str() );
   }
 
@@ -226,7 +220,7 @@ namespace dss {
   } // GetBoolValue
 
 
-  bool PropertySystem::GetBoolValue( const string& _propPath ) const {
+  bool PropertySystem::GetBoolValue( const std::string& _propPath ) const {
     return GetBoolValue( _propPath.c_str() );
   } // GetBoolValue
 
@@ -241,7 +235,7 @@ namespace dss {
   } // GetStringValue
 
 
-  const char* PropertySystem::GetStringValue( const string& _propPath ) const {
+  const char* PropertySystem::GetStringValue( const std::string& _propPath ) const {
     return GetStringValue( _propPath.c_str() );
   } // GetStringValue
 
@@ -263,7 +257,7 @@ namespace dss {
   } // SetIntValue
 
 
-  bool PropertySystem::SetIntValue( const string& _propPath, const int _value, bool _mayCreate ) {
+  bool PropertySystem::SetIntValue( const std::string& _propPath, const int _value, bool _mayCreate ) {
     return SetIntValue( _propPath.c_str(), _value, _mayCreate );
   } // SetIntValue
 
@@ -285,7 +279,7 @@ namespace dss {
   } // SetBoolValue
 
 
-  bool PropertySystem::SetBoolValue( const string& _propPath, const bool _value, bool _mayCreate ) {
+  bool PropertySystem::SetBoolValue( const std::string& _propPath, const bool _value, bool _mayCreate ) {
     return SetBoolValue( _propPath.c_str(), _value, _mayCreate );
   } // SetBoolValue
 
@@ -307,17 +301,17 @@ namespace dss {
   } // SetStringValue
 
 
-  bool PropertySystem::SetStringValue( const string& _propPath, const char* _value, bool _mayCreate ) {
+  bool PropertySystem::SetStringValue( const std::string& _propPath, const char* _value, bool _mayCreate ) {
     return SetStringValue( _propPath.c_str(), _value, _mayCreate );
   } // SetStringValue
 
 
-  bool PropertySystem::SetStringValue( const char* _propPath, const string& _value, bool _mayCreate ) {
+  bool PropertySystem::SetStringValue( const char* _propPath, const std::string& _value, bool _mayCreate ) {
     return SetStringValue( _propPath, _value.c_str(), _mayCreate );
   } // SetStringValue
 
 
-  bool PropertySystem::SetStringValue( const string& _propPath, const string& _value, bool _mayCreate ) {
+  bool PropertySystem::SetStringValue( const std::string& _propPath, const std::string& _value, bool _mayCreate ) {
     return SetStringValue( _propPath.c_str(), _value.c_str(), _mayCreate );
   } // SetStringValue
 
@@ -357,7 +351,7 @@ namespace dss {
   } // AddChild
 
 
-  const string& PropertyNode::GetDisplayName() const {
+  const std::string& PropertyNode::GetDisplayName() const {
     if( m_Index != 0 ) {
       stringstream sstr;
       sstr << GetName() << "[" << m_Index << "]" << endl;
@@ -368,7 +362,7 @@ namespace dss {
   } // GetDisplayName
 
 
-  PropertyNode* PropertyNode::GetProperty( const string _propPath ) {
+  PropertyNode* PropertyNode::GetProperty( const std::string& _propPath ) {
     string propPath = _propPath;
     string propName = _propPath;
     string::size_type slashPos = propPath.find( '/' );
@@ -387,7 +381,7 @@ namespace dss {
   } // GetProperty
 
 
-  int PropertyNode::GetAndRemoveIndexFromPropertyName( string& _propName ) {
+  int PropertyNode::GetAndRemoveIndexFromPropertyName(std::string& _propName) {
     int result = 0;
     string::size_type pos = _propName.find( '[' );
     if( pos != string::npos ) {
@@ -404,7 +398,7 @@ namespace dss {
   } // GetAndRemoveIndexFromPropertyName
 
 
-  PropertyNode* PropertyNode::GetPropertyByName( const string _name ) {
+  PropertyNode* PropertyNode::GetPropertyByName( const std::string& _name ) {
     int index = 0;
     string propName = _name;
     index = GetAndRemoveIndexFromPropertyName( propName );
@@ -433,7 +427,7 @@ namespace dss {
   } // GetPropertyName
 
 
-  int PropertyNode::Count( const string _propertyName ) {
+  int PropertyNode::Count( const std::string& _propertyName ) {
     int result = 0;
     for( vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end(); it++ ) {
@@ -471,7 +465,7 @@ namespace dss {
   } // SetStringValue
 
 
-  void PropertyNode::SetStringValue( const string& _value ) {
+  void PropertyNode::SetStringValue( const std::string& _value ) {
     SetStringValue( _value.c_str() );
   } // SetStringValue
 
@@ -643,7 +637,7 @@ namespace dss {
   } // RemoveListener
 
 
-  PropertyNode* PropertyNode::CreateProperty( const string _propPath ) {
+  PropertyNode* PropertyNode::CreateProperty( const std::string& _propPath ) {
     string nextOne = GetRoot( _propPath );
     string remainder = _propPath;
     remainder.erase( 0, nextOne.length() + 1 );
@@ -794,7 +788,7 @@ namespace dss {
   //=============================================== Utilities
 
 
-  string GetBasePath( const string _path ) {
+  string GetBasePath( const std::string& _path ) {
     string result = _path;
     if( result.length() > 1 ) {
       string::size_type pos = result.rfind( '/' );
@@ -807,7 +801,7 @@ namespace dss {
   } // GetBasePath
 
 
-  string GetProperty( const string _path ) {
+  string GetProperty( const std::string& _path ) {
     string result = _path;
     string::size_type pos = result.rfind( '/' );
     result.erase( 0, pos + 1 );
@@ -815,7 +809,7 @@ namespace dss {
   } // GetProperty
 
 
-  string GetRoot( const string _path ) {
+  string GetRoot( const std::string& _path ) {
     string result = _path;
     string::size_type pos = result.find( '/' );
     if( pos != string::npos ) {

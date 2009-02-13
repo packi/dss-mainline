@@ -1,13 +1,11 @@
 #ifndef NEUROPROPERTYSYSTEM_H
 #define NEUROPROPERTYSYSTEM_H
 
-#include <libxml/xmlwriter.h>
 #include <libxml/tree.h>
+#include <libxml/xmlwriter.h>
 
 #include <vector>
 #include <string>
-
-using namespace std;
 
 namespace dss {
 
@@ -30,9 +28,9 @@ namespace dss {
     int PropertyLevel;
   } aPropertyValue;
 
-  string GetBasePath(const string _path);
-  string GetProperty(const string _path);
-  string GetRoot(const string _path);
+  std::string GetBasePath(const std::string& _path);
+  std::string GetProperty(const std::string& _path);
+  std::string GetRoot(const std::string& _path);
 
   /**
    @author Patrick Staehlin <me@packi.ch>
@@ -44,45 +42,43 @@ namespace dss {
     PropertySystem();
     ~PropertySystem();
 
-    bool LoadFromXML(const char* _fileName, PropertyNode* _rootNode = NULL);
-    bool LoadFromXML(const string& _fileName, PropertyNode* _rootNode = NULL);
+    bool LoadFromXML(const std::string& _fileName, PropertyNode* _rootNode = NULL);
     bool SaveToXML(const char* _fileName, PropertyNode* _rootNode = NULL) const;
-    bool
-        SaveToXML(const string& _fileName, PropertyNode* _rootNode = NULL) const;
+    bool SaveToXML(const std::string& _fileName, PropertyNode* _rootNode = NULL) const;
 
     PropertyNode* GetProperty(const char* _propPath) const;
-    PropertyNode* GetProperty(const string _propPath) const;
+    PropertyNode* GetProperty(const std::string& _propPath) const;
 
     PropertyNode* GetRootNode() const {
       return m_RootNode;
     }
     ;
 
-    PropertyNode* CreateProperty(const string _propPath);
+    PropertyNode* CreateProperty(const std::string& _propPath);
 
     // fast access to property values
     int GetIntValue(const char* _propPath) const;
-    int GetIntValue(const string& _propPath) const;
+    int GetIntValue(const std::string& _propPath) const;
     bool GetBoolValue(const char* _propPath) const;
-    bool GetBoolValue(const string& _propPath) const;
+    bool GetBoolValue(const std::string& _propPath) const;
     const char* GetStringValue(const char* _propPath) const;
-    const char* GetStringValue(const string& _propPath) const;
+    const char* GetStringValue(const std::string& _propPath) const;
 
     bool SetIntValue(const char* _propPath, const int _value, bool _mayCreate =
         true);
-    bool SetIntValue(const string& _propPath, const int _value,
+    bool SetIntValue(const std::string& _propPath, const int _value,
                      bool _mayCreate = true);
     bool SetBoolValue(const char* _propPath, const bool _value,
                       bool _mayCreate = true);
-    bool SetBoolValue(const string& _propPath, const bool _value,
+    bool SetBoolValue(const std::string& _propPath, const bool _value,
                       bool _mayCreate = true);
     bool SetStringValue(const char* _propPath, const char* _value,
                         bool _mayCreate = true);
-    bool SetStringValue(const string& _propPath, const char* _value,
+    bool SetStringValue(const std::string& _propPath, const char* _value,
                         bool _mayCreate = true);
-    bool SetStringValue(const char* _propPath, const string& _value,
+    bool SetStringValue(const char* _propPath, const std::string& _value,
                         bool _mayCreate = true);
-    bool SetStringValue(const string& _propPath, const string& _value,
+    bool SetStringValue(const std::string& _propPath, const std::string& _value,
                         bool _mayCreate = true);
 
   }; //  PropertySystem
@@ -207,7 +203,7 @@ namespace dss {
 
   class PropertyListener {
   private:
-    vector<const PropertyNode*> m_Properties;
+    std::vector<const PropertyNode*> m_Properties;
   protected:
     friend class PropertyNode;
     virtual void PropertyChanged(const PropertyNode* _changedNode);
@@ -227,35 +223,35 @@ namespace dss {
       PropertyProxy<int>* intProxy;
       PropertyProxy<const char*>* stringProxy;
     } m_Proxy;
-    vector<PropertyNode*> m_ChildNodes;
-    mutable vector<PropertyListener*> m_Listeners;
+    std::vector<PropertyNode*> m_ChildNodes;
+    mutable std::vector<PropertyListener*> m_Listeners;
     PropertyNode* m_ParentNode;
-    string m_Name;
-    mutable string m_DisplayName;
+    std::string m_Name;
+    mutable std::string m_DisplayName;
     bool m_LinkedToProxy;
     int m_Index;
   private:
     void AddChild(PropertyNode* _childNode);
-    PropertyNode* GetPropertyByName(const string _name);
+    PropertyNode* GetPropertyByName(const std::string& _name);
     void ClearValue();
 
-    int GetAndRemoveIndexFromPropertyName(string& _propName);
+    int GetAndRemoveIndexFromPropertyName(std::string& _propName);
 
     void NotifyListeners(void(PropertyListener::*_callback)(const PropertyNode*));
   public:
     PropertyNode(PropertyNode* _parentNode, const char* _name, int _index = 0);
     ~PropertyNode();
 
-    const string& GetName() const {
+    const std::string& GetName() const {
       return m_Name;
     }
-    const string& GetDisplayName() const;
+    const std::string& GetDisplayName() const;
 
-    PropertyNode* GetProperty(const string _propPath);
-    int Count(const string _propertyName);
+    PropertyNode* GetProperty(const std::string& _propPath);
+    int Count(const std::string& _propertyName);
 
     void SetStringValue(const char* _value);
-    void SetStringValue(const string& _value);
+    void SetStringValue(const std::string& _value);
     void SetIntegerValue(const int _value);
     void SetBooleanValue(const bool _value);
 
@@ -263,9 +259,10 @@ namespace dss {
     int GetIntegerValue();
     bool GetBoolValue();
 
-    string GetAsString();
+    std::string GetAsString();
 
-    PropertyNode* CreateProperty(const string _propPath);
+    PropertyNode* CreateProperty(const std::string& _propPath);
+    void MoveTo(const std::string& _path);
 
     aValueType GetValueType();
 
@@ -278,8 +275,11 @@ namespace dss {
     void AddListener(PropertyListener* _listener) const;
     void RemoveListener(PropertyListener* _listener) const;
 
+    int GetChildCount() const { return m_ChildNodes.size(); }
+    PropertyNode* GetChild(const int _index) { return m_ChildNodes.at(_index); }
+
     void ForeachChildOf(void(*_callback)(PropertyNode*)) {
-      for (vector<PropertyNode*>::iterator it = m_ChildNodes.begin(); it
+      for (std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin(); it
           != m_ChildNodes.end(); ++it) {
         (*_callback)(*it);
       }
@@ -288,7 +288,7 @@ namespace dss {
     // needs to stay inside the header file, else the template specializations won't get generated ;-=
     template<class Cls>
     void ForeachChildOf(Cls& _objRef, void(Cls::*_callback)(PropertyNode*)) {
-      for (vector<PropertyNode*>::iterator it = m_ChildNodes.begin(); it
+      for (std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin(); it
           != m_ChildNodes.end(); ++it) {
         (_objRef.*_callback)(*it);
       }

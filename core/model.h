@@ -34,6 +34,7 @@
 
 using namespace std;
 
+#include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -115,6 +116,8 @@ namespace dss {
       return m_DSID == _other.m_DSID;
     }
 
+    string GetName() const;
+
     virtual void TurnOn();
     virtual void TurnOff();
 
@@ -140,7 +143,8 @@ namespace dss {
   typedef DeviceVector::const_iterator DeviceConstIterator;
 
   /** Represents a dsID */
-  class Device : public IDeviceInterface {
+  class Device : public IDeviceInterface,
+                 public boost::noncopyable {
   private:
     string m_Name;
     dsid_t m_DSID;
@@ -508,7 +512,8 @@ namespace dss {
     * This is the root of the datamodel of the dss. The Apartment is responsible for delivering
     * and loading all subitems.
     */
-  class Apartment : public DeviceContainer,
+  class Apartment : public boost::noncopyable,
+                    public DeviceContainer,
                     public Subsystem,
                     private Thread
   {
@@ -548,6 +553,7 @@ namespace dss {
 
     /** Returns a reference to the device with the DSID _dsid */
     Device& GetDeviceByDSID(const dsid_t _dsid) const;
+    Device& GetDeviceByDSID(const dsid_t _dsid);
     /** Returns a reference to the device with the name _name*/
     Device& GetDeviceByName(const string& _name);
     /** Returns a device by it's short-address and modulator */

@@ -10,18 +10,6 @@
 #ifndef DSS_H_INCLUDED
 #define DSS_H_INCLUDED
 
-#include <bitset>
-
-#include "base.h"
-#include "thread.h"
-#include "syncevent.h"
-
-#include <cstdio>
-#include <string>
-#include <sstream>
-
-using namespace std;
-
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -58,6 +46,7 @@ namespace dss {
   private:
     static DSS* m_Instance;
     std::vector<Subsystem*> m_Subsystems;
+    time_t m_TimeStarted;
     boost::shared_ptr<WebServer> m_pWebServer;
     boost::shared_ptr<DS485Interface> m_pDS485Interface;
     boost::shared_ptr<PropertySystem> m_pPropertySystem;
@@ -78,6 +67,8 @@ namespace dss {
 
     void LoadConfig();
     void AddDefaultInterpreterPlugins();
+
+    int GetUptime() const;
   public:
     void Initialize();
     void Run();

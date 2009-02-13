@@ -8,9 +8,10 @@
  */
 
 #include "modeljs.h"
-#include "../dss.h"
-#include "../logger.h"
+#include "core/dss.h"
+#include "core/logger.h"
 
+#include <sstream>
 #include <boost/scoped_ptr.hpp>
 
 namespace dss {

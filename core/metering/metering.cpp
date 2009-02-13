@@ -64,7 +64,7 @@ namespace dss {
           iSeries != e; ++iSeries)
       {
         if(iSeries != series.begin()) {
-          (*iSeries)->SetNextSeries((iSeries - 1)->get());
+          (*iSeries)->SetNextSeries(boost::prior(iSeries)->get());
         }
       }
       if(series.empty()) {
@@ -81,10 +81,7 @@ namespace dss {
         {
           // Load series from file
           string fileName = m_MeteringStorageLocation + UnsignedLongIntToHexString((*ipModulator)->GetDSID()) + "_" + (*iConfig)->GetFilenameSuffix() + ".xml";
-          int dist = distance(m_Config.begin(), iConfig);
-          int size = series.size();
           Series<AdderValue>* s = series[distance(m_Config.begin(), iConfig)].get();
-          cout << dist << " " << size << endl;
           Logger::GetInstance()->Log(string("Metering::CheckModulators: Trying to save series to '") + fileName + "'");
           writer.WriteToXML(*s, fileName);
         }

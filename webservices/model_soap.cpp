@@ -44,13 +44,15 @@ int AuthorizeAndGetSet(struct soap *soap, const int _token, const int _setID, ds
   return SOAP_OK;
 } // AuthorizeAndGetSet
 
-int AuthorizeAndGetDevice(struct soap *soap, const int _token, const int _devID, dss::Device& result) {
+int AuthorizeAndGetDevice(struct soap *soap, const int _token, const int _devID, dss::DeviceReference& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
+
   dss::Apartment& apt = dss::DSS::GetInstance()->GetApartment();
+  result = dss::DeviceReference(_devID, apt);
   try {
-    result = apt.GetDeviceByDSID(_devID);
+    result.GetDevice();
   } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Device not found", NULL);
   }
@@ -667,7 +669,7 @@ int dss__Group_UndoScene(struct soap *soap, int _token, int _groupID, int _scene
 //---------------------------------- Device
 
 int dss__Device_TurnOn(struct soap *soap, int _token, unsigned long _deviceID, bool& result) {
-  dss::Device dev(-1, NULL);
+  dss::DeviceReference dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
@@ -678,7 +680,7 @@ int dss__Device_TurnOn(struct soap *soap, int _token, unsigned long _deviceID, b
 }
 
 int dss__Device_TurnOff(struct soap *soap, int _token, unsigned long _deviceID, bool& result) {
-  dss::Device dev(-1, NULL);
+  dss::DeviceReference dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
@@ -689,7 +691,7 @@ int dss__Device_TurnOff(struct soap *soap, int _token, unsigned long _deviceID, 
 }
 
 int dss__Device_IncreaseValue(struct soap *soap, int _token, unsigned long _deviceID, int _paramID, bool& result) {
-  dss::Device dev(-1, NULL);
+  dss::DeviceReference dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
@@ -700,7 +702,7 @@ int dss__Device_IncreaseValue(struct soap *soap, int _token, unsigned long _devi
 }
 
 int dss__Device_DecreaseValue(struct soap *soap, int _token, unsigned long _deviceID, int _paramID, bool& result) {
-  dss::Device dev(-1, NULL);
+  dss::DeviceReference dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
@@ -711,7 +713,7 @@ int dss__Device_DecreaseValue(struct soap *soap, int _token, unsigned long _devi
 }
 
 int dss__Device_Enable(struct soap *soap, int _token, unsigned long _deviceID, bool& result) {
-  dss::Device dev(-1, NULL);
+  dss::DeviceReference dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
@@ -722,7 +724,7 @@ int dss__Device_Enable(struct soap *soap, int _token, unsigned long _deviceID, b
 }
 
 int dss__Device_Disable(struct soap *soap, int _token, unsigned long _deviceID, bool& result) {
-  dss::Device dev(-1, NULL);
+  dss::DeviceReference dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
@@ -733,7 +735,7 @@ int dss__Device_Disable(struct soap *soap, int _token, unsigned long _deviceID, 
 }
 
 int dss__Device_StartDim(struct soap *soap, int _token, unsigned long _deviceID, bool _directionUp, int _paramID, bool& result) {
-  dss::Device dev(-1, NULL);
+  dss::DeviceReference dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
@@ -744,7 +746,7 @@ int dss__Device_StartDim(struct soap *soap, int _token, unsigned long _deviceID,
 }
 
 int dss__Device_EndDim(struct soap *soap, int _token, unsigned long _deviceID, int _paramID, bool& result) {
-  dss::Device dev(-1, NULL);
+  dss::DeviceReference dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
@@ -755,7 +757,7 @@ int dss__Device_EndDim(struct soap *soap, int _token, unsigned long _deviceID, i
 }
 
 int dss__Device_SetValue(struct soap *soap, int _token, unsigned long _deviceID, double _value, int _paramID, bool& result) {
-  dss::Device dev(-1, NULL);
+  dss::DeviceReference dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
@@ -766,7 +768,7 @@ int dss__Device_SetValue(struct soap *soap, int _token, unsigned long _deviceID,
 }
 
 int dss__Device_CallScene(struct soap *soap, int _token, unsigned long _deviceID, int _sceneID, bool& result) {
-  dss::Device device(-1, NULL);
+  dss::DeviceReference device(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
   if(getResult != SOAP_OK) {
     return getResult;
@@ -777,7 +779,7 @@ int dss__Device_CallScene(struct soap *soap, int _token, unsigned long _deviceID
 }
 
 int dss__Device_SaveScene(struct soap *soap, int _token, unsigned long _deviceID, int _sceneID, bool& result) {
-  dss::Device device(-1, NULL);
+  dss::DeviceReference device(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
   if(getResult != SOAP_OK) {
     return getResult;
@@ -788,7 +790,7 @@ int dss__Device_SaveScene(struct soap *soap, int _token, unsigned long _deviceID
 }
 
 int dss__Device_UndoScene(struct soap *soap, int _token, unsigned long _deviceID, int _sceneID, bool& result) {
-  dss::Device device(-1, NULL);
+  dss::DeviceReference device(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
   if(getResult != SOAP_OK) {
     return getResult;
@@ -799,17 +801,17 @@ int dss__Device_UndoScene(struct soap *soap, int _token, unsigned long _deviceID
 }
 
 int dss__Device_GetValue(struct soap *soap, int _token, unsigned long _deviceID, int _paramID, double& result) {
-  dss::Device dev(-1, NULL);
+  dss::DeviceReference dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  result = dev.GetValue(_paramID);
+  result = dev.GetDevice().GetValue(_paramID);
   return SOAP_OK;
 }
 
 int dss__Device_GetName(struct soap *soap, int _token, unsigned long _deviceID, char** result) {
-  dss::Device dev(-1, NULL);
+  dss::DeviceReference dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
@@ -822,18 +824,18 @@ int dss__Device_GetName(struct soap *soap, int _token, unsigned long _deviceID, 
 } // dss__Device_GetName
 
 int dss__Device_GetFunctionID(struct soap *soap, int _token, unsigned long _deviceID, int& result) {
-  dss::Device dev(-1, NULL);
+  dss::DeviceReference dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
 	return getResult;
   }
-  result = dev.GetFunctionID();
+  result = dev.GetDevice().GetFunctionID();
   return SOAP_OK;
 } // dss__Device_GetFunctionID
 
 int dss__Switch_GetGroupID(struct soap *soap, int _token, unsigned long _deviceID, int& result) {
-  dss::Device dev(-1, NULL);
-  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  dss::DeviceReference devRef(-1, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, devRef);
   if(getResult != SOAP_OK) {
     return getResult;
   }
@@ -842,6 +844,7 @@ int dss__Switch_GetGroupID(struct soap *soap, int _token, unsigned long _deviceI
   if(simDev != NULL && (sw = dynamic_cast<dss::DSIDSimSwitch*>(simDev)) != NULL) {
   	result = dss::DSS::GetInstance()->GetModulatorSim().GetGroupForSwitch(sw);
   } else {
+    dss::Device& dev = devRef.GetDevice();
     for(int iGroup = 1; iGroup < 9; iGroup++) {
       if(dev.IsInGroup(iGroup)) {
         result = iGroup;
@@ -853,7 +856,7 @@ int dss__Switch_GetGroupID(struct soap *soap, int _token, unsigned long _deviceI
 } // dss__Switch_GetGroupID
 
 int dss__Switch_SimulateKeypress(struct soap *soap, int _token, unsigned long _deviceID, int _buttonNr, char* _kind, bool& result) {
-  dss::Device dev(-1, NULL);
+  dss::DeviceReference dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
@@ -874,20 +877,20 @@ int dss__Switch_SimulateKeypress(struct soap *soap, int _token, unsigned long _d
 } // dss__Switch_SimulateKeypress
 
 int dss__Device_GetZoneID(struct soap *soap, int _token, unsigned long _deviceID, int& result) {
-  dss::Device dev(-1, NULL);
+  dss::DeviceReference dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
   }
 
-  result = dev.GetZoneID();
+  result = dev.GetDevice().GetZoneID();
   return SOAP_OK;
 } // dss__Device_GetZoneID
 
 //==================================================== Information
 
 int dss__Device_GetDSID(struct soap *soap, int _token, unsigned long _deviceID, unsigned long& result) {
-  dss::Device dev(-1, NULL);
+  dss::DeviceReference dev(-1, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;

@@ -15,6 +15,7 @@
 */
 
 
+#include "core/base.h"
 #include "core/dss.h"
 #include "core/logger.h"
 #include "unix/ds485.h"
@@ -57,7 +58,7 @@ int main (int argc, char * const argv[]) {
 #endif
 
 #ifdef USE_LIBXML
-  // let libXML initialize it's parser
+  // let libXML initialize its parser
   xmlInitParser();
 #endif
 
