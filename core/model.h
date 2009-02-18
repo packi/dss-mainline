@@ -45,6 +45,9 @@ namespace dss {
   class DeviceContainer;
   class Apartment;
   class Group;
+  class PropertyNode;
+
+  class PropertyNode;
 
   /** Interface to a single or multiple devices.
    */
@@ -99,6 +102,7 @@ namespace dss {
   private:
     dsid_t m_DSID;
     const Apartment* m_Apartment;
+    PropertyNode* m_pPropertyNode;
   public:
     DeviceReference(const DeviceReference& _copy);
     DeviceReference(const dsid_t _dsid, const Apartment& _apartment);
@@ -155,6 +159,10 @@ namespace dss {
     bitset<63> m_GroupBitmask;
     vector<int> m_Groups;
     int m_SubscriptionEventID;
+
+    PropertyNode* m_pPropertyNode;
+  protected:
+    void PublishToPropertyTree();
   public:
     Device(const dsid_t _dsid, Apartment* _pApartment);
     virtual ~Device() {};
@@ -529,6 +537,8 @@ namespace dss {
     vector<Group*> m_Groups;
     boost::ptr_vector<Action> m_Actions;
     bool m_IsInitializing;
+
+    PropertyNode* m_pPropertyNode;
   private:
     void LoadDevices(XMLNode& _node);
     void LoadModulators(XMLNode& _node);
@@ -600,6 +610,7 @@ namespace dss {
 
   public:
 
+    PropertyNode* GetPropertyNode() { return m_pPropertyNode; }
     /** Processes a keypress on the given dsid.
       * @param _number The button number that was pressed starting with 1
       */

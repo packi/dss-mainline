@@ -4,6 +4,9 @@
 #include <libxml/tree.h>
 #include <libxml/xmlwriter.h>
 
+#include <boost/mpl/if.hpp>
+#include <boost/type_traits/is_class.hpp>
+
 #include <vector>
 #include <string>
 
@@ -43,10 +46,8 @@ namespace dss {
     ~PropertySystem();
 
     bool LoadFromXML(const std::string& _fileName, PropertyNode* _rootNode = NULL);
-    bool SaveToXML(const char* _fileName, PropertyNode* _rootNode = NULL) const;
     bool SaveToXML(const std::string& _fileName, PropertyNode* _rootNode = NULL) const;
 
-    PropertyNode* GetProperty(const char* _propPath) const;
     PropertyNode* GetProperty(const std::string& _propPath) const;
 
     PropertyNode* GetRootNode() const {
@@ -57,30 +58,16 @@ namespace dss {
     PropertyNode* CreateProperty(const std::string& _propPath);
 
     // fast access to property values
-    int GetIntValue(const char* _propPath) const;
     int GetIntValue(const std::string& _propPath) const;
-    bool GetBoolValue(const char* _propPath) const;
     bool GetBoolValue(const std::string& _propPath) const;
-    const char* GetStringValue(const char* _propPath) const;
-    const char* GetStringValue(const std::string& _propPath) const;
+    std::string GetStringValue(const std::string& _propPath) const;
 
-    bool SetIntValue(const char* _propPath, const int _value, bool _mayCreate =
-        true);
     bool SetIntValue(const std::string& _propPath, const int _value,
                      bool _mayCreate = true);
-    bool SetBoolValue(const char* _propPath, const bool _value,
-                      bool _mayCreate = true);
     bool SetBoolValue(const std::string& _propPath, const bool _value,
                       bool _mayCreate = true);
-    bool SetStringValue(const char* _propPath, const char* _value,
-                        bool _mayCreate = true);
-    bool SetStringValue(const std::string& _propPath, const char* _value,
-                        bool _mayCreate = true);
-    bool SetStringValue(const char* _propPath, const std::string& _value,
-                        bool _mayCreate = true);
     bool SetStringValue(const std::string& _propPath, const std::string& _value,
                         bool _mayCreate = true);
-
   }; //  PropertySystem
 
 
@@ -100,17 +87,41 @@ namespace dss {
 
 
   template<class T>
+  class PropertyProxyReference : public PropertyProxy<T> {
+  private:
+    T& m_Reference;
+    bool m_Writeable;
+  public:
+    PropertyProxyReference(T& _reference, bool _writeable = true)
+    : m_Reference(_reference),
+      m_Writeable(_writeable)
+    { }
+
+    virtual ~PropertyProxyReference() { }
+
+    virtual T GetValue() const { return m_Reference; }
+
+    virtual void SetValue(T _value) {
+      if(m_Writeable) {
+        m_Reference = _value;
+      }
+    }
+
+    virtual PropertyProxyReference* clone() const {
+      return new PropertyProxyReference<T>(m_Reference, m_Writeable);
+    }
+  };
+
+  template<class T>
   class PropertyProxyPointer: public PropertyProxy<T> {
   private:
     T* m_PointerToValue;
   public:
-    PropertyProxyPointer(T* _ptrToValue) :
-      m_PointerToValue(_ptrToValue) {
-    }
-    ;
-    virtual ~PropertyProxyPointer() {
-    }
-    ;
+    PropertyProxyPointer(T* _ptrToValue)
+    : m_PointerToValue(_ptrToValue)
+    { }
+
+    virtual ~PropertyProxyPointer() { }
 
     virtual T GetValue() const {
       return *m_PointerToValue;
@@ -167,7 +178,7 @@ namespace dss {
   class PropertyProxyMemberFunction: public PropertyProxy<T> {
   private:
     typedef T (Cls::*aGetterType)() const;
-    typedef void (Cls::*aSetterType)(T);
+    typedef void (Cls::*aSetterType)(typename boost::mpl::if_c<boost::is_class<T>::value, const T&, const T>::type);
     Cls& m_Obj;
     aGetterType m_GetterPtr;
     aSetterType m_SetterPtr;
@@ -221,7 +232,7 @@ namespace dss {
     union {
       PropertyProxy<bool>* boolProxy;
       PropertyProxy<int>* intProxy;
-      PropertyProxy<const char*>* stringProxy;
+      PropertyProxy<std::string>* stringProxy;
     } m_Proxy;
     std::vector<PropertyNode*> m_ChildNodes;
     mutable std::vector<PropertyListener*> m_Listeners;
@@ -232,7 +243,6 @@ namespace dss {
     int m_Index;
   private:
     void AddChild(PropertyNode* _childNode);
-    PropertyNode* GetPropertyByName(const std::string& _name);
     void ClearValue();
 
     int GetAndRemoveIndexFromPropertyName(std::string& _propName);
@@ -255,7 +265,7 @@ namespace dss {
     void SetIntegerValue(const int _value);
     void SetBooleanValue(const bool _value);
 
-    const char* GetStringValue();
+    std::string GetStringValue();
     int GetIntegerValue();
     bool GetBoolValue();
 
@@ -264,12 +274,14 @@ namespace dss {
     PropertyNode* CreateProperty(const std::string& _propPath);
     void MoveTo(const std::string& _path);
 
+    PropertyNode* GetPropertyByName(const std::string& _name);
+
     aValueType GetValueType();
 
     // proxy support
     bool LinkToProxy(const PropertyProxy<bool>& _proxy);
     bool LinkToProxy(const PropertyProxy<int>& _proxy);
-    bool LinkToProxy(const PropertyProxy<const char*>& _proxy);
+    bool LinkToProxy(const PropertyProxy<std::string>& _proxy);
     bool UnlinkProxy();
 
     void AddListener(PropertyListener* _listener) const;

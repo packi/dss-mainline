@@ -31,13 +31,33 @@ namespace dss {
 
   //================================================== Device
 
+  const devid_t ShortAddressStaleDevice = 0xFFFF;
+
   Device::Device(dsid_t _dsid, Apartment* _pApartment)
   : m_DSID(_dsid),
-    m_ShortAddress(0xFF),
+    m_ShortAddress(ShortAddressStaleDevice),
     m_ZoneID(0),
     m_pApartment(_pApartment),
-    m_SubscriptionEventID(-1)
+    m_SubscriptionEventID(-1),
+    m_pPropertyNode(NULL)
   {
+  }
+
+  void Device::PublishToPropertyTree() {
+    if(m_pPropertyNode == NULL) {
+      // don't publish stale devices for now
+      if(m_ShortAddress == ShortAddressStaleDevice) {
+        return;
+      } else {
+        if(m_pApartment->GetPropertyNode() != NULL) {
+          m_pPropertyNode = m_pApartment->GetPropertyNode()->CreateProperty("devices/device+");
+//          m_pPropertyNode->CreateProperty("name")->LinkToProxy(PropertyProxyMemberFunction<Device, string>(*this, &Device::GetName, &Device::SetName));
+          m_pPropertyNode->CreateProperty("name")->LinkToProxy(PropertyProxyReference<string>(m_Name));
+          m_pPropertyNode->CreateProperty("ModulatorID")->LinkToProxy(PropertyProxyReference<int>(m_ModulatorID, false));
+          m_pPropertyNode->CreateProperty("ZoneID")->LinkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
+        }
+      }
+    }
   }
 
   void Device::TurnOn() {
@@ -147,6 +167,7 @@ namespace dss {
 
   void Device::SetShortAddress(const devid_t _shortAddress) {
     m_ShortAddress = _shortAddress;
+    PublishToPropertyTree();
   } // SetShortAddress
 
   dsid_t Device::GetDSID() const {
@@ -477,7 +498,8 @@ namespace dss {
 
   Apartment::Apartment(DSS* _pDSS)
   : Subsystem(_pDSS, "Apartment"),
-    Thread("Apartment")
+    Thread("Apartment"),
+    m_pPropertyNode(NULL)
   {
     Zone* zoneZero = new Zone(0);
     AddDefaultGroupsToZone(*zoneZero);
@@ -500,6 +522,7 @@ namespace dss {
   void Apartment::Initialize() {
     Subsystem::Initialize();
     DSS::GetInstance()->GetPropertySystem().SetStringValue(GetPropertyBasePath() + "configfile", "data/apartment.xml", true);
+    m_pPropertyNode = DSS::GetInstance()->GetPropertySystem().CreateProperty("/apartment");
   } // Initialize
 
   void Apartment::Start() {

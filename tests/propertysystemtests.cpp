@@ -95,7 +95,7 @@ protected:
     propND4->SetIntegerValue(2);
     CPPUNIT_ASSERT_EQUAL(2, propND4->GetIntegerValue());
     propND4->SetStringValue("bla");
-    CPPUNIT_ASSERT_EQUAL(0, strcmp(propND4->GetStringValue(), "bla"));
+    CPPUNIT_ASSERT(propND4->GetStringValue() == "bla");
     propSys->CreateProperty("/bla/blubb");
     propSys->CreateProperty("/bla/bll");
     propSys->CreateProperty("/bla/bll/bsa");
