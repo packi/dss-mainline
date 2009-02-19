@@ -6,6 +6,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cassert>
+#include <cstring>
 
 namespace dss {
 
