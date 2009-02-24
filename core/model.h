@@ -94,6 +94,13 @@ namespace dss {
     virtual ~IDeviceInterface() {};
   };
 
+  class Switch {
+  private:
+    int m_NumberOfButtons;
+  public:
+    Switch(const int _numberOfButtons);
+  };
+
   /** Internal reference to a device.
    * A DeviceReference is virtually interchangable with a device. It is used in places
      where a reference to a device is needed.
@@ -114,7 +121,7 @@ namespace dss {
     dsid_t GetDSID() const;
 
     int GetFunctionID() const;
-    bool IsSwitch() const;
+    bool HasSwitch() const;
 
     bool operator==(const DeviceReference& _other) const {
       return m_DSID == _other.m_DSID;
@@ -159,6 +166,7 @@ namespace dss {
     bitset<63> m_GroupBitmask;
     vector<int> m_Groups;
     int m_SubscriptionEventID;
+    int m_FunctionID;
 
     PropertyNode* m_pPropertyNode;
   protected:
@@ -188,7 +196,8 @@ namespace dss {
     virtual void UndoScene(const int _sceneNr);
 
     int GetFunctionID() const;
-    bool IsSwitch() const;
+    void SetFunctionID(const int _value);
+    bool HasSwitch() const;
 
     string GetName() const;
     void SetName(const string& _name);
@@ -660,7 +669,7 @@ namespace __gnu_cxx
   template<>
   struct hash<const dss::Modulator*>  {
     size_t operator()(const dss::Modulator* x) const  {
-      return x->GetDSID();
+      return x->GetDSID().lower;
     }
   };
 

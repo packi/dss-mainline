@@ -110,8 +110,8 @@ namespace dss {
 
   string ToJSONValue(const DeviceReference& _device) {
     std::stringstream sstream;
-    sstream << "{ \"id\": \"" << _device.GetDSID() << "\""
-            << ", \"isSwitch\": " << ToJSONValue(_device.IsSwitch())
+    sstream << "{ \"id\": \"" << _device.GetDSID().ToString() << "\""
+            << ", \"isSwitch\": " << ToJSONValue(_device.HasSwitch())
             << ", \"name\": \"" << _device.GetDevice().GetName()
             << "\", \"on\": " << ToJSONValue(_device.IsOn()) << " }";
     return sstream.str();
@@ -260,7 +260,7 @@ namespace dss {
       string devidStr = paramMap["device"];
       string zoneIDStr = paramMap["zone"];
       if(!devidStr.empty()) {
-        int devid = StrToUInt(devidStr);
+        dsid_t devid = dsid::FromString(devidStr);
         DSS::GetInstance()->GetApartment().GetDeviceByDSID(devid).TurnOn();
         shttpd_printf(_arg, "{ok:1}");
       } else if(!zoneIDStr.empty()) {
@@ -275,7 +275,7 @@ namespace dss {
       string devidStr = paramMap["device"];
       string zoneIDStr = paramMap["zone"];
       if(!devidStr.empty()) {
-        int devid = StrToUInt(devidStr);
+        dsid_t devid = dsid::FromString(devidStr);
         DSS::GetInstance()->GetApartment().GetDeviceByDSID(devid).TurnOff();
         shttpd_printf(_arg, "{ok:1}");
       } else if(!zoneIDStr.empty()) {
@@ -306,9 +306,9 @@ namespace dss {
       frame->GetHeader().SetCounter(counter);
       frame->SetCommand(command);
       for(int iByte = 0; iByte < length; iByte++) {
-        uint8 byte = StrToIntDef(paramMap[string("payload_") + IntToString(iByte+1)], 0xFF);
+        uint8_t byte = StrToIntDef(paramMap[string("payload_") + IntToString(iByte+1)], 0xFF);
         cout << "b" << dec << iByte << ": " << hex << (int)byte << "\n";
-        frame->GetPayload().Add<uint8>(byte);
+        frame->GetPayload().Add<uint8_t>(byte);
       }
       cout << dec <<"done" << endl;
       DS485Interface* intf = &DSS::GetInstance()->GetDS485Interface();
@@ -329,7 +329,7 @@ namespace dss {
       string devidStr = paramMap["device"];
       if(method == "sim/switch/getstate") {
         if(!devidStr.empty()) {
-          dsid_t devid = StrToUInt(devidStr);
+          dsid_t devid = dsid::FromString(devidStr);
           DSIDInterface* dev = DSS::GetInstance()->GetModulatorSim().GetSimulatedDevice(devid);
           DSIDSimSwitch* sw = NULL;
           if(dev != NULL && (sw = dynamic_cast<DSIDSimSwitch*>(dev)) != NULL) {
@@ -342,7 +342,7 @@ namespace dss {
         }
       } else if(method == "sim/switch/pressed") {
         if(!devidStr.empty()) {
-          dsid_t devid = StrToUInt(devidStr);
+          dsid_t devid = dsid::FromString(devidStr);
           int buttonNr = StrToIntDef(paramMap["buttonnr"], 1);
           DSIDInterface* dev = DSS::GetInstance()->GetModulatorSim().GetSimulatedDevice(devid);
           DSIDSimSwitch* sw = NULL;
@@ -477,7 +477,7 @@ namespace dss {
 
         string devidStr = paramMap["devid"];
         if(!devidStr.empty()) {
-          dsid_t devid = StrToUInt(devidStr);
+          dsid_t devid = dsid::FromString(devidStr);
 
           Device& dev = DSS::GetInstance()->GetApartment().GetDeviceByDSID(devid);
 

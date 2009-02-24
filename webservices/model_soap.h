@@ -9,6 +9,7 @@
 /** \file */
 
 typedef unsigned long xsd__unsignedInt;
+typedef unsigned long long xsd__unsignedLong;
 /*
 class IntArray {
 public:
@@ -22,6 +23,11 @@ public:
   int __size;
 };
 */
+
+struct dss__dsid {
+  xsd__unsignedLong upper;
+  xsd__unsignedInt lower;
+};
 
 int dss__Test(char* bla, std::vector<int>& ints);
 
@@ -40,7 +46,7 @@ int dss__FreeSet(int _token, int _setID, bool& result);
 int dss__Apartment_CreateSetFromGroup(int _token, char* _groupName, int& setID);
 /** Creates a set containing all devices in the given array
  * @see dss__CreateEmptySet*/
-int dss__Apartment_CreateSetFromDeviceIDs(int _token, std::vector<int> _ids, int& setID);
+int dss__Apartment_CreateSetFromDeviceIDs(int _token, std::vector<struct dss__dsid> _ids, int& setID);
 /** Creates a set containing all devices in the given array */
 int dss__Apartment_CreateSetFromDeviceNames(int _token, std::vector<std::string> _names, int& setID);
 /** Creates an empty set.
@@ -49,14 +55,14 @@ int dss__Apartment_CreateEmptySet(int _token, int& setID);
 /** Creates a set containing all devices */
 int dss__Apartment_GetDevices(int _token, int& setID);
 /** Returns the device ID for the given _deviceName */
-int dss__Apartment_GetDeviceIDByName(int _token, char* _deviceName, int& deviceID);
+int dss__Apartment_GetDeviceIDByName(int _token, char* _deviceName, struct dss__dsid& deviceID);
 
 /** Adds the given device to the set */
 int dss__Set_AddDeviceByName(int _token, int _setID, char* _name, bool& result);
 /** Adds the given device to the set */
-int dss__Set_AddDeviceByID(int _token, int _setID, int _deviceID, bool& result);
+int dss__Set_AddDeviceByID(int _token, int _setID, struct dss__dsid _deviceID, bool& result);
 /** Removes the device from the set */
-int dss__Set_RemoveDevice(int _token, int _setID, int _deviceID, bool& result);
+int dss__Set_RemoveDevice(int _token, int _setID, struct dss__dsid _deviceID, bool& result);
 /** Combines two sets into another set */
 int dss__Set_Combine(int _token, int _setID1, int _setID2, int& setID);
 /** Removes all devices contained in _SetIDToRemove from _setID and copies those into setID */
@@ -64,7 +70,7 @@ int dss__Set_Remove(int _token, int _setID, int _setIDToRemove, int& setID);
 /** Removes all devices which don't belong to the specified group */
 int dss__Set_ByGroup(int _token, int _setID, int _groupID, int& setID);
 /** Returns an array containing all device ids contained in the given set */
-int dss__Set_GetContainedDevices(int _token, int _setID, std::vector<int>& deviceIDs);
+int dss__Set_GetContainedDevices(int _token, int _setID, std::vector<struct dss__dsid>& deviceIDs);
 
 /** Looks up the group id for the given group name */
 int dss__Apartment_GetGroupByName(int _token, char* _groupName, int& groupID);
@@ -143,49 +149,49 @@ int dss__Group_SaveScene(int _token, int _groupID, int _sceneNr, bool& result);
 //--------------------------- Device
 
 /** Sends a turn on command to the device. */
-int dss__Device_TurnOn(int _token, xsd__unsignedInt _deviceID, bool& result);
+int dss__Device_TurnOn(int _token, struct dss__dsid _deviceID, bool& result);
 /** Sends a turn off command to the device. */
-int dss__Device_TurnOff(int _token, xsd__unsignedInt _deviceID, bool& result);
+int dss__Device_TurnOff(int _token, struct dss__dsid _deviceID, bool& result);
 /** Increases the parameter specified by _paramID on the device. If _paramID == -1
  * the default parameter will be increased */
-int dss__Device_IncreaseValue(int _token, xsd__unsignedInt _deviceID, int _paramID, bool& result);
+int dss__Device_IncreaseValue(int _token, struct dss__dsid _deviceID, int _paramID, bool& result);
 /** Decreases the parameter specified by _paramID on the device. If _paramID == -1
  * the default parameter will be decreased */
-int dss__Device_DecreaseValue(int _token, xsd__unsignedInt _deviceID, int _paramID, bool& result);
+int dss__Device_DecreaseValue(int _token, struct dss__dsid _deviceID, int _paramID, bool& result);
 /** Enables the device. */
-int dss__Device_Enable(int _token, xsd__unsignedInt _deviceID, bool& result);
+int dss__Device_Enable(int _token, struct dss__dsid _deviceID, bool& result);
 /** Disables the device. */
-int dss__Device_Disable(int _token, xsd__unsignedInt _deviceID, bool& result);
+int dss__Device_Disable(int _token, struct dss__dsid _deviceID, bool& result);
 /** Starts dimming the given parameter. If _directionUp is true, the dimming will increase
  * the parameter specified by _paramID. If _paramID == -1 the default parameter will be
  * dimmed. */
-int dss__Device_StartDim(int _token, xsd__unsignedInt _deviceID, bool _directionUp, int _paramID, bool& result);
+int dss__Device_StartDim(int _token, struct dss__dsid _deviceID, bool _directionUp, int _paramID, bool& result);
 /** Stops dimming the given parameter. If _parameterID == -1 dimming the default parameter
  * will be stopped. */
-int dss__Device_EndDim(int _token, xsd__unsignedInt _deviceID, int _paramID, bool& result);
+int dss__Device_EndDim(int _token, struct dss__dsid _deviceID, int _paramID, bool& result);
 /** Sets the value of the parameter _paramID to _value. If _paramID == -1 the default parameter
  * will be set. */
-int dss__Device_SetValue(int _token, xsd__unsignedInt _deviceID, double _value, int _paramID, bool& result);
+int dss__Device_SetValue(int _token, struct dss__dsid _deviceID, double _value, int _paramID, bool& result);
 /** Returns the value of the parameter _paramID. If _paramID == -1 the value of the default parameter
  * will be returned. */
-int dss__Device_GetValue(int _token, xsd__unsignedInt _deviceID, int _paramID, double& result);
+int dss__Device_GetValue(int _token, struct dss__dsid _deviceID, int _paramID, double& result);
 
 
 /** Calls the scene _sceneNr on the device identified by _deviceID. */
-int dss__Device_CallScene(int _token, xsd__unsignedInt _deviceID, int _sceneNr, bool& result);
+int dss__Device_CallScene(int _token, struct dss__dsid _deviceID, int _sceneNr, bool& result);
 /** Saves the scene _sceneNr on the device identified by _devicdID. */
-int dss__Device_SaveScene(int _token, xsd__unsignedInt _deviceID, int _sceneNr, bool& result);
+int dss__Device_SaveScene(int _token, struct dss__dsid _deviceID, int _sceneNr, bool& result);
 
 /** Returns the name of a device */
-int dss__Device_GetName(int _token, xsd__unsignedInt _deviceID, char** result);
+int dss__Device_GetName(int _token, struct dss__dsid _deviceID, char** result);
 
 /** Returns the zone id of the specified device */
-int dss__Device_GetZoneID(int _token, xsd__unsignedInt _deviceID, int& result);
+int dss__Device_GetZoneID(int _token, struct dss__dsid _deviceID, int& result);
 
 //==================================================== Information
 
 /** Returns the DSID of the given device */
-int dss__Device_GetDSID(int _token, xsd__unsignedInt _deviceID, xsd__unsignedInt& result);
+int dss__Device_GetDSID(int _token, struct dss__dsid _deviceID, struct dss__dsid& result);
 
 int dss__Modulator_GetPowerConsumption(int _token, int _modulatorID, xsd__unsignedInt& result);
 
@@ -194,19 +200,19 @@ int dss__Modulator_GetPowerConsumption(int _token, int _modulatorID, xsd__unsign
 //These calls may be restricted to privileged users.
 
 /** Returns an integer array of modulators known to the dss. */
-int dss__Apartment_GetModulatorIDs(int _token, std::vector<int>& ids);
+int dss__Apartment_GetModulatorIDs(int _token, std::vector<struct dss__dsid>& ids);
 /** Returns the DSID of the given modulator. */
-int dss__Modulator_GetDSID(int _token, int _modulatorID, xsd__unsignedInt& dsid);
+int dss__Modulator_GetDSID(int _token, int _modulatorID, struct dss__dsid& dsid);
 /** Retuns the name of the given modulator. */
-int dss__Modulator_GetName(int _token, int _modulatorID, char** name);
+int dss__Modulator_GetName(int _token, struct dss__dsid _modulatorID, char** name);
 /** Allocates a zone */
 int dss__Apartment_AllocateZone(int _token, int& zoneID);
 /** Deletes a previously allocated zone. */
 int dss__Apartment_DeleteZone(int _token, int _zoneID, int& result);
 /** Adds a device to a zone */
-int dss__Zone_AddDevice(int _token, int _zoneID, int _deviceID, int& result);
+int dss__Zone_AddDevice(int _token, int _zoneID, struct dss__dsid _deviceID, int& result);
 /** Removes a device from a zone */
-int dss__Zone_RemoveDevice(int _token, int _zoneID, int _deviceID, int& result);
+int dss__Zone_RemoveDevice(int _token, int _zoneID, struct dss__dsid _deviceID, int& result);
 /** Sets the name of a zone to _name */
 int dss__Zone_SetName(int _token, int _zoneID, char* _name, int& result);
 /** Allocates a user-defined group. */
@@ -214,18 +220,18 @@ int dss__Apartment_AllocateUserGroup(int _token, int& groupID);
 /** Revmoes a previously allocated group. */
 int dss__Group_RemoveUserGroup(int _token, int _groupID, int& result);
 /** Adds a device to the given group. */
-int dss__Group_AddDevice(int _token, int _groupID, int _deviceID, int& result);
+int dss__Group_AddDevice(int _token, int _groupID, struct dss__dsid _deviceID, int& result);
 /** Removes a device from the given group. */
-int dss__Group_RemoveDevice(int _token, int _groupID, int _deviceID, int& result);
+int dss__Group_RemoveDevice(int _token, int _groupID, struct dss__dsid _deviceID, int& result);
 
 /** Returns the function id of the specified device */
-int dss__Device_GetFunctionID(int _token, xsd__unsignedInt _deviceID, int& result);
+int dss__Device_GetFunctionID(int _token, struct dss__dsid _deviceID, int& result);
 /** Returns the group id of the specified switch */
-int dss__Switch_GetGroupID(int _token, xsd__unsignedInt _deviceID, int& result);
+int dss__Switch_GetGroupID(int _token, struct dss__dsid _deviceID, int& result);
 /** Simulates a key press on the specified switch and button
   * @param _kind One of ("click", "touch", "touchend")
   */
-int dss__Switch_SimulateKeypress(int _token, xsd__unsignedInt _deviceID, int _buttonNr, char* _kind, bool& result);
+//int dss__Switch_SimulateKeypress(int _token, struct dss__dsid _deviceID, int _buttonNr, char* _kind, bool& result);
 
 class dss__inParameter {
 public:

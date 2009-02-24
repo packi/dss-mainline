@@ -219,57 +219,57 @@ namespace dss {
     frame.GetHeader().SetType(1);
     frame.SetCommand(CommandRequest);
     if(_cmd == cmdTurnOn) {
-      frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
+      frame.GetPayload().Add<uint8_t>(FunctionGroupCallScene);
       frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
       frame.GetPayload().Add<uint16_t>(_group.GetID());
       frame.GetPayload().Add<uint16_t>(SceneMax);
       SendFrame(frame);
     } else if(_cmd == cmdTurnOff) {
-      frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
+      frame.GetPayload().Add<uint8_t>(FunctionGroupCallScene);
       frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
       frame.GetPayload().Add<uint16_t>(_group.GetID());
       frame.GetPayload().Add<uint16_t>(SceneOff);
       SendFrame(frame);
     } else if(_cmd == cmdCallScene) {
-      frame.GetPayload().Add<uint8>(FunctionGroupCallScene);
+      frame.GetPayload().Add<uint8_t>(FunctionGroupCallScene);
       frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
       frame.GetPayload().Add<uint16_t>(_group.GetID());
       frame.GetPayload().Add<uint16_t>(_param);
       SendFrame(frame);
     } else if(_cmd == cmdSaveScene) {
-      frame.GetPayload().Add<uint8>(FunctionGroupSaveScene);
+      frame.GetPayload().Add<uint8_t>(FunctionGroupSaveScene);
       frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
       frame.GetPayload().Add<uint16_t>(_group.GetID());
       frame.GetPayload().Add<uint16_t>(_param);
       SendFrame(frame);
     } else if(_cmd == cmdUndoScene) {
-      frame.GetPayload().Add<uint8>(FunctionGroupUndoScene);
+      frame.GetPayload().Add<uint8_t>(FunctionGroupUndoScene);
       frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
       frame.GetPayload().Add<uint16_t>(_group.GetID());
       frame.GetPayload().Add<uint16_t>(_param);
       SendFrame(frame);
     } else if(_cmd == cmdStartDimUp) {
-      frame.GetPayload().Add<uint8>(FunctionGroupStartDimInc);
+      frame.GetPayload().Add<uint8_t>(FunctionGroupStartDimInc);
       frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
       frame.GetPayload().Add<uint16_t>(_group.GetID());
       SendFrame(frame);
     } else if(_cmd == cmdStartDimDown) {
-      frame.GetPayload().Add<uint8>(FunctionGroupStartDimDec);
+      frame.GetPayload().Add<uint8_t>(FunctionGroupStartDimDec);
       frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
       frame.GetPayload().Add<uint16_t>(_group.GetID());
       SendFrame(frame);
     } else if(_cmd == cmdStopDim) {
-      frame.GetPayload().Add<uint8>(FunctionGroupEndDim);
+      frame.GetPayload().Add<uint8_t>(FunctionGroupEndDim);
       frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
       frame.GetPayload().Add<uint16_t>(_group.GetID());
       SendFrame(frame);
     } else if(_cmd == cmdIncreaseValue) {
-      frame.GetPayload().Add<uint8>(FunctionGroupIncreaseValue);
+      frame.GetPayload().Add<uint8_t>(FunctionGroupIncreaseValue);
       frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
       frame.GetPayload().Add<uint16_t>(_group.GetID());
       SendFrame(frame);
     } else if(_cmd == cmdDecreaseValue) {
-      frame.GetPayload().Add<uint8>(FunctionGroupDecreaseValue);
+      frame.GetPayload().Add<uint8_t>(FunctionGroupDecreaseValue);
       frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
       frame.GetPayload().Add<uint16_t>(_group.GetID());
       SendFrame(frame);
@@ -281,7 +281,7 @@ namespace dss {
     return SendCommand(_cmd, _device.GetShortAddress(), _device.GetModulatorID(), _param);
   } // SendCommand
 
-  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID, int _param) {
+  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param) {
     vector<int> result;
     DS485CommandFrame frame;
     frame.GetHeader().SetDestination(_modulatorID);
@@ -289,63 +289,69 @@ namespace dss {
     frame.GetHeader().SetType(1);
     frame.SetCommand(CommandRequest);
     if(_cmd == cmdTurnOn) {
-      frame.GetPayload().Add<uint8>(FunctionDeviceCallScene);
+      frame.GetPayload().Add<uint8_t>(FunctionDeviceCallScene);
       frame.GetPayload().Add<devid_t>(_id);
       frame.GetPayload().Add<uint16_t>(SceneMax);
       SendFrame(frame);
     } else if(_cmd == cmdTurnOff) {
-      frame.GetPayload().Add<uint8>(FunctionDeviceCallScene);
+      frame.GetPayload().Add<uint8_t>(FunctionDeviceCallScene);
       frame.GetPayload().Add<devid_t>(_id);
       frame.GetPayload().Add<uint16_t>(SceneOff);
       SendFrame(frame);
     } else if(_cmd == cmdGetOnOff) {
-      frame.GetPayload().Add<uint8>(FunctionDeviceGetOnOff);
+      frame.GetPayload().Add<uint8_t>(FunctionDeviceGetOnOff);
       frame.GetPayload().Add<uint16_t>(_id);
       SendFrame(frame);
-      uint8 res = ReceiveSingleResult(FunctionDeviceGetOnOff);
+      uint8_t res = ReceiveSingleResult(FunctionDeviceGetOnOff);
       result.push_back(res);
     } else if(_cmd == cmdGetValue) {
-      frame.GetPayload().Add<uint8>(FunctionDeviceGetParameterValue);
+      frame.GetPayload().Add<uint8_t>(FunctionDeviceGetParameterValue);
       frame.GetPayload().Add<uint16_t>(_id);
       frame.GetPayload().Add<uint16_t>(_param);
       SendFrame(frame);
-      uint8 res = ReceiveSingleResult(FunctionDeviceGetParameterValue);
+      uint8_t res = ReceiveSingleResult(FunctionDeviceGetParameterValue);
       result.push_back(res);
     } else if(_cmd == cmdSetValue) {
-      frame.GetPayload().Add<uint8>(FunctionDeviceSetParameterValue);
+      frame.GetPayload().Add<uint8_t>(FunctionDeviceSetParameterValue);
       frame.GetPayload().Add<uint16_t>(_id);
       frame.GetPayload().Add<uint16_t>(_param);
       frame.GetPayload().Add<uint16_t>(_param); // TODO: introduce a second parameter for the value itself
       SendFrame(frame);
-      uint8 res = ReceiveSingleResult(FunctionDeviceSetParameterValue);
+      uint8_t res = ReceiveSingleResult(FunctionDeviceSetParameterValue);
       result.push_back(res);
     } else if(_cmd == cmdGetFunctionID) {
-      frame.GetPayload().Add<uint8>(FunctionDeviceGetFunctionID);
+      frame.GetPayload().Add<uint8_t>(FunctionDeviceGetFunctionID);
       frame.GetPayload().Add<devid_t>(_id);
       SendFrame(frame);
-      uint8 res = ReceiveSingleResult(FunctionDeviceGetFunctionID);
-      result.push_back(res);
+      vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionDeviceGetFunctionID);
+      if(results.size() > 0) {
+        PayloadDissector pd((results.front())->GetPayload());
+        pd.Get<uint8_t>(); // skip the function id
+        if(pd.Get<uint16_t>() == 0x0001) {
+          result.push_back(pd.Get<uint16_t>());
+        }
+      }
     } else if(_cmd == cmdCallScene) {
-      frame.GetPayload().Add<uint8>(FunctionDeviceCallScene);
+      frame.GetPayload().Add<uint8_t>(FunctionDeviceCallScene);
       frame.GetPayload().Add<devid_t>(_id);
       frame.GetPayload().Add<uint16_t>(_param);
       SendFrame(frame);
     } else if(_cmd == cmdSaveScene) {
-      frame.GetPayload().Add<uint8>(FunctionDeviceSaveScene);
+      frame.GetPayload().Add<uint8_t>(FunctionDeviceSaveScene);
       frame.GetPayload().Add<devid_t>(_id);
       frame.GetPayload().Add<uint16_t>(_param);
       SendFrame(frame);
     } else if(_cmd == cmdUndoScene) {
-      frame.GetPayload().Add<uint8>(FunctionDeviceUndoScene);
+      frame.GetPayload().Add<uint8_t>(FunctionDeviceUndoScene);
       frame.GetPayload().Add<devid_t>(_id);
       frame.GetPayload().Add<uint16_t>(_param);
       SendFrame(frame);
     } else if(_cmd == cmdIncreaseValue) {
-      frame.GetPayload().Add<uint8>(FunctionDeviceIncreaseValue);
+      frame.GetPayload().Add<uint8_t>(FunctionDeviceIncreaseValue);
       frame.GetPayload().Add<devid_t>(_id);
       SendFrame(frame);
     } else if(_cmd == cmdDecreaseValue) {
-      frame.GetPayload().Add<uint8>(FunctionDeviceDecreaseValue);
+      frame.GetPayload().Add<uint8_t>(FunctionDeviceDecreaseValue);
       frame.GetPayload().Add<devid_t>(_id);
       SendFrame(frame);
     }
@@ -369,7 +375,7 @@ namespace dss {
     }
   }
 
-  bool DS485Proxy::IsSimAddress(const uint8 _addr) {
+  bool DS485Proxy::IsSimAddress(const uint8_t _addr) {
     return DSS::GetInstance()->GetModulatorSim().GetID() == _addr;
   } // IsSimAddress
 
@@ -378,11 +384,35 @@ namespace dss {
     cmdFrame.GetHeader().SetDestination(0);
     cmdFrame.GetHeader().SetBroadcast(true);
     cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8>(FunctionGetTypeRequest);
+    Log("Proxy: GetModulators");
+    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetDSID);
+    SendFrame(cmdFrame);
+    vector<int> result;
+
+    map<int, bool> resultFrom;
+
+    vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionModulatorGetDSID);
+    for(vector<boost::shared_ptr<DS485CommandFrame> >::iterator iFrame = results.begin(), e = results.end();
+        iFrame != e; ++iFrame)
+    {
+      int source = (*iFrame)->GetHeader().GetSource();
+      if(resultFrom[source]) {
+        Log(string("already received result from ") + IntToString(source));
+        continue;
+      }
+      resultFrom[source] = true;
+
+      PayloadDissector pd((*iFrame)->GetPayload());
+      result.push_back(source);
+    }
+
+
+
+    /*
+    cmdFrame.GetPayload().Add<uint8_t>(FunctionGetTypeRequest);
     Log("Proxy: GetModulators");
     SendFrame(cmdFrame);
 
-    vector<int> result;
 
     map<int, bool> resultFrom;
 
@@ -398,7 +428,7 @@ namespace dss {
       resultFrom[source] = true;
 
       PayloadDissector pd((*iFrame)->GetPayload());
-      pd.Get<uint8>();
+      pd.Get<uint8_t>();
       uint16_t devID = pd.Get<uint16_t>();
       devID &= 0x00FF;
       if(devID == 0) {
@@ -416,7 +446,7 @@ namespace dss {
 
       string name;
       for(int i = 0; i < 6; i++) {
-        char c = static_cast<char>(pd.Get<uint8>());
+        char c = static_cast<char>(pd.Get<uint8_t>());
         if(c != '\0') {
           name += c;
         }
@@ -425,7 +455,7 @@ namespace dss {
 
       result.push_back(source);
     }
-
+*/
     return result;
   } // GetModulators
 
@@ -433,10 +463,16 @@ namespace dss {
     DS485CommandFrame cmdFrame;
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetGroupsSize);
+    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetGroupsSize);
     cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
     SendFrame(cmdFrame);
-    uint8 res = ReceiveSingleResult(FunctionModulatorGetGroupsSize);
+    int8_t res = static_cast<int8_t>(ReceiveSingleResult(FunctionModulatorGetGroupsSize));
+    if(res < 0) {
+      Log("GetGroupCount: Negative group count received '" + IntToString(res) +
+          " on modulator " + IntToString(_modulatorID) +
+          " with zone " + IntToString(_zoneID));
+      res = 0;
+    }
     return res;
   } // GetGroupCount
 
@@ -449,12 +485,16 @@ namespace dss {
       DS485CommandFrame cmdFrame;
       cmdFrame.GetHeader().SetDestination(_modulatorID);
       cmdFrame.SetCommand(CommandRequest);
-      cmdFrame.GetPayload().Add<uint8>(FunctionZoneGetGroupIdForInd);
+      cmdFrame.GetPayload().Add<uint8_t>(FunctionZoneGetGroupIdForInd);
       cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
       cmdFrame.GetPayload().Add<uint16_t>(iGroup);
       SendFrame(cmdFrame);
-      uint8 res = ReceiveSingleResult(FunctionZoneGetGroupIdForInd);
-      result.push_back(res);
+      int8_t res = static_cast<int8_t>(ReceiveSingleResult(FunctionZoneGetGroupIdForInd));
+      if(res < 0) {
+        Log("GetGroups: Negative index received '" + IntToString(res) + "' for index " + IntToString(iGroup));
+      } else {
+        result.push_back(res);
+      }
     }
 
     return result;
@@ -464,11 +504,19 @@ namespace dss {
     DS485CommandFrame cmdFrame;
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8>(FunctionGroupGetDeviceCount);
+    cmdFrame.GetPayload().Add<uint8_t>(FunctionGroupGetDeviceCount);
     cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
     cmdFrame.GetPayload().Add<uint16_t>(_groupID);
+    Log("before");
     SendFrame(cmdFrame);
-    uint8 res = ReceiveSingleResult(FunctionGroupGetDeviceCount);
+    Log("after");
+    int16_t res = static_cast<int16_t>(ReceiveSingleResult16(FunctionGroupGetDeviceCount));
+    if(res < 0) {
+      Log("GetDevicesInGroupCount: Negative count received '" + IntToString(res) +
+          "' on modulator " + IntToString(_modulatorID) +
+          " with zoneID " + IntToString(_zoneID) + " in group " + IntToString(_groupID));
+      res = 0;
+    }
     return res;
   } // GetDevicesInGroupCount
 
@@ -480,13 +528,19 @@ namespace dss {
       DS485CommandFrame cmdFrame;
       cmdFrame.GetHeader().SetDestination(_modulatorID);
       cmdFrame.SetCommand(CommandRequest);
-      cmdFrame.GetPayload().Add<uint8>(FunctionGroupGetDevKeyForInd);
+      cmdFrame.GetPayload().Add<uint8_t>(FunctionGroupGetDevKeyForInd);
       cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
       cmdFrame.GetPayload().Add<uint16_t>(_groupID);
       cmdFrame.GetPayload().Add<uint16_t>(iDevice);
+      Log("b1: zoneID: " + IntToString(_zoneID) + " groupID: " + IntToString(_groupID) + " index: " + IntToString(iDevice));
       SendFrame(cmdFrame);
-      uint16_t res = ReceiveSingleResult16(FunctionGroupGetDevKeyForInd);
-      result.push_back(res);
+      Log("b2");
+      int16_t res = static_cast<int16_t>(ReceiveSingleResult16(FunctionGroupGetDevKeyForInd));
+      if(res < 0) {
+        Log("GetDevicesInGroup: Negative device id received '" + IntToString(res) + "' for index " + IntToString(iDevice));
+      } else {
+        result.push_back(res);
+      }
     }
 
     return result;
@@ -501,11 +555,11 @@ namespace dss {
       DS485CommandFrame cmdFrame;
       cmdFrame.GetHeader().SetDestination(_modulatorID);
       cmdFrame.SetCommand(CommandRequest);
-      cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetZoneIdForInd);
+      cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetZoneIdForInd);
       cmdFrame.GetPayload().Add<uint16_t>(iGroup);
       Log("GetZoneID");
       SendFrame(cmdFrame);
-      uint8 tempResult = ReceiveSingleResult(FunctionModulatorGetZoneIdForInd);
+      uint8_t tempResult = ReceiveSingleResult(FunctionModulatorGetZoneIdForInd);
       result.push_back(tempResult);
       Log("Receive ZoneID: " + UIntToString((unsigned int)tempResult));
     }
@@ -516,11 +570,11 @@ namespace dss {
     DS485CommandFrame cmdFrame;
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetZonesSize);
+    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetZonesSize);
     Log("GetZoneCount");
     SendFrame(cmdFrame);
 
-    uint8 result = ReceiveSingleResult(FunctionModulatorGetZonesSize);
+    uint8_t result = ReceiveSingleResult(FunctionModulatorGetZonesSize);
     return result;
   } // GetZoneCount
 
@@ -528,12 +582,17 @@ namespace dss {
     DS485CommandFrame cmdFrame;
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8>(FunctionModulatorCountDevInZone);
+    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorCountDevInZone);
     cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
     Log("GetDevicesCountInZone");
     SendFrame(cmdFrame);
 
-    uint8_t result = ReceiveSingleResult(FunctionModulatorCountDevInZone);
+    int16_t result = static_cast<int16_t>(ReceiveSingleResult16(FunctionModulatorCountDevInZone));
+    if(result < 0) {
+      Log("GetDevicesCountInZone: negative count '" + IntToString(result) + "'");
+      result = 0;
+    }
+
     return result;
   } // GetDevicesCountInZone
 
@@ -546,7 +605,7 @@ namespace dss {
       DS485CommandFrame cmdFrame;
       cmdFrame.GetHeader().SetDestination(_modulatorID);
       cmdFrame.SetCommand(CommandRequest);
-      cmdFrame.GetPayload().Add<uint8>(FunctionModulatorDevKeyInZone);
+      cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorDevKeyInZone);
       cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
       cmdFrame.GetPayload().Add<uint16_t>(iDevice);
       SendFrame(cmdFrame);
@@ -560,7 +619,7 @@ namespace dss {
     DS485CommandFrame cmdFrame;
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8>(FunctionDeviceSetZoneID);
+    cmdFrame.GetPayload().Add<uint8_t>(FunctionDeviceSetZoneID);
     cmdFrame.GetPayload().Add<devid_t>(_deviceID);
     cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
     SendFrame(cmdFrame);
@@ -571,7 +630,7 @@ namespace dss {
     DS485CommandFrame cmdFrame;
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8>(FunctionModulatorAddZone);
+    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorAddZone);
     cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
     SendFrame(cmdFrame);
     ReceiveSingleResult(FunctionModulatorAddZone);
@@ -581,7 +640,7 @@ namespace dss {
     DS485CommandFrame cmdFrame;
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8>(FunctionDeviceGetDSID);
+    cmdFrame.GetPayload().Add<uint8_t>(FunctionDeviceGetDSID);
     cmdFrame.GetPayload().Add<uint16_t>(_deviceID);
     SendFrame(cmdFrame);
     Log("Proxy: GetDSIDOfDevice");
@@ -589,11 +648,11 @@ namespace dss {
     vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionDeviceGetDSID);
     if(results.size() != 1) {
       Log(string("DS485Proxy::GetDSIDOfDevice: received multiple or 0 results: ") + IntToString(results.size()), lsError);
-      return 0;
+      return NullDSID;
     }
     PayloadDissector pd(results.at(0)->GetPayload());
-    pd.Get<uint8>(); // discard the function id
-    pd.Get<uint8>(); // function result
+    pd.Get<uint8_t>(); // discard the function id
+    pd.Get<uint16_t>(); // function result
     return pd.Get<dsid_t>();
   }
 
@@ -601,17 +660,17 @@ namespace dss {
     DS485CommandFrame cmdFrame;
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetDSID);
+    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetDSID);
     Log(string("Proxy: GetDSIDOfModulator ") + IntToString(_modulatorID));
     SendFrame(cmdFrame);
 
     vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionModulatorGetDSID);
     if(results.size() != 1) {
       Log(string("DS485Proxy::GetDSIDOfModulator: received multiple results ") + IntToString(results.size()), lsError);
-      return 0;
+      return NullDSID;
     }
     PayloadDissector pd(results.at(0)->GetPayload());
-    pd.Get<uint8>(); // discard the function id
+    pd.Get<uint8_t>(); // discard the function id
     return pd.Get<dsid_t>();
   } // GetDSIDOfModulator
 
@@ -619,7 +678,7 @@ namespace dss {
     DS485CommandFrame cmdFrame;
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetPowerConsumption);
+    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetPowerConsumption);
     Log(string("Proxy: GetPowerConsumption ") + IntToString(_modulatorID));
     SendFrame(cmdFrame);
 
@@ -629,7 +688,7 @@ namespace dss {
       return 0;
     }
     PayloadDissector pd(results.at(0)->GetPayload());
-    pd.Get<uint8>(); // discard the function id
+    pd.Get<uint8_t>(); // discard the function id
     return pd.Get<devid_t>();
   } // GetPowerConsumption
 
@@ -637,7 +696,7 @@ namespace dss {
     DS485CommandFrame cmdFrame;
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8>(FunctionModulatorGetEnergyMeterValue);
+    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetEnergyMeterValue);
     Log(string("Proxy: GetEnergyMeterValue ") + IntToString(_modulatorID));
     SendFrame(cmdFrame);
 
@@ -647,7 +706,7 @@ namespace dss {
       return 0;
     }
     PayloadDissector pd(results.at(0)->GetPayload());
-    pd.Get<uint8>(); // discard the function id
+    pd.Get<uint8_t>(); // discard the function id
     return pd.Get<devid_t>();
   } // GetEnergyMeterValue
 
@@ -655,7 +714,7 @@ namespace dss {
     DS485CommandFrame cmdFrame;
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8>(FunctionDeviceSubscribe);
+    cmdFrame.GetPayload().Add<uint8_t>(FunctionDeviceSubscribe);
     cmdFrame.GetPayload().Add<uint16_t>(_groupID);
     cmdFrame.GetPayload().Add<devid_t>(_deviceID);
     Log(string("Proxy: Subscribe ") + IntToString(_modulatorID));
@@ -679,7 +738,7 @@ namespace dss {
   } // RemoveUserGroup
 
 
-  vector<boost::shared_ptr<DS485CommandFrame> > DS485Proxy::Receive(uint8 _functionID) {
+  vector<boost::shared_ptr<DS485CommandFrame> > DS485Proxy::Receive(uint8_t _functionID) {
     vector<boost::shared_ptr<DS485CommandFrame> > result;
 
     if(m_DS485Controller.GetState() == csSlave || m_DS485Controller.GetState() == csMaster) {
@@ -707,7 +766,7 @@ namespace dss {
     return result;
   } // Receive
 
-  uint8 DS485Proxy::ReceiveSingleResult(const uint8 _functionID) {
+  uint8_t DS485Proxy::ReceiveSingleResult(const uint8_t _functionID) {
     vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(_functionID);
 
     if(results.empty()) {
@@ -721,18 +780,18 @@ namespace dss {
     DS485CommandFrame* frame = results.at(0).get();
 
     PayloadDissector pd(frame->GetPayload());
-    uint8 functionID = pd.Get<uint8>();
+    uint8_t functionID = pd.Get<uint8_t>();
     if(functionID != _functionID) {
       Log("function ids are different");
     }
-    uint8 result = pd.Get<uint8>();
+    uint8_t result = pd.Get<uint8_t>();
 
     results.clear();
 
     return result;
   } // ReceiveSingleResult
 
-  uint16_t DS485Proxy::ReceiveSingleResult16(const uint8 _functionID) {
+  uint16_t DS485Proxy::ReceiveSingleResult16(const uint8_t _functionID) {
     vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(_functionID);
 
     if(results.empty()) {
@@ -746,13 +805,13 @@ namespace dss {
     DS485CommandFrame* frame = results.at(0).get();
 
     PayloadDissector pd(frame->GetPayload());
-    uint8 functionID = pd.Get<uint8>();
+    uint8_t functionID = pd.Get<uint8_t>();
     if(functionID != _functionID) {
       Log("function ids are different");
     }
-    uint16_t result = pd.Get<uint8>();
+    uint16_t result = pd.Get<uint8_t>();
     if(!pd.IsEmpty()) {
-      result |= (pd.Get<uint8>() << 8);
+      result |= (pd.Get<uint8_t>() << 8);
     } else {
       Log("ReceiveSingleResult16: only received half of the data (8bit)");
     }
@@ -885,6 +944,9 @@ namespace dss {
 
     case FunctionDeviceSubscribe:
       return "Function Device Subscribe";
+
+    case FunctionDeviceGetFunctionID:
+      return "Function Device Get Function ID";
     }
     return "";
   } // FunctionIDToString
@@ -905,60 +967,17 @@ namespace dss {
 			  continue;
 			}
 
-			uint8 functionID = ch.front();
+			uint8_t functionID = ch.front();
 			if(frame->GetCommand() == CommandRequest) {
-/*
-			  if(functionID == FunctionKeyPressed) {
-				Log("Got keypress");
-				PayloadDissector pd(frame->GetPayload());
-				pd.Get<uint8>();
-				uint16_t param = pd.Get<uint16_t>();
-				Log("Zone: " + IntToString((param >> 8) & 0x00FF));
-				if(param & 0x0001 == 0x0001) {
-				  param = pd.Get<uint16_t>();
-				  Log("Short version");
-				  if((param & 0x8000) == 0x8000) {
-					Log("From switch");
-					devid_t shortAddress = (param & 0x7F00) >> 8;
-					Log(string("Device: ") + IntToString(shortAddress));
-					int buttonNumber = (param & 0x00F0) >> 4;
-					Log(string("Button: ") + IntToString(buttonNumber));
-					ButtonPressKind kind = static_cast<ButtonPressKind>(param & 0x000F);
+			  if(functionID == FunctionZoneAddDevice) {
 
-					Modulator& mod = DSS::GetInstance()->GetApartment().GetModulatorByBusID(frame->GetHeader().GetSource());
-					DeviceReference devRef = mod.GetDevices().GetByBusID(shortAddress);
-
-					DSS::GetInstance()->GetApartment().OnKeypress(devRef.GetDSID(), kind, buttonNumber);
-				  } else {
-					Log("From sensor");
-				  }
-				} else {
-				  Log("Long version");
-				  uint16_t param2 = pd.Get<uint16_t>();
-				  uint16_t param3 = pd.Get<uint16_t>();
-				  uint16_t param4 = pd.Get<uint16_t>();
-
-				  cout << hex << "p2: " << param2 << "\np3: " << param3 << "\np4: " << param4 << endl;
-
-				  uint16_t subqualifier = ((param2 & 0x000F) << 4) | ((param3 & 0xF000) >> 12);
-				  uint16_t databits = ((param3 & 0x0FF0) >> 4);
-				  uint16_t addr = ((param3 & 0x000F) << 6) | ((param4 & 0xFC00) >> 10);
-				  uint16_t subqualifier2 = ((param4 & 0x03F0) >> 4);
-				  uint16_t mainqualifier = (param4 & 0x000F);
-				  cout << "subqualifier: " << subqualifier << "\n"
-					   << "databits    : " << databits << "\n"
-					   << "addr        : " << addr << "\n"
-					   << "subqual2    : " << subqualifier2 << "\n"
-					   << "mainqualif  : " << mainqualifier << endl;
-				}
 			  }
-*/
 			} else {
 			  std::ostringstream sstream;
 			  sstream << "Response: ";
 			  PayloadDissector pd(frame->GetPayload());
 			  while(!pd.IsEmpty()) {
-				  uint8 data = pd.Get<uint8>();
+				  uint8_t data = pd.Get<uint8_t>();
 				  sstream << "(0x" << std::hex << (unsigned int)data << ", " << std::dec << (int)data << "d)";
 			  }
 			  sstream << std::dec;
@@ -979,7 +998,7 @@ namespace dss {
   } // Execute
 
   void DS485Proxy::CollectFrame(boost::shared_ptr<DS485CommandFrame>& _frame) {
-    uint8 commandID = _frame->GetCommand();
+    uint8_t commandID = _frame->GetCommand();
     if(commandID != CommandResponse && commandID != CommandRequest) {
       Log("discarded non response/request frame", lsInfo);
       Log(string("frame type ") + CommandToString(commandID));

@@ -118,7 +118,7 @@ namespace dss {
       return (*m_Interface->get_value)(m_Handle, _parameterNr);
     }
 
-    virtual uint8 GetFunctionID() {
+    virtual uint8_t GetFunctionID() {
       // TODO: implement get function id for plugins
       return 0;
     }
@@ -155,7 +155,7 @@ namespace dss {
   DSModulatorSim::DSModulatorSim(DSS* _pDSS)
   : Subsystem(_pDSS, "DSModulatorSim")
   {
-    m_ModulatorDSID = SimulationPrefix | 0x0000FFFF;
+    m_ModulatorDSID = dsid_t(0, SimulationPrefix);
     m_Initialized = false;
   } // DSModulatorSim
 
@@ -236,7 +236,8 @@ namespace dss {
         m_ID = StrToIntDef(attrs["busid"], 70);
       }
       if(attrs["dsid"].size() != 0) {
-        m_ModulatorDSID = SimulationPrefix | StrToIntDef(attrs["dsid"], 50);
+        m_ModulatorDSID = dsid_t::FromString(attrs["dsid"]);
+        m_ModulatorDSID.lower |= SimulationPrefix;
       }
 
       XMLNodeList& nodes = rootNode.GetChildren();
@@ -253,15 +254,16 @@ namespace dss {
     {
       if(iNode->GetName() == "device") {
         HashMapConstStringString& attrs = iNode->GetAttributes();
-        dsid_t dsid = 0xFFFFFFFF;
+        dsid_t dsid = NullDSID;
         int busid = -1;
         if(attrs["dsid"].size() > 0) {
-          dsid = SimulationPrefix | StrToUInt(attrs["dsid"]);
+          dsid = dsid_t::FromString(attrs["dsid"]);
+          dsid.lower |= SimulationPrefix;
         }
         if(attrs["busid"].size() > 0) {
           busid = StrToInt(attrs["busid"]);
         }
-        if((dsid == 0xFFFFFFFF) || (busid == -1)) {
+        if((dsid == NullDSID) || (busid == -1)) {
           Logger::GetInstance()->Log("Sim: missing dsid or busid of device");
           continue;
         }
@@ -441,8 +443,8 @@ namespace dss {
   } // GroupIncValue
 
   void DSModulatorSim::Process(DS485Frame& _frame) {
-    const uint8 HeaderTypeToken = 0;
-    const uint8 HeaderTypeCommand = 1;
+    const uint8_t HeaderTypeToken = 0;
+    const uint8_t HeaderTypeCommand = 1;
 
     try {
       DS485Header& header = _frame.GetHeader();
@@ -451,8 +453,8 @@ namespace dss {
       } else if(header.GetType() == HeaderTypeCommand) {
         DS485CommandFrame& cmdFrame = dynamic_cast<DS485CommandFrame&>(_frame);
         PayloadDissector pd(cmdFrame.GetPayload());
-        if(cmdFrame.GetCommand() == CommandRequest) {
-          int cmdNr = pd.Get<uint8>();
+        if((cmdFrame.GetCommand() == CommandRequest) && !pd.IsEmpty()) {
+          int cmdNr = pd.Get<uint8_t>();
           DS485CommandFrame* response;
           switch(cmdNr) {
             case FunctionDeviceCallScene:
@@ -465,9 +467,9 @@ namespace dss {
               break;
             case FunctionGroupCallScene:
               {
-                uint8 zoneID = pd.Get<uint16_t>();
-                uint8 groupID = pd.Get<uint16_t>();
-                uint8 sceneID = pd.Get<uint16_t>();
+                uint8_t zoneID = pd.Get<uint16_t>();
+                uint8_t groupID = pd.Get<uint16_t>();
+                uint8_t sceneID = pd.Get<uint16_t>();
                 GroupCallScene(zoneID, groupID, sceneID);
               }
               break;
@@ -481,9 +483,9 @@ namespace dss {
               break;
             case FunctionGroupSaveScene:
               {
-                uint8 zoneID = pd.Get<uint16_t>();
-                uint8 groupID = pd.Get<uint16_t>();
-                uint8 sceneID = pd.Get<uint16_t>();
+                uint8_t zoneID = pd.Get<uint16_t>();
+                uint8_t groupID = pd.Get<uint16_t>();
+                uint8_t sceneID = pd.Get<uint16_t>();
                 GroupSaveScene(zoneID, groupID, sceneID);
               }
               break;
@@ -497,9 +499,9 @@ namespace dss {
               break;
             case FunctionGroupUndoScene:
               {
-                uint8 zoneID = pd.Get<uint16_t>();
-                uint8 groupID = pd.Get<uint16_t>();
-                uint8 sceneID = pd.Get<uint16_t>();
+                uint8_t zoneID = pd.Get<uint16_t>();
+                uint8_t groupID = pd.Get<uint16_t>();
+                uint8_t sceneID = pd.Get<uint16_t>();
                 GroupUndoScene(zoneID, groupID, sceneID);
               }
               break;
@@ -517,7 +519,7 @@ namespace dss {
                 int paramID = pd.Get<uint16_t>();
                 double result = LookupDevice(devID).GetValue(paramID);
                 response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint16_t>(static_cast<uint8>(result));
+                response->GetPayload().Add<uint16_t>(static_cast<uint8_t>(result));
                 DistributeFrame(response);
               }
               break;
@@ -525,7 +527,7 @@ namespace dss {
               {
                 int devID = pd.Get<uint16_t>();
                 int paramID = pd.Get<uint16_t>();
-                uint8 value = pd.Get<uint16_t>();
+                uint8_t value = pd.Get<uint16_t>();
                 LookupDevice(devID).SetValue(value, paramID);
                 DistributeFrame(boost::shared_ptr<DS485CommandFrame>(CreateAck(cmdFrame, cmdNr)));
               }
@@ -539,7 +541,7 @@ namespace dss {
               break;
             case FunctionModulatorGetZoneIdForInd:
               {
-                uint8 index = pd.Get<uint16_t>();
+                uint8_t index = pd.Get<uint16_t>();
                 map< const int, vector<DSIDInterface*> >::iterator it = m_Zones.begin();
                 advance(it, index);
                 response = CreateResponse(cmdFrame, cmdNr);
@@ -549,7 +551,7 @@ namespace dss {
               break;
             case FunctionModulatorCountDevInZone:
               {
-                uint8 index = pd.Get<uint16_t>();
+                uint8_t index = pd.Get<uint16_t>();
                 response = CreateResponse(cmdFrame, cmdNr);
                 response->GetPayload().Add<uint16_t>(m_Zones[index].size());
                 DistributeFrame(response);
@@ -557,8 +559,8 @@ namespace dss {
               break;
             case FunctionModulatorDevKeyInZone:
               {
-                uint8 zoneID = pd.Get<uint16_t>();
-                uint8 deviceIndex = pd.Get<devid_t>();
+                uint8_t zoneID = pd.Get<uint16_t>();
+                uint8_t deviceIndex = pd.Get<devid_t>();
                 response = CreateResponse(cmdFrame, cmdNr);
                 response->GetPayload().Add<uint16_t>(m_Zones[zoneID].at(deviceIndex)->GetShortAddress());
                 DistributeFrame(response);
@@ -591,8 +593,8 @@ namespace dss {
             case FunctionGroupGetDeviceCount:
               {
                 response = CreateResponse(cmdFrame, cmdNr);
-                int zoneID = pd.Get<uint8>();
-                int groupID = pd.Get<uint8>();
+                int zoneID = pd.Get<uint8_t>();
+                int groupID = pd.Get<uint8_t>();
                 int result = m_DevicesOfGroupInZone[pair<const int, const int>(zoneID, groupID)].size();
                 response->GetPayload().Add<uint16_t>(result);
                 DistributeFrame(response);
@@ -646,14 +648,14 @@ namespace dss {
                 response = CreateResponse(cmdFrame, cmdNr);
                 int devID = pd.Get<uint16_t>();
                 DSIDInterface& dev = LookupDevice(devID);
-                response->GetPayload().Add<uint8>(1); // return-code (device found, all well)
+                response->GetPayload().Add<uint8_t>(1); // return-code (device found, all well)
                 response->GetPayload().Add<dsid_t>(dev.GetDSID());
                 DistributeFrame(response);
               }
               break;
             case FunctionDeviceSubscribe:
               {
-                /*uint8 groupID =*/ pd.Get<uint16_t>();
+                /*uint8_t groupID =*/ pd.Get<uint16_t>();
                 devid_t devID = pd.Get<devid_t>();
                 DSIDInterface& dev = LookupDevice(devID);
                 m_ButtonSubscriptionFlag[&dev] = 70;
@@ -663,21 +665,21 @@ namespace dss {
               {
                 response = CreateResponse(cmdFrame, cmdNr);
                 // Type 2 bytes (high, low)
-                response->GetPayload().Add<uint8>(0x00);
-                response->GetPayload().Add<uint8>(0x01);
+                response->GetPayload().Add<uint8_t>(0x00);
+                response->GetPayload().Add<uint8_t>(0x01);
                 // HW-Version 2 bytes (high, low)
-                response->GetPayload().Add<uint8>(0x00);
-                response->GetPayload().Add<uint8>(0x01);
+                response->GetPayload().Add<uint8_t>(0x00);
+                response->GetPayload().Add<uint8_t>(0x01);
                 // SW-Version 2 bytes (high, low)
-                response->GetPayload().Add<uint8>(0x00);
-                response->GetPayload().Add<uint8>(0x01);
+                response->GetPayload().Add<uint8_t>(0x00);
+                response->GetPayload().Add<uint8_t>(0x01);
                 // free text
-                response->GetPayload().Add<uint8>('d');
-                response->GetPayload().Add<uint8>('S');
-                response->GetPayload().Add<uint8>('M');
-                response->GetPayload().Add<uint8>('S');
-                response->GetPayload().Add<uint8>('i');
-                response->GetPayload().Add<uint8>('m');
+                response->GetPayload().Add<uint8_t>('d');
+                response->GetPayload().Add<uint8_t>('S');
+                response->GetPayload().Add<uint8_t>('M');
+                response->GetPayload().Add<uint8_t>('S');
+                response->GetPayload().Add<uint8_t>('i');
+                response->GetPayload().Add<uint8_t>('m');
                 DistributeFrame(response);
               }
               break;
@@ -697,7 +699,7 @@ namespace dss {
               break;
             case FunctionModulatorAddZone:
               {
-                uint8 zoneID = pd.Get<uint16_t>();
+                uint8_t zoneID = pd.Get<uint16_t>();
                 response = CreateResponse(cmdFrame, cmdNr);
                 bool isValid = true;
                 for(map< const int, vector<DSIDInterface*> >::iterator iZoneEntry = m_Zones.begin(), e = m_Zones.end();
@@ -719,7 +721,7 @@ namespace dss {
               break;
             case FunctionDeviceSetZoneID:
               {
-                uint8 zoneID = pd.Get<uint16_t>();
+                uint8_t zoneID = pd.Get<uint16_t>();
                 devid_t devID = pd.Get<devid_t>();
                 DSIDInterface& dev = LookupDevice(devID);
 
@@ -752,14 +754,14 @@ namespace dss {
   } // CreateReply
 
 
-  DS485CommandFrame* DSModulatorSim::CreateAck(DS485CommandFrame& _request, uint8 _functionID) {
+  DS485CommandFrame* DSModulatorSim::CreateAck(DS485CommandFrame& _request, uint8_t _functionID) {
     DS485CommandFrame* result = CreateReply(_request);
     result->SetCommand(CommandAck);
     result->GetPayload().Add(_functionID);
     return result;
   }
 
-  DS485CommandFrame* DSModulatorSim::CreateResponse(DS485CommandFrame& _request, uint8 _functionID) {
+  DS485CommandFrame* DSModulatorSim::CreateResponse(DS485CommandFrame& _request, uint8_t _functionID) {
     DS485CommandFrame* result = CreateReply(_request);
     result->SetCommand(CommandResponse);
     result->GetPayload().Add(_functionID);
@@ -791,7 +793,7 @@ namespace dss {
       frame->GetHeader().SetSource(m_ID);
       frame->GetHeader().SetBroadcast(false);
 
-      frame->GetPayload().Add<uint8>(FunctionKeyPressed);
+      frame->GetPayload().Add<uint8_t>(FunctionKeyPressed);
                           /* zone */          /* group */      /* short message */
       uint16_t param = ((0 & 0xFF) << 8) | ((0 & 0x7F) << 1) | 0x0001;
       frame->GetPayload().Add<uint16_t>(param);
@@ -981,7 +983,7 @@ namespace dss {
     return static_cast<double>(m_CurrentValue);
   } // GetValue
 
-  uint8 DSIDSim::GetFunctionID() {
+  uint8_t DSIDSim::GetFunctionID() {
     return FunctionIDDevice;
   }
 

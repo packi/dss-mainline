@@ -30,7 +30,7 @@ namespace dss {
     }
 
     try {
-      DeviceReference ref = _zone.GetDevices().GetByDSID(StrToUInt(_identifier));
+      DeviceReference ref = _zone.GetDevices().GetByDSID(dsid_t::FromString(_identifier));
       Set result;
       result.AddDevice(ref);
       return result;

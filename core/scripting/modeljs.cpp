@@ -465,7 +465,11 @@ namespace dss {
           *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, "device"));
           return JS_TRUE;
         case 1:
-          *rval = INT_TO_JSVAL(dev->GetDSID());
+          {
+            // make a local reference so the string does not go out of scope
+            std::string tmp = dev->GetDSID().ToString();
+            *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, tmp.c_str()));
+          }
           return JS_TRUE;
         case 2:
           *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, dev->GetDevice().GetName().c_str()));
@@ -497,7 +501,7 @@ namespace dss {
   };
 
   JSObject* ModelScriptContextExtension::CreateJSDevice(ScriptContext& _ctx, Device& _dev) {
-    DeviceReference ref(_dev.GetShortAddress(), m_Apartment);
+    DeviceReference ref(_dev.GetDSID(), m_Apartment);
     return CreateJSDevice(_ctx, ref);
   } // CreateJSDevice
 

@@ -69,11 +69,11 @@ namespace dss {
                      public    IDS485FrameCollector {
   private:
     FittingResult BestFit(const Set& _set);
-    bool IsSimAddress(const uint8 _addr);
+    bool IsSimAddress(const uint8_t _addr);
 
-    vector<boost::shared_ptr<DS485CommandFrame> > Receive(uint8 _functionID);
-    uint8 ReceiveSingleResult(const uint8 _functionID);
-    uint16_t ReceiveSingleResult16(const uint8 _functionID);
+    vector<boost::shared_ptr<DS485CommandFrame> > Receive(uint8_t _functionID);
+    uint8_t ReceiveSingleResult(const uint8_t _functionID);
+    uint16_t ReceiveSingleResult16(const uint8_t _functionID);
 
     void SignalEvent();
 
@@ -133,7 +133,7 @@ namespace dss {
     //------------------------------------------------ Device manipulation
     virtual vector<int> SendCommand(DS485Command _cmd, const Set& _set, int _param);
     virtual vector<int> SendCommand(DS485Command _cmd, const Device& _device, int _param);
-    virtual vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID, int _param);
+    virtual vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param);
     virtual vector<int> SendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param);
 
     //------------------------------------------------ Helpers

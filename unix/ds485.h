@@ -10,10 +10,10 @@
 #ifndef _DS485_H_INCLUDED
 #define _DS485_H_INCLUDED
 
-#include "../core/thread.h"
+#include "core/thread.h"
 #include "serialcom.h"
-#include "../core/ds485types.h"
-#include "../core/syncevent.h"
+#include "core/ds485types.h"
+#include "core/syncevent.h"
 
 #include <vector>
 
@@ -38,11 +38,11 @@ namespace dss {
 
   class DS485Header {
   private:
-    uint8 m_Type;
-    uint8 m_Counter;
-    uint8 m_Source;
+    uint8_t m_Type;
+    uint8_t m_Counter;
+    uint8_t m_Source;
     bool m_Broadcast;
-    uint8 m_Destination;
+    uint8_t m_Destination;
   public:
     DS485Header()
     : m_Type(0x00),
@@ -52,17 +52,17 @@ namespace dss {
       m_Destination(0xff)
     {};
 
-    uint8 GetDestination() const { return m_Destination; };
+    uint8_t GetDestination() const { return m_Destination; };
     bool IsBroadcast() const { return m_Broadcast; };
-    uint8 GetSource() const { return m_Source; };
-    uint8 GetCounter() const { return m_Counter; };
-    uint8 GetType() const { return m_Type; };
+    uint8_t GetSource() const { return m_Source; };
+    uint8_t GetCounter() const { return m_Counter; };
+    uint8_t GetType() const { return m_Type; };
 
-    void SetDestination(const uint8 _value) { m_Destination = _value; };
+    void SetDestination(const uint8_t _value) { m_Destination = _value; };
     void SetBroadcast(const bool _value) { m_Broadcast = _value; };
-    void SetSource(const uint8 _value) { m_Source = _value; };
-    void SetCounter(const uint8 _value) { m_Counter = _value; };
-    void SetType(const uint8 _value) { m_Type = _value; };
+    void SetSource(const uint8_t _value) { m_Source = _value; };
+    void SetCounter(const uint8_t _value) { m_Counter = _value; };
+    void SetType(const uint8_t _value) { m_Type = _value; };
 
     vector<unsigned char> ToChar() const;
     void FromChar(const unsigned char* _data, const int _len);
@@ -85,17 +85,17 @@ namespace dss {
 
   class DS485CommandFrame : public DS485Frame {
   private:
-    uint8 m_Command;
-    uint8 m_Length;
+    uint8_t m_Command;
+    uint8_t m_Length;
   public:
     DS485CommandFrame();
     virtual ~DS485CommandFrame() {};
 
-    uint8 GetCommand() const { return m_Command; };
-    uint8 GetLength() const { return m_Length; };
+    uint8_t GetCommand() const { return m_Command; };
+    uint8_t GetLength() const { return m_Length; };
 
-    void SetCommand(const uint8 _value) { m_Command = _value; };
-    void SetLength(const uint8 _value) { m_Length = _value; };
+    void SetCommand(const uint8_t _value) { m_Command = _value; };
+    void SetLength(const uint8_t _value) { m_Length = _value; };
 
     virtual vector<unsigned char> ToChar() const;
   };
@@ -234,11 +234,11 @@ namespace dss {
     t Get();
   }; // PayloadDissector
 
-  const char* CommandToString(const uint8 _command);
+  const char* CommandToString(const uint8_t _command);
 
-  const dsid_t SimulationPrefix = 0xFFC00000;
+  const uint32_t SimulationPrefix = 0xFFC00000;
   inline bool IsSimulationDSID(const dsid_t _dsid) {
-    return _dsid & SimulationPrefix == SimulationPrefix;
+    return _dsid.lower & SimulationPrefix == SimulationPrefix;
   }
 
 }

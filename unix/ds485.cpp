@@ -9,9 +9,9 @@
 
 #include "ds485.h"
 
-#include "../core/base.h"
-#include "../core/logger.h"
-#include "../core/ds485const.h"
+#include "core/base.h"
+#include "core/logger.h"
+#include "core/ds485const.h"
 
 #include <stdexcept>
 #include <sstream>
@@ -32,9 +32,9 @@ namespace dss {
   //================================================== DS485Payload
 
   template<>
-  void DS485Payload::Add(uint8 _data) {
+  void DS485Payload::Add(uint8_t _data) {
     m_Data.push_back(_data);
-  } // Add<uint8>
+  } // Add<uint8_t>
 
   template<>
   void DS485Payload::Add(devid_t _data) {
@@ -48,11 +48,16 @@ namespace dss {
   } // Add<bool>
 
   template<>
+  void DS485Payload::Add(uint32_t _data) {
+    Add<uint16_t>((_data >>  0) & 0x0000FFFF);
+    Add<uint16_t>((_data >> 16) & 0x0000FFFF);
+  }
+
+  template<>
   void DS485Payload::Add(dsid_t _data) {
-    m_Data.push_back((_data & 0x000000FF) >> 0);
-    m_Data.push_back((_data & 0x0000FF00) >> 8);
-    m_Data.push_back((_data & 0x00FF0000) >> 16);
-    m_Data.push_back((_data & 0xFF000000) >> 24);
+    Add<uint32_t>((_data.upper >>  0) & 0x00000000FFFFFFFF);
+    Add<uint32_t>((_data.upper >> 32) & 0x00000000FFFFFFFF);
+    Add(_data.lower);
   } // Add<dsid_t>
 
   int DS485Payload::Size() const {
@@ -224,10 +229,10 @@ namespace dss {
     solicitSuccessorResponseFrame->GetHeader().SetDestination(0);
     solicitSuccessorResponseFrame->GetHeader().SetSource(0x3F);
     solicitSuccessorResponseFrame->SetCommand(CommandSolicitSuccessorResponse);
-    solicitSuccessorResponseFrame->GetPayload().Add<uint8>(static_cast<uint8>((dsid >> 24) & 0x000000FF));
-    solicitSuccessorResponseFrame->GetPayload().Add<uint8>(static_cast<uint8>((dsid >> 16) & 0x000000FF));
-    solicitSuccessorResponseFrame->GetPayload().Add<uint8>(static_cast<uint8>((dsid >> 18) & 0x000000FF));
-    solicitSuccessorResponseFrame->GetPayload().Add<uint8>(static_cast<uint8>((dsid >>  0) & 0x000000FF));
+    solicitSuccessorResponseFrame->GetPayload().Add<uint8_t>(static_cast<uint8_t>((dsid >> 24) & 0x000000FF));
+    solicitSuccessorResponseFrame->GetPayload().Add<uint8_t>(static_cast<uint8_t>((dsid >> 16) & 0x000000FF));
+    solicitSuccessorResponseFrame->GetPayload().Add<uint8_t>(static_cast<uint8_t>((dsid >> 18) & 0x000000FF));
+    solicitSuccessorResponseFrame->GetPayload().Add<uint8_t>(static_cast<uint8_t>((dsid >>  0) & 0x000000FF));
 
     int senseTimeMS = 0;
     int numberOfJoinPacketsToWait = -1;
@@ -405,6 +410,8 @@ namespace dss {
                     cout << "\n&&&&got other" << endl;
                     AddToReceivedQueue(cmdFrame);
                   }
+                } else {
+                  cout << "no ack received" << endl;
                 }
               }
             }
@@ -420,11 +427,12 @@ namespace dss {
             // Handle token timeout
             time_t now;
             time(&now);
-            if(now - tokenReceivedAt > 15) {
+            if((now - tokenReceivedAt) > 15) {
               cerr << "restarting" << endl;
               DoChangeState(csInitial);
               m_NextStationID = 0xFF;
               m_StationID = 0xFF;
+              continue;
             }
             cout << "f*" << (int)cmdFrame->GetCommand() << "*";
 
@@ -669,7 +677,7 @@ namespace dss {
               frame->SetLength(m_ReceiveBuffer[3] & 0x0F);
               frame->SetCommand(m_ReceiveBuffer[3] >> 4 & 0x0F);
               for(int iByte = 0; iByte < m_MessageLength; iByte++) {
-                frame->GetPayload().Add<uint8>(static_cast<uint8>(m_ReceiveBuffer[iByte + 4]));
+                frame->GetPayload().Add<uint8_t>(static_cast<uint8_t>(m_ReceiveBuffer[iByte + 4]));
               }
               //cout << "*" << frame->GetCommand() << "*";
               //flush(cout);
@@ -715,37 +723,36 @@ namespace dss {
   //================================================== PayloadDissector
 
   template<>
-  uint8 PayloadDissector::Get() {
-    uint8 result = m_Payload.back();
+  uint8_t PayloadDissector::Get() {
+    uint8_t result = m_Payload.back();
     m_Payload.pop_back();
-    return result;
-  }
-
-  template<>
-  dsid_t PayloadDissector::Get() {
-    dsid_t result;
-    result = (Get<uint8>() <<  0) |
-             (Get<uint8>() <<  8) |
-             (Get<uint8>() << 16) |
-             (Get<uint8>() << 24);
     return result;
   }
 
   template<>
   uint32_t PayloadDissector::Get() {
     uint32_t result;
-    result = (Get<uint8>() <<  0) |
-             (Get<uint8>() <<  8) |
-             (Get<uint8>() << 16) |
-             (Get<uint8>() << 24);
+    result = (Get<uint8_t>() <<  0) |
+             (Get<uint8_t>() <<  8) |
+             (Get<uint8_t>() << 16) |
+             (Get<uint8_t>() << 24);
+    return result;
+  }
+
+  template<>
+  dsid_t PayloadDissector::Get() {
+    dsid_t result;
+    result.upper = (Get<uint32_t>() <<  0) |
+                   (((uint64_t)Get<uint32_t>()) << 32);
+    result.lower = Get<uint32_t>();
     return result;
   }
 
   template<>
   uint16_t PayloadDissector::Get() {
     uint16_t result;
-    result = (Get<uint8>() << 0)  |
-             (Get<uint8>() << 8);
+    result = (Get<uint8_t>() << 0)  |
+             (Get<uint8_t>() << 8);
     return result;
   }
 
@@ -775,11 +782,11 @@ namespace dss {
 
           DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(frame.get());
           if(cmdFrame != NULL) {
-            uint8 cmd = cmdFrame->GetCommand();
+            uint8_t cmd = cmdFrame->GetCommand();
             cout << "Command Frame: " << CommandToString(cmdFrame->GetCommand()) << "\n";
             if(cmd == CommandRequest || cmd == CommandResponse) {
               PayloadDissector pd(cmdFrame->GetPayload());
-              cout << (int)pd.Get<uint8>() << "\n";
+              cout << (int)pd.Get<uint8_t>() << "\n";
             }
           } else {
             cout << "token " << (int)frame->GetHeader().GetSource() << " -> " << (int)frame->GetHeader().GetDestination()  << "\n";
@@ -795,7 +802,7 @@ namespace dss {
 
   //================================================== Global helpers
 
-  const char* CommandToString(const uint8 _command) {
+  const char* CommandToString(const uint8_t _command) {
     switch(_command) {
     case CommandSolicitSuccessorRequestLong:
       return "solicit successor request long";
@@ -827,5 +834,7 @@ namespace dss {
       return "(unknown)";
     }
   } // CommandToString
+
+  const dsid_t NullDSID(0,0);
 
 }

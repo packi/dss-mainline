@@ -109,7 +109,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="ids" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
+     <element name="ids" type="dss:dsid" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -180,10 +180,11 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-GetDeviceIDByNameResponse">
+  <element name="dsid">
    <complexType>
     <sequence>
-     <element name="deviceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="upper" type="xsd:unsignedLong" minOccurs="1" maxOccurs="1"/>
+     <element name="lower" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -211,7 +212,7 @@
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -229,7 +230,7 @@
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -308,7 +309,7 @@
   <element name="Set-GetContainedDevicesResponse">
    <complexType>
     <sequence>
-     <element name="deviceIDs" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
+     <element name="deviceIDs" type="dss:dsid" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -759,7 +760,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -776,7 +777,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -793,7 +794,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
@@ -811,7 +812,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
@@ -829,7 +830,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -846,7 +847,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -863,7 +864,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
      <element name="directionUp" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
@@ -882,7 +883,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
@@ -900,7 +901,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
      <element name="value" type="xsd:double" minOccurs="1" maxOccurs="1"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
@@ -919,7 +920,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
@@ -937,7 +938,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
      <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
@@ -955,7 +956,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
      <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
@@ -973,7 +974,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -990,7 +991,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -1007,15 +1008,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Device-GetDSIDResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -1048,7 +1041,7 @@
   <element name="Apartment-GetModulatorIDsResponse">
    <complexType>
     <sequence>
-     <element name="ids" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
+     <element name="ids" type="dss:dsid" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
@@ -1061,20 +1054,12 @@
     </sequence>
    </complexType>
   </element>
-  <!-- operation response element -->
-  <element name="Modulator-GetDSIDResponse">
-   <complexType>
-    <sequence>
-     <element name="dsid" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
   <!-- operation request element -->
   <element name="Modulator-GetName">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="modulatorID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="modulatorID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -1125,7 +1110,7 @@
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -1143,7 +1128,7 @@
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -1212,7 +1197,7 @@
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -1230,7 +1215,7 @@
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -1247,7 +1232,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -1264,7 +1249,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -1273,25 +1258,6 @@
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Switch-SimulateKeypress">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
-     <element name="buttonNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="kind" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Switch-SimulateKeypressResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>

@@ -90,7 +90,7 @@ namespace dss {
     /** Returns the DSID of a given modulator */
     virtual dsid_t GetDSIDOfModulator(const int _modulatorID) = 0;
 
-    /** Returns the current powerconsumption in mW */
+    /** Returns the current power-consumption in mW */
     virtual unsigned long GetPowerConsumption(const int _modulatorID) = 0;
 
     /** Returns the meter value in Wh */
@@ -102,7 +102,7 @@ namespace dss {
     //------------------------------------------------ Device manipulation
     virtual vector<int> SendCommand(DS485Command _cmd, const Set& _set, int _param = -1) = 0;
     virtual vector<int> SendCommand(DS485Command _cmd, const Device& _device, int _param = -1) = 0;
-    virtual vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8 _modulatorID, int _param = -1) = 0;
+    virtual vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param = -1) = 0;
     virtual vector<int> SendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param = -1) = 0;
   };
 }

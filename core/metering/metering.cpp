@@ -45,7 +45,7 @@ namespace dss {
           iConfig != e; ++iConfig)
       {
         // Load series from file
-        string fileName = m_MeteringStorageLocation + UnsignedLongIntToHexString((*ipModulator)->GetDSID()) + "_" + (*iConfig)->GetFilenameSuffix() + ".xml";
+        string fileName = m_MeteringStorageLocation + (*ipModulator)->GetDSID().ToString() + "_" + (*iConfig)->GetFilenameSuffix() + ".xml";
         Logger::GetInstance()->Log(string("Metering::CheckModulators: Trying to load series from '") + fileName + "'");
         if(FileExists(fileName)) {
           boost::shared_ptr<Series<AdderValue> > s = boost::shared_ptr<Series<AdderValue> >(reader.ReadFromXML(fileName));
@@ -80,7 +80,7 @@ namespace dss {
             iConfig != e; ++iConfig)
         {
           // Load series from file
-          string fileName = m_MeteringStorageLocation + UnsignedLongIntToHexString((*ipModulator)->GetDSID()) + "_" + (*iConfig)->GetFilenameSuffix() + ".xml";
+          string fileName = m_MeteringStorageLocation + (*ipModulator)->GetDSID().ToString() + "_" + (*iConfig)->GetFilenameSuffix() + ".xml";
           Series<AdderValue>* s = series[distance(m_Config.begin(), iConfig)].get();
           Logger::GetInstance()->Log(string("Metering::CheckModulators: Trying to save series to '") + fileName + "'");
           writer.WriteToXML(*s, fileName);

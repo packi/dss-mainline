@@ -50,7 +50,7 @@ namespace dss {
         return;
       } else {
         if(m_pApartment->GetPropertyNode() != NULL) {
-          m_pPropertyNode = m_pApartment->GetPropertyNode()->CreateProperty("devices/device+");
+          m_pPropertyNode = m_pApartment->GetPropertyNode()->CreateProperty("zones/zone" + IntToString(m_ZoneID) + "/device+");
 //          m_pPropertyNode->CreateProperty("name")->LinkToProxy(PropertyProxyMemberFunction<Device, string>(*this, &Device::GetName, &Device::SetName));
           m_pPropertyNode->CreateProperty("name")->LinkToProxy(PropertyProxyReference<string>(m_Name));
           m_pPropertyNode->CreateProperty("ModulatorID")->LinkToProxy(PropertyProxyReference<int>(m_ModulatorID, false));
@@ -110,12 +110,16 @@ namespace dss {
   } // IsOn
 
   int Device::GetFunctionID() const {
-    return DSS::GetInstance()->GetDS485Interface().SendCommand(cmdGetFunctionID, *this).front();
+    return m_FunctionID;
   } // GetFunctionID
 
-  bool Device::IsSwitch() const {
+  void Device::SetFunctionID(const int _value) {
+    m_FunctionID = _value;
+  } // SetFunctionID
+
+  bool Device::HasSwitch() const {
     return false; //GetFunctionID() == FunctionIDSwitch;
-  } // IsSwitch
+  } // HasSwitch
 
   void Device::SetValue(const double _value, const int _parameterNr) {
   } // SetValue
@@ -391,7 +395,7 @@ namespace dss {
   DeviceReference Set::GetByDSID(const dsid_t _dsid) {
     Set resultSet = GetSubset(ByDSIDSelector(_dsid));
     if(resultSet.Length() == 0) {
-      throw ItemNotFoundException(string("with dsid ") + IntToString(_dsid));
+      throw ItemNotFoundException("with dsid " + _dsid.ToString());
     }
     return resultSet.m_ContainedDevices.front();
   } // GetByDSID
@@ -579,6 +583,12 @@ namespace dss {
     while(!interface.IsReady() && !m_Terminated) {
       SleepMS(1000);
     }
+/*
+    while(!m_Terminated) {
+      SleepSeconds(2);
+    }
+*/
+
     while(!m_Terminated) {
       Logger::GetInstance()->Log("Apartment::Execute received proxy event, enumerating apartment / dSMs");
 
@@ -586,37 +596,38 @@ namespace dss {
       foreach(int modulatorID, modIDs) {
         Log("Found modulator with id: " + IntToString(modulatorID));
         dsid_t modDSID = interface.GetDSIDOfModulator(modulatorID);
-        Logger::GetInstance()->Log(string("  DSID: ") + UIntToString(modDSID));
+        Log("  DSID: " + modDSID.ToString());
         Modulator& modulator = AllocateModulator(modDSID);
         modulator.SetBusID(modulatorID);
 
         vector<int> zoneIDs = interface.GetZones(modulatorID);
-//        for(vector<int>::iterator iZoneID = zoneIDs.begin(); iZoneID != zoneIDs.end(); ++iZoneID) {
         foreach(int zoneID, zoneIDs) {
-//          int zoneID = *iZoneID;
           Log("  Found zone with id: " + IntToString(zoneID));
           Zone& zone = AllocateZone(modulator, zoneID);
 
           vector<int> devices = interface.GetDevicesInZone(modulatorID, zoneID);
           foreach(int devID, devices) {
-  //        for(vector<int>::iterator iDevice = devices.begin(); iDevice != devices.end(); ++iDevice) {
-//            int devID = *iDevice;
-            Log("    Found device with id: " + IntToString(devID));
             dsid_t dsid = interface.GetDSIDOfDevice(modulatorID, devID);
-            Log("    DSID: " + UIntToString(dsid));
+            int functionID = interface.SendCommand(cmdGetFunctionID, devID, modulatorID).front();
+            Log("    Found device with id: " + IntToString(devID));
+            Log("    DSID:        " + dsid.ToString());
+            Log("    Function ID: " + UnsignedLongIntToHexString(functionID));
             Device& dev = AllocateDevice(dsid);
             dev.SetShortAddress(devID);
             dev.SetModulatorID(modulatorID);
             dev.SetZoneID(zoneID);
+            dev.SetFunctionID(functionID);
             zone.AddDevice(DeviceReference(dev, *this));
             modulator.AddDevice(DeviceReference(dev, *this));
           }
+
           vector<int> groupIDs = interface.GetGroups(modulatorID, zoneID);
           foreach(int groupID, groupIDs) {
             Log("    Found group with id: " + IntToString(groupID));
             vector<int> devingroup = interface.GetDevicesInGroup(modulatorID, zoneID, groupID);
             foreach(int devID, devingroup) {
               try {
+                Log("     Adding device " + IntToString(devID) + " to group " + IntToString(groupID));
                 Device& dev = GetDeviceByShortAddress(modulator, devID);
                 dev.SetShortAddress(devID);
                 dev.GetGroupBitmask().set(groupID-1);
@@ -664,7 +675,7 @@ namespace dss {
     XMLNodeList devices = _node.GetChildren();
     for(XMLNodeList::iterator iNode = devices.begin(); iNode != devices.end(); ++iNode) {
       if(iNode->GetName() == "device") {
-        dsid_t dsid = StrToUInt(iNode->GetAttributes()["dsid"]);
+        dsid_t dsid = dsid_t::FromString(iNode->GetAttributes()["dsid"]);
         string name;
         try {
           XMLNode& nameNode = iNode->GetChildByName("name");
@@ -699,7 +710,7 @@ namespace dss {
     XMLNodeList modulators = _node.GetChildren();
     for(XMLNodeList::iterator iModulator = modulators.begin(); iModulator != modulators.end(); ++iModulator) {
       if(iModulator->GetName() == "modulator") {
-        int id = StrToInt(iModulator->GetAttributes()["id"]);
+        dsid_t id = dsid_t::FromString(iModulator->GetAttributes()["id"]);
         string name;
         XMLNode& nameNode = iModulator->GetChildByName("name");
         if(nameNode.GetChildren().size() > 0) {
@@ -742,7 +753,7 @@ namespace dss {
         return *dev;
       }
     }
-    throw ItemNotFoundException(IntToString(_dsid));
+    throw ItemNotFoundException(_dsid.ToString());
   } // GetDeviceByShortAddress const
 
   Device& Apartment::GetDeviceByDSID(const dsid_t _dsid) {
@@ -751,7 +762,7 @@ namespace dss {
         return *dev;
       }
     }
-    throw ItemNotFoundException(IntToString(_dsid));
+    throw ItemNotFoundException(_dsid.ToString());
   } // GetDeviceByShortAddress
 
   Device& Apartment::GetDeviceByShortAddress(const Modulator& _modulator, const devid_t _deviceID) const {
@@ -828,7 +839,7 @@ namespace dss {
         return *modulator;
       }
     }
-    throw ItemNotFoundException(IntToString(_dsid));
+    throw ItemNotFoundException(_dsid.ToString());
   } // GetModulatorByDSID
 
   vector<Modulator*>& Apartment::GetModulators() {
@@ -1214,8 +1225,8 @@ namespace dss {
     return GetDevice().IsOn();
   }
 
-  bool DeviceReference::IsSwitch() const {
-    return GetDevice().IsSwitch();
+  bool DeviceReference::HasSwitch() const {
+    return GetDevice().HasSwitch();
   }
 
   void DeviceReference::CallScene(const int _sceneNr) {

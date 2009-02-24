@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2009-01-27 11:01:32 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2009-02-24 17:01:38 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -217,8 +217,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__Device_GetFunctionID(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Switch-GetGroupID"))
 		return soap_serve_dss__Switch_GetGroupID(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Switch-SimulateKeypress"))
-		return soap_serve_dss__Switch_SimulateKeypress(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Event-Raise"))
 		return soap_serve_dss__Event_Raise(soap);
 	return soap->error = SOAP_NO_METHOD;
@@ -596,8 +594,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetDevices(struct soap *soap
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetDeviceIDByName(struct soap *soap)
 {	struct dss__Apartment_GetDeviceIDByName soap_tmp_dss__Apartment_GetDeviceIDByName;
-	struct dss__Apartment_GetDeviceIDByNameResponse soap_tmp_dss__Apartment_GetDeviceIDByNameResponse;
-	soap_default_dss__Apartment_GetDeviceIDByNameResponse(soap, &soap_tmp_dss__Apartment_GetDeviceIDByNameResponse);
+	struct dss__dsid deviceID;
+	soap_default_dss__dsid(soap, &deviceID);
 	soap_default_dss__Apartment_GetDeviceIDByName(soap, &soap_tmp_dss__Apartment_GetDeviceIDByName);
 	soap->encodingStyle = NULL;
 	if (!soap_get_dss__Apartment_GetDeviceIDByName(soap, &soap_tmp_dss__Apartment_GetDeviceIDByName, "dss:Apartment-GetDeviceIDByName", NULL))
@@ -606,18 +604,18 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetDeviceIDByName(struct soa
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Apartment_GetDeviceIDByName(soap, soap_tmp_dss__Apartment_GetDeviceIDByName._token, soap_tmp_dss__Apartment_GetDeviceIDByName._deviceName, soap_tmp_dss__Apartment_GetDeviceIDByNameResponse.deviceID);
+	soap->error = dss__Apartment_GetDeviceIDByName(soap, soap_tmp_dss__Apartment_GetDeviceIDByName._token, soap_tmp_dss__Apartment_GetDeviceIDByName._deviceName, deviceID);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
-	soap_serialize_dss__Apartment_GetDeviceIDByNameResponse(soap, &soap_tmp_dss__Apartment_GetDeviceIDByNameResponse);
+	soap_serialize_dss__dsid(soap, &deviceID);
 	if (soap_begin_count(soap))
 		return soap->error;
 	if (soap->mode & SOAP_IO_LENGTH)
 	{	if (soap_envelope_begin_out(soap)
 		 || soap_putheader(soap)
 		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Apartment_GetDeviceIDByNameResponse(soap, &soap_tmp_dss__Apartment_GetDeviceIDByNameResponse, "dss:Apartment-GetDeviceIDByNameResponse", "")
+		 || soap_put_dss__dsid(soap, &deviceID, "dss:dsid", "")
 		 || soap_body_end_out(soap)
 		 || soap_envelope_end_out(soap))
 			 return soap->error;
@@ -627,7 +625,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetDeviceIDByName(struct soa
 	 || soap_envelope_begin_out(soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Apartment_GetDeviceIDByNameResponse(soap, &soap_tmp_dss__Apartment_GetDeviceIDByNameResponse, "dss:Apartment-GetDeviceIDByNameResponse", "")
+	 || soap_put_dss__dsid(soap, &deviceID, "dss:dsid", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -2526,8 +2524,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetZoneID(struct soap *soap)
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetDSID(struct soap *soap)
 {	struct dss__Device_GetDSID soap_tmp_dss__Device_GetDSID;
-	struct dss__Device_GetDSIDResponse soap_tmp_dss__Device_GetDSIDResponse;
-	soap_default_dss__Device_GetDSIDResponse(soap, &soap_tmp_dss__Device_GetDSIDResponse);
+	struct dss__dsid result;
+	soap_default_dss__dsid(soap, &result);
 	soap_default_dss__Device_GetDSID(soap, &soap_tmp_dss__Device_GetDSID);
 	soap->encodingStyle = NULL;
 	if (!soap_get_dss__Device_GetDSID(soap, &soap_tmp_dss__Device_GetDSID, "dss:Device-GetDSID", NULL))
@@ -2536,18 +2534,18 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetDSID(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Device_GetDSID(soap, soap_tmp_dss__Device_GetDSID._token, soap_tmp_dss__Device_GetDSID._deviceID, soap_tmp_dss__Device_GetDSIDResponse.result);
+	soap->error = dss__Device_GetDSID(soap, soap_tmp_dss__Device_GetDSID._token, soap_tmp_dss__Device_GetDSID._deviceID, result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
-	soap_serialize_dss__Device_GetDSIDResponse(soap, &soap_tmp_dss__Device_GetDSIDResponse);
+	soap_serialize_dss__dsid(soap, &result);
 	if (soap_begin_count(soap))
 		return soap->error;
 	if (soap->mode & SOAP_IO_LENGTH)
 	{	if (soap_envelope_begin_out(soap)
 		 || soap_putheader(soap)
 		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Device_GetDSIDResponse(soap, &soap_tmp_dss__Device_GetDSIDResponse, "dss:Device-GetDSIDResponse", "")
+		 || soap_put_dss__dsid(soap, &result, "dss:dsid", "")
 		 || soap_body_end_out(soap)
 		 || soap_envelope_end_out(soap))
 			 return soap->error;
@@ -2557,7 +2555,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetDSID(struct soap *soap)
 	 || soap_envelope_begin_out(soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Device_GetDSIDResponse(soap, &soap_tmp_dss__Device_GetDSIDResponse, "dss:Device-GetDSIDResponse", "")
+	 || soap_put_dss__dsid(soap, &result, "dss:dsid", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -2649,8 +2647,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetModulatorIDs(struct soap 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Modulator_GetDSID(struct soap *soap)
 {	struct dss__Modulator_GetDSID soap_tmp_dss__Modulator_GetDSID;
-	struct dss__Modulator_GetDSIDResponse soap_tmp_dss__Modulator_GetDSIDResponse;
-	soap_default_dss__Modulator_GetDSIDResponse(soap, &soap_tmp_dss__Modulator_GetDSIDResponse);
+	struct dss__dsid dsid;
+	soap_default_dss__dsid(soap, &dsid);
 	soap_default_dss__Modulator_GetDSID(soap, &soap_tmp_dss__Modulator_GetDSID);
 	soap->encodingStyle = NULL;
 	if (!soap_get_dss__Modulator_GetDSID(soap, &soap_tmp_dss__Modulator_GetDSID, "dss:Modulator-GetDSID", NULL))
@@ -2659,18 +2657,18 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Modulator_GetDSID(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Modulator_GetDSID(soap, soap_tmp_dss__Modulator_GetDSID._token, soap_tmp_dss__Modulator_GetDSID._modulatorID, soap_tmp_dss__Modulator_GetDSIDResponse.dsid);
+	soap->error = dss__Modulator_GetDSID(soap, soap_tmp_dss__Modulator_GetDSID._token, soap_tmp_dss__Modulator_GetDSID._modulatorID, dsid);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
-	soap_serialize_dss__Modulator_GetDSIDResponse(soap, &soap_tmp_dss__Modulator_GetDSIDResponse);
+	soap_serialize_dss__dsid(soap, &dsid);
 	if (soap_begin_count(soap))
 		return soap->error;
 	if (soap->mode & SOAP_IO_LENGTH)
 	{	if (soap_envelope_begin_out(soap)
 		 || soap_putheader(soap)
 		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Modulator_GetDSIDResponse(soap, &soap_tmp_dss__Modulator_GetDSIDResponse, "dss:Modulator-GetDSIDResponse", "")
+		 || soap_put_dss__dsid(soap, &dsid, "dss:dsid", "")
 		 || soap_body_end_out(soap)
 		 || soap_envelope_end_out(soap))
 			 return soap->error;
@@ -2680,7 +2678,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Modulator_GetDSID(struct soap *soap)
 	 || soap_envelope_begin_out(soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Modulator_GetDSIDResponse(soap, &soap_tmp_dss__Modulator_GetDSIDResponse, "dss:Modulator-GetDSIDResponse", "")
+	 || soap_put_dss__dsid(soap, &dsid, "dss:dsid", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -3176,47 +3174,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Switch_GetGroupID(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__Switch_GetGroupIDResponse(soap, &soap_tmp_dss__Switch_GetGroupIDResponse, "dss:Switch-GetGroupIDResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Switch_SimulateKeypress(struct soap *soap)
-{	struct dss__Switch_SimulateKeypress soap_tmp_dss__Switch_SimulateKeypress;
-	struct dss__Switch_SimulateKeypressResponse soap_tmp_dss__Switch_SimulateKeypressResponse;
-	soap_default_dss__Switch_SimulateKeypressResponse(soap, &soap_tmp_dss__Switch_SimulateKeypressResponse);
-	soap_default_dss__Switch_SimulateKeypress(soap, &soap_tmp_dss__Switch_SimulateKeypress);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Switch_SimulateKeypress(soap, &soap_tmp_dss__Switch_SimulateKeypress, "dss:Switch-SimulateKeypress", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Switch_SimulateKeypress(soap, soap_tmp_dss__Switch_SimulateKeypress._token, soap_tmp_dss__Switch_SimulateKeypress._deviceID, soap_tmp_dss__Switch_SimulateKeypress._buttonNr, soap_tmp_dss__Switch_SimulateKeypress._kind, soap_tmp_dss__Switch_SimulateKeypressResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Switch_SimulateKeypressResponse(soap, &soap_tmp_dss__Switch_SimulateKeypressResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Switch_SimulateKeypressResponse(soap, &soap_tmp_dss__Switch_SimulateKeypressResponse, "dss:Switch-SimulateKeypressResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Switch_SimulateKeypressResponse(soap, &soap_tmp_dss__Switch_SimulateKeypressResponse, "dss:Switch-SimulateKeypressResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

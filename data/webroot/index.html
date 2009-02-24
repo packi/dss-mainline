@@ -41,8 +41,8 @@ function Apartment(into) {
         if(zone.id == 0) { 
           return;
         }
-        zonelist += "<li>" + zone.name + '[<a href="#" onclick="turnOnZone(' + zone.id + ')">Turn On</a>';
-        zonelist += '&nbsp;|&nbsp;<a href="#" onclick="turnOffZone(' + zone.id + ')">Turn Off</a>]</li><ul>';
+        zonelist += "<li>" + zone.name + '[<a href="#" onclick="turnOnZone(\'' + zone.id + '\')">Turn On</a>';
+        zonelist += '&nbsp;|&nbsp;<a href="#" onclick="turnOffZone(\'' + zone.id + '\')">Turn Off</a>]</li><ul>';
         zone.devices.each(function(device) {
           zonelist += "<li>" + device.name;
           devNum++;
@@ -52,8 +52,8 @@ function Apartment(into) {
             } else {
               zonelist += " Off ";
             }
-            zonelist += '[<a href="#" onclick="turnOn(' + device.id + ')">Turn On</a>';
-            zonelist += '&nbsp;|&nbsp;<a href="#" onclick="turnOff(' + device.id + ')">Turn Off</a>]';
+            zonelist += '[<a href="#" onclick="turnOn(\'' + device.id + '\')">Turn On</a>';
+            zonelist += '&nbsp;|&nbsp;<a href="#" onclick="turnOff(\'' + device.id + '\')">Turn Off</a>]';
           } else {
             zonelist += '<div id="switch_' + device.id + '"/>';
             switchIDs[switchIDs.length] = device.id;

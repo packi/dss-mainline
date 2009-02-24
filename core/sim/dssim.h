@@ -69,8 +69,8 @@ namespace dss {
     void LoadPlugins();
 
     DSIDInterface& LookupDevice(const devid_t _id);
-    DS485CommandFrame* CreateResponse(DS485CommandFrame& _request, uint8 _functionID);
-    DS485CommandFrame* CreateAck(DS485CommandFrame& _request, uint8 _functionID);
+    DS485CommandFrame* CreateResponse(DS485CommandFrame& _request, uint8_t _functionID);
+    DS485CommandFrame* CreateAck(DS485CommandFrame& _request, uint8_t _functionID);
     DS485CommandFrame* CreateReply(DS485CommandFrame& _request);
   private:
     void DeviceCallScene(const int _deviceID, const int _sceneID);
@@ -135,7 +135,7 @@ namespace dss {
 
     virtual double GetValue(int _parameterNr = -1) const = 0;
 
-    virtual uint8 GetFunctionID() = 0;
+    virtual uint8_t GetFunctionID() = 0;
   }; // DSIDInterface
 
   class DSIDSim : public DSIDInterface {
@@ -147,8 +147,8 @@ namespace dss {
     bool m_DimmingUp;
     vector<int> m_Parameters;
     DSModulatorSim* m_Modulator;
-    vector<uint8> m_ValuesForScene;
-    uint8 m_CurrentValue;
+    vector<uint8_t> m_ValuesForScene;
+    uint8_t m_CurrentValue;
     int m_DimTimeMS;
   public:
     DSIDSim(const DSModulatorSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress);
@@ -170,7 +170,7 @@ namespace dss {
 
     virtual double GetValue(int _parameterNr = -1) const;
 
-    virtual uint8 GetFunctionID();
+    virtual uint8_t GetFunctionID();
   }; // DSIDSim
 
 
@@ -192,7 +192,7 @@ namespace dss {
 
     const int GetNumberOfButtons() const { return m_NumberOfButtons; }
 
-    virtual uint8 GetFunctionID() { return FunctionIDSwitch; }
+    virtual uint8_t GetFunctionID() { return FunctionIDSwitch; }
   };
 }
 

@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <modulator busid="70" dsid="10">
+<!--
   <device dsid="11" busid="10" type="standard.simple" />
   <zone id="1"> 
     <device dsid="1" busid="1" type="standard.switch" />
@@ -19,4 +20,5 @@
       <device busid="5" />
     </group>
   </zone>
+  -->
 </modulator>

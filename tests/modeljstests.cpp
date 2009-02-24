@@ -71,9 +71,9 @@ protected:
   void testSets() {
     Apartment apt(NULL);
 
-    Device& dev1 = apt.AllocateDevice(1);
+    Device& dev1 = apt.AllocateDevice(dsid_t(0,1));
     dev1.SetShortAddress(1);
-    Device& dev2 = apt.AllocateDevice(2);
+    Device& dev2 = apt.AllocateDevice(dsid_t(0,2));
     dev2.SetShortAddress(2);
 
     boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
@@ -95,10 +95,10 @@ protected:
   void testDevices() {
     Apartment apt(NULL);
 
-    Device& dev1 = apt.AllocateDevice(1);
+    Device& dev1 = apt.AllocateDevice(dsid_t(0,1));
     dev1.SetShortAddress(1);
     dev1.SetName("dev1");
-    Device& dev2 = apt.AllocateDevice(2);
+    Device& dev2 = apt.AllocateDevice(dsid_t(0,2));
     dev2.SetShortAddress(2);
     dev2.SetName("dev2");
 
@@ -117,7 +117,7 @@ protected:
   void testEvents() {
     Apartment apt(NULL);
 
-    Device& dev = apt.AllocateDevice(1);
+    Device& dev = apt.AllocateDevice(dsid_t(0,1));
     dev.SetShortAddress(1);
     dev.SetName("dev");
 
@@ -151,7 +151,7 @@ protected:
   void testSubscriptions() {
     Apartment apt(NULL);
 
-    Device& dev = apt.AllocateDevice(1);
+    Device& dev = apt.AllocateDevice(dsid_t(0,1));
     dev.SetShortAddress(1);
     dev.SetName("dev");
 
