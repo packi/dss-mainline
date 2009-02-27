@@ -969,6 +969,8 @@ namespace dss {
 
 			uint8_t functionID = ch.front();
 			if(frame->GetCommand() == CommandRequest) {
+			  string functionIDStr = FunctionIDToString(functionID);
+			  Log("Got request: " + functionIDStr);
 			  if(functionID == FunctionZoneAddDevice) {
 
 			  }
