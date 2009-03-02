@@ -689,7 +689,7 @@ namespace dss {
     }
     PayloadDissector pd(results.at(0)->GetPayload());
     pd.Get<uint8_t>(); // discard the function id
-    return pd.Get<devid_t>();
+    return pd.Get<uint32_t>();
   } // GetPowerConsumption
 
   unsigned long DS485Proxy::GetEnergyMeterValue(const int _modulatorID) {
@@ -707,7 +707,7 @@ namespace dss {
     }
     PayloadDissector pd(results.at(0)->GetPayload());
     pd.Get<uint8_t>(); // discard the function id
-    return pd.Get<devid_t>();
+    return pd.Get<uint16_t>();
   } // GetEnergyMeterValue
 
   void DS485Proxy::Subscribe(const int _modulatorID, const int _groupID, const int _deviceID) {
@@ -955,47 +955,48 @@ namespace dss {
     SignalEvent();
 
     while(!m_Terminated) {
-		if(!m_IncomingFrames.empty() || m_PacketHere.WaitFor(50)) {
-		  while(!m_IncomingFrames.empty()) {
-			// process packets and put them into a functionID-hash
-			boost::shared_ptr<DS485CommandFrame> frame = m_IncomingFrames.front();
-			m_IncomingFrames.erase(m_IncomingFrames.begin());
+      if(!m_IncomingFrames.empty() || m_PacketHere.WaitFor(50)) {
+        while(!m_IncomingFrames.empty()) {
+          // process packets and put them into a functionID-hash
+          boost::shared_ptr<DS485CommandFrame> frame = m_IncomingFrames.front();
+          m_IncomingFrames.erase(m_IncomingFrames.begin());
+          Log("R");
 
-			vector<unsigned char> ch = frame->GetPayload().ToChar();
-			if(ch.size() < 1) {
-			  Log("Received Command Frame w/o function identifier");
-			  continue;
-			}
+          vector<unsigned char> ch = frame->GetPayload().ToChar();
+          if(ch.size() < 1) {
+            Log("Received Command Frame w/o function identifier");
+            continue;
+          }
 
-			uint8_t functionID = ch.front();
-			if(frame->GetCommand() == CommandRequest) {
-			  string functionIDStr = FunctionIDToString(functionID);
-			  Log("Got request: " + functionIDStr);
-			  if(functionID == FunctionZoneAddDevice) {
+          uint8_t functionID = ch.front();
+          if(frame->GetCommand() == CommandRequest) {
+            string functionIDStr = FunctionIDToString(functionID);
+            Log("Got request: " + functionIDStr);
+            if(functionID == FunctionZoneAddDevice) {
 
-			  }
-			} else {
-			  std::ostringstream sstream;
-			  sstream << "Response: ";
-			  PayloadDissector pd(frame->GetPayload());
-			  while(!pd.IsEmpty()) {
-				  uint8_t data = pd.Get<uint8_t>();
-				  sstream << "(0x" << std::hex << (unsigned int)data << ", " << std::dec << (int)data << "d)";
-			  }
-			  sstream << std::dec;
-			  Log(sstream.str());
+            }
+          } else {
+            std::ostringstream sstream;
+            sstream << "Response: ";
+            PayloadDissector pd(frame->GetPayload());
+            while(!pd.IsEmpty()) {
+              uint8_t data = pd.Get<uint8_t>();
+              sstream << "(0x" << std::hex << (unsigned int)data << ", " << std::dec << (int)data << "d)";
+            }
+            sstream << std::dec;
+            Log(sstream.str());
 
-			  // create an explicit copy since frame is a shared ptr and would free the contained
-			  // frame if going out of scope
-			  DS485CommandFrame* pFrame = new DS485CommandFrame();
-			  *pFrame = *frame.get();
+            // create an explicit copy since frame is a shared ptr and would free the contained
+            // frame if going out of scope
+            DS485CommandFrame* pFrame = new DS485CommandFrame();
+            *pFrame = *frame.get();
 
-			  Log(string("Response for: ") + FunctionIDToString(functionID));
-			  ReceivedFrame* rf = new ReceivedFrame(m_DS485Controller.GetTokenCount(), pFrame);
-			  m_ReceivedFramesByFunctionID[functionID].push_back(rf);
-			}
-		  }
-		}
+            Log(string("Response for: ") + FunctionIDToString(functionID));
+            ReceivedFrame* rf = new ReceivedFrame(m_DS485Controller.GetTokenCount(), pFrame);
+            m_ReceivedFramesByFunctionID[functionID].push_back(rf);
+          }
+        }
+      }
     }
   } // Execute
 

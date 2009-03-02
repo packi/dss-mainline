@@ -128,5 +128,7 @@ namespace dss {
   //================================================== Explicit instantiations
   template class SeriesReader<AdderValue>;
   template class SeriesWriter<AdderValue>;
+  template class SeriesReader<CurrentValue>;
+  template class SeriesWriter<CurrentValue>;
 
 } // namespace dss

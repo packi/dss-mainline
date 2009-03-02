@@ -406,6 +406,7 @@ namespace dss {
                 if(cmdAckFrame != NULL) {
                   if(cmdAckFrame->GetCommand() == CommandAck) {
                     m_PendingFrames.erase(m_PendingFrames.begin());
+                    cout << "\ngot ack" << endl;
                   } else {
                     cout << "\n&&&&got other" << endl;
                     AddToReceivedQueue(cmdFrame);
@@ -461,6 +462,8 @@ namespace dss {
                 cout << "a(req)";
               }
               keep = true;
+            } else {
+              cout << "&&&&&&&&&& unknown frame id: " << cmdFrame->GetCommand() << endl;
             }
             if(keep) {
               // put in into the received queue

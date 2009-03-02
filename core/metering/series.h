@@ -39,6 +39,7 @@ namespace dss {
       m_Max(_value),
       m_TimeStamp(_timeStamp)
     { } // Value
+
     virtual ~Value() {};
 
     virtual void MergeWith(const Value& _other) {
@@ -71,6 +72,22 @@ namespace dss {
     double GetValue() const { return m_Value; }
   }; // Value
 
+  class CurrentValue : public Value {
+  public:
+    CurrentValue(double _value, const DateTime& _timeStamp)
+    : Value(_value, _timeStamp)
+    { }
+
+    CurrentValue(double _value)
+    : Value(_value)
+    { }
+
+    virtual void MergeWith(const Value& _other) {
+      Value::MergeWith(_other);
+      m_Value = _other.GetValue();
+    }
+  };
+
   class AdderValue : public Value {
   public:
     AdderValue(double _value, const DateTime& _timeStamp)
@@ -80,10 +97,6 @@ namespace dss {
     AdderValue(double _value)
     : Value(_value)
     {}
-
-    virtual void ReadFromXMLNode(XMLNode& _node) {
-      Value::ReadFromXMLNode(_node);
-    }
 
     virtual void MergeWith(const Value& _other)
     {

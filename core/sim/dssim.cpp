@@ -157,6 +157,11 @@ namespace dss {
   {
     m_ModulatorDSID = dsid_t(0, SimulationPrefix);
     m_Initialized = false;
+/*
+    if(_pDSS != NULL) {
+      GetDSS().GetPropertySystem().CreateProperty("/sim");
+    }
+    */
   } // DSModulatorSim
 
   void DSModulatorSim::Initialize() {
