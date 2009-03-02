@@ -28,4 +28,4 @@ add_executable(dss main.cpp namespaces.cpp)
 link_libraries(gsoap++)
 
 target_link_libraries(dss core unix webservices pthread shttpd
-	boost_filesystem ical rt dl)
+	boost_filesystem ical rt dl js PocoXML)
