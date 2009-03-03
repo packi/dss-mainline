@@ -91,7 +91,7 @@ namespace dss {
 
     virtual bool IsReady();
 
-    void SendFrame(DS485CommandFrame& _frame, bool _force = false);
+    virtual void SendFrame(DS485CommandFrame& _frame, bool _force = false);
 
     //------------------------------------------------ Handling
     virtual void Initialize();

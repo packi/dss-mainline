@@ -38,12 +38,79 @@ class SeriesTest : public CPPUNIT_NS::TestCase
 {
   CPPUNIT_TEST_SUITE(SeriesTest);
   CPPUNIT_TEST(testWrapping);
+  CPPUNIT_TEST(testRealtime);
+  CPPUNIT_TEST(testReadWrite);
   CPPUNIT_TEST_SUITE_END();
 
 public:
   void setUp(void) {}
   void tearDown(void) {}
 protected:
+
+  void testReadWrite() {
+    Series<CurrentValue> five(5 * 60, 10);
+    Series<CurrentValue> minutely(60, 10, &five);
+    Series<CurrentValue> secondly(1, 10, &minutely);
+
+
+    DateTime testStart;
+
+    secondly.AddValue(1, testStart);
+    secondly.AddValue(2, testStart.AddSeconds(1));
+
+    CPPUNIT_ASSERT_EQUAL(2u, secondly.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL(2.0, secondly.GetValues().front().GetValue());
+
+    secondly.AddValue(3, testStart.AddSeconds(1));
+    secondly.AddValue(4, testStart.AddSeconds(1));
+    secondly.AddValue(5, testStart.AddSeconds(1));
+
+    CPPUNIT_ASSERT_EQUAL(2u, secondly.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL(2.0, secondly.GetValues().front().GetMin());
+    CPPUNIT_ASSERT_EQUAL(5.0, secondly.GetValues().front().GetValue());
+    CPPUNIT_ASSERT_EQUAL(5.0, secondly.GetValues().front().GetMax());
+
+    SeriesWriter<CurrentValue> writer;
+    writer.WriteToXML(secondly, "/home/patrick/workspace/dss/data/webroot/test.xml");
+
+    SeriesReader<CurrentValue> reader;
+
+    Series<CurrentValue>* series = reader.ReadFromXML("/home/patrick/workspace/dss/data/webroot/test.xml");
+    CPPUNIT_ASSERT(series != NULL);
+    CPPUNIT_ASSERT_EQUAL(2u, series->GetValues().size());
+    CPPUNIT_ASSERT_EQUAL(2.0, series->GetValues().front().GetMin());
+    CPPUNIT_ASSERT_EQUAL(5.0, series->GetValues().front().GetValue());
+    CPPUNIT_ASSERT_EQUAL(5.0, series->GetValues().front().GetMax());
+
+    delete series;
+  } // testReadWrite
+
+  void testRealtime() {
+    Series<CurrentValue> five(5 * 60, 10);
+    Series<CurrentValue> minutely(60, 10, &five);
+    Series<CurrentValue> secondly(1, 10, &minutely);
+
+    DateTime testStart;
+
+    secondly.AddValue(1, DateTime());
+
+    SleepSeconds(1);
+
+    secondly.AddValue(2, DateTime());
+
+    CPPUNIT_ASSERT_EQUAL(2u, secondly.GetValues().size());
+
+    CPPUNIT_ASSERT_EQUAL(2.0, secondly.GetValues().front().GetValue());
+
+    secondly.AddValue(3, DateTime());
+    secondly.AddValue(4, DateTime());
+    secondly.AddValue(5, DateTime());
+
+    CPPUNIT_ASSERT_EQUAL(2u, secondly.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL(2.0, secondly.GetValues().front().GetMin());
+    CPPUNIT_ASSERT_EQUAL(5.0, secondly.GetValues().front().GetValue());
+    CPPUNIT_ASSERT_EQUAL(5.0, secondly.GetValues().front().GetMax());
+  }
 
   void testWrapping() {
     Series<AdderValue> hourly (3600, 10);
@@ -93,11 +160,13 @@ protected:
 
     minutely.AddValue(61, testStart.AddMinute(61));
 
-  //  CPPUNIT_ASSERT_EQUAL(1u, hourly.GetValues().size());
-/*
+    cout << hourly.GetValues().size() << " " << hourly.GetValues().front().GetValue() << endl;
+
+    CPPUNIT_ASSERT_EQUAL(1u, hourly.GetValues().size());
+
     double val = SeriesAdder<5,5>::value;
     CPPUNIT_ASSERT_EQUAL(val, hourly.GetValues().front().GetValue());
-*/
+
     minutely.AddValue(62, testStart.AddMinute(62));
 
     SeriesWriter<AdderValue> writer;

@@ -14,6 +14,7 @@
 #include "core/logger.h"
 #include "core/ds485const.h"
 #include "core/sim/dssim.h"
+#include "core/event.h"
 
 #include <sstream>
 
@@ -164,7 +165,7 @@ namespace dss {
   bool DS485Proxy::IsReady() {
 	  return IsRunning()
 	         && ((m_DS485Controller.GetState() == csSlave) ||
-	             (m_DS485Controller.GetState() == csMaster) ||
+	             (m_DS485Controller.GetState() == csDesignatedMaster) ||
 	             (m_DS485Controller.GetState() == csError)) // allow the simulation to run on it's own
 	         &&  DSS::GetInstance()->GetModulatorSim().Ready();
   } // IsReady
@@ -671,6 +672,7 @@ namespace dss {
     }
     PayloadDissector pd(results.at(0)->GetPayload());
     pd.Get<uint8_t>(); // discard the function id
+    //pd.Get<uint8_t>(); // function result, don't know if that's sent though
     return pd.Get<dsid_t>();
   } // GetDSIDOfModulator
 
@@ -687,6 +689,9 @@ namespace dss {
       Log(string("DS485Proxy::GetPowerConsumption: received multiple results ") + IntToString(results.size()), lsError);
       return 0;
     }
+    if(results.at(0)->GetHeader().GetSource() != _modulatorID) {
+      Log("GetPowerConsumption: received result from wrong source");
+    }
     PayloadDissector pd(results.at(0)->GetPayload());
     pd.Get<uint8_t>(); // discard the function id
     return pd.Get<uint32_t>();
@@ -702,7 +707,7 @@ namespace dss {
 
     vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionModulatorGetEnergyMeterValue);
     if(results.size() != 1) {
-      Log(string("DS485Proxy::GetEnergyMeterValue: received multiple results ") + IntToString(results.size()), lsError);
+      Log("DS485Proxy::GetEnergyMeterValue: received multiple results " + IntToString(results.size()), lsError);
       return 0;
     }
     PayloadDissector pd(results.at(0)->GetPayload());
@@ -717,7 +722,7 @@ namespace dss {
     cmdFrame.GetPayload().Add<uint8_t>(FunctionDeviceSubscribe);
     cmdFrame.GetPayload().Add<uint16_t>(_groupID);
     cmdFrame.GetPayload().Add<devid_t>(_deviceID);
-    Log(string("Proxy: Subscribe ") + IntToString(_modulatorID));
+    Log("Proxy: Subscribe " + IntToString(_modulatorID));
     SendFrame(cmdFrame);
   } // Subscribe
 
@@ -972,7 +977,21 @@ namespace dss {
           if(frame->GetCommand() == CommandRequest) {
             string functionIDStr = FunctionIDToString(functionID);
             Log("Got request: " + functionIDStr);
+            PayloadDissector pd(frame->GetPayload());
             if(functionID == FunctionZoneAddDevice) {
+              Log("New device");
+            } else if(functionID == FunctionGroupCallScene) {
+              pd.Get<uint8_t>(); // function id
+              uint16_t zoneID = pd.Get<uint16_t>();
+              uint16_t groupID = pd.Get<uint16_t>();
+              uint16_t sceneID = pd.Get<uint16_t>();
+              if(sceneID == SceneBell) {
+                boost::shared_ptr<Event> evt(new Event("bell"));
+                GetDSS().GetEventQueue().PushEvent(evt);
+              } else if(sceneID == SceneAlarm) {
+                boost::shared_ptr<Event> evt(new Event("alarm"));
+                GetDSS().GetEventQueue().PushEvent(evt);
+              }
 
             }
           } else {

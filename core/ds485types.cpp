@@ -14,7 +14,11 @@ namespace dss {
 
   std::string dsid::ToString() const {
     std::stringstream sstream;
-    sstream << std::hex << upper << lower;
+    sstream.fill('0');
+    sstream.width(16);
+    sstream << std::hex << upper;
+    sstream.width(8);
+    sstream << lower;
     return sstream.str();
   }
 

@@ -60,6 +60,7 @@ namespace dss {
     map<const DSIDInterface*, int> m_ButtonToGroupMapping;
     map<const DSIDInterface*, int> m_ButtonSubscriptionFlag;
     map<const DSIDInterface*, int> m_DeviceZoneMapping;
+    map<const int, int> m_LastCalledSceneForGroup;
   private:
     void LoadFromConfig();
     void LoadDevices(XMLNodeList& _nodes, const int _zoneID);
@@ -193,7 +194,7 @@ namespace dss {
     const int GetNumberOfButtons() const { return m_NumberOfButtons; }
 
     virtual uint8_t GetFunctionID() { return FunctionIDSwitch; }
-  };
+  }; // DSIDSimSwitch
 }
 
 #endif /*DSSIM_H_*/

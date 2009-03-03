@@ -55,9 +55,15 @@ namespace dss {
 
   template<>
   void DS485Payload::Add(dsid_t _data) {
-    Add<uint32_t>((_data.upper >>  0) & 0x00000000FFFFFFFF);
-    Add<uint32_t>((_data.upper >> 32) & 0x00000000FFFFFFFF);
-    Add(_data.lower);
+    cout << "sending: " << _data.ToString() << endl;
+    // 0x11223344 55667788
+    for(int iByte = 0; iByte < 8; iByte++) {
+      Add<uint8_t>((_data.upper >> ((8 - iByte - 1) * 8)) & 0x00000000000000FF);
+    }
+    Add<uint8_t>((_data.lower >> 24) & 0x000000FF);
+    Add<uint8_t>((_data.lower >> 16) & 0x000000FF);
+    Add<uint8_t>((_data.lower >>  8) & 0x000000FF);
+    Add<uint8_t>((_data.lower >>  0) & 0x000000FF);
   } // Add<dsid_t>
 
   int DS485Payload::Size() const {
@@ -745,9 +751,16 @@ namespace dss {
   template<>
   dsid_t PayloadDissector::Get() {
     dsid_t result;
-    result.upper = (Get<uint32_t>() <<  0) |
-                   (((uint64_t)Get<uint32_t>()) << 32);
-    result.lower = Get<uint32_t>();
+    result.upper = 0;
+    for(int iByte = 0; iByte < 8; iByte++) {
+      result.upper |= ((uint64_t)Get<uint8_t>() << ((8 - iByte - 1) * 8));
+    }
+    result.lower  = (Get<uint8_t>() << 24);
+    result.lower |= (Get<uint8_t>() << 16);
+    result.lower |= (Get<uint8_t>() <<  8);
+    result.lower |= (Get<uint8_t>() <<  0);
+
+    cout << "got: " << result.ToString() << endl;
     return result;
   }
 

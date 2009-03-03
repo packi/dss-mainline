@@ -22,7 +22,7 @@ namespace dss {
     Thread("Metering")
   {
     boost::shared_ptr<MeteringConfigChain> configConsumption(new MeteringConfigChain(false, 1));
-    configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_seconds",        1, 400)));
+    configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_seconds",        2, 400)));
     configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_minutely",  1 * 60, 400)));
     configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_5minutely", 5 * 60, 400)));
     configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_hourly",   60 * 60, 400)));
@@ -70,10 +70,10 @@ namespace dss {
         }
       }
       // stitch up chain
-      for(vector<boost::shared_ptr<Series<CurrentValue> > >::iterator iSeries = series.begin(), e = series.end();
+      for(vector<boost::shared_ptr<Series<CurrentValue> > >::reverse_iterator iSeries = series.rbegin(), e = series.rend();
           iSeries != e; ++iSeries)
       {
-        if(iSeries != series.begin()) {
+        if(iSeries != series.rbegin()) {
           (*iSeries)->SetNextSeries(boost::prior(iSeries)->get());
         }
       }
@@ -105,7 +105,7 @@ namespace dss {
     // check modulators periodically
     while(!m_Terminated) {
       if(!DSS::GetInstance()->GetDS485Interface().IsReady()) {
-        SleepSeconds(40);
+        SleepSeconds(20);
         continue;
       }
 

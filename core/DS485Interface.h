@@ -9,6 +9,7 @@
 #define DS485INTERFACE_H_
 
 #include "ds485types.h"
+#include "unix/ds485.h"
 #include "model.h"
 
 #include <vector>
@@ -46,6 +47,8 @@ namespace dss {
 
     /** Returns true when the interface is ready to transmit user generated DS485Packets */
     virtual bool IsReady() = 0;
+
+    virtual void SendFrame(DS485CommandFrame& _frame, bool _force = false) = 0;
 
     //------------------------------------------------ Specialized Commands (system)
     /** Returns an vector containing the bus-ids of all modulators present. */

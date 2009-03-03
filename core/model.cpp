@@ -118,7 +118,7 @@ namespace dss {
   } // SetFunctionID
 
   bool Device::HasSwitch() const {
-    return false; //GetFunctionID() == FunctionIDSwitch;
+    return GetFunctionID() == FunctionIDSwitch;
   } // HasSwitch
 
   void Device::SetValue(const double _value, const int _parameterNr) {

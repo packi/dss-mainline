@@ -100,7 +100,7 @@ namespace dss {
     pDoc->appendChild(pRoot);
 
     const std::deque<T> values = _series.GetValues();
-    for(typename std::deque<T>::const_iterator iValue = values.begin(), e = values.end();
+    for(typename std::deque<T>::const_reverse_iterator iValue = values.rbegin(), e = values.rend();
         iValue != e; ++iValue)
     {
       AutoPtr<Element> elem = pDoc->createElement("value");
