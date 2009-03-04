@@ -542,6 +542,7 @@ namespace dss {
     m_Groups.push_back(grp);
     grp = new Group(GroupIDYellow, zoneID, *this);
     grp->SetName("yellow");
+    _zone.AddGroup(grp);
     m_Groups.push_back(grp);
     grp = new Group(GroupIDGray, zoneID, *this);
     grp->SetName("gray");
@@ -1015,6 +1016,10 @@ namespace dss {
   		DSS::GetInstance()->GetDS485Interface().SetZoneID(dev.GetModulatorID(), dev.GetShortAddress(), m_ZoneID);
   	}
   } // AddDevice
+
+  void Zone::AddGroup(Group* _group) {
+    m_Groups.push_back(_group);
+  }
 
   void Zone::RemoveDevice(const DeviceReference& _device) {
     DeviceIterator pos = find(m_Devices.begin(), m_Devices.end(), _device);

@@ -478,7 +478,7 @@ namespace dss {
     Group* GetGroup(const int _id) const;
 
     /** Adds a group to the zone */
-    void AddGroup(UserGroup* _group);
+    void AddGroup(Group* _group);
     /** Removes a group from the zone */
     void RemoveGroup(UserGroup* _group);
 

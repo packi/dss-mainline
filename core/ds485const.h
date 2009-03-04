@@ -82,9 +82,9 @@ namespace dss {
   // Scene constants for devices
   const uint8_t SceneOff = 0x00;
   const uint8_t Scene1 = 0x05;
-  const uint8_t Scene2 = 0x02;
-  const uint8_t Scene3 = 0x03;
-  const uint8_t Scene4 = 0x04;
+  const uint8_t Scene2 = 0x11;
+  const uint8_t Scene3 = 0x12;
+  const uint8_t Scene4 = 0x13;
   const uint8_t SceneStandBy = 0x30;
   const uint8_t SceneDeepOff = 0x31;
   const uint8_t SceneInc = 0x0B;

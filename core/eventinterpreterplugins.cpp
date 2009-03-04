@@ -38,6 +38,13 @@ namespace dss {
         newEvent->SetTime(timeParam);
       }
     }
+    if(_subscription.GetOptions().HasParameter(EventPropertyLocation)) {
+      string location = _subscription.GetOptions().GetParameter(EventPropertyLocation);
+      if(location.size() > 0) {
+        Logger::GetInstance()->Log("RaiseEvent: Event has location");
+        newEvent->SetLocation(location);
+      }
+    }
     newEvent->SetProperties(_event.GetProperties());
     GetEventInterpreter().GetQueue().PushEvent(newEvent);
   } // HandleEvent
@@ -218,7 +225,11 @@ namespace dss {
       if(_event.HasPropertySet(EventPropertyLocation)) {
         to = builder.BuildSet(_event.GetPropertyByName(EventPropertyLocation), &_event.GetRaisedAtZone());
       } else {
-        to = _event.GetRaisedAtZone().GetDevices();
+        if(_subscription.GetOptions().HasParameter(EventPropertyLocation)) {
+          to = builder.BuildSet(_subscription.GetOptions().GetParameter(EventPropertyLocation), NULL);
+        } else {
+          to = _event.GetRaisedAtZone().GetDevices();
+        }
       }
 
       if(cmd == cmdCallScene || cmd == cmdSaveScene || cmd == cmdUndoScene) {
@@ -229,6 +240,7 @@ namespace dss {
       {
         m_pInterface->SendCommand(cmd, to, options->GetParameterIndex());
       } else {
+        Logger::GetInstance()->Log("EventInterpreterPluginDS485::HandleEvent: sending...");
         m_pInterface->SendCommand(cmd, to, 0);
       }
     } else {

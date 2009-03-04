@@ -3,6 +3,8 @@
 #include <iostream>
 #include <map>
 
+#include <pthread.h>
+
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/SocketStream.h>
 #include <Poco/Net/SocketAddress.h>
@@ -10,6 +12,7 @@
 #include <Poco/Exception.h>
 
 #include "../../../core/sim/include/dsid_plugin.h"
+#include "../../../core/ds485const.h"
 
 class DSID {
   private:
@@ -32,14 +35,21 @@ class DSID {
     virtual double GetValue(int _parameterNr = -1) const = 0;
 };
 
-class DSIDVLCRemote : public DSID {
+void* handleBell(void* ptr);
 
+class DSIDVLCRemote : public DSID {
+private:
+  pthread_t m_ThreadHandle;
+public:
+    DSIDVLCRemote() {
+      lastScene = dss::SceneOff;
+    }
     virtual ~DSIDVLCRemote() {}
 
     void SendCommand(const std::string& _command) {
       try
        {
-               Poco::Net::SocketAddress sa("localhost", 4212);
+               Poco::Net::SocketAddress sa("192.168.2.1", 4212);
                Poco::Net::StreamSocket sock(sa);
                Poco::Net::SocketStream str(sock);
 
@@ -56,13 +66,45 @@ class DSIDVLCRemote : public DSID {
        }
     }
 
+    int lastScene;
+
     virtual void CallScene(const int _sceneNr) {
       std::cout << "call scene " << _sceneNr << "\n";
-      if(_sceneNr == 0) {
+      if(_sceneNr == dss::SceneDeepOff) {
         SendCommand("stop");
-      } else if(_sceneNr == 2) {
+      } else if(_sceneNr == dss::SceneOff || _sceneNr == dss::SceneMin) {
         SendCommand("pause");
+      } else if(_sceneNr == dss::SceneMax) {
+        SendCommand("pause");
+      } else if(_sceneNr == dss::SceneBell) {
+        m_ThreadHandle = 0;
+        pthread_create(&m_ThreadHandle, NULL, handleBell, this );
+      } else if(_sceneNr == dss::Scene1) {
+        if(lastScene == dss::Scene2) {
+          SendCommand("prev");
+        } else {
+          SendCommand("next");
+        }
+      } else if(_sceneNr == dss::Scene2) {
+        if(lastScene == dss::Scene3) {
+          SendCommand("prev");
+        } else {
+          SendCommand("next");
+        }
+      } else if(_sceneNr == dss::Scene3) {
+        if(lastScene == dss::Scene4) {
+          SendCommand("prev");
+        } else {
+          SendCommand("next");
+        }
+      } else if(_sceneNr == dss::Scene4) {
+        if(lastScene == dss::Scene1) {
+          SendCommand("prev");
+        } else {
+          SendCommand("next");
+        }
       }
+      lastScene = _sceneNr;
       std::cout << "end call scene" << std::endl;
     }
 
@@ -75,24 +117,12 @@ class DSIDVLCRemote : public DSID {
 
     virtual void IncreaseValue(const int _parameterNr = -1) {
       std::cout << "increase value of parameter " << _parameterNr << "\n";
-      // param 0 is the track
-      // param 1 is the volume
-      if(_parameterNr == 0) {
-        SendCommand("next");
-      } else if(_parameterNr == 1) {
-        SendCommand("volup");
-      }
+      SendCommand("volup");
     }
 
     virtual void DecreaseValue(const int _parameterNr = -1) {
       std::cout << "decrease value of parameter " << _parameterNr << "\n";
-      // param 0 is the track
-      // param 1 is the volume
-      if(_parameterNr == 0) {
-        SendCommand("prev");
-      } else if(_parameterNr == 1) {
-        SendCommand("voldown");
-      }
+      SendCommand("voldown");
     }
 
     virtual void Enable() {
@@ -116,6 +146,14 @@ class DSIDVLCRemote : public DSID {
       return 0.0;
     }
 };
+
+void* handleBell(void* ptr) {
+  DSIDVLCRemote* remote = (DSIDVLCRemote*)ptr;
+  remote->SendCommand("pause");
+  sleep(5);
+  remote->SendCommand("pause");
+  return NULL;
+}
 
 class DSIDFactory {
 private:

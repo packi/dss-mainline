@@ -26,7 +26,7 @@ namespace dss {
       Set result;
       result.AddDevice(ref);
       return result;
-    } catch(runtime_error&) {
+    } catch(exception&) {
     }
 
     try {
@@ -34,7 +34,7 @@ namespace dss {
       Set result;
       result.AddDevice(ref);
       return result;
-    } catch(runtime_error&) {
+    } catch(exception&) {
     }
 
     // TODO: we might need to query zone 0 for the identifier too
@@ -62,7 +62,10 @@ namespace dss {
     for(vector<string>::iterator iPart = splitted.begin(), e = splitted.end();
        iPart != e; ++iPart)
     {
-      result = RestrictBy(*iPart, result, *context);
+      //cout << endl << "part: " << iPart << endl:
+      if(iPart->size() > 0) {
+        result = RestrictBy(*iPart, result, *context);
+      }
     }
     return result;
   } // BuildSet

@@ -225,18 +225,21 @@ namespace dss {
       frame.GetPayload().Add<uint16_t>(_group.GetID());
       frame.GetPayload().Add<uint16_t>(SceneMax);
       SendFrame(frame);
+      Log("turn on: zone " + IntToString(_zone.GetZoneID()) + " group: " + IntToString(_group.GetID()));
     } else if(_cmd == cmdTurnOff) {
       frame.GetPayload().Add<uint8_t>(FunctionGroupCallScene);
       frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
       frame.GetPayload().Add<uint16_t>(_group.GetID());
       frame.GetPayload().Add<uint16_t>(SceneOff);
       SendFrame(frame);
+      Log("turn off: zone " + IntToString(_zone.GetZoneID()) + " group: " + IntToString(_group.GetID()));
     } else if(_cmd == cmdCallScene) {
       frame.GetPayload().Add<uint8_t>(FunctionGroupCallScene);
       frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());
       frame.GetPayload().Add<uint16_t>(_group.GetID());
       frame.GetPayload().Add<uint16_t>(_param);
       SendFrame(frame);
+      Log("call scene: zone " + IntToString(_zone.GetZoneID()) + " group: " + IntToString(_group.GetID()));
     } else if(_cmd == cmdSaveScene) {
       frame.GetPayload().Add<uint8_t>(FunctionGroupSaveScene);
       frame.GetPayload().Add<uint16_t>(_zone.GetZoneID());

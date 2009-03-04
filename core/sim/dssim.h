@@ -179,11 +179,13 @@ namespace dss {
   private:
     const int m_NumberOfButtons;
     int m_DefaultColor;
+    bool m_IsBell;
   public:
     DSIDSimSwitch(const DSModulatorSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress, const int _numButtons)
     : DSIDSim(_simulator, _dsid, _shortAddress),
       m_NumberOfButtons(_numButtons),
-      m_DefaultColor(GroupIDYellow)
+      m_DefaultColor(GroupIDYellow),
+      m_IsBell(false)
     {};
     ~DSIDSimSwitch() {}
 
@@ -192,6 +194,9 @@ namespace dss {
     const int GetDefaultColor() const { return m_DefaultColor; }
 
     const int GetNumberOfButtons() const { return m_NumberOfButtons; }
+
+    bool IsBell() const { return m_IsBell; }
+    void SetIsBell(const bool _value) { m_IsBell = _value; }
 
     virtual uint8_t GetFunctionID() { return FunctionIDSwitch; }
   }; // DSIDSimSwitch

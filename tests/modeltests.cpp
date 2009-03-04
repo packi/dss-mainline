@@ -8,6 +8,7 @@
  */
 
 #include "../core/model.h"
+#include "../core/setbuilder.h"
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/BriefTestProgressListener.h>
@@ -77,6 +78,7 @@ protected:
 
     Device& dev1 = apt.AllocateDevice(dsid_t(0,1));
     dev1.SetShortAddress(1);
+    dev1.GetGroupBitmask().set(0);
     Device& dev2 = apt.AllocateDevice(dsid_t(0,2));
     dev2.SetShortAddress(2);
     Device& dev3 = apt.AllocateDevice(dsid_t(0,3));
@@ -90,6 +92,11 @@ protected:
     CPPUNIT_ASSERT_EQUAL(dev2, allDevices.GetByBusID(2).GetDevice());
     CPPUNIT_ASSERT_EQUAL(dev3, allDevices.GetByBusID(3).GetDevice());
     CPPUNIT_ASSERT_EQUAL(dev4, allDevices.GetByBusID(4).GetDevice());
+
+    SetBuilder builder;
+    Set asdf = builder.BuildSet("yellow", &apt.GetZone(0));//allDevices.GetByGroup(1);
+
+    cout << asdf.Length() << endl;
 
     Set setdev1 = Set(dev1);
 

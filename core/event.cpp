@@ -164,7 +164,7 @@ namespace dss {
                 plugin->HandleEvent(*toProcess, **ipSubscription);
                 called = true;
                 Logger::GetInstance()->Log("EventInterpreter: called.");
-                break;
+               // break;
               }
               if(!called) {
                 Logger::GetInstance()->Log(string("EventInterpreter: Could not find handler '") + (*ipSubscription)->GetHandlerName());
@@ -328,7 +328,7 @@ namespace dss {
       DateTime when;
       bool validDate = false;
       string timeStr = _event->GetPropertyByName(EventPropertyTime);
-      if(timeStr.size() > 2) {
+      if(timeStr.size() >= 2) {
         // relative time
         if(timeStr[0] == '+') {
           string timeOffset = timeStr.substr(1, string::npos);
@@ -420,6 +420,7 @@ namespace dss {
     DateTime result = now.AddYear(10);
     if(DebugEventRunner) {
       Logger::GetInstance()->Log("EventRunner: *********");
+      Logger::GetInstance()->Log("number in queue: " + IntToString(GetSize()));
     }
     for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
         ipSchedEvt != e; ++ipSchedEvt)
@@ -459,7 +460,7 @@ namespace dss {
       }
 
       if(!m_NewItem.WaitFor(sleepSeconds * 1000)) {
-        return RaisePendingEvents(m_WakeTime, 10);
+        return RaisePendingEvents(m_WakeTime, 2);
       }
     }
     return false;
