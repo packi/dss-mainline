@@ -14,7 +14,14 @@ add_definitions(-DXP_UNIX -DUSE_SIM -DUSE_LIBXML -DNO_CGI)
 
 include_directories(external)
 include_directories(${DSS_SOURCE_DIR})
-include_directories(/usr/include/libxml2)
+
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  include_directories(/opt/local/include)
+  link_directories(/opt/local/lib)
+  link_libraries(boost_filesystem-mt boost_system-mt PocoFoundation)
+ELSE(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  target_link_libraries(boost_filesystem rt)
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 add_subdirectory(core)
 add_subdirectory(unix)
@@ -28,4 +35,4 @@ add_executable(dss main.cpp namespaces.cpp)
 link_libraries(gsoap++)
 
 target_link_libraries(dss core unix webservices pthread shttpd
-	boost_filesystem ical rt dl js PocoXML)
+	 ical dl js PocoXML)
