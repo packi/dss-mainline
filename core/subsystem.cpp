@@ -22,7 +22,7 @@ namespace dss {
       if(GetDSS().GetState() < ssCreatingSubsystems) {
         throw std::runtime_error("creating subsystem way too early");
       }
-      GetDSS().GetPropertySystem().SetIntValue(GetPropertyBasePath() + "loglevel", 0, true);
+      GetDSS().GetPropertySystem().SetIntValue(GetConfigPropertyBasePath() + "loglevel", 0, true);
     }
   } // ctor
 
@@ -32,7 +32,7 @@ namespace dss {
       if(GetDSS().GetState() < ssInitializingSubsystems) {
         throw std::runtime_error("you shouldn't initialize your subsystem at this phase");
       }
-      severity = static_cast<aLogSeverity>(GetDSS().GetPropertySystem().GetIntValue(GetPropertyBasePath() + "loglevel"));
+      severity = static_cast<aLogSeverity>(GetDSS().GetPropertySystem().GetIntValue(GetConfigPropertyBasePath() + "loglevel"));
     }
     m_pLogChannel.reset(new LogChannel(m_Name, severity));
     m_State = ssInitialized;
@@ -44,8 +44,12 @@ namespace dss {
     }
   } // Start
 
-  std::string Subsystem::GetPropertyBasePath() {
+  std::string Subsystem::GetConfigPropertyBasePath() {
     return "/config/subsystems/" + m_Name + "/";
+  } // GetConfigPropertyBasePath
+
+  std::string Subsystem::GetPropertyBasePath() {
+    return "/system/" + m_Name + "/";
   } // GetPropertyBasePath
 
   void Subsystem::Log(const std::string& _message, aLogSeverity _severity) {

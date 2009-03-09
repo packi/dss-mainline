@@ -15,6 +15,7 @@
 #include "core/ds485const.h"
 #include "core/sim/dssim.h"
 #include "core/event.h"
+#include "core/propertysystem.h"
 
 #include <sstream>
 
@@ -160,7 +161,25 @@ namespace dss {
   DS485Proxy::DS485Proxy(DSS* _pDSS)
   : Thread("DS485Proxy"),
     Subsystem(_pDSS, "DS485Proxy")
-  { } // ctor
+  {
+    if(_pDSS != NULL) {
+      _pDSS->GetPropertySystem().CreateProperty(GetConfigPropertyBasePath() + "rs485devicename")
+            ->LinkToProxy(PropertyProxyMemberFunction<DS485Controller, string>(m_DS485Controller, &DS485Controller::GetRS485DeviceName, &DS485Controller::SetRS485DeviceName));
+
+      _pDSS->GetPropertySystem().CreateProperty(GetPropertyBasePath() + "tokensReceived")
+            ->LinkToProxy(PropertyProxyMemberFunction<DS485Controller, int>(m_DS485Controller, &DS485Controller::GetTokenCount));
+
+      const DS485FrameReader& reader = m_DS485Controller.GetFrameReader();
+      _pDSS->GetPropertySystem().CreateProperty(GetPropertyBasePath() + "framesReceived")
+            ->LinkToProxy(PropertyProxyMemberFunction<DS485FrameReader, int>(reader, &DS485FrameReader::GetNumberOfFramesReceived));
+
+      _pDSS->GetPropertySystem().CreateProperty(GetPropertyBasePath() + "incompleteFramesReceived")
+            ->LinkToProxy(PropertyProxyMemberFunction<DS485FrameReader, int>(reader, &DS485FrameReader::GetNumberOfIncompleteFramesReceived));
+
+      _pDSS->GetPropertySystem().CreateProperty(GetPropertyBasePath() + "crcErrors")
+            ->LinkToProxy(PropertyProxyMemberFunction<DS485FrameReader, int>(reader, &DS485FrameReader::GetNumberOfCRCErrors));
+    }
+  } // ctor
 
   bool DS485Proxy::IsReady() {
 	  return IsRunning()

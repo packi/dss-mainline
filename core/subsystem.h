@@ -30,6 +30,7 @@ namespace dss {
     std::string m_Name;
     boost::shared_ptr<LogChannel> m_pLogChannel;
   protected:
+    std::string GetConfigPropertyBasePath();
     std::string GetPropertyBasePath();
   public:
     Subsystem(DSS* _pDSS, const std::string& _name);

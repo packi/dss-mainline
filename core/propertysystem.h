@@ -177,37 +177,50 @@ namespace dss {
   template<class Cls, class T>
   class PropertyProxyMemberFunction: public PropertyProxy<T> {
   private:
-    typedef T (Cls::*aGetterType)() const;
+    typedef typename boost::mpl::if_c<boost::is_class<T>::value, const T&, T>::type (Cls::*aGetterType)() const;
     typedef void (Cls::*aSetterType)(typename boost::mpl::if_c<boost::is_class<T>::value, const T&, const T>::type);
-    Cls& m_Obj;
+    Cls* m_Obj;
+    const Cls* m_ConstObj;
     aGetterType m_GetterPtr;
     aSetterType m_SetterPtr;
   public:
-    PropertyProxyMemberFunction(Cls& _obj, aGetterType _getter = 0,
-                                aSetterType _setter = 0)
-    :  m_Obj(_obj), m_GetterPtr(_getter), m_SetterPtr(_setter)
+    PropertyProxyMemberFunction(Cls& _obj, aGetterType _getter = NULL,
+                                aSetterType _setter = NULL)
+    : m_Obj(&_obj), m_ConstObj(NULL), m_GetterPtr(_getter), m_SetterPtr(_setter)
     { }
+
+    PropertyProxyMemberFunction(const Cls& _obj, aGetterType _getter = NULL)
+    : m_Obj(NULL), m_ConstObj(&_obj), m_GetterPtr(_getter), m_SetterPtr(NULL)
+    { }
+
 
     virtual ~PropertyProxyMemberFunction() {
     }
 
     virtual T GetValue() const {
       if (m_GetterPtr != NULL) {
-        return (m_Obj.*m_GetterPtr)();
-      } else {
-        return PropertyProxy<T>::DefaultValue;
+        if(m_Obj != NULL) {
+          return (*m_Obj.*m_GetterPtr)();
+        } else if(m_ConstObj != NULL) {
+          return (*m_ConstObj.*m_GetterPtr)();
+        }
       }
+      return PropertyProxy<T>::DefaultValue;
     } // GetValue
 
     virtual void SetValue(T _value) {
-      if (m_SetterPtr != NULL) {
-        (m_Obj.*m_SetterPtr)(_value);
+      if (m_SetterPtr != NULL && m_Obj != NULL) {
+        (*m_Obj.*m_SetterPtr)(_value);
       }
     } // SetValue
 
     virtual PropertyProxyMemberFunction* clone() const {
-      return new PropertyProxyMemberFunction<Cls, T> (m_Obj, m_GetterPtr,
-                                                      m_SetterPtr);
+      if(m_Obj != NULL) {
+        return new PropertyProxyMemberFunction<Cls, T> (*m_Obj, m_GetterPtr,
+                                                        m_SetterPtr);
+      } else {
+        return new PropertyProxyMemberFunction<Cls, T> (*m_ConstObj, m_GetterPtr);
+      }
     }
   }; // PropertyProxyMemberFunction
 

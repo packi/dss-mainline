@@ -641,6 +641,7 @@ namespace dss {
 
     if(nameAttr != NULL) {
       string propName = (char*)nameAttr->children->content;
+      propName = dss::GetProperty(propName);
       GetAndRemoveIndexFromPropertyName(propName);
       if(m_Name.length() > 0) {
         assert(m_Name == propName);

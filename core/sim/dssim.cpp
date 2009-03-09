@@ -897,7 +897,6 @@ namespace dss {
             frame.GetPayload().Add<uint16_t>(groupToControl);
 
             GetDSS().GetDS485Interface().SendFrame(frame);
-//          GroupIncValue(zoneID, groupToControl, 1);
           } else if(_kind == Touch) {
             DS485CommandFrame frame;
             frame.GetHeader().SetDestination(0);
@@ -910,7 +909,6 @@ namespace dss {
             frame.GetPayload().Add<uint16_t>(groupToControl);
 
             GetDSS().GetDS485Interface().SendFrame(frame);
-//            GroupStartDim(zoneID, groupToControl, true, 0);
           } else if(_kind == TouchEnd) {
             DS485CommandFrame frame;
             frame.GetHeader().SetDestination(0);
@@ -923,7 +921,6 @@ namespace dss {
             frame.GetPayload().Add<uint16_t>(groupToControl);
 
             GetDSS().GetDS485Interface().SendFrame(frame);
-//            GroupEndDim(zoneID, groupToControl, 0);
           }
         } else if(_buttonNr == 8) {
           if(_kind == Click) {
@@ -938,7 +935,6 @@ namespace dss {
             frame.GetPayload().Add<uint16_t>(groupToControl);
 
             GetDSS().GetDS485Interface().SendFrame(frame);
-//            GroupDecValue(zoneID, groupToControl, 1);
           } else if(_kind == Touch) {
             DS485CommandFrame frame;
             frame.GetHeader().SetDestination(0);
@@ -951,7 +947,6 @@ namespace dss {
             frame.GetPayload().Add<uint16_t>(groupToControl);
 
             GetDSS().GetDS485Interface().SendFrame(frame);
-//            GroupStartDim(zoneID, groupToControl, false, 0);
           } else if(_kind == TouchEnd) {
             DS485CommandFrame frame;
             frame.GetHeader().SetDestination(0);
@@ -964,7 +959,6 @@ namespace dss {
             frame.GetPayload().Add<uint16_t>(groupToControl);
 
             GetDSS().GetDS485Interface().SendFrame(frame);
-//            GroupEndDim(zoneID, groupToControl, 0);
           }
         } else if(_buttonNr == 4) {
           if(_kind == Click) {
@@ -1017,7 +1011,6 @@ namespace dss {
             frame.GetPayload().Add<uint16_t>(nextScene);
 
             GetDSS().GetDS485Interface().SendFrame(frame);
-//            GroupDecValue(zoneID, groupToControl, 0);
           }
         } else if(_buttonNr == 5) {
           if(_kind == Click) {
@@ -1034,7 +1027,6 @@ namespace dss {
               frame.GetPayload().Add<uint16_t>(SceneOff);
 
               GetDSS().GetDS485Interface().SendFrame(frame);
-//              GroupCallScene(zoneID, groupToControl, SceneOff);
             } else {
               DS485CommandFrame frame;
               frame.GetHeader().SetDestination(0);
@@ -1048,7 +1040,6 @@ namespace dss {
               frame.GetPayload().Add<uint16_t>(SceneMax);
 
               GetDSS().GetDS485Interface().SendFrame(frame);
-//              GroupCallScene(zoneID, groupToControl, SceneMax);
             }
           } else if(_kind == Touch) {
             DS485CommandFrame frame;
@@ -1063,7 +1054,6 @@ namespace dss {
             frame.GetPayload().Add<uint16_t>(SceneDeepOff);
 
             GetDSS().GetDS485Interface().SendFrame(frame);
-//            GroupCallScene(zoneID, groupToControl, SceneDeepOff);
           }
         }
       } else if(_switch.GetNumberOfButtons() == 5) {

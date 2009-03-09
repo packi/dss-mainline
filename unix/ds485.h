@@ -16,24 +16,23 @@
 #include "core/syncevent.h"
 
 #include <vector>
+#include <string>
 
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/shared_ptr.hpp>
-
-using namespace std;
 
 namespace dss {
 
   class DS485Payload {
   private:
-    vector<unsigned char> m_Data;
+    std::vector<unsigned char> m_Data;
   public:
     template<class t>
     void Add(t _data);
 
     int Size() const;
 
-    vector<unsigned char> ToChar() const;
+    std::vector<unsigned char> ToChar() const;
   }; // DS485Payload
 
   class DS485Header {
@@ -64,7 +63,7 @@ namespace dss {
     void SetCounter(const uint8_t _value) { m_Counter = _value; };
     void SetType(const uint8_t _value) { m_Type = _value; };
 
-    vector<unsigned char> ToChar() const;
+    std::vector<unsigned char> ToChar() const;
     void FromChar(const unsigned char* _data, const int _len);
   };
 
@@ -77,7 +76,7 @@ namespace dss {
     virtual ~DS485Frame() {};
     DS485Header& GetHeader() { return m_Header; };
 
-    virtual vector<unsigned char> ToChar() const;
+    virtual std::vector<unsigned char> ToChar() const;
 
     DS485Payload& GetPayload();
     const DS485Payload& GetPayload() const;
@@ -97,7 +96,7 @@ namespace dss {
     void SetCommand(const uint8_t _value) { m_Command = _value; };
     void SetLength(const uint8_t _value) { m_Length = _value; };
 
-    virtual vector<unsigned char> ToChar() const;
+    virtual std::vector<unsigned char> ToChar() const;
   };
 
   class IDS485FrameCollector;
@@ -105,7 +104,7 @@ namespace dss {
   /** A frame provider receives frames from somewhere */
   class DS485FrameProvider {
   private:
-    vector<IDS485FrameCollector*> m_FrameCollectors;
+    std::vector<IDS485FrameCollector*> m_FrameCollectors;
   protected:
     /** Distributes the frame to the collectors */
     void DistributeFrame(boost::shared_ptr<DS485CommandFrame> _frame);
@@ -150,6 +149,9 @@ namespace dss {
 
     bool m_EscapeNext;
     bool m_IsEscaped;
+    int m_NumberOfFramesReceived;
+    int m_NumberOfIncompleteFramesReceived;
+    int m_NumberOfCRCErrors;
   private:
     int m_Handle;
     boost::shared_ptr<SerialComBase> m_SerialCom;
@@ -161,9 +163,12 @@ namespace dss {
 
     void SetSerialCom(boost::shared_ptr<SerialComBase> _serialCom);
 
-
     DS485Frame* GetFrame(const int _timeoutMS);
     bool SenseTraffic(const int _timeoutMS);
+
+    int GetNumberOfFramesReceived() const { return m_NumberOfFramesReceived; }
+    int GetNumberOfIncompleteFramesReceived() const { return m_NumberOfIncompleteFramesReceived; }
+    int GetNumberOfCRCErrors() const { return m_NumberOfCRCErrors; }
   }; // FrameReader
 
   class DS485Controller : public Thread,
@@ -171,6 +176,7 @@ namespace dss {
   private:
     aControllerState m_State;
     DS485FrameReader m_FrameReader;
+    std::string m_RS485DeviceName;
     int m_StationID;
     int m_NextStationID;
     int m_TokenCounter;
@@ -192,6 +198,9 @@ namespace dss {
     DS485Controller();
     virtual ~DS485Controller();
 
+    void SetRS485DeviceName(const std::string& _value);
+    const std::string& GetRS485DeviceName() const { return m_RS485DeviceName; }
+
     void EnqueueFrame(DS485CommandFrame& _frame);
     bool WaitForEvent(const int _timeoutMS);
     void WaitForCommandFrame();
@@ -199,6 +208,8 @@ namespace dss {
 
     aControllerState GetState() const;
     int GetTokenCount() const { return m_TokenCounter; };
+
+    const DS485FrameReader& GetFrameReader() const { return m_FrameReader; }
 
     virtual void Execute();
   }; // DS485Controller
@@ -214,17 +225,17 @@ namespace dss {
     DS485FrameReader m_FrameReader;
     boost::shared_ptr<SerialCom> m_SerialCom;
   public:
-    DS485FrameSniffer(const string& _deviceName);
+    DS485FrameSniffer(const std::string& _deviceName);
 
     void Run();
   }; // IDS485FrameSniffer
 
   class PayloadDissector {
   private:
-    vector<unsigned char> m_Payload;
+    std::vector<unsigned char> m_Payload;
   public:
     PayloadDissector(DS485Payload& _payload) {
-      vector<unsigned char> payload =_payload.ToChar();
+      std::vector<unsigned char> payload =_payload.ToChar();
       m_Payload.insert(m_Payload.begin(), payload.rbegin(), payload.rend());
     }
 

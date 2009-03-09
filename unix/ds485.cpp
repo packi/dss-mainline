@@ -143,12 +143,20 @@ namespace dss {
 
   DS485Controller::DS485Controller()
   : Thread("DS485Controller"),
-    m_State(csInitial)
+    m_State(csInitial),
+    m_RS485DeviceName("/dev/ttyUSB0")
   {
   } // ctor
 
   DS485Controller::~DS485Controller() {
   } // dtor
+
+  void DS485Controller::SetRS485DeviceName(const std::string& _value) {
+    m_RS485DeviceName = _value;
+    if(IsRunning()) {
+      Logger::GetInstance()->Log("DS485Controller::SetRS485DeviceName: Called too late. Value updated but it won't have any effect.", lsError);
+    }
+  } // SetRS485DeviceName
 
   DS485Frame* DS485Controller::GetFrameFromWire() {
     DS485Frame* result = m_FrameReader.GetFrame(100);
@@ -210,10 +218,10 @@ namespace dss {
   void DS485Controller::Execute() {
     m_SerialCom.reset(new SerialCom());
     try {
-      //TODO: read from config
-      m_SerialCom->Open("/dev/ttyUSB0");
+      Logger::GetInstance()->Log("DS485Controller::Execute: Opening '" + m_RS485DeviceName + "' as serial device", lsInfo);
+      m_SerialCom->Open(m_RS485DeviceName.c_str());
     } catch(const runtime_error& _ex) {
-      Logger::GetInstance()->Log(string("Caught exception while opening serial port: ") + _ex.what());
+      Logger::GetInstance()->Log(string("Caught exception while opening serial port: ") + _ex.what(), lsFatal);
       DoChangeState(csError);
       return;
     }
@@ -549,6 +557,10 @@ namespace dss {
 
     m_EscapeNext = false;
     m_IsEscaped = false;
+
+    m_NumberOfFramesReceived = 0;
+    m_NumberOfIncompleteFramesReceived = 0;
+    m_NumberOfCRCErrors = 0;
   } // ctor
 
   DS485FrameReader::~DS485FrameReader() {
@@ -583,6 +595,7 @@ namespace dss {
         if(m_State == rsSynchronizing || m_ValidBytes == 0) {
           break;
         }
+        m_NumberOfIncompleteFramesReceived++;
       }
 
       char currentChar;
@@ -648,6 +661,7 @@ namespace dss {
                 //Logger::GetInstance()->Log("Packet is a Token");
                 DS485Frame* frame = new DS485Frame();
                 frame->GetHeader().FromChar(m_ReceiveBuffer, m_ValidBytes);
+                m_NumberOfFramesReceived++;
 
                 //cout << "-";
                 //flush(cout);
@@ -677,9 +691,11 @@ namespace dss {
               uint16_t dataCRC = CRC16(m_ReceiveBuffer, m_ValidBytes);
               if(dataCRC != 0) {
                 Logger::GetInstance()->Log("*********** crc mismatch.", lsError);
+                m_NumberOfCRCErrors++;
               } else {
                 //Logger::GetInstance()->Log("received packet, crc ok");
                 //cout << "#";
+                m_NumberOfFramesReceived++;
               }
               DS485CommandFrame* frame = new DS485CommandFrame();
               frame->GetHeader().FromChar(m_ReceiveBuffer, m_ValidBytes);

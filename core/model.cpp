@@ -420,7 +420,7 @@ namespace dss {
 
   Set Set::Remove(const Set& _other) const {
     Set resultSet(*this);
-    foreach(const DeviceReference& iDevice, m_ContainedDevices) {
+    foreach(const DeviceReference& iDevice, _other.m_ContainedDevices) {
       resultSet.RemoveDevice(iDevice);
     }
     return resultSet;
@@ -525,7 +525,7 @@ namespace dss {
 
   void Apartment::Initialize() {
     Subsystem::Initialize();
-    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetPropertyBasePath() + "configfile", "data/apartment.xml", true);
+    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "configfile", "data/apartment.xml", true);
     m_pPropertyNode = DSS::GetInstance()->GetPropertySystem().CreateProperty("/apartment");
   } // Initialize
 
@@ -546,33 +546,41 @@ namespace dss {
     m_Groups.push_back(grp);
     grp = new Group(GroupIDGray, zoneID, *this);
     grp->SetName("gray");
+    _zone.AddGroup(grp);
     m_Groups.push_back(grp);
     grp = new Group(GroupIDBlue, zoneID, *this);
     grp->SetName("blue");
+    _zone.AddGroup(grp);
     m_Groups.push_back(grp);
     grp = new Group(GroupIDCyan, zoneID, *this);
     grp->SetName("cyan");
+    _zone.AddGroup(grp);
     m_Groups.push_back(grp);
     grp = new Group(GroupIDRed, zoneID, *this);
     grp->SetName("red");
+    _zone.AddGroup(grp);
     m_Groups.push_back(grp);
     grp = new Group(GroupIDViolet, zoneID, *this);
     grp->SetName("magenta");
+    _zone.AddGroup(grp);
     m_Groups.push_back(grp);
     grp = new Group(GroupIDGreen, zoneID, *this);
     grp->SetName("green");
+    _zone.AddGroup(grp);
     m_Groups.push_back(grp);
     grp = new Group(GroupIDBlack, zoneID, *this);
     grp->SetName("black");
+    _zone.AddGroup(grp);
     m_Groups.push_back(grp);
     grp = new Group(GroupIDWhite, zoneID, *this);
     grp->SetName("white");
+    _zone.AddGroup(grp);
     m_Groups.push_back(grp);
   } // AddDefaultGroupsToZone
 
   void Apartment::Execute() {
     // Load devices/modulators/etc. from a config-file
-    string configFileName = DSS::GetInstance()->GetPropertySystem().GetStringValue(GetPropertyBasePath() + "configfile");
+    string configFileName = DSS::GetInstance()->GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "configfile");
     if(!FileExists(configFileName)) {
       Logger::GetInstance()->Log(string("Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
     } else {

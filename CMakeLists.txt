@@ -20,7 +20,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   link_directories(/opt/local/lib)
   link_libraries(boost_filesystem-mt boost_system-mt PocoFoundation)
 ELSE(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  target_link_libraries(boost_filesystem rt)
+  link_libraries(boost_filesystem rt)
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 add_subdirectory(core)
