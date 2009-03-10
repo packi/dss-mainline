@@ -38,7 +38,7 @@ namespace dss {
     m_ShortAddress(ShortAddressStaleDevice),
     m_ZoneID(0),
     m_pApartment(_pApartment),
-    m_SubscriptionEventID(-1),
+    m_LastCalledScene(SceneOff),
     m_pPropertyNode(NULL)
   {
   }
@@ -105,8 +105,9 @@ namespace dss {
   } // EndDim
 
   bool Device::IsOn() const {
-    vector<int> res = DSS::GetInstance()->GetDS485Interface().SendCommand(cmdGetOnOff, *this);
-    return res.front() != 0;
+    return (m_LastCalledScene != SceneOff) &&
+           (m_LastCalledScene != SceneDeepOff) &&
+           (m_LastCalledScene != SceneStandBy);
   } // IsOn
 
   int Device::GetFunctionID() const {
@@ -148,18 +149,6 @@ namespace dss {
   void Device::SetName(const string& _name) {
     m_Name = _name;
   } // SetName
-
-  bool Device::HasSubscription() const {
-    return m_SubscriptionEventID != -1;
-  } // HasSubscription
-
-  int Device::GetSubscriptionEventID() const {
-    return m_SubscriptionEventID;
-  } // GetSubscriptionEventID
-
-  void Device::SetSubscriptionEventID(const int _value) {
-    m_SubscriptionEventID = _value;
-  } // SetSubscriptionEventID
 
   bool Device::operator==(const Device& _other) const {
     return _other.m_ShortAddress == m_ShortAddress;
@@ -211,7 +200,7 @@ namespace dss {
   } // GetGroupBitmask
 
   bool Device::IsInGroup(const int _groupID) const {
-    return m_GroupBitmask.test(_groupID - 1);
+    return (_groupID == 0) || m_GroupBitmask.test(_groupID - 1);
   } // IsInGroup
 
   Apartment& Device::GetApartment() const {
@@ -480,24 +469,6 @@ namespace dss {
     return out;
   } // operator<<
 
-  //================================================== Arguments
-
-  bool Arguments::HasValue(const string& _name) const {
-    return m_ArgumentList.find(_name) != m_ArgumentList.end();
-  } // HasValue
-
-  string Arguments::GetValue(const string& _name) const {
-    if(HasValue(_name)) {
-      HashMapConstStringString::const_iterator it = m_ArgumentList.find(_name);
-      return it->second;
-    }
-    throw ItemNotFoundException(_name);
-  } // GetValue
-
-  void Arguments::SetValue(const string& _name, const string& _value) {
-    m_ArgumentList[_name] = _value;
-  } // SetValue
-
   //================================================== Apartment
 
   Apartment::Apartment(DSS* _pDSS)
@@ -539,6 +510,7 @@ namespace dss {
 
     Group* grp = new Group(GroupIDBroadcast, zoneID, *this);
     grp->SetName("broadcast");
+    _zone.AddGroup(grp);
     m_Groups.push_back(grp);
     grp = new Group(GroupIDYellow, zoneID, *this);
     grp->SetName("yellow");
@@ -647,11 +619,7 @@ namespace dss {
           }
         }
       }
-      foreach(Device* dev, m_Devices) {
-        if(dev->HasSubscription()) {
-          interface.Subscribe(dev->GetModulatorID(), 0, dev->GetShortAddress());
-        }
-      }
+
       break;
     }
     Logger::GetInstance()->Log("******** Finished loading model from dSM(s)...", lsInfo);
@@ -694,21 +662,10 @@ namespace dss {
         } catch(XMLException& e) {
           /* discard node not found exceptions */
         }
-        int eventid = -1;
-        try {
-          XMLNode& nameNode = iNode->GetChildByName("event");
-          if(nameNode.GetChildren().size() > 0) {
-            eventid = StrToIntDef((nameNode.GetChildren()[0]).GetContent(), -1);
-          }
-        } catch(XMLException& e) {
-          /* discard node not found exceptions */
-        }
+
         Device* newDevice = new Device(dsid, this);
         if(name.size() > 0) {
           newDevice->SetName(name);
-        }
-        if(eventid != -1) {
-          newDevice->SetSubscriptionEventID(eventid);
         }
         m_StaleDevices.push_back(newDevice);
       }
@@ -956,15 +913,63 @@ namespace dss {
   	return *zone;
   } // AllocateZone
 
-  void Apartment::OnKeypress(const dsid_t& _dsid, const ButtonPressKind _kind, const int _number) {
-    Device& dev = GetDeviceByDSID(_dsid);
-    if(dev.HasSubscription()) {
-  /*
-      Event evt(dev.GetSubscriptionEventID(), _dsid);
-      OnEvent(evt);
-      */
+  class SetLastCalledSceneAction : public IDeviceAction {
+  protected:
+    int m_SceneID;
+  public:
+    SetLastCalledSceneAction(const int _sceneID)
+    : m_SceneID(_sceneID) {}
+    virtual ~SetLastCalledSceneAction() {}
+
+    virtual bool Perform(Device& _device) {
+      _device.SetLastCalledScene(m_SceneID);
+      return true;
     }
-  } // OnKeypress
+  };
+
+
+  void Apartment::OnGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID) {
+    try {
+      Zone& zone = GetZone(_zoneID);
+      Group* group = zone.GetGroup(_groupID);
+      if(group != NULL) {
+        Set s = zone.GetDevices().GetByGroup(_groupID);
+        SetLastCalledSceneAction act(_sceneID);
+        s.Perform(act);
+      } else {
+        Log("OnGroupCallScene: Could not find group with id '" + IntToString(_groupID) + "' in Zone '" + IntToString(_zoneID) + "'");
+      }
+    } catch(ItemNotFoundException& e) {
+      Log("OnGroupCallScene: Could not find zone with id '" + IntToString(_zoneID) + "'");
+    }
+
+  } // OnGroupCallScene
+
+  void Apartment::OnDeviceCallScene(const int _modulatorID, const int _deviceID, const int _sceneID) {
+    try {
+      Modulator& mod = GetModulatorByBusID(_modulatorID);
+      try {
+        DeviceReference devRef = mod.GetDevices().GetByBusID(_deviceID);
+        devRef.GetDevice().SetLastCalledScene(_sceneID);
+      } catch(ItemNotFoundException& e) {
+        Log("OnDeviceCallScene: Could not find device with bus-id '" + IntToString(_deviceID) + "' on modulator '" + IntToString(_modulatorID) + "'");
+      }
+    } catch(ItemNotFoundException& e) {
+      Log("OnDeviceCallScene: Could not find modulator with bus-id '" + IntToString(_modulatorID) + "'");
+    }
+
+  } // OnDeviceCallScene
+
+  void Apartment::OnAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID) {
+    dsid_t dsid = GetDSS().GetDS485Interface().GetDSIDOfDevice(_modID, _devID);
+    Device& dev = AllocateDevice(dsid);
+
+    dev.SetModulatorID(_modID);
+    dev.SetZoneID(_zoneID);
+    dev.SetShortAddress(_devID);
+    dev.SetFunctionID(_functionID);
+  } // OnAddDevice
+
 
   //================================================== Modulator
 

@@ -75,8 +75,6 @@ namespace dss {
 
   const uint8_t FunctionDeviceGetFunctionID = 0x66;
 
-  const uint8_t FunctionDeviceSubscribe = 0xF3;
-
   const uint8_t FunctionGetTypeRequest = 0x90;
 
   // Scene constants for devices

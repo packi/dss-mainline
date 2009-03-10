@@ -326,6 +326,7 @@ namespace dss {
               if(attrs["busid"].size() > 0) {
                 DSIDInterface& dev = LookupDevice(StrToUInt(attrs["busid"]));
                 m_DevicesOfGroupInZone[pair<const int, const int>(_zoneID, groupID)].push_back(&dev);
+                Log("LoadGroups: Adding device " + attrs["busid"] + " to group " + IntToString(groupID) + " in zone " + IntToString(_zoneID));
               }
             }
           }
@@ -630,8 +631,8 @@ namespace dss {
             case FunctionGroupGetDeviceCount:
               {
                 response = CreateResponse(cmdFrame, cmdNr);
-                int zoneID = pd.Get<uint8_t>();
-                int groupID = pd.Get<uint8_t>();
+                int zoneID = pd.Get<uint16_t>();
+                int groupID = pd.Get<uint16_t>();
                 int result = m_DevicesOfGroupInZone[pair<const int, const int>(zoneID, groupID)].size();
                 response->GetPayload().Add<uint16_t>(result);
                 DistributeFrame(response);
@@ -688,14 +689,6 @@ namespace dss {
                 response->GetPayload().Add<uint16_t>(1); // return-code (device found, all well)
                 response->GetPayload().Add<dsid_t>(dev.GetDSID());
                 DistributeFrame(response);
-              }
-              break;
-            case FunctionDeviceSubscribe:
-              {
-                /*uint8_t groupID =*/ pd.Get<uint16_t>();
-                devid_t devID = pd.Get<devid_t>();
-                DSIDInterface& dev = LookupDevice(devID);
-                m_ButtonSubscriptionFlag[&dev] = 70;
               }
               break;
             case FunctionGetTypeRequest:
@@ -770,8 +763,7 @@ namespace dss {
               }
               break;
             default:
-              Logger::GetInstance()->Log(string("Invalid function id for sim: " + IntToString(cmdNr)), lsError);
-              //throw runtime_error(string("DSModulatorSim: Invalid function id: ") + IntToString(cmdNr));
+              Logger::GetInstance()->Log("Invalid function id for sim: " + IntToString(cmdNr), lsError);
           }
         }
       }
@@ -821,7 +813,6 @@ namespace dss {
   } // GetID
 
   void DSModulatorSim::ProcessButtonPress(const DSIDSimSwitch& _switch, int _buttonNr, const ButtonPressKind _kind) {
-     // if we have subscriptions, notify the listeners
     int zoneID = m_DeviceZoneMapping[&_switch];
     int groupToControl = GetGroupForSwitch(&_switch);
     if(_switch.IsBell()) {
@@ -838,19 +829,6 @@ namespace dss {
         frame.GetPayload().Add<uint16_t>(SceneBell);
 
         GetDSS().GetDS485Interface().SendFrame(frame);
-
-        DS485CommandFrame* pframe = new DS485CommandFrame();
-        pframe->GetHeader().SetDestination(0);
-        pframe->GetHeader().SetBroadcast(true);
-        pframe->GetHeader().SetType(1);
-        pframe->SetCommand(CommandRequest);
-
-        pframe->GetPayload().Add<uint8_t>(FunctionGroupCallScene);
-        pframe->GetPayload().Add<uint16_t>(0);
-        pframe->GetPayload().Add<uint16_t>(0);
-        pframe->GetPayload().Add<uint16_t>(SceneBell);
-
-        DistributeFrame(pframe);
       }
     } else {
       // redistribute according to the selected color, etc...

@@ -396,6 +396,9 @@ namespace dss {
         //}
       }
     }
+    boost::shared_ptr<DS485CommandFrame> pFrame(new DS485CommandFrame);
+    *pFrame = _frame;
+    CollectFrame(pFrame);
   }
 
   bool DS485Proxy::IsSimAddress(const uint8_t _addr) {
@@ -737,16 +740,6 @@ namespace dss {
     return pd.Get<uint16_t>();
   } // GetEnergyMeterValue
 
-  void DS485Proxy::Subscribe(const int _modulatorID, const int _groupID, const int _deviceID) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.GetHeader().SetDestination(_modulatorID);
-    cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionDeviceSubscribe);
-    cmdFrame.GetPayload().Add<uint16_t>(_groupID);
-    cmdFrame.GetPayload().Add<devid_t>(_deviceID);
-    Log("Proxy: Subscribe " + IntToString(_modulatorID));
-    SendFrame(cmdFrame);
-  } // Subscribe
 
   void DS485Proxy::AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID) {
 
@@ -969,9 +962,6 @@ namespace dss {
     case FunctionKeyPressed:
       return "Function Key Pressed";
 
-    case FunctionDeviceSubscribe:
-      return "Function Device Subscribe";
-
     case FunctionDeviceGetFunctionID:
       return "Function Device Get Function ID";
     }
@@ -984,9 +974,11 @@ namespace dss {
     while(!m_Terminated) {
       if(!m_IncomingFrames.empty() || m_PacketHere.WaitFor(50)) {
         while(!m_IncomingFrames.empty()) {
+          m_IncomingFramesGuard.Lock();
           // process packets and put them into a functionID-hash
           boost::shared_ptr<DS485CommandFrame> frame = m_IncomingFrames.front();
           m_IncomingFrames.erase(m_IncomingFrames.begin());
+          m_IncomingFramesGuard.Unlock();
           Log("R");
 
           vector<unsigned char> ch = frame->GetPayload().ToChar();
@@ -1002,6 +994,13 @@ namespace dss {
             PayloadDissector pd(frame->GetPayload());
             if(functionID == FunctionZoneAddDevice) {
               Log("New device");
+              pd.Get<uint8_t>(); // function id
+              int modID = frame->GetHeader().GetSource();
+              int zoneID = pd.Get<uint16_t>();
+              int devID = pd.Get<uint16_t>();
+              pd.Get<uint16_t>(); // version
+              int functionID = pd.Get<uint16_t>();
+              GetDSS().GetApartment().OnAddDevice(modID, zoneID, devID, functionID);
             } else if(functionID == FunctionGroupCallScene) {
               pd.Get<uint8_t>(); // function id
               uint16_t zoneID = pd.Get<uint16_t>();
@@ -1014,7 +1013,13 @@ namespace dss {
                 boost::shared_ptr<Event> evt(new Event("alarm"));
                 GetDSS().GetEventQueue().PushEvent(evt);
               }
-
+              DSS::GetInstance()->GetApartment().OnGroupCallScene(zoneID, groupID, sceneID);
+            } else if(functionID == FunctionDeviceCallScene) {
+              pd.Get<uint8_t>(); // functionID
+              uint16_t devID = pd.Get<uint16_t>();
+              uint16_t sceneID = pd.Get<uint16_t>();
+              int modID = frame->GetHeader().GetDestination();
+              GetDSS().GetApartment().OnDeviceCallScene(modID, devID, sceneID);
             }
           } else {
             std::ostringstream sstream;
@@ -1024,7 +1029,7 @@ namespace dss {
               uint8_t data = pd.Get<uint8_t>();
               sstream << "(0x" << std::hex << (unsigned int)data << ", " << std::dec << (int)data << "d)";
             }
-            sstream << std::dec;
+             sstream << std::dec;
             Log(sstream.str());
 
             // create an explicit copy since frame is a shared ptr and would free the contained
@@ -1047,7 +1052,9 @@ namespace dss {
       Log("discarded non response/request frame", lsInfo);
       Log(string("frame type ") + CommandToString(commandID));
     } else {
+      m_IncomingFramesGuard.Lock();
       m_IncomingFrames.push_back(_frame);
+      m_IncomingFramesGuard.Unlock();
       m_PacketHere.Signal();
     }
   } // CollectFrame

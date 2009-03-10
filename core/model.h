@@ -165,8 +165,8 @@ namespace dss {
     Apartment* m_pApartment;
     bitset<63> m_GroupBitmask;
     vector<int> m_Groups;
-    int m_SubscriptionEventID;
     int m_FunctionID;
+    int m_LastCalledScene;
 
     PropertyNode* m_pPropertyNode;
   protected:
@@ -212,6 +212,9 @@ namespace dss {
     /** Returns the number of groups the device is a member of */
     int GetGroupsCount() const;
 
+    int GetLastCalledScene() const { return m_LastCalledScene; }
+    void SetLastCalledScene(const int _value) { m_LastCalledScene = _value; }
+
     /** Returns the short address of the device. This is the address
      * the device got from the dSM. */
     devid_t GetShortAddress() const;
@@ -227,10 +230,6 @@ namespace dss {
     /** Returns the apartment the device resides in. */
     Apartment& GetApartment() const;
 
-    bool HasSubscription() const;
-    int GetSubscriptionEventID() const;
-    void SetSubscriptionEventID(const int _value);
-
     bool operator==(const Device& _other) const;
   };
 
@@ -240,14 +239,14 @@ namespace dss {
   class IDeviceSelector {
   public:
     virtual bool SelectDevice(const Device& _device) const = 0;
-    virtual ~IDeviceSelector() {};
+    virtual ~IDeviceSelector() {}
   };
 
   /** Abstract interface to perform an Action on each device of a set */
   class IDeviceAction {
   public:
     virtual bool Perform(Device& _device) = 0;
-    virtual ~IDeviceAction() {};
+    virtual ~IDeviceAction() {}
   };
 
   /** A set holds an arbitrary list of devices.
@@ -491,40 +490,6 @@ namespace dss {
   }; // Zone
 
 
-  /** Arguments to be passed to an action / event */
-  class Arguments {
-  private:
-    HashMapConstStringString m_ArgumentList;
-  public:
-    /** Returns true if the argument list contains a value named _name */
-    bool HasValue(const string& _name) const;
-    /** Returns the value of _name */
-    string GetValue(const string& _name) const;
-    /** Sets the value of _name to _value */
-    void SetValue(const string& _name, const string& _value);
-  };
-
-  /** Abstract Action to be executed with a list of Arguments */
-  class Action {
-  private:
-    string m_Name;
-    string m_NameForUser;
-    int m_ID;
-  public:
-    Action(const string& _name, const string& _nameForUser)
-    : m_Name(_name), m_NameForUser(_nameForUser) {}
-
-    virtual ~Action() {}
-
-    /** Performs the action with _args */
-    virtual void Perform(const Arguments& _args) = 0;
-
-    /** Returns the actions name */
-    const string& GetName() { return m_Name; }
-    /** Returns the actions readable name */
-    const string& GetNameForUser() { return m_NameForUser; }
-  };
-
   /** Represents an Apartment
     * This is the root of the datamodel of the dss. The Apartment is responsible for delivering
     * and loading all subitems.
@@ -544,7 +509,6 @@ namespace dss {
     vector<Modulator*> m_Modulators;
     vector<Device*> m_Devices;
     vector<Group*> m_Groups;
-    boost::ptr_vector<Action> m_Actions;
     bool m_IsInitializing;
 
     PropertyNode* m_pPropertyNode;
@@ -620,10 +584,10 @@ namespace dss {
   public:
 
     PropertyNode* GetPropertyNode() { return m_pPropertyNode; }
-    /** Processes a keypress on the given dsid.
-      * @param _number The button number that was pressed starting with 1
-      */
-    void OnKeypress(const dsid_t& _dsid, const ButtonPressKind _kind, const int _number);
+
+    void OnGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
+    void OnDeviceCallScene(const int _modulatorID, const int _deviceID, const int _sceneID);
+    void OnAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID);
   }; // Apartment
 
   //============================================= Helper definitions

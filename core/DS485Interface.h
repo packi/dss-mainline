@@ -99,9 +99,6 @@ namespace dss {
     /** Returns the meter value in Wh */
     virtual unsigned long GetEnergyMeterValue(const int _modulatorID) = 0;
 
-    /** Subscribes to all events raised by the given device */
-    virtual void Subscribe(const int _moduatorID, const int _groupID, const int _deviceID) = 0;
-
     //------------------------------------------------ Device manipulation
     virtual vector<int> SendCommand(DS485Command _cmd, const Set& _set, int _param = -1) = 0;
     virtual vector<int> SendCommand(DS485Command _cmd, const Device& _device, int _param = -1) = 0;

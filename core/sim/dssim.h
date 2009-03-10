@@ -58,7 +58,6 @@ namespace dss {
     vector<DS485Frame*> m_PendingFrames;
     DSIDFactory m_DSIDFactory;
     map<const DSIDInterface*, int> m_ButtonToGroupMapping;
-    map<const DSIDInterface*, int> m_ButtonSubscriptionFlag;
     map<const DSIDInterface*, int> m_DeviceZoneMapping;
     map<const int, int> m_LastCalledSceneForGroup;
   private:

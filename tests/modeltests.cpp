@@ -19,19 +19,6 @@
 
 using namespace dss;
 
-class TestAction : public Action {
-private:
-  int& m_ToModify;
-public:
-  TestAction(int& _toModify)
-  : Action("test", "Test Action"),
-  m_ToModify(_toModify) { };
-
-  virtual void Perform(const Arguments& args) {
-    m_ToModify++;
-  };
-};
-
 class ModelTest : public CPPUNIT_NS::TestCase
 {
   CPPUNIT_TEST_SUITE(ModelTest);
@@ -45,34 +32,7 @@ public:
 
 
 protected:
-  /*
-  void testSubscriptions(void) {
-    int testActionCalled = 0;
 
-    Apartment appt;
-    TestAction act(testActionCalled);
-    vector<int> ids;
-    ids.push_back(1);
-    Arguments args;
-    Subscription& subs = appt.Subscribe(act, args,ids);
-
-    Event evtOne(1, 1);
-    Event evtTwo(2, 1);
-
-    appt.OnEvent(evtOne);
-    CPPUNIT_ASSERT_EQUAL(1, testActionCalled);
-    appt.OnEvent(evtTwo);
-    CPPUNIT_ASSERT_EQUAL(1, testActionCalled);
-    appt.OnEvent(evtOne);
-    CPPUNIT_ASSERT_EQUAL(2, testActionCalled);
-
-    appt.Unsubscribe(subs.GetID());
-
-    appt.OnEvent(evtOne);
-    appt.OnEvent(evtTwo);
-    CPPUNIT_ASSERT_EQUAL(2, testActionCalled);
-  } // testSubscriptions
-*/
   void testSet() {
     Apartment apt(NULL);
 
@@ -94,9 +54,9 @@ protected:
     CPPUNIT_ASSERT_EQUAL(dev4, allDevices.GetByBusID(4).GetDevice());
 
     SetBuilder builder;
-    Set asdf = builder.BuildSet("yellow", &apt.GetZone(0));//allDevices.GetByGroup(1);
+    Set builderTest = builder.BuildSet("yellow", &apt.GetZone(0));
 
-    cout << asdf.Length() << endl;
+    CPPUNIT_ASSERT_EQUAL(1, builderTest.Length());
 
     Set setdev1 = Set(dev1);
 
@@ -104,12 +64,15 @@ protected:
 
     CPPUNIT_ASSERT_EQUAL(3, allMinusDev1.Length());
 
+    CPPUNIT_ASSERT_EQUAL(false, allMinusDev1.Contains(dev1));
+
+    /*
     try {
       allMinusDev1.GetByBusID(1);
       CPPUNIT_ASSERT(false);
     } catch(ItemNotFoundException& e) {
       CPPUNIT_ASSERT(true);
-    }
+    }*/
 
     CPPUNIT_ASSERT_EQUAL(dev2, allMinusDev1.GetByBusID(2).GetDevice());
     CPPUNIT_ASSERT_EQUAL(dev3, allMinusDev1.GetByBusID(3).GetDevice());

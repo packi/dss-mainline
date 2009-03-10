@@ -17,6 +17,7 @@
 #include "core/syncevent.h"
 #include "core/DS485Interface.h"
 #include "core/subsystem.h"
+#include "core/mutex.h"
 
 #include <map>
 #include <vector>
@@ -82,6 +83,7 @@ namespace dss {
 
     SyncEvent m_PacketHere;
     FramesByID m_ReceivedFramesByFunctionID;
+    Mutex m_IncomingFramesGuard;
     CommandFrameSharedPtrVector m_IncomingFrames;
   protected:
     virtual void Execute();
@@ -127,8 +129,6 @@ namespace dss {
 
     virtual unsigned long GetPowerConsumption(const int _modulatorID);
     virtual unsigned long GetEnergyMeterValue(const int _modulatorID);
-
-    virtual void Subscribe(const int _moduatorID, const int _groupID, const int _deviceID);
 
     //------------------------------------------------ Device manipulation
     virtual vector<int> SendCommand(DS485Command _cmd, const Set& _set, int _param);
