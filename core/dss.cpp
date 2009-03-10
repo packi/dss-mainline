@@ -72,7 +72,7 @@ namespace dss {
     m_Subsystems.push_back(m_pEventInterpreter.get());
 
     m_pMetering = boost::shared_ptr<Metering>(new Metering(this));
-    //m_Subsystems.push_back(m_pMetering.get());
+    m_Subsystems.push_back(m_pMetering.get());
 
     m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner);
     m_pEventQueue = boost::shared_ptr<EventQueue>(new EventQueue);

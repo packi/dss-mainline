@@ -129,6 +129,8 @@ namespace dss {
     virtual void Enable() = 0;
     virtual void Disable() = 0;
 
+    virtual int GetConsumption() = 0;
+
     virtual void StartDim(bool _directionUp, const int _parameterNr = -1) = 0;
     virtual void EndDim(const int _parameterNr = -1) = 0;
     virtual void SetValue(const double _value, int _parameterNr = -1) = 0;
@@ -150,6 +152,7 @@ namespace dss {
     vector<uint8_t> m_ValuesForScene;
     uint8_t m_CurrentValue;
     int m_DimTimeMS;
+    int m_SimpleConsumption;
   public:
     DSIDSim(const DSModulatorSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress);
     virtual ~DSIDSim() {}
@@ -164,6 +167,8 @@ namespace dss {
     virtual void Enable();
     virtual void Disable();
 
+    virtual int GetConsumption();
+
     virtual void StartDim(bool _directionUp, const int _parameterNr = -1);
     virtual void EndDim(const int _parameterNr = -1);
     virtual void SetValue(const double _value, int _parameterNr = -1);
@@ -171,6 +176,7 @@ namespace dss {
     virtual double GetValue(int _parameterNr = -1) const;
 
     virtual uint8_t GetFunctionID();
+    void SetSimpleConsumption(const int _value) { m_SimpleConsumption = _value; }
   }; // DSIDSim
 
 

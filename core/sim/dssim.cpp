@@ -6,6 +6,7 @@
 #include "include/dsid_plugin.h"
 #include "core/dss.h"
 #include "core/DS485Interface.h"
+#include "core/foreach.h"
 
 #include <dlfcn.h>
 
@@ -74,6 +75,10 @@ namespace dss {
       if(m_Interface == NULL) {
         Logger::GetInstance()->Log("sim: got a null interface");
       }
+    }
+
+    virtual int GetConsumption() {
+      return 0;
     }
 
     virtual void CallScene(const int _sceneNr) {
@@ -716,7 +721,11 @@ namespace dss {
             case FunctionModulatorGetPowerConsumption:
               {
                 response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint32_t>(0);
+                uint32_t val = 0;
+                foreach(DSIDInterface* interface, m_SimulatedDevices) {
+                  val += interface->GetConsumption();
+                }
+                response->GetPayload().Add<uint32_t>(val);
                 DistributeFrame(response);
               }
               break;
@@ -1066,9 +1075,10 @@ namespace dss {
   DSIDSim::DSIDSim(const DSModulatorSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress)
   : DSIDInterface(_simulator, _dsid, _shortAddress),
     m_Enabled(true),
-    m_CurrentValue(0)
+    m_CurrentValue(0),
+    m_SimpleConsumption(6 * 1000)
   {
-	m_ValuesForScene.resize(255);
+ 	  m_ValuesForScene.resize(255);
     m_ValuesForScene[SceneOff] = 0;
     m_ValuesForScene[SceneMax] = 255;
     m_ValuesForScene[SceneMin] = 255;
@@ -1076,9 +1086,13 @@ namespace dss {
     m_ValuesForScene[Scene2] = 255;
     m_ValuesForScene[Scene3] = 255;
     m_ValuesForScene[Scene4] = 255;
-    m_ValuesForScene[SceneStandBy] = 255;
-    m_ValuesForScene[SceneDeepOff] = 255;
+    m_ValuesForScene[SceneStandBy] = 0;
+    m_ValuesForScene[SceneDeepOff] = 0;
   } // ctor
+
+  int DSIDSim::GetConsumption() {
+    return m_CurrentValue == 0 ? 0 : m_SimpleConsumption;
+  }
 
   void DSIDSim::CallScene(const int _sceneNr) {
     if(m_Enabled) {
