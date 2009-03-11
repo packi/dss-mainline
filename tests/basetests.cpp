@@ -39,12 +39,12 @@ protected:
     const char testStr[] = "123456789";
 
     uint16_t crc = CRC16((unsigned const char*)&testStr, sizeof(testStr)-1);
-//    CPPUNIT_ASSERT_EQUAL((uint16_t)0x29b1, crc);
+    CPPUNIT_ASSERT_EQUAL((uint16_t)0x2189, crc);
 
 
     const char testStr2[] = "\xfd\x01\x03\x14\xbb\x01\x00\x00";//\xeb\x08";
     crc = CRC16((unsigned const char*)&testStr2, sizeof(testStr2)-1);
-    printf("%2x\n", crc );
+    CPPUNIT_ASSERT_EQUAL((uint16_t)0x08eb, crc);
   }
 
   void testURLDecode(void) {

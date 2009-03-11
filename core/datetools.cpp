@@ -217,6 +217,14 @@ namespace dss {
     return out;
   } // operator<<
 
+  string EraseLeadingZeros(const string& _string) {
+    string result = _string;
+    while((result.size() > 1) && (result.find('0') == 0)) {
+      result.erase(0,1);
+    }
+    return result;
+  }
+
   DateTime DateTime::FromISO(const string& _isoStr) {
     DateTime result;
 
@@ -224,26 +232,26 @@ namespace dss {
       throw invalid_argument("_isoStr is shorter than expected");
     }
 
-    int year = StrToInt(_isoStr.substr(0, 4));
-    int month = StrToInt(_isoStr.substr(4, 2));
+    int year = StrToInt(EraseLeadingZeros(_isoStr.substr(0, 4)));
+    int month = StrToInt(EraseLeadingZeros(_isoStr.substr(4, 2)));
     if(month > 12 || month == 0) {
       throw invalid_argument("month should be between 1 and 12");
     }
-    int day = StrToInt(_isoStr.substr(6, 2));
+    int day = StrToInt(EraseLeadingZeros(_isoStr.substr(6, 2)));
 
     if(_isoStr.at(8) != 'T') {
       throw invalid_argument("_isoStr should have a 'T' at position 8");
     }
 
-    int hour = StrToInt(_isoStr.substr(9,2));
+    int hour = StrToInt(EraseLeadingZeros(_isoStr.substr(9,2)));
     if(hour > 23) {
       throw invalid_argument("hour should be between 0 and 24");
     }
-    int min = StrToInt(_isoStr.substr(11,2));
+    int min = StrToInt(EraseLeadingZeros(_isoStr.substr(11,2)));
     if(min > 59) {
       throw invalid_argument("minute should be between 0 and 59");
     }
-    int sec = StrToInt(_isoStr.substr(13, 2));
+    int sec = StrToInt(EraseLeadingZeros(_isoStr.substr(13, 2)));
     if(sec > 59) {
       throw invalid_argument("second should be between 0 and 59");
     }

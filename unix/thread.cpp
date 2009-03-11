@@ -23,7 +23,15 @@ DWORD WINAPI
 #endif
 ThreadStarterHelperFunc( void* _pThreadObj ) {
 	Thread* thObj = static_cast<Thread*>(_pThreadObj);
+
 	thObj->Execute();
+
+  if(thObj->GetThreadIdentifier() != NULL) {
+    Logger::GetInstance()->Log(string("Destroying thread: ") + thObj->GetThreadIdentifier());
+  } else {
+    Logger::GetInstance()->Log("Destroying thread: (no name)");
+  }
+
   if( static_cast<Thread*>(_pThreadObj)->GetFreeAtTerimnation() ) {
     delete static_cast<Thread*>(_pThreadObj);
   }
@@ -40,11 +48,6 @@ Thread::Thread(const char* _name )
 { } // ctor
 
 Thread::~Thread() {
-  if( m_Name != NULL  ) {
-    Logger::GetInstance()->Log(string("Destroying thread: ") + m_Name);
-  } else {
-    Logger::GetInstance()->Log("Destroying thread: (no name)");
-  }
   if( !m_Terminated && (m_ThreadHandle != 0) ) {
     m_Terminated = true;
 #ifndef WIN32

@@ -45,6 +45,7 @@ public:
 
     bool IsRunning() const { return m_Running; }
 
+    const char* GetThreadIdentifier() { return m_Name; }
 }; //  Thread
 
 }
