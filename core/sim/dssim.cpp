@@ -628,7 +628,7 @@ namespace dss {
             case FunctionModulatorGetDSID:
               {
                 response = CreateResponse(cmdFrame, cmdNr);
-                //response->GetPayload().Add<uint8_t>(0x01); // ok, device exists
+                //response->GetPayload().Add<uint8_t>(0x01); // TODO: ok, device exists
                 response->GetPayload().Add<dsid_t>(m_ModulatorDSID);
                 DistributeFrame(response);
               }

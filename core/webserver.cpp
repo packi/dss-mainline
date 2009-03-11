@@ -21,8 +21,8 @@ namespace dss {
   {
     Logger::GetInstance()->Log("Starting Webserver...");
     m_SHttpdContext = shttpd_init();
-    DSS::GetInstance()->GetPropertySystem().SetStringValue("/config/webserver/ports", "8080", true);
-    DSS::GetInstance()->GetPropertySystem().SetStringValue("/config/webserver/webroot", "data/webroot/", true);
+    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "ports", "8080", true);
+    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "webroot", "data/webroot/", true);
   } // ctor
 
   WebServer::~WebServer() {
@@ -32,11 +32,11 @@ namespace dss {
   void WebServer::Initialize() {
     Subsystem::Initialize();
 
-    string ports = DSS::GetInstance()->GetPropertySystem().GetStringValue("/config/webserver/ports");
+    string ports = DSS::GetInstance()->GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "ports");
     Log("Webserver: Listening on port(s) " + ports);
     shttpd_set_option(m_SHttpdContext, "ports", ports.c_str());
 
-    string aliases = string("/=") + DSS::GetInstance()->GetPropertySystem().GetStringValue("/config/webserver/webroot");
+    string aliases = string("/=") + DSS::GetInstance()->GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "webroot");
     Log("Webserver: Configured aliases: " + aliases);
     shttpd_set_option(m_SHttpdContext, "aliases", aliases.c_str());
 
@@ -363,113 +363,6 @@ namespace dss {
       if(fail) {
         shttpd_printf(_arg, "{ok:0}");
       }
-/*
-    } else if(BeginsWith(method, "subscription/")) {
-      if(method == "subscription/getlist") {
-        EmitHTTPHeader(200, _arg, "application/json");
-
-        stringstream response;
-        response << "{ \"subscriptions\":[";
-
-        bool first = true;
-        int numSubscriptions = DSS::GetInstance()->GetApartment().GetSubscriptionCount();
-        for(int iSubscription = 0; iSubscription < numSubscriptions; iSubscription++) {
-          Subscription& sub = DSS::GetInstance()->GetApartment().GetSubscription(iSubscription);
-          if(!first) {
-            response << ",";
-          }
-          response << "{ \"id\": " << sub.GetID() << ","
-                   <<   "\"name\":" << ToJSONValue(sub.GetName()) << ","
-                   <<   "\"evtids\":" << ToJSONArray<int>(sub.GetEventIDs()) << ","
-                   <<   "\"srcids\":" << ToJSONArray<int>(sub.GetSourceIDs())
-                   << "}";
-          first = false;
-        }
-        response << "]}";
-
-        shttpd_printf(_arg, response.str().c_str());
-      } else if(method == "subscription/unsubscribe") {
-        EmitHTTPHeader(200, _arg, "application/json");
-
-        if(!paramMap["id"].empty()) {
-          int subscriptionID = StrToInt(paramMap["id"]);
-
-          DSS::GetInstance()->GetApartment().Unsubscribe(subscriptionID);
-
-          shttpd_printf(_arg, "{ok:1}");
-        } else {
-          shttpd_printf(_arg, "{ok:0}");
-        }
-
-      } else if(method == "subscription/subscribe") {
-        EmitHTTPHeader(200, _arg, "application/json");
-
-        string evtIDsString = paramMap["evtids"];
-        string sourceIDsString = paramMap["sourceids"];
-        string actionName = paramMap["action"];
-        string fileParam = paramMap["file"];
-      }
-    } else if(BeginsWith(method, "event/")) {
-      EmitHTTPHeader(200, _arg, "application/json");
-
-
-      if(method == "event/getlist") {
-        stringstream response;
-        response << "{ \"events\":[";
-        bool first = true;
-        int numEvents = DSS::GetInstance()->GetEventRunner().GetSize();
-        for(int iEvent = 0; iEvent < numEvents; iEvent++) {
-          const ScheduledEvent& schedEvt = DSS::GetInstance()->GetEventRunner().GetEvent(iEvent);
-          if(!first) {
-            response << ",";
-          }
-          response << "{ id: " << iEvent << ","
-                   <<   "\"evtid\":" << schedEvt.GetEvent().GetID() << ","
-                   <<   "\"sourceid\":" << schedEvt.GetEvent().GetSource() << ","
-                   <<   "\"name\": \"" << schedEvt.GetName() << "\""
-                   << "}";
-          first = false;
-        }
-        response << "]}";
-
-        shttpd_printf(_arg, response.str().c_str());
-      } else if(method == "event/remove") {
-        int eventID = StrToInt(paramMap["id"]);
-        DSS::GetInstance()->GetEventRunner().RemoveEvent(eventID);
-        shttpd_printf(_arg, "{ok:1}");
-      } else if(paramMap["evtid"].empty() || paramMap["sourceid"].empty()) {
-        shttpd_printf(_arg, "{ok:0}");
-      } else {
-        int eventID = StrToInt(paramMap["evtid"]);
-        int sourceID = StrToInt(paramMap["sourceid"]);
-        if(method == "event/raise") {
-          Event evt(eventID, sourceID);
-          DSS::GetInstance()->GetApartment().OnEvent(evt);
-          shttpd_printf(_arg, "{ok:1}");
-        } else if(method == "event/schedule") {
-          if(paramMap["schedule"].empty() || paramMap["start"].empty()) {
-            shttpd_printf(_arg, "{ok:0}");
-          } else {
-            string schedule = paramMap["schedule"];
-            string startTimeISO = paramMap["start"];
-            string name = paramMap["name"];
-
-            boost::shared_ptr<Event> evt(new Event(eventID, sourceID));
-            boost::shared_ptr<Schedule> sch(new ICalSchedule(schedule, startTimeISO));
-
-            ScheduledEvent* scheduledEvent = new ScheduledEvent(evt, sch);
-            if(!name.empty()) {
-              scheduledEvent->SetName(name);
-            }
-
-            DSS::GetInstance()->GetEventRunner().AddEvent(scheduledEvent);
-            shttpd_printf(_arg, "{ok:1}");
-          }
-        } else {
-          shttpd_printf(_arg, "{ok:0}");
-        }
-      }
-      */
     } else if(BeginsWith(method, "structure/")) {
       if(method == "structure/zoneAddDevice") {
       	bool ok = true;

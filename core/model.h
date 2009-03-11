@@ -301,12 +301,12 @@ namespace dss {
     Set GetByGroup(const string& _name) const;
     /** Returns the device indicated by _name
      */
-    DeviceReference GetByName(const string& _name);
+    DeviceReference GetByName(const string& _name) const;
     /** Returns the device indicated by _busid */
-    DeviceReference GetByBusID(const devid_t _busid);
+    DeviceReference GetByBusID(const devid_t _busid) const;
 
     /** Returns the device indicated by _dsid */
-    DeviceReference GetByDSID(const dsid_t _dsid);
+    DeviceReference GetByDSID(const dsid_t _dsid)  const;
 
     /* Returns the number of devices contained in this set */
     int Length() const;

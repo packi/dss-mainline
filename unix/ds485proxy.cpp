@@ -61,8 +61,7 @@ namespace dss {
     Set singleDevices;
 
 	if(_zone.GetDevices().Length() == _set.Length()) {
-	  // TODO: use the group of the zone...
-	  fittingGroups.push_back(&DSS::GetInstance()->GetApartment().GetGroup(GroupIDBroadcast));
+	  fittingGroups.push_back(_zone.GetGroup(GroupIDBroadcast));
 	  Logger::GetInstance()->Log(string("Optimization: Set contains all devices of zone ") + IntToString(_zone.GetZoneID()));
 	} else {
 	    vector<Group*> unsuitableGroups;
@@ -386,7 +385,7 @@ namespace dss {
     bool sim = IsSimAddress(_frame.GetHeader().GetDestination());
     if(broadcast || sim) {
       Log("Sending packet to sim");
-      DSS::GetInstance()->GetModulatorSim().Process(_frame);
+      GetDSS().GetModulatorSim().Process(_frame);
     }
     if(broadcast || !sim) {
       if((m_DS485Controller.GetState() == csSlave) || (m_DS485Controller.GetState() == csMaster)) {
@@ -402,7 +401,7 @@ namespace dss {
   }
 
   bool DS485Proxy::IsSimAddress(const uint8_t _addr) {
-    return DSS::GetInstance()->GetModulatorSim().GetID() == _addr;
+    return GetDSS().GetModulatorSim().GetID() == _addr;
   } // IsSimAddress
 
   vector<int> DS485Proxy::GetModulators() {
@@ -757,7 +756,6 @@ namespace dss {
 
   } // RemoveUserGroup
 
-
   vector<boost::shared_ptr<DS485CommandFrame> > DS485Proxy::Receive(uint8_t _functionID) {
     vector<boost::shared_ptr<DS485CommandFrame> > result;
 
@@ -844,7 +842,7 @@ namespace dss {
   void DS485Proxy::Initialize() {
     Subsystem::Initialize();
     m_DS485Controller.AddFrameCollector(this);
-    DSS::GetInstance()->GetModulatorSim().AddFrameCollector(this);
+    GetDSS().GetModulatorSim().AddFrameCollector(this);
   }
 
   void DS485Proxy::Start() {
@@ -1013,7 +1011,7 @@ namespace dss {
                 boost::shared_ptr<Event> evt(new Event("alarm"));
                 GetDSS().GetEventQueue().PushEvent(evt);
               }
-              DSS::GetInstance()->GetApartment().OnGroupCallScene(zoneID, groupID, sceneID);
+              GetDSS().GetApartment().OnGroupCallScene(zoneID, groupID, sceneID);
             } else if(functionID == FunctionDeviceCallScene) {
               pd.Get<uint8_t>(); // functionID
               uint16_t devID = pd.Get<uint16_t>();

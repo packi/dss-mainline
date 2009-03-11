@@ -340,7 +340,7 @@ namespace dss {
     }
   };
 
-  DeviceReference Set::GetByName(const string& _name) {
+  DeviceReference Set::GetByName(const string& _name) const {
     Set resultSet = GetSubset(ByNameSelector(_name));
     if(resultSet.Length() == 0) {
       throw ItemNotFoundException(_name);
@@ -361,7 +361,7 @@ namespace dss {
     }
   };
 
-  DeviceReference Set::GetByBusID(const devid_t _id) {
+  DeviceReference Set::GetByBusID(const devid_t _id) const {
     Set resultSet = GetSubset(ByIDSelector(_id));
     if(resultSet.Length() == 0) {
       throw ItemNotFoundException(string("with busid ") + IntToString(_id));
@@ -381,7 +381,7 @@ namespace dss {
     }
   };
 
-  DeviceReference Set::GetByDSID(const dsid_t _dsid) {
+  DeviceReference Set::GetByDSID(const dsid_t _dsid) const {
     Set resultSet = GetSubset(ByDSIDSelector(_dsid));
     if(resultSet.Length() == 0) {
       throw ItemNotFoundException("with dsid " + _dsid.ToString());

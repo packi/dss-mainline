@@ -7,8 +7,9 @@
  *
  */
 
-#include "../core/model.h"
-#include "../core/setbuilder.h"
+#include "core/model.h"
+#include "core/setbuilder.h"
+#include "core/ds485const.h"
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/BriefTestProgressListener.h>
@@ -22,8 +23,8 @@ using namespace dss;
 class ModelTest : public CPPUNIT_NS::TestCase
 {
   CPPUNIT_TEST_SUITE(ModelTest);
-  //CPPUNIT_TEST(testSubscriptions);
   CPPUNIT_TEST(testSet);
+  CPPUNIT_TEST(testSetBuilder);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -38,7 +39,6 @@ protected:
 
     Device& dev1 = apt.AllocateDevice(dsid_t(0,1));
     dev1.SetShortAddress(1);
-    dev1.GetGroupBitmask().set(0);
     Device& dev2 = apt.AllocateDevice(dsid_t(0,2));
     dev2.SetShortAddress(2);
     Device& dev3 = apt.AllocateDevice(dsid_t(0,3));
@@ -52,11 +52,6 @@ protected:
     CPPUNIT_ASSERT_EQUAL(dev2, allDevices.GetByBusID(2).GetDevice());
     CPPUNIT_ASSERT_EQUAL(dev3, allDevices.GetByBusID(3).GetDevice());
     CPPUNIT_ASSERT_EQUAL(dev4, allDevices.GetByBusID(4).GetDevice());
-
-    SetBuilder builder;
-    Set builderTest = builder.BuildSet("yellow", &apt.GetZone(0));
-
-    CPPUNIT_ASSERT_EQUAL(1, builderTest.Length());
 
     Set setdev1 = Set(dev1);
 
@@ -119,6 +114,42 @@ protected:
     CPPUNIT_ASSERT_EQUAL(dev3, allMinusDev1.GetByBusID(3).GetDevice());
     CPPUNIT_ASSERT_EQUAL(dev4, allMinusDev1.GetByBusID(4).GetDevice());
   } // testSet
+
+  void testSetBuilder() {
+    Apartment apt(NULL);
+
+    Device& dev1 = apt.AllocateDevice(dsid_t(0,1));
+    dev1.SetShortAddress(1);
+    dev1.GetGroupBitmask().set(GroupIDYellow - 1);
+    Device& dev2 = apt.AllocateDevice(dsid_t(0,2));
+    dev2.SetShortAddress(2);
+    dev2.GetGroupBitmask().set(GroupIDCyan - 1);
+    Device& dev3 = apt.AllocateDevice(dsid_t(0,3));
+    dev3.SetShortAddress(3);
+    Device& dev4 = apt.AllocateDevice(dsid_t(0,4));
+    dev4.SetShortAddress(4);
+
+    SetBuilder builder;
+    Set builderTest = builder.BuildSet("yellow", &apt.GetZone(0));
+
+    CPPUNIT_ASSERT_EQUAL(1, builderTest.Length());
+    CPPUNIT_ASSERT_EQUAL(dev1, builderTest.Get(0).GetDevice());
+
+    builderTest = builder.BuildSet("cyan", &apt.GetZone(0));
+
+    CPPUNIT_ASSERT_EQUAL(1, builderTest.Length());
+    CPPUNIT_ASSERT_EQUAL(dev2, builderTest.Get(0).GetDevice());
+
+    builderTest = builder.BuildSet("dsid(1)", &apt.GetZone(0));
+    CPPUNIT_ASSERT_EQUAL(1, builderTest.Length());
+    CPPUNIT_ASSERT_EQUAL(dev1, builderTest.Get(0).GetDevice());
+
+    builderTest = builder.BuildSet("yellow.dsid(1)", &apt.GetZone(0));
+    CPPUNIT_ASSERT_EQUAL(1, builderTest.Length());
+    CPPUNIT_ASSERT_EQUAL(dev1, builderTest.Get(0).GetDevice());
+
+  } // testSetBuilder
+
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(ModelTest);

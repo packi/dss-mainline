@@ -193,14 +193,21 @@ namespace dss {
     return ToUTF8(_wcharString.c_str(), _wcharString.size());
   }
 
-  vector<string> SplitString(const string& _source, const char _delimiter) {
+  vector<string> SplitString(const string& _source, const char _delimiter, bool _trimEntries) {
     vector<string> result;
     string curString = _source;
     while(curString.size() > 0) {
       string::size_type delimPos = curString.find(_delimiter, 0);
-      result.push_back(curString.substr(0, delimPos));
+      if(_trimEntries) {
+        result.push_back(Trim(curString.substr(0, delimPos)));
+      } else {
+        result.push_back(curString.substr(0, delimPos));
+      }
       if(delimPos != string::npos) {
         curString = curString.substr(delimPos+1, string::npos);
+        if(curString.size() == 0) {
+          result.push_back("");
+        }
       } else {
         break;
       }

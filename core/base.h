@@ -116,7 +116,7 @@ namespace dss {
 
   extern const char* theISOFormatString;
 
-  vector<string> SplitString(const string& _source, const char _delimiter);
+  vector<string> SplitString(const string& _source, const char _delimiter, bool _trimEntries = false);
   void ReplaceAll(string& s, const string& a, const string& b);
   bool EndsWith(const string& str, const string& searchString);
   bool BeginsWith(const string& str, const string& searchString);
