@@ -16,15 +16,23 @@ namespace dss {
   //================================================== Subsystem
 
   Subsystem::Subsystem(DSS* _pDSS, const std::string& _name)
-  : m_State(ssCreated), m_pDSS(_pDSS), m_Name(_name)
+  : m_State(ssCreated),
+    m_pDSS(_pDSS),
+    m_Name(_name),
+    m_Enabled(true)
   {
     if(m_pDSS != NULL) {
       if(GetDSS().GetState() < ssCreatingSubsystems) {
         throw std::runtime_error("creating subsystem way too early");
       }
       GetDSS().GetPropertySystem().SetIntValue(GetConfigPropertyBasePath() + "loglevel", 0, true);
+      GetDSS().GetPropertySystem().CreateProperty(GetConfigPropertyBasePath() + "enabled")
+         ->LinkToProxy(PropertyProxyPointer<bool>(&m_Enabled));
     }
   } // ctor
+
+  Subsystem::~Subsystem() {
+  } // dtor
 
   void Subsystem::Initialize() {
     aLogSeverity severity = lsDebug;
@@ -41,6 +49,9 @@ namespace dss {
   void Subsystem::Start() {
     if(m_State != ssInitialized) {
       throw new std::runtime_error("Subsystem::Start: Subsystem '" + m_Name + "' was not initialized.");
+    }
+    if(m_Enabled) {
+      DoStart();
     }
   } // Start
 

@@ -19,12 +19,14 @@ namespace dss {
     static void JSONHandler(struct shttpd_arg* _arg);
     static void HTTPListOptions(struct shttpd_arg* _arg);
     static void EmitHTTPHeader(int _code, struct shttpd_arg* _arg, const std::string& _contentType = "text/html");
+
+  protected:
+    virtual void DoStart();
   public:
     WebServer(DSS* _pDSS);
     ~WebServer();
 
     virtual void Initialize();
-    virtual void Start();
 
   }; // WebServer
 

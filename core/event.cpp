@@ -125,8 +125,7 @@ namespace dss {
     ScrubVector(m_Plugins);
   } // dtor
 
-  void EventInterpreter::Start() {
-    Subsystem::Start();
+  void EventInterpreter::DoStart() {
     Run();
   }
 

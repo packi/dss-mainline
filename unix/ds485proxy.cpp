@@ -819,8 +819,7 @@ namespace dss {
     GetDSS().GetModulatorSim().AddFrameCollector(this);
   }
 
-  void DS485Proxy::Start() {
-    Subsystem::Start();
+  void DS485Proxy::DoStart() {
     try {
       m_DS485Controller.Run();
     } catch (const runtime_error& _ex) {
@@ -1077,16 +1076,22 @@ namespace dss {
   } // dtor
 
   void FrameBucket::AddFrame(boost::shared_ptr<ReceivedFrame> _frame) {
+    m_FramesMutex.Lock();
     m_Frames.push_back(_frame);
+    m_FramesMutex.Unlock();
+
     m_PacketHere.Signal();
   } // AddFrame
 
   boost::shared_ptr<ReceivedFrame> FrameBucket::PopFrame() {
     boost::shared_ptr<ReceivedFrame> result;
+
+    m_FramesMutex.Lock();
     if(!m_Frames.empty()) {
       result = m_Frames.front();
       m_Frames.pop_front();
     }
+    m_FramesMutex.Unlock();
     return result;
   } // PopFrame
 

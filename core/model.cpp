@@ -500,8 +500,7 @@ namespace dss {
     m_pPropertyNode = DSS::GetInstance()->GetPropertySystem().CreateProperty("/apartment");
   } // Initialize
 
-  void Apartment::Start() {
-    Subsystem::Start();
+  void Apartment::DoStart() {
     Run();
   } // Start
 
@@ -962,7 +961,6 @@ namespace dss {
     } catch(ItemNotFoundException& e) {
       Log("OnDeviceCallScene: Could not find modulator with bus-id '" + IntToString(_modulatorID) + "'");
     }
-
   } // OnDeviceCallScene
 
   void Apartment::OnAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID) {
@@ -973,6 +971,8 @@ namespace dss {
     dev.SetZoneID(_zoneID);
     dev.SetShortAddress(_devID);
     dev.SetFunctionID(_functionID);
+
+    // TODO: get groups, etc...
   } // OnAddDevice
 
 

@@ -46,11 +46,12 @@ namespace dss {
     dssService m_Service;
     int m_LastSessionID;
     SessionByID m_SessionByID;
+  protected:
+    virtual void DoStart();
   public:
     WebServices(DSS* _pDSS);
     virtual ~WebServices();
 
-    virtual void Start();
 
     WebServiceSession& NewSession(soap* _soapRequest, int& token);
     void DeleteSession(soap* _soapRequest, const int _token);

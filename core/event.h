@@ -272,11 +272,12 @@ namespace dss {
     void LoadSubscription(XMLNode& _node);
     void LoadFilter(XMLNode& _node, EventSubscription& _subscription);
     EventInterpreterPlugin* GetPluginByName(const string& _name);
+  protected:
+    virtual void DoStart();
   public:
     EventInterpreter(DSS* _pDSS);
     virtual ~EventInterpreter();
 
-    virtual void Start();
 
     virtual void Execute();
 

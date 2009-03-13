@@ -28,18 +28,21 @@ namespace dss {
     aSubsystemState m_State;
     DSS* m_pDSS;
     std::string m_Name;
+    bool m_Enabled;
     boost::shared_ptr<LogChannel> m_pLogChannel;
   protected:
     std::string GetConfigPropertyBasePath();
     std::string GetPropertyBasePath();
+
+    virtual void DoStart() = 0;
   public:
     Subsystem(DSS* _pDSS, const std::string& _name);
-    virtual ~Subsystem() {};
+    virtual ~Subsystem();
 
     DSS& GetDSS() { return *m_pDSS; }
 
     virtual void Initialize();
-    virtual void Start();
+    void Start();
 
     void Log(const std::string& _message, aLogSeverity _severity = lsDebug);
   };

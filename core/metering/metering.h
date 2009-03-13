@@ -32,11 +32,12 @@ namespace dss {
     void CheckModulators(boost::shared_ptr<MeteringConfigChain> _config);
 
     virtual void Execute();
+  protected:
+    virtual void DoStart();
   public:
     Metering(DSS* _pDSS);
     virtual ~Metering() {};
 
-    virtual void Start();
   }; // Metering
 
   class MeteringConfig {

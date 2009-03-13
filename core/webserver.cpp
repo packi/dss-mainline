@@ -44,8 +44,7 @@ namespace dss {
     shttpd_register_uri(m_SHttpdContext, "/json/*", &JSONHandler, NULL);
   } // Initialize
 
-  void WebServer::Start() {
-    Subsystem::Start();
+  void WebServer::DoStart() {
     Run();
   } // Start
 

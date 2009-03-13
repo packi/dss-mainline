@@ -4,5 +4,8 @@
     <property name="subsystems/DS485Proxy/rs485devicename" type="string">
       <value>/dev/ttyUSB0</value>
     </property>
+    <property name="subsystems/Metering/enabled" type="boolean">
+      <value>true</value>
+    </property>
   </property>
 </properties>

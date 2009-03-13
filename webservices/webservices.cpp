@@ -16,8 +16,7 @@ namespace dss {
 
   } // dtor
 
-  void WebServices::Start() {
-    Subsystem::Start();
+  void WebServices::DoStart() {
     Run();
   }
 

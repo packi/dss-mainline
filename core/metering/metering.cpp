@@ -38,8 +38,7 @@ namespace dss {
     m_Config.push_back(configEnergy);
   } // Metering
 
-  void Metering::Start() {
-    Subsystem::Start();
+  void Metering::DoStart() {
     Run();
   } // Start
 

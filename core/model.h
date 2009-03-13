@@ -47,8 +47,6 @@ namespace dss {
   class Group;
   class PropertyNode;
 
-  class PropertyNode;
-
   /** Interface to a single or multiple devices.
    */
   class IDeviceInterface {
@@ -521,12 +519,13 @@ namespace dss {
     void AddDefaultGroupsToZone(Zone& _zone);
     /** Starts the event-processing */
     virtual void Execute();
+  protected:
+    virtual void DoStart();
   public:
     Apartment(DSS* _pDSS);
     virtual ~Apartment();
 
     virtual void Initialize();
-    virtual void Start();
 
     /** Returns a set containing all devices of the set */
     virtual Set GetDevices() const;
@@ -583,10 +582,17 @@ namespace dss {
 
   public:
 
+    /** Returns the root-node for the apartment tree */
     PropertyNode* GetPropertyNode() { return m_pPropertyNode; }
 
+    /** Called by the DS485Proxy if a group-call-scene frame was intercepted.
+     *  Updates the state of all devices contained in the group. */
     void OnGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
+    /** Called by the DS485Proxy if a device-call-scene frame was intercepted.
+     *  Updates the state of the device. */
     void OnDeviceCallScene(const int _modulatorID, const int _deviceID, const int _sceneID);
+    /** Called by the DS485Proxy if an add-device frame was intercepted.
+     *  Adds the device to the model. */
     void OnAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID);
   }; // Apartment
 
