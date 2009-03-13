@@ -48,7 +48,7 @@ namespace dss {
     /** Returns true when the interface is ready to transmit user generated DS485Packets */
     virtual bool IsReady() = 0;
 
-    virtual void SendFrame(DS485CommandFrame& _frame, bool _force = false) = 0;
+    virtual void SendFrame(DS485CommandFrame& _frame) = 0;
 
     //------------------------------------------------ Specialized Commands (system)
     /** Returns an vector containing the bus-ids of all modulators present. */

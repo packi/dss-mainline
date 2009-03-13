@@ -571,9 +571,10 @@ namespace dss {
 */
 
     while(!m_Terminated) {
-      Logger::GetInstance()->Log("Apartment::Execute received proxy event, enumerating apartment / dSMs");
+      Log("Apartment::Execute received proxy event, enumerating apartment / dSMs");
 
       vector<int> modIDs = interface.GetModulators();
+      Log("Found " + IntToString(modIDs.size()) + " modulators...");
       foreach(int modulatorID, modIDs) {
         Log("Found modulator with id: " + IntToString(modulatorID));
         dsid_t modDSID = interface.GetDSIDOfModulator(modulatorID);
@@ -589,7 +590,11 @@ namespace dss {
           vector<int> devices = interface.GetDevicesInZone(modulatorID, zoneID);
           foreach(int devID, devices) {
             dsid_t dsid = interface.GetDSIDOfDevice(modulatorID, devID);
-            int functionID = interface.SendCommand(cmdGetFunctionID, devID, modulatorID).front();
+            vector<int> results = results;
+            int functionID = 0;
+            if(results.size() == 1) {
+              functionID = results.front();
+            }
             Log("    Found device with id: " + IntToString(devID));
             Log("    DSID:        " + dsid.ToString());
             Log("    Function ID: " + UnsignedLongIntToHexString(functionID));

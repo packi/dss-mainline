@@ -314,7 +314,7 @@ namespace dss {
       DS485Interface* intf = &DSS::GetInstance()->GetDS485Interface();
       DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
       if(proxy != NULL) {
-        proxy->SendFrame(*frame, true);
+        proxy->SendFrame(*frame);
       } else {
         delete frame;
       }

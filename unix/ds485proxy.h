@@ -42,26 +42,43 @@ using namespace std;
 
 namespace dss {
 
+  class DS485Proxy;
   typedef hash_map<const Zone*, pair< vector<Group*>, Set> > FittingResult;
-
-
-  template<class t>
-  class DS485Parameter {
-  private:
-    t _data;
-  };
 
   class ReceivedFrame {
   private:
     int m_ReceivedAtToken;
     boost::shared_ptr<DS485CommandFrame> m_Frame;
   public:
-    ReceivedFrame(const int _receivedAt, DS485CommandFrame* _frame);
+    ReceivedFrame(const int _receivedAt, boost::shared_ptr<DS485CommandFrame> _frame);
     boost::shared_ptr<DS485CommandFrame> GetFrame() { return m_Frame; };
     int GetReceivedAt() const { return m_ReceivedAtToken; };
-  };
+  }; // ReceivedFrame
 
-  typedef map<int, vector<ReceivedFrame*> > FramesByID;
+  /** A frame bucket holds response-frames for any given function id */
+  class FrameBucket {
+  private:
+    deque<boost::shared_ptr<ReceivedFrame> > m_Frames;
+    DS485Proxy* m_pProxy;
+    int m_FunctionID;
+    int m_SourceID;
+    SyncEvent m_PacketHere;
+  public:
+    FrameBucket(DS485Proxy* _proxy, int _functionID, int _sourceID);
+    ~FrameBucket();
+
+    int GetFunctionID() const { return m_FunctionID; }
+    int GetSourceID() const { return m_SourceID; }
+
+    void AddFrame(boost::shared_ptr<ReceivedFrame> _frame);
+    boost::shared_ptr<ReceivedFrame> PopFrame();
+    void WaitForFrames(int _timeoutMS);
+    void WaitForFrame(int _timeoutMS);
+
+    int GetFrameCount() const;
+    bool IsEmpty() const;
+  }; // FrameBucket
+
   typedef vector<boost::shared_ptr<DS485CommandFrame> > CommandFrameSharedPtrVector;
 
   class DS485Proxy : protected Thread,
@@ -72,9 +89,11 @@ namespace dss {
     FittingResult BestFit(const Set& _set);
     bool IsSimAddress(const uint8_t _addr);
 
-    vector<boost::shared_ptr<DS485CommandFrame> > Receive(uint8_t _functionID);
-    uint8_t ReceiveSingleResult(const uint8_t _functionID);
-    uint16_t ReceiveSingleResult16(const uint8_t _functionID);
+    boost::shared_ptr<ReceivedFrame> ReceiveSingleFrame(DS485CommandFrame& _frame, uint8_t _functionID);
+    uint8_t ReceiveSingleResult(DS485CommandFrame& _frame, const uint8_t _functionID);
+    uint16_t ReceiveSingleResult16(DS485CommandFrame& _frame, const uint8_t _functionID);
+
+    vector<FrameBucket*> m_FrameBuckets;
 
     void SignalEvent();
 
@@ -82,7 +101,6 @@ namespace dss {
     SyncEvent m_ProxyEvent;
 
     SyncEvent m_PacketHere;
-    FramesByID m_ReceivedFramesByFunctionID;
     Mutex m_IncomingFramesGuard;
     CommandFrameSharedPtrVector m_IncomingFrames;
   protected:
@@ -93,7 +111,8 @@ namespace dss {
 
     virtual bool IsReady();
 
-    virtual void SendFrame(DS485CommandFrame& _frame, bool _force = false);
+    virtual void SendFrame(DS485CommandFrame& _frame);
+    boost::shared_ptr<FrameBucket> SendFrameAndInstallBucket(DS485CommandFrame& _frame, const int _functionID);
 
     //------------------------------------------------ Handling
     virtual void Initialize();
@@ -101,6 +120,9 @@ namespace dss {
     void WaitForProxyEvent();
 
     virtual void CollectFrame(boost::shared_ptr<DS485CommandFrame>& _frame);
+
+    void AddFrameBucket(FrameBucket* _bucket);
+    void RemoveFrameBucket(FrameBucket* _bucket);
 
     //------------------------------------------------ Specialized Commands (system)
     virtual vector<int> GetModulators();
