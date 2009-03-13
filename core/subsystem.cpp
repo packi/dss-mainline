@@ -43,6 +43,8 @@ namespace dss {
       severity = static_cast<aLogSeverity>(GetDSS().GetPropertySystem().GetIntValue(GetConfigPropertyBasePath() + "loglevel"));
     }
     m_pLogChannel.reset(new LogChannel(m_Name, severity));
+    GetDSS().GetPropertySystem().GetProperty(GetConfigPropertyBasePath() + "loglevel")
+      ->LinkToProxy(PropertyProxyMemberFunction<Subsystem, int>(*this, &Subsystem::GetLogSeverity, &Subsystem::SetLogSeverity));
     m_State = ssInitialized;
   } // Initialize
 
@@ -66,4 +68,19 @@ namespace dss {
   void Subsystem::Log(const std::string& _message, aLogSeverity _severity) {
     Logger::GetInstance()->Log(*m_pLogChannel, _message, _severity);
   }
+
+  int Subsystem::GetLogSeverity() const {
+    if(m_pLogChannel.get() == NULL) {
+      return 0;
+    } else {
+      return m_pLogChannel->GetMinimumSeverity();
+    }
+  }
+
+  void Subsystem::SetLogSeverity(int _value) {
+    if(m_pLogChannel.get() != NULL) {
+      m_pLogChannel->SetMinimumSeverity(static_cast<aLogSeverity>(_value));
+    }
+  }
+
 } // namespace dss

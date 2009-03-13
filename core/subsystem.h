@@ -34,6 +34,9 @@ namespace dss {
     std::string GetConfigPropertyBasePath();
     std::string GetPropertyBasePath();
 
+    int GetLogSeverity() const;
+    void SetLogSeverity(int _value);
+
     virtual void DoStart() = 0;
   public:
     Subsystem(DSS* _pDSS, const std::string& _name);
