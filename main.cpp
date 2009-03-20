@@ -119,5 +119,13 @@ int main (int argc, char * const argv[]) {
     dss::DSS::GetInstance()->Initialize();
     dss::DSS::GetInstance()->Run();
   }
+
+#ifdef USE_LIBXML
+  // free some internal memory of libxml to make valgrind happy
+  // NOTE: this needs to be the last call in a process.
+  //       Trust me....
+  xmlCleanupParser();
+#endif
+
   return 0;
 }
