@@ -129,6 +129,7 @@ namespace dss {
 
   struct tm DateFromISOString( const char* _dateTimeAsString ) {
     struct tm result;
+    memset(&result, '\0', sizeof(result));
     strptime( _dateTimeAsString, theISOFormatString, &result );
     return result;
   } // DateFromISOString

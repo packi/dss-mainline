@@ -137,6 +137,8 @@ protected:
     propND1->SetIntegerValue(5);
     CPPUNIT_ASSERT_EQUAL(5, propND1->GetIntegerValue());
     propND1->UnlinkProxy();
+
+    delete propSys;
   } // testPropertySystem
 
 }; // PropertySystemTest

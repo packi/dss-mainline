@@ -84,6 +84,9 @@
 <option id="gnu.cpp.link.option.strip.411759775" name="Omit all symbol information (-s)" superClass="gnu.cpp.link.option.strip"/>
 <option id="gnu.cpp.link.option.libs.226478544" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="xml2"/>
+<listOptionValue builtIn="false" value="PocoNet"/>
+<listOptionValue builtIn="false" value="PocoFoundation"/>
+<listOptionValue builtIn="false" value="dl"/>
 <listOptionValue builtIn="false" value="PocoXML"/>
 <listOptionValue builtIn="false" value="boost_filesystem"/>
 <listOptionValue builtIn="false" value="gsoap++"/>
@@ -93,7 +96,7 @@
 <listOptionValue builtIn="false" value="cppunit"/>
 </option>
 <option id="gnu.cpp.link.option.paths.1134950262" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths"/>
-<option id="gnu.cpp.link.option.flags.2027765230" name="Linker flags" superClass="gnu.cpp.link.option.flags"/>
+<option id="gnu.cpp.link.option.flags.2027765230" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="-Wl,-E" valueType="string"/>
 <option id="gnu.cpp.link.option.other.1261378497" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other"/>
 <option id="gnu.cpp.link.option.userobjs.1285451436" name="Other objects" superClass="gnu.cpp.link.option.userobjs"/>
 <option id="gnu.cpp.link.option.shared.415471997" name="Shared (-shared)" superClass="gnu.cpp.link.option.shared"/>

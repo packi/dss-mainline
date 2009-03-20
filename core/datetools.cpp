@@ -302,6 +302,9 @@ namespace dss {
     m_StartDate = icaltime_from_string(_startDateISO.c_str());
   } // ctor
 
+  ICalSchedule::~ICalSchedule() {
+  } // dtor
+
   void ical_to_tm(const icaltimetype& icalTime, struct tm& tm) {
     memset(&tm, '\0', sizeof(tm));
     if(!icalTime.is_date) {

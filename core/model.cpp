@@ -589,7 +589,7 @@ namespace dss {
           vector<int> devices = interface.GetDevicesInZone(modulatorID, zoneID);
           foreach(int devID, devices) {
             dsid_t dsid = interface.GetDSIDOfDevice(modulatorID, devID);
-            vector<int> results = results;
+            vector<int> results = interface.SendCommand(cmdGetFunctionID, devID, modulatorID);
             int functionID = 0;
             if(results.size() == 1) {
               functionID = results.front();
@@ -628,6 +628,9 @@ namespace dss {
     }
     Logger::GetInstance()->Log("******** Finished loading model from dSM(s)...", lsInfo);
     m_IsInitializing = false;
+    while(0) {
+      SleepSeconds(10);
+    }
   } // Run
 
   void Apartment::ReadConfigurationFromXML(const string& _fileName) {

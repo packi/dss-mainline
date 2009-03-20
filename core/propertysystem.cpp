@@ -58,6 +58,7 @@ namespace dss {
 
 
   PropertySystem::~PropertySystem() {
+    delete m_RootNode;
   } // dtor
 
 
@@ -70,8 +71,6 @@ namespace dss {
     if (rootNode == NULL) {
       rootNode = GetRootNode();
     }
-
-    xmlInitParser();
 
     doc = xmlParseFile(_fileName.c_str());
     if (doc == NULL) {
@@ -108,7 +107,7 @@ namespace dss {
     }
 
     xmlFreeDoc(doc);
-    xmlCleanupParser();
+
     return false;
   } // LoadFromXML
 
@@ -277,9 +276,7 @@ namespace dss {
 
   PropertyNode::~PropertyNode() {
     if(m_PropVal.valueType == vTypeString) {
-      if(m_PropVal.actualValue.pString != NULL) {
-        free(m_PropVal.actualValue.pString);
-      }
+      free(m_PropVal.actualValue.pString);
     }
     for(vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end();) {

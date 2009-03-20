@@ -208,7 +208,7 @@ namespace dss {
     struct icaltimetype m_StartDate;
   public:
     ICalSchedule(const string& _rrule, const string _startDateISO);
-    virtual ~ICalSchedule() {}
+    virtual ~ICalSchedule();
 
     virtual DateTime GetNextOccurence(const DateTime& _from) ;
     virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
