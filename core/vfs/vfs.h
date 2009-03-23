@@ -32,8 +32,36 @@ namespace dss {
 
     boost::shared_ptr<Reader> CreateReader(const string& _uri);
     boost::shared_ptr<Writer> CreateWriter(const string& _uri);
+  }; // VFS
+  
+  class Processor {
+  private:
+    string m_Name;
+  public:
+    Processor(const string& _name);
+    
+    int Process(const char* _in, unsigned int _inLen, char* _out, int _outLen);
+    
+    bool IsPreprocessor();
+  }; // Processor
+  
+  class Reader {
+  private:
+    string m_Name;
+  public:
+    Reader(const string& _name);
+    
+    int Read(char* _out, int _outLen);
   };
-
+  
+  class Writer {
+  private:
+    string m_Name;
+  public:
+    Writer(const string& _name);
+    
+    int Write(const char* _in, int _inLen);
+  };
 
 }
 
