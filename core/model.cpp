@@ -39,7 +39,8 @@ namespace dss {
     m_ZoneID(0),
     m_pApartment(_pApartment),
     m_LastCalledScene(SceneOff),
-    m_pPropertyNode(NULL)
+    m_pPropertyNode(NULL),
+    m_Consumption(0)
   {
   }
 
@@ -206,6 +207,10 @@ namespace dss {
   Apartment& Device::GetApartment() const {
     return *m_pApartment;
   } // GetApartment
+
+  unsigned long Device::GetPowerConsumption() {
+    return m_Consumption;
+  } // GetPowerConsumption
 
   //================================================== Set
 
@@ -460,6 +465,14 @@ namespace dss {
   DeviceReference& Set::operator[](const int _index) {
     return Get(_index);
   } // operator[]
+
+  unsigned long Set::GetPowerConsumption() {
+    unsigned long result = 0;
+    foreach(DeviceReference& iDevice, m_ContainedDevices) {
+      result += iDevice.GetPowerConsumption();
+    }
+    return result;
+  } // GetPowerConsumption
 
   ostream& operator<<(ostream& out, const Device& _dt) {
     out << "Device ID " << _dt.GetShortAddress();
@@ -940,6 +953,7 @@ namespace dss {
       Zone& zone = GetZone(_zoneID);
       Group* group = zone.GetGroup(_groupID);
       if(group != NULL) {
+        Log("OnGroupCallScene: group-id '" + IntToString(_groupID) + "' in Zone '" + IntToString(_zoneID) + "'");
         Set s = zone.GetDevices().GetByGroup(_groupID);
         SetLastCalledSceneAction act(_sceneID);
         s.Perform(act);
@@ -1175,6 +1189,10 @@ namespace dss {
     GetDevices().UndoScene(_sceneNr);
   } // UndoScene
 
+  unsigned long Group::GetPowerConsumption() {
+    return GetDevices().GetPowerConsumption();
+  } // GetPowerConsumption
+
   //================================================== DeviceReference
 
   DeviceReference::DeviceReference(const DeviceReference& _copy)
@@ -1267,5 +1285,8 @@ namespace dss {
     GetDevice().UndoScene(_sceneNr);
   } // UndoScene
 
+  unsigned long DeviceReference::GetPowerConsumption() {
+    return GetDevice().GetPowerConsumption();
+  }
 
 }

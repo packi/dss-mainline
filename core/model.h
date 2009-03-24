@@ -89,6 +89,9 @@ namespace dss {
     virtual void SaveScene(const int _sceneNr) = 0;
     virtual void UndoScene(const int _sceneNr) = 0;
 
+    /** Returns the consumption in mW */
+    virtual unsigned long GetPowerConsumption() = 0;
+
     virtual ~IDeviceInterface() {};
   };
 
@@ -145,6 +148,8 @@ namespace dss {
     virtual void CallScene(const int _sceneNr);
     virtual void SaveScene(const int _sceneNr);
     virtual void UndoScene(const int _sceneNr);
+
+    virtual unsigned long GetPowerConsumption();
  };
 
   typedef vector<DeviceReference> DeviceVector;
@@ -165,6 +170,7 @@ namespace dss {
     vector<int> m_Groups;
     int m_FunctionID;
     int m_LastCalledScene;
+    unsigned long m_Consumption;
 
     PropertyNode* m_pPropertyNode;
   protected:
@@ -227,6 +233,8 @@ namespace dss {
     void SetZoneID(const int _value);
     /** Returns the apartment the device resides in. */
     Apartment& GetApartment() const;
+
+    virtual unsigned long GetPowerConsumption();
 
     bool operator==(const Device& _other) const;
   };
@@ -339,6 +347,8 @@ namespace dss {
     void RemoveDevice(const DeviceReference& _device);
     /** Removes the device _device from the set */
     void RemoveDevice(const Device& _device);
+
+    virtual unsigned long GetPowerConsumption();
   }; // Set
 
 
@@ -380,7 +390,9 @@ namespace dss {
     /** Adds a DeviceReference to the modulators devices list */
     void AddDevice(const DeviceReference& _device);
 
+    /** Returns the consumption in mW */
     unsigned long GetPowerConsumption();
+    /** Returns the meter value in Wh */
     unsigned long GetEnergyMeterValue();
   }; // Modulator
 
@@ -422,6 +434,8 @@ namespace dss {
     virtual void CallScene(const int _sceneNr);
     virtual void SaveScene(const int _sceneNr);
     virtual void UndoScene(const int _sceneNr);
+
+    virtual unsigned long GetPowerConsumption();
 
     Group& operator=(const Group& _other);
   }; // Group

@@ -5,7 +5,7 @@
       <value>/dev/ttyUSB0</value>
     </property>
     <property name="subsystems/Metering/enabled" type="boolean">
-      <value>true</value>
+      <value>false</value>
     </property>
   </property>
 </properties>

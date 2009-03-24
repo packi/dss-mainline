@@ -133,6 +133,22 @@ namespace dss {
     return sstream.str();
   }
 
+  string ToJSONValue(Zone& _zone) {
+    std::stringstream sstream;
+    sstream << "{ id: " << _zone.GetZoneID() << ",";
+    string name = _zone.GetName();
+    if(name.size() == 0) {
+      name = string("Zone ") + IntToString(_zone.GetZoneID());
+    }
+    sstream << "name: " << ToJSONValue(name) << ", ";
+
+    Set devices = _zone.GetDevices();
+    sstream << ToJSONValue(devices, "devices");
+
+    sstream << "} ";
+    return sstream.str();
+  } // ToJSONValue(Zone)
+
   string ToJSONValue(Apartment& _apartment) {
   	std::stringstream sstream;
   	sstream << "{ apartment: { zones: [";
@@ -147,17 +163,7 @@ namespace dss {
 	  	} else {
 	  		first = false;
 	  	}
-	  	sstream << "{ id: " << pZone->GetZoneID() << ",";
-	  	string name = pZone->GetName();
-	  	if(name.size() == 0) {
-	  		name = string("Zone ") + IntToString(pZone->GetZoneID());
-	  	}
-	  	sstream << "name: " << ToJSONValue(name) << ", ";
-
-	  	Set devices = pZone->GetDevices();
-      sstream << ToJSONValue(devices, "devices");
-
-	  	sstream << "} ";
+	  	sstream << ToJSONValue(*pZone);
 	  }
     sstream << "]} }";
 	  return sstream.str();
@@ -206,6 +212,61 @@ namespace dss {
     return arr.str();
   } // ToJSONArray<int>
 
+  bool WebServer::IsDeviceInterfaceCall(const std::string& _method) {
+    return EndsWith(_method, "/turnOn")
+        || EndsWith(_method, "/turnOff")
+        || EndsWith(_method, "/increaseValue")
+        || EndsWith(_method, "/decreaseValue")
+        || EndsWith(_method, "/enable")
+        || EndsWith(_method, "/disable")
+        || EndsWith(_method, "/startDim")
+        || EndsWith(_method, "/endDim")
+        || EndsWith(_method, "/setValue")
+        || EndsWith(_method, "/callScene")
+        || EndsWith(_method, "/saveScene")
+        || EndsWith(_method, "/undoScene");
+/*
+    virtual void TurnOn() = 0;
+    virtual void TurnOff() = 0;
+    virtual void IncreaseValue(const int _parameterNr = -1) = 0;
+    virtual void DecreaseValue(const int _parameterNr = -1) = 0;
+    virtual void Enable() = 0;
+    virtual void Disable() = 0;
+    virtual void StartDim(bool _directionUp, const int _parameterNr = -1) = 0;
+    virtual void EndDim(const int _parameterNr = -1)= 0;
+    virtual void SetValue(const double _value, int _parameterNr = -1) = 0;
+    virtual void CallScene(const int _sceneNr) = 0;
+    virtual void SaveScene(const int _sceneNr) = 0;
+    virtual void UndoScene(const int _sceneNr) = 0;
+*/
+  } // IsDeviceInterfaceCall
+
+  void WebServer::HandleApartmentCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg) {
+    if(IsDeviceInterfaceCall(_method)) {
+      // handle it
+    } else {
+      if(EndsWith(_method, "/getStructure")) {
+
+      }
+    }
+
+  } // HandleApartmentCall
+
+  void WebServer::HandleZoneCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg) {
+
+  } // HandleZoneCall
+
+  void WebServer::HandleDeviceCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg) {
+
+  } // HandleDeviceCall
+
+  void WebServer::HandleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg) {
+
+  } // HandleSetCall
+
+  void WebServer::HandlePropertyCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg) {
+
+  } // HandlePropertyCall
 
   void WebServer::JSONHandler(struct shttpd_arg* _arg) {
     const string urlid = "/json/";
@@ -213,6 +274,20 @@ namespace dss {
     HashMapConstStringString paramMap = ParseParameter(shttpd_get_env(_arg, "QUERY_STRING"));
 
     string method = uri.substr(uri.find(urlid) + urlid.size());
+
+    WebServer& self = DSS::GetInstance()->GetWebServer();
+
+    if(BeginsWith(method, "apartment/")) {
+      self.HandleApartmentCall(method, paramMap, _arg);
+    } else if(BeginsWith(method, "zone/")) {
+      self.HandleZoneCall(method, paramMap, _arg);
+    } else if(BeginsWith(method, "device/")) {
+      self.HandleDeviceCall(method, paramMap, _arg);
+    } else if(BeginsWith(method, "set/")) {
+      self.HandleSetCall(method, paramMap, _arg);
+    } else if(BeginsWith(method, "property/")) {
+      self.HandlePropertyCall(method, paramMap, _arg);
+    }
 
     if(method == "getdevices") {
       EmitHTTPHeader(200, _arg, "application/json");

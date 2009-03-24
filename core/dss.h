@@ -90,6 +90,7 @@ namespace dss {
     EventQueue& GetEventQueue() { return *m_pEventQueue; }
     Metering& GetMetering() { return *m_pMetering; }
     PropertySystem& GetPropertySystem() { return *m_pPropertySystem; }
+    WebServer& GetWebServer() { return *m_pWebServer; }
   }; // DSS
 
 }

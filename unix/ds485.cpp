@@ -477,7 +477,7 @@ namespace dss {
               }
               keep = true;
             } else {
-              cout << "&&&&&&&&&& unknown frame id: " << cmdFrame->GetCommand() << endl;
+              cout << "&&&&&&&&&& unknown frame id: " << (int)cmdFrame->GetCommand() << endl;
             }
             if(keep) {
               // put in into the received queue
