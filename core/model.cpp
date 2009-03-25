@@ -39,8 +39,8 @@ namespace dss {
     m_ZoneID(0),
     m_pApartment(_pApartment),
     m_LastCalledScene(SceneOff),
-    m_pPropertyNode(NULL),
-    m_Consumption(0)
+    m_Consumption(0),
+    m_pPropertyNode(NULL)
   {
   }
 
@@ -1111,7 +1111,64 @@ namespace dss {
   		result.push_back((*iModulator)->GetBusID());
   	}
   	return result;
-  }
+  } // GetModulators
+
+  void Zone::TurnOn() {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdTurnOn, *this, GroupIDBroadcast);
+  } // TurnOn
+
+  void Zone::TurnOff() {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdTurnOn, *this, GroupIDBroadcast);
+  } // TurnOff
+
+  void Zone::IncreaseValue(const int _parameterNr) {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdIncreaseValue, *this, GroupIDBroadcast, _parameterNr);
+  } // IncreaseValue
+
+  void Zone::DecreaseValue(const int _parameterNr) {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdDecreaseValue, *this, GroupIDBroadcast, _parameterNr);
+  } // DecreaseValue
+
+  void Zone::Enable() {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdEnable, *this, GroupIDBroadcast);
+  } // Enable
+
+  void Zone::Disable() {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdDisable, *this, GroupIDBroadcast);
+  } // Disable
+
+  void Zone::StartDim(const bool _directionUp, const int _parameterNr) {
+    if(_directionUp) {
+      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStartDimUp, *this, GroupIDBroadcast, _parameterNr);
+    } else {
+      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStartDimDown, *this, GroupIDBroadcast, _parameterNr);
+    }
+  } // StartDim
+
+  void Zone::EndDim(const int _parameterNr) {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStopDim, *this, GroupIDBroadcast, _parameterNr);
+  } // EndDim
+
+  void Zone::SetValue(const double _value, const int _parameterNr) {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdSetValue, *this, GroupIDBroadcast, _parameterNr);
+  } // SetValue
+
+  void Zone::CallScene(const int _sceneNr) {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdCallScene, *this, GroupIDBroadcast, _sceneNr);
+  } // CallScene
+
+  void Zone::SaveScene(const int _sceneNr) {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdSaveScene, *this, GroupIDBroadcast, _sceneNr);
+  } // SaveScene
+
+  void Zone::UndoScene(const int _sceneNr) {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdUndoScene, *this, GroupIDBroadcast, _sceneNr);
+  } // UndoScene
+
+  unsigned long Zone::GetPowerConsumption() {
+    return GetDevices().GetPowerConsumption();
+  } // GetPowerConsumption
+
 
   //============================================= Group
 

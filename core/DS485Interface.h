@@ -104,6 +104,7 @@ namespace dss {
     virtual vector<int> SendCommand(DS485Command _cmd, const Device& _device, int _param = -1) = 0;
     virtual vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param = -1) = 0;
     virtual vector<int> SendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param = -1) = 0;
+    virtual vector<int> SendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param = -1) = 0;
   };
 }
 #endif /* DS485INTERFACE_H_ */

@@ -1,10 +1,14 @@
 <html>
   <head>
     <title>digitalStrom - Server</title>
+	<script src="model.js" language="JavaScript" type="text/javascript"></script>
 	<script src="prototype.js" language="JavaScript" type="text/javascript"></script>
 	<script src="switch.js" language="JavaScript" type="text/javascript"></script>
 	<link rel="stylesheet" type="text/css" href="main.css"/>
 	<script type="text/javascript" language="JavaScript">
+
+apt2 = new Apartment2();
+apt2.turnOn(1);
 
 function Apartment(into) {
   var self = this;
@@ -12,7 +16,7 @@ function Apartment(into) {
   this.devices = [];
   this.zones = [];
   this.fetchApartment = function() {
-    new Ajax.Request('/json/getapartment', 
+    new Ajax.Request('/json/apartment/getStructure', 
       {
         method:'get', 
         onComplete: function(transport, json) {
@@ -20,9 +24,10 @@ function Apartment(into) {
         }
       } 
     );
-    new Ajax.Request('/json/getunassigneddevices', 
+    new Ajax.Request('/json/apartment/getDevices', 
       {
         method:'get', 
+        parameters: {"unassigned": true},
         onComplete: function(transport, json) {
         }
       } 

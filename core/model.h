@@ -457,7 +457,8 @@ namespace dss {
 
   /** Represents a Zone
     */
-  class Zone : public DeviceContainer {
+  class Zone : public DeviceContainer,
+               public IDeviceInterface {
   private:
     int m_ZoneID;
     DeviceVector m_Devices;
@@ -499,6 +500,25 @@ namespace dss {
     void SetZoneID(const int _value);
 
     vector<int> GetModulators() const;
+
+    virtual void TurnOn();
+    virtual void TurnOff();
+
+    virtual void IncreaseValue(const int _parameterNr = -1);
+    virtual void DecreaseValue(const int _parameterNr = -1);
+
+    virtual void Enable();
+    virtual void Disable();
+
+    virtual void StartDim(bool _directionUp, const int _parameterNr = -1);
+    virtual void EndDim(const int _parameterNr = -1);
+    virtual void SetValue(const double _value, int _parameterNr = -1);
+
+    virtual void CallScene(const int _sceneNr);
+    virtual void SaveScene(const int _sceneNr);
+    virtual void UndoScene(const int _sceneNr);
+
+    virtual unsigned long GetPowerConsumption();
   }; // Zone
 
 
