@@ -102,7 +102,7 @@ namespace dss {
       return "false";
     }
   }
-
+  
   string ToJSONValue(const string& _value) {
     return string("\"") + _value + '"';
   } // ToJSONValue
@@ -110,6 +110,16 @@ namespace dss {
   string ToJSONValue(const char* _value) {
     return ToJSONValue(string(_value));
   }
+
+  string ResultToJSON(const bool _ok, const string& _message = "") {
+    stringstream sstream;
+    sstream << "{ " << ToJSONValue("ok") << ":" << ToJSONValue(_ok);
+    if(!_message.empty()) {
+      sstream << ", " << ToJSONValue("message") << ":" << ToJSONValue(_message);
+    }
+    sstream << "}";
+    return sstream.str();
+  } // ResultToJSON
 
   string ToJSONValue(const DeviceReference& _device) {
     std::stringstream sstream;
@@ -139,12 +149,12 @@ namespace dss {
 
   string ToJSONValue(Zone& _zone) {
     std::stringstream sstream;
-    sstream << "{ id: " << _zone.GetZoneID() << ",";
+    sstream << "{ \"id\": " << _zone.GetZoneID() << ",";
     string name = _zone.GetName();
     if(name.size() == 0) {
       name = string("Zone ") + IntToString(_zone.GetZoneID());
     }
-    sstream << "name: " << ToJSONValue(name) << ", ";
+    sstream << "\"name\": " << ToJSONValue(name) << ", ";
 
     Set devices = _zone.GetDevices();
     sstream << ToJSONValue(devices, "devices");
@@ -155,7 +165,7 @@ namespace dss {
 
   string ToJSONValue(Apartment& _apartment) {
   	std::stringstream sstream;
-  	sstream << "{ apartment: { zones: [";
+  	sstream << "{ \"apartment\": { \"zones\": [";
 	  vector<Zone*>& zones = _apartment.GetZones();
 	  bool first = true;
 	  for(vector<Zone*>::iterator ipZone = zones.begin(), e = zones.end();
@@ -273,13 +283,7 @@ namespace dss {
     } else if(EndsWith(_method, "/getConsumption")) {
       return "{ consumption: " +  UIntToString(_interface->GetPowerConsumption()) +"}";
     }
-    stringstream sstream;
-    sstream << "{ ok: " << ToJSONValue(ok);
-    if(!ok) {
-      sstream << ", message: " << ToJSONValue(errorString);
-    }
-    sstream << " }";
-    return sstream.str();
+    return ResultToJSON(ok, errorString);
   } // CallDeviceInterface
 
   bool WebServer::IsDeviceInterfaceCall(const std::string& _method) {
@@ -442,9 +446,7 @@ namespace dss {
       }
     }
     if(!ok) {
-      stringstream sstream;
-      sstream << "{ ok: " << ToJSONValue(ok) << ", message: " << ToJSONValue(errorMessage) << " }";
-      return sstream.str();
+      return ResultToJSON(ok, errorMessage);
     }
   } // HandleZoneCall
 
@@ -489,9 +491,7 @@ namespace dss {
         return "";
       }
     } else {
-      stringstream sstream;
-      sstream << "{ ok: " << ToJSONValue(ok) << ", message: " << ToJSONValue(errorMessage) << " }";
-      return sstream.str();
+      return ResultToJSON(ok, errorMessage);
     }
   } // HandleDeviceCall
 
@@ -519,7 +519,7 @@ namespace dss {
         e->SetLocation(location);
       }
       GetDSS().GetEventQueue().PushEvent(e);
-      result =  "{ ok: " + ToJSONValue(true) + "}";
+      return ResultToJSON(true);
     } else {
       _handled = false;
     }
@@ -550,13 +550,13 @@ namespace dss {
             }
             int buttonNr = StrToIntDef(_parameter["buttonnr"], 1);
             GetDSS().GetModulatorSim().ProcessButtonPress(*sw, buttonNr, kind);
-            return "{ ok: " + ToJSONValue(true) + " }";
+            return ResultToJSON(true);
           } else {
             _handled = false;
             return "";
           }
         } else {
-          return "Could not find simulated switch";
+          return ResultToJSON(false, "Could not find simulated switch");
         }
       }
     } else {
@@ -600,7 +600,7 @@ namespace dss {
       } else {
         delete frame;
       }
-      return "{ ok: " + ToJSONValue(true) + " }";
+      return ResultToJSON(true);
     } else {
       _handled = false;
       return "";

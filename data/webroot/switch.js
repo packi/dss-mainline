@@ -17,9 +17,9 @@ function Button(switchID, buttonID, parentSwitch) {
       { method:'get',
 	parameters: 
 	  { 
-	    device: self.switchID,
-            buttonnr: self.buttonID,
-            kind: kind
+        device: self.switchID,
+        buttonnr: self.buttonID,
+        kind: kind
 	  },
       
 	onComplete: function(transport, json) {

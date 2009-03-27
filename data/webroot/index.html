@@ -1,47 +1,31 @@
 <html>
   <head>
     <title>digitalStrom - Server</title>
-	<script src="model.js" language="JavaScript" type="text/javascript"></script>
 	<script src="prototype.js" language="JavaScript" type="text/javascript"></script>
+	<script src="model.js" language="JavaScript" type="text/javascript"></script>
 	<script src="switch.js" language="JavaScript" type="text/javascript"></script>
 	<link rel="stylesheet" type="text/css" href="main.css"/>
 	<script type="text/javascript" language="JavaScript">
+/*
+apt2 = new Apartment();
+Apartment.turnOff();
+Apartment.getPowerConsumption();
+apt2.fetch();
+Apartment.startDim(true);
+*/
 
-apt2 = new Apartment2();
-apt2.turnOn(1);
-
-function Apartment(into) {
+function ApartmentRenderer(into) {
   var self = this;
+  self.apartment = new Apartment();
+  self.apartment.fetch();
 
-  this.devices = [];
-  this.zones = [];
-  this.fetchApartment = function() {
-    new Ajax.Request('/json/apartment/getStructure', 
-      {
-        method:'get', 
-        onComplete: function(transport, json) {
-          self.doUpdate(transport.responseJSON.apartment.zones);
-        }
-      } 
-    );
-    new Ajax.Request('/json/apartment/getDevices', 
-      {
-        method:'get', 
-        parameters: {"unassigned": true},
-        onComplete: function(transport, json) {
-        }
-      } 
-    );
-  };
-  
-  this.doUpdate = function(zones) {
+  this.render = function() {
     var iSwitch = 0;
     var switchIDs = [];
     var devNum = 0;
-    self.zones = zones;
 
     var zonelist = "<ul>"
-    zones.each(
+    self.apartment.zones.each(
       function(zone) {
         if(zone.id == 0) { 
           return;
@@ -51,17 +35,17 @@ function Apartment(into) {
         zone.devices.each(function(device) {
           zonelist += "<li>" + device.name;
           devNum++;
-          if(device.isSwitch == false) {
-            if(device.on) {
+          if(!device.isSwitch()) {
+            if(device.isOn()) {
               zonelist += " On ";
             } else {
               zonelist += " Off ";
             }
-            zonelist += '[<a href="#" onclick="turnOn(\'' + device.id + '\')">Turn On</a>';
-            zonelist += '&nbsp;|&nbsp;<a href="#" onclick="turnOff(\'' + device.id + '\')">Turn Off</a>]';
+            zonelist += '[<a href="#" onclick="turnOn(\'' + device.dsid + '\')">Turn On</a>';
+            zonelist += '&nbsp;|&nbsp;<a href="#" onclick="turnOff(\'' + device.dsid + '\')">Turn Off</a>]';
           } else {
-            zonelist += '<div id="switch_' + device.id + '"/>';
-            switchIDs[switchIDs.length] = device.id;
+            zonelist += '<div id="switch_' + device.dsid + '"/>';
+            switchIDs[switchIDs.length] = device.dsid;
           }
 
           zonelist += "</li>";
@@ -79,7 +63,6 @@ function Apartment(into) {
     $('numDevs').innerHTML = devNum;
   }
   
-  self.fetchApartment();
 }
 
 
@@ -87,187 +70,24 @@ var apt = null;
 
 
 	function turnOn(devid) {
-	  new Ajax.Request('/json/turnon', 
-	    {
-	      method:'get', 
-	      parameters: {device: devid},
-          //onComplete: function(transport, json) {
-          //  apt.fetchApartment();
-          //}
-	    } 
-	  );
+	  new Device(devid).turnOn();
 	}
 	
 	function turnOff(devid) {
-	  new Ajax.Request('/json/turnoff',
-	    {
-	      method:'get', 
-	      parameters: {device: devid},
-          //onComplete: function(transport, json) {
-          //  apt.fetchApartment();
-          //}
-	    } 
-	  );
+	  new Device(devid).turnOff();
 	}
 
 	function turnOnZone(zoneid) {
-	  new Ajax.Request('/json/turnon', 
-	    {
-	      method:'get', 
-	      parameters: {zone: zoneid},
-          //onComplete: function(transport, json) {
-          //  apt.fetchApartment();
-          //}
-	    } 
-	  );
+	  new Zone(zoneid).turnOn();
 	}
 	
 	function turnOffZone(zoneid) {
-	  new Ajax.Request('/json/turnoff',
-	    {
-	      method:'get', 
-	      parameters: {zone: zoneid},
-          //onComplete: function(transport, json) {
-          //  apt.fetchApartment();
-          //}
-	    } 
-	  );
+	  new Zone(zoneid).turnOff();
 	}
 	
-	function raiseEvent() {
-	  new Ajax.Request('/json/event/raise',
-	    {
-	      method:'get', 
-	      parameters: 
-	        { 
-	          evtid: $F('evtid'),
-	          sourceid: $F('eventsrc')
-	        }
-	    } 
-	  );
-	}
-	
-	function scheduleEvent() {
-	  new Ajax.Request('/json/event/schedule',
-	    {
-	      method:'get', 
-	      parameters: 
-	        { 
-	          evtid: $F('evtid'),
-	          sourceid: $F('eventsrc'),
-	          schedule: $F('eventsched'),
-	          start: $F('eventstart'),
-	          name: $F('evtname')
-	        },
-	      onComplete: function(transport, json) {
-	        updateEvents();
-	      }
-	    } 
-	  );
-	}
-	
-	function deleteEvent(id) {
-	  new Ajax.Request('/json/event/remove',
-	    {
-	      method: 'get',
-	      parameters:
-	        {
-	          id: id
-	        },
-	      onComplete: function(transport, json) {
-	        updateEvents();
-	      }
-	    }
-	  );
-	}
-	
-	function updateEventList(events) {
-	  var eventlist = "<h2>Scheduled events</h2><ol>";
-	  events.each(
-	    function(event) {
-	      eventlist += "<li>" +  event.name + ' <a href="#" onclick="deleteEvent(' + event.id + ')">Remove</a></li>';
-	    }
-	  );
-	  eventlist += "</ol>";
-	  $('evt_div').innerHTML = eventlist;
-	}
-	
-	function updateEvents() {
-	  new Ajax.Request('/json/event/getlist',
-	    {
-	       method: 'get',
-	       onComplete: function(transport, json) {
-	         updateEventList(transport.responseJSON.events);
-	       }
-	    }
-	  ); 
-	}
-	
-	function unsubscribeFrom(id) {
-	  new Ajax.Request('/json/subscription/unsubscribe',
-	    {
-	      method: 'get',
-	      parameters:
-	        {
-	          id: id
-	        },
-	      onComplete: function(transport, json) {
-	        updateSubscriptions();
-	      }
-	    }
-	  );
-	}
-	
-    function updateSubscriptionsList(subscriptions) {
-	  var subscriptionlist = "<h2>Subscriptions</h2><table>";
-	  subscriptionlist += "<tr><th>Name</th><th>ID</th><th>Action</th></tr>";
-	  subscriptions.each(
-	    function(subscription) {
-	      subscriptionlist += "<tr><td>" + subscription.name + "</td><td>" + subscription.id + '</td><td><a href="#" onclick="unsubscribeFrom(' + subscription.id + ')">Unsubscribe</a></td></tr>';
-	    }
-	  );
-	  subscriptionlist += "</table>";
-	  $('sub_div').innerHTML = subscriptionlist;
-	}
-	
-	
-	function updateSubscriptions() {
-	  new Ajax.Request('/json/subscription/getlist',
-	    {
-	      method: 'get',
-	      onComplete: function(transport, json) {
-	        updateSubscriptionsList(transport.responseJSON.subscriptions);
-	      }
-	    }
-	  );
-	}
-	
-	function subscribe() {
-	  new Ajax.Request('/json/subscription/subscribe',
-	    {
-	      method: 'get',
-	      parameters:
-	        {
-	          evtids: $F('sub_evtids'),
-	          sourceids: $F('sub_sourceid'),
-	          action: $F('action_name'),
-	          file: $F('param_file')
-	        },
-	      onComplete: function(transport, json) {
-	        updateSubscriptions();
-	      }
-	    }
-	  );
-	}
-  
-//	doUpdate();	
-//	updateEvents();
-//	updateSubscriptions();
-
-var apt = null;
-
 function doOnload() {
-  apt = new Apartment("bla");
+  apt = new ApartmentRenderer("bla");
+  apt.render();
 }
 </script>
   </head>
@@ -279,56 +99,6 @@ function doOnload() {
 	</div>
 	<div class="container fl">
         <div id="bla">(loading...)</div>
-<!--
-	<form>
-	<h2>Event Raising / Scheduling</h2>
-	<table>
-	  <tr><td>Event ID:</td><td><input type="text" id="evtid" value="1001"/></td></tr>
-	  <tr><td>Event Source:</td><td><input type="text" id="eventsrc" value="1"/></td></tr>
-	  <tr><td>Event Schedule:</td><td><input type="text" id="eventsched" value="FREQ=MINUTELY;INTERVAL=2"/></td></tr>
-	  <tr><td>Event Start:</td><td><input type="text" id="eventstart" value="20080520T080000"/></td></tr>
-	  <tr><td>Event Name:</td><td><input type="text" id="evtname" value="testing..."/></td></tr>
-	  <tr><td><a href="#" onclick="raiseEvent()">Raise</a>
-	  <a href="#" onclick="scheduleEvent()">Schedule</a></td></tr>
-	  </table>
-	</form>
--->
 	</div>
-<!--
-	<div id="devList" class="container fl">
-	(...loading...)
-	</div>
--->
-<!--
-	<div id="evt_div" class="container fl">
-	(...loading...)
-	</div>
-	<div id="sub_div" class="container fl">
-	(...loading...)
-	</div>	
--->
-
-<!--
-	<div class="container fl">
-	<form>
-	  <h2>Subscription</h2>
-	  <table>
-	    <tr><td>Event IDs</td><td><input type="text" id="sub_evtids" value="1001"/></td></tr>
-	    <tr><td>Source IDs</td><td><input type="text" id="sub_sourceid" value=""/></td></tr>
-	    <tr>
-	      <td>Action</td>
-	      <td>
-	        <select id="action_name">
-	          <option value="none">(please choose)</option>
-	          <option value="actionJS">Execute JavaScript</option>
-	        </select>
-	      </td>
-	    </tr>
-	    <tr><td>Parameter[file]</td><td><input type="text" id="param_file"></td></tr>
-	    <tr><td><a href="#" onclick="subscribe()">Subscribe</td><td></td></tr>
-      </table>
-	</form>
-	</div>
--->
   </body>	
 </html>
