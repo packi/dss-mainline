@@ -15,14 +15,10 @@
 namespace dss {
 
   class WebServiceSession : public Session {
-  private:
-    int m_Token;
+  protected:
     uint32_t m_OriginatorIP;
-
-    int m_LastSetNr;
-    DateTime m_LastTouched;
-    SetsByID m_SetsByID;
   public:
+    WebServiceSession() {}
     WebServiceSession(const int _tokenID, soap* _soapRequest);
 
     bool IsOwner(soap* _soapRequest);
@@ -30,14 +26,14 @@ namespace dss {
     WebServiceSession& operator=(const WebServiceSession& _other);
   };
 
-  typedef boost::ptr_map<const int, WebServiceSession> SessionByID;
+  typedef boost::ptr_map<const int, WebServiceSession> WebServiceSessionByID;
 
   class WebServices : public Subsystem,
                       private Thread {
   private:
     dssService m_Service;
     int m_LastSessionID;
-    SessionByID m_SessionByID;
+    WebServiceSessionByID m_SessionByID;
   protected:
     virtual void DoStart();
   public:

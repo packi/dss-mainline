@@ -5,19 +5,21 @@
 #include "datetools.h"
 #include "model.h"
 
+#include <map>
+
 namespace dss {
 
-  typedef map<const int, Set> SetsByID;
+  typedef std::map<const int, Set> SetsByID;
 
   class Session {
   private:
     int m_Token;
-    uint32_t m_OriginatorIP;
 
     int m_LastSetNr;
     DateTime m_LastTouched;
     SetsByID m_SetsByID;
   public:
+    Session() {}
     Session(const int _tokenID);
 
     bool IsStillValid();

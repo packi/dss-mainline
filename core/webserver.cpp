@@ -102,7 +102,7 @@ namespace dss {
       return "false";
     }
   }
-  
+
   string ToJSONValue(const string& _value) {
     return string("\"") + _value + '"';
   } // ToJSONValue
@@ -226,7 +226,7 @@ namespace dss {
     return arr.str();
   } // ToJSONArray<int>
 
-  string WebServer::CallDeviceInterface(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, IDeviceInterface* _interface) {
+  string WebServer::CallDeviceInterface(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, IDeviceInterface* _interface, Session* _session) {
     bool ok = true;
     string errorString;
     assert(_interface != NULL);
@@ -302,7 +302,7 @@ namespace dss {
         || EndsWith(_method, "/getConsumption");
   } // IsDeviceInterfaceCall
 
-  string WebServer::HandleApartmentCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled) {
+  string WebServer::HandleApartmentCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     bool ok = true;
     string errorMessage;
     _handled = true;
@@ -337,7 +337,7 @@ namespace dss {
         if(interface == NULL) {
           interface = &GetDSS().GetApartment().GetGroup(GroupIDBroadcast);
         }
-        return CallDeviceInterface(_method, _parameter, _arg, interface);
+        return CallDeviceInterface(_method, _parameter, _arg, interface, _session);
       } else {
         stringstream sstream;
         sstream << "{ ok: " << ToJSONValue(ok) << ", message: " << ToJSONValue(errorMessage) << " }";
@@ -356,6 +356,10 @@ namespace dss {
         }
 
         result = "{" + ToJSONValue(devices, "devices") + "}";
+      } if(EndsWith(_method, "/login")) {
+        int token = m_LastSessionID;
+        m_Sessions[token] = Session(token);
+        return "{" + ToJSONValue("token") + ": " + ToJSONValue(token) + "}";
       } else {
         _handled = false;
       }
@@ -363,7 +367,7 @@ namespace dss {
     }
   } // HandleApartmentCall
 
-  string WebServer::HandleZoneCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled) {
+  string WebServer::HandleZoneCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     bool ok = true;
     string errorMessage;
     _handled = true;
@@ -438,7 +442,7 @@ namespace dss {
           if(interface == NULL) {
             interface = pZone;
           }
-          return CallDeviceInterface(_method, _parameter, _arg, interface);
+          return CallDeviceInterface(_method, _parameter, _arg, interface, _session);
         }
       } else {
         _handled = false;
@@ -447,10 +451,12 @@ namespace dss {
     }
     if(!ok) {
       return ResultToJSON(ok, errorMessage);
+    } else {
+      return "";
     }
   } // HandleZoneCall
 
-  string WebServer::HandleDeviceCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled) {
+  string WebServer::HandleDeviceCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     bool ok = true;
     string errorMessage;
     _handled = true;
@@ -485,7 +491,7 @@ namespace dss {
     }
     if(ok) {
       if(IsDeviceInterfaceCall(_method)) {
-        return CallDeviceInterface(_method, _parameter, _arg, pDevice);
+        return CallDeviceInterface(_method, _parameter, _arg, pDevice, _session);
       } else {
         _handled = false;
         return "";
@@ -495,15 +501,15 @@ namespace dss {
     }
   } // HandleDeviceCall
 
-  string WebServer::HandleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled) {
+  string WebServer::HandleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
 
   } // HandleSetCall
 
-  string WebServer::HandlePropertyCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled) {
+  string WebServer::HandlePropertyCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
 
   } // HandlePropertyCall
 
-  string WebServer::HandleEventCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled) {
+  string WebServer::HandleEventCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     _handled = true;
     string result;
     if(EndsWith(_method, "/raise")) {
@@ -526,7 +532,7 @@ namespace dss {
     return result;
   } // HandleEventCall
 
-  string WebServer::HandleSimCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled) {
+  string WebServer::HandleSimCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     _handled = true;
     if(BeginsWith(_method, "sim/switch")) {
       string devidStr = _parameter["device"];
@@ -565,7 +571,7 @@ namespace dss {
     return "";
   } // HandleSimCall
 
-  string WebServer::HandleDebugCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled) {
+  string WebServer::HandleDebugCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     _handled = true;
     if(EndsWith(_method, "/sendFrame")) {
       int destination = StrToIntDef(_parameter["destination"],0) & 0x3F;
@@ -616,24 +622,40 @@ namespace dss {
 
     WebServer& self = DSS::GetInstance()->GetWebServer();
 
+    Session* session = NULL;
+    string tokenStr = paramMap["token"];
+    if(!tokenStr.empty()) {
+      int token = StrToIntDef(tokenStr, -1);
+      if(token != -1) {
+        SessionByID::iterator iEntry = self.m_Sessions.find(token);
+        if(iEntry != self.m_Sessions.end()) {
+          if(iEntry->second->IsStillValid()) {
+            Session& s = *iEntry->second;
+            session = &s;
+          }
+        }
+      }
+    }
+
+
     string result;
     bool handled = false;
     if(BeginsWith(method, "apartment/")) {
-      result = self.HandleApartmentCall(method, paramMap, _arg, handled);
+      result = self.HandleApartmentCall(method, paramMap, _arg, handled, session);
     } else if(BeginsWith(method, "zone/")) {
-      result = self.HandleZoneCall(method, paramMap, _arg, handled);
+      result = self.HandleZoneCall(method, paramMap, _arg, handled, session);
     } else if(BeginsWith(method, "device/")) {
-      result = self.HandleDeviceCall(method, paramMap, _arg, handled);
+      result = self.HandleDeviceCall(method, paramMap, _arg, handled, session);
     } else if(BeginsWith(method, "set/")) {
-      result = self.HandleSetCall(method, paramMap, _arg, handled);
+      result = self.HandleSetCall(method, paramMap, _arg, handled, session);
     } else if(BeginsWith(method, "property/")) {
-      result = self.HandlePropertyCall(method, paramMap, _arg, handled);
+      result = self.HandlePropertyCall(method, paramMap, _arg, handled, session);
     } else if(BeginsWith(method, "event/")) {
-      result = self.HandleEventCall(method, paramMap, _arg, handled);
+      result = self.HandleEventCall(method, paramMap, _arg, handled, session);
     } else if(BeginsWith(method, "sim/")) {
-      result = self.HandleSimCall(method, paramMap, _arg, handled);
+      result = self.HandleSimCall(method, paramMap, _arg, handled, session);
     } else if(BeginsWith(method, "debug/")) {
-      result = self.HandleDebugCall(method, paramMap, _arg, handled);
+      result = self.HandleDebugCall(method, paramMap, _arg, handled, session);
     }
     EmitHTTPHeader(200, _arg, "application/json");
     if(!handled) {
