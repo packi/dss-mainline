@@ -6,6 +6,7 @@
 #include "core/thread.h"
 #include "core/datetools.h"
 #include "core/subsystem.h"
+#include "core/session.h"
 
 #include <boost/ptr_container/ptr_map.hpp>
 
@@ -13,9 +14,7 @@
 
 namespace dss {
 
-  typedef map<const int, Set> SetsByID;
-
-  class WebServiceSession {
+  class WebServiceSession : public Session {
   private:
     int m_Token;
     uint32_t m_OriginatorIP;
@@ -24,16 +23,9 @@ namespace dss {
     DateTime m_LastTouched;
     SetsByID m_SetsByID;
   public:
-    WebServiceSession() {};
     WebServiceSession(const int _tokenID, soap* _soapRequest);
 
-    bool IsStillValid();
     bool IsOwner(soap* _soapRequest);
-    bool HasSetWithID(const int _id);
-    Set& GetSetByID(const int _id);
-    Set& AllocateSet(int& _id);
-    void FreeSet(const int id);
-    Set& AddSet(Set _set, int& id);
 
     WebServiceSession& operator=(const WebServiceSession& _other);
   };

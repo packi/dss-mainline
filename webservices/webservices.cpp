@@ -73,7 +73,7 @@ namespace dss {
 
   bool WebServiceSession::IsStillValid() {
     const int TheSessionTimeout = 5;
-    return m_LastTouched.AddMinute(TheSessionTimeout).After(DateTime());
+    return true;//m_LastTouched.AddMinute(TheSessionTimeout).After(DateTime());
   } // IsStillValid
 
   bool WebServiceSession::IsOwner(soap* _soapRequest) {

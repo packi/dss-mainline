@@ -1,6 +1,7 @@
 var DSS = Class.create({
 });
 
+DSS.token = undefined;
 DSS.endpoint = "/json/";
 DSS.sendSyncRequest = function(_uri, _parameter) {
     var responseObj
