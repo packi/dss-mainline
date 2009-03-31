@@ -6,6 +6,7 @@
 #include "unix/ds485proxy.h"
 #include "sim/dssim.h"
 #include "propertysystem.h"
+#include "foreach.h"
 
 #include <iostream>
 #include <sstream>
@@ -306,7 +307,13 @@ namespace dss {
     bool ok = true;
     string errorMessage;
     _handled = true;
-    if(IsDeviceInterfaceCall(_method)) {
+    if(EndsWith(_method, "/getConsumption")) {
+      int accumulatedConsumption = 0;
+      foreach(Modulator* pModulator, GetDSS().GetApartment().GetModulators()) {
+        accumulatedConsumption += pModulator->GetPowerConsumption();
+      }
+      return "{ consumption: " +  UIntToString(accumulatedConsumption) +"}";
+    } else if(IsDeviceInterfaceCall(_method)) {
       IDeviceInterface* interface = NULL;
       string groupName = _parameter["groupName"];
       string groupIDString = _parameter["groupID"];
@@ -356,7 +363,7 @@ namespace dss {
         }
 
         result = "{" + ToJSONValue(devices, "devices") + "}";
-      } if(EndsWith(_method, "/login")) {
+      } else if(EndsWith(_method, "/login")) {
         int token = m_LastSessionID;
         m_Sessions[token] = Session(token);
         return "{" + ToJSONValue("token") + ": " + ToJSONValue(token) + "}";
