@@ -282,7 +282,7 @@ namespace dss {
         ok = false;
       }
     } else if(EndsWith(_method, "/getConsumption")) {
-      return "{ consumption: " +  UIntToString(_interface->GetPowerConsumption()) +"}";
+      return "{ " + ToJSONValue("consumption") + ": " +  UIntToString(_interface->GetPowerConsumption()) +"}";
     }
     return ResultToJSON(ok, errorString);
   } // CallDeviceInterface
@@ -312,7 +312,7 @@ namespace dss {
       foreach(Modulator* pModulator, GetDSS().GetApartment().GetModulators()) {
         accumulatedConsumption += pModulator->GetPowerConsumption();
       }
-      return "{ consumption: " +  UIntToString(accumulatedConsumption) +"}";
+      return "{ " + ToJSONValue("consumption") + ": " +  UIntToString(accumulatedConsumption) +"}";
     } else if(IsDeviceInterfaceCall(_method)) {
       IDeviceInterface* interface = NULL;
       string groupName = _parameter["groupName"];
