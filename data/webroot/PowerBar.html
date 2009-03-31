@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <title>digitalStrom - Demo - Power Bar</title>
+	<script src="prototype.js" language="JavaScript" type="text/javascript"></script>
+	<script src="model.js" language="JavaScript" type="text/javascript"></script>
+	<link rel="stylesheet" type="text/css" href="main.css"/>
+	<script type="text/javascript" language="JavaScript">
+
+var MAXMILLIWATT = 150000;
+
+function createPowerBar() {
+  var p = Apartment.getPowerConsumption()
+  var bar = "*".times(Math.round(p * 100.0 / MAXMILLIWATT));
+  $("powerContainer").update(bar + " " + (p / 1000.0) + "W" );
+}
+
+function doOnload() {
+  new PeriodicalExecuter(createPowerBar, 5);
+  createPowerBar();
+}
+
+</script>
+  </head>
+  <body onload="doOnload()">
+    <h1>digitalStrom - Demo - Power Bar</h1>
+    <div class="container" id="powerContainer" />
+  </body>	
+</html>
