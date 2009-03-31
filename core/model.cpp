@@ -333,6 +333,16 @@ namespace dss {
     }
   } // GetByGroup(name)
 
+  Set Set::GetByZone(int _zoneID) const {
+    Set result;
+    foreach(const DeviceReference& dev, m_ContainedDevices) {
+      if(dev.GetDevice().GetZoneID() == _zoneID) {
+        result.AddDevice(dev);
+      }
+    }
+    return result;
+  } // GetByZone
+
   class ByNameSelector : public IDeviceSelector {
   private:
     const string m_Name;
@@ -1118,7 +1128,7 @@ namespace dss {
   } // TurnOn
 
   void Zone::TurnOff() {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdTurnOn, *this, GroupIDBroadcast);
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdTurnOff, *this, GroupIDBroadcast);
   } // TurnOff
 
   void Zone::IncreaseValue(const int _parameterNr) {

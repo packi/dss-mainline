@@ -36,7 +36,7 @@ var Group = Class.create({
     this.name = _name;
     this.id = _id;
   }
-});
+}); // Group
 
 var Apartment = Class.create({
   initialize: function() {
@@ -57,7 +57,7 @@ var Apartment = Class.create({
       });
     });
   }
-});
+}); // Apartment
 
 Apartment.sendRequest = function(_functionName, _parameter) {
   DSS.sendRequest("apartment/" + _functionName, _parameter);
@@ -243,8 +243,12 @@ var Zone = Class.create({
     var parameter = this.getParameterForDeviceCall(_group);
     var respObj = this.sendSyncRequest("getConsumption", parameter);
     return respObj.consumption;
+  },
+
+  sendEvent: function(_name) {
+    new HEvent(_name, '.zone(' + this.id + ')').raise();
   }
-});
+}); // Zone
 
 var Device = Class.create({
   initialize: function(_dsid, _name) {
@@ -339,9 +343,41 @@ var Device = Class.create({
     var parameter = this.getParameterForDeviceCall();
     var respObj = this.sendSyncRequest("getConsumption", parameter);
     return respObj.consumption;
-  }
-});
+  },
 
-if(!Object.isUndefined(onModelLoaded) && Object.isFunction(onModelLoaded)) {
+  sendEvent: function(_name) {
+    new HEvent(_name, '.dsid(' + this.dsid + ')').raise();
+  }
+}); // Device
+
+var HEvent = Class.create({
+  initialize: function(_name, _location, _context) {
+    this.name = _name;
+    this.location = _location;
+    this.context = _context;
+  },
+  
+  sendRequest: function(_functionName, _parameter) {
+    DSS.sendRequest("event/" + _functionName, _parameter);
+  },
+
+  sendSyncRequest: function(_functionName, _parameter) {
+    return DSS.sendSyncRequest("event/" + _functionName, _parameter);
+  },
+
+  raise: function() {
+    var parameter = {};
+    parameter['name'] = this.name;
+    if(!Object.isUndefined(this.location)) {
+      parameter['location'] = this.location;
+    }
+    if(!Object.isUndefined(this.context)) {
+      parameter['location'] = this.context;
+    }
+    this.sendRequest('raise', parameter);
+  }
+}); // HEvent
+
+if(hasKey(this, 'onModelLoaded') && !Object.isUndefined(onModelLoaded) && Object.isFunction(onModelLoaded)) {
   onModelLoaded();
 }

@@ -1,18 +1,15 @@
 <html>
   <head>
     <title>digitalStrom - Server</title>
+<script type="text/javascript" language="JavaScript">
+function onModelLoaded() {
+}
+</script>
 	<script src="prototype.js" language="JavaScript" type="text/javascript"></script>
 	<script src="model.js" language="JavaScript" type="text/javascript"></script>
 	<script src="switch.js" language="JavaScript" type="text/javascript"></script>
 	<link rel="stylesheet" type="text/css" href="main.css"/>
 	<script type="text/javascript" language="JavaScript">
-/*
-apt2 = new Apartment();
-Apartment.turnOff();
-Apartment.getPowerConsumption();
-apt2.fetch();
-Apartment.startDim(true);
-*/
 
 function ApartmentRenderer(into) {
   var self = this;
@@ -65,12 +62,12 @@ function ApartmentRenderer(into) {
   
 }
 
-
 var apt = null;
 
 
 	function turnOn(devid) {
 	  new Device(devid).turnOn();
+//new HEvent('turnOn', '.dsid(0000000000000000ffc00004)', undefined).raise();
 	}
 	
 	function turnOff(devid) {
@@ -78,7 +75,9 @@ var apt = null;
 	}
 
 	function turnOnZone(zoneid) {
-	  new Zone(zoneid).turnOn();
+          var z = new Zone(zoneid);
+          z.sendEvent('turnOn');
+	  //new Zone(zoneid).sendEvent('turnoOn');
 	}
 	
 	function turnOffZone(zoneid) {

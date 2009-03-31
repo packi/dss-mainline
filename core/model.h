@@ -305,6 +305,8 @@ namespace dss {
      * Note that these groups could be spanned over multiple modulators.
      */
     Set GetByGroup(const string& _name) const;
+
+    Set GetByZone(int _zoneID) const;
     /** Returns the device indicated by _name
      */
     DeviceReference GetByName(const string& _name) const;

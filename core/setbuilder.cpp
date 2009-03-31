@@ -44,6 +44,12 @@ namespace dss {
       } else {
         throw runtime_error("SetBuilder::RestrictByFunction: dsid requires exactly one parameter.");
       }
+    } else if(functionName == "zone") {
+      if(paramList.size() == 1) {
+        result = _set.GetByZone(StrToInt(paramList[0]));
+      } else {
+        throw runtime_error("SetBuilder::RestrictByFunction: zone requires exactly one parameter.");
+      }
     }
     return result;
   }
