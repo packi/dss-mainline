@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <title>digitalStrom - Demo - Zone on/off Switch</title>
+	<script src="prototype.js" language="JavaScript" type="text/javascript"></script>
+	<script src="model.js" language="JavaScript" type="text/javascript"></script>
+	<link rel="stylesheet" type="text/css" href="main.css"/>
+	<script type="text/javascript" language="JavaScript">
+
+function switchZone(_state) {
+  if (_state) {
+    console.log("enable");
+    new HEvent('turnOn', '.zone(4)').raise();
+  } else {
+    console.log("disable");
+    new HEvent('turnOff', '.zone(4)').raise();
+  }
+}
+
+</script>
+  </head>
+  <body>
+    <h1>digitalStrom - Demo - Zone on/off Switch</h1>
+    <div class="container">
+      <a href="javascript:switchZone(true)">Ein</a>
+      <a href="javascript:switchZone(false)">Aus</a>
+    </div>
+  </body>	
+</html>
