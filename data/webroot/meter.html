@@ -1,0 +1,61 @@
+<html>
+  <head>
+    <title>digitalStrom - Meter</title>
+<script type="text/javascript" language="JavaScript">
+function onModelLoaded() {
+}
+</script>
+	<script src="prototype.js" language="JavaScript" type="text/javascript"></script>
+	<script src="model.js" language="JavaScript" type="text/javascript"></script>
+	<script src="switch.js" language="JavaScript" type="text/javascript"></script>
+	<link rel="stylesheet" type="text/css" href="main.css"/>
+	<script type="text/javascript" language="JavaScript">
+
+var i = 0;
+	
+function doUpdate() {
+
+  $('bla').innerHTML = 'Consumption:<p><object data="metering/0000000000000000ffc00010_consumption_5minutely.xml" type="image/svg+xml" width="400" height="300"><embed src="metering/0000000000000000ffc00010_consumption_5minutely.xml" type="image/svg+xml" width="400" height="300" /></object>';
+  $('bla2').innerHTML = 'Energy:<p><object data="metering/0000000000000000ffc00010_consumption_5minutely.xml" type="image/svg+xml" width="400" height="300"><embed src="metering/0000000000000000ffc00010_consumption_5minutely.xml" type="image/svg+xml" width="400" height="300" /></object>';
+//<img src="metering/0000000000000000ffc00010_consumption_5minutely.xml" ></img>';
+  // call ourself
+  //setTimeout('doUpdate()', 1000);
+}
+
+</script>
+  </head>
+  <body onload="doUpdate()">
+    <h1>dSS based Smart-Meter</h1>
+	<div class="container fl2">
+          <div id="bla">(loading...)</div>
+          <div id="bla2">(loading...)</div>
+	</div>
+        <div class="container fl3">
+          <div id="bla3">
+Meter-XML:<pre>
+&lt;?xml version="1.0"?&gt;
+&lt;metering version="1"&gt;
+ &lt;config&gt;
+   &lt;from_dsid&gt;AABBCCDDEEFF&lt;/from_dsid&gt;
+   &lt;comment&gt;Meter im Keller&lt;/comment&gt;
+   &lt;unit&gt;kWh&lt;/unit&gt;
+   &lt;generated_at&gt;02022009T105321Z&lt;/generated_at&gt;
+   &lt;latest_cost_info&gt;02022009T105321Z&lt;/latest_cost_info&gt;
+ &lt;/config&gt;
+ &lt;values resolution="3600" max_values="400"&gt;
+  &lt;value timestamp="02022009T105321Z"&gt;
+   &lt;min&gt;123456&lt;/min&gt;
+   &lt;max&gt;123456&lt;/max&gt;
+   &lt;avg&gt;123456&lt;/avg&gt;
+  &lt;/value&gt;
+  &lt;value timestamp="02022009T115321Z"&gt;
+  ...
+  &lt;/value&gt;
+ &lt;/values&gt;
+&lt;/metering&gt;
+</pre>
+  </div>
+</div>
+   </div>
+  </body>	
+</html>

@@ -31,6 +31,21 @@ td {
 	/*width:250px;*/
 }
 
+.fl2 {
+	float:left;
+	margin-top:10px;
+	margin-right:10px;
+	height:650px;
+	/*width:250px;*/
+}
+
+.fl3 {
+	float:right;
+	margin-top:10px;
+	margin-right:10px;
+	height:650px;
+	/*width:250px;*/
+}
 .item {
 	padding:5px;
 }
