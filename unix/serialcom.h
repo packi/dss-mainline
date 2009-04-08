@@ -7,6 +7,9 @@
  *
  */
 
+#ifndef _SERIAL_COM_H_INCLUDED
+#define _SERIAL_COM_H_INCLUDED
+
 #include <termios.h>
 
 #include <vector>
@@ -31,11 +34,15 @@ namespace dss {
   }; // SerialComBase
 
   class SerialCom : public SerialComBase {
+  public:
+    typedef enum { sp9600, sp115200 } SerialSpeed;
   private:
     struct termios m_CommSettings;
     int m_Handle;
     string m_PortDevName;
     Mutex m_ReadWriteLock;
+    SerialSpeed m_Speed;
+    bool m_Blocking;
   public:
     SerialCom();
     virtual ~SerialCom();
@@ -45,6 +52,9 @@ namespace dss {
     virtual char GetChar();
     virtual bool GetCharTimeout(char& _charOut, const int _timeoutMS);
     virtual void PutChar(const char& _char);
+
+    void SetSpeed(SerialSpeed _value) { m_Speed = _value; }
+    void SetBlocking(bool _value) { m_Blocking = _value; }
   }; // SerialCom
 
   class SerialComSim : public SerialComBase {
@@ -54,7 +64,7 @@ namespace dss {
     /** Data that has ben written by the user of SerialComBase */
     deque<char> m_OutgoingData;
   public:
-	virtual ~SerialComSim() {};
+    virtual ~SerialComSim() {};
 
     virtual bool Open(const char* _serialPort);
 
@@ -67,3 +77,5 @@ namespace dss {
   }; // SerialComSim
 
 }
+
+#endif

@@ -10,6 +10,7 @@
 #include "core/dss.h"
 #include "core/logger.h"
 #include "core/DS485Interface.h"
+#include "core/propertysystem.h"
 #include "seriespersistence.h"
 #include "core/foreach.h"
 
@@ -21,7 +22,7 @@ namespace dss {
   : Subsystem(_pDSS, "Metering"),
     Thread("Metering")
   {
-    m_MeteringStorageLocation = "data/webroot/metering/";
+    GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "storageLocation", "data/webroot/metering/", true);
     boost::shared_ptr<MeteringConfigChain> configConsumption(new MeteringConfigChain(false, 1));
     configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_seconds",        2, 400)));
     configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_minutely",  1 * 60, 400)));
@@ -39,6 +40,7 @@ namespace dss {
   } // Metering
 
   void Metering::DoStart() {
+    m_MeteringStorageLocation = GetDSS().GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "storageLocation");
     Run();
   } // Start
 

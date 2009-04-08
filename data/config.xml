@@ -2,6 +2,9 @@
 <properties version="1">
   <property name="config">
     <property name="subsystems/DS485Proxy/rs485devicename" type="string">
+      <value>/dev/ttyUSB1</value>
+    </property>
+    <property name="subsystems/FakeMeter/device" type="string">
       <value>/dev/ttyUSB0</value>
     </property>
     <property name="subsystems/Metering/enabled" type="boolean">

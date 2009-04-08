@@ -10,6 +10,10 @@
 #include "core/xmlwrapper.h"
 #include "core/logger.h"
 
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
+
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Attr.h>
@@ -108,6 +112,8 @@ namespace dss {
       pRoot->appendChild(elem);
     }
 
+    // write it to a temporary site first
+    string tmpOut = _path + ".tmp";
     std::ofstream ofs(_path.c_str() );
 
     if(ofs) {
@@ -117,6 +123,9 @@ namespace dss {
       writer.writeNode(ofs, pDoc);
 
       ofs.close();
+
+      // move it to the desired location
+      fs::rename(tmpOut, _path);
     } else {
       Logger::GetInstance()->Log("Could not open file for writing");
     }

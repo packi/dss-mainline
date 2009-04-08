@@ -21,6 +21,7 @@ namespace dss {
   class DS485Interface;
   class PropertySystem;
   class Metering;
+  class FakeMeter;
   class EventRunner;
   class EventQueue;
   class EventInterpreter;
@@ -59,6 +60,7 @@ namespace dss {
     boost::shared_ptr<EventInterpreter> m_pEventInterpreter;
     boost::shared_ptr<EventQueue> m_pEventQueue;
     boost::shared_ptr<Metering> m_pMetering;
+    boost::shared_ptr<FakeMeter> m_pFakeMeter;
 
     aDSSState m_State;
 

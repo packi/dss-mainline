@@ -24,6 +24,7 @@
 #include "webservices/webservices.h"
 #include "event.h"
 #include "metering/metering.h"
+#include "metering/fake_meter.h"
 
 #include <cassert>
 #include <string>
@@ -73,6 +74,9 @@ namespace dss {
 
     m_pMetering = boost::shared_ptr<Metering>(new Metering(this));
     m_Subsystems.push_back(m_pMetering.get());
+
+    m_pFakeMeter = boost::shared_ptr<FakeMeter>(new FakeMeter(this));
+    m_Subsystems.push_back(m_pFakeMeter.get());
 
     m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner);
     m_pEventQueue = boost::shared_ptr<EventQueue>(new EventQueue);

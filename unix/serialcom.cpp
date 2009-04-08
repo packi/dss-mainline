@@ -22,7 +22,10 @@ namespace dss {
 
   //================================================== SerialCom
 
-  SerialCom::SerialCom() {
+  SerialCom::SerialCom()
+  : m_Speed(sp115200),
+    m_Blocking(false)
+  {
     memset(&m_CommSettings, '\0', sizeof(m_CommSettings));
   } // ctor
 
@@ -32,7 +35,11 @@ namespace dss {
 
   bool SerialCom::Open(const char* _serialPort) {
     m_PortDevName = _serialPort;
-    m_Handle = open(_serialPort, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
+    int flags = O_RDWR | O_NOCTTY;
+    if(!m_Blocking) {
+      flags |= O_NDELAY | O_NONBLOCK;
+    }
+    m_Handle = open(_serialPort, flags);
     if(m_Handle == -1) {
       perror("serial");
       throw runtime_error(string("could not open port ") + m_PortDevName);
@@ -51,7 +58,14 @@ namespace dss {
 		m_CommSettings.c_cc[VMIN] = 0;
 		m_CommSettings.c_cc[VTIME] = 0;
 
-    speed_t rate = B115200;
+    speed_t rate;
+    if(m_Speed == sp115200) {
+      rate = B115200;
+    } else if(m_Speed == sp9600) {
+      rate = B9600;
+    } else {
+      throw runtime_error("Invalid value of speed");
+    }
     cfsetispeed(&m_CommSettings, rate);
     cfsetospeed(&m_CommSettings, rate);
 
@@ -67,13 +81,8 @@ namespace dss {
   char SerialCom::GetChar() {
     char result;
 
-    int count;
-    do {
-     count = read(m_Handle, &result, 1);
-     if(count < 0 && count != EAGAIN) {
-       perror("read failed");
-     }
-    } while(count != 1);
+    while(!GetCharTimeout(result, 10000)) {
+    }
 
     return result;
   } // GetChar
