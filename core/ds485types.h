@@ -34,6 +34,10 @@ namespace dss {
       return (upper == _other.upper) && (lower == _other.lower);
     }
 
+    bool operator!=(const dsid& _other) const {
+      return !(_other == *this);
+    }
+
     dsid& operator=(const dsid& _other) {
       upper = _other.upper;
       lower = _other.lower;

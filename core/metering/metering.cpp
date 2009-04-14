@@ -23,7 +23,8 @@ namespace dss {
     Thread("Metering")
   {
     GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "storageLocation", "data/webroot/metering/", true);
-    boost::shared_ptr<MeteringConfigChain> configConsumption(new MeteringConfigChain(false, 1));
+    boost::shared_ptr<MeteringConfigChain> configConsumption(new MeteringConfigChain(false, 1, "mA"));
+    configConsumption->SetComment("Consumption in mA");
     configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_seconds",        2, 400)));
     configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_minutely",  1 * 60, 400)));
     configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_5minutely", 5 * 60, 400)));
@@ -31,7 +32,8 @@ namespace dss {
     configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_daily", 24 * 60*60, 400)));
     m_Config.push_back(configConsumption);
 
-    boost::shared_ptr<MeteringConfigChain> configEnergy(new MeteringConfigChain(true, 60));
+    boost::shared_ptr<MeteringConfigChain> configEnergy(new MeteringConfigChain(true, 60, "kWh"));
+    configEnergy->SetComment("Energymeter value");
     configEnergy->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("energy_minutely",  1 * 60, 400)));
     configEnergy->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("energy_5minutely", 5 * 60, 400)));
     configEnergy->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("energy_hourly",   60 * 60, 400)));
@@ -68,7 +70,11 @@ namespace dss {
             return; // TODO: another strategy would be moving the file out of our way and just create an empty one
           }
         } else {
-          series.push_back(boost::shared_ptr<Series<CurrentValue> >(new Series<CurrentValue>(_config->GetResolution(iConfig), _config->GetNumberOfValues(iConfig))));
+          boost::shared_ptr<Series<CurrentValue> > newSeries((new Series<CurrentValue>(_config->GetResolution(iConfig), _config->GetNumberOfValues(iConfig))));
+          newSeries->SetUnit(_config->GetUnit());
+          newSeries->SetComment(_config->GetComment());
+          newSeries->SetFromDSID((*ipModulator)->GetDSID());
+          series.push_back(newSeries);
         }
       }
       // stitch up chain

@@ -62,10 +62,12 @@ namespace dss {
     bool m_IsEnergy;
     int m_CheckIntervalSeconds;
     DateTime m_LastRun;
+    std::string m_Unit;
+    std::string m_Comment;
     std::vector<boost::shared_ptr<MeteringConfig> > m_Chain;
   public:
-    MeteringConfigChain(bool _isEnergy, int _checkIntervalSeconds)
-    : m_IsEnergy(_isEnergy), m_CheckIntervalSeconds(_checkIntervalSeconds)
+    MeteringConfigChain(bool _isEnergy, int _checkIntervalSeconds, const std::string& _unit)
+    : m_IsEnergy(_isEnergy), m_CheckIntervalSeconds(_checkIntervalSeconds), m_Unit(_unit)
     { }
 
     void AddConfig(boost::shared_ptr<MeteringConfig> _config);
@@ -81,6 +83,9 @@ namespace dss {
     bool IsEnergy() const { return m_IsEnergy; }
     bool IsConsumption() const { return !m_IsEnergy; }
     int GetCheckIntervalSeconds() const { return m_CheckIntervalSeconds; }
+    const std::string& GetUnit() const { return m_Unit; }
+    const std::string& GetComment() const { return m_Comment; }
+    void SetComment(const std::string& _value) { m_Comment = _value; }
   }; // MeteringConfigChain
 
 } // namespace dss

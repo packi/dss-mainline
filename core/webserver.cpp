@@ -75,7 +75,6 @@ namespace dss {
     shttpd_printf(_arg, sstream.str().c_str());
   } // EmitHTTPHeader
 
-
   HashMapConstStringString ParseParameter(const char* _params) {
     HashMapConstStringString result;
     if(_params != NULL) {
@@ -94,7 +93,7 @@ namespace dss {
 
   string ToJSONValue(const int& _value) {
     return IntToString(_value);
-  } // ToJSONValue
+  } // ToJSONValue(int)
 
   string ToJSONValue(const bool& _value) {
     if(_value) {
@@ -102,15 +101,15 @@ namespace dss {
     } else {
       return "false";
     }
-  }
+  } // ToJSONValue(bool)
 
   string ToJSONValue(const string& _value) {
     return string("\"") + _value + '"';
-  } // ToJSONValue
+  } // ToJSONValue(const string&)
 
   string ToJSONValue(const char* _value) {
     return ToJSONValue(string(_value));
-  }
+  } // ToJSONValue(const char*)
 
   string ResultToJSON(const bool _ok, const string& _message = "") {
     stringstream sstream;
@@ -129,7 +128,7 @@ namespace dss {
             << ", \"name\": \"" << _device.GetDevice().GetName()
             << "\", \"on\": " << ToJSONValue(_device.IsOn()) << " }";
     return sstream.str();
-  }
+  } // ToJSONValue(DeviceReference)
 
   string ToJSONValue(const Set& _set, const string& _arrayName) {
     std::stringstream sstream;
@@ -146,7 +145,7 @@ namespace dss {
     }
     sstream << "]";
     return sstream.str();
-  }
+  } // ToJSONValue(Set,Name)
 
   string ToJSONValue(Zone& _zone) {
     std::stringstream sstream;
@@ -202,7 +201,7 @@ namespace dss {
     }
 
     return devices;
-  }
+  } // GetUnassignedDevices
 
   template<class t>
   string ToJSONArray(const vector<t>& _v);

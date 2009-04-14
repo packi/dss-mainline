@@ -9,6 +9,7 @@
 
 #include "core/xmlwrapper.h"
 #include "core/logger.h"
+#include "core/foreach.h"
 
 #include <boost/filesystem.hpp>
 
@@ -47,38 +48,69 @@ namespace dss {
   Series<T>* SeriesReader<T>::ReadFromXML(const string& _fileName) {
     XMLDocumentFileReader reader(_fileName);
 
-    XMLNode rootNode = reader.GetDocument().GetRootNode();
-    if(rootNode.GetName() == "values") {
+    XMLNode& rootNode = reader.GetDocument().GetRootNode();
+    if(rootNode.GetName() == "metering") {
+      Series<T>* result = NULL;
       if(rootNode.GetAttributes()["version"] != IntToString(SeriesXMLFileVersion)) {
         Logger::GetInstance()->Log(string("SeriesReader::ReadFromXML: Version mismatch, expected ") + IntToString(SeriesXMLFileVersion) + " got " + rootNode.GetAttributes()["version"],
                                    lsError);
         return NULL;
       }
-      int numberOfValues = StrToIntDef(rootNode.GetAttributes()["numberOfValues"], -1);
-      if(numberOfValues == -1) {
-        Logger::GetInstance()->Log(string("SeriesReader::ReadFromXML: numberOfValues attribute missing or invalid: ") + rootNode.GetAttributes()["numberOfValues"],
-                                   lsError);
-        return NULL;
-      }
-      int resolution = StrToIntDef(rootNode.GetAttributes()["resolution"], -1);
-      if(resolution == -1) {
-        Logger::GetInstance()->Log(string("SeriesReader::ReadFromXML: resolution attribute missing or invalid: ") + rootNode.GetAttributes()["numberOfValues"],
-                                   lsError);
-        return NULL;
-      }
+      XMLNodeList& children = rootNode.GetChildren();
+      foreach(XMLNode node, children) {
+        if(node.GetName() == "values") {
+          int numberOfValues = StrToIntDef(node.GetAttributes()["numberOfValues"], -1);
+          if(numberOfValues == -1) {
+            Logger::GetInstance()->Log(string("SeriesReader::ReadFromXML: numberOfValues attribute missing or invalid: ") + node.GetAttributes()["numberOfValues"],
+                                       lsError);
+            return NULL;
+          }
+          int resolution = StrToIntDef(node.GetAttributes()["resolution"], -1);
+          if(resolution == -1) {
+            Logger::GetInstance()->Log(string("SeriesReader::ReadFromXML: resolution attribute missing or invalid: ") + node.GetAttributes()["numberOfValues"],
+                                       lsError);
+            return NULL;
+          }
 
-      Series<T>* result = new Series<T>(resolution, numberOfValues);
-      XMLNodeList& values = rootNode.GetChildren();
-      for(XMLNodeList::iterator iNode = values.begin(), e = values.end();
-          iNode != e; ++iNode)
-      {
-        if(iNode->GetName() == "value") {
+          result = new Series<T>(resolution, numberOfValues);
+          XMLNodeList& values = node.GetChildren();
+          for(XMLNodeList::iterator iNode = values.begin(), e = values.end();
+              iNode != e; ++iNode)
+          {
+            if(iNode->GetName() == "value") {
+              try {
+                T value(0);
+                value.ReadFromXMLNode(*iNode);
+                result->AddValue(value);
+              } catch(runtime_error& e) {
+                Logger::GetInstance()->Log(string("SeriesReader::ReadFromXML: Error while reading value: ") + e.what());
+              }
+            }
+          }
+        }
+      }
+      foreach(XMLNode node, children) {
+        if(node.GetName() == "config") {
           try {
-            T value(0);
-            value.ReadFromXMLNode(*iNode);
-            result->AddValue(value);
-          } catch(runtime_error& e) {
-            Logger::GetInstance()->Log(string("SeriesReader::ReadFromXML: Error while reading value: ") + e.what());
+            XMLNode& commentNode = node.GetChildByName("comment");
+            if(result != NULL) {
+              result->SetComment(commentNode.GetChildren()[0].GetContent());
+            }
+          } catch(runtime_error&) {
+          }
+          try {
+            XMLNode& dsidNode = node.GetChildByName("from_dsid");
+            if(result != NULL) {
+              result->SetFromDSID(dsid_t::FromString(dsidNode.GetChildren()[0].GetContent()));
+            }
+          } catch(runtime_error&) {
+          }
+          try {
+            XMLNode& unitNode = node.GetChildByName("unit");
+            if(result != NULL) {
+              result->SetUnit(unitNode.GetChildren()[0].GetContent());
+            }
+          } catch(runtime_error&) {
           }
         }
       }
@@ -97,24 +129,51 @@ namespace dss {
     pDoc->appendChild(pXMLHeader);
     AutoPtr<ProcessingInstruction> pProcessing = pDoc->createProcessingInstruction("xml-stylesheet", "href='value_graph.xslt' type='text/xsl'");
     pDoc->appendChild(pProcessing);
-    AutoPtr<Element> pRoot = pDoc->createElement("values");
+    // metering node
+    AutoPtr<Element> pRoot = pDoc->createElement("metering");
     pRoot->setAttribute("version", IntToString(SeriesXMLFileVersion));
-    pRoot->setAttribute("resolution", IntToString(_series.GetResolution()));
-    pRoot->setAttribute("numberOfValues", IntToString(_series.GetNumberOfValues()));
     pDoc->appendChild(pRoot);
+    // metering/config
+    AutoPtr<Element> pConfig = pDoc->createElement("config");
+    pRoot->appendChild(pConfig);
+
+    if(!_series.GetComment().empty()) {
+      AutoPtr<Element> elem = pDoc->createElement("comment");
+      AutoPtr<Text> txt = pDoc->createTextNode(_series.GetComment());
+      elem->appendChild(txt);
+      pConfig->appendChild(elem);
+    }
+    if(_series.GetFromDSID() != NullDSID) {
+      AutoPtr<Element> elem = pDoc->createElement("from_dsid");
+      AutoPtr<Text> txt = pDoc->createTextNode(_series.GetFromDSID().ToString());
+      elem->appendChild(txt);
+      pConfig->appendChild(elem);
+    }
+    if(!_series.GetUnit().empty()) {
+      AutoPtr<Element> elem = pDoc->createElement("unit");
+      AutoPtr<Text> txt = pDoc->createTextNode(_series.GetUnit());
+      elem->appendChild(txt);
+      pConfig->appendChild(elem);
+    }
+    //pRoot->appendChild(pConfig);
+    // metering/values
+    AutoPtr<Element> pValues = pDoc->createElement("values");
+    pValues->setAttribute("resolution", IntToString(_series.GetResolution()));
+    pValues->setAttribute("numberOfValues", IntToString(_series.GetNumberOfValues()));
+    pRoot->appendChild(pValues);
 
     const std::deque<T> values = _series.GetValues();
     for(typename std::deque<T>::const_reverse_iterator iValue = values.rbegin(), e = values.rend();
         iValue != e; ++iValue)
     {
       AutoPtr<Element> elem = pDoc->createElement("value");
-      iValue->WriteToXMLNode(elem);
-      pRoot->appendChild(elem);
+      iValue->WriteToXMLNode(pDoc, elem);
+      pValues->appendChild(elem);
     }
 
     // write it to a temporary site first
     string tmpOut = _path + ".tmp";
-    std::ofstream ofs(_path.c_str() );
+    std::ofstream ofs(tmpOut.c_str() );
 
     if(ofs) {
       DOMWriter writer;
@@ -125,7 +184,7 @@ namespace dss {
       ofs.close();
 
       // move it to the desired location
-      fs::rename(tmpOut, _path);
+      rename(tmpOut.c_str(), _path.c_str());
     } else {
       Logger::GetInstance()->Log("Could not open file for writing");
     }

@@ -3,10 +3,11 @@
 
 #include "core/datetools.h"
 #include "core/xmlwrapper.h"
-#include "core/datetools.h"
+#include "core/ds485types.h"
 
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
+#include <Poco/DOM/Text.h>
 #include <Poco/DOM/AutoPtr.h>
 
 #include <boost/shared_ptr.hpp>
@@ -15,6 +16,7 @@
 
 using Poco::XML::Document;
 using Poco::XML::Element;
+using Poco::XML::Text;
 using Poco::XML::AutoPtr;
 
 namespace dss {
@@ -52,17 +54,29 @@ namespace dss {
     } // MergeWith
 
     virtual void ReadFromXMLNode(XMLNode& _node) {
-      m_Value = StrToDouble(_node.GetAttributes()["value"]);
-      m_Min = StrToDouble(_node.GetAttributes()["min"]);
-      m_Max = StrToDouble(_node.GetAttributes()["max"]);
       m_TimeStamp = DateTime(DateFromISOString(_node.GetAttributes()["timestamp"].c_str()));
+      m_Min = StrToDouble(_node.GetChildByName("value").GetChildren()[0].GetContent());
+      m_Max = StrToDouble(_node.GetChildByName("max").GetChildren()[0].GetContent());
+      m_Value = StrToDouble(_node.GetChildByName("value").GetChildren()[0].GetContent());
     } // ReadFromXMLNode
 
-    virtual void WriteToXMLNode(AutoPtr<Element>& _elem) const {
-      _elem->setAttribute("value", DoubleToString(m_Value));
-      _elem->setAttribute("min", DoubleToString(m_Min));
-      _elem->setAttribute("max", DoubleToString(m_Max));
+    virtual void WriteToXMLNode(AutoPtr<Document>& _doc, AutoPtr<Element>& _elem) const {
       _elem->setAttribute("timestamp", (string)m_TimeStamp);
+
+      AutoPtr<Element> elem = _doc->createElement("min");
+      AutoPtr<Text> txt = _doc->createTextNode(DoubleToString(m_Min));
+      elem->appendChild(txt);
+      _elem->appendChild(elem);
+
+      elem = _doc->createElement("max");
+      txt = _doc->createTextNode(DoubleToString(m_Max));
+      elem->appendChild(txt);
+      _elem->appendChild(elem);
+
+      elem = _doc->createElement("value");
+      txt = _doc->createTextNode(DoubleToString(m_Value));
+      elem->appendChild(txt);
+      _elem->appendChild(elem);
     } // WriteToXMLNode
 
     const DateTime& GetTimeStamp() const { return m_TimeStamp; }
@@ -114,6 +128,10 @@ namespace dss {
     unsigned int m_NumberOfValues;
     Series<T>* m_NextSeries;
     std::deque<value_type> m_Values;
+  private:
+    std::string m_Comment;
+    dsid_t m_FromDSID;
+    std::string m_Unit;
   public:
     Series(const int _resolution, const unsigned int _numberOfValues)
     : m_Resolution(_resolution),
@@ -180,6 +198,13 @@ namespace dss {
     void SetNextSeries(Series<T>* _value) { m_NextSeries = _value; }
     int GetNumberOfValues() const { return m_NumberOfValues; }
     int GetResolution() const { return m_Resolution; }
+
+    const std::string& GetComment() const { return m_Comment; }
+    void SetComment(const string& _value) { m_Comment = _value; }
+    const dsid_t& GetFromDSID() const { return m_FromDSID; }
+    void SetFromDSID(const dsid_t& _value) { m_FromDSID = _value; }
+    const std::string GetUnit() const { return m_Unit; }
+    void SetUnit(const string& _value) { m_Unit = _value; }
   }; // Series
 
 } // namespace dss
