@@ -55,7 +55,7 @@ namespace dss {
 
     virtual void ReadFromXMLNode(XMLNode& _node) {
       m_TimeStamp = DateTime(DateFromISOString(_node.GetAttributes()["timestamp"].c_str()));
-      m_Min = StrToDouble(_node.GetChildByName("value").GetChildren()[0].GetContent());
+      m_Min = StrToDouble(_node.GetChildByName("min").GetChildren()[0].GetContent());
       m_Max = StrToDouble(_node.GetChildByName("max").GetChildren()[0].GetContent());
       m_Value = StrToDouble(_node.GetChildByName("value").GetChildren()[0].GetContent());
     } // ReadFromXMLNode
@@ -154,7 +154,15 @@ namespace dss {
         DateTime lastValStamp = lastVal.GetTimeStamp();
         int diff = _value.GetTimeStamp().Difference(lastValStamp);
         if(diff < m_Resolution) {
-          lastVal.MergeWith(_value);
+          if(m_Values.size() > 1) {
+            lastVal.MergeWith(_value);
+          } else {
+            // if we've got only one value the next incoming value has to be in the next interval
+            DateTime prevStamp = m_Values.front().GetTimeStamp();
+            value_type newVal = _value;
+            newVal.SetTimeStamp(prevStamp.AddSeconds(m_Resolution));
+            m_Values.push_front(newVal);
+          }
         } else {
           // if we've got more than one value in the queue,
           // make sure we've got the right interval

@@ -40,6 +40,8 @@ class SeriesTest : public CPPUNIT_NS::TestCase
   CPPUNIT_TEST(testWrapping);
   CPPUNIT_TEST(testRealtime);
   CPPUNIT_TEST(testReadWrite);
+  CPPUNIT_TEST(testReadWriteExtended);
+  CPPUNIT_TEST(testTimestamps);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -47,11 +49,35 @@ public:
   void tearDown(void) {}
 protected:
 
+  void testTimestamps() {
+    Series<CurrentValue> five(5 * 60, 10);
+    Series<CurrentValue> minutely(60, 10, &five);
+    Series<CurrentValue> secondly2(2, 10, &minutely);
+
+    DateTime testStart;
+
+    secondly2.AddValue(1, testStart);
+    secondly2.AddValue(2, testStart.AddSeconds(1));
+    secondly2.AddValue(2, testStart.AddSeconds(2));
+
+    CPPUNIT_ASSERT_EQUAL(2u, secondly2.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL(2.0, secondly2.GetValues().front().GetValue());
+
+    CPPUNIT_ASSERT_EQUAL(testStart.AddSeconds(2), secondly2.GetValues().front().GetTimeStamp());
+
+    // skip one value
+    secondly2.AddValue(3, testStart.AddSeconds(5));
+
+    CPPUNIT_ASSERT_EQUAL(4u, secondly2.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL(3.0, secondly2.GetValues().front().GetValue());
+
+    CPPUNIT_ASSERT_EQUAL(testStart.AddSeconds(5), secondly2.GetValues().front().GetTimeStamp());
+  } // testTimestamps
+
   void testReadWrite() {
     Series<CurrentValue> five(5 * 60, 10);
     Series<CurrentValue> minutely(60, 10, &five);
     Series<CurrentValue> secondly(1, 10, &minutely);
-
 
     DateTime testStart;
 
@@ -84,6 +110,74 @@ protected:
 
     delete series;
   } // testReadWrite
+
+  void testReadWriteExtended() {
+    int delay[]   =  { 0, 1, 2, 4, 5, 7, 8, 120, 160 };
+    int values[]  =  { 1, 2, 3, 4, 5, 6, 7,  8,  9 };
+    int lastDelay = 0;
+    int numValues = sizeof(delay)/sizeof(int);
+
+
+    DateTime startTime;
+
+    Series<CurrentValue> five(5 * 60, 10);
+    Series<CurrentValue> minutely(60, 10, &five);
+    Series<CurrentValue> secondly2(2, 10, &minutely);
+
+    secondly2.AddValue(values[0], startTime.AddSeconds(delay[0]));
+    SeriesWriter<CurrentValue> writer;
+    writer.WriteToXML(secondly2, "/home/patrick/workspace/dss/data/webroot/test_2seconds.xml");
+    writer.WriteToXML(minutely, "/home/patrick/workspace/dss/data/webroot/test_minutely.xml");
+    writer.WriteToXML(five, "/home/patrick/workspace/dss/data/webroot/test_five_minutely.xml");
+
+    unsigned int lastNumValsSeconds = secondly2.GetValues().size();
+    unsigned int lastNumValsMinutely = minutely.GetValues().size();
+    unsigned int lastNumValsFive = five.GetValues().size();
+
+    SeriesReader<CurrentValue> reader;
+    DateTime lastTimeStamp = startTime;
+
+    for(int iVal = 1; iVal < numValues; iVal++) {
+      int curDelay = delay[iVal];
+      int curValue = values[iVal];
+      int diff = curDelay - lastDelay;
+      cout << "\ndiff: " << diff << "\ncurDelay: " << curDelay << endl;
+
+      boost::shared_ptr<Series<CurrentValue> > pFive(reader.ReadFromXML("/home/patrick/workspace/dss/data/webroot/test_five_minutely.xml"));
+      boost::shared_ptr<Series<CurrentValue> > pMinutely(reader.ReadFromXML("/home/patrick/workspace/dss/data/webroot/test_minutely.xml"));
+      boost::shared_ptr<Series<CurrentValue> > pSecondly2(reader.ReadFromXML("/home/patrick/workspace/dss/data/webroot/test_2seconds.xml"));
+
+      cout << "secondly last: " << lastNumValsSeconds << " current: " << pSecondly2->GetValues().size() << endl;
+      CPPUNIT_ASSERT_EQUAL(lastNumValsSeconds, pSecondly2->GetValues().size());
+      CPPUNIT_ASSERT_EQUAL(lastNumValsMinutely, pMinutely->GetValues().size());
+      CPPUNIT_ASSERT_EQUAL(lastNumValsFive, pFive->GetValues().size());
+      cout << "last timestamp: " << lastTimeStamp << " current: " << pSecondly2->GetValues().front().GetTimeStamp() << endl;
+      CPPUNIT_ASSERT_EQUAL(lastTimeStamp, pSecondly2->GetValues().front().GetTimeStamp());
+
+      pMinutely->SetNextSeries(pFive.get());
+      pSecondly2->SetNextSeries(pMinutely.get());
+
+      pSecondly2->AddValue(curValue, startTime.AddSeconds(curDelay));
+
+      if(diff > 2) {
+        int numNewVals = (diff + 1) / 2;
+        cout << "diff       : " << diff << endl;
+        cout << "numNewVals : " << numNewVals << endl;
+        cout << "lastValSec : " << lastNumValsSeconds << endl;
+        cout << "current    : " << pSecondly2->GetValues().size() << endl;
+        //CPPUNIT_ASSERT_EQUAL(lastNumValsSeconds + numNewVals, pSecondly)
+      }
+
+      lastNumValsSeconds = pSecondly2->GetValues().size();
+      lastNumValsMinutely = pMinutely->GetValues().size();
+      lastNumValsFive = pFive->GetValues().size();
+      lastTimeStamp = pSecondly2->GetValues().front().GetTimeStamp();
+
+      writer.WriteToXML(*pSecondly2, "/home/patrick/workspace/dss/data/webroot/test_2seconds.xml");
+      writer.WriteToXML(*pMinutely, "/home/patrick/workspace/dss/data/webroot/test_minutely.xml");
+      writer.WriteToXML(*pFive, "/home/patrick/workspace/dss/data/webroot/test_five_minutely.xml");
+    }
+  } // testReadWriteExtended
 
   void testRealtime() {
     Series<CurrentValue> five(5 * 60, 10);

@@ -46,6 +46,13 @@ int main (int argc, char * const argv[]) {
   // make sure timezone gets set
   tzset();
 
+  tzname[0] = tzname[1] = "GMT";
+  timezone = 0;
+  daylight = 0;
+
+  setenv("TZ", "UTC", 1);
+
+
 #ifndef WIN32
   srand((getpid() << 16) ^ getuid() ^ time(0));
   // disable broken pipe signal

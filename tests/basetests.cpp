@@ -13,6 +13,7 @@
 
 
 #include "../core/base.h"
+#include "../core/datetools.h"
 
 #undef CPPUNIT_ASSERT
 #define CPPUNIT_ASSERT(condition) CPPUNIT_ASSERT_EQUAL(true, (condition))
@@ -27,6 +28,7 @@ class BaseTest : public CPPUNIT_NS::TestCase
   CPPUNIT_TEST(testConversions);
   CPPUNIT_TEST(testTrim);
   CPPUNIT_TEST(testSplitString);
+  CPPUNIT_TEST(testISODate);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -144,6 +146,25 @@ protected:
     CPPUNIT_ASSERT_EQUAL(string("b"), result[1]);
 
   } // testSplitString
+
+  void testISODate() {
+    const char c = 'C';
+    struct tm inst;
+    time_t now;
+    time( &now );
+    localtime_r(&now, &inst);
+    mktime(&inst);
+
+    string asString = DateToISOString<string>(&inst);
+    struct tm parsed = DateFromISOString(asString.c_str());
+    parsed.tm_zone = &c;
+
+    DateTime instObj(inst);
+    DateTime parsedObj(parsed);
+
+    cout << "original: " << instObj << " parsed: " << parsedObj << endl;
+    CPPUNIT_ASSERT_EQUAL(instObj, parsedObj);
+  } // testISODate
 
 };
 
