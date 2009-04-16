@@ -43,6 +43,7 @@ namespace dss {
 
   void Metering::DoStart() {
     m_MeteringStorageLocation = GetDSS().GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "storageLocation");
+    Log("Writing files to: " + m_MeteringStorageLocation);
     Run();
   } // Start
 

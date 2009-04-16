@@ -13,6 +13,7 @@
 #include "unix/serialcom.h"
 
 #include <boost/shared_ptr.hpp>
+#include <string>
 
 namespace dss {
 
@@ -22,6 +23,7 @@ namespace dss {
     int m_LastValue;
     boost::shared_ptr<Series<CurrentValue> > m_Series;
     SerialCom m_SerialCom;
+    std::string m_MeteringStorageLocation;
   private:
     virtual void Execute();
   protected:

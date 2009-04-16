@@ -8,6 +8,7 @@
 #include "fake_meter.h"
 #include "core/dss.h"
 #include "core/propertysystem.h"
+#include "seriespersistence.h"
 
 #include <cmath>
 
@@ -18,9 +19,12 @@ namespace dss {
     Thread("FakeMeter")
   {
     GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "device", "/dev/ttyS2");
+    GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "storageLocation", "data/webroot/metering/", true);
   }
 
   void FakeMeter::Execute() {
+    SeriesWriter<CurrentValue> writer;
+
     string dev = GetDSS().GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "device");
     m_Series.reset(new Series<CurrentValue>(60, 400));
     try {
@@ -53,10 +57,13 @@ namespace dss {
       } while(!m_Terminated && c != 'E');
       Log("Found value " + IntToString(val));
       m_Series->AddValue(val, DateTime());
+      writer.WriteToXML(*m_Series, m_MeteringStorageLocation + "metering.xml");
     }
   } // Execute
 
   void FakeMeter::DoStart() {
+    m_MeteringStorageLocation = GetDSS().GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "storageLocation");
+    Log("Writing files to: " + m_MeteringStorageLocation);
     Run();
   } // DoStart
 

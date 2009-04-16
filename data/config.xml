@@ -2,10 +2,19 @@
 <properties version="1">
   <property name="config">
     <property name="subsystems/DS485Proxy/rs485devicename" type="string">
-      <value>/dev/ttyUSB1</value>
+      <value>/dev/ttyS0</value>
     </property>
     <property name="subsystems/FakeMeter/device" type="string">
-      <value>/dev/ttyUSB0</value>
+      <value>/dev/ttyS2</value>
+    </property>
+    <property name="subsystems/FakeMeter/storageLocation" type="string">
+      <value>/mnt/webroot/metering/</value>
+    </property>
+    <property name="subsystems/Metering/storageLocation" type="string">
+      <value>/mnt/webroot/metering/</value>
+    </property>
+    <property name="subsystems/WebServer/webroot" type="string">
+      <value>/mnt/webroot/</value>
     </property>
     <property name="subsystems/Metering/enabled" type="boolean">
       <value>true</value>

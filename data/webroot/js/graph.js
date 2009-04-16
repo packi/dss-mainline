@@ -9,8 +9,8 @@ function start() {
   var dummy = new Date();
   fetchXML('metering_xml', 'metering/metering.xml?time=' + dummy);
   initGraph('graph' , 'metering/0000000000000000ffc00010_consumption_seconds.xml?time=' + dummy);
+  initGraph('graph2' , 'metering/metering.xml?time=' + dummy);
   setTimeout('start()', 5000);
-  //initGraph('graph2' , 'xml/graph2.xml?time=' + dummy);
 }
 
 function fetchXML(drawWhere, url) {
