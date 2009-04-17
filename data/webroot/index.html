@@ -24,7 +24,7 @@ function ApartmentRenderer(into) {
     var zonelist = "<ul>"
     self.apartment.zones.each(
       function(zone) {
-        if(zone.id == 0) { 
+        if(zone.id == 0) {
           return;
         }
         zonelist += "<li>" + zone.name + '[<a href="#" onclick="turnOnZone(\'' + zone.id + '\')">Turn On</a>';
@@ -59,7 +59,7 @@ function ApartmentRenderer(into) {
     });
     $('numDevs').innerHTML = devNum;
   }
-  
+
 }
 
 var apt = null;
@@ -69,21 +69,22 @@ var apt = null;
 	  new Device(devid).turnOn();
 //new HEvent('turnOn', '.dsid(0000000000000000ffc00004)', undefined).raise();
 	}
-	
+
 	function turnOff(devid) {
 	  new Device(devid).turnOff();
 	}
 
 	function turnOnZone(zoneid) {
-          var z = new Zone(zoneid);
-          z.sendEvent('turnOn');
+    new Zone(zoneid).turnOn();
+         // var z = new Zone(zoneid);
+         // z.sendEvent('turnOn');
 	  //new Zone(zoneid).sendEvent('turnoOn');
 	}
-	
+
 	function turnOffZone(zoneid) {
 	  new Zone(zoneid).turnOff();
 	}
-	
+
 function doOnload() {
   apt = new ApartmentRenderer("bla");
   apt.render();
@@ -99,5 +100,5 @@ function doOnload() {
 	<div class="container fl">
         <div id="bla">(loading...)</div>
 	</div>
-  </body>	
+  </body>
 </html>

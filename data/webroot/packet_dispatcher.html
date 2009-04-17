@@ -1,10 +1,10 @@
 <html>
   <head>
     <title>digitalStrom - Server</title>
-	<script src="prototype.js" language="JavaScript" type="text/javascript"></script>
+	<script src="js/prototype.js" language="JavaScript" type="text/javascript"></script>
 	<link rel="stylesheet" type="text/css" href="main.css"/>
 	<script type="text/javascript" language="JavaScript">
-	
+
         function log(str) {
           var logDiv = $('log');
           logDiv.innerHTML += str + '<br/>';
@@ -13,7 +13,7 @@
 function SendPanel(container) {
   var self = this;
   this.container = $(container);
-  
+
   this.setup = function() {
     var html = '<form id="send_form"><table id="send_table">';
     function addLine(first, second) {
@@ -28,7 +28,7 @@ function SendPanel(container) {
     [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].each(function(val) {
       addLine('Payload byte ' + val, '<input id="payload_' + val + '" value="0x00" />');
     });
-    
+
     html += '</table><a id="submit" href="#">send</a></form>';
     self.container.innerHTML = html;
     $('submit').onclick = function() {
@@ -37,10 +37,10 @@ function SendPanel(container) {
   }
   this.send = function() {
     new Ajax.Request(
-      '/json/sendframe', 
+      '/json/debug/sendFrame',
       { method:'get',
-	parameters: 
-	  { 
+	parameters:
+	  {
 	    destination: $F('destination'),
             broadcast: $('broadcast').checked,
             counter: $F('counter'),
@@ -63,14 +63,14 @@ function SendPanel(container) {
             payload_15: $F('payload_15'),
             payload_16: $F('payload_16')
 	  },
-      
+
 	onComplete: function(transport, json) {
           log('sent');
         }
       }
     );
   }
-  
+
   this.setup();
 }
 
@@ -85,5 +85,5 @@ function doOnLoad() {
     <div id="send_panel">
     </div>
     Log: <div id="log">Log</div>
-  </body>	
+  </body>
 </html>

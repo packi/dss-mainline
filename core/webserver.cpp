@@ -669,7 +669,7 @@ namespace dss {
     }
     shttpd_printf(_arg, result.c_str());
     _arg->flags |= SHTTPD_END_OF_OUTPUT;
-    return;
+   // return;
 
     if(BeginsWith(method, "structure/")) {
       if(method == "structure/zoneAddDevice") {

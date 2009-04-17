@@ -3,7 +3,7 @@
 
   <zone id="1"> 
     <device dsid="1" busid="1" type="standard.switch" />
-    <device dsid="2" busid="2" type="standard.simple" /> <!-- type="example.vlc_remote" /> -->
+    <device dsid="2" busid="2" type="example.vlc_remote" /> 
     <device dsid="4" busid="4" type="standard.simple"/>
     <device dsid="6" busid="6" type="standard.switch" bell="true"/>
     <group id="1">

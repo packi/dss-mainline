@@ -18,13 +18,13 @@ body {
 
 ul.drag {
     border: 1px solid gray;
-    width: 200px; 
+    width: 200px;
     list-style: none;
     margin:0;
     padding:0;
     /*
-       The bottom padding provides the cushion that makes the empty 
-       list targetable.  Alternatively, we could leave the padding 
+       The bottom padding provides the cushion that makes the empty
+       list targetable.  Alternatively, we could leave the padding
        off by default, adding it when we detect that the list is empty.
     */
     padding-bottom:20px;
@@ -54,21 +54,22 @@ function StructureModifier(containerForOthers, containerForUnassigned) {
   this.zones = [];
   this.devLists = [];
   this.fetchApartment = function() {
-    new Ajax.Request('/json/getapartment', 
+    new Ajax.Request('/json/apartment/getStructure',
       {
-        method:'get', 
+        method:'get',
         onComplete: function(transport, json) {
           self.doUpdate(transport.responseJSON.apartment.zones);
         }
-      } 
+      }
     );
-    new Ajax.Request('/json/getunassigneddevices', 
+    new Ajax.Request('/json/apartment/getStructure',
       {
-        method:'get', 
+        method:'get',
+        parameters: { unassigned: true },
         onComplete: function(transport, json) {
           self.updateUnassigned(transport.responseJSON.devices);
         }
-      } 
+      }
     );
   };
 
@@ -109,7 +110,7 @@ function StructureModifier(containerForOthers, containerForUnassigned) {
 
     $('numDevs').innerHTML = self.devNum;
   }
-  
+
   this.doUpdate = function(zones) {
     var zoneids = [];
     var devids = [];
@@ -120,7 +121,7 @@ function StructureModifier(containerForOthers, containerForUnassigned) {
     var zonelist = '';//"<ul>"
     zones.each(
       function(zone) {
-        if(zone.id == 0) { 
+        if(zone.id == 0) {
           return;
         }
         var rid = 'zone_' + zone.id;
@@ -147,7 +148,7 @@ function StructureModifier(containerForOthers, containerForUnassigned) {
     );
     zonelist += "";
     $(containerForOthers).innerHTML = zonelist;
-    
+
     zoneids.each(
       function(rid) {
         new YAHOO.util.DDTarget(rid);
@@ -164,7 +165,7 @@ function StructureModifier(containerForOthers, containerForUnassigned) {
 
     $('numDevs').innerHTML = self.devNum;
   }
-  
+
   self.fetchApartment();
 }
 
@@ -193,30 +194,30 @@ YAHOO.example.DDApp = {
     moveDeviceToZone: function(device, targetZone) {
 	  new Ajax.Request('/json/structure/zoneAddDevice',
 	    {
-	      method:'get', 
-	      parameters: 
-	        { 
+	      method:'get',
+	      parameters:
+	        {
 	          devid: device.id,
 	          zone: targetZone
 	        },
 	      onComplete: function(transport, json) {
 	      }
-	    } 
+	    }
 	  );
     },
 
     doAddZone: function() {
 	  new Ajax.Request('/json/structure/addZone',
 	    {
-	      method:'get', 
-	      parameters: 
-	        { 
+	      method:'get',
+	      parameters:
+	        {
 	          zoneID: $F('zoneID'),
 	          modulatorID: $F('modulatorID')
 	        },
 	      onComplete: function(transport, json) {
 	      }
-	    } 
+	    }
 	  );
     },
 
@@ -285,14 +286,14 @@ YAHOO.extend(YAHOO.example.DDList, YAHOO.util.DDProxy, {
 
         // Show the proxy element and animate it to the src element's location
         Dom.setStyle(proxy, "visibility", "");
-        var a = new YAHOO.util.Motion( 
-            proxy, { 
-                points: { 
+        var a = new YAHOO.util.Motion(
+            proxy, {
+                points: {
                     to: Dom.getXY(srcEl)
                 }
-            }, 
-            0.2, 
-            YAHOO.util.Easing.easeOut 
+            },
+            0.2,
+            YAHOO.util.Easing.easeOut
         )
         var proxyid = proxy.id;
         var thisid = this.id;
@@ -312,10 +313,10 @@ YAHOO.extend(YAHOO.example.DDList, YAHOO.util.DDProxy, {
         if (DDM.interactionInfo.drop.length === 1) {
 
             // The position of the cursor at the time of the drop (YAHOO.util.Point)
-            var pt = DDM.interactionInfo.point; 
+            var pt = DDM.interactionInfo.point;
 
             // The region occupied by the source element at the time of the drop
-            var region = DDM.interactionInfo.sourceRegion; 
+            var region = DDM.interactionInfo.sourceRegion;
 
             // Check to see if we are over the source element's location.  We will
             // append to the bottom of the list once we are sure it was a drop in
@@ -346,7 +347,7 @@ YAHOO.extend(YAHOO.example.DDList, YAHOO.util.DDProxy, {
     },
 
     onDragOver: function(e, id) {
-    
+
         var srcEl = this.getEl();
         var destEl = Dom.get(id);
 
@@ -391,5 +392,5 @@ Event.onDOMReady(YAHOO.example.DDApp.init, YAHOO.example.DDApp, true);
           <div id="other_zones">(loading...)</div>
 	</div>
 
-  </body>	
+  </body>
 </html>
