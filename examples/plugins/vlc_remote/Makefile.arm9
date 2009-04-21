@@ -1,0 +1,14 @@
+CXX=/opt/emlix/picocom1/bin/arm-linux-gnueabi-g++
+
+all:	vlc_remote.so 
+
+vlc_remote.so2:	vlc_remote.o
+	#g++ -lPocoNet -lpthread -shared -Wl,-soname,vlc_remote.so -o vlc_remote.so *.o
+	$(CXX) -shared -o vlc_remote.so *.o
+	
+
+vlc_remote.so:	vlc_remote.cpp
+	$(CXX) -g3 -O0 -Wall -fPIC -shared vlc_remote.cpp -I /home/patrick/test/sysroot/include -o vlc_remote.so
+
+install:	vlc_remote.so
+#	cp vlc_remote.so ../../../data/plugins/
