@@ -49,7 +49,7 @@ public:
     void SendCommand(const std::string& _command) {
       try
        {
-               Poco::Net::SocketAddress sa("192.168.2.1", 4212);
+               Poco::Net::SocketAddress sa("127.0.0.1", 4212);
                Poco::Net::StreamSocket sock(sa);
                Poco::Net::SocketStream str(sock);
 

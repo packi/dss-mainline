@@ -17,6 +17,7 @@ namespace dss {
   const uint8_t CommandResponse = 0x0a;
   const uint8_t CommandAck = 0x0b;
   const uint8_t CommandBusy = 0x0c;
+  const uint8_t CommandEvent = 0x0f;
 
   // dSS => dSM function constants
   const uint8_t FunctionModulatorAddZone = 0x00;

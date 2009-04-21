@@ -54,12 +54,19 @@ namespace dss {
 
   typedef pair<vector<Group*>, Set> FittingResultPerModulator;
 
+  const bool OptimizerDebug = true;
+
   /** Precondition: _set contains only devices of _zone */
   FittingResultPerModulator BestFit(const Zone& _zone, const Set& _set) {
     Set workingCopy = _set;
 
     vector<Group*> fittingGroups;
     Set singleDevices;
+
+    if(OptimizerDebug) {
+      Logger::GetInstance()->Log("Finding fit for zone " + IntToString(_zone.GetZoneID()));
+    }
+
 
 	if(_zone.GetDevices().Length() == _set.Length()) {
 	  fittingGroups.push_back(_zone.GetGroup(GroupIDBroadcast));
@@ -71,32 +78,61 @@ namespace dss {
 		while(!workingCopy.IsEmpty()) {
 		  DeviceReference& ref = workingCopy.Get(0);
 		  workingCopy.RemoveDevice(ref);
+		  
+		  if(OptimizerDebug) {
+		    Logger::GetInstance()->Log("Working with device " + ref.GetDSID().ToString());
+		  }
 
 		  bool foundGroup = false;
 		  for(int iGroup = 0; iGroup < ref.GetDevice().GetGroupsCount(); iGroup++) {
 			Group& g = ref.GetDevice().GetGroupByIndex(iGroup);
 
+  		    if(OptimizerDebug) {
+		      Logger::GetInstance()->Log("  Checking Group " + IntToString(g.GetID()));
+		    }
 			// continue if already found unsuitable
 			if(find(unsuitableGroups.begin(), unsuitableGroups.end(), &g) != unsuitableGroups.end()) {
+  		      if(OptimizerDebug) {
+		        Logger::GetInstance()->Log("  Group discarded before, continuing search");
+		      }
 			  continue;
 			}
 
 			// see if we've got a fit
 			bool groupFits = true;
 			Set devicesInGroup = _zone.GetDevices().GetByGroup(g);
+  		    if(OptimizerDebug) {
+		      Logger::GetInstance()->Log("    Group has " + IntToString(devicesInGroup.Length()) + " devices");
+		    }
 			for(int iDevice = 0; iDevice < devicesInGroup.Length(); iDevice++) {
 			  if(!_set.Contains(devicesInGroup.Get(iDevice))) {
 				unsuitableGroups.push_back(&g);
 				groupFits = false;
+   		        if(OptimizerDebug) {
+		          Logger::GetInstance()->Log("    Original set does _not_ contain device " + devicesInGroup.Get(iDevice).GetDevice().GetDSID().ToString());
+		        }			  
 				break;
 			  }
+   		      if(OptimizerDebug) {
+		        Logger::GetInstance()->Log("    Original set contains device " + devicesInGroup.Get(iDevice).GetDevice().GetDSID().ToString());
+		      }			  
 			}
 			if(groupFits) {
+  		      if(OptimizerDebug) {
+		        Logger::GetInstance()->Log("  Found a fit " + IntToString(g.GetID()));
+		      }
 			  foundGroup = true;
 			  fittingGroups.push_back(&g);
+   		      if(OptimizerDebug) {
+		        Logger::GetInstance()->Log("  Removing devices from working copy");
+		      }
 			  while(!devicesInGroup.IsEmpty()) {
 				workingCopy.RemoveDevice(devicesInGroup.Get(0));
+			    devicesInGroup.RemoveDevice(devicesInGroup.Get(0));
 			  }
+   		      if(OptimizerDebug) {
+		        Logger::GetInstance()->Log("  Done. (Removing devices from working copy)");
+		      }
 			  break;
 			}
 		  }
@@ -970,7 +1006,7 @@ namespace dss {
           }
 
           uint8_t functionID = ch.front();
-          if(frame->GetCommand() == CommandRequest) {
+          if(frame->GetCommand() == CommandRequest || frame->GetCommand() == CommandEvent) {
             string functionIDStr = FunctionIDToString(functionID);
             Log("Got request: " + functionIDStr);
             PayloadDissector pd(frame->GetPayload());
@@ -1039,8 +1075,8 @@ namespace dss {
 
   void DS485Proxy::CollectFrame(boost::shared_ptr<DS485CommandFrame>& _frame) {
     uint8_t commandID = _frame->GetCommand();
-    if(commandID != CommandResponse && commandID != CommandRequest) {
-      Log("discarded non response/request frame", lsInfo);
+    if(commandID != CommandResponse && commandID != CommandRequest && commandID != CommandEvent) {
+      Log("discarded non response/request/command frame", lsInfo);
       Log(string("frame type ") + CommandToString(commandID));
     } else {
       m_IncomingFramesGuard.Lock();

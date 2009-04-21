@@ -208,6 +208,7 @@ namespace dss {
 
     bitset<63>& GetGroupBitmask();
     bool IsInGroup(const int _groupID) const;
+    void AddToGroup(const int _groupID);
 
     /** Returns the group id of the _index'th group */
     int GetGroupIdByIndex(const int _index) const;

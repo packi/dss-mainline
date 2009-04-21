@@ -163,7 +163,6 @@ namespace dss {
                 plugin->HandleEvent(*toProcess, **ipSubscription);
                 called = true;
                 Logger::GetInstance()->Log("EventInterpreter: called.");
-               // break;
               }
               if(!called) {
                 Logger::GetInstance()->Log(string("EventInterpreter: Could not find handler '") + (*ipSubscription)->GetHandlerName());
@@ -421,18 +420,25 @@ namespace dss {
       Logger::GetInstance()->Log("EventRunner: *********");
       Logger::GetInstance()->Log("number in queue: " + IntToString(GetSize()));
     }
+    
     for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
-        ipSchedEvt != e; ++ipSchedEvt)
+        ipSchedEvt != e; )
     {
       DateTime next = ipSchedEvt->GetSchedule().GetNextOccurence(now);
       if(DebugEventRunner) {
         Logger::GetInstance()->Log(string("next:   ") + (string)next);
         Logger::GetInstance()->Log(string("result: ") + (string)result);
       }
+      if(next == DateTime::NullDate) {
+        Logger::GetInstance()->Log("EventRunner: Removing event");
+        m_ScheduledEvents.erase(ipSchedEvt++);
+        continue;
+      }
       result = min(result, next);
       if(DebugEventRunner) {
         Logger::GetInstance()->Log(string("chosen: ") + (string)result);
       }
+      ++ipSchedEvt;
     }
     return result;
   } // GetNextOccurence
@@ -453,7 +459,7 @@ namespace dss {
       int sleepSeconds = m_WakeTime.Difference(now);
 
       // Prevent loops when a cycle takes less than 1s
-      if(sleepSeconds == 0) {
+      if(sleepSeconds <= 0) {
         m_NewItem.WaitFor(1000);
         return false;
       }

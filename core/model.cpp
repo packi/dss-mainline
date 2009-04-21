@@ -191,6 +191,11 @@ namespace dss {
   Group& Device::GetGroupByIndex(const int _index) {
     return m_pApartment->GetGroup(GetGroupIdByIndex(_index));
   } // GetGroupByIndex
+  
+  void Device::AddToGroup(const int _groupID) {
+    m_GroupBitmask.set(_groupID-1);
+    m_Groups.push_back(_groupID);
+  } // AddToGroup
 
   int Device::GetGroupsCount() const {
     return m_Groups.size();
@@ -638,7 +643,7 @@ namespace dss {
                 Log("     Adding device " + IntToString(devID) + " to group " + IntToString(groupID));
                 Device& dev = GetDeviceByShortAddress(modulator, devID);
                 dev.SetShortAddress(devID);
-                dev.GetGroupBitmask().set(groupID-1);
+                dev.AddToGroup(groupID);
               } catch(ItemNotFoundException& e) {
                 Logger::GetInstance()->Log(string("Could not find device with short-address ") + IntToString(devID));
               }
@@ -1194,7 +1199,7 @@ namespace dss {
   } // GetID
 
   Set Group::GetDevices() const {
-    return m_Apartment.GetDevices().GetByGroup(m_GroupID);
+    return m_Apartment.GetDevices().GetByZone(m_ZoneID).GetByGroup(m_GroupID);
   }
 
   void Group::AddDevice(const DeviceReference& _device) { /* do nothing or throw? */ }
