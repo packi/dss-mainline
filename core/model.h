@@ -550,7 +550,7 @@ namespace dss {
   private:
     void LoadDevices(XMLNode& _node);
     void LoadModulators(XMLNode& _node);
-    void LoadZones(XMLNode& _node, Modulator& _modulator);
+    void LoadZones(XMLNode& _node);
     Modulator& AllocateModulator(const dsid_t _dsid);
 
     void AddDefaultGroupsToZone(Zone& _zone);

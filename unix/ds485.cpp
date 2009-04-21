@@ -337,7 +337,12 @@ namespace dss {
                  (cmdFrame->GetCommand() == CommandSolicitSuccessorRequestLong)) {
                 // if it's the first of it's kind, determine how many we've got to skip
                 if(numberOfJoinPacketsToWait == -1) {
-                  numberOfJoinPacketsToWait = rand() % 10 + 10;
+                  if(cmdFrame->GetCommand() == CommandSolicitSuccessorRequest) {
+                    numberOfJoinPacketsToWait = rand() % 10 + 10;
+                  } else {
+                    // don’t wait forever if we’re in slow-joining mode
+                    numberOfJoinPacketsToWait = rand() % 10;
+                  }
                   cout << "** Waiting for " << numberOfJoinPacketsToWait << endl;
                 } else {
                   numberOfJoinPacketsToWait--;
@@ -351,8 +356,6 @@ namespace dss {
                   //cout << numberOfJoinPacketsToWait << endl;
                 }
               }
-            } else {
-              cerr << "not a cmdframe" << endl;
             }
           }
           break;
@@ -466,7 +469,7 @@ namespace dss {
                 cout << "b";
               }
               keep = true;
-            } else if(cmdFrame->GetCommand() == CommandRequest) {
+            } else if(cmdFrame->GetCommand() == CommandRequest || cmdFrame->GetCommand() == CommandEvent) {
               if(!cmdFrame->GetHeader().IsBroadcast()) {
                 DS485CommandFrame* ack = new DS485CommandFrame();
                 ack->GetHeader().SetSource(m_StationID);

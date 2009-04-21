@@ -675,6 +675,8 @@ namespace dss {
             LoadDevices(*iNode);
           } else if(nodeName == "modulators") {
             LoadModulators(*iNode);
+          } else if(nodeName == "zones") {
+            LoadZones(*iNode);
           }
         }
       } else {
@@ -722,12 +724,12 @@ namespace dss {
           newModulator->SetName(name);
         }
         m_StaleModulators.push_back(newModulator);
-        LoadZones(*iModulator, *newModulator);
+        //LoadZones(*iModulator, *newModulator);
       }
     }
   } // LoadModulators
 
-  void Apartment::LoadZones(XMLNode& _node, Modulator& _modulator) {
+  void Apartment::LoadZones(XMLNode& _node) {
     // TODO: A Zone can span over multiple modulators
     XMLNodeList zones = _node.GetChildren();
     for(XMLNodeList::iterator iZone = zones.begin(); iZone != zones.end(); ++iZone) {
@@ -742,7 +744,6 @@ namespace dss {
         if(name.size() > 0) {
           newZone->SetName(name);
         }
-        newZone->AddToModulator(_modulator);
         m_StaleZones.push_back(newZone);
       }
     }

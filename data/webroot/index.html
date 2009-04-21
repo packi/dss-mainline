@@ -39,7 +39,7 @@ function ApartmentRenderer(into) {
               zonelist += " Off ";
             }
             zonelist += '[<a href="#" onclick="turnOn(\'' + device.dsid + '\')">Turn On</a>';
-            zonelist += '&nbsp;|&nbsp;<a href="#" onclick="turnOff(\'' + device.dsid + '\')">Turn Off</a>]';
+            zonelist += '&nbsp;|&nbsp;<a href="#" onclick="turnOff(\'' + device.dsid + '\')">Turn Off</a>] ' + device.dsid;
           } else {
             zonelist += '<div id="switch_' + device.dsid + '"/>';
             switchIDs[switchIDs.length] = device.dsid;
