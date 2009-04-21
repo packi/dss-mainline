@@ -6,6 +6,9 @@
     <device dsid="2" busid="2" type="example.vlc_remote" />
     <device dsid="4" busid="4" type="standard.simple"/>
     <device dsid="6" busid="6" type="standard.switch" bell="true"/>
+    <device dsid="7" busid="7" type="aizo.sensornest">
+      <parameter name="mac">00:30:56:f2:29:4c</parameter>
+    </device>
     <group id="1">
       <device busid="4" />
     </group>

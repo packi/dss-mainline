@@ -113,6 +113,8 @@ namespace dss {
 
     virtual ~DSIDInterface() {}
 
+    virtual void Initialize() {};
+
     virtual dsid_t GetDSID() const { return m_DSID; }
     virtual devid_t GetShortAddress() const { return m_ShortAddress; }
     virtual void SetShortAddress(const devid_t _value) { m_ShortAddress = _value; }
@@ -140,6 +142,9 @@ namespace dss {
     virtual double GetValue(int _parameterNr = -1) const = 0;
 
     virtual uint8_t GetFunctionID() = 0;
+
+    virtual void SetConfigParameter(const string& _name, const string& _value) = 0;
+    virtual const string& GetConfigParameter(const string& _name) const = 0;
   }; // DSIDInterface
 
   class DSIDSim : public DSIDInterface {
@@ -155,6 +160,7 @@ namespace dss {
     uint8_t m_CurrentValue;
     int m_DimTimeMS;
     int m_SimpleConsumption;
+    Properties m_ConfigParameter;
   public:
     DSIDSim(const DSModulatorSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress);
     virtual ~DSIDSim() {}
@@ -179,6 +185,8 @@ namespace dss {
 
     virtual uint8_t GetFunctionID();
     void SetSimpleConsumption(const int _value) { m_SimpleConsumption = _value; }
+    virtual void SetConfigParameter(const string& _name, const string& _value);
+    virtual const string& GetConfigParameter(const string& _name) const;
   }; // DSIDSim
 
 

@@ -130,6 +130,16 @@ namespace dss {
       return 0;
     }
 
+    virtual void SetConfigParameter(const string& _name, const string& _value) {
+      // TODO: pass on
+    } // SetConfigParameter
+
+    virtual const string GetConfigParameter(const string& _name) const {
+      // TODO: pass on
+      return "";
+    }
+
+
   }; // DSIDPlugin
 
 
@@ -164,11 +174,6 @@ namespace dss {
   {
     m_ModulatorDSID = dsid_t(0, SimulationPrefix);
     m_Initialized = false;
-/*
-    if(_pDSS != NULL) {
-      GetDSS().GetPropertySystem().CreateProperty("/sim");
-    }
-    */
   } // DSModulatorSim
 
   void DSModulatorSim::Initialize() {
@@ -285,6 +290,20 @@ namespace dss {
         }
 
         DSIDInterface* newDSID = m_DSIDFactory.CreateDSID(type, dsid, busid);
+        try {
+          foreach(XMLNode& iParam, iNode->GetChildren()) {
+            if(iParam.GetName() == "parameter") {
+              string paramName = iParam.GetAttributes()["name"];
+              string paramValue = iParam.GetChildren()[0].GetContent();
+              if(paramName.empty()) {
+                Log("Missing attribute name of parameter node");
+                continue;
+              }
+              newDSID->SetConfigParameter(paramName, paramValue);
+            }
+          }
+        } catch(runtime_error&) {
+        }
         if(newDSID != NULL) {
           m_SimulatedDevices.push_back(newDSID);
           if(_zoneID != 0) {
@@ -300,12 +319,8 @@ namespace dss {
               Log("LoadDevices:   switch is bell");
             }
           }
-          /*
-          // every device is contained in zone 0 (broadcast zone)
-          if(_zoneID != 0) {
-            m_Zones[0].push_back(newDSID);
-          }
-          */
+
+          newDSID->Initialize();
           Log("LoadDevices: found device");
         } else {
           Log("LoadDevices: could not create instance for type \"" + type + "\"");
@@ -1164,7 +1179,16 @@ namespace dss {
 
   uint8_t DSIDSim::GetFunctionID() {
     return FunctionIDDevice;
-  }
+  } // GetFunctionID
+
+  void DSIDSim::SetConfigParameter(const string& _name, const string& _value) {
+    m_ConfigParameter.Set(_name, _value);
+  } // SetConfigParameter
+
+  const string& DSIDSim::GetConfigParameter(const string& _name) const {
+    return m_ConfigParameter.Get(_name, "");
+  } // GetConfigParameter
+
 
   //================================================== DSIDCreator
 
