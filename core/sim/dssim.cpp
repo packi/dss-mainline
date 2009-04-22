@@ -311,6 +311,7 @@ namespace dss {
             m_Zones[_zoneID].push_back(newDSID);
           }
           m_DeviceZoneMapping[newDSID] = _zoneID;
+          newDSID->SetZoneID(_zoneID);
 
           DSIDSimSwitch* sw = dynamic_cast<DSIDSimSwitch*>(newDSID);
           if(sw != NULL) {
@@ -785,6 +786,7 @@ namespace dss {
                 m_Zones[oldZoneID].erase(oldEntry);
                 m_Zones[zoneID].push_back(&dev);
                 m_DeviceZoneMapping[&dev] = zoneID;
+                dev.SetZoneID(zoneID);
               }
               break;
             default:

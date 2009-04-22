@@ -407,6 +407,7 @@ namespace dss {
     Apartment& m_Apartment;
     int m_ZoneID;
     int m_GroupID;
+    int m_LastCalledScene;
   public:
     Group(const int _id, const int _zoneID, Apartment& _apartment);
     virtual ~Group() {};
@@ -439,6 +440,9 @@ namespace dss {
     virtual void UndoScene(const int _sceneNr);
 
     virtual unsigned long GetPowerConsumption();
+
+    int GetLastCalledScene() const { return m_LastCalledScene; }
+    void SetLastCalledScene(const int _value) { m_LastCalledScene = _value; }
 
     Group& operator=(const Group& _other);
   }; // Group

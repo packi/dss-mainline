@@ -191,7 +191,7 @@ namespace dss {
   Group& Device::GetGroupByIndex(const int _index) {
     return m_pApartment->GetGroup(GetGroupIdByIndex(_index));
   } // GetGroupByIndex
-  
+
   void Device::AddToGroup(const int _groupID) {
     m_GroupBitmask.set(_groupID-1);
     m_Groups.push_back(_groupID);
@@ -973,6 +973,7 @@ namespace dss {
         Set s = zone.GetDevices().GetByGroup(_groupID);
         SetLastCalledSceneAction act(_sceneID);
         s.Perform(act);
+        group->SetLastCalledScene(_sceneID);
       } else {
         Log("OnGroupCallScene: Could not find group with id '" + IntToString(_groupID) + "' in Zone '" + IntToString(_zoneID) + "'");
       }
@@ -1191,7 +1192,8 @@ namespace dss {
   Group::Group(const int _id, const int _zoneID, Apartment& _apartment)
   : m_Apartment(_apartment),
     m_ZoneID(_zoneID),
-    m_GroupID(_id)
+    m_GroupID(_id),
+    m_LastCalledScene(SceneOff)
   {
   }
 

@@ -1,14 +1,14 @@
 
 
-all:	vlc_remote.so install
+all:	slim_slave.so install
 
-vlc_remote.so2:	vlc_remote.o
-	#g++ -lPocoNet -lpthread -shared -Wl,-soname,vlc_remote.so -o vlc_remote.so *.o
-	g++ -shared -o vlc_remote.so *.o
+slim_slave.so2:	slim_slave.o
+	#g++ -lPocoNet -lpthread -shared -Wl,-soname,slim_slave.so -o slim_slave.so *.o
+	g++ -shared -o slim_slave.so *.o
 	
 
-vlc_remote.so:	vlc_remote.cpp
-	g++ -g3 -O0 -Wall -fPIC -shared vlc_remote.cpp -o vlc_remote.so
+slim_slave.so:	slim_slave.cpp
+	g++ -g3 -O0 -Wall -fPIC -shared slim_slave.cpp -o slim_slave.so
 
-install:	vlc_remote.so
-	cp vlc_remote.so ../../../data/plugins/
+install:	slim_slave.so
+	cp slim_slave.so ../../data/plugins/

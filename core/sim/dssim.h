@@ -107,6 +107,7 @@ namespace dss {
     dsid_t m_DSID;
     devid_t m_ShortAddress;
     const DSModulatorSim& m_Simulator;
+    int m_ZoneID;
   public:
     DSIDInterface(const DSModulatorSim& _simulator, dsid_t _dsid, devid_t _shortAddress)
     : m_DSID(_dsid), m_ShortAddress(_shortAddress), m_Simulator(_simulator) {}
@@ -145,6 +146,9 @@ namespace dss {
 
     virtual void SetConfigParameter(const string& _name, const string& _value) = 0;
     virtual string GetConfigParameter(const string& _name) const = 0;
+
+    virtual void SetZoneID(const int _value) { m_ZoneID = _value; }
+    virtual int GetZoneID() const { return m_ZoneID; }
   }; // DSIDInterface
 
   class DSIDSim : public DSIDInterface {
