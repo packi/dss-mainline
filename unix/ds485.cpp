@@ -425,10 +425,12 @@ namespace dss {
                     m_PendingFrames.erase(m_PendingFrames.begin());
                     cout << "\ngot ack" << endl;
                   } else {
+                    m_PendingFrames.erase(m_PendingFrames.begin());
                     cout << "\n&&&&got other" << endl;
                     AddToReceivedQueue(cmdFrame);
                   }
                 } else {
+                  m_PendingFrames.erase(m_PendingFrames.begin());
                   cout << "no ack received" << endl;
                 }
               }

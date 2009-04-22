@@ -264,7 +264,7 @@ namespace dss {
     }
 
   } // LoadFromConfig
-
+  
   void DSModulatorSim::LoadDevices(XMLNodeList& _nodes, const int _zoneID) {
     for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
         iNode != e; ++iNode)
@@ -346,8 +346,9 @@ namespace dss {
             if(iChildNode->GetName() == "device") {
               attrs = iChildNode->GetAttributes();
               if(attrs["busid"].size() > 0) {
-                DSIDInterface& dev = LookupDevice(StrToUInt(attrs["busid"]));
-                m_DevicesOfGroupInZone[pair<const int, const int>(_zoneID, groupID)].push_back(&dev);
+                unsigned long busID = StrToUInt(attrs["busid"]);
+                DSIDInterface& dev = LookupDevice(busID);
+                AddDeviceToGroup(&dev, groupID);
                 Log("LoadGroups: Adding device " + attrs["busid"] + " to group " + IntToString(groupID) + " in zone " + IntToString(_zoneID));
               }
             }
@@ -358,6 +359,11 @@ namespace dss {
       }
     }
   } // LoadGroups
+
+  void DSModulatorSim::AddDeviceToGroup(DSIDInterface* _device, int _groupID) {
+    m_DevicesOfGroupInZone[pair<const int, const int>(_device->GetZoneID(), _groupID)].push_back(_device);
+    m_GroupsPerDevice[_device->GetShortAddress()].push_back(_groupID);
+  } // AddDeviceToGroup
 
   void DSModulatorSim::LoadZones(XMLNodeList& _nodes) {
     for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
@@ -732,6 +738,23 @@ namespace dss {
                 response->GetPayload().Add<uint8_t>('S');
                 response->GetPayload().Add<uint8_t>('i');
                 response->GetPayload().Add<uint8_t>('m');
+                DistributeFrame(response);
+              }
+              break;
+            case FunctionDeviceGetGroups:
+              {
+                response = CreateResponse(cmdFrame, cmdNr);
+                // TODO: not yet done....
+                DistributeFrame(response);
+              }
+              break;
+            case FunctionDeviceAddToGroup:
+              {
+                devid_t devID = pd.Get<uint16_t>();
+                DSIDInterface& dev = LookupDevice(devID);
+                int groupID = pd.Get<uint16_t>();
+                AddDeviceToGroup(&dev, groupID);
+                response->GetPayload().Add<uint16_t>(1);
                 DistributeFrame(response);
               }
               break;

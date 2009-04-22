@@ -392,6 +392,8 @@ namespace dss {
 
     /** Adds a DeviceReference to the modulators devices list */
     void AddDevice(const DeviceReference& _device);
+    
+    void RemoveDevice(const DeviceReference& _device);
 
     /** Returns the consumption in mW */
     unsigned long GetPowerConsumption();

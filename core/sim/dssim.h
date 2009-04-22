@@ -60,7 +60,9 @@ namespace dss {
     map<const DSIDInterface*, int> m_ButtonToGroupMapping;
     map<const DSIDInterface*, int> m_DeviceZoneMapping;
     map<const int, int> m_LastCalledSceneForGroup;
+    map<const int, vector<int> > m_GroupsPerDevice;
   private:
+    void AddDeviceToGroup(DSIDInterface* _device, int _groupID);
     void LoadFromConfig();
     void LoadDevices(XMLNodeList& _nodes, const int _zoneID);
     void LoadGroups(XMLNodeList& _nodes, const int _zoneID);

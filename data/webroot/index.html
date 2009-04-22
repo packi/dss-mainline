@@ -20,11 +20,13 @@ function ApartmentRenderer(into) {
     var iSwitch = 0;
     var switchIDs = [];
     var devNum = 0;
+    var devTotal = 0;
 
     var zonelist = "<ul>"
     self.apartment.zones.each(
       function(zone) {
         if(zone.id == 0) {
+          devTotal = zone.devices.length;
           return;
         }
         zonelist += "<li>" + zone.name + '[<a href="#" onclick="turnOnZone(\'' + zone.id + '\')">Turn On</a>';
@@ -57,7 +59,12 @@ function ApartmentRenderer(into) {
     switchIDs.each(function(switchID) {
       var sw = new Switch('switch_' + switchID, switchID);
     });
-    $('numDevs').innerHTML = devNum;
+    var hiddenDevs = devTotal - devNum;
+    if(hiddenDevs > 0) {
+      $('numDevs').innerHTML = devTotal + ' (' + hiddenDevs + ' hidden)';
+    } else {
+      $('numDevs').innerHTML = devTotal;
+    }
   }
 
 }

@@ -347,6 +347,12 @@ var Device = Class.create({
 
   sendEvent: function(_name) {
     new HEvent(_name, '.dsid(' + this.dsid + ')').raise();
+  },
+  
+  getGroups: function() {
+    var parameter = this.getParameterForDeviceCall();
+    var respObj = this.sendSyncRequest("getGroups", parameter);
+    return respObj.groups;
   }
 }); // Device
 

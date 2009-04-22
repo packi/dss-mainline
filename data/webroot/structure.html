@@ -62,7 +62,7 @@ function StructureModifier(containerForOthers, containerForUnassigned) {
         }
       }
     );
-    new Ajax.Request('/json/apartment/getStructure',
+    new Ajax.Request('/json/apartment/getDevices',
       {
         method:'get',
         parameters: { unassigned: true },

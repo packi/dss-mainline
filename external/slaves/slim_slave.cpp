@@ -66,8 +66,9 @@ public:
                Poco::Net::SocketStream str(sock);
 
                std::cout << "before sending: " << _command << std::endl;
-               str << m_PlayerMACHeader <<
-               str << _command << "\r\n" << std::flush;
+               str << m_PlayerMACHeader << " ";
+               str << _command << "\n" << std::flush;
+               std::cout << m_PlayerMACHeader << " " << _command << std::endl;
                std::cout << "done sending" << std::endl;
 
                sock.close();
@@ -88,6 +89,7 @@ public:
     void NextSong() {
       if(lastWasOff()) 
       {
+        SendCommand("power 1");
         SendCommand("play");
       }
       SendCommand("playlist index +1");
@@ -95,6 +97,7 @@ public:
     
     void PreviousSong() {
       if(lastWasOff()) {
+        SendCommand("power 1");
         SendCommand("play");
       }
       SendCommand("playlist index -1");
@@ -107,6 +110,7 @@ public:
       } else if(_sceneNr == dss::SceneOff || _sceneNr == dss::SceneMin) {
         SendCommand("power 0");
       } else if(_sceneNr == dss::SceneMax) {
+        SendCommand("power 1");
         SendCommand("play");
       } else if(_sceneNr == dss::SceneBell) {
         m_ThreadHandle = 0;
@@ -184,8 +188,10 @@ public:
       } else if(_name == "host") {
         m_RemoteHost = _value;
       } else if(_name == "playermac") {
+        std::cout << "config-param: " << _value << std::endl;
         m_PlayerMACHeader = _value;
         dss::ReplaceAll(m_PlayerMACHeader, ":", "%3A");
+        std::cout << "after: " << m_PlayerMACHeader << std::endl;
       }
     }
 };

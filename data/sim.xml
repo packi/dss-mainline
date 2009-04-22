@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <modulator busid="70" dsid="10">
+  <device dsid="1" busid="1" type="standard.switch" />
   <zone id="1"> 
-    <device dsid="1" busid="1" type="standard.switch" />
     <device dsid="2" busid="2" type="aizo.slimslave">
-      <parameter name="port">1234</parameter>
-      <parameter name="host">127.0.0.1</parameter>
-      <parameter name="playermac">00:00:00:00:00:00</parameter>
+      <parameter name="port">9090</parameter>
+      <parameter name="host">192.168.0.5</parameter>
+      <parameter name="playermac">00:04:20:06:9e:33</parameter>
     </device>
     <device dsid="4" busid="4" type="standard.simple"/>
     <device dsid="6" busid="6" type="standard.switch" bell="true"/>
@@ -14,6 +14,7 @@
     </device>
     <group id="1">
       <device busid="4" />
+      <device busid="2" />
     </group>
     <group id="4">
       <device busid="2" />

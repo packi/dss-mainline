@@ -998,15 +998,39 @@ namespace dss {
   } // OnDeviceCallScene
 
   void Apartment::OnAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID) {
+    // get full dsid
     dsid_t dsid = GetDSS().GetDS485Interface().GetDSIDOfDevice(_modID, _devID);
     Device& dev = AllocateDevice(dsid);
+    
+    // remove from old modulator
+    try {
+      Modulator& oldModulator = GetModulatorByBusID(dev.GetModulatorID());
+      oldModulator.RemoveDevice(DeviceReference(dev, *this));
+    } catch(runtime_error&) {
+    }
 
+    // remove from old zone
+    try {
+      Zone& oldZone = GetZone(dev.GetZoneID());
+      oldZone.RemoveDevice(DeviceReference(dev, *this));
+    } catch(runtime_error&) {
+    }
+
+    // update device
     dev.SetModulatorID(_modID);
     dev.SetZoneID(_zoneID);
     dev.SetShortAddress(_devID);
     dev.SetFunctionID(_functionID);
 
-    // TODO: get groups, etc...
+    // add to new modulator
+    Modulator& modulator = GetModulatorByBusID(_modID);
+    modulator.AddDevice(DeviceReference(dev, *this));
+    
+    // add to new zone
+    Zone& newZone = AllocateZone(modulator, _zoneID);
+    newZone.AddDevice(DeviceReference(dev, *this));
+
+    // TODO: get groups
   } // OnAddDevice
 
 
@@ -1025,6 +1049,13 @@ namespace dss {
   void Modulator::AddDevice(const DeviceReference& _device) {
   	m_ConnectedDevices.push_back(_device);
   } // AddDevice
+  
+  void Modulator::RemoveDevice(const DeviceReference& _device) {
+    DeviceIterator pos = find(m_ConnectedDevices.begin(), m_ConnectedDevices.end(), _device);
+    if(pos != m_ConnectedDevices.end()) {
+      m_ConnectedDevices.erase(pos);
+    }
+  } // RemoveDevice
 
   dsid_t Modulator::GetDSID() const {
     return m_DSID;

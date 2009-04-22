@@ -498,6 +498,25 @@ namespace dss {
     if(ok) {
       if(IsDeviceInterfaceCall(_method)) {
         return CallDeviceInterface(_method, _parameter, _arg, pDevice, _session);
+      } else if(BeginsWith(_method, "device/getGroups")) {
+        int numGroups = pDevice->GetGroupsCount();
+        stringstream sstream;
+        sstream << "{ " << ToJSONValue("groups") << ": [";
+        bool first = true;
+        for(int iGroup = 0; iGroup < numGroups; iGroup++) {
+          if(!first) {
+            sstream << ", ";
+          }
+          first = false;
+          Group& group = pDevice->GetGroupByIndex(iGroup);
+          sstream << "{ " << ToJSONValue("id") << ":" << group.GetID();
+          if(!group.GetName().empty()) {
+            sstream << ", " << ToJSONValue("name") << ":" << ToJSONValue(group.GetName());
+          }
+          sstream << "}";
+        }
+        sstream << "]}";
+        return sstream.str();
       } else {
         _handled = false;
         return "";
@@ -571,6 +590,10 @@ namespace dss {
           return ResultToJSON(false, "Could not find simulated switch");
         }
       }
+    } else if(BeginsWith(_method, "sim/addDevice")) {
+      string type = _parameter["type"];
+      string dsidStr = _parameter["dsid"];
+      // TODO: not finished yet ;)
     } else {
       _handled = false;
     }
