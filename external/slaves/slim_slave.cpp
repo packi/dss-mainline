@@ -11,9 +11,9 @@
 #include <Poco/StreamCopier.h>
 #include <Poco/Exception.h>
 
-#include "../../../core/sim/include/dsid_plugin.h"
-#include "../../../core/ds485const.h"
-#include "../../../core/base.h"
+#include "../../core/sim/include/dsid_plugin.h"
+#include "../../core/ds485const.h"
+#include "../../core/base.h"
 
 class DSID {
   private:
@@ -40,75 +40,100 @@ class DSID {
 
 void* handleBell(void* ptr);
 
-class DSIDVLCRemote : public DSID {
+class DSIDSlimSlaveRemote : public DSID {
 private:
   pthread_t m_ThreadHandle;
   int m_RemotePort;
   std::string m_RemoteHost;
+  std::string m_PlayerMACHeader;
 public:
-    DSIDVLCRemote() {
+    DSIDSlimSlaveRemote() {
       lastScene = dss::SceneOff;
       m_RemotePort = 4212;
       m_RemoteHost = "127.0.0.1";
+      m_PlayerMACHeader = "";
     }
-    virtual ~DSIDVLCRemote() {}
+    virtual ~DSIDSlimSlaveRemote() {}
 
     void SendCommand(const std::string& _command) {
       try
        {
+               if(m_PlayerMACHeader.empty()) {
+                 std::cerr << "Parameter playerMAC not specified. NOT sending command " << _command << endl;
+               }
                Poco::Net::SocketAddress sa(m_RemoteHost, m_RemotePort);
                Poco::Net::StreamSocket sock(sa);
                Poco::Net::SocketStream str(sock);
 
                std::cout << "before sending: " << _command << std::endl;
+               str << m_PlayerMACHeader <<
                str << _command << "\r\n" << std::flush;
-               str << "logout\r\n" << std::flush;
                std::cout << "done sending" << std::endl;
 
                sock.close();
        }
        catch (Poco::Exception& exc)
        {
-               std::cerr << "******** [vlc_remote.so] exception caught: " << exc.displayText() << std::endl;
+               std::cerr << "******** [slim_slave.so] exception caught: " << exc.displayText() << std::endl;
        }
     }
 
     int lastScene;
+    
+    bool lastWasOff() {
+       return   lastScene == dss::SceneDeepOff || lastScene == dss::SceneStandBy
+             || lastScene == dss::SceneOff || lastScene == dss::SceneMin;
+     }
+    
+    void NextSong() {
+      if(lastWasOff()) 
+      {
+        SendCommand("play");
+      }
+      SendCommand("playlist index +1");
+    }
+    
+    void PreviousSong() {
+      if(lastWasOff()) {
+        SendCommand("play");
+      }
+      SendCommand("playlist index -1");
+    }
 
     virtual void CallScene(const int _sceneNr) {
       std::cout << "call scene " << _sceneNr << "\n";
-      if(_sceneNr == dss::SceneDeepOff) {
-        SendCommand("stop");
+      if(_sceneNr == dss::SceneDeepOff || _sceneNr == dss::SceneStandBy) {
+        SendCommand("power 0");
       } else if(_sceneNr == dss::SceneOff || _sceneNr == dss::SceneMin) {
-        SendCommand("pause");
+        SendCommand("power 0");
       } else if(_sceneNr == dss::SceneMax) {
-        SendCommand("pause");
+        SendCommand("play");
       } else if(_sceneNr == dss::SceneBell) {
         m_ThreadHandle = 0;
         pthread_create(&m_ThreadHandle, NULL, handleBell, this );
       } else if(_sceneNr == dss::Scene1) {
         if(lastScene == dss::Scene2) {
-          SendCommand("prev");
+          PreviousSong();
         } else {
-          SendCommand("next");
+          NextSong();
         }
       } else if(_sceneNr == dss::Scene2) {
         if(lastScene == dss::Scene3) {
-          SendCommand("prev");
+          PreviousSong();
         } else {
-          SendCommand("next");
+          NextSong();
         }
       } else if(_sceneNr == dss::Scene3) {
         if(lastScene == dss::Scene4) {
-          SendCommand("prev");
+          PreviousSong();
         } else {
-          SendCommand("next");
+          NextSong();
         }
       } else if(_sceneNr == dss::Scene4) {
         if(lastScene == dss::Scene1) {
-          SendCommand("prev");
+          PreviousSong();
         } else {
-          SendCommand("next");
+          NextSong();
         }
       }
       lastScene = _sceneNr;
@@ -124,12 +149,12 @@ public:
 
     virtual void IncreaseValue(const int _parameterNr = -1) {
       std::cout << "increase value of parameter " << _parameterNr << "\n";
-      SendCommand("volup");
+      SendCommand("mixer volume +5");
     }
 
     virtual void DecreaseValue(const int _parameterNr = -1) {
       std::cout << "decrease value of parameter " << _parameterNr << "\n";
-      SendCommand("voldown");
+      SendCommand("mixer volume -6\r\nmixer volume +1");
     }
 
     virtual void Enable() {
@@ -158,15 +183,18 @@ public:
         m_RemotePort = dss::StrToInt(_value);
       } else if(_name == "host") {
         m_RemoteHost = _value;
+      } else if(_name == "playermac") {
+        m_PlayerMACHeader = _value;
+        dss::ReplaceAll(m_PlayerMACHeader, ":", "%3A");
       }
     }
 };
 
 void* handleBell(void* ptr) {
-  DSIDVLCRemote* remote = (DSIDVLCRemote*)ptr;
-  remote->SendCommand("pause");
-  sleep(5);
-  remote->SendCommand("pause");
+  DSIDSlimSlaveRemote* remote = (DSIDSlimSlaveRemote*)ptr;
+  remote->SendCommand("power 0");
+  sleep(3);
+  remote->SendCommand("play");
   return NULL;
 }
 
@@ -189,7 +217,7 @@ public:
   }
 
   int CreateDSID() {
-    DSID* newDSID = new DSIDVLCRemote();
+    DSID* newDSID = new DSIDSlimSlaveRemote();
     m_DSIDs[m_NextHandle] = newDSID;
     return m_NextHandle++;
   }
@@ -209,7 +237,7 @@ int dsid_getversion() {
 } // dsid_getversion
 
 const char* dsid_get_plugin_name() {
-  return "example.vlc_remote";
+  return "aizo.slimslave";
 } // dsid_get_plugin_name
 
 int dsid_create_instance() {
@@ -303,7 +331,6 @@ static struct dsid_interface intf_description = {
   &get_function_id,
 
   &get_parameter_name,
-  
   &set_configuration_parameter,
 };
 

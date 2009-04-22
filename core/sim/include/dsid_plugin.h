@@ -33,6 +33,8 @@ extern "C" {
     int (*get_function_id)(int _handle);
 
     const char* (*get_parameter_name)(int _handle, int _parameterNumber);
+
+    void (*set_configuration_parameter)(int _handle, const char* _name, const char* _value);
   };
 
   int dsid_getversion();

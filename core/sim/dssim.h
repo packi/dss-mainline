@@ -144,7 +144,7 @@ namespace dss {
     virtual uint8_t GetFunctionID() = 0;
 
     virtual void SetConfigParameter(const string& _name, const string& _value) = 0;
-    virtual const string& GetConfigParameter(const string& _name) const = 0;
+    virtual string GetConfigParameter(const string& _name) const = 0;
   }; // DSIDInterface
 
   class DSIDSim : public DSIDInterface {
@@ -186,7 +186,7 @@ namespace dss {
     virtual uint8_t GetFunctionID();
     void SetSimpleConsumption(const int _value) { m_SimpleConsumption = _value; }
     virtual void SetConfigParameter(const string& _name, const string& _value);
-    virtual const string& GetConfigParameter(const string& _name) const;
+    virtual string GetConfigParameter(const string& _name) const;
   }; // DSIDSim
 
 

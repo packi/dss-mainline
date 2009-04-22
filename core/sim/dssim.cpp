@@ -131,10 +131,10 @@ namespace dss {
     }
 
     virtual void SetConfigParameter(const string& _name, const string& _value) {
-      // TODO: pass on
+      (*m_Interface->set_configuration_parameter)(m_Handle, _name.c_str(), _value.c_str());
     } // SetConfigParameter
 
-    virtual const string GetConfigParameter(const string& _name) const {
+    virtual string GetConfigParameter(const string& _name) const {
       // TODO: pass on
       return "";
     }
@@ -299,6 +299,7 @@ namespace dss {
                 Log("Missing attribute name of parameter node");
                 continue;
               }
+              Log("LoadDevices:   Found parameter '" + paramName + "' with value '" + paramValue + "'");
               newDSID->SetConfigParameter(paramName, paramValue);
             }
           }
@@ -1185,7 +1186,7 @@ namespace dss {
     m_ConfigParameter.Set(_name, _value);
   } // SetConfigParameter
 
-  const string& DSIDSim::GetConfigParameter(const string& _name) const {
+  string DSIDSim::GetConfigParameter(const string& _name) const {
     return m_ConfigParameter.Get(_name, "");
   } // GetConfigParameter
 

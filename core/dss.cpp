@@ -126,6 +126,7 @@ namespace dss {
     Logger::GetInstance()->Log("DSS stating up....", lsInfo);
     LoadConfig();
 
+
     m_State = ssInitializingSubsystems;
     std::for_each(m_Subsystems.begin(), m_Subsystems.end(), InitializeSubsystem);
 
