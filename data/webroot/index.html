@@ -32,7 +32,7 @@ function ApartmentRenderer(into) {
         zonelist += "<li>" + zone.name + '[<a href="#" onclick="turnOnZone(\'' + zone.id + '\')">Turn On</a>';
         zonelist += '&nbsp;|&nbsp;<a href="#" onclick="turnOffZone(\'' + zone.id + '\')">Turn Off</a>]</li><ul>';
         zone.devices.each(function(device) {
-          zonelist += "<li>" + device.name;
+          zonelist += '<li><p title="' + device.fid + '">' + device.name;
           devNum++;
           if(!device.isSwitch()) {
             if(device.isOn()) {
@@ -47,7 +47,7 @@ function ApartmentRenderer(into) {
             switchIDs[switchIDs.length] = device.dsid;
           }
 
-          zonelist += "</li>";
+          zonelist += "</p></li>";
         });
         zonelist += "</ul>";
       }

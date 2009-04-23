@@ -264,7 +264,7 @@ namespace dss {
     }
 
   } // LoadFromConfig
-  
+
   void DSModulatorSim::LoadDevices(XMLNodeList& _nodes, const int _zoneID) {
     for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
         iNode != e; ++iNode)
@@ -567,6 +567,26 @@ namespace dss {
                 uint16_t zoneID = pd.Get<uint16_t>();
                 uint16_t groupID = pd.Get<uint16_t>();
                 GroupDecValue(zoneID, groupID, 0);
+              }
+              break;
+            case FunctionDeviceIncreaseValue:
+              {
+                uint16_t devID = pd.Get<uint16_t>();
+                DSIDInterface& dev = LookupDevice(devID);
+                dev.IncreaseValue();
+                response = CreateResponse(cmdFrame, cmdNr);
+                response->GetPayload().Add<uint16_t>(1);
+                DistributeFrame(response);
+              }
+              break;
+            case FunctionDeviceDecreaseValue:
+              {
+                uint16_t devID = pd.Get<uint16_t>();
+                DSIDInterface& dev = LookupDevice(devID);
+                dev.DecreaseValue();
+                response = CreateResponse(cmdFrame, cmdNr);
+                response->GetPayload().Add<uint16_t>(1);
+                DistributeFrame(response);
               }
               break;
             case FunctionDeviceGetFunctionID:

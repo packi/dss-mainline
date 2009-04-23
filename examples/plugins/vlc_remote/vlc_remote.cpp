@@ -34,7 +34,7 @@ class DSID {
     virtual void SetValue(const double _value, int _parameterNr = -1) = 0;
 
     virtual double GetValue(int _parameterNr = -1) const = 0;
-    
+
     virtual void SetConfigurationParameter(const std::string& _name, const std::string& _value) = 0;
 };
 
@@ -76,7 +76,7 @@ public:
     int lastScene;
 
     virtual void CallScene(const int _sceneNr) {
-      std::cout << "call scene " << _sceneNr << "\n";
+      std::cout << "call scene " << _sceneNr << " (last: " << lastScene << ")\n";
       if(_sceneNr == dss::SceneDeepOff) {
         SendCommand("stop");
       } else if(_sceneNr == dss::SceneOff || _sceneNr == dss::SceneMin) {
@@ -87,11 +87,7 @@ public:
         m_ThreadHandle = 0;
         pthread_create(&m_ThreadHandle, NULL, handleBell, this );
       } else if(_sceneNr == dss::Scene1) {
-        if(lastScene == dss::Scene2) {
-          SendCommand("prev");
-        } else {
-          SendCommand("next");
-        }
+        SendCommand("pause");
       } else if(_sceneNr == dss::Scene2) {
         if(lastScene == dss::Scene3) {
           SendCommand("prev");
@@ -105,7 +101,7 @@ public:
           SendCommand("next");
         }
       } else if(_sceneNr == dss::Scene4) {
-        if(lastScene == dss::Scene1) {
+        if(lastScene == dss::Scene2) {
           SendCommand("prev");
         } else {
           SendCommand("next");
@@ -152,7 +148,7 @@ public:
     virtual double GetValue(int _parameterNr = -1) const {
       return 0.0;
     }
-    
+
     virtual void SetConfigurationParameter(const std::string& _name, const std::string& _value) {
       if(_name == "port") {
         m_RemotePort = dss::StrToInt(_value);
@@ -303,7 +299,7 @@ static struct dsid_interface intf_description = {
   &get_function_id,
 
   &get_parameter_name,
-  
+
   &set_configuration_parameter,
 };
 

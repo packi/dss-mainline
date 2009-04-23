@@ -125,8 +125,9 @@ namespace dss {
     std::stringstream sstream;
     sstream << "{ \"id\": \"" << _device.GetDSID().ToString() << "\""
             << ", \"isSwitch\": " << ToJSONValue(_device.HasSwitch())
-            << ", \"name\": \"" << _device.GetDevice().GetName()
-            << "\", \"on\": " << ToJSONValue(_device.IsOn()) << " }";
+            << ", \"name\": " << ToJSONValue(_device.GetDevice().GetName())
+            << ", \"fid\": " << ToJSONValue(_device.GetDevice().GetFunctionID())
+            << ", \"on\": " << ToJSONValue(_device.IsOn()) << " }";
     return sstream.str();
   } // ToJSONValue(DeviceReference)
 

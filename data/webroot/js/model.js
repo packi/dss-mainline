@@ -5,25 +5,25 @@ DSS.token = undefined;
 DSS.endpoint = "/json/";
 DSS.sendSyncRequest = function(_uri, _parameter) {
     var responseObj
-    var req = new Ajax.Request(DSS.endpoint + _uri, 
+    var req = new Ajax.Request(DSS.endpoint + _uri,
       {
-        method: 'get', 
+        method: 'get',
         parameters: _parameter,
         asynchronous: false,
         onComplete: function(transport, json) {
           responseObj = transport.responseJSON;
         }
-      } 
+      }
     );
     return responseObj;
 }
 
 DSS.sendRequest = function(_uri, _parameter) {
-    new Ajax.Request(DSS.endpoint + _uri, 
+    new Ajax.Request(DSS.endpoint + _uri,
       {
-        method: 'get', 
+        method: 'get',
         parameters: _parameter,
-      } 
+      }
     );
 }
 
@@ -42,7 +42,7 @@ var Apartment = Class.create({
   initialize: function() {
     this.zones = [];
   },
-  
+
   fetch: function() {
     var self = this;
     var structure = Apartment.sendSyncRequest("getStructure", {});
@@ -51,6 +51,7 @@ var Apartment = Class.create({
       self.zones.push(zoneObj);
       zone.devices.each(function(device) {
         var deviceObj = new Device(device.id, device.name);
+        deviceObj.fid = device.fid;
         zoneObj.devices.push(deviceObj);
         deviceObj.on = device.on;
         deviceObj.hasSwitch = device.isSwitch;
@@ -61,18 +62,18 @@ var Apartment = Class.create({
 
 Apartment.sendRequest = function(_functionName, _parameter) {
   DSS.sendRequest("apartment/" + _functionName, _parameter);
-} 
+}
 
 Apartment.sendSyncRequest = function(_functionName, _parameter) {
   return DSS.sendSyncRequest("apartment/" + _functionName, _parameter);
-} 
+}
 
 Apartment.getParameterForDeviceCall = function(_group) {
   var parameter = {};
   if(Object.isNumber(_group)) {
     parameter['groupID'] = _group;
   } else if(Object.isString(_group)) {
-    parameter['groupName'] = _group; 
+    parameter['groupName'] = _group;
   } else if(!Object.isUndefined(_group) && _group != null) {
     if(hasKey(_group, 'name')) {
       parameter['groupName'] = _group['name'];
@@ -86,26 +87,26 @@ Apartment.getParameterForDeviceCall = function(_group) {
 Apartment.turnOn = function(_group) {
   this.sendRequest("turnOn", this.getParameterForDeviceCall(_group));
 }
- 
+
 Apartment.turnOff = function(_group) {
   this.sendRequest("turnOff", this.getParameterForDeviceCall(_group));
 }
 
-Apartment.callScene = function(_sceneID, _group) {
+Apartment.callScene = function(_sceneNr, _group) {
   var parameter = this.getParameterForDeviceCall(_group);
-  parameter['sceneID'] = _sceneID;
+  parameter['sceneNr'] = _sceneNr;
   this.sendRequest("callScene", parameter);
 }
 
-Apartment.saveScene = function(_sceneID, _group) {
+Apartment.saveScene = function(_sceneNr, _group) {
   var parameter = this.getParameterForDeviceCall(_group);
-  parameter['sceneID'] = _sceneID;
+  parameter['sceneNr'] = _sceneNr;
   this.sendRequest("saveScene", parameter);
 }
 
-Apartment.undoScene = function(_sceneID, _group) {
+Apartment.undoScene = function(_sceneNr, _group) {
   var parameter = this.getParameterForDeviceCall(_group);
-  parameter['sceneID'] = _sceneID;
+  parameter['sceneNr'] = _sceneNr;
   this.sendRequest("undoScene", parameter);
 }
 
@@ -152,9 +153,9 @@ var Zone = Class.create({
   initialize: function(_id, _name) {
     this.id = _id;
     this.name = _name;
-    this.devices = []; 
+    this.devices = [];
   },
-  
+
   sendRequest: function(_functionName, _parameter) {
     DSS.sendRequest("zone/" + _functionName, _parameter);
   },
@@ -169,7 +170,7 @@ var Zone = Class.create({
     if(Object.isNumber(_group)) {
       parameter['groupID'] = _group;
     } else if(Object.isString(_group)) {
-      parameter['groupName'] = _group; 
+      parameter['groupName'] = _group;
     } else if(!Object.isUndefined(_group) && _group != null) {
       if(hasKey(_group, 'name')) {
         parameter['groupName'] = _group['name'];
@@ -183,26 +184,26 @@ var Zone = Class.create({
   turnOn: function(_group) {
     this.sendRequest("turnOn", this.getParameterForDeviceCall(_group));
   },
- 
+
   turnOff: function(_group) {
     this.sendRequest("turnOff", this.getParameterForDeviceCall(_group));
   },
 
-  callScene: function(_sceneID, _group) {
+  callScene: function(_sceneNr, _group) {
     var parameter = this.getParameterForDeviceCall(_group);
-    parameter['sceneID'] = _sceneID;
+    parameter['sceneNr'] = _sceneNr;
     this.sendRequest("callScene", parameter);
   },
 
-  saveScene: function(_sceneID, _group) {
+  saveScene: function(_sceneNr, _group) {
     var parameter = this.getParameterForDeviceCall(_group);
-    parameter['sceneID'] = _sceneID;
+    parameter['sceneNr'] = _sceneNr;
     this.sendRequest("saveScene", parameter);
   },
 
-  undoScene: function(_sceneID, _group) {
+  undoScene: function(_sceneNr, _group) {
     var parameter = this.getParameterForDeviceCall(_group);
-    parameter['sceneID'] = _sceneID;
+    parameter['sceneNr'] = _sceneNr;
     this.sendRequest("undoScene", parameter);
   },
 
@@ -257,15 +258,15 @@ var Device = Class.create({
     this.on = false;
     this.hasSwitch = false;
   },
-  
+
   isSwitch: function() {
     return this.hasSwitch;
   },
-  
+
   isOn: function() {
     return this.on;
   },
-  
+
   sendRequest: function(_functionName, _parameter) {
     DSS.sendRequest("device/" + _functionName, _parameter);
   },
@@ -283,26 +284,26 @@ var Device = Class.create({
   turnOn: function() {
     this.sendRequest("turnOn", this.getParameterForDeviceCall());
   },
- 
+
   turnOff: function() {
     this.sendRequest("turnOff", this.getParameterForDeviceCall());
   },
 
-  callScene: function(_sceneID) {
+  callScene: function(_sceneNr) {
     var parameter = this.getParameterForDeviceCall();
-    parameter['sceneID'] = _sceneID;
+    parameter['sceneNr'] = _sceneNr;
     this.sendRequest("callScene", parameter);
   },
 
-  saveScene: function(_sceneID) {
+  saveScene: function(_sceneNr) {
     var parameter = this.getParameterForDeviceCall();
-    parameter['sceneID'] = _sceneID;
+    parameter['sceneNr'] = _sceneNr;
     this.sendRequest("saveScene", parameter);
   },
 
-  undoScene: function(_sceneID) {
+  undoScene: function(_sceneNr) {
     var parameter = this.getParameterForDeviceCall();
-    parameter['sceneID'] = _sceneID;
+    parameter['sceneNr'] = _sceneNr;
     this.sendRequest("undoScene", parameter);
   },
 
@@ -348,7 +349,7 @@ var Device = Class.create({
   sendEvent: function(_name) {
     new HEvent(_name, '.dsid(' + this.dsid + ')').raise();
   },
-  
+
   getGroups: function() {
     var parameter = this.getParameterForDeviceCall();
     var respObj = this.sendSyncRequest("getGroups", parameter);
@@ -362,7 +363,7 @@ var HEvent = Class.create({
     this.location = _location;
     this.context = _context;
   },
-  
+
   sendRequest: function(_functionName, _parameter) {
     DSS.sendRequest("event/" + _functionName, _parameter);
   },

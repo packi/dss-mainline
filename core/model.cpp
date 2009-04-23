@@ -922,9 +922,11 @@ namespace dss {
   		if(zone->GetZoneID() == _zoneID) {
   			m_Zones.push_back(zone);
   			m_StaleZones.erase(std::find(m_StaleZones.begin(), m_StaleZones.end(), zone));
+  	    zone->AddToModulator(_modulator);
   	    if(!IsInitializing()) {
   	      DSS::GetInstance()->GetDS485Interface().CreateZone(_modulator.GetBusID(), _zoneID);
   	    }
+  	    AddDefaultGroupsToZone(*zone);
   			return *zone;
   		}
   	}
@@ -1001,7 +1003,7 @@ namespace dss {
     // get full dsid
     dsid_t dsid = GetDSS().GetDS485Interface().GetDSIDOfDevice(_modID, _devID);
     Device& dev = AllocateDevice(dsid);
-    
+
     // remove from old modulator
     try {
       Modulator& oldModulator = GetModulatorByBusID(dev.GetModulatorID());
@@ -1025,7 +1027,7 @@ namespace dss {
     // add to new modulator
     Modulator& modulator = GetModulatorByBusID(_modID);
     modulator.AddDevice(DeviceReference(dev, *this));
-    
+
     // add to new zone
     Zone& newZone = AllocateZone(modulator, _zoneID);
     newZone.AddDevice(DeviceReference(dev, *this));
@@ -1049,7 +1051,7 @@ namespace dss {
   void Modulator::AddDevice(const DeviceReference& _device) {
   	m_ConnectedDevices.push_back(_device);
   } // AddDevice
-  
+
   void Modulator::RemoveDevice(const DeviceReference& _device) {
     DeviceIterator pos = find(m_ConnectedDevices.begin(), m_ConnectedDevices.end(), _device);
     if(pos != m_ConnectedDevices.end()) {
@@ -1284,6 +1286,9 @@ namespace dss {
   } // operator=
 
   void Group::CallScene(const int _sceneNr) {
+    // this might be redundant, but since a set could be
+    // optimized if it contains only one device its safer like that...
+    m_LastCalledScene = _sceneNr;
     GetDevices().CallScene(_sceneNr);
   } // CallScene
 
