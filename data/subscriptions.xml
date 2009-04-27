@@ -9,7 +9,7 @@
   <subscription event-name="brighter" handler-name="bus_handler">
     <send type="increaseValue" />
   </subscription>
-  <subscription event-name="bell" handler-name="raise_event">
+  <subscription event-name="abell" handler-name="raise_event">
     <parameter>
       <parameter name="event_name">blink</parameter>
     </parameter>

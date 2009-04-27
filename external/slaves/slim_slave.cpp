@@ -34,7 +34,7 @@ class DSID {
     virtual void SetValue(const double _value, int _parameterNr = -1) = 0;
 
     virtual double GetValue(int _parameterNr = -1) const = 0;
-    
+
     virtual void SetConfigurationParameter(const std::string& _name, const std::string& _value) = 0;
 };
 
@@ -80,25 +80,31 @@ public:
     }
 
     int lastScene;
-    
+
     bool lastWasOff() {
        return   lastScene == dss::SceneDeepOff || lastScene == dss::SceneStandBy
              || lastScene == dss::SceneOff || lastScene == dss::SceneMin;
      }
-    
+
+    void PowerOn() {
+      SendCommand("power 1");
+      SendCommand("play");
+    }
+
+    void PowerOff() {
+      SendCommand("power 0");
+    }
+
     void NextSong() {
-      if(lastWasOff()) 
-      {
-        SendCommand("power 1");
-        SendCommand("play");
+      if(lastWasOff()) {
+        PowerOn();
       }
       SendCommand("playlist index +1");
     }
-    
+
     void PreviousSong() {
       if(lastWasOff()) {
-        SendCommand("power 1");
-        SendCommand("play");
+        PowerOn();
       }
       SendCommand("playlist index -1");
     }
@@ -106,21 +112,17 @@ public:
     virtual void CallScene(const int _sceneNr) {
       std::cout << "call scene " << _sceneNr << "\n";
       if(_sceneNr == dss::SceneDeepOff || _sceneNr == dss::SceneStandBy) {
-        SendCommand("power 0");
+        PowerOff();
       } else if(_sceneNr == dss::SceneOff || _sceneNr == dss::SceneMin) {
-        SendCommand("power 0");
+        PowerOff();
       } else if(_sceneNr == dss::SceneMax) {
-        SendCommand("power 1");
-        SendCommand("play");
+        PowerOn();
       } else if(_sceneNr == dss::SceneBell) {
         m_ThreadHandle = 0;
         pthread_create(&m_ThreadHandle, NULL, handleBell, this );
       } else if(_sceneNr == dss::Scene1) {
-        if(lastScene == dss::Scene2) {
-          PreviousSong();
-        } else {
-          NextSong();
-        }
+        SendCommand("power 1");
+        SendCommand("play");
       } else if(_sceneNr == dss::Scene2) {
         if(lastScene == dss::Scene3) {
           PreviousSong();
@@ -134,7 +136,7 @@ public:
           NextSong();
         }
       } else if(_sceneNr == dss::Scene4) {
-        if(lastScene == dss::Scene1) {
+        if(lastScene == dss::Scene2) {
           PreviousSong();
         } else {
           NextSong();
@@ -181,7 +183,7 @@ public:
     virtual double GetValue(int _parameterNr = -1) const {
       return 0.0;
     }
-    
+
     virtual void SetConfigurationParameter(const std::string& _name, const std::string& _value) {
       if(_name == "port") {
         m_RemotePort = dss::StrToInt(_value);

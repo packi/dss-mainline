@@ -642,7 +642,6 @@ namespace dss {
               try {
                 Log("     Adding device " + IntToString(devID) + " to group " + IntToString(groupID));
                 Device& dev = GetDeviceByShortAddress(modulator, devID);
-                dev.SetShortAddress(devID);
                 dev.AddToGroup(groupID);
               } catch(ItemNotFoundException& e) {
                 Logger::GetInstance()->Log(string("Could not find device with short-address ") + IntToString(devID));
@@ -656,10 +655,49 @@ namespace dss {
     }
     Logger::GetInstance()->Log("******** Finished loading model from dSM(s)...", lsInfo);
     m_IsInitializing = false;
-    while(0) {
-      SleepSeconds(10);
+
+    while(!m_Terminated) {
+      if(!m_ModelEvents.empty()) {
+        ModelEvent& event = m_ModelEvents.front();
+        switch(event.GetEventType()) {
+        case ModelEvent::etNewDevice:
+          if(event.GetParameterCount() != 4) {
+            Log("Expected exactly 4 parameter for ModelEvent::etNewDevice");
+          } else {
+            OnAddDevice(event.GetParameter(0), event.GetParameter(1), event.GetParameter(2), event.GetParameter(3));
+          }
+          break;
+        case ModelEvent::etCallSceneDevice:
+          if(event.GetParameterCount() != 3) {
+            Log("Expected exactly 3 parameter for ModelEvent::etCallSceneDevice");
+          } else {
+            OnDeviceCallScene(event.GetParameter(0), event.GetParameter(1), event.GetParameter(2));
+          }
+          break;
+        case ModelEvent::etCallSceneGroup:
+          if(event.GetParameterCount() != 3) {
+            Log("Expected exactly 3 parameter for ModelEvent::etCallSceneGroup");
+          } else {
+            OnGroupCallScene(event.GetParameter(0), event.GetParameter(1), event.GetParameter(2));
+          }
+          break;
+        }
+
+        m_ModelEventsMutex.Lock();
+        m_ModelEvents.erase(m_ModelEvents.begin());
+        m_ModelEventsMutex.Unlock();
+      } else {
+        m_NewModelEvent.WaitFor(1000);
+      }
     }
   } // Run
+
+  void Apartment::AddModelEvent(ModelEvent* _pEvent) {
+    m_ModelEventsMutex.Lock();
+    m_ModelEvents.push_back(_pEvent);
+    m_ModelEventsMutex.Unlock();
+    m_NewModelEvent.Signal();
+  } // AddModelEvent
 
   void Apartment::ReadConfigurationFromXML(const string& _fileName) {
     const int apartmentConfigVersion = 1;
@@ -965,7 +1003,6 @@ namespace dss {
     }
   };
 
-
   void Apartment::OnGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID) {
     try {
       Zone& zone = GetZone(_zoneID);
@@ -1001,8 +1038,16 @@ namespace dss {
 
   void Apartment::OnAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID) {
     // get full dsid
+    Log("New Device found");
+    Log("  Modulator: " + IntToString(_modID));
+    Log("  Zone:      " + IntToString(_zoneID));
+    Log("  BusID:     " + IntToString(_devID));
+    Log("  FID:       " + IntToString(_functionID));
+
     dsid_t dsid = GetDSS().GetDS485Interface().GetDSIDOfDevice(_modID, _devID);
     Device& dev = AllocateDevice(dsid);
+
+    Log("  DSID:      " + dsid.ToString());
 
     // remove from old modulator
     try {

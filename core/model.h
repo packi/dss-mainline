@@ -28,6 +28,8 @@
 #include "xmlwrapper.h"
 #include "thread.h"
 #include "subsystem.h"
+#include "mutex.h"
+#include "syncevent.h"
 
 #include <vector>
 #include <string>
@@ -392,7 +394,7 @@ namespace dss {
 
     /** Adds a DeviceReference to the modulators devices list */
     void AddDevice(const DeviceReference& _device);
-    
+
     void RemoveDevice(const DeviceReference& _device);
 
     /** Returns the consumption in mW */
@@ -531,6 +533,23 @@ namespace dss {
   }; // Zone
 
 
+  class ModelEvent {
+  public:
+    typedef enum { etCallSceneGroup, etCallSceneDevice, etNewDevice } EventType;
+  private:
+    EventType m_EventType;
+    vector<int> m_Parameter;
+  public:
+    ModelEvent(EventType _type)
+    : m_EventType(_type)
+    {}
+
+    void AddParameter(const int _param) { m_Parameter.push_back(_param); }
+    int GetParameter(const int _index) const { return m_Parameter.at(_index); }
+    int GetParameterCount() const { return m_Parameter.size(); }
+    EventType GetEventType() { return m_EventType; }
+  };
+
   /** Represents an Apartment
     * This is the root of the datamodel of the dss. The Apartment is responsible for delivering
     * and loading all subitems.
@@ -553,6 +572,10 @@ namespace dss {
     bool m_IsInitializing;
 
     PropertyNode* m_pPropertyNode;
+
+    boost::ptr_vector<ModelEvent> m_ModelEvents;
+    Mutex m_ModelEventsMutex;
+    SyncEvent m_NewModelEvent;
   private:
     void LoadDevices(XMLNode& _node);
     void LoadModulators(XMLNode& _node);
@@ -627,6 +650,8 @@ namespace dss {
 
     /** Returns the root-node for the apartment tree */
     PropertyNode* GetPropertyNode() { return m_pPropertyNode; }
+
+    void AddModelEvent(ModelEvent* _pEvent);
 
     /** Called by the DS485Proxy if a group-call-scene frame was intercepted.
      *  Updates the state of all devices contained in the group. */

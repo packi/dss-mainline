@@ -127,6 +127,8 @@ namespace dss {
             << ", \"isSwitch\": " << ToJSONValue(_device.HasSwitch())
             << ", \"name\": " << ToJSONValue(_device.GetDevice().GetName())
             << ", \"fid\": " << ToJSONValue(_device.GetDevice().GetFunctionID())
+            << ", \"circuitID\":" << ToJSONValue(_device.GetDevice().GetModulatorID())
+            << ", \"busID\":"  << ToJSONValue(_device.GetDevice().GetShortAddress())
             << ", \"on\": " << ToJSONValue(_device.IsOn()) << " }";
     return sstream.str();
   } // ToJSONValue(DeviceReference)

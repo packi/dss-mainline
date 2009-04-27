@@ -78,7 +78,7 @@ namespace dss {
 		while(!workingCopy.IsEmpty()) {
 		  DeviceReference& ref = workingCopy.Get(0);
 		  workingCopy.RemoveDevice(ref);
-		  
+
 		  if(OptimizerDebug) {
 		    Logger::GetInstance()->Log("Working with device " + ref.GetDSID().ToString());
 		  }
@@ -110,12 +110,12 @@ namespace dss {
 				groupFits = false;
    		        if(OptimizerDebug) {
 		          Logger::GetInstance()->Log("    Original set does _not_ contain device " + devicesInGroup.Get(iDevice).GetDevice().GetDSID().ToString());
-		        }			  
+		        }
 				break;
 			  }
    		      if(OptimizerDebug) {
 		        Logger::GetInstance()->Log("    Original set contains device " + devicesInGroup.Get(iDevice).GetDevice().GetDSID().ToString());
-		      }			  
+		      }
 			}
 			if(groupFits) {
   		      if(OptimizerDebug) {
@@ -1010,6 +1010,10 @@ namespace dss {
             string functionIDStr = FunctionIDToString(functionID);
             Log("Got request: " + functionIDStr);
             PayloadDissector pd(frame->GetPayload());
+            if(frame->GetHeader().IsBroadcast()) {
+              Log("Redistributing frame to simulation");
+              GetDSS().GetModulatorSim().Process(*frame.get());
+            }
             if(functionID == FunctionZoneAddDevice) {
               Log("New device");
               pd.Get<uint8_t>(); // function id
@@ -1018,7 +1022,13 @@ namespace dss {
               int devID = pd.Get<uint16_t>();
               pd.Get<uint16_t>(); // version
               int functionID = pd.Get<uint16_t>();
-              GetDSS().GetApartment().OnAddDevice(modID, zoneID, devID, functionID);
+
+              ModelEvent* pEvent = new ModelEvent(ModelEvent::etNewDevice);
+              pEvent->AddParameter(modID);
+              pEvent->AddParameter(zoneID);
+              pEvent->AddParameter(devID);
+              pEvent->AddParameter(functionID);
+              GetDSS().GetApartment().AddModelEvent(pEvent);
             } else if(functionID == FunctionGroupCallScene) {
               pd.Get<uint8_t>(); // function id
               uint16_t zoneID = pd.Get<uint16_t>();
@@ -1030,14 +1040,26 @@ namespace dss {
               } else if(sceneID == SceneAlarm) {
                 boost::shared_ptr<Event> evt(new Event("alarm"));
                 GetDSS().GetEventQueue().PushEvent(evt);
+              } else if(sceneID == ScenePanic) {
+                boost::shared_ptr<Event> evt(new Event("panic"));
+                GetDSS().GetEventQueue().PushEvent(evt);
+              } else {
+                ModelEvent* pEvent = new ModelEvent(ModelEvent::etCallSceneGroup);
+                pEvent->AddParameter(zoneID);
+                pEvent->AddParameter(groupID);
+                pEvent->AddParameter(sceneID);
+                GetDSS().GetApartment().AddModelEvent(pEvent);
               }
-              GetDSS().GetApartment().OnGroupCallScene(zoneID, groupID, sceneID);
             } else if(functionID == FunctionDeviceCallScene) {
               pd.Get<uint8_t>(); // functionID
               uint16_t devID = pd.Get<uint16_t>();
               uint16_t sceneID = pd.Get<uint16_t>();
               int modID = frame->GetHeader().GetDestination();
-              GetDSS().GetApartment().OnDeviceCallScene(modID, devID, sceneID);
+              ModelEvent* pEvent = new ModelEvent(ModelEvent::etCallSceneDevice);
+              pEvent->AddParameter(modID);
+              pEvent->AddParameter(devID);
+              pEvent->AddParameter(sceneID);
+              GetDSS().GetApartment().AddModelEvent(pEvent);
             }
           } else {
             std::ostringstream sstream;

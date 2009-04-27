@@ -52,6 +52,8 @@ var Apartment = Class.create({
       zone.devices.each(function(device) {
         var deviceObj = new Device(device.id, device.name);
         deviceObj.fid = device.fid;
+        deviceObj.busID = device.busID;
+        deviceObj.circuitID = device.circuitID;
         zoneObj.devices.push(deviceObj);
         deviceObj.on = device.on;
         deviceObj.hasSwitch = device.isSwitch;

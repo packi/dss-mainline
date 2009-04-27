@@ -75,7 +75,14 @@ public:
 
     int lastScene;
 
+    bool lastWasOff() {
+       return   lastScene == dss::SceneDeepOff || lastScene == dss::SceneStandBy
+             || lastScene == dss::SceneOff || lastScene == dss::SceneMin;
+     }
+
+
     virtual void CallScene(const int _sceneNr) {
+      bool keepScene = _sceneNr != dss::SceneBell && _sceneNr != dss::SceneAlarm && _sceneNr != dss::ScenePanic;
       std::cout << "call scene " << _sceneNr << " (last: " << lastScene << ")\n";
       if(_sceneNr == dss::SceneDeepOff) {
         SendCommand("stop");
@@ -84,8 +91,10 @@ public:
       } else if(_sceneNr == dss::SceneMax) {
         SendCommand("pause");
       } else if(_sceneNr == dss::SceneBell) {
-        m_ThreadHandle = 0;
-        pthread_create(&m_ThreadHandle, NULL, handleBell, this );
+        if(!lastWasOff()) {
+          m_ThreadHandle = 0;
+          pthread_create(&m_ThreadHandle, NULL, handleBell, this );
+        }
       } else if(_sceneNr == dss::Scene1) {
         SendCommand("pause");
       } else if(_sceneNr == dss::Scene2) {
@@ -107,7 +116,9 @@ public:
           SendCommand("next");
         }
       }
-      lastScene = _sceneNr;
+      if(keepScene) {
+        lastScene = _sceneNr;
+      }
       std::cout << "end call scene" << std::endl;
     }
 
