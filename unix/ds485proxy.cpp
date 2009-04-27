@@ -1008,6 +1008,9 @@ namespace dss {
           uint8_t functionID = ch.front();
           if(frame->GetCommand() == CommandRequest || frame->GetCommand() == CommandEvent) {
             string functionIDStr = FunctionIDToString(functionID);
+            if(functionIDStr.empty()) {
+              functionIDStr = "Unknown function id: " + IntToString(functionID, true);
+            }
             Log("Got request: " + functionIDStr);
             PayloadDissector pd(frame->GetPayload());
             if(frame->GetHeader().IsBroadcast()) {

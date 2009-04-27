@@ -568,7 +568,6 @@ namespace dss {
     vector<Zone*> m_Zones;
     vector<Modulator*> m_Modulators;
     vector<Device*> m_Devices;
-    vector<Group*> m_Groups;
     bool m_IsInitializing;
 
     PropertyNode* m_pPropertyNode;
@@ -638,8 +637,6 @@ namespace dss {
     Group& GetGroup(const string& _name);
     /** Returns a Group by id */
     Group& GetGroup(const int _id);
-    /** Returns a vector of all groups */
-    vector<Group*>& GetGroups();
 
     /** Allocates a group */
     UserGroup& AllocateGroup(const int _id);

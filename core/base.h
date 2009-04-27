@@ -100,7 +100,7 @@ namespace dss {
   unsigned int StrToUInt(const string& _strValue);
   int StrToIntDef(const string& _strValue, const int _default);
 
-  string IntToString(const int _int);
+  string IntToString(const int _int, const bool _hex = false);
   string UIntToString(unsigned long int _int);
 
   double StrToDouble(const string& _strValue);

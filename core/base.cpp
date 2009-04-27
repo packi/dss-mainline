@@ -98,8 +98,11 @@ namespace dss {
     return sstream.str();
   } // DoubleToString
 
-  string IntToString(const int _int) {
+  string IntToString(const int _int, bool _hex) {
     stringstream sstream;
+    if(_hex) {
+      sstream << hex << "0x";
+    }
     sstream << _int;
     return sstream.str();
   } // IntToString

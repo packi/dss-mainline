@@ -511,10 +511,14 @@ namespace dss {
             sstream << ", ";
           }
           first = false;
-          Group& group = pDevice->GetGroupByIndex(iGroup);
-          sstream << "{ " << ToJSONValue("id") << ":" << group.GetID();
-          if(!group.GetName().empty()) {
-            sstream << ", " << ToJSONValue("name") << ":" << ToJSONValue(group.GetName());
+          try {
+            Group& group = pDevice->GetGroupByIndex(iGroup);
+            sstream << "{ " << ToJSONValue("id") << ":" << group.GetID();
+            if(!group.GetName().empty()) {
+              sstream << ", " << ToJSONValue("name") << ":" << ToJSONValue(group.GetName());
+            }
+          } catch (runtime_error&) {
+            Log("Group only present at device level");
           }
           sstream << "}";
         }

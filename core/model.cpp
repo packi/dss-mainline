@@ -194,7 +194,11 @@ namespace dss {
 
   void Device::AddToGroup(const int _groupID) {
     m_GroupBitmask.set(_groupID-1);
-    m_Groups.push_back(_groupID);
+    if(find(m_Groups.begin(), m_Groups.end(), _groupID) == m_Groups.end()) {
+      m_Groups.push_back(_groupID);
+    } else {
+      Logger::GetInstance()->Log("Device " + m_DSID.ToString() + " (bus: " + IntToString(m_ShortAddress) + ", zone: " + IntToString(m_ZoneID) + ") is already in group " + IntToString(_groupID));
+    }
   } // AddToGroup
 
   int Device::GetGroupsCount() const {
@@ -512,7 +516,6 @@ namespace dss {
 
   Apartment::~Apartment() {
     ScrubVector(m_Devices);
-    ScrubVector(m_Groups);
     ScrubVector(m_Zones);
     ScrubVector(m_Modulators);
 
@@ -538,43 +541,33 @@ namespace dss {
     Group* grp = new Group(GroupIDBroadcast, zoneID, *this);
     grp->SetName("broadcast");
     _zone.AddGroup(grp);
-    m_Groups.push_back(grp);
     grp = new Group(GroupIDYellow, zoneID, *this);
     grp->SetName("yellow");
     _zone.AddGroup(grp);
-    m_Groups.push_back(grp);
     grp = new Group(GroupIDGray, zoneID, *this);
     grp->SetName("gray");
     _zone.AddGroup(grp);
-    m_Groups.push_back(grp);
     grp = new Group(GroupIDBlue, zoneID, *this);
     grp->SetName("blue");
     _zone.AddGroup(grp);
-    m_Groups.push_back(grp);
     grp = new Group(GroupIDCyan, zoneID, *this);
     grp->SetName("cyan");
     _zone.AddGroup(grp);
-    m_Groups.push_back(grp);
     grp = new Group(GroupIDRed, zoneID, *this);
     grp->SetName("red");
     _zone.AddGroup(grp);
-    m_Groups.push_back(grp);
     grp = new Group(GroupIDViolet, zoneID, *this);
     grp->SetName("magenta");
     _zone.AddGroup(grp);
-    m_Groups.push_back(grp);
     grp = new Group(GroupIDGreen, zoneID, *this);
     grp->SetName("green");
     _zone.AddGroup(grp);
-    m_Groups.push_back(grp);
     grp = new Group(GroupIDBlack, zoneID, *this);
     grp->SetName("black");
     _zone.AddGroup(grp);
-    m_Groups.push_back(grp);
     grp = new Group(GroupIDWhite, zoneID, *this);
     grp->SetName("white");
     _zone.AddGroup(grp);
-    m_Groups.push_back(grp);
   } // AddDefaultGroupsToZone
 
   void Apartment::Execute() {
@@ -591,11 +584,6 @@ namespace dss {
     while(!interface.IsReady() && !m_Terminated) {
       SleepMS(1000);
     }
-/*
-    while(!m_Terminated) {
-      SleepSeconds(2);
-    }
-*/
 
     while(!m_Terminated) {
       Log("Apartment::Execute received proxy event, enumerating apartment / dSMs");
@@ -643,6 +631,20 @@ namespace dss {
                 Log("     Adding device " + IntToString(devID) + " to group " + IntToString(groupID));
                 Device& dev = GetDeviceByShortAddress(modulator, devID);
                 dev.AddToGroup(groupID);
+                if(zone.GetGroup(groupID) == NULL) {
+                  Log("     Adding new group to zone");
+                  zone.AddGroup(new Group(groupID, zone.GetZoneID(), *this));
+                }
+                zone.GetGroup(groupID)->AddDevice(DeviceReference(dev, *this));
+                try {
+                  Group& group = GetGroup(groupID);
+                  group.AddDevice(DeviceReference(dev, *this));
+                } catch(ItemNotFoundException&) {
+                  Group* pGroup = new Group(groupID, 0, *this);
+                  GetZone(0).AddGroup(pGroup);
+                  pGroup->AddDevice(DeviceReference(dev, *this));
+                  Log("     Adding new group to zone 0");
+                }
               } catch(ItemNotFoundException& e) {
                 Logger::GetInstance()->Log(string("Could not find device with short-address ") + IntToString(devID));
               }
@@ -888,26 +890,20 @@ namespace dss {
 
   // Group queries
   Group& Apartment::GetGroup(const string& _name) {
-    foreach(Group* group, m_Groups) {
-      if(group->GetName() == _name) {
-        return *group;
-      }
+    Group* pResult = GetZone(0).GetGroup(_name);
+    if(pResult != NULL) {
+      return *pResult;
     }
     throw ItemNotFoundException(_name);
   } // GetGroup(name)
 
   Group& Apartment::GetGroup(const int _id) {
-    foreach(Group* group, m_Groups) {
-      if(group->GetID() == _id) {
-        return *group;
-      }
+    Group* pResult = GetZone(0).GetGroup(_id);
+    if(pResult != NULL) {
+      return *pResult;
     }
     throw ItemNotFoundException(IntToString(_id));
   } // GetGroup(id)
-
-  vector<Group*>& Apartment::GetGroups() {
-    return m_Groups;
-  } // GetGroups
 
   Device& Apartment::AllocateDevice(const dsid_t _dsid) {
     // search for existing device

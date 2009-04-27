@@ -82,47 +82,71 @@ namespace dss {
     }
 
     virtual void CallScene(const int _sceneNr) {
-      (*m_Interface->call_scene)(m_Handle, _sceneNr);
+      if(m_Interface->call_scene != NULL) {
+        (*m_Interface->call_scene)(m_Handle, _sceneNr);
+      }
     }
 
     virtual void SaveScene(const int _sceneNr) {
-      (*m_Interface->save_scene)(m_Handle, _sceneNr);
+      if(m_Interface->save_scene != NULL) {
+        (*m_Interface->save_scene)(m_Handle, _sceneNr);
+      }
     }
 
     virtual void UndoScene(const int _sceneNr) {
-      (*m_Interface->undo_scene)(m_Handle, _sceneNr);
+      if(m_Interface->undo_scene != NULL) {
+        (*m_Interface->undo_scene)(m_Handle, _sceneNr);
+      }
     }
 
     virtual void IncreaseValue(const int _parameterNr = -1) {
-      (*m_Interface->increase_value)(m_Handle, _parameterNr);
+      if(m_Interface->increase_value != NULL) {
+        (*m_Interface->increase_value)(m_Handle, _parameterNr);
+      }
     }
 
     virtual void DecreaseValue(const int _parameterNr = -1) {
-      (*m_Interface->decrease_value)(m_Handle, _parameterNr);
+      if(m_Interface->decrease_value != NULL) {
+        (*m_Interface->decrease_value)(m_Handle, _parameterNr);
+      }
     }
 
     virtual void Enable() {
-      (*m_Interface->enable)(m_Handle);
+      if(m_Interface->enable != NULL) {
+        (*m_Interface->enable)(m_Handle);
+      }
     }
 
     virtual void Disable() {
-      (*m_Interface->disable)(m_Handle);
+      if(m_Interface->disable != NULL) {
+        (*m_Interface->disable)(m_Handle);
+      }
     }
 
     virtual void StartDim(bool _directionUp, const int _parameterNr = -1) {
-      (*m_Interface->start_dim)(m_Handle, _directionUp, _parameterNr);
+      if(m_Interface->start_dim != NULL) {
+        (*m_Interface->start_dim)(m_Handle, _directionUp, _parameterNr);
+      }
     }
 
     virtual void EndDim(const int _parameterNr = -1) {
-      (*m_Interface->end_dim)(m_Handle, _parameterNr);
+      if(m_Interface->end_dim != NULL) {
+        (*m_Interface->end_dim)(m_Handle, _parameterNr);
+      }
     }
 
     virtual void SetValue(const double _value, int _parameterNr = -1) {
-      (*m_Interface->set_value)(m_Handle, _parameterNr, _value);
+      if(m_Interface->set_value != NULL) {
+        (*m_Interface->set_value)(m_Handle, _parameterNr, _value);
+      }
     }
 
     virtual double GetValue(int _parameterNr = -1) const {
-      return (*m_Interface->get_value)(m_Handle, _parameterNr);
+      if(m_Interface->get_value != NULL) {
+        return (*m_Interface->get_value)(m_Handle, _parameterNr);
+      } else {
+        return 0.0;
+      }
     }
 
     virtual uint8_t GetFunctionID() {
@@ -131,7 +155,9 @@ namespace dss {
     }
 
     virtual void SetConfigParameter(const string& _name, const string& _value) {
-      (*m_Interface->set_configuration_parameter)(m_Handle, _name.c_str(), _value.c_str());
+      if(m_Interface->set_configuration_parameter != NULL) {
+        (*m_Interface->set_configuration_parameter)(m_Handle, _name.c_str(), _value.c_str());
+      }
     } // SetConfigParameter
 
     virtual string GetConfigParameter(const string& _name) const {
