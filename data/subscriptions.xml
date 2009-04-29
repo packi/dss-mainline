@@ -1,5 +1,21 @@
 <?xml version="1.0"?>
 <subscriptions version="1">
+  <subscription event-name="call" handler-name="raise_event">
+    <parameter>
+      <parameter name="event_name">sendBell</parameter>
+    </parameter>
+    <filter match="all">
+      <property-filter type="matches" value="0797428986" property="source" />
+    </filter>
+  </subscription>
+  <subscription event-name="sendBell" handler-name="bus_handler">
+    <send type="callScene">
+      <parameter name="scene">14</parameter>
+    </send>
+    <parameter>
+      <parameter name="location">.fid(4136)</parameter>
+    </parameter>    
+  </subscription>
   <subscription event-name="turnOn" handler-name="bus_handler">
     <send type="turnOn" />
   </subscription>
