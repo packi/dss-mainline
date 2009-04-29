@@ -1273,15 +1273,16 @@ namespace dss {
 
   DSIDInterface* DSIDFactory::CreateDSID(const string& _identifier, const dsid_t _dsid, const devid_t _shortAddress) {
     boost::ptr_vector<DSIDCreator>::iterator
-      iCreator = m_RegisteredCreators.begin(),
-      e = m_RegisteredCreators.end();
+    iCreator = m_RegisteredCreators.begin(),
+    e = m_RegisteredCreators.end();
     while(iCreator != e) {
       if(iCreator->GetIdentifier() == _identifier) {
         return iCreator->CreateDSID(_dsid, _shortAddress);
       }
       ++iCreator;
     }
-    return NULL;
+    Logger::GetInstance()->Log(string("Could not find creator for DSID type '") + _identifier + "'");
+    throw new runtime_error(string("Could not find creator for DSID type '") + _identifier + "'");
   }
 
   void DSIDFactory::RegisterCreator(DSIDCreator* _creator) {
