@@ -235,6 +235,10 @@ namespace dss {
     m_ContainedDevices = _devices;
   } // ctor(DeviceVector)
 
+  Set::Set(const Set& _copy) {
+    m_ContainedDevices = _copy.m_ContainedDevices;
+  }
+
   void Set::TurnOn() {
     DSS::GetInstance()->GetDS485Interface().SendCommand(cmdTurnOn, *this);
   } // TurnOn
@@ -326,7 +330,11 @@ namespace dss {
   };
 
   Set Set::GetByGroup(int _groupNr) const {
-    return GetSubset(ByGroupSelector(_groupNr));
+    if(_groupNr != GroupIDBroadcast) {
+      return GetSubset(ByGroupSelector(_groupNr));
+    } else {
+      return *this;
+    }
   } // GetByGroup(id)
 
   Set Set::GetByGroup(const Group& _group) const {
@@ -344,13 +352,18 @@ namespace dss {
   } // GetByGroup(name)
 
   Set Set::GetByZone(int _zoneID) const {
-    Set result;
-    foreach(const DeviceReference& dev, m_ContainedDevices) {
-      if(dev.GetDevice().GetZoneID() == _zoneID) {
-        result.AddDevice(dev);
+    if(_zoneID != 0) {
+      Set result;
+      foreach(const DeviceReference& dev, m_ContainedDevices) {
+        if(dev.GetDevice().GetZoneID() == _zoneID) {
+          result.AddDevice(dev);
+        }
       }
+      return result;
+    } else {
+      // return a copy of this set if the broadcast zone was requested
+      return *this;
     }
-    return result;
   } // GetByZone
 
   Set Set::GetByFunctionID(const int _functionID) const {

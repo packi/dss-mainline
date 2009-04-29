@@ -1013,10 +1013,12 @@ namespace dss {
             }
             Log("Got request: " + functionIDStr);
             PayloadDissector pd(frame->GetPayload());
+            /*
             if(frame->GetHeader().IsBroadcast()) {
               Log("Redistributing frame to simulation");
               GetDSS().GetModulatorSim().Process(*frame.get());
             }
+            */
             if(functionID == FunctionZoneAddDevice) {
               Log("New device");
               pd.Get<uint8_t>(); // function id

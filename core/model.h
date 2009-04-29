@@ -267,6 +267,7 @@ namespace dss {
     DeviceVector m_ContainedDevices;
   public:
     Set();
+    Set(const Set& _copy);
     Set(Device& _device);
     Set(DeviceReference& _reference);
     Set(DeviceVector _devices);

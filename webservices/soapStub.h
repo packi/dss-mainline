@@ -31,19 +31,8 @@
 
 #endif
 
-#ifndef SOAP_TYPE_dss__dsid
-#define SOAP_TYPE_dss__dsid (18)
-/* dss:dsid */
-struct dss__dsid
-{
-public:
-	ULONG64 upper;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:unsignedLong */
-	unsigned long lower;	/* required element of type xsd:unsignedInt */
-};
-#endif
-
 #ifndef SOAP_TYPE_dss__TestResponse
-#define SOAP_TYPE_dss__TestResponse (22)
+#define SOAP_TYPE_dss__TestResponse (21)
 /* dss:TestResponse */
 struct dss__TestResponse
 {
@@ -53,7 +42,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Test
-#define SOAP_TYPE_dss__Test (23)
+#define SOAP_TYPE_dss__Test (22)
 /* dss:Test */
 struct dss__Test
 {
@@ -63,7 +52,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__AuthenticateResponse
-#define SOAP_TYPE_dss__AuthenticateResponse (26)
+#define SOAP_TYPE_dss__AuthenticateResponse (25)
 /* dss:AuthenticateResponse */
 struct dss__AuthenticateResponse
 {
@@ -73,7 +62,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Authenticate
-#define SOAP_TYPE_dss__Authenticate (27)
+#define SOAP_TYPE_dss__Authenticate (26)
 /* dss:Authenticate */
 struct dss__Authenticate
 {
@@ -84,7 +73,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SignOffResponse
-#define SOAP_TYPE_dss__SignOffResponse (29)
+#define SOAP_TYPE_dss__SignOffResponse (28)
 /* dss:SignOffResponse */
 struct dss__SignOffResponse
 {
@@ -94,7 +83,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SignOff
-#define SOAP_TYPE_dss__SignOff (30)
+#define SOAP_TYPE_dss__SignOff (29)
 /* dss:SignOff */
 struct dss__SignOff
 {
@@ -104,7 +93,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__FreeSetResponse
-#define SOAP_TYPE_dss__FreeSetResponse (34)
+#define SOAP_TYPE_dss__FreeSetResponse (33)
 /* dss:FreeSetResponse */
 struct dss__FreeSetResponse
 {
@@ -114,7 +103,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__FreeSet
-#define SOAP_TYPE_dss__FreeSet (35)
+#define SOAP_TYPE_dss__FreeSet (34)
 /* dss:FreeSet */
 struct dss__FreeSet
 {
@@ -124,20 +113,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_CreateSetFromGroupResponse
-#define SOAP_TYPE_dss__Apartment_CreateSetFromGroupResponse (37)
-/* dss:Apartment-CreateSetFromGroupResponse */
-struct dss__Apartment_CreateSetFromGroupResponse
+#ifndef SOAP_TYPE_dss__ApartmentCreateSetFromGroupResponse
+#define SOAP_TYPE_dss__ApartmentCreateSetFromGroupResponse (36)
+/* dss:ApartmentCreateSetFromGroupResponse */
+struct dss__ApartmentCreateSetFromGroupResponse
 {
 public:
 	int setID;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_CreateSetFromGroup
-#define SOAP_TYPE_dss__Apartment_CreateSetFromGroup (38)
-/* dss:Apartment-CreateSetFromGroup */
-struct dss__Apartment_CreateSetFromGroup
+#ifndef SOAP_TYPE_dss__ApartmentCreateSetFromGroup
+#define SOAP_TYPE_dss__ApartmentCreateSetFromGroup (37)
+/* dss:ApartmentCreateSetFromGroup */
+struct dss__ApartmentCreateSetFromGroup
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -145,45 +134,45 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_CreateSetFromDeviceIDsResponse
-#define SOAP_TYPE_dss__Apartment_CreateSetFromDeviceIDsResponse (41)
-/* dss:Apartment-CreateSetFromDeviceIDsResponse */
-struct dss__Apartment_CreateSetFromDeviceIDsResponse
-{
-public:
-	int setID;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Apartment_CreateSetFromDeviceIDs
-#define SOAP_TYPE_dss__Apartment_CreateSetFromDeviceIDs (42)
-/* dss:Apartment-CreateSetFromDeviceIDs */
-struct dss__Apartment_CreateSetFromDeviceIDs
-{
-public:
-	int _token;	/* required element of type xsd:int */
-	std::vector<struct dss__dsid >_ids;	/* required element of type dss:dsid */
-};
-#endif
-
 #if 0 /* volatile type: do not redeclare here */
 
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_CreateSetFromDeviceNamesResponse
-#define SOAP_TYPE_dss__Apartment_CreateSetFromDeviceNamesResponse (46)
-/* dss:Apartment-CreateSetFromDeviceNamesResponse */
-struct dss__Apartment_CreateSetFromDeviceNamesResponse
+#ifndef SOAP_TYPE_dss__ApartmentCreateSetFromDeviceIDsResponse
+#define SOAP_TYPE_dss__ApartmentCreateSetFromDeviceIDsResponse (41)
+/* dss:ApartmentCreateSetFromDeviceIDsResponse */
+struct dss__ApartmentCreateSetFromDeviceIDsResponse
 {
 public:
 	int setID;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_CreateSetFromDeviceNames
-#define SOAP_TYPE_dss__Apartment_CreateSetFromDeviceNames (47)
-/* dss:Apartment-CreateSetFromDeviceNames */
-struct dss__Apartment_CreateSetFromDeviceNames
+#ifndef SOAP_TYPE_dss__ApartmentCreateSetFromDeviceIDs
+#define SOAP_TYPE_dss__ApartmentCreateSetFromDeviceIDs (42)
+/* dss:ApartmentCreateSetFromDeviceIDs */
+struct dss__ApartmentCreateSetFromDeviceIDs
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	std::vector<std::string >_ids;	/* required element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__ApartmentCreateSetFromDeviceNamesResponse
+#define SOAP_TYPE_dss__ApartmentCreateSetFromDeviceNamesResponse (44)
+/* dss:ApartmentCreateSetFromDeviceNamesResponse */
+struct dss__ApartmentCreateSetFromDeviceNamesResponse
+{
+public:
+	int setID;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__ApartmentCreateSetFromDeviceNames
+#define SOAP_TYPE_dss__ApartmentCreateSetFromDeviceNames (45)
+/* dss:ApartmentCreateSetFromDeviceNames */
+struct dss__ApartmentCreateSetFromDeviceNames
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -191,50 +180,60 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_CreateEmptySetResponse
-#define SOAP_TYPE_dss__Apartment_CreateEmptySetResponse (49)
-/* dss:Apartment-CreateEmptySetResponse */
-struct dss__Apartment_CreateEmptySetResponse
+#ifndef SOAP_TYPE_dss__ApartmentCreateEmptySetResponse
+#define SOAP_TYPE_dss__ApartmentCreateEmptySetResponse (47)
+/* dss:ApartmentCreateEmptySetResponse */
+struct dss__ApartmentCreateEmptySetResponse
 {
 public:
 	int setID;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_CreateEmptySet
-#define SOAP_TYPE_dss__Apartment_CreateEmptySet (50)
-/* dss:Apartment-CreateEmptySet */
-struct dss__Apartment_CreateEmptySet
+#ifndef SOAP_TYPE_dss__ApartmentCreateEmptySet
+#define SOAP_TYPE_dss__ApartmentCreateEmptySet (48)
+/* dss:ApartmentCreateEmptySet */
+struct dss__ApartmentCreateEmptySet
 {
 public:
 	int _token;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_GetDevicesResponse
-#define SOAP_TYPE_dss__Apartment_GetDevicesResponse (52)
-/* dss:Apartment-GetDevicesResponse */
-struct dss__Apartment_GetDevicesResponse
+#ifndef SOAP_TYPE_dss__ApartmentGetDevicesResponse
+#define SOAP_TYPE_dss__ApartmentGetDevicesResponse (50)
+/* dss:ApartmentGetDevicesResponse */
+struct dss__ApartmentGetDevicesResponse
 {
 public:
 	int setID;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_GetDevices
-#define SOAP_TYPE_dss__Apartment_GetDevices (53)
-/* dss:Apartment-GetDevices */
-struct dss__Apartment_GetDevices
+#ifndef SOAP_TYPE_dss__ApartmentGetDevices
+#define SOAP_TYPE_dss__ApartmentGetDevices (51)
+/* dss:ApartmentGetDevices */
+struct dss__ApartmentGetDevices
 {
 public:
 	int _token;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_GetDeviceIDByName
-#define SOAP_TYPE_dss__Apartment_GetDeviceIDByName (56)
-/* dss:Apartment-GetDeviceIDByName */
-struct dss__Apartment_GetDeviceIDByName
+#ifndef SOAP_TYPE_dss__ApartmentGetDeviceIDByNameResponse
+#define SOAP_TYPE_dss__ApartmentGetDeviceIDByNameResponse (54)
+/* dss:ApartmentGetDeviceIDByNameResponse */
+struct dss__ApartmentGetDeviceIDByNameResponse
+{
+public:
+	std::string deviceID;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__ApartmentGetDeviceIDByName
+#define SOAP_TYPE_dss__ApartmentGetDeviceIDByName (55)
+/* dss:ApartmentGetDeviceIDByName */
+struct dss__ApartmentGetDeviceIDByName
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -242,20 +241,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_AddDeviceByNameResponse
-#define SOAP_TYPE_dss__Set_AddDeviceByNameResponse (58)
-/* dss:Set-AddDeviceByNameResponse */
-struct dss__Set_AddDeviceByNameResponse
+#ifndef SOAP_TYPE_dss__SetAddDeviceByNameResponse
+#define SOAP_TYPE_dss__SetAddDeviceByNameResponse (57)
+/* dss:SetAddDeviceByNameResponse */
+struct dss__SetAddDeviceByNameResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_AddDeviceByName
-#define SOAP_TYPE_dss__Set_AddDeviceByName (59)
-/* dss:Set-AddDeviceByName */
-struct dss__Set_AddDeviceByName
+#ifndef SOAP_TYPE_dss__SetAddDeviceByName
+#define SOAP_TYPE_dss__SetAddDeviceByName (58)
+/* dss:SetAddDeviceByName */
+struct dss__SetAddDeviceByName
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -264,64 +263,64 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_AddDeviceByIDResponse
-#define SOAP_TYPE_dss__Set_AddDeviceByIDResponse (61)
-/* dss:Set-AddDeviceByIDResponse */
-struct dss__Set_AddDeviceByIDResponse
+#ifndef SOAP_TYPE_dss__SetAddDeviceByIDResponse
+#define SOAP_TYPE_dss__SetAddDeviceByIDResponse (60)
+/* dss:SetAddDeviceByIDResponse */
+struct dss__SetAddDeviceByIDResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_AddDeviceByID
-#define SOAP_TYPE_dss__Set_AddDeviceByID (62)
-/* dss:Set-AddDeviceByID */
-struct dss__Set_AddDeviceByID
+#ifndef SOAP_TYPE_dss__SetAddDeviceByID
+#define SOAP_TYPE_dss__SetAddDeviceByID (61)
+/* dss:SetAddDeviceByID */
+struct dss__SetAddDeviceByID
 {
 public:
 	int _token;	/* required element of type xsd:int */
 	int _setID;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_RemoveDeviceResponse
-#define SOAP_TYPE_dss__Set_RemoveDeviceResponse (64)
-/* dss:Set-RemoveDeviceResponse */
-struct dss__Set_RemoveDeviceResponse
+#ifndef SOAP_TYPE_dss__SetRemoveDeviceResponse
+#define SOAP_TYPE_dss__SetRemoveDeviceResponse (63)
+/* dss:SetRemoveDeviceResponse */
+struct dss__SetRemoveDeviceResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_RemoveDevice
-#define SOAP_TYPE_dss__Set_RemoveDevice (65)
-/* dss:Set-RemoveDevice */
-struct dss__Set_RemoveDevice
+#ifndef SOAP_TYPE_dss__SetRemoveDevice
+#define SOAP_TYPE_dss__SetRemoveDevice (64)
+/* dss:SetRemoveDevice */
+struct dss__SetRemoveDevice
 {
 public:
 	int _token;	/* required element of type xsd:int */
 	int _setID;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_CombineResponse
-#define SOAP_TYPE_dss__Set_CombineResponse (67)
-/* dss:Set-CombineResponse */
-struct dss__Set_CombineResponse
+#ifndef SOAP_TYPE_dss__SetCombineResponse
+#define SOAP_TYPE_dss__SetCombineResponse (66)
+/* dss:SetCombineResponse */
+struct dss__SetCombineResponse
 {
 public:
 	int setID;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_Combine
-#define SOAP_TYPE_dss__Set_Combine (68)
-/* dss:Set-Combine */
-struct dss__Set_Combine
+#ifndef SOAP_TYPE_dss__SetCombine
+#define SOAP_TYPE_dss__SetCombine (67)
+/* dss:SetCombine */
+struct dss__SetCombine
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -330,20 +329,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_RemoveResponse
-#define SOAP_TYPE_dss__Set_RemoveResponse (70)
-/* dss:Set-RemoveResponse */
-struct dss__Set_RemoveResponse
+#ifndef SOAP_TYPE_dss__SetRemoveResponse
+#define SOAP_TYPE_dss__SetRemoveResponse (69)
+/* dss:SetRemoveResponse */
+struct dss__SetRemoveResponse
 {
 public:
 	int setID;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_Remove
-#define SOAP_TYPE_dss__Set_Remove (71)
-/* dss:Set-Remove */
-struct dss__Set_Remove
+#ifndef SOAP_TYPE_dss__SetRemove
+#define SOAP_TYPE_dss__SetRemove (70)
+/* dss:SetRemove */
+struct dss__SetRemove
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -352,20 +351,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_ByGroupResponse
-#define SOAP_TYPE_dss__Set_ByGroupResponse (73)
-/* dss:Set-ByGroupResponse */
-struct dss__Set_ByGroupResponse
+#ifndef SOAP_TYPE_dss__SetByGroupResponse
+#define SOAP_TYPE_dss__SetByGroupResponse (72)
+/* dss:SetByGroupResponse */
+struct dss__SetByGroupResponse
 {
 public:
 	int setID;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_ByGroup
-#define SOAP_TYPE_dss__Set_ByGroup (74)
-/* dss:Set-ByGroup */
-struct dss__Set_ByGroup
+#ifndef SOAP_TYPE_dss__SetByGroup
+#define SOAP_TYPE_dss__SetByGroup (73)
+/* dss:SetByGroup */
+struct dss__SetByGroup
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -374,20 +373,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_GetContainedDevicesResponse
-#define SOAP_TYPE_dss__Set_GetContainedDevicesResponse (77)
-/* dss:Set-GetContainedDevicesResponse */
-struct dss__Set_GetContainedDevicesResponse
+#ifndef SOAP_TYPE_dss__SetGetContainedDevicesResponse
+#define SOAP_TYPE_dss__SetGetContainedDevicesResponse (76)
+/* dss:SetGetContainedDevicesResponse */
+struct dss__SetGetContainedDevicesResponse
 {
 public:
-	std::vector<struct dss__dsid >deviceIDs;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type dss:dsid */
+	std::vector<std::string >deviceIDs;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:string */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_GetContainedDevices
-#define SOAP_TYPE_dss__Set_GetContainedDevices (78)
-/* dss:Set-GetContainedDevices */
-struct dss__Set_GetContainedDevices
+#ifndef SOAP_TYPE_dss__SetGetContainedDevices
+#define SOAP_TYPE_dss__SetGetContainedDevices (77)
+/* dss:SetGetContainedDevices */
+struct dss__SetGetContainedDevices
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -395,20 +394,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_GetGroupByNameResponse
-#define SOAP_TYPE_dss__Apartment_GetGroupByNameResponse (80)
-/* dss:Apartment-GetGroupByNameResponse */
-struct dss__Apartment_GetGroupByNameResponse
+#ifndef SOAP_TYPE_dss__ApartmentGetGroupByNameResponse
+#define SOAP_TYPE_dss__ApartmentGetGroupByNameResponse (79)
+/* dss:ApartmentGetGroupByNameResponse */
+struct dss__ApartmentGetGroupByNameResponse
 {
 public:
 	int groupID;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_GetGroupByName
-#define SOAP_TYPE_dss__Apartment_GetGroupByName (81)
-/* dss:Apartment-GetGroupByName */
-struct dss__Apartment_GetGroupByName
+#ifndef SOAP_TYPE_dss__ApartmentGetGroupByName
+#define SOAP_TYPE_dss__ApartmentGetGroupByName (80)
+/* dss:ApartmentGetGroupByName */
+struct dss__ApartmentGetGroupByName
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -416,20 +415,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_GetZoneByNameResponse
-#define SOAP_TYPE_dss__Apartment_GetZoneByNameResponse (83)
-/* dss:Apartment-GetZoneByNameResponse */
-struct dss__Apartment_GetZoneByNameResponse
+#ifndef SOAP_TYPE_dss__ApartmentGetZoneByNameResponse
+#define SOAP_TYPE_dss__ApartmentGetZoneByNameResponse (82)
+/* dss:ApartmentGetZoneByNameResponse */
+struct dss__ApartmentGetZoneByNameResponse
 {
 public:
 	int zoneID;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_GetZoneByName
-#define SOAP_TYPE_dss__Apartment_GetZoneByName (84)
-/* dss:Apartment-GetZoneByName */
-struct dss__Apartment_GetZoneByName
+#ifndef SOAP_TYPE_dss__ApartmentGetZoneByName
+#define SOAP_TYPE_dss__ApartmentGetZoneByName (83)
+/* dss:ApartmentGetZoneByName */
+struct dss__ApartmentGetZoneByName
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -437,61 +436,40 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_GetZoneIDsResponse
-#define SOAP_TYPE_dss__Apartment_GetZoneIDsResponse (86)
-/* dss:Apartment-GetZoneIDsResponse */
-struct dss__Apartment_GetZoneIDsResponse
+#ifndef SOAP_TYPE_dss__ApartmentGetZoneIDsResponse
+#define SOAP_TYPE_dss__ApartmentGetZoneIDsResponse (85)
+/* dss:ApartmentGetZoneIDsResponse */
+struct dss__ApartmentGetZoneIDsResponse
 {
 public:
 	std::vector<int >zoneIDs;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_GetZoneIDs
-#define SOAP_TYPE_dss__Apartment_GetZoneIDs (87)
-/* dss:Apartment-GetZoneIDs */
-struct dss__Apartment_GetZoneIDs
+#ifndef SOAP_TYPE_dss__ApartmentGetZoneIDs
+#define SOAP_TYPE_dss__ApartmentGetZoneIDs (86)
+/* dss:ApartmentGetZoneIDs */
+struct dss__ApartmentGetZoneIDs
 {
 public:
 	int _token;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_TurnOnResponse
-#define SOAP_TYPE_dss__Set_TurnOnResponse (89)
-/* dss:Set-TurnOnResponse */
-struct dss__Set_TurnOnResponse
+#ifndef SOAP_TYPE_dss__SetTurnOnResponse
+#define SOAP_TYPE_dss__SetTurnOnResponse (88)
+/* dss:SetTurnOnResponse */
+struct dss__SetTurnOnResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_TurnOn
-#define SOAP_TYPE_dss__Set_TurnOn (90)
-/* dss:Set-TurnOn */
-struct dss__Set_TurnOn
-{
-public:
-	int _token;	/* required element of type xsd:int */
-	int _setID;	/* required element of type xsd:int */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Set_TurnOffResponse
-#define SOAP_TYPE_dss__Set_TurnOffResponse (92)
-/* dss:Set-TurnOffResponse */
-struct dss__Set_TurnOffResponse
-{
-public:
-	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Set_TurnOff
-#define SOAP_TYPE_dss__Set_TurnOff (93)
-/* dss:Set-TurnOff */
-struct dss__Set_TurnOff
+#ifndef SOAP_TYPE_dss__SetTurnOn
+#define SOAP_TYPE_dss__SetTurnOn (89)
+/* dss:SetTurnOn */
+struct dss__SetTurnOn
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -499,42 +477,41 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_IncreaseValueResponse
-#define SOAP_TYPE_dss__Set_IncreaseValueResponse (95)
-/* dss:Set-IncreaseValueResponse */
-struct dss__Set_IncreaseValueResponse
+#ifndef SOAP_TYPE_dss__SetTurnOffResponse
+#define SOAP_TYPE_dss__SetTurnOffResponse (91)
+/* dss:SetTurnOffResponse */
+struct dss__SetTurnOffResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_IncreaseValue
-#define SOAP_TYPE_dss__Set_IncreaseValue (96)
-/* dss:Set-IncreaseValue */
-struct dss__Set_IncreaseValue
+#ifndef SOAP_TYPE_dss__SetTurnOff
+#define SOAP_TYPE_dss__SetTurnOff (92)
+/* dss:SetTurnOff */
+struct dss__SetTurnOff
 {
 public:
 	int _token;	/* required element of type xsd:int */
 	int _setID;	/* required element of type xsd:int */
-	int _paramID;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_DecreaseValueResponse
-#define SOAP_TYPE_dss__Set_DecreaseValueResponse (98)
-/* dss:Set-DecreaseValueResponse */
-struct dss__Set_DecreaseValueResponse
+#ifndef SOAP_TYPE_dss__SetIncreaseValueResponse
+#define SOAP_TYPE_dss__SetIncreaseValueResponse (94)
+/* dss:SetIncreaseValueResponse */
+struct dss__SetIncreaseValueResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_DecreaseValue
-#define SOAP_TYPE_dss__Set_DecreaseValue (99)
-/* dss:Set-DecreaseValue */
-struct dss__Set_DecreaseValue
+#ifndef SOAP_TYPE_dss__SetIncreaseValue
+#define SOAP_TYPE_dss__SetIncreaseValue (95)
+/* dss:SetIncreaseValue */
+struct dss__SetIncreaseValue
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -543,20 +520,42 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_EnableResponse
-#define SOAP_TYPE_dss__Set_EnableResponse (101)
-/* dss:Set-EnableResponse */
-struct dss__Set_EnableResponse
+#ifndef SOAP_TYPE_dss__SetDecreaseValueResponse
+#define SOAP_TYPE_dss__SetDecreaseValueResponse (97)
+/* dss:SetDecreaseValueResponse */
+struct dss__SetDecreaseValueResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_Enable
-#define SOAP_TYPE_dss__Set_Enable (102)
-/* dss:Set-Enable */
-struct dss__Set_Enable
+#ifndef SOAP_TYPE_dss__SetDecreaseValue
+#define SOAP_TYPE_dss__SetDecreaseValue (98)
+/* dss:SetDecreaseValue */
+struct dss__SetDecreaseValue
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	int _setID;	/* required element of type xsd:int */
+	int _paramID;	/* required element of type xsd:int */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__SetEnableResponse
+#define SOAP_TYPE_dss__SetEnableResponse (100)
+/* dss:SetEnableResponse */
+struct dss__SetEnableResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__SetEnable
+#define SOAP_TYPE_dss__SetEnable (101)
+/* dss:SetEnable */
+struct dss__SetEnable
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -564,20 +563,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_DisableResponse
-#define SOAP_TYPE_dss__Set_DisableResponse (104)
-/* dss:Set-DisableResponse */
-struct dss__Set_DisableResponse
+#ifndef SOAP_TYPE_dss__SetDisableResponse
+#define SOAP_TYPE_dss__SetDisableResponse (103)
+/* dss:SetDisableResponse */
+struct dss__SetDisableResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_Disable
-#define SOAP_TYPE_dss__Set_Disable (105)
-/* dss:Set-Disable */
-struct dss__Set_Disable
+#ifndef SOAP_TYPE_dss__SetDisable
+#define SOAP_TYPE_dss__SetDisable (104)
+/* dss:SetDisable */
+struct dss__SetDisable
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -585,20 +584,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_StartDimResponse
-#define SOAP_TYPE_dss__Set_StartDimResponse (107)
-/* dss:Set-StartDimResponse */
-struct dss__Set_StartDimResponse
+#ifndef SOAP_TYPE_dss__SetStartDimResponse
+#define SOAP_TYPE_dss__SetStartDimResponse (106)
+/* dss:SetStartDimResponse */
+struct dss__SetStartDimResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_StartDim
-#define SOAP_TYPE_dss__Set_StartDim (108)
-/* dss:Set-StartDim */
-struct dss__Set_StartDim
+#ifndef SOAP_TYPE_dss__SetStartDim
+#define SOAP_TYPE_dss__SetStartDim (107)
+/* dss:SetStartDim */
+struct dss__SetStartDim
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -608,20 +607,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_EndDimResponse
-#define SOAP_TYPE_dss__Set_EndDimResponse (110)
-/* dss:Set-EndDimResponse */
-struct dss__Set_EndDimResponse
+#ifndef SOAP_TYPE_dss__SetEndDimResponse
+#define SOAP_TYPE_dss__SetEndDimResponse (109)
+/* dss:SetEndDimResponse */
+struct dss__SetEndDimResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_EndDim
-#define SOAP_TYPE_dss__Set_EndDim (111)
-/* dss:Set-EndDim */
-struct dss__Set_EndDim
+#ifndef SOAP_TYPE_dss__SetEndDim
+#define SOAP_TYPE_dss__SetEndDim (110)
+/* dss:SetEndDim */
+struct dss__SetEndDim
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -630,20 +629,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_SetValueResponse
-#define SOAP_TYPE_dss__Set_SetValueResponse (114)
-/* dss:Set-SetValueResponse */
-struct dss__Set_SetValueResponse
+#ifndef SOAP_TYPE_dss__SetSetValueResponse
+#define SOAP_TYPE_dss__SetSetValueResponse (113)
+/* dss:SetSetValueResponse */
+struct dss__SetSetValueResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_SetValue
-#define SOAP_TYPE_dss__Set_SetValue (115)
-/* dss:Set-SetValue */
-struct dss__Set_SetValue
+#ifndef SOAP_TYPE_dss__SetSetValue
+#define SOAP_TYPE_dss__SetSetValue (114)
+/* dss:SetSetValue */
+struct dss__SetSetValue
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -653,20 +652,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_CallSceneResponse
-#define SOAP_TYPE_dss__Set_CallSceneResponse (117)
-/* dss:Set-CallSceneResponse */
-struct dss__Set_CallSceneResponse
+#ifndef SOAP_TYPE_dss__SetCallSceneResponse
+#define SOAP_TYPE_dss__SetCallSceneResponse (116)
+/* dss:SetCallSceneResponse */
+struct dss__SetCallSceneResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_CallScene
-#define SOAP_TYPE_dss__Set_CallScene (118)
-/* dss:Set-CallScene */
-struct dss__Set_CallScene
+#ifndef SOAP_TYPE_dss__SetCallScene
+#define SOAP_TYPE_dss__SetCallScene (117)
+/* dss:SetCallScene */
+struct dss__SetCallScene
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -675,20 +674,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_SaveSceneResponse
-#define SOAP_TYPE_dss__Set_SaveSceneResponse (120)
-/* dss:Set-SaveSceneResponse */
-struct dss__Set_SaveSceneResponse
+#ifndef SOAP_TYPE_dss__SetSaveSceneResponse
+#define SOAP_TYPE_dss__SetSaveSceneResponse (119)
+/* dss:SetSaveSceneResponse */
+struct dss__SetSaveSceneResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Set_SaveScene
-#define SOAP_TYPE_dss__Set_SaveScene (121)
-/* dss:Set-SaveScene */
-struct dss__Set_SaveScene
+#ifndef SOAP_TYPE_dss__SetSaveScene
+#define SOAP_TYPE_dss__SetSaveScene (120)
+/* dss:SetSaveScene */
+struct dss__SetSaveScene
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -697,20 +696,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_TurnOnResponse
-#define SOAP_TYPE_dss__Group_TurnOnResponse (123)
-/* dss:Group-TurnOnResponse */
-struct dss__Group_TurnOnResponse
+#ifndef SOAP_TYPE_dss__ApartmentTurnOnResponse
+#define SOAP_TYPE_dss__ApartmentTurnOnResponse (122)
+/* dss:ApartmentTurnOnResponse */
+struct dss__ApartmentTurnOnResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_TurnOn
-#define SOAP_TYPE_dss__Group_TurnOn (124)
-/* dss:Group-TurnOn */
-struct dss__Group_TurnOn
+#ifndef SOAP_TYPE_dss__ApartmentTurnOn
+#define SOAP_TYPE_dss__ApartmentTurnOn (123)
+/* dss:ApartmentTurnOn */
+struct dss__ApartmentTurnOn
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -718,20 +717,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_TurnOffResponse
-#define SOAP_TYPE_dss__Group_TurnOffResponse (126)
-/* dss:Group-TurnOffResponse */
-struct dss__Group_TurnOffResponse
+#ifndef SOAP_TYPE_dss__ApartmentTurnOffResponse
+#define SOAP_TYPE_dss__ApartmentTurnOffResponse (125)
+/* dss:ApartmentTurnOffResponse */
+struct dss__ApartmentTurnOffResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_TurnOff
-#define SOAP_TYPE_dss__Group_TurnOff (127)
-/* dss:Group-TurnOff */
-struct dss__Group_TurnOff
+#ifndef SOAP_TYPE_dss__ApartmentTurnOff
+#define SOAP_TYPE_dss__ApartmentTurnOff (126)
+/* dss:ApartmentTurnOff */
+struct dss__ApartmentTurnOff
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -739,42 +738,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_IncreaseValueResponse
-#define SOAP_TYPE_dss__Group_IncreaseValueResponse (129)
-/* dss:Group-IncreaseValueResponse */
-struct dss__Group_IncreaseValueResponse
+#ifndef SOAP_TYPE_dss__ApartmentIncreaseValueResponse
+#define SOAP_TYPE_dss__ApartmentIncreaseValueResponse (128)
+/* dss:ApartmentIncreaseValueResponse */
+struct dss__ApartmentIncreaseValueResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_IncreaseValue
-#define SOAP_TYPE_dss__Group_IncreaseValue (130)
-/* dss:Group-IncreaseValue */
-struct dss__Group_IncreaseValue
-{
-public:
-	int _token;	/* required element of type xsd:int */
-	int _groupID;	/* required element of type xsd:int */
-	int _paramID;	/* required element of type xsd:int */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Group_DecreaseValueResponse
-#define SOAP_TYPE_dss__Group_DecreaseValueResponse (132)
-/* dss:Group-DecreaseValueResponse */
-struct dss__Group_DecreaseValueResponse
-{
-public:
-	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Group_DecreaseValue
-#define SOAP_TYPE_dss__Group_DecreaseValue (133)
-/* dss:Group-DecreaseValue */
-struct dss__Group_DecreaseValue
+#ifndef SOAP_TYPE_dss__ApartmentIncreaseValue
+#define SOAP_TYPE_dss__ApartmentIncreaseValue (129)
+/* dss:ApartmentIncreaseValue */
+struct dss__ApartmentIncreaseValue
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -783,20 +760,42 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_EnableResponse
-#define SOAP_TYPE_dss__Group_EnableResponse (135)
-/* dss:Group-EnableResponse */
-struct dss__Group_EnableResponse
+#ifndef SOAP_TYPE_dss__ApartmentDecreaseValueResponse
+#define SOAP_TYPE_dss__ApartmentDecreaseValueResponse (131)
+/* dss:ApartmentDecreaseValueResponse */
+struct dss__ApartmentDecreaseValueResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_Enable
-#define SOAP_TYPE_dss__Group_Enable (136)
-/* dss:Group-Enable */
-struct dss__Group_Enable
+#ifndef SOAP_TYPE_dss__ApartmentDecreaseValue
+#define SOAP_TYPE_dss__ApartmentDecreaseValue (132)
+/* dss:ApartmentDecreaseValue */
+struct dss__ApartmentDecreaseValue
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	int _groupID;	/* required element of type xsd:int */
+	int _paramID;	/* required element of type xsd:int */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__ApartmentEnableResponse
+#define SOAP_TYPE_dss__ApartmentEnableResponse (134)
+/* dss:ApartmentEnableResponse */
+struct dss__ApartmentEnableResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__ApartmentEnable
+#define SOAP_TYPE_dss__ApartmentEnable (135)
+/* dss:ApartmentEnable */
+struct dss__ApartmentEnable
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -804,20 +803,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_DisableResponse
-#define SOAP_TYPE_dss__Group_DisableResponse (138)
-/* dss:Group-DisableResponse */
-struct dss__Group_DisableResponse
+#ifndef SOAP_TYPE_dss__ApartmentDisableResponse
+#define SOAP_TYPE_dss__ApartmentDisableResponse (137)
+/* dss:ApartmentDisableResponse */
+struct dss__ApartmentDisableResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_Disable
-#define SOAP_TYPE_dss__Group_Disable (139)
-/* dss:Group-Disable */
-struct dss__Group_Disable
+#ifndef SOAP_TYPE_dss__ApartmentDisable
+#define SOAP_TYPE_dss__ApartmentDisable (138)
+/* dss:ApartmentDisable */
+struct dss__ApartmentDisable
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -825,20 +824,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_StartDimResponse
-#define SOAP_TYPE_dss__Group_StartDimResponse (141)
-/* dss:Group-StartDimResponse */
-struct dss__Group_StartDimResponse
+#ifndef SOAP_TYPE_dss__ApartmentStartDimResponse
+#define SOAP_TYPE_dss__ApartmentStartDimResponse (140)
+/* dss:ApartmentStartDimResponse */
+struct dss__ApartmentStartDimResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_StartDim
-#define SOAP_TYPE_dss__Group_StartDim (142)
-/* dss:Group-StartDim */
-struct dss__Group_StartDim
+#ifndef SOAP_TYPE_dss__ApartmentStartDim
+#define SOAP_TYPE_dss__ApartmentStartDim (141)
+/* dss:ApartmentStartDim */
+struct dss__ApartmentStartDim
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -848,20 +847,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_EndDimResponse
-#define SOAP_TYPE_dss__Group_EndDimResponse (144)
-/* dss:Group-EndDimResponse */
-struct dss__Group_EndDimResponse
+#ifndef SOAP_TYPE_dss__ApartmentEndDimResponse
+#define SOAP_TYPE_dss__ApartmentEndDimResponse (143)
+/* dss:ApartmentEndDimResponse */
+struct dss__ApartmentEndDimResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_EndDim
-#define SOAP_TYPE_dss__Group_EndDim (145)
-/* dss:Group-EndDim */
-struct dss__Group_EndDim
+#ifndef SOAP_TYPE_dss__ApartmentEndDim
+#define SOAP_TYPE_dss__ApartmentEndDim (144)
+/* dss:ApartmentEndDim */
+struct dss__ApartmentEndDim
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -870,20 +869,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_SetValueResponse
-#define SOAP_TYPE_dss__Group_SetValueResponse (147)
-/* dss:Group-SetValueResponse */
-struct dss__Group_SetValueResponse
+#ifndef SOAP_TYPE_dss__ApartmentSetValueResponse
+#define SOAP_TYPE_dss__ApartmentSetValueResponse (146)
+/* dss:ApartmentSetValueResponse */
+struct dss__ApartmentSetValueResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_SetValue
-#define SOAP_TYPE_dss__Group_SetValue (148)
-/* dss:Group-SetValue */
-struct dss__Group_SetValue
+#ifndef SOAP_TYPE_dss__ApartmentSetValue
+#define SOAP_TYPE_dss__ApartmentSetValue (147)
+/* dss:ApartmentSetValue */
+struct dss__ApartmentSetValue
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -893,20 +892,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_CallSceneResponse
-#define SOAP_TYPE_dss__Group_CallSceneResponse (150)
-/* dss:Group-CallSceneResponse */
-struct dss__Group_CallSceneResponse
+#ifndef SOAP_TYPE_dss__ApartmentCallSceneResponse
+#define SOAP_TYPE_dss__ApartmentCallSceneResponse (149)
+/* dss:ApartmentCallSceneResponse */
+struct dss__ApartmentCallSceneResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_CallScene
-#define SOAP_TYPE_dss__Group_CallScene (151)
-/* dss:Group-CallScene */
-struct dss__Group_CallScene
+#ifndef SOAP_TYPE_dss__ApartmentCallScene
+#define SOAP_TYPE_dss__ApartmentCallScene (150)
+/* dss:ApartmentCallScene */
+struct dss__ApartmentCallScene
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -915,20 +914,20 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_SaveSceneResponse
-#define SOAP_TYPE_dss__Group_SaveSceneResponse (153)
-/* dss:Group-SaveSceneResponse */
-struct dss__Group_SaveSceneResponse
+#ifndef SOAP_TYPE_dss__ApartmentSaveSceneResponse
+#define SOAP_TYPE_dss__ApartmentSaveSceneResponse (152)
+/* dss:ApartmentSaveSceneResponse */
+struct dss__ApartmentSaveSceneResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_SaveScene
-#define SOAP_TYPE_dss__Group_SaveScene (154)
-/* dss:Group-SaveScene */
-struct dss__Group_SaveScene
+#ifndef SOAP_TYPE_dss__ApartmentSaveScene
+#define SOAP_TYPE_dss__ApartmentSaveScene (153)
+/* dss:ApartmentSaveScene */
+struct dss__ApartmentSaveScene
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -937,335 +936,575 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_TurnOnResponse
-#define SOAP_TYPE_dss__Device_TurnOnResponse (156)
-/* dss:Device-TurnOnResponse */
-struct dss__Device_TurnOnResponse
+#ifndef SOAP_TYPE_dss__ZoneTurnOnResponse
+#define SOAP_TYPE_dss__ZoneTurnOnResponse (155)
+/* dss:ZoneTurnOnResponse */
+struct dss__ZoneTurnOnResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_TurnOn
-#define SOAP_TYPE_dss__Device_TurnOn (157)
-/* dss:Device-TurnOn */
-struct dss__Device_TurnOn
+#ifndef SOAP_TYPE_dss__ZoneTurnOn
+#define SOAP_TYPE_dss__ZoneTurnOn (156)
+/* dss:ZoneTurnOn */
+struct dss__ZoneTurnOn
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	int _zoneID;	/* required element of type xsd:int */
+	int _groupID;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_TurnOffResponse
-#define SOAP_TYPE_dss__Device_TurnOffResponse (159)
-/* dss:Device-TurnOffResponse */
-struct dss__Device_TurnOffResponse
+#ifndef SOAP_TYPE_dss__ZoneTurnOffResponse
+#define SOAP_TYPE_dss__ZoneTurnOffResponse (158)
+/* dss:ZoneTurnOffResponse */
+struct dss__ZoneTurnOffResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_TurnOff
-#define SOAP_TYPE_dss__Device_TurnOff (160)
-/* dss:Device-TurnOff */
-struct dss__Device_TurnOff
+#ifndef SOAP_TYPE_dss__ZoneTurnOff
+#define SOAP_TYPE_dss__ZoneTurnOff (159)
+/* dss:ZoneTurnOff */
+struct dss__ZoneTurnOff
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	int _zoneID;	/* required element of type xsd:int */
+	int _groupID;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_IncreaseValueResponse
-#define SOAP_TYPE_dss__Device_IncreaseValueResponse (162)
-/* dss:Device-IncreaseValueResponse */
-struct dss__Device_IncreaseValueResponse
+#ifndef SOAP_TYPE_dss__ZoneIncreaseValueResponse
+#define SOAP_TYPE_dss__ZoneIncreaseValueResponse (161)
+/* dss:ZoneIncreaseValueResponse */
+struct dss__ZoneIncreaseValueResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_IncreaseValue
-#define SOAP_TYPE_dss__Device_IncreaseValue (163)
-/* dss:Device-IncreaseValue */
-struct dss__Device_IncreaseValue
+#ifndef SOAP_TYPE_dss__ZoneIncreaseValue
+#define SOAP_TYPE_dss__ZoneIncreaseValue (162)
+/* dss:ZoneIncreaseValue */
+struct dss__ZoneIncreaseValue
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	int _zoneID;	/* required element of type xsd:int */
+	int _groupID;	/* required element of type xsd:int */
 	int _paramID;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_DecreaseValueResponse
-#define SOAP_TYPE_dss__Device_DecreaseValueResponse (165)
-/* dss:Device-DecreaseValueResponse */
-struct dss__Device_DecreaseValueResponse
+#ifndef SOAP_TYPE_dss__ZoneDecreaseValueResponse
+#define SOAP_TYPE_dss__ZoneDecreaseValueResponse (164)
+/* dss:ZoneDecreaseValueResponse */
+struct dss__ZoneDecreaseValueResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_DecreaseValue
-#define SOAP_TYPE_dss__Device_DecreaseValue (166)
-/* dss:Device-DecreaseValue */
-struct dss__Device_DecreaseValue
+#ifndef SOAP_TYPE_dss__ZoneDecreaseValue
+#define SOAP_TYPE_dss__ZoneDecreaseValue (165)
+/* dss:ZoneDecreaseValue */
+struct dss__ZoneDecreaseValue
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	int _zoneID;	/* required element of type xsd:int */
+	int _groupID;	/* required element of type xsd:int */
 	int _paramID;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_EnableResponse
-#define SOAP_TYPE_dss__Device_EnableResponse (168)
-/* dss:Device-EnableResponse */
-struct dss__Device_EnableResponse
+#ifndef SOAP_TYPE_dss__ZoneEnableResponse
+#define SOAP_TYPE_dss__ZoneEnableResponse (167)
+/* dss:ZoneEnableResponse */
+struct dss__ZoneEnableResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_Enable
-#define SOAP_TYPE_dss__Device_Enable (169)
-/* dss:Device-Enable */
-struct dss__Device_Enable
+#ifndef SOAP_TYPE_dss__ZoneEnable
+#define SOAP_TYPE_dss__ZoneEnable (168)
+/* dss:ZoneEnable */
+struct dss__ZoneEnable
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	int _zoneID;	/* required element of type xsd:int */
+	int _groupID;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_DisableResponse
-#define SOAP_TYPE_dss__Device_DisableResponse (171)
-/* dss:Device-DisableResponse */
-struct dss__Device_DisableResponse
+#ifndef SOAP_TYPE_dss__ZoneDisableResponse
+#define SOAP_TYPE_dss__ZoneDisableResponse (170)
+/* dss:ZoneDisableResponse */
+struct dss__ZoneDisableResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_Disable
-#define SOAP_TYPE_dss__Device_Disable (172)
-/* dss:Device-Disable */
-struct dss__Device_Disable
+#ifndef SOAP_TYPE_dss__ZoneDisable
+#define SOAP_TYPE_dss__ZoneDisable (171)
+/* dss:ZoneDisable */
+struct dss__ZoneDisable
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	int _zoneID;	/* required element of type xsd:int */
+	int _groupID;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_StartDimResponse
-#define SOAP_TYPE_dss__Device_StartDimResponse (174)
-/* dss:Device-StartDimResponse */
-struct dss__Device_StartDimResponse
+#ifndef SOAP_TYPE_dss__ZoneStartDimResponse
+#define SOAP_TYPE_dss__ZoneStartDimResponse (173)
+/* dss:ZoneStartDimResponse */
+struct dss__ZoneStartDimResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_StartDim
-#define SOAP_TYPE_dss__Device_StartDim (175)
-/* dss:Device-StartDim */
-struct dss__Device_StartDim
+#ifndef SOAP_TYPE_dss__ZoneStartDim
+#define SOAP_TYPE_dss__ZoneStartDim (174)
+/* dss:ZoneStartDim */
+struct dss__ZoneStartDim
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	int _zoneID;	/* required element of type xsd:int */
+	int _groupID;	/* required element of type xsd:int */
 	bool _directionUp;	/* required element of type xsd:boolean */
 	int _paramID;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_EndDimResponse
-#define SOAP_TYPE_dss__Device_EndDimResponse (177)
-/* dss:Device-EndDimResponse */
-struct dss__Device_EndDimResponse
+#ifndef SOAP_TYPE_dss__ZoneEndDimResponse
+#define SOAP_TYPE_dss__ZoneEndDimResponse (176)
+/* dss:ZoneEndDimResponse */
+struct dss__ZoneEndDimResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_EndDim
-#define SOAP_TYPE_dss__Device_EndDim (178)
-/* dss:Device-EndDim */
-struct dss__Device_EndDim
+#ifndef SOAP_TYPE_dss__ZoneEndDim
+#define SOAP_TYPE_dss__ZoneEndDim (177)
+/* dss:ZoneEndDim */
+struct dss__ZoneEndDim
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	int _zoneID;	/* required element of type xsd:int */
+	int _groupID;	/* required element of type xsd:int */
 	int _paramID;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_SetValueResponse
-#define SOAP_TYPE_dss__Device_SetValueResponse (180)
-/* dss:Device-SetValueResponse */
-struct dss__Device_SetValueResponse
+#ifndef SOAP_TYPE_dss__ZoneSetValueResponse
+#define SOAP_TYPE_dss__ZoneSetValueResponse (179)
+/* dss:ZoneSetValueResponse */
+struct dss__ZoneSetValueResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_SetValue
-#define SOAP_TYPE_dss__Device_SetValue (181)
-/* dss:Device-SetValue */
-struct dss__Device_SetValue
+#ifndef SOAP_TYPE_dss__ZoneSetValue
+#define SOAP_TYPE_dss__ZoneSetValue (180)
+/* dss:ZoneSetValue */
+struct dss__ZoneSetValue
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	int _zoneID;	/* required element of type xsd:int */
+	int _groupID;	/* required element of type xsd:int */
 	double _value;	/* required element of type xsd:double */
 	int _paramID;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_GetValueResponse
-#define SOAP_TYPE_dss__Device_GetValueResponse (184)
-/* dss:Device-GetValueResponse */
-struct dss__Device_GetValueResponse
+#ifndef SOAP_TYPE_dss__ZoneCallSceneResponse
+#define SOAP_TYPE_dss__ZoneCallSceneResponse (182)
+/* dss:ZoneCallSceneResponse */
+struct dss__ZoneCallSceneResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__ZoneCallScene
+#define SOAP_TYPE_dss__ZoneCallScene (183)
+/* dss:ZoneCallScene */
+struct dss__ZoneCallScene
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	int _zoneID;	/* required element of type xsd:int */
+	int _groupID;	/* required element of type xsd:int */
+	int _sceneNr;	/* required element of type xsd:int */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__ZoneSaveSceneResponse
+#define SOAP_TYPE_dss__ZoneSaveSceneResponse (185)
+/* dss:ZoneSaveSceneResponse */
+struct dss__ZoneSaveSceneResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__ZoneSaveScene
+#define SOAP_TYPE_dss__ZoneSaveScene (186)
+/* dss:ZoneSaveScene */
+struct dss__ZoneSaveScene
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	int _zoneID;	/* required element of type xsd:int */
+	int _groupID;	/* required element of type xsd:int */
+	int _sceneNr;	/* required element of type xsd:int */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceTurnOnResponse
+#define SOAP_TYPE_dss__DeviceTurnOnResponse (188)
+/* dss:DeviceTurnOnResponse */
+struct dss__DeviceTurnOnResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceTurnOn
+#define SOAP_TYPE_dss__DeviceTurnOn (189)
+/* dss:DeviceTurnOn */
+struct dss__DeviceTurnOn
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	char *_deviceID;	/* optional element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceTurnOffResponse
+#define SOAP_TYPE_dss__DeviceTurnOffResponse (191)
+/* dss:DeviceTurnOffResponse */
+struct dss__DeviceTurnOffResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceTurnOff
+#define SOAP_TYPE_dss__DeviceTurnOff (192)
+/* dss:DeviceTurnOff */
+struct dss__DeviceTurnOff
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	char *_deviceID;	/* optional element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceIncreaseValueResponse
+#define SOAP_TYPE_dss__DeviceIncreaseValueResponse (194)
+/* dss:DeviceIncreaseValueResponse */
+struct dss__DeviceIncreaseValueResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceIncreaseValue
+#define SOAP_TYPE_dss__DeviceIncreaseValue (195)
+/* dss:DeviceIncreaseValue */
+struct dss__DeviceIncreaseValue
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	char *_deviceID;	/* optional element of type xsd:string */
+	int _paramID;	/* required element of type xsd:int */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceDecreaseValueResponse
+#define SOAP_TYPE_dss__DeviceDecreaseValueResponse (197)
+/* dss:DeviceDecreaseValueResponse */
+struct dss__DeviceDecreaseValueResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceDecreaseValue
+#define SOAP_TYPE_dss__DeviceDecreaseValue (198)
+/* dss:DeviceDecreaseValue */
+struct dss__DeviceDecreaseValue
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	char *_deviceID;	/* optional element of type xsd:string */
+	int _paramID;	/* required element of type xsd:int */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceEnableResponse
+#define SOAP_TYPE_dss__DeviceEnableResponse (200)
+/* dss:DeviceEnableResponse */
+struct dss__DeviceEnableResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceEnable
+#define SOAP_TYPE_dss__DeviceEnable (201)
+/* dss:DeviceEnable */
+struct dss__DeviceEnable
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	char *_deviceID;	/* optional element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceDisableResponse
+#define SOAP_TYPE_dss__DeviceDisableResponse (203)
+/* dss:DeviceDisableResponse */
+struct dss__DeviceDisableResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceDisable
+#define SOAP_TYPE_dss__DeviceDisable (204)
+/* dss:DeviceDisable */
+struct dss__DeviceDisable
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	char *_deviceID;	/* optional element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceStartDimResponse
+#define SOAP_TYPE_dss__DeviceStartDimResponse (206)
+/* dss:DeviceStartDimResponse */
+struct dss__DeviceStartDimResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceStartDim
+#define SOAP_TYPE_dss__DeviceStartDim (207)
+/* dss:DeviceStartDim */
+struct dss__DeviceStartDim
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	char *_deviceID;	/* optional element of type xsd:string */
+	bool _directionUp;	/* required element of type xsd:boolean */
+	int _paramID;	/* required element of type xsd:int */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceEndDimResponse
+#define SOAP_TYPE_dss__DeviceEndDimResponse (209)
+/* dss:DeviceEndDimResponse */
+struct dss__DeviceEndDimResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceEndDim
+#define SOAP_TYPE_dss__DeviceEndDim (210)
+/* dss:DeviceEndDim */
+struct dss__DeviceEndDim
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	char *_deviceID;	/* optional element of type xsd:string */
+	int _paramID;	/* required element of type xsd:int */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceSetValueResponse
+#define SOAP_TYPE_dss__DeviceSetValueResponse (212)
+/* dss:DeviceSetValueResponse */
+struct dss__DeviceSetValueResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceSetValue
+#define SOAP_TYPE_dss__DeviceSetValue (213)
+/* dss:DeviceSetValue */
+struct dss__DeviceSetValue
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	char *_deviceID;	/* optional element of type xsd:string */
+	double _value;	/* required element of type xsd:double */
+	int _paramID;	/* required element of type xsd:int */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceGetValueResponse
+#define SOAP_TYPE_dss__DeviceGetValueResponse (216)
+/* dss:DeviceGetValueResponse */
+struct dss__DeviceGetValueResponse
 {
 public:
 	double result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:double */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_GetValue
-#define SOAP_TYPE_dss__Device_GetValue (185)
-/* dss:Device-GetValue */
-struct dss__Device_GetValue
+#ifndef SOAP_TYPE_dss__DeviceGetValue
+#define SOAP_TYPE_dss__DeviceGetValue (217)
+/* dss:DeviceGetValue */
+struct dss__DeviceGetValue
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	char *_deviceID;	/* optional element of type xsd:string */
 	int _paramID;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_CallSceneResponse
-#define SOAP_TYPE_dss__Device_CallSceneResponse (187)
-/* dss:Device-CallSceneResponse */
-struct dss__Device_CallSceneResponse
+#ifndef SOAP_TYPE_dss__DeviceCallSceneResponse
+#define SOAP_TYPE_dss__DeviceCallSceneResponse (219)
+/* dss:DeviceCallSceneResponse */
+struct dss__DeviceCallSceneResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_CallScene
-#define SOAP_TYPE_dss__Device_CallScene (188)
-/* dss:Device-CallScene */
-struct dss__Device_CallScene
+#ifndef SOAP_TYPE_dss__DeviceCallScene
+#define SOAP_TYPE_dss__DeviceCallScene (220)
+/* dss:DeviceCallScene */
+struct dss__DeviceCallScene
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	char *_deviceID;	/* optional element of type xsd:string */
 	int _sceneNr;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_SaveSceneResponse
-#define SOAP_TYPE_dss__Device_SaveSceneResponse (190)
-/* dss:Device-SaveSceneResponse */
-struct dss__Device_SaveSceneResponse
+#ifndef SOAP_TYPE_dss__DeviceSaveSceneResponse
+#define SOAP_TYPE_dss__DeviceSaveSceneResponse (222)
+/* dss:DeviceSaveSceneResponse */
+struct dss__DeviceSaveSceneResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_SaveScene
-#define SOAP_TYPE_dss__Device_SaveScene (191)
-/* dss:Device-SaveScene */
-struct dss__Device_SaveScene
+#ifndef SOAP_TYPE_dss__DeviceSaveScene
+#define SOAP_TYPE_dss__DeviceSaveScene (223)
+/* dss:DeviceSaveScene */
+struct dss__DeviceSaveScene
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	char *_deviceID;	/* optional element of type xsd:string */
 	int _sceneNr;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_GetNameResponse
-#define SOAP_TYPE_dss__Device_GetNameResponse (194)
-/* dss:Device-GetNameResponse */
-struct dss__Device_GetNameResponse
+#ifndef SOAP_TYPE_dss__DeviceGetNameResponse
+#define SOAP_TYPE_dss__DeviceGetNameResponse (226)
+/* dss:DeviceGetNameResponse */
+struct dss__DeviceGetNameResponse
 {
 public:
 	char **result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* optional element of type xsd:string */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_GetName
-#define SOAP_TYPE_dss__Device_GetName (195)
-/* dss:Device-GetName */
-struct dss__Device_GetName
+#ifndef SOAP_TYPE_dss__DeviceGetName
+#define SOAP_TYPE_dss__DeviceGetName (227)
+/* dss:DeviceGetName */
+struct dss__DeviceGetName
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_GetZoneIDResponse
-#define SOAP_TYPE_dss__Device_GetZoneIDResponse (197)
-/* dss:Device-GetZoneIDResponse */
-struct dss__Device_GetZoneIDResponse
+#ifndef SOAP_TYPE_dss__DeviceGetZoneIDResponse
+#define SOAP_TYPE_dss__DeviceGetZoneIDResponse (229)
+/* dss:DeviceGetZoneIDResponse */
+struct dss__DeviceGetZoneIDResponse
 {
 public:
 	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_GetZoneID
-#define SOAP_TYPE_dss__Device_GetZoneID (198)
-/* dss:Device-GetZoneID */
-struct dss__Device_GetZoneID
+#ifndef SOAP_TYPE_dss__DeviceGetZoneID
+#define SOAP_TYPE_dss__DeviceGetZoneID (230)
+/* dss:DeviceGetZoneID */
+struct dss__DeviceGetZoneID
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_GetDSID
-#define SOAP_TYPE_dss__Device_GetDSID (200)
-/* dss:Device-GetDSID */
-struct dss__Device_GetDSID
-{
-public:
-	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Modulator_GetPowerConsumptionResponse
-#define SOAP_TYPE_dss__Modulator_GetPowerConsumptionResponse (203)
-/* dss:Modulator-GetPowerConsumptionResponse */
-struct dss__Modulator_GetPowerConsumptionResponse
+#ifndef SOAP_TYPE_dss__ModulatorGetPowerConsumptionResponse
+#define SOAP_TYPE_dss__ModulatorGetPowerConsumptionResponse (233)
+/* dss:ModulatorGetPowerConsumptionResponse */
+struct dss__ModulatorGetPowerConsumptionResponse
 {
 public:
 	unsigned long result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:unsignedInt */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Modulator_GetPowerConsumption
-#define SOAP_TYPE_dss__Modulator_GetPowerConsumption (204)
-/* dss:Modulator-GetPowerConsumption */
-struct dss__Modulator_GetPowerConsumption
+#ifndef SOAP_TYPE_dss__ModulatorGetPowerConsumption
+#define SOAP_TYPE_dss__ModulatorGetPowerConsumption (234)
+/* dss:ModulatorGetPowerConsumption */
+struct dss__ModulatorGetPowerConsumption
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -1273,92 +1512,81 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_GetModulatorIDsResponse
-#define SOAP_TYPE_dss__Apartment_GetModulatorIDsResponse (206)
-/* dss:Apartment-GetModulatorIDsResponse */
-struct dss__Apartment_GetModulatorIDsResponse
+#ifndef SOAP_TYPE_dss__ApartmentGetModulatorIDsResponse
+#define SOAP_TYPE_dss__ApartmentGetModulatorIDsResponse (236)
+/* dss:ApartmentGetModulatorIDsResponse */
+struct dss__ApartmentGetModulatorIDsResponse
 {
 public:
-	std::vector<struct dss__dsid >ids;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type dss:dsid */
+	std::vector<std::string >ids;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:string */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_GetModulatorIDs
-#define SOAP_TYPE_dss__Apartment_GetModulatorIDs (207)
-/* dss:Apartment-GetModulatorIDs */
-struct dss__Apartment_GetModulatorIDs
-{
-public:
-	int _token;	/* required element of type xsd:int */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Modulator_GetDSID
-#define SOAP_TYPE_dss__Modulator_GetDSID (209)
-/* dss:Modulator-GetDSID */
-struct dss__Modulator_GetDSID
+#ifndef SOAP_TYPE_dss__ApartmentGetModulatorIDs
+#define SOAP_TYPE_dss__ApartmentGetModulatorIDs (237)
+/* dss:ApartmentGetModulatorIDs */
+struct dss__ApartmentGetModulatorIDs
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	int _modulatorID;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Modulator_GetNameResponse
-#define SOAP_TYPE_dss__Modulator_GetNameResponse (211)
-/* dss:Modulator-GetNameResponse */
-struct dss__Modulator_GetNameResponse
+#ifndef SOAP_TYPE_dss__ModulatorGetNameResponse
+#define SOAP_TYPE_dss__ModulatorGetNameResponse (239)
+/* dss:ModulatorGetNameResponse */
+struct dss__ModulatorGetNameResponse
 {
 public:
-	char **name;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* optional element of type xsd:string */
+	std::string name;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:string */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Modulator_GetName
-#define SOAP_TYPE_dss__Modulator_GetName (212)
-/* dss:Modulator-GetName */
-struct dss__Modulator_GetName
+#ifndef SOAP_TYPE_dss__ModulatorGetName
+#define SOAP_TYPE_dss__ModulatorGetName (240)
+/* dss:ModulatorGetName */
+struct dss__ModulatorGetName
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _modulatorID;	/* required element of type dss:dsid */
+	char *_modulatorID;	/* optional element of type xsd:string */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_AllocateZoneResponse
-#define SOAP_TYPE_dss__Apartment_AllocateZoneResponse (214)
-/* dss:Apartment-AllocateZoneResponse */
-struct dss__Apartment_AllocateZoneResponse
+#ifndef SOAP_TYPE_dss__ApartmentAllocateZoneResponse
+#define SOAP_TYPE_dss__ApartmentAllocateZoneResponse (242)
+/* dss:ApartmentAllocateZoneResponse */
+struct dss__ApartmentAllocateZoneResponse
 {
 public:
 	int zoneID;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_AllocateZone
-#define SOAP_TYPE_dss__Apartment_AllocateZone (215)
-/* dss:Apartment-AllocateZone */
-struct dss__Apartment_AllocateZone
+#ifndef SOAP_TYPE_dss__ApartmentAllocateZone
+#define SOAP_TYPE_dss__ApartmentAllocateZone (243)
+/* dss:ApartmentAllocateZone */
+struct dss__ApartmentAllocateZone
 {
 public:
 	int _token;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_DeleteZoneResponse
-#define SOAP_TYPE_dss__Apartment_DeleteZoneResponse (217)
-/* dss:Apartment-DeleteZoneResponse */
-struct dss__Apartment_DeleteZoneResponse
+#ifndef SOAP_TYPE_dss__ApartmentDeleteZoneResponse
+#define SOAP_TYPE_dss__ApartmentDeleteZoneResponse (245)
+/* dss:ApartmentDeleteZoneResponse */
+struct dss__ApartmentDeleteZoneResponse
 {
 public:
 	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_DeleteZone
-#define SOAP_TYPE_dss__Apartment_DeleteZone (218)
-/* dss:Apartment-DeleteZone */
-struct dss__Apartment_DeleteZone
+#ifndef SOAP_TYPE_dss__ApartmentDeleteZone
+#define SOAP_TYPE_dss__ApartmentDeleteZone (246)
+/* dss:ApartmentDeleteZone */
+struct dss__ApartmentDeleteZone
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -1367,7 +1595,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Zone_AddDeviceResponse
-#define SOAP_TYPE_dss__Zone_AddDeviceResponse (220)
+#define SOAP_TYPE_dss__Zone_AddDeviceResponse (248)
 /* dss:Zone-AddDeviceResponse */
 struct dss__Zone_AddDeviceResponse
 {
@@ -1377,19 +1605,19 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Zone_AddDevice
-#define SOAP_TYPE_dss__Zone_AddDevice (221)
+#define SOAP_TYPE_dss__Zone_AddDevice (249)
 /* dss:Zone-AddDevice */
 struct dss__Zone_AddDevice
 {
 public:
 	int _token;	/* required element of type xsd:int */
 	int _zoneID;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
 
 #ifndef SOAP_TYPE_dss__Zone_RemoveDeviceResponse
-#define SOAP_TYPE_dss__Zone_RemoveDeviceResponse (223)
+#define SOAP_TYPE_dss__Zone_RemoveDeviceResponse (251)
 /* dss:Zone-RemoveDeviceResponse */
 struct dss__Zone_RemoveDeviceResponse
 {
@@ -1399,19 +1627,19 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Zone_RemoveDevice
-#define SOAP_TYPE_dss__Zone_RemoveDevice (224)
+#define SOAP_TYPE_dss__Zone_RemoveDevice (252)
 /* dss:Zone-RemoveDevice */
 struct dss__Zone_RemoveDevice
 {
 public:
 	int _token;	/* required element of type xsd:int */
 	int _zoneID;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
 
 #ifndef SOAP_TYPE_dss__Zone_SetNameResponse
-#define SOAP_TYPE_dss__Zone_SetNameResponse (226)
+#define SOAP_TYPE_dss__Zone_SetNameResponse (254)
 /* dss:Zone-SetNameResponse */
 struct dss__Zone_SetNameResponse
 {
@@ -1421,7 +1649,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Zone_SetName
-#define SOAP_TYPE_dss__Zone_SetName (227)
+#define SOAP_TYPE_dss__Zone_SetName (255)
 /* dss:Zone-SetName */
 struct dss__Zone_SetName
 {
@@ -1432,40 +1660,40 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_AllocateUserGroupResponse
-#define SOAP_TYPE_dss__Apartment_AllocateUserGroupResponse (229)
-/* dss:Apartment-AllocateUserGroupResponse */
-struct dss__Apartment_AllocateUserGroupResponse
+#ifndef SOAP_TYPE_dss__ApartmentAllocateUserGroupResponse
+#define SOAP_TYPE_dss__ApartmentAllocateUserGroupResponse (257)
+/* dss:ApartmentAllocateUserGroupResponse */
+struct dss__ApartmentAllocateUserGroupResponse
 {
 public:
 	int groupID;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Apartment_AllocateUserGroup
-#define SOAP_TYPE_dss__Apartment_AllocateUserGroup (230)
-/* dss:Apartment-AllocateUserGroup */
-struct dss__Apartment_AllocateUserGroup
+#ifndef SOAP_TYPE_dss__ApartmentAllocateUserGroup
+#define SOAP_TYPE_dss__ApartmentAllocateUserGroup (258)
+/* dss:ApartmentAllocateUserGroup */
+struct dss__ApartmentAllocateUserGroup
 {
 public:
 	int _token;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_RemoveUserGroupResponse
-#define SOAP_TYPE_dss__Group_RemoveUserGroupResponse (232)
-/* dss:Group-RemoveUserGroupResponse */
-struct dss__Group_RemoveUserGroupResponse
+#ifndef SOAP_TYPE_dss__GroupRemoveUserGroupResponse
+#define SOAP_TYPE_dss__GroupRemoveUserGroupResponse (260)
+/* dss:GroupRemoveUserGroupResponse */
+struct dss__GroupRemoveUserGroupResponse
 {
 public:
 	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_RemoveUserGroup
-#define SOAP_TYPE_dss__Group_RemoveUserGroup (233)
-/* dss:Group-RemoveUserGroup */
-struct dss__Group_RemoveUserGroup
+#ifndef SOAP_TYPE_dss__GroupRemoveUserGroup
+#define SOAP_TYPE_dss__GroupRemoveUserGroup (261)
+/* dss:GroupRemoveUserGroup */
+struct dss__GroupRemoveUserGroup
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -1473,148 +1701,106 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_AddDeviceResponse
-#define SOAP_TYPE_dss__Group_AddDeviceResponse (235)
-/* dss:Group-AddDeviceResponse */
-struct dss__Group_AddDeviceResponse
+#ifndef SOAP_TYPE_dss__GroupAddDeviceResponse
+#define SOAP_TYPE_dss__GroupAddDeviceResponse (263)
+/* dss:GroupAddDeviceResponse */
+struct dss__GroupAddDeviceResponse
 {
 public:
 	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_AddDevice
-#define SOAP_TYPE_dss__Group_AddDevice (236)
-/* dss:Group-AddDevice */
-struct dss__Group_AddDevice
+#ifndef SOAP_TYPE_dss__GroupAddDevice
+#define SOAP_TYPE_dss__GroupAddDevice (264)
+/* dss:GroupAddDevice */
+struct dss__GroupAddDevice
 {
 public:
 	int _token;	/* required element of type xsd:int */
 	int _groupID;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_RemoveDeviceResponse
-#define SOAP_TYPE_dss__Group_RemoveDeviceResponse (238)
-/* dss:Group-RemoveDeviceResponse */
-struct dss__Group_RemoveDeviceResponse
+#ifndef SOAP_TYPE_dss__GroupRemoveDeviceResponse
+#define SOAP_TYPE_dss__GroupRemoveDeviceResponse (266)
+/* dss:GroupRemoveDeviceResponse */
+struct dss__GroupRemoveDeviceResponse
 {
 public:
 	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Group_RemoveDevice
-#define SOAP_TYPE_dss__Group_RemoveDevice (239)
-/* dss:Group-RemoveDevice */
-struct dss__Group_RemoveDevice
+#ifndef SOAP_TYPE_dss__GroupRemoveDevice
+#define SOAP_TYPE_dss__GroupRemoveDevice (267)
+/* dss:GroupRemoveDevice */
+struct dss__GroupRemoveDevice
 {
 public:
 	int _token;	/* required element of type xsd:int */
 	int _groupID;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_GetFunctionIDResponse
-#define SOAP_TYPE_dss__Device_GetFunctionIDResponse (241)
-/* dss:Device-GetFunctionIDResponse */
-struct dss__Device_GetFunctionIDResponse
+#ifndef SOAP_TYPE_dss__DeviceGetFunctionIDResponse
+#define SOAP_TYPE_dss__DeviceGetFunctionIDResponse (269)
+/* dss:DeviceGetFunctionIDResponse */
+struct dss__DeviceGetFunctionIDResponse
 {
 public:
 	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Device_GetFunctionID
-#define SOAP_TYPE_dss__Device_GetFunctionID (242)
-/* dss:Device-GetFunctionID */
-struct dss__Device_GetFunctionID
+#ifndef SOAP_TYPE_dss__DeviceGetFunctionID
+#define SOAP_TYPE_dss__DeviceGetFunctionID (270)
+/* dss:DeviceGetFunctionID */
+struct dss__DeviceGetFunctionID
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Switch_GetGroupIDResponse
-#define SOAP_TYPE_dss__Switch_GetGroupIDResponse (244)
-/* dss:Switch-GetGroupIDResponse */
-struct dss__Switch_GetGroupIDResponse
+#ifndef SOAP_TYPE_dss__SwitchGetGroupIDResponse
+#define SOAP_TYPE_dss__SwitchGetGroupIDResponse (272)
+/* dss:SwitchGetGroupIDResponse */
+struct dss__SwitchGetGroupIDResponse
 {
 public:
 	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Switch_GetGroupID
-#define SOAP_TYPE_dss__Switch_GetGroupID (245)
-/* dss:Switch-GetGroupID */
-struct dss__Switch_GetGroupID
+#ifndef SOAP_TYPE_dss__SwitchGetGroupID
+#define SOAP_TYPE_dss__SwitchGetGroupID (273)
+/* dss:SwitchGetGroupID */
+struct dss__SwitchGetGroupID
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	struct dss__dsid _deviceID;	/* required element of type dss:dsid */
+	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__inParameter
-#define SOAP_TYPE_dss__inParameter (246)
-/* dss:inParameter */
-class SOAP_CMAC dss__inParameter
-{
-public:
-	std::vector<std::string >values;	/* optional element of type xsd:string */
-	std::vector<std::string >names;	/* optional element of type xsd:string */
-public:
-	virtual int soap_type() const { return 246; } /* = unique id SOAP_TYPE_dss__inParameter */
-	virtual void soap_default(struct soap*);
-	virtual void soap_serialize(struct soap*) const;
-	virtual int soap_put(struct soap*, const char*, const char*) const;
-	virtual int soap_out(struct soap*, const char*, int, const char*) const;
-	virtual void *soap_get(struct soap*, const char*, const char*);
-	virtual void *soap_in(struct soap*, const char*, const char*);
-	         dss__inParameter()  { }
-	virtual ~dss__inParameter() { }
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__outParameter
-#define SOAP_TYPE_dss__outParameter (247)
-/* dss:outParameter */
-class SOAP_CMAC dss__outParameter
-{
-public:
-	std::vector<std::string >values;	/* optional element of type xsd:string */
-	std::vector<std::string >names;	/* optional element of type xsd:string */
-public:
-	virtual int soap_type() const { return 247; } /* = unique id SOAP_TYPE_dss__outParameter */
-	virtual void soap_default(struct soap*);
-	virtual void soap_serialize(struct soap*) const;
-	virtual int soap_put(struct soap*, const char*, const char*) const;
-	virtual int soap_out(struct soap*, const char*, int, const char*) const;
-	virtual void *soap_get(struct soap*, const char*, const char*);
-	virtual void *soap_in(struct soap*, const char*, const char*);
-	         dss__outParameter()  { }
-	virtual ~dss__outParameter() { }
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Event_RaiseResponse
-#define SOAP_TYPE_dss__Event_RaiseResponse (249)
-/* dss:Event-RaiseResponse */
-struct dss__Event_RaiseResponse
+#ifndef SOAP_TYPE_dss__EventRaiseResponse
+#define SOAP_TYPE_dss__EventRaiseResponse (275)
+/* dss:EventRaiseResponse */
+struct dss__EventRaiseResponse
 {
 public:
 	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__Event_Raise
-#define SOAP_TYPE_dss__Event_Raise (250)
-/* dss:Event-Raise */
-struct dss__Event_Raise
+#ifndef SOAP_TYPE_dss__EventRaise
+#define SOAP_TYPE_dss__EventRaise (276)
+/* dss:EventRaise */
+struct dss__EventRaise
 {
 public:
 	int _token;	/* required element of type xsd:int */
@@ -1626,7 +1812,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Header
-#define SOAP_TYPE_SOAP_ENV__Header (251)
+#define SOAP_TYPE_SOAP_ENV__Header (277)
 /* SOAP Header: */
 struct SOAP_ENV__Header
 {
@@ -1638,7 +1824,7 @@ private:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Code
-#define SOAP_TYPE_SOAP_ENV__Code (252)
+#define SOAP_TYPE_SOAP_ENV__Code (278)
 /* SOAP Fault Code: */
 struct SOAP_ENV__Code
 {
@@ -1649,7 +1835,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Detail
-#define SOAP_TYPE_SOAP_ENV__Detail (254)
+#define SOAP_TYPE_SOAP_ENV__Detail (280)
 /* SOAP-ENV:Detail */
 struct SOAP_ENV__Detail
 {
@@ -1661,7 +1847,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Reason
-#define SOAP_TYPE_SOAP_ENV__Reason (257)
+#define SOAP_TYPE_SOAP_ENV__Reason (283)
 /* SOAP-ENV:Reason */
 struct SOAP_ENV__Reason
 {
@@ -1671,7 +1857,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Fault
-#define SOAP_TYPE_SOAP_ENV__Fault (258)
+#define SOAP_TYPE_SOAP_ENV__Fault (284)
 /* SOAP Fault: */
 struct SOAP_ENV__Fault
 {
@@ -1751,143 +1937,161 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__SignOff(struct soap*, int _token, int &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__FreeSet(struct soap*, int _token, int _setID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_CreateSetFromGroup(struct soap*, int _token, char *_groupName, int &setID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCreateSetFromGroup(struct soap*, int _token, char *_groupName, int &setID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_CreateSetFromDeviceIDs(struct soap*, int _token, std::vector<struct dss__dsid >_ids, int &setID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCreateSetFromDeviceIDs(struct soap*, int _token, std::vector<std::string >_ids, int &setID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_CreateSetFromDeviceNames(struct soap*, int _token, std::vector<std::string >_names, int &setID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCreateSetFromDeviceNames(struct soap*, int _token, std::vector<std::string >_names, int &setID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_CreateEmptySet(struct soap*, int _token, int &setID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCreateEmptySet(struct soap*, int _token, int &setID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetDevices(struct soap*, int _token, int &setID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetDevices(struct soap*, int _token, int &setID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetDeviceIDByName(struct soap*, int _token, char *_deviceName, struct dss__dsid &deviceID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetDeviceIDByName(struct soap*, int _token, char *_deviceName, std::string &deviceID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_AddDeviceByName(struct soap*, int _token, int _setID, char *_name, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetAddDeviceByName(struct soap*, int _token, int _setID, char *_name, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_AddDeviceByID(struct soap*, int _token, int _setID, struct dss__dsid _deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetAddDeviceByID(struct soap*, int _token, int _setID, char *_deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_RemoveDevice(struct soap*, int _token, int _setID, struct dss__dsid _deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetRemoveDevice(struct soap*, int _token, int _setID, char *_deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_Combine(struct soap*, int _token, int _setID1, int _setID2, int &setID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetCombine(struct soap*, int _token, int _setID1, int _setID2, int &setID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_Remove(struct soap*, int _token, int _setID, int _setIDToRemove, int &setID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetRemove(struct soap*, int _token, int _setID, int _setIDToRemove, int &setID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_ByGroup(struct soap*, int _token, int _setID, int _groupID, int &setID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetByGroup(struct soap*, int _token, int _setID, int _groupID, int &setID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_GetContainedDevices(struct soap*, int _token, int _setID, std::vector<struct dss__dsid >&deviceIDs);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetGetContainedDevices(struct soap*, int _token, int _setID, std::vector<std::string >&deviceIDs);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetGroupByName(struct soap*, int _token, char *_groupName, int &groupID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetGroupByName(struct soap*, int _token, char *_groupName, int &groupID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetZoneByName(struct soap*, int _token, char *_zoneName, int &zoneID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetZoneByName(struct soap*, int _token, char *_zoneName, int &zoneID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetZoneIDs(struct soap*, int _token, std::vector<int >&zoneIDs);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetZoneIDs(struct soap*, int _token, std::vector<int >&zoneIDs);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_TurnOn(struct soap*, int _token, int _setID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetTurnOn(struct soap*, int _token, int _setID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_TurnOff(struct soap*, int _token, int _setID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetTurnOff(struct soap*, int _token, int _setID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_IncreaseValue(struct soap*, int _token, int _setID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetIncreaseValue(struct soap*, int _token, int _setID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_DecreaseValue(struct soap*, int _token, int _setID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetDecreaseValue(struct soap*, int _token, int _setID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_Enable(struct soap*, int _token, int _setID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetEnable(struct soap*, int _token, int _setID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_Disable(struct soap*, int _token, int _setID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetDisable(struct soap*, int _token, int _setID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_StartDim(struct soap*, int _token, int _setID, bool _directionUp, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetStartDim(struct soap*, int _token, int _setID, bool _directionUp, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_EndDim(struct soap*, int _token, int _setID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetEndDim(struct soap*, int _token, int _setID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_SetValue(struct soap*, int _token, int _setID, double _value, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetSetValue(struct soap*, int _token, int _setID, double _value, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_CallScene(struct soap*, int _token, int _setID, int _sceneNr, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetCallScene(struct soap*, int _token, int _setID, int _sceneNr, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Set_SaveScene(struct soap*, int _token, int _setID, int _sceneNr, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetSaveScene(struct soap*, int _token, int _setID, int _sceneNr, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Group_TurnOn(struct soap*, int _token, int _groupID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentTurnOn(struct soap*, int _token, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Group_TurnOff(struct soap*, int _token, int _groupID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentTurnOff(struct soap*, int _token, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Group_IncreaseValue(struct soap*, int _token, int _groupID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentIncreaseValue(struct soap*, int _token, int _groupID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Group_DecreaseValue(struct soap*, int _token, int _groupID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentDecreaseValue(struct soap*, int _token, int _groupID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Group_Enable(struct soap*, int _token, int _groupID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentEnable(struct soap*, int _token, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Group_Disable(struct soap*, int _token, int _groupID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentDisable(struct soap*, int _token, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Group_StartDim(struct soap*, int _token, int _groupID, bool _directionUp, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentStartDim(struct soap*, int _token, int _groupID, bool _directionUp, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Group_EndDim(struct soap*, int _token, int _groupID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentEndDim(struct soap*, int _token, int _groupID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Group_SetValue(struct soap*, int _token, int _groupID, double _value, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentSetValue(struct soap*, int _token, int _groupID, double _value, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Group_CallScene(struct soap*, int _token, int _groupID, int _sceneNr, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCallScene(struct soap*, int _token, int _groupID, int _sceneNr, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Group_SaveScene(struct soap*, int _token, int _groupID, int _sceneNr, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentSaveScene(struct soap*, int _token, int _groupID, int _sceneNr, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_TurnOn(struct soap*, int _token, struct dss__dsid _deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneTurnOn(struct soap*, int _token, int _zoneID, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_TurnOff(struct soap*, int _token, struct dss__dsid _deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneTurnOff(struct soap*, int _token, int _zoneID, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_IncreaseValue(struct soap*, int _token, struct dss__dsid _deviceID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneIncreaseValue(struct soap*, int _token, int _zoneID, int _groupID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_DecreaseValue(struct soap*, int _token, struct dss__dsid _deviceID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneDecreaseValue(struct soap*, int _token, int _zoneID, int _groupID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_Enable(struct soap*, int _token, struct dss__dsid _deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneEnable(struct soap*, int _token, int _zoneID, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_Disable(struct soap*, int _token, struct dss__dsid _deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneDisable(struct soap*, int _token, int _zoneID, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_StartDim(struct soap*, int _token, struct dss__dsid _deviceID, bool _directionUp, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneStartDim(struct soap*, int _token, int _zoneID, int _groupID, bool _directionUp, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_EndDim(struct soap*, int _token, struct dss__dsid _deviceID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneEndDim(struct soap*, int _token, int _zoneID, int _groupID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_SetValue(struct soap*, int _token, struct dss__dsid _deviceID, double _value, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSetValue(struct soap*, int _token, int _zoneID, int _groupID, double _value, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetValue(struct soap*, int _token, struct dss__dsid _deviceID, int _paramID, double &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneCallScene(struct soap*, int _token, int _zoneID, int _groupID, int _sceneNr, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_CallScene(struct soap*, int _token, struct dss__dsid _deviceID, int _sceneNr, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSaveScene(struct soap*, int _token, int _zoneID, int _groupID, int _sceneNr, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_SaveScene(struct soap*, int _token, struct dss__dsid _deviceID, int _sceneNr, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceTurnOn(struct soap*, int _token, char *_deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetName(struct soap*, int _token, struct dss__dsid _deviceID, char **result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceTurnOff(struct soap*, int _token, char *_deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetZoneID(struct soap*, int _token, struct dss__dsid _deviceID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceIncreaseValue(struct soap*, int _token, char *_deviceID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetDSID(struct soap*, int _token, struct dss__dsid _deviceID, struct dss__dsid &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceDecreaseValue(struct soap*, int _token, char *_deviceID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Modulator_GetPowerConsumption(struct soap*, int _token, int _modulatorID, unsigned long &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceEnable(struct soap*, int _token, char *_deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_GetModulatorIDs(struct soap*, int _token, std::vector<struct dss__dsid >&ids);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceDisable(struct soap*, int _token, char *_deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Modulator_GetDSID(struct soap*, int _token, int _modulatorID, struct dss__dsid &dsid);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceStartDim(struct soap*, int _token, char *_deviceID, bool _directionUp, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Modulator_GetName(struct soap*, int _token, struct dss__dsid _modulatorID, char **name);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceEndDim(struct soap*, int _token, char *_deviceID, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_AllocateZone(struct soap*, int _token, int &zoneID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSetValue(struct soap*, int _token, char *_deviceID, double _value, int _paramID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_DeleteZone(struct soap*, int _token, int _zoneID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetValue(struct soap*, int _token, char *_deviceID, int _paramID, double &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Zone_AddDevice(struct soap*, int _token, int _zoneID, struct dss__dsid _deviceID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceCallScene(struct soap*, int _token, char *_deviceID, int _sceneNr, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Zone_RemoveDevice(struct soap*, int _token, int _zoneID, struct dss__dsid _deviceID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSaveScene(struct soap*, int _token, char *_deviceID, int _sceneNr, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetName(struct soap*, int _token, char *_deviceID, char **result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetZoneID(struct soap*, int _token, char *_deviceID, int &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__ModulatorGetPowerConsumption(struct soap*, int _token, int _modulatorID, unsigned long &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetModulatorIDs(struct soap*, int _token, std::vector<std::string >&ids);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__ModulatorGetName(struct soap*, int _token, char *_modulatorID, std::string &name);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentAllocateZone(struct soap*, int _token, int &zoneID);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentDeleteZone(struct soap*, int _token, int _zoneID, int &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__Zone_AddDevice(struct soap*, int _token, int _zoneID, char *_deviceID, int &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__Zone_RemoveDevice(struct soap*, int _token, int _zoneID, char *_deviceID, int &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Zone_SetName(struct soap*, int _token, int _zoneID, char *_name, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Apartment_AllocateUserGroup(struct soap*, int _token, int &groupID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentAllocateUserGroup(struct soap*, int _token, int &groupID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Group_RemoveUserGroup(struct soap*, int _token, int _groupID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__GroupRemoveUserGroup(struct soap*, int _token, int _groupID, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Group_AddDevice(struct soap*, int _token, int _groupID, struct dss__dsid _deviceID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__GroupAddDevice(struct soap*, int _token, int _groupID, char *_deviceID, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Group_RemoveDevice(struct soap*, int _token, int _groupID, struct dss__dsid _deviceID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__GroupRemoveDevice(struct soap*, int _token, int _groupID, char *_deviceID, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Device_GetFunctionID(struct soap*, int _token, struct dss__dsid _deviceID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetFunctionID(struct soap*, int _token, char *_deviceID, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Switch_GetGroupID(struct soap*, int _token, struct dss__dsid _deviceID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SwitchGetGroupID(struct soap*, int _token, char *_deviceID, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Event_Raise(struct soap*, int _token, char *_eventName, char *_context, char *_parameter, char *_location, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__EventRaise(struct soap*, int _token, char *_eventName, char *_context, char *_parameter, char *_location, bool &result);
 
 /******************************************************************************\
  *                                                                            *
@@ -1907,123 +2111,141 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SignOff(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__FreeSet(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_CreateSetFromGroup(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentCreateSetFromGroup(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_CreateSetFromDeviceIDs(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentCreateSetFromDeviceIDs(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_CreateSetFromDeviceNames(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentCreateSetFromDeviceNames(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_CreateEmptySet(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentCreateEmptySet(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetDevices(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetDevices(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetDeviceIDByName(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetDeviceIDByName(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_AddDeviceByName(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetAddDeviceByName(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_AddDeviceByID(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetAddDeviceByID(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_RemoveDevice(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetRemoveDevice(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_Combine(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetCombine(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_Remove(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetRemove(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_ByGroup(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetByGroup(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_GetContainedDevices(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetGetContainedDevices(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetGroupByName(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetGroupByName(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetZoneByName(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetZoneByName(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetZoneIDs(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetZoneIDs(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_TurnOn(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetTurnOn(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_TurnOff(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetTurnOff(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_IncreaseValue(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetIncreaseValue(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_DecreaseValue(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetDecreaseValue(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_Enable(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetEnable(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_Disable(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetDisable(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_StartDim(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetStartDim(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_EndDim(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetEndDim(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_SetValue(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetSetValue(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_CallScene(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetCallScene(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Set_SaveScene(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetSaveScene(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_TurnOn(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentTurnOn(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_TurnOff(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentTurnOff(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_IncreaseValue(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentIncreaseValue(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_DecreaseValue(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentDecreaseValue(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_Enable(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentEnable(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_Disable(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentDisable(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_StartDim(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentStartDim(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_EndDim(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentEndDim(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_SetValue(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentSetValue(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_CallScene(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentCallScene(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_SaveScene(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentSaveScene(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_TurnOn(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneTurnOn(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_TurnOff(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneTurnOff(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_IncreaseValue(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneIncreaseValue(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_DecreaseValue(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneDecreaseValue(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_Enable(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneEnable(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_Disable(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneDisable(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_StartDim(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneStartDim(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_EndDim(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneEndDim(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_SetValue(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneSetValue(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetValue(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneCallScene(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_CallScene(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneSaveScene(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_SaveScene(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceTurnOn(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetName(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceTurnOff(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetZoneID(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceIncreaseValue(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetDSID(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceDecreaseValue(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Modulator_GetPowerConsumption(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceEnable(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_GetModulatorIDs(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceDisable(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Modulator_GetDSID(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceStartDim(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Modulator_GetName(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceEndDim(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_AllocateZone(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceSetValue(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_DeleteZone(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetValue(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceCallScene(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceSaveScene(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetName(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetZoneID(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ModulatorGetPowerConsumption(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetModulatorIDs(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ModulatorGetName(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentAllocateZone(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentDeleteZone(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Zone_AddDevice(struct soap*);
 
@@ -2031,19 +2253,19 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Zone_RemoveDevice(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Zone_SetName(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Apartment_AllocateUserGroup(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentAllocateUserGroup(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_RemoveUserGroup(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__GroupRemoveUserGroup(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_AddDevice(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__GroupAddDevice(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Group_RemoveDevice(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__GroupRemoveDevice(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Device_GetFunctionID(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetFunctionID(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Switch_GetGroupID(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SwitchGetGroupID(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Event_Raise(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__EventRaise(struct soap*);
 
 #endif
 

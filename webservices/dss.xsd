@@ -9,18 +9,6 @@
   elementFormDefault="unqualified"
   attributeFormDefault="unqualified">
   <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
-  <complexType name="inParameter">
-   <sequence>
-     <element name="values" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
-     <element name="names" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
-   </sequence>
-  </complexType>
-  <complexType name="outParameter">
-   <sequence>
-     <element name="values" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
-     <element name="names" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
-   </sequence>
-  </complexType>
   <!-- operation request element -->
   <element name="Test">
    <complexType>
@@ -88,7 +76,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-CreateSetFromGroup">
+  <element name="ApartmentCreateSetFromGroup">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -97,7 +85,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-CreateSetFromGroupResponse">
+  <element name="ApartmentCreateSetFromGroupResponse">
    <complexType>
     <sequence>
      <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -105,16 +93,16 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-CreateSetFromDeviceIDs">
+  <element name="ApartmentCreateSetFromDeviceIDs">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="ids" type="dss:dsid" minOccurs="1" maxOccurs="unbounded"/>
+     <element name="ids" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-CreateSetFromDeviceIDsResponse">
+  <element name="ApartmentCreateSetFromDeviceIDsResponse">
    <complexType>
     <sequence>
      <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -122,7 +110,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-CreateSetFromDeviceNames">
+  <element name="ApartmentCreateSetFromDeviceNames">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -131,7 +119,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-CreateSetFromDeviceNamesResponse">
+  <element name="ApartmentCreateSetFromDeviceNamesResponse">
    <complexType>
     <sequence>
      <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -139,7 +127,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-CreateEmptySet">
+  <element name="ApartmentCreateEmptySet">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -147,7 +135,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-CreateEmptySetResponse">
+  <element name="ApartmentCreateEmptySetResponse">
    <complexType>
     <sequence>
      <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -155,7 +143,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-GetDevices">
+  <element name="ApartmentGetDevices">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -163,7 +151,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-GetDevicesResponse">
+  <element name="ApartmentGetDevicesResponse">
    <complexType>
     <sequence>
      <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -171,7 +159,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-GetDeviceIDByName">
+  <element name="ApartmentGetDeviceIDByName">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -180,16 +168,15 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="dsid">
+  <element name="ApartmentGetDeviceIDByNameResponse">
    <complexType>
     <sequence>
-     <element name="upper" type="xsd:unsignedLong" minOccurs="1" maxOccurs="1"/>
-     <element name="lower" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-AddDeviceByName">
+  <element name="SetAddDeviceByName">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -199,7 +186,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-AddDeviceByNameResponse">
+  <element name="SetAddDeviceByNameResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -207,17 +194,17 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-AddDeviceByID">
+  <element name="SetAddDeviceByID">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-AddDeviceByIDResponse">
+  <element name="SetAddDeviceByIDResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -225,17 +212,17 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-RemoveDevice">
+  <element name="SetRemoveDevice">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-RemoveDeviceResponse">
+  <element name="SetRemoveDeviceResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -243,7 +230,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-Combine">
+  <element name="SetCombine">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -253,7 +240,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-CombineResponse">
+  <element name="SetCombineResponse">
    <complexType>
     <sequence>
      <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -261,7 +248,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-Remove">
+  <element name="SetRemove">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -271,7 +258,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-RemoveResponse">
+  <element name="SetRemoveResponse">
    <complexType>
     <sequence>
      <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -279,7 +266,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-ByGroup">
+  <element name="SetByGroup">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -289,7 +276,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-ByGroupResponse">
+  <element name="SetByGroupResponse">
    <complexType>
     <sequence>
      <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -297,7 +284,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-GetContainedDevices">
+  <element name="SetGetContainedDevices">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -306,15 +293,15 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-GetContainedDevicesResponse">
+  <element name="SetGetContainedDevicesResponse">
    <complexType>
     <sequence>
-     <element name="deviceIDs" type="dss:dsid" minOccurs="1" maxOccurs="unbounded"/>
+     <element name="deviceIDs" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-GetGroupByName">
+  <element name="ApartmentGetGroupByName">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -323,7 +310,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-GetGroupByNameResponse">
+  <element name="ApartmentGetGroupByNameResponse">
    <complexType>
     <sequence>
      <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -331,7 +318,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-GetZoneByName">
+  <element name="ApartmentGetZoneByName">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -340,7 +327,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-GetZoneByNameResponse">
+  <element name="ApartmentGetZoneByNameResponse">
    <complexType>
     <sequence>
      <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -348,7 +335,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-GetZoneIDs">
+  <element name="ApartmentGetZoneIDs">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -356,7 +343,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-GetZoneIDsResponse">
+  <element name="ApartmentGetZoneIDsResponse">
    <complexType>
     <sequence>
      <element name="zoneIDs" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
@@ -364,7 +351,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-TurnOn">
+  <element name="SetTurnOn">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -373,7 +360,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-TurnOnResponse">
+  <element name="SetTurnOnResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -381,7 +368,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-TurnOff">
+  <element name="SetTurnOff">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -390,7 +377,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-TurnOffResponse">
+  <element name="SetTurnOffResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -398,25 +385,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-IncreaseValue">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Set-IncreaseValueResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Set-DecreaseValue">
+  <element name="SetIncreaseValue">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -426,7 +395,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-DecreaseValueResponse">
+  <element name="SetIncreaseValueResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -434,7 +403,25 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-Enable">
+  <element name="SetDecreaseValue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="SetDecreaseValueResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="SetEnable">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -443,7 +430,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-EnableResponse">
+  <element name="SetEnableResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -451,7 +438,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-Disable">
+  <element name="SetDisable">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -460,7 +447,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-DisableResponse">
+  <element name="SetDisableResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -468,7 +455,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-StartDim">
+  <element name="SetStartDim">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -479,7 +466,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-StartDimResponse">
+  <element name="SetStartDimResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -487,7 +474,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-EndDim">
+  <element name="SetEndDim">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -497,7 +484,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-EndDimResponse">
+  <element name="SetEndDimResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -505,7 +492,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-SetValue">
+  <element name="SetSetValue">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -516,7 +503,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-SetValueResponse">
+  <element name="SetSetValueResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -524,7 +511,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-CallScene">
+  <element name="SetCallScene">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -534,7 +521,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-CallSceneResponse">
+  <element name="SetCallSceneResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -542,7 +529,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Set-SaveScene">
+  <element name="SetSaveScene">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -552,7 +539,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Set-SaveSceneResponse">
+  <element name="SetSaveSceneResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -560,7 +547,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Group-TurnOn">
+  <element name="ApartmentTurnOn">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -569,7 +556,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Group-TurnOnResponse">
+  <element name="ApartmentTurnOnResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -577,7 +564,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Group-TurnOff">
+  <element name="ApartmentTurnOff">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -586,7 +573,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Group-TurnOffResponse">
+  <element name="ApartmentTurnOffResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -594,25 +581,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Group-IncreaseValue">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Group-IncreaseValueResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Group-DecreaseValue">
+  <element name="ApartmentIncreaseValue">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -622,7 +591,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Group-DecreaseValueResponse">
+  <element name="ApartmentIncreaseValueResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -630,7 +599,25 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Group-Enable">
+  <element name="ApartmentDecreaseValue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ApartmentDecreaseValueResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ApartmentEnable">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -639,7 +626,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Group-EnableResponse">
+  <element name="ApartmentEnableResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -647,7 +634,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Group-Disable">
+  <element name="ApartmentDisable">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -656,7 +643,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Group-DisableResponse">
+  <element name="ApartmentDisableResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -664,7 +651,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Group-StartDim">
+  <element name="ApartmentStartDim">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -675,7 +662,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Group-StartDimResponse">
+  <element name="ApartmentStartDimResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -683,7 +670,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Group-EndDim">
+  <element name="ApartmentEndDim">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -693,7 +680,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Group-EndDimResponse">
+  <element name="ApartmentEndDimResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -701,7 +688,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Group-SetValue">
+  <element name="ApartmentSetValue">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -712,7 +699,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Group-SetValueResponse">
+  <element name="ApartmentSetValueResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -720,7 +707,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Group-CallScene">
+  <element name="ApartmentCallScene">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -730,7 +717,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Group-CallSceneResponse">
+  <element name="ApartmentCallSceneResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -738,7 +725,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Group-SaveScene">
+  <element name="ApartmentSaveScene">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -748,7 +735,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Group-SaveSceneResponse">
+  <element name="ApartmentSaveSceneResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -756,16 +743,17 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-TurnOn">
+  <element name="ZoneTurnOn">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Device-TurnOnResponse">
+  <element name="ZoneTurnOnResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -773,16 +761,17 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-TurnOff">
+  <element name="ZoneTurnOff">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Device-TurnOffResponse">
+  <element name="ZoneTurnOffResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -790,17 +779,18 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-IncreaseValue">
+  <element name="ZoneIncreaseValue">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Device-IncreaseValueResponse">
+  <element name="ZoneIncreaseValueResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -808,17 +798,18 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-DecreaseValue">
+  <element name="ZoneDecreaseValue">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Device-DecreaseValueResponse">
+  <element name="ZoneDecreaseValueResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -826,16 +817,17 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-Enable">
+  <element name="ZoneEnable">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Device-EnableResponse">
+  <element name="ZoneEnableResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -843,16 +835,17 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-Disable">
+  <element name="ZoneDisable">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Device-DisableResponse">
+  <element name="ZoneDisableResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -860,18 +853,19 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-StartDim">
+  <element name="ZoneStartDim">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="directionUp" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Device-StartDimResponse">
+  <element name="ZoneStartDimResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -879,17 +873,18 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-EndDim">
+  <element name="ZoneEndDim">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Device-EndDimResponse">
+  <element name="ZoneEndDimResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -897,18 +892,19 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-SetValue">
+  <element name="ZoneSetValue">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="value" type="xsd:double" minOccurs="1" maxOccurs="1"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Device-SetValueResponse">
+  <element name="ZoneSetValueResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -916,17 +912,215 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-GetValue">
+  <element name="ZoneCallScene">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ZoneCallSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ZoneSaveScene">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ZoneSaveSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceTurnOn">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceTurnOnResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceTurnOff">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceTurnOffResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceIncreaseValue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Device-GetValueResponse">
+  <element name="DeviceIncreaseValueResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceDecreaseValue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceDecreaseValueResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceEnable">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceEnableResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceDisable">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceDisableResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceStartDim">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="directionUp" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceStartDimResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceEndDim">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceEndDimResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceSetValue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="value" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceSetValueResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceGetValue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceGetValueResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:double" minOccurs="1" maxOccurs="1"/>
@@ -934,17 +1128,17 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-CallScene">
+  <element name="DeviceCallScene">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Device-CallSceneResponse">
+  <element name="DeviceCallSceneResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -952,17 +1146,17 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-SaveScene">
+  <element name="DeviceSaveScene">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Device-SaveSceneResponse">
+  <element name="DeviceSaveSceneResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -970,16 +1164,16 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-GetName">
+  <element name="DeviceGetName">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Device-GetNameResponse">
+  <element name="DeviceGetNameResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
@@ -987,16 +1181,16 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-GetZoneID">
+  <element name="DeviceGetZoneID">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Device-GetZoneIDResponse">
+  <element name="DeviceGetZoneIDResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1004,16 +1198,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-GetDSID">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Modulator-GetPowerConsumption">
+  <element name="ModulatorGetPowerConsumption">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1022,7 +1207,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Modulator-GetPowerConsumptionResponse">
+  <element name="ModulatorGetPowerConsumptionResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
@@ -1030,7 +1215,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-GetModulatorIDs">
+  <element name="ApartmentGetModulatorIDs">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1038,41 +1223,32 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-GetModulatorIDsResponse">
+  <element name="ApartmentGetModulatorIDsResponse">
    <complexType>
     <sequence>
-     <element name="ids" type="dss:dsid" minOccurs="1" maxOccurs="unbounded"/>
+     <element name="ids" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Modulator-GetDSID">
+  <element name="ModulatorGetName">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="modulatorID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Modulator-GetName">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="modulatorID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="modulatorID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Modulator-GetNameResponse">
+  <element name="ModulatorGetNameResponse">
    <complexType>
     <sequence>
-     <element name="name" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-AllocateZone">
+  <element name="ApartmentAllocateZone">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1080,7 +1256,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-AllocateZoneResponse">
+  <element name="ApartmentAllocateZoneResponse">
    <complexType>
     <sequence>
      <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1088,7 +1264,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-DeleteZone">
+  <element name="ApartmentDeleteZone">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1097,7 +1273,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-DeleteZoneResponse">
+  <element name="ApartmentDeleteZoneResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1110,7 +1286,7 @@
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
@@ -1128,7 +1304,7 @@
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
@@ -1159,7 +1335,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Apartment-AllocateUserGroup">
+  <element name="ApartmentAllocateUserGroup">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1167,7 +1343,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Apartment-AllocateUserGroupResponse">
+  <element name="ApartmentAllocateUserGroupResponse">
    <complexType>
     <sequence>
      <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1175,7 +1351,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Group-RemoveUserGroup">
+  <element name="GroupRemoveUserGroup">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1184,7 +1360,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Group-RemoveUserGroupResponse">
+  <element name="GroupRemoveUserGroupResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1192,17 +1368,17 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Group-AddDevice">
+  <element name="GroupAddDevice">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Group-AddDeviceResponse">
+  <element name="GroupAddDeviceResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1210,17 +1386,17 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Group-RemoveDevice">
+  <element name="GroupRemoveDevice">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Group-RemoveDeviceResponse">
+  <element name="GroupRemoveDeviceResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1228,16 +1404,16 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Device-GetFunctionID">
+  <element name="DeviceGetFunctionID">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Device-GetFunctionIDResponse">
+  <element name="DeviceGetFunctionIDResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1245,16 +1421,16 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Switch-GetGroupID">
+  <element name="SwitchGetGroupID">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="dss:dsid" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Switch-GetGroupIDResponse">
+  <element name="SwitchGetGroupIDResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1262,7 +1438,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Event-Raise">
+  <element name="EventRaise">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1274,7 +1450,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Event-RaiseResponse">
+  <element name="EventRaiseResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
