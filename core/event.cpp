@@ -12,6 +12,8 @@
 #include "xmlwrapper.h"
 #include "dss.h"
 
+#include "foreach.h"
+
 #include <set>
 #include <iostream>
 
@@ -149,6 +151,11 @@ namespace dss {
         if(toProcess.get() != NULL) {
 
           Logger::GetInstance()->Log(string("EventInterpreter: Got event from queue: '") + toProcess->GetName() + "'");
+          for(HashMapConstStringString::const_iterator iParam = toProcess->GetProperties().GetContainer().begin(), e = toProcess->GetProperties().GetContainer().end();
+              iParam != e; ++iParam)
+          {
+            Logger::GetInstance()->Log("EventInterpreter:  Parameter '" + iParam->first + "' = '" + iParam->second + "'");
+          }
 
           for(vector< boost::shared_ptr<EventSubscription> >::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
               ipSubscription != e; ++ipSubscription)
@@ -168,6 +175,8 @@ namespace dss {
                 Logger::GetInstance()->Log(string("EventInterpreter: Could not find handler '") + (*ipSubscription)->GetHandlerName());
               }
 
+            } else {
+              Logger::GetInstance()->Log(string("EventInterpreter: No match on subscription'") + (*ipSubscription)->GetID() + "'");
             }
           }
 
@@ -420,7 +429,7 @@ namespace dss {
       Logger::GetInstance()->Log("EventRunner: *********");
       Logger::GetInstance()->Log("number in queue: " + IntToString(GetSize()));
     }
-    
+
     for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
         ipSchedEvt != e; )
     {

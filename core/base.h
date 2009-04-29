@@ -151,7 +151,7 @@ namespace dss {
 
     bool Unset(const string& _key);
 
-    const HashMapConstStringString GetContainer() const { return m_Container; }
+    const HashMapConstStringString& GetContainer() const { return m_Container; }
   };
 
   template <typename resCls>
