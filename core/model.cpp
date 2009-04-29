@@ -107,6 +107,7 @@ namespace dss {
 
   bool Device::IsOn() const {
     return (m_LastCalledScene != SceneOff) &&
+           (m_LastCalledScene != SceneMin) &&
            (m_LastCalledScene != SceneDeepOff) &&
            (m_LastCalledScene != SceneStandBy);
   } // IsOn
@@ -351,6 +352,16 @@ namespace dss {
     }
     return result;
   } // GetByZone
+
+  Set Set::GetByFunctionID(const int _functionID) const {
+    Set result;
+    foreach(const DeviceReference& dev, m_ContainedDevices) {
+      if(dev.GetDevice().GetFunctionID() == _functionID) {
+        result.AddDevice(dev);
+      }
+    }
+    return result;
+  }
 
   class ByNameSelector : public IDeviceSelector {
   private:

@@ -309,6 +309,8 @@ namespace dss {
      */
     Set GetByGroup(const string& _name) const;
 
+    Set GetByFunctionID(const int _functionID) const;
+
     Set GetByZone(int _zoneID) const;
     /** Returns the device indicated by _name
      */
