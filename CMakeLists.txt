@@ -12,10 +12,23 @@ ENDIF (LIBXML2_FOUND)
 
 add_definitions(-DXP_UNIX -DUSE_SIM -DUSE_LIBXML -DNO_CGI)
 
+include_directories(external)
+include_directories(${DSS_SOURCE_DIR})
+
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  include_directories(/opt/local/include)
+  set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} /opt/local/include)
+  link_directories(/opt/local/lib)
+  link_libraries(boost_filesystem-mt boost_system-mt PocoFoundation PocoNet)
+ELSE(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  link_libraries(boost_filesystem rt)
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
 # header tests
 INCLUDE(CheckIncludeFiles)
 
 # check for SpiderMonkey API header
+set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DXP_UNIX)
 CHECK_INCLUDE_FILES(mozjs/jsapi.h HAVE_MOZJS_JSAPI_H)
 CHECK_INCLUDE_FILES(js/jsapi.h HAVE_JS_JSAPI_H)
 
@@ -23,18 +36,7 @@ CHECK_INCLUDE_FILES(js/jsapi.h HAVE_JS_JSAPI_H)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 add_definitions(-DHAVE_CONFIG_H)
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
-
-include_directories(external)
-include_directories(${DSS_SOURCE_DIR})
-
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  include_directories(/opt/local/include)
-  link_directories(/opt/local/lib)
-  link_libraries(boost_filesystem-mt boost_system-mt PocoFoundation PocoNet)
-ELSE(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  link_libraries(boost_filesystem rt)
-ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_subdirectory(core)
 add_subdirectory(unix)
