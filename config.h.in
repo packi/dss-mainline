@@ -1,0 +1,9 @@
+#ifndef DIGITAL_STROM_SERVER_CONFIG_H
+#define DIGITAL_STROM_SERVER_CONFIG_H
+
+/* SpiderMonkey API header */
+#cmakedefine HAVE_MOZJS_JSAPI_H
+#cmakedefine HAVE_JS_JSAPI_H
+
+#endif /* DIGITAL_STROM_SERVER_CONFIG_H */
+

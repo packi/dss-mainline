@@ -12,6 +12,19 @@ ENDIF (LIBXML2_FOUND)
 
 add_definitions(-DXP_UNIX -DUSE_SIM -DUSE_LIBXML -DNO_CGI)
 
+# header tests
+INCLUDE(CheckIncludeFiles)
+
+# check for SpiderMonkey API header
+CHECK_INCLUDE_FILES(mozjs/jsapi.h HAVE_MOZJS_JSAPI_H)
+CHECK_INCLUDE_FILES(js/jsapi.h HAVE_JS_JSAPI_H)
+
+# generate config.h header file
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+add_definitions(-DHAVE_CONFIG_H)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+
 include_directories(external)
 include_directories(${DSS_SOURCE_DIR})
 

@@ -10,8 +10,17 @@
 #ifndef JSHANDLER_H_INCLUDED
 #define JSHANDLER_H_INCLUDED
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "base.h"
+
+#ifdef HAVE_MOZJS_JSAPI_H
 #include <mozjs/jsapi.h>
+#else
+#include <js/jsapi.h>
+#endif
 
 #include <vector>
 
