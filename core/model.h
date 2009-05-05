@@ -94,6 +94,9 @@ namespace dss {
     /** Returns the consumption in mW */
     virtual unsigned long GetPowerConsumption() = 0;
 
+    virtual void NextScene() = 0;
+    virtual void PreviousScene() = 0;
+
     virtual ~IDeviceInterface() {};
   };
 
@@ -151,6 +154,9 @@ namespace dss {
     virtual void SaveScene(const int _sceneNr);
     virtual void UndoScene(const int _sceneNr);
 
+    virtual void NextScene();
+    virtual void PreviousScene();
+
     virtual unsigned long GetPowerConsumption();
  };
 
@@ -200,6 +206,9 @@ namespace dss {
     virtual void CallScene(const int _sceneNr);
     virtual void SaveScene(const int _sceneNr);
     virtual void UndoScene(const int _sceneNr);
+
+    virtual void NextScene();
+    virtual void PreviousScene();
 
     int GetFunctionID() const;
     void SetFunctionID(const int _value);
@@ -356,6 +365,9 @@ namespace dss {
     /** Removes the device _device from the set */
     void RemoveDevice(const Device& _device);
 
+    virtual void NextScene();
+    virtual void PreviousScene();
+
     virtual unsigned long GetPowerConsumption();
   }; // Set
 
@@ -446,6 +458,9 @@ namespace dss {
     virtual void SaveScene(const int _sceneNr);
     virtual void UndoScene(const int _sceneNr);
 
+    virtual void NextScene();
+    virtual void PreviousScene();
+
     virtual unsigned long GetPowerConsumption();
 
     int GetLastCalledScene() const { return m_LastCalledScene; }
@@ -531,6 +546,9 @@ namespace dss {
     virtual void CallScene(const int _sceneNr);
     virtual void SaveScene(const int _sceneNr);
     virtual void UndoScene(const int _sceneNr);
+
+    virtual void NextScene();
+    virtual void PreviousScene();
 
     virtual unsigned long GetPowerConsumption();
   }; // Zone

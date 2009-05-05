@@ -6,8 +6,8 @@ function onModelLoaded() {
 }
 </script>
 	<script src="js/prototype.js" language="JavaScript" type="text/javascript"></script>
+  <script src="js/switch.js" language="JavaScript" type="text/javascript"></script>
 	<script src="js/model.js" language="JavaScript" type="text/javascript"></script>
-	<script src="js/switch.js" language="JavaScript" type="text/javascript"></script>
 	<link rel="stylesheet" type="text/css" href="main.css"/>
 	<script type="text/javascript" language="JavaScript">
 
@@ -44,7 +44,7 @@ function ApartmentRenderer(into) {
             zonelist += '&nbsp;|&nbsp;<a href="#" onclick="turnOff(\'' + device.dsid + '\')">Turn Off</a>] ' + device.dsid;
           } else {
             zonelist += '<div id="switch_' + device.dsid + '"/>';
-            switchIDs[switchIDs.length] = device.dsid;
+            switchIDs[switchIDs.length] = { id: device.dsid, zoneID: zone.id };
           }
 
           zonelist += "</p></li>";
@@ -57,7 +57,7 @@ function ApartmentRenderer(into) {
 
 
     switchIDs.each(function(switchID) {
-      var sw = new Switch('switch_' + switchID, switchID);
+      var sw = new Switch('switch_' + switchID.id, switchID.id, switchID.zoneID, 1 );
     });
     var hiddenDevs = devTotal - devNum;
     if(hiddenDevs > 0) {

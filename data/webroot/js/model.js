@@ -250,6 +250,13 @@ var Zone = Class.create({
 
   sendEvent: function(_name) {
     new HEvent(_name, '.zone(' + this.id + ')').raise();
+  },
+
+  sendButtonPress: function(_buttonNumber, _group) {
+    var parameter = this.getParameterForDeviceCall(_group);
+    parameter['zoneID'] = this.id;
+    parameter['buttonnr'] = _buttonNumber;
+    DSS.sendRequest("sim/switch/pressed", parameter);
   }
 }); // Zone
 
@@ -356,7 +363,19 @@ var Device = Class.create({
     var parameter = this.getParameterForDeviceCall();
     var respObj = this.sendSyncRequest("getGroups", parameter);
     return respObj.groups;
+  },
+
+  refresh: function() {
+    var parameter = this.getParameterForDeviceCall();
+    var respObj = this.sendSyncRequest("getState", parameter);
+    if(respObj.ok) {
+      this.ok = respObj.result.isOn;
+      return true;
+    }
+    return false;
   }
+
+
 }); // Device
 
 var HEvent = Class.create({

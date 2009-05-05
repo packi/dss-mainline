@@ -24,7 +24,7 @@
       <parameter name="host">192.168.169.232</parameter>
     </device>
 <!--
-    <device dsid="2" busid="2" type="aizo.slimslave"> 
+    <device dsid="2" busid="2" type="aizo.slim_slave"> 
       <parameter name="port">9090</parameter>
       <parameter name="host">192.168.0.5</parameter>
       <parameter name="playermac">00:04:20:06:9e:33</parameter>

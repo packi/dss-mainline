@@ -29,6 +29,9 @@
 
 namespace dss {
 
+  int getNextScene(const int _currentScene);
+  int getPreviousScene(const int _currentScene);
+
   //================================================== Device
 
   const devid_t ShortAddressStaleDevice = 0xFFFF;
@@ -143,6 +146,14 @@ namespace dss {
   void Device::UndoScene(const int _sceneNr) {
     DSS::GetInstance()->GetDS485Interface().SendCommand(cmdUndoScene, *this, _sceneNr);
   } // UndoScene
+
+  void Device::NextScene() {
+    CallScene(getNextScene(m_LastCalledScene));
+  } // NextScene
+
+  void Device::PreviousScene() {
+    CallScene(getNextScene(m_LastCalledScene));
+  } // PreviousScene
 
   string Device::GetName() const {
     return m_Name;
@@ -297,6 +308,14 @@ namespace dss {
   void Set::UndoScene(const int _sceneNr) {
     DSS::GetInstance()->GetDS485Interface().SendCommand(cmdUndoScene, *this, _sceneNr);
   } // UndoScene
+
+  void Set::NextScene() {
+    throw runtime_error("Not yet implemented");
+  } // NextScene
+
+  void Set::PreviousScene() {
+    throw runtime_error("Not yet implemented");
+  } // PreviousScene
 
   void Set::Perform(IDeviceAction& _deviceAction) {
     for(DeviceIterator iDevice = m_ContainedDevices.begin(); iDevice != m_ContainedDevices.end(); ++iDevice) {
@@ -650,6 +669,8 @@ namespace dss {
           foreach(int groupID, groupIDs) {
             Log("    Found group with id: " + IntToString(groupID));
             vector<int> devingroup = interface.GetDevicesInGroup(modulatorID, zoneID, groupID);
+
+            // TODO: read last called scene for group
             foreach(int devID, devingroup) {
               try {
                 Log("     Adding device " + IntToString(devID) + " to group " + IntToString(groupID));
@@ -1284,6 +1305,20 @@ namespace dss {
     return GetDevices().GetPowerConsumption();
   } // GetPowerConsumption
 
+  void Zone::NextScene() {
+    Group* broadcastGroup = GetGroup(0);
+    if(broadcastGroup != NULL) {
+      broadcastGroup->NextScene();
+    }
+  } // NextScene
+
+  void Zone::PreviousScene() {
+    Group* broadcastGroup = GetGroup(0);
+    if(broadcastGroup != NULL) {
+      broadcastGroup->PreviousScene();
+    }
+  } // PreviousScene
+
 
   //============================================= Group
 
@@ -1293,7 +1328,7 @@ namespace dss {
     m_GroupID(_id),
     m_LastCalledScene(SceneOff)
   {
-  }
+  } // ctor
 
   int Group::GetID() const {
     return m_GroupID;
@@ -1301,7 +1336,7 @@ namespace dss {
 
   Set Group::GetDevices() const {
     return m_Apartment.GetDevices().GetByZone(m_ZoneID).GetByGroup(m_GroupID);
-  }
+  } // GetDevices
 
   void Group::AddDevice(const DeviceReference& _device) { /* do nothing or throw? */ }
   void Group::RemoveDevice(const DeviceReference& _device) { /* do nothing or throw? */ }
@@ -1368,6 +1403,15 @@ namespace dss {
   unsigned long Group::GetPowerConsumption() {
     return GetDevices().GetPowerConsumption();
   } // GetPowerConsumption
+
+  void Group::NextScene() {
+    CallScene(getNextScene(m_LastCalledScene));
+  } // NextScene
+
+  void Group::PreviousScene() {
+    CallScene(getPreviousScene(m_LastCalledScene));
+  } // PreviousScene
+
 
   //================================================== DeviceReference
 
@@ -1464,5 +1508,53 @@ namespace dss {
   unsigned long DeviceReference::GetPowerConsumption() {
     return GetDevice().GetPowerConsumption();
   }
+
+  void DeviceReference::NextScene() {
+    GetDevice().NextScene();
+  }
+
+  void DeviceReference::PreviousScene() {
+    GetDevice().PreviousScene();
+  }
+
+  //================================================== Utils
+
+  int getNextScene(const int _currentScene) {
+    switch(_currentScene) {
+    case ScenePanic:
+    case SceneStandBy:
+    case SceneDeepOff:
+    case SceneOff:
+    case Scene1:
+      return Scene2;
+    case Scene2:
+      return Scene3;
+    case Scene3:
+      return Scene4;
+    case Scene4:
+      return Scene2;
+    default:
+      return Scene1;
+    }
+  } // getNextScene
+
+  int getPreviousScene(const int _currentScene) {
+    switch(_currentScene) {
+    case ScenePanic:
+    case SceneStandBy:
+    case SceneDeepOff:
+    case SceneOff:
+    case Scene1:
+      return Scene4;
+    case dss::Scene2:
+      return Scene4;
+    case dss::Scene3:
+      return Scene2;
+    case dss::Scene4:
+      return Scene3;
+    default:
+      return Scene1;
+    }
+  } // getPreviousScene
 
 }

@@ -121,6 +121,12 @@ namespace dss {
     return sstream.str();
   } // ResultToJSON
 
+  string JSONOk(const string& _innerResult) {
+    stringstream sstream;
+    sstream << "{ " << ToJSONValue("ok") << ":" << ToJSONValue(true) << ", " << ToJSONValue("result")<<  ": " << _innerResult << " }";
+    return sstream.str();
+  }
+
   string ToJSONValue(const DeviceReference& _device) {
     std::stringstream sstream;
     sstream << "{ \"id\": \"" << _device.GetDSID().ToString() << "\""
@@ -524,6 +530,10 @@ namespace dss {
         }
         sstream << "]}";
         return sstream.str();
+      } else if(BeginsWith(_method, "device/getState")) {
+        stringstream sstream;
+        sstream << "{ " << ToJSONValue("isOn") << ":" << ToJSONValue(pDevice->IsOn()) << " }";
+        return JSONOk(sstream.str());
       } else {
         _handled = false;
         return "";
@@ -567,35 +577,73 @@ namespace dss {
   string WebServer::HandleSimCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     _handled = true;
     if(BeginsWith(_method, "sim/switch")) {
-      string devidStr = _parameter["device"];
-      if(!devidStr.empty()) {
-        dsid_t devid = dsid::FromString(devidStr);
-        DSIDInterface* dev = GetDSS().GetModulatorSim().GetSimulatedDevice(devid);
-        DSIDSimSwitch* sw = NULL;
-        if(dev != NULL && (sw = dynamic_cast<DSIDSimSwitch*>(dev)) != NULL) {
-          if(EndsWith(_method, "/switch/getstate")) {
-            std::stringstream sstream;
-            sstream << "{ groupid: " << GetDSS().GetModulatorSim().GetGroupForSwitch(sw)
-                    << " }";
-            return sstream.str();
-          } else if(EndsWith(_method, "/switch/pressed")) {
-            ButtonPressKind kind = Click;
-            string kindStr = _parameter["kind"];
-            if(kindStr == "touch") {
-              kind = Touch;
-            } else if(kindStr == "touchend") {
-              kind = TouchEnd;
-            }
-            int buttonNr = StrToIntDef(_parameter["buttonnr"], 1);
-            GetDSS().GetModulatorSim().ProcessButtonPress(*sw, buttonNr, kind);
-            return ResultToJSON(true);
-          } else {
-            _handled = false;
-            return "";
-          }
-        } else {
-          return ResultToJSON(false, "Could not find simulated switch");
+      if(EndsWith(_method, "/switch/pressed")) {
+        int buttonNr = StrToIntDef(_parameter["buttonnr"], -1);
+        if(buttonNr == -1) {
+          return ResultToJSON(false, "Invalid button number");
         }
+
+        int zoneID = StrToIntDef(_parameter["zoneID"], -1);
+        if(zoneID == -1) {
+          return ResultToJSON(false, "Could not parse zoneID");
+        }
+        int groupID = StrToIntDef(_parameter["groupID"], -1);
+        if(groupID == -1) {
+          return ResultToJSON(false, "Could not parse groupID");
+        }
+        try {
+          Zone& zone = GetDSS().GetApartment().GetZone(zoneID);
+          Group* pGroup = zone.GetGroup(groupID);
+
+          if(pGroup == NULL) {
+            return ResultToJSON(false, "Could not find group");
+          }
+
+          switch(buttonNr) {
+          case 1: // upper-left
+          case 3: // upper-right
+          case 7: // lower-left
+          case 9: // lower-right
+            break;
+          case 2: // up
+            pGroup->IncreaseValue();
+            break;
+          case 8: // down
+            pGroup->DecreaseValue();
+            break;
+          case 4: // left
+            pGroup->PreviousScene();
+            break;
+          case 6: // right
+            pGroup->NextScene();
+            break;
+          case 5:
+            {
+              if(groupID == GroupIDGreen) {
+                pGroup->CallScene(SceneBell);
+              } else if(groupID == GroupIDRed){
+                pGroup->CallScene(SceneAlarm);
+              } else {
+                const int lastScene = pGroup->GetLastCalledScene();
+                if(lastScene == dss::SceneOff || lastScene == dss::SceneDeepOff ||
+                   lastScene == dss::SceneStandBy || lastScene == dss::ScenePanic)
+                {
+                  pGroup->CallScene(dss::Scene1);
+                } else {
+                  pGroup->CallScene(dss::SceneOff);
+                }
+              }
+            }
+            break;
+          default:
+            return ResultToJSON(false, "Invalid button nr (range is 1..9)");
+          }
+        } catch(runtime_error&) {
+          return ResultToJSON(false, "Could not find zone");
+        }
+      } else {
+        _handled = false;
+        return "";
       }
     } else if(BeginsWith(_method, "sim/addDevice")) {
       string type = _parameter["type"];
