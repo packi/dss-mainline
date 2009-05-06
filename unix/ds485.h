@@ -212,6 +212,8 @@ namespace dss {
     const DS485FrameReader& GetFrameReader() const { return m_FrameReader; }
 
     virtual void Execute();
+
+    int GetStationID() const { return m_StationID; }
   }; // DS485Controller
 
   class IDS485FrameCollector {
