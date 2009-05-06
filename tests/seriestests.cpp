@@ -60,7 +60,7 @@ protected:
     secondly2.AddValue(2, testStart.AddSeconds(1));
     secondly2.AddValue(2, testStart.AddSeconds(2));
 
-    CPPUNIT_ASSERT_EQUAL(2u, secondly2.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL((size_t)2, secondly2.GetValues().size());
     CPPUNIT_ASSERT_EQUAL(2.0, secondly2.GetValues().front().GetValue());
 
     CPPUNIT_ASSERT_EQUAL(testStart.AddSeconds(2), secondly2.GetValues().front().GetTimeStamp());
@@ -68,7 +68,7 @@ protected:
     // skip one value
     secondly2.AddValue(3, testStart.AddSeconds(5));
 
-    CPPUNIT_ASSERT_EQUAL(4u, secondly2.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL((size_t)4, secondly2.GetValues().size());
     CPPUNIT_ASSERT_EQUAL(3.0, secondly2.GetValues().front().GetValue());
 
     CPPUNIT_ASSERT_EQUAL(testStart.AddSeconds(5), secondly2.GetValues().front().GetTimeStamp());
@@ -84,14 +84,14 @@ protected:
     secondly.AddValue(1, testStart);
     secondly.AddValue(2, testStart.AddSeconds(1));
 
-    CPPUNIT_ASSERT_EQUAL(2u, secondly.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL((size_t)2, secondly.GetValues().size());
     CPPUNIT_ASSERT_EQUAL(2.0, secondly.GetValues().front().GetValue());
 
     secondly.AddValue(3, testStart.AddSeconds(1));
     secondly.AddValue(4, testStart.AddSeconds(1));
     secondly.AddValue(5, testStart.AddSeconds(1));
 
-    CPPUNIT_ASSERT_EQUAL(2u, secondly.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL((size_t)2, secondly.GetValues().size());
     CPPUNIT_ASSERT_EQUAL(2.0, secondly.GetValues().front().GetMin());
     CPPUNIT_ASSERT_EQUAL(5.0, secondly.GetValues().front().GetValue());
     CPPUNIT_ASSERT_EQUAL(5.0, secondly.GetValues().front().GetMax());
@@ -103,7 +103,7 @@ protected:
 
     Series<CurrentValue>* series = reader.ReadFromXML("/home/patrick/workspace/dss/data/webroot/test.xml");
     CPPUNIT_ASSERT(series != NULL);
-    CPPUNIT_ASSERT_EQUAL(2u, series->GetValues().size());
+    CPPUNIT_ASSERT_EQUAL((size_t)2, series->GetValues().size());
     CPPUNIT_ASSERT_EQUAL(2.0, series->GetValues().front().GetMin());
     CPPUNIT_ASSERT_EQUAL(5.0, series->GetValues().front().GetValue());
     CPPUNIT_ASSERT_EQUAL(5.0, series->GetValues().front().GetMax());
@@ -130,9 +130,9 @@ protected:
     writer.WriteToXML(minutely, "/home/patrick/workspace/dss/data/webroot/test_minutely.xml");
     writer.WriteToXML(five, "/home/patrick/workspace/dss/data/webroot/test_five_minutely.xml");
 
-    unsigned int lastNumValsSeconds = secondly2.GetValues().size();
-    unsigned int lastNumValsMinutely = minutely.GetValues().size();
-    unsigned int lastNumValsFive = five.GetValues().size();
+    size_t lastNumValsSeconds = secondly2.GetValues().size();
+    size_t lastNumValsMinutely = minutely.GetValues().size();
+    size_t lastNumValsFive = five.GetValues().size();
 
     SeriesReader<CurrentValue> reader;
     DateTime lastTimeStamp = startTime;
@@ -192,7 +192,7 @@ protected:
 
     secondly.AddValue(2, DateTime());
 
-    CPPUNIT_ASSERT_EQUAL(2u, secondly.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL((size_t)2, secondly.GetValues().size());
 
     CPPUNIT_ASSERT_EQUAL(2.0, secondly.GetValues().front().GetValue());
 
@@ -200,7 +200,7 @@ protected:
     secondly.AddValue(4, DateTime());
     secondly.AddValue(5, DateTime());
 
-    CPPUNIT_ASSERT_EQUAL(2u, secondly.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL((size_t)2, secondly.GetValues().size());
     CPPUNIT_ASSERT_EQUAL(2.0, secondly.GetValues().front().GetMin());
     CPPUNIT_ASSERT_EQUAL(5.0, secondly.GetValues().front().GetValue());
     CPPUNIT_ASSERT_EQUAL(5.0, secondly.GetValues().front().GetMax());
@@ -219,7 +219,7 @@ protected:
     }
 
     const std::deque<AdderValue>& minuteValues = minutely.GetValues();
-    CPPUNIT_ASSERT_EQUAL(10u, minuteValues.size());
+    CPPUNIT_ASSERT_EQUAL((size_t)10, minuteValues.size());
 
     // values 60 - 51 should still be present in minutely
     for(std::deque<AdderValue>::const_iterator iValue = minuteValues.begin(), e = minuteValues.end();
@@ -229,7 +229,7 @@ protected:
     }
 
     const std::deque<AdderValue>& fiveminuteValues = five.GetValues();
-    CPPUNIT_ASSERT_EQUAL(10u, fiveminuteValues.size());
+    CPPUNIT_ASSERT_EQUAL((size_t)10, fiveminuteValues.size());
 
     vector<int> fiveMinuteValuesExpected;
     fiveMinuteValuesExpected.push_back(SeriesAdder<50,5>::value);
@@ -250,13 +250,13 @@ protected:
       CPPUNIT_ASSERT_EQUAL((double)fiveMinuteValuesExpected[distance(fiveminuteValues.begin(), iValue)], iValue->GetValue());
     }
 
-    CPPUNIT_ASSERT_EQUAL(0u, hourly.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL((size_t)0, hourly.GetValues().size());
 
     minutely.AddValue(61, testStart.AddMinute(61));
 
     cout << hourly.GetValues().size() << " " << hourly.GetValues().front().GetValue() << endl;
 
-    CPPUNIT_ASSERT_EQUAL(1u, hourly.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL((size_t)1, hourly.GetValues().size());
 
     double val = SeriesAdder<5,5>::value;
     CPPUNIT_ASSERT_EQUAL(val, hourly.GetValues().front().GetValue());
@@ -266,7 +266,7 @@ protected:
     SeriesWriter<AdderValue> writer;
     writer.WriteToXML(minutely, "/home/patrick/workspace/dss/data/webroot/minutely.xml");
 
-    CPPUNIT_ASSERT_EQUAL(1u, hourly.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL((size_t)1, hourly.GetValues().size());
   } // testWrapping
 
 };

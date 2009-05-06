@@ -148,7 +148,7 @@ protected:
   } // testSplitString
 
   void testISODate() {
-    const char c = 'C';
+    char c = 'C';
     struct tm inst;
     time_t now;
     time( &now );

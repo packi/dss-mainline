@@ -10,7 +10,7 @@ ELSE (LIBXML2_FOUND)
 	LibXML2.")
 ENDIF (LIBXML2_FOUND)
 
-add_definitions(-DXP_UNIX -DUSE_SIM -DUSE_LIBXML -DNO_CGI)
+add_definitions(-DXP_UNIX -DUSE_SIM -DUSE_LIBXML -DNO_CGI -DWITH_TESTS)
 
 include_directories(external)
 include_directories(${DSS_SOURCE_DIR})
@@ -42,12 +42,13 @@ add_subdirectory(core)
 add_subdirectory(unix)
 add_subdirectory(webservices)
 add_subdirectory(external)
+add_subdirectory(tests)
 
-link_directories(${DSS_BINARY_DIR}/core ${DSS_BINARY_DIR}/unix)
+link_directories(${DSS_BINARY_DIR}/core ${DSS_BINARY_DIR}/unix ${DSS_BINARY_DIR}/tests)
 
 add_executable(dss main.cpp namespaces.cpp)
 
 link_libraries(gsoap++)
 
-target_link_libraries(dss core unix webservices pthread shttpd
-	 ical dl js PocoXML)
+target_link_libraries(dss tests core unix webservices pthread shttpd
+	 ical dl js PocoXML cppunit)

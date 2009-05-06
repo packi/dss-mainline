@@ -791,6 +791,9 @@ namespace dss {
               {
                 response = CreateResponse(cmdFrame, cmdNr);
                 // TODO: not yet done....
+                for(int iByte = 0; iByte < 64/8; iByte++) {
+                
+                }
                 DistributeFrame(response);
               }
               break;
