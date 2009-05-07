@@ -15,12 +15,6 @@ private:
   pthread_t m_ThreadHandle;
 protected:
   virtual void sendCommand(const std::string& _command) = 0;
-
-    bool lastWasOff() {
-       return   m_LastScene == dss::SceneDeepOff || m_LastScene == dss::SceneStandBy
-             || m_LastScene == dss::SceneOff || m_LastScene == dss::SceneMin;
-     }
-
 public:
     virtual void powerOn() = 0;
     virtual void powerOff() = 0;
@@ -102,6 +96,12 @@ public:
 
     virtual void SetConfigurationParameter(const std::string& _name, const std::string& _value) {
     }
+
+    bool lastWasOff() {
+       return   m_LastScene == dss::SceneDeepOff || m_LastScene == dss::SceneStandBy
+             || m_LastScene == dss::SceneOff || m_LastScene == dss::SceneMin;
+     }
+
 public:
   DSIDMedia() {
     m_LastScene = dss::SceneOff;

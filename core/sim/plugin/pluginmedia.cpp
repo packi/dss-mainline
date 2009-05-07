@@ -9,8 +9,10 @@
 
 void* handleBell(void* ptr) {
   DSIDMedia* mediaPlayer = (DSIDMedia*)ptr;
-  mediaPlayer->powerOn();
-  sleep(3);
-  mediaPlayer->powerOff();
+  if(!mediaPlayer->lastWasOff()) {
+    mediaPlayer->powerOff();
+    sleep(3);
+    mediaPlayer->powerOn();
+  }
   return NULL;
 } // handleBell
