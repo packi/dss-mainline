@@ -46,7 +46,7 @@ function Button(switchID, buttonID, parentSwitch) {
   }
 }
 
-function Switch(intoID, switchID, groupID, zoneID) {
+function Switch(intoID, switchID, zoneID, groupID) {
   var self = this;
   this.buttons = [];
   this.switchID = switchID;
