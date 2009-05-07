@@ -38,8 +38,12 @@ set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DXP_UNIX)
 CHECK_INCLUDE_FILES(mozjs/jsapi.h HAVE_MOZJS_JSAPI_H)
 CHECK_INCLUDE_FILES(js/jsapi.h HAVE_JS_JSAPI_H)
 
+
 # check for SpiderMonkey Library
 find_library(MOZJS mozjs)
+IF(${MOZJS} MATCHES "MOZJS-NOTFOUND")
+find_library(MOZJS js)
+ENDIF(${MOZJS} MATCHES "MOZJS-NOTFOUND")
 
 # generate config.h header file
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
