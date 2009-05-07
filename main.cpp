@@ -108,8 +108,11 @@ int main (int argc, char * const argv[]) {
   }
 
 #ifdef WITH_TESTS
+  cout << "compiled WITH_TESTS" << endl;
   if(testFlag != 1) {
+    cout << "running tests" << endl;
     dss::Tests::Run();
+    cout << "done running tests" << endl;
   }
 #endif
 

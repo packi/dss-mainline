@@ -375,6 +375,22 @@ namespace dss {
         int token = m_LastSessionID;
         m_Sessions[token] = Session(token);
         return "{" + ToJSONValue("token") + ": " + ToJSONValue(token) + "}";
+      } else if(EndsWith(_method, "/getCircuits")) {
+        stringstream sstream;
+        sstream << "{ " << ToJSONValue("circuits") << ": [";
+        bool first = true;
+        vector<Modulator*>& modulators = GetDSS().GetApartment().GetModulators();
+        foreach(Modulator* modulator, modulators) {
+          if(!first) {
+            sstream << ",";
+          }
+          first = false;
+          sstream << "{ " << ToJSONValue("name") << ": " << ToJSONValue(modulator->GetName());
+          sstream << ", " << ToJSONValue("dsid") << ": " << ToJSONValue(modulator->GetDSID().ToString());
+          sstream << "}";
+        }
+        sstream << "]}";
+        return JSONOk(sstream.str());
       } else {
         _handled = false;
       }
@@ -416,53 +432,68 @@ namespace dss {
       errorMessage = "Need parameter name or id to identify zone";
     }
     if(ok) {
-      if(IsDeviceInterfaceCall(_method)) {
-        IDeviceInterface* interface = NULL;
-        if(ok) {
-          string groupName = _parameter["groupName"];
-          string groupIDString = _parameter["groupID"];
-          if(!groupName.empty()) {
-            try {
-              Group* grp = pZone->GetGroup(groupName);
-              if(grp == NULL) {
-                // TODO: this might better be done by the zone
-                throw runtime_error("dummy");
-              }
-              interface = grp;
-            } catch(runtime_error& e) {
-              errorMessage = "Could not find group with name '" + groupName + "'";
-              ok = false;
-            }
-          } else if(!groupIDString.empty()) {
-            try {
-              int groupID = StrToIntDef(groupIDString, -1);
-              if(groupID != -1) {
-                Group* grp = pZone->GetGroup(groupID);
-                if(grp == NULL) {
-                  // TODO: this might better be done by the zone
-                  throw runtime_error("dummy");
-                }
-                interface = grp;
-              } else {
-                errorMessage = "Could not parse group id '" + groupIDString + "'";
-                ok = false;
-              }
-            } catch(runtime_error& e) {
-              errorMessage = "Could not find group with ID '" + groupIDString + "'";
-              ok = false;
-            }
-          }
-        }
-        if(ok) {
-          if(interface == NULL) {
-            interface = pZone;
-          }
-          return CallDeviceInterface(_method, _parameter, _arg, interface, _session);
-        }
-      } else {
-        _handled = false;
-        return "";
-      }
+      Group* pGroup = NULL;
+	  string groupName = _parameter["groupName"];
+	  string groupIDString = _parameter["groupID"];
+	  if(!groupName.empty()) {
+		try {
+		  pGroup = pZone->GetGroup(groupName);
+		  if(pGroup == NULL) {
+			// TODO: this might better be done by the zone
+			throw runtime_error("dummy");
+		  }
+		} catch(runtime_error& e) {
+		  errorMessage = "Could not find group with name '" + groupName + "'";
+		  ok = false;
+		}
+	  } else if(!groupIDString.empty()) {
+		try {
+		  int groupID = StrToIntDef(groupIDString, -1);
+		  if(groupID != -1) {
+			pGroup = pZone->GetGroup(groupID);
+			if(pGroup == NULL) {
+			  // TODO: this might better be done by the zone
+			  throw runtime_error("dummy");
+			}
+		  } else {
+			errorMessage = "Could not parse group id '" + groupIDString + "'";
+			ok = false;
+		  }
+		} catch(runtime_error& e) {
+		  errorMessage = "Could not find group with ID '" + groupIDString + "'";
+		  ok = false;
+		}
+	  }
+	  if(ok) {
+		  if(IsDeviceInterfaceCall(_method)) {
+			IDeviceInterface* interface = NULL;
+			if(pGroup != NULL) {
+			  interface = pGroup;
+			}
+			if(ok) {
+			  if(interface == NULL) {
+				interface = pZone;
+			  }
+			  return CallDeviceInterface(_method, _parameter, _arg, interface, _session);
+			}
+		  } else if(EndsWith(_method, "/getLastCalledScene")) {
+		    int lastScene = 0;
+		    if(pGroup != NULL) {
+		      lastScene = pGroup->GetLastCalledScene();
+		    } else if(pZone != NULL) {
+		      lastScene = pZone->GetGroup(0)->GetLastCalledScene();
+		    } else {
+		      // should never reach here because ok, would be false
+		      assert(false);
+		    }
+		    stringstream sstream;
+		    sstream << "{" << ToJSONValue("scene") << ":" << ToJSONValue(lastScene) << "}";
+		    return JSONOk(sstream.str());
+		  } else {
+			_handled = false;
+			return "";
+		  }
+	  }
     }
     if(!ok) {
       return ResultToJSON(ok, errorMessage);
@@ -543,6 +574,30 @@ namespace dss {
     }
   } // HandleDeviceCall
 
+  string WebServer::HandleCircuitCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+    _handled = true;
+    string idString = _parameter["id"];
+    if(idString.empty()) {
+      return ResultToJSON(false, "missing parameter id");
+    }
+    dsid_t dsid = dsid_t::FromString(idString);
+    if(dsid == NullDSID) {
+      return ResultToJSON(false, "could not parse dsid");
+    }
+    try {
+      Modulator& modulator = GetDSS().GetApartment().GetModulatorByDSID(dsid);
+      if(EndsWith(_method, "circuit/getName")) {
+        return JSONOk("{ " + ToJSONValue("name") + ": " + ToJSONValue(modulator.GetName()) + "}");
+      } else {
+        _handled = false;
+      }
+    } catch(runtime_error&) {
+      return ResultToJSON(false, "could not find modulator with given dsid");
+    }
+    return "";
+  } // HandleCircuitCall
+
+  
   string WebServer::HandleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
 
   } // HandleSetCall
@@ -729,6 +784,8 @@ namespace dss {
     } else if(BeginsWith(method, "zone/")) {
       result = self.HandleZoneCall(method, paramMap, _arg, handled, session);
     } else if(BeginsWith(method, "device/")) {
+      result = self.HandleDeviceCall(method, paramMap, _arg, handled, session);
+    } else if(BeginsWith(method, "circuit/")) {
       result = self.HandleDeviceCall(method, paramMap, _arg, handled, session);
     } else if(BeginsWith(method, "set/")) {
       result = self.HandleSetCall(method, paramMap, _arg, handled, session);
