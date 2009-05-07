@@ -20,8 +20,10 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} /opt/local/include)
   link_directories(/opt/local/lib)
   link_libraries(boost_filesystem-mt boost_system-mt PocoFoundation PocoNet)
+  SET(DNS_SD_LIB)
 ELSE(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   link_libraries(boost_filesystem rt)
+  SET(DNS_SD_LIB dns_sd)
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -63,4 +65,4 @@ add_executable(dss main.cpp namespaces.cpp)
 
 link_libraries(gsoap++)
 
-target_link_libraries(dss tests core unix webservices pthread shttpd ical dl PocoXML ${MOZJS} cppunit)
+target_link_libraries(dss tests core unix webservices pthread shttpd ical dl PocoXML ${MOZJS} cppunit ${DNS_SD_LIB})
