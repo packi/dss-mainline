@@ -24,6 +24,12 @@ ELSE(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   link_libraries(boost_filesystem rt)
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -Wno-deprecated)
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
+link_libraries(PocoFoundation PocoNet)
+
 # header tests
 INCLUDE(CheckIncludeFiles)
 
@@ -31,6 +37,9 @@ INCLUDE(CheckIncludeFiles)
 set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DXP_UNIX)
 CHECK_INCLUDE_FILES(mozjs/jsapi.h HAVE_MOZJS_JSAPI_H)
 CHECK_INCLUDE_FILES(js/jsapi.h HAVE_JS_JSAPI_H)
+
+# check for SpiderMonkey Library
+find_library(MOZJS mozjs)
 
 # generate config.h header file
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
@@ -50,5 +59,4 @@ add_executable(dss main.cpp namespaces.cpp)
 
 link_libraries(gsoap++)
 
-target_link_libraries(dss tests core unix webservices pthread shttpd
-	 ical dl js PocoXML cppunit)
+target_link_libraries(dss tests core unix webservices pthread shttpd ical dl PocoXML ${MOZJS} cppunit)
