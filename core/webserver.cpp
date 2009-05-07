@@ -597,13 +597,15 @@ namespace dss {
     return "";
   } // HandleCircuitCall
 
-  
-  string WebServer::HandleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
 
+  string WebServer::HandleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+    _handled = false;
+    return "";
   } // HandleSetCall
 
   string WebServer::HandlePropertyCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
-
+    _handled = false;
+    return "";
   } // HandlePropertyCall
 
   string WebServer::HandleEventCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
@@ -628,6 +630,58 @@ namespace dss {
     }
     return result;
   } // HandleEventCall
+
+  string WebServer::HandleStructureCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+    _handled = true;
+    if(EndsWith(_method, "structure/zoneAddDevice")) {
+      bool ok = true;
+
+      string devidStr = _parameter["devid"];
+      if(!devidStr.empty()) {
+        dsid_t devid = dsid::FromString(devidStr);
+
+        Device& dev = DSS::GetInstance()->GetApartment().GetDeviceByDSID(devid);
+
+        string zoneIDStr = _parameter["zone"];
+        if(!zoneIDStr.empty()) {
+          try {
+            int zoneID = StrToInt(zoneIDStr);
+            DSS::GetInstance()->GetApartment().GetZone(zoneID).AddDevice(DeviceReference(dev, DSS::GetInstance()->GetApartment()));
+          } catch(runtime_error&) {
+            ok = false;
+          }
+        }
+        return ResultToJSON(ok, "");
+      } else {
+        return ResultToJSON(false, "Need parameter devid");
+      }
+    } else if(EndsWith(_method, "structure/addZone")) {
+      bool ok = false;
+      int zoneID = -1;
+      int modulatorID = -1;
+
+      string zoneIDStr = _parameter["zoneID"];
+      if(!zoneIDStr.empty()) {
+        zoneID = StrToIntDef(zoneIDStr, -1);
+      }
+      string modIDStr = _parameter["modulatorID"];
+      if(!modIDStr.empty()) {
+        modulatorID = StrToIntDef(modIDStr, -1);
+      }
+      if(zoneID != -1 && modulatorID != -1) {
+        try {
+          Modulator& modulator = DSS::GetInstance()->GetApartment().GetModulatorByBusID(modulatorID);
+          DSS::GetInstance()->GetApartment().AllocateZone(modulator, zoneID);
+          ok = true;
+        } catch(runtime_error&) {
+        }
+      }
+      return ResultToJSON(true, "");
+    } else {
+      _handled = false;
+      return "";
+    }
+  } // HandleStructureCall
 
   string WebServer::HandleSimCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     _handled = true;
@@ -793,72 +847,21 @@ namespace dss {
       result = self.HandlePropertyCall(method, paramMap, _arg, handled, session);
     } else if(BeginsWith(method, "event/")) {
       result = self.HandleEventCall(method, paramMap, _arg, handled, session);
+    } else if(BeginsWith(method, "structure/")) {
+      result = self.HandleStructureCall(method, paramMap, _arg, handled, session);
     } else if(BeginsWith(method, "sim/")) {
       result = self.HandleSimCall(method, paramMap, _arg, handled, session);
     } else if(BeginsWith(method, "debug/")) {
       result = self.HandleDebugCall(method, paramMap, _arg, handled, session);
     }
-    EmitHTTPHeader(200, _arg, "application/json");
+
     if(!handled) {
+      EmitHTTPHeader(404, _arg, "application/json");
       result = "{ ok: " + ToJSONValue(false) + ", message: " + ToJSONValue("Call to unknown function") + " }";
+    } else {
+      EmitHTTPHeader(200, _arg, "application/json");
     }
     shttpd_printf(_arg, result.c_str());
-    _arg->flags |= SHTTPD_END_OF_OUTPUT;
-   // return;
-
-    if(BeginsWith(method, "structure/")) {
-      if(method == "structure/zoneAddDevice") {
-      	bool ok = true;
-        EmitHTTPHeader(200, _arg, "application/json");
-
-        string devidStr = paramMap["devid"];
-        if(!devidStr.empty()) {
-          dsid_t devid = dsid::FromString(devidStr);
-
-          Device& dev = DSS::GetInstance()->GetApartment().GetDeviceByDSID(devid);
-
-          string zoneIDStr = paramMap["zone"];
-          if(!zoneIDStr.empty()) {
-          	try {
-              int zoneID = StrToInt(zoneIDStr);
-              DSS::GetInstance()->GetApartment().GetZone(zoneID).AddDevice(DeviceReference(dev, DSS::GetInstance()->GetApartment()));
-          	} catch(runtime_error&) {
-          		ok = false;
-          	}
-          }
-          if(ok) {
-            shttpd_printf(_arg, "{ok:1}");
-          } else {
-          	shttpd_printf(_arg, "{ok:0}");
-          }
-        } else {
-          shttpd_printf(_arg, "{ok:0}");
-        }
-      } else if(method == "structure/addZone") {
-        bool ok = false;
-        EmitHTTPHeader(200, _arg, "application/json");
-        int zoneID = -1;
-        int modulatorID = -1;
-        string zoneIDStr = paramMap["zoneID"];
-        if(!zoneIDStr.empty()) {
-          zoneID = StrToIntDef(zoneIDStr, -1);
-        }
-        string modIDStr = paramMap["modulatorID"];
-        if(!modIDStr.empty()) {
-          modulatorID = StrToIntDef(modIDStr, -1);
-        }
-        if(zoneID != -1 && modulatorID != -1) {
-          try {
-            Modulator& modulator = DSS::GetInstance()->GetApartment().GetModulatorByBusID(modulatorID);
-            DSS::GetInstance()->GetApartment().AllocateZone(modulator, zoneID);
-            ok = true;
-          } catch(runtime_error&) {
-          }
-        }
-      }
-    } else {
-     // shttpd_printf(_arg, "hello %s, method %s, params %s", uri.c_str(), method.c_str(), params.c_str());
-    }
     _arg->flags |= SHTTPD_END_OF_OUTPUT;
   } // JSONHandler
 
