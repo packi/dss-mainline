@@ -18,6 +18,7 @@
 #endif
 
 #include "webserver.h"
+#include "bonjour.h"
 #ifdef USE_SIM
   #include "sim/dssim.h"
 #endif
@@ -134,6 +135,9 @@ namespace dss {
 
     m_State = ssStarting;
     std::for_each(m_Subsystems.begin(), m_Subsystems.end(), StartSubsystem);
+
+    BonjourHandler bonjour;
+    bonjour.Run();
 
     m_State = ssRunning;
 
