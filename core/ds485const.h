@@ -97,6 +97,8 @@ namespace dss {
   const uint8_t SceneAlarm = 0x2A;
   const uint8_t ScenePanic = 0x2B;
 
+  const uint16_t SceneFlagLocalOff = 0x0100;
+
   const int GroupIDBroadcast = 0;
   const int GroupIDYellow = 1;
   const int GroupIDGray = 2;

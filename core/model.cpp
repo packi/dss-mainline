@@ -1060,9 +1060,9 @@ namespace dss {
       if(group != NULL) {
         Log("OnGroupCallScene: group-id '" + IntToString(_groupID) + "' in Zone '" + IntToString(_zoneID) + "'");
         Set s = zone.GetDevices().GetByGroup(_groupID);
-        SetLastCalledSceneAction act(_sceneID);
+        SetLastCalledSceneAction act(_sceneID & 0x00ff);
         s.Perform(act);
-        group->SetLastCalledScene(_sceneID);
+        group->SetLastCalledScene(_sceneID & 0x00ff);
       } else {
         Log("OnGroupCallScene: Could not find group with id '" + IntToString(_groupID) + "' in Zone '" + IntToString(_zoneID) + "'");
       }
@@ -1077,7 +1077,7 @@ namespace dss {
       Modulator& mod = GetModulatorByBusID(_modulatorID);
       try {
         DeviceReference devRef = mod.GetDevices().GetByBusID(_deviceID);
-        devRef.GetDevice().SetLastCalledScene(_sceneID);
+        devRef.GetDevice().SetLastCalledScene(_sceneID & 0x00ff);
       } catch(ItemNotFoundException& e) {
         Log("OnDeviceCallScene: Could not find device with bus-id '" + IntToString(_deviceID) + "' on modulator '" + IntToString(_modulatorID) + "'");
       }
@@ -1397,7 +1397,7 @@ namespace dss {
   void Group::CallScene(const int _sceneNr) {
     // this might be redundant, but since a set could be
     // optimized if it contains only one device its safer like that...
-    m_LastCalledScene = _sceneNr;
+    m_LastCalledScene = _sceneNr & 0x00ff;
     GetDevices().CallScene(_sceneNr);
   } // CallScene
 
