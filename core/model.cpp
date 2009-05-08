@@ -749,6 +749,7 @@ namespace dss {
   void Apartment::ReadConfigurationFromXML(const string& _fileName) {
     const int apartmentConfigVersion = 1;
     XMLDocumentFileReader reader(_fileName);
+    SetName("dSS");
 
     XMLNode rootNode = reader.GetDocument().GetRootNode();
     if(rootNode.GetName() == "config") {
@@ -762,10 +763,18 @@ namespace dss {
             LoadModulators(*iNode);
           } else if(nodeName == "zones") {
             LoadZones(*iNode);
+          } else if(nodeName == "apartment") {
+            try {
+              XMLNode& nameNode = iNode->GetChildByName("name");
+              if(!nameNode.GetChildren().empty()) {
+                SetName((nameNode.GetChildren()[0]).GetContent());
+              }
+            } catch(runtime_error&) {
+            }
           }
         }
       } else {
-        Logger::GetInstance()->Log("Log file has the wrong version");
+        Logger::GetInstance()->Log("Config file has the wrong version");
       }
     }
   } // ReadConfigurationFromXML

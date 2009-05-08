@@ -1,7 +1,8 @@
 #include "bonjour.h"
-#include "propertysystem.h"
-#include "dss.h"
-#include "base.h"
+#include "core/propertysystem.h"
+#include "core/dss.h"
+#include "core/model.h"
+#include "core/base.h"
 
 #include <arpa/inet.h>
 
@@ -225,7 +226,7 @@ static void client_callback(AvahiClient *c, AvahiClientState state, AVAHI_GCC_UN
         goto fail;
     }
 
-    name = avahi_strdup("DSS");
+    name = avahi_strdup(DSS::GetInstance()->GetApartment().GetName());
 
     /* Allocate a new client */
     client = avahi_client_new(avahi_simple_poll_get(simple_poll), (AvahiClientFlags)0 , client_callback, NULL, &error);

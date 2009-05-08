@@ -391,6 +391,10 @@ namespace dss {
         }
         sstream << "]}";
         return JSONOk(sstream.str());
+      } else if(EndsWith(_method, "/getName")) {
+        stringstream sstream;
+        sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(GetDSS().GetApartment().GetName()) << "}";
+        return JSONOk(sstream.str());
       } else {
         _handled = false;
       }
