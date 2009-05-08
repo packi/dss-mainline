@@ -25,8 +25,8 @@ public:
     virtual void volumeDown() = 0;
 
     virtual void CallScene(const int _sceneNr) {
-      bool keepScene = _sceneNr != dss::SceneBell && _sceneNr != dss::SceneAlarm && _sceneNr != dss::ScenePanic;
-      if(_sceneNr == dss::SceneDeepOff) {
+      bool keepScene = _sceneNr != dss::SceneBell && _sceneNr != dss::SceneAlarm;
+      if(_sceneNr == dss::SceneDeepOff || _sceneNr == dss::ScenePanic) {
         deepOff();
       } else if(_sceneNr == dss::SceneOff || _sceneNr == dss::SceneMin || _sceneNr == dss::SceneStandBy) {
         powerOff();
@@ -99,7 +99,7 @@ public:
 
     bool lastWasOff() {
        return   m_LastScene == dss::SceneDeepOff || m_LastScene == dss::SceneStandBy
-             || m_LastScene == dss::SceneOff || m_LastScene == dss::SceneMin;
+             || m_LastScene == dss::SceneOff || m_LastScene == dss::SceneMin || m_LastScene == dss::ScenePanic;
      }
 
 public:
