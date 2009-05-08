@@ -35,11 +35,11 @@ namespace dss {
 
   //-------------------------------------------------- Event
 
-  typedef enum EventRaiseLocation {
+  typedef enum {
     erlZone,
     erlDevice,
     erlApartment
-  };
+  } EventRaiseLocation;
 
   class Event {
   private:

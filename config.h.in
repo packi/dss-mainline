@@ -4,6 +4,8 @@
 /* SpiderMonkey API header */
 #cmakedefine HAVE_MOZJS_JSAPI_H
 #cmakedefine HAVE_JS_JSAPI_H
+#cmakedefine HAVE_DNS_SD
+#cmakedefine HAVE_AVAHI
 
 #endif /* DIGITAL_STROM_SERVER_CONFIG_H */
 

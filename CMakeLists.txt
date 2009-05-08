@@ -44,7 +44,7 @@ CHECK_INCLUDE_FILES(dns_sd.h HAVE_DNS_SD)
 CHECK_INCLUDE_FILES(avahi-client/publish.h HAVE_AVAHI)
 
 IF(${HAVE_AVAHI} MATCHES 1) 
-  SET(DNS_SD_LIB avahi-common avahi-core)
+  SET(DNS_SD_LIB avahi-common avahi-client)
 ELSE(${HAVE_AVAHI} MATCHES 1)
 ENDIF(${HAVE_AVAHI} MATCHES 1)
 

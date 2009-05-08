@@ -7,44 +7,43 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include <dns_sd.h>
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+
+  #ifdef HAVE_AVAHI
+    #define USE_AVAHI
+  #elif defined HAVE_DNS_SD
+    #define USE_DNS_SD
+  #else
+    #error "Need either AVAHI or DNS_SD"
+  #endif
+#endif // HAVE_CONFIG_H
+
+#ifdef USE_AVAHI
+  #include <avahi-client/client.h>
+  #include <avahi-client/publish.h>
+
+  #include <avahi-common/alternative.h>
+  #include <avahi-common/simple-watch.h>
+#endif
+
+#ifdef USE_DNS_SD
+  #include <dns_sd.h>
+#endif
 
 namespace dss {
-
-
-  class LookupRecord {
-    private:
-      std::string m_HostName;
-      std::string m_FullName;
-      int m_Port;
-      int m_IP;
-    public:
-      LookupRecord()
-      : m_HostName(""),
-        m_FullName(""),
-        m_Port(0),
-        m_IP(0)
-      {}
-
-      void SetHostName(const std::string& _value) { m_HostName = _value; };
-      const std::string& GetHostName() const { return m_HostName; };
-
-      void SetFullName(const std::string& _value) { m_FullName = _value; };
-      const std::string& GetFullName() const { return m_FullName; };
-
-      void SetIP(const int _value) { m_IP = _value; };
-      const int GetIP() const { return m_IP; };
-
-      void SetPort(const int _value) { m_Port = _value; };
-      const int GetPort() const { return m_Port; };
-  }; // LookupRecord
 
   /**
 	  @author Patrick Staehlin <me@packi.ch>
   */
   class BonjourHandler : public Thread {
     private:
+#ifdef USE_AVAHI
+#endif
+#ifdef USE_DNS_SD
       DNSServiceRef m_RegisterReference;
+#endif
     public:
       BonjourHandler();
       virtual ~BonjourHandler();
@@ -56,3 +55,4 @@ namespace dss {
 }
 
 #endif
+
