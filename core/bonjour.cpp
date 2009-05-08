@@ -226,7 +226,7 @@ static void client_callback(AvahiClient *c, AvahiClientState state, AVAHI_GCC_UN
         goto fail;
     }
 
-    name = avahi_strdup(DSS::GetInstance()->GetApartment().GetName());
+    name = avahi_strdup(DSS::GetInstance()->GetApartment().GetName().c_str());
 
     /* Allocate a new client */
     client = avahi_client_new(avahi_simple_poll_get(simple_poll), (AvahiClientFlags)0 , client_callback, NULL, &error);
