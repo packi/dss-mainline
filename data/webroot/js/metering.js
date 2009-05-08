@@ -8,8 +8,8 @@
 
 jQuery.noConflict();
 
-var devicePlot, devicePlotTimer, meteringPlot, meteringPlotTimer, meteringXMLTimer;
-var updateDevicePlot = true, updateMeteringPlot = true, updateXML = true;
+var devicePlot, devicePlotTimer, meteringPlot, meteringPlotTimer;
+var updateDevicePlot = true, updateMeteringPlot = true;
 var reloadInterval = 1000;
 
 var plotOptions = {
@@ -44,6 +44,24 @@ var plotOptions = {
 		}
 	}
 };
+
+function xml2Str(xmlNode) {
+   try {
+      // Gecko-based browsers, Safari, Opera.
+      return (new XMLSerializer()).serializeToString(xmlNode);
+  }
+  catch (e) {
+     try {
+        // Internet Explorer.
+        return xmlNode.xml;
+     }
+     catch (e) {  
+        //Other browsers without XML Serializer
+        alert('XMLSerializer not supported');
+     }
+   }
+   return false;
+}
 
 function parseXML(xml) {
 	var values = jQuery(xml).find('values').get(0);
@@ -81,9 +99,11 @@ function reloadDevicePlot() {
 function toggleDevicePlotUpdates() {
 	if(updateDevicePlot) {
 		clearTimeout(devicePlotTimer);
+		jQuery("#updateDevicePlot").attr('checked', false);
 		updateDevicePlot = false;
 	} else {
 		updateDevicePlot = true;
+		jQuery("#updateDevicePlot").attr('checked', true);
 		reloadDevicePlot();
 	}
 }
@@ -95,6 +115,8 @@ function reloadMeteringPlot() {
 		url: "metering/metering.xml?date=" + currentDate.getTime(),
 		dataType: "xml",
 		success: function(xml) {
+			var xmlString = xml2Str(xml).replace(/</ig, "&lt;").replace(/>/ig, "&gt;");
+			jQuery('#meteringXML').html('<pre>' + xmlString + '</pre>');
 			var rawData = parseXML(xml);
 			redrawPlot(meteringPlot, rawData);
 			if(updateMeteringPlot) {
@@ -107,41 +129,12 @@ function reloadMeteringPlot() {
 function toggleMeteringPlotUpdates() {
 	if(updateMeteringPlot) {
 		clearTimeout(meteringPlotTimer);
+		jQuery("#updateMeteringPlot").attr('checked', false);
 		updateMeteringPlot = false;
 	} else {
 		updateMeteringPlot = true;
+		jQuery("#updateMeteringPlot").attr('checked', true);
 		reloadMeteringPlot();
-	}
-}
-
-
-function reloadXML() {
-	var currentDate = new Date();
-	jQuery.ajax({
-		type: "GET",
-		url: "metering/metering.xml?date=" + currentDate.getTime(),
-		dataType: "text",
-		success: function(xml) {
-			var xmlString = xml;
-			var re = new RegExp('<', "g");
-			xmlString = xmlString.replace(re, '&lt;');
-			re = new RegExp('>', "g");
-			xmlString = xmlString.replace(re, '&gt;');
-			jQuery('#meteringXML').html('<pre>' + xmlString + '</pre>');
-			if(updateXML) {
-				meteringXMLTimer = setTimeout("reloadXML()", reloadInterval);
-			}
-		}
-	});
-}
-
-function toggleXMLUpdates() {
-	if(updateXML) {
-		clearTimeout(meteringXMLTimer);
-		updateXML = false;
-	} else {
-		updateXML = true;
-		reloadXML();
 	}
 }
 
@@ -158,15 +151,9 @@ function redrawPlot(plot, data) {
 
 jQuery(document).ready(function() {
 	initPlots();
-	if(updateDevicePlot) {
-		reloadDevicePlot();
-	}
-	if(updateMeteringPlot) {
-		reloadMeteringPlot();
-	}
-	if(updateXML) {
-		reloadXML();
-	}
+	
+	reloadDevicePlot();
+	reloadMeteringPlot();
 	
 	jQuery("#updateDevicePlot").click(function () {
 		toggleDevicePlotUpdates();
@@ -174,9 +161,5 @@ jQuery(document).ready(function() {
 	
 	jQuery("#updateMeteringPlot").click(function () {
 		toggleMeteringPlotUpdates();
-	});
-	
-	jQuery("#updateMeteringXML").click(function () {
-		toggleXMLUpdates();
 	});
 });
