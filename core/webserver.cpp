@@ -848,7 +848,7 @@ namespace dss {
     } else if(BeginsWith(method, "device/")) {
       result = self.HandleDeviceCall(method, paramMap, _arg, handled, session);
     } else if(BeginsWith(method, "circuit/")) {
-      result = self.HandleDeviceCall(method, paramMap, _arg, handled, session);
+      result = self.HandleCircuitCall(method, paramMap, _arg, handled, session);
     } else if(BeginsWith(method, "set/")) {
       result = self.HandleSetCall(method, paramMap, _arg, handled, session);
     } else if(BeginsWith(method, "property/")) {
