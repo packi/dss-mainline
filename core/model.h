@@ -395,6 +395,12 @@ namespace dss {
     dsid_t m_DSID;
     int m_BusID;
     DeviceVector m_ConnectedDevices;
+    int m_EnergyLevelOrange;
+    int m_EnergyLevelRed;
+    int m_PowerConsumption;
+    DateTime m_PowerConsumptionAge;
+    int m_EnergyMeterValue;
+    DateTime m_EnergyMeterValueAge;
   public:
     Modulator(const dsid_t _dsid);
     virtual ~Modulator() {};
@@ -416,6 +422,11 @@ namespace dss {
     unsigned long GetPowerConsumption();
     /** Returns the meter value in Wh */
     unsigned long GetEnergyMeterValue();
+    
+    int GetEnergyLevelOrange() const { return m_EnergyLevelOrange; }
+    int GetEnergyLevelRed() const { return m_EnergyLevelRed; }
+    void SetEnergyLevelRed(const int _value) { m_EnergyLevelRed = _value; }
+    void SetEnergyLevelOrange(const int _value) { m_EnergyLevelOrange = _value; }
   }; // Modulator
 
   /** Represents a predefined group */

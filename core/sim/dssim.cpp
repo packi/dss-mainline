@@ -196,7 +196,9 @@ namespace dss {
   //================================================== DSModulatorSim
 
   DSModulatorSim::DSModulatorSim(DSS* _pDSS)
-  : Subsystem(_pDSS, "DSModulatorSim")
+  : Subsystem(_pDSS, "DSModulatorSim"),
+    m_EnergyLevelOrange(200),
+    m_EnergyLevelRed(400)
   {
     m_ModulatorDSID = dsid_t(0, SimulationPrefix);
     m_Initialized = false;
@@ -205,6 +207,7 @@ namespace dss {
   void DSModulatorSim::Initialize() {
     Subsystem::Initialize();
     m_ID = 70;
+    m_Name = "Simulated dSM";
     m_DSIDFactory.RegisterCreator(new DSIDSimCreator(*this));
     m_DSIDFactory.RegisterCreator(new DSIDSimSwitchCreator(*this));
     LoadPlugins();
@@ -282,6 +285,15 @@ namespace dss {
         m_ModulatorDSID = dsid_t::FromString(attrs["dsid"]);
         m_ModulatorDSID.lower |= SimulationPrefix;
       }
+      m_EnergyLevelOrange = StrToIntDef(attrs["orange"], m_EnergyLevelOrange);
+      m_EnergyLevelRed = StrToIntDef(attrs["red"], m_EnergyLevelRed);
+      try {
+        XMLNode& nameNode = rootNode.GetChildByName("name");
+        if(!nameNode.GetChildren().empty()) {
+          m_Name = nameNode.GetChildren()[0].GetContent();
+        }
+      } catch(XMLException&) {
+      }
 
       XMLNodeList& nodes = rootNode.GetChildren();
       LoadDevices(nodes, 0);
@@ -327,6 +339,8 @@ namespace dss {
               }
               Log("LoadDevices:   Found parameter '" + paramName + "' with value '" + paramValue + "'");
               newDSID->SetConfigParameter(paramName, paramValue);
+            } else if(iParam.GetName() == "name") {
+              m_DeviceNames[busid] = iParam.GetChildren()[0].GetContent();
             }
           }
         } catch(runtime_error&) {
@@ -592,7 +606,7 @@ namespace dss {
               {
                 uint16_t zoneID = pd.Get<uint16_t>();
                 uint16_t groupID = pd.Get<uint16_t>();
-                GroupDecValue(zoneID, groupID, 0);
+                GroupDecValue(zoneID, groupID, 0);                
               }
               break;
             case FunctionDeviceIncreaseValue:
@@ -622,6 +636,14 @@ namespace dss {
                 response->GetPayload().Add<uint16_t>(0x0001); // everything ok
                 response->GetPayload().Add<uint16_t>(LookupDevice(devID).GetFunctionID());
                 DistributeFrame(response);
+              }
+              break;
+            case FunctionDeviceGetName:
+              {
+                devid_t devID = pd.Get<devid_t>();
+                string name = m_DeviceNames[devID];
+                response = CreateResponse(cmdFrame, cmdNr);
+                
               }
               break;
             case FunctionDeviceGetParameterValue:
@@ -859,6 +881,17 @@ namespace dss {
                 m_Zones[zoneID].push_back(&dev);
                 m_DeviceZoneMapping[&dev] = zoneID;
                 dev.SetZoneID(zoneID);
+                response = CreateResponse(cmdFrame, cmdNr);
+                response->GetPayload().Add<uint16_t>(1);
+                DistributeFrame(response);
+              }
+              break;
+            case FunctionModulatorGetEnergyBorder:
+              {
+                response = CreateResponse(cmdFrame, cmdNr);
+                response->GetPayload().Add<uint16_t>(m_EnergyLevelOrange);
+                response->GetPayload().Add<uint16_t>(m_EnergyLevelRed);
+                DistributeFrame(response);
               }
               break;
             default:
@@ -1166,7 +1199,7 @@ namespace dss {
   : DSIDInterface(_simulator, _dsid, _shortAddress),
     m_Enabled(true),
     m_CurrentValue(0),
-    m_SimpleConsumption(6 * 1000)
+    m_SimpleConsumption(25 * 1000)
   {
  	  m_ValuesForScene.resize(255);
     m_ValuesForScene[SceneOff] = 0;
@@ -1181,7 +1214,7 @@ namespace dss {
   } // ctor
 
   int DSIDSim::GetConsumption() {
-    return m_CurrentValue == 0 ? 0 : m_SimpleConsumption;
+    return m_CurrentValue == 0 ? 0 : (m_SimpleConsumption + (rand() % 100));
   }
 
   void DSIDSim::CallScene(const int _sceneNr) {

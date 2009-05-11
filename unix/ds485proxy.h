@@ -167,6 +167,7 @@ namespace dss {
 
     virtual unsigned long GetPowerConsumption(const int _modulatorID);
     virtual unsigned long GetEnergyMeterValue(const int _modulatorID);
+    virtual bool GetEnergyBorder(const int _modulatorID, int& _lower, int& _upper);
 
     //------------------------------------------------ Device manipulation
     virtual vector<int> SendCommand(DS485Command _cmd, const Set& _set, int _param);

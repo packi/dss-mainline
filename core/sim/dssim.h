@@ -49,6 +49,8 @@ namespace dss {
   class DSModulatorSim : public DS485FrameProvider,
                          public Subsystem {
   private:
+    int m_EnergyLevelOrange;
+    int m_EnergyLevelRed;
     int m_ID;
     dsid_t m_ModulatorDSID;
     bool m_Initialized;
@@ -61,6 +63,8 @@ namespace dss {
     map<const DSIDInterface*, int> m_DeviceZoneMapping;
     map<const int, int> m_LastCalledSceneForGroup;
     map<const int, vector<int> > m_GroupsPerDevice;
+    map<const int, string> m_DeviceNames;
+    string m_Name;
   private:
     void AddDeviceToGroup(DSIDInterface* _device, int _groupID);
     void LoadFromConfig();

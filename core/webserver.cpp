@@ -592,6 +592,12 @@ namespace dss {
       Modulator& modulator = GetDSS().GetApartment().GetModulatorByDSID(dsid);
       if(EndsWith(_method, "circuit/getName")) {
         return JSONOk("{ " + ToJSONValue("name") + ": " + ToJSONValue(modulator.GetName()) + "}");
+      } else if(EndsWith(_method, "circuit/getEnergyBorder")) {
+        stringstream sstream;
+        sstream << "{" << ToJSONValue("orange") << ":" << ToJSONValue(modulator.GetEnergyLevelOrange());
+        sstream << "," << ToJSONValue("red") << ":" << ToJSONValue(modulator.GetEnergyLevelRed());
+        sstream << "}";
+        return JSONOk(sstream.str());
       } else if(EndsWith(_method, "/getConsumption")) {
         return JSONOk("{ " + ToJSONValue("consumption") + ": " +  UIntToString(modulator.GetPowerConsumption()) +"}");
       } else if(EndsWith(_method, "/getEnergyMeterValue")) {

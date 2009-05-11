@@ -77,8 +77,11 @@ namespace dss {
   const uint8_t FunctionModulatorGetEnergyMeterValue = 0x95;
 
   const uint8_t FunctionDeviceGetFunctionID = 0x66;
+  const uint8_t FunctionDeviceGetName = 0x68;
 
   const uint8_t FunctionGetTypeRequest = 0x90;
+  
+  const uint8_t FunctionModulatorGetEnergyBorder = 0x97;
 
   // Scene constants for devices
   const uint8_t SceneOff = 0x00;

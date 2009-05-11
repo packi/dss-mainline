@@ -98,6 +98,8 @@ namespace dss {
 
     /** Returns the meter value in Wh */
     virtual unsigned long GetEnergyMeterValue(const int _modulatorID) = 0;
+    
+    virtual bool GetEnergyBorder(const int _modulatorID, int& _lower, int& _upper) = 0;
 
     //------------------------------------------------ Device manipulation
     virtual vector<int> SendCommand(DS485Command _cmd, const Set& _set, int _param = -1) = 0;

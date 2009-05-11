@@ -784,6 +784,28 @@ namespace dss {
     pd.Get<uint8_t>(); // discard the function id
     return pd.Get<uint16_t>();
   } // GetEnergyMeterValue
+  
+  bool DS485Proxy::GetEnergyBorder(const int _modulatorID, int& _lower, int& _upper) {
+    DS485CommandFrame cmdFrame;
+    cmdFrame.GetHeader().SetDestination(_modulatorID);
+    cmdFrame.SetCommand(CommandRequest);
+    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetEnergyBorder);
+
+    boost::shared_ptr<FrameBucket> bucket = SendFrameAndInstallBucket(cmdFrame, FunctionModulatorGetEnergyBorder);
+
+    bucket->WaitForFrame(1000);
+
+    boost::shared_ptr<ReceivedFrame> recFrame = bucket->PopFrame();
+    if(recFrame.get() == NULL) {
+	  return false;
+    }
+    
+    PayloadDissector pd(recFrame->GetFrame()->GetPayload());
+    pd.Get<uint8_t>(); // discard the function id
+    _lower = pd.Get<uint16_t>();
+    _upper = pd.Get<uint16_t>();
+    return true;
+  } // GetEnergyBorder
 
 
   void DS485Proxy::AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID) {

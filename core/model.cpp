@@ -639,6 +639,12 @@ namespace dss {
         Log("  DSID: " + modDSID.ToString());
         Modulator& modulator = AllocateModulator(modDSID);
         modulator.SetBusID(modulatorID);
+        
+        int levelOrange, levelRed;
+        if(interface.GetEnergyBorder(modulatorID, levelOrange, levelRed)) {
+          modulator.SetEnergyLevelOrange(levelOrange);
+          modulator.SetEnergyLevelRed(levelRed);
+        }
 
         vector<int> zoneIDs = interface.GetZones(modulatorID);
         foreach(int zoneID, zoneIDs) {
@@ -1135,7 +1141,9 @@ namespace dss {
 
   Modulator::Modulator(const dsid_t _dsid)
   : m_DSID(_dsid),
-    m_BusID(0xFF)
+    m_BusID(0xFF),
+    m_EnergyMeterValue(0),
+    m_PowerConsumption(0)
   {
   } // ctor
 
@@ -1167,11 +1175,21 @@ namespace dss {
   } // SetBusID
 
   unsigned long Modulator::GetPowerConsumption() {
-    return DSS::GetInstance()->GetDS485Interface().GetPowerConsumption(m_BusID);
+    DateTime now;
+    if(!now.AddSeconds(-1).Before(m_PowerConsumptionAge)) {
+      m_PowerConsumption =  DSS::GetInstance()->GetDS485Interface().GetPowerConsumption(m_BusID);
+      m_PowerConsumptionAge = now;
+    }
+    return m_PowerConsumption;
   } // GetPowerConsumption
 
   unsigned long Modulator::GetEnergyMeterValue() {
-    return DSS::GetInstance()->GetDS485Interface().GetEnergyMeterValue(m_BusID);
+    DateTime now;
+    if(!now.AddSeconds(-1).Before(m_EnergyMeterValueAge)) {
+      m_EnergyMeterValue = DSS::GetInstance()->GetDS485Interface().GetEnergyMeterValue(m_BusID);
+      m_EnergyMeterValueAge = now;
+    }
+    return m_EnergyMeterValue;
   } // GetEnergyMeterValue
 
 

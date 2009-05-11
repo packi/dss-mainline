@@ -25,31 +25,33 @@ public:
     virtual void volumeDown() = 0;
 
     virtual void CallScene(const int _sceneNr) {
-      bool keepScene = _sceneNr != dss::SceneBell && _sceneNr != dss::SceneAlarm;
-      if(_sceneNr == dss::SceneDeepOff || _sceneNr == dss::ScenePanic) {
+      // mask out local on/off
+      int realScene = _sceneNr & 0x00ff;
+      bool keepScene = realScene != dss::SceneBell && realScene != dss::SceneAlarm;
+      if(realScene == dss::SceneDeepOff || realScene == dss::ScenePanic) {
         deepOff();
-      } else if(_sceneNr == dss::SceneOff || _sceneNr == dss::SceneMin || _sceneNr == dss::SceneStandBy) {
+      } else if(realScene == dss::SceneOff || realScene == dss::SceneMin || realScene == dss::SceneStandBy) {
         powerOff();
-      } else if(_sceneNr == dss::SceneMax) {
+      } else if(realScene == dss::SceneMax) {
         powerOn();
-      } else if(_sceneNr == dss::SceneBell) {
+      } else if(realScene == dss::SceneBell) {
         m_ThreadHandle = 0;
         pthread_create(&m_ThreadHandle, NULL, handleBell, this );
-      } else if(_sceneNr == dss::Scene1) {
+      } else if(realScene == dss::Scene1) {
         powerOn();
-      } else if(_sceneNr == dss::Scene2) {
+      } else if(realScene == dss::Scene2) {
         if(m_LastScene == dss::Scene3) {
           previousSong();
         } else {
           nextSong();
         }
-      } else if(_sceneNr == dss::Scene3) {
+      } else if(realScene == dss::Scene3) {
         if(m_LastScene == dss::Scene4) {
           previousSong();
         } else {
           nextSong();
         }
-      } else if(_sceneNr == dss::Scene4) {
+      } else if(realScene == dss::Scene4) {
         if(m_LastScene == dss::Scene2) {
           previousSong();
         } else {
@@ -57,7 +59,7 @@ public:
         }
       }
       if(keepScene) {
-        m_LastScene = _sceneNr;
+        m_LastScene = realScene;
       }
     }
 
