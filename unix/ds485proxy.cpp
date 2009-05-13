@@ -618,6 +618,41 @@ namespace dss {
     return result;
   } // GetDevicesInGroup
 
+  vector<int> DS485Proxy::GetGroupsOfDevice(const int _modulatorID, const int _deviceID) {
+    vector<int> result;
+
+    DS485CommandFrame cmdFrame;
+    cmdFrame.GetHeader().SetDestination(_modulatorID);
+    cmdFrame.SetCommand(CommandRequest);
+    cmdFrame.GetPayload().Add<uint8_t>(FunctionDeviceGetGroups);
+    cmdFrame.GetPayload().Add<uint16_t>(_deviceID);
+
+    boost::shared_ptr<FrameBucket> bucket = SendFrameAndInstallBucket(cmdFrame, FunctionModulatorGetDSID);
+
+    bucket->WaitForFrame(1000);
+
+    while(true) {
+      boost::shared_ptr<ReceivedFrame> recFrame = bucket->PopFrame();
+      if(recFrame.get() == NULL) {
+        break;
+      }
+
+      PayloadDissector pd(recFrame->GetFrame()->GetPayload());
+      pd.Get<uint8_t>(); // discard the function id
+      pd.Get<uint8_t>(); // function result
+
+      for(int iByte = 0; iByte < 8; iByte++) {
+        uint8_t byte = pd.Get<uint8_t>();
+        for(int iBit = 0; iBit < 8; iBit++) {
+          if(byte & (1 << iBit)) {
+            result.push_back((iByte * 8 + iBit) + 1);
+          }
+        }
+      }
+    }
+    return result;
+  } // GetGroupsOfDevice
+
   vector<int> DS485Proxy::GetZones(const int _modulatorID) {
     vector<int> result;
 

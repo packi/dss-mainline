@@ -156,6 +156,8 @@ namespace dss {
     virtual int GetDevicesInGroupCount(const int _modulatorID, const int _zoneID, const int _groupID);
     virtual vector<int> GetDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID);
 
+    virtual vector<int> GetGroupsOfDevice(const int _modulatorID, const int _deviceID);
+
     virtual void AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID);
     virtual void RemoveFromGroup(const int _modulatorID, const int _groupID, const int _deviceID);
 
