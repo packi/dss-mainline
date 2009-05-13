@@ -811,10 +811,25 @@ namespace dss {
               break;
             case FunctionDeviceGetGroups:
               {
+                devid_t devID = pd.Get<uint16_t>();
+                LookupDevice(devID);
+                vector<int>& groupsList = m_GroupsPerDevice[devID];
+
+
+                // format: (8,7,6,5,4,3,2,1) (16,15,14,13,12,11,10,9), etc...
+                unsigned char bytes[8];
+                foreach(int groupID, groupsList) {
+                  if(groupID != 0) {
+                    int iBit = (groupID - 1) % 8;
+                    int iByte = (groupID -1) / 8;
+                    bytes[iByte] |= 1 << iBit;
+                  }
+                }
+
                 response = CreateResponse(cmdFrame, cmdNr);
-                // TODO: not yet done....
-                for(int iByte = 0; iByte < 64/8; iByte++) {
-                
+                response->GetPayload().Add<uint8_t>(1);
+                for(int iByte = 0; iByte < 8; iByte++) {
+                  response->GetPayload().Add<uint8_t>(bytes[iByte]);
                 }
                 DistributeFrame(response);
               }

@@ -78,6 +78,8 @@ namespace dss {
     /** Returns a vector containing the bus-ids of the devices present in the given group */
     virtual vector<int> GetDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID) = 0;
 
+    virtual vector<int> GetGroupsOfDevice(const int _modulatorID, const int _deviceID) = 0;
+
     /** Adds a device to a given group */
     virtual void AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID) = 0;
     /** Removes a device from a given group */

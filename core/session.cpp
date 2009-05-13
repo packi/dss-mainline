@@ -10,7 +10,7 @@ namespace dss {
   } // ctor
 
   bool Session::IsStillValid() {
-    const int TheSessionTimeout = 5;
+    //const int TheSessionTimeout = 5;
     return true;//m_LastTouched.AddMinute(TheSessionTimeout).After(DateTime());
   } // IsStillValid
 

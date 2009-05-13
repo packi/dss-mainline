@@ -28,6 +28,7 @@
 <option id="gnu.cpp.compiler.option.preprocessor.preprocess.1231112907" name="Preprocess only (-E)" superClass="gnu.cpp.compiler.option.preprocessor.preprocess"/>
 <option id="gnu.cpp.compiler.option.preprocessor.def.701665023" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="XP_UNIX"/>
+<listOptionValue builtIn="false" value="USE_DNS_SD"/>
 <listOptionValue builtIn="false" value="WITH_TESTS"/>
 <listOptionValue builtIn="false" value="USE_SIM"/>
 <listOptionValue builtIn="false" value="USE_LIBXML"/>
@@ -84,6 +85,7 @@
 <option id="gnu.cpp.link.option.strip.411759775" name="Omit all symbol information (-s)" superClass="gnu.cpp.link.option.strip"/>
 <option id="gnu.cpp.link.option.libs.226478544" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="xml2"/>
+<listOptionValue builtIn="false" value="dns_sd"/>
 <listOptionValue builtIn="false" value="PocoNet"/>
 <listOptionValue builtIn="false" value="PocoFoundation"/>
 <listOptionValue builtIn="false" value="dl"/>
