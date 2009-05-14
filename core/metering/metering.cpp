@@ -22,7 +22,7 @@ namespace dss {
   : Subsystem(_pDSS, "Metering"),
     Thread("Metering")
   {
-    GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "storageLocation", "data/webroot/metering/", true);
+    GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "storageLocation", GetDSS().GetDataDirectory() + "webroot/metering/", true);
     boost::shared_ptr<MeteringConfigChain> configConsumption(new MeteringConfigChain(false, 1, "mA"));
     configConsumption->SetComment("Consumption in mA");
     configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_seconds",        2, 400)));

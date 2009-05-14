@@ -222,7 +222,7 @@ namespace dss {
 
   void DSModulatorSim::LoadPlugins() {
     fs::directory_iterator end_iter;
-     for ( fs::directory_iterator dir_itr("data/plugins");
+     for ( fs::directory_iterator dir_itr(GetDSS().GetDataDirectory() + "plugins");
            dir_itr != end_iter;
            ++dir_itr )
      {
@@ -273,7 +273,7 @@ namespace dss {
     } // LoadPlugins
 
   void DSModulatorSim::LoadFromConfig() {
-    XMLDocumentFileReader reader("data/sim.xml");
+    XMLDocumentFileReader reader(GetDSS().GetDataDirectory() + "sim.xml");
     XMLNode rootNode = reader.GetDocument().GetRootNode();
 
     if(rootNode.GetName() == "modulator") {
@@ -606,7 +606,7 @@ namespace dss {
               {
                 uint16_t zoneID = pd.Get<uint16_t>();
                 uint16_t groupID = pd.Get<uint16_t>();
-                GroupDecValue(zoneID, groupID, 0);                
+                GroupDecValue(zoneID, groupID, 0);
               }
               break;
             case FunctionDeviceIncreaseValue:
@@ -643,7 +643,7 @@ namespace dss {
                 devid_t devID = pd.Get<devid_t>();
                 string name = m_DeviceNames[devID];
                 response = CreateResponse(cmdFrame, cmdNr);
-                
+
               }
               break;
             case FunctionDeviceGetParameterValue:
@@ -1229,7 +1229,7 @@ namespace dss {
   } // ctor
 
   int DSIDSim::GetConsumption() {
-    return m_CurrentValue == 0 ? 0 : (m_SimpleConsumption + (rand() % 100));
+    return (int)((m_CurrentValue / 255.0) * m_SimpleConsumption) + (rand() % 100);
   }
 
   void DSIDSim::CallScene(const int _sceneNr) {
@@ -1253,12 +1253,14 @@ namespace dss {
   void DSIDSim::IncreaseValue(const int _parameterNr) {
     if(m_Enabled) {
       m_CurrentValue++;
+      m_CurrentValue = min((uint8_t)0xff, m_CurrentValue);
     }
   } // IncreaseValue
 
   void DSIDSim::DecreaseValue(const int _parameterNr) {
     if(m_Enabled) {
       m_CurrentValue--;
+      m_CurrentValue = max((uint8_t)0, m_CurrentValue);
     }
   } // DecreaseValue
 

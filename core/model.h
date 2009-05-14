@@ -422,7 +422,7 @@ namespace dss {
     unsigned long GetPowerConsumption();
     /** Returns the meter value in Wh */
     unsigned long GetEnergyMeterValue();
-    
+
     int GetEnergyLevelOrange() const { return m_EnergyLevelOrange; }
     int GetEnergyLevelRed() const { return m_EnergyLevelRed; }
     void SetEnergyLevelRed(const int _value) { m_EnergyLevelRed = _value; }

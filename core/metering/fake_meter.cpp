@@ -19,7 +19,7 @@ namespace dss {
     Thread("FakeMeter")
   {
     GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "device", "/dev/ttyS2");
-    GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "storageLocation", "data/webroot/metering/", true);
+    GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "storageLocation", GetDSS().GetDataDirectory()+"webroot/metering/", true);
   }
 
   void FakeMeter::Execute() {

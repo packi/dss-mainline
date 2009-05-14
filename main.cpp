@@ -27,6 +27,8 @@
 #include <csignal>
 #include <getopt.h>
 
+#include <boost/program_options.hpp>
+
 #ifdef USE_LIBXML
   #include <libxml/tree.h>
   #include <libxml/encoding.h>
@@ -35,8 +37,18 @@
 #include <iostream>
 
 using namespace std;
+namespace po = boost::program_options;
 
-int main (int argc, char * const argv[]) {
+pair<string, string> parse_prop(const string& s)
+{
+    if (s.find("--prop") == 0) {
+      return make_pair("prop", s.substr(7));
+    } else {
+        return make_pair(string(), string());
+    }
+}
+
+int main (int argc, char* argv[]) {
 
   if (!setlocale(LC_CTYPE, "")) {
     cerr << "Can't set the specified locale! Check LANG, LC_CTYPE, LC_ALL." << endl;
@@ -63,53 +75,57 @@ int main (int argc, char * const argv[]) {
   WSAStartup( 0x1010, &dat );
 #endif
 
+
+  vector<string> properties;
 #ifdef USE_LIBXML
   // let libXML initialize its parser
   xmlInitParser();
 #endif
 
-  int testFlag = 0;
+
+  po::options_description desc("Allowed options");
+  desc.add_options()
+      ("help", "produce help message")
+#ifdef WITH_TESTS
+      ("dont-runtests", po::value<bool>(), "if set, no tests will be run")
+#endif
+#ifndef __APPLE__
+      ("sniff,s", po::value<bool>(), "start the ds485 sniffer")
+#endif
+      ("prop", po::value<vector<string> >(), "sets a property")
+  ;
+
+  po::variables_map vm;
+  po::store(po::command_line_parser(argc, argv).options(desc).extra_parser(parse_prop)
+          .run(), vm);
+  po::notify(vm);
+
+  if (vm.count("help")) {
+      cout << desc << "\n";
+      return 1;
+  }
+
+  bool runTests = true;
+  if (vm.count("dont-runtests")) {
+    runTests = vm["dont-runtests"].as<bool>();
+  }
+
+  if (vm.count("prop"))
+  {
+      properties = vm["prop"].as< vector<string> >();
+  }
+
   string snifferDev;
   bool startSniffer = false;
-  int c;
-  while(1) {
-    static struct option long_options[] =
-      {
-        // These options set a flag.
-        {"dont-runtest", no_argument, &testFlag, 1},
-        // These options don't set a flag.
-        // We distinguish them by their indices.
-        {"sniff",  required_argument,    0, 's'},
-        {0, 0, 0, 0}
-      };
-    // getopt_long stores the option index here.
-    int option_index = 0;
 
-    c = getopt_long (argc, argv, "s:",
-                    long_options, &option_index);
-
-    if (c == -1) {
-      break;
-    }
-
-    switch(c)
-    {
-      case 0:
-        break;
-      case 's':
-        snifferDev = optarg;
-        startSniffer = true;
-        break;
-      default:
-        abort();
-        break;
-    }
-
+  if(vm.count("sniff")) {
+    startSniffer = true;
+    snifferDev = vm["sniff"].as<string>();
   }
 
 #ifdef WITH_TESTS
   cout << "compiled WITH_TESTS" << endl;
-  if(testFlag != 1) {
+  if(runTests) {
     cout << "running tests" << endl;
     dss::Tests::Run();
     cout << "done running tests" << endl;
@@ -126,7 +142,7 @@ int main (int argc, char * const argv[]) {
 #endif
   } else {
     // start DSS
-    dss::DSS::GetInstance()->Initialize();
+    dss::DSS::GetInstance()->Initialize(properties);
     dss::DSS::GetInstance()->Run();
   }
 

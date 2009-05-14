@@ -31,6 +31,7 @@ namespace dss {
 
   int getNextScene(const int _currentScene);
   int getPreviousScene(const int _currentScene);
+  bool rememberScene(const int _scene);
 
   //================================================== Device
 
@@ -570,7 +571,7 @@ namespace dss {
 
   void Apartment::Initialize() {
     Subsystem::Initialize();
-    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "configfile", "data/apartment.xml", true);
+    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "configfile", GetDSS().GetDataDirectory() + "apartment.xml", true);
     m_pPropertyNode = DSS::GetInstance()->GetPropertySystem().CreateProperty("/apartment");
   } // Initialize
 
@@ -639,7 +640,7 @@ namespace dss {
         Log("  DSID: " + modDSID.ToString());
         Modulator& modulator = AllocateModulator(modDSID);
         modulator.SetBusID(modulatorID);
-        
+
         int levelOrange, levelRed;
         if(interface.GetEnergyBorder(modulatorID, levelOrange, levelRed)) {
           modulator.SetEnergyLevelOrange(levelOrange);
@@ -1066,8 +1067,10 @@ namespace dss {
       if(group != NULL) {
         Log("OnGroupCallScene: group-id '" + IntToString(_groupID) + "' in Zone '" + IntToString(_zoneID) + "' scene: " + IntToString(_sceneID));
         Set s = zone.GetDevices().GetByGroup(_groupID);
-        SetLastCalledSceneAction act(_sceneID & 0x00ff);
-        s.Perform(act);
+        if(rememberScene(_sceneID & 0x00ff)) {
+          SetLastCalledSceneAction act(_sceneID & 0x00ff);
+          s.Perform(act);
+        }
         group->SetLastCalledScene(_sceneID & 0x00ff);
       } else {
         Log("OnGroupCallScene: Could not find group with id '" + IntToString(_groupID) + "' in Zone '" + IntToString(_zoneID) + "'");
@@ -1082,8 +1085,11 @@ namespace dss {
     try {
       Modulator& mod = GetModulatorByBusID(_modulatorID);
       try {
+        Log("OnDeviceCallScene: modulator-id '" + IntToString(_modulatorID) + "' for device '" + IntToString(_deviceID) + "' scene: " + IntToString(_sceneID));
         DeviceReference devRef = mod.GetDevices().GetByBusID(_deviceID);
-        devRef.GetDevice().SetLastCalledScene(_sceneID & 0x00ff);
+        if(rememberScene(_sceneID & 0x00ff)) {
+          devRef.GetDevice().SetLastCalledScene(_sceneID & 0x00ff);
+        }
       } catch(ItemNotFoundException& e) {
         Log("OnDeviceCallScene: Could not find device with bus-id '" + IntToString(_deviceID) + "' on modulator '" + IntToString(_modulatorID) + "' scene:" + IntToString(_sceneID));
       }
@@ -1142,8 +1148,8 @@ namespace dss {
   Modulator::Modulator(const dsid_t _dsid)
   : m_DSID(_dsid),
     m_BusID(0xFF),
-    m_EnergyMeterValue(0),
-    m_PowerConsumption(0)
+    m_PowerConsumption(0),
+    m_EnergyMeterValue(0)
   {
   } // ctor
 
@@ -1415,7 +1421,9 @@ namespace dss {
   void Group::CallScene(const int _sceneNr) {
     // this might be redundant, but since a set could be
     // optimized if it contains only one device its safer like that...
-    m_LastCalledScene = _sceneNr & 0x00ff;
+    if(rememberScene(_sceneNr & 0x00ff)) {
+      m_LastCalledScene = _sceneNr & 0x00ff;
+    }
     GetDevices().CallScene(_sceneNr);
   } // CallScene
 
@@ -1583,5 +1591,9 @@ namespace dss {
       return Scene1;
     }
   } // getPreviousScene
+
+  bool rememberScene(const int _scene) {
+    return (_scene != SceneBell) && (_scene != SceneAlarm);
+  } // rememberScene
 
 }

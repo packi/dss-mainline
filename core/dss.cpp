@@ -26,6 +26,7 @@
 #include "event.h"
 #include "metering/metering.h"
 #include "metering/fake_meter.h"
+#include "foreach.h"
 
 #include <cassert>
 #include <string>
@@ -40,17 +41,20 @@ namespace dss {
   {
     m_State = ssInvalid;
     m_pPropertySystem = boost::shared_ptr<PropertySystem>(new PropertySystem);
+    m_DataDirectory = "data/";
 
     m_TimeStarted = time(NULL);
     m_pPropertySystem->CreateProperty("/system/uptime")->LinkToProxy(
         PropertyProxyMemberFunction<DSS,int>(*this, &DSS::GetUptime));
+    m_pPropertySystem->CreateProperty("/config/datadirectory")->LinkToProxy(
+        PropertyProxyPointer<string>(&m_DataDirectory));
   } // ctor
 
   int DSS::GetUptime() const {
     return (int)difftime( time( NULL ), m_TimeStarted );
   } // GetUptime
 
-  void DSS::Initialize() {
+  void DSS::Initialize(const vector<string>& _properties) {
     m_State = ssCreatingSubsystems;
 
     m_pDS485Interface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this));
@@ -81,6 +85,38 @@ namespace dss {
 
     m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner);
     m_pEventQueue = boost::shared_ptr<EventQueue>(new EventQueue);
+
+    m_pPropertySystem->SetStringValue("/config/datadir", "data/");
+
+    foreach(string propLine, _properties) {
+      string::size_type pos = propLine.find("=");
+      if(pos == string::npos) {
+        Logger::GetInstance()->Log("invalid property specified on commandline (format is name=value): '" + propLine + "'", lsError);
+        abort();
+      } else {
+        string name = propLine.substr(0, pos);
+        string value = propLine.substr(pos+1, string::npos);
+        Logger::GetInstance()->Log("Setting property '" + name + "' to '" + value + "'", lsInfo);
+        try {
+          int val = StrToInt(value);
+          m_pPropertySystem->SetIntValue(name, val, true);
+          continue;
+        } catch(invalid_argument&) {
+        }
+
+        if(value == "true") {
+          m_pPropertySystem->SetBoolValue(name, true, true);
+          continue;
+        }
+
+        if(value == "false") {
+          m_pPropertySystem->SetBoolValue(name, false, true);
+          continue;
+        }
+
+        m_pPropertySystem->SetStringValue(name, value, true);
+      }
+    }
   }
 
 #ifdef WITH_TESTS
@@ -148,10 +184,10 @@ namespace dss {
   void DSS::LoadConfig() {
     m_State = ssLoadingConfig;
     // define defaults
-    GetPropertySystem().SetStringValue("/config/eventinterpreter/subscriptionfile", "data/subscriptions.xml", true);
+    GetPropertySystem().SetStringValue("/config/eventinterpreter/subscriptionfile", GetDSS().GetDataDirectory() + "subscriptions.xml", true);
 
     Logger::GetInstance()->Log("Loading config", lsInfo);
-    GetPropertySystem().LoadFromXML("data/config.xml", GetPropertySystem().GetProperty("/config"));
+    GetPropertySystem().LoadFromXML("config.xml", GetPropertySystem().GetProperty("/config"));
   } // LoadConfig
 
 }

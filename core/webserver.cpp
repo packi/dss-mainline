@@ -23,7 +23,7 @@ namespace dss {
     Logger::GetInstance()->Log("Starting Webserver...");
     m_SHttpdContext = shttpd_init();
     DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "ports", "8080", true);
-    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "webroot", "data/webroot/", true);
+    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "webroot", GetDSS().GetDataDirectory() + "webroot/", true);
   } // ctor
 
   WebServer::~WebServer() {
@@ -743,9 +743,9 @@ namespace dss {
           case 5:
             {
               if(groupID == GroupIDGreen) {
-                pGroup->CallScene(SceneBell);
+                GetDSS().GetApartment().GetGroup(0).CallScene(SceneBell);
               } else if(groupID == GroupIDRed){
-                pGroup->CallScene(SceneAlarm);
+                GetDSS().GetApartment().GetGroup(0).CallScene(SceneAlarm);
               } else {
                 const int lastScene = pGroup->GetLastCalledScene();
                 if(lastScene == dss::SceneOff || lastScene == dss::SceneDeepOff ||

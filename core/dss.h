@@ -13,6 +13,8 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <vector>
+
 namespace dss {
 
   class DSS;
@@ -61,6 +63,7 @@ namespace dss {
     boost::shared_ptr<EventQueue> m_pEventQueue;
     boost::shared_ptr<Metering> m_pMetering;
     boost::shared_ptr<FakeMeter> m_pFakeMeter;
+    std::string m_DataDirectory;
 
     aDSSState m_State;
 
@@ -72,7 +75,7 @@ namespace dss {
 
     int GetUptime() const;
   public:
-    void Initialize();
+    void Initialize(const std::vector<std::string>& _properties);
     void Run();
 
     static DSS* GetInstance();
@@ -93,6 +96,8 @@ namespace dss {
     Metering& GetMetering() { return *m_pMetering; }
     PropertySystem& GetPropertySystem() { return *m_pPropertySystem; }
     WebServer& GetWebServer() { return *m_pWebServer; }
+
+    const std::string& GetDataDirectory() const { return m_DataDirectory; }
   }; // DSS
 
 }
