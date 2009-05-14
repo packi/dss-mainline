@@ -129,10 +129,11 @@ namespace dss {
   } // HasSwitch
 
   void Device::SetValue(const double _value, const int _parameterNr) {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdSetValue, *this, _value);
   } // SetValue
 
   double Device::GetValue(const int _parameterNr) {
-    vector<int> res = DSS::GetInstance()->GetDS485Interface().SendCommand(cmdGetValue, *this);
+    vector<int> res = DSS::GetInstance()->GetDS485Interface().SendCommand(cmdGetValue, *this, _parameterNr);
     return res.front();
   } // GetValue
 
@@ -296,6 +297,7 @@ namespace dss {
   } // EndDim
 
   void Set::SetValue(const double _value, int _parameterNr) {
+    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdSetValue, *this, _value);
   } // SetValue
 
   void Set::CallScene(const int _sceneNr) {

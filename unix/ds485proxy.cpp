@@ -339,6 +339,12 @@ namespace dss {
       frame.GetPayload().Add<uint16_t>(toZone);
       frame.GetPayload().Add<uint16_t>(_groupID);
       SendFrame(frame);
+    } else if(_cmd == cmdSetValue) {
+      frame.GetPayload().Add<uint8_t>(FunctionGroupSetValue);
+      frame.GetPayload().Add<uint16_t>(toZone);
+      frame.GetPayload().Add<uint16_t>(_groupID);
+      frame.GetPayload().Add<uint16_t>(_param);
+      SendFrame(frame);
     }
     return result;
   }
@@ -420,6 +426,11 @@ namespace dss {
     } else if(_cmd == cmdDecreaseValue) {
       frame.GetPayload().Add<uint8_t>(FunctionDeviceDecreaseValue);
       frame.GetPayload().Add<devid_t>(_id);
+      SendFrame(frame);
+    } else if(_cmd == cmdSetValue) {
+      frame.GetPayload().Add<uint8_t>(FunctionDeviceSetValue);
+      frame.GetPayload().Add<devid_t>(_id);
+      frame.GetPayload().Add<devid_t>(_param);
       SendFrame(frame);
     }
     return result;

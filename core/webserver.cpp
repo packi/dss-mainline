@@ -261,7 +261,13 @@ namespace dss {
     } else if(EndsWith(_method, "/endDim")) {
       _interface->EndDim();
     } else if(EndsWith(_method, "/setValue")) {
-      // nop
+      int value = StrToIntDef(_parameter["value"], -1);
+      if(value == -1) {
+        errorString = "invalid or missing parameter value: '" + _parameter["value"] + "'";
+        ok = false;
+      } else {
+        _interface->SetValue(value);
+      }
     } else if(EndsWith(_method, "/callScene")) {
       string sceneStr = _parameter["sceneNr"];
       int sceneID = StrToIntDef(sceneStr, -1);

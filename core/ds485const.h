@@ -45,6 +45,7 @@ namespace dss {
   const uint8_t FunctionGroupCallScene = 0x25;
   const uint8_t FunctionGroupSaveScene = 0x26;
   const uint8_t FunctionGroupUndoScene = 0x27;
+  const uint8_t FunctionGroupSetValue = 0x28;
 
   const uint8_t FunctionZoneAddDevice = 0x30;
   const uint8_t FunctionZoneRemoveDevice = 0x31;
@@ -62,6 +63,7 @@ namespace dss {
   const uint8_t FunctionDeviceSetParameterValue = 0x4B;
   const uint8_t FunctionDeviceIncreaseValue  = 0x4C;
   const uint8_t FunctionDeviceDecreaseValue  = 0x4D;
+  const uint8_t FunctionDeviceSetValue  = 0x50;
 
   const uint8_t FunctionDeviceSetZoneID = 0x4F;
 

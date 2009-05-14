@@ -531,6 +531,18 @@ namespace dss {
       }
     }
   } // GroupIncValue
+  
+  void DSModulatorSim::GroupSetValue(const int _zoneID, const int _groupID, const int _value) {
+    pair<const int, const int> zonesGroup(_zoneID, _groupID);
+    if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
+      vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
+      for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
+          iDSID != e; ++iDSID)
+      {
+        (*iDSID)->SetValue(_value);
+      }
+    }
+  } // GroupSetValue
 
   void DSModulatorSim::Process(DS485Frame& _frame) {
     const uint8_t HeaderTypeToken = 0;
@@ -609,6 +621,14 @@ namespace dss {
                 GroupDecValue(zoneID, groupID, 0);
               }
               break;
+            case FunctionGroupSetValue:
+              {
+                uint16_t zoneID = pd.Get<uint16_t>();
+                uint16_t groupID = pd.Get<uint16_t>();
+                uint16_t value = pd.Get<uint16_t>();
+                GroupSetValue(zoneID, groupID, value);
+              }
+              break;
             case FunctionDeviceIncreaseValue:
               {
                 uint16_t devID = pd.Get<uint16_t>();
@@ -635,6 +655,17 @@ namespace dss {
                 response = CreateResponse(cmdFrame, cmdNr);
                 response->GetPayload().Add<uint16_t>(0x0001); // everything ok
                 response->GetPayload().Add<uint16_t>(LookupDevice(devID).GetFunctionID());
+                DistributeFrame(response);
+              }
+              break;
+            case FunctionDeviceSetValue:
+              {
+                uint16_t devID = pd.Get<uint16_t>();
+                DSIDInterface& dev = LookupDevice(devID);
+                uint16_t value = pd.Get<uint16_t>();
+                dev.SetValue(value);
+                response = CreateResponse(cmdFrame, cmdNr);
+                response->GetPayload().Add<uint16_t>(1);
                 DistributeFrame(response);
               }
               break;

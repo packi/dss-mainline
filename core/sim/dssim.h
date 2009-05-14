@@ -89,6 +89,7 @@ namespace dss {
     void GroupEndDim(const int _zoneID, const int _groupID, const int _parameterNr);
     void GroupDecValue(const int _zoneID, const int _groupID, const int _parameterNr);
     void GroupIncValue(const int _zoneID, const int _groupID, const int _parameterNr);
+    void GroupSetValue(const int _zoneID, const int _groupID, const int _value);
   protected:
     virtual void DoStart() {}
   public:
