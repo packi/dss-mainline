@@ -1064,7 +1064,7 @@ namespace dss {
       Zone& zone = GetZone(_zoneID);
       Group* group = zone.GetGroup(_groupID);
       if(group != NULL) {
-        Log("OnGroupCallScene: group-id '" + IntToString(_groupID) + "' in Zone '" + IntToString(_zoneID) + "'");
+        Log("OnGroupCallScene: group-id '" + IntToString(_groupID) + "' in Zone '" + IntToString(_zoneID) + "' scene: " + IntToString(_sceneID));
         Set s = zone.GetDevices().GetByGroup(_groupID);
         SetLastCalledSceneAction act(_sceneID & 0x00ff);
         s.Perform(act);
@@ -1085,7 +1085,7 @@ namespace dss {
         DeviceReference devRef = mod.GetDevices().GetByBusID(_deviceID);
         devRef.GetDevice().SetLastCalledScene(_sceneID & 0x00ff);
       } catch(ItemNotFoundException& e) {
-        Log("OnDeviceCallScene: Could not find device with bus-id '" + IntToString(_deviceID) + "' on modulator '" + IntToString(_modulatorID) + "'");
+        Log("OnDeviceCallScene: Could not find device with bus-id '" + IntToString(_deviceID) + "' on modulator '" + IntToString(_modulatorID) + "' scene:" + IntToString(_sceneID));
       }
     } catch(ItemNotFoundException& e) {
       Log("OnDeviceCallScene: Could not find modulator with bus-id '" + IntToString(_modulatorID) + "'");

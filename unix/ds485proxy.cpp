@@ -1073,10 +1073,7 @@ namespace dss {
             PayloadDissector pd(frame->GetPayload());
 
             if(frame->GetFrameSource() == fsWire) {
-              if(frame->GetHeader().IsBroadcast() && (frame->GetHeader().GetSource() != m_DS485Controller.GetStationID())) {
-                Log("Redistributing frame to simulation");
-                GetDSS().GetModulatorSim().Process(*frame.get());
-              }
+              GetDSS().GetModulatorSim().Process(*frame.get());
             }
             if(functionID == FunctionZoneAddDevice) {
               Log("New device");
