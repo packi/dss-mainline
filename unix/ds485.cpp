@@ -517,6 +517,7 @@ namespace dss {
     // Signal our listeners
     DS485CommandFrame* frame = new DS485CommandFrame();
     *frame = *_frame;
+    frame->SetFrameSource(fsWire);
     DistributeFrame(boost::shared_ptr<DS485CommandFrame>(frame));
     m_CommandFrameEvent.Signal();
   } // AddToReceivedQueue

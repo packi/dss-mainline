@@ -67,10 +67,16 @@ namespace dss {
     void FromChar(const unsigned char* _data, const int _len);
   };
 
+  typedef enum {
+    fsWire,
+    fsDSS
+  } aFrameSource; 
+  
   class DS485Frame {
   private:
     DS485Header m_Header;
     DS485Payload m_Payload;
+    aFrameSource m_FrameSource;
   public:
     DS485Frame() {};
     virtual ~DS485Frame() {};
@@ -80,6 +86,9 @@ namespace dss {
 
     DS485Payload& GetPayload();
     const DS485Payload& GetPayload() const;
+    
+    aFrameSource GetFrameSource() const { return m_FrameSource; }
+    void SetFrameSource(aFrameSource _value) { m_FrameSource; }
   }; // DS485Frame
 
   class DS485CommandFrame : public DS485Frame {

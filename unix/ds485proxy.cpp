@@ -428,6 +428,7 @@ namespace dss {
   void DS485Proxy::SendFrame(DS485CommandFrame& _frame) {
     bool broadcast = _frame.GetHeader().IsBroadcast();
     bool sim = IsSimAddress(_frame.GetHeader().GetDestination());
+    _frame.SetFrameSource(fsDSS);
     if(broadcast || sim) {
       Log("Sending packet to sim");
       GetDSS().GetModulatorSim().Process(_frame);
@@ -1071,9 +1072,11 @@ namespace dss {
             Log("Got request: " + functionIDStr);
             PayloadDissector pd(frame->GetPayload());
 
-            if(frame->GetHeader().IsBroadcast() && (frame->GetHeader().GetSource() != m_DS485Controller.GetStationID())) {
-              Log("Redistributing frame to simulation");
-              GetDSS().GetModulatorSim().Process(*frame.get());
+            if(frame->GetFrameSource() == fsWire) {
+              if(frame->GetHeader().IsBroadcast() && (frame->GetHeader().GetSource() != m_DS485Controller.GetStationID())) {
+                Log("Redistributing frame to simulation");
+                GetDSS().GetModulatorSim().Process(*frame.get());
+              }
             }
             if(functionID == FunctionZoneAddDevice) {
               Log("New device");
