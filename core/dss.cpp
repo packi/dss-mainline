@@ -184,10 +184,10 @@ namespace dss {
   void DSS::LoadConfig() {
     m_State = ssLoadingConfig;
     // define defaults
-    GetPropertySystem().SetStringValue("/config/eventinterpreter/subscriptionfile", GetDSS().GetDataDirectory() + "subscriptions.xml", true);
+    GetPropertySystem().SetStringValue("/config/eventinterpreter/subscriptionfile", GetDataDirectory() + "subscriptions.xml", true);
 
     Logger::GetInstance()->Log("Loading config", lsInfo);
-    GetPropertySystem().LoadFromXML("config.xml", GetPropertySystem().GetProperty("/config"));
+    GetPropertySystem().LoadFromXML(GetDataDirectory() + "config.xml", GetPropertySystem().GetProperty("/config"));
   } // LoadConfig
 
 }
