@@ -70,8 +70,8 @@ namespace dss {
   typedef enum {
     fsWire,
     fsDSS
-  } aFrameSource; 
-  
+  } aFrameSource;
+
   class DS485Frame {
   private:
     DS485Header m_Header;
@@ -86,9 +86,9 @@ namespace dss {
 
     DS485Payload& GetPayload();
     const DS485Payload& GetPayload() const;
-    
+
     aFrameSource GetFrameSource() const { return m_FrameSource; }
-    void SetFrameSource(aFrameSource _value) { m_FrameSource; }
+    void SetFrameSource(aFrameSource _value) { m_FrameSource = _value; }
   }; // DS485Frame
 
   class DS485CommandFrame : public DS485Frame {
