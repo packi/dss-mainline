@@ -880,7 +880,8 @@ namespace dss {
       return boost::shared_ptr<ReceivedFrame>();
     } else if(bucket->GetFrameCount() > 1) {
       Log(string("received multiple results (") + IntToString(bucket->GetFrameCount()) + ") for request (" + FunctionIDToString(_functionID) + ")");
-      return boost::shared_ptr<ReceivedFrame>();
+      // TODO: check
+      return bucket->PopFrame();
     }
 
     boost::shared_ptr<ReceivedFrame> recFrame = bucket->PopFrame();
