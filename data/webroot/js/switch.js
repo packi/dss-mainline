@@ -14,24 +14,22 @@ function Button(switchID, buttonID, parentSwitch) {
   this.down = function() {
     self.timeoutID = setTimeout(
       function() {
-        self.sendTouch()
-      },
-      500
-    );
+        self.sendTouch();
+      }, 500);
     self.gotDown = true;
-  }
+  };
 
   this.sendTouch = function() {
-    if(self.gotDown == true) {
+    if(self.gotDown === true) {
       //log('touch');
       self.reportAction('touch');
       self.sentTouch = true;
     }
-  }
+  };
 
   this.up = function() {
-    if(self.gotDown == true) {
-      if(self.sentTouch == true) {
+    if(self.gotDown === true) {
+      if(self.sentTouch === true) {
         //log('touch end');
         self.reportAction('touchend');
       } else {
@@ -43,7 +41,7 @@ function Button(switchID, buttonID, parentSwitch) {
     self.gotDown = false;
     self.sentTouch = false;
     self.timeoutID = 0;
-  }
+  };
 }
 
 function Switch(intoID, switchID, zoneID, groupID) {
@@ -58,17 +56,17 @@ function Switch(intoID, switchID, zoneID, groupID) {
     for(var iButton = 0; iButton < numButtons; iButton++) {
       self.buttons[iButton] = new Button(switchID, iButton+1, self);
     }
-  }
+  };
 
   this.generateButtons(9);
   var buttonIDTemplate = 'switch_' + switchID + '_button_';
 
   function generateTable() {
     function doRow(startIdx, numCol, widths, height) {
-      var result = '<tr>'
+      var result = '<tr>';
       for(var iCol = 0; iCol < numCol; iCol++) {
         var btnIdx = startIdx + iCol;
-        result += '<td style="background-color: #ffffff" width="' + widths[iCol] + '" height="' + height + 'px" id="' + buttonIDTemplate + btnIdx + '"/>'
+        result += '<td style="background-color: #ffffff" width="' + widths[iCol] + '" height="' + height + 'px" id="' + buttonIDTemplate + btnIdx + '"/>';
       }
       result += '</tr>';
       return result;
@@ -97,7 +95,7 @@ function Switch(intoID, switchID, zoneID, groupID) {
     elem.onmouseout =
       function() {
         buttonObj.up();
-      }
+      };
   }
 
   for(var iBtn = 0; iBtn < 9; iBtn++) {
@@ -123,14 +121,14 @@ function Switch(intoID, switchID, zoneID, groupID) {
       newColor = "#00FF00";
     } else if(_groupID == 8 /* black */) {
       newColor = "#000000";
-    } else if(_groupID = 9 /* white */) {
+    } else if(_groupID == 9 /* white */) {
       newColor = "#FFFFFF";
     }
     $(buttonIDTemplate + '5').style.backgroundColor = newColor;
-  }
+  };
 
   this.onClick = function(_buttonNr) {
-    new Ajax.Request(
+    var request = new Ajax.Request(
       '/json/sim/switch/pressed',
       { method:'get',
         parameters:
@@ -146,19 +144,19 @@ function Switch(intoID, switchID, zoneID, groupID) {
     } else if(_buttonNr == 3) {
       self.setGroup(3); // climate
     } else if(_buttonNr == 7) {
-      var nextGroup = self.groupID - 1;
-      if(nextGroup == 0) {
+      var nextGroup = (self.groupID - 1);
+      if(nextGroup === 0) {
         nextGroup = 9;
       }
       self.setGroup(nextGroup);
     } else if(_buttonNr == 9) {
-      var nextGroup = self.groupID + 1;
+      var nextGroup = (self.groupID + 1);
       if(nextGroup == 10) {
         nextGroup = 1;
       }
       self.setGroup(nextGroup);
     }
-  }
+  };
 
   self.setGroup(1);
 }

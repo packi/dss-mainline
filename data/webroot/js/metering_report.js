@@ -10,7 +10,7 @@ jQuery.noConflict();
 var receiverTimer, senderTimer;
 var connection = false;
 var sendData = true;
-var receiveInterval = 1000, sendInterval = 1000;
+var receiveInterval = 1000, sendInterval = 200;
 var connenctionStatusID = "#connectionStatus"
 var connectionButtonID = "#connectionButton";
 var clearButtonID = "#clearQueueButton";
@@ -40,7 +40,7 @@ function startSender() {
 	if(connection) {
 		senderTimer = setTimeout(function() {
 			sendValue();
-		}, 500);
+		}, sendInterval);
 	}
 }
 
@@ -56,19 +56,12 @@ function updateQueueLength() {
 function sendValue() {
 	var value = jQuery("#receivedData > li:first");
 	if(value.length > 0) {
-// 		value.effect("slide", {direction: "right", mode: "hide" }, 500, function() {
-// 			jQuery(this).remove();
-// 			updateQueueLength();
-// 		 	startSender();
-// 		});
 		sending = true;
-		value.fadeTo(400, 0, function() {
+		value.fadeTo(300, 0, function() {
 				updateQueueLength();
 				sending = false;
-				jQuery(this).slideUp(400, function() {
-					jQuery(this).remove();
-					startSender();
-		 	})
+				jQuery(this).remove();
+				startSender();
 		});
 	} else {
 		startSender();
@@ -108,7 +101,7 @@ function parseXML(xml) {
 	return data;
 }
 
-function fetchXML() {
+function fetchXML(dismiss) {
 	var currentDate = new Date();
 	jQuery.ajax({
 		type: "GET",
@@ -123,11 +116,17 @@ function fetchXML() {
 					newValues.push(this);
 				}
 			});
+			if(dismiss) {
+				
+			}
 			// ignore the last element, because it is likely that the value changes
 			newValues.pop();
-			loadNewValues(newValues);
+			lastReceived = jQuery(newValues).get(newValues.length - 1).time
+			if(!dismiss) {
+				loadNewValues(newValues);
+			}
 			setTimeout(function() {
-				fetchXML();
+				fetchXML(false);
 			}, 3000);
 		}
 	});
@@ -155,7 +154,7 @@ function toggleConnection() {
 
 function init() {
 	toggleConnection();
-	fetchXML();
+	fetchXML(true);
 	jQuery(connectionButtonID).click( function() {
 		toggleConnection();
 	});

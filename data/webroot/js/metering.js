@@ -9,24 +9,28 @@
 jQuery.noConflict();
 
 var devicePlot, devicePlotTimer, meteringPlot, meteringPlotTimer;
-var updateDevicePlot = true, updateMeteringPlot = true;
+var updateDevicePlot = false, updateMeteringPlot = false;
 var reloadInterval = 1000;
 
 var plotOptions = {
 	lines: { show: true },
 	points: { show: false },
 	grid: { hoverable: false, clickable: false },
+	color: "blue",
 	yaxis: { 
-		autoscaleMargin: 0.05, 
-		labelWidth: 50,
-		labelHeight: 9,
-		min: 0
+		labelWidth: 65,
+		min: 0,
+		tickFormatter: valueFormatterWatt
 	},
 	xaxis: {
 		mode: "time",
 		minTickSize: [1, "minute"],
-		tickFormatter: function (val, axis) {
-			var d = new Date(val);
+		tickFormatter: timeTickFormatter
+	}
+};
+
+function timeTickFormatter(val, axis) {
+	var d = new Date(val);
 			var tick = "";
 			tick = d.getUTCFullYear();
 			tick = tick + "-";
@@ -40,10 +44,13 @@ var plotOptions = {
 			tick = tick + ":";
 			tick = tick + ((d.getUTCSeconds() < 10) ? ( "0" + d.getUTCSeconds() ) : d.getUTCSeconds() );
 			return tick;
-			
-		}
-	}
-};
+}
+
+function valueFormatterWatt(val, axis) {
+	// val is in mW
+	return (val/1000).toFixed(axis.tickDecimals) + " W";
+}
+
 
 function xml2Str(xmlNode) {
    try {
@@ -87,23 +94,29 @@ function reloadDevicePlot() {
 		url: "metering/0000000000000000ffc00010_consumption_seconds.xml?date=" + currentDate.getTime(),
 		dataType: "xml",
 		success: function(xml) {
-			var rawData = parseXML(xml);
-			redrawPlot(devicePlot, rawData);
-			if(updateDevicePlot) {
-				devicePlotTimer = setTimeout("reloadDevicePlot()", reloadInterval);
+				var xmlString = xml2Str(xml).replace(/</ig, "&lt;").replace(/>/ig, "&gt;");
+				jQuery('#deviceXML').html('<pre>' + xmlString + '</pre>');
+				var rawData = parseXML(xml);
+				redrawPlot(devicePlot, rawData);
+				if(updateDevicePlot) {
+					devicePlotTimer = setTimeout("reloadDevicePlot()", reloadInterval);
+				}
+			},
+		error: function(XMLHttpRequest, textStatus, errorThrown) {
+				alert("could not load device data: " + textStatus + "\n" + XMLHttpRequest.responseText);
+				toggleDevicePlotUpdates();
 			}
-		}
 	});
 }
 
 function toggleDevicePlotUpdates() {
 	if(updateDevicePlot) {
 		clearTimeout(devicePlotTimer);
-		jQuery("#updateDevicePlot").attr('checked', false);
+		jQuery("#updateDevicePlot").attr("checked", "");
 		updateDevicePlot = false;
 	} else {
 		updateDevicePlot = true;
-		jQuery("#updateDevicePlot").attr('checked', true);
+		jQuery("#updateDevicePlot").attr("checked", "checked");
 		reloadDevicePlot();
 	}
 }
@@ -115,25 +128,29 @@ function reloadMeteringPlot() {
 		url: "metering/metering.xml?date=" + currentDate.getTime(),
 		dataType: "xml",
 		success: function(xml) {
-			var xmlString = xml2Str(xml).replace(/</ig, "&lt;").replace(/>/ig, "&gt;");
-			jQuery('#meteringXML').html('<pre>' + xmlString + '</pre>');
-			var rawData = parseXML(xml);
-			redrawPlot(meteringPlot, rawData);
-			if(updateMeteringPlot) {
-				meteringPlotTimer = setTimeout("reloadMeteringPlot()", reloadInterval);
+				var xmlString = xml2Str(xml).replace(/</ig, "&lt;").replace(/>/ig, "&gt;");
+				jQuery('#meteringXML').html('<pre>' + xmlString + '</pre>');
+				var rawData = parseXML(xml);
+				redrawPlot(meteringPlot, rawData);
+				if(updateMeteringPlot) {
+					meteringPlotTimer = setTimeout("reloadMeteringPlot()", reloadInterval);
+				}
+			},
+		error: function(XMLHttpRequest, textStatus, errorThrown) {
+				alert("could not load metering data: " + textStatus + "\n" + XMLHttpRequest.responseText);
+				toggleMeteringPlotUpdates();
 			}
-		}
 	});
 }
 
 function toggleMeteringPlotUpdates() {
 	if(updateMeteringPlot) {
 		clearTimeout(meteringPlotTimer);
-		jQuery("#updateMeteringPlot").attr('checked', false);
+		jQuery("#updateMeteringPlot").attr("checked", "");
 		updateMeteringPlot = false;
 	} else {
 		updateMeteringPlot = true;
-		jQuery("#updateMeteringPlot").attr('checked', true);
+		jQuery("#updateMeteringPlot").attr("checked", "checked");
 		reloadMeteringPlot();
 	}
 }
@@ -144,7 +161,7 @@ function initPlots() {
 }
 
 function redrawPlot(plot, data) {
-	plot.setData([data]);
+	plot.setData([{data: data, color: "blue"}]);
 	plot.setupGrid();
 	plot.draw();
 }
@@ -152,14 +169,13 @@ function redrawPlot(plot, data) {
 jQuery(document).ready(function() {
 	initPlots();
 	
-	reloadDevicePlot();
-	reloadMeteringPlot();
-	
+	jQuery("#updateMeteringPlot").click(function () {
+		toggleMeteringPlotUpdates();
+	});
 	jQuery("#updateDevicePlot").click(function () {
 		toggleDevicePlotUpdates();
 	});
 	
-	jQuery("#updateMeteringPlot").click(function () {
-		toggleMeteringPlotUpdates();
-	});
+	toggleDevicePlotUpdates();
+	toggleMeteringPlotUpdates();
 });

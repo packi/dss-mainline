@@ -4,7 +4,7 @@ var DSS = Class.create({
 DSS.token = undefined;
 DSS.endpoint = "/json/";
 DSS.sendSyncRequest = function(_uri, _parameter) {
-    var responseObj
+    var responseObj;
     var req = new Ajax.Request(DSS.endpoint + _uri,
       {
         method: 'get',
@@ -16,16 +16,16 @@ DSS.sendSyncRequest = function(_uri, _parameter) {
       }
     );
     return responseObj;
-}
+};
 
 DSS.sendRequest = function(_uri, _parameter) {
-    new Ajax.Request(DSS.endpoint + _uri,
+    var request = new Ajax.Request(DSS.endpoint + _uri,
       {
         method: 'get',
-        parameters: _parameter,
+        parameters: _parameter
       }
     );
-}
+};
 
 function hasKey(_obj, _key) {
   return (typeof(_obj[_key]) != "undefined");
@@ -64,11 +64,11 @@ var Apartment = Class.create({
 
 Apartment.sendRequest = function(_functionName, _parameter) {
   DSS.sendRequest("apartment/" + _functionName, _parameter);
-}
+};
 
 Apartment.sendSyncRequest = function(_functionName, _parameter) {
   return DSS.sendSyncRequest("apartment/" + _functionName, _parameter);
-}
+};
 
 Apartment.getParameterForDeviceCall = function(_group) {
   var parameter = {};
@@ -76,7 +76,7 @@ Apartment.getParameterForDeviceCall = function(_group) {
     parameter['groupID'] = _group;
   } else if(Object.isString(_group)) {
     parameter['groupName'] = _group;
-  } else if(!Object.isUndefined(_group) && _group != null) {
+  } else if(!Object.isUndefined(_group) && _group !== null) {
     if(hasKey(_group, 'name')) {
       parameter['groupName'] = _group['name'];
     } else if(hasKey(_group, 'id')) {
@@ -84,72 +84,72 @@ Apartment.getParameterForDeviceCall = function(_group) {
     }
   }
   return parameter;
-}
+};
 
 Apartment.turnOn = function(_group) {
   this.sendRequest("turnOn", this.getParameterForDeviceCall(_group));
-}
+};
 
 Apartment.turnOff = function(_group) {
   this.sendRequest("turnOff", this.getParameterForDeviceCall(_group));
-}
+};
 
 Apartment.callScene = function(_sceneNr, _group) {
   var parameter = this.getParameterForDeviceCall(_group);
   parameter['sceneNr'] = _sceneNr;
   this.sendRequest("callScene", parameter);
-}
+};
 
 Apartment.saveScene = function(_sceneNr, _group) {
   var parameter = this.getParameterForDeviceCall(_group);
   parameter['sceneNr'] = _sceneNr;
   this.sendRequest("saveScene", parameter);
-}
+};
 
 Apartment.undoScene = function(_sceneNr, _group) {
   var parameter = this.getParameterForDeviceCall(_group);
   parameter['sceneNr'] = _sceneNr;
   this.sendRequest("undoScene", parameter);
-}
+};
 
 Apartment.increaseValue = function(_group) {
   var parameter = this.getParameterForDeviceCall(_group);
   this.sendRequest("increaseValue", parameter);
-}
+};
 
 Apartment.decreaseValue = function(_group) {
   var parameter = this.getParameterForDeviceCall(_group);
   this.sendRequest("decreaseValue", parameter);
-}
+};
 
 Apartment.enable = function(_group) {
   var parameter = this.getParameterForDeviceCall(_group);
   this.sendRequest("enable", parameter);
-}
+};
 
 Apartment.disable = function(_group) {
   var parameter = this.getParameterForDeviceCall(_group);
   this.sendRequest("disable", parameter);
-}
+};
 
 Apartment.startDim = function(_up, _group) {
   var parameter = this.getParameterForDeviceCall(_group);
-  if(Object.isUndefined(_up) || _up == true) {
+  if(Object.isUndefined(_up) || _up === true) {
     parameter.up = true;
   }
   this.sendRequest("startDim", parameter);
-}
+};
 
 Apartment.endDim = function(_group) {
   var parameter = this.getParameterForDeviceCall(_group);
   this.sendRequest("endDim", parameter);
-}
+};
 
 Apartment.getPowerConsumption = function(_group) {
   var parameter = this.getParameterForDeviceCall(_group);
   var respObj = this.sendSyncRequest("getConsumption", parameter);
   return respObj.consumption;
-}
+};
 
 var Zone = Class.create({
   initialize: function(_id, _name) {
@@ -173,7 +173,7 @@ var Zone = Class.create({
       parameter['groupID'] = _group;
     } else if(Object.isString(_group)) {
       parameter['groupName'] = _group;
-    } else if(!Object.isUndefined(_group) && _group != null) {
+    } else if(!Object.isUndefined(_group) && _group !== null) {
       if(hasKey(_group, 'name')) {
         parameter['groupName'] = _group['name'];
       } else if(hasKey(_group, 'id')) {
@@ -231,7 +231,7 @@ var Zone = Class.create({
 
   startDim: function(_up, _group) {
     var parameter = this.getParameterForDeviceCall(_group);
-    if(isUndefined(_up) || _up == false) {
+    if(isUndefined(_up) || _up === false) {
       parameter['up'] = true;
     }
     this.sendRequest("startDim", parameter);
@@ -249,7 +249,7 @@ var Zone = Class.create({
   },
 
   sendEvent: function(_name) {
-    new HEvent(_name, '.zone(' + this.id + ')').raise();
+    var event = new HEvent(_name, '.zone(' + this.id + ')').raise();
   },
 
   sendButtonPress: function(_buttonNumber, _group) {
@@ -338,7 +338,7 @@ var Device = Class.create({
 
   startDim: function(_up) {
     var parameter = this.getParameterForDeviceCall();
-    if(!isUndefined(_up) && _up != false) {
+    if(!isUndefined(_up) && _up !== false) {
       parameter['up'] = true;
     }
     this.sendRequest("startDim", parameter);
@@ -356,7 +356,7 @@ var Device = Class.create({
   },
 
   sendEvent: function(_name) {
-    new HEvent(_name, '.dsid(' + this.dsid + ')').raise();
+    var event = new HEvent(_name, '.dsid(' + this.dsid + ')').raise();
   },
 
   getGroups: function() {
