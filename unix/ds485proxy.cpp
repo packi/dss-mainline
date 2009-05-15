@@ -831,7 +831,7 @@ namespace dss {
     pd.Get<uint8_t>(); // discard the function id
     return pd.Get<uint16_t>();
   } // GetEnergyMeterValue
-  
+
   bool DS485Proxy::GetEnergyBorder(const int _modulatorID, int& _lower, int& _upper) {
     DS485CommandFrame cmdFrame;
     cmdFrame.GetHeader().SetDestination(_modulatorID);
@@ -846,7 +846,7 @@ namespace dss {
     if(recFrame.get() == NULL) {
 	  return false;
     }
-    
+
     PayloadDissector pd(recFrame->GetFrame()->GetPayload());
     pd.Get<uint8_t>(); // discard the function id
     _lower = pd.Get<uint16_t>();
@@ -1107,22 +1107,21 @@ namespace dss {
               uint16_t zoneID = pd.Get<uint16_t>();
               uint16_t groupID = pd.Get<uint16_t>();
               uint16_t sceneID = pd.Get<uint16_t>();
-              if(sceneID == SceneBell) {
+              if((sceneID & 0x00ff) == SceneBell) {
                 boost::shared_ptr<Event> evt(new Event("bell"));
                 GetDSS().GetEventQueue().PushEvent(evt);
-              } else if(sceneID == SceneAlarm) {
+              } else if((sceneID & 0x00ff) == SceneAlarm) {
                 boost::shared_ptr<Event> evt(new Event("alarm"));
                 GetDSS().GetEventQueue().PushEvent(evt);
-              } else if(sceneID == ScenePanic) {
+              } else if((sceneID & 0x00ff) == ScenePanic) {
                 boost::shared_ptr<Event> evt(new Event("panic"));
                 GetDSS().GetEventQueue().PushEvent(evt);
-              } else {
-                ModelEvent* pEvent = new ModelEvent(ModelEvent::etCallSceneGroup);
-                pEvent->AddParameter(zoneID);
-                pEvent->AddParameter(groupID);
-                pEvent->AddParameter(sceneID);
-                GetDSS().GetApartment().AddModelEvent(pEvent);
               }
+              ModelEvent* pEvent = new ModelEvent(ModelEvent::etCallSceneGroup);
+              pEvent->AddParameter(zoneID);
+              pEvent->AddParameter(groupID);
+              pEvent->AddParameter(sceneID);
+              GetDSS().GetApartment().AddModelEvent(pEvent);
             } else if(functionID == FunctionDeviceCallScene) {
               pd.Get<uint8_t>(); // functionID
               uint16_t devID = pd.Get<uint16_t>();

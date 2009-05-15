@@ -562,6 +562,7 @@ namespace dss {
     virtual void PreviousScene();
 
     virtual unsigned long GetPowerConsumption();
+    vector<Group*> GetGroups() { return m_Groups; }
   }; // Zone
 
 

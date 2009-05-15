@@ -1068,12 +1068,30 @@ namespace dss {
       Group* group = zone.GetGroup(_groupID);
       if(group != NULL) {
         Log("OnGroupCallScene: group-id '" + IntToString(_groupID) + "' in Zone '" + IntToString(_zoneID) + "' scene: " + IntToString(_sceneID));
-        Set s = zone.GetDevices().GetByGroup(_groupID);
         if(rememberScene(_sceneID & 0x00ff)) {
+          Set s = zone.GetDevices().GetByGroup(_groupID);
           SetLastCalledSceneAction act(_sceneID & 0x00ff);
           s.Perform(act);
+
+          vector<Zone*> zonesToUpdate;
+          if(_zoneID == 0) {
+            zonesToUpdate = m_Zones;
+          } else {
+            zonesToUpdate.push_back(&zone);
+          }
+          foreach(Zone* pZone, zonesToUpdate) {
+            if(_groupID == 0) {
+              foreach(Group* pGroup, pZone->GetGroups()) {
+                pGroup->SetLastCalledScene(_sceneID & 0x00ff);
+              }
+            } else {
+              Group* pGroup = pZone->GetGroup(_groupID);
+              if(pGroup != NULL) {
+                pGroup->SetLastCalledScene(_sceneID & 0x00ff);
+              }
+            }
+          }
         }
-        group->SetLastCalledScene(_sceneID & 0x00ff);
       } else {
         Log("OnGroupCallScene: Could not find group with id '" + IntToString(_groupID) + "' in Zone '" + IntToString(_zoneID) + "'");
       }
