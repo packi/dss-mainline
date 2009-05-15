@@ -27,8 +27,8 @@ public:
     virtual void CallScene(const int _sceneNr) {
       // mask out local on/off
       int realScene = _sceneNr & 0x00ff;
-      bool keepScene = (realScene != dss::SceneBell) && (realScene != dss::SceneAlarm);
-      if(realScene == dss::SceneDeepOff || realScene == dss::ScenePanic) {
+      bool keepScene = (realScene != dss::SceneBell);
+      if(realScene == dss::SceneDeepOff || realScene == dss::ScenePanic || realScene == dss::SceneAlarm) {
         deepOff();
       } else if(realScene == dss::SceneOff || realScene == dss::SceneMin || realScene == dss::SceneStandBy) {
         powerOff();
@@ -100,7 +100,7 @@ public:
     }
 
     bool lastWasOff() {
-       return   m_LastScene == dss::SceneDeepOff || m_LastScene == dss::SceneStandBy
+       return   m_LastScene == dss::SceneDeepOff || m_LastScene == dss::SceneStandBy || m_LastScene == dss::SceneAlarm
              || m_LastScene == dss::SceneOff || m_LastScene == dss::SceneMin || m_LastScene == dss::ScenePanic;
      }
 
