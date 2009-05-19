@@ -15,50 +15,70 @@ using namespace std;
 #include <boost/ptr_container/ptr_vector.hpp>
 
 namespace dss {
-  class DSIDSim;
   class DS485Frame;
   class DSIDInterface;
   class DSModulatorSim;
-  class DSIDSimSwitch;
 
   class DSIDCreator {
   private:
     string m_Identifier;
-    const DSModulatorSim& m_DSSim;
-  protected:
-    const DSModulatorSim& GetSimulator() { return m_DSSim; }
   public:
-    DSIDCreator(const DSModulatorSim& _simulator, const string& _identifier);
+    DSIDCreator(const string& _identifier);
     virtual ~DSIDCreator() {};
 
-    const string& GetIdentifier() { return m_Identifier; }
-    virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress) = 0;
+    const string& GetIdentifier() const { return m_Identifier; }
+    virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) = 0;
   };
 
   class DSIDFactory {
   private:
     boost::ptr_vector<DSIDCreator> m_RegisteredCreators;
   public:
-    DSIDInterface* CreateDSID(const string& _identifier, const dsid_t _dsid, const devid_t _shortAddress);
+    DSIDInterface* CreateDSID(const string& _identifier, const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator);
 
     void RegisterCreator(DSIDCreator* _creator);
   };
 
+  class DSSim : public Subsystem,
+                public DS485FrameProvider {
+  private:
+    DSIDFactory m_DSIDFactory;
+    bool m_Initialized;
+    boost::ptr_vector<DSModulatorSim> m_Modulators;
+  private:
+    void LoadPlugins();
+
+    void LoadFromConfig();
+  protected:
+    virtual void DoStart() {}
+  public:
+    DSSim(DSS* _pDSS);
+    virtual ~DSSim() {}
+    virtual void Initialize();
+
+    void process(DS485Frame& _frame);
+    bool isSimAddress(const uint8_t _address);
+
+    bool isReady();
+
+    DSIDFactory& getDSIDFactory() { return m_DSIDFactory; }
+
+    void DistributeFrame(boost::shared_ptr<DS485CommandFrame> _frame);
+  }; // DSSim
+
   typedef map< const pair<const int, const int>,  vector<DSIDInterface*> > IntPairToDSIDSimVector;
 
-  class DSModulatorSim : public DS485FrameProvider,
-                         public Subsystem {
+  class DSModulatorSim {
   private:
+    DSSim* m_pSimulation;
     int m_EnergyLevelOrange;
     int m_EnergyLevelRed;
     int m_ID;
     dsid_t m_ModulatorDSID;
-    bool m_Initialized;
     vector<DSIDInterface*> m_SimulatedDevices;
     map< const int, vector<DSIDInterface*> > m_Zones;
     IntPairToDSIDSimVector m_DevicesOfGroupInZone;
     vector<DS485Frame*> m_PendingFrames;
-    DSIDFactory m_DSIDFactory;
     map<const DSIDInterface*, int> m_ButtonToGroupMapping;
     map<const DSIDInterface*, int> m_DeviceZoneMapping;
     map<const int, int> m_LastCalledSceneForGroup;
@@ -67,17 +87,16 @@ namespace dss {
     string m_Name;
   private:
     void AddDeviceToGroup(DSIDInterface* _device, int _groupID);
-    void LoadFromConfig();
     void LoadDevices(XMLNodeList& _nodes, const int _zoneID);
     void LoadGroups(XMLNodeList& _nodes, const int _zoneID);
     void LoadZones(XMLNodeList& _nodes);
 
-    void LoadPlugins();
-
     DSIDInterface& LookupDevice(const devid_t _id);
-    DS485CommandFrame* CreateResponse(DS485CommandFrame& _request, uint8_t _functionID);
-    DS485CommandFrame* CreateAck(DS485CommandFrame& _request, uint8_t _functionID);
-    DS485CommandFrame* CreateReply(DS485CommandFrame& _request);
+    boost::shared_ptr<DS485CommandFrame> CreateResponse(DS485CommandFrame& _request, uint8_t _functionID);
+    boost::shared_ptr<DS485CommandFrame> CreateAck(DS485CommandFrame& _request, uint8_t _functionID);
+    boost::shared_ptr<DS485CommandFrame> CreateReply(DS485CommandFrame& _request);
+
+    void DistributeFrame(boost::shared_ptr<DS485CommandFrame> _frame);
   private:
     void DeviceCallScene(const int _deviceID, const int _sceneID);
     void GroupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
@@ -92,21 +111,18 @@ namespace dss {
     void GroupSetValue(const int _zoneID, const int _groupID, const int _value);
   protected:
     virtual void DoStart() {}
+    void Log(const string& _message, aLogSeverity _severity = lsDebug);
   public:
-    DSModulatorSim(DSS* _pDSS);
+    DSModulatorSim(DSSim* _pSimulator);
     virtual ~DSModulatorSim() {}
-    virtual void Initialize();
 
-    bool Ready();
+    bool InitializeFromNode(XMLNode& _node);
 
     int GetID() const;
 
     void Process(DS485Frame& _frame);
 
-    void ProcessButtonPress(const DSIDSimSwitch& _switch, int _buttonNr, const ButtonPressKind _kind);
-
     DSIDInterface* GetSimulatedDevice(const dsid_t _dsid);
-    int GetGroupForSwitch(const DSIDSimSwitch* _switch);
   }; // DSModulatorSim
 
   class DSIDInterface {
@@ -158,74 +174,7 @@ namespace dss {
     virtual int GetZoneID() const { return m_ZoneID; }
   }; // DSIDInterface
 
-  class DSIDSim : public DSIDInterface {
-  private:
-    bool m_On;
-    bool m_Enabled;
-    bool m_Dimming;
-    time_t m_DimmStartTime;
-    bool m_DimmingUp;
-    vector<int> m_Parameters;
-    DSModulatorSim* m_Modulator;
-    vector<uint8_t> m_ValuesForScene;
-    uint8_t m_CurrentValue;
-    int m_DimTimeMS;
-    int m_SimpleConsumption;
-    Properties m_ConfigParameter;
-  public:
-    DSIDSim(const DSModulatorSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress);
-    virtual ~DSIDSim() {}
 
-    virtual void CallScene(const int _sceneNr);
-    virtual void SaveScene(const int _sceneNr);
-    virtual void UndoScene(const int _sceneNr);
-
-    virtual void IncreaseValue(const int _parameterNr = -1);
-    virtual void DecreaseValue(const int _parameterNr = -1);
-
-    virtual void Enable();
-    virtual void Disable();
-
-    virtual int GetConsumption();
-
-    virtual void StartDim(bool _directionUp, const int _parameterNr = -1);
-    virtual void EndDim(const int _parameterNr = -1);
-    virtual void SetValue(const double _value, int _parameterNr = -1);
-
-    virtual double GetValue(int _parameterNr = -1) const;
-
-    virtual uint8_t GetFunctionID();
-    void SetSimpleConsumption(const int _value) { m_SimpleConsumption = _value; }
-    virtual void SetConfigParameter(const string& _name, const string& _value);
-    virtual string GetConfigParameter(const string& _name) const;
-  }; // DSIDSim
-
-
-  class DSIDSimSwitch : public DSIDSim {
-  private:
-    const int m_NumberOfButtons;
-    int m_DefaultColor;
-    bool m_IsBell;
-  public:
-    DSIDSimSwitch(const DSModulatorSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress, const int _numButtons)
-    : DSIDSim(_simulator, _dsid, _shortAddress),
-      m_NumberOfButtons(_numButtons),
-      m_DefaultColor(GroupIDYellow),
-      m_IsBell(false)
-    {};
-    ~DSIDSimSwitch() {}
-
-    void PressKey(const ButtonPressKind _kind, const int _buttonNr);
-
-    const int GetDefaultColor() const { return m_DefaultColor; }
-
-    const int GetNumberOfButtons() const { return m_NumberOfButtons; }
-
-    bool IsBell() const { return m_IsBell; }
-    void SetIsBell(const bool _value) { m_IsBell = _value; }
-
-    virtual uint8_t GetFunctionID() { return FunctionIDSwitch; }
-  }; // DSIDSimSwitch
 }
 
 #endif /*DSSIM_H_*/

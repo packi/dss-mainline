@@ -25,14 +25,14 @@ namespace dss {
 
   class DSIDSimCreator : public DSIDCreator {
   public:
-    DSIDSimCreator(const DSModulatorSim& _simulator)
-    : DSIDCreator(_simulator, "standard.simple")
+    DSIDSimCreator()
+    : DSIDCreator("standard.simple")
     {}
 
     virtual ~DSIDSimCreator() {};
 
-    virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress) {
-      return new DSIDSim(GetSimulator(), _dsid, _shortAddress);
+    virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
+      return new DSIDSim(_modulator, _dsid, _shortAddress);
     }
   };
 
@@ -40,14 +40,14 @@ namespace dss {
 
   class DSIDSimSwitchCreator : public DSIDCreator {
   public:
-    DSIDSimSwitchCreator(const DSModulatorSim& _simulator)
-    : DSIDCreator(_simulator, "standard.switch")
+    DSIDSimSwitchCreator()
+    : DSIDCreator("standard.switch")
     {}
 
     virtual ~DSIDSimSwitchCreator() {};
 
-    virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress) {
-      return new DSIDSimSwitch(GetSimulator(), _dsid, _shortAddress, 9);
+    virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
+      return new DSIDSimSwitch(_modulator, _dsid, _shortAddress, 9);
     }
   };
 
@@ -176,8 +176,8 @@ namespace dss {
     void* m_SOHandle;
     int (*createInstance)();
   public:
-    DSIDPluginCreator(const DSModulatorSim& _simulator, void* _soHandle, const char* _pluginName)
-    : DSIDCreator(_simulator, _pluginName),
+    DSIDPluginCreator(void* _soHandle, const char* _pluginName)
+    : DSIDCreator(_pluginName),
       m_SOHandle(_soHandle)
     {
       *(void**)(&createInstance) = dlsym(m_SOHandle, "dsid_create_instance");
@@ -187,121 +187,175 @@ namespace dss {
       }
     }
 
-    virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress) {
+    virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
       int handle = (*createInstance)();
-      return new DSIDPlugin(GetSimulator(), _dsid, _shortAddress, m_SOHandle, handle);
+      return new DSIDPlugin(_modulator, _dsid, _shortAddress, m_SOHandle, handle);
     }
   }; // DSIDPluginCreator
 
+  //================================================== DSSim
+
+  DSSim::DSSim(DSS* _pDSS)
+  : Subsystem(_pDSS, "DSSim")
+  {}
+
+  void DSSim::Initialize() {
+    Subsystem::Initialize();
+    m_DSIDFactory.RegisterCreator(new DSIDSimCreator());
+    m_DSIDFactory.RegisterCreator(new DSIDSimSwitchCreator());
+
+    LoadPlugins();
+    LoadFromConfig();
+
+    m_Initialized = true;
+  } // Initialize
+
+
+  void DSSim::LoadFromConfig() {
+    const int theConfigFileVersion = 1;
+    XMLDocumentFileReader reader(GetDSS().GetDataDirectory() + "sim.xml");
+    XMLNode rootNode = reader.GetDocument().GetRootNode();
+
+    if(rootNode.GetName() == "simulation") {
+      string fileVersionStr = rootNode.GetAttributes()["version"];
+      if(StrToIntDef(fileVersionStr, -1) == theConfigFileVersion) {
+        XMLNodeList& modulators = rootNode.GetChildren();
+        foreach(XMLNode& node, modulators) {
+          if(node.GetName() == "modulator") {
+            DSModulatorSim* modulator = NULL;
+            try {
+              modulator = new DSModulatorSim(this);
+              modulator->InitializeFromNode(node);
+              m_Modulators.push_back(modulator);
+            } catch(runtime_error&) {
+              delete modulator;
+            }
+          }
+        }
+      } else {
+        Log("Version mismatch, or missing version attribute. Expected ''" + IntToString(theConfigFileVersion) + "'" + fileVersionStr + "' ");
+      }
+    } else {
+      Log("sim.xml must have a root-node named 'simulation'", lsFatal);
+    }
+  } // LoadFromConfig
+
+  void DSSim::LoadPlugins() {
+    fs::directory_iterator end_iter;
+    for ( fs::directory_iterator dir_itr(GetDSS().GetDataDirectory() + "plugins");
+          dir_itr != end_iter;
+          ++dir_itr )
+    {
+      try {
+        if (fs::is_regular(dir_itr->status())) {
+          if(EndsWith(dir_itr->leaf(), ".so")) {
+            Log("LoadPlugins: Trying to load '" + dir_itr->string() + "'", lsInfo);
+            void* handle = dlopen(dir_itr->string().c_str(), RTLD_LAZY);
+            if(handle == NULL) {
+              Log("LoadPlugins: Could not load plugin \"" + dir_itr->leaf() + "\" message: " + dlerror(), lsError);
+              continue;
+            }
+
+            dlerror();
+            int (*version)();
+            *(void**) (&version) = dlsym(handle, "dsid_getversion");
+            char* error;
+            if((error = dlerror()) != NULL) {
+               Log("LoadPlugins: could get version from \"" + dir_itr->leaf() + "\":" + error, lsError);
+               continue;
+            }
+
+            int ver = (*version)();
+            if(ver != DSID_PLUGIN_API_VERSION) {
+              Log("LoadPlugins: Versionmismatch (plugin: " + IntToString(ver) + " api:" + IntToString(DSID_PLUGIN_API_VERSION) + ")", lsError);
+              continue;
+            }
+
+            const char* (*get_name)();
+            *(void**)(&get_name) = dlsym(handle, "dsid_get_plugin_name");
+            if((error = dlerror()) != NULL) {
+              Log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
+              continue;
+            }
+            const char* pluginName = (*get_name)();
+            if(pluginName == NULL) {
+              Log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
+              continue;
+            }
+            Log("LoadPlugins: Plugin provides " + string(pluginName), lsInfo);
+            m_DSIDFactory.RegisterCreator(new DSIDPluginCreator(handle, pluginName));
+          }
+        }
+      } catch (const std::exception & ex) {
+        Log("LoadPlugins: Cought exception while loading " + dir_itr->leaf() + " '" + ex.what() + "'", lsError);
+      }
+    }
+  } // LoadPlugins
+
+  bool DSSim::isReady() {
+    return m_Initialized;
+  } // Ready
+
+  bool DSSim::isSimAddress(const uint8_t _address) {
+    foreach(DSModulatorSim& modulator, m_Modulators) {
+      if(modulator.GetID() == _address) {
+        return true;
+      }
+    }
+    return false;
+  } // isSimAddress
+
+  void DSSim::process(DS485Frame& _frame) {
+    foreach(DSModulatorSim& modulator, m_Modulators) {
+      modulator.Process(_frame);
+    }
+  } // process
+
+  void DSSim::DistributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
+    DS485FrameProvider::DistributeFrame(_frame);
+  } // DistributeFrame
+
   //================================================== DSModulatorSim
 
-  DSModulatorSim::DSModulatorSim(DSS* _pDSS)
-  : Subsystem(_pDSS, "DSModulatorSim"),
+  DSModulatorSim::DSModulatorSim(DSSim* _pSimulation)
+  : m_pSimulation(_pSimulation),
     m_EnergyLevelOrange(200),
     m_EnergyLevelRed(400)
   {
     m_ModulatorDSID = dsid_t(0, SimulationPrefix);
-    m_Initialized = false;
-  } // DSModulatorSim
-
-  void DSModulatorSim::Initialize() {
-    Subsystem::Initialize();
     m_ID = 70;
     m_Name = "Simulated dSM";
-    m_DSIDFactory.RegisterCreator(new DSIDSimCreator(*this));
-    m_DSIDFactory.RegisterCreator(new DSIDSimSwitchCreator(*this));
-    LoadPlugins();
+  } // DSModulatorSim
 
-    LoadFromConfig();
-    m_Initialized = true;
-  } // Initialize
+  void DSModulatorSim::Log(const string& _message, aLogSeverity _severity) {
+    m_pSimulation->Log(_message, _severity);
+  } // Log
 
-  bool DSModulatorSim::Ready() {
-	  return m_Initialized;
-  } // Ready
-
-  void DSModulatorSim::LoadPlugins() {
-    fs::directory_iterator end_iter;
-     for ( fs::directory_iterator dir_itr(GetDSS().GetDataDirectory() + "plugins");
-           dir_itr != end_iter;
-           ++dir_itr )
-     {
-       try {
-         if (fs::is_regular(dir_itr->status())) {
-           if(EndsWith(dir_itr->leaf(), ".so")) {
-             Log("LoadPlugins: Trying to load '" + dir_itr->string() + "'", lsInfo);
-             void* handle = dlopen(dir_itr->string().c_str(), RTLD_LAZY);
-             if(handle == NULL) {
-               Log("LoadPlugins: Could not load plugin \"" + dir_itr->leaf() + "\" message: " + dlerror(), lsError);
-               continue;
-             }
-
-             dlerror();
-             int (*version)();
-             *(void**) (&version) = dlsym(handle, "dsid_getversion");
-             char* error;
-             if((error = dlerror()) != NULL) {
-                Log("LoadPlugins: could get version from \"" + dir_itr->leaf() + "\":" + error, lsError);
-                continue;
-             }
-
-             int ver = (*version)();
-             if(ver != DSID_PLUGIN_API_VERSION) {
-               Log("LoadPlugins: Versionmismatch (plugin: " + IntToString(ver) + " api:" + IntToString(DSID_PLUGIN_API_VERSION) + ")", lsError);
-               continue;
-             }
-
-             const char* (*get_name)();
-             *(void**)(&get_name) = dlsym(handle, "dsid_get_plugin_name");
-             if((error = dlerror()) != NULL) {
-                Log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
-                continue;
-             }
-             const char* pluginName = (*get_name)();
-             if(pluginName == NULL) {
-               Log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
-               continue;
-             }
-             Log("LoadPlugins: Plugin provides " + string(pluginName), lsInfo);
-             m_DSIDFactory.RegisterCreator(new DSIDPluginCreator(*this, handle, pluginName));
-           }
-         }
-       } catch (const std::exception & ex) {
-         Log("LoadPlugins: Cought exception while loading " + dir_itr->leaf() + " '" + ex.what() + "'", lsError);
-       }
-     }
-    } // LoadPlugins
-
-  void DSModulatorSim::LoadFromConfig() {
-    XMLDocumentFileReader reader(GetDSS().GetDataDirectory() + "sim.xml");
-    XMLNode rootNode = reader.GetDocument().GetRootNode();
-
-    if(rootNode.GetName() == "modulator") {
-      HashMapConstStringString& attrs = rootNode.GetAttributes();
-      if(attrs["busid"].size() != 0) {
-        m_ID = StrToIntDef(attrs["busid"], 70);
+  bool DSModulatorSim::InitializeFromNode(XMLNode& _node) {
+    HashMapConstStringString& attrs = _node.GetAttributes();
+    if(attrs["busid"].size() != 0) {
+      m_ID = StrToIntDef(attrs["busid"], 70);
+    }
+    if(attrs["dsid"].size() != 0) {
+      m_ModulatorDSID = dsid_t::FromString(attrs["dsid"]);
+      m_ModulatorDSID.lower |= SimulationPrefix;
+    }
+    m_EnergyLevelOrange = StrToIntDef(attrs["orange"], m_EnergyLevelOrange);
+    m_EnergyLevelRed = StrToIntDef(attrs["red"], m_EnergyLevelRed);
+    try {
+      XMLNode& nameNode = _node.GetChildByName("name");
+      if(!nameNode.GetChildren().empty()) {
+        m_Name = nameNode.GetChildren()[0].GetContent();
       }
-      if(attrs["dsid"].size() != 0) {
-        m_ModulatorDSID = dsid_t::FromString(attrs["dsid"]);
-        m_ModulatorDSID.lower |= SimulationPrefix;
-      }
-      m_EnergyLevelOrange = StrToIntDef(attrs["orange"], m_EnergyLevelOrange);
-      m_EnergyLevelRed = StrToIntDef(attrs["red"], m_EnergyLevelRed);
-      try {
-        XMLNode& nameNode = rootNode.GetChildByName("name");
-        if(!nameNode.GetChildren().empty()) {
-          m_Name = nameNode.GetChildren()[0].GetContent();
-        }
-      } catch(XMLException&) {
-      }
-
-      XMLNodeList& nodes = rootNode.GetChildren();
-      LoadDevices(nodes, 0);
-      LoadGroups(nodes, 0);
-      LoadZones(nodes);
+    } catch(XMLException&) {
     }
 
-  } // LoadFromConfig
+    XMLNodeList& nodes = _node.GetChildren();
+    LoadDevices(nodes, 0);
+    LoadGroups(nodes, 0);
+    LoadZones(nodes);
+    return true;
+  } // InitializeFromNode
 
   void DSModulatorSim::LoadDevices(XMLNodeList& _nodes, const int _zoneID) {
     for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
@@ -327,7 +381,7 @@ namespace dss {
           type = attrs["type"];
         }
 
-        DSIDInterface* newDSID = m_DSIDFactory.CreateDSID(type, dsid, busid);
+        DSIDInterface* newDSID = m_pSimulation->getDSIDFactory().CreateDSID(type, dsid, busid, *this);
         try {
           foreach(XMLNode& iParam, iNode->GetChildren()) {
             if(iParam.GetName() == "parameter") {
@@ -531,7 +585,7 @@ namespace dss {
       }
     }
   } // GroupIncValue
-  
+
   void DSModulatorSim::GroupSetValue(const int _zoneID, const int _groupID, const int _value) {
     pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
@@ -550,6 +604,9 @@ namespace dss {
 
     try {
       DS485Header& header = _frame.GetHeader();
+      if(!(header.GetDestination() == m_ID || header.IsBroadcast())) {
+        return;
+      }
       if(header.GetType() == HeaderTypeToken) {
         // Transmit pending things
       } else if(header.GetType() == HeaderTypeCommand) {
@@ -557,7 +614,7 @@ namespace dss {
         PayloadDissector pd(cmdFrame.GetPayload());
         if((cmdFrame.GetCommand() == CommandRequest) && !pd.IsEmpty()) {
           int cmdNr = pd.Get<uint8_t>();
-          DS485CommandFrame* response;
+          boost::shared_ptr<DS485CommandFrame> response;
           switch(cmdNr) {
             case FunctionDeviceCallScene:
               {
@@ -950,9 +1007,12 @@ namespace dss {
     }
   } // Process
 
+  void DSModulatorSim::DistributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
+    m_pSimulation->DistributeFrame(_frame);
+  } // DistributeFrame
 
-  DS485CommandFrame* DSModulatorSim::CreateReply(DS485CommandFrame& _request) {
-    DS485CommandFrame* result = new DS485CommandFrame();
+  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::CreateReply(DS485CommandFrame& _request) {
+    boost::shared_ptr<DS485CommandFrame> result(new DS485CommandFrame());
     result->GetHeader().SetDestination(_request.GetHeader().GetSource());
     result->GetHeader().SetSource(m_ID);
     result->GetHeader().SetBroadcast(false);
@@ -961,15 +1021,15 @@ namespace dss {
   } // CreateReply
 
 
-  DS485CommandFrame* DSModulatorSim::CreateAck(DS485CommandFrame& _request, uint8_t _functionID) {
-    DS485CommandFrame* result = CreateReply(_request);
+  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::CreateAck(DS485CommandFrame& _request, uint8_t _functionID) {
+    boost::shared_ptr<DS485CommandFrame> result = CreateReply(_request);
     result->SetCommand(CommandAck);
     result->GetPayload().Add(_functionID);
     return result;
   }
 
-  DS485CommandFrame* DSModulatorSim::CreateResponse(DS485CommandFrame& _request, uint8_t _functionID) {
-    DS485CommandFrame* result = CreateReply(_request);
+  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::CreateResponse(DS485CommandFrame& _request, uint8_t _functionID) {
+    boost::shared_ptr<DS485CommandFrame> result = CreateReply(_request);
     result->SetCommand(CommandResponse);
     result->GetPayload().Add(_functionID);
     return result;
@@ -989,7 +1049,7 @@ namespace dss {
   int DSModulatorSim::GetID() const {
     return m_ID;
   } // GetID
-
+/*
   void DSModulatorSim::ProcessButtonPress(const DSIDSimSwitch& _switch, int _buttonNr, const ButtonPressKind _kind) {
     int zoneID = m_DeviceZoneMapping[&_switch];
     int groupToControl = GetGroupForSwitch(&_switch);
@@ -1216,6 +1276,7 @@ namespace dss {
       }
     }
   } // ProcessButtonPress
+*/
 
   DSIDInterface* DSModulatorSim::GetSimulatedDevice(const dsid_t _dsid) {
     for(vector<DSIDInterface*>::iterator iDSID = m_SimulatedDevices.begin(), e = m_SimulatedDevices.end();
@@ -1228,6 +1289,7 @@ namespace dss {
     return NULL;
   } // GetSimulatedDevice
 
+  /*
   int DSModulatorSim::GetGroupForSwitch(const DSIDSimSwitch* _switch) {
     if(_switch != NULL) {
       if(m_ButtonToGroupMapping.find(_switch) != m_ButtonToGroupMapping.end()) {
@@ -1237,131 +1299,23 @@ namespace dss {
     }
     return GroupIDYellow;
   } // GetGroupForSwitch
-
-
-  //================================================== DSIDSim
-
-  DSIDSim::DSIDSim(const DSModulatorSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress)
-  : DSIDInterface(_simulator, _dsid, _shortAddress),
-    m_Enabled(true),
-    m_CurrentValue(0),
-    m_SimpleConsumption(25 * 1000)
-  {
- 	  m_ValuesForScene.resize(255);
-    m_ValuesForScene[SceneOff] = 0;
-    m_ValuesForScene[SceneMax] = 255;
-    m_ValuesForScene[SceneMin] = 255;
-    m_ValuesForScene[Scene1] = 255;
-    m_ValuesForScene[Scene2] = 255;
-    m_ValuesForScene[Scene3] = 255;
-    m_ValuesForScene[Scene4] = 255;
-    m_ValuesForScene[SceneStandBy] = 0;
-    m_ValuesForScene[SceneDeepOff] = 0;
-  } // ctor
-
-  int DSIDSim::GetConsumption() {
-    return (int)((m_CurrentValue / 255.0) * m_SimpleConsumption) + (rand() % 100);
-  }
-
-  void DSIDSim::CallScene(const int _sceneNr) {
-    if(m_Enabled) {
-      m_CurrentValue = m_ValuesForScene.at(_sceneNr);
-    }
-  } // CallScene
-
-  void DSIDSim::SaveScene(const int _sceneNr) {
-    if(m_Enabled) {
-      m_ValuesForScene[_sceneNr] = m_CurrentValue;
-    }
-  } // SaveScene
-
-  void DSIDSim::UndoScene(const int _sceneNr) {
-    if(m_Enabled) {
-      m_CurrentValue = m_ValuesForScene.at(_sceneNr);
-    }
-  } // UndoScene
-
-  void DSIDSim::IncreaseValue(const int _parameterNr) {
-    if(m_Enabled) {
-      m_CurrentValue++;
-      m_CurrentValue = min((uint8_t)0xff, m_CurrentValue);
-    }
-  } // IncreaseValue
-
-  void DSIDSim::DecreaseValue(const int _parameterNr) {
-    if(m_Enabled) {
-      m_CurrentValue--;
-      m_CurrentValue = max((uint8_t)0, m_CurrentValue);
-    }
-  } // DecreaseValue
-
-  void DSIDSim::Enable() {
-    m_Enabled = true;
-  } // Enable
-
-  void DSIDSim::Disable() {
-    m_Enabled = false;
-  } // Disable
-
-  void DSIDSim::StartDim(bool _directionUp, const int _parameterNr) {
-    if(m_Enabled) {
-      m_DimmingUp = _directionUp;
-      m_Dimming = true;
-      time(&m_DimmStartTime);
-    }
-  } // StartDim
-
-  void DSIDSim::EndDim(const int _parameterNr) {
-    if(m_Enabled) {
-      time_t now;
-      time(&now);
-      if(m_DimmingUp) {
-        m_CurrentValue = static_cast<int>(max(m_CurrentValue + difftime(m_DimmStartTime, now) * 5, 255.0));
-      } else {
-        m_CurrentValue = static_cast<int>(min(m_CurrentValue - difftime(m_DimmStartTime, now) * 5, 255.0));
-      }
-    }
-  } // EndDim
-
-  void DSIDSim::SetValue(const double _value, int _parameterNr) {
-    if(m_Enabled) {
-      m_CurrentValue = static_cast<int>(_value);
-    }
-  } // SetValue
-
-  double DSIDSim::GetValue(int _parameterNr) const {
-    return static_cast<double>(m_CurrentValue);
-  } // GetValue
-
-  uint8_t DSIDSim::GetFunctionID() {
-    return FunctionIDDevice;
-  } // GetFunctionID
-
-  void DSIDSim::SetConfigParameter(const string& _name, const string& _value) {
-    m_ConfigParameter.Set(_name, _value);
-  } // SetConfigParameter
-
-  string DSIDSim::GetConfigParameter(const string& _name) const {
-    return m_ConfigParameter.Get(_name, "");
-  } // GetConfigParameter
-
-
+*/
   //================================================== DSIDCreator
 
-  DSIDCreator::DSIDCreator(const DSModulatorSim& _simulator, const string& _identifier)
-  : m_Identifier(_identifier),
-    m_DSSim(_simulator)
+  DSIDCreator::DSIDCreator(const string& _identifier)
+  : m_Identifier(_identifier)
   {} // ctor
+
 
   //================================================== DSIDFactory
 
-  DSIDInterface* DSIDFactory::CreateDSID(const string& _identifier, const dsid_t _dsid, const devid_t _shortAddress) {
+  DSIDInterface* DSIDFactory::CreateDSID(const string& _identifier, const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
     boost::ptr_vector<DSIDCreator>::iterator
     iCreator = m_RegisteredCreators.begin(),
     e = m_RegisteredCreators.end();
     while(iCreator != e) {
       if(iCreator->GetIdentifier() == _identifier) {
-        return iCreator->CreateDSID(_dsid, _shortAddress);
+        return iCreator->CreateDSID(_dsid, _shortAddress, _modulator);
       }
       ++iCreator;
     }

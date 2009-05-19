@@ -215,7 +215,6 @@ protected:
     runner.SetEventQueue(&queue);
 
     DSModulatorSim modSim(NULL);
-    modSim.Initialize();
     DS485Proxy proxy(NULL);
 
     Apartment apt(NULL);

@@ -30,7 +30,7 @@ namespace dss {
   class Apartment;
   class WebServices;
 #ifdef USE_SIM
-  class DSModulatorSim;
+  class DSSim;
 #endif
 
   typedef enum {
@@ -55,7 +55,7 @@ namespace dss {
     boost::shared_ptr<PropertySystem> m_pPropertySystem;
     boost::shared_ptr<Apartment> m_pApartment;
 #ifdef USE_SIM
-    boost::shared_ptr<DSModulatorSim> m_pModulatorSim;
+    boost::shared_ptr<DSSim> m_pSimulation;
 #endif
     boost::shared_ptr<EventRunner> m_pEventRunner;
     boost::shared_ptr<WebServices> m_pWebServices;
@@ -88,7 +88,7 @@ namespace dss {
     DS485Interface& GetDS485Interface() { return *m_pDS485Interface; }
     Apartment& GetApartment() { return *m_pApartment; }
 #ifdef USE_SIM
-    DSModulatorSim& GetModulatorSim() { return *m_pModulatorSim; }
+    DSSim& GetSimulation() { return *m_pSimulation; }
 #endif
     EventRunner& GetEventRunner() { return *m_pEventRunner; }
     WebServices& GetWebServices() { return *m_pWebServices; }

@@ -991,15 +991,16 @@ int dss__DeviceGetFunctionID(struct soap *soap, int _token, char* _deviceID, int
 } // dss__DeviceGetFunctionID
 
 int dss__SwitchGetGroupID(struct soap *soap, int _token, char* _deviceID, int& result) {
+ /*
   dss::DeviceReference devRef(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, devRef);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dss::DSIDInterface* simDev = dss::DSS::GetInstance()->GetModulatorSim().GetSimulatedDevice(FromSOAP(_deviceID));
+  dss::DSIDInterface* simDev = dss::DSS::GetInstance()->GetSimulation().GetSimulatedDevice(FromSOAP(_deviceID));
   dss::DSIDSimSwitch* sw = NULL;
   if(simDev != NULL && (sw = dynamic_cast<dss::DSIDSimSwitch*>(simDev)) != NULL) {
-  	result = dss::DSS::GetInstance()->GetModulatorSim().GetGroupForSwitch(sw);
+  	result = dss::DSS::GetInstance()->GetSimulation().GetGroupForSwitch(sw);
   } else {
     dss::Device& dev = devRef.GetDevice();
     for(int iGroup = 1; iGroup < 9; iGroup++) {
@@ -1009,16 +1010,18 @@ int dss__SwitchGetGroupID(struct soap *soap, int _token, char* _deviceID, int& r
       }
     }
   }
+  */
   return SOAP_OK;
 } // dss__SwitchGetGroupID
 
 int dss__SwitchSimulateKeypress(struct soap *soap, int _token, char* _deviceID, int _buttonNr, char* _kind, bool& result) {
+/*
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dss::DSIDInterface* simDev = dss::DSS::GetInstance()->GetModulatorSim().GetSimulatedDevice(FromSOAP(_deviceID));
+  dss::DSIDInterface* simDev = dss::DSS::GetInstance()->GetSimulation().GetSimulatedDevice(FromSOAP(_deviceID));
   dss::DSIDSimSwitch* sw = NULL;
   if(simDev != NULL && (sw = dynamic_cast<dss::DSIDSimSwitch*>(simDev)) != NULL) {
     dss::ButtonPressKind kind = dss::Click;
@@ -1027,9 +1030,10 @@ int dss__SwitchSimulateKeypress(struct soap *soap, int _token, char* _deviceID, 
     } else if(string(_kind) == "touchend") {
       kind = dss::TouchEnd;
     }
-    dss::DSS::GetInstance()->GetModulatorSim().ProcessButtonPress(*sw, _buttonNr, kind);
+    dss::DSS::GetInstance()->GetSimulation().ProcessButtonPress(*sw, _buttonNr, kind);
     return SOAP_OK;
   }
+  */
   return soap_sender_fault(soap, "Could not find switch", NULL);
 } // dss__SwitchSimulateKeypress
 

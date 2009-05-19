@@ -70,8 +70,8 @@ namespace dss {
     m_Subsystems.push_back(m_pWebServices.get());
 
 #ifdef USE_SIM
-    m_pModulatorSim = boost::shared_ptr<DSModulatorSim>(new DSModulatorSim(this));
-    m_Subsystems.push_back(m_pModulatorSim.get());
+    m_pSimulation = boost::shared_ptr<DSSim>(new DSSim(this));
+    m_Subsystems.push_back(m_pSimulation.get());
 #endif
 
     m_pEventInterpreter = boost::shared_ptr<EventInterpreter>(new EventInterpreter(this));

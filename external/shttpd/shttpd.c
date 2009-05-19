@@ -849,6 +849,10 @@ read_stream(struct stream *stream)
 	    stream->io.total + len > stream->content_len)
 		len = stream->content_len - stream->io.total;
 
+	if(!stream->io_class) {
+	  assert(0);
+	}
+
 	/* Read from underlying channel */
 	n = stream->nread_last = stream->io_class->read(stream,
 	    io_space(&stream->io), len);

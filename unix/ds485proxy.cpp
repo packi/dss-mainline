@@ -222,7 +222,7 @@ namespace dss {
 	         && ((m_DS485Controller.GetState() == csSlave) ||
 	             (m_DS485Controller.GetState() == csDesignatedMaster) ||
 	             (m_DS485Controller.GetState() == csError)) // allow the simulation to run on it's own
-	         &&  DSS::GetInstance()->GetModulatorSim().Ready();
+	         &&  DSS::GetInstance()->GetSimulation().isReady();
   } // IsReady
 
   FittingResult DS485Proxy::BestFit(const Set& _set) {
@@ -442,7 +442,7 @@ namespace dss {
     _frame.SetFrameSource(fsDSS);
     if(broadcast || sim) {
       Log("Sending packet to sim");
-      GetDSS().GetModulatorSim().Process(_frame);
+      GetDSS().GetSimulation().process(_frame);
     }
     if(broadcast || !sim) {
       if((m_DS485Controller.GetState() == csSlave) || (m_DS485Controller.GetState() == csMaster)) {
@@ -464,7 +464,7 @@ namespace dss {
   }
 
   bool DS485Proxy::IsSimAddress(const uint8_t _addr) {
-    return GetDSS().GetModulatorSim().GetID() == _addr;
+    return GetDSS().GetSimulation().isSimAddress(_addr);
   } // IsSimAddress
 
   vector<int> DS485Proxy::GetModulators() {
@@ -933,7 +933,7 @@ namespace dss {
   void DS485Proxy::Initialize() {
     Subsystem::Initialize();
     m_DS485Controller.AddFrameCollector(this);
-    GetDSS().GetModulatorSim().AddFrameCollector(this);
+    GetDSS().GetSimulation().AddFrameCollector(this);
   }
 
   void DS485Proxy::DoStart() {
@@ -1085,7 +1085,7 @@ namespace dss {
             PayloadDissector pd(frame->GetPayload());
 
             if(frame->GetFrameSource() == fsWire) {
-              GetDSS().GetModulatorSim().Process(*frame.get());
+              GetDSS().GetSimulation().process(*frame.get());
             }
             if(functionID == FunctionZoneAddDevice) {
               Log("New device");
