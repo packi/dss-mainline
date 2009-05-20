@@ -384,7 +384,7 @@ namespace dss {
     }
 
     virtual void SetName(const string& _name) { m_Name = _name; };
-    string GetName() { return m_Name; };
+    const string& GetName() const { return m_Name; };
 
     virtual ~DeviceContainer() {};
   }; // DeviceContainer

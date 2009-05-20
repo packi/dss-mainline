@@ -156,6 +156,25 @@ namespace dss {
     return sstream.str();
   } // ToJSONValue(Set,Name)
 
+  string ToJSONValue(const Group& _group) {
+    std::stringstream sstream;
+    sstream << "{ " << ToJSONValue("id") << ": " << ToJSONValue(_group.GetID()) << ",";
+    sstream << ToJSONValue("name") << ": " << ToJSONValue(_group.GetName()) << ", ";
+    sstream << ToJSONValue("devices") << ": [";
+    Set devices = _group.GetDevices();
+    bool first = true;
+    for(int iDevice = 0; iDevice < devices.Length(); iDevice++) {
+      if(!first) {
+        sstream << " , ";
+      } else {
+        first = false;
+      }
+      sstream << " { " << ToJSONValue("id") << ": " << ToJSONValue(devices[iDevice].GetDSID().ToString()) << " }";
+    }
+    sstream << "]} ";
+    return sstream.str();
+  } // ToJSONValue(Group)
+
   string ToJSONValue(Zone& _zone) {
     std::stringstream sstream;
     sstream << "{ \"id\": " << _zone.GetZoneID() << ",";
@@ -167,6 +186,16 @@ namespace dss {
 
     Set devices = _zone.GetDevices();
     sstream << ToJSONValue(devices, "devices");
+    sstream << "," << ToJSONValue("groups") << ": [";
+    bool first = true;
+    foreach(Group* pGroup, _zone.GetGroups()) {
+      if(!first) {
+        sstream << ",";
+      }
+      first = false;
+      sstream  << ToJSONValue(*pGroup);
+    }
+    sstream << "] ";
 
     sstream << "} ";
     return sstream.str();
