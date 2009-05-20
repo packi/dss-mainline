@@ -973,10 +973,7 @@ int dss__DeviceGetName(struct soap *soap, int _token, char* _deviceID, char** re
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  const char* devname = dev.GetName().c_str();
-  char* resMem = (char*)soap_malloc(soap, dev.GetName().size()+1);
-  strcpy(resMem, devname);
-  result[0] = resMem;
+  *result = soap_strdup(soap, dev.GetName().c_str());
   return SOAP_OK;
 } // dss__DeviceGetName
 

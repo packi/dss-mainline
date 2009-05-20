@@ -397,8 +397,7 @@ namespace dss {
       m_Proxy.stringProxy->SetValue(_value);
     } else {
       if(_value != NULL) {
-        m_PropVal.actualValue.pString = (char*)malloc(strlen(_value) + 1);
-        strcpy(m_PropVal.actualValue.pString, _value);
+        m_PropVal.actualValue.pString = strdup(_value);
       }
     }
     m_PropVal.valueType = vTypeString;
