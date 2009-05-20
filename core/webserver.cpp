@@ -79,7 +79,7 @@ namespace dss {
     HashMapConstStringString result;
     if(_params != NULL) {
       vector<string> paramList = SplitString(_params, '&');
-      for(vector<string>::iterator iParam = paramList.begin(); iParam < paramList.end(); ++iParam) {
+      for(vector<string>::iterator iParam = paramList.begin(); iParam != paramList.end(); ++iParam) {
         vector<string> nameValue = SplitString(*iParam, '=');
         if(nameValue.size() != 2) {
           result[*iParam] = "";
@@ -393,6 +393,7 @@ namespace dss {
           first = false;
           sstream << "{ " << ToJSONValue("name") << ": " << ToJSONValue(modulator->GetName());
           sstream << ", " << ToJSONValue("dsid") << ": " << ToJSONValue(modulator->GetDSID().ToString());
+          sstream << ", " << ToJSONValue("busid") << ": " << ToJSONValue(modulator->GetBusID());
           sstream << "}";
         }
         sstream << "]}";
