@@ -605,6 +605,13 @@ namespace dss {
         stringstream sstream;
         sstream << "{ " << ToJSONValue("isOn") << ":" << ToJSONValue(pDevice->IsOn()) << " }";
         return JSONOk(sstream.str());
+      } else if(BeginsWith(_method, "device/getName")) {
+        stringstream sstream;
+        sstream << "{ " << ToJSONValue("name") << ":" << ToJSONValue(pDevice->GetName()) << " }";
+        return JSONOk(sstream.str());
+      } else if(BeginsWith(_method, "device/setName")) {
+        pDevice->SetName(_parameter["name"]);
+        return ResultToJSON(true);
       } else {
         _handled = false;
         return "";
@@ -628,6 +635,9 @@ namespace dss {
       Modulator& modulator = GetDSS().GetApartment().GetModulatorByDSID(dsid);
       if(EndsWith(_method, "circuit/getName")) {
         return JSONOk("{ " + ToJSONValue("name") + ": " + ToJSONValue(modulator.GetName()) + "}");
+      } else if(EndsWith(_method, "circuit/setName")) {
+        modulator.SetName(_parameter["name"]);
+        return ResultToJSON(true);
       } else if(EndsWith(_method, "circuit/getEnergyBorder")) {
         stringstream sstream;
         sstream << "{" << ToJSONValue("orange") << ":" << ToJSONValue(modulator.GetEnergyLevelOrange());
