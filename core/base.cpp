@@ -200,7 +200,7 @@ namespace dss {
   vector<string> SplitString(const string& _source, const char _delimiter, bool _trimEntries) {
     vector<string> result;
     string curString = _source;
-    while(curString.size() > 0) {
+    while(!curString.empty()) {
       string::size_type delimPos = curString.find(_delimiter, 0);
       if(_trimEntries) {
         result.push_back(Trim(curString.substr(0, delimPos)));

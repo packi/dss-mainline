@@ -365,11 +365,11 @@ namespace dss {
         HashMapConstStringString& attrs = iNode->GetAttributes();
         dsid_t dsid = NullDSID;
         int busid = -1;
-        if(attrs["dsid"].size() > 0) {
+        if(!attrs["dsid"].empty()) {
           dsid = dsid_t::FromString(attrs["dsid"]);
           dsid.lower |= SimulationPrefix;
         }
-        if(attrs["busid"].size() > 0) {
+        if(!attrs["busid"].empty()) {
           busid = StrToInt(attrs["busid"]);
         }
         if((dsid == NullDSID) || (busid == -1)) {
@@ -377,7 +377,7 @@ namespace dss {
           continue;
         }
         string type = "standard.simple";
-        if(attrs["type"].size() != 0) {
+        if(!attrs["type"].empty()) {
           type = attrs["type"];
         }
 
@@ -431,7 +431,7 @@ namespace dss {
     {
       if(iNode->GetName() == "group") {
         HashMapConstStringString& attrs = iNode->GetAttributes();
-        if(attrs["id"].size() > 0) {
+        if(!attrs["id"].empty()) {
           int groupID = StrToIntDef(attrs["id"], -1);
           XMLNodeList& children = iNode->GetChildren();
           for(XMLNodeList::iterator iChildNode = children.begin(), e = children.end();
@@ -439,7 +439,7 @@ namespace dss {
           {
             if(iChildNode->GetName() == "device") {
               attrs = iChildNode->GetAttributes();
-              if(attrs["busid"].size() > 0) {
+              if(!attrs["busid"].empty()) {
                 unsigned long busID = StrToUInt(attrs["busid"]);
                 DSIDInterface& dev = LookupDevice(busID);
                 AddDeviceToGroup(&dev, groupID);
@@ -466,7 +466,7 @@ namespace dss {
       if(iNode->GetName() == "zone") {
         HashMapConstStringString& attrs = iNode->GetAttributes();
         int zoneID = -1;
-        if(attrs["id"].size() > 0) {
+        if(!attrs["id"].empty()) {
           zoneID = StrToIntDef(attrs["id"], -1);
         }
         if(zoneID != -1) {

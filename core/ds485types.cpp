@@ -27,21 +27,21 @@ namespace dss {
     std::string remainder = _string;
 
     // parse the string in 4 Byte chunks
-    if(remainder.size() > 0) {
+    if(!remainder.empty()) {
       int nChar = std::min((int)remainder.size(), 8);
       int start = remainder.size() - nChar;
       result.lower = StrToUInt("0x" + remainder.substr(start,nChar));
       remainder.erase(start, nChar);
     }
 
-    if(remainder.size() > 0) {
+    if(!remainder.empty()) {
       int nChar = std::min((int)remainder.size(), 8);
       int start = remainder.size() - nChar;
       result.upper = StrToUInt("0x" + remainder.substr(start,nChar));
       remainder.erase(start, nChar);
     }
 
-    if(remainder.size() > 0) {
+    if(!remainder.empty()) {
       int nChar = std::min((int)remainder.size(), 8);
       int start = remainder.size() - nChar;
       result.upper |= ((uint64_t)StrToUInt("0x" + remainder.substr(start,nChar)) << 32);

@@ -33,14 +33,14 @@ namespace dss {
     boost::shared_ptr<Event> newEvent(new Event(_subscription.GetOptions().GetParameter("event_name")));
     if(_subscription.GetOptions().HasParameter("time")) {
       string timeParam = _subscription.GetOptions().GetParameter("time");
-      if(timeParam.size() > 0) {
+      if(!timeParam.empty()) {
         Logger::GetInstance()->Log("RaiseEvent: Event has time");
         newEvent->SetTime(timeParam);
       }
     }
     if(_subscription.GetOptions().HasParameter(EventPropertyLocation)) {
       string location = _subscription.GetOptions().GetParameter(EventPropertyLocation);
-      if(location.size() > 0) {
+      if(!location.empty()) {
         Logger::GetInstance()->Log("RaiseEvent: Event has location");
         newEvent->SetLocation(location);
       }
@@ -128,7 +128,7 @@ namespace dss {
       if(iNode->GetName() == "parameter") {
         if(iNode->GetAttributes()["name"] == _parameterName) {
           XMLNodeList& children = iNode->GetChildren();
-          if(children.size() > 0) {
+          if(!children.empty()) {
             return children[0].GetContent();
           }
         }
@@ -190,7 +190,7 @@ namespace dss {
           return NULL;
         }
 
-        if(paramName.size() > 0) {
+        if(!paramName.empty()) {
           string paramValue = GetParameter(iNode->GetChildren(), paramName);
           if(paramValue.size() == 0 && needParam) {
             Logger::GetInstance()->Log(string("bus_handler: Needed parameter '") + paramName + "' not found in subscription for type '" + typeName + "'", lsError);

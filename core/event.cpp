@@ -596,11 +596,11 @@ namespace dss {
       if(nodeName == "parameter") {
         string value;
         string name;
-        if(iNode->GetChildren().size() > 0) {
+        if(!iNode->GetChildren().empty()) {
           value = iNode->GetChildren()[0].GetContent();
         }
         name = iNode->GetAttributes()["name"];
-        if(name.size() > 0) {
+        if(!name.empty()) {
           SetParameter(name, value);
         }
       }
