@@ -137,6 +137,10 @@ namespace dss {
     return m_Instance;
   } // GetInstance
 
+  bool DSS::HasInstance() {
+    return m_Instance != NULL;
+  }
+
   void DSS::AddDefaultInterpreterPlugins() {
     EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
     m_pEventInterpreter->AddPlugin(plugin);

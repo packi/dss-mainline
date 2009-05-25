@@ -383,7 +383,7 @@ namespace dss {
       return GetDevices().GetSubset(_selector);
     }
 
-    virtual void SetName(const string& _name) { m_Name = _name; };
+    virtual void SetName(const string& _name);
     const string& GetName() const { return m_Name; };
 
     virtual ~DeviceContainer() {};
@@ -568,7 +568,7 @@ namespace dss {
 
   class ModelEvent {
   public:
-    typedef enum { etCallSceneGroup, etCallSceneDevice, etNewDevice } EventType;
+    typedef enum { etCallSceneGroup, etCallSceneDevice, etNewDevice, etModelDirty } EventType;
   private:
     EventType m_EventType;
     vector<int> m_Parameter;
@@ -630,6 +630,8 @@ namespace dss {
 
     /** Loads the datamodel and marks the contained items as "stale" */
     void ReadConfigurationFromXML(const string& _fileName);
+
+    void WriteConfigurationToXML(const string& _fileName);
 
     /** Returns a reference to the device with the DSID _dsid */
     Device& GetDeviceByDSID(const dsid_t _dsid) const;

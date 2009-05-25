@@ -79,6 +79,7 @@ namespace dss {
     void Run();
 
     static DSS* GetInstance();
+    static bool HasInstance();
 #ifdef WITH_TESTS
     static void Teardown();
 #endif

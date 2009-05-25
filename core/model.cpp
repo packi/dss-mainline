@@ -27,6 +27,26 @@
 
 #include "foreach.h"
 
+#include <fstream>
+
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Attr.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/DOM/ProcessingInstruction.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/XML/XMLWriter.h>
+
+using Poco::XML::Document;
+using Poco::XML::Element;
+using Poco::XML::Attr;
+using Poco::XML::Text;
+using Poco::XML::ProcessingInstruction;
+using Poco::XML::AutoPtr;
+using Poco::XML::DOMWriter;
+using Poco::XML::XMLWriter;
+
 namespace dss {
 
   int getNextScene(const int _currentScene);
@@ -162,11 +182,16 @@ namespace dss {
   } // GetName
 
   void Device::SetName(const string& _name) {
-    m_Name = _name;
+    if(m_Name != _name) {
+      m_Name = _name;
+      if(DSS::HasInstance()) {
+        m_pApartment->AddModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+      }
+    }
   } // SetName
 
   bool Device::operator==(const Device& _other) const {
-    return _other.m_ShortAddress == m_ShortAddress;
+    return _other.m_DSID == m_DSID;
   } // operator==
 
   devid_t Device::GetShortAddress() const {
@@ -541,7 +566,7 @@ namespace dss {
 
   ostream& operator<<(ostream& out, const Device& _dt) {
     out << "Device ID " << _dt.GetShortAddress();
-    if(_dt.GetName().size() > 0) {
+    if(!_dt.GetName().empty()) {
       out << " name: " << _dt.GetName();
     }
     return out;
@@ -552,13 +577,9 @@ namespace dss {
   Apartment::Apartment(DSS* _pDSS)
   : Subsystem(_pDSS, "Apartment"),
     Thread("Apartment"),
+    m_IsInitializing(true),
     m_pPropertyNode(NULL)
-  {
-    Zone* zoneZero = new Zone(0);
-    AddDefaultGroupsToZone(*zoneZero);
-    m_Zones.push_back(zoneZero);
-    m_IsInitializing = true;
-  } // ctor
+  { } // ctor
 
   Apartment::~Apartment() {
     ScrubVector(m_Devices);
@@ -573,6 +594,10 @@ namespace dss {
 
   void Apartment::Initialize() {
     Subsystem::Initialize();
+    // create default zone
+    Zone* zoneZero = new Zone(0);
+    AddDefaultGroupsToZone(*zoneZero);
+    m_Zones.push_back(zoneZero);
     DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "configfile", GetDSS().GetDataDirectory() + "apartment.xml", true);
     m_pPropertyNode = DSS::GetInstance()->GetPropertySystem().CreateProperty("/apartment");
   } // Initialize
@@ -737,6 +762,9 @@ namespace dss {
             OnGroupCallScene(event.GetParameter(0), event.GetParameter(1), event.GetParameter(2));
           }
           break;
+        case ModelEvent::etModelDirty:
+          WriteConfigurationToXML(DSS::GetInstance()->GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "configfile"));
+          break;
         }
 
         m_ModelEventsMutex.Lock();
@@ -749,20 +777,25 @@ namespace dss {
   } // Run
 
   void Apartment::AddModelEvent(ModelEvent* _pEvent) {
-    m_ModelEventsMutex.Lock();
-    m_ModelEvents.push_back(_pEvent);
-    m_ModelEventsMutex.Unlock();
-    m_NewModelEvent.Signal();
+    if(m_IsInitializing) {
+      delete _pEvent;
+    } else {
+      m_ModelEventsMutex.Lock();
+      m_ModelEvents.push_back(_pEvent);
+      m_ModelEventsMutex.Unlock();
+      m_NewModelEvent.Signal();
+    }
   } // AddModelEvent
 
+  const int ApartmentConfigVersion = 1;
+
   void Apartment::ReadConfigurationFromXML(const string& _fileName) {
-    const int apartmentConfigVersion = 1;
     XMLDocumentFileReader reader(_fileName);
     SetName("dSS");
 
     XMLNode rootNode = reader.GetDocument().GetRootNode();
     if(rootNode.GetName() == "config") {
-      if(StrToInt(rootNode.GetAttributes()["version"]) == apartmentConfigVersion) {
+      if(StrToInt(rootNode.GetAttributes()["version"]) == ApartmentConfigVersion) {
         XMLNodeList nodes = rootNode.GetChildren();
         for(XMLNodeList::iterator iNode = nodes.begin(); iNode != nodes.end(); ++iNode) {
           string nodeName = iNode->GetName();
@@ -796,7 +829,7 @@ namespace dss {
         string name;
         try {
           XMLNode& nameNode = iNode->GetChildByName("name");
-          if(nameNode.GetChildren().size() > 0) {
+          if(!nameNode.GetChildren().empty()) {
             name = (nameNode.GetChildren()[0]).GetContent();
           }
         } catch(XMLException& e) {
@@ -804,7 +837,7 @@ namespace dss {
         }
 
         Device* newDevice = new Device(dsid, this);
-        if(name.size() > 0) {
+        if(!name.empty()) {
           newDevice->SetName(name);
         }
         m_StaleDevices.push_back(newDevice);
@@ -818,12 +851,15 @@ namespace dss {
       if(iModulator->GetName() == "modulator") {
         dsid_t id = dsid_t::FromString(iModulator->GetAttributes()["id"]);
         string name;
-        XMLNode& nameNode = iModulator->GetChildByName("name");
-        if(nameNode.GetChildren().size() > 0) {
-          name = (nameNode.GetChildren()[0]).GetContent();
+        try {
+          XMLNode& nameNode = iModulator->GetChildByName("name");
+          if(!nameNode.GetChildren().empty()) {
+            name = (nameNode.GetChildren()[0]).GetContent();
+          }
+        } catch(XMLException&) {
         }
         Modulator* newModulator = new Modulator(id);
-        if(name.size() > 0) {
+        if(!name.empty()) {
           newModulator->SetName(name);
         }
         m_StaleModulators.push_back(newModulator);
@@ -839,18 +875,124 @@ namespace dss {
       if(iZone->GetName() == "zone") {
         int id = StrToInt(iZone->GetAttributes()["id"]);
         string name;
-        XMLNode& nameNode = iZone->GetChildByName("name");
-        if(nameNode.GetChildren().size() > 0) {
-          name = (nameNode.GetChildren()[0]).GetContent();
+        try {
+          XMLNode& nameNode = iZone->GetChildByName("name");
+          if(!nameNode.GetChildren().empty()) {
+            name = (nameNode.GetChildren()[0]).GetContent();
+          }
+        } catch(XMLException&) {
         }
         Zone* newZone = new Zone(id);
-        if(name.size() > 0) {
+        if(!name.empty()) {
           newZone->SetName(name);
         }
         m_StaleZones.push_back(newZone);
       }
     }
   } // LoadZones
+
+  void DeviceToXML(const Device* pDevice, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
+    AutoPtr<Element> pDeviceNode = _pDocument->createElement("device");
+    pDeviceNode->setAttribute("dsid", pDevice->GetDSID().ToString());
+    if(!pDevice->GetName().empty()) {
+      AutoPtr<Element> pNameNode = _pDocument->createElement("name");
+      AutoPtr<Text> txtNode = _pDocument->createTextNode(pDevice->GetName());
+      pNameNode->appendChild(txtNode);
+      pDeviceNode->appendChild(pNameNode);
+    }
+    _parentNode->appendChild(pDeviceNode);
+  } // DeviceToXML
+
+  void ZoneToXML(const Zone* pZone, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
+    AutoPtr<Element> pZoneNode = _pDocument->createElement("zone");
+    pZoneNode->setAttribute("id", IntToString(pZone->GetZoneID()));
+    if(!pZone->GetName().empty()) {
+      AutoPtr<Element> pNameNode = _pDocument->createElement("name");
+      AutoPtr<Text> txtNode = _pDocument->createTextNode(pZone->GetName());
+      pNameNode->appendChild(txtNode);
+      pZoneNode->appendChild(pNameNode);
+    }
+    _parentNode->appendChild(pZoneNode);
+  } // ZoneToXML
+
+  void ModulatorToXML(const Modulator* pModulator, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
+    AutoPtr<Element> pModulatorNode = _pDocument->createElement("modulator");
+    pModulatorNode->setAttribute("id", pModulator->GetDSID().ToString());
+    if(!pModulator->GetName().empty()) {
+      AutoPtr<Element> pNameNode = _pDocument->createElement("name");
+      AutoPtr<Text> txtNode = _pDocument->createTextNode(pModulator->GetName());
+      pNameNode->appendChild(txtNode);
+      pModulatorNode->appendChild(pNameNode);
+    }
+    _parentNode->appendChild(pModulatorNode);
+  } // ModulatorToXML
+
+  void Apartment::WriteConfigurationToXML(const string& _fileName) {
+    Log("Writing apartment config to '" + _fileName + "'", lsInfo);
+    AutoPtr<Document> pDoc = new Document;
+
+    AutoPtr<ProcessingInstruction> pXMLHeader = pDoc->createProcessingInstruction("xml", "version='1.0' encoding='utf-8'");
+    pDoc->appendChild(pXMLHeader);
+
+    AutoPtr<Element> pRoot = pDoc->createElement("config");
+    pRoot->setAttribute("version", IntToString(ApartmentConfigVersion));
+    pDoc->appendChild(pRoot);
+
+    // apartment
+    AutoPtr<Element> pApartment = pDoc->createElement("apartment");
+    pRoot->appendChild(pApartment);
+    AutoPtr<Element> pApartmentName = pDoc->createElement("name");
+    AutoPtr<Text> pApartmentNameText = pDoc->createTextNode(GetName());
+    pApartmentName->appendChild(pApartmentNameText);
+    pApartment->appendChild(pApartmentName);
+
+    // devices
+    AutoPtr<Element> pDevices = pDoc->createElement("devices");
+    pRoot->appendChild(pDevices);
+    foreach(Device* pDevice, m_Devices) {
+      DeviceToXML(pDevice, pDevices, pDoc);
+    }
+    foreach(Device* pDevice, m_StaleDevices) {
+      DeviceToXML(pDevice, pDevices, pDoc);
+    }
+
+    // zones
+    AutoPtr<Element> pZones = pDoc->createElement("zones");
+    pRoot->appendChild(pZones);
+    foreach(Zone* pZone, m_Zones) {
+      ZoneToXML(pZone, pZones, pDoc);
+    }
+    foreach(Zone* pZone, m_StaleZones) {
+      ZoneToXML(pZone, pZones, pDoc);
+    }
+
+    // modulators
+    AutoPtr<Element> pModulators = pDoc->createElement("modulators");
+    pRoot->appendChild(pModulators);
+    foreach(Modulator* pModulator, m_Modulators) {
+      ModulatorToXML(pModulator, pModulators, pDoc);
+    }
+    foreach(Modulator* pModulator, m_StaleModulators) {
+      ModulatorToXML(pModulator, pModulators, pDoc);
+    }
+
+    string tmpOut = _fileName + ".tmp";
+    std::ofstream ofs(tmpOut.c_str());
+
+    if(ofs) {
+      DOMWriter writer;
+      writer.setNewLine("\n");
+      writer.setOptions(XMLWriter::PRETTY_PRINT);
+      writer.writeNode(ofs, pDoc);
+
+      ofs.close();
+
+      // move it to the desired location
+      rename(tmpOut.c_str(), _fileName.c_str());
+    } else {
+      Logger::GetInstance()->Log("Could not open file '" + tmpOut + "' for writing", lsFatal);
+    }
+  } // WriteConfigurationToXML
 
   Device& Apartment::GetDeviceByDSID(const dsid_t _dsid) const {
     foreach(Device* dev, m_Devices) {
@@ -995,7 +1137,7 @@ namespace dss {
   } // AllocateDevice
 
   Modulator& Apartment::AllocateModulator(const dsid_t _dsid) {
-    foreach(Modulator* modulator, m_StaleModulators) {
+    foreach(Modulator* modulator, m_Modulators) {
       if((modulator)->GetDSID() == _dsid) {
         return *modulator;
       }
@@ -1178,7 +1320,11 @@ namespace dss {
   } // GetDevices
 
   void Modulator::AddDevice(const DeviceReference& _device) {
-  	m_ConnectedDevices.push_back(_device);
+    if(!Contains(m_ConnectedDevices, _device)) {
+  	  m_ConnectedDevices.push_back(_device);
+    } else {
+      Logger::GetInstance()->Log("Modulator::AddDevice: DUPLICATE DEVICE Detected modulator: " + IntToString(m_BusID) + " device: " + _device.GetDSID().ToString(), lsFatal);
+    }
   } // AddDevice
 
   void Modulator::RemoveDevice(const DeviceReference& _device) {
@@ -1235,10 +1381,15 @@ namespace dss {
   		} catch(runtime_error&) {
   		}
   	}
-    m_Devices.push_back(_device);
-  	if(!dev.GetApartment().IsInitializing()) {
-  		DSS::GetInstance()->GetDS485Interface().SetZoneID(dev.GetModulatorID(), dev.GetShortAddress(), m_ZoneID);
-  	}
+    if(!Contains(m_Devices, _device)) {
+      m_Devices.push_back(_device);
+      if(!dev.GetApartment().IsInitializing()) {
+        DSS::GetInstance()->GetDS485Interface().SetZoneID(dev.GetModulatorID(), dev.GetShortAddress(), m_ZoneID);
+      }
+    } else {
+      Logger::GetInstance()->Log("Zone::AddDevice: DUPLICATE DEVICE Detected Zone: " + IntToString(m_ZoneID) + " device: " + _device.GetDSID().ToString(), lsFatal);
+    }
+
   } // AddDevice
 
   void Zone::AddGroup(Group* _group) {
@@ -1570,6 +1721,15 @@ namespace dss {
 
   void DeviceReference::PreviousScene() {
     GetDevice().PreviousScene();
+  }
+
+  void DeviceContainer::SetName(const string& _name) {
+    if(m_Name != _name) {
+      m_Name = _name;
+      if(DSS::HasInstance()) {
+        DSS::GetInstance()->GetApartment().AddModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+      }
+    }
   }
 
   //================================================== Utils

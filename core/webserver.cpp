@@ -432,7 +432,7 @@ namespace dss {
         sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(GetDSS().GetApartment().GetName()) << "}";
         return JSONOk(sstream.str());
       } else if(EndsWith(_method, "/setName")) {
-        GetDSS().GetApartment().SetName(_parameter["name"]);
+        GetDSS().GetApartment().SetName(_parameter["newName"]);
         result = ResultToJSON(true);
       } else {
         _handled = false;
@@ -448,15 +448,7 @@ namespace dss {
     string zoneName = _parameter["name"];
     string zoneIDString = _parameter["id"];
     Zone* pZone = NULL;
-    if(!zoneName.empty()) {
-      try {
-        Zone& zone = GetDSS().GetApartment().GetZone(zoneName);
-        pZone = &zone;
-      } catch(runtime_error& e) {
-        ok = false;
-        errorMessage = "Could not find zone named '" + zoneName + "'";
-      }
-    } else if(!zoneIDString.empty()) {
+    if(!zoneIDString.empty()) {
       int zoneID = StrToIntDef(zoneIDString, -1);
       if(zoneID != -1) {
         try {
@@ -469,6 +461,14 @@ namespace dss {
       } else {
         ok = false;
         errorMessage = "Could not parse id '" + zoneIDString + "'";
+      }
+    } else if(!zoneName.empty()) {
+      try {
+        Zone& zone = GetDSS().GetApartment().GetZone(zoneName);
+        pZone = &zone;
+      } catch(runtime_error& e) {
+        ok = false;
+        errorMessage = "Could not find zone named '" + zoneName + "'";
       }
     } else {
       ok = false;
@@ -533,10 +533,11 @@ namespace dss {
           sstream << "{" << ToJSONValue("scene") << ":" << ToJSONValue(lastScene) << "}";
           return JSONOk(sstream.str());
         } else if(EndsWith(_method, "/getName")) {
-          GetDSS().GetApartment().SetName(_parameter["name"]);
-          return ResultToJSON(true);
+          stringstream sstream;
+          sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(pZone->GetName()) << "}";
+          return JSONOk(sstream.str());
         } else if(EndsWith(_method, "/setName")) {
-          GetDSS().GetApartment().SetName(_parameter["name"]);
+          pZone->SetName(_parameter["newName"]);
           return ResultToJSON(true);
         } else {
           _handled = false;
@@ -558,15 +559,7 @@ namespace dss {
     string deviceName = _parameter["name"];
     string deviceDSIDString = _parameter["dsid"];
     Device* pDevice = NULL;
-    if(!deviceName.empty()) {
-      try {
-        Device& device = GetDSS().GetApartment().GetDeviceByName(deviceName);
-        pDevice = &device;
-      } catch(runtime_error&  e) {
-        ok = false;
-        errorMessage = "Could not find device named '" + deviceName + "'";
-      }
-    } else if(!deviceDSIDString.empty()) {
+    if(!deviceDSIDString.empty()) {
       dsid_t deviceDSID = dsid_t::FromString(deviceDSIDString);
       if(!(deviceDSID == NullDSID)) {
         try {
@@ -579,6 +572,14 @@ namespace dss {
       } else {
         ok = false;
         errorMessage = "Could not parse dsid '" + deviceDSIDString + "'";
+      }
+    } else if(!deviceName.empty()) {
+      try {
+        Device& device = GetDSS().GetApartment().GetDeviceByName(deviceName);
+        pDevice = &device;
+      } catch(runtime_error&  e) {
+        ok = false;
+        errorMessage = "Could not find device named '" + deviceName + "'";
       }
     } else {
       ok = false;
@@ -619,7 +620,7 @@ namespace dss {
         sstream << "{ " << ToJSONValue("name") << ":" << ToJSONValue(pDevice->GetName()) << " }";
         return JSONOk(sstream.str());
       } else if(BeginsWith(_method, "device/setName")) {
-        pDevice->SetName(_parameter["name"]);
+        pDevice->SetName(_parameter["newName"]);
         return ResultToJSON(true);
       } else {
         _handled = false;
@@ -645,7 +646,7 @@ namespace dss {
       if(EndsWith(_method, "circuit/getName")) {
         return JSONOk("{ " + ToJSONValue("name") + ": " + ToJSONValue(modulator.GetName()) + "}");
       } else if(EndsWith(_method, "circuit/setName")) {
-        modulator.SetName(_parameter["name"]);
+        modulator.SetName(_parameter["newName"]);
         return ResultToJSON(true);
       } else if(EndsWith(_method, "circuit/getEnergyBorder")) {
         stringstream sstream;
