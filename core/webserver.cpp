@@ -431,6 +431,9 @@ namespace dss {
         stringstream sstream;
         sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(GetDSS().GetApartment().GetName()) << "}";
         return JSONOk(sstream.str());
+      } else if(EndsWith(_method, "/setName")) {
+        GetDSS().GetApartment().SetName(_parameter["name"]);
+        result = ResultToJSON(true);
       } else {
         _handled = false;
       }
@@ -449,7 +452,7 @@ namespace dss {
       try {
         Zone& zone = GetDSS().GetApartment().GetZone(zoneName);
         pZone = &zone;
-      } catch(runtime_error&  e) {
+      } catch(runtime_error& e) {
         ok = false;
         errorMessage = "Could not find zone named '" + zoneName + "'";
       }
@@ -473,67 +476,73 @@ namespace dss {
     }
     if(ok) {
       Group* pGroup = NULL;
-	  string groupName = _parameter["groupName"];
-	  string groupIDString = _parameter["groupID"];
-	  if(!groupName.empty()) {
-		try {
-		  pGroup = pZone->GetGroup(groupName);
-		  if(pGroup == NULL) {
-			// TODO: this might better be done by the zone
-			throw runtime_error("dummy");
-		  }
-		} catch(runtime_error& e) {
-		  errorMessage = "Could not find group with name '" + groupName + "'";
-		  ok = false;
-		}
-	  } else if(!groupIDString.empty()) {
-		try {
-		  int groupID = StrToIntDef(groupIDString, -1);
-		  if(groupID != -1) {
-			pGroup = pZone->GetGroup(groupID);
-			if(pGroup == NULL) {
-			  // TODO: this might better be done by the zone
-			  throw runtime_error("dummy");
-			}
-		  } else {
-			errorMessage = "Could not parse group id '" + groupIDString + "'";
-			ok = false;
-		  }
-		} catch(runtime_error& e) {
-		  errorMessage = "Could not find group with ID '" + groupIDString + "'";
-		  ok = false;
-		}
-	  }
-	  if(ok) {
-		  if(IsDeviceInterfaceCall(_method)) {
-			IDeviceInterface* interface = NULL;
-			if(pGroup != NULL) {
-			  interface = pGroup;
-			}
-			if(ok) {
-			  if(interface == NULL) {
-				interface = pZone;
-			  }
-			  return CallDeviceInterface(_method, _parameter, _arg, interface, _session);
-			}
-		  } else if(EndsWith(_method, "/getLastCalledScene")) {
-		    int lastScene = 0;
-		    if(pGroup != NULL) {
-		      lastScene = pGroup->GetLastCalledScene();
-		    } else if(pZone != NULL) {
-		      lastScene = pZone->GetGroup(0)->GetLastCalledScene();
-		    } else {
-		      // should never reach here because ok, would be false
-		      assert(false);
-		    }
-		    stringstream sstream;
-		    sstream << "{" << ToJSONValue("scene") << ":" << ToJSONValue(lastScene) << "}";
-		    return JSONOk(sstream.str());
-		  } else {
-			_handled = false;
-			return "";
-		  }
-	  }
+      string groupName = _parameter["groupName"];
+      string groupIDString = _parameter["groupID"];
+      if(!groupName.empty()) {
+        try {
+          pGroup = pZone->GetGroup(groupName);
+          if(pGroup == NULL) {
+            // TODO: this might better be done by the zone
+            throw runtime_error("dummy");
+          }
+        } catch(runtime_error& e) {
+          errorMessage = "Could not find group with name '" + groupName + "'";
+          ok = false;
+        }
+      } else if(!groupIDString.empty()) {
+        try {
+          int groupID = StrToIntDef(groupIDString, -1);
+          if(groupID != -1) {
+            pGroup = pZone->GetGroup(groupID);
+            if(pGroup == NULL) {
+              // TODO: this might better be done by the zone
+              throw runtime_error("dummy");
+            }
+          } else {
+            errorMessage = "Could not parse group id '" + groupIDString + "'";
+            ok = false;
+          }
+        } catch(runtime_error& e) {
+          errorMessage = "Could not find group with ID '" + groupIDString + "'";
+          ok = false;
+        }
+      }
+      if(ok) {
+        if(IsDeviceInterfaceCall(_method)) {
+          IDeviceInterface* interface = NULL;
+          if(pGroup != NULL) {
+            interface = pGroup;
+          }
+          if(ok) {
+            if(interface == NULL) {
+              interface = pZone;
+            }
+            return CallDeviceInterface(_method, _parameter, _arg, interface, _session);
+          }
+        } else if(EndsWith(_method, "/getLastCalledScene")) {
+          int lastScene = 0;
+          if(pGroup != NULL) {
+            lastScene = pGroup->GetLastCalledScene();
+          } else if(pZone != NULL) {
+            lastScene = pZone->GetGroup(0)->GetLastCalledScene();
+          } else {
+            // should never reach here because ok, would be false
+            assert(false);
+          }
+          stringstream sstream;
+          sstream << "{" << ToJSONValue("scene") << ":" << ToJSONValue(lastScene) << "}";
+          return JSONOk(sstream.str());
+        } else if(EndsWith(_method, "/getName")) {
+          GetDSS().GetApartment().SetName(_parameter["name"]);
+          return ResultToJSON(true);
+        } else if(EndsWith(_method, "/setName")) {
+          GetDSS().GetApartment().SetName(_parameter["name"]);
+          return ResultToJSON(true);
+        } else {
+          _handled = false;
+          return "";
+        }
+      }
     }
     if(!ok) {
       return ResultToJSON(ok, errorMessage);
