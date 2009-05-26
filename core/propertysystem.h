@@ -63,11 +63,11 @@ namespace dss {
     std::string GetStringValue(const std::string& _propPath) const;
 
     bool SetIntValue(const std::string& _propPath, const int _value,
-                     bool _mayCreate = true);
+                     bool _mayCreate = true, bool _mayOverwrite = true);
     bool SetBoolValue(const std::string& _propPath, const bool _value,
-                      bool _mayCreate = true);
+                      bool _mayCreate = true, bool _mayOverwrite = true);
     bool SetStringValue(const std::string& _propPath, const std::string& _value,
-                        bool _mayCreate = true);
+                        bool _mayCreate = true, bool _mayOverwrite = true);
   }; //  PropertySystem
 
 

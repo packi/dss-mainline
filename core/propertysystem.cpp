@@ -210,14 +210,14 @@ namespace dss {
     }
   } // GetStringValue
 
-  bool PropertySystem::SetIntValue(const std::string& _propPath, const int _value, bool _mayCreate) {
-    if(_mayCreate) {
+  bool PropertySystem::SetIntValue(const std::string& _propPath, const int _value, bool _mayCreate, bool _mayOverwrite) {
+    PropertyNode* prop = GetProperty(_propPath);
+    if((prop == NULL) &&_mayCreate) {
       PropertyNode* prop = CreateProperty(_propPath);
       prop->SetIntegerValue(_value);
       return true;
     } else {
-      PropertyNode* prop = GetProperty(_propPath);
-      if(prop != NULL) {
+      if(prop != NULL && _mayOverwrite) {
         prop->SetIntegerValue(_value);
         return true;
       } else {
@@ -226,14 +226,14 @@ namespace dss {
     }
   } // SetIntValue
 
-  bool PropertySystem::SetBoolValue(const std::string& _propPath, const bool _value, bool _mayCreate) {
-    if(_mayCreate) {
+  bool PropertySystem::SetBoolValue(const std::string& _propPath, const bool _value, bool _mayCreate, bool _mayOverwrite) {
+    PropertyNode* prop = GetProperty(_propPath);
+    if((prop == NULL) &&_mayCreate) {
       PropertyNode* prop = CreateProperty(_propPath);
       prop->SetBooleanValue(_value);
       return true;
     } else {
-      PropertyNode* prop = GetProperty(_propPath);
-      if(prop != NULL) {
+      if(prop != NULL && _mayOverwrite) {
         prop->SetBooleanValue(_value);
         return true;
       } else {
@@ -242,14 +242,14 @@ namespace dss {
     }
   } // SetBoolValue
 
-  bool PropertySystem::SetStringValue(const std::string& _propPath, const std::string& _value, bool _mayCreate) {
-    if(_mayCreate) {
+  bool PropertySystem::SetStringValue(const std::string& _propPath, const std::string& _value, bool _mayCreate, bool _mayOverwrite) {
+    PropertyNode* prop = GetProperty(_propPath);
+    if((prop == NULL) &&_mayCreate) {
       PropertyNode* prop = CreateProperty(_propPath);
       prop->SetStringValue(_value);
       return true;
     } else {
-      PropertyNode* prop = GetProperty(_propPath);
-      if(prop != NULL) {
+      if(prop != NULL && _mayOverwrite) {
         prop->SetStringValue(_value);
         return true;
       } else {
