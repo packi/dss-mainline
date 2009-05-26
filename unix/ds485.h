@@ -136,7 +136,8 @@ namespace dss {
     csSlaveJoining,
     csSlave,
     csSlaveWaitingForFirstToken,
-    csError
+    csError,
+    csCommError
   } aControllerState;
 
   typedef enum {
@@ -203,6 +204,7 @@ namespace dss {
 
     void DoChangeState(aControllerState _newState);
     void AddToReceivedQueue(DS485CommandFrame* _frame);
+    bool ResetSerialLine();
   public:
     DS485Controller();
     virtual ~DS485Controller();

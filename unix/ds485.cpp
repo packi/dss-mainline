@@ -215,17 +215,24 @@ namespace dss {
     return true;
   } // PutFrameOnWire
 
-  void DS485Controller::Execute() {
+  bool DS485Controller::ResetSerialLine() {
     m_SerialCom.reset(new SerialCom());
     try {
       Logger::GetInstance()->Log("DS485Controller::Execute: Opening '" + m_RS485DeviceName + "' as serial device", lsInfo);
       m_SerialCom->Open(m_RS485DeviceName.c_str());
+      m_FrameReader.SetSerialCom(m_SerialCom);
+      return true;
     } catch(const runtime_error& _ex) {
       Logger::GetInstance()->Log(string("Caught exception while opening serial port: ") + _ex.what(), lsFatal);
+      return false;
+    }
+  } // ResetSerialLine
+
+  void DS485Controller::Execute() {
+    if(!ResetSerialLine()) {
       DoChangeState(csError);
       return;
     }
-    m_FrameReader.SetSerialCom(m_SerialCom);
     DoChangeState(csInitial);
     m_StationID = 0xFF;
     m_NextStationID = 0xFF;
@@ -251,28 +258,50 @@ namespace dss {
     int senseTimeMS = 0;
     int numberOfJoinPacketsToWait = -1;
     bool lastSentWasToken = false;
+    int comErrorSleepTimeScaler = 1;
 
     while(!m_Terminated) {
 
       if(m_State == csInitial) {
         senseTimeMS = (rand() % 1000) + 100;
+        numberOfJoinPacketsToWait = -1;
+        lastSentWasToken = false;
+        m_StationID = 0xFF;
+        m_NextStationID = 0xFF;
         DoChangeState(csSensing);
         continue;
+      } else if(m_State == csCommError) {
+        SleepMS(comErrorSleepTimeScaler++ * 500);
+        comErrorSleepTimeScaler = min(comErrorSleepTimeScaler, 60);
+        if(ResetSerialLine()) {
+          DoChangeState(csInitial);
+        }
+        continue;
       } else if(m_State == csSensing) {
-        if(m_FrameReader.SenseTraffic(senseTimeMS)) {
-          Logger::GetInstance()->Log("Sensed traffic on the line, changing to csSlaveWaitingToJoin");
-          // wait some time for the first frame and skip it...
-          delete m_FrameReader.GetFrame(1000);
-          DoChangeState(csSlaveWaitingToJoin);
-        } else {
-          Logger::GetInstance()->Log("No traffic on line, I'll be your master today");
-          DoChangeState(csDesignatedMaster);
+        try {
+          if(m_FrameReader.SenseTraffic(senseTimeMS)) {
+            Logger::GetInstance()->Log("Sensed traffic on the line, changing to csSlaveWaitingToJoin");
+            // wait some time for the first frame and skip it...
+            delete m_FrameReader.GetFrame(1000);
+            DoChangeState(csSlaveWaitingToJoin);
+          } else {
+            Logger::GetInstance()->Log("No traffic on line, I'll be your master today");
+            DoChangeState(csDesignatedMaster);
+          }
+          comErrorSleepTimeScaler = 1;
+        } catch(const runtime_error&) {
+          DoChangeState(csCommError);
         }
         continue;
       }
 
-
-      boost::scoped_ptr<DS485Frame> frame(GetFrameFromWire());
+      boost::scoped_ptr<DS485Frame> frame;
+      try {
+        frame.reset(GetFrameFromWire());
+      } catch(const runtime_error&) {
+        DoChangeState(csCommError);
+        continue;
+      }
       if(frame.get() == NULL) {
         cout << "§";
         // resend token after timeout

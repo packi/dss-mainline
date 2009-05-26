@@ -16,6 +16,8 @@
 #include <errno.h>
 #include <cstring>
 
+#include <iostream>
+
 #include <stdexcept>
 
 namespace dss {
@@ -24,7 +26,8 @@ namespace dss {
 
   SerialCom::SerialCom()
   : m_Speed(sp115200),
-    m_Blocking(false)
+    m_Blocking(false),
+    m_Handle(-1)
   {
     memset(&m_CommSettings, '\0', sizeof(m_CommSettings));
   } // ctor
@@ -43,6 +46,8 @@ namespace dss {
     if(m_Handle == -1) {
       perror("serial");
       throw runtime_error(string("could not open port ") + m_PortDevName);
+    } else {
+      std::cout << "Handle: " << m_Handle << std::endl;
     }
 
 
@@ -66,10 +71,20 @@ namespace dss {
     } else {
       throw runtime_error("Invalid value of speed");
     }
-    cfsetispeed(&m_CommSettings, rate);
-    cfsetospeed(&m_CommSettings, rate);
+    if(cfsetispeed(&m_CommSettings, rate) == -1) {
+      perror("cfsetispeed");
+      throw runtime_error(string("could not set input speed of port ") + m_PortDevName);
+    }
+    if(cfsetospeed(&m_CommSettings, rate) == -1) {
+      perror("cfsetospeed");
+      throw runtime_error(string("could not set ouput speed of port ") + m_PortDevName);
+    }
 
-    tcflush(m_Handle, TCIOFLUSH); // flush remaining characters
+    // flush remaining characters
+    if(tcflush(m_Handle, TCIOFLUSH) == -1) {
+      perror("tcflush");
+      throw runtime_error(string("could not flush port ") + m_PortDevName);
+    }
 
     if(tcsetattr(m_Handle, TCSANOW, &m_CommSettings) == -1) {
       perror("tcsetattr");
@@ -96,16 +111,29 @@ namespace dss {
     timeout.tv_sec = 0;
     timeout.tv_usec = _timeoutMS * 1000;
 
-    int res = select(m_Handle + 1, &fdRead, NULL, NULL, &timeout );
+    int res = select(m_Handle + 1, &fdRead, NULL, NULL, &timeout);
     if(res == 1) {
       m_ReadWriteLock.Lock();
-      read(m_Handle, &_chOut, 1);
+      res = read(m_Handle, &_chOut, 1);
       m_ReadWriteLock.Unlock();
-      return true;
+      if(res == 1) {
+        return true;
+      } else {
+        if((res == EWOULDBLOCK) || (res == EAGAIN)) {
+          return false;
+        } else {
+          close(m_Handle);
+          m_Handle = -1;
+          perror("SerialCom::GetCharTimeout read");
+          throw runtime_error("read failed");
+        }
+      }
     } else if(res == 0) {
       // timeout
       return false;
     } else {
+      close(m_Handle);
+      m_Handle = -1;
       perror("SerialCom::GetCharTimeout() select");
       throw runtime_error("select failed");
     }
@@ -124,6 +152,8 @@ namespace dss {
       }
     }
     if(ret != 1) {
+      close(m_Handle);
+      m_Handle = -1;
       perror("SerialCom::PutChar");
       throw runtime_error("error writing to serial port");
     }
