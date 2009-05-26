@@ -11,6 +11,7 @@
 #include "logger.h"
 #include "xmlwrapper.h"
 #include "dss.h"
+#include "propertysystem.h"
 
 #include "foreach.h"
 
@@ -108,13 +109,6 @@ namespace dss {
 
   //================================================== EventInterpreter
 
-/*
-
-   EventInterpreter::EventInterpreter(EventQueue* _queue)
-  : m_Queue(_queue),
-    m_EventsProcessed(0)
-  { } // ctor(EventQueue)
-*/
   EventInterpreter::EventInterpreter(DSS* _pDSS)
   : Subsystem(_pDSS, "EventInterpreter"),
     Thread("EventInterpreter"),
@@ -129,13 +123,20 @@ namespace dss {
 
   void EventInterpreter::DoStart() {
     Run();
-  }
+  } // DoStart
+
+  void EventInterpreter::Initialize() {
+    Subsystem::Initialize();
+    GetDSS().GetPropertySystem().SetStringValue(GetPropertyBasePath() + "subscriptionfile", GetDSS().GetDataDirectory() + "subscriptions.xml", true, false);
+  } // Initialize
 
   void EventInterpreter::AddPlugin(EventInterpreterPlugin* _plugin) {
     m_Plugins.push_back(_plugin);
   } // AddPlugin
 
   void EventInterpreter::Execute() {
+    LoadFromXML(GetDSS().GetPropertySystem().GetStringValue(GetPropertyBasePath() + "subscriptionfile"));
+
     if(m_Queue == NULL) {
       Logger::GetInstance()->Log("EventInterpreter: No queue set. Can't work like that... exiting...", lsFatal);
       return;
@@ -150,7 +151,7 @@ namespace dss {
         boost::shared_ptr<Event> toProcess = m_Queue->PopEvent();
         if(toProcess.get() != NULL) {
 
-          Logger::GetInstance()->Log(string("EventInterpreter: Got event from queue: '") + toProcess->GetName() + "'");
+          Logger::GetInstance()->Log(string("EventInterpreter: Got event from queue: '") + toProcess->GetName() + "'", lsInfo);
           for(HashMapConstStringString::const_iterator iParam = toProcess->GetProperties().GetContainer().begin(), e = toProcess->GetProperties().GetContainer().end();
               iParam != e; ++iParam)
           {
@@ -172,7 +173,7 @@ namespace dss {
                 Logger::GetInstance()->Log("EventInterpreter: called.");
               }
               if(!called) {
-                Logger::GetInstance()->Log(string("EventInterpreter: Could not find handler '") + (*ipSubscription)->GetHandlerName());
+                Logger::GetInstance()->Log(string("EventInterpreter: Could not find handler '") + (*ipSubscription)->GetHandlerName(), lsInfo);
               }
 
             } else {
@@ -181,7 +182,7 @@ namespace dss {
           }
 
           m_EventsProcessed++;
-          Logger::GetInstance()->Log(string("EventInterpreter: Done processing event '") + toProcess->GetName() + "'");
+          Logger::GetInstance()->Log(string("EventInterpreter: Done processing event '") + toProcess->GetName() + "'", lsInfo);
         }
       }
     }
@@ -330,7 +331,7 @@ namespace dss {
   { } // ctor
 
   void EventQueue::PushEvent(boost::shared_ptr<Event> _event) {
-    Logger::GetInstance()->Log(string("EventQueue: New event '") + _event->GetName() + "' in queue...");
+    Logger::GetInstance()->Log(string("EventQueue: New event '") + _event->GetName() + "' in queue...", lsInfo);
     if(_event->HasPropertySet(EventPropertyTime)) {
       DateTime when;
       bool validDate = false;
@@ -344,7 +345,7 @@ namespace dss {
             when = when.AddSeconds(offset);
             validDate = true;
           } else {
-            Logger::GetInstance()->Log(string("EventQueue::PushEvent: Could not parse offset or offset is below zero '") + timeOffset + "'", lsError);
+            Logger::GetInstance()->Log(string("EventQueue::PushEvent: Could not parse offset or offset is below zero: '") + timeOffset + "'", lsError);
           }
         } else {
           try {
@@ -356,7 +357,7 @@ namespace dss {
         }
       }
       if(validDate) {
-        Logger::GetInstance()->Log(string("EventQueue::PushEvent: Event has a valid time, rescheduling at ") + (string)when);
+        Logger::GetInstance()->Log(string("EventQueue::PushEvent: Event has a valid time, rescheduling at ") + (string)when, lsInfo);
         Schedule* sched = new StaticSchedule(when);
         ScheduledEvent* scheduledEvent = new ScheduledEvent(_event, sched);
         scheduledEvent->SetOwnsEvent(false);

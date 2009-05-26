@@ -10,6 +10,10 @@
 #ifndef DSS_H_INCLUDED
 #define DSS_H_INCLUDED
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -29,7 +33,7 @@ namespace dss {
   class EventInterpreter;
   class Apartment;
   class WebServices;
-#ifdef USE_SIM
+#ifdef WITH_SIM
   class DSSim;
 #endif
 
@@ -54,7 +58,7 @@ namespace dss {
     boost::shared_ptr<DS485Interface> m_pDS485Interface;
     boost::shared_ptr<PropertySystem> m_pPropertySystem;
     boost::shared_ptr<Apartment> m_pApartment;
-#ifdef USE_SIM
+#ifdef WITH_SIM
     boost::shared_ptr<DSSim> m_pSimulation;
 #endif
     boost::shared_ptr<EventRunner> m_pEventRunner;
@@ -88,7 +92,7 @@ namespace dss {
 
     DS485Interface& GetDS485Interface() { return *m_pDS485Interface; }
     Apartment& GetApartment() { return *m_pApartment; }
-#ifdef USE_SIM
+#ifdef WITH_SIM
     DSSim& GetSimulation() { return *m_pSimulation; }
 #endif
     EventRunner& GetEventRunner() { return *m_pEventRunner; }
@@ -99,6 +103,7 @@ namespace dss {
     WebServer& GetWebServer() { return *m_pWebServer; }
 
     const std::string& GetDataDirectory() const { return m_DataDirectory; }
+    void SetDataDirectory(const std::string& _value);
   }; // DSS
 
 }

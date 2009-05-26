@@ -242,53 +242,57 @@ namespace dss {
 
   void DSSim::LoadPlugins() {
     fs::directory_iterator end_iter;
-    for ( fs::directory_iterator dir_itr(GetDSS().GetDataDirectory() + "plugins");
-          dir_itr != end_iter;
-          ++dir_itr )
-    {
-      try {
-        if (fs::is_regular(dir_itr->status())) {
-          if(EndsWith(dir_itr->leaf(), ".so")) {
-            Log("LoadPlugins: Trying to load '" + dir_itr->string() + "'", lsInfo);
-            void* handle = dlopen(dir_itr->string().c_str(), RTLD_LAZY);
-            if(handle == NULL) {
-              Log("LoadPlugins: Could not load plugin \"" + dir_itr->leaf() + "\" message: " + dlerror(), lsError);
-              continue;
-            }
+    try {
+      for ( fs::directory_iterator dir_itr(GetDSS().GetDataDirectory() + "plugins");
+            dir_itr != end_iter;
+            ++dir_itr )
+      {
+        try {
+          if (fs::is_regular(dir_itr->status())) {
+            if(EndsWith(dir_itr->leaf(), ".so")) {
+              Log("LoadPlugins: Trying to load '" + dir_itr->string() + "'", lsInfo);
+              void* handle = dlopen(dir_itr->string().c_str(), RTLD_LAZY);
+              if(handle == NULL) {
+                Log("LoadPlugins: Could not load plugin \"" + dir_itr->leaf() + "\" message: " + dlerror(), lsError);
+                continue;
+              }
 
-            dlerror();
-            int (*version)();
-            *(void**) (&version) = dlsym(handle, "dsid_getversion");
-            char* error;
-            if((error = dlerror()) != NULL) {
-               Log("LoadPlugins: could get version from \"" + dir_itr->leaf() + "\":" + error, lsError);
-               continue;
-            }
+              dlerror();
+              int (*version)();
+              *(void**) (&version) = dlsym(handle, "dsid_getversion");
+              char* error;
+              if((error = dlerror()) != NULL) {
+                 Log("LoadPlugins: could get version from \"" + dir_itr->leaf() + "\":" + error, lsError);
+                 continue;
+              }
 
-            int ver = (*version)();
-            if(ver != DSID_PLUGIN_API_VERSION) {
-              Log("LoadPlugins: Versionmismatch (plugin: " + IntToString(ver) + " api:" + IntToString(DSID_PLUGIN_API_VERSION) + ")", lsError);
-              continue;
-            }
+              int ver = (*version)();
+              if(ver != DSID_PLUGIN_API_VERSION) {
+                Log("LoadPlugins: Versionmismatch (plugin: " + IntToString(ver) + " api:" + IntToString(DSID_PLUGIN_API_VERSION) + ")", lsError);
+                continue;
+              }
 
-            const char* (*get_name)();
-            *(void**)(&get_name) = dlsym(handle, "dsid_get_plugin_name");
-            if((error = dlerror()) != NULL) {
-              Log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
-              continue;
+              const char* (*get_name)();
+              *(void**)(&get_name) = dlsym(handle, "dsid_get_plugin_name");
+              if((error = dlerror()) != NULL) {
+                Log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
+                continue;
+              }
+              const char* pluginName = (*get_name)();
+              if(pluginName == NULL) {
+                Log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
+                continue;
+              }
+              Log("LoadPlugins: Plugin provides " + string(pluginName), lsInfo);
+              m_DSIDFactory.RegisterCreator(new DSIDPluginCreator(handle, pluginName));
             }
-            const char* pluginName = (*get_name)();
-            if(pluginName == NULL) {
-              Log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
-              continue;
-            }
-            Log("LoadPlugins: Plugin provides " + string(pluginName), lsInfo);
-            m_DSIDFactory.RegisterCreator(new DSIDPluginCreator(handle, pluginName));
           }
+        } catch (const std::exception & ex) {
+          Log("LoadPlugins: Cought exception while loading " + dir_itr->leaf() + " '" + ex.what() + "'", lsError);
         }
-      } catch (const std::exception & ex) {
-        Log("LoadPlugins: Cought exception while loading " + dir_itr->leaf() + " '" + ex.what() + "'", lsError);
       }
+    } catch(const std::exception& ex) {
+      Log(string("Error loading plugins: '") + ex.what() + "'");
     }
   } // LoadPlugins
 

@@ -7,6 +7,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
 #include "dss.h"
 #include "logger.h"
 #include "xmlwrapper.h"
@@ -19,7 +23,7 @@
 
 #include "webserver.h"
 #include "bonjour.h"
-#ifdef USE_SIM
+#ifdef WITH_SIM
   #include "sim/dssim.h"
 #endif
 #include "webservices/webservices.h"
@@ -37,22 +41,36 @@ namespace dss {
 
   //============================================= DSS
 
+#ifdef WITH_DATADIR
+const char* DataDirectory = WITH_DATADIR;
+#else
+const char* DataDirectory = "data/";
+#endif
+
   DSS::DSS()
   {
     m_State = ssInvalid;
     m_pPropertySystem = boost::shared_ptr<PropertySystem>(new PropertySystem);
-    m_DataDirectory = "data/";
+    SetDataDirectory(DataDirectory);
 
     m_TimeStarted = time(NULL);
     m_pPropertySystem->CreateProperty("/system/uptime")->LinkToProxy(
         PropertyProxyMemberFunction<DSS,int>(*this, &DSS::GetUptime));
     m_pPropertySystem->CreateProperty("/config/datadirectory")->LinkToProxy(
-        PropertyProxyPointer<string>(&m_DataDirectory));
+        PropertyProxyMemberFunction<DSS,string>(*this, &DSS::GetDataDirectory, &DSS::SetDataDirectory));
   } // ctor
 
   int DSS::GetUptime() const {
     return (int)difftime( time( NULL ), m_TimeStarted );
   } // GetUptime
+
+  void DSS::SetDataDirectory(const string& _value) {
+    if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
+      m_DataDirectory = _value + "/";
+    } else {
+      m_DataDirectory = _value;
+    }
+  } // SetDataDirectory
 
   void DSS::Initialize(const vector<string>& _properties) {
     m_State = ssCreatingSubsystems;
@@ -69,7 +87,7 @@ namespace dss {
     m_pWebServices = boost::shared_ptr<WebServices>(new WebServices(this));
     m_Subsystems.push_back(m_pWebServices.get());
 
-#ifdef USE_SIM
+#ifdef WITH_SIM
     m_pSimulation = boost::shared_ptr<DSSim>(new DSSim(this));
     m_Subsystems.push_back(m_pSimulation.get());
 #endif
@@ -85,8 +103,6 @@ namespace dss {
 
     m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner);
     m_pEventQueue = boost::shared_ptr<EventQueue>(new EventQueue);
-
-    m_pPropertySystem->SetStringValue("/config/datadir", "data/");
 
     foreach(string propLine, _properties) {
       string::size_type pos = propLine.find("=");
@@ -146,8 +162,6 @@ namespace dss {
     m_pEventInterpreter->AddPlugin(plugin);
     plugin = new EventInterpreterPluginDS485(m_pDS485Interface.get(), m_pEventInterpreter.get());
     m_pEventInterpreter->AddPlugin(plugin);
-
-    m_pEventInterpreter->LoadFromXML(GetPropertySystem().GetStringValue("/config/eventinterpreter/subscriptionfile"));
 
     m_pEventRunner->SetEventQueue(m_pEventQueue.get());
     m_pEventInterpreter->SetEventRunner(m_pEventRunner.get());

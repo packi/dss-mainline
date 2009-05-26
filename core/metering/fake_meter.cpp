@@ -18,8 +18,6 @@ namespace dss {
   : Subsystem(_pDSS, "FakeMeter"),
     Thread("FakeMeter")
   {
-    GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "device", "/dev/ttyS2");
-    GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "storageLocation", GetDSS().GetDataDirectory()+"webroot/metering/", true);
   }
 
   void FakeMeter::Execute() {
@@ -60,6 +58,13 @@ namespace dss {
       writer.WriteToXML(*m_Series, m_MeteringStorageLocation + "metering.xml");
     }
   } // Execute
+
+  void FakeMeter::Initialize() {
+    Subsystem::Initialize();
+
+    GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "device", "/dev/ttyS2", true, false);
+    GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "storageLocation", GetDSS().GetDataDirectory()+"webroot/metering/", true, false);
+  }
 
   void FakeMeter::DoStart() {
     m_MeteringStorageLocation = GetDSS().GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "storageLocation");

@@ -22,8 +22,6 @@ namespace dss {
   {
     Logger::GetInstance()->Log("Starting Webserver...");
     m_SHttpdContext = shttpd_init();
-    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "ports", "8080", true);
-    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "webroot", GetDSS().GetDataDirectory() + "webroot/", true);
   } // ctor
 
   WebServer::~WebServer() {
@@ -33,6 +31,16 @@ namespace dss {
   void WebServer::Initialize() {
     Subsystem::Initialize();
 
+    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "webroot", GetDSS().GetDataDirectory() + "webroot/", true, false);
+    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "ports", "8080", true, false);
+
+  } // Initialize
+
+  void WebServer::DoStart() {
+    Run();
+  } // Start
+
+  void WebServer::Execute() {
     string ports = DSS::GetInstance()->GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "ports");
     Log("Webserver: Listening on port(s) " + ports);
     shttpd_set_option(m_SHttpdContext, "ports", ports.c_str());
@@ -43,13 +51,7 @@ namespace dss {
 
     shttpd_register_uri(m_SHttpdContext, "/browse/*", &HTTPListOptions, NULL);
     shttpd_register_uri(m_SHttpdContext, "/json/*", &JSONHandler, NULL);
-  } // Initialize
 
-  void WebServer::DoStart() {
-    Run();
-  } // Start
-
-  void WebServer::Execute() {
     Log("Webserver started", lsInfo);
     while(!m_Terminated) {
       shttpd_poll(m_SHttpdContext, 1000);
@@ -884,6 +886,7 @@ namespace dss {
     string method = uri.substr(uri.find(urlid) + urlid.size());
 
     WebServer& self = DSS::GetInstance()->GetWebServer();
+    self.Log("Processing call to " + method);
 
     Session* session = NULL;
     string tokenStr = paramMap["token"];
@@ -899,7 +902,6 @@ namespace dss {
         }
       }
     }
-
 
     string result;
     bool handled = false;
@@ -928,6 +930,7 @@ namespace dss {
     if(!handled) {
       EmitHTTPHeader(404, _arg, "application/json");
       result = "{ ok: " + ToJSONValue(false) + ", message: " + ToJSONValue("Call to unknown function") + " }";
+      self.Log("Unknown function '" + method + "'", lsError);
     } else {
       EmitHTTPHeader(200, _arg, "application/json");
     }
@@ -944,6 +947,9 @@ namespace dss {
     HashMapConstStringString paramMap = ParseParameter(shttpd_get_env(_arg, "QUERY_STRING"));
 
     string path = uri.substr(uri.find(urlid) + urlid.size());
+    if(path.empty()) {
+      path = "/";
+    }
     shttpd_printf(_arg, "<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><body>");
 
     std::stringstream stream;

@@ -6,6 +6,9 @@
 #cmakedefine HAVE_JS_JSAPI_H
 #cmakedefine HAVE_DNS_SD
 #cmakedefine HAVE_AVAHI
+#cmakedefine WITH_SIM
+#cmakedefine WITH_TESTS
+#cmakedefine WITH_DATADIR "${WITH_DATADIR}"
 
 #endif /* DIGITAL_STROM_SERVER_CONFIG_H */
 

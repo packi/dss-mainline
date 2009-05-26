@@ -1,5 +1,12 @@
-cmake_minimum_required (VERSION 2.6)
-project(DSS)
+CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
+PROJECT(DSS)
+
+OPTION(WITH_TESTS "Include test-suite" ON)
+OPTION(WITH_SIM "Compile and start the simulation" ON)
+IF(NOT WITH_DATADIR)
+	SET(WITH_DATADIR "data/" CACHE FILEPATH "Data directory")
+ENDIF(NOT WITH_DATADIR)
+
 
 INCLUDE (${CMAKE_ROOT}/Modules/FindLibXml2.cmake)
 IF (LIBXML2_FOUND)
@@ -10,19 +17,19 @@ ELSE (LIBXML2_FOUND)
 	LibXML2.")
 ENDIF (LIBXML2_FOUND)
 
-add_definitions(-DXP_UNIX -DUSE_SIM -DUSE_LIBXML -DNO_CGI -DWITH_TESTS)
+ADD_DEFINITIONS(-DXP_UNIX -DUSE_LIBXML -DNO_CGI)
 
-include_directories(external)
-include_directories(${DSS_SOURCE_DIR})
+INCLUDE_DIRECTORIES(external)
+INCLUDE_DIRECTORIES(${DSS_SOURCE_DIR})
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  include_directories(/opt/local/include)
-  set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} /opt/local/include)
-  link_directories(/opt/local/lib)
-  link_libraries(boost_filesystem-mt boost_system-mt boost_program_options-mt PocoFoundation PocoNet)
+  INCLUDE_DIRECTORIES(/opt/local/include)
+  SET(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} /opt/local/include)
+  LINK_DIRECTORIES(/opt/local/lib)
+  LINK_LIBRARIES(boost_filesystem-mt boost_system-mt boost_program_options-mt PocoFoundation PocoNet)
   SET(DNS_SD_LIB)
 ELSE(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  link_libraries(boost_filesystem boost_program_options rt)
+  LINK_LIBRARIES(boost_filesystem boost_program_options rt)
   SET(DNS_SD_LIB dns_sd)
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
@@ -30,13 +37,13 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -Wno-deprecated)
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
-link_libraries(PocoFoundation PocoNet)
+LINK_LIBRARIES(PocoFoundation PocoNet)
 
 # header tests
 INCLUDE(CheckIncludeFiles)
 
 # check for SpiderMonkey API header
-set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DXP_UNIX)
+SET(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DXP_UNIX)
 CHECK_INCLUDE_FILES(mozjs/jsapi.h HAVE_MOZJS_JSAPI_H)
 CHECK_INCLUDE_FILES(js/jsapi.h HAVE_JS_JSAPI_H)
 
@@ -50,27 +57,33 @@ ENDIF(${HAVE_AVAHI} MATCHES 1)
 
 
 # check for SpiderMonkey Library
-find_library(MOZJS mozjs)
+FIND_LIBRARY(MOZJS mozjs)
 IF(${MOZJS} MATCHES "MOZJS-NOTFOUND")
-find_library(MOZJS js)
+  FIND_LIBRARY(MOZJS js)
 ENDIF(${MOZJS} MATCHES "MOZJS-NOTFOUND")
+
+# set default data directory
+
+
 
 # generate config.h header file
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-add_definitions(-DHAVE_CONFIG_H)
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+ADD_DEFINITIONS(-DHAVE_CONFIG_H)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
-add_subdirectory(core)
-add_subdirectory(unix)
-add_subdirectory(webservices)
-add_subdirectory(external)
-add_subdirectory(tests)
+ADD_SUBDIRECTORY(core)
+ADD_SUBDIRECTORY(unix)
+ADD_SUBDIRECTORY(webservices)
+ADD_SUBDIRECTORY(external)
+IF(WITH_TESTS) 
+  ADD_SUBDIRECTORY(tests)
+ENDIF(WITH_TESTS)
 
-link_directories(${DSS_BINARY_DIR}/core ${DSS_BINARY_DIR}/unix ${DSS_BINARY_DIR}/tests)
+LINK_DIRECTORIES(${DSS_BINARY_DIR}/core ${DSS_BINARY_DIR}/unix ${DSS_BINARY_DIR}/tests)
 
-add_executable(dss main.cpp namespaces.cpp)
+ADD_EXECUTABLE(dss main.cpp namespaces.cpp)
 
-link_libraries(gsoap++)
+LINK_LIBRARIES(gsoap++)
 
-target_link_libraries(dss tests core unix webservices pthread shttpd ical dl PocoXML ${MOZJS} cppunit ${DNS_SD_LIB})
+TARGET_LINK_LIBRARIES(dss tests core unix webservices pthread shttpd ical dl PocoXML ${MOZJS} cppunit ${DNS_SD_LIB})

@@ -15,6 +15,11 @@
 */
 
 
+
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
 #include "core/base.h"
 #include "core/dss.h"
 #include "core/logger.h"

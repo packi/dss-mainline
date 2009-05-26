@@ -598,8 +598,8 @@ namespace dss {
     Zone* zoneZero = new Zone(0);
     AddDefaultGroupsToZone(*zoneZero);
     m_Zones.push_back(zoneZero);
-    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "configfile", GetDSS().GetDataDirectory() + "apartment.xml", true);
     m_pPropertyNode = DSS::GetInstance()->GetPropertySystem().CreateProperty("/apartment");
+    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "configfile", GetDSS().GetDataDirectory() + "apartment.xml", true, false);
   } // Initialize
 
   void Apartment::DoStart() {
@@ -645,95 +645,94 @@ namespace dss {
     // Load devices/modulators/etc. from a config-file
     string configFileName = DSS::GetInstance()->GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "configfile");
     if(!FileExists(configFileName)) {
-      Logger::GetInstance()->Log(string("Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
+      Logger::GetInstance()->Log(string("Apartment::Execute: Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
     } else {
       ReadConfigurationFromXML(configFileName);
     }
 
     DS485Interface& interface = DSS::GetInstance()->GetDS485Interface();
 
+    Log("Apartment::Execute: Waiting for interface to get ready", lsInfo);
+
     while(!interface.IsReady() && !m_Terminated) {
       SleepMS(1000);
     }
 
-    while(!m_Terminated) {
-      Log("Apartment::Execute received proxy event, enumerating apartment / dSMs");
+    Log("Apartment::Execute: Interface is ready, enumerating model", lsInfo);
 
-      vector<int> modIDs = interface.GetModulators();
-      Log("Found " + IntToString(modIDs.size()) + " modulators...");
-      foreach(int modulatorID, modIDs) {
-        Log("Found modulator with id: " + IntToString(modulatorID));
-        dsid_t modDSID = interface.GetDSIDOfModulator(modulatorID);
-        Log("  DSID: " + modDSID.ToString());
-        Modulator& modulator = AllocateModulator(modDSID);
-        modulator.SetBusID(modulatorID);
+    vector<int> modIDs = interface.GetModulators();
+    Log("Found " + IntToString(modIDs.size()) + " modulators...");
+    foreach(int modulatorID, modIDs) {
+      Log("Found modulator with id: " + IntToString(modulatorID));
+      dsid_t modDSID = interface.GetDSIDOfModulator(modulatorID);
+      Log("  DSID: " + modDSID.ToString());
+      Modulator& modulator = AllocateModulator(modDSID);
+      modulator.SetBusID(modulatorID);
 
-        int levelOrange, levelRed;
-        if(interface.GetEnergyBorder(modulatorID, levelOrange, levelRed)) {
-          modulator.SetEnergyLevelOrange(levelOrange);
-          modulator.SetEnergyLevelRed(levelRed);
+      int levelOrange, levelRed;
+      if(interface.GetEnergyBorder(modulatorID, levelOrange, levelRed)) {
+        modulator.SetEnergyLevelOrange(levelOrange);
+        modulator.SetEnergyLevelRed(levelRed);
+      }
+
+      vector<int> zoneIDs = interface.GetZones(modulatorID);
+      foreach(int zoneID, zoneIDs) {
+        Log("  Found zone with id: " + IntToString(zoneID));
+        Zone& zone = AllocateZone(modulator, zoneID);
+
+        vector<int> devices = interface.GetDevicesInZone(modulatorID, zoneID);
+        foreach(int devID, devices) {
+          dsid_t dsid = interface.GetDSIDOfDevice(modulatorID, devID);
+          vector<int> results = interface.SendCommand(cmdGetFunctionID, devID, modulatorID);
+          int functionID = 0;
+          if(results.size() == 1) {
+            functionID = results.front();
+          }
+          Log("    Found device with id: " + IntToString(devID));
+          Log("    DSID:        " + dsid.ToString());
+          Log("    Function ID: " + UnsignedLongIntToHexString(functionID));
+          Device& dev = AllocateDevice(dsid);
+          dev.SetShortAddress(devID);
+          dev.SetModulatorID(modulatorID);
+          dev.SetZoneID(zoneID);
+          dev.SetFunctionID(functionID);
+          zone.AddDevice(DeviceReference(dev, *this));
+          modulator.AddDevice(DeviceReference(dev, *this));
         }
 
-        vector<int> zoneIDs = interface.GetZones(modulatorID);
-        foreach(int zoneID, zoneIDs) {
-          Log("  Found zone with id: " + IntToString(zoneID));
-          Zone& zone = AllocateZone(modulator, zoneID);
+        vector<int> groupIDs = interface.GetGroups(modulatorID, zoneID);
+        foreach(int groupID, groupIDs) {
+          Log("    Found group with id: " + IntToString(groupID));
+          vector<int> devingroup = interface.GetDevicesInGroup(modulatorID, zoneID, groupID);
 
-          vector<int> devices = interface.GetDevicesInZone(modulatorID, zoneID);
-          foreach(int devID, devices) {
-            dsid_t dsid = interface.GetDSIDOfDevice(modulatorID, devID);
-            vector<int> results = interface.SendCommand(cmdGetFunctionID, devID, modulatorID);
-            int functionID = 0;
-            if(results.size() == 1) {
-              functionID = results.front();
-            }
-            Log("    Found device with id: " + IntToString(devID));
-            Log("    DSID:        " + dsid.ToString());
-            Log("    Function ID: " + UnsignedLongIntToHexString(functionID));
-            Device& dev = AllocateDevice(dsid);
-            dev.SetShortAddress(devID);
-            dev.SetModulatorID(modulatorID);
-            dev.SetZoneID(zoneID);
-            dev.SetFunctionID(functionID);
-            zone.AddDevice(DeviceReference(dev, *this));
-            modulator.AddDevice(DeviceReference(dev, *this));
-          }
-
-          vector<int> groupIDs = interface.GetGroups(modulatorID, zoneID);
-          foreach(int groupID, groupIDs) {
-            Log("    Found group with id: " + IntToString(groupID));
-            vector<int> devingroup = interface.GetDevicesInGroup(modulatorID, zoneID, groupID);
-
-            // TODO: read last called scene for group
-            foreach(int devID, devingroup) {
-              try {
-                Log("     Adding device " + IntToString(devID) + " to group " + IntToString(groupID));
-                Device& dev = GetDeviceByShortAddress(modulator, devID);
-                dev.AddToGroup(groupID);
-                if(zone.GetGroup(groupID) == NULL) {
-                  Log("     Adding new group to zone");
-                  zone.AddGroup(new Group(groupID, zone.GetZoneID(), *this));
-                }
-                zone.GetGroup(groupID)->AddDevice(DeviceReference(dev, *this));
-                try {
-                  Group& group = GetGroup(groupID);
-                  group.AddDevice(DeviceReference(dev, *this));
-                } catch(ItemNotFoundException&) {
-                  Group* pGroup = new Group(groupID, 0, *this);
-                  GetZone(0).AddGroup(pGroup);
-                  pGroup->AddDevice(DeviceReference(dev, *this));
-                  Log("     Adding new group to zone 0");
-                }
-              } catch(ItemNotFoundException& e) {
-                Logger::GetInstance()->Log(string("Could not find device with short-address ") + IntToString(devID));
+          // TODO: read last called scene for group
+          foreach(int devID, devingroup) {
+            try {
+              Log("     Adding device " + IntToString(devID) + " to group " + IntToString(groupID));
+              Device& dev = GetDeviceByShortAddress(modulator, devID);
+              dev.AddToGroup(groupID);
+              if(zone.GetGroup(groupID) == NULL) {
+                Log("     Adding new group to zone");
+                zone.AddGroup(new Group(groupID, zone.GetZoneID(), *this));
               }
+              zone.GetGroup(groupID)->AddDevice(DeviceReference(dev, *this));
+              try {
+                Group& group = GetGroup(groupID);
+                group.AddDevice(DeviceReference(dev, *this));
+              } catch(ItemNotFoundException&) {
+                Group* pGroup = new Group(groupID, 0, *this);
+                GetZone(0).AddGroup(pGroup);
+                pGroup->AddDevice(DeviceReference(dev, *this));
+                Log("     Adding new group to zone 0");
+              }
+            } catch(ItemNotFoundException& e) {
+              Logger::GetInstance()->Log(string("Could not find device with short-address ") + IntToString(devID));
             }
           }
         }
       }
-
-      break;
     }
+
     Logger::GetInstance()->Log("******** Finished loading model from dSM(s)...", lsInfo);
     m_IsInitializing = false;
 

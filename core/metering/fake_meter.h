@@ -32,6 +32,7 @@ namespace dss {
     FakeMeter(DSS* _pDSS);
     virtual ~FakeMeter() {};
 
+    virtual void Initialize();
   }; // FakeMeter
 
 }

@@ -278,6 +278,7 @@ namespace dss {
     EventInterpreter(DSS* _pDSS);
     virtual ~EventInterpreter();
 
+    virtual void Initialize();
 
     virtual void Execute();
 
