@@ -116,7 +116,9 @@ namespace dss {
     m_EventRunner(NULL),
     m_EventsProcessed(0)
   {
-    GetDSS().GetPropertySystem().CreateProperty(GetPropertyBasePath() + "eventsProcessed")->LinkToProxy(PropertyProxyPointer<int>(&m_EventsProcessed));
+    if(DSS::HasInstance()) {
+      GetDSS().GetPropertySystem().CreateProperty(GetPropertyBasePath() + "eventsProcessed")->LinkToProxy(PropertyProxyPointer<int>(&m_EventsProcessed));
+    }
   } // ctor()
 
   EventInterpreter::~EventInterpreter() {

@@ -70,6 +70,7 @@ protected:
 
   void testSets() {
     Apartment apt(NULL);
+    apt.Initialize();
 
     Device& dev1 = apt.AllocateDevice(dsid_t(0,1));
     dev1.SetShortAddress(1);
@@ -94,6 +95,7 @@ protected:
 
   void testDevices() {
     Apartment apt(NULL);
+    apt.Initialize();
 
     Device& dev1 = apt.AllocateDevice(dsid_t(0,1));
     dev1.SetShortAddress(1);
@@ -116,6 +118,7 @@ protected:
 
   void testEvents() {
     Apartment apt(NULL);
+    apt.Initialize();
 
     Device& dev = apt.AllocateDevice(dsid_t(0,1));
     dev.SetShortAddress(1);
@@ -150,6 +153,7 @@ protected:
 
   void testSubscriptions() {
     Apartment apt(NULL);
+    apt.Initialize();
 
     Device& dev = apt.AllocateDevice(dsid_t(0,1));
     dev.SetShortAddress(1);
@@ -180,6 +184,8 @@ protected:
                         "s.subscribe();\n"
                         "\n");
     ctx->Evaluate<void>();
+
+    CPPUNIT_ASSERT_EQUAL(interpreter.GetNumberOfSubscriptions(), 1);
   } // testSubscriptions
 
 };

@@ -43,8 +43,10 @@ namespace dss {
       severity = static_cast<aLogSeverity>(GetDSS().GetPropertySystem().GetIntValue(GetConfigPropertyBasePath() + "loglevel"));
     }
     m_pLogChannel.reset(new LogChannel(m_Name, severity));
-    GetDSS().GetPropertySystem().GetProperty(GetConfigPropertyBasePath() + "loglevel")
-      ->LinkToProxy(PropertyProxyMemberFunction<Subsystem, int>(*this, &Subsystem::GetLogSeverity, &Subsystem::SetLogSeverity));
+    if(m_pDSS != NULL) {
+      GetDSS().GetPropertySystem().GetProperty(GetConfigPropertyBasePath() + "loglevel")
+        ->LinkToProxy(PropertyProxyMemberFunction<Subsystem, int>(*this, &Subsystem::GetLogSeverity, &Subsystem::SetLogSeverity));
+    }
     m_State = ssInitialized;
   } // Initialize
 

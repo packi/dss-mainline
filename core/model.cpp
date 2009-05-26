@@ -598,8 +598,10 @@ namespace dss {
     Zone* zoneZero = new Zone(0);
     AddDefaultGroupsToZone(*zoneZero);
     m_Zones.push_back(zoneZero);
-    m_pPropertyNode = DSS::GetInstance()->GetPropertySystem().CreateProperty("/apartment");
-    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "configfile", GetDSS().GetDataDirectory() + "apartment.xml", true, false);
+    if(DSS::HasInstance()) {
+      m_pPropertyNode = DSS::GetInstance()->GetPropertySystem().CreateProperty("/apartment");
+      DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "configfile", GetDSS().GetDataDirectory() + "apartment.xml", true, false);
+    }
   } // Initialize
 
   void Apartment::DoStart() {
