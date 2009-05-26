@@ -30,7 +30,7 @@
 <listOptionValue builtIn="false" value="XP_UNIX"/>
 <listOptionValue builtIn="false" value="USE_DNS_SD"/>
 <listOptionValue builtIn="false" value="WITH_TESTS"/>
-<listOptionValue builtIn="false" value="USE_SIM"/>
+<listOptionValue builtIn="false" value="WITH_SIM"/>
 <listOptionValue builtIn="false" value="USE_LIBXML"/>
 <listOptionValue builtIn="false" value="NO_CGI"/>
 </option>
@@ -117,7 +117,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="core/sim/plugin/pluginmedia.cpp|core/sim/plugin/pluginmedia.h|core/sim/plugin/pluginbase.h|core/sim/plugin/pluginbase.cpp|external/slaves/slim_slave.cpp|external/meter.c|webservices/CMakeFiles|external/shttpd/CMakeFiles|external/CMakeFiles|core/CMakeFiles|CMakeFiles|doc.cpp|examples|win32|SC23|webservices/soapServerLib.cpp|external/shttpd/standalone.c|external/shttpd/compat_wince.c|external/shttpd/compat_win32.c|external/shttpd/compat_rtems.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+<entry excluding="build|core/sim/plugin/pluginmedia.cpp|core/sim/plugin/pluginmedia.h|core/sim/plugin/pluginbase.h|core/sim/plugin/pluginbase.cpp|external/slaves/slim_slave.cpp|external/meter.c|webservices/CMakeFiles|external/shttpd/CMakeFiles|external/CMakeFiles|core/CMakeFiles|CMakeFiles|doc.cpp|examples|win32|SC23|webservices/soapServerLib.cpp|external/shttpd/standalone.c|external/shttpd/compat_wince.c|external/shttpd/compat_win32.c|external/shttpd/compat_rtems.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 </sourceEntries>
 </configuration>
 </storageModule>
@@ -586,7 +586,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="core/sim/plugin/pluginmedia.cpp|core/sim/plugin/pluginmedia.h|core/sim/plugin/pluginbase.h|core/sim/plugin/pluginbase.cpp|external/slaves/slim_slave.cpp|external/meter.c|webservices/CMakeFiles|external/shttpd/CMakeFiles|external/CMakeFiles|core/CMakeFiles|CMakeFiles|doc.cpp|examples|win32|SC23|webservices/soapServerLib.cpp|webservices/soapServer.cpp|webservices/soapC.cpp|external/shttpd/standalone.c|external/shttpd/compat_wince.c|external/shttpd/compat_win32.c|external/shttpd/compat_rtems.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+<entry excluding="build|core/sim/plugin/pluginmedia.cpp|core/sim/plugin/pluginmedia.h|core/sim/plugin/pluginbase.h|core/sim/plugin/pluginbase.cpp|external/slaves/slim_slave.cpp|external/meter.c|webservices/CMakeFiles|external/shttpd/CMakeFiles|external/CMakeFiles|core/CMakeFiles|CMakeFiles|doc.cpp|examples|win32|SC23|webservices/soapServerLib.cpp|webservices/soapServer.cpp|webservices/soapC.cpp|external/shttpd/standalone.c|external/shttpd/compat_wince.c|external/shttpd/compat_win32.c|external/shttpd/compat_rtems.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 </sourceEntries>
 </configuration>
 </storageModule>

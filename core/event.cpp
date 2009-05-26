@@ -115,7 +115,9 @@ namespace dss {
     m_Queue(NULL),
     m_EventRunner(NULL),
     m_EventsProcessed(0)
-  { } // ctor()
+  {
+    GetDSS().GetPropertySystem().CreateProperty(GetPropertyBasePath() + "eventsProcessed")->LinkToProxy(PropertyProxyPointer<int>(&m_EventsProcessed));
+  } // ctor()
 
   EventInterpreter::~EventInterpreter() {
     ScrubVector(m_Plugins);
@@ -127,7 +129,7 @@ namespace dss {
 
   void EventInterpreter::Initialize() {
     Subsystem::Initialize();
-    GetDSS().GetPropertySystem().SetStringValue(GetPropertyBasePath() + "subscriptionfile", GetDSS().GetDataDirectory() + "subscriptions.xml", true, false);
+    GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "subscriptionfile", GetDSS().GetDataDirectory() + "subscriptions.xml", true, false);
   } // Initialize
 
   void EventInterpreter::AddPlugin(EventInterpreterPlugin* _plugin) {
@@ -135,7 +137,7 @@ namespace dss {
   } // AddPlugin
 
   void EventInterpreter::Execute() {
-    LoadFromXML(GetDSS().GetPropertySystem().GetStringValue(GetPropertyBasePath() + "subscriptionfile"));
+    LoadFromXML(GetDSS().GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "subscriptionfile"));
 
     if(m_Queue == NULL) {
       Logger::GetInstance()->Log("EventInterpreter: No queue set. Can't work like that... exiting...", lsFatal);

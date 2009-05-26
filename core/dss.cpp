@@ -201,9 +201,6 @@ const char* DataDirectory = "data/";
 
   void DSS::LoadConfig() {
     m_State = ssLoadingConfig;
-    // define defaults
-    GetPropertySystem().SetStringValue("/config/eventinterpreter/subscriptionfile", GetDataDirectory() + "subscriptions.xml", true);
-
     Logger::GetInstance()->Log("Loading config", lsInfo);
     GetPropertySystem().LoadFromXML(GetDataDirectory() + "config.xml", GetPropertySystem().GetProperty("/config"));
   } // LoadConfig
