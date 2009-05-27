@@ -55,7 +55,6 @@ namespace dss {
 
   template<>
   void DS485Payload::Add(dsid_t _data) {
-    cout << "sending: " << _data.ToString() << endl;
     // 0x11223344 55667788
     for(int iByte = 0; iByte < 8; iByte++) {
       Add<uint8_t>((_data.upper >> ((8 - iByte - 1) * 8)) & 0x00000000000000FF);
@@ -303,7 +302,11 @@ namespace dss {
         continue;
       }
       if(frame.get() == NULL) {
-        cout << "§";
+        if(m_State != csDesignatedMaster) {
+          cout << "§";
+        } else {
+          SleepMS(1000);
+        }
         // resend token after timeout
         if(lastSentWasToken) {
           PutFrameOnWire(token.get(), false);
@@ -811,7 +814,6 @@ namespace dss {
     result.lower |= (Get<uint8_t>() <<  8);
     result.lower |= (Get<uint8_t>() <<  0);
 
-    cout << "got: " << result.ToString() << endl;
     return result;
   }
 

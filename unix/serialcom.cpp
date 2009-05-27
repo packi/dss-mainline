@@ -16,8 +16,6 @@
 #include <errno.h>
 #include <cstring>
 
-#include <iostream>
-
 #include <stdexcept>
 
 namespace dss {
@@ -25,9 +23,9 @@ namespace dss {
   //================================================== SerialCom
 
   SerialCom::SerialCom()
-  : m_Speed(sp115200),
-    m_Blocking(false),
-    m_Handle(-1)
+  : m_Handle(-1),
+    m_Speed(sp115200),
+    m_Blocking(false)
   {
     memset(&m_CommSettings, '\0', sizeof(m_CommSettings));
   } // ctor
@@ -46,8 +44,6 @@ namespace dss {
     if(m_Handle == -1) {
       perror("serial");
       throw runtime_error(string("could not open port ") + m_PortDevName);
-    } else {
-      std::cout << "Handle: " << m_Handle << std::endl;
     }
 
 
