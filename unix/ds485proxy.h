@@ -71,6 +71,7 @@ namespace dss {
     int m_SourceID;
     SyncEvent m_PacketHere;
     Mutex m_FramesMutex;
+    bool m_SingleFrame;
   public:
     FrameBucket(DS485Proxy* _proxy, int _functionID, int _sourceID);
     ~FrameBucket();
@@ -79,7 +80,7 @@ namespace dss {
     int GetSourceID() const { return m_SourceID; }
 
     /** Adds a ReceivedFrame to the frames queue */
-    void AddFrame(boost::shared_ptr<ReceivedFrame> _frame);
+    bool AddFrame(boost::shared_ptr<ReceivedFrame> _frame);
     /** Returns the least recently received item int the queue.
      * The pointer will contain NULL if IsEmpty() returns true. */
     boost::shared_ptr<ReceivedFrame> PopFrame();

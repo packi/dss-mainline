@@ -670,15 +670,19 @@ namespace dss {
 
     int numZones = GetZoneCount(_modulatorID);
     Log(string("Modulator has ") + IntToString(numZones) + " zones");
-    for(int iGroup = 0; iGroup < numZones; iGroup++) {
+    for(int iZone = 0; iZone < numZones; iZone++) {
       DS485CommandFrame cmdFrame;
       cmdFrame.GetHeader().SetDestination(_modulatorID);
       cmdFrame.SetCommand(CommandRequest);
       cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetZoneIdForInd);
-      cmdFrame.GetPayload().Add<uint16_t>(iGroup);
+      cmdFrame.GetPayload().Add<uint16_t>(iZone);
       Log("GetZoneID");
-      uint8_t tempResult = ReceiveSingleResult(cmdFrame, FunctionModulatorGetZoneIdForInd);
-      result.push_back(tempResult);
+      int16_t tempResult = static_cast<int16_t>(ReceiveSingleResult16(cmdFrame, FunctionModulatorGetZoneIdForInd));
+      if(tempResult < 0) {
+        Log("GetZones: Negative zone id " + IntToString(tempResult) + " received. Modulator: " + IntToString(_modulatorID) + " index: " + IntToString(iZone), lsError);
+      } else {
+        result.push_back(tempResult);
+      }
       Log("Receive ZoneID: " + UIntToString((unsigned int)tempResult));
     }
     return result;
@@ -708,7 +712,7 @@ namespace dss {
 
     int16_t result = static_cast<int16_t>(ReceiveSingleResult16(cmdFrame, FunctionModulatorCountDevInZone));
     if(result < 0) {
-      Log("GetDevicesCountInZone: negative count '" + IntToString(result) + "'");
+      Log("GetDevicesCountInZone: negative count '" + IntToString(result) + "'", lsError);
       result = 0;
     }
 
@@ -900,7 +904,7 @@ namespace dss {
       PayloadDissector pd(recFrame->GetFrame()->GetPayload());
       uint8_t functionID = pd.Get<uint8_t>();
       if(functionID != _functionID) {
-        Log("function ids are different");
+        Log("function ids are different", lsFatal);
       }
       uint8_t result = pd.Get<uint8_t>();
       return result;
@@ -922,7 +926,7 @@ namespace dss {
       if(!pd.IsEmpty()) {
         result |= (pd.Get<uint8_t>() << 8);
       } else {
-        Log("ReceiveSingleResult16: only received half of the data (8bit)");
+        Log("ReceiveSingleResult16: only received half of the data (8bit)", lsFatal);
       }
       return result;
     } else {
@@ -940,7 +944,7 @@ namespace dss {
     try {
       m_DS485Controller.Run();
     } catch (const runtime_error& _ex) {
-    	Log(string("Caught exception while starting DS485Controlle: ") + _ex.what());
+    	Log(string("Caught exception while starting DS485Controlle: ") + _ex.what(), lsFatal);
     }
     // call Thread::Run()
     Run();
@@ -1071,7 +1075,7 @@ namespace dss {
 
           vector<unsigned char> ch = frame->GetPayload().ToChar();
           if(ch.size() < 1) {
-            Log("Received Command Frame w/o function identifier");
+            Log("Received Command Frame w/o function identifier", lsFatal);
             continue;
           }
 
@@ -1152,8 +1156,9 @@ namespace dss {
             foreach(FrameBucket* bucket, m_FrameBuckets) {
               if(bucket->GetFunctionID() == functionID) {
                 if((bucket->GetSourceID() == -1) || (bucket->GetSourceID() == frame->GetHeader().GetSource())) {
-                  bucket->AddFrame(rf);
-                  bucketFound = true;
+                  if(bucket->AddFrame(rf)) {
+                    bucketFound = true;
+                  }
                 }
               }
             }
@@ -1205,7 +1210,8 @@ namespace dss {
   FrameBucket::FrameBucket(DS485Proxy* _proxy, int _functionID, int _sourceID)
   : m_pProxy(_proxy),
     m_FunctionID(_functionID),
-    m_SourceID(_sourceID)
+    m_SourceID(_sourceID),
+    m_SingleFrame(false)
   {
     Logger::GetInstance()->Log("Bucket: Registering for fid: " + IntToString(_functionID) + " sid: " + IntToString(_sourceID));
     m_pProxy->AddFrameBucket(this);
@@ -1216,12 +1222,19 @@ namespace dss {
     m_pProxy->RemoveFrameBucket(this);
   } // dtor
 
-  void FrameBucket::AddFrame(boost::shared_ptr<ReceivedFrame> _frame) {
+  bool FrameBucket::AddFrame(boost::shared_ptr<ReceivedFrame> _frame) {
+    bool result = false;
     m_FramesMutex.Lock();
-    m_Frames.push_back(_frame);
+    if(!m_SingleFrame || m_Frames.empty()) {
+      m_Frames.push_back(_frame);
+      result = true;
+    }
     m_FramesMutex.Unlock();
 
-    m_PacketHere.Signal();
+    if(result) {
+      m_PacketHere.Signal();
+    }
+    return result;
   } // AddFrame
 
   boost::shared_ptr<ReceivedFrame> FrameBucket::PopFrame() {
@@ -1241,6 +1254,7 @@ namespace dss {
   } // WaitForFrames
 
   void FrameBucket::WaitForFrame(int _timeoutMS) {
+    m_SingleFrame = true;
     Logger::GetInstance()->Log("*** Waiting");
     if(m_PacketHere.WaitFor(_timeoutMS)) {
       Logger::GetInstance()->Log("*** Got Frame");
