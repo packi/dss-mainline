@@ -36,6 +36,7 @@ protected:
 
   void testSet() {
     Apartment apt(NULL);
+    apt.Initialize();
 
     Device& dev1 = apt.AllocateDevice(dsid_t(0,1));
     dev1.SetShortAddress(1);
@@ -117,6 +118,7 @@ protected:
 
   void testSetBuilder() {
     Apartment apt(NULL);
+    apt.Initialize();
 
     Device& dev1 = apt.AllocateDevice(dsid_t(0,1));
     dev1.SetShortAddress(1);

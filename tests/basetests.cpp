@@ -161,8 +161,9 @@ protected:
 
     DateTime instObj(inst);
     DateTime parsedObj(parsed);
-
+#ifndef VERBOSE_TESTS
     cout << "original: " << instObj << " parsed: " << parsedObj << endl;
+#endif
     CPPUNIT_ASSERT_EQUAL(instObj, parsedObj);
   } // testISODate
 

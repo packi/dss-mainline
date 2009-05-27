@@ -58,7 +58,11 @@ namespace dss {
     LogChannel(const std::string& _name, aLogSeverity _minimumSeverity = lsDebug)
     : m_Name(_name), m_MinimumSeverity(_minimumSeverity)
     {
-      Logger::GetInstance()->Log(*this, "Logchannel created", lsInfo);
+      Logger::GetInstance()->Log(*this, "Logchannel created");
+    }
+
+    ~LogChannel() {
+      Logger::GetInstance()->Log(*this, "Logchannel destroyed");
     }
 
     aLogSeverity GetMinimumSeverity() const { return m_MinimumSeverity; }
