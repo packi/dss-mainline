@@ -22,10 +22,15 @@ namespace fs = boost::filesystem;
 #include <Poco/DOM/Text.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/DOMParser.h>
 #include <Poco/XML/XMLWriter.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/Node.h>
+#include <Poco/SAX/InputSource.h>
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 
 using Poco::XML::Document;
@@ -37,6 +42,12 @@ using Poco::XML::AutoPtr;
 using Poco::XML::DOMWriter;
 using Poco::XML::XMLWriter;
 
+using Poco::XML::DOMParser;
+using Poco::XML::InputSource;
+using Poco::XML::NodeList;
+using Poco::XML::Node;
+using Poco::Exception;
+
 
 namespace dss {
 
@@ -46,77 +57,69 @@ namespace dss {
 
   template<class T>
   Series<T>* SeriesReader<T>::ReadFromXML(const string& _fileName) {
-    XMLDocumentFileReader reader(_fileName);
+    Timestamp parsing;
 
-    XMLNode& rootNode = reader.GetDocument().GetRootNode();
-    if(rootNode.GetName() == "metering") {
-      Series<T>* result = NULL;
-      if(rootNode.GetAttributes()["version"] != IntToString(SeriesXMLFileVersion)) {
-        Logger::GetInstance()->Log(string("SeriesReader::ReadFromXML: Version mismatch, expected ") + IntToString(SeriesXMLFileVersion) + " got " + rootNode.GetAttributes()["version"],
-                                   lsError);
-        return NULL;
-      }
-      XMLNodeList& children = rootNode.GetChildren();
-      foreach(XMLNode node, children) {
-        if(node.GetName() == "values") {
-          int numberOfValues = StrToIntDef(node.GetAttributes()["numberOfValues"], -1);
-          if(numberOfValues == -1) {
-            Logger::GetInstance()->Log(string("SeriesReader::ReadFromXML: numberOfValues attribute missing or invalid: ") + node.GetAttributes()["numberOfValues"],
-                                       lsError);
-            return NULL;
-          }
-          int resolution = StrToIntDef(node.GetAttributes()["resolution"], -1);
-          if(resolution == -1) {
-            Logger::GetInstance()->Log(string("SeriesReader::ReadFromXML: resolution attribute missing or invalid: ") + node.GetAttributes()["numberOfValues"],
-                                       lsError);
-            return NULL;
-          }
+    std::ifstream inFile(_fileName.c_str());
 
-          result = new Series<T>(resolution, numberOfValues);
-          XMLNodeList& values = node.GetChildren();
-          for(XMLNodeList::iterator iNode = values.begin(), e = values.end();
-              iNode != e; ++iNode)
-          {
-            if(iNode->GetName() == "value") {
-              try {
-                T value(0);
-                value.ReadFromXMLNode(*iNode);
-                result->AddValue(value);
-              } catch(runtime_error& e) {
-                Logger::GetInstance()->Log(string("SeriesReader::ReadFromXML: Error while reading value: ") + e.what());
-              }
-            }
-          }
-        }
-      }
-      foreach(XMLNode node, children) {
-        if(node.GetName() == "config") {
-          try {
-            XMLNode& commentNode = node.GetChildByName("comment");
-            if(result != NULL) {
-              result->SetComment(commentNode.GetChildren()[0].GetContent());
-            }
-          } catch(runtime_error&) {
-          }
-          try {
-            XMLNode& dsidNode = node.GetChildByName("from_dsid");
-            if(result != NULL) {
-              result->SetFromDSID(dsid_t::FromString(dsidNode.GetChildren()[0].GetContent()));
-            }
-          } catch(runtime_error&) {
-          }
-          try {
-            XMLNode& unitNode = node.GetChildByName("unit");
-            if(result != NULL) {
-              result->SetUnit(unitNode.GetChildren()[0].GetContent());
-            }
-          } catch(runtime_error&) {
-          }
-        }
-      }
-      return result;
+    InputSource input(inFile);
+    Series<T>* result = NULL;
+    DOMParser parser;
+    AutoPtr<Document> pDoc = parser.parse(&input);
+    AutoPtr<Element> rootNode = pDoc->documentElement();
+    if(rootNode->localName() != "metering") {
+      Logger::GetInstance()->Log("SeriesReader::ReadFromXML: root node must be named metering, got: '" + rootNode->localName() + "'");
+      return NULL;
     }
-    return NULL;
+    if(!rootNode->hasAttribute("version")) {
+      Logger::GetInstance()->Log("SeriesReader::ReadFromXML: missing version attribute", lsError);
+      return NULL;
+    }
+
+    if(StrToIntDef(rootNode->getAttribute("version"),-1) != SeriesXMLFileVersion) {
+      Logger::GetInstance()->Log(string("SeriesReader::ReadFromXML: Version mismatch, expected ") + IntToString(SeriesXMLFileVersion) + " got " + rootNode->getAttribute("version"),
+                                 lsError);
+      return NULL;
+    }
+
+    Element* valuesNode = rootNode->getChildElement("values");
+    int numberOfValues = StrToInt(valuesNode->getAttribute("numberOfValues"));
+    int resolution = StrToInt(valuesNode->getAttribute("resolution"));
+
+    result = new Series<T>(resolution, numberOfValues);
+
+    Node* node = valuesNode->firstChild();
+    while(node != NULL) {
+      if(node->nodeName() == "value") {
+        try {
+          T value(0);
+          value.ReadFromXMLNode(node);
+          result->AddValue(value);
+        } catch(runtime_error& e) {
+          Logger::GetInstance()->Log(string("SeriesReader::ReadFromXML: Error while reading value: ") + e.what());
+        }
+      }
+      node = node->nextSibling();
+    }
+
+    Element* configElem = rootNode->getChildElement("config");
+    if(configElem != NULL) {
+      Element* elem = configElem->getChildElement("comment");
+      if(elem != NULL && elem->hasChildNodes()) {
+        result->SetComment(elem->firstChild()->getNodeValue());
+      }
+
+      elem = configElem->getChildElement("from_dsid");
+      if(elem != NULL && elem->hasChildNodes()) {
+        result->SetFromDSID(dsid_t::FromString(elem->firstChild()->getNodeValue()));
+      }
+
+      elem = configElem->getChildElement("unit");
+      if(elem != NULL && elem->hasChildNodes()) {
+        result->SetUnit(elem->firstChild()->getNodeValue());
+      }
+    }
+
+    return result;
   }
 
   //================================================== SeriesWriter
@@ -125,6 +128,7 @@ namespace dss {
   bool SeriesWriter<T>::WriteToXML(const Series<T>& _series, const string& _path) {
     AutoPtr<Document> pDoc = new Document;
 
+    Timestamp buildingXML;
     AutoPtr<ProcessingInstruction> pXMLHeader = pDoc->createProcessingInstruction("xml", "version='1.0' encoding='utf-8'");
     pDoc->appendChild(pXMLHeader);
     AutoPtr<ProcessingInstruction> pProcessing = pDoc->createProcessingInstruction("xml-stylesheet", "href='value_graph.xslt' type='text/xsl'");
@@ -155,14 +159,14 @@ namespace dss {
       elem->appendChild(txt);
       pConfig->appendChild(elem);
     }
-    //pRoot->appendChild(pConfig);
+
     // metering/values
     AutoPtr<Element> pValues = pDoc->createElement("values");
     pValues->setAttribute("resolution", IntToString(_series.GetResolution()));
     pValues->setAttribute("numberOfValues", IntToString(_series.GetNumberOfValues()));
     pRoot->appendChild(pValues);
 
-    const std::deque<T> values = _series.GetValues();
+    const std::deque<T>& values = _series.GetValues();
     for(typename std::deque<T>::const_reverse_iterator iValue = values.rbegin(), e = values.rend();
         iValue != e; ++iValue)
     {
@@ -170,21 +174,34 @@ namespace dss {
       iValue->WriteToXMLNode(pDoc, elem);
       pValues->appendChild(elem);
     }
+    cout << "building xml: " << Timestamp().GetDifference(buildingXML) << endl;
 
+
+    Timestamp writingXML;
     // write it to a temporary site first
     string tmpOut = _path + ".tmp";
     std::ofstream ofs(tmpOut.c_str() );
 
     if(ofs) {
       DOMWriter writer;
-      writer.setNewLine("\n");
-      writer.setOptions(XMLWriter::PRETTY_PRINT);
-      writer.writeNode(ofs, pDoc);
+      //writer.setNewLine("\n");
+      //writer.setOptions(XMLWriter::PRETTY_PRINT);
+
+      // write output to stringstream first...
+      std::stringstream sstream;
+      writer.writeNode(sstream, pDoc);
+      string content = sstream.str();
+      // ...and write the whole thing in one operation
+      ofs.write(content.c_str(), content.size());
 
       ofs.close();
 
+      cout << "writing xml: " << Timestamp().GetDifference(writingXML) << endl;
+
+      Timestamp renaming;
       // move it to the desired location
       rename(tmpOut.c_str(), _path.c_str());
+      cout << "renaming: " << Timestamp().GetDifference(renaming) << endl;
     } else {
       Logger::GetInstance()->Log("Could not open file for writing");
     }

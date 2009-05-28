@@ -7,7 +7,9 @@
 
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
+#include <Poco/DOM/Node.h>
 #include <Poco/DOM/Text.h>
+#include <Poco/DOM/NamedNodeMap.h>
 #include <Poco/DOM/AutoPtr.h>
 
 #include <boost/shared_ptr.hpp>
@@ -16,8 +18,10 @@
 
 using Poco::XML::Document;
 using Poco::XML::Element;
+using Poco::XML::Node;
 using Poco::XML::Text;
 using Poco::XML::AutoPtr;
+using Poco::XML::NamedNodeMap;
 
 namespace dss {
 
@@ -58,6 +62,15 @@ namespace dss {
       m_Min = StrToDouble(_node.GetChildByName("min").GetChildren()[0].GetContent());
       m_Max = StrToDouble(_node.GetChildByName("max").GetChildren()[0].GetContent());
       m_Value = StrToDouble(_node.GetChildByName("value").GetChildren()[0].GetContent());
+    } // ReadFromXMLNode
+
+    virtual void ReadFromXMLNode(Node* _node) {
+      Element* elem = dynamic_cast<Element*>(_node);
+
+      m_TimeStamp = DateTime(DateFromISOString(elem->getAttribute("timestamp").c_str()));
+      m_Min = StrToDouble(elem->getChildElement("min")->firstChild()->getNodeValue());
+      m_Max = StrToDouble(elem->getChildElement("max")->firstChild()->getNodeValue());
+      m_Value = StrToDouble(elem->getChildElement("value")->firstChild()->getNodeValue());
     } // ReadFromXMLNode
 
     virtual void WriteToXMLNode(AutoPtr<Document>& _doc, AutoPtr<Element>& _elem) const {
