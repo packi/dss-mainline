@@ -145,6 +145,7 @@ namespace dss {
     std::string m_Comment;
     dsid_t m_FromDSID;
     std::string m_Unit;
+    Properties m_Properties;
   public:
     Series(const int _resolution, const unsigned int _numberOfValues)
     : m_Resolution(_resolution),
@@ -190,23 +191,23 @@ namespace dss {
           // add zero values where we don't have any data
           while(diff > m_Resolution) {
             diff -= m_Resolution;
+            cout << "filling unknown value" << endl;
             lastValStamp = lastValStamp.AddSeconds(m_Resolution);
-            m_Values.push_front(value_type(0, lastValStamp));
+            m_Values.push_front(value_type(m_Values.front().GetValue(), lastValStamp));
           }
           m_Values.push_front(_value);
           // if we've got an excess of values
           while(m_Values.size() > m_NumberOfValues) {
-            value_type val = m_Values.back();
             m_Values.pop_back();
-            if(m_NextSeries != NULL) {
-              m_NextSeries->AddValue(val);
-            }
           }
         }
       } else {
         // first value of series
         m_Values.push_front(_value);
       }
+      if(m_NextSeries != NULL) {
+        m_NextSeries->AddValue(_value);
+      }	
     } // AddValue
 
     void AddValue(double _value, const DateTime& _timestamp) {
@@ -226,6 +227,11 @@ namespace dss {
     void SetFromDSID(const dsid_t& _value) { m_FromDSID = _value; }
     const std::string GetUnit() const { return m_Unit; }
     void SetUnit(const string& _value) { m_Unit = _value; }
+    bool Has(const string& _key) const { return m_Properties.Has(_key); }
+    void Set(const string& _key, const string& _value)  { return m_Properties.Set(_key, _value); }
+    const string& Get(const string& _key) const { return m_Properties.Get(_key); }
+    const Properties& GetProperties() const { return m_Properties; }
+    
   }; // Series
 
 } // namespace dss

@@ -65,7 +65,7 @@ namespace dss {
     Series<T>* result = NULL;
     DOMParser parser;
     AutoPtr<Document> pDoc = parser.parse(&input);
-    AutoPtr<Element> rootNode = pDoc->documentElement();
+    Element* rootNode = pDoc->documentElement();
     if(rootNode->localName() != "metering") {
       Logger::GetInstance()->Log("SeriesReader::ReadFromXML: root node must be named metering, got: '" + rootNode->localName() + "'");
       return NULL;
@@ -118,8 +118,8 @@ namespace dss {
         result->SetUnit(elem->firstChild()->getNodeValue());
       }
     }
-
     return result;
+
   }
 
   //================================================== SeriesWriter
@@ -159,6 +159,16 @@ namespace dss {
       elem->appendChild(txt);
       pConfig->appendChild(elem);
     }
+    
+    for(HashMapConstStringString::const_iterator iProperty = _series.GetProperties().GetContainer().begin(),
+    	end = _series.GetProperties().GetContainer().end(); iProperty != end; ++iProperty)
+    {
+      AutoPtr<Element> elem = pDoc->createElement(iProperty->first);
+      AutoPtr<Text> txt = pDoc->createTextNode(iProperty->second);
+      elem->appendChild(txt);
+      pConfig->appendChild(elem);
+    }
+    
 
     // metering/values
     AutoPtr<Element> pValues = pDoc->createElement("values");
@@ -184,8 +194,8 @@ namespace dss {
 
     if(ofs) {
       DOMWriter writer;
-      //writer.setNewLine("\n");
-      //writer.setOptions(XMLWriter::PRETTY_PRINT);
+      writer.setNewLine("\n");
+      writer.setOptions(XMLWriter::PRETTY_PRINT);
 
       // write output to stringstream first...
       std::stringstream sstream;
