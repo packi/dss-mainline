@@ -108,6 +108,21 @@ protected:
     CPPUNIT_ASSERT_EQUAL(5.0, series->GetValues().front().GetValue());
     CPPUNIT_ASSERT_EQUAL(5.0, series->GetValues().front().GetMax());
 
+    series->SetComment("my comment");
+    series->SetUnit("kW");
+    writer.WriteToXML(*series, "/home/patrick/workspace/dss/data/webroot/test.xml");
+    delete series;
+
+    series = reader.ReadFromXML("/home/patrick/workspace/dss/data/webroot/test.xml");
+    CPPUNIT_ASSERT(series != NULL);
+    CPPUNIT_ASSERT_EQUAL((size_t)2, series->GetValues().size());
+    CPPUNIT_ASSERT_EQUAL(2.0, series->GetValues().front().GetMin());
+    CPPUNIT_ASSERT_EQUAL(5.0, series->GetValues().front().GetValue());
+    CPPUNIT_ASSERT_EQUAL(5.0, series->GetValues().front().GetMax());
+    CPPUNIT_ASSERT_EQUAL(string("my comment"), series->GetComment());
+    CPPUNIT_ASSERT_EQUAL(string("kW"), series->GetUnit());
+
+
     delete series;
   } // testReadWrite
 
