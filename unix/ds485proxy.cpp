@@ -1255,11 +1255,13 @@ namespace dss {
 
   void FrameBucket::WaitForFrame(int _timeoutMS) {
     m_SingleFrame = true;
-    Logger::GetInstance()->Log("*** Waiting");
-    if(m_PacketHere.WaitFor(_timeoutMS)) {
-      Logger::GetInstance()->Log("*** Got Frame");
-    } else {
-      Logger::GetInstance()->Log("*** No Frame");
+    if(m_Frames.empty()) {
+      Logger::GetInstance()->Log("*** Waiting");
+      if(m_PacketHere.WaitFor(_timeoutMS)) {
+        Logger::GetInstance()->Log("*** Got Frame");
+      } else {
+        Logger::GetInstance()->Log("*** No Frame");
+      }
     }
   } // WaitForFrame
 
