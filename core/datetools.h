@@ -15,6 +15,7 @@
 #include <libical/ical.h>
 #include <vector>
 #include <ostream>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -213,6 +214,25 @@ namespace dss {
     virtual DateTime GetNextOccurence(const DateTime& _from) ;
     virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
   }; // ICalSchedule
+
+  //================================================== Timestamp
+
+  /** Class that can store and compute the difference to another timestamp. */
+  class Timestamp {
+  private:
+    struct timeval m_Value;
+  public:
+    Timestamp() {
+      gettimeofday(&m_Value, NULL);
+    }
+
+    /** Calculates the difference to \a _previous in miliseconds */
+    double GetDifference(const Timestamp& _previous) {
+      double diffMS = ((m_Value.tv_sec*1000.0 + m_Value.tv_usec/1000.0) -
+                       (_previous.m_Value.tv_sec*1000.0 + _previous.m_Value.tv_usec/1000.0));
+      return diffMS;
+    }
+  }; // Timestamp
 
 }
 
