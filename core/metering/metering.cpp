@@ -53,17 +53,22 @@ namespace dss {
 
     _config->Running();
 
+    Timestamp checkingAll;
     std::vector<Modulator*>& modulators = DSS::GetInstance()->GetApartment().GetModulators();
     for(std::vector<Modulator*>::iterator ipModulator = modulators.begin(), e = modulators.end();
         ipModulator != e; ++ipModulator)
     {
+      Timestamp checkingModulator;
+      Timestamp startedLoading;
       vector<boost::shared_ptr<Series<CurrentValue> > > series;
       for(int iConfig = 0; iConfig < _config->Size(); iConfig++) {
         // Load series from file
         string fileName = m_MeteringStorageLocation + (*ipModulator)->GetDSID().ToString() + "_" + _config->GetFilenameSuffix(iConfig) + ".xml";
         Logger::GetInstance()->Log(string("Metering::CheckModulators: Trying to load series from '") + fileName + "'");
         if(FileExists(fileName)) {
+          Timestamp startedLoadingSingle;
           boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.ReadFromXML(fileName));
+          cout << "loading single: " <<  Timestamp().GetDifference(startedLoadingSingle) << endl;
           if(s.get() != NULL) {
             series.push_back(s);
           } else {
@@ -78,6 +83,8 @@ namespace dss {
           series.push_back(newSeries);
         }
       }
+      cout << "loading: " << Timestamp().GetDifference(startedLoading) << endl;
+
       // stitch up chain
       for(vector<boost::shared_ptr<Series<CurrentValue> > >::reverse_iterator iSeries = series.rbegin(), e = series.rend();
           iSeries != e; ++iSeries)
@@ -91,33 +98,45 @@ namespace dss {
       } else {
         Logger::GetInstance()->Log("Metering::CheckModulators: Series loaded, updating");
         // Update series
-        if(_config->IsEnergy()) {
-          series[0]->AddValue((*ipModulator)->GetEnergyMeterValue(), DateTime());
-        } else {
-          series[0]->AddValue((*ipModulator)->GetPowerConsumption(), DateTime());
-        }
 
+        unsigned long value;
+        DateTime timeRequested;
+        Timestamp fetchingValue;
+        if(_config->IsEnergy()) {
+          value = (*ipModulator)->GetEnergyMeterValue();
+        } else {
+          value = (*ipModulator)->GetPowerConsumption();
+        }
+        cout << "fetching value: " << Timestamp().GetDifference(fetchingValue) << endl;
+        Timestamp startedAddingValue;
+        series[0]->AddValue(value, timeRequested);
+        cout << "adding value: " << Timestamp().GetDifference(startedAddingValue) << endl;
+
+        Timestamp startedWriting;
         // Store series
         Logger::GetInstance()->Log("Metering::CheckModulators: Writing series back...");
         for(int iConfig = 0; iConfig < _config->Size(); iConfig++) {
+          Timestamp startedWritingSingle;
           // Load series from file
           string fileName = m_MeteringStorageLocation + (*ipModulator)->GetDSID().ToString() + "_" + _config->GetFilenameSuffix(iConfig) + ".xml";
           Series<CurrentValue>* s = series[iConfig].get();
           Logger::GetInstance()->Log(string("Metering::CheckModulators: Trying to save series to '") + fileName + "'");
           writer.WriteToXML(*s, fileName);
+          cout << "writing single: " << Timestamp().GetDifference(startedWritingSingle) << endl;
         }
+        cout << "writing: " << Timestamp().GetDifference(startedWriting) << endl;
       }
+      cout << "checkingModulator: " << Timestamp().GetDifference(checkingModulator) << endl;
     }
+    cout << "checking all: " << Timestamp().GetDifference(checkingAll) << endl;
   } // CheckModulators
 
   void Metering::Execute() {
     // check modulators periodically
+    while(DSS::GetInstance()->GetApartment().IsInitializing()) {
+      SleepSeconds(1);
+    }
     while(!m_Terminated) {
-      if(!DSS::GetInstance()->GetDS485Interface().IsReady()) {
-        SleepSeconds(20);
-        continue;
-      }
-
       int sleepTimeSec = 60000;
 
       Logger::GetInstance()->Log("Metering::Execute: Checking modulators");
