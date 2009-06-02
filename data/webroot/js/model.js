@@ -1,31 +1,31 @@
 var DSS = Class.create({
-});
+});	
 
-DSS.token = undefined;
-DSS.endpoint = "/json/";
-DSS.sendSyncRequest = function(_uri, _parameter) {
-    var responseObj;
-    var req = new Ajax.Request(DSS.endpoint + _uri,
-      {
-        method: 'get',
-        parameters: _parameter,
-        asynchronous: false,
-        onComplete: function(transport, json) {
-          responseObj = transport.responseJSON;
-        }
-      }
-    );
-    return responseObj;
-};
+DSS.token = undefined,
+DSS.endpoint = "/json/",
 
-DSS.sendRequest = function(_uri, _parameter) {
-    var request = new Ajax.Request(DSS.endpoint + _uri,
-      {
-        method: 'get',
-        parameters: _parameter
-      }
-    );
-};
+	DSS.sendSyncRequest = function(_uri, _parameter) {
+		var responseObj;
+		var req = new Ajax.Request(this.endpoint + _uri,
+		{
+			method: 'get',
+			parameters: _parameter,
+			asynchronous: false,
+			onComplete: function(transport, json) {
+			responseObj = transport.responseJSON;
+			}
+		});
+		return responseObj;
+	};
+	
+	DSS.sendRequest = function(_uri, _parameter) {
+		var request = new Ajax.Request(DSS.endpoint + _uri,
+		{
+			method: 'get',
+			parameters: _parameter
+		});
+	};
+//});
 
 function hasKey(_obj, _key) {
   return (typeof(_obj[_key]) != "undefined");
@@ -39,117 +39,121 @@ var Group = Class.create({
 }); // Group
 
 var Apartment = Class.create({
-  initialize: function() {
-    this.zones = [];
-  },
-
-  fetch: function() {
-    var self = this;
-    var structure = Apartment.sendSyncRequest("getStructure", {});
-    structure.apartment.zones.each(function(zone) {
-      var zoneObj = new Zone(zone.id, zone.name);
-      self.zones.push(zoneObj);
-      zone.devices.each(function(device) {
-        var deviceObj = new Device(device.id, device.name);
-        deviceObj.fid = device.fid;
-        deviceObj.busID = device.busID;
-        deviceObj.circuitID = device.circuitID;
-        zoneObj.devices.push(deviceObj);
-        deviceObj.on = device.on;
-        deviceObj.hasSwitch = device.isSwitch;
-      });
-    });
-  }
+	initialize: function() {
+		this.zones = [];
+	},
+	
+	fetch: function() {
+		var self = this;
+		var structure = self.sendSyncRequest("getStructure", {});
+		structure.apartment.zones.each(function(zone) {
+			var zoneObj = new Zone(zone.id, zone.name);
+			self.zones.push(zoneObj);
+			zone.devices.each(function(device) {
+			var deviceObj = new Device(device.id, device.name);
+				deviceObj.fid = device.fid;
+				deviceObj.busID = device.busID;
+				deviceObj.circuitID = device.circuitID;
+				zoneObj.devices.push(deviceObj);
+				deviceObj.on = device.on;
+				deviceObj.hasSwitch = device.isSwitch;
+			});
+		});
+	},
+	
+	sendRequest: function(_functionName, _parameter) {
+		DSS.sendRequest("apartment/" + _functionName, _parameter);
+	},
+	
+	sendSyncRequest: function(_functionName, _parameter) {
+		return DSS.sendSyncRequest("apartment/" + _functionName, _parameter);
+	},
+	
+	getParameterForDeviceCall: function(_group) {
+		var parameter = {};
+		if(Object.isNumber(_group)) {
+			parameter['groupID'] = _group;
+		} else if(Object.isString(_group)) {
+			parameter['groupName'] = _group;
+		} else if(!Object.isUndefined(_group) && _group !== null) {
+			if(hasKey(_group, 'name')) {
+				parameter['groupName'] = _group['name'];
+			} else if(hasKey(_group, 'id')) {
+				parameter['groupID'] = _group['id'];
+			}
+		}
+		return parameter;
+	},
+	
+	turnOn: function(_group) {
+		this.sendRequest("turnOn", this.getParameterForDeviceCall(_group));
+	},
+	
+	turnOff: function(_group) {
+		this.sendRequest("turnOff", this.getParameterForDeviceCall(_group));
+	},
+	
+	callScene: function(_sceneNr, _group) {
+		var parameter = this.getParameterForDeviceCall(_group);
+		parameter['sceneNr'] = _sceneNr;
+		this.sendRequest("callScene", parameter);
+	},
+	
+	saveScene: function(_sceneNr, _group) {
+		var parameter = this.getParameterForDeviceCall(_group);
+		parameter['sceneNr'] = _sceneNr;
+		this.sendRequest("saveScene", parameter);
+	},
+	
+	undoScene: function(_sceneNr, _group) {
+		var parameter = this.getParameterForDeviceCall(_group);
+		parameter['sceneNr'] = _sceneNr;
+		this.sendRequest("undoScene", parameter);
+	},
+	increaseValue: function(_group) {
+		var parameter = this.getParameterForDeviceCall(_group);
+		this.sendRequest("increaseValue", parameter);
+	},
+	decreaseValue: function(_group) {
+		var parameter = this.getParameterForDeviceCall(_group);
+		this.sendRequest("decreaseValue", parameter);
+	},
+	
+	enable: function(_group) {
+		var parameter = this.getParameterForDeviceCall(_group);
+		this.sendRequest("enable", parameter);
+	},
+	
+	disable: function(_group) {
+		var parameter = this.getParameterForDeviceCall(_group);
+		this.sendRequest("disable", parameter);
+	},
+	
+	startDim: function(_up, _group) {
+		var parameter = this.getParameterForDeviceCall(_group);
+		if(Object.isUndefined(_up) || _up === true) {
+			parameter.up = true;
+		}
+		this.sendRequest("startDim", parameter);
+	},
+	
+	endDim: function(_group) {
+		var parameter = this.getParameterForDeviceCall(_group);
+		this.sendRequest("endDim", parameter);
+	},
+	
+	getPowerConsumption: function(_group) {
+		var parameter = this.getParameterForDeviceCall(_group);
+		var respObj = this.sendSyncRequest("getConsumption", parameter);
+		return respObj.consumption;
+	},
+	
+	getCircuits: function() {
+		var respObj = this.sendSyncRequest("getCircuits", {});
+		return respObj.result;
+	}
 }); // Apartment
 
-Apartment.sendRequest = function(_functionName, _parameter) {
-  DSS.sendRequest("apartment/" + _functionName, _parameter);
-};
-
-Apartment.sendSyncRequest = function(_functionName, _parameter) {
-  return DSS.sendSyncRequest("apartment/" + _functionName, _parameter);
-};
-
-Apartment.getParameterForDeviceCall = function(_group) {
-  var parameter = {};
-  if(Object.isNumber(_group)) {
-    parameter['groupID'] = _group;
-  } else if(Object.isString(_group)) {
-    parameter['groupName'] = _group;
-  } else if(!Object.isUndefined(_group) && _group !== null) {
-    if(hasKey(_group, 'name')) {
-      parameter['groupName'] = _group['name'];
-    } else if(hasKey(_group, 'id')) {
-      parameter['groupID'] = _group['id'];
-    }
-  }
-  return parameter;
-};
-
-Apartment.turnOn = function(_group) {
-  this.sendRequest("turnOn", this.getParameterForDeviceCall(_group));
-};
-
-Apartment.turnOff = function(_group) {
-  this.sendRequest("turnOff", this.getParameterForDeviceCall(_group));
-};
-
-Apartment.callScene = function(_sceneNr, _group) {
-  var parameter = this.getParameterForDeviceCall(_group);
-  parameter['sceneNr'] = _sceneNr;
-  this.sendRequest("callScene", parameter);
-};
-
-Apartment.saveScene = function(_sceneNr, _group) {
-  var parameter = this.getParameterForDeviceCall(_group);
-  parameter['sceneNr'] = _sceneNr;
-  this.sendRequest("saveScene", parameter);
-};
-
-Apartment.undoScene = function(_sceneNr, _group) {
-  var parameter = this.getParameterForDeviceCall(_group);
-  parameter['sceneNr'] = _sceneNr;
-  this.sendRequest("undoScene", parameter);
-};
-
-Apartment.increaseValue = function(_group) {
-  var parameter = this.getParameterForDeviceCall(_group);
-  this.sendRequest("increaseValue", parameter);
-};
-
-Apartment.decreaseValue = function(_group) {
-  var parameter = this.getParameterForDeviceCall(_group);
-  this.sendRequest("decreaseValue", parameter);
-};
-
-Apartment.enable = function(_group) {
-  var parameter = this.getParameterForDeviceCall(_group);
-  this.sendRequest("enable", parameter);
-};
-
-Apartment.disable = function(_group) {
-  var parameter = this.getParameterForDeviceCall(_group);
-  this.sendRequest("disable", parameter);
-};
-
-Apartment.startDim = function(_up, _group) {
-  var parameter = this.getParameterForDeviceCall(_group);
-  if(Object.isUndefined(_up) || _up === true) {
-    parameter.up = true;
-  }
-  this.sendRequest("startDim", parameter);
-};
-
-Apartment.endDim = function(_group) {
-  var parameter = this.getParameterForDeviceCall(_group);
-  this.sendRequest("endDim", parameter);
-};
-
-Apartment.getPowerConsumption = function(_group) {
-  var parameter = this.getParameterForDeviceCall(_group);
-  var respObj = this.sendSyncRequest("getConsumption", parameter);
-  return respObj.consumption;
-};
 
 var Zone = Class.create({
   initialize: function(_id, _name) {

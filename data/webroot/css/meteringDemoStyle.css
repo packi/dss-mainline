@@ -1,0 +1,356 @@
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	background-color: #EAEAEA;
+	padding: 10px;
+	color: #666666;
+}
+#main {
+	width: 995px;
+	margin: auto;
+	background-image: url(images/main-background.png);
+}
+#header {
+	height: 107px;
+	margin: 0;
+	background-image: url(images/header.png);
+	background-repeat: no-repeat;
+	text-indent: -1000px;
+}
+#navigation {
+	position: relative;
+	border-top: 1px solid #CCCCCC;
+	height: 39px;
+	margin: 0 4px;
+	background-image: url(images/navigation-background.png);
+}
+
+#navigation ul li {
+	cursor: pointer;
+}
+
+#viewMode {
+	position: absolute;
+	margin: 0;
+	padding: 0;
+	top: 6px;
+	left: 10px;
+	width: 90px;
+	height: 26px;
+	background-image: url(images/view-mode-3d.png);
+	color: transparent;
+	font-size: 11px;
+}
+#threeD {
+	position: absolute;
+	left: 19px;
+	top: 7px;
+}
+#map {
+	position: absolute;
+	left: 51px;
+	top: 7px;
+}
+
+#buildingSection {
+	position: absolute;
+	left: 130px;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	font-weight: bold;
+	color: #9f9f9f;
+}
+#buildingSection li {
+	float: left;
+	padding: 0 15px;
+	height: 100%;
+	display: block;
+	line-height: 39px;
+}
+#buildingSection li.selected {
+	border-left: 1px solid #cccccc;
+	border-right: 1px solid #cccccc;
+	color: #666666;
+	background-image: url(images/navigation-background-selected.png);
+}
+#content {
+	margin: 0 4px;
+}
+#building {
+	float: left;
+	height: 520px;
+	width: 482px;
+	margin: 0;
+	padding: 5px;
+}
+#selectionArea {
+	position:relative;
+	margin: 70px auto 0 auto;
+	width: 400px;
+}
+img {
+	position: absolute;
+	top: 0;
+	left: 0;
+	border: none;
+}
+area {
+	cursor: pointer;
+}
+#firstFloorHover {
+	visibility: hidden;
+}
+#charts {
+	height: 520px;
+	width: 482px;
+	margin: 0 0 0 492px;
+	padding: 5px;
+}
+#charts h2 {
+	margin: auto;
+	display:block;
+	width: 450px;
+	font-size: medium;
+	vertical-align: middle;
+	line-height: 49px;
+}
+#graphSelectionIcon {
+	display: block;
+	height: 49px;
+	width: 53px;
+	float: left;
+	margin-right: 5px;
+	background-image: url(images/room-green.png);
+}
+#graphSelectionTitle {
+	font-weight: normal;
+}
+
+#graphSelector {
+	width: 426px;
+	height: 25px;
+	display: block;
+	font-size: x-small;
+	font-weight: normal;
+	text-align: bottom;
+	vertical-align: bottom;
+	margin: 0 auto;
+	padding: 0;
+	color: #868686;
+}
+#graphSelector li {
+	display: block;
+	float: left;
+	cursor: pointer;
+	width: 68px;
+	height: 20px;
+	line-height: 20px;
+	text-align: center;
+	list-style-type: none;
+	margin: 0;
+	margin-top: 4px;
+	padding: 0;
+	display: inline-block;
+	vertical-align: middle;
+	border: 1px solid #cccccc;
+	border-bottom: none;
+	background-image: url(images/graph-selector-background.png);
+
+}
+#graphSelector li.selected {
+	height: 24px;
+	line-height: 24px;
+	margin: 0;
+	color: black;
+	background-image: url(images/graph-selector-background-selected.png);
+}
+#graph {
+	position: relative;
+	margin: auto;
+	width: 450px;
+	height: 300px;
+	background-image: url(images/chart-background.png);
+}
+#curve {
+	position: relative;
+	top: 0;
+	left: 0;
+	width: 450px;
+	height: 270px;
+	background-image: url(images/graph-background.png);
+}
+canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+.tickLabel {
+	font-size: xx-small;
+}
+#showRawXML {
+	width: 120px;
+	height: 100px;
+	background-image: url(images/show-xml.png);
+	margin-left: 16px;
+	margin-top: 2px;
+	cursor: pointer;
+}
+#queueHeader {
+	height: 36px;
+	background-image: url(images/queue-header.png);
+}
+#toggleQueue {
+	font-size: small;
+ 	float: left;
+ 	margin-top: 10px;
+ 	margin-left: 10px;
+	font-weight: bold;
+	cursor: pointer;
+	padding-left: 21px;
+	line-height: 20px;
+	background-image: url(images/button-open.png);
+	background-repeat: no-repeat;
+}
+#queue {
+	background-color: #f0f0f0;
+	height: 95px;
+	overflow: auto;
+	display: none;
+}
+#queueContainer {
+	width: 1000px;
+}
+.xmlFragment {
+	display: inline-block;
+	width: 102px;
+	padding: 0 10px 0 10px;
+	height: 72px;
+	font-size: x-small;
+	overflow: hidden;
+	background-image: url(images/telegram-background.png);
+}
+.xmlFragment pre {
+	width: 102px;
+	height: 55px;
+	margin: 7px 0 0 0;
+	overflow: hidden;
+}
+#queueFooter {
+	position: relative;
+	height: 36px;
+	background-image: url(images/queue-footer.png);
+}
+#queueFooter p {
+	margin: 0px;
+	font-size: small;
+}
+#queueTitle {
+	float: left;
+	line-height: 36px;
+	font-weight: bold;
+	padding-left: 10px;
+}
+#queueStatus {
+	font-weight: normal;
+}
+#connectionStatus {
+	position: absolute;
+	top: 0;
+	right: 5px;
+	height: 30px;
+	width: 130px;
+	font-weight: bold;
+}
+
+#connectionStatusText {
+	background-image: url(images/button-connected.png);
+	background-repeat: no-repeat;
+	padding-left: 21px;
+	cursor: pointer;
+}
+/*
+#connectionStatusIndicator {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+}
+*/
+#footer {
+	height: 12px;
+	background-image: url(images/footer.png);
+}
+
+#scrollbar_container {
+	position:relative;
+	width:500px;
+}
+
+#scrollbar_track {
+	position:absolute;
+	top:0;
+	right:0;
+	height:100%;
+	width:10px;
+	background-color:transparent;
+	cursor:move;
+}
+
+#scrollbar_handle {
+	width:10px;
+	background-color:#5c92e7;
+	cursor:move;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	opacity:0.9;
+    -moz-opacity:0.9;
+}
+
+#scrollbar_content {
+	overflow:hidden;
+	width:485px;
+	height:250px;
+}
+
+#rawDataOverlay {
+	position: fixed;
+	display: none;
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+	background-color: black;
+}
+
+#rawDataOverlayBox {
+	display: none;
+	padding: 15px;
+	width: 696px;
+	height: 436px;
+	position: absolute;
+	left: 50%;
+	top: 50px;
+	margin-left: -348px;
+	background-image: url(images/overlay-box.png);
+}
+
+#xml {
+	overflow: auto;
+	height: 390px;
+	overflow: auto;
+	border: 1px solid #cccccc;
+	color: #5c5e51;
+	background-color: #f9ffdd;
+	padding: 0 10px;
+}
+
+#hideXML {
+	font-size: small;
+	font-weight: bold;
+	margin-bottom: 10px;
+	cursor: pointer;
+	padding-left: 21px;
+	line-height: 20px;
+	background-image: url(images/button-close.png);
+	background-repeat: no-repeat;
+	width: 65px;
+}

@@ -53,21 +53,19 @@ function valueFormatterWatt(val, axis) {
 
 
 function xml2Str(xmlNode) {
-   try {
-      // Gecko-based browsers, Safari, Opera.
-      return (new XMLSerializer()).serializeToString(xmlNode);
-  }
-  catch (e) {
-     try {
-        // Internet Explorer.
-        return xmlNode.xml;
-     }
-     catch (e) {  
-        //Other browsers without XML Serializer
-        alert('XMLSerializer not supported');
-     }
-   }
-   return false;
+	try {
+		// Gecko-based browsers, Safari, Opera.
+		return (new XMLSerializer()).serializeToString(xmlNode);
+	} catch (e) {
+		try {
+			// Internet Explorer.
+			return xmlNode.xml;
+		} catch (e) {
+			//Other browsers without XML Serializer
+			alert('XMLSerializer not supported');
+		}
+	}
+	return false;
 }
 
 function parseXML(xml) {
