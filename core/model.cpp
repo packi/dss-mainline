@@ -638,6 +638,9 @@ namespace dss {
     grp = new Group(GroupIDWhite, zoneID, *this);
     grp->SetName("white");
     _zone.AddGroup(grp);
+    grp = new Group(GroupIDDisplay, zoneID, *this);
+    grp->SetName("display");
+    _zone.AddGroup(grp);
   } // AddDefaultGroupsToZone
 
   void Apartment::Execute() {
