@@ -214,6 +214,9 @@ namespace dss {
 
       _pDSS->GetPropertySystem().CreateProperty(GetPropertyBasePath() + "crcErrors")
             ->LinkToProxy(PropertyProxyMemberFunction<DS485FrameReader, int>(reader, &DS485FrameReader::GetNumberOfCRCErrors));
+
+      _pDSS->GetPropertySystem().CreateProperty(GetPropertyBasePath() + "state")
+            ->LinkToProxy(PropertyProxyMemberFunction<DS485Controller, string>(m_DS485Controller, &DS485Controller::GetStateAsString));
     }
   } // ctor
 

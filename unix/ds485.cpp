@@ -29,6 +29,8 @@ namespace dss {
   const unsigned char FrameStart = 0xFD;
   const unsigned char EscapeCharacter = 0xFC;
 
+  const char* ControllerStateToString(const aControllerState _state);
+
   //================================================== DS485Payload
 
   template<>
@@ -557,6 +559,7 @@ namespace dss {
   void DS485Controller::DoChangeState(aControllerState _newState) {
     if(_newState != m_State) {
       m_State = _newState;
+      m_StateString = ControllerStateToString(m_State);
       m_ControllerEvent.Signal();
     }
   } // DoChangeState
@@ -576,6 +579,10 @@ namespace dss {
   aControllerState DS485Controller::GetState() const {
     return m_State;
   } // GetState
+
+  const std::string& DS485Controller::GetStateAsString() const {
+    return m_StateString;
+  } // GetStateAsString
 
   void DS485Controller::WaitForCommandFrame() {
     m_CommandFrameEvent.WaitFor();
@@ -903,6 +910,35 @@ namespace dss {
       return "(unknown)";
     }
   } // CommandToString
+
+  const char* ControllerStateToString(const aControllerState _state) {
+    switch(_state) {
+    case csInitial:
+      return "initial";
+    case csSensing:
+      return "sensing";
+    case csDesignatedMaster:
+      return "designated master";
+    case csBroadcastingDSID:
+      return "broadcasting DSID";
+    case csMaster:
+      return "master";
+    case csSlaveWaitingToJoin:
+      return "slave waiting to join";
+    case csSlaveJoining:
+      return "slave joining";
+    case csSlave:
+      return "slave";
+    case csSlaveWaitingForFirstToken:
+      return "slave waiting for first token";
+    case csError:
+      return "error";
+    case csCommError:
+      return "comm error";
+    default:
+      return "(unknown)";
+    }
+  } // ControllerStateToString
 
   const dsid_t NullDSID(0,0);
 

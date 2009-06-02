@@ -187,6 +187,7 @@ namespace dss {
     aControllerState m_State;
     DS485FrameReader m_FrameReader;
     std::string m_RS485DeviceName;
+    std::string m_StateString;
     int m_StationID;
     int m_NextStationID;
     int m_TokenCounter;
@@ -219,6 +220,8 @@ namespace dss {
 
     aControllerState GetState() const;
     int GetTokenCount() const { return m_TokenCounter; };
+
+    const std::string& GetStateAsString() const;
 
     const DS485FrameReader& GetFrameReader() const { return m_FrameReader; }
 
