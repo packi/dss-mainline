@@ -295,7 +295,7 @@ namespace dss {
       frame.GetPayload().Add<uint8_t>(FunctionGroupCallScene);
       frame.GetPayload().Add<uint16_t>(toZone);
       frame.GetPayload().Add<uint16_t>(_groupID);
-      frame.GetPayload().Add<uint16_t>(SceneOff);
+      frame.GetPayload().Add<uint16_t>(SceneMin);
       SendFrame(frame);
       Log("turn off: zone " + IntToString(_zone.GetZoneID()) + " group: " + IntToString(_groupID));
     } else if(_cmd == cmdCallScene) {
@@ -375,7 +375,7 @@ namespace dss {
     } else if(_cmd == cmdTurnOff) {
       frame.GetPayload().Add<uint8_t>(FunctionDeviceCallScene);
       frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<uint16_t>(SceneOff);
+      frame.GetPayload().Add<uint16_t>(SceneMin);
       SendFrame(frame);
     } else if(_cmd == cmdGetOnOff) {
       frame.GetPayload().Add<uint8_t>(FunctionDeviceGetOnOff);
