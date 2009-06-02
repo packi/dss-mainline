@@ -49,7 +49,7 @@ pair<string, string> parse_prop(const string& s)
     if (s.find("--prop") == 0) {
       return make_pair("prop", s.substr(7));
     } else {
-        return make_pair(string(), string());
+      return make_pair(string(), string());
     }
 }
 
