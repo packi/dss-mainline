@@ -117,9 +117,6 @@ static void create_services(AvahiClient *c) {
     if (avahi_entry_group_is_empty(group)) {
         fprintf(stderr, "Adding service '%s'\n", name);
 
-        /* Create some random TXT data */
-        snprintf(r, sizeof(r), "random=%i", rand());
-
         /* We will now add two services and one subtype to the entry
          * group. The two services have the same name, but differ in
          * the service type (IPP vs. BSD LPR). Only services with the
@@ -128,7 +125,7 @@ static void create_services(AvahiClient *c) {
         int serverPort = StrToInt(DSS::GetInstance()->GetPropertySystem().GetStringValue("/config/subsystems/WebServer/ports"));
 
         /* Add the service for IPP */
-        if ((ret = avahi_entry_group_add_service(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, (AvahiPublishFlags)0, name, "_dssweb._tcp", NULL, NULL, serverPort, "test=blah", r, NULL)) < 0) {
+        if ((ret = avahi_entry_group_add_service(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, (AvahiPublishFlags)0, name, "_dssweb._tcp", NULL, NULL, serverPort, NULL, NULL, NULL)) < 0) {
 
             if (ret == AVAHI_ERR_COLLISION)
                 goto collision;
