@@ -255,6 +255,24 @@ int dss__SwitchGetGroupID(int _token, char* _deviceID, int& result);
   */
 //int dss__SwitchSimulateKeypress(int _token, char* _deviceID, int _buttonNr, char* _kind, bool& result);
 
+
 //==================================================== Events
 
 int dss__EventRaise(int _token, char* _eventName, char* _context, char* _parameter, char* _location, bool& result);
+
+
+// =================================================== Properties
+
+int dss__PropertyGetType(int _token, std::string _propertyName, std::string& result);
+
+int dss__PropertySetInt(int _token, std::string _propertyName, int _value, bool _mayCreate = true, bool& result);
+int dss__PropertySetString(int _token, std::string _propertyName, char* _value, bool _mayCreate = true, bool& result);
+int dss__PropertySetBool(int _token, std::string _propertyName, bool _value, bool _mayCreate = true, bool& result);
+
+int dss__PropertyGetInt(int _token, std::string _propertyName, int& result);
+int dss__PropertyGetString(int _token, std::string _propertyName, std::string& result);
+int dss__PropertyGetBool(int _token, std::string _propertyName, bool& result);
+
+int dss__PropertyGetChildren(int _token, std::string _propertyName, std::vector<std::string>& result);
+
+

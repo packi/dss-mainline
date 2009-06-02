@@ -208,4 +208,20 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__SwitchGetGroupID(struct soap*, int _token, char *
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__EventRaise(struct soap*, int _token, char *_eventName, char *_context, char *_parameter, char *_location, bool &result);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetType(struct soap*, int _token, std::string _propertyName, std::string &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertySetInt(struct soap*, int _token, std::string _propertyName, int _value, bool _mayCreate, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertySetString(struct soap*, int _token, std::string _propertyName, char *_value, bool _mayCreate, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertySetBool(struct soap*, int _token, std::string _propertyName, bool _value, bool _mayCreate, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetInt(struct soap*, int _token, std::string _propertyName, int &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetString(struct soap*, int _token, std::string _propertyName, std::string &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetBool(struct soap*, int _token, std::string _propertyName, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetChildren(struct soap*, int _token, std::string _propertyName, std::vector<std::string >&result);
+
 #endif

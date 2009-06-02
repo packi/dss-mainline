@@ -1811,8 +1811,182 @@ public:
 };
 #endif
 
+#ifndef SOAP_TYPE_dss__PropertyGetTypeResponse
+#define SOAP_TYPE_dss__PropertyGetTypeResponse (278)
+/* dss:PropertyGetTypeResponse */
+struct dss__PropertyGetTypeResponse
+{
+public:
+	std::string result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertyGetType
+#define SOAP_TYPE_dss__PropertyGetType (279)
+/* dss:PropertyGetType */
+struct dss__PropertyGetType
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	std::string _propertyName;	/* required element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertySetIntResponse
+#define SOAP_TYPE_dss__PropertySetIntResponse (281)
+/* dss:PropertySetIntResponse */
+struct dss__PropertySetIntResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertySetInt
+#define SOAP_TYPE_dss__PropertySetInt (282)
+/* dss:PropertySetInt */
+struct dss__PropertySetInt
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	std::string _propertyName;	/* required element of type xsd:string */
+	int _value;	/* required element of type xsd:int */
+	bool _mayCreate;	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertySetStringResponse
+#define SOAP_TYPE_dss__PropertySetStringResponse (284)
+/* dss:PropertySetStringResponse */
+struct dss__PropertySetStringResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertySetString
+#define SOAP_TYPE_dss__PropertySetString (285)
+/* dss:PropertySetString */
+struct dss__PropertySetString
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	std::string _propertyName;	/* required element of type xsd:string */
+	char *_value;	/* optional element of type xsd:string */
+	bool _mayCreate;	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertySetBoolResponse
+#define SOAP_TYPE_dss__PropertySetBoolResponse (287)
+/* dss:PropertySetBoolResponse */
+struct dss__PropertySetBoolResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertySetBool
+#define SOAP_TYPE_dss__PropertySetBool (288)
+/* dss:PropertySetBool */
+struct dss__PropertySetBool
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	std::string _propertyName;	/* required element of type xsd:string */
+	bool _value;	/* required element of type xsd:boolean */
+	bool _mayCreate;	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertyGetIntResponse
+#define SOAP_TYPE_dss__PropertyGetIntResponse (290)
+/* dss:PropertyGetIntResponse */
+struct dss__PropertyGetIntResponse
+{
+public:
+	int result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertyGetInt
+#define SOAP_TYPE_dss__PropertyGetInt (291)
+/* dss:PropertyGetInt */
+struct dss__PropertyGetInt
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	std::string _propertyName;	/* required element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertyGetStringResponse
+#define SOAP_TYPE_dss__PropertyGetStringResponse (293)
+/* dss:PropertyGetStringResponse */
+struct dss__PropertyGetStringResponse
+{
+public:
+	std::string result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertyGetString
+#define SOAP_TYPE_dss__PropertyGetString (294)
+/* dss:PropertyGetString */
+struct dss__PropertyGetString
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	std::string _propertyName;	/* required element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertyGetBoolResponse
+#define SOAP_TYPE_dss__PropertyGetBoolResponse (296)
+/* dss:PropertyGetBoolResponse */
+struct dss__PropertyGetBoolResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertyGetBool
+#define SOAP_TYPE_dss__PropertyGetBool (297)
+/* dss:PropertyGetBool */
+struct dss__PropertyGetBool
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	std::string _propertyName;	/* required element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertyGetChildrenResponse
+#define SOAP_TYPE_dss__PropertyGetChildrenResponse (299)
+/* dss:PropertyGetChildrenResponse */
+struct dss__PropertyGetChildrenResponse
+{
+public:
+	std::vector<std::string >result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__PropertyGetChildren
+#define SOAP_TYPE_dss__PropertyGetChildren (300)
+/* dss:PropertyGetChildren */
+struct dss__PropertyGetChildren
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	std::string _propertyName;	/* required element of type xsd:string */
+};
+#endif
+
 #ifndef SOAP_TYPE_SOAP_ENV__Header
-#define SOAP_TYPE_SOAP_ENV__Header (277)
+#define SOAP_TYPE_SOAP_ENV__Header (301)
 /* SOAP Header: */
 struct SOAP_ENV__Header
 {
@@ -1824,7 +1998,7 @@ private:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Code
-#define SOAP_TYPE_SOAP_ENV__Code (278)
+#define SOAP_TYPE_SOAP_ENV__Code (302)
 /* SOAP Fault Code: */
 struct SOAP_ENV__Code
 {
@@ -1835,7 +2009,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Detail
-#define SOAP_TYPE_SOAP_ENV__Detail (280)
+#define SOAP_TYPE_SOAP_ENV__Detail (304)
 /* SOAP-ENV:Detail */
 struct SOAP_ENV__Detail
 {
@@ -1847,7 +2021,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Reason
-#define SOAP_TYPE_SOAP_ENV__Reason (283)
+#define SOAP_TYPE_SOAP_ENV__Reason (307)
 /* SOAP-ENV:Reason */
 struct SOAP_ENV__Reason
 {
@@ -1857,7 +2031,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Fault
-#define SOAP_TYPE_SOAP_ENV__Fault (284)
+#define SOAP_TYPE_SOAP_ENV__Fault (308)
 /* SOAP Fault: */
 struct SOAP_ENV__Fault
 {
@@ -2093,6 +2267,22 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__SwitchGetGroupID(struct soap*, int _token, char *
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__EventRaise(struct soap*, int _token, char *_eventName, char *_context, char *_parameter, char *_location, bool &result);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetType(struct soap*, int _token, std::string _propertyName, std::string &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertySetInt(struct soap*, int _token, std::string _propertyName, int _value, bool _mayCreate, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertySetString(struct soap*, int _token, std::string _propertyName, char *_value, bool _mayCreate, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertySetBool(struct soap*, int _token, std::string _propertyName, bool _value, bool _mayCreate, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetInt(struct soap*, int _token, std::string _propertyName, int &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetString(struct soap*, int _token, std::string _propertyName, std::string &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetBool(struct soap*, int _token, std::string _propertyName, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetChildren(struct soap*, int _token, std::string _propertyName, std::vector<std::string >&result);
+
 /******************************************************************************\
  *                                                                            *
  * Skeletons                                                                  *
@@ -2266,6 +2456,22 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetFunctionID(struct soap*);
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SwitchGetGroupID(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__EventRaise(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertyGetType(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertySetInt(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertySetString(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertySetBool(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertyGetInt(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertyGetString(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertyGetBool(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertyGetChildren(struct soap*);
 
 #endif
 

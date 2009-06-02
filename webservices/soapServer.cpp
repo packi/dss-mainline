@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2009-04-29 07:46:51 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2009-06-02 09:32:18 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -237,6 +237,22 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__SwitchGetGroupID(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:EventRaise"))
 		return soap_serve_dss__EventRaise(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:PropertyGetType"))
+		return soap_serve_dss__PropertyGetType(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:PropertySetInt"))
+		return soap_serve_dss__PropertySetInt(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:PropertySetString"))
+		return soap_serve_dss__PropertySetString(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:PropertySetBool"))
+		return soap_serve_dss__PropertySetBool(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:PropertyGetInt"))
+		return soap_serve_dss__PropertyGetInt(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:PropertyGetString"))
+		return soap_serve_dss__PropertyGetString(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:PropertyGetBool"))
+		return soap_serve_dss__PropertyGetBool(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:PropertyGetChildren"))
+		return soap_serve_dss__PropertyGetChildren(soap);
 	return soap->error = SOAP_NO_METHOD;
 }
 #endif
@@ -3599,6 +3615,334 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__EventRaise(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__EventRaiseResponse(soap, &soap_tmp_dss__EventRaiseResponse, "dss:EventRaiseResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertyGetType(struct soap *soap)
+{	struct dss__PropertyGetType soap_tmp_dss__PropertyGetType;
+	struct dss__PropertyGetTypeResponse soap_tmp_dss__PropertyGetTypeResponse;
+	soap_default_dss__PropertyGetTypeResponse(soap, &soap_tmp_dss__PropertyGetTypeResponse);
+	soap_default_dss__PropertyGetType(soap, &soap_tmp_dss__PropertyGetType);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__PropertyGetType(soap, &soap_tmp_dss__PropertyGetType, "dss:PropertyGetType", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__PropertyGetType(soap, soap_tmp_dss__PropertyGetType._token, soap_tmp_dss__PropertyGetType._propertyName, soap_tmp_dss__PropertyGetTypeResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__PropertyGetTypeResponse(soap, &soap_tmp_dss__PropertyGetTypeResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__PropertyGetTypeResponse(soap, &soap_tmp_dss__PropertyGetTypeResponse, "dss:PropertyGetTypeResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__PropertyGetTypeResponse(soap, &soap_tmp_dss__PropertyGetTypeResponse, "dss:PropertyGetTypeResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertySetInt(struct soap *soap)
+{	struct dss__PropertySetInt soap_tmp_dss__PropertySetInt;
+	struct dss__PropertySetIntResponse soap_tmp_dss__PropertySetIntResponse;
+	soap_default_dss__PropertySetIntResponse(soap, &soap_tmp_dss__PropertySetIntResponse);
+	soap_default_dss__PropertySetInt(soap, &soap_tmp_dss__PropertySetInt);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__PropertySetInt(soap, &soap_tmp_dss__PropertySetInt, "dss:PropertySetInt", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__PropertySetInt(soap, soap_tmp_dss__PropertySetInt._token, soap_tmp_dss__PropertySetInt._propertyName, soap_tmp_dss__PropertySetInt._value, soap_tmp_dss__PropertySetInt._mayCreate, soap_tmp_dss__PropertySetIntResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__PropertySetIntResponse(soap, &soap_tmp_dss__PropertySetIntResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__PropertySetIntResponse(soap, &soap_tmp_dss__PropertySetIntResponse, "dss:PropertySetIntResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__PropertySetIntResponse(soap, &soap_tmp_dss__PropertySetIntResponse, "dss:PropertySetIntResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertySetString(struct soap *soap)
+{	struct dss__PropertySetString soap_tmp_dss__PropertySetString;
+	struct dss__PropertySetStringResponse soap_tmp_dss__PropertySetStringResponse;
+	soap_default_dss__PropertySetStringResponse(soap, &soap_tmp_dss__PropertySetStringResponse);
+	soap_default_dss__PropertySetString(soap, &soap_tmp_dss__PropertySetString);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__PropertySetString(soap, &soap_tmp_dss__PropertySetString, "dss:PropertySetString", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__PropertySetString(soap, soap_tmp_dss__PropertySetString._token, soap_tmp_dss__PropertySetString._propertyName, soap_tmp_dss__PropertySetString._value, soap_tmp_dss__PropertySetString._mayCreate, soap_tmp_dss__PropertySetStringResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__PropertySetStringResponse(soap, &soap_tmp_dss__PropertySetStringResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__PropertySetStringResponse(soap, &soap_tmp_dss__PropertySetStringResponse, "dss:PropertySetStringResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__PropertySetStringResponse(soap, &soap_tmp_dss__PropertySetStringResponse, "dss:PropertySetStringResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertySetBool(struct soap *soap)
+{	struct dss__PropertySetBool soap_tmp_dss__PropertySetBool;
+	struct dss__PropertySetBoolResponse soap_tmp_dss__PropertySetBoolResponse;
+	soap_default_dss__PropertySetBoolResponse(soap, &soap_tmp_dss__PropertySetBoolResponse);
+	soap_default_dss__PropertySetBool(soap, &soap_tmp_dss__PropertySetBool);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__PropertySetBool(soap, &soap_tmp_dss__PropertySetBool, "dss:PropertySetBool", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__PropertySetBool(soap, soap_tmp_dss__PropertySetBool._token, soap_tmp_dss__PropertySetBool._propertyName, soap_tmp_dss__PropertySetBool._value, soap_tmp_dss__PropertySetBool._mayCreate, soap_tmp_dss__PropertySetBoolResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__PropertySetBoolResponse(soap, &soap_tmp_dss__PropertySetBoolResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__PropertySetBoolResponse(soap, &soap_tmp_dss__PropertySetBoolResponse, "dss:PropertySetBoolResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__PropertySetBoolResponse(soap, &soap_tmp_dss__PropertySetBoolResponse, "dss:PropertySetBoolResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertyGetInt(struct soap *soap)
+{	struct dss__PropertyGetInt soap_tmp_dss__PropertyGetInt;
+	struct dss__PropertyGetIntResponse soap_tmp_dss__PropertyGetIntResponse;
+	soap_default_dss__PropertyGetIntResponse(soap, &soap_tmp_dss__PropertyGetIntResponse);
+	soap_default_dss__PropertyGetInt(soap, &soap_tmp_dss__PropertyGetInt);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__PropertyGetInt(soap, &soap_tmp_dss__PropertyGetInt, "dss:PropertyGetInt", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__PropertyGetInt(soap, soap_tmp_dss__PropertyGetInt._token, soap_tmp_dss__PropertyGetInt._propertyName, soap_tmp_dss__PropertyGetIntResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__PropertyGetIntResponse(soap, &soap_tmp_dss__PropertyGetIntResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__PropertyGetIntResponse(soap, &soap_tmp_dss__PropertyGetIntResponse, "dss:PropertyGetIntResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__PropertyGetIntResponse(soap, &soap_tmp_dss__PropertyGetIntResponse, "dss:PropertyGetIntResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertyGetString(struct soap *soap)
+{	struct dss__PropertyGetString soap_tmp_dss__PropertyGetString;
+	struct dss__PropertyGetStringResponse soap_tmp_dss__PropertyGetStringResponse;
+	soap_default_dss__PropertyGetStringResponse(soap, &soap_tmp_dss__PropertyGetStringResponse);
+	soap_default_dss__PropertyGetString(soap, &soap_tmp_dss__PropertyGetString);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__PropertyGetString(soap, &soap_tmp_dss__PropertyGetString, "dss:PropertyGetString", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__PropertyGetString(soap, soap_tmp_dss__PropertyGetString._token, soap_tmp_dss__PropertyGetString._propertyName, soap_tmp_dss__PropertyGetStringResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__PropertyGetStringResponse(soap, &soap_tmp_dss__PropertyGetStringResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__PropertyGetStringResponse(soap, &soap_tmp_dss__PropertyGetStringResponse, "dss:PropertyGetStringResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__PropertyGetStringResponse(soap, &soap_tmp_dss__PropertyGetStringResponse, "dss:PropertyGetStringResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertyGetBool(struct soap *soap)
+{	struct dss__PropertyGetBool soap_tmp_dss__PropertyGetBool;
+	struct dss__PropertyGetBoolResponse soap_tmp_dss__PropertyGetBoolResponse;
+	soap_default_dss__PropertyGetBoolResponse(soap, &soap_tmp_dss__PropertyGetBoolResponse);
+	soap_default_dss__PropertyGetBool(soap, &soap_tmp_dss__PropertyGetBool);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__PropertyGetBool(soap, &soap_tmp_dss__PropertyGetBool, "dss:PropertyGetBool", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__PropertyGetBool(soap, soap_tmp_dss__PropertyGetBool._token, soap_tmp_dss__PropertyGetBool._propertyName, soap_tmp_dss__PropertyGetBoolResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__PropertyGetBoolResponse(soap, &soap_tmp_dss__PropertyGetBoolResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__PropertyGetBoolResponse(soap, &soap_tmp_dss__PropertyGetBoolResponse, "dss:PropertyGetBoolResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__PropertyGetBoolResponse(soap, &soap_tmp_dss__PropertyGetBoolResponse, "dss:PropertyGetBoolResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertyGetChildren(struct soap *soap)
+{	struct dss__PropertyGetChildren soap_tmp_dss__PropertyGetChildren;
+	struct dss__PropertyGetChildrenResponse soap_tmp_dss__PropertyGetChildrenResponse;
+	soap_default_dss__PropertyGetChildrenResponse(soap, &soap_tmp_dss__PropertyGetChildrenResponse);
+	soap_default_dss__PropertyGetChildren(soap, &soap_tmp_dss__PropertyGetChildren);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__PropertyGetChildren(soap, &soap_tmp_dss__PropertyGetChildren, "dss:PropertyGetChildren", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__PropertyGetChildren(soap, soap_tmp_dss__PropertyGetChildren._token, soap_tmp_dss__PropertyGetChildren._propertyName, soap_tmp_dss__PropertyGetChildrenResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__PropertyGetChildrenResponse(soap, &soap_tmp_dss__PropertyGetChildrenResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__PropertyGetChildrenResponse(soap, &soap_tmp_dss__PropertyGetChildrenResponse, "dss:PropertyGetChildrenResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__PropertyGetChildrenResponse(soap, &soap_tmp_dss__PropertyGetChildrenResponse, "dss:PropertyGetChildrenResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

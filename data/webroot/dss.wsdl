@@ -1473,6 +1473,148 @@
     </sequence>
    </complexType>
   </element>
+  <!-- operation request element -->
+  <element name="PropertyGetType">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="propertyName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="PropertyGetTypeResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="PropertySetInt">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="propertyName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+     <element name="value" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="mayCreate" type="xsd:boolean" minOccurs="1" maxOccurs="1" default="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="PropertySetIntResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="PropertySetString">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="propertyName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+     <element name="value" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="mayCreate" type="xsd:boolean" minOccurs="1" maxOccurs="1" default="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="PropertySetStringResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="PropertySetBool">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="propertyName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+     <element name="value" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+     <element name="mayCreate" type="xsd:boolean" minOccurs="1" maxOccurs="1" default="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="PropertySetBoolResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="PropertyGetInt">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="propertyName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="PropertyGetIntResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="PropertyGetString">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="propertyName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="PropertyGetStringResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="PropertyGetBool">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="propertyName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="PropertyGetBoolResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="PropertyGetChildren">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="propertyName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="PropertyGetChildrenResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
+    </sequence>
+   </complexType>
+  </element>
  </schema>
 
 </types>
@@ -2133,6 +2275,70 @@
  <part name="parameters" element="dss:EventRaiseResponse"/>
 </message>
 
+<message name="PropertyGetTypeRequest">
+ <part name="parameters" element="dss:PropertyGetType"/>
+</message>
+
+<message name="PropertyGetTypeResponse">
+ <part name="parameters" element="dss:PropertyGetTypeResponse"/>
+</message>
+
+<message name="PropertySetIntRequest">
+ <part name="parameters" element="dss:PropertySetInt"/>
+</message>
+
+<message name="PropertySetIntResponse">
+ <part name="parameters" element="dss:PropertySetIntResponse"/>
+</message>
+
+<message name="PropertySetStringRequest">
+ <part name="parameters" element="dss:PropertySetString"/>
+</message>
+
+<message name="PropertySetStringResponse">
+ <part name="parameters" element="dss:PropertySetStringResponse"/>
+</message>
+
+<message name="PropertySetBoolRequest">
+ <part name="parameters" element="dss:PropertySetBool"/>
+</message>
+
+<message name="PropertySetBoolResponse">
+ <part name="parameters" element="dss:PropertySetBoolResponse"/>
+</message>
+
+<message name="PropertyGetIntRequest">
+ <part name="parameters" element="dss:PropertyGetInt"/>
+</message>
+
+<message name="PropertyGetIntResponse">
+ <part name="parameters" element="dss:PropertyGetIntResponse"/>
+</message>
+
+<message name="PropertyGetStringRequest">
+ <part name="parameters" element="dss:PropertyGetString"/>
+</message>
+
+<message name="PropertyGetStringResponse">
+ <part name="parameters" element="dss:PropertyGetStringResponse"/>
+</message>
+
+<message name="PropertyGetBoolRequest">
+ <part name="parameters" element="dss:PropertyGetBool"/>
+</message>
+
+<message name="PropertyGetBoolResponse">
+ <part name="parameters" element="dss:PropertyGetBoolResponse"/>
+</message>
+
+<message name="PropertyGetChildrenRequest">
+ <part name="parameters" element="dss:PropertyGetChildren"/>
+</message>
+
+<message name="PropertyGetChildrenResponse">
+ <part name="parameters" element="dss:PropertyGetChildrenResponse"/>
+</message>
+
 <portType name="MyType">
  <operation name="Test">
   <documentation>Service definition of function dss__Test</documentation>
@@ -2543,6 +2749,46 @@
   <documentation>Service definition of function dss__EventRaise</documentation>
   <input message="tns:EventRaiseRequest"/>
   <output message="tns:EventRaiseResponse"/>
+ </operation>
+ <operation name="PropertyGetType">
+  <documentation>Service definition of function dss__PropertyGetType</documentation>
+  <input message="tns:PropertyGetTypeRequest"/>
+  <output message="tns:PropertyGetTypeResponse"/>
+ </operation>
+ <operation name="PropertySetInt">
+  <documentation>Service definition of function dss__PropertySetInt</documentation>
+  <input message="tns:PropertySetIntRequest"/>
+  <output message="tns:PropertySetIntResponse"/>
+ </operation>
+ <operation name="PropertySetString">
+  <documentation>Service definition of function dss__PropertySetString</documentation>
+  <input message="tns:PropertySetStringRequest"/>
+  <output message="tns:PropertySetStringResponse"/>
+ </operation>
+ <operation name="PropertySetBool">
+  <documentation>Service definition of function dss__PropertySetBool</documentation>
+  <input message="tns:PropertySetBoolRequest"/>
+  <output message="tns:PropertySetBoolResponse"/>
+ </operation>
+ <operation name="PropertyGetInt">
+  <documentation>Service definition of function dss__PropertyGetInt</documentation>
+  <input message="tns:PropertyGetIntRequest"/>
+  <output message="tns:PropertyGetIntResponse"/>
+ </operation>
+ <operation name="PropertyGetString">
+  <documentation>Service definition of function dss__PropertyGetString</documentation>
+  <input message="tns:PropertyGetStringRequest"/>
+  <output message="tns:PropertyGetStringResponse"/>
+ </operation>
+ <operation name="PropertyGetBool">
+  <documentation>Service definition of function dss__PropertyGetBool</documentation>
+  <input message="tns:PropertyGetBoolRequest"/>
+  <output message="tns:PropertyGetBoolResponse"/>
+ </operation>
+ <operation name="PropertyGetChildren">
+  <documentation>Service definition of function dss__PropertyGetChildren</documentation>
+  <input message="tns:PropertyGetChildrenRequest"/>
+  <output message="tns:PropertyGetChildrenResponse"/>
  </operation>
 </portType>
 
@@ -3278,6 +3524,78 @@
   </output>
  </operation>
  <operation name="EventRaise">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="PropertyGetType">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="PropertySetInt">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="PropertySetString">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="PropertySetBool">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="PropertyGetInt">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="PropertyGetString">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="PropertyGetBool">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="PropertyGetChildren">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

@@ -4,6 +4,7 @@
 #include "core/event.h"
 #include "webservices/webservices.h"
 #include "core/sim/dssim.h"
+#include "core/propertysystem.h"
 
 #include <vector>
 #include <string>
@@ -1163,4 +1164,133 @@ int dss__EventRaise(struct soap *soap, int _token, char* _eventName, char* _cont
 
   result = true;
   return SOAP_OK;
-} // dss__Event_Raise
+} // dss__EventRaise
+
+//==================================================== Properties
+
+int dss__PropertyGetType(struct soap *soap, int _token, std::string _propertyName, std::string& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+
+  dss::PropertySystem& propSys = dss::DSS::GetInstance()->GetPropertySystem();
+  dss::PropertyNode* node = propSys.GetProperty(_propertyName);
+  if(node == NULL) {
+    return soap_sender_fault(soap, "Property does not exist", NULL);
+  }
+
+  result = dss::GetValueTypeAsString(node->GetValueType());
+  return SOAP_OK;
+} // dss__PropertyGetType
+
+int dss__PropertySetInt(struct soap *soap, int _token, std::string _propertyName, int _value, bool _mayCreate, bool& result) {
+  if(!IsAuthorized(soap, _token)) {
+    result = false;
+    return NotAuthorized(soap);
+  }
+
+  dss::PropertySystem& propSys = dss::DSS::GetInstance()->GetPropertySystem();
+  if(!propSys.SetIntValue(_propertyName, _value, _mayCreate)) {
+    result = false;
+    return soap_sender_fault(soap, "Property does not exist", NULL);
+  }
+
+  result = true;
+  return SOAP_OK;
+} // dss__PropertySetInt
+
+int dss__PropertySetString(struct soap *soap, int _token, std::string _propertyName, char* _value, bool _mayCreate, bool& result) {
+  if(!IsAuthorized(soap, _token)) {
+    result = false;
+    return NotAuthorized(soap);
+  }
+
+  dss::PropertySystem& propSys = dss::DSS::GetInstance()->GetPropertySystem();
+  if(!propSys.SetStringValue(_propertyName, _value, _mayCreate)) {
+    result = false;
+    return soap_sender_fault(soap, "Property does not exist", NULL);
+  }
+
+  result = true;
+  return SOAP_OK;
+} // dss__PropertySetString
+
+int dss__PropertySetBool(struct soap *soap, int _token, std::string _propertyName, bool _value, bool _mayCreate, bool& result) {
+  if(!IsAuthorized(soap, _token)) {
+    result = false;
+    return NotAuthorized(soap);
+  }
+
+  dss::PropertySystem& propSys = dss::DSS::GetInstance()->GetPropertySystem();
+  if(!propSys.SetBoolValue(_propertyName, _value, _mayCreate)) {
+    result = false;
+    return soap_sender_fault(soap, "Property does not exist", NULL);
+  }
+
+  result = true;
+  return SOAP_OK;
+} // dss__PropertySetBool
+
+int dss__PropertyGetInt(struct soap *soap, int _token, std::string _propertyName, int& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+
+  dss::PropertySystem& propSys = dss::DSS::GetInstance()->GetPropertySystem();
+  dss::PropertyNode* node = propSys.GetProperty(_propertyName);
+  if(node == NULL) {
+    return soap_sender_fault(soap, "Property does not exist", NULL);
+  }
+
+  result = node->GetIntegerValue();
+  return SOAP_OK;
+} // dss__PropertyGetInt
+
+int dss__PropertyGetString(struct soap *soap, int _token, std::string _propertyName, std::string& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+
+  dss::PropertySystem& propSys = dss::DSS::GetInstance()->GetPropertySystem();
+  dss::PropertyNode* node = propSys.GetProperty(_propertyName);
+  if(node == NULL) {
+    return soap_sender_fault(soap, "Property does not exist", NULL);
+  }
+
+  result = node->GetStringValue();
+  return SOAP_OK;
+} // dss__PropertyGetString
+
+int dss__PropertyGetBool(struct soap *soap, int _token, std::string _propertyName, bool& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+
+  dss::PropertySystem& propSys = dss::DSS::GetInstance()->GetPropertySystem();
+  dss::PropertyNode* node = propSys.GetProperty(_propertyName);
+  if(node == NULL) {
+    return soap_sender_fault(soap, "Property does not exist", NULL);
+  }
+
+  result = node->GetBoolValue();
+  return SOAP_OK;
+} // dss__PropertyGetBool
+
+int dss__PropertyGetChildren(struct soap *soap, int _token, std::string _propertyName, std::vector<std::string>& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+
+  dss::PropertySystem& propSys = dss::DSS::GetInstance()->GetPropertySystem();
+  dss::PropertyNode* node = propSys.GetProperty(_propertyName);
+  if(node == NULL) {
+    return soap_sender_fault(soap, "Property does not exist", NULL);
+  }
+
+  for(int iChild = 0; iChild < node->GetChildCount(); iChild++) {
+    result.push_back(node->GetChild(iChild)->GetName());
+  }
+
+  return SOAP_OK;
+} // dss__PropertyGetChildren
+
