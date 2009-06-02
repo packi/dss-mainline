@@ -110,7 +110,7 @@ var DSMainMeterReport = Class.create({
 		var self = this;
 		jQuery.ajax({
 			type: "GET",
-			url: "metering/metering.xml?date=" + currentDate.getTime(),
+			url: "metering/metering_consumption_seconds.xml?date=" + currentDate.getTime(),
 			dataType: "xml",
 			success: function(xml) {
 				var values = self.parseXML(xml);
