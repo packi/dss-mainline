@@ -19,6 +19,7 @@
 class DSIDSlimSlaveRemote : public DSIDMedia {
 private:
   int m_RemotePort;
+  int m_DefaultVolume;
   std::string m_RemoteHost;
   std::string m_PlayerMACHeader;
 public:
@@ -26,6 +27,7 @@ public:
       m_RemotePort = 4212;
       m_RemoteHost = "127.0.0.1";
       m_PlayerMACHeader = "";
+      m_DefaultVolume = -1;
     }
     virtual ~DSIDSlimSlaveRemote() {}
 
@@ -52,6 +54,9 @@ public:
 
     virtual void powerOn() {
       sendCommand("power 1");
+      if(m_DefaultVolume != -1) {
+        sendCommand("mixer volume " + dss::IntToString(m_DefaultVolume));
+      }
       sendCommand("play");
     }
 
@@ -95,6 +100,8 @@ public:
         m_PlayerMACHeader = _value;
         dss::ReplaceAll(m_PlayerMACHeader, ":", "%3A");
         std::cout << "after: " << m_PlayerMACHeader << std::endl;
+      } else if(_name == "volume") {
+        m_DefaultVolume = dss::StrToInt(_value);
       }
     }
 };
