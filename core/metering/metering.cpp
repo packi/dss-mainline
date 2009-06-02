@@ -23,16 +23,18 @@ namespace dss {
     Thread("Metering")
   {
     GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "storageLocation", GetDSS().GetDataDirectory() + "webroot/metering/", true);
-    boost::shared_ptr<MeteringConfigChain> configConsumption(new MeteringConfigChain(false, 1, "mA"));
-    configConsumption->SetComment("Consumption in mA");
+    boost::shared_ptr<MeteringConfigChain> configConsumption(new MeteringConfigChain(false, 1, "mW"));
+    configConsumption->SetComment("Consumption in mW");
     configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_seconds",        2, 400)));
-    configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_minutely",  1 * 60, 400)));
+    configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_10seconds",     10, 400)));
+//    configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_minutely",  1 * 60, 400)));
     configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_5minutely", 5 * 60, 400)));
-    configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_hourly",   60 * 60, 400)));
-    configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_daily", 24 * 60*60, 400)));
+    configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_halfhourly",30 * 60, 400)));
+    configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_2hourly", 2 * 60*60, 400)));
+    configConsumption->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_daily",  24 * 60*60, 400)));
     m_Config.push_back(configConsumption);
 
-    boost::shared_ptr<MeteringConfigChain> configEnergy(new MeteringConfigChain(true, 60, "kWh"));
+    boost::shared_ptr<MeteringConfigChain> configEnergy(new MeteringConfigChain(true, 60, "Wh"));
     configEnergy->SetComment("Energymeter value");
     configEnergy->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("energy_minutely",  1 * 60, 400)));
     configEnergy->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("energy_5minutely", 5 * 60, 400)));
@@ -117,7 +119,7 @@ namespace dss {
         Logger::GetInstance()->Log("Metering::CheckModulators: Writing series back...");
         for(int iConfig = 0; iConfig < _config->Size(); iConfig++) {
           Timestamp startedWritingSingle;
-          // Load series from file
+          // Write series to file
           string fileName = m_MeteringStorageLocation + (*ipModulator)->GetDSID().ToString() + "_" + _config->GetFilenameSuffix(iConfig) + ".xml";
           Series<CurrentValue>* s = series[iConfig].get();
           Logger::GetInstance()->Log(string("Metering::CheckModulators: Trying to save series to '") + fileName + "'");
