@@ -49,9 +49,6 @@ using Poco::XML::XMLWriter;
 
 namespace dss {
 
-  int getNextScene(const int _currentScene);
-  int getPreviousScene(const int _currentScene);
-  bool rememberScene(const int _scene);
 
   //================================================== Device
 
@@ -170,11 +167,11 @@ namespace dss {
   } // UndoScene
 
   void Device::NextScene() {
-    CallScene(getNextScene(m_LastCalledScene));
+    CallScene(SceneHelper::getNextScene(m_LastCalledScene));
   } // NextScene
 
   void Device::PreviousScene() {
-    CallScene(getNextScene(m_LastCalledScene));
+    CallScene(SceneHelper::getNextScene(m_LastCalledScene));
   } // PreviousScene
 
   string Device::GetName() const {
@@ -1211,7 +1208,7 @@ namespace dss {
       Group* group = zone.GetGroup(_groupID);
       if(group != NULL) {
         Log("OnGroupCallScene: group-id '" + IntToString(_groupID) + "' in Zone '" + IntToString(_zoneID) + "' scene: " + IntToString(_sceneID));
-        if(rememberScene(_sceneID & 0x00ff)) {
+        if(SceneHelper::rememberScene(_sceneID & 0x00ff)) {
           Set s = zone.GetDevices().GetByGroup(_groupID);
           SetLastCalledSceneAction act(_sceneID & 0x00ff);
           s.Perform(act);
@@ -1250,7 +1247,7 @@ namespace dss {
       try {
         Log("OnDeviceCallScene: modulator-id '" + IntToString(_modulatorID) + "' for device '" + IntToString(_deviceID) + "' scene: " + IntToString(_sceneID));
         DeviceReference devRef = mod.GetDevices().GetByBusID(_deviceID);
-        if(rememberScene(_sceneID & 0x00ff)) {
+        if(SceneHelper::rememberScene(_sceneID & 0x00ff)) {
           devRef.GetDevice().SetLastCalledScene(_sceneID & 0x00ff);
         }
       } catch(ItemNotFoundException& e) {
@@ -1593,7 +1590,7 @@ namespace dss {
   void Group::CallScene(const int _sceneNr) {
     // this might be redundant, but since a set could be
     // optimized if it contains only one device its safer like that...
-    if(rememberScene(_sceneNr & 0x00ff)) {
+    if(SceneHelper::rememberScene(_sceneNr & 0x00ff)) {
       m_LastCalledScene = _sceneNr & 0x00ff;
     }
     GetDevices().CallScene(_sceneNr);
@@ -1612,11 +1609,11 @@ namespace dss {
   } // GetPowerConsumption
 
   void Group::NextScene() {
-    CallScene(getNextScene(m_LastCalledScene));
+    CallScene(SceneHelper::getNextScene(m_LastCalledScene));
   } // NextScene
 
   void Group::PreviousScene() {
-    CallScene(getPreviousScene(m_LastCalledScene));
+    CallScene(SceneHelper::getPreviousScene(m_LastCalledScene));
   } // PreviousScene
 
 
@@ -1735,7 +1732,7 @@ namespace dss {
 
   //================================================== Utils
 
-  int getNextScene(const int _currentScene) {
+  unsigned int SceneHelper::getNextScene(const unsigned int _currentScene) {
     switch(_currentScene) {
     case ScenePanic:
     case SceneStandBy:
@@ -1754,7 +1751,7 @@ namespace dss {
     }
   } // getNextScene
 
-  int getPreviousScene(const int _currentScene) {
+  unsigned int SceneHelper::getPreviousScene(const unsigned int _currentScene) {
     switch(_currentScene) {
     case ScenePanic:
     case SceneStandBy:
@@ -1773,8 +1770,35 @@ namespace dss {
     }
   } // getPreviousScene
 
-  bool rememberScene(const int _scene) {
-    return (_scene != SceneBell);
+  bool SceneHelper::m_Initialized = false;
+  std::bitset<64> SceneHelper::m_ZonesToIgnore;
+
+  void SceneHelper::initialize() {
+    m_Initialized = true;
+    m_ZonesToIgnore.reset();
+    m_ZonesToIgnore.set(SceneInc);
+    m_ZonesToIgnore.set(SceneDec);
+    m_ZonesToIgnore.set(SceneStop);
+    m_ZonesToIgnore.set(SceneBell);
+    m_ZonesToIgnore.set(SceneEnergyOverload);
+    m_ZonesToIgnore.set(SceneEnergyHigh);
+    m_ZonesToIgnore.set(SceneEnergyMiddle);
+    m_ZonesToIgnore.set(SceneEnergyLow);
+    m_ZonesToIgnore.set(SceneEnergyClassA);
+    m_ZonesToIgnore.set(SceneEnergyClassB);
+    m_ZonesToIgnore.set(SceneEnergyClassC);
+    m_ZonesToIgnore.set(SceneEnergyClassD);
+    m_ZonesToIgnore.set(SceneEnergyClassE);
+    m_ZonesToIgnore.set(SceneLocalOff);
+    m_ZonesToIgnore.set(SceneLocalOn);
+  }
+
+  bool SceneHelper::rememberScene(const unsigned int _scene) {
+    if(!m_Initialized) {
+      initialize();
+      assert(m_Initialized);
+    }
+    return !m_ZonesToIgnore.test(_scene);
   } // rememberScene
 
 }

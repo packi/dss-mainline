@@ -717,6 +717,18 @@ namespace dss {
     ~ItemNotFoundException() throw() {}
   };
 
+  class SceneHelper {
+  private:
+    static std::bitset<64> m_ZonesToIgnore;
+    static bool m_Initialized;
+
+    static void initialize();
+  public:
+    static bool rememberScene(const unsigned int _sceneID);
+    static unsigned int getNextScene(const unsigned int _currentScene);
+    static unsigned int getPreviousScene(const unsigned int _currentScene);
+  };
+
 }
 
 //#ifdef DOC
