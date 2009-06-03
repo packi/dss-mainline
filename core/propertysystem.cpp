@@ -456,7 +456,7 @@ namespace dss {
         return m_PropVal.actualValue.Integer;
       }
     } else {
-      cerr << "Property-Type missmatch: " << m_Name << endl;
+      cerr << "Property-Type mismatch: " << m_Name << endl;
       return 0;
     }
   } // GetIntegerValue

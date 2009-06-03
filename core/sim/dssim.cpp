@@ -7,6 +7,7 @@
 #include "core/dss.h"
 #include "core/DS485Interface.h"
 #include "core/foreach.h"
+#include "core/propertysystem.h"
 
 #include <dlfcn.h>
 
@@ -204,6 +205,9 @@ namespace dss {
     m_DSIDFactory.RegisterCreator(new DSIDSimCreator());
     m_DSIDFactory.RegisterCreator(new DSIDSimSwitchCreator());
 
+    GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "configfile", GetDSS().GetDataDirectory() + "sim.xml", true, false);
+
+
     LoadPlugins();
     LoadFromConfig();
 
@@ -213,7 +217,8 @@ namespace dss {
 
   void DSSim::LoadFromConfig() {
     const int theConfigFileVersion = 1;
-    XMLDocumentFileReader reader(GetDSS().GetDataDirectory() + "sim.xml");
+    string filename = GetConfigPropertyBasePath() + "configfile";
+    XMLDocumentFileReader reader(GetDSS().GetPropertySystem().GetStringValue(filename));
     XMLNode rootNode = reader.GetDocument().GetRootNode();
 
     if(rootNode.GetName() == "simulation") {
@@ -236,7 +241,7 @@ namespace dss {
         Log("Version mismatch, or missing version attribute. Expected ''" + IntToString(theConfigFileVersion) + "'" + fileVersionStr + "' ");
       }
     } else {
-      Log("sim.xml must have a root-node named 'simulation'", lsFatal);
+      Log(filename + " must have a root-node named 'simulation'", lsFatal);
     }
   } // LoadFromConfig
 
