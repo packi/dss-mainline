@@ -870,7 +870,6 @@ namespace dss {
   } // LoadModulators
 
   void Apartment::LoadZones(XMLNode& _node) {
-    // TODO: A Zone can span over multiple modulators
     XMLNodeList zones = _node.GetChildren();
     for(XMLNodeList::iterator iZone = zones.begin(); iZone != zones.end(); ++iZone) {
       if(iZone->GetName() == "zone") {

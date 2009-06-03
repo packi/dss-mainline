@@ -247,7 +247,6 @@ namespace dss {
       Apartment& apt = _set.Get(0).GetDevice().GetApartment();
       if(_set.Length() == apt.GetDevices().Length()) {
         Log("Optimization: Set contains all devices of apartment");
-        // TODO: Get the group from the zone
         return SendCommand(_cmd, apt.GetZone(0), apt.GetGroup(GroupIDBroadcast), _param);
       }
     }
