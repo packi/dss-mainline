@@ -676,7 +676,69 @@ namespace dss {
   } // HandleSetCall
 
   string WebServer::HandlePropertyCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
-    _handled = false;
+    _handled = true;
+    string propName = _parameter["path"];
+    if(propName.empty()) {
+      return ResultToJSON(false, "Need parameter \'path\' for property operations");
+    }
+    PropertyNode* node = GetDSS().GetPropertySystem().GetProperty(propName);
+
+    if(EndsWith(_method, "/getString")) {
+      if(node == NULL) {
+        return ResultToJSON(false, "Could not find node named '" + propName + "'");
+      }
+      stringstream sstream;
+      sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->GetStringValue()) << "}";
+      return JSONOk(sstream.str());
+    } else if(EndsWith(_method, "/getInteger")) {
+      if(node == NULL) {
+        return ResultToJSON(false, "Could not find node named '" + propName + "'");
+      }
+      stringstream sstream;
+      sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->GetIntegerValue()) << "}";
+      return JSONOk(sstream.str());
+    } else if(EndsWith(_method, "/getBoolean")) {
+      if(node == NULL) {
+        return ResultToJSON(false, "Could not find node named '" + propName + "'");
+      }
+      stringstream sstream;
+      sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->GetBoolValue()) << "}";
+      return JSONOk(sstream.str());
+    } else if(EndsWith(_method, "/setString")) {
+      string value = _parameter["value"];
+      if(node == NULL) {
+        node = GetDSS().GetPropertySystem().CreateProperty(propName);
+      }
+      node->SetStringValue(value);
+    } else if(EndsWith(_method, "/setBoolean")) {
+      string strValue = _parameter["value"];
+      bool value;
+      if(strValue == "true") {
+        value = true;
+      } else if(strValue == "false") {
+        value = false;
+      } else {
+        return ResultToJSON(false, "Expected 'true' or 'false' for parameter 'value' but got: '" + strValue + "'");
+      }
+      if(node == NULL) {
+        node = GetDSS().GetPropertySystem().CreateProperty(propName);
+      }
+      node->SetBooleanValue(value);
+    } else if(EndsWith(_method, "/setInteger")) {
+      string strValue = _parameter["value"];
+      int value;
+      try {
+        value = StrToInt(strValue);
+      } catch(...) {
+        return ResultToJSON(false, "Could not convert parameter 'value' to string. Got: '" + strValue + "'");
+      }
+      if(node == NULL) {
+        node = GetDSS().GetPropertySystem().CreateProperty(propName);
+      }
+      node->SetIntegerValue(value);
+    } else {
+      _handled = false;
+    }
     return "";
   } // HandlePropertyCall
 
