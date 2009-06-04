@@ -10,7 +10,9 @@
 using namespace std;
 
 int testGetter() {
+#ifdef VERBOSE_TESTS
   cout << "testGetter() called" << endl;
+#endif
   return 2;
 }
 
@@ -25,7 +27,9 @@ public:
 
   void SetValue(int _value) {
     m_Value = _value;
+#ifdef VERBOSE_TESTS
     cout << "PropTest::SetValue new value: " << _value << endl;
+#endif
   }
 
   int GetValue() const {
@@ -102,7 +106,6 @@ protected:
     propSys->CreateProperty("/bla/bll+/bsa");
     CPPUNIT_ASSERT_EQUAL(2, propSys->GetProperty("/bla")->Count("bll"));
     CPPUNIT_ASSERT(propSys->GetProperty("/af/sgd/sdf") == NULL);
-    cout << "blaa" << endl;
 
     // test pointer to value
     int bla = 7;

@@ -156,17 +156,22 @@ protected:
       int curDelay = delay[iVal];
       int curValue = values[iVal];
       int diff = curDelay - lastDelay;
+#ifdef VERBOSE_TESTS
       cout << "\ndiff: " << diff << "\ncurDelay: " << curDelay << endl;
-
+#endif
       boost::shared_ptr<Series<CurrentValue> > pFive(reader.ReadFromXML("/home/patrick/workspace/dss/data/webroot/test_five_minutely.xml"));
       boost::shared_ptr<Series<CurrentValue> > pMinutely(reader.ReadFromXML("/home/patrick/workspace/dss/data/webroot/test_minutely.xml"));
       boost::shared_ptr<Series<CurrentValue> > pSecondly2(reader.ReadFromXML("/home/patrick/workspace/dss/data/webroot/test_2seconds.xml"));
 
+#ifdef VERBOSE_TESTS
       cout << "secondly last: " << lastNumValsSeconds << " current: " << pSecondly2->GetValues().size() << endl;
+#endif
       CPPUNIT_ASSERT_EQUAL(lastNumValsSeconds, pSecondly2->GetValues().size());
       CPPUNIT_ASSERT_EQUAL(lastNumValsMinutely, pMinutely->GetValues().size());
       CPPUNIT_ASSERT_EQUAL(lastNumValsFive, pFive->GetValues().size());
+#ifdef VERBOSE_TESTS
       cout << "last timestamp: " << lastTimeStamp << " current: " << pSecondly2->GetValues().front().GetTimeStamp() << endl;
+#endif
       CPPUNIT_ASSERT_EQUAL(lastTimeStamp, pSecondly2->GetValues().front().GetTimeStamp());
 
       pMinutely->SetNextSeries(pFive.get());
@@ -175,12 +180,14 @@ protected:
       pSecondly2->AddValue(curValue, startTime.AddSeconds(curDelay));
 
       if(diff > 2) {
+#ifdef VERBOSE_TESTS
         int numNewVals = (diff + 1) / 2;
         cout << "diff       : " << diff << endl;
         cout << "numNewVals : " << numNewVals << endl;
         cout << "lastValSec : " << lastNumValsSeconds << endl;
         cout << "current    : " << pSecondly2->GetValues().size() << endl;
         //CPPUNIT_ASSERT_EQUAL(lastNumValsSeconds + numNewVals, pSecondly)
+#endif
       }
 
       lastNumValsSeconds = pSecondly2->GetValues().size();
