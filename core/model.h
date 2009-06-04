@@ -508,7 +508,7 @@ namespace dss {
   	Zone(const int _id)
   	: m_ZoneID(_id)
   	{}
-    virtual ~Zone() {}
+    virtual ~Zone();
     virtual Set GetDevices() const;
 
     void AddToModulator(Modulator& _modulator);

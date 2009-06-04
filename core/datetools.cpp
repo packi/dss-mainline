@@ -303,6 +303,7 @@ namespace dss {
   } // ctor
 
   ICalSchedule::~ICalSchedule() {
+    icalrecurrencetype_clear(&m_Recurrence);
   } // dtor
 
   void ical_to_tm(const icaltimetype& icalTime, struct tm& tm) {
@@ -332,6 +333,8 @@ namespace dss {
       ical_to_tm(icalTime, tm);
       current = DateTime::FromUTC(mktime(&tm));
     } while(current.Before(_from));
+    icalrecur_iterator_free(it);
+    it = NULL;
 
     if(current.After(_from) || current == _from) {
       result = current;

@@ -60,6 +60,29 @@ const char* DataDirectory = "data/";
         PropertyProxyMemberFunction<DSS,string>(*this, &DSS::GetDataDirectory, &DSS::SetDataDirectory));
   } // ctor
 
+  DSS::~DSS() {
+    m_State = ssTerminating;
+
+    m_pWebServer.reset();
+    m_pWebServices.reset();
+
+    m_pEventQueue.reset();
+    m_pEventRunner.reset();
+
+    m_pEventInterpreter.reset();
+    m_pMetering.reset();
+    m_pFakeMeter.reset();
+
+#ifdef WITH_SIM
+    m_pSimulation.reset();
+#endif
+
+    m_pDS485Interface.reset();
+
+
+    m_pApartment.reset();
+  }
+
   int DSS::GetUptime() const {
     return (int)difftime( time( NULL ), m_TimeStarted );
   } // GetUptime
@@ -198,6 +221,12 @@ const char* DataDirectory = "data/";
     // pass control to the eventrunner
     m_pEventRunner->Run();
   } // Run
+
+  void DSS::Shutdown() {
+    DSS* inst = m_Instance;
+    m_Instance = NULL;
+    delete inst;
+  } // Shutdown
 
   void DSS::LoadConfig() {
     m_State = ssLoadingConfig;

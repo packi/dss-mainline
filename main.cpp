@@ -93,6 +93,7 @@ int main (int argc, char* argv[]) {
       ("help", "produce help message")
 #ifdef WITH_TESTS
       ("dont-runtests", po::value<bool>(), "if set, no tests will be run")
+      ("quit-after-tests", po::value<bool>(), "if set, the application will terminate after running its tests")
 #endif
 #ifndef __APPLE__
       ("sniff,s", po::value<bool>(), "start the ds485 sniffer")
@@ -111,12 +112,16 @@ int main (int argc, char* argv[]) {
   }
 
   bool runTests = true;
-  if (vm.count("dont-runtests")) {
-    runTests = vm["dont-runtests"].as<bool>();
+  if(vm.count("dont-runtests")) {
+    runTests = !vm["dont-runtests"].as<bool>();
   }
 
-  if (vm.count("prop"))
-  {
+  bool quitAfterTests = false;
+  if(runTests) {
+    quitAfterTests = vm["quit-after-tests"].as<bool>();
+  }
+
+  if(vm.count("prop")) {
       properties = vm["prop"].as< vector<string> >();
   }
 
@@ -137,7 +142,7 @@ int main (int argc, char* argv[]) {
   }
 #endif
 
-  if(startSniffer) {
+  if(!quitAfterTests && startSniffer) {
 #ifndef __APPLE__
     dss::DS485FrameSniffer sniffer(snifferDev);
     sniffer.Run();
@@ -146,9 +151,15 @@ int main (int argc, char* argv[]) {
     }
 #endif
   } else {
-    // start DSS
-    dss::DSS::GetInstance()->Initialize(properties);
-    dss::DSS::GetInstance()->Run();
+    if(!quitAfterTests) {
+      // start DSS
+      dss::DSS::GetInstance()->Initialize(properties);
+      dss::DSS::GetInstance()->Run();
+    }
+    if(dss::DSS::HasInstance()) {
+      dss::DSS::Shutdown();
+    }
+    dss::Logger::Shutdown();
   }
 
 #ifdef USE_LIBXML

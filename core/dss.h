@@ -43,7 +43,8 @@ namespace dss {
     ssLoadingConfig,
     ssInitializingSubsystems,
     ssStarting,
-    ssRunning
+    ssRunning,
+    ssTerminating
   } aDSSState;
 
   /** Main class
@@ -79,11 +80,13 @@ namespace dss {
 
     int GetUptime() const;
   public:
+    ~DSS();
     void Initialize(const std::vector<std::string>& _properties);
     void Run();
 
     static DSS* GetInstance();
     static bool HasInstance();
+    static void Shutdown();
 #ifdef WITH_TESTS
     static void Teardown();
 #endif

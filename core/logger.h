@@ -43,6 +43,7 @@ namespace dss {
     Logger() {}
   public:
     static Logger* GetInstance();
+    static void Shutdown();
 
     void Log(const std::string& _message, const aLogSeverity _severity = lsDebug);
     void Log(const char* _message, const aLogSeverity _severity = lsDebug);

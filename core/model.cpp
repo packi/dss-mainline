@@ -1367,6 +1367,12 @@ namespace dss {
 
   //================================================== Zone
 
+  Zone::~Zone() {
+    ScrubVector(m_Groups);
+    // we don't own our modulators
+    m_Modulators.clear();
+  } // dtor
+
   Set Zone::GetDevices() const {
     return Set(m_Devices);
   } // GetDevices

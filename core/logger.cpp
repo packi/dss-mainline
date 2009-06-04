@@ -86,6 +86,14 @@ namespace dss {
     }
     assert(m_Instance != NULL);
     return m_Instance;
+  } // GetInstance
+
+  void Logger::Shutdown() {
+    if(m_Instance != NULL) {
+      Logger* inst = m_Instance;
+      m_Instance = NULL;
+      delete inst;
+    }
   }
 
   void Logger::Log(const string& _message, const aLogSeverity _severity) {
