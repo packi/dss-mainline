@@ -392,10 +392,15 @@ namespace dss {
 
 
   void PropertyNode::SetStringValue(const char* _value) {
-    ClearValue();
     if(m_LinkedToProxy) {
-      m_Proxy.stringProxy->SetValue(_value);
+      if(m_PropVal.valueType == vTypeString) {
+        m_Proxy.stringProxy->SetValue(_value);
+      } else {
+        cerr << "*** setting string on a non string property";
+        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+      }
     } else {
+      ClearValue();
       if(_value != NULL) {
         m_PropVal.actualValue.pString = strdup(_value);
       }
@@ -411,10 +416,15 @@ namespace dss {
 
 
   void PropertyNode::SetIntegerValue(const int _value) {
-    ClearValue();
     if(m_LinkedToProxy) {
-      m_Proxy.intProxy->SetValue(_value);
+      if(m_PropVal.valueType == vTypeInteger) {
+        m_Proxy.intProxy->SetValue(_value);
+      } else {
+        cerr << "*** setting integer on a non integer property";
+        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+      }
     } else {
+      ClearValue();
       m_PropVal.actualValue.Integer = _value;
     }
     m_PropVal.valueType = vTypeInteger;
@@ -423,10 +433,15 @@ namespace dss {
 
 
   void PropertyNode::SetBooleanValue(const bool _value) {
-    ClearValue();
     if(m_LinkedToProxy) {
-      m_Proxy.boolProxy->SetValue(_value);
+      if(m_PropVal.valueType == vTypeBoolean) {
+        m_Proxy.boolProxy->SetValue(_value);
+      } else {
+        cerr << "*** setting bool on a non booleanproperty";
+        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+      }
     } else {
+      ClearValue();
       m_PropVal.actualValue.Boolean = _value;
     }
     m_PropVal.valueType = vTypeBoolean;
@@ -435,21 +450,21 @@ namespace dss {
 
 
   std::string PropertyNode::GetStringValue() {
-    if(m_PropVal.valueType == vTypeString || m_LinkedToProxy) {
+    if(m_PropVal.valueType == vTypeString) {
       if(m_LinkedToProxy) {
         return m_Proxy.stringProxy->GetValue();
       } else {
         return m_PropVal.actualValue.pString;
       }
     } else {
-      cerr << "Property-Type missmatch: " << m_Name << endl;
-      throw runtime_error("Property-Type missmatch: " + m_Name);
+      cerr << "Property-Type mismatch: " << m_Name << endl;
+      throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
     }
   } // GetStringValue
 
 
   int PropertyNode::GetIntegerValue() {
-    if(m_PropVal.valueType == vTypeInteger || m_LinkedToProxy) {
+    if(m_PropVal.valueType == vTypeInteger) {
       if(m_LinkedToProxy) {
         return m_Proxy.intProxy->GetValue();
       } else {
@@ -457,21 +472,21 @@ namespace dss {
       }
     } else {
       cerr << "Property-Type mismatch: " << m_Name << endl;
-      return 0;
+      throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
     }
   } // GetIntegerValue
 
 
   bool PropertyNode::GetBoolValue() {
-    if(m_PropVal.valueType == vTypeBoolean || m_LinkedToProxy) {
+    if(m_PropVal.valueType == vTypeBoolean) {
       if(m_LinkedToProxy) {
         return m_Proxy.boolProxy->GetValue();
       } else {
         return m_PropVal.actualValue.Boolean;
       }
     } else {
-      cerr << "Property-Type missmatch: " << m_Name << endl;
-      return false;
+      cerr << "Property-Type mismatch: " << m_Name << endl;
+      throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
     }
   } // GetBoolValue
 

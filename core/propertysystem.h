@@ -7,6 +7,7 @@
 #include <boost/mpl/if.hpp>
 #include <boost/type_traits/is_class.hpp>
 
+#include <stdexcept>
 #include <vector>
 #include <string>
 
@@ -322,6 +323,14 @@ namespace dss {
     bool SaveAsXML(xmlTextWriterPtr _writer);
     bool LoadFromNode(xmlNode* _pNode);
   }; // PropertyNode
+
+  class PropertyTypeMismatch : public std::runtime_error {
+  public:
+    explicit
+    PropertyTypeMismatch(const std::string&  __arg)
+    : runtime_error(__arg)
+    { }
+  };
 
 } // namespace dss
 
