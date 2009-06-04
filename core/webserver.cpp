@@ -123,9 +123,13 @@ namespace dss {
     return sstream.str();
   } // ResultToJSON
 
-  string JSONOk(const string& _innerResult) {
+  string JSONOk(const string& _innerResult = "") {
     stringstream sstream;
-    sstream << "{ " << ToJSONValue("ok") << ":" << ToJSONValue(true) << ", " << ToJSONValue("result")<<  ": " << _innerResult << " }";
+    sstream << "{ " << ToJSONValue("ok") << ":" << ToJSONValue(true);
+    if(!_innerResult.empty()) {
+      sstream << ", " << ToJSONValue("result")<<  ": " << _innerResult;
+    }
+    sstream << " }";
     return sstream.str();
   }
 
@@ -687,29 +691,46 @@ namespace dss {
       if(node == NULL) {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
-      stringstream sstream;
-      sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->GetStringValue()) << "}";
-      return JSONOk(sstream.str());
+      try {
+        stringstream sstream;
+        sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->GetStringValue()) << "}";
+        return JSONOk(sstream.str());
+      } catch(PropertyTypeMismatch& ex) {
+        return ResultToJSON(false, string("Error getting property: '") + ex.what() + "'");
+      }
     } else if(EndsWith(_method, "/getInteger")) {
       if(node == NULL) {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
-      stringstream sstream;
-      sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->GetIntegerValue()) << "}";
-      return JSONOk(sstream.str());
+      try {
+        stringstream sstream;
+        sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->GetIntegerValue()) << "}";
+        return JSONOk(sstream.str());
+      } catch(PropertyTypeMismatch& ex) {
+        return ResultToJSON(false, string("Error getting property: '") + ex.what() + "'");
+      }
     } else if(EndsWith(_method, "/getBoolean")) {
       if(node == NULL) {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
-      stringstream sstream;
-      sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->GetBoolValue()) << "}";
-      return JSONOk(sstream.str());
+      try {
+        stringstream sstream;
+        sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->GetBoolValue()) << "}";
+        return JSONOk(sstream.str());
+      } catch(PropertyTypeMismatch& ex) {
+        return ResultToJSON(false, string("Error getting property: '") + ex.what() + "'");
+      }
     } else if(EndsWith(_method, "/setString")) {
       string value = _parameter["value"];
       if(node == NULL) {
         node = GetDSS().GetPropertySystem().CreateProperty(propName);
       }
-      node->SetStringValue(value);
+      try {
+        node->SetStringValue(value);
+      } catch(PropertyTypeMismatch& ex) {
+        return ResultToJSON(false, string("Error setting property: '") + ex.what() + "'");
+      }
+      return JSONOk();
     } else if(EndsWith(_method, "/setBoolean")) {
       string strValue = _parameter["value"];
       bool value;
@@ -723,7 +744,12 @@ namespace dss {
       if(node == NULL) {
         node = GetDSS().GetPropertySystem().CreateProperty(propName);
       }
-      node->SetBooleanValue(value);
+      try {
+        node->SetBooleanValue(value);
+      } catch(PropertyTypeMismatch& ex) {
+        return ResultToJSON(false, string("Error setting property: '") + ex.what() + "'");
+      }
+      return JSONOk();
     } else if(EndsWith(_method, "/setInteger")) {
       string strValue = _parameter["value"];
       int value;
@@ -735,7 +761,38 @@ namespace dss {
       if(node == NULL) {
         node = GetDSS().GetPropertySystem().CreateProperty(propName);
       }
-      node->SetIntegerValue(value);
+      try {
+        node->SetIntegerValue(value);
+      } catch(PropertyTypeMismatch& ex) {
+        return ResultToJSON(false, string("Error setting property: '") + ex.what() + "'");
+      }
+      return JSONOk();
+    } else if(EndsWith(_method, "/getChildren")) {
+      if(node == NULL) {
+        return ResultToJSON(false, "Could not find node named '" + propName + "'");
+      }
+      stringstream sstream;
+      sstream << "[";
+      bool first = true;
+      for(int iChild = 0; iChild < node->GetChildCount(); iChild++) {
+        if(!first) {
+          sstream << ",";
+        }
+        first = false;
+        PropertyNode* cnode = node->GetChild(iChild);
+        sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(cnode->GetName());
+        sstream << "," << ToJSONValue("type") << ":" << ToJSONValue(GetValueTypeAsString(cnode->GetValueType()));
+        sstream << "}";
+      }
+      sstream << "]";
+      return JSONOk(sstream.str());
+    } else if(EndsWith(_method, "/getType")) {
+      if(node == NULL) {
+        return ResultToJSON(false, "Could not find node named '" + propName + "'");
+      }
+      stringstream sstream;
+      sstream << ":" << ToJSONValue("type") << ":" << ToJSONValue(GetValueTypeAsString(node->GetValueType())) << "}";
+      return JSONOk(sstream.str());
     } else {
       _handled = false;
     }
