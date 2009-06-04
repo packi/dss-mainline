@@ -123,12 +123,15 @@ namespace dss {
   }
 
   //================================================== SeriesWriter
+  //#define LOG_TIMING
 
   template<class T>
   bool SeriesWriter<T>::WriteToXML(const Series<T>& _series, const string& _path) {
     AutoPtr<Document> pDoc = new Document;
 
+#ifdef LOG_TIMING
     Timestamp buildingXML;
+#endif
     AutoPtr<ProcessingInstruction> pXMLHeader = pDoc->createProcessingInstruction("xml", "version='1.0' encoding='utf-8'");
     pDoc->appendChild(pXMLHeader);
     AutoPtr<ProcessingInstruction> pProcessing = pDoc->createProcessingInstruction("xml-stylesheet", "href='value_graph.xslt' type='text/xsl'");
@@ -159,7 +162,7 @@ namespace dss {
       elem->appendChild(txt);
       pConfig->appendChild(elem);
     }
-    
+
     for(HashMapConstStringString::const_iterator iProperty = _series.GetProperties().GetContainer().begin(),
     	end = _series.GetProperties().GetContainer().end(); iProperty != end; ++iProperty)
     {
@@ -168,7 +171,7 @@ namespace dss {
       elem->appendChild(txt);
       pConfig->appendChild(elem);
     }
-    
+
 
     // metering/values
     AutoPtr<Element> pValues = pDoc->createElement("values");
@@ -184,10 +187,11 @@ namespace dss {
       iValue->WriteToXMLNode(pDoc, elem);
       pValues->appendChild(elem);
     }
+#ifdef LOG_TIMING
     cout << "building xml: " << Timestamp().GetDifference(buildingXML) << endl;
 
-
     Timestamp writingXML;
+#endif
     // write it to a temporary site first
     string tmpOut = _path + ".tmp";
     std::ofstream ofs(tmpOut.c_str() );
@@ -206,12 +210,16 @@ namespace dss {
 
       ofs.close();
 
+#ifdef LOG_TIMING
       cout << "writing xml: " << Timestamp().GetDifference(writingXML) << endl;
 
       Timestamp renaming;
+#endif
       // move it to the desired location
       rename(tmpOut.c_str(), _path.c_str());
+#ifdef LOG_TIMING
       cout << "renaming: " << Timestamp().GetDifference(renaming) << endl;
+#endif
     } else {
       Logger::GetInstance()->Log("Could not open file for writing");
     }
@@ -219,6 +227,8 @@ namespace dss {
     return true;
 
   }
+
+// #undef LOG_TIMING
 
   //================================================== Explicit instantiations
   template class SeriesReader<AdderValue>;

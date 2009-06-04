@@ -49,32 +49,40 @@ namespace dss {
     Run();
   } // Start
 
+//#define LOG_TIMING
+
   void Metering::CheckModulators(boost::shared_ptr<MeteringConfigChain> _config) {
     SeriesReader<CurrentValue> reader;
     SeriesWriter<CurrentValue> writer;
 
     _config->Running();
 
+#ifdef LOG_TIMING
     Timestamp checkingAll;
+#endif
     std::vector<Modulator*>& modulators = DSS::GetInstance()->GetApartment().GetModulators();
     for(std::vector<Modulator*>::iterator ipModulator = modulators.begin(), e = modulators.end();
         ipModulator != e; ++ipModulator)
     {
+#ifdef LOG_TIMING
       Timestamp checkingModulator;
       Timestamp startedLoading;
+#endif
       vector<boost::shared_ptr<Series<CurrentValue> > > series;
       for(int iConfig = 0; iConfig < _config->Size(); iConfig++) {
         // Load series from file
         string fileName = m_MeteringStorageLocation + (*ipModulator)->GetDSID().ToString() + "_" + _config->GetFilenameSuffix(iConfig) + ".xml";
-        Logger::GetInstance()->Log(string("Metering::CheckModulators: Trying to load series from '") + fileName + "'");
+        Log(string("Metering::CheckModulators: Trying to load series from '") + fileName + "'");
         if(FileExists(fileName)) {
           Timestamp startedLoadingSingle;
           boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.ReadFromXML(fileName));
+#ifdef LOG_TIMING
           cout << "loading single: " <<  Timestamp().GetDifference(startedLoadingSingle) << endl;
+#endif
           if(s.get() != NULL) {
             series.push_back(s);
           } else {
-            Logger::GetInstance()->Log(string("Metering::CheckModulators: Failed to load series"));
+            Log(string("Metering::CheckModulators: Failed to load series"));
             return; // TODO: another strategy would be moving the file out of our way and just create an empty one
           }
         } else {
@@ -85,7 +93,9 @@ namespace dss {
           series.push_back(newSeries);
         }
       }
+#ifdef LOG_TIMING
       cout << "loading: " << Timestamp().GetDifference(startedLoading) << endl;
+#endif
 
       // stitch up chain
       for(vector<boost::shared_ptr<Series<CurrentValue> > >::reverse_iterator iSeries = series.rbegin(), e = series.rend();
@@ -96,42 +106,62 @@ namespace dss {
         }
       }
       if(series.empty()) {
-        Logger::GetInstance()->Log("Metering::CheckModulators: No series configured, check your config");
+        Log("Metering::CheckModulators: No series configured, check your config");
       } else {
-        Logger::GetInstance()->Log("Metering::CheckModulators: Series loaded, updating");
+        Log("Metering::CheckModulators: Series loaded, updating");
         // Update series
 
         unsigned long value;
         DateTime timeRequested;
+#ifdef LOG_TIMING
         Timestamp fetchingValue;
+#endif
         if(_config->IsEnergy()) {
           value = (*ipModulator)->GetEnergyMeterValue();
         } else {
           value = (*ipModulator)->GetPowerConsumption();
         }
+#ifdef LOG_TIMING
         cout << "fetching value: " << Timestamp().GetDifference(fetchingValue) << endl;
         Timestamp startedAddingValue;
+#endif
         series[0]->AddValue(value, timeRequested);
+#ifdef LOG_TIMING
         cout << "adding value: " << Timestamp().GetDifference(startedAddingValue) << endl;
+#endif
 
+#ifdef LOG_TIMING
         Timestamp startedWriting;
+#endif
         // Store series
-        Logger::GetInstance()->Log("Metering::CheckModulators: Writing series back...");
+        Log("Metering::CheckModulators: Writing series back...");
         for(int iConfig = 0; iConfig < _config->Size(); iConfig++) {
+#ifdef LOG_TIMING
           Timestamp startedWritingSingle;
+#endif
           // Write series to file
           string fileName = m_MeteringStorageLocation + (*ipModulator)->GetDSID().ToString() + "_" + _config->GetFilenameSuffix(iConfig) + ".xml";
           Series<CurrentValue>* s = series[iConfig].get();
-          Logger::GetInstance()->Log(string("Metering::CheckModulators: Trying to save series to '") + fileName + "'");
+          Log(string("Metering::CheckModulators: Trying to save series to '") + fileName + "'");
           writer.WriteToXML(*s, fileName);
+#ifdef LOG_TIMING
           cout << "writing single: " << Timestamp().GetDifference(startedWritingSingle) << endl;
+#endif
         }
+#ifdef LOG_TIMING
         cout << "writing: " << Timestamp().GetDifference(startedWriting) << endl;
+#endif
       }
+#ifdef LOG_TIMING
       cout << "checkingModulator: " << Timestamp().GetDifference(checkingModulator) << endl;
+#endif
     }
+#ifdef LOG_TIMING
     cout << "checking all: " << Timestamp().GetDifference(checkingAll) << endl;
+#endif
   } // CheckModulators
+
+  //#undef LOG_TIMING
 
   void Metering::Execute() {
     // check modulators periodically
@@ -141,14 +171,14 @@ namespace dss {
     while(!m_Terminated) {
       int sleepTimeSec = 60000;
 
-      Logger::GetInstance()->Log("Metering::Execute: Checking modulators");
+      Log("Metering::Execute: Checking modulators");
       for(unsigned int iConfig = 0; iConfig < m_Config.size(); iConfig++) {
         if(m_Config[iConfig]->NeedsRun()) {
           CheckModulators(m_Config[iConfig]);
         }
         sleepTimeSec = std::min(sleepTimeSec, m_Config[iConfig]->GetCheckIntervalSeconds());
       }
-      Logger::GetInstance()->Log("Metering::Execute: Done checking modulators");
+      Log("Metering::Execute: Done checking modulators");
       SleepSeconds(sleepTimeSec);
     }
   } // Execute
