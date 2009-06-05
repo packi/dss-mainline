@@ -33,6 +33,10 @@ namespace dss {
     double m_Max;
     DateTime m_TimeStamp;
   public:
+#ifdef WITH_GCOV
+    Value();
+#endif
+
     Value(double _value)
     : m_Value(_value),
       m_Min(_value),
@@ -101,6 +105,10 @@ namespace dss {
 
   class CurrentValue : public Value {
   public:
+#ifdef WITH_GCOV
+    CurrentValue();
+#endif
+
     CurrentValue(double _value, const DateTime& _timeStamp)
     : Value(_value, _timeStamp)
     { }
@@ -117,6 +125,10 @@ namespace dss {
 
   class AdderValue : public Value {
   public:
+#ifdef WITH_GCOV
+    AdderValue();
+#endif
+
     AdderValue(double _value, const DateTime& _timeStamp)
     : Value(_value, _timeStamp)
     {}
@@ -147,6 +159,10 @@ namespace dss {
     std::string m_Unit;
     Properties m_Properties;
   public:
+#ifdef WITH_GCOV
+    Series();
+#endif
+
     Series(const int _resolution, const unsigned int _numberOfValues)
     : m_Resolution(_resolution),
       m_NumberOfValues(_numberOfValues),
@@ -207,7 +223,7 @@ namespace dss {
       }
       if(m_NextSeries != NULL) {
         m_NextSeries->AddValue(_value);
-      }	
+      }
     } // AddValue
 
     void AddValue(double _value, const DateTime& _timestamp) {
@@ -231,7 +247,7 @@ namespace dss {
     void Set(const string& _key, const string& _value)  { return m_Properties.Set(_key, _value); }
     const string& Get(const string& _key) const { return m_Properties.Get(_key); }
     const Properties& GetProperties() const { return m_Properties; }
-    
+
   }; // Series
 
 } // namespace dss
