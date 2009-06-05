@@ -31,6 +31,8 @@ public:
   void setUp(void) {}
   void tearDown(void) {}
 
+  ModelTest() {}
+
 
 protected:
 

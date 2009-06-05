@@ -47,6 +47,8 @@ class SeriesTest : public CPPUNIT_NS::TestCase
 public:
   void setUp(void) {}
   void tearDown(void) {}
+
+  SeriesTest() {}
 protected:
 
   void testTimestamps() {
