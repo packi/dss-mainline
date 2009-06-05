@@ -41,6 +41,9 @@
 
 #include <iostream>
 
+#define DSS_VERSION "0.4a1"
+#define DSS_RELEASED_AT "20090605"
+
 using namespace std;
 namespace po = boost::program_options;
 
@@ -59,6 +62,8 @@ int main (int argc, char* argv[]) {
     cerr << "Can't set the specified locale! Check LANG, LC_CTYPE, LC_ALL." << endl;
     return 1;
   }
+
+  cout << "DSS v" << DSS_VERSION << " released at " << DSS_RELEASED_AT << endl;
 
   // make sure timezone gets set
   tzset();
