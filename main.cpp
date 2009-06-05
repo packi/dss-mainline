@@ -153,8 +153,8 @@ int main (int argc, char* argv[]) {
   } else {
     if(!quitAfterTests) {
       // start DSS
-     // dss::DSS::GetInstance()->Initialize(properties);
-     // dss::DSS::GetInstance()->Run();
+      dss::DSS::GetInstance()->Initialize(properties);
+      dss::DSS::GetInstance()->Run();
     }
     if(dss::DSS::HasInstance()) {
       dss::DSS::Shutdown();
