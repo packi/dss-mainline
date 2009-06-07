@@ -66,6 +66,7 @@ jQuery(document).ready(function() {
 						<div id="allFloors">
 						</div>
 						<div id="firstFloor">
+						<div id="firstFloor_3d" style="position: absolute;">
 							<img src="views/first_floor.jpg" usemap="#firstFloorMap"/>
 							<img id="firstFloorSelection" src="views/room_1.jpg" usemap="#firstFloorMap"/>
 							<img id="firstFloorHover" class="hoverOverlay" src="views/room_2.jpg" usemap="#firstFloorMap"/>
@@ -83,6 +84,26 @@ jQuery(document).ready(function() {
 								<area id="room5" shape="poly" coords="226,111,182,150,283,204,323,157" nohref="nohref" title="Schlafzimmer" alt="Schlafzimmer" />
 								<area id="room6" shape="poly" coords="177,153,141,185,246,249,278,208" nohref="nohref" title="Bad" alt="Bad" />
 							</map>
+						</div>
+						<div id="firstFloor_map" style="display: none;">
+							<img src="views/first_floor_map.png" usemap="#firstFloorMapMap"/>
+							<img id="firstFloorSelectionMap" src="views/room_1_map.png" usemap="#firstFloorMapMap"/>
+							<img id="firstFloorHoverMap" class="hoverOverlay" src="views/room_1_map.png" usemap="#firstFloorMapMap"/>
+							<img id="consumptionOverlay1map" class="consumptionOverlay" src="views/room_1_map_green.png" usemap="#firstFloorMapMap"/>
+							<img id="consumptionOverlay2map" class="consumptionOverlay" src="views/room_2_map_green.png" usemap="#firstFloorMapMap"/>
+							<img id="consumptionOverlay3map" class="consumptionOverlay" src="views/room_3_map_green.png" usemap="#firstFloorMapMap"/>
+							<img id="consumptionOverlay4map" class="consumptionOverlay" src="views/room_4_map_green.png" usemap="#firstFloorMapMap"/>
+							<img id="consumptionOverlay5map" class="consumptionOverlay" src="views/room_5_map_green.png" usemap="#firstFloorMapMap"/>
+							<img id="consumptionOverlay6map" class="consumptionOverlay" src="views/room_6_map_green.png" usemap="#firstFloorMapMap"/>
+							<map name="firstFloorMapMap">
+								<area id="room1map" shape="poly" coords="49,11,49,154,160,154,159,10" nohref="nohref" title="Arbeitszimmer" alt="Arbeitszimmer" />
+								<area id="room2map" shape="poly" coords="49,159,49,293,160,293,159,159" nohref="nohref" title="Esszimmer" alt="Esszimmer" />
+								<area id="room3map" shape="poly" coords="164,11,165,293,225,293,225,11" nohref="nohref" title="Gang" alt="Gang" />
+								<area id="room4map" shape="poly" coords="230,11,230,154,344,154,344,11" nohref="nohref" title="Wohnzimmer" alt="Wohnzimmer" />
+								<area id="room5map" shape="poly" coords="230,159,230,236,344,236,344,159" nohref="nohref" title="Schlafzimmer" alt="Schlafzimmer" />
+								<area id="room6map" shape="poly" coords="230,240,230,293,344,293,344,240" nohref="nohref" title="Bad" alt="Bad" />
+							</map>
+						</div>
 						</div>
 					</div>
 				</div>

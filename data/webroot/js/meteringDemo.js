@@ -31,6 +31,25 @@ function registerHandlers() {
 			var roomNumber = i;
 			jQuery("#room" + roomNumber).click(function() {
 				jQuery("#firstFloorSelection").attr("src", "views/room_" + roomNumber + ".png");
+				jQuery("#firstFloorSelectionMap").attr("src", "views/room_" + roomNumber + "_map.png");
+				graph.setDSM(dSMIDs[roomNumber-1]);
+				jQuery("#graphSelectionTitle").text(roomNames[roomNumber - 1]);
+			});
+		})();
+		(function () {
+			var roomNumber = i;
+			jQuery("#room" + roomNumber + "map").hover(function() {
+				jQuery("#firstFloorHoverMap").attr("src", "views/room_" + roomNumber + "_map.png").css( {visibility: "visible"});
+			}, function() {
+				jQuery("#firstFloorHoverMap").css({visibility: "hidden"});
+			});
+		})();
+		
+		(function () {
+			var roomNumber = i;
+			jQuery("#room" + roomNumber + "map").click(function() {
+				jQuery("#firstFloorSelection").attr("src", "views/room_" + roomNumber + ".png");
+				jQuery("#firstFloorSelectionMap").attr("src", "views/room_" + roomNumber + "_map.png");
 				graph.setDSM(dSMIDs[roomNumber-1]);
 				jQuery("#graphSelectionTitle").text(roomNames[roomNumber - 1]);
 			});
@@ -62,9 +81,13 @@ function registerHandlers() {
 	});
 	jQuery("#threeD").click(function() {
 		jQuery("#viewMode").css({backgroundImage: "url(images/view-mode-3d.png)"});
+		jQuery("#firstFloor_3d").css({display: "block"});
+		jQuery("#firstFloor_map").css({display: "none"});
 	});
 	jQuery("#map").click(function() {
 		jQuery("#viewMode").css({backgroundImage: "url(images/view-mode-map.png)"});
+		jQuery("#firstFloor_3d").css({display: "none"});
+		jQuery("#firstFloor_map").css({display: "block"});
 	});
 	jQuery("#toggleQueue").data("queueOpen", false).click(function() {
 		toggleMainMeterQueue();
@@ -77,6 +100,7 @@ function registerHandlers() {
 
 function setConsumptionOverlayForRoom(roomNumber, state) {
 	jQuery("#consumptionOverlay" + roomNumber).attr("src", "views/room_" + roomNumber + "_" + state + ".png");
+	jQuery("#consumptionOverlay" + roomNumber + "map").attr("src", "views/room_" + roomNumber + "_map_" + state + ".png");
 }
 
 function toggleMainMeterQueue() {
