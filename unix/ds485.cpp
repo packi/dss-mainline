@@ -692,13 +692,13 @@ namespace dss {
 
             // attempt to parse the header
             if(m_ValidBytes == TheHeaderSize) {
-              if(m_ReceiveBuffer[1] & 0x02 == 0x02) {
+              if((m_ReceiveBuffer[1] & 0x02) == 0x02) {
                 //Logger::GetInstance()->Log("Packet is a broadcast");
               } else {
                 //Logger::GetInstance()->Log("*Packet is adressed");
               }
               // check if it's a token or not
-              if(m_ReceiveBuffer[1] & 0x01 == 0x01) {
+              if((m_ReceiveBuffer[1] & 0x01) == 0x01) {
                 //Logger::GetInstance()->Log("Packet is a Frame");
                 m_State = rsReadingPacket;
                 m_MessageLength = -1;

@@ -68,7 +68,8 @@ int main (int argc, char* argv[]) {
   // make sure timezone gets set
   tzset();
 
-  tzname[0] = tzname[1] = "GMT";
+  char* tzNameCopy = strdup("GMT");
+  tzname[0] = tzname[1] = tzNameCopy;
   timezone = 0;
   daylight = 0;
 
@@ -173,6 +174,7 @@ int main (int argc, char* argv[]) {
   //       Trust me....
   xmlCleanupParser();
 #endif
+  free(tzNameCopy);
 
   return 0;
 }

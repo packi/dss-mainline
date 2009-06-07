@@ -98,7 +98,7 @@ static void entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state,
 }
 
 static void create_services(AvahiClient *c) {
-    char *n, r[128];
+    char *n;
     int ret;
     assert(c);
 
@@ -211,11 +211,9 @@ static void client_callback(AvahiClient *c, AvahiClientState state, AVAHI_GCC_UN
 
   void BonjourHandler::Execute() {
 
-    int serverPort = StrToInt(DSS::GetInstance()->GetPropertySystem().GetStringValue("/config/subsystems/WebServer/ports"));
 #ifdef USE_AVAHI
     AvahiClient *client = NULL;
     int error;
-    struct timeval tv;
 
     /* Allocate main loop object */
     if (!(simple_poll = avahi_simple_poll_new())) {
@@ -252,6 +250,7 @@ fail:
 #endif
 #ifdef USE_DNS_SD
     DNSServiceErrorType err;
+    int serverPort = StrToInt(DSS::GetInstance()->GetPropertySystem().GetStringValue("/config/subsystems/WebServer/ports"));
 
     memset(&m_RegisterReference, '\0', sizeof(m_RegisterReference));
 

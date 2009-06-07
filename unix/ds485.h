@@ -265,7 +265,7 @@ namespace dss {
 
   const uint32_t SimulationPrefix = 0xFFC00000;
   inline bool IsSimulationDSID(const dsid_t _dsid) {
-    return _dsid.lower & SimulationPrefix == SimulationPrefix;
+    return (_dsid.lower & SimulationPrefix) == SimulationPrefix;
   }
 
 }
