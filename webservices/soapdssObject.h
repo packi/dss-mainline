@@ -44,8 +44,6 @@ class dssService : public soap
 \******************************************************************************/
 
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Test(struct soap*, char *bla, std::vector<int >&ints);
-
 SOAP_FMAC5 int SOAP_FMAC6 dss__Authenticate(struct soap*, char *_userName, char *_password, int &token);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__SignOff(struct soap*, int _token, int &result);
@@ -177,6 +175,10 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSaveScene(struct soap*, int _token, char *_
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetName(struct soap*, int _token, char *_deviceID, char **result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetZoneID(struct soap*, int _token, char *_deviceID, int &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSetLocation(struct soap*, int _token, char *_deviceID, struct DeviceLocation _location, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetLocation(struct soap*, int _token, char *_deviceID, struct DeviceLocation &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ModulatorGetPowerConsumption(struct soap*, int _token, int _modulatorID, unsigned long &result);
 

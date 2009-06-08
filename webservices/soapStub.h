@@ -31,28 +31,8 @@
 
 #endif
 
-#ifndef SOAP_TYPE_dss__TestResponse
-#define SOAP_TYPE_dss__TestResponse (21)
-/* dss:TestResponse */
-struct dss__TestResponse
-{
-public:
-	std::vector<int >ints;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
-};
-#endif
-
-#ifndef SOAP_TYPE_dss__Test
-#define SOAP_TYPE_dss__Test (22)
-/* dss:Test */
-struct dss__Test
-{
-public:
-	char *bla;	/* optional element of type xsd:string */
-};
-#endif
-
 #ifndef SOAP_TYPE_dss__AuthenticateResponse
-#define SOAP_TYPE_dss__AuthenticateResponse (25)
+#define SOAP_TYPE_dss__AuthenticateResponse (20)
 /* dss:AuthenticateResponse */
 struct dss__AuthenticateResponse
 {
@@ -62,7 +42,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Authenticate
-#define SOAP_TYPE_dss__Authenticate (26)
+#define SOAP_TYPE_dss__Authenticate (21)
 /* dss:Authenticate */
 struct dss__Authenticate
 {
@@ -73,7 +53,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SignOffResponse
-#define SOAP_TYPE_dss__SignOffResponse (28)
+#define SOAP_TYPE_dss__SignOffResponse (23)
 /* dss:SignOffResponse */
 struct dss__SignOffResponse
 {
@@ -83,7 +63,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SignOff
-#define SOAP_TYPE_dss__SignOff (29)
+#define SOAP_TYPE_dss__SignOff (24)
 /* dss:SignOff */
 struct dss__SignOff
 {
@@ -93,7 +73,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__FreeSetResponse
-#define SOAP_TYPE_dss__FreeSetResponse (33)
+#define SOAP_TYPE_dss__FreeSetResponse (28)
 /* dss:FreeSetResponse */
 struct dss__FreeSetResponse
 {
@@ -103,7 +83,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__FreeSet
-#define SOAP_TYPE_dss__FreeSet (34)
+#define SOAP_TYPE_dss__FreeSet (29)
 /* dss:FreeSet */
 struct dss__FreeSet
 {
@@ -114,7 +94,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentCreateSetFromGroupResponse
-#define SOAP_TYPE_dss__ApartmentCreateSetFromGroupResponse (36)
+#define SOAP_TYPE_dss__ApartmentCreateSetFromGroupResponse (31)
 /* dss:ApartmentCreateSetFromGroupResponse */
 struct dss__ApartmentCreateSetFromGroupResponse
 {
@@ -124,7 +104,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentCreateSetFromGroup
-#define SOAP_TYPE_dss__ApartmentCreateSetFromGroup (37)
+#define SOAP_TYPE_dss__ApartmentCreateSetFromGroup (32)
 /* dss:ApartmentCreateSetFromGroup */
 struct dss__ApartmentCreateSetFromGroup
 {
@@ -139,7 +119,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentCreateSetFromDeviceIDsResponse
-#define SOAP_TYPE_dss__ApartmentCreateSetFromDeviceIDsResponse (41)
+#define SOAP_TYPE_dss__ApartmentCreateSetFromDeviceIDsResponse (36)
 /* dss:ApartmentCreateSetFromDeviceIDsResponse */
 struct dss__ApartmentCreateSetFromDeviceIDsResponse
 {
@@ -149,7 +129,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentCreateSetFromDeviceIDs
-#define SOAP_TYPE_dss__ApartmentCreateSetFromDeviceIDs (42)
+#define SOAP_TYPE_dss__ApartmentCreateSetFromDeviceIDs (37)
 /* dss:ApartmentCreateSetFromDeviceIDs */
 struct dss__ApartmentCreateSetFromDeviceIDs
 {
@@ -160,7 +140,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentCreateSetFromDeviceNamesResponse
-#define SOAP_TYPE_dss__ApartmentCreateSetFromDeviceNamesResponse (44)
+#define SOAP_TYPE_dss__ApartmentCreateSetFromDeviceNamesResponse (39)
 /* dss:ApartmentCreateSetFromDeviceNamesResponse */
 struct dss__ApartmentCreateSetFromDeviceNamesResponse
 {
@@ -170,7 +150,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentCreateSetFromDeviceNames
-#define SOAP_TYPE_dss__ApartmentCreateSetFromDeviceNames (45)
+#define SOAP_TYPE_dss__ApartmentCreateSetFromDeviceNames (40)
 /* dss:ApartmentCreateSetFromDeviceNames */
 struct dss__ApartmentCreateSetFromDeviceNames
 {
@@ -181,7 +161,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentCreateEmptySetResponse
-#define SOAP_TYPE_dss__ApartmentCreateEmptySetResponse (47)
+#define SOAP_TYPE_dss__ApartmentCreateEmptySetResponse (42)
 /* dss:ApartmentCreateEmptySetResponse */
 struct dss__ApartmentCreateEmptySetResponse
 {
@@ -191,7 +171,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentCreateEmptySet
-#define SOAP_TYPE_dss__ApartmentCreateEmptySet (48)
+#define SOAP_TYPE_dss__ApartmentCreateEmptySet (43)
 /* dss:ApartmentCreateEmptySet */
 struct dss__ApartmentCreateEmptySet
 {
@@ -201,7 +181,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentGetDevicesResponse
-#define SOAP_TYPE_dss__ApartmentGetDevicesResponse (50)
+#define SOAP_TYPE_dss__ApartmentGetDevicesResponse (45)
 /* dss:ApartmentGetDevicesResponse */
 struct dss__ApartmentGetDevicesResponse
 {
@@ -211,7 +191,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentGetDevices
-#define SOAP_TYPE_dss__ApartmentGetDevices (51)
+#define SOAP_TYPE_dss__ApartmentGetDevices (46)
 /* dss:ApartmentGetDevices */
 struct dss__ApartmentGetDevices
 {
@@ -221,7 +201,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentGetDeviceIDByNameResponse
-#define SOAP_TYPE_dss__ApartmentGetDeviceIDByNameResponse (54)
+#define SOAP_TYPE_dss__ApartmentGetDeviceIDByNameResponse (49)
 /* dss:ApartmentGetDeviceIDByNameResponse */
 struct dss__ApartmentGetDeviceIDByNameResponse
 {
@@ -231,7 +211,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentGetDeviceIDByName
-#define SOAP_TYPE_dss__ApartmentGetDeviceIDByName (55)
+#define SOAP_TYPE_dss__ApartmentGetDeviceIDByName (50)
 /* dss:ApartmentGetDeviceIDByName */
 struct dss__ApartmentGetDeviceIDByName
 {
@@ -242,7 +222,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetAddDeviceByNameResponse
-#define SOAP_TYPE_dss__SetAddDeviceByNameResponse (57)
+#define SOAP_TYPE_dss__SetAddDeviceByNameResponse (52)
 /* dss:SetAddDeviceByNameResponse */
 struct dss__SetAddDeviceByNameResponse
 {
@@ -252,7 +232,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetAddDeviceByName
-#define SOAP_TYPE_dss__SetAddDeviceByName (58)
+#define SOAP_TYPE_dss__SetAddDeviceByName (53)
 /* dss:SetAddDeviceByName */
 struct dss__SetAddDeviceByName
 {
@@ -264,7 +244,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetAddDeviceByIDResponse
-#define SOAP_TYPE_dss__SetAddDeviceByIDResponse (60)
+#define SOAP_TYPE_dss__SetAddDeviceByIDResponse (55)
 /* dss:SetAddDeviceByIDResponse */
 struct dss__SetAddDeviceByIDResponse
 {
@@ -274,7 +254,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetAddDeviceByID
-#define SOAP_TYPE_dss__SetAddDeviceByID (61)
+#define SOAP_TYPE_dss__SetAddDeviceByID (56)
 /* dss:SetAddDeviceByID */
 struct dss__SetAddDeviceByID
 {
@@ -286,7 +266,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetRemoveDeviceResponse
-#define SOAP_TYPE_dss__SetRemoveDeviceResponse (63)
+#define SOAP_TYPE_dss__SetRemoveDeviceResponse (58)
 /* dss:SetRemoveDeviceResponse */
 struct dss__SetRemoveDeviceResponse
 {
@@ -296,7 +276,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetRemoveDevice
-#define SOAP_TYPE_dss__SetRemoveDevice (64)
+#define SOAP_TYPE_dss__SetRemoveDevice (59)
 /* dss:SetRemoveDevice */
 struct dss__SetRemoveDevice
 {
@@ -308,7 +288,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetCombineResponse
-#define SOAP_TYPE_dss__SetCombineResponse (66)
+#define SOAP_TYPE_dss__SetCombineResponse (61)
 /* dss:SetCombineResponse */
 struct dss__SetCombineResponse
 {
@@ -318,7 +298,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetCombine
-#define SOAP_TYPE_dss__SetCombine (67)
+#define SOAP_TYPE_dss__SetCombine (62)
 /* dss:SetCombine */
 struct dss__SetCombine
 {
@@ -330,7 +310,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetRemoveResponse
-#define SOAP_TYPE_dss__SetRemoveResponse (69)
+#define SOAP_TYPE_dss__SetRemoveResponse (64)
 /* dss:SetRemoveResponse */
 struct dss__SetRemoveResponse
 {
@@ -340,7 +320,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetRemove
-#define SOAP_TYPE_dss__SetRemove (70)
+#define SOAP_TYPE_dss__SetRemove (65)
 /* dss:SetRemove */
 struct dss__SetRemove
 {
@@ -352,7 +332,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetByGroupResponse
-#define SOAP_TYPE_dss__SetByGroupResponse (72)
+#define SOAP_TYPE_dss__SetByGroupResponse (67)
 /* dss:SetByGroupResponse */
 struct dss__SetByGroupResponse
 {
@@ -362,7 +342,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetByGroup
-#define SOAP_TYPE_dss__SetByGroup (73)
+#define SOAP_TYPE_dss__SetByGroup (68)
 /* dss:SetByGroup */
 struct dss__SetByGroup
 {
@@ -374,7 +354,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetGetContainedDevicesResponse
-#define SOAP_TYPE_dss__SetGetContainedDevicesResponse (76)
+#define SOAP_TYPE_dss__SetGetContainedDevicesResponse (71)
 /* dss:SetGetContainedDevicesResponse */
 struct dss__SetGetContainedDevicesResponse
 {
@@ -384,7 +364,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetGetContainedDevices
-#define SOAP_TYPE_dss__SetGetContainedDevices (77)
+#define SOAP_TYPE_dss__SetGetContainedDevices (72)
 /* dss:SetGetContainedDevices */
 struct dss__SetGetContainedDevices
 {
@@ -395,7 +375,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentGetGroupByNameResponse
-#define SOAP_TYPE_dss__ApartmentGetGroupByNameResponse (79)
+#define SOAP_TYPE_dss__ApartmentGetGroupByNameResponse (74)
 /* dss:ApartmentGetGroupByNameResponse */
 struct dss__ApartmentGetGroupByNameResponse
 {
@@ -405,7 +385,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentGetGroupByName
-#define SOAP_TYPE_dss__ApartmentGetGroupByName (80)
+#define SOAP_TYPE_dss__ApartmentGetGroupByName (75)
 /* dss:ApartmentGetGroupByName */
 struct dss__ApartmentGetGroupByName
 {
@@ -416,7 +396,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentGetZoneByNameResponse
-#define SOAP_TYPE_dss__ApartmentGetZoneByNameResponse (82)
+#define SOAP_TYPE_dss__ApartmentGetZoneByNameResponse (77)
 /* dss:ApartmentGetZoneByNameResponse */
 struct dss__ApartmentGetZoneByNameResponse
 {
@@ -426,7 +406,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentGetZoneByName
-#define SOAP_TYPE_dss__ApartmentGetZoneByName (83)
+#define SOAP_TYPE_dss__ApartmentGetZoneByName (78)
 /* dss:ApartmentGetZoneByName */
 struct dss__ApartmentGetZoneByName
 {
@@ -437,7 +417,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentGetZoneIDsResponse
-#define SOAP_TYPE_dss__ApartmentGetZoneIDsResponse (85)
+#define SOAP_TYPE_dss__ApartmentGetZoneIDsResponse (82)
 /* dss:ApartmentGetZoneIDsResponse */
 struct dss__ApartmentGetZoneIDsResponse
 {
@@ -447,7 +427,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentGetZoneIDs
-#define SOAP_TYPE_dss__ApartmentGetZoneIDs (86)
+#define SOAP_TYPE_dss__ApartmentGetZoneIDs (83)
 /* dss:ApartmentGetZoneIDs */
 struct dss__ApartmentGetZoneIDs
 {
@@ -457,7 +437,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetTurnOnResponse
-#define SOAP_TYPE_dss__SetTurnOnResponse (88)
+#define SOAP_TYPE_dss__SetTurnOnResponse (85)
 /* dss:SetTurnOnResponse */
 struct dss__SetTurnOnResponse
 {
@@ -467,7 +447,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetTurnOn
-#define SOAP_TYPE_dss__SetTurnOn (89)
+#define SOAP_TYPE_dss__SetTurnOn (86)
 /* dss:SetTurnOn */
 struct dss__SetTurnOn
 {
@@ -478,7 +458,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetTurnOffResponse
-#define SOAP_TYPE_dss__SetTurnOffResponse (91)
+#define SOAP_TYPE_dss__SetTurnOffResponse (88)
 /* dss:SetTurnOffResponse */
 struct dss__SetTurnOffResponse
 {
@@ -488,7 +468,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetTurnOff
-#define SOAP_TYPE_dss__SetTurnOff (92)
+#define SOAP_TYPE_dss__SetTurnOff (89)
 /* dss:SetTurnOff */
 struct dss__SetTurnOff
 {
@@ -499,7 +479,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetIncreaseValueResponse
-#define SOAP_TYPE_dss__SetIncreaseValueResponse (94)
+#define SOAP_TYPE_dss__SetIncreaseValueResponse (91)
 /* dss:SetIncreaseValueResponse */
 struct dss__SetIncreaseValueResponse
 {
@@ -509,7 +489,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetIncreaseValue
-#define SOAP_TYPE_dss__SetIncreaseValue (95)
+#define SOAP_TYPE_dss__SetIncreaseValue (92)
 /* dss:SetIncreaseValue */
 struct dss__SetIncreaseValue
 {
@@ -521,7 +501,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetDecreaseValueResponse
-#define SOAP_TYPE_dss__SetDecreaseValueResponse (97)
+#define SOAP_TYPE_dss__SetDecreaseValueResponse (94)
 /* dss:SetDecreaseValueResponse */
 struct dss__SetDecreaseValueResponse
 {
@@ -531,7 +511,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetDecreaseValue
-#define SOAP_TYPE_dss__SetDecreaseValue (98)
+#define SOAP_TYPE_dss__SetDecreaseValue (95)
 /* dss:SetDecreaseValue */
 struct dss__SetDecreaseValue
 {
@@ -543,7 +523,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetEnableResponse
-#define SOAP_TYPE_dss__SetEnableResponse (100)
+#define SOAP_TYPE_dss__SetEnableResponse (97)
 /* dss:SetEnableResponse */
 struct dss__SetEnableResponse
 {
@@ -553,7 +533,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetEnable
-#define SOAP_TYPE_dss__SetEnable (101)
+#define SOAP_TYPE_dss__SetEnable (98)
 /* dss:SetEnable */
 struct dss__SetEnable
 {
@@ -564,7 +544,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetDisableResponse
-#define SOAP_TYPE_dss__SetDisableResponse (103)
+#define SOAP_TYPE_dss__SetDisableResponse (100)
 /* dss:SetDisableResponse */
 struct dss__SetDisableResponse
 {
@@ -574,7 +554,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetDisable
-#define SOAP_TYPE_dss__SetDisable (104)
+#define SOAP_TYPE_dss__SetDisable (101)
 /* dss:SetDisable */
 struct dss__SetDisable
 {
@@ -585,7 +565,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetStartDimResponse
-#define SOAP_TYPE_dss__SetStartDimResponse (106)
+#define SOAP_TYPE_dss__SetStartDimResponse (103)
 /* dss:SetStartDimResponse */
 struct dss__SetStartDimResponse
 {
@@ -595,7 +575,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetStartDim
-#define SOAP_TYPE_dss__SetStartDim (107)
+#define SOAP_TYPE_dss__SetStartDim (104)
 /* dss:SetStartDim */
 struct dss__SetStartDim
 {
@@ -608,7 +588,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetEndDimResponse
-#define SOAP_TYPE_dss__SetEndDimResponse (109)
+#define SOAP_TYPE_dss__SetEndDimResponse (106)
 /* dss:SetEndDimResponse */
 struct dss__SetEndDimResponse
 {
@@ -618,7 +598,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetEndDim
-#define SOAP_TYPE_dss__SetEndDim (110)
+#define SOAP_TYPE_dss__SetEndDim (107)
 /* dss:SetEndDim */
 struct dss__SetEndDim
 {
@@ -630,7 +610,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetSetValueResponse
-#define SOAP_TYPE_dss__SetSetValueResponse (113)
+#define SOAP_TYPE_dss__SetSetValueResponse (110)
 /* dss:SetSetValueResponse */
 struct dss__SetSetValueResponse
 {
@@ -640,7 +620,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetSetValue
-#define SOAP_TYPE_dss__SetSetValue (114)
+#define SOAP_TYPE_dss__SetSetValue (111)
 /* dss:SetSetValue */
 struct dss__SetSetValue
 {
@@ -653,7 +633,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetCallSceneResponse
-#define SOAP_TYPE_dss__SetCallSceneResponse (116)
+#define SOAP_TYPE_dss__SetCallSceneResponse (113)
 /* dss:SetCallSceneResponse */
 struct dss__SetCallSceneResponse
 {
@@ -663,7 +643,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetCallScene
-#define SOAP_TYPE_dss__SetCallScene (117)
+#define SOAP_TYPE_dss__SetCallScene (114)
 /* dss:SetCallScene */
 struct dss__SetCallScene
 {
@@ -675,7 +655,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetSaveSceneResponse
-#define SOAP_TYPE_dss__SetSaveSceneResponse (119)
+#define SOAP_TYPE_dss__SetSaveSceneResponse (116)
 /* dss:SetSaveSceneResponse */
 struct dss__SetSaveSceneResponse
 {
@@ -685,7 +665,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SetSaveScene
-#define SOAP_TYPE_dss__SetSaveScene (120)
+#define SOAP_TYPE_dss__SetSaveScene (117)
 /* dss:SetSaveScene */
 struct dss__SetSaveScene
 {
@@ -697,7 +677,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentTurnOnResponse
-#define SOAP_TYPE_dss__ApartmentTurnOnResponse (122)
+#define SOAP_TYPE_dss__ApartmentTurnOnResponse (119)
 /* dss:ApartmentTurnOnResponse */
 struct dss__ApartmentTurnOnResponse
 {
@@ -707,7 +687,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentTurnOn
-#define SOAP_TYPE_dss__ApartmentTurnOn (123)
+#define SOAP_TYPE_dss__ApartmentTurnOn (120)
 /* dss:ApartmentTurnOn */
 struct dss__ApartmentTurnOn
 {
@@ -718,7 +698,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentTurnOffResponse
-#define SOAP_TYPE_dss__ApartmentTurnOffResponse (125)
+#define SOAP_TYPE_dss__ApartmentTurnOffResponse (122)
 /* dss:ApartmentTurnOffResponse */
 struct dss__ApartmentTurnOffResponse
 {
@@ -728,7 +708,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentTurnOff
-#define SOAP_TYPE_dss__ApartmentTurnOff (126)
+#define SOAP_TYPE_dss__ApartmentTurnOff (123)
 /* dss:ApartmentTurnOff */
 struct dss__ApartmentTurnOff
 {
@@ -739,7 +719,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentIncreaseValueResponse
-#define SOAP_TYPE_dss__ApartmentIncreaseValueResponse (128)
+#define SOAP_TYPE_dss__ApartmentIncreaseValueResponse (125)
 /* dss:ApartmentIncreaseValueResponse */
 struct dss__ApartmentIncreaseValueResponse
 {
@@ -749,7 +729,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentIncreaseValue
-#define SOAP_TYPE_dss__ApartmentIncreaseValue (129)
+#define SOAP_TYPE_dss__ApartmentIncreaseValue (126)
 /* dss:ApartmentIncreaseValue */
 struct dss__ApartmentIncreaseValue
 {
@@ -761,7 +741,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentDecreaseValueResponse
-#define SOAP_TYPE_dss__ApartmentDecreaseValueResponse (131)
+#define SOAP_TYPE_dss__ApartmentDecreaseValueResponse (128)
 /* dss:ApartmentDecreaseValueResponse */
 struct dss__ApartmentDecreaseValueResponse
 {
@@ -771,7 +751,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentDecreaseValue
-#define SOAP_TYPE_dss__ApartmentDecreaseValue (132)
+#define SOAP_TYPE_dss__ApartmentDecreaseValue (129)
 /* dss:ApartmentDecreaseValue */
 struct dss__ApartmentDecreaseValue
 {
@@ -783,7 +763,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentEnableResponse
-#define SOAP_TYPE_dss__ApartmentEnableResponse (134)
+#define SOAP_TYPE_dss__ApartmentEnableResponse (131)
 /* dss:ApartmentEnableResponse */
 struct dss__ApartmentEnableResponse
 {
@@ -793,7 +773,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentEnable
-#define SOAP_TYPE_dss__ApartmentEnable (135)
+#define SOAP_TYPE_dss__ApartmentEnable (132)
 /* dss:ApartmentEnable */
 struct dss__ApartmentEnable
 {
@@ -804,7 +784,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentDisableResponse
-#define SOAP_TYPE_dss__ApartmentDisableResponse (137)
+#define SOAP_TYPE_dss__ApartmentDisableResponse (134)
 /* dss:ApartmentDisableResponse */
 struct dss__ApartmentDisableResponse
 {
@@ -814,7 +794,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentDisable
-#define SOAP_TYPE_dss__ApartmentDisable (138)
+#define SOAP_TYPE_dss__ApartmentDisable (135)
 /* dss:ApartmentDisable */
 struct dss__ApartmentDisable
 {
@@ -825,7 +805,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentStartDimResponse
-#define SOAP_TYPE_dss__ApartmentStartDimResponse (140)
+#define SOAP_TYPE_dss__ApartmentStartDimResponse (137)
 /* dss:ApartmentStartDimResponse */
 struct dss__ApartmentStartDimResponse
 {
@@ -835,7 +815,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentStartDim
-#define SOAP_TYPE_dss__ApartmentStartDim (141)
+#define SOAP_TYPE_dss__ApartmentStartDim (138)
 /* dss:ApartmentStartDim */
 struct dss__ApartmentStartDim
 {
@@ -848,7 +828,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentEndDimResponse
-#define SOAP_TYPE_dss__ApartmentEndDimResponse (143)
+#define SOAP_TYPE_dss__ApartmentEndDimResponse (140)
 /* dss:ApartmentEndDimResponse */
 struct dss__ApartmentEndDimResponse
 {
@@ -858,7 +838,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentEndDim
-#define SOAP_TYPE_dss__ApartmentEndDim (144)
+#define SOAP_TYPE_dss__ApartmentEndDim (141)
 /* dss:ApartmentEndDim */
 struct dss__ApartmentEndDim
 {
@@ -870,7 +850,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentSetValueResponse
-#define SOAP_TYPE_dss__ApartmentSetValueResponse (146)
+#define SOAP_TYPE_dss__ApartmentSetValueResponse (143)
 /* dss:ApartmentSetValueResponse */
 struct dss__ApartmentSetValueResponse
 {
@@ -880,7 +860,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentSetValue
-#define SOAP_TYPE_dss__ApartmentSetValue (147)
+#define SOAP_TYPE_dss__ApartmentSetValue (144)
 /* dss:ApartmentSetValue */
 struct dss__ApartmentSetValue
 {
@@ -893,7 +873,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentCallSceneResponse
-#define SOAP_TYPE_dss__ApartmentCallSceneResponse (149)
+#define SOAP_TYPE_dss__ApartmentCallSceneResponse (146)
 /* dss:ApartmentCallSceneResponse */
 struct dss__ApartmentCallSceneResponse
 {
@@ -903,7 +883,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentCallScene
-#define SOAP_TYPE_dss__ApartmentCallScene (150)
+#define SOAP_TYPE_dss__ApartmentCallScene (147)
 /* dss:ApartmentCallScene */
 struct dss__ApartmentCallScene
 {
@@ -915,7 +895,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentSaveSceneResponse
-#define SOAP_TYPE_dss__ApartmentSaveSceneResponse (152)
+#define SOAP_TYPE_dss__ApartmentSaveSceneResponse (149)
 /* dss:ApartmentSaveSceneResponse */
 struct dss__ApartmentSaveSceneResponse
 {
@@ -925,7 +905,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentSaveScene
-#define SOAP_TYPE_dss__ApartmentSaveScene (153)
+#define SOAP_TYPE_dss__ApartmentSaveScene (150)
 /* dss:ApartmentSaveScene */
 struct dss__ApartmentSaveScene
 {
@@ -937,7 +917,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneTurnOnResponse
-#define SOAP_TYPE_dss__ZoneTurnOnResponse (155)
+#define SOAP_TYPE_dss__ZoneTurnOnResponse (152)
 /* dss:ZoneTurnOnResponse */
 struct dss__ZoneTurnOnResponse
 {
@@ -947,7 +927,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneTurnOn
-#define SOAP_TYPE_dss__ZoneTurnOn (156)
+#define SOAP_TYPE_dss__ZoneTurnOn (153)
 /* dss:ZoneTurnOn */
 struct dss__ZoneTurnOn
 {
@@ -959,7 +939,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneTurnOffResponse
-#define SOAP_TYPE_dss__ZoneTurnOffResponse (158)
+#define SOAP_TYPE_dss__ZoneTurnOffResponse (155)
 /* dss:ZoneTurnOffResponse */
 struct dss__ZoneTurnOffResponse
 {
@@ -969,7 +949,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneTurnOff
-#define SOAP_TYPE_dss__ZoneTurnOff (159)
+#define SOAP_TYPE_dss__ZoneTurnOff (156)
 /* dss:ZoneTurnOff */
 struct dss__ZoneTurnOff
 {
@@ -981,7 +961,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneIncreaseValueResponse
-#define SOAP_TYPE_dss__ZoneIncreaseValueResponse (161)
+#define SOAP_TYPE_dss__ZoneIncreaseValueResponse (158)
 /* dss:ZoneIncreaseValueResponse */
 struct dss__ZoneIncreaseValueResponse
 {
@@ -991,7 +971,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneIncreaseValue
-#define SOAP_TYPE_dss__ZoneIncreaseValue (162)
+#define SOAP_TYPE_dss__ZoneIncreaseValue (159)
 /* dss:ZoneIncreaseValue */
 struct dss__ZoneIncreaseValue
 {
@@ -1004,7 +984,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneDecreaseValueResponse
-#define SOAP_TYPE_dss__ZoneDecreaseValueResponse (164)
+#define SOAP_TYPE_dss__ZoneDecreaseValueResponse (161)
 /* dss:ZoneDecreaseValueResponse */
 struct dss__ZoneDecreaseValueResponse
 {
@@ -1014,7 +994,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneDecreaseValue
-#define SOAP_TYPE_dss__ZoneDecreaseValue (165)
+#define SOAP_TYPE_dss__ZoneDecreaseValue (162)
 /* dss:ZoneDecreaseValue */
 struct dss__ZoneDecreaseValue
 {
@@ -1027,7 +1007,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneEnableResponse
-#define SOAP_TYPE_dss__ZoneEnableResponse (167)
+#define SOAP_TYPE_dss__ZoneEnableResponse (164)
 /* dss:ZoneEnableResponse */
 struct dss__ZoneEnableResponse
 {
@@ -1037,7 +1017,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneEnable
-#define SOAP_TYPE_dss__ZoneEnable (168)
+#define SOAP_TYPE_dss__ZoneEnable (165)
 /* dss:ZoneEnable */
 struct dss__ZoneEnable
 {
@@ -1049,7 +1029,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneDisableResponse
-#define SOAP_TYPE_dss__ZoneDisableResponse (170)
+#define SOAP_TYPE_dss__ZoneDisableResponse (167)
 /* dss:ZoneDisableResponse */
 struct dss__ZoneDisableResponse
 {
@@ -1059,7 +1039,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneDisable
-#define SOAP_TYPE_dss__ZoneDisable (171)
+#define SOAP_TYPE_dss__ZoneDisable (168)
 /* dss:ZoneDisable */
 struct dss__ZoneDisable
 {
@@ -1071,7 +1051,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneStartDimResponse
-#define SOAP_TYPE_dss__ZoneStartDimResponse (173)
+#define SOAP_TYPE_dss__ZoneStartDimResponse (170)
 /* dss:ZoneStartDimResponse */
 struct dss__ZoneStartDimResponse
 {
@@ -1081,7 +1061,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneStartDim
-#define SOAP_TYPE_dss__ZoneStartDim (174)
+#define SOAP_TYPE_dss__ZoneStartDim (171)
 /* dss:ZoneStartDim */
 struct dss__ZoneStartDim
 {
@@ -1095,7 +1075,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneEndDimResponse
-#define SOAP_TYPE_dss__ZoneEndDimResponse (176)
+#define SOAP_TYPE_dss__ZoneEndDimResponse (173)
 /* dss:ZoneEndDimResponse */
 struct dss__ZoneEndDimResponse
 {
@@ -1105,7 +1085,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneEndDim
-#define SOAP_TYPE_dss__ZoneEndDim (177)
+#define SOAP_TYPE_dss__ZoneEndDim (174)
 /* dss:ZoneEndDim */
 struct dss__ZoneEndDim
 {
@@ -1118,7 +1098,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneSetValueResponse
-#define SOAP_TYPE_dss__ZoneSetValueResponse (179)
+#define SOAP_TYPE_dss__ZoneSetValueResponse (176)
 /* dss:ZoneSetValueResponse */
 struct dss__ZoneSetValueResponse
 {
@@ -1128,7 +1108,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneSetValue
-#define SOAP_TYPE_dss__ZoneSetValue (180)
+#define SOAP_TYPE_dss__ZoneSetValue (177)
 /* dss:ZoneSetValue */
 struct dss__ZoneSetValue
 {
@@ -1142,7 +1122,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneCallSceneResponse
-#define SOAP_TYPE_dss__ZoneCallSceneResponse (182)
+#define SOAP_TYPE_dss__ZoneCallSceneResponse (179)
 /* dss:ZoneCallSceneResponse */
 struct dss__ZoneCallSceneResponse
 {
@@ -1152,7 +1132,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneCallScene
-#define SOAP_TYPE_dss__ZoneCallScene (183)
+#define SOAP_TYPE_dss__ZoneCallScene (180)
 /* dss:ZoneCallScene */
 struct dss__ZoneCallScene
 {
@@ -1165,7 +1145,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneSaveSceneResponse
-#define SOAP_TYPE_dss__ZoneSaveSceneResponse (185)
+#define SOAP_TYPE_dss__ZoneSaveSceneResponse (182)
 /* dss:ZoneSaveSceneResponse */
 struct dss__ZoneSaveSceneResponse
 {
@@ -1175,7 +1155,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ZoneSaveScene
-#define SOAP_TYPE_dss__ZoneSaveScene (186)
+#define SOAP_TYPE_dss__ZoneSaveScene (183)
 /* dss:ZoneSaveScene */
 struct dss__ZoneSaveScene
 {
@@ -1188,7 +1168,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceTurnOnResponse
-#define SOAP_TYPE_dss__DeviceTurnOnResponse (188)
+#define SOAP_TYPE_dss__DeviceTurnOnResponse (185)
 /* dss:DeviceTurnOnResponse */
 struct dss__DeviceTurnOnResponse
 {
@@ -1198,7 +1178,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceTurnOn
-#define SOAP_TYPE_dss__DeviceTurnOn (189)
+#define SOAP_TYPE_dss__DeviceTurnOn (186)
 /* dss:DeviceTurnOn */
 struct dss__DeviceTurnOn
 {
@@ -1209,7 +1189,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceTurnOffResponse
-#define SOAP_TYPE_dss__DeviceTurnOffResponse (191)
+#define SOAP_TYPE_dss__DeviceTurnOffResponse (188)
 /* dss:DeviceTurnOffResponse */
 struct dss__DeviceTurnOffResponse
 {
@@ -1219,7 +1199,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceTurnOff
-#define SOAP_TYPE_dss__DeviceTurnOff (192)
+#define SOAP_TYPE_dss__DeviceTurnOff (189)
 /* dss:DeviceTurnOff */
 struct dss__DeviceTurnOff
 {
@@ -1230,7 +1210,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceIncreaseValueResponse
-#define SOAP_TYPE_dss__DeviceIncreaseValueResponse (194)
+#define SOAP_TYPE_dss__DeviceIncreaseValueResponse (191)
 /* dss:DeviceIncreaseValueResponse */
 struct dss__DeviceIncreaseValueResponse
 {
@@ -1240,7 +1220,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceIncreaseValue
-#define SOAP_TYPE_dss__DeviceIncreaseValue (195)
+#define SOAP_TYPE_dss__DeviceIncreaseValue (192)
 /* dss:DeviceIncreaseValue */
 struct dss__DeviceIncreaseValue
 {
@@ -1252,7 +1232,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceDecreaseValueResponse
-#define SOAP_TYPE_dss__DeviceDecreaseValueResponse (197)
+#define SOAP_TYPE_dss__DeviceDecreaseValueResponse (194)
 /* dss:DeviceDecreaseValueResponse */
 struct dss__DeviceDecreaseValueResponse
 {
@@ -1262,7 +1242,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceDecreaseValue
-#define SOAP_TYPE_dss__DeviceDecreaseValue (198)
+#define SOAP_TYPE_dss__DeviceDecreaseValue (195)
 /* dss:DeviceDecreaseValue */
 struct dss__DeviceDecreaseValue
 {
@@ -1274,7 +1254,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceEnableResponse
-#define SOAP_TYPE_dss__DeviceEnableResponse (200)
+#define SOAP_TYPE_dss__DeviceEnableResponse (197)
 /* dss:DeviceEnableResponse */
 struct dss__DeviceEnableResponse
 {
@@ -1284,7 +1264,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceEnable
-#define SOAP_TYPE_dss__DeviceEnable (201)
+#define SOAP_TYPE_dss__DeviceEnable (198)
 /* dss:DeviceEnable */
 struct dss__DeviceEnable
 {
@@ -1295,7 +1275,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceDisableResponse
-#define SOAP_TYPE_dss__DeviceDisableResponse (203)
+#define SOAP_TYPE_dss__DeviceDisableResponse (200)
 /* dss:DeviceDisableResponse */
 struct dss__DeviceDisableResponse
 {
@@ -1305,7 +1285,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceDisable
-#define SOAP_TYPE_dss__DeviceDisable (204)
+#define SOAP_TYPE_dss__DeviceDisable (201)
 /* dss:DeviceDisable */
 struct dss__DeviceDisable
 {
@@ -1316,7 +1296,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceStartDimResponse
-#define SOAP_TYPE_dss__DeviceStartDimResponse (206)
+#define SOAP_TYPE_dss__DeviceStartDimResponse (203)
 /* dss:DeviceStartDimResponse */
 struct dss__DeviceStartDimResponse
 {
@@ -1326,7 +1306,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceStartDim
-#define SOAP_TYPE_dss__DeviceStartDim (207)
+#define SOAP_TYPE_dss__DeviceStartDim (204)
 /* dss:DeviceStartDim */
 struct dss__DeviceStartDim
 {
@@ -1339,7 +1319,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceEndDimResponse
-#define SOAP_TYPE_dss__DeviceEndDimResponse (209)
+#define SOAP_TYPE_dss__DeviceEndDimResponse (206)
 /* dss:DeviceEndDimResponse */
 struct dss__DeviceEndDimResponse
 {
@@ -1349,7 +1329,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceEndDim
-#define SOAP_TYPE_dss__DeviceEndDim (210)
+#define SOAP_TYPE_dss__DeviceEndDim (207)
 /* dss:DeviceEndDim */
 struct dss__DeviceEndDim
 {
@@ -1361,7 +1341,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceSetValueResponse
-#define SOAP_TYPE_dss__DeviceSetValueResponse (212)
+#define SOAP_TYPE_dss__DeviceSetValueResponse (209)
 /* dss:DeviceSetValueResponse */
 struct dss__DeviceSetValueResponse
 {
@@ -1371,7 +1351,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceSetValue
-#define SOAP_TYPE_dss__DeviceSetValue (213)
+#define SOAP_TYPE_dss__DeviceSetValue (210)
 /* dss:DeviceSetValue */
 struct dss__DeviceSetValue
 {
@@ -1384,7 +1364,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceGetValueResponse
-#define SOAP_TYPE_dss__DeviceGetValueResponse (216)
+#define SOAP_TYPE_dss__DeviceGetValueResponse (213)
 /* dss:DeviceGetValueResponse */
 struct dss__DeviceGetValueResponse
 {
@@ -1394,7 +1374,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceGetValue
-#define SOAP_TYPE_dss__DeviceGetValue (217)
+#define SOAP_TYPE_dss__DeviceGetValue (214)
 /* dss:DeviceGetValue */
 struct dss__DeviceGetValue
 {
@@ -1406,7 +1386,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceCallSceneResponse
-#define SOAP_TYPE_dss__DeviceCallSceneResponse (219)
+#define SOAP_TYPE_dss__DeviceCallSceneResponse (216)
 /* dss:DeviceCallSceneResponse */
 struct dss__DeviceCallSceneResponse
 {
@@ -1416,7 +1396,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceCallScene
-#define SOAP_TYPE_dss__DeviceCallScene (220)
+#define SOAP_TYPE_dss__DeviceCallScene (217)
 /* dss:DeviceCallScene */
 struct dss__DeviceCallScene
 {
@@ -1428,7 +1408,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceSaveSceneResponse
-#define SOAP_TYPE_dss__DeviceSaveSceneResponse (222)
+#define SOAP_TYPE_dss__DeviceSaveSceneResponse (219)
 /* dss:DeviceSaveSceneResponse */
 struct dss__DeviceSaveSceneResponse
 {
@@ -1438,7 +1418,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceSaveScene
-#define SOAP_TYPE_dss__DeviceSaveScene (223)
+#define SOAP_TYPE_dss__DeviceSaveScene (220)
 /* dss:DeviceSaveScene */
 struct dss__DeviceSaveScene
 {
@@ -1450,7 +1430,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceGetNameResponse
-#define SOAP_TYPE_dss__DeviceGetNameResponse (226)
+#define SOAP_TYPE_dss__DeviceGetNameResponse (223)
 /* dss:DeviceGetNameResponse */
 struct dss__DeviceGetNameResponse
 {
@@ -1460,7 +1440,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceGetName
-#define SOAP_TYPE_dss__DeviceGetName (227)
+#define SOAP_TYPE_dss__DeviceGetName (224)
 /* dss:DeviceGetName */
 struct dss__DeviceGetName
 {
@@ -1471,7 +1451,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceGetZoneIDResponse
-#define SOAP_TYPE_dss__DeviceGetZoneIDResponse (229)
+#define SOAP_TYPE_dss__DeviceGetZoneIDResponse (226)
 /* dss:DeviceGetZoneIDResponse */
 struct dss__DeviceGetZoneIDResponse
 {
@@ -1481,7 +1461,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceGetZoneID
-#define SOAP_TYPE_dss__DeviceGetZoneID (230)
+#define SOAP_TYPE_dss__DeviceGetZoneID (227)
 /* dss:DeviceGetZoneID */
 struct dss__DeviceGetZoneID
 {
@@ -1491,8 +1471,53 @@ public:
 };
 #endif
 
+#ifndef SOAP_TYPE_DeviceLocation
+#define SOAP_TYPE_DeviceLocation (228)
+/* DeviceLocation */
+struct DeviceLocation
+{
+public:
+	double x;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:double */
+	double y;	/* required element of type xsd:double */
+	double z;	/* required element of type xsd:double */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceSetLocationResponse
+#define SOAP_TYPE_dss__DeviceSetLocationResponse (230)
+/* dss:DeviceSetLocationResponse */
+struct dss__DeviceSetLocationResponse
+{
+public:
+	bool result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:boolean */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceSetLocation
+#define SOAP_TYPE_dss__DeviceSetLocation (231)
+/* dss:DeviceSetLocation */
+struct dss__DeviceSetLocation
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	char *_deviceID;	/* optional element of type xsd:string */
+	struct DeviceLocation _location;	/* required element of type DeviceLocation */
+};
+#endif
+
+#ifndef SOAP_TYPE_dss__DeviceGetLocation
+#define SOAP_TYPE_dss__DeviceGetLocation (234)
+/* dss:DeviceGetLocation */
+struct dss__DeviceGetLocation
+{
+public:
+	int _token;	/* required element of type xsd:int */
+	char *_deviceID;	/* optional element of type xsd:string */
+};
+#endif
+
 #ifndef SOAP_TYPE_dss__ModulatorGetPowerConsumptionResponse
-#define SOAP_TYPE_dss__ModulatorGetPowerConsumptionResponse (233)
+#define SOAP_TYPE_dss__ModulatorGetPowerConsumptionResponse (237)
 /* dss:ModulatorGetPowerConsumptionResponse */
 struct dss__ModulatorGetPowerConsumptionResponse
 {
@@ -1502,7 +1527,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ModulatorGetPowerConsumption
-#define SOAP_TYPE_dss__ModulatorGetPowerConsumption (234)
+#define SOAP_TYPE_dss__ModulatorGetPowerConsumption (238)
 /* dss:ModulatorGetPowerConsumption */
 struct dss__ModulatorGetPowerConsumption
 {
@@ -1513,7 +1538,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentGetModulatorIDsResponse
-#define SOAP_TYPE_dss__ApartmentGetModulatorIDsResponse (236)
+#define SOAP_TYPE_dss__ApartmentGetModulatorIDsResponse (240)
 /* dss:ApartmentGetModulatorIDsResponse */
 struct dss__ApartmentGetModulatorIDsResponse
 {
@@ -1523,7 +1548,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentGetModulatorIDs
-#define SOAP_TYPE_dss__ApartmentGetModulatorIDs (237)
+#define SOAP_TYPE_dss__ApartmentGetModulatorIDs (241)
 /* dss:ApartmentGetModulatorIDs */
 struct dss__ApartmentGetModulatorIDs
 {
@@ -1533,7 +1558,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ModulatorGetNameResponse
-#define SOAP_TYPE_dss__ModulatorGetNameResponse (239)
+#define SOAP_TYPE_dss__ModulatorGetNameResponse (243)
 /* dss:ModulatorGetNameResponse */
 struct dss__ModulatorGetNameResponse
 {
@@ -1543,7 +1568,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ModulatorGetName
-#define SOAP_TYPE_dss__ModulatorGetName (240)
+#define SOAP_TYPE_dss__ModulatorGetName (244)
 /* dss:ModulatorGetName */
 struct dss__ModulatorGetName
 {
@@ -1554,7 +1579,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentAllocateZoneResponse
-#define SOAP_TYPE_dss__ApartmentAllocateZoneResponse (242)
+#define SOAP_TYPE_dss__ApartmentAllocateZoneResponse (246)
 /* dss:ApartmentAllocateZoneResponse */
 struct dss__ApartmentAllocateZoneResponse
 {
@@ -1564,7 +1589,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentAllocateZone
-#define SOAP_TYPE_dss__ApartmentAllocateZone (243)
+#define SOAP_TYPE_dss__ApartmentAllocateZone (247)
 /* dss:ApartmentAllocateZone */
 struct dss__ApartmentAllocateZone
 {
@@ -1574,7 +1599,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentDeleteZoneResponse
-#define SOAP_TYPE_dss__ApartmentDeleteZoneResponse (245)
+#define SOAP_TYPE_dss__ApartmentDeleteZoneResponse (249)
 /* dss:ApartmentDeleteZoneResponse */
 struct dss__ApartmentDeleteZoneResponse
 {
@@ -1584,7 +1609,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentDeleteZone
-#define SOAP_TYPE_dss__ApartmentDeleteZone (246)
+#define SOAP_TYPE_dss__ApartmentDeleteZone (250)
 /* dss:ApartmentDeleteZone */
 struct dss__ApartmentDeleteZone
 {
@@ -1595,7 +1620,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Zone_AddDeviceResponse
-#define SOAP_TYPE_dss__Zone_AddDeviceResponse (248)
+#define SOAP_TYPE_dss__Zone_AddDeviceResponse (252)
 /* dss:Zone-AddDeviceResponse */
 struct dss__Zone_AddDeviceResponse
 {
@@ -1605,7 +1630,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Zone_AddDevice
-#define SOAP_TYPE_dss__Zone_AddDevice (249)
+#define SOAP_TYPE_dss__Zone_AddDevice (253)
 /* dss:Zone-AddDevice */
 struct dss__Zone_AddDevice
 {
@@ -1617,7 +1642,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Zone_RemoveDeviceResponse
-#define SOAP_TYPE_dss__Zone_RemoveDeviceResponse (251)
+#define SOAP_TYPE_dss__Zone_RemoveDeviceResponse (255)
 /* dss:Zone-RemoveDeviceResponse */
 struct dss__Zone_RemoveDeviceResponse
 {
@@ -1627,7 +1652,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Zone_RemoveDevice
-#define SOAP_TYPE_dss__Zone_RemoveDevice (252)
+#define SOAP_TYPE_dss__Zone_RemoveDevice (256)
 /* dss:Zone-RemoveDevice */
 struct dss__Zone_RemoveDevice
 {
@@ -1639,7 +1664,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Zone_SetNameResponse
-#define SOAP_TYPE_dss__Zone_SetNameResponse (254)
+#define SOAP_TYPE_dss__Zone_SetNameResponse (258)
 /* dss:Zone-SetNameResponse */
 struct dss__Zone_SetNameResponse
 {
@@ -1649,7 +1674,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__Zone_SetName
-#define SOAP_TYPE_dss__Zone_SetName (255)
+#define SOAP_TYPE_dss__Zone_SetName (259)
 /* dss:Zone-SetName */
 struct dss__Zone_SetName
 {
@@ -1661,7 +1686,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentAllocateUserGroupResponse
-#define SOAP_TYPE_dss__ApartmentAllocateUserGroupResponse (257)
+#define SOAP_TYPE_dss__ApartmentAllocateUserGroupResponse (261)
 /* dss:ApartmentAllocateUserGroupResponse */
 struct dss__ApartmentAllocateUserGroupResponse
 {
@@ -1671,7 +1696,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentAllocateUserGroup
-#define SOAP_TYPE_dss__ApartmentAllocateUserGroup (258)
+#define SOAP_TYPE_dss__ApartmentAllocateUserGroup (262)
 /* dss:ApartmentAllocateUserGroup */
 struct dss__ApartmentAllocateUserGroup
 {
@@ -1681,7 +1706,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__GroupRemoveUserGroupResponse
-#define SOAP_TYPE_dss__GroupRemoveUserGroupResponse (260)
+#define SOAP_TYPE_dss__GroupRemoveUserGroupResponse (264)
 /* dss:GroupRemoveUserGroupResponse */
 struct dss__GroupRemoveUserGroupResponse
 {
@@ -1691,7 +1716,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__GroupRemoveUserGroup
-#define SOAP_TYPE_dss__GroupRemoveUserGroup (261)
+#define SOAP_TYPE_dss__GroupRemoveUserGroup (265)
 /* dss:GroupRemoveUserGroup */
 struct dss__GroupRemoveUserGroup
 {
@@ -1702,7 +1727,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__GroupAddDeviceResponse
-#define SOAP_TYPE_dss__GroupAddDeviceResponse (263)
+#define SOAP_TYPE_dss__GroupAddDeviceResponse (267)
 /* dss:GroupAddDeviceResponse */
 struct dss__GroupAddDeviceResponse
 {
@@ -1712,7 +1737,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__GroupAddDevice
-#define SOAP_TYPE_dss__GroupAddDevice (264)
+#define SOAP_TYPE_dss__GroupAddDevice (268)
 /* dss:GroupAddDevice */
 struct dss__GroupAddDevice
 {
@@ -1724,7 +1749,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__GroupRemoveDeviceResponse
-#define SOAP_TYPE_dss__GroupRemoveDeviceResponse (266)
+#define SOAP_TYPE_dss__GroupRemoveDeviceResponse (270)
 /* dss:GroupRemoveDeviceResponse */
 struct dss__GroupRemoveDeviceResponse
 {
@@ -1734,7 +1759,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__GroupRemoveDevice
-#define SOAP_TYPE_dss__GroupRemoveDevice (267)
+#define SOAP_TYPE_dss__GroupRemoveDevice (271)
 /* dss:GroupRemoveDevice */
 struct dss__GroupRemoveDevice
 {
@@ -1746,7 +1771,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceGetFunctionIDResponse
-#define SOAP_TYPE_dss__DeviceGetFunctionIDResponse (269)
+#define SOAP_TYPE_dss__DeviceGetFunctionIDResponse (273)
 /* dss:DeviceGetFunctionIDResponse */
 struct dss__DeviceGetFunctionIDResponse
 {
@@ -1756,7 +1781,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__DeviceGetFunctionID
-#define SOAP_TYPE_dss__DeviceGetFunctionID (270)
+#define SOAP_TYPE_dss__DeviceGetFunctionID (274)
 /* dss:DeviceGetFunctionID */
 struct dss__DeviceGetFunctionID
 {
@@ -1767,7 +1792,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SwitchGetGroupIDResponse
-#define SOAP_TYPE_dss__SwitchGetGroupIDResponse (272)
+#define SOAP_TYPE_dss__SwitchGetGroupIDResponse (276)
 /* dss:SwitchGetGroupIDResponse */
 struct dss__SwitchGetGroupIDResponse
 {
@@ -1777,7 +1802,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SwitchGetGroupID
-#define SOAP_TYPE_dss__SwitchGetGroupID (273)
+#define SOAP_TYPE_dss__SwitchGetGroupID (277)
 /* dss:SwitchGetGroupID */
 struct dss__SwitchGetGroupID
 {
@@ -1788,7 +1813,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__EventRaiseResponse
-#define SOAP_TYPE_dss__EventRaiseResponse (275)
+#define SOAP_TYPE_dss__EventRaiseResponse (279)
 /* dss:EventRaiseResponse */
 struct dss__EventRaiseResponse
 {
@@ -1798,7 +1823,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__EventRaise
-#define SOAP_TYPE_dss__EventRaise (276)
+#define SOAP_TYPE_dss__EventRaise (280)
 /* dss:EventRaise */
 struct dss__EventRaise
 {
@@ -1812,7 +1837,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetTypeResponse
-#define SOAP_TYPE_dss__PropertyGetTypeResponse (278)
+#define SOAP_TYPE_dss__PropertyGetTypeResponse (282)
 /* dss:PropertyGetTypeResponse */
 struct dss__PropertyGetTypeResponse
 {
@@ -1822,7 +1847,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetType
-#define SOAP_TYPE_dss__PropertyGetType (279)
+#define SOAP_TYPE_dss__PropertyGetType (283)
 /* dss:PropertyGetType */
 struct dss__PropertyGetType
 {
@@ -1833,7 +1858,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertySetIntResponse
-#define SOAP_TYPE_dss__PropertySetIntResponse (281)
+#define SOAP_TYPE_dss__PropertySetIntResponse (285)
 /* dss:PropertySetIntResponse */
 struct dss__PropertySetIntResponse
 {
@@ -1843,7 +1868,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertySetInt
-#define SOAP_TYPE_dss__PropertySetInt (282)
+#define SOAP_TYPE_dss__PropertySetInt (286)
 /* dss:PropertySetInt */
 struct dss__PropertySetInt
 {
@@ -1856,7 +1881,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertySetStringResponse
-#define SOAP_TYPE_dss__PropertySetStringResponse (284)
+#define SOAP_TYPE_dss__PropertySetStringResponse (288)
 /* dss:PropertySetStringResponse */
 struct dss__PropertySetStringResponse
 {
@@ -1866,7 +1891,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertySetString
-#define SOAP_TYPE_dss__PropertySetString (285)
+#define SOAP_TYPE_dss__PropertySetString (289)
 /* dss:PropertySetString */
 struct dss__PropertySetString
 {
@@ -1879,7 +1904,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertySetBoolResponse
-#define SOAP_TYPE_dss__PropertySetBoolResponse (287)
+#define SOAP_TYPE_dss__PropertySetBoolResponse (291)
 /* dss:PropertySetBoolResponse */
 struct dss__PropertySetBoolResponse
 {
@@ -1889,7 +1914,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertySetBool
-#define SOAP_TYPE_dss__PropertySetBool (288)
+#define SOAP_TYPE_dss__PropertySetBool (292)
 /* dss:PropertySetBool */
 struct dss__PropertySetBool
 {
@@ -1902,7 +1927,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetIntResponse
-#define SOAP_TYPE_dss__PropertyGetIntResponse (290)
+#define SOAP_TYPE_dss__PropertyGetIntResponse (294)
 /* dss:PropertyGetIntResponse */
 struct dss__PropertyGetIntResponse
 {
@@ -1912,7 +1937,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetInt
-#define SOAP_TYPE_dss__PropertyGetInt (291)
+#define SOAP_TYPE_dss__PropertyGetInt (295)
 /* dss:PropertyGetInt */
 struct dss__PropertyGetInt
 {
@@ -1923,7 +1948,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetStringResponse
-#define SOAP_TYPE_dss__PropertyGetStringResponse (293)
+#define SOAP_TYPE_dss__PropertyGetStringResponse (297)
 /* dss:PropertyGetStringResponse */
 struct dss__PropertyGetStringResponse
 {
@@ -1933,7 +1958,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetString
-#define SOAP_TYPE_dss__PropertyGetString (294)
+#define SOAP_TYPE_dss__PropertyGetString (298)
 /* dss:PropertyGetString */
 struct dss__PropertyGetString
 {
@@ -1944,7 +1969,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetBoolResponse
-#define SOAP_TYPE_dss__PropertyGetBoolResponse (296)
+#define SOAP_TYPE_dss__PropertyGetBoolResponse (300)
 /* dss:PropertyGetBoolResponse */
 struct dss__PropertyGetBoolResponse
 {
@@ -1954,7 +1979,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetBool
-#define SOAP_TYPE_dss__PropertyGetBool (297)
+#define SOAP_TYPE_dss__PropertyGetBool (301)
 /* dss:PropertyGetBool */
 struct dss__PropertyGetBool
 {
@@ -1965,7 +1990,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetChildrenResponse
-#define SOAP_TYPE_dss__PropertyGetChildrenResponse (299)
+#define SOAP_TYPE_dss__PropertyGetChildrenResponse (303)
 /* dss:PropertyGetChildrenResponse */
 struct dss__PropertyGetChildrenResponse
 {
@@ -1975,7 +2000,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__PropertyGetChildren
-#define SOAP_TYPE_dss__PropertyGetChildren (300)
+#define SOAP_TYPE_dss__PropertyGetChildren (304)
 /* dss:PropertyGetChildren */
 struct dss__PropertyGetChildren
 {
@@ -1986,7 +2011,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Header
-#define SOAP_TYPE_SOAP_ENV__Header (301)
+#define SOAP_TYPE_SOAP_ENV__Header (305)
 /* SOAP Header: */
 struct SOAP_ENV__Header
 {
@@ -1998,7 +2023,7 @@ private:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Code
-#define SOAP_TYPE_SOAP_ENV__Code (302)
+#define SOAP_TYPE_SOAP_ENV__Code (306)
 /* SOAP Fault Code: */
 struct SOAP_ENV__Code
 {
@@ -2009,7 +2034,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Detail
-#define SOAP_TYPE_SOAP_ENV__Detail (304)
+#define SOAP_TYPE_SOAP_ENV__Detail (308)
 /* SOAP-ENV:Detail */
 struct SOAP_ENV__Detail
 {
@@ -2021,7 +2046,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Reason
-#define SOAP_TYPE_SOAP_ENV__Reason (307)
+#define SOAP_TYPE_SOAP_ENV__Reason (311)
 /* SOAP-ENV:Reason */
 struct SOAP_ENV__Reason
 {
@@ -2031,7 +2056,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Fault
-#define SOAP_TYPE_SOAP_ENV__Fault (308)
+#define SOAP_TYPE_SOAP_ENV__Fault (312)
 /* SOAP Fault: */
 struct SOAP_ENV__Fault
 {
@@ -2102,8 +2127,6 @@ typedef ULONG64 xsd__unsignedLong;
  *                                                                            *
 \******************************************************************************/
 
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Test(struct soap*, char *bla, std::vector<int >&ints);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Authenticate(struct soap*, char *_userName, char *_password, int &token);
 
@@ -2237,6 +2260,10 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetName(struct soap*, int _token, char *_de
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetZoneID(struct soap*, int _token, char *_deviceID, int &result);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSetLocation(struct soap*, int _token, char *_deviceID, struct DeviceLocation _location, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetLocation(struct soap*, int _token, char *_deviceID, struct DeviceLocation &result);
+
 SOAP_FMAC5 int SOAP_FMAC6 dss__ModulatorGetPowerConsumption(struct soap*, int _token, int _modulatorID, unsigned long &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetModulatorIDs(struct soap*, int _token, std::vector<std::string >&ids);
@@ -2292,8 +2319,6 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetChildren(struct soap*, int _token, std
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap*);
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Test(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Authenticate(struct soap*);
 
@@ -2426,6 +2451,10 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceSaveScene(struct soap*);
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetName(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetZoneID(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceSetLocation(struct soap*);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetLocation(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ModulatorGetPowerConsumption(struct soap*);
 

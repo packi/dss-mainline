@@ -187,6 +187,38 @@ namespace dss {
     }
   } // SetName
 
+  const DeviceLocation& Device::GetLocation() const {
+    return m_Location;
+  } // GetLocation
+
+  void Device::SetLocation(const DeviceLocation& _value) {
+    m_Location = _value;
+  } // SetLocation
+
+  double Device::GetLocationX() const {
+    return m_Location.get<0>();
+  } // GetLocationX
+
+  double Device::GetLocationY() const {
+    return m_Location.get<1>();
+  } // GetLocationY
+
+  double Device::GetLocationZ() const {
+    return m_Location.get<2>();
+  } // GetLocationZ
+
+  void Device::SetLocationX(const double _value) {
+    boost::get<0>(m_Location) = _value;
+  } // SetLocationX
+
+  void Device::SetLocationY(const double _value) {
+    boost::get<1>(m_Location) = _value;
+  } // SetLocationY
+
+  void Device::SetLocationZ(const double _value) {
+    boost::get<2>(m_Location) = _value;
+  } // SetLocationZ
+
   bool Device::operator==(const Device& _other) const {
     return _other.m_DSID == m_DSID;
   } // operator==

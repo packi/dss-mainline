@@ -97,6 +97,10 @@ namespace dss {
     return IntToString(_value);
   } // ToJSONValue(int)
 
+  string ToJSONValue(const double& _value) {
+    return DoubleToString(_value);
+  } // ToJSONValue(double)
+
   string ToJSONValue(const bool& _value) {
     if(_value) {
       return "true";
@@ -627,6 +631,30 @@ namespace dss {
         return JSONOk(sstream.str());
       } else if(BeginsWith(_method, "device/setName")) {
         pDevice->SetName(_parameter["newName"]);
+        return ResultToJSON(true);
+      } else if(BeginsWith(_method, "device/getLocation")) {
+        const DeviceLocation& location = pDevice->GetLocation();
+        stringstream sstream;
+        sstream << "{" << ToJSONValue("x") << ":" << ToJSONValue(location.get<0>()) << ","
+                       << ToJSONValue("y") << ":" << ToJSONValue(location.get<1>()) << ","
+                       << ToJSONValue("z") << ":" << ToJSONValue(location.get<2>())
+                << "}";
+        return JSONOk(sstream.str());
+      } else if(BeginsWith(_method, "device/setLocation")) {
+        DeviceLocation location = pDevice->GetLocation();
+        string strParam = _parameter["x"];
+        if(!strParam.empty()) {
+          pDevice->SetLocationX(StrToDouble(strParam));
+        }
+        strParam = _parameter["y"];
+        if(!strParam.empty()) {
+          pDevice->SetLocationY(StrToDouble(strParam));
+        }
+        strParam = _parameter["z"];
+        if(!strParam.empty()) {
+          pDevice->SetLocationZ(StrToDouble(strParam));
+        }
+        pDevice->SetLocation(location);
         return ResultToJSON(true);
       } else {
         _handled = false;

@@ -10,12 +10,6 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-int dss__Test(struct soap *soap, char*, std::vector<int>& res) {
-  res.push_back(1);
-  res.push_back(2);
-  return SOAP_OK;
-}
-
 inline dss::dsid_t FromSOAP(const char* _dsid) {
   dss::dsid_t result = dss::dsid_t::FromString(_dsid);
   return result;
@@ -1045,6 +1039,33 @@ int dss__DeviceGetZoneID(struct soap *soap, int _token, char* _deviceID, int& re
   result = dev.GetDevice().GetZoneID();
   return SOAP_OK;
 } // dss__DeviceGetZoneID
+
+int dss__DeviceSetLocation(struct soap *soap, int _token, char* _deviceID, struct DeviceLocation _location, bool& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  dss::DeviceLocation location = boost::make_tuple(_location.x, _location.y, _location.z);
+
+  dev.GetDevice().SetLocation(location);
+  return SOAP_OK;
+} // dss__DeviceSetLocation
+
+int dss__DeviceGetLocation(struct soap *soap, int _token, char* _deviceID, struct DeviceLocation& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  const dss::Device& device = dev.GetDevice();
+  result.x = device.GetLocationX();
+  result.y = device.GetLocationY();
+  result.z = device.GetLocationZ();
+
+  return SOAP_OK;
+} // dss__DeviceGetLoaction
+
 
 //==================================================== Information
 

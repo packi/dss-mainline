@@ -10,22 +10,6 @@
   attributeFormDefault="unqualified">
   <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
   <!-- operation request element -->
-  <element name="Test">
-   <complexType>
-    <sequence>
-     <element name="bla" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="TestResponse">
-   <complexType>
-    <sequence>
-     <element name="ints" type="xsd:int" minOccurs="1" maxOccurs="unbounded"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
   <element name="Authenticate">
    <complexType>
     <sequence>
@@ -1194,6 +1178,43 @@
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceSetLocation">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="location" type="dss:DeviceLocation" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceSetLocationResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceGetLocation">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceLocation">
+   <complexType>
+    <sequence>
+     <element name="x" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+     <element name="y" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+     <element name="z" type="xsd:double" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>

@@ -39,6 +39,7 @@ using namespace std;
 #include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/tuple/tuple.hpp>
 
 namespace dss {
 
@@ -100,13 +101,6 @@ namespace dss {
     virtual ~IDeviceInterface() {};
   };
 
-  class Switch {
-  private:
-    int m_NumberOfButtons;
-  public:
-    Switch(const int _numberOfButtons);
-  };
-
   /** Internal reference to a device.
    * A DeviceReference is virtually interchangable with a device. It is used in places
      where a reference to a device is needed.
@@ -163,6 +157,7 @@ namespace dss {
   typedef vector<DeviceReference> DeviceVector;
   typedef DeviceVector::iterator DeviceIterator;
   typedef DeviceVector::const_iterator DeviceConstIterator;
+  typedef boost::tuple<double, double, double> DeviceLocation;
 
   /** Represents a dsID */
   class Device : public IDeviceInterface,
@@ -181,6 +176,7 @@ namespace dss {
     unsigned long m_Consumption;
 
     PropertyNode* m_pPropertyNode;
+    DeviceLocation m_Location;
   protected:
     void PublishToPropertyTree();
   public:
@@ -216,6 +212,17 @@ namespace dss {
 
     string GetName() const;
     void SetName(const string& _name);
+
+    const DeviceLocation& GetLocation() const;
+    void SetLocation(const DeviceLocation& _value);
+
+    double GetLocationX() const;
+    double GetLocationY() const;
+    double GetLocationZ() const;
+
+    void SetLocationX(const double _value);
+    void SetLocationY(const double _value);
+    void SetLocationZ(const double _value);
 
     bitset<63>& GetGroupBitmask();
     bool IsInGroup(const int _groupID) const;
@@ -498,7 +505,8 @@ namespace dss {
   /** Represents a Zone
     */
   class Zone : public DeviceContainer,
-               public IDeviceInterface {
+               public IDeviceInterface,
+               public boost::noncopyable {
   private:
     int m_ZoneID;
     DeviceVector m_Devices;
