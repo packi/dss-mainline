@@ -63,7 +63,8 @@ jQuery(document).ready(function() {
 			<div id="content">
 				<div id="building">
 					<div id="selectionArea">
-						<div id="allFloors">
+						<div id="allFloors" style="display: none;">
+							<img id="allfloorsConsumption" src="views/building.png" style="height: 309px;"/>
 						</div>
 						<div id="firstFloor">
 						<div id="firstFloor_3d" style="position: absolute;">
@@ -85,7 +86,7 @@ jQuery(document).ready(function() {
 								<area id="room6" shape="poly" coords="177,153,141,185,246,249,278,208" nohref="nohref" title="Bad" alt="Bad" />
 							</map>
 						</div>
-						<div id="firstFloor_map" style="display: none;">
+						<div id="firstFloor_map" style="position: absolute; display: none;">
 							<img src="views/first_floor_map.png" usemap="#firstFloorMapMap"/>
 							<img id="firstFloorSelectionMap" src="views/room_1_map.png" usemap="#firstFloorMapMap"/>
 							<img id="firstFloorHoverMap" class="hoverOverlay" src="views/room_1_map.png" usemap="#firstFloorMapMap"/>
@@ -108,7 +109,7 @@ jQuery(document).ready(function() {
 					</div>
 				</div>
 				<div id="charts">
-					<h2><div id="graphSelectionIcon"></div>Stromverbrauch: <span id="graphSelectionTitle">Arbeitszimmer</span></h2>
+					<h2 id="graphSelection"><div id="graphSelectionIcon"></div>Stromverbrauch: <span id="graphSelectionTitle">Arbeitszimmer</span></h2>
 					<ul id="graphSelector">
 						<li id="five_minutes" class="selected">letzte 5 Min.</li>
 						<li id="one_hour">letzte Std.</li>

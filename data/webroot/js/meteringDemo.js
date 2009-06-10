@@ -16,6 +16,9 @@ var roomNames = [
 				"Bad"
 			];
 
+
+var buildingMode = false;
+
 function registerHandlers() {
 	for(var i = 1; i <= 6; i++) {
 		(function () {
@@ -80,20 +83,48 @@ function registerHandlers() {
 		})
 	});
 	jQuery("#threeD").click(function() {
-		jQuery("#viewMode").css({backgroundImage: "url(images/view-mode-3d.png)"});
-		jQuery("#firstFloor_3d").css({display: "block"});
-		jQuery("#firstFloor_map").css({display: "none"});
+		if(!buildingMode) {
+			jQuery("#viewMode").css({backgroundImage: "url(images/view-mode-3d.png)"});
+			jQuery("#firstFloor_3d").css({display: "block"});
+			jQuery("#firstFloor_map").css({display: "none"});
+		}
 	});
 	jQuery("#map").click(function() {
-		jQuery("#viewMode").css({backgroundImage: "url(images/view-mode-map.png)"});
-		jQuery("#firstFloor_3d").css({display: "none"});
-		jQuery("#firstFloor_map").css({display: "block"});
+		if(!buildingMode) {
+			jQuery("#viewMode").css({backgroundImage: "url(images/view-mode-map.png)"});
+			jQuery("#firstFloor_3d").css({display: "none"});
+			jQuery("#firstFloor_map").css({display: "block"});
+		}
 	});
 	jQuery("#toggleQueue").data("queueOpen", false).click(function() {
 		toggleMainMeterQueue();
 	});
 	jQuery("#connectionStatusText").data("connected", true).click(function() {
 		toggleConnection();
+	});
+	
+	jQuery("#entireBuilding").click(function() {
+		jQuery("#entireBuilding").addClass("selected");
+		jQuery("#groundFloor").removeClass("selected");
+		graph.setDSM("metering");
+		jQuery("#graphSelectionTitle").text("Ganze Wohnung");
+		jQuery("#allFloors").css({display: "block"});
+		jQuery("#firstFloor_map, #firstFloor_3d").css({display: "none"});
+		buildingMode = true;
+	});
+	jQuery("#groundFloor").click(function() {
+		jQuery("#groundFloor").addClass("selected");
+		jQuery("#entireBuilding").removeClass("selected");
+		graph.setDSM("0000000000000000ffc00011");
+		jQuery("#firstFloorSelection").attr("src", "views/room_1.png");
+		jQuery("#firstFloorSelectionMap").attr("src", "views/room_1_map.png");
+		jQuery("#viewMode").css({backgroundImage: "url(images/view-mode-3d.png)"});
+		jQuery("#firstFloor_3d").css({display: "block"});
+		jQuery("#firstFloor_map").css({display: "none"});
+		jQuery("#graphSelectionTitle").text(roomNames[0]);
+		jQuery("#allFloors, #firstFloor_map").css({display: "none"});
+		jQuery("#firstFloor_3d").css({display: "block"});
+		buildingMode = false;
 	});
 	//var scrollbar = new Control.ScrollBar('scrollbar_content','scrollbar_track');
 }

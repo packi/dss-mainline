@@ -5,13 +5,14 @@
   * along with flot ( http://code.google.com/p/flot/ )
   *
   */
-
+var resolution = "seconds";
 var DSGraph = Class.create({
 	initialize: function(adSMID) {
 		this.dSMID = adSMID;
 		this.timer = undefined;
 		this.plot = undefined;
 		this.updatePlot = true;
+		this.requestID = 1;
 		this.currentResolution = "seconds";
 		this.reloadInterval = 2000;
 		this.baseURL = "metering/";
@@ -57,14 +58,13 @@ var DSGraph = Class.create({
 	},
 	
 	timeTickFormatter: function(val, axis) {
-		var self = this;
 		var d = new Date(val);
 		var tick = "";
-		switch(self.currentResolution) {
+		switch(resolution) {
 			case "seconds":
 			case "10seconds":
 			case "5minutely":
-				tick = tick + ((d.getUTCHours() < 10) ? ( "0" + (d.getUTCHours()+2) ) : (d.getUTCHours()+2) );
+				tick = tick + ((d.getUTCHours() < 8) ? ( "0" + (d.getUTCHours()+2) ) : (d.getUTCHours()+2) );
 				tick = tick + ":";
 				tick = tick + ((d.getUTCMinutes() < 10) ? ( "0" + d.getUTCMinutes() ) : d.getUTCMinutes() );
 				tick = tick + ":";
@@ -75,7 +75,7 @@ var DSGraph = Class.create({
 				tick = tick + "-";
 				tick = tick + ((d.getUTCMonth() < 10 ) ? ("0" + d.getUTCMonth() ) : d.getUTCMonth() );
 				tick = tick + "-";
-				tick = tick + ((d.getUTCDate() < 10) ? ("0" + d.getUTCDate() ) : d.getUTCDate() );			
+				tick = tick + ((d.getUTCDate() < 10) ? ("0" + d.getUTCDate() ) : d.getUTCDate() );
 		}
 		return tick;
 	},
@@ -96,15 +96,18 @@ var DSGraph = Class.create({
 			var value = parseInt( jQuery(values[i]).children("value").text() );
 			rawData.push([date, value]);
 		}
+		rawData.pop();
 		return rawData;
 	},
 	
 	reloadPlot: function() {
 		var currentDate = new Date();
 		var self = this;
+		this.requestID += 1;
+		var requestID = this.requestID;
 		jQuery.ajax({
 			type: "GET",
-			url: this.baseURL + this.dSMID + "_consumption_" + this.currentResolution + ".xml?date=" + currentDate.getTime(),
+			url: self.baseURL + self.dSMID + "_consumption_" + self.currentResolution + ".xml?date=" + currentDate.getTime(),
 			dataType: "xml",
 			success: function(xml) {
 					var xmlString = self.xml2Str(xml).replace(/</ig, "&lt;").replace(/>/ig, "&gt;");
@@ -113,7 +116,7 @@ var DSGraph = Class.create({
 					var rawData = self.parseXML(xml);
 					self.redrawPlot(rawData);
 					self.updateConsumptionIndicator(rawData);
-					if(self.updatePlot) {
+					if(self.updatePlot && (requestID == self.requestID)) {
 						self.timer = setTimeout(function() {
 							self.reloadPlot(); }, self.reloadInterval);
 					}
@@ -129,18 +132,30 @@ var DSGraph = Class.create({
 		var lastVal = rawData[rawData.length-1];
 		if(lastVal !== undefined) {
 			lastVal = lastVal[1];
-			if(lastVal > 70000) {
-				jQuery("#graphSelectionIcon").css({backgroundImage: "url(images/room-red.png)"});
-			} else if(lastVal > 30000) {
-				jQuery("#graphSelectionIcon").css({backgroundImage: "url(images/room-yellow.png)"});
+			if(this.dSMID == "metering") {
+				if(lastVal > 70000*6) {
+					jQuery("#graphSelectionIcon").css({backgroundImage: "url(images/house-red.png)"});
+				} else if(lastVal > 30000*6) {
+					jQuery("#graphSelectionIcon").css({backgroundImage: "url(images/house-yellow.png)"});
+				} else {
+					jQuery("#graphSelectionIcon").css({backgroundImage: "url(images/house-green.png)"});
+				}
 			} else {
-				jQuery("#graphSelectionIcon").css({backgroundImage: "url(images/room-green.png)"});
+				if(lastVal > 70000) {
+					jQuery("#graphSelectionIcon").css({backgroundImage: "url(images/room-red.png)"});
+				} else if(lastVal > 30000) {
+					jQuery("#graphSelectionIcon").css({backgroundImage: "url(images/room-yellow.png)"});
+				} else {
+					jQuery("#graphSelectionIcon").css({backgroundImage: "url(images/room-green.png)"});
+				}
 			}
+
 		}
 	},
 	
 	setResolution: function(aResolution) {
 		this.currentResolution = this.resolutions[aResolution];
+		resolution = this.currentResolution;
 		if(this.updatePlot) {
 			clearTimeout(this.timer);
 		}
@@ -149,6 +164,13 @@ var DSGraph = Class.create({
 	
 	setDSM: function(adSMID) {
 		this.dSMID = adSMID;
+		if(this.dSMID == "metering") {
+			this.plotOptions.yaxis.max = 6*100000;
+			this.plot = jQuery.plot( jQuery("#curve"), [], this.plotOptions );
+		} else {
+			this.plotOptions.yaxis.max = 100000;
+			this.plot = jQuery.plot( jQuery("#curve"), [], this.plotOptions );
+		}
 		if(this.updatePlot) {
 			clearTimeout(this.timer);
 		}
