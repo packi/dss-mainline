@@ -147,13 +147,11 @@ function toggleMainMeterQueue() {
 
 function toggleConnection() {
 	var button = jQuery("#connectionStatusText");
-	console.log("toggling connection: " + button);
 	if(button.data("connected")) {
 		console.log("disconnecting");
 		button.data("connected", false).text("disconnected").css({backgroundImage: "url(images/button-disconnected.png)"});
 		reporter.stop();
 	} else {
-	console.log("connecting");
 		button.data("connected", true).text("connected").css({backgroundImage: "url(images/button-connected.png)"});
 		reporter.restart();
 	}
