@@ -36,6 +36,7 @@ namespace dss {
   const uint8_t FunctionGroupGetDevKeyForInd = 0x13;
 
   const uint8_t FunctionZoneGetGroupIdForInd = 0x17;
+  const uint8_t FunctionGroupGetLastCalledScene = 0x18;
 
   const uint8_t FunctionGroupIncreaseValue = 0x20;
   const uint8_t FunctionGroupDecreaseValue = 0x21;

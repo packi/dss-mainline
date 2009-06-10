@@ -787,7 +787,6 @@ namespace dss {
     cmdFrame.SetCommand(CommandRequest);
     cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetDSID);
     Log(string("Proxy: GetDSIDOfModulator ") + IntToString(_modulatorID));
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetDSID);
 
     boost::shared_ptr<ReceivedFrame> recFrame = ReceiveSingleFrame(cmdFrame, FunctionModulatorGetDSID);
     if(recFrame.get() == NULL) {
@@ -800,6 +799,22 @@ namespace dss {
     //pd.Get<uint8_t>(); // function result, don't know if that's sent though
     return pd.Get<dsid_t>();
   } // GetDSIDOfModulator
+
+  int DS485Proxy::GetLastCalledScene(const int _modulatorID, const int _zoneID, const int _groupID) {
+    DS485CommandFrame cmdFrame;
+    cmdFrame.GetHeader().SetDestination(_modulatorID);
+    cmdFrame.SetCommand(CommandRequest);
+    cmdFrame.GetPayload().Add<uint8_t>(FunctionGroupGetLastCalledScene);
+    Log(string("Proxy: GetDSIDOfModulator ") + IntToString(_modulatorID));
+    cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
+    cmdFrame.GetPayload().Add<uint16_t>(_groupID);
+
+    int16_t res = static_cast<int16_t>(ReceiveSingleResult16(cmdFrame, FunctionGroupGetLastCalledScene));
+    if(res < 0) {
+      Log("DS485Proxy::GetLastCalledScene: negative result received: " + IntToString(res));
+    }
+    return res;
+  } // GetLastCalledScene
 
   unsigned long DS485Proxy::GetPowerConsumption(const int _modulatorID) {
     DS485CommandFrame cmdFrame;

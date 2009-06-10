@@ -495,7 +495,7 @@ namespace dss {
 
   void DSModulatorSim::GroupCallScene(const int _zoneID, const int _groupID, const int _sceneID) {
 	vector<DSIDInterface*> dsids;
-	m_LastCalledSceneForGroup[_groupID] = _sceneID;
+	m_LastCalledSceneForZoneAndGroup[make_pair(_zoneID, _groupID)] = _sceneID;
 	if(_groupID == GroupIDBroadcast) {
 	  if(_zoneID == 0) {
 	    dsids = m_SimulatedDevices;
@@ -841,6 +841,15 @@ namespace dss {
                 DistributeFrame(response);
               }
               break;
+            case FunctionGroupGetLastCalledScene:
+              {
+                int zoneID = pd.Get<uint16_t>();
+                int groupID = pd.Get<uint16_t>();
+                response = CreateResponse(cmdFrame, cmdNr);
+                response->GetPayload().Add<uint16_t>(m_LastCalledSceneForZoneAndGroup[make_pair(zoneID, groupID)]);
+                DistributeFrame(response);
+              }
+              break;
             case FunctionZoneGetGroupIdForInd:
               {
                 response = CreateResponse(cmdFrame, cmdNr);
@@ -1057,235 +1066,6 @@ namespace dss {
   int DSModulatorSim::GetID() const {
     return m_ID;
   } // GetID
-/*
-  void DSModulatorSim::ProcessButtonPress(const DSIDSimSwitch& _switch, int _buttonNr, const ButtonPressKind _kind) {
-    int zoneID = m_DeviceZoneMapping[&_switch];
-    int groupToControl = GetGroupForSwitch(&_switch);
-    if(_switch.IsBell()) {
-      if(_kind == Click) {
-        DS485CommandFrame frame;
-        frame.GetHeader().SetDestination(0);
-        frame.GetHeader().SetBroadcast(true);
-        frame.GetHeader().SetType(1);
-        frame.SetCommand(CommandRequest);
-
-        frame.GetPayload().Add<uint8_t>(FunctionGroupCallScene);
-        frame.GetPayload().Add<uint16_t>(0);
-        frame.GetPayload().Add<uint16_t>(0);
-        frame.GetPayload().Add<uint16_t>(SceneBell);
-
-        GetDSS().GetDS485Interface().SendFrame(frame);
-      }
-    } else {
-      // redistribute according to the selected color, etc...
-      if(_switch.GetNumberOfButtons() == 9) {
-        // for 9 button switches we'll need to track the groups ourselves
-        // 1 2 3
-        // 4 5 6
-        // 7 8 9
-        // 1 sets the group to light, 3 is security
-        // 7 is for audio and 9 toggles between the others
-        // 9 toggles between on and off
-        // click: 2 Scene(1) on, 8 Scene(0) off,
-        //
-        if(_buttonNr == 1) {
-          if(_kind == Click || _kind == TouchEnd) {
-            m_ButtonToGroupMapping[&_switch] = GroupIDYellow;
-          }
-        } else if(_buttonNr == 3) {
-          if(_kind == Click || _kind == TouchEnd) {
-            m_ButtonToGroupMapping[&_switch] = GroupIDRed;
-          }
-        } else if(_buttonNr == 7) {
-          if(_kind == Click || _kind == TouchEnd) {
-            m_ButtonToGroupMapping[&_switch] = GroupIDCyan;
-          }
-        } else if(_buttonNr == 9) {
-          if(_kind == Click || _kind == TouchEnd) {
-            if((groupToControl + 1) > GroupIDMax) {
-              m_ButtonToGroupMapping[&_switch] = GroupIDYellow;
-            } else {
-              m_ButtonToGroupMapping[&_switch] = groupToControl + 1;
-            }
-          }
-        } else if(_buttonNr == 2) {
-          if(_kind == Click) {
-            DS485CommandFrame frame;
-            frame.GetHeader().SetDestination(0);
-            frame.GetHeader().SetBroadcast(true);
-            frame.GetHeader().SetType(1);
-            frame.SetCommand(CommandRequest);
-
-            frame.GetPayload().Add<uint8_t>(FunctionGroupIncreaseValue);
-            frame.GetPayload().Add<uint16_t>(zoneID);
-            frame.GetPayload().Add<uint16_t>(groupToControl);
-
-            GetDSS().GetDS485Interface().SendFrame(frame);
-          } else if(_kind == Touch) {
-            DS485CommandFrame frame;
-            frame.GetHeader().SetDestination(0);
-            frame.GetHeader().SetBroadcast(true);
-            frame.GetHeader().SetType(1);
-            frame.SetCommand(CommandRequest);
-
-            frame.GetPayload().Add<uint8_t>(FunctionGroupStartDimInc);
-            frame.GetPayload().Add<uint16_t>(zoneID);
-            frame.GetPayload().Add<uint16_t>(groupToControl);
-
-            GetDSS().GetDS485Interface().SendFrame(frame);
-          } else if(_kind == TouchEnd) {
-            DS485CommandFrame frame;
-            frame.GetHeader().SetDestination(0);
-            frame.GetHeader().SetBroadcast(true);
-            frame.GetHeader().SetType(1);
-            frame.SetCommand(CommandRequest);
-
-            frame.GetPayload().Add<uint8_t>(FunctionGroupEndDim);
-            frame.GetPayload().Add<uint16_t>(zoneID);
-            frame.GetPayload().Add<uint16_t>(groupToControl);
-
-            GetDSS().GetDS485Interface().SendFrame(frame);
-          }
-        } else if(_buttonNr == 8) {
-          if(_kind == Click) {
-            DS485CommandFrame frame;
-            frame.GetHeader().SetDestination(0);
-            frame.GetHeader().SetBroadcast(true);
-            frame.GetHeader().SetType(1);
-            frame.SetCommand(CommandRequest);
-
-            frame.GetPayload().Add<uint8_t>(FunctionGroupDecreaseValue);
-            frame.GetPayload().Add<uint16_t>(zoneID);
-            frame.GetPayload().Add<uint16_t>(groupToControl);
-
-            GetDSS().GetDS485Interface().SendFrame(frame);
-          } else if(_kind == Touch) {
-            DS485CommandFrame frame;
-            frame.GetHeader().SetDestination(0);
-            frame.GetHeader().SetBroadcast(true);
-            frame.GetHeader().SetType(1);
-            frame.SetCommand(CommandRequest);
-
-            frame.GetPayload().Add<uint8_t>(FunctionGroupStartDimDec);
-            frame.GetPayload().Add<uint16_t>(zoneID);
-            frame.GetPayload().Add<uint16_t>(groupToControl);
-
-            GetDSS().GetDS485Interface().SendFrame(frame);
-          } else if(_kind == TouchEnd) {
-            DS485CommandFrame frame;
-            frame.GetHeader().SetDestination(0);
-            frame.GetHeader().SetBroadcast(true);
-            frame.GetHeader().SetType(1);
-            frame.SetCommand(CommandRequest);
-
-            frame.GetPayload().Add<uint8_t>(FunctionGroupEndDim);
-            frame.GetPayload().Add<uint16_t>(zoneID);
-            frame.GetPayload().Add<uint16_t>(groupToControl);
-
-            GetDSS().GetDS485Interface().SendFrame(frame);
-          }
-        } else if(_buttonNr == 4) {
-          if(_kind == Click) {
-            int lastScene = m_LastCalledSceneForGroup[groupToControl];
-            int nextScene = Scene4;
-            if(lastScene == Scene1) {
-              nextScene = Scene4;
-            } else if(lastScene == Scene4) {
-              nextScene = Scene3;
-            } else if(lastScene == Scene3) {
-              nextScene = Scene2;
-            } else if(lastScene == Scene2) {
-              nextScene = Scene1;
-            }
-            DS485CommandFrame frame;
-            frame.GetHeader().SetDestination(0);
-            frame.GetHeader().SetBroadcast(true);
-            frame.GetHeader().SetType(1);
-            frame.SetCommand(CommandRequest);
-
-            frame.GetPayload().Add<uint8_t>(FunctionGroupCallScene);
-            frame.GetPayload().Add<uint16_t>(zoneID);
-            frame.GetPayload().Add<uint16_t>(groupToControl);
-            frame.GetPayload().Add<uint16_t>(nextScene);
-
-            GetDSS().GetDS485Interface().SendFrame(frame);
-          }
-        } else if(_buttonNr == 6) {
-          if(_kind == Click) {
-            int lastScene = m_LastCalledSceneForGroup[groupToControl];
-            int nextScene = Scene1;
-            if(lastScene == Scene4) {
-              nextScene = Scene1;
-            } else if(lastScene == Scene1) {
-              nextScene = Scene2;
-            } else if(lastScene == Scene2) {
-              nextScene = Scene3;
-            } else if(lastScene == Scene3) {
-              nextScene = Scene4;
-            }
-            DS485CommandFrame frame;
-            frame.GetHeader().SetDestination(0);
-            frame.GetHeader().SetBroadcast(true);
-            frame.GetHeader().SetType(1);
-            frame.SetCommand(CommandRequest);
-
-            frame.GetPayload().Add<uint8_t>(FunctionGroupCallScene);
-            frame.GetPayload().Add<uint16_t>(zoneID);
-            frame.GetPayload().Add<uint16_t>(groupToControl);
-            frame.GetPayload().Add<uint16_t>(nextScene);
-
-            GetDSS().GetDS485Interface().SendFrame(frame);
-          }
-        } else if(_buttonNr == 5) {
-          if(_kind == Click) {
-            if(m_LastCalledSceneForGroup[groupToControl] == SceneMax) {
-              DS485CommandFrame frame;
-              frame.GetHeader().SetDestination(0);
-              frame.GetHeader().SetBroadcast(true);
-              frame.GetHeader().SetType(1);
-              frame.SetCommand(CommandRequest);
-
-              frame.GetPayload().Add<uint8_t>(FunctionGroupCallScene);
-              frame.GetPayload().Add<uint16_t>(zoneID);
-              frame.GetPayload().Add<uint16_t>(groupToControl);
-              frame.GetPayload().Add<uint16_t>(SceneOff);
-
-              GetDSS().GetDS485Interface().SendFrame(frame);
-            } else {
-              DS485CommandFrame frame;
-              frame.GetHeader().SetDestination(0);
-              frame.GetHeader().SetBroadcast(true);
-              frame.GetHeader().SetType(1);
-              frame.SetCommand(CommandRequest);
-
-              frame.GetPayload().Add<uint8_t>(FunctionGroupCallScene);
-              frame.GetPayload().Add<uint16_t>(zoneID);
-              frame.GetPayload().Add<uint16_t>(groupToControl);
-              frame.GetPayload().Add<uint16_t>(SceneMax);
-
-              GetDSS().GetDS485Interface().SendFrame(frame);
-            }
-          } else if(_kind == Touch) {
-            DS485CommandFrame frame;
-            frame.GetHeader().SetDestination(0);
-            frame.GetHeader().SetBroadcast(true);
-            frame.GetHeader().SetType(1);
-            frame.SetCommand(CommandRequest);
-
-            frame.GetPayload().Add<uint8_t>(FunctionGroupCallScene);
-            frame.GetPayload().Add<uint16_t>(zoneID);
-            frame.GetPayload().Add<uint16_t>(groupToControl);
-            frame.GetPayload().Add<uint16_t>(SceneDeepOff);
-
-            GetDSS().GetDS485Interface().SendFrame(frame);
-          }
-        }
-      } else if(_switch.GetNumberOfButtons() == 5) {
-      }
-    }
-  } // ProcessButtonPress
-*/
-
   DSIDInterface* DSModulatorSim::GetSimulatedDevice(const dsid_t _dsid) {
     for(vector<DSIDInterface*>::iterator iDSID = m_SimulatedDevices.begin(), e = m_SimulatedDevices.end();
         iDSID != e; ++iDSID)
@@ -1297,17 +1077,7 @@ namespace dss {
     return NULL;
   } // GetSimulatedDevice
 
-  /*
-  int DSModulatorSim::GetGroupForSwitch(const DSIDSimSwitch* _switch) {
-    if(_switch != NULL) {
-      if(m_ButtonToGroupMapping.find(_switch) != m_ButtonToGroupMapping.end()) {
-        return m_ButtonToGroupMapping[_switch];
-      }
-      return _switch->GetDefaultColor();
-    }
-    return GroupIDYellow;
-  } // GetGroupForSwitch
-*/
+
   //================================================== DSIDCreator
 
   DSIDCreator::DSIDCreator(const string& _identifier)

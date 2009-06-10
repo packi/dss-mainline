@@ -47,6 +47,8 @@ using Poco::XML::AutoPtr;
 using Poco::XML::DOMWriter;
 using Poco::XML::XMLWriter;
 
+#include <iostream>
+
 namespace dss {
 
 
@@ -768,8 +770,19 @@ namespace dss {
                 Log("     Adding new group to zone 0");
               }
             } catch(ItemNotFoundException& e) {
-              Logger::GetInstance()->Log(string("Could not find device with short-address ") + IntToString(devID));
+              Logger::GetInstance()->Log("Could not find device with short-address " + IntToString(devID) + " on modulator " + IntToString(modulatorID), lsFatal);
             }
+          }
+
+          // get last called scene for zone, group
+          try {
+            int lastCalledScene = interface.GetLastCalledScene(modulatorID, zoneID, groupID);
+            Group* pGroup = zone.GetGroup(groupID);
+            cout << "zoneID: " << zoneID << " groupID: " << groupID << " lastScene: " << lastCalledScene << endl;
+            assert(pGroup != NULL);
+            OnGroupCallScene(zoneID, groupID, lastCalledScene);
+          } catch(runtime_error& error) {
+            Logger::GetInstance()->Log(string("Error getting last called scene '") + error.what() + "'", lsError);
           }
         }
       }

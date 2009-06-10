@@ -81,9 +81,9 @@ namespace dss {
     vector<DS485Frame*> m_PendingFrames;
     map<const DSIDInterface*, int> m_ButtonToGroupMapping;
     map<const DSIDInterface*, int> m_DeviceZoneMapping;
-    map<const int, int> m_LastCalledSceneForGroup;
     map<const int, vector<int> > m_GroupsPerDevice;
     map<const int, string> m_DeviceNames;
+    map< const pair<const int, const int>, int> m_LastCalledSceneForZoneAndGroup;
     string m_Name;
   private:
     void AddDeviceToGroup(DSIDInterface* _device, int _groupID);

@@ -95,12 +95,16 @@ namespace dss {
     /** Returns the DSID of a given modulator */
     virtual dsid_t GetDSIDOfModulator(const int _modulatorID) = 0;
 
+    virtual int GetLastCalledScene(const int _modulatorID, const int _zoneID, const int _groupID) = 0;
+
+    //------------------------------------------------ Metering
+
     /** Returns the current power-consumption in mW */
     virtual unsigned long GetPowerConsumption(const int _modulatorID) = 0;
 
     /** Returns the meter value in Wh */
     virtual unsigned long GetEnergyMeterValue(const int _modulatorID) = 0;
-    
+
     virtual bool GetEnergyBorder(const int _modulatorID, int& _lower, int& _upper) = 0;
 
     //------------------------------------------------ Device manipulation

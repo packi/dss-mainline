@@ -168,6 +168,8 @@ namespace dss {
     virtual dsid_t GetDSIDOfDevice(const int _modulatorID, const int _deviceID);
     virtual dsid_t GetDSIDOfModulator(const int _modulatorID);
 
+    virtual int GetLastCalledScene(const int _modulatorID, const int _zoneID, const int _groupID);
+
     virtual unsigned long GetPowerConsumption(const int _modulatorID);
     virtual unsigned long GetEnergyMeterValue(const int _modulatorID);
     virtual bool GetEnergyBorder(const int _modulatorID, int& _lower, int& _upper);
