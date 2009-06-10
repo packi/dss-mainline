@@ -19,7 +19,7 @@ namespace dss {
     m_ValuesForScene.resize(255);
     m_ValuesForScene[SceneOff] = 0;
     m_ValuesForScene[SceneMax] = 255;
-    m_ValuesForScene[SceneMin] = 255;
+    m_ValuesForScene[SceneMin] = 0;
     m_ValuesForScene[Scene1] = 255;
     m_ValuesForScene[Scene2] = 255;
     m_ValuesForScene[Scene3] = 255;
