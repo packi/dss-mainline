@@ -67,6 +67,7 @@ namespace dss {
     XMLNode& AddChildNode(const string& _name, const string& _content = "");
 
     XMLNode& GetChildByName(const string& _name);
+    bool HasChildWithName(const string& _name);
 
     XMLNodeList& GetChildren();
     HashMapConstStringString& GetAttributes();

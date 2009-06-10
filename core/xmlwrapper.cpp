@@ -124,6 +124,16 @@ namespace dss {
     throw XMLException("Could not find node");
   } // GetChildByName
 
+  bool XMLNode::HasChildWithName(const string& _name) {
+    XMLNodeList& children = GetChildren();
+    for(XMLNodeList::iterator it = children.begin(); it != children.end(); ++it) {
+      if(it->GetName() == _name) {
+        return true;
+      }
+    }
+    return false;
+  } // HasChildWithName
+
   XMLNode& XMLNode::AddChildNode(const string& _name, const string& _content) {
     AssertHasNode("Need a node to append a child to");
 

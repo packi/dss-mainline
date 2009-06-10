@@ -644,15 +644,15 @@ namespace dss {
         DeviceLocation location = pDevice->GetLocation();
         string strParam = _parameter["x"];
         if(!strParam.empty()) {
-          pDevice->SetLocationX(StrToDouble(strParam));
+          boost::get<0>(location) = StrToDouble(strParam);
         }
         strParam = _parameter["y"];
         if(!strParam.empty()) {
-          pDevice->SetLocationY(StrToDouble(strParam));
+          boost::get<1>(location) = StrToDouble(strParam);
         }
         strParam = _parameter["z"];
         if(!strParam.empty()) {
-          pDevice->SetLocationZ(StrToDouble(strParam));
+          boost::get<2>(location) = StrToDouble(strParam);
         }
         pDevice->SetLocation(location);
         return ResultToJSON(true);

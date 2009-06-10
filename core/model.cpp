@@ -181,9 +181,7 @@ namespace dss {
   void Device::SetName(const string& _name) {
     if(m_Name != _name) {
       m_Name = _name;
-      if(DSS::HasInstance()) {
-        m_pApartment->AddModelEvent(new ModelEvent(ModelEvent::etModelDirty));
-      }
+      Dirty();
     }
   } // SetName
 
@@ -193,6 +191,7 @@ namespace dss {
 
   void Device::SetLocation(const DeviceLocation& _value) {
     m_Location = _value;
+    Dirty();
   } // SetLocation
 
   double Device::GetLocationX() const {
@@ -209,15 +208,24 @@ namespace dss {
 
   void Device::SetLocationX(const double _value) {
     boost::get<0>(m_Location) = _value;
+    Dirty();
   } // SetLocationX
 
   void Device::SetLocationY(const double _value) {
     boost::get<1>(m_Location) = _value;
+    Dirty();
   } // SetLocationY
 
   void Device::SetLocationZ(const double _value) {
     boost::get<2>(m_Location) = _value;
+    Dirty();
   } // SetLocationZ
+
+  void Device::Dirty() {
+    if(m_pApartment != NULL) {
+      m_pApartment->AddModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    }
+  } // Dirty
 
   bool Device::operator==(const Device& _other) const {
     return _other.m_DSID == m_DSID;
@@ -869,9 +877,47 @@ namespace dss {
           /* discard node not found exceptions */
         }
 
+        DeviceLocation location;
+        bool locationIsValid = false;
+        try {
+          XMLNode& locationNode = iNode->GetChildByName("location");
+          if(locationNode.HasChildWithName("x")) {
+            XMLNode& node = locationNode.GetChildByName("x");
+            if(!node.GetChildren().empty()) {
+              string valueStr = (node.GetChildren()[0]).GetContent();
+              if(!valueStr.empty()) {
+                boost::get<0>(location) = StrToDouble(valueStr);
+              }
+            }
+          }
+          if(locationNode.HasChildWithName("y")) {
+            XMLNode& node = locationNode.GetChildByName("y");
+            if(!node.GetChildren().empty()) {
+              string valueStr = (node.GetChildren()[0]).GetContent();
+              if(!valueStr.empty()) {
+                boost::get<1>(location) = StrToDouble(valueStr);
+              }
+            }
+          }
+          if(locationNode.HasChildWithName("z")) {
+            XMLNode& node = locationNode.GetChildByName("z");
+            if(!node.GetChildren().empty()) {
+              string valueStr = (node.GetChildren()[0]).GetContent();
+              if(!valueStr.empty()) {
+                boost::get<2>(location) = StrToDouble(valueStr);
+              }
+            }
+          }
+          locationIsValid = true;
+        } catch(XMLException& e) {
+        }
+
         Device* newDevice = new Device(dsid, this);
         if(!name.empty()) {
           newDevice->SetName(name);
+        }
+        if(locationIsValid) {
+          newDevice->SetLocation(location);
         }
         m_StaleDevices.push_back(newDevice);
       }
@@ -923,36 +969,53 @@ namespace dss {
     }
   } // LoadZones
 
-  void DeviceToXML(const Device* pDevice, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
+  void DeviceToXML(const Device* _pDevice, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
     AutoPtr<Element> pDeviceNode = _pDocument->createElement("device");
-    pDeviceNode->setAttribute("dsid", pDevice->GetDSID().ToString());
-    if(!pDevice->GetName().empty()) {
+    pDeviceNode->setAttribute("dsid", _pDevice->GetDSID().ToString());
+    if(!_pDevice->GetName().empty()) {
       AutoPtr<Element> pNameNode = _pDocument->createElement("name");
-      AutoPtr<Text> txtNode = _pDocument->createTextNode(pDevice->GetName());
+      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pDevice->GetName());
       pNameNode->appendChild(txtNode);
       pDeviceNode->appendChild(pNameNode);
     }
+    AutoPtr<Element> pLocationNode = _pDocument->createElement("location");
+    AutoPtr<Element> pValueNode = _pDocument->createElement("x");
+    AutoPtr<Text> txtNode = _pDocument->createTextNode(DoubleToString(_pDevice->GetLocationX()));
+    pValueNode->appendChild(txtNode);
+    pLocationNode->appendChild(pValueNode);
+
+    pValueNode = _pDocument->createElement("y");
+    txtNode = _pDocument->createTextNode(DoubleToString(_pDevice->GetLocationY()));
+    pValueNode->appendChild(txtNode);
+    pLocationNode->appendChild(pValueNode);
+
+    pValueNode = _pDocument->createElement("z");
+    txtNode = _pDocument->createTextNode(DoubleToString(_pDevice->GetLocationZ()));
+    pValueNode->appendChild(txtNode);
+    pLocationNode->appendChild(pValueNode);
+
+    pDeviceNode->appendChild(pLocationNode);
     _parentNode->appendChild(pDeviceNode);
   } // DeviceToXML
 
-  void ZoneToXML(const Zone* pZone, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
+  void ZoneToXML(const Zone* _pZone, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
     AutoPtr<Element> pZoneNode = _pDocument->createElement("zone");
-    pZoneNode->setAttribute("id", IntToString(pZone->GetZoneID()));
-    if(!pZone->GetName().empty()) {
+    pZoneNode->setAttribute("id", IntToString(_pZone->GetZoneID()));
+    if(!_pZone->GetName().empty()) {
       AutoPtr<Element> pNameNode = _pDocument->createElement("name");
-      AutoPtr<Text> txtNode = _pDocument->createTextNode(pZone->GetName());
+      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pZone->GetName());
       pNameNode->appendChild(txtNode);
       pZoneNode->appendChild(pNameNode);
     }
     _parentNode->appendChild(pZoneNode);
   } // ZoneToXML
 
-  void ModulatorToXML(const Modulator* pModulator, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
+  void ModulatorToXML(const Modulator* _pModulator, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
     AutoPtr<Element> pModulatorNode = _pDocument->createElement("modulator");
-    pModulatorNode->setAttribute("id", pModulator->GetDSID().ToString());
-    if(!pModulator->GetName().empty()) {
+    pModulatorNode->setAttribute("id", _pModulator->GetDSID().ToString());
+    if(!_pModulator->GetName().empty()) {
       AutoPtr<Element> pNameNode = _pDocument->createElement("name");
-      AutoPtr<Text> txtNode = _pDocument->createTextNode(pModulator->GetName());
+      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pModulator->GetName());
       pNameNode->appendChild(txtNode);
       pModulatorNode->appendChild(pNameNode);
     }

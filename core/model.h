@@ -179,6 +179,7 @@ namespace dss {
     DeviceLocation m_Location;
   protected:
     void PublishToPropertyTree();
+    void Dirty();
   public:
     Device(const dsid_t _dsid, Apartment* _pApartment);
     virtual ~Device() {};
