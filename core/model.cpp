@@ -47,8 +47,6 @@ using Poco::XML::AutoPtr;
 using Poco::XML::DOMWriter;
 using Poco::XML::XMLWriter;
 
-#include <iostream>
-
 namespace dss {
 
 
@@ -783,11 +781,11 @@ namespace dss {
           try {
             int lastCalledScene = interface.GetLastCalledScene(modulatorID, zoneID, groupID);
             Group* pGroup = zone.GetGroup(groupID);
-            cout << "zoneID: " << zoneID << " groupID: " << groupID << " lastScene: " << lastCalledScene << endl;
+            Log(" zoneID: " + IntToString(zoneID) + " groupID: " + IntToString(groupID) + " lastScene: " + IntToString(lastCalledScene));
             assert(pGroup != NULL);
             OnGroupCallScene(zoneID, groupID, lastCalledScene);
           } catch(runtime_error& error) {
-            Logger::GetInstance()->Log(string("Error getting last called scene '") + error.what() + "'", lsError);
+            Log(string("Error getting last called scene '") + error.what() + "'", lsError);
           }
         }
       }

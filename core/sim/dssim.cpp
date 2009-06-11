@@ -11,8 +11,6 @@
 
 #include <dlfcn.h>
 
-#include <iostream>
-
 #include <string>
 #include <stdexcept>
 
@@ -1059,8 +1057,7 @@ namespace dss {
         return **ipSimDev;
       }
     }
-    cerr << "id: " << _shortAddress << endl;
-    throw runtime_error("could not find device");
+    throw runtime_error(string("could not find device with id: ") + IntToString(_shortAddress));
   } // LookupDevice
 
   int DSModulatorSim::GetID() const {
