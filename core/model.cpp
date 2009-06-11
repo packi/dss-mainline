@@ -1412,8 +1412,8 @@ namespace dss {
     Zone& newZone = AllocateZone(modulator, _zoneID);
     newZone.AddDevice(DeviceReference(dev, *this));
 
+    // get groups of device
     dev.ResetGroups();
-    // TODO: get groups
     vector<int> groups = GetDSS().GetDS485Interface().GetGroupsOfDevice(_modID, _devID);
     foreach(int iGroup, groups) {
       Log("  Adding to Group: " + IntToString(iGroup));
