@@ -641,7 +641,7 @@ namespace dss {
     cmdFrame.GetPayload().Add<uint8_t>(FunctionDeviceGetGroups);
     cmdFrame.GetPayload().Add<uint16_t>(_deviceID);
 
-    boost::shared_ptr<FrameBucket> bucket = SendFrameAndInstallBucket(cmdFrame, FunctionModulatorGetDSID);
+    boost::shared_ptr<FrameBucket> bucket = SendFrameAndInstallBucket(cmdFrame, FunctionDeviceGetGroups);
 
     bucket->WaitForFrame(1000);
 
@@ -653,7 +653,7 @@ namespace dss {
 
       PayloadDissector pd(recFrame->GetFrame()->GetPayload());
       pd.Get<uint8_t>(); // discard the function id
-      pd.Get<uint8_t>(); // function result
+      pd.Get<uint16_t>(); // function result
 
       for(int iByte = 0; iByte < 8; iByte++) {
         uint8_t byte = pd.Get<uint8_t>();

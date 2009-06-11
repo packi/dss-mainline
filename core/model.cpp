@@ -279,6 +279,11 @@ namespace dss {
     }
   } // AddToGroup
 
+  void Device::ResetGroups() {
+    m_GroupBitmask.reset();
+    m_Groups.clear();
+  } // ResetGroups
+
   int Device::GetGroupsCount() const {
     return m_Groups.size();
   } // GetGroupsCount
@@ -1409,7 +1414,13 @@ namespace dss {
     Zone& newZone = AllocateZone(modulator, _zoneID);
     newZone.AddDevice(DeviceReference(dev, *this));
 
+    dev.ResetGroups();
     // TODO: get groups
+    vector<int> groups = GetDSS().GetDS485Interface().GetGroupsOfDevice(_modID, _devID);
+    foreach(int iGroup, groups) {
+      Log("  Adding to Group: " + IntToString(iGroup));
+      dev.AddToGroup(iGroup);
+    }
   } // OnAddDevice
 
 

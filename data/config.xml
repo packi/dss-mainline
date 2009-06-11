@@ -18,11 +18,11 @@
       <value>/mnt/webroot/</value>
     </property>
 -->    
-    <property name="subsystems/Metering/enabled" type="boolean">
+    <property name="subsystems/FakeMeter/enabled" type="boolean">
       <value>false</value>
     </property>
     <property name="subsystems/Metering/enabled" type="boolean">
-      <value>false/value>
+      <value>false</value>
     </property>
   </property>
 </properties>

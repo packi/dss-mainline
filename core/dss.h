@@ -75,7 +75,7 @@ namespace dss {
     /// Private constructor for singleton
     DSS();
 
-    void LoadConfig();
+    bool LoadConfig();
     void AddDefaultInterpreterPlugins();
 
     int GetUptime() const;

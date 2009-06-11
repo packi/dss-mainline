@@ -104,11 +104,10 @@ namespace dss {
     if (!versionOK) {
       cerr << "Version mismatch while loading properties from \"" << _fileName
           << "\"" << endl;
+      xmlFreeDoc(doc);
     }
 
-    xmlFreeDoc(doc);
-
-    return false;
+    return versionOK;
   } // LoadFromXML
 
 

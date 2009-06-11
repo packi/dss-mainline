@@ -236,6 +236,8 @@ namespace dss {
     /** Returns the number of groups the device is a member of */
     int GetGroupsCount() const;
 
+    void ResetGroups();
+
     int GetLastCalledScene() const { return m_LastCalledScene; }
     void SetLastCalledScene(const int _value) { m_LastCalledScene = _value; }
 

@@ -932,7 +932,7 @@ namespace dss {
                 }
 
                 response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint8_t>(1);
+                response->GetPayload().Add<uint16_t>(1);
                 for(int iByte = 0; iByte < 8; iByte++) {
                   response->GetPayload().Add<uint8_t>(bytes[iByte]);
                 }

@@ -202,7 +202,10 @@ const char* DataDirectory = "data/";
 
   void DSS::Run() {
     Logger::GetInstance()->Log("DSS stating up....", lsInfo);
-    LoadConfig();
+    if(!LoadConfig()) {
+      Logger::GetInstance()->Log("Could not parse config file", lsFatal);
+      return;
+    }
 
 
     m_State = ssInitializingSubsystems;
@@ -228,10 +231,10 @@ const char* DataDirectory = "data/";
     delete inst;
   } // Shutdown
 
-  void DSS::LoadConfig() {
+  bool DSS::LoadConfig() {
     m_State = ssLoadingConfig;
     Logger::GetInstance()->Log("Loading config", lsInfo);
-    GetPropertySystem().LoadFromXML(GetDataDirectory() + "config.xml", GetPropertySystem().GetProperty("/config"));
+    return GetPropertySystem().LoadFromXML(GetDataDirectory() + "config.xml", GetPropertySystem().GetProperty("/config"));
   } // LoadConfig
 
 }
