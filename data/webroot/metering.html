@@ -29,12 +29,12 @@ jQuery(document).ready(function() {
 	jQuery("#meter").click(function() {
 		jQuery("#series li").css({color: "#666666"});
 		jQuery(this).css({color: "red"});
-		graph.setDSM(id);
+		graph.setDSM("metering");
 	});
 	
 	jQuery(circuits).each(function() {
 		var id = this.dsid;
-		if(this.name !== undefined) {
+		if(this.name !== "") {
 			jQuery("#series").append("<li id=" + id + ">" + this.name + "<\/li>");
 		} else {
 			jQuery("#series").append("<li id=" + id + ">" + id + "<\/li>");
