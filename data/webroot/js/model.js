@@ -150,7 +150,7 @@ var Apartment = Class.create({
 	
 	getCircuits: function() {
 		var respObj = this.sendSyncRequest("getCircuits", {});
-		return respObj.result;
+		return respObj.result.circuits;
 	}
 }); // Apartment
 

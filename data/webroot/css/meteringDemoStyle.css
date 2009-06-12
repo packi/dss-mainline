@@ -355,3 +355,7 @@ canvas {
 	background-repeat: no-repeat;
 	width: 65px;
 }
+
+#series li {
+	cursor: pointer;
+}
