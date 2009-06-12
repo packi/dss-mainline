@@ -93,7 +93,7 @@ var DSGraph = Class.create({
 			var d_date = dateAttribute.slice(0, dateAttribute.indexOf(' ')).split('-');
 			var d_time = dateAttribute.slice(dateAttribute.indexOf(' ')+1).split(':');
 			var date = Date.UTC(d_date[0],d_date[1],d_date[2],d_time[0],d_time[1],d_time[2]);
-			var value = parseInt( jQuery(values[i]).children("value").text() );
+			var value = parseFloat( jQuery(values[i]).children("value").text() );
 			rawData.push([date, value]);
 		}
 		rawData.pop();
