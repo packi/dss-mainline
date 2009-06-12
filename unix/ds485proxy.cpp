@@ -805,7 +805,7 @@ namespace dss {
     cmdFrame.GetHeader().SetDestination(_modulatorID);
     cmdFrame.SetCommand(CommandRequest);
     cmdFrame.GetPayload().Add<uint8_t>(FunctionGroupGetLastCalledScene);
-    Log(string("Proxy: GetDSIDOfModulator ") + IntToString(_modulatorID));
+    Log(string("Proxy: GetLastCalledScene ") + IntToString(_modulatorID));
     cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
     cmdFrame.GetPayload().Add<uint16_t>(_groupID);
 
