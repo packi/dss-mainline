@@ -1,6 +1,8 @@
 #ifndef DS485CONST_H_
 #define DS485CONST_H_
 
+#include <stdint.h>
+
 namespace dss {
 
   // DS485 comands
@@ -132,6 +134,8 @@ namespace dss {
 
   const int FunctionIDDevice = 0;
   const int FunctionIDSwitch = 1;
+
+  const uint64_t DSIDHeader = 0x3504175FE0000000ll;
 }
 
 #endif /*DS485CONST_H_*/

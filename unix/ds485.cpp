@@ -147,6 +147,8 @@ namespace dss {
     m_State(csInitial),
     m_RS485DeviceName("/dev/ttyUSB0")
   {
+    m_DSID.upper = DSIDHeader;
+    m_DSID.lower = 0xDEADBEEF;
   } // ctor
 
   DS485Controller::~DS485Controller() {
@@ -241,9 +243,6 @@ namespace dss {
     time_t responseSentAt;
     time_t tokenReceivedAt;
 
-    // TODO: read from somewhere
-    uint32_t dsid = 0xdeadbeef;
-
     // prepare token frame
     boost::scoped_ptr<DS485Frame> token(new DS485Frame());
     // prepare solicit successor response frame
@@ -251,10 +250,7 @@ namespace dss {
     solicitSuccessorResponseFrame->GetHeader().SetDestination(0);
     solicitSuccessorResponseFrame->GetHeader().SetSource(0x3F);
     solicitSuccessorResponseFrame->SetCommand(CommandSolicitSuccessorResponse);
-    solicitSuccessorResponseFrame->GetPayload().Add<uint8_t>(static_cast<uint8_t>((dsid >> 24) & 0x000000FF));
-    solicitSuccessorResponseFrame->GetPayload().Add<uint8_t>(static_cast<uint8_t>((dsid >> 16) & 0x000000FF));
-    solicitSuccessorResponseFrame->GetPayload().Add<uint8_t>(static_cast<uint8_t>((dsid >> 18) & 0x000000FF));
-    solicitSuccessorResponseFrame->GetPayload().Add<uint8_t>(static_cast<uint8_t>((dsid >>  0) & 0x000000FF));
+    solicitSuccessorResponseFrame->GetPayload().Add(m_DSID);
 
     int senseTimeMS = 0;
     int numberOfJoinPacketsToWait = -1;

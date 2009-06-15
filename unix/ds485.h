@@ -197,6 +197,7 @@ namespace dss {
     SyncEvent m_ControllerEvent;
     SyncEvent m_CommandFrameEvent;
     SyncEvent m_TokenEvent;
+    dsid_t m_DSID;
   private:
     DS485Frame* GetFrameFromWire();
     bool PutFrameOnWire(const DS485Frame* _pFrame, bool _freeFrame = true);
@@ -228,6 +229,8 @@ namespace dss {
     virtual void Execute();
 
     int GetStationID() const { return m_StationID; }
+
+    void SetDSID(const dsid_t& _value) { m_DSID = _value; }
   }; // DS485Controller
 
   class IDS485FrameCollector {

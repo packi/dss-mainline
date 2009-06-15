@@ -217,6 +217,8 @@ namespace dss {
 
       _pDSS->GetPropertySystem().CreateProperty(GetPropertyBasePath() + "state")
             ->LinkToProxy(PropertyProxyMemberFunction<DS485Controller, string>(m_DS485Controller, &DS485Controller::GetStateAsString));
+
+      _pDSS->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "dsid", "3504175FE0000000DEADBEEF", true, false);
     }
   } // ctor
 
@@ -959,13 +961,14 @@ namespace dss {
 
   void DS485Proxy::DoStart() {
     try {
+      m_DS485Controller.SetDSID(dsid_t::FromString(GetDSS().GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "dsid")));
       m_DS485Controller.Run();
     } catch (const runtime_error& _ex) {
     	Log(string("Caught exception while starting DS485Controlle: ") + _ex.what(), lsFatal);
     }
     // call Thread::Run()
     Run();
-  } // Run
+  } // DoStart
 
   void DS485Proxy::WaitForProxyEvent() {
     m_ProxyEvent.WaitFor();
@@ -1204,14 +1207,14 @@ namespace dss {
 
   void DS485Proxy::AddFrameBucket(FrameBucket* _bucket) {
     m_FrameBuckets.push_back(_bucket);
-  }
+  } // AddFrameBucket
 
   void DS485Proxy::RemoveFrameBucket(FrameBucket* _bucket) {
     vector<FrameBucket*>::iterator pos = find(m_FrameBuckets.begin(), m_FrameBuckets.end(), _bucket);
     if(pos != m_FrameBuckets.end()) {
       m_FrameBuckets.erase(pos);
     }
-  }
+  } // RemoveFrameBucket
 
   //================================================== ReceivedFrame
 
@@ -1284,10 +1287,10 @@ namespace dss {
 
   int FrameBucket::GetFrameCount() const {
     return m_Frames.size();
-  }
+  } // GetFrameCount
 
   bool FrameBucket::IsEmpty() const {
     return m_Frames.empty();
-  }
+  } // IsEmpty
 
 }
