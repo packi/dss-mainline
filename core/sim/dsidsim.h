@@ -48,7 +48,7 @@ namespace dss {
 
     virtual double GetValue(int _parameterNr = -1) const;
 
-    virtual uint8_t GetFunctionID();
+    virtual uint16_t GetFunctionID();
     void SetSimpleConsumption(const int _value) { m_SimpleConsumption = _value; }
     virtual void SetConfigParameter(const string& _name, const string& _value);
     virtual string GetConfigParameter(const string& _name) const;
@@ -78,7 +78,7 @@ namespace dss {
     bool IsBell() const { return m_IsBell; }
     void SetIsBell(const bool _value) { m_IsBell = _value; }
 
-    virtual uint8_t GetFunctionID() { return FunctionIDSwitch; }
+    virtual uint16_t GetFunctionID() { return FunctionIDSwitch; }
   }; // DSIDSimSwitch
 }
 

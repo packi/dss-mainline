@@ -8,7 +8,7 @@
 #ifndef DSID_PLUGIN_H_
 #define DSID_PLUGIN_H_
 
-#define DSID_PLUGIN_API_VERSION 1
+#define DSID_PLUGIN_API_VERSION 2
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,6 +35,7 @@ extern "C" {
     const char* (*get_parameter_name)(int _handle, int _parameterNumber);
 
     void (*set_configuration_parameter)(int _handle, const char* _name, const char* _value);
+    int (*get_configuration_parameter)(int _handle, const char* _name, char* _value, int _maxLen);
   };
 
   int dsid_getversion();

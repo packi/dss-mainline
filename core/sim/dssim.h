@@ -165,7 +165,7 @@ namespace dss {
 
     virtual double GetValue(int _parameterNr = -1) const = 0;
 
-    virtual uint8_t GetFunctionID() = 0;
+    virtual uint16_t GetFunctionID() = 0;
 
     virtual void SetConfigParameter(const string& _name, const string& _value) = 0;
     virtual string GetConfigParameter(const string& _name) const = 0;

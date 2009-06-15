@@ -102,7 +102,7 @@ namespace dss {
     return static_cast<double>(m_CurrentValue);
   } // GetValue
 
-  uint8_t DSIDSim::GetFunctionID() {
+  uint16_t DSIDSim::GetFunctionID() {
     return FunctionIDDevice;
   } // GetFunctionID
 

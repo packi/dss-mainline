@@ -13,6 +13,7 @@
 
 #include <string>
 #include <stdexcept>
+#include <iostream>
 
 #include <boost/filesystem.hpp>
 
@@ -148,10 +149,12 @@ namespace dss {
       }
     }
 
-    virtual uint8_t GetFunctionID() {
-      // TODO: implement get function id for plugins
+    virtual uint16_t GetFunctionID() {
+      if(m_Interface->get_function_id != NULL) {
+        return (m_Interface->get_function_id)(m_Handle);
+      }
       return 0;
-    }
+    } // GetFunctionID
 
     virtual void SetConfigParameter(const string& _name, const string& _value) {
       if(m_Interface->set_configuration_parameter != NULL) {
@@ -160,10 +163,20 @@ namespace dss {
     } // SetConfigParameter
 
     virtual string GetConfigParameter(const string& _name) const {
-      // TODO: pass on
-      return "";
-    }
+      if(m_Interface->get_configuration_parameter != NULL) {
+        const int bufferSize = 256;
+        char buffer[bufferSize];
+        memset(&buffer, '\0', bufferSize);
+        int len = (*m_Interface->get_configuration_parameter)(m_Handle, _name.c_str(), &buffer[0], bufferSize - 1);
 
+        if(len > 0 && len < bufferSize) {
+          buffer[len] = '\0';
+          //string result = buffer;
+          return string(&buffer[0]);
+        }
+      }
+      return "";
+    } // GetConfigParameter
 
   }; // DSIDPlugin
 
@@ -271,7 +284,7 @@ namespace dss {
 
               int ver = (*version)();
               if(ver != DSID_PLUGIN_API_VERSION) {
-                Log("LoadPlugins: Versionmismatch (plugin: " + IntToString(ver) + " api:" + IntToString(DSID_PLUGIN_API_VERSION) + ")", lsError);
+                Log("LoadPlugins: Version mismatch (plugin: " + IntToString(ver) + " api: " + IntToString(DSID_PLUGIN_API_VERSION) + ")", lsError);
                 continue;
               }
 
@@ -329,7 +342,7 @@ namespace dss {
     m_EnergyLevelOrange(200),
     m_EnergyLevelRed(400)
   {
-    m_ModulatorDSID = dsid_t(0, SimulationPrefix);
+    m_ModulatorDSID = dsid_t(DSIDHeader, SimulationPrefix);
     m_ID = 70;
     m_Name = "Simulated dSM";
   } // DSModulatorSim
@@ -345,7 +358,8 @@ namespace dss {
     }
     if(attrs["dsid"].size() != 0) {
       m_ModulatorDSID = dsid_t::FromString(attrs["dsid"]);
-      m_ModulatorDSID.lower |= SimulationPrefix;
+      m_ModulatorDSID.upper = (m_ModulatorDSID.upper & 0x000000000000000Fll) | DSIDHeader;
+      m_ModulatorDSID.lower = (m_ModulatorDSID.lower & 0x002FFFFF) | SimulationPrefix;
     }
     m_EnergyLevelOrange = StrToIntDef(attrs["orange"], m_EnergyLevelOrange);
     m_EnergyLevelRed = StrToIntDef(attrs["red"], m_EnergyLevelRed);
@@ -374,7 +388,8 @@ namespace dss {
         int busid = -1;
         if(!attrs["dsid"].empty()) {
           dsid = dsid_t::FromString(attrs["dsid"]);
-          dsid.lower |= SimulationPrefix;
+          dsid.upper = (dsid.upper & 0x000000000000000Fll) | DSIDHeader;
+          dsid.lower = (dsid.lower & 0x002FFFFF) | SimulationPrefix;
         }
         if(!attrs["busid"].empty()) {
           busid = StrToInt(attrs["busid"]);
