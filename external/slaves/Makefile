@@ -7,7 +7,7 @@ slim_slave.so2:	slim_slave.o
 	g++ -shared -o slim_slave.so *.o
 	
 
-slim_slave.so:	slim_slave.cpp
+slim_slave.so:	slim_slave.cpp ../../core/sim/include/dsid_plugin.h ../../core/sim/plugin/pluginbase.cpp ../../core/sim/plugin/pluginmedia.cpp
 	g++ -g3 -O0 -Wall -fPIC -shared slim_slave.cpp ../../core/sim/plugin/pluginbase.cpp ../../core/sim/plugin/pluginmedia.cpp -o slim_slave.so
 
 install:	slim_slave.so
