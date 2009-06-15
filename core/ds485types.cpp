@@ -25,6 +25,8 @@ namespace dss {
   dsid_t dsid::FromString(const std::string& _string) {
     dsid_t result;
     std::string remainder = _string;
+    result.upper = 0ll;
+    result.lower = 0;
 
     // parse the string in 4 Byte chunks
     if(!remainder.empty()) {
