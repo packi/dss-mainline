@@ -2,52 +2,50 @@
 
 namespace dss {
 
-Mutex::Mutex()
-{
+Mutex::Mutex() {
 #ifndef WIN32
   pthread_mutex_init( &m_Mutex, NULL );
 #else
   m_Mutex = CreateMutex( NULL, false, NULL );
 #endif
-}
+} // ctor
 
 
-Mutex::~Mutex()
-{
+Mutex::~Mutex() {
 #ifndef WIN32
   pthread_mutex_destroy( &m_Mutex );
 #else
   CloseHandle( m_Mutex );
 #endif
-}
+} // dtor
 
 
-bool Mutex::Lock() {
+bool Mutex::lock() {
 #ifndef WIN32
   return pthread_mutex_lock( &m_Mutex ) == 0;
 #else
-	
+
   return WaitForSingleObject( m_Mutex, INFINITE ) == WAIT_OBJECT_0;
 #endif
-} // Lock
+} // lock
 
 
-bool Mutex::TryLock() {
+bool Mutex::tryLock() {
 #ifndef WIN32
   return pthread_mutex_trylock( &m_Mutex ) == 0;
 #else
   return WaitForSingleObject( m_Mutex, 0 ) == WAIT_OBJECT_0;
 #endif
-} // TryLock
+} // tryLock
 
 
-bool Mutex::Unlock() {
+bool Mutex::unlock() {
 #ifndef WIN32
   return pthread_mutex_unlock( &m_Mutex ) == 0;
 #else
   return (bool)ReleaseMutex( m_Mutex );
 #endif
-} // Unlock
+} // unlock
 
 //==================================================== LockableObject
 
@@ -63,13 +61,13 @@ LockableObject::~LockableObject() {
 } // dtor
 
 
-bool LockableObject::IsLocked() {
+bool LockableObject::isLocked() {
   return m_Locked;
-} // IsLocked
+} // isLocked
 
 
-bool LockableObject::Lock() {
-  m_LockMutex.Lock();
+bool LockableObject::lock() {
+  m_LockMutex.lock();
 #ifdef WIN32
   m_LockedBy = GetCurrentThreadId();
 #else
@@ -77,28 +75,28 @@ bool LockableObject::Lock() {
 #endif
   m_Locked = true;
   return m_Locked;
-} // Lock
+} // lock
 
 
-bool LockableObject::Unlock() {
+bool LockableObject::unlock() {
   m_Locked = false;
   m_LockedBy = 0;
-  m_LockMutex.Unlock();
+  m_LockMutex.unlock();
   return true;
-} // Unlock
+} // unlock
 
 
-bool LockableObject::IsLockedCurrentThread() {
+bool LockableObject::isLockedCurrentThread() {
   if( !m_Locked || m_LockedBy == 0 ) {
     return false;
   } else {
-#ifdef WIN32    
+#ifdef WIN32
 	  return GetCurrentThreadId() == m_LockedBy;
 #else
     return pthread_equal( pthread_self(), m_LockedBy ) != 0;
 #endif
   }
-} // IsLockedByCurrentThread
+} // isLockedByCurrentThread
 
 
 //==================================================== AssertLocked
@@ -106,10 +104,10 @@ bool LockableObject::IsLockedCurrentThread() {
 AssertLocked::AssertLocked( LockableObject* objToLock )
   : m_ObjRef( objToLock )
 {
-  if( objToLock->IsLocked() && objToLock->IsLockedCurrentThread() ) {
+  if( objToLock->isLocked() && objToLock->isLockedCurrentThread() ) {
     m_OwnLock = false;
   } else {
-    m_ObjRef->Lock();
+    m_ObjRef->lock();
     m_OwnLock = true;
   }
 } // ctor
@@ -117,7 +115,7 @@ AssertLocked::AssertLocked( LockableObject* objToLock )
 
 AssertLocked::~AssertLocked() {
   if( m_OwnLock ) {
-    m_ObjRef->Unlock();
+    m_ObjRef->unlock();
   }
 } // dtor
 

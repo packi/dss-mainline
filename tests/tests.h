@@ -10,6 +10,6 @@
 namespace dss {
   class Tests {
   public:
-    static bool Run();
+    static bool run();
   };
 }

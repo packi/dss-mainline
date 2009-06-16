@@ -25,10 +25,10 @@ class SyncEvent{
     SyncEvent();
     virtual ~SyncEvent();
 
-    void Signal();
-    void Broadcast();
-    int WaitFor();
-    bool WaitFor( int _timeoutMS );
+    void signal();
+    void broadcast();
+    int waitFor();
+    bool waitFor( int _timeoutMS );
 }; //  SyncEvent
 
 }

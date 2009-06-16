@@ -15,13 +15,13 @@ namespace dss {
   template<class T>
   class SeriesReader {
   public:
-    Series<T>* ReadFromXML(const string& _fileName);
+    Series<T>* readFromXML(const string& _fileName);
   }; // SeriesReader
 
   template<class T>
   class SeriesWriter {
   public:
-    bool WriteToXML(const Series<T>& _series, const string& _path);
+    bool writeToXML(const Series<T>& _series, const string& _path);
   }; // SeriesWriter
 } // namespace dss
 

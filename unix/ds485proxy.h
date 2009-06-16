@@ -55,10 +55,10 @@ namespace dss {
     boost::shared_ptr<DS485CommandFrame> m_Frame;
   public:
     ReceivedFrame(const int _receivedAt, boost::shared_ptr<DS485CommandFrame> _frame);
-    boost::shared_ptr<DS485CommandFrame> GetFrame() { return m_Frame; };
+    boost::shared_ptr<DS485CommandFrame> getFrame() { return m_Frame; };
 
     /** Returns the arrival time in (owned) tokens */
-    int GetReceivedAt() const { return m_ReceivedAtToken; };
+    int getReceivedAt() const { return m_ReceivedAtToken; };
   }; // ReceivedFrame
 
   /** A frame bucket holds response-frames for any given function id/source id pair.
@@ -76,23 +76,23 @@ namespace dss {
     FrameBucket(DS485Proxy* _proxy, int _functionID, int _sourceID);
     ~FrameBucket();
 
-    int GetFunctionID() const { return m_FunctionID; }
-    int GetSourceID() const { return m_SourceID; }
+    int getFunctionID() const { return m_FunctionID; }
+    int getSourceID() const { return m_SourceID; }
 
     /** Adds a ReceivedFrame to the frames queue */
-    bool AddFrame(boost::shared_ptr<ReceivedFrame> _frame);
+    bool addFrame(boost::shared_ptr<ReceivedFrame> _frame);
     /** Returns the least recently received item int the queue.
-     * The pointer will contain NULL if IsEmpty() returns true. */
-    boost::shared_ptr<ReceivedFrame> PopFrame();
+     * The pointer will contain NULL if isEmpty() returns true. */
+    boost::shared_ptr<ReceivedFrame> popFrame();
 
     /** Waits for frames to arrive for @_timeoutMS */
-    void WaitForFrames(int _timeoutMS);
+    void waitForFrames(int _timeoutMS);
     /** Waits for a frame to arrive in @_timeoutMS.
      * If a frame arrives earlier, the function returns */
-    void WaitForFrame(int _timeoutMS);
+    void waitForFrame(int _timeoutMS);
 
-    int GetFrameCount() const;
-    bool IsEmpty() const;
+    int getFrameCount() const;
+    bool isEmpty() const;
   }; // FrameBucket
 
   typedef vector<boost::shared_ptr<DS485CommandFrame> > CommandFrameSharedPtrVector;
@@ -102,17 +102,17 @@ namespace dss {
                      public    DS485Interface,
                      public    IDS485FrameCollector {
   private:
-    FittingResult BestFit(const Set& _set);
-    bool IsSimAddress(const uint8_t _addr);
+    FittingResult bestFit(const Set& _set);
+    bool isSimAddress(const uint8_t _addr);
 
     /** Returns a single frame or NULL if none should arrive within the timeout (1000ms) */
-    boost::shared_ptr<ReceivedFrame> ReceiveSingleFrame(DS485CommandFrame& _frame, uint8_t _functionID);
-    uint8_t ReceiveSingleResult(DS485CommandFrame& _frame, const uint8_t _functionID);
-    uint16_t ReceiveSingleResult16(DS485CommandFrame& _frame, const uint8_t _functionID);
+    boost::shared_ptr<ReceivedFrame> receiveSingleFrame(DS485CommandFrame& _frame, uint8_t _functionID);
+    uint8_t receiveSingleResult(DS485CommandFrame& _frame, const uint8_t _functionID);
+    uint16_t receiveSingleResult16(DS485CommandFrame& _frame, const uint8_t _functionID);
 
     vector<FrameBucket*> m_FrameBuckets;
 
-    void SignalEvent();
+    void signalEvent();
 
     DS485Controller m_DS485Controller;
     SyncEvent m_ProxyEvent;
@@ -121,67 +121,67 @@ namespace dss {
     Mutex m_IncomingFramesGuard;
     CommandFrameSharedPtrVector m_IncomingFrames;
   protected:
-    virtual void Execute();
-    virtual void DoStart();
+    virtual void execute();
+    virtual void doStart();
   public:
     DS485Proxy(DSS* _pDSS);
     virtual ~DS485Proxy() {};
 
-    virtual bool IsReady();
+    virtual bool isReady();
 
-    virtual void SendFrame(DS485CommandFrame& _frame);
-    boost::shared_ptr<FrameBucket> SendFrameAndInstallBucket(DS485CommandFrame& _frame, const int _functionID);
+    virtual void sendFrame(DS485CommandFrame& _frame);
+    boost::shared_ptr<FrameBucket> sendFrameAndInstallBucket(DS485CommandFrame& _frame, const int _functionID);
 
     //------------------------------------------------ Handling
-    virtual void Initialize();
-    void WaitForProxyEvent();
+    virtual void initialize();
+    void waitForProxyEvent();
 
-    virtual void CollectFrame(boost::shared_ptr<DS485CommandFrame>& _frame);
+    virtual void collectFrame(boost::shared_ptr<DS485CommandFrame>& _frame);
 
-    void AddFrameBucket(FrameBucket* _bucket);
-    void RemoveFrameBucket(FrameBucket* _bucket);
+    void addFrameBucket(FrameBucket* _bucket);
+    void removeFrameBucket(FrameBucket* _bucket);
 
     //------------------------------------------------ Specialized Commands (system)
-    virtual vector<int> GetModulators();
+    virtual vector<int> getModulators();
 
-    virtual vector<int> GetZones(const int _modulatorID);
-    virtual int GetZoneCount(const int _modulatorID);
-    virtual vector<int> GetDevicesInZone(const int _modulatorID, const int _zoneID);
-    virtual int GetDevicesCountInZone(const int _modulatorID, const int _zoneID);
+    virtual vector<int> getZones(const int _modulatorID);
+    virtual int getZoneCount(const int _modulatorID);
+    virtual vector<int> getDevicesInZone(const int _modulatorID, const int _zoneID);
+    virtual int getDevicesCountInZone(const int _modulatorID, const int _zoneID);
 
-    virtual void SetZoneID(const int _modulatorID, const devid_t _deviceID, const int _zoneID);
-    virtual void CreateZone(const int _modulatorID, const int _zoneID);
+    virtual void setZoneID(const int _modulatorID, const devid_t _deviceID, const int _zoneID);
+    virtual void createZone(const int _modulatorID, const int _zoneID);
 
-    virtual int GetGroupCount(const int _modulatorID, const int _zoneID);
-    virtual vector<int> GetGroups(const int _modulatorID, const int _zoneID);
-    virtual int GetDevicesInGroupCount(const int _modulatorID, const int _zoneID, const int _groupID);
-    virtual vector<int> GetDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID);
+    virtual int getGroupCount(const int _modulatorID, const int _zoneID);
+    virtual vector<int> getGroups(const int _modulatorID, const int _zoneID);
+    virtual int getDevicesInGroupCount(const int _modulatorID, const int _zoneID, const int _groupID);
+    virtual vector<int> getDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID);
 
-    virtual vector<int> GetGroupsOfDevice(const int _modulatorID, const int _deviceID);
+    virtual vector<int> getGroupsOfDevice(const int _modulatorID, const int _deviceID);
 
-    virtual void AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID);
-    virtual void RemoveFromGroup(const int _modulatorID, const int _groupID, const int _deviceID);
+    virtual void addToGroup(const int _modulatorID, const int _groupID, const int _deviceID);
+    virtual void removeFromGroup(const int _modulatorID, const int _groupID, const int _deviceID);
 
-    virtual int AddUserGroup(const int _modulatorID);
-    virtual void RemoveUserGroup(const int _modulatorID, const int _groupID);
+    virtual int addUserGroup(const int _modulatorID);
+    virtual void removeUserGroup(const int _modulatorID, const int _groupID);
 
-    virtual dsid_t GetDSIDOfDevice(const int _modulatorID, const int _deviceID);
-    virtual dsid_t GetDSIDOfModulator(const int _modulatorID);
+    virtual dsid_t getDSIDOfDevice(const int _modulatorID, const int _deviceID);
+    virtual dsid_t getDSIDOfModulator(const int _modulatorID);
 
-    virtual int GetLastCalledScene(const int _modulatorID, const int _zoneID, const int _groupID);
+    virtual int getLastCalledScene(const int _modulatorID, const int _zoneID, const int _groupID);
 
-    virtual unsigned long GetPowerConsumption(const int _modulatorID);
-    virtual unsigned long GetEnergyMeterValue(const int _modulatorID);
-    virtual bool GetEnergyBorder(const int _modulatorID, int& _lower, int& _upper);
+    virtual unsigned long getPowerConsumption(const int _modulatorID);
+    virtual unsigned long getEnergyMeterValue(const int _modulatorID);
+    virtual bool getEnergyBorder(const int _modulatorID, int& _lower, int& _upper);
 
     //------------------------------------------------ Device manipulation
-    virtual vector<int> SendCommand(DS485Command _cmd, const Set& _set, int _param);
-    virtual vector<int> SendCommand(DS485Command _cmd, const Device& _device, int _param);
-    virtual vector<int> SendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param);
-    virtual vector<int> SendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param);
-    virtual vector<int> SendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param = -1);
+    virtual vector<int> sendCommand(DS485Command _cmd, const Set& _set, int _param);
+    virtual vector<int> sendCommand(DS485Command _cmd, const Device& _device, int _param);
+    virtual vector<int> sendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param);
+    virtual vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param);
+    virtual vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param = -1);
     //------------------------------------------------ Helpers
-    DS485Controller& GetController() { return m_DS485Controller; }
+    DS485Controller& getController() { return m_DS485Controller; }
   };
 }
 

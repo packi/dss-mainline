@@ -19,22 +19,22 @@ namespace dss {
     vTypeNone = 0, vTypeInteger, vTypeString, vTypeBoolean
   } aValueType;
 
-  const char* GetValueTypeAsString(aValueType _value);
-  aValueType GetValueTypeFromString(const char* _str);
+  const char* getValueTypeAsString(aValueType _value);
+  aValueType getValueTypeFromString(const char* _str);
 
   typedef struct {
     aValueType valueType;
     union {
       char* pString;
-      int Integer;
-      bool Boolean;
+      int integer;
+      bool boolean;
     } actualValue;
     int PropertyLevel;
   } aPropertyValue;
 
-  std::string GetBasePath(const std::string& _path);
-  std::string GetProperty(const std::string& _path);
-  std::string GetRoot(const std::string& _path);
+  std::string getBasePath(const std::string& _path);
+  std::string getProperty(const std::string& _path);
+  std::string getRoot(const std::string& _path);
 
   /**
    @author Patrick Staehlin <me@packi.ch>
@@ -46,28 +46,28 @@ namespace dss {
     PropertySystem();
     ~PropertySystem();
 
-    bool LoadFromXML(const std::string& _fileName, PropertyNode* _rootNode = NULL);
-    bool SaveToXML(const std::string& _fileName, PropertyNode* _rootNode = NULL) const;
+    bool loadFromXML(const std::string& _fileName, PropertyNode* _rootNode = NULL);
+    bool saveToXML(const std::string& _fileName, PropertyNode* _rootNode = NULL) const;
 
-    PropertyNode* GetProperty(const std::string& _propPath) const;
+    PropertyNode* getProperty(const std::string& _propPath) const;
 
-    PropertyNode* GetRootNode() const {
+    PropertyNode* getRootNode() const {
       return m_RootNode;
     }
     ;
 
-    PropertyNode* CreateProperty(const std::string& _propPath);
+    PropertyNode* createProperty(const std::string& _propPath);
 
     // fast access to property values
-    int GetIntValue(const std::string& _propPath) const;
-    bool GetBoolValue(const std::string& _propPath) const;
-    std::string GetStringValue(const std::string& _propPath) const;
+    int getIntValue(const std::string& _propPath) const;
+    bool getBoolValue(const std::string& _propPath) const;
+    std::string getStringValue(const std::string& _propPath) const;
 
-    bool SetIntValue(const std::string& _propPath, const int _value,
+    bool setIntValue(const std::string& _propPath, const int _value,
                      bool _mayCreate = true, bool _mayOverwrite = true);
-    bool SetBoolValue(const std::string& _propPath, const bool _value,
+    bool setBoolValue(const std::string& _propPath, const bool _value,
                       bool _mayCreate = true, bool _mayOverwrite = true);
-    bool SetStringValue(const std::string& _propPath, const std::string& _value,
+    bool setStringValue(const std::string& _propPath, const std::string& _value,
                         bool _mayCreate = true, bool _mayOverwrite = true);
   }; //  PropertySystem
 
@@ -80,8 +80,8 @@ namespace dss {
     ;
 
     static const T DefaultValue;
-    virtual T GetValue() const = 0;
-    virtual void SetValue(T _value) = 0;
+    virtual T getValue() const = 0;
+    virtual void setValue(T _value) = 0;
 
     virtual PropertyProxy* clone() const = 0;
   }; // PropertyProxy
@@ -100,9 +100,9 @@ namespace dss {
 
     virtual ~PropertyProxyReference() { }
 
-    virtual T GetValue() const { return m_Reference; }
+    virtual T getValue() const { return m_Reference; }
 
-    virtual void SetValue(T _value) {
+    virtual void setValue(T _value) {
       if(m_Writeable) {
         m_Reference = _value;
       }
@@ -124,11 +124,11 @@ namespace dss {
 
     virtual ~PropertyProxyPointer() { }
 
-    virtual T GetValue() const {
+    virtual T getValue() const {
       return *m_PointerToValue;
     }
     ;
-    virtual void SetValue(T _value) {
+    virtual void setValue(T _value) {
       *m_PointerToValue = _value;
     }
     ;
@@ -155,7 +155,7 @@ namespace dss {
     virtual ~PropertyProxyStaticFunction()
     { }
 
-    virtual T GetValue() const {
+    virtual T getValue() const {
       if (m_GetterPtr != NULL) {
         return (*m_GetterPtr)();
       } else {
@@ -163,7 +163,7 @@ namespace dss {
       }
     } // GetValue
 
-    virtual void SetValue(T _value) {
+    virtual void setValue(T _value) {
       if (m_SetterPtr != NULL) {
         (*m_SetterPtr)(_value);
       }
@@ -198,7 +198,7 @@ namespace dss {
     virtual ~PropertyProxyMemberFunction() {
     }
 
-    virtual T GetValue() const {
+    virtual T getValue() const {
       if (m_GetterPtr != NULL) {
         if(m_Obj != NULL) {
           return (*m_Obj.*m_GetterPtr)();
@@ -209,7 +209,7 @@ namespace dss {
       return PropertyProxy<T>::DefaultValue;
     } // GetValue
 
-    virtual void SetValue(T _value) {
+    virtual void setValue(T _value) {
       if (m_SetterPtr != NULL && m_Obj != NULL) {
         (*m_Obj.*m_SetterPtr)(_value);
       }
@@ -231,10 +231,10 @@ namespace dss {
     std::vector<const PropertyNode*> m_Properties;
   protected:
     friend class PropertyNode;
-    virtual void PropertyChanged(const PropertyNode* _changedNode);
+    virtual void propertyChanged(const PropertyNode* _changedNode);
 
-    void RegisterProperty(const PropertyNode* _node);
-    void UnregisterProperty(const PropertyNode* _node);
+    void registerProperty(const PropertyNode* _node);
+    void unregisterProperty(const PropertyNode* _node);
   public:
     virtual ~PropertyListener();
   }; // PropertyListener
@@ -256,55 +256,55 @@ namespace dss {
     bool m_LinkedToProxy;
     int m_Index;
   private:
-    void AddChild(PropertyNode* _childNode);
-    void ClearValue();
+    void addChild(PropertyNode* _childNode);
+    void clearValue();
 
-    int GetAndRemoveIndexFromPropertyName(std::string& _propName);
+    int getAndRemoveIndexFromPropertyName(std::string& _propName);
 
-    void NotifyListeners(void(PropertyListener::*_callback)(const PropertyNode*));
+    void notifyListeners(void(PropertyListener::*_callback)(const PropertyNode*));
   public:
     PropertyNode(PropertyNode* _parentNode, const char* _name, int _index = 0);
     ~PropertyNode();
 
-    const std::string& GetName() const {
+    const std::string& getName() const {
       return m_Name;
     }
-    const std::string& GetDisplayName() const;
+    const std::string& getDisplayName() const;
 
-    PropertyNode* GetProperty(const std::string& _propPath);
-    int Count(const std::string& _propertyName);
+    PropertyNode* getProperty(const std::string& _propPath);
+    int count(const std::string& _propertyName);
 
-    void SetStringValue(const char* _value);
-    void SetStringValue(const std::string& _value);
-    void SetIntegerValue(const int _value);
-    void SetBooleanValue(const bool _value);
+    void setStringValue(const char* _value);
+    void setStringValue(const std::string& _value);
+    void setIntegerValue(const int _value);
+    void setBooleanValue(const bool _value);
 
-    std::string GetStringValue();
-    int GetIntegerValue();
-    bool GetBoolValue();
+    std::string getStringValue();
+    int getIntegerValue();
+    bool getBoolValue();
 
-    std::string GetAsString();
+    std::string getAsString();
 
-    PropertyNode* CreateProperty(const std::string& _propPath);
-    void MoveTo(const std::string& _path);
+    PropertyNode* createProperty(const std::string& _propPath);
+    void moveTo(const std::string& _path);
 
-    PropertyNode* GetPropertyByName(const std::string& _name);
+    PropertyNode* getPropertyByName(const std::string& _name);
 
-    aValueType GetValueType();
+    aValueType getValueType();
 
     // proxy support
-    bool LinkToProxy(const PropertyProxy<bool>& _proxy);
-    bool LinkToProxy(const PropertyProxy<int>& _proxy);
-    bool LinkToProxy(const PropertyProxy<std::string>& _proxy);
-    bool UnlinkProxy();
+    bool linkToProxy(const PropertyProxy<bool>& _proxy);
+    bool linkToProxy(const PropertyProxy<int>& _proxy);
+    bool linkToProxy(const PropertyProxy<std::string>& _proxy);
+    bool unlinkProxy();
 
-    void AddListener(PropertyListener* _listener) const;
-    void RemoveListener(PropertyListener* _listener) const;
+    void addListener(PropertyListener* _listener) const;
+    void removeListener(PropertyListener* _listener) const;
 
-    int GetChildCount() const { return m_ChildNodes.size(); }
-    PropertyNode* GetChild(const int _index) { return m_ChildNodes.at(_index); }
+    int getChildCount() const { return m_ChildNodes.size(); }
+    PropertyNode* getChild(const int _index) { return m_ChildNodes.at(_index); }
 
-    void ForeachChildOf(void(*_callback)(PropertyNode*)) {
+    void foreachChildOf(void(*_callback)(PropertyNode*)) {
       for (std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin(); it
           != m_ChildNodes.end(); ++it) {
         (*_callback)(*it);
@@ -313,15 +313,15 @@ namespace dss {
 
     // needs to stay inside the header file, else the template specializations won't get generated ;-=
     template<class Cls>
-    void ForeachChildOf(Cls& _objRef, void(Cls::*_callback)(PropertyNode*)) {
+    void foreachChildOf(Cls& _objRef, void(Cls::*_callback)(PropertyNode*)) {
       for (std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin(); it
           != m_ChildNodes.end(); ++it) {
         (_objRef.*_callback)(*it);
       }
     }
   public:
-    bool SaveAsXML(xmlTextWriterPtr _writer);
-    bool LoadFromNode(xmlNode* _pNode);
+    bool saveAsXML(xmlTextWriterPtr _writer);
+    bool loadFromNode(xmlNode* _pNode);
   }; // PropertyNode
 
   class PropertyTypeMismatch : public std::runtime_error {

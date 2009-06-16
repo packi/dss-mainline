@@ -30,38 +30,38 @@ SyncEvent::~SyncEvent()
 }
 
 
-void SyncEvent::Signal() {
+void SyncEvent::signal() {
 #ifndef WIN32
-  m_ConditionMutex.Lock();
+  m_ConditionMutex.lock();
 
   assert( pthread_cond_signal( &m_Condition ) == 0 );
 
-  m_ConditionMutex.Unlock();
+  m_ConditionMutex.unlock();
 #else
   SetEvent( m_EventHandle );
 #endif
-} // Signal
+} // signal
 
-void SyncEvent::Broadcast() {
+void SyncEvent::broadcast() {
 #ifndef WIN32
-  m_ConditionMutex.Lock();
+  m_ConditionMutex.lock();
 
   assert(pthread_cond_broadcast(&m_Condition) == 0);
 
-  m_ConditionMutex.Unlock();
+  m_ConditionMutex.unlock();
 #else
-  #error SyncEvent::Broadcast is not yet implemented
+  #error SyncEvent::broadcast is not yet implemented
 #endif
 }
 
 
-int SyncEvent::WaitFor() {
+int SyncEvent::waitFor() {
 #ifndef WIN32
-  m_ConditionMutex.Lock();
+  m_ConditionMutex.lock();
 
-  int result = pthread_cond_wait( &m_Condition, m_ConditionMutex.GetMutex() );
+  int result = pthread_cond_wait( &m_Condition, m_ConditionMutex.getMutex() );
 
-  m_ConditionMutex.Unlock();
+  m_ConditionMutex.unlock();
   if( result != ETIMEDOUT && result != 0 ) {
     assert( false );
   }
@@ -69,30 +69,30 @@ int SyncEvent::WaitFor() {
 #else
   return WaitForSingleObject( m_EventHandle, INFINITE );
 #endif
-} // WaitFor
+} // waitFor
 
 
-bool SyncEvent::WaitFor( int _timeoutMS ) {
+bool SyncEvent::waitFor( int _timeoutMS ) {
 #ifndef WIN32
   struct timeval now;
   struct timespec timeout;
   int timeoutSec = _timeoutMS / 1000;
   int timeoutMSec = _timeoutMS - 1000 * timeoutSec;
 
-  m_ConditionMutex.Lock();
+  m_ConditionMutex.lock();
   gettimeofday( &now, NULL );
   timeout.tv_sec = now.tv_sec + timeoutSec;
   timeout.tv_nsec = (now.tv_usec + timeoutMSec * 1000) * 1000;
-  int result = pthread_cond_timedwait( &m_Condition, m_ConditionMutex.GetMutex(), &timeout );
-  m_ConditionMutex.Unlock();
+  int result = pthread_cond_timedwait( &m_Condition, m_ConditionMutex.getMutex(), &timeout );
+  m_ConditionMutex.unlock();
   if(result != ETIMEDOUT && result != 0) {
-    //perror("SyncEvent::WaitFor");
+    //perror("SyncEvent::waitFor");
   }
   return !(result == ETIMEDOUT);
 #else
   return WaitForSingleObject( m_EventHandle, _timeoutMS ) == WAIT_OBJECT_0;
 #endif
-} // WaitFor
+} // waitFor
 
 
 } // namespace

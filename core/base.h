@@ -82,7 +82,7 @@ namespace dss {
 
 
   template<class t>
-  bool Contains(const vector<t>& _v, const t _item) {
+  bool contains(const vector<t>& _v, const t _item) {
     return find(_v.begin(), _v.end(), _item) != _v.end();
   }
 
@@ -95,48 +95,48 @@ namespace dss {
   typedef hash_map<const string, string> HashMapConstStringString;
   //============================================= Conversion helpers
 
-  int StrToInt(const string& _strValue);
+  int strToInt(const string& _strValue);
 
-  unsigned int StrToUInt(const string& _strValue);
-  int StrToIntDef(const string& _strValue, const int _default);
+  unsigned int strToUInt(const string& _strValue);
+  int strToIntDef(const string& _strValue, const int _default);
 
-  string IntToString(const int _int, const bool _hex = false);
-  string UIntToString(unsigned long int _int);
+  string intToString(const int _int, const bool _hex = false);
+  string uintToString(unsigned long int _int);
 
-  double StrToDouble(const string& _strValue);
-  double StrToDouble(const string& _strValue, const double _default);
+  double strToDouble(const string& _strValue);
+  double strToDouble(const string& _strValue, const double _default);
 
-  string UnsignedLongIntToHexString(const unsigned long long _value);
+  string unsignedLongIntToHexString(const unsigned long long _value);
 
-  string DoubleToString(const double _value);
+  string doubleToString(const double _value);
 
   template <class t>
-  t DateToISOString(const struct tm* _dateTime);
-  struct tm DateFromISOString(const char* _dateTimeAsString);
+  t dateToISOString(const struct tm* _dateTime);
+  struct tm dateFromISOString(const char* _dateTimeAsString);
 
   extern const char* theISOFormatString;
 
-  vector<string> SplitString(const string& _source, const char _delimiter, bool _trimEntries = false);
-  void ReplaceAll(string& s, const string& a, const string& b);
-  bool EndsWith(const string& str, const string& searchString);
-  bool BeginsWith(const string& str, const string& searchString);
+  vector<string> splitString(const string& _source, const char _delimiter, bool _trimEntries = false);
+  void replaceAll(string& s, const string& a, const string& b);
+  bool endsWith(const string& str, const string& searchString);
+  bool beginsWith(const string& str, const string& searchString);
 
-  string URLDecode(const string& _in);
+  string urlDecode(const string& _in);
 
   //============================================= Encoding helpers
-  const wstring FromUTF8(const char* _utf8string, int _len);
-  const string ToUTF8(const wchar_t* _wcharString, int _len);
+  const wstring fromUTF8(const char* _utf8string, int _len);
+  const string toUTF8(const wchar_t* _wcharString, int _len);
 
-  const wstring FromUTF8(const string& _utf8string);
-  const string ToUTF8(const wstring& _wcharString);
+  const wstring fromUTF8(const string& _utf8string);
+  const string toUTF8(const wstring& _wcharString);
 
-  bool FileExists( const char* _fileName );
-  bool FileExists( const string& _fileName );
+  bool fileExists( const char* _fileName );
+  bool fileExists( const string& _fileName );
 
-  uint16_t CRC16(unsigned const char* _data, const int _size);
+  uint16_t crc16(unsigned const char* _data, const int _size);
   uint16_t update_crc(uint16_t _crc, const unsigned char& c);
 
-  string Trim(const string& _str);
+  string trim(const string& _str);
 
   //============================================= Helper classes
 
@@ -144,14 +144,14 @@ namespace dss {
   private:
     HashMapConstStringString m_Container;
   public:
-    bool Has(const string& _key) const;
-    void Set(const string& _key, const string& _value);
-    const string& Get(const string& _key) const;
-    const string& Get(const string& _key, const string& _default) const;
+    bool has(const string& _key) const;
+    void set(const string& _key, const string& _value);
+    const string& get(const string& _key) const;
+    const string& get(const string& _key, const string& _default) const;
 
-    bool Unset(const string& _key);
+    bool unset(const string& _key);
 
-    const HashMapConstStringString& GetContainer() const { return m_Container; }
+    const HashMapConstStringString& getContainer() const { return m_Container; }
   };
 
   template <typename resCls>
@@ -159,7 +159,7 @@ namespace dss {
   protected:
     resCls* m_Resource;
 
-    resCls* Release() {
+    resCls* release() {
       resCls* result = m_Resource;
       m_Resource = NULL;
       return result;
@@ -168,12 +168,12 @@ namespace dss {
     explicit ResourceHolder(resCls* _resource = NULL) : m_Resource(_resource) {}
 
     ResourceHolder(ResourceHolder<resCls>& _other)
-    : m_Resource(_other.Release())
+    : m_Resource(_other.release())
     {
     }
 
     ResourceHolder<resCls>& operator=(ResourceHolder<resCls>& _rhs) {
-      m_Resource = _rhs.Release();
+      m_Resource = _rhs.release();
       return *this;
     }
 
@@ -181,7 +181,7 @@ namespace dss {
 
   class Finalizable {
   public:
-    virtual void Finalize() = 0;
+    virtual void finalize() = 0;
     virtual ~Finalizable() {}
   }; // Finalizable
 
@@ -194,12 +194,12 @@ namespace dss {
     {}
 
     virtual ~Finalizer() {
-      m_Finalizable.Finalize();
+      m_Finalizable.finalize();
     }
   };
 
   template<class t>
-  void ScrubVector(vector<t*>& _vector) {
+  void scrubVector(vector<t*>& _vector) {
     while(!_vector.empty()) {
       t* elem = *_vector.begin();
       _vector.erase(_vector.begin());
@@ -207,8 +207,8 @@ namespace dss {
     }
   } // ScrubVector
 
-  void SleepSeconds( const unsigned int _seconds );
-  void SleepMS( const unsigned int _ms );
+  void sleepSeconds( const unsigned int _seconds );
+  void sleepMS( const unsigned int _ms );
 
   //============================================= Exception
 

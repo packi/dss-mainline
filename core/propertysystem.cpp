@@ -62,14 +62,14 @@ namespace dss {
   } // dtor
 
 
-  bool PropertySystem::LoadFromXML(const std::string& _fileName,
+  bool PropertySystem::loadFromXML(const std::string& _fileName,
                                    PropertyNode* _rootNode) {
     xmlDoc* doc = NULL;
     xmlNode *rootElem = NULL;
 
     PropertyNode* rootNode = _rootNode;
     if (rootNode == NULL) {
-      rootNode = GetRootNode();
+      rootNode = getRootNode();
     }
 
     doc = xmlParseFile(_fileName.c_str());
@@ -92,7 +92,7 @@ namespace dss {
             while (curNode != NULL) {
               if ((curNode->type == XML_ELEMENT_NODE)
                   && (strcmp((char*) curNode->name, "property") == 0)) {
-                rootNode->LoadFromNode(curNode);
+                rootNode->loadFromNode(curNode);
                 break;
               }
               curNode = curNode->next;
@@ -108,10 +108,10 @@ namespace dss {
     }
 
     return versionOK;
-  } // LoadFromXML
+  } // loadFromXML
 
 
-  bool PropertySystem::SaveToXML(const std::string& _fileName, PropertyNode* _rootNode) const {
+  bool PropertySystem::saveToXML(const std::string& _fileName, PropertyNode* _rootNode) const {
     int rc;
     xmlTextWriterPtr writer;
     PropertyNode* root = _rootNode;
@@ -139,7 +139,7 @@ namespace dss {
       return false;
     }
 
-    root->SaveAsXML(writer);
+    root->saveAsXML(writer);
 
     rc = xmlTextWriterEndElement(writer);
     if(rc < 0) {
@@ -154,10 +154,10 @@ namespace dss {
     xmlFreeTextWriter(writer);
 
     return true;
-  } // SaveToXML
+  } // saveToXML
 
 
-  PropertyNode* PropertySystem::GetProperty(const std::string& _propPath) const {
+  PropertyNode* PropertySystem::getProperty(const std::string& _propPath) const {
     if(_propPath[ 0 ] != '/') {
       return NULL;
     }
@@ -166,11 +166,11 @@ namespace dss {
     if(propPath.length() == 0) {
       return m_RootNode;
     }
-    return m_RootNode->GetProperty(propPath);
-  } // GetProperty
+    return m_RootNode->getProperty(propPath);
+  } // getProperty
 
 
-  PropertyNode* PropertySystem::CreateProperty(const std::string& _propPath) {
+  PropertyNode* PropertySystem::createProperty(const std::string& _propPath) {
     if(_propPath[ 0 ] != '/') {
       return NULL;
     }
@@ -179,83 +179,83 @@ namespace dss {
     if(propPath.length() == 0) {
       return m_RootNode;
     }
-    return m_RootNode->CreateProperty(propPath);
-  } // CreateProperty
+    return m_RootNode->createProperty(propPath);
+  } // createProperty
 
-  int PropertySystem::GetIntValue(const std::string& _propPath) const {
-    PropertyNode* prop = GetProperty(_propPath);
+  int PropertySystem::getIntValue(const std::string& _propPath) const {
+    PropertyNode* prop = getProperty(_propPath);
     if(prop != NULL) {
-      return prop->GetIntegerValue();
+      return prop->getIntegerValue();
     } else {
       return 0;
     }
-  } // GetIntValue
+  } // getIntValue
 
-  bool PropertySystem::GetBoolValue(const std::string& _propPath) const {
-    PropertyNode* prop = GetProperty(_propPath);
+  bool PropertySystem::getBoolValue(const std::string& _propPath) const {
+    PropertyNode* prop = getProperty(_propPath);
     if(prop != NULL) {
-      return prop->GetBoolValue();
+      return prop->getBoolValue();
     } else {
       return false;
     }
-  } // GetBoolValue
+  } // getBoolValue
 
-  std::string PropertySystem::GetStringValue(const std::string& _propPath) const {
-    PropertyNode* prop = GetProperty(_propPath);
+  std::string PropertySystem::getStringValue(const std::string& _propPath) const {
+    PropertyNode* prop = getProperty(_propPath);
     if(prop != NULL) {
-      return prop->GetStringValue();
+      return prop->getStringValue();
     } else {
       return std::string();
     }
-  } // GetStringValue
+  } // getStringValue
 
-  bool PropertySystem::SetIntValue(const std::string& _propPath, const int _value, bool _mayCreate, bool _mayOverwrite) {
-    PropertyNode* prop = GetProperty(_propPath);
+  bool PropertySystem::setIntValue(const std::string& _propPath, const int _value, bool _mayCreate, bool _mayOverwrite) {
+    PropertyNode* prop = getProperty(_propPath);
     if((prop == NULL) &&_mayCreate) {
-      PropertyNode* prop = CreateProperty(_propPath);
-      prop->SetIntegerValue(_value);
+      PropertyNode* prop = createProperty(_propPath);
+      prop->setIntegerValue(_value);
       return true;
     } else {
       if(prop != NULL && _mayOverwrite) {
-        prop->SetIntegerValue(_value);
+        prop->setIntegerValue(_value);
         return true;
       } else {
         return false;
       }
     }
-  } // SetIntValue
+  } // setIntValue
 
-  bool PropertySystem::SetBoolValue(const std::string& _propPath, const bool _value, bool _mayCreate, bool _mayOverwrite) {
-    PropertyNode* prop = GetProperty(_propPath);
+  bool PropertySystem::setBoolValue(const std::string& _propPath, const bool _value, bool _mayCreate, bool _mayOverwrite) {
+    PropertyNode* prop = getProperty(_propPath);
     if((prop == NULL) &&_mayCreate) {
-      PropertyNode* prop = CreateProperty(_propPath);
-      prop->SetBooleanValue(_value);
+      PropertyNode* prop = createProperty(_propPath);
+      prop->setBooleanValue(_value);
       return true;
     } else {
       if(prop != NULL && _mayOverwrite) {
-        prop->SetBooleanValue(_value);
+        prop->setBooleanValue(_value);
         return true;
       } else {
         return false;
       }
     }
-  } // SetBoolValue
+  } // setBoolValue
 
-  bool PropertySystem::SetStringValue(const std::string& _propPath, const std::string& _value, bool _mayCreate, bool _mayOverwrite) {
-    PropertyNode* prop = GetProperty(_propPath);
+  bool PropertySystem::setStringValue(const std::string& _propPath, const std::string& _value, bool _mayCreate, bool _mayOverwrite) {
+    PropertyNode* prop = getProperty(_propPath);
     if((prop == NULL) &&_mayCreate) {
-      PropertyNode* prop = CreateProperty(_propPath);
-      prop->SetStringValue(_value);
+      PropertyNode* prop = createProperty(_propPath);
+      prop->setStringValue(_value);
       return true;
     } else {
       if(prop != NULL && _mayOverwrite) {
-        prop->SetStringValue(_value);
+        prop->setStringValue(_value);
         return true;
       } else {
         return false;
       }
     }
-  } // SetStringValue
+  } // setStringValue
 
 
   //=============================================== PropertyNode
@@ -268,7 +268,7 @@ namespace dss {
   {
     memset(&m_PropVal, '\0', sizeof(aPropertyValue));
     if(_parentNode) {
-      _parentNode->AddChild(this);
+      _parentNode->addChild(this);
     }
   } // ctor
 
@@ -285,63 +285,63 @@ namespace dss {
   } // dtor
 
 
-  void PropertyNode::AddChild(PropertyNode* _childNode) {
+  void PropertyNode::addChild(PropertyNode* _childNode) {
     m_ChildNodes.push_back(_childNode);
-  } // AddChild
+  } // addChild
 
 
-  const std::string& PropertyNode::GetDisplayName() const {
-    if(m_ParentNode->Count(m_Name) > 1) {
+  const std::string& PropertyNode::getDisplayName() const {
+    if(m_ParentNode->count(m_Name) > 1) {
       stringstream sstr;
-      sstr << GetName() << "[" << m_Index << "]" << endl;
+      sstr << getName() << "[" << m_Index << "]" << endl;
       m_DisplayName = sstr.str();
       return m_DisplayName;
     } else {
       return m_Name;
     }
-  } // GetDisplayName
+  } // getDisplayName
 
 
-  PropertyNode* PropertyNode::GetProperty(const std::string& _propPath) {
+  PropertyNode* PropertyNode::getProperty(const std::string& _propPath) {
     string propPath = _propPath;
     string propName = _propPath;
     string::size_type slashPos = propPath.find('/');
     if(slashPos != string::npos) {
       propName = propPath.substr(0, slashPos);
       propPath.erase(0, slashPos + 1);
-      PropertyNode* child = GetPropertyByName(propName);
+      PropertyNode* child = getPropertyByName(propName);
       if(child != NULL) {
-        return child->GetProperty(propPath);
+        return child->getProperty(propPath);
       } else {
         return NULL;
       }
     } else {
-      return GetPropertyByName(propName);
+      return getPropertyByName(propName);
     }
-  } // GetProperty
+  } // getProperty
 
 
-  int PropertyNode::GetAndRemoveIndexFromPropertyName(std::string& _propName) {
+  int PropertyNode::getAndRemoveIndexFromPropertyName(std::string& _propName) {
     int result = 0;
     string::size_type pos = _propName.find('[');
     if(pos != string::npos) {
       string::size_type end = _propName.find(']');
       string indexAsString = _propName.substr(pos + 1, end - pos - 1);
       _propName.erase(pos, end);
-      if(Trim(indexAsString) == "last") {
+      if(trim(indexAsString) == "last") {
         result = -1;
       } else {
         result = atoi(indexAsString.c_str());
       }
     }
     return result;
-  } // GetAndRemoveIndexFromPropertyName
+  } // getAndRemoveIndexFromPropertyName
 
 
-  PropertyNode* PropertyNode::GetPropertyByName(const std::string& _name) {
+  PropertyNode* PropertyNode::getPropertyByName(const std::string& _name) {
     int index = 0;
     string propName = _name;
-    index = GetAndRemoveIndexFromPropertyName(propName);
+    index = getAndRemoveIndexFromPropertyName(propName);
 
     int curIndex = 0;
     int lastMatch = -1;
@@ -364,10 +364,10 @@ namespace dss {
       }
     }
     return NULL;
-  } // GetPropertyName
+  } // getPropertyName
 
 
-  int PropertyNode::Count(const std::string& _propertyName) {
+  int PropertyNode::count(const std::string& _propertyName) {
     int result = 0;
     for(vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end(); it++) {
@@ -377,81 +377,81 @@ namespace dss {
       }
     }
     return result;
-  } // Count
+  } // count
 
 
-  void PropertyNode::ClearValue() {
+  void PropertyNode::clearValue() {
     if(m_PropVal.valueType == vTypeString) {
       if(m_PropVal.actualValue.pString != NULL) {
         free(m_PropVal.actualValue.pString);
       }
     }
     memset(&m_PropVal, '\0', sizeof(aPropertyValue));
-  } // ClearValue
+  } // clearValue
 
 
-  void PropertyNode::SetStringValue(const char* _value) {
+  void PropertyNode::setStringValue(const char* _value) {
     if(m_LinkedToProxy) {
       if(m_PropVal.valueType == vTypeString) {
-        m_Proxy.stringProxy->SetValue(_value);
+        m_Proxy.stringProxy->setValue(_value);
       } else {
         cerr << "*** setting string on a non string property";
         throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
       }
     } else {
-      ClearValue();
+      clearValue();
       if(_value != NULL) {
         m_PropVal.actualValue.pString = strdup(_value);
       }
     }
     m_PropVal.valueType = vTypeString;
-    NotifyListeners(&PropertyListener::PropertyChanged);
-  } // SetStringValue
+    notifyListeners(&PropertyListener::propertyChanged);
+  } // setStringValue
 
 
-  void PropertyNode::SetStringValue(const std::string& _value) {
-    SetStringValue(_value.c_str());
-  } // SetStringValue
+  void PropertyNode::setStringValue(const std::string& _value) {
+    setStringValue(_value.c_str());
+  } // setStringValue
 
 
-  void PropertyNode::SetIntegerValue(const int _value) {
+  void PropertyNode::setIntegerValue(const int _value) {
     if(m_LinkedToProxy) {
       if(m_PropVal.valueType == vTypeInteger) {
-        m_Proxy.intProxy->SetValue(_value);
+        m_Proxy.intProxy->setValue(_value);
       } else {
         cerr << "*** setting integer on a non integer property";
         throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
       }
     } else {
-      ClearValue();
-      m_PropVal.actualValue.Integer = _value;
+      clearValue();
+      m_PropVal.actualValue.integer = _value;
     }
     m_PropVal.valueType = vTypeInteger;
-    NotifyListeners(&PropertyListener::PropertyChanged);
-  } // SetIntegerValue
+    notifyListeners(&PropertyListener::propertyChanged);
+  } // setIntegerValue
 
 
-  void PropertyNode::SetBooleanValue(const bool _value) {
+  void PropertyNode::setBooleanValue(const bool _value) {
     if(m_LinkedToProxy) {
       if(m_PropVal.valueType == vTypeBoolean) {
-        m_Proxy.boolProxy->SetValue(_value);
+        m_Proxy.boolProxy->setValue(_value);
       } else {
         cerr << "*** setting bool on a non booleanproperty";
         throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
       }
     } else {
-      ClearValue();
-      m_PropVal.actualValue.Boolean = _value;
+      clearValue();
+      m_PropVal.actualValue.boolean = _value;
     }
     m_PropVal.valueType = vTypeBoolean;
-    NotifyListeners(&PropertyListener::PropertyChanged);
-  } // SetBooleanValue
+    notifyListeners(&PropertyListener::propertyChanged);
+  } // setBooleanValue
 
 
-  std::string PropertyNode::GetStringValue() {
+  std::string PropertyNode::getStringValue() {
     if(m_PropVal.valueType == vTypeString) {
       if(m_LinkedToProxy) {
-        return m_Proxy.stringProxy->GetValue();
+        return m_Proxy.stringProxy->getValue();
       } else {
         return m_PropVal.actualValue.pString;
       }
@@ -459,37 +459,37 @@ namespace dss {
       cerr << "Property-Type mismatch: " << m_Name << endl;
       throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
     }
-  } // GetStringValue
+  } // getStringValue
 
 
-  int PropertyNode::GetIntegerValue() {
+  int PropertyNode::getIntegerValue() {
     if(m_PropVal.valueType == vTypeInteger) {
       if(m_LinkedToProxy) {
-        return m_Proxy.intProxy->GetValue();
+        return m_Proxy.intProxy->getValue();
       } else {
-        return m_PropVal.actualValue.Integer;
+        return m_PropVal.actualValue.integer;
       }
     } else {
       cerr << "Property-Type mismatch: " << m_Name << endl;
       throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
     }
-  } // GetIntegerValue
+  } // getIntegerValue
 
 
-  bool PropertyNode::GetBoolValue() {
+  bool PropertyNode::getBoolValue() {
     if(m_PropVal.valueType == vTypeBoolean) {
       if(m_LinkedToProxy) {
-        return m_Proxy.boolProxy->GetValue();
+        return m_Proxy.boolProxy->getValue();
       } else {
-        return m_PropVal.actualValue.Boolean;
+        return m_PropVal.actualValue.boolean;
       }
     } else {
       cerr << "Property-Type mismatch: " << m_Name << endl;
       throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
     }
-  } // GetBoolValue
+  } // getBoolValue
 
-  bool PropertyNode::LinkToProxy(const PropertyProxy<bool>& _proxy) {
+  bool PropertyNode::linkToProxy(const PropertyProxy<bool>& _proxy) {
     if(m_LinkedToProxy) {
       return false;
     }
@@ -497,9 +497,9 @@ namespace dss {
     m_LinkedToProxy = true;
     m_PropVal.valueType = vTypeBoolean;
     return true;
-  } // LinkToProxy
+  } // linkToProxy
 
-  bool PropertyNode::LinkToProxy(const PropertyProxy<int>& _proxy) {
+  bool PropertyNode::linkToProxy(const PropertyProxy<int>& _proxy) {
     if(m_LinkedToProxy) {
       return false;
     }
@@ -507,9 +507,9 @@ namespace dss {
     m_LinkedToProxy = true;
     m_PropVal.valueType = vTypeInteger;
     return true;
-  } // LinkToProxy
+  } // linkToProxy
 
-  bool PropertyNode::LinkToProxy(const PropertyProxy<std::string>& _proxy) {
+  bool PropertyNode::linkToProxy(const PropertyProxy<std::string>& _proxy) {
     if(m_LinkedToProxy) {
       return false;
     }
@@ -517,11 +517,11 @@ namespace dss {
     m_LinkedToProxy = true;
     m_PropVal.valueType = vTypeString;
     return true;
-  } // LinkToProxy
+  } // linkToProxy
 
-  bool PropertyNode::UnlinkProxy() {
+  bool PropertyNode::unlinkProxy() {
     if(m_LinkedToProxy) {
-      switch(GetValueType()) {
+      switch(getValueType()) {
         case vTypeString:
           delete m_Proxy.stringProxy;
           m_Proxy.stringProxy = NULL;
@@ -541,26 +541,26 @@ namespace dss {
       return true;
     }
     return false;
-  } // UnlinkProxy
+  } // unlinkProxy
 
 
-  aValueType PropertyNode::GetValueType() {
+  aValueType PropertyNode::getValueType() {
     return m_PropVal.valueType;
-  } // GetValueType
+  } // getValueType
 
 
-  string PropertyNode::GetAsString() {
+  string PropertyNode::getAsString() {
     string result;
 
-    switch(GetValueType()) {
+    switch(getValueType()) {
       case vTypeString:
-        result = GetStringValue();
+        result = getStringValue();
         break;
       case vTypeInteger:
-        result = IntToString(GetIntegerValue());
+        result = intToString(getIntegerValue());
         break;
       case vTypeBoolean:
-        if(GetBoolValue()) {
+        if(getBoolValue()) {
           result = "true";
         } else {
           result = "false";
@@ -570,69 +570,69 @@ namespace dss {
         result = "";
     }
     return result;
-  } // GetAsString
+  } // getAsString
 
 
-  void PropertyNode::AddListener(PropertyListener* _listener) const {
+  void PropertyNode::addListener(PropertyListener* _listener) const {
     m_Listeners.push_back(_listener);
-  } // AddListener
+  } // addListener
 
 
-  void PropertyNode::RemoveListener(PropertyListener* _listener) const {
+  void PropertyNode::removeListener(PropertyListener* _listener) const {
     vector<PropertyListener*>::iterator it = std::find(m_Listeners.begin(), m_Listeners.end(), _listener);
     if(it != m_Listeners.end()) {
       m_Listeners.erase(it);
-      _listener->UnregisterProperty(this);
+      _listener->unregisterProperty(this);
     }
-  } // RemoveListener
+  } // removeListener
 
 
-  PropertyNode* PropertyNode::CreateProperty(const std::string& _propPath) {
-    string nextOne = GetRoot(_propPath);
+  PropertyNode* PropertyNode::createProperty(const std::string& _propPath) {
+    string nextOne = getRoot(_propPath);
     string remainder = _propPath;
     remainder.erase(0, nextOne.length() + 1);
     PropertyNode* nextNode = NULL;
-    if((nextNode = GetPropertyByName(nextOne)) == NULL) {
+    if((nextNode = getPropertyByName(nextOne)) == NULL) {
       if(nextOne[ nextOne.length() - 1 ] == '+') {
         nextOne.erase(nextOne.length() - 1, 1);
       }
-      int index = GetAndRemoveIndexFromPropertyName(nextOne);
+      int index = getAndRemoveIndexFromPropertyName(nextOne);
       if(index == 0) {
-        index = Count(nextOne) + 1;
+        index = count(nextOne) + 1;
       }
       nextNode = new PropertyNode(this, nextOne.c_str(), index);
     }
 
     if(remainder.length() > 0) {
-      return nextNode->CreateProperty(remainder);
+      return nextNode->createProperty(remainder);
     } else {
       return nextNode;
     }
   }
 
-  bool PropertyNode::SaveAsXML(xmlTextWriterPtr _writer) {
+  bool PropertyNode::saveAsXML(xmlTextWriterPtr _writer) {
     int rc = xmlTextWriterStartElement(_writer, (xmlChar*)"property");
     if(rc < 0) {
       return false;
     }
 
-    rc = xmlTextWriterWriteAttribute(_writer, (xmlChar*)"type", (xmlChar*)GetValueTypeAsString(GetValueType()));
+    rc = xmlTextWriterWriteAttribute(_writer, (xmlChar*)"type", (xmlChar*)getValueTypeAsString(getValueType()));
     if(rc < 0) {
       return false;
     }
 
-    rc = xmlTextWriterWriteAttribute(_writer, (xmlChar*)"name", (xmlChar*)GetDisplayName().c_str());
+    rc = xmlTextWriterWriteAttribute(_writer, (xmlChar*)"name", (xmlChar*)getDisplayName().c_str());
     if(rc < 0) {
       return false;
     }
 
-    if(GetValueType() != vTypeNone) {
-      xmlTextWriterWriteElement(_writer, (xmlChar*)"value", (xmlChar*)GetAsString().c_str());
+    if(getValueType() != vTypeNone) {
+      xmlTextWriterWriteElement(_writer, (xmlChar*)"value", (xmlChar*)getAsString().c_str());
     }
 
     for(vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end(); ++it) {
-      if(!(*it)->SaveAsXML(_writer)) {
+      if(!(*it)->saveAsXML(_writer)) {
         return false;
       }
     }
@@ -642,35 +642,35 @@ namespace dss {
       return false;
     }
     return true;
-  } // SaveAsXML
+  } // saveAsXML
 
 
-  bool PropertyNode::LoadFromNode(xmlNode* _pNode) {
+  bool PropertyNode::loadFromNode(xmlNode* _pNode) {
     xmlAttr* nameAttr = xmlSearchAttr(_pNode, (xmlChar*)"name");
     xmlAttr* typeAttr = xmlSearchAttr(_pNode, (xmlChar*)"type");
 
     if(nameAttr != NULL) {
       string propName = (char*)nameAttr->children->content;
-      propName = dss::GetProperty(propName);
-      GetAndRemoveIndexFromPropertyName(propName);
+      propName = dss::getProperty(propName);
+      getAndRemoveIndexFromPropertyName(propName);
       if(m_Name.length() > 0) {
         assert(m_Name == propName);
       }
       m_Name = propName;
       if(typeAttr != NULL) {
-        aValueType valueType = GetValueTypeFromString((char*)typeAttr->children->content);
+        aValueType valueType = getValueTypeFromString((char*)typeAttr->children->content);
         if(valueType != vTypeNone) {
           xmlNode* valueNode = xmlSearchNode(_pNode, "value", false);
           if(valueNode != NULL) {
             switch(valueType) {
               case vTypeString:
-                SetStringValue((char*)valueNode->children->content);
+                setStringValue((char*)valueNode->children->content);
                 break;
               case vTypeInteger:
-                SetIntegerValue(atoi((char*)valueNode->children->content));
+                setIntegerValue(atoi((char*)valueNode->children->content));
                 break;
               case vTypeBoolean:
-                SetBooleanValue(strcmp((char*)valueNode->children->content, "true") == 0);
+                setBooleanValue(strcmp((char*)valueNode->children->content, "true") == 0);
                 break;
               default:
                 assert(false);
@@ -683,8 +683,8 @@ namespace dss {
         if(curNode->type == XML_ELEMENT_NODE && strcmp((char*)curNode->name, "property") == 0) {
           nameAttr = xmlSearchAttr(curNode, (xmlChar*)"name");
           if(nameAttr != NULL) {
-            PropertyNode* candidate = CreateProperty(string((char*)nameAttr->children->content));
-            candidate->LoadFromNode(curNode);
+            PropertyNode* candidate = createProperty(string((char*)nameAttr->children->content));
+            candidate->loadFromNode(curNode);
           }
         }
         curNode = curNode->next;
@@ -692,10 +692,10 @@ namespace dss {
       return true;
     }
     return false;
-  } // LoadFromNode
+  } // loadFromNode
 
 
-  void PropertyNode::NotifyListeners(void (PropertyListener::*_callback)(const PropertyNode*)) {
+  void PropertyNode::notifyListeners(void (PropertyListener::*_callback)(const PropertyNode*)) {
     vector<PropertyListener*>::iterator it;
     bool notified = false;
     for(it = m_Listeners.begin(); it != m_Listeners.end(); ++it) {
@@ -704,7 +704,7 @@ namespace dss {
     }
     if(!notified) {
       if(m_ParentNode != NULL) {
-        m_ParentNode->NotifyListeners(_callback);
+        m_ParentNode->notifyListeners(_callback);
       }
     }
   }
@@ -716,32 +716,32 @@ namespace dss {
   PropertyListener::~PropertyListener() {
     vector<const PropertyNode*>::iterator it;
     for(it = m_Properties.begin(); it != m_Properties.end(); ++it) {
-      (*it)->RemoveListener(this);
+      (*it)->removeListener(this);
     }
   } // dtor
 
 
-  void PropertyListener::PropertyChanged(const PropertyNode* _changedNode) {
-  } // PropertyChanged
+  void PropertyListener::propertyChanged(const PropertyNode* _changedNode) {
+  } // propertyChanged
 
 
-  void PropertyListener::RegisterProperty(const PropertyNode* _node) {
+  void PropertyListener::registerProperty(const PropertyNode* _node) {
     m_Properties.push_back(_node);
-  } // RegisterProperty
+  } // registerProperty
 
 
-  void PropertyListener::UnregisterProperty(const PropertyNode* _node) {
+  void PropertyListener::unregisterProperty(const PropertyNode* _node) {
    vector<const PropertyNode*>::iterator it = std::find(m_Properties.begin(), m_Properties.end(), _node);
     if(it != m_Properties.end()) {
       m_Properties.erase(it);
     }
-  } // UnregisterProperty
+  } // unregisterProperty
 
 
   //=============================================== Utilities
 
 
-  string GetBasePath(const std::string& _path) {
+  string getBasePath(const std::string& _path) {
     string result = _path;
     if(result.length() > 1) {
       string::size_type pos = result.rfind('/');
@@ -751,25 +751,25 @@ namespace dss {
       result = "/";
     }
     return result;
-  } // GetBasePath
+  } // getBasePath
 
-  string GetProperty(const std::string& _path) {
+  string getProperty(const std::string& _path) {
     string result = _path;
     string::size_type pos = result.rfind('/');
     result.erase(0, pos + 1);
     return result;
-  } // GetProperty
+  } // getProperty
 
-  string GetRoot(const std::string& _path) {
+  string getRoot(const std::string& _path) {
     string result = _path;
     string::size_type pos = result.find('/');
     if(pos != string::npos) {
       result.erase(pos);
     }
     return result;
-  } // GetRoot
+  } // getRoot
 
-  const char* GetValueTypeAsString(aValueType _value) {
+  const char* getValueTypeAsString(aValueType _value) {
     switch(_value) {
       case vTypeNone:
         return "none";
@@ -785,9 +785,9 @@ namespace dss {
         break;
     }
     return "unknown";
-  } // GetValueTypeAsString
+  } // getValueTypeAsString
 
-  aValueType GetValueTypeFromString(const char* _str) {
+  aValueType getValueTypeFromString(const char* _str) {
     string strVal = _str;
     if(strVal == "none") {
       return vTypeNone;
@@ -800,7 +800,7 @@ namespace dss {
     } else {
       assert(false);
     }
-  } // GetValueTypeFromString
+  } // getValueTypeFromString
 
 
   //==================================================== Default property values

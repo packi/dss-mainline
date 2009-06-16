@@ -23,18 +23,18 @@ namespace dss {
     int m_LastValue;
     boost::shared_ptr<MeteringConfigChain> m_Config;
     vector<boost::shared_ptr<Series<CurrentValue> > > m_Series;
-    
+
     SerialCom m_SerialCom;
     std::string m_MeteringStorageLocation;
   private:
-    virtual void Execute();
+    virtual void execute();
   protected:
-    virtual void DoStart();
+    virtual void doStart();
   public:
     FakeMeter(DSS* _pDSS);
     virtual ~FakeMeter() {};
 
-    virtual void Initialize();
+    virtual void initialize();
   }; // FakeMeter
 
 }

@@ -27,29 +27,29 @@ namespace dss {
 
   XMLNode::XMLNode()
   {
-    Initialize();
+    initialize();
   } // ctor()
 
   XMLNode::XMLNode(const XMLNode& _other)
   {
-	Initialize();
-    CopyFrom(_other);
+    initialize();
+    copyFrom(_other);
   } // ctor(copy)
 
   XMLNode::XMLNode(xmlNode* _node)
   {
-    Initialize();
+    initialize();
     m_pNode = _node;
-    AssertHasNode("XMLNode::ctor(xmlNode*): Node must not be NULL");
+    assertHasNode("XMLNode::ctor(xmlNode*): Node must not be NULL");
   } // ctor(xmlNode*)
 
-  void XMLNode::Initialize() {
+  void XMLNode::initialize() {
     m_pNode = NULL;
     m_AttributesRead = false;
     m_ChildrenRead = false;
-  } // Initialize
+  } // initialize
 
-  void XMLNode::CopyFrom(const XMLNode& _other) {
+  void XMLNode::copyFrom(const XMLNode& _other) {
     m_pNode = _other.m_pNode;
     m_Children = _other.m_Children;
     m_ChildrenRead = _other.m_ChildrenRead;
@@ -59,10 +59,10 @@ namespace dss {
       m_Attributes.clear();
     }
     m_AttributesRead = _other.m_AttributesRead;
-  } // CopyFrom
+  } // copyFrom
 
-  const string XMLNode::GetName() {
-    AssertHasNode("Can't get name without node");
+  const string XMLNode::getName() {
+    assertHasNode("Can't get name without node");
 #ifdef USE_LIBXML
     const char* name = (const char*)m_pNode->name;
 #else
@@ -71,8 +71,8 @@ namespace dss {
     return name;
   }
 
-  const string XMLNode::GetContent() {
-    AssertHasNode("Can't get content without node");
+  const string XMLNode::getContent() {
+    assertHasNode("Can't get content without node");
 #ifdef USE_LIBXML
     const char* content = (const char*)m_pNode->content;
 #else
@@ -81,14 +81,14 @@ namespace dss {
     return content;
   }
 
-  void XMLNode::AssertHasNode(const string& _reason) {
+  void XMLNode::assertHasNode(const string& _reason) {
     if(m_pNode == NULL) {
       throw XMLException(_reason);
     }
   }
 
-  XMLNodeList& XMLNode::GetChildren() {
-    AssertHasNode("Can't return children without node");
+  XMLNodeList& XMLNode::getChildren() {
+    assertHasNode("Can't return children without node");
 
     if(!m_ChildrenRead) {
 #ifdef USE_LIBXML
@@ -114,41 +114,41 @@ namespace dss {
     return m_Children;
   }
 
-  XMLNode& XMLNode::GetChildByName(const string& _name) {
-    XMLNodeList& children = GetChildren();
+  XMLNode& XMLNode::getChildByName(const string& _name) {
+    XMLNodeList& children = getChildren();
     for(XMLNodeList::iterator it = children.begin(); it != children.end(); ++it) {
-      if(it->GetName() == _name) {
+      if(it->getName() == _name) {
         return *it;
       }
     }
     throw XMLException("Could not find node");
-  } // GetChildByName
+  } // getChildByName
 
-  bool XMLNode::HasChildWithName(const string& _name) {
-    XMLNodeList& children = GetChildren();
+  bool XMLNode::hasChildWithName(const string& _name) {
+    XMLNodeList& children = getChildren();
     for(XMLNodeList::iterator it = children.begin(); it != children.end(); ++it) {
-      if(it->GetName() == _name) {
+      if(it->getName() == _name) {
         return true;
       }
     }
     return false;
-  } // HasChildWithName
+  } // hasChildWithName
 
-  XMLNode& XMLNode::AddChildNode(const string& _name, const string& _content) {
-    AssertHasNode("Need a node to append a child to");
+  XMLNode& XMLNode::addChildNode(const string& _name, const string& _content) {
+    assertHasNode("Need a node to append a child to");
 
     if(_name.size() == 0) {
-      throw XMLException("XMLNode::AddChildNode: parameter _name must not be empty");
+      throw XMLException("XMLNode::addChildNode: parameter _name must not be empty");
     }
    /* XMLNode result(xmlNewChild(m_pNode, NULL, _name.c_str(), _content.c_str()));
     m_Children.push_back(result);
     return m_Children[m_Children.size()];
     */
-    throw XMLException("XMLNode::AddChildNode: parameter _name must not be empty");
-  } // AddChildNode
+    throw XMLException("XMLNode::addChildNode: parameter _name must not be empty");
+  } // addChildNode
 
-  HashMapConstStringString& XMLNode::GetAttributes() {
-    AssertHasNode("Can't return children without node");
+  HashMapConstStringString& XMLNode::getAttributes() {
+    assertHasNode("Can't return children without node");
 
     if(!m_AttributesRead) {
 #ifdef USE_LIBXML
@@ -211,19 +211,19 @@ namespace dss {
     }
   }
 
-  XMLNode& XMLDocument::GetRootNode() {
+  XMLNode& XMLDocument::getRootNode() {
     return m_RootNode;
-  } // GetRootNode
+  } // getRootNode
 
 
-  void XMLDocument::SaveToFile(const string& _fileName) {
+  void XMLDocument::saveToFile(const string& _fileName) {
     FILE* out = fopen(_fileName.c_str(), "w");
     if(out == NULL) {
-      throw XMLException(string("XMLDocumen::SaveToFile: Could not open file ") + _fileName);
+      throw XMLException(string("XMLDocumen::saveToFile: Could not open file ") + _fileName);
     }
 #ifdef USE_LIBXML
     if(xmlDocDump(out, m_Resource) < 0) {
-      throw XMLException(string("XMLDocumen::SaveToFile: xmlDocDump failed for file:") + _fileName);
+      throw XMLException(string("XMLDocumen::saveToFile: xmlDocDump failed for file:") + _fileName);
     }
 #endif
   }
@@ -238,9 +238,9 @@ namespace dss {
   XMLDocumentReader::~XMLDocumentReader() {
   }
 
-  XMLDocument& XMLDocumentFileReader::GetDocument() {
-    if(!FileExists(m_URI.c_str())) {
-      throw XMLException(string("XMLDocumentFileReader::GetDocument: File '") + m_URI + "' does not exist");
+  XMLDocument& XMLDocumentFileReader::getDocument() {
+    if(!fileExists(m_URI.c_str())) {
+      throw XMLException(string("XMLDocumentFileReader::getDocument: File '") + m_URI + "' does not exist");
     }
 
 #ifdef USE_LIBXML

@@ -18,23 +18,23 @@ class DSID {
   private:
   public:
     virtual ~DSID() {}
-    virtual void CallScene(const int _sceneNr) = 0;
-    virtual void SaveScene(const int _sceneNr) = 0;
-    virtual void UndoScene(const int _sceneNr) = 0;
+    virtual void callScene(const int _sceneNr) = 0;
+    virtual void saveScene(const int _sceneNr) = 0;
+    virtual void undoScene(const int _sceneNr) = 0;
 
-    virtual void IncreaseValue(const int _parameterNr = -1) = 0;
-    virtual void DecreaseValue(const int _parameterNr = -1) = 0;
+    virtual void increaseValue(const int _parameterNr = -1) = 0;
+    virtual void decreaseValue(const int _parameterNr = -1) = 0;
 
-    virtual void Enable() = 0;
-    virtual void Disable() = 0;
+    virtual void enable() = 0;
+    virtual void disable() = 0;
 
-    virtual void StartDim(bool _directionUp, const int _parameterNr = -1) = 0;
-    virtual void EndDim(const int _parameterNr = -1) = 0;
-    virtual void SetValue(const double _value, int _parameterNr = -1) = 0;
+    virtual void startDim(bool _directionUp, const int _parameterNr = -1) = 0;
+    virtual void endDim(const int _parameterNr = -1) = 0;
+    virtual void setValue(const double _value, int _parameterNr = -1) = 0;
 
-    virtual double GetValue(int _parameterNr = -1) const = 0;
+    virtual double getValue(int _parameterNr = -1) const = 0;
 
-    virtual void SetConfigurationParameter(const std::string& _name, const std::string& _value) = 0;
+    virtual void setConfigurationParameter(const std::string& _name, const std::string& _value) = 0;
 };
 
 class DSIDFactory {
@@ -46,7 +46,7 @@ private:
 
 protected:
   static DSIDFactory* m_Instance;
-  virtual DSID* DoCreateDSID() = 0;
+  virtual DSID* doCreateDSID() = 0;
 
   DSIDFactory(const std::string& _pluginName)
   : m_NextHandle(1),
@@ -55,27 +55,27 @@ protected:
 
   virtual ~DSIDFactory() {};
 public:
-  static DSIDFactory& GetInstance() {
+  static DSIDFactory& getInstance() {
     if(m_Instance == NULL) {
       throw std::runtime_error("No Factory created yet");
     }
     return *m_Instance;
   }
 
-  int CreateDSID() {
-    DSID* newDSID = DoCreateDSID();
+  int createDSID() {
+    DSID* newDSID = doCreateDSID();
     m_DSIDs[m_NextHandle] = newDSID;
     return m_NextHandle++;
   }
 
-  void DestroyDSID(const int _handle) {
+  void destroyDSID(const int _handle) {
   }
 
-  DSID* GetDSID(const int _handle) {
+  DSID* getDSID(const int _handle) {
     return m_DSIDs[_handle];
   }
 
-  const std::string& GetPluginName() const { return m_PluginName; }
+  const std::string& getPluginName() const { return m_PluginName; }
 }; // DSIDFactory
 
 

@@ -28,59 +28,59 @@ namespace dss {
     m_ValuesForScene[SceneDeepOff] = 0;
   } // ctor
 
-  int DSIDSim::GetConsumption() {
+  int DSIDSim::getConsumption() {
     return (int)((m_CurrentValue / 255.0) * m_SimpleConsumption) + (rand() % 100);
   }
 
-  void DSIDSim::CallScene(const int _sceneNr) {
+  void DSIDSim::callScene(const int _sceneNr) {
     if(m_Enabled) {
       m_CurrentValue = m_ValuesForScene.at(_sceneNr);
     }
-  } // CallScene
+  } // callScene
 
-  void DSIDSim::SaveScene(const int _sceneNr) {
+  void DSIDSim::saveScene(const int _sceneNr) {
     if(m_Enabled) {
       m_ValuesForScene[_sceneNr] = m_CurrentValue;
     }
-  } // SaveScene
+  } // saveScene
 
-  void DSIDSim::UndoScene(const int _sceneNr) {
+  void DSIDSim::undoScene(const int _sceneNr) {
     if(m_Enabled) {
       m_CurrentValue = m_ValuesForScene.at(_sceneNr);
     }
-  } // UndoScene
+  } // undoScene
 
-  void DSIDSim::IncreaseValue(const int _parameterNr) {
+  void DSIDSim::increaseValue(const int _parameterNr) {
     if(m_Enabled) {
       m_CurrentValue += 10;
       m_CurrentValue = min((uint8_t)0xff, m_CurrentValue);
     }
-  } // IncreaseValue
+  } // increaseValue
 
-  void DSIDSim::DecreaseValue(const int _parameterNr) {
+  void DSIDSim::decreaseValue(const int _parameterNr) {
     if(m_Enabled) {
       m_CurrentValue -= 10;
       m_CurrentValue = max((uint8_t)0, m_CurrentValue);
     }
-  } // DecreaseValue
+  } // decreaseValue
 
-  void DSIDSim::Enable() {
+  void DSIDSim::enable() {
     m_Enabled = true;
-  } // Enable
+  } // enable
 
-  void DSIDSim::Disable() {
+  void DSIDSim::disable() {
     m_Enabled = false;
-  } // Disable
+  } // disable
 
-  void DSIDSim::StartDim(bool _directionUp, const int _parameterNr) {
+  void DSIDSim::startDim(bool _directionUp, const int _parameterNr) {
     if(m_Enabled) {
       m_DimmingUp = _directionUp;
       m_Dimming = true;
       time(&m_DimmStartTime);
     }
-  } // StartDim
+  } // startDim
 
-  void DSIDSim::EndDim(const int _parameterNr) {
+  void DSIDSim::endDim(const int _parameterNr) {
     if(m_Enabled) {
       time_t now;
       time(&now);
@@ -90,29 +90,29 @@ namespace dss {
         m_CurrentValue = static_cast<int>(min(m_CurrentValue - difftime(m_DimmStartTime, now) * 5, 255.0));
       }
     }
-  } // EndDim
+  } // endDim
 
-  void DSIDSim::SetValue(const double _value, int _parameterNr) {
+  void DSIDSim::setValue(const double _value, int _parameterNr) {
     if(m_Enabled) {
       m_CurrentValue = static_cast<int>(_value);
     }
-  } // SetValue
+  } // setValue
 
-  double DSIDSim::GetValue(int _parameterNr) const {
+  double DSIDSim::getValue(int _parameterNr) const {
     return static_cast<double>(m_CurrentValue);
-  } // GetValue
+  } // getValue
 
-  uint16_t DSIDSim::GetFunctionID() {
+  uint16_t DSIDSim::getFunctionID() {
     return FunctionIDDevice;
-  } // GetFunctionID
+  } // getFunctionID
 
-  void DSIDSim::SetConfigParameter(const string& _name, const string& _value) {
-    m_ConfigParameter.Set(_name, _value);
-  } // SetConfigParameter
+  void DSIDSim::setConfigParameter(const string& _name, const string& _value) {
+    m_ConfigParameter.set(_name, _value);
+  } // setConfigParameter
 
-  string DSIDSim::GetConfigParameter(const string& _name) const {
-    return m_ConfigParameter.Get(_name, "");
-  } // GetConfigParameter
+  string DSIDSim::getConfigParameter(const string& _name) const {
+    return m_ConfigParameter.get(_name, "");
+  } // getConfigParameter
 
 
 }

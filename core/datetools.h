@@ -45,74 +45,74 @@ namespace dss {
     DateTime(const struct tm& _tm);
 
     /** Adds \a _hours hours to the time and normalizes the DateTime */
-    DateTime AddHour(const int _hours) const;
+    DateTime addHour(const int _hours) const;
     /** Adds \a _minutes minutes to the time and normalizes the DateTime */
-    DateTime AddMinute(const int _minutes) const;
+    DateTime addMinute(const int _minutes) const;
     /** Adds \a _seconds seconds to the time and normalizes the DateTime */
-    DateTime AddSeconds(const int _seconds) const;
+    DateTime addSeconds(const int _seconds) const;
     /** Adds \a _month months to the date and normalizes the DateTime */
-    DateTime AddMonth(const int _month) const;
+    DateTime addMonth(const int _month) const;
     /** Adds \a _years years to the date and normalizes the DateTime */
-    DateTime AddYear(const int _years) const;
+    DateTime addYear(const int _years) const;
     /** Adds \a _days days to the date and normalizes the DateTime */
-    DateTime AddDay(const int _days) const;
+    DateTime addDay(const int _days) const;
 
     /** Returns the day of month */
-    int GetDay() const;
+    int getDay() const;
     /** Returns the week */
-    int GetWeek() const;
+    int getWeek() const;
     /** Returns the month */
-    int GetMonth() const;
+    int getMonth() const;
     /** Returns the year */
-    int GetYear() const;
+    int getYear() const;
 
     /** Returns the hour */
-    int GetHour() const;
+    int getHour() const;
     /** Returns the minute */
-    int GetMinute() const;
+    int getMinute() const;
     /** Returns the second */
-    int GetSecond() const;
+    int getSecond() const;
 
     /** Sets the day of month */
-    void SetDay(const int _value);
+    void setDay(const int _value);
     /** Sets the month */
-    void SetMonth(const int _value);
+    void setMonth(const int _value);
     /** Sets the year */
-    void SetYear(const int _value);
+    void setYear(const int _value);
     /** Sets the hour */
-    void SetHour(const int _value);
+    void setHour(const int _value);
     /** Sets the minute */
-    void SetMinute(const int _value);
+    void setMinute(const int _value);
     /** Sets the second */
-    void SetSecond(const int _value);
+    void setSecond(const int _value);
 
     /** Sets the date part without touching the time */
-    void SetDate(int _day, int _month, int _year);
+    void setDate(int _day, int _month, int _year);
     /** Sets the time part without touching the date */
-    void SetTime(int _hour, int _minute, int _second);
+    void setTime(int _hour, int _minute, int _second);
 
     /** Clears the date part as in setting it to zero */
-    void ClearDate();
+    void clearDate();
     /** Clears the time part as in settin it to zero */
-    void ClearTime();
+    void clearTime();
     /** Clears the date and time part
       * @see ClearDate
       * @see ClearTime
       */
-    void Clear();
+    void clear();
 
     /** Normalizes the date/time information */
-    void Validate();
+    void validate();
 
     /** Returns the day of year */
-    int GetDayOfYear() const;
+    int getDayOfYear() const;
     /** Returns the weekday */
-    Weekday GetWeekday() const;
+    Weekday getWeekday() const;
 
     /** Returns true if the instance is before _other */
-    bool Before(const DateTime& _other) const;
+    bool before(const DateTime& _other) const;
     /** Returns true if the instance is after _other */
-    bool After(const DateTime& _other) const;
+    bool after(const DateTime& _other) const;
     /** Returns true if the instance and _other represent the same date and time */
     bool operator==(const DateTime& _other) const;
     /** Returns true if the instance and _other do not represent the same time and date */
@@ -122,7 +122,7 @@ namespace dss {
     bool operator<(const DateTime& _other) const;
 
     /** Returns the difference in days */
-    int Difference(const DateTime& _other) const;
+    int difference(const DateTime& _other) const;
 
     ostream& operator<<(ostream& out) const;
     operator string() const;
@@ -135,12 +135,12 @@ namespace dss {
      * @param _isoStr DateTime string formatted as "yyyymmddThhmmssZ"
      * @throw invalid_argument if a malformatted \a _isoStr is provided
      */
-    static DateTime FromISO(const string& _isoStr);
+    static DateTime fromISO(const string& _isoStr);
     /** Creates an instance from a time_t struct that is in UTC */
-    static DateTime FromUTC(const time_t& _time);
+    static DateTime fromUTC(const time_t& _time);
     /** Creates an instance from a time_t struct and converts the internal
       * time to UTC */
-    static DateTime ToUTC(const time_t& _time);
+    static DateTime toUTC(const time_t& _time);
   }; // DateTime
 
   ostream& operator<<(ostream& out, const DateTime& _dt);
@@ -153,11 +153,11 @@ namespace dss {
     /** Returns the date of the next occurence.
       * @return \a DateTime::NullDate or a \a DateTime value after \a _from
       */
-    virtual DateTime GetNextOccurence(const DateTime& _from) = 0;
+    virtual DateTime getNextOccurence(const DateTime& _from) = 0;
     /** Lists all ocurrences between \a _from and \a _to.
       * @return A list containing dates between \a _from and \a _to or an empty vector
       */
-    virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to) = 0;
+    virtual vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to) = 0;
   };
 
   /** Schedule that's scheduled on a specific DateTime */
@@ -168,8 +168,8 @@ namespace dss {
     StaticSchedule(const DateTime& _when) : m_When(_when) {}
     virtual ~StaticSchedule() {}
 
-    virtual DateTime GetNextOccurence(const DateTime& _from) ;
-    virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
+    virtual DateTime getNextOccurence(const DateTime& _from) ;
+    virtual vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
   };
 
   typedef enum {
@@ -192,14 +192,14 @@ namespace dss {
     DateTime m_BeginingAt;
     DateTime m_EndingAt;
   private:
-    int GetIntervalInSeconds();
+    int getIntervalInSeconds();
   public:
     RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt);
     RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt, DateTime _endingAt);
     virtual ~RepeatingSchedule() {}
 
-    virtual DateTime GetNextOccurence(const DateTime& _from) ;
-    virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
+    virtual DateTime getNextOccurence(const DateTime& _from) ;
+    virtual vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
   }; // RepeatingSchedule
 
   /** Schedule that gets it's schedule from an iCal's RRULE */
@@ -211,8 +211,8 @@ namespace dss {
     ICalSchedule(const string& _rrule, const string _startDateISO);
     virtual ~ICalSchedule();
 
-    virtual DateTime GetNextOccurence(const DateTime& _from) ;
-    virtual vector<DateTime> GetOccurencesBetween(const DateTime& _from, const DateTime& _to);
+    virtual DateTime getNextOccurence(const DateTime& _from) ;
+    virtual vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
   }; // ICalSchedule
 
   //================================================== Timestamp
@@ -227,7 +227,7 @@ namespace dss {
     }
 
     /** Calculates the difference to \a _previous in miliseconds */
-    double GetDifference(const Timestamp& _previous) {
+    double getDifference(const Timestamp& _previous) {
       double diffMS = ((m_Value.tv_sec*1000.0 + m_Value.tv_usec/1000.0) -
                        (_previous.m_Value.tv_sec*1000.0 + _previous.m_Value.tv_usec/1000.0));
       return diffMS;

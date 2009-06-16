@@ -35,17 +35,17 @@ public:
 
     virtual ~Thread();
 
-    virtual void Execute() = 0;
+    virtual void execute() = 0;
 
-    bool Run();
-    bool Stop();
-    bool Terminate();
-    void SetFreeAtTermination( bool _value ) { m_FreeAtTermination = _value; }
-    bool GetFreeAtTerimnation() { return m_FreeAtTermination; }
+    bool run();
+    bool stop();
+    bool terminate();
+    void setFreeAtTermination( bool _value ) { m_FreeAtTermination = _value; }
+    bool getFreeAtTerimnation() { return m_FreeAtTermination; }
 
-    bool IsRunning() const { return m_Running; }
+    bool isRunning() const { return m_Running; }
 
-    const char* GetThreadIdentifier() { return m_Name; }
+    const char* getThreadIdentifier() { return m_Name; }
 }; //  Thread
 
 }

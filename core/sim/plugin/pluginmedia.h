@@ -24,7 +24,7 @@ public:
     virtual void volumeUp() = 0;
     virtual void volumeDown() = 0;
 
-    virtual void CallScene(const int _sceneNr) {
+    virtual void callScene(const int _sceneNr) {
       // mask out local on/off
       int realScene = _sceneNr & 0x00ff;
       bool keepScene = (realScene != dss::SceneBell);
@@ -63,40 +63,40 @@ public:
       }
     }
 
-    virtual void SaveScene(const int _sceneNr) {
+    virtual void saveScene(const int _sceneNr) {
     }
 
-    virtual void UndoScene(const int _sceneNr) {
+    virtual void undoScene(const int _sceneNr) {
     }
 
-    virtual void IncreaseValue(const int _parameterNr = -1) {
+    virtual void increaseValue(const int _parameterNr = -1) {
       volumeUp();
     }
 
-    virtual void DecreaseValue(const int _parameterNr = -1) {
+    virtual void decreaseValue(const int _parameterNr = -1) {
       volumeDown();
     }
 
-    virtual void Enable() {
+    virtual void enable() {
     }
 
-    virtual void Disable() {
+    virtual void disable() {
     }
 
-    virtual void StartDim(bool _directionUp, const int _parameterNr = -1) {
+    virtual void startDim(bool _directionUp, const int _parameterNr = -1) {
     }
 
-    virtual void EndDim(const int _parameterNr = -1) {
+    virtual void endDim(const int _parameterNr = -1) {
     }
 
-    virtual void SetValue(const double _value, int _parameterNr = -1) {
+    virtual void setValue(const double _value, int _parameterNr = -1) {
     }
 
-    virtual double GetValue(int _parameterNr = -1) const {
+    virtual double getValue(int _parameterNr = -1) const {
       return 0.0;
     }
 
-    virtual void SetConfigurationParameter(const std::string& _name, const std::string& _value) {
+    virtual void setConfigurationParameter(const std::string& _name, const std::string& _value) {
     }
 
     bool lastWasOff() {

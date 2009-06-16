@@ -30,28 +30,28 @@ namespace dss {
     DSIDSim(const DSModulatorSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress);
     virtual ~DSIDSim() {}
 
-    virtual void CallScene(const int _sceneNr);
-    virtual void SaveScene(const int _sceneNr);
-    virtual void UndoScene(const int _sceneNr);
+    virtual void callScene(const int _sceneNr);
+    virtual void saveScene(const int _sceneNr);
+    virtual void undoScene(const int _sceneNr);
 
-    virtual void IncreaseValue(const int _parameterNr = -1);
-    virtual void DecreaseValue(const int _parameterNr = -1);
+    virtual void increaseValue(const int _parameterNr = -1);
+    virtual void decreaseValue(const int _parameterNr = -1);
 
-    virtual void Enable();
-    virtual void Disable();
+    virtual void enable();
+    virtual void disable();
 
-    virtual int GetConsumption();
+    virtual int getConsumption();
 
-    virtual void StartDim(bool _directionUp, const int _parameterNr = -1);
-    virtual void EndDim(const int _parameterNr = -1);
-    virtual void SetValue(const double _value, int _parameterNr = -1);
+    virtual void startDim(bool _directionUp, const int _parameterNr = -1);
+    virtual void endDim(const int _parameterNr = -1);
+    virtual void setValue(const double _value, int _parameterNr = -1);
 
-    virtual double GetValue(int _parameterNr = -1) const;
+    virtual double getValue(int _parameterNr = -1) const;
 
-    virtual uint16_t GetFunctionID();
-    void SetSimpleConsumption(const int _value) { m_SimpleConsumption = _value; }
-    virtual void SetConfigParameter(const string& _name, const string& _value);
-    virtual string GetConfigParameter(const string& _name) const;
+    virtual uint16_t getFunctionID();
+    void setSimpleConsumption(const int _value) { m_SimpleConsumption = _value; }
+    virtual void setConfigParameter(const string& _name, const string& _value);
+    virtual string getConfigParameter(const string& _name) const;
   }; // DSIDSim
 
 
@@ -69,16 +69,16 @@ namespace dss {
     {};
     ~DSIDSimSwitch() {}
 
-    void PressKey(const ButtonPressKind _kind, const int _buttonNr);
+    void pressKey(const ButtonPressKind _kind, const int _buttonNr);
 
-    const int GetDefaultColor() const { return m_DefaultColor; }
+    const int getDefaultColor() const { return m_DefaultColor; }
 
-    const int GetNumberOfButtons() const { return m_NumberOfButtons; }
+    const int getNumberOfButtons() const { return m_NumberOfButtons; }
 
-    bool IsBell() const { return m_IsBell; }
-    void SetIsBell(const bool _value) { m_IsBell = _value; }
+    bool isBell() const { return m_IsBell; }
+    void setIsBell(const bool _value) { m_IsBell = _value; }
 
-    virtual uint16_t GetFunctionID() { return FunctionIDSwitch; }
+    virtual uint16_t getFunctionID() { return FunctionIDSwitch; }
   }; // DSIDSimSwitch
 }
 

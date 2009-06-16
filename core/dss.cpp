@@ -51,13 +51,13 @@ const char* DataDirectory = "data/";
   {
     m_State = ssInvalid;
     m_pPropertySystem = boost::shared_ptr<PropertySystem>(new PropertySystem);
-    SetDataDirectory(DataDirectory);
+    setDataDirectory(DataDirectory);
 
     m_TimeStarted = time(NULL);
-    m_pPropertySystem->CreateProperty("/system/uptime")->LinkToProxy(
-        PropertyProxyMemberFunction<DSS,int>(*this, &DSS::GetUptime));
-    m_pPropertySystem->CreateProperty("/config/datadirectory")->LinkToProxy(
-        PropertyProxyMemberFunction<DSS,string>(*this, &DSS::GetDataDirectory, &DSS::SetDataDirectory));
+    m_pPropertySystem->createProperty("/system/uptime")->linkToProxy(
+        PropertyProxyMemberFunction<DSS,int>(*this, &DSS::getUptime));
+    m_pPropertySystem->createProperty("/config/datadirectory")->linkToProxy(
+        PropertyProxyMemberFunction<DSS,string>(*this, &DSS::getDataDirectory, &DSS::setDataDirectory));
   } // ctor
 
   DSS::~DSS() {
@@ -83,19 +83,19 @@ const char* DataDirectory = "data/";
     m_pApartment.reset();
   }
 
-  int DSS::GetUptime() const {
+  int DSS::getUptime() const {
     return (int)difftime( time( NULL ), m_TimeStarted );
-  } // GetUptime
+  } // getUptime
 
-  void DSS::SetDataDirectory(const string& _value) {
+  void DSS::setDataDirectory(const string& _value) {
     if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
       m_DataDirectory = _value + "/";
     } else {
       m_DataDirectory = _value;
     }
-  } // SetDataDirectory
+  } // setDataDirectory
 
-  void DSS::Initialize(const vector<string>& _properties) {
+  void DSS::initialize(const vector<string>& _properties) {
     m_State = ssCreatingSubsystems;
 
     m_pDS485Interface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this));
@@ -130,36 +130,36 @@ const char* DataDirectory = "data/";
     foreach(string propLine, _properties) {
       string::size_type pos = propLine.find("=");
       if(pos == string::npos) {
-        Logger::GetInstance()->Log("invalid property specified on commandline (format is name=value): '" + propLine + "'", lsError);
+        Logger::getInstance()->log("invalid property specified on commandline (format is name=value): '" + propLine + "'", lsError);
         abort();
       } else {
         string name = propLine.substr(0, pos);
         string value = propLine.substr(pos+1, string::npos);
-        Logger::GetInstance()->Log("Setting property '" + name + "' to '" + value + "'", lsInfo);
+        Logger::getInstance()->log("Setting property '" + name + "' to '" + value + "'", lsInfo);
         try {
-          int val = StrToInt(value);
-          m_pPropertySystem->SetIntValue(name, val, true);
+          int val = strToInt(value);
+          m_pPropertySystem->setIntValue(name, val, true);
           continue;
         } catch(invalid_argument&) {
         }
 
         if(value == "true") {
-          m_pPropertySystem->SetBoolValue(name, true, true);
+          m_pPropertySystem->setBoolValue(name, true, true);
           continue;
         }
 
         if(value == "false") {
-          m_pPropertySystem->SetBoolValue(name, false, true);
+          m_pPropertySystem->setBoolValue(name, false, true);
           continue;
         }
 
-        m_pPropertySystem->SetStringValue(name, value, true);
+        m_pPropertySystem->setStringValue(name, value, true);
       }
     }
   }
 
 #ifdef WITH_TESTS
-  void DSS::Teardown() {
+  void DSS::teardown() {
     DSS* instance = m_Instance;
     m_Instance = NULL;
     delete instance;
@@ -168,42 +168,42 @@ const char* DataDirectory = "data/";
 
   DSS* DSS::m_Instance = NULL;
 
-  DSS* DSS::GetInstance() {
+  DSS* DSS::getInstance() {
     if(m_Instance == NULL) {
       m_Instance = new DSS();
     }
     assert(m_Instance != NULL);
     return m_Instance;
-  } // GetInstance
+  } // getInstance
 
-  bool DSS::HasInstance() {
+  bool DSS::hasInstance() {
     return m_Instance != NULL;
   }
 
-  void DSS::AddDefaultInterpreterPlugins() {
+  void DSS::addDefaultInterpreterPlugins() {
     EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
-    m_pEventInterpreter->AddPlugin(plugin);
+    m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterPluginDS485(m_pDS485Interface.get(), m_pEventInterpreter.get());
-    m_pEventInterpreter->AddPlugin(plugin);
+    m_pEventInterpreter->addPlugin(plugin);
 
-    m_pEventRunner->SetEventQueue(m_pEventQueue.get());
-    m_pEventInterpreter->SetEventRunner(m_pEventRunner.get());
-    m_pEventQueue->SetEventRunner(m_pEventRunner.get());
-    m_pEventInterpreter->SetEventQueue(m_pEventQueue.get());
+    m_pEventRunner->setEventQueue(m_pEventQueue.get());
+    m_pEventInterpreter->setEventRunner(m_pEventRunner.get());
+    m_pEventQueue->setEventRunner(m_pEventRunner.get());
+    m_pEventInterpreter->setEventQueue(m_pEventQueue.get());
   }
 
   void InitializeSubsystem(Subsystem* _pSubsystem) {
-    _pSubsystem->Initialize();
-  } // InitializeSubsystem
+    _pSubsystem->initialize();
+  } // initializeSubsystem
 
   void StartSubsystem(Subsystem* _pSubsystem) {
-    _pSubsystem->Start();
+    _pSubsystem->start();
   }
 
-  void DSS::Run() {
-    Logger::GetInstance()->Log("DSS stating up....", lsInfo);
-    if(!LoadConfig()) {
-      Logger::GetInstance()->Log("Could not parse config file", lsFatal);
+  void DSS::run() {
+    Logger::getInstance()->log("DSS stating up....", lsInfo);
+    if(!loadConfig()) {
+      Logger::getInstance()->log("Could not parse config file", lsFatal);
       return;
     }
 
@@ -211,30 +211,30 @@ const char* DataDirectory = "data/";
     m_State = ssInitializingSubsystems;
     std::for_each(m_Subsystems.begin(), m_Subsystems.end(), InitializeSubsystem);
 
-    AddDefaultInterpreterPlugins();
+    addDefaultInterpreterPlugins();
 
     m_State = ssStarting;
     std::for_each(m_Subsystems.begin(), m_Subsystems.end(), StartSubsystem);
 
     BonjourHandler bonjour;
-    bonjour.Run();
+    bonjour.run();
 
     m_State = ssRunning;
 
     // pass control to the eventrunner
-    m_pEventRunner->Run();
-  } // Run
+    m_pEventRunner->run();
+  } // run
 
-  void DSS::Shutdown() {
+  void DSS::shutdown() {
     DSS* inst = m_Instance;
     m_Instance = NULL;
     delete inst;
-  } // Shutdown
+  } // shutdown
 
-  bool DSS::LoadConfig() {
+  bool DSS::loadConfig() {
     m_State = ssLoadingConfig;
-    Logger::GetInstance()->Log("Loading config", lsInfo);
-    return GetPropertySystem().LoadFromXML(GetDataDirectory() + "config.xml", GetPropertySystem().GetProperty("/config"));
-  } // LoadConfig
+    Logger::getInstance()->log("Loading config", lsInfo);
+    return getPropertySystem().loadFromXML(getDataDirectory() + "config.xml", getPropertySystem().getProperty("/config"));
+  } // loadConfig
 
 }

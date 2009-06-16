@@ -42,7 +42,7 @@ namespace dss {
     if(errorCode != kDNSServiceErr_NoError) {
       cerr << "error received in browse callback" << endl;
     }
-  } // RegisterCallback
+  } // registerCallback
 #endif
 
 
@@ -122,7 +122,7 @@ static void create_services(AvahiClient *c) {
          * the service type (IPP vs. BSD LPR). Only services with the
          * same name should be put in the same entry group. */
 
-        int serverPort = StrToInt(DSS::GetInstance()->GetPropertySystem().GetStringValue("/config/subsystems/WebServer/ports"));
+        int serverPort = strToInt(DSS::getInstance()->getPropertySystem().getStringValue("/config/subsystems/WebServer/ports"));
 
         /* Add the service for IPP */
         if ((ret = avahi_entry_group_add_service(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, (AvahiPublishFlags)0, name, "_dssweb._tcp", NULL, NULL, serverPort, NULL, NULL, NULL)) < 0) {
@@ -209,7 +209,7 @@ static void client_callback(AvahiClient *c, AvahiClientState state, AVAHI_GCC_UN
 #endif
 
 
-  void BonjourHandler::Execute() {
+  void BonjourHandler::execute() {
 
 #ifdef USE_AVAHI
     AvahiClient *client = NULL;
@@ -221,7 +221,7 @@ static void client_callback(AvahiClient *c, AvahiClientState state, AVAHI_GCC_UN
         goto fail;
     }
 
-    name = avahi_strdup(DSS::GetInstance()->GetApartment().GetName().c_str());
+    name = avahi_strdup(DSS::getInstance()->getApartment().getName().c_str());
 
     /* Allocate a new client */
     client = avahi_client_new(avahi_simple_poll_get(simple_poll), (AvahiClientFlags)0 , client_callback, NULL, &error);
@@ -250,7 +250,7 @@ fail:
 #endif
 #ifdef USE_DNS_SD
     DNSServiceErrorType err;
-    int serverPort = StrToInt(DSS::GetInstance()->GetPropertySystem().GetStringValue("/config/subsystems/WebServer/ports"));
+    int serverPort = strToInt(DSS::getInstance()->getPropertySystem().getStringValue("/config/subsystems/WebServer/ports"));
 
     memset(&m_RegisterReference, '\0', sizeof(m_RegisterReference));
 
@@ -274,7 +274,7 @@ fail:
       throw runtime_error("error registering service");
     }
 #endif
-  } // Execute
+  } // execute
 
 }
 

@@ -29,11 +29,11 @@ namespace dss {
     std::string m_MeteringStorageLocation;
     std::vector<boost::shared_ptr<MeteringConfigChain> > m_Config;
   private:
-    void CheckModulators(boost::shared_ptr<MeteringConfigChain> _config);
+    void checkModulators(boost::shared_ptr<MeteringConfigChain> _config);
 
-    virtual void Execute();
+    virtual void execute();
   protected:
-    virtual void DoStart();
+    virtual void doStart();
   public:
     Metering(DSS* _pDSS);
     virtual ~Metering() {};
@@ -52,9 +52,9 @@ namespace dss {
       m_NumberOfValues(_numberOfValues)
     { } // ctor
 
-    const std::string& GetFilenameSuffix() const { return m_FilenameSuffix; }
-    const int GetResolution() const { return m_Resolution; }
-    const int GetNumberOfValues() const { return m_NumberOfValues; }
+    const std::string& getFilenameSuffix() const { return m_FilenameSuffix; }
+    const int getResolution() const { return m_Resolution; }
+    const int getNumberOfValues() const { return m_NumberOfValues; }
   }; // MeteringConfig
 
   class MeteringConfigChain {
@@ -70,22 +70,22 @@ namespace dss {
     : m_IsEnergy(_isEnergy), m_CheckIntervalSeconds(_checkIntervalSeconds), m_Unit(_unit)
     { }
 
-    void AddConfig(boost::shared_ptr<MeteringConfig> _config);
-    bool NeedsRun() const;
-    void Running();
+    void addConfig(boost::shared_ptr<MeteringConfig> _config);
+    bool needsRun() const;
+    void running();
 
-    const int Size() const { return m_Chain.size(); }
+    const int size() const { return m_Chain.size(); }
 
-    const std::string& GetFilenameSuffix(int _index) const { return m_Chain.at(_index)->GetFilenameSuffix(); }
-    const int GetResolution(int _index) const { return m_Chain.at(_index)->GetResolution(); }
-    const int GetNumberOfValues(int _index) const { return m_Chain.at(_index)->GetNumberOfValues(); }
+    const std::string& getFilenameSuffix(int _index) const { return m_Chain.at(_index)->getFilenameSuffix(); }
+    const int getResolution(int _index) const { return m_Chain.at(_index)->getResolution(); }
+    const int getNumberOfValues(int _index) const { return m_Chain.at(_index)->getNumberOfValues(); }
 
-    bool IsEnergy() const { return m_IsEnergy; }
-    bool IsConsumption() const { return !m_IsEnergy; }
-    int GetCheckIntervalSeconds() const { return m_CheckIntervalSeconds; }
-    const std::string& GetUnit() const { return m_Unit; }
-    const std::string& GetComment() const { return m_Comment; }
-    void SetComment(const std::string& _value) { m_Comment = _value; }
+    bool isEnergy() const { return m_IsEnergy; }
+    bool isConsumption() const { return !m_IsEnergy; }
+    int getCheckIntervalSeconds() const { return m_CheckIntervalSeconds; }
+    const std::string& getUnit() const { return m_Unit; }
+    const std::string& getComment() const { return m_Comment; }
+    void setComment(const std::string& _value) { m_Comment = _value; }
   }; // MeteringConfigChain
 
 } // namespace dss

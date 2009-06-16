@@ -28,11 +28,11 @@ namespace dss {
     std::vector<unsigned char> m_Data;
   public:
     template<class t>
-    void Add(t _data);
+    void add(t _data);
 
-    int Size() const;
+    int size() const;
 
-    std::vector<unsigned char> ToChar() const;
+    std::vector<unsigned char> toChar() const;
   }; // DS485Payload
 
   class DS485Header {
@@ -51,20 +51,20 @@ namespace dss {
       m_Destination(0xff)
     {};
 
-    uint8_t GetDestination() const { return m_Destination; };
-    bool IsBroadcast() const { return m_Broadcast; };
-    uint8_t GetSource() const { return m_Source; };
-    uint8_t GetCounter() const { return m_Counter; };
-    uint8_t GetType() const { return m_Type; };
+    uint8_t getDestination() const { return m_Destination; };
+    bool isBroadcast() const { return m_Broadcast; };
+    uint8_t getSource() const { return m_Source; };
+    uint8_t getCounter() const { return m_Counter; };
+    uint8_t getType() const { return m_Type; };
 
-    void SetDestination(const uint8_t _value) { m_Destination = _value; };
-    void SetBroadcast(const bool _value) { m_Broadcast = _value; };
-    void SetSource(const uint8_t _value) { m_Source = _value; };
-    void SetCounter(const uint8_t _value) { m_Counter = _value; };
-    void SetType(const uint8_t _value) { m_Type = _value; };
+    void setDestination(const uint8_t _value) { m_Destination = _value; };
+    void setBroadcast(const bool _value) { m_Broadcast = _value; };
+    void setSource(const uint8_t _value) { m_Source = _value; };
+    void setCounter(const uint8_t _value) { m_Counter = _value; };
+    void setType(const uint8_t _value) { m_Type = _value; };
 
-    std::vector<unsigned char> ToChar() const;
-    void FromChar(const unsigned char* _data, const int _len);
+    std::vector<unsigned char> toChar() const;
+    void fromChar(const unsigned char* _data, const int _len);
   };
 
   typedef enum {
@@ -80,15 +80,15 @@ namespace dss {
   public:
     DS485Frame() {};
     virtual ~DS485Frame() {};
-    DS485Header& GetHeader() { return m_Header; };
+    DS485Header& getHeader() { return m_Header; };
 
-    virtual std::vector<unsigned char> ToChar() const;
+    virtual std::vector<unsigned char> toChar() const;
 
-    DS485Payload& GetPayload();
-    const DS485Payload& GetPayload() const;
+    DS485Payload& getPayload();
+    const DS485Payload& getPayload() const;
 
-    aFrameSource GetFrameSource() const { return m_FrameSource; }
-    void SetFrameSource(aFrameSource _value) { m_FrameSource = _value; }
+    aFrameSource getFrameSource() const { return m_FrameSource; }
+    void setFrameSource(aFrameSource _value) { m_FrameSource = _value; }
   }; // DS485Frame
 
   class DS485CommandFrame : public DS485Frame {
@@ -99,13 +99,13 @@ namespace dss {
     DS485CommandFrame();
     virtual ~DS485CommandFrame() {};
 
-    uint8_t GetCommand() const { return m_Command; };
-    uint8_t GetLength() const { return m_Length; };
+    uint8_t getCommand() const { return m_Command; };
+    uint8_t getLength() const { return m_Length; };
 
-    void SetCommand(const uint8_t _value) { m_Command = _value; };
-    void SetLength(const uint8_t _value) { m_Length = _value; };
+    void setCommand(const uint8_t _value) { m_Command = _value; };
+    void setLength(const uint8_t _value) { m_Length = _value; };
 
-    virtual std::vector<unsigned char> ToChar() const;
+    virtual std::vector<unsigned char> toChar() const;
   };
 
   class IDS485FrameCollector;
@@ -116,14 +116,14 @@ namespace dss {
     std::vector<IDS485FrameCollector*> m_FrameCollectors;
   protected:
     /** Distributes the frame to the collectors */
-    void DistributeFrame(boost::shared_ptr<DS485CommandFrame> _frame);
+    void distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame);
     /** Distributes the frame to the collectors.
      * NOTE: the ownership of the frame is transfered to the frame provider
      */
-    void DistributeFrame(DS485CommandFrame* _pFrame);
+    void distributeFrame(DS485CommandFrame* _pFrame);
   public:
-    void AddFrameCollector(IDS485FrameCollector* _collector);
-    void RemoveFrameCollector(IDS485FrameCollector* _collector);
+    void addFrameCollector(IDS485FrameCollector* _collector);
+    void removeFrameCollector(IDS485FrameCollector* _collector);
   };
 
   typedef enum {
@@ -166,19 +166,19 @@ namespace dss {
     int m_Handle;
     boost::shared_ptr<SerialComBase> m_SerialCom;
   private:
-    bool GetCharTimeout(char& _charOut, const int _timeoutMS);
+    bool getCharTimeout(char& _charOut, const int _timeoutMS);
   public:
     DS485FrameReader();
     virtual ~DS485FrameReader();
 
-    void SetSerialCom(boost::shared_ptr<SerialComBase> _serialCom);
+    void setSerialCom(boost::shared_ptr<SerialComBase> _serialCom);
 
-    DS485Frame* GetFrame(const int _timeoutMS);
-    bool SenseTraffic(const int _timeoutMS);
+    DS485Frame* getFrame(const int _timeoutMS);
+    bool senseTraffic(const int _timeoutMS);
 
-    int GetNumberOfFramesReceived() const { return m_NumberOfFramesReceived; }
-    int GetNumberOfIncompleteFramesReceived() const { return m_NumberOfIncompleteFramesReceived; }
-    int GetNumberOfCRCErrors() const { return m_NumberOfCRCErrors; }
+    int getNumberOfFramesReceived() const { return m_NumberOfFramesReceived; }
+    int getNumberOfIncompleteFramesReceived() const { return m_NumberOfIncompleteFramesReceived; }
+    int getNumberOfCRCErrors() const { return m_NumberOfCRCErrors; }
   }; // FrameReader
 
   class DS485Controller : public Thread,
@@ -199,43 +199,43 @@ namespace dss {
     SyncEvent m_TokenEvent;
     dsid_t m_DSID;
   private:
-    DS485Frame* GetFrameFromWire();
-    bool PutFrameOnWire(const DS485Frame* _pFrame, bool _freeFrame = true);
+    DS485Frame* getFrameFromWire();
+    bool putFrameOnWire(const DS485Frame* _pFrame, bool _freeFrame = true);
 
-    inline void PutCharOnWire(const unsigned char _ch);
+    inline void putCharOnWire(const unsigned char _ch);
 
-    void DoChangeState(aControllerState _newState);
-    void AddToReceivedQueue(DS485CommandFrame* _frame);
-    bool ResetSerialLine();
+    void doChangeState(aControllerState _newState);
+    void addToReceivedQueue(DS485CommandFrame* _frame);
+    bool resetSerialLine();
   public:
     DS485Controller();
     virtual ~DS485Controller();
 
-    void SetRS485DeviceName(const std::string& _value);
-    const std::string& GetRS485DeviceName() const { return m_RS485DeviceName; }
+    void setRS485DeviceName(const std::string& _value);
+    const std::string& getRS485DeviceName() const { return m_RS485DeviceName; }
 
-    void EnqueueFrame(DS485CommandFrame& _frame);
-    bool WaitForEvent(const int _timeoutMS);
-    void WaitForCommandFrame();
-    void WaitForToken();
+    void enqueueFrame(DS485CommandFrame& _frame);
+    bool waitForEvent(const int _timeoutMS);
+    void waitForCommandFrame();
+    void waitForToken();
 
-    aControllerState GetState() const;
-    int GetTokenCount() const { return m_TokenCounter; };
+    aControllerState getState() const;
+    int getTokenCount() const { return m_TokenCounter; };
 
-    const std::string& GetStateAsString() const;
+    const std::string& getStateAsString() const;
 
-    const DS485FrameReader& GetFrameReader() const { return m_FrameReader; }
+    const DS485FrameReader& getFrameReader() const { return m_FrameReader; }
 
-    virtual void Execute();
+    virtual void execute();
 
-    int GetStationID() const { return m_StationID; }
+    int getStationID() const { return m_StationID; }
 
-    void SetDSID(const dsid_t& _value) { m_DSID = _value; }
+    void setDSID(const dsid_t& _value) { m_DSID = _value; }
   }; // DS485Controller
 
   class IDS485FrameCollector {
   public:
-    virtual void CollectFrame(boost::shared_ptr<DS485CommandFrame>& _frame) = 0;
+    virtual void collectFrame(boost::shared_ptr<DS485CommandFrame>& _frame) = 0;
     virtual ~IDS485FrameCollector() {};
   }; // DS485FrameCollector
 
@@ -246,7 +246,7 @@ namespace dss {
   public:
     DS485FrameSniffer(const std::string& _deviceName);
 
-    void Run();
+    void run();
   }; // IDS485FrameSniffer
 
   class PayloadDissector {
@@ -254,20 +254,20 @@ namespace dss {
     std::vector<unsigned char> m_Payload;
   public:
     PayloadDissector(DS485Payload& _payload) {
-      std::vector<unsigned char> payload =_payload.ToChar();
+      std::vector<unsigned char> payload =_payload.toChar();
       m_Payload.insert(m_Payload.begin(), payload.rbegin(), payload.rend());
     }
 
-    bool IsEmpty() { return m_Payload.empty(); };
+    bool isEmpty() { return m_Payload.empty(); };
 
     template<class t>
-    t Get();
+    t get();
   }; // PayloadDissector
 
-  const char* CommandToString(const uint8_t _command);
+  const char* commandToString(const uint8_t _command);
 
   const uint32_t SimulationPrefix = 0xFFC00000;
-  inline bool IsSimulationDSID(const dsid_t _dsid) {
+  inline bool isSimulationDSID(const dsid_t _dsid) {
     return (_dsid.lower & SimulationPrefix) == SimulationPrefix;
   }
 

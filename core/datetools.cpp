@@ -33,183 +33,183 @@ namespace dss {
 
   DateTime::DateTime(const struct tm& _tm) {
     m_DateTime = _tm;
-    Validate();
+    validate();
   }
 
-  void DateTime::Validate() {
+  void DateTime::validate() {
     mktime(&m_DateTime);
-  } // Validate
+  } // validate
 
-  DateTime DateTime::AddHour(const int _hours) const {
+  DateTime DateTime::addHour(const int _hours) const {
     DateTime result(*this);
     result.m_DateTime.tm_hour += _hours;
     mktime(&result.m_DateTime);
     return result;
-  } // AddHour
+  } // addHour
 
-  DateTime DateTime::AddMinute(const int _minutes) const {
+  DateTime DateTime::addMinute(const int _minutes) const {
     DateTime result(*this);
     result.m_DateTime.tm_min += _minutes;
     mktime(&result.m_DateTime);
     return result;
-  } // AddMinute
+  } // addMinute
 
-  DateTime DateTime::AddSeconds(const int _seconds) const {
+  DateTime DateTime::addSeconds(const int _seconds) const {
     DateTime result(*this);
     result.m_DateTime.tm_sec += _seconds;
     mktime(&result.m_DateTime);
     return result;
-  } // AddSeconds
+  } // addSeconds
 
-  DateTime DateTime::AddMonth(const int _month) const {
+  DateTime DateTime::addMonth(const int _month) const {
     DateTime result(*this);
     result.m_DateTime.tm_mon += _month;
     mktime(&result.m_DateTime);
     return result;
 
-  } // AddMonth
+  } // addMonth
 
-  DateTime DateTime::AddYear(const int _years) const {
+  DateTime DateTime::addYear(const int _years) const {
     DateTime result(*this);
     result.m_DateTime.tm_year += _years;
     mktime(&result.m_DateTime);
     return result;
-  } // AddYear
+  } // addYear
 
-  DateTime DateTime::AddDay(const int _days) const {
+  DateTime DateTime::addDay(const int _days) const {
     DateTime result(*this);
     result.m_DateTime.tm_mday += _days;
     mktime(&result.m_DateTime);
     return result;
-  } // AddDay
+  } // addDay
 
-  int DateTime::GetDay() const {
+  int DateTime::getDay() const {
     return m_DateTime.tm_mday;
-  } // GetDay
+  } // getDay
 
-  int DateTime::GetWeek() const {
+  int DateTime::getWeek() const {
     return -1;
-  } // GetWeek
+  } // getWeek
 
-  int DateTime::GetMonth() const {
+  int DateTime::getMonth() const {
     return m_DateTime.tm_mon;
-  } // GetMonth
+  } // getMonth
 
-  int DateTime::GetYear() const {
+  int DateTime::getYear() const {
     return m_DateTime.tm_year + 1900;
-  } // GetYear
+  } // getYear
 
-  int DateTime::GetHour() const {
+  int DateTime::getHour() const {
     return m_DateTime.tm_hour;
-  } // GetHour
+  } // getHour
 
-  int DateTime::GetMinute() const {
+  int DateTime::getMinute() const {
     return m_DateTime.tm_min;
-  } // GetMinute
+  } // getMinute
 
-  int DateTime::GetSecond() const {
+  int DateTime::getSecond() const {
     return m_DateTime.tm_sec;
-  } // GetSecond
+  } // getSecond
 
-  int DateTime::GetDayOfYear() const {
+  int DateTime::getDayOfYear() const {
     return m_DateTime.tm_yday;
-  } // GetDayOfYear
+  } // getDayOfYear
 
-  Weekday DateTime::GetWeekday() const {
+  Weekday DateTime::getWeekday() const {
     return (Weekday)m_DateTime.tm_wday;
-  } // GetWeekday
+  } // getWeekday
 
-  void DateTime::SetDay(const int _value) {
+  void DateTime::setDay(const int _value) {
     m_DateTime.tm_mday = _value;
-  } // SetDay
+  } // setDay
 
-  void DateTime::SetMonth(const int _value) {
+  void DateTime::setMonth(const int _value) {
     m_DateTime.tm_mon = _value;
-  } // SetMonth
+  } // setMonth
 
-  void DateTime::SetYear(const int _value) {
+  void DateTime::setYear(const int _value) {
     m_DateTime.tm_year = _value - 1900;
-  } // SetYear
+  } // setYear
 
-  void DateTime::SetHour(const int _value) {
+  void DateTime::setHour(const int _value) {
     m_DateTime.tm_hour = _value;
-  } // SetHour
+  } // setHour
 
-  void DateTime::SetMinute(const int _value) {
+  void DateTime::setMinute(const int _value) {
     m_DateTime.tm_min = _value;
-  } // SetMinute
+  } // setMinute
 
-  void DateTime::SetSecond(const int _value) {
+  void DateTime::setSecond(const int _value) {
     m_DateTime.tm_sec = _value;
-  } // SetSecond
+  } // setSecond
 
-  void DateTime::SetDate(int _day, int _month, int _year) {
+  void DateTime::setDate(int _day, int _month, int _year) {
     m_DateTime.tm_mday = _day;
     m_DateTime.tm_mon = _month;
     m_DateTime.tm_year = _year - 1900;
     m_DateTime.tm_gmtoff = 0;
     m_DateTime.tm_isdst = -1;
     mktime(&m_DateTime);
-  } // SetDate
+  } // setDate
 
-  void DateTime::SetTime(int _hour, int _minute, int _second) {
+  void DateTime::setTime(int _hour, int _minute, int _second) {
     m_DateTime.tm_hour = _hour;
     m_DateTime.tm_min = _minute;
     m_DateTime.tm_sec = _second;
     mktime(&m_DateTime);
-  } // SetTime
+  } // setTime
 
-  void DateTime::ClearDate() {
-    SetDate(0,0,1900);
-  } // ClearDate
+  void DateTime::clearDate() {
+    setDate(0,0,1900);
+  } // clearDate
 
-  void DateTime::ClearTime() {
-    SetTime(0,0,0);
-  } // ClearTime
+  void DateTime::clearTime() {
+    setTime(0,0,0);
+  } // clearTime
 
-  void DateTime::Clear() {
-    ClearDate();
-    ClearTime();
-  } // Clear
+  void DateTime::clear() {
+    clearDate();
+    clearTime();
+  } // clear
 
-  bool DateTime::Before(const DateTime& _other) const {
+  bool DateTime::before(const DateTime& _other) const {
     struct tm self = m_DateTime;
     struct tm other = _other.m_DateTime;
     return difftime(mktime(&self), mktime(&other)) < 0;
-  } // Before
+  } // before
 
-  bool DateTime::After(const DateTime& _other) const {
+  bool DateTime::after(const DateTime& _other) const {
     struct tm self = m_DateTime;
     struct tm other = _other.m_DateTime;
     return difftime(mktime(&self), mktime(&other)) > 0;
-  } // After
+  } // after
 
   bool DateTime::operator==(const DateTime& _other) const {
-    return Difference(_other) == 0;
+    return difference(_other) == 0;
   } // operator==
 
   bool DateTime::operator!=(const DateTime& _other) const {
-    return Difference(_other) != 0;
+    return difference(_other) != 0;
   } // operator!=
 
   bool DateTime::operator<(const DateTime& _other) const {
-    return Difference(_other) < 0;
+    return difference(_other) < 0;
   } // operator<
 
-  int DateTime::Difference(const DateTime& _other) const {
+  int DateTime::difference(const DateTime& _other) const {
     struct tm self = m_DateTime;
     struct tm other = _other.m_DateTime;
     return static_cast<int>(difftime(mktime(&self), mktime(&other)));
-  } // Difference
+  } // difference
 
   ostream& DateTime::operator<<(ostream& out) const {
-    string bla = DateToISOString<string>(&m_DateTime);
+    string bla = dateToISOString<string>(&m_DateTime);
     out << bla;
     return out;
   } // operator<<
 
   DateTime::operator string() const {
-    return DateToISOString<string>(&m_DateTime);
+    return dateToISOString<string>(&m_DateTime);
   } // operator string()
 
   ostream& operator<<(ostream& out, const DateTime& _dt) {
@@ -225,33 +225,33 @@ namespace dss {
     return result;
   }
 
-  DateTime DateTime::FromISO(const string& _isoStr) {
+  DateTime DateTime::fromISO(const string& _isoStr) {
     DateTime result;
 
     if(_isoStr.size() < 8 /*date*/ + 6 /*time*/ + 2 /* 'T', 'Z' */) {
       throw invalid_argument("_isoStr is shorter than expected");
     }
 
-    int year = StrToInt(EraseLeadingZeros(_isoStr.substr(0, 4)));
-    int month = StrToInt(EraseLeadingZeros(_isoStr.substr(4, 2)));
+    int year = strToInt(EraseLeadingZeros(_isoStr.substr(0, 4)));
+    int month = strToInt(EraseLeadingZeros(_isoStr.substr(4, 2)));
     if(month > 12 || month == 0) {
       throw invalid_argument("month should be between 1 and 12");
     }
-    int day = StrToInt(EraseLeadingZeros(_isoStr.substr(6, 2)));
+    int day = strToInt(EraseLeadingZeros(_isoStr.substr(6, 2)));
 
     if(_isoStr.at(8) != 'T') {
       throw invalid_argument("_isoStr should have a 'T' at position 8");
     }
 
-    int hour = StrToInt(EraseLeadingZeros(_isoStr.substr(9,2)));
+    int hour = strToInt(EraseLeadingZeros(_isoStr.substr(9,2)));
     if(hour > 23) {
       throw invalid_argument("hour should be between 0 and 24");
     }
-    int min = StrToInt(EraseLeadingZeros(_isoStr.substr(11,2)));
+    int min = strToInt(EraseLeadingZeros(_isoStr.substr(11,2)));
     if(min > 59) {
       throw invalid_argument("minute should be between 0 and 59");
     }
-    int sec = StrToInt(EraseLeadingZeros(_isoStr.substr(13, 2)));
+    int sec = strToInt(EraseLeadingZeros(_isoStr.substr(13, 2)));
     if(sec > 59) {
       throw invalid_argument("second should be between 0 and 59");
     }
@@ -265,35 +265,35 @@ namespace dss {
     tm.tm_min = min;
     tm.tm_sec = sec;
 
-    return DateTime::FromUTC(mktime(&tm));
-  } // FromISO
+    return DateTime::fromUTC(mktime(&tm));
+  } // fromISO
 
-  DateTime DateTime::FromUTC(const time_t& _time) {
+  DateTime DateTime::fromUTC(const time_t& _time) {
     return DateTime(_time - timezone);
-  } // FromUTC
+  } // fromUTC
 
-  DateTime DateTime::ToUTC(const time_t& _time) {
+  DateTime DateTime::toUTC(const time_t& _time) {
     return DateTime(_time + timezone);
-  } // ToUTC
+  } // toUTC
 
   DateTime DateTime::NullDate(0);
 
   //================================================== StaticSchedule
 
-  DateTime StaticSchedule::GetNextOccurence(const DateTime& _from) {
-    if(_from.Before(m_When)) {
+  DateTime StaticSchedule::getNextOccurence(const DateTime& _from) {
+    if(_from.before(m_When)) {
       return m_When;
     }
     return DateTime::NullDate;
-  } // GetNextOccurence
+  } // getNextOccurence
 
-  vector<DateTime> StaticSchedule::GetOccurencesBetween(const DateTime& _from, const DateTime& _to) {
+  vector<DateTime> StaticSchedule::getOccurencesBetween(const DateTime& _from, const DateTime& _to) {
     vector<DateTime> result;
-    if(_from.Before(m_When) && _to.After(m_When)) {
+    if(_from.before(m_When) && _to.after(m_When)) {
       result.push_back(m_When);
     }
     return result;
-  } // GetOccurencesBetween
+  } // getOccurencesBetween
 
   //================================================== ICalSchedule
 
@@ -318,7 +318,7 @@ namespace dss {
     tm.tm_year = icalTime.year - 1900;
   } // ical_to_tm
 
-  DateTime ICalSchedule::GetNextOccurence(const DateTime& _from) {
+  DateTime ICalSchedule::getNextOccurence(const DateTime& _from) {
     DateTime result;
     DateTime current;
 
@@ -331,21 +331,21 @@ namespace dss {
 
       struct tm tm;
       ical_to_tm(icalTime, tm);
-      current = DateTime::FromUTC(mktime(&tm));
-    } while(current.Before(_from));
+      current = DateTime::fromUTC(mktime(&tm));
+    } while(current.before(_from));
     icalrecur_iterator_free(it);
     it = NULL;
 
-    if(current.After(_from) || current == _from) {
+    if(current.after(_from) || current == _from) {
       result = current;
     } else {
       result = DateTime::NullDate;
     }
 
     return result;
-  } // GetNextOccurence
+  } // getNextOccurence
 
-  vector<DateTime> ICalSchedule::GetOccurencesBetween(const DateTime& _from, const DateTime& _to) {
+  vector<DateTime> ICalSchedule::getOccurencesBetween(const DateTime& _from, const DateTime& _to) {
     vector<DateTime> result;
 
     DateTime current;
@@ -361,9 +361,9 @@ namespace dss {
       } else {
         break;
       }
-    } while(current.Before(_from));
+    } while(current.before(_from));
 
-    if(last.Before(_to)) {
+    if(last.before(_to)) {
 
       do {
         result.push_back(last);
@@ -373,14 +373,14 @@ namespace dss {
         } else {
           break;
         }
-      } while(last.Before(_to));
+      } while(last.before(_to));
     }
 
     icalrecur_iterator_free(it);
     it = NULL;
 
     return result;
-  } // GetOccurencesBetween
+  } // getOccurencesBetween
 
 
   //================================================== RepeatingSchedule
@@ -401,25 +401,25 @@ namespace dss {
   {
   } // ctor
 
-  DateTime RepeatingSchedule::GetNextOccurence(const DateTime& _from)  {
+  DateTime RepeatingSchedule::getNextOccurence(const DateTime& _from)  {
     bool hasEndDate = m_EndingAt != DateTime::NullDate;
 
-    if(_from.Before(m_BeginingAt)) {
+    if(_from.before(m_BeginingAt)) {
       return m_BeginingAt;
-    } else if(hasEndDate && _from.After(m_EndingAt)) {
+    } else if(hasEndDate && _from.after(m_EndingAt)) {
       return DateTime::NullDate;
     }
-    int intervalInSeconds = GetIntervalInSeconds();
-    int diffInSeconds = _from.Difference(m_BeginingAt);
+    int intervalInSeconds = getIntervalInSeconds();
+    int diffInSeconds = _from.difference(m_BeginingAt);
     int numIntervals = diffInSeconds / intervalInSeconds;
     if(diffInSeconds % intervalInSeconds != 0) {
       numIntervals++;
     }
 
-    return m_BeginingAt.AddSeconds(numIntervals * intervalInSeconds);
-  } // GetNextOccurence
+    return m_BeginingAt.addSeconds(numIntervals * intervalInSeconds);
+  } // getNextOccurence
 
-  int RepeatingSchedule::GetIntervalInSeconds() {
+  int RepeatingSchedule::getIntervalInSeconds() {
     switch(m_RepetitionMode) {
       case Weekly:
         return 60 /*sec*/ * 60 /* minutes */ * 24 /*hours*/ * 7 /*days*/ * m_RepeatingInterval;
@@ -433,18 +433,18 @@ namespace dss {
       default:
         throw invalid_argument("m_RepetitionMode must be one of the given enum values");
     }
-  } // GetIntervalInSeconds
+  } // getIntervalInSeconds
 
-  vector<DateTime> RepeatingSchedule::GetOccurencesBetween(const DateTime& _from, const DateTime& _to) {
+  vector<DateTime> RepeatingSchedule::getOccurencesBetween(const DateTime& _from, const DateTime& _to) {
     vector<DateTime> result;
 
-    int intervalInSeconds = GetIntervalInSeconds();
-    DateTime currentDate = GetNextOccurence(_from);
-    while(currentDate != DateTime::NullDate && (currentDate.Before(_to) || currentDate == _to)) {
+    int intervalInSeconds = getIntervalInSeconds();
+    DateTime currentDate = getNextOccurence(_from);
+    while(currentDate != DateTime::NullDate && (currentDate.before(_to) || currentDate == _to)) {
       result.push_back(currentDate);
-      currentDate = currentDate.AddSeconds(intervalInSeconds);
+      currentDate = currentDate.addSeconds(intervalInSeconds);
     }
     return result;
-  } // GetOccurencesBetween
+  } // getOccurencesBetween
 
 }

@@ -48,7 +48,7 @@ namespace dss {
       BonjourHandler();
       virtual ~BonjourHandler();
 
-      virtual void Execute();
+      virtual void execute();
 
   }; //  Bonjour
 

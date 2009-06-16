@@ -41,66 +41,66 @@ namespace dss {
     : m_Value(_value),
       m_Min(_value),
       m_Max(_value)
-    { } // Value
+    { } // ctor
 
     Value(double _value, const DateTime& _timeStamp)
     : m_Value(_value),
       m_Min(_value),
       m_Max(_value),
       m_TimeStamp(_timeStamp)
-    { } // Value
+    { } // ctor
 
     virtual ~Value() {};
 
-    virtual void MergeWith(const Value& _other) {
-      if(_other.GetMax() > m_Max) {
-        m_Max = _other.GetMax();
+    virtual void mergeWith(const Value& _other) {
+      if(_other.getMax() > m_Max) {
+        m_Max = _other.getMax();
       }
-      if(_other.GetMin() < m_Min) {
-        m_Min = _other.GetMin();
+      if(_other.getMin() < m_Min) {
+        m_Min = _other.getMin();
       }
-    } // MergeWith
+    } // mergeWith
 
-    virtual void ReadFromXMLNode(XMLNode& _node) {
-      m_TimeStamp = DateTime(DateFromISOString(_node.GetAttributes()["timestamp"].c_str()));
-      m_Min = StrToDouble(_node.GetChildByName("min").GetChildren()[0].GetContent());
-      m_Max = StrToDouble(_node.GetChildByName("max").GetChildren()[0].GetContent());
-      m_Value = StrToDouble(_node.GetChildByName("value").GetChildren()[0].GetContent());
-    } // ReadFromXMLNode
+    virtual void readFromXMLNode(XMLNode& _node) {
+      m_TimeStamp = DateTime(dateFromISOString(_node.getAttributes()["timestamp"].c_str()));
+      m_Min = strToDouble(_node.getChildByName("min").getChildren()[0].getContent());
+      m_Max = strToDouble(_node.getChildByName("max").getChildren()[0].getContent());
+      m_Value = strToDouble(_node.getChildByName("value").getChildren()[0].getContent());
+    } // readFromXMLNode
 
-    virtual void ReadFromXMLNode(Node* _node) {
+    virtual void readFromXMLNode(Node* _node) {
       Element* elem = dynamic_cast<Element*>(_node);
 
-      m_TimeStamp = DateTime(DateFromISOString(elem->getAttribute("timestamp").c_str()));
-      m_Min = StrToDouble(elem->getChildElement("min")->firstChild()->getNodeValue());
-      m_Max = StrToDouble(elem->getChildElement("max")->firstChild()->getNodeValue());
-      m_Value = StrToDouble(elem->getChildElement("value")->firstChild()->getNodeValue());
-    } // ReadFromXMLNode
+      m_TimeStamp = DateTime(dateFromISOString(elem->getAttribute("timestamp").c_str()));
+      m_Min = strToDouble(elem->getChildElement("min")->firstChild()->getNodeValue());
+      m_Max = strToDouble(elem->getChildElement("max")->firstChild()->getNodeValue());
+      m_Value = strToDouble(elem->getChildElement("value")->firstChild()->getNodeValue());
+    } // readFromXMLNode
 
-    virtual void WriteToXMLNode(AutoPtr<Document>& _doc, AutoPtr<Element>& _elem) const {
+    virtual void writeToXMLNode(AutoPtr<Document>& _doc, AutoPtr<Element>& _elem) const {
       _elem->setAttribute("timestamp", (string)m_TimeStamp);
 
       AutoPtr<Element> elem = _doc->createElement("min");
-      AutoPtr<Text> txt = _doc->createTextNode(DoubleToString(m_Min));
+      AutoPtr<Text> txt = _doc->createTextNode(doubleToString(m_Min));
       elem->appendChild(txt);
       _elem->appendChild(elem);
 
       elem = _doc->createElement("max");
-      txt = _doc->createTextNode(DoubleToString(m_Max));
+      txt = _doc->createTextNode(doubleToString(m_Max));
       elem->appendChild(txt);
       _elem->appendChild(elem);
 
       elem = _doc->createElement("value");
-      txt = _doc->createTextNode(DoubleToString(m_Value));
+      txt = _doc->createTextNode(doubleToString(m_Value));
       elem->appendChild(txt);
       _elem->appendChild(elem);
-    } // WriteToXMLNode
+    } // writeToXMLNode
 
-    const DateTime& GetTimeStamp() const { return m_TimeStamp; }
-    void SetTimeStamp(const DateTime& _value) { m_TimeStamp = _value; }
-    double GetMin() const { return m_Min; }
-    double GetMax() const { return m_Max; }
-    double GetValue() const { return m_Value; }
+    const DateTime& getTimeStamp() const { return m_TimeStamp; }
+    void setTimeStamp(const DateTime& _value) { m_TimeStamp = _value; }
+    double getMin() const { return m_Min; }
+    double getMax() const { return m_Max; }
+    double getValue() const { return m_Value; }
   }; // Value
 
   class CurrentValue : public Value {
@@ -117,9 +117,9 @@ namespace dss {
     : Value(_value)
     { }
 
-    virtual void MergeWith(const Value& _other) {
-      Value::MergeWith(_other);
-      m_Value = _other.GetValue();
+    virtual void mergeWith(const Value& _other) {
+      Value::mergeWith(_other);
+      m_Value = _other.getValue();
     }
   };
 
@@ -137,10 +137,10 @@ namespace dss {
     : Value(_value)
     {}
 
-    virtual void MergeWith(const Value& _other)
+    virtual void mergeWith(const Value& _other)
     {
-      Value::MergeWith(_other);
-      m_Value += _other.GetValue();
+      Value::mergeWith(_other);
+      m_Value += _other.getValue();
     }
   };
 
@@ -175,22 +175,22 @@ namespace dss {
       m_NextSeries(_nextSeries)
     { } // ctor
 
-    void AddValue(const value_type& _value) {
+    void addValue(const value_type& _value) {
       if(m_Resolution == 0) {
         throw runtime_error("Series::AddValue: m_Resolution is Zero. This will lead to an infinite loop");
       }
       if(!m_Values.empty()) {
         Value& lastVal = m_Values.front();
-        DateTime lastValStamp = lastVal.GetTimeStamp();
-        int diff = _value.GetTimeStamp().Difference(lastValStamp);
+        DateTime lastValStamp = lastVal.getTimeStamp();
+        int diff = _value.getTimeStamp().difference(lastValStamp);
         if(diff < m_Resolution) {
           if(m_Values.size() > 1) {
-            lastVal.MergeWith(_value);
+            lastVal.mergeWith(_value);
           } else {
             // if we've got only one value the next incoming value has to be in the next interval
-            DateTime prevStamp = m_Values.front().GetTimeStamp();
+            DateTime prevStamp = m_Values.front().getTimeStamp();
             value_type newVal = _value;
-            newVal.SetTimeStamp(prevStamp.AddSeconds(m_Resolution));
+            newVal.setTimeStamp(prevStamp.addSeconds(m_Resolution));
             m_Values.push_front(newVal);
           }
         } else {
@@ -200,16 +200,16 @@ namespace dss {
 
             typename std::deque<value_type>::iterator iSecondValue = m_Values.begin();
             advance(iSecondValue, 1);
-            DateTime prevStamp = iSecondValue->GetTimeStamp();
-            lastValStamp = prevStamp.AddSeconds(m_Resolution);
-            lastVal.SetTimeStamp(lastValStamp);
+            DateTime prevStamp = iSecondValue->getTimeStamp();
+            lastValStamp = prevStamp.addSeconds(m_Resolution);
+            lastVal.setTimeStamp(lastValStamp);
           }
           // add zero values where we don't have any data
           while(diff > m_Resolution) {
             diff -= m_Resolution;
             cout << "filling unknown value" << endl;
-            lastValStamp = lastValStamp.AddSeconds(m_Resolution);
-            m_Values.push_front(value_type(m_Values.front().GetValue(), lastValStamp));
+            lastValStamp = lastValStamp.addSeconds(m_Resolution);
+            m_Values.push_front(value_type(m_Values.front().getValue(), lastValStamp));
           }
           m_Values.push_front(_value);
           // if we've got an excess of values
@@ -222,31 +222,31 @@ namespace dss {
         m_Values.push_front(_value);
       }
       if(m_NextSeries != NULL) {
-        m_NextSeries->AddValue(_value);
+        m_NextSeries->addValue(_value);
       }
-    } // AddValue
+    } // addValue
 
-    void AddValue(double _value, const DateTime& _timestamp) {
-      AddValue(value_type(_value, _timestamp));
-    } // AddValue
+    void addValue(double _value, const DateTime& _timestamp) {
+      addValue(value_type(_value, _timestamp));
+    } // addValue
 
-    std::deque<value_type>& GetValues() { return m_Values; }
-    const std::deque<value_type>& GetValues() const { return m_Values; }
+    std::deque<value_type>& getValues() { return m_Values; }
+    const std::deque<value_type>& getValues() const { return m_Values; }
 
-    void SetNextSeries(Series<T>* _value) { m_NextSeries = _value; }
-    int GetNumberOfValues() const { return m_NumberOfValues; }
-    int GetResolution() const { return m_Resolution; }
+    void setNextSeries(Series<T>* _value) { m_NextSeries = _value; }
+    int getNumberOfValues() const { return m_NumberOfValues; }
+    int getResolution() const { return m_Resolution; }
 
-    const std::string& GetComment() const { return m_Comment; }
-    void SetComment(const string& _value) { m_Comment = _value; }
-    const dsid_t& GetFromDSID() const { return m_FromDSID; }
-    void SetFromDSID(const dsid_t& _value) { m_FromDSID = _value; }
-    const std::string GetUnit() const { return m_Unit; }
-    void SetUnit(const string& _value) { m_Unit = _value; }
-    bool Has(const string& _key) const { return m_Properties.Has(_key); }
-    void Set(const string& _key, const string& _value)  { return m_Properties.Set(_key, _value); }
-    const string& Get(const string& _key) const { return m_Properties.Get(_key); }
-    const Properties& GetProperties() const { return m_Properties; }
+    const std::string& getComment() const { return m_Comment; }
+    void setComment(const string& _value) { m_Comment = _value; }
+    const dsid_t& getFromDSID() const { return m_FromDSID; }
+    void setFromDSID(const dsid_t& _value) { m_FromDSID = _value; }
+    const std::string getUnit() const { return m_Unit; }
+    void setUnit(const string& _value) { m_Unit = _value; }
+    bool has(const string& _key) const { return m_Properties.has(_key); }
+    void set(const string& _key, const string& _value)  { return m_Properties.set(_key, _value); }
+    const string& get(const string& _key) const { return m_Properties.get(_key); }
+    const Properties& getProperties() const { return m_Properties; }
 
   }; // Series
 

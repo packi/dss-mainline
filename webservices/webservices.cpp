@@ -16,11 +16,11 @@ namespace dss {
 
   } // dtor
 
-  void WebServices::DoStart() {
-    Run();
+  void WebServices::doStart() {
+    run();
   }
 
-  void WebServices::Execute() {
+  void WebServices::execute() {
     m_Service.bind(NULL, 8081, 10);
     while(!m_Terminated) {
       int socket = m_Service.accept();
@@ -28,36 +28,36 @@ namespace dss {
         m_Service.serve();
       }
     }
-  } // Execute
+  } // execute
 
-  WebServiceSession& WebServices::NewSession(soap* _soapRequest, int& token) {
+  WebServiceSession& WebServices::newSession(soap* _soapRequest, int& token) {
     token = ++m_LastSessionID;
     m_SessionByID[token] = WebServiceSession(token, _soapRequest);
     return m_SessionByID[token];
-  } // NewSession
+  } // newSession
 
-  void WebServices::DeleteSession(soap* _soapRequest, const int _token) {
+  void WebServices::deleteSession(soap* _soapRequest, const int _token) {
     WebServiceSessionByID::iterator iEntry = m_SessionByID.find(_token);
     if(iEntry != m_SessionByID.end()) {
-      if(iEntry->second->IsOwner(_soapRequest)) {
+      if(iEntry->second->isOwner(_soapRequest)) {
         m_SessionByID.erase(iEntry);
       }
     }
-  } // DeleteSession
+  } // deleteSession
 
-  bool WebServices::IsAuthorized(soap* _soapRequest, const int _token) {
+  bool WebServices::isAuthorized(soap* _soapRequest, const int _token) {
     WebServiceSessionByID::iterator iEntry = m_SessionByID.find(_token);
     if(iEntry != m_SessionByID.end()) {
-      if(iEntry->second->IsOwner(_soapRequest)) {
-        if(iEntry->second->IsStillValid()) {
+      if(iEntry->second->isOwner(_soapRequest)) {
+        if(iEntry->second->isStillValid()) {
           return true;
         }
       }
     }
     return false;
-  } // IsAuthorized
+  } // isAuthorized
 
-  WebServiceSession& WebServices::GetSession(soap* _soapRequest, const int _token) {
+  WebServiceSession& WebServices::getSession(soap* _soapRequest, const int _token) {
     return m_SessionByID[_token];
   }
 
@@ -70,7 +70,7 @@ namespace dss {
   {
   } // ctor
 
-  bool WebServiceSession::IsOwner(soap* _soapRequest) {
+  bool WebServiceSession::isOwner(soap* _soapRequest) {
     return _soapRequest->ip == m_OriginatorIP;
   }
 

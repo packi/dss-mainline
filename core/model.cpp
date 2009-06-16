@@ -65,242 +65,242 @@ namespace dss {
   {
   }
 
-  void Device::PublishToPropertyTree() {
+  void Device::publishToPropertyTree() {
     if(m_pPropertyNode == NULL) {
       // don't publish stale devices for now
       if(m_ShortAddress == ShortAddressStaleDevice) {
         return;
       } else {
-        if(m_pApartment->GetPropertyNode() != NULL) {
-          m_pPropertyNode = m_pApartment->GetPropertyNode()->CreateProperty("zones/zone" + IntToString(m_ZoneID) + "/device+");
-//          m_pPropertyNode->CreateProperty("name")->LinkToProxy(PropertyProxyMemberFunction<Device, string>(*this, &Device::GetName, &Device::SetName));
-          m_pPropertyNode->CreateProperty("name")->LinkToProxy(PropertyProxyReference<string>(m_Name));
-          m_pPropertyNode->CreateProperty("ModulatorID")->LinkToProxy(PropertyProxyReference<int>(m_ModulatorID, false));
-          m_pPropertyNode->CreateProperty("ZoneID")->LinkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
+        if(m_pApartment->getPropertyNode() != NULL) {
+          m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone" + intToString(m_ZoneID) + "/device+");
+//          m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyMemberFunction<Device, string>(*this, &Device::getName, &Device::setName));
+          m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyReference<string>(m_Name));
+          m_pPropertyNode->createProperty("ModulatorID")->linkToProxy(PropertyProxyReference<int>(m_ModulatorID, false));
+          m_pPropertyNode->createProperty("ZoneID")->linkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
         }
       }
     }
   }
 
-  void Device::TurnOn() {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdTurnOn, *this);
-  } // TurnOn
+  void Device::turnOn() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdTurnOn, *this);
+  } // turnOn
 
-  void Device::TurnOff() {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdTurnOff, *this);
-  } // TurnOff
+  void Device::turnOff() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdTurnOff, *this);
+  } // turnOff
 
-  void Device::IncreaseValue(const int _parameterNr) {
+  void Device::increaseValue(const int _parameterNr) {
     if(_parameterNr == -1) {
-      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdIncreaseValue, *this);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseValue, *this);
     } else {
-      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdIncreaseParam, *this);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseParam, *this);
     }
-  } // IncreaseValue
+  } // increaseValue
 
-  void Device::DecreaseValue(const int _parameterNr) {
+  void Device::decreaseValue(const int _parameterNr) {
     if(_parameterNr == -1) {
-      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdDecreaseValue, *this);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseValue, *this);
     } else {
-      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdDecreaseParam, *this);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseParam, *this);
     }
-  } // DecreaseValue
+  } // decreaseValue
 
-  void Device::Enable() {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdEnable, *this);
-  } // Enable
+  void Device::enable() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdEnable, *this);
+  } // enable
 
-  void Device::Disable() {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdDisable, *this);
-  } // Disable
+  void Device::disable() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdDisable, *this);
+  } // disable
 
-  void Device::StartDim(const bool _directionUp, const int _parameterNr) {
+  void Device::startDim(const bool _directionUp, const int _parameterNr) {
     if(_directionUp) {
-      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStartDimUp, *this);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimUp, *this);
     } else {
-      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStartDimDown, *this);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimDown, *this);
     }
-  } // StartDim
+  } // startDim
 
-  void Device::EndDim(const int _parameterNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStopDim, *this);
-  } // EndDim
+  void Device::endDim(const int _parameterNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdStopDim, *this);
+  } // endDim
 
-  bool Device::IsOn() const {
+  bool Device::isOn() const {
     return (m_LastCalledScene != SceneOff) &&
            (m_LastCalledScene != SceneMin) &&
            (m_LastCalledScene != SceneDeepOff) &&
            (m_LastCalledScene != SceneStandBy);
-  } // IsOn
+  } // isOn
 
-  int Device::GetFunctionID() const {
+  int Device::getFunctionID() const {
     return m_FunctionID;
-  } // GetFunctionID
+  } // getFunctionID
 
-  void Device::SetFunctionID(const int _value) {
+  void Device::setFunctionID(const int _value) {
     m_FunctionID = _value;
-  } // SetFunctionID
+  } // setFunctionID
 
-  bool Device::HasSwitch() const {
-    return GetFunctionID() == FunctionIDSwitch;
-  } // HasSwitch
+  bool Device::hasSwitch() const {
+    return getFunctionID() == FunctionIDSwitch;
+  } // hasSwitch
 
-  void Device::SetValue(const double _value, const int _parameterNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdSetValue, *this, (int)_value);
-  } // SetValue
+  void Device::setValue(const double _value, const int _parameterNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, *this, (int)_value);
+  } // setValue
 
-  double Device::GetValue(const int _parameterNr) {
-    vector<int> res = DSS::GetInstance()->GetDS485Interface().SendCommand(cmdGetValue, *this, _parameterNr);
+  double Device::getValue(const int _parameterNr) {
+    vector<int> res = DSS::getInstance()->getDS485Interface().sendCommand(cmdGetValue, *this, _parameterNr);
     return res.front();
-  } // GetValue
+  } // getValue
 
-  void Device::CallScene(const int _sceneNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdCallScene, *this, _sceneNr);
-  } // CallScene
+  void Device::callScene(const int _sceneNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdCallScene, *this, _sceneNr);
+  } // callScene
 
-  void Device::SaveScene(const int _sceneNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdSaveScene, *this, _sceneNr);
-  } // SaveScene
+  void Device::saveScene(const int _sceneNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdSaveScene, *this, _sceneNr);
+  } // saveScene
 
-  void Device::UndoScene(const int _sceneNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdUndoScene, *this, _sceneNr);
-  } // UndoScene
+  void Device::undoScene(const int _sceneNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdUndoScene, *this, _sceneNr);
+  } // undoScene
 
-  void Device::NextScene() {
-    CallScene(SceneHelper::getNextScene(m_LastCalledScene));
-  } // NextScene
+  void Device::nextScene() {
+    callScene(SceneHelper::getNextScene(m_LastCalledScene));
+  } // nextScene
 
-  void Device::PreviousScene() {
-    CallScene(SceneHelper::getNextScene(m_LastCalledScene));
-  } // PreviousScene
+  void Device::previousScene() {
+    callScene(SceneHelper::getNextScene(m_LastCalledScene));
+  } // previousScene
 
-  string Device::GetName() const {
+  string Device::getName() const {
     return m_Name;
-  } // GetName
+  } // getName
 
-  void Device::SetName(const string& _name) {
+  void Device::setName(const string& _name) {
     if(m_Name != _name) {
       m_Name = _name;
-      Dirty();
+      dirty();
     }
-  } // SetName
+  } // setName
 
-  const DeviceLocation& Device::GetLocation() const {
+  const DeviceLocation& Device::getLocation() const {
     return m_Location;
-  } // GetLocation
+  } // getLocation
 
-  void Device::SetLocation(const DeviceLocation& _value) {
+  void Device::setLocation(const DeviceLocation& _value) {
     m_Location = _value;
-    Dirty();
-  } // SetLocation
+    dirty();
+  } // setLocation
 
-  double Device::GetLocationX() const {
+  double Device::getLocationX() const {
     return m_Location.get<0>();
-  } // GetLocationX
+  } // getLocationX
 
-  double Device::GetLocationY() const {
+  double Device::getLocationY() const {
     return m_Location.get<1>();
-  } // GetLocationY
+  } // getLocationY
 
-  double Device::GetLocationZ() const {
+  double Device::getLocationZ() const {
     return m_Location.get<2>();
-  } // GetLocationZ
+  } // getLocationZ
 
-  void Device::SetLocationX(const double _value) {
+  void Device::setLocationX(const double _value) {
     boost::get<0>(m_Location) = _value;
-    Dirty();
-  } // SetLocationX
+    dirty();
+  } // setLocationX
 
-  void Device::SetLocationY(const double _value) {
+  void Device::setLocationY(const double _value) {
     boost::get<1>(m_Location) = _value;
-    Dirty();
-  } // SetLocationY
+    dirty();
+  } // setLocationY
 
-  void Device::SetLocationZ(const double _value) {
+  void Device::setLocationZ(const double _value) {
     boost::get<2>(m_Location) = _value;
-    Dirty();
-  } // SetLocationZ
+    dirty();
+  } // setLocationZ
 
-  void Device::Dirty() {
+  void Device::dirty() {
     if(m_pApartment != NULL) {
-      m_pApartment->AddModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+      m_pApartment->addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     }
-  } // Dirty
+  } // dirty
 
   bool Device::operator==(const Device& _other) const {
     return _other.m_DSID == m_DSID;
   } // operator==
 
-  devid_t Device::GetShortAddress() const {
+  devid_t Device::getShortAddress() const {
     return m_ShortAddress;
-  } // GetShortAddress
+  } // getShortAddress
 
-  void Device::SetShortAddress(const devid_t _shortAddress) {
+  void Device::setShortAddress(const devid_t _shortAddress) {
     m_ShortAddress = _shortAddress;
-    PublishToPropertyTree();
-  } // SetShortAddress
+    publishToPropertyTree();
+  } // setShortAddress
 
-  dsid_t Device::GetDSID() const {
+  dsid_t Device::getDSID() const {
     return m_DSID;
-  } // GetDSID;
+  } // getDSID;
 
-  int Device::GetModulatorID() const {
+  int Device::getModulatorID() const {
     return m_ModulatorID;
-  } // GetModulatorID
+  } // getModulatorID
 
-  void Device::SetModulatorID(const int _modulatorID) {
+  void Device::setModulatorID(const int _modulatorID) {
     m_ModulatorID = _modulatorID;
-  } // SetModulatorID
+  } // setModulatorID
 
-  int Device::GetZoneID() const {
+  int Device::getZoneID() const {
   	return m_ZoneID;
-  } // GetZoneID
+  } // getZoneID
 
-  void Device::SetZoneID(const int _value) {
+  void Device::setZoneID(const int _value) {
   	m_ZoneID = _value;
-  } // SetZoneID
+  } // setZoneID
 
-  int Device:: GetGroupIdByIndex(const int _index) const {
+  int Device:: getGroupIdByIndex(const int _index) const {
     return m_Groups[_index];
-  } // GetGroupIdByIndex
+  } // getGroupIdByIndex
 
-  Group& Device::GetGroupByIndex(const int _index) {
-    return m_pApartment->GetGroup(GetGroupIdByIndex(_index));
-  } // GetGroupByIndex
+  Group& Device::getGroupByIndex(const int _index) {
+    return m_pApartment->getGroup(getGroupIdByIndex(_index));
+  } // getGroupByIndex
 
-  void Device::AddToGroup(const int _groupID) {
+  void Device::addToGroup(const int _groupID) {
     m_GroupBitmask.set(_groupID-1);
     if(find(m_Groups.begin(), m_Groups.end(), _groupID) == m_Groups.end()) {
       m_Groups.push_back(_groupID);
     } else {
-      Logger::GetInstance()->Log("Device " + m_DSID.ToString() + " (bus: " + IntToString(m_ShortAddress) + ", zone: " + IntToString(m_ZoneID) + ") is already in group " + IntToString(_groupID));
+      Logger::getInstance()->log("Device " + m_DSID.toString() + " (bus: " + intToString(m_ShortAddress) + ", zone: " + intToString(m_ZoneID) + ") is already in group " + intToString(_groupID));
     }
-  } // AddToGroup
+  } // addToGroup
 
-  void Device::ResetGroups() {
+  void Device::resetGroups() {
     m_GroupBitmask.reset();
     m_Groups.clear();
-  } // ResetGroups
+  } // resetGroups
 
-  int Device::GetGroupsCount() const {
+  int Device::getGroupsCount() const {
     return m_Groups.size();
-  } // GetGroupsCount
+  } // getGroupsCount
 
-  bitset<63>& Device::GetGroupBitmask() {
+  bitset<63>& Device::getGroupBitmask() {
     return m_GroupBitmask;
-  } // GetGroupBitmask
+  } // getGroupBitmask
 
-  bool Device::IsInGroup(const int _groupID) const {
+  bool Device::isInGroup(const int _groupID) const {
     return (_groupID == 0) || m_GroupBitmask.test(_groupID - 1);
-  } // IsInGroup
+  } // isInGroup
 
-  Apartment& Device::GetApartment() const {
+  Apartment& Device::getApartment() const {
     return *m_pApartment;
-  } // GetApartment
+  } // getApartment
 
-  unsigned long Device::GetPowerConsumption() {
+  unsigned long Device::getPowerConsumption() {
     return m_Consumption;
-  } // GetPowerConsumption
+  } // getPowerConsumption
 
   //================================================== Set
 
@@ -308,7 +308,7 @@ namespace dss {
   } // ctor
 
   Set::Set(Device& _device) {
-    m_ContainedDevices.push_back(DeviceReference(_device, _device.GetApartment()));
+    m_ContainedDevices.push_back(DeviceReference(_device, _device.getApartment()));
   } // ctor(Device)
 
   Set::Set(DeviceVector _devices) {
@@ -319,89 +319,89 @@ namespace dss {
     m_ContainedDevices = _copy.m_ContainedDevices;
   }
 
-  void Set::TurnOn() {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdTurnOn, *this);
-  } // TurnOn
+  void Set::turnOn() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdTurnOn, *this);
+  } // turnOn
 
-  void Set::TurnOff() {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdTurnOff, *this);
-  } // TurnOff
+  void Set::turnOff() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdTurnOff, *this);
+  } // turnOff
 
-  void Set::IncreaseValue(const int _parameterNr) {
+  void Set::increaseValue(const int _parameterNr) {
     if(_parameterNr == -1) {
-      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdIncreaseValue, *this);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseValue, *this);
     } else {
-      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdIncreaseParam, *this);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseParam, *this);
     }
-  } // IncreaseValue
+  } // increaseValue
 
-  void Set::DecreaseValue(const int _parameterNr) {
+  void Set::decreaseValue(const int _parameterNr) {
     if(_parameterNr == -1) {
-      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdDecreaseValue, *this);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseValue, *this);
     } else {
-      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdDecreaseParam, *this);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseParam, *this);
     }
-  } // DecreaseValue
+  } // decreaseValue
 
-  void Set::Enable() {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdEnable, *this);
-  } // Enable
+  void Set::enable() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdEnable, *this);
+  } // enable
 
-  void Set::Disable() {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdDisable, *this);
-  } // Disable
+  void Set::disable() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdDisable, *this);
+  } // disable
 
-  void Set::StartDim(bool _directionUp, const int _parameterNr) {
+  void Set::startDim(bool _directionUp, const int _parameterNr) {
     if(_directionUp) {
-      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStartDimUp, *this);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimUp, *this);
     } else {
-      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStartDimDown, *this);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimDown, *this);
     }
-  } // StartDim
+  } // startDim
 
-  void Set::EndDim(const int _parameterNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStopDim, *this);
-  } // EndDim
+  void Set::endDim(const int _parameterNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdStopDim, *this);
+  } // endDim
 
-  void Set::SetValue(const double _value, int _parameterNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdSetValue, *this, (int)_value);
-  } // SetValue
+  void Set::setValue(const double _value, int _parameterNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, *this, (int)_value);
+  } // setValue
 
-  void Set::CallScene(const int _sceneNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdCallScene, *this, _sceneNr);
-  } // CallScene
+  void Set::callScene(const int _sceneNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdCallScene, *this, _sceneNr);
+  } // callScene
 
-  void Set::SaveScene(const int _sceneNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdSaveScene, *this, _sceneNr);
-  } // SaveScene
+  void Set::saveScene(const int _sceneNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdSaveScene, *this, _sceneNr);
+  } // saveScene
 
-  void Set::UndoScene(const int _sceneNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdUndoScene, *this, _sceneNr);
-  } // UndoScene
+  void Set::undoScene(const int _sceneNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdUndoScene, *this, _sceneNr);
+  } // undoScene
 
-  void Set::NextScene() {
+  void Set::nextScene() {
     throw runtime_error("Not yet implemented");
-  } // NextScene
+  } // nextScene
 
-  void Set::PreviousScene() {
+  void Set::previousScene() {
     throw runtime_error("Not yet implemented");
-  } // PreviousScene
+  } // previousScene
 
-  void Set::Perform(IDeviceAction& _deviceAction) {
+  void Set::perform(IDeviceAction& _deviceAction) {
     for(DeviceIterator iDevice = m_ContainedDevices.begin(); iDevice != m_ContainedDevices.end(); ++iDevice) {
-      _deviceAction.Perform(iDevice->GetDevice());
+      _deviceAction.perform(iDevice->getDevice());
     }
-  } // Perform
+  } // perform
 
-  Set Set::GetSubset(const IDeviceSelector& _selector) const {
+  Set Set::getSubset(const IDeviceSelector& _selector) const {
     Set result;
     foreach(DeviceReference iDevice, m_ContainedDevices) {
-      if(_selector.SelectDevice(iDevice.GetDevice())) {
-        result.AddDevice(iDevice);
+      if(_selector.selectDevice(iDevice.getDevice())) {
+        result.addDevice(iDevice);
       }
     }
     return result;
-  } // GetSubset
+  } // getSubset
 
   class ByGroupSelector : public IDeviceSelector {
   private:
@@ -413,39 +413,39 @@ namespace dss {
 
     virtual ~ByGroupSelector() {}
 
-    virtual bool SelectDevice(const Device& _device) const {
-      return _device.IsInGroup(m_GroupNr);
+    virtual bool selectDevice(const Device& _device) const {
+      return _device.isInGroup(m_GroupNr);
     }
   };
 
-  Set Set::GetByGroup(int _groupNr) const {
+  Set Set::getByGroup(int _groupNr) const {
     if(_groupNr != GroupIDBroadcast) {
-      return GetSubset(ByGroupSelector(_groupNr));
+      return getSubset(ByGroupSelector(_groupNr));
     } else {
       return *this;
     }
-  } // GetByGroup(id)
+  } // getByGroup(id)
 
-  Set Set::GetByGroup(const Group& _group) const {
-    return GetByGroup(_group.GetID());
-  } // GetByGroup(ref)
+  Set Set::getByGroup(const Group& _group) const {
+    return getByGroup(_group.getID());
+  } // getByGroup(ref)
 
-  Set Set::GetByGroup(const string& _name) const {
+  Set Set::getByGroup(const string& _name) const {
     Set result;
-    if(IsEmpty()) {
+    if(isEmpty()) {
       return result;
     } else {
-      Group& g = Get(0).GetDevice().GetApartment().GetGroup(_name);
-      return GetByGroup(g.GetID());
+      Group& g = get(0).getDevice().getApartment().getGroup(_name);
+      return getByGroup(g.getID());
     }
-  } // GetByGroup(name)
+  } // getByGroup(name)
 
-  Set Set::GetByZone(int _zoneID) const {
+  Set Set::getByZone(int _zoneID) const {
     if(_zoneID != 0) {
       Set result;
       foreach(const DeviceReference& dev, m_ContainedDevices) {
-        if(dev.GetDevice().GetZoneID() == _zoneID) {
-          result.AddDevice(dev);
+        if(dev.getDevice().getZoneID() == _zoneID) {
+          result.addDevice(dev);
         }
       }
       return result;
@@ -453,13 +453,13 @@ namespace dss {
       // return a copy of this set if the broadcast zone was requested
       return *this;
     }
-  } // GetByZone
+  } // getByZone
 
-  Set Set::GetByFunctionID(const int _functionID) const {
+  Set Set::getByFunctionID(const int _functionID) const {
     Set result;
     foreach(const DeviceReference& dev, m_ContainedDevices) {
-      if(dev.GetDevice().GetFunctionID() == _functionID) {
-        result.AddDevice(dev);
+      if(dev.getDevice().getFunctionID() == _functionID) {
+        result.addDevice(dev);
       }
     }
     return result;
@@ -472,18 +472,18 @@ namespace dss {
     ByNameSelector(const string& _name) : m_Name(_name) {};
     virtual ~ByNameSelector() {};
 
-    virtual bool SelectDevice(const Device& _device) const {
-      return _device.GetName() == m_Name;
+    virtual bool selectDevice(const Device& _device) const {
+      return _device.getName() == m_Name;
     }
   };
 
-  DeviceReference Set::GetByName(const string& _name) const {
-    Set resultSet = GetSubset(ByNameSelector(_name));
-    if(resultSet.Length() == 0) {
+  DeviceReference Set::getByName(const string& _name) const {
+    Set resultSet = getSubset(ByNameSelector(_name));
+    if(resultSet.length() == 0) {
       throw ItemNotFoundException(_name);
     }
     return resultSet.m_ContainedDevices.front();
-  } // GetByName
+  } // getByName
 
 
   class ByIDSelector : public IDeviceSelector {
@@ -493,18 +493,18 @@ namespace dss {
     ByIDSelector(const devid_t _id) : m_ID(_id) {}
     virtual ~ByIDSelector() {};
 
-    virtual bool SelectDevice(const Device& _device) const {
-      return _device.GetShortAddress() == m_ID;
+    virtual bool selectDevice(const Device& _device) const {
+      return _device.getShortAddress() == m_ID;
     }
   };
 
-  DeviceReference Set::GetByBusID(const devid_t _id) const {
-    Set resultSet = GetSubset(ByIDSelector(_id));
-    if(resultSet.Length() == 0) {
-      throw ItemNotFoundException(string("with busid ") + IntToString(_id));
+  DeviceReference Set::getByBusID(const devid_t _id) const {
+    Set resultSet = getSubset(ByIDSelector(_id));
+    if(resultSet.length() == 0) {
+      throw ItemNotFoundException(string("with busid ") + intToString(_id));
     }
     return resultSet.m_ContainedDevices.front();
-  } // GetByBusID
+  } // getByBusID
 
   class ByDSIDSelector : public IDeviceSelector {
   private:
@@ -513,103 +513,103 @@ namespace dss {
     ByDSIDSelector(const dsid_t _id) : m_ID(_id) {}
     virtual ~ByDSIDSelector() {};
 
-    virtual bool SelectDevice(const Device& _device) const {
-      return _device.GetDSID() == m_ID;
+    virtual bool selectDevice(const Device& _device) const {
+      return _device.getDSID() == m_ID;
     }
   };
 
-  DeviceReference Set::GetByDSID(const dsid_t _dsid) const {
-    Set resultSet = GetSubset(ByDSIDSelector(_dsid));
-    if(resultSet.Length() == 0) {
-      throw ItemNotFoundException("with dsid " + _dsid.ToString());
+  DeviceReference Set::getByDSID(const dsid_t _dsid) const {
+    Set resultSet = getSubset(ByDSIDSelector(_dsid));
+    if(resultSet.length() == 0) {
+      throw ItemNotFoundException("with dsid " + _dsid.toString());
     }
     return resultSet.m_ContainedDevices.front();
-  } // GetByDSID
+  } // getByDSID
 
-  int Set::Length() const {
+  int Set::length() const {
     return m_ContainedDevices.size();
-  } // Length
+  } // length
 
-  bool Set::IsEmpty() const {
-    return Length() == 0;
-  } // IsEmpty
+  bool Set::isEmpty() const {
+    return length() == 0;
+  } // isEmpty
 
-  Set Set::Combine(Set& _other) const {
+  Set Set::combine(Set& _other) const {
     Set resultSet(_other);
     foreach(const DeviceReference& iDevice, m_ContainedDevices) {
-      if(!resultSet.Contains(iDevice)) {
-        resultSet.AddDevice(iDevice);
+      if(!resultSet.contains(iDevice)) {
+        resultSet.addDevice(iDevice);
       }
     }
     return resultSet;
-  } // Combine
+  } // combine
 
-  Set Set::Remove(const Set& _other) const {
+  Set Set::remove(const Set& _other) const {
     Set resultSet(*this);
     foreach(const DeviceReference& iDevice, _other.m_ContainedDevices) {
-      resultSet.RemoveDevice(iDevice);
+      resultSet.removeDevice(iDevice);
     }
     return resultSet;
-  } // Remove
+  } // remove
 
-  bool Set::Contains(const DeviceReference& _device) const {
+  bool Set::contains(const DeviceReference& _device) const {
     DeviceVector::const_iterator pos = find(m_ContainedDevices.begin(), m_ContainedDevices.end(), _device);
     return pos != m_ContainedDevices.end();
-  } // Contains
+  } // contains
 
-  bool Set::Contains(const Device& _device) const {
-    return Contains(DeviceReference(_device, _device.GetApartment()));
-  } // Contains
+  bool Set::contains(const Device& _device) const {
+    return contains(DeviceReference(_device, _device.getApartment()));
+  } // contains
 
-  void Set::AddDevice(const DeviceReference& _device) {
-    if(!Contains(_device)) {
+  void Set::addDevice(const DeviceReference& _device) {
+    if(!contains(_device)) {
       m_ContainedDevices.push_back(_device);
     }
-  } // AddDevice
+  } // addDevice
 
-  void Set::AddDevice(const Device& _device) {
-    AddDevice(DeviceReference(_device, _device.GetApartment()));
-  } // AddDevice
+  void Set::addDevice(const Device& _device) {
+    addDevice(DeviceReference(_device, _device.getApartment()));
+  } // addDevice
 
-  void Set::RemoveDevice(const DeviceReference& _device) {
+  void Set::removeDevice(const DeviceReference& _device) {
     DeviceVector::iterator pos = find(m_ContainedDevices.begin(), m_ContainedDevices.end(), _device);
     if(pos != m_ContainedDevices.end()) {
       m_ContainedDevices.erase(pos);
     }
-  } // RemoveDevice
+  } // removeDevice
 
-  void Set::RemoveDevice(const Device& _device) {
-    RemoveDevice(DeviceReference(_device, _device.GetApartment()));
-  } // RemoveDevice
+  void Set::removeDevice(const Device& _device) {
+    removeDevice(DeviceReference(_device, _device.getApartment()));
+  } // removeDevice
 
-  const DeviceReference& Set::Get(int _index) const {
+  const DeviceReference& Set::get(int _index) const {
     return m_ContainedDevices.at(_index);
-  } // Get
+  } // get
 
   const DeviceReference& Set::operator[](const int _index) const {
-    return Get(_index);
+    return get(_index);
   } // operator[]
 
-  DeviceReference& Set::Get(int _index) {
+  DeviceReference& Set::get(int _index) {
     return m_ContainedDevices.at(_index);
-  } // Get
+  } // get
 
   DeviceReference& Set::operator[](const int _index) {
-    return Get(_index);
+    return get(_index);
   } // operator[]
 
-  unsigned long Set::GetPowerConsumption() {
+  unsigned long Set::getPowerConsumption() {
     unsigned long result = 0;
     foreach(DeviceReference& iDevice, m_ContainedDevices) {
-      result += iDevice.GetPowerConsumption();
+      result += iDevice.getPowerConsumption();
     }
     return result;
-  } // GetPowerConsumption
+  } // getPowerConsumption
 
   ostream& operator<<(ostream& out, const Device& _dt) {
-    out << "Device ID " << _dt.GetShortAddress();
-    if(!_dt.GetName().empty()) {
-      out << " name: " << _dt.GetName();
+    out << "Device ID " << _dt.getShortAddress();
+    if(!_dt.getName().empty()) {
+      out << " name: " << _dt.getName();
     }
     return out;
   } // operator<<
@@ -624,270 +624,270 @@ namespace dss {
   { } // ctor
 
   Apartment::~Apartment() {
-    ScrubVector(m_Devices);
-    ScrubVector(m_Zones);
-    ScrubVector(m_Modulators);
+    scrubVector(m_Devices);
+    scrubVector(m_Zones);
+    scrubVector(m_Modulators);
 
-    ScrubVector(m_StaleDevices);
-    ScrubVector(m_StaleGroups);
-    ScrubVector(m_StaleModulators);
-    ScrubVector(m_StaleZones);
+    scrubVector(m_StaleDevices);
+    scrubVector(m_StaleGroups);
+    scrubVector(m_StaleModulators);
+    scrubVector(m_StaleZones);
   } // dtor
 
-  void Apartment::Initialize() {
-    Subsystem::Initialize();
+  void Apartment::initialize() {
+    Subsystem::initialize();
     // create default zone
     Zone* zoneZero = new Zone(0);
-    AddDefaultGroupsToZone(*zoneZero);
+    addDefaultGroupsToZone(*zoneZero);
     m_Zones.push_back(zoneZero);
-    if(DSS::HasInstance()) {
-      m_pPropertyNode = DSS::GetInstance()->GetPropertySystem().CreateProperty("/apartment");
-      DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "configfile", GetDSS().GetDataDirectory() + "apartment.xml", true, false);
+    if(DSS::hasInstance()) {
+      m_pPropertyNode = DSS::getInstance()->getPropertySystem().createProperty("/apartment");
+      DSS::getInstance()->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "configfile", getDSS().getDataDirectory() + "apartment.xml", true, false);
     }
-  } // Initialize
+  } // initialize
 
-  void Apartment::DoStart() {
-    Run();
-  } // Start
+  void Apartment::doStart() {
+    run();
+  } // start
 
-  void Apartment::AddDefaultGroupsToZone(Zone& _zone) {
-    int zoneID = _zone.GetZoneID();
+  void Apartment::addDefaultGroupsToZone(Zone& _zone) {
+    int zoneID = _zone.getZoneID();
 
     Group* grp = new Group(GroupIDBroadcast, zoneID, *this);
-    grp->SetName("broadcast");
-    _zone.AddGroup(grp);
+    grp->setName("broadcast");
+    _zone.addGroup(grp);
     grp = new Group(GroupIDYellow, zoneID, *this);
-    grp->SetName("yellow");
-    _zone.AddGroup(grp);
+    grp->setName("yellow");
+    _zone.addGroup(grp);
     grp = new Group(GroupIDGray, zoneID, *this);
-    grp->SetName("gray");
-    _zone.AddGroup(grp);
+    grp->setName("gray");
+    _zone.addGroup(grp);
     grp = new Group(GroupIDBlue, zoneID, *this);
-    grp->SetName("blue");
-    _zone.AddGroup(grp);
+    grp->setName("blue");
+    _zone.addGroup(grp);
     grp = new Group(GroupIDCyan, zoneID, *this);
-    grp->SetName("cyan");
-    _zone.AddGroup(grp);
+    grp->setName("cyan");
+    _zone.addGroup(grp);
     grp = new Group(GroupIDRed, zoneID, *this);
-    grp->SetName("red");
-    _zone.AddGroup(grp);
+    grp->setName("red");
+    _zone.addGroup(grp);
     grp = new Group(GroupIDViolet, zoneID, *this);
-    grp->SetName("magenta");
-    _zone.AddGroup(grp);
+    grp->setName("magenta");
+    _zone.addGroup(grp);
     grp = new Group(GroupIDGreen, zoneID, *this);
-    grp->SetName("green");
-    _zone.AddGroup(grp);
+    grp->setName("green");
+    _zone.addGroup(grp);
     grp = new Group(GroupIDBlack, zoneID, *this);
-    grp->SetName("black");
-    _zone.AddGroup(grp);
+    grp->setName("black");
+    _zone.addGroup(grp);
     grp = new Group(GroupIDWhite, zoneID, *this);
-    grp->SetName("white");
-    _zone.AddGroup(grp);
+    grp->setName("white");
+    _zone.addGroup(grp);
     grp = new Group(GroupIDDisplay, zoneID, *this);
-    grp->SetName("display");
-    _zone.AddGroup(grp);
-  } // AddDefaultGroupsToZone
+    grp->setName("display");
+    _zone.addGroup(grp);
+  } // addDefaultGroupsToZone
 
-  void Apartment::Execute() {
-    // Load devices/modulators/etc. from a config-file
-    string configFileName = DSS::GetInstance()->GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "configfile");
-    if(!FileExists(configFileName)) {
-      Logger::GetInstance()->Log(string("Apartment::Execute: Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
+  void Apartment::execute() {
+    // load devices/modulators/etc. from a config-file
+    string configFileName = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile");
+    if(!fileExists(configFileName)) {
+      Logger::getInstance()->log(string("Apartment::execute: Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
     } else {
-      ReadConfigurationFromXML(configFileName);
+      readConfigurationFromXML(configFileName);
     }
 
-    DS485Interface& interface = DSS::GetInstance()->GetDS485Interface();
+    DS485Interface& interface = DSS::getInstance()->getDS485Interface();
 
-    Log("Apartment::Execute: Waiting for interface to get ready", lsInfo);
+    log("Apartment::execute: Waiting for interface to get ready", lsInfo);
 
-    while(!interface.IsReady() && !m_Terminated) {
-      SleepMS(1000);
+    while(!interface.isReady() && !m_Terminated) {
+      sleepMS(1000);
     }
 
-    Log("Apartment::Execute: Interface is ready, enumerating model", lsInfo);
+    log("Apartment::execute: Interface is ready, enumerating model", lsInfo);
 
-    vector<int> modIDs = interface.GetModulators();
-    Log("Found " + IntToString(modIDs.size()) + " modulators...");
+    vector<int> modIDs = interface.getModulators();
+    log("Found " + intToString(modIDs.size()) + " modulators...");
     foreach(int modulatorID, modIDs) {
-      Log("Found modulator with id: " + IntToString(modulatorID));
-      dsid_t modDSID = interface.GetDSIDOfModulator(modulatorID);
-      Log("  DSID: " + modDSID.ToString());
-      Modulator& modulator = AllocateModulator(modDSID);
-      modulator.SetBusID(modulatorID);
+      log("Found modulator with id: " + intToString(modulatorID));
+      dsid_t modDSID = interface.getDSIDOfModulator(modulatorID);
+      log("  DSID: " + modDSID.toString());
+      Modulator& modulator = allocateModulator(modDSID);
+      modulator.setBusID(modulatorID);
 
       int levelOrange, levelRed;
-      if(interface.GetEnergyBorder(modulatorID, levelOrange, levelRed)) {
-        modulator.SetEnergyLevelOrange(levelOrange);
-        modulator.SetEnergyLevelRed(levelRed);
+      if(interface.getEnergyBorder(modulatorID, levelOrange, levelRed)) {
+        modulator.setEnergyLevelOrange(levelOrange);
+        modulator.setEnergyLevelRed(levelRed);
       }
 
-      vector<int> zoneIDs = interface.GetZones(modulatorID);
+      vector<int> zoneIDs = interface.getZones(modulatorID);
       foreach(int zoneID, zoneIDs) {
-        Log("  Found zone with id: " + IntToString(zoneID));
-        Zone& zone = AllocateZone(modulator, zoneID);
+        log("  Found zone with id: " + intToString(zoneID));
+        Zone& zone = allocateZone(modulator, zoneID);
 
-        vector<int> devices = interface.GetDevicesInZone(modulatorID, zoneID);
+        vector<int> devices = interface.getDevicesInZone(modulatorID, zoneID);
         foreach(int devID, devices) {
-          dsid_t dsid = interface.GetDSIDOfDevice(modulatorID, devID);
-          vector<int> results = interface.SendCommand(cmdGetFunctionID, devID, modulatorID);
+          dsid_t dsid = interface.getDSIDOfDevice(modulatorID, devID);
+          vector<int> results = interface.sendCommand(cmdGetFunctionID, devID, modulatorID);
           int functionID = 0;
           if(results.size() == 1) {
             functionID = results.front();
           }
-          Log("    Found device with id: " + IntToString(devID));
-          Log("    DSID:        " + dsid.ToString());
-          Log("    Function ID: " + UnsignedLongIntToHexString(functionID));
-          Device& dev = AllocateDevice(dsid);
-          dev.SetShortAddress(devID);
-          dev.SetModulatorID(modulatorID);
-          dev.SetZoneID(zoneID);
-          dev.SetFunctionID(functionID);
-          zone.AddDevice(DeviceReference(dev, *this));
-          modulator.AddDevice(DeviceReference(dev, *this));
+          log("    Found device with id: " + intToString(devID));
+          log("    DSID:        " + dsid.toString());
+          log("    Function ID: " + unsignedLongIntToHexString(functionID));
+          Device& dev = allocateDevice(dsid);
+          dev.setShortAddress(devID);
+          dev.setModulatorID(modulatorID);
+          dev.setZoneID(zoneID);
+          dev.setFunctionID(functionID);
+          zone.addDevice(DeviceReference(dev, *this));
+          modulator.addDevice(DeviceReference(dev, *this));
         }
 
-        vector<int> groupIDs = interface.GetGroups(modulatorID, zoneID);
+        vector<int> groupIDs = interface.getGroups(modulatorID, zoneID);
         foreach(int groupID, groupIDs) {
-          Log("    Found group with id: " + IntToString(groupID));
-          vector<int> devingroup = interface.GetDevicesInGroup(modulatorID, zoneID, groupID);
+          log("    Found group with id: " + intToString(groupID));
+          vector<int> devingroup = interface.getDevicesInGroup(modulatorID, zoneID, groupID);
 
           // TODO: read last called scene for group
           foreach(int devID, devingroup) {
             try {
-              Log("     Adding device " + IntToString(devID) + " to group " + IntToString(groupID));
-              Device& dev = GetDeviceByShortAddress(modulator, devID);
-              dev.AddToGroup(groupID);
-              if(zone.GetGroup(groupID) == NULL) {
-                Log("     Adding new group to zone");
-                zone.AddGroup(new Group(groupID, zone.GetZoneID(), *this));
+              log("     Adding device " + intToString(devID) + " to group " + intToString(groupID));
+              Device& dev = getDeviceByShortAddress(modulator, devID);
+              dev.addToGroup(groupID);
+              if(zone.getGroup(groupID) == NULL) {
+                log("     Adding new group to zone");
+                zone.addGroup(new Group(groupID, zone.getZoneID(), *this));
               }
-              zone.GetGroup(groupID)->AddDevice(DeviceReference(dev, *this));
+              zone.getGroup(groupID)->addDevice(DeviceReference(dev, *this));
               try {
-                Group& group = GetGroup(groupID);
-                group.AddDevice(DeviceReference(dev, *this));
+                Group& group = getGroup(groupID);
+                group.addDevice(DeviceReference(dev, *this));
               } catch(ItemNotFoundException&) {
                 Group* pGroup = new Group(groupID, 0, *this);
-                GetZone(0).AddGroup(pGroup);
-                pGroup->AddDevice(DeviceReference(dev, *this));
-                Log("     Adding new group to zone 0");
+                getZone(0).addGroup(pGroup);
+                pGroup->addDevice(DeviceReference(dev, *this));
+                log("     Adding new group to zone 0");
               }
             } catch(ItemNotFoundException& e) {
-              Logger::GetInstance()->Log("Could not find device with short-address " + IntToString(devID) + " on modulator " + IntToString(modulatorID), lsFatal);
+              Logger::getInstance()->log("Could not find device with short-address " + intToString(devID) + " on modulator " + intToString(modulatorID), lsFatal);
             }
           }
 
           // get last called scene for zone, group
           try {
-            int lastCalledScene = interface.GetLastCalledScene(modulatorID, zoneID, groupID);
-            Group* pGroup = zone.GetGroup(groupID);
-            Log(" zoneID: " + IntToString(zoneID) + " groupID: " + IntToString(groupID) + " lastScene: " + IntToString(lastCalledScene));
+            int lastCalledScene = interface.getLastCalledScene(modulatorID, zoneID, groupID);
+            Group* pGroup = zone.getGroup(groupID);
+            log(" zoneID: " + intToString(zoneID) + " groupID: " + intToString(groupID) + " lastScene: " + intToString(lastCalledScene));
             assert(pGroup != NULL);
-            OnGroupCallScene(zoneID, groupID, lastCalledScene);
+            onGroupCallScene(zoneID, groupID, lastCalledScene);
           } catch(runtime_error& error) {
-            Log(string("Error getting last called scene '") + error.what() + "'", lsError);
+            log(string("Error getting last called scene '") + error.what() + "'", lsError);
           }
         }
       }
     }
 
-    Logger::GetInstance()->Log("******** Finished loading model from dSM(s)...", lsInfo);
+    Logger::getInstance()->log("******** Finished loading model from dSM(s)...", lsInfo);
     m_IsInitializing = false;
 
     while(!m_Terminated) {
       if(!m_ModelEvents.empty()) {
         ModelEvent& event = m_ModelEvents.front();
-        switch(event.GetEventType()) {
+        switch(event.getEventType()) {
         case ModelEvent::etNewDevice:
-          if(event.GetParameterCount() != 4) {
-            Log("Expected exactly 4 parameter for ModelEvent::etNewDevice");
+          if(event.getParameterCount() != 4) {
+            log("Expected exactly 4 parameter for ModelEvent::etNewDevice");
           } else {
-            OnAddDevice(event.GetParameter(0), event.GetParameter(1), event.GetParameter(2), event.GetParameter(3));
+            onAddDevice(event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3));
           }
           break;
         case ModelEvent::etCallSceneDevice:
-          if(event.GetParameterCount() != 3) {
-            Log("Expected exactly 3 parameter for ModelEvent::etCallSceneDevice");
+          if(event.getParameterCount() != 3) {
+            log("Expected exactly 3 parameter for ModelEvent::etCallSceneDevice");
           } else {
-            OnDeviceCallScene(event.GetParameter(0), event.GetParameter(1), event.GetParameter(2));
+            onDeviceCallScene(event.getParameter(0), event.getParameter(1), event.getParameter(2));
           }
           break;
         case ModelEvent::etCallSceneGroup:
-          if(event.GetParameterCount() != 3) {
-            Log("Expected exactly 3 parameter for ModelEvent::etCallSceneGroup");
+          if(event.getParameterCount() != 3) {
+            log("Expected exactly 3 parameter for ModelEvent::etCallSceneGroup");
           } else {
-            OnGroupCallScene(event.GetParameter(0), event.GetParameter(1), event.GetParameter(2));
+            onGroupCallScene(event.getParameter(0), event.getParameter(1), event.getParameter(2));
           }
           break;
         case ModelEvent::etModelDirty:
-          WriteConfigurationToXML(DSS::GetInstance()->GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "configfile"));
+          writeConfigurationToXML(DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile"));
           break;
         }
 
-        m_ModelEventsMutex.Lock();
+        m_ModelEventsMutex.lock();
         m_ModelEvents.erase(m_ModelEvents.begin());
-        m_ModelEventsMutex.Unlock();
+        m_ModelEventsMutex.unlock();
       } else {
-        m_NewModelEvent.WaitFor(1000);
+        m_NewModelEvent.waitFor(1000);
       }
     }
-  } // Run
+  } // run
 
-  void Apartment::AddModelEvent(ModelEvent* _pEvent) {
+  void Apartment::addModelEvent(ModelEvent* _pEvent) {
     if(m_IsInitializing) {
       delete _pEvent;
     } else {
-      m_ModelEventsMutex.Lock();
+      m_ModelEventsMutex.lock();
       m_ModelEvents.push_back(_pEvent);
-      m_ModelEventsMutex.Unlock();
-      m_NewModelEvent.Signal();
+      m_ModelEventsMutex.unlock();
+      m_NewModelEvent.signal();
     }
-  } // AddModelEvent
+  } // addModelEvent
 
   const int ApartmentConfigVersion = 1;
 
-  void Apartment::ReadConfigurationFromXML(const string& _fileName) {
+  void Apartment::readConfigurationFromXML(const string& _fileName) {
     XMLDocumentFileReader reader(_fileName);
-    SetName("dSS");
+    setName("dSS");
 
-    XMLNode rootNode = reader.GetDocument().GetRootNode();
-    if(rootNode.GetName() == "config") {
-      if(StrToInt(rootNode.GetAttributes()["version"]) == ApartmentConfigVersion) {
-        XMLNodeList nodes = rootNode.GetChildren();
+    XMLNode rootNode = reader.getDocument().getRootNode();
+    if(rootNode.getName() == "config") {
+      if(strToInt(rootNode.getAttributes()["version"]) == ApartmentConfigVersion) {
+        XMLNodeList nodes = rootNode.getChildren();
         for(XMLNodeList::iterator iNode = nodes.begin(); iNode != nodes.end(); ++iNode) {
-          string nodeName = iNode->GetName();
+          string nodeName = iNode->getName();
           if(nodeName == "devices") {
-            LoadDevices(*iNode);
+            loadDevices(*iNode);
           } else if(nodeName == "modulators") {
-            LoadModulators(*iNode);
+            loadModulators(*iNode);
           } else if(nodeName == "zones") {
-            LoadZones(*iNode);
+            loadZones(*iNode);
           } else if(nodeName == "apartment") {
             try {
-              XMLNode& nameNode = iNode->GetChildByName("name");
-              if(!nameNode.GetChildren().empty()) {
-                SetName((nameNode.GetChildren()[0]).GetContent());
+              XMLNode& nameNode = iNode->getChildByName("name");
+              if(!nameNode.getChildren().empty()) {
+                setName((nameNode.getChildren()[0]).getContent());
               }
             } catch(runtime_error&) {
             }
           }
         }
       } else {
-        Logger::GetInstance()->Log("Config file has the wrong version");
+        Logger::getInstance()->log("Config file has the wrong version");
       }
     }
-  } // ReadConfigurationFromXML
+  } // readConfigurationFromXML
 
-  void Apartment::LoadDevices(XMLNode& _node) {
-    XMLNodeList devices = _node.GetChildren();
+  void Apartment::loadDevices(XMLNode& _node) {
+    XMLNodeList devices = _node.getChildren();
     for(XMLNodeList::iterator iNode = devices.begin(); iNode != devices.end(); ++iNode) {
-      if(iNode->GetName() == "device") {
-        dsid_t dsid = dsid_t::FromString(iNode->GetAttributes()["dsid"]);
+      if(iNode->getName() == "device") {
+        dsid_t dsid = dsid_t::fromString(iNode->getAttributes()["dsid"]);
         string name;
         try {
-          XMLNode& nameNode = iNode->GetChildByName("name");
-          if(!nameNode.GetChildren().empty()) {
-            name = (nameNode.GetChildren()[0]).GetContent();
+          XMLNode& nameNode = iNode->getChildByName("name");
+          if(!nameNode.getChildren().empty()) {
+            name = (nameNode.getChildren()[0]).getContent();
           }
         } catch(XMLException& e) {
           /* discard node not found exceptions */
@@ -896,31 +896,31 @@ namespace dss {
         DeviceLocation location;
         bool locationIsValid = false;
         try {
-          XMLNode& locationNode = iNode->GetChildByName("location");
-          if(locationNode.HasChildWithName("x")) {
-            XMLNode& node = locationNode.GetChildByName("x");
-            if(!node.GetChildren().empty()) {
-              string valueStr = (node.GetChildren()[0]).GetContent();
+          XMLNode& locationNode = iNode->getChildByName("location");
+          if(locationNode.hasChildWithName("x")) {
+            XMLNode& node = locationNode.getChildByName("x");
+            if(!node.getChildren().empty()) {
+              string valueStr = (node.getChildren()[0]).getContent();
               if(!valueStr.empty()) {
-                boost::get<0>(location) = StrToDouble(valueStr);
+                boost::get<0>(location) = strToDouble(valueStr);
               }
             }
           }
-          if(locationNode.HasChildWithName("y")) {
-            XMLNode& node = locationNode.GetChildByName("y");
-            if(!node.GetChildren().empty()) {
-              string valueStr = (node.GetChildren()[0]).GetContent();
+          if(locationNode.hasChildWithName("y")) {
+            XMLNode& node = locationNode.getChildByName("y");
+            if(!node.getChildren().empty()) {
+              string valueStr = (node.getChildren()[0]).getContent();
               if(!valueStr.empty()) {
-                boost::get<1>(location) = StrToDouble(valueStr);
+                boost::get<1>(location) = strToDouble(valueStr);
               }
             }
           }
-          if(locationNode.HasChildWithName("z")) {
-            XMLNode& node = locationNode.GetChildByName("z");
-            if(!node.GetChildren().empty()) {
-              string valueStr = (node.GetChildren()[0]).GetContent();
+          if(locationNode.hasChildWithName("z")) {
+            XMLNode& node = locationNode.getChildByName("z");
+            if(!node.getChildren().empty()) {
+              string valueStr = (node.getChildren()[0]).getContent();
               if(!valueStr.empty()) {
-                boost::get<2>(location) = StrToDouble(valueStr);
+                boost::get<2>(location) = strToDouble(valueStr);
               }
             }
           }
@@ -930,130 +930,130 @@ namespace dss {
 
         Device* newDevice = new Device(dsid, this);
         if(!name.empty()) {
-          newDevice->SetName(name);
+          newDevice->setName(name);
         }
         if(locationIsValid) {
-          newDevice->SetLocation(location);
+          newDevice->setLocation(location);
         }
         m_StaleDevices.push_back(newDevice);
       }
     }
-  } // LoadDevices
+  } // loadDevices
 
-  void Apartment::LoadModulators(XMLNode& _node) {
-    XMLNodeList modulators = _node.GetChildren();
+  void Apartment::loadModulators(XMLNode& _node) {
+    XMLNodeList modulators = _node.getChildren();
     for(XMLNodeList::iterator iModulator = modulators.begin(); iModulator != modulators.end(); ++iModulator) {
-      if(iModulator->GetName() == "modulator") {
-        dsid_t id = dsid_t::FromString(iModulator->GetAttributes()["id"]);
+      if(iModulator->getName() == "modulator") {
+        dsid_t id = dsid_t::fromString(iModulator->getAttributes()["id"]);
         string name;
         try {
-          XMLNode& nameNode = iModulator->GetChildByName("name");
-          if(!nameNode.GetChildren().empty()) {
-            name = (nameNode.GetChildren()[0]).GetContent();
+          XMLNode& nameNode = iModulator->getChildByName("name");
+          if(!nameNode.getChildren().empty()) {
+            name = (nameNode.getChildren()[0]).getContent();
           }
         } catch(XMLException&) {
         }
         Modulator* newModulator = new Modulator(id);
         if(!name.empty()) {
-          newModulator->SetName(name);
+          newModulator->setName(name);
         }
         m_StaleModulators.push_back(newModulator);
-        //LoadZones(*iModulator, *newModulator);
+        //loadZones(*iModulator, *newModulator);
       }
     }
-  } // LoadModulators
+  } // loadModulators
 
-  void Apartment::LoadZones(XMLNode& _node) {
-    XMLNodeList zones = _node.GetChildren();
+  void Apartment::loadZones(XMLNode& _node) {
+    XMLNodeList zones = _node.getChildren();
     for(XMLNodeList::iterator iZone = zones.begin(); iZone != zones.end(); ++iZone) {
-      if(iZone->GetName() == "zone") {
-        int id = StrToInt(iZone->GetAttributes()["id"]);
+      if(iZone->getName() == "zone") {
+        int id = strToInt(iZone->getAttributes()["id"]);
         string name;
         try {
-          XMLNode& nameNode = iZone->GetChildByName("name");
-          if(!nameNode.GetChildren().empty()) {
-            name = (nameNode.GetChildren()[0]).GetContent();
+          XMLNode& nameNode = iZone->getChildByName("name");
+          if(!nameNode.getChildren().empty()) {
+            name = (nameNode.getChildren()[0]).getContent();
           }
         } catch(XMLException&) {
         }
         Zone* newZone = new Zone(id);
         if(!name.empty()) {
-          newZone->SetName(name);
+          newZone->setName(name);
         }
         m_StaleZones.push_back(newZone);
       }
     }
-  } // LoadZones
+  } // loadZones
 
   void DeviceToXML(const Device* _pDevice, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
     AutoPtr<Element> pDeviceNode = _pDocument->createElement("device");
-    pDeviceNode->setAttribute("dsid", _pDevice->GetDSID().ToString());
-    if(!_pDevice->GetName().empty()) {
+    pDeviceNode->setAttribute("dsid", _pDevice->getDSID().toString());
+    if(!_pDevice->getName().empty()) {
       AutoPtr<Element> pNameNode = _pDocument->createElement("name");
-      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pDevice->GetName());
+      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pDevice->getName());
       pNameNode->appendChild(txtNode);
       pDeviceNode->appendChild(pNameNode);
     }
     AutoPtr<Element> pLocationNode = _pDocument->createElement("location");
     AutoPtr<Element> pValueNode = _pDocument->createElement("x");
-    AutoPtr<Text> txtNode = _pDocument->createTextNode(DoubleToString(_pDevice->GetLocationX()));
+    AutoPtr<Text> txtNode = _pDocument->createTextNode(doubleToString(_pDevice->getLocationX()));
     pValueNode->appendChild(txtNode);
     pLocationNode->appendChild(pValueNode);
 
     pValueNode = _pDocument->createElement("y");
-    txtNode = _pDocument->createTextNode(DoubleToString(_pDevice->GetLocationY()));
+    txtNode = _pDocument->createTextNode(doubleToString(_pDevice->getLocationY()));
     pValueNode->appendChild(txtNode);
     pLocationNode->appendChild(pValueNode);
 
     pValueNode = _pDocument->createElement("z");
-    txtNode = _pDocument->createTextNode(DoubleToString(_pDevice->GetLocationZ()));
+    txtNode = _pDocument->createTextNode(doubleToString(_pDevice->getLocationZ()));
     pValueNode->appendChild(txtNode);
     pLocationNode->appendChild(pValueNode);
 
     pDeviceNode->appendChild(pLocationNode);
     _parentNode->appendChild(pDeviceNode);
-  } // DeviceToXML
+  } // deviceToXML
 
   void ZoneToXML(const Zone* _pZone, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
     AutoPtr<Element> pZoneNode = _pDocument->createElement("zone");
-    pZoneNode->setAttribute("id", IntToString(_pZone->GetZoneID()));
-    if(!_pZone->GetName().empty()) {
+    pZoneNode->setAttribute("id", intToString(_pZone->getZoneID()));
+    if(!_pZone->getName().empty()) {
       AutoPtr<Element> pNameNode = _pDocument->createElement("name");
-      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pZone->GetName());
+      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pZone->getName());
       pNameNode->appendChild(txtNode);
       pZoneNode->appendChild(pNameNode);
     }
     _parentNode->appendChild(pZoneNode);
-  } // ZoneToXML
+  } // zoneToXML
 
   void ModulatorToXML(const Modulator* _pModulator, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
     AutoPtr<Element> pModulatorNode = _pDocument->createElement("modulator");
-    pModulatorNode->setAttribute("id", _pModulator->GetDSID().ToString());
-    if(!_pModulator->GetName().empty()) {
+    pModulatorNode->setAttribute("id", _pModulator->getDSID().toString());
+    if(!_pModulator->getName().empty()) {
       AutoPtr<Element> pNameNode = _pDocument->createElement("name");
-      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pModulator->GetName());
+      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pModulator->getName());
       pNameNode->appendChild(txtNode);
       pModulatorNode->appendChild(pNameNode);
     }
     _parentNode->appendChild(pModulatorNode);
-  } // ModulatorToXML
+  } // modulatorToXML
 
-  void Apartment::WriteConfigurationToXML(const string& _fileName) {
-    Log("Writing apartment config to '" + _fileName + "'", lsInfo);
+  void Apartment::writeConfigurationToXML(const string& _fileName) {
+    log("Writing apartment config to '" + _fileName + "'", lsInfo);
     AutoPtr<Document> pDoc = new Document;
 
     AutoPtr<ProcessingInstruction> pXMLHeader = pDoc->createProcessingInstruction("xml", "version='1.0' encoding='utf-8'");
     pDoc->appendChild(pXMLHeader);
 
     AutoPtr<Element> pRoot = pDoc->createElement("config");
-    pRoot->setAttribute("version", IntToString(ApartmentConfigVersion));
+    pRoot->setAttribute("version", intToString(ApartmentConfigVersion));
     pDoc->appendChild(pRoot);
 
     // apartment
     AutoPtr<Element> pApartment = pDoc->createElement("apartment");
     pRoot->appendChild(pApartment);
     AutoPtr<Element> pApartmentName = pDoc->createElement("name");
-    AutoPtr<Text> pApartmentNameText = pDoc->createTextNode(GetName());
+    AutoPtr<Text> pApartmentNameText = pDoc->createTextNode(getName());
     pApartmentName->appendChild(pApartmentNameText);
     pApartment->appendChild(pApartmentName);
 
@@ -1101,161 +1101,161 @@ namespace dss {
       // move it to the desired location
       rename(tmpOut.c_str(), _fileName.c_str());
     } else {
-      Logger::GetInstance()->Log("Could not open file '" + tmpOut + "' for writing", lsFatal);
+      Logger::getInstance()->log("Could not open file '" + tmpOut + "' for writing", lsFatal);
     }
-  } // WriteConfigurationToXML
+  } // writeConfigurationToXML
 
-  Device& Apartment::GetDeviceByDSID(const dsid_t _dsid) const {
+  Device& Apartment::getDeviceByDSID(const dsid_t _dsid) const {
     foreach(Device* dev, m_Devices) {
-      if(dev->GetDSID() == _dsid) {
+      if(dev->getDSID() == _dsid) {
         return *dev;
       }
     }
-    throw ItemNotFoundException(_dsid.ToString());
-  } // GetDeviceByShortAddress const
+    throw ItemNotFoundException(_dsid.toString());
+  } // getDeviceByShortAddress const
 
-  Device& Apartment::GetDeviceByDSID(const dsid_t _dsid) {
+  Device& Apartment::getDeviceByDSID(const dsid_t _dsid) {
     foreach(Device* dev, m_Devices) {
-      if(dev->GetDSID() == _dsid) {
+      if(dev->getDSID() == _dsid) {
         return *dev;
       }
     }
-    throw ItemNotFoundException(_dsid.ToString());
-  } // GetDeviceByShortAddress
+    throw ItemNotFoundException(_dsid.toString());
+  } // getDeviceByShortAddress
 
-  Device& Apartment::GetDeviceByShortAddress(const Modulator& _modulator, const devid_t _deviceID) const {
+  Device& Apartment::getDeviceByShortAddress(const Modulator& _modulator, const devid_t _deviceID) const {
     foreach(Device* dev, m_Devices) {
-      if((dev->GetShortAddress() == _deviceID) &&
-          (_modulator.GetBusID() == dev->GetModulatorID())) {
+      if((dev->getShortAddress() == _deviceID) &&
+          (_modulator.getBusID() == dev->getModulatorID())) {
         return *dev;
       }
     }
-    throw ItemNotFoundException(IntToString(_deviceID));
-  } // GetDeviceByShortAddress
+    throw ItemNotFoundException(intToString(_deviceID));
+  } // getDeviceByShortAddress
 
-  Device& Apartment::GetDeviceByName(const string& _name) {
+  Device& Apartment::getDeviceByName(const string& _name) {
     foreach(Device* dev, m_Devices) {
-      if(dev->GetName() == _name) {
+      if(dev->getName() == _name) {
         return *dev;
       }
     }
     throw ItemNotFoundException(_name);
-  } // GetDeviceByName
+  } // getDeviceByName
 
-  Set Apartment::GetDevices() const {
+  Set Apartment::getDevices() const {
     DeviceVector devs;
     foreach(Device* dev, m_Devices) {
       devs.push_back(DeviceReference(*dev, *this));
     }
 
     return Set(devs);
-  } // GetDevices
+  } // getDevices
 
-  Zone& Apartment::GetZone(const string& _zoneName) {
+  Zone& Apartment::getZone(const string& _zoneName) {
     foreach(Zone* zone, m_Zones) {
-      if(zone->GetName() == _zoneName) {
+      if(zone->getName() == _zoneName) {
         return *zone;
       }
     }
     throw ItemNotFoundException(_zoneName);
-  } // GetZone(name)
+  } // getZone(name)
 
-  Zone& Apartment::GetZone(const int _id) {
+  Zone& Apartment::getZone(const int _id) {
     foreach(Zone* zone, m_Zones) {
-      if(zone->GetZoneID() == _id) {
+      if(zone->getZoneID() == _id) {
         return *zone;
       }
     }
-    throw ItemNotFoundException(IntToString(_id));
-  } // GetZone(id)
+    throw ItemNotFoundException(intToString(_id));
+  } // getZone(id)
 
-  vector<Zone*>& Apartment::GetZones() {
+  vector<Zone*>& Apartment::getZones() {
     return m_Zones;
-  } // GetZones
+  } // getZones
 
-  Modulator& Apartment::GetModulator(const string& _modName) {
+  Modulator& Apartment::getModulator(const string& _modName) {
     foreach(Modulator* modulator, m_Modulators) {
-      if(modulator->GetName() == _modName) {
+      if(modulator->getName() == _modName) {
         return *modulator;
       }
     }
     throw ItemNotFoundException(_modName);
-  } // GetModulator(name)
+  } // getModulator(name)
 
-  Modulator& Apartment::GetModulatorByBusID(const int _busId) {
+  Modulator& Apartment::getModulatorByBusID(const int _busId) {
     foreach(Modulator* modulator, m_Modulators) {
-      if(modulator->GetBusID() == _busId) {
+      if(modulator->getBusID() == _busId) {
         return *modulator;
       }
     }
-    throw ItemNotFoundException(IntToString(_busId));
-  } // GetModulatorByBusID
+    throw ItemNotFoundException(intToString(_busId));
+  } // getModulatorByBusID
 
-  Modulator& Apartment::GetModulatorByDSID(const dsid_t _dsid) {
+  Modulator& Apartment::getModulatorByDSID(const dsid_t _dsid) {
     foreach(Modulator* modulator, m_Modulators) {
-      if(modulator->GetDSID() == _dsid) {
+      if(modulator->getDSID() == _dsid) {
         return *modulator;
       }
     }
-    throw ItemNotFoundException(_dsid.ToString());
-  } // GetModulatorByDSID
+    throw ItemNotFoundException(_dsid.toString());
+  } // getModulatorByDSID
 
-  vector<Modulator*>& Apartment::GetModulators() {
+  vector<Modulator*>& Apartment::getModulators() {
     return m_Modulators;
-  } // GetModulators
+  } // getModulators
 
   // Group queries
-  Group& Apartment::GetGroup(const string& _name) {
-    Group* pResult = GetZone(0).GetGroup(_name);
+  Group& Apartment::getGroup(const string& _name) {
+    Group* pResult = getZone(0).getGroup(_name);
     if(pResult != NULL) {
       return *pResult;
     }
     throw ItemNotFoundException(_name);
-  } // GetGroup(name)
+  } // getGroup(name)
 
-  Group& Apartment::GetGroup(const int _id) {
-    Group* pResult = GetZone(0).GetGroup(_id);
+  Group& Apartment::getGroup(const int _id) {
+    Group* pResult = getZone(0).getGroup(_id);
     if(pResult != NULL) {
       return *pResult;
     }
-    throw ItemNotFoundException(IntToString(_id));
-  } // GetGroup(id)
+    throw ItemNotFoundException(intToString(_id));
+  } // getGroup(id)
 
-  Device& Apartment::AllocateDevice(const dsid_t _dsid) {
+  Device& Apartment::allocateDevice(const dsid_t _dsid) {
     // search for existing device
     foreach(Device* device, m_Devices) {
-      if(device->GetDSID() == _dsid) {
-        GetZone(0).AddDevice(DeviceReference(*device, *this));
+      if(device->getDSID() == _dsid) {
+        getZone(0).addDevice(DeviceReference(*device, *this));
         return *device;
       }
     }
 
     // search for stale devices
     foreach(Device* device, m_StaleDevices) {
-      if(device->GetDSID() == _dsid) {
+      if(device->getDSID() == _dsid) {
         Device* pResult = device;
         m_Devices.push_back(pResult);
         m_StaleDevices.erase(std::find(m_StaleDevices.begin(), m_StaleDevices.end(),device));
-        GetZone(0).AddDevice(DeviceReference(*pResult, *this));
+        getZone(0).addDevice(DeviceReference(*pResult, *this));
         return *pResult;
       }
     }
 
     Device* pResult = new Device(_dsid, this);
     m_Devices.push_back(pResult);
-    GetZone(0).AddDevice(DeviceReference(*pResult, *this));
+    getZone(0).addDevice(DeviceReference(*pResult, *this));
     return *pResult;
-  } // AllocateDevice
+  } // allocateDevice
 
-  Modulator& Apartment::AllocateModulator(const dsid_t _dsid) {
+  Modulator& Apartment::allocateModulator(const dsid_t _dsid) {
     foreach(Modulator* modulator, m_Modulators) {
-      if((modulator)->GetDSID() == _dsid) {
+      if((modulator)->getDSID() == _dsid) {
         return *modulator;
       }
     }
 
     foreach(Modulator* modulator, m_StaleModulators) {
-      if(modulator->GetDSID() == _dsid) {
+      if(modulator->getDSID() == _dsid) {
         m_Modulators.push_back(modulator);
         m_StaleModulators.erase(std::find(m_StaleModulators.begin(), m_StaleModulators.end(), modulator));
         return *modulator;
@@ -1265,27 +1265,27 @@ namespace dss {
     Modulator* pResult = new Modulator(_dsid);
     m_Modulators.push_back(pResult);
     return *pResult;
-  } // AllocateModulator
+  } // allocateModulator
 
-  Zone& Apartment::AllocateZone(Modulator& _modulator, int _zoneID) {
+  Zone& Apartment::allocateZone(Modulator& _modulator, int _zoneID) {
     foreach(Zone* zone, m_StaleZones) {
-  		if(zone->GetZoneID() == _zoneID) {
+  		if(zone->getZoneID() == _zoneID) {
   			m_Zones.push_back(zone);
   			m_StaleZones.erase(std::find(m_StaleZones.begin(), m_StaleZones.end(), zone));
-  	    zone->AddToModulator(_modulator);
-  	    if(!IsInitializing()) {
-  	      DSS::GetInstance()->GetDS485Interface().CreateZone(_modulator.GetBusID(), _zoneID);
+  	    zone->addToModulator(_modulator);
+  	    if(!isInitializing()) {
+  	      DSS::getInstance()->getDS485Interface().createZone(_modulator.getBusID(), _zoneID);
   	    }
-  	    AddDefaultGroupsToZone(*zone);
+  	    addDefaultGroupsToZone(*zone);
   			return *zone;
   		}
   	}
 
     foreach(Zone* zone, m_Zones) {
-  		if(zone->GetZoneID() == _zoneID) {
-  		  vector<int> modsOfZone = zone->GetModulators();
-  		  if(find(modsOfZone.begin(), modsOfZone.end(), _modulator.GetBusID()) == modsOfZone.end()) {
-          DSS::GetInstance()->GetDS485Interface().CreateZone(_modulator.GetBusID(), _zoneID);
+  		if(zone->getZoneID() == _zoneID) {
+  		  vector<int> modsOfZone = zone->getModulators();
+  		  if(find(modsOfZone.begin(), modsOfZone.end(), _modulator.getBusID()) == modsOfZone.end()) {
+          DSS::getInstance()->getDS485Interface().createZone(_modulator.getBusID(), _zoneID);
   		  }
   			return *zone;
   		}
@@ -1293,13 +1293,13 @@ namespace dss {
 
   	Zone* zone = new Zone(_zoneID);
   	m_Zones.push_back(zone);
-  	zone->AddToModulator(_modulator);
-  	AddDefaultGroupsToZone(*zone);
-    if(!IsInitializing()) {
-      DSS::GetInstance()->GetDS485Interface().CreateZone(_modulator.GetBusID(), _zoneID);
+  	zone->addToModulator(_modulator);
+  	addDefaultGroupsToZone(*zone);
+    if(!isInitializing()) {
+      DSS::getInstance()->getDS485Interface().createZone(_modulator.getBusID(), _zoneID);
     }
   	return *zone;
-  } // AllocateZone
+  } // allocateZone
 
   class SetLastCalledSceneAction : public IDeviceAction {
   protected:
@@ -1309,22 +1309,22 @@ namespace dss {
     : m_SceneID(_sceneID) {}
     virtual ~SetLastCalledSceneAction() {}
 
-    virtual bool Perform(Device& _device) {
-      _device.SetLastCalledScene(m_SceneID);
+    virtual bool perform(Device& _device) {
+      _device.setLastCalledScene(m_SceneID);
       return true;
     }
   };
 
-  void Apartment::OnGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID) {
+  void Apartment::onGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID) {
     try {
-      Zone& zone = GetZone(_zoneID);
-      Group* group = zone.GetGroup(_groupID);
+      Zone& zone = getZone(_zoneID);
+      Group* group = zone.getGroup(_groupID);
       if(group != NULL) {
-        Log("OnGroupCallScene: group-id '" + IntToString(_groupID) + "' in Zone '" + IntToString(_zoneID) + "' scene: " + IntToString(_sceneID));
+        log("OnGroupCallScene: group-id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "' scene: " + intToString(_sceneID));
         if(SceneHelper::rememberScene(_sceneID & 0x00ff)) {
-          Set s = zone.GetDevices().GetByGroup(_groupID);
+          Set s = zone.getDevices().getByGroup(_groupID);
           SetLastCalledSceneAction act(_sceneID & 0x00ff);
-          s.Perform(act);
+          s.perform(act);
 
           vector<Zone*> zonesToUpdate;
           if(_zoneID == 0) {
@@ -1334,92 +1334,92 @@ namespace dss {
           }
           foreach(Zone* pZone, zonesToUpdate) {
             if(_groupID == 0) {
-              foreach(Group* pGroup, pZone->GetGroups()) {
-                pGroup->SetLastCalledScene(_sceneID & 0x00ff);
+              foreach(Group* pGroup, pZone->getGroups()) {
+                pGroup->setLastCalledScene(_sceneID & 0x00ff);
               }
             } else {
-              Group* pGroup = pZone->GetGroup(_groupID);
+              Group* pGroup = pZone->getGroup(_groupID);
               if(pGroup != NULL) {
-                pGroup->SetLastCalledScene(_sceneID & 0x00ff);
+                pGroup->setLastCalledScene(_sceneID & 0x00ff);
               }
             }
           }
         }
       } else {
-        Log("OnGroupCallScene: Could not find group with id '" + IntToString(_groupID) + "' in Zone '" + IntToString(_zoneID) + "'");
+        log("OnGroupCallScene: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'");
       }
     } catch(ItemNotFoundException& e) {
-      Log("OnGroupCallScene: Could not find zone with id '" + IntToString(_zoneID) + "'");
+      log("OnGroupCallScene: Could not find zone with id '" + intToString(_zoneID) + "'");
     }
 
-  } // OnGroupCallScene
+  } // onGroupCallScene
 
-  void Apartment::OnDeviceCallScene(const int _modulatorID, const int _deviceID, const int _sceneID) {
+  void Apartment::onDeviceCallScene(const int _modulatorID, const int _deviceID, const int _sceneID) {
     try {
-      Modulator& mod = GetModulatorByBusID(_modulatorID);
+      Modulator& mod = getModulatorByBusID(_modulatorID);
       try {
-        Log("OnDeviceCallScene: modulator-id '" + IntToString(_modulatorID) + "' for device '" + IntToString(_deviceID) + "' scene: " + IntToString(_sceneID));
-        DeviceReference devRef = mod.GetDevices().GetByBusID(_deviceID);
+        log("OnDeviceCallScene: modulator-id '" + intToString(_modulatorID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID));
+        DeviceReference devRef = mod.getDevices().getByBusID(_deviceID);
         if(SceneHelper::rememberScene(_sceneID & 0x00ff)) {
-          devRef.GetDevice().SetLastCalledScene(_sceneID & 0x00ff);
+          devRef.getDevice().setLastCalledScene(_sceneID & 0x00ff);
         }
       } catch(ItemNotFoundException& e) {
-        Log("OnDeviceCallScene: Could not find device with bus-id '" + IntToString(_deviceID) + "' on modulator '" + IntToString(_modulatorID) + "' scene:" + IntToString(_sceneID));
+        log("OnDeviceCallScene: Could not find device with bus-id '" + intToString(_deviceID) + "' on modulator '" + intToString(_modulatorID) + "' scene:" + intToString(_sceneID));
       }
     } catch(ItemNotFoundException& e) {
-      Log("OnDeviceCallScene: Could not find modulator with bus-id '" + IntToString(_modulatorID) + "'");
+      log("OnDeviceCallScene: Could not find modulator with bus-id '" + intToString(_modulatorID) + "'");
     }
-  } // OnDeviceCallScene
+  } // onDeviceCallScene
 
-  void Apartment::OnAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID) {
+  void Apartment::onAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID) {
     // get full dsid
-    Log("New Device found");
-    Log("  Modulator: " + IntToString(_modID));
-    Log("  Zone:      " + IntToString(_zoneID));
-    Log("  BusID:     " + IntToString(_devID));
-    Log("  FID:       " + IntToString(_functionID));
+    log("New Device found");
+    log("  Modulator: " + intToString(_modID));
+    log("  Zone:      " + intToString(_zoneID));
+    log("  BusID:     " + intToString(_devID));
+    log("  FID:       " + intToString(_functionID));
 
-    dsid_t dsid = GetDSS().GetDS485Interface().GetDSIDOfDevice(_modID, _devID);
-    Device& dev = AllocateDevice(dsid);
+    dsid_t dsid = getDSS().getDS485Interface().getDSIDOfDevice(_modID, _devID);
+    Device& dev = allocateDevice(dsid);
 
-    Log("  DSID:      " + dsid.ToString());
+    log("  DSID:      " + dsid.toString());
 
     // remove from old modulator
     try {
-      Modulator& oldModulator = GetModulatorByBusID(dev.GetModulatorID());
-      oldModulator.RemoveDevice(DeviceReference(dev, *this));
+      Modulator& oldModulator = getModulatorByBusID(dev.getModulatorID());
+      oldModulator.removeDevice(DeviceReference(dev, *this));
     } catch(runtime_error&) {
     }
 
     // remove from old zone
     try {
-      Zone& oldZone = GetZone(dev.GetZoneID());
-      oldZone.RemoveDevice(DeviceReference(dev, *this));
+      Zone& oldZone = getZone(dev.getZoneID());
+      oldZone.removeDevice(DeviceReference(dev, *this));
     } catch(runtime_error&) {
     }
 
     // update device
-    dev.SetModulatorID(_modID);
-    dev.SetZoneID(_zoneID);
-    dev.SetShortAddress(_devID);
-    dev.SetFunctionID(_functionID);
+    dev.setModulatorID(_modID);
+    dev.setZoneID(_zoneID);
+    dev.setShortAddress(_devID);
+    dev.setFunctionID(_functionID);
 
     // add to new modulator
-    Modulator& modulator = GetModulatorByBusID(_modID);
-    modulator.AddDevice(DeviceReference(dev, *this));
+    Modulator& modulator = getModulatorByBusID(_modID);
+    modulator.addDevice(DeviceReference(dev, *this));
 
     // add to new zone
-    Zone& newZone = AllocateZone(modulator, _zoneID);
-    newZone.AddDevice(DeviceReference(dev, *this));
+    Zone& newZone = allocateZone(modulator, _zoneID);
+    newZone.addDevice(DeviceReference(dev, *this));
 
     // get groups of device
-    dev.ResetGroups();
-    vector<int> groups = GetDSS().GetDS485Interface().GetGroupsOfDevice(_modID, _devID);
+    dev.resetGroups();
+    vector<int> groups = getDSS().getDS485Interface().getGroupsOfDevice(_modID, _devID);
     foreach(int iGroup, groups) {
-      Log("  Adding to Group: " + IntToString(iGroup));
-      dev.AddToGroup(iGroup);
+      log("  Adding to Group: " + intToString(iGroup));
+      dev.addToGroup(iGroup);
     }
-  } // OnAddDevice
+  } // onAddDevice
 
 
   //================================================== Modulator
@@ -1432,219 +1432,219 @@ namespace dss {
   {
   } // ctor
 
-  Set Modulator::GetDevices() const {
+  Set Modulator::getDevices() const {
     return m_ConnectedDevices;
-  } // GetDevices
+  } // getDevices
 
-  void Modulator::AddDevice(const DeviceReference& _device) {
-    if(!Contains(m_ConnectedDevices, _device)) {
+  void Modulator::addDevice(const DeviceReference& _device) {
+    if(!contains(m_ConnectedDevices, _device)) {
   	  m_ConnectedDevices.push_back(_device);
     } else {
-      Logger::GetInstance()->Log("Modulator::AddDevice: DUPLICATE DEVICE Detected modulator: " + IntToString(m_BusID) + " device: " + _device.GetDSID().ToString(), lsFatal);
+      Logger::getInstance()->log("Modulator::addDevice: DUPLICATE DEVICE Detected modulator: " + intToString(m_BusID) + " device: " + _device.getDSID().toString(), lsFatal);
     }
-  } // AddDevice
+  } // addDevice
 
-  void Modulator::RemoveDevice(const DeviceReference& _device) {
+  void Modulator::removeDevice(const DeviceReference& _device) {
     DeviceIterator pos = find(m_ConnectedDevices.begin(), m_ConnectedDevices.end(), _device);
     if(pos != m_ConnectedDevices.end()) {
       m_ConnectedDevices.erase(pos);
     }
-  } // RemoveDevice
+  } // removeDevice
 
-  dsid_t Modulator::GetDSID() const {
+  dsid_t Modulator::getDSID() const {
     return m_DSID;
-  } // GetDSID
+  } // getDSID
 
-  int Modulator::GetBusID() const {
+  int Modulator::getBusID() const {
     return m_BusID;
-  } // GetBusID
+  } // getBusID
 
-  void Modulator::SetBusID(const int _busID) {
+  void Modulator::setBusID(const int _busID) {
     m_BusID = _busID;
-  } // SetBusID
+  } // setBusID
 
-  unsigned long Modulator::GetPowerConsumption() {
+  unsigned long Modulator::getPowerConsumption() {
     DateTime now;
-    if(!now.AddSeconds(-1).Before(m_PowerConsumptionAge)) {
-      m_PowerConsumption =  DSS::GetInstance()->GetDS485Interface().GetPowerConsumption(m_BusID);
+    if(!now.addSeconds(-1).before(m_PowerConsumptionAge)) {
+      m_PowerConsumption =  DSS::getInstance()->getDS485Interface().getPowerConsumption(m_BusID);
       m_PowerConsumptionAge = now;
     }
     return m_PowerConsumption;
-  } // GetPowerConsumption
+  } // getPowerConsumption
 
-  unsigned long Modulator::GetEnergyMeterValue() {
+  unsigned long Modulator::getEnergyMeterValue() {
     DateTime now;
-    if(!now.AddSeconds(-1).Before(m_EnergyMeterValueAge)) {
-      m_EnergyMeterValue = DSS::GetInstance()->GetDS485Interface().GetEnergyMeterValue(m_BusID);
+    if(!now.addSeconds(-1).before(m_EnergyMeterValueAge)) {
+      m_EnergyMeterValue = DSS::getInstance()->getDS485Interface().getEnergyMeterValue(m_BusID);
       m_EnergyMeterValueAge = now;
     }
     return m_EnergyMeterValue;
-  } // GetEnergyMeterValue
+  } // getEnergyMeterValue
 
 
   //================================================== Zone
 
   Zone::~Zone() {
-    ScrubVector(m_Groups);
+    scrubVector(m_Groups);
     // we don't own our modulators
     m_Modulators.clear();
   } // dtor
 
-  Set Zone::GetDevices() const {
+  Set Zone::getDevices() const {
     return Set(m_Devices);
-  } // GetDevices
+  } // getDevices
 
-  void Zone::AddDevice(const DeviceReference& _device) {
-    const Device& dev = _device.GetDevice();
-  	int oldZoneID = dev.GetZoneID();
+  void Zone::addDevice(const DeviceReference& _device) {
+    const Device& dev = _device.getDevice();
+  	int oldZoneID = dev.getZoneID();
   	if(oldZoneID != -1) {
   		try {
-  		  Zone& oldZone = dev.GetApartment().GetZone(oldZoneID);
-  		  oldZone.RemoveDevice(_device);
+  		  Zone& oldZone = dev.getApartment().getZone(oldZoneID);
+  		  oldZone.removeDevice(_device);
   		} catch(runtime_error&) {
   		}
   	}
-    if(!Contains(m_Devices, _device)) {
+    if(!contains(m_Devices, _device)) {
       m_Devices.push_back(_device);
-      if(!dev.GetApartment().IsInitializing()) {
-        DSS::GetInstance()->GetDS485Interface().SetZoneID(dev.GetModulatorID(), dev.GetShortAddress(), m_ZoneID);
+      if(!dev.getApartment().isInitializing()) {
+        DSS::getInstance()->getDS485Interface().setZoneID(dev.getModulatorID(), dev.getShortAddress(), m_ZoneID);
       }
     } else {
-      Logger::GetInstance()->Log("Zone::AddDevice: DUPLICATE DEVICE Detected Zone: " + IntToString(m_ZoneID) + " device: " + _device.GetDSID().ToString(), lsFatal);
+      Logger::getInstance()->log("Zone::addDevice: DUPLICATE DEVICE Detected Zone: " + intToString(m_ZoneID) + " device: " + _device.getDSID().toString(), lsFatal);
     }
 
-  } // AddDevice
+  } // addDevice
 
-  void Zone::AddGroup(Group* _group) {
+  void Zone::addGroup(Group* _group) {
     m_Groups.push_back(_group);
   }
 
-  void Zone::RemoveDevice(const DeviceReference& _device) {
+  void Zone::removeDevice(const DeviceReference& _device) {
     DeviceIterator pos = find(m_Devices.begin(), m_Devices.end(), _device);
     if(pos != m_Devices.end()) {
       m_Devices.erase(pos);
     }
-  } // RemoveDevice
+  } // removeDevice
 
-  Group* Zone::GetGroup(const string& _name) const {
+  Group* Zone::getGroup(const string& _name) const {
     for(vector<Group*>::const_iterator ipGroup = m_Groups.begin(), e = m_Groups.end();
         ipGroup != e; ++ipGroup)
     {
-        if((*ipGroup)->GetName() == _name) {
+        if((*ipGroup)->getName() == _name) {
           return *ipGroup;
         }
     }
     return NULL;
-  } // GetGroup
+  } // getGroup
 
-  Group* Zone::GetGroup(const int _id) const {
+  Group* Zone::getGroup(const int _id) const {
     for(vector<Group*>::const_iterator ipGroup = m_Groups.begin(), e = m_Groups.end();
         ipGroup != e; ++ipGroup)
     {
-        if((*ipGroup)->GetID() == _id) {
+        if((*ipGroup)->getID() == _id) {
           return *ipGroup;
         }
     }
     return NULL;
-  } // GetGroup
+  } // getGroup
 
   void AddGroup(UserGroup& _group);
   void RemoveGroup(UserGroup& _group);
 
-  int Zone::GetZoneID() const {
+  int Zone::getZoneID() const {
     return m_ZoneID;
-  } // GetZoneID
+  } // getZoneID
 
-  void Zone::SetZoneID(const int _value) {
+  void Zone::setZoneID(const int _value) {
     m_ZoneID = _value;
-  } // SetZoneID
+  } // setZoneID
 
-  void Zone::AddToModulator(Modulator& _modulator) {
+  void Zone::addToModulator(Modulator& _modulator) {
     m_Modulators.push_back(&_modulator);
-  } // AddToModulator
+  } // addToModulator
 
-  void Zone::RemoveFromModulator(Modulator& _modulator) {
+  void Zone::removeFromModulator(Modulator& _modulator) {
     m_Modulators.erase(find(m_Modulators.begin(), m_Modulators.end(), &_modulator));
-  } // RemoveFromModulator
+  } // removeFromModulator
 
-  vector<int> Zone::GetModulators() const {
+  vector<int> Zone::getModulators() const {
   	vector<int> result;
   	for(vector<Modulator*>::const_iterator iModulator = m_Modulators.begin(), e = m_Modulators.end();
   	    iModulator != e; ++iModulator) {
-  		result.push_back((*iModulator)->GetBusID());
+  		result.push_back((*iModulator)->getBusID());
   	}
   	return result;
-  } // GetModulators
+  } // getModulators
 
-  void Zone::TurnOn() {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdTurnOn, *this, GroupIDBroadcast);
-  } // TurnOn
+  void Zone::turnOn() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdTurnOn, *this, GroupIDBroadcast);
+  } // turnOn
 
-  void Zone::TurnOff() {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdTurnOff, *this, GroupIDBroadcast);
-  } // TurnOff
+  void Zone::turnOff() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdTurnOff, *this, GroupIDBroadcast);
+  } // turnOff
 
-  void Zone::IncreaseValue(const int _parameterNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdIncreaseValue, *this, GroupIDBroadcast, _parameterNr);
-  } // IncreaseValue
+  void Zone::increaseValue(const int _parameterNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseValue, *this, GroupIDBroadcast, _parameterNr);
+  } // increaseValue
 
-  void Zone::DecreaseValue(const int _parameterNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdDecreaseValue, *this, GroupIDBroadcast, _parameterNr);
-  } // DecreaseValue
+  void Zone::decreaseValue(const int _parameterNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseValue, *this, GroupIDBroadcast, _parameterNr);
+  } // decreaseValue
 
-  void Zone::Enable() {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdEnable, *this, GroupIDBroadcast);
-  } // Enable
+  void Zone::enable() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdEnable, *this, GroupIDBroadcast);
+  } // enable
 
-  void Zone::Disable() {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdDisable, *this, GroupIDBroadcast);
-  } // Disable
+  void Zone::disable() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdDisable, *this, GroupIDBroadcast);
+  } // disable
 
-  void Zone::StartDim(const bool _directionUp, const int _parameterNr) {
+  void Zone::startDim(const bool _directionUp, const int _parameterNr) {
     if(_directionUp) {
-      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStartDimUp, *this, GroupIDBroadcast, _parameterNr);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimUp, *this, GroupIDBroadcast, _parameterNr);
     } else {
-      DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStartDimDown, *this, GroupIDBroadcast, _parameterNr);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimDown, *this, GroupIDBroadcast, _parameterNr);
     }
-  } // StartDim
+  } // startDim
 
-  void Zone::EndDim(const int _parameterNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdStopDim, *this, GroupIDBroadcast, _parameterNr);
-  } // EndDim
+  void Zone::endDim(const int _parameterNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdStopDim, *this, GroupIDBroadcast, _parameterNr);
+  } // endDim
 
-  void Zone::SetValue(const double _value, const int _parameterNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdSetValue, *this, GroupIDBroadcast, _parameterNr);
-  } // SetValue
+  void Zone::setValue(const double _value, const int _parameterNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, *this, GroupIDBroadcast, _parameterNr);
+  } // setValue
 
-  void Zone::CallScene(const int _sceneNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdCallScene, *this, GroupIDBroadcast, _sceneNr);
-  } // CallScene
+  void Zone::callScene(const int _sceneNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdCallScene, *this, GroupIDBroadcast, _sceneNr);
+  } // callScene
 
-  void Zone::SaveScene(const int _sceneNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdSaveScene, *this, GroupIDBroadcast, _sceneNr);
-  } // SaveScene
+  void Zone::saveScene(const int _sceneNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdSaveScene, *this, GroupIDBroadcast, _sceneNr);
+  } // saveScene
 
-  void Zone::UndoScene(const int _sceneNr) {
-    DSS::GetInstance()->GetDS485Interface().SendCommand(cmdUndoScene, *this, GroupIDBroadcast, _sceneNr);
-  } // UndoScene
+  void Zone::undoScene(const int _sceneNr) {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdUndoScene, *this, GroupIDBroadcast, _sceneNr);
+  } // undoScene
 
-  unsigned long Zone::GetPowerConsumption() {
-    return GetDevices().GetPowerConsumption();
-  } // GetPowerConsumption
+  unsigned long Zone::getPowerConsumption() {
+    return getDevices().getPowerConsumption();
+  } // getPowerConsumption
 
-  void Zone::NextScene() {
-    Group* broadcastGroup = GetGroup(0);
+  void Zone::nextScene() {
+    Group* broadcastGroup = getGroup(0);
     if(broadcastGroup != NULL) {
-      broadcastGroup->NextScene();
+      broadcastGroup->nextScene();
     }
-  } // NextScene
+  } // nextScene
 
-  void Zone::PreviousScene() {
-    Group* broadcastGroup = GetGroup(0);
+  void Zone::previousScene() {
+    Group* broadcastGroup = getGroup(0);
     if(broadcastGroup != NULL) {
-      broadcastGroup->PreviousScene();
+      broadcastGroup->previousScene();
     }
-  } // PreviousScene
+  } // previousScene
 
 
   //============================================= Group
@@ -1657,52 +1657,52 @@ namespace dss {
   {
   } // ctor
 
-  int Group::GetID() const {
+  int Group::getID() const {
     return m_GroupID;
-  } // GetID
+  } // getID
 
-  Set Group::GetDevices() const {
-    return m_Apartment.GetDevices().GetByZone(m_ZoneID).GetByGroup(m_GroupID);
-  } // GetDevices
+  Set Group::getDevices() const {
+    return m_Apartment.getDevices().getByZone(m_ZoneID).getByGroup(m_GroupID);
+  } // getDevices
 
-  void Group::AddDevice(const DeviceReference& _device) { /* do nothing or throw? */ }
-  void Group::RemoveDevice(const DeviceReference& _device) { /* do nothing or throw? */ }
+  void Group::addDevice(const DeviceReference& _device) { /* do nothing or throw? */ }
+  void Group::removeDevice(const DeviceReference& _device) { /* do nothing or throw? */ }
 
-  void Group::TurnOn() {
-    GetDevices().TurnOn();
-  } // TurnOn
+  void Group::turnOn() {
+    getDevices().turnOn();
+  } // turnOn
 
-  void Group::TurnOff() {
-    GetDevices().TurnOff();
-  } // TurnOff
+  void Group::turnOff() {
+    getDevices().turnOff();
+  } // turnOff
 
-  void Group::IncreaseValue(const int _parameterNr) {
-    GetDevices().IncreaseValue(_parameterNr);
-  } // IncreaseValue
+  void Group::increaseValue(const int _parameterNr) {
+    getDevices().increaseValue(_parameterNr);
+  } // increaseValue
 
-  void Group::DecreaseValue(const int _parameterNr) {
-    GetDevices().DecreaseValue(_parameterNr);
-  } // DecreaseValue
+  void Group::decreaseValue(const int _parameterNr) {
+    getDevices().decreaseValue(_parameterNr);
+  } // decreaseValue
 
-  void Group::Enable() {
-    GetDevices().Enable();
-  } // Enable
+  void Group::enable() {
+    getDevices().enable();
+  } // enable
 
-  void Group::Disable() {
-    GetDevices().Disable();
-  } // Disable
+  void Group::disable() {
+    getDevices().disable();
+  } // disable
 
-  void Group::StartDim(bool _directionUp, const int _parameterNr)  {
-    GetDevices().StartDim(_directionUp, _parameterNr);
-  } // StartDim
+  void Group::startDim(bool _directionUp, const int _parameterNr)  {
+    getDevices().startDim(_directionUp, _parameterNr);
+  } // startDim
 
-  void Group::EndDim(const int _parameterNr) {
-    GetDevices().EndDim(_parameterNr);
-  } // EndDim
+  void Group::endDim(const int _parameterNr) {
+    getDevices().endDim(_parameterNr);
+  } // endDim
 
-  void Group::SetValue(const double _value, int _parameterNr) {
-    GetDevices().SetValue(_value, _parameterNr);
-  } // SetValue
+  void Group::setValue(const double _value, int _parameterNr) {
+    getDevices().setValue(_value, _parameterNr);
+  } // setValue
 
   Group& Group::operator=(const Group& _other) {
     m_Devices = _other.m_Devices;
@@ -1712,34 +1712,34 @@ namespace dss {
     return *this;
   } // operator=
 
-  void Group::CallScene(const int _sceneNr) {
+  void Group::callScene(const int _sceneNr) {
     // this might be redundant, but since a set could be
     // optimized if it contains only one device its safer like that...
     if(SceneHelper::rememberScene(_sceneNr & 0x00ff)) {
       m_LastCalledScene = _sceneNr & 0x00ff;
     }
-    GetDevices().CallScene(_sceneNr);
-  } // CallScene
+    getDevices().callScene(_sceneNr);
+  } // callScene
 
-  void Group::SaveScene(const int _sceneNr) {
-    GetDevices().SaveScene(_sceneNr);
-  } // SaveScene
+  void Group::saveScene(const int _sceneNr) {
+    getDevices().saveScene(_sceneNr);
+  } // saveScene
 
-  void Group::UndoScene(const int _sceneNr) {
-    GetDevices().UndoScene(_sceneNr);
-  } // UndoScene
+  void Group::undoScene(const int _sceneNr) {
+    getDevices().undoScene(_sceneNr);
+  } // undoScene
 
-  unsigned long Group::GetPowerConsumption() {
-    return GetDevices().GetPowerConsumption();
-  } // GetPowerConsumption
+  unsigned long Group::getPowerConsumption() {
+    return getDevices().getPowerConsumption();
+  } // getPowerConsumption
 
-  void Group::NextScene() {
-    CallScene(SceneHelper::getNextScene(m_LastCalledScene));
-  } // NextScene
+  void Group::nextScene() {
+    callScene(SceneHelper::getNextScene(m_LastCalledScene));
+  } // nextScene
 
-  void Group::PreviousScene() {
-    CallScene(SceneHelper::getPreviousScene(m_LastCalledScene));
-  } // PreviousScene
+  void Group::previousScene() {
+    callScene(SceneHelper::getPreviousScene(m_LastCalledScene));
+  } // previousScene
 
 
   //================================================== DeviceReference
@@ -1757,100 +1757,100 @@ namespace dss {
   } // ctor(dsid)
 
   DeviceReference::DeviceReference(const Device& _device, const Apartment& _apartment)
-  : m_DSID(_device.GetDSID()),
+  : m_DSID(_device.getDSID()),
     m_Apartment(&_apartment)
   {
   } // ctor(device)
 
-  Device& DeviceReference::GetDevice() {
-    return m_Apartment->GetDeviceByDSID(m_DSID);
-  } // GetDevice
+  Device& DeviceReference::getDevice() {
+    return m_Apartment->getDeviceByDSID(m_DSID);
+  } // getDevice
 
-  const Device& DeviceReference::GetDevice() const {
-    return m_Apartment->GetDeviceByDSID(m_DSID);
-  } // GetDevice
+  const Device& DeviceReference::getDevice() const {
+    return m_Apartment->getDeviceByDSID(m_DSID);
+  } // getDevice
 
-  dsid_t DeviceReference::GetDSID() const {
+  dsid_t DeviceReference::getDSID() const {
     return m_DSID;
-  } // GetID
+  } // getID
 
-  string DeviceReference::GetName() const {
-    return GetDevice().GetName();
-  } //GetName
+  string DeviceReference::getName() const {
+    return getDevice().getName();
+  } //getName
 
-  void DeviceReference::TurnOn() {
-    GetDevice().TurnOn();
-  } // TurnOn
+  void DeviceReference::turnOn() {
+    getDevice().turnOn();
+  } // turnOn
 
-  void DeviceReference::TurnOff() {
-    GetDevice().TurnOff();
-  } // TurnOff
+  void DeviceReference::turnOff() {
+    getDevice().turnOff();
+  } // turnOff
 
-  void DeviceReference::IncreaseValue(const int _parameterNr) {
-    GetDevice().IncreaseValue(_parameterNr);
-  } // IncreaseValue
+  void DeviceReference::increaseValue(const int _parameterNr) {
+    getDevice().increaseValue(_parameterNr);
+  } // increaseValue
 
-  void DeviceReference::DecreaseValue(const int _parameterNr) {
-    GetDevice().DecreaseValue(_parameterNr);
-  } // DecreaseValue
+  void DeviceReference::decreaseValue(const int _parameterNr) {
+    getDevice().decreaseValue(_parameterNr);
+  } // decreaseValue
 
-  void DeviceReference::Enable() {
-    GetDevice().Enable();
-  } // Enable
+  void DeviceReference::enable() {
+    getDevice().enable();
+  } // enable
 
-  void DeviceReference::Disable() {
-    GetDevice().Disable();
-  } // Disable
+  void DeviceReference::disable() {
+    getDevice().disable();
+  } // disable
 
-  void DeviceReference::StartDim(const bool _directionUp, const int _parameterNr) {
-    GetDevice().StartDim(_directionUp, _parameterNr);
-  } // StartDim
+  void DeviceReference::startDim(const bool _directionUp, const int _parameterNr) {
+    getDevice().startDim(_directionUp, _parameterNr);
+  } // startDim
 
-  void DeviceReference::EndDim(const int _parameterNr) {
-    GetDevice().EndDim(_parameterNr);
-  } // EndDim
+  void DeviceReference::endDim(const int _parameterNr) {
+    getDevice().endDim(_parameterNr);
+  } // endDim
 
-  void DeviceReference::SetValue(const double _value, const int _parameterNr) {
-    GetDevice().SetValue(_value, _parameterNr);
-  } // SetValue
+  void DeviceReference::setValue(const double _value, const int _parameterNr) {
+    getDevice().setValue(_value, _parameterNr);
+  } // setValue
 
-  bool DeviceReference::IsOn() const {
-    return GetDevice().IsOn();
+  bool DeviceReference::isOn() const {
+    return getDevice().isOn();
   }
 
-  bool DeviceReference::HasSwitch() const {
-    return GetDevice().HasSwitch();
+  bool DeviceReference::hasSwitch() const {
+    return getDevice().hasSwitch();
   }
 
-  void DeviceReference::CallScene(const int _sceneNr) {
-    GetDevice().CallScene(_sceneNr);
-  } // CallScene
+  void DeviceReference::callScene(const int _sceneNr) {
+    getDevice().callScene(_sceneNr);
+  } // callScene
 
-  void DeviceReference::SaveScene(const int _sceneNr) {
-    GetDevice().SaveScene(_sceneNr);
-  } // SaveScene
+  void DeviceReference::saveScene(const int _sceneNr) {
+    getDevice().saveScene(_sceneNr);
+  } // saveScene
 
-  void DeviceReference::UndoScene(const int _sceneNr) {
-    GetDevice().UndoScene(_sceneNr);
-  } // UndoScene
+  void DeviceReference::undoScene(const int _sceneNr) {
+    getDevice().undoScene(_sceneNr);
+  } // undoScene
 
-  unsigned long DeviceReference::GetPowerConsumption() {
-    return GetDevice().GetPowerConsumption();
+  unsigned long DeviceReference::getPowerConsumption() {
+    return getDevice().getPowerConsumption();
   }
 
-  void DeviceReference::NextScene() {
-    GetDevice().NextScene();
+  void DeviceReference::nextScene() {
+    getDevice().nextScene();
   }
 
-  void DeviceReference::PreviousScene() {
-    GetDevice().PreviousScene();
+  void DeviceReference::previousScene() {
+    getDevice().previousScene();
   }
 
-  void DeviceContainer::SetName(const string& _name) {
+  void DeviceContainer::setName(const string& _name) {
     if(m_Name != _name) {
       m_Name = _name;
-      if(DSS::HasInstance()) {
-        DSS::GetInstance()->GetApartment().AddModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+      if(DSS::hasInstance()) {
+        DSS::getInstance()->getApartment().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
       }
     }
   }
@@ -1884,11 +1884,11 @@ namespace dss {
     case SceneOff:
     case Scene1:
       return Scene4;
-    case dss::Scene2:
+    case Scene2:
       return Scene4;
-    case dss::Scene3:
+    case Scene3:
       return Scene2;
-    case dss::Scene4:
+    case Scene4:
       return Scene3;
     default:
       return Scene1;

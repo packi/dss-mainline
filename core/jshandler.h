@@ -44,20 +44,20 @@ namespace dss {
     ScriptEnvironment();
     virtual ~ScriptEnvironment();
 
-    void Initialize();
+    void initialize();
 
     /** Adds a ScriptExtension to the extension list. The ScriptEnvironment
       * is now responsible to free the object. */
-    void AddExtension(ScriptExtension* _pExtension);
+    void addExtension(ScriptExtension* _pExtension);
     /** Returns a pointer to the extension named _name.
       * @return Pointer to the instance or NULL if not found */
-    const ScriptExtension* GetExtension(const string& _name) const;
-    ScriptExtension* GetExtension(const string& _name);
+    const ScriptExtension* getExtension(const string& _name) const;
+    ScriptExtension* getExtension(const string& _name);
 
     /** Creates a new ScriptContext with all registered extensions present */
-    ScriptContext* GetContext();
+    ScriptContext* getContext();
 
-    bool IsInitialized();
+    bool isInitialized();
   };
 
   /** ScriptContext is a wrapper for a scripts execution context.
@@ -71,7 +71,7 @@ namespace dss {
     JSObject* m_pSourceObject;
     ScriptEnvironment& m_Environment;
     JSContext* m_pContext;
-    static void JsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er);
+    static void jsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er);
   public:
     ScriptContext(ScriptEnvironment& _env, JSContext* _pContext);
     virtual ~ScriptContext();
@@ -80,11 +80,11 @@ namespace dss {
       * @throw runtime_error if _fileName does not exist
       * @throw ScriptException if there is something wrong with the script
       */
-    void LoadFromFile(const string& _fileName);
+    void loadFromFile(const string& _fileName);
     /** Loads the script from Memory.
       * @throw ScriptException if there is something wrong with the script
       */
-    void LoadFromMemory(const char* _script);
+    void loadFromMemory(const char* _script);
 
     /** Evaluates the previously loaded script. The result of the script
       * will be casted to typeof t.
@@ -92,18 +92,18 @@ namespace dss {
       * @throw SciptException
       */
     template <class t>
-    t Evaluate();
+    t evaluate();
 
     /** Returns a pointer to the JSContext */
-    JSContext* GetJSContext() { return m_pContext; }
+    JSContext* getJSContext() { return m_pContext; }
     /** Returns a const reference to the ScriptEnvironment */
-    const ScriptEnvironment& GetEnvironment() const { return m_Environment; }
-    ScriptEnvironment& GetEnvironment() { return m_Environment; }
+    const ScriptEnvironment& getEnvironment() const { return m_Environment; }
+    ScriptEnvironment& getEnvironment() { return m_Environment; }
   public:
 
     /** Helper function to convert a jsval to a t. */
     template<class t>
-    t ConvertTo(const jsval& _val);
+    t convertTo(const jsval& _val);
   };
 
   /** Exception class that will be raised if anything out of the
@@ -132,7 +132,7 @@ namespace dss {
     virtual ~ScriptRuntimeException() throw() {}
 
     /** Holds the original script exception message */
-    const string& GetExceptionMessage() const { return m_ExceptionMessage; }
+    const string& getExceptionMessage() const { return m_ExceptionMessage; }
   };
 
   /** A ScriptExtension extends a scripts context. This is
@@ -147,10 +147,10 @@ namespace dss {
     virtual ~ScriptExtension() {}
 
     /** Extend a ScriptContext with the provided extension */
-    virtual void ExtendContext(ScriptContext& _context) = 0;
+    virtual void extendContext(ScriptContext& _context) = 0;
 
     /** Returns the name of the extension */
-    const string& GetName() const { return m_Name; }
+    const string& getName() const { return m_Name; }
   }; // ScriptExtension
 
 
@@ -165,15 +165,15 @@ namespace dss {
     /** Returns the objects "classname" property. This property must be
       * present for this call to succeed.
       */
-    const string GetClassName();
+    const string getClassName();
     /** Compares the objects classname to _className.
       * @see GetClassName
       */
-    bool Is(const string& _className);
+    bool is(const string& _className);
 
     /** Returns the property named _name as type t */
     template<class t>
-    t GetProperty(const string& _name);
+    t getProperty(const string& _name);
   }; // ScriptObject
 }
 

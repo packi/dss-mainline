@@ -75,38 +75,38 @@ namespace dss {
     /// Private constructor for singleton
     DSS();
 
-    bool LoadConfig();
-    void AddDefaultInterpreterPlugins();
+    bool loadConfig();
+    void addDefaultInterpreterPlugins();
 
-    int GetUptime() const;
+    int getUptime() const;
   public:
     ~DSS();
-    void Initialize(const std::vector<std::string>& _properties);
-    void Run();
+    void initialize(const std::vector<std::string>& _properties);
+    void run();
 
-    static DSS* GetInstance();
-    static bool HasInstance();
-    static void Shutdown();
+    static DSS* getInstance();
+    static bool hasInstance();
+    static void shutdown();
 #ifdef WITH_TESTS
-    static void Teardown();
+    static void teardown();
 #endif
 
-    aDSSState GetState() const { return m_State; }
+    aDSSState getState() const { return m_State; }
 
-    DS485Interface& GetDS485Interface() { return *m_pDS485Interface; }
-    Apartment& GetApartment() { return *m_pApartment; }
+    DS485Interface& getDS485Interface() { return *m_pDS485Interface; }
+    Apartment& getApartment() { return *m_pApartment; }
 #ifdef WITH_SIM
-    DSSim& GetSimulation() { return *m_pSimulation; }
+    DSSim& getSimulation() { return *m_pSimulation; }
 #endif
-    EventRunner& GetEventRunner() { return *m_pEventRunner; }
-    WebServices& GetWebServices() { return *m_pWebServices; }
-    EventQueue& GetEventQueue() { return *m_pEventQueue; }
-    Metering& GetMetering() { return *m_pMetering; }
-    PropertySystem& GetPropertySystem() { return *m_pPropertySystem; }
-    WebServer& GetWebServer() { return *m_pWebServer; }
+    EventRunner& getEventRunner() { return *m_pEventRunner; }
+    WebServices& getWebServices() { return *m_pWebServices; }
+    EventQueue& getEventQueue() { return *m_pEventQueue; }
+    Metering& getMetering() { return *m_pMetering; }
+    PropertySystem& getPropertySystem() { return *m_pPropertySystem; }
+    WebServer& getWebServer() { return *m_pWebServer; }
 
-    const std::string& GetDataDirectory() const { return m_DataDirectory; }
-    void SetDataDirectory(const std::string& _value);
+    const std::string& getDataDirectory() const { return m_DataDirectory; }
+    void setDataDirectory(const std::string& _value);
   }; // DSS
 
 }

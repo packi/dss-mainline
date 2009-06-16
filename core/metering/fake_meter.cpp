@@ -22,21 +22,21 @@ namespace dss {
   {
 
     m_Config.reset(new MeteringConfigChain(false, 1, "mW"));
-    m_Config->SetComment("Consumption in mW");
-    m_Config->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_seconds",        2, 400)));
-    m_Config->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_10seconds",     10, 400)));
-    m_Config->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_5minutely", 5 * 60, 400)));
-    m_Config->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_halfhourly",30 * 60, 400)));
-    m_Config->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_2hourly", 2 * 60*60, 400)));
-    m_Config->AddConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_daily",  24 * 60*60, 400)));
+    m_Config->setComment("Consumption in mW");
+    m_Config->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_seconds",        2, 400)));
+    m_Config->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_10seconds",     10, 400)));
+    m_Config->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_5minutely", 5 * 60, 400)));
+    m_Config->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_halfhourly",30 * 60, 400)));
+    m_Config->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_2hourly", 2 * 60*60, 400)));
+    m_Config->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_daily",  24 * 60*60, 400)));
 
-    for(int iConfig = 0; iConfig < m_Config->Size(); iConfig++) {
-    	boost::shared_ptr<Series<CurrentValue> > newSeries((new Series<CurrentValue>(m_Config->GetResolution(iConfig), m_Config->GetNumberOfValues(iConfig))));
-        newSeries->SetUnit(m_Config->GetUnit());
-        newSeries->SetComment(m_Config->GetComment());
-        newSeries->Set("Customer-ID", "798UID88S9J");
-        newSeries->Set("Contract", "798UID88S9J-AX0T");
-        newSeries->Set("Name", "Jon Doe");
+    for(int iConfig = 0; iConfig < m_Config->size(); iConfig++) {
+    	boost::shared_ptr<Series<CurrentValue> > newSeries((new Series<CurrentValue>(m_Config->getResolution(iConfig), m_Config->getNumberOfValues(iConfig))));
+        newSeries->setUnit(m_Config->getUnit());
+        newSeries->setComment(m_Config->getComment());
+        newSeries->set("Customer-ID", "798UID88S9J");
+        newSeries->set("Contract", "798UID88S9J-AX0T");
+        newSeries->set("Name", "Jon Doe");
         m_Series.push_back(newSeries);
     }
     // stitch up chain
@@ -44,24 +44,24 @@ namespace dss {
       iSeries != e; ++iSeries)
     {
       if(iSeries != m_Series.rbegin()) {
-        (*iSeries)->SetNextSeries(boost::prior(iSeries)->get());
+        (*iSeries)->setNextSeries(boost::prior(iSeries)->get());
       }
     }
   }
 
-  void FakeMeter::Execute() {
-    while(GetDSS().GetApartment().IsInitializing()) {
-      SleepSeconds(1);
+  void FakeMeter::execute() {
+    while(getDSS().getApartment().isInitializing()) {
+      sleepSeconds(1);
     }
     SeriesWriter<CurrentValue> writer;
 
-    string dev = GetDSS().GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "device");
-    bool addJitter = GetDSS().GetPropertySystem().GetBoolValue(GetConfigPropertyBasePath() + "addJitter");
+    string dev = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "device");
+    bool addJitter = getDSS().getPropertySystem().getBoolValue(getConfigPropertyBasePath() + "addJitter");
     int holdTime = rand() % 15;
     unsigned long holdValue = 2 + (rand() % 5) * 10000;
 	  srand(time(NULL));
     while(!m_Terminated) {
-      SleepSeconds(1);
+      sleepSeconds(1);
       if(holdTime <= 0) {
       	holdTime = 2 + (rand() % 5);
       	if((rand() % 10) >= 5) {
@@ -76,37 +76,37 @@ namespace dss {
       	holdTime--;
       }
 
-      DateTime now = DateTime();
+      DateTime now;
       unsigned long consumption = 0;
-      foreach(Modulator* modulator, GetDSS().GetApartment().GetModulators()) {
-      	consumption += modulator->GetPowerConsumption();
+      foreach(Modulator* modulator, getDSS().getApartment().getModulators()) {
+      	consumption += modulator->getPowerConsumption();
       }
       if(addJitter) {
         consumption += holdValue;
       }
-      m_Series.front()->AddValue(consumption, now);
+      m_Series.front()->addValue(consumption, now);
 
-      for(int iConfig = 0; iConfig < m_Config->Size(); iConfig++) {
+      for(int iConfig = 0; iConfig < m_Config->size(); iConfig++) {
         // Write series to file
-        string fileName = m_MeteringStorageLocation + "metering_" + m_Config->GetFilenameSuffix(iConfig) + ".xml";
+        string fileName = m_MeteringStorageLocation + "metering_" + m_Config->getFilenameSuffix(iConfig) + ".xml";
         Series<CurrentValue>* s = m_Series[iConfig].get();
-        writer.WriteToXML(*s, fileName);
+        writer.writeToXML(*s, fileName);
       }
     }
-  } // Execute
+  } // execute
 
-  void FakeMeter::Initialize() {
-    Subsystem::Initialize();
+  void FakeMeter::initialize() {
+    Subsystem::initialize();
 
-    GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "device", "/dev/ttyS2", true, false);
-    GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "storageLocation", GetDSS().GetDataDirectory()+"webroot/metering/", true, false);
-    GetDSS().GetPropertySystem().SetBoolValue(GetConfigPropertyBasePath() + "addJitter", false, true, false);
+    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "device", "/dev/ttyS2", true, false);
+    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "storageLocation", getDSS().getDataDirectory()+"webroot/metering/", true, false);
+    getDSS().getPropertySystem().setBoolValue(getConfigPropertyBasePath() + "addJitter", false, true, false);
   }
 
-  void FakeMeter::DoStart() {
-    m_MeteringStorageLocation = GetDSS().GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "storageLocation");
-    Log("Writing files to: " + m_MeteringStorageLocation);
-    Run();
-  } // DoStart
+  void FakeMeter::doStart() {
+    m_MeteringStorageLocation = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "storageLocation");
+    log("Writing files to: " + m_MeteringStorageLocation);
+    run();
+  } // doStart
 
 }

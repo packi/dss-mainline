@@ -58,22 +58,22 @@ protected:
 
     DateTime testStart;
 
-    secondly2.AddValue(1, testStart);
-    secondly2.AddValue(2, testStart.AddSeconds(1));
-    secondly2.AddValue(2, testStart.AddSeconds(2));
+    secondly2.addValue(1, testStart);
+    secondly2.addValue(2, testStart.addSeconds(1));
+    secondly2.addValue(2, testStart.addSeconds(2));
 
-    CPPUNIT_ASSERT_EQUAL((size_t)2, secondly2.GetValues().size());
-    CPPUNIT_ASSERT_EQUAL(2.0, secondly2.GetValues().front().GetValue());
+    CPPUNIT_ASSERT_EQUAL((size_t)2, secondly2.getValues().size());
+    CPPUNIT_ASSERT_EQUAL(2.0, secondly2.getValues().front().getValue());
 
-    CPPUNIT_ASSERT_EQUAL(testStart.AddSeconds(2), secondly2.GetValues().front().GetTimeStamp());
+    CPPUNIT_ASSERT_EQUAL(testStart.addSeconds(2), secondly2.getValues().front().getTimeStamp());
 
     // skip one value
-    secondly2.AddValue(3, testStart.AddSeconds(5));
+    secondly2.addValue(3, testStart.addSeconds(5));
 
-    CPPUNIT_ASSERT_EQUAL((size_t)4, secondly2.GetValues().size());
-    CPPUNIT_ASSERT_EQUAL(3.0, secondly2.GetValues().front().GetValue());
+    CPPUNIT_ASSERT_EQUAL((size_t)4, secondly2.getValues().size());
+    CPPUNIT_ASSERT_EQUAL(3.0, secondly2.getValues().front().getValue());
 
-    CPPUNIT_ASSERT_EQUAL(testStart.AddSeconds(5), secondly2.GetValues().front().GetTimeStamp());
+    CPPUNIT_ASSERT_EQUAL(testStart.addSeconds(5), secondly2.getValues().front().getTimeStamp());
   } // testTimestamps
 
   void testReadWrite() {
@@ -83,46 +83,46 @@ protected:
 
     DateTime testStart;
 
-    secondly.AddValue(1, testStart);
-    secondly.AddValue(2, testStart.AddSeconds(1));
+    secondly.addValue(1, testStart);
+    secondly.addValue(2, testStart.addSeconds(1));
 
-    CPPUNIT_ASSERT_EQUAL((size_t)2, secondly.GetValues().size());
-    CPPUNIT_ASSERT_EQUAL(2.0, secondly.GetValues().front().GetValue());
+    CPPUNIT_ASSERT_EQUAL((size_t)2, secondly.getValues().size());
+    CPPUNIT_ASSERT_EQUAL(2.0, secondly.getValues().front().getValue());
 
-    secondly.AddValue(3, testStart.AddSeconds(1));
-    secondly.AddValue(4, testStart.AddSeconds(1));
-    secondly.AddValue(5, testStart.AddSeconds(1));
+    secondly.addValue(3, testStart.addSeconds(1));
+    secondly.addValue(4, testStart.addSeconds(1));
+    secondly.addValue(5, testStart.addSeconds(1));
 
-    CPPUNIT_ASSERT_EQUAL((size_t)2, secondly.GetValues().size());
-    CPPUNIT_ASSERT_EQUAL(2.0, secondly.GetValues().front().GetMin());
-    CPPUNIT_ASSERT_EQUAL(5.0, secondly.GetValues().front().GetValue());
-    CPPUNIT_ASSERT_EQUAL(5.0, secondly.GetValues().front().GetMax());
+    CPPUNIT_ASSERT_EQUAL((size_t)2, secondly.getValues().size());
+    CPPUNIT_ASSERT_EQUAL(2.0, secondly.getValues().front().getMin());
+    CPPUNIT_ASSERT_EQUAL(5.0, secondly.getValues().front().getValue());
+    CPPUNIT_ASSERT_EQUAL(5.0, secondly.getValues().front().getMax());
 
     SeriesWriter<CurrentValue> writer;
-    writer.WriteToXML(secondly, "/home/patrick/workspace/dss/data/webroot/test.xml");
+    writer.writeToXML(secondly, "/home/patrick/workspace/dss/data/webroot/test.xml");
 
     SeriesReader<CurrentValue> reader;
 
-    Series<CurrentValue>* series = reader.ReadFromXML("/home/patrick/workspace/dss/data/webroot/test.xml");
+    Series<CurrentValue>* series = reader.readFromXML("/home/patrick/workspace/dss/data/webroot/test.xml");
     CPPUNIT_ASSERT(series != NULL);
-    CPPUNIT_ASSERT_EQUAL((size_t)2, series->GetValues().size());
-    CPPUNIT_ASSERT_EQUAL(2.0, series->GetValues().front().GetMin());
-    CPPUNIT_ASSERT_EQUAL(5.0, series->GetValues().front().GetValue());
-    CPPUNIT_ASSERT_EQUAL(5.0, series->GetValues().front().GetMax());
+    CPPUNIT_ASSERT_EQUAL((size_t)2, series->getValues().size());
+    CPPUNIT_ASSERT_EQUAL(2.0, series->getValues().front().getMin());
+    CPPUNIT_ASSERT_EQUAL(5.0, series->getValues().front().getValue());
+    CPPUNIT_ASSERT_EQUAL(5.0, series->getValues().front().getMax());
 
-    series->SetComment("my comment");
-    series->SetUnit("kW");
-    writer.WriteToXML(*series, "/home/patrick/workspace/dss/data/webroot/test.xml");
+    series->setComment("my comment");
+    series->setUnit("kW");
+    writer.writeToXML(*series, "/home/patrick/workspace/dss/data/webroot/test.xml");
     delete series;
 
-    series = reader.ReadFromXML("/home/patrick/workspace/dss/data/webroot/test.xml");
+    series = reader.readFromXML("/home/patrick/workspace/dss/data/webroot/test.xml");
     CPPUNIT_ASSERT(series != NULL);
-    CPPUNIT_ASSERT_EQUAL((size_t)2, series->GetValues().size());
-    CPPUNIT_ASSERT_EQUAL(2.0, series->GetValues().front().GetMin());
-    CPPUNIT_ASSERT_EQUAL(5.0, series->GetValues().front().GetValue());
-    CPPUNIT_ASSERT_EQUAL(5.0, series->GetValues().front().GetMax());
-    CPPUNIT_ASSERT_EQUAL(string("my comment"), series->GetComment());
-    CPPUNIT_ASSERT_EQUAL(string("kW"), series->GetUnit());
+    CPPUNIT_ASSERT_EQUAL((size_t)2, series->getValues().size());
+    CPPUNIT_ASSERT_EQUAL(2.0, series->getValues().front().getMin());
+    CPPUNIT_ASSERT_EQUAL(5.0, series->getValues().front().getValue());
+    CPPUNIT_ASSERT_EQUAL(5.0, series->getValues().front().getMax());
+    CPPUNIT_ASSERT_EQUAL(string("my comment"), series->getComment());
+    CPPUNIT_ASSERT_EQUAL(string("kW"), series->getUnit());
 
 
     delete series;
@@ -141,15 +141,15 @@ protected:
     Series<CurrentValue> minutely(60, 10, &five);
     Series<CurrentValue> secondly2(2, 10, &minutely);
 
-    secondly2.AddValue(values[0], startTime.AddSeconds(delay[0]));
+    secondly2.addValue(values[0], startTime.addSeconds(delay[0]));
     SeriesWriter<CurrentValue> writer;
-    writer.WriteToXML(secondly2, "/home/patrick/workspace/dss/data/webroot/test_2seconds.xml");
-    writer.WriteToXML(minutely, "/home/patrick/workspace/dss/data/webroot/test_minutely.xml");
-    writer.WriteToXML(five, "/home/patrick/workspace/dss/data/webroot/test_five_minutely.xml");
+    writer.writeToXML(secondly2, "/home/patrick/workspace/dss/data/webroot/test_2seconds.xml");
+    writer.writeToXML(minutely, "/home/patrick/workspace/dss/data/webroot/test_minutely.xml");
+    writer.writeToXML(five, "/home/patrick/workspace/dss/data/webroot/test_five_minutely.xml");
 
-    size_t lastNumValsSeconds = secondly2.GetValues().size();
-    size_t lastNumValsMinutely = minutely.GetValues().size();
-    size_t lastNumValsFive = five.GetValues().size();
+    size_t lastNumValsSeconds = secondly2.getValues().size();
+    size_t lastNumValsMinutely = minutely.getValues().size();
+    size_t lastNumValsFive = five.getValues().size();
 
     SeriesReader<CurrentValue> reader;
     DateTime lastTimeStamp = startTime;
@@ -161,25 +161,25 @@ protected:
 #ifdef VERBOSE_TESTS
       cout << "\ndiff: " << diff << "\ncurDelay: " << curDelay << endl;
 #endif
-      boost::shared_ptr<Series<CurrentValue> > pFive(reader.ReadFromXML("/home/patrick/workspace/dss/data/webroot/test_five_minutely.xml"));
-      boost::shared_ptr<Series<CurrentValue> > pMinutely(reader.ReadFromXML("/home/patrick/workspace/dss/data/webroot/test_minutely.xml"));
-      boost::shared_ptr<Series<CurrentValue> > pSecondly2(reader.ReadFromXML("/home/patrick/workspace/dss/data/webroot/test_2seconds.xml"));
+      boost::shared_ptr<Series<CurrentValue> > pFive(reader.readFromXML("/home/patrick/workspace/dss/data/webroot/test_five_minutely.xml"));
+      boost::shared_ptr<Series<CurrentValue> > pMinutely(reader.readFromXML("/home/patrick/workspace/dss/data/webroot/test_minutely.xml"));
+      boost::shared_ptr<Series<CurrentValue> > pSecondly2(reader.readFromXML("/home/patrick/workspace/dss/data/webroot/test_2seconds.xml"));
 
 #ifdef VERBOSE_TESTS
-      cout << "secondly last: " << lastNumValsSeconds << " current: " << pSecondly2->GetValues().size() << endl;
+      cout << "secondly last: " << lastNumValsSeconds << " current: " << pSecondly2->getValues().size() << endl;
 #endif
-      CPPUNIT_ASSERT_EQUAL(lastNumValsSeconds, pSecondly2->GetValues().size());
-      CPPUNIT_ASSERT_EQUAL(lastNumValsMinutely, pMinutely->GetValues().size());
-      CPPUNIT_ASSERT_EQUAL(lastNumValsFive, pFive->GetValues().size());
+      CPPUNIT_ASSERT_EQUAL(lastNumValsSeconds, pSecondly2->getValues().size());
+      CPPUNIT_ASSERT_EQUAL(lastNumValsMinutely, pMinutely->getValues().size());
+      CPPUNIT_ASSERT_EQUAL(lastNumValsFive, pFive->getValues().size());
 #ifdef VERBOSE_TESTS
-      cout << "last timestamp: " << lastTimeStamp << " current: " << pSecondly2->GetValues().front().GetTimeStamp() << endl;
+      cout << "last timestamp: " << lastTimeStamp << " current: " << pSecondly2->getValues().front().getTimeStamp() << endl;
 #endif
-      CPPUNIT_ASSERT_EQUAL(lastTimeStamp, pSecondly2->GetValues().front().GetTimeStamp());
+      CPPUNIT_ASSERT_EQUAL(lastTimeStamp, pSecondly2->getValues().front().getTimeStamp());
 
-      pMinutely->SetNextSeries(pFive.get());
-      pSecondly2->SetNextSeries(pMinutely.get());
+      pMinutely->setNextSeries(pFive.get());
+      pSecondly2->setNextSeries(pMinutely.get());
 
-      pSecondly2->AddValue(curValue, startTime.AddSeconds(curDelay));
+      pSecondly2->addValue(curValue, startTime.addSeconds(curDelay));
 
       if(diff > 2) {
 #ifdef VERBOSE_TESTS
@@ -187,19 +187,19 @@ protected:
         cout << "diff       : " << diff << endl;
         cout << "numNewVals : " << numNewVals << endl;
         cout << "lastValSec : " << lastNumValsSeconds << endl;
-        cout << "current    : " << pSecondly2->GetValues().size() << endl;
+        cout << "current    : " << pSecondly2->getValues().size() << endl;
         //CPPUNIT_ASSERT_EQUAL(lastNumValsSeconds + numNewVals, pSecondly)
 #endif
       }
 
-      lastNumValsSeconds = pSecondly2->GetValues().size();
-      lastNumValsMinutely = pMinutely->GetValues().size();
-      lastNumValsFive = pFive->GetValues().size();
-      lastTimeStamp = pSecondly2->GetValues().front().GetTimeStamp();
+      lastNumValsSeconds = pSecondly2->getValues().size();
+      lastNumValsMinutely = pMinutely->getValues().size();
+      lastNumValsFive = pFive->getValues().size();
+      lastTimeStamp = pSecondly2->getValues().front().getTimeStamp();
 
-      writer.WriteToXML(*pSecondly2, "/home/patrick/workspace/dss/data/webroot/test_2seconds.xml");
-      writer.WriteToXML(*pMinutely, "/home/patrick/workspace/dss/data/webroot/test_minutely.xml");
-      writer.WriteToXML(*pFive, "/home/patrick/workspace/dss/data/webroot/test_five_minutely.xml");
+      writer.writeToXML(*pSecondly2, "/home/patrick/workspace/dss/data/webroot/test_2seconds.xml");
+      writer.writeToXML(*pMinutely, "/home/patrick/workspace/dss/data/webroot/test_minutely.xml");
+      writer.writeToXML(*pFive, "/home/patrick/workspace/dss/data/webroot/test_five_minutely.xml");
     }
   } // testReadWriteExtended
 
@@ -210,24 +210,24 @@ protected:
 
     DateTime testStart;
 
-    secondly.AddValue(1, DateTime());
+    secondly.addValue(1, DateTime());
 
-    SleepSeconds(1);
+    sleepSeconds(1);
 
-    secondly.AddValue(2, DateTime());
+    secondly.addValue(2, DateTime());
 
-    CPPUNIT_ASSERT_EQUAL((size_t)2, secondly.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL((size_t)2, secondly.getValues().size());
 
-    CPPUNIT_ASSERT_EQUAL(2.0, secondly.GetValues().front().GetValue());
+    CPPUNIT_ASSERT_EQUAL(2.0, secondly.getValues().front().getValue());
 
-    secondly.AddValue(3, DateTime());
-    secondly.AddValue(4, DateTime());
-    secondly.AddValue(5, DateTime());
+    secondly.addValue(3, DateTime());
+    secondly.addValue(4, DateTime());
+    secondly.addValue(5, DateTime());
 
-    CPPUNIT_ASSERT_EQUAL((size_t)2, secondly.GetValues().size());
-    CPPUNIT_ASSERT_EQUAL(2.0, secondly.GetValues().front().GetMin());
-    CPPUNIT_ASSERT_EQUAL(5.0, secondly.GetValues().front().GetValue());
-    CPPUNIT_ASSERT_EQUAL(5.0, secondly.GetValues().front().GetMax());
+    CPPUNIT_ASSERT_EQUAL((size_t)2, secondly.getValues().size());
+    CPPUNIT_ASSERT_EQUAL(2.0, secondly.getValues().front().getMin());
+    CPPUNIT_ASSERT_EQUAL(5.0, secondly.getValues().front().getValue());
+    CPPUNIT_ASSERT_EQUAL(5.0, secondly.getValues().front().getMax());
   }
 
   void testWrapping() {
@@ -239,20 +239,20 @@ protected:
 
     // add values 1..60 to minutely (60 values)
     for(int iValue = 1; iValue <= 60; iValue++) {
-      minutely.AddValue(iValue, testStart.AddMinute(iValue));
+      minutely.addValue(iValue, testStart.addMinute(iValue));
     }
 
-    const std::deque<AdderValue>& minuteValues = minutely.GetValues();
+    const std::deque<AdderValue>& minuteValues = minutely.getValues();
     CPPUNIT_ASSERT_EQUAL((size_t)10, minuteValues.size());
 
     // values 60 - 51 should still be present in minutely
     for(std::deque<AdderValue>::const_iterator iValue = minuteValues.begin(), e = minuteValues.end();
         iValue != e; ++iValue)
     {
-      CPPUNIT_ASSERT_EQUAL(60.0 - distance(minuteValues.begin(), iValue), iValue->GetValue());
+      CPPUNIT_ASSERT_EQUAL(60.0 - distance(minuteValues.begin(), iValue), iValue->getValue());
     }
 
-    const std::deque<AdderValue>& fiveminuteValues = five.GetValues();
+    const std::deque<AdderValue>& fiveminuteValues = five.getValues();
     CPPUNIT_ASSERT_EQUAL((size_t)10, fiveminuteValues.size());
 
     vector<int> fiveMinuteValuesExpected;
@@ -271,26 +271,26 @@ protected:
     for(std::deque<AdderValue>::const_iterator iValue = fiveminuteValues.begin(), e = fiveminuteValues.end();
         iValue != e; ++iValue)
     {
-      CPPUNIT_ASSERT_EQUAL((double)fiveMinuteValuesExpected[distance(fiveminuteValues.begin(), iValue)], iValue->GetValue());
+      CPPUNIT_ASSERT_EQUAL((double)fiveMinuteValuesExpected[distance(fiveminuteValues.begin(), iValue)], iValue->getValue());
     }
 
-    CPPUNIT_ASSERT_EQUAL((size_t)0, hourly.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL((size_t)0, hourly.getValues().size());
 
-    minutely.AddValue(61, testStart.AddMinute(61));
+    minutely.addValue(61, testStart.addMinute(61));
 
-    cout << hourly.GetValues().size() << " " << hourly.GetValues().front().GetValue() << endl;
+    cout << hourly.getValues().size() << " " << hourly.getValues().front().getValue() << endl;
 
-    CPPUNIT_ASSERT_EQUAL((size_t)1, hourly.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL((size_t)1, hourly.getValues().size());
 
     double val = SeriesAdder<5,5>::value;
-    CPPUNIT_ASSERT_EQUAL(val, hourly.GetValues().front().GetValue());
+    CPPUNIT_ASSERT_EQUAL(val, hourly.getValues().front().getValue());
 
-    minutely.AddValue(62, testStart.AddMinute(62));
+    minutely.addValue(62, testStart.addMinute(62));
 
     SeriesWriter<AdderValue> writer;
-    writer.WriteToXML(minutely, "/home/patrick/workspace/dss/data/webroot/minutely.xml");
+    writer.writeToXML(minutely, "/home/patrick/workspace/dss/data/webroot/minutely.xml");
 
-    CPPUNIT_ASSERT_EQUAL((size_t)1, hourly.GetValues().size());
+    CPPUNIT_ASSERT_EQUAL((size_t)1, hourly.getValues().size());
   } // testWrapping
 
 };

@@ -31,7 +31,7 @@ namespace dss {
 
     virtual ~DSIDSimCreator() {};
 
-    virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
+    virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
       return new DSIDSim(_modulator, _dsid, _shortAddress);
     }
   };
@@ -46,7 +46,7 @@ namespace dss {
 
     virtual ~DSIDSimSwitchCreator() {};
 
-    virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
+    virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
       return new DSIDSimSwitch(_modulator, _dsid, _shortAddress, 9);
     }
   };
@@ -68,80 +68,80 @@ namespace dss {
       *(void**)(&get_interface) = dlsym(m_SOHandle, "dsid_get_interface");
       char* error;
       if((error = dlerror()) != NULL) {
-        Logger::GetInstance()->Log("sim: error getting interface");
+        Logger::getInstance()->log("sim: error getting interface");
       }
 
       m_Interface = (*get_interface)();
       if(m_Interface == NULL) {
-        Logger::GetInstance()->Log("sim: got a null interface");
+        Logger::getInstance()->log("sim: got a null interface");
       }
     }
 
-    virtual int GetConsumption() {
+    virtual int getConsumption() {
       return 0;
     }
 
-    virtual void CallScene(const int _sceneNr) {
+    virtual void callScene(const int _sceneNr) {
       if(m_Interface->call_scene != NULL) {
         (*m_Interface->call_scene)(m_Handle, _sceneNr);
       }
     }
 
-    virtual void SaveScene(const int _sceneNr) {
+    virtual void saveScene(const int _sceneNr) {
       if(m_Interface->save_scene != NULL) {
         (*m_Interface->save_scene)(m_Handle, _sceneNr);
       }
     }
 
-    virtual void UndoScene(const int _sceneNr) {
+    virtual void undoScene(const int _sceneNr) {
       if(m_Interface->undo_scene != NULL) {
         (*m_Interface->undo_scene)(m_Handle, _sceneNr);
       }
     }
 
-    virtual void IncreaseValue(const int _parameterNr = -1) {
+    virtual void increaseValue(const int _parameterNr = -1) {
       if(m_Interface->increase_value != NULL) {
         (*m_Interface->increase_value)(m_Handle, _parameterNr);
       }
     }
 
-    virtual void DecreaseValue(const int _parameterNr = -1) {
+    virtual void decreaseValue(const int _parameterNr = -1) {
       if(m_Interface->decrease_value != NULL) {
         (*m_Interface->decrease_value)(m_Handle, _parameterNr);
       }
     }
 
-    virtual void Enable() {
+    virtual void enable() {
       if(m_Interface->enable != NULL) {
         (*m_Interface->enable)(m_Handle);
       }
     }
 
-    virtual void Disable() {
+    virtual void disable() {
       if(m_Interface->disable != NULL) {
         (*m_Interface->disable)(m_Handle);
       }
     }
 
-    virtual void StartDim(bool _directionUp, const int _parameterNr = -1) {
+    virtual void startDim(bool _directionUp, const int _parameterNr = -1) {
       if(m_Interface->start_dim != NULL) {
         (*m_Interface->start_dim)(m_Handle, _directionUp, _parameterNr);
       }
     }
 
-    virtual void EndDim(const int _parameterNr = -1) {
+    virtual void endDim(const int _parameterNr = -1) {
       if(m_Interface->end_dim != NULL) {
         (*m_Interface->end_dim)(m_Handle, _parameterNr);
       }
     }
 
-    virtual void SetValue(const double _value, int _parameterNr = -1) {
+    virtual void setValue(const double _value, int _parameterNr = -1) {
       if(m_Interface->set_value != NULL) {
         (*m_Interface->set_value)(m_Handle, _parameterNr, _value);
       }
     }
 
-    virtual double GetValue(int _parameterNr = -1) const {
+    virtual double getValue(int _parameterNr = -1) const {
       if(m_Interface->get_value != NULL) {
         return (*m_Interface->get_value)(m_Handle, _parameterNr);
       } else {
@@ -149,20 +149,20 @@ namespace dss {
       }
     }
 
-    virtual uint16_t GetFunctionID() {
+    virtual uint16_t getFunctionID() {
       if(m_Interface->get_function_id != NULL) {
         return (m_Interface->get_function_id)(m_Handle);
       }
       return 0;
-    } // GetFunctionID
+    } // getFunctionID
 
-    virtual void SetConfigParameter(const string& _name, const string& _value) {
+    virtual void setConfigParameter(const string& _name, const string& _value) {
       if(m_Interface->set_configuration_parameter != NULL) {
         (*m_Interface->set_configuration_parameter)(m_Handle, _name.c_str(), _value.c_str());
       }
-    } // SetConfigParameter
+    } // setConfigParameter
 
-    virtual string GetConfigParameter(const string& _name) const {
+    virtual string getConfigParameter(const string& _name) const {
       if(m_Interface->get_configuration_parameter != NULL) {
         const int bufferSize = 256;
         char buffer[bufferSize];
@@ -171,12 +171,11 @@ namespace dss {
 
         if(len > 0 && len < bufferSize) {
           buffer[len] = '\0';
-          //string result = buffer;
           return string(&buffer[0]);
         }
       }
       return "";
-    } // GetConfigParameter
+    } // getConfigParameter
 
   }; // DSIDPlugin
 
@@ -195,11 +194,11 @@ namespace dss {
       *(void**)(&createInstance) = dlsym(m_SOHandle, "dsid_create_instance");
       char* error;
       if((error = dlerror()) != NULL) {
-        Logger::GetInstance()->Log("sim: error getting pointer to dsid_create_instance");
+        Logger::getInstance()->log("sim: error getting pointer to dsid_create_instance");
       }
     }
 
-    virtual DSIDInterface* CreateDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
+    virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
       int handle = (*createInstance)();
       return new DSIDPlugin(_modulator, _dsid, _shortAddress, m_SOHandle, handle);
     }
@@ -211,37 +210,37 @@ namespace dss {
   : Subsystem(_pDSS, "DSSim")
   {}
 
-  void DSSim::Initialize() {
-    Subsystem::Initialize();
-    m_DSIDFactory.RegisterCreator(new DSIDSimCreator());
-    m_DSIDFactory.RegisterCreator(new DSIDSimSwitchCreator());
+  void DSSim::initialize() {
+    Subsystem::initialize();
+    m_DSIDFactory.registerCreator(new DSIDSimCreator());
+    m_DSIDFactory.registerCreator(new DSIDSimSwitchCreator());
 
-    GetDSS().GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "configfile", GetDSS().GetDataDirectory() + "sim.xml", true, false);
+    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "configfile", getDSS().getDataDirectory() + "sim.xml", true, false);
 
 
-    LoadPlugins();
-    LoadFromConfig();
+    loadPlugins();
+    loadFromConfig();
 
     m_Initialized = true;
-  } // Initialize
+  } // initialize
 
 
-  void DSSim::LoadFromConfig() {
+  void DSSim::loadFromConfig() {
     const int theConfigFileVersion = 1;
-    string filename = GetConfigPropertyBasePath() + "configfile";
-    XMLDocumentFileReader reader(GetDSS().GetPropertySystem().GetStringValue(filename));
-    XMLNode rootNode = reader.GetDocument().GetRootNode();
+    string filename = getConfigPropertyBasePath() + "configfile";
+    XMLDocumentFileReader reader(getDSS().getPropertySystem().getStringValue(filename));
+    XMLNode rootNode = reader.getDocument().getRootNode();
 
-    if(rootNode.GetName() == "simulation") {
-      string fileVersionStr = rootNode.GetAttributes()["version"];
-      if(StrToIntDef(fileVersionStr, -1) == theConfigFileVersion) {
-        XMLNodeList& modulators = rootNode.GetChildren();
+    if(rootNode.getName() == "simulation") {
+      string fileVersionStr = rootNode.getAttributes()["version"];
+      if(strToIntDef(fileVersionStr, -1) == theConfigFileVersion) {
+        XMLNodeList& modulators = rootNode.getChildren();
         foreach(XMLNode& node, modulators) {
-          if(node.GetName() == "modulator") {
+          if(node.getName() == "modulator") {
             DSModulatorSim* modulator = NULL;
             try {
               modulator = new DSModulatorSim(this);
-              modulator->InitializeFromNode(node);
+              modulator->initializeFromNode(node);
               m_Modulators.push_back(modulator);
             } catch(runtime_error&) {
               delete modulator;
@@ -249,27 +248,27 @@ namespace dss {
           }
         }
       } else {
-        Log("Version mismatch, or missing version attribute. Expected ''" + IntToString(theConfigFileVersion) + "'" + fileVersionStr + "' ");
+        log("Version mismatch, or missing version attribute. Expected ''" + intToString(theConfigFileVersion) + "'" + fileVersionStr + "' ");
       }
     } else {
-      Log(filename + " must have a root-node named 'simulation'", lsFatal);
+      log(filename + " must have a root-node named 'simulation'", lsFatal);
     }
-  } // LoadFromConfig
+  } // loadFromConfig
 
-  void DSSim::LoadPlugins() {
+  void DSSim::loadPlugins() {
     fs::directory_iterator end_iter;
     try {
-      for ( fs::directory_iterator dir_itr(GetDSS().GetDataDirectory() + "plugins");
+      for ( fs::directory_iterator dir_itr(getDSS().getDataDirectory() + "plugins");
             dir_itr != end_iter;
             ++dir_itr )
       {
         try {
           if (fs::is_regular(dir_itr->status())) {
-            if(EndsWith(dir_itr->leaf(), ".so")) {
-              Log("LoadPlugins: Trying to load '" + dir_itr->string() + "'", lsInfo);
+            if(endsWith(dir_itr->leaf(), ".so")) {
+              log("LoadPlugins: Trying to load '" + dir_itr->string() + "'", lsInfo);
               void* handle = dlopen(dir_itr->string().c_str(), RTLD_LAZY);
               if(handle == NULL) {
-                Log("LoadPlugins: Could not load plugin \"" + dir_itr->leaf() + "\" message: " + dlerror(), lsError);
+                log("LoadPlugins: Could not load plugin \"" + dir_itr->leaf() + "\" message: " + dlerror(), lsError);
                 continue;
               }
 
@@ -278,47 +277,47 @@ namespace dss {
               *(void**) (&version) = dlsym(handle, "dsid_getversion");
               char* error;
               if((error = dlerror()) != NULL) {
-                 Log("LoadPlugins: could get version from \"" + dir_itr->leaf() + "\":" + error, lsError);
+                 log("LoadPlugins: could get version from \"" + dir_itr->leaf() + "\":" + error, lsError);
                  continue;
               }
 
               int ver = (*version)();
               if(ver != DSID_PLUGIN_API_VERSION) {
-                Log("LoadPlugins: Version mismatch (plugin: " + IntToString(ver) + " api: " + IntToString(DSID_PLUGIN_API_VERSION) + ")", lsError);
+                log("LoadPlugins: Version mismatch (plugin: " + intToString(ver) + " api: " + intToString(DSID_PLUGIN_API_VERSION) + ")", lsError);
                 continue;
               }
 
               const char* (*get_name)();
               *(void**)(&get_name) = dlsym(handle, "dsid_get_plugin_name");
               if((error = dlerror()) != NULL) {
-                Log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
+                log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
                 continue;
               }
               const char* pluginName = (*get_name)();
               if(pluginName == NULL) {
-                Log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
+                log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
                 continue;
               }
-              Log("LoadPlugins: Plugin provides " + string(pluginName), lsInfo);
-              m_DSIDFactory.RegisterCreator(new DSIDPluginCreator(handle, pluginName));
+              log("LoadPlugins: Plugin provides " + string(pluginName), lsInfo);
+              m_DSIDFactory.registerCreator(new DSIDPluginCreator(handle, pluginName));
             }
           }
         } catch (const std::exception & ex) {
-          Log("LoadPlugins: Cought exception while loading " + dir_itr->leaf() + " '" + ex.what() + "'", lsError);
+          log("LoadPlugins: Cought exception while loading " + dir_itr->leaf() + " '" + ex.what() + "'", lsError);
         }
       }
     } catch(const std::exception& ex) {
-      Log(string("Error loading plugins: '") + ex.what() + "'");
+      log(string("Error loading plugins: '") + ex.what() + "'");
     }
-  } // LoadPlugins
+  } // loadPlugins
 
   bool DSSim::isReady() {
     return m_Initialized;
-  } // Ready
+  } // ready
 
   bool DSSim::isSimAddress(const uint8_t _address) {
     foreach(DSModulatorSim& modulator, m_Modulators) {
-      if(modulator.GetID() == _address) {
+      if(modulator.getID() == _address) {
         return true;
       }
     }
@@ -327,13 +326,13 @@ namespace dss {
 
   void DSSim::process(DS485Frame& _frame) {
     foreach(DSModulatorSim& modulator, m_Modulators) {
-      modulator.Process(_frame);
+      modulator.process(_frame);
     }
   } // process
 
-  void DSSim::DistributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
-    DS485FrameProvider::DistributeFrame(_frame);
-  } // DistributeFrame
+  void DSSim::distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
+    DS485FrameProvider::distributeFrame(_frame);
+  } // distributeFrame
 
   //================================================== DSModulatorSim
 
@@ -345,57 +344,57 @@ namespace dss {
     m_ModulatorDSID = dsid_t(DSIDHeader, SimulationPrefix);
     m_ID = 70;
     m_Name = "Simulated dSM";
-  } // DSModulatorSim
+  } // dSModulatorSim
 
-  void DSModulatorSim::Log(const string& _message, aLogSeverity _severity) {
-    m_pSimulation->Log(_message, _severity);
-  } // Log
+  void DSModulatorSim::log(const string& _message, aLogSeverity _severity) {
+    m_pSimulation->log(_message, _severity);
+  } // log
 
-  bool DSModulatorSim::InitializeFromNode(XMLNode& _node) {
-    HashMapConstStringString& attrs = _node.GetAttributes();
+  bool DSModulatorSim::initializeFromNode(XMLNode& _node) {
+    HashMapConstStringString& attrs = _node.getAttributes();
     if(attrs["busid"].size() != 0) {
-      m_ID = StrToIntDef(attrs["busid"], 70);
+      m_ID = strToIntDef(attrs["busid"], 70);
     }
     if(attrs["dsid"].size() != 0) {
-      m_ModulatorDSID = dsid_t::FromString(attrs["dsid"]);
+      m_ModulatorDSID = dsid_t::fromString(attrs["dsid"]);
       m_ModulatorDSID.upper = (m_ModulatorDSID.upper & 0x000000000000000Fll) | DSIDHeader;
       m_ModulatorDSID.lower = (m_ModulatorDSID.lower & 0x002FFFFF) | SimulationPrefix;
     }
-    m_EnergyLevelOrange = StrToIntDef(attrs["orange"], m_EnergyLevelOrange);
-    m_EnergyLevelRed = StrToIntDef(attrs["red"], m_EnergyLevelRed);
+    m_EnergyLevelOrange = strToIntDef(attrs["orange"], m_EnergyLevelOrange);
+    m_EnergyLevelRed = strToIntDef(attrs["red"], m_EnergyLevelRed);
     try {
-      XMLNode& nameNode = _node.GetChildByName("name");
-      if(!nameNode.GetChildren().empty()) {
-        m_Name = nameNode.GetChildren()[0].GetContent();
+      XMLNode& nameNode = _node.getChildByName("name");
+      if(!nameNode.getChildren().empty()) {
+        m_Name = nameNode.getChildren()[0].getContent();
       }
     } catch(XMLException&) {
     }
 
-    XMLNodeList& nodes = _node.GetChildren();
-    LoadDevices(nodes, 0);
-    LoadGroups(nodes, 0);
-    LoadZones(nodes);
+    XMLNodeList& nodes = _node.getChildren();
+    loadDevices(nodes, 0);
+    loadGroups(nodes, 0);
+    loadZones(nodes);
     return true;
-  } // InitializeFromNode
+  } // initializeFromNode
 
-  void DSModulatorSim::LoadDevices(XMLNodeList& _nodes, const int _zoneID) {
+  void DSModulatorSim::loadDevices(XMLNodeList& _nodes, const int _zoneID) {
     for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
         iNode != e; ++iNode)
     {
-      if(iNode->GetName() == "device") {
-        HashMapConstStringString& attrs = iNode->GetAttributes();
+      if(iNode->getName() == "device") {
+        HashMapConstStringString& attrs = iNode->getAttributes();
         dsid_t dsid = NullDSID;
         int busid = -1;
         if(!attrs["dsid"].empty()) {
-          dsid = dsid_t::FromString(attrs["dsid"]);
+          dsid = dsid_t::fromString(attrs["dsid"]);
           dsid.upper = (dsid.upper & 0x000000000000000Fll) | DSIDHeader;
           dsid.lower = (dsid.lower & 0x002FFFFF) | SimulationPrefix;
         }
         if(!attrs["busid"].empty()) {
-          busid = StrToInt(attrs["busid"]);
+          busid = strToInt(attrs["busid"]);
         }
         if((dsid == NullDSID) || (busid == -1)) {
-          Log("missing dsid or busid of device");
+          log("missing dsid or busid of device");
           continue;
         }
         string type = "standard.simple";
@@ -403,20 +402,20 @@ namespace dss {
           type = attrs["type"];
         }
 
-        DSIDInterface* newDSID = m_pSimulation->getDSIDFactory().CreateDSID(type, dsid, busid, *this);
+        DSIDInterface* newDSID = m_pSimulation->getDSIDFactory().createDSID(type, dsid, busid, *this);
         try {
-          foreach(XMLNode& iParam, iNode->GetChildren()) {
-            if(iParam.GetName() == "parameter") {
-              string paramName = iParam.GetAttributes()["name"];
-              string paramValue = iParam.GetChildren()[0].GetContent();
+          foreach(XMLNode& iParam, iNode->getChildren()) {
+            if(iParam.getName() == "parameter") {
+              string paramName = iParam.getAttributes()["name"];
+              string paramValue = iParam.getChildren()[0].getContent();
               if(paramName.empty()) {
-                Log("Missing attribute name of parameter node");
+                log("Missing attribute name of parameter node");
                 continue;
               }
-              Log("LoadDevices:   Found parameter '" + paramName + "' with value '" + paramValue + "'");
-              newDSID->SetConfigParameter(paramName, paramValue);
-            } else if(iParam.GetName() == "name") {
-              m_DeviceNames[busid] = iParam.GetChildren()[0].GetContent();
+              log("LoadDevices:   Found parameter '" + paramName + "' with value '" + paramValue + "'");
+              newDSID->setConfigParameter(paramName, paramValue);
+            } else if(iParam.getName() == "name") {
+              m_DeviceNames[busid] = iParam.getChildren()[0].getContent();
             }
           }
         } catch(runtime_error&) {
@@ -427,86 +426,86 @@ namespace dss {
             m_Zones[_zoneID].push_back(newDSID);
           }
           m_DeviceZoneMapping[newDSID] = _zoneID;
-          newDSID->SetZoneID(_zoneID);
+          newDSID->setZoneID(_zoneID);
 
           DSIDSimSwitch* sw = dynamic_cast<DSIDSimSwitch*>(newDSID);
           if(sw != NULL) {
-            Log("LoadDevices:   it's a switch");
+            log("LoadDevices:   it's a switch");
             if(attrs["bell"] == "true") {
-              sw->SetIsBell(true);
-              Log("LoadDevices:   switch is bell");
+              sw->setIsBell(true);
+              log("LoadDevices:   switch is bell");
             }
           }
 
-          newDSID->Initialize();
-          Log("LoadDevices: found device");
+          newDSID->initialize();
+          log("LoadDevices: found device");
         } else {
-          Log("LoadDevices: could not create instance for type \"" + type + "\"");
+          log("LoadDevices: could not create instance for type \"" + type + "\"");
         }
       }
     }
-  } // LoadDevices
+  } // loadDevices
 
-  void DSModulatorSim::LoadGroups(XMLNodeList& _nodes, const int _zoneID) {
+  void DSModulatorSim::loadGroups(XMLNodeList& _nodes, const int _zoneID) {
     for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
         iNode != e; ++iNode)
     {
-      if(iNode->GetName() == "group") {
-        HashMapConstStringString& attrs = iNode->GetAttributes();
+      if(iNode->getName() == "group") {
+        HashMapConstStringString& attrs = iNode->getAttributes();
         if(!attrs["id"].empty()) {
-          int groupID = StrToIntDef(attrs["id"], -1);
-          XMLNodeList& children = iNode->GetChildren();
+          int groupID = strToIntDef(attrs["id"], -1);
+          XMLNodeList& children = iNode->getChildren();
           for(XMLNodeList::iterator iChildNode = children.begin(), e = children.end();
               iChildNode != e; ++iChildNode)
           {
-            if(iChildNode->GetName() == "device") {
-              attrs = iChildNode->GetAttributes();
+            if(iChildNode->getName() == "device") {
+              attrs = iChildNode->getAttributes();
               if(!attrs["busid"].empty()) {
-                unsigned long busID = StrToUInt(attrs["busid"]);
-                DSIDInterface& dev = LookupDevice(busID);
-                AddDeviceToGroup(&dev, groupID);
-                Log("LoadGroups: Adding device " + attrs["busid"] + " to group " + IntToString(groupID) + " in zone " + IntToString(_zoneID));
+                unsigned long busID = strToUInt(attrs["busid"]);
+                DSIDInterface& dev = lookupDevice(busID);
+                addDeviceToGroup(&dev, groupID);
+                log("LoadGroups: Adding device " + attrs["busid"] + " to group " + intToString(groupID) + " in zone " + intToString(_zoneID));
               }
             }
           }
         } else {
-          Log("LoadGroups: Could not find attribute id of group, skipping entry", lsError);
+          log("LoadGroups: Could not find attribute id of group, skipping entry", lsError);
         }
       }
     }
-  } // LoadGroups
+  } // loadGroups
 
-  void DSModulatorSim::AddDeviceToGroup(DSIDInterface* _device, int _groupID) {
-    m_DevicesOfGroupInZone[pair<const int, const int>(_device->GetZoneID(), _groupID)].push_back(_device);
-    m_GroupsPerDevice[_device->GetShortAddress()].push_back(_groupID);
-  } // AddDeviceToGroup
+  void DSModulatorSim::addDeviceToGroup(DSIDInterface* _device, int _groupID) {
+    m_DevicesOfGroupInZone[pair<const int, const int>(_device->getZoneID(), _groupID)].push_back(_device);
+    m_GroupsPerDevice[_device->getShortAddress()].push_back(_groupID);
+  } // addDeviceToGroup
 
-  void DSModulatorSim::LoadZones(XMLNodeList& _nodes) {
+  void DSModulatorSim::loadZones(XMLNodeList& _nodes) {
     for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
         iNode != e; ++iNode)
     {
-      if(iNode->GetName() == "zone") {
-        HashMapConstStringString& attrs = iNode->GetAttributes();
+      if(iNode->getName() == "zone") {
+        HashMapConstStringString& attrs = iNode->getAttributes();
         int zoneID = -1;
         if(!attrs["id"].empty()) {
-          zoneID = StrToIntDef(attrs["id"], -1);
+          zoneID = strToIntDef(attrs["id"], -1);
         }
         if(zoneID != -1) {
-          Log("LoadZones: found zone (" + IntToString(zoneID) + ")");
-          LoadDevices(iNode->GetChildren(), zoneID);
-          LoadGroups(iNode->GetChildren(), zoneID);
+          log("LoadZones: found zone (" + intToString(zoneID) + ")");
+          loadDevices(iNode->getChildren(), zoneID);
+          loadGroups(iNode->getChildren(), zoneID);
         } else {
-          Log("LoadZones: could not find/parse id for zone");
+          log("LoadZones: could not find/parse id for zone");
         }
       }
     }
-  } // LoadZones
+  } // loadZones
 
-  void DSModulatorSim::DeviceCallScene(int _deviceID, const int _sceneID) {
-    LookupDevice(_deviceID).CallScene(_sceneID);
-  } // DeviceCallScene
+  void DSModulatorSim::deviceCallScene(int _deviceID, const int _sceneID) {
+    lookupDevice(_deviceID).callScene(_sceneID);
+  } // deviceCallScene
 
-  void DSModulatorSim::GroupCallScene(const int _zoneID, const int _groupID, const int _sceneID) {
+  void DSModulatorSim::groupCallScene(const int _zoneID, const int _groupID, const int _sceneID) {
 	vector<DSIDInterface*> dsids;
 	m_LastCalledSceneForZoneAndGroup[make_pair(_zoneID, _groupID)] = _sceneID;
 	if(_groupID == GroupIDBroadcast) {
@@ -524,295 +523,295 @@ namespace dss {
     for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
         iDSID != e; ++iDSID)
     {
-      (*iDSID)->CallScene(_sceneID);
+      (*iDSID)->callScene(_sceneID);
     }
-  } // GroupCallScene
+  } // groupCallScene
 
-  void DSModulatorSim::DeviceSaveScene(int _deviceID, const int _sceneID) {
-    LookupDevice(_deviceID).SaveScene(_sceneID);
-  } // DeviceSaveScene
+  void DSModulatorSim::deviceSaveScene(int _deviceID, const int _sceneID) {
+    lookupDevice(_deviceID).saveScene(_sceneID);
+  } // deviceSaveScene
 
-  void DSModulatorSim::GroupSaveScene(const int _zoneID, const int _groupID, const int _sceneID) {
+  void DSModulatorSim::groupSaveScene(const int _zoneID, const int _groupID, const int _sceneID) {
     pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
       vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
-        (*iDSID)->SaveScene(_sceneID);
+        (*iDSID)->saveScene(_sceneID);
       }
     }
-  } // GroupSaveScene
+  } // groupSaveScene
 
-  void DSModulatorSim::DeviceUndoScene(int _deviceID, const int _sceneID) {
-    LookupDevice(_deviceID).UndoScene(_sceneID);
-  } // DeviceUndoScene
+  void DSModulatorSim::deviceUndoScene(int _deviceID, const int _sceneID) {
+    lookupDevice(_deviceID).undoScene(_sceneID);
+  } // deviceUndoScene
 
-  void DSModulatorSim::GroupUndoScene(const int _zoneID, const int _groupID, const int _sceneID) {
+  void DSModulatorSim::groupUndoScene(const int _zoneID, const int _groupID, const int _sceneID) {
     pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
       vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
-        (*iDSID)->UndoScene(_sceneID);
+        (*iDSID)->undoScene(_sceneID);
       }
     }
-  } // GroupUndoScene
+  } // groupUndoScene
 
-  void DSModulatorSim::GroupStartDim(const int _zoneID, const int _groupID, bool _up, int _parameterNr) {
+  void DSModulatorSim::groupStartDim(const int _zoneID, const int _groupID, bool _up, int _parameterNr) {
     pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
       vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
-        (*iDSID)->StartDim(_up, _parameterNr);
+        (*iDSID)->startDim(_up, _parameterNr);
       }
     }
-  } // GroupStartDim
+  } // groupStartDim
 
-  void DSModulatorSim::GroupEndDim(const int _zoneID, const int _groupID, const int _parameterNr) {
+  void DSModulatorSim::groupEndDim(const int _zoneID, const int _groupID, const int _parameterNr) {
     pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
       vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
-        (*iDSID)->EndDim(_parameterNr);
+        (*iDSID)->endDim(_parameterNr);
       }
     }
-  } // GroupEndDim
+  } // groupEndDim
 
-  void DSModulatorSim::GroupDecValue(const int _zoneID, const int _groupID, const int _parameterNr) {
+  void DSModulatorSim::groupDecValue(const int _zoneID, const int _groupID, const int _parameterNr) {
     pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
       vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
-        (*iDSID)->DecreaseValue(_parameterNr);
+        (*iDSID)->decreaseValue(_parameterNr);
       }
     }
-  } // GroupDecValue
+  } // groupDecValue
 
-  void DSModulatorSim::GroupIncValue(const int _zoneID, const int _groupID, const int _parameterNr) {
+  void DSModulatorSim::groupIncValue(const int _zoneID, const int _groupID, const int _parameterNr) {
     pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
       vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
-        (*iDSID)->IncreaseValue(_parameterNr);
+        (*iDSID)->increaseValue(_parameterNr);
       }
     }
-  } // GroupIncValue
+  } // groupIncValue
 
-  void DSModulatorSim::GroupSetValue(const int _zoneID, const int _groupID, const int _value) {
+  void DSModulatorSim::groupSetValue(const int _zoneID, const int _groupID, const int _value) {
     pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
       vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
-        (*iDSID)->SetValue(_value);
+        (*iDSID)->setValue(_value);
       }
     }
-  } // GroupSetValue
+  } // groupSetValue
 
-  void DSModulatorSim::Process(DS485Frame& _frame) {
+  void DSModulatorSim::process(DS485Frame& _frame) {
     const uint8_t HeaderTypeToken = 0;
     const uint8_t HeaderTypeCommand = 1;
 
     try {
-      DS485Header& header = _frame.GetHeader();
-      if(!(header.GetDestination() == m_ID || header.IsBroadcast())) {
+      DS485Header& header = _frame.getHeader();
+      if(!(header.getDestination() == m_ID || header.isBroadcast())) {
         return;
       }
-      if(header.GetType() == HeaderTypeToken) {
+      if(header.getType() == HeaderTypeToken) {
         // Transmit pending things
-      } else if(header.GetType() == HeaderTypeCommand) {
+      } else if(header.getType() == HeaderTypeCommand) {
         DS485CommandFrame& cmdFrame = dynamic_cast<DS485CommandFrame&>(_frame);
-        PayloadDissector pd(cmdFrame.GetPayload());
-        if((cmdFrame.GetCommand() == CommandRequest) && !pd.IsEmpty()) {
-          int cmdNr = pd.Get<uint8_t>();
+        PayloadDissector pd(cmdFrame.getPayload());
+        if((cmdFrame.getCommand() == CommandRequest) && !pd.isEmpty()) {
+          int cmdNr = pd.get<uint8_t>();
           boost::shared_ptr<DS485CommandFrame> response;
           switch(cmdNr) {
             case FunctionDeviceCallScene:
               {
-                devid_t devID = pd.Get<devid_t>();
-                int sceneID = pd.Get<uint16_t>();
-                DeviceCallScene(devID, sceneID);
-                DistributeFrame(boost::shared_ptr<DS485CommandFrame>(CreateAck(cmdFrame, cmdNr)));
+                devid_t devID = pd.get<devid_t>();
+                int sceneID = pd.get<uint16_t>();
+                deviceCallScene(devID, sceneID);
+                distributeFrame(boost::shared_ptr<DS485CommandFrame>(createAck(cmdFrame, cmdNr)));
               }
               break;
             case FunctionGroupCallScene:
               {
-                uint8_t zoneID = pd.Get<uint16_t>();
-                uint8_t groupID = pd.Get<uint16_t>();
-                uint8_t sceneID = pd.Get<uint16_t>();
-                GroupCallScene(zoneID, groupID, sceneID);
+                uint8_t zoneID = pd.get<uint16_t>();
+                uint8_t groupID = pd.get<uint16_t>();
+                uint8_t sceneID = pd.get<uint16_t>();
+                groupCallScene(zoneID, groupID, sceneID);
               }
               break;
             case FunctionDeviceSaveScene:
               {
-                devid_t devID = pd.Get<devid_t>();
-                int sceneID = pd.Get<uint16_t>();
-                DeviceSaveScene(devID, sceneID);
-                DistributeFrame(boost::shared_ptr<DS485CommandFrame>(CreateAck(cmdFrame, cmdNr)));
+                devid_t devID = pd.get<devid_t>();
+                int sceneID = pd.get<uint16_t>();
+                deviceSaveScene(devID, sceneID);
+                distributeFrame(boost::shared_ptr<DS485CommandFrame>(createAck(cmdFrame, cmdNr)));
               }
               break;
             case FunctionGroupSaveScene:
               {
-                uint8_t zoneID = pd.Get<uint16_t>();
-                uint8_t groupID = pd.Get<uint16_t>();
-                uint8_t sceneID = pd.Get<uint16_t>();
-                GroupSaveScene(zoneID, groupID, sceneID);
+                uint8_t zoneID = pd.get<uint16_t>();
+                uint8_t groupID = pd.get<uint16_t>();
+                uint8_t sceneID = pd.get<uint16_t>();
+                groupSaveScene(zoneID, groupID, sceneID);
               }
               break;
             case FunctionDeviceUndoScene:
               {
-                devid_t devID = pd.Get<devid_t>();
-                int sceneID = pd.Get<uint16_t>();
-                DeviceUndoScene(devID, sceneID);
-                DistributeFrame(boost::shared_ptr<DS485CommandFrame>(CreateAck(cmdFrame, cmdNr)));
+                devid_t devID = pd.get<devid_t>();
+                int sceneID = pd.get<uint16_t>();
+                deviceUndoScene(devID, sceneID);
+                distributeFrame(boost::shared_ptr<DS485CommandFrame>(createAck(cmdFrame, cmdNr)));
               }
               break;
             case FunctionGroupUndoScene:
               {
-                uint16_t zoneID = pd.Get<uint16_t>();
-                uint16_t groupID = pd.Get<uint16_t>();
-                uint16_t sceneID = pd.Get<uint16_t>();
-                GroupUndoScene(zoneID, groupID, sceneID);
+                uint16_t zoneID = pd.get<uint16_t>();
+                uint16_t groupID = pd.get<uint16_t>();
+                uint16_t sceneID = pd.get<uint16_t>();
+                groupUndoScene(zoneID, groupID, sceneID);
               }
               break;
             case FunctionGroupIncreaseValue:
               {
-                uint16_t zoneID = pd.Get<uint16_t>();
-                uint16_t groupID = pd.Get<uint16_t>();
-                GroupIncValue(zoneID, groupID, 0);
+                uint16_t zoneID = pd.get<uint16_t>();
+                uint16_t groupID = pd.get<uint16_t>();
+                groupIncValue(zoneID, groupID, 0);
               }
               break;
             case FunctionGroupDecreaseValue:
               {
-                uint16_t zoneID = pd.Get<uint16_t>();
-                uint16_t groupID = pd.Get<uint16_t>();
-                GroupDecValue(zoneID, groupID, 0);
+                uint16_t zoneID = pd.get<uint16_t>();
+                uint16_t groupID = pd.get<uint16_t>();
+                groupDecValue(zoneID, groupID, 0);
               }
               break;
             case FunctionGroupSetValue:
               {
-                uint16_t zoneID = pd.Get<uint16_t>();
-                uint16_t groupID = pd.Get<uint16_t>();
-                uint16_t value = pd.Get<uint16_t>();
-                GroupSetValue(zoneID, groupID, value);
+                uint16_t zoneID = pd.get<uint16_t>();
+                uint16_t groupID = pd.get<uint16_t>();
+                uint16_t value = pd.get<uint16_t>();
+                groupSetValue(zoneID, groupID, value);
               }
               break;
             case FunctionDeviceIncreaseValue:
               {
-                uint16_t devID = pd.Get<uint16_t>();
-                DSIDInterface& dev = LookupDevice(devID);
-                dev.IncreaseValue();
-                response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint16_t>(1);
-                DistributeFrame(response);
+                uint16_t devID = pd.get<uint16_t>();
+                DSIDInterface& dev = lookupDevice(devID);
+                dev.increaseValue();
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(1);
+                distributeFrame(response);
               }
               break;
             case FunctionDeviceDecreaseValue:
               {
-                uint16_t devID = pd.Get<uint16_t>();
-                DSIDInterface& dev = LookupDevice(devID);
-                dev.DecreaseValue();
-                response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint16_t>(1);
-                DistributeFrame(response);
+                uint16_t devID = pd.get<uint16_t>();
+                DSIDInterface& dev = lookupDevice(devID);
+                dev.decreaseValue();
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(1);
+                distributeFrame(response);
               }
               break;
             case FunctionDeviceGetFunctionID:
               {
-                devid_t devID = pd.Get<devid_t>();
-                response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint16_t>(0x0001); // everything ok
-                response->GetPayload().Add<uint16_t>(LookupDevice(devID).GetFunctionID());
-                DistributeFrame(response);
+                devid_t devID = pd.get<devid_t>();
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(0x0001); // everything ok
+                response->getPayload().add<uint16_t>(lookupDevice(devID).getFunctionID());
+                distributeFrame(response);
               }
               break;
             case FunctionDeviceSetValue:
               {
-                uint16_t devID = pd.Get<uint16_t>();
-                DSIDInterface& dev = LookupDevice(devID);
-                uint16_t value = pd.Get<uint16_t>();
-                dev.SetValue(value);
-                response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint16_t>(1);
-                DistributeFrame(response);
+                uint16_t devID = pd.get<uint16_t>();
+                DSIDInterface& dev = lookupDevice(devID);
+                uint16_t value = pd.get<uint16_t>();
+                dev.setValue(value);
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(1);
+                distributeFrame(response);
               }
               break;
             case FunctionDeviceGetName:
               {
-                devid_t devID = pd.Get<devid_t>();
+                devid_t devID = pd.get<devid_t>();
                 string name = m_DeviceNames[devID];
-                response = CreateResponse(cmdFrame, cmdNr);
+                response = createResponse(cmdFrame, cmdNr);
 
               }
               break;
             case FunctionDeviceGetParameterValue:
               {
-                int devID = pd.Get<uint16_t>();
-                int paramID = pd.Get<uint16_t>();
-                double result = LookupDevice(devID).GetValue(paramID);
-                response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint16_t>(static_cast<uint8_t>(result));
-                DistributeFrame(response);
+                int devID = pd.get<uint16_t>();
+                int paramID = pd.get<uint16_t>();
+                double result = lookupDevice(devID).getValue(paramID);
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(static_cast<uint8_t>(result));
+                distributeFrame(response);
               }
               break;
             case FunctionDeviceSetParameterValue:
               {
-                int devID = pd.Get<uint16_t>();
-                int paramID = pd.Get<uint16_t>();
-                uint8_t value = pd.Get<uint16_t>();
-                LookupDevice(devID).SetValue(value, paramID);
-                DistributeFrame(boost::shared_ptr<DS485CommandFrame>(CreateAck(cmdFrame, cmdNr)));
+                int devID = pd.get<uint16_t>();
+                int paramID = pd.get<uint16_t>();
+                uint8_t value = pd.get<uint16_t>();
+                lookupDevice(devID).setValue(value, paramID);
+                distributeFrame(boost::shared_ptr<DS485CommandFrame>(createAck(cmdFrame, cmdNr)));
               }
               break;
             case FunctionModulatorGetZonesSize:
               {
-                response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint16_t>(m_Zones.size());
-                DistributeFrame(response);
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(m_Zones.size());
+                distributeFrame(response);
               }
               break;
             case FunctionModulatorGetZoneIdForInd:
               {
-                uint8_t index = pd.Get<uint16_t>();
+                uint8_t index = pd.get<uint16_t>();
                 map< const int, vector<DSIDInterface*> >::iterator it = m_Zones.begin();
                 advance(it, index);
-                response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint16_t>(it->first);
-                DistributeFrame(response);
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(it->first);
+                distributeFrame(response);
               }
               break;
             case FunctionModulatorCountDevInZone:
               {
-                uint8_t index = pd.Get<uint16_t>();
-                response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint16_t>(m_Zones[index].size());
-                DistributeFrame(response);
+                uint8_t index = pd.get<uint16_t>();
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(m_Zones[index].size());
+                distributeFrame(response);
               }
               break;
             case FunctionModulatorDevKeyInZone:
               {
-                uint8_t zoneID = pd.Get<uint16_t>();
-                uint8_t deviceIndex = pd.Get<devid_t>();
-                response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint16_t>(m_Zones[zoneID].at(deviceIndex)->GetShortAddress());
-                DistributeFrame(response);
+                uint8_t zoneID = pd.get<uint16_t>();
+                uint8_t deviceIndex = pd.get<devid_t>();
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(m_Zones[zoneID].at(deviceIndex)->getShortAddress());
+                distributeFrame(response);
               }
               break;
             case FunctionModulatorGetGroupsSize:
               {
-                response = CreateResponse(cmdFrame, cmdNr);
-                int zoneID = pd.Get<uint16_t>();
+                response = createResponse(cmdFrame, cmdNr);
+                int zoneID = pd.get<uint16_t>();
                 IntPairToDSIDSimVector::iterator it = m_DevicesOfGroupInZone.begin();
                 IntPairToDSIDSimVector::iterator end = m_DevicesOfGroupInZone.end();
                 int result = 0;
@@ -822,52 +821,52 @@ namespace dss {
                   }
                   it++;
                 }
-                response->GetPayload().Add<uint16_t>(result);
-                DistributeFrame(response);
+                response->getPayload().add<uint16_t>(result);
+                distributeFrame(response);
               }
               break;
             case FunctionModulatorGetDSID:
               {
-                response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<dsid_t>(m_ModulatorDSID);
-                DistributeFrame(response);
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<dsid_t>(m_ModulatorDSID);
+                distributeFrame(response);
               }
               break;
             case FunctionGroupGetDeviceCount:
               {
-                response = CreateResponse(cmdFrame, cmdNr);
-                int zoneID = pd.Get<uint16_t>();
-                int groupID = pd.Get<uint16_t>();
+                response = createResponse(cmdFrame, cmdNr);
+                int zoneID = pd.get<uint16_t>();
+                int groupID = pd.get<uint16_t>();
                 int result = m_DevicesOfGroupInZone[pair<const int, const int>(zoneID, groupID)].size();
-                response->GetPayload().Add<uint16_t>(result);
-                DistributeFrame(response);
+                response->getPayload().add<uint16_t>(result);
+                distributeFrame(response);
               }
               break;
             case FunctionGroupGetDevKeyForInd:
               {
-                response = CreateResponse(cmdFrame, cmdNr);
-                int zoneID = pd.Get<uint16_t>();
-                int groupID = pd.Get<uint16_t>();
-                int index = pd.Get<uint16_t>();
-                int result = m_DevicesOfGroupInZone[pair<const int, const int>(zoneID, groupID)].at(index)->GetShortAddress();
-                response->GetPayload().Add<uint16_t>(result);
-                DistributeFrame(response);
+                response = createResponse(cmdFrame, cmdNr);
+                int zoneID = pd.get<uint16_t>();
+                int groupID = pd.get<uint16_t>();
+                int index = pd.get<uint16_t>();
+                int result = m_DevicesOfGroupInZone[pair<const int, const int>(zoneID, groupID)].at(index)->getShortAddress();
+                response->getPayload().add<uint16_t>(result);
+                distributeFrame(response);
               }
               break;
             case FunctionGroupGetLastCalledScene:
               {
-                int zoneID = pd.Get<uint16_t>();
-                int groupID = pd.Get<uint16_t>();
-                response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint16_t>(m_LastCalledSceneForZoneAndGroup[make_pair(zoneID, groupID)]);
-                DistributeFrame(response);
+                int zoneID = pd.get<uint16_t>();
+                int groupID = pd.get<uint16_t>();
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(m_LastCalledSceneForZoneAndGroup[make_pair(zoneID, groupID)]);
+                distributeFrame(response);
               }
               break;
             case FunctionZoneGetGroupIdForInd:
               {
-                response = CreateResponse(cmdFrame, cmdNr);
-                int zoneID = pd.Get<uint16_t>();
-                int groupIndex= pd.Get<uint16_t>();
+                response = createResponse(cmdFrame, cmdNr);
+                int zoneID = pd.get<uint16_t>();
+                int groupIndex= pd.get<uint16_t>();
 
                 IntPairToDSIDSimVector::iterator it = m_DevicesOfGroupInZone.begin();
                 IntPairToDSIDSimVector::iterator end = m_DevicesOfGroupInZone.end();
@@ -882,55 +881,55 @@ namespace dss {
                   }
                   it++;
                 }
-                response->GetPayload().Add<uint16_t>(result);
-                DistributeFrame(response);
+                response->getPayload().add<uint16_t>(result);
+                distributeFrame(response);
               }
               break;
             case FunctionDeviceGetOnOff:
               {
-                response = CreateResponse(cmdFrame, cmdNr);
-                int devID = pd.Get<uint16_t>();
-                DSIDInterface& dev = LookupDevice(devID);
-                response->GetPayload().Add<uint16_t>(dev.IsTurnedOn());
-                DistributeFrame(response);
+                response = createResponse(cmdFrame, cmdNr);
+                int devID = pd.get<uint16_t>();
+                DSIDInterface& dev = lookupDevice(devID);
+                response->getPayload().add<uint16_t>(dev.isTurnedOn());
+                distributeFrame(response);
               }
               break;
             case FunctionDeviceGetDSID:
               {
-                response = CreateResponse(cmdFrame, cmdNr);
-                int devID = pd.Get<uint16_t>();
-                DSIDInterface& dev = LookupDevice(devID);
-                response->GetPayload().Add<uint16_t>(1); // return-code (device found, all well)
-                response->GetPayload().Add<dsid_t>(dev.GetDSID());
-                DistributeFrame(response);
+                response = createResponse(cmdFrame, cmdNr);
+                int devID = pd.get<uint16_t>();
+                DSIDInterface& dev = lookupDevice(devID);
+                response->getPayload().add<uint16_t>(1); // return-code (device found, all well)
+                response->getPayload().add<dsid_t>(dev.getDSID());
+                distributeFrame(response);
               }
               break;
             case FunctionGetTypeRequest:
               {
-                response = CreateResponse(cmdFrame, cmdNr);
+                response = createResponse(cmdFrame, cmdNr);
                 // Type 2 bytes (high, low)
-                response->GetPayload().Add<uint8_t>(0x00);
-                response->GetPayload().Add<uint8_t>(0x01);
+                response->getPayload().add<uint8_t>(0x00);
+                response->getPayload().add<uint8_t>(0x01);
                 // HW-Version 2 bytes (high, low)
-                response->GetPayload().Add<uint8_t>(0x00);
-                response->GetPayload().Add<uint8_t>(0x01);
+                response->getPayload().add<uint8_t>(0x00);
+                response->getPayload().add<uint8_t>(0x01);
                 // SW-Version 2 bytes (high, low)
-                response->GetPayload().Add<uint8_t>(0x00);
-                response->GetPayload().Add<uint8_t>(0x01);
+                response->getPayload().add<uint8_t>(0x00);
+                response->getPayload().add<uint8_t>(0x01);
                 // free text
-                response->GetPayload().Add<uint8_t>('d');
-                response->GetPayload().Add<uint8_t>('S');
-                response->GetPayload().Add<uint8_t>('M');
-                response->GetPayload().Add<uint8_t>('S');
-                response->GetPayload().Add<uint8_t>('i');
-                response->GetPayload().Add<uint8_t>('m');
-                DistributeFrame(response);
+                response->getPayload().add<uint8_t>('d');
+                response->getPayload().add<uint8_t>('S');
+                response->getPayload().add<uint8_t>('M');
+                response->getPayload().add<uint8_t>('S');
+                response->getPayload().add<uint8_t>('i');
+                response->getPayload().add<uint8_t>('m');
+                distributeFrame(response);
               }
               break;
             case FunctionDeviceGetGroups:
               {
-                devid_t devID = pd.Get<uint16_t>();
-                LookupDevice(devID);
+                devid_t devID = pd.get<uint16_t>();
+                lookupDevice(devID);
                 vector<int>& groupsList = m_GroupsPerDevice[devID];
 
 
@@ -944,52 +943,52 @@ namespace dss {
                   }
                 }
 
-                response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint16_t>(1);
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(1);
                 for(int iByte = 0; iByte < 8; iByte++) {
-                  response->GetPayload().Add<uint8_t>(bytes[iByte]);
+                  response->getPayload().add<uint8_t>(bytes[iByte]);
                 }
-                DistributeFrame(response);
+                distributeFrame(response);
               }
               break;
             case FunctionDeviceAddToGroup:
               {
-                devid_t devID = pd.Get<uint16_t>();
-                DSIDInterface& dev = LookupDevice(devID);
-                int groupID = pd.Get<uint16_t>();
-                AddDeviceToGroup(&dev, groupID);
-                response->GetPayload().Add<uint16_t>(1);
-                DistributeFrame(response);
+                devid_t devID = pd.get<uint16_t>();
+                DSIDInterface& dev = lookupDevice(devID);
+                int groupID = pd.get<uint16_t>();
+                addDeviceToGroup(&dev, groupID);
+                response->getPayload().add<uint16_t>(1);
+                distributeFrame(response);
               }
               break;
             case FunctionModulatorGetPowerConsumption:
               {
-                response = CreateResponse(cmdFrame, cmdNr);
+                response = createResponse(cmdFrame, cmdNr);
                 uint32_t val = 0;
                 foreach(DSIDInterface* interface, m_SimulatedDevices) {
-                  val += interface->GetConsumption();
+                  val += interface->getConsumption();
                 }
-                response->GetPayload().Add<uint32_t>(val);
-                DistributeFrame(response);
+                response->getPayload().add<uint32_t>(val);
+                distributeFrame(response);
               }
               break;
             case FunctionModulatorGetEnergyMeterValue:
               {
-                response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint16_t>(0);
-                DistributeFrame(response);
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(0);
+                distributeFrame(response);
               }
               break;
             case FunctionModulatorAddZone:
               {
-                uint8_t zoneID = pd.Get<uint16_t>();
-                response = CreateResponse(cmdFrame, cmdNr);
+                uint8_t zoneID = pd.get<uint16_t>();
+                response = createResponse(cmdFrame, cmdNr);
                 bool isValid = true;
                 for(map< const int, vector<DSIDInterface*> >::iterator iZoneEntry = m_Zones.begin(), e = m_Zones.end();
                     iZoneEntry != e; ++iZoneEntry)
                 {
                   if(iZoneEntry->first == zoneID) {
-                    response->GetPayload().Add<uint16_t>(static_cast<uint16_t>(-7));
+                    response->getPayload().add<uint16_t>(static_cast<uint16_t>(-7));
                     isValid = false;
                     break;
                   }
@@ -997,97 +996,97 @@ namespace dss {
                 if(isValid) {
                   // make the zone visible in the map
                   m_Zones[zoneID].size();
-                  response->GetPayload().Add<uint16_t>(1);
+                  response->getPayload().add<uint16_t>(1);
                 }
-                DistributeFrame(response);
+                distributeFrame(response);
               }
               break;
             case FunctionDeviceSetZoneID:
               {
-                uint8_t zoneID = pd.Get<uint16_t>();
-                devid_t devID = pd.Get<devid_t>();
-                DSIDInterface& dev = LookupDevice(devID);
+                uint8_t zoneID = pd.get<uint16_t>();
+                devid_t devID = pd.get<devid_t>();
+                DSIDInterface& dev = lookupDevice(devID);
 
                 int oldZoneID = m_DeviceZoneMapping[&dev];
                 vector<DSIDInterface*>::iterator oldEntry = find(m_Zones[oldZoneID].begin(), m_Zones[oldZoneID].end(), &dev);
                 m_Zones[oldZoneID].erase(oldEntry);
                 m_Zones[zoneID].push_back(&dev);
                 m_DeviceZoneMapping[&dev] = zoneID;
-                dev.SetZoneID(zoneID);
-                response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint16_t>(1);
-                DistributeFrame(response);
+                dev.setZoneID(zoneID);
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(1);
+                distributeFrame(response);
               }
               break;
             case FunctionModulatorGetEnergyBorder:
               {
-                response = CreateResponse(cmdFrame, cmdNr);
-                response->GetPayload().Add<uint16_t>(m_EnergyLevelOrange);
-                response->GetPayload().Add<uint16_t>(m_EnergyLevelRed);
-                DistributeFrame(response);
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(m_EnergyLevelOrange);
+                response->getPayload().add<uint16_t>(m_EnergyLevelRed);
+                distributeFrame(response);
               }
               break;
             default:
-              Logger::GetInstance()->Log("Invalid function id for sim: " + IntToString(cmdNr), lsError);
+              Logger::getInstance()->log("Invalid function id for sim: " + intToString(cmdNr), lsError);
           }
         }
       }
     } catch(runtime_error& e) {
-      Logger::GetInstance()->Log(string("DSModulatorSim: Exeption while processing packet. Message: '") + e.what() + "'");
+      Logger::getInstance()->log(string("DSModulatorSim: Exeption while processing packet. Message: '") + e.what() + "'");
     }
-  } // Process
+  } // process
 
-  void DSModulatorSim::DistributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
-    m_pSimulation->DistributeFrame(_frame);
-  } // DistributeFrame
+  void DSModulatorSim::distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
+    m_pSimulation->distributeFrame(_frame);
+  } // distributeFrame
 
-  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::CreateReply(DS485CommandFrame& _request) {
+  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::createReply(DS485CommandFrame& _request) {
     boost::shared_ptr<DS485CommandFrame> result(new DS485CommandFrame());
-    result->GetHeader().SetDestination(_request.GetHeader().GetSource());
-    result->GetHeader().SetSource(m_ID);
-    result->GetHeader().SetBroadcast(false);
-    result->GetHeader().SetCounter(_request.GetHeader().GetCounter());
+    result->getHeader().setDestination(_request.getHeader().getSource());
+    result->getHeader().setSource(m_ID);
+    result->getHeader().setBroadcast(false);
+    result->getHeader().setCounter(_request.getHeader().getCounter());
     return result;
-  } // CreateReply
+  } // createReply
 
 
-  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::CreateAck(DS485CommandFrame& _request, uint8_t _functionID) {
-    boost::shared_ptr<DS485CommandFrame> result = CreateReply(_request);
-    result->SetCommand(CommandAck);
-    result->GetPayload().Add(_functionID);
+  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::createAck(DS485CommandFrame& _request, uint8_t _functionID) {
+    boost::shared_ptr<DS485CommandFrame> result = createReply(_request);
+    result->setCommand(CommandAck);
+    result->getPayload().add(_functionID);
     return result;
   }
 
-  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::CreateResponse(DS485CommandFrame& _request, uint8_t _functionID) {
-    boost::shared_ptr<DS485CommandFrame> result = CreateReply(_request);
-    result->SetCommand(CommandResponse);
-    result->GetPayload().Add(_functionID);
+  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::createResponse(DS485CommandFrame& _request, uint8_t _functionID) {
+    boost::shared_ptr<DS485CommandFrame> result = createReply(_request);
+    result->setCommand(CommandResponse);
+    result->getPayload().add(_functionID);
     return result;
-  } // CreateResponse
+  } // createResponse
 
 
-  DSIDInterface& DSModulatorSim::LookupDevice(const devid_t _shortAddress) {
+  DSIDInterface& DSModulatorSim::lookupDevice(const devid_t _shortAddress) {
     for(vector<DSIDInterface*>::iterator ipSimDev = m_SimulatedDevices.begin(); ipSimDev != m_SimulatedDevices.end(); ++ipSimDev) {
-      if((*ipSimDev)->GetShortAddress() == _shortAddress)  {
+      if((*ipSimDev)->getShortAddress() == _shortAddress)  {
         return **ipSimDev;
       }
     }
-    throw runtime_error(string("could not find device with id: ") + IntToString(_shortAddress));
-  } // LookupDevice
+    throw runtime_error(string("could not find device with id: ") + intToString(_shortAddress));
+  } // lookupDevice
 
-  int DSModulatorSim::GetID() const {
+  int DSModulatorSim::getID() const {
     return m_ID;
-  } // GetID
-  DSIDInterface* DSModulatorSim::GetSimulatedDevice(const dsid_t _dsid) {
+  } // getID
+  DSIDInterface* DSModulatorSim::getSimulatedDevice(const dsid_t _dsid) {
     for(vector<DSIDInterface*>::iterator iDSID = m_SimulatedDevices.begin(), e = m_SimulatedDevices.end();
         iDSID != e; ++iDSID)
     {
-      if((*iDSID)->GetDSID() == _dsid) {
+      if((*iDSID)->getDSID() == _dsid) {
         return *iDSID;
       }
     }
     return NULL;
-  } // GetSimulatedDevice
+  } // getSimulatedDevice
 
 
   //================================================== DSIDCreator
@@ -1099,21 +1098,21 @@ namespace dss {
 
   //================================================== DSIDFactory
 
-  DSIDInterface* DSIDFactory::CreateDSID(const string& _identifier, const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
+  DSIDInterface* DSIDFactory::createDSID(const string& _identifier, const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
     boost::ptr_vector<DSIDCreator>::iterator
     iCreator = m_RegisteredCreators.begin(),
     e = m_RegisteredCreators.end();
     while(iCreator != e) {
-      if(iCreator->GetIdentifier() == _identifier) {
-        return iCreator->CreateDSID(_dsid, _shortAddress, _modulator);
+      if(iCreator->getIdentifier() == _identifier) {
+        return iCreator->createDSID(_dsid, _shortAddress, _modulator);
       }
       ++iCreator;
     }
-    Logger::GetInstance()->Log(string("Could not find creator for DSID type '") + _identifier + "'");
+    Logger::getInstance()->log(string("Could not find creator for DSID type '") + _identifier + "'");
     throw new runtime_error(string("Could not find creator for DSID type '") + _identifier + "'");
   }
 
-  void DSIDFactory::RegisterCreator(DSIDCreator* _creator) {
+  void DSIDFactory::registerCreator(DSIDCreator* _creator) {
     m_RegisteredCreators.push_back(_creator);
   }
 

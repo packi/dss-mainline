@@ -20,7 +20,7 @@ namespace dss {
   : Subsystem(_pDSS, "WebServer"),
     Thread("WebServer")
   {
-    Logger::GetInstance()->Log("Starting Webserver...");
+    Logger::getInstance()->log("Starting Webserver...");
     m_SHttpdContext = shttpd_init();
   } // ctor
 
@@ -28,37 +28,37 @@ namespace dss {
     shttpd_fini(m_SHttpdContext);
   } // dtor
 
-  void WebServer::Initialize() {
-    Subsystem::Initialize();
+  void WebServer::initialize() {
+    Subsystem::initialize();
 
-    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "webroot", GetDSS().GetDataDirectory() + "webroot/", true, false);
-    DSS::GetInstance()->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "ports", "8080", true, false);
+    DSS::getInstance()->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "webroot", getDSS().getDataDirectory() + "webroot/", true, false);
+    DSS::getInstance()->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "ports", "8080", true, false);
 
-  } // Initialize
+  } // initialize
 
-  void WebServer::DoStart() {
-    Run();
-  } // Start
+  void WebServer::doStart() {
+    run();
+  } // start
 
-  void WebServer::Execute() {
-    string ports = DSS::GetInstance()->GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "ports");
-    Log("Webserver: Listening on port(s) " + ports);
+  void WebServer::execute() {
+    string ports = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "ports");
+    log("Webserver: Listening on port(s) " + ports);
     shttpd_set_option(m_SHttpdContext, "ports", ports.c_str());
 
-    string aliases = string("/=") + DSS::GetInstance()->GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "webroot");
-    Log("Webserver: Configured aliases: " + aliases);
+    string aliases = string("/=") + DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "webroot");
+    log("Webserver: Configured aliases: " + aliases);
     shttpd_set_option(m_SHttpdContext, "aliases", aliases.c_str());
 
-    shttpd_register_uri(m_SHttpdContext, "/browse/*", &HTTPListOptions, NULL);
-    shttpd_register_uri(m_SHttpdContext, "/json/*", &JSONHandler, NULL);
+    shttpd_register_uri(m_SHttpdContext, "/browse/*", &httpBrowseProperties, NULL);
+    shttpd_register_uri(m_SHttpdContext, "/json/*", &jsonHandler, NULL);
 
-    Log("Webserver started", lsInfo);
+    log("Webserver started", lsInfo);
     while(!m_Terminated) {
       shttpd_poll(m_SHttpdContext, 1000);
     }
-  } // Execute
+  } // execute
 
-  const char* HTTPCodeToMessage(const int _code) {
+  const char* httpCodeToMessage(const int _code) {
     if(_code == 400) {
       return "Bad Request";
     } else if(_code == 401) {
@@ -70,36 +70,36 @@ namespace dss {
     }
   }
 
-  void WebServer::EmitHTTPHeader(int _code, struct shttpd_arg* _arg, const std::string& _contentType) {
+  void WebServer::emitHTTPHeader(int _code, struct shttpd_arg* _arg, const std::string& _contentType) {
     std::stringstream sstream;
-    sstream << "HTTP/1.1 " << _code << ' ' << HTTPCodeToMessage(_code) << "\r\n";
+    sstream << "HTTP/1.1 " << _code << ' ' << httpCodeToMessage(_code) << "\r\n";
     sstream << "Content-Type: " << _contentType << "; charset=utf-8\r\n\r\n";
     shttpd_printf(_arg, sstream.str().c_str());
-  } // EmitHTTPHeader
+  } // emitHTTPHeader
 
   HashMapConstStringString ParseParameter(const char* _params) {
     HashMapConstStringString result;
     if(_params != NULL) {
-      vector<string> paramList = SplitString(_params, '&');
+      vector<string> paramList = splitString(_params, '&');
       for(vector<string>::iterator iParam = paramList.begin(); iParam != paramList.end(); ++iParam) {
-        vector<string> nameValue = SplitString(*iParam, '=');
+        vector<string> nameValue = splitString(*iParam, '=');
         if(nameValue.size() != 2) {
           result[*iParam] = "";
         } else {
-          result[URLDecode(nameValue.at(0))] = URLDecode(nameValue.at(1));
+          result[urlDecode(nameValue.at(0))] = urlDecode(nameValue.at(1));
         }
       }
     }
     return result;
-  } // ParseParameter
+  } // parseParameter
 
   string ToJSONValue(const int& _value) {
-    return IntToString(_value);
-  } // ToJSONValue(int)
+    return intToString(_value);
+  } // toJSONValue(int)
 
   string ToJSONValue(const double& _value) {
-    return DoubleToString(_value);
-  } // ToJSONValue(double)
+    return doubleToString(_value);
+  } // toJSONValue(double)
 
   string ToJSONValue(const bool& _value) {
     if(_value) {
@@ -107,15 +107,15 @@ namespace dss {
     } else {
       return "false";
     }
-  } // ToJSONValue(bool)
+  } // toJSONValue(bool)
 
   string ToJSONValue(const string& _value) {
     return string("\"") + _value + '"';
-  } // ToJSONValue(const string&)
+  } // toJSONValue(const string&)
 
   string ToJSONValue(const char* _value) {
     return ToJSONValue(string(_value));
-  } // ToJSONValue(const char*)
+  } // toJSONValue(const char*)
 
   string ResultToJSON(const bool _ok, const string& _message = "") {
     stringstream sstream;
@@ -125,7 +125,7 @@ namespace dss {
     }
     sstream << "}";
     return sstream.str();
-  } // ResultToJSON
+  } // resultToJSON
 
   string JSONOk(const string& _innerResult = "") {
     stringstream sstream;
@@ -139,22 +139,22 @@ namespace dss {
 
   string ToJSONValue(const DeviceReference& _device) {
     std::stringstream sstream;
-    sstream << "{ \"id\": \"" << _device.GetDSID().ToString() << "\""
-            << ", \"isSwitch\": " << ToJSONValue(_device.HasSwitch())
-            << ", \"name\": " << ToJSONValue(_device.GetDevice().GetName())
-            << ", \"fid\": " << ToJSONValue(_device.GetDevice().GetFunctionID())
-            << ", \"circuitID\":" << ToJSONValue(_device.GetDevice().GetModulatorID())
-            << ", \"busID\":"  << ToJSONValue(_device.GetDevice().GetShortAddress())
-            << ", \"on\": " << ToJSONValue(_device.IsOn()) << " }";
+    sstream << "{ \"id\": \"" << _device.getDSID().toString() << "\""
+            << ", \"isSwitch\": " << ToJSONValue(_device.hasSwitch())
+            << ", \"name\": " << ToJSONValue(_device.getDevice().getName())
+            << ", \"fid\": " << ToJSONValue(_device.getDevice().getFunctionID())
+            << ", \"circuitID\":" << ToJSONValue(_device.getDevice().getModulatorID())
+            << ", \"busID\":"  << ToJSONValue(_device.getDevice().getShortAddress())
+            << ", \"on\": " << ToJSONValue(_device.isOn()) << " }";
     return sstream.str();
-  } // ToJSONValue(DeviceReference)
+  } // toJSONValue(DeviceReference)
 
   string ToJSONValue(const Set& _set, const string& _arrayName) {
     std::stringstream sstream;
     sstream << ToJSONValue(_arrayName) << ":[";
     bool firstDevice = true;
-    for(int iDevice = 0; iDevice < _set.Length(); iDevice++) {
-      const DeviceReference& d = _set.Get(iDevice);
+    for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
+      const DeviceReference& d = _set.get(iDevice);
       if(firstDevice) {
         firstDevice = false;
       } else {
@@ -164,41 +164,41 @@ namespace dss {
     }
     sstream << "]";
     return sstream.str();
-  } // ToJSONValue(Set,Name)
+  } // toJSONValue(Set,Name)
 
   string ToJSONValue(const Group& _group) {
     std::stringstream sstream;
-    sstream << "{ " << ToJSONValue("id") << ": " << ToJSONValue(_group.GetID()) << ",";
-    sstream << ToJSONValue("name") << ": " << ToJSONValue(_group.GetName()) << ", ";
+    sstream << "{ " << ToJSONValue("id") << ": " << ToJSONValue(_group.getID()) << ",";
+    sstream << ToJSONValue("name") << ": " << ToJSONValue(_group.getName()) << ", ";
     sstream << ToJSONValue("devices") << ": [";
-    Set devices = _group.GetDevices();
+    Set devices = _group.getDevices();
     bool first = true;
-    for(int iDevice = 0; iDevice < devices.Length(); iDevice++) {
+    for(int iDevice = 0; iDevice < devices.length(); iDevice++) {
       if(!first) {
         sstream << " , ";
       } else {
         first = false;
       }
-      sstream << " { " << ToJSONValue("id") << ": " << ToJSONValue(devices[iDevice].GetDSID().ToString()) << " }";
+      sstream << " { " << ToJSONValue("id") << ": " << ToJSONValue(devices[iDevice].getDSID().toString()) << " }";
     }
     sstream << "]} ";
     return sstream.str();
-  } // ToJSONValue(Group)
+  } // toJSONValue(Group)
 
   string ToJSONValue(Zone& _zone) {
     std::stringstream sstream;
-    sstream << "{ \"id\": " << _zone.GetZoneID() << ",";
-    string name = _zone.GetName();
+    sstream << "{ \"id\": " << _zone.getZoneID() << ",";
+    string name = _zone.getName();
     if(name.size() == 0) {
-      name = string("Zone ") + IntToString(_zone.GetZoneID());
+      name = string("Zone ") + intToString(_zone.getZoneID());
     }
     sstream << "\"name\": " << ToJSONValue(name) << ", ";
 
-    Set devices = _zone.GetDevices();
+    Set devices = _zone.getDevices();
     sstream << ToJSONValue(devices, "devices");
     sstream << "," << ToJSONValue("groups") << ": [";
     bool first = true;
-    foreach(Group* pGroup, _zone.GetGroups()) {
+    foreach(Group* pGroup, _zone.getGroups()) {
       if(!first) {
         sstream << ",";
       }
@@ -209,12 +209,12 @@ namespace dss {
 
     sstream << "} ";
     return sstream.str();
-  } // ToJSONValue(Zone)
+  } // toJSONValue(Zone)
 
   string ToJSONValue(Apartment& _apartment) {
   	std::stringstream sstream;
   	sstream << "{ \"apartment\": { \"zones\": [";
-	  vector<Zone*>& zones = _apartment.GetZones();
+	  vector<Zone*>& zones = _apartment.getZones();
 	  bool first = true;
 	  for(vector<Zone*>::iterator ipZone = zones.begin(), e = zones.end();
 	      ipZone != e; ++ipZone)
@@ -229,27 +229,27 @@ namespace dss {
 	  }
     sstream << "]} }";
 	  return sstream.str();
-  } // ToJSONValue(Apartment)
+  } // toJSONValue(Apartment)
 
   Set GetUnassignedDevices() {
-    Apartment& apt = DSS::GetInstance()->GetApartment();
-    Set devices = apt.GetZone(0).GetDevices();
+    Apartment& apt = DSS::getInstance()->getApartment();
+    Set devices = apt.getZone(0).getDevices();
 
-    vector<Zone*>& zones = apt.GetZones();
+    vector<Zone*>& zones = apt.getZones();
     for(vector<Zone*>::iterator ipZone = zones.begin(), e = zones.end();
         ipZone != e; ++ipZone)
     {
       Zone* pZone = *ipZone;
-      if(pZone->GetZoneID() == 0) {
+      if(pZone->getZoneID() == 0) {
         // zone 0 holds all devices, so we're going to skip it
         continue;
       }
 
-      devices = devices.Remove(pZone->GetDevices());
+      devices = devices.remove(pZone->getDevices());
     }
 
     return devices;
-  } // GetUnassignedDevices
+  } // getUnassignedDevices
 
   template<class t>
   string ToJSONArray(const vector<t>& _v);
@@ -272,107 +272,107 @@ namespace dss {
     }
     arr << "]";
     return arr.str();
-  } // ToJSONArray<int>
+  } // toJSONArray<int>
 
-  string WebServer::CallDeviceInterface(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, IDeviceInterface* _interface, Session* _session) {
+  string WebServer::callDeviceInterface(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, IDeviceInterface* _interface, Session* _session) {
     bool ok = true;
     string errorString;
     assert(_interface != NULL);
-    if(EndsWith(_method, "/turnOn")) {
-      _interface->TurnOn();
-    } else if(EndsWith(_method, "/turnOff")) {
-      _interface->TurnOff();
-    } else if(EndsWith(_method, "/increaseValue")) {
-      _interface->IncreaseValue();
-    } else if(EndsWith(_method, "/decreaseValue")) {
-      _interface->DecreaseValue();
-    } else if(EndsWith(_method, "/enable")) {
-      _interface->Enable();
-    } else if(EndsWith(_method, "/disable")) {
-      _interface->Disable();
-    } else if(EndsWith(_method, "/startDim")) {
+    if(endsWith(_method, "/turnOn")) {
+      _interface->turnOn();
+    } else if(endsWith(_method, "/turnOff")) {
+      _interface->turnOff();
+    } else if(endsWith(_method, "/increaseValue")) {
+      _interface->increaseValue();
+    } else if(endsWith(_method, "/decreaseValue")) {
+      _interface->decreaseValue();
+    } else if(endsWith(_method, "/enable")) {
+      _interface->enable();
+    } else if(endsWith(_method, "/disable")) {
+      _interface->disable();
+    } else if(endsWith(_method, "/startDim")) {
       string direction = _parameter["direction"];
       if(direction == "up") {
-        _interface->StartDim(true);
+        _interface->startDim(true);
       } else {
-        _interface->StartDim(false);
+        _interface->startDim(false);
       }
-    } else if(EndsWith(_method, "/endDim")) {
-      _interface->EndDim();
-    } else if(EndsWith(_method, "/setValue")) {
-      int value = StrToIntDef(_parameter["value"], -1);
+    } else if(endsWith(_method, "/endDim")) {
+      _interface->endDim();
+    } else if(endsWith(_method, "/setValue")) {
+      int value = strToIntDef(_parameter["value"], -1);
       if(value == -1) {
         errorString = "invalid or missing parameter value: '" + _parameter["value"] + "'";
         ok = false;
       } else {
-        _interface->SetValue(value);
+        _interface->setValue(value);
       }
-    } else if(EndsWith(_method, "/callScene")) {
+    } else if(endsWith(_method, "/callScene")) {
       string sceneStr = _parameter["sceneNr"];
-      int sceneID = StrToIntDef(sceneStr, -1);
+      int sceneID = strToIntDef(sceneStr, -1);
       if(sceneID != -1) {
-        _interface->CallScene(sceneID);
+        _interface->callScene(sceneID);
       } else {
         errorString = "invalid sceneNr: '" + sceneStr + "'";
         ok = false;
       }
-    } else if(EndsWith(_method, "/saveScene")) {
+    } else if(endsWith(_method, "/saveScene")) {
       string sceneStr = _parameter["sceneNr"];
-      int sceneID = StrToIntDef(sceneStr, -1);
+      int sceneID = strToIntDef(sceneStr, -1);
       if(sceneID != -1) {
-        _interface->SaveScene(sceneID);
+        _interface->saveScene(sceneID);
       } else {
         errorString = "invalid sceneNr: '" + sceneStr + "'";
         ok = false;
       }
-    } else if(EndsWith(_method, "/undoScene")) {
+    } else if(endsWith(_method, "/undoScene")) {
       string sceneStr = _parameter["sceneNr"];
-      int sceneID = StrToIntDef(sceneStr, -1);
+      int sceneID = strToIntDef(sceneStr, -1);
       if(sceneID != -1) {
-        _interface->UndoScene(sceneID);
+        _interface->undoScene(sceneID);
       } else {
         errorString = "invalid sceneNr: '" + sceneStr + "'";
         ok = false;
       }
-    } else if(EndsWith(_method, "/getConsumption")) {
-      return "{ " + ToJSONValue("consumption") + ": " +  UIntToString(_interface->GetPowerConsumption()) +"}";
+    } else if(endsWith(_method, "/getConsumption")) {
+      return "{ " + ToJSONValue("consumption") + ": " +  uintToString(_interface->getPowerConsumption()) +"}";
     }
     return ResultToJSON(ok, errorString);
-  } // CallDeviceInterface
+  } // callDeviceInterface
 
-  bool WebServer::IsDeviceInterfaceCall(const std::string& _method) {
-    return EndsWith(_method, "/turnOn")
-        || EndsWith(_method, "/turnOff")
-        || EndsWith(_method, "/increaseValue")
-        || EndsWith(_method, "/decreaseValue")
-        || EndsWith(_method, "/enable")
-        || EndsWith(_method, "/disable")
-        || EndsWith(_method, "/startDim")
-        || EndsWith(_method, "/endDim")
-        || EndsWith(_method, "/setValue")
-        || EndsWith(_method, "/callScene")
-        || EndsWith(_method, "/saveScene")
-        || EndsWith(_method, "/undoScene")
-        || EndsWith(_method, "/getConsumption");
-  } // IsDeviceInterfaceCall
+  bool WebServer::isDeviceInterfaceCall(const std::string& _method) {
+    return endsWith(_method, "/turnOn")
+        || endsWith(_method, "/turnOff")
+        || endsWith(_method, "/increaseValue")
+        || endsWith(_method, "/decreaseValue")
+        || endsWith(_method, "/enable")
+        || endsWith(_method, "/disable")
+        || endsWith(_method, "/startDim")
+        || endsWith(_method, "/endDim")
+        || endsWith(_method, "/setValue")
+        || endsWith(_method, "/callScene")
+        || endsWith(_method, "/saveScene")
+        || endsWith(_method, "/undoScene")
+        || endsWith(_method, "/getConsumption");
+  } // isDeviceInterfaceCall
 
-  string WebServer::HandleApartmentCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleApartmentCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     bool ok = true;
     string errorMessage;
     _handled = true;
-    if(EndsWith(_method, "/getConsumption")) {
+    if(endsWith(_method, "/getConsumption")) {
       int accumulatedConsumption = 0;
-      foreach(Modulator* pModulator, GetDSS().GetApartment().GetModulators()) {
-        accumulatedConsumption += pModulator->GetPowerConsumption();
+      foreach(Modulator* pModulator, getDSS().getApartment().getModulators()) {
+        accumulatedConsumption += pModulator->getPowerConsumption();
       }
-      return "{ " + ToJSONValue("consumption") + ": " +  UIntToString(accumulatedConsumption) +"}";
-    } else if(IsDeviceInterfaceCall(_method)) {
+      return "{ " + ToJSONValue("consumption") + ": " +  uintToString(accumulatedConsumption) +"}";
+    } else if(isDeviceInterfaceCall(_method)) {
       IDeviceInterface* interface = NULL;
       string groupName = _parameter["groupName"];
       string groupIDString = _parameter["groupID"];
       if(!groupName.empty()) {
         try {
-          Group& grp = GetDSS().GetApartment().GetGroup(groupName);
+          Group& grp = getDSS().getApartment().getGroup(groupName);
           interface = &grp;
         } catch(runtime_error& e) {
           errorMessage = "Could not find group with name '" + groupName + "'";
@@ -380,9 +380,9 @@ namespace dss {
         }
       } else if(!groupIDString.empty()) {
         try {
-          int groupID = StrToIntDef(groupIDString, -1);
+          int groupID = strToIntDef(groupIDString, -1);
           if(groupID != -1) {
-            Group& grp = GetDSS().GetApartment().GetGroup(groupID);
+            Group& grp = getDSS().getApartment().getGroup(groupID);
             interface = &grp;
           } else {
             errorMessage = "Could not parse group id '" + groupIDString + "'";
@@ -395,9 +395,9 @@ namespace dss {
       }
       if(ok) {
         if(interface == NULL) {
-          interface = &GetDSS().GetApartment().GetGroup(GroupIDBroadcast);
+          interface = &getDSS().getApartment().getGroup(GroupIDBroadcast);
         }
-        return CallDeviceInterface(_method, _parameter, _arg, interface, _session);
+        return callDeviceInterface(_method, _parameter, _arg, interface, _session);
       } else {
         stringstream sstream;
         sstream << "{ ok: " << ToJSONValue(ok) << ", message: " << ToJSONValue(errorMessage) << " }";
@@ -405,53 +405,53 @@ namespace dss {
       }
     } else {
       string result;
-      if(EndsWith(_method, "/getStructure")) {
-        result = ToJSONValue(GetDSS().GetApartment());
-      } else if(EndsWith(_method, "/getDevices")) {
+      if(endsWith(_method, "/getStructure")) {
+        result = ToJSONValue(getDSS().getApartment());
+      } else if(endsWith(_method, "/getDevices")) {
         Set devices;
         if(_parameter["unassigned"].empty()) {
-          devices = GetDSS().GetApartment().GetDevices();
+          devices = getDSS().getApartment().getDevices();
         } else {
           devices = GetUnassignedDevices();
         }
 
         result = "{" + ToJSONValue(devices, "devices") + "}";
-      } else if(EndsWith(_method, "/login")) {
+      } else if(endsWith(_method, "/login")) {
         int token = m_LastSessionID;
         m_Sessions[token] = Session(token);
         return "{" + ToJSONValue("token") + ": " + ToJSONValue(token) + "}";
-      } else if(EndsWith(_method, "/getCircuits")) {
+      } else if(endsWith(_method, "/getCircuits")) {
         stringstream sstream;
         sstream << "{ " << ToJSONValue("circuits") << ": [";
         bool first = true;
-        vector<Modulator*>& modulators = GetDSS().GetApartment().GetModulators();
+        vector<Modulator*>& modulators = getDSS().getApartment().getModulators();
         foreach(Modulator* modulator, modulators) {
           if(!first) {
             sstream << ",";
           }
           first = false;
-          sstream << "{ " << ToJSONValue("name") << ": " << ToJSONValue(modulator->GetName());
-          sstream << ", " << ToJSONValue("dsid") << ": " << ToJSONValue(modulator->GetDSID().ToString());
-          sstream << ", " << ToJSONValue("busid") << ": " << ToJSONValue(modulator->GetBusID());
+          sstream << "{ " << ToJSONValue("name") << ": " << ToJSONValue(modulator->getName());
+          sstream << ", " << ToJSONValue("dsid") << ": " << ToJSONValue(modulator->getDSID().toString());
+          sstream << ", " << ToJSONValue("busid") << ": " << ToJSONValue(modulator->getBusID());
           sstream << "}";
         }
         sstream << "]}";
         return JSONOk(sstream.str());
-      } else if(EndsWith(_method, "/getName")) {
+      } else if(endsWith(_method, "/getName")) {
         stringstream sstream;
-        sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(GetDSS().GetApartment().GetName()) << "}";
+        sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(getDSS().getApartment().getName()) << "}";
         return JSONOk(sstream.str());
-      } else if(EndsWith(_method, "/setName")) {
-        GetDSS().GetApartment().SetName(_parameter["newName"]);
+      } else if(endsWith(_method, "/setName")) {
+        getDSS().getApartment().setName(_parameter["newName"]);
         result = ResultToJSON(true);
       } else {
         _handled = false;
       }
       return result;
     }
-  } // HandleApartmentCall
+  } // handleApartmentCall
 
-  string WebServer::HandleZoneCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleZoneCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     bool ok = true;
     string errorMessage;
     _handled = true;
@@ -459,10 +459,10 @@ namespace dss {
     string zoneIDString = _parameter["id"];
     Zone* pZone = NULL;
     if(!zoneIDString.empty()) {
-      int zoneID = StrToIntDef(zoneIDString, -1);
+      int zoneID = strToIntDef(zoneIDString, -1);
       if(zoneID != -1) {
         try {
-          Zone& zone = GetDSS().GetApartment().GetZone(zoneID);
+          Zone& zone = getDSS().getApartment().getZone(zoneID);
           pZone = &zone;
         } catch(runtime_error& e) {
           ok = false;
@@ -474,7 +474,7 @@ namespace dss {
       }
     } else if(!zoneName.empty()) {
       try {
-        Zone& zone = GetDSS().GetApartment().GetZone(zoneName);
+        Zone& zone = getDSS().getApartment().getZone(zoneName);
         pZone = &zone;
       } catch(runtime_error& e) {
         ok = false;
@@ -490,7 +490,7 @@ namespace dss {
       string groupIDString = _parameter["groupID"];
       if(!groupName.empty()) {
         try {
-          pGroup = pZone->GetGroup(groupName);
+          pGroup = pZone->getGroup(groupName);
           if(pGroup == NULL) {
             // TODO: this might better be done by the zone
             throw runtime_error("dummy");
@@ -501,9 +501,9 @@ namespace dss {
         }
       } else if(!groupIDString.empty()) {
         try {
-          int groupID = StrToIntDef(groupIDString, -1);
+          int groupID = strToIntDef(groupIDString, -1);
           if(groupID != -1) {
-            pGroup = pZone->GetGroup(groupID);
+            pGroup = pZone->getGroup(groupID);
             if(pGroup == NULL) {
               // TODO: this might better be done by the zone
               throw runtime_error("dummy");
@@ -518,7 +518,7 @@ namespace dss {
         }
       }
       if(ok) {
-        if(IsDeviceInterfaceCall(_method)) {
+        if(isDeviceInterfaceCall(_method)) {
           IDeviceInterface* interface = NULL;
           if(pGroup != NULL) {
             interface = pGroup;
@@ -527,14 +527,14 @@ namespace dss {
             if(interface == NULL) {
               interface = pZone;
             }
-            return CallDeviceInterface(_method, _parameter, _arg, interface, _session);
+            return callDeviceInterface(_method, _parameter, _arg, interface, _session);
           }
-        } else if(EndsWith(_method, "/getLastCalledScene")) {
+        } else if(endsWith(_method, "/getLastCalledScene")) {
           int lastScene = 0;
           if(pGroup != NULL) {
-            lastScene = pGroup->GetLastCalledScene();
+            lastScene = pGroup->getLastCalledScene();
           } else if(pZone != NULL) {
-            lastScene = pZone->GetGroup(0)->GetLastCalledScene();
+            lastScene = pZone->getGroup(0)->getLastCalledScene();
           } else {
             // should never reach here because ok, would be false
             assert(false);
@@ -542,12 +542,12 @@ namespace dss {
           stringstream sstream;
           sstream << "{" << ToJSONValue("scene") << ":" << ToJSONValue(lastScene) << "}";
           return JSONOk(sstream.str());
-        } else if(EndsWith(_method, "/getName")) {
+        } else if(endsWith(_method, "/getName")) {
           stringstream sstream;
-          sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(pZone->GetName()) << "}";
+          sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(pZone->getName()) << "}";
           return JSONOk(sstream.str());
-        } else if(EndsWith(_method, "/setName")) {
-          pZone->SetName(_parameter["newName"]);
+        } else if(endsWith(_method, "/setName")) {
+          pZone->setName(_parameter["newName"]);
           return ResultToJSON(true);
         } else {
           _handled = false;
@@ -560,9 +560,9 @@ namespace dss {
     } else {
       return "";
     }
-  } // HandleZoneCall
+  } // handleZoneCall
 
-  string WebServer::HandleDeviceCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleDeviceCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     bool ok = true;
     string errorMessage;
     _handled = true;
@@ -570,10 +570,10 @@ namespace dss {
     string deviceDSIDString = _parameter["dsid"];
     Device* pDevice = NULL;
     if(!deviceDSIDString.empty()) {
-      dsid_t deviceDSID = dsid_t::FromString(deviceDSIDString);
+      dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
       if(!(deviceDSID == NullDSID)) {
         try {
-          Device& device = GetDSS().GetApartment().GetDeviceByDSID(deviceDSID);
+          Device& device = getDSS().getApartment().getDeviceByDSID(deviceDSID);
           pDevice = &device;
         } catch(runtime_error& e) {
           ok = false;
@@ -585,7 +585,7 @@ namespace dss {
       }
     } else if(!deviceName.empty()) {
       try {
-        Device& device = GetDSS().GetApartment().GetDeviceByName(deviceName);
+        Device& device = getDSS().getApartment().getDeviceByName(deviceName);
         pDevice = &device;
       } catch(runtime_error&  e) {
         ok = false;
@@ -596,10 +596,10 @@ namespace dss {
       errorMessage = "Need parameter name or dsid to identify device";
     }
     if(ok) {
-      if(IsDeviceInterfaceCall(_method)) {
-        return CallDeviceInterface(_method, _parameter, _arg, pDevice, _session);
-      } else if(BeginsWith(_method, "device/getGroups")) {
-        int numGroups = pDevice->GetGroupsCount();
+      if(isDeviceInterfaceCall(_method)) {
+        return callDeviceInterface(_method, _parameter, _arg, pDevice, _session);
+      } else if(beginsWith(_method, "device/getGroups")) {
+        int numGroups = pDevice->getGroupsCount();
         stringstream sstream;
         sstream << "{ " << ToJSONValue("groups") << ": [";
         bool first = true;
@@ -609,52 +609,52 @@ namespace dss {
           }
           first = false;
           try {
-            Group& group = pDevice->GetGroupByIndex(iGroup);
-            sstream << "{ " << ToJSONValue("id") << ":" << group.GetID();
-            if(!group.GetName().empty()) {
-              sstream << ", " << ToJSONValue("name") << ":" << ToJSONValue(group.GetName());
+            Group& group = pDevice->getGroupByIndex(iGroup);
+            sstream << "{ " << ToJSONValue("id") << ":" << group.getID();
+            if(!group.getName().empty()) {
+              sstream << ", " << ToJSONValue("name") << ":" << ToJSONValue(group.getName());
             }
           } catch (runtime_error&) {
-            Log("Group only present at device level");
+            log("Group only present at device level");
           }
           sstream << "}";
         }
         sstream << "]}";
         return sstream.str();
-      } else if(BeginsWith(_method, "device/getState")) {
+      } else if(beginsWith(_method, "device/getState")) {
         stringstream sstream;
-        sstream << "{ " << ToJSONValue("isOn") << ":" << ToJSONValue(pDevice->IsOn()) << " }";
+        sstream << "{ " << ToJSONValue("isOn") << ":" << ToJSONValue(pDevice->isOn()) << " }";
         return JSONOk(sstream.str());
-      } else if(BeginsWith(_method, "device/getName")) {
+      } else if(beginsWith(_method, "device/getName")) {
         stringstream sstream;
-        sstream << "{ " << ToJSONValue("name") << ":" << ToJSONValue(pDevice->GetName()) << " }";
+        sstream << "{ " << ToJSONValue("name") << ":" << ToJSONValue(pDevice->getName()) << " }";
         return JSONOk(sstream.str());
-      } else if(BeginsWith(_method, "device/setName")) {
-        pDevice->SetName(_parameter["newName"]);
+      } else if(beginsWith(_method, "device/setName")) {
+        pDevice->setName(_parameter["newName"]);
         return ResultToJSON(true);
-      } else if(BeginsWith(_method, "device/getLocation")) {
-        const DeviceLocation& location = pDevice->GetLocation();
+      } else if(beginsWith(_method, "device/getLocation")) {
+        const DeviceLocation& location = pDevice->getLocation();
         stringstream sstream;
         sstream << "{" << ToJSONValue("x") << ":" << ToJSONValue(location.get<0>()) << ","
                        << ToJSONValue("y") << ":" << ToJSONValue(location.get<1>()) << ","
                        << ToJSONValue("z") << ":" << ToJSONValue(location.get<2>())
                 << "}";
         return JSONOk(sstream.str());
-      } else if(BeginsWith(_method, "device/setLocation")) {
-        DeviceLocation location = pDevice->GetLocation();
+      } else if(beginsWith(_method, "device/setLocation")) {
+        DeviceLocation location = pDevice->getLocation();
         string strParam = _parameter["x"];
         if(!strParam.empty()) {
-          boost::get<0>(location) = StrToDouble(strParam);
+          boost::get<0>(location) = strToDouble(strParam);
         }
         strParam = _parameter["y"];
         if(!strParam.empty()) {
-          boost::get<1>(location) = StrToDouble(strParam);
+          boost::get<1>(location) = strToDouble(strParam);
         }
         strParam = _parameter["z"];
         if(!strParam.empty()) {
-          boost::get<2>(location) = StrToDouble(strParam);
+          boost::get<2>(location) = strToDouble(strParam);
         }
-        pDevice->SetLocation(location);
+        pDevice->setLocation(location);
         return ResultToJSON(true);
       } else {
         _handled = false;
@@ -663,35 +663,35 @@ namespace dss {
     } else {
       return ResultToJSON(ok, errorMessage);
     }
-  } // HandleDeviceCall
+  } // handleDeviceCall
 
-  string WebServer::HandleCircuitCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleCircuitCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     _handled = true;
     string idString = _parameter["id"];
     if(idString.empty()) {
       return ResultToJSON(false, "missing parameter id");
     }
-    dsid_t dsid = dsid_t::FromString(idString);
+    dsid_t dsid = dsid_t::fromString(idString);
     if(dsid == NullDSID) {
       return ResultToJSON(false, "could not parse dsid");
     }
     try {
-      Modulator& modulator = GetDSS().GetApartment().GetModulatorByDSID(dsid);
-      if(EndsWith(_method, "circuit/getName")) {
-        return JSONOk("{ " + ToJSONValue("name") + ": " + ToJSONValue(modulator.GetName()) + "}");
-      } else if(EndsWith(_method, "circuit/setName")) {
-        modulator.SetName(_parameter["newName"]);
+      Modulator& modulator = getDSS().getApartment().getModulatorByDSID(dsid);
+      if(endsWith(_method, "circuit/getName")) {
+        return JSONOk("{ " + ToJSONValue("name") + ": " + ToJSONValue(modulator.getName()) + "}");
+      } else if(endsWith(_method, "circuit/setName")) {
+        modulator.setName(_parameter["newName"]);
         return ResultToJSON(true);
-      } else if(EndsWith(_method, "circuit/getEnergyBorder")) {
+      } else if(endsWith(_method, "circuit/getEnergyBorder")) {
         stringstream sstream;
-        sstream << "{" << ToJSONValue("orange") << ":" << ToJSONValue(modulator.GetEnergyLevelOrange());
-        sstream << "," << ToJSONValue("red") << ":" << ToJSONValue(modulator.GetEnergyLevelRed());
+        sstream << "{" << ToJSONValue("orange") << ":" << ToJSONValue(modulator.getEnergyLevelOrange());
+        sstream << "," << ToJSONValue("red") << ":" << ToJSONValue(modulator.getEnergyLevelRed());
         sstream << "}";
         return JSONOk(sstream.str());
-      } else if(EndsWith(_method, "/getConsumption")) {
-        return JSONOk("{ " + ToJSONValue("consumption") + ": " +  UIntToString(modulator.GetPowerConsumption()) +"}");
-      } else if(EndsWith(_method, "/getEnergyMeterValue")) {
-        return JSONOk("{ " + ToJSONValue("metervalue") + ": " +  UIntToString(modulator.GetEnergyMeterValue()) +"}");
+      } else if(endsWith(_method, "/getConsumption")) {
+        return JSONOk("{ " + ToJSONValue("consumption") + ": " +  uintToString(modulator.getPowerConsumption()) +"}");
+      } else if(endsWith(_method, "/getEnergyMeterValue")) {
+        return JSONOk("{ " + ToJSONValue("metervalue") + ": " +  uintToString(modulator.getEnergyMeterValue()) +"}");
       } else {
         _handled = false;
       }
@@ -699,67 +699,67 @@ namespace dss {
       return ResultToJSON(false, "could not find modulator with given dsid");
     }
     return "";
-  } // HandleCircuitCall
+  } // handleCircuitCall
 
 
-  string WebServer::HandleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     _handled = false;
     return "";
-  } // HandleSetCall
+  } // handleSetCall
 
-  string WebServer::HandlePropertyCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handlePropertyCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     _handled = true;
     string propName = _parameter["path"];
     if(propName.empty()) {
       return ResultToJSON(false, "Need parameter \'path\' for property operations");
     }
-    PropertyNode* node = GetDSS().GetPropertySystem().GetProperty(propName);
+    PropertyNode* node = getDSS().getPropertySystem().getProperty(propName);
 
-    if(EndsWith(_method, "/getString")) {
+    if(endsWith(_method, "/getString")) {
       if(node == NULL) {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
       try {
         stringstream sstream;
-        sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->GetStringValue()) << "}";
+        sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getStringValue()) << "}";
         return JSONOk(sstream.str());
       } catch(PropertyTypeMismatch& ex) {
         return ResultToJSON(false, string("Error getting property: '") + ex.what() + "'");
       }
-    } else if(EndsWith(_method, "/getInteger")) {
+    } else if(endsWith(_method, "/getInteger")) {
       if(node == NULL) {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
       try {
         stringstream sstream;
-        sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->GetIntegerValue()) << "}";
+        sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getIntegerValue()) << "}";
         return JSONOk(sstream.str());
       } catch(PropertyTypeMismatch& ex) {
         return ResultToJSON(false, string("Error getting property: '") + ex.what() + "'");
       }
-    } else if(EndsWith(_method, "/getBoolean")) {
+    } else if(endsWith(_method, "/getBoolean")) {
       if(node == NULL) {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
       try {
         stringstream sstream;
-        sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->GetBoolValue()) << "}";
+        sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getBoolValue()) << "}";
         return JSONOk(sstream.str());
       } catch(PropertyTypeMismatch& ex) {
         return ResultToJSON(false, string("Error getting property: '") + ex.what() + "'");
       }
-    } else if(EndsWith(_method, "/setString")) {
+    } else if(endsWith(_method, "/setString")) {
       string value = _parameter["value"];
       if(node == NULL) {
-        node = GetDSS().GetPropertySystem().CreateProperty(propName);
+        node = getDSS().getPropertySystem().createProperty(propName);
       }
       try {
-        node->SetStringValue(value);
+        node->setStringValue(value);
       } catch(PropertyTypeMismatch& ex) {
         return ResultToJSON(false, string("Error setting property: '") + ex.what() + "'");
       }
       return JSONOk();
-    } else if(EndsWith(_method, "/setBoolean")) {
+    } else if(endsWith(_method, "/setBoolean")) {
       string strValue = _parameter["value"];
       bool value;
       if(strValue == "true") {
@@ -770,102 +770,102 @@ namespace dss {
         return ResultToJSON(false, "Expected 'true' or 'false' for parameter 'value' but got: '" + strValue + "'");
       }
       if(node == NULL) {
-        node = GetDSS().GetPropertySystem().CreateProperty(propName);
+        node = getDSS().getPropertySystem().createProperty(propName);
       }
       try {
-        node->SetBooleanValue(value);
+        node->setBooleanValue(value);
       } catch(PropertyTypeMismatch& ex) {
         return ResultToJSON(false, string("Error setting property: '") + ex.what() + "'");
       }
       return JSONOk();
-    } else if(EndsWith(_method, "/setInteger")) {
+    } else if(endsWith(_method, "/setInteger")) {
       string strValue = _parameter["value"];
       int value;
       try {
-        value = StrToInt(strValue);
+        value = strToInt(strValue);
       } catch(...) {
         return ResultToJSON(false, "Could not convert parameter 'value' to string. Got: '" + strValue + "'");
       }
       if(node == NULL) {
-        node = GetDSS().GetPropertySystem().CreateProperty(propName);
+        node = getDSS().getPropertySystem().createProperty(propName);
       }
       try {
-        node->SetIntegerValue(value);
+        node->setIntegerValue(value);
       } catch(PropertyTypeMismatch& ex) {
         return ResultToJSON(false, string("Error setting property: '") + ex.what() + "'");
       }
       return JSONOk();
-    } else if(EndsWith(_method, "/getChildren")) {
+    } else if(endsWith(_method, "/getChildren")) {
       if(node == NULL) {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
       stringstream sstream;
       sstream << "[";
       bool first = true;
-      for(int iChild = 0; iChild < node->GetChildCount(); iChild++) {
+      for(int iChild = 0; iChild < node->getChildCount(); iChild++) {
         if(!first) {
           sstream << ",";
         }
         first = false;
-        PropertyNode* cnode = node->GetChild(iChild);
-        sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(cnode->GetName());
-        sstream << "," << ToJSONValue("type") << ":" << ToJSONValue(GetValueTypeAsString(cnode->GetValueType()));
+        PropertyNode* cnode = node->getChild(iChild);
+        sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(cnode->getName());
+        sstream << "," << ToJSONValue("type") << ":" << ToJSONValue(getValueTypeAsString(cnode->getValueType()));
         sstream << "}";
       }
       sstream << "]";
       return JSONOk(sstream.str());
-    } else if(EndsWith(_method, "/getType")) {
+    } else if(endsWith(_method, "/getType")) {
       if(node == NULL) {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
       stringstream sstream;
-      sstream << ":" << ToJSONValue("type") << ":" << ToJSONValue(GetValueTypeAsString(node->GetValueType())) << "}";
+      sstream << ":" << ToJSONValue("type") << ":" << ToJSONValue(getValueTypeAsString(node->getValueType())) << "}";
       return JSONOk(sstream.str());
     } else {
       _handled = false;
     }
     return "";
-  } // HandlePropertyCall
+  } // handlePropertyCall
 
-  string WebServer::HandleEventCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleEventCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     _handled = true;
     string result;
-    if(EndsWith(_method, "/raise")) {
+    if(endsWith(_method, "/raise")) {
       string name = _parameter["name"];
       string location = _parameter["location"];
       string context = _parameter["context"];
 
       boost::shared_ptr<Event> e(new Event(name));
       if(!context.empty()) {
-        e->SetContext(context);
+        e->setContext(context);
       }
       if(!location.empty()) {
-        e->SetLocation(location);
+        e->setLocation(location);
       }
-      GetDSS().GetEventQueue().PushEvent(e);
+      getDSS().getEventQueue().pushEvent(e);
       return ResultToJSON(true);
     } else {
       _handled = false;
     }
     return result;
-  } // HandleEventCall
+  } // handleEventCall
 
-  string WebServer::HandleStructureCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleStructureCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     _handled = true;
-    if(EndsWith(_method, "structure/zoneAddDevice")) {
+    if(endsWith(_method, "structure/zoneAddDevice")) {
       bool ok = true;
 
       string devidStr = _parameter["devid"];
       if(!devidStr.empty()) {
-        dsid_t devid = dsid::FromString(devidStr);
+        dsid_t devid = dsid::fromString(devidStr);
 
-        Device& dev = DSS::GetInstance()->GetApartment().GetDeviceByDSID(devid);
+        Device& dev = DSS::getInstance()->getApartment().getDeviceByDSID(devid);
 
         string zoneIDStr = _parameter["zone"];
         if(!zoneIDStr.empty()) {
           try {
-            int zoneID = StrToInt(zoneIDStr);
-            DSS::GetInstance()->GetApartment().GetZone(zoneID).AddDevice(DeviceReference(dev, DSS::GetInstance()->GetApartment()));
+            int zoneID = strToInt(zoneIDStr);
+            DSS::getInstance()->getApartment().getZone(zoneID).addDevice(DeviceReference(dev, DSS::getInstance()->getApartment()));
           } catch(runtime_error&) {
             ok = false;
           }
@@ -874,23 +874,23 @@ namespace dss {
       } else {
         return ResultToJSON(false, "Need parameter devid");
       }
-    } else if(EndsWith(_method, "structure/addZone")) {
+    } else if(endsWith(_method, "structure/addZone")) {
       bool ok = false;
       int zoneID = -1;
       int modulatorID = -1;
 
       string zoneIDStr = _parameter["zoneID"];
       if(!zoneIDStr.empty()) {
-        zoneID = StrToIntDef(zoneIDStr, -1);
+        zoneID = strToIntDef(zoneIDStr, -1);
       }
       string modIDStr = _parameter["modulatorID"];
       if(!modIDStr.empty()) {
-        modulatorID = StrToIntDef(modIDStr, -1);
+        modulatorID = strToIntDef(modIDStr, -1);
       }
       if(zoneID != -1 && modulatorID != -1) {
         try {
-          Modulator& modulator = DSS::GetInstance()->GetApartment().GetModulatorByBusID(modulatorID);
-          DSS::GetInstance()->GetApartment().AllocateZone(modulator, zoneID);
+          Modulator& modulator = DSS::getInstance()->getApartment().getModulatorByBusID(modulatorID);
+          DSS::getInstance()->getApartment().allocateZone(modulator, zoneID);
           ok = true;
         } catch(runtime_error&) {
         }
@@ -900,28 +900,28 @@ namespace dss {
       _handled = false;
       return "";
     }
-  } // HandleStructureCall
+  } // handleStructureCall
 
-  string WebServer::HandleSimCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleSimCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     _handled = true;
-    if(BeginsWith(_method, "sim/switch")) {
-      if(EndsWith(_method, "/switch/pressed")) {
-        int buttonNr = StrToIntDef(_parameter["buttonnr"], -1);
+    if(beginsWith(_method, "sim/switch")) {
+      if(endsWith(_method, "/switch/pressed")) {
+        int buttonNr = strToIntDef(_parameter["buttonnr"], -1);
         if(buttonNr == -1) {
           return ResultToJSON(false, "Invalid button number");
         }
 
-        int zoneID = StrToIntDef(_parameter["zoneID"], -1);
+        int zoneID = strToIntDef(_parameter["zoneID"], -1);
         if(zoneID == -1) {
           return ResultToJSON(false, "Could not parse zoneID");
         }
-        int groupID = StrToIntDef(_parameter["groupID"], -1);
+        int groupID = strToIntDef(_parameter["groupID"], -1);
         if(groupID == -1) {
           return ResultToJSON(false, "Could not parse groupID");
         }
         try {
-          Zone& zone = GetDSS().GetApartment().GetZone(zoneID);
-          Group* pGroup = zone.GetGroup(groupID);
+          Zone& zone = getDSS().getApartment().getZone(zoneID);
+          Group* pGroup = zone.getGroup(groupID);
 
           if(pGroup == NULL) {
             return ResultToJSON(false, "Could not find group");
@@ -934,31 +934,31 @@ namespace dss {
           case 9: // lower-right
             break;
           case 2: // up
-            pGroup->IncreaseValue();
+            pGroup->increaseValue();
             break;
           case 8: // down
-            pGroup->DecreaseValue();
+            pGroup->decreaseValue();
             break;
           case 4: // left
-            pGroup->PreviousScene();
+            pGroup->previousScene();
             break;
           case 6: // right
-            pGroup->NextScene();
+            pGroup->nextScene();
             break;
           case 5:
             {
               if(groupID == GroupIDGreen) {
-                GetDSS().GetApartment().GetGroup(0).CallScene(SceneBell);
+                getDSS().getApartment().getGroup(0).callScene(SceneBell);
               } else if(groupID == GroupIDRed){
-                GetDSS().GetApartment().GetGroup(0).CallScene(SceneAlarm);
+                getDSS().getApartment().getGroup(0).callScene(SceneAlarm);
               } else {
-                const int lastScene = pGroup->GetLastCalledScene();
-                if(lastScene == dss::SceneOff || lastScene == dss::SceneDeepOff ||
-                   lastScene == dss::SceneStandBy || lastScene == dss::ScenePanic)
+                const int lastScene = pGroup->getLastCalledScene();
+                if(lastScene == SceneOff || lastScene == SceneDeepOff ||
+                   lastScene == SceneStandBy || lastScene == ScenePanic)
                 {
-                  pGroup->CallScene(dss::Scene1);
+                  pGroup->callScene(Scene1);
                 } else {
-                  pGroup->CallScene(dss::SceneOff);
+                  pGroup->callScene(SceneOff);
                 }
               }
             }
@@ -973,7 +973,7 @@ namespace dss {
         _handled = false;
         return "";
       }
-    } else if(BeginsWith(_method, "sim/addDevice")) {
+    } else if(beginsWith(_method, "sim/addDevice")) {
       string type = _parameter["type"];
       string dsidStr = _parameter["dsid"];
       // TODO: not finished yet ;)
@@ -981,16 +981,16 @@ namespace dss {
       _handled = false;
     }
     return "";
-  } // HandleSimCall
+  } // handleSimCall
 
-  string WebServer::HandleDebugCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleDebugCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     _handled = true;
-    if(EndsWith(_method, "/sendFrame")) {
-      int destination = StrToIntDef(_parameter["destination"],0) & 0x3F;
+    if(endsWith(_method, "/sendFrame")) {
+      int destination = strToIntDef(_parameter["destination"],0) & 0x3F;
       bool broadcast = _parameter["broadcast"] == "true";
-      int counter = StrToIntDef(_parameter["counter"], 0x00) & 0x03;
-      int command = StrToIntDef(_parameter["command"], 0x09 /* request */) & 0x00FF;
-      int length = StrToIntDef(_parameter["length"], 0x00) & 0x0F;
+      int counter = strToIntDef(_parameter["counter"], 0x00) & 0x03;
+      int command = strToIntDef(_parameter["command"], 0x09 /* request */) & 0x00FF;
+      int length = strToIntDef(_parameter["length"], 0x00) & 0x0F;
 
       std::cout
            << "sending frame: "
@@ -1001,20 +1001,20 @@ namespace dss {
            << "\nlen :    " << length << std::endl;
 
       DS485CommandFrame* frame = new DS485CommandFrame();
-      frame->GetHeader().SetBroadcast(broadcast);
-      frame->GetHeader().SetDestination(destination);
-      frame->GetHeader().SetCounter(counter);
-      frame->SetCommand(command);
+      frame->getHeader().setBroadcast(broadcast);
+      frame->getHeader().setDestination(destination);
+      frame->getHeader().setCounter(counter);
+      frame->setCommand(command);
       for(int iByte = 0; iByte < length; iByte++) {
-        uint8_t byte = StrToIntDef(_parameter[string("payload_") + IntToString(iByte+1)], 0xFF);
+        uint8_t byte = strToIntDef(_parameter[string("payload_") + intToString(iByte+1)], 0xFF);
         cout << "b" << dec << iByte << ": " << hex << (int)byte << "\n";
-        frame->GetPayload().Add<uint8_t>(byte);
+        frame->getPayload().add<uint8_t>(byte);
       }
       cout << dec <<"done" << endl;
-      DS485Interface* intf = &DSS::GetInstance()->GetDS485Interface();
+      DS485Interface* intf = &DSS::getInstance()->getDS485Interface();
       DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
       if(proxy != NULL) {
-        proxy->SendFrame(*frame);
+        proxy->sendFrame(*frame);
       } else {
         delete frame;
       }
@@ -1023,26 +1023,26 @@ namespace dss {
       _handled = false;
       return "";
     }
-  } // HandleDebugCall
+  } // handleDebugCall
 
-  void WebServer::JSONHandler(struct shttpd_arg* _arg) {
+  void WebServer::jsonHandler(struct shttpd_arg* _arg) {
     const string urlid = "/json/";
     string uri = shttpd_get_env(_arg, "REQUEST_URI");
     HashMapConstStringString paramMap = ParseParameter(shttpd_get_env(_arg, "QUERY_STRING"));
 
     string method = uri.substr(uri.find(urlid) + urlid.size());
 
-    WebServer& self = DSS::GetInstance()->GetWebServer();
-    self.Log("Processing call to " + method);
+    WebServer& self = DSS::getInstance()->getWebServer();
+    self.log("Processing call to " + method);
 
     Session* session = NULL;
     string tokenStr = paramMap["token"];
     if(!tokenStr.empty()) {
-      int token = StrToIntDef(tokenStr, -1);
+      int token = strToIntDef(tokenStr, -1);
       if(token != -1) {
         SessionByID::iterator iEntry = self.m_Sessions.find(token);
         if(iEntry != self.m_Sessions.end()) {
-          if(iEntry->second->IsStillValid()) {
+          if(iEntry->second->isStillValid()) {
             Session& s = *iEntry->second;
             session = &s;
           }
@@ -1052,45 +1052,45 @@ namespace dss {
 
     string result;
     bool handled = false;
-    if(BeginsWith(method, "apartment/")) {
-      result = self.HandleApartmentCall(method, paramMap, _arg, handled, session);
-    } else if(BeginsWith(method, "zone/")) {
-      result = self.HandleZoneCall(method, paramMap, _arg, handled, session);
-    } else if(BeginsWith(method, "device/")) {
-      result = self.HandleDeviceCall(method, paramMap, _arg, handled, session);
-    } else if(BeginsWith(method, "circuit/")) {
-      result = self.HandleCircuitCall(method, paramMap, _arg, handled, session);
-    } else if(BeginsWith(method, "set/")) {
-      result = self.HandleSetCall(method, paramMap, _arg, handled, session);
-    } else if(BeginsWith(method, "property/")) {
-      result = self.HandlePropertyCall(method, paramMap, _arg, handled, session);
-    } else if(BeginsWith(method, "event/")) {
-      result = self.HandleEventCall(method, paramMap, _arg, handled, session);
-    } else if(BeginsWith(method, "structure/")) {
-      result = self.HandleStructureCall(method, paramMap, _arg, handled, session);
-    } else if(BeginsWith(method, "sim/")) {
-      result = self.HandleSimCall(method, paramMap, _arg, handled, session);
-    } else if(BeginsWith(method, "debug/")) {
-      result = self.HandleDebugCall(method, paramMap, _arg, handled, session);
+    if(beginsWith(method, "apartment/")) {
+      result = self.handleApartmentCall(method, paramMap, _arg, handled, session);
+    } else if(beginsWith(method, "zone/")) {
+      result = self.handleZoneCall(method, paramMap, _arg, handled, session);
+    } else if(beginsWith(method, "device/")) {
+      result = self.handleDeviceCall(method, paramMap, _arg, handled, session);
+    } else if(beginsWith(method, "circuit/")) {
+      result = self.handleCircuitCall(method, paramMap, _arg, handled, session);
+    } else if(beginsWith(method, "set/")) {
+      result = self.handleSetCall(method, paramMap, _arg, handled, session);
+    } else if(beginsWith(method, "property/")) {
+      result = self.handlePropertyCall(method, paramMap, _arg, handled, session);
+    } else if(beginsWith(method, "event/")) {
+      result = self.handleEventCall(method, paramMap, _arg, handled, session);
+    } else if(beginsWith(method, "structure/")) {
+      result = self.handleStructureCall(method, paramMap, _arg, handled, session);
+    } else if(beginsWith(method, "sim/")) {
+      result = self.handleSimCall(method, paramMap, _arg, handled, session);
+    } else if(beginsWith(method, "debug/")) {
+      result = self.handleDebugCall(method, paramMap, _arg, handled, session);
     }
 
     if(!handled) {
-      EmitHTTPHeader(404, _arg, "application/json");
+      emitHTTPHeader(404, _arg, "application/json");
       result = "{ ok: " + ToJSONValue(false) + ", message: " + ToJSONValue("Call to unknown function") + " }";
-      self.Log("Unknown function '" + method + "'", lsError);
+      self.log("Unknown function '" + method + "'", lsError);
     } else {
-      EmitHTTPHeader(200, _arg, "application/json");
+      emitHTTPHeader(200, _arg, "application/json");
     }
     shttpd_printf(_arg, result.c_str());
     _arg->flags |= SHTTPD_END_OF_OUTPUT;
-  } // JSONHandler
+  } // jsonHandler
 
-  void WebServer::HTTPListOptions(struct shttpd_arg* _arg) {
-    EmitHTTPHeader(200, _arg);
+  void WebServer::httpBrowseProperties(struct shttpd_arg* _arg) {
+    emitHTTPHeader(200, _arg);
 
     const string urlid = "/browse";
     string uri = shttpd_get_env(_arg, "REQUEST_URI");
-    uri = URLDecode(uri);
+    uri = urlDecode(uri);
     HashMapConstStringString paramMap = ParseParameter(shttpd_get_env(_arg, "QUERY_STRING"));
 
     string path = uri.substr(uri.find(urlid) + urlid.size());
@@ -1102,30 +1102,30 @@ namespace dss {
     std::stringstream stream;
     stream << "<h1>" << path << "</h1>";
     stream << "<ul>";
-    PropertyNode* node = DSS::GetInstance()->GetPropertySystem().GetProperty(path);
+    PropertyNode* node = DSS::getInstance()->getPropertySystem().getProperty(path);
     if(node != NULL) {
-      for(int iNode = 0; iNode < node->GetChildCount(); iNode++) {
-        PropertyNode* cnode = node->GetChild(iNode);
+      for(int iNode = 0; iNode < node->getChildCount(); iNode++) {
+        PropertyNode* cnode = node->getChild(iNode);
 
         stream << "<li>";
-        if(cnode->GetChildCount() != 0) {
-          stream << "<a href=\"/browse" << path << "/" << cnode->GetDisplayName() << "\">" << cnode->GetDisplayName() << "</a>";
+        if(cnode->getChildCount() != 0) {
+          stream << "<a href=\"/browse" << path << "/" << cnode->getDisplayName() << "\">" << cnode->getDisplayName() << "</a>";
         } else {
-          stream << cnode->GetDisplayName();
+          stream << cnode->getDisplayName();
         }
         stream << " : ";
-        stream << GetValueTypeAsString(cnode->GetValueType()) << " : ";
-        switch(cnode->GetValueType()) {
+        stream << getValueTypeAsString(cnode->getValueType()) << " : ";
+        switch(cnode->getValueType()) {
         case vTypeBoolean:
-          stream << cnode->GetBoolValue();
+          stream << cnode->getBoolValue();
           break;
         case vTypeInteger:
-          stream << cnode->GetIntegerValue();
+          stream << cnode->getIntegerValue();
           break;
         case vTypeNone:
           break;
         case vTypeString:
-          stream << cnode->GetStringValue();
+          stream << cnode->getStringValue();
           break;
         default:
           stream << "unknown value";
@@ -1137,6 +1137,6 @@ namespace dss {
     shttpd_printf(_arg, stream.str().c_str());
 
     _arg->flags |= SHTTPD_END_OF_OUTPUT;
-  } // HTTPListOptions
+  } // httpBrowseProperties
 
 }

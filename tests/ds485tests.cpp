@@ -123,9 +123,9 @@ protected:
     frame.push_back('\x7E');
     frame.push_back('\x88');
 
-    simPort->PutSimData(frame);
-    reader->SetSerialCom(simPort);
-    //reader->Execute();
+    simPort->putSimData(frame);
+    reader->setSerialCom(simPort);
+    //reader->execute();
   }
 
 };

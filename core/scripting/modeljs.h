@@ -27,28 +27,28 @@ namespace dss {
     ModelScriptContextExtension(Apartment& _apartment);
     virtual ~ModelScriptContextExtension() {}
 
-    virtual void ExtendContext(ScriptContext& _context);
+    virtual void extendContext(ScriptContext& _context);
 
     /** Returns a reference to the wrapped apartment */
-    Apartment& GetApartment() const { return m_Apartment; }
+    Apartment& getApartment() const { return m_Apartment; }
 
     /** Creates a JSObject that wrapps a Set.
       * @param _ctx Context in which to create the object
       * @param _set Reference to the \a Set being wrapped
       */
-    JSObject* CreateJSSet(ScriptContext& _ctx, Set& _set);
+    JSObject* createJSSet(ScriptContext& _ctx, Set& _set);
     /** Creates a JSObject that wrapps a Set.
       * @param _ctx Context in which to create the object
       * @param _set Reference to the \a Set being wrapped
       */
-    JSObject* CreateJSDevice(ScriptContext& _ctx, Device& _ref);
-    JSObject* CreateJSDevice(ScriptContext& _ctx, DeviceReference& _ref);
+    JSObject* createJSDevice(ScriptContext& _ctx, Device& _ref);
+    JSObject* createJSDevice(ScriptContext& _ctx, DeviceReference& _ref);
 
     template<class t>
-    t ConvertTo(ScriptContext& _context, jsval val);
+    t convertTo(ScriptContext& _context, jsval val);
 
     template<class t>
-    t ConvertTo(ScriptContext& _context, JSObject* _obj);
+    t convertTo(ScriptContext& _context, JSObject* _obj);
   }; // ModelScriptContextExtension
 
   class EventScriptExtension : public ScriptExtension {
@@ -59,16 +59,16 @@ namespace dss {
     EventScriptExtension(EventQueue& _queue, EventInterpreter& _interpreter);
     virtual ~EventScriptExtension() {}
 
-    virtual void ExtendContext(ScriptContext& _context);
+    virtual void extendContext(ScriptContext& _context);
 
-    EventQueue& GetEventQueue() { return m_Queue; }
-    const EventQueue& GetEventQueue() const { return m_Queue; }
+    EventQueue& getEventQueue() { return m_Queue; }
+    const EventQueue& getEventQueue() const { return m_Queue; }
 
-    EventInterpreter& GetEventInterpreter() { return m_Interpreter; }
-    const EventInterpreter& GetEventInterpreter() const { return m_Interpreter; }
+    EventInterpreter& getEventInterpreter() { return m_Interpreter; }
+    const EventInterpreter& getEventInterpreter() const { return m_Interpreter; }
 
-    JSObject* CreateJSEvent(ScriptContext& _ctx, boost::shared_ptr<Event> _event);
-    JSObject* CreateJSSubscription(ScriptContext& _ctx, boost::shared_ptr<EventSubscription> _subscription);
+    JSObject* createJSEvent(ScriptContext& _ctx, boost::shared_ptr<Event> _event);
+    JSObject* createJSSubscription(ScriptContext& _ctx, boost::shared_ptr<EventSubscription> _subscription);
   };
 
 }

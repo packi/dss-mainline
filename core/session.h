@@ -22,12 +22,12 @@ namespace dss {
     Session() {}
     Session(const int _tokenID);
 
-    bool IsStillValid();
-    bool HasSetWithID(const int _id);
-    Set& GetSetByID(const int _id);
-    Set& AllocateSet(int& _id);
-    void FreeSet(const int id);
-    Set& AddSet(Set _set, int& id);
+    bool isStillValid();
+    bool hasSetWithID(const int _id);
+    Set& getSetByID(const int _id);
+    Set& allocateSet(int& _id);
+    void freeSet(const int id);
+    Set& addSet(Set _set, int& id);
 
     Session& operator=(const Session& _other);
   }; // Session

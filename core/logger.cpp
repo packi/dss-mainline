@@ -49,12 +49,12 @@ namespace dss {
       default:
         return "[unknown severity]";
     }
-  } // SeverityToString<const char*>
+  } // severityToString<const char*>
 
   template <>
   const string SeverityToString(const aLogSeverity _severity) {
     return string(SeverityToString<const char*>(_severity));
-  } // SeverityToString<const string>
+  } // severityToString<const string>
 
   template <>
   const wchar_t* SeverityToString(const aLogSeverity _severity) {
@@ -72,23 +72,23 @@ namespace dss {
       default:
         return L"[unknown severity]";
     }
-  } // SeverityToString<const wchar_t*>
+  } // severityToString<const wchar_t*>
 
   template <>
   const wstring SeverityToString(const aLogSeverity _severity) {
     return wstring(SeverityToString<const wchar_t*>(_severity));
-  } // SeverityToString<const wstring>
+  } // severityToString<const wstring>
 
 
-  Logger* Logger::GetInstance() {
+  Logger* Logger::getInstance() {
     if(m_Instance == NULL) {
       m_Instance = new Logger();
     }
     assert(m_Instance != NULL);
     return m_Instance;
-  } // GetInstance
+  } // getInstance
 
-  void Logger::Shutdown() {
+  void Logger::shutdown() {
     if(m_Instance != NULL) {
       Logger* inst = m_Instance;
       m_Instance = NULL;
@@ -96,7 +96,7 @@ namespace dss {
     }
   }
 
-  void Logger::Log(const string& _message, const aLogSeverity _severity) {
+  void Logger::log(const string& _message, const aLogSeverity _severity) {
     time_t now = time( NULL );
     struct tm t;
 #ifdef WIN32
@@ -104,17 +104,17 @@ namespace dss {
 #else
     localtime_r( &now, &t );
 #endif
-    cout << "[" << DateToISOString<string>(&t) << "]" << SeverityToString<const string>(_severity) << " " << _message << endl;
-  } // Log
+    cout << "[" << dateToISOString<string>(&t) << "]" << SeverityToString<const string>(_severity) << " " << _message << endl;
+  } // log
 
-  void Logger::Log(const char* _message, const aLogSeverity _severity) {
-    Log(string(_message), _severity);
-  } // Log
+  void Logger::log(const char* _message, const aLogSeverity _severity) {
+    log(string(_message), _severity);
+  } // log
 
-  void Logger::Log(const LogChannel& _channel, const std::string& _message, const aLogSeverity _severity) {
-    if(_channel.MayLog(_severity)) {
-      Log(string("[") + _channel.GetName() + "] " + _message, _severity);
+  void Logger::log(const LogChannel& _channel, const std::string& _message, const aLogSeverity _severity) {
+    if(_channel.maylog(_severity)) {
+      log(string("[") + _channel.getName() + "] " + _message, _severity);
     }
-  } // Log
+  } // log
 
 }

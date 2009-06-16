@@ -38,119 +38,119 @@ protected:
 
   void testSet() {
     Apartment apt(NULL);
-    apt.Initialize();
+    apt.initialize();
 
-    Device& dev1 = apt.AllocateDevice(dsid_t(0,1));
-    dev1.SetShortAddress(1);
-    Device& dev2 = apt.AllocateDevice(dsid_t(0,2));
-    dev2.SetShortAddress(2);
-    Device& dev3 = apt.AllocateDevice(dsid_t(0,3));
-    dev3.SetShortAddress(3);
-    Device& dev4 = apt.AllocateDevice(dsid_t(0,4));
-    dev4.SetShortAddress(4);
+    Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+    dev1.setShortAddress(1);
+    Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+    dev2.setShortAddress(2);
+    Device& dev3 = apt.allocateDevice(dsid_t(0,3));
+    dev3.setShortAddress(3);
+    Device& dev4 = apt.allocateDevice(dsid_t(0,4));
+    dev4.setShortAddress(4);
 
-    Set allDevices = apt.GetDevices();
+    Set allDevices = apt.getDevices();
 
-    CPPUNIT_ASSERT_EQUAL(dev1, allDevices.GetByBusID(1).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev2, allDevices.GetByBusID(2).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev3, allDevices.GetByBusID(3).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev4, allDevices.GetByBusID(4).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev1, allDevices.getByBusID(1).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev2, allDevices.getByBusID(2).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev3, allDevices.getByBusID(3).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev4, allDevices.getByBusID(4).getDevice());
 
     Set setdev1 = Set(dev1);
 
-    Set allMinusDev1 = allDevices.Remove(setdev1);
+    Set allMinusDev1 = allDevices.remove(setdev1);
 
-    CPPUNIT_ASSERT_EQUAL(3, allMinusDev1.Length());
+    CPPUNIT_ASSERT_EQUAL(3, allMinusDev1.length());
 
-    CPPUNIT_ASSERT_EQUAL(false, allMinusDev1.Contains(dev1));
+    CPPUNIT_ASSERT_EQUAL(false, allMinusDev1.contains(dev1));
 
     /*
     try {
-      allMinusDev1.GetByBusID(1);
+      allMinusDev1.getByBusID(1);
       CPPUNIT_ASSERT(false);
     } catch(ItemNotFoundException& e) {
       CPPUNIT_ASSERT(true);
     }*/
 
-    CPPUNIT_ASSERT_EQUAL(dev2, allMinusDev1.GetByBusID(2).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev3, allMinusDev1.GetByBusID(3).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev4, allMinusDev1.GetByBusID(4).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(dev2, allMinusDev1.getByBusID(2).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev3, allMinusDev1.getByBusID(3).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev4, allMinusDev1.getByBusID(4).getDevice());
 
     // check that the other sets are not afected by our operation
-    CPPUNIT_ASSERT_EQUAL(1, setdev1.Length());
-    CPPUNIT_ASSERT_EQUAL(dev1, setdev1.GetByBusID(1).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(1, setdev1.length());
+    CPPUNIT_ASSERT_EQUAL(dev1, setdev1.getByBusID(1).getDevice());
 
-    CPPUNIT_ASSERT_EQUAL(4, allDevices.Length());
-    CPPUNIT_ASSERT_EQUAL(dev1, allDevices.GetByBusID(1).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev2, allDevices.GetByBusID(2).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev3, allDevices.GetByBusID(3).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev4, allDevices.GetByBusID(4).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(4, allDevices.length());
+    CPPUNIT_ASSERT_EQUAL(dev1, allDevices.getByBusID(1).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev2, allDevices.getByBusID(2).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev3, allDevices.getByBusID(3).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev4, allDevices.getByBusID(4).getDevice());
 
-    Set allRecombined = allMinusDev1.Combine(setdev1);
+    Set allRecombined = allMinusDev1.combine(setdev1);
 
-    CPPUNIT_ASSERT_EQUAL(4, allRecombined.Length());
-    CPPUNIT_ASSERT_EQUAL(dev1, allRecombined.GetByBusID(1).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev2, allRecombined.GetByBusID(2).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev3, allRecombined.GetByBusID(3).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev4, allRecombined.GetByBusID(4).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(4, allRecombined.length());
+    CPPUNIT_ASSERT_EQUAL(dev1, allRecombined.getByBusID(1).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev2, allRecombined.getByBusID(2).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev3, allRecombined.getByBusID(3).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev4, allRecombined.getByBusID(4).getDevice());
 
-    CPPUNIT_ASSERT_EQUAL(1, setdev1.Length());
-    CPPUNIT_ASSERT_EQUAL(dev1, setdev1.GetByBusID(1).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(1, setdev1.length());
+    CPPUNIT_ASSERT_EQUAL(dev1, setdev1.getByBusID(1).getDevice());
 
-    allRecombined = allRecombined.Combine(setdev1);
-    CPPUNIT_ASSERT_EQUAL(4, allRecombined.Length());
+    allRecombined = allRecombined.combine(setdev1);
+    CPPUNIT_ASSERT_EQUAL(4, allRecombined.length());
 
-    allRecombined = allRecombined.Combine(setdev1);
-    CPPUNIT_ASSERT_EQUAL(4, allRecombined.Length());
+    allRecombined = allRecombined.combine(setdev1);
+    CPPUNIT_ASSERT_EQUAL(4, allRecombined.length());
 
-    allRecombined = allRecombined.Combine(allRecombined);
-    CPPUNIT_ASSERT_EQUAL(4, allRecombined.Length());
-    CPPUNIT_ASSERT_EQUAL(dev1, allRecombined.GetByBusID(1).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev2, allRecombined.GetByBusID(2).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev3, allRecombined.GetByBusID(3).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev4, allRecombined.GetByBusID(4).GetDevice());
+    allRecombined = allRecombined.combine(allRecombined);
+    CPPUNIT_ASSERT_EQUAL(4, allRecombined.length());
+    CPPUNIT_ASSERT_EQUAL(dev1, allRecombined.getByBusID(1).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev2, allRecombined.getByBusID(2).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev3, allRecombined.getByBusID(3).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev4, allRecombined.getByBusID(4).getDevice());
 
     allMinusDev1 = allRecombined;
-    allMinusDev1.RemoveDevice(dev1);
-    CPPUNIT_ASSERT_EQUAL(3, allMinusDev1.Length());
-    CPPUNIT_ASSERT_EQUAL(dev2, allMinusDev1.GetByBusID(2).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev3, allMinusDev1.GetByBusID(3).GetDevice());
-    CPPUNIT_ASSERT_EQUAL(dev4, allMinusDev1.GetByBusID(4).GetDevice());
+    allMinusDev1.removeDevice(dev1);
+    CPPUNIT_ASSERT_EQUAL(3, allMinusDev1.length());
+    CPPUNIT_ASSERT_EQUAL(dev2, allMinusDev1.getByBusID(2).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev3, allMinusDev1.getByBusID(3).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev4, allMinusDev1.getByBusID(4).getDevice());
   } // testSet
 
   void testSetBuilder() {
     Apartment apt(NULL);
-    apt.Initialize();
+    apt.initialize();
 
-    Device& dev1 = apt.AllocateDevice(dsid_t(0,1));
-    dev1.SetShortAddress(1);
-    dev1.GetGroupBitmask().set(GroupIDYellow - 1);
-    Device& dev2 = apt.AllocateDevice(dsid_t(0,2));
-    dev2.SetShortAddress(2);
-    dev2.GetGroupBitmask().set(GroupIDCyan - 1);
-    Device& dev3 = apt.AllocateDevice(dsid_t(0,3));
-    dev3.SetShortAddress(3);
-    Device& dev4 = apt.AllocateDevice(dsid_t(0,4));
-    dev4.SetShortAddress(4);
+    Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+    dev1.setShortAddress(1);
+    dev1.getGroupBitmask().set(GroupIDYellow - 1);
+    Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+    dev2.setShortAddress(2);
+    dev2.getGroupBitmask().set(GroupIDCyan - 1);
+    Device& dev3 = apt.allocateDevice(dsid_t(0,3));
+    dev3.setShortAddress(3);
+    Device& dev4 = apt.allocateDevice(dsid_t(0,4));
+    dev4.setShortAddress(4);
 
     SetBuilder builder;
-    Set builderTest = builder.BuildSet("yellow", &apt.GetZone(0));
+    Set builderTest = builder.buildSet("yellow", &apt.getZone(0));
 
-    CPPUNIT_ASSERT_EQUAL(1, builderTest.Length());
-    CPPUNIT_ASSERT_EQUAL(dev1, builderTest.Get(0).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(1, builderTest.length());
+    CPPUNIT_ASSERT_EQUAL(dev1, builderTest.get(0).getDevice());
 
-    builderTest = builder.BuildSet("cyan", &apt.GetZone(0));
+    builderTest = builder.buildSet("cyan", &apt.getZone(0));
 
-    CPPUNIT_ASSERT_EQUAL(1, builderTest.Length());
-    CPPUNIT_ASSERT_EQUAL(dev2, builderTest.Get(0).GetDevice());
+    CPPUNIT_ASSERT_EQUAL(1, builderTest.length());
+    CPPUNIT_ASSERT_EQUAL(dev2, builderTest.get(0).getDevice());
 
-    builderTest = builder.BuildSet("dsid(1)", &apt.GetZone(0));
-    CPPUNIT_ASSERT_EQUAL(1, builderTest.Length());
-    CPPUNIT_ASSERT_EQUAL(dev1, builderTest.Get(0).GetDevice());
+    builderTest = builder.buildSet("dsid(1)", &apt.getZone(0));
+    CPPUNIT_ASSERT_EQUAL(1, builderTest.length());
+    CPPUNIT_ASSERT_EQUAL(dev1, builderTest.get(0).getDevice());
 
-    builderTest = builder.BuildSet("yellow.dsid(1)", &apt.GetZone(0));
-    CPPUNIT_ASSERT_EQUAL(1, builderTest.Length());
-    CPPUNIT_ASSERT_EQUAL(dev1, builderTest.Get(0).GetDevice());
+    builderTest = builder.buildSet("yellow.dsid(1)", &apt.getZone(0));
+    CPPUNIT_ASSERT_EQUAL(1, builderTest.length());
+    CPPUNIT_ASSERT_EQUAL(dev1, builderTest.get(0).getDevice());
 
   } // testSetBuilder
 

@@ -31,23 +31,23 @@ namespace dss {
     bool m_Enabled;
     boost::shared_ptr<LogChannel> m_pLogChannel;
   protected:
-    std::string GetConfigPropertyBasePath();
-    std::string GetPropertyBasePath();
+    std::string getConfigPropertyBasePath();
+    std::string getPropertyBasePath();
 
-    int GetLogSeverity() const;
-    void SetLogSeverity(int _value);
+    int getLogSeverity() const;
+    void setLogSeverity(int _value);
 
-    virtual void DoStart() = 0;
+    virtual void doStart() = 0;
   public:
     Subsystem(DSS* _pDSS, const std::string& _name);
     virtual ~Subsystem();
 
-    DSS& GetDSS() { return *m_pDSS; }
+    DSS& getDSS() { return *m_pDSS; }
 
-    virtual void Initialize();
-    void Start();
+    virtual void initialize();
+    void start();
 
-    void Log(const std::string& _message, aLogSeverity _severity = lsDebug);
+    void log(const std::string& _message, aLogSeverity _severity = lsDebug);
   };
 
 }; // namespace dss

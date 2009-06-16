@@ -16,54 +16,54 @@ int dsid_getversion() {
 } // dsid_getversion
 
 const char* dsid_get_plugin_name() {
-  return DSIDFactory::GetInstance().GetPluginName().c_str();
+  return DSIDFactory::getInstance().getPluginName().c_str();
 } // dsid_get_plugin_name
 
 int dsid_create_instance() {
-  return DSIDFactory::GetInstance().CreateDSID();
+  return DSIDFactory::getInstance().createDSID();
 }
 
 void dsid_register_callback(void (*callback)(int _handle, int _eventID)) {
 }
 
 void dsid_destroy_instance(int _handle) {
-  DSIDFactory::GetInstance().DestroyDSID(_handle);
+  DSIDFactory::getInstance().destroyDSID(_handle);
 }
 
 double get_value(int _handle, int _parameterNumber) {
-  return DSIDFactory::GetInstance().GetDSID(_handle)->GetValue(_parameterNumber);
+  return DSIDFactory::getInstance().getDSID(_handle)->getValue(_parameterNumber);
 } // get_value
 
 void set_value(int _handle, int _parameterNumber, double _value) {
-  DSIDFactory::GetInstance().GetDSID(_handle)->SetValue(_value, _parameterNumber);
+  DSIDFactory::getInstance().getDSID(_handle)->setValue(_value, _parameterNumber);
 } // set_value
 
 void increase_value(int _handle, int _parameterNumber) {
-  DSIDFactory::GetInstance().GetDSID(_handle)->IncreaseValue(_parameterNumber);
+  DSIDFactory::getInstance().getDSID(_handle)->increaseValue(_parameterNumber);
 } // increase_value
 
 void decrease_value(int _handle, int _parameterNumber) {
-  DSIDFactory::GetInstance().GetDSID(_handle)->DecreaseValue(_parameterNumber);
+  DSIDFactory::getInstance().getDSID(_handle)->decreaseValue(_parameterNumber);
 } // decrease_value
 
 void call_scene(int _handle, int _sceneNr) {
-  DSIDFactory::GetInstance().GetDSID(_handle)->CallScene(_sceneNr);
+  DSIDFactory::getInstance().getDSID(_handle)->callScene(_sceneNr);
 } // call_scene
 
 void save_scene(int _handle, int _sceneNr) {
-  DSIDFactory::GetInstance().GetDSID(_handle)->SaveScene(_sceneNr);
+  DSIDFactory::getInstance().getDSID(_handle)->saveScene(_sceneNr);
 } // save_scene
 
 void undo_scene(int _handle, int _sceneNr) {
-  DSIDFactory::GetInstance().GetDSID(_handle)->UndoScene(_sceneNr);
+  DSIDFactory::getInstance().getDSID(_handle)->undoScene(_sceneNr);
 } // undo_scene
 
 void enable(int _handle) {
-  DSIDFactory::GetInstance().GetDSID(_handle)->Enable();
+  DSIDFactory::getInstance().getDSID(_handle)->enable();
 } // enable
 
 void disable(int _handle) {
-  DSIDFactory::GetInstance().GetDSID(_handle)->Disable();
+  DSIDFactory::getInstance().getDSID(_handle)->disable();
 } // disable
 
 void get_group(int _handle) {
@@ -88,7 +88,7 @@ const char* get_parameter_name(int _handle, int _parameterNumber) {
 } // get_parameter_name
 
 void set_configuration_parameter(int _handle, const char* _name, const char* _value) {
-  DSIDFactory::GetInstance().GetDSID(_handle)->SetConfigurationParameter(_name, _value);
+  DSIDFactory::getInstance().getDSID(_handle)->setConfigurationParameter(_name, _value);
 }
 
 static struct dsid_interface intf_description = {

@@ -34,13 +34,13 @@ namespace dss {
     close(m_Handle);
   } // dtor
 
-  bool SerialCom::Open(const char* _serialPort) {
+  bool SerialCom::open(const char* _serialPort) {
     m_PortDevName = _serialPort;
     int flags = O_RDWR | O_NOCTTY;
     if(!m_Blocking) {
       flags |= O_NDELAY | O_NONBLOCK;
     }
-    m_Handle = open(_serialPort, flags);
+    m_Handle = ::open(_serialPort, flags);
     if(m_Handle == -1) {
       perror("serial");
       throw runtime_error(string("could not open port ") + m_PortDevName);
@@ -87,18 +87,18 @@ namespace dss {
       throw runtime_error(string("could not set attributes of port ") + m_PortDevName);
     }
     return true;
-  } // Open
+  } // open
 
-  char SerialCom::GetChar() {
+  char SerialCom::getChar() {
     char result;
 
-    while(!GetCharTimeout(result, 10000)) {
+    while(!getCharTimeout(result, 10000)) {
     }
 
     return result;
-  } // GetChar
+  } // getChar
 
-  bool SerialCom::GetCharTimeout(char& _chOut, int _timeoutMS) {
+  bool SerialCom::getCharTimeout(char& _chOut, int _timeoutMS) {
     fd_set  fdRead;
     FD_ZERO(&fdRead);
     FD_SET(m_Handle, &fdRead);
@@ -109,9 +109,9 @@ namespace dss {
 
     int res = select(m_Handle + 1, &fdRead, NULL, NULL, &timeout);
     if(res == 1) {
-      m_ReadWriteLock.Lock();
+      m_ReadWriteLock.lock();
       res = read(m_Handle, &_chOut, 1);
-      m_ReadWriteLock.Unlock();
+      m_ReadWriteLock.unlock();
       if(res == 1) {
         return true;
       } else {
@@ -120,7 +120,7 @@ namespace dss {
         } else {
           close(m_Handle);
           m_Handle = -1;
-          perror("SerialCom::GetCharTimeout read");
+          perror("SerialCom::getCharTimeout read");
           throw runtime_error("read failed");
         }
       }
@@ -130,42 +130,42 @@ namespace dss {
     } else {
       close(m_Handle);
       m_Handle = -1;
-      perror("SerialCom::GetCharTimeout() select");
+      perror("SerialCom::getCharTimeout() select");
       throw runtime_error("select failed");
     }
     return false;
   }
 
-  void SerialCom::PutChar(const char& _char) {
+  void SerialCom::putChar(const char& _char) {
     int ret = 0;
     while(ret == 0 || ret == EAGAIN) {
-      m_ReadWriteLock.Lock();
+      m_ReadWriteLock.lock();
       ret = write(m_Handle, &_char, 1);
-      m_ReadWriteLock.Unlock();
+      m_ReadWriteLock.unlock();
 
       if(ret != 1) {
-        SleepMS(1);
+        sleepMS(1);
       }
     }
     if(ret != 1) {
       close(m_Handle);
       m_Handle = -1;
-      perror("SerialCom::PutChar");
+      perror("SerialCom::putChar");
       throw runtime_error("error writing to serial port");
     }
-  } // PutChar
+  } // putChar
 
   //================================================== SerialComSim
 
-  bool SerialComSim::Open(const char* _serialPort) {
+  bool SerialComSim::open(const char* _serialPort) {
     return true;
-  } // Open
+  } // open
 
-  deque<char>& SerialComSim::GetWrittenData() {
+  deque<char>& SerialComSim::getWrittenData() {
     return m_OutgoingData;
-  } // GetWrittenData
+  } // getWrittenData
 
-  void SerialComSim::PutSimData(const string& _data) {
+  void SerialComSim::putSimData(const string& _data) {
     for(string::const_iterator iChar = _data.begin(), e = _data.end();
         iChar != e; ++iChar)
     {
@@ -173,32 +173,32 @@ namespace dss {
     }
   }
 
-  char SerialComSim::GetChar() {
+  char SerialComSim::getChar() {
     while(m_IncomingData.size() == 0) {
-      SleepMS(100);
+      sleepMS(100);
     }
     char result = m_IncomingData.front();
     m_IncomingData.pop_front();
     return result;
   }
 
-  bool SerialComSim::GetCharTimeout(char& _charOut, const int _timeoutMS) {
+  bool SerialComSim::getCharTimeout(char& _charOut, const int _timeoutMS) {
     // TODO: we could/should/want to use an event to wait on incoming data
     if(m_IncomingData.size() != 0) {
-      _charOut = GetChar();
+      _charOut = getChar();
       return true;
     } else {
-      SleepMS(_timeoutMS);
+      sleepMS(_timeoutMS);
       if(m_IncomingData.size() != 0) {
-        _charOut = GetChar();
+        _charOut = getChar();
         return true;
       }
     }
     return false;
-  } // GetCharTimeout
+  } // getCharTimeout
 
-  void SerialComSim::PutChar(const char& _char) {
+  void SerialComSim::putChar(const char& _char) {
     m_OutgoingData.push_back(_char);
-  } // PutChar
+  } // putChar
 
 }

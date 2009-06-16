@@ -78,9 +78,9 @@ public:
       sendCommand("voldown");
     } // volumeDown
 
-    virtual void SetConfigurationParameter(const std::string& _name, const std::string& _value) {
+    virtual void setConfigurationParameter(const std::string& _name, const std::string& _value) {
       if(_name == "port") {
-        m_RemotePort = dss::StrToInt(_value);
+        m_RemotePort = dss::strToInt(_value);
       } else if(_name == "host") {
         m_RemoteHost = _value;
       }
@@ -95,12 +95,12 @@ protected:
 
   virtual ~VLCRemoteDSIDFactory() {}
 
-  virtual DSID* DoCreateDSID() {
+  virtual DSID* doCreateDSID() {
     return new DSIDVLCRemote();
   }
 
 public:
-  static void Create() {
+  static void create() {
     if(m_Instance == NULL) {
       m_Instance = new VLCRemoteDSIDFactory();
     }
@@ -110,6 +110,6 @@ public:
 
 static void _init(void) __attribute__ ((constructor));
 static void _init(void) {
-  VLCRemoteDSIDFactory::Create();
+  VLCRemoteDSIDFactory::create();
 } // init
 

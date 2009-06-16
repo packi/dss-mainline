@@ -24,11 +24,11 @@ namespace dss {
 
   class SerialComBase {
   public:
-    virtual bool Open(const char* _serialPort) =  0;
+    virtual bool open(const char* _serialPort) =  0;
 
-    virtual char GetChar() = 0;
-    virtual bool GetCharTimeout(char& _charOut, const int _timeoutMS) = 0;
-    virtual void PutChar(const char& _char) = 0;
+    virtual char getChar() = 0;
+    virtual bool getCharTimeout(char& _charOut, const int _timeoutMS) = 0;
+    virtual void putChar(const char& _char) = 0;
 
     virtual ~SerialComBase() {};
   }; // SerialComBase
@@ -47,14 +47,14 @@ namespace dss {
     SerialCom();
     virtual ~SerialCom();
 
-    virtual bool Open(const char* _serialPort);
+    virtual bool open(const char* _serialPort);
 
-    virtual char GetChar();
-    virtual bool GetCharTimeout(char& _charOut, const int _timeoutMS);
-    virtual void PutChar(const char& _char);
+    virtual char getChar();
+    virtual bool getCharTimeout(char& _charOut, const int _timeoutMS);
+    virtual void putChar(const char& _char);
 
-    void SetSpeed(SerialSpeed _value) { m_Speed = _value; }
-    void SetBlocking(bool _value) { m_Blocking = _value; }
+    void setSpeed(SerialSpeed _value) { m_Speed = _value; }
+    void setBlocking(bool _value) { m_Blocking = _value; }
   }; // SerialCom
 
   class SerialComSim : public SerialComBase {
@@ -66,14 +66,14 @@ namespace dss {
   public:
     virtual ~SerialComSim() {};
 
-    virtual bool Open(const char* _serialPort);
+    virtual bool open(const char* _serialPort);
 
-    deque<char>& GetWrittenData();
-    void PutSimData(const string& _data);
+    deque<char>& getWrittenData();
+    void putSimData(const string& _data);
 
-    virtual char GetChar();
-    virtual bool GetCharTimeout(char& _charOut, const int _timeoutMS);
-    virtual void PutChar(const char& _char);
+    virtual char getChar();
+    virtual bool getCharTimeout(char& _charOut, const int _timeoutMS);
+    virtual void putChar(const char& _char);
   }; // SerialComSim
 
 }

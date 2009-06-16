@@ -17,12 +17,12 @@ using std::string;
 namespace dss {
   class SetBuilder {
   protected:
-	  Set RestrictBy(const string& _identifier, const Set& _set, const Zone& _zone);
-	  Set RestrictByFunction(const string& _identifier, const Set& _set, const Zone& _zone);
+	  Set restrictBy(const string& _identifier, const Set& _set, const Zone& _zone);
+	  Set restrictByFunction(const string& _identifier, const Set& _set, const Zone& _zone);
 	public:
 	  SetBuilder();
 
-	  Set BuildSet(const string& _setDescription, const Zone* _context);
+	  Set buildSet(const string& _setDescription, const Zone* _context);
   }; // SetBuilder
 
 } // namespace dss

@@ -26,53 +26,53 @@ namespace dss {
   } // dtor
 
 
-  void ScriptEnvironment::Initialize() {
+  void ScriptEnvironment::initialize() {
     m_pRuntime = JS_NewRuntime(8L * 1024L * 1024L);
     if (m_pRuntime == NULL) {
       throw ScriptException("Error creating environment");
     }
-  } // Initialize
+  } // initialize
 
-  bool ScriptEnvironment::IsInitialized() {
+  bool ScriptEnvironment::isInitialized() {
     return m_pRuntime != NULL;
-  } // IsInitialized
+  } // isInitialized
 
-  void ScriptEnvironment::AddExtension(ScriptExtension* _pExtension) {
+  void ScriptEnvironment::addExtension(ScriptExtension* _pExtension) {
     m_Extensions.push_back(_pExtension);
-  } // AddExtension
+  } // addExtension
 
-  ScriptContext* ScriptEnvironment::GetContext() {
+  ScriptContext* ScriptEnvironment::getContext() {
     JSContext* context = JS_NewContext(m_pRuntime, 8192);
 
     ScriptContext* pResult = new ScriptContext(*this, context);
     JS_SetContextPrivate(context, pResult);
     for(boost::ptr_vector<ScriptExtension>::iterator ipExtension = m_Extensions.begin(); ipExtension != m_Extensions.end(); ++ipExtension) {
-      ipExtension->ExtendContext(*pResult);
+      ipExtension->extendContext(*pResult);
     }
     return pResult;
-  } // GetContext
+  } // getContext
 
-  ScriptExtension* ScriptEnvironment::GetExtension(const string& _name) {
+  ScriptExtension* ScriptEnvironment::getExtension(const string& _name) {
     for(boost::ptr_vector<ScriptExtension>::iterator ipExtension = m_Extensions.begin(); ipExtension != m_Extensions.end(); ++ipExtension) {
-      if(ipExtension->GetName() == _name) {
+      if(ipExtension->getName() == _name) {
         return &*ipExtension;
       }
     }
     return NULL;
-  } // GetExtension
+  } // getExtension
 
-  const ScriptExtension* ScriptEnvironment::GetExtension(const string& _name) const {
+  const ScriptExtension* ScriptEnvironment::getExtension(const string& _name) const {
     for(boost::ptr_vector<ScriptExtension>::const_iterator ipExtension = m_Extensions.begin(); ipExtension != m_Extensions.end(); ++ipExtension) {
-      if(ipExtension->GetName() == _name) {
+      if(ipExtension->getName() == _name) {
         return &*ipExtension;
       }
     }
     return NULL;
-  } // GetExtension
+  } // getExtension
 
   //============================================= ScriptContext
 
-  void ScriptContext::JsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er) {
+  void ScriptContext::jsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er) {
     char *pointer=NULL;
     char *line=NULL;
     int len;
@@ -106,7 +106,7 @@ namespace dss {
 
     free(pointer);
     free(line);
-  } // JsErrorHandler
+  } // jsErrorHandler
 
 
   JSBool global_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
@@ -147,7 +147,7 @@ namespace dss {
     m_pContext(_pContext)
   {
     JS_SetOptions(m_pContext, JSOPTION_VAROBJFIX | JSOPTION_DONT_REPORT_UNCAUGHT);
-    JS_SetErrorReporter(m_pContext, JsErrorHandler);
+    JS_SetErrorReporter(m_pContext, jsErrorHandler);
 
     /* Create the global object. */
     m_pRootObject = JS_NewObject(m_pContext, &global_class, NULL, NULL);
@@ -172,9 +172,9 @@ namespace dss {
     JS_DestroyContext(m_pContext);
   } // dtor
 
-  void ScriptContext::LoadFromFile(const string& _fileName) {
+  void ScriptContext::loadFromFile(const string& _fileName) {
     m_FileName = _fileName;
-    if(!FileExists(_fileName)) {
+    if(!fileExists(_fileName)) {
       throw ScriptException(string("File \"") + _fileName + "\" not found");
     }
 
@@ -190,17 +190,17 @@ namespace dss {
       throw ScriptException("Could not add named root for script");
     }
     */
-  } // LoadFromFile
+  } // loadFromFile
 
-  void ScriptContext::LoadFromMemory(const char* _script) {
+  void ScriptContext::loadFromMemory(const char* _script) {
     m_pScriptToExecute = JS_CompileScript(m_pContext, m_pRootObject, _script, strlen(_script), "memory", 1);
     if(m_pScriptToExecute == NULL) {
       throw ScriptException(string("Could not parse in-memory script"));
     }
-  } // LoadFromMemory
+  } // loadFromMemory
 
   template<>
-  int ScriptContext::ConvertTo(const jsval& _val) {
+  int ScriptContext::convertTo(const jsval& _val) {
     if(JSVAL_IS_NUMBER(_val)) {
       int result;
       if(JS_ValueToInt32(m_pContext, _val, &result)) {
@@ -211,7 +211,7 @@ namespace dss {
   }
 
   template<>
-  string ScriptContext::ConvertTo(const jsval& _val) {
+  string ScriptContext::convertTo(const jsval& _val) {
     JSString* result;
     result = JS_ValueToString(m_pContext, _val);
     if( result == NULL) {
@@ -222,7 +222,7 @@ namespace dss {
   }
 
   template<>
-  bool ScriptContext::ConvertTo(const jsval& _val) {
+  bool ScriptContext::convertTo(const jsval& _val) {
     if(JSVAL_IS_BOOLEAN(_val)) {
       JSBool result;
       if(JS_ValueToBoolean(m_pContext, _val, &result)) {
@@ -233,7 +233,7 @@ namespace dss {
   }
 
   template<>
-  double ScriptContext::ConvertTo(const jsval& _val) {
+  double ScriptContext::convertTo(const jsval& _val) {
     if(JSVAL_IS_NUMBER(_val)) {
       jsdouble result;
       if(JS_ValueToNumber(m_pContext, _val, &result)) {
@@ -244,7 +244,7 @@ namespace dss {
   }
 
   template <>
-  jsval ScriptContext::Evaluate() {
+  jsval ScriptContext::evaluate() {
     jsval rval;
     JSBool ok = JS_ExecuteScript(m_pContext, m_pRootObject, m_pScriptToExecute, &rval);
     if(ok) {
@@ -266,29 +266,29 @@ namespace dss {
         throw ScriptException("Error executing script");
       }
     }
-  } // Evaluate<jsval>
+  } // evaluate<jsval>
 
   template <>
-  double ScriptContext::Evaluate() {
-    return ConvertTo<double>(Evaluate<jsval>());
-  } // Evaluate<double>
-
-
-  template <>
-  int ScriptContext::Evaluate() {
-    return ConvertTo<int>(Evaluate<jsval>());
-  } // Evaluate<int>
+  double ScriptContext::evaluate() {
+    return convertTo<double>(evaluate<jsval>());
+  } // evaluate<double>
 
 
   template <>
-  void ScriptContext::Evaluate() {
-    Evaluate<jsval>();
-  } // Evaluate<void>
+  int ScriptContext::evaluate() {
+    return convertTo<int>(evaluate<jsval>());
+  } // evaluate<int>
+
 
   template <>
-  string ScriptContext::Evaluate() {
-    return ConvertTo<string>(Evaluate<jsval>());
-  } // Evaluate<string>
+  void ScriptContext::evaluate() {
+    evaluate<jsval>();
+  } // evaluate<void>
+
+  template <>
+  string ScriptContext::evaluate() {
+    return convertTo<string>(evaluate<jsval>());
+  } // evaluate<string>
 
   //================================================== ScriptExtension
 
@@ -301,14 +301,14 @@ namespace dss {
   } // ctor
 
   template<>
-  jsval ScriptObject::GetProperty(const string& _name) {
+  jsval ScriptObject::getProperty(const string& _name) {
     JSBool found;
-    if(!JS_HasProperty(m_Context.GetJSContext(), m_pObject, _name.c_str(), &found)) {
+    if(!JS_HasProperty(m_Context.getJSContext(), m_pObject, _name.c_str(), &found)) {
       throw ScriptException("Could not enumerate property");
     }
     if(found) {
       jsval result;
-      if(JS_GetProperty(m_Context.GetJSContext(), m_pObject, _name.c_str(), &result)) {
+      if(JS_GetProperty(m_Context.getJSContext(), m_pObject, _name.c_str(), &result)) {
         return result;
       } else {
         throw ScriptException(string("Could not retrieve value of property ") + _name);
@@ -316,22 +316,22 @@ namespace dss {
     } else {
       throw ScriptException(string("Could not find property ") + _name);
     }
-  } // GetProperty<jsval>
+  } // getProperty<jsval>
 
   template<>
-  string ScriptObject::GetProperty(const string& _name) {
-    jsval value = GetProperty<jsval>(_name);
+  string ScriptObject::getProperty(const string& _name) {
+    jsval value = getProperty<jsval>(_name);
     if(JSVAL_IS_STRING(value)) {
       return string(JS_GetStringBytes(JSVAL_TO_STRING(value)));
     }
     throw ScriptException(string("Property is not of string type: ") + _name);
-  } // GetProperty<string>
+  } // getProperty<string>
 
-  bool ScriptObject::Is(const string& _className) {
-    return GetClassName() == _className;
+  bool ScriptObject::is(const string& _className) {
+    return getClassName() == _className;
   }
 
-  const string ScriptObject::GetClassName() {
-    return GetProperty<string>("className");
-  } // GetClassName
+  const string ScriptObject::getClassName() {
+    return getProperty<string>("className");
+  } // getClassName
 }

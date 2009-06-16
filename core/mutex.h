@@ -23,12 +23,12 @@ public:
     Mutex();
     virtual ~Mutex();
 
-    virtual bool Lock();
-    virtual bool TryLock();
-    virtual bool Unlock();
+    virtual bool lock();
+    virtual bool tryLock();
+    virtual bool unlock();
 
 #ifndef WIN32
-	pthread_mutex_t* GetMutex() { return &m_Mutex; }
+	pthread_mutex_t* getMutex() { return &m_Mutex; }
 #endif
 }; //  Mutex
 
@@ -47,14 +47,14 @@ class LockableObject {
   public:
     LockableObject();
     virtual ~LockableObject();
-    bool IsLocked();
-    bool IsLockedCurrentThread();
-    bool Lock();
-    bool Unlock();
+    bool isLocked();
+    bool isLockedCurrentThread();
+    bool lock();
+    bool unlock();
 }; // LockableObject;
 
 /** Asserts that an object can be accessed from the current thread.
- * If another thread instanciates AssertLocked( obj ), it requires
+ * If another thread instanciates assertLocked( obj ), it requires
  * the other thread to wait for a proper lock.
  */
 class AssertLocked {

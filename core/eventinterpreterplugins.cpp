@@ -29,25 +29,25 @@ namespace dss {
   EventInterpreterPluginRaiseEvent::~EventInterpreterPluginRaiseEvent()
   { } // dtor
 
-  void EventInterpreterPluginRaiseEvent::HandleEvent(Event& _event, const EventSubscription& _subscription) {
-    boost::shared_ptr<Event> newEvent(new Event(_subscription.GetOptions().GetParameter("event_name")));
-    if(_subscription.GetOptions().HasParameter("time")) {
-      string timeParam = _subscription.GetOptions().GetParameter("time");
+  void EventInterpreterPluginRaiseEvent::handleEvent(Event& _event, const EventSubscription& _subscription) {
+    boost::shared_ptr<Event> newEvent(new Event(_subscription.getOptions().getParameter("event_name")));
+    if(_subscription.getOptions().hasParameter("time")) {
+      string timeParam = _subscription.getOptions().getParameter("time");
       if(!timeParam.empty()) {
-        Logger::GetInstance()->Log("RaiseEvent: Event has time");
-        newEvent->SetTime(timeParam);
+        Logger::getInstance()->log("RaiseEvent: Event has time");
+        newEvent->setTime(timeParam);
       }
     }
-    if(_subscription.GetOptions().HasParameter(EventPropertyLocation)) {
-      string location = _subscription.GetOptions().GetParameter(EventPropertyLocation);
+    if(_subscription.getOptions().hasParameter(EventPropertyLocation)) {
+      string location = _subscription.getOptions().getParameter(EventPropertyLocation);
       if(!location.empty()) {
-        Logger::GetInstance()->Log("RaiseEvent: Event has location");
-        newEvent->SetLocation(location);
+        Logger::getInstance()->log("RaiseEvent: Event has location");
+        newEvent->setLocation(location);
       }
     }
-    newEvent->SetProperties(_event.GetProperties());
-    GetEventInterpreter().GetQueue().PushEvent(newEvent);
-  } // HandleEvent
+    newEvent->setProperties(_event.getProperties());
+    getEventInterpreter().getQueue().pushEvent(newEvent);
+  } // handleEvent
 
 
   //================================================== EventInterpreterPluginJavascript
@@ -56,34 +56,34 @@ namespace dss {
   : EventInterpreterPlugin("javascript", _pInterpreter)
   { } // ctor
 
-  void EventInterpreterPluginJavascript::HandleEvent(Event& _event, const EventSubscription& _subscription) {
-    if(_subscription.GetOptions().HasParameter("filename")) {
-      string scriptName = _subscription.GetOptions().GetParameter("filename");
-      if(FileExists(scriptName)) {
+  void EventInterpreterPluginJavascript::handleEvent(Event& _event, const EventSubscription& _subscription) {
+    if(_subscription.getOptions().hasParameter("filename")) {
+      string scriptName = _subscription.getOptions().getParameter("filename");
+      if(fileExists(scriptName)) {
 
-        if(!m_Environment.IsInitialized()) {
-          m_Environment.Initialize();
-          ScriptExtension* ext = new ModelScriptContextExtension(DSS::GetInstance()->GetApartment());
-          m_Environment.AddExtension(ext);
-          ext = new EventScriptExtension(DSS::GetInstance()->GetEventQueue(), GetEventInterpreter());
-          m_Environment.AddExtension(ext);
+        if(!m_Environment.isInitialized()) {
+          m_Environment.initialize();
+          ScriptExtension* ext = new ModelScriptContextExtension(DSS::getInstance()->getApartment());
+          m_Environment.addExtension(ext);
+          ext = new EventScriptExtension(DSS::getInstance()->getEventQueue(), getEventInterpreter());
+          m_Environment.addExtension(ext);
         }
 
         try {
-          boost::scoped_ptr<ScriptContext> ctx(m_Environment.GetContext());
-          ctx->LoadFromFile(_subscription.GetOptions().GetParameter("filename"));
-          ctx->Evaluate<void>();
+          boost::scoped_ptr<ScriptContext> ctx(m_Environment.getContext());
+          ctx->loadFromFile(_subscription.getOptions().getParameter("filename"));
+          ctx->evaluate<void>();
         } catch(ScriptException& e) {
-          Logger::GetInstance()->Log(string("EventInterpreterPluginJavascript::HandleEvent: Cought event while running/parsing script '")
+          Logger::getInstance()->log(string("EventInterpreterPluginJavascript::handleEvent: Cought event while running/parsing script '")
                               + scriptName + "'. Message: " + e.what(), lsError);
         }
       } else {
-        Logger::GetInstance()->Log(string("EventInterpreterPluginJavascript::HandleEvent: Could not find script: '") + scriptName + "'", lsError);
+        Logger::getInstance()->log(string("EventInterpreterPluginJavascript::handleEvent: Could not find script: '") + scriptName + "'", lsError);
       }
     } else {
-      throw runtime_error("EventInterpreteRPluginJavascript::HandleEvent: missing argument filename");
+      throw runtime_error("EventInterpreteRPluginJavascript::handleEvent: missing argument filename");
     }
-  } // HandleEvent
+  } // handleEvent
 
 
   //================================================== EventInterpreterPluginDS485
@@ -105,101 +105,101 @@ namespace dss {
     : m_ParameterIndex(-1), m_SceneIndex(-1)
     { }
 
-    void SetCommand(const DS485Command _value) { m_Command = _value; }
-    DS485Command GetCommand() const { return m_Command; }
+    void setCommand(const DS485Command _value) { m_Command = _value; }
+    DS485Command getCommand() const { return m_Command; }
 
-    void SetParameterIndex(const int _value) { m_ParameterIndex = _value; }
-    int GetParameterIndex() const { return m_ParameterIndex; }
+    void setParameterIndex(const int _value) { m_ParameterIndex = _value; }
+    int getParameterIndex() const { return m_ParameterIndex; }
 
-    void SetTo(const string& _value) { m_To = _value; }
+    void setTo(const string& _value) { m_To = _value; }
     const string& GetTo() const { return m_To; }
 
-    void SetContext(const string& _value) { m_Context = _value; }
-    const string& GetContext() const { return m_Context; }
+    void setContext(const string& _value) { m_Context = _value; }
+    const string& getContext() const { return m_Context; }
 
-    void SetSceneIndex(const int _value) { m_SceneIndex = _value; }
-    int GetSceneIndex() const { return m_SceneIndex; }
+    void setSceneIndex(const int _value) { m_SceneIndex = _value; }
+    int getSceneIndex() const { return m_SceneIndex; }
   };
 
-  string EventInterpreterPluginDS485::GetParameter(XMLNodeList& _nodes, const string& _parameterName) {
+  string EventInterpreterPluginDS485::getParameter(XMLNodeList& _nodes, const string& _parameterName) {
     for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
         iNode != e; ++iNode)
     {
-      if(iNode->GetName() == "parameter") {
-        if(iNode->GetAttributes()["name"] == _parameterName) {
-          XMLNodeList& children = iNode->GetChildren();
+      if(iNode->getName() == "parameter") {
+        if(iNode->getAttributes()["name"] == _parameterName) {
+          XMLNodeList& children = iNode->getChildren();
           if(!children.empty()) {
-            return children[0].GetContent();
+            return children[0].getContent();
           }
         }
       }
     }
     return "";
-  } // GetParameter
+  } // getParameter
 
-  SubscriptionOptions* EventInterpreterPluginDS485::CreateOptionsFromXML(XMLNodeList& _nodes) {
+  SubscriptionOptions* EventInterpreterPluginDS485::createOptionsFromXML(XMLNodeList& _nodes) {
     SubscriptionOptionsDS485* result = new SubscriptionOptionsDS485();
     for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
         iNode != e; ++iNode)
     {
-      if(iNode->GetName() == "send") {
-        string typeName = iNode->GetAttributes()["type"];
+      if(iNode->getName() == "send") {
+        string typeName = iNode->getAttributes()["type"];
         string paramName = "";
         bool needParam = false;
         if(typeName == "turnOn") {
-          result->SetCommand(cmdTurnOn);
+          result->setCommand(cmdTurnOn);
         } else if(typeName == "turnOff") {
-          result->SetCommand(cmdTurnOff);
+          result->setCommand(cmdTurnOff);
         } else if(typeName == "dimUp") {
-          result->SetCommand(cmdStartDimUp);
+          result->setCommand(cmdStartDimUp);
           paramName = "parameter";
         } else if(typeName == "stopDim") {
-          result->SetCommand(cmdStopDim);
+          result->setCommand(cmdStopDim);
           paramName = "parameter";
         } else if(typeName == "callScene") {
-          result->SetCommand(cmdCallScene);
+          result->setCommand(cmdCallScene);
           paramName = "scene";
           needParam = true;
         } else if(typeName == "saveScene") {
-          result->SetCommand(cmdSaveScene);
+          result->setCommand(cmdSaveScene);
           paramName = "scene";
           needParam = true;
         } else if(typeName == "undoScene") {
-          result->SetCommand(cmdUndoScene);
+          result->setCommand(cmdUndoScene);
           paramName = "scene";
           needParam = true;
         } else if(typeName == "increaseValue") {
-          result->SetCommand(cmdIncreaseValue);
+          result->setCommand(cmdIncreaseValue);
           paramName = "parameter";
         } else if(typeName == "decreaseValue") {
-          result->SetCommand(cmdDecreaseValue);
+          result->setCommand(cmdDecreaseValue);
           paramName = "parameter";
         } else if(typeName == "enable") {
-          result->SetCommand(cmdEnable);
+          result->setCommand(cmdEnable);
         } else if(typeName == "disable") {
-          result->SetCommand(cmdDisable);
+          result->setCommand(cmdDisable);
         } else if(typeName == "increaseParameter") {
-          result->SetCommand(cmdIncreaseParam);
+          result->setCommand(cmdIncreaseParam);
           paramName = "parameter";
         } else if(typeName == "decreaseParameter") {
-          result->SetCommand(cmdDecreaseParam);
+          result->setCommand(cmdDecreaseParam);
           paramName = "parameter";
         } else {
-          Logger::GetInstance()->Log(string("unknown command: ") + typeName);
+          Logger::getInstance()->log(string("unknown command: ") + typeName);
           delete result;
           return NULL;
         }
 
         if(!paramName.empty()) {
-          string paramValue = GetParameter(iNode->GetChildren(), paramName);
+          string paramValue = getParameter(iNode->getChildren(), paramName);
           if(paramValue.size() == 0 && needParam) {
-            Logger::GetInstance()->Log(string("bus_handler: Needed parameter '") + paramName + "' not found in subscription for type '" + typeName + "'", lsError);
+            Logger::getInstance()->log(string("bus_handler: Needed parameter '") + paramName + "' not found in subscription for type '" + typeName + "'", lsError);
           }
 
           if(paramName == "parameter") {
-            result->SetParameterIndex(StrToIntDef(paramValue, -1));
+            result->setParameterIndex(strToIntDef(paramValue, -1));
           } else if(paramName == "scene") {
-            result->SetSceneIndex(StrToIntDef(paramValue, -1));
+            result->setSceneIndex(strToIntDef(paramValue, -1));
           }
         }
       }
@@ -208,10 +208,10 @@ namespace dss {
     return result;
   }
 
-  void EventInterpreterPluginDS485::HandleEvent(Event& _event, const EventSubscription& _subscription) {
-    const SubscriptionOptionsDS485* options = dynamic_cast<const SubscriptionOptionsDS485*>(&_subscription.GetOptions());
+  void EventInterpreterPluginDS485::handleEvent(Event& _event, const EventSubscription& _subscription) {
+    const SubscriptionOptionsDS485* options = dynamic_cast<const SubscriptionOptionsDS485*>(&_subscription.getOptions());
     if(options != NULL) {
-      DS485Command cmd = options->GetCommand();
+      DS485Command cmd = options->getCommand();
 
 
       // determine location
@@ -222,30 +222,30 @@ namespace dss {
 
       SetBuilder builder;
       Set to;
-      if(_event.HasPropertySet(EventPropertyLocation)) {
-        to = builder.BuildSet(_event.GetPropertyByName(EventPropertyLocation), &_event.GetRaisedAtZone());
+      if(_event.hasPropertySet(EventPropertyLocation)) {
+        to = builder.buildSet(_event.getPropertyByName(EventPropertyLocation), &_event.getRaisedAtZone());
       } else {
-        if(_subscription.GetOptions().HasParameter(EventPropertyLocation)) {
-          to = builder.BuildSet(_subscription.GetOptions().GetParameter(EventPropertyLocation), NULL);
+        if(_subscription.getOptions().hasParameter(EventPropertyLocation)) {
+          to = builder.buildSet(_subscription.getOptions().getParameter(EventPropertyLocation), NULL);
         } else {
-          to = _event.GetRaisedAtZone().GetDevices();
+          to = _event.getRaisedAtZone().getDevices();
         }
       }
 
       if(cmd == cmdCallScene || cmd == cmdSaveScene || cmd == cmdUndoScene) {
-        m_pInterface->SendCommand(cmd, to, options->GetSceneIndex());
+        m_pInterface->sendCommand(cmd, to, options->getSceneIndex());
       } else if(cmd == cmdIncreaseParam || cmd == cmdDecreaseParam ||
                 cmd == cmdIncreaseValue || cmd == cmdDecreaseValue ||
                 cmd == cmdStartDimUp || cmd == cmdStartDimDown || cmd == cmdStopDim)
       {
-        m_pInterface->SendCommand(cmd, to, options->GetParameterIndex());
+        m_pInterface->sendCommand(cmd, to, options->getParameterIndex());
       } else {
-        Logger::GetInstance()->Log("EventInterpreterPluginDS485::HandleEvent: sending...");
-        m_pInterface->SendCommand(cmd, to, 0);
+        Logger::getInstance()->log("EventInterpreterPluginDS485::handleEvent: sending...");
+        m_pInterface->sendCommand(cmd, to, 0);
       }
     } else {
-      Logger::GetInstance()->Log("EventInterpreterPluginDS485::HandleEvent: Options are not of type SubscriptionOptionsDS485, ignoring", lsError);
+      Logger::getInstance()->log("EventInterpreterPluginDS485::handleEvent: Options are not of type SubscriptionOptionsDS485, ignoring", lsError);
     }
-  } // HandleEvent
+  } // handleEvent
 
 } // namespace dss

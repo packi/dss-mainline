@@ -143,7 +143,7 @@ int main (int argc, char* argv[]) {
   cout << "compiled WITH_TESTS" << endl;
   if(runTests) {
     cout << "running tests" << endl;
-    dss::Tests::Run();
+    dss::Tests::run();
     cout << "done running tests" << endl;
   }
 #endif
@@ -151,21 +151,21 @@ int main (int argc, char* argv[]) {
   if(!quitAfterTests && startSniffer) {
 #ifndef __APPLE__
     dss::DS485FrameSniffer sniffer(snifferDev);
-    sniffer.Run();
+    sniffer.run();
     while(true) {
-      dss::SleepSeconds(10);
+      dss::sleepSeconds(10);
     }
 #endif
   } else {
     if(!quitAfterTests) {
       // start DSS
-      dss::DSS::GetInstance()->Initialize(properties);
-      dss::DSS::GetInstance()->Run();
+      dss::DSS::getInstance()->initialize(properties);
+      dss::DSS::getInstance()->run();
     }
-    if(dss::DSS::HasInstance()) {
-      dss::DSS::Shutdown();
+    if(dss::DSS::hasInstance()) {
+      dss::DSS::shutdown();
     }
-    dss::Logger::Shutdown();
+    dss::Logger::shutdown();
   }
 
 #ifdef USE_LIBXML

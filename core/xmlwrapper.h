@@ -45,32 +45,32 @@ namespace dss {
     XMLNodeList m_Children;
     HashMapConstStringString m_Attributes;
 
-    void AssertHasNode(const string& _reason);
-    void Initialize();
-    void CopyFrom(const XMLNode& _other);
+    void assertHasNode(const string& _reason);
+    void initialize();
+    void copyFrom(const XMLNode& _other);
   public:
     XMLNode();
     XMLNode(const XMLNode& _other);
     XMLNode(xmlNode* _node);
     XMLNode& operator=(const XMLNode& _rhs) {
-      CopyFrom(_rhs);
+      copyFrom(_rhs);
       return *this;
     }
 
-    const string GetName();
-    const string GetContent();
+    const string getName();
+    const string getContent();
 
-    void SetContent(const string& _value);
-    void SetName(const string& _value);
+    void setContent(const string& _value);
+    void setName(const string& _value);
 
-    XMLNode& AddTextNode();
-    XMLNode& AddChildNode(const string& _name, const string& _content = "");
+    XMLNode& addTextNode();
+    XMLNode& addChildNode(const string& _name, const string& _content = "");
 
-    XMLNode& GetChildByName(const string& _name);
-    bool HasChildWithName(const string& _name);
+    XMLNode& getChildByName(const string& _name);
+    bool hasChildWithName(const string& _name);
 
-    XMLNodeList& GetChildren();
-    HashMapConstStringString& GetAttributes();
+    XMLNodeList& getChildren();
+    HashMapConstStringString& getAttributes();
   }; // XMLNode
 
   class XMLDocument : ResourceHolder<xmlDoc> {
@@ -81,9 +81,9 @@ namespace dss {
     XMLDocument(XMLDocument& _other);
     ~XMLDocument();
 
-    void SaveToFile(const string& _fileName);
+    void saveToFile(const string& _fileName);
 
-    XMLNode& GetRootNode();
+    XMLNode& getRootNode();
   }; // XMLDocument
 
   class XMLDocumentReader {
@@ -91,7 +91,7 @@ namespace dss {
     XMLDocument m_Document;
   public:
     virtual ~XMLDocumentReader();
-    virtual XMLDocument& GetDocument() = 0;
+    virtual XMLDocument& getDocument() = 0;
   }; // XMLReader
 
   class XMLDocumentFileReader : public XMLDocumentReader {
@@ -101,7 +101,7 @@ namespace dss {
     XMLDocumentFileReader(const string& _uri);
     virtual ~XMLDocumentFileReader() {}
 
-    virtual XMLDocument& GetDocument();
+    virtual XMLDocument& getDocument();
   };
 
   class XMLDocumentMemoryReader : public XMLDocumentReader {
@@ -110,7 +110,7 @@ namespace dss {
   public:
     XMLDocumentMemoryReader(const char* _xmlData);
     virtual ~XMLDocumentMemoryReader() {}
-    virtual XMLDocument& GetDocument();
+    virtual XMLDocument& getDocument();
   }; // XMLDocumentMemoryReaders
 
   class XMLException : public DSSException {

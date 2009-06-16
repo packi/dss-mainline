@@ -55,7 +55,7 @@ public:
     virtual void powerOn() {
       sendCommand("power 1");
       if(m_DefaultVolume != -1) {
-        sendCommand("mixer volume " + dss::IntToString(m_DefaultVolume));
+        sendCommand("mixer volume " + dss::intToString(m_DefaultVolume));
       }
       sendCommand("play");
     }
@@ -90,18 +90,18 @@ public:
       sendCommand("mixer volume -6\r\nmixer volume +1");
     }
 
-    virtual void SetConfigurationParameter(const std::string& _name, const std::string& _value) {
+    virtual void setConfigurationParameter(const std::string& _name, const std::string& _value) {
       if(_name == "port") {
-        m_RemotePort = dss::StrToInt(_value);
+        m_RemotePort = dss::strToInt(_value);
       } else if(_name == "host") {
         m_RemoteHost = _value;
       } else if(_name == "playermac") {
         std::cout << "config-param: " << _value << std::endl;
         m_PlayerMACHeader = _value;
-        dss::ReplaceAll(m_PlayerMACHeader, ":", "%3A");
+        dss::replaceAll(m_PlayerMACHeader, ":", "%3A");
         std::cout << "after: " << m_PlayerMACHeader << std::endl;
       } else if(_name == "volume") {
-        m_DefaultVolume = dss::StrToInt(_value);
+        m_DefaultVolume = dss::strToInt(_value);
       }
     }
 };
@@ -114,12 +114,12 @@ protected:
 
   virtual ~SlimSlaveDSIDFactory() {}
 
-  virtual DSID* DoCreateDSID() {
+  virtual DSID* doCreateDSID() {
     return new DSIDSlimSlaveRemote();
   }
 
 public:
-  static void Create() {
+  static void create() {
     if(m_Instance == NULL) {
       m_Instance = new SlimSlaveDSIDFactory();
     }
@@ -129,6 +129,6 @@ public:
 
 static void _init(void) __attribute__ ((constructor));
 static void _init(void) {
-  SlimSlaveDSIDFactory::Create();
+  SlimSlaveDSIDFactory::create();
 } // _init
 

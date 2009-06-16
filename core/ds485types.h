@@ -44,9 +44,9 @@ namespace dss {
       return *this;
     }
 
-    std::string ToString() const;
+    std::string toString() const;
 
-    static dsid FromString(const std::string& _string);
+    static dsid fromString(const std::string& _string);
   } dsid_t;
 
   extern const dsid_t NullDSID;

@@ -42,13 +42,13 @@ namespace dss {
 
     Logger() {}
   public:
-    static Logger* GetInstance();
-    static void Shutdown();
+    static Logger* getInstance();
+    static void shutdown();
 
-    void Log(const std::string& _message, const aLogSeverity _severity = lsDebug);
-    void Log(const char* _message, const aLogSeverity _severity = lsDebug);
+    void log(const std::string& _message, const aLogSeverity _severity = lsDebug);
+    void log(const char* _message, const aLogSeverity _severity = lsDebug);
 
-    void Log(const LogChannel& _channel, const std::string& _message, const aLogSeverity _severity = lsDebug);
+    void log(const LogChannel& _channel, const std::string& _message, const aLogSeverity _severity = lsDebug);
   }; // Logger
 
   class LogChannel {
@@ -59,17 +59,17 @@ namespace dss {
     LogChannel(const std::string& _name, aLogSeverity _minimumSeverity = lsDebug)
     : m_Name(_name), m_MinimumSeverity(_minimumSeverity)
     {
-      Logger::GetInstance()->Log(*this, "Logchannel created");
+      Logger::getInstance()->log(*this, "Logchannel created");
     }
 
     ~LogChannel() {
-      Logger::GetInstance()->Log(*this, "Logchannel destroyed");
+      Logger::getInstance()->log(*this, "Logchannel destroyed");
     }
 
-    aLogSeverity GetMinimumSeverity() const { return m_MinimumSeverity; }
-    void SetMinimumSeverity(aLogSeverity _value) { m_MinimumSeverity = _value; }
-    const std::string& GetName() const { return m_Name; }
-    bool MayLog(aLogSeverity _severity) const { return _severity >= m_MinimumSeverity; }
+    aLogSeverity getMinimumSeverity() const { return m_MinimumSeverity; }
+    void setMinimumSeverity(aLogSeverity _value) { m_MinimumSeverity = _value; }
+    const std::string& getName() const { return m_Name; }
+    bool maylog(aLogSeverity _severity) const { return _severity >= m_MinimumSeverity; }
   }; // LogChannel
 
 

@@ -57,46 +57,46 @@ namespace dss {
     /** Turns the device on.
      *  This will normaly invoke the first scene stored on the device.
      */
-    virtual void TurnOn() = 0;
+    virtual void turnOn() = 0;
     /** Turns the device off.
       */
-    virtual void TurnOff() = 0;
+    virtual void turnOff() = 0;
 
     /** Increases the value of the given parameter by one,
      * If no parameter gets passed, it will increase the default value of the device(s).
      */
-    virtual void IncreaseValue(const int _parameterNr = -1) = 0;
+    virtual void increaseValue(const int _parameterNr = -1) = 0;
     /** Decreases the value of the given parameter by one.
      * If no parameter gets passed, it will decrease the default value of the device(s).
      */
-    virtual void DecreaseValue(const int _parameterNr = -1) = 0;
+    virtual void decreaseValue(const int _parameterNr = -1) = 0;
 
     /** Enables a previously disabled device.
      */
-    virtual void Enable() = 0;
+    virtual void enable() = 0;
     /** Disables a device.
-      * A disabled device does only react to Enable().
+      * A disabled device does only react to enable().
       */
-    virtual void Disable() = 0;
+    virtual void disable() = 0;
 
     /** Starts dimming the given parameter.
      * If _directionUp is true, the value gets increased over time. Else its getting decreased
      */
-    virtual void StartDim(bool _directionUp, const int _parameterNr = -1) = 0;
+    virtual void startDim(bool _directionUp, const int _parameterNr = -1) = 0;
     /** Stops the dimming */
-    virtual void EndDim(const int _parameterNr = -1)= 0;
+    virtual void endDim(const int _parameterNr = -1)= 0;
     /** Sets the value of the given parameter */
-    virtual void SetValue(const double _value, int _parameterNr = -1) = 0;
+    virtual void setValue(const double _value, int _parameterNr = -1) = 0;
 
-    virtual void CallScene(const int _sceneNr) = 0;
-    virtual void SaveScene(const int _sceneNr) = 0;
-    virtual void UndoScene(const int _sceneNr) = 0;
+    virtual void callScene(const int _sceneNr) = 0;
+    virtual void saveScene(const int _sceneNr) = 0;
+    virtual void undoScene(const int _sceneNr) = 0;
 
     /** Returns the consumption in mW */
-    virtual unsigned long GetPowerConsumption() = 0;
+    virtual unsigned long getPowerConsumption() = 0;
 
-    virtual void NextScene() = 0;
-    virtual void PreviousScene() = 0;
+    virtual void nextScene() = 0;
+    virtual void previousScene() = 0;
 
     virtual ~IDeviceInterface() {};
   };
@@ -116,42 +116,42 @@ namespace dss {
     DeviceReference(const Device& _device, const Apartment& _apartment);
     virtual ~DeviceReference() {};
 
-    Device& GetDevice();
-    const Device& GetDevice() const;
-    dsid_t GetDSID() const;
+    Device& getDevice();
+    const Device& getDevice() const;
+    dsid_t getDSID() const;
 
-    int GetFunctionID() const;
-    bool HasSwitch() const;
+    int getFunctionID() const;
+    bool hasSwitch() const;
 
     bool operator==(const DeviceReference& _other) const {
       return m_DSID == _other.m_DSID;
     }
 
-    string GetName() const;
+    string getName() const;
 
-    virtual void TurnOn();
-    virtual void TurnOff();
+    virtual void turnOn();
+    virtual void turnOff();
 
-    virtual void IncreaseValue(const int _parameterNr = -1);
-    virtual void DecreaseValue(const int _parameterNr = -1);
+    virtual void increaseValue(const int _parameterNr = -1);
+    virtual void decreaseValue(const int _parameterNr = -1);
 
-    virtual void Enable();
-    virtual void Disable();
+    virtual void enable();
+    virtual void disable();
 
-    virtual bool IsOn() const;
+    virtual bool isOn() const;
 
-    virtual void StartDim(const bool _directionUp, const int _parameterNr = -1);
-    virtual void EndDim(const int _parameterNr = -1);
-    virtual void SetValue(const double _value, const int _parameterNr = -1);
+    virtual void startDim(const bool _directionUp, const int _parameterNr = -1);
+    virtual void endDim(const int _parameterNr = -1);
+    virtual void setValue(const double _value, const int _parameterNr = -1);
 
-    virtual void CallScene(const int _sceneNr);
-    virtual void SaveScene(const int _sceneNr);
-    virtual void UndoScene(const int _sceneNr);
+    virtual void callScene(const int _sceneNr);
+    virtual void saveScene(const int _sceneNr);
+    virtual void undoScene(const int _sceneNr);
 
-    virtual void NextScene();
-    virtual void PreviousScene();
+    virtual void nextScene();
+    virtual void previousScene();
 
-    virtual unsigned long GetPowerConsumption();
+    virtual unsigned long getPowerConsumption();
  };
 
   typedef vector<DeviceReference> DeviceVector;
@@ -178,85 +178,85 @@ namespace dss {
     PropertyNode* m_pPropertyNode;
     DeviceLocation m_Location;
   protected:
-    void PublishToPropertyTree();
-    void Dirty();
+    void publishToPropertyTree();
+    void dirty();
   public:
     Device(const dsid_t _dsid, Apartment* _pApartment);
     virtual ~Device() {};
 
-    virtual void TurnOn();
-    virtual void TurnOff();
+    virtual void turnOn();
+    virtual void turnOff();
 
-    virtual void IncreaseValue(const int _parameterNr = -1);
-    virtual void DecreaseValue(const int _parameterNr = -1);
+    virtual void increaseValue(const int _parameterNr = -1);
+    virtual void decreaseValue(const int _parameterNr = -1);
 
-    virtual void Enable();
-    virtual void Disable();
+    virtual void enable();
+    virtual void disable();
 
-    virtual bool IsOn() const;
+    virtual bool isOn() const;
 
-    virtual void StartDim(const bool _directionUp, const int _parameterNr = -1);
-    virtual void EndDim(const int _parameterNr = -1);
-    virtual void SetValue(const double _value, const int _parameterNr = -1);
-    double GetValue(const int _parameterNr = -1);
+    virtual void startDim(const bool _directionUp, const int _parameterNr = -1);
+    virtual void endDim(const int _parameterNr = -1);
+    virtual void setValue(const double _value, const int _parameterNr = -1);
+    double getValue(const int _parameterNr = -1);
 
-    virtual void CallScene(const int _sceneNr);
-    virtual void SaveScene(const int _sceneNr);
-    virtual void UndoScene(const int _sceneNr);
+    virtual void callScene(const int _sceneNr);
+    virtual void saveScene(const int _sceneNr);
+    virtual void undoScene(const int _sceneNr);
 
-    virtual void NextScene();
-    virtual void PreviousScene();
+    virtual void nextScene();
+    virtual void previousScene();
 
-    int GetFunctionID() const;
-    void SetFunctionID(const int _value);
-    bool HasSwitch() const;
+    int getFunctionID() const;
+    void setFunctionID(const int _value);
+    bool hasSwitch() const;
 
-    string GetName() const;
-    void SetName(const string& _name);
+    string getName() const;
+    void setName(const string& _name);
 
-    const DeviceLocation& GetLocation() const;
-    void SetLocation(const DeviceLocation& _value);
+    const DeviceLocation& getLocation() const;
+    void setLocation(const DeviceLocation& _value);
 
-    double GetLocationX() const;
-    double GetLocationY() const;
-    double GetLocationZ() const;
+    double getLocationX() const;
+    double getLocationY() const;
+    double getLocationZ() const;
 
-    void SetLocationX(const double _value);
-    void SetLocationY(const double _value);
-    void SetLocationZ(const double _value);
+    void setLocationX(const double _value);
+    void setLocationY(const double _value);
+    void setLocationZ(const double _value);
 
-    bitset<63>& GetGroupBitmask();
-    bool IsInGroup(const int _groupID) const;
-    void AddToGroup(const int _groupID);
+    bitset<63>& getGroupBitmask();
+    bool isInGroup(const int _groupID) const;
+    void addToGroup(const int _groupID);
 
     /** Returns the group id of the _index'th group */
-    int GetGroupIdByIndex(const int _index) const;
+    int getGroupIdByIndex(const int _index) const;
     /** Returns _index'th group of the device */
-    Group& GetGroupByIndex(const int _index);
+    Group& getGroupByIndex(const int _index);
     /** Returns the number of groups the device is a member of */
-    int GetGroupsCount() const;
+    int getGroupsCount() const;
 
-    void ResetGroups();
+    void resetGroups();
 
-    int GetLastCalledScene() const { return m_LastCalledScene; }
-    void SetLastCalledScene(const int _value) { m_LastCalledScene = _value; }
+    int getLastCalledScene() const { return m_LastCalledScene; }
+    void setLastCalledScene(const int _value) { m_LastCalledScene = _value; }
 
     /** Returns the short address of the device. This is the address
      * the device got from the dSM. */
-    devid_t GetShortAddress() const;
-    void SetShortAddress(const devid_t _shortAddress);
+    devid_t getShortAddress() const;
+    void setShortAddress(const devid_t _shortAddress);
     /** Returns the DSID of the device */
-    dsid_t GetDSID() const;
+    dsid_t getDSID() const;
     /** Returns the id of the modulator the device is connected to */
-    int GetModulatorID() const;
-    void SetModulatorID(const int _modulatorID);
+    int getModulatorID() const;
+    void setModulatorID(const int _modulatorID);
 
-    int GetZoneID() const;
-    void SetZoneID(const int _value);
+    int getZoneID() const;
+    void setZoneID(const int _value);
     /** Returns the apartment the device resides in. */
-    Apartment& GetApartment() const;
+    Apartment& getApartment() const;
 
-    virtual unsigned long GetPowerConsumption();
+    virtual unsigned long getPowerConsumption();
 
     bool operator==(const Device& _other) const;
   };
@@ -266,14 +266,14 @@ namespace dss {
   /** Abstract interface to select certain Devices from a set */
   class IDeviceSelector {
   public:
-    virtual bool SelectDevice(const Device& _device) const = 0;
+    virtual bool selectDevice(const Device& _device) const = 0;
     virtual ~IDeviceSelector() {}
   };
 
   /** Abstract interface to perform an Action on each device of a set */
   class IDeviceAction {
   public:
-    virtual bool Perform(Device& _device) = 0;
+    virtual bool perform(Device& _device) = 0;
     virtual ~IDeviceAction() {}
   };
 
@@ -292,93 +292,93 @@ namespace dss {
     Set(DeviceVector _devices);
     virtual ~Set() {};
 
-    virtual void TurnOn();
-    virtual void TurnOff();
+    virtual void turnOn();
+    virtual void turnOff();
 
-    virtual void IncreaseValue(const int _parameterNr = -1);
-    virtual void DecreaseValue(const int _parameterNr = -1);
+    virtual void increaseValue(const int _parameterNr = -1);
+    virtual void decreaseValue(const int _parameterNr = -1);
 
-    virtual void Enable();
-    virtual void Disable();
+    virtual void enable();
+    virtual void disable();
 
-    virtual void StartDim(bool _directionUp, const int _parameterNr = -1);
-    virtual void EndDim(const int _parameterNr = -1);
-    virtual void SetValue(const double _value, int _parameterNr = -1);
+    virtual void startDim(bool _directionUp, const int _parameterNr = -1);
+    virtual void endDim(const int _parameterNr = -1);
+    virtual void setValue(const double _value, int _parameterNr = -1);
 
-    virtual void CallScene(const int _sceneNr);
-    virtual void SaveScene(const int _sceneNr);
-    virtual void UndoScene(const int _sceneNr);
+    virtual void callScene(const int _sceneNr);
+    virtual void saveScene(const int _sceneNr);
+    virtual void undoScene(const int _sceneNr);
 
     /** Performs the given action on all contained devices */
-    void Perform(IDeviceAction& _deviceAction);
+    void perform(IDeviceAction& _deviceAction);
 
     /** Returns a subset selected by the given selector
-     * A device will be included in the resulting set if _selector.SelectDevice(...) return true.
+     * A device will be included in the resulting set if _selector.selectDevice(...) return true.
      */
-    Set GetSubset(const IDeviceSelector& _selector) const;
+    Set getSubset(const IDeviceSelector& _selector) const;
     /** Returns a subset of the devices which are member of the given group
     * Note that these groups could be spanned over multiple modulators.
      */
-    Set GetByGroup(int _groupNr) const;
+    Set getByGroup(int _groupNr) const;
     /** Returns a subset of the devices which are member of the given group
      * Note that these groups could be spanned over multiple modulators.
      */
-    Set GetByGroup(const Group& _group) const;
+    Set getByGroup(const Group& _group) const;
     /** Returns a subset of the devices which are member of the given group
      * Note that these groups could be spanned over multiple modulators.
      */
-    Set GetByGroup(const string& _name) const;
+    Set getByGroup(const string& _name) const;
 
-    Set GetByFunctionID(const int _functionID) const;
+    Set getByFunctionID(const int _functionID) const;
 
-    Set GetByZone(int _zoneID) const;
+    Set getByZone(int _zoneID) const;
     /** Returns the device indicated by _name
      */
-    DeviceReference GetByName(const string& _name) const;
+    DeviceReference getByName(const string& _name) const;
     /** Returns the device indicated by _busid */
-    DeviceReference GetByBusID(const devid_t _busid) const;
+    DeviceReference getByBusID(const devid_t _busid) const;
 
     /** Returns the device indicated by _dsid */
-    DeviceReference GetByDSID(const dsid_t _dsid)  const;
+    DeviceReference getByDSID(const dsid_t _dsid)  const;
 
     /* Returns the number of devices contained in this set */
-    int Length() const;
+    int length() const;
     /* Returns true if the set is empty */
-    bool IsEmpty() const;
+    bool isEmpty() const;
 
     /* Returns a set that's combined with the set _other.
      * Duplicates get filtered out.
      */
-    Set Combine(Set& _other) const;
+    Set combine(Set& _other) const;
     /* Returns a set with all device in _other removed */
-    Set Remove(const Set& _other) const;
+    Set remove(const Set& _other) const;
 
     /** Returns the _index'th device */
-    const DeviceReference& Get(int _index) const;
+    const DeviceReference& get(int _index) const;
     const DeviceReference& operator[](const int _index) const;
 
-    DeviceReference& Get(int _index);
+    DeviceReference& get(int _index);
     DeviceReference& operator[](const int _index);
 
     /** Returns true if the set contains _device */
-    bool Contains(const DeviceReference& _device) const;
+    bool contains(const DeviceReference& _device) const;
     /** Returns true if the set contains _device */
-    bool Contains(const Device& _device) const;
+    bool contains(const Device& _device) const;
 
     /** Adds the device _device to the set */
-    void AddDevice(const DeviceReference& _device);
+    void addDevice(const DeviceReference& _device);
     /** Adds the device _device to the set */
-    void AddDevice(const Device& _device);
+    void addDevice(const Device& _device);
 
     /** Removes the device _device from the set */
-    void RemoveDevice(const DeviceReference& _device);
+    void removeDevice(const DeviceReference& _device);
     /** Removes the device _device from the set */
-    void RemoveDevice(const Device& _device);
+    void removeDevice(const Device& _device);
 
-    virtual void NextScene();
-    virtual void PreviousScene();
+    virtual void nextScene();
+    virtual void previousScene();
 
-    virtual unsigned long GetPowerConsumption();
+    virtual unsigned long getPowerConsumption();
   }; // Set
 
 
@@ -387,14 +387,14 @@ namespace dss {
   private:
     string m_Name;
   public:
-    virtual Set GetDevices() const = 0;
+    virtual Set getDevices() const = 0;
     /** Returns a subset of the devices contained, selected by _selector */
-    virtual Set GetDevices(const IDeviceSelector& _selector) const {
-      return GetDevices().GetSubset(_selector);
+    virtual Set getDevices(const IDeviceSelector& _selector) const {
+      return getDevices().getSubset(_selector);
     }
 
-    virtual void SetName(const string& _name);
-    const string& GetName() const { return m_Name; };
+    virtual void setName(const string& _name);
+    const string& getName() const { return m_Name; };
 
     virtual ~DeviceContainer() {};
   }; // DeviceContainer
@@ -414,29 +414,29 @@ namespace dss {
   public:
     Modulator(const dsid_t _dsid);
     virtual ~Modulator() {};
-    virtual Set GetDevices() const;
+    virtual Set getDevices() const;
 
     /** Returns the DSID of the Modulator */
-    dsid_t GetDSID() const;
+    dsid_t getDSID() const;
     /** Returns the bus id of the Modulator */
-    int GetBusID() const;
+    int getBusID() const;
     /** Sets the bus id of the Modulator */
-    void SetBusID(const int _busID);
+    void setBusID(const int _busID);
 
     /** Adds a DeviceReference to the modulators devices list */
-    void AddDevice(const DeviceReference& _device);
+    void addDevice(const DeviceReference& _device);
 
-    void RemoveDevice(const DeviceReference& _device);
+    void removeDevice(const DeviceReference& _device);
 
     /** Returns the consumption in mW */
-    unsigned long GetPowerConsumption();
+    unsigned long getPowerConsumption();
     /** Returns the meter value in Wh */
-    unsigned long GetEnergyMeterValue();
+    unsigned long getEnergyMeterValue();
 
-    int GetEnergyLevelOrange() const { return m_EnergyLevelOrange; }
-    int GetEnergyLevelRed() const { return m_EnergyLevelRed; }
-    void SetEnergyLevelRed(const int _value) { m_EnergyLevelRed = _value; }
-    void SetEnergyLevelOrange(const int _value) { m_EnergyLevelOrange = _value; }
+    int getEnergyLevelOrange() const { return m_EnergyLevelOrange; }
+    int getEnergyLevelRed() const { return m_EnergyLevelRed; }
+    void setEnergyLevelRed(const int _value) { m_EnergyLevelRed = _value; }
+    void setEnergyLevelOrange(const int _value) { m_EnergyLevelOrange = _value; }
   }; // Modulator
 
   /** Represents a predefined group */
@@ -451,41 +451,41 @@ namespace dss {
   public:
     Group(const int _id, const int _zoneID, Apartment& _apartment);
     virtual ~Group() {};
-    virtual Set GetDevices() const;
+    virtual Set getDevices() const;
 
     /** Returns the id of the group */
-    int GetID() const;
+    int getID() const;
 
     /** As of now, this function throws an error */
-    virtual void AddDevice(const DeviceReference& _device);
+    virtual void addDevice(const DeviceReference& _device);
     /** As of now, this function throws an error */
-    virtual void RemoveDevice(const DeviceReference& _device);
+    virtual void removeDevice(const DeviceReference& _device);
 
 
-    virtual void TurnOn();
-    virtual void TurnOff();
+    virtual void turnOn();
+    virtual void turnOff();
 
-    virtual void IncreaseValue(const int _parameterNr = -1);
-    virtual void DecreaseValue(const int _parameterNr = -1);
+    virtual void increaseValue(const int _parameterNr = -1);
+    virtual void decreaseValue(const int _parameterNr = -1);
 
-    virtual void Enable();
-    virtual void Disable();
+    virtual void enable();
+    virtual void disable();
 
-    virtual void StartDim(bool _directionUp, const int _parameterNr = -1);
-    virtual void EndDim(const int _parameterNr = -1);
-    virtual void SetValue(const double _value, int _parameterNr = -1);
+    virtual void startDim(bool _directionUp, const int _parameterNr = -1);
+    virtual void endDim(const int _parameterNr = -1);
+    virtual void setValue(const double _value, int _parameterNr = -1);
 
-    virtual void CallScene(const int _sceneNr);
-    virtual void SaveScene(const int _sceneNr);
-    virtual void UndoScene(const int _sceneNr);
+    virtual void callScene(const int _sceneNr);
+    virtual void saveScene(const int _sceneNr);
+    virtual void undoScene(const int _sceneNr);
 
-    virtual void NextScene();
-    virtual void PreviousScene();
+    virtual void nextScene();
+    virtual void previousScene();
 
-    virtual unsigned long GetPowerConsumption();
+    virtual unsigned long getPowerConsumption();
 
-    int GetLastCalledScene() const { return m_LastCalledScene; }
-    void SetLastCalledScene(const int _value) { m_LastCalledScene = _value; }
+    int getLastCalledScene() const { return m_LastCalledScene; }
+    void setLastCalledScene(const int _value) { m_LastCalledScene = _value; }
 
     Group& operator=(const Group& _other);
   }; // Group
@@ -498,11 +498,11 @@ namespace dss {
     /** Adds a device to the group.
      * This will permanently add the device to the group.
      */
-    virtual void AddDevice(const Device& _device);
+    virtual void addDevice(const Device& _device);
     /** Removes a device from the group.
      * This will permanently remove the device from the group.
      */
-    virtual void RemoveDevice(const Device& _device);
+    virtual void removeDevice(const Device& _device);
   }; // UserGroup
 
   /** Represents a Zone
@@ -520,60 +520,60 @@ namespace dss {
   	: m_ZoneID(_id)
   	{}
     virtual ~Zone();
-    virtual Set GetDevices() const;
+    virtual Set getDevices() const;
 
-    void AddToModulator(Modulator& _modulator);
-    void RemoveFromModulator(Modulator& _modulator);
+    void addToModulator(Modulator& _modulator);
+    void removeFromModulator(Modulator& _modulator);
 
     /** Adds a device to the zone.
      * This will permanently add the device to the zone.
      */
-    void AddDevice(const DeviceReference& _device);
+    void addDevice(const DeviceReference& _device);
 
     /** Removes a device from the zone.
      * This will permanently remove the device from the zone.
      */
-    void RemoveDevice(const DeviceReference& _device);
+    void removeDevice(const DeviceReference& _device);
 
     /** Returns the group with the name _name */
-    Group* GetGroup(const string& _name) const;
+    Group* getGroup(const string& _name) const;
     /** Returns the group with the id _id */
-    Group* GetGroup(const int _id) const;
+    Group* getGroup(const int _id) const;
 
     /** Adds a group to the zone */
-    void AddGroup(Group* _group);
+    void addGroup(Group* _group);
     /** Removes a group from the zone */
-    void RemoveGroup(UserGroup* _group);
+    void removeGroup(UserGroup* _group);
 
     /** Returns the zones id */
-    int GetZoneID() const;
+    int getZoneID() const;
     /** Sets the zones id */
-    void SetZoneID(const int _value);
+    void setZoneID(const int _value);
 
-    vector<int> GetModulators() const;
+    vector<int> getModulators() const;
 
-    virtual void TurnOn();
-    virtual void TurnOff();
+    virtual void turnOn();
+    virtual void turnOff();
 
-    virtual void IncreaseValue(const int _parameterNr = -1);
-    virtual void DecreaseValue(const int _parameterNr = -1);
+    virtual void increaseValue(const int _parameterNr = -1);
+    virtual void decreaseValue(const int _parameterNr = -1);
 
-    virtual void Enable();
-    virtual void Disable();
+    virtual void enable();
+    virtual void disable();
 
-    virtual void StartDim(bool _directionUp, const int _parameterNr = -1);
-    virtual void EndDim(const int _parameterNr = -1);
-    virtual void SetValue(const double _value, int _parameterNr = -1);
+    virtual void startDim(bool _directionUp, const int _parameterNr = -1);
+    virtual void endDim(const int _parameterNr = -1);
+    virtual void setValue(const double _value, int _parameterNr = -1);
 
-    virtual void CallScene(const int _sceneNr);
-    virtual void SaveScene(const int _sceneNr);
-    virtual void UndoScene(const int _sceneNr);
+    virtual void callScene(const int _sceneNr);
+    virtual void saveScene(const int _sceneNr);
+    virtual void undoScene(const int _sceneNr);
 
-    virtual void NextScene();
-    virtual void PreviousScene();
+    virtual void nextScene();
+    virtual void previousScene();
 
-    virtual unsigned long GetPowerConsumption();
-    vector<Group*> GetGroups() { return m_Groups; }
+    virtual unsigned long getPowerConsumption();
+    vector<Group*> getGroups() { return m_Groups; }
   }; // Zone
 
 
@@ -588,10 +588,10 @@ namespace dss {
     : m_EventType(_type)
     {}
 
-    void AddParameter(const int _param) { m_Parameter.push_back(_param); }
-    int GetParameter(const int _index) const { return m_Parameter.at(_index); }
-    int GetParameterCount() const { return m_Parameter.size(); }
-    EventType GetEventType() { return m_EventType; }
+    void addParameter(const int _param) { m_Parameter.push_back(_param); }
+    int getParameter(const int _index) const { return m_Parameter.at(_index); }
+    int getParameterCount() const { return m_Parameter.size(); }
+    EventType getEventType() { return m_EventType; }
   };
 
   /** Represents an Apartment
@@ -620,91 +620,91 @@ namespace dss {
     Mutex m_ModelEventsMutex;
     SyncEvent m_NewModelEvent;
   private:
-    void LoadDevices(XMLNode& _node);
-    void LoadModulators(XMLNode& _node);
-    void LoadZones(XMLNode& _node);
-    Modulator& AllocateModulator(const dsid_t _dsid);
+    void loadDevices(XMLNode& _node);
+    void loadModulators(XMLNode& _node);
+    void loadZones(XMLNode& _node);
+    Modulator& allocateModulator(const dsid_t _dsid);
 
-    void AddDefaultGroupsToZone(Zone& _zone);
+    void addDefaultGroupsToZone(Zone& _zone);
     /** Starts the event-processing */
-    virtual void Execute();
+    virtual void execute();
   protected:
-    virtual void DoStart();
+    virtual void doStart();
   public:
     Apartment(DSS* _pDSS);
     virtual ~Apartment();
 
-    virtual void Initialize();
+    virtual void initialize();
 
     /** Returns a set containing all devices of the set */
-    virtual Set GetDevices() const;
+    virtual Set getDevices() const;
 
     /** Loads the datamodel and marks the contained items as "stale" */
-    void ReadConfigurationFromXML(const string& _fileName);
+    void readConfigurationFromXML(const string& _fileName);
 
-    void WriteConfigurationToXML(const string& _fileName);
+    void writeConfigurationToXML(const string& _fileName);
 
     /** Returns a reference to the device with the DSID _dsid */
-    Device& GetDeviceByDSID(const dsid_t _dsid) const;
-    Device& GetDeviceByDSID(const dsid_t _dsid);
+    Device& getDeviceByDSID(const dsid_t _dsid) const;
+    Device& getDeviceByDSID(const dsid_t _dsid);
     /** Returns a reference to the device with the name _name*/
-    Device& GetDeviceByName(const string& _name);
+    Device& getDeviceByName(const string& _name);
     /** Returns a device by it's short-address and modulator */
-    Device& GetDeviceByShortAddress(const Modulator& _modulator, const devid_t _deviceID) const;
+    Device& getDeviceByShortAddress(const Modulator& _modulator, const devid_t _deviceID) const;
 
     /** Allocates a device and returns a reference to it.
      *  If there is a stale device with the same dsid, this device gets "activated"
      */
-    Device& AllocateDevice(const dsid_t _dsid);
+    Device& allocateDevice(const dsid_t _dsid);
 
     /** Returns the Zone by name */
-    Zone& GetZone(const string& _zoneName);
+    Zone& getZone(const string& _zoneName);
     /** Returns the Zone by its id */
-    Zone& GetZone(const int _id);
+    Zone& getZone(const int _id);
     /** Returns a vector of all zones */
-    vector<Zone*>& GetZones();
+    vector<Zone*>& getZones();
 
     /** Allocates a zone and returns a reference to it. Should a zone with
       * the given _zoneID already exist, a reference to the existing zone will
       * be returned.
       */
-    Zone& AllocateZone(Modulator& _modulator, int _zoneID);
+    Zone& allocateZone(Modulator& _modulator, int _zoneID);
 
     /** Returns a Modulator by name */
-    Modulator& GetModulator(const string& _modName);
+    Modulator& getModulator(const string& _modName);
     /** Returns a Modulator by DSID  */
-    Modulator& GetModulatorByDSID(const dsid_t _dsid);
+    Modulator& getModulatorByDSID(const dsid_t _dsid);
     /** Returns a Modulator by bus-id */
-    Modulator& GetModulatorByBusID(const int _busID);
+    Modulator& getModulatorByBusID(const int _busID);
     /** Returns a vector of all modulators */
-    vector<Modulator*>& GetModulators();
+    vector<Modulator*>& getModulators();
 
     /** Returns a Group by name */
-    Group& GetGroup(const string& _name);
+    Group& getGroup(const string& _name);
     /** Returns a Group by id */
-    Group& GetGroup(const int _id);
+    Group& getGroup(const int _id);
 
     /** Allocates a group */
-    UserGroup& AllocateGroup(const int _id);
+    UserGroup& allocateGroup(const int _id);
 
-    bool IsInitializing() const { return m_IsInitializing; }
+    bool isInitializing() const { return m_IsInitializing; }
 
   public:
 
     /** Returns the root-node for the apartment tree */
-    PropertyNode* GetPropertyNode() { return m_pPropertyNode; }
+    PropertyNode* getPropertyNode() { return m_pPropertyNode; }
 
-    void AddModelEvent(ModelEvent* _pEvent);
+    void addModelEvent(ModelEvent* _pEvent);
 
     /** Called by the DS485Proxy if a group-call-scene frame was intercepted.
      *  Updates the state of all devices contained in the group. */
-    void OnGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
+    void onGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
     /** Called by the DS485Proxy if a device-call-scene frame was intercepted.
      *  Updates the state of the device. */
-    void OnDeviceCallScene(const int _modulatorID, const int _deviceID, const int _sceneID);
+    void onDeviceCallScene(const int _modulatorID, const int _deviceID, const int _sceneID);
     /** Called by the DS485Proxy if an add-device frame was intercepted.
      *  Adds the device to the model. */
-    void OnAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID);
+    void onAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID);
   }; // Apartment
 
   //============================================= Helper definitions
@@ -716,7 +716,7 @@ namespace dss {
     DeviceSelectorFun m_SelectorFunction;
   public:
     DeviceSelector(DeviceSelectorFun& _selectorFun) : m_SelectorFunction(_selectorFun) {}
-    virtual bool SelectDevice(const Device& _device) { return m_SelectorFunction(_device); }
+    virtual bool selectDevice(const Device& _device) { return m_SelectorFunction(_device); }
 
     virtual ~DeviceSelector() {}
   }; // DeviceSelector
@@ -762,14 +762,14 @@ namespace __gnu_cxx
   template<>
   struct hash<const dss::Modulator*>  {
     size_t operator()(const dss::Modulator* x) const  {
-      return x->GetDSID().lower;
+      return x->getDSID().lower;
     }
   };
 
   template<>
   struct hash<const dss::Zone*>  {
     size_t operator()(const dss::Zone* x) const  {
-      return x->GetZoneID();
+      return x->getZoneID();
     }
   };
 }

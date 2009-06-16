@@ -28,110 +28,110 @@ namespace dss {
 
   typedef hash_map<const Modulator*, Set> HashMapModulatorSet;
 
-  HashMapModulatorSet SplitByModulator(const Set& _set) {
+  HashMapModulatorSet splitByModulator(const Set& _set) {
     HashMapModulatorSet result;
-    for(int iDevice = 0; iDevice < _set.Length(); iDevice++) {
-      const DeviceReference& dev = _set.Get(iDevice);
-      Modulator& mod = dev.GetDevice().GetApartment().GetModulatorByBusID(dev.GetDevice().GetModulatorID());
-      result[&mod].AddDevice(dev);
+    for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
+      const DeviceReference& dev = _set.get(iDevice);
+      Modulator& mod = dev.getDevice().getApartment().getModulatorByBusID(dev.getDevice().getModulatorID());
+      result[&mod].addDevice(dev);
     }
     return result;
-  } // SplitByModulator
+  } // splitByModulator
 
 
   typedef map<const Zone*, Set> HashMapZoneSet;
 
-  HashMapZoneSet SplitByZone(const Set& _set) {
+  HashMapZoneSet splitByZone(const Set& _set) {
     HashMapZoneSet result;
-    for(int iDevice = 0; iDevice < _set.Length(); iDevice++) {
-      const DeviceReference& devRef = _set.Get(iDevice);
-      const Device& dev = devRef.GetDevice();
-      Zone& zone = dev.GetApartment().GetZone(dev.GetZoneID());
-      result[&zone].AddDevice(dev);
+    for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
+      const DeviceReference& devRef = _set.get(iDevice);
+      const Device& dev = devRef.getDevice();
+      Zone& zone = dev.getApartment().getZone(dev.getZoneID());
+      result[&zone].addDevice(dev);
     }
     return result;
-  } // SplitByZone
+  } // splitByZone
 
   typedef pair<vector<Group*>, Set> FittingResultPerModulator;
 
   const bool OptimizerDebug = true;
 
   /** Precondition: _set contains only devices of _zone */
-  FittingResultPerModulator BestFit(const Zone& _zone, const Set& _set) {
+  FittingResultPerModulator bestFit(const Zone& _zone, const Set& _set) {
     Set workingCopy = _set;
 
     vector<Group*> fittingGroups;
     Set singleDevices;
 
     if(OptimizerDebug) {
-      Logger::GetInstance()->Log("Finding fit for zone " + IntToString(_zone.GetZoneID()));
+      Logger::getInstance()->log("Finding fit for zone " + intToString(_zone.getZoneID()));
     }
 
 
-	if(_zone.GetDevices().Length() == _set.Length()) {
-	  fittingGroups.push_back(_zone.GetGroup(GroupIDBroadcast));
-	  Logger::GetInstance()->Log(string("Optimization: Set contains all devices of zone ") + IntToString(_zone.GetZoneID()));
+	if(_zone.getDevices().length() == _set.length()) {
+	  fittingGroups.push_back(_zone.getGroup(GroupIDBroadcast));
+	  Logger::getInstance()->log(string("Optimization: Set contains all devices of zone ") + intToString(_zone.getZoneID()));
 	} else {
 	    vector<Group*> unsuitableGroups;
 	    Set workingCopy = _set;
 
-		while(!workingCopy.IsEmpty()) {
-		  DeviceReference& ref = workingCopy.Get(0);
-		  workingCopy.RemoveDevice(ref);
+		while(!workingCopy.isEmpty()) {
+		  DeviceReference& ref = workingCopy.get(0);
+		  workingCopy.removeDevice(ref);
 
 		  if(OptimizerDebug) {
-		    Logger::GetInstance()->Log("Working with device " + ref.GetDSID().ToString());
+		    Logger::getInstance()->log("Working with device " + ref.getDSID().toString());
 		  }
 
 		  bool foundGroup = false;
-		  for(int iGroup = 0; iGroup < ref.GetDevice().GetGroupsCount(); iGroup++) {
-			Group& g = ref.GetDevice().GetGroupByIndex(iGroup);
+		  for(int iGroup = 0; iGroup < ref.getDevice().getGroupsCount(); iGroup++) {
+			Group& g = ref.getDevice().getGroupByIndex(iGroup);
 
   		    if(OptimizerDebug) {
-		      Logger::GetInstance()->Log("  Checking Group " + IntToString(g.GetID()));
+		      Logger::getInstance()->log("  Checking Group " + intToString(g.getID()));
 		    }
 			// continue if already found unsuitable
 			if(find(unsuitableGroups.begin(), unsuitableGroups.end(), &g) != unsuitableGroups.end()) {
   		      if(OptimizerDebug) {
-		        Logger::GetInstance()->Log("  Group discarded before, continuing search");
+		        Logger::getInstance()->log("  Group discarded before, continuing search");
 		      }
 			  continue;
 			}
 
 			// see if we've got a fit
 			bool groupFits = true;
-			Set devicesInGroup = _zone.GetDevices().GetByGroup(g);
+			Set devicesInGroup = _zone.getDevices().getByGroup(g);
   		    if(OptimizerDebug) {
-		      Logger::GetInstance()->Log("    Group has " + IntToString(devicesInGroup.Length()) + " devices");
+		      Logger::getInstance()->log("    Group has " + intToString(devicesInGroup.length()) + " devices");
 		    }
-			for(int iDevice = 0; iDevice < devicesInGroup.Length(); iDevice++) {
-			  if(!_set.Contains(devicesInGroup.Get(iDevice))) {
+			for(int iDevice = 0; iDevice < devicesInGroup.length(); iDevice++) {
+			  if(!_set.contains(devicesInGroup.get(iDevice))) {
 				unsuitableGroups.push_back(&g);
 				groupFits = false;
    		        if(OptimizerDebug) {
-		          Logger::GetInstance()->Log("    Original set does _not_ contain device " + devicesInGroup.Get(iDevice).GetDevice().GetDSID().ToString());
+		          Logger::getInstance()->log("    Original set does _not_ contain device " + devicesInGroup.get(iDevice).getDevice().getDSID().toString());
 		        }
 				break;
 			  }
    		      if(OptimizerDebug) {
-		        Logger::GetInstance()->Log("    Original set contains device " + devicesInGroup.Get(iDevice).GetDevice().GetDSID().ToString());
+		        Logger::getInstance()->log("    Original set contains device " + devicesInGroup.get(iDevice).getDevice().getDSID().toString());
 		      }
 			}
 			if(groupFits) {
   		      if(OptimizerDebug) {
-		        Logger::GetInstance()->Log("  Found a fit " + IntToString(g.GetID()));
+		        Logger::getInstance()->log("  Found a fit " + intToString(g.getID()));
 		      }
 			  foundGroup = true;
 			  fittingGroups.push_back(&g);
    		      if(OptimizerDebug) {
-		        Logger::GetInstance()->Log("  Removing devices from working copy");
+		        Logger::getInstance()->log("  Removing devices from working copy");
 		      }
-			  while(!devicesInGroup.IsEmpty()) {
-				workingCopy.RemoveDevice(devicesInGroup.Get(0));
-			    devicesInGroup.RemoveDevice(devicesInGroup.Get(0));
+			  while(!devicesInGroup.isEmpty()) {
+				workingCopy.removeDevice(devicesInGroup.get(0));
+			    devicesInGroup.removeDevice(devicesInGroup.get(0));
 			  }
    		      if(OptimizerDebug) {
-		        Logger::GetInstance()->Log("  Done. (Removing devices from working copy)");
+		        Logger::getInstance()->log("  Done. (Removing devices from working copy)");
 		      }
 			  break;
 			}
@@ -139,27 +139,27 @@ namespace dss {
 
 		  // if no fitting group found
 		  if(!foundGroup) {
-			singleDevices.AddDevice(ref);
+			singleDevices.addDevice(ref);
 		  }
 		}
 	}
     return FittingResultPerModulator(fittingGroups, singleDevices);
   }
 
-  FittingResultPerModulator BestFit(const Modulator& _modulator, const Set& _set) {
+  FittingResultPerModulator bestFit(const Modulator& _modulator, const Set& _set) {
     Set workingCopy = _set;
 
     vector<Group*> unsuitableGroups;
     vector<Group*> fittingGroups;
     Set singleDevices;
 
-    while(!workingCopy.IsEmpty()) {
-      DeviceReference& ref = workingCopy.Get(0);
-      workingCopy.RemoveDevice(ref);
+    while(!workingCopy.isEmpty()) {
+      DeviceReference& ref = workingCopy.get(0);
+      workingCopy.removeDevice(ref);
 
       bool foundGroup = false;
-      for(int iGroup = 0; iGroup < ref.GetDevice().GetGroupsCount(); iGroup++) {
-        Group& g = ref.GetDevice().GetGroupByIndex(iGroup);
+      for(int iGroup = 0; iGroup < ref.getDevice().getGroupsCount(); iGroup++) {
+        Group& g = ref.getDevice().getGroupByIndex(iGroup);
 
         // continue if already found unsuitable
         if(find(unsuitableGroups.begin(), unsuitableGroups.end(), &g) != unsuitableGroups.end()) {
@@ -168,9 +168,9 @@ namespace dss {
 
         // see if we've got a fit
         bool groupFits = true;
-        Set devicesInGroup = _modulator.GetDevices().GetByGroup(g);
-        for(int iDevice = 0; iDevice < devicesInGroup.Length(); iDevice++) {
-          if(!_set.Contains(devicesInGroup.Get(iDevice))) {
+        Set devicesInGroup = _modulator.getDevices().getByGroup(g);
+        for(int iDevice = 0; iDevice < devicesInGroup.length(); iDevice++) {
+          if(!_set.contains(devicesInGroup.get(iDevice))) {
             unsuitableGroups.push_back(&g);
             groupFits = false;
             break;
@@ -179,8 +179,8 @@ namespace dss {
         if(groupFits) {
           foundGroup = true;
           fittingGroups.push_back(&g);
-          while(!devicesInGroup.IsEmpty()) {
-            workingCopy.RemoveDevice(devicesInGroup.Get(0));
+          while(!devicesInGroup.isEmpty()) {
+            workingCopy.removeDevice(devicesInGroup.get(0));
           }
           break;
         }
@@ -188,7 +188,7 @@ namespace dss {
 
       // if no fitting group found
       if(!foundGroup) {
-        singleDevices.AddDevice(ref);
+        singleDevices.addDevice(ref);
       }
     }
     return FittingResultPerModulator(fittingGroups, singleDevices);
@@ -199,302 +199,302 @@ namespace dss {
     Subsystem(_pDSS, "DS485Proxy")
   {
     if(_pDSS != NULL) {
-      _pDSS->GetPropertySystem().CreateProperty(GetConfigPropertyBasePath() + "rs485devicename")
-            ->LinkToProxy(PropertyProxyMemberFunction<DS485Controller, string>(m_DS485Controller, &DS485Controller::GetRS485DeviceName, &DS485Controller::SetRS485DeviceName));
+      _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "rs485devicename")
+            ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, string>(m_DS485Controller, &DS485Controller::getRS485DeviceName, &DS485Controller::setRS485DeviceName));
 
-      _pDSS->GetPropertySystem().CreateProperty(GetPropertyBasePath() + "tokensReceived")
-            ->LinkToProxy(PropertyProxyMemberFunction<DS485Controller, int>(m_DS485Controller, &DS485Controller::GetTokenCount));
+      _pDSS->getPropertySystem().createProperty(getPropertyBasePath() + "tokensReceived")
+            ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, int>(m_DS485Controller, &DS485Controller::getTokenCount));
 
-      const DS485FrameReader& reader = m_DS485Controller.GetFrameReader();
-      _pDSS->GetPropertySystem().CreateProperty(GetPropertyBasePath() + "framesReceived")
-            ->LinkToProxy(PropertyProxyMemberFunction<DS485FrameReader, int>(reader, &DS485FrameReader::GetNumberOfFramesReceived));
+      const DS485FrameReader& reader = m_DS485Controller.getFrameReader();
+      _pDSS->getPropertySystem().createProperty(getPropertyBasePath() + "framesReceived")
+            ->linkToProxy(PropertyProxyMemberFunction<DS485FrameReader, int>(reader, &DS485FrameReader::getNumberOfFramesReceived));
 
-      _pDSS->GetPropertySystem().CreateProperty(GetPropertyBasePath() + "incompleteFramesReceived")
-            ->LinkToProxy(PropertyProxyMemberFunction<DS485FrameReader, int>(reader, &DS485FrameReader::GetNumberOfIncompleteFramesReceived));
+      _pDSS->getPropertySystem().createProperty(getPropertyBasePath() + "incompleteFramesReceived")
+            ->linkToProxy(PropertyProxyMemberFunction<DS485FrameReader, int>(reader, &DS485FrameReader::getNumberOfIncompleteFramesReceived));
 
-      _pDSS->GetPropertySystem().CreateProperty(GetPropertyBasePath() + "crcErrors")
-            ->LinkToProxy(PropertyProxyMemberFunction<DS485FrameReader, int>(reader, &DS485FrameReader::GetNumberOfCRCErrors));
+      _pDSS->getPropertySystem().createProperty(getPropertyBasePath() + "crcErrors")
+            ->linkToProxy(PropertyProxyMemberFunction<DS485FrameReader, int>(reader, &DS485FrameReader::getNumberOfCRCErrors));
 
-      _pDSS->GetPropertySystem().CreateProperty(GetPropertyBasePath() + "state")
-            ->LinkToProxy(PropertyProxyMemberFunction<DS485Controller, string>(m_DS485Controller, &DS485Controller::GetStateAsString));
+      _pDSS->getPropertySystem().createProperty(getPropertyBasePath() + "state")
+            ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, string>(m_DS485Controller, &DS485Controller::getStateAsString));
 
-      _pDSS->GetPropertySystem().SetStringValue(GetConfigPropertyBasePath() + "dsid", "3504175FE0000000DEADBEEF", true, false);
+      _pDSS->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "dsid", "3504175FE0000000DEADBEEF", true, false);
     }
   } // ctor
 
-  bool DS485Proxy::IsReady() {
-	  return IsRunning()
-	         && ((m_DS485Controller.GetState() == csSlave) ||
-	             (m_DS485Controller.GetState() == csDesignatedMaster) ||
-	             (m_DS485Controller.GetState() == csError)) // allow the simulation to run on it's own
-	         &&  DSS::GetInstance()->GetSimulation().isReady();
-  } // IsReady
+  bool DS485Proxy::isReady() {
+	  return isRunning()
+	         && ((m_DS485Controller.getState() == csSlave) ||
+	             (m_DS485Controller.getState() == csDesignatedMaster) ||
+	             (m_DS485Controller.getState() == csError)) // allow the simulation to run on it's own
+	         &&  DSS::getInstance()->getSimulation().isReady();
+  } // isReady
 
-  FittingResult DS485Proxy::BestFit(const Set& _set) {
+  FittingResult DS485Proxy::bestFit(const Set& _set) {
     FittingResult result;
-    HashMapZoneSet zoneToSet = SplitByZone(_set);
+    HashMapZoneSet zoneToSet = splitByZone(_set);
 
     for(HashMapZoneSet::iterator it = zoneToSet.begin(); it != zoneToSet.end(); ++it) {
-      result[it->first] = dss::BestFit(*(it->first), it->second);
+      result[it->first] = dss::bestFit(*(it->first), it->second);
     }
 
     return result;
   }
 
-  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, const Set& _set, int _param) {
-    if(_set.Length() == 1) {
-      Log("Optimization: Set contains only one device");
-      return SendCommand(_cmd, _set.Get(0).GetDevice(), _param);
-    } else if(_set.Length() > 0) {
-      Apartment& apt = _set.Get(0).GetDevice().GetApartment();
-      if(_set.Length() == apt.GetDevices().Length()) {
-        Log("Optimization: Set contains all devices of apartment");
-        return SendCommand(_cmd, apt.GetZone(0), apt.GetGroup(GroupIDBroadcast), _param);
+  vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Set& _set, int _param) {
+    if(_set.length() == 1) {
+      log("Optimization: Set contains only one device");
+      return sendCommand(_cmd, _set.get(0).getDevice(), _param);
+    } else if(_set.length() > 0) {
+      Apartment& apt = _set.get(0).getDevice().getApartment();
+      if(_set.length() == apt.getDevices().length()) {
+        log("Optimization: Set contains all devices of apartment");
+        return sendCommand(_cmd, apt.getZone(0), apt.getGroup(GroupIDBroadcast), _param);
       }
     }
 
     vector<int> result;
-    FittingResult fittedResult = BestFit(_set);
+    FittingResult fittedResult = bestFit(_set);
     for(FittingResult::iterator iResult = fittedResult.begin(); iResult != fittedResult.end(); ++iResult) {
       const Zone* zone = iResult->first;
       FittingResultPerModulator res = iResult->second;
       vector<Group*> groups = res.first;
       for(vector<Group*>::iterator ipGroup = groups.begin(); ipGroup != groups.end(); ++ipGroup) {
-        SendCommand(_cmd, *zone, **ipGroup, _param);
+        sendCommand(_cmd, *zone, **ipGroup, _param);
       }
       Set& set = res.second;
-      for(int iDevice = 0; iDevice < set.Length(); iDevice++) {
-        SendCommand(_cmd, set.Get(iDevice).GetDevice(), _param);
+      for(int iDevice = 0; iDevice < set.length(); iDevice++) {
+        sendCommand(_cmd, set.get(iDevice).getDevice(), _param);
       }
     }
     return result;
-  } // SendCommand
+  } // sendCommand
 
-  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param) {
+  vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param) {
     vector<int> result;
 
     DS485CommandFrame frame;
-    frame.GetHeader().SetDestination(0);
-    frame.GetHeader().SetBroadcast(true);
-    frame.GetHeader().SetType(1);
-    frame.SetCommand(CommandRequest);
+    frame.getHeader().setDestination(0);
+    frame.getHeader().setBroadcast(true);
+    frame.getHeader().setType(1);
+    frame.setCommand(CommandRequest);
     int toZone;
-    if(GetDSS().GetApartment().GetZones().size() == 2 /* zone 0 + another zone */) {
+    if(getDSS().getApartment().getZones().size() == 2 /* zone 0 + another zone */) {
       toZone = 0;
-      Log("SendCommand(Zone,GroupID): Only one zone present, sending frame to broadcast zone");
+      log("sendCommand(Zone,GroupID): Only one zone present, sending frame to broadcast zone");
     } else {
-      toZone = _zone.GetZoneID();
+      toZone = _zone.getZoneID();
     }
     if(_cmd == cmdTurnOn) {
-      frame.GetPayload().Add<uint8_t>(FunctionGroupCallScene);
-      frame.GetPayload().Add<uint16_t>(toZone);
-      frame.GetPayload().Add<uint16_t>(_groupID);
-      frame.GetPayload().Add<uint16_t>(SceneMax);
-      SendFrame(frame);
-      Log("turn on: zone " + IntToString(_zone.GetZoneID()) + " group: " + IntToString(_groupID));
+      frame.getPayload().add<uint8_t>(FunctionGroupCallScene);
+      frame.getPayload().add<uint16_t>(toZone);
+      frame.getPayload().add<uint16_t>(_groupID);
+      frame.getPayload().add<uint16_t>(SceneMax);
+      sendFrame(frame);
+      log("turn on: zone " + intToString(_zone.getZoneID()) + " group: " + intToString(_groupID));
     } else if(_cmd == cmdTurnOff) {
-      frame.GetPayload().Add<uint8_t>(FunctionGroupCallScene);
-      frame.GetPayload().Add<uint16_t>(toZone);
-      frame.GetPayload().Add<uint16_t>(_groupID);
-      frame.GetPayload().Add<uint16_t>(SceneMin);
-      SendFrame(frame);
-      Log("turn off: zone " + IntToString(_zone.GetZoneID()) + " group: " + IntToString(_groupID));
+      frame.getPayload().add<uint8_t>(FunctionGroupCallScene);
+      frame.getPayload().add<uint16_t>(toZone);
+      frame.getPayload().add<uint16_t>(_groupID);
+      frame.getPayload().add<uint16_t>(SceneMin);
+      sendFrame(frame);
+      log("turn off: zone " + intToString(_zone.getZoneID()) + " group: " + intToString(_groupID));
     } else if(_cmd == cmdCallScene) {
-      frame.GetPayload().Add<uint8_t>(FunctionGroupCallScene);
-      frame.GetPayload().Add<uint16_t>(toZone);
-      frame.GetPayload().Add<uint16_t>(_groupID);
-      frame.GetPayload().Add<uint16_t>(_param);
-      SendFrame(frame);
-      Log("call scene: zone " + IntToString(_zone.GetZoneID()) + " group: " + IntToString(_groupID));
+      frame.getPayload().add<uint8_t>(FunctionGroupCallScene);
+      frame.getPayload().add<uint16_t>(toZone);
+      frame.getPayload().add<uint16_t>(_groupID);
+      frame.getPayload().add<uint16_t>(_param);
+      sendFrame(frame);
+      log("call scene: zone " + intToString(_zone.getZoneID()) + " group: " + intToString(_groupID));
     } else if(_cmd == cmdSaveScene) {
-      frame.GetPayload().Add<uint8_t>(FunctionGroupSaveScene);
-      frame.GetPayload().Add<uint16_t>(toZone);
-      frame.GetPayload().Add<uint16_t>(_groupID);
-      frame.GetPayload().Add<uint16_t>(_param);
-      SendFrame(frame);
+      frame.getPayload().add<uint8_t>(FunctionGroupSaveScene);
+      frame.getPayload().add<uint16_t>(toZone);
+      frame.getPayload().add<uint16_t>(_groupID);
+      frame.getPayload().add<uint16_t>(_param);
+      sendFrame(frame);
     } else if(_cmd == cmdUndoScene) {
-      frame.GetPayload().Add<uint8_t>(FunctionGroupUndoScene);
-      frame.GetPayload().Add<uint16_t>(toZone);
-      frame.GetPayload().Add<uint16_t>(_groupID);
-      frame.GetPayload().Add<uint16_t>(_param);
-      SendFrame(frame);
+      frame.getPayload().add<uint8_t>(FunctionGroupUndoScene);
+      frame.getPayload().add<uint16_t>(toZone);
+      frame.getPayload().add<uint16_t>(_groupID);
+      frame.getPayload().add<uint16_t>(_param);
+      sendFrame(frame);
     } else if(_cmd == cmdStartDimUp) {
-      frame.GetPayload().Add<uint8_t>(FunctionGroupStartDimInc);
-      frame.GetPayload().Add<uint16_t>(toZone);
-      frame.GetPayload().Add<uint16_t>(_groupID);
-      SendFrame(frame);
+      frame.getPayload().add<uint8_t>(FunctionGroupStartDimInc);
+      frame.getPayload().add<uint16_t>(toZone);
+      frame.getPayload().add<uint16_t>(_groupID);
+      sendFrame(frame);
     } else if(_cmd == cmdStartDimDown) {
-      frame.GetPayload().Add<uint8_t>(FunctionGroupStartDimDec);
-      frame.GetPayload().Add<uint16_t>(toZone);
-      frame.GetPayload().Add<uint16_t>(_groupID);
-      SendFrame(frame);
+      frame.getPayload().add<uint8_t>(FunctionGroupStartDimDec);
+      frame.getPayload().add<uint16_t>(toZone);
+      frame.getPayload().add<uint16_t>(_groupID);
+      sendFrame(frame);
     } else if(_cmd == cmdStopDim) {
-      frame.GetPayload().Add<uint8_t>(FunctionGroupEndDim);
-      frame.GetPayload().Add<uint16_t>(toZone);
-      frame.GetPayload().Add<uint16_t>(_groupID);
-      SendFrame(frame);
+      frame.getPayload().add<uint8_t>(FunctionGroupEndDim);
+      frame.getPayload().add<uint16_t>(toZone);
+      frame.getPayload().add<uint16_t>(_groupID);
+      sendFrame(frame);
     } else if(_cmd == cmdIncreaseValue) {
-      frame.GetPayload().Add<uint8_t>(FunctionGroupIncreaseValue);
-      frame.GetPayload().Add<uint16_t>(toZone);
-      frame.GetPayload().Add<uint16_t>(_groupID);
-      SendFrame(frame);
+      frame.getPayload().add<uint8_t>(FunctionGroupIncreaseValue);
+      frame.getPayload().add<uint16_t>(toZone);
+      frame.getPayload().add<uint16_t>(_groupID);
+      sendFrame(frame);
     } else if(_cmd == cmdDecreaseValue) {
-      frame.GetPayload().Add<uint8_t>(FunctionGroupDecreaseValue);
-      frame.GetPayload().Add<uint16_t>(toZone);
-      frame.GetPayload().Add<uint16_t>(_groupID);
-      SendFrame(frame);
+      frame.getPayload().add<uint8_t>(FunctionGroupDecreaseValue);
+      frame.getPayload().add<uint16_t>(toZone);
+      frame.getPayload().add<uint16_t>(_groupID);
+      sendFrame(frame);
     } else if(_cmd == cmdSetValue) {
-      frame.GetPayload().Add<uint8_t>(FunctionGroupSetValue);
-      frame.GetPayload().Add<uint16_t>(toZone);
-      frame.GetPayload().Add<uint16_t>(_groupID);
-      frame.GetPayload().Add<uint16_t>(_param);
-      SendFrame(frame);
+      frame.getPayload().add<uint8_t>(FunctionGroupSetValue);
+      frame.getPayload().add<uint16_t>(toZone);
+      frame.getPayload().add<uint16_t>(_groupID);
+      frame.getPayload().add<uint16_t>(_param);
+      sendFrame(frame);
     }
     return result;
   }
 
-  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param) {
-    return SendCommand(_cmd, _zone, _group.GetID(), _param);
-  } // SendCommand
+  vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param) {
+    return sendCommand(_cmd, _zone, _group.getID(), _param);
+  } // sendCommand
 
-  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, const Device& _device, int _param) {
-    return SendCommand(_cmd, _device.GetShortAddress(), _device.GetModulatorID(), _param);
-  } // SendCommand
+  vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Device& _device, int _param) {
+    return sendCommand(_cmd, _device.getShortAddress(), _device.getModulatorID(), _param);
+  } // sendCommand
 
-  vector<int> DS485Proxy::SendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param) {
+  vector<int> DS485Proxy::sendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param) {
     vector<int> result;
     DS485CommandFrame frame;
-    frame.GetHeader().SetDestination(_modulatorID);
-    frame.GetHeader().SetBroadcast(false);
-    frame.GetHeader().SetType(1);
-    frame.SetCommand(CommandRequest);
+    frame.getHeader().setDestination(_modulatorID);
+    frame.getHeader().setBroadcast(false);
+    frame.getHeader().setType(1);
+    frame.setCommand(CommandRequest);
     if(_cmd == cmdTurnOn) {
-      frame.GetPayload().Add<uint8_t>(FunctionDeviceCallScene);
-      frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<uint16_t>(SceneMax);
-      SendFrame(frame);
+      frame.getPayload().add<uint8_t>(FunctionDeviceCallScene);
+      frame.getPayload().add<devid_t>(_id);
+      frame.getPayload().add<uint16_t>(SceneMax);
+      sendFrame(frame);
     } else if(_cmd == cmdTurnOff) {
-      frame.GetPayload().Add<uint8_t>(FunctionDeviceCallScene);
-      frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<uint16_t>(SceneMin);
-      SendFrame(frame);
+      frame.getPayload().add<uint8_t>(FunctionDeviceCallScene);
+      frame.getPayload().add<devid_t>(_id);
+      frame.getPayload().add<uint16_t>(SceneMin);
+      sendFrame(frame);
     } else if(_cmd == cmdGetOnOff) {
-      frame.GetPayload().Add<uint8_t>(FunctionDeviceGetOnOff);
-      frame.GetPayload().Add<uint16_t>(_id);
-      uint8_t res = ReceiveSingleResult(frame, FunctionDeviceGetOnOff);
+      frame.getPayload().add<uint8_t>(FunctionDeviceGetOnOff);
+      frame.getPayload().add<uint16_t>(_id);
+      uint8_t res = receiveSingleResult(frame, FunctionDeviceGetOnOff);
       result.push_back(res);
     } else if(_cmd == cmdGetValue) {
-      frame.GetPayload().Add<uint8_t>(FunctionDeviceGetParameterValue);
-      frame.GetPayload().Add<uint16_t>(_id);
-      frame.GetPayload().Add<uint16_t>(_param);
-      uint8_t res = ReceiveSingleResult(frame, FunctionDeviceGetParameterValue);
+      frame.getPayload().add<uint8_t>(FunctionDeviceGetParameterValue);
+      frame.getPayload().add<uint16_t>(_id);
+      frame.getPayload().add<uint16_t>(_param);
+      uint8_t res = receiveSingleResult(frame, FunctionDeviceGetParameterValue);
       result.push_back(res);
     } else if(_cmd == cmdSetValue) {
-      frame.GetPayload().Add<uint8_t>(FunctionDeviceSetParameterValue);
-      frame.GetPayload().Add<uint16_t>(_id);
-      frame.GetPayload().Add<uint16_t>(_param);
-      frame.GetPayload().Add<uint16_t>(_param); // TODO: introduce a second parameter for the value itself
-      uint8_t res = ReceiveSingleResult(frame, FunctionDeviceSetParameterValue);
+      frame.getPayload().add<uint8_t>(FunctionDeviceSetParameterValue);
+      frame.getPayload().add<uint16_t>(_id);
+      frame.getPayload().add<uint16_t>(_param);
+      frame.getPayload().add<uint16_t>(_param); // TODO: introduce a second parameter for the value itself
+      uint8_t res = receiveSingleResult(frame, FunctionDeviceSetParameterValue);
       result.push_back(res);
     } else if(_cmd == cmdGetFunctionID) {
-      frame.GetPayload().Add<uint8_t>(FunctionDeviceGetFunctionID);
-      frame.GetPayload().Add<devid_t>(_id);
+      frame.getPayload().add<uint8_t>(FunctionDeviceGetFunctionID);
+      frame.getPayload().add<devid_t>(_id);
 
-      boost::shared_ptr<ReceivedFrame> resFrame = ReceiveSingleFrame(frame, FunctionDeviceGetFunctionID);
+      boost::shared_ptr<ReceivedFrame> resFrame = receiveSingleFrame(frame, FunctionDeviceGetFunctionID);
       if(resFrame.get() != NULL) {
-        PayloadDissector pd(resFrame->GetFrame()->GetPayload());
-        pd.Get<uint8_t>(); // skip the function id
-        if(pd.Get<uint16_t>() == 0x0001) {
-          result.push_back(pd.Get<uint16_t>());
+        PayloadDissector pd(resFrame->getFrame()->getPayload());
+        pd.get<uint8_t>(); // skip the function id
+        if(pd.get<uint16_t>() == 0x0001) {
+          result.push_back(pd.get<uint16_t>());
         }
       }
     } else if(_cmd == cmdCallScene) {
-      frame.GetPayload().Add<uint8_t>(FunctionDeviceCallScene);
-      frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<uint16_t>(_param);
-      SendFrame(frame);
+      frame.getPayload().add<uint8_t>(FunctionDeviceCallScene);
+      frame.getPayload().add<devid_t>(_id);
+      frame.getPayload().add<uint16_t>(_param);
+      sendFrame(frame);
     } else if(_cmd == cmdSaveScene) {
-      frame.GetPayload().Add<uint8_t>(FunctionDeviceSaveScene);
-      frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<uint16_t>(_param);
-      SendFrame(frame);
+      frame.getPayload().add<uint8_t>(FunctionDeviceSaveScene);
+      frame.getPayload().add<devid_t>(_id);
+      frame.getPayload().add<uint16_t>(_param);
+      sendFrame(frame);
     } else if(_cmd == cmdUndoScene) {
-      frame.GetPayload().Add<uint8_t>(FunctionDeviceUndoScene);
-      frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<uint16_t>(_param);
-      SendFrame(frame);
+      frame.getPayload().add<uint8_t>(FunctionDeviceUndoScene);
+      frame.getPayload().add<devid_t>(_id);
+      frame.getPayload().add<uint16_t>(_param);
+      sendFrame(frame);
     } else if(_cmd == cmdIncreaseValue) {
-      frame.GetPayload().Add<uint8_t>(FunctionDeviceIncreaseValue);
-      frame.GetPayload().Add<devid_t>(_id);
-      SendFrame(frame);
+      frame.getPayload().add<uint8_t>(FunctionDeviceIncreaseValue);
+      frame.getPayload().add<devid_t>(_id);
+      sendFrame(frame);
     } else if(_cmd == cmdDecreaseValue) {
-      frame.GetPayload().Add<uint8_t>(FunctionDeviceDecreaseValue);
-      frame.GetPayload().Add<devid_t>(_id);
-      SendFrame(frame);
+      frame.getPayload().add<uint8_t>(FunctionDeviceDecreaseValue);
+      frame.getPayload().add<devid_t>(_id);
+      sendFrame(frame);
     } else if(_cmd == cmdSetValue) {
-      frame.GetPayload().Add<uint8_t>(FunctionDeviceSetValue);
-      frame.GetPayload().Add<devid_t>(_id);
-      frame.GetPayload().Add<devid_t>(_param);
-      SendFrame(frame);
+      frame.getPayload().add<uint8_t>(FunctionDeviceSetValue);
+      frame.getPayload().add<devid_t>(_id);
+      frame.getPayload().add<devid_t>(_param);
+      sendFrame(frame);
     }
     return result;
-  } // SendCommand
+  } // sendCommand
 
-  void DS485Proxy::SendFrame(DS485CommandFrame& _frame) {
-    bool broadcast = _frame.GetHeader().IsBroadcast();
-    bool sim = IsSimAddress(_frame.GetHeader().GetDestination());
-    _frame.SetFrameSource(fsDSS);
+  void DS485Proxy::sendFrame(DS485CommandFrame& _frame) {
+    bool broadcast = _frame.getHeader().isBroadcast();
+    bool sim = isSimAddress(_frame.getHeader().getDestination());
+    _frame.setFrameSource(fsDSS);
     if(broadcast || sim) {
-      Log("Sending packet to sim");
-      GetDSS().GetSimulation().process(_frame);
+      log("Sending packet to sim");
+      getDSS().getSimulation().process(_frame);
     }
     if(broadcast || !sim) {
-      if((m_DS485Controller.GetState() == csSlave) || (m_DS485Controller.GetState() == csMaster)) {
-        Log("Sending packet to hardware");
-       	m_DS485Controller.EnqueueFrame(_frame);
+      if((m_DS485Controller.getState() == csSlave) || (m_DS485Controller.getState() == csMaster)) {
+        log("Sending packet to hardware");
+       	m_DS485Controller.enqueueFrame(_frame);
       }
     }
     boost::shared_ptr<DS485CommandFrame> pFrame(new DS485CommandFrame);
     *pFrame = _frame;
     // relay the frame to update our state
-    CollectFrame(pFrame);
-  } // SendFrame
+    collectFrame(pFrame);
+  } // sendFrame
 
-  boost::shared_ptr<FrameBucket> DS485Proxy::SendFrameAndInstallBucket(DS485CommandFrame& _frame, const int _functionID) {
-    int sourceID = _frame.GetHeader().IsBroadcast() ? -1 :  _frame.GetHeader().GetDestination();
+  boost::shared_ptr<FrameBucket> DS485Proxy::sendFrameAndInstallBucket(DS485CommandFrame& _frame, const int _functionID) {
+    int sourceID = _frame.getHeader().isBroadcast() ? -1 :  _frame.getHeader().getDestination();
     boost::shared_ptr<FrameBucket> result(new FrameBucket(this, _functionID, sourceID));
-    SendFrame(_frame);
+    sendFrame(_frame);
     return result;
   }
 
-  bool DS485Proxy::IsSimAddress(const uint8_t _addr) {
-    return GetDSS().GetSimulation().isSimAddress(_addr);
-  } // IsSimAddress
+  bool DS485Proxy::isSimAddress(const uint8_t _addr) {
+    return getDSS().getSimulation().isSimAddress(_addr);
+  } // isSimAddress
 
-  vector<int> DS485Proxy::GetModulators() {
+  vector<int> DS485Proxy::getModulators() {
     DS485CommandFrame cmdFrame;
-    cmdFrame.GetHeader().SetDestination(0);
-    cmdFrame.GetHeader().SetBroadcast(true);
-    cmdFrame.SetCommand(CommandRequest);
-    Log("Proxy: GetModulators");
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetDSID);
+    cmdFrame.getHeader().setDestination(0);
+    cmdFrame.getHeader().setBroadcast(true);
+    cmdFrame.setCommand(CommandRequest);
+    log("Proxy: GetModulators");
+    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetDSID);
 
-    boost::shared_ptr<FrameBucket> bucket = SendFrameAndInstallBucket(cmdFrame, FunctionModulatorGetDSID);
+    boost::shared_ptr<FrameBucket> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionModulatorGetDSID);
 
-    bucket->WaitForFrames(1000);
+    bucket->waitForFrames(1000);
 
     map<int, bool> resultFrom;
 
     vector<int> result;
     while(true) {
-      boost::shared_ptr<ReceivedFrame> recFrame = bucket->PopFrame();
+      boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
       if(recFrame.get() == NULL) {
         break;
       }
 
-      int source = recFrame->GetFrame()->GetHeader().GetSource();
+      int source = recFrame->getFrame()->getHeader().getSource();
       if(resultFrom[source]) {
-        Log("already received result from " + IntToString(source));
+        log("already received result from " + intToString(source));
         continue;
       }
       resultFrom[source] = true;
@@ -503,162 +503,162 @@ namespace dss {
     }
 
     /*
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionGetTypeRequest);
-    Log("Proxy: GetModulators");
-    SendFrame(cmdFrame);
+    cmdFrame.getPayload().add<uint8_t>(FunctionGetTypeRequest);
+    log("Proxy: GetModulators");
+    sendFrame(cmdFrame);
 
 
     map<int, bool> resultFrom;
 
-    vector<boost::shared_ptr<DS485CommandFrame> > results = Receive(FunctionGetTypeRequest);
+    vector<boost::shared_ptr<DS485CommandFrame> > results = receive(FunctionGetTypeRequest);
     for(vector<boost::shared_ptr<DS485CommandFrame> >::iterator iFrame = results.begin(), e = results.end();
         iFrame != e; ++iFrame)
     {
-      int source = (*iFrame)->GetHeader().GetSource();
+      int source = (*iFrame)->getHeader().getSource();
       if(resultFrom[source]) {
-        Log(string("already received result from ") + IntToString(source));
+        log(string("already received result from ") + intToString(source));
         continue;
       }
       resultFrom[source] = true;
 
-      PayloadDissector pd((*iFrame)->GetPayload());
-      pd.Get<uint8_t>();
-      uint16_t devID = pd.Get<uint16_t>();
+      PayloadDissector pd((*iFrame)->getPayload());
+      pd.get<uint8_t>();
+      uint16_t devID = pd.get<uint16_t>();
       devID &= 0x00FF;
       if(devID == 0) {
-        Log("Found dSS");
+        log("Found dSS");
       } else if(devID == 1) {
-        Log("Found dSM");
+        log("Found dSM");
       } else {
-        Log(string("Found unknown device (") + IntToString(devID) + ")");
+        log(string("Found unknown device (") + intToString(devID) + ")");
       }
-      uint16_t hwVersion = pd.Get<uint16_t>();
-      uint16_t swVersion = pd.Get<uint16_t>();
+      uint16_t hwVersion = pd.get<uint16_t>();
+      uint16_t swVersion = pd.get<uint16_t>();
 
-      Log(string("  HW-Version: ") + IntToString(hwVersion >> 8) + "." + IntToString(hwVersion && 0xFF00));
-      Log(string("  SW-Version: ") + IntToString(swVersion >> 8) + "." + IntToString(swVersion && 0xFF00));
+      log(string("  HW-Version: ") + intToString(hwVersion >> 8) + "." + intToString(hwVersion && 0xFF00));
+      log(string("  SW-Version: ") + intToString(swVersion >> 8) + "." + intToString(swVersion && 0xFF00));
 
       string name;
       for(int i = 0; i < 6; i++) {
-        char c = static_cast<char>(pd.Get<uint8_t>());
+        char c = static_cast<char>(pd.get<uint8_t>());
         if(c != '\0') {
           name += c;
         }
       }
-      Log(string("  Name:      \"") + name + "\"");
+      log(string("  Name:      \"") + name + "\"");
 
       result.push_back(source);
     }
 */
     return result;
-  } // GetModulators
+  } // getModulators
 
-  int DS485Proxy::GetGroupCount(const int _modulatorID, const int _zoneID) {
+  int DS485Proxy::getGroupCount(const int _modulatorID, const int _zoneID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.GetHeader().SetDestination(_modulatorID);
-    cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetGroupsSize);
-    cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
-    int8_t res = static_cast<int8_t>(ReceiveSingleResult(cmdFrame, FunctionModulatorGetGroupsSize));
+    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetGroupsSize);
+    cmdFrame.getPayload().add<uint16_t>(_zoneID);
+    int8_t res = static_cast<int8_t>(receiveSingleResult(cmdFrame, FunctionModulatorGetGroupsSize));
     if(res < 0) {
-      Log("GetGroupCount: Negative group count received '" + IntToString(res) +
-          " on modulator " + IntToString(_modulatorID) +
-          " with zone " + IntToString(_zoneID));
+      log("GetGroupCount: Negative group count received '" + intToString(res) +
+          " on modulator " + intToString(_modulatorID) +
+          " with zone " + intToString(_zoneID));
       res = 0;
     }
     return res;
-  } // GetGroupCount
+  } // getGroupCount
 
-  vector<int> DS485Proxy::GetGroups(const int _modulatorID, const int _zoneID) {
+  vector<int> DS485Proxy::getGroups(const int _modulatorID, const int _zoneID) {
     vector<int> result;
 
-    int numGroups = GetGroupCount(_modulatorID, _zoneID);
-    Log(string("Modulator has ") + IntToString(numGroups) + " groups");
+    int numGroups = getGroupCount(_modulatorID, _zoneID);
+    log(string("Modulator has ") + intToString(numGroups) + " groups");
     for(int iGroup = 0; iGroup < numGroups; iGroup++) {
       DS485CommandFrame cmdFrame;
-      cmdFrame.GetHeader().SetDestination(_modulatorID);
-      cmdFrame.SetCommand(CommandRequest);
-      cmdFrame.GetPayload().Add<uint8_t>(FunctionZoneGetGroupIdForInd);
-      cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
-      cmdFrame.GetPayload().Add<uint16_t>(iGroup);
+      cmdFrame.getHeader().setDestination(_modulatorID);
+      cmdFrame.setCommand(CommandRequest);
+      cmdFrame.getPayload().add<uint8_t>(FunctionZoneGetGroupIdForInd);
+      cmdFrame.getPayload().add<uint16_t>(_zoneID);
+      cmdFrame.getPayload().add<uint16_t>(iGroup);
 
-      int8_t res = static_cast<int8_t>(ReceiveSingleResult(cmdFrame, FunctionZoneGetGroupIdForInd));
+      int8_t res = static_cast<int8_t>(receiveSingleResult(cmdFrame, FunctionZoneGetGroupIdForInd));
       if(res < 0) {
-        Log("GetGroups: Negative index received '" + IntToString(res) + "' for index " + IntToString(iGroup));
+        log("GetGroups: Negative index received '" + intToString(res) + "' for index " + intToString(iGroup));
       } else {
         result.push_back(res);
       }
     }
 
     return result;
-  } // GetGroups
+  } // getGroups
 
-  int DS485Proxy::GetDevicesInGroupCount(const int _modulatorID, const int _zoneID, const int _groupID) {
+  int DS485Proxy::getDevicesInGroupCount(const int _modulatorID, const int _zoneID, const int _groupID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.GetHeader().SetDestination(_modulatorID);
-    cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionGroupGetDeviceCount);
-    cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
-    cmdFrame.GetPayload().Add<uint16_t>(_groupID);
+    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionGroupGetDeviceCount);
+    cmdFrame.getPayload().add<uint16_t>(_zoneID);
+    cmdFrame.getPayload().add<uint16_t>(_groupID);
 
-    int16_t res = static_cast<int16_t>(ReceiveSingleResult16(cmdFrame, FunctionGroupGetDeviceCount));
+    int16_t res = static_cast<int16_t>(receiveSingleResult16(cmdFrame, FunctionGroupGetDeviceCount));
     if(res < 0) {
-      Log("GetDevicesInGroupCount: Negative count received '" + IntToString(res) +
-          "' on modulator " + IntToString(_modulatorID) +
-          " with zoneID " + IntToString(_zoneID) + " in group " + IntToString(_groupID));
+      log("GetDevicesInGroupCount: Negative count received '" + intToString(res) +
+          "' on modulator " + intToString(_modulatorID) +
+          " with zoneID " + intToString(_zoneID) + " in group " + intToString(_groupID));
       res = 0;
     }
     return res;
-  } // GetDevicesInGroupCount
+  } // getDevicesInGroupCount
 
-  vector<int> DS485Proxy::GetDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID) {
+  vector<int> DS485Proxy::getDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID) {
     vector<int> result;
 
-    int numDevices = GetDevicesInGroupCount(_modulatorID, _zoneID, _groupID);
+    int numDevices = getDevicesInGroupCount(_modulatorID, _zoneID, _groupID);
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
       DS485CommandFrame cmdFrame;
-      cmdFrame.GetHeader().SetDestination(_modulatorID);
-      cmdFrame.SetCommand(CommandRequest);
-      cmdFrame.GetPayload().Add<uint8_t>(FunctionGroupGetDevKeyForInd);
-      cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
-      cmdFrame.GetPayload().Add<uint16_t>(_groupID);
-      cmdFrame.GetPayload().Add<uint16_t>(iDevice);
-      int16_t res = static_cast<int16_t>(ReceiveSingleResult16(cmdFrame, FunctionGroupGetDevKeyForInd));
+      cmdFrame.getHeader().setDestination(_modulatorID);
+      cmdFrame.setCommand(CommandRequest);
+      cmdFrame.getPayload().add<uint8_t>(FunctionGroupGetDevKeyForInd);
+      cmdFrame.getPayload().add<uint16_t>(_zoneID);
+      cmdFrame.getPayload().add<uint16_t>(_groupID);
+      cmdFrame.getPayload().add<uint16_t>(iDevice);
+      int16_t res = static_cast<int16_t>(receiveSingleResult16(cmdFrame, FunctionGroupGetDevKeyForInd));
       if(res < 0) {
-        Log("GetDevicesInGroup: Negative device id received '" + IntToString(res) + "' for index " + IntToString(iDevice));
+        log("GetDevicesInGroup: Negative device id received '" + intToString(res) + "' for index " + intToString(iDevice));
       } else {
         result.push_back(res);
       }
     }
 
     return result;
-  } // GetDevicesInGroup
+  } // getDevicesInGroup
 
-  vector<int> DS485Proxy::GetGroupsOfDevice(const int _modulatorID, const int _deviceID) {
+  vector<int> DS485Proxy::getGroupsOfDevice(const int _modulatorID, const int _deviceID) {
     vector<int> result;
 
     DS485CommandFrame cmdFrame;
-    cmdFrame.GetHeader().SetDestination(_modulatorID);
-    cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionDeviceGetGroups);
-    cmdFrame.GetPayload().Add<uint16_t>(_deviceID);
+    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionDeviceGetGroups);
+    cmdFrame.getPayload().add<uint16_t>(_deviceID);
 
-    boost::shared_ptr<FrameBucket> bucket = SendFrameAndInstallBucket(cmdFrame, FunctionDeviceGetGroups);
+    boost::shared_ptr<FrameBucket> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionDeviceGetGroups);
 
-    bucket->WaitForFrame(1000);
+    bucket->waitForFrame(1000);
 
     while(true) {
-      boost::shared_ptr<ReceivedFrame> recFrame = bucket->PopFrame();
+      boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
       if(recFrame.get() == NULL) {
         break;
       }
 
-      PayloadDissector pd(recFrame->GetFrame()->GetPayload());
-      pd.Get<uint8_t>(); // discard the function id
-      pd.Get<uint16_t>(); // function result
+      PayloadDissector pd(recFrame->getFrame()->getPayload());
+      pd.get<uint8_t>(); // discard the function id
+      pd.get<uint16_t>(); // function result
 
       for(int iByte = 0; iByte < 8; iByte++) {
-        uint8_t byte = pd.Get<uint8_t>();
+        uint8_t byte = pd.get<uint8_t>();
         for(int iBit = 0; iBit < 8; iBit++) {
           if(byte & (1 << iBit)) {
             result.push_back((iByte * 8 + iBit) + 1);
@@ -667,316 +667,316 @@ namespace dss {
       }
     }
     return result;
-  } // GetGroupsOfDevice
+  } // getGroupsOfDevice
 
-  vector<int> DS485Proxy::GetZones(const int _modulatorID) {
+  vector<int> DS485Proxy::getZones(const int _modulatorID) {
     vector<int> result;
 
-    int numZones = GetZoneCount(_modulatorID);
-    Log(string("Modulator has ") + IntToString(numZones) + " zones");
+    int numZones = getZoneCount(_modulatorID);
+    log(string("Modulator has ") + intToString(numZones) + " zones");
     for(int iZone = 0; iZone < numZones; iZone++) {
       DS485CommandFrame cmdFrame;
-      cmdFrame.GetHeader().SetDestination(_modulatorID);
-      cmdFrame.SetCommand(CommandRequest);
-      cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetZoneIdForInd);
-      cmdFrame.GetPayload().Add<uint16_t>(iZone);
-      Log("GetZoneID");
-      int16_t tempResult = static_cast<int16_t>(ReceiveSingleResult16(cmdFrame, FunctionModulatorGetZoneIdForInd));
+      cmdFrame.getHeader().setDestination(_modulatorID);
+      cmdFrame.setCommand(CommandRequest);
+      cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetZoneIdForInd);
+      cmdFrame.getPayload().add<uint16_t>(iZone);
+      log("GetZoneID");
+      int16_t tempResult = static_cast<int16_t>(receiveSingleResult16(cmdFrame, FunctionModulatorGetZoneIdForInd));
       if(tempResult < 0) {
-        Log("GetZones: Negative zone id " + IntToString(tempResult) + " received. Modulator: " + IntToString(_modulatorID) + " index: " + IntToString(iZone), lsError);
+        log("GetZones: Negative zone id " + intToString(tempResult) + " received. Modulator: " + intToString(_modulatorID) + " index: " + intToString(iZone), lsError);
       } else {
         result.push_back(tempResult);
       }
-      Log("Receive ZoneID: " + UIntToString((unsigned int)tempResult));
+      log("receive ZoneID: " + uintToString((unsigned int)tempResult));
     }
     return result;
-  } // GetZones
+  } // getZones
 
-  int DS485Proxy::GetZoneCount(const int _modulatorID) {
+  int DS485Proxy::getZoneCount(const int _modulatorID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.GetHeader().SetDestination(_modulatorID);
-    cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetZonesSize);
-    Log("GetZoneCount");
+    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetZonesSize);
+    log("GetZoneCount");
 
     // TODO: check result-code
-    uint8_t result = ReceiveSingleResult(cmdFrame, FunctionModulatorGetZonesSize);
+    uint8_t result = receiveSingleResult(cmdFrame, FunctionModulatorGetZonesSize);
     return result;
-  } // GetZoneCount
+  } // getZoneCount
 
-  int DS485Proxy::GetDevicesCountInZone(const int _modulatorID, const int _zoneID) {
+  int DS485Proxy::getDevicesCountInZone(const int _modulatorID, const int _zoneID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.GetHeader().SetDestination(_modulatorID);
-    cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorCountDevInZone);
-    cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
-    Log("GetDevicesCountInZone");
+    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorCountDevInZone);
+    cmdFrame.getPayload().add<uint16_t>(_zoneID);
+    log("GetDevicesCountInZone");
 
-    Log(IntToString(_modulatorID) + " " + IntToString(_zoneID));
+    log(intToString(_modulatorID) + " " + intToString(_zoneID));
 
-    int16_t result = static_cast<int16_t>(ReceiveSingleResult16(cmdFrame, FunctionModulatorCountDevInZone));
+    int16_t result = static_cast<int16_t>(receiveSingleResult16(cmdFrame, FunctionModulatorCountDevInZone));
     if(result < 0) {
-      Log("GetDevicesCountInZone: negative count '" + IntToString(result) + "'", lsError);
+      log("GetDevicesCountInZone: negative count '" + intToString(result) + "'", lsError);
       result = 0;
     }
 
     return result;
-  } // GetDevicesCountInZone
+  } // getDevicesCountInZone
 
-  vector<int> DS485Proxy::GetDevicesInZone(const int _modulatorID, const int _zoneID) {
+  vector<int> DS485Proxy::getDevicesInZone(const int _modulatorID, const int _zoneID) {
     vector<int> result;
 
-    int numDevices = GetDevicesCountInZone(_modulatorID, _zoneID);
-    Log(string("Found ") + IntToString(numDevices) + " in zone.");
+    int numDevices = getDevicesCountInZone(_modulatorID, _zoneID);
+    log(string("Found ") + intToString(numDevices) + " in zone.");
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
       DS485CommandFrame cmdFrame;
-      cmdFrame.GetHeader().SetDestination(_modulatorID);
-      cmdFrame.SetCommand(CommandRequest);
-      cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorDevKeyInZone);
-      cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
-      cmdFrame.GetPayload().Add<uint16_t>(iDevice);
+      cmdFrame.getHeader().setDestination(_modulatorID);
+      cmdFrame.setCommand(CommandRequest);
+      cmdFrame.getPayload().add<uint8_t>(FunctionModulatorDevKeyInZone);
+      cmdFrame.getPayload().add<uint16_t>(_zoneID);
+      cmdFrame.getPayload().add<uint16_t>(iDevice);
 
-      result.push_back(ReceiveSingleResult16(cmdFrame, FunctionModulatorDevKeyInZone));
+      result.push_back(receiveSingleResult16(cmdFrame, FunctionModulatorDevKeyInZone));
     }
     return result;
-  } // GetDevicesInZone
+  } // getDevicesInZone
 
-  void DS485Proxy::SetZoneID(const int _modulatorID, const devid_t _deviceID, const int _zoneID) {
+  void DS485Proxy::setZoneID(const int _modulatorID, const devid_t _deviceID, const int _zoneID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.GetHeader().SetDestination(_modulatorID);
-    cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionDeviceSetZoneID);
-    cmdFrame.GetPayload().Add<devid_t>(_deviceID);
-    cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
+    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionDeviceSetZoneID);
+    cmdFrame.getPayload().add<devid_t>(_deviceID);
+    cmdFrame.getPayload().add<uint16_t>(_zoneID);
 
     // TODO: check result-code
-    ReceiveSingleResult(cmdFrame, FunctionDeviceSetZoneID);
-  } // SetZoneID
+    receiveSingleResult(cmdFrame, FunctionDeviceSetZoneID);
+  } // setZoneID
 
-  void DS485Proxy::CreateZone(const int _modulatorID, const int _zoneID) {
+  void DS485Proxy::createZone(const int _modulatorID, const int _zoneID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.GetHeader().SetDestination(_modulatorID);
-    cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorAddZone);
-    cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
+    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorAddZone);
+    cmdFrame.getPayload().add<uint16_t>(_zoneID);
 
     // TODO: check result-code
-    ReceiveSingleResult(cmdFrame, FunctionModulatorAddZone);
-  } // CreateZone
+    receiveSingleResult(cmdFrame, FunctionModulatorAddZone);
+  } // createZone
 
-  dsid_t DS485Proxy::GetDSIDOfDevice(const int _modulatorID, const int _deviceID) {
+  dsid_t DS485Proxy::getDSIDOfDevice(const int _modulatorID, const int _deviceID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.GetHeader().SetDestination(_modulatorID);
-    cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionDeviceGetDSID);
-    cmdFrame.GetPayload().Add<uint16_t>(_deviceID);
-    Log("Proxy: GetDSIDOfDevice");
+    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionDeviceGetDSID);
+    cmdFrame.getPayload().add<uint16_t>(_deviceID);
+    log("Proxy: GetDSIDOfDevice");
 
-    boost::shared_ptr<ReceivedFrame> recFrame = ReceiveSingleFrame(cmdFrame, FunctionDeviceGetDSID);
+    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDeviceGetDSID);
     if(recFrame.get() == NULL) {
       return NullDSID;
     }
 
-    PayloadDissector pd(recFrame->GetFrame()->GetPayload());
-    pd.Get<uint8_t>(); // discard the function id
-    pd.Get<uint16_t>(); // function result
-    return pd.Get<dsid_t>();
+    PayloadDissector pd(recFrame->getFrame()->getPayload());
+    pd.get<uint8_t>(); // discard the function id
+    pd.get<uint16_t>(); // function result
+    return pd.get<dsid_t>();
   }
 
-  dsid_t DS485Proxy::GetDSIDOfModulator(const int _modulatorID) {
+  dsid_t DS485Proxy::getDSIDOfModulator(const int _modulatorID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.GetHeader().SetDestination(_modulatorID);
-    cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetDSID);
-    Log(string("Proxy: GetDSIDOfModulator ") + IntToString(_modulatorID));
+    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetDSID);
+    log(string("Proxy: GetDSIDOfModulator ") + intToString(_modulatorID));
 
-    boost::shared_ptr<ReceivedFrame> recFrame = ReceiveSingleFrame(cmdFrame, FunctionModulatorGetDSID);
+    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionModulatorGetDSID);
     if(recFrame.get() == NULL) {
-      Log("GetDSIDOfModulator: received no result from " + IntToString(_modulatorID), lsError);
+      log("GetDSIDOfModulator: received no result from " + intToString(_modulatorID), lsError);
       return NullDSID;
     }
 
-    PayloadDissector pd(recFrame->GetFrame()->GetPayload());
-    pd.Get<uint8_t>(); // discard the function id
-    //pd.Get<uint8_t>(); // function result, don't know if that's sent though
-    return pd.Get<dsid_t>();
-  } // GetDSIDOfModulator
+    PayloadDissector pd(recFrame->getFrame()->getPayload());
+    pd.get<uint8_t>(); // discard the function id
+    //pd.get<uint8_t>(); // function result, don't know if that's sent though
+    return pd.get<dsid_t>();
+  } // getDSIDOfModulator
 
-  int DS485Proxy::GetLastCalledScene(const int _modulatorID, const int _zoneID, const int _groupID) {
+  int DS485Proxy::getLastCalledScene(const int _modulatorID, const int _zoneID, const int _groupID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.GetHeader().SetDestination(_modulatorID);
-    cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionGroupGetLastCalledScene);
-    Log(string("Proxy: GetLastCalledScene ") + IntToString(_modulatorID));
-    cmdFrame.GetPayload().Add<uint16_t>(_zoneID);
-    cmdFrame.GetPayload().Add<uint16_t>(_groupID);
+    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionGroupGetLastCalledScene);
+    log(string("Proxy: GetLastCalledScene ") + intToString(_modulatorID));
+    cmdFrame.getPayload().add<uint16_t>(_zoneID);
+    cmdFrame.getPayload().add<uint16_t>(_groupID);
 
-    int16_t res = static_cast<int16_t>(ReceiveSingleResult16(cmdFrame, FunctionGroupGetLastCalledScene));
+    int16_t res = static_cast<int16_t>(receiveSingleResult16(cmdFrame, FunctionGroupGetLastCalledScene));
     if(res < 0) {
-      Log("DS485Proxy::GetLastCalledScene: negative result received: " + IntToString(res));
+      log("DS485Proxy::getLastCalledScene: negative result received: " + intToString(res));
     }
     return res;
-  } // GetLastCalledScene
+  } // getLastCalledScene
 
-  unsigned long DS485Proxy::GetPowerConsumption(const int _modulatorID) {
+  unsigned long DS485Proxy::getPowerConsumption(const int _modulatorID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.GetHeader().SetDestination(_modulatorID);
-    cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetPowerConsumption);
-    Log(string("Proxy: GetPowerConsumption ") + IntToString(_modulatorID));
+    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetPowerConsumption);
+    log(string("Proxy: GetPowerConsumption ") + intToString(_modulatorID));
 
-    boost::shared_ptr<ReceivedFrame> recFrame = ReceiveSingleFrame(cmdFrame, FunctionModulatorGetPowerConsumption);
+    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionModulatorGetPowerConsumption);
     if(recFrame.get() == NULL) {
-      Log("DS485Proxy::GetPowerConsumption: received no results", lsError);
+      log("DS485Proxy::getPowerConsumption: received no results", lsError);
       return 0;
     }
-    if(recFrame->GetFrame()->GetHeader().GetSource() != _modulatorID) {
-      Log("GetPowerConsumption: received result from wrong source");
+    if(recFrame->getFrame()->getHeader().getSource() != _modulatorID) {
+      log("GetPowerConsumption: received result from wrong source");
     }
-    PayloadDissector pd(recFrame->GetFrame()->GetPayload());
-    pd.Get<uint8_t>(); // discard the function id
-    return pd.Get<uint32_t>();
-  } // GetPowerConsumption
+    PayloadDissector pd(recFrame->getFrame()->getPayload());
+    pd.get<uint8_t>(); // discard the function id
+    return pd.get<uint32_t>();
+  } // getPowerConsumption
 
-  unsigned long DS485Proxy::GetEnergyMeterValue(const int _modulatorID) {
+  unsigned long DS485Proxy::getEnergyMeterValue(const int _modulatorID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.GetHeader().SetDestination(_modulatorID);
-    cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetEnergyMeterValue);
-    Log(string("Proxy: GetEnergyMeterValue ") + IntToString(_modulatorID));
+    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetEnergyMeterValue);
+    log(string("Proxy: GetEnergyMeterValue ") + intToString(_modulatorID));
 
-    boost::shared_ptr<ReceivedFrame> recFrame = ReceiveSingleFrame(cmdFrame, FunctionModulatorGetEnergyMeterValue);
+    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionModulatorGetEnergyMeterValue);
     if(recFrame.get() == NULL) {
-      Log("DS485Proxy::GetEnergyMeterValue: received no results", lsError);
+      log("DS485Proxy::getEnergyMeterValue: received no results", lsError);
       return 0;
     }
-    PayloadDissector pd(recFrame->GetFrame()->GetPayload());
-    pd.Get<uint8_t>(); // discard the function id
-    return pd.Get<uint16_t>();
-  } // GetEnergyMeterValue
+    PayloadDissector pd(recFrame->getFrame()->getPayload());
+    pd.get<uint8_t>(); // discard the function id
+    return pd.get<uint16_t>();
+  } // getEnergyMeterValue
 
-  bool DS485Proxy::GetEnergyBorder(const int _modulatorID, int& _lower, int& _upper) {
+  bool DS485Proxy::getEnergyBorder(const int _modulatorID, int& _lower, int& _upper) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.GetHeader().SetDestination(_modulatorID);
-    cmdFrame.SetCommand(CommandRequest);
-    cmdFrame.GetPayload().Add<uint8_t>(FunctionModulatorGetEnergyBorder);
+    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetEnergyBorder);
 
-    boost::shared_ptr<FrameBucket> bucket = SendFrameAndInstallBucket(cmdFrame, FunctionModulatorGetEnergyBorder);
+    boost::shared_ptr<FrameBucket> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionModulatorGetEnergyBorder);
 
-    bucket->WaitForFrame(1000);
+    bucket->waitForFrame(1000);
 
-    boost::shared_ptr<ReceivedFrame> recFrame = bucket->PopFrame();
+    boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
     if(recFrame.get() == NULL) {
 	  return false;
     }
 
-    PayloadDissector pd(recFrame->GetFrame()->GetPayload());
-    pd.Get<uint8_t>(); // discard the function id
-    _lower = pd.Get<uint16_t>();
-    _upper = pd.Get<uint16_t>();
+    PayloadDissector pd(recFrame->getFrame()->getPayload());
+    pd.get<uint8_t>(); // discard the function id
+    _lower = pd.get<uint16_t>();
+    _upper = pd.get<uint16_t>();
     return true;
-  } // GetEnergyBorder
+  } // getEnergyBorder
 
 
-  void DS485Proxy::AddToGroup(const int _modulatorID, const int _groupID, const int _deviceID) {
+  void DS485Proxy::addToGroup(const int _modulatorID, const int _groupID, const int _deviceID) {
 
-  } // AddToGroup
+  } // addToGroup
 
-  void DS485Proxy::RemoveFromGroup(const int _modulatorID, const int _groupID, const int _deviceID) {
+  void DS485Proxy::removeFromGroup(const int _modulatorID, const int _groupID, const int _deviceID) {
 
-  } // RemoveFromGroup
+  } // removeFromGroup
 
-  int DS485Proxy::AddUserGroup(const int _modulatorID) {
+  int DS485Proxy::addUserGroup(const int _modulatorID) {
     return 0;
-  } // AddUserGroup
+  } // addUserGroup
 
-  void DS485Proxy::RemoveUserGroup(const int _modulatorID, const int _groupID) {
+  void DS485Proxy::removeUserGroup(const int _modulatorID, const int _groupID) {
 
-  } // RemoveUserGroup
+  } // removeUserGroup
 
-  boost::shared_ptr<ReceivedFrame> DS485Proxy::ReceiveSingleFrame(DS485CommandFrame& _frame, uint8_t _functionID) {
-    boost::shared_ptr<FrameBucket> bucket = SendFrameAndInstallBucket(_frame, _functionID);
-    bucket->WaitForFrame(1000);
+  boost::shared_ptr<ReceivedFrame> DS485Proxy::receiveSingleFrame(DS485CommandFrame& _frame, uint8_t _functionID) {
+    boost::shared_ptr<FrameBucket> bucket = sendFrameAndInstallBucket(_frame, _functionID);
+    bucket->waitForFrame(1000);
 
-    if(bucket->IsEmpty()) {
-      Log(string("received no results for request (") + FunctionIDToString(_functionID) + ")");
+    if(bucket->isEmpty()) {
+      log(string("received no results for request (") + FunctionIDToString(_functionID) + ")");
       return boost::shared_ptr<ReceivedFrame>();
-    } else if(bucket->GetFrameCount() > 1) {
-      Log(string("received multiple results (") + IntToString(bucket->GetFrameCount()) + ") for request (" + FunctionIDToString(_functionID) + ")");
+    } else if(bucket->getFrameCount() > 1) {
+      log(string("received multiple results (") + intToString(bucket->getFrameCount()) + ") for request (" + FunctionIDToString(_functionID) + ")");
       // TODO: check
-      return bucket->PopFrame();
+      return bucket->popFrame();
     }
 
-    boost::shared_ptr<ReceivedFrame> recFrame = bucket->PopFrame();
+    boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
 
     if(recFrame.get() != NULL) {
       return recFrame;
     } else {
-      throw runtime_error("Received frame is NULL but bucket->IsEmpty() returns false");
+      throw runtime_error("received frame is NULL but bucket->isEmpty() returns false");
     }
-  } // ReceiveSingleFrame
+  } // receiveSingleFrame
 
-  uint8_t DS485Proxy::ReceiveSingleResult(DS485CommandFrame& _frame, const uint8_t _functionID) {
-    boost::shared_ptr<ReceivedFrame> recFrame = ReceiveSingleFrame(_frame, _functionID);
+  uint8_t DS485Proxy::receiveSingleResult(DS485CommandFrame& _frame, const uint8_t _functionID) {
+    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(_frame, _functionID);
 
     if(recFrame.get() != NULL) {
-      PayloadDissector pd(recFrame->GetFrame()->GetPayload());
-      uint8_t functionID = pd.Get<uint8_t>();
+      PayloadDissector pd(recFrame->getFrame()->getPayload());
+      uint8_t functionID = pd.get<uint8_t>();
       if(functionID != _functionID) {
-        Log("function ids are different", lsFatal);
+        log("function ids are different", lsFatal);
       }
-      uint8_t result = pd.Get<uint8_t>();
+      uint8_t result = pd.get<uint8_t>();
       return result;
     } else {
       return 0;
     }
-  } // ReceiveSingleResult
+  } // receiveSingleResult
 
-  uint16_t DS485Proxy::ReceiveSingleResult16(DS485CommandFrame& _frame, const uint8_t _functionID) {
-    boost::shared_ptr<ReceivedFrame> recFrame = ReceiveSingleFrame(_frame, _functionID);
+  uint16_t DS485Proxy::receiveSingleResult16(DS485CommandFrame& _frame, const uint8_t _functionID) {
+    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(_frame, _functionID);
 
     if(recFrame.get() != NULL) {
-      PayloadDissector pd(recFrame->GetFrame()->GetPayload());
-      uint8_t functionID = pd.Get<uint8_t>();
+      PayloadDissector pd(recFrame->getFrame()->getPayload());
+      uint8_t functionID = pd.get<uint8_t>();
       if(functionID != _functionID) {
-        Log("function ids are different");
+        log("function ids are different");
       }
-      uint16_t result = pd.Get<uint8_t>();
-      if(!pd.IsEmpty()) {
-        result |= (pd.Get<uint8_t>() << 8);
+      uint16_t result = pd.get<uint8_t>();
+      if(!pd.isEmpty()) {
+        result |= (pd.get<uint8_t>() << 8);
       } else {
-        Log("ReceiveSingleResult16: only received half of the data (8bit)", lsFatal);
+        log("receiveSingleResult16: only received half of the data (8bit)", lsFatal);
       }
       return result;
     } else {
       return 0;
     }
-  } // ReceiveSingleResult16
+  } // receiveSingleResult16
 
-  void DS485Proxy::Initialize() {
-    Subsystem::Initialize();
-    m_DS485Controller.AddFrameCollector(this);
-    GetDSS().GetSimulation().AddFrameCollector(this);
+  void DS485Proxy::initialize() {
+    Subsystem::initialize();
+    m_DS485Controller.addFrameCollector(this);
+    getDSS().getSimulation().addFrameCollector(this);
   }
 
-  void DS485Proxy::DoStart() {
+  void DS485Proxy::doStart() {
     try {
-      m_DS485Controller.SetDSID(dsid_t::FromString(GetDSS().GetPropertySystem().GetStringValue(GetConfigPropertyBasePath() + "dsid")));
-      m_DS485Controller.Run();
+      m_DS485Controller.setDSID(dsid_t::fromString(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "dsid")));
+      m_DS485Controller.run();
     } catch (const runtime_error& _ex) {
-    	Log(string("Caught exception while starting DS485Controlle: ") + _ex.what(), lsFatal);
+    	log(string("Caught exception while starting DS485Controlle: ") + _ex.what(), lsFatal);
     }
-    // call Thread::Run()
-    Run();
-  } // DoStart
+    // call Thread::run()
+    run();
+  } // doStart
 
-  void DS485Proxy::WaitForProxyEvent() {
-    m_ProxyEvent.WaitFor();
-  } // WaitForProxyEvent
+  void DS485Proxy::waitForProxyEvent() {
+    m_ProxyEvent.waitFor();
+  } // waitForProxyEvent
 
-  void DS485Proxy::SignalEvent() {
-    m_ProxyEvent.Signal();
-  } // SignalEvent
+  void DS485Proxy::signalEvent() {
+    m_ProxyEvent.signal();
+  } // signalEvent
 
   const char* FunctionIDToString(const int _functionID) {
     switch(_functionID) {
@@ -1078,145 +1078,145 @@ namespace dss {
       return "Function Device Get Function ID";
     }
     return "";
-  } // FunctionIDToString
+  } // functionIDToString
 
-  void DS485Proxy::Execute() {
-    SignalEvent();
+  void DS485Proxy::execute() {
+    signalEvent();
 
     while(!m_Terminated) {
-      if(!m_IncomingFrames.empty() || m_PacketHere.WaitFor(50)) {
+      if(!m_IncomingFrames.empty() || m_PacketHere.waitFor(50)) {
         while(!m_IncomingFrames.empty()) {
-          m_IncomingFramesGuard.Lock();
+          m_IncomingFramesGuard.lock();
           // process packets and put them into a functionID-hash
           boost::shared_ptr<DS485CommandFrame> frame = m_IncomingFrames.front();
           m_IncomingFrames.erase(m_IncomingFrames.begin());
-          m_IncomingFramesGuard.Unlock();
-          Log("R");
+          m_IncomingFramesGuard.unlock();
+          log("R");
 
-          vector<unsigned char> ch = frame->GetPayload().ToChar();
+          vector<unsigned char> ch = frame->getPayload().toChar();
           if(ch.size() < 1) {
-            Log("Received Command Frame w/o function identifier", lsFatal);
+            log("received Command Frame w/o function identifier", lsFatal);
             continue;
           }
 
           uint8_t functionID = ch.front();
-          if(frame->GetCommand() == CommandRequest || frame->GetCommand() == CommandEvent) {
+          if(frame->getCommand() == CommandRequest || frame->getCommand() == CommandEvent) {
             string functionIDStr = FunctionIDToString(functionID);
             if(functionIDStr.empty()) {
-              functionIDStr = "Unknown function id: " + IntToString(functionID, true);
+              functionIDStr = "Unknown function id: " + intToString(functionID, true);
             }
-            Log("Got request: " + functionIDStr);
-            PayloadDissector pd(frame->GetPayload());
+            log("Got request: " + functionIDStr);
+            PayloadDissector pd(frame->getPayload());
 
-            if(frame->GetFrameSource() == fsWire) {
-              GetDSS().GetSimulation().process(*frame.get());
+            if(frame->getFrameSource() == fsWire) {
+              getDSS().getSimulation().process(*frame.get());
             }
             if(functionID == FunctionZoneAddDevice) {
-              Log("New device");
-              pd.Get<uint8_t>(); // function id
-              int modID = frame->GetHeader().GetSource();
-              int zoneID = pd.Get<uint16_t>();
-              int devID = pd.Get<uint16_t>();
-              pd.Get<uint16_t>(); // version
-              int functionID = pd.Get<uint16_t>();
+              log("New device");
+              pd.get<uint8_t>(); // function id
+              int modID = frame->getHeader().getSource();
+              int zoneID = pd.get<uint16_t>();
+              int devID = pd.get<uint16_t>();
+              pd.get<uint16_t>(); // version
+              int functionID = pd.get<uint16_t>();
 
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etNewDevice);
-              pEvent->AddParameter(modID);
-              pEvent->AddParameter(zoneID);
-              pEvent->AddParameter(devID);
-              pEvent->AddParameter(functionID);
-              GetDSS().GetApartment().AddModelEvent(pEvent);
+              pEvent->addParameter(modID);
+              pEvent->addParameter(zoneID);
+              pEvent->addParameter(devID);
+              pEvent->addParameter(functionID);
+              getDSS().getApartment().addModelEvent(pEvent);
             } else if(functionID == FunctionGroupCallScene) {
-              pd.Get<uint8_t>(); // function id
-              uint16_t zoneID = pd.Get<uint16_t>();
-              uint16_t groupID = pd.Get<uint16_t>();
-              uint16_t sceneID = pd.Get<uint16_t>();
+              pd.get<uint8_t>(); // function id
+              uint16_t zoneID = pd.get<uint16_t>();
+              uint16_t groupID = pd.get<uint16_t>();
+              uint16_t sceneID = pd.get<uint16_t>();
               if((sceneID & 0x00ff) == SceneBell) {
                 boost::shared_ptr<Event> evt(new Event("bell"));
-                GetDSS().GetEventQueue().PushEvent(evt);
+                getDSS().getEventQueue().pushEvent(evt);
               } else if((sceneID & 0x00ff) == SceneAlarm) {
                 boost::shared_ptr<Event> evt(new Event("alarm"));
-                GetDSS().GetEventQueue().PushEvent(evt);
+                getDSS().getEventQueue().pushEvent(evt);
               } else if((sceneID & 0x00ff) == ScenePanic) {
                 boost::shared_ptr<Event> evt(new Event("panic"));
-                GetDSS().GetEventQueue().PushEvent(evt);
+                getDSS().getEventQueue().pushEvent(evt);
               }
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etCallSceneGroup);
-              pEvent->AddParameter(zoneID);
-              pEvent->AddParameter(groupID);
-              pEvent->AddParameter(sceneID);
-              GetDSS().GetApartment().AddModelEvent(pEvent);
+              pEvent->addParameter(zoneID);
+              pEvent->addParameter(groupID);
+              pEvent->addParameter(sceneID);
+              getDSS().getApartment().addModelEvent(pEvent);
             } else if(functionID == FunctionDeviceCallScene) {
-              pd.Get<uint8_t>(); // functionID
-              uint16_t devID = pd.Get<uint16_t>();
-              uint16_t sceneID = pd.Get<uint16_t>();
-              int modID = frame->GetHeader().GetDestination();
+              pd.get<uint8_t>(); // functionID
+              uint16_t devID = pd.get<uint16_t>();
+              uint16_t sceneID = pd.get<uint16_t>();
+              int modID = frame->getHeader().getDestination();
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etCallSceneDevice);
-              pEvent->AddParameter(modID);
-              pEvent->AddParameter(devID);
-              pEvent->AddParameter(sceneID);
-              GetDSS().GetApartment().AddModelEvent(pEvent);
+              pEvent->addParameter(modID);
+              pEvent->addParameter(devID);
+              pEvent->addParameter(sceneID);
+              getDSS().getApartment().addModelEvent(pEvent);
             }
           } else {
             std::ostringstream sstream;
             sstream << "Response: ";
-            PayloadDissector pd(frame->GetPayload());
-            while(!pd.IsEmpty()) {
-              uint8_t data = pd.Get<uint8_t>();
+            PayloadDissector pd(frame->getPayload());
+            while(!pd.isEmpty()) {
+              uint8_t data = pd.get<uint8_t>();
               sstream << "(0x" << std::hex << (unsigned int)data << ", " << std::dec << (int)data << "d)";
             }
             sstream << std::dec;
-            Log(sstream.str());
+            log(sstream.str());
 
-            Log(string("Response for: ") + FunctionIDToString(functionID));
-            boost::shared_ptr<ReceivedFrame> rf(new ReceivedFrame(m_DS485Controller.GetTokenCount(), frame));
+            log(string("Response for: ") + FunctionIDToString(functionID));
+            boost::shared_ptr<ReceivedFrame> rf(new ReceivedFrame(m_DS485Controller.getTokenCount(), frame));
 
             bool bucketFound = false;
             // search for a bucket to put the frame in
             foreach(FrameBucket* bucket, m_FrameBuckets) {
-              if(bucket->GetFunctionID() == functionID) {
-                if((bucket->GetSourceID() == -1) || (bucket->GetSourceID() == frame->GetHeader().GetSource())) {
-                  if(bucket->AddFrame(rf)) {
+              if(bucket->getFunctionID() == functionID) {
+                if((bucket->getSourceID() == -1) || (bucket->getSourceID() == frame->getHeader().getSource())) {
+                  if(bucket->addFrame(rf)) {
                     bucketFound = true;
                   }
                 }
               }
             }
             if(!bucketFound) {
-              Log("No bucket found for " + IntToString(frame->GetHeader().GetSource()));
+              log("No bucket found for " + intToString(frame->getHeader().getSource()));
             }
 
           }
         }
       }
     }
-  } // Execute
+  } // execute
 
-  void DS485Proxy::CollectFrame(boost::shared_ptr<DS485CommandFrame>& _frame) {
-    uint8_t commandID = _frame->GetCommand();
+  void DS485Proxy::collectFrame(boost::shared_ptr<DS485CommandFrame>& _frame) {
+    uint8_t commandID = _frame->getCommand();
     if(commandID != CommandResponse && commandID != CommandRequest && commandID != CommandEvent) {
-      Log("discarded non response/request/command frame", lsInfo);
-      Log(string("frame type ") + CommandToString(commandID));
+      log("discarded non response/request/command frame", lsInfo);
+      log(string("frame type ") + commandToString(commandID));
     } else {
-      m_IncomingFramesGuard.Lock();
+      m_IncomingFramesGuard.lock();
       m_IncomingFrames.push_back(_frame);
-      m_IncomingFramesGuard.Unlock();
-      m_PacketHere.Signal();
+      m_IncomingFramesGuard.unlock();
+      m_PacketHere.signal();
     }
-  } // CollectFrame
+  } // collectFrame
 
-  void DS485Proxy::AddFrameBucket(FrameBucket* _bucket) {
+  void DS485Proxy::addFrameBucket(FrameBucket* _bucket) {
     m_FrameBuckets.push_back(_bucket);
-  } // AddFrameBucket
+  } // addFrameBucket
 
-  void DS485Proxy::RemoveFrameBucket(FrameBucket* _bucket) {
+  void DS485Proxy::removeFrameBucket(FrameBucket* _bucket) {
     vector<FrameBucket*>::iterator pos = find(m_FrameBuckets.begin(), m_FrameBuckets.end(), _bucket);
     if(pos != m_FrameBuckets.end()) {
       m_FrameBuckets.erase(pos);
     }
-  } // RemoveFrameBucket
+  } // removeFrameBucket
 
-  //================================================== ReceivedFrame
+  //================================================== receivedFrame
 
   ReceivedFrame::ReceivedFrame(const int _receivedAt, boost::shared_ptr<DS485CommandFrame> _frame)
   : m_ReceivedAtToken(_receivedAt),
@@ -1233,64 +1233,64 @@ namespace dss {
     m_SourceID(_sourceID),
     m_SingleFrame(false)
   {
-    Logger::GetInstance()->Log("Bucket: Registering for fid: " + IntToString(_functionID) + " sid: " + IntToString(_sourceID));
-    m_pProxy->AddFrameBucket(this);
+    Logger::getInstance()->log("Bucket: Registering for fid: " + intToString(_functionID) + " sid: " + intToString(_sourceID));
+    m_pProxy->addFrameBucket(this);
   } // ctor
 
   FrameBucket::~FrameBucket() {
-    Logger::GetInstance()->Log("Bucket: Removing for fid: " + IntToString(m_FunctionID) + " sid: " + IntToString(m_SourceID));
-    m_pProxy->RemoveFrameBucket(this);
+    Logger::getInstance()->log("Bucket: Removing for fid: " + intToString(m_FunctionID) + " sid: " + intToString(m_SourceID));
+    m_pProxy->removeFrameBucket(this);
   } // dtor
 
-  bool FrameBucket::AddFrame(boost::shared_ptr<ReceivedFrame> _frame) {
+  bool FrameBucket::addFrame(boost::shared_ptr<ReceivedFrame> _frame) {
     bool result = false;
-    m_FramesMutex.Lock();
+    m_FramesMutex.lock();
     if(!m_SingleFrame || m_Frames.empty()) {
       m_Frames.push_back(_frame);
       result = true;
     }
-    m_FramesMutex.Unlock();
+    m_FramesMutex.unlock();
 
     if(result) {
-      m_PacketHere.Signal();
+      m_PacketHere.signal();
     }
     return result;
-  } // AddFrame
+  } // addFrame
 
-  boost::shared_ptr<ReceivedFrame> FrameBucket::PopFrame() {
+  boost::shared_ptr<ReceivedFrame> FrameBucket::popFrame() {
     boost::shared_ptr<ReceivedFrame> result;
 
-    m_FramesMutex.Lock();
+    m_FramesMutex.lock();
     if(!m_Frames.empty()) {
       result = m_Frames.front();
       m_Frames.pop_front();
     }
-    m_FramesMutex.Unlock();
+    m_FramesMutex.unlock();
     return result;
-  } // PopFrame
+  } // popFrame
 
-  void FrameBucket::WaitForFrames(int _timeoutMS) {
-    SleepMS(_timeoutMS);
-  } // WaitForFrames
+  void FrameBucket::waitForFrames(int _timeoutMS) {
+    sleepMS(_timeoutMS);
+  } // waitForFrames
 
-  void FrameBucket::WaitForFrame(int _timeoutMS) {
+  void FrameBucket::waitForFrame(int _timeoutMS) {
     m_SingleFrame = true;
     if(m_Frames.empty()) {
-      Logger::GetInstance()->Log("*** Waiting");
-      if(m_PacketHere.WaitFor(_timeoutMS)) {
-        Logger::GetInstance()->Log("*** Got Frame");
+      Logger::getInstance()->log("*** Waiting");
+      if(m_PacketHere.waitFor(_timeoutMS)) {
+        Logger::getInstance()->log("*** Got Frame");
       } else {
-        Logger::GetInstance()->Log("*** No Frame");
+        Logger::getInstance()->log("*** No Frame");
       }
     }
-  } // WaitForFrame
+  } // waitForFrame
 
-  int FrameBucket::GetFrameCount() const {
+  int FrameBucket::getFrameCount() const {
     return m_Frames.size();
-  } // GetFrameCount
+  } // getFrameCount
 
-  bool FrameBucket::IsEmpty() const {
+  bool FrameBucket::isEmpty() const {
     return m_Frames.empty();
-  } // IsEmpty
+  } // isEmpty
 
 }

@@ -21,7 +21,7 @@ namespace dss {
     WebServiceSession() {}
     WebServiceSession(const int _tokenID, soap* _soapRequest);
 
-    bool IsOwner(soap* _soapRequest);
+    bool isOwner(soap* _soapRequest);
 
     WebServiceSession& operator=(const WebServiceSession& _other);
   };
@@ -35,19 +35,19 @@ namespace dss {
     int m_LastSessionID;
     WebServiceSessionByID m_SessionByID;
   protected:
-    virtual void DoStart();
+    virtual void doStart();
   public:
     WebServices(DSS* _pDSS);
     virtual ~WebServices();
 
 
-    WebServiceSession& NewSession(soap* _soapRequest, int& token);
-    void DeleteSession(soap* _soapRequest, const int _token);
-    WebServiceSession& GetSession(soap* _soapRequest, const int _token);
+    WebServiceSession& newSession(soap* _soapRequest, int& token);
+    void deleteSession(soap* _soapRequest, const int _token);
+    WebServiceSession& getSession(soap* _soapRequest, const int _token);
 
-    bool IsAuthorized(soap* _soapRequest, const int _token);
+    bool isAuthorized(soap* _soapRequest, const int _token);
 
-    virtual void Execute();
+    virtual void execute();
   };
 
 }

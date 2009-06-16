@@ -24,19 +24,19 @@ DWORD WINAPI
 ThreadStarterHelperFunc( void* _pThreadObj ) {
 	Thread* thObj = static_cast<Thread*>(_pThreadObj);
 
-	thObj->Execute();
+	thObj->execute();
 
-  if(thObj->GetThreadIdentifier() != NULL) {
-    Logger::GetInstance()->Log(string("Destroying thread: ") + thObj->GetThreadIdentifier());
+  if(thObj->getThreadIdentifier() != NULL) {
+    Logger::getInstance()->log(string("Destroying thread: ") + thObj->getThreadIdentifier());
   } else {
-    Logger::GetInstance()->Log("Destroying thread: (no name)");
+    Logger::getInstance()->log("Destroying thread: (no name)");
   }
 
-  if( static_cast<Thread*>(_pThreadObj)->GetFreeAtTerimnation() ) {
+  if( static_cast<Thread*>(_pThreadObj)->getFreeAtTerimnation() ) {
     delete static_cast<Thread*>(_pThreadObj);
   }
   return NULL;
-} // ThreadStarterHelpFunc
+} // threadStarterHelpFunc
 
 
 Thread::Thread(const char* _name )
@@ -58,11 +58,11 @@ Thread::~Thread() {
   }
 } // dtor
 
-bool Thread::Run() {
+bool Thread::run() {
   assert( !m_Running );
   m_Running = true;
   if( m_Name != NULL ) {
-    Logger::GetInstance()->Log(string("creating thread for \"") + m_Name + "\"");
+    Logger::getInstance()->log(string("creating thread for \"") + m_Name + "\"");
   }
 #ifndef WIN32
   pthread_create( &m_ThreadHandle, NULL, ThreadStarterHelperFunc, this );
@@ -70,9 +70,9 @@ bool Thread::Run() {
   m_ThreadHandle = CreateThread( NULL, 0, &ThreadStarterHelperFunc, this, NULL, NULL );
 #endif
   return true;
-} // Run
+} // run
 
-bool Thread::Stop() {
+bool Thread::stop() {
 #ifdef WIN32
   TerminateThread( m_ThreadHandle, 0 );
 #else
@@ -80,10 +80,10 @@ bool Thread::Stop() {
   pthread_kill( m_ThreadHandle, -9 );
 #endif
   return true;
-} // Stop
+} // stop
 
 
-bool Thread::Terminate() {
+bool Thread::terminate() {
   if( !m_Terminated && (m_ThreadHandle != 0) ) {
     m_Terminated = true;
 #ifndef WIN32
@@ -94,7 +94,7 @@ bool Thread::Terminate() {
   }
   m_ThreadHandle = 0;
   return true;
-} // Terminate
+} // terminate
 
 
 }

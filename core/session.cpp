@@ -9,36 +9,36 @@ namespace dss {
     m_LastTouched = DateTime();
   } // ctor
 
-  bool Session::IsStillValid() {
+  bool Session::isStillValid() {
     //const int TheSessionTimeout = 5;
-    return true;//m_LastTouched.AddMinute(TheSessionTimeout).After(DateTime());
-  } // IsStillValid
+    return true;//m_LastTouched.addMinute(TheSessionTimeout).after(DateTime());
+  } // isStillValid
 
-  bool Session::HasSetWithID(const int _id) {
+  bool Session::hasSetWithID(const int _id) {
     SetsByID::iterator iKey = m_SetsByID.find(_id);
     return iKey != m_SetsByID.end();
-  } // HasSetWithID
+  } // hasSetWithID
 
-  Set& Session::GetSetByID(const int _id) {
+  Set& Session::getSetByID(const int _id) {
     SetsByID::iterator iEntry = m_SetsByID.find(_id);
     return iEntry->second;
-  } // GetSetByID
+  } // getSetByID
 
-  Set& Session::AllocateSet(int& id) {
+  Set& Session::allocateSet(int& id) {
     id = ++m_LastSetNr;
     m_SetsByID[id] = Set();
     return m_SetsByID[id];
-  } // AllocateSet
+  } // allocateSet
 
-  Set& Session::AddSet(Set _set, int& id) {
+  Set& Session::addSet(Set _set, int& id) {
     id = ++m_LastSetNr;
     m_SetsByID[id] = _set;
     return m_SetsByID[id];
-  } // AddSet
+  } // addSet
 
-  void Session::FreeSet(const int _id) {
+  void Session::freeSet(const int _id) {
     m_SetsByID.erase(m_SetsByID.find(_id));
-  } // FreeSet
+  } // freeSet
 
   Session& Session::operator=(const Session& _other) {
     m_LastSetNr = _other.m_LastSetNr;

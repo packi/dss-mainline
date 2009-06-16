@@ -22,66 +22,66 @@ namespace dss {
     m_Enabled(true)
   {
     if(m_pDSS != NULL) {
-      if(GetDSS().GetState() < ssCreatingSubsystems) {
+      if(getDSS().getState() < ssCreatingSubsystems) {
         throw std::runtime_error("creating subsystem way too early");
       }
-      GetDSS().GetPropertySystem().SetIntValue(GetConfigPropertyBasePath() + "loglevel", 0, true);
-      GetDSS().GetPropertySystem().CreateProperty(GetConfigPropertyBasePath() + "enabled")
-         ->LinkToProxy(PropertyProxyPointer<bool>(&m_Enabled));
+      getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "loglevel", 0, true);
+      getDSS().getPropertySystem().createProperty(getConfigPropertyBasePath() + "enabled")
+         ->linkToProxy(PropertyProxyPointer<bool>(&m_Enabled));
     }
   } // ctor
 
   Subsystem::~Subsystem() {
   } // dtor
 
-  void Subsystem::Initialize() {
+  void Subsystem::initialize() {
     aLogSeverity severity = lsDebug;
     if(m_pDSS != NULL) {
-      if(GetDSS().GetState() < ssInitializingSubsystems) {
+      if(getDSS().getState() < ssInitializingSubsystems) {
         throw std::runtime_error("you shouldn't initialize your subsystem at this phase");
       }
-      severity = static_cast<aLogSeverity>(GetDSS().GetPropertySystem().GetIntValue(GetConfigPropertyBasePath() + "loglevel"));
+      severity = static_cast<aLogSeverity>(getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "loglevel"));
     }
     m_pLogChannel.reset(new LogChannel(m_Name, severity));
     if(m_pDSS != NULL) {
-      GetDSS().GetPropertySystem().GetProperty(GetConfigPropertyBasePath() + "loglevel")
-        ->LinkToProxy(PropertyProxyMemberFunction<Subsystem, int>(*this, &Subsystem::GetLogSeverity, &Subsystem::SetLogSeverity));
+      getDSS().getPropertySystem().getProperty(getConfigPropertyBasePath() + "loglevel")
+        ->linkToProxy(PropertyProxyMemberFunction<Subsystem, int>(*this, &Subsystem::getLogSeverity, &Subsystem::setLogSeverity));
     }
     m_State = ssInitialized;
-  } // Initialize
+  } // initialize
 
-  void Subsystem::Start() {
+  void Subsystem::start() {
     if(m_State != ssInitialized) {
-      throw new std::runtime_error("Subsystem::Start: Subsystem '" + m_Name + "' was not initialized.");
+      throw new std::runtime_error("Subsystem::start: Subsystem '" + m_Name + "' was not initialized.");
     }
     if(m_Enabled) {
-      DoStart();
+      doStart();
     }
-  } // Start
+  } // start
 
-  std::string Subsystem::GetConfigPropertyBasePath() {
+  std::string Subsystem::getConfigPropertyBasePath() {
     return "/config/subsystems/" + m_Name + "/";
-  } // GetConfigPropertyBasePath
+  } // getConfigPropertyBasePath
 
-  std::string Subsystem::GetPropertyBasePath() {
+  std::string Subsystem::getPropertyBasePath() {
     return "/system/" + m_Name + "/";
-  } // GetPropertyBasePath
+  } // getPropertyBasePath
 
-  void Subsystem::Log(const std::string& _message, aLogSeverity _severity) {
-    Logger::GetInstance()->Log(*m_pLogChannel, _message, _severity);
+  void Subsystem::log(const std::string& _message, aLogSeverity _severity) {
+    Logger::getInstance()->log(*m_pLogChannel, _message, _severity);
   }
 
-  int Subsystem::GetLogSeverity() const {
+  int Subsystem::getLogSeverity() const {
     if(m_pLogChannel.get() == NULL) {
       return 0;
     } else {
-      return m_pLogChannel->GetMinimumSeverity();
+      return m_pLogChannel->getMinimumSeverity();
     }
   }
 
-  void Subsystem::SetLogSeverity(int _value) {
+  void Subsystem::setLogSeverity(int _value) {
     if(m_pLogChannel.get() != NULL) {
-      m_pLogChannel->SetMinimumSeverity(static_cast<aLogSeverity>(_value));
+      m_pLogChannel->setMinimumSeverity(static_cast<aLogSeverity>(_value));
     }
   }
 
