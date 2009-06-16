@@ -19,10 +19,10 @@
     </property>
 -->    
     <property name="subsystems/FakeMeter/enabled" type="boolean">
-      <value>false</value>
+      <value>true</value>
     </property>
     <property name="subsystems/Metering/enabled" type="boolean">
-      <value>false</value>
+      <value>true</value>
     </property>
   </property>
 </properties>
