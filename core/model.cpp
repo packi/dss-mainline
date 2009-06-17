@@ -743,8 +743,9 @@ namespace dss {
           dev.setModulatorID(modulatorID);
           dev.setZoneID(zoneID);
           dev.setFunctionID(functionID);
-          zone.addDevice(DeviceReference(dev, *this));
-          modulator.addDevice(DeviceReference(dev, *this));
+          DeviceReference devRef(dev, *this);
+          zone.addDevice(devRef);
+          modulator.addDevice(devRef);
         }
 
         vector<int> groupIDs = interface.getGroups(modulatorID, zoneID);
@@ -1225,7 +1226,8 @@ namespace dss {
     // search for existing device
     foreach(Device* device, m_Devices) {
       if(device->getDSID() == _dsid) {
-        getZone(0).addDevice(DeviceReference(*device, *this));
+        DeviceReference devRef(*device, *this);
+        getZone(0).addDevice(devRef);
         return *device;
       }
     }
@@ -1236,14 +1238,16 @@ namespace dss {
         Device* pResult = device;
         m_Devices.push_back(pResult);
         m_StaleDevices.erase(std::find(m_StaleDevices.begin(), m_StaleDevices.end(),device));
-        getZone(0).addDevice(DeviceReference(*pResult, *this));
+        DeviceReference devRef(*pResult, *this);
+        getZone(0).addDevice(devRef);
         return *pResult;
       }
     }
 
     Device* pResult = new Device(_dsid, this);
     m_Devices.push_back(pResult);
-    getZone(0).addDevice(DeviceReference(*pResult, *this));
+    DeviceReference devRef(*pResult, *this);
+    getZone(0).addDevice(devRef);
     return *pResult;
   } // allocateDevice
 
@@ -1381,20 +1385,21 @@ namespace dss {
 
     dsid_t dsid = getDSS().getDS485Interface().getDSIDOfDevice(_modID, _devID);
     Device& dev = allocateDevice(dsid);
+    DeviceReference devRef(dev, *this);
 
     log("  DSID:      " + dsid.toString());
 
     // remove from old modulator
     try {
       Modulator& oldModulator = getModulatorByBusID(dev.getModulatorID());
-      oldModulator.removeDevice(DeviceReference(dev, *this));
+      oldModulator.removeDevice(devRef);
     } catch(runtime_error&) {
     }
 
     // remove from old zone
     try {
       Zone& oldZone = getZone(dev.getZoneID());
-      oldZone.removeDevice(DeviceReference(dev, *this));
+      oldZone.removeDevice(devRef);
     } catch(runtime_error&) {
     }
 
@@ -1406,11 +1411,11 @@ namespace dss {
 
     // add to new modulator
     Modulator& modulator = getModulatorByBusID(_modID);
-    modulator.addDevice(DeviceReference(dev, *this));
+    modulator.addDevice(devRef);
 
     // add to new zone
     Zone& newZone = allocateZone(modulator, _zoneID);
-    newZone.addDevice(DeviceReference(dev, *this));
+    newZone.addDevice(devRef);
 
     // get groups of device
     dev.resetGroups();
@@ -1494,7 +1499,7 @@ namespace dss {
     return Set(m_Devices);
   } // getDevices
 
-  void Zone::addDevice(const DeviceReference& _device) {
+  void Zone::addDevice(DeviceReference& _device) {
     const Device& dev = _device.getDevice();
   	int oldZoneID = dev.getZoneID();
   	if(oldZoneID != -1) {
@@ -1512,7 +1517,7 @@ namespace dss {
     } else {
       Logger::getInstance()->log("Zone::addDevice: DUPLICATE DEVICE Detected Zone: " + intToString(m_ZoneID) + " device: " + _device.getDSID().toString(), lsFatal);
     }
-
+    _device.getDevice().setZoneID(m_ZoneID);
   } // addDevice
 
   void Zone::addGroup(Group* _group) {

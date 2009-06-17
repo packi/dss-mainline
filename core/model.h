@@ -528,7 +528,7 @@ namespace dss {
     /** Adds a device to the zone.
      * This will permanently add the device to the zone.
      */
-    void addDevice(const DeviceReference& _device);
+    void addDevice(DeviceReference& _device);
 
     /** Removes a device from the zone.
      * This will permanently remove the device from the zone.

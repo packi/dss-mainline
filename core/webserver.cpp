@@ -865,7 +865,8 @@ namespace dss {
         if(!zoneIDStr.empty()) {
           try {
             int zoneID = strToInt(zoneIDStr);
-            DSS::getInstance()->getApartment().getZone(zoneID).addDevice(DeviceReference(dev, DSS::getInstance()->getApartment()));
+            DeviceReference devRef(dev, DSS::getInstance()->getApartment());
+            DSS::getInstance()->getApartment().getZone(zoneID).addDevice(devRef);
           } catch(runtime_error&) {
             ok = false;
           }
