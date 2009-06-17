@@ -24,6 +24,7 @@ class ModelTest : public CPPUNIT_NS::TestCase
 {
   CPPUNIT_TEST_SUITE(ModelTest);
   CPPUNIT_TEST(testSet);
+  CPPUNIT_TEST(testZoneMoving);
   CPPUNIT_TEST(testSetBuilder);
   CPPUNIT_TEST_SUITE_END();
 
@@ -35,6 +36,75 @@ public:
 
 
 protected:
+
+  void testZoneMoving() {
+    Apartment apt(NULL);
+    apt.initialize();
+
+    Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+    dev1.setShortAddress(1);
+    DeviceReference devRef1(dev1, apt);
+    Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+    dev2.setShortAddress(2);
+    DeviceReference devRef2(dev2, apt);
+    Device& dev3 = apt.allocateDevice(dsid_t(0,3));
+    dev3.setShortAddress(3);
+    DeviceReference devRef3(dev3, apt);
+    Device& dev4 = apt.allocateDevice(dsid_t(0,4));
+    dev4.setShortAddress(4);
+    DeviceReference devRef4(dev4, apt);
+
+    Modulator modulator(NullDSID);
+
+    Zone& zone1 = apt.allocateZone(modulator, 1);
+    zone1.addDevice(devRef1);
+    zone1.addDevice(devRef2);
+    zone1.addDevice(devRef3);
+    zone1.addDevice(devRef4);
+
+    Set allDevices = apt.getDevices();
+
+    CPPUNIT_ASSERT_EQUAL(dev1, allDevices.getByBusID(1).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev2, allDevices.getByBusID(2).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev3, allDevices.getByBusID(3).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev4, allDevices.getByBusID(4).getDevice());
+
+    CPPUNIT_ASSERT_EQUAL(4, zone1.getDevices().length());
+
+    Zone& zone2 = apt.allocateZone(modulator, 2);
+
+    zone2.addDevice(devRef2);
+    zone2.addDevice(devRef4);
+
+    CPPUNIT_ASSERT_EQUAL(2, zone1.getDevices().length());
+    CPPUNIT_ASSERT_EQUAL(2, zone2.getDevices().length());
+
+    // check that the devices are moved correctly in the zones datamodel
+    Set zone1Devices = zone1.getDevices();
+    CPPUNIT_ASSERT_EQUAL(dev1, zone1Devices.getByBusID(1).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev3, zone1Devices.getByBusID(3).getDevice());
+
+    Set zone2Devices = zone2.getDevices();
+    CPPUNIT_ASSERT_EQUAL(dev2, zone2Devices.getByBusID(2).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev4, zone2Devices.getByBusID(4).getDevice());
+
+    // check the datamodel of the devices
+    CPPUNIT_ASSERT_EQUAL(1, dev1.getZoneID());
+    CPPUNIT_ASSERT_EQUAL(1, dev3.getZoneID());
+
+    CPPUNIT_ASSERT_EQUAL(2, dev2.getZoneID());
+    CPPUNIT_ASSERT_EQUAL(2, dev4.getZoneID());
+
+    // check that the groups are set up correctly
+    // (this should be the case if all test above passed)
+    Set zone1Group0Devices = zone1.getGroup(GroupIDBroadcast)->getDevices();
+    CPPUNIT_ASSERT_EQUAL(dev1, zone1Group0Devices.getByBusID(1).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev3, zone1Group0Devices.getByBusID(3).getDevice());
+
+    Set zone2Group0Devices = zone2.getGroup(GroupIDBroadcast)->getDevices();
+    CPPUNIT_ASSERT_EQUAL(dev2, zone2Group0Devices.getByBusID(2).getDevice());
+    CPPUNIT_ASSERT_EQUAL(dev4, zone2Group0Devices.getByBusID(4).getDevice());
+  } // testZoneMoving
 
   void testSet() {
     Apartment apt(NULL);
