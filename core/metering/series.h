@@ -148,11 +148,12 @@ namespace dss {
   class Series {
   public:
     typedef T value_type;
+    typedef std::deque<value_type> QueueType;
   private:
     int m_Resolution;
     unsigned int m_NumberOfValues;
     Series<T>* m_NextSeries;
-    std::deque<value_type> m_Values;
+    QueueType m_Values;
   private:
     std::string m_Comment;
     dsid_t m_FromDSID;
@@ -179,51 +180,46 @@ namespace dss {
       if(m_Resolution == 0) {
         throw runtime_error("Series::AddValue: m_Resolution is Zero. This will lead to an infinite loop");
       }
+      DateTime bucketTimeStamp(static_cast<time_t>(_value.getTimeStamp().secondsSinceEpoch() - 
+        _value.getTimeStamp().secondsSinceEpoch() % m_Resolution));
       if(!m_Values.empty()) {
         Value& lastVal = m_Values.front();
         DateTime lastValStamp = lastVal.getTimeStamp();
         int diff = _value.getTimeStamp().difference(lastValStamp);
-        if(diff < m_Resolution) {
-          if(m_Values.size() > 1) {
-            lastVal.mergeWith(_value);
-          } else {
-            // if we've got only one value the next incoming value has to be in the next interval
-            DateTime prevStamp = m_Values.front().getTimeStamp();
-            value_type newVal = _value;
-            newVal.setTimeStamp(prevStamp.addSeconds(m_Resolution));
-            m_Values.push_front(newVal);
-          }
+        diff = diff;
+        if(lastValStamp == bucketTimeStamp) {
+          lastVal.mergeWith(_value);
+        } else if (bucketTimeStamp.after(lastValStamp)) {
+          m_Values.push_front(value_type(_value.getValue(), bucketTimeStamp));
         } else {
-          // if we've got more than one value in the queue,
-          // make sure we've got the right interval
-          if(m_Values.size() > 1) {
-
-            typename std::deque<value_type>::iterator iSecondValue = m_Values.begin();
-            advance(iSecondValue, 1);
-            DateTime prevStamp = iSecondValue->getTimeStamp();
-            lastValStamp = prevStamp.addSeconds(m_Resolution);
-            lastVal.setTimeStamp(lastValStamp);
+        	typename QueueType::iterator iValue = m_Values.begin(), e = m_Values.end();
+          while(iValue != e) {
+            DateTime currentStamp = iValue->getTimeStamp();
+            if(currentStamp <= bucketTimeStamp) {
+           		cout << "blah";
+              break;
+            }
+            ++iValue;
           }
-          // add zero values where we don't have any data
-          while(diff > m_Resolution) {
-            diff -= m_Resolution;
-            cout << "filling unknown value" << endl;
-            lastValStamp = lastValStamp.addSeconds(m_Resolution);
-            m_Values.push_front(value_type(m_Values.front().getValue(), lastValStamp));
-          }
-          m_Values.push_front(_value);
-          // if we've got an excess of values
-          while(m_Values.size() > m_NumberOfValues) {
-            m_Values.pop_back();
+          if(bucketTimeStamp == iValue->getTimeStamp()) {
+          	iValue->mergeWith(value_type(_value.getValue(), bucketTimeStamp));
+          } else if (iValue == e) {
+          	m_Values.push_back(value_type(_value.getValue(), bucketTimeStamp));
+          } else {
+						m_Values.insert(iValue, value_type(_value.getValue(), bucketTimeStamp));
           }
         }
       } else {
-        // first value of series
-        m_Values.push_front(_value);
+        // insert at correct point
+        m_Values.push_front(value_type(_value.getValue(), bucketTimeStamp));
+      }
+      while(m_Values.size() > m_NumberOfValues) {
+        m_Values.pop_back();
       }
       if(m_NextSeries != NULL) {
         m_NextSeries->addValue(_value);
       }
+      // if we've got an excess of values
     } // addValue
 
     void addValue(double _value, const DateTime& _timestamp) {

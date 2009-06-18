@@ -196,11 +196,28 @@ namespace dss {
     return difference(_other) < 0;
   } // operator<
 
+	bool DateTime::operator>(const DateTime& _other) const {
+    return difference(_other) > 0;
+  } // operator>
+
+  bool DateTime::operator<=(const DateTime& _other) const {
+    return difference(_other) <= 0;
+  } // operator<=
+
+  bool DateTime::operator>=(const DateTime& _other) const {
+    return difference(_other) >= 0;
+  } // operator>=
+
   int DateTime::difference(const DateTime& _other) const {
     struct tm self = m_DateTime;
     struct tm other = _other.m_DateTime;
     return static_cast<int>(difftime(mktime(&self), mktime(&other)));
   } // difference
+  
+  time_t DateTime::secondsSinceEpoch() const {
+    struct tm self = m_DateTime;
+    return mktime(&self);
+  }
 
   ostream& DateTime::operator<<(ostream& out) const {
     string bla = dateToISOString<string>(&m_DateTime);

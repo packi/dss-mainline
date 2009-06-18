@@ -118,11 +118,23 @@ namespace dss {
     /** Returns true if the instance and _other do not represent the same time and date */
     bool operator!=(const DateTime& _other) const;
     /** Returns true if the instance is before _other.
-      * @see Before */
+      * @see before */
     bool operator<(const DateTime& _other) const;
+    /** Returns true if the instance is after _other.
+      * @see after */
+    bool operator>(const DateTime& _other) const;
+    /** Returns true if the instance is before or equal _other.
+      * @see before */
+    bool operator<=(const DateTime& _other) const;
+    /** Returns true if the instance is after or equal _other.
+      * @see after */
+    bool operator>=(const DateTime& _other) const;
 
     /** Returns the difference in days */
     int difference(const DateTime& _other) const;
+
+    /** Returns the seconds since epoch */
+    time_t secondsSinceEpoch() const;
 
     ostream& operator<<(ostream& out) const;
     operator string() const;
