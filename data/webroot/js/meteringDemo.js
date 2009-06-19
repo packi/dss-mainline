@@ -1,21 +1,4 @@
 var resolutions = ["five_minutes", "one_hour", "one_day", "one_week", "one_month", "one_year"];
-var dSMIDs = [
-				"0000000000000000ffc00011", 
-				"0000000000000000ffc00012", 
-				"0000000000000000ffc00013", 
-				"0000000000000000ffc00014", 
-				"0000000000000000ffc00015", 
-				"0000000000000000ffc00016"
-			];
-var roomNames = [
-				"Arbeitszimmer",
-				"Esszimmer",
-				"Gang",
-				"Wohnzimmer",
-				"Schlafzimmer",
-				"Bad"
-			];
-
 
 var buildingMode = false;
 
@@ -115,7 +98,7 @@ function registerHandlers() {
 	jQuery("#groundFloor").click(function() {
 		jQuery("#groundFloor").addClass("selected");
 		jQuery("#entireBuilding").removeClass("selected");
-		graph.setDSM("0000000000000000ffc00011");
+		graph.setDSM(dSMIDs[0]);
 		jQuery("#firstFloorSelection").attr("src", "views/room_1.png");
 		jQuery("#firstFloorSelectionMap").attr("src", "views/room_1_map.png");
 		jQuery("#viewMode").css({backgroundImage: "url(images/view-mode-3d.png)"});

@@ -16,12 +16,28 @@
 		<script type="text/javascript">
 var graph;
 var reporter;
+var dSMIDs = [
+				"3504175fe0000000ffc00011", 
+				"3504175fe0000000ffc00012", 
+				"3504175fe0000000ffc00013", 
+				"3504175fe0000000ffc00014", 
+				"3504175fe0000000ffc00015", 
+				"3504175fe0000000ffc00016"
+			];
+var roomNames = [
+				"Arbeitszimmer",
+				"Esszimmer",
+				"Gang",
+				"Wohnzimmer",
+				"Schlafzimmer",
+				"Bad"
+			];
 jQuery(document).ready(function() {
 	jQuery(".consumptionOverlay").css({opacity: 0.3});
 	jQuery(".hoverOverlay").css({opacity: 0.2});
 	registerHandlers();
 	updatePowerConsumptionOverlays();
-	graph = new DSGraph("0000000000000000ffc00011");
+	graph = new DSGraph(dSMIDs[0]);
 	graph.start();
 	reporter = new DSMainMeterReport();
 	reporter.start();
