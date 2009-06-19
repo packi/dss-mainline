@@ -182,36 +182,36 @@ namespace dss {
       }
       DateTime bucketTimeStamp(static_cast<time_t>(_value.getTimeStamp().secondsSinceEpoch() - 
         _value.getTimeStamp().secondsSinceEpoch() % m_Resolution));
+      value_type newValue = _value;
+      newValue.setTimeStamp(bucketTimeStamp);
       if(!m_Values.empty()) {
         Value& lastVal = m_Values.front();
         DateTime lastValStamp = lastVal.getTimeStamp();
-        int diff = _value.getTimeStamp().difference(lastValStamp);
-        diff = diff;
         if(lastValStamp == bucketTimeStamp) {
           lastVal.mergeWith(_value);
         } else if (bucketTimeStamp.after(lastValStamp)) {
-          m_Values.push_front(value_type(_value.getValue(), bucketTimeStamp));
+          m_Values.push_front(newValue);
         } else {
-        	typename QueueType::iterator iValue = m_Values.begin(), e = m_Values.end();
+          typename QueueType::iterator iValue = m_Values.begin(), e = m_Values.end();
           while(iValue != e) {
             DateTime currentStamp = iValue->getTimeStamp();
             if(currentStamp <= bucketTimeStamp) {
-           		cout << "blah";
+              cout << "blah";
               break;
             }
             ++iValue;
           }
           if(bucketTimeStamp == iValue->getTimeStamp()) {
-          	iValue->mergeWith(value_type(_value.getValue(), bucketTimeStamp));
+            iValue->mergeWith(_value);
           } else if (iValue == e) {
-          	m_Values.push_back(value_type(_value.getValue(), bucketTimeStamp));
+            m_Values.push_back(newValue);
           } else {
-						m_Values.insert(iValue, value_type(_value.getValue(), bucketTimeStamp));
+            m_Values.insert(iValue, newValue);
           }
         }
       } else {
         // insert at correct point
-        m_Values.push_front(value_type(_value.getValue(), bucketTimeStamp));
+        m_Values.push_front(newValue);
       }
       while(m_Values.size() > m_NumberOfValues) {
         m_Values.pop_back();

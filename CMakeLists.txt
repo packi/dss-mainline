@@ -82,7 +82,7 @@ LINK_DIRECTORIES(${DSS_BINARY_DIR}/core ${DSS_BINARY_DIR}/unix ${DSS_BINARY_DIR}
 SET(BOOST_TEST_LIB)
 IF(WITH_TESTS) 
   ADD_SUBDIRECTORY(tests)
-  SET(BOOST_TEST_LIB boost_unit_test_framework)
+  SET(BOOST_TEST_LIB boost_unit_test_framework-mt)
 ENDIF(WITH_TESTS)
 
 ADD_EXECUTABLE(dss main.cpp namespaces.cpp)

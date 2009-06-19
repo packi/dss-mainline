@@ -66,12 +66,12 @@ BOOST_AUTO_TEST_CASE(readWrite) {
   BOOST_CHECK_EQUAL( 2.0, secondly.getValues().front().getValue() );
 
   secondly.addValue(3, testStart.addSeconds(1));
-  secondly.addValue(4, testStart.addSeconds(1));
   secondly.addValue(5, testStart.addSeconds(1));
+  secondly.addValue(4, testStart.addSeconds(1));
 
   BOOST_CHECK_EQUAL( (size_t)2, secondly.getValues().size() );
   BOOST_CHECK_EQUAL( 2.0, secondly.getValues().front().getMin() );
-  BOOST_CHECK_EQUAL( 5.0, secondly.getValues().front().getValue() );
+  BOOST_CHECK_EQUAL( 4.0, secondly.getValues().front().getValue() );
   BOOST_CHECK_EQUAL( 5.0, secondly.getValues().front().getMax() );
 
   SeriesWriter<CurrentValue> writer;
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(readWrite) {
   BOOST_REQUIRE_MESSAGE( series != NULL, "reading series from file" );
   BOOST_CHECK_EQUAL( (size_t)2, series->getValues().size() );
   BOOST_CHECK_EQUAL( 2.0, series->getValues().front().getMin() );
-  BOOST_CHECK_EQUAL( 5.0, series->getValues().front().getValue() );
+  BOOST_CHECK_EQUAL( 4.0, series->getValues().front().getValue() );
   BOOST_CHECK_EQUAL( 5.0, series->getValues().front().getMax() );
 
   series->setComment("my comment");
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(readWrite) {
   BOOST_REQUIRE_MESSAGE( series != NULL, "reading series from file" );
   BOOST_CHECK_EQUAL( (size_t)2, series->getValues().size() );
   BOOST_CHECK_EQUAL( 2.0, series->getValues().front().getMin() );
-  BOOST_CHECK_EQUAL( 5.0, series->getValues().front().getValue() );
+  BOOST_CHECK_EQUAL( 4.0, series->getValues().front().getValue() );
   BOOST_CHECK_EQUAL( 5.0, series->getValues().front().getMax() );
   BOOST_CHECK_EQUAL( string("my comment"), series->getComment() );
   BOOST_CHECK_EQUAL( string("kW"), series->getUnit() );
@@ -111,7 +111,9 @@ BOOST_AUTO_TEST_CASE(readWriteExtended) {
   int numValues = sizeof(delay)/sizeof(int);
 
 
-  DateTime startTime;
+  DateTime now;
+  DateTime startTime(static_cast<time_t>(now.secondsSinceEpoch() - 
+        now.secondsSinceEpoch() % (5*60)));
 
   Series<CurrentValue> five(5 * 60, 10);
   Series<CurrentValue> minutely(60, 10, &five);
@@ -215,7 +217,7 @@ BOOST_AUTO_TEST_CASE(wrapping) {
 
   // add values 1..60 to minutely (60 values)
   for(int iValue = 1; iValue <= 60; iValue++) {
-    minutely.addValue(iValue, testStart.addMinute(iValue));
+    minutely.addValue(iValue, testStart.addMinute(iValue-1));
   }
 
   const std::deque<AdderValue>& minuteValues = minutely.getValues();
@@ -232,6 +234,8 @@ BOOST_AUTO_TEST_CASE(wrapping) {
   BOOST_CHECK_EQUAL( (size_t)10, fiveminuteValues.size() );
 
   vector<int> fiveMinuteValuesExpected;
+  fiveMinuteValuesExpected.push_back(SeriesAdder<60,5>::value);
+  fiveMinuteValuesExpected.push_back(SeriesAdder<55,5>::value);
   fiveMinuteValuesExpected.push_back(SeriesAdder<50,5>::value);
   fiveMinuteValuesExpected.push_back(SeriesAdder<45,5>::value);
   fiveMinuteValuesExpected.push_back(SeriesAdder<40,5>::value);
@@ -240,8 +244,6 @@ BOOST_AUTO_TEST_CASE(wrapping) {
   fiveMinuteValuesExpected.push_back(SeriesAdder<25,5>::value);
   fiveMinuteValuesExpected.push_back(SeriesAdder<20,5>::value);
   fiveMinuteValuesExpected.push_back(SeriesAdder<15,5>::value);
-  fiveMinuteValuesExpected.push_back(SeriesAdder<10,5>::value);
-  fiveMinuteValuesExpected.push_back(SeriesAdder< 5,5>::value);
 
   // values 50 - 1 should still be present in minutely
   for(std::deque<AdderValue>::const_iterator iValue = fiveminuteValues.begin(), e = fiveminuteValues.end();
@@ -250,23 +252,21 @@ BOOST_AUTO_TEST_CASE(wrapping) {
     BOOST_CHECK_EQUAL( (double)fiveMinuteValuesExpected[distance(fiveminuteValues.begin(), iValue)], iValue->getValue() );
   }
 
-  BOOST_CHECK_EQUAL( (size_t)0, hourly.getValues().size() );
+  BOOST_CHECK_EQUAL( (size_t)1, hourly.getValues().size() );
 
-  minutely.addValue(61, testStart.addMinute(61));
+  double val = SeriesAdder<60,60>::value;
+  BOOST_CHECK_EQUAL( val, hourly.getValues().front().getValue() );
+  
+  minutely.addValue(61, testStart.addMinute(60));
 
   BOOST_TEST_MESSAGE(hourly.getValues().size() << " " << hourly.getValues().front().getValue());
 
-  BOOST_CHECK_EQUAL( (size_t)1, hourly.getValues().size() );
-
-  double val = SeriesAdder<5,5>::value;
-  BOOST_CHECK_EQUAL( val, hourly.getValues().front().getValue() );
-
-  minutely.addValue(62, testStart.addMinute(62));
+  BOOST_CHECK_EQUAL( (size_t)2, hourly.getValues().size() );
 
   SeriesWriter<AdderValue> writer;
   writer.writeToXML(minutely, "/Users/pisco/Desktop/dss/tmpminutely.xml");
 
-  BOOST_CHECK_EQUAL( (size_t)1, hourly.getValues().size() );
+  BOOST_CHECK_EQUAL( (size_t)2, hourly.getValues().size() );
 } // testWrapping
 
 BOOST_AUTO_TEST_SUITE_END()
