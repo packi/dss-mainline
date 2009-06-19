@@ -462,7 +462,9 @@ namespace dss {
     _frame.setFrameSource(fsDSS);
     if(broadcast || sim) {
       log("Sending packet to sim");
-      getDSS().getSimulation().process(_frame);
+      if(DSS::hasInstance()) {
+        getDSS().getSimulation().process(_frame);
+      }
     }
     if(broadcast || !sim) {
       if((m_DS485Controller.getState() == csSlave) || (m_DS485Controller.getState() == csMaster)) {
@@ -484,7 +486,11 @@ namespace dss {
   }
 
   bool DS485Proxy::isSimAddress(const uint8_t _addr) {
-    return getDSS().getSimulation().isSimAddress(_addr);
+    if(DSS::hasInstance()) {
+      return getDSS().getSimulation().isSimAddress(_addr);
+    } else {
+      return true;
+    }
   } // isSimAddress
 
   vector<int> DS485Proxy::getModulators() {
@@ -972,7 +978,9 @@ namespace dss {
   void DS485Proxy::initialize() {
     Subsystem::initialize();
     m_DS485Controller.addFrameCollector(this);
-    getDSS().getSimulation().addFrameCollector(this);
+    if(DSS::hasInstance()) {
+      getDSS().getSimulation().addFrameCollector(this);
+    }
   }
 
   void DS485Proxy::doStart() {

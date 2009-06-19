@@ -7,6 +7,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "tests.h"
+#include <cstdio>
 
 namespace dss {
 
@@ -17,6 +18,7 @@ namespace dss {
 
   static void _init(void) __attribute__ ((constructor));
   static void _init(void) {
+    printf("Testing...\n");
     // make sure timezone gets set
     tzset();
 

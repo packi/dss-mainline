@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(testEmptySubscriptionXML) {
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 } // testEmptySubscriptionXML
 
-void testNonExistingXML() {
+BOOST_AUTO_TEST_CASE(testNonExistingXML) {
   EventInterpreter interpreter(NULL);
 
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(testSubscriptionXML) {
 
   runner.runOnce();
 
-  sleep(12);
+  sleep(3);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
 
@@ -152,6 +152,7 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
   SetBuilder setBuilder;
 
   Apartment apt(NULL);
+  apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setName("dev1");
@@ -189,8 +190,10 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
 
   DSModulatorSim modSim(NULL);
   DS485Proxy proxy(NULL);
+  proxy.initialize();
 
   Apartment apt(NULL);
+  apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setName("dev1");
@@ -236,9 +239,9 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
 
   runner.runOnce();
 
-  sleep(600);
+  sleep(1);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 1);
 
   queue.shutdown();
   interpreter.terminate();

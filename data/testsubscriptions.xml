@@ -3,7 +3,7 @@
   <subscription event-name="event1" handler-name="raise_event">
     <parameter>
       <parameter name="event_name">event2</parameter>
-      <parameter name="time">+10</parameter>
+      <parameter name="time">+2</parameter>
     </parameter>
   </subscription>
   <subscription event-name="event2" handler-name="nonexisting">

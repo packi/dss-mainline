@@ -22,7 +22,7 @@
 <builder buildPath="${workspace_loc:/dss/Debug}" id="cdt.managedbuild.target.gnu.builder.exe.debug.427296680" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.exe.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.archiver.base.634058683" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.967713840" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
-<option id="gnu.cpp.compiler.exe.debug.option.optimization.level.734137773" name="Optimization Level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.optimize" valueType="enumerated"/>
+<option id="gnu.cpp.compiler.exe.debug.option.optimization.level.734137773" name="Optimization Level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.exe.debug.option.debugging.level.99741560" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.option.preprocessor.nostdinc.1147284604" name="Do not search system directories (-nostdinc)" superClass="gnu.cpp.compiler.option.preprocessor.nostdinc"/>
 <option id="gnu.cpp.compiler.option.preprocessor.preprocess.1231112907" name="Preprocess only (-E)" superClass="gnu.cpp.compiler.option.preprocessor.preprocess"/>
@@ -50,7 +50,7 @@
 <option id="gnu.cpp.compiler.option.warnings.nowarn.1854385011" name="Inhibit all warnings (-w)" superClass="gnu.cpp.compiler.option.warnings.nowarn"/>
 <option id="gnu.cpp.compiler.option.warnings.allwarn.2054199582" name="All warnings (-Wall)" superClass="gnu.cpp.compiler.option.warnings.allwarn"/>
 <option id="gnu.cpp.compiler.option.warnings.toerrors.1617358126" name="Warnings as errors (-Werror)" superClass="gnu.cpp.compiler.option.warnings.toerrors" value="true" valueType="boolean"/>
-<option id="gnu.cpp.compiler.option.other.other.1914146518" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -Wall -Werror -Wuninitialized" valueType="string"/>
+<option id="gnu.cpp.compiler.option.other.other.1914146518" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -Wall -Werror" valueType="string"/>
 <option id="gnu.cpp.compiler.option.other.verbose.729351838" name="Verbose (-v)" superClass="gnu.cpp.compiler.option.other.verbose"/>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1757763393" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
