@@ -1,196 +1,163 @@
-/*
- *  modeljstests.cpp
- *  dSS
- *
- *  Created by Patrick Stählin on 4/23/08.
- *  Copyright 2008 __MyCompanyName__. All rights reserved.
- *
- */
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
 
 #include "../core/scripting/modeljs.h"
 #include "../core/event.h"
 #include "../core/eventinterpreterplugins.h"
 
-#include <cppunit/extensions/HelperMacros.h>
-#include <cppunit/BriefTestProgressListener.h>
-#include <cppunit/extensions/TestFactoryRegistry.h>
-
 #include <boost/scoped_ptr.hpp>
-
-#undef CPPUNIT_ASSERT
-#define CPPUNIT_ASSERT(condition) CPPUNIT_ASSERT_EQUAL(true, (condition))
-
 #include <memory>
 
 using namespace std;
-
 using namespace dss;
 
-class ModelTestJS : public CPPUNIT_NS::TestCase
-{
-  CPPUNIT_TEST_SUITE(ModelTestJS);
-  CPPUNIT_TEST(testBasics);
-  CPPUNIT_TEST(testSets);
-  CPPUNIT_TEST(testDevices);
-  CPPUNIT_TEST(testEvents);
-  CPPUNIT_TEST(testSubscriptions);
-  CPPUNIT_TEST_SUITE_END();
+BOOST_AUTO_TEST_SUITE(ModelJS)
 
-public:
-  void setUp(void) {}
-  void tearDown(void) {}
+BOOST_AUTO_TEST_CASE(testBasics) {
+  Apartment apt(NULL);
+  apt.setName("my apartment");
 
 
-protected:
-  void testBasics(void) {
-    Apartment apt(NULL);
-    apt.setName("my apartment");
+  auto_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ModelScriptContextExtension* ext = new ModelScriptContextExtension(apt);
+  env->addExtension(ext);
 
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->loadFromMemory("getName()");
+  string name = ctx->evaluate<string>();
 
-    auto_ptr<ScriptEnvironment> env(new ScriptEnvironment());
-    env->initialize();
-    ModelScriptContextExtension* ext = new ModelScriptContextExtension(apt);
-    env->addExtension(ext);
+  BOOST_CHECK_EQUAL(apt.getName(), name);
 
-    boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-    ctx->loadFromMemory("getName()");
-    string name = ctx->evaluate<string>();
+  ctx.reset(env->getContext());
+  ctx->loadFromMemory("setName('hello'); getName()");
 
-    CPPUNIT_ASSERT_EQUAL(apt.getName(), name);
+  name = ctx->evaluate<string>();
+  ctx.reset();
 
-    ctx.reset(env->getContext());
-    ctx->loadFromMemory("setName('hello'); getName()");
+  BOOST_CHECK_EQUAL(string("hello"), name);
+  BOOST_CHECK_EQUAL(string("hello"), apt.getName());
+} // testBasics
 
-    name = ctx->evaluate<string>();
-    ctx.reset();
+BOOST_AUTO_TEST_CASE(testSets) {
+  Apartment apt(NULL);
+  apt.initialize();
 
-    CPPUNIT_ASSERT_EQUAL(string("hello"), name);
-    CPPUNIT_ASSERT_EQUAL(string("hello"), apt.getName());
-  } // testBasics
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
+  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2.setShortAddress(2);
 
-  void testSets() {
-    Apartment apt(NULL);
-    apt.initialize();
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ModelScriptContextExtension* ext = new ModelScriptContextExtension(apt);
+  env->addExtension(ext);
 
-    Device& dev1 = apt.allocateDevice(dsid_t(0,1));
-    dev1.setShortAddress(1);
-    Device& dev2 = apt.allocateDevice(dsid_t(0,2));
-    dev2.setShortAddress(2);
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->loadFromMemory("var devs = getDevices(); devs.length()");
+  int length = ctx->evaluate<int>();
 
-    boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
-    env->initialize();
-    ModelScriptContextExtension* ext = new ModelScriptContextExtension(apt);
-    env->addExtension(ext);
+  BOOST_CHECK_EQUAL(2, length);
 
-    boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-    ctx->loadFromMemory("var devs = getDevices(); devs.length()");
-    int length = ctx->evaluate<int>();
+  ctx.reset(env->getContext());
+  ctx->loadFromMemory("var devs = getDevices(); var devs2 = getDevices(); devs.combine(devs2)");
+  ctx->evaluate<void>();
+} // testSets
 
-    CPPUNIT_ASSERT_EQUAL(2, length);
+BOOST_AUTO_TEST_CASE(testDevices) {
+  Apartment apt(NULL);
+  apt.initialize();
 
-    ctx.reset(env->getContext());
-    ctx->loadFromMemory("var devs = getDevices(); var devs2 = getDevices(); devs.combine(devs2)");
-    ctx->evaluate<void>();
-  } // testSets
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
+  dev1.setName("dev1");
+  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2.setShortAddress(2);
+  dev2.setName("dev2");
 
-  void testDevices() {
-    Apartment apt(NULL);
-    apt.initialize();
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ModelScriptContextExtension* ext = new ModelScriptContextExtension(apt);
+  env->addExtension(ext);
 
-    Device& dev1 = apt.allocateDevice(dsid_t(0,1));
-    dev1.setShortAddress(1);
-    dev1.setName("dev1");
-    Device& dev2 = apt.allocateDevice(dsid_t(0,2));
-    dev2.setShortAddress(2);
-    dev2.setName("dev2");
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->loadFromMemory("var devs = getDevices();\n"
+                      "var f = function(dev) { print(dev.name); }\n"
+                      "devs.perform(f)\n");
+  ctx->evaluate<void>();
+} // testDevices
 
-    boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
-    env->initialize();
-    ModelScriptContextExtension* ext = new ModelScriptContextExtension(apt);
-    env->addExtension(ext);
+BOOST_AUTO_TEST_CASE(testEvents) {
+  Apartment apt(NULL);
+  apt.initialize();
 
-    boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-    ctx->loadFromMemory("var devs = getDevices();\n"
-                        "var f = function(dev) { print(dev.name); }\n"
-                        "devs.perform(f)\n");
-    ctx->evaluate<void>();
-  }
+  Device& dev = apt.allocateDevice(dsid_t(0,1));
+  dev.setShortAddress(1);
+  dev.setName("dev");
 
-  void testEvents() {
-    Apartment apt(NULL);
-    apt.initialize();
+  EventQueue queue;
+  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+  interpreter.setEventQueue(&queue);
+  interpreter.setEventRunner(&runner);
+  queue.setEventRunner(&runner);
+  runner.setEventQueue(&queue);
 
-    Device& dev = apt.allocateDevice(dsid_t(0,1));
-    dev.setShortAddress(1);
-    dev.setName("dev");
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new ModelScriptContextExtension(apt);
+  env->addExtension(ext);
+  ext = new EventScriptExtension(queue, interpreter);
+  env->addExtension(ext);
 
-    EventQueue queue;
-    EventRunner runner;
-    EventInterpreter interpreter(NULL);
-    interpreter.setEventQueue(&queue);
-    interpreter.setEventRunner(&runner);
-    queue.setEventRunner(&runner);
-    runner.setEventQueue(&queue);
+  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
+  interpreter.addPlugin(plugin);
 
-    boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
-    env->initialize();
-    ScriptExtension* ext = new ModelScriptContextExtension(apt);
-    env->addExtension(ext);
-    ext = new EventScriptExtension(queue, interpreter);
-    env->addExtension(ext);
+  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 
-    EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
-    interpreter.addPlugin(plugin);
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->loadFromMemory("var evt = new event('test');\n"
+                      "evt.raise()\n"
+                      "\n");
+  ctx->evaluate<void>();
+} // testEvents
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+BOOST_AUTO_TEST_CASE(testSubscriptions) {
+  Apartment apt(NULL);
+  apt.initialize();
 
-    boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-    ctx->loadFromMemory("var evt = new event('test');\n"
-                        "evt.raise()\n"
-                        "\n");
-    ctx->evaluate<void>();
-  } // testEvents
+  Device& dev = apt.allocateDevice(dsid_t(0,1));
+  dev.setShortAddress(1);
+  dev.setName("dev");
 
-  void testSubscriptions() {
-    Apartment apt(NULL);
-    apt.initialize();
+  EventQueue queue;
+  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+  interpreter.setEventQueue(&queue);
+  interpreter.setEventRunner(&runner);
+  queue.setEventRunner(&runner);
+  runner.setEventQueue(&queue);
 
-    Device& dev = apt.allocateDevice(dsid_t(0,1));
-    dev.setShortAddress(1);
-    dev.setName("dev");
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new ModelScriptContextExtension(apt);
+  env->addExtension(ext);
+  ext = new EventScriptExtension(queue, interpreter);
+  env->addExtension(ext);
 
-    EventQueue queue;
-    EventRunner runner;
-    EventInterpreter interpreter(NULL);
-    interpreter.setEventQueue(&queue);
-    interpreter.setEventRunner(&runner);
-    queue.setEventRunner(&runner);
-    runner.setEventQueue(&queue);
+  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
+  interpreter.addPlugin(plugin);
 
-    boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
-    env->initialize();
-    ScriptExtension* ext = new ModelScriptContextExtension(apt);
-    env->addExtension(ext);
-    ext = new EventScriptExtension(queue, interpreter);
-    env->addExtension(ext);
+  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 
-    EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
-    interpreter.addPlugin(plugin);
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->loadFromMemory("var s = new subscription('test', 'test', { 'param1': 1, 'param2': 2, 'string': 'string'} );\n"
+                      "s.subscribe();\n"
+                      "\n");
+  ctx->evaluate<void>();
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 1);
+} // testSubscriptions
 
-    boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-    ctx->loadFromMemory("var s = new subscription('test', 'test', { 'param1': 1, 'param2': 2, 'string': 'string'} );\n"
-                        "s.subscribe();\n"
-                        "\n");
-    ctx->evaluate<void>();
-
-    CPPUNIT_ASSERT_EQUAL(interpreter.getNumberOfSubscriptions(), 1);
-  } // testSubscriptions
-
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION(ModelTestJS);
-
-
-
+BOOST_AUTO_TEST_SUITE_END()

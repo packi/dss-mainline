@@ -131,7 +131,9 @@ namespace dss {
 
   void EventInterpreter::initialize() {
     Subsystem::initialize();
-    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptionfile", getDSS().getDataDirectory() + "subscriptions.xml", true, false);
+    if(DSS::hasInstance()) {
+      getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptionfile", getDSS().getDataDirectory() + "subscriptions.xml", true, false);
+    }
   } // initialize
 
   void EventInterpreter::addPlugin(EventInterpreterPlugin* _plugin) {
@@ -139,7 +141,9 @@ namespace dss {
   } // addPlugin
 
   void EventInterpreter::execute() {
-    loadFromXML(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptionfile"));
+    if(DSS::hasInstance()) {
+      loadFromXML(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptionfile"));
+    }
 
     if(m_Queue == NULL) {
       Logger::getInstance()->log("EventInterpreter: No queue set. Can't work like that... exiting...", lsFatal);

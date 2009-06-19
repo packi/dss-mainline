@@ -1,42 +1,33 @@
-/*
- *  tests.cpp
- *  dSS
- *
- *  Created by Patrick Stählin on 4/11/08.
- *  Copyright 2008 __MyCompanyName__. All rights reserved.
- *
- */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#define BOOST_TEST_MAIN
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
 
 #include "tests.h"
-
-#include <cppunit/TestRunner.h>
-#include <cppunit/TestResult.h>
-#include <cppunit/TestResultCollector.h>
-#include <cppunit/extensions/HelperMacros.h>
-#include <cppunit/BriefTestProgressListener.h>
-#include <cppunit/extensions/TestFactoryRegistry.h>
-
 
 namespace dss {
 
   bool Tests::run() {
-    //--- Create the event manager and test controller
-    CPPUNIT_NS::TestResult controller;
-
-    //--- Add a listener that colllects test result
-    CPPUNIT_NS::TestResultCollector result;
-    controller.addListener( &result );
-
-    //--- Add a listener that print dots as test run.
-    CPPUNIT_NS::BriefTestProgressListener progress;
-    controller.addListener( &progress );
-
-    //--- Add the top suite to the test runner
-    CPPUNIT_NS::TestRunner runner;
-    runner.addTest( CPPUNIT_NS::TestFactoryRegistry::getRegistry().makeTest() );
-    runner.run( controller );
-
-    return result.wasSuccessful();
+    return true;
   }
+
+
+  static void _init(void) __attribute__ ((constructor));
+  static void _init(void) {
+    // make sure timezone gets set
+    tzset();
+
+    char* tzNameCopy = strdup("GMT");
+    tzname[0] = tzname[1] = tzNameCopy;
+    timezone = 0;
+    daylight = 0;
+
+    setenv("TZ", "UTC", 1);
+  }
+
+
 
 }

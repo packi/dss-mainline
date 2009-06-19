@@ -1,130 +1,100 @@
-/*
- *  datetoolstests.cpp
- *  dSS
- *
- *  Created by Patrick Stählin on 4/17/08.
- *  Copyright 2008 __MyCompanyName__. All rights reserved.
- *
- */
-
-#include <cassert>
-
-#include <cppunit/extensions/HelperMacros.h>
-#include <cppunit/BriefTestProgressListener.h>
-#include <cppunit/extensions/TestFactoryRegistry.h>
-
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
 
 #include "../core/datetools.h"
 
-#undef CPPUNIT_ASSERT
-#define CPPUNIT_ASSERT(condition) CPPUNIT_ASSERT_EQUAL(true, (condition))
-
 using namespace dss;
 
-class DateToolsTest : public CPPUNIT_NS::TestCase
-{
-  CPPUNIT_TEST_SUITE(DateToolsTest);
-  CPPUNIT_TEST(testSimpleDates);
-  CPPUNIT_TEST(testAddingComparing);
-  CPPUNIT_TEST(testStaticSchedule);
-  CPPUNIT_TEST(testDynamicSchedule);
-  CPPUNIT_TEST(testDynamicScheduleICal);
-  CPPUNIT_TEST_SUITE_END();
+BOOST_AUTO_TEST_SUITE(DateTools)
 
-public:
-  void setUp(void) {}
-  void tearDown(void) {}
+BOOST_AUTO_TEST_CASE(testSimpleDates) {
+  DateTime dt;
+  dt.clear();
+  BOOST_CHECK_EQUAL(dt.getDay(), 0);
+  BOOST_CHECK_EQUAL(dt.getMonth(), 0);
+  BOOST_CHECK_EQUAL(dt.getYear(), 1900);
+  BOOST_CHECK_EQUAL(dt.getSecond(), 0);
+  BOOST_CHECK_EQUAL(dt.getMinute(), 0);
+  BOOST_CHECK_EQUAL(dt.getHour(), 0);
 
-protected:
-  void testSimpleDates(void) {
-    DateTime dt;
-    dt.clear();
-    CPPUNIT_ASSERT_EQUAL(dt.getDay(), 0);
-    CPPUNIT_ASSERT_EQUAL(dt.getMonth(), 0);
-    CPPUNIT_ASSERT_EQUAL(dt.getYear(), 1900);
-    CPPUNIT_ASSERT_EQUAL(dt.getSecond(), 0);
-    CPPUNIT_ASSERT_EQUAL(dt.getMinute(), 0);
-    CPPUNIT_ASSERT_EQUAL(dt.getHour(), 0);
+  dt.setDate(1, January, 2008);
+  dt.validate();
 
-    dt.setDate(1, January, 2008);
-    dt.validate();
+  BOOST_CHECK_EQUAL(dt.getWeekday(), Tuesday);
 
-    CPPUNIT_ASSERT_EQUAL(dt.getWeekday(), Tuesday);
+  DateTime dt2 = dt.addDay(1);
 
-    DateTime dt2 = dt.addDay(1);
+  BOOST_CHECK_EQUAL(dt2.getWeekday(), Wednesday);
 
-    CPPUNIT_ASSERT_EQUAL(dt2.getWeekday(), Wednesday);
+  DateTime dt3 = dt2.addDay(-2);
 
-    DateTime dt3 = dt2.addDay(-2);
+  BOOST_CHECK_EQUAL(dt3.getWeekday(), Monday);
+  BOOST_CHECK_EQUAL(dt3.getYear(), 2007);
+} // testSimpleDates
 
-    CPPUNIT_ASSERT_EQUAL(dt3.getWeekday(), Monday);
-    CPPUNIT_ASSERT_EQUAL(dt3.getYear(), 2007);
-  }
+BOOST_AUTO_TEST_CASE(testAddingComparing) {
+  DateTime dt;
+  DateTime dt2 = dt.addHour(1);
 
-  void testAddingComparing(void) {
-    DateTime dt;
-    DateTime dt2 = dt.addHour(1);
+  assert(dt2.after(dt));
+  assert(!dt2.before(dt));
+  assert(dt.before(dt2));
+  assert(!dt.after(dt2));
 
-    assert(dt2.after(dt));
-    assert(!dt2.before(dt));
-    assert(dt.before(dt2));
-    assert(!dt.after(dt2));
+  BOOST_CHECK(dt2.after(dt));
+  BOOST_CHECK(!dt2.before(dt));
+  BOOST_CHECK(dt.before(dt2));
+  BOOST_CHECK(!dt.after(dt2));
+} // testAddingComparing
 
-    CPPUNIT_ASSERT(dt2.after(dt));
-    CPPUNIT_ASSERT(!dt2.before(dt));
-    CPPUNIT_ASSERT(dt.before(dt2));
-    CPPUNIT_ASSERT(!dt.after(dt2));
-  }
+BOOST_AUTO_TEST_CASE(testStaticSchedule) {
+  DateTime when;
+  when.setDate(15, April, 2008);
+  when.setTime(10, 00, 00);
 
-  void testStaticSchedule() {
-    DateTime when;
-    when.setDate(15, April, 2008);
-    when.setTime(10, 00, 00);
+  StaticSchedule schedule(when);
 
-    StaticSchedule schedule(when);
+  BOOST_CHECK_EQUAL(when, schedule.getNextOccurence(when.addMinute(-1)));
+  BOOST_CHECK_EQUAL(DateTime::NullDate, schedule.getNextOccurence(when.addMinute(1)));
 
-    CPPUNIT_ASSERT_EQUAL(when, schedule.getNextOccurence(when.addMinute(-1)));
-    CPPUNIT_ASSERT_EQUAL(DateTime::NullDate, schedule.getNextOccurence(when.addMinute(1)));
+  vector<DateTime> schedList = schedule.getOccurencesBetween(when.addMinute(-1), when.addMinute(1));
+  BOOST_CHECK_EQUAL(static_cast<size_t>(1), schedList.size());
 
-    vector<DateTime> schedList = schedule.getOccurencesBetween(when.addMinute(-1), when.addMinute(1));
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), schedList.size());
+  schedList = schedule.getOccurencesBetween(when.addMinute(1), when.addMinute(2));
+  BOOST_CHECK_EQUAL(static_cast<size_t>(0), schedList.size());
+} // testStaticSchedule
 
-    schedList = schedule.getOccurencesBetween(when.addMinute(1), when.addMinute(2));
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), schedList.size());
-  }
+BOOST_AUTO_TEST_CASE(testDynamicSchedule) {
+  DateTime when;
+  when.setDate(15, April, 2008);
+  when.setTime(10, 00, 00);
 
-  void testDynamicSchedule() {
-    DateTime when;
-    when.setDate(15, April, 2008);
-    when.setTime(10, 00, 00);
+  RepeatingSchedule schedule(Minutely, 5, when);
 
-    RepeatingSchedule schedule(Minutely, 5, when);
+  BOOST_CHECK_EQUAL(when,              schedule.getNextOccurence(when.addSeconds(-1)));
+  BOOST_CHECK_EQUAL(when.addMinute(5), schedule.getNextOccurence(when.addSeconds(1)));
 
-    CPPUNIT_ASSERT_EQUAL(when,              schedule.getNextOccurence(when.addSeconds(-1)));
-    CPPUNIT_ASSERT_EQUAL(when.addMinute(5), schedule.getNextOccurence(when.addSeconds(1)));
+  vector<DateTime> v = schedule.getOccurencesBetween(when, when.addMinute(10));
 
-    vector<DateTime> v = schedule.getOccurencesBetween(when, when.addMinute(10));
+  BOOST_CHECK_EQUAL(static_cast<size_t>(3), v.size());
+  BOOST_CHECK_EQUAL(when, v[0]);
+  BOOST_CHECK_EQUAL(when.addMinute(5), v[1]);
+  BOOST_CHECK_EQUAL(when.addMinute(10), v[2]);
+} // testDynamicSchedule
 
-    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3), v.size());
-    CPPUNIT_ASSERT_EQUAL(when, v[0]);
-    CPPUNIT_ASSERT_EQUAL(when.addMinute(5), v[1]);
-    CPPUNIT_ASSERT_EQUAL(when.addMinute(10), v[2]);
-  }
+BOOST_AUTO_TEST_CASE(testDynamicScheduleICal) {
+  ICalSchedule sched("FREQ=MINUTELY;INTERVAL=2", "20080505T080000Z");
 
-  void testDynamicScheduleICal() {
-    ICalSchedule sched("FREQ=MINUTELY;INTERVAL=2", "20080505T080000Z");
+  DateTime startTime = DateTime::fromISO("20080505T080000Z");
 
-    DateTime startTime = DateTime::fromISO("20080505T080000Z");
+  DateTime firstRecurr = sched.getNextOccurence(startTime);
+  BOOST_CHECK_EQUAL(startTime, firstRecurr);
 
-    DateTime firstRecurr = sched.getNextOccurence(startTime);
-    CPPUNIT_ASSERT_EQUAL(startTime, firstRecurr);
+  DateTime startPlusOneSec = startTime.addSeconds(1);
+  DateTime nextRecurr = sched.getNextOccurence(startPlusOneSec);
+  BOOST_CHECK_EQUAL(startTime.addMinute(2), nextRecurr);
+} // testDynamicScheduleICal
 
-    DateTime startPlusOneSec = startTime.addSeconds(1);
-    DateTime nextRecurr = sched.getNextOccurence(startPlusOneSec);
-    CPPUNIT_ASSERT_EQUAL(startTime.addMinute(2), nextRecurr);
-  }
-
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION(DateToolsTest);
+BOOST_AUTO_TEST_SUITE_END()
 

@@ -1,19 +1,24 @@
 /*
- *  Copyright:
- *  (c) 2008 by
- *  futureLAB AG
- *  Schwalmenackerstrasse 4
- *  CH-8400 Winterthur / Schweiz
- *  Alle Rechte vorbehalten.
- *  Jede Art der Vervielfaeltigung, Verbreitung,
- *  Auswertung oder Veraenderung - auch auszugsweise -
- *  ist ohne vorgaengige schriftliche Genehmigung durch
- *  die futureLAB AG untersagt.
- *
- * Last change $Date$
- * by $Author$
-*/
+    Copyright (c) 2009 by digitalSTROM.org, Zurich, Switzerland
 
+    This file is part of digitalSTROM Server.
+
+    digitalSTROM Server is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    digitalSTROM Server is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
+
+    Last change $Date$
+    by $Author$
+*/
 
 
 #ifdef HAVE_CONFIG_H
@@ -33,6 +38,11 @@
 #include <getopt.h>
 
 #include <boost/program_options.hpp>
+
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+
 
 #ifdef USE_LIBXML
   #include <libxml/tree.h>
@@ -54,6 +64,13 @@ pair<string, string> parse_prop(const string& s)
     } else {
       return make_pair(string(), string());
     }
+}
+
+bool init_unit_test() {
+  using namespace ::boost::unit_test;
+  //assign_op( framework::master_test_suite().p_name.value, "Tests", 0 );
+
+    return true;
 }
 
 int main (int argc, char* argv[]) {
@@ -143,7 +160,8 @@ int main (int argc, char* argv[]) {
   cout << "compiled WITH_TESTS" << endl;
   if(runTests) {
     cout << "running tests" << endl;
-    dss::Tests::run();
+    char* params[2] = {"--report_level=detailed", "--log_level=all"};
+    ::boost::unit_test::unit_test_main( &init_unit_test, 2,  &params[0] );
     cout << "done running tests" << endl;
   }
 #endif

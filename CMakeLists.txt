@@ -79,12 +79,15 @@ ADD_SUBDIRECTORY(external)
 
 LINK_DIRECTORIES(${DSS_BINARY_DIR}/core ${DSS_BINARY_DIR}/unix ${DSS_BINARY_DIR}/tests)
 
+SET(BOOST_TEST_LIB)
 IF(WITH_TESTS) 
   ADD_SUBDIRECTORY(tests)
+  SET(BOOST_TEST_LIB boost_unit_test_framework)
 ENDIF(WITH_TESTS)
 
 ADD_EXECUTABLE(dss main.cpp namespaces.cpp)
 
 LINK_LIBRARIES(gsoap++)
 
-TARGET_LINK_LIBRARIES(dss tests core unix webservices pthread shttpd ical dl PocoXML ${MOZJS} cppunit ${DNS_SD_LIB})
+TARGET_LINK_LIBRARIES(dss tests core unix webservices pthread shttpd
+	ical dl PocoXML ${MOZJS} ${DNS_SD_LIB} ${BOOST_TEST_LIB})

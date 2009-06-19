@@ -1,14 +1,6 @@
- /*
- * eventtests.cpp
- *
- *  Created on: Nov 7, 2008
- *      Author: patrick
- */
-
-#include <cppunit/extensions/HelperMacros.h>
-#include <cppunit/BriefTestProgressListener.h>
-#include <cppunit/extensions/TestFactoryRegistry.h>
-
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
 
 #include "../core/event.h"
 #include "../core/eventinterpreterplugins.h"
@@ -18,260 +10,239 @@
 
 using namespace dss;
 
-#undef CPPUNIT_ASSERT
-#define CPPUNIT_ASSERT(condition) CPPUNIT_ASSERT_EQUAL(true, (condition))
+BOOST_AUTO_TEST_SUITE(Events)
 
-class EventTest : public CPPUNIT_NS::TestCase
-{
-  CPPUNIT_TEST_SUITE(EventTest);
-//  CPPUNIT_TEST(testSimpleEvent);
-//  CPPUNIT_TEST(testSubscription);
-//  CPPUNIT_TEST(testEmptySubscriptionXML);
-//  CPPUNIT_TEST(testNonExistingXML);
-//  CPPUNIT_TEST(testSubscriptionXML);
-//  CPPUNIT_TEST(testSetBuilder);
-//  CPPUNIT_TEST(testDS485Events);
-  CPPUNIT_TEST_SUITE_END();
+BOOST_AUTO_TEST_CASE(testSimpleEvent) {
+  EventQueue queue;
+  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+  interpreter.setEventQueue(&queue);
+  interpreter.setEventRunner(&runner);
+  interpreter.run();
 
-public:
-  void setUp(void) {}
-  void tearDown(void) {}
+  boost::shared_ptr<Event> pEvent(new Event("event1"));
 
-protected:
+  queue.pushEvent(pEvent);
 
-  void testSimpleEvent(void) {
-    EventQueue queue;
-    EventRunner runner;
-    EventInterpreter interpreter(NULL);
-    interpreter.setEventQueue(&queue);
-    interpreter.setEventRunner(&runner);
-    interpreter.run();
+  sleep(1);
 
-    boost::shared_ptr<Event> pEvent(new Event("event1"));
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 1);
 
-    queue.pushEvent(pEvent);
+  pEvent.reset(new Event("event2"));
 
-    sleep(1);
+  queue.pushEvent(pEvent);
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getEventsProcessed(), 1);
+  sleep(1);
 
-    pEvent.reset(new Event("event2"));
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
 
-    queue.pushEvent(pEvent);
+  queue.shutdown();
+  interpreter.terminate();
+  sleep(2);
+} // testSimpleEvent
 
-    sleep(1);
+BOOST_AUTO_TEST_CASE(testSubscription) {
+  EventQueue queue;
+  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+  interpreter.setEventQueue(&queue);
+  interpreter.setEventRunner(&runner);
+  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
+  interpreter.addPlugin(plugin);
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getEventsProcessed(), 2);
+  interpreter.run();
 
-    queue.shutdown();
-    interpreter.terminate();
-    sleep(2);
-  } // testSimpleEvent
+  boost::shared_ptr<Event> pEvent(new Event("my_event"));
 
-  void testSubscription() {
-    EventQueue queue;
-    EventRunner runner;
-    EventInterpreter interpreter(NULL);
-    interpreter.setEventQueue(&queue);
-    interpreter.setEventRunner(&runner);
-    EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
-    interpreter.addPlugin(plugin);
+  boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
+  opts->setParameter("event_name", "event1");
+  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", opts));
+  interpreter.subscribe(subscription);
 
-    interpreter.run();
+  queue.pushEvent(pEvent);
 
-    boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  sleep(1);
 
-    boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
-    opts->setParameter("event_name", "event1");
-    boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", opts));
-    interpreter.subscribe(subscription);
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
 
-    queue.pushEvent(pEvent);
+  pEvent.reset(new Event("event2"));
 
-    sleep(1);
+  queue.pushEvent(pEvent);
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getEventsProcessed(), 2);
+  sleep(1);
 
-    pEvent.reset(new Event("event2"));
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 3);
 
-    queue.pushEvent(pEvent);
+  queue.shutdown();
+  interpreter.terminate();
+  sleep(2);
+} // testSubscription
 
-    sleep(1);
+BOOST_AUTO_TEST_CASE(testEmptySubscriptionXML) {
+  EventQueue queue;
+  EventInterpreter interpreter(NULL);
+  interpreter.setEventQueue(&queue);
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getEventsProcessed(), 3);
+  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 
-    queue.shutdown();
-    interpreter.terminate();
-    sleep(2);
-  } // testSubscription
+  interpreter.loadFromXML("data/testsubscriptions_empty.xml");
 
-  void testEmptySubscriptionXML() {
-    EventQueue queue;
-    EventInterpreter interpreter(NULL);
-    interpreter.setEventQueue(&queue);
+  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+} // testEmptySubscriptionXML
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+void testNonExistingXML() {
+  EventInterpreter interpreter(NULL);
 
-    interpreter.loadFromXML("data/testsubscriptions_empty.xml");
+  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
-  } // testEmptySubscriptionXML
+  try {
+    interpreter.loadFromXML("data/iwillnever_be_a_subscription.xml");
+  } catch(runtime_error& e) {
+  }
 
-  void testNonExistingXML() {
-    EventInterpreter interpreter(NULL);
+  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+} // testNonExistingXML
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+BOOST_AUTO_TEST_CASE(testSubscriptionXML) {
+  EventQueue queue;
+  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+  interpreter.setEventQueue(&queue);
+  interpreter.setEventRunner(&runner);
+  queue.setEventRunner(&runner);
+  runner.setEventQueue(&queue);
+  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
+  interpreter.addPlugin(plugin);
 
-    try {
-      interpreter.loadFromXML("data/iwillnever_be_a_subscription.xml");
-    } catch(runtime_error& e) {
-    }
+  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
-  } // testNonExistingXML
+  try {
+    interpreter.loadFromXML("data/testsubscriptions.xml");
+  } catch(runtime_error& e) {
+  }
 
-  void testSubscriptionXML() {
-    EventQueue queue;
-    EventRunner runner;
-    EventInterpreter interpreter(NULL);
-    interpreter.setEventQueue(&queue);
-    interpreter.setEventRunner(&runner);
-    queue.setEventRunner(&runner);
-    runner.setEventQueue(&queue);
-    EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
-    interpreter.addPlugin(plugin);
+  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 2);
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 0);
 
-    try {
-      interpreter.loadFromXML("data/testsubscriptions.xml");
-    } catch(runtime_error& e) {
-    }
+  interpreter.run();
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getNumberOfSubscriptions(), 2);
+  sleep(1);
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getEventsProcessed(), 0);
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 0);
 
-    interpreter.run();
+  boost::shared_ptr<Event> evt(new Event("event1"));
+  queue.pushEvent(evt);
 
-    sleep(1);
+  sleep(1);
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getEventsProcessed(), 0);
+  runner.runOnce();
 
-    boost::shared_ptr<Event> evt(new Event("event1"));
-    queue.pushEvent(evt);
+  sleep(12);
 
-    sleep(1);
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
 
-    runner.runOnce();
-
-    sleep(12);
-
-    CPPUNIT_ASSERT_EQUAL(interpreter.getEventsProcessed(), 2);
-
-    queue.shutdown();
-    interpreter.terminate();
-    sleep(1);
-  } // testSubscriptionXML
+  queue.shutdown();
+  interpreter.terminate();
+  sleep(1);
+} // testSubscriptionXML
 
 
-  void testSetBuilder() {
-    SetBuilder setBuilder;
+BOOST_AUTO_TEST_CASE(testSetBuilder) {
+  SetBuilder setBuilder;
 
-    Apartment apt(NULL);
+  Apartment apt(NULL);
 
-    Device& dev1 = apt.allocateDevice(dsid_t(0,1));
-    dev1.setName("dev1");
-    dev1.setShortAddress(1);
-    Device& dev2 = apt.allocateDevice(dsid_t(0,2));
-    dev2.setName("dev2");
-    dev2.setShortAddress(2);
-    Device& dev3 = apt.allocateDevice(dsid_t(0,3));
-    dev3.setName("dev3");
-    dev3.setShortAddress(3);
-    Device& dev4 = apt.allocateDevice(dsid_t(0,4));
-    dev4.setName("dev4");
-    dev4.setShortAddress(4);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setName("dev1");
+  dev1.setShortAddress(1);
+  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2.setName("dev2");
+  dev2.setShortAddress(2);
+  Device& dev3 = apt.allocateDevice(dsid_t(0,3));
+  dev3.setName("dev3");
+  dev3.setShortAddress(3);
+  Device& dev4 = apt.allocateDevice(dsid_t(0,4));
+  dev4.setName("dev4");
+  dev4.setShortAddress(4);
 
-    Set res = setBuilder.buildSet("", &apt.getZone(0));
-    CPPUNIT_ASSERT_EQUAL(res.length(), 4);
+  Set res = setBuilder.buildSet("", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(res.length(), 4);
 
-    res = setBuilder.buildSet("dev1", &apt.getZone(0));
-    CPPUNIT_ASSERT_EQUAL(res.length(), 1);
-    CPPUNIT_ASSERT_EQUAL(res.get(0).getDevice().getName(), string("dev1"));
+  res = setBuilder.buildSet("dev1", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(res.length(), 1);
+  BOOST_CHECK_EQUAL(res.get(0).getDevice().getName(), string("dev1"));
 
-    res = setBuilder.buildSet("dev2", &apt.getZone(0));
-    CPPUNIT_ASSERT_EQUAL(res.length(), 1);
-    CPPUNIT_ASSERT_EQUAL(res.get(0).getDevice().getName(), string("dev2"));
+  res = setBuilder.buildSet("dev2", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(res.length(), 1);
+  BOOST_CHECK_EQUAL(res.get(0).getDevice().getName(), string("dev2"));
 } // testSetBuilder
 
-  void testDS485Events() {
-    EventQueue queue;
-    EventRunner runner;
-    EventInterpreter interpreter(NULL);
-    interpreter.setEventQueue(&queue);
-    interpreter.setEventRunner(&runner);
-    queue.setEventRunner(&runner);
-    runner.setEventQueue(&queue);
+BOOST_AUTO_TEST_CASE(testDS485Events) {
+  EventQueue queue;
+  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+  interpreter.setEventQueue(&queue);
+  interpreter.setEventRunner(&runner);
+  queue.setEventRunner(&runner);
+  runner.setEventQueue(&queue);
 
-    DSModulatorSim modSim(NULL);
-    DS485Proxy proxy(NULL);
+  DSModulatorSim modSim(NULL);
+  DS485Proxy proxy(NULL);
 
-    Apartment apt(NULL);
+  Apartment apt(NULL);
 
-    Device& dev1 = apt.allocateDevice(dsid_t(0,1));
-    dev1.setName("dev1");
-    dev1.setShortAddress(1);
-    Device& dev2 = apt.allocateDevice(dsid_t(0,2));
-    dev2.setName("dev2");
-    dev2.setShortAddress(2);
-    Device& dev3 = apt.allocateDevice(dsid_t(0,3));
-    dev3.setName("dev3");
-    dev3.setShortAddress(3);
-    Device& dev4 = apt.allocateDevice(dsid_t(0,4));
-    dev4.setName("dev4");
-    dev4.setShortAddress(4);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setName("dev1");
+  dev1.setShortAddress(1);
+  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2.setName("dev2");
+  dev2.setShortAddress(2);
+  Device& dev3 = apt.allocateDevice(dsid_t(0,3));
+  dev3.setName("dev3");
+  dev3.setShortAddress(3);
+  Device& dev4 = apt.allocateDevice(dsid_t(0,4));
+  dev4.setName("dev4");
+  dev4.setShortAddress(4);
 
 
-    EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
-    interpreter.addPlugin(plugin);
-    plugin = new EventInterpreterPluginDS485(&proxy, &interpreter);
-    interpreter.addPlugin(plugin);
+  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
+  interpreter.addPlugin(plugin);
+  plugin = new EventInterpreterPluginDS485(&proxy, &interpreter);
+  interpreter.addPlugin(plugin);
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 
-    try {
-      interpreter.loadFromXML("data/testsubscriptions_DS485.xml");
-    } catch(runtime_error& e) {
-    }
+  try {
+    interpreter.loadFromXML("data/testsubscriptions_DS485.xml");
+  } catch(runtime_error& e) {
+  }
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getNumberOfSubscriptions(), 3);
+  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 3);
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getEventsProcessed(), 0);
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 0);
 
-    interpreter.run();
+  interpreter.run();
 
-    sleep(1);
+  sleep(1);
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getEventsProcessed(), 0);
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 0);
 
-    boost::shared_ptr<Event> evt(new Event("brighter", &apt.getZone(0)));
-    evt->setLocation("dev1");
-    queue.pushEvent(evt);
+  boost::shared_ptr<Event> evt(new Event("brighter", &apt.getZone(0)));
+  evt->setLocation("dev1");
+  queue.pushEvent(evt);
 
-    sleep(1);
+  sleep(1);
 
-    runner.runOnce();
+  runner.runOnce();
 
-    sleep(600);
+  sleep(600);
 
-    CPPUNIT_ASSERT_EQUAL(interpreter.getEventsProcessed(), 2);
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
 
-    queue.shutdown();
-    interpreter.terminate();
-    sleep(1);
-  } // testDS485Events
+  queue.shutdown();
+  interpreter.terminate();
+  sleep(1);
+} // testDS485Events
 
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION(EventTest);
+BOOST_AUTO_TEST_SUITE_END()
