@@ -69,9 +69,25 @@ namespace dss {
 
 
 	if(_zone.getDevices().length() == _set.length()) {
-	  fittingGroups.push_back(_zone.getGroup(GroupIDBroadcast));
 	  Logger::getInstance()->log(string("Optimization: Set contains all devices of zone ") + intToString(_zone.getZoneID()));
-	} else {
+      bitset<63> possibleGroups;
+      possibleGroups.set();
+      for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
+        possibleGroups &= _set[iDevice].getDevice().getGroupBitmask();
+	  }
+	  if(possibleGroups.any()) {
+        for(unsigned int iGroup = 0; iGroup < possibleGroups.size(); iGroup++) {
+          if(possibleGroups.test(iGroup)) {
+            Logger::getInstance()->log("Sending the command to group " + intToString(iGroup + 1));
+            fittingGroups.push_back(_zone.getGroup(iGroup + 1));
+            break;
+          }
+        }
+      } else {
+        Logger::getInstance()->log("Sending the command to broadcast group");
+  	    fittingGroups.push_back(_zone.getGroup(GroupIDBroadcast));
+  	  }
+    } else {
 	    vector<Group*> unsuitableGroups;
 	    Set workingCopy = _set;
 
@@ -239,7 +255,7 @@ namespace dss {
     }
 
     return result;
-  }
+  } // bestFit(const Set&)
 
   vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Set& _set, int _param) {
     if(_set.length() == 1) {

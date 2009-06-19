@@ -289,6 +289,10 @@ namespace dss {
   bitset<63>& Device::getGroupBitmask() {
     return m_GroupBitmask;
   } // getGroupBitmask
+  
+  const bitset<63>& Device::getGroupBitmask() const {
+    return m_GroupBitmask;
+  } // getGroupBitmask  
 
   bool Device::isInGroup(const int _groupID) const {
     return (_groupID == 0) || m_GroupBitmask.test(_groupID - 1);

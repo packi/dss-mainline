@@ -226,6 +226,8 @@ namespace dss {
     void setLocationZ(const double _value);
 
     bitset<63>& getGroupBitmask();
+    const bitset<63>& getGroupBitmask() const;
+    
     bool isInGroup(const int _groupID) const;
     void addToGroup(const int _groupID);
 
