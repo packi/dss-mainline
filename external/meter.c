@@ -1,3 +1,24 @@
+/*
+    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009 futureLAB AG, Winterthur, Switzerland
+
+    This file is part of digitalSTROM Server.
+
+    digitalSTROM Server is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    digitalSTROM Server is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 #include <pic16f628.h>
 
 // Fake power-meter
@@ -22,7 +43,7 @@ static void initializePorts() {
   CMCON = 0x07; // disable comparators
   PORTA = 0x00;
   PORTB = 0x05; // set tx & rb0 to 1
-  
+
   TRISA = 0xFF;
   TRISB = 0xF2;
 
@@ -61,7 +82,7 @@ void main() {
   unsigned char buf[7];
 
 
- 
+
   initializePorts();
   meterValue = 0;
   out = 0xFF;
@@ -79,7 +100,7 @@ void main() {
       do {
         //buf[i] = '0' + tmp % 10;
         //i++;
-	putch('0' + tmp % 10);	
+	putch('0' + tmp % 10);
       } while( (tmp /= 10) != 0);
       //while(i > 0) {
        // putch(buf[i]);
@@ -100,8 +121,8 @@ void main() {
 static void sleep() {
   unsigned int counter1;
   unsigned int counter2;
-  
-  counter1 = 0xFFFF;  
+
+  counter1 = 0xFFFF;
   while(counter1 > 0) {
     counter1--;
     counter2 = 0xFFFF;

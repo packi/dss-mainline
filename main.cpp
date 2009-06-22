@@ -1,5 +1,6 @@
 /*
-    Copyright (c) 2009 by digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009 futureLAB AG, Winterthur, Switzerland
 
     This file is part of digitalSTROM Server.
 
