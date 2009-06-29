@@ -217,7 +217,6 @@ namespace dss {
           while(iValue != e) {
             DateTime currentStamp = iValue->getTimeStamp();
             if(currentStamp <= bucketTimeStamp) {
-              cout << "blah";
               break;
             }
             ++iValue;
@@ -264,6 +263,33 @@ namespace dss {
     void set(const string& _key, const string& _value)  { return m_Properties.set(_key, _value); }
     const string& get(const string& _key) const { return m_Properties.get(_key); }
     const Properties& getProperties() const { return m_Properties; }
+    
+    std::deque<value_type>* getExpandedValues() {
+      std::deque<value_type>* expandedQueue = new std::deque<value_type>;
+      DateTime nextValStamp = m_Values.back().getTimeStamp();
+      
+      for(typename QueueType::reverse_iterator iValue = m_Values.rbegin(), e = m_Values.rend(); iValue != e;
+        iValue++)
+      {
+        while(nextValStamp < iValue->getTimeStamp()) {
+          value_type holdVal = expandedQueue->front();
+          holdVal.setTimeStamp(nextValStamp);
+          expandedQueue->push_front(holdVal);
+          nextValStamp = nextValStamp.addSeconds(m_Resolution);
+        }
+        expandedQueue->push_front(*iValue);
+        nextValStamp = nextValStamp.addSeconds(m_Resolution);
+      }
+      DateTime now;
+      nextValStamp = DateTime(static_cast<time_t>(now.secondsSinceEpoch() -
+        now.secondsSinceEpoch() % m_Resolution));
+      while(nextValStamp > expandedQueue->front().getTimeStamp()) {
+        value_type holdVal = expandedQueue->front();
+        holdVal.setTimeStamp(holdVal.getTimeStamp().addSeconds(m_Resolution));
+        expandedQueue->push_front(holdVal);
+      }
+      return expandedQueue;
+    }
 
   }; // Series
 

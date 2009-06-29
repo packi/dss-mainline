@@ -51,7 +51,9 @@ namespace dss {
   public:
     Metering(DSS* _pDSS);
     virtual ~Metering() {};
-
+    
+    const std::vector<boost::shared_ptr<MeteringConfigChain> > getConfig() const { return m_Config; }
+    const std::string& getStorageLocation() const { return m_MeteringStorageLocation; }
   }; // Metering
 
   class MeteringConfig {

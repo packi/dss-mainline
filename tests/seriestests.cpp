@@ -47,8 +47,6 @@ struct SeriesAdder<0, 0>
 };
 
 BOOST_AUTO_TEST_CASE(timestamps) {
-//   Series<CurrentValue> five(5 * 60, 10);
-//   Series<CurrentValue> minutely(60, 10, &five);
   Series<CurrentValue> secondly2(2, 10);
 
   DateTime now;
@@ -72,6 +70,59 @@ BOOST_AUTO_TEST_CASE(timestamps) {
 
   BOOST_CHECK_EQUAL( testStart.addSeconds(4), secondly2.getValues().front().getTimeStamp() );
 } // testTimestamps
+
+BOOST_AUTO_TEST_CASE(insertions) {
+  Series<CurrentValue> secondly2(2, 10);
+
+  DateTime now;
+  DateTime testStart(static_cast<time_t>(now.secondsSinceEpoch() -
+        now.secondsSinceEpoch() % 2));
+
+  // [0]
+  secondly2.addValue(0, testStart.addSeconds(2*0));
+  BOOST_CHECK_EQUAL( (size_t)1, secondly2.getValues().size() );
+  BOOST_CHECK_EQUAL( 0.0, secondly2.getValues().front().getValue() );
+
+  // [2,0]
+  secondly2.addValue(2, testStart.addSeconds(2*2));
+  BOOST_CHECK_EQUAL( (size_t)2, secondly2.getValues().size() );
+  BOOST_CHECK_EQUAL( 2.0, secondly2.getValues().front().getValue() );
+
+  // [4,2,0]
+  secondly2.addValue(4, testStart.addSeconds(2*4));
+  BOOST_CHECK_EQUAL( (size_t)3, secondly2.getValues().size() );
+  BOOST_CHECK_EQUAL( 4.0, secondly2.getValues().front().getValue() );
+
+  // [4,2,1,0]
+  secondly2.addValue(1, testStart.addSeconds(2*1));
+  BOOST_CHECK_EQUAL( (size_t)4, secondly2.getValues().size() );
+  BOOST_CHECK_EQUAL( 1.0, secondly2.getValues()[2].getValue() );
+
+  // [4,3,2,1,0]
+  secondly2.addValue(3, testStart.addSeconds(2*3));
+  BOOST_CHECK_EQUAL( (size_t)5, secondly2.getValues().size() );
+  BOOST_CHECK_EQUAL( 3.0, secondly2.getValues()[1].getValue() );
+
+  // [5,4,3,2,1,0]
+  secondly2.addValue(5, testStart.addSeconds(2*5));
+  BOOST_CHECK_EQUAL( (size_t)6, secondly2.getValues().size() );
+  BOOST_CHECK_EQUAL( 5.0, secondly2.getValues().front().getValue() );
+
+  // insert an elemet that should be merged with the front value
+  secondly2.addValue(10, testStart.addSeconds(2*5));
+  BOOST_CHECK_EQUAL( (size_t)6, secondly2.getValues().size() );
+  BOOST_CHECK_EQUAL( 10.0, secondly2.getValues().front().getValue() );
+  BOOST_CHECK_EQUAL( 5.0, secondly2.getValues().front().getMin() );
+
+  // insert two element that should be merged with the third value
+  secondly2.addValue(1, testStart.addSeconds(2*3));
+  secondly2.addValue(20, testStart.addSeconds(2*3));
+  secondly2.addValue(11, testStart.addSeconds(2*3));
+  BOOST_CHECK_EQUAL( (size_t)6, secondly2.getValues().size() );
+  BOOST_CHECK_EQUAL( 1.0, secondly2.getValues()[2].getMin() );
+  BOOST_CHECK_EQUAL( 20.0, secondly2.getValues()[2].getMax() );
+  BOOST_CHECK_EQUAL( 11.0, secondly2.getValues()[2].getValue() );
+} // insertions
 
 BOOST_AUTO_TEST_CASE(readWrite) {
   Series<CurrentValue> five(5 * 60, 10);
@@ -280,8 +331,6 @@ BOOST_AUTO_TEST_CASE(wrapping) {
   
   minutely.addValue(61, testStart.addMinute(60));
 
-  BOOST_TEST_MESSAGE(hourly.getValues().size() << " " << hourly.getValues().front().getValue());
-
   BOOST_CHECK_EQUAL( (size_t)2, hourly.getValues().size() );
 
   SeriesWriter<AdderValue> writer;
@@ -289,5 +338,39 @@ BOOST_AUTO_TEST_CASE(wrapping) {
 
   BOOST_CHECK_EQUAL( (size_t)2, hourly.getValues().size() );
 } // testWrapping
+
+BOOST_AUTO_TEST_CASE(expansion) {
+  Series<AdderValue> minutely(60, 10);
+
+  DateTime now;
+  DateTime testStart(static_cast<time_t>(now.secondsSinceEpoch() -
+        now.secondsSinceEpoch() % 60));
+  
+  // add values 1..60 to minutely (60 values)
+  for(int iValue = 1; iValue <= 5; iValue++) {
+    minutely.addValue(iValue, testStart.addMinute((iValue-1)*2));
+  }
+  
+  std::deque<AdderValue>* expanded = minutely.getExpandedValues();
+  BOOST_CHECK_EQUAL( (size_t)9, expanded->size() );
+  delete expanded;
+} // expansion
+
+BOOST_AUTO_TEST_CASE(expansionToPresent) {
+  Series<AdderValue> minutely(60, 10);
+
+  DateTime now;
+  DateTime testStart(static_cast<time_t>(now.secondsSinceEpoch() -
+        now.secondsSinceEpoch() % 60 - 19 * 60));
+  
+  // add values 1..60 to minutely (60 values)
+  for(int iValue = 1; iValue <= 5; iValue++) {
+    minutely.addValue(iValue, testStart.addMinute((iValue-1)*2));
+  }
+  
+  std::deque<AdderValue>* expanded = minutely.getExpandedValues();
+  BOOST_CHECK_EQUAL( (size_t)20, expanded->size() );
+  delete expanded;
+} // expansion
 
 BOOST_AUTO_TEST_SUITE_END()
