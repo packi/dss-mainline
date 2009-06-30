@@ -247,7 +247,7 @@ namespace dss {
 
   class IDS485FrameCollector {
   public:
-    virtual void collectFrame(boost::shared_ptr<DS485CommandFrame>& _frame) = 0;
+    virtual void collectFrame(boost::shared_ptr<DS485CommandFrame> _frame) = 0;
     virtual ~IDS485FrameCollector() {};
   }; // DS485FrameCollector
 

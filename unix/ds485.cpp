@@ -556,11 +556,11 @@ namespace dss {
 
   // TODO: look into boost::weak_ptr
   void DS485Controller::addToReceivedQueue(DS485CommandFrame* _frame) {
-    // Signal our listeners
-    DS485CommandFrame* frame = new DS485CommandFrame();
-    *frame = *_frame;
+    boost::shared_ptr<DS485CommandFrame> frame(new DS485CommandFrame());
+    (*frame) = *_frame;
     frame->setFrameSource(fsWire);
-    distributeFrame(boost::shared_ptr<DS485CommandFrame>(frame));
+    distributeFrame(frame);
+    // Signal our listeners
     m_CommandFrameEvent.signal();
   } // addToReceivedQueue
 
@@ -794,7 +794,8 @@ namespace dss {
   } // distributeFrame
 
   void DS485FrameProvider::distributeFrame(DS485CommandFrame* _pFrame) {
-    distributeFrame(boost::shared_ptr<DS485CommandFrame>(_pFrame));
+    boost::shared_ptr<DS485CommandFrame> tempRef(_pFrame);
+    distributeFrame(tempRef);
   } // distributeFrame
 
 

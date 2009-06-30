@@ -148,7 +148,7 @@ namespace dss {
     virtual void initialize();
     void waitForProxyEvent();
 
-    virtual void collectFrame(boost::shared_ptr<DS485CommandFrame>& _frame);
+    virtual void collectFrame(boost::shared_ptr<DS485CommandFrame> _frame);
 
     void addFrameBucket(FrameBucket* _bucket);
     void removeFrameBucket(FrameBucket* _bucket);

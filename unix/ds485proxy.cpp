@@ -1228,7 +1228,7 @@ namespace dss {
     }
   } // execute
 
-  void DS485Proxy::collectFrame(boost::shared_ptr<DS485CommandFrame>& _frame) {
+  void DS485Proxy::collectFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
     uint8_t commandID = _frame->getCommand();
     if(commandID != CommandResponse && commandID != CommandRequest && commandID != CommandEvent) {
       log("discarded non response/request/command frame", lsInfo);
