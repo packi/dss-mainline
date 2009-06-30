@@ -161,8 +161,8 @@ int main (int argc, char* argv[]) {
   cout << "compiled WITH_TESTS" << endl;
   if(runTests) {
     cout << "running tests" << endl;
-    char* params[3] = {"dss", "--report_level=detailed", "--log_level=all"};
-    ::boost::unit_test::unit_test_main( &init_unit_test, 3,  &params[0] );
+    const char* params[3] = {"dss", "--report_level=detailed", "--log_level=all"};
+    ::boost::unit_test::unit_test_main( &init_unit_test, 3,  const_cast<char**>(params) );
     cout << "done running tests" << endl;
   }
 #endif

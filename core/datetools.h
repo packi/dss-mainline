@@ -22,9 +22,17 @@
 #ifndef _DATE_TOOLS_H_INCLUDED
 #define _DATE_TOOLS_H_INCLUDED
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "base.h"
 
+#ifdef HAVE_LIBICAL_ICAL_H
 #include <libical/ical.h>
+#elif defined(HAVE_ICAL_H)
+#include <ical.h>
+#endif
 #include <vector>
 #include <ostream>
 #include <sys/time.h>
