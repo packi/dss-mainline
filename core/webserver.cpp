@@ -28,6 +28,9 @@
 #include "sim/dssim.h"
 #include "propertysystem.h"
 #include "foreach.h"
+#include "metering/metering.h"
+#include "metering/series.h"
+#include "metering/seriespersistence.h"
 
 #include <iostream>
 #include <sstream>
@@ -1046,6 +1049,138 @@ namespace dss {
       return "";
     }
   } // handleDebugCall
+  
+  string WebServer::handleMeteringCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+    if(endsWith(_method, "/getResolutions")) {
+      _handled = true;
+      std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = getDSS().getMetering().getConfig();
+      stringstream sstream;
+      sstream << "{" << ToJSONValue("resolutions") << ":" << "[";
+      for(unsigned int iConfig = 0; iConfig < meteringConfig.size(); iConfig++) {
+        boost::shared_ptr<MeteringConfigChain> cConfig = meteringConfig[iConfig];
+        for(int jConfig = 0; jConfig < cConfig->size(); jConfig++) {
+          sstream << "{" << ToJSONValue("type") << ":" << (cConfig->isEnergy() ? ToJSONValue("energy") : ToJSONValue("consumption") ) << ","
+                  << ToJSONValue("unit") << ":" << ToJSONValue(cConfig->getUnit()) << ","
+                  << ToJSONValue("resolution") << ":" << ToJSONValue(cConfig->getResolution(jConfig)) << "}";
+          if(jConfig < cConfig->size() && iConfig < meteringConfig.size()) {
+            sstream << ",";
+          }
+        }
+      }
+      sstream << "]"  << "}";
+      return JSONOk(sstream.str());
+    } else if(endsWith(_method, "/getSeries")) {
+      _handled = true;
+      stringstream sstream;
+      sstream << "{ " << ToJSONValue("series") << ": [";
+      bool first = true;
+      vector<Modulator*>& modulators = getDSS().getApartment().getModulators();
+      foreach(Modulator* modulator, modulators) {
+        if(!first) {
+          sstream << ",";
+        }
+        first = false;
+        sstream << "{ " << ToJSONValue("dsid") << ": " << ToJSONValue(modulator->getDSID().toString());
+        sstream << ", " << ToJSONValue("type") << ": " << ToJSONValue("energy");
+        sstream << "},";
+        sstream << "{ " << ToJSONValue("dsid") << ": " << ToJSONValue(modulator->getDSID().toString());
+        sstream << ", " << ToJSONValue("type") << ": " << ToJSONValue("consumption");
+        sstream << "}";
+      }
+      sstream << "]}";
+      return JSONOk(sstream.str());
+    } else if(endsWith(_method, "/getValues")) { //?dsid=;n=,resolution=,type=
+      _handled = true;
+      std::string errorMessage;
+      std::string deviceDSIDString = _parameter["dsid"];
+      std::string resolutionString = _parameter["resolution"];
+      std::string typeString = _parameter["type"];
+      std::string fileSuffix;
+      std::string storageLocation;
+      std::string seriesPath;
+      int resolution;
+      bool energy;
+      if(!deviceDSIDString.empty()) {
+        dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
+        if(!(deviceDSID == NullDSID)) {
+          try {
+            getDSS().getApartment().getModulatorByDSID(deviceDSID);
+          } catch(runtime_error& e) {
+            return ResultToJSON(false, "Could not find device with dsid '" + deviceDSIDString + "'");
+          }
+        } else {
+         return ResultToJSON(false, "Could not parse dsid '" + deviceDSIDString + "'");
+        }
+      } else {
+        return ResultToJSON(false, "Could not parse dsid '" + deviceDSIDString + "'");
+      }
+      resolution = strToIntDef(resolutionString, -1);
+      if(resolution == -1) {
+        return ResultToJSON(false, "Need could not parse resolution '" + resolutionString + "'");
+      }
+      if(typeString.empty()) {        
+        return ResultToJSON(false, "Need a type, 'energy' or 'consumption'");
+      } else {
+        if(typeString == "consumption") {
+          energy = false;
+        } else if(typeString == "energy") {
+          energy = true;
+        } else {
+          return ResultToJSON(false, "Invalide type '" + typeString + "'");
+        }
+      }
+      if(!resolutionString.empty()) {
+        std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = getDSS().getMetering().getConfig();
+        storageLocation = getDSS().getMetering().getStorageLocation();
+        for(unsigned int iConfig = 0; iConfig < meteringConfig.size(); iConfig++) {
+          boost::shared_ptr<MeteringConfigChain> cConfig = meteringConfig[iConfig];
+          for(int jConfig = 0; jConfig < cConfig->size(); jConfig++) {
+            if(cConfig->isEnergy() == energy && cConfig->getResolution(jConfig) == resolution) {
+              fileSuffix = cConfig->getFilenameSuffix(jConfig);
+            }
+          }
+        }
+        if(fileSuffix.empty()) {
+          return ResultToJSON(false, "No data for '" + typeString + "' and resolution '" + resolutionString + "'");
+        } else {
+          seriesPath = storageLocation + deviceDSIDString + "_" + fileSuffix + ".xml";
+          log("_Trying to load series from " + seriesPath);
+          if(fileExists(seriesPath)) {
+            SeriesReader<CurrentValue> reader;
+            boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(seriesPath));
+            std::deque<CurrentValue>* values = s->getExpandedValues();
+            bool first = true;
+            stringstream sstream;
+            sstream << "{ " ;
+            sstream << ToJSONValue("dsmid") << ":" << ToJSONValue(deviceDSIDString) << ",";
+            sstream << ToJSONValue("type") << ":" << ToJSONValue(typeString) << ",";
+            sstream << ToJSONValue("resolution") << ":" << ToJSONValue(resolutionString) << ",";
+            sstream << ToJSONValue("values") << ": [";
+            for(std::deque<CurrentValue>::iterator iValue = values->begin(), e = values->end(); iValue != e; iValue++)
+            {
+              if(!first) {
+                sstream << ",";
+              }
+              first = false;
+              sstream << "[" << iValue->getTimeStamp().secondsSinceEpoch()  << "," << iValue->getValue() << "]";
+            }
+            sstream << "]}";
+            delete values;
+            return JSONOk(sstream.str());
+          } else {
+            return ResultToJSON(false, "No data-file for '" + typeString + "' and resolution '" + resolutionString + "'");
+          }
+        }
+      } else {
+        return ResultToJSON(false, "Could not parse resolution '" + resolutionString + "'");
+      }    
+    } else if(endsWith(_method, "/getAggregatedValues")) { //?set=;n=,resolution=;type=
+      _handled = false;
+      return "";
+    }
+    _handled = false;
+    return "";
+  } // handleMeteringCall
 
   void WebServer::jsonHandler(struct shttpd_arg* _arg) {
     const string urlid = "/json/";
@@ -1094,6 +1229,8 @@ namespace dss {
       result = self.handleSimCall(method, paramMap, _arg, handled, session);
     } else if(beginsWith(method, "debug/")) {
       result = self.handleDebugCall(method, paramMap, _arg, handled, session);
+    } else if(beginsWith(method, "metering/")) {
+      result = self.handleMeteringCall(method, paramMap, _arg, handled, session);
     }
 
     if(!handled) {

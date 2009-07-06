@@ -22,6 +22,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <math.h>
 
 #include "core/metering/series.h"
 #include "core/metering/seriespersistence.h"
@@ -124,6 +125,71 @@ BOOST_AUTO_TEST_CASE(insertions) {
   BOOST_CHECK_EQUAL( 11.0, secondly2.getValues()[2].getValue() );
 } // insertions
 
+BOOST_AUTO_TEST_CASE(slidingWindow) {
+  int resolution = 2;
+  int queueLength = 10;
+  Series<CurrentValue> secondly2(resolution, queueLength);
+
+  DateTime now;
+  DateTime testStart(static_cast<time_t>(now.secondsSinceEpoch() -
+        now.secondsSinceEpoch() % resolution));
+
+  for(int iVal = 0; iVal < 30; iVal++) {
+    secondly2.addValue(iVal, testStart.addSeconds(resolution*iVal));
+    if(iVal < queueLength) {
+      BOOST_CHECK_EQUAL(iVal, secondly2.getValues().front().getValue());
+      BOOST_CHECK_EQUAL(0, secondly2.getValues().back().getValue());
+      BOOST_CHECK_EQUAL((size_t)iVal+1, secondly2.getValues().size());
+    } else {
+      BOOST_CHECK_EQUAL(iVal, secondly2.getValues().front().getValue());
+      BOOST_CHECK_EQUAL(iVal-(queueLength-1), secondly2.getValues().back().getValue());
+      BOOST_CHECK_EQUAL((size_t)queueLength, secondly2.getValues().size());
+    }
+  }
+} // slidingWindow
+
+BOOST_AUTO_TEST_CASE(sparcity) {
+  int resolution = 2;
+  int queueLength = 10;
+  Series<CurrentValue> secondly2(resolution, queueLength);
+
+  DateTime now;
+  DateTime testStart(static_cast<time_t>(now.secondsSinceEpoch() -
+        now.secondsSinceEpoch() % resolution));
+
+  for(int iVal = 0; iVal < 30; iVal++) {
+    secondly2.addValue(iVal, testStart.addSeconds(resolution*iVal*2));
+    if(iVal < ceil(queueLength / 2)) {
+      BOOST_CHECK_EQUAL(iVal, secondly2.getValues().front().getValue());
+      BOOST_CHECK_EQUAL(0, secondly2.getValues().back().getValue());
+      BOOST_CHECK_EQUAL((size_t)iVal+1, secondly2.getValues().size());
+    } else {
+      BOOST_CHECK_EQUAL(iVal, secondly2.getValues().front().getValue());
+      BOOST_CHECK_EQUAL(iVal-(ceil(queueLength / 2)-1), secondly2.getValues().back().getValue());
+      BOOST_CHECK_EQUAL((size_t)ceil(queueLength/2.0), secondly2.getValues().size());
+    }
+  }
+} // sparcity
+
+BOOST_AUTO_TEST_CASE(sparcity2) {
+  int resolution = 2;
+  int queueLength = 10;
+  Series<CurrentValue> secondly2(resolution, queueLength);
+
+  DateTime now;
+  DateTime testStart(static_cast<time_t>(now.secondsSinceEpoch() -
+        now.secondsSinceEpoch() % resolution - (4*queueLength*resolution)));
+
+  for(int iVal = 0; iVal < resolution; iVal++) {
+    secondly2.addValue(iVal, testStart.addSeconds(resolution*iVal));
+  }
+  
+  now = now.addSeconds( -(now.secondsSinceEpoch() % resolution) );
+  secondly2.addValue(0, now);
+  
+  BOOST_CHECK_EQUAL((size_t)1, secondly2.getValues().size());
+} // sparcity2
+
 BOOST_AUTO_TEST_CASE(readWrite) {
   Series<CurrentValue> five(5 * 60, 10);
   Series<CurrentValue> minutely(60, 10, &five);
@@ -171,7 +237,6 @@ BOOST_AUTO_TEST_CASE(readWrite) {
   BOOST_CHECK_EQUAL( 5.0, series->getValues().front().getMax() );
   BOOST_CHECK_EQUAL( string("my comment"), series->getComment() );
   BOOST_CHECK_EQUAL( string("kW"), series->getUnit() );
-
 
   delete series;
 } // testReadWrite
@@ -369,7 +434,10 @@ BOOST_AUTO_TEST_CASE(expansionToPresent) {
   }
   
   std::deque<AdderValue>* expanded = minutely.getExpandedValues();
-  BOOST_CHECK_EQUAL( (size_t)20, expanded->size() );
+  BOOST_CHECK_EQUAL( (size_t)10, expanded->size() );
+  for(std::deque<AdderValue>::iterator iValue = expanded->begin(), e = expanded->end(); iValue != e; iValue++) {
+    BOOST_CHECK_EQUAL( (size_t)5, iValue->getValue() );
+  }
   delete expanded;
 } // expansion
 

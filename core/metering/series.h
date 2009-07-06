@@ -221,25 +221,27 @@ namespace dss {
             }
             ++iValue;
           }
-          if(bucketTimeStamp == iValue->getTimeStamp()) {
-            iValue->mergeWith(_value);
-          } else if (iValue == e) {
+          if (iValue == e) {
             m_Values.push_back(newValue);
+          } else if(bucketTimeStamp == iValue->getTimeStamp()) {
+            iValue->mergeWith(_value);
           } else {
             m_Values.insert(iValue, newValue);
           }
         }
       } else {
-        // insert at correct point
+        // insert at front
         m_Values.push_front(newValue);
       }
-      while(m_Values.size() > m_NumberOfValues) {
+      DateTime oldestBucket = m_Values.front().getTimeStamp();
+      oldestBucket = oldestBucket.addSeconds( -(m_Resolution*(m_NumberOfValues-1)) );
+      while((m_Values.size() > m_NumberOfValues) ||
+             ((m_Values.size() > 1) && (m_Values.back().getTimeStamp() < oldestBucket))) {
         m_Values.pop_back();
       }
       if(m_NextSeries != NULL) {
         m_NextSeries->addValue(_value);
       }
-      // if we've got an excess of values
     } // addValue
 
     void addValue(double _value, const DateTime& _timestamp) {
@@ -266,27 +268,22 @@ namespace dss {
     
     std::deque<value_type>* getExpandedValues() {
       std::deque<value_type>* expandedQueue = new std::deque<value_type>;
-      DateTime nextValStamp = m_Values.back().getTimeStamp();
       
-      for(typename QueueType::reverse_iterator iValue = m_Values.rbegin(), e = m_Values.rend(); iValue != e;
-        iValue++)
-      {
-        while(nextValStamp < iValue->getTimeStamp()) {
-          value_type holdVal = expandedQueue->front();
-          holdVal.setTimeStamp(nextValStamp);
-          expandedQueue->push_front(holdVal);
-          nextValStamp = nextValStamp.addSeconds(m_Resolution);
-        }
-        expandedQueue->push_front(*iValue);
-        nextValStamp = nextValStamp.addSeconds(m_Resolution);
+      typename QueueType::iterator iValue = m_Values.begin(), e = m_Values.end();
+      
+      DateTime iCurrentTimeStamp;
+      iCurrentTimeStamp = iCurrentTimeStamp.addSeconds(iCurrentTimeStamp.secondsSinceEpoch() % m_Resolution);
+      if(iCurrentTimeStamp < m_Values.front().getTimeStamp()) {
+        iCurrentTimeStamp = m_Values.front().getTimeStamp();
       }
-      DateTime now;
-      nextValStamp = DateTime(static_cast<time_t>(now.secondsSinceEpoch() -
-        now.secondsSinceEpoch() % m_Resolution));
-      while(nextValStamp > expandedQueue->front().getTimeStamp()) {
-        value_type holdVal = expandedQueue->front();
-        holdVal.setTimeStamp(holdVal.getTimeStamp().addSeconds(m_Resolution));
-        expandedQueue->push_front(holdVal);
+      while( (iValue != e) && (expandedQueue->size() < m_NumberOfValues) ) {
+        value_type val = *iValue;
+        val.setTimeStamp(iCurrentTimeStamp);
+        expandedQueue->push_back(val);
+        if(iValue->getTimeStamp() == iCurrentTimeStamp) {
+          iValue++;
+        }
+        iCurrentTimeStamp = iCurrentTimeStamp.addSeconds(-m_Resolution);
       }
       return expandedQueue;
     }
