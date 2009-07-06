@@ -28,6 +28,8 @@
 #include "sim/dssim.h"
 #include "propertysystem.h"
 #include "foreach.h"
+#include "core/web/restful.h"
+#include "core/web/restfulapiwriter.h"
 #include "metering/metering.h"
 #include "metering/series.h"
 #include "metering/seriespersistence.h"
@@ -58,6 +60,138 @@ namespace dss {
     DSS::getInstance()->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "webroot", getDSS().getDataDirectory() + "webroot/", true, false);
     DSS::getInstance()->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "ports", "8080", true, false);
 
+    RestfulAPI api;
+    RestfulClass& cls = api.addClass("apartment");
+    cls.addMethod("getName");
+    cls.addMethod("setName").withParameter("newName", "string");
+    cls.addMethod("turnOn")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("turnOff")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("increaseValue")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("decreaseValue")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("enable")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("disable")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("startDim")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("endDim")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("setValue")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("callScene")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("saveScene")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("undoScene")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("getConsumption")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("getStructure");
+    cls.addMethod("getDevices")
+      .withParameter("unassigned", "boolean", false);
+    cls.addStaticMethod("login");
+    cls.addMethod("getCircuits");
+
+    cls = api.addClass("zone")
+        .withInstanceParameter("id", "integer", false)
+        .withInstanceParameter("name", "string", false)
+        .requireOneOf("id", "name");
+    cls.addMethod("getName");
+    cls.addMethod("setName").withParameter("newName", "string");
+    cls.addMethod("turnOn")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("turnOff")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("increaseValue")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("decreaseValue")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("enable")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("disable")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("startDim")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("endDim")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("setValue")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("callScene")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("saveScene")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("undoScene")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+    cls.addMethod("getConsumption")
+      .withParameter("groupID", "integer", false)
+      .withParameter("groupName", "string", false);
+
+    cls = api.addClass("device")
+        .withInstanceParameter("dsid", "integer", false)
+        .withInstanceParameter("name", "string", false)
+        .requireOneOf("dsid", "name");
+    cls.addMethod("getName");
+    cls.addMethod("setName").withParameter("newName", "string");
+    cls.addMethod("getGroups");
+    cls.addMethod("getState");
+    cls.addMethod("getLocation");
+    cls.addMethod("setLocation")
+      .withParameter("x", "double", false)
+      .withParameter("y", "double", false)
+      .withParameter("z", "double", false);
+    cls.addMethod("turnOn");
+    cls.addMethod("turnOff");
+    cls.addMethod("increaseValue");
+    cls.addMethod("decreaseValue");
+    cls.addMethod("enable");
+    cls.addMethod("disable");
+    cls.addMethod("startDim");
+    cls.addMethod("endDim");
+    cls.addMethod("setValue");
+    cls.addMethod("callScene");
+    cls.addMethod("saveScene");
+    cls.addMethod("undoScene");
+    cls.addMethod("getConsumption");
+
+    cls = api.addClass("circuit")
+       .withInstanceParameter("dsid", "dsid", true);
+    cls.addMethod("getName");
+    cls.addMethod("setName")
+        .withParameter("newName", "string", true);
+    cls.addMethod("getEnergyBorder");
+    cls.addMethod("getConsumption");
+    cls.addMethod("getEnergyMeterValue");
+
+    RestfulAPIWriter::WriteToXML(api, "data/json_api.xml");
   } // initialize
 
   void WebServer::doStart() {
