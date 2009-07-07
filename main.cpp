@@ -40,9 +40,11 @@
 
 #include <boost/program_options.hpp>
 
-#define BOOST_TEST_NO_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
+#ifdef WITH_TESTS
+  #define BOOST_TEST_NO_MAIN
+  #define BOOST_TEST_DYN_LINK
+  #include <boost/test/unit_test.hpp>
+#endif
 
 
 #ifdef USE_LIBXML
@@ -67,12 +69,14 @@ pair<string, string> parse_prop(const string& s)
     }
 }
 
+#ifdef WITH_TESTS
 bool init_unit_test() {
   using namespace ::boost::unit_test;
   //assign_op( framework::master_test_suite().p_name.value, "Tests", 0 );
 
     return true;
 }
+#endif
 
 int main (int argc, char* argv[]) {
 
