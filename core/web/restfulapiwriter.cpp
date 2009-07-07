@@ -50,6 +50,24 @@ namespace dss {
       AutoPtr<Text> pClassNameTextNode = pDoc->createTextNode(cls.getName());
       pClassNameNode->appendChild(pClassNameTextNode);
 
+      if((!cls.getDocumentationShort().empty()) || (!cls.getDocumentationLong().empty())) {
+        AutoPtr<Element> pDocumentation = pDoc->createElement("documentation");
+        if(!cls.getDocumentationShort().empty()) {
+          AutoPtr<Element> pShortNode = pDoc->createElement("short");
+          AutoPtr<Text> pShortText = pDoc->createTextNode(cls.getDocumentationShort());
+          pShortNode->appendChild(pShortText);
+          pDocumentation->appendChild(pShortNode);
+        }
+        if(!cls.getDocumentationLong().empty()) {
+          AutoPtr<Element> pLongNode = pDoc->createElement("long");
+          AutoPtr<Text> pLongText = pDoc->createTextNode(cls.getDocumentationLong());
+          pLongNode->appendChild(pLongText);
+          pDocumentation->appendChild(pLongNode);
+        }
+        pClass->appendChild(pDocumentation);
+      }
+
+
       AutoPtr<Element> pMethods = pDoc->createElement("methods");
       foreach(const RestfulMethod& method, cls.getMethods()) {
         AutoPtr<Element> pMethod = pDoc->createElement("method");
@@ -57,6 +75,23 @@ namespace dss {
         pMethod->appendChild(pMethodNameNode);
         AutoPtr<Text> pMethodNameTextNode = pDoc->createTextNode(method.getName());
         pMethodNameNode->appendChild(pMethodNameTextNode);
+
+        if((!method.getDocumentationShort().empty()) || (!method.getDocumentationLong().empty())) {
+          AutoPtr<Element> pDocumentation = pDoc->createElement("documentation");
+          if(!method.getDocumentationShort().empty()) {
+            AutoPtr<Element> pShortNode = pDoc->createElement("short");
+            AutoPtr<Text> pShortText = pDoc->createTextNode(method.getDocumentationShort());
+            pShortNode->appendChild(pShortText);
+            pDocumentation->appendChild(pShortNode);
+          }
+          if(!method.getDocumentationLong().empty()) {
+            AutoPtr<Element> pLongNode = pDoc->createElement("long");
+            AutoPtr<Text> pLongText = pDoc->createTextNode(method.getDocumentationLong());
+            pLongNode->appendChild(pLongText);
+            pDocumentation->appendChild(pLongNode);
+          }
+          pMethod->appendChild(pDocumentation);
+        }
 
         AutoPtr<Element> pParams = pDoc->createElement("parameter");
         foreach(const RestfulParameter& parameter, method.getParameter()) {

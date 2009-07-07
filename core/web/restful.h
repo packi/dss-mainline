@@ -56,6 +56,8 @@ namespace dss {
   class RestfulMethod {
   private:
     std::string m_Name;
+    std::string m_DocumentationShort;
+    std::string m_DocumentationLong;
     boost::ptr_vector<RestfulParameter> m_Parameter;
   public:
     RestfulMethod(const std::string& _name)
@@ -75,10 +77,18 @@ namespace dss {
       return *this;
     }
 
+    RestfulMethod& withDocumentation(const std::string& _short, const std::string& _long = "") {
+      m_DocumentationShort = _short;
+      m_DocumentationLong = _long;
+      return *this;
+    }
+
     bool checkRequest(const std::string& _uri, const Properties& _parameter);
 
     const std::string& getName() const { return m_Name; }
     const boost::ptr_vector<RestfulParameter>& getParameter() const { return m_Parameter; }
+    const std::string& getDocumentationShort() const { return m_DocumentationShort; }
+    const std::string& getDocumentationLong() const { return m_DocumentationLong; }
   }; // RestfulMethod
 
   class RestfulClass {
@@ -87,6 +97,8 @@ namespace dss {
     boost::ptr_vector<RestfulMethod> m_Methods;
     boost::ptr_vector<RestfulMethod> m_StaticMethods;
     boost::ptr_vector<RestfulParameter> m_InstanceParameter;
+    std::string m_DocumentationShort;
+    std::string m_DocumentationLong;
     //RestfulAPI& m_API;
   public:
     RestfulClass(const std::string& _name, RestfulAPI& _api)
@@ -109,6 +121,12 @@ namespace dss {
       return *this;
     }
 
+    RestfulClass& withDocumentation(const std::string& _short, const std::string& _long = "") {
+      m_DocumentationShort = _short;
+      m_DocumentationLong = _long;
+      return *this;
+    }
+
     RestfulClass& requireOneOf(const std::string& _parameter1, const std::string& _parameter2) {
       return *this;
     }
@@ -119,6 +137,8 @@ namespace dss {
     const boost::ptr_vector<RestfulParameter>& getInstanceParameter() const { return m_InstanceParameter; }
     const boost::ptr_vector<RestfulMethod>& getMethods() const { return m_Methods; }
     const boost::ptr_vector<RestfulMethod>& getStaticMethods() const { return m_StaticMethods; }
+    const std::string& getDocumentationShort() const { return m_DocumentationShort; }
+    const std::string& getDocumentationLong() const { return m_DocumentationLong; }
   }; // RestfulClass
 
   class RestfulAPI {

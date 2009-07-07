@@ -61,135 +61,213 @@ namespace dss {
     DSS::getInstance()->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "ports", "8080", true, false);
 
     RestfulAPI api;
-    RestfulClass& clsApartment = api.addClass("apartment");
-    clsApartment.addMethod("getName");
-    clsApartment.addMethod("setName").withParameter("newName", "string", true);
+    RestfulClass& clsApartment = api.addClass("apartment")
+       .withDocumentation("A wrapper for global functions as well as adressing all devices connected to the dSS");
+    clsApartment.addMethod("getName")
+      .withDocumentation("Returns the name of the apartment");
+    clsApartment.addMethod("setName")
+      .withParameter("newName", "string", true)
+      .withDocumentation("Sets the name of the apartment to newName");
     clsApartment.addMethod("turnOn")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withDocumentation("Turns on all devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("turnOff")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withDocumentation("Turns off all devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("increaseValue")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withDocumentation("Increases the main value on all devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("decreaseValue")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withDocumentation("Decreases the main value on all devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("enable")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withDocumentation("Enables all devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("disable")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withDocumentation("Disables all devices of the apartment.", "A disabled device will react only to an enable call. If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("startDim")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withParameter("direction", "string", false)
+      .withDocumentation("Starts dimming the devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("endDim")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withDocumentation("Stops dimming the devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("setValue")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withParameter("value", "integer", true)
+      .withDocumentation("Sets the output value of all devices of the apartment to value.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("callScene")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withParameter("sceneNr", "integer", true)
+      .withDocumentation("Calls the scene sceneNr on all devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("saveScene")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withParameter("sceneNr", "integer", true)
+      .withDocumentation("Saves the current output value to sceneNr.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("undoScene")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withParameter("sceneNr", "integer", true)
+      .withDocumentation("Undos setting the value of sceneNr.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("getConsumption")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
-    clsApartment.addMethod("getStructure");
+      .withParameter("groupName", "string", false)
+      .withDocumentation("Returns the consumption of all devices in the apartment in mW.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
+    clsApartment.addMethod("getStructure")
+      .withParameter("sceneNr", "integer", true)
+      .withDocumentation("Returns an object containing the structure of the apartment.");
     clsApartment.addMethod("getDevices")
-      .withParameter("unassigned", "boolean", false);
-    clsApartment.addStaticMethod("login");
-    clsApartment.addMethod("getCircuits");
+      .withParameter("unassigned", "boolean", false)
+      .withDocumentation("Returns the list of devices in the apartment.", "If unassigned is true, only devices that are not assigned to a zone get returned");
+    clsApartment.addStaticMethod("login")
+      .withDocumentation("Returns a session token");
+    clsApartment.addMethod("getCircuits")
+      .withDocumentation("Returns a list of the circuits present in the apartment");
 
     RestfulClass& clsZone = api.addClass("zone")
         .withInstanceParameter("id", "integer", false)
         .withInstanceParameter("name", "string", false)
         .requireOneOf("id", "name");
-    clsZone.addMethod("getName");
-    clsZone.addMethod("setName").withParameter("newName", "string", true);
+    clsZone.addMethod("getName")
+      .withDocumentation("Returns the name of the zone.");
+    clsZone.addMethod("setName")
+      .withParameter("newName", "string", true)
+      .withDocumentation("Sets the name of the zone to newName.");
     clsZone.addMethod("turnOn")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withDocumentation("Turns on all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("turnOff")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withDocumentation("Turns off all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("increaseValue")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withDocumentation("Increases the main value of all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("decreaseValue")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withDocumentation("Decreases the main value of all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("enable")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withDocumentation("Enables all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("disable")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withDocumentation("Disables all devices in the zone.", "Disabled devices will react only to a enable call. If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("startDim")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withParameter("direction", "string", false)
+      .withDocumentation("Starts dimming the main value of all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("endDim")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withDocumentation("Stops dimming of all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("setValue")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withParameter("value", "integer", true)
+      .withDocumentation("Sets the output value of all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("callScene")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withParameter("sceneNr", "integer", true)
+      .withDocumentation("Sets the scene sceneNr on all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("saveScene")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withParameter("sceneNr", "integer", true)
+      .withDocumentation("Saves the current output value to sceneNr of all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("undoScene")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withParameter("sceneNr", "integer", true)
+      .withDocumentation("Undos the setting of a scene value.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("getConsumption")
       .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false);
+      .withParameter("groupName", "string", false)
+      .withDocumentation("Returns the consumption of all devices in the zone in mW.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
 
     RestfulClass& clsDevice = api.addClass("device")
         .withInstanceParameter("dsid", "integer", false)
         .withInstanceParameter("name", "string", false)
         .requireOneOf("dsid", "name");
-    clsDevice.addMethod("getName");
-    clsDevice.addMethod("setName").withParameter("newName", "string", true);
-    clsDevice.addMethod("getGroups");
-    clsDevice.addMethod("getState");
-    clsDevice.addMethod("getLocation");
+    clsDevice.addMethod("getName")
+       .withDocumentation("Returns the name of the device");
+    clsDevice.addMethod("setName")
+      .withParameter("newName", "string", true)
+      .withDocumentation("Sets the name of the device to newName");
+    clsDevice.addMethod("getGroups")
+      .withDocumentation("Returns an array of groups the device is in");
+    clsDevice.addMethod("getState")
+      .withDocumentation("Returns the state of the device");
+    clsDevice.addMethod("getLocation")
+      .withDocumentation("Returns the location of the device.");
     clsDevice.addMethod("setLocation")
       .withParameter("x", "double", false)
       .withParameter("y", "double", false)
-      .withParameter("z", "double", false);
-    clsDevice.addMethod("turnOn");
-    clsDevice.addMethod("turnOff");
-    clsDevice.addMethod("increaseValue");
-    clsDevice.addMethod("decreaseValue");
-    clsDevice.addMethod("enable");
-    clsDevice.addMethod("disable");
-    clsDevice.addMethod("startDim");
-    clsDevice.addMethod("endDim");
-    clsDevice.addMethod("setValue");
-    clsDevice.addMethod("callScene");
-    clsDevice.addMethod("saveScene");
-    clsDevice.addMethod("undoScene");
-    clsDevice.addMethod("getConsumption");
+      .withParameter("z", "double", false)
+      .withDocumentation("Sets the location of the device.");
+    clsDevice.addMethod("turnOn")
+      .withDocumentation("Turns on the device.", "This will call SceneMax on the device.");
+    clsDevice.addMethod("turnOff")
+      .withDocumentation("Turns off the device.", "This will call SceneMin on the device.");
+    clsDevice.addMethod("increaseValue")
+      .withDocumentation("Increases the default value of the device.");
+    clsDevice.addMethod("decreaseValue")
+      .withDocumentation("Decreases the default value of the device.");
+    clsDevice.addMethod("enable")
+      .withDocumentation("Enables the device.");
+    clsDevice.addMethod("disable")
+      .withDocumentation("Disables the device.", "A disabled device will only react to enable calls.");
+    clsDevice.addMethod("startDim")
+      .withParameter("direction", "string", false)
+      .withDocumentation("Starts dimming the device.", "If direction equals 'up' it will dim up, otherwise down.");
+    clsDevice.addMethod("endDim")
+      .withDocumentation("Stops dimming.");
+    clsDevice.addMethod("setValue")
+      .withParameter("value", "integer", true)
+      .withDocumentation("Sets the output value of the device to value");
+    clsDevice.addMethod("callScene")
+      .withParameter("sceneNr", "integer", true)
+      .withDocumentation("Calls scene sceneNr on the device.");
+    clsDevice.addMethod("saveScene")
+      .withParameter("sceneNr", "integer", true)
+      .withDocumentation("Saves the current outputvalue to sceneNr.");
+    clsDevice.addMethod("undoScene")
+      .withParameter("sceneNr", "integer", true)
+      .withDocumentation("Undos saving the scene value for sceneNr");
+    clsDevice.addMethod("getConsumption")
+      .withDocumentation("Returns the consumption of the device in mW.", "Note that this works only for simulated devices at the moment.");
 
     RestfulClass& clsCircuit = api.addClass("circuit")
        .withInstanceParameter("id", "dsid", true);
-    clsCircuit.addMethod("getName");
+    clsCircuit.addMethod("getName")
+       .withDocumentation("Returns the name of the circuit.");
     clsCircuit.addMethod("setName")
-       .withParameter("newName", "string", true);
-    clsCircuit.addMethod("getEnergyBorder");
-    clsCircuit.addMethod("getConsumption");
-    clsCircuit.addMethod("getEnergyMeterValue");
+       .withParameter("newName", "string", true)
+       .withDocumentation("Sets the name of the circuit to newName.");
+    clsCircuit.addMethod("getEnergyBorder")
+       .withDocumentation("Returns the energy borders (orange, red).");
+    clsCircuit.addMethod("getConsumption")
+       .withDocumentation("Returns the consumption of all connected devices in mW");
+    clsCircuit.addMethod("getEnergyMeterValue")
+       .withDocumentation("Returns the meter-value in Wh");
 
     RestfulAPIWriter::WriteToXML(api, "doc/json_api.xml");
   } // initialize
