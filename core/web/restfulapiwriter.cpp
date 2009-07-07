@@ -35,6 +35,8 @@ namespace dss {
 
     AutoPtr<ProcessingInstruction> pXMLHeader = pDoc->createProcessingInstruction("xml", "version='1.0' encoding='utf-8'");
     pDoc->appendChild(pXMLHeader);
+    AutoPtr<ProcessingInstruction> pXMLStylesheet = pDoc->createProcessingInstruction("xml-stylesheet", "type='text/xml' href='json_api.xslt'");
+    pDoc->appendChild(pXMLStylesheet);
 
     AutoPtr<Element> pRoot = pDoc->createElement("api");
     pDoc->appendChild(pRoot);
@@ -59,10 +61,21 @@ namespace dss {
         AutoPtr<Element> pParams = pDoc->createElement("parameter");
         foreach(const RestfulParameter& parameter, method.getParameter()) {
           AutoPtr<Element> pParameter = pDoc->createElement("parameter");
+
           AutoPtr<Element> pParameterNameNode = pDoc->createElement("name");
           pParameter->appendChild(pParameterNameNode);
           AutoPtr<Text> pParameterNameTextNode = pDoc->createTextNode(parameter.getName());
           pParameterNameNode->appendChild(pParameterNameTextNode);
+          
+          AutoPtr<Element> pParameterTypeNode = pDoc->createElement("type");
+          pParameter->appendChild(pParameterTypeNode);
+          AutoPtr<Text> pParameterTypeTextNode = pDoc->createTextNode(parameter.getTypeName());
+          pParameterTypeNode->appendChild(pParameterTypeTextNode);
+
+          AutoPtr<Element> pParameterRequiredNode = pDoc->createElement("required");
+          pParameter->appendChild(pParameterRequiredNode);
+          AutoPtr<Text> pParameterRequiredTextNode = pDoc->createTextNode(parameter.isRequired() ? "true" : "false");
+          pParameterRequiredNode->appendChild(pParameterRequiredTextNode);
 
           pParams->appendChild(pParameter);
         }

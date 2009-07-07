@@ -61,137 +61,137 @@ namespace dss {
     DSS::getInstance()->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "ports", "8080", true, false);
 
     RestfulAPI api;
-    RestfulClass& cls = api.addClass("apartment");
-    cls.addMethod("getName");
-    cls.addMethod("setName").withParameter("newName", "string");
-    cls.addMethod("turnOn")
+    RestfulClass& clsApartment = api.addClass("apartment");
+    clsApartment.addMethod("getName");
+    clsApartment.addMethod("setName").withParameter("newName", "string", true);
+    clsApartment.addMethod("turnOn")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("turnOff")
+    clsApartment.addMethod("turnOff")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("increaseValue")
+    clsApartment.addMethod("increaseValue")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("decreaseValue")
+    clsApartment.addMethod("decreaseValue")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("enable")
+    clsApartment.addMethod("enable")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("disable")
+    clsApartment.addMethod("disable")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("startDim")
+    clsApartment.addMethod("startDim")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("endDim")
+    clsApartment.addMethod("endDim")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("setValue")
+    clsApartment.addMethod("setValue")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("callScene")
+    clsApartment.addMethod("callScene")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("saveScene")
+    clsApartment.addMethod("saveScene")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("undoScene")
+    clsApartment.addMethod("undoScene")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("getConsumption")
+    clsApartment.addMethod("getConsumption")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("getStructure");
-    cls.addMethod("getDevices")
+    clsApartment.addMethod("getStructure");
+    clsApartment.addMethod("getDevices")
       .withParameter("unassigned", "boolean", false);
-    cls.addStaticMethod("login");
-    cls.addMethod("getCircuits");
+    clsApartment.addStaticMethod("login");
+    clsApartment.addMethod("getCircuits");
 
-    cls = api.addClass("zone")
+    RestfulClass& clsZone = api.addClass("zone")
         .withInstanceParameter("id", "integer", false)
         .withInstanceParameter("name", "string", false)
         .requireOneOf("id", "name");
-    cls.addMethod("getName");
-    cls.addMethod("setName").withParameter("newName", "string");
-    cls.addMethod("turnOn")
+    clsZone.addMethod("getName");
+    clsZone.addMethod("setName").withParameter("newName", "string", true);
+    clsZone.addMethod("turnOn")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("turnOff")
+    clsZone.addMethod("turnOff")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("increaseValue")
+    clsZone.addMethod("increaseValue")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("decreaseValue")
+    clsZone.addMethod("decreaseValue")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("enable")
+    clsZone.addMethod("enable")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("disable")
+    clsZone.addMethod("disable")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("startDim")
+    clsZone.addMethod("startDim")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("endDim")
+    clsZone.addMethod("endDim")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("setValue")
+    clsZone.addMethod("setValue")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("callScene")
+    clsZone.addMethod("callScene")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("saveScene")
+    clsZone.addMethod("saveScene")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("undoScene")
+    clsZone.addMethod("undoScene")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
-    cls.addMethod("getConsumption")
+    clsZone.addMethod("getConsumption")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false);
 
-    cls = api.addClass("device")
+    RestfulClass& clsDevice = api.addClass("device")
         .withInstanceParameter("dsid", "integer", false)
         .withInstanceParameter("name", "string", false)
         .requireOneOf("dsid", "name");
-    cls.addMethod("getName");
-    cls.addMethod("setName").withParameter("newName", "string");
-    cls.addMethod("getGroups");
-    cls.addMethod("getState");
-    cls.addMethod("getLocation");
-    cls.addMethod("setLocation")
+    clsDevice.addMethod("getName");
+    clsDevice.addMethod("setName").withParameter("newName", "string", true);
+    clsDevice.addMethod("getGroups");
+    clsDevice.addMethod("getState");
+    clsDevice.addMethod("getLocation");
+    clsDevice.addMethod("setLocation")
       .withParameter("x", "double", false)
       .withParameter("y", "double", false)
       .withParameter("z", "double", false);
-    cls.addMethod("turnOn");
-    cls.addMethod("turnOff");
-    cls.addMethod("increaseValue");
-    cls.addMethod("decreaseValue");
-    cls.addMethod("enable");
-    cls.addMethod("disable");
-    cls.addMethod("startDim");
-    cls.addMethod("endDim");
-    cls.addMethod("setValue");
-    cls.addMethod("callScene");
-    cls.addMethod("saveScene");
-    cls.addMethod("undoScene");
-    cls.addMethod("getConsumption");
+    clsDevice.addMethod("turnOn");
+    clsDevice.addMethod("turnOff");
+    clsDevice.addMethod("increaseValue");
+    clsDevice.addMethod("decreaseValue");
+    clsDevice.addMethod("enable");
+    clsDevice.addMethod("disable");
+    clsDevice.addMethod("startDim");
+    clsDevice.addMethod("endDim");
+    clsDevice.addMethod("setValue");
+    clsDevice.addMethod("callScene");
+    clsDevice.addMethod("saveScene");
+    clsDevice.addMethod("undoScene");
+    clsDevice.addMethod("getConsumption");
 
-    cls = api.addClass("circuit")
-       .withInstanceParameter("dsid", "dsid", true);
-    cls.addMethod("getName");
-    cls.addMethod("setName")
-        .withParameter("newName", "string", true);
-    cls.addMethod("getEnergyBorder");
-    cls.addMethod("getConsumption");
-    cls.addMethod("getEnergyMeterValue");
+    RestfulClass& clsCircuit = api.addClass("circuit")
+       .withInstanceParameter("id", "dsid", true);
+    clsCircuit.addMethod("getName");
+    clsCircuit.addMethod("setName")
+       .withParameter("newName", "string", true);
+    clsCircuit.addMethod("getEnergyBorder");
+    clsCircuit.addMethod("getConsumption");
+    clsCircuit.addMethod("getEnergyMeterValue");
 
-    RestfulAPIWriter::WriteToXML(api, "data/json_api.xml");
+    RestfulAPIWriter::WriteToXML(api, "doc/json_api.xml");
   } // initialize
 
   void WebServer::doStart() {

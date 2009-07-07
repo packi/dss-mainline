@@ -50,6 +50,7 @@ namespace dss {
 
     const std::string& getName() const { return m_Name; }
     const std::string& getTypeName() const { return m_TypeName; }
+    bool isRequired() const { return m_Required; }
   }; // RestfulParameter
 
   class RestfulMethod {
@@ -125,9 +126,11 @@ namespace dss {
     boost::ptr_vector<RestfulClass> m_Classes;
   public:
     bool checkRequest(const std::string& _uri, const Properties& _parameter);
+    
     RestfulClass& addClass(const std::string& _className) {
-      m_Classes.push_back(new RestfulClass(_className, *this));
-      return m_Classes.back();
+      RestfulClass* result = new RestfulClass(_className, *this);
+      m_Classes.push_back(result);
+      return *result;
     }
 
     const boost::ptr_vector<RestfulClass>& getClasses() const { return m_Classes; }
