@@ -1,0 +1,36 @@
+body, td {
+	font-family : Helvetica;
+	font-size:10pt;
+}
+
+th {
+  width: 100px;
+  font-size: 10pt;
+  text-align: left;
+}
+
+h1 {
+  font-size: 12pt;
+}
+
+.single_class_box {
+	padding: 10px;
+}
+
+.documentation_box {
+    position: absolute;
+    left: 125px;
+    top: -10px;
+	padding: 10px;
+}
+
+.class_box {
+    float: left;
+	border:1px solid #000000;
+	width: 100px;
+	padding: 10px;
+}
+
+.documentation_box {
+    float: left;
+}
