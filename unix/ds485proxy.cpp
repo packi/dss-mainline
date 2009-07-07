@@ -1209,6 +1209,7 @@ namespace dss {
 
             bool bucketFound = false;
             // search for a bucket to put the frame in
+            m_FrameBucketsGuard.lock();
             foreach(FrameBucket* bucket, m_FrameBuckets) {
               if(bucket->getFunctionID() == functionID) {
                 if((bucket->getSourceID() == -1) || (bucket->getSourceID() == frame->getHeader().getSource())) {
@@ -1218,6 +1219,7 @@ namespace dss {
                 }
               }
             }
+            m_FrameBucketsGuard.unlock();
             if(!bucketFound) {
               log("No bucket found for " + intToString(frame->getHeader().getSource()));
             }
@@ -1242,14 +1244,18 @@ namespace dss {
   } // collectFrame
 
   void DS485Proxy::addFrameBucket(FrameBucket* _bucket) {
+    m_FrameBucketsGuard.lock();
     m_FrameBuckets.push_back(_bucket);
+    m_FrameBucketsGuard.unlock();
   } // addFrameBucket
 
   void DS485Proxy::removeFrameBucket(FrameBucket* _bucket) {
+    m_FrameBucketsGuard.lock();
     vector<FrameBucket*>::iterator pos = find(m_FrameBuckets.begin(), m_FrameBuckets.end(), _bucket);
     if(pos != m_FrameBuckets.end()) {
       m_FrameBuckets.erase(pos);
     }
+    m_FrameBucketsGuard.unlock();
   } // removeFrameBucket
 
   //================================================== receivedFrame

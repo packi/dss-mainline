@@ -131,6 +131,7 @@ namespace dss {
 
     SyncEvent m_PacketHere;
     Mutex m_IncomingFramesGuard;
+    Mutex m_FrameBucketsGuard;
     CommandFrameSharedPtrVector m_IncomingFrames;
   protected:
     virtual void execute();
