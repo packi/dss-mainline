@@ -32,13 +32,16 @@
 
 namespace dss {
 
-/**
-  @author Patrick Staehlin <me@packi.ch>
-*/
+/** Wrapper for pthread-conditions and Windows events.
+ * A number of threads can wait on the same SyncEvent. Using
+ * signal() or broadcast() one or all of these listeners can
+ * be awaken.
+ * @author Patrick Staehlin <me@packi.ch>
+ */
 class SyncEvent{
   private:
 #ifndef WIN32
-	Mutex m_ConditionMutex;
+    Mutex m_ConditionMutex;
     pthread_cond_t m_Condition;
 #else
     HANDLE m_EventHandle;
@@ -47,9 +50,14 @@ class SyncEvent{
     SyncEvent();
     virtual ~SyncEvent();
 
+    /** Signals one listener */
     void signal();
+    /** Signals all listeners */
     void broadcast();
+    /** Waits for a signal */
     int waitFor();
+    /** Waits for a signal for _timeoutMS miliseconds.
+     * @return \c true if a signal was received within _timeoutMS miliseconds */
     bool waitFor( int _timeoutMS );
 }; //  SyncEvent
 

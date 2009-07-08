@@ -57,11 +57,12 @@ namespace dss {
   class IDeviceInterface {
   public:
     /** Turns the device on.
-     *  This will normaly invoke the first scene stored on the device.
+     *  This will invoke scene "max".
      */
     virtual void turnOn() = 0;
     /** Turns the device off.
-      */
+     * This will invoke scene "min"
+     */
     virtual void turnOff() = 0;
 
     /** Increases the value of the given parameter by one,
@@ -77,12 +78,12 @@ namespace dss {
      */
     virtual void enable() = 0;
     /** Disables a device.
-      * A disabled device does only react to enable().
+      * A disabled device may only react to enable().
       */
     virtual void disable() = 0;
 
     /** Starts dimming the given parameter.
-     * If _directionUp is true, the value gets increased over time. Else its getting decreased
+     * If _directionUp is true, the value gets increased over time. Else its getting decreased.
      */
     virtual void startDim(bool _directionUp, const int _parameterNr = -1) = 0;
     /** Stops the dimming */
@@ -90,14 +91,29 @@ namespace dss {
     /** Sets the value of the given parameter */
     virtual void setValue(const double _value, int _parameterNr = -1) = 0;
 
+
+    /** Sets the scene on the device.
+     * The output value will be set according to the scene lookup table in the device.
+     */
     virtual void callScene(const int _sceneNr) = 0;
+    /** Stores the current output value into the scene lookup table.
+     * The next time scene _sceneNr gets called the output will be set according to the lookup table.
+     */
     virtual void saveScene(const int _sceneNr) = 0;
+    /** Restores the last set value of _sceneNr
+     */
     virtual void undoScene(const int _sceneNr) = 0;
 
     /** Returns the consumption in mW */
     virtual unsigned long getPowerConsumption() = 0;
 
+    /** Calls the next scene according to the last called scene.
+     * @see dss::SceneHelper::getNextScene
+     */
     virtual void nextScene() = 0;
+    /** Calls the previos scene according to the last called scene.
+     * @see dss::SceneHelper::getPreviousScene
+     */
     virtual void previousScene() = 0;
 
     virtual ~IDeviceInterface() {};
@@ -113,22 +129,34 @@ namespace dss {
     const Apartment* m_Apartment;
     PropertyNode* m_pPropertyNode;
   public:
+    /** Copy constructor */
     DeviceReference(const DeviceReference& _copy);
     DeviceReference(const dsid_t _dsid, const Apartment& _apartment);
     DeviceReference(const Device& _device, const Apartment& _apartment);
     virtual ~DeviceReference() {};
 
+    /** Returns a reference to the referenced device
+     * @note This accesses the apartment which has to be valid.
+     */
     Device& getDevice();
+    /** @copydoc getDevice() */
     const Device& getDevice() const;
+    /** Returns the DSID of the referenced device */
     dsid_t getDSID() const;
 
+    /** Returns the function id.
+     * @note This will lookup the device */
     int getFunctionID() const;
     bool hasSwitch() const;
 
+    /** Compares two device references.
+     * Device references are considered equal if their DSID match. */
     bool operator==(const DeviceReference& _other) const {
       return m_DSID == _other.m_DSID;
     }
 
+    /** Returns the name of the referenced device.
+     * @note This will lookup the device. */
     string getName() const;
 
     virtual void turnOn();
@@ -140,6 +168,10 @@ namespace dss {
     virtual void enable();
     virtual void disable();
 
+    /** Returns wheter the device is turned on.
+     * @note The detection is soly based on the last called scene. As soon as we've
+     * got submetering data this should reflect the real state.
+     */
     virtual bool isOn() const;
 
     virtual void startDim(const bool _directionUp, const int _parameterNr = -1);
@@ -180,9 +212,14 @@ namespace dss {
     PropertyNode* m_pPropertyNode;
     DeviceLocation m_Location;
   protected:
+    /** Publishes the device to the property tree.
+     * @see DSS::getPropertySystem */
     void publishToPropertyTree();
+    /** Sends the application a note that something has changed.
+     * This will cause the \c apartment.xml to be updated. */
     void dirty();
   public:
+    /** Creates and initializes a device. */
     Device(const dsid_t _dsid, Apartment* _pApartment);
     virtual ~Device() {};
 
@@ -195,11 +232,14 @@ namespace dss {
     virtual void enable();
     virtual void disable();
 
+    /** @copydoc DeviceReference::isOn() */
     virtual bool isOn() const;
 
     virtual void startDim(const bool _directionUp, const int _parameterNr = -1);
     virtual void endDim(const int _parameterNr = -1);
     virtual void setValue(const double _value, const int _parameterNr = -1);
+    /** Returns the value of _parameterNr.
+     * @note not yet implemented */
     double getValue(const int _parameterNr = -1);
 
     virtual void callScene(const int _sceneNr);
@@ -209,28 +249,71 @@ namespace dss {
     virtual void nextScene();
     virtual void previousScene();
 
+    /** Returns the function ID of the device.
+     * A function ID specifies a certain subset of functionality that
+     * a device implements.
+     */
     int getFunctionID() const;
+    /** Sets the functionID to _value */
     void setFunctionID(const int _value);
     bool hasSwitch() const;
 
+    /** Returns the name of the device. */
     string getName() const;
+    /** Sets the name of the device.
+     * @note This will cause the apartment to store
+     * \c apartment.xml
+     */
     void setName(const string& _name);
 
+    /** Returns the devices location in abstract coordinates (0-100) */
     const DeviceLocation& getLocation() const;
+    /** Sets the devices location.
+     * @note This will cause the apartment to store
+     * \c apartment.xml
+     */
     void setLocation(const DeviceLocation& _value);
 
+    /** Returns the devices x coordinate */
     double getLocationX() const;
+    /** Returns the devices y coordinate */
     double getLocationY() const;
+    /** Returns the devices z coordinate */
     double getLocationZ() const;
 
+    /** Sets the devices x coordinate.
+     * @note This will cause the apartment to store
+     * \c apartment.xml. So if you have to change more
+     * than one coordinate consider to use setLocation.
+     *
+     * @see setLocation
+     */
     void setLocationX(const double _value);
+    /** Sets the devices y coordinate.
+     * @note This will cause the apartment to store
+     * \c apartment.xml. So if you have to change more
+     * than one coordinate consider to use setLocation.
+     *
+     * @see setLocation
+     */
     void setLocationY(const double _value);
+    /** Sets the devices z coordinate.
+     * @note This will cause the apartment to store
+     * \c apartment.xml. So if you have to change more
+     * than one coordinate consider to use setLocation.
+     *
+     * @see setLocation
+     */
     void setLocationZ(const double _value);
 
+    /** Returns the group bitmask (1 based) of the device */
     bitset<63>& getGroupBitmask();
+    /** @copydoc getGroupBitmask() */
     const bitset<63>& getGroupBitmask() const;
 
+    /** Returns wheter the device is in group _groupID or not. */
     bool isInGroup(const int _groupID) const;
+    /** Adds the device to group _groupID. */
     void addToGroup(const int _groupID);
 
     /** Returns the group id of the _index'th group */
@@ -240,28 +323,41 @@ namespace dss {
     /** Returns the number of groups the device is a member of */
     int getGroupsCount() const;
 
+    /** Removes the device from all group.
+     * The device will remain in the broadcastgroup though.
+     */
     void resetGroups();
 
+    /** Returns the last called scene.
+     * At the moment this information is used to determine wheter a device is
+     * turned on or not. */
     int getLastCalledScene() const { return m_LastCalledScene; }
+    /** Sets the last called scene. */
     void setLastCalledScene(const int _value) { m_LastCalledScene = _value; }
 
     /** Returns the short address of the device. This is the address
      * the device got from the dSM. */
     devid_t getShortAddress() const;
+    /** Sets the short-address of the device. */
     void setShortAddress(const devid_t _shortAddress);
     /** Returns the DSID of the device */
     dsid_t getDSID() const;
     /** Returns the id of the modulator the device is connected to */
     int getModulatorID() const;
+    /** Sets the modulatorID of the device. */
     void setModulatorID(const int _modulatorID);
 
+    /** Returns the zone ID the device resides in. */
     int getZoneID() const;
+    /** Sets the zone ID of the device. */
     void setZoneID(const int _value);
     /** Returns the apartment the device resides in. */
     Apartment& getApartment() const;
 
     virtual unsigned long getPowerConsumption();
 
+    /** Returns wheter two devices are equal.
+     * Devices are considered equal if their DSID are a match.*/
     bool operator==(const Device& _other) const;
   };
 
@@ -270,6 +366,8 @@ namespace dss {
   /** Abstract interface to select certain Devices from a set */
   class IDeviceSelector {
   public:
+    /** The implementor should return true if the device should appear in the
+     * resulting set. */
     virtual bool selectDevice(const Device& _device) const = 0;
     virtual ~IDeviceSelector() {}
   };
@@ -277,6 +375,7 @@ namespace dss {
   /** Abstract interface to perform an Action on each device of a set */
   class IDeviceAction {
   public:
+    /** This action will be performed for every device contained in the set. */
     virtual bool perform(Device& _device) = 0;
     virtual ~IDeviceAction() {}
   };
@@ -284,15 +383,21 @@ namespace dss {
   /** A set holds an arbitrary list of devices.
     * A Command sent to an instance of this class will replicate the command to all
     * contained devices.
+    * Only references to devices will be stored.
    */
   class Set : public IDeviceInterface {
   private:
     DeviceVector m_ContainedDevices;
   public:
+    /** Constructor for an empty Set.*/
     Set();
+    /** Copy constructor. */
     Set(const Set& _copy);
+    /** Constructor for a set containing only _device. */
     Set(Device& _device);
+    /** Constructor for a set containing only _reference. */
     Set(DeviceReference& _reference);
+    /** Constructor for a set containing _devices. */
     Set(DeviceVector _devices);
     virtual ~Set() {};
 
@@ -333,8 +438,10 @@ namespace dss {
      */
     Set getByGroup(const string& _name) const;
 
+    /** Returns a subset of devices with the given function-id. */
     Set getByFunctionID(const int _functionID) const;
 
+    /** Returns a subset that contains all devices belonging to Zone _zoneID. */
     Set getByZone(int _zoneID) const;
     /** Returns the device indicated by _name
      */
@@ -345,12 +452,12 @@ namespace dss {
     /** Returns the device indicated by _dsid */
     DeviceReference getByDSID(const dsid_t _dsid)  const;
 
-    /* Returns the number of devices contained in this set */
+    /** Returns the number of devices contained in this set */
     int length() const;
-    /* Returns true if the set is empty */
+    /** Returns true if the set is empty */
     bool isEmpty() const;
 
-    /* Returns a set that's combined with the set _other.
+    /** Returns a set that's combined with the set _other.
      * Duplicates get filtered out.
      */
     Set combine(Set& _other) const;
@@ -359,9 +466,12 @@ namespace dss {
 
     /** Returns the _index'th device */
     const DeviceReference& get(int _index) const;
+    /** @copydoc get */
     const DeviceReference& operator[](const int _index) const;
 
+    /** @copydoc get */
     DeviceReference& get(int _index);
+    /** @copydoc get */
     DeviceReference& operator[](const int _index);
 
     /** Returns true if the set contains _device */
@@ -391,13 +501,16 @@ namespace dss {
   private:
     string m_Name;
   public:
+    /** Returns a set containing all devices of the container. */
     virtual Set getDevices() const = 0;
     /** Returns a subset of the devices contained, selected by _selector */
     virtual Set getDevices(const IDeviceSelector& _selector) const {
       return getDevices().getSubset(_selector);
     }
 
+    /** Sets the name of the container. */
     virtual void setName(const string& _name);
+    /** Returns the name of the container */
     const string& getName() const { return m_Name; };
 
     virtual ~DeviceContainer() {};
@@ -416,6 +529,7 @@ namespace dss {
     int m_EnergyMeterValue;
     DateTime m_EnergyMeterValueAge;
   public:
+    /** Constructs a modulator with the given dsid. */
     Modulator(const dsid_t _dsid);
     virtual ~Modulator() {};
     virtual Set getDevices() const;
@@ -430,6 +544,7 @@ namespace dss {
     /** Adds a DeviceReference to the modulators devices list */
     void addDevice(const DeviceReference& _device);
 
+    /** Removes the device identified by the reference. */
     void removeDevice(const DeviceReference& _device);
 
     /** Returns the consumption in mW */
@@ -437,9 +552,15 @@ namespace dss {
     /** Returns the meter value in Wh */
     unsigned long getEnergyMeterValue();
 
+    /** Returns the orange energy level */
     int getEnergyLevelOrange() const { return m_EnergyLevelOrange; }
+    /** Returns the red energy level */
     int getEnergyLevelRed() const { return m_EnergyLevelRed; }
+    /** Sets the orange energy level.
+     * @note This has no effect on the modulator as of now. */
     void setEnergyLevelRed(const int _value) { m_EnergyLevelRed = _value; }
+    /** Sets the red energy level.
+     * @note This has no effect on the modulator as of now. */
     void setEnergyLevelOrange(const int _value) { m_EnergyLevelOrange = _value; }
   }; // Modulator
 
@@ -453,6 +574,7 @@ namespace dss {
     int m_GroupID;
     int m_LastCalledScene;
   public:
+    /** Constructs a group with the given id belonging to _zoneID. */
     Group(const int _id, const int _zoneID, Apartment& _apartment);
     virtual ~Group() {};
     virtual Set getDevices() const;
@@ -488,9 +610,13 @@ namespace dss {
 
     virtual unsigned long getPowerConsumption();
 
+    /** @copydoc Device::getLastCalledScene */
     int getLastCalledScene() const { return m_LastCalledScene; }
+    /** @copydoc Device::setLastCalledScene */
     void setLastCalledScene(const int _value) { m_LastCalledScene = _value; }
 
+    /** Compares a group to another group.
+     * Two groups are considered equal if they belong to the same group and zone. */
     Group& operator=(const Group& _other);
   }; // Group
 
@@ -509,8 +635,9 @@ namespace dss {
     virtual void removeDevice(const Device& _device);
   }; // UserGroup
 
-  /** Represents a Zone
-    */
+  /** Represents a Zone.
+   * A Zone houses multiple devices. It can span over multiple modulators.
+   */
   class Zone : public DeviceContainer,
                public IDeviceInterface,
                public boost::noncopyable {
@@ -526,7 +653,9 @@ namespace dss {
     virtual ~Zone();
     virtual Set getDevices() const;
 
+    /** Adds the Zone to a modulator. */
     void addToModulator(Modulator& _modulator);
+    /** Removes the Zone from a modulator. */
     void removeFromModulator(Modulator& _modulator);
 
     /** Adds a device to the zone.
@@ -554,6 +683,7 @@ namespace dss {
     /** Sets the zones id */
     void setZoneID(const int _value);
 
+    /** Returns a list of the modulators the zone is registered with. */
     vector<int> getModulators() const;
 
     virtual void turnOn();
@@ -577,24 +707,38 @@ namespace dss {
     virtual void previousScene();
 
     virtual unsigned long getPowerConsumption();
+    /** Returns a vector of groups present on the zone. */
     vector<Group*> getGroups() { return m_Groups; }
   }; // Zone
 
 
+  /** A Model event gets processed by the apartment asynchronously.
+   * It consists of multiple integer parameter whose meanig is defined by ModelEvent::EventType
+   */
   class ModelEvent {
   public:
-    typedef enum { etCallSceneGroup, etCallSceneDevice, etNewDevice, etModelDirty } EventType;
+    typedef enum { etCallSceneGroup,  /**< A group has changed the scene. */
+                   etCallSceneDevice, /**< A device has changed the scene (only raised from the simulation at the moment). */
+                   etNewDevice,       /**< A new device has been detected */
+                   etModelDirty       /**< A parameter that will be stored in \c apartment.xml has been changed. */
+                 } EventType;
   private:
     EventType m_EventType;
     vector<int> m_Parameter;
   public:
+    /** Constructs a ModelEvent with the given EventType. */
     ModelEvent(EventType _type)
     : m_EventType(_type)
     {}
 
+    /** Adds an integer parameter. */
     void addParameter(const int _param) { m_Parameter.push_back(_param); }
+    /** Returns the parameter at _index.
+     * @note Check getParameterCount to check the bounds. */
     int getParameter(const int _index) const { return m_Parameter.at(_index); }
+    /** Returns the parameter count. */
     int getParameterCount() const { return m_Parameter.size(); }
+    /** Returns the type of the event. */
     EventType getEventType() { return m_EventType; }
   };
 
@@ -650,6 +794,7 @@ namespace dss {
 
     /** Returns a reference to the device with the DSID _dsid */
     Device& getDeviceByDSID(const dsid_t _dsid) const;
+    /** @copydoc getDeviceByDSID */
     Device& getDeviceByDSID(const dsid_t _dsid);
     /** Returns a reference to the device with the name _name*/
     Device& getDeviceByName(const string& _name);
@@ -691,13 +836,16 @@ namespace dss {
     /** Allocates a group */
     UserGroup& allocateGroup(const int _id);
 
+    /** Returns wheter the apartment is still initializing or already running. */
     bool isInitializing() const { return m_IsInitializing; }
-
   public:
 
     /** Returns the root-node for the apartment tree */
     PropertyNode* getPropertyNode() { return m_pPropertyNode; }
 
+    /** Adds a model event to the queue.
+     * The ownership of the event will reside with the Apartment. ModelEvents arriving while initializing will be discarded.
+     */
     void addModelEvent(ModelEvent* _pEvent);
 
     /** Called by the DS485Proxy if a group-call-scene frame was intercepted.
@@ -732,6 +880,7 @@ namespace dss {
     ~ItemNotFoundException() throw() {}
   };
 
+  /** Helper functions for scene management. */
   class SceneHelper {
   private:
     static std::bitset<64> m_ZonesToIgnore;
@@ -739,8 +888,19 @@ namespace dss {
 
     static void initialize();
   public:
+    /** Returns wheter to remember a scene.
+     * Certain scenes represent events thus they won't have to be remembered.
+     */
     static bool rememberScene(const unsigned int _sceneID);
+    /** Returns the next scene based on _currentScene.
+     * From off to Scene1 -> Scene2 -> Scene3 -> Scene4 -> Scene1...
+     * \param _currentScene Scene now active.
+     */
     static unsigned int getNextScene(const unsigned int _currentScene);
+    /** Returns the previous scene based on _currentScene.
+     * From off to Scene1 -> Scene4 -> Scene3 -> Scene2 -> Scene1...
+     * \param _currentScene Scene now active.
+     */
     static unsigned int getPreviousScene(const unsigned int _currentScene);
   };
 

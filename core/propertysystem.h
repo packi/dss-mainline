@@ -58,8 +58,11 @@ namespace dss {
   std::string getProperty(const std::string& _path);
   std::string getRoot(const std::string& _path);
 
-  /**
-   @author Patrick Staehlin <me@packi.ch>
+  /** A tree tree consisting of different value nodes.
+   * The tree can by serialized to and from XML. Nodes can either
+   * store values by themselves or, with the use of proxies be
+   * linked directly to an object or pointer.
+   * @author Patrick Staehlin <me@packi.ch>
    */
   class PropertySystem {
   private:

@@ -31,7 +31,7 @@
 
 namespace dss {
 
-/**
+/** Wrapper for pthread- and Windows mutex.
 @author Patrick Staehlin
 */
 class Mutex{
@@ -45,8 +45,13 @@ public:
     Mutex();
     virtual ~Mutex();
 
+    /** Acquire a lock or blocks until a lock could be acquired.
+     * @return \c true if the lock was successfully acquired.*/
     virtual bool lock();
+    /** Tries to acquire a lock in a nonblocking way.
+     * @return \c true if the lock was successfully*/
     virtual bool tryLock();
+    /** Releases the Mutex. */
     virtual bool unlock();
 
 #ifndef WIN32
@@ -69,9 +74,15 @@ class LockableObject {
   public:
     LockableObject();
     virtual ~LockableObject();
+    /** Returns \c true if the object is locked */
     bool isLocked();
+    /** Returns \c true if the object is locked by the current thread */
     bool isLockedCurrentThread();
+    /** Acquires a lock.
+     * @see Mutex::lock */
     bool lock();
+    /** Releases a lock.
+     * @see Mutex::unlock */
     bool unlock();
 }; // LockableObject;
 

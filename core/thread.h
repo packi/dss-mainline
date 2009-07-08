@@ -31,7 +31,7 @@
 
 namespace dss {
 
-/**
+/** Wrapper for pthread- and Windows threads
 @author Patrick Staehlin
 */
 class Thread{
@@ -47,20 +47,31 @@ private:
 protected:
   bool m_Terminated;
 public:
+    /** Constructs a thread with the given name */
     Thread(const char* _name = NULL);
 
     virtual ~Thread();
 
+    /** This function will be called in a separate thread. */
     virtual void execute() = 0;
 
+    /** Starts the thread. This will call execute. */
     bool run();
+    /** Stops the thread */
     bool stop();
+    /** Terminates the thread */
     bool terminate();
+    /** Sets whether the thread should be freed after it finishes running.
+     * The destructor has to make sure that no dangling references are
+     * left.*/
     void setFreeAtTermination( bool _value ) { m_FreeAtTermination = _value; }
+    /** Returns whether the thread gets freed after finishing. */
     bool getFreeAtTerimnation() { return m_FreeAtTermination; }
 
+    /** Returns whether the Thread is running or not*/
     bool isRunning() const { return m_Running; }
 
+    /** Returns the name of the thread that got passed to the constructor */
     const char* getThreadIdentifier() { return m_Name; }
 }; //  Thread
 
