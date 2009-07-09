@@ -83,7 +83,7 @@ namespace dss {
     return m_Data.size();
   } // size
 
-  vector<unsigned char> DS485Payload::toChar() const {
+  const vector<unsigned char>& DS485Payload::toChar() const {
     return m_Data;
   } // getData
 
@@ -146,7 +146,7 @@ namespace dss {
     }
     result.push_back(tmp);
 
-    vector<unsigned char> payload = getPayload().toChar();
+    const vector<unsigned char>& payload = getPayload().toChar();
     result.insert(result.end(), payload.begin(), payload.end());
     return result;
   } // toChar

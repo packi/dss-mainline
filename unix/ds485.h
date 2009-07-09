@@ -35,18 +35,23 @@
 
 namespace dss {
 
+  /** Stores the payload of a DS485Frame */
   class DS485Payload {
   private:
     std::vector<unsigned char> m_Data;
   public:
+    /** Adds \a _data to the payload. */
     template<class t>
     void add(t _data);
 
+    /** Returns the size of the payload added.*/
     int size() const;
 
-    std::vector<unsigned char> toChar() const;
+    /** Returns a const reference of the data */
+    const std::vector<unsigned char>& toChar() const;
   }; // DS485Payload
 
+  /** Wrapper for a DS485 header. */
   class DS485Header {
   private:
     uint8_t m_Type;
@@ -63,9 +68,17 @@ namespace dss {
       m_Destination(0xff)
     {};
 
+    /** Returns the destination of the frame.
+     * @note This field may not contain any useful information if isBroadcast
+     * returns \c true */
     uint8_t getDestination() const { return m_Destination; };
+    /** Returns whether the the frame is a broadcast or not. */
     bool isBroadcast() const { return m_Broadcast; };
+    /** Returns the source of the frame */
     uint8_t getSource() const { return m_Source; };
+    /** Returns the counter of the frame.
+     * The use of this field is mostly for debugging purposes. Implementors
+     * should increase it every packet they send to detect dropped frames. */
     uint8_t getCounter() const { return m_Counter; };
     uint8_t getType() const { return m_Type; };
 
@@ -266,7 +279,7 @@ namespace dss {
     std::vector<unsigned char> m_Payload;
   public:
     PayloadDissector(DS485Payload& _payload) {
-      std::vector<unsigned char> payload =_payload.toChar();
+      const std::vector<unsigned char>& payload =_payload.toChar();
       m_Payload.insert(m_Payload.begin(), payload.rbegin(), payload.rend());
     }
 

@@ -129,13 +129,13 @@ namespace dss {
     /** Returns the weekday */
     Weekday getWeekday() const;
 
-    /** Returns true if the instance is before _other */
+    /** Returns true if the instance is before \a _other */
     bool before(const DateTime& _other) const;
-    /** Returns true if the instance is after _other */
+    /** Returns true if the instance is after \a _other */
     bool after(const DateTime& _other) const;
-    /** Returns true if the instance and _other represent the same date and time */
+    /** Returns true if the instance and \a _other represent the same date and time */
     bool operator==(const DateTime& _other) const;
-    /** Returns true if the instance and _other do not represent the same time and date */
+    /** Returns true if the instance and \a _other do not represent the same time and date */
     bool operator!=(const DateTime& _other) const;
     /** Returns true if the instance is before _other.
       * @see before */

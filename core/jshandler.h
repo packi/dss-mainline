@@ -179,11 +179,11 @@ namespace dss {
       */
     const string getClassName();
     /** Compares the objects classname to _className.
-      * @see GetClassName
+      * @see getClassName
       */
     bool is(const string& _className);
 
-    /** Returns the property named _name as type t */
+    /** Returns the property named \a _name as type \a t */
     template<class t>
     t getProperty(const string& _name);
   }; // ScriptObject

@@ -49,11 +49,12 @@ namespace dss {
       * @param _set Reference to the \a Set being wrapped
       */
     JSObject* createJSSet(ScriptContext& _ctx, Set& _set);
-    /** Creates a JSObject that wrapps a Set.
+    /** Creates a JSObject that wrapps a Device.
       * @param _ctx Context in which to create the object
-      * @param _set Reference to the \a Set being wrapped
+      * @param _device Reference to the \a Device being wrapped
       */
     JSObject* createJSDevice(ScriptContext& _ctx, Device& _ref);
+    /** @copydoc createJSDevice */
     JSObject* createJSDevice(ScriptContext& _ctx, DeviceReference& _ref);
 
     template<class t>

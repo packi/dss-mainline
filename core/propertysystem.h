@@ -71,53 +71,93 @@ namespace dss {
     PropertySystem();
     ~PropertySystem();
 
+    /** Loads a subtree from XML.
+     * Everything in the XML has to be relatove to _rootNode. */
     bool loadFromXML(const std::string& _fileName, PropertyNode* _rootNode = NULL);
+    /** Saves a subtree to XML. */
     bool saveToXML(const std::string& _fileName, PropertyNode* _rootNode = NULL) const;
 
+    /** Searches a property by path.
+     * @return The node, or NULL if not found. */
     PropertyNode* getProperty(const std::string& _propPath) const;
 
+    /** Returns the root node. */
     PropertyNode* getRootNode() const {
       return m_RootNode;
     }
     ;
 
+    /** Creates a property and the path to it. */
     PropertyNode* createProperty(const std::string& _propPath);
 
     // fast access to property values
+    /** Returns the value of a property as an int.
+     * Will throw an exception if the node does not exist or
+     * the types don't match.*/
     int getIntValue(const std::string& _propPath) const;
+    /** Returns the value of a property as a boolean.
+     * Will throw an exception if the node does not exist or
+     * the types don't match.*/
     bool getBoolValue(const std::string& _propPath) const;
+    /** Returns the value of a property as a string.
+     * Will throw an exception if the node does not exist or
+     * the types don't match.*/
     std::string getStringValue(const std::string& _propPath) const;
 
+    /** Sets the value of a property.
+     * @return \c true if the property was successfully set.
+     * @param _mayCreate If \c true, the property gets created if it does not exist
+     * @param _mayOverwrite If \c false, the property does not get set if it already exists */
     bool setIntValue(const std::string& _propPath, const int _value,
                      bool _mayCreate = true, bool _mayOverwrite = true);
+    /** Sets the value of a property.
+     * @return \c true if the property was successfully set.
+     * @param _mayCreate If \c true, the property gets created if it does not exist
+     * @param _mayOverwrite If \c false, the property does not get set if it already exists */
     bool setBoolValue(const std::string& _propPath, const bool _value,
                       bool _mayCreate = true, bool _mayOverwrite = true);
+    /** Sets the value of a property.
+     * @return \c true if the property was successfully set.
+     * @param _mayCreate If \c true, the property gets created if it does not exist
+     * @param _mayOverwrite If \c false, the property does not get set if it already exists */
     bool setStringValue(const std::string& _propPath, const std::string& _value,
                         bool _mayCreate = true, bool _mayOverwrite = true);
   }; //  PropertySystem
 
 
+  /** Abstract base class for property proxies.
+   * A property-proxy can be linked to a property node. By
+   * specifying a proxy, the node will get a fixed type T.
+   * Calls to set or get the value of the linked node
+   * will be redirected to the proxy. */
   template<class T>
   class PropertyProxy {
   public:
     virtual ~PropertyProxy() {
     }
-    ;
 
+    /** Default value for write-only properties. */
     static const T DefaultValue;
+    /** Returns the value of the property. */
     virtual T getValue() const = 0;
+    /** Sets the value for a property. */
     virtual void setValue(T _value) = 0;
 
+    /** Creates a copy of the proxy. */
     virtual PropertyProxy* clone() const = 0;
   }; // PropertyProxy
 
 
+  /** PropertyProxy that is links to a reference of a variable. */
   template<class T>
   class PropertyProxyReference : public PropertyProxy<T> {
   private:
     T& m_Reference;
     bool m_Writeable;
   public:
+    /** Constructs a PropertyProxyReference.
+     * @param _reference The reference it gets linked to
+     * @param _writeable If \c true (default) values will get written back to _reference*/
     PropertyProxyReference(T& _reference, bool _writeable = true)
     : m_Reference(_reference),
       m_Writeable(_writeable)
@@ -138,6 +178,7 @@ namespace dss {
     }
   };
 
+  /** PropertyProxy that links to a pointer of a variable. */
   template<class T>
   class PropertyProxyPointer: public PropertyProxy<T> {
   private:
@@ -164,6 +205,7 @@ namespace dss {
   }; // PropertyProxyPointer
 
 
+  /** PropertyProxy that links to a static methods or simple functions. */
   template<class T>
   class PropertyProxyStaticFunction: public PropertyProxy<T> {
   private:
@@ -200,9 +242,12 @@ namespace dss {
   }; // PropertyProxyStaticFunction
 
 
+  /** PropertyProxy that links to a member function.
+   * Cls is the type of the class that we're linking against. */
   template<class Cls, class T>
   class PropertyProxyMemberFunction: public PropertyProxy<T> {
   private:
+    // magic ahead: if the type of T is a class, expect a const-reference, else expect a copy of the value
     typedef typename boost::mpl::if_c<boost::is_class<T>::value, const T&, T>::type (Cls::*aGetterType)() const;
     typedef void (Cls::*aSetterType)(typename boost::mpl::if_c<boost::is_class<T>::value, const T&, const T>::type);
     Cls* m_Obj;
@@ -251,20 +296,25 @@ namespace dss {
   }; // PropertyProxyMemberFunction
 
 
+  /** Notifies a class if one or many properties change. */
   class PropertyListener {
   private:
     std::vector<const PropertyNode*> m_Properties;
   protected:
     friend class PropertyNode;
+    /** Function that gets called if a property changes. */
     virtual void propertyChanged(const PropertyNode* _changedNode);
 
+    /** Add a property node to the notifiers. */
     void registerProperty(const PropertyNode* _node);
+    /** Remove a property from the notifiers */
     void unregisterProperty(const PropertyNode* _node);
   public:
     virtual ~PropertyListener();
   }; // PropertyListener
 
 
+  /** The heart of the PropertySystem. */
   class PropertyNode {
   private:
     aPropertyValue m_PropVal;
@@ -291,44 +341,75 @@ namespace dss {
     PropertyNode(PropertyNode* _parentNode, const char* _name, int _index = 0);
     ~PropertyNode();
 
+    /** Returns the name of the property. */
     const std::string& getName() const {
       return m_Name;
     }
+    /** Returns the displayname of the property. Since a PropertyNode can have
+     * multiple subnodes, the displayname includes the index.*/
     const std::string& getDisplayName() const;
 
+    /** Returns a child node by path.
+     * @return The child or NULL if not found */
     PropertyNode* getProperty(const std::string& _propPath);
     int count(const std::string& _propertyName);
 
+    /** Sets the value as string. */
     void setStringValue(const char* _value);
+    /** Sets the value as string. */
     void setStringValue(const std::string& _value);
+    /** Sets the value as integer. */
     void setIntegerValue(const int _value);
+    /** Sets the value as boolean. */
     void setBooleanValue(const bool _value);
 
+    /** Returns the string value.
+     * Throws an exception if the value-types don't match. */
     std::string getStringValue();
+    /** Returns the integer value.
+     * Throws an exception if the value-types don't match. */
     int getIntegerValue();
+    /** Returns the boolean value.
+     * Throws an exception if the value-types don't match. */
     bool getBoolValue();
 
+    /** Returns the value as string, regardless of it's value-type.*/
     std::string getAsString();
 
+    /** Recursively adds a child-node. */
     PropertyNode* createProperty(const std::string& _propPath);
+    /** Moves this node to \a _path. */
     void moveTo(const std::string& _path);
 
+    /** Returns a child node by name.
+     * Or NULL if not found.*/
     PropertyNode* getPropertyByName(const std::string& _name);
 
+    /** Returns the type of the property. */
     aValueType getValueType();
 
     // proxy support
+    /** Links to the given proxy.
+     * The incoming proxy will get cloned. */
     bool linkToProxy(const PropertyProxy<bool>& _proxy);
+    /** @copydoc linkToProxy */
     bool linkToProxy(const PropertyProxy<int>& _proxy);
+    /** @copydoc linkToProxy */
     bool linkToProxy(const PropertyProxy<std::string>& _proxy);
+    /** Unlinks from a proxy */
     bool unlinkProxy();
 
+    /** Adds a listener. */
     void addListener(PropertyListener* _listener) const;
+    /** Removes a listener */
     void removeListener(PropertyListener* _listener) const;
 
+    /** Returns the count of the nodes children. */
     int getChildCount() const { return m_ChildNodes.size(); }
+    /** Returns a child node by index. */
     PropertyNode* getChild(const int _index) { return m_ChildNodes.at(_index); }
 
+    /** Performs \a _callback for each child node (non-recursive) */
     void foreachChildOf(void(*_callback)(PropertyNode*)) {
       for (std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin(); it
           != m_ChildNodes.end(); ++it) {
@@ -337,6 +418,7 @@ namespace dss {
     } // ForeachChildOf
 
     // needs to stay inside the header file, else the template specializations won't get generated ;-=
+    /** @copydoc foreachChildOf */
     template<class Cls>
     void foreachChildOf(Cls& _objRef, void(Cls::*_callback)(PropertyNode*)) {
       for (std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin(); it
@@ -345,10 +427,13 @@ namespace dss {
       }
     }
   public:
+    /** Writes the node to XML */
     bool saveAsXML(xmlTextWriterPtr _writer);
+    /** Loads the node from XML */
     bool loadFromNode(xmlNode* _pNode);
   }; // PropertyNode
 
+  /** Exception that gets thrown if a incompatible assignment would take place. */
   class PropertyTypeMismatch : public std::runtime_error {
   public:
     explicit

@@ -254,7 +254,7 @@ namespace dss {
      * a device implements.
      */
     int getFunctionID() const;
-    /** Sets the functionID to _value */
+    /** Sets the functionID to \a _value */
     void setFunctionID(const int _value);
     bool hasSwitch() const;
 
@@ -311,14 +311,14 @@ namespace dss {
     /** @copydoc getGroupBitmask() */
     const bitset<63>& getGroupBitmask() const;
 
-    /** Returns wheter the device is in group _groupID or not. */
+    /** Returns wheter the device is in group \a _groupID or not. */
     bool isInGroup(const int _groupID) const;
-    /** Adds the device to group _groupID. */
+    /** Adds the device to group \a _groupID. */
     void addToGroup(const int _groupID);
 
-    /** Returns the group id of the _index'th group */
+    /** Returns the group id of the \a _index'th group */
     int getGroupIdByIndex(const int _index) const;
-    /** Returns _index'th group of the device */
+    /** Returns \a _index'th group of the device */
     Group& getGroupByIndex(const int _index);
     /** Returns the number of groups the device is a member of */
     int getGroupsCount() const;
@@ -393,11 +393,11 @@ namespace dss {
     Set();
     /** Copy constructor. */
     Set(const Set& _copy);
-    /** Constructor for a set containing only _device. */
+    /** Constructor for a set containing only \a _device. */
     Set(Device& _device);
-    /** Constructor for a set containing only _reference. */
+    /** Constructor for a set containing only \a _reference. */
     Set(DeviceReference& _reference);
-    /** Constructor for a set containing _devices. */
+    /** Constructor for a set containing \a _devices. */
     Set(DeviceVector _devices);
     virtual ~Set() {};
 
@@ -441,15 +441,15 @@ namespace dss {
     /** Returns a subset of devices with the given function-id. */
     Set getByFunctionID(const int _functionID) const;
 
-    /** Returns a subset that contains all devices belonging to Zone _zoneID. */
+    /** Returns a subset that contains all devices belonging to Zone \a _zoneID. */
     Set getByZone(int _zoneID) const;
     /** Returns the device indicated by _name
      */
     DeviceReference getByName(const string& _name) const;
-    /** Returns the device indicated by _busid */
+    /** Returns the device indicated by \a _busid */
     DeviceReference getByBusID(const devid_t _busid) const;
 
-    /** Returns the device indicated by _dsid */
+    /** Returns the device indicated by \a _dsid */
     DeviceReference getByDSID(const dsid_t _dsid)  const;
 
     /** Returns the number of devices contained in this set */
@@ -464,7 +464,7 @@ namespace dss {
     /* Returns a set with all device in _other removed */
     Set remove(const Set& _other) const;
 
-    /** Returns the _index'th device */
+    /** Returns the \a _index'th device */
     const DeviceReference& get(int _index) const;
     /** @copydoc get */
     const DeviceReference& operator[](const int _index) const;
@@ -474,19 +474,19 @@ namespace dss {
     /** @copydoc get */
     DeviceReference& operator[](const int _index);
 
-    /** Returns true if the set contains _device */
+    /** Returns true if the set contains \a _device */
     bool contains(const DeviceReference& _device) const;
-    /** Returns true if the set contains _device */
+    /** Returns true if the set contains \a _device */
     bool contains(const Device& _device) const;
 
-    /** Adds the device _device to the set */
+    /** Adds the device \a _device to the set */
     void addDevice(const DeviceReference& _device);
-    /** Adds the device _device to the set */
+    /** Adds the device \a _device to the set */
     void addDevice(const Device& _device);
 
-    /** Removes the device _device from the set */
+    /** Removes the device \a _device from the set */
     void removeDevice(const DeviceReference& _device);
-    /** Removes the device _device from the set */
+    /** Removes the device \a _device from the set */
     void removeDevice(const Device& _device);
 
     virtual void nextScene();
@@ -503,7 +503,7 @@ namespace dss {
   public:
     /** Returns a set containing all devices of the container. */
     virtual Set getDevices() const = 0;
-    /** Returns a subset of the devices contained, selected by _selector */
+    /** Returns a subset of the devices contained, selected by \a _selector */
     virtual Set getDevices(const IDeviceSelector& _selector) const {
       return getDevices().getSubset(_selector);
     }
@@ -574,7 +574,7 @@ namespace dss {
     int m_GroupID;
     int m_LastCalledScene;
   public:
-    /** Constructs a group with the given id belonging to _zoneID. */
+    /** Constructs a group with the given id belonging to \a _zoneID. */
     Group(const int _id, const int _zoneID, Apartment& _apartment);
     virtual ~Group() {};
     virtual Set getDevices() const;
@@ -668,9 +668,9 @@ namespace dss {
      */
     void removeDevice(const DeviceReference& _device);
 
-    /** Returns the group with the name _name */
+    /** Returns the group with the name \a _name */
     Group* getGroup(const string& _name) const;
-    /** Returns the group with the id _id */
+    /** Returns the group with the id \a _id */
     Group* getGroup(const int _id) const;
 
     /** Adds a group to the zone */
@@ -792,11 +792,11 @@ namespace dss {
 
     void writeConfigurationToXML(const string& _fileName);
 
-    /** Returns a reference to the device with the DSID _dsid */
+    /** Returns a reference to the device with the DSID \a _dsid */
     Device& getDeviceByDSID(const dsid_t _dsid) const;
     /** @copydoc getDeviceByDSID */
     Device& getDeviceByDSID(const dsid_t _dsid);
-    /** Returns a reference to the device with the name _name*/
+    /** Returns a reference to the device with the name \a _name*/
     Device& getDeviceByName(const string& _name);
     /** Returns a device by it's short-address and modulator */
     Device& getDeviceByShortAddress(const Modulator& _modulator, const devid_t _deviceID) const;

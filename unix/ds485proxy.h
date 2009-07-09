@@ -74,7 +74,7 @@ namespace dss {
   }; // ReceivedFrame
 
   /** A frame bucket holds response-frames for any given function id/source id pair.
-   *  If @m_SourceID is -1 every source matches. */
+   *  If m_SourceID is -1 every source matches. */
   class FrameBucket {
   private:
     deque<boost::shared_ptr<ReceivedFrame> > m_Frames;
@@ -97,9 +97,9 @@ namespace dss {
      * The pointer will contain NULL if isEmpty() returns true. */
     boost::shared_ptr<ReceivedFrame> popFrame();
 
-    /** Waits for frames to arrive for @_timeoutMS */
+    /** Waits for frames to arrive for \a _timeoutMS */
     void waitForFrames(int _timeoutMS);
-    /** Waits for a frame to arrive in @_timeoutMS.
+    /** Waits for a frame to arrive in \a _timeoutMS.
      * If a frame arrives earlier, the function returns */
     void waitForFrame(int _timeoutMS);
 

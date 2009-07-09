@@ -29,7 +29,7 @@ extern "C" {
 #endif
 
   struct dsid_interface {
-      /** Returns the value for _parameterNumber of the device specified by _handle. */
+      /** Returns the value for _parameterNumber of the device specified by \a _handle. */
     double (*get_value)(int _handle, int _parameterNumber);
     void (*set_value)(int _handle, int _parameterNumber, double _value);
     void (*increase_value)(int _handle, int _parameterNumber);

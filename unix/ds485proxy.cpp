@@ -1129,7 +1129,7 @@ namespace dss {
           m_IncomingFramesGuard.unlock();
           log("R");
 
-          vector<unsigned char> ch = frame->getPayload().toChar();
+          const vector<unsigned char>& ch = frame->getPayload().toChar();
           if(ch.size() < 1) {
             log("received Command Frame w/o function identifier", lsFatal);
             continue;
