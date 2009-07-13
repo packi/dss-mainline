@@ -469,7 +469,7 @@ namespace dss {
                   } else {
                     m_PendingFrames.erase(m_PendingFrames.begin());
                     cout << "\n&&&&got other" << endl;
-                    addToReceivedQueue(cmdFrame);
+                    addToReceivedQueue(cmdAckFrame);
                   }
                 } else {
                   m_PendingFrames.erase(m_PendingFrames.begin());
@@ -556,6 +556,10 @@ namespace dss {
 
   // TODO: look into boost::weak_ptr
   void DS485Controller::addToReceivedQueue(DS485CommandFrame* _frame) {
+    if(_frame == NULL) {
+      Logger::getInstance()->log("DS485Controller::addToReceivedQueue: _frame is NULL", lsFatal);
+      return;
+    }
     boost::shared_ptr<DS485CommandFrame> frame(new DS485CommandFrame());
     (*frame) = *_frame;
     frame->setFrameSource(fsWire);
