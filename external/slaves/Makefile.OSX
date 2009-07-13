@@ -4,8 +4,8 @@ all:	slim_slave.so install
 
 slim_slave.so:	slim_slave.o
 	g++ -lPocoNet -dynamiclib -undefined dynamic_lookup -single_module -o slim_slave.so *.o
-slim_slave.o:	slim_slave.cpp
-	g++ -g3 -O0 -Wall -fPIC -c slim_slave.cpp
+slim_slave.o:	slim_slave.cpp ../../core/sim/include/dsid_plugin.h ../../core/sim/plugin/pluginbase.cpp ../../core/sim/plugin/pluginmedia.cpp
+	g++ -g3 -O0 -Wall -fPIC -c slim_slave.cpp ../../core/sim/plugin/pluginbase.cpp ../../core/sim/plugin/pluginmedia.cpp
 
 install:	slim_slave.so
 	cp slim_slave.so ../../data/plugins/
