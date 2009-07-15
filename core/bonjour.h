@@ -33,12 +33,14 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 
-  #ifdef HAVE_AVAHI
-    #define USE_AVAHI
-  #elif defined HAVE_DNS_SD
-    #define USE_DNS_SD
-  #else
-    #error "Need either AVAHI or DNS_SD"
+  #ifdef WITH_BONJOUR
+    #ifdef HAVE_AVAHI
+      #define USE_AVAHI
+    #elif defined HAVE_DNS_SD
+      #define USE_DNS_SD
+    #else
+      #error "Need either AVAHI or DNS_SD"
+    #endif
   #endif
 #endif // HAVE_CONFIG_H
 

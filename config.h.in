@@ -11,6 +11,7 @@
 #cmakedefine WITH_SIM
 #cmakedefine WITH_TESTS
 #cmakedefine WITH_DATADIR "${WITH_DATADIR}"
+#cmakedefine WITH_BONJOUR
 
 #endif /* DIGITAL_STROM_SERVER_CONFIG_H */
 

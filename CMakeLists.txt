@@ -29,8 +29,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   LINK_LIBRARIES(boost_filesystem-mt boost_system-mt boost_program_options-mt PocoFoundation PocoNet)
   SET(DNS_SD_LIB)
 ELSE(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  LINK_LIBRARIES(boost_filesystem-mt boost_program_options-mt rt)
-  SET(DNS_SD_LIB dns_sd)
+  LINK_LIBRARIES(boost_filesystem-mt boost_system-mt boost_program_options-mt rt)
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -59,8 +58,17 @@ CHECK_INCLUDE_FILES(avahi-client/publish.h HAVE_AVAHI)
 
 IF(${HAVE_AVAHI} MATCHES 1) 
   SET(DNS_SD_LIB avahi-common avahi-client)
+  SET(WITH_BONJOUR)
 ELSE(${HAVE_AVAHI} MATCHES 1)
 ENDIF(${HAVE_AVAHI} MATCHES 1)
+
+IF(${HAVE_DNS_SD} MATCHES 1)
+  SET(WITH_BONJOUR)
+  IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    SET(DNS_SD_LIB dns_sd)
+  ENDIF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+ELSE(${HAVE_DNS_SD} MATCHES 1)
+ENDIF(${HAVE_DNS_SD} MATCHES 1)
 
 
 # check for SpiderMonkey Library
@@ -88,14 +96,16 @@ ADD_SUBDIRECTORY(doc)
 LINK_DIRECTORIES(${DSS_BINARY_DIR}/core ${DSS_BINARY_DIR}/unix ${DSS_BINARY_DIR}/tests)
 
 SET(BOOST_TEST_LIB)
+SET(TEST_LIB)
 IF(WITH_TESTS) 
   ADD_SUBDIRECTORY(tests)
   SET(BOOST_TEST_LIB boost_unit_test_framework-mt)
+  SET(TEST_LIB tests)
 ENDIF(WITH_TESTS)
 
 ADD_EXECUTABLE(dss main.cpp namespaces.cpp)
 
 LINK_LIBRARIES(gsoap++)
 
-TARGET_LINK_LIBRARIES(dss tests core unix webservices pthread shttpd
+TARGET_LINK_LIBRARIES(dss ${TEST_LIB} core unix webservices pthread shttpd
 	ical dl PocoXML ${MOZJS} ${DNS_SD_LIB} ${BOOST_TEST_LIB})

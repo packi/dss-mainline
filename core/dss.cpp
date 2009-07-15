@@ -34,7 +34,9 @@
 #endif
 
 #include "webserver.h"
-#include "bonjour.h"
+#ifdef WITH_BONJOUR
+  #include "bonjour.h"
+#endif
 #ifdef WITH_SIM
   #include "sim/dssim.h"
 #endif
@@ -228,8 +230,10 @@ const char* DataDirectory = "data/";
     m_State = ssStarting;
     std::for_each(m_Subsystems.begin(), m_Subsystems.end(), StartSubsystem);
 
+#ifdef WITH_BONJOUR
     BonjourHandler bonjour;
     bonjour.run();
+#endif
 
     m_State = ssRunning;
 
