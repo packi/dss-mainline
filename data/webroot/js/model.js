@@ -394,7 +394,7 @@ var Device = Class.create({
     var parameter = this.getParameterForDeviceCall();
     var respObj = this.sendSyncRequest("getState", parameter);
     if(respObj.ok) {
-      this.ok = respObj.result.isOn;
+      this.on = respObj.result.isOn;
       return true;
     }
     return false;
