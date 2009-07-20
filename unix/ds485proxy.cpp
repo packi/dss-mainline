@@ -511,10 +511,9 @@ namespace dss {
     cmdFrame.getHeader().setBroadcast(true);
     cmdFrame.setCommand(CommandRequest);
     log("Proxy: GetModulators");
-    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetDSID);
 
-    boost::shared_ptr<FrameBucket> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionModulatorGetDSID);
-
+    cmdFrame.getPayload().add<uint8_t>(FunctionGetTypeRequest);
+    boost::shared_ptr<FrameBucket> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionGetTypeRequest);
     bucket->waitForFrames(1000);
 
     map<int, bool> resultFrom;
@@ -525,37 +524,14 @@ namespace dss {
       if(recFrame.get() == NULL) {
         break;
       }
-
       int source = recFrame->getFrame()->getHeader().getSource();
-      if(resultFrom[source]) {
-        log("already received result from " + intToString(source));
-        continue;
-      }
-      resultFrom[source] = true;
-
-      result.push_back(source);
-    }
-
-    /*
-    cmdFrame.getPayload().add<uint8_t>(FunctionGetTypeRequest);
-    log("Proxy: GetModulators");
-    sendFrame(cmdFrame);
-
-
-    map<int, bool> resultFrom;
-
-    vector<boost::shared_ptr<DS485CommandFrame> > results = receive(FunctionGetTypeRequest);
-    for(vector<boost::shared_ptr<DS485CommandFrame> >::iterator iFrame = results.begin(), e = results.end();
-        iFrame != e; ++iFrame)
-    {
-      int source = (*iFrame)->getHeader().getSource();
       if(resultFrom[source]) {
         log(string("already received result from ") + intToString(source));
         continue;
       }
       resultFrom[source] = true;
 
-      PayloadDissector pd((*iFrame)->getPayload());
+      PayloadDissector pd(recFrame->getFrame()->getPayload());
       pd.get<uint8_t>();
       uint16_t devID = pd.get<uint16_t>();
       devID &= 0x00FF;
@@ -583,7 +559,7 @@ namespace dss {
 
       result.push_back(source);
     }
-*/
+
     return result;
   } // getModulators
 
