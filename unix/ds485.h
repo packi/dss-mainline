@@ -218,6 +218,7 @@ namespace dss {
     int m_TokenCounter;
 
     boost::ptr_vector<DS485CommandFrame> m_PendingFrames;
+    Mutex m_PendingFramesGuard;
     boost::shared_ptr<SerialCom> m_SerialCom;
     SyncEvent m_ControllerEvent;
     SyncEvent m_CommandFrameEvent;

@@ -452,6 +452,7 @@ namespace dss {
             if(!m_PendingFrames.empty() && (m_TokenCounter > 10)) {
 
               // send frame
+              m_PendingFramesGuard.lock();
               DS485CommandFrame& frameToSend = m_PendingFrames.front();
               putFrameOnWire(&frameToSend, false);
               cout << "p%" << (int)frameToSend.getCommand() << "%e" << endl;
@@ -477,6 +478,7 @@ namespace dss {
                 }
               }
             }
+            m_PendingFramesGuard.unlock();
             putFrameOnWire(token.get(), false);
 //            cout << ".";
 //            flush(cout);
@@ -581,7 +583,9 @@ namespace dss {
     DS485CommandFrame* frame = new DS485CommandFrame();
     *frame = _frame;
     frame->getHeader().setSource(m_StationID);
+    m_PendingFramesGuard.lock();
     m_PendingFrames.push_back(frame);
+    m_PendingFramesGuard.unlock();
   } // enqueueFrame
 
   bool DS485Controller::waitForEvent(const int _timeoutMS) {
