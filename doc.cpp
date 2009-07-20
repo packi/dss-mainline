@@ -56,7 +56,7 @@ Each subsystem has an entry in the config subtree with at least two entries \c l
 
 \subsection config_apartment Apartment
 
-The Apartment config resides in data/apartment.xml. It contains everything that won't be stored in the dSMs such as device names that are longer than 14 characters.
+The Apartment config resides in data/apartment.xml. It contains everything that won't be stored in the dSMs such as device names that are longer than 20 characters.
 
 \verbatim
 <?xml version='1.0' encoding='utf-8'?>
@@ -74,12 +74,18 @@ The Apartment config resides in data/apartment.xml. It contains everything that 
       </location>
     </device>
     <device dsid="3504175fe0000000ffc00006">
-      <name>Klingel</name>
+      <name>Bell</name>
       <location>
         [...]
       </location>
     </device>
- </devices>
+  </devices>
+  <zones>
+    <zone id="1">
+      <name>Zone 1</name>
+    </zone>
+    [...]
+  </zones>
 </config>
 \endverbatim
 
@@ -93,7 +99,7 @@ The simulation has it's own configuration:
 <?xml version="1.0"?>
 <sim>
   <modulator busid="70" dsid="10">
-    <zone id="0"> <!-- id can be omitted, in fact zone may be omitted if there's only one zone -->
+    <zone id="1"> <!-- id can be omitted, in fact zone may be omitted if there's only one zone -->
       <device dsid="1" busid="1" type="standard.switch" />
       <device dsid="2" busid="2" type="example.vlc_remote" />
       <device dsid="4" busid="4" type="standard.simple"/>
@@ -104,7 +110,7 @@ The simulation has it's own configuration:
         <device busid="2" />
       </group>
     </zone>
-    <zone id="1">
+    <zone id="2">
       <device dsid="3" busid="3" type="standard.switch"/>
       <device dsid="5" busid="5" type="standard.simple" />
       <group id="1">
@@ -125,6 +131,40 @@ If the type of a device is not specified it defaults to "standard.simple".
 It's possible to write custom dSIDs with the use of the plugin API. The standard location of the plugins is at "data/plugins". For each file there a couple of checks (such as comparing the API version) are performed to ensure the stability of the dSS. The plugin is then asked for it's name and registered in the plugin factory, ready to use.
 
 To form groups inside a zone a group tag containing references to the devices must be inserted. At the moment it's not possible to define devices inside a group tag.
+
+\section compiling Compiling
+
+This section should give some hints about compiling the dSS.
+
+\subsection prerequisites Prerequisites
+
+The following libraries and their development headers have to be present on the system:
+
+\li libxml
+\li boost
+\li poco
+\li gsoap
+\li libical
+\li spidermonkey
+
+\subsection building Building
+
+Building should be as easy as:
+
+\verbatim
+cd dss/build
+cmake ..
+make
+\endverbatim
+
+There are several compile time options that can be passed to cmake:
+
+\li \c -DWITH_DATADIR=path specifies the default location of the data directory.
+\li \c -DWITH_TESTS=[yes|no] include tests in the build.
+\li \c -DWITH_SIM=[yes|no] include the simulation in the build
+\li \c -DCMAKE_BUILD_TYPE=[Release|Debug]
+
+If you're creating backtraces for error reporting, please use \c -DCMAKE_BUILD_TYPE=Debug.
 
 \section sets Sets
 
@@ -162,6 +202,10 @@ Set allLights = allDevices.getByGroup("yellow");
 allLights.turnOn();
 
 \endcode
+
+\section websites Default websites
+
+All websites present on the dSS reside in \c data/webroot. They may be viewed by pointing a browser to http://localhost:8080/. To create zones or regroup devices there is a very basic interface at \c http://localhost:8080/structure.html. The server-port is announced over mDNS (Bonjour) using the service name \c _dssweb._tcp.
 
 \section plugins Simulation plugins
 
@@ -242,5 +286,16 @@ The source of the dSS comes with an example implementation of a simulated dSID. 
 \verbatim
 vlc --rc-host localhost:4212
 \endverbatim
+
+\section notice Legal notice
+
+Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+Copyright (c) 2009 futureLAB AG, Zurich, Switzerland
+
+  This file is part of digitalSTROM Server.
+
+  digitalSTROM Server is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+digitalSTROM Server is provided by the copyright holders and contributors “as is” and any expressed or implied warranties, including but not limited to the implied warranties of merchantability and fitness for a particular purpose are disclaimed.  In no event shall the copyright owner or contributors be liable for any direct, indirect, incidental, special, exemplary or consequential damages (including but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or Tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage. Because some states do not allow the exclusion or limitation of liability for consequential or incidental damages, the above limitation may not apply to you. In such states, digitalSTROM.org liability is limited to the greatest extent permitted by law
 
 */
