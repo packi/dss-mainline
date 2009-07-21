@@ -316,6 +316,60 @@ BOOST_AUTO_TEST_CASE(readWriteExtended) {
   }
 } // testReadWriteExtended
 
+BOOST_AUTO_TEST_CASE(ImNotExactlySureWhatItestAtThisMoment) {
+  /* we build a serie of N values where each value equals its time offset
+   * (value of time0 + 4 * day = 4)
+   */
+  const unsigned int N = 400;
+  const unsigned int SECONDS_PER_DAY = 86400;
+  const time_t T0 = 1200000000; // 2008-01-10T22:20:00
+  DateTime startT(T0);
+
+  /* build serie */
+  Series<CurrentValue> daily(SECONDS_PER_DAY, N);
+  BOOST_CHECK_EQUAL( static_cast<int>(SECONDS_PER_DAY), daily.getResolution() );
+  BOOST_CHECK_EQUAL( static_cast<int>(N), daily.getNumberOfValues() );
+  for (unsigned int i = 0; i < N; i++) {
+    DateTime ts = startT.addSeconds(i * SECONDS_PER_DAY);
+    daily.addValue(i, ts);
+    /* because the timestamp contains 22:20 hours, the result date is only equal */
+    BOOST_CHECK_EQUAL( ts.getYear(), daily.getValues().front().getTimeStamp().getYear() );
+    BOOST_CHECK_EQUAL( ts.getMonth(), daily.getValues().front().getTimeStamp().getMonth() );
+    BOOST_CHECK_EQUAL( ts.getDay(), daily.getValues().front().getTimeStamp().getDay() );
+  }
+
+  typedef Series<CurrentValue>::QueueType queue_type_;
+
+  /* test values */
+  queue_type_ queue(daily.getValues());
+  unsigned int numberOfElements = 0;
+  for (queue_type_::const_iterator iter = queue.begin();
+       iter != queue.end();
+       iter++)
+  {
+    ++numberOfElements;
+    double v = iter->getValue();
+    BOOST_CHECK_EQUAL( (N - numberOfElements), static_cast<unsigned int>(v) );
+    DateTime ts = startT.addSeconds((N - numberOfElements) * SECONDS_PER_DAY);
+    BOOST_CHECK_EQUAL( ts.getYear(), iter->getTimeStamp().getYear() );
+    BOOST_CHECK_EQUAL( ts.getMonth(), iter->getTimeStamp().getMonth() );
+    BOOST_CHECK_EQUAL( ts.getDay(), iter->getTimeStamp().getDay() );
+  }
+  BOOST_CHECK_EQUAL( numberOfElements, N );
+
+  /* test expanded values */
+  queue_type_ *queueExpanded = daily.getExpandedValues();
+  numberOfElements = 0;
+  for (queue_type_::const_iterator iter = queueExpanded->begin();
+       iter != queueExpanded->end();
+       iter++)
+  {
+    ++numberOfElements;
+    double v = iter->getValue();
+    BOOST_CHECK_EQUAL( numberOfElements, static_cast<unsigned int>(v) );
+  }
+} // testImNotExactlySureWhatItestAtThisMoment
+
 BOOST_AUTO_TEST_CASE(realtime) {
   Series<CurrentValue> five(5 * 60, 10);
   Series<CurrentValue> minutely(60, 10, &five);
