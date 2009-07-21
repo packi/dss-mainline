@@ -322,8 +322,7 @@ BOOST_AUTO_TEST_CASE(ImNotExactlySureWhatItestAtThisMoment) {
    */
   const unsigned int N = 400;
   const unsigned int SECONDS_PER_DAY = 86400;
-  const time_t T0 = 1200000000; // 2008-01-10T22:20:00
-  DateTime startT(T0);
+  DateTime startT;
 
   /* build serie */
   Series<CurrentValue> daily(SECONDS_PER_DAY, N);
@@ -332,17 +331,23 @@ BOOST_AUTO_TEST_CASE(ImNotExactlySureWhatItestAtThisMoment) {
   for (unsigned int i = 0; i < N; i++) {
     DateTime ts = startT.addSeconds(i * SECONDS_PER_DAY);
     daily.addValue(i, ts);
-    /* because the timestamp contains 22:20 hours, the result date is only equal */
-    BOOST_CHECK_EQUAL( ts.getYear(), daily.getValues().front().getTimeStamp().getYear() );
-    BOOST_CHECK_EQUAL( ts.getMonth(), daily.getValues().front().getTimeStamp().getMonth() );
-    BOOST_CHECK_EQUAL( ts.getDay(), daily.getValues().front().getTimeStamp().getDay() );
+    const DateTime& insertedDate = daily.getValues().front().getTimeStamp();
+    /* because the timestamp contains 22:20 hours only the date will be equal.
+       The time must be equal the buckets boundary (00:00:00) */
+    BOOST_CHECK_EQUAL( ts.getYear(), insertedDate.getYear() );
+    BOOST_CHECK_EQUAL( ts.getMonth(), insertedDate.getMonth() );
+    BOOST_CHECK_EQUAL( ts.getDay(), insertedDate.getDay() );
+    BOOST_CHECK_EQUAL( 0, insertedDate.getHour() );
+    BOOST_CHECK_EQUAL( 0, insertedDate.getMinute() );
+    BOOST_CHECK_EQUAL( 0, insertedDate.getSecond() );
   }
 
   typedef Series<CurrentValue>::QueueType queue_type_;
 
   /* test values */
   queue_type_ queue(daily.getValues());
-  unsigned int numberOfElements = 0;
+  BOOST_CHECK_EQUAL( N, queue.size() );
+unsigned int numberOfElements = 0;
   for (queue_type_::const_iterator iter = queue.begin();
        iter != queue.end();
        iter++)
@@ -366,7 +371,7 @@ BOOST_AUTO_TEST_CASE(ImNotExactlySureWhatItestAtThisMoment) {
   {
     ++numberOfElements;
     double v = iter->getValue();
-    BOOST_CHECK_EQUAL( numberOfElements, static_cast<unsigned int>(v) );
+    BOOST_CHECK_EQUAL( (N - numberOfElements), static_cast<unsigned int>(v) );
   }
 } // testImNotExactlySureWhatItestAtThisMoment
 

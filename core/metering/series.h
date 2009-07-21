@@ -202,7 +202,7 @@ namespace dss {
         throw runtime_error("Series::AddValue: m_Resolution is Zero. This will lead to an infinite loop");
       }
       DateTime bucketTimeStamp(static_cast<time_t>(_value.getTimeStamp().secondsSinceEpoch() -
-        _value.getTimeStamp().secondsSinceEpoch() % m_Resolution));
+        (_value.getTimeStamp().secondsSinceEpoch() % m_Resolution)));
       value_type newValue = _value;
       newValue.setTimeStamp(bucketTimeStamp);
       if(!m_Values.empty()) {
@@ -270,9 +270,9 @@ namespace dss {
       std::deque<value_type>* expandedQueue = new std::deque<value_type>;
       
       typename QueueType::iterator iValue = m_Values.begin(), e = m_Values.end();
-      
+
       DateTime iCurrentTimeStamp;
-      iCurrentTimeStamp = iCurrentTimeStamp.addSeconds(iCurrentTimeStamp.secondsSinceEpoch() % m_Resolution);
+      iCurrentTimeStamp = iCurrentTimeStamp.addSeconds(-(iCurrentTimeStamp.secondsSinceEpoch() % m_Resolution));
       if(iCurrentTimeStamp < m_Values.front().getTimeStamp()) {
         iCurrentTimeStamp = m_Values.front().getTimeStamp();
       }
