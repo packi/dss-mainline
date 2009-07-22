@@ -37,8 +37,6 @@
 #include <ostream>
 #include <sys/time.h>
 
-using namespace std;
-
 namespace dss {
 
   typedef enum {
@@ -156,8 +154,8 @@ namespace dss {
     /** Returns the seconds since epoch */
     time_t secondsSinceEpoch() const;
 
-    ostream& operator<<(ostream& out) const;
-    operator string() const;
+    std::ostream& operator<<(std::ostream& out) const;
+    operator std::string() const;
 
     /** The NullDate has it's date and time parts set to 0. It should
       * be used for default values. */
@@ -167,7 +165,7 @@ namespace dss {
      * @param _isoStr DateTime string formatted as "yyyymmddThhmmssZ"
      * @throw invalid_argument if a malformatted \a _isoStr is provided
      */
-    static DateTime fromISO(const string& _isoStr);
+    static DateTime fromISO(const std::string& _isoStr);
     /** Creates an instance from a time_t struct that is in UTC */
     static DateTime fromUTC(const time_t& _time);
     /** Creates an instance from a time_t struct and converts the internal
@@ -175,7 +173,7 @@ namespace dss {
     static DateTime toUTC(const time_t& _time);
   }; // DateTime
 
-  ostream& operator<<(ostream& out, const DateTime& _dt);
+  std::ostream& operator<<(std::ostream& out, const DateTime& _dt);
 
   /** A Schedule is an abstract construct that's able to determine the
     * next occurence or even the next occurences. */
@@ -187,9 +185,9 @@ namespace dss {
       */
     virtual DateTime getNextOccurence(const DateTime& _from) = 0;
     /** Lists all ocurrences between \a _from and \a _to.
-      * @return A list containing dates between \a _from and \a _to or an empty vector
+      * @return A list containing dates between \a _from and \a _to or an empty std::vector
       */
-    virtual vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to) = 0;
+    virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to) = 0;
   };
 
   /** Schedule that's scheduled on a specific DateTime */
@@ -201,7 +199,7 @@ namespace dss {
     virtual ~StaticSchedule() {}
 
     virtual DateTime getNextOccurence(const DateTime& _from) ;
-    virtual vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
+    virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
   };
 
   typedef enum {
@@ -231,7 +229,7 @@ namespace dss {
     virtual ~RepeatingSchedule() {}
 
     virtual DateTime getNextOccurence(const DateTime& _from) ;
-    virtual vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
+    virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
   }; // RepeatingSchedule
 
   /** Schedule that gets it's schedule from an iCal's RRULE */
@@ -240,11 +238,11 @@ namespace dss {
     struct icalrecurrencetype m_Recurrence;
     struct icaltimetype m_StartDate;
   public:
-    ICalSchedule(const string& _rrule, const string _startDateISO);
+    ICalSchedule(const std::string& _rrule, const std::string _startDateISO);
     virtual ~ICalSchedule();
 
     virtual DateTime getNextOccurence(const DateTime& _from) ;
-    virtual vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
+    virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
   }; // ICalSchedule
 
   //================================================== Timestamp

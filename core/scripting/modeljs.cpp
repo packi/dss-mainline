@@ -27,7 +27,7 @@
 #include <boost/scoped_ptr.hpp>
 
 namespace dss {
-  const string ModelScriptcontextExtensionName = "modelextension";
+  const std::string ModelScriptcontextExtensionName = "modelextension";
 
   ModelScriptContextExtension::ModelScriptContextExtension(Apartment& _apartment)
   : ScriptExtension(ModelScriptcontextExtensionName),
@@ -57,7 +57,7 @@ namespace dss {
 
     ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
     if(ext != NULL) {
-      string aptName = ext->getApartment().getName();
+      std::string aptName = ext->getApartment().getName();
       JSString* str = JS_NewStringCopyN(cx, aptName.c_str(), aptName.size());
 
       *rval = STRING_TO_JSVAL(str);
@@ -73,7 +73,7 @@ namespace dss {
     if(ext != NULL && argc >= 1) {
       JSString* str = JS_ValueToString(cx, argv[0]);
       if(str != NULL) {
-        string aptName = JS_GetStringBytes(str);
+        std::string aptName = JS_GetStringBytes(str);
         ext->getApartment().setName(aptName);
 
         *rval = INT_TO_JSVAL(0);
@@ -101,13 +101,13 @@ namespace dss {
   JSBool global_log(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
     if (argc < 1) {
       *rval = INT_TO_JSVAL(0); /* Send back a return value of 0. */
-      Logger::getInstance()->log("JS: global_log: (empty string)");
+      Logger::getInstance()->log("JS: global_log: (empty std::string)");
     } else {
-      stringstream sstr;
+      std::stringstream sstr;
       unsigned int i;
       for (i=0; i<argc; i++){
-        JSString *val = JS_ValueToString(cx, argv[i]); /* Convert the value to a javascript string. */
-        char *str = JS_GetStringBytes(val); /* Then convert it to a C-style string. */
+        JSString *val = JS_ValueToString(cx, argv[i]); /* Convert the value to a javascript std::string. */
+        char *str = JS_GetStringBytes(val); /* Then convert it to a C-style std::string. */
         sstr << str;
       }
       Logger::getInstance()->log(sstr.str());
@@ -478,7 +478,7 @@ namespace dss {
           return JS_TRUE;
         case 1:
           {
-            // make a local reference so the string does not go out of scope
+            // make a local reference so the std::string does not go out of scope
             std::string tmp = dev->getDSID().toString();
             *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, tmp.c_str()));
           }
@@ -530,7 +530,7 @@ namespace dss {
 
   //================================================== EventScriptExtension
 
-  const string EventScriptExtensionName = "eventextension";
+  const std::string EventScriptExtensionName = "eventextension";
 
   EventScriptExtension::EventScriptExtension(EventQueue& _queue, EventInterpreter& _interpreter)
   : ScriptExtension(EventScriptExtensionName),

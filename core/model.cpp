@@ -75,7 +75,7 @@ namespace dss {
       } else {
         if(m_pApartment->getPropertyNode() != NULL) {
           m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone" + intToString(m_ZoneID) + "/device+");
-//          m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyMemberFunction<Device, string>(*this, &Device::getName, &Device::setName));
+//          m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
           m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyReference<string>(m_Name));
           m_pPropertyNode->createProperty("ModulatorID")->linkToProxy(PropertyProxyReference<int>(m_ModulatorID, false));
           m_pPropertyNode->createProperty("ZoneID")->linkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
@@ -176,11 +176,11 @@ namespace dss {
     callScene(SceneHelper::getNextScene(m_LastCalledScene));
   } // previousScene
 
-  string Device::getName() const {
+  std::string Device::getName() const {
     return m_Name;
   } // getName
 
-  void Device::setName(const string& _name) {
+  void Device::setName(const std::string& _name) {
     if(m_Name != _name) {
       m_Name = _name;
       dirty();
@@ -288,11 +288,11 @@ namespace dss {
     return m_Groups.size();
   } // getGroupsCount
 
-  bitset<63>& Device::getGroupBitmask() {
+  std::bitset<63>& Device::getGroupBitmask() {
     return m_GroupBitmask;
   } // getGroupBitmask
 
-  const bitset<63>& Device::getGroupBitmask() const {
+  const std::bitset<63>& Device::getGroupBitmask() const {
     return m_GroupBitmask;
   } // getGroupBitmask
 
@@ -436,7 +436,7 @@ namespace dss {
     return getByGroup(_group.getID());
   } // getByGroup(ref)
 
-  Set Set::getByGroup(const string& _name) const {
+  Set Set::getByGroup(const std::string& _name) const {
     Set result;
     if(isEmpty()) {
       return result;
@@ -473,9 +473,9 @@ namespace dss {
 
   class ByNameSelector : public IDeviceSelector {
   private:
-    const string m_Name;
+    const std::string m_Name;
   public:
-    ByNameSelector(const string& _name) : m_Name(_name) {};
+    ByNameSelector(const std::string& _name) : m_Name(_name) {};
     virtual ~ByNameSelector() {};
 
     virtual bool selectDevice(const Device& _device) const {
@@ -483,7 +483,7 @@ namespace dss {
     }
   };
 
-  DeviceReference Set::getByName(const string& _name) const {
+  DeviceReference Set::getByName(const std::string& _name) const {
     Set resultSet = getSubset(ByNameSelector(_name));
     if(resultSet.length() == 0) {
       throw ItemNotFoundException(_name);
@@ -612,7 +612,7 @@ namespace dss {
     return result;
   } // getPowerConsumption
 
-  ostream& operator<<(ostream& out, const Device& _dt) {
+  std::ostream& operator<<(std::ostream& out, const Device& _dt) {
     out << "Device ID " << _dt.getShortAddress();
     if(!_dt.getName().empty()) {
       out << " name: " << _dt.getName();
@@ -696,7 +696,7 @@ namespace dss {
 
   void Apartment::execute() {
     // load devices/modulators/etc. from a config-file
-    string configFileName = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile");
+    std::string configFileName = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile");
     if(!fileExists(configFileName)) {
       Logger::getInstance()->log(string("Apartment::execute: Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
     } else {
@@ -853,7 +853,7 @@ namespace dss {
 
   const int ApartmentConfigVersion = 1;
 
-  void Apartment::readConfigurationFromXML(const string& _fileName) {
+  void Apartment::readConfigurationFromXML(const std::string& _fileName) {
     XMLDocumentFileReader reader(_fileName);
     setName("dSS");
 
@@ -862,7 +862,7 @@ namespace dss {
       if(strToInt(rootNode.getAttributes()["version"]) == ApartmentConfigVersion) {
         XMLNodeList nodes = rootNode.getChildren();
         for(XMLNodeList::iterator iNode = nodes.begin(); iNode != nodes.end(); ++iNode) {
-          string nodeName = iNode->getName();
+          std::string nodeName = iNode->getName();
           if(nodeName == "devices") {
             loadDevices(*iNode);
           } else if(nodeName == "modulators") {
@@ -890,7 +890,7 @@ namespace dss {
     for(XMLNodeList::iterator iNode = devices.begin(); iNode != devices.end(); ++iNode) {
       if(iNode->getName() == "device") {
         dsid_t dsid = dsid_t::fromString(iNode->getAttributes()["dsid"]);
-        string name;
+        std::string name;
         try {
           XMLNode& nameNode = iNode->getChildByName("name");
           if(!nameNode.getChildren().empty()) {
@@ -907,7 +907,7 @@ namespace dss {
           if(locationNode.hasChildWithName("x")) {
             XMLNode& node = locationNode.getChildByName("x");
             if(!node.getChildren().empty()) {
-              string valueStr = (node.getChildren()[0]).getContent();
+              std::string valueStr = (node.getChildren()[0]).getContent();
               if(!valueStr.empty()) {
                 boost::get<0>(location) = strToDouble(valueStr);
               }
@@ -916,7 +916,7 @@ namespace dss {
           if(locationNode.hasChildWithName("y")) {
             XMLNode& node = locationNode.getChildByName("y");
             if(!node.getChildren().empty()) {
-              string valueStr = (node.getChildren()[0]).getContent();
+              std::string valueStr = (node.getChildren()[0]).getContent();
               if(!valueStr.empty()) {
                 boost::get<1>(location) = strToDouble(valueStr);
               }
@@ -925,7 +925,7 @@ namespace dss {
           if(locationNode.hasChildWithName("z")) {
             XMLNode& node = locationNode.getChildByName("z");
             if(!node.getChildren().empty()) {
-              string valueStr = (node.getChildren()[0]).getContent();
+              std::string valueStr = (node.getChildren()[0]).getContent();
               if(!valueStr.empty()) {
                 boost::get<2>(location) = strToDouble(valueStr);
               }
@@ -952,7 +952,7 @@ namespace dss {
     for(XMLNodeList::iterator iModulator = modulators.begin(); iModulator != modulators.end(); ++iModulator) {
       if(iModulator->getName() == "modulator") {
         dsid_t id = dsid_t::fromString(iModulator->getAttributes()["id"]);
-        string name;
+        std::string name;
         try {
           XMLNode& nameNode = iModulator->getChildByName("name");
           if(!nameNode.getChildren().empty()) {
@@ -975,7 +975,7 @@ namespace dss {
     for(XMLNodeList::iterator iZone = zones.begin(); iZone != zones.end(); ++iZone) {
       if(iZone->getName() == "zone") {
         int id = strToInt(iZone->getAttributes()["id"]);
-        string name;
+        std::string name;
         try {
           XMLNode& nameNode = iZone->getChildByName("name");
           if(!nameNode.getChildren().empty()) {
@@ -1045,7 +1045,7 @@ namespace dss {
     _parentNode->appendChild(pModulatorNode);
   } // modulatorToXML
 
-  void Apartment::writeConfigurationToXML(const string& _fileName) {
+  void Apartment::writeConfigurationToXML(const std::string& _fileName) {
     log("Writing apartment config to '" + _fileName + "'", lsInfo);
     AutoPtr<Document> pDoc = new Document;
 
@@ -1094,7 +1094,7 @@ namespace dss {
       ModulatorToXML(pModulator, pModulators, pDoc);
     }
 
-    string tmpOut = _fileName + ".tmp";
+    std::string tmpOut = _fileName + ".tmp";
     std::ofstream ofs(tmpOut.c_str());
 
     if(ofs) {
@@ -1140,7 +1140,7 @@ namespace dss {
     throw ItemNotFoundException(intToString(_deviceID));
   } // getDeviceByShortAddress
 
-  Device& Apartment::getDeviceByName(const string& _name) {
+  Device& Apartment::getDeviceByName(const std::string& _name) {
     foreach(Device* dev, m_Devices) {
       if(dev->getName() == _name) {
         return *dev;
@@ -1158,7 +1158,7 @@ namespace dss {
     return Set(devs);
   } // getDevices
 
-  Zone& Apartment::getZone(const string& _zoneName) {
+  Zone& Apartment::getZone(const std::string& _zoneName) {
     foreach(Zone* zone, m_Zones) {
       if(zone->getName() == _zoneName) {
         return *zone;
@@ -1180,7 +1180,7 @@ namespace dss {
     return m_Zones;
   } // getZones
 
-  Modulator& Apartment::getModulator(const string& _modName) {
+  Modulator& Apartment::getModulator(const std::string& _modName) {
     foreach(Modulator* modulator, m_Modulators) {
       if(modulator->getName() == _modName) {
         return *modulator;
@@ -1212,7 +1212,7 @@ namespace dss {
   } // getModulators
 
   // Group queries
-  Group& Apartment::getGroup(const string& _name) {
+  Group& Apartment::getGroup(const std::string& _name) {
     Group* pResult = getZone(0).getGroup(_name);
     if(pResult != NULL) {
       return *pResult;
@@ -1537,7 +1537,7 @@ namespace dss {
     }
   } // removeDevice
 
-  Group* Zone::getGroup(const string& _name) const {
+  Group* Zone::getGroup(const std::string& _name) const {
     for(vector<Group*>::const_iterator ipGroup = m_Groups.begin(), e = m_Groups.end();
         ipGroup != e; ++ipGroup)
     {
@@ -1785,7 +1785,7 @@ namespace dss {
     return m_DSID;
   } // getID
 
-  string DeviceReference::getName() const {
+  std::string DeviceReference::getName() const {
     return getDevice().getName();
   } //getName
 
@@ -1857,7 +1857,7 @@ namespace dss {
     getDevice().previousScene();
   }
 
-  void DeviceContainer::setName(const string& _name) {
+  void DeviceContainer::setName(const std::string& _name) {
     if(m_Name != _name) {
       m_Name = _name;
       if(DSS::hasInstance()) {

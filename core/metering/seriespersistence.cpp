@@ -70,7 +70,7 @@ namespace dss {
   //================================================== SeriesReader
 
   template<class T>
-  Series<T>* SeriesReader<T>::readFromXML(const string& _fileName) {
+  Series<T>* SeriesReader<T>::readFromXML(const std::string& _fileName) {
     Timestamp parsing;
 
     std::ifstream inFile(_fileName.c_str());
@@ -90,7 +90,7 @@ namespace dss {
     }
 
     if(strToIntDef(rootNode->getAttribute("version"),-1) != SeriesXMLFileVersion) {
-      Logger::getInstance()->log(string("SeriesReader::readFromXML: Version mismatch, expected ") + intToString(SeriesXMLFileVersion) + " got " + rootNode->getAttribute("version"),
+      Logger::getInstance()->log(std::string("SeriesReader::readFromXML: Version mismatch, expected ") + intToString(SeriesXMLFileVersion) + " got " + rootNode->getAttribute("version"),
                                  lsError);
       return NULL;
     }
@@ -108,8 +108,8 @@ namespace dss {
           T value(0);
           value.readFromXMLNode(node);
           result->addValue(value);
-        } catch(runtime_error& e) {
-          Logger::getInstance()->log(string("SeriesReader::readFromXML: Error while reading value: ") + e.what());
+        } catch(std::runtime_error& e) {
+          Logger::getInstance()->log(std::string("SeriesReader::readFromXML: Error while reading value: ") + e.what());
         }
       }
       node = node->nextSibling();
@@ -140,7 +140,7 @@ namespace dss {
   //#define LOG_TIMING
 
   template<class T>
-  bool SeriesWriter<T>::writeToXML(const Series<T>& _series, const string& _path) {
+  bool SeriesWriter<T>::writeToXML(const Series<T>& _series, const std::string& _path) {
     AutoPtr<Document> pDoc = new Document;
 
 #ifdef LOG_TIMING
@@ -202,12 +202,12 @@ namespace dss {
       pValues->appendChild(elem);
     }
 #ifdef LOG_TIMING
-    cout << "building xml: " << Timestamp().getDifference(buildingXML) << endl;
+    std::cout << "building xml: " << Timestamp().getDifference(buildingXML) << std::endl;
 
     Timestamp writingXML;
 #endif
     // write it to a temporary site first
-    string tmpOut = _path + ".tmp";
+    std::string tmpOut = _path + ".tmp";
     std::ofstream ofs(tmpOut.c_str() );
 
     if(ofs) {
@@ -215,24 +215,24 @@ namespace dss {
       writer.setNewLine("\n");
       writer.setOptions(XMLWriter::PRETTY_PRINT);
 
-      // write output to stringstream first...
+      // write output to std::stringstream first...
       std::stringstream sstream;
       writer.writeNode(sstream, pDoc);
-      string content = sstream.str();
+      std::string content = sstream.str();
       // ...and write the whole thing in one operation
       ofs.write(content.c_str(), content.size());
 
       ofs.close();
 
 #ifdef LOG_TIMING
-      cout << "writing xml: " << Timestamp().getDifference(writingXML) << endl;
+      std::cout << "writing xml: " << Timestamp().getDifference(writingXML) << std::endl;
 
       Timestamp renaming;
 #endif
       // move it to the desired location
       rename(tmpOut.c_str(), _path.c_str());
 #ifdef LOG_TIMING
-      cout << "renaming: " << Timestamp().getDifference(renaming) << endl;
+      std::cout << "renaming: " << Timestamp().getDifference(renaming) << std::endl;
 #endif
     } else {
       Logger::getInstance()->log("Could not open file for writing");

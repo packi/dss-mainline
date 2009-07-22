@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(testStaticSchedule) {
   BOOST_CHECK_EQUAL(when, schedule.getNextOccurence(when.addMinute(-1)));
   BOOST_CHECK_EQUAL(DateTime::NullDate, schedule.getNextOccurence(when.addMinute(1)));
 
-  vector<DateTime> schedList = schedule.getOccurencesBetween(when.addMinute(-1), when.addMinute(1));
+  std::vector<DateTime> schedList = schedule.getOccurencesBetween(when.addMinute(-1), when.addMinute(1));
   BOOST_CHECK_EQUAL(static_cast<size_t>(1), schedList.size());
 
   schedList = schedule.getOccurencesBetween(when.addMinute(1), when.addMinute(2));
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(testDynamicSchedule) {
   BOOST_CHECK_EQUAL(when,              schedule.getNextOccurence(when.addSeconds(-1)));
   BOOST_CHECK_EQUAL(when.addMinute(5), schedule.getNextOccurence(when.addSeconds(1)));
 
-  vector<DateTime> v = schedule.getOccurencesBetween(when, when.addMinute(10));
+  std::vector<DateTime> v = schedule.getOccurencesBetween(when, when.addMinute(10));
 
   BOOST_CHECK_EQUAL(static_cast<size_t>(3), v.size());
   BOOST_CHECK_EQUAL(when, v[0]);

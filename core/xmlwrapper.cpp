@@ -62,7 +62,7 @@ namespace dss {
     m_AttributesRead = _other.m_AttributesRead;
   } // copyFrom
 
-  const string XMLNode::getName() {
+  const std::string XMLNode::getName() {
     assertHasNode("Can't get name without node");
 #ifdef USE_LIBXML
     const char* name = (const char*)m_pNode->name;
@@ -72,7 +72,7 @@ namespace dss {
     return name;
   }
 
-  const string XMLNode::getContent() {
+  const std::string XMLNode::getContent() {
     assertHasNode("Can't get content without node");
 #ifdef USE_LIBXML
     const char* content = (const char*)m_pNode->content;
@@ -82,7 +82,7 @@ namespace dss {
     return content;
   }
 
-  void XMLNode::assertHasNode(const string& _reason) {
+  void XMLNode::assertHasNode(const std::string& _reason) {
     if(m_pNode == NULL) {
       throw XMLException(_reason);
     }
@@ -115,7 +115,7 @@ namespace dss {
     return m_Children;
   }
 
-  XMLNode& XMLNode::getChildByName(const string& _name) {
+  XMLNode& XMLNode::getChildByName(const std::string& _name) {
     XMLNodeList& children = getChildren();
     for(XMLNodeList::iterator it = children.begin(); it != children.end(); ++it) {
       if(it->getName() == _name) {
@@ -125,7 +125,7 @@ namespace dss {
     throw XMLException("Could not find node");
   } // getChildByName
 
-  bool XMLNode::hasChildWithName(const string& _name) {
+  bool XMLNode::hasChildWithName(const std::string& _name) {
     XMLNodeList& children = getChildren();
     for(XMLNodeList::iterator it = children.begin(); it != children.end(); ++it) {
       if(it->getName() == _name) {
@@ -135,7 +135,7 @@ namespace dss {
     return false;
   } // hasChildWithName
 
-  XMLNode& XMLNode::addChildNode(const string& _name, const string& _content) {
+  XMLNode& XMLNode::addChildNode(const std::string& _name, const std::string& _content) {
     assertHasNode("Need a node to append a child to");
 
     if(_name.size() == 0) {
@@ -217,21 +217,21 @@ namespace dss {
   } // getRootNode
 
 
-  void XMLDocument::saveToFile(const string& _fileName) {
+  void XMLDocument::saveToFile(const std::string& _fileName) {
     FILE* out = fopen(_fileName.c_str(), "w");
     if(out == NULL) {
-      throw XMLException(string("XMLDocumen::saveToFile: Could not open file ") + _fileName);
+      throw XMLException(std::string("XMLDocumen::saveToFile: Could not open file ") + _fileName);
     }
 #ifdef USE_LIBXML
     if(xmlDocDump(out, m_Resource) < 0) {
-      throw XMLException(string("XMLDocumen::saveToFile: xmlDocDump failed for file:") + _fileName);
+      throw XMLException(std::string("XMLDocumen::saveToFile: xmlDocDump failed for file:") + _fileName);
     }
 #endif
   }
 
   //============================================= XMLDocumentFileReader
 
-  XMLDocumentFileReader::XMLDocumentFileReader(const string& _uri)
+  XMLDocumentFileReader::XMLDocumentFileReader(const std::string& _uri)
   : m_URI(_uri)
   {
   }
@@ -241,20 +241,20 @@ namespace dss {
 
   XMLDocument& XMLDocumentFileReader::getDocument() {
     if(!fileExists(m_URI.c_str())) {
-      throw XMLException(string("XMLDocumentFileReader::getDocument: File '") + m_URI + "' does not exist");
+      throw XMLException(std::string("XMLDocumentFileReader::getDocument: File '") + m_URI + "' does not exist");
     }
 
 #ifdef USE_LIBXML
     xmlDoc* doc = xmlParseFile(m_URI.c_str());
     if(doc == NULL) {
-      throw XMLException(string("Could not parse file: ") + m_URI);
+      throw XMLException(std::string("Could not parse file: ") + m_URI);
     }
 
     XMLDocument docObj(doc);
     m_Document = docObj;
 #else
     ifstream f(m_URI.c_str());
-    string str((istreambuf_iterator<char>(f)), istreambuf_iterator<char>());
+    std::string str((istreambuf_iterator<char>(f)), istreambuf_iterator<char>());
 
     PScanner scanner;
     scanner = scnInit();

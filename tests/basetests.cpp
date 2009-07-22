@@ -43,20 +43,20 @@ BOOST_AUTO_TEST_CASE(testCRC) {
 }
 
 BOOST_AUTO_TEST_CASE(testUrlDecode) {
-  BOOST_CHECK_EQUAL(string(" "), urlDecode("%20"));
-  BOOST_CHECK_EQUAL(string("a "), urlDecode("a%20"));
-  BOOST_CHECK_EQUAL(string(" a"), urlDecode("%20a"));
-  BOOST_CHECK_EQUAL(string("v a"), urlDecode("v%20a"));
-  BOOST_CHECK_EQUAL(string("  "), urlDecode("%20%20"));
-  BOOST_CHECK_EQUAL(string("   "), urlDecode("%20%20%20"));
+  BOOST_CHECK_EQUAL(std::string(" "), urlDecode("%20"));
+  BOOST_CHECK_EQUAL(std::string("a "), urlDecode("a%20"));
+  BOOST_CHECK_EQUAL(std::string(" a"), urlDecode("%20a"));
+  BOOST_CHECK_EQUAL(std::string("v a"), urlDecode("v%20a"));
+  BOOST_CHECK_EQUAL(std::string("  "), urlDecode("%20%20"));
+  BOOST_CHECK_EQUAL(std::string("   "), urlDecode("%20%20%20"));
 
-  BOOST_CHECK_EQUAL(string(" "), urlDecode("+"));
-  BOOST_CHECK_EQUAL(string("  "), urlDecode("++"));
-  BOOST_CHECK_EQUAL(string(" a "), urlDecode("+a+"));
-  BOOST_CHECK_EQUAL(string("  a"), urlDecode("++a"));
-  BOOST_CHECK_EQUAL(string("a  "), urlDecode("a++"));
-  BOOST_CHECK_EQUAL(string("  b"), urlDecode("+%20b"));
-  BOOST_CHECK_EQUAL(string("sourceid=1&schedule=FREQ=MINUTELY;INTERVAL=1&start=20080520T080000Z"),
+  BOOST_CHECK_EQUAL(std::string(" "), urlDecode("+"));
+  BOOST_CHECK_EQUAL(std::string("  "), urlDecode("++"));
+  BOOST_CHECK_EQUAL(std::string(" a "), urlDecode("+a+"));
+  BOOST_CHECK_EQUAL(std::string("  a"), urlDecode("++a"));
+  BOOST_CHECK_EQUAL(std::string("a  "), urlDecode("a++"));
+  BOOST_CHECK_EQUAL(std::string("  b"), urlDecode("+%20b"));
+  BOOST_CHECK_EQUAL(std::string("sourceid=1&schedule=FREQ=MINUTELY;INTERVAL=1&start=20080520T080000Z"),
                        urlDecode("sourceid=1&schedule=FREQ%3DMINUTELY%3BINTERVAL%3D1&start=20080520T080000Z"));
 } // teturlDecode
 
@@ -72,41 +72,41 @@ BOOST_AUTO_TEST_CASE(testConversions) {
 } // testConversions
 
 BOOST_AUTO_TEST_CASE(testTrim) {
-  // reductions to zero-string
-  BOOST_CHECK_EQUAL(string(""), trim(""));
-  BOOST_CHECK_EQUAL(string(""), trim(" "));
-  BOOST_CHECK_EQUAL(string(""), trim("  "));
-  BOOST_CHECK_EQUAL(string(""), trim("     "));
-  BOOST_CHECK_EQUAL(string(""), trim("\r"));
-  BOOST_CHECK_EQUAL(string(""), trim(" \r"));
-  BOOST_CHECK_EQUAL(string(""), trim(" \r "));
-  BOOST_CHECK_EQUAL(string(""), trim("\n"));
-  BOOST_CHECK_EQUAL(string(""), trim(" \n"));
-  BOOST_CHECK_EQUAL(string(""), trim(" \n "));
-  BOOST_CHECK_EQUAL(string(""), trim("\t"));
-  BOOST_CHECK_EQUAL(string(""), trim(" \t "));
+  // reductions to zero-std::string
+  BOOST_CHECK_EQUAL(std::string(""), trim(""));
+  BOOST_CHECK_EQUAL(std::string(""), trim(" "));
+  BOOST_CHECK_EQUAL(std::string(""), trim("  "));
+  BOOST_CHECK_EQUAL(std::string(""), trim("     "));
+  BOOST_CHECK_EQUAL(std::string(""), trim("\r"));
+  BOOST_CHECK_EQUAL(std::string(""), trim(" \r"));
+  BOOST_CHECK_EQUAL(std::string(""), trim(" \r "));
+  BOOST_CHECK_EQUAL(std::string(""), trim("\n"));
+  BOOST_CHECK_EQUAL(std::string(""), trim(" \n"));
+  BOOST_CHECK_EQUAL(std::string(""), trim(" \n "));
+  BOOST_CHECK_EQUAL(std::string(""), trim("\t"));
+  BOOST_CHECK_EQUAL(std::string(""), trim(" \t "));
 
   // reductions to single character
-  BOOST_CHECK_EQUAL(string("a"), trim(" a "));
-  BOOST_CHECK_EQUAL(string("a"), trim("  a "));
-  BOOST_CHECK_EQUAL(string("a"), trim("  a  "));
+  BOOST_CHECK_EQUAL(std::string("a"), trim(" a "));
+  BOOST_CHECK_EQUAL(std::string("a"), trim("  a "));
+  BOOST_CHECK_EQUAL(std::string("a"), trim("  a  "));
 
   // noop
-  BOOST_CHECK_EQUAL(string("a a"), trim("a a"));
-  BOOST_CHECK_EQUAL(string("a\ra"), trim("a\ra"));
-  BOOST_CHECK_EQUAL(string("a\ta"), trim("a\ta"));
-  BOOST_CHECK_EQUAL(string("a\na"), trim("a\na"));
-  BOOST_CHECK_EQUAL(string("a  a"), trim("a  a"));
+  BOOST_CHECK_EQUAL(std::string("a a"), trim("a a"));
+  BOOST_CHECK_EQUAL(std::string("a\ra"), trim("a\ra"));
+  BOOST_CHECK_EQUAL(std::string("a\ta"), trim("a\ta"));
+  BOOST_CHECK_EQUAL(std::string("a\na"), trim("a\na"));
+  BOOST_CHECK_EQUAL(std::string("a  a"), trim("a  a"));
 
   // reductions to multiple character & no-op
-  BOOST_CHECK_EQUAL(string("a a"), trim(" a a "));
-  BOOST_CHECK_EQUAL(string("a a"), trim("  a a "));
-  BOOST_CHECK_EQUAL(string("a a"), trim("  a a  "));
+  BOOST_CHECK_EQUAL(std::string("a a"), trim(" a a "));
+  BOOST_CHECK_EQUAL(std::string("a a"), trim("  a a "));
+  BOOST_CHECK_EQUAL(std::string("a a"), trim("  a a  "));
 } // testTrim
 
 BOOST_AUTO_TEST_CASE(testSplitString) {
 
-  vector<string> result;
+  std::vector<std::string> result;
 
   result = splitString("", ',');
   BOOST_CHECK_EQUAL((size_t)0, result.size());
@@ -119,24 +119,24 @@ BOOST_AUTO_TEST_CASE(testSplitString) {
 
   result = splitString("a,b", ',');
   BOOST_CHECK_EQUAL((size_t)2, result.size());
-  BOOST_CHECK_EQUAL(string("a"), result[0]);
-  BOOST_CHECK_EQUAL(string("b"), result[1]);
+  BOOST_CHECK_EQUAL(std::string("a"), result[0]);
+  BOOST_CHECK_EQUAL(std::string("b"), result[1]);
 
   result = splitString("a,b,", ',');
   BOOST_CHECK_EQUAL((size_t)3, result.size());
-  BOOST_CHECK_EQUAL(string("a"), result[0]);
-  BOOST_CHECK_EQUAL(string("b"), result[1]);
-  BOOST_CHECK_EQUAL(string(""), result[2]);
+  BOOST_CHECK_EQUAL(std::string("a"), result[0]);
+  BOOST_CHECK_EQUAL(std::string("b"), result[1]);
+  BOOST_CHECK_EQUAL(std::string(""), result[2]);
 
   result = splitString("a;,b\n", ',');
   BOOST_CHECK_EQUAL((size_t)2, result.size());
-  BOOST_CHECK_EQUAL(string("a;"), result[0]);
-  BOOST_CHECK_EQUAL(string("b\n"), result[1]);
+  BOOST_CHECK_EQUAL(std::string("a;"), result[0]);
+  BOOST_CHECK_EQUAL(std::string("b\n"), result[1]);
 
   result = splitString("a, b", ',', true);
   BOOST_CHECK_EQUAL((size_t)2, result.size());
-  BOOST_CHECK_EQUAL(string("a"), result[0]);
-  BOOST_CHECK_EQUAL(string("b"), result[1]);
+  BOOST_CHECK_EQUAL(std::string("a"), result[0]);
+  BOOST_CHECK_EQUAL(std::string("b"), result[1]);
 
 } // testSplitString
 
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(testISODate) {
   localtime_r(&now, &inst);
   mktime(&inst);
 
-  string asString = dateToISOString<string>(&inst);
+  std::string asString = dateToISOString<std::string>(&inst);
   struct tm parsed = dateFromISOString(asString.c_str());
   parsed.tm_zone = &c;
 

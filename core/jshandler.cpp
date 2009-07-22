@@ -64,7 +64,7 @@ namespace dss {
     return pResult;
   } // getContext
 
-  ScriptExtension* ScriptEnvironment::getExtension(const string& _name) {
+  ScriptExtension* ScriptEnvironment::getExtension(const std::string& _name) {
     for(boost::ptr_vector<ScriptExtension>::iterator ipExtension = m_Extensions.begin(); ipExtension != m_Extensions.end(); ++ipExtension) {
       if(ipExtension->getName() == _name) {
         return &*ipExtension;
@@ -73,7 +73,7 @@ namespace dss {
     return NULL;
   } // getExtension
 
-  const ScriptExtension* ScriptEnvironment::getExtension(const string& _name) const {
+  const ScriptExtension* ScriptEnvironment::getExtension(const std::string& _name) const {
     for(boost::ptr_vector<ScriptExtension>::const_iterator ipExtension = m_Extensions.begin(); ipExtension != m_Extensions.end(); ++ipExtension) {
       if(ipExtension->getName() == _name) {
         return &*ipExtension;
@@ -130,10 +130,10 @@ namespace dss {
       unsigned int i;
       size_t amountWritten=0;
       for (i=0; i<argc; i++){
-        JSString *val = JS_ValueToString(cx, argv[i]); /* Convert the value to a javascript string. */
-        char *str = JS_GetStringBytes(val); /* Then convert it to a C-style string. */
-        size_t length = JS_GetStringLength(val); /* Get the length of the string, # of chars. */
-        amountWritten = fwrite(str, sizeof(*str), length, stdout); /* write the string to stdout. */
+        JSString *val = JS_ValueToString(cx, argv[i]); /* Convert the value to a javascript std::string. */
+        char *str = JS_GetStringBytes(val); /* Then convert it to a C-style std::string. */
+        size_t length = JS_GetStringLength(val); /* Get the length of the std::string, # of chars. */
+        amountWritten = fwrite(str, sizeof(*str), length, stdout); /* write the std::string to stdout. */
       }
       *rval = INT_TO_JSVAL(amountWritten); /* Set the return value to be the number of bytes/chars written */
     }
@@ -184,15 +184,15 @@ namespace dss {
     JS_DestroyContext(m_pContext);
   } // dtor
 
-  void ScriptContext::loadFromFile(const string& _fileName) {
+  void ScriptContext::loadFromFile(const std::string& _fileName) {
     m_FileName = _fileName;
     if(!fileExists(_fileName)) {
-      throw ScriptException(string("File \"") + _fileName + "\" not found");
+      throw ScriptException(std::string("File \"") + _fileName + "\" not found");
     }
 
     m_pScriptToExecute = JS_CompileFile(m_pContext, m_pRootObject, _fileName.c_str());
     if(m_pScriptToExecute == NULL) {
-      throw ScriptException(string("Could not parse file \"") + _fileName + "\"");
+      throw ScriptException(std::string("Could not parse file \"") + _fileName + "\"");
     }
     /*
     // protect newly allocated script from garbage-collection
@@ -207,7 +207,7 @@ namespace dss {
   void ScriptContext::loadFromMemory(const char* _script) {
     m_pScriptToExecute = JS_CompileScript(m_pContext, m_pRootObject, _script, strlen(_script), "memory", 1);
     if(m_pScriptToExecute == NULL) {
-      throw ScriptException(string("Could not parse in-memory script"));
+      throw ScriptException(std::string("Could not parse in-memory script"));
     }
   } // loadFromMemory
 
@@ -223,14 +223,14 @@ namespace dss {
   }
 
   template<>
-  string ScriptContext::convertTo(const jsval& _val) {
+  std::string ScriptContext::convertTo(const jsval& _val) {
     JSString* result;
     result = JS_ValueToString(m_pContext, _val);
     if( result == NULL) {
       throw ScriptException("Could not convert jsval to JSString");
     }
 
-    return string(JS_GetStringBytes(result));
+    return std::string(JS_GetStringBytes(result));
   }
 
   template<>
@@ -270,7 +270,7 @@ namespace dss {
           JSString* errstr = JS_ValueToString(m_pContext, exval);
           if(errstr != NULL) {
             const char* errmsgBytes = JS_GetStringBytes(errstr);
-            throw ScriptRuntimeException(string("Caught Exception while executing script: ") + errmsgBytes, string(errmsgBytes));
+            throw ScriptRuntimeException(std::string("Caught Exception while executing script: ") + errmsgBytes, std::string(errmsgBytes));
           }
         }
         throw ScriptException("Exception was pending after script execution, but couldnt get it from the vm");
@@ -298,8 +298,8 @@ namespace dss {
   } // evaluate<void>
 
   template <>
-  string ScriptContext::evaluate() {
-    return convertTo<string>(evaluate<jsval>());
+  std::string ScriptContext::evaluate() {
+    return convertTo<std::string>(evaluate<jsval>());
   } // evaluate<string>
 
   //================================================== ScriptExtension
@@ -313,7 +313,7 @@ namespace dss {
   } // ctor
 
   template<>
-  jsval ScriptObject::getProperty(const string& _name) {
+  jsval ScriptObject::getProperty(const std::string& _name) {
     JSBool found;
     if(!JS_HasProperty(m_Context.getJSContext(), m_pObject, _name.c_str(), &found)) {
       throw ScriptException("Could not enumerate property");
@@ -323,27 +323,27 @@ namespace dss {
       if(JS_GetProperty(m_Context.getJSContext(), m_pObject, _name.c_str(), &result)) {
         return result;
       } else {
-        throw ScriptException(string("Could not retrieve value of property ") + _name);
+        throw ScriptException(std::string("Could not retrieve value of property ") + _name);
       }
     } else {
-      throw ScriptException(string("Could not find property ") + _name);
+      throw ScriptException(std::string("Could not find property ") + _name);
     }
   } // getProperty<jsval>
 
   template<>
-  string ScriptObject::getProperty(const string& _name) {
+  std::string ScriptObject::getProperty(const std::string& _name) {
     jsval value = getProperty<jsval>(_name);
     if(JSVAL_IS_STRING(value)) {
-      return string(JS_GetStringBytes(JSVAL_TO_STRING(value)));
+      return std::string(JS_GetStringBytes(JSVAL_TO_STRING(value)));
     }
-    throw ScriptException(string("Property is not of string type: ") + _name);
+    throw ScriptException(std::string("Property is not of std::string type: ") + _name);
   } // getProperty<string>
 
-  bool ScriptObject::is(const string& _className) {
+  bool ScriptObject::is(const std::string& _className) {
     return getClassName() == _className;
   }
 
-  const string ScriptObject::getClassName() {
-    return getProperty<string>("className");
+  const std::string ScriptObject::getClassName() {
+    return getProperty<std::string>("className");
   } // getClassName
 }

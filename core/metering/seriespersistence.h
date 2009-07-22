@@ -29,13 +29,13 @@ namespace dss {
   template<class T>
   class SeriesReader {
   public:
-    Series<T>* readFromXML(const string& _fileName);
+    Series<T>* readFromXML(const std::string& _fileName);
   }; // SeriesReader
 
   template<class T>
   class SeriesWriter {
   public:
-    bool writeToXML(const Series<T>& _series, const string& _path);
+    bool writeToXML(const Series<T>& _series, const std::string& _path);
   }; // SeriesWriter
 } // namespace dss
 

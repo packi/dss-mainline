@@ -24,7 +24,6 @@
 
 #include <termios.h>
 
-#include <vector>
 #include <deque>
 #include <string>
 
@@ -51,7 +50,7 @@ namespace dss {
   private:
     struct termios m_CommSettings;
     int m_Handle;
-    string m_PortDevName;
+    std::string m_PortDevName;
     Mutex m_ReadWriteLock;
     SerialSpeed m_Speed;
     bool m_Blocking;
@@ -72,16 +71,16 @@ namespace dss {
   class SerialComSim : public SerialComBase {
   private:
     /** Data that will be presented to the user of SerialComBase */
-    deque<char> m_IncomingData;
+    std::deque<char> m_IncomingData;
     /** Data that has ben written by the user of SerialComBase */
-    deque<char> m_OutgoingData;
+    std::deque<char> m_OutgoingData;
   public:
     virtual ~SerialComSim() {};
 
     virtual bool open(const char* _serialPort);
 
-    deque<char>& getWrittenData();
-    void putSimData(const string& _data);
+    std::deque<char>& getWrittenData();
+    void putSimData(const std::string& _data);
 
     virtual char getChar();
     virtual bool getCharTimeout(char& _charOut, const int _timeoutMS);

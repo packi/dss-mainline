@@ -96,7 +96,7 @@ namespace dss {
 
     doc = xmlParseFile(_fileName.c_str());
     if (doc == NULL) {
-      cerr << "Error loading properties from \"" << _fileName << "\"" << endl;
+      std::cerr << "Error loading properties from \"" << _fileName << "\"" << std::endl;
       return false;
     }
     rootElem = xmlDocGetRootElement(doc);
@@ -124,8 +124,8 @@ namespace dss {
       }
     }
     if (!versionOK) {
-      cerr << "Version mismatch while loading properties from \"" << _fileName
-          << "\"" << endl;
+      std::cerr << "Version mismatch while loading properties from \"" << _fileName
+          << "\"" << std::endl;
       xmlFreeDoc(doc);
     }
 
@@ -183,7 +183,7 @@ namespace dss {
     if(_propPath[ 0 ] != '/') {
       return NULL;
     }
-    string propPath = _propPath;
+    std::string propPath = _propPath;
     propPath.erase(0, 1);
     if(propPath.length() == 0) {
       return m_RootNode;
@@ -196,7 +196,7 @@ namespace dss {
     if(_propPath[ 0 ] != '/') {
       return NULL;
     }
-    string propPath = _propPath;
+    std::string propPath = _propPath;
     propPath.erase(0, 1);
     if(propPath.length() == 0) {
       return m_RootNode;
@@ -299,7 +299,7 @@ namespace dss {
     if(m_PropVal.valueType == vTypeString) {
       free(m_PropVal.actualValue.pString);
     }
-    for(vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
+    for(std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end();) {
       delete *it;
       it = m_ChildNodes.erase(it);
@@ -314,8 +314,8 @@ namespace dss {
 
   const std::string& PropertyNode::getDisplayName() const {
     if(m_ParentNode->count(m_Name) > 1) {
-      stringstream sstr;
-      sstr << getName() << "[" << m_Index << "]" << endl;
+      std::stringstream sstr;
+      sstr << getName() << "[" << m_Index << "]" << std::endl;
       m_DisplayName = sstr.str();
       return m_DisplayName;
     } else {
@@ -325,10 +325,10 @@ namespace dss {
 
 
   PropertyNode* PropertyNode::getProperty(const std::string& _propPath) {
-    string propPath = _propPath;
-    string propName = _propPath;
-    string::size_type slashPos = propPath.find('/');
-    if(slashPos != string::npos) {
+    std::string propPath = _propPath;
+    std::string propName = _propPath;
+    std::string::size_type slashPos = propPath.find('/');
+    if(slashPos != std::string::npos) {
       propName = propPath.substr(0, slashPos);
       propPath.erase(0, slashPos + 1);
       PropertyNode* child = getPropertyByName(propName);
@@ -345,10 +345,10 @@ namespace dss {
 
   int PropertyNode::getAndRemoveIndexFromPropertyName(std::string& _propName) {
     int result = 0;
-    string::size_type pos = _propName.find('[');
-    if(pos != string::npos) {
-      string::size_type end = _propName.find(']');
-      string indexAsString = _propName.substr(pos + 1, end - pos - 1);
+    std::string::size_type pos = _propName.find('[');
+    if(pos != std::string::npos) {
+      std::string::size_type end = _propName.find(']');
+      std::string indexAsString = _propName.substr(pos + 1, end - pos - 1);
       _propName.erase(pos, end);
       if(trim(indexAsString) == "last") {
         result = -1;
@@ -362,13 +362,13 @@ namespace dss {
 
   PropertyNode* PropertyNode::getPropertyByName(const std::string& _name) {
     int index = 0;
-    string propName = _name;
+    std::string propName = _name;
     index = getAndRemoveIndexFromPropertyName(propName);
 
     int curIndex = 0;
     int lastMatch = -1;
     int numItem = 0;
-    for(vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
+    for(std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end(); it++) {
       numItem++;
       PropertyNode* cur = *it;
@@ -391,7 +391,7 @@ namespace dss {
 
   int PropertyNode::count(const std::string& _propertyName) {
     int result = 0;
-    for(vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
+    for(std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end(); it++) {
       PropertyNode* cur = *it;
       if(cur->m_Name == _propertyName) {
@@ -417,7 +417,7 @@ namespace dss {
       if(m_PropVal.valueType == vTypeString) {
         m_Proxy.stringProxy->setValue(_value);
       } else {
-        cerr << "*** setting string on a non string property";
+        std::cerr << "*** setting std::string on a non std::string property";
         throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
       }
     } else {
@@ -441,7 +441,7 @@ namespace dss {
       if(m_PropVal.valueType == vTypeInteger) {
         m_Proxy.intProxy->setValue(_value);
       } else {
-        cerr << "*** setting integer on a non integer property";
+        std::cerr << "*** setting integer on a non integer property";
         throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
       }
     } else {
@@ -458,7 +458,7 @@ namespace dss {
       if(m_PropVal.valueType == vTypeBoolean) {
         m_Proxy.boolProxy->setValue(_value);
       } else {
-        cerr << "*** setting bool on a non booleanproperty";
+        std::cerr << "*** setting bool on a non booleanproperty";
         throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
       }
     } else {
@@ -478,7 +478,7 @@ namespace dss {
         return m_PropVal.actualValue.pString;
       }
     } else {
-      cerr << "Property-Type mismatch: " << m_Name << endl;
+      std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
       throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
     }
   } // getStringValue
@@ -492,7 +492,7 @@ namespace dss {
         return m_PropVal.actualValue.integer;
       }
     } else {
-      cerr << "Property-Type mismatch: " << m_Name << endl;
+      std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
       throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
     }
   } // getIntegerValue
@@ -506,7 +506,7 @@ namespace dss {
         return m_PropVal.actualValue.boolean;
       }
     } else {
-      cerr << "Property-Type mismatch: " << m_Name << endl;
+      std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
       throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
     }
   } // getBoolValue
@@ -571,8 +571,8 @@ namespace dss {
   } // getValueType
 
 
-  string PropertyNode::getAsString() {
-    string result;
+  std::string PropertyNode::getAsString() {
+    std::string result;
 
     switch(getValueType()) {
       case vTypeString:
@@ -601,7 +601,7 @@ namespace dss {
 
 
   void PropertyNode::removeListener(PropertyListener* _listener) const {
-    vector<PropertyListener*>::iterator it = std::find(m_Listeners.begin(), m_Listeners.end(), _listener);
+    std::vector<PropertyListener*>::iterator it = std::find(m_Listeners.begin(), m_Listeners.end(), _listener);
     if(it != m_Listeners.end()) {
       m_Listeners.erase(it);
       _listener->unregisterProperty(this);
@@ -610,8 +610,8 @@ namespace dss {
 
 
   PropertyNode* PropertyNode::createProperty(const std::string& _propPath) {
-    string nextOne = getRoot(_propPath);
-    string remainder = _propPath;
+    std::string nextOne = getRoot(_propPath);
+    std::string remainder = _propPath;
     remainder.erase(0, nextOne.length() + 1);
     PropertyNode* nextNode = NULL;
     if((nextNode = getPropertyByName(nextOne)) == NULL) {
@@ -652,7 +652,7 @@ namespace dss {
       xmlTextWriterWriteElement(_writer, (xmlChar*)"value", (xmlChar*)getAsString().c_str());
     }
 
-    for(vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
+    for(std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end(); ++it) {
       if(!(*it)->saveAsXML(_writer)) {
         return false;
@@ -672,7 +672,7 @@ namespace dss {
     xmlAttr* typeAttr = xmlSearchAttr(_pNode, (xmlChar*)"type");
 
     if(nameAttr != NULL) {
-      string propName = (char*)nameAttr->children->content;
+      std::string propName = (char*)nameAttr->children->content;
       propName = dss::getProperty(propName);
       getAndRemoveIndexFromPropertyName(propName);
       if(m_Name.length() > 0) {
@@ -705,7 +705,7 @@ namespace dss {
         if(curNode->type == XML_ELEMENT_NODE && strcmp((char*)curNode->name, "property") == 0) {
           nameAttr = xmlSearchAttr(curNode, (xmlChar*)"name");
           if(nameAttr != NULL) {
-            PropertyNode* candidate = createProperty(string((char*)nameAttr->children->content));
+            PropertyNode* candidate = createProperty(std::string((char*)nameAttr->children->content));
             candidate->loadFromNode(curNode);
           }
         }
@@ -718,7 +718,7 @@ namespace dss {
 
 
   void PropertyNode::notifyListeners(void (PropertyListener::*_callback)(const PropertyNode*)) {
-    vector<PropertyListener*>::iterator it;
+    std::vector<PropertyListener*>::iterator it;
     bool notified = false;
     for(it = m_Listeners.begin(); it != m_Listeners.end(); ++it) {
       ((*it)->*_callback)(this);
@@ -736,7 +736,7 @@ namespace dss {
 
 
   PropertyListener::~PropertyListener() {
-    vector<const PropertyNode*>::iterator it;
+    std::vector<const PropertyNode*>::iterator it;
     for(it = m_Properties.begin(); it != m_Properties.end(); ++it) {
       (*it)->removeListener(this);
     }
@@ -753,7 +753,7 @@ namespace dss {
 
 
   void PropertyListener::unregisterProperty(const PropertyNode* _node) {
-   vector<const PropertyNode*>::iterator it = std::find(m_Properties.begin(), m_Properties.end(), _node);
+   std::vector<const PropertyNode*>::iterator it = std::find(m_Properties.begin(), m_Properties.end(), _node);
     if(it != m_Properties.end()) {
       m_Properties.erase(it);
     }
@@ -763,11 +763,11 @@ namespace dss {
   //=============================================== Utilities
 
 
-  string getBasePath(const std::string& _path) {
-    string result = _path;
+  std::string getBasePath(const std::string& _path) {
+    std::string result = _path;
     if(result.length() > 1) {
-      string::size_type pos = result.rfind('/');
-      result.erase(pos, string::npos);
+      std::string::size_type pos = result.rfind('/');
+      result.erase(pos, std::string::npos);
     }
     if(result.length() == 0) {
       result = "/";
@@ -775,17 +775,17 @@ namespace dss {
     return result;
   } // getBasePath
 
-  string getProperty(const std::string& _path) {
-    string result = _path;
-    string::size_type pos = result.rfind('/');
+  std::string getProperty(const std::string& _path) {
+    std::string result = _path;
+    std::string::size_type pos = result.rfind('/');
     result.erase(0, pos + 1);
     return result;
   } // getProperty
 
-  string getRoot(const std::string& _path) {
-    string result = _path;
-    string::size_type pos = result.find('/');
-    if(pos != string::npos) {
+  std::string getRoot(const std::string& _path) {
+    std::string result = _path;
+    std::string::size_type pos = result.find('/');
+    if(pos != std::string::npos) {
       result.erase(pos);
     }
     return result;
@@ -810,7 +810,7 @@ namespace dss {
   } // getValueTypeAsString
 
   aValueType getValueTypeFromString(const char* _str) {
-    string strVal = _str;
+    std::string strVal = _str;
     if(strVal == "none") {
       return vTypeNone;
     } else if(strVal == "integer") {

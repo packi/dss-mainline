@@ -235,8 +235,8 @@ BOOST_AUTO_TEST_CASE(readWrite) {
   BOOST_CHECK_EQUAL( 2.0, series->getValues().front().getMin() );
   BOOST_CHECK_EQUAL( 4.0, series->getValues().front().getValue() );
   BOOST_CHECK_EQUAL( 5.0, series->getValues().front().getMax() );
-  BOOST_CHECK_EQUAL( string("my comment"), series->getComment() );
-  BOOST_CHECK_EQUAL( string("kW"), series->getUnit() );
+  BOOST_CHECK_EQUAL( std::string("my comment"), series->getComment() );
+  BOOST_CHECK_EQUAL( std::string("kW"), series->getUnit() );
 
   delete series;
 } // testReadWrite
@@ -429,7 +429,7 @@ BOOST_AUTO_TEST_CASE(wrapping) {
   const std::deque<AdderValue>& fiveminuteValues = five.getValues();
   BOOST_CHECK_EQUAL( (size_t)10, fiveminuteValues.size() );
 
-  vector<int> fiveMinuteValuesExpected;
+  std::vector<int> fiveMinuteValuesExpected;
   fiveMinuteValuesExpected.push_back(SeriesAdder<60,5>::value);
   fiveMinuteValuesExpected.push_back(SeriesAdder<55,5>::value);
   fiveMinuteValuesExpected.push_back(SeriesAdder<50,5>::value);

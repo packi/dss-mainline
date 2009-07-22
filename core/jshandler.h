@@ -34,11 +34,7 @@
 #include <js/jsapi.h>
 #endif
 
-#include <vector>
-
 #include <boost/ptr_container/ptr_vector.hpp>
-
-using namespace std;
 
 namespace dss {
 
@@ -63,8 +59,8 @@ namespace dss {
     void addExtension(ScriptExtension* _pExtension);
     /** Returns a pointer to the extension named _name.
       * @return Pointer to the instance or NULL if not found */
-    const ScriptExtension* getExtension(const string& _name) const;
-    ScriptExtension* getExtension(const string& _name);
+    const ScriptExtension* getExtension(const std::string& _name) const;
+    ScriptExtension* getExtension(const std::string& _name);
 
     /** Creates a new ScriptContext with all registered extensions present */
     ScriptContext* getContext();
@@ -74,11 +70,11 @@ namespace dss {
 
   /** ScriptContext is a wrapper for a scripts execution context.
     * A script can either be loaded from a file or from
-    * a string contained in memory. */
+    * a std::string contained in memory. */
   class ScriptContext {
   private:
     JSScript* m_pScriptToExecute;
-    string m_FileName;
+    std::string m_FileName;
     JSObject* m_pRootObject;
     JSObject* m_pSourceObject;
     ScriptEnvironment& m_Environment;
@@ -92,7 +88,7 @@ namespace dss {
       * @throw runtime_error if _fileName does not exist
       * @throw ScriptException if there is something wrong with the script
       */
-    void loadFromFile(const string& _fileName);
+    void loadFromFile(const std::string& _fileName);
     /** Loads the script from Memory.
       * @throw ScriptException if there is something wrong with the script
       */
@@ -122,7 +118,7 @@ namespace dss {
     * ordinary should happen. */
   class ScriptException : public DSSException {
   public:
-    ScriptException(const string& _what)
+    ScriptException(const std::string& _what)
     : DSSException(_what)
     {
     }
@@ -134,9 +130,9 @@ namespace dss {
     * in a ScriptRuntimeException being raised. */
   class ScriptRuntimeException : public ScriptException {
   private:
-    const string m_ExceptionMessage;
+    const std::string m_ExceptionMessage;
   public:
-    ScriptRuntimeException(const string& _what, const string& _exceptionMessage) throw()
+    ScriptRuntimeException(const std::string& _what, const std::string& _exceptionMessage) throw()
     : ScriptException(_what),
       m_ExceptionMessage(_exceptionMessage)
     { }
@@ -144,7 +140,7 @@ namespace dss {
     virtual ~ScriptRuntimeException() throw() {}
 
     /** Holds the original script exception message */
-    const string& getExceptionMessage() const { return m_ExceptionMessage; }
+    const std::string& getExceptionMessage() const { return m_ExceptionMessage; }
   };
 
   /** A ScriptExtension extends a scripts context. This is
@@ -153,16 +149,16 @@ namespace dss {
     */
   class ScriptExtension {
   private:
-    const string m_Name;
+    const std::string m_Name;
   public:
-    ScriptExtension(const string& _name) : m_Name(_name) {}
+    ScriptExtension(const std::string& _name) : m_Name(_name) {}
     virtual ~ScriptExtension() {}
 
     /** Extend a ScriptContext with the provided extension */
     virtual void extendContext(ScriptContext& _context) = 0;
 
     /** Returns the name of the extension */
-    const string& getName() const { return m_Name; }
+    const std::string& getName() const { return m_Name; }
   }; // ScriptExtension
 
 
@@ -177,15 +173,15 @@ namespace dss {
     /** Returns the objects "classname" property. This property must be
       * present for this call to succeed.
       */
-    const string getClassName();
+    const std::string getClassName();
     /** Compares the objects classname to _className.
       * @see getClassName
       */
-    bool is(const string& _className);
+    bool is(const std::string& _className);
 
     /** Returns the property named \a _name as type \a t */
     template<class t>
-    t getProperty(const string& _name);
+    t getProperty(const std::string& _name);
   }; // ScriptObject
 }
 

@@ -329,7 +329,7 @@ namespace dss {
         opts.reset(new SubscriptionOptions());
       }
       opts->loadParameterFromXML(paramNode);
-    } catch(runtime_error& e) {
+    } catch(std::runtime_error& e) {
       // only delete options created in the try-part...
       if(!hadOpts) {
         opts.reset();
@@ -340,7 +340,7 @@ namespace dss {
     try {
       XMLNode& filterNode = _node.getChildByName("filter");
       loadFilter(filterNode, *subscription);
-    } catch(runtime_error& e) {
+    } catch(std::runtime_error& e) {
     }
 
     subscribe(subscription);
@@ -374,7 +374,7 @@ namespace dss {
           try {
             when = DateTime::fromISO(timeStr);
             validDate = true;
-          } catch(runtime_error& e) {
+          } catch(std::runtime_error& e) {
             Logger::getInstance()->log(string("EventQueue::pushEvent: Invalid time specified '") + timeStr + "' error: " + e.what(), lsError);
           }
         }
@@ -467,7 +467,7 @@ namespace dss {
         m_ScheduledEvents.erase(ipSchedEvt++);
         continue;
       }
-      result = min(result, next);
+      result = std::min(result, next);
       if(DebugEventRunner) {
         Logger::getInstance()->log(string("chosen: ") + (string)result);
       }
@@ -508,15 +508,15 @@ namespace dss {
     bool result = false;
     DateTime virtualNow = _from.addSeconds(-_deltaSeconds/2);
     if(DebugEventRunner) {
-      cout << "vNow:    " << virtualNow << endl;
+      cout << "vNow:    " << virtualNow << std::endl;
     }
     for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
         ipSchedEvt != e; ++ipSchedEvt)
     {
       DateTime nextOccurence = ipSchedEvt->getSchedule().getNextOccurence(virtualNow);
       if(DebugEventRunner) {
-        cout << "nextOcc: " << nextOccurence << endl;
-        cout << "diff:    " << nextOccurence.difference(virtualNow) << endl;
+        cout << "nextOcc: " << nextOccurence << std::endl;
+        cout << "diff:    " << nextOccurence.difference(virtualNow) << std::endl;
       }
       if(abs(nextOccurence.difference(virtualNow)) <= _deltaSeconds/2) {
         result = true;

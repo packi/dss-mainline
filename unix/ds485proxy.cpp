@@ -32,8 +32,6 @@
 
 #include <sstream>
 
-#include <boost/scoped_ptr.hpp>
-
 namespace dss {
 
   const char* FunctionIDToString(const int _functionID); // internal forward declaration
@@ -64,7 +62,7 @@ namespace dss {
     return result;
   } // splitByZone
 
-  typedef pair<vector<Group*>, Set> FittingResultPerModulator;
+  typedef std::pair<std::vector<Group*>, Set> FittingResultPerModulator;
 
   const bool OptimizerDebug = true;
 
@@ -72,7 +70,7 @@ namespace dss {
   FittingResultPerModulator bestFit(const Zone& _zone, const Set& _set) {
     Set workingCopy = _set;
 
-    vector<Group*> fittingGroups;
+    std::vector<Group*> fittingGroups;
     Set singleDevices;
 
     if(OptimizerDebug) {
@@ -82,7 +80,7 @@ namespace dss {
 
 	if(_zone.getDevices().length() == _set.length()) {
 	  Logger::getInstance()->log(string("Optimization: Set contains all devices of zone ") + intToString(_zone.getZoneID()));
-      bitset<63> possibleGroups;
+      std::bitset<63> possibleGroups;
       possibleGroups.set();
       for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
         possibleGroups &= _set[iDevice].getDevice().getGroupBitmask();
@@ -100,7 +98,7 @@ namespace dss {
   	    fittingGroups.push_back(_zone.getGroup(GroupIDBroadcast));
   	  }
     } else {
-	    vector<Group*> unsuitableGroups;
+	    std::vector<Group*> unsuitableGroups;
 	    Set workingCopy = _set;
 
 		while(!workingCopy.isEmpty()) {
@@ -177,8 +175,8 @@ namespace dss {
   FittingResultPerModulator bestFit(const Modulator& _modulator, const Set& _set) {
     Set workingCopy = _set;
 
-    vector<Group*> unsuitableGroups;
-    vector<Group*> fittingGroups;
+    std::vector<Group*> unsuitableGroups;
+    std::vector<Group*> fittingGroups;
     Set singleDevices;
 
     while(!workingCopy.isEmpty()) {
@@ -228,7 +226,7 @@ namespace dss {
   {
     if(_pDSS != NULL) {
       _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "rs485devicename")
-            ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, string>(m_DS485Controller, &DS485Controller::getRS485DeviceName, &DS485Controller::setRS485DeviceName));
+            ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, std::string>(m_DS485Controller, &DS485Controller::getRS485DeviceName, &DS485Controller::setRS485DeviceName));
 
       _pDSS->getPropertySystem().createProperty(getPropertyBasePath() + "tokensReceived")
             ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, int>(m_DS485Controller, &DS485Controller::getTokenCount));
@@ -244,7 +242,7 @@ namespace dss {
             ->linkToProxy(PropertyProxyMemberFunction<DS485FrameReader, int>(reader, &DS485FrameReader::getNumberOfCRCErrors));
 
       _pDSS->getPropertySystem().createProperty(getPropertyBasePath() + "state")
-            ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, string>(m_DS485Controller, &DS485Controller::getStateAsString));
+            ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, std::string>(m_DS485Controller, &DS485Controller::getStateAsString));
 
       _pDSS->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "dsid", "3504175FE0000000DEADBEEF", true, false);
     }
@@ -269,7 +267,7 @@ namespace dss {
     return result;
   } // bestFit(const Set&)
 
-  vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Set& _set, int _param) {
+  std::vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Set& _set, int _param) {
     if(_set.length() == 1) {
       log("Optimization: Set contains only one device");
       return sendCommand(_cmd, _set.get(0).getDevice(), _param);
@@ -281,12 +279,12 @@ namespace dss {
       }
     }
 
-    vector<int> result;
+    std::vector<int> result;
     FittingResult fittedResult = bestFit(_set);
     for(FittingResult::iterator iResult = fittedResult.begin(); iResult != fittedResult.end(); ++iResult) {
       const Zone* zone = iResult->first;
       FittingResultPerModulator res = iResult->second;
-      vector<Group*> groups = res.first;
+      std::vector<Group*> groups = res.first;
       for(vector<Group*>::iterator ipGroup = groups.begin(); ipGroup != groups.end(); ++ipGroup) {
         sendCommand(_cmd, *zone, **ipGroup, _param);
       }
@@ -298,8 +296,8 @@ namespace dss {
     return result;
   } // sendCommand
 
-  vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param) {
-    vector<int> result;
+  std::vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param) {
+    std::vector<int> result;
 
     DS485CommandFrame frame;
     frame.getHeader().setDestination(0);
@@ -381,16 +379,16 @@ namespace dss {
     return result;
   }
 
-  vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param) {
+  std::vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param) {
     return sendCommand(_cmd, _zone, _group.getID(), _param);
   } // sendCommand
 
-  vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Device& _device, int _param) {
+  std::vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Device& _device, int _param) {
     return sendCommand(_cmd, _device.getShortAddress(), _device.getModulatorID(), _param);
   } // sendCommand
 
-  vector<int> DS485Proxy::sendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param) {
-    vector<int> result;
+  std::vector<int> DS485Proxy::sendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param) {
+    std::vector<int> result;
     DS485CommandFrame frame;
     frame.getHeader().setDestination(_modulatorID);
     frame.getHeader().setBroadcast(false);
@@ -505,7 +503,7 @@ namespace dss {
     }
   } // isSimAddress
 
-  vector<int> DS485Proxy::getModulators() {
+  std::vector<int> DS485Proxy::getModulators() {
     DS485CommandFrame cmdFrame;
     cmdFrame.getHeader().setDestination(0);
     cmdFrame.getHeader().setBroadcast(true);
@@ -518,7 +516,7 @@ namespace dss {
 
     map<int, bool> resultFrom;
 
-    vector<int> result;
+    std::vector<int> result;
     while(true) {
       boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
       if(recFrame.get() == NULL) {
@@ -548,7 +546,7 @@ namespace dss {
       log(string("  HW-Version: ") + intToString(hwVersion >> 8) + "." + intToString(hwVersion && 0xFF00));
       log(string("  SW-Version: ") + intToString(swVersion >> 8) + "." + intToString(swVersion && 0xFF00));
 
-      string name;
+      std::string name;
       for(int i = 0; i < 6; i++) {
         char c = static_cast<char>(pd.get<uint8_t>());
         if(c != '\0') {
@@ -579,8 +577,8 @@ namespace dss {
     return res;
   } // getGroupCount
 
-  vector<int> DS485Proxy::getGroups(const int _modulatorID, const int _zoneID) {
-    vector<int> result;
+  std::vector<int> DS485Proxy::getGroups(const int _modulatorID, const int _zoneID) {
+    std::vector<int> result;
 
     int numGroups = getGroupCount(_modulatorID, _zoneID);
     log(string("Modulator has ") + intToString(numGroups) + " groups");
@@ -621,8 +619,8 @@ namespace dss {
     return res;
   } // getDevicesInGroupCount
 
-  vector<int> DS485Proxy::getDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID) {
-    vector<int> result;
+  std::vector<int> DS485Proxy::getDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID) {
+    std::vector<int> result;
 
     int numDevices = getDevicesInGroupCount(_modulatorID, _zoneID, _groupID);
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
@@ -644,8 +642,8 @@ namespace dss {
     return result;
   } // getDevicesInGroup
 
-  vector<int> DS485Proxy::getGroupsOfDevice(const int _modulatorID, const int _deviceID) {
-    vector<int> result;
+  std::vector<int> DS485Proxy::getGroupsOfDevice(const int _modulatorID, const int _deviceID) {
+    std::vector<int> result;
 
     DS485CommandFrame cmdFrame;
     cmdFrame.getHeader().setDestination(_modulatorID);
@@ -679,8 +677,8 @@ namespace dss {
     return result;
   } // getGroupsOfDevice
 
-  vector<int> DS485Proxy::getZones(const int _modulatorID) {
-    vector<int> result;
+  std::vector<int> DS485Proxy::getZones(const int _modulatorID) {
+    std::vector<int> result;
 
     int numZones = getZoneCount(_modulatorID);
     log(string("Modulator has ") + intToString(numZones) + " zones");
@@ -733,8 +731,8 @@ namespace dss {
     return result;
   } // getDevicesCountInZone
 
-  vector<int> DS485Proxy::getDevicesInZone(const int _modulatorID, const int _zoneID) {
-    vector<int> result;
+  std::vector<int> DS485Proxy::getDevicesInZone(const int _modulatorID, const int _zoneID) {
+    std::vector<int> result;
 
     int numDevices = getDevicesCountInZone(_modulatorID, _zoneID);
     log(string("Found ") + intToString(numDevices) + " in zone.");
@@ -1105,7 +1103,7 @@ namespace dss {
           m_IncomingFramesGuard.unlock();
           log("R");
 
-          const vector<unsigned char>& ch = frame->getPayload().toChar();
+          const std::vector<unsigned char>& ch = frame->getPayload().toChar();
           if(ch.size() < 1) {
             log("received Command Frame w/o function identifier", lsFatal);
             continue;
@@ -1113,7 +1111,7 @@ namespace dss {
 
           uint8_t functionID = ch.front();
           if(frame->getCommand() == CommandRequest || frame->getCommand() == CommandEvent) {
-            string functionIDStr = FunctionIDToString(functionID);
+            std::string functionIDStr = FunctionIDToString(functionID);
             if(functionIDStr.empty()) {
               functionIDStr = "Unknown function id: " + intToString(functionID, true);
             }
@@ -1227,7 +1225,7 @@ namespace dss {
 
   void DS485Proxy::removeFrameBucket(FrameBucket* _bucket) {
     m_FrameBucketsGuard.lock();
-    vector<FrameBucket*>::iterator pos = find(m_FrameBuckets.begin(), m_FrameBuckets.end(), _bucket);
+    std::vector<FrameBucket*>::iterator pos = find(m_FrameBuckets.begin(), m_FrameBuckets.end(), _bucket);
     if(pos != m_FrameBuckets.end()) {
       m_FrameBuckets.erase(pos);
     }

@@ -31,8 +31,6 @@
 #include <map>
 #include <vector>
 
-using namespace std;
-
 #include <boost/ptr_container/ptr_vector.hpp>
 
 namespace dss {
@@ -87,7 +85,7 @@ namespace dss {
     void distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame);
   }; // DSSim
 
-  typedef map< const pair<const int, const int>,  vector<DSIDInterface*> > IntPairToDSIDSimVector;
+  typedef std::map< const pair<const int, const int>,  std::vector<DSIDInterface*> > IntPairToDSIDSimVector;
 
   class DSModulatorSim {
   private:
@@ -96,15 +94,15 @@ namespace dss {
     int m_EnergyLevelRed;
     int m_ID;
     dsid_t m_ModulatorDSID;
-    vector<DSIDInterface*> m_SimulatedDevices;
-    map< const int, vector<DSIDInterface*> > m_Zones;
+    std::vector<DSIDInterface*> m_SimulatedDevices;
+    std::map< const int, std::vector<DSIDInterface*> > m_Zones;
     IntPairToDSIDSimVector m_DevicesOfGroupInZone;
-    vector<DS485Frame*> m_PendingFrames;
-    map<const DSIDInterface*, int> m_ButtonToGroupMapping;
-    map<const DSIDInterface*, int> m_DeviceZoneMapping;
-    map<const int, vector<int> > m_GroupsPerDevice;
-    map<const int, string> m_DeviceNames;
-    map< const pair<const int, const int>, int> m_LastCalledSceneForZoneAndGroup;
+    std::vector<DS485Frame*> m_PendingFrames;
+    std::map<const DSIDInterface*, int> m_ButtonToGroupMapping;
+    std::map<const DSIDInterface*, int> m_DeviceZoneMapping;
+    std::map<const int, std::vector<int> > m_GroupsPerDevice;
+    std::map<const int, string> m_DeviceNames;
+    std::map< const pair<const int, const int>, int> m_LastCalledSceneForZoneAndGroup;
     string m_Name;
   private:
     void addDeviceToGroup(DSIDInterface* _device, int _groupID);

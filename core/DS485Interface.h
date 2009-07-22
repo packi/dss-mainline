@@ -65,15 +65,15 @@ namespace dss {
     virtual void sendFrame(DS485CommandFrame& _frame) = 0;
 
     //------------------------------------------------ Specialized Commands (system)
-    /** Returns an vector containing the bus-ids of all modulators present. */
-    virtual vector<int> getModulators() = 0;
+    /** Returns an std::vector containing the bus-ids of all modulators present. */
+    virtual std::vector<int> getModulators() = 0;
 
-    /** Returns a vector conatining the zone-ids of the specified modulator */
-    virtual vector<int> getZones(const int _modulatorID) = 0;
+    /** Returns a std::vector conatining the zone-ids of the specified modulator */
+    virtual std::vector<int> getZones(const int _modulatorID) = 0;
     /** Returns the count of the zones of the specified modulator */
     virtual int getZoneCount(const int _modulatorID) = 0;
     /** Returns the bus-ids of the devices present in the given zone of the specified modulator */
-    virtual vector<int> getDevicesInZone(const int _modulatorID, const int _zoneID) = 0;
+    virtual std::vector<int> getDevicesInZone(const int _modulatorID, const int _zoneID) = 0;
     /** Returns the count of devices present in the given zone of the specified modulator */
     virtual int getDevicesCountInZone(const int _modulatorID, const int _zoneID) = 0;
 
@@ -85,14 +85,14 @@ namespace dss {
 
     /** Returns the count of groups present in the given zone of the specifid modulator */
     virtual int getGroupCount(const int _modulatorID, const int _zoneID) = 0;
-    /** Returns the a vector containing the group-ids of the given zone on the specified modulator */
-    virtual vector<int> getGroups(const int _modulatorID, const int _zoneID) = 0;
+    /** Returns the a std::vector containing the group-ids of the given zone on the specified modulator */
+    virtual std::vector<int> getGroups(const int _modulatorID, const int _zoneID) = 0;
     /** Returns the count of devices present in the given group */
     virtual int getDevicesInGroupCount(const int _modulatorID, const int _zoneID, const int _groupID) = 0;
-    /** Returns a vector containing the bus-ids of the devices present in the given group */
-    virtual vector<int> getDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID) = 0;
+    /** Returns a std::vector containing the bus-ids of the devices present in the given group */
+    virtual std::vector<int> getDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID) = 0;
 
-    virtual vector<int> getGroupsOfDevice(const int _modulatorID, const int _deviceID) = 0;
+    virtual std::vector<int> getGroupsOfDevice(const int _modulatorID, const int _deviceID) = 0;
 
     /** Adds a device to a given group */
     virtual void addToGroup(const int _modulatorID, const int _groupID, const int _deviceID) = 0;
@@ -122,11 +122,11 @@ namespace dss {
     virtual bool getEnergyBorder(const int _modulatorID, int& _lower, int& _upper) = 0;
 
     //------------------------------------------------ Device manipulation
-    virtual vector<int> sendCommand(DS485Command _cmd, const Set& _set, int _param = -1) = 0;
-    virtual vector<int> sendCommand(DS485Command _cmd, const Device& _device, int _param = -1) = 0;
-    virtual vector<int> sendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param = -1) = 0;
-    virtual vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param = -1) = 0;
-    virtual vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param = -1) = 0;
+    virtual std::vector<int> sendCommand(DS485Command _cmd, const Set& _set, int _param = -1) = 0;
+    virtual std::vector<int> sendCommand(DS485Command _cmd, const Device& _device, int _param = -1) = 0;
+    virtual std::vector<int> sendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param = -1) = 0;
+    virtual std::vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param = -1) = 0;
+    virtual std::vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param = -1) = 0;
   };
 }
 #endif /* DS485INTERFACE_H_ */

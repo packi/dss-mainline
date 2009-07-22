@@ -35,7 +35,7 @@ namespace dss {
 
   class XMLNode;
 
-  typedef vector<XMLNode> XMLNodeList;
+  typedef std::vector<XMLNode> XMLNodeList;
 
   class XMLNode {
   private:
@@ -46,7 +46,7 @@ namespace dss {
     XMLNodeList m_Children;
     HashMapConstStringString m_Attributes;
 
-    void assertHasNode(const string& _reason);
+    void assertHasNode(const std::string& _reason);
     void initialize();
     void copyFrom(const XMLNode& _other);
   public:
@@ -58,17 +58,17 @@ namespace dss {
       return *this;
     }
 
-    const string getName();
-    const string getContent();
+    const std::string getName();
+    const std::string getContent();
 
-    void setContent(const string& _value);
-    void setName(const string& _value);
+    void setContent(const std::string& _value);
+    void setName(const std::string& _value);
 
     XMLNode& addTextNode();
-    XMLNode& addChildNode(const string& _name, const string& _content = "");
+    XMLNode& addChildNode(const std::string& _name, const std::string& _content = "");
 
-    XMLNode& getChildByName(const string& _name);
-    bool hasChildWithName(const string& _name);
+    XMLNode& getChildByName(const std::string& _name);
+    bool hasChildWithName(const std::string& _name);
 
     XMLNodeList& getChildren();
     HashMapConstStringString& getAttributes();
@@ -82,7 +82,7 @@ namespace dss {
     XMLDocument(XMLDocument& _other);
     ~XMLDocument();
 
-    void saveToFile(const string& _fileName);
+    void saveToFile(const std::string& _fileName);
 
     XMLNode& getRootNode();
   }; // XMLDocument
@@ -97,9 +97,9 @@ namespace dss {
 
   class XMLDocumentFileReader : public XMLDocumentReader {
   private:
-    const string m_URI;
+    const std::string m_URI;
   public:
-    XMLDocumentFileReader(const string& _uri);
+    XMLDocumentFileReader(const std::string& _uri);
     virtual ~XMLDocumentFileReader() {}
 
     virtual XMLDocument& getDocument();
@@ -107,7 +107,7 @@ namespace dss {
 
   class XMLDocumentMemoryReader : public XMLDocumentReader {
   private:
-    const string m_XMLData;
+    const std::string m_XMLData;
   public:
     XMLDocumentMemoryReader(const char* _xmlData);
     virtual ~XMLDocumentMemoryReader() {}
@@ -116,7 +116,7 @@ namespace dss {
 
   class XMLException : public DSSException {
   public:
-    XMLException( const string& _message )
+    XMLException( const std::string& _message )
     : DSSException(_message)
     { }
   }; // XMLException

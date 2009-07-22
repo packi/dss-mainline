@@ -36,8 +36,6 @@
 #include <vector>
 #include <string>
 
-using namespace std;
-
 #include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/shared_ptr.hpp>
@@ -157,7 +155,7 @@ namespace dss {
 
     /** Returns the name of the referenced device.
      * @note This will lookup the device. */
-    string getName() const;
+    std::string getName() const;
 
     virtual void turnOn();
     virtual void turnOff();
@@ -188,7 +186,7 @@ namespace dss {
     virtual unsigned long getPowerConsumption();
  };
 
-  typedef vector<DeviceReference> DeviceVector;
+  typedef std::vector<DeviceReference> DeviceVector;
   typedef DeviceVector::iterator DeviceIterator;
   typedef DeviceVector::const_iterator DeviceConstIterator;
   typedef boost::tuple<double, double, double> DeviceLocation;
@@ -197,14 +195,14 @@ namespace dss {
   class Device : public IDeviceInterface,
                  public boost::noncopyable {
   private:
-    string m_Name;
+    std::string m_Name;
     dsid_t m_DSID;
     devid_t m_ShortAddress;
     int m_ModulatorID;
     int m_ZoneID;
     Apartment* m_pApartment;
-    bitset<63> m_GroupBitmask;
-    vector<int> m_Groups;
+    std::bitset<63> m_GroupBitmask;
+    std::vector<int> m_Groups;
     int m_FunctionID;
     int m_LastCalledScene;
     unsigned long m_Consumption;
@@ -259,12 +257,12 @@ namespace dss {
     bool hasSwitch() const;
 
     /** Returns the name of the device. */
-    string getName() const;
+    std::string getName() const;
     /** Sets the name of the device.
      * @note This will cause the apartment to store
      * \c apartment.xml
      */
-    void setName(const string& _name);
+    void setName(const std::string& _name);
 
     /** Returns the devices location in abstract coordinates (0-100) */
     const DeviceLocation& getLocation() const;
@@ -307,9 +305,9 @@ namespace dss {
     void setLocationZ(const double _value);
 
     /** Returns the group bitmask (1 based) of the device */
-    bitset<63>& getGroupBitmask();
+    std::bitset<63>& getGroupBitmask();
     /** @copydoc getGroupBitmask() */
-    const bitset<63>& getGroupBitmask() const;
+    const std::bitset<63>& getGroupBitmask() const;
 
     /** Returns wheter the device is in group \a _groupID or not. */
     bool isInGroup(const int _groupID) const;
@@ -361,7 +359,7 @@ namespace dss {
     bool operator==(const Device& _other) const;
   };
 
-  ostream& operator<<(ostream& out, const Device& _dt);
+  std::ostream& operator<<(std::ostream& out, const Device& _dt);
 
   /** Abstract interface to select certain Devices from a set */
   class IDeviceSelector {
@@ -436,7 +434,7 @@ namespace dss {
     /** Returns a subset of the devices which are member of the given group
      * Note that these groups could be spanned over multiple modulators.
      */
-    Set getByGroup(const string& _name) const;
+    Set getByGroup(const std::string& _name) const;
 
     /** Returns a subset of devices with the given function-id. */
     Set getByFunctionID(const int _functionID) const;
@@ -445,7 +443,7 @@ namespace dss {
     Set getByZone(int _zoneID) const;
     /** Returns the device indicated by _name
      */
-    DeviceReference getByName(const string& _name) const;
+    DeviceReference getByName(const std::string& _name) const;
     /** Returns the device indicated by \a _busid */
     DeviceReference getByBusID(const devid_t _busid) const;
 
@@ -499,7 +497,7 @@ namespace dss {
   /** A class derived from DeviceContainer can deliver a Set of its Devices */
   class DeviceContainer {
   private:
-    string m_Name;
+    std::string m_Name;
   public:
     /** Returns a set containing all devices of the container. */
     virtual Set getDevices() const = 0;
@@ -509,9 +507,9 @@ namespace dss {
     }
 
     /** Sets the name of the container. */
-    virtual void setName(const string& _name);
+    virtual void setName(const std::string& _name);
     /** Returns the name of the container */
-    const string& getName() const { return m_Name; };
+    const std::string& getName() const { return m_Name; };
 
     virtual ~DeviceContainer() {};
   }; // DeviceContainer
@@ -644,8 +642,8 @@ namespace dss {
   private:
     int m_ZoneID;
     DeviceVector m_Devices;
-    vector<Modulator*> m_Modulators;
-    vector<Group*> m_Groups;
+    std::vector<Modulator*> m_Modulators;
+    std::vector<Group*> m_Groups;
   public:
   	Zone(const int _id)
   	: m_ZoneID(_id)
@@ -669,7 +667,7 @@ namespace dss {
     void removeDevice(const DeviceReference& _device);
 
     /** Returns the group with the name \a _name */
-    Group* getGroup(const string& _name) const;
+    Group* getGroup(const std::string& _name) const;
     /** Returns the group with the id \a _id */
     Group* getGroup(const int _id) const;
 
@@ -684,7 +682,7 @@ namespace dss {
     void setZoneID(const int _value);
 
     /** Returns a list of the modulators the zone is registered with. */
-    vector<int> getModulators() const;
+    std::vector<int> getModulators() const;
 
     virtual void turnOn();
     virtual void turnOff();
@@ -708,7 +706,7 @@ namespace dss {
 
     virtual unsigned long getPowerConsumption();
     /** Returns a vector of groups present on the zone. */
-    vector<Group*> getGroups() { return m_Groups; }
+    std::vector<Group*> getGroups() { return m_Groups; }
   }; // Zone
 
 
@@ -724,7 +722,7 @@ namespace dss {
                  } EventType;
   private:
     EventType m_EventType;
-    vector<int> m_Parameter;
+    std::vector<int> m_Parameter;
   public:
     /** Constructs a ModelEvent with the given EventType. */
     ModelEvent(EventType _type)
@@ -752,14 +750,14 @@ namespace dss {
                     private Thread
   {
   private:
-    vector<Device*> m_StaleDevices;
-    vector<Modulator*> m_StaleModulators;
-    vector<Zone*> m_StaleZones;
-    vector<Group*> m_StaleGroups;
+    std::vector<Device*> m_StaleDevices;
+    std::vector<Modulator*> m_StaleModulators;
+    std::vector<Zone*> m_StaleZones;
+    std::vector<Group*> m_StaleGroups;
 
-    vector<Zone*> m_Zones;
-    vector<Modulator*> m_Modulators;
-    vector<Device*> m_Devices;
+    std::vector<Zone*> m_Zones;
+    std::vector<Modulator*> m_Modulators;
+    std::vector<Device*> m_Devices;
     bool m_IsInitializing;
 
     PropertyNode* m_pPropertyNode;
@@ -788,16 +786,16 @@ namespace dss {
     virtual Set getDevices() const;
 
     /** Loads the datamodel and marks the contained items as "stale" */
-    void readConfigurationFromXML(const string& _fileName);
+    void readConfigurationFromXML(const std::string& _fileName);
 
-    void writeConfigurationToXML(const string& _fileName);
+    void writeConfigurationToXML(const std::string& _fileName);
 
     /** Returns a reference to the device with the DSID \a _dsid */
     Device& getDeviceByDSID(const dsid_t _dsid) const;
     /** @copydoc getDeviceByDSID */
     Device& getDeviceByDSID(const dsid_t _dsid);
     /** Returns a reference to the device with the name \a _name*/
-    Device& getDeviceByName(const string& _name);
+    Device& getDeviceByName(const std::string& _name);
     /** Returns a device by it's short-address and modulator */
     Device& getDeviceByShortAddress(const Modulator& _modulator, const devid_t _deviceID) const;
 
@@ -807,11 +805,11 @@ namespace dss {
     Device& allocateDevice(const dsid_t _dsid);
 
     /** Returns the Zone by name */
-    Zone& getZone(const string& _zoneName);
+    Zone& getZone(const std::string& _zoneName);
     /** Returns the Zone by its id */
     Zone& getZone(const int _id);
     /** Returns a vector of all zones */
-    vector<Zone*>& getZones();
+    std::vector<Zone*>& getZones();
 
     /** Allocates a zone and returns a reference to it. Should a zone with
       * the given _zoneID already exist, a reference to the existing zone will
@@ -820,16 +818,16 @@ namespace dss {
     Zone& allocateZone(Modulator& _modulator, int _zoneID);
 
     /** Returns a Modulator by name */
-    Modulator& getModulator(const string& _modName);
+    Modulator& getModulator(const std::string& _modName);
     /** Returns a Modulator by DSID  */
     Modulator& getModulatorByDSID(const dsid_t _dsid);
     /** Returns a Modulator by bus-id */
     Modulator& getModulatorByBusID(const int _busID);
     /** Returns a vector of all modulators */
-    vector<Modulator*>& getModulators();
+    std::vector<Modulator*>& getModulators();
 
     /** Returns a Group by name */
-    Group& getGroup(const string& _name);
+    Group& getGroup(const std::string& _name);
     /** Returns a Group by id */
     Group& getGroup(const int _id);
 
@@ -876,7 +874,7 @@ namespace dss {
   /** Exception that will be thrown if a given item could not be found */
   class ItemNotFoundException : public DSSException {
   public:
-    ItemNotFoundException(const string& _name) : DSSException(string("Could not find item ") + _name) {};
+    ItemNotFoundException(const std::string& _name) : DSSException(std::string("Could not find item ") + _name) {};
     ~ItemNotFoundException() throw() {}
   };
 

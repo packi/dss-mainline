@@ -25,7 +25,6 @@
 
 #include <string>
 #include <vector>
-#include <cwchar>
 
 #ifndef WIN32
   #include <ext/hash_map>
@@ -35,14 +34,16 @@
 #include <stdexcept>
 
 #ifndef WIN32
-using namespace __gnu_cxx;
+#define HASH_NAMESPACE __gnu_cxx
 #else
-using namespace stdext;
+#definne HASH_NAMESPACE stdext;
 #endif
 
-namespace __gnu_cxx
-{
+#define HASH_MAP HASH_NAMESPACE::hash_map
 
+namespace HASH_NAMESPACE
+{
+/*
   template<> struct hash<const wchar_t*>  {
     size_t operator()(const wchar_t* x) const {
       size_t result = static_cast<size_t>(12342349871239342341ULL);
@@ -68,49 +69,43 @@ namespace __gnu_cxx
       return hash< const wchar_t* >()( x.c_str() );
     }
   };
-
+*/
   template<>
   struct hash<const std::string> {
     size_t operator()(const std::string& x) const {
-      return hash<const char*>()(x.c_str());
+      return HASH_NAMESPACE::hash<const char*>()(x.c_str());
     }
   };
 }
 
-
-using namespace std;
-
 namespace dss {
 
-
   template<class t>
-  bool contains(const vector<t>& _v, const t _item) {
+  bool contains(const std::vector<t>& _v, const t _item) {
     return find(_v.begin(), _v.end(), _item) != _v.end();
   }
 
 
   //============================================= Common types
-  typedef hash_map<wstring, wstring> HashMapWStringWString;
-  typedef hash_map<const wstring, wstring> HashMapConstWStringWString;
+  typedef HASH_MAP<std::string, std::string> HashMapStringString;
+  typedef HASH_MAP<const std::string, std::string> HashMapConstStringString;
 
-  typedef hash_map<string, string> HashMapStringString;
-  typedef hash_map<const string, string> HashMapConstStringString;
   //============================================= Conversion helpers
 
-  int strToInt(const string& _strValue);
+  int strToInt(const std::string& _strValue);
 
-  unsigned int strToUInt(const string& _strValue);
-  int strToIntDef(const string& _strValue, const int _default);
+  unsigned int strToUInt(const std::string& _strValue);
+  int strToIntDef(const std::string& _strValue, const int _default);
 
-  string intToString(const int _int, const bool _hex = false);
-  string uintToString(unsigned long int _int);
+  std::string intToString(const int _int, const bool _hex = false);
+  std::string uintToString(unsigned long int _int);
 
-  double strToDouble(const string& _strValue);
-  double strToDouble(const string& _strValue, const double _default);
+  double strToDouble(const std::string& _strValue);
+  double strToDouble(const std::string& _strValue, const double _default);
 
-  string unsignedLongIntToHexString(const unsigned long long _value);
+  std::string unsignedLongIntToHexString(const unsigned long long _value);
 
-  string doubleToString(const double _value);
+  std::string doubleToString(const double _value);
 
   template <class t>
   t dateToISOString(const struct tm* _dateTime);
@@ -118,27 +113,22 @@ namespace dss {
 
   extern const char* theISOFormatString;
 
-  vector<string> splitString(const string& _source, const char _delimiter, bool _trimEntries = false);
-  void replaceAll(string& s, const string& a, const string& b);
-  bool endsWith(const string& str, const string& searchString);
-  bool beginsWith(const string& str, const string& searchString);
+  std::vector<std::string> splitString(const std::string& _source, const char _delimiter, bool _trimEntries = false);
+  void replaceAll(std::string& s, const std::string& a, const std::string& b);
+  bool endsWith(const std::string& str, const std::string& searchString);
+  bool beginsWith(const std::string& str, const std::string& searchString);
 
-  string urlDecode(const string& _in);
+  std::string urlDecode(const std::string& _in);
 
   //============================================= Encoding helpers
-  const wstring fromUTF8(const char* _utf8string, int _len);
-  const string toUTF8(const wchar_t* _wcharString, int _len);
-
-  const wstring fromUTF8(const string& _utf8string);
-  const string toUTF8(const wstring& _wcharString);
 
   bool fileExists( const char* _fileName );
-  bool fileExists( const string& _fileName );
+  bool fileExists( const std::string& _fileName );
 
   uint16_t crc16(unsigned const char* _data, const int _size);
   uint16_t update_crc(uint16_t _crc, const unsigned char& c);
 
-  string trim(const string& _str);
+  std::string trim(const std::string& _str);
 
   //============================================= Helper classes
 
@@ -146,12 +136,12 @@ namespace dss {
   private:
     HashMapConstStringString m_Container;
   public:
-    bool has(const string& _key) const;
-    void set(const string& _key, const string& _value);
-    const string& get(const string& _key) const;
-    const string& get(const string& _key, const string& _default) const;
+    bool has(const std::string& _key) const;
+    void set(const std::string& _key, const std::string& _value);
+    const std::string& get(const std::string& _key) const;
+    const std::string& get(const std::string& _key, const std::string& _default) const;
 
-    bool unset(const string& _key);
+    bool unset(const std::string& _key);
 
     const HashMapConstStringString& getContainer() const { return m_Container; }
   };
@@ -201,22 +191,22 @@ namespace dss {
   };
 
   template<class t>
-  void scrubVector(vector<t*>& _vector) {
+  void scrubVector(std::vector<t*>& _vector) {
     while(!_vector.empty()) {
       t* elem = *_vector.begin();
       _vector.erase(_vector.begin());
       delete elem;
     }
-  } // ScrubVector
+  } // scrubVector
 
   void sleepSeconds( const unsigned int _seconds );
   void sleepMS( const unsigned int _ms );
 
   //============================================= Exception
 
-  class DSSException : public runtime_error {
+  class DSSException : public std::runtime_error {
   public:
-    DSSException(const string& _message)
+    DSSException(const std::string& _message)
       : runtime_error( _message )
     { }
 

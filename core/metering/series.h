@@ -99,7 +99,7 @@ namespace dss {
     } // readFromXMLNode
 
     virtual void writeToXMLNode(AutoPtr<Document>& _doc, AutoPtr<Element>& _elem) const {
-      _elem->setAttribute("timestamp", (string)m_TimeStamp);
+      _elem->setAttribute("timestamp", (std::string)m_TimeStamp);
 
       AutoPtr<Element> elem = _doc->createElement("min");
       AutoPtr<Text> txt = _doc->createTextNode(doubleToString(m_Min));
@@ -199,7 +199,7 @@ namespace dss {
 
     void addValue(const value_type& _value) {
       if(m_Resolution == 0) {
-        throw runtime_error("Series::AddValue: m_Resolution is Zero. This will lead to an infinite loop");
+        throw std::runtime_error("Series::AddValue: m_Resolution is Zero. This will lead to an infinite loop");
       }
       DateTime bucketTimeStamp(static_cast<time_t>(_value.getTimeStamp().secondsSinceEpoch() -
         (_value.getTimeStamp().secondsSinceEpoch() % m_Resolution)));
@@ -256,14 +256,14 @@ namespace dss {
     int getResolution() const { return m_Resolution; }
 
     const std::string& getComment() const { return m_Comment; }
-    void setComment(const string& _value) { m_Comment = _value; }
+    void setComment(const std::string& _value) { m_Comment = _value; }
     const dsid_t& getFromDSID() const { return m_FromDSID; }
     void setFromDSID(const dsid_t& _value) { m_FromDSID = _value; }
     const std::string getUnit() const { return m_Unit; }
-    void setUnit(const string& _value) { m_Unit = _value; }
-    bool has(const string& _key) const { return m_Properties.has(_key); }
-    void set(const string& _key, const string& _value)  { return m_Properties.set(_key, _value); }
-    const string& get(const string& _key) const { return m_Properties.get(_key); }
+    void setUnit(const std::string& _value) { m_Unit = _value; }
+    bool has(const std::string& _key) const { return m_Properties.has(_key); }
+    void set(const std::string& _key, const std::string& _value)  { return m_Properties.set(_key, _value); }
+    const std::string& get(const std::string& _key) const { return m_Properties.get(_key); }
     const Properties& getProperties() const { return m_Properties; }
     
     std::deque<value_type>* getExpandedValues() {

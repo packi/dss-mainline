@@ -231,58 +231,58 @@ namespace dss {
     return mktime(&self);
   }
 
-  ostream& DateTime::operator<<(ostream& out) const {
-    string bla = dateToISOString<string>(&m_DateTime);
+  std::ostream& DateTime::operator<<(std::ostream& out) const {
+    std::string bla = dateToISOString<std::string>(&m_DateTime);
     out << bla;
     return out;
   } // operator<<
 
-  DateTime::operator string() const {
-    return dateToISOString<string>(&m_DateTime);
-  } // operator string()
+  DateTime::operator std::string() const {
+    return dateToISOString<std::string>(&m_DateTime);
+  } // operator std::string()
 
-  ostream& operator<<(ostream& out, const DateTime& _dt) {
+  std::ostream& operator<<(std::ostream& out, const DateTime& _dt) {
     _dt << out;
     return out;
   } // operator<<
 
-  string EraseLeadingZeros(const string& _string) {
-    string result = _string;
+  std::string EraseLeadingZeros(const std::string& _string) {
+    std::string result = _string;
     while((result.size() > 1) && (result.find('0') == 0)) {
       result.erase(0,1);
     }
     return result;
   }
 
-  DateTime DateTime::fromISO(const string& _isoStr) {
+  DateTime DateTime::fromISO(const std::string& _isoStr) {
     DateTime result;
 
     if(_isoStr.size() < 8 /*date*/ + 6 /*time*/ + 2 /* 'T', 'Z' */) {
-      throw invalid_argument("_isoStr is shorter than expected");
+      throw std::invalid_argument("_isoStr is shorter than expected");
     }
 
     int year = strToInt(EraseLeadingZeros(_isoStr.substr(0, 4)));
     int month = strToInt(EraseLeadingZeros(_isoStr.substr(4, 2)));
     if(month > 12 || month == 0) {
-      throw invalid_argument("month should be between 1 and 12");
+      throw std::invalid_argument("month should be between 1 and 12");
     }
     int day = strToInt(EraseLeadingZeros(_isoStr.substr(6, 2)));
 
     if(_isoStr.at(8) != 'T') {
-      throw invalid_argument("_isoStr should have a 'T' at position 8");
+      throw std::invalid_argument("_isoStr should have a 'T' at position 8");
     }
 
     int hour = strToInt(EraseLeadingZeros(_isoStr.substr(9,2)));
     if(hour > 23) {
-      throw invalid_argument("hour should be between 0 and 24");
+      throw std::invalid_argument("hour should be between 0 and 24");
     }
     int min = strToInt(EraseLeadingZeros(_isoStr.substr(11,2)));
     if(min > 59) {
-      throw invalid_argument("minute should be between 0 and 59");
+      throw std::invalid_argument("minute should be between 0 and 59");
     }
     int sec = strToInt(EraseLeadingZeros(_isoStr.substr(13, 2)));
     if(sec > 59) {
-      throw invalid_argument("second should be between 0 and 59");
+      throw std::invalid_argument("second should be between 0 and 59");
     }
 
     struct tm tm;
@@ -316,8 +316,8 @@ namespace dss {
     return DateTime::NullDate;
   } // getNextOccurence
 
-  vector<DateTime> StaticSchedule::getOccurencesBetween(const DateTime& _from, const DateTime& _to) {
-    vector<DateTime> result;
+  std::vector<DateTime> StaticSchedule::getOccurencesBetween(const DateTime& _from, const DateTime& _to) {
+    std::vector<DateTime> result;
     if(_from.before(m_When) && _to.after(m_When)) {
       result.push_back(m_When);
     }
@@ -326,7 +326,7 @@ namespace dss {
 
   //================================================== ICalSchedule
 
-  ICalSchedule::ICalSchedule(const string& _rrule, const string _startDateISO) {
+  ICalSchedule::ICalSchedule(const std::string& _rrule, const std::string _startDateISO) {
     m_Recurrence = icalrecurrencetype_from_string(_rrule.c_str());
     m_StartDate = icaltime_from_string(_startDateISO.c_str());
   } // ctor
@@ -374,8 +374,8 @@ namespace dss {
     return result;
   } // getNextOccurence
 
-  vector<DateTime> ICalSchedule::getOccurencesBetween(const DateTime& _from, const DateTime& _to) {
-    vector<DateTime> result;
+  std::vector<DateTime> ICalSchedule::getOccurencesBetween(const DateTime& _from, const DateTime& _to) {
+    std::vector<DateTime> result;
 
     DateTime current;
     DateTime last;
@@ -460,12 +460,12 @@ namespace dss {
         // TODO: a month has 30 days for now... other repetition schemes would allow for "every 1st monday" etc
         return 30 * 60 /*sec*/ * 60 /* minutes */ * 24 /*hours*/ * 7 /*days*/ * m_RepeatingInterval;
       default:
-        throw invalid_argument("m_RepetitionMode must be one of the given enum values");
+        throw std::invalid_argument("m_RepetitionMode must be one of the given enum values");
     }
   } // getIntervalInSeconds
 
-  vector<DateTime> RepeatingSchedule::getOccurencesBetween(const DateTime& _from, const DateTime& _to) {
-    vector<DateTime> result;
+  std::vector<DateTime> RepeatingSchedule::getOccurencesBetween(const DateTime& _from, const DateTime& _to) {
+    std::vector<DateTime> result;
 
     int intervalInSeconds = getIntervalInSeconds();
     DateTime currentDate = getNextOccurence(_from);

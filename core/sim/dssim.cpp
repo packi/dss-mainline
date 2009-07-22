@@ -177,13 +177,13 @@ namespace dss {
       return 0;
     } // getFunctionID
 
-    virtual void setConfigParameter(const string& _name, const string& _value) {
+    virtual void setConfigParameter(const std::string& _name, const std::string& _value) {
       if(m_Interface->set_configuration_parameter != NULL) {
         (*m_Interface->set_configuration_parameter)(m_Handle, _name.c_str(), _value.c_str());
       }
     } // setConfigParameter
 
-    virtual string getConfigParameter(const string& _name) const {
+    virtual std::string getConfigParameter(const std::string& _name) const {
       if(m_Interface->get_configuration_parameter != NULL) {
         const int bufferSize = 256;
         char buffer[bufferSize];
@@ -192,7 +192,7 @@ namespace dss {
 
         if(len > 0 && len < bufferSize) {
           buffer[len] = '\0';
-          return string(&buffer[0]);
+          return std::string(&buffer[0]);
         }
       }
       return "";
@@ -248,12 +248,12 @@ namespace dss {
 
   void DSSim::loadFromConfig() {
     const int theConfigFileVersion = 1;
-    string filename = getConfigPropertyBasePath() + "configfile";
+    std::string filename = getConfigPropertyBasePath() + "configfile";
     XMLDocumentFileReader reader(getDSS().getPropertySystem().getStringValue(filename));
     XMLNode rootNode = reader.getDocument().getRootNode();
 
     if(rootNode.getName() == "simulation") {
-      string fileVersionStr = rootNode.getAttributes()["version"];
+      std::string fileVersionStr = rootNode.getAttributes()["version"];
       if(strToIntDef(fileVersionStr, -1) == theConfigFileVersion) {
         XMLNodeList& modulators = rootNode.getChildren();
         foreach(XMLNode& node, modulators) {
@@ -319,7 +319,7 @@ namespace dss {
                 log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
                 continue;
               }
-              log("LoadPlugins: Plugin provides " + string(pluginName), lsInfo);
+              log("LoadPlugins: Plugin provides " + std::string(pluginName), lsInfo);
               m_DSIDFactory.registerCreator(new DSIDPluginCreator(handle, pluginName));
             }
           }
@@ -367,7 +367,7 @@ namespace dss {
     m_Name = "Simulated dSM";
   } // dSModulatorSim
 
-  void DSModulatorSim::log(const string& _message, aLogSeverity _severity) {
+  void DSModulatorSim::log(const std::string& _message, aLogSeverity _severity) {
     m_pSimulation->log(_message, _severity);
   } // log
 
@@ -418,7 +418,7 @@ namespace dss {
           log("missing dsid or busid of device");
           continue;
         }
-        string type = "standard.simple";
+        std::string type = "standard.simple";
         if(!attrs["type"].empty()) {
           type = attrs["type"];
         }
@@ -427,8 +427,8 @@ namespace dss {
         try {
           foreach(XMLNode& iParam, iNode->getChildren()) {
             if(iParam.getName() == "parameter") {
-              string paramName = iParam.getAttributes()["name"];
-              string paramValue = iParam.getChildren()[0].getContent();
+              std::string paramName = iParam.getAttributes()["name"];
+              std::string paramValue = iParam.getChildren()[0].getContent();
               if(paramName.empty()) {
                 log("Missing attribute name of parameter node");
                 continue;
@@ -555,7 +555,7 @@ namespace dss {
   void DSModulatorSim::groupSaveScene(const int _zoneID, const int _groupID, const int _sceneID) {
     pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
+      std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
@@ -571,7 +571,7 @@ namespace dss {
   void DSModulatorSim::groupUndoScene(const int _zoneID, const int _groupID, const int _sceneID) {
     pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
+      std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
@@ -583,7 +583,7 @@ namespace dss {
   void DSModulatorSim::groupStartDim(const int _zoneID, const int _groupID, bool _up, int _parameterNr) {
     pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
+      std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
@@ -595,7 +595,7 @@ namespace dss {
   void DSModulatorSim::groupEndDim(const int _zoneID, const int _groupID, const int _parameterNr) {
     pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
+      std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
@@ -607,7 +607,7 @@ namespace dss {
   void DSModulatorSim::groupDecValue(const int _zoneID, const int _groupID, const int _parameterNr) {
     pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
+      std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
@@ -619,7 +619,7 @@ namespace dss {
   void DSModulatorSim::groupIncValue(const int _zoneID, const int _groupID, const int _parameterNr) {
     pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
+      std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
@@ -631,7 +631,7 @@ namespace dss {
   void DSModulatorSim::groupSetValue(const int _zoneID, const int _groupID, const int _value) {
     pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
-      vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
+      std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
@@ -771,7 +771,7 @@ namespace dss {
             case FunctionDeviceGetName:
               {
                 devid_t devID = pd.get<devid_t>();
-                string name = m_DeviceNames[devID];
+                std::string name = m_DeviceNames[devID];
                 response = createResponse(cmdFrame, cmdNr);
 
               }
@@ -805,7 +805,7 @@ namespace dss {
             case FunctionModulatorGetZoneIdForInd:
               {
                 uint8_t index = pd.get<uint16_t>();
-                map< const int, vector<DSIDInterface*> >::iterator it = m_Zones.begin();
+                map< const int, std::vector<DSIDInterface*> >::iterator it = m_Zones.begin();
                 advance(it, index);
                 response = createResponse(cmdFrame, cmdNr);
                 response->getPayload().add<uint16_t>(it->first);
@@ -951,7 +951,7 @@ namespace dss {
               {
                 devid_t devID = pd.get<uint16_t>();
                 lookupDevice(devID);
-                vector<int>& groupsList = m_GroupsPerDevice[devID];
+                std::vector<int>& groupsList = m_GroupsPerDevice[devID];
 
 
                 // format: (8,7,6,5,4,3,2,1) (16,15,14,13,12,11,10,9), etc...
@@ -1005,7 +1005,7 @@ namespace dss {
                 uint8_t zoneID = pd.get<uint16_t>();
                 response = createResponse(cmdFrame, cmdNr);
                 bool isValid = true;
-                for(map< const int, vector<DSIDInterface*> >::iterator iZoneEntry = m_Zones.begin(), e = m_Zones.end();
+                for(map< const int, std::vector<DSIDInterface*> >::iterator iZoneEntry = m_Zones.begin(), e = m_Zones.end();
                     iZoneEntry != e; ++iZoneEntry)
                 {
                   if(iZoneEntry->first == zoneID) {
@@ -1029,7 +1029,7 @@ namespace dss {
                 DSIDInterface& dev = lookupDevice(devID);
 
                 int oldZoneID = m_DeviceZoneMapping[&dev];
-                vector<DSIDInterface*>::iterator oldEntry = find(m_Zones[oldZoneID].begin(), m_Zones[oldZoneID].end(), &dev);
+                std::vector<DSIDInterface*>::iterator oldEntry = find(m_Zones[oldZoneID].begin(), m_Zones[oldZoneID].end(), &dev);
                 m_Zones[oldZoneID].erase(oldEntry);
                 m_Zones[zoneID].push_back(&dev);
                 m_DeviceZoneMapping[&dev] = zoneID;
@@ -1112,14 +1112,14 @@ namespace dss {
 
   //================================================== DSIDCreator
 
-  DSIDCreator::DSIDCreator(const string& _identifier)
+  DSIDCreator::DSIDCreator(const std::string& _identifier)
   : m_Identifier(_identifier)
   {} // ctor
 
 
   //================================================== DSIDFactory
 
-  DSIDInterface* DSIDFactory::createDSID(const string& _identifier, const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
+  DSIDInterface* DSIDFactory::createDSID(const std::string& _identifier, const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
     boost::ptr_vector<DSIDCreator>::iterator
     iCreator = m_RegisteredCreators.begin(),
     e = m_RegisteredCreators.end();

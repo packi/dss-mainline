@@ -22,6 +22,8 @@
 #ifndef _DS485_PROXY_H_INCLUDED
 #define _DS485_PROXY_H_INCLUDED
 
+#include <bitset>
+
 #include "core/model.h"
 
 #include "core/ds485types.h"
@@ -55,7 +57,7 @@ using namespace std;
 namespace dss {
 
   class DS485Proxy;
-  typedef hash_map<const Zone*, pair< vector<Group*>, Set> > FittingResult;
+  typedef hash_map<const Zone*, std::pair< std::vector<Group*>, Set> > FittingResult;
 
 
   /** A ReceivedFrame stores a boost::shared_ptr to the frame as well as the token-counter
@@ -107,7 +109,7 @@ namespace dss {
     bool isEmpty() const;
   }; // FrameBucket
 
-  typedef vector<boost::shared_ptr<DS485CommandFrame> > CommandFrameSharedPtrVector;
+  typedef std::vector<boost::shared_ptr<DS485CommandFrame> > CommandFrameSharedPtrVector;
 
   class DS485Proxy : protected Thread,
                      public    Subsystem,
@@ -122,7 +124,7 @@ namespace dss {
     uint8_t receiveSingleResult(DS485CommandFrame& _frame, const uint8_t _functionID);
     uint16_t receiveSingleResult16(DS485CommandFrame& _frame, const uint8_t _functionID);
 
-    vector<FrameBucket*> m_FrameBuckets;
+    std::vector<FrameBucket*> m_FrameBuckets;
 
     void signalEvent();
 
@@ -155,22 +157,22 @@ namespace dss {
     void removeFrameBucket(FrameBucket* _bucket);
 
     //------------------------------------------------ Specialized Commands (system)
-    virtual vector<int> getModulators();
+    virtual std::vector<int> getModulators();
 
-    virtual vector<int> getZones(const int _modulatorID);
+    virtual std::vector<int> getZones(const int _modulatorID);
     virtual int getZoneCount(const int _modulatorID);
-    virtual vector<int> getDevicesInZone(const int _modulatorID, const int _zoneID);
+    virtual std::vector<int> getDevicesInZone(const int _modulatorID, const int _zoneID);
     virtual int getDevicesCountInZone(const int _modulatorID, const int _zoneID);
 
     virtual void setZoneID(const int _modulatorID, const devid_t _deviceID, const int _zoneID);
     virtual void createZone(const int _modulatorID, const int _zoneID);
 
     virtual int getGroupCount(const int _modulatorID, const int _zoneID);
-    virtual vector<int> getGroups(const int _modulatorID, const int _zoneID);
+    virtual std::vector<int> getGroups(const int _modulatorID, const int _zoneID);
     virtual int getDevicesInGroupCount(const int _modulatorID, const int _zoneID, const int _groupID);
-    virtual vector<int> getDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID);
+    virtual std::vector<int> getDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID);
 
-    virtual vector<int> getGroupsOfDevice(const int _modulatorID, const int _deviceID);
+    virtual std::vector<int> getGroupsOfDevice(const int _modulatorID, const int _deviceID);
 
     virtual void addToGroup(const int _modulatorID, const int _groupID, const int _deviceID);
     virtual void removeFromGroup(const int _modulatorID, const int _groupID, const int _deviceID);
@@ -188,11 +190,11 @@ namespace dss {
     virtual bool getEnergyBorder(const int _modulatorID, int& _lower, int& _upper);
 
     //------------------------------------------------ Device manipulation
-    virtual vector<int> sendCommand(DS485Command _cmd, const Set& _set, int _param);
-    virtual vector<int> sendCommand(DS485Command _cmd, const Device& _device, int _param);
-    virtual vector<int> sendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param);
-    virtual vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param);
-    virtual vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param = -1);
+    virtual std::vector<int> sendCommand(DS485Command _cmd, const Set& _set, int _param);
+    virtual std::vector<int> sendCommand(DS485Command _cmd, const Device& _device, int _param);
+    virtual std::vector<int> sendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param);
+    virtual std::vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param);
+    virtual std::vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param = -1);
     //------------------------------------------------ Helpers
     DS485Controller& getController() { return m_DS485Controller; }
   };

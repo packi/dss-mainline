@@ -28,18 +28,18 @@
 
 namespace dss {
 
-  //============================================= String parsing/formatting/conversion
+  //============================================= std::string parsing/formatting/conversion
 
-  string trim(const string& _str) {
-    string result = _str;
-    string::size_type notwhite = result.find_first_not_of( " \t\n\r" );
+  std::string trim(const std::string& _str) {
+    std::string result = _str;
+    std::string::size_type notwhite = result.find_first_not_of( " \t\n\r" );
     result.erase(0,notwhite);
     notwhite = result.find_last_not_of( " \t\n\r" );
     result.erase( notwhite + 1 );
     return result;
   } // trim
 
-  int strToInt(const string& _strValue) {
+  int strToInt(const std::string& _strValue) {
     if(!_strValue.empty()) {
       char* endp;
       int result = strtol(_strValue.c_str(), &endp, 0);
@@ -47,10 +47,10 @@ namespace dss {
         return result;
       }
     }
-    throw invalid_argument(string("strToInt: Could not parse value: '") + _strValue + "'");
+    throw std::invalid_argument(std::string("strToInt: Could not parse value: '") + _strValue + "'");
   } // strToInt
 
-  int strToIntDef(const string& _strValue, const int _default) {
+  int strToIntDef(const std::string& _strValue, const int _default) {
     if(!_strValue.empty()) {
       char* endp;
       int result = strtol(_strValue.c_str(), &endp, 0);
@@ -61,7 +61,7 @@ namespace dss {
     return _default;
   } // strToIntDef
 
-  unsigned int strToUInt(const string& _strValue) {
+  unsigned int strToUInt(const std::string& _strValue) {
     if(!_strValue.empty()) {
       char* endp;
       unsigned int result = strtoul(_strValue.c_str(), &endp, 0);
@@ -69,10 +69,10 @@ namespace dss {
         return result;
       }
     }
-    throw invalid_argument(string("strToUInt: Could not parse value: '") + _strValue + "'");
+    throw std::invalid_argument(std::string("strToUInt: Could not parse value: '") + _strValue + "'");
   } // strToUInt
 
-  double strToDouble(const string& _strValue) {
+  double strToDouble(const std::string& _strValue) {
     if(!_strValue.empty()) {
       char* endp;
       double result = strtod(_strValue.c_str(), &endp);
@@ -80,10 +80,10 @@ namespace dss {
         return result;
       }
     }
-    throw invalid_argument(string("strToDouble: Could not parse value: '") + _strValue + "'");
+    throw std::invalid_argument(std::string("strToDouble: Could not parse value: '") + _strValue + "'");
   } // strToDouble
 
-  double strToDouble(const string& _strValue, const double _default) {
+  double strToDouble(const std::string& _strValue, const double _default) {
     if(!_strValue.empty()) {
       char* endp;
       double result = strtod(_strValue.c_str(), &endp);
@@ -94,40 +94,40 @@ namespace dss {
     return _default;
   } // strToDouble
 
-  string doubleToString(const double _value) {
-    stringstream sstream;
+  std::string doubleToString(const double _value) {
+    std::stringstream sstream;
     sstream << _value;
     return sstream.str();
   } // doubleToString
 
-  string intToString(const int _int, bool _hex) {
-    stringstream sstream;
+  std::string intToString(const int _int, bool _hex) {
+    std::stringstream sstream;
     if(_hex) {
-      sstream << hex << "0x";
+      sstream << std::hex << "0x";
     }
     sstream << _int;
     return sstream.str();
   } // intToString
 
-  string uintToString(unsigned long int _int) {
-    stringstream sstream;
+  std::string uintToString(unsigned long int _int) {
+    std::stringstream sstream;
     sstream << _int;
     return sstream.str();
   } // uintToString
 
-  string unsignedLongIntToHexString(const unsigned long long _value) {
-    stringstream sstream;
-    sstream << hex << _value;
+  std::string unsignedLongIntToHexString(const unsigned long long _value) {
+    std::stringstream sstream;
+    sstream << std::hex << _value;
     return sstream.str();
   }
 
   const char* theISOFormatString = "%Y-%m-%d %H:%M:%S";
 
   template <>
-  string dateToISOString( const struct tm* _dateTime ) {
+  std::string dateToISOString( const struct tm* _dateTime ) {
     char buf[ 20 ];
     strftime( buf, 20, theISOFormatString, _dateTime );
-    string result = buf;
+    std::string result = buf;
     return result;
   } // dateToISOString
 
@@ -139,78 +139,18 @@ namespace dss {
     return result;
   } // dateFromISOString
 
-
-  template <>
-  wstring dateToISOString(const struct tm* _dateTime) {
-    return fromUTF8(dateToISOString<string>(_dateTime));
-  } // dateToISOString
-
-  const int ConversionBufferSize = 1024;
-
-  /** Takes a string in utf-8 format and converts it to a wide-string */
-  const wstring fromUTF8(const char* _utf8string, int _len) {
-    wchar_t buffer[ConversionBufferSize];
-    wstring result;
-    mbstate_t state;
-    const char* ptr;
-
-    ptr = &_utf8string[0];
-    memset(&state, '\0', sizeof(mbstate_t));
-    while(true) {
-      size_t wlen = mbsnrtowcs(buffer, &ptr,
-                               _len,
-                               ConversionBufferSize,  // max chars to return
-                               &state);
-      if(wlen < 0) {
-        throw DSSException("fromUTF8: Illegal sequence encountered");
-      } else if(wlen == 0 ) {
-        break;
-      }
-      result.append(buffer, wlen);
-    }
-    return result;
-  } // fromUTF8
-
-  const string toUTF8(const wchar_t* _wcharString, int _len) {
-    char buffer[ConversionBufferSize];
-    string result;
-    mbstate_t state;
-    const wchar_t* ptr;
-
-    ptr = &_wcharString[0];
-    memset(&state, '\0', sizeof(mbstate_t));
-    while(true) {
-      size_t len = wcsnrtombs(buffer, &ptr, _len, ConversionBufferSize, &state);
-      if(len < 0) {
-        throw DSSException("ToUF8: Error");
-      } else if(len == 0) {
-        break;
-      }
-      result.append(buffer, len);
-    }
-    return result;
-  } // toUTF8
-
-  const wstring fromUTF8(const string& _utf8string) {
-    return fromUTF8(_utf8string.c_str(), _utf8string.size());
-  }
-
-  const string toUTF8(const wstring& _wcharString) {
-    return toUTF8(_wcharString.c_str(), _wcharString.size());
-  }
-
-  vector<string> splitString(const string& _source, const char _delimiter, bool _trimEntries) {
-    vector<string> result;
-    string curString = _source;
+  std::vector<std::string> splitString(const std::string& _source, const char _delimiter, bool _trimEntries) {
+    std::vector<std::string> result;
+    std::string curString = _source;
     while(!curString.empty()) {
-      string::size_type delimPos = curString.find(_delimiter, 0);
+      std::string::size_type delimPos = curString.find(_delimiter, 0);
       if(_trimEntries) {
         result.push_back(trim(curString.substr(0, delimPos)));
       } else {
         result.push_back(curString.substr(0, delimPos));
       }
-      if(delimPos != string::npos) {
-        curString = curString.substr(delimPos+1, string::npos);
+      if(delimPos != std::string::npos) {
+        curString = curString.substr(delimPos+1, std::string::npos);
         if(curString.size() == 0) {
           result.push_back("");
         }
@@ -221,25 +161,25 @@ namespace dss {
     return result;
   } // splitString
 
-  void replaceAll(string& s, const string& a, const string& b) {
-    for (string::size_type i = s.find(a);
-         i != string::npos;
+  void replaceAll(std::string& s, const std::string& a, const std::string& b) {
+    for (std::string::size_type i = s.find(a);
+         i != std::string::npos;
          i = s.find(a, i + b.size()))
       s.replace(i, a.size(), b);
   } // replaceAll
 
-  string urlDecode(const string& _in) {
-    string result = "";
+  std::string urlDecode(const std::string& _in) {
+    std::string result = "";
 
-    string::size_type lastPos = 0;
-    string::size_type pos = _in.find('%', 0);
-    while(pos != string::npos && _in.length() > (pos + 2)) {
+    std::string::size_type lastPos = 0;
+    std::string::size_type pos = _in.find('%', 0);
+    while(pos != std::string::npos && _in.length() > (pos + 2)) {
       if(lastPos != pos) {
-        string add = _in.substr(lastPos, pos - lastPos);
+        std::string add = _in.substr(lastPos, pos - lastPos);
         replaceAll(add, "+", " ");
         result += add;
       }
-      string hex = _in.substr(pos+1, 2);
+      std::string hex = _in.substr(pos+1, 2);
       char* ptr;
       char tmp = (char)strtol(hex.c_str(), &ptr, 16);
       if(*ptr != '\0') {
@@ -250,24 +190,24 @@ namespace dss {
       pos = _in.find('%', lastPos);
     }
     if(lastPos < _in.length()) {
-      string end = _in.substr(lastPos, string::npos);
+      std::string end = _in.substr(lastPos, std::string::npos);
       replaceAll(end, "+", " ");
       result += end;
     }
     return result;
   }
 
-  bool endsWith( const string& str, const string& searchString ) {
-    string::size_type lenStr = str.length();
-    string::size_type lenSearch = searchString.length();
+  bool endsWith( const std::string& str, const std::string& searchString ) {
+    std::string::size_type lenStr = str.length();
+    std::string::size_type lenSearch = searchString.length();
     return (lenStr >= lenSearch) &&
     (str.compare( lenStr - lenSearch, lenSearch, searchString ) == 0);
   } // endsWith
 
 
-  bool beginsWith( const string& str, const string& searchString ) {
-    string::size_type lenStr = str.length();
-    string::size_type lenSearch = searchString.length();
+  bool beginsWith( const std::string& str, const std::string& searchString ) {
+    std::string::size_type lenStr = str.length();
+    std::string::size_type lenSearch = searchString.length();
     return (lenStr >= lenSearch) &&
     (str.compare( 0, lenSearch, searchString ) == 0);
   } // beginsWith
@@ -357,7 +297,7 @@ namespace dss {
 
   //================================================== File utilities
 
-  bool fileExists( const string& _fileName ) {
+  bool fileExists( const std::string& _fileName ) {
     return fileExists(_fileName.c_str());
   } // fileExists
 
@@ -399,18 +339,18 @@ namespace dss {
 
   //================================================== Properties
 
-  bool Properties::has(const string& _key) const {
+  bool Properties::has(const std::string& _key) const {
     HashMapConstStringString::const_iterator iEntry = m_Container.find(_key);
     return iEntry != m_Container.end();
   } // has
 
-  void Properties::set(const string& _key, const string& _value) {
+  void Properties::set(const std::string& _key, const std::string& _value) {
     m_Container[_key] = _value;
   } // set
 
-  const string& Properties::get(const string& _key) const {
+  const std::string& Properties::get(const std::string& _key) const {
     if(!has(_key)) {
-      throw runtime_error(string("could not find value for '") + _key + "' in properties");
+      throw std::runtime_error(std::string("could not find value for '") + _key + "' in properties");
     } else {
       // not using operator[] here because its non-const
       HashMapConstStringString::const_iterator iEntry = m_Container.find(_key);
@@ -418,7 +358,7 @@ namespace dss {
     }
   } // get
 
-  const string& Properties::get(const string& _key, const string& _default) const {
+  const std::string& Properties::get(const std::string& _key, const std::string& _default) const {
     if(has(_key)) {
       // not using operator[] here because its non-const
       HashMapConstStringString::const_iterator iEntry = m_Container.find(_key);
@@ -428,7 +368,7 @@ namespace dss {
     }
   } // get(with default)
 
-  bool Properties::unset(const string& _key) {
+  bool Properties::unset(const std::string& _key) {
     HashMapConstStringString::iterator iEntry = m_Container.find(_key);
     if(iEntry != m_Container.end()) {
       m_Container.erase(iEntry);

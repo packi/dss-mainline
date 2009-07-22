@@ -38,8 +38,6 @@
 #endif // USE_AVAHI
 
 
-using namespace std;
-
 namespace dss {
 
   BonjourHandler::BonjourHandler()
@@ -62,7 +60,7 @@ namespace dss {
     void *context )
   {
     if(errorCode != kDNSServiceErr_NoError) {
-      cerr << "error received in browse callback" << endl;
+      std::cerr << "error received in browse callback" << std::endl;
     }
   } // registerCallback
 #endif

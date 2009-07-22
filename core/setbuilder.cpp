@@ -37,14 +37,14 @@ namespace dss {
   Set SetBuilder::restrictByFunction(const string& _identifier, const Set& _set, const Zone& _zone) {
     string::size_type openingBracket = _identifier.find('(');
     if(openingBracket == string::npos) {
-      throw runtime_error("SetBuilder::restrictByFunction: No '(' found in identifier : '" + _identifier + "'");
+      throw std::runtime_error("SetBuilder::restrictByFunction: No '(' found in identifier : '" + _identifier + "'");
     }
     string::size_type closingBracket = _identifier.find(')', openingBracket);
     if(openingBracket == string::npos) {
-      throw runtime_error("SetBuilder::restrictByFunction: No ')' found after '(' in identifier : '" + _identifier + "'");
+      throw std::runtime_error("SetBuilder::restrictByFunction: No ')' found after '(' in identifier : '" + _identifier + "'");
     }
     if(_identifier.find_first_not_of("\r\n \t", closingBracket + 1) != string::npos) {
-      throw runtime_error("SetBuilder::restrictByFunction: Garbage found after parameter '" + _identifier + "'");
+      throw std::runtime_error("SetBuilder::restrictByFunction: Garbage found after parameter '" + _identifier + "'");
     }
 
     string functionName = trim(_identifier.substr(0, openingBracket));
@@ -56,27 +56,27 @@ namespace dss {
       if(paramList.size() == 1) {
         result.addDevice(_set.getByDSID(dsid_t::fromString(paramList[0])));
       } else {
-        throw runtime_error("SetBuilder::restrictByFunction: dsid requires exactly one parameter.");
+        throw std::runtime_error("SetBuilder::restrictByFunction: dsid requires exactly one parameter.");
       }
     } else if(functionName == "zone") {
       if(paramList.size() == 1) {
         result = _set.getByZone(strToInt(paramList[0]));
       } else {
-        throw runtime_error("SetBuilder::restrictByFunction: zone requires exactly one parameter.");
+        throw std::runtime_error("SetBuilder::restrictByFunction: zone requires exactly one parameter.");
       }
     } else if(functionName == "fid") {
       if(paramList.size() == 1) {
         result = _set.getByFunctionID(strToInt(paramList[0]));
       } else {
-        throw runtime_error("SetBuilder::restrictByFunction: fid requires exactly one parameter");
+        throw std::runtime_error("SetBuilder::restrictByFunction: fid requires exactly one parameter");
       }
     }
     return result;
   }
 
-  Set SetBuilder::restrictBy(const string& _identifier, const Set& _set, const Zone& _zone) {
+  Set SetBuilder::restrictBy(const std::string& _identifier, const Set& _set, const Zone& _zone) {
 
-    if(_identifier.find('(') != string::npos) {
+    if(_identifier.find('(') != std::string::npos) {
       return restrictByFunction(_identifier, _set, _zone);
     } else {
 
@@ -85,7 +85,7 @@ namespace dss {
         Set result;
         result.addDevice(ref);
         return result;
-      } catch(exception&) {
+      } catch(std::exception&) {
       }
 
       // TODO: we might need to query zone 0 for the identifier too
@@ -101,7 +101,7 @@ namespace dss {
     return result;
   } // restrictBy
 
-  Set SetBuilder::buildSet(const string& _setDescription, const Zone* _context) {
+  Set SetBuilder::buildSet(const std::string& _setDescription, const Zone* _context) {
 	  Set result;
 	  const Zone* context = _context;
 	  if(_context == NULL || beginsWith(_setDescription, ".")) {
@@ -110,8 +110,8 @@ namespace dss {
 	  } else {
 		  result = _context->getDevices();
 	  }
-    vector<string> splitted = splitString(_setDescription, '.');
-    for(vector<string>::iterator iPart = splitted.begin(), e = splitted.end();
+    std::vector<std::string> splitted = splitString(_setDescription, '.');
+    for(std::vector<std::string>::iterator iPart = splitted.begin(), e = splitted.end();
        iPart != e; ++iPart)
     {
       if(iPart->size() > 0) {

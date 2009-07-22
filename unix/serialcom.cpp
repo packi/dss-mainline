@@ -55,7 +55,7 @@ namespace dss {
     m_Handle = ::open(_serialPort, flags);
     if(m_Handle == -1) {
       perror("serial");
-      throw runtime_error(string("could not open port ") + m_PortDevName);
+      throw std::runtime_error(string("could not open port ") + m_PortDevName);
     }
 
 
@@ -77,26 +77,26 @@ namespace dss {
     } else if(m_Speed == sp9600) {
       rate = B9600;
     } else {
-      throw runtime_error("Invalid value of speed");
+      throw std::runtime_error("Invalid value of speed");
     }
     if(cfsetispeed(&m_CommSettings, rate) == -1) {
       perror("cfsetispeed");
-      throw runtime_error(string("could not set input speed of port ") + m_PortDevName);
+      throw std::runtime_error(string("could not set input speed of port ") + m_PortDevName);
     }
     if(cfsetospeed(&m_CommSettings, rate) == -1) {
       perror("cfsetospeed");
-      throw runtime_error(string("could not set ouput speed of port ") + m_PortDevName);
+      throw std::runtime_error(string("could not set ouput speed of port ") + m_PortDevName);
     }
 
     // flush remaining characters
     if(tcflush(m_Handle, TCIOFLUSH) == -1) {
       perror("tcflush");
-      throw runtime_error(string("could not flush port ") + m_PortDevName);
+      throw std::runtime_error(string("could not flush port ") + m_PortDevName);
     }
 
     if(tcsetattr(m_Handle, TCSANOW, &m_CommSettings) == -1) {
       perror("tcsetattr");
-      throw runtime_error(string("could not set attributes of port ") + m_PortDevName);
+      throw std::runtime_error(string("could not set attributes of port ") + m_PortDevName);
     }
     return true;
   } // open
@@ -133,7 +133,7 @@ namespace dss {
           close(m_Handle);
           m_Handle = -1;
           perror("SerialCom::getCharTimeout read");
-          throw runtime_error("read failed");
+          throw std::runtime_error("read failed");
         }
       }
     } else if(res == 0) {
@@ -143,7 +143,7 @@ namespace dss {
       close(m_Handle);
       m_Handle = -1;
       perror("SerialCom::getCharTimeout() select");
-      throw runtime_error("select failed");
+      throw std::runtime_error("select failed");
     }
     return false;
   }
@@ -163,7 +163,7 @@ namespace dss {
       close(m_Handle);
       m_Handle = -1;
       perror("SerialCom::putChar");
-      throw runtime_error("error writing to serial port");
+      throw std::runtime_error("error writing to serial port");
     }
   } // putChar
 
@@ -177,7 +177,7 @@ namespace dss {
     return m_OutgoingData;
   } // getWrittenData
 
-  void SerialComSim::putSimData(const string& _data) {
+  void SerialComSim::putSimData(const std::string& _data) {
     for(string::const_iterator iChar = _data.begin(), e = _data.end();
         iChar != e; ++iChar)
     {
