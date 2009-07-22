@@ -2,7 +2,7 @@
 <properties version="1">
   <property name="config">
     <property name="subsystems/DS485Proxy/rs485devicename" type="string">
-      <value>/dev/tty.usbserial-FTCV05XN</value>
+      <value>/dev/ttyUSB0</value>
     </property>
  <!--
     <property name="subsystems/FakeMeter/device" type="string">
@@ -18,11 +18,17 @@
       <value>/mnt/webroot/</value>
     </property>
 -->    
+    <property name="subsystems/WebServer/plugins/testplugin/file" type="string">
+      <value>data/webplugins/webserver_plugin.so</value>
+    </property>
+    <property name="subsystems/WebServer/plugins/testplugin/uri" type="string">
+      <value>/test/*</value>
+    </property>
     <property name="subsystems/FakeMeter/enabled" type="boolean">
-      <value>true</value>
+      <value>false</value>
     </property>
     <property name="subsystems/Metering/enabled" type="boolean">
-      <value>true</value>
+      <value>false</value>
     </property>
   </property>
 </properties>

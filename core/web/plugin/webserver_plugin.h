@@ -23,3 +23,18 @@
 
 #define WEBSERVER_PLUGIN_API_VERSION 0
 
+#include <string>
+
+#include "../../base.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+  int plugin_getversion();
+  bool plugin_handlerequest(const std::string& _uri, dss::HashMapConstStringString& _parameter, std::string& result);
+
+
+#ifdef __cplusplus
+}
+#endif

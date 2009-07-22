@@ -30,13 +30,18 @@
 
 namespace dss {
 
+
+
   class WebServerPlugin {
   private:
     std::string m_URI;
     std::string m_File;
     void* m_Handle;
+    typedef bool (*HandleRequest_t)(const std::string& _uri, HashMapConstStringString& _parameter, std::string& result);
+    HandleRequest_t m_pHandleRequest;
   public:
-    WebServerPlugin(const std::string& _uri, const std::string _file);
+    WebServerPlugin(const std::string& _uri, const std::string& _file);
+    ~WebServerPlugin();
     void load();
     bool handleRequest(const std::string& _uri, HashMapConstStringString& _parameter, std::string& result);
   };

@@ -32,9 +32,16 @@
 
 namespace dss {
 
-  WebServerPlugin::WebServerPlugin(const std::string& _uri, const std::string _file)
-  : m_URI(_uri), m_File(_file), m_Handle(NULL)
+  WebServerPlugin::WebServerPlugin(const std::string& _uri, const std::string& _file)
+  : m_URI(_uri), m_File(_file), m_Handle(NULL), m_pHandleRequest(NULL)
   { } // ctor
+
+  WebServerPlugin::~WebServerPlugin() {
+    m_pHandleRequest = NULL;
+    if(m_Handle != NULL) {
+      dlclose(m_Handle);
+    }
+  } // dtor
 
   void WebServerPlugin::load() {
     assert(m_Handle == NULL);
@@ -53,7 +60,7 @@ namespace dss {
     *(void**) (&version) = dlsym(m_Handle, "plugin_getversion");
     char* error;
     if((error = dlerror()) != NULL) {
-      Logger::getInstance()->log("WebServerPlugin::load(): could get version from \"" + m_File + "\":" + error, lsError);
+      Logger::getInstance()->log("WebServerPlugin::load(): Could not get symbol 'plugin_getversion' from \"" + m_File + "\":" + error, lsError);
       return;
     }
 
@@ -62,9 +69,18 @@ namespace dss {
       Logger::getInstance()->log("WebServerPlugin::load(): Version mismatch (plugin: " + intToString(ver) + " api: " + intToString(WEBSERVER_PLUGIN_API_VERSION) + ")", lsError);
       return;
     }
+
+    *(void**) (&m_pHandleRequest) = dlsym(m_Handle, "plugin_handlerequest");
+    if((error = dlerror()) != NULL) {
+       Logger::getInstance()->log("WebServerPlugin::load(): Could not get symbol 'plugin_handlerequest' from plugin: \"" + m_File + "\":" + error, lsError);
+       return;
+    }
   } // load
 
   bool WebServerPlugin::handleRequest(const std::string& _uri, HashMapConstStringString& _parameter, std::string& result) {
+    if(m_Handle != NULL && m_pHandleRequest != NULL) {
+      return (*m_pHandleRequest)(_uri, _parameter, result);
+    }
     return false;
   } // handleRequest
 

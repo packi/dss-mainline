@@ -83,7 +83,7 @@ namespace dss {
     if(pURINode == NULL) {
       log("loadPlugin: Missing subnode 'uri on node " + _node.getDisplayName(), lsError);
     }
-    WebServerPlugin* plugin = new WebServerPlugin(pFileNode->getStringValue(), pURINode->getStringValue());
+    WebServerPlugin* plugin = new WebServerPlugin(pURINode->getStringValue(), pFileNode->getStringValue());
     try {
       plugin->load();
     } catch(runtime_error& e) {
@@ -92,7 +92,7 @@ namespace dss {
     }
     m_Plugins.push_back(plugin);
 
-    shttpd_register_uri(m_SHttpdContext, pURINode->getStringValue().c_str(), &httpPluginCallback, &plugin);
+    shttpd_register_uri(m_SHttpdContext, pURINode->getStringValue().c_str(), &httpPluginCallback, plugin);
   } // loadPlugin
 
   void WebServer::setupAPI() {
@@ -339,6 +339,8 @@ namespace dss {
       return "Unauthorized\r\nWWW-Authenticate: Basic realm=\"dSS\"";
     } else if(_code == 403) {
       return "Forbidden";
+    } else if(_code == 500) {
+      return "Internal Server Error";
     } else {
       return "OK";
     }
@@ -1448,10 +1450,13 @@ namespace dss {
 
     string result;
     if(plugin.handleRequest(_uri, paramMap, result)) {
+      emitHTTPHeader(200, _arg, "text/plain");
       shttpd_printf(_arg, result.c_str());
     } else {
+      emitHTTPHeader(500, _arg, "text/plain");
       shttpd_printf(_arg, "error");
     }
+    _arg->flags |= SHTTPD_END_OF_OUTPUT;
   } // pluginCalled
 
   void WebServer::jsonHandler(struct shttpd_arg* _arg) {

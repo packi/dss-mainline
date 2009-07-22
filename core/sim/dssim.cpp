@@ -298,7 +298,7 @@ namespace dss {
               *(void**) (&version) = dlsym(handle, "dsid_getversion");
               char* error;
               if((error = dlerror()) != NULL) {
-                 log("LoadPlugins: could get version from \"" + dir_itr->leaf() + "\":" + error, lsError);
+                 log("LoadPlugins: Could not get symbol 'dsid_getversion' from plugin: \"" + dir_itr->leaf() + "\":" + error, lsError);
                  continue;
               }
 
