@@ -410,20 +410,20 @@ namespace dss {
     PropertyNode* getChild(const int _index) { return m_ChildNodes.at(_index); }
 
     /** Performs \a _callback for each child node (non-recursive) */
-    void foreachChildOf(void(*_callback)(PropertyNode*)) {
+    void foreachChildOf(void(*_callback)(PropertyNode&)) {
       for (std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin(); it
           != m_ChildNodes.end(); ++it) {
-        (*_callback)(*it);
+        (*_callback)(**it);
       }
     } // ForeachChildOf
 
     // needs to stay inside the header file, else the template specializations won't get generated ;-=
     /** @copydoc foreachChildOf */
     template<class Cls>
-    void foreachChildOf(Cls& _objRef, void(Cls::*_callback)(PropertyNode*)) {
+    void foreachChildOf(Cls& _objRef, void(Cls::*_callback)(PropertyNode&)) {
       for (std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin(); it
           != m_ChildNodes.end(); ++it) {
-        (_objRef.*_callback)(*it);
+        (_objRef.*_callback)(**it);
       }
     }
   public:

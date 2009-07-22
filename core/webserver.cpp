@@ -33,6 +33,7 @@
 #include "metering/metering.h"
 #include "metering/series.h"
 #include "metering/seriespersistence.h"
+#include "web/webserverplugin.h"
 
 #include <iostream>
 #include <sstream>
@@ -57,9 +58,44 @@ namespace dss {
   void WebServer::initialize() {
     Subsystem::initialize();
 
-    DSS::getInstance()->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "webroot", getDSS().getDataDirectory() + "webroot/", true, false);
-    DSS::getInstance()->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "ports", "8080", true, false);
+    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "webroot", getDSS().getDataDirectory() + "webroot/", true, false);
+    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "ports", "8080", true, false);
 
+    setupAPI();
+  } // initialize
+
+  void WebServer::loadPlugins() {
+    PropertyNode* pluginsNode = getDSS().getPropertySystem().getProperty(getConfigPropertyBasePath() + "plugins");
+    if(pluginsNode != NULL) {
+      log("Found plugins node, trying to loading plugins", lsInfo);
+      pluginsNode->foreachChildOf(*this, &WebServer::loadPlugin);
+    }
+  } // loadPlugins
+
+  void WebServer::loadPlugin(PropertyNode& _node) {
+    PropertyNode* pFileNode = _node.getProperty("file");
+    PropertyNode* pURINode = _node.getProperty("uri");
+
+    if(pFileNode == NULL) {
+      log("loadPlugin: Missing subnode name 'file' on node " + _node.getDisplayName(), lsError);
+      return;
+    }
+    if(pURINode == NULL) {
+      log("loadPlugin: Missing subnode 'uri on node " + _node.getDisplayName(), lsError);
+    }
+    WebServerPlugin* plugin = new WebServerPlugin(pFileNode->getStringValue(), pURINode->getStringValue());
+    try {
+      plugin->load();
+    } catch(runtime_error& e) {
+      delete plugin;
+      plugin = NULL;
+    }
+    m_Plugins.push_back(plugin);
+
+    shttpd_register_uri(m_SHttpdContext, pURINode->getStringValue().c_str(), &httpPluginCallback, &plugin);
+  } // loadPlugin
+
+  void WebServer::setupAPI() {
     RestfulAPI api;
     RestfulClass& clsApartment = api.addClass("apartment")
        .withDocumentation("A wrapper for global functions as well as adressing all devices connected to the dSS");
@@ -270,7 +306,7 @@ namespace dss {
        .withDocumentation("Returns the meter-value in Wh");
 
     RestfulAPIWriter::WriteToXML(api, "doc/json_api.xml");
-  } // initialize
+  } // setupAPI
 
   void WebServer::doStart() {
     run();
@@ -287,6 +323,8 @@ namespace dss {
 
     shttpd_register_uri(m_SHttpdContext, "/browse/*", &httpBrowseProperties, NULL);
     shttpd_register_uri(m_SHttpdContext, "/json/*", &jsonHandler, NULL);
+
+    loadPlugins();
 
     log("Webserver started", lsInfo);
     while(!m_Terminated) {
@@ -313,7 +351,7 @@ namespace dss {
     shttpd_printf(_arg, sstream.str().c_str());
   } // emitHTTPHeader
 
-  HashMapConstStringString ParseParameter(const char* _params) {
+  HashMapConstStringString parseParameter(const char* _params) {
     HashMapConstStringString result;
     if(_params != NULL) {
       vector<string> paramList = splitString(_params, '&');
@@ -1394,10 +1432,32 @@ namespace dss {
     return "";
   } // handleMeteringCall
 
+  void WebServer::httpPluginCallback(struct shttpd_arg* _arg) {
+    if(_arg->user_data != NULL) {
+      WebServerPlugin* plugin = static_cast<WebServerPlugin*>(_arg->user_data);
+      WebServer& self = DSS::getInstance()->getWebServer();
+      string uri = shttpd_get_env(_arg, "REQUEST_URI");
+      self.log("Plugin: Processing call to " + uri);
+
+      self.pluginCalled(_arg, *plugin, uri);
+    }
+  } // httpPluginCallback
+
+  void WebServer::pluginCalled(struct shttpd_arg* _arg, WebServerPlugin& plugin, const std::string& _uri) {
+    HashMapConstStringString paramMap = parseParameter(shttpd_get_env(_arg, "QUERY_STRING"));
+
+    string result;
+    if(plugin.handleRequest(_uri, paramMap, result)) {
+      shttpd_printf(_arg, result.c_str());
+    } else {
+      shttpd_printf(_arg, "error");
+    }
+  } // pluginCalled
+
   void WebServer::jsonHandler(struct shttpd_arg* _arg) {
     const string urlid = "/json/";
     string uri = shttpd_get_env(_arg, "REQUEST_URI");
-    HashMapConstStringString paramMap = ParseParameter(shttpd_get_env(_arg, "QUERY_STRING"));
+    HashMapConstStringString paramMap = parseParameter(shttpd_get_env(_arg, "QUERY_STRING"));
 
     string method = uri.substr(uri.find(urlid) + urlid.size());
 
@@ -1462,7 +1522,7 @@ namespace dss {
     const string urlid = "/browse";
     string uri = shttpd_get_env(_arg, "REQUEST_URI");
     uri = urlDecode(uri);
-    HashMapConstStringString paramMap = ParseParameter(shttpd_get_env(_arg, "QUERY_STRING"));
+    HashMapConstStringString paramMap = parseParameter(shttpd_get_env(_arg, "QUERY_STRING"));
 
     string path = uri.substr(uri.find(urlid) + urlid.size());
     if(path.empty()) {

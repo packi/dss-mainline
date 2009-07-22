@@ -32,11 +32,13 @@
 #include <string>
 
 #include <boost/ptr_container/ptr_map.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 namespace dss {
 
-
   class IDeviceInterface;
+  class PropertyNode;
+  class WebServerPlugin;
 
   typedef boost::ptr_map<const int, Session> SessionByID;
 
@@ -46,8 +48,12 @@ namespace dss {
     struct shttpd_ctx* m_SHttpdContext;
     int m_LastSessionID;
     SessionByID m_Sessions;
+    boost::ptr_vector<WebServerPlugin> m_Plugins;
   private:
     virtual void execute();
+    void setupAPI();
+    void loadPlugin(PropertyNode& _node);
+    void loadPlugins();
   protected:
     bool isDeviceInterfaceCall(const std::string& _method);
     string callDeviceInterface(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, IDeviceInterface* _interface, Session* _session);
@@ -64,10 +70,11 @@ namespace dss {
     string handleSimCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session);
     string handleDebugCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session);
     string handleMeteringCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session);
+    void pluginCalled(struct shttpd_arg* _arg, WebServerPlugin& plugin, const std::string& _uri);
 
+    static void httpPluginCallback(struct shttpd_arg* _arg);
     static void httpBrowseProperties(struct shttpd_arg* _arg);
     static void emitHTTPHeader(int _code, struct shttpd_arg* _arg, const std::string& _contentType = "text/html");
-
   protected:
     virtual void doStart();
   public:
