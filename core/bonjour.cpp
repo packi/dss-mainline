@@ -291,7 +291,7 @@ fail:
     );
 
     if(err != kDNSServiceErr_NoError) {
-      throw runtime_error("error registering service");
+      throw std::runtime_error("error registering service");
     }
 #endif
   } // execute
