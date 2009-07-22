@@ -3,6 +3,8 @@ using namespace dss;
 /**
 \mainpage digitalStrom Server
 
+\image html digitalSTROM.png
+
 \section overview Overview
 
 The dSS consists of several subsystems as shown in the following image:
