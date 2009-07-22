@@ -21,26 +21,4 @@
     by $Author: pstaehlin $
 */
 
-#ifndef WEBSERVERPLUGIN_H_
-#define WEBSERVERPLUGIN_H_
-
-#include "core/base.h"
-
-#include <string>
-
-namespace dss {
-
-  class WebServerPlugin {
-  private:
-    std::string m_URI;
-    std::string m_File;
-    void* m_Handle;
-  public:
-    WebServerPlugin(const std::string& _uri, const std::string _file);
-    void load();
-    bool handleRequest(const std::string& _uri, HashMapConstStringString& _parameter, std::string& result);
-  };
-
-} // namespace dss
-
-#endif /* WEBSERVERPLUGIN_H_ */
+#define WEBSERVER_PLUGIN_API_VERSION 0

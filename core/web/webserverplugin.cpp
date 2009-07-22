@@ -23,20 +23,48 @@
 
 
 #include "webserverplugin.h"
+#include "plugin/webserver_plugin.h"
+#include "core/logger.h"
+
+#include <cassert>
+
+#include <dlfcn.h>
 
 namespace dss {
 
   WebServerPlugin::WebServerPlugin(const std::string& _uri, const std::string _file)
-  : m_URI(_uri), m_File(_file)
+  : m_URI(_uri), m_File(_file), m_Handle(NULL)
   { } // ctor
 
   void WebServerPlugin::load() {
+    assert(m_Handle == NULL);
+    Logger::getInstance()->log("WebServerPlugin::load(): Trying to load \"" + m_File + "\"", lsInfo);
     if(!fileExists(m_File)) {
       throw runtime_error(string("Plugin '") + m_File + "' does not exist.");
     }
+    m_Handle = dlopen(m_File.c_str(), RTLD_LAZY);
+    if(m_Handle == NULL) {
+      Logger::getInstance()->log("WebServerPlugin::load(): Could not load plugin \"" + m_File + "\" message: " + dlerror(), lsError);
+      return;
+    }
+
+    dlerror();
+    int (*version)();
+    *(void**) (&version) = dlsym(m_Handle, "plugin_getversion");
+    char* error;
+    if((error = dlerror()) != NULL) {
+      Logger::getInstance()->log("WebServerPlugin::load(): could get version from \"" + m_File + "\":" + error, lsError);
+      return;
+    }
+
+    int ver = (*version)();
+    if(ver != WEBSERVER_PLUGIN_API_VERSION) {
+      Logger::getInstance()->log("WebServerPlugin::load(): Version mismatch (plugin: " + intToString(ver) + " api: " + intToString(WEBSERVER_PLUGIN_API_VERSION) + ")", lsError);
+      return;
+    }
   } // load
 
-  bool WebServerPlugin::handleRequest(const std::string& _uri, HashMapConstStringString& _parameter, string& result) {
+  bool WebServerPlugin::handleRequest(const std::string& _uri, HashMapConstStringString& _parameter, std::string& result) {
     return false;
   } // handleRequest
 
