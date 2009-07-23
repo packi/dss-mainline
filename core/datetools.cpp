@@ -324,8 +324,10 @@ namespace dss {
     return result;
   } // getOccurencesBetween
 
+
   //================================================== ICalSchedule
 
+#if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
   ICalSchedule::ICalSchedule(const std::string& _rrule, const std::string _startDateISO) {
     m_Recurrence = icalrecurrencetype_from_string(_rrule.c_str());
     m_StartDate = icaltime_from_string(_startDateISO.c_str());
@@ -411,7 +413,7 @@ namespace dss {
     return result;
   } // getOccurencesBetween
 
-
+#endif
   //================================================== RepeatingSchedule
 
   RepeatingSchedule::RepeatingSchedule(RepetitionMode _mode, int _interval, DateTime _beginingAt)

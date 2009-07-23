@@ -232,6 +232,7 @@ namespace dss {
     virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
   }; // RepeatingSchedule
 
+#if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
   /** Schedule that gets it's schedule from an iCal's RRULE */
   class ICalSchedule : public Schedule {
   private:
@@ -244,6 +245,7 @@ namespace dss {
     virtual DateTime getNextOccurence(const DateTime& _from) ;
     virtual std::vector<DateTime> getOccurencesBetween(const DateTime& _from, const DateTime& _to);
   }; // ICalSchedule
+#endif
 
   //================================================== Timestamp
 
