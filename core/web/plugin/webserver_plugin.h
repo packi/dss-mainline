@@ -27,12 +27,16 @@
 
 #include "../../base.h"
 
+namespace dss {
+  class DSS;
+}
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
   int plugin_getversion();
-  bool plugin_handlerequest(const std::string& _uri, dss::HashMapConstStringString& _parameter, std::string& result);
+  bool plugin_handlerequest(const std::string& _uri, dss::HashMapConstStringString& _parameter, dss::DSS& _dss, std::string& result);
 
 
 #ifdef __cplusplus

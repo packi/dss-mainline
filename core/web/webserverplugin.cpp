@@ -77,9 +77,9 @@ namespace dss {
     }
   } // load
 
-  bool WebServerPlugin::handleRequest(const std::string& _uri, HashMapConstStringString& _parameter, std::string& result) {
+  bool WebServerPlugin::handleRequest(const std::string& _uri, HashMapConstStringString& _parameter, DSS& _dss, std::string& result) {
     if(m_Handle != NULL && m_pHandleRequest != NULL) {
-      return (*m_pHandleRequest)(_uri, _parameter, result);
+      return (*m_pHandleRequest)(_uri, _parameter, _dss, result);
     }
     return false;
   } // handleRequest

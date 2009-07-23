@@ -89,9 +89,12 @@ namespace dss {
     } catch(runtime_error& e) {
       delete plugin;
       plugin = NULL;
+      log(string("Cought exception while loading: ") + e.what(), lsError);
+      return;
     }
     m_Plugins.push_back(plugin);
 
+    log("Registering " + pFileNode->getStringValue() + " for URI '" + pURINode->getStringValue() + "'");
     shttpd_register_uri(m_SHttpdContext, pURINode->getStringValue().c_str(), &httpPluginCallback, plugin);
   } // loadPlugin
 
@@ -1449,7 +1452,7 @@ namespace dss {
     HashMapConstStringString paramMap = parseParameter(shttpd_get_env(_arg, "QUERY_STRING"));
 
     string result;
-    if(plugin.handleRequest(_uri, paramMap, result)) {
+    if(plugin.handleRequest(_uri, paramMap, getDSS(), result)) {
       emitHTTPHeader(200, _arg, "text/plain");
       shttpd_printf(_arg, result.c_str());
     } else {
