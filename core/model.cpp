@@ -26,6 +26,7 @@
 #include "dss.h"
 #include "logger.h"
 #include "propertysystem.h"
+#include "xmlwrapper.h"
 
 #include "foreach.h"
 

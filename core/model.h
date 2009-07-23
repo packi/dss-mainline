@@ -27,7 +27,6 @@
 #include "base.h"
 #include "datetools.h"
 #include "ds485types.h"
-#include "xmlwrapper.h"
 #include "thread.h"
 #include "subsystem.h"
 #include "mutex.h"
@@ -49,6 +48,7 @@ namespace dss {
   class Apartment;
   class Group;
   class PropertyNode;
+  class XMLNode;
 
   /** Interface to a single or multiple devices.
    */
