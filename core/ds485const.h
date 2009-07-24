@@ -109,6 +109,12 @@ namespace dss {
 
   const uint8_t FunctionModulatorGetEnergyBorder = 0x97;
 
+  const uint8_t FunctionDSLinkConfigWrite = 0xa0;
+  const uint8_t FunctionDSLinkConfigRead = 0xa1;
+  const uint8_t FunctionDSLinkSend = 0xa2;
+  const uint8_t FunctionDSLinkReceive = 0xa3;
+  const uint8_t FunctionDSLinkInterrupt = 0x85;
+
   // Scene constants for devices
   const uint8_t SceneOff = 0x00;
   const uint8_t Scene1 = 0x05;
