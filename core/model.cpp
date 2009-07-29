@@ -816,6 +816,11 @@ namespace dss {
     Logger::getInstance()->log("******** Finished loading model from dSM(s)...", lsInfo);
     m_IsInitializing = false;
 
+    {
+      boost::shared_ptr<Event> readyEvent(new Event("model_ready"));
+      getDSS().getEventQueue().pushEvent(readyEvent);
+    }
+
     while(!m_Terminated) {
       if(!m_ModelEvents.empty()) {
         ModelEvent& event = m_ModelEvents.front();
