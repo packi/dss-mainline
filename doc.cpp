@@ -3,7 +3,7 @@ using namespace dss;
 /**
 \mainpage digitalStrom Server
 
-\image html digitalSTROM.png
+\image html digitalSTROM_small.png
 
 \section overview Overview
 
@@ -259,6 +259,9 @@ The structure looks like that:
     int (*get_function_id)(int _handle);
 
     const char* (*get_parameter_name)(int _handle, int _parameterNumber);
+
+    void (*set_configuration_parameter)(int _handle, const char* _name, const char* _value);
+    int (*get_configuration_parameter)(int _handle, const char* _name, char* _value, int _maxLen);
   };
 \endcode
 
@@ -267,16 +270,18 @@ The first parameter to each function is the instance identifier or handle to the
 The plugin has to be compiled as a shared-object. Here is an example of a makefile:
 
 \verbatim
-all:	vlc_remote.so install
+all:    vlc_remote.so install
 
-vlc_remote.so:	vlc_remote.o
-	g++ -lPocoNet -shared -Wl,-soname,vlc_remote.so -o vlc_remote.so *.o
+vlc_remote.so2: vlc_remote.o
+        #g++ -lPocoNet -lpthread -shared -Wl,-soname,vlc_remote.so -o vlc_remote.so *.o
+        g++ -shared -o vlc_remote.so *.o
 
-vlc_remote.o:	vlc_remote.cpp
-	g++ -g3 -O0 -Wall -fPIC -c vlc_remote.cpp
 
-install:	vlc_remote.so
-	cp vlc_remote.so ../../../data/plugins/
+vlc_remote.so:  vlc_remote.cpp ../../../core/sim/plugin/pluginbase.cpp ../../../core/sim/plugin/pluginmedia.cpp ../../../core/sim/include/dsid_plugin.h
+                g++ -g3 -O0 -Wall -fPIC -shared vlc_remote.cpp ../../../core/sim/plugin/pluginbase.cpp ../../../core/sim/plugin/pluginmedia.cpp -o vlc_remote.so
+
+install:        vlc_remote.so
+        cp vlc_remote.so ../../../data/plugins/
 \endverbatim
 
 Ensure that -fPIC is present, else it won't generate position independent code and is thus unsuitable for a shared-object.
