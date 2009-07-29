@@ -77,6 +77,8 @@ namespace dss {
     Event(const string& _name, DeviceReference* _ref);
     Event(const string& _name);
 
+    ~Event();
+
     const string& getName() const { return m_Name; }
 
     const string& getPropertyByName(const string& _name) const;

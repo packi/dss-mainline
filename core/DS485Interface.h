@@ -121,6 +121,11 @@ namespace dss {
 
     virtual bool getEnergyBorder(const int _modulatorID, int& _lower, int& _upper) = 0;
 
+    //------------------------------------------------ UDI
+    //virtual void dSLinkConfigWrite(devid_t _devAdr, uint8_t _index, uint8_t _value) = 0;
+    //virtual bool dSLinkConfigRead(devid_t _devAdr, uint8_t _index, uint8_t& value) = 0;
+    virtual uint8_t dSLinkSend(const int _modulatorID, devid_t _devAdr, uint8_t _value, uint8_t _flags) = 0;
+
     //------------------------------------------------ Device manipulation
     virtual std::vector<int> sendCommand(DS485Command _cmd, const Set& _set, int _param = -1) = 0;
     virtual std::vector<int> sendCommand(DS485Command _cmd, const Device& _device, int _param = -1) = 0;

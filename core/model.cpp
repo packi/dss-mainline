@@ -27,6 +27,7 @@
 #include "logger.h"
 #include "propertysystem.h"
 #include "xmlwrapper.h"
+#include "event.h"
 
 #include "foreach.h"
 
@@ -80,6 +81,7 @@ namespace dss {
           m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyReference<string>(m_Name));
           m_pPropertyNode->createProperty("ModulatorID")->linkToProxy(PropertyProxyReference<int>(m_ModulatorID, false));
           m_pPropertyNode->createProperty("ZoneID")->linkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
+          m_pPropertyNode->createProperty("interruptMode")->setStringValue("ignore");
         }
       }
     }
@@ -308,6 +310,18 @@ namespace dss {
   unsigned long Device::getPowerConsumption() {
     return m_Consumption;
   } // getPowerConsumption
+
+  uint8_t Device::dsLinkSend(uint8_t _value, bool _lastByte, bool _writeOnly) {
+    uint8_t flags = 0;
+    if(_lastByte) {
+      flags |= DSLinkSendLastByte;
+    }
+    if(_writeOnly) {
+      flags |= DSLinkSendWriteOnly;
+    }
+    return DSS::getInstance()->getDS485Interface().dSLinkSend(m_ModulatorID, m_ShortAddress, _value, flags);
+  } // dsLinkSend
+
 
   //================================================== Set
 
@@ -829,6 +843,16 @@ namespace dss {
           break;
         case ModelEvent::etModelDirty:
           writeConfigurationToXML(DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile"));
+          break;
+        case ModelEvent::etDSLinkInterrupt:
+          if(event.getParameterCount() != 3) {
+            log("Expected exactly 3 parameter for ModelEvent::etDSLinkInterrupt");
+          } else {
+            onDSLinkInterrupt(event.getParameter(0), event.getParameter(1), event.getParameter(2));
+          }
+          break;
+        default:
+          assert(false);
           break;
         }
 
@@ -1433,6 +1457,63 @@ namespace dss {
     }
   } // onAddDevice
 
+  void Apartment::onDSLinkInterrupt(const int _modID, const int _devID, const int _priority) {
+    // get full dsid
+    log("dSLinkInterrupt:");
+    log("  Modulator: " + intToString(_modID));
+    log("  DevID:     " + intToString(_devID));
+    log("  Priority:  " + intToString(_priority));
+
+    try {
+      Modulator& modulator = getModulatorByBusID(_modID);
+      try {
+        Device& device = getDeviceByShortAddress(modulator, _devID);
+        PropertyNode* deviceNode = device.getPropertyNode();
+        if(deviceNode == NULL) {
+          return;
+        }
+        PropertyNode* modeNode = deviceNode->getProperty("interrupt/mode");
+        if(deviceNode == NULL) {
+          return;
+        }
+        string mode = modeNode->getStringValue();
+        if(mode == "ignore") {
+          log("ignoring interrupt");
+        } else if(mode == "raise_event") {
+          log("raising interrupt as event");
+          string eventName = "dslink_interrupt";
+          PropertyNode* eventNameNode = deviceNode->getProperty("interrupt/event/name");
+          if(eventNameNode == NULL) {
+            log("no node called 'interrupt/event' found, assuming name is 'dslink_interrupt'");
+          } else {
+            eventName = eventNameNode->getAsString();
+          }
+
+          // create event to be raised
+          DeviceReference devRef(device, *this);
+          boost::shared_ptr<Event> evt(new Event(eventName, &devRef));
+          evt->setProperty("device", device.getDSID().toString());
+          string priorityString = "unknown";
+          if(_priority == 0) {
+            priorityString = "normal";
+          } else if(_priority == 1) {
+            priorityString = "high";
+          }
+          evt->setProperty("priority", priorityString);
+          getDSS().getEventQueue().pushEvent(evt);
+        } else {
+          log("unknown interrupt mode '" + mode + "'", lsError);
+        }
+      } catch (ItemNotFoundException& ex) {
+        log("Apartment::onDSLinkInterrupt: Unknown device with ID " + intToString(_devID));
+        return;
+      }
+    } catch(ItemNotFoundException& ex) {
+      log("Apartment::onDSLinkInterrupt: Unknown Modulator with ID " + intToString(_modID));
+      return;
+    }
+
+  } // onDSLinkInterrupt
 
   //================================================== Modulator
 

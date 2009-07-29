@@ -112,6 +112,8 @@ namespace dss {
   const uint8_t FunctionDSLinkConfigWrite = 0xa0;
   const uint8_t FunctionDSLinkConfigRead = 0xa1;
   const uint8_t FunctionDSLinkSend = 0xa2;
+  const uint8_t DSLinkSendLastByte = 0x01;
+  const uint8_t DSLinkSendWriteOnly = 0x02;
   const uint8_t FunctionDSLinkReceive = 0xa3;
   const uint8_t FunctionDSLinkInterrupt = 0x85;
 

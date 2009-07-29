@@ -42,7 +42,9 @@ namespace dss {
 
   Event::Event(const string& _name)
   : m_Name(_name),
-    m_RaiseLocation(erlApartment)
+    m_RaiseLocation(erlApartment),
+    m_RaisedAtZone(NULL),
+    m_RaisedAtDevice(NULL)
   {
     reset();
   } // ctor
@@ -50,10 +52,26 @@ namespace dss {
   Event::Event(const string& _name, Zone* _zone)
   : m_Name(_name),
     m_RaiseLocation(erlZone),
-    m_RaisedAtZone(_zone)
+    m_RaisedAtZone(_zone),
+    m_RaisedAtDevice(NULL)
   {
     reset();
   } // ctor
+
+  Event::Event(const string& _name, DeviceReference* _reference)
+  : m_Name(_name),
+    m_RaiseLocation(erlDevice),
+    m_RaisedAtZone(NULL),
+    m_RaisedAtDevice(NULL)
+  {
+    m_RaisedAtDevice = new DeviceReference(*_reference);
+    reset();
+  }
+
+  Event::~Event() {
+    delete m_RaisedAtDevice;
+    m_RaisedAtDevice = NULL;
+  }
 
   void Event::reset() {
     m_LocationSet = false;

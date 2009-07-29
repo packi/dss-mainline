@@ -125,7 +125,6 @@ namespace dss {
   private:
     dsid_t m_DSID;
     const Apartment* m_Apartment;
-    PropertyNode* m_pPropertyNode;
   public:
     /** Copy constructor */
     DeviceReference(const DeviceReference& _copy);
@@ -353,6 +352,12 @@ namespace dss {
     Apartment& getApartment() const;
 
     virtual unsigned long getPowerConsumption();
+
+    /** Sends a byte to the device using dsLink. If \a _writeOnly is \c true,
+     * the result of the function is not defined. */
+    uint8_t dsLinkSend(uint8_t _value, bool _lastByte, bool _writeOnly);
+
+    PropertyNode* getPropertyNode() { return m_pPropertyNode; }
 
     /** Returns wheter two devices are equal.
      * Devices are considered equal if their DSID are a match.*/
@@ -718,7 +723,8 @@ namespace dss {
     typedef enum { etCallSceneGroup,  /**< A group has changed the scene. */
                    etCallSceneDevice, /**< A device has changed the scene (only raised from the simulation at the moment). */
                    etNewDevice,       /**< A new device has been detected */
-                   etModelDirty       /**< A parameter that will be stored in \c apartment.xml has been changed. */
+                   etModelDirty,      /**< A parameter that will be stored in \c apartment.xml has been changed. */
+                   etDSLinkInterrupt  /**< An interrupt has occured */
                  } EventType;
   private:
     EventType m_EventType;
@@ -855,6 +861,7 @@ namespace dss {
     /** Called by the DS485Proxy if an add-device frame was intercepted.
      *  Adds the device to the model. */
     void onAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID);
+    void onDSLinkInterrupt(const int _modID, const int _devID, const int _priority);
   }; // Apartment
 
   //============================================= Helper definitions

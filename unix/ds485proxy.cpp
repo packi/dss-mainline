@@ -875,7 +875,7 @@ namespace dss {
 
     boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
     if(recFrame.get() == NULL) {
-	  return false;
+      return false;
     }
 
     PayloadDissector pd(recFrame->getFrame()->getPayload());
@@ -885,6 +885,28 @@ namespace dss {
     return true;
   } // getEnergyBorder
 
+  uint8_t DS485Proxy::dSLinkSend(const int _modulatorID, devid_t _devAdr, uint8_t _value, uint8_t _flags) {
+    DS485CommandFrame cmdFrame;
+    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionDSLinkSend);
+    cmdFrame.getPayload().add<uint16_t>(_devAdr);
+    cmdFrame.getPayload().add<uint16_t>(_value);
+    cmdFrame.getPayload().add<uint16_t>(_flags);
+
+    if((_flags & DSLinkSendWriteOnly) == 0) {
+      boost::shared_ptr<FrameBucket> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionDSLinkReceive);
+      bucket->waitForFrame(10000);
+      boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
+      if(recFrame.get() == NULL) {
+        return 0;
+      }
+      PayloadDissector pd(recFrame->getFrame()->getPayload());
+      pd.get<uint8_t>(); // discard the function id
+      return pd.get<uint16_t>();
+    }
+    return 0;
+  } // dsLinkSend
 
   void DS485Proxy::addToGroup(const int _modulatorID, const int _groupID, const int _deviceID) {
 
@@ -1086,6 +1108,16 @@ namespace dss {
 
     case FunctionDeviceGetFunctionID:
       return "Function Device Get Function ID";
+    case FunctionDSLinkConfigWrite:
+      return "Function dSLink Config Write";
+    case FunctionDSLinkConfigRead:
+      return "Function dSLink Config Read";
+    case FunctionDSLinkSend:
+      return "Function dSLink Send";
+    case FunctionDSLinkReceive:
+      return "Function dSLink Receive";
+    case FunctionDSLinkInterrupt:
+      return "Function DSLink Interrupt";
     }
     return "";
   } // functionIDToString
@@ -1165,6 +1197,16 @@ namespace dss {
               pEvent->addParameter(modID);
               pEvent->addParameter(devID);
               pEvent->addParameter(sceneID);
+              getDSS().getApartment().addModelEvent(pEvent);
+            } else if(functionID == FunctionDSLinkInterrupt) {
+              pd.get<uint8_t>(); // functionID
+              uint16_t devID = pd.get<uint16_t>();
+              uint16_t priority = pd.get<uint16_t>();
+              int modID = frame->getHeader().getDestination();
+              ModelEvent* pEvent = new ModelEvent(ModelEvent::etDSLinkInterrupt);
+              pEvent->addParameter(modID);
+              pEvent->addParameter(devID);
+              pEvent->addParameter(priority);
               getDSS().getApartment().addModelEvent(pEvent);
             }
           } else {
