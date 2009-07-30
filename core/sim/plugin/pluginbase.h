@@ -41,6 +41,7 @@ class DSID {
 
     virtual void enable() = 0;
     virtual void disable() = 0;
+    virtual int getFunctionID() { return 0; }
 
     virtual void startDim(bool _directionUp, const int _parameterNr = -1) = 0;
     virtual void endDim(const int _parameterNr = -1) = 0;
@@ -49,6 +50,7 @@ class DSID {
     virtual double getValue(int _parameterNr = -1) const = 0;
 
     virtual void setConfigurationParameter(const std::string& _name, const std::string& _value) = 0;
+    virtual unsigned char udiSend(unsigned char _value, bool _lastByte) { return 0; }
 };
 
 class DSIDFactory {

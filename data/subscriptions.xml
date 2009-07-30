@@ -46,4 +46,9 @@
   <subscription event-name="darker" handler-name="bus_handler">
     <send type="decreaseValue" />
   </subscription>
+  <subscription event-name="model_ready" handler-name="javascript">
+    <parameter>
+      <parameter name="filename">data/setup_udi.js</parameter>
+    </parameter>
+  </subscription>
 </subscriptions> 

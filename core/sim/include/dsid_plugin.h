@@ -22,7 +22,7 @@
 #ifndef DSID_PLUGIN_H_
 #define DSID_PLUGIN_H_
 
-#define DSID_PLUGIN_API_VERSION 2
+#define DSID_PLUGIN_API_VERSION 3
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,6 +50,8 @@ extern "C" {
 
     void (*set_configuration_parameter)(int _handle, const char* _name, const char* _value);
     int (*get_configuration_parameter)(int _handle, const char* _name, char* _value, int _maxLen);
+
+    unsigned char (*udi_send)(int _handle, unsigned char _value, bool _lastByte);
   };
 
   int dsid_getversion();

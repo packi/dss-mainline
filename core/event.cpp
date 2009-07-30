@@ -122,7 +122,18 @@ namespace dss {
 
   bool Event::setProperty(const string& _name, const string& _value) {
     if(!_name.empty()) {
-      m_Properties.set(_name, _value);
+      if(_name == EventPropertyLocation) {
+        m_LocationSet = true;
+        m_Location = _value;
+      } else if(_name == EventPropertyContext) {
+        m_ContextSet = true;
+        m_Context = _value;
+      } else if(_name == EventPropertyTime) {
+        m_TimeSet = true;
+        m_Time = _value;
+      } else {
+        m_Properties.set(_name, _value);
+      }
       return true;
     }
     return false;

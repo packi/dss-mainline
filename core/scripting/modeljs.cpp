@@ -174,7 +174,60 @@ namespace dss {
       return JS_TRUE;
     }
     return JS_FALSE;
-  }
+  } // set_remove
+
+  JSBool set_by_name(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if(ext != NULL && set != NULL && argc >= 1) {
+      JSString* str = JS_ValueToString(cx, argv[0]);
+      if(str != NULL) {
+        std::string name = JS_GetStringBytes(str);
+        DeviceReference result = set->getByName(name);
+        JSObject* resultObj = ext->createJSDevice(*ctx, result);
+        *rval = OBJECT_TO_JSVAL(resultObj);
+        return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  } // set_by_name
+
+  JSBool set_by_dsid(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if(ext != NULL && set != NULL && argc >= 1) {
+      JSString* str = JS_ValueToString(cx, argv[0]);
+      if(str != NULL) {
+        std::string dsid = JS_GetStringBytes(str);
+        DeviceReference result = set->getByDSID(dsid_t::fromString(dsid));
+        JSObject* resultObj = ext->createJSDevice(*ctx, result);
+        *rval = OBJECT_TO_JSVAL(resultObj);
+        return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  } // set_by_dsid
+
+  JSBool set_by_functionid(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if(ext != NULL && set != NULL && argc >= 1) {
+      int32_t fid = 0;
+      if(JS_ValueToInt32(cx, argv[0], &fid)) {
+        Set result = set->getByFunctionID(fid);
+        JSObject* resultObj = ext->createJSSet(*ctx, result);
+        *rval = OBJECT_TO_JSVAL(resultObj);
+        return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  } // set_by_functionid
 
   JSBool set_JSGet(JSContext *cx, JSObject *obj, jsval id, jsval *rval) {
     Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
@@ -201,6 +254,9 @@ namespace dss {
     {"length", set_length, 0, 0, 0},
     {"combine", set_combine, 1, 0, 0},
     {"remove", set_remove, 1, 0, 0},
+    {"byName", set_by_name, 1, 0, 0},
+    {"byDSID", set_by_dsid, 1, 0, 0},
+    {"byFunctionID", set_by_functionid, 1, 0, 0},
     {NULL},
   };
 
@@ -401,6 +457,31 @@ namespace dss {
     return JS_FALSE;
   } // dev_save_scene
 
+  JSBool dev_dslink_send(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ScriptObject self(obj, *ctx);
+    if(self.is("device")) {
+      DeviceReference* ref = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+      int value = ctx->convertTo<int>(argv[0]);
+      bool writeOnly = false;
+      bool lastByte = false;
+      if(argc == 0) {
+        return JS_FALSE;
+      }
+      if(argc > 1) {
+        lastByte = ctx->convertTo<bool>(argv[1]);
+      }
+      if(argc > 2) {
+        writeOnly = ctx->convertTo<bool>(argv[2]);
+      }
+      value = ref->getDevice().dsLinkSend(value, lastByte, writeOnly);
+      *rval = INT_TO_JSVAL(value);
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // dev_dslink_send
+
   class JSDeviceAction : public IDeviceAction {
   private:
     jsval m_Function;
@@ -446,13 +527,13 @@ namespace dss {
     {"startDim", dev_start_dim, 1, 0, 0},
     {"endDim", dev_end_dim, 0, 0, 0},
     {"setValue", dev_set_value, 0, 0, 0},
-//    {"getValue", dev_turn_on, 0, 0, 0},
     {"perform", dev_perform, 1, 0, 0},
     {"increaseValue", dev_increase_value, 0, 0, 0},
     {"decreaseValue", dev_decrease_value, 0, 0, 0},
     {"callScene", dev_call_scene, 1, 0, 0},
     {"saveScene", dev_save_scene, 1, 0, 0},
     {"undoScene", dev_undo_scene, 1, 0, 0},
+    {"dSLinkSend", dev_dslink_send, 3, 0, 0},
     {NULL}
   };
 
@@ -551,6 +632,32 @@ namespace dss {
         char* name = JS_GetStringBytes(val);
 
         boost::shared_ptr<Event> newEvent(new Event(name));
+
+        JSObject* paramObj;
+        if((argc >= 2) && (JS_ValueToObject(cx, argv[1], &paramObj) == JS_TRUE)) {
+          JSObject* propIter = JS_NewPropertyIterator(cx, paramObj);
+          jsid propID;
+          while(JS_NextProperty(cx, propIter, &propID) == JS_TRUE) {
+            if(propID == JSVAL_VOID) {
+              break;
+            }
+            JSObject* obj;
+            jsval vp;
+            JS_GetMethodById(cx, paramObj, propID, &obj, &vp);
+
+            jsval vp2;
+
+            val = JS_ValueToString(cx, vp);
+            char* propValue = JS_GetStringBytes(val);
+
+            JS_IdToValue(cx, propID, &vp2);
+            val = JS_ValueToString(cx, vp2);
+            char* propName = JS_GetStringBytes(val);
+
+            newEvent->setProperty(propName, propValue);
+          }
+        }
+
         JSObject* obj = ext->createJSEvent(*ctx, newEvent);
 
         *rval = OBJECT_TO_JSVAL(obj);

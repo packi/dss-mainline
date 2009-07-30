@@ -94,7 +94,7 @@ int get_group_id(int _handle) {
 } // get_group_id
 
 int get_function_id(int _handle) {
-  return -1;
+  return DSIDFactory::getInstance().getDSID(_handle)->getFunctionID();
 } // get_function_id
 
 const char* get_parameter_name(int _handle, int _parameterNumber) {
@@ -103,7 +103,18 @@ const char* get_parameter_name(int _handle, int _parameterNumber) {
 
 void set_configuration_parameter(int _handle, const char* _name, const char* _value) {
   DSIDFactory::getInstance().getDSID(_handle)->setConfigurationParameter(_name, _value);
-}
+} // set_configuration_parameter
+
+int get_configuration_parameter(int _handle, const char* _name, char* _value, int _maxLen) {
+  if(_maxLen > 0) {
+    _value[0] = '\0';
+  }
+  return 0;
+} // get_configuration_parameter
+
+unsigned char udi_send(int _handle, unsigned char _value, bool _lastByte) {
+  return DSIDFactory::getInstance().getDSID(_handle)->udiSend(_value, _lastByte);
+} // udi_send
 
 static struct dsid_interface intf_description = {
   &get_value,
@@ -125,6 +136,8 @@ static struct dsid_interface intf_description = {
   &get_parameter_name,
 
   &set_configuration_parameter,
+  &get_configuration_parameter,
+  &udi_send,
 };
 
 
