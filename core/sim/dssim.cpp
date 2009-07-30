@@ -197,6 +197,13 @@ namespace dss {
       }
       return "";
     } // getConfigParameter
+    
+    virtual uint8_t dsLinkSend(uint8_t _value, uint8_t _flags) {
+      if(m_Interface->udi_send != NULL) {
+        return  (*m_Interface->udi_send)(m_Handle, _value, _flags);
+      }
+      return 0;
+    } // dsLinkSend
 
   }; // DSIDPlugin
 
@@ -1045,6 +1052,24 @@ namespace dss {
                 response->getPayload().add<uint16_t>(m_EnergyLevelOrange);
                 response->getPayload().add<uint16_t>(m_EnergyLevelRed);
                 distributeFrame(response);
+              }
+              break;
+            case FunctionDSLinkSend:
+              {
+                devid_t devID = pd.get<devid_t>();
+                DSIDInterface& dev = lookupDevice(devID);
+                uint16_t valueToSend = pd.get<uint16_t>();
+                uint16_t flags = pd.get<uint16_t>();    
+                
+                uint8_t value = dev.dsLinkSend(valueToSend, flags);
+                if((flags & DSLinkSendWriteOnly) == 0) {
+                  response = createReply(cmdFrame);
+                  response->setCommand(CommandRequest);
+                  response->getPayload().add<uint8_t>(FunctionDSLinkReceive);
+                  response->getPayload().add<devid_t>(devID);
+                  response->getPayload().add<uint16_t>(value);
+                  distributeFrame(response);
+                }
               }
               break;
             default:

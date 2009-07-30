@@ -191,6 +191,7 @@ namespace dss {
 
     virtual void setZoneID(const int _value) { m_ZoneID = _value; }
     virtual int getZoneID() const { return m_ZoneID; }
+    virtual uint8_t dsLinkSend(uint8_t _value, uint8_t _flags) { return 0; }
   }; // DSIDInterface
 
 

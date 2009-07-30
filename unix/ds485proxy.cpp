@@ -899,12 +899,15 @@ namespace dss {
       bucket->waitForFrame(10000);
       boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
       if(recFrame.get() == NULL) {
+        log("dsLinkSend: No packet received");
         return 0;
       }
       PayloadDissector pd(recFrame->getFrame()->getPayload());
       pd.get<uint8_t>(); // discard the function id
+      pd.get<uint16_t>(); // device id
       return pd.get<uint16_t>();
     }
+    log("dsLinkSend: Not waiting for response (waitOnly is set)");
     return 0;
   } // dsLinkSend
 
@@ -1142,7 +1145,7 @@ namespace dss {
           }
 
           uint8_t functionID = ch.front();
-          if(frame->getCommand() == CommandRequest || frame->getCommand() == CommandEvent) {
+          if((frame->getCommand() == CommandRequest || frame->getCommand() == CommandEvent) && functionID != FunctionDSLinkReceive) {
             std::string functionIDStr = FunctionIDToString(functionID);
             if(functionIDStr.empty()) {
               functionIDStr = "Unknown function id: " + intToString(functionID, true);

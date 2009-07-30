@@ -588,7 +588,7 @@ namespace dss {
 
   static JSPropertySpec dev_properties[] = {
     {"className", 0, 0, dev_JSGet},
-    {"id", 1, 0, dev_JSGet},
+    {"dsid", 1, 0, dev_JSGet},
     {"name", 2, 0, dev_JSGet},
     {NULL}
   };

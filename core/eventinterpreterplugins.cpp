@@ -84,7 +84,7 @@ namespace dss {
 
         try {
           boost::scoped_ptr<ScriptContext> ctx(m_Environment.getContext());
-          ctx->loadFromFile(_subscription.getOptions().getParameter("filename"));
+          ctx->loadFromFile(scriptName);
           ctx->evaluate<void>();
         } catch(ScriptException& e) {
           Logger::getInstance()->log(string("EventInterpreterPluginJavascript::handleEvent: Cought event while running/parsing script '")

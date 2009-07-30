@@ -180,7 +180,9 @@ namespace dss {
   ScriptContext::~ScriptContext() {
     JS_SetContextPrivate(m_pContext, NULL);
 //    JS_RemoveRoot(m_pContext, m_pSourceObject);
-    JS_DestroyScript(m_pContext, m_pScriptToExecute);
+    if(m_pScriptToExecute != NULL) {
+      JS_DestroyScript(m_pContext, m_pScriptToExecute);
+    }
     JS_DestroyContext(m_pContext);
   } // dtor
 
