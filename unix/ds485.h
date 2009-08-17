@@ -233,6 +233,8 @@ namespace dss {
     void doChangeState(aControllerState _newState);
     void addToReceivedQueue(DS485CommandFrame* _frame);
     bool resetSerialLine();
+
+    void handleSetSuccessor(DS485CommandFrame* _frame);
   public:
     DS485Controller();
     virtual ~DS485Controller();

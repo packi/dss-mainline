@@ -249,9 +249,9 @@ namespace dss {
       return;
     }
     doChangeState(csInitial);
-    m_StationID = 0xFF;
-    m_NextStationID = 0xFF;
     m_TokenCounter = 0;
+    m_NextStationID = 0xFF;
+    m_StationID = 0xFF;
     time_t responseSentAt;
     time_t tokenReceivedAt;
 
@@ -268,6 +268,7 @@ namespace dss {
     int numberOfJoinPacketsToWait = -1;
     bool lastSentWasToken = false;
     int comErrorSleepTimeScaler = 1;
+    int missedFramesCounter = 0;
 
     while(!m_Terminated) {
 
@@ -275,8 +276,6 @@ namespace dss {
         senseTimeMS = (rand() % 1000) + 100;
         numberOfJoinPacketsToWait = -1;
         lastSentWasToken = false;
-        m_StationID = 0xFF;
-        m_NextStationID = 0xFF;
         doChangeState(csSensing);
         continue;
       } else if(m_State == csCommError) {
@@ -314,6 +313,12 @@ namespace dss {
       if(frame.get() == NULL) {
         if(m_State != csDesignatedMaster) {
           cout << "§";
+          missedFramesCounter++;
+          if(missedFramesCounter == 50) {
+            missedFramesCounter = 0;
+            cout << "haven't received any frames for 50 iterations, restarting..." << endl;
+            doChangeState(csInitial);
+          }
         } else {
           sleepMS(1000);
         }
@@ -328,6 +333,7 @@ namespace dss {
         DS485Header& header = frame->getHeader();
         DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(frame.get());
         lastSentWasToken = false;
+        missedFramesCounter = 0;
 
         // discard packets which are not addressed to us
         if(!header.isBroadcast() &&
@@ -403,9 +409,8 @@ namespace dss {
           break;
         case csSlaveJoining:
           if(cmdFrame != NULL) {
-            DS485Payload& payload = cmdFrame->getPayload();
             if(cmdFrame->getCommand() == CommandSetDeviceAddressRequest) {
-              m_StationID = payload.toChar().at(0);
+              m_StationID = cmdFrame->getPayload().toChar().at(0);
               DS485CommandFrame* frameToSend = new DS485CommandFrame();
               frameToSend->getHeader().setDestination(0);
               frameToSend->getHeader().setSource(m_StationID);
@@ -413,17 +418,8 @@ namespace dss {
               putFrameOnWire(frameToSend);
               cout << "### new address " << m_StationID << "\n";
             } else if(cmdFrame->getCommand() == CommandSetSuccessorAddressRequest) {
-              // TODO: handle these in slave and master mode too
               if(header.getDestination() == m_StationID) {
-                m_NextStationID = payload.toChar().at(0);
-                DS485CommandFrame* frameToSend = new DS485CommandFrame();
-                frameToSend->getHeader().setDestination(0);
-                frameToSend->getHeader().setSource(m_StationID);
-                frameToSend->setCommand(CommandSetSuccessorAddressResponse);
-                putFrameOnWire(frameToSend);
-                cout << "### successor " << m_NextStationID << "\n";
-              } else {
-                cout << "****** not for me" << endl;
+                handleSetSuccessor(cmdFrame);
               }
             } else {
               // check if our response has timed-out
@@ -434,7 +430,7 @@ namespace dss {
                 cerr << "çççççççççç haven't received my address" << endl;
               }
             }
-            if(m_StationID != 0x3F && m_NextStationID != 0xFF) {
+            if((m_StationID != 0x3F) && (m_NextStationID != 0xFF)) {
               Logger::getInstance()->log("######### successfully joined the network", lsInfo);
               token->getHeader().setDestination(m_NextStationID);
               token->getHeader().setSource(m_StationID);
@@ -448,6 +444,7 @@ namespace dss {
           break;
         case csSlave:
           if(cmdFrame == NULL) {
+            cout << "+";
             // it's a token
             if(!m_PendingFrames.empty() && (m_TokenCounter > 10)) {
 
@@ -480,7 +477,7 @@ namespace dss {
             }
             m_PendingFramesGuard.unlock();
             putFrameOnWire(token.get(), false);
-//            cout << ".";
+            cout << ".";
 //            flush(cout);
             time(&tokenReceivedAt);
             m_TokenEvent.broadcast();
@@ -494,8 +491,6 @@ namespace dss {
             if((now - tokenReceivedAt) > 15) {
               cerr << "restarting" << endl;
               doChangeState(csInitial);
-              m_NextStationID = 0xFF;
-              m_StationID = 0xFF;
               continue;
             }
             cout << "f*" << (int)cmdFrame->getCommand() << "*";
@@ -525,6 +520,10 @@ namespace dss {
                 cout << "a(req)";
               }
               keep = true;
+            } else if(cmdFrame->getCommand() == CommandSetSuccessorAddressRequest) {
+              if(header.getDestination() == m_StationID) {
+                handleSetSuccessor(cmdFrame);
+              }
             } else {
               cout << "&&&&&&&&&& unknown frame id: " << (int)cmdFrame->getCommand() << endl;
             }
@@ -542,12 +541,13 @@ namespace dss {
             m_TokenCounter = 0;
             doChangeState(csSlave);
             time(&tokenReceivedAt);
-            cout << ".";
+            cout << "*";
             flush(cout);
           }
           break;
         case csDesignatedMaster:
-          sleepMS(1000);
+          sleepMS(10000);
+          doChangeState(csInitial);
           break;
         default:
           throw runtime_error("invalid value for m_State");
@@ -555,6 +555,16 @@ namespace dss {
       }
     }
   } // execute
+
+  void DS485Controller::handleSetSuccessor(DS485CommandFrame* _frame) {
+    m_NextStationID = _frame->getPayload().toChar().at(0);
+    DS485CommandFrame* frameToSend = new DS485CommandFrame();
+    frameToSend->getHeader().setDestination(0);
+    frameToSend->getHeader().setSource(m_StationID);
+    frameToSend->setCommand(CommandSetSuccessorAddressResponse);
+    putFrameOnWire(frameToSend);
+    cout << "### successor " << m_NextStationID << "\n";
+  } // handleSetSuccessor
 
   // TODO: look into boost::weak_ptr
   void DS485Controller::addToReceivedQueue(DS485CommandFrame* _frame) {
@@ -574,6 +584,10 @@ namespace dss {
     if(_newState != m_State) {
       m_State = _newState;
       m_StateString = controllerStateToString(m_State);
+      if(m_State == csInitial) {
+        m_NextStationID = 0xFF;
+        m_StationID = 0xFF;
+      }
       m_ControllerEvent.signal();
     }
   } // doChangeState
@@ -657,6 +671,7 @@ namespace dss {
           break;
         }
         m_NumberOfIncompleteFramesReceived++;
+        return NULL;
       }
 
       char currentChar;
@@ -876,7 +891,8 @@ namespace dss {
           DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(frame.get());
           if(cmdFrame != NULL) {
             uint8_t cmd = cmdFrame->getCommand();
-            cout << "Command Frame: " << commandToString(cmdFrame->getCommand()) << "\n";
+            cout << "Command Frame: " << commandToString(cmd) <<  " " << "(" <<  (int)cmd << ") " << (int)frame->getHeader().getSource() << " -> " << (int)frame->getHeader().getDestination()  << "\n";
+
             if(cmd == CommandRequest || cmd == CommandResponse) {
               PayloadDissector pd(cmdFrame->getPayload());
               cout << (int)pd.get<uint8_t>() << "\n";
@@ -884,7 +900,7 @@ namespace dss {
           } else {
             cout << "token " << (int)frame->getHeader().getSource() << " -> " << (int)frame->getHeader().getDestination()  << "\n";
           }
-          cout << "seq: " << frame->getHeader().getCounter() << endl;
+          cout << "seq: " << (int)frame->getHeader().getCounter() << endl;
 
           lastFrame = thisFrame;
         }
