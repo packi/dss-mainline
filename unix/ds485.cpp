@@ -337,7 +337,7 @@ namespace dss {
 
         // discard packets which are not addressed to us
         if(!header.isBroadcast() &&
-            header.getDestination() != m_StationID &&
+           (header.getDestination() != m_StationID) &&
               (m_State == csSlave ||
                m_State == csMaster)
           )
@@ -537,12 +537,14 @@ namespace dss {
           break;
         case csSlaveWaitingForFirstToken:
           if(cmdFrame == NULL) {
-            putFrameOnWire(token.get(), false);
-            m_TokenCounter = 0;
-            doChangeState(csSlave);
-            time(&tokenReceivedAt);
-//            cout << "*";
-            flush(cout);
+            if(header.getDestination() == m_StationID) {
+              putFrameOnWire(token.get(), false);
+              m_TokenCounter = 0;
+              doChangeState(csSlave);
+              time(&tokenReceivedAt);
+//              cout << ">";
+//              flush(cout);
+            }
           }
           break;
         case csDesignatedMaster:
