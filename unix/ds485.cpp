@@ -367,8 +367,7 @@ namespace dss {
               } else {
                 cout << "sent response to get address thingie" << endl;
               }
-            } else {
-              //cout << "not my address " << header.getDestination() << endl;
+              continue;
             }
           }
         }
@@ -523,6 +522,7 @@ namespace dss {
             } else if(cmdFrame->getCommand() == CommandSetSuccessorAddressRequest) {
               if(header.getDestination() == m_StationID) {
                 handleSetSuccessor(cmdFrame);
+                token->getHeader().setDestination(m_NextStationID);
               }
             } else {
               cout << "&&&&&&&&&& unknown frame id: " << (int)cmdFrame->getCommand() << endl;
