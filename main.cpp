@@ -124,7 +124,7 @@ int main (int argc, char* argv[]) {
       ("quit-after-tests", po::value<bool>(), "if set, the application will terminate after running its tests")
 #endif
 #ifndef __APPLE__
-      ("sniff,s", po::value<bool>(), "start the ds485 sniffer")
+      ("sniff,s", po::value<string>(), "start the ds485 sniffer")
 #endif
       ("prop", po::value<vector<string> >(), "sets a property")
   ;
