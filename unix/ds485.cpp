@@ -444,7 +444,7 @@ namespace dss {
           break;
         case csSlave:
           if(cmdFrame == NULL) {
-            cout << "+";
+//            cout << "+";
             // it's a token
             if(!m_PendingFrames.empty() && (m_TokenCounter > 10)) {
 
@@ -477,7 +477,7 @@ namespace dss {
             }
             m_PendingFramesGuard.unlock();
             putFrameOnWire(token.get(), false);
-            cout << ".";
+//            cout << ".";
 //            flush(cout);
             time(&tokenReceivedAt);
             m_TokenEvent.broadcast();
@@ -541,7 +541,7 @@ namespace dss {
             m_TokenCounter = 0;
             doChangeState(csSlave);
             time(&tokenReceivedAt);
-            cout << "*";
+//            cout << "*";
             flush(cout);
           }
           break;
