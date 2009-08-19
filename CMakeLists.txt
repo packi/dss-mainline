@@ -29,7 +29,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   LINK_LIBRARIES(boost_filesystem-mt boost_system-mt boost_program_options-mt PocoFoundation PocoNet)
   SET(DNS_SD_LIB)
 ELSE(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  LINK_LIBRARIES(boost_filesystem-mt boost_system-mt boost_program_options-mt rt)
+  LINK_LIBRARIES(boost_filesystem-mt boost_program_options-mt rt)
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
