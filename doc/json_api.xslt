@@ -33,6 +33,22 @@
           <xsl:variable name="methodCount" select="count(methods/method)" />
           <xsl:if test="$methodCount > 0">
             <div>
+              <h3>Instance variables</h3>
+              Instance variables identify the instance of the class being called. One of them is required on every call.
+              <xsl:variable name="instanceParamCount" select="count(instanceParameter/parameter)" />
+              <xsl:choose>
+                <xsl:when test="$instanceParamCount > 0">
+                  <table class="parameter">
+                    <th class="parameter">Name</th><th class="parameter">Type</th><th class="parameter">Required</th>
+                    <xsl:for-each select="instanceParameter/parameter">
+                      <tr><td><xsl:value-of select="name" /></td><td><xsl:value-of select="type" /></td><td><xsl:value-of select="required" /></td></tr>
+                    </xsl:for-each>
+                  </table>
+                </xsl:when>
+                <xsl:otherwise>
+                  <p>No instance parameter</p>
+                </xsl:otherwise>
+              </xsl:choose>              
               <h3>Methods</h3>
               <dl>
               <xsl:for-each select="methods/method">

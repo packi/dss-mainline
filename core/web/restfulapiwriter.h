@@ -10,11 +10,17 @@
 
 #include "restful.h"
 
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+
 namespace dss {
 
   class RestfulAPIWriter {
+  private:
+    static Poco::XML::AutoPtr<Poco::XML::Element> writeToXML(const RestfulParameter& _parameter, Poco::XML::AutoPtr<Poco::XML::Document>& _document);
   public:
-    static void WriteToXML(const RestfulAPI& api, const std::string& _location);
+    static void writeToXML(const RestfulAPI& api, const std::string& _location);
   }; // RestfulAPIWriter
 
 } // namespace dss

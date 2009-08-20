@@ -10,12 +10,9 @@
 
 #include <fstream>
 
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
 #include <Poco/DOM/Attr.h>
 #include <Poco/DOM/Text.h>
 #include <Poco/DOM/ProcessingInstruction.h>
-#include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/XML/XMLWriter.h>
 
@@ -30,7 +27,7 @@ using Poco::XML::XMLWriter;
 
 namespace dss {
 
-  void RestfulAPIWriter::WriteToXML(const RestfulAPI& api, const std::string& _location) {
+  void RestfulAPIWriter::writeToXML(const RestfulAPI& api, const std::string& _location) {
     AutoPtr<Document> pDoc = new Document;
 
     AutoPtr<ProcessingInstruction> pXMLHeader = pDoc->createProcessingInstruction("xml", "version='1.0' encoding='utf-8'");
@@ -49,6 +46,14 @@ namespace dss {
       pClass->appendChild(pClassNameNode);
       AutoPtr<Text> pClassNameTextNode = pDoc->createTextNode(cls.getName());
       pClassNameNode->appendChild(pClassNameTextNode);
+
+      AutoPtr<Element> pInstanceParamNode = pDoc->createElement("instanceParameter");
+      pClass->appendChild(pInstanceParamNode);
+      foreach(const RestfulParameter& instanceParam, cls.getInstanceParameter()) {
+        AutoPtr<Element> pParameter = writeToXML(instanceParam, pDoc);
+        pInstanceParamNode->appendChild(pParameter);
+      }
+
 
       if((!cls.getDocumentationShort().empty()) || (!cls.getDocumentationLong().empty())) {
         AutoPtr<Element> pDocumentation = pDoc->createElement("documentation");
@@ -95,23 +100,7 @@ namespace dss {
 
         AutoPtr<Element> pParams = pDoc->createElement("parameter");
         foreach(const RestfulParameter& parameter, method.getParameter()) {
-          AutoPtr<Element> pParameter = pDoc->createElement("parameter");
-
-          AutoPtr<Element> pParameterNameNode = pDoc->createElement("name");
-          pParameter->appendChild(pParameterNameNode);
-          AutoPtr<Text> pParameterNameTextNode = pDoc->createTextNode(parameter.getName());
-          pParameterNameNode->appendChild(pParameterNameTextNode);
-          
-          AutoPtr<Element> pParameterTypeNode = pDoc->createElement("type");
-          pParameter->appendChild(pParameterTypeNode);
-          AutoPtr<Text> pParameterTypeTextNode = pDoc->createTextNode(parameter.getTypeName());
-          pParameterTypeNode->appendChild(pParameterTypeTextNode);
-
-          AutoPtr<Element> pParameterRequiredNode = pDoc->createElement("required");
-          pParameter->appendChild(pParameterRequiredNode);
-          AutoPtr<Text> pParameterRequiredTextNode = pDoc->createTextNode(parameter.isRequired() ? "true" : "false");
-          pParameterRequiredNode->appendChild(pParameterRequiredTextNode);
-
+          AutoPtr<Element> pParameter = writeToXML(parameter, pDoc);
           pParams->appendChild(pParameter);
         }
         pMethod->appendChild(pParams);
@@ -131,7 +120,29 @@ namespace dss {
       writer.writeNode(ofs, pDoc);
       ofs.close();
     }
-  } // WriteToXML
+  } // writeToXML
+
+  Poco::XML::AutoPtr<Poco::XML::Element> RestfulAPIWriter::writeToXML(const RestfulParameter& _parameter, Poco::XML::AutoPtr<Poco::XML::Document>& _document) {
+    AutoPtr<Element>  pParameter = _document->createElement("parameter");
+
+    AutoPtr<Element> pParameterNameNode = _document->createElement("name");
+    pParameter->appendChild(pParameterNameNode);
+    AutoPtr<Text> pParameterNameTextNode = _document->createTextNode(_parameter.getName());
+    pParameterNameNode->appendChild(pParameterNameTextNode);
+
+    AutoPtr<Element> pParameterTypeNode = _document->createElement("type");
+    pParameter->appendChild(pParameterTypeNode);
+    AutoPtr<Text> pParameterTypeTextNode = _document->createTextNode(_parameter.getTypeName());
+    pParameterTypeNode->appendChild(pParameterTypeTextNode);
+
+    AutoPtr<Element> pParameterRequiredNode = _document->createElement("required");
+    pParameter->appendChild(pParameterRequiredNode);
+    AutoPtr<Text> pParameterRequiredTextNode = _document->createTextNode(_parameter.isRequired() ? "true" : "false");
+    pParameterRequiredNode->appendChild(pParameterRequiredTextNode);
+
+    return pParameter;
+  } // writeToXML
+
 
 } // namespace dss
 

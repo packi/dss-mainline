@@ -190,7 +190,7 @@ namespace dss {
       }
       return true;
     }
-  };
+  }; // RestfulParameterTypeInteger
 
   class RestfulRequest {
   private:

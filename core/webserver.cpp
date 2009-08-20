@@ -314,7 +314,7 @@ namespace dss {
     clsCircuit.addMethod("getEnergyMeterValue")
        .withDocumentation("Returns the meter-value in Wh");
 
-    RestfulAPIWriter::WriteToXML(api, "doc/json_api.xml");
+    RestfulAPIWriter::writeToXML(api, "doc/json_api.xml");
   } // setupAPI
 
   void WebServer::doStart() {
