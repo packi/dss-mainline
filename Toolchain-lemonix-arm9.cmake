@@ -16,6 +16,8 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}-mcpu=arm9")
 include_directories(${LOCAL_SYSROOT}include/ ${BOARD_SYSROOT}include/)
 link_directories(${LOCAL_SYSROOT}lib ${BOARD_SYSROOT}lib)
 
+LINK_LIBRARIES(boost_system-mt)
+
 # where is the target environment 
 SET(CMAKE_FIND_ROOT_PATH  ${BOARD_SYSROOT} ${LOCAL_SYSROOT})
 
