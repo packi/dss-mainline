@@ -314,6 +314,37 @@ namespace dss {
     clsCircuit.addMethod("getEnergyMeterValue")
        .withDocumentation("Returns the meter-value in Wh");
 
+    RestfulClass& clsProp = api.addClass("property")
+        .withInstanceParameter("path", "string", true);
+    clsProp.addMethod("getString")
+        .withDocumentation("Returns the string value of the property", "This will fail if the property is not of type 'string'.");
+    clsProp.addMethod("getInteger")
+        .withDocumentation("Returns the integer value of the property", "This will fail if the property is not of type 'integer'.");
+    clsProp.addMethod("getBoolean")
+        .withDocumentation("Returns the boolean value of the property", "This will fail if the property is not of type 'boolean'.");
+    clsProp.addMethod("setString")
+        .withParameter("value", "string", true)
+        .withDocumentation("Sets the string value of the property", "This will fail if the property is not of type 'string'.");
+    clsProp.addMethod("setInteger")
+        .withParameter("value", "integer", true)
+        .withDocumentation("Sets the integer value of the property", "This will fail if the property is not of type 'integer'.");
+    clsProp.addMethod("setBoolean")
+        .withParameter("value", "boolean", true)
+        .withDocumentation("Sets the boolean value of the property", "This will fail if the property is not of type 'boolean'.");
+    clsProp.addMethod("getChildren")
+        .withParameter("value", "string", true)
+        .withDocumentation("Returns an array of the nodes children");
+    clsProp.addMethod("setString")
+        .withDocumentation("Returns the type of the node");
+
+    RestfulClass& clsEvent = api.addClass("event");
+    clsEvent.addMethod("raise")
+       .withParameter("name", "string", true)
+       .withParameter("context", "string", false)
+       .withParameter("location", "string", false)
+       .withDocumentation("Raises an event", "The context describes the source of the event. The location, if provided, defines where any action that is taken "
+           "by any subscription should happen.");
+
     RestfulAPIWriter::writeToXML(api, "doc/json_api.xml");
   } // setupAPI
 
