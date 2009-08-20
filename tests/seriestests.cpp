@@ -22,6 +22,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/filesystem.hpp>
 #include <math.h>
 
 #include "core/metering/series.h"
@@ -213,11 +214,11 @@ BOOST_AUTO_TEST_CASE(readWrite) {
   BOOST_CHECK_EQUAL( 5.0, secondly.getValues().front().getMax() );
 
   SeriesWriter<CurrentValue> writer;
-  writer.writeToXML(secondly, "/Users/pisco/Desktop/dss/tmptest.xml");
+  writer.writeToXML(secondly, "data/tmptest.xml");
 
   SeriesReader<CurrentValue> reader;
 
-  Series<CurrentValue>* series = reader.readFromXML("/Users/pisco/Desktop/dss/tmptest.xml");
+  Series<CurrentValue>* series = reader.readFromXML("data/tmptest.xml");
   BOOST_REQUIRE_MESSAGE( series != NULL, "reading series from file" );
   BOOST_CHECK_EQUAL( (size_t)2, series->getValues().size() );
   BOOST_CHECK_EQUAL( 2.0, series->getValues().front().getMin() );
@@ -226,10 +227,10 @@ BOOST_AUTO_TEST_CASE(readWrite) {
 
   series->setComment("my comment");
   series->setUnit("kW");
-  writer.writeToXML(*series, "/Users/pisco/Desktop/dss/tmptest.xml");
+  writer.writeToXML(*series, "data/tmptest.xml");
   delete series;
 
-  series = reader.readFromXML("/Users/pisco/Desktop/dss/tmptest.xml");
+  series = reader.readFromXML("data/tmptest.xml");
   BOOST_REQUIRE_MESSAGE( series != NULL, "reading series from file" );
   BOOST_CHECK_EQUAL( (size_t)2, series->getValues().size() );
   BOOST_CHECK_EQUAL( 2.0, series->getValues().front().getMin() );
@@ -237,7 +238,9 @@ BOOST_AUTO_TEST_CASE(readWrite) {
   BOOST_CHECK_EQUAL( 5.0, series->getValues().front().getMax() );
   BOOST_CHECK_EQUAL( std::string("my comment"), series->getComment() );
   BOOST_CHECK_EQUAL( std::string("kW"), series->getUnit() );
-
+  
+  boost::filesystem::remove_all("data/tmptest.xml");
+  
   delete series;
 } // testReadWrite
 
@@ -258,9 +261,9 @@ BOOST_AUTO_TEST_CASE(readWriteExtended) {
 
   secondly2.addValue(values[0], startTime.addSeconds(delay[0]));
   SeriesWriter<CurrentValue> writer;
-  writer.writeToXML(secondly2, "/Users/pisco/Desktop/dss/tmptest_2seconds.xml");
-  writer.writeToXML(minutely, "/Users/pisco/Desktop/dss/tmptest_minutely.xml");
-  writer.writeToXML(five, "/Users/pisco/Desktop/dss/tmptest_five_minutely.xml");
+  writer.writeToXML(secondly2, "data/tmptest_2seconds.xml");
+  writer.writeToXML(minutely, "data/tmptest_minutely.xml");
+  writer.writeToXML(five, "data/tmptest_five_minutely.xml");
 
   size_t lastNumValsSeconds = secondly2.getValues().size();
   size_t lastNumValsMinutely = minutely.getValues().size();
@@ -276,9 +279,9 @@ BOOST_AUTO_TEST_CASE(readWriteExtended) {
 
     BOOST_TEST_MESSAGE("diff: " << diff << "\ncurDelay: " << curDelay);
 
-    boost::shared_ptr<Series<CurrentValue> > pFive(reader.readFromXML("/Users/pisco/Desktop/dss/tmptest_five_minutely.xml"));
-    boost::shared_ptr<Series<CurrentValue> > pMinutely(reader.readFromXML("/Users/pisco/Desktop/dss/tmptest_minutely.xml"));
-    boost::shared_ptr<Series<CurrentValue> > pSecondly2(reader.readFromXML("/Users/pisco/Desktop/dss/tmptest_2seconds.xml"));
+    boost::shared_ptr<Series<CurrentValue> > pFive(reader.readFromXML("data/tmptest_five_minutely.xml"));
+    boost::shared_ptr<Series<CurrentValue> > pMinutely(reader.readFromXML("data/tmptest_minutely.xml"));
+    boost::shared_ptr<Series<CurrentValue> > pSecondly2(reader.readFromXML("data/tmptest_2seconds.xml"));
 
 
     BOOST_TEST_MESSAGE("secondly last: " << lastNumValsSeconds << " current: " << pSecondly2->getValues().size());
@@ -310,10 +313,14 @@ BOOST_AUTO_TEST_CASE(readWriteExtended) {
     lastNumValsFive = pFive->getValues().size();
     lastTimeStamp = pSecondly2->getValues().front().getTimeStamp();
 
-    writer.writeToXML(*pSecondly2, "/Users/pisco/Desktop/dss/tmptest_2seconds.xml");
-    writer.writeToXML(*pMinutely, "/Users/pisco/Desktop/dss/tmptest_minutely.xml");
-    writer.writeToXML(*pFive, "/Users/pisco/Desktop/dss/tmptest_five_minutely.xml");
+    writer.writeToXML(*pSecondly2, "data/tmptest_2seconds.xml");
+    writer.writeToXML(*pMinutely, "data/tmptest_minutely.xml");
+    writer.writeToXML(*pFive, "data/tmptest_five_minutely.xml");
   }
+  
+  boost::filesystem::remove_all("data/tmptest_2seconds.xml");
+  boost::filesystem::remove_all("data/tmptest_minutely.xml");
+  boost::filesystem::remove_all("data/tmptest_five_minutely.xml");
 } // testReadWriteExtended
 
 BOOST_AUTO_TEST_CASE(ImNotExactlySureWhatItestAtThisMoment) {
@@ -458,9 +465,11 @@ BOOST_AUTO_TEST_CASE(wrapping) {
   BOOST_CHECK_EQUAL( (size_t)2, hourly.getValues().size() );
 
   SeriesWriter<AdderValue> writer;
-  writer.writeToXML(minutely, "/Users/pisco/Desktop/dss/tmpminutely.xml");
+  writer.writeToXML(minutely, "data/tmpminutely.xml");
 
   BOOST_CHECK_EQUAL( (size_t)2, hourly.getValues().size() );
+  
+  boost::filesystem::remove_all("data/tmpminutely.xml");
 } // testWrapping
 
 BOOST_AUTO_TEST_CASE(expansion) {
