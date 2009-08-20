@@ -40,14 +40,6 @@
 
 #include <boost/program_options.hpp>
 
-/*
-#ifdef WITH_TESTS
-  #define BOOST_TEST_NO_MAIN
-  #define BOOST_TEST_DYN_LINK
-  #include <boost/test/unit_test.hpp>
-#endif
-*/
-
 #ifdef USE_LIBXML
   #include <libxml/tree.h>
   #include <libxml/encoding.h>
