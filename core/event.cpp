@@ -410,9 +410,8 @@ namespace dss {
       }
       if(validDate) {
         Logger::getInstance()->log(string("EventQueue::pushEvent: Event has a valid time, rescheduling at ") + (string)when, lsInfo);
-        Schedule* sched = new StaticSchedule(when);
+        boost::shared_ptr<Schedule> sched(new StaticSchedule(when));
         ScheduledEvent* scheduledEvent = new ScheduledEvent(_event, sched);
-        scheduledEvent->setOwnsEvent(false);
         m_EventRunner->addEvent(scheduledEvent);
       } else {
         Logger::getInstance()->log("EventQueue::pushEvent: Dropping event with invalid time", lsError);
@@ -562,14 +561,6 @@ namespace dss {
     }
     return result;
   } // raisePendingEvents
-
-
-  //================================================== ScheduledEvent
-
-  ScheduledEvent::~ScheduledEvent() {
-    delete m_Schedule;
-    m_Schedule = NULL;
-  } // dtor
 
 
   //================================================== EventSubscription

@@ -323,25 +323,21 @@ namespace dss {
   class ScheduledEvent {
   private:
     boost::shared_ptr<Event> m_Event;
-    Schedule* m_Schedule;
+    boost::shared_ptr<Schedule> m_Schedule;
     string m_Name;
-    bool m_OwnsEvent;
   public:
-    ScheduledEvent(boost::shared_ptr<Event> _pEvt, Schedule* _pSchedule)
-    : m_Event(_pEvt), m_Schedule(_pSchedule), m_OwnsEvent(true) {};
-    ~ScheduledEvent();
+    ScheduledEvent(boost::shared_ptr<Event> _pEvt, boost::shared_ptr<Schedule> _pSchedule)
+    : m_Event(_pEvt), m_Schedule(_pSchedule) {};
 
     /** Returns the event that will be raised */
-    boost::shared_ptr<Event> getEvent() { return m_Event; };
+    boost::shared_ptr<Event> getEvent() { return m_Event; }
     /** Returns the associated Schedule */
-    Schedule& getSchedule() const { return *m_Schedule; };
+    Schedule& getSchedule() const { return *m_Schedule; }
     /** Returns the name of this ScheduledEvent */
-    const string& getName() const { return m_Name; };
+    const string& getName() const { return m_Name; }
     /** Sets the name of this ScheduledEvent */
-    void setName(const string& _value) { m_Name = _value; };
-
-    void setOwnsEvent(const bool _value) { m_OwnsEvent = _value; }
-  };
+    void setName(const string& _value) { m_Name = _value; }
+  }; // ScheduledEvent
 
 
   //================================================== Constants
