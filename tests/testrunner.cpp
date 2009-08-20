@@ -23,26 +23,29 @@
 #include "config.h"
 #endif
 
-#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_MAIN
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
 #include "tests.h"
 #include <cstdio>
-#include <cstring>
 
 namespace dss {
 
-  bool init_unit_test() {
-    return true;
+  static void _init(void) __attribute__ ((constructor));
+  static void _init(void) {
+    printf("Testing...\n");
+    // make sure timezone gets set
+    tzset();
+
+    char* tzNameCopy = strdup("GMT");
+    tzname[0] = tzname[1] = tzNameCopy;
+    timezone = 0;
+    daylight = 0;
+
+    setenv("TZ", "UTC", 1);
   }
 
 
-  bool Tests::run() {
-    const char* params[3] = {"dss", "--report_level=detailed", "--log_level=all"};
-    ::boost::unit_test::unit_test_main( &init_unit_test, 3,  const_cast<char**>(params) );
-
-    return true;
-  }
 
 }

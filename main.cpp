@@ -40,12 +40,13 @@
 
 #include <boost/program_options.hpp>
 
+/*
 #ifdef WITH_TESTS
   #define BOOST_TEST_NO_MAIN
   #define BOOST_TEST_DYN_LINK
   #include <boost/test/unit_test.hpp>
 #endif
-
+*/
 
 #ifdef USE_LIBXML
   #include <libxml/tree.h>
@@ -60,23 +61,13 @@
 using namespace std;
 namespace po = boost::program_options;
 
-pair<string, string> parse_prop(const string& s)
-{
+pair<string, string> parse_prop(const string& s) {
     if (s.find("--prop") == 0) {
       return make_pair("prop", s.substr(7));
     } else {
       return make_pair(string(), string());
     }
-}
-
-#ifdef WITH_TESTS
-bool init_unit_test() {
-  using namespace ::boost::unit_test;
-  //assign_op( framework::master_test_suite().p_name.value, "Tests", 0 );
-
-    return true;
-}
-#endif
+} // parse_prop
 
 int main (int argc, char* argv[]) {
 
@@ -165,8 +156,7 @@ int main (int argc, char* argv[]) {
   cout << "compiled WITH_TESTS" << endl;
   if(runTests) {
     cout << "running tests" << endl;
-    const char* params[3] = {"dss", "--report_level=detailed", "--log_level=all"};
-    ::boost::unit_test::unit_test_main( &init_unit_test, 3,  const_cast<char**>(params) );
+    dss::Tests::run();
     cout << "done running tests" << endl;
   }
 #endif
