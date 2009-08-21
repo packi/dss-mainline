@@ -1,0 +1,53 @@
+#!/bin/sh
+# Johannes Winkelmann, johannes.winkelmann@aizo.com
+#
+# Wrapper script to build dss from hudson
+
+###
+## config
+#
+BUILD_DIR=hudson_build
+CCACHE_PATH=/usr/lib/ccache
+CMAKE_SOURCE_DIR=..
+CMAKE_OPTS=
+
+export CCACHE_DIR=/tmp/ccache_hudson
+mkdir -p $CCACHE_DIR
+
+export LANG=C
+
+# -- main
+
+# exit on any error
+set -e
+
+# print env information
+PACKAGES="gsoap libxml-2.0 mozilla-js"
+for p in $PACKAGES; do
+	echo -n "$p: "
+	pkg-config --modversion $p
+done
+gcc -v
+
+# setup
+if [ -n "$1" ]; then
+    cd $1
+fi
+
+
+
+# cleanup
+rm -rf $BUILD_DIR
+mkdir -p $BUILD_DIR
+cd $BUILD_DIR
+cp -r ../data .
+if [ -n "$CCACHE_PATH" ]; then
+    export PATH=$CCACHE_PATH:$PATH
+fi
+
+# build
+cmake $CMAKE_SOURCE_DIR $CMAKE_OPTS
+make VERBOSE=1
+
+make dsstests
+./tests/dsstests
