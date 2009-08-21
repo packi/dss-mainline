@@ -215,6 +215,68 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
   builderTest = builder.buildSet("yellow.dsid(1)", &apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet("dsid(1).yellow", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(1, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet("yellow.yellow.yellow.yellow.yellow.yellow.dsid(1)", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(1, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet(" yellow ", &apt.getZone(0));
+
+  BOOST_CHECK_EQUAL(1, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet("\t\n\rcyan", &apt.getZone(0));
+
+  BOOST_CHECK_EQUAL(1, builderTest.length());
+  BOOST_CHECK_EQUAL(dev2, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet("dsid( 1)", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(1, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet("dsid( 1 )", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(1, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet("dsid(1 )", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(1, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet(" dsid(1 ) ", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(1, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet("yellow .dsid(1)", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(1, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet("yellow. dsid(1)", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(1, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet("yellow . dsid(1)", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(1, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet("dsid(1) .yellow", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(1, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet("dsid(1). yellow", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(1, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet("dsid(1) . yellow", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(1, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet("yellow .yellow. yellow . yellow  .yellow.  yellow \n.dsid(\t1)    ", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(1, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 } // testSetBuilder
 
 BOOST_AUTO_TEST_SUITE_END()

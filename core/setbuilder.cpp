@@ -25,6 +25,7 @@
 
 #include <vector>
 #include <stdexcept>
+#include <cassert>
 
 using std::vector;
 
@@ -34,66 +35,75 @@ namespace dss {
 
   } // ctor
 
-  Set SetBuilder::restrictByFunction(const string& _identifier, const Set& _set, const Zone& _zone) {
-    string::size_type openingBracket = _identifier.find('(');
-    if(openingBracket == string::npos) {
-      throw std::runtime_error("SetBuilder::restrictByFunction: No '(' found in identifier : '" + _identifier + "'");
+  void SetBuilder::skipWhitespace(unsigned int& _index) {
+    while((_index < m_SetDescription.size()) && isspace(m_SetDescription[_index])) {
+      _index++;
     }
-    string::size_type closingBracket = _identifier.find(')', openingBracket);
-    if(openingBracket == string::npos) {
-      throw std::runtime_error("SetBuilder::restrictByFunction: No ')' found after '(' in identifier : '" + _identifier + "'");
-    }
-    if(_identifier.find_first_not_of("\r\n \t", closingBracket + 1) != string::npos) {
-      throw std::runtime_error("SetBuilder::restrictByFunction: Garbage found after parameter '" + _identifier + "'");
-    }
+  } // skipWhitespace
 
-    string functionName = trim(_identifier.substr(0, openingBracket));
-    string parameter = _identifier.substr(openingBracket + 1, closingBracket - openingBracket - 1);
-    vector<string> paramList = splitString(parameter, ',', true);
+  std::string SetBuilder::readParameter(unsigned int& _index) {
+    skipWhitespace(_index);
+    int start = _index;
+    std::string::size_type pos = m_SetDescription.find_first_of(",)", _index);
+    if(pos == std::string::npos) {
+      throw std::runtime_error("expected , or )");
+    }
+    _index = pos;
+    std::string result = m_SetDescription.substr(start, _index - start);
+    skipWhitespace(_index);
+    return result;
+  } // readParameter
+
+  int SetBuilder::readInt(unsigned int& _index) {
+    return strToInt(trim(readParameter(_index)));
+  } // readInt
+
+  dsid_t SetBuilder::readDSID(unsigned int& _index) {
+    return dsid_t::fromString(trim(readParameter(_index)));
+  } // readDSID
+
+  Set SetBuilder::restrictByFunction(const string& _functionName, unsigned int& _index, const Set& _set, const Zone& _zone) {
+    if(_index >= m_SetDescription.size()) {
+      throw std::range_error("_index is out of bounds");
+    }
+    assert(m_SetDescription[_index-1] == '(');
 
     Set result;
-    if(functionName == "dsid") {
-      if(paramList.size() == 1) {
-        result.addDevice(_set.getByDSID(dsid_t::fromString(paramList[0])));
-      } else {
-        throw std::runtime_error("SetBuilder::restrictByFunction: dsid requires exactly one parameter.");
-      }
-    } else if(functionName == "zone") {
-      if(paramList.size() == 1) {
-        result = _set.getByZone(strToInt(paramList[0]));
-      } else {
-        throw std::runtime_error("SetBuilder::restrictByFunction: zone requires exactly one parameter.");
-      }
-    } else if(functionName == "fid") {
-      if(paramList.size() == 1) {
-        result = _set.getByFunctionID(strToInt(paramList[0]));
-      } else {
-        throw std::runtime_error("SetBuilder::restrictByFunction: fid requires exactly one parameter");
-      }
+
+    if(_functionName == "dsid") {
+      dsid_t dsid = readDSID(_index);
+      result.addDevice(_set.getByDSID(dsid));
+    } else if(_functionName == "zone") {
+      int zoneID = readInt(_index);
+      result = _set.getByZone(zoneID);
+    } else if(_functionName == "fid") {
+      int fid = readInt(_index);
+      result = _set.getByFunctionID(fid);
     }
+    assert(m_SetDescription[_index] == ')' || m_SetDescription[_index] == ',');
+    if(m_SetDescription[_index] == ',') {
+      throw std::runtime_error("superfluous parameter detected at position " + intToString(_index));
+    }
+    _index++; // skip over closing bracket
+
     return result;
   }
 
   Set SetBuilder::restrictBy(const std::string& _identifier, const Set& _set, const Zone& _zone) {
 
-    if(_identifier.find('(') != std::string::npos) {
-      return restrictByFunction(_identifier, _set, _zone);
-    } else {
+    try {
+      DeviceReference ref = _zone.getDevices().getByName(_identifier);
+      Set result;
+      result.addDevice(ref);
+      return result;
+    } catch(std::exception&) {
+    }
 
-      try {
-        DeviceReference ref = _zone.getDevices().getByName(_identifier);
-        Set result;
-        result.addDevice(ref);
-        return result;
-      } catch(std::exception&) {
-      }
-
-      // TODO: we might need to query zone 0 for the identifier too
-      Group* grp = _zone.getGroup(_identifier);
-      if(grp != NULL) {
-        Set result = _set.getByGroup(*grp);
-        return result;
-      }
+    // TODO: we might need to query zone 0 for the identifier too
+    Group* grp = _zone.getGroup(_identifier);
+    if(grp != NULL) {
+      Set result = _set.getByGroup(*grp);
+      return result;
     }
     // return empty set
     // TODO: throw exception?
@@ -101,23 +111,65 @@ namespace dss {
     return result;
   } // restrictBy
 
+
+  Set SetBuilder::parseSet(unsigned int& _index, const Set& _set, const Zone& _context) {
+    skipWhitespace(_index);
+    if(_index >= m_SetDescription.size()) {
+      return _set;
+    }
+    // scan forward to a delimiter
+    std::string::size_type pos = m_SetDescription.find_first_of(".(),", _index);
+    bool end = false;
+    if(pos == std::string::npos) {
+      pos = m_SetDescription.size() - 1;
+      end = true;
+    } else if(pos == m_SetDescription.size() - 1) {
+      end = true;
+    }
+    string entry = m_SetDescription.substr(_index, pos + 1 - _index );
+    if(entry == ".") {
+      _index = pos + 1;
+      return DSS::getInstance()->getApartment().getDevices();
+    } else if(m_SetDescription[pos] == '(') {
+      _index = pos + 1;
+      Set tmp = restrictByFunction(entry.erase(entry.size()-1), _index, _set, _context);
+      skipWhitespace(_index);
+      // don't recurse if we're at the end or we were parsing a parameter
+      if((_index < m_SetDescription.size()) && (m_SetDescription[_index] != ',')) {
+        _index++;
+        return parseSet(_index, tmp, _context);
+      } else {
+        return tmp;
+      }
+    } else {
+      std::string item = entry;
+      if(!end) {
+        item.erase(item.size()-1);
+      }
+      Set tmp = restrictBy(trim(item), _set, _context);
+      _index = pos + 1;
+      // bail out if we're parsing parameter
+      if(!endsWith(item, ",")) {
+        return parseSet(_index, tmp, _context);
+      }
+    }
+    return _set;
+  }
+
   Set SetBuilder::buildSet(const std::string& _setDescription, const Zone* _context) {
 	  Set result;
+	  m_SetDescription = _setDescription;
 	  const Zone* context = _context;
-	  if(_context == NULL || beginsWith(_setDescription, ".")) {
+    unsigned int index = 0;
+	  if((_context == NULL) || beginsWith(_setDescription, ".")) {
 		  context = &DSS::getInstance()->getApartment().getZone(0);
 		  result = context->getDevices();
+		  index = 0;
 	  } else {
 		  result = _context->getDevices();
 	  }
-    std::vector<std::string> splitted = splitString(_setDescription, '.');
-    for(std::vector<std::string>::iterator iPart = splitted.begin(), e = splitted.end();
-       iPart != e; ++iPart)
-    {
-      if(iPart->size() > 0) {
-        result = restrictBy(*iPart, result, *context);
-      }
-    }
+    result = parseSet(index, result, *context);
+
     return result;
   } // buildSet
 
