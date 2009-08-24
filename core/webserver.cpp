@@ -34,6 +34,7 @@
 #include "metering/series.h"
 #include "metering/seriespersistence.h"
 #include "web/webserverplugin.h"
+#include "core/setbuilder.h"
 
 #include <iostream>
 #include <sstream>
@@ -344,6 +345,59 @@ namespace dss {
        .withParameter("location", "string", false)
        .withDocumentation("Raises an event", "The context describes the source of the event. The location, if provided, defines where any action that is taken "
            "by any subscription should happen.");
+
+    RestfulClass& clsSet = api.addClass("set")
+        .withInstanceParameter("self", "string", false);
+    clsSet.addMethod("fromApartment")
+        .withDocumentation("Creates a set that contains all devices of the apartment");
+    clsSet.addMethod("byZone")
+        .withParameter("zoneID", "integer", false)
+        .withParameter("zoneName", "string", false)
+        .withDocumentation("Restricts the set to the given zone");
+    clsSet.addMethod("byGroup")
+        .withParameter("groupID", "integer", false)
+        .withParameter("groupName", "integer", false)
+        .withDocumentation("Restricts the set to the given group");
+    clsSet.addMethod("byDSID")
+        .withParameter("dsid", "dsid", true)
+        .withDocumentation("Restricts the set to the given dsid");
+    clsSet.addMethod("add")
+        .withParameter("other", "string", true)
+        .withDocumentation("Combines the set self with other");
+    clsSet.addMethod("subtract")
+        .withParameter("other", "string", true)
+        .withDocumentation("Subtracts the set self from other");
+    clsSet.addMethod("turnOn")
+        .withDocumentation("Turns on all devices of the set.");
+    clsSet.addMethod("turnOff")
+        .withDocumentation("Turns off all devices of the set.");
+    clsSet.addMethod("increaseValue")
+        .withDocumentation("Increases the main value on all devices of the set.");
+    clsSet.addMethod("decreaseValue")
+        .withDocumentation("Decreases the main value on all devices of the set.");
+    clsSet.addMethod("enable")
+        .withDocumentation("Enables all devices of the set.");
+    clsSet.addMethod("disable")
+        .withDocumentation("Disables all devices of the set.", "A disabled device will react only to an enable call.");
+    clsSet.addMethod("startDim")
+      .withParameter("direction", "string", false)
+      .withDocumentation("Starts dimming the devices of the set.");
+    clsSet.addMethod("endDim")
+      .withDocumentation("Stops dimming the devices of the set.");
+    clsSet.addMethod("setValue")
+      .withParameter("value", "integer", true)
+      .withDocumentation("Sets the output value of all devices of the set to value.");
+    clsSet.addMethod("callScene")
+      .withParameter("sceneNr", "integer", true)
+      .withDocumentation("Calls the scene sceneNr on all devices of the set.");
+    clsSet.addMethod("saveScene")
+      .withParameter("sceneNr", "integer", true)
+      .withDocumentation("Saves the current output value to sceneNr.");
+    clsSet.addMethod("undoScene")
+      .withParameter("sceneNr", "integer", true)
+      .withDocumentation("Undoes setting the value of sceneNr.");
+    clsApartment.addMethod("getConsumption")
+      .withDocumentation("Returns the consumption of all devices in the set in mW.");
 
     RestfulAPIWriter::writeToXML(api, "doc/json_api.xml");
   } // setupAPI
@@ -1043,7 +1097,103 @@ namespace dss {
 
 
   string WebServer::handleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
-    _handled = false;
+    _handled = true;
+    if(endsWith(_method, "/fromApartment")) {
+      _handled = true;
+      return JSONOk("{'self': '.'}");
+    } else {
+      std::string self = trim(_parameter["self"]);
+      if(self.empty()) {
+        return ResultToJSON(false, "missing parameter 'self'");
+      }
+
+      if(endsWith(_method, "/byZone")) {
+        std::string additionalPart;
+        if(self != ".") {
+          additionalPart = ".";
+        }
+        if(!_parameter["zoneID"].empty()) {
+          additionalPart += "zone(" + _parameter["zoneID"] + ")";
+        } else if(!_parameter["zoneName"].empty()) {
+          additionalPart += _parameter["zoneName"];
+        } else {
+          return ResultToJSON(false, "missing either zoneID or zoneName");
+        }
+
+        std::stringstream sstream;
+        sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
+        return JSONOk(sstream.str());
+      } else if(endsWith(_method, "/byGroup")) {
+        std::string additionalPart;
+        if(self != ".") {
+          additionalPart = ".";
+        }
+        if(!_parameter["groupID"].empty()) {
+          additionalPart += "group(" + _parameter["groupID"] + ")";
+        } else if(!_parameter["groupName"].empty()) {
+          additionalPart += _parameter["groupName"];
+        } else {
+          return ResultToJSON(false, "missing either groupID or groupName");
+        }
+
+        std::stringstream sstream;
+        sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
+        return JSONOk(sstream.str());
+      } else if(endsWith(_method, "/byDSID")) {
+        std::string additionalPart;
+        if(self != ".") {
+          additionalPart = ".";
+        }
+        if(!_parameter["dsid"].empty()) {
+          additionalPart += "dsid(" + _parameter["dsid"] + ")";
+        } else {
+          return ResultToJSON(false, "missing parameter dsid");
+        }
+
+        std::stringstream sstream;
+        sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
+        return JSONOk(sstream.str());
+      } else if(endsWith(_method, "/getDevices")) {
+        SetBuilder builder;
+        Set set = builder.buildSet(self, NULL);
+        return ToJSONValue(set, "devices");
+      } else if(endsWith(_method, "/add")) {
+        std::string other = _parameter["other"];
+        if(other.empty()) {
+          return ResultToJSON(false, "missing parameter other");
+        }
+        std::string additionalPart;
+        if(self != ".") {
+          additionalPart = ".";
+        }
+        additionalPart += "add(" + other + ")";
+
+        std::stringstream sstream;
+        sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
+        return JSONOk(sstream.str());
+      } else if(endsWith(_method, "/subtract")) {
+        std::string other = _parameter["other"];
+        if(other.empty()) {
+          return ResultToJSON(false, "missing parameter other");
+        }
+        std::string additionalPart;
+        if(self != ".") {
+          additionalPart = ".";
+        }
+        additionalPart += "subtract(" + other + ")";
+
+        std::stringstream sstream;
+        sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
+        return JSONOk(sstream.str());
+      } else if(isDeviceInterfaceCall(_method)) {
+        SetBuilder builder;
+        Set set = builder.buildSet(self, NULL);
+        return callDeviceInterface(_method, _parameter, _arg, &set, _session);
+      } else {
+        _handled = false;
+      }
+
+    }
     return "";
   } // handleSetCall
 

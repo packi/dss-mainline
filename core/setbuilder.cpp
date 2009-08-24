@@ -26,6 +26,7 @@
 #include <vector>
 #include <stdexcept>
 #include <cassert>
+#include <iostream>
 
 using std::vector;
 
@@ -76,9 +77,21 @@ namespace dss {
     } else if(_functionName == "zone") {
       int zoneID = readInt(_index);
       result = _set.getByZone(zoneID);
+    } else if(_functionName == "group") {
+      int groupID = readInt(_index);
+      result = _set.getByZone(groupID);
     } else if(_functionName == "fid") {
       int fid = readInt(_index);
       result = _set.getByFunctionID(fid);
+    } else if(_functionName == "add") {
+      Set inner = parseSet(_index, _zone.getDevices(), _zone);
+      result = _set.combine(inner);
+    } else if(_functionName == "remove") {
+      std::cout << "_set.length: " << _set.length() << std::endl;
+      Set inner = parseSet(_index, _zone.getDevices(), _zone);
+      std::cout << "inner.length: " << inner.length() << std::endl;
+      result = _set.remove(inner);
+      std::cout << "result.length: " << result.length() << std::endl;
     }
     assert(m_SetDescription[_index] == ')' || m_SetDescription[_index] == ',');
     if(m_SetDescription[_index] == ',') {
@@ -129,13 +142,14 @@ namespace dss {
     string entry = m_SetDescription.substr(_index, pos + 1 - _index );
     if(entry == ".") {
       _index = pos + 1;
-      return DSS::getInstance()->getApartment().getDevices();
+      Set newRoot = DSS::getInstance()->getApartment().getDevices();
+      return parseSet(_index, newRoot, _context);
     } else if(m_SetDescription[pos] == '(') {
       _index = pos + 1;
       Set tmp = restrictByFunction(entry.erase(entry.size()-1), _index, _set, _context);
       skipWhitespace(_index);
       // don't recurse if we're at the end or we were parsing a parameter
-      if((_index < m_SetDescription.size()) && (m_SetDescription[_index] != ',')) {
+      if((_index < m_SetDescription.size()) && (m_SetDescription[_index] != ',') && (m_SetDescription[_index] != ')')) {
         _index++;
         return parseSet(_index, tmp, _context);
       } else {

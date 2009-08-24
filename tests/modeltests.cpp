@@ -277,6 +277,15 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
   builderTest = builder.buildSet("yellow .yellow. yellow . yellow  .yellow.  yellow \n.dsid(\t1)    ", &apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet("group(0).remove(dsid(1))", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(3, builderTest.length());
+
+  builderTest = builder.buildSet("remove(dsid(1))", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(3, builderTest.length());
+
+  builderTest = builder.buildSet("remove(yellow)", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(3, builderTest.length());
 } // testSetBuilder
 
 BOOST_AUTO_TEST_SUITE_END()
