@@ -464,13 +464,17 @@ namespace dss {
   } // getEvent
 
   void EventRunner::removeEvent(const int _idx) {
+    m_EventsMutex.lock();
     boost::ptr_vector<ScheduledEvent>::iterator it = m_ScheduledEvents.begin();
     advance(it, _idx);
     m_ScheduledEvents.erase(it);
+    m_EventsMutex.unlock();
   } // removeEvent
 
   void EventRunner::addEvent(ScheduledEvent* _scheduledEvent) {
+    m_EventsMutex.lock();
     m_ScheduledEvents.push_back(_scheduledEvent);
+    m_EventsMutex.unlock();
     m_NewItem.signal();
   } // addEvent
 
@@ -482,6 +486,7 @@ namespace dss {
       Logger::getInstance()->log("number in queue: " + intToString(getSize()));
     }
 
+    m_EventsMutex.lock();
     for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
         ipSchedEvt != e; )
     {
@@ -501,6 +506,7 @@ namespace dss {
       }
       ++ipSchedEvt;
     }
+    m_EventsMutex.unlock();
     return result;
   } // getNextOccurence
 
@@ -530,7 +536,7 @@ namespace dss {
       }
     }
     return false;
-  }
+  } // runOnce
 
   bool EventRunner::raisePendingEvents(DateTime& _from, int _deltaSeconds) {
     bool result = false;
@@ -538,6 +544,8 @@ namespace dss {
     if(DebugEventRunner) {
       cout << "vNow:    " << virtualNow << std::endl;
     }
+
+    m_EventsMutex.lock();
     for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
         ipSchedEvt != e; ++ipSchedEvt)
     {
@@ -559,6 +567,7 @@ namespace dss {
         }
       }
     }
+    m_EventsMutex.unlock();
     return result;
   } // raisePendingEvents
 

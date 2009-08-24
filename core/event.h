@@ -257,6 +257,7 @@ namespace dss {
     DateTime m_WakeTime;
     SyncEvent m_NewItem;
     EventQueue* m_EventQueue;
+    Mutex m_EventsMutex;
   public:
     EventRunner();
 
