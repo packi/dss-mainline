@@ -1,0 +1,542 @@
+#!/bin/sh
+#
+#    showdeplib - Show dependent libraries of a binary and print also the
+#                 rpm, deb, gentoo ebuild or OSX/Fink/Macports packages the
+#                 file is included in
+#    Copyright (C) 2004-2009  Andreas Stricker <andy@knitter.ch>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+# Global variables
+VERSION='0.3'
+BINARIES=''
+FOLLOWLINKS='n'
+PACK='none'
+DESTDIR=''
+COPYMODE='n'
+CHANGENAME='n'
+RECURSIVE='n'
+PARSABLE='n'
+LEVEL='0'
+TRAILINGSPACE=''
+CACHEFILE=''
+INTERNAL_RUN='n'
+
+# ----------------------------------------------------------------------------
+# Helper functions
+# ----------------------------------------------------------------------------
+
+# try to determine kind of library dependency tool
+case "$OSTYPE" in
+    linux*)
+        LIBRARY_TOOL='ldd'
+        LIBRARY_TOOL_ARGS=''
+        LIBRARY_REGEX='s/^ *\(.*\) => \(.*\) [(].*$/\2:\1/'
+        ;;
+    darwin*|Darwin*)
+        LIBRARY_TOOL='otool'
+        LIBRARY_TOOL_ARGS='-L'
+        LIBRARY_REGEX='s/^[	 ]*\([^ ][^ ]*\/\([^\/ ][^\/ ]*\)\) [(].*$/\1:\2/'
+        ;;
+    *)
+        echo "Warning: unsupported OS type, using ldd" >&2
+        LIBRARY_TOOL='ldd'
+        LIBRARY_TOOL_ARGS=''
+        LIBRARY_REGEX=''
+        ;;
+esac
+
+# Print help
+function showhelp() {
+    cat <<_EOF
+
+showdeplib version $VERSION, Copyright (C) 2004-2006 Andreas Stricker
+email: andy@knitter.ch / F15C 5655 2C2D 9A66 AB37 01CF 6C96 BABF 1984 9DB0
+
+showdeplib comes with ABSOLUTELY NO WARRANTY
+This is free software, and you are welcome to redistribute it under
+certain conditions
+
+Usage: $0 PACKAGES OPTIONS [--copyto DIR] binary
+
+  OPTIONS:
+    --rpm         -r  Show rpm package including the dependent library
+    --deb         -d  Show deb package including the dependent library
+    --ebuild      -e  Show ebuild package including the dependent library
+    --mac         -m  Show OSX Framework, Macport or Fink package including
+                        the dependent library
+
+    --followlinks -l  Follow links to final library if dependency is a link
+    --recursive   -R  Recursive lookup libraries (implies -l)
+    --copyto DIR  -c  Copy dependend libraries to DIR (implies -l and -R)
+
+    --change-name DIR 
+                  -n  OSX only: Copy all dependencies to target directory
+                      and change the install name using install_name_tool
+
+    --parsable    -p  output parsable format
+
+    --version         Show version
+    --help        -h  Show this help text
+_EOF
+    exit "$1"
+}
+
+# print error and exit
+function error() {
+    echo "Error: $1" 1>&2
+    exit 1
+}
+
+# search full path to binary $1 and return true if binary
+# exists or false if it does not exist or it is not a binary
+function binexist() {
+    local BINTOTEST=`which "$1"`
+    if test -z "$BINTOTEST"; then
+        false
+    else
+        test -x "$BINTOTEST"
+    fi
+}
+
+function is_library() {
+    if echo "$1" | grep -q '\.dylib$'; then
+        true
+    elif echo "$1" | grep -q -E '^lib[^.]*\.so(\.[0-9.]){0,3}$'; then
+        true
+    elif file "$1" | grep -q -i '.*:.*executable'; then
+        false
+    elif file "$1" | grep -q -E -i '^.*:.*(dynamically|shared( object)?|library)'; then
+        true
+    else
+        error "Cannot determine type of '$1'"
+    fi
+}
+
+function is_osx_system_prefix() {
+    echo "$1" | grep -q -E '^\/(System|Library|usr\/(lib|libexec|bin|share))\/'
+}
+
+function build_target_dir() {
+    local deplib="$1"
+    local dest_dir="$2"
+    local fulldir="`dirname "$deplib"`"
+    if test "$CHANGENAME" = 'y'; then
+        if is_library "$deplib"; then
+            echo "$dest_dir/lib"
+        else
+            echo "$dest_dir/bin"
+        fi
+    else
+        if echo "$fulldir" | grep -q '^\/'; then
+            fulldir=`echo "$fulldir" | sed -e 's/^.//'`
+        else
+            if is_library "$deplib"; then
+                fulldir=`echo "$PWD/$fulldir" | sed -e 's/^.//'`
+            else
+                fulldir=''
+            fi
+        fi
+        echo "$dest_dir/$fulldir"
+    fi
+}
+
+# return $1 spaces
+function fillspace() {
+    printf "% $1s" ""
+}
+
+function change_name() {
+    local deplib="$1"
+    local dest_dir="$2"
+    local target_dir=""
+    local target_filename=""
+    local relpath=""
+    local libfn=""
+    if is_osx_system_prefix "$deplib"; then
+        : # don't copy system prefix
+    else
+        target_dir="`build_target_dir "$deplib" "$dest_dir"`"
+        target_filename="`basename "$deplib"`"
+
+        relpath='@executable_path/../lib'
+
+        if is_library "$deplib"; then
+            install_name_tool -id "$relpath/$target_filename" "$target_dir/$target_filename"
+            r=$?
+            if test "$r" -ne 0; then
+                error "install_name_tool exited with error"
+                exit $r
+            fi
+        fi
+        $0 --parsable "$deplib" | cut -d ":" -f 1 | while read lib; do
+            test "$lib" = "$deplib" && continue
+            is_osx_system_prefix "$lib" && continue
+            libfn="`basename "$lib"`"
+            install_name_tool -change "$lib" "$relpath/$libfn" "$target_dir/$target_filename"
+            r=$?
+            if test "$r" -ne 0; then
+                error "install_name_tool exited with error"
+                exit $r
+            fi
+        done
+    fi
+}
+
+function printformatted() {
+    local prefix="$1"
+    local libname="$2"
+    local package="$3"
+    local format="$4"
+    local version="$5"
+    if test "$PARSABLE" = 'y'; then
+        echo "${libname}:${package}:${format}:${version}"
+    else
+        if test "$package" = "notfound"; then
+            package="not found in any package"
+        fi
+        if test -z "$format" -a -z "$package"; then
+            echo "$TRAILINGSPACE${prefix} ${libname}"
+        elif test -z "$format"; then
+            echo "$TRAILINGSPACE${prefix} ${libname} (${package})"
+        elif test -z "$version"; then
+            echo "$TRAILINGSPACE${prefix} ${libname} (${format}: ${package})"
+        else
+            echo "$TRAILINGSPACE${prefix} ${libname} (${format}: ${package} ${version})"
+        fi
+    fi
+}
+
+# Print information about file $1 on screen starting with $2
+# if needed, look in package database for corresponding package
+# in recursive mode also call the script itself again with library
+# In copymode also copy file to destination directory
+function printlib() {
+    local DEPLIB="$1"
+    local prefix="$2"
+    case "$PACK" in
+        rpm)
+            PACKAGE=`rpm -qf $DEPLIB 2> /dev/null`
+            if test -z "$PACKAGE"; then
+                printformatted "$prefix" "$DEPLIB" "notfound"
+            else
+                printformatted "$prefix" "$DEPLIB" "$PACKAGE" "rpm"
+            fi
+        ;;
+        deb)
+            PACKAGE=`dpkg -S $DEPLIB 2> /dev/null | sed -e 's/:.*$//'`
+            if test -z "$PACKAGE"; then
+                printformatted "$prefix" "$DEPLIB" "notfound"
+            else
+                printformatted "$prefix" "$DEPLIB" "$PACKAGE" "deb"
+            fi
+        ;;
+        ebuild)
+            PACKAGE=`equery --quiet --nocolor belongs $DEPLIB 2> /dev/null | cut -d " " -f 1`
+            if test -z "$PACKAGE"; then
+                printformatted "$prefix" "$DEPLIB" "notfound"
+            else
+                printformatted "$prefix" "$DEPLIB" "$PACKAGE" "ebuild"
+            fi
+        ;;
+        mac)
+            case "$DEPLIB" in
+                /System/*|/Library/*)
+                    if echo "$DEPLIB" | grep -q -E '\/(System/)?Library\/Frameworks\/.*\.framework\/Versions\/'; then
+                        framework=`echo "$DEPLIB" \
+                                    | sed -e 's,^/System,,'\
+                                          -e 's,^/Library/Frameworks,,'\
+                                          -e 's,^.*/\([^./][^./]*\)\.framework/Versions/\([^/][^/]*\)/.*$,\1:\2,'`
+                        version=`echo "$framework" | cut -d ':' -f 2`
+                        framework=`echo "$framework" | cut -d ':' -f 1`
+                    else
+                        framework='?'
+                        version=''
+                    fi
+                    printformatted "$prefix" "$DEPLIB" "$framework" "Framework" "$version"
+                ;;
+                /usr/local/*)
+                    printformatted "$prefix" "$DEPLIB" "user-local" "UNIX"
+                ;;
+                /usr/*)
+                    printformatted "$prefix" "$DEPLIB" "system-usr" "UNIX"
+                ;;
+                /sw/*)
+                    PACKAGE=`dpkg -S $DEPLIB 2> /dev/null | sed -e 's/:.*$//'`
+                    if test -z "$PACKAGE"; then
+                        printformatted "$prefix" "$DEPLIB" "notfound"
+                    else
+                        printformatted "$prefix" "$DEPLIB" "$PACKAGE" "Fink"
+                    fi
+                ;;
+                *)
+                    PACKAGE=`port provides $DEPLIB 2> /dev/null | sed -e 's/^.*: *//'`
+                    if echo "$PACKAGE" | grep -q 'is not provided'; then
+                        PACKAGE=''
+                    fi
+                    if test -z "$PACKAGE"; then
+                        printformatted "$prefix" "$DEPLIB" "notfound"
+                    else
+                        PACKAGE_VERSION=`port info --version $PACKAGE | sed -e 's/^version: *//'`
+                        printformatted "$prefix" "$DEPLIB" "$PACKAGE" "macport" "$PACKAGE_VERSION"
+                    fi
+                ;;
+            esac
+        ;;
+        *)
+            printformatted "$prefix" "$DEPLIB"
+        ;;
+    esac
+    # in copy mode also copy file to destination directory
+    if test "$COPYMODE" = 'y'; then
+        if test "$CHANGENAME" = 'y' && is_osx_system_prefix "$DEPLIB"; then
+            :
+        else
+            TARGETDIR="`build_target_dir "$DEPLIB" "$DESTDIR"`"
+            mkdir -p "$TARGETDIR"
+            cp "$DEPLIB" "$TARGETDIR"
+        fi
+    fi
+    # apply install_name_tool if change-name option was specified
+    if test "$CHANGENAME" = 'y'; then
+        change_name "$DEPLIB" "$DESTDIR"
+    fi
+    # in recursive mode call the script itself again with library
+    if test "$RECURSIVE" = 'y' -a ! -L "$DEPLIB"; then
+        # depfile should not occure in cache file (to prevent loop for ever)
+        if grep -q "$DEPLIB" "$CACHEFILE"; then
+            :
+        else
+            echo "$DEPLIB" >> $CACHEFILE
+
+            cmdline="--internal-level $(($LEVEL+1))"
+            cmdline="$cmdline --internal-cachefile \"$CACHEFILE\""
+            cmdline="$cmdline --recursive"
+            cmdline="$cmdline --followlinks"
+            test "$PARSABLE" = 'y' && cmdline="$cmdline --parsable"
+            case "$PACK" in
+                rpm) cmdline="$cmdline --rpm" ;;
+                deb) cmdline="$cmdline --deb" ;;
+                ebuild) cmdline="$cmdline --ebuild" ;;
+                mac) cmdline="$cmdline --mac" ;;
+            esac
+
+            if test "$CHANGENAME" = 'y'; then
+                cmdline="$cmdline --change-name \"$DESTDIR\""
+            elif test "$COPYMODE" = 'y'; then
+                cmdline="$cmdline --copyto \"$DESTDIR\""
+            fi
+            sh -c "$0 $cmdline \"$DEPLIB\""
+            r=$?
+            if test "$r" -ne 0; then
+                error "Executing failed: '$0 $cmdline $DEPLIB'"
+                exit $r
+            fi
+        fi
+    fi
+}
+
+# Parse parameter list
+while test -n "$1"; do
+    # note: reserve -e for ebuild, -s for slackware packages and -d for debian package
+    case "$1" in
+        # just for internal use: check if $0 is this script
+        --internal-check-myself)
+            exit 23
+        ;;
+        # just for internal use: Level of invocation
+        --internal-level)
+            LEVEL="$2"
+            INTERNAL_RUN='y'
+            shift 
+        ;;
+        # just for internale use: Name of cache file
+        --internal-cachefile)
+            CACHEFILE="$2"
+            INTERNAL_RUN='y'
+            shift
+        ;;
+        --rpm|-r)
+            binexist "rpm" && PACK='rpm'
+        ;;
+        --deb|-d)
+            binexist "dpkg" && PACK='deb'
+        ;;
+        --ebuild|-e)
+            binexist "equery" && PACK='ebuild'
+        ;;
+        --mac|-m)
+            binexist "port" && PACK='mac'
+        ;;
+        --followlinks|-l)
+            FOLLOWLINKS='y'
+        ;;
+        --recursive|-R)
+            RECURSIVE='y'
+            FOLLOWLINKS='y'
+        ;;
+        --copyto|-c)
+            DESTDIR="$2"
+            COPYMODE='y'
+            FOLLOWLINKS='y'
+            RECURSIVE='y'
+            shift
+        ;;
+        --change-name|-n)
+            DESTDIR="$2"
+            COPYMODE='y'
+            CHANGENAME='y'
+            FOLLOWLINKS='y'
+            RECURSIVE='y'
+            shift
+        ;;
+        --parsable|--parseable|-p)
+            PARSABLE='y'
+        ;;
+        --version)
+            echo "showdeplib version $VERSION"
+            exit 0
+        ;;
+        --help|-h)
+            showhelp 0
+        ;;
+        --*|-*)
+            echo "Unknown Parameter $1"
+            showhelp 1
+        ;;
+        *)
+            if test -z "$BINARIES"; then
+                BINARIES="$1"
+            else
+                BINARIES="$BINARIES:$1"
+            fi
+        ;;
+    esac
+    shift
+done
+
+# check if $0 is usable
+if test "$INTERNAL_RUN" = 'n'; then
+    if test -x "$0"; then
+        $0 --internal-check-myself
+        if test $? -ne 23; then
+            error "script \$0 is unusable"
+        fi
+    else
+        error "script '$0' needs own name and path to execute"
+    fi
+fi
+
+# ----------------------------------------------------------------------------
+# main program
+# ----------------------------------------------------------------------------
+
+# calculate space
+TRAILINGSPACE=`fillspace $((LEVEL*2))`
+
+# make a temporary file if in recursive mode
+if test "$RECURSIVE" = 'y' -a $LEVEL -eq 0; then
+    test -n "$TMPDIR" -a -d "$TMPDIR" || TMPDIR='/tmp'
+    CACHEFILE=`mktemp -q $TMPDIR/showdeplib.XXXXXX`
+    if [ $? -ne 0 ]; then
+        error "Can't create temp file, exiting..."
+    fi
+    touch "$CACHEFILE"
+fi
+
+# Tests if copy mode is on
+
+if test "$COPYMODE" = 'y' -a -n "$DESTDIR"; then
+    # destination directory must exist
+    test -d "$DESTDIR" || \
+        error "$DESTDIR is not a directory"
+    test "$INTERNAL_RUN" = 'n' && \
+        echo "Copy mode enabled, copy to $DESTDIR"
+    # no trailing slash
+    LASTCHAR=`echo "$DESTDIR" | sed -e 's/^.*\(.\)$/\1/'`
+    if test "$LASTCHAR" = "/"; then
+        DESTDIR=`echo "$DESTDIR" | sed -e 's/.$//'`
+    fi
+fi
+
+if test "$CHANGENAME" = 'y' -a "$INTERNAL_RUN" = 'n'; then
+    echo "Using install_name_tool to change library prefix"
+fi
+
+# main loop to process all binaries
+
+IFSSAVE="$IFS"
+IFS=":"; for binary in $BINARIES; do
+    printlib "$binary" ""
+    # extract dependent libaries and process them
+    $LIBRARY_TOOL $LIBRARY_TOOL_ARGS "$binary" | sed -e "$LIBRARY_REGEX" \
+    | while read DEPLIB LIBNAME; do
+        test "$binary" = "$DEPLIB" && continue # OSX binary reference to itself
+        if test -z "$DEPLIB"; then
+            if echo "$LIBNAME" | grep -q "linux-gate.so"; then
+                :
+            else
+                echo "$TRAILINGSPACE  ?? $LIBNAME (unresolved library)"
+            fi
+            continue
+        fi
+        # test for statically linked executables
+        if echo "$DEPLIB" | grep -q -E "(statically linked|Archive)"; then
+            echo "$TRAILINGSPACE   (statically linked)"
+            continue
+        fi
+        # test for other types of executable (eg. scripts)
+        if echo "$DEPLIB" | grep -q "not a dynamic executable"; then
+            echo "$TRAILINGSPACE   (not a dynamic executable)"
+            continue
+        fi
+        # test for OSX keywords @executable_path
+        if echo "$DEPLIB" | grep -q "@executable_path"; then
+            echo "$TRAILINGSPACE   (OSX @executable_path)"
+        fi
+        printlib "$DEPLIB" "  =>"
+        # if enabled, follow links to final library file
+        if test "$FOLLOWLINKS" = 'y' -a -L "$DEPLIB"; then
+            CURLIB="$DEPLIB"
+            while test -L "$CURLIB"; do
+                OLDCURLIB="$CURLIB"
+                CURLIB=`ls -l $OLDCURLIB | sed -e 's/^.*-> //'`
+                # always with absolute paths
+                case "$CURLIB" in
+                    /*)
+                        :
+                    ;;
+                    *)
+                        OLDCURLIBPATH=`dirname "$OLDCURLIB"`
+                        CURLIB="$OLDCURLIBPATH/$CURLIB"
+                    ;;
+                esac
+                printlib "$CURLIB" "     ->"
+            done
+        fi
+    done
+done
+IFS="$IFSSAVE"
+
+# delete temporary file
+if test "$RECURSIVE" = 'y' -a $LEVEL -eq 0; then
+    if test -n "$CACHEFILE" -a -f "$CACHEFILE"; then
+        rm "$CACHEFILE"
+    fi
+fi
+
+exit 0
+# end of script
+
