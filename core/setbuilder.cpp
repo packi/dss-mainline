@@ -26,7 +26,6 @@
 #include <vector>
 #include <stdexcept>
 #include <cassert>
-#include <iostream>
 
 using std::vector;
 
@@ -87,11 +86,8 @@ namespace dss {
       Set inner = parseSet(_index, _zone.getDevices(), _zone);
       result = _set.combine(inner);
     } else if(_functionName == "remove") {
-      std::cout << "_set.length: " << _set.length() << std::endl;
       Set inner = parseSet(_index, _zone.getDevices(), _zone);
-      std::cout << "inner.length: " << inner.length() << std::endl;
       result = _set.remove(inner);
-      std::cout << "result.length: " << result.length() << std::endl;
     }
     assert(m_SetDescription[_index] == ')' || m_SetDescription[_index] == ',');
     if(m_SetDescription[_index] == ',') {
@@ -157,15 +153,20 @@ namespace dss {
       }
     } else {
       std::string item = entry;
-      if(!end) {
+      bool parsingParam = endsWith(item, ",") || endsWith(item, ")");
+      if(!end || parsingParam) {
         item.erase(item.size()-1);
       }
       Set tmp = restrictBy(trim(item), _set, _context);
       _index = pos + 1;
-      // bail out if we're parsing parameter
-      if(!endsWith(item, ",")) {
+
+      if(!end && !parsingParam) {
         return parseSet(_index, tmp, _context);
       }
+      if(parsingParam) {
+        _index--; // make sure we're positioned on the closing token
+      }
+      return tmp;
     }
     return _set;
   }
