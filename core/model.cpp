@@ -65,7 +65,7 @@ namespace dss {
     m_pApartment(_pApartment),
     m_LastCalledScene(SceneOff),
     m_Consumption(0),
-    m_pPropertyNode(NULL)
+    m_pPropertyNode()
   {
   }
 
@@ -641,7 +641,7 @@ namespace dss {
   : Subsystem(_pDSS, "Apartment"),
     Thread("Apartment"),
     m_IsInitializing(true),
-    m_pPropertyNode(NULL)
+    m_pPropertyNode()
   { } // ctor
 
   Apartment::~Apartment() {
@@ -1496,11 +1496,11 @@ namespace dss {
       Modulator& modulator = getModulatorByBusID(_modID);
       try {
         Device& device = getDeviceByShortAddress(modulator, _devID);
-        PropertyNode* deviceNode = device.getPropertyNode();
+        PropertyNodePtr deviceNode = device.getPropertyNode();
         if(deviceNode == NULL) {
           return;
         }
-        PropertyNode* modeNode = deviceNode->getProperty("interrupt/mode");
+        PropertyNodePtr modeNode = deviceNode->getProperty("interrupt/mode");
         if(deviceNode == NULL) {
           return;
         }
@@ -1510,7 +1510,7 @@ namespace dss {
         } else if(mode == "raise_event") {
           log("raising interrupt as event");
           string eventName = "dslink_interrupt";
-          PropertyNode* eventNameNode = deviceNode->getProperty("interrupt/event/name");
+          PropertyNodePtr eventNameNode = deviceNode->getProperty("interrupt/event/name");
           if(eventNameNode == NULL) {
             log("no node called 'interrupt/event' found, assuming name is 'dslink_interrupt'");
           } else {

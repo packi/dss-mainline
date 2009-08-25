@@ -63,12 +63,15 @@ BOOST_AUTO_TEST_SUITE(PropertySystemTests)
 
 BOOST_AUTO_TEST_CASE(testPropertySystem) {
   PropertySystem* propSys = new PropertySystem();
-  PropertyNode* propND1 = new PropertyNode(propSys->getRootNode(), "config");
-  PropertyNode* propND2 = new PropertyNode(propSys->getRootNode(), "system");
-  PropertyNode* propND3 = new PropertyNode(propND1, "UI");
-  PropertyNode* propND4 = new PropertyNode(propND3, "settings");
+  PropertyNodePtr propND1 = propSys->createProperty("/config");
+  PropertyNodePtr propND2 = propSys->createProperty("/system");
+  PropertyNodePtr propND3(new PropertyNode("UI"));
+  propND1->addChild(propND3);
+  PropertyNodePtr propND4(new PropertyNode("settings"));
+  propND3->addChild(propND4);
   BOOST_CHECK(propSys->getProperty("/config/UI/settings[ last ]") == propND4);
-  PropertyNode* propND5 = new PropertyNode(propND3, "settings");
+  PropertyNodePtr propND5(new PropertyNode("settings"));
+  propND3->addChild(propND5);
   BOOST_CHECK(propSys->getProperty("/config/UI/settings[ last ]") == propND5);
 
   getBasePath("/bla/asdf");
@@ -112,8 +115,8 @@ BOOST_AUTO_TEST_CASE(testPropertySystem) {
   propND2->addChild(propND1);
   BOOST_CHECK(propSys->getProperty("/testing/here/toRemove/childNode") != NULL);
 
-  delete propND2->removeChild(propND1);
-  propND1 = NULL;
+  propND2->removeChild(propND1);
+  propND1.reset();
 
   BOOST_CHECK(propSys->getProperty("/testing/here/toRemove/childNode") == NULL);
   BOOST_CHECK(propSys->getProperty("/testing/here/toRemove") == NULL);

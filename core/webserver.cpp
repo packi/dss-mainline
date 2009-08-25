@@ -66,7 +66,7 @@ namespace dss {
   } // initialize
 
   void WebServer::loadPlugins() {
-    PropertyNode* pluginsNode = getDSS().getPropertySystem().getProperty(getConfigPropertyBasePath() + "plugins");
+    PropertyNodePtr pluginsNode = getDSS().getPropertySystem().getProperty(getConfigPropertyBasePath() + "plugins");
     if(pluginsNode != NULL) {
       log("Found plugins node, trying to loading plugins", lsInfo);
       pluginsNode->foreachChildOf(*this, &WebServer::loadPlugin);
@@ -74,8 +74,8 @@ namespace dss {
   } // loadPlugins
 
   void WebServer::loadPlugin(PropertyNode& _node) {
-    PropertyNode* pFileNode = _node.getProperty("file");
-    PropertyNode* pURINode = _node.getProperty("uri");
+    PropertyNodePtr pFileNode = _node.getProperty("file");
+    PropertyNodePtr pURINode = _node.getProperty("uri");
 
     if(pFileNode == NULL) {
       log("loadPlugin: Missing subnode name 'file' on node " + _node.getDisplayName(), lsError);
@@ -1207,7 +1207,7 @@ namespace dss {
     if(propName.empty()) {
       return ResultToJSON(false, "Need parameter \'path\' for property operations");
     }
-    PropertyNode* node = getDSS().getPropertySystem().getProperty(propName);
+    PropertyNodePtr node = getDSS().getPropertySystem().getProperty(propName);
 
     if(endsWith(_method, "/getString")) {
       if(node == NULL) {
@@ -1301,7 +1301,7 @@ namespace dss {
           sstream << ",";
         }
         first = false;
-        PropertyNode* cnode = node->getChild(iChild);
+        PropertyNodePtr cnode = node->getChild(iChild);
         sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(cnode->getName());
         sstream << "," << ToJSONValue("type") << ":" << ToJSONValue(getValueTypeAsString(cnode->getValueType()));
         sstream << "}";
@@ -1756,10 +1756,10 @@ namespace dss {
     std::stringstream stream;
     stream << "<h1>" << path << "</h1>";
     stream << "<ul>";
-    PropertyNode* node = DSS::getInstance()->getPropertySystem().getProperty(path);
+    PropertyNodePtr node = DSS::getInstance()->getPropertySystem().getProperty(path);
     if(node != NULL) {
       for(int iNode = 0; iNode < node->getChildCount(); iNode++) {
-        PropertyNode* cnode = node->getChild(iNode);
+        PropertyNodePtr cnode = node->getChild(iNode);
 
         stream << "<li>";
         if(cnode->getChildCount() != 0) {

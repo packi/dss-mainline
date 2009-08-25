@@ -32,10 +32,13 @@
 #include <stdexcept>
 #include <vector>
 #include <string>
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 namespace dss {
 
   class PropertyNode;
+  typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   typedef enum {
     vTypeNone = 0, vTypeInteger, vTypeString, vTypeBoolean
@@ -66,29 +69,29 @@ namespace dss {
    */
   class PropertySystem {
   private:
-    PropertyNode* m_RootNode;
+    PropertyNodePtr m_RootNode;
   public:
     PropertySystem();
     ~PropertySystem();
 
     /** Loads a subtree from XML.
      * Everything in the XML has to be relatove to _rootNode. */
-    bool loadFromXML(const std::string& _fileName, PropertyNode* _rootNode = NULL);
+    bool loadFromXML(const std::string& _fileName, PropertyNodePtr _rootNode);
     /** Saves a subtree to XML. */
-    bool saveToXML(const std::string& _fileName, PropertyNode* _rootNode = NULL) const;
+    bool saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode) const;
 
     /** Searches a property by path.
      * @return The node, or NULL if not found. */
-    PropertyNode* getProperty(const std::string& _propPath) const;
+    PropertyNodePtr getProperty(const std::string& _propPath) const;
 
     /** Returns the root node. */
-    PropertyNode* getRootNode() const {
+    PropertyNodePtr getRootNode() const {
       return m_RootNode;
     }
     ;
 
     /** Creates a property and the path to it. */
-    PropertyNode* createProperty(const std::string& _propPath);
+    PropertyNodePtr createProperty(const std::string& _propPath);
 
     // fast access to property values
     /** Returns the value of a property as an int.
@@ -299,25 +302,25 @@ namespace dss {
   /** Notifies a class if one or many properties change. */
   class PropertyListener {
   private:
-    std::vector<const PropertyNode*> m_Properties;
+    std::vector<PropertyNodePtr> m_Properties;
   protected:
     friend class PropertyNode;
     /** Function that gets called if a property changes. */
-    virtual void propertyChanged(PropertyNode* _changedNode);
-    virtual void propertyRemoved(PropertyNode* _parent, PropertyNode* _child);
-    virtual void propertyAdded(PropertyNode* _parent, PropertyNode* _child);
+    virtual void propertyChanged(PropertyNodePtr _changedNode);
+    virtual void propertyRemoved(PropertyNodePtr _parent, PropertyNodePtr _child);
+    virtual void propertyAdded(PropertyNodePtr _parent, PropertyNodePtr _child);
 
     /** Add a property node to the notifiers. */
-    void registerProperty(const PropertyNode* _node);
+    void registerProperty(PropertyNodePtr _node);
     /** Remove a property from the notifiers */
-    void unregisterProperty(const PropertyNode* _node);
+    void unregisterProperty(PropertyNodePtr _node);
   public:
     virtual ~PropertyListener();
   }; // PropertyListener
 
 
   /** The heart of the PropertySystem. */
-  class PropertyNode {
+  class PropertyNode : public boost::enable_shared_from_this<PropertyNode> {
   private:
     aPropertyValue m_PropVal;
     union {
@@ -325,8 +328,8 @@ namespace dss {
       PropertyProxy<int>* intProxy;
       PropertyProxy<std::string>* stringProxy;
     } m_Proxy;
-    std::vector<PropertyNode*> m_ChildNodes;
-    mutable std::vector<PropertyListener*> m_Listeners;
+    std::vector<PropertyNodePtr> m_ChildNodes;
+    std::vector<PropertyListener*> m_Listeners;
     PropertyNode* m_ParentNode;
     std::string m_Name;
     mutable std::string m_DisplayName;
@@ -337,13 +340,12 @@ namespace dss {
 
     int getAndRemoveIndexFromPropertyName(std::string& _propName);
 
-    void propertyChanged();
-    void childAdded(PropertyNode* _child);
-    void childRemoved(PropertyNode* _child);
-    void notifyListeners(void(PropertyListener::*_callback)(PropertyNode*));
-    void notifyListeners(void(PropertyListener::*_callback)(PropertyNode*, PropertyNode*), PropertyNode* _node);
+    void childAdded(PropertyNodePtr _child);
+    void childRemoved(PropertyNodePtr _child);
+    void notifyListeners(void(PropertyListener::*_callback)(PropertyNodePtr));
+    void notifyListeners(void(PropertyListener::*_callback)(PropertyNodePtr, PropertyNodePtr), PropertyNodePtr _node);
   public:
-    PropertyNode(PropertyNode* _parentNode, const char* _name, int _index = 0);
+    PropertyNode(const char* _name, int _index = 0);
     ~PropertyNode();
 
     /** Returns the name of the property. */
@@ -356,7 +358,7 @@ namespace dss {
 
     /** Returns a child node by path.
      * @return The child or NULL if not found */
-    PropertyNode* getProperty(const std::string& _propPath);
+    PropertyNodePtr getProperty(const std::string& _propPath);
     int count(const std::string& _propertyName);
 
     /** Sets the value as string. */
@@ -382,13 +384,13 @@ namespace dss {
     std::string getAsString();
 
     /** Recursively adds a child-node. */
-    PropertyNode* createProperty(const std::string& _propPath);
+    PropertyNodePtr createProperty(const std::string& _propPath);
     /** Moves this node to \a _path. */
     void moveTo(const std::string& _path);
 
     /** Returns a child node by name.
      * Or NULL if not found.*/
-    PropertyNode* getPropertyByName(const std::string& _name);
+    PropertyNodePtr getPropertyByName(const std::string& _name);
 
     /** Returns the type of the property. */
     aValueType getValueType();
@@ -405,21 +407,24 @@ namespace dss {
     bool unlinkProxy();
 
     /** Adds a listener. */
-    void addListener(PropertyListener* _listener) const;
+    void addListener(PropertyListener* _listener);
     /** Removes a listener */
-    void removeListener(PropertyListener* _listener) const;
+    void removeListener(PropertyListener* _listener);
 
     /** Returns the count of the nodes children. */
     int getChildCount() const { return m_ChildNodes.size(); }
     /** Returns a child node by index. */
-    PropertyNode* getChild(const int _index) { return m_ChildNodes.at(_index); }
+    PropertyNodePtr getChild(const int _index) { return m_ChildNodes.at(_index); }
 
-    void addChild(PropertyNode* _childNode);
-    PropertyNode* removeChild(PropertyNode* _childNode);
+    void addChild(PropertyNodePtr _childNode);
+    PropertyNodePtr removeChild(PropertyNodePtr _childNode);
+
+    /** Notifies all listeners that the value of this property has changed */
+    void propertyChanged();
 
     /** Performs \a _callback for each child node (non-recursive) */
     void foreachChildOf(void(*_callback)(PropertyNode&)) {
-      for (std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin(); it
+      for (std::vector<PropertyNodePtr>::iterator it = m_ChildNodes.begin(); it
           != m_ChildNodes.end(); ++it) {
         (*_callback)(**it);
       }
@@ -429,7 +434,7 @@ namespace dss {
     /** @copydoc foreachChildOf */
     template<class Cls>
     void foreachChildOf(Cls& _objRef, void(Cls::*_callback)(PropertyNode&)) {
-      for (std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin(); it
+      for (std::vector<PropertyNodePtr>::iterator it = m_ChildNodes.begin(); it
           != m_ChildNodes.end(); ++it) {
         (_objRef.*_callback)(**it);
       }

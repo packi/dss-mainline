@@ -49,6 +49,7 @@ namespace dss {
   class Group;
   class PropertyNode;
   class XMLNode;
+  typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   /** Interface to a single or multiple devices.
    */
@@ -206,7 +207,7 @@ namespace dss {
     int m_LastCalledScene;
     unsigned long m_Consumption;
 
-    PropertyNode* m_pPropertyNode;
+    PropertyNodePtr m_pPropertyNode;
     DeviceLocation m_Location;
   protected:
     /** Publishes the device to the property tree.
@@ -357,7 +358,7 @@ namespace dss {
      * the result of the function is not defined. */
     uint8_t dsLinkSend(uint8_t _value, bool _lastByte, bool _writeOnly);
 
-    PropertyNode* getPropertyNode() { return m_pPropertyNode; }
+    PropertyNodePtr getPropertyNode() { return m_pPropertyNode; }
 
     /** Returns wheter two devices are equal.
      * Devices are considered equal if their DSID are a match.*/
@@ -779,7 +780,7 @@ namespace dss {
     std::vector<Device*> m_Devices;
     bool m_IsInitializing;
 
-    PropertyNode* m_pPropertyNode;
+    PropertyNodePtr m_pPropertyNode;
 
     boost::ptr_vector<ModelEvent> m_ModelEvents;
     Mutex m_ModelEventsMutex;
@@ -861,7 +862,7 @@ namespace dss {
   public:
 
     /** Returns the root-node for the apartment tree */
-    PropertyNode* getPropertyNode() { return m_pPropertyNode; }
+    PropertyNodePtr getPropertyNode() { return m_pPropertyNode; }
 
     /** Adds a model event to the queue.
      * The ownership of the event will reside with the Apartment. ModelEvents arriving while initializing will be discarded.

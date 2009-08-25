@@ -74,22 +74,19 @@ namespace dss {
 
   //=============================================== PropertySystem
 
-  PropertySystem::PropertySystem() :
-    m_RootNode(new PropertyNode(NULL, "/")) {
-  } // ctor
-
+  PropertySystem::PropertySystem()
+  : m_RootNode(new PropertyNode("/"))
+  { } // ctor
 
   PropertySystem::~PropertySystem() {
-    delete m_RootNode;
   } // dtor
 
-
   bool PropertySystem::loadFromXML(const std::string& _fileName,
-                                   PropertyNode* _rootNode) {
+                                   PropertyNodePtr _rootNode) {
     xmlDoc* doc = NULL;
     xmlNode *rootElem = NULL;
 
-    PropertyNode* rootNode = _rootNode;
+    PropertyNodePtr rootNode = _rootNode;
     if (rootNode == NULL) {
       rootNode = getRootNode();
     }
@@ -133,10 +130,10 @@ namespace dss {
   } // loadFromXML
 
 
-  bool PropertySystem::saveToXML(const std::string& _fileName, PropertyNode* _rootNode) const {
+  bool PropertySystem::saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode) const {
     int rc;
     xmlTextWriterPtr writer;
-    PropertyNode* root = _rootNode;
+    PropertyNodePtr root = _rootNode;
     if (root == NULL) {
       root = m_RootNode;
     }
@@ -179,9 +176,9 @@ namespace dss {
   } // saveToXML
 
 
-  PropertyNode* PropertySystem::getProperty(const std::string& _propPath) const {
+  PropertyNodePtr PropertySystem::getProperty(const std::string& _propPath) const {
     if(_propPath[ 0 ] != '/') {
-      return NULL;
+      return PropertyNodePtr();
     }
     std::string propPath = _propPath;
     propPath.erase(0, 1);
@@ -192,9 +189,9 @@ namespace dss {
   } // getProperty
 
 
-  PropertyNode* PropertySystem::createProperty(const std::string& _propPath) {
+  PropertyNodePtr PropertySystem::createProperty(const std::string& _propPath) {
     if(_propPath[ 0 ] != '/') {
-      return NULL;
+      return PropertyNodePtr();
     }
     std::string propPath = _propPath;
     propPath.erase(0, 1);
@@ -205,7 +202,7 @@ namespace dss {
   } // createProperty
 
   int PropertySystem::getIntValue(const std::string& _propPath) const {
-    PropertyNode* prop = getProperty(_propPath);
+    PropertyNodePtr prop = getProperty(_propPath);
     if(prop != NULL) {
       return prop->getIntegerValue();
     } else {
@@ -214,7 +211,7 @@ namespace dss {
   } // getIntValue
 
   bool PropertySystem::getBoolValue(const std::string& _propPath) const {
-    PropertyNode* prop = getProperty(_propPath);
+    PropertyNodePtr prop = getProperty(_propPath);
     if(prop != NULL) {
       return prop->getBoolValue();
     } else {
@@ -223,7 +220,7 @@ namespace dss {
   } // getBoolValue
 
   std::string PropertySystem::getStringValue(const std::string& _propPath) const {
-    PropertyNode* prop = getProperty(_propPath);
+    PropertyNodePtr prop = getProperty(_propPath);
     if(prop != NULL) {
       return prop->getStringValue();
     } else {
@@ -232,9 +229,9 @@ namespace dss {
   } // getStringValue
 
   bool PropertySystem::setIntValue(const std::string& _propPath, const int _value, bool _mayCreate, bool _mayOverwrite) {
-    PropertyNode* prop = getProperty(_propPath);
+    PropertyNodePtr prop = getProperty(_propPath);
     if((prop == NULL) &&_mayCreate) {
-      PropertyNode* prop = createProperty(_propPath);
+      PropertyNodePtr prop = createProperty(_propPath);
       prop->setIntegerValue(_value);
       return true;
     } else {
@@ -248,9 +245,9 @@ namespace dss {
   } // setIntValue
 
   bool PropertySystem::setBoolValue(const std::string& _propPath, const bool _value, bool _mayCreate, bool _mayOverwrite) {
-    PropertyNode* prop = getProperty(_propPath);
+    PropertyNodePtr prop = getProperty(_propPath);
     if((prop == NULL) &&_mayCreate) {
-      PropertyNode* prop = createProperty(_propPath);
+      PropertyNodePtr prop = createProperty(_propPath);
       prop->setBooleanValue(_value);
       return true;
     } else {
@@ -264,9 +261,9 @@ namespace dss {
   } // setBoolValue
 
   bool PropertySystem::setStringValue(const std::string& _propPath, const std::string& _value, bool _mayCreate, bool _mayOverwrite) {
-    PropertyNode* prop = getProperty(_propPath);
+    PropertyNodePtr prop = getProperty(_propPath);
     if((prop == NULL) &&_mayCreate) {
-      PropertyNode* prop = createProperty(_propPath);
+      PropertyNodePtr prop = createProperty(_propPath);
       prop->setStringValue(_value);
       return true;
     } else {
@@ -282,33 +279,29 @@ namespace dss {
 
   //=============================================== PropertyNode
 
-  PropertyNode::PropertyNode(PropertyNode* _parentNode, const char* _name, int _index)
-    : m_ParentNode(_parentNode),
+  PropertyNode::PropertyNode(const char* _name, int _index)
+    : m_ParentNode(NULL),
       m_Name(_name),
       m_LinkedToProxy(false),
       m_Index(_index)
   {
     memset(&m_PropVal, '\0', sizeof(aPropertyValue));
-    if(_parentNode) {
-      _parentNode->addChild(this);
-    }
   } // ctor
 
   PropertyNode::~PropertyNode() {
     if(m_ParentNode != NULL) {
-      m_ParentNode->removeChild(this);
+      m_ParentNode->removeChild(shared_from_this());
     }
-    for(std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
+    for(std::vector<PropertyNodePtr>::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end();) {
       childRemoved(*it);
       (*it)->m_ParentNode = NULL; // prevent the child-node from calling removeChild
-      delete *it;
       it = m_ChildNodes.erase(it);
     }
     for(std::vector<PropertyListener*>::iterator it = m_Listeners.begin();
         it != m_Listeners.end();)
     {
-      (*it)->unregisterProperty(this);
+      (*it)->unregisterProperty(shared_from_this());
       it = m_Listeners.erase(it);
     }
     if(m_PropVal.valueType == vTypeString) {
@@ -316,8 +309,8 @@ namespace dss {
     }
   } // dtor
 
-  PropertyNode* PropertyNode::removeChild(PropertyNode* _childNode) {
-    std::vector<PropertyNode*>::iterator it = std::find(m_ChildNodes.begin(), m_ChildNodes.end(), _childNode);
+  PropertyNodePtr PropertyNode::removeChild(PropertyNodePtr _childNode) {
+    std::vector<PropertyNodePtr>::iterator it = std::find(m_ChildNodes.begin(), m_ChildNodes.end(), _childNode);
     if(it != m_ChildNodes.end()) {
       m_ChildNodes.erase(it);
     }
@@ -326,7 +319,13 @@ namespace dss {
     return _childNode;
   }
 
-  void PropertyNode::addChild(PropertyNode* _childNode) {
+  void PropertyNode::addChild(PropertyNodePtr _childNode) {
+    if(_childNode.get() == this) {
+      throw std::runtime_error("Adding self as child node");
+    }
+    if(_childNode.get() == NULL) {
+      throw std::runtime_error("Adding NULL as child node");
+    }
     if(_childNode->m_ParentNode != NULL) {
       _childNode->m_ParentNode->removeChild(_childNode);
     }
@@ -346,18 +345,18 @@ namespace dss {
     }
   } // getDisplayName
 
-  PropertyNode* PropertyNode::getProperty(const std::string& _propPath) {
+  PropertyNodePtr PropertyNode::getProperty(const std::string& _propPath) {
     std::string propPath = _propPath;
     std::string propName = _propPath;
     std::string::size_type slashPos = propPath.find('/');
     if(slashPos != std::string::npos) {
       propName = propPath.substr(0, slashPos);
       propPath.erase(0, slashPos + 1);
-      PropertyNode* child = getPropertyByName(propName);
+      PropertyNodePtr child = getPropertyByName(propName);
       if(child != NULL) {
         return child->getProperty(propPath);
       } else {
-        return NULL;
+        return PropertyNodePtr();
       }
     } else {
       return getPropertyByName(propName);
@@ -380,7 +379,7 @@ namespace dss {
     return result;
   } // getAndRemoveIndexFromPropertyName
 
-  PropertyNode* PropertyNode::getPropertyByName(const std::string& _name) {
+  PropertyNodePtr PropertyNode::getPropertyByName(const std::string& _name) {
     int index = 0;
     std::string propName = _name;
     index = getAndRemoveIndexFromPropertyName(propName);
@@ -388,10 +387,10 @@ namespace dss {
     int curIndex = 0;
     int lastMatch = -1;
     int numItem = 0;
-    for(std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
+    for(std::vector<PropertyNodePtr>::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end(); it++) {
       numItem++;
-      PropertyNode* cur = *it;
+      PropertyNodePtr cur = *it;
       if(cur->m_Name == propName) {
         if(curIndex == index) {
           return cur;
@@ -405,14 +404,14 @@ namespace dss {
         return m_ChildNodes[ lastMatch ];
       }
     }
-    return NULL;
+    return PropertyNodePtr();
   } // getPropertyName
 
   int PropertyNode::count(const std::string& _propertyName) {
     int result = 0;
-    for(std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
+    for(std::vector<PropertyNodePtr>::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end(); it++) {
-      PropertyNode* cur = *it;
+      PropertyNodePtr cur = *it;
       if(cur->m_Name == _propertyName) {
         result++;
       }
@@ -605,23 +604,23 @@ namespace dss {
     return result;
   } // getAsString
 
-  void PropertyNode::addListener(PropertyListener* _listener) const {
+  void PropertyNode::addListener(PropertyListener* _listener) {
     m_Listeners.push_back(_listener);
   } // addListener
 
-  void PropertyNode::removeListener(PropertyListener* _listener) const {
+  void PropertyNode::removeListener(PropertyListener* _listener) {
     std::vector<PropertyListener*>::iterator it = std::find(m_Listeners.begin(), m_Listeners.end(), _listener);
     if(it != m_Listeners.end()) {
       m_Listeners.erase(it);
-      _listener->unregisterProperty(this);
+      _listener->unregisterProperty(shared_from_this());
     }
   } // removeListener
 
-  PropertyNode* PropertyNode::createProperty(const std::string& _propPath) {
+  PropertyNodePtr PropertyNode::createProperty(const std::string& _propPath) {
     std::string nextOne = getRoot(_propPath);
     std::string remainder = _propPath;
     remainder.erase(0, nextOne.length() + 1);
-    PropertyNode* nextNode = NULL;
+    PropertyNodePtr nextNode;
     if((nextNode = getPropertyByName(nextOne)) == NULL) {
       if(nextOne[ nextOne.length() - 1 ] == '+') {
         nextOne.erase(nextOne.length() - 1, 1);
@@ -630,7 +629,8 @@ namespace dss {
       if(index == 0) {
         index = count(nextOne) + 1;
       }
-      nextNode = new PropertyNode(this, nextOne.c_str(), index);
+      nextNode.reset(new PropertyNode(nextOne.c_str(), index));
+      addChild(nextNode);
     }
 
     if(remainder.length() > 0) {
@@ -660,7 +660,7 @@ namespace dss {
       xmlTextWriterWriteElement(_writer, (xmlChar*)"value", (xmlChar*)getAsString().c_str());
     }
 
-    for(std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
+    for(std::vector<PropertyNodePtr>::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end(); ++it) {
       if(!(*it)->saveAsXML(_writer)) {
         return false;
@@ -712,7 +712,7 @@ namespace dss {
         if(curNode->type == XML_ELEMENT_NODE && strcmp((char*)curNode->name, "property") == 0) {
           nameAttr = xmlSearchAttr(curNode, (xmlChar*)"name");
           if(nameAttr != NULL) {
-            PropertyNode* candidate = createProperty(std::string((char*)nameAttr->children->content));
+            PropertyNodePtr candidate = createProperty(std::string((char*)nameAttr->children->content));
             candidate->loadFromNode(curNode);
           }
         }
@@ -727,19 +727,19 @@ namespace dss {
     notifyListeners(&PropertyListener::propertyChanged);
   } // propertyChanged
 
-  void PropertyNode::childAdded(PropertyNode* _child) {
+  void PropertyNode::childAdded(PropertyNodePtr _child) {
     notifyListeners(&PropertyListener::propertyAdded, _child);
   } // childAdded
 
-  void PropertyNode::childRemoved(PropertyNode* _child) {
+  void PropertyNode::childRemoved(PropertyNodePtr _child) {
     notifyListeners(&PropertyListener::propertyRemoved, _child);
   } // childRemoved
 
-  void PropertyNode::notifyListeners(void (PropertyListener::*_callback)(PropertyNode*)) {
+  void PropertyNode::notifyListeners(void (PropertyListener::*_callback)(PropertyNodePtr)) {
     std::vector<PropertyListener*>::iterator it;
     bool notified = false;
     for(it = m_Listeners.begin(); it != m_Listeners.end(); ++it) {
-      ((*it)->*_callback)(this);
+      ((*it)->*_callback)(shared_from_this());
       notified = true;
     }
     if(!notified) {
@@ -749,11 +749,11 @@ namespace dss {
     }
   } // notifyListeners
 
-  void PropertyNode::notifyListeners(void (PropertyListener::*_callback)(PropertyNode*,PropertyNode*), PropertyNode* _node) {
+  void PropertyNode::notifyListeners(void (PropertyListener::*_callback)(PropertyNodePtr,PropertyNodePtr), PropertyNodePtr _node) {
     std::vector<PropertyListener*>::iterator it;
     bool notified = false;
     for(it = m_Listeners.begin(); it != m_Listeners.end(); ++it) {
-      ((*it)->*_callback)(this, _node);
+      ((*it)->*_callback)(shared_from_this(), _node);
       notified = true;
     }
     if(!notified) {
@@ -767,27 +767,27 @@ namespace dss {
   //=============================================== PropertyListener
 
   PropertyListener::~PropertyListener() {
-    std::vector<const PropertyNode*>::iterator it;
+    std::vector<PropertyNodePtr>::iterator it;
     for(it = m_Properties.begin(); it != m_Properties.end(); ++it) {
       (*it)->removeListener(this);
     }
   } // dtor
 
-  void PropertyListener::propertyChanged(PropertyNode* _changedNode) {
+  void PropertyListener::propertyChanged(PropertyNodePtr _changedNode) {
   } // propertyChanged
 
-  void PropertyListener::propertyRemoved(PropertyNode* _parent, PropertyNode* _child) {
+  void PropertyListener::propertyRemoved(PropertyNodePtr _parent, PropertyNodePtr _child) {
   } // propertyRemoved
 
-  void PropertyListener::propertyAdded(PropertyNode* _parent, PropertyNode* _child) {
+  void PropertyListener::propertyAdded(PropertyNodePtr _parent, PropertyNodePtr _child) {
   } // propertyAdded
 
-  void PropertyListener::registerProperty(const PropertyNode* _node) {
+  void PropertyListener::registerProperty(PropertyNodePtr _node) {
     m_Properties.push_back(_node);
   } // registerProperty
 
-  void PropertyListener::unregisterProperty(const PropertyNode* _node) {
-   std::vector<const PropertyNode*>::iterator it = std::find(m_Properties.begin(), m_Properties.end(), _node);
+  void PropertyListener::unregisterProperty(PropertyNodePtr _node) {
+   std::vector<PropertyNodePtr>::iterator it = std::find(m_Properties.begin(), m_Properties.end(), _node);
     if(it != m_Properties.end()) {
       m_Properties.erase(it);
     }
