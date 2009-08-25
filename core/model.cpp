@@ -709,33 +709,23 @@ namespace dss {
     _zone.addGroup(grp);
   } // addDefaultGroupsToZone
 
-  void Apartment::execute() {
-    // load devices/modulators/etc. from a config-file
-    std::string configFileName = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile");
-    if(!fileExists(configFileName)) {
-      Logger::getInstance()->log(string("Apartment::execute: Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
-    } else {
-      readConfigurationFromXML(configFileName);
-    }
-
+  void Apartment::initializeFromBus() {
     DS485Interface& interface = DSS::getInstance()->getDS485Interface();
 
-    log("Apartment::execute: Waiting for interface to get ready", lsInfo);
-
-    while(!interface.isReady() && !m_Terminated) {
-      sleepMS(1000);
-    }
-
-    log("Apartment::execute: Interface is ready, enumerating model", lsInfo);
-
-    vector<int> modIDs = interface.getModulators();
+    vector<ModulatorSpec_t> modIDs = interface.getModulators();
     log("Found " + intToString(modIDs.size()) + " modulators...");
-    foreach(int modulatorID, modIDs) {
+    foreach(ModulatorSpec_t& modulatorSpec, modIDs) {
+      // bus-id, sw-version, hw-version, name, device-id
+      int modulatorID = modulatorSpec.get<0>();
       log("Found modulator with id: " + intToString(modulatorID));
       dsid_t modDSID = interface.getDSIDOfModulator(modulatorID);
       log("  DSID: " + modDSID.toString());
       Modulator& modulator = allocateModulator(modDSID);
       modulator.setBusID(modulatorID);
+      modulator.setSoftwareVersion(modulatorSpec.get<1>());
+      modulator.setHardwareVersion(modulatorSpec.get<2>());
+      modulator.setHardwareName(modulatorSpec.get<3>());
+      modulator.setDeviceType(modulatorSpec.get<4>());
 
       int levelOrange, levelRed;
       if(interface.getEnergyBorder(modulatorID, levelOrange, levelRed)) {
@@ -812,6 +802,27 @@ namespace dss {
         }
       }
     }
+  } // initializeFromBus
+
+  void Apartment::execute() {
+    // load devices/modulators/etc. from a config-file
+    std::string configFileName = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile");
+    if(!fileExists(configFileName)) {
+      Logger::getInstance()->log(string("Apartment::execute: Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
+    } else {
+      readConfigurationFromXML(configFileName);
+    }
+
+    DS485Interface& interface = DSS::getInstance()->getDS485Interface();
+
+    log("Apartment::execute: Waiting for interface to get ready", lsInfo);
+
+    while(!interface.isReady() && !m_Terminated) {
+      sleepMS(1000);
+    }
+
+    log("Apartment::execute: Interface is ready, enumerating model", lsInfo);
+    initializeFromBus();
 
     Logger::getInstance()->log("******** Finished loading model from dSM(s)...", lsInfo);
     m_IsInitializing = false;

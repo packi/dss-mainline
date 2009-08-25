@@ -803,6 +803,10 @@ namespace dss {
           sstream << "{ " << ToJSONValue("name") << ": " << ToJSONValue(modulator->getName());
           sstream << ", " << ToJSONValue("dsid") << ": " << ToJSONValue(modulator->getDSID().toString());
           sstream << ", " << ToJSONValue("busid") << ": " << ToJSONValue(modulator->getBusID());
+          sstream << ", " << ToJSONValue("hwVersion") << ": " << ToJSONValue(modulator->getHardwareVersion());
+          sstream << ", " << ToJSONValue("swVersion") << ": " << ToJSONValue(modulator->getSoftwareVersion());
+          sstream << ", " << ToJSONValue("hwName") << ": " << ToJSONValue(modulator->getHardwareName());
+          sstream << ", " << ToJSONValue("deviceType") << ": " << ToJSONValue(modulator->getDeviceType());
           sstream << "}";
         }
         sstream << "]}";

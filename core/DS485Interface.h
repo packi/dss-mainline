@@ -26,9 +26,9 @@
 #include "unix/ds485.h"
 #include "model.h"
 
+#include <string>
 #include <vector>
-
-using namespace std;
+#include <boost/tuple/tuple.hpp>
 
 namespace dss {
 
@@ -54,6 +54,8 @@ namespace dss {
 	  cmdGetFunctionID
 	} DS485Command;
 
+	typedef boost::tuple<int, int, int, std::string, int> ModulatorSpec_t; // bus-id, sw-version, hw-version, name, device-id
+
   /** Interface to be implemented by any implementation of the DS485 interface */
   class DS485Interface {
   public:
@@ -66,7 +68,7 @@ namespace dss {
 
     //------------------------------------------------ Specialized Commands (system)
     /** Returns an std::vector containing the bus-ids of all modulators present. */
-    virtual std::vector<int> getModulators() = 0;
+    virtual std::vector<ModulatorSpec_t> getModulators() = 0;
 
     /** Returns a std::vector conatining the zone-ids of the specified modulator */
     virtual std::vector<int> getZones(const int _modulatorID) = 0;

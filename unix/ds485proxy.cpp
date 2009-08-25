@@ -503,7 +503,7 @@ namespace dss {
     }
   } // isSimAddress
 
-  std::vector<int> DS485Proxy::getModulators() {
+  std::vector<ModulatorSpec_t> DS485Proxy::getModulators() {
     DS485CommandFrame cmdFrame;
     cmdFrame.getHeader().setDestination(0);
     cmdFrame.getHeader().setBroadcast(true);
@@ -516,7 +516,7 @@ namespace dss {
 
     map<int, bool> resultFrom;
 
-    std::vector<int> result;
+    std::vector<ModulatorSpec_t> result;
     while(true) {
       boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
       if(recFrame.get() == NULL) {
@@ -555,7 +555,9 @@ namespace dss {
       }
       log(string("  Name:      \"") + name + "\"");
 
-      result.push_back(source);
+      // bus-id, sw-version, hw-version, name, device-id
+      ModulatorSpec_t spec(source, swVersion, hwVersion, name, devID);
+      result.push_back(spec);
     }
 
     return result;

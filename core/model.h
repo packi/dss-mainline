@@ -531,6 +531,10 @@ namespace dss {
     DateTime m_PowerConsumptionAge;
     int m_EnergyMeterValue;
     DateTime m_EnergyMeterValueAge;
+    int m_HardwareVersion;
+    int m_SoftwareVersion;
+    std::string m_HardwareName;
+    int m_DeviceType;
   public:
     /** Constructs a modulator with the given dsid. */
     Modulator(const dsid_t _dsid);
@@ -565,6 +569,15 @@ namespace dss {
     /** Sets the red energy level.
      * @note This has no effect on the modulator as of now. */
     void setEnergyLevelOrange(const int _value) { m_EnergyLevelOrange = _value; }
+
+    int getHardwareVersion() const { return m_HardwareVersion; }
+    void setHardwareVersion(const int _value) { m_HardwareVersion = _value; }
+    int getSoftwareVersion() const { return m_SoftwareVersion; }
+    void setSoftwareVersion(const int _value) { m_SoftwareVersion = _value; }
+    std::string getHardwareName() const { return m_HardwareName; }
+    void setHardwareName(const std::string& _value) { m_HardwareName = _value; }
+    int getDeviceType() { return m_DeviceType; }
+    void setDeviceType(const int _value) { m_DeviceType = _value; }
   }; // Modulator
 
   /** Represents a predefined group */
@@ -780,6 +793,7 @@ namespace dss {
     void addDefaultGroupsToZone(Zone& _zone);
     /** Starts the event-processing */
     virtual void execute();
+    void initializeFromBus();
   protected:
     virtual void doStart();
   public:

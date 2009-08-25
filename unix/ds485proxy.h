@@ -157,7 +157,7 @@ namespace dss {
     void removeFrameBucket(FrameBucket* _bucket);
 
     //------------------------------------------------ Specialized Commands (system)
-    virtual std::vector<int> getModulators();
+    virtual std::vector<ModulatorSpec_t> getModulators();
 
     virtual std::vector<int> getZones(const int _modulatorID);
     virtual int getZoneCount(const int _modulatorID);
