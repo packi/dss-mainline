@@ -105,6 +105,20 @@ BOOST_AUTO_TEST_CASE(testPropertySystem) {
   BOOST_CHECK_EQUAL(2, propSys->getProperty("/bla")->count("bll"));
   BOOST_CHECK(propSys->getProperty("/af/sgd/sdf") == NULL);
 
+  propND1 = propSys->createProperty("/testing/toRemove");
+  propSys->createProperty("/testing/toRemove/childNode");
+  propND2 = propSys->createProperty("/testing/here");
+
+  propND2->addChild(propND1);
+  BOOST_CHECK(propSys->getProperty("/testing/here/toRemove/childNode") != NULL);
+
+  delete propND2->removeChild(propND1);
+  propND1 = NULL;
+
+  BOOST_CHECK(propSys->getProperty("/testing/here/toRemove/childNode") == NULL);
+  BOOST_CHECK(propSys->getProperty("/testing/here/toRemove") == NULL);
+  BOOST_CHECK(propSys->getProperty("/testing/here") != NULL);
+
   // test pointer to value
   int bla = 7;
   propND1 = propSys->getProperty("/bla/blubb");

@@ -303,7 +303,9 @@ namespace dss {
   protected:
     friend class PropertyNode;
     /** Function that gets called if a property changes. */
-    virtual void propertyChanged(const PropertyNode* _changedNode);
+    virtual void propertyChanged(PropertyNode* _changedNode);
+    virtual void propertyRemoved(PropertyNode* _parent, PropertyNode* _child);
+    virtual void propertyAdded(PropertyNode* _parent, PropertyNode* _child);
 
     /** Add a property node to the notifiers. */
     void registerProperty(const PropertyNode* _node);
@@ -331,12 +333,15 @@ namespace dss {
     bool m_LinkedToProxy;
     int m_Index;
   private:
-    void addChild(PropertyNode* _childNode);
     void clearValue();
 
     int getAndRemoveIndexFromPropertyName(std::string& _propName);
 
-    void notifyListeners(void(PropertyListener::*_callback)(const PropertyNode*));
+    void propertyChanged();
+    void childAdded(PropertyNode* _child);
+    void childRemoved(PropertyNode* _child);
+    void notifyListeners(void(PropertyListener::*_callback)(PropertyNode*));
+    void notifyListeners(void(PropertyListener::*_callback)(PropertyNode*, PropertyNode*), PropertyNode* _node);
   public:
     PropertyNode(PropertyNode* _parentNode, const char* _name, int _index = 0);
     ~PropertyNode();
@@ -408,6 +413,9 @@ namespace dss {
     int getChildCount() const { return m_ChildNodes.size(); }
     /** Returns a child node by index. */
     PropertyNode* getChild(const int _index) { return m_ChildNodes.at(_index); }
+
+    void addChild(PropertyNode* _childNode);
+    PropertyNode* removeChild(PropertyNode* _childNode);
 
     /** Performs \a _callback for each child node (non-recursive) */
     void foreachChildOf(void(*_callback)(PropertyNode&)) {

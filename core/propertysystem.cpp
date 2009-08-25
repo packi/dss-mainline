@@ -294,23 +294,46 @@ namespace dss {
     }
   } // ctor
 
-
   PropertyNode::~PropertyNode() {
-    if(m_PropVal.valueType == vTypeString) {
-      free(m_PropVal.actualValue.pString);
+    if(m_ParentNode != NULL) {
+      m_ParentNode->removeChild(this);
     }
     for(std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end();) {
+      childRemoved(*it);
+      (*it)->m_ParentNode = NULL; // prevent the child-node from calling removeChild
       delete *it;
       it = m_ChildNodes.erase(it);
     }
+    for(std::vector<PropertyListener*>::iterator it = m_Listeners.begin();
+        it != m_Listeners.end();)
+    {
+      (*it)->unregisterProperty(this);
+      it = m_Listeners.erase(it);
+    }
+    if(m_PropVal.valueType == vTypeString) {
+      free(m_PropVal.actualValue.pString);
+    }
   } // dtor
 
+  PropertyNode* PropertyNode::removeChild(PropertyNode* _childNode) {
+    std::vector<PropertyNode*>::iterator it = std::find(m_ChildNodes.begin(), m_ChildNodes.end(), _childNode);
+    if(it != m_ChildNodes.end()) {
+      m_ChildNodes.erase(it);
+    }
+    _childNode->m_ParentNode = NULL;
+    childRemoved(_childNode);
+    return _childNode;
+  }
 
   void PropertyNode::addChild(PropertyNode* _childNode) {
+    if(_childNode->m_ParentNode != NULL) {
+      _childNode->m_ParentNode->removeChild(_childNode);
+    }
+    _childNode->m_ParentNode = this;
     m_ChildNodes.push_back(_childNode);
+    childAdded(_childNode);
   } // addChild
-
 
   const std::string& PropertyNode::getDisplayName() const {
     if(m_ParentNode->count(m_Name) > 1) {
@@ -322,7 +345,6 @@ namespace dss {
       return m_Name;
     }
   } // getDisplayName
-
 
   PropertyNode* PropertyNode::getProperty(const std::string& _propPath) {
     std::string propPath = _propPath;
@@ -342,7 +364,6 @@ namespace dss {
     }
   } // getProperty
 
-
   int PropertyNode::getAndRemoveIndexFromPropertyName(std::string& _propName) {
     int result = 0;
     std::string::size_type pos = _propName.find('[');
@@ -358,7 +379,6 @@ namespace dss {
     }
     return result;
   } // getAndRemoveIndexFromPropertyName
-
 
   PropertyNode* PropertyNode::getPropertyByName(const std::string& _name) {
     int index = 0;
@@ -388,7 +408,6 @@ namespace dss {
     return NULL;
   } // getPropertyName
 
-
   int PropertyNode::count(const std::string& _propertyName) {
     int result = 0;
     for(std::vector<PropertyNode*>::iterator it = m_ChildNodes.begin();
@@ -401,7 +420,6 @@ namespace dss {
     return result;
   } // count
 
-
   void PropertyNode::clearValue() {
     if(m_PropVal.valueType == vTypeString) {
       if(m_PropVal.actualValue.pString != NULL) {
@@ -410,7 +428,6 @@ namespace dss {
     }
     memset(&m_PropVal, '\0', sizeof(aPropertyValue));
   } // clearValue
-
 
   void PropertyNode::setStringValue(const char* _value) {
     if(m_LinkedToProxy) {
@@ -427,14 +444,12 @@ namespace dss {
       }
     }
     m_PropVal.valueType = vTypeString;
-    notifyListeners(&PropertyListener::propertyChanged);
+    propertyChanged();
   } // setStringValue
-
 
   void PropertyNode::setStringValue(const std::string& _value) {
     setStringValue(_value.c_str());
   } // setStringValue
-
 
   void PropertyNode::setIntegerValue(const int _value) {
     if(m_LinkedToProxy) {
@@ -449,9 +464,8 @@ namespace dss {
       m_PropVal.actualValue.integer = _value;
     }
     m_PropVal.valueType = vTypeInteger;
-    notifyListeners(&PropertyListener::propertyChanged);
+    propertyChanged();
   } // setIntegerValue
-
 
   void PropertyNode::setBooleanValue(const bool _value) {
     if(m_LinkedToProxy) {
@@ -466,9 +480,8 @@ namespace dss {
       m_PropVal.actualValue.boolean = _value;
     }
     m_PropVal.valueType = vTypeBoolean;
-    notifyListeners(&PropertyListener::propertyChanged);
+    propertyChanged();
   } // setBooleanValue
-
 
   std::string PropertyNode::getStringValue() {
     if(m_PropVal.valueType == vTypeString) {
@@ -483,7 +496,6 @@ namespace dss {
     }
   } // getStringValue
 
-
   int PropertyNode::getIntegerValue() {
     if(m_PropVal.valueType == vTypeInteger) {
       if(m_LinkedToProxy) {
@@ -496,7 +508,6 @@ namespace dss {
       throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
     }
   } // getIntegerValue
-
 
   bool PropertyNode::getBoolValue() {
     if(m_PropVal.valueType == vTypeBoolean) {
@@ -594,11 +605,9 @@ namespace dss {
     return result;
   } // getAsString
 
-
   void PropertyNode::addListener(PropertyListener* _listener) const {
     m_Listeners.push_back(_listener);
   } // addListener
-
 
   void PropertyNode::removeListener(PropertyListener* _listener) const {
     std::vector<PropertyListener*>::iterator it = std::find(m_Listeners.begin(), m_Listeners.end(), _listener);
@@ -607,7 +616,6 @@ namespace dss {
       _listener->unregisterProperty(this);
     }
   } // removeListener
-
 
   PropertyNode* PropertyNode::createProperty(const std::string& _propPath) {
     std::string nextOne = getRoot(_propPath);
@@ -666,7 +674,6 @@ namespace dss {
     return true;
   } // saveAsXML
 
-
   bool PropertyNode::loadFromNode(xmlNode* _pNode) {
     xmlAttr* nameAttr = xmlSearchAttr(_pNode, (xmlChar*)"name");
     xmlAttr* typeAttr = xmlSearchAttr(_pNode, (xmlChar*)"type");
@@ -716,8 +723,19 @@ namespace dss {
     return false;
   } // loadFromNode
 
+  void PropertyNode::propertyChanged() {
+    notifyListeners(&PropertyListener::propertyChanged);
+  } // propertyChanged
 
-  void PropertyNode::notifyListeners(void (PropertyListener::*_callback)(const PropertyNode*)) {
+  void PropertyNode::childAdded(PropertyNode* _child) {
+    notifyListeners(&PropertyListener::propertyAdded, _child);
+  } // childAdded
+
+  void PropertyNode::childRemoved(PropertyNode* _child) {
+    notifyListeners(&PropertyListener::propertyRemoved, _child);
+  } // childRemoved
+
+  void PropertyNode::notifyListeners(void (PropertyListener::*_callback)(PropertyNode*)) {
     std::vector<PropertyListener*>::iterator it;
     bool notified = false;
     for(it = m_Listeners.begin(); it != m_Listeners.end(); ++it) {
@@ -729,11 +747,24 @@ namespace dss {
         m_ParentNode->notifyListeners(_callback);
       }
     }
-  }
+  } // notifyListeners
+
+  void PropertyNode::notifyListeners(void (PropertyListener::*_callback)(PropertyNode*,PropertyNode*), PropertyNode* _node) {
+    std::vector<PropertyListener*>::iterator it;
+    bool notified = false;
+    for(it = m_Listeners.begin(); it != m_Listeners.end(); ++it) {
+      ((*it)->*_callback)(this, _node);
+      notified = true;
+    }
+    if(!notified) {
+      if(m_ParentNode != NULL) {
+        m_ParentNode->notifyListeners(_callback, _node);
+      }
+    }
+  } // notifyListeners
 
 
   //=============================================== PropertyListener
-
 
   PropertyListener::~PropertyListener() {
     std::vector<const PropertyNode*>::iterator it;
@@ -742,15 +773,18 @@ namespace dss {
     }
   } // dtor
 
-
-  void PropertyListener::propertyChanged(const PropertyNode* _changedNode) {
+  void PropertyListener::propertyChanged(PropertyNode* _changedNode) {
   } // propertyChanged
 
+  void PropertyListener::propertyRemoved(PropertyNode* _parent, PropertyNode* _child) {
+  } // propertyRemoved
+
+  void PropertyListener::propertyAdded(PropertyNode* _parent, PropertyNode* _child) {
+  } // propertyAdded
 
   void PropertyListener::registerProperty(const PropertyNode* _node) {
     m_Properties.push_back(_node);
   } // registerProperty
-
 
   void PropertyListener::unregisterProperty(const PropertyNode* _node) {
    std::vector<const PropertyNode*>::iterator it = std::find(m_Properties.begin(), m_Properties.end(), _node);
@@ -761,7 +795,6 @@ namespace dss {
 
 
   //=============================================== Utilities
-
 
   std::string getBasePath(const std::string& _path) {
     std::string result = _path;
