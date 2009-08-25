@@ -208,6 +208,7 @@ namespace dss {
     unsigned long m_Consumption;
 
     PropertyNodePtr m_pPropertyNode;
+    PropertyNodePtr m_pAliasNode;
     DeviceLocation m_Location;
   protected:
     /** Publishes the device to the property tree.

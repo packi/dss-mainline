@@ -76,7 +76,7 @@ namespace dss {
         return;
       } else {
         if(m_pApartment->getPropertyNode() != NULL) {
-          m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone" + intToString(m_ZoneID) + "/device+");
+          m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/" + m_DSID.toString());
 //          m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
           m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyReference<string>(m_Name));
           m_pPropertyNode->createProperty("ModulatorID")->linkToProxy(PropertyProxyReference<int>(m_ModulatorID, false));
@@ -262,7 +262,18 @@ namespace dss {
   } // getZoneID
 
   void Device::setZoneID(const int _value) {
-  	m_ZoneID = _value;
+    if(_value != m_ZoneID) {
+      m_ZoneID = _value;
+      if((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
+        std::string basePath = "zones/zone" + intToString(m_ZoneID) + "/";
+        if(m_pAliasNode == NULL) {
+          m_pAliasNode = m_pApartment->getPropertyNode()->createProperty(basePath + m_DSID.toString());
+          m_pAliasNode->alias(m_pPropertyNode);
+        } else {
+          m_pApartment->getPropertyNode()->getProperty(basePath)->addChild(m_pAliasNode);
+        }
+      }
+    }
   } // setZoneID
 
   int Device:: getGroupIdByIndex(const int _index) const {
@@ -1331,6 +1342,9 @@ namespace dss {
   } // allocateModulator
 
   Zone& Apartment::allocateZone(Modulator& _modulator, int _zoneID) {
+    if(getPropertyNode() != NULL) {
+      getPropertyNode()->createProperty("zones/zone" + intToString(_zoneID));
+    }
     foreach(Zone* zone, m_StaleZones) {
   		if(zone->getZoneID() == _zoneID) {
   			m_Zones.push_back(zone);

@@ -419,9 +419,9 @@ namespace dss {
     void removeListener(PropertyListener* _listener);
 
     /** Returns the count of the nodes children. */
-    int getChildCount() const { return m_ChildNodes.size(); }
+    int getChildCount() const { return m_Aliased ? m_AliasTarget->m_ChildNodes.size() : m_ChildNodes.size(); }
     /** Returns a child node by index. */
-    PropertyNodePtr getChild(const int _index) { return m_ChildNodes.at(_index); }
+    PropertyNodePtr getChild(const int _index) { return m_Aliased ? m_AliasTarget->m_ChildNodes.at(_index) : m_ChildNodes.at(_index); }
 
     void addChild(PropertyNodePtr _childNode);
     PropertyNodePtr removeChild(PropertyNodePtr _childNode);
@@ -431,9 +431,14 @@ namespace dss {
 
     /** Performs \a _callback for each child node (non-recursive) */
     void foreachChildOf(void(*_callback)(PropertyNode&)) {
-      for (PropertyList::iterator it = m_ChildNodes.begin(); it
-          != m_ChildNodes.end(); ++it) {
-        (*_callback)(**it);
+      if(m_Aliased) {
+        m_AliasTarget->foreachChildOf(_callback);
+      } else {
+        for (PropertyList::iterator it = m_ChildNodes.begin(); it
+            != m_ChildNodes.end(); ++it)
+        {
+          (*_callback)(**it);
+        }
       }
     } // ForeachChildOf
 
@@ -441,9 +446,14 @@ namespace dss {
     /** @copydoc foreachChildOf */
     template<class Cls>
     void foreachChildOf(Cls& _objRef, void(Cls::*_callback)(PropertyNode&)) {
-      for (PropertyList::iterator it = m_ChildNodes.begin(); it
-          != m_ChildNodes.end(); ++it) {
-        (_objRef.*_callback)(**it);
+      if(m_Aliased) {
+        m_AliasTarget->foreachChildOf(_objRef, _callback);
+      } else {
+        for (PropertyList::iterator it = m_ChildNodes.begin(); it
+            != m_ChildNodes.end(); ++it)
+        {
+          (_objRef.*_callback)(**it);
+        }
       }
     }
   public:
