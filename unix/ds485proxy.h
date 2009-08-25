@@ -135,6 +135,8 @@ namespace dss {
     Mutex m_IncomingFramesGuard;
     Mutex m_FrameBucketsGuard;
     CommandFrameSharedPtrVector m_IncomingFrames;
+
+    ModulatorSpec_t modulatorSpecFromFrame(boost::shared_ptr<DS485CommandFrame> _frame);
   protected:
     virtual void execute();
     virtual void doStart();
@@ -158,6 +160,7 @@ namespace dss {
 
     //------------------------------------------------ Specialized Commands (system)
     virtual std::vector<ModulatorSpec_t> getModulators();
+    virtual ModulatorSpec_t getModulatorSpec(const int _modulatorID);
 
     virtual std::vector<int> getZones(const int _modulatorID);
     virtual int getZoneCount(const int _modulatorID);

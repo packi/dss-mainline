@@ -503,6 +503,41 @@ namespace dss {
     }
   } // isSimAddress
 
+
+  ModulatorSpec_t DS485Proxy::modulatorSpecFromFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
+    int source = _frame->getHeader().getSource();
+
+    PayloadDissector pd(_frame->getPayload());
+    pd.get<uint8_t>();
+    uint16_t devID = pd.get<uint16_t>();
+    devID &= 0x00FF;
+    if(devID == 0) {
+      log("Found dSS");
+    } else if(devID == 1) {
+      log("Found dSM");
+    } else {
+      log(string("Found unknown device (") + intToString(devID) + ")");
+    }
+    uint16_t hwVersion = pd.get<uint16_t>();
+    uint16_t swVersion = pd.get<uint16_t>();
+
+    log(string("  HW-Version: ") + intToString(hwVersion >> 8) + "." + intToString(hwVersion && 0xFF00));
+    log(string("  SW-Version: ") + intToString(swVersion >> 8) + "." + intToString(swVersion && 0xFF00));
+
+    std::string name;
+    for(int i = 0; i < 6; i++) {
+      char c = static_cast<char>(pd.get<uint8_t>());
+      if(c != '\0') {
+        name += c;
+      }
+    }
+    log(string("  Name:      \"") + name + "\"");
+
+    // bus-id, sw-version, hw-version, name, device-id
+    ModulatorSpec_t spec(source, swVersion, hwVersion, name, devID);
+    return spec;
+  } // modulatorSpecFromFrame
+
   std::vector<ModulatorSpec_t> DS485Proxy::getModulators() {
     DS485CommandFrame cmdFrame;
     cmdFrame.getHeader().setDestination(0);
@@ -527,41 +562,31 @@ namespace dss {
         log(string("already received result from ") + intToString(source));
         continue;
       }
-      resultFrom[source] = true;
-
-      PayloadDissector pd(recFrame->getFrame()->getPayload());
-      pd.get<uint8_t>();
-      uint16_t devID = pd.get<uint16_t>();
-      devID &= 0x00FF;
-      if(devID == 0) {
-        log("Found dSS");
-      } else if(devID == 1) {
-        log("Found dSM");
-      } else {
-        log(string("Found unknown device (") + intToString(devID) + ")");
-      }
-      uint16_t hwVersion = pd.get<uint16_t>();
-      uint16_t swVersion = pd.get<uint16_t>();
-
-      log(string("  HW-Version: ") + intToString(hwVersion >> 8) + "." + intToString(hwVersion && 0xFF00));
-      log(string("  SW-Version: ") + intToString(swVersion >> 8) + "." + intToString(swVersion && 0xFF00));
-
-      std::string name;
-      for(int i = 0; i < 6; i++) {
-        char c = static_cast<char>(pd.get<uint8_t>());
-        if(c != '\0') {
-          name += c;
-        }
-      }
-      log(string("  Name:      \"") + name + "\"");
-
-      // bus-id, sw-version, hw-version, name, device-id
-      ModulatorSpec_t spec(source, swVersion, hwVersion, name, devID);
+      ModulatorSpec_t spec = modulatorSpecFromFrame(recFrame->getFrame());
       result.push_back(spec);
     }
 
     return result;
   } // getModulators
+
+  ModulatorSpec_t DS485Proxy::getModulatorSpec(const int _modulatorID) {
+    DS485CommandFrame cmdFrame;
+    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setBroadcast(true);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionGetTypeRequest);
+    log("Proxy: getModulatorSpec");
+
+    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionGetTypeRequest);
+
+    if(recFrame.get() == NULL) {
+      throw new runtime_error("No frame received");
+    }
+
+    ModulatorSpec_t result = modulatorSpecFromFrame(recFrame->getFrame());
+
+    return result;
+  } // getModulatorSpec
 
   int DS485Proxy::getGroupCount(const int _modulatorID, const int _zoneID) {
     DS485CommandFrame cmdFrame;

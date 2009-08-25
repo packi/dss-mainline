@@ -709,6 +709,92 @@ namespace dss {
     _zone.addGroup(grp);
   } // addDefaultGroupsToZone
 
+  void Apartment::scanModulator(Modulator& _modulator) {
+    DS485Interface& interface = DSS::getInstance()->getDS485Interface();
+    int modulatorID = _modulator.getBusID();
+
+    ModulatorSpec_t spec = interface.getModulatorSpec(modulatorID);
+    _modulator.setSoftwareVersion(spec.get<1>());
+    _modulator.setHardwareVersion(spec.get<2>());
+    _modulator.setHardwareName(spec.get<3>());
+    _modulator.setDeviceType(spec.get<4>());
+
+    int levelOrange, levelRed;
+    if(interface.getEnergyBorder(modulatorID, levelOrange, levelRed)) {
+      _modulator.setEnergyLevelOrange(levelOrange);
+      _modulator.setEnergyLevelRed(levelRed);
+    }
+
+    vector<int> zoneIDs = interface.getZones(modulatorID);
+    foreach(int zoneID, zoneIDs) {
+      log("  Found zone with id: " + intToString(zoneID));
+      Zone& zone = allocateZone(_modulator, zoneID);
+
+      vector<int> devices = interface.getDevicesInZone(modulatorID, zoneID);
+      foreach(int devID, devices) {
+        dsid_t dsid = interface.getDSIDOfDevice(modulatorID, devID);
+        vector<int> results = interface.sendCommand(cmdGetFunctionID, devID, modulatorID);
+        int functionID = 0;
+        if(results.size() == 1) {
+          functionID = results.front();
+        }
+        log("    Found device with id: " + intToString(devID));
+        log("    DSID:        " + dsid.toString());
+        log("    Function ID: " + unsignedLongIntToHexString(functionID));
+        Device& dev = allocateDevice(dsid);
+        dev.setShortAddress(devID);
+        dev.setModulatorID(modulatorID);
+        dev.setZoneID(zoneID);
+        dev.setFunctionID(functionID);
+        DeviceReference devRef(dev, *this);
+        zone.addDevice(devRef);
+        _modulator.addDevice(devRef);
+      }
+
+      vector<int> groupIDs = interface.getGroups(modulatorID, zoneID);
+      foreach(int groupID, groupIDs) {
+        log("    Found group with id: " + intToString(groupID));
+        vector<int> devingroup = interface.getDevicesInGroup(modulatorID, zoneID, groupID);
+
+        // TODO: read last called scene for group
+        foreach(int devID, devingroup) {
+          try {
+            log("     Adding device " + intToString(devID) + " to group " + intToString(groupID));
+            Device& dev = getDeviceByShortAddress(_modulator, devID);
+            dev.addToGroup(groupID);
+            if(zone.getGroup(groupID) == NULL) {
+              log("     Adding new group to zone");
+              zone.addGroup(new Group(groupID, zone.getZoneID(), *this));
+            }
+            zone.getGroup(groupID)->addDevice(DeviceReference(dev, *this));
+            try {
+              Group& group = getGroup(groupID);
+              group.addDevice(DeviceReference(dev, *this));
+            } catch(ItemNotFoundException&) {
+              Group* pGroup = new Group(groupID, 0, *this);
+              getZone(0).addGroup(pGroup);
+              pGroup->addDevice(DeviceReference(dev, *this));
+              log("     Adding new group to zone 0");
+            }
+          } catch(ItemNotFoundException& e) {
+            Logger::getInstance()->log("Could not find device with short-address " + intToString(devID) + " on modulator " + intToString(modulatorID), lsFatal);
+          }
+        }
+
+        // get last called scene for zone, group
+        try {
+          int lastCalledScene = interface.getLastCalledScene(modulatorID, zoneID, groupID);
+          Group* pGroup = zone.getGroup(groupID);
+          log(" zoneID: " + intToString(zoneID) + " groupID: " + intToString(groupID) + " lastScene: " + intToString(lastCalledScene));
+          assert(pGroup != NULL);
+          onGroupCallScene(zoneID, groupID, lastCalledScene);
+        } catch(runtime_error& error) {
+          log(string("Error getting last called scene '") + error.what() + "'", lsError);
+        }
+      }
+    }
+  } // scanModulator
+
   void Apartment::initializeFromBus() {
     DS485Interface& interface = DSS::getInstance()->getDS485Interface();
 
@@ -722,87 +808,57 @@ namespace dss {
       log("  DSID: " + modDSID.toString());
       Modulator& modulator = allocateModulator(modDSID);
       modulator.setBusID(modulatorID);
-      modulator.setSoftwareVersion(modulatorSpec.get<1>());
-      modulator.setHardwareVersion(modulatorSpec.get<2>());
-      modulator.setHardwareName(modulatorSpec.get<3>());
-      modulator.setDeviceType(modulatorSpec.get<4>());
-
-      int levelOrange, levelRed;
-      if(interface.getEnergyBorder(modulatorID, levelOrange, levelRed)) {
-        modulator.setEnergyLevelOrange(levelOrange);
-        modulator.setEnergyLevelRed(levelRed);
-      }
-
-      vector<int> zoneIDs = interface.getZones(modulatorID);
-      foreach(int zoneID, zoneIDs) {
-        log("  Found zone with id: " + intToString(zoneID));
-        Zone& zone = allocateZone(modulator, zoneID);
-
-        vector<int> devices = interface.getDevicesInZone(modulatorID, zoneID);
-        foreach(int devID, devices) {
-          dsid_t dsid = interface.getDSIDOfDevice(modulatorID, devID);
-          vector<int> results = interface.sendCommand(cmdGetFunctionID, devID, modulatorID);
-          int functionID = 0;
-          if(results.size() == 1) {
-            functionID = results.front();
-          }
-          log("    Found device with id: " + intToString(devID));
-          log("    DSID:        " + dsid.toString());
-          log("    Function ID: " + unsignedLongIntToHexString(functionID));
-          Device& dev = allocateDevice(dsid);
-          dev.setShortAddress(devID);
-          dev.setModulatorID(modulatorID);
-          dev.setZoneID(zoneID);
-          dev.setFunctionID(functionID);
-          DeviceReference devRef(dev, *this);
-          zone.addDevice(devRef);
-          modulator.addDevice(devRef);
-        }
-
-        vector<int> groupIDs = interface.getGroups(modulatorID, zoneID);
-        foreach(int groupID, groupIDs) {
-          log("    Found group with id: " + intToString(groupID));
-          vector<int> devingroup = interface.getDevicesInGroup(modulatorID, zoneID, groupID);
-
-          // TODO: read last called scene for group
-          foreach(int devID, devingroup) {
-            try {
-              log("     Adding device " + intToString(devID) + " to group " + intToString(groupID));
-              Device& dev = getDeviceByShortAddress(modulator, devID);
-              dev.addToGroup(groupID);
-              if(zone.getGroup(groupID) == NULL) {
-                log("     Adding new group to zone");
-                zone.addGroup(new Group(groupID, zone.getZoneID(), *this));
-              }
-              zone.getGroup(groupID)->addDevice(DeviceReference(dev, *this));
-              try {
-                Group& group = getGroup(groupID);
-                group.addDevice(DeviceReference(dev, *this));
-              } catch(ItemNotFoundException&) {
-                Group* pGroup = new Group(groupID, 0, *this);
-                getZone(0).addGroup(pGroup);
-                pGroup->addDevice(DeviceReference(dev, *this));
-                log("     Adding new group to zone 0");
-              }
-            } catch(ItemNotFoundException& e) {
-              Logger::getInstance()->log("Could not find device with short-address " + intToString(devID) + " on modulator " + intToString(modulatorID), lsFatal);
-            }
-          }
-
-          // get last called scene for zone, group
-          try {
-            int lastCalledScene = interface.getLastCalledScene(modulatorID, zoneID, groupID);
-            Group* pGroup = zone.getGroup(groupID);
-            log(" zoneID: " + intToString(zoneID) + " groupID: " + intToString(groupID) + " lastScene: " + intToString(lastCalledScene));
-            assert(pGroup != NULL);
-            onGroupCallScene(zoneID, groupID, lastCalledScene);
-          } catch(runtime_error& error) {
-            log(string("Error getting last called scene '") + error.what() + "'", lsError);
-          }
-        }
-      }
+      scanModulator(modulator);
     }
   } // initializeFromBus
+
+  void Apartment::handleModelEvents() {
+    if(!m_ModelEvents.empty()) {
+      ModelEvent& event = m_ModelEvents.front();
+      switch(event.getEventType()) {
+      case ModelEvent::etNewDevice:
+        if(event.getParameterCount() != 4) {
+          log("Expected exactly 4 parameter for ModelEvent::etNewDevice");
+        } else {
+          onAddDevice(event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3));
+        }
+        break;
+      case ModelEvent::etCallSceneDevice:
+        if(event.getParameterCount() != 3) {
+          log("Expected exactly 3 parameter for ModelEvent::etCallSceneDevice");
+        } else {
+          onDeviceCallScene(event.getParameter(0), event.getParameter(1), event.getParameter(2));
+        }
+        break;
+      case ModelEvent::etCallSceneGroup:
+        if(event.getParameterCount() != 3) {
+          log("Expected exactly 3 parameter for ModelEvent::etCallSceneGroup");
+        } else {
+          onGroupCallScene(event.getParameter(0), event.getParameter(1), event.getParameter(2));
+        }
+        break;
+      case ModelEvent::etModelDirty:
+        writeConfigurationToXML(DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile"));
+        break;
+      case ModelEvent::etDSLinkInterrupt:
+        if(event.getParameterCount() != 3) {
+          log("Expected exactly 3 parameter for ModelEvent::etDSLinkInterrupt");
+        } else {
+          onDSLinkInterrupt(event.getParameter(0), event.getParameter(1), event.getParameter(2));
+        }
+        break;
+      default:
+        assert(false);
+        break;
+      }
+
+      m_ModelEventsMutex.lock();
+      m_ModelEvents.erase(m_ModelEvents.begin());
+      m_ModelEventsMutex.unlock();
+    } else {
+      m_NewModelEvent.waitFor(1000);
+    }
+  } // handleModelEvents
 
   void Apartment::execute() {
     // load devices/modulators/etc. from a config-file
@@ -833,51 +889,7 @@ namespace dss {
     }
 
     while(!m_Terminated) {
-      if(!m_ModelEvents.empty()) {
-        ModelEvent& event = m_ModelEvents.front();
-        switch(event.getEventType()) {
-        case ModelEvent::etNewDevice:
-          if(event.getParameterCount() != 4) {
-            log("Expected exactly 4 parameter for ModelEvent::etNewDevice");
-          } else {
-            onAddDevice(event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3));
-          }
-          break;
-        case ModelEvent::etCallSceneDevice:
-          if(event.getParameterCount() != 3) {
-            log("Expected exactly 3 parameter for ModelEvent::etCallSceneDevice");
-          } else {
-            onDeviceCallScene(event.getParameter(0), event.getParameter(1), event.getParameter(2));
-          }
-          break;
-        case ModelEvent::etCallSceneGroup:
-          if(event.getParameterCount() != 3) {
-            log("Expected exactly 3 parameter for ModelEvent::etCallSceneGroup");
-          } else {
-            onGroupCallScene(event.getParameter(0), event.getParameter(1), event.getParameter(2));
-          }
-          break;
-        case ModelEvent::etModelDirty:
-          writeConfigurationToXML(DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile"));
-          break;
-        case ModelEvent::etDSLinkInterrupt:
-          if(event.getParameterCount() != 3) {
-            log("Expected exactly 3 parameter for ModelEvent::etDSLinkInterrupt");
-          } else {
-            onDSLinkInterrupt(event.getParameter(0), event.getParameter(1), event.getParameter(2));
-          }
-          break;
-        default:
-          assert(false);
-          break;
-        }
-
-        m_ModelEventsMutex.lock();
-        m_ModelEvents.erase(m_ModelEvents.begin());
-        m_ModelEventsMutex.unlock();
-      } else {
-        m_NewModelEvent.waitFor(1000);
-      }
+      handleModelEvents();
     }
   } // run
 

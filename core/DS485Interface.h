@@ -67,8 +67,11 @@ namespace dss {
     virtual void sendFrame(DS485CommandFrame& _frame) = 0;
 
     //------------------------------------------------ Specialized Commands (system)
-    /** Returns an std::vector containing the bus-ids of all modulators present. */
+    /** Returns an std::vector containing the modulator-spec of all modulators present. */
     virtual std::vector<ModulatorSpec_t> getModulators() = 0;
+
+    /** Returns the modulator-spec for a modulator */
+    virtual ModulatorSpec_t getModulatorSpec(const int _modulatorID) = 0;
 
     /** Returns a std::vector conatining the zone-ids of the specified modulator */
     virtual std::vector<int> getZones(const int _modulatorID) = 0;

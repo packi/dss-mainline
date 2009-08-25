@@ -794,6 +794,8 @@ namespace dss {
     /** Starts the event-processing */
     virtual void execute();
     void initializeFromBus();
+    void scanModulator(Modulator& _modulator);
+    void handleModelEvents();
   protected:
     virtual void doStart();
   public:
