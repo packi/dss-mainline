@@ -1195,7 +1195,7 @@ int dss__PropertyGetType(struct soap *soap, int _token, std::string _propertyNam
   }
 
   dss::PropertySystem& propSys = dss::DSS::getInstance()->getPropertySystem();
-  dss::PropertyNode* node = propSys.getProperty(_propertyName);
+  dss::PropertyNodePtr node = propSys.getProperty(_propertyName);
   if(node == NULL) {
     return soap_sender_fault(soap, "Property does not exist", NULL);
   }
@@ -1258,7 +1258,7 @@ int dss__PropertyGetInt(struct soap *soap, int _token, std::string _propertyName
   }
 
   dss::PropertySystem& propSys = dss::DSS::getInstance()->getPropertySystem();
-  dss::PropertyNode* node = propSys.getProperty(_propertyName);
+  dss::PropertyNodePtr node = propSys.getProperty(_propertyName);
   if(node == NULL) {
     return soap_sender_fault(soap, "Property does not exist", NULL);
   }
@@ -1273,7 +1273,7 @@ int dss__PropertyGetString(struct soap *soap, int _token, std::string _propertyN
   }
 
   dss::PropertySystem& propSys = dss::DSS::getInstance()->getPropertySystem();
-  dss::PropertyNode* node = propSys.getProperty(_propertyName);
+  dss::PropertyNodePtr node = propSys.getProperty(_propertyName);
   if(node == NULL) {
     return soap_sender_fault(soap, "Property does not exist", NULL);
   }
@@ -1288,7 +1288,7 @@ int dss__PropertyGetBool(struct soap *soap, int _token, std::string _propertyNam
   }
 
   dss::PropertySystem& propSys = dss::DSS::getInstance()->getPropertySystem();
-  dss::PropertyNode* node = propSys.getProperty(_propertyName);
+  dss::PropertyNodePtr node = propSys.getProperty(_propertyName);
   if(node == NULL) {
     return soap_sender_fault(soap, "Property does not exist", NULL);
   }
@@ -1303,7 +1303,7 @@ int dss__PropertyGetChildren(struct soap *soap, int _token, std::string _propert
   }
 
   dss::PropertySystem& propSys = dss::DSS::getInstance()->getPropertySystem();
-  dss::PropertyNode* node = propSys.getProperty(_propertyName);
+  dss::PropertyNodePtr node = propSys.getProperty(_propertyName);
   if(node == NULL) {
     return soap_sender_fault(soap, "Property does not exist", NULL);
   }

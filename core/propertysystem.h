@@ -302,7 +302,7 @@ namespace dss {
   /** Notifies a class if one or many properties change. */
   class PropertyListener {
   private:
-    std::vector<PropertyNodePtr> m_Properties;
+    std::vector<PropertyNode*> m_Properties;
   protected:
     friend class PropertyNode;
     /** Function that gets called if a property changes. */
@@ -319,6 +319,8 @@ namespace dss {
   }; // PropertyListener
 
 
+  typedef std::vector<PropertyNodePtr> PropertyList;
+
   /** The heart of the PropertySystem. */
   class PropertyNode : public boost::enable_shared_from_this<PropertyNode> {
   private:
@@ -328,12 +330,15 @@ namespace dss {
       PropertyProxy<int>* intProxy;
       PropertyProxy<std::string>* stringProxy;
     } m_Proxy;
-    std::vector<PropertyNodePtr> m_ChildNodes;
+    PropertyList m_ChildNodes;
+    std::vector<PropertyNode*> m_AliasedBy;
     std::vector<PropertyListener*> m_Listeners;
     PropertyNode* m_ParentNode;
     std::string m_Name;
     mutable std::string m_DisplayName;
     bool m_LinkedToProxy;
+    bool m_Aliased;
+    PropertyNode* m_AliasTarget;
     int m_Index;
   private:
     void clearValue();
@@ -395,6 +400,8 @@ namespace dss {
     /** Returns the type of the property. */
     aValueType getValueType();
 
+    void alias(PropertyNodePtr _target);
+
     // proxy support
     /** Links to the given proxy.
      * The incoming proxy will get cloned. */
@@ -424,7 +431,7 @@ namespace dss {
 
     /** Performs \a _callback for each child node (non-recursive) */
     void foreachChildOf(void(*_callback)(PropertyNode&)) {
-      for (std::vector<PropertyNodePtr>::iterator it = m_ChildNodes.begin(); it
+      for (PropertyList::iterator it = m_ChildNodes.begin(); it
           != m_ChildNodes.end(); ++it) {
         (*_callback)(**it);
       }
@@ -434,7 +441,7 @@ namespace dss {
     /** @copydoc foreachChildOf */
     template<class Cls>
     void foreachChildOf(Cls& _objRef, void(Cls::*_callback)(PropertyNode&)) {
-      for (std::vector<PropertyNodePtr>::iterator it = m_ChildNodes.begin(); it
+      for (PropertyList::iterator it = m_ChildNodes.begin(); it
           != m_ChildNodes.end(); ++it) {
         (_objRef.*_callback)(**it);
       }

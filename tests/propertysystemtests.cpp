@@ -23,6 +23,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <iostream>
 
 using namespace std;
@@ -62,7 +63,7 @@ using namespace dss;
 BOOST_AUTO_TEST_SUITE(PropertySystemTests)
 
 BOOST_AUTO_TEST_CASE(testPropertySystem) {
-  PropertySystem* propSys = new PropertySystem();
+  boost::scoped_ptr<PropertySystem> propSys(new PropertySystem());
   PropertyNodePtr propND1 = propSys->createProperty("/config");
   PropertyNodePtr propND2 = propSys->createProperty("/system");
   PropertyNodePtr propND3(new PropertyNode("UI"));
@@ -155,8 +156,78 @@ BOOST_AUTO_TEST_CASE(testPropertySystem) {
   propND1->setIntegerValue(5);
   BOOST_CHECK_EQUAL(5, propND1->getIntegerValue());
   propND1->unlinkProxy();
-
-  delete propSys;
 } // testPropertySystem
+
+BOOST_AUTO_TEST_CASE(testAliases) {
+  boost::scoped_ptr<PropertySystem> propSys(new PropertySystem());
+
+  propSys->createProperty("/config/zone0/device1");
+  propSys->createProperty("/config/zone0/device1/name")->setStringValue("dev1");
+  propSys->createProperty("/config/zone0/device1/dsid")->setIntegerValue(1111);
+  propSys->createProperty("/config/zone0/device1/isOn")->setBooleanValue(false);
+  propSys->createProperty("/config/zone0/device2");
+  propSys->createProperty("/config/zone0/device3");
+  propSys->createProperty("/config/zone0/device4");
+
+  propSys->createProperty("/config/zone1");
+  propSys->createProperty("/config/zone2");
+
+  propSys->createProperty("/config/zone1/device1")->alias(propSys->getProperty("/config/zone0/device1"));
+
+  BOOST_CHECK_EQUAL(propSys->getStringValue("/config/zone1/device1/name"), "dev1");
+  BOOST_CHECK_EQUAL(propSys->getIntValue("/config/zone1/device1/dsid"), 1111);
+  BOOST_CHECK_EQUAL(propSys->getBoolValue("/config/zone1/device1/isOn"), false);
+
+  propSys->setStringValue("/config/zone1/device1/name", "new name");
+
+  BOOST_CHECK_EQUAL(propSys->getStringValue("/config/zone1/device1/name"), "new name");
+  BOOST_CHECK_EQUAL(propSys->getStringValue("/config/zone0/device1/name"), "new name");
+
+  propSys->setIntValue("/config/zone1/device1/dsid", 1234);
+
+  BOOST_CHECK_EQUAL(propSys->getIntValue("/config/zone1/device1/dsid"), 1234);
+  BOOST_CHECK_EQUAL(propSys->getIntValue("/config/zone0/device1/dsid"), 1234);
+
+  propSys->setBoolValue("/config/zone1/device1/isOn", true);
+
+  BOOST_CHECK_EQUAL(propSys->getBoolValue("/config/zone1/device1/isOn"), true);
+  BOOST_CHECK_EQUAL(propSys->getBoolValue("/config/zone0/device1/isOn"), true);
+
+  // move the alias
+  propSys->getProperty("/config/zone2")->addChild(propSys->getProperty("/config/zone1/device1"));
+
+  BOOST_CHECK_EQUAL(propSys->getStringValue("/config/zone2/device1/name"), "new name");
+  BOOST_CHECK_EQUAL(propSys->getIntValue("/config/zone2/device1/dsid"), 1234);
+  BOOST_CHECK_EQUAL(propSys->getBoolValue("/config/zone2/device1/isOn"), true);
+
+  // move the alias target
+  propSys->getProperty("/config/zone1")->addChild(propSys->getProperty("/config/zone0/device1"));
+
+  BOOST_CHECK_EQUAL(propSys->getStringValue("/config/zone2/device1/name"), "new name");
+  BOOST_CHECK_EQUAL(propSys->getIntValue("/config/zone2/device1/dsid"), 1234);
+  BOOST_CHECK_EQUAL(propSys->getBoolValue("/config/zone2/device1/isOn"), true);
+
+  // un-alias
+  propSys->getProperty("/config/zone2/device1")->alias(PropertyNodePtr());
+
+  BOOST_CHECK(propSys->getProperty("/config/zone2/device1") != NULL);
+  BOOST_CHECK(propSys->getProperty("/config/zone2/device1/name") == NULL);
+  BOOST_CHECK(propSys->getProperty("/config/zone2/device1/dsid") == NULL);
+  BOOST_CHECK(propSys->getProperty("/config/zone2/device1/isOn") == NULL);
+
+  propSys->getProperty("/config/zone2/device1")->alias(propSys->getProperty("/config/zone1/device1"));
+  BOOST_CHECK(propSys->getProperty("/config/zone2/device1") != NULL);
+  BOOST_CHECK(propSys->getProperty("/config/zone2/device1/name") != NULL);
+  BOOST_CHECK(propSys->getProperty("/config/zone2/device1/dsid") != NULL);
+  BOOST_CHECK(propSys->getProperty("/config/zone2/device1/isOn") != NULL);
+
+  // remove alias
+  propSys->getProperty("/config/zone1")->removeChild(propSys->getProperty("/config/zone1/device1"));
+
+  BOOST_CHECK(propSys->getProperty("/config/zone2/device1") != NULL);
+  BOOST_CHECK(propSys->getProperty("/config/zone2/device1/name") == NULL);
+  BOOST_CHECK(propSys->getProperty("/config/zone2/device1/dsid") == NULL);
+  BOOST_CHECK(propSys->getProperty("/config/zone2/device1/isOn") == NULL);
+} // testAliases
 
 BOOST_AUTO_TEST_SUITE_END()

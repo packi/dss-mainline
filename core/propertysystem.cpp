@@ -30,6 +30,8 @@
 #include <cassert>
 #include <cstring>
 
+#include "foreach.h"
+
 namespace dss {
 
   const int PROPERTY_FORMAT_VERSION = 1;
@@ -283,55 +285,83 @@ namespace dss {
     : m_ParentNode(NULL),
       m_Name(_name),
       m_LinkedToProxy(false),
+      m_Aliased(false),
       m_Index(_index)
   {
     memset(&m_PropVal, '\0', sizeof(aPropertyValue));
   } // ctor
 
   PropertyNode::~PropertyNode() {
+    // tell our parent node that we're gone
     if(m_ParentNode != NULL) {
       m_ParentNode->removeChild(shared_from_this());
     }
-    for(std::vector<PropertyNodePtr>::iterator it = m_ChildNodes.begin();
-         it != m_ChildNodes.end();) {
+    // un-alias our aliases
+    for(std::vector<PropertyNode*>::iterator it = m_AliasedBy.begin();
+        it != m_AliasedBy.end();)
+    {
+      (*it)->alias(PropertyNodePtr());
+    }
+    // remove from alias targets list
+    if(m_Aliased) {
+      m_Aliased = false;
+      std::vector<PropertyNode*>::iterator it = find(m_AliasTarget->m_AliasedBy.begin(), m_AliasTarget->m_AliasedBy.end(), this);
+      if(it != m_AliasTarget->m_AliasedBy.end()) {
+        m_AliasTarget->m_AliasedBy.erase(it);
+      } else {
+        assert(false); // we have to be in that list, or else something went horribly wrong
+      }
+      m_AliasTarget = NULL;
+    }
+    // remove all child nodes
+    for(PropertyList::iterator it = m_ChildNodes.begin();
+         it != m_ChildNodes.end();)
+    {
       childRemoved(*it);
       (*it)->m_ParentNode = NULL; // prevent the child-node from calling removeChild
       it = m_ChildNodes.erase(it);
     }
+    // remove listeners
     for(std::vector<PropertyListener*>::iterator it = m_Listeners.begin();
         it != m_Listeners.end();)
     {
       (*it)->unregisterProperty(shared_from_this());
       it = m_Listeners.erase(it);
     }
-    if(m_PropVal.valueType == vTypeString) {
-      free(m_PropVal.actualValue.pString);
-    }
+    clearValue();
   } // dtor
 
   PropertyNodePtr PropertyNode::removeChild(PropertyNodePtr _childNode) {
-    std::vector<PropertyNodePtr>::iterator it = std::find(m_ChildNodes.begin(), m_ChildNodes.end(), _childNode);
-    if(it != m_ChildNodes.end()) {
-      m_ChildNodes.erase(it);
+    if(m_Aliased) {
+      return m_AliasTarget->removeChild(_childNode);
+    } else {
+      PropertyList::iterator it = std::find(m_ChildNodes.begin(), m_ChildNodes.end(), _childNode);
+      if(it != m_ChildNodes.end()) {
+        m_ChildNodes.erase(it);
+      }
+      _childNode->m_ParentNode = NULL;
+      childRemoved(_childNode);
+      return _childNode;
     }
-    _childNode->m_ParentNode = NULL;
-    childRemoved(_childNode);
-    return _childNode;
   }
 
   void PropertyNode::addChild(PropertyNodePtr _childNode) {
-    if(_childNode.get() == this) {
-      throw std::runtime_error("Adding self as child node");
+    if(m_Aliased) {
+      m_AliasTarget->removeChild(_childNode);
+    } else {
+      if(_childNode.get() == this) {
+        throw std::runtime_error("Adding self as child node");
+      }
+      if(_childNode.get() == NULL) {
+        throw std::runtime_error("Adding NULL as child node");
+      }
+      if(_childNode->m_ParentNode != NULL) {
+        _childNode->m_ParentNode->removeChild(_childNode);
+      }
+      _childNode->m_ParentNode = this;
+      m_ChildNodes.push_back(_childNode);
+      childAdded(_childNode);
     }
-    if(_childNode.get() == NULL) {
-      throw std::runtime_error("Adding NULL as child node");
-    }
-    if(_childNode->m_ParentNode != NULL) {
-      _childNode->m_ParentNode->removeChild(_childNode);
-    }
-    _childNode->m_ParentNode = this;
-    m_ChildNodes.push_back(_childNode);
-    childAdded(_childNode);
   } // addChild
 
   const std::string& PropertyNode::getDisplayName() const {
@@ -346,104 +376,122 @@ namespace dss {
   } // getDisplayName
 
   PropertyNodePtr PropertyNode::getProperty(const std::string& _propPath) {
-    std::string propPath = _propPath;
-    std::string propName = _propPath;
-    std::string::size_type slashPos = propPath.find('/');
-    if(slashPos != std::string::npos) {
-      propName = propPath.substr(0, slashPos);
-      propPath.erase(0, slashPos + 1);
-      PropertyNodePtr child = getPropertyByName(propName);
-      if(child != NULL) {
-        return child->getProperty(propPath);
-      } else {
-        return PropertyNodePtr();
-      }
+    if(m_Aliased) {
+      return m_AliasTarget->getProperty(_propPath);
     } else {
-      return getPropertyByName(propName);
+      std::string propPath = _propPath;
+      std::string propName = _propPath;
+      std::string::size_type slashPos = propPath.find('/');
+      if(slashPos != std::string::npos) {
+        propName = propPath.substr(0, slashPos);
+        propPath.erase(0, slashPos + 1);
+        PropertyNodePtr child = getPropertyByName(propName);
+        if(child != NULL) {
+          return child->getProperty(propPath);
+        } else {
+          return PropertyNodePtr();
+        }
+      } else {
+        return getPropertyByName(propName);
+      }
     }
   } // getProperty
 
   int PropertyNode::getAndRemoveIndexFromPropertyName(std::string& _propName) {
-    int result = 0;
-    std::string::size_type pos = _propName.find('[');
-    if(pos != std::string::npos) {
-      std::string::size_type end = _propName.find(']');
-      std::string indexAsString = _propName.substr(pos + 1, end - pos - 1);
-      _propName.erase(pos, end);
-      if(trim(indexAsString) == "last") {
-        result = -1;
-      } else {
-        result = atoi(indexAsString.c_str());
+    if(m_Aliased) {
+      return m_AliasTarget->getAndRemoveIndexFromPropertyName(_propName);
+    } else {
+      int result = 0;
+      std::string::size_type pos = _propName.find('[');
+      if(pos != std::string::npos) {
+        std::string::size_type end = _propName.find(']');
+        std::string indexAsString = _propName.substr(pos + 1, end - pos - 1);
+        _propName.erase(pos, end);
+        if(trim(indexAsString) == "last") {
+          result = -1;
+        } else {
+          result = atoi(indexAsString.c_str());
+        }
       }
+      return result;
     }
-    return result;
   } // getAndRemoveIndexFromPropertyName
 
   PropertyNodePtr PropertyNode::getPropertyByName(const std::string& _name) {
-    int index = 0;
-    std::string propName = _name;
-    index = getAndRemoveIndexFromPropertyName(propName);
+    if(m_Aliased) {
+      return m_AliasTarget->getPropertyByName(_name);
+    } else {
+      int index = 0;
+      std::string propName = _name;
+      index = getAndRemoveIndexFromPropertyName(propName);
 
-    int curIndex = 0;
-    int lastMatch = -1;
-    int numItem = 0;
-    for(std::vector<PropertyNodePtr>::iterator it = m_ChildNodes.begin();
-         it != m_ChildNodes.end(); it++) {
-      numItem++;
-      PropertyNodePtr cur = *it;
-      if(cur->m_Name == propName) {
-        if(curIndex == index) {
-          return cur;
+      int curIndex = 0;
+      int lastMatch = -1;
+      int numItem = 0;
+      for(PropertyList::iterator it = m_ChildNodes.begin();
+           it != m_ChildNodes.end(); it++) {
+        numItem++;
+        PropertyNodePtr cur = *it;
+        if(cur->m_Name == propName) {
+          if(curIndex == index) {
+            return cur;
+          }
+          curIndex++;
+          lastMatch = numItem - 1;
         }
-        curIndex++;
-        lastMatch = numItem - 1;
       }
-    }
-    if(index == -1) {
-      if(lastMatch != -1) {
-        return m_ChildNodes[ lastMatch ];
+      if(index == -1) {
+        if(lastMatch != -1) {
+          return m_ChildNodes[ lastMatch ];
+        }
       }
+      return PropertyNodePtr();
     }
-    return PropertyNodePtr();
   } // getPropertyName
 
   int PropertyNode::count(const std::string& _propertyName) {
-    int result = 0;
-    for(std::vector<PropertyNodePtr>::iterator it = m_ChildNodes.begin();
-         it != m_ChildNodes.end(); it++) {
-      PropertyNodePtr cur = *it;
-      if(cur->m_Name == _propertyName) {
-        result++;
+    if(m_Aliased) {
+      return m_AliasTarget->count(_propertyName);
+    } else {
+      int result = 0;
+      for(PropertyList::iterator it = m_ChildNodes.begin();
+           it != m_ChildNodes.end(); it++) {
+        PropertyNodePtr cur = *it;
+        if(cur->m_Name == _propertyName) {
+          result++;
+        }
       }
+      return result;
     }
-    return result;
   } // count
 
   void PropertyNode::clearValue() {
     if(m_PropVal.valueType == vTypeString) {
-      if(m_PropVal.actualValue.pString != NULL) {
-        free(m_PropVal.actualValue.pString);
-      }
+      free(m_PropVal.actualValue.pString);
     }
     memset(&m_PropVal, '\0', sizeof(aPropertyValue));
   } // clearValue
 
   void PropertyNode::setStringValue(const char* _value) {
-    if(m_LinkedToProxy) {
-      if(m_PropVal.valueType == vTypeString) {
-        m_Proxy.stringProxy->setValue(_value);
-      } else {
-        std::cerr << "*** setting std::string on a non std::string property";
-        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
-      }
+    if(m_Aliased) {
+      m_AliasTarget->setStringValue(_value);
     } else {
-      clearValue();
-      if(_value != NULL) {
-        m_PropVal.actualValue.pString = strdup(_value);
+      if(m_LinkedToProxy) {
+        if(m_PropVal.valueType == vTypeString) {
+          m_Proxy.stringProxy->setValue(_value);
+        } else {
+          std::cerr << "*** setting std::string on a non std::string property";
+          throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+        }
+      } else {
+        clearValue();
+        if(_value != NULL) {
+          m_PropVal.actualValue.pString = strdup(_value);
+        }
       }
+      m_PropVal.valueType = vTypeString;
+      propertyChanged();
     }
-    m_PropVal.valueType = vTypeString;
-    propertyChanged();
   } // setStringValue
 
   void PropertyNode::setStringValue(const std::string& _value) {
@@ -451,78 +499,128 @@ namespace dss {
   } // setStringValue
 
   void PropertyNode::setIntegerValue(const int _value) {
-    if(m_LinkedToProxy) {
-      if(m_PropVal.valueType == vTypeInteger) {
-        m_Proxy.intProxy->setValue(_value);
-      } else {
-        std::cerr << "*** setting integer on a non integer property";
-        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
-      }
+    if(m_Aliased) {
+      m_AliasTarget->setIntegerValue(_value);
     } else {
-      clearValue();
-      m_PropVal.actualValue.integer = _value;
+      if(m_LinkedToProxy) {
+        if(m_PropVal.valueType == vTypeInteger) {
+          m_Proxy.intProxy->setValue(_value);
+        } else {
+          std::cerr << "*** setting integer on a non integer property";
+          throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+        }
+      } else {
+        clearValue();
+        m_PropVal.actualValue.integer = _value;
+      }
+      m_PropVal.valueType = vTypeInteger;
+      propertyChanged();
     }
-    m_PropVal.valueType = vTypeInteger;
-    propertyChanged();
   } // setIntegerValue
 
   void PropertyNode::setBooleanValue(const bool _value) {
-    if(m_LinkedToProxy) {
-      if(m_PropVal.valueType == vTypeBoolean) {
-        m_Proxy.boolProxy->setValue(_value);
-      } else {
-        std::cerr << "*** setting bool on a non booleanproperty";
-        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
-      }
+    if(m_Aliased) {
+      m_AliasTarget->setBooleanValue(_value);
     } else {
-      clearValue();
-      m_PropVal.actualValue.boolean = _value;
+      if(m_LinkedToProxy) {
+        if(m_PropVal.valueType == vTypeBoolean) {
+          m_Proxy.boolProxy->setValue(_value);
+        } else {
+          std::cerr << "*** setting bool on a non booleanproperty";
+          throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+        }
+      } else {
+        clearValue();
+        m_PropVal.actualValue.boolean = _value;
+      }
+      m_PropVal.valueType = vTypeBoolean;
+      propertyChanged();
     }
-    m_PropVal.valueType = vTypeBoolean;
-    propertyChanged();
   } // setBooleanValue
 
   std::string PropertyNode::getStringValue() {
-    if(m_PropVal.valueType == vTypeString) {
-      if(m_LinkedToProxy) {
-        return m_Proxy.stringProxy->getValue();
-      } else {
-        return m_PropVal.actualValue.pString;
-      }
+    if(m_Aliased) {
+      return m_AliasTarget->getStringValue();
     } else {
-      std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
-      throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+      if(m_PropVal.valueType == vTypeString) {
+        if(m_LinkedToProxy) {
+          return m_Proxy.stringProxy->getValue();
+        } else {
+          return m_PropVal.actualValue.pString;
+        }
+      } else {
+        std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
+        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+      }
     }
   } // getStringValue
 
   int PropertyNode::getIntegerValue() {
-    if(m_PropVal.valueType == vTypeInteger) {
-      if(m_LinkedToProxy) {
-        return m_Proxy.intProxy->getValue();
-      } else {
-        return m_PropVal.actualValue.integer;
-      }
+    if(m_Aliased) {
+      return m_AliasTarget->getIntegerValue();
     } else {
-      std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
-      throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+      if(m_PropVal.valueType == vTypeInteger) {
+        if(m_LinkedToProxy) {
+          return m_Proxy.intProxy->getValue();
+        } else {
+          return m_PropVal.actualValue.integer;
+        }
+      } else {
+        std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
+        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+      }
     }
   } // getIntegerValue
 
   bool PropertyNode::getBoolValue() {
-    if(m_PropVal.valueType == vTypeBoolean) {
-      if(m_LinkedToProxy) {
-        return m_Proxy.boolProxy->getValue();
-      } else {
-        return m_PropVal.actualValue.boolean;
-      }
+    if(m_Aliased) {
+      return m_AliasTarget->getBoolValue();
     } else {
-      std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
-      throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+      if(m_PropVal.valueType == vTypeBoolean) {
+        if(m_LinkedToProxy) {
+          return m_Proxy.boolProxy->getValue();
+        } else {
+          return m_PropVal.actualValue.boolean;
+        }
+      } else {
+        std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
+        throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
+      }
     }
   } // getBoolValue
 
-  bool PropertyNode::linkToProxy(const PropertyProxy<bool>& _proxy) {
+  void PropertyNode::alias(PropertyNodePtr _target) {
+    if(m_ChildNodes.size() > 0) {
+      throw std::runtime_error("Cannot alias node if it has children");
+    }
     if(m_LinkedToProxy) {
+      throw std::runtime_error("Cannot alias node if it is linked to a proxy");
+    }
+    if(_target == NULL) {
+      if(m_Aliased) {
+        if(m_AliasTarget != NULL) {
+          std::vector<PropertyNode*>::iterator it = find(m_AliasTarget->m_AliasedBy.begin(), m_AliasTarget->m_AliasedBy.end(), this);
+          if(it != m_AliasTarget->m_AliasedBy.end()) {
+            m_AliasTarget->m_AliasedBy.erase(it);
+          } else {
+            assert(false); // if we're not in that list something went horibly wrong
+          }
+          m_AliasTarget = NULL;
+          m_Aliased = false;
+        } else {
+          throw std::runtime_error("Node is flagged as aliased but m_AliasTarget is NULL");
+        }
+      }
+    } else {
+      clearValue();
+      m_AliasTarget = _target.get();
+      m_Aliased = true;
+      m_AliasTarget->m_AliasedBy.push_back(this);
+    }
+  }
+
+  bool PropertyNode::linkToProxy(const PropertyProxy<bool>& _proxy) {
+    if(m_LinkedToProxy || m_Aliased) {
       return false;
     }
     m_Proxy.boolProxy = _proxy.clone();
@@ -532,7 +630,7 @@ namespace dss {
   } // linkToProxy
 
   bool PropertyNode::linkToProxy(const PropertyProxy<int>& _proxy) {
-    if(m_LinkedToProxy) {
+    if(m_LinkedToProxy || m_Aliased) {
       return false;
     }
     m_Proxy.intProxy = _proxy.clone();
@@ -542,7 +640,7 @@ namespace dss {
   } // linkToProxy
 
   bool PropertyNode::linkToProxy(const PropertyProxy<std::string>& _proxy) {
-    if(m_LinkedToProxy) {
+    if(m_LinkedToProxy || m_Aliased) {
       return false;
     }
     m_Proxy.stringProxy = _proxy.clone();
@@ -577,31 +675,35 @@ namespace dss {
 
 
   aValueType PropertyNode::getValueType() {
-    return m_PropVal.valueType;
+    return m_Aliased ? m_AliasTarget->m_PropVal.valueType : m_PropVal.valueType;
   } // getValueType
 
 
   std::string PropertyNode::getAsString() {
-    std::string result;
+    if(m_Aliased) {
+      return m_AliasTarget->getAsString();
+    } else {
+      std::string result;
 
-    switch(getValueType()) {
-      case vTypeString:
-        result = getStringValue();
-        break;
-      case vTypeInteger:
-        result = intToString(getIntegerValue());
-        break;
-      case vTypeBoolean:
-        if(getBoolValue()) {
-          result = "true";
-        } else {
-          result = "false";
-        }
-        break;
-      default:
-        result = "";
+      switch(getValueType()) {
+        case vTypeString:
+          result = getStringValue();
+          break;
+        case vTypeInteger:
+          result = intToString(getIntegerValue());
+          break;
+        case vTypeBoolean:
+          if(getBoolValue()) {
+            result = "true";
+          } else {
+            result = "false";
+          }
+          break;
+        default:
+          result = "";
+      }
+      return result;
     }
-    return result;
   } // getAsString
 
   void PropertyNode::addListener(PropertyListener* _listener) {
@@ -617,26 +719,30 @@ namespace dss {
   } // removeListener
 
   PropertyNodePtr PropertyNode::createProperty(const std::string& _propPath) {
-    std::string nextOne = getRoot(_propPath);
-    std::string remainder = _propPath;
-    remainder.erase(0, nextOne.length() + 1);
-    PropertyNodePtr nextNode;
-    if((nextNode = getPropertyByName(nextOne)) == NULL) {
-      if(nextOne[ nextOne.length() - 1 ] == '+') {
-        nextOne.erase(nextOne.length() - 1, 1);
-      }
-      int index = getAndRemoveIndexFromPropertyName(nextOne);
-      if(index == 0) {
-        index = count(nextOne) + 1;
-      }
-      nextNode.reset(new PropertyNode(nextOne.c_str(), index));
-      addChild(nextNode);
-    }
-
-    if(remainder.length() > 0) {
-      return nextNode->createProperty(remainder);
+    if(m_Aliased) {
+      return m_AliasTarget->createProperty(_propPath);
     } else {
-      return nextNode;
+      std::string nextOne = getRoot(_propPath);
+      std::string remainder = _propPath;
+      remainder.erase(0, nextOne.length() + 1);
+      PropertyNodePtr nextNode;
+      if((nextNode = getPropertyByName(nextOne)) == NULL) {
+        if(nextOne[ nextOne.length() - 1 ] == '+') {
+          nextOne.erase(nextOne.length() - 1, 1);
+        }
+        int index = getAndRemoveIndexFromPropertyName(nextOne);
+        if(index == 0) {
+          index = count(nextOne) + 1;
+        }
+        nextNode.reset(new PropertyNode(nextOne.c_str(), index));
+        addChild(nextNode);
+      }
+
+      if(remainder.length() > 0) {
+        return nextNode->createProperty(remainder);
+      } else {
+        return nextNode;
+      }
     }
   }
 
@@ -660,7 +766,7 @@ namespace dss {
       xmlTextWriterWriteElement(_writer, (xmlChar*)"value", (xmlChar*)getAsString().c_str());
     }
 
-    for(std::vector<PropertyNodePtr>::iterator it = m_ChildNodes.begin();
+    for(PropertyList::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end(); ++it) {
       if(!(*it)->saveAsXML(_writer)) {
         return false;
@@ -747,6 +853,9 @@ namespace dss {
         m_ParentNode->notifyListeners(_callback);
       }
     }
+    foreach(PropertyNode* prop, m_AliasedBy) {
+      prop->notifyListeners(_callback);
+    }
   } // notifyListeners
 
   void PropertyNode::notifyListeners(void (PropertyListener::*_callback)(PropertyNodePtr,PropertyNodePtr), PropertyNodePtr _node) {
@@ -761,13 +870,16 @@ namespace dss {
         m_ParentNode->notifyListeners(_callback, _node);
       }
     }
+    foreach(PropertyNode* prop, m_AliasedBy) {
+      prop->notifyListeners(_callback, _node);
+    }
   } // notifyListeners
 
 
   //=============================================== PropertyListener
 
   PropertyListener::~PropertyListener() {
-    std::vector<PropertyNodePtr>::iterator it;
+    std::vector<PropertyNode*>::iterator it;
     for(it = m_Properties.begin(); it != m_Properties.end(); ++it) {
       (*it)->removeListener(this);
     }
@@ -783,11 +895,11 @@ namespace dss {
   } // propertyAdded
 
   void PropertyListener::registerProperty(PropertyNodePtr _node) {
-    m_Properties.push_back(_node);
+    m_Properties.push_back(_node.get());
   } // registerProperty
 
   void PropertyListener::unregisterProperty(PropertyNodePtr _node) {
-   std::vector<PropertyNodePtr>::iterator it = std::find(m_Properties.begin(), m_Properties.end(), _node);
+    std::vector<PropertyNode*>::iterator it = std::find(m_Properties.begin(), m_Properties.end(), _node.get());
     if(it != m_Properties.end()) {
       m_Properties.erase(it);
     }
