@@ -7,11 +7,12 @@ IF(NOT WITH_DATADIR)
 	SET(WITH_DATADIR "data/" CACHE FILEPATH "Data directory")
 ENDIF(NOT WITH_DATADIR)
 
+SET(REQUIRED_LIBS)
 
 INCLUDE (${CMAKE_ROOT}/Modules/FindLibXml2.cmake)
 IF (LIBXML2_FOUND)
 	INCLUDE_DIRECTORIES (${LIBXML2_INCLUDE_DIR})
-	LINK_LIBRARIES (${LIBXML2_LIBRARIES})
+	SET(REQUIRED_LIBS ${REQUIRED_LIBS} ${LIBXML2_LIBRARIES})
 ELSE (LIBXML2_FOUND)
 	MESSAGE (FATAL_ERROR "Cannot build without LibXML2. Please install
 	LibXML2.")
@@ -26,10 +27,10 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   INCLUDE_DIRECTORIES(/opt/local/include)
   SET(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} /opt/local/include)
   LINK_DIRECTORIES(/opt/local/lib)
-  LINK_LIBRARIES(boost_filesystem-mt boost_system-mt boost_program_options-mt PocoFoundation PocoNet)
+  SET(REQUIRED_LIBS ${REQUIRED_LIBS}  boost_filesystem-mt boost_system-mt boost_program_options-mt PocoFoundation PocoNet)
   SET(DNS_SD_LIB)
 ELSE(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  LINK_LIBRARIES(boost_filesystem-mt boost_program_options-mt rt)
+  SET(REQUIRED_LIBS ${REQUIRED_LIBS} boost_filesystem-mt boost_program_options-mt rt)
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -40,7 +41,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   ENDIF(HAVE_WNO_DEPRECATED)
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
-LINK_LIBRARIES(PocoFoundation PocoNet)
+SET(REQUIRED_LIBS ${REQUIRED_LIBS} PocoFoundation PocoNet)
 
 # header tests
 INCLUDE(CheckIncludeFiles)
@@ -95,17 +96,19 @@ ADD_SUBDIRECTORY(doc)
 
 LINK_DIRECTORIES(${DSS_BINARY_DIR}/core ${DSS_BINARY_DIR}/unix ${DSS_BINARY_DIR}/tests)
 
+
+SET(REQUIRED_LIBS ${REQUIRED_LIBS} gsoap++ PocoXML ${MOZJS} ${DNS_SD_LIB}
+	${BOOST_TEST_LIB} dl ical)
+
 SET(BOOST_TEST_LIB)
 SET(TEST_LIB)
 IF(WITH_TESTS) 
-  ADD_SUBDIRECTORY(tests)
   SET(BOOST_TEST_LIB boost_unit_test_framework-mt)
   SET(TEST_LIB tests)
+  ADD_SUBDIRECTORY(tests)
 ENDIF(WITH_TESTS)
 
 ADD_EXECUTABLE(dss main.cpp namespaces.cpp)
 
-LINK_LIBRARIES(gsoap++)
-
-TARGET_LINK_LIBRARIES(dss ${TEST_LIB} core unix webservices pthread shttpd
-	ical dl PocoXML ${MOZJS} ${DNS_SD_LIB} ${BOOST_TEST_LIB})
+TARGET_LINK_LIBRARIES(dss ${TEST_LIB} ${BOOST_TEST_LIB} core unix webservices pthread
+	shttpd ${REQUIRED_LIBS})

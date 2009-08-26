@@ -7,7 +7,9 @@ add_executable( dsstests EXCLUDE_FROM_ALL testrunner.cpp ../namespaces.cpp
 	        eventtests.cpp  modeljstests.cpp  modeltests.cpp
 		        propertysystemtests.cpp  scriptstest.cpp
 			seriestests.cpp)
-target_link_libraries( dsstests -lboost_unit_test_framework-mt core unix webservices pthread shttpd ical PocoXML ${MOZJS} ${DNS_SD_LIB})
+
+target_link_libraries(dsstests ${BOOST_TEST_LIB} core unix webservices 
+	pthread shttpd ${REQUIRED_LIBS})
 
 add_custom_target( test
   COMMAND dsstests --report_level=detailed --log_level=all
