@@ -109,31 +109,31 @@ var DSSwitch = Class.create({
 		var newColor;
 		switch(this.groupID) {
 			case 1:
-				newColor = "#FFFF00"; /* light */
+				newColor = "#FFFF00"; /* yellow */
 				break;
 			case 2:
-				newColor = "#AAAAAA"; /* shadow */
+				newColor = "#AAAAAA"; /* gray */
 				break;
 			case 3:
-				newColor = "#0000FF"; /* climate */
+				newColor = "#0000FF"; /* blue */
 				break;
 			case 4:
-				newColor = "#00FFFF"; /* audio */
+				newColor = "#00FFFF"; /* cyan */
 				break;
 			case 5:
-				newColor = "#FF00FF"; /* video */
+				newColor = "#FF0000"; /* red */
 				break;
 			case 6:
-				newColor = "#FF0000"; /* security */
+				newColor = "#FF00FF"; /* magenta */
 				break;
 			case 7:
-				newColor = "#00FF00"; /* access */
+				newColor = "#00FF00"; /* green */
 				break;
 			case 8:
-				newColor = "#000000"; /* joker */
+				newColor = "#000000"; /* black */
 				break;
 			case 9:
-				newColor = "#FFFFFF"; /* custom */
+				newColor = "#FFFFFF"; /* white */
 				break;
 			default:
 				newColor = "#ff6600"; // orange is for unknown / broadcast groups

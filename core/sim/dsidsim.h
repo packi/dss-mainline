@@ -78,7 +78,7 @@ namespace dss {
     DSIDSimSwitch(const DSModulatorSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress, const int _numButtons)
     : DSIDSim(_simulator, _dsid, _shortAddress),
       m_NumberOfButtons(_numButtons),
-      m_DefaultColor(GroupIDlight),
+      m_DefaultColor(GroupIDYellow),
       m_IsBell(false)
     {};
     ~DSIDSimSwitch() {}
