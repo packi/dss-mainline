@@ -33,14 +33,14 @@
   <subscription event-name="blink" handler-name="raise_event">
     <parameter>
       <parameter name="event_name">turnOn</parameter>
-      <parameter name="location">.yellow</parameter>
+      <parameter name="location">.light</parameter>
     </parameter>
   </subscription>
   <subscription event-name="blink" handler-name="raise_event">
     <parameter>
       <parameter name="event_name">turnOff</parameter>
       <parameter name="time">+10</parameter>
-      <parameter name="location">.yellow</parameter>
+      <parameter name="location">.light</parameter>
     </parameter>
   </subscription>
   <subscription event-name="darker" handler-name="bus_handler">

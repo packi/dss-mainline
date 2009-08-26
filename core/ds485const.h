@@ -149,15 +149,15 @@ namespace dss {
   const uint16_t SceneFlagLocalOff = 0x0100;
 
   const int GroupIDBroadcast = 0;
-  const int GroupIDYellow = 1;
-  const int GroupIDGray = 2;
-  const int GroupIDBlue = 3;
-  const int GroupIDCyan = 4;
-  const int GroupIDRed = 5;
-  const int GroupIDViolet = 6;
-  const int GroupIDGreen = 7;
-  const int GroupIDBlack = 8;
-  const int GroupIDWhite = 9;
+  const int GroupIDlight = 1;
+  const int GroupIDshadow = 2;
+  const int GroupIDclimate = 3;
+  const int GroupIDaudio = 4;
+  const int GroupIDvideo = 5;
+  const int GroupIDsecurity = 6;
+  const int GroupIDaccess = 7;
+  const int GroupIDjoker = 8;
+  const int GroupIDcustom = 9;
   const int GroupIDDisplay = 10;
   const int GroupIDMax = GroupIDDisplay;
 

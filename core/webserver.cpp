@@ -1421,9 +1421,9 @@ namespace dss {
             break;
           case 5:
             {
-              if(groupID == GroupIDGreen) {
+              if(groupID == GroupIDaccess) {
                 getDSS().getApartment().getGroup(0).callScene(SceneBell);
-              } else if(groupID == GroupIDRed){
+              } else if(groupID == GroupIDsecurity){
                 getDSS().getApartment().getGroup(0).callScene(SceneAlarm);
               } else {
                 const int lastScene = pGroup->getLastCalledScene();

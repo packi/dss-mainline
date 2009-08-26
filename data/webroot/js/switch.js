@@ -126,23 +126,23 @@ function Switch(intoID, switchID, zoneID, groupID) {
   this.setGroup = function(_groupID) {
     self.groupID = _groupID;
     var newColor = "#ff6600"; // orange is for unknown / broadcast groups
-    if(_groupID == 1 /* yellow */) {
+    if(_groupID == 1 /* light */) {
       newColor = "#FFFF00";
-    } else if(_groupID == 2 /* gray */) {
+    } else if(_groupID == 2 /* shadow */) {
       newColor = "#AAAAAA";
-    } else if(_groupID == 3 /* blue */) {
+    } else if(_groupID == 3 /* climate */) {
       newColor = "#0000FF";
-    } else if(_groupID == 4 /* cyan */) {
+    } else if(_groupID == 4 /* audio */) {
       newColor = "#00FFFF";
-    } else if(_groupID == 5 /* red */) {
-      newColor = "#FF0000";
-    } else if(_groupID == 6 /* magenta */) {
+    } else if(_groupID == 5 /* video */) {
       newColor = "#FF00FF";
-    } else if(_groupID == 7 /* green */) {
+    } else if(_groupID == 6 /* security */) {
+      newColor = "#FF0000";
+    } else if(_groupID == 7 /* access */) {
       newColor = "#00FF00";
-    } else if(_groupID == 8 /* black */) {
+    } else if(_groupID == 8 /* joker */) {
       newColor = "#000000";
-    } else if(_groupID == 9 /* white */) {
+    } else if(_groupID == 9 /* custom */) {
       newColor = "#FFFFFF";
     }
     $(buttonIDTemplate + '5').style.backgroundColor = newColor;
