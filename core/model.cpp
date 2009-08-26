@@ -190,42 +190,6 @@ namespace dss {
     }
   } // setName
 
-  const DeviceLocation& Device::getLocation() const {
-    return m_Location;
-  } // getLocation
-
-  void Device::setLocation(const DeviceLocation& _value) {
-    m_Location = _value;
-    dirty();
-  } // setLocation
-
-  double Device::getLocationX() const {
-    return m_Location.get<0>();
-  } // getLocationX
-
-  double Device::getLocationY() const {
-    return m_Location.get<1>();
-  } // getLocationY
-
-  double Device::getLocationZ() const {
-    return m_Location.get<2>();
-  } // getLocationZ
-
-  void Device::setLocationX(const double _value) {
-    boost::get<0>(m_Location) = _value;
-    dirty();
-  } // setLocationX
-
-  void Device::setLocationY(const double _value) {
-    boost::get<1>(m_Location) = _value;
-    dirty();
-  } // setLocationY
-
-  void Device::setLocationZ(const double _value) {
-    boost::get<2>(m_Location) = _value;
-    dirty();
-  } // setLocationZ
-
   void Device::dirty() {
     if(m_pApartment != NULL) {
       m_pApartment->addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
@@ -964,47 +928,9 @@ namespace dss {
           /* discard node not found exceptions */
         }
 
-        DeviceLocation location;
-        bool locationIsValid = false;
-        try {
-          XMLNode& locationNode = iNode->getChildByName("location");
-          if(locationNode.hasChildWithName("x")) {
-            XMLNode& node = locationNode.getChildByName("x");
-            if(!node.getChildren().empty()) {
-              std::string valueStr = (node.getChildren()[0]).getContent();
-              if(!valueStr.empty()) {
-                boost::get<0>(location) = strToDouble(valueStr);
-              }
-            }
-          }
-          if(locationNode.hasChildWithName("y")) {
-            XMLNode& node = locationNode.getChildByName("y");
-            if(!node.getChildren().empty()) {
-              std::string valueStr = (node.getChildren()[0]).getContent();
-              if(!valueStr.empty()) {
-                boost::get<1>(location) = strToDouble(valueStr);
-              }
-            }
-          }
-          if(locationNode.hasChildWithName("z")) {
-            XMLNode& node = locationNode.getChildByName("z");
-            if(!node.getChildren().empty()) {
-              std::string valueStr = (node.getChildren()[0]).getContent();
-              if(!valueStr.empty()) {
-                boost::get<2>(location) = strToDouble(valueStr);
-              }
-            }
-          }
-          locationIsValid = true;
-        } catch(XMLException& e) {
-        }
-
         Device* newDevice = new Device(dsid, this);
         if(!name.empty()) {
           newDevice->setName(name);
-        }
-        if(locationIsValid) {
-          newDevice->setLocation(location);
         }
         m_StaleDevices.push_back(newDevice);
       }
@@ -1065,23 +991,7 @@ namespace dss {
       pNameNode->appendChild(txtNode);
       pDeviceNode->appendChild(pNameNode);
     }
-    AutoPtr<Element> pLocationNode = _pDocument->createElement("location");
-    AutoPtr<Element> pValueNode = _pDocument->createElement("x");
-    AutoPtr<Text> txtNode = _pDocument->createTextNode(doubleToString(_pDevice->getLocationX()));
-    pValueNode->appendChild(txtNode);
-    pLocationNode->appendChild(pValueNode);
 
-    pValueNode = _pDocument->createElement("y");
-    txtNode = _pDocument->createTextNode(doubleToString(_pDevice->getLocationY()));
-    pValueNode->appendChild(txtNode);
-    pLocationNode->appendChild(pValueNode);
-
-    pValueNode = _pDocument->createElement("z");
-    txtNode = _pDocument->createTextNode(doubleToString(_pDevice->getLocationZ()));
-    pValueNode->appendChild(txtNode);
-    pLocationNode->appendChild(pValueNode);
-
-    pDeviceNode->appendChild(pLocationNode);
     _parentNode->appendChild(pDeviceNode);
   } // deviceToXML
 

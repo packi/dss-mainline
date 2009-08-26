@@ -1198,43 +1198,6 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="DeviceSetLocation">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="location" type="dss:DeviceLocation" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="DeviceSetLocationResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="DeviceGetLocation">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="DeviceLocation">
-   <complexType>
-    <sequence>
-     <element name="x" type="xsd:double" minOccurs="1" maxOccurs="1"/>
-     <element name="y" type="xsd:double" minOccurs="1" maxOccurs="1"/>
-     <element name="z" type="xsd:double" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
   <element name="ModulatorGetPowerConsumption">
    <complexType>
     <sequence>
@@ -2168,22 +2131,6 @@
  <part name="parameters" element="dss:DeviceGetZoneIDResponse"/>
 </message>
 
-<message name="DeviceSetLocationRequest">
- <part name="parameters" element="dss:DeviceSetLocation"/>
-</message>
-
-<message name="DeviceSetLocationResponse">
- <part name="parameters" element="dss:DeviceSetLocationResponse"/>
-</message>
-
-<message name="DeviceGetLocation">
- <part name="parameters" element="dss:DeviceGetLocation"/>
-</message>
-
-<message name="DeviceLocation">
- <part name="parameters" element="DeviceLocation"/>
-</message>
-
 <message name="ModulatorGetPowerConsumptionRequest">
  <part name="parameters" element="dss:ModulatorGetPowerConsumption"/>
 </message>
@@ -2698,16 +2645,6 @@
   <documentation>Service definition of function dss__DeviceGetZoneID</documentation>
   <input message="tns:DeviceGetZoneIDRequest"/>
   <output message="tns:DeviceGetZoneIDResponse"/>
- </operation>
- <operation name="DeviceSetLocation">
-  <documentation>Service definition of function dss__DeviceSetLocation</documentation>
-  <input message="tns:DeviceSetLocationRequest"/>
-  <output message="tns:DeviceSetLocationResponse"/>
- </operation>
- <operation name="DeviceGetLocation">
-  <documentation>Service definition of function dss__DeviceGetLocation</documentation>
-  <input message="tns:DeviceGetLocation"/>
-  <output message="tns:DeviceLocation"/>
  </operation>
  <operation name="ModulatorGetPowerConsumption">
   <documentation>Service definition of function dss__ModulatorGetPowerConsumption</documentation>
@@ -3414,24 +3351,6 @@
   </output>
  </operation>
  <operation name="DeviceGetZoneID">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="DeviceSetLocation">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="DeviceGetLocation">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

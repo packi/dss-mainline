@@ -1009,30 +1009,6 @@ namespace dss {
       } else if(beginsWith(_method, "device/setName")) {
         pDevice->setName(_parameter["newName"]);
         return ResultToJSON(true);
-      } else if(beginsWith(_method, "device/getLocation")) {
-        const DeviceLocation& location = pDevice->getLocation();
-        stringstream sstream;
-        sstream << "{" << ToJSONValue("x") << ":" << ToJSONValue(location.get<0>()) << ","
-                       << ToJSONValue("y") << ":" << ToJSONValue(location.get<1>()) << ","
-                       << ToJSONValue("z") << ":" << ToJSONValue(location.get<2>())
-                << "}";
-        return JSONOk(sstream.str());
-      } else if(beginsWith(_method, "device/setLocation")) {
-        DeviceLocation location = pDevice->getLocation();
-        string strParam = _parameter["x"];
-        if(!strParam.empty()) {
-          boost::get<0>(location) = strToDouble(strParam);
-        }
-        strParam = _parameter["y"];
-        if(!strParam.empty()) {
-          boost::get<1>(location) = strToDouble(strParam);
-        }
-        strParam = _parameter["z"];
-        if(!strParam.empty()) {
-          boost::get<2>(location) = strToDouble(strParam);
-        }
-        pDevice->setLocation(location);
-        return ResultToJSON(true);
       } else if(beginsWith(_method, "device/dSLinkSend")) {
         int iValue = strToIntDef(_parameter["value"], -1);
         if(iValue == -1) {

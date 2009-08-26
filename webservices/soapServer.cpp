@@ -205,10 +205,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__DeviceGetName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetZoneID"))
 		return soap_serve_dss__DeviceGetZoneID(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:DeviceSetLocation"))
-		return soap_serve_dss__DeviceSetLocation(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetLocation"))
-		return soap_serve_dss__DeviceGetLocation(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ModulatorGetPowerConsumption"))
 		return soap_serve_dss__ModulatorGetPowerConsumption(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentGetModulatorIDs"))
@@ -2968,87 +2964,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetZoneID(struct soap *soap)
 	return soap_closesock(soap);
 }
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceSetLocation(struct soap *soap)
-{	struct dss__DeviceSetLocation soap_tmp_dss__DeviceSetLocation;
-	struct dss__DeviceSetLocationResponse soap_tmp_dss__DeviceSetLocationResponse;
-	soap_default_dss__DeviceSetLocationResponse(soap, &soap_tmp_dss__DeviceSetLocationResponse);
-	soap_default_dss__DeviceSetLocation(soap, &soap_tmp_dss__DeviceSetLocation);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__DeviceSetLocation(soap, &soap_tmp_dss__DeviceSetLocation, "dss:DeviceSetLocation", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__DeviceSetLocation(soap, soap_tmp_dss__DeviceSetLocation._token, soap_tmp_dss__DeviceSetLocation._deviceID, soap_tmp_dss__DeviceSetLocation._location, soap_tmp_dss__DeviceSetLocationResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__DeviceSetLocationResponse(soap, &soap_tmp_dss__DeviceSetLocationResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__DeviceSetLocationResponse(soap, &soap_tmp_dss__DeviceSetLocationResponse, "dss:DeviceSetLocationResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__DeviceSetLocationResponse(soap, &soap_tmp_dss__DeviceSetLocationResponse, "dss:DeviceSetLocationResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetLocation(struct soap *soap)
-{	struct dss__DeviceGetLocation soap_tmp_dss__DeviceGetLocation;
-	struct DeviceLocation result;
-	soap_default_DeviceLocation(soap, &result);
-	soap_default_dss__DeviceGetLocation(soap, &soap_tmp_dss__DeviceGetLocation);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__DeviceGetLocation(soap, &soap_tmp_dss__DeviceGetLocation, "dss:DeviceGetLocation", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__DeviceGetLocation(soap, soap_tmp_dss__DeviceGetLocation._token, soap_tmp_dss__DeviceGetLocation._deviceID, result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_DeviceLocation(soap, &result);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_DeviceLocation(soap, &result, "DeviceLocation", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_DeviceLocation(soap, &result, "DeviceLocation", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ModulatorGetPowerConsumption(struct soap *soap)
 {	struct dss__ModulatorGetPowerConsumption soap_tmp_dss__ModulatorGetPowerConsumption;

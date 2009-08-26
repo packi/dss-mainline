@@ -1040,32 +1040,6 @@ int dss__DeviceGetZoneID(struct soap *soap, int _token, char* _deviceID, int& re
   return SOAP_OK;
 } // dss__DeviceGetZoneID
 
-int dss__DeviceSetLocation(struct soap *soap, int _token, char* _deviceID, struct DeviceLocation _location, bool& result) {
-  dss::DeviceReference dev(dss::NullDSID, NULL);
-  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  dss::DeviceLocation location = boost::make_tuple(_location.x, _location.y, _location.z);
-
-  dev.getDevice().setLocation(location);
-  return SOAP_OK;
-} // dss__DeviceSetLocation
-
-int dss__DeviceGetLocation(struct soap *soap, int _token, char* _deviceID, struct DeviceLocation& result) {
-  dss::DeviceReference dev(dss::NullDSID, NULL);
-  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  const dss::Device& device = dev.getDevice();
-  result.x = device.getLocationX();
-  result.y = device.getLocationY();
-  result.z = device.getLocationZ();
-
-  return SOAP_OK;
-} // dss__DeviceGetLoaction
-
 
 //==================================================== Information
 

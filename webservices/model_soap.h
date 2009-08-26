@@ -200,14 +200,6 @@ int dss__DeviceGetName(int _token, char* _deviceID, char** result);
 /** Returns the zone id of the specified device */
 int dss__DeviceGetZoneID(int _token, char* _deviceID, int& result);
 
-struct DeviceLocation {
-  double x;
-  double y;
-  double z;
-};
-
-int dss__DeviceSetLocation(int _token, char* _deviceID, struct DeviceLocation _location, bool& result);
-int dss__DeviceGetLocation(int _token, char* _deviceID, struct DeviceLocation& result);
 
 //==================================================== Information
 

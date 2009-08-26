@@ -209,7 +209,7 @@ namespace dss {
 
     PropertyNodePtr m_pPropertyNode;
     PropertyNodePtr m_pAliasNode;
-    DeviceLocation m_Location;
+
   protected:
     /** Publishes the device to the property tree.
      * @see DSS::getPropertySystem */
@@ -264,46 +264,6 @@ namespace dss {
      * \c apartment.xml
      */
     void setName(const std::string& _name);
-
-    /** Returns the devices location in abstract coordinates (0-100) */
-    const DeviceLocation& getLocation() const;
-    /** Sets the devices location.
-     * @note This will cause the apartment to store
-     * \c apartment.xml
-     */
-    void setLocation(const DeviceLocation& _value);
-
-    /** Returns the devices x coordinate */
-    double getLocationX() const;
-    /** Returns the devices y coordinate */
-    double getLocationY() const;
-    /** Returns the devices z coordinate */
-    double getLocationZ() const;
-
-    /** Sets the devices x coordinate.
-     * @note This will cause the apartment to store
-     * \c apartment.xml. So if you have to change more
-     * than one coordinate consider to use setLocation.
-     *
-     * @see setLocation
-     */
-    void setLocationX(const double _value);
-    /** Sets the devices y coordinate.
-     * @note This will cause the apartment to store
-     * \c apartment.xml. So if you have to change more
-     * than one coordinate consider to use setLocation.
-     *
-     * @see setLocation
-     */
-    void setLocationY(const double _value);
-    /** Sets the devices z coordinate.
-     * @note This will cause the apartment to store
-     * \c apartment.xml. So if you have to change more
-     * than one coordinate consider to use setLocation.
-     *
-     * @see setLocation
-     */
-    void setLocationZ(const double _value);
 
     /** Returns the group bitmask (1 based) of the device */
     std::bitset<63>& getGroupBitmask();
