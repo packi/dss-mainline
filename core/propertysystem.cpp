@@ -381,6 +381,9 @@ namespace dss {
     } else {
       std::string propPath = _propPath;
       std::string propName = _propPath;
+      if(endsWith(propName, "/")) {
+        propName.erase(propName.size() - 1);
+      }
       std::string::size_type slashPos = propPath.find('/');
       if(slashPos != std::string::npos) {
         propName = propPath.substr(0, slashPos);

@@ -229,12 +229,16 @@ namespace dss {
     if(_value != m_ZoneID) {
       m_ZoneID = _value;
       if((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
-        std::string basePath = "zones/zone" + intToString(m_ZoneID) + "/";
+        std::string basePath = "zones/zone" + intToString(m_ZoneID);
         if(m_pAliasNode == NULL) {
-          m_pAliasNode = m_pApartment->getPropertyNode()->createProperty(basePath + m_DSID.toString());
+          m_pAliasNode = m_pApartment->getPropertyNode()->createProperty(basePath + "/" + m_DSID.toString());
           m_pAliasNode->alias(m_pPropertyNode);
         } else {
-          m_pApartment->getPropertyNode()->getProperty(basePath)->addChild(m_pAliasNode);
+          PropertyNodePtr base = m_pApartment->getPropertyNode()->getProperty(basePath);
+          if(base == NULL) {
+            throw std::runtime_error("PropertyNode of the new zone does not exist");
+          }
+          base->addChild(m_pAliasNode);
         }
       }
     }
@@ -451,6 +455,20 @@ namespace dss {
     }
   } // getByZone
 
+  Set Set::getByModulator(const int _modulatorID) const {
+    Set result;
+    foreach(const DeviceReference& dev, m_ContainedDevices) {
+      if(dev.getDevice().getModulatorID() == _modulatorID) {
+        result.addDevice(dev);
+      }
+    }
+    return result;
+  } // getByModulator
+
+  Set Set::getByModulator(const Modulator& _modulator) const {
+    return getByModulator(_modulator.getBusID());
+  } // getByModulator
+
   Set Set::getByFunctionID(const int _functionID) const {
     Set result;
     foreach(const DeviceReference& dev, m_ContainedDevices) {
@@ -459,7 +477,17 @@ namespace dss {
       }
     }
     return result;
-  }
+  } // getByFunctionID
+
+  Set Set::getByPresence(const bool _presence) const {
+    Set result;
+    foreach(const DeviceReference& dev, m_ContainedDevices) {
+      if(dev.getDevice().isPresent()== _presence) {
+        result.addDevice(dev);
+      }
+    }
+    return result;
+  } // getByPresence
 
   class ByNameSelector : public IDeviceSelector {
   private:
@@ -623,11 +651,6 @@ namespace dss {
     scrubVector(m_Devices);
     scrubVector(m_Zones);
     scrubVector(m_Modulators);
-
-    scrubVector(m_StaleDevices);
-    scrubVector(m_StaleGroups);
-    scrubVector(m_StaleModulators);
-    scrubVector(m_StaleZones);
   } // dtor
 
   void Apartment::initialize() {
@@ -636,6 +659,7 @@ namespace dss {
     Zone* zoneZero = new Zone(0);
     addDefaultGroupsToZone(*zoneZero);
     m_Zones.push_back(zoneZero);
+    zoneZero->setIsPresent(true);
     if(DSS::hasInstance()) {
       m_pPropertyNode = DSS::getInstance()->getPropertySystem().createProperty("/apartment");
       DSS::getInstance()->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "configfile", getDSS().getDataDirectory() + "apartment.xml", true, false);
@@ -699,11 +723,14 @@ namespace dss {
       _modulator.setEnergyLevelOrange(levelOrange);
       _modulator.setEnergyLevelRed(levelRed);
     }
+    _modulator.setIsPresent(true);
 
     vector<int> zoneIDs = interface.getZones(modulatorID);
     foreach(int zoneID, zoneIDs) {
       log("  Found zone with id: " + intToString(zoneID));
-      Zone& zone = allocateZone(_modulator, zoneID);
+      Zone& zone = allocateZone(zoneID);
+      zone.addToModulator(_modulator);
+      zone.setIsPresent(true);
 
       vector<int> devices = interface.getDevicesInZone(modulatorID, zoneID);
       foreach(int devID, devices) {
@@ -724,6 +751,7 @@ namespace dss {
         DeviceReference devRef(dev, *this);
         zone.addDevice(devRef);
         _modulator.addDevice(devRef);
+        dev.setIsPresent(true);
       }
 
       vector<int> groupIDs = interface.getGroups(modulatorID, zoneID);
@@ -731,7 +759,6 @@ namespace dss {
         log("    Found group with id: " + intToString(groupID));
         vector<int> devingroup = interface.getDevicesInGroup(modulatorID, zoneID, groupID);
 
-        // TODO: read last called scene for group
         foreach(int devID, devingroup) {
           try {
             log("     Adding device " + intToString(devID) + " to group " + intToString(groupID));
@@ -741,14 +768,18 @@ namespace dss {
               log("     Adding new group to zone");
               zone.addGroup(new Group(groupID, zone.getZoneID(), *this));
             }
-            zone.getGroup(groupID)->addDevice(DeviceReference(dev, *this));
+            Group* pGroup = zone.getGroup(groupID);
+            pGroup->addDevice(DeviceReference(dev, *this));
+            pGroup->setIsPresent(true);
             try {
               Group& group = getGroup(groupID);
               group.addDevice(DeviceReference(dev, *this));
+              group.setIsPresent(true);
             } catch(ItemNotFoundException&) {
               Group* pGroup = new Group(groupID, 0, *this);
               getZone(0).addGroup(pGroup);
               pGroup->addDevice(DeviceReference(dev, *this));
+              pGroup->setIsPresent(true);
               log("     Adding new group to zone 0");
             }
           } catch(ItemNotFoundException& e) {
@@ -928,11 +959,10 @@ namespace dss {
           /* discard node not found exceptions */
         }
 
-        Device* newDevice = new Device(dsid, this);
+        Device& newDevice = allocateDevice(dsid);
         if(!name.empty()) {
-          newDevice->setName(name);
+          newDevice.setName(name);
         }
-        m_StaleDevices.push_back(newDevice);
       }
     }
   } // loadDevices
@@ -950,12 +980,10 @@ namespace dss {
           }
         } catch(XMLException&) {
         }
-        Modulator* newModulator = new Modulator(id);
+        Modulator& newModulator = allocateModulator(id);
         if(!name.empty()) {
-          newModulator->setName(name);
+          newModulator.setName(name);
         }
-        m_StaleModulators.push_back(newModulator);
-        //loadZones(*iModulator, *newModulator);
       }
     }
   } // loadModulators
@@ -973,11 +1001,10 @@ namespace dss {
           }
         } catch(XMLException&) {
         }
-        Zone* newZone = new Zone(id);
+        Zone& newZone = allocateZone(id);
         if(!name.empty()) {
-          newZone->setName(name);
+          newZone.setName(name);
         }
-        m_StaleZones.push_back(newZone);
       }
     }
   } // loadZones
@@ -1044,9 +1071,6 @@ namespace dss {
     foreach(Device* pDevice, m_Devices) {
       DeviceToXML(pDevice, pDevices, pDoc);
     }
-    foreach(Device* pDevice, m_StaleDevices) {
-      DeviceToXML(pDevice, pDevices, pDoc);
-    }
 
     // zones
     AutoPtr<Element> pZones = pDoc->createElement("zones");
@@ -1054,17 +1078,11 @@ namespace dss {
     foreach(Zone* pZone, m_Zones) {
       ZoneToXML(pZone, pZones, pDoc);
     }
-    foreach(Zone* pZone, m_StaleZones) {
-      ZoneToXML(pZone, pZones, pDoc);
-    }
 
     // modulators
     AutoPtr<Element> pModulators = pDoc->createElement("modulators");
     pRoot->appendChild(pModulators);
     foreach(Modulator* pModulator, m_Modulators) {
-      ModulatorToXML(pModulator, pModulators, pDoc);
-    }
-    foreach(Modulator* pModulator, m_StaleModulators) {
       ModulatorToXML(pModulator, pModulators, pDoc);
     }
 
@@ -1212,18 +1230,6 @@ namespace dss {
       }
     }
 
-    // search for stale devices
-    foreach(Device* device, m_StaleDevices) {
-      if(device->getDSID() == _dsid) {
-        Device* pResult = device;
-        m_Devices.push_back(pResult);
-        m_StaleDevices.erase(std::find(m_StaleDevices.begin(), m_StaleDevices.end(),device));
-        DeviceReference devRef(*pResult, *this);
-        getZone(0).addDevice(devRef);
-        return *pResult;
-      }
-    }
-
     Device* pResult = new Device(_dsid, this);
     m_Devices.push_back(pResult);
     DeviceReference devRef(*pResult, *this);
@@ -1238,53 +1244,25 @@ namespace dss {
       }
     }
 
-    foreach(Modulator* modulator, m_StaleModulators) {
-      if(modulator->getDSID() == _dsid) {
-        m_Modulators.push_back(modulator);
-        m_StaleModulators.erase(std::find(m_StaleModulators.begin(), m_StaleModulators.end(), modulator));
-        return *modulator;
-      }
-    }
-
     Modulator* pResult = new Modulator(_dsid);
     m_Modulators.push_back(pResult);
     return *pResult;
   } // allocateModulator
 
-  Zone& Apartment::allocateZone(Modulator& _modulator, int _zoneID) {
+  Zone& Apartment::allocateZone(int _zoneID) {
     if(getPropertyNode() != NULL) {
       getPropertyNode()->createProperty("zones/zone" + intToString(_zoneID));
     }
-    foreach(Zone* zone, m_StaleZones) {
-  		if(zone->getZoneID() == _zoneID) {
-  			m_Zones.push_back(zone);
-  			m_StaleZones.erase(std::find(m_StaleZones.begin(), m_StaleZones.end(), zone));
-  	    zone->addToModulator(_modulator);
-  	    if(!isInitializing()) {
-  	      DSS::getInstance()->getDS485Interface().createZone(_modulator.getBusID(), _zoneID);
-  	    }
-  	    addDefaultGroupsToZone(*zone);
-  			return *zone;
-  		}
-  	}
 
     foreach(Zone* zone, m_Zones) {
   		if(zone->getZoneID() == _zoneID) {
-  		  vector<int> modsOfZone = zone->getModulators();
-  		  if(find(modsOfZone.begin(), modsOfZone.end(), _modulator.getBusID()) == modsOfZone.end()) {
-          DSS::getInstance()->getDS485Interface().createZone(_modulator.getBusID(), _zoneID);
-  		  }
   			return *zone;
   		}
   	}
 
   	Zone* zone = new Zone(_zoneID);
   	m_Zones.push_back(zone);
-  	zone->addToModulator(_modulator);
   	addDefaultGroupsToZone(*zone);
-    if(!isInitializing()) {
-      DSS::getInstance()->getDS485Interface().createZone(_modulator.getBusID(), _zoneID);
-    }
   	return *zone;
   } // allocateZone
 
@@ -1383,6 +1361,7 @@ namespace dss {
     try {
       Zone& oldZone = getZone(dev.getZoneID());
       oldZone.removeDevice(devRef);
+      // TODO: check if the zone is empty on the modulator and remove it in that case
     } catch(runtime_error&) {
     }
 
@@ -1397,7 +1376,8 @@ namespace dss {
     modulator.addDevice(devRef);
 
     // add to new zone
-    Zone& newZone = allocateZone(modulator, _zoneID);
+    Zone& newZone = allocateZone(_zoneID);
+    newZone.addToModulator(modulator);
     newZone.addDevice(devRef);
 
     // get groups of device
@@ -1604,22 +1584,29 @@ namespace dss {
     m_ZoneID = _value;
   } // setZoneID
 
-  void Zone::addToModulator(Modulator& _modulator) {
-    m_Modulators.push_back(&_modulator);
+  void Zone::addToModulator(const Modulator& _modulator) {
+    // make sure the zone is connected to the modulator
+    if(find(m_Modulators.begin(), m_Modulators.end(), &_modulator) == m_Modulators.end()) {
+      m_Modulators.push_back(&_modulator);
+    }
   } // addToModulator
 
-  void Zone::removeFromModulator(Modulator& _modulator) {
+  void Zone::removeFromModulator(const Modulator& _modulator) {
     m_Modulators.erase(find(m_Modulators.begin(), m_Modulators.end(), &_modulator));
   } // removeFromModulator
 
   vector<int> Zone::getModulators() const {
   	vector<int> result;
-  	for(vector<Modulator*>::const_iterator iModulator = m_Modulators.begin(), e = m_Modulators.end();
+  	for(vector<const Modulator*>::const_iterator iModulator = m_Modulators.begin(), e = m_Modulators.end();
   	    iModulator != e; ++iModulator) {
   		result.push_back((*iModulator)->getBusID());
   	}
   	return result;
   } // getModulators
+
+  bool Zone::registeredOnModulator(const Modulator& _modulator) const {
+    return find(m_Modulators.begin(), m_Modulators.end(), &_modulator) != m_Modulators.end();
+  } // registeredOnModulator
 
   void Zone::turnOn() {
     DSS::getInstance()->getDS485Interface().sendCommand(cmdTurnOn, *this, GroupIDBroadcast);

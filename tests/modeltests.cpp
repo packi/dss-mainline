@@ -48,9 +48,7 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
   dev4.setShortAddress(4);
   DeviceReference devRef4(dev4, apt);
 
-  Modulator modulator(NullDSID);
-
-  Zone& zone1 = apt.allocateZone(modulator, 1);
+  Zone& zone1 = apt.allocateZone(1);
   zone1.addDevice(devRef1);
   zone1.addDevice(devRef2);
   zone1.addDevice(devRef3);
@@ -65,8 +63,7 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
 
   BOOST_CHECK_EQUAL(4, zone1.getDevices().length());
 
-  Zone& zone2 = apt.allocateZone(modulator, 2);
-
+  Zone& zone2 = apt.allocateZone(2);
   zone2.addDevice(devRef2);
   zone2.addDevice(devRef4);
 

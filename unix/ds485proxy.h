@@ -169,6 +169,7 @@ namespace dss {
 
     virtual void setZoneID(const int _modulatorID, const devid_t _deviceID, const int _zoneID);
     virtual void createZone(const int _modulatorID, const int _zoneID);
+    virtual void removeZone(const int _modulatorID, const int _zoneID);
 
     virtual int getGroupCount(const int _modulatorID, const int _zoneID);
     virtual std::vector<int> getGroups(const int _modulatorID, const int _zoneID);

@@ -799,6 +799,17 @@ namespace dss {
     receiveSingleResult(cmdFrame, FunctionModulatorAddZone);
   } // createZone
 
+  void DS485Proxy::removeZone(const int _modulatorID, const int _zoneID) {
+    DS485CommandFrame cmdFrame;
+    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorRemoveZone);
+    cmdFrame.getPayload().add<uint16_t>(_zoneID);
+
+    // TODO: check result-code
+    receiveSingleResult(cmdFrame, FunctionModulatorAddZone);
+  } // removeZone
+
   dsid_t DS485Proxy::getDSIDOfDevice(const int _modulatorID, const int _deviceID) {
     DS485CommandFrame cmdFrame;
     cmdFrame.getHeader().setDestination(_modulatorID);

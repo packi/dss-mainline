@@ -1031,8 +1031,8 @@ namespace dss {
               break;
             case FunctionDeviceSetZoneID:
               {
-                uint8_t zoneID = pd.get<uint16_t>();
                 devid_t devID = pd.get<devid_t>();
+                uint8_t zoneID = pd.get<uint16_t>();
                 DSIDInterface& dev = lookupDevice(devID);
 
                 int oldZoneID = m_DeviceZoneMapping[&dev];

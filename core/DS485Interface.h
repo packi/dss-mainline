@@ -88,6 +88,9 @@ namespace dss {
     /** Creates a new Zone on the given modulator */
     virtual void createZone(const int _modulatorID, const int _zoneID) = 0;
 
+    /** Removes the zone \a _zoneID on the modulator \a _modulatorID */
+    virtual void removeZone(const int _modulatorID, const int _zoneID) = 0;
+
     /** Returns the count of groups present in the given zone of the specifid modulator */
     virtual int getGroupCount(const int _modulatorID, const int _zoneID) = 0;
     /** Returns the a std::vector containing the group-ids of the given zone on the specified modulator */

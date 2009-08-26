@@ -35,6 +35,7 @@
 #include "metering/seriespersistence.h"
 #include "web/webserverplugin.h"
 #include "core/setbuilder.h"
+#include "core/structuremanipulator.h"
 
 #include <iostream>
 #include <sstream>
@@ -518,6 +519,7 @@ namespace dss {
             << ", \"fid\": " << ToJSONValue(_device.getDevice().getFunctionID())
             << ", \"circuitID\":" << ToJSONValue(_device.getDevice().getModulatorID())
             << ", \"busID\":"  << ToJSONValue(_device.getDevice().getShortAddress())
+            << ", \"isPresent\":"  << ToJSONValue(_device.getDevice().isPresent())
             << ", \"on\": " << ToJSONValue(_device.isOn()) << " }";
     return sstream.str();
   } // toJSONValue(DeviceReference)
@@ -543,6 +545,7 @@ namespace dss {
     std::stringstream sstream;
     sstream << "{ " << ToJSONValue("id") << ": " << ToJSONValue(_group.getID()) << ",";
     sstream << ToJSONValue("name") << ": " << ToJSONValue(_group.getName()) << ", ";
+    sstream << ToJSONValue("isPresent") << ": " << ToJSONValue(_group.isPresent()) << ", ";
     sstream << ToJSONValue("devices") << ": [";
     Set devices = _group.getDevices();
     bool first = true;
@@ -566,6 +569,7 @@ namespace dss {
       name = string("Zone ") + intToString(_zone.getZoneID());
     }
     sstream << "\"name\": " << ToJSONValue(name) << ", ";
+    sstream << "\"isPresent\": " << ToJSONValue(_zone.isPresent()) << ", ";
 
     Set devices = _zone.getDevices();
     sstream << ToJSONValue(devices, "devices");
@@ -1325,6 +1329,7 @@ namespace dss {
 
   string WebServer::handleStructureCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
     _handled = true;
+    StructureManipulator manipulator(getDSS().getDS485Interface(), getDSS().getApartment());
     if(endsWith(_method, "structure/zoneAddDevice")) {
       bool ok = true;
 
@@ -1333,13 +1338,21 @@ namespace dss {
         dsid_t devid = dsid::fromString(devidStr);
 
         Device& dev = DSS::getInstance()->getApartment().getDeviceByDSID(devid);
+        if(!dev.isPresent()) {
+          return ResultToJSON(false, "cannot add nonexisting device to a zone");
+        }
 
         string zoneIDStr = _parameter["zone"];
         if(!zoneIDStr.empty()) {
           try {
             int zoneID = strToInt(zoneIDStr);
             DeviceReference devRef(dev, DSS::getInstance()->getApartment());
-            DSS::getInstance()->getApartment().getZone(zoneID).addDevice(devRef);
+            try {
+              Zone& zone = getDSS().getApartment().getZone(zoneID);
+              manipulator.addDeviceToZone(dev, zone);
+            } catch(ItemNotFoundException&) {
+              return ResultToJSON(false, "Could not find zone");
+            }
           } catch(runtime_error&) {
             ok = false;
           }
@@ -1351,23 +1364,16 @@ namespace dss {
     } else if(endsWith(_method, "structure/addZone")) {
       bool ok = false;
       int zoneID = -1;
-      int modulatorID = -1;
 
       string zoneIDStr = _parameter["zoneID"];
       if(!zoneIDStr.empty()) {
         zoneID = strToIntDef(zoneIDStr, -1);
       }
-      string modIDStr = _parameter["modulatorID"];
-      if(!modIDStr.empty()) {
-        modulatorID = strToIntDef(modIDStr, -1);
-      }
-      if(zoneID != -1 && modulatorID != -1) {
-        try {
-          Modulator& modulator = DSS::getInstance()->getApartment().getModulatorByBusID(modulatorID);
-          DSS::getInstance()->getApartment().allocateZone(modulator, zoneID);
-          ok = true;
-        } catch(runtime_error&) {
-        }
+      if(zoneID != -1) {
+        getDSS().getApartment().allocateZone(zoneID);
+        ok = true;
+      } else {
+        ResultToJSON(false, "could not find zone");
       }
       return ResultToJSON(true, "");
     } else {

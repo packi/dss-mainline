@@ -47,9 +47,22 @@ namespace dss {
   class DeviceContainer;
   class Apartment;
   class Group;
+  class Modulator;
   class PropertyNode;
   class XMLNode;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
+
+  class PhysicalModelItem {
+  private:
+    bool m_IsPresent;
+  public:
+    PhysicalModelItem()
+    : m_IsPresent(false)
+    { }
+
+    bool isPresent() const { return m_IsPresent; }
+    void setIsPresent(const bool _value) { m_IsPresent = _value; }
+  };
 
   /** Interface to a single or multiple devices.
    */
@@ -193,6 +206,7 @@ namespace dss {
 
   /** Represents a dsID */
   class Device : public IDeviceInterface,
+                 public PhysicalModelItem,
                  public boost::noncopyable {
   private:
     std::string m_Name;
@@ -408,6 +422,15 @@ namespace dss {
 
     /** Returns a subset that contains all devices belonging to Zone \a _zoneID. */
     Set getByZone(int _zoneID) const;
+
+    /** Returns a subset that contains all devices belonging to Modulator \a _modulatorID */
+    Set getByModulator(const int _modulatorID) const;
+    /** Returns a subset that contains all devices belonging to Modulator \a _modulator */
+    Set getByModulator(const Modulator& _modulator) const;
+
+    /** Returns a subset that contains all devices that have the presence state of \a _present */
+    Set getByPresence(const bool _present) const;
+
     /** Returns the device indicated by _name
      */
     DeviceReference getByName(const std::string& _name) const;
@@ -482,7 +505,8 @@ namespace dss {
   }; // DeviceContainer
 
   /** Represents a Modulator */
-  class Modulator : public DeviceContainer {
+  class Modulator : public DeviceContainer,
+                    public PhysicalModelItem {
   private:
     dsid_t m_DSID;
     int m_BusID;
@@ -544,7 +568,8 @@ namespace dss {
 
   /** Represents a predefined group */
   class Group : public DeviceContainer,
-                public IDeviceInterface {
+                public IDeviceInterface,
+                public PhysicalModelItem  {
   protected:
     DeviceVector m_Devices;
     Apartment& m_Apartment;
@@ -618,11 +643,12 @@ namespace dss {
    */
   class Zone : public DeviceContainer,
                public IDeviceInterface,
+               public PhysicalModelItem,
                public boost::noncopyable {
   private:
     int m_ZoneID;
     DeviceVector m_Devices;
-    std::vector<Modulator*> m_Modulators;
+    std::vector<const Modulator*> m_Modulators;
     std::vector<Group*> m_Groups;
   public:
   	Zone(const int _id)
@@ -632,9 +658,9 @@ namespace dss {
     virtual Set getDevices() const;
 
     /** Adds the Zone to a modulator. */
-    void addToModulator(Modulator& _modulator);
+    void addToModulator(const Modulator& _modulator);
     /** Removes the Zone from a modulator. */
-    void removeFromModulator(Modulator& _modulator);
+    void removeFromModulator(const Modulator& _modulator);
 
     /** Adds a device to the zone.
      * This will permanently add the device to the zone.
@@ -663,6 +689,7 @@ namespace dss {
 
     /** Returns a list of the modulators the zone is registered with. */
     std::vector<int> getModulators() const;
+    bool registeredOnModulator(const Modulator& _modulator) const;
 
     virtual void turnOn();
     virtual void turnOff();
@@ -731,11 +758,6 @@ namespace dss {
                     private Thread
   {
   private:
-    std::vector<Device*> m_StaleDevices;
-    std::vector<Modulator*> m_StaleModulators;
-    std::vector<Zone*> m_StaleZones;
-    std::vector<Group*> m_StaleGroups;
-
     std::vector<Zone*> m_Zones;
     std::vector<Modulator*> m_Modulators;
     std::vector<Device*> m_Devices;
@@ -799,7 +821,7 @@ namespace dss {
       * the given _zoneID already exist, a reference to the existing zone will
       * be returned.
       */
-    Zone& allocateZone(Modulator& _modulator, int _zoneID);
+    Zone& allocateZone(int _zoneID);
 
     /** Returns a Modulator by name */
     Modulator& getModulator(const std::string& _modName);
@@ -885,7 +907,7 @@ namespace dss {
      * \param _currentScene Scene now active.
      */
     static unsigned int getPreviousScene(const unsigned int _currentScene);
-  };
+  }; // SceneHelper
 
 }
 
