@@ -487,13 +487,16 @@ namespace dss {
     return ToJSONValue(string(_value));
   } // toJSONValue(const char*)
 
-  string ResultToJSON(const bool _ok, const string& _message = "") {
+  string WebServer::ResultToJSON(const bool _ok, const string& _message) {
     stringstream sstream;
     sstream << "{ " << ToJSONValue("ok") << ":" << ToJSONValue(_ok);
     if(!_message.empty()) {
       sstream << ", " << ToJSONValue("message") << ":" << ToJSONValue(_message);
     }
     sstream << "}";
+    if(!_ok) {
+      log("JSON call failed: '" + _message + "'");
+    }
     return sstream.str();
   } // resultToJSON
 

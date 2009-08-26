@@ -54,6 +54,7 @@ namespace dss {
     void setupAPI();
     void loadPlugin(PropertyNode& _node);
     void loadPlugins();
+    std::string ResultToJSON(const bool _ok, const std::string& _message = "");
   protected:
     bool isDeviceInterfaceCall(const std::string& _method);
     std::string callDeviceInterface(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, IDeviceInterface* _interface, Session* _session);
