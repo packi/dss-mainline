@@ -78,6 +78,7 @@ var Apartment = Class.create({
 				zoneObj.devices.push(deviceObj);
 				deviceObj.on = device.on;
 				deviceObj.hasSwitch = device.isSwitch;
+				deviceObj.isPresent = device.isPresent;
 			});
 		});
 	},
@@ -430,6 +431,127 @@ var HEvent = Class.create({
     this.sendRequest('raise', parameter);
   }
 }); // HEvent
+
+var Set = Class.create({
+  initialize: function(_self) {
+    this.self = _self;
+  },
+
+  sendRequest: function(_functionName, _parameter) {
+    DSS.sendRequest("set/" + _functionName, _parameter);
+  },
+
+  sendSyncRequest: function(_functionName, _parameter) {
+    return DSS.sendSyncRequest("set/" + _functionName, _parameter);
+  },
+
+  getParameterForSetCall: function() {
+    var parameter = {};
+    parameter['self'] = this.self;
+    return parameter;
+  },
+
+  turnOn: function() {
+    this.sendRequest("turnOn", this.getParameterForSetCall());
+  },
+
+  turnOff: function() {
+    this.sendRequest("turnOff", this.getParameterForSetCall());
+  },
+
+  callScene: function(_sceneNr) {
+    var parameter = this.getParameterForSetCall();
+    parameter['sceneNr'] = _sceneNr;
+    this.sendRequest("callScene", parameter);
+  },
+
+  saveScene: function(_sceneNr) {
+    var parameter = this.getParameterForSetCall();
+    parameter['sceneNr'] = _sceneNr;
+    this.sendRequest("saveScene", parameter);
+  },
+
+  undoScene: function(_sceneNr) {
+    var parameter = this.getParameterForSetCall();
+    parameter['sceneNr'] = _sceneNr;
+    this.sendRequest("undoScene", parameter);
+  },
+
+  increaseValue: function() {
+    var parameter = this.getParameterForSetCall();
+    this.sendRequest("increaseValue", parameter);
+  },
+
+  decreaseValue: function() {
+    var parameter = this.getParameterForSetCall();
+    this.sendRequest("decreaseValue", parameter);
+  },
+
+  enable: function() {
+    var parameter = this.getParameterForSetCall();
+    this.sendRequest("enable", parameter);
+  },
+
+  disable: function() {
+    var parameter = this.getParameterForSetCall();
+    this.sendRequest("disable", parameter);
+  },
+
+  startDim: function(_up) {
+    var parameter = this.getParameterForSetCall();
+    if(!isUndefined(_up) && _up !== false) {
+      parameter['up'] = true;
+    }
+    this.sendRequest("startDim", parameter);
+  },
+
+  endDim: function() {
+    var parameter = this.getParameterForSetCall();
+    this.sendRequest("endDim", parameter);
+  },
+
+  getPowerConsumption: function() {
+    var parameter = this.getParameterForSetCall();
+    var respObj = this.sendSyncRequest("getConsumption", parameter);
+    return respObj.consumption;
+  },
+
+  getGroups: function() {
+    var parameter = this.getParameterForSetCall();
+    var respObj = this.sendSyncRequest("getGroups", parameter);
+    return respObj.groups;
+  },
+
+  refresh: function() {
+    var parameter = this.getParameterForSetCall();
+    var respObj = this.sendSyncRequest("getState", parameter);
+    if(respObj.ok) {
+      this.on = respObj.result.isOn;
+      return true;
+    }
+    return false;
+  },
+  
+  byZone: function(_zoneID) {
+    var parameter = this.getParameterForSetCall();
+    parameter['zoneID'] = _zoneID;
+    var respObj = this.sendSyncRequest("getState", parameter);
+    if(respObj.ok) {
+      return new Set(respObj.result.self);
+    }
+    return undefined;
+  },
+  
+  getDevices: function() {
+    var respObj = this.sendSyncRequest("getDevices", this.getParameterForSetCall());
+    if(respObj.ok) {
+      return respObj.result.devices;
+    }
+    return undefined;
+  }
+  
+}); // Set
+
 
 if(hasKey(this, 'onModelLoaded') && !Object.isUndefined(onModelLoaded) && Object.isFunction(onModelLoaded)) {
   onModelLoaded();

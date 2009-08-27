@@ -29,25 +29,27 @@ function ApartmentRenderer(into) {
           devTotal = zone.devices.length;
           return;
         }
-        zonelist += "<li>" + zone.name + '[<a href="#" onclick="turnOnZone(\'' + zone.id + '\')">Turn On</a>';
+        zonelist += "<li>" + zone.name + '&nbsp;[<a href="#" onclick="turnOnZone(\'' + zone.id + '\')">Turn On</a>';
         zonelist += '&nbsp;|&nbsp;<a href="#" onclick="turnOffZone(\'' + zone.id + '\')">Turn Off</a>]</li><ul>';
         zone.devices.each(function(device) {
-          zonelist += '<li><p title="fid:' + device.fid + ' circuitID: ' + device.circuitID + ' busID: ' + device.busID + '">' + device.name;
-          devNum++;
-          if(!device.isSwitch()) {
-            if(device.isOn()) {
-              zonelist += " On ";
+          if(device.isPresent) {
+            zonelist += '<li><p title="fid:' + device.fid + ' circuitID: ' + device.circuitID + ' busID: ' + device.busID + '">' + device.name;
+            devNum++;
+            if(!device.isSwitch()) {
+              if(device.isOn()) {
+                zonelist += ' <span id="state_' + device.dsid + '"><b>On</b></span> ';
+              } else {
+                zonelist += ' <span id="state_' + device.dsid + '"><b>Off</b></span> ';
+              }
+              zonelist += '[<a href="#" onclick="turnOn(\'' + device.dsid + '\')">Turn On</a>';
+              zonelist += '&nbsp;|&nbsp;<a href="#" onclick="turnOff(\'' + device.dsid + '\')">Turn Off</a>] ' + device.dsid;
             } else {
-              zonelist += " Off ";
+              zonelist += '<div id="switch_' + device.dsid + '"/>';
+              switchIDs[switchIDs.length] = { id: device.dsid, zoneID: zone.id };
             }
-            zonelist += '[<a href="#" onclick="turnOn(\'' + device.dsid + '\')">Turn On</a>';
-            zonelist += '&nbsp;|&nbsp;<a href="#" onclick="turnOff(\'' + device.dsid + '\')">Turn Off</a>] ' + device.dsid;
-          } else {
-            zonelist += '<div id="switch_' + device.dsid + '"/>';
-            switchIDs[switchIDs.length] = { id: device.dsid, zoneID: zone.id };
-          }
 
-          zonelist += "</p></li>";
+            zonelist += "</p></li>";
+          }
         });
         zonelist += "</ul>";
       }
@@ -73,35 +75,63 @@ var apt = null;
 
 
 	function turnOn(devid) {
-	  new Device(devid).turnOn();
-//new HEvent('turnOn', '.dsid(0000000000000000ffc00004)', undefined).raise();
+	  var dev = new Device(devid);
+	  dev.turnOn();
+      setTimeout(function() { updateDevice(devid); }, 100);
 	}
 
 	function turnOff(devid) {
-	  new Device(devid).turnOff();
+	  var dev = new Device(devid);
+	  dev.turnOff();
+      setTimeout(function() { updateDevice(devid); }, 100);
 	}
 
 	function turnOnZone(zoneid) {
-    new Zone(zoneid).turnOn();
-         // var z = new Zone(zoneid);
-         // z.sendEvent('turnOn');
-	  //new Zone(zoneid).sendEvent('turnoOn');
+      var zone = new Zone(zoneid);
+      zone.turnOn();
+      setTimeout(function() { updateZone(zoneid); }, 100);
 	}
 
 	function turnOffZone(zoneid) {
-	  new Zone(zoneid).turnOff();
+	  var zone = new Zone(zoneid);
+	  zone.turnOff();
+      setTimeout(function() { updateZone(zoneid); }, 100);
+	}
+	
+	function update(_setSpec) {
+	  var set = new Set(_setSpec);
+	  var devs = set.getDevices();
+	  devs.each(function(device) {
+	    if(device.isPresent) {
+  	      var htmlString;
+          if(device.on) {
+            htmlString = '<b>On</b>';
+          } else {
+            htmlString = '<b>Off</b>';
+          }
+          $('state_' + device.id).innerHTML = htmlString;
+        }
+	  });
+	}
+	
+	function updateZone(zoneid) {
+	  update(".zone(" + zoneid + ")");
 	}
 
-function doOnload() {
-  apt = new ApartmentRenderer("bla");
-  apt.render();
-}
+	function updateDevice(dsid) {
+	  update(".dsid(" + dsid + ")");
+	}
+
+    function doOnload() {
+      apt = new ApartmentRenderer("bla");
+      apt.render();
+    }
 </script>
   </head>
   <body onload="doOnload()">
     <h1>Welcome to the dSS!</h1>
     <div class="container">
-		<div class="item"><a href="config">Config</a>&nbsp;<a href="http://localhost:8080/json/event/raise?name=bell">Bell</a></div>
+		<div class="item"><a href="browse/">Browse properties</a></div>
 		<div class="item">Connected devices: <span id="numDevs">(...loading...)</span></div>
 	</div>
 	<div class="container">

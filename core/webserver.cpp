@@ -1143,7 +1143,7 @@ namespace dss {
       } else if(endsWith(_method, "/getDevices")) {
         SetBuilder builder;
         Set set = builder.buildSet(self, NULL);
-        return ToJSONValue(set, "devices");
+        return JSONOk("{" + ToJSONValue(set, "devices") + "}");
       } else if(endsWith(_method, "/add")) {
         std::string other = _parameter["other"];
         if(other.empty()) {
