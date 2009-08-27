@@ -288,6 +288,8 @@ namespace dss {
     bool isInGroup(const int _groupID) const;
     /** Adds the device to group \a _groupID. */
     void addToGroup(const int _groupID);
+    /** Removes the device from group \a _groupID */
+    void removeFromGroup(const int _groupID);
 
     /** Returns the group id of the \a _index'th group */
     int getGroupIdByIndex(const int _index) const;
@@ -584,12 +586,7 @@ namespace dss {
 
     /** Returns the id of the group */
     int getID() const;
-
-    /** As of now, this function throws an error */
-    virtual void addDevice(const DeviceReference& _device);
-    /** As of now, this function throws an error */
-    virtual void removeDevice(const DeviceReference& _device);
-
+    int getZoneID() const;
 
     virtual void turnOn();
     virtual void turnOff();

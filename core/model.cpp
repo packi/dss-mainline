@@ -261,6 +261,14 @@ namespace dss {
     }
   } // addToGroup
 
+  void Device::removeFromGroup(const int _groupID) {
+    m_GroupBitmask.reset(_groupID-1);
+    std::vector<int>::iterator it = find(m_Groups.begin(), m_Groups.end(), _groupID);
+    if(it != m_Groups.end()) {
+      m_Groups.erase(it);
+    }
+  } // removeFromGroup
+
   void Device::resetGroups() {
     m_GroupBitmask.reset();
     m_Groups.clear();
@@ -769,16 +777,13 @@ namespace dss {
               zone.addGroup(new Group(groupID, zone.getZoneID(), *this));
             }
             Group* pGroup = zone.getGroup(groupID);
-            pGroup->addDevice(DeviceReference(dev, *this));
             pGroup->setIsPresent(true);
             try {
               Group& group = getGroup(groupID);
-              group.addDevice(DeviceReference(dev, *this));
               group.setIsPresent(true);
             } catch(ItemNotFoundException&) {
               Group* pGroup = new Group(groupID, 0, *this);
               getZone(0).addGroup(pGroup);
-              pGroup->addDevice(DeviceReference(dev, *this));
               pGroup->setIsPresent(true);
               log("     Adding new group to zone 0");
             }
@@ -1541,8 +1546,18 @@ namespace dss {
   } // addDevice
 
   void Zone::addGroup(Group* _group) {
+    if(_group->getZoneID() != m_ZoneID) {
+      throw std::runtime_error("Zone::addGroup: ZoneID of _group does not match own");
+    }
     m_Groups.push_back(_group);
-  }
+  } // addGroup
+
+  void Zone::removeGroup(UserGroup* _group) {
+    std::vector<Group*>::iterator it = find(m_Groups.begin(), m_Groups.end(), _group);
+    if(it != m_Groups.end()) {
+      m_Groups.erase(it);
+    }
+  } // removeGroup
 
   void Zone::removeDevice(const DeviceReference& _device) {
     DeviceIterator pos = find(m_Devices.begin(), m_Devices.end(), _device);
@@ -1572,9 +1587,6 @@ namespace dss {
     }
     return NULL;
   } // getGroup
-
-  void AddGroup(UserGroup& _group);
-  void RemoveGroup(UserGroup& _group);
 
   int Zone::getZoneID() const {
     return m_ZoneID;
@@ -1693,12 +1705,13 @@ namespace dss {
     return m_GroupID;
   } // getID
 
+  int Group::getZoneID() const {
+    return m_ZoneID;
+  } // getZoneID
+
   Set Group::getDevices() const {
     return m_Apartment.getDevices().getByZone(m_ZoneID).getByGroup(m_GroupID);
   } // getDevices
-
-  void Group::addDevice(const DeviceReference& _device) { /* do nothing or throw? */ }
-  void Group::removeDevice(const DeviceReference& _device) { /* do nothing or throw? */ }
 
   void Group::turnOn() {
     getDevices().turnOn();
