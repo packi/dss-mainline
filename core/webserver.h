@@ -22,10 +22,9 @@
 #ifndef WEBSERVER_H_
 #define WEBSERVER_H_
 
-#include <shttpd/shttpd.h>
+#include <mongoose/mongoose.h>
 
 #include "base.h"
-#include "thread.h"
 #include "subsystem.h"
 #include "session.h"
 
@@ -42,40 +41,48 @@ namespace dss {
 
   typedef boost::ptr_map<const int, Session> SessionByID;
 
-  class WebServer : public Subsystem,
-                    private Thread {
+  class WebServer : public Subsystem {
   private:
-    struct shttpd_ctx* m_SHttpdContext;
+    struct mg_context* m_mgContext;
     int m_LastSessionID;
     SessionByID m_Sessions;
     boost::ptr_vector<WebServerPlugin> m_Plugins;
   private:
-    virtual void execute();
     void setupAPI();
     void loadPlugin(PropertyNode& _node);
     void loadPlugins();
     std::string ResultToJSON(const bool _ok, const std::string& _message = "");
   protected:
     bool isDeviceInterfaceCall(const std::string& _method);
-    std::string callDeviceInterface(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, IDeviceInterface* _interface, Session* _session);
+    std::string callDeviceInterface(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, IDeviceInterface* _interface, Session* _session);
 
-    static void jsonHandler(struct shttpd_arg* _arg);
-    std::string handleApartmentCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session);
-    std::string handleZoneCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session);
-    std::string handleDeviceCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session);
-    std::string handleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session);
-    std::string handlePropertyCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session);
-    std::string handleEventCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session);
-    std::string handleCircuitCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session);
-    std::string handleStructureCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session);
-    std::string handleSimCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session);
-    std::string handleDebugCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session);
-    std::string handleMeteringCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session);
-    void pluginCalled(struct shttpd_arg* _arg, WebServerPlugin& plugin, const std::string& _uri);
+    std::string handleApartmentCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
+    std::string handleZoneCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
+    std::string handleDeviceCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
+    std::string handleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
+    std::string handlePropertyCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
+    std::string handleEventCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
+    std::string handleCircuitCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
+    std::string handleStructureCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
+    std::string handleSimCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
+    std::string handleDebugCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
+    std::string handleMeteringCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
+    void pluginCalled(struct mg_connection* _connection, 
+                      const struct mg_request_info* _info,
+                      WebServerPlugin& plugin, 
+                      const std::string& _uri);
 
-    static void httpPluginCallback(struct shttpd_arg* _arg);
-    static void httpBrowseProperties(struct shttpd_arg* _arg);
-    static void emitHTTPHeader(int _code, struct shttpd_arg* _arg, const std::string& _contentType = "text/html");
+    static void httpPluginCallback(struct mg_connection* _connection,
+                                   const struct mg_request_info* _info, 
+                                   void* _userData);
+    static void httpBrowseProperties(struct mg_connection* _connection,
+                                   const struct mg_request_info* _info, 
+                                   void* _userData);
+    static void jsonHandler(struct mg_connection* _connection,
+                            const struct mg_request_info* _info, 
+                            void* _userData);
+
+      static void emitHTTPHeader(int _code, struct mg_connection* _connection, const std::string& _contentType = "text/html");
   protected:
     virtual void doStart();
   public:

@@ -111,4 +111,4 @@ ENDIF(WITH_TESTS)
 ADD_EXECUTABLE(dss main.cpp namespaces.cpp)
 
 TARGET_LINK_LIBRARIES(dss ${TEST_LIB} ${BOOST_TEST_LIB} core unix webservices pthread
-	shttpd ${REQUIRED_LIBS})
+	mongoose ${REQUIRED_LIBS})

@@ -46,15 +46,14 @@ namespace dss {
   //============================================= WebServer
 
   WebServer::WebServer(DSS* _pDSS)
-  : Subsystem(_pDSS, "WebServer"),
-    Thread("WebServer")
+  : Subsystem(_pDSS, "WebServer")
   {
     Logger::getInstance()->log("Starting Webserver...");
-    m_SHttpdContext = shttpd_init();
+    m_mgContext = mg_start();
   } // ctor
 
   WebServer::~WebServer() {
-    shttpd_fini(m_SHttpdContext);
+    mg_stop(m_mgContext);
   } // dtor
 
   void WebServer::initialize() {
@@ -97,7 +96,7 @@ namespace dss {
     m_Plugins.push_back(plugin);
 
     log("Registering " + pFileNode->getStringValue() + " for URI '" + pURINode->getStringValue() + "'");
-    shttpd_register_uri(m_SHttpdContext, pURINode->getStringValue().c_str(), &httpPluginCallback, plugin);
+    mg_set_uri_callback(m_mgContext, pURINode->getStringValue().c_str(), &httpPluginCallback, plugin);
   } // loadPlugin
 
   void WebServer::setupAPI() {
@@ -409,28 +408,21 @@ namespace dss {
   } // setupAPI
 
   void WebServer::doStart() {
-    run();
-  } // start
-
-  void WebServer::execute() {
     string ports = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "ports");
     log("Webserver: Listening on port(s) " + ports);
-    shttpd_set_option(m_SHttpdContext, "ports", ports.c_str());
+    mg_set_option(m_mgContext, "ports", ports.c_str());
 
     string aliases = string("/=") + DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "webroot");
     log("Webserver: Configured aliases: " + aliases);
-    shttpd_set_option(m_SHttpdContext, "aliases", aliases.c_str());
+    mg_set_option(m_mgContext, "aliases", aliases.c_str());
 
-    shttpd_register_uri(m_SHttpdContext, "/browse/*", &httpBrowseProperties, NULL);
-    shttpd_register_uri(m_SHttpdContext, "/json/*", &jsonHandler, NULL);
+    mg_set_uri_callback(m_mgContext, "/browse/*", &httpBrowseProperties, NULL);
+    mg_set_uri_callback(m_mgContext, "/json/*", &jsonHandler, NULL);
 
     loadPlugins();
 
     log("Webserver started", lsInfo);
-    while(!m_Terminated) {
-      shttpd_poll(m_SHttpdContext, 1000);
-    }
-  } // execute
+  } // start
 
   const char* httpCodeToMessage(const int _code) {
     if(_code == 400) {
@@ -446,11 +438,12 @@ namespace dss {
     }
   }
 
-  void WebServer::emitHTTPHeader(int _code, struct shttpd_arg* _arg, const std::string& _contentType) {
+  void WebServer::emitHTTPHeader(int _code, struct mg_connection* _connection, const std::string& _contentType) {
     std::stringstream sstream;
     sstream << "HTTP/1.1 " << _code << ' ' << httpCodeToMessage(_code) << "\r\n";
     sstream << "Content-Type: " << _contentType << "; charset=utf-8\r\n\r\n";
-    shttpd_printf(_arg, sstream.str().c_str());
+    string tmp = sstream.str();
+    mg_write(_connection, tmp.c_str(), tmp.length());
   } // emitHTTPHeader
 
   HashMapConstStringString parseParameter(const char* _params) {
@@ -656,7 +649,7 @@ namespace dss {
     return arr.str();
   } // toJSONArray<int>
 
-  string WebServer::callDeviceInterface(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, IDeviceInterface* _interface, Session* _session) {
+  string WebServer::callDeviceInterface(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, IDeviceInterface* _interface, Session* _session) {
     bool ok = true;
     string errorString;
     assert(_interface != NULL);
@@ -738,7 +731,7 @@ namespace dss {
         || endsWith(_method, "/getConsumption");
   } // isDeviceInterfaceCall
 
-  string WebServer::handleApartmentCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleApartmentCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     bool ok = true;
     string errorMessage;
     _handled = true;
@@ -779,7 +772,7 @@ namespace dss {
         if(interface == NULL) {
           interface = &getDSS().getApartment().getGroup(GroupIDBroadcast);
         }
-        return callDeviceInterface(_method, _parameter, _arg, interface, _session);
+        return callDeviceInterface(_method, _parameter, _connection, interface, _session);
       } else {
         stringstream sstream;
         sstream << "{ ok: " << ToJSONValue(ok) << ", message: " << ToJSONValue(errorMessage) << " }";
@@ -837,7 +830,7 @@ namespace dss {
     }
   } // handleApartmentCall
 
-  string WebServer::handleZoneCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleZoneCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     bool ok = true;
     string errorMessage;
     _handled = true;
@@ -913,7 +906,7 @@ namespace dss {
             if(interface == NULL) {
               interface = pZone;
             }
-            return callDeviceInterface(_method, _parameter, _arg, interface, _session);
+            return callDeviceInterface(_method, _parameter, _connection, interface, _session);
           }
         } else if(endsWith(_method, "/getLastCalledScene")) {
           int lastScene = 0;
@@ -948,7 +941,7 @@ namespace dss {
     }
   } // handleZoneCall
 
-  string WebServer::handleDeviceCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleDeviceCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     bool ok = true;
     string errorMessage;
     _handled = true;
@@ -983,7 +976,7 @@ namespace dss {
     }
     if(ok) {
       if(isDeviceInterfaceCall(_method)) {
-        return callDeviceInterface(_method, _parameter, _arg, pDevice, _session);
+        return callDeviceInterface(_method, _parameter, _connection, pDevice, _session);
       } else if(beginsWith(_method, "device/getGroups")) {
         int numGroups = pDevice->getGroupsCount();
         stringstream sstream;
@@ -1067,7 +1060,7 @@ namespace dss {
     }
   } // handleDeviceCall
 
-  string WebServer::handleCircuitCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleCircuitCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     _handled = true;
     string idString = _parameter["id"];
     if(idString.empty()) {
@@ -1104,7 +1097,7 @@ namespace dss {
   } // handleCircuitCall
 
 
-  string WebServer::handleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     _handled = true;
     if(endsWith(_method, "/fromApartment")) {
       _handled = true;
@@ -1196,7 +1189,7 @@ namespace dss {
       } else if(isDeviceInterfaceCall(_method)) {
         SetBuilder builder;
         Set set = builder.buildSet(self, NULL);
-        return callDeviceInterface(_method, _parameter, _arg, &set, _session);
+        return callDeviceInterface(_method, _parameter, _connection, &set, _session);
       } else {
         _handled = false;
       }
@@ -1205,7 +1198,7 @@ namespace dss {
     return "";
   } // handleSetCall
 
-  string WebServer::handlePropertyCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handlePropertyCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     _handled = true;
     string propName = _parameter["path"];
     if(propName.empty()) {
@@ -1325,7 +1318,7 @@ namespace dss {
     return "";
   } // handlePropertyCall
 
-  string WebServer::handleEventCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleEventCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     _handled = true;
     string result;
     if(endsWith(_method, "/raise")) {
@@ -1348,7 +1341,11 @@ namespace dss {
     return result;
   } // handleEventCall
 
-  string WebServer::handleStructureCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleStructureCall(const std::string& _method, 
+                                        HashMapConstStringString& _parameter, 
+                                        struct mg_connection* _connection, 
+                                        bool& _handled, 
+                                        Session* _session) {
     _handled = true;
     StructureManipulator manipulator(getDSS().getDS485Interface(), getDSS().getApartment());
     if(endsWith(_method, "structure/zoneAddDevice")) {
@@ -1403,7 +1400,7 @@ namespace dss {
     }
   } // handleStructureCall
 
-  string WebServer::handleSimCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleSimCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     _handled = true;
     if(beginsWith(_method, "sim/switch")) {
       if(endsWith(_method, "/switch/pressed")) {
@@ -1484,7 +1481,7 @@ namespace dss {
     return "";
   } // handleSimCall
 
-  string WebServer::handleDebugCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+  string WebServer::handleDebugCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     _handled = true;
     if(endsWith(_method, "/sendFrame")) {
       int destination = strToIntDef(_parameter["destination"],0) & 0x3F;
@@ -1525,8 +1522,8 @@ namespace dss {
       return "";
     }
   } // handleDebugCall
-  
-  string WebServer::handleMeteringCall(const std::string& _method, HashMapConstStringString& _parameter, struct shttpd_arg* _arg, bool& _handled, Session* _session) {
+
+  string WebServer::handleMeteringCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     if(endsWith(_method, "/getResolutions")) {
       _handled = true;
       std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = getDSS().getMetering().getConfig();
@@ -1594,7 +1591,7 @@ namespace dss {
       if(resolution == -1) {
         return ResultToJSON(false, "Need could not parse resolution '" + resolutionString + "'");
       }
-      if(typeString.empty()) {        
+      if(typeString.empty()) {
         return ResultToJSON(false, "Need a type, 'energy' or 'consumption'");
       } else {
         if(typeString == "consumption") {
@@ -1649,7 +1646,7 @@ namespace dss {
         }
       } else {
         return ResultToJSON(false, "Could not parse resolution '" + resolutionString + "'");
-      }    
+      }
     } else if(endsWith(_method, "/getAggregatedValues")) { //?set=;n=,resolution=;type=
       _handled = false;
       return "";
@@ -1658,35 +1655,43 @@ namespace dss {
     return "";
   } // handleMeteringCall
 
-  void WebServer::httpPluginCallback(struct shttpd_arg* _arg) {
-    if(_arg->user_data != NULL) {
-      WebServerPlugin* plugin = static_cast<WebServerPlugin*>(_arg->user_data);
+  void WebServer::httpPluginCallback(struct mg_connection* _connection,
+                                     const struct mg_request_info* _info, 
+                                     void* _userData) {
+    if(_userData != NULL) {
+      WebServerPlugin* plugin = static_cast<WebServerPlugin*>(_userData);
       WebServer& self = DSS::getInstance()->getWebServer();
-      string uri = shttpd_get_env(_arg, "REQUEST_URI");
+      
+      string uri = _info->uri;
       self.log("Plugin: Processing call to " + uri);
 
-      self.pluginCalled(_arg, *plugin, uri);
+      self.pluginCalled(_connection, _info, *plugin, uri);
     }
   } // httpPluginCallback
 
-  void WebServer::pluginCalled(struct shttpd_arg* _arg, WebServerPlugin& plugin, const std::string& _uri) {
-    HashMapConstStringString paramMap = parseParameter(shttpd_get_env(_arg, "QUERY_STRING"));
+  void WebServer::pluginCalled(struct mg_connection* _connection, 
+                               const struct mg_request_info* _info,
+                               WebServerPlugin& plugin, 
+                               const std::string& _uri) {
+    HashMapConstStringString paramMap = parseParameter(_info->query_string);
 
     string result;
     if(plugin.handleRequest(_uri, paramMap, getDSS(), result)) {
-      emitHTTPHeader(200, _arg, "text/plain");
-      shttpd_printf(_arg, result.c_str());
+      emitHTTPHeader(200, _connection, "text/plain");
+      mg_write(_connection, result.c_str(), result.length());
     } else {
-      emitHTTPHeader(500, _arg, "text/plain");
-      shttpd_printf(_arg, "error");
+      emitHTTPHeader(500, _connection, "text/plain");
+      mg_printf(_connection, "error");
     }
-    _arg->flags |= SHTTPD_END_OF_OUTPUT;
   } // pluginCalled
 
-  void WebServer::jsonHandler(struct shttpd_arg* _arg) {
-    const string urlid = "/json/";
-    string uri = shttpd_get_env(_arg, "REQUEST_URI");
-    HashMapConstStringString paramMap = parseParameter(shttpd_get_env(_arg, "QUERY_STRING"));
+  void WebServer::jsonHandler(struct mg_connection* _connection,
+                              const struct mg_request_info* _info, 
+                              void* _userData) {
+    const string urlid = "/json/";     
+    string uri = _info->uri;
+    
+    HashMapConstStringString paramMap = parseParameter(_info->query_string);
 
     string method = uri.substr(uri.find(urlid) + urlid.size());
 
@@ -1711,53 +1716,53 @@ namespace dss {
     string result;
     bool handled = false;
     if(beginsWith(method, "apartment/")) {
-      result = self.handleApartmentCall(method, paramMap, _arg, handled, session);
+      result = self.handleApartmentCall(method, paramMap, _connection, handled, session);
     } else if(beginsWith(method, "zone/")) {
-      result = self.handleZoneCall(method, paramMap, _arg, handled, session);
+      result = self.handleZoneCall(method, paramMap, _connection, handled, session);
     } else if(beginsWith(method, "device/")) {
-      result = self.handleDeviceCall(method, paramMap, _arg, handled, session);
+      result = self.handleDeviceCall(method, paramMap, _connection, handled, session);
     } else if(beginsWith(method, "circuit/")) {
-      result = self.handleCircuitCall(method, paramMap, _arg, handled, session);
+      result = self.handleCircuitCall(method, paramMap, _connection, handled, session);
     } else if(beginsWith(method, "set/")) {
-      result = self.handleSetCall(method, paramMap, _arg, handled, session);
+      result = self.handleSetCall(method, paramMap, _connection, handled, session);
     } else if(beginsWith(method, "property/")) {
-      result = self.handlePropertyCall(method, paramMap, _arg, handled, session);
+      result = self.handlePropertyCall(method, paramMap, _connection, handled, session);
     } else if(beginsWith(method, "event/")) {
-      result = self.handleEventCall(method, paramMap, _arg, handled, session);
+      result = self.handleEventCall(method, paramMap, _connection, handled, session);
     } else if(beginsWith(method, "structure/")) {
-      result = self.handleStructureCall(method, paramMap, _arg, handled, session);
+      result = self.handleStructureCall(method, paramMap, _connection, handled, session);
     } else if(beginsWith(method, "sim/")) {
-      result = self.handleSimCall(method, paramMap, _arg, handled, session);
+      result = self.handleSimCall(method, paramMap, _connection, handled, session);
     } else if(beginsWith(method, "debug/")) {
-      result = self.handleDebugCall(method, paramMap, _arg, handled, session);
+      result = self.handleDebugCall(method, paramMap, _connection, handled, session);
     } else if(beginsWith(method, "metering/")) {
-      result = self.handleMeteringCall(method, paramMap, _arg, handled, session);
+      result = self.handleMeteringCall(method, paramMap, _connection, handled, session);
     }
 
     if(!handled) {
-      emitHTTPHeader(404, _arg, "application/json");
+      emitHTTPHeader(404, _connection, "application/json");
       result = "{ ok: " + ToJSONValue(false) + ", message: " + ToJSONValue("Call to unknown function") + " }";
       self.log("Unknown function '" + method + "'", lsError);
     } else {
-      emitHTTPHeader(200, _arg, "application/json");
+      emitHTTPHeader(200, _connection, "application/json");
     }
-    shttpd_printf(_arg, result.c_str());
-    _arg->flags |= SHTTPD_END_OF_OUTPUT;
+    mg_write(_connection, result.c_str(), result.length());
   } // jsonHandler
 
-  void WebServer::httpBrowseProperties(struct shttpd_arg* _arg) {
-    emitHTTPHeader(200, _arg);
+  void WebServer::httpBrowseProperties(struct mg_connection* _connection,
+                                       const struct mg_request_info* _info, 
+                                       void* _userData) {
+    emitHTTPHeader(200, _connection);
 
     const string urlid = "/browse";
-    string uri = shttpd_get_env(_arg, "REQUEST_URI");
-    uri = urlDecode(uri);
-    HashMapConstStringString paramMap = parseParameter(shttpd_get_env(_arg, "QUERY_STRING"));
+    string uri = _info->uri;
+    HashMapConstStringString paramMap = parseParameter(_info->query_string);
 
     string path = uri.substr(uri.find(urlid) + urlid.size());
     if(path.empty()) {
       path = "/";
     }
-    shttpd_printf(_arg, "<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><body>");
+    mg_printf(_connection, "<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><body>");
 
     std::stringstream stream;
     stream << "<h1>" << path << "</h1>";
@@ -1794,9 +1799,8 @@ namespace dss {
     }
 
     stream << "</ul></body></html>";
-    shttpd_printf(_arg, stream.str().c_str());
-
-    _arg->flags |= SHTTPD_END_OF_OUTPUT;
+    string tmp = stream.str();
+    mg_write(_connection, tmp.c_str(), tmp.length());
   } // httpBrowseProperties
 
 }
