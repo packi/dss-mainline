@@ -140,6 +140,8 @@ namespace dss {
     virtual std::vector<int> sendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param = -1) = 0;
     virtual std::vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param = -1) = 0;
     virtual std::vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param = -1) = 0;
+    
+    virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) = 0;
   };
 }
 #endif /* DS485INTERFACE_H_ */

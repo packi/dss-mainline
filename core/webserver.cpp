@@ -282,8 +282,13 @@ namespace dss {
     clsDevice.addMethod("endDim")
       .withDocumentation("Stops dimming.");
     clsDevice.addMethod("setValue")
-      .withParameter("value", "integer", true)
+      .withParameter("value", "double", true)
       .withDocumentation("Sets the output value of the device to value");
+    clsDevice.addMethod("setRawValue")
+      .withParameter("value", "integer", true)
+      .withParameter("parameterID", "integer", true)
+      .withParameter("size", "integer", true)
+      .withDocumentation("Sets the value of register parameterID to value");
     clsDevice.addMethod("callScene")
       .withParameter("sceneNr", "integer", true)
       .withDocumentation("Calls scene sceneNr on the device.");
@@ -1013,6 +1018,22 @@ namespace dss {
       } else if(beginsWith(_method, "device/setName")) {
         pDevice->setName(_parameter["newName"]);
         return ResultToJSON(true);
+      } else if(beginsWith(_method, "device/setRawValue")) {
+        int value = strToIntDef(_parameter["value"], -1);
+        if(value == -1) {
+          return ResultToJSON(false, "Invalid or missing parameter 'value'");
+        }
+        int parameterID = strToIntDef(_parameter["parameterID"], -1);
+        if(parameterID == -1) {
+          return ResultToJSON(false, "Invalid or missing parameter 'parameterID'");
+        }
+        int size = strToIntDef(_parameter["size"], -1);
+        if(size == -1) {
+          return ResultToJSON(false, "Invalid or missing parameter 'size'");
+        }
+
+        pDevice->setRawValue(value, parameterID, size);
+        return JSONOk();
       } else if(beginsWith(_method, "device/dSLinkSend")) {
         int iValue = strToIntDef(_parameter["value"], -1);
         if(iValue == -1) {

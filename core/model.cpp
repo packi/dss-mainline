@@ -151,8 +151,16 @@ namespace dss {
   } // hasSwitch
 
   void Device::setValue(const double _value, const int _parameterNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, *this, (int)_value);
+    if(_parameterNr == -1) {
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, *this, _value);
+    } else {
+      DSS::getInstance()->getDS485Interface().setValueDevice(*this, (int)_value, _parameterNr, 1);
+    }
   } // setValue
+  
+  void Device::setRawValue(const uint16_t _value, const int _parameterNr, const int _size) {
+    DSS::getInstance()->getDS485Interface().setValueDevice(*this, _value, _parameterNr, _size);
+  } // setRawValue
 
   double Device::getValue(const int _parameterNr) {
     vector<int> res = DSS::getInstance()->getDS485Interface().sendCommand(cmdGetValue, *this, _parameterNr);
@@ -372,7 +380,11 @@ namespace dss {
   } // endDim
 
   void Set::setValue(const double _value, int _parameterNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, *this, (int)_value);
+    if(_parameterNr == -1) {
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, *this, (int)_value);
+    } else {
+      throw std::runtime_error("Can't set arbitrary parameter on a set");
+    }
   } // setValue
 
   void Set::callScene(const int _sceneNr) {
@@ -1657,7 +1669,11 @@ namespace dss {
   } // endDim
 
   void Zone::setValue(const double _value, const int _parameterNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, *this, GroupIDBroadcast, _parameterNr);
+    if(_parameterNr == -1) {
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, *this, GroupIDBroadcast, _value);
+    } else {
+      throw std::runtime_error("Can't set arbitrary parameter on a zone");
+    }
   } // setValue
 
   void Zone::callScene(const int _sceneNr) {

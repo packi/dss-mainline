@@ -371,13 +371,13 @@ namespace dss {
       sendFrame(frame);
     } else if(_cmd == cmdSetValue) {
       frame.getPayload().add<uint8_t>(FunctionGroupSetValue);
-      frame.getPayload().add<uint16_t>(toZone);
-      frame.getPayload().add<uint16_t>(_groupID);
-      frame.getPayload().add<uint16_t>(_param);
+      frame.getPayload().add<devid_t>(toZone);
+      frame.getPayload().add<devid_t>(_groupID);
+      frame.getPayload().add<devid_t>(_param);
       sendFrame(frame);
     }
     return result;
-  }
+  } // sendCommand(zone, group)
 
   std::vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param) {
     return sendCommand(_cmd, _zone, _group.getID(), _param);
@@ -414,13 +414,6 @@ namespace dss {
       frame.getPayload().add<uint16_t>(_id);
       frame.getPayload().add<uint16_t>(_param);
       uint8_t res = receiveSingleResult(frame, FunctionDeviceGetParameterValue);
-      result.push_back(res);
-    } else if(_cmd == cmdSetValue) {
-      frame.getPayload().add<uint8_t>(FunctionDeviceSetParameterValue);
-      frame.getPayload().add<uint16_t>(_id);
-      frame.getPayload().add<uint16_t>(_param);
-      frame.getPayload().add<uint16_t>(_param); // TODO: introduce a second parameter for the value itself
-      uint8_t res = receiveSingleResult(frame, FunctionDeviceSetParameterValue);
       result.push_back(res);
     } else if(_cmd == cmdGetFunctionID) {
       frame.getPayload().add<uint8_t>(FunctionDeviceGetFunctionID);
@@ -464,7 +457,7 @@ namespace dss {
       sendFrame(frame);
     }
     return result;
-  } // sendCommand
+  } // sendCommand(device)
 
   void DS485Proxy::sendFrame(DS485CommandFrame& _frame) {
     bool broadcast = _frame.getHeader().isBroadcast();
@@ -503,7 +496,20 @@ namespace dss {
     }
   } // isSimAddress
 
-
+  void DS485Proxy::setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) {
+    DS485CommandFrame frame;
+    frame.getHeader().setDestination(_device.getModulatorID());
+    frame.getHeader().setBroadcast(false);
+    frame.getHeader().setType(1);
+    frame.setCommand(CommandRequest);
+    frame.getPayload().add<uint8_t>(FunctionDeviceSetParameterValue);
+    frame.getPayload().add<uint16_t>(_device.getShortAddress());
+    frame.getPayload().add<uint16_t>(_parameterID);
+    frame.getPayload().add<uint16_t>(_size - 1);
+    frame.getPayload().add<uint16_t>(_value);
+    sendFrame(frame);
+  } // setValueDevice
+  
   ModulatorSpec_t DS485Proxy::modulatorSpecFromFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
     int source = _frame->getHeader().getSource();
 

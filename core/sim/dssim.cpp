@@ -764,6 +764,19 @@ namespace dss {
                 distributeFrame(response);
               }
               break;
+            case FunctionDeviceSetParameterValue:
+              {
+                uint16_t devID = pd.get<uint16_t>();
+                DSIDInterface& dev = lookupDevice(devID);
+                uint16_t parameterID = pd.get<uint16_t>();
+                /* uint16_t size = */ pd.get<uint16_t>();
+                uint16_t value = pd.get<uint16_t>();
+                dev.setValue(value, parameterID);
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(1);
+                distributeFrame(response);
+              }
+              break;
             case FunctionDeviceSetValue:
               {
                 uint16_t devID = pd.get<uint16_t>();
@@ -791,15 +804,6 @@ namespace dss {
                 response = createResponse(cmdFrame, cmdNr);
                 response->getPayload().add<uint16_t>(static_cast<uint8_t>(result));
                 distributeFrame(response);
-              }
-              break;
-            case FunctionDeviceSetParameterValue:
-              {
-                int devID = pd.get<uint16_t>();
-                int paramID = pd.get<uint16_t>();
-                uint8_t value = pd.get<uint16_t>();
-                lookupDevice(devID).setValue(value, paramID);
-                distributeFrame(boost::shared_ptr<DS485CommandFrame>(createAck(cmdFrame, cmdNr)));
               }
               break;
             case FunctionModulatorGetZonesSize:

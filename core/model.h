@@ -197,7 +197,7 @@ namespace dss {
     virtual void previousScene();
 
     virtual unsigned long getPowerConsumption();
- };
+ }; // DeviceReference
 
   typedef std::vector<DeviceReference> DeviceVector;
   typedef DeviceVector::iterator DeviceIterator;
@@ -251,6 +251,7 @@ namespace dss {
     virtual void startDim(const bool _directionUp, const int _parameterNr = -1);
     virtual void endDim(const int _parameterNr = -1);
     virtual void setValue(const double _value, const int _parameterNr = -1);
+    void setRawValue(const uint16_t _value, const int _parameterNr, const int _size);
     /** Returns the value of _parameterNr.
      * @note not yet implemented */
     double getValue(const int _parameterNr = -1);
@@ -340,7 +341,7 @@ namespace dss {
     /** Returns wheter two devices are equal.
      * Devices are considered equal if their DSID are a match.*/
     bool operator==(const Device& _other) const;
-  };
+  }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);
 
