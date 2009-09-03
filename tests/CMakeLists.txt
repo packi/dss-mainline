@@ -9,7 +9,7 @@ add_executable( dsstests EXCLUDE_FROM_ALL testrunner.cpp ../namespaces.cpp
 			seriestests.cpp)
 
 target_link_libraries(dsstests ${BOOST_TEST_LIB} core unix webservices 
-	pthread shttpd ${REQUIRED_LIBS})
+	pthread mongoose ${REQUIRED_LIBS})
 
 add_custom_target( test
   COMMAND dsstests --report_level=detailed --log_level=all
