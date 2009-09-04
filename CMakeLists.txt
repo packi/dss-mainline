@@ -78,9 +78,15 @@ IF(${MOZJS} MATCHES "MOZJS-NOTFOUND")
   FIND_LIBRARY(MOZJS js)
 ENDIF(${MOZJS} MATCHES "MOZJS-NOTFOUND")
 
-# set default data directory
-
-
+# check for gsoap library
+CHECK_INCLUDE_FILES(stdsoap2.h HAVE_STDSOAP2_H)
+IF(NOT HAVE_STDSOAP2_H)
+  MESSAGE(FATAL_ERROR "gsoap library is required: stdsoap2.h header not found")
+ENDIF(NOT HAVE_STDSOAP2_H)
+FIND_LIBRARY(GSOAPPP "gsoap++")
+IF(${GSOAPPP} MATCHES "GSOAPPP-NOTFOUND")
+  MESSAGE(FATAL_ERROR "gsoap library is required: library gsoap++ not found")
+ENDIF(${GSOAPPP} MATCHES "GSOAPPP-NOTFOUND")
 
 # generate config.h header file
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
@@ -97,7 +103,7 @@ ADD_SUBDIRECTORY(doc)
 LINK_DIRECTORIES(${DSS_BINARY_DIR}/core ${DSS_BINARY_DIR}/unix ${DSS_BINARY_DIR}/tests)
 
 
-SET(REQUIRED_LIBS ${REQUIRED_LIBS} gsoap++ PocoXML ${MOZJS} ${DNS_SD_LIB}
+SET(REQUIRED_LIBS ${REQUIRED_LIBS} ${GSOAPPP} PocoXML ${MOZJS} ${DNS_SD_LIB}
 	${BOOST_TEST_LIB} dl ical)
 
 SET(BOOST_TEST_LIB)
