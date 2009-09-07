@@ -1855,6 +1855,8 @@ static const struct {
 	{".shtm",	5,	"text/html",			9},
 	{".shtml",	6,	"text/html",			9},
 	{".css",	4,	"text/css",			8},
+	{".xml",	4,	"text/xml",			8},
+	{".xslt",	5,	"application/xml",		15},
 	{".js",		3,	"application/x-javascript",	24},
 	{".ico",	4,	"image/x-icon",			12},
 	{".gif",	4,	"image/gif",			9},
