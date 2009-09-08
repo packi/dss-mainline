@@ -152,7 +152,7 @@ namespace dss {
 
   void Device::setValue(const double _value, const int _parameterNr) {
     if(_parameterNr == -1) {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, *this, _value);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, *this, static_cast<int>(_value));
     } else {
       DSS::getInstance()->getDS485Interface().setValueDevice(*this, (int)_value, _parameterNr, 1);
     }
@@ -1670,7 +1670,7 @@ namespace dss {
 
   void Zone::setValue(const double _value, const int _parameterNr) {
     if(_parameterNr == -1) {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, *this, GroupIDBroadcast, _value);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, *this, GroupIDBroadcast, static_cast<int>(_value));
     } else {
       throw std::runtime_error("Can't set arbitrary parameter on a zone");
     }
