@@ -154,11 +154,11 @@ Ext.onReady(function(){
 										
 										
 										Ext.Ajax.request({
-											url: '/json/apartment/zone/setName',
+											url: '/json/zone/setName',
 											disableCaching: true,
 											method: "GET",
 											params: { id: i,
-																name: text},
+																newName: text},
 											success: function(result, request) {
 												try {
 													var jsonData = Ext.util.JSON.decode(result.responseText);
