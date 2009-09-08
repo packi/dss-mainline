@@ -1,3 +1,8 @@
+IF(WITH_GCOV)
+  ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+ENDIF(WITH_GCOV)
+
+
 file(GLOB files *.cpp)
 
 add_library(core ${files} scripting/modeljs.cpp sim/dssim.cpp sim/dsidsim.cpp
