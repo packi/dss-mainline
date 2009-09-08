@@ -25,25 +25,31 @@
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 
 namespace dss {
 
   class DS485CommandFrame;
+  class DS485ClientImpl;
 
   class __attribute__ ((visibility("default"))) DS485Client {
   public:
+    DS485Client();
+
     typedef void (*FrameCallback_t)(boost::shared_ptr<DS485CommandFrame>);
 
     /** Sends a frame and discards incoming frames */
-    void SendFrameDiscardResult(DS485CommandFrame& _frame);
+    void sendFrameDiscardResult(DS485CommandFrame& _frame);
     /** Sends a frame and receives one response frame with the same functionID as \a _functionID within _timeoutMS */
-    boost::shared_ptr<DS485CommandFrame> SendFrameSingleResult(DS485CommandFrame& _frame, int _functionID, int _timeoutMS);
+    boost::shared_ptr<DS485CommandFrame> sendFrameSingleResult(DS485CommandFrame& _frame, int _functionID, int _timeoutMS);
     /** Sends a frame and receives all frames with the same functionID as \a _functionID within _timeoutMS */
-    std::vector<boost::shared_ptr<DS485CommandFrame> > SendFrameMultipleResults(DS485CommandFrame& _frame, int _functionID, int _timeoutMS);
+    std::vector<boost::shared_ptr<DS485CommandFrame> > sendFrameMultipleResults(DS485CommandFrame& _frame, int _functionID, int _timeoutMS);
     /** Subscribes to all frames with the functionID \a _functionID and source \a _source. If \a _source is -1 all Frames will captured. \a _callback is called once per received frame. */
-    void SubscribeTo(int _functionID, int _source, FrameCallback_t _callback);
+    void subscribeTo(int _functionID, int _source, FrameCallback_t _callback);
     /** Unsubscribes the first description that matches \a _functionID and \a _source. */
-    void UnsubscribeFrom(int _functionID, int _source);
+    void unsubscribeFrom(int _functionID, int _source);
+  private:
+    boost::scoped_ptr<DS485ClientImpl> m_pImpl;
   }; // DS485Client
 }
 

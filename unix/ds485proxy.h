@@ -75,26 +75,40 @@ namespace dss {
     int getReceivedAt() const { return m_ReceivedAtToken; };
   }; // ReceivedFrame
 
-  /** A frame bucket holds response-frames for any given function id/source id pair.
-   *  If m_SourceID is -1 every source matches. */
-  class FrameBucket {
-  private:
-    deque<boost::shared_ptr<ReceivedFrame> > m_Frames;
-    DS485Proxy* m_pProxy;
-    int m_FunctionID;
-    int m_SourceID;
-    SyncEvent m_PacketHere;
-    Mutex m_FramesMutex;
-    bool m_SingleFrame;
+
+  /** A frame bucket gets notified on every frame that matches any given
+   *  function-/source-id pair.
+   *  If \a m_SourceID is -1 every source matches. */
+  class FrameBucketBase {
   public:
-    FrameBucket(DS485Proxy* _proxy, int _functionID, int _sourceID);
-    ~FrameBucket();
+    FrameBucketBase(DS485Proxy* _proxy, int _functionID, int _sourceID);
+    virtual ~FrameBucketBase();
 
     int getFunctionID() const { return m_FunctionID; }
     int getSourceID() const { return m_SourceID; }
 
+    virtual bool addFrame(boost::shared_ptr<ReceivedFrame> _frame) = 0;
+  private:
+    DS485Proxy* m_pProxy;
+    int m_FunctionID;
+    int m_SourceID;
+  }; // FrameBucketBase
+
+
+  /** FrameBucketCollector holds its received frames in a queue.
+    */
+  class FrameBucketCollector : public FrameBucketBase {
+  private:
+    deque<boost::shared_ptr<ReceivedFrame> > m_Frames;
+    SyncEvent m_PacketHere;
+    Mutex m_FramesMutex;
+    bool m_SingleFrame;
+  public:
+    FrameBucketCollector(DS485Proxy* _proxy, int _functionID, int _sourceID);
+    virtual ~FrameBucketCollector() { }
+
     /** Adds a ReceivedFrame to the frames queue */
-    bool addFrame(boost::shared_ptr<ReceivedFrame> _frame);
+    virtual bool addFrame(boost::shared_ptr<ReceivedFrame> _frame);
     /** Returns the least recently received item int the queue.
      * The pointer will contain NULL if isEmpty() returns true. */
     boost::shared_ptr<ReceivedFrame> popFrame();
@@ -103,11 +117,12 @@ namespace dss {
     void waitForFrames(int _timeoutMS);
     /** Waits for a frame to arrive in \a _timeoutMS.
      * If a frame arrives earlier, the function returns */
-    void waitForFrame(int _timeoutMS);
+    bool waitForFrame(int _timeoutMS);
 
     int getFrameCount() const;
     bool isEmpty() const;
-  }; // FrameBucket
+  }; // FrameBucketCollector
+
 
   typedef std::vector<boost::shared_ptr<DS485CommandFrame> > CommandFrameSharedPtrVector;
 
@@ -124,7 +139,7 @@ namespace dss {
     uint8_t receiveSingleResult(DS485CommandFrame& _frame, const uint8_t _functionID);
     uint16_t receiveSingleResult16(DS485CommandFrame& _frame, const uint8_t _functionID);
 
-    std::vector<FrameBucket*> m_FrameBuckets;
+    std::vector<FrameBucketBase*> m_FrameBuckets;
 
     void signalEvent();
 
@@ -147,7 +162,8 @@ namespace dss {
     virtual bool isReady();
 
     virtual void sendFrame(DS485CommandFrame& _frame);
-    boost::shared_ptr<FrameBucket> sendFrameAndInstallBucket(DS485CommandFrame& _frame, const int _functionID);
+    boost::shared_ptr<FrameBucketCollector> sendFrameAndInstallBucket(DS485CommandFrame& _frame, const int _functionID);
+    void installBucket(boost::shared_ptr<FrameBucketBase> _bucket);
 
     //------------------------------------------------ Handling
     virtual void initialize();
@@ -155,8 +171,8 @@ namespace dss {
 
     virtual void collectFrame(boost::shared_ptr<DS485CommandFrame> _frame);
 
-    void addFrameBucket(FrameBucket* _bucket);
-    void removeFrameBucket(FrameBucket* _bucket);
+    void addFrameBucket(FrameBucketBase* _bucket);
+    void removeFrameBucket(FrameBucketBase* _bucket);
 
     //------------------------------------------------ Specialized Commands (system)
     virtual std::vector<ModulatorSpec_t> getModulators();
@@ -206,7 +222,8 @@ namespace dss {
     void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size);
     //------------------------------------------------ Helpers
     DS485Controller& getController() { return m_DS485Controller; }
-  };
+  }; // DS485Proxy
+
 }
 
 #endif
