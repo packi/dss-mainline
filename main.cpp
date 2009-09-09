@@ -26,6 +26,10 @@
   #include "config.h"
 #endif
 
+#ifdef HAVE_BUILD_INFO_H
+  #include "build_info.h"
+#endif
+
 #include "core/base.h"
 #include "core/dss.h"
 #include "core/logger.h"
@@ -48,7 +52,6 @@
 #include <iostream>
 
 #define DSS_VERSION "0.4a1"
-#define DSS_RELEASED_AT "20090605"
 
 using namespace std;
 namespace po = boost::program_options;
@@ -68,7 +71,17 @@ int main (int argc, char* argv[]) {
     return 1;
   }
 
-  cout << "DSS v" << DSS_VERSION << " released at " << DSS_RELEASED_AT << endl;
+#ifdef RELEASE_BUILD
+  cout << "DSS v" << DSS_VERSION << " released at " << DSS_BUILD_DATE << endl;
+#else
+  cout << "DSS version info:\n";
+  cout << "  RCS revision: " << DSS_RCS_REVISION << "\n";
+  cout << "  RCS url:      " << DSS_RCS_URL << "\n";
+  cout << "  build date:   " << DSS_BUILD_DATE << "\n";
+  cout << "  build user:   " << DSS_BUILD_USER << "\n";
+  cout << "  build host:   " << DSS_BUILD_HOST << "\n";
+  cout << endl;
+#endif
 
   // make sure timezone gets set
   tzset();
