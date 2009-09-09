@@ -1058,7 +1058,7 @@ namespace dss {
                 distributeFrame(response);
               }
               break;
-            case FunctionDSLinkSend:
+            case FunctionDSLinkSendDevice:
               {
                 devid_t devID = pd.get<devid_t>();
                 DSIDInterface& dev = lookupDevice(devID);

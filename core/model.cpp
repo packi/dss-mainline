@@ -834,6 +834,40 @@ namespace dss {
       scanModulator(modulator);
     }
   } // initializeFromBus
+  
+  void Apartment::newModulator(int _modulatorBusID) {
+    DS485Interface& interface = DSS::getInstance()->getDS485Interface();
+    log("Found modulator with id: " + intToString(_modulatorBusID));
+    dsid_t modDSID = interface.getDSIDOfModulator(_modulatorBusID);
+    log("  DSID: " + modDSID.toString());
+    Modulator& modulator = allocateModulator(modDSID);
+    modulator.setBusID(_modulatorBusID);
+    scanModulator(modulator);
+  } // newModulator
+
+  class SetNotPresentAction : public IDeviceAction {
+  public:
+    virtual bool perform(Device& _device) {
+      _device.setIsPresent(false);
+      return true;
+    }
+  }; // SetNotPresentAction
+  
+  void Apartment::lostModulator(int _modulatorBusID) {
+    try {
+      Modulator& modulator = getModulatorByBusID(_modulatorBusID);
+      modulator.setIsPresent(false);
+      Set devices = modulator.getDevices();
+      SetNotPresentAction action;
+      devices.perform(action);
+    } catch(ItemNotFoundException& e) {
+      log(std::string("Apartment::lostModulator: ") + e.what(), lsError);
+    }
+  } // lostModulator
+  
+  void Apartment::modulatorReady(int _modulatorBusID) {
+    newModulator(_modulatorBusID);
+  } // modulatorReady
 
   void Apartment::handleModelEvents() {
     if(!m_ModelEvents.empty()) {
@@ -868,6 +902,27 @@ namespace dss {
           log("Expected exactly 3 parameter for ModelEvent::etDSLinkInterrupt");
         } else {
           onDSLinkInterrupt(event.getParameter(0), event.getParameter(1), event.getParameter(2));
+        }
+        break;
+      case ModelEvent::etNewModulator:
+        if(event.getParameterCount() != 1) {
+          log("Expected exactly 1 parameter for ModelEvent::etNewModulator");
+        } else {
+          newModulator(event.getParameter(0));
+        }
+        break;
+      case ModelEvent::etLostModulator:
+        if(event.getParameterCount() != 1) {
+          log("Expected exactly 1 parameter for ModelEvent::etLostModulator");
+        } else {
+          lostModulator(event.getParameter(0));
+        }
+        break;
+      case ModelEvent::etModulatorReady:
+        if(event.getParameterCount() != 1) {
+          log("Expected exactly 1 parameter for ModelEvent::etModulatorReady");
+        } else {
+          modulatorReady(event.getParameter(0));
         }
         break;
       default:

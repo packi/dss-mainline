@@ -933,7 +933,7 @@ namespace dss {
     DS485CommandFrame cmdFrame;
     cmdFrame.getHeader().setDestination(_modulatorID);
     cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDSLinkSend);
+    cmdFrame.getPayload().add<uint8_t>(FunctionDSLinkSendDevice);
     cmdFrame.getPayload().add<uint16_t>(_devAdr);
     cmdFrame.getPayload().add<uint16_t>(_value);
     cmdFrame.getPayload().add<uint16_t>(_flags);
@@ -1150,21 +1150,27 @@ namespace dss {
     case FunctionGetTypeRequest:
       return "Function Get Type";
 
-    case FunctionKeyPressed:
-      return "Function Key Pressed";
-
     case FunctionDeviceGetFunctionID:
       return "Function Device Get Function ID";
     case FunctionDSLinkConfigWrite:
       return "Function dSLink Config Write";
     case FunctionDSLinkConfigRead:
       return "Function dSLink Config Read";
-    case FunctionDSLinkSend:
-      return "Function dSLink Send";
+    case FunctionDSLinkSendDevice:
+      return "Function dSLink Send Device";
+    case FunctionDSLinkSendGroup:
+      return "Function dSLink Send Group";
     case FunctionDSLinkReceive:
       return "Function dSLink Receive";
     case FunctionDSLinkInterrupt:
       return "Function DSLink Interrupt";
+      
+    case EventNewDS485Device:
+      return "Event New DS485 Device";
+    case EventLostDS485Device:
+      return "Event Lost DS485 Device";
+    case EventDeviceReady:
+      return "Event Device Ready";    
     }
     return "";
   } // functionIDToString
@@ -1254,6 +1260,23 @@ namespace dss {
               pEvent->addParameter(modID);
               pEvent->addParameter(devID);
               pEvent->addParameter(priority);
+              getDSS().getApartment().addModelEvent(pEvent);
+            } else if(functionID == EventNewDS485Device) {
+              pd.get<uint8_t>(); // functionID
+              int modID = pd.get<uint16_t>();
+              ModelEvent* pEvent = new ModelEvent(ModelEvent::etNewModulator);
+              pEvent->addParameter(modID);
+              getDSS().getApartment().addModelEvent(pEvent);
+            } else if(functionID == EventLostDS485Device) {
+              pd.get<uint8_t>(); // functionID
+              int modID = pd.get<uint16_t>();
+              ModelEvent* pEvent = new ModelEvent(ModelEvent::etLostModulator);
+              pEvent->addParameter(modID);
+              getDSS().getApartment().addModelEvent(pEvent);
+            } else if(functionID == EventDeviceReady) {
+              int modID = frame->getHeader().getDestination();
+              ModelEvent* pEvent = new ModelEvent(ModelEvent::etModulatorReady);
+              pEvent->addParameter(modID);
               getDSS().getApartment().addModelEvent(pEvent);
             }
           } else {

@@ -96,8 +96,6 @@ namespace dss {
   const uint8_t FunctionDeviceGetDSID = 0x65;
   const uint8_t FunctionDeviceGetGroups = 0x67;
 
-  const uint8_t FunctionKeyPressed = 0x80;
-
   const uint8_t FunctionModulatorGetDSID = 0x91;
   const uint8_t FunctionModulatorGetPowerConsumption = 0x94;
   const uint8_t FunctionModulatorGetEnergyMeterValue = 0x95;
@@ -111,11 +109,16 @@ namespace dss {
 
   const uint8_t FunctionDSLinkConfigWrite = 0xa0;
   const uint8_t FunctionDSLinkConfigRead = 0xa1;
-  const uint8_t FunctionDSLinkSend = 0xa2;
+  const uint8_t FunctionDSLinkSendDevice = 0xc2;
+  const uint8_t FunctionDSLinkSendGroup = 0xc4;
   const uint8_t DSLinkSendLastByte = 0x01;
   const uint8_t DSLinkSendWriteOnly = 0x02;
   const uint8_t FunctionDSLinkReceive = 0xa3;
   const uint8_t FunctionDSLinkInterrupt = 0x85;
+  
+  const uint8_t EventNewDS485Device = 0x80;
+  const uint8_t EventLostDS485Device = 0x81;
+  const uint8_t EventDeviceReady = 0x82;
 
   // Scene constants for devices
   const uint8_t SceneOff = 0x00;

@@ -724,7 +724,10 @@ namespace dss {
                    etCallSceneDevice, /**< A device has changed the scene (only raised from the simulation at the moment). */
                    etNewDevice,       /**< A new device has been detected */
                    etModelDirty,      /**< A parameter that will be stored in \c apartment.xml has been changed. */
-                   etDSLinkInterrupt  /**< An interrupt has occured */
+                   etDSLinkInterrupt,  /**< An interrupt has occured */
+                   etNewModulator, /**< A new modulator has joined the bus */
+                   etLostModulator, /**< We've lost a modulator on the bus */
+                   etModulatorReady /**< A modulator has completed its scanning cycle and is now ready */
                  } EventType;
   private:
     EventType m_EventType;
@@ -778,6 +781,9 @@ namespace dss {
     void initializeFromBus();
     void scanModulator(Modulator& _modulator);
     void handleModelEvents();
+    void newModulator(int _modulatorBusID);
+    void lostModulator(int _modulatorBusID);
+    void modulatorReady(int _modulatorBusID);
   protected:
     virtual void doStart();
   public:
