@@ -51,8 +51,6 @@
 
 #include <iostream>
 
-#define DSS_VERSION "0.4a1"
-
 using namespace std;
 namespace po = boost::program_options;
 
@@ -65,16 +63,12 @@ pair<string, string> parse_prop(const string& s) {
 } // parse_prop
 
 void printVersion() {
-#ifdef RELEASE_BUILD
-  cout << "DSS v" << DSS_VERSION << " released at " << DSS_BUILD_DATE << endl;
-#else
-  cout << "DSS version info:\n";
-  cout << "  RCS revision: " << DSS_RCS_REVISION << "\n";
-  cout << "  RCS url:      " << DSS_RCS_URL << "\n";
-  cout << "  build date:   " << DSS_BUILD_DATE << "\n";
-  cout << "  build user:   " << DSS_BUILD_USER << "\n";
-  cout << "  build host:   " << DSS_BUILD_HOST << "\n";
-  cout << endl;
+  cout << "DSS v" << DSS_VERSION << " built on " << DSS_BUILD_DATE << endl;
+#ifndef RELEASE_BUILD
+  cout << "  RCS revision: " << DSS_RCS_REVISION << endl;
+  cout << "  RCS url:      " << DSS_RCS_URL      << endl;
+  cout << "  build user:   " << DSS_BUILD_USER   << endl;
+  cout << "  build host:   " << DSS_BUILD_HOST   << endl;
 #endif
 }
 
