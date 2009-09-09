@@ -34,6 +34,8 @@ This should generate the "dss" executable. Run it using
 -DWITH_SIM=[yes|no] 
  include the simulation in the build
 -DCMAKE_BUILD_TYPE=[Release|Debug]
+-DRELEASE_BUILD=[0|1]
+ create a release build (only affects version number output)
 
 == Using ==
 
