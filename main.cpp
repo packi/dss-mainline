@@ -64,13 +64,7 @@ pair<string, string> parse_prop(const string& s) {
     }
 } // parse_prop
 
-int main (int argc, char* argv[]) {
-
-  if (!setlocale(LC_CTYPE, "")) {
-    cerr << "Can't set the specified locale! Check LANG, LC_CTYPE, LC_ALL." << endl;
-    return 1;
-  }
-
+void printVersion() {
 #ifdef RELEASE_BUILD
   cout << "DSS v" << DSS_VERSION << " released at " << DSS_BUILD_DATE << endl;
 #else
@@ -82,7 +76,15 @@ int main (int argc, char* argv[]) {
   cout << "  build host:   " << DSS_BUILD_HOST << "\n";
   cout << endl;
 #endif
+}
 
+int main (int argc, char* argv[]) {
+
+  if (!setlocale(LC_CTYPE, "")) {
+    cerr << "Can't set the specified locale! Check LANG, LC_CTYPE, LC_ALL." << endl;
+    return 1;
+  }
+  
   // make sure timezone gets set
   tzset();
 
@@ -123,6 +125,7 @@ int main (int argc, char* argv[]) {
       ("sniff,s", po::value<string>(), "start the ds485 sniffer")
 #endif
       ("prop", po::value<vector<string> >(), "sets a property")
+      ("version,v", "print version information and exit")
   ;
 
   po::variables_map vm;
@@ -133,6 +136,11 @@ int main (int argc, char* argv[]) {
   if (vm.count("help")) {
       cout << desc << "\n";
       return 1;
+  }
+
+  if (vm.count("version")) {
+    printVersion();
+    return 1;
   }
 
   bool runTests = true;
@@ -177,6 +185,12 @@ int main (int argc, char* argv[]) {
   } else {
     if(!quitAfterTests) {
       // start DSS
+
+      // for now, we always print out the version to make the logs
+      // more expressive; this should go away in the future
+      printVersion();
+
+      
       dss::DSS::getInstance()->initialize(properties);
       dss::DSS::getInstance()->run();
     }
