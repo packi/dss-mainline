@@ -16,26 +16,24 @@ fi
 
 rcs_rev="undefined"
 rcs_root="undefined"
-if [ -n "$(which svn)" ]; then
-  if [ -d $BASEDIR/.svn ]; then
-     rcs_rev=$(svnversion $BASEDIR)
-     rcs_root=$(svn info $BASEDIR|grep ^URL:|sed -e 's|URL:\s*||')
-  elif [ -d $BASEDIR/.git ]; then
-    if [ -d $BASEDIR/.git/svn ]; then
-     rcs_rev=svn-$(git svn info|grep ^Revision:| sed -e 's|Revision:\s*||')+
-     rcs_root=$(git svn info|grep ^URL:|sed -e 's|URL:\s*||')    
-    else
-      rcs_root=$(git branch|grep ^*)
-    fi
-    rcs_rev="${rcs_rev}git:$(git rev-parse HEAD)"
-    rcs_st=$(git status $BASEDIR|grep modified:)
-    if [ -n "$rcs_st" ]; then
-      rcs_rev="$rcs_rev-dirty"
-    fi
-  elif [ -d $BASEDIR/.hg ]; then
-     rcs_rev=$(hg identify) # already contains the '+' marked when modified
-     rcs_root=$(hg branch)
-  fi 
+if [ -d $BASEDIR/.svn ]; then
+  rcs_rev=$(svnversion $BASEDIR)
+  rcs_root=$(svn info $BASEDIR|grep ^URL:|sed -e 's|URL:\s*||')
+elif [ -d $BASEDIR/.git ]; then
+  if [ -d $BASEDIR/.git/svn ]; then
+    rcs_rev=svn-$(git svn info|grep ^Revision:| sed -e 's|Revision:\s*||')+
+    rcs_root=$(git svn info|grep ^URL:|sed -e 's|URL:\s*||')    
+  else
+    rcs_root=$(git branch|grep ^*)
+  fi
+  rcs_rev="${rcs_rev}git:$(git rev-parse HEAD)"
+  rcs_st=$(git status $BASEDIR|grep modified:)
+  if [ -n "$rcs_st" ]; then
+    rcs_rev="$rcs_rev-dirty"
+  fi
+elif [ -d $BASEDIR/.hg ]; then
+  rcs_rev=$(hg identify) # already contains the '+' marked when modified
+  rcs_root=$(hg branch)
 fi
 
 
