@@ -18,12 +18,8 @@ rcs_rev="undefined"
 rcs_root="undefined"
 if [ -n "$(which svn)" ]; then
   if [ -d $BASEDIR/.svn ]; then
-     rcs_rev=$(svn info $BASEDIR|grep ^Revision:| sed -e 's|Revision:\s*||')
+     rcs_rev=$(svnversion $BASEDIR)
      rcs_root=$(svn info $BASEDIR|grep ^URL:|sed -e 's|URL:\s*||')
-     rcs_st=$(svn st $BASEDIR|grep ^M)
-     if [ -n "$rcs_st" ]; then
-	rcs_rev="$rcs_rev-dirty"
-     fi
   elif [ -d $BASEDIR/.git ]; then
     if [ -d $BASEDIR/.git/svn ]; then
      rcs_rev=svn-$(git svn info|grep ^Revision:| sed -e 's|Revision:\s*||')+
