@@ -35,11 +35,13 @@
 #endif
 
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/scoped_ptr.hpp>
 
 namespace dss {
 
   class ScriptContext;
   class ScriptExtension;
+  class ScriptObject;
 
   /** Wrapper for a script runtime environment. The ScriptEnvironment
     * is also responsible for creating Contexts and enhancing them with
@@ -76,6 +78,7 @@ namespace dss {
     JSScript* m_pScriptToExecute;
     std::string m_FileName;
     JSObject* m_pRootObject;
+    boost::scoped_ptr<ScriptObject> m_RootObject;
     JSObject* m_pSourceObject;
     ScriptEnvironment& m_Environment;
     JSContext* m_pContext;
@@ -107,6 +110,7 @@ namespace dss {
     /** Returns a const reference to the ScriptEnvironment */
     const ScriptEnvironment& getEnvironment() const { return m_Environment; }
     ScriptEnvironment& getEnvironment() { return m_Environment; }
+    ScriptObject& getRootObject() { return *m_RootObject; }
   public:
 
     /** Helper function to convert a jsval to a t. */
@@ -169,6 +173,7 @@ namespace dss {
     ScriptContext& m_Context;
   public:
     ScriptObject(JSObject* _pObject, ScriptContext& _context);
+    ScriptObject(ScriptContext& _context, ScriptObject* _pParent);
 
     /** Returns the objects "classname" property. This property must be
       * present for this call to succeed.
@@ -182,7 +187,12 @@ namespace dss {
     /** Returns the property named \a _name as type \a t */
     template<class t>
     t getProperty(const std::string& _name);
+
+    /** Sets the property named \a _name to \a _value */
+    template<class t>
+    void setProperty(const std::string& _name, t _value);
   }; // ScriptObject
-}
+
+} // namespace dss
 
 #endif

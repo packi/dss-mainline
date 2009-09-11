@@ -166,6 +166,7 @@ namespace dss {
     if (m_pRootObject == NULL) {
       throw ScriptException("Could not create root-object");
     }
+    m_RootObject.reset(new ScriptObject(m_pRootObject, *this));
 
     JS_DefineFunctions(m_pContext, m_pRootObject, global_methods);
 
@@ -312,6 +313,18 @@ namespace dss {
   : m_pObject(_pObject),
     m_Context(_context)
   {
+    assert(_pObject != NULL);
+  } // ctor
+
+  ScriptObject::ScriptObject(ScriptContext& _context, ScriptObject* _pParent)
+  : m_pObject(NULL),
+    m_Context(_context)
+  {
+    JSObject* parentObj = NULL;
+    if(_pParent != NULL) {
+      parentObj = _pParent->m_pObject;
+    }
+    m_pObject = JS_NewObject(m_Context.getJSContext(), NULL, NULL, parentObj);
   } // ctor
 
   template<>
@@ -335,17 +348,53 @@ namespace dss {
   template<>
   std::string ScriptObject::getProperty(const std::string& _name) {
     jsval value = getProperty<jsval>(_name);
-    if(JSVAL_IS_STRING(value)) {
-      return std::string(JS_GetStringBytes(JSVAL_TO_STRING(value)));
-    }
-    throw ScriptException(std::string("Property is not of std::string type: ") + _name);
+    return m_Context.convertTo<std::string>(value);
   } // getProperty<string>
+
+  template<>
+  int ScriptObject::getProperty(const std::string& _name) {
+    jsval value = getProperty<jsval>(_name);
+    return m_Context.convertTo<int>(value);
+  } // getProperty<string>
+
+  template<>
+  void ScriptObject::setProperty(const std::string& _name, jsval _value) {
+    JS_SetProperty(m_Context.getJSContext(), m_pObject, _name.c_str(), &_value);
+  } // setProperty<jsval>
+
+  template<>
+  void ScriptObject::setProperty(const std::string& _name, const std::string& _value) {
+    JSString* str = JS_NewStringCopyN(m_Context.getJSContext(), _value.c_str(), _value.size());
+    setProperty(_name, STRING_TO_JSVAL(str));
+  } // setProperty<std::string>
+
+  template<>
+  void ScriptObject::setProperty(const std::string& _name, const char* _value) {
+    std::string str(_value);
+    setProperty<const std::string&>(_name, str);
+  } // setProperty<const char*>
+
+  template<>
+  void ScriptObject::setProperty(const std::string& _name, int _value) {
+    jsval val;
+    if(!JS_NewNumberValue(m_Context.getJSContext(), _value, &val)) {
+      throw ScriptException("could not allocate number");
+    }
+    setProperty(_name, val);
+  } // setProperty<int>
+
+  template<>
+  void ScriptObject::setProperty(const std::string& _name, ScriptObject* _value) {
+    assert(_value != NULL);
+    setProperty(_name, OBJECT_TO_JSVAL(_value->m_pObject));
+  } // setProperty<ScriptObject>
 
   bool ScriptObject::is(const std::string& _className) {
     return getClassName() == _className;
-  }
+  } // is
 
   const std::string ScriptObject::getClassName() {
     return getProperty<std::string>("className");
   } // getClassName
+
 }
