@@ -567,6 +567,12 @@ namespace dss {
         case 2:
           *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, dev->getDevice().getName().c_str()));
           return JS_TRUE;
+        case 3: 
+          *rval = INT_TO_JSVAL(dev->getDevice().getZoneID());
+          return JS_TRUE;
+        case 4:
+          *rval = INT_TO_JSVAL(dev->getDevice().getModulatorID());
+          return JS_TRUE;
       }
     }
     return JS_FALSE;
@@ -590,6 +596,8 @@ namespace dss {
     {"className", 0, 0, dev_JSGet},
     {"dsid", 1, 0, dev_JSGet},
     {"name", 2, 0, dev_JSGet},
+    {"zoneID", 3, 0, dev_JSGet},
+    {"circuitID", 4, 0, dev_JSGet},
     {NULL}
   };
 

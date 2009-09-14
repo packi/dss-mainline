@@ -155,7 +155,8 @@ namespace dss {
   };
 
   ScriptContext::ScriptContext(ScriptEnvironment& _env, JSContext* _pContext)
-  : m_Environment(_env),
+  : m_pScriptToExecute(NULL),
+    m_Environment(_env),
     m_pContext(_pContext)
   {
     JS_SetOptions(m_pContext, JSOPTION_VAROBJFIX | JSOPTION_DONT_REPORT_UNCAUGHT);
@@ -188,6 +189,9 @@ namespace dss {
   } // dtor
 
   void ScriptContext::loadFromFile(const std::string& _fileName) {
+    if(m_pScriptToExecute != NULL) {
+      JS_DestroyScript(m_pContext, m_pScriptToExecute);
+    }
     m_FileName = _fileName;
     if(!fileExists(_fileName)) {
       throw ScriptException(std::string("File \"") + _fileName + "\" not found");
@@ -208,6 +212,9 @@ namespace dss {
   } // loadFromFile
 
   void ScriptContext::loadFromMemory(const char* _script) {
+    if(m_pScriptToExecute != NULL) {
+      JS_DestroyScript(m_pContext, m_pScriptToExecute);
+    }
     m_pScriptToExecute = JS_CompileScript(m_pContext, m_pRootObject, _script, strlen(_script), "memory", 1);
     if(m_pScriptToExecute == NULL) {
       throw ScriptException(std::string("Could not parse in-memory script"));
