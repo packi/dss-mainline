@@ -84,6 +84,14 @@ namespace dss {
 
         try {
           boost::scoped_ptr<ScriptContext> ctx(m_Environment.getContext());
+          ScriptObject raisedEvent(*ctx, NULL);
+          raisedEvent.setProperty<const std::string&>("name", _event.getName());
+          ScriptObject param(*ctx, NULL);
+          // TODO: add parameter
+          raisedEvent.setProperty("parameter", &param);
+          ctx->getRootObject().setProperty("raisedEvent", &raisedEvent);
+          // TODO: add subscription
+          
           ctx->loadFromFile(scriptName);
           ctx->evaluate<void>();
         } catch(ScriptException& e) {
