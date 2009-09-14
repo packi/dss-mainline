@@ -42,14 +42,13 @@ BOOST_AUTO_TEST_CASE(testSimpleObject) {
   BOOST_CHECK_EQUAL(obj.getProperty<int>("testing"), 1);
   ctx->getRootObject().setProperty("obj", &obj);
 
-  ctx->loadFromMemory("obj.testing");
-  BOOST_CHECK_EQUAL(ctx->evaluate<int>(), 1);
+  BOOST_CHECK_EQUAL(ctx->evaluateScript<int>("obj.testing"), 1);
   obj.setProperty("testing", 0);
-  BOOST_CHECK_EQUAL(ctx->evaluate<int>(), 0);
+  BOOST_CHECK_EQUAL(ctx->evaluateScript<int>("obj.testing"), 0);
 
-  obj.setProperty("testing", "test");
-  BOOST_CHECK_EQUAL(obj.getProperty<std::string>("testing"), "test");
-  BOOST_CHECK_EQUAL(ctx->evaluate<std::string>(), "test");
+  obj.setProperty("testing2", "test");
+  BOOST_CHECK_EQUAL(obj.getProperty<std::string>("testing2"), "test");
+  BOOST_CHECK_EQUAL(ctx->evaluateScript<std::string>("obj.testing2"), "test");
 } // testSimpleObject
 
 BOOST_AUTO_TEST_SUITE_END()

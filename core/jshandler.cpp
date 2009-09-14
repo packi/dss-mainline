@@ -220,7 +220,12 @@ namespace dss {
       throw ScriptException(std::string("Could not parse in-memory script"));
     }
   } // loadFromMemory
-
+  
+  template<>
+  jsval ScriptContext::convertTo(const jsval& _val) {
+    return _val;
+  }
+ 
   template<>
   int ScriptContext::convertTo(const jsval& _val) {
     if(JSVAL_IS_NUMBER(_val)) {
@@ -264,53 +269,98 @@ namespace dss {
     }
     throw ScriptException("Value is not of type double");
   }
-
+  
+  bool ScriptContext::raisePendingExceptions() {
+    if(JS_IsExceptionPending(m_pContext)) {
+      jsval exval;
+      if(JS_GetPendingException(m_pContext, &exval)) {
+        JS_ClearPendingException(m_pContext);
+        JSString* errstr = JS_ValueToString(m_pContext, exval);
+        if(errstr != NULL) {
+          const char* errmsgBytes = JS_GetStringBytes(errstr);
+          throw ScriptRuntimeException(std::string("Caught Exception while executing script: ") + errmsgBytes, std::string(errmsgBytes));
+        }
+      }
+      throw ScriptException("Exception was pending after script execution, but couldnt get it from the vm");  
+    }
+    return false;
+  } // raisePendingExceptions
+      
   template <>
   jsval ScriptContext::evaluate() {
     jsval rval;
     JSBool ok = JS_ExecuteScript(m_pContext, m_pRootObject, m_pScriptToExecute, &rval);
     if(ok) {
-      //JS_GC(m_pContext);
       return rval;
     } else {
-      if(JS_IsExceptionPending(m_pContext)) {
-        jsval exval;
-        if(JS_GetPendingException(m_pContext, &exval)) {
-          JS_ClearPendingException(m_pContext);
-          JSString* errstr = JS_ValueToString(m_pContext, exval);
-          if(errstr != NULL) {
-            const char* errmsgBytes = JS_GetStringBytes(errstr);
-            throw ScriptRuntimeException(std::string("Caught Exception while executing script: ") + errmsgBytes, std::string(errmsgBytes));
-          }
-        }
-        throw ScriptException("Exception was pending after script execution, but couldnt get it from the vm");
-      } else {
-        throw ScriptException("Error executing script");
-      }
+      raisePendingExceptions();
+      throw ScriptException("Error executing script");
     }
   } // evaluate<jsval>
-
+  
+  template <>
+  void ScriptContext::evaluate() {
+    evaluate<jsval>();
+  } // evaluate<void>
+  
   template <>
   double ScriptContext::evaluate() {
     return convertTo<double>(evaluate<jsval>());
   } // evaluate<double>
-
 
   template <>
   int ScriptContext::evaluate() {
     return convertTo<int>(evaluate<jsval>());
   } // evaluate<int>
 
-
   template <>
-  void ScriptContext::evaluate() {
-    evaluate<jsval>();
-  } // evaluate<void>
+  bool ScriptContext::evaluate() {
+    return convertTo<bool>(evaluate<jsval>());
+  } // evaluate<bool>
 
   template <>
   std::string ScriptContext::evaluate() {
     return convertTo<std::string>(evaluate<jsval>());
   } // evaluate<string>
+
+  template <>
+  jsval ScriptContext::evaluateScript(const std::string& _script) {
+    const char* filename = "temporary_script";
+    jsval rval;
+    JSBool ok = JS_EvaluateScript(m_pContext, m_pRootObject, _script.c_str(), _script.size(),
+                       filename, 0, &rval);
+    if(ok) {
+      return rval;
+    } else {
+      raisePendingExceptions();
+      throw ScriptException("Error executing script");
+    }
+  } // evaluateScript
+  
+  template <>
+  void ScriptContext::evaluateScript(const std::string& _script) {
+    evaluateScript<jsval>(_script);
+  } // evaluateScript<void>
+
+  template <>
+  int ScriptContext::evaluateScript(const std::string& _script) {
+    return convertTo<int>(evaluateScript<jsval>(_script));
+  } // evaluateScript<int>
+
+  template <>
+  double ScriptContext::evaluateScript(const std::string& _script) {
+    return convertTo<double>(evaluateScript<jsval>(_script));
+  } // evaluateScript<double>
+
+  template <>
+  std::string ScriptContext::evaluateScript(const std::string& _script) {
+    return convertTo<std::string>(evaluateScript<jsval>(_script));
+  } // evaluateScript<std::string>
+
+  template <>
+  bool ScriptContext::evaluateScript(const std::string& _script) {
+    return convertTo<bool>(evaluateScript<jsval>(_script));
+  } // evaluateScript<bool>
 
   //================================================== ScriptExtension
 

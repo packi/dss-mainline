@@ -23,9 +23,10 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include "../core/scripting/modeljs.h"
-#include "../core/event.h"
-#include "../core/eventinterpreterplugins.h"
+#include "core/scripting/modeljs.h"
+#include "core/event.h"
+#include "core/eventinterpreterplugins.h"
+#include "core/propertysystem.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <memory>
@@ -180,5 +181,21 @@ BOOST_AUTO_TEST_CASE(testSubscriptions) {
 
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 1);
 } // testSubscriptions
+
+BOOST_AUTO_TEST_CASE(testProperties) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluateScript<void>("setProperty('/testing', 1)");
+  BOOST_CHECK_EQUAL(ctx->evaluateScript<int>("getProperty('/testing')"), 1);
+  BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 1);
+  
+  propSys.setIntValue("/testing", 2);
+  BOOST_CHECK_EQUAL(ctx->evaluateScript<int>("getProperty('/testing')"), 2);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

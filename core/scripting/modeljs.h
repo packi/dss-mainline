@@ -82,7 +82,24 @@ namespace dss {
 
     JSObject* createJSEvent(ScriptContext& _ctx, boost::shared_ptr<Event> _event);
     JSObject* createJSSubscription(ScriptContext& _ctx, boost::shared_ptr<EventSubscription> _subscription);
-  };
+  }; // EventScriptExtension
+  
+  class PropertySystem;
+  class PropertyNode;
+  
+  class PropertyScriptExtension : public ScriptExtension {
+  public:
+    PropertyScriptExtension(PropertySystem& _propertySystem);
+    virtual ~PropertyScriptExtension() {}
+    
+    virtual void extendContext(ScriptContext& _context);
+    
+    PropertySystem& getPropertySystem() { return m_PropertySystem; }
+    
+    JSObject* createJSProperty(ScriptContext& _ctx, boost::shared_ptr<PropertyNode> _node);
+  private:
+    PropertySystem& m_PropertySystem;
+  }; // PropertyScriptExtension
 
 }
 

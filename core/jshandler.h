@@ -83,6 +83,7 @@ namespace dss {
     ScriptEnvironment& m_Environment;
     JSContext* m_pContext;
     static void jsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er);
+    bool raisePendingExceptions();
   public:
     ScriptContext(ScriptEnvironment& _env, JSContext* _pContext);
     virtual ~ScriptContext();
@@ -104,6 +105,10 @@ namespace dss {
       */
     template <class t>
     t evaluate();
+
+    /** Evaluates the given script */  
+    template <class t>
+    t evaluateScript(const std::string& _script);
 
     /** Returns a pointer to the JSContext */
     JSContext* getJSContext() { return m_pContext; }

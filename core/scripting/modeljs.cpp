@@ -20,11 +20,13 @@
 */
 
 #include "modeljs.h"
-#include "core/dss.h"
-#include "core/logger.h"
 
 #include <sstream>
 #include <boost/scoped_ptr.hpp>
+
+#include "core/dss.h"
+#include "core/logger.h"
+#include "core/propertysystem.h"
 
 namespace dss {
   const std::string ModelScriptcontextExtensionName = "modelextension";
@@ -883,5 +885,94 @@ namespace dss {
     JS_SetPrivate(_ctx.getJSContext(), result, subscriptionWrapper);
     return result;
   }
+
+  //================================================== PropertyScriptExtension
+
+  const std::string PropertyScriptExtensionName = "propertyextension";
+
+  PropertyScriptExtension::PropertyScriptExtension(PropertySystem& _propertySystem) 
+  : ScriptExtension(PropertyScriptExtensionName),
+    m_PropertySystem(_propertySystem)
+  { } // ctor
+    
+  JSBool global_prop_setProperty(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    if(argc > 2) {
+      Logger::getInstance()->log("JS: global_prop_setProperty: need two arguments: property-path & value", lsError);
+    } else {
+      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+      PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+      std::string propName = ctx->convertTo<std::string>(argv[0]);
+      
+      PropertyNodePtr node = ext->getPropertySystem().createProperty(propName);
+      try {
+        if(JSVAL_IS_STRING(argv[1])) {
+          node->setStringValue(ctx->convertTo<std::string>(argv[1]));
+        } else if(JSVAL_IS_BOOLEAN(argv[1])) {
+          node->setBooleanValue(ctx->convertTo<bool>(argv[1]));
+        } else if(JSVAL_IS_INT(argv[1])) {
+          node->setIntegerValue(ctx->convertTo<int>(argv[1]));
+        } else {
+          Logger::getInstance()->log("JS: global_prop_setProperty: unknown type of argument 2", lsError);
+        }
+        *rval = JSVAL_TRUE;
+        return JS_TRUE;
+      } catch(PropertyTypeMismatch&) {
+        Logger::getInstance()->log("Error setting value of " + propName, lsFatal);
+      }
+    }
+    return JS_FALSE;
+  } // global_prop_setProperty
+
+  JSBool global_prop_getProperty(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    if(argc > 1) {
+      Logger::getInstance()->log("JS: global_prop_getProperty: need one argument: property-path", lsError);
+    } else {
+      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+      PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+      std::string propName = ctx->convertTo<std::string>(argv[0]);
+      
+      PropertyNodePtr node = ext->getPropertySystem().getProperty(propName);
+      if(node == NULL) {
+        *rval = JSVAL_NULL;
+      } else {
+        switch(node->getValueType()) {
+        case vTypeInteger:
+          *rval = INT_TO_JSVAL(node->getIntegerValue());
+          break;
+        case vTypeString: {
+            std::string val = node->getStringValue();
+            *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, val.c_str()));
+          }
+          break;
+        case vTypeBoolean:
+          *rval = BOOLEAN_TO_JSVAL(node->getBoolValue());
+          break;
+        case vTypeNone:
+          *rval = JSVAL_VOID;
+        default:
+          assert(false);
+        }
+      }
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // global_prop_getProperty
+
+  JSFunctionSpec prop_global_methods[] = {
+    {"setProperty", global_prop_setProperty, 2, 0, 0},
+    {"getProperty", global_prop_getProperty, 1, 0, 0},
+    {NULL},
+  };
+
+  void PropertyScriptExtension::extendContext(ScriptContext& _context) {
+    JS_DefineFunctions(_context.getJSContext(), JS_GetGlobalObject(_context.getJSContext()), prop_global_methods);
+  } // extendContext
+
+  JSObject* PropertyScriptExtension::createJSProperty(ScriptContext& _ctx, boost::shared_ptr<PropertyNode> _node) {
+    return NULL;
+  } // createJSProperty
+
 
 } // namespace
