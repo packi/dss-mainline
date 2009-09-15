@@ -51,4 +51,29 @@ BOOST_AUTO_TEST_CASE(testSimpleObject) {
   BOOST_CHECK_EQUAL(ctx->evaluateScript<std::string>("obj.testing2"), "test");
 } // testSimpleObject
 
+BOOST_AUTO_TEST_CASE(testCallingFunctions) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  jsval res = ctx->evaluateScript<jsval>("dev = { func: function(a,b,c) { return { e: a, f: b, g: c }; } }; dev");
+
+  BOOST_ASSERT(JSVAL_IS_OBJECT(res));
+
+  ScriptObject obj(JSVAL_TO_OBJECT(res), *ctx);
+
+  ScriptFunctionParameterList list(*ctx);
+  list.add<const std::string&>(std::string("testing"));
+  list.add<int>(1);
+  list.add<bool>(false);
+
+  res = obj.callFunctionByName<jsval>("func", list);
+
+  BOOST_ASSERT(JSVAL_IS_OBJECT(res));
+  ScriptObject resObj(JSVAL_TO_OBJECT(res), *ctx);
+  BOOST_CHECK_EQUAL(resObj.getProperty<std::string>("e"), "testing");
+  BOOST_CHECK_EQUAL(resObj.getProperty<int>("f"), 1);
+  BOOST_CHECK_EQUAL(resObj.getProperty<bool>("g"), false);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

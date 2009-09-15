@@ -22,6 +22,9 @@
 #include "jshandler.h"
 
 #include <cstring>
+#include <sstream>
+
+#include "core/logger.h"
 
 namespace dss {
 
@@ -123,21 +126,23 @@ namespace dss {
 
   JSBool global_print(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
     if (argc < 1){
-      /* No arguments passed in, so do nothing. */
-      /* We still want to return JS_TRUE though, other wise an exception will be thrown by the engine. */
-      *rval = INT_TO_JSVAL(0); /* Send back a return value of 0. */
+      /* No arguments passed in, so do nothing.
+        We still want to return JS_TRUE though, other wise an exception will be
+        thrown by the engine. */
+      *rval = INT_TO_JSVAL(0);
     } else {
-      unsigned int i;
-      size_t amountWritten=0;
-      for (i=0; i<argc; i++){
-        JSString *val = JS_ValueToString(cx, argv[i]); /* Convert the value to a javascript std::string. */
-        char *str = JS_GetStringBytes(val); /* Then convert it to a C-style std::string. */
-        size_t length = JS_GetStringLength(val); /* Get the length of the std::string, # of chars. */
-        amountWritten = fwrite(str, sizeof(*str), length, stdout); /* write the std::string to stdout. */
+      std::stringstream sstream;
+      sstream << "JS: ";
+      for(unsigned int i = 0; i < argc; i++) {
+        JSString *val = JS_ValueToString(cx, argv[i]);
+        char *str = JS_GetStringBytes(val);
+        size_t length = JS_GetStringLength(val);
+        std::string stdStr(str, length);
+        sstream << stdStr;
       }
-      *rval = INT_TO_JSVAL(amountWritten); /* Set the return value to be the number of bytes/chars written */
+      *rval = BOOLEAN_TO_JSVAL(true);
+      Logger::getInstance()->log(sstream.str());
     }
-    fwrite("\n", 1, 1, stdout);
     return JS_TRUE;
   }
 
@@ -362,7 +367,49 @@ namespace dss {
     return convertTo<bool>(evaluateScript<jsval>(_script));
   } // evaluateScript<bool>
 
+
   //================================================== ScriptExtension
+
+
+  //================================================== ScriptFunctionParameterList
+
+  template<>
+  void ScriptFunctionParameterList::add(jsval _value) {
+    m_Parameter.push_back(_value);
+  } // add<jsval>
+
+  template<>
+  void ScriptFunctionParameterList::add(int _value) {
+    m_Parameter.push_back(INT_TO_JSVAL(_value));
+  } // add<int>
+
+  template<>
+  void ScriptFunctionParameterList::add(unsigned short _value) {
+    m_Parameter.push_back(INT_TO_JSVAL(_value));
+  } // add<unsigned short>
+
+  template<>
+  void ScriptFunctionParameterList::add(double _value) {
+    m_Parameter.push_back(DOUBLE_TO_JSVAL(_value));
+  } // add<double>
+
+  template<>
+  void ScriptFunctionParameterList::add(bool _value) {
+    m_Parameter.push_back(BOOLEAN_TO_JSVAL(_value));
+  } // add<bool>
+
+  template<>
+  void ScriptFunctionParameterList::add(const std::string& _value) {
+    JSString* str = JS_NewStringCopyN(m_Context.getJSContext(), _value.c_str(), _value.size());
+    m_Parameter.push_back(STRING_TO_JSVAL(str));
+  } // add<const std::string&>
+
+  template<>
+  void ScriptFunctionParameterList::add(std::string _value) {
+    JSString* str = JS_NewStringCopyN(m_Context.getJSContext(), _value.c_str(), _value.size());
+    m_Parameter.push_back(STRING_TO_JSVAL(str));
+  } // add<std::string&>
+
 
   //================================================== ScriptObject
 
@@ -415,6 +462,18 @@ namespace dss {
   } // getProperty<string>
 
   template<>
+  double ScriptObject::getProperty(const std::string& _name) {
+    jsval value = getProperty<jsval>(_name);
+    return m_Context.convertTo<double>(value);
+  } // getProperty<double>
+
+  template<>
+  bool ScriptObject::getProperty(const std::string& _name) {
+    jsval value = getProperty<jsval>(_name);
+    return m_Context.convertTo<bool>(value);
+  } // getProperty<bool>
+
+  template<>
   void ScriptObject::setProperty(const std::string& _name, jsval _value) {
     JS_SetProperty(m_Context.getJSContext(), m_pObject, _name.c_str(), &_value);
   } // setProperty<jsval>
@@ -454,4 +513,53 @@ namespace dss {
     return getProperty<std::string>("className");
   } // getClassName
 
-}
+  template<>
+  jsval ScriptObject::callFunctionByName<jsval>(const std::string& _functionName,
+                                                ScriptFunctionParameterList& _parameter) {
+    int paramc = _parameter.size();
+    jsval* paramv = (jsval*)malloc(sizeof(jsval) * paramc);
+    for(int iParam = 0; iParam < paramc; iParam++) {
+      paramv[iParam] = _parameter.get(iParam);
+    }
+    jsval rval;
+    JSBool ok = JS_CallFunctionName(m_Context.getJSContext(), m_pObject, _functionName.c_str(), paramc, paramv, &rval);
+    free(paramv);
+    if(ok) {
+      return rval;
+    } else {
+      m_Context.raisePendingExceptions();
+      throw ScriptException("Error running function");
+    }
+  } // callFunctionByName<jsval>
+
+  template<>
+  void ScriptObject::callFunctionByName(const std::string& _functionName,
+                                                ScriptFunctionParameterList& _parameter) {
+    callFunctionByName<jsval>(_functionName, _parameter);
+  } // callFunctionByName<void>
+
+  template<>
+  int ScriptObject::callFunctionByName(const std::string& _functionName,
+                                                ScriptFunctionParameterList& _parameter) {
+    return m_Context.convertTo<int>(callFunctionByName<jsval>(_functionName, _parameter));
+  } // callFunctionByName<int>
+
+  template<>
+  double ScriptObject::callFunctionByName(const std::string& _functionName,
+                                                ScriptFunctionParameterList& _parameter) {
+    return m_Context.convertTo<double>(callFunctionByName<jsval>(_functionName, _parameter));
+  } // callFunctionByName<double>
+
+  template<>
+  bool ScriptObject::callFunctionByName(const std::string& _functionName,
+                                                ScriptFunctionParameterList& _parameter) {
+    return m_Context.convertTo<bool>(callFunctionByName<jsval>(_functionName, _parameter));
+  } // callFunctionByName<bool>
+
+  template<>
+  std::string ScriptObject::callFunctionByName(const std::string& _functionName,
+                                                ScriptFunctionParameterList& _parameter) {
+    return m_Context.convertTo<std::string>(callFunctionByName<jsval>(_functionName, _parameter));
+  } // callFunctionByName<std::string>
+
+} // namespace dss

@@ -83,7 +83,6 @@ namespace dss {
     ScriptEnvironment& m_Environment;
     JSContext* m_pContext;
     static void jsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er);
-    bool raisePendingExceptions();
   public:
     ScriptContext(ScriptEnvironment& _env, JSContext* _pContext);
     virtual ~ScriptContext();
@@ -116,6 +115,7 @@ namespace dss {
     const ScriptEnvironment& getEnvironment() const { return m_Environment; }
     ScriptEnvironment& getEnvironment() { return m_Environment; }
     ScriptObject& getRootObject() { return *m_RootObject; }
+    bool raisePendingExceptions();
   public:
 
     /** Helper function to convert a jsval to a t. */
@@ -171,6 +171,22 @@ namespace dss {
   }; // ScriptExtension
 
 
+  class ScriptFunctionParameterList {
+  public:
+    ScriptFunctionParameterList(ScriptContext& _context)
+    : m_Context(_context)
+    {} // ctor
+
+    template<class t>
+    void add(t _value);
+
+    int size() { return m_Parameter.size(); }
+    jsval get(const int _index) { return m_Parameter.at(_index); }
+  private:
+    ScriptContext& m_Context;
+    std::vector<jsval> m_Parameter;
+  }; // ScriptFunctionParameterList
+
   /** A ScriptObject is a wrapper for a JavaScript object. */
   class ScriptObject {
   private:
@@ -196,6 +212,9 @@ namespace dss {
     /** Sets the property named \a _name to \a _value */
     template<class t>
     void setProperty(const std::string& _name, t _value);
+
+    template<class t>
+    t callFunctionByName(const std::string& _functionName, ScriptFunctionParameterList& _parameter);
   }; // ScriptObject
 
 } // namespace dss

@@ -4,6 +4,16 @@
     <property name="subsystems/DS485Proxy/rs485devicename" type="string">
       <value>/dev/ttyUSB0</value>
     </property>
+    <property name="subsystems/DSSim/js-devices">
+      <property name="example">
+        <property name="script-file" type="string">
+          <value>data/simulated_device.js</value>
+        </property>
+        <property name="id" type="string">
+          <value>example.js-device</value>
+        </property>
+      </property>
+    </property>
  <!--
     <property name="subsystems/FakeMeter/device" type="string">
       <value>/dev/ttyS2</value>
@@ -18,12 +28,14 @@
       <value>/mnt/webroot/</value>
     </property>
 -->    
-    <property name="subsystems/WebServer/plugins/testplugin/file" type="string">
-      <value>data/webplugins/webserver_plugin.so</value>
-    </property>
-    <property name="subsystems/WebServer/plugins/testplugin/uri" type="string">
-      <value>/test/*</value>
-    </property>
+    <property name="subsystems/WebServer/plugins/testplugin">
+      <property name="file" type="string">
+        <value>data/webplugins/webserver_plugin.so</value>
+      </property>
+      <property name="uri" type="string">
+        <value>/test/*</value>
+      </property>
+    </property>    
     <property name="subsystems/FakeMeter/enabled" type="boolean">
       <value>false</value>
     </property>
