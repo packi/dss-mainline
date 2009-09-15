@@ -63,12 +63,16 @@ pair<string, string> parse_prop(const string& s) {
 } // parse_prop
 
 void printVersion() {
+#ifdef HAVE_BUILD_INFO_H
   cout << "DSS v" << DSS_VERSION << " built on " << DSS_BUILD_DATE << endl;
 #ifndef RELEASE_BUILD
   cout << "  RCS revision: " << DSS_RCS_REVISION << endl;
   cout << "  RCS url:      " << DSS_RCS_URL      << endl;
   cout << "  build user:   " << DSS_BUILD_USER   << endl;
   cout << "  build host:   " << DSS_BUILD_HOST   << endl;
+#endif
+#else
+  cout << "No build information included" << endl;
 #endif
 }
 
