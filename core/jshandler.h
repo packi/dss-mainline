@@ -215,7 +215,10 @@ namespace dss {
 
     template<class t>
     t callFunctionByName(const std::string& _functionName, ScriptFunctionParameterList& _parameter);
-  }; // ScriptObject
+
+    template<class t>
+    t callFunctionByReference(jsval _function, ScriptFunctionParameterList& _parameter);
+}; // ScriptObject
 
 } // namespace dss
 

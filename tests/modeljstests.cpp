@@ -198,4 +198,58 @@ BOOST_AUTO_TEST_CASE(testProperties) {
   BOOST_CHECK_EQUAL(ctx->evaluateScript<int>("getProperty('/testing')"), 2);
 }
 
+BOOST_AUTO_TEST_CASE(testPropertyListener) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluateScript<void>("setProperty('/testing', 1); setProperty('/triggered', false); "
+                            "listener_ident = setListener('/testing', function(changedNode) { setProperty('/triggered', true); }); "
+      );
+
+  BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
+  BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 1);
+
+  propSys.setIntValue("/testing", 2);
+
+  BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), true);
+  BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 2);
+
+  // check that removing works
+  ctx->evaluateScript<void>("removeListener(listener_ident);");
+
+  propSys.setBoolValue("/triggered", false);
+  BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
+
+  propSys.setIntValue("/testing", 2);
+
+  BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
+  BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 2);
+
+  // check that closures are working as expected
+  ctx->evaluateScript<void>("setProperty('/triggered', false); "
+                            "var ident = setListener('/testing', function(changedNode) { setProperty('/triggered', true); removeListener(ident); }); "
+      );
+
+  BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
+
+  propSys.setIntValue("/testing", 2);
+
+  BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), true);
+  BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 2);
+
+  propSys.setBoolValue("/triggered", false);
+  BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
+
+  propSys.setIntValue("/testing", 2);
+
+  BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
+  BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 2);
+
+
+}
+
 BOOST_AUTO_TEST_SUITE_END()

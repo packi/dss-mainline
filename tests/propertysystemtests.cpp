@@ -230,4 +230,32 @@ BOOST_AUTO_TEST_CASE(testAliases) {
   BOOST_CHECK(propSys->getProperty("/config/zone2/device1/isOn") == NULL);
 } // testAliases
 
+class TestListener : public PropertyListener {
+public:
+  TestListener(PropertySystem& _system, const std::string& _path)
+  : m_System(_system), m_Path(_path) {}
+
+  virtual void propertyChanged(PropertyNodePtr _pChangedNode) {
+    m_System.setBoolValue(m_Path, true);
+  }
+private:
+  PropertySystem& m_System;
+  const std::string& m_Path;
+};
+
+BOOST_AUTO_TEST_CASE(testListener) {
+  const std::string kTriggerPath = "/triggered";
+  boost::scoped_ptr<PropertySystem> propSys(new PropertySystem());
+  PropertyNodePtr node = propSys->createProperty("/testing");
+  boost::scoped_ptr<TestListener> listener(new TestListener(*propSys, kTriggerPath));
+  node->addListener(listener.get());
+
+  propSys->setBoolValue(kTriggerPath, false);
+  BOOST_CHECK_EQUAL(propSys->getBoolValue(kTriggerPath), false);
+
+  node->setIntegerValue(1);
+
+  BOOST_CHECK_EQUAL(propSys->getBoolValue(kTriggerPath), true);
+} // testListener
+
 BOOST_AUTO_TEST_SUITE_END()

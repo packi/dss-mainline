@@ -315,6 +315,8 @@ namespace dss {
     /** Remove a property from the notifiers */
     void unregisterProperty(PropertyNode* _node);
   public:
+    bool isListening() { return !m_Properties.empty(); }
+    void unsubscribe();
     virtual ~PropertyListener();
   }; // PropertyListener
 

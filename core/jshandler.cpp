@@ -514,8 +514,8 @@ namespace dss {
   } // getClassName
 
   template<>
-  jsval ScriptObject::callFunctionByName<jsval>(const std::string& _functionName,
-                                                ScriptFunctionParameterList& _parameter) {
+  jsval ScriptObject::callFunctionByName(const std::string& _functionName,
+                                         ScriptFunctionParameterList& _parameter) {
     int paramc = _parameter.size();
     jsval* paramv = (jsval*)malloc(sizeof(jsval) * paramc);
     for(int iParam = 0; iParam < paramc; iParam++) {
@@ -561,5 +561,54 @@ namespace dss {
                                                 ScriptFunctionParameterList& _parameter) {
     return m_Context.convertTo<std::string>(callFunctionByName<jsval>(_functionName, _parameter));
   } // callFunctionByName<std::string>
+
+  template<>
+  jsval ScriptObject::callFunctionByReference(jsval _function,
+                                              ScriptFunctionParameterList& _parameter) {
+    int paramc = _parameter.size();
+    jsval* paramv = (jsval*)malloc(sizeof(jsval) * paramc);
+    for(int iParam = 0; iParam < paramc; iParam++) {
+      paramv[iParam] = _parameter.get(iParam);
+    }
+    jsval rval;
+    JSBool ok = JS_CallFunctionValue(m_Context.getJSContext(), m_pObject, _function, paramc, paramv, &rval);
+    free(paramv);
+    if(ok) {
+      return rval;
+    } else {
+      m_Context.raisePendingExceptions();
+      throw ScriptException("Error running function");
+    }
+  } // callFunctionByReference<jsval>
+
+  template<>
+  void ScriptObject::callFunctionByReference(jsval _function,
+                                             ScriptFunctionParameterList& _parameter) {
+    callFunctionByReference<jsval>(_function, _parameter);
+  } // callFunctionByReference<void>
+
+  template<>
+  int ScriptObject::callFunctionByReference(jsval _function,
+                                            ScriptFunctionParameterList& _parameter) {
+    return m_Context.convertTo<int>(callFunctionByReference<jsval>(_function, _parameter));
+  } // callFunctionByReference<int>
+
+  template<>
+  double ScriptObject::callFunctionByReference(jsval _function,
+                                               ScriptFunctionParameterList& _parameter) {
+    return m_Context.convertTo<double>(callFunctionByReference<jsval>(_function, _parameter));
+  } // callFunctionByReference<double>
+
+  template<>
+  bool ScriptObject::callFunctionByReference(jsval _function,
+                                             ScriptFunctionParameterList& _parameter) {
+    return m_Context.convertTo<bool>(callFunctionByReference<jsval>(_function, _parameter));
+  } // callFunctionByReference<bool>
+
+  template<>
+  std::string ScriptObject::callFunctionByReference(jsval _function,
+                                                    ScriptFunctionParameterList& _parameter) {
+    return m_Context.convertTo<std::string>(callFunctionByReference<jsval>(_function, _parameter));
+  } // callFunctionByReference<std::string>
 
 } // namespace dss

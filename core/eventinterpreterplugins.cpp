@@ -80,6 +80,8 @@ namespace dss {
           m_Environment.addExtension(ext);
           ext = new EventScriptExtension(DSS::getInstance()->getEventQueue(), getEventInterpreter());
           m_Environment.addExtension(ext);
+          ext = new PropertyScriptExtension(DSS::getInstance()->getPropertySystem());
+          m_Environment.addExtension(ext);
         }
 
         try {

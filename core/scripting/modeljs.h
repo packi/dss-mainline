@@ -24,9 +24,12 @@
 
 #include <bitset>
 
-#include "../jshandler.h"
-#include "../model.h"
-#include "../event.h"
+#include <boost/ptr_container/ptr_vector.hpp>
+
+#include "core/jshandler.h"
+#include "core/model.h"
+#include "core/event.h"
+#include "core/propertysystem.h"
 
 namespace dss {
 
@@ -86,6 +89,28 @@ namespace dss {
   
   class PropertySystem;
   class PropertyNode;
+  class PropertyScriptExtension;
+  
+  class PropertyScriptListener : public PropertyListener {
+  public:
+    PropertyScriptListener(PropertyScriptExtension* _pExtension, ScriptContext* _pContext, JSObject* _functionObj, jsval _function, const std::string& _identifier);
+
+    virtual void propertyChanged(PropertyNodePtr _changedNode);
+    virtual void propertyRemoved(PropertyNodePtr _parent, PropertyNodePtr _child);
+    virtual void propertyAdded(PropertyNodePtr _parent, PropertyNodePtr _child);
+
+    const std::string& getIdentifier() const { return m_Identifier; }
+  private:
+    void doOnChange(PropertyNodePtr _changedNode);
+    void createScriptObject();
+  private:
+    PropertyScriptExtension* m_pExtension;
+    ScriptContext* m_pContext;
+    JSObject* m_pFunctionObject;
+    jsval m_Function;
+    std::string m_Identifier;
+    boost::scoped_ptr<ScriptObject> m_pScriptObject;
+  }; // PropertyScriptListener
   
   class PropertyScriptExtension : public ScriptExtension {
   public:
@@ -97,8 +122,13 @@ namespace dss {
     PropertySystem& getPropertySystem() { return m_PropertySystem; }
     
     JSObject* createJSProperty(ScriptContext& _ctx, boost::shared_ptr<PropertyNode> _node);
+    std::string produceListenerID();
+    void addListener(PropertyScriptListener* _pListener);
+    void removeListener(const std::string& _identifier);
   private:
     PropertySystem& m_PropertySystem;
+    boost::ptr_vector<PropertyScriptListener> m_Listeners;
+    int m_NextListenerID;
   }; // PropertyScriptExtension
 
 }

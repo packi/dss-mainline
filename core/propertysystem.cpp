@@ -846,11 +846,19 @@ namespace dss {
   } // childRemoved
 
   void PropertyNode::notifyListeners(void (PropertyListener::*_callback)(PropertyNodePtr)) {
-    std::vector<PropertyListener*>::iterator it;
     bool notified = false;
-    for(it = m_Listeners.begin(); it != m_Listeners.end(); ++it) {
-      ((*it)->*_callback)(shared_from_this());
-      notified = true;
+    if(!m_Listeners.empty()) {
+      // as the list might get modified in the listener code we need to iterate
+      // over a copy of our listeners
+      std::vector<PropertyListener*> copy = m_Listeners;
+      std::vector<PropertyListener*>::iterator it;
+      foreach(PropertyListener* pListener, copy) {
+        // check if the original list still contains the listener
+        if(contains(m_Listeners, pListener)) {
+          (pListener->*_callback)(shared_from_this());
+          notified = true;
+        }
+      }
     }
     if(!notified) {
       if(m_ParentNode != NULL) {
@@ -863,11 +871,19 @@ namespace dss {
   } // notifyListeners
 
   void PropertyNode::notifyListeners(void (PropertyListener::*_callback)(PropertyNodePtr,PropertyNodePtr), PropertyNodePtr _node) {
-    std::vector<PropertyListener*>::iterator it;
     bool notified = false;
-    for(it = m_Listeners.begin(); it != m_Listeners.end(); ++it) {
-      ((*it)->*_callback)(shared_from_this(), _node);
-      notified = true;
+    if(!m_Listeners.empty()) {
+      // as the list might get modified in the listener code we need to iterate
+      // over a copy of our listeners
+      std::vector<PropertyListener*> copy = m_Listeners;
+      std::vector<PropertyListener*>::iterator it;
+      foreach(PropertyListener* pListener, copy) {
+        // check if the original list still contains the listener
+        if(contains(m_Listeners, pListener)) {
+          (pListener->*_callback)(shared_from_this(), _node);
+          notified = true;
+        }
+      }
     }
     if(!notified) {
       if(m_ParentNode != NULL) {
@@ -883,12 +899,16 @@ namespace dss {
   //=============================================== PropertyListener
 
   PropertyListener::~PropertyListener() {
+    unsubscribe();
+  } // dtor
+
+  void PropertyListener::unsubscribe() {
     // while this does look like an infinite loop it isn't
     // as the property will call unregisterProperty in removeListener
     while(!m_Properties.empty()) {
       m_Properties.front()->removeListener(this);
     }
-  } // dtor
+  } // unsubscribe
 
   void PropertyListener::propertyChanged(PropertyNodePtr _changedNode) {
   } // propertyChanged
