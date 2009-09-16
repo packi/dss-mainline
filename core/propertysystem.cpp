@@ -325,7 +325,7 @@ namespace dss {
     for(std::vector<PropertyListener*>::iterator it = m_Listeners.begin();
         it != m_Listeners.end();)
     {
-      (*it)->unregisterProperty(shared_from_this());
+      (*it)->unregisterProperty(this);
       it = m_Listeners.erase(it);
     }
     clearValue();
@@ -710,6 +710,7 @@ namespace dss {
   } // getAsString
 
   void PropertyNode::addListener(PropertyListener* _listener) {
+    _listener->registerProperty(this);
     m_Listeners.push_back(_listener);
   } // addListener
 
@@ -717,7 +718,7 @@ namespace dss {
     std::vector<PropertyListener*>::iterator it = std::find(m_Listeners.begin(), m_Listeners.end(), _listener);
     if(it != m_Listeners.end()) {
       m_Listeners.erase(it);
-      _listener->unregisterProperty(shared_from_this());
+      _listener->unregisterProperty(this);
     }
   } // removeListener
 
@@ -882,9 +883,10 @@ namespace dss {
   //=============================================== PropertyListener
 
   PropertyListener::~PropertyListener() {
-    std::vector<PropertyNode*>::iterator it;
-    for(it = m_Properties.begin(); it != m_Properties.end(); ++it) {
-      (*it)->removeListener(this);
+    // while this does look like an infinite loop it isn't
+    // as the property will call unregisterProperty in removeListener
+    while(!m_Properties.empty()) {
+      m_Properties.front()->removeListener(this);
     }
   } // dtor
 
@@ -897,12 +899,12 @@ namespace dss {
   void PropertyListener::propertyAdded(PropertyNodePtr _parent, PropertyNodePtr _child) {
   } // propertyAdded
 
-  void PropertyListener::registerProperty(PropertyNodePtr _node) {
-    m_Properties.push_back(_node.get());
+  void PropertyListener::registerProperty(PropertyNode* _node) {
+    m_Properties.push_back(_node);
   } // registerProperty
 
-  void PropertyListener::unregisterProperty(PropertyNodePtr _node) {
-    std::vector<PropertyNode*>::iterator it = std::find(m_Properties.begin(), m_Properties.end(), _node.get());
+  void PropertyListener::unregisterProperty(PropertyNode* _node) {
+    std::vector<PropertyNode*>::iterator it = std::find(m_Properties.begin(), m_Properties.end(), _node);
     if(it != m_Properties.end()) {
       m_Properties.erase(it);
     }

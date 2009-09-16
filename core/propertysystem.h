@@ -311,9 +311,9 @@ namespace dss {
     virtual void propertyAdded(PropertyNodePtr _parent, PropertyNodePtr _child);
 
     /** Add a property node to the notifiers. */
-    void registerProperty(PropertyNodePtr _node);
+    void registerProperty(PropertyNode* _node);
     /** Remove a property from the notifiers */
-    void unregisterProperty(PropertyNodePtr _node);
+    void unregisterProperty(PropertyNode* _node);
   public:
     virtual ~PropertyListener();
   }; // PropertyListener
