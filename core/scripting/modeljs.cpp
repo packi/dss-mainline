@@ -1020,7 +1020,7 @@ namespace dss {
   } // createJSProperty
 
   std::string PropertyScriptExtension::produceListenerID() {
-    return "listener_" + intToString(int(this), true) + "_" + intToString(m_NextListenerID++);
+    return "listener_" + intToString(long(this), true) + "_" + intToString(m_NextListenerID++);
   } // produceListenerID
 
   void PropertyScriptExtension::addListener(PropertyScriptListener* _pListener) {
