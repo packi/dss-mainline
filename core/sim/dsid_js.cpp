@@ -21,6 +21,8 @@
 
 #include "dsid_js.h"
 #include "core/jshandler.h"
+#include "core/scripting/modeljs.h"
+#include "core/dss.h"
 
 namespace dss {
 
@@ -200,7 +202,7 @@ namespace dss {
       if(m_pSelf != NULL) {
         try {
           ScriptFunctionParameterList param(*m_pContext);
-          m_pSelf->callFunctionByName<int>("getFunctionID", param);
+          return m_pSelf->callFunctionByName<int>("getFunctionID", param);
         } catch(ScriptException& e) {
           Logger::getInstance()->log(std::string("DSIDJS: Error calling 'getFunctionID'") + e.what(), lsError);
         }
@@ -254,14 +256,75 @@ namespace dss {
   }; // DSIDJS
 
 
+  //================================================== DSIDScriptExtension
+
+  const char* DSIDScriptExtensionName = "dsidextension";
+
+  class DSIDScriptExtension : public ScriptExtension {
+  public:
+    DSIDScriptExtension(DSSim& _simulation)
+    : ScriptExtension(DSIDScriptExtensionName),
+      m_Simulation(_simulation)
+    { } // ctor
+
+    virtual ~DSIDScriptExtension() {}
+
+    virtual void extendContext(ScriptContext& _context);
+
+    void dSLinkInterrupt(const dsid_t& _dsid) {
+      DSIDInterface* intf = m_Simulation.getSimulatedDevice(_dsid);
+      if(intf != NULL) {
+        intf->dSLinkInterrupt();
+      }
+    } // dSLinkInterrupt
+
+  private:
+    DSSim& m_Simulation;
+  }; // PropertyScriptExtension
+
+  JSBool global_dsid_dSLinkInterrupt(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    if(argc < 1) {
+      Logger::getInstance()->log("JS: glogal_dsid_dSLinkInterrupt: need argument dsid", lsError);
+    } else {
+      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+      DSIDScriptExtension* ext = dynamic_cast<DSIDScriptExtension*>(ctx->getEnvironment().getExtension(DSIDScriptExtensionName));
+      std::string dsidString = ctx->convertTo<std::string>(argv[0]);
+
+      try {
+        dsid_t dsid = dsid_t::fromString(dsidString);
+        ext->dSLinkInterrupt(dsid);
+      } catch(std::runtime_error&) {
+        Logger::getInstance()->log("Could not parse DSID");
+      }
+
+      *rval = JSVAL_TRUE;
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // global_prop_setListener
+
+  JSFunctionSpec dsid_global_methods[] = {
+    {"dSLinkInterrupt", global_dsid_dSLinkInterrupt, 1, 0, 0},
+    {NULL},
+  };
+
+  void DSIDScriptExtension::extendContext(ScriptContext& _context) {
+    JS_DefineFunctions(_context.getJSContext(), JS_GetGlobalObject(_context.getJSContext()), dsid_global_methods);
+  } // extendContext
+
+
   //================================================== DSIDJSCreator
 
-  DSIDJSCreator::DSIDJSCreator(const std::string& _fileName, const std::string& _pluginName)
+  DSIDJSCreator::DSIDJSCreator(const std::string& _fileName, const std::string& _pluginName, DSSim& _simulator)
   : DSIDCreator(_pluginName),
     m_pScriptEnvironment(new ScriptEnvironment()),
-    m_FileName(_fileName)
+    m_FileName(_fileName),
+    m_Simulator(_simulator)
   {
     m_pScriptEnvironment->initialize();
+    m_pScriptEnvironment->addExtension(new PropertyScriptExtension(DSS::getInstance()->getPropertySystem()));
+    m_pScriptEnvironment->addExtension(new DSIDScriptExtension(m_Simulator));
   } // ctor
 
   DSIDInterface* DSIDJSCreator::createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {

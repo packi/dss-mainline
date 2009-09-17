@@ -83,6 +83,7 @@ namespace dss {
     DSIDFactory& getDSIDFactory() { return m_DSIDFactory; }
 
     void distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame);
+    DSIDInterface* getSimulatedDevice(const dsid_t& _dsid);
   }; // DSSim
 
   typedef std::map< const pair<const int, const int>,  std::vector<DSIDInterface*> > IntPairToDSIDSimVector;
@@ -111,11 +112,11 @@ namespace dss {
     void loadZones(XMLNodeList& _nodes);
 
     DSIDInterface& lookupDevice(const devid_t _id);
-    boost::shared_ptr<DS485CommandFrame> createResponse(DS485CommandFrame& _request, uint8_t _functionID);
-    boost::shared_ptr<DS485CommandFrame> createAck(DS485CommandFrame& _request, uint8_t _functionID);
-    boost::shared_ptr<DS485CommandFrame> createReply(DS485CommandFrame& _request);
+    boost::shared_ptr<DS485CommandFrame> createResponse(DS485CommandFrame& _request, uint8_t _functionID) const;
+    boost::shared_ptr<DS485CommandFrame> createAck(DS485CommandFrame& _request, uint8_t _functionID) const;
+    boost::shared_ptr<DS485CommandFrame> createReply(DS485CommandFrame& _request) const;
 
-    void distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame);
+    void distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) const;
   private:
     void deviceCallScene(const int _deviceID, const int _sceneID);
     void groupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
@@ -142,6 +143,7 @@ namespace dss {
     void process(DS485Frame& _frame);
 
     DSIDInterface* getSimulatedDevice(const dsid_t _dsid);
+    void dSLinkInterrupt(devid_t _shortAddress) const;
   }; // DSModulatorSim
 
   class DSIDInterface {
@@ -192,6 +194,11 @@ namespace dss {
     virtual void setZoneID(const int _value) { m_ZoneID = _value; }
     virtual int getZoneID() const { return m_ZoneID; }
     virtual uint8_t dsLinkSend(uint8_t _value, uint8_t _flags) { return 0; }
+
+    /** Signals the modulator that a interrupt has occurred */
+    void dSLinkInterrupt() {
+      m_Simulator.dSLinkInterrupt(m_ShortAddress);
+    }
   }; // DSIDInterface
 
 

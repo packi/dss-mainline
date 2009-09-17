@@ -82,6 +82,7 @@ namespace dss {
     JSObject* m_pSourceObject;
     ScriptEnvironment& m_Environment;
     JSContext* m_pContext;
+    bool m_KeepContext;
     static void jsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er);
   public:
     ScriptContext(ScriptEnvironment& _env, JSContext* _pContext);
@@ -116,6 +117,8 @@ namespace dss {
     ScriptEnvironment& getEnvironment() { return m_Environment; }
     ScriptObject& getRootObject() { return *m_RootObject; }
     bool raisePendingExceptions();
+    bool getKeepContext() { return m_KeepContext; };
+    void setKeepContext(bool _value) { m_KeepContext = _value; }
   public:
 
     /** Helper function to convert a jsval to a t. */

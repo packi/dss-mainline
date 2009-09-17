@@ -23,6 +23,9 @@
 #define EVENTINTERPRETERPLUGINS_H_
 
 #include "event.h"
+
+#include <boost/shared_ptr.hpp>
+
 #include "jshandler.h"
 
 namespace dss {
@@ -34,9 +37,11 @@ namespace dss {
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   }; // EventInterpreterPluginRaiseEvent
 
+
   class EventInterpreterPluginJavascript : public EventInterpreterPlugin {
   private:
     ScriptEnvironment m_Environment;
+    std::vector<boost::shared_ptr<ScriptContext> > m_KeptContexts;
   public:
     EventInterpreterPluginJavascript(EventInterpreter* _pInterpreter);
 

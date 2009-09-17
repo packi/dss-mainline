@@ -100,7 +100,7 @@ namespace dss {
               continue;
             }
             log("Found js-device with script '" + scriptFile + "' and id: '" + simIDNode->getAsString() + "'", lsInfo);
-            m_DSIDFactory.registerCreator(new DSIDJSCreator(scriptFile, simIDNode->getAsString()));
+            m_DSIDFactory.registerCreator(new DSIDJSCreator(scriptFile, simIDNode->getAsString(), *this));
           } else {
             log("DSSim::initialize: Missing property id", lsError);
           }
@@ -226,6 +226,18 @@ namespace dss {
   void DSSim::distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
     DS485FrameProvider::distributeFrame(_frame);
   } // distributeFrame
+
+  DSIDInterface* DSSim::getSimulatedDevice(const dsid_t& _dsid) {
+    DSIDInterface* result = NULL;
+    foreach(DSModulatorSim& modulator, m_Modulators) {
+      result = modulator.getSimulatedDevice(_dsid);
+      if(result != NULL) {
+        break;
+      }
+    }
+    return result;
+  } // getSimulatedDevice
+
 
   //================================================== DSModulatorSim
 
@@ -951,11 +963,23 @@ namespace dss {
     }
   } // process
 
-  void DSModulatorSim::distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
+  void DSModulatorSim::distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) const {
     m_pSimulation->distributeFrame(_frame);
   } // distributeFrame
 
-  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::createReply(DS485CommandFrame& _request) {
+  void DSModulatorSim::dSLinkInterrupt(devid_t _shortAddress) const {
+    boost::shared_ptr<DS485CommandFrame> result(new DS485CommandFrame());
+    result->getHeader().setDestination(0);
+    result->getHeader().setSource(m_ID);
+    result->getHeader().setBroadcast(true);
+    result->getHeader().setCounter(0);
+    result->setCommand(CommandEvent);
+    result->getPayload().add<uint8_t>(FunctionDSLinkInterrupt);
+    result->getPayload().add<devid_t>(_shortAddress);
+    distributeFrame(result);
+  } // dSLinkInterrupt
+
+  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::createReply(DS485CommandFrame& _request) const {
     boost::shared_ptr<DS485CommandFrame> result(new DS485CommandFrame());
     result->getHeader().setDestination(_request.getHeader().getSource());
     result->getHeader().setSource(m_ID);
@@ -964,21 +988,19 @@ namespace dss {
     return result;
   } // createReply
 
-
-  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::createAck(DS485CommandFrame& _request, uint8_t _functionID) {
+  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::createAck(DS485CommandFrame& _request, uint8_t _functionID) const {
     boost::shared_ptr<DS485CommandFrame> result = createReply(_request);
     result->setCommand(CommandAck);
     result->getPayload().add(_functionID);
     return result;
-  }
+  } // createAck
 
-  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::createResponse(DS485CommandFrame& _request, uint8_t _functionID) {
+  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::createResponse(DS485CommandFrame& _request, uint8_t _functionID) const {
     boost::shared_ptr<DS485CommandFrame> result = createReply(_request);
     result->setCommand(CommandResponse);
     result->getPayload().add(_functionID);
     return result;
   } // createResponse
-
 
   DSIDInterface& DSModulatorSim::lookupDevice(const devid_t _shortAddress) {
     for(vector<DSIDInterface*>::iterator ipSimDev = m_SimulatedDevices.begin(); ipSimDev != m_SimulatedDevices.end(); ++ipSimDev) {
@@ -992,6 +1014,7 @@ namespace dss {
   int DSModulatorSim::getID() const {
     return m_ID;
   } // getID
+
   DSIDInterface* DSModulatorSim::getSimulatedDevice(const dsid_t _dsid) {
     for(vector<DSIDInterface*>::iterator iDSID = m_SimulatedDevices.begin(), e = m_SimulatedDevices.end();
         iDSID != e; ++iDSID)
@@ -1025,10 +1048,10 @@ namespace dss {
     }
     Logger::getInstance()->log(string("Could not find creator for DSID type '") + _identifier + "'");
     throw new runtime_error(string("Could not find creator for DSID type '") + _identifier + "'");
-  }
+  } // createDSID
 
   void DSIDFactory::registerCreator(DSIDCreator* _creator) {
     m_RegisteredCreators.push_back(_creator);
-  }
+  } // registerCreator
 
 }

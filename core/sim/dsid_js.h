@@ -33,11 +33,12 @@ namespace dss {
 
   class DSIDJSCreator : public DSIDCreator {
   public:
-    DSIDJSCreator(const std::string& _fileName, const std::string& _pluginName);
+    DSIDJSCreator(const std::string& _fileName, const std::string& _pluginName, DSSim& _simulator);
     virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator);
   private:
     boost::scoped_ptr<ScriptEnvironment> m_pScriptEnvironment;
     std::string m_FileName;
+    DSSim& m_Simulator;
   }; // DSIDPluginCreator
 
 }

@@ -906,20 +906,26 @@ namespace dss {
       std::string propName = ctx->convertTo<std::string>(argv[0]);
       
       PropertyNodePtr node = ext->getPropertySystem().createProperty(propName);
-      try {
-        if(JSVAL_IS_STRING(argv[1])) {
-          node->setStringValue(ctx->convertTo<std::string>(argv[1]));
-        } else if(JSVAL_IS_BOOLEAN(argv[1])) {
-          node->setBooleanValue(ctx->convertTo<bool>(argv[1]));
-        } else if(JSVAL_IS_INT(argv[1])) {
-          node->setIntegerValue(ctx->convertTo<int>(argv[1]));
-        } else {
-          Logger::getInstance()->log("JS: global_prop_setProperty: unknown type of argument 2", lsError);
+      if(node != NULL) {
+        try {
+          if(JSVAL_IS_STRING(argv[1])) {
+            node->setStringValue(ctx->convertTo<std::string>(argv[1]));
+          } else if(JSVAL_IS_BOOLEAN(argv[1])) {
+            node->setBooleanValue(ctx->convertTo<bool>(argv[1]));
+          } else if(JSVAL_IS_INT(argv[1])) {
+            node->setIntegerValue(ctx->convertTo<int>(argv[1]));
+          } else {
+            Logger::getInstance()->log("JS: global_prop_setProperty: unknown type of argument 2", lsError);
+          }
+          *rval = JSVAL_TRUE;
+          return JS_TRUE;
+        } catch(PropertyTypeMismatch&) {
+          Logger::getInstance()->log("Error setting value of " + propName, lsFatal);
         }
-        *rval = JSVAL_TRUE;
+      } else {
+        Logger::getInstance()->log("Coule not create property " + propName, lsFatal);
+        *rval = JSVAL_FALSE;
         return JS_TRUE;
-      } catch(PropertyTypeMismatch&) {
-        Logger::getInstance()->log("Error setting value of " + propName, lsFatal);
       }
     }
     return JS_FALSE;

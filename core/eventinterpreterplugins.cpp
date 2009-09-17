@@ -85,17 +85,33 @@ namespace dss {
         }
 
         try {
-          boost::scoped_ptr<ScriptContext> ctx(m_Environment.getContext());
+          boost::shared_ptr<ScriptContext> ctx(m_Environment.getContext());
           ScriptObject raisedEvent(*ctx, NULL);
           raisedEvent.setProperty<const std::string&>("name", _event.getName());
-          ScriptObject param(*ctx, NULL);
-          // TODO: add parameter
-          raisedEvent.setProperty("parameter", &param);
           ctx->getRootObject().setProperty("raisedEvent", &raisedEvent);
-          // TODO: add subscription
+
+          // add raisedEvent.parameter
+          ScriptObject param(*ctx, NULL);
+          raisedEvent.setProperty("parameter", &param);
+          const HashMapConstStringString& props =  _event.getProperties().getContainer();
+          for(HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end();
+              iParam != e; ++iParam)
+          {
+            param.setProperty<const std::string&>(iParam->first, iParam->second);
+          }
+
+          // add raisedEvent.subscription
+          ScriptObject subscriptionObj(*ctx, NULL);
+          raisedEvent.setProperty("subscription", &subscriptionObj);
+          subscriptionObj.setProperty<const std::string&>("name", _subscription.getEventName());
           
           ctx->loadFromFile(scriptName);
           ctx->evaluate<void>();
+
+          if(ctx->getKeepContext()) {
+            m_KeptContexts.push_back(ctx);
+            Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: keeping script " + scriptName + " in memory", lsInfo);
+          }
         } catch(ScriptException& e) {
           Logger::getInstance()->log(string("EventInterpreterPluginJavascript::handleEvent: Cought event while running/parsing script '")
                               + scriptName + "'. Message: " + e.what(), lsError);

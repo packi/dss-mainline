@@ -144,7 +144,13 @@ namespace dss {
       Logger::getInstance()->log(sstream.str());
     }
     return JS_TRUE;
-  }
+  } // global_print
+
+  JSBool global_keepContext(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    ctx->setKeepContext(true);
+    return JS_TRUE;
+} // global_print
 
   static JSClass global_class = {
     "global", JSCLASS_NEW_RESOLVE, /* use the new resolve hook */
@@ -156,6 +162,7 @@ namespace dss {
 
   JSFunctionSpec global_methods[] = {
     {"print", global_print, 1, 0, 0},
+    {"keepContext", global_keepContext, 0, 0, 0},
     {NULL},
   };
 
