@@ -55,7 +55,7 @@ public:
     virtual void sendCommand(const std::string& _command) {
       try {
         if(m_PlayerMACHeader.empty()) {
-         std::cerr << "Parameter playerMAC not specified. NOT sending command " << _command << endl;
+         std::cerr << "Parameter playerMAC not specified. NOT sending command " << _command << std::endl;
         }
         Poco::Net::SocketAddress sa(m_RemoteHost, m_RemotePort);
         Poco::Net::StreamSocket sock(sa);
