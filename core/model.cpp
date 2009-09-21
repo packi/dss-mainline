@@ -818,7 +818,59 @@ namespace dss {
     }
   } // scanModulator
 
+  class SetNotPresentAction : public IDeviceAction {
+  public:
+    virtual bool perform(Device& _device) {
+      _device.setIsPresent(false);
+      return true;
+    }
+  }; // SetNotPresentAction
+
   void Apartment::initializeFromBus() {
+    DS485Interface& interface = DSS::getInstance()->getDS485Interface();
+
+    // mark modulators as not present
+    foreach(Modulator* pModulator, m_Modulators) {
+      pModulator->setIsPresent(false);
+    }
+
+    // mark present modulators as present
+    vector<ModulatorSpec_t> modIDs = interface.getModulators();
+    log("Found " + intToString(modIDs.size()) + " modulators...");
+    foreach(ModulatorSpec_t& modulatorSpec, modIDs) {
+      // bus-id, sw-version, hw-version, name, device-id
+      int modulatorID = modulatorSpec.get<0>();
+      log("Found modulator with id: " + intToString(modulatorID));
+      dsid_t modDSID = interface.getDSIDOfModulator(modulatorID);
+      log("  DSID: " + modDSID.toString());
+      Modulator& modulator = allocateModulator(modDSID);
+      log("Marking modulator as present");
+      modulator.setIsPresent(true);
+    }
+
+    // scan modulators
+    foreach(ModulatorSpec_t& modulatorSpec, modIDs) {
+      // bus-id, sw-version, hw-version, name, device-id
+      int modulatorID = modulatorSpec.get<0>();
+      log("Found modulator with id: " + intToString(modulatorID));
+      dsid_t modDSID = interface.getDSIDOfModulator(modulatorID);
+      log("  DSID: " + modDSID.toString());
+      Modulator& modulator = allocateModulator(modDSID);
+      modulator.setBusID(modulatorID);
+      scanModulator(modulator);
+    }
+    
+    // mark devices of absent modulators as not present
+    foreach(Modulator* pModulator, m_Modulators) {
+      if(!pModulator->isPresent()) {
+        Set devices = pModulator->getDevices();
+        SetNotPresentAction action;
+        devices.perform(action);        
+      }
+    }
+  } // initializeFromBus
+  
+  void Apartment::newModulator(int _modulatorBusID) {
     DS485Interface& interface = DSS::getInstance()->getDS485Interface();
 
     vector<ModulatorSpec_t> modIDs = interface.getModulators();
@@ -831,42 +883,16 @@ namespace dss {
       log("  DSID: " + modDSID.toString());
       Modulator& modulator = allocateModulator(modDSID);
       modulator.setBusID(modulatorID);
-      scanModulator(modulator);
     }
-  } // initializeFromBus
-  
-  void Apartment::newModulator(int _modulatorBusID) {
-    DS485Interface& interface = DSS::getInstance()->getDS485Interface();
-    log("Found modulator with id: " + intToString(_modulatorBusID));
-    dsid_t modDSID = interface.getDSIDOfModulator(_modulatorBusID);
-    log("  DSID: " + modDSID.toString());
-    Modulator& modulator = allocateModulator(modDSID);
-    modulator.setBusID(_modulatorBusID);
-    scanModulator(modulator);
   } // newModulator
-
-  class SetNotPresentAction : public IDeviceAction {
-  public:
-    virtual bool perform(Device& _device) {
-      _device.setIsPresent(false);
-      return true;
-    }
-  }; // SetNotPresentAction
   
   void Apartment::lostModulator(int _modulatorBusID) {
-    try {
-      Modulator& modulator = getModulatorByBusID(_modulatorBusID);
-      modulator.setIsPresent(false);
-      Set devices = modulator.getDevices();
-      SetNotPresentAction action;
-      devices.perform(action);
-    } catch(ItemNotFoundException& e) {
-      log(std::string("Apartment::lostModulator: ") + e.what(), lsError);
-    }
-  } // lostModulator
+    initializeFromBus();
+  }
   
   void Apartment::modulatorReady(int _modulatorBusID) {
-    newModulator(_modulatorBusID);
+    log("Modulator with id: " + intToString(_modulatorBusID) + " is ready");
+    initializeFromBus();
   } // modulatorReady
 
   void Apartment::handleModelEvents() {
