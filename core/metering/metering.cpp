@@ -78,6 +78,9 @@ namespace dss {
     for(std::vector<Modulator*>::iterator ipModulator = modulators.begin(), e = modulators.end();
         ipModulator != e; ++ipModulator)
     {
+      if(!(*ipModulator)->isPresent()) {
+        continue;
+      }
 #ifdef LOG_TIMING
       Timestamp checkingModulator;
       Timestamp startedLoading;
