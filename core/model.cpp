@@ -888,7 +888,7 @@ namespace dss {
   
   void Apartment::lostModulator(int _modulatorBusID) {
     initializeFromBus();
-  }
+  } // lostModulator
   
   void Apartment::modulatorReady(int _modulatorBusID) {
     log("Modulator with id: " + intToString(_modulatorBusID) + " is ready");
@@ -951,6 +951,9 @@ namespace dss {
           modulatorReady(event.getParameter(0));
         }
         break;
+      case ModelEvent::etBusReady:
+        log("Got bus ready event.", lsInfo);
+        initializeFromBus();
       default:
         assert(false);
         break;

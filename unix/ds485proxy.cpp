@@ -1177,8 +1177,18 @@ namespace dss {
 
   void DS485Proxy::execute() {
     signalEvent();
+    
+    aControllerState lastState = m_DS485Controller.getState();
 
     while(!m_Terminated) {
+      aControllerState currentState = m_DS485Controller.getState();
+      if(currentState != lastState) {
+        if((currentState == csSlave) || (currentState == csMaster)) {
+          ModelEvent* pEvent = new ModelEvent(ModelEvent::etBusReady);
+          getDSS().getApartment().addModelEvent(pEvent);
+        }
+        lastState = currentState;
+      }
       if(!m_IncomingFrames.empty() || m_PacketHere.waitFor(50)) {
         while(!m_IncomingFrames.empty()) {
           m_IncomingFramesGuard.lock();

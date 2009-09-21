@@ -727,7 +727,8 @@ namespace dss {
                    etDSLinkInterrupt,  /**< An interrupt has occured */
                    etNewModulator, /**< A new modulator has joined the bus */
                    etLostModulator, /**< We've lost a modulator on the bus */
-                   etModulatorReady /**< A modulator has completed its scanning cycle and is now ready */
+                   etModulatorReady, /**< A modulator has completed its scanning cycle and is now ready */
+                   etBusReady /**< The bus transitioned into ready state */
                  } EventType;
   private:
     EventType m_EventType;
