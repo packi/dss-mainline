@@ -516,19 +516,19 @@ namespace dss {
     PayloadDissector pd(_frame->getPayload());
     pd.get<uint8_t>();
     uint16_t devID = pd.get<uint16_t>();
-    devID &= 0x00FF;
+    devID =  devID >> 8;
     if(devID == 0) {
       log("Found dSS");
     } else if(devID == 1) {
       log("Found dSM");
     } else {
-      log(string("Found unknown device (") + intToString(devID) + ")");
+      log(string("Found unknown device (") + intToString(devID, true) + ")");
     }
-    uint16_t hwVersion = pd.get<uint16_t>();
-    uint16_t swVersion = pd.get<uint16_t>();
+    uint16_t hwVersion = (pd.get<uint8_t>() << 8) | pd.get<uint8_t>();
+    uint16_t swVersion = (pd.get<uint8_t>() << 8) | pd.get<uint8_t>();
 
-    log(string("  HW-Version: ") + intToString(hwVersion >> 8) + "." + intToString(hwVersion && 0xFF00));
-    log(string("  SW-Version: ") + intToString(swVersion >> 8) + "." + intToString(swVersion && 0xFF00));
+    log(string("  HW-Version: ") + intToString(hwVersion >> 8) + "." + intToString(hwVersion & 0x00FF));
+    log(string("  SW-Version: ") + intToString(swVersion >> 8) + "." + intToString(swVersion & 0x00FF));
 
     std::string name;
     for(int i = 0; i < 6; i++) {
