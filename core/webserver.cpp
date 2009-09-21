@@ -812,6 +812,7 @@ namespace dss {
           sstream << ", " << ToJSONValue("swVersion") << ": " << ToJSONValue(modulator->getSoftwareVersion());
           sstream << ", " << ToJSONValue("hwName") << ": " << ToJSONValue(modulator->getHardwareName());
           sstream << ", " << ToJSONValue("deviceType") << ": " << ToJSONValue(modulator->getDeviceType());
+          sstream << ", " << ToJSONValue("isPresent") << ": " << ToJSONValue(modulator->isPresent());
           sstream << "}";
         }
         sstream << "]}";
