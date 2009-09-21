@@ -275,6 +275,7 @@ namespace dss {
       if(m_State == csInitial) {
         senseTimeMS = (rand() % 1000) + 100;
         numberOfJoinPacketsToWait = -1;
+        m_TokenCounter = 0;
         lastSentWasToken = false;
         doChangeState(csSensing);
         continue;
