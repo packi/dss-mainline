@@ -954,6 +954,7 @@ namespace dss {
       case ModelEvent::etBusReady:
         log("Got bus ready event.", lsInfo);
         initializeFromBus();
+        break;
       default:
         assert(false);
         break;
