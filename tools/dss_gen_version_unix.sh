@@ -14,8 +14,8 @@ if [ -z "$TARGETDIR" ] ; then
   exit 1
 fi
 
-rcs_rev="undefined"
-rcs_root="undefined"
+rcs_rev="REV_UNDEFINED"
+rcs_root="URL_UNDEFINED"
 if [ -d $BASEDIR/.svn ]; then
   rcs_rev=$(svnversion $BASEDIR)
   rcs_root=$(svn info $BASEDIR|grep ^URL:|sed -e 's|URL:\s*||')
