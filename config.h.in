@@ -15,7 +15,6 @@
 #cmakedefine WITH_DATADIR "${WITH_DATADIR}"
 #cmakedefine WITH_BONJOUR
 #cmakedefine WITH_GCOV
-#cmakedefine RELEASE_BUILD
 
 #endif /* DIGITAL_STROM_SERVER_CONFIG_H */
 

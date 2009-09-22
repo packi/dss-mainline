@@ -4,7 +4,6 @@ PROJECT(DSS)
 OPTION(WITH_TESTS "Include test-suite" ON)
 OPTION(WITH_SIM "Compile and start the simulation" ON)
 OPTION(WITH_GCOV "Compile coverage information into the dss" OFF)
-OPTION(RELEASE_BUILD "Whether this release is a release build" OFF)
 
 IF(NOT WITH_DATADIR)
   SET(WITH_DATADIR "${CMAKE_INSTALL_PREFIX}/share/dss/data" CACHE FILEPATH "Data directory")

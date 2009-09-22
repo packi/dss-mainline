@@ -63,17 +63,16 @@ pair<string, string> parse_prop(const string& s) {
 } // parse_prop
 
 void printVersion() {
+  cout << "DSS";
+#ifdef HAVE_CONFIG_H
+  cout << " v" << DSS_VERSION;
+#endif
 #ifdef HAVE_BUILD_INFO_H
-  cout << "DSS v" << DSS_VERSION << " built on " << DSS_BUILD_DATE << endl;
-#ifndef RELEASE_BUILD
-  cout << "  RCS revision: " << DSS_RCS_REVISION << endl;
-  cout << "  RCS url:      " << DSS_RCS_URL      << endl;
-  cout << "  build user:   " << DSS_BUILD_USER   << endl;
-  cout << "  build host:   " << DSS_BUILD_HOST   << endl;
+  cout << " (r" << DSS_RCS_REVISION << ")"
+       << " (" << DSS_BUILD_USER << "@" << DSS_BUILD_HOST << ")"
+       << " " << DSS_BUILD_DATE;
 #endif
-#else
-  cout << "No build information included" << endl;
-#endif
+  cout << endl;
 }
 
 int main (int argc, char* argv[]) {
@@ -82,7 +81,7 @@ int main (int argc, char* argv[]) {
     cerr << "Can't set the specified locale! Check LANG, LC_CTYPE, LC_ALL." << endl;
     return 1;
   }
-  
+
   // make sure timezone gets set
   tzset();
 
@@ -188,7 +187,7 @@ int main (int argc, char* argv[]) {
       // more expressive; this should go away in the future
       printVersion();
 
-      
+
       dss::DSS::getInstance()->initialize(properties);
       dss::DSS::getInstance()->run();
     }
