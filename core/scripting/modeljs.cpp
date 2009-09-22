@@ -720,7 +720,7 @@ namespace dss {
 
         }
 
-        boost::shared_ptr<EventSubscription> subscription(new EventSubscription(eventName, handlerName, opts));
+        boost::shared_ptr<EventSubscription> subscription(new EventSubscription(eventName, handlerName, ext->getEventInterpreter(), opts));
 
         JSObject* obj = ext->createJSSubscription(*ctx, subscription);
         *rval = OBJECT_TO_JSVAL(obj);

@@ -68,6 +68,12 @@ namespace dss {
     reset();
   }
 
+  Event::Event()
+  : m_Name("unnamed_event")
+  {
+    reset();
+  }
+
   Event::~Event() {
     delete m_RaisedAtDevice;
     m_RaisedAtDevice = NULL;
@@ -215,7 +221,7 @@ namespace dss {
           {
             if((*ipSubscription)->matches(*toProcess)) {
               bool called = false;
-              Logger::getInstance()->log(string("EventInterpreter: Subscription'") + (*ipSubscription)->getID() + "' matches event");
+              Logger::getInstance()->log(string("EventInterpreter: Subscription '") + (*ipSubscription)->getID() + "' matches event");
 
               EventInterpreterPlugin* plugin = getPluginByName((*ipSubscription)->getHandlerName());
               if(plugin != NULL) {
@@ -229,7 +235,7 @@ namespace dss {
               }
 
             } else {
-              Logger::getInstance()->log(string("EventInterpreter: No match on subscription'") + (*ipSubscription)->getID() + "'");
+              Logger::getInstance()->log(string("EventInterpreter: No match on subscription '") + (*ipSubscription)->getID() + "'");
             }
           }
 
@@ -252,6 +258,8 @@ namespace dss {
   } // getPluginByName
 
   void EventInterpreter::subscribe(boost::shared_ptr<EventSubscription> _subscription) {
+    assert(_subscription != NULL);
+    assert(subscriptionByID(_subscription->getID()) == NULL);
     m_Subscriptions.push_back(_subscription);
   } // subscribe
 
@@ -265,6 +273,28 @@ namespace dss {
       }
     }
   } // unsubscribe
+
+  boost::shared_ptr<EventSubscription> EventInterpreter::subscriptionByID(const std::string& _subscriptionID) {
+    boost::shared_ptr<EventSubscription> result;
+    for(vector< boost::shared_ptr<EventSubscription> >::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
+        ipSubscription != e; ++ipSubscription)
+    {
+      if((*ipSubscription)->getID() == _subscriptionID) {
+        result = *ipSubscription;
+        break;
+      }
+    }
+    return result;
+  } // subscriptionByID
+
+  std::string EventInterpreter::uniqueSubscriptionID(const std::string& _proposal) {
+    std::string result = _proposal;
+    int index = 1;
+    while(subscriptionByID(result) != NULL) {
+      result = _proposal + intToString(index++);
+    }
+    return result;
+  } // uniqueSubscriptionID
 
   void EventInterpreter::loadFromXML(const string& _fileName) {
     const int apartmentConfigVersion = 1;
@@ -365,7 +395,7 @@ namespace dss {
       }
     }
 
-    boost::shared_ptr<EventSubscription> subscription(new EventSubscription(evtName, handlerName, opts));
+    boost::shared_ptr<EventSubscription> subscription(new EventSubscription(evtName, handlerName, *this, opts));
     try {
       XMLNode& filterNode = _node.getChildByName("filter");
       loadFilter(filterNode, *subscription);
@@ -574,23 +604,14 @@ namespace dss {
 
   //================================================== EventSubscription
 
-  EventSubscription::EventSubscription(const string& _eventName, const string& _handlerName, boost::shared_ptr<SubscriptionOptions> _options)
+  EventSubscription::EventSubscription(const string& _eventName, const string& _handlerName, EventInterpreter& _interpreter, boost::shared_ptr<SubscriptionOptions> _options)
   : m_EventName(_eventName),
     m_HandlerName(_handlerName),
-    m_ID(_eventName + _handlerName),
     m_SubscriptionOptions(_options)
   {
+    m_ID = _interpreter.uniqueSubscriptionID(_eventName + "_" +  _handlerName);
     initialize();
   } // ctor
-
-  EventSubscription::EventSubscription(const string& _eventName, const string& _handlerName, const string& _id, boost::shared_ptr<SubscriptionOptions> _options)
-  : m_EventName(_eventName),
-    m_HandlerName(_handlerName),
-    m_ID(_id),
-    m_SubscriptionOptions(_options)
-  {
-    initialize();
-  } // ctor(with id)
 
   EventSubscription::~EventSubscription() {
   } // dtor

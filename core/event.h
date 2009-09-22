@@ -76,6 +76,7 @@ namespace dss {
     Event(const string& _name, Zone* _context);
     Event(const string& _name, DeviceReference* _ref);
     Event(const string& _name);
+    Event();
 
     ~Event();
 
@@ -186,8 +187,7 @@ namespace dss {
   protected:
     void initialize();
   public:
-    EventSubscription(const string& _eventName, const string& _handlerName, boost::shared_ptr<SubscriptionOptions> _options);
-    EventSubscription(const string& _eventName, const string& _handlerName, const string& _id, boost::shared_ptr<SubscriptionOptions> _options);
+    EventSubscription(const string& _eventName, const string& _handlerName, EventInterpreter& _interpreter, boost::shared_ptr<SubscriptionOptions> _options);
 
     ~EventSubscription();
 
@@ -289,7 +289,7 @@ namespace dss {
   private:
     void loadSubscription(XMLNode& _node);
     void loadFilter(XMLNode& _node, EventSubscription& _subscription);
-    EventInterpreterPlugin* getPluginByName(const string& _name);
+    boost::shared_ptr<EventSubscription> subscriptionByID(const std::string& _name);
   protected:
     virtual void doStart();
   public:
@@ -301,11 +301,13 @@ namespace dss {
     virtual void execute();
 
     void addPlugin(EventInterpreterPlugin* _plugin);
+    EventInterpreterPlugin* getPluginByName(const std::string& _name);
 
     void subscribe(boost::shared_ptr<EventSubscription> _subscription);
     void unsubscribe(const string& _subscriptionID);
 
     void loadFromXML(const string& _fileName);
+    std::string uniqueSubscriptionID(const std::string& _proposal);
 
     int getEventsProcessed() const { return m_EventsProcessed; }
     EventQueue& getQueue() { return *m_Queue; }

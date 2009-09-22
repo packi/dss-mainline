@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(testSubscription) {
 
   boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
   opts->setParameter("event_name", "event1");
-  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", opts));
+  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", interpreter, opts));
   interpreter.subscribe(subscription);
 
   queue.pushEvent(pEvent);
