@@ -62,6 +62,42 @@ namespace dss {
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   }; // EventInterpreterPluginDS485
 
+
+  //-------------------------------------------------- Event Relay
+
+  class EventInterpreterInternalRelay;
+
+  class EventRelayTarget {
+  public:
+    EventRelayTarget(EventInterpreterInternalRelay& _relay)
+    : m_Relay(_relay)
+    { } // ctor
+    virtual ~EventRelayTarget();
+
+    virtual void handleEvent(Event& _event, const EventSubscription& _subscription) = 0;
+    virtual void subscribeTo(boost::shared_ptr<EventSubscription> _pSubscription);
+    virtual void unsubscribeFrom(const std::string& _subscriptionID);
+  private:
+    EventInterpreterInternalRelay& m_Relay;
+    std::vector<std::string> m_SubscriptionIDs;
+  }; // EventRelayTarget
+
+  class EventInterpreterInternalRelay : public EventInterpreterPlugin {
+  public:
+    EventInterpreterInternalRelay(EventInterpreter* _pInterpreter);
+    virtual ~EventInterpreterInternalRelay();
+
+    virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+
+    static const char* getPluginName() { return "internal_relay"; }
+  protected:
+    friend class EventRelayTarget;
+    void registerSubscription(EventRelayTarget* _pTarget, const std::string& _subscriptionID);
+    void removeSubscription(const std::string& _subscriptionID);
+  private:
+    HASH_NAMESPACE::hash_map<const std::string, EventRelayTarget*> m_IDTargetMap;
+  }; // EventInterpreterInternalRelay
+
 } // namespace dss
 
 #endif /* EVENTINTERPRETERPLUGINS_H_ */

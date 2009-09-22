@@ -25,6 +25,12 @@
   elementFormDefault="unqualified"
   attributeFormDefault="unqualified">
   <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
+  <complexType name="Event">
+   <sequence>
+     <element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+     <element name="parameter" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+   </sequence>
+  </complexType>
   <!-- operation request element -->
   <element name="Authenticate">
    <complexType>
@@ -1458,6 +1464,40 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="EventWaitFor">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="timeout" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="EventWaitForResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="dss:Event" minOccurs="1" maxOccurs="unbounded"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="EventSubscribeTo">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="EventSubscribeToResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="PropertyGetType">
    <complexType>
     <sequence>
@@ -2251,6 +2291,22 @@
  <part name="parameters" element="dss:EventRaiseResponse"/>
 </message>
 
+<message name="EventWaitForRequest">
+ <part name="parameters" element="dss:EventWaitFor"/>
+</message>
+
+<message name="EventWaitForResponse">
+ <part name="parameters" element="dss:EventWaitForResponse"/>
+</message>
+
+<message name="EventSubscribeToRequest">
+ <part name="parameters" element="dss:EventSubscribeTo"/>
+</message>
+
+<message name="EventSubscribeToResponse">
+ <part name="parameters" element="dss:EventSubscribeToResponse"/>
+</message>
+
 <message name="PropertyGetTypeRequest">
  <part name="parameters" element="dss:PropertyGetType"/>
 </message>
@@ -2720,6 +2776,16 @@
   <documentation>Service definition of function dss__EventRaise</documentation>
   <input message="tns:EventRaiseRequest"/>
   <output message="tns:EventRaiseResponse"/>
+ </operation>
+ <operation name="EventWaitFor">
+  <documentation>Service definition of function dss__EventWaitFor</documentation>
+  <input message="tns:EventWaitForRequest"/>
+  <output message="tns:EventWaitForResponse"/>
+ </operation>
+ <operation name="EventSubscribeTo">
+  <documentation>Service definition of function dss__EventSubscribeTo</documentation>
+  <input message="tns:EventSubscribeToRequest"/>
+  <output message="tns:EventSubscribeToResponse"/>
  </operation>
  <operation name="PropertyGetType">
   <documentation>Service definition of function dss__PropertyGetType</documentation>
@@ -3486,6 +3552,24 @@
   </output>
  </operation>
  <operation name="EventRaise">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="EventWaitFor">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="EventSubscribeTo">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

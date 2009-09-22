@@ -244,7 +244,15 @@ int dss__SwitchGetGroupID(int _token, char* _deviceID, int& result);
 
 //==================================================== Events
 
+class dss__Event {
+public:
+  std::string name;
+  std::vector<std::string> parameter;
+};
+
 int dss__EventRaise(int _token, char* _eventName, char* _context, char* _parameter, char* _location, bool& result);
+int dss__EventWaitFor(int _token, int _timeout, std::vector<dss__Event>& result);
+int dss__EventSubscribeTo(int _token, std::string _name, std::string& result);
 
 
 // =================================================== Properties

@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2009-06-08 14:45:47 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2009-09-22 13:48:12 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -235,6 +235,10 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__SwitchGetGroupID(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:EventRaise"))
 		return soap_serve_dss__EventRaise(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:EventWaitFor"))
+		return soap_serve_dss__EventWaitFor(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:EventSubscribeTo"))
+		return soap_serve_dss__EventSubscribeTo(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:PropertyGetType"))
 		return soap_serve_dss__PropertyGetType(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:PropertySetInt"))
@@ -2964,7 +2968,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetZoneID(struct soap *soap)
 	return soap_closesock(soap);
 }
 
-
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ModulatorGetPowerConsumption(struct soap *soap)
 {	struct dss__ModulatorGetPowerConsumption soap_tmp_dss__ModulatorGetPowerConsumption;
 	struct dss__ModulatorGetPowerConsumptionResponse soap_tmp_dss__ModulatorGetPowerConsumptionResponse;
@@ -3573,6 +3576,88 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__EventRaise(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__EventRaiseResponse(soap, &soap_tmp_dss__EventRaiseResponse, "dss:EventRaiseResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__EventWaitFor(struct soap *soap)
+{	struct dss__EventWaitFor soap_tmp_dss__EventWaitFor;
+	struct dss__EventWaitForResponse soap_tmp_dss__EventWaitForResponse;
+	soap_default_dss__EventWaitForResponse(soap, &soap_tmp_dss__EventWaitForResponse);
+	soap_default_dss__EventWaitFor(soap, &soap_tmp_dss__EventWaitFor);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__EventWaitFor(soap, &soap_tmp_dss__EventWaitFor, "dss:EventWaitFor", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__EventWaitFor(soap, soap_tmp_dss__EventWaitFor._token, soap_tmp_dss__EventWaitFor._timeout, soap_tmp_dss__EventWaitForResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__EventWaitForResponse(soap, &soap_tmp_dss__EventWaitForResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__EventWaitForResponse(soap, &soap_tmp_dss__EventWaitForResponse, "dss:EventWaitForResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__EventWaitForResponse(soap, &soap_tmp_dss__EventWaitForResponse, "dss:EventWaitForResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__EventSubscribeTo(struct soap *soap)
+{	struct dss__EventSubscribeTo soap_tmp_dss__EventSubscribeTo;
+	struct dss__EventSubscribeToResponse soap_tmp_dss__EventSubscribeToResponse;
+	soap_default_dss__EventSubscribeToResponse(soap, &soap_tmp_dss__EventSubscribeToResponse);
+	soap_default_dss__EventSubscribeTo(soap, &soap_tmp_dss__EventSubscribeTo);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__EventSubscribeTo(soap, &soap_tmp_dss__EventSubscribeTo, "dss:EventSubscribeTo", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__EventSubscribeTo(soap, soap_tmp_dss__EventSubscribeTo._token, soap_tmp_dss__EventSubscribeTo._name, soap_tmp_dss__EventSubscribeToResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__EventSubscribeToResponse(soap, &soap_tmp_dss__EventSubscribeToResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__EventSubscribeToResponse(soap, &soap_tmp_dss__EventSubscribeToResponse, "dss:EventSubscribeToResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__EventSubscribeToResponse(soap, &soap_tmp_dss__EventSubscribeToResponse, "dss:EventSubscribeToResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

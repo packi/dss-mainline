@@ -32,6 +32,14 @@ bool IsAuthorized(struct soap *soap, const int _token) {
   return result;
 } // isAuthorized
 
+int AuthorizeAndGetSession(struct soap *soap, const int _token, dss::WebServiceSession& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+  result = dss::DSS::getInstance()->getWebServices().getSession(soap, _token);
+  return SOAP_OK;
+} // AuthorizeAndGetSession
+
 int AuthorizeAndGetSet(struct soap *soap, const int _token, const int _setID, dss::Set& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
@@ -1122,6 +1130,7 @@ int dss__GroupRemoveDevice(struct soap *soap, int _token, int _groupID, char* _d
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
+
 //==================================================== Events
 
 int dss__EventRaise(struct soap *soap, int _token, char* _eventName, char* _context, char* _parameter, char* _location, bool& result) {
@@ -1160,6 +1169,45 @@ int dss__EventRaise(struct soap *soap, int _token, char* _eventName, char* _cont
   result = true;
   return SOAP_OK;
 } // dss__EventRaise
+
+int dss__EventWaitFor(struct soap *soap, int _token, int _timeout, std::vector<dss__Event>& result) {
+  dss::WebServiceSession session;
+  int getResult = AuthorizeAndGetSession(soap, _token, session);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  session.waitForEvent(_timeout);
+
+  while(session.hasEvent()) {
+    dss::Event origEvent = session.popEvent();
+    dss__Event evt;
+    evt.name = origEvent.getName();
+    const dss::HashMapConstStringString& props =  origEvent.getProperties().getContainer();
+    for(dss::HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end();
+        iParam != e; ++iParam)
+    {
+      std::string paramString = iParam->first + "=" + iParam->second;
+      evt.parameter.push_back(paramString);
+    }
+    result.push_back(evt);
+  }
+
+  return SOAP_OK;
+} // dss__EventWaitFor
+
+int dss__EventSubscribeTo(struct soap *soap, int _token, std::string _name, std::string& result) {
+  dss::WebServiceSession session;
+  int getResult = AuthorizeAndGetSession(soap, _token, session);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  result = session.subscribeTo(_name);
+
+  return SOAP_OK;
+} // dss__EventSubscribeTo
+
 
 //==================================================== Properties
 

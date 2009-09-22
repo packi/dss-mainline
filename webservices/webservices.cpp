@@ -5,6 +5,8 @@
 
 #include <boost/foreach.hpp>
 
+#include "core/dss.h"
+
 namespace dss {
   //================================================== WebServices
 
@@ -92,13 +94,87 @@ namespace dss {
   }
 
 
+  //================================================== WebServiceEventListener
+
+  class WebServiceEventListener : public EventRelayTarget {
+  public:
+    WebServiceEventListener(EventInterpreterInternalRelay& _relay)
+    : EventRelayTarget(_relay)
+    { } // ctor
+    ~WebServiceEventListener() {
+      while(!m_Subscriptions.empty()) {
+        DSS::getInstance()->getEventInterpreter().unsubscribe(m_Subscriptions.front()->getID());
+        m_Subscriptions.erase(m_Subscriptions.begin());
+      }
+    } // dtor
+
+    virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+    bool waitForEvent(const int _timeoutMS);
+    Event popEvent();
+    bool hasEvent() { return !m_PendingEvents.empty(); }
+
+    virtual std::string subscribeTo(const std::string& _eventName);
+  private:
+    SyncEvent m_EventArrived;
+    Mutex m_PendingEventsMutex;
+    std::vector<Event> m_PendingEvents;
+    std::vector<boost::shared_ptr<EventSubscription> > m_Subscriptions;
+  }; // WebServiceEventListener
+
+  void WebServiceEventListener::handleEvent(Event& _event, const EventSubscription& _subscription) {
+    m_PendingEventsMutex.lock();
+    m_PendingEvents.push_back(_event);
+    m_PendingEventsMutex.unlock();
+    m_EventArrived.signal();
+  } // handleEvent
+
+  bool WebServiceEventListener::waitForEvent(const int _timeoutMS) {
+    if(m_PendingEvents.empty()) {
+      if(_timeoutMS == 0) {
+        m_EventArrived.waitFor();
+      } else if(_timeoutMS > 0) {
+        m_EventArrived.waitFor(_timeoutMS);
+      }
+    }
+    return !m_PendingEvents.empty();
+  } // waitForEvent
+
+  Event WebServiceEventListener::popEvent() {
+    Event result;
+    m_PendingEventsMutex.lock();
+    result = m_PendingEvents.front();
+    m_PendingEvents.erase(m_PendingEvents.begin());
+    m_PendingEventsMutex.unlock();
+    return result;
+  } // popEvent
+
+  std::string WebServiceEventListener::subscribeTo(const std::string& _eventName) {
+    boost::shared_ptr<EventSubscription> subscription(
+      new dss::EventSubscription(
+            _eventName,
+            EventInterpreterInternalRelay::getPluginName(),
+            DSS::getInstance()->getEventInterpreter(),
+            boost::shared_ptr<dss::SubscriptionOptions>()
+      )
+    );
+
+    EventRelayTarget::subscribeTo(subscription);
+    m_Subscriptions.push_back(subscription);
+    DSS::getInstance()->getEventInterpreter().subscribe(subscription);
+
+    return subscription->getID();
+  } // subscribeTo
+
+
   //================================================== WebServiceSession
 
   WebServiceSession::WebServiceSession(const int _tokenID, soap* _soapRequest)
   : Session(_tokenID),
     m_OriginatorIP(_soapRequest->ip)
-  {
-  } // ctor
+  { } // ctor
+
+  WebServiceSession::~WebServiceSession() {
+  } // dtor
 
   bool WebServiceSession::isOwner(soap* _soapRequest) {
     return _soapRequest->ip == m_OriginatorIP;
@@ -110,6 +186,41 @@ namespace dss {
 
     return *this;
   } // operator=
+
+  void WebServiceSession::createListener() {
+    if(m_pEventListener == NULL) {
+      EventInterpreterInternalRelay* pPlugin =
+          dynamic_cast<EventInterpreterInternalRelay*>(
+              DSS::getInstance()->getEventInterpreter().getPluginByName(
+                std::string(EventInterpreterInternalRelay::getPluginName())
+              )
+          );
+      if(pPlugin == NULL) {
+        throw new std::runtime_error("Need EventInterpreterInternalRelay to be registered");
+      }
+      m_pEventListener.reset(new WebServiceEventListener(*pPlugin));
+    }
+    assert(m_pEventListener != NULL);
+  } // createListener
+
+  bool WebServiceSession::waitForEvent(const int _timeoutMS) {
+    createListener();
+    return m_pEventListener->waitForEvent(_timeoutMS);
+  } // waitForEvent
+
+  Event WebServiceSession::popEvent() {
+    createListener();
+    return m_pEventListener->popEvent();
+  } // popEvent
+
+  std::string WebServiceSession::subscribeTo(const std::string& _eventName) {
+    return m_pEventListener->subscribeTo(_eventName);
+  } // subscribeTo
+
+  bool WebServiceSession::hasEvent() {
+    createListener();
+    return m_pEventListener->hasEvent();
+  } // hasEvent
 
 
   //================================================== WebServicesWorker

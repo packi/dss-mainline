@@ -287,4 +287,52 @@ namespace dss {
     }
   } // handleEvent
 
+
+  //================================================== EventRelayTarget
+
+  EventRelayTarget::~EventRelayTarget() {
+    while(!m_SubscriptionIDs.empty()) {
+      unsubscribeFrom(m_SubscriptionIDs.front());
+    }
+  } // dtor
+
+  void EventRelayTarget::subscribeTo(boost::shared_ptr<EventSubscription> _pSubscription) {
+    m_Relay.registerSubscription(this, _pSubscription->getID());
+    m_SubscriptionIDs.push_back(_pSubscription->getID());
+  } // subscribeTo
+
+  void EventRelayTarget::unsubscribeFrom(const std::string& _subscriptionID) {
+    m_Relay.removeSubscription(_subscriptionID);
+    std::vector<std::string>::iterator it =
+      std::find(m_SubscriptionIDs.begin(), m_SubscriptionIDs.end(), _subscriptionID);
+    if(it != m_SubscriptionIDs.end()) {
+      m_SubscriptionIDs.erase(it);
+    }
+  } // unsubscribeFrom
+
+
+  //================================================== EventInterpreterInternalRelay
+
+  EventInterpreterInternalRelay::EventInterpreterInternalRelay(EventInterpreter* _pInterpreter)
+  : EventInterpreterPlugin(getPluginName(), _pInterpreter)
+  { } // ctor
+
+  EventInterpreterInternalRelay::~EventInterpreterInternalRelay() {
+  } // dtor
+
+  void EventInterpreterInternalRelay::handleEvent(Event& _event, const EventSubscription& _subscription) {
+    EventRelayTarget* target = m_IDTargetMap[_subscription.getID()];
+    if(target != NULL) {
+      target->handleEvent(_event, _subscription);
+    }
+  } // handleEvent
+
+  void EventInterpreterInternalRelay::registerSubscription(EventRelayTarget* _pTarget, const std::string& _subscriptionID) {
+    m_IDTargetMap[_subscriptionID] = _pTarget;
+  } // registerSubscription
+
+  void EventInterpreterInternalRelay::removeSubscription(const std::string& _subscriptionID) {
+    m_IDTargetMap[_subscriptionID] = NULL;
+  } // removeSubscription
+
 } // namespace dss

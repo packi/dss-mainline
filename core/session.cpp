@@ -64,12 +64,14 @@ namespace dss {
     m_LastSetNr = _other.m_LastSetNr;
     m_Token = _other.m_Token;
     m_LastTouched = _other.m_LastTouched;
-
+    m_SetsByID = _other.m_SetsByID;
+/*
     for(SetsByID::const_iterator iEntry = m_SetsByID.begin(), e = m_SetsByID.end();
         iEntry != e; ++iEntry)
     {
       m_SetsByID[iEntry->first] = iEntry->second;
     }
+    */
     return *this;
   }
 

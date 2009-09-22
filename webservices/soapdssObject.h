@@ -176,10 +176,6 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetName(struct soap*, int _token, char *_de
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetZoneID(struct soap*, int _token, char *_deviceID, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSetLocation(struct soap*, int _token, char *_deviceID, struct DeviceLocation _location, bool &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetLocation(struct soap*, int _token, char *_deviceID, struct DeviceLocation &result);
-
 SOAP_FMAC5 int SOAP_FMAC6 dss__ModulatorGetPowerConsumption(struct soap*, int _token, int _modulatorID, unsigned long &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetModulatorIDs(struct soap*, int _token, std::vector<std::string >&ids);
@@ -209,6 +205,10 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetFunctionID(struct soap*, int _token, cha
 SOAP_FMAC5 int SOAP_FMAC6 dss__SwitchGetGroupID(struct soap*, int _token, char *_deviceID, int &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__EventRaise(struct soap*, int _token, char *_eventName, char *_context, char *_parameter, char *_location, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__EventWaitFor(struct soap*, int _token, int _timeout, std::vector<dss__Event >&result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__EventSubscribeTo(struct soap*, int _token, std::string _name, std::string &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetType(struct soap*, int _token, std::string _propertyName, std::string &result);
 
