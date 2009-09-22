@@ -1,0 +1,14 @@
+Source: dss
+Section: unknown
+Priority: extra
+Maintainer: Johannes Winkelmann <johannes.winkelmann@aizo.com>
+Build-Depends: debhelper (>= 7), cmake
+Standards-Version: 3.8.0
+Homepage: http://developer.digitalstrom.org
+
+Package: dss
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: digitalSTROM server
+ The digitalSTROM server software allows advanced configuration of a
+ digitalSTROM installation

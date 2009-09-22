@@ -4,8 +4,10 @@ PROJECT(DSS)
 OPTION(WITH_TESTS "Include test-suite" ON)
 OPTION(WITH_SIM "Compile and start the simulation" ON)
 OPTION(WITH_GCOV "Compile coverage information into the dss" OFF)
+OPTION(RELEASE_BUILD "Whether this release is a release build" OFF)
+
 IF(NOT WITH_DATADIR)
-  SET(WITH_DATADIR "${CMAKE_INSTALL_PREFIX}/share/dss/data/" CACHE FILEPATH "Data directory")
+  SET(WITH_DATADIR "${CMAKE_INSTALL_PREFIX}/share/dss/data" CACHE FILEPATH "Data directory")
 ENDIF(NOT WITH_DATADIR)
 
 SET(DSS_GEN_VERSION_CMD "")
@@ -143,7 +145,7 @@ ENDIF(WITH_TESTS)
 ADD_EXECUTABLE(dss main.cpp namespaces.cpp)
 
 INSTALL(TARGETS dss RUNTIME DESTINATION bin)
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data DESTINATION ${WITH_DATADIR}
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data/ DESTINATION ${WITH_DATADIR}
         PATTERN "/webroot/js/lib/extjs/docs" EXCLUDE
         PATTERN "/webroot/js/lib/extjs/examples" EXCLUDE
        )
@@ -151,3 +153,9 @@ INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data DESTINATION ${WITH_DATADIR}
 
 TARGET_LINK_LIBRARIES(dss ${TEST_LIB} ${BOOST_TEST_LIB} core unix webservices pthread
 	mongoose ${REQUIRED_LIBS})
+
+
+ADD_CUSTOM_TARGET(debian
+	COMMAND dpkg-buildpackage -rfakeroot
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
