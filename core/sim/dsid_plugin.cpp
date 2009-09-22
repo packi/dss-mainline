@@ -41,7 +41,7 @@ namespace dss {
       m_Handle(_handle)
     {
       struct dsid_interface* (*get_interface)();
-      *(void**)(&get_interface) = dlsym(m_SOHandle, "dsid_get_interface");
+      get_interface = (struct dsid_interface*(*)())dlsym(m_SOHandle, "dsid_get_interface");
       char* error;
       if((error = dlerror()) != NULL) {
         Logger::getInstance()->log("sim: error getting interface");
@@ -169,7 +169,7 @@ namespace dss {
   : DSIDCreator(_pluginName),
     m_SOHandle(_soHandle)
   {
-    *(void**)(&createInstance) = dlsym(m_SOHandle, "dsid_create_instance");
+    createInstance = (int (*)())dlsym(m_SOHandle, "dsid_create_instance");
     char* error;
     if((error = dlerror()) != NULL) {
       Logger::getInstance()->log("sim: error getting pointer to dsid_create_instance");

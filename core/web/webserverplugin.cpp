@@ -57,7 +57,7 @@ namespace dss {
 
     dlerror();
     int (*version)();
-    *(void**) (&version) = dlsym(m_Handle, "plugin_getversion");
+    version = (int (*)())dlsym(m_Handle, "plugin_getversion");
     char* error;
     if((error = dlerror()) != NULL) {
       Logger::getInstance()->log("WebServerPlugin::load(): Could not get symbol 'plugin_getversion' from \"" + m_File + "\":" + error, lsError);
@@ -70,7 +70,8 @@ namespace dss {
       return;
     }
 
-    *(void**) (&m_pHandleRequest) = dlsym(m_Handle, "plugin_handlerequest");
+    m_pHandleRequest = (bool (*)(const std::string& _uri, dss::HashMapConstStringString& _parameter, dss::DSS& _dss, std::string& result))
+                       dlsym(m_Handle, "plugin_handlerequest");
     if((error = dlerror()) != NULL) {
        Logger::getInstance()->log("WebServerPlugin::load(): Could not get symbol 'plugin_handlerequest' from plugin: \"" + m_File + "\":" + error, lsError);
        return;

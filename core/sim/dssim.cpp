@@ -167,7 +167,7 @@ namespace dss {
 
               dlerror();
               int (*version)();
-              *(void**) (&version) = dlsym(handle, "dsid_getversion");
+              version = (int (*)())dlsym(handle, "dsid_getversion");
               char* error;
               if((error = dlerror()) != NULL) {
                  log("LoadPlugins: Could not get symbol 'dsid_getversion' from plugin: \"" + dir_itr->leaf() + "\":" + error, lsError);
@@ -181,7 +181,7 @@ namespace dss {
               }
 
               const char* (*get_name)();
-              *(void**)(&get_name) = dlsym(handle, "dsid_get_plugin_name");
+              get_name = (const char*(*)())dlsym(handle, "dsid_get_plugin_name");
               if((error = dlerror()) != NULL) {
                 log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
                 continue;
