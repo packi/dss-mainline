@@ -1,4 +1,4 @@
-print("in data/read_teperature.js");
+print("in data/read_temperature.js");
 
 // create a set containing all temperature sensors
 
