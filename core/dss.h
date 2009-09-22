@@ -116,6 +116,7 @@ namespace dss {
     Metering& getMetering() { return *m_pMetering; }
     PropertySystem& getPropertySystem() { return *m_pPropertySystem; }
     WebServer& getWebServer() { return *m_pWebServer; }
+    EventInterpreter& getEventInterpreter() { return *m_pEventInterpreter; }
 
     const std::string& getDataDirectory() const { return m_DataDirectory; }
     void setDataDirectory(const std::string& _value);
