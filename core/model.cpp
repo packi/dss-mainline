@@ -1472,6 +1472,7 @@ namespace dss {
     dev.setZoneID(_zoneID);
     dev.setShortAddress(_devID);
     dev.setFunctionID(_functionID);
+    dev.setIsPresent(true);
 
     // add to new modulator
     Modulator& modulator = getModulatorByBusID(_modID);
