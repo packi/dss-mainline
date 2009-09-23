@@ -157,7 +157,7 @@ namespace dss {
       DSS::getInstance()->getDS485Interface().setValueDevice(*this, (int)_value, _parameterNr, 1);
     }
   } // setValue
-  
+
   void Device::setRawValue(const uint16_t _value, const int _parameterNr, const int _size) {
     DSS::getInstance()->getDS485Interface().setValueDevice(*this, _value, _parameterNr, _size);
   } // setRawValue
@@ -859,17 +859,17 @@ namespace dss {
       modulator.setBusID(modulatorID);
       scanModulator(modulator);
     }
-    
+
     // mark devices of absent modulators as not present
     foreach(Modulator* pModulator, m_Modulators) {
       if(!pModulator->isPresent()) {
         Set devices = pModulator->getDevices();
         SetNotPresentAction action;
-        devices.perform(action);        
+        devices.perform(action);
       }
     }
   } // initializeFromBus
-  
+
   void Apartment::newModulator(int _modulatorBusID) {
     DS485Interface& interface = DSS::getInstance()->getDS485Interface();
 
@@ -885,11 +885,11 @@ namespace dss {
       modulator.setBusID(modulatorID);
     }
   } // newModulator
-  
+
   void Apartment::lostModulator(int _modulatorBusID) {
     initializeFromBus();
   } // lostModulator
-  
+
   void Apartment::modulatorReady(int _modulatorBusID) {
     log("Modulator with id: " + intToString(_modulatorBusID) + " is ready");
     initializeFromBus();
@@ -1507,7 +1507,7 @@ namespace dss {
           return;
         }
         PropertyNodePtr modeNode = deviceNode->getProperty("interrupt/mode");
-        if(deviceNode == NULL) {
+        if(modeNode == NULL) {
           return;
         }
         string mode = modeNode->getStringValue();
