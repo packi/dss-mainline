@@ -552,7 +552,7 @@ namespace dss {
               break;
             case FunctionGroupCallScene:
               {
-                uint8_t zoneID = pd.get<uint16_t>();
+                uint16_t zoneID = pd.get<uint16_t>();
                 uint8_t groupID = pd.get<uint16_t>();
                 uint8_t sceneID = pd.get<uint16_t>();
                 groupCallScene(zoneID, groupID, sceneID);
@@ -568,7 +568,7 @@ namespace dss {
               break;
             case FunctionGroupSaveScene:
               {
-                uint8_t zoneID = pd.get<uint16_t>();
+                uint16_t zoneID = pd.get<uint16_t>();
                 uint8_t groupID = pd.get<uint16_t>();
                 uint8_t sceneID = pd.get<uint16_t>();
                 groupSaveScene(zoneID, groupID, sceneID);
@@ -702,7 +702,7 @@ namespace dss {
               break;
             case FunctionModulatorCountDevInZone:
               {
-                uint8_t index = pd.get<uint16_t>();
+                uint16_t index = pd.get<uint16_t>();
                 response = createResponse(cmdFrame, cmdNr);
                 response->getPayload().add<uint16_t>(m_Zones[index].size());
                 distributeFrame(response);
@@ -710,8 +710,8 @@ namespace dss {
               break;
             case FunctionModulatorDevKeyInZone:
               {
-                uint8_t zoneID = pd.get<uint16_t>();
-                uint8_t deviceIndex = pd.get<devid_t>();
+                uint16_t zoneID = pd.get<uint16_t>();
+                uint16_t deviceIndex = pd.get<devid_t>();
                 response = createResponse(cmdFrame, cmdNr);
                 response->getPayload().add<uint16_t>(m_Zones[zoneID].at(deviceIndex)->getShortAddress());
                 distributeFrame(response);
@@ -890,7 +890,7 @@ namespace dss {
               break;
             case FunctionModulatorAddZone:
               {
-                uint8_t zoneID = pd.get<uint16_t>();
+                uint16_t zoneID = pd.get<uint16_t>();
                 response = createResponse(cmdFrame, cmdNr);
                 bool isValid = true;
                 for(map< const int, std::vector<DSIDInterface*> >::iterator iZoneEntry = m_Zones.begin(), e = m_Zones.end();
@@ -913,7 +913,7 @@ namespace dss {
             case FunctionDeviceSetZoneID:
               {
                 devid_t devID = pd.get<devid_t>();
-                uint8_t zoneID = pd.get<uint16_t>();
+                uint16_t zoneID = pd.get<uint16_t>();
                 DSIDInterface& dev = lookupDevice(devID);
 
                 int oldZoneID = m_DeviceZoneMapping[&dev];
