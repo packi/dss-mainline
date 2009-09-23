@@ -475,6 +475,20 @@ namespace dss {
        	m_DS485Controller.enqueueFrame(_frame);
       }
     }
+    std::ostringstream sstream;
+    sstream << "Frame content: ";
+    PayloadDissector pd(_frame.getPayload());
+    while(!pd.isEmpty()) {
+      uint8_t data = pd.get<uint8_t>();
+      sstream << "(0x" << std::hex << (unsigned int)data << ", " << std::dec << (int)data << "d)";
+    }
+    sstream << std::dec;
+    sstream << " to " << int(_frame.getHeader().getDestination());
+    if(broadcast) {
+      sstream << " as broadcast";
+    }
+    log(sstream.str());
+
     boost::shared_ptr<DS485CommandFrame> pFrame(new DS485CommandFrame);
     *pFrame = _frame;
     // relay the frame to update our state
@@ -1165,6 +1179,12 @@ namespace dss {
     case FunctionDSLinkInterrupt:
       return "Function DSLink Interrupt";
       
+    case FunctionZoneAddDevice:
+      return "Function Zone Add Device";
+    case FunctionZoneRemoveDevice:
+      return "Function Zone Remove Device";
+    case FunctionDeviceAddToGroup:
+      return "Function Device Add To Group";
     case EventNewDS485Device:
       return "Event New DS485 Device";
     case EventLostDS485Device:
@@ -1210,7 +1230,18 @@ namespace dss {
             if(functionIDStr.empty()) {
               functionIDStr = "Unknown function id: " + intToString(functionID, true);
             }
-            log("Got request: " + functionIDStr);
+            std::ostringstream sstream;
+            sstream << "Got request: " << functionIDStr << " from " << int(frame->getHeader().getSource()) << " ";
+
+            PayloadDissector pdDump(frame->getPayload());
+            while(!pdDump.isEmpty()) {
+              uint8_t data = pdDump.get<uint8_t>();
+              sstream << "(0x" << std::hex << (unsigned int)data << ", " << std::dec << (int)data << "d)";
+            }
+            sstream << std::dec;
+            log(sstream.str());
+
+
             PayloadDissector pd(frame->getPayload());
 
             if(frame->getFrameSource() == fsWire) {
@@ -1298,6 +1329,7 @@ namespace dss {
               sstream << "(0x" << std::hex << (unsigned int)data << ", " << std::dec << (int)data << "d)";
             }
             sstream << std::dec;
+            sstream << " from " << int(frame->getHeader().getSource());
             log(sstream.str());
 
             log(string("Response for: ") + FunctionIDToString(functionID));
