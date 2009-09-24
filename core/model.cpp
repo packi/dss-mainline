@@ -81,7 +81,7 @@ namespace dss {
           m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyReference<string>(m_Name));
           m_pPropertyNode->createProperty("ModulatorID")->linkToProxy(PropertyProxyReference<int>(m_ModulatorID, false));
           m_pPropertyNode->createProperty("ZoneID")->linkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
-          m_pPropertyNode->createProperty("interruptMode")->setStringValue("ignore");
+          m_pPropertyNode->createProperty("interrupt/mode")->setStringValue("ignore");
         }
       }
     }
