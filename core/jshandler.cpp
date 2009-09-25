@@ -169,7 +169,8 @@ namespace dss {
   ScriptContext::ScriptContext(ScriptEnvironment& _env, JSContext* _pContext)
   : m_pScriptToExecute(NULL),
     m_Environment(_env),
-    m_pContext(_pContext)
+    m_pContext(_pContext),
+    m_KeepContext(false)
   {
     JS_SetOptions(m_pContext, JSOPTION_VAROBJFIX | JSOPTION_DONT_REPORT_UNCAUGHT);
     JS_SetErrorReporter(m_pContext, jsErrorHandler);

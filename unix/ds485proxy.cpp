@@ -962,7 +962,13 @@ namespace dss {
       }
       PayloadDissector pd(recFrame->getFrame()->getPayload());
       pd.get<uint8_t>(); // discard the function id
-      pd.get<uint16_t>(); // device id
+      pd.get<uint16_t>(); // garbage
+      devid_t devAddress = pd.get<uint16_t>(); // device address
+      if(devAddress != _devAdr) {
+        log("dSLinkSend: Received answer for wrong device expected: " 
+            + intToString(_devAdr, true) + 
+            " got: " + intToString(devAddress, true));
+      }
       return pd.get<uint16_t>();
     }
     log("dsLinkSend: Not waiting for response (waitOnly is set)");
@@ -1296,7 +1302,7 @@ namespace dss {
               pd.get<uint8_t>(); // functionID
               uint16_t devID = pd.get<uint16_t>();
               uint16_t priority = pd.get<uint16_t>();
-              int modID = frame->getHeader().getDestination();
+              int modID = frame->getHeader().getSource();
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etDSLinkInterrupt);
               pEvent->addParameter(modID);
               pEvent->addParameter(devID);

@@ -92,13 +92,15 @@ namespace dss {
 
           // add raisedEvent.parameter
           ScriptObject param(*ctx, NULL);
-          raisedEvent.setProperty("parameter", &param);
           const HashMapConstStringString& props =  _event.getProperties().getContainer();
           for(HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end();
               iParam != e; ++iParam)
           {
+            Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: setting parameter " + iParam->first +
+                                       " to " + iParam->second);
             param.setProperty<const std::string&>(iParam->first, iParam->second);
           }
+          raisedEvent.setProperty("parameter", &param);
 
           // add raisedEvent.subscription
           ScriptObject subscriptionObj(*ctx, NULL);
