@@ -113,7 +113,7 @@ namespace dss {
   const uint8_t FunctionDSLinkSendGroup = 0xc4;
   const uint8_t DSLinkSendLastByte = 0x01;
   const uint8_t DSLinkSendWriteOnly = 0x02;
-  const uint8_t FunctionDSLinkReceive = 0xa3;
+  const uint8_t FunctionDSLinkReceive = 0xc3;
   const uint8_t FunctionDSLinkInterrupt = 0x85;
   
   const uint8_t EventNewDS485Device = 0x80;
