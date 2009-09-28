@@ -26,10 +26,6 @@
   #include "config.h"
 #endif
 
-#ifdef HAVE_BUILD_INFO_H
-  #include "build_info.h"
-#endif
-
 #include "core/base.h"
 #include "core/dss.h"
 #include "core/logger.h"
@@ -61,19 +57,6 @@ pair<string, string> parse_prop(const string& s) {
       return make_pair(string(), string());
     }
 } // parse_prop
-
-void printVersion() {
-  cout << "DSS";
-#ifdef HAVE_CONFIG_H
-  cout << " v" << DSS_VERSION;
-#endif
-#ifdef HAVE_BUILD_INFO_H
-  cout << " (r" << DSS_RCS_REVISION << ")"
-       << " (" << DSS_BUILD_USER << "@" << DSS_BUILD_HOST << ")"
-       << " " << DSS_BUILD_DATE;
-#endif
-  cout << endl;
-}
 
 int main (int argc, char* argv[]) {
 
@@ -136,7 +119,7 @@ int main (int argc, char* argv[]) {
   }
 
   if (vm.count("version")) {
-    printVersion();
+    std::cout << dss::DSS::versionString() << std::endl;
     return 1;
   }
 
@@ -182,12 +165,6 @@ int main (int argc, char* argv[]) {
   } else {
     if(!quitAfterTests) {
       // start DSS
-
-      // for now, we always print out the version to make the logs
-      // more expressive; this should go away in the future
-      printVersion();
-
-
       dss::DSS::getInstance()->initialize(properties);
       dss::DSS::getInstance()->run();
     }
