@@ -46,18 +46,21 @@ namespace dss {
   //============================================= WebServer
 
   WebServer::WebServer(DSS* _pDSS)
-  : Subsystem(_pDSS, "WebServer")
+    : Subsystem(_pDSS, "WebServer"), m_mgContext(0)
   {
-    Logger::getInstance()->log("Starting Webserver...");
-    m_mgContext = mg_start();
   } // ctor
 
   WebServer::~WebServer() {
-    mg_stop(m_mgContext);
+    if (m_mgContext) {
+      mg_stop(m_mgContext);
+    }
   } // dtor
 
   void WebServer::initialize() {
     Subsystem::initialize();
+
+    log("Starting Webserver...");
+    m_mgContext = mg_start();
 
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "webroot", getDSS().getDataDirectory() + "webroot/", true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "ports", "8080", true, false);
@@ -1342,10 +1345,10 @@ namespace dss {
     return result;
   } // handleEventCall
 
-  string WebServer::handleStructureCall(const std::string& _method, 
-                                        HashMapConstStringString& _parameter, 
-                                        struct mg_connection* _connection, 
-                                        bool& _handled, 
+  string WebServer::handleStructureCall(const std::string& _method,
+                                        HashMapConstStringString& _parameter,
+                                        struct mg_connection* _connection,
+                                        bool& _handled,
                                         Session* _session) {
     _handled = true;
     StructureManipulator manipulator(getDSS().getDS485Interface(), getDSS().getApartment());
@@ -1657,12 +1660,12 @@ namespace dss {
   } // handleMeteringCall
 
   void WebServer::httpPluginCallback(struct mg_connection* _connection,
-                                     const struct mg_request_info* _info, 
+                                     const struct mg_request_info* _info,
                                      void* _userData) {
     if(_userData != NULL) {
       WebServerPlugin* plugin = static_cast<WebServerPlugin*>(_userData);
       WebServer& self = DSS::getInstance()->getWebServer();
-      
+
       string uri = _info->uri;
       self.log("Plugin: Processing call to " + uri);
 
@@ -1670,9 +1673,9 @@ namespace dss {
     }
   } // httpPluginCallback
 
-  void WebServer::pluginCalled(struct mg_connection* _connection, 
+  void WebServer::pluginCalled(struct mg_connection* _connection,
                                const struct mg_request_info* _info,
-                               WebServerPlugin& plugin, 
+                               WebServerPlugin& plugin,
                                const std::string& _uri) {
     HashMapConstStringString paramMap = parseParameter(_info->query_string);
 
@@ -1687,11 +1690,11 @@ namespace dss {
   } // pluginCalled
 
   void WebServer::jsonHandler(struct mg_connection* _connection,
-                              const struct mg_request_info* _info, 
+                              const struct mg_request_info* _info,
                               void* _userData) {
-    const string urlid = "/json/";     
+    const string urlid = "/json/";
     string uri = _info->uri;
-    
+
     HashMapConstStringString paramMap = parseParameter(_info->query_string);
 
     string method = uri.substr(uri.find(urlid) + urlid.size());
@@ -1751,7 +1754,7 @@ namespace dss {
   } // jsonHandler
 
   void WebServer::httpBrowseProperties(struct mg_connection* _connection,
-                                       const struct mg_request_info* _info, 
+                                       const struct mg_request_info* _info,
                                        void* _userData) {
     emitHTTPHeader(200, _connection);
 
