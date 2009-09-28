@@ -248,8 +248,87 @@ BOOST_AUTO_TEST_CASE(testPropertyListener) {
 
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
   BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 2);
-
-
 }
+
+BOOST_AUTO_TEST_CASE(testReentrancy) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluateScript<void>("setProperty('/testing', 1); setProperty('/triggered', false); "
+                            "setListener('/triggered', function() { setProperty('/itWorks', true); } ); "
+                            "listener_ident = setListener('/testing', function(changedNode) { setProperty('/triggered', true); }); "
+      );
+      
+  propSys.setBoolValue("/testing", true);
+  
+  BOOST_CHECK_EQUAL(propSys.getBoolValue("/itWorks"), true);
+} // testReentrancy
+
+class TestThreadingThread : public Thread {
+public:
+  TestThreadingThread(PropertyNodePtr _node) 
+  : Thread("TestThreadingThread"),
+    m_pNode(_node)
+  {
+  }
+  
+  virtual void execute() {
+    while(!m_Terminated) {
+      m_pNode->setIntegerValue(2);
+    }
+  }
+  
+private:
+  PropertyNodePtr m_pNode;
+}; // TestThreadingThread
+
+BOOST_AUTO_TEST_CASE(testThreading) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluateScript<void>("var func = setProperty('/testing1', 1); setProperty('/testing2', 1); "
+                            "setListener('/testing1', function() { setProperty('/itWorks', true); } ); "
+                            "setListener('/testing2', function() { setProperty('/itWorks', true); } ); "
+      );
+      
+  PropertyNodePtr node1 = propSys.getProperty("/testing1");
+  PropertyNodePtr node2 = propSys.getProperty("/testing2");
+  
+  // different nodes
+  {
+    TestThreadingThread t1(node1);
+    TestThreadingThread t2(node2);
+    t1.run();
+    t2.run();
+  
+    sleepSeconds(1);
+  
+    t1.terminate();
+    t2.terminate();
+    sleepMS(500);
+  }
+  
+  // same node
+  {
+    TestThreadingThread t1(node1);
+    TestThreadingThread t2(node1);
+    t1.run();
+    t2.run();
+  
+    sleepSeconds(1);
+  
+    t1.terminate();
+    t2.terminate();
+    sleepMS(500);
+  }
+} // testThreading
 
 BOOST_AUTO_TEST_SUITE_END()

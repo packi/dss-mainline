@@ -26,8 +26,6 @@
 #include "config.h"
 #endif
 
-#include "base.h"
-
 #ifdef HAVE_MOZJS_JSAPI_H
 #include <mozjs/jsapi.h>
 #else
@@ -36,6 +34,9 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/scoped_ptr.hpp>
+
+#include "base.h"
+#include "mutex.h"
 
 namespace dss {
 
@@ -73,7 +74,7 @@ namespace dss {
   /** ScriptContext is a wrapper for a scripts execution context.
     * A script can either be loaded from a file or from
     * a std::string contained in memory. */
-  class ScriptContext {
+  class ScriptContext : public LockableObject {
   private:
     JSScript* m_pScriptToExecute;
     std::string m_FileName;
