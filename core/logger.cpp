@@ -80,6 +80,9 @@ namespace dss {
     return wstring(SeverityToString<const wchar_t*>(_severity));
   } // severityToString<const wstring>
 
+  Logger::Logger()
+    : m_logTarget(boost::shared_ptr<LogTarget>(new CoutLogTarget())) 
+  {}
 
   Logger* Logger::getInstance() {
     if(m_Instance == NULL) {
@@ -105,7 +108,9 @@ namespace dss {
 #else
     localtime_r( &now, &t );
 #endif
-    cout << "[" << dateToISOString<string>(&t) << "]" << SeverityToString<const string>(_severity) << " " << _message << endl;
+    m_logTarget->outputStream() << "[" << dateToISOString<string>(&t) << "]" 
+                               << SeverityToString<const string>(_severity) << " " 
+                               << _message << endl;
   } // log
 
   void Logger::log(const char* _message, const aLogSeverity _severity) {
@@ -117,5 +122,16 @@ namespace dss {
       log(string("[") + _channel.getName() + "] " + _message, _severity);
     }
   } // log
+
+
+  bool Logger::setLogTarget(boost::shared_ptr<LogTarget>& _logTarget) {
+    if (_logTarget->open()) {
+      m_logTarget->close();
+      m_logTarget = _logTarget;
+      return true;
+    }
+    return false;
+  } // setLogTarget
+
 
 }

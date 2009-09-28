@@ -102,6 +102,7 @@ namespace dss {
 #ifdef WITH_TESTS
     static void teardown();
 #endif
+    static std::string versionString();
 
     aDSSState getState() const { return m_State; }
 

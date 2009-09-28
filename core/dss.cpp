@@ -23,6 +23,11 @@
   #include "config.h"
 #endif
 
+#ifdef HAVE_BUILD_INFO_H
+  #include "build_info.h"
+#endif
+
+
 #include "dss.h"
 #include "logger.h"
 #include "xmlwrapper.h"
@@ -48,6 +53,7 @@
 
 #include <cassert>
 #include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -217,12 +223,32 @@ const char* DataDirectory = "data/";
   }
 
   void DSS::run() {
-    Logger::getInstance()->log("DSS stating up....", lsInfo);
+    Logger::getInstance()->log("DSS starting up....", lsInfo);
     if(!loadConfig()) {
       Logger::getInstance()->log("Could not parse config file", lsFatal);
       return;
     }
-
+    
+    // see whether we have a log file set in config.xml, and set the
+    // log target accordingly
+    PropertyNodePtr pNode = getPropertySystem().getProperty("/config/logfile");
+    if (pNode) {
+      std::string logFileName = pNode->getStringValue();      
+      Logger::getInstance()->log("Logging to file: " + logFileName, lsInfo);
+      
+      boost::shared_ptr<dss::LogTarget> 
+        logTarget(new dss::FileLogTarget(logFileName));
+      if (!dss::Logger::getInstance()->setLogTarget(logTarget)) {
+        Logger::getInstance()->log("Failed to open logfile '" + logFileName + 
+                                   "'; exiting", lsFatal);
+        return;
+      }
+    } else {
+      Logger::getInstance()->log("No logfile configured, logging to stdout", 
+                                 lsInfo);
+    }
+    
+    dss::Logger::getInstance()->log(versionString(), lsInfo);
 
     m_State = ssInitializingSubsystems;
     std::for_each(m_Subsystems.begin(), m_Subsystems.end(), InitializeSubsystem);
@@ -254,5 +280,20 @@ const char* DataDirectory = "data/";
     Logger::getInstance()->log("Loading config", lsInfo);
     return getPropertySystem().loadFromXML(getDataDirectory() + "config.xml", getPropertySystem().getProperty("/config"));
   } // loadConfig
+
+
+  std::string DSS::versionString() {
+    std::ostringstream ostr;
+    ostr << "DSS";
+#ifdef HAVE_CONFIG_H
+    ostr << " v" << DSS_VERSION;
+#endif
+#ifdef HAVE_BUILD_INFO_H
+    ostr << " (r" << DSS_RCS_REVISION << ")"
+         << " (" << DSS_BUILD_USER << "@" << DSS_BUILD_HOST << ")"
+         << " " << DSS_BUILD_DATE;
+#endif
+    return ostr.str();
+  }
 
 }
