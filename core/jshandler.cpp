@@ -23,6 +23,8 @@
 
 #include <cstring>
 #include <sstream>
+#include <fstream>
+#include <iostream>
 
 #include "core/logger.h"
 
@@ -60,7 +62,6 @@ namespace dss {
     JSContext* context = JS_NewContext(m_pRuntime, 8192);
 
     ScriptContext* pResult = new ScriptContext(*this, context);
-    JS_SetContextPrivate(context, pResult);
     for(boost::ptr_vector<ScriptExtension>::iterator ipExtension = m_Extensions.begin(); ipExtension != m_Extensions.end(); ++ipExtension) {
       ipExtension->extendContext(*pResult);
     }
@@ -103,8 +104,7 @@ namespace dss {
       line = (char*)malloc(len);
       strncpy(line, er->linebuf, len);
       line[len-1] = '\0';
-    }
-    else {
+    } else {
       len=0;
       pointer = (char*)malloc(1);
       line = (char*)malloc(1);
@@ -167,8 +167,7 @@ namespace dss {
   };
 
   ScriptContext::ScriptContext(ScriptEnvironment& _env, JSContext* _pContext)
-  : m_pScriptToExecute(NULL),
-    m_Environment(_env),
+  : m_Environment(_env),
     m_pContext(_pContext),
     m_KeepContext(false)
   {
@@ -190,54 +189,33 @@ namespace dss {
       throw ScriptException("InitStandardClasses failed");
     }
 
+    JS_SetContextPrivate(m_pContext, this);
   } // ctor
 
   ScriptContext::~ScriptContext() {
+    scrubVector(m_AttachedObjects);
     JS_SetContextPrivate(m_pContext, NULL);
-//    JS_RemoveRoot(m_pContext, m_pSourceObject);
-    if(m_pScriptToExecute != NULL) {
-      JS_DestroyScript(m_pContext, m_pScriptToExecute);
-    }
     JS_DestroyContext(m_pContext);
+    m_pContext = NULL;
   } // dtor
 
-  void ScriptContext::loadFromFile(const std::string& _fileName) {
-    if(m_pScriptToExecute != NULL) {
-      JS_DestroyScript(m_pContext, m_pScriptToExecute);
-    }
-    m_FileName = _fileName;
-    if(!fileExists(_fileName)) {
-      throw ScriptException(std::string("File \"") + _fileName + "\" not found");
-    }
+  void ScriptContext::attachObject(ScriptContextAttachedObject* _pObject) {
+    m_AttachedObjects.push_back(_pObject);
+  } // attachObject
 
-    m_pScriptToExecute = JS_CompileFile(m_pContext, m_pRootObject, _fileName.c_str());
-    if(m_pScriptToExecute == NULL) {
-      throw ScriptException(std::string("Could not parse file \"") + _fileName + "\"");
+  void ScriptContext::removeAttachedObject(ScriptContextAttachedObject* _pObject) {
+    std::vector<ScriptContextAttachedObject*>::iterator it =
+       std::find(m_AttachedObjects.begin(), m_AttachedObjects.end(), _pObject);
+    if(it != m_AttachedObjects.end()) {
+      m_AttachedObjects.erase(it);
+      delete _pObject;
     }
-    /*
-    // protect newly allocated script from garbage-collection
-    m_pSourceObject = JS_NewScriptObject(m_pContext, m_pScriptToExecute);
-    if (m_pSourceObject == NULL
-        || !JS_AddNamedRoot(m_pContext, &m_pSourceObject, "scrobj")) {
-      throw ScriptException("Could not add named root for script");
-    }
-    */
-  } // loadFromFile
+  } // removeAttachedObject
 
-  void ScriptContext::loadFromMemory(const char* _script) {
-    if(m_pScriptToExecute != NULL) {
-      JS_DestroyScript(m_pContext, m_pScriptToExecute);
-    }
-    m_pScriptToExecute = JS_CompileScript(m_pContext, m_pRootObject, _script, strlen(_script), "memory", 1);
-    if(m_pScriptToExecute == NULL) {
-      throw ScriptException(std::string("Could not parse in-memory script"));
-    }
-  } // loadFromMemory
-  
   template<>
   jsval ScriptContext::convertTo(const jsval& _val) {
     return _val;
-  }
+  } // convertTo<jsval>
  
   template<>
   int ScriptContext::convertTo(const jsval& _val) {
@@ -298,52 +276,21 @@ namespace dss {
     }
     return false;
   } // raisePendingExceptions
-      
+
   template <>
-  jsval ScriptContext::evaluate() {
+  jsval ScriptContext::evaluateScript(const std::string& _fileName) {
     AssertLocked(this);
-    jsval rval;
-    JSBool ok = JS_ExecuteScript(m_pContext, m_pRootObject, m_pScriptToExecute, &rval);
-    if(ok) {
-      return rval;
-    } else {
-      raisePendingExceptions();
-      throw ScriptException("Error executing script");
+
+    std::ifstream in(_fileName.c_str());
+    std::string line;
+    std::stringstream sstream;
+    while(std::getline(in,line)) {
+      sstream << line << "\n";
     }
-  } // evaluate<jsval>
-  
-  template <>
-  void ScriptContext::evaluate() {
-    evaluate<jsval>();
-  } // evaluate<void>
-  
-  template <>
-  double ScriptContext::evaluate() {
-    return convertTo<double>(evaluate<jsval>());
-  } // evaluate<double>
-
-  template <>
-  int ScriptContext::evaluate() {
-    return convertTo<int>(evaluate<jsval>());
-  } // evaluate<int>
-
-  template <>
-  bool ScriptContext::evaluate() {
-    return convertTo<bool>(evaluate<jsval>());
-  } // evaluate<bool>
-
-  template <>
-  std::string ScriptContext::evaluate() {
-    return convertTo<std::string>(evaluate<jsval>());
-  } // evaluate<string>
-
-  template <>
-  jsval ScriptContext::evaluateScript(const std::string& _script) {
-    AssertLocked(this);
-    const char* filename = "temporary_script";
     jsval rval;
-    JSBool ok = JS_EvaluateScript(m_pContext, m_pRootObject, _script.c_str(), _script.size(),
-                       filename, 0, &rval);
+    std::string script = sstream.str();
+    JSBool ok = JS_EvaluateScript(m_pContext, m_pRootObject, script.c_str(), script.size(),
+                       _fileName.c_str(), 0, &rval);
     if(ok) {
       return rval;
     } else {
@@ -351,7 +298,7 @@ namespace dss {
       throw ScriptException("Error executing script");
     }
   } // evaluateScript
-  
+
   template <>
   void ScriptContext::evaluateScript(const std::string& _script) {
     evaluateScript<jsval>(_script);
@@ -376,6 +323,47 @@ namespace dss {
   bool ScriptContext::evaluateScript(const std::string& _script) {
     return convertTo<bool>(evaluateScript<jsval>(_script));
   } // evaluateScript<bool>
+
+  template <>
+  jsval ScriptContext::evaluate(const std::string& _script) {
+    AssertLocked(this);
+
+    const char* filename = "temporary_script";
+    jsval rval;
+    JSBool ok = JS_EvaluateScript(m_pContext, m_pRootObject, _script.c_str(), _script.size(),
+                       filename, 0, &rval);
+    if(ok) {
+      return rval;
+    } else {
+      raisePendingExceptions();
+      throw ScriptException("Error executing script");
+    }
+  } // evaluate
+  
+  template <>
+  void ScriptContext::evaluate(const std::string& _script) {
+    evaluate<jsval>(_script);
+  } // evaluate<void>
+
+  template <>
+  int ScriptContext::evaluate(const std::string& _script) {
+    return convertTo<int>(evaluate<jsval>(_script));
+  } // evaluate<int>
+
+  template <>
+  double ScriptContext::evaluate(const std::string& _script) {
+    return convertTo<double>(evaluate<jsval>(_script));
+  } // evaluate<double>
+
+  template <>
+  std::string ScriptContext::evaluate(const std::string& _script) {
+    return convertTo<std::string>(evaluate<jsval>(_script));
+  } // evaluate<std::string>
+
+  template <>
+  bool ScriptContext::evaluate(const std::string& _script) {
+    return convertTo<bool>(evaluate<jsval>(_script));
+  } // evaluate<bool>
 
 
   //================================================== ScriptExtension

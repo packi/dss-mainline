@@ -107,8 +107,7 @@ namespace dss {
           raisedEvent.setProperty("subscription", &subscriptionObj);
           subscriptionObj.setProperty<const std::string&>("name", _subscription.getEventName());
           
-          ctx->loadFromFile(scriptName);
-          ctx->evaluate<void>();
+          ctx->evaluateScript<void>(scriptName);
 
           if(ctx->getKeepContext()) {
             m_KeptContexts.push_back(ctx);

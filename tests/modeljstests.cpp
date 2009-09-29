@@ -47,16 +47,11 @@ BOOST_AUTO_TEST_CASE(testBasics) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->loadFromMemory("getName()");
-  string name = ctx->evaluate<string>();
+  string name = ctx->evaluate<string>("getName()");
 
   BOOST_CHECK_EQUAL(apt.getName(), name);
 
-  ctx.reset(env->getContext());
-  ctx->loadFromMemory("setName('hello'); getName()");
-
-  name = ctx->evaluate<string>();
-  ctx.reset();
+  name = ctx->evaluate<string>("setName('hello'); getName()");
 
   BOOST_CHECK_EQUAL(string("hello"), name);
   BOOST_CHECK_EQUAL(string("hello"), apt.getName());
@@ -77,14 +72,11 @@ BOOST_AUTO_TEST_CASE(testSets) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->loadFromMemory("var devs = getDevices(); devs.length()");
-  int length = ctx->evaluate<int>();
+  int length = ctx->evaluate<int>("var devs = getDevices(); devs.length()");
 
   BOOST_CHECK_EQUAL(2, length);
 
-  ctx.reset(env->getContext());
-  ctx->loadFromMemory("var devs = getDevices(); var devs2 = getDevices(); devs.combine(devs2)");
-  ctx->evaluate<void>();
+  ctx->evaluate<void>("var devs = getDevices(); var devs2 = getDevices(); devs.combine(devs2)");
 } // testSets
 
 BOOST_AUTO_TEST_CASE(testDevices) {
@@ -104,10 +96,9 @@ BOOST_AUTO_TEST_CASE(testDevices) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->loadFromMemory("var devs = getDevices();\n"
+  ctx->evaluate<void>("var devs = getDevices();\n"
                       "var f = function(dev) { print(dev.name); }\n"
                       "devs.perform(f)\n");
-  ctx->evaluate<void>();
 } // testDevices
 
 BOOST_AUTO_TEST_CASE(testEvents) {
@@ -139,10 +130,10 @@ BOOST_AUTO_TEST_CASE(testEvents) {
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->loadFromMemory("var evt = new event('test');\n"
+  ctx->evaluate<void>("var evt = new event('test');\n"
                       "evt.raise()\n"
                       "\n");
-  ctx->evaluate<void>();
+  // TODO: add subscription to confirm the event actually got raised
 } // testEvents
 
 BOOST_AUTO_TEST_CASE(testSubscriptions) {
@@ -174,10 +165,9 @@ BOOST_AUTO_TEST_CASE(testSubscriptions) {
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->loadFromMemory("var s = new subscription('test', 'test', { 'param1': 1, 'param2': 2, 'string': 'string'} );\n"
+  ctx->evaluate<void>("var s = new subscription('test', 'test', { 'param1': 1, 'param2': 2, 'string': 'string'} );\n"
                       "s.subscribe();\n"
                       "\n");
-  ctx->evaluate<void>();
 
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 1);
 } // testSubscriptions
@@ -190,12 +180,12 @@ BOOST_AUTO_TEST_CASE(testProperties) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluateScript<void>("setProperty('/testing', 1)");
-  BOOST_CHECK_EQUAL(ctx->evaluateScript<int>("getProperty('/testing')"), 1);
+  ctx->evaluate<void>("setProperty('/testing', 1)");
+  BOOST_CHECK_EQUAL(ctx->evaluate<int>("getProperty('/testing')"), 1);
   BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 1);
   
   propSys.setIntValue("/testing", 2);
-  BOOST_CHECK_EQUAL(ctx->evaluateScript<int>("getProperty('/testing')"), 2);
+  BOOST_CHECK_EQUAL(ctx->evaluate<int>("getProperty('/testing')"), 2);
 }
 
 BOOST_AUTO_TEST_CASE(testPropertyListener) {
@@ -206,8 +196,8 @@ BOOST_AUTO_TEST_CASE(testPropertyListener) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluateScript<void>("setProperty('/testing', 1); setProperty('/triggered', false); "
-                            "listener_ident = setListener('/testing', function(changedNode) { setProperty('/triggered', true); }); "
+  ctx->evaluate<void>("setProperty('/testing', 1); setProperty('/triggered', false); "
+                      "listener_ident = setListener('/testing', function(changedNode) { setProperty('/triggered', true); }); "
       );
 
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
@@ -219,7 +209,7 @@ BOOST_AUTO_TEST_CASE(testPropertyListener) {
   BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 2);
 
   // check that removing works
-  ctx->evaluateScript<void>("removeListener(listener_ident);");
+  ctx->evaluate<void>("removeListener(listener_ident);");
 
   propSys.setBoolValue("/triggered", false);
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
@@ -230,8 +220,8 @@ BOOST_AUTO_TEST_CASE(testPropertyListener) {
   BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 2);
 
   // check that closures are working as expected
-  ctx->evaluateScript<void>("setProperty('/triggered', false); "
-                            "var ident = setListener('/testing', function(changedNode) { setProperty('/triggered', true); removeListener(ident); }); "
+  ctx->evaluate<void>("setProperty('/triggered', false); "
+                      "var ident = setListener('/testing', function(changedNode) { setProperty('/triggered', true); removeListener(ident); }); "
       );
 
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
@@ -258,14 +248,21 @@ BOOST_AUTO_TEST_CASE(testReentrancy) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluateScript<void>("setProperty('/testing', 1); setProperty('/triggered', false); "
-                            "setListener('/triggered', function() { setProperty('/itWorks', true); } ); "
+  ctx->evaluate<void>("setProperty('/testing', 1); setProperty('/triggered', false); "
+                            "other_ident = setListener('/triggered', function() { setProperty('/itWorks', true); } ); "
                             "listener_ident = setListener('/testing', function(changedNode) { setProperty('/triggered', true); }); "
       );
       
   propSys.setBoolValue("/testing", true);
   
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/itWorks"), true);
+
+  // TODO: find out why it crashes w/o those lines
+  ctx->evaluate<void>("removeListener(other_ident); "
+                      "removeListener(listener_ident); "
+      );
+
+  ctx.reset();
 } // testReentrancy
 
 class TestThreadingThread : public Thread {
@@ -294,9 +291,9 @@ BOOST_AUTO_TEST_CASE(testThreading) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluateScript<void>("var func = setProperty('/testing1', 1); setProperty('/testing2', 1); "
-                            "setListener('/testing1', function() { setProperty('/itWorks', true); } ); "
-                            "setListener('/testing2', function() { setProperty('/itWorks', true); } ); "
+  ctx->evaluate<void>("var func = setProperty('/testing1', 1); setProperty('/testing2', 1); "
+                      "l1 = setListener('/testing1', function() { setProperty('/itWorks', true); } ); "
+                      "l2 = setListener('/testing2', function() { setProperty('/itWorks', true); } ); "
       );
       
   PropertyNodePtr node1 = propSys.getProperty("/testing1");
@@ -329,6 +326,9 @@ BOOST_AUTO_TEST_CASE(testThreading) {
     t2.terminate();
     sleepMS(500);
   }
+
+  // TODO: find out why it crashes w/o those lines
+  ctx->evaluate<void>("removeListener(l1); removeListener(l2);");
 } // testThreading
 
 BOOST_AUTO_TEST_SUITE_END()

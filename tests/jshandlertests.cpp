@@ -42,13 +42,13 @@ BOOST_AUTO_TEST_CASE(testSimpleObject) {
   BOOST_CHECK_EQUAL(obj.getProperty<int>("testing"), 1);
   ctx->getRootObject().setProperty("obj", &obj);
 
-  BOOST_CHECK_EQUAL(ctx->evaluateScript<int>("obj.testing"), 1);
+  BOOST_CHECK_EQUAL(ctx->evaluate<int>("obj.testing"), 1);
   obj.setProperty("testing", 0);
-  BOOST_CHECK_EQUAL(ctx->evaluateScript<int>("obj.testing"), 0);
+  BOOST_CHECK_EQUAL(ctx->evaluate<int>("obj.testing"), 0);
 
   obj.setProperty("testing2", "test");
   BOOST_CHECK_EQUAL(obj.getProperty<std::string>("testing2"), "test");
-  BOOST_CHECK_EQUAL(ctx->evaluateScript<std::string>("obj.testing2"), "test");
+  BOOST_CHECK_EQUAL(ctx->evaluate<std::string>("obj.testing2"), "test");
 } // testSimpleObject
 
 BOOST_AUTO_TEST_CASE(testCallingFunctions) {
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(testCallingFunctions) {
   env->initialize();
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  jsval res = ctx->evaluateScript<jsval>("dev = { func: function(a,b,c) { return { e: a, f: b, g: c }; } }; dev");
+  jsval res = ctx->evaluate<jsval>("dev = { func: function(a,b,c) { return { e: a, f: b, g: c }; } }; dev");
 
   BOOST_ASSERT(JSVAL_IS_OBJECT(res));
 

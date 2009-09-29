@@ -91,9 +91,11 @@ namespace dss {
   class PropertyNode;
   class PropertyScriptExtension;
   
-  class PropertyScriptListener : public PropertyListener {
+  class PropertyScriptListener : public PropertyListener,
+                                 public ScriptContextAttachedObject {
   public:
     PropertyScriptListener(PropertyScriptExtension* _pExtension, ScriptContext* _pContext, JSObject* _functionObj, jsval _function, const std::string& _identifier);
+    virtual ~PropertyScriptListener();
 
     virtual void propertyChanged(PropertyNodePtr _changedNode);
     virtual void propertyRemoved(PropertyNodePtr _parent, PropertyNodePtr _child);
@@ -127,7 +129,7 @@ namespace dss {
     void removeListener(const std::string& _identifier);
   private:
     PropertySystem& m_PropertySystem;
-    boost::ptr_vector<PropertyScriptListener> m_Listeners;
+    std::vector<PropertyScriptListener*> m_Listeners;
     int m_NextListenerID;
   }; // PropertyScriptExtension
 

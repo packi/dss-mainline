@@ -985,6 +985,8 @@ namespace dss {
             new PropertyScriptListener(ext, ctx, obj, argv[1], ident);
         ext->addListener(listener);
         node->addListener(listener);
+        ctx->attachObject(listener);
+
         JSString* str = JS_NewStringCopyZ(cx, ident.c_str());
         *rval = STRING_TO_JSVAL(str);
       }
@@ -1034,14 +1036,15 @@ namespace dss {
   } // addListener
 
   void PropertyScriptExtension::removeListener(const std::string& _identifier) {
-    for(boost::ptr_vector<PropertyScriptListener>::iterator it = m_Listeners.begin(), e = m_Listeners.end();
+    for(std::vector<PropertyScriptListener*>::iterator it = m_Listeners.begin(), e = m_Listeners.end();
         it != e; ++it) {
-      if(it->getIdentifier() == _identifier) {
-        it->unsubscribe();
+      if((*it)->getIdentifier() == _identifier) {
+        (*it)->unsubscribe();
+        m_Listeners.erase(it);
         return;
       }
     }
-  }
+  } // removeListener
 
 
   //================================================== PropertyScriptListener
@@ -1056,7 +1059,14 @@ namespace dss {
     m_pFunctionObject(_functionObj),
     m_Function(_function),
     m_Identifier(_identifier)
-  { } // ctor
+  {
+    JS_AddRoot(_pContext->getJSContext(), &m_Function);
+  } // ctor
+
+  PropertyScriptListener::~PropertyScriptListener() {
+    m_pExtension->removeListener(m_Identifier);
+    JS_RemoveRoot(m_pContext->getJSContext(), &m_Function);
+  } // dtor
 
   void PropertyScriptListener::createScriptObject() {
     if(m_pScriptObject == NULL) {
@@ -1076,10 +1086,15 @@ namespace dss {
   } // propertyAdded
 
   void PropertyScriptListener::doOnChange(PropertyNodePtr _changedNode) {
+    AssertLocked locked(m_pContext);
     createScriptObject();
     ScriptFunctionParameterList list(*m_pContext);
     list.add(_changedNode->getDisplayName());
-    m_pScriptObject->callFunctionByReference<void>(m_Function, list);
+    try {
+      m_pScriptObject->callFunctionByReference<void>(m_Function, list);
+    } catch(ScriptRuntimeException& e) {
+      Logger::getInstance()->log("PropertyScriptListener::doOnChange: Caught exception while calling handler: " + std::string(e.what()), lsFatal);
+    }
   } // doOnChange
 
 } // namespace

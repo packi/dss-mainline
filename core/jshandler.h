@@ -26,6 +26,10 @@
 #include "config.h"
 #endif
 
+#include <iostream>
+
+#define JS_THREADSAFE
+
 #ifdef HAVE_MOZJS_JSAPI_H
 #include <mozjs/jsapi.h>
 #else
@@ -43,6 +47,7 @@ namespace dss {
   class ScriptContext;
   class ScriptExtension;
   class ScriptObject;
+  class ScriptContextAttachedObject;
 
   /** Wrapper for a script runtime environment. The ScriptEnvironment
     * is also responsible for creating Contexts and enhancing them with
@@ -76,40 +81,25 @@ namespace dss {
     * a std::string contained in memory. */
   class ScriptContext : public LockableObject {
   private:
-    JSScript* m_pScriptToExecute;
     std::string m_FileName;
     JSObject* m_pRootObject;
     boost::scoped_ptr<ScriptObject> m_RootObject;
-    JSObject* m_pSourceObject;
     ScriptEnvironment& m_Environment;
     JSContext* m_pContext;
     bool m_KeepContext;
+    std::vector<ScriptContextAttachedObject*> m_AttachedObjects;
     static void jsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er);
   public:
     ScriptContext(ScriptEnvironment& _env, JSContext* _pContext);
     virtual ~ScriptContext();
 
-    /** Loads the script from File
-      * @throw runtime_error if _fileName does not exist
-      * @throw ScriptException if there is something wrong with the script
-      */
-    void loadFromFile(const std::string& _fileName);
-    /** Loads the script from Memory.
-      * @throw ScriptException if there is something wrong with the script
-      */
-    void loadFromMemory(const char* _script);
-
-    /** Evaluates the previously loaded script. The result of the script
-      * will be casted to typeof t.
-      * @throw ScriptRuntimeException if the script raised an exception
-      * @throw SciptException
-      */
-    template <class t>
-    t evaluate();
-
     /** Evaluates the given script */  
     template <class t>
-    t evaluateScript(const std::string& _script);
+    t evaluate(const std::string& _script);
+
+    /** Evaluates the given file */
+    template <class t>
+    t evaluateScript(const std::string& _fileName);
 
     /** Returns a pointer to the JSContext */
     JSContext* getJSContext() { return m_pContext; }
@@ -120,12 +110,15 @@ namespace dss {
     bool raisePendingExceptions();
     bool getKeepContext() { return m_KeepContext; };
     void setKeepContext(bool _value) { m_KeepContext = _value; }
+
+    void attachObject(ScriptContextAttachedObject* _pObject);
+    void removeAttachedObject(ScriptContextAttachedObject* _pObject);
   public:
 
     /** Helper function to convert a jsval to a t. */
     template<class t>
     t convertTo(const jsval& _val);
-  };
+  }; // ScriptContext
 
   /** Exception class that will be raised if anything out of the
     * ordinary should happen. */
@@ -222,7 +215,14 @@ namespace dss {
 
     template<class t>
     t callFunctionByReference(jsval _function, ScriptFunctionParameterList& _parameter);
-}; // ScriptObject
+  }; // ScriptObject
+
+  class ScriptContextAttachedObject {
+  public:
+    ~ScriptContextAttachedObject() {
+      std::cout << "destroying attached object" << std::endl;
+    }
+  }; // ScriptContextAttachedObject
 
 } // namespace dss
 

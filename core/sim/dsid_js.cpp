@@ -23,22 +23,25 @@
 #include "core/jshandler.h"
 #include "core/scripting/modeljs.h"
 #include "core/dss.h"
+#include "core/thread.h"
 
 namespace dss {
 
   class DSIDJS : public DSIDInterface {
   public:
     DSIDJS(const DSModulatorSim& _simulator, dsid_t _dsid,
-           devid_t _shortAddress, boost::shared_ptr<ScriptContext> _pContext)
+           devid_t _shortAddress, boost::shared_ptr<ScriptContext> _pContext,
+           const std::string& _fileName)
     : DSIDInterface(_simulator, _dsid, _shortAddress),
-      m_pContext(_pContext)
+      m_pContext(_pContext),
+      m_FileName(_fileName)
     {}
 
     virtual ~DSIDJS() {}
 
     virtual void initialize() {
       try {
-        jsval res = m_pContext->evaluate<jsval>();
+        jsval res = m_pContext->evaluateScript<jsval>(m_FileName);
         if(JSVAL_IS_OBJECT(res)) {
           m_pJSThis = JSVAL_TO_OBJECT(res);
           m_pSelf.reset(new ScriptObject(m_pJSThis, *m_pContext));
@@ -253,6 +256,7 @@ namespace dss {
     boost::shared_ptr<ScriptContext> m_pContext;
     JSObject* m_pJSThis;
     boost::shared_ptr<ScriptObject> m_pSelf;
+    std::string m_FileName;
   }; // DSIDJS
 
 
@@ -282,6 +286,23 @@ namespace dss {
     DSSim& m_Simulation;
   }; // PropertyScriptExtension
 
+  class DSLinkInterrupSender : public Thread {
+  public:
+    DSLinkInterrupSender(dsid_t _dsid, DSIDScriptExtension* _ext)
+    : Thread("DSLinkInterruptSender"),
+      m_DSID(_dsid), m_Ext(_ext)
+    {
+      setFreeAtTermination(true);
+    }
+    virtual void execute() {
+      sleepMS(rand() % 3000);
+      m_Ext->dSLinkInterrupt(m_DSID);
+    }
+  private:
+    dsid_t m_DSID;
+    DSIDScriptExtension* m_Ext;
+  };
+
   JSBool global_dsid_dSLinkInterrupt(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     if(argc < 1) {
       Logger::getInstance()->log("JS: glogal_dsid_dSLinkInterrupt: need argument dsid", lsError);
@@ -293,7 +314,8 @@ namespace dss {
 
       try {
         dsid_t dsid = dsid_t::fromString(dsidString);
-        ext->dSLinkInterrupt(dsid);
+        DSLinkInterrupSender* sender = new DSLinkInterrupSender(dsid, ext);
+        sender->run();
       } catch(std::runtime_error&) {
         Logger::getInstance()->log("Could not parse DSID");
       }
@@ -329,12 +351,7 @@ namespace dss {
 
   DSIDInterface* DSIDJSCreator::createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
     boost::shared_ptr<ScriptContext> pContext(m_pScriptEnvironment->getContext());
-    try {
-      pContext->loadFromFile(m_FileName);
-    } catch(ScriptException& e) {
-      Logger::getInstance()->log("DSIDJSCreator: Could not parse file: " + m_FileName + "(" + e.what() + ")", lsError);
-    }
-    DSIDJS* result = new DSIDJS(_modulator, _dsid, _shortAddress, pContext);
+    DSIDJS* result = new DSIDJS(_modulator, _dsid, _shortAddress, pContext, m_FileName);
     return result;
   } // createDSID
 

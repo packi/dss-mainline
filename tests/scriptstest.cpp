@@ -35,34 +35,26 @@ BOOST_AUTO_TEST_SUITE(Scripting)
 BOOST_AUTO_TEST_CASE(testSimpleScripts) {
   ScriptEnvironment env;
   env.initialize();
-  ScriptContext* ctx = env.getContext();
-  ctx->loadFromMemory("x = 10; print(x); x = x * x;");
-  double result = ctx->evaluate<double>();
+  boost::scoped_ptr<ScriptContext> ctx(env.getContext());
+  double result = ctx->evaluate<double>("x = 10; print(x); x = x * x;");
   BOOST_CHECK_EQUAL(result, 100.0);
-  delete ctx;
 
-  ctx = env.getContext();
-  ctx->loadFromFile("data/test.js");
-  result = ctx->evaluate<double>();
+  ctx.reset(env.getContext());
+  result = ctx->evaluateScript<double>("data/test.js");
   BOOST_CHECK_EQUAL(result, 100.0);
-  delete ctx;
 
-  ctx = env.getContext();
-  ctx->loadFromMemory("x = 'bla'; x = x + 'bla';");
-  string sres = ctx->evaluate<string>();
+  ctx.reset(env.getContext());
+  string sres = ctx->evaluate<string>("x = 'bla'; x = x + 'bla';");
   BOOST_CHECK_EQUAL(sres, string("blabla"));
-  delete ctx;
 } // testSimpleScripts
 
 BOOST_AUTO_TEST_CASE(testMultipleIterations) {
   ScriptEnvironment env;
   env.initialize();
   for(int i = 0; i < 100; i++) {
-    ScriptContext* ctx = env.getContext();
-    ctx->loadFromFile("data/test3.js");
-    ctx->evaluate<void>();
+    boost::scoped_ptr<ScriptContext> ctx(env.getContext());
+    ctx->evaluateScript<void>("data/test3.js");
     cout << ".";
-    delete ctx;
   }
   cout << endl;
 } // testMultipleIterations
@@ -71,9 +63,8 @@ BOOST_AUTO_TEST_CASE(testExceptionHandling) {
   ScriptEnvironment* env = new ScriptEnvironment();
   env->initialize();
   ScriptContext* ctx = env->getContext();
-  ctx->loadFromMemory("x = {}; x.what = 'bla'; x.toString = function() { return 'bla'; }; throw x; x = 10;");
   try {
-    ctx->evaluate<double>();
+    ctx->evaluate<double>("x = {}; x.what = 'bla'; x.toString = function() { return 'bla'; }; throw x; x = 10;");
     BOOST_CHECK(false);
   } catch(ScriptRuntimeException& _ex) {
     BOOST_CHECK_EQUAL(_ex.getExceptionMessage(), string("bla"));
