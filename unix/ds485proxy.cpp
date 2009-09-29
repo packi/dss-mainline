@@ -1223,7 +1223,7 @@ namespace dss {
           m_IncomingFrames.erase(m_IncomingFrames.begin());
           m_IncomingFramesGuard.unlock();
           log("R");
-
+          
           const std::vector<unsigned char>& ch = frame->getPayload().toChar();
           if(ch.size() < 1) {
             log("received Command Frame w/o function identifier", lsFatal);
@@ -1238,6 +1238,11 @@ namespace dss {
             }
             std::ostringstream sstream;
             sstream << "Got request: " << functionIDStr << " from " << int(frame->getHeader().getSource()) << " ";
+            if(frame->getFrameSource() == fsWire) {
+              sstream << "over the wire ";
+            } else {
+              sstream << "from the dss ";
+            }
 
             PayloadDissector pdDump(frame->getPayload());
             while(!pdDump.isEmpty()) {
