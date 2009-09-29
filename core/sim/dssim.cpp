@@ -947,6 +947,7 @@ namespace dss {
                   response = createReply(cmdFrame);
                   response->setCommand(CommandRequest);
                   response->getPayload().add<uint8_t>(FunctionDSLinkReceive);
+                  response->getPayload().add<devid_t>(0x00); // garbage
                   response->getPayload().add<devid_t>(devID);
                   response->getPayload().add<uint16_t>(value);
                   distributeFrame(response);
