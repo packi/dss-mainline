@@ -214,6 +214,7 @@ namespace dss {
   } // popEvent
 
   std::string WebServiceSession::subscribeTo(const std::string& _eventName) {
+    createListener();
     return m_pEventListener->subscribeTo(_eventName);
   } // subscribeTo
 

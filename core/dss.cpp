@@ -207,6 +207,8 @@ const char* DataDirectory = "data/";
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterPluginJavascript(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
+    plugin = new EventInterpreterInternalRelay(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
 
     m_pEventRunner->setEventQueue(m_pEventQueue.get());
     m_pEventInterpreter->setEventRunner(m_pEventRunner.get());

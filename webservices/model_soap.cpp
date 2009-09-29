@@ -32,11 +32,11 @@ bool IsAuthorized(struct soap *soap, const int _token) {
   return result;
 } // isAuthorized
 
-int AuthorizeAndGetSession(struct soap *soap, const int _token, dss::WebServiceSession& result) {
+int AuthorizeAndGetSession(struct soap *soap, const int _token, dss::WebServiceSession** result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
-  result = dss::DSS::getInstance()->getWebServices().getSession(soap, _token);
+  *result = &dss::DSS::getInstance()->getWebServices().getSession(soap, _token);
   return SOAP_OK;
 } // AuthorizeAndGetSession
 
@@ -1171,16 +1171,16 @@ int dss__EventRaise(struct soap *soap, int _token, char* _eventName, char* _cont
 } // dss__EventRaise
 
 int dss__EventWaitFor(struct soap *soap, int _token, int _timeout, std::vector<dss__Event>& result) {
-  dss::WebServiceSession session;
-  int getResult = AuthorizeAndGetSession(soap, _token, session);
+  dss::WebServiceSession* session;
+  int getResult = AuthorizeAndGetSession(soap, _token, &session);
   if(getResult != SOAP_OK) {
     return getResult;
   }
 
-  session.waitForEvent(_timeout);
+  session->waitForEvent(_timeout);
 
-  while(session.hasEvent()) {
-    dss::Event origEvent = session.popEvent();
+  while(session->hasEvent()) {
+    dss::Event origEvent = session->popEvent();
     dss__Event evt;
     evt.name = origEvent.getName();
     const dss::HashMapConstStringString& props =  origEvent.getProperties().getContainer();
@@ -1197,13 +1197,13 @@ int dss__EventWaitFor(struct soap *soap, int _token, int _timeout, std::vector<d
 } // dss__EventWaitFor
 
 int dss__EventSubscribeTo(struct soap *soap, int _token, std::string _name, std::string& result) {
-  dss::WebServiceSession session;
-  int getResult = AuthorizeAndGetSession(soap, _token, session);
+  dss::WebServiceSession* session;
+  int getResult = AuthorizeAndGetSession(soap, _token, &session);
   if(getResult != SOAP_OK) {
     return getResult;
   }
 
-  result = session.subscribeTo(_name);
+  result = session->subscribeTo(_name);
 
   return SOAP_OK;
 } // dss__EventSubscribeTo
