@@ -89,6 +89,8 @@ public:
   virtual bool open() = 0;
   virtual void close() = 0;  
   virtual std::ostream& outputStream() = 0;
+
+  virtual ~LogTarget() {} // make g++ happy
 }; // LogTarget
 
 class CoutLogTarget : public LogTarget {
