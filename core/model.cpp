@@ -820,8 +820,8 @@ namespace dss {
           Group* pGroup = zone.getGroup(groupID);
           assert(pGroup != NULL);
           log(" zoneID: " + intToString(zoneID) + " groupID: " + intToString(groupID) + " lastScene: " + intToString(lastCalledScene));
-          if(lastCalledScene < 0 || lastCalledScene > 63) {
-            log("Zone id is out of bounds. zoneID: " + intToString(zoneID) + " groupID: " + intToString(groupID) + " lastScene: " + intToString(lastCalledScene), lsError);
+          if(lastCalledScene < 0 || lastCalledScene > MaxSceneNumber) {
+            log("scanModulator: _sceneID is out of bounds. zoneID: " + intToString(zoneID) + " groupID: " + intToString(groupID) + " scene: " + intToString(lastCalledScene), lsError);
           } else {
             onGroupCallScene(zoneID, groupID, lastCalledScene);
           }
@@ -1431,8 +1431,8 @@ namespace dss {
 
   void Apartment::onGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID) {
     try {
-      if(_sceneID < 0 || _sceneID > 63) {
-        log("Zone id is out of bounds. zoneID: " + intToString(_zoneID) + " groupID: " + intToString(_groupID) + " lastScene: " + intToString(_sceneID), lsError);
+      if(_sceneID < 0 || _sceneID > MaxSceneNumber) {
+        log("onGroupCallScene: Scene number is out of bounds. zoneID: " + intToString(_zoneID) + " groupID: " + intToString(_groupID) + " scene: " + intToString(_sceneID), lsError);
         return;
       }
       Zone& zone = getZone(_zoneID);
@@ -1474,8 +1474,8 @@ namespace dss {
 
   void Apartment::onDeviceCallScene(const int _modulatorID, const int _deviceID, const int _sceneID) {
     try {
-      if(_sceneID < 0 || _sceneID > 63) {
-        log("Zone id is out of bounds. modulator-id '" + intToString(_modulatorID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID), lsError);
+      if(_sceneID < 0 || _sceneID > MaxSceneNumber) {
+        log("onDeviceCallScene: _sceneID is out of bounds. modulator-id '" + intToString(_modulatorID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID), lsError);
         return;
       }
       Modulator& mod = getModulatorByBusID(_modulatorID);

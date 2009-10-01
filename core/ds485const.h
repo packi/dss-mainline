@@ -148,6 +148,8 @@ namespace dss {
   const uint8_t SceneEnergyClassF = 0x37;
   const uint8_t SceneLocalOff = 0x3D;
   const uint8_t SceneLocalOn = 0x3E;
+  
+  const uint8_t MaxSceneNumber = 0x3F;
 
   const uint16_t SceneFlagLocalOff = 0x0100;
 
