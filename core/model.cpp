@@ -818,9 +818,13 @@ namespace dss {
         try {
           int lastCalledScene = interface.getLastCalledScene(modulatorID, zoneID, groupID);
           Group* pGroup = zone.getGroup(groupID);
-          log(" zoneID: " + intToString(zoneID) + " groupID: " + intToString(groupID) + " lastScene: " + intToString(lastCalledScene));
           assert(pGroup != NULL);
-          onGroupCallScene(zoneID, groupID, lastCalledScene);
+          log(" zoneID: " + intToString(zoneID) + " groupID: " + intToString(groupID) + " lastScene: " + intToString(lastCalledScene));
+          if(lastCalledScene < 0 || lastCalledScene > 63) {
+            log("Zone id is out of bounds. zoneID: " + intToString(zoneID) + " groupID: " + intToString(groupID) + " lastScene: " + intToString(lastCalledScene), lsError);
+          } else {
+            onGroupCallScene(zoneID, groupID, lastCalledScene);
+          }
         } catch(runtime_error& error) {
           log(string("Error getting last called scene '") + error.what() + "'", lsError);
         }
@@ -1427,6 +1431,10 @@ namespace dss {
 
   void Apartment::onGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID) {
     try {
+      if(_sceneID < 0 || _sceneID > 63) {
+        log("Zone id is out of bounds. zoneID: " + intToString(_zoneID) + " groupID: " + intToString(_groupID) + " lastScene: " + intToString(_sceneID), lsError);
+        return;
+      }
       Zone& zone = getZone(_zoneID);
       Group* group = zone.getGroup(_groupID);
       if(group != NULL) {
@@ -1466,6 +1474,10 @@ namespace dss {
 
   void Apartment::onDeviceCallScene(const int _modulatorID, const int _deviceID, const int _sceneID) {
     try {
+      if(_sceneID < 0 || _sceneID > 63) {
+        log("Zone id is out of bounds. modulator-id '" + intToString(_modulatorID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID), lsError);
+        return;
+      }
       Modulator& mod = getModulatorByBusID(_modulatorID);
       try {
         log("OnDeviceCallScene: modulator-id '" + intToString(_modulatorID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID));
