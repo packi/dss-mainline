@@ -66,7 +66,7 @@ namespace dss {
 
   void Subsystem::start() {
     if(m_State != ssInitialized) {
-      throw new std::runtime_error("Subsystem::start: Subsystem '" + m_Name + "' was not initialized.");
+      throw std::runtime_error("Subsystem::start: Subsystem '" + m_Name + "' was not initialized.");
     }
     if(m_Enabled) {
       doStart();

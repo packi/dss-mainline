@@ -600,7 +600,7 @@ namespace dss {
     boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionGetTypeRequest);
 
     if(recFrame.get() == NULL) {
-      throw new runtime_error("No frame received");
+      throw runtime_error("No frame received");
     }
 
     ModulatorSpec_t result = modulatorSpecFromFrame(recFrame->getFrame());

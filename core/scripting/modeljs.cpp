@@ -1092,7 +1092,7 @@ namespace dss {
     list.add(_changedNode->getDisplayName());
     try {
       m_pScriptObject->callFunctionByReference<void>(m_Function, list);
-    } catch(ScriptRuntimeException& e) {
+    } catch(ScriptException& e) {
       Logger::getInstance()->log("PropertyScriptListener::doOnChange: Caught exception while calling handler: " + std::string(e.what()), lsFatal);
     }
   } // doOnChange

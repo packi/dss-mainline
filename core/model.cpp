@@ -664,7 +664,8 @@ namespace dss {
   : Subsystem(_pDSS, "Apartment"),
     Thread("Apartment"),
     m_IsInitializing(true),
-    m_pPropertyNode()
+    m_pPropertyNode(),
+    m_RescanBusIn(-1)
   { } // ctor
 
   Apartment::~Apartment() {
@@ -728,15 +729,20 @@ namespace dss {
     _zone.addGroup(grp);
   } // addDefaultGroupsToZone
 
-  void Apartment::scanModulator(Modulator& _modulator) {
+  bool Apartment::scanModulator(Modulator& _modulator) {
     DS485Interface& interface = DSS::getInstance()->getDS485Interface();
     int modulatorID = _modulator.getBusID();
 
-    ModulatorSpec_t spec = interface.getModulatorSpec(modulatorID);
-    _modulator.setSoftwareVersion(spec.get<1>());
-    _modulator.setHardwareVersion(spec.get<2>());
-    _modulator.setHardwareName(spec.get<3>());
-    _modulator.setDeviceType(spec.get<4>());
+    try {
+      ModulatorSpec_t spec = interface.getModulatorSpec(modulatorID);
+      _modulator.setSoftwareVersion(spec.get<1>());
+      _modulator.setHardwareVersion(spec.get<2>());
+      _modulator.setHardwareName(spec.get<3>());
+      _modulator.setDeviceType(spec.get<4>());
+    } catch(std::runtime_error& e) {
+      log(std::string("scanModulator: Error getting modulator spec: ") + e.what(), lsFatal);
+      return false;
+    }
 
     int levelOrange, levelRed;
     if(interface.getEnergyBorder(modulatorID, levelOrange, levelRed)) {
@@ -755,6 +761,10 @@ namespace dss {
       vector<int> devices = interface.getDevicesInZone(modulatorID, zoneID);
       foreach(int devID, devices) {
         dsid_t dsid = interface.getDSIDOfDevice(modulatorID, devID);
+        if(dsid == NullDSID) {
+          log("scanModulator: Error getting DSID of device " + intToString(devID) + " on modulator " + _modulator.getDSID().toString(), lsFatal);
+          continue;
+        }
         vector<int> results = interface.sendCommand(cmdGetFunctionID, devID, modulatorID);
         int functionID = 0;
         if(results.size() == 1) {
@@ -816,6 +826,7 @@ namespace dss {
         }
       }
     }
+    return true;
   } // scanModulator
 
   class SetNotPresentAction : public IDeviceAction {
@@ -842,6 +853,11 @@ namespace dss {
       int modulatorID = modulatorSpec.get<0>();
       log("Found modulator with id: " + intToString(modulatorID));
       dsid_t modDSID = interface.getDSIDOfModulator(modulatorID);
+      if(modDSID == NullDSID) {
+        log("Could not get DSID of modulator with last known bus-id: " + intToString(modulatorID), lsFatal);
+        scheduleRescan();
+        continue;
+      }
       log("  DSID: " + modDSID.toString());
       Modulator& modulator = allocateModulator(modDSID);
       log("Marking modulator as present");
@@ -855,9 +871,16 @@ namespace dss {
       log("Found modulator with id: " + intToString(modulatorID));
       dsid_t modDSID = interface.getDSIDOfModulator(modulatorID);
       log("  DSID: " + modDSID.toString());
+      if(modDSID == NullDSID) {
+        log("Could not get DSID of modulator with last known bus-id: " + intToString(modulatorID), lsFatal);
+        scheduleRescan();
+        continue;
+      }
       Modulator& modulator = allocateModulator(modDSID);
       modulator.setBusID(modulatorID);
-      scanModulator(modulator);
+      if(!scanModulator(modulator)) {
+        scheduleRescan();
+      }
     }
 
     // mark devices of absent modulators as not present
@@ -881,6 +904,11 @@ namespace dss {
       log("Found modulator with id: " + intToString(modulatorID));
       dsid_t modDSID = interface.getDSIDOfModulator(modulatorID);
       log("  DSID: " + modDSID.toString());
+      if(modDSID == NullDSID) {
+        log("Could not get DSID of modulator with last known bus-id: " + intToString(modulatorID), lsFatal);
+        scheduleRescan();
+        continue;
+      }
       Modulator& modulator = allocateModulator(modDSID);
       modulator.setBusID(modulatorID);
     }
@@ -965,8 +993,23 @@ namespace dss {
       m_ModelEventsMutex.unlock();
     } else {
       m_NewModelEvent.waitFor(1000);
+      if(m_RescanBusIn > 0) {
+        m_RescanBusIn--;
+      }
+      if(m_RescanBusIn == 0) {
+        m_RescanBusIn = -1;
+        initializeFromBus();
+      }
     }
   } // handleModelEvents
+
+  void Apartment::scheduleRescan() {
+    const int kBusRescanTimeSeconds = 10;
+    if(m_RescanBusIn <= 0) {
+      m_RescanBusIn = kBusRescanTimeSeconds;
+      log("Rescanning bus in " + intToString(kBusRescanTimeSeconds) + " seconds", lsInfo);
+    }
+  }
 
   void Apartment::execute() {
     // load devices/modulators/etc. from a config-file

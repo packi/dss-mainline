@@ -770,6 +770,7 @@ namespace dss {
     boost::ptr_vector<ModelEvent> m_ModelEvents;
     Mutex m_ModelEventsMutex;
     SyncEvent m_NewModelEvent;
+    int m_RescanBusIn;
   private:
     void loadDevices(XMLNode& _node);
     void loadModulators(XMLNode& _node);
@@ -780,11 +781,12 @@ namespace dss {
     /** Starts the event-processing */
     virtual void execute();
     void initializeFromBus();
-    void scanModulator(Modulator& _modulator);
+    bool scanModulator(Modulator& _modulator);
     void handleModelEvents();
     void newModulator(int _modulatorBusID);
     void lostModulator(int _modulatorBusID);
     void modulatorReady(int _modulatorBusID);
+    void scheduleRescan();
   protected:
     virtual void doStart();
   public:

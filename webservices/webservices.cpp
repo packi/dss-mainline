@@ -196,7 +196,7 @@ namespace dss {
               )
           );
       if(pPlugin == NULL) {
-        throw new std::runtime_error("Need EventInterpreterInternalRelay to be registered");
+        throw std::runtime_error("Need EventInterpreterInternalRelay to be registered");
       }
       m_pEventListener.reset(new WebServiceEventListener(*pPlugin));
     }

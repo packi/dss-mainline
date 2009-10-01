@@ -1048,7 +1048,7 @@ namespace dss {
       ++iCreator;
     }
     Logger::getInstance()->log(string("Could not find creator for DSID type '") + _identifier + "'");
-    throw new runtime_error(string("Could not find creator for DSID type '") + _identifier + "'");
+    throw runtime_error(string("Could not find creator for DSID type '") + _identifier + "'");
   } // createDSID
 
   void DSIDFactory::registerCreator(DSIDCreator* _creator) {
