@@ -178,6 +178,8 @@ namespace dss {
       .withDocumentation("Returns a session token");
     clsApartment.addMethod("getCircuits")
       .withDocumentation("Returns a list of the circuits present in the apartment");
+    clsApartment.addMethod("rescan")
+      .withDocumentation("Rescans all circuits of the apartment");
 
     RestfulClass& clsZone = api.addClass("zone")
         .withInstanceParameter("id", "integer", false)
@@ -322,6 +324,8 @@ namespace dss {
        .withDocumentation("Returns the consumption of all connected devices in mW");
     clsCircuit.addMethod("getEnergyMeterValue")
        .withDocumentation("Returns the meter-value in Wh");
+    clsCircuit.addMethod("rescan")
+       .withDocumentation("Rescans the circuit");
 
     RestfulClass& clsProp = api.addClass("property")
         .withInstanceParameter("path", "string", true);
@@ -827,6 +831,9 @@ namespace dss {
       } else if(endsWith(_method, "/setName")) {
         getDSS().getApartment().setName(_parameter["newName"]);
         result = ResultToJSON(true);
+      } else if(endsWith(_method, "/rescan")) {
+        getDSS().getApartment().initializeFromBus();
+        result = ResultToJSON(true);
       } else {
         _handled = false;
       }
@@ -1096,6 +1103,13 @@ namespace dss {
         return JSONOk("{ " + ToJSONValue("consumption") + ": " +  uintToString(modulator.getPowerConsumption()) +"}");
       } else if(endsWith(_method, "/getEnergyMeterValue")) {
         return JSONOk("{ " + ToJSONValue("metervalue") + ": " +  uintToString(modulator.getEnergyMeterValue()) +"}");
+      } else if(endsWith(_method, "/rescan")) {
+        try {
+          getDSS().getApartment().scanModulator(modulator);
+          return ResultToJSON(true);
+        } catch(std::runtime_error& err) {
+          return ResultToJSON(false, err.what());
+        }
       } else {
         _handled = false;
       }

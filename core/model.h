@@ -780,8 +780,6 @@ namespace dss {
     void addDefaultGroupsToZone(Zone& _zone);
     /** Starts the event-processing */
     virtual void execute();
-    void initializeFromBus();
-    bool scanModulator(Modulator& _modulator);
     void handleModelEvents();
     void newModulator(int _modulatorBusID);
     void lostModulator(int _modulatorBusID);
@@ -849,6 +847,9 @@ namespace dss {
 
     /** Returns wheter the apartment is still initializing or already running. */
     bool isInitializing() const { return m_IsInitializing; }
+
+    void initializeFromBus();
+    bool scanModulator(Modulator& _modulator);
   public:
 
     /** Returns the root-node for the apartment tree */
