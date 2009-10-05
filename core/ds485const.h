@@ -170,6 +170,24 @@ namespace dss {
   const int FunctionIDSwitch = 1;
 
   const uint64_t DSIDHeader = 0x3504175FE0000000ll;
+
+  // error codes as received by the modulator
+  const int kDS485Ok = 1;
+  const int kDS485NoIDForIndexFound = -1;
+  const int kDS485ZoneNotFound = -2;
+  const int kDS485IndexOutOfBounds = -3;
+  const int kDS485GroupIDOutOfBounds = -4;
+  const int kDS485ZoneCannotBeDeleted = -5;
+  const int kDS485OutOfMemory = -6;
+  const int kDS485RoomAlreadyExists = -7;
+  const int kDS485InvalidDeviceID = -8;
+  const int kDS485CannotRemoveFromStandardGroup = -9;
+  const int kDS485CannotDeleteStandardGroup = -10;
+  const int kDS485DSIDIsNull = -11;
+  const int kDS485ReservedRoomNumber = -15;
+  const int kDS485DeviceNotFound = -16;
+  const int kDS485GroupNotFound = -18;
+
 }
 
 #endif /*DS485CONST_H_*/
