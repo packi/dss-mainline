@@ -309,7 +309,7 @@ const char* DataDirectory = "data/";
       }
       default: {
         std::ostringstream ostr;
-        ostr << "DSS::handleSignal(): unhandled signal " << _signum << endl;
+        ostr << "DSS::handleSignal(): unhandled signal " << _signum << std::endl;
         Logger::getInstance()->log(ostr.str(), lsWarning);
         break;
       }
