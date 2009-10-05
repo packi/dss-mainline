@@ -125,6 +125,12 @@ int dss__ApartmentCallScene(int _token, int _groupID, int _sceneNr, bool& result
 /** Saves the scene _sceneNr on all devices contained int the group _groupID. */
 int dss__ApartmentSaveScene(int _token, int _groupID, int _sceneNr, bool& result);
 
+/** Rescans the bus for new devices/circuits */
+int dss__ApartmentRescan(int _token, bool& result);
+
+//--------------------------- Circuit
+/** Rescans the circuit for new/lost devices */
+int dss__CircuitRescan(int _token, char* _dsid, bool& result);
 
 //--------------------------- Zone
 

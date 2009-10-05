@@ -419,7 +419,46 @@ int dss__ApartmentGetZoneIDs(struct soap *soap, int _token, std::vector<int>& zo
   }
 
   return SOAP_OK;
-}
+} // dss__ApartmentGetZoneIDs
+
+int dss__ApartmentRescan(struct soap *soap, int _token, bool& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+
+  dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
+  apt.initializeFromBus();
+
+  return SOAP_OK;
+} // dss__ApartmentRescan
+
+//==================================================== Circuit
+
+int dss__CircuitRescan(struct soap *soap, int _token, char* _dsid, bool& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+
+  dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
+  dss::dsid_t dsid;
+  try {
+    dsid = dss::dsid_t::fromString(_dsid);
+  } catch(std::invalid_argument&) {
+    return soap_sender_fault(soap, "Error parsing dsid", NULL);
+  }
+  try {
+    dss::Modulator& mod = apt.getModulatorByDSID(dsid);
+    try {
+      result = apt.scanModulator(mod);
+    } catch(std::runtime_error&) {
+      soap_receiver_fault(soap, "Error scanning bus", NULL);
+    }
+  } catch(dss::ItemNotFoundException&) {
+    return soap_sender_fault(soap, "Could not find modulator", NULL);
+  }
+
+  return SOAP_OK;
+} // dss__CircuitRescan
 
 
 //==================================================== Manipulation

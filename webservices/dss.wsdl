@@ -749,6 +749,39 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="ApartmentRescan">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ApartmentRescanResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="CircuitRescan">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="dsid" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="CircuitRescanResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="ZoneTurnOn">
    <complexType>
     <sequence>
@@ -1971,6 +2004,22 @@
  <part name="parameters" element="dss:ApartmentSaveSceneResponse"/>
 </message>
 
+<message name="ApartmentRescanRequest">
+ <part name="parameters" element="dss:ApartmentRescan"/>
+</message>
+
+<message name="ApartmentRescanResponse">
+ <part name="parameters" element="dss:ApartmentRescanResponse"/>
+</message>
+
+<message name="CircuitRescanRequest">
+ <part name="parameters" element="dss:CircuitRescan"/>
+</message>
+
+<message name="CircuitRescanResponse">
+ <part name="parameters" element="dss:CircuitRescanResponse"/>
+</message>
+
 <message name="ZoneTurnOnRequest">
  <part name="parameters" element="dss:ZoneTurnOn"/>
 </message>
@@ -2576,6 +2625,16 @@
   <documentation>Service definition of function dss__ApartmentSaveScene</documentation>
   <input message="tns:ApartmentSaveSceneRequest"/>
   <output message="tns:ApartmentSaveSceneResponse"/>
+ </operation>
+ <operation name="ApartmentRescan">
+  <documentation>Service definition of function dss__ApartmentRescan</documentation>
+  <input message="tns:ApartmentRescanRequest"/>
+  <output message="tns:ApartmentRescanResponse"/>
+ </operation>
+ <operation name="CircuitRescan">
+  <documentation>Service definition of function dss__CircuitRescan</documentation>
+  <input message="tns:CircuitRescanRequest"/>
+  <output message="tns:CircuitRescanResponse"/>
  </operation>
  <operation name="ZoneTurnOn">
   <documentation>Service definition of function dss__ZoneTurnOn</documentation>
@@ -3192,6 +3251,24 @@
   </output>
  </operation>
  <operation name="ApartmentSaveScene">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="ApartmentRescan">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="CircuitRescan">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

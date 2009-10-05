@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2009-09-22 13:48:12 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2009-10-05 14:18:40 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -155,6 +155,10 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__ApartmentCallScene(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentSaveScene"))
 		return soap_serve_dss__ApartmentSaveScene(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentRescan"))
+		return soap_serve_dss__ApartmentRescan(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:CircuitRescan"))
+		return soap_serve_dss__CircuitRescan(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ZoneTurnOn"))
 		return soap_serve_dss__ZoneTurnOn(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ZoneTurnOff"))
@@ -1933,6 +1937,88 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentSaveScene(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__ApartmentSaveSceneResponse(soap, &soap_tmp_dss__ApartmentSaveSceneResponse, "dss:ApartmentSaveSceneResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentRescan(struct soap *soap)
+{	struct dss__ApartmentRescan soap_tmp_dss__ApartmentRescan;
+	struct dss__ApartmentRescanResponse soap_tmp_dss__ApartmentRescanResponse;
+	soap_default_dss__ApartmentRescanResponse(soap, &soap_tmp_dss__ApartmentRescanResponse);
+	soap_default_dss__ApartmentRescan(soap, &soap_tmp_dss__ApartmentRescan);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__ApartmentRescan(soap, &soap_tmp_dss__ApartmentRescan, "dss:ApartmentRescan", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__ApartmentRescan(soap, soap_tmp_dss__ApartmentRescan._token, soap_tmp_dss__ApartmentRescanResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__ApartmentRescanResponse(soap, &soap_tmp_dss__ApartmentRescanResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__ApartmentRescanResponse(soap, &soap_tmp_dss__ApartmentRescanResponse, "dss:ApartmentRescanResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__ApartmentRescanResponse(soap, &soap_tmp_dss__ApartmentRescanResponse, "dss:ApartmentRescanResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__CircuitRescan(struct soap *soap)
+{	struct dss__CircuitRescan soap_tmp_dss__CircuitRescan;
+	struct dss__CircuitRescanResponse soap_tmp_dss__CircuitRescanResponse;
+	soap_default_dss__CircuitRescanResponse(soap, &soap_tmp_dss__CircuitRescanResponse);
+	soap_default_dss__CircuitRescan(soap, &soap_tmp_dss__CircuitRescan);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__CircuitRescan(soap, &soap_tmp_dss__CircuitRescan, "dss:CircuitRescan", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__CircuitRescan(soap, soap_tmp_dss__CircuitRescan._token, soap_tmp_dss__CircuitRescan._dsid, soap_tmp_dss__CircuitRescanResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__CircuitRescanResponse(soap, &soap_tmp_dss__CircuitRescanResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__CircuitRescanResponse(soap, &soap_tmp_dss__CircuitRescanResponse, "dss:CircuitRescanResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__CircuitRescanResponse(soap, &soap_tmp_dss__CircuitRescanResponse, "dss:CircuitRescanResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

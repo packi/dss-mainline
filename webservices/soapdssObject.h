@@ -126,6 +126,10 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCallScene(struct soap*, int _token, int 
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentSaveScene(struct soap*, int _token, int _groupID, int _sceneNr, bool &result);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentRescan(struct soap*, int _token, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__CircuitRescan(struct soap*, int _token, char *_dsid, bool &result);
+
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneTurnOn(struct soap*, int _token, int _zoneID, int _groupID, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneTurnOff(struct soap*, int _token, int _zoneID, int _groupID, bool &result);
