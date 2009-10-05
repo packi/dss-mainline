@@ -19,8 +19,8 @@
 
 */
 
-#ifndef LOGGER_H_INLUDED
-#define LOGGER_H_INLUDED
+#ifndef LOGGER_H_INCLUDED
+#define LOGGER_H_INCLUDED
 
 #include <string>
 #include <ostream>
