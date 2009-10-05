@@ -25,6 +25,7 @@
 #include "ds485types.h"
 #include "unix/ds485.h"
 #include "model.h"
+#include "base.h"
 
 #include <string>
 #include <vector>
@@ -143,5 +144,12 @@ namespace dss {
     
     virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) = 0;
   };
+
+  class DS485ApiError : public DSSException {
+  public:
+    DS485ApiError(const std::string& _what)
+    : DSSException(_what) {}
+  }; // DS485ApiError
+
 }
 #endif /* DS485INTERFACE_H_ */

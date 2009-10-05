@@ -33,9 +33,9 @@ namespace dss {
     bool m_Dimming;
     time_t m_DimmStartTime;
     bool m_DimmingUp;
-    vector<int> m_Parameters;
+    std::vector<int> m_Parameters;
     DSModulatorSim* m_Modulator;
-    vector<uint8_t> m_ValuesForScene;
+    std::vector<uint8_t> m_ValuesForScene;
     uint8_t m_CurrentValue;
     int m_DimTimeMS;
     int m_SimpleConsumption;
@@ -64,8 +64,8 @@ namespace dss {
 
     virtual uint16_t getFunctionID();
     void setSimpleConsumption(const int _value) { m_SimpleConsumption = _value; }
-    virtual void setConfigParameter(const string& _name, const string& _value);
-    virtual string getConfigParameter(const string& _name) const;
+    virtual void setConfigParameter(const std::string& _name, const std::string& _value);
+    virtual std::string getConfigParameter(const std::string& _name) const;
   }; // DSIDSim
 
 

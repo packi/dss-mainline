@@ -67,14 +67,14 @@ namespace dss {
   void DSIDSim::increaseValue(const int _parameterNr) {
     if(m_Enabled) {
       m_CurrentValue += 10;
-      m_CurrentValue = min((uint8_t)0xff, m_CurrentValue);
+      m_CurrentValue = std::min((uint8_t)0xff, m_CurrentValue);
     }
   } // increaseValue
 
   void DSIDSim::decreaseValue(const int _parameterNr) {
     if(m_Enabled) {
       m_CurrentValue -= 10;
-      m_CurrentValue = max((uint8_t)0, m_CurrentValue);
+      m_CurrentValue = std::max((uint8_t)0, m_CurrentValue);
     }
   } // decreaseValue
 
@@ -99,16 +99,16 @@ namespace dss {
       time_t now;
       time(&now);
       if(m_DimmingUp) {
-        m_CurrentValue = static_cast<int>(max(m_CurrentValue + difftime(m_DimmStartTime, now) * 5, 255.0));
+        m_CurrentValue = int(std::max(m_CurrentValue + difftime(m_DimmStartTime, now) * 5, 255.0));
       } else {
-        m_CurrentValue = static_cast<int>(min(m_CurrentValue - difftime(m_DimmStartTime, now) * 5, 255.0));
+        m_CurrentValue = int(std::min(m_CurrentValue - difftime(m_DimmStartTime, now) * 5, 255.0));
       }
     }
   } // endDim
 
   void DSIDSim::setValue(const double _value, int _parameterNr) {
     if(m_Enabled) {
-      m_CurrentValue = static_cast<int>(_value);
+      m_CurrentValue = int(_value);
     }
   } // setValue
 
@@ -120,11 +120,11 @@ namespace dss {
     return FunctionIDDevice;
   } // getFunctionID
 
-  void DSIDSim::setConfigParameter(const string& _name, const string& _value) {
+  void DSIDSim::setConfigParameter(const std::string& _name, const std::string& _value) {
     m_ConfigParameter.set(_name, _value);
   } // setConfigParameter
 
-  string DSIDSim::getConfigParameter(const string& _name) const {
+  std::string DSIDSim::getConfigParameter(const std::string& _name) const {
     return m_ConfigParameter.get(_name, "");
   } // getConfigParameter
 

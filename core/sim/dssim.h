@@ -40,12 +40,12 @@ namespace dss {
 
   class DSIDCreator {
   private:
-    string m_Identifier;
+    std::string m_Identifier;
   public:
-    DSIDCreator(const string& _identifier);
+    DSIDCreator(const std::string& _identifier);
     virtual ~DSIDCreator() {};
 
-    const string& getIdentifier() const { return m_Identifier; }
+    const std::string& getIdentifier() const { return m_Identifier; }
     virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) = 0;
   };
 
@@ -53,7 +53,7 @@ namespace dss {
   private:
     boost::ptr_vector<DSIDCreator> m_RegisteredCreators;
   public:
-    DSIDInterface* createDSID(const string& _identifier, const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator);
+    DSIDInterface* createDSID(const std::string& _identifier, const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator);
 
     void registerCreator(DSIDCreator* _creator);
   };
@@ -86,7 +86,7 @@ namespace dss {
     DSIDInterface* getSimulatedDevice(const dsid_t& _dsid);
   }; // DSSim
 
-  typedef std::map< const pair<const int, const int>,  std::vector<DSIDInterface*> > IntPairToDSIDSimVector;
+  typedef std::map< const std::pair<const int, const int>,  std::vector<DSIDInterface*> > IntPairToDSIDSimVector;
 
   class DSModulatorSim {
   private:
@@ -102,9 +102,9 @@ namespace dss {
     std::map<const DSIDInterface*, int> m_ButtonToGroupMapping;
     std::map<const DSIDInterface*, int> m_DeviceZoneMapping;
     std::map<const int, std::vector<int> > m_GroupsPerDevice;
-    std::map<const int, string> m_DeviceNames;
-    std::map< const pair<const int, const int>, int> m_LastCalledSceneForZoneAndGroup;
-    string m_Name;
+    std::map<const int, std::string> m_DeviceNames;
+    std::map< const std::pair<const int, const int>, int> m_LastCalledSceneForZoneAndGroup;
+    std::string m_Name;
   private:
     void addDeviceToGroup(DSIDInterface* _device, int _groupID);
     void loadDevices(XMLNodeList& _nodes, const int _zoneID);
@@ -131,7 +131,7 @@ namespace dss {
     void groupSetValue(const int _zoneID, const int _groupID, const int _value);
   protected:
     virtual void doStart() {}
-    void log(const string& _message, aLogSeverity _severity = lsDebug);
+    void log(const std::string& _message, aLogSeverity _severity = lsDebug);
   public:
     DSModulatorSim(DSSim* _pSimulator);
     virtual ~DSModulatorSim() {}
@@ -188,12 +188,15 @@ namespace dss {
 
     virtual uint16_t getFunctionID() = 0;
 
-    virtual void setConfigParameter(const string& _name, const string& _value) = 0;
-    virtual string getConfigParameter(const string& _name) const = 0;
+    virtual void setConfigParameter(const std::string& _name, const std::string& _value) = 0;
+    virtual std::string getConfigParameter(const std::string& _name) const = 0;
 
     virtual void setZoneID(const int _value) { m_ZoneID = _value; }
     virtual int getZoneID() const { return m_ZoneID; }
-    virtual uint8_t dsLinkSend(uint8_t _value, uint8_t _flags) { return 0; }
+    virtual uint8_t dsLinkSend(uint8_t _value, uint8_t _flags, bool& _handled) {
+      _handled = false;
+      return 0;
+    }
 
     /** Signals the modulator that a interrupt has occurred */
     void dSLinkInterrupt() {

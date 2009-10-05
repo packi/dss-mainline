@@ -29,8 +29,6 @@
 #include <signal.h>
 #endif
 
-using namespace std;
-
 namespace dss {
 
 #ifndef WIN32
@@ -44,7 +42,7 @@ ThreadStarterHelperFunc( void* _pThreadObj ) {
 	thObj->execute();
 
   if(thObj->getThreadIdentifier() != NULL) {
-    Logger::getInstance()->log(string("Destroying thread: ") + thObj->getThreadIdentifier());
+    Logger::getInstance()->log(std::string("Destroying thread: ") + thObj->getThreadIdentifier());
   } else {
     Logger::getInstance()->log("Destroying thread: (no name)");
   }
@@ -79,7 +77,7 @@ bool Thread::run() {
   assert( !m_Running );
   m_Running = true;
   if( m_Name != NULL ) {
-    Logger::getInstance()->log(string("creating thread for \"") + m_Name + "\"");
+    Logger::getInstance()->log(std::string("creating thread for \"") + m_Name + "\"");
   }
 #ifndef WIN32
   pthread_create( &m_ThreadHandle, NULL, ThreadStarterHelperFunc, this );

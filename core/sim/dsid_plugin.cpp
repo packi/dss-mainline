@@ -153,10 +153,12 @@ namespace dss {
       return "";
     } // getConfigParameter
 
-    virtual uint8_t dsLinkSend(uint8_t _value, uint8_t _flags) {
+    virtual uint8_t dsLinkSend(uint8_t _value, uint8_t _flags, bool _handled) {
       if(m_Interface->udi_send != NULL) {
+        _handled = true;
         return  (*m_Interface->udi_send)(m_Handle, _value, _flags);
       }
+      _handled = false;
       return 0;
     } // dsLinkSend
 

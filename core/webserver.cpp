@@ -90,7 +90,7 @@ namespace dss {
     WebServerPlugin* plugin = new WebServerPlugin(pURINode->getStringValue(), pFileNode->getStringValue());
     try {
       plugin->load();
-    } catch(runtime_error& e) {
+    } catch(std::runtime_error& e) {
       delete plugin;
       plugin = NULL;
       log(string("Cought exception while loading: ") + e.what(), lsError);
@@ -490,7 +490,7 @@ namespace dss {
   } // toJSONValue(const char*)
 
   string WebServer::ResultToJSON(const bool _ok, const string& _message) {
-    stringstream sstream;
+    std::stringstream sstream;
     sstream << "{ " << ToJSONValue("ok") << ":" << ToJSONValue(_ok);
     if(!_message.empty()) {
       sstream << ", " << ToJSONValue("message") << ":" << ToJSONValue(_message);
@@ -503,7 +503,7 @@ namespace dss {
   } // resultToJSON
 
   string JSONOk(const string& _innerResult = "") {
-    stringstream sstream;
+    std::stringstream sstream;
     sstream << "{ " << ToJSONValue("ok") << ":" << ToJSONValue(true);
     if(!_innerResult.empty()) {
       sstream << ", " << ToJSONValue("result")<<  ": " << _innerResult;
@@ -752,7 +752,7 @@ namespace dss {
         try {
           Group& grp = getDSS().getApartment().getGroup(groupName);
           interface = &grp;
-        } catch(runtime_error& e) {
+        } catch(std::runtime_error& e) {
           errorMessage = "Could not find group with name '" + groupName + "'";
           ok = false;
         }
@@ -766,7 +766,7 @@ namespace dss {
             errorMessage = "Could not parse group id '" + groupIDString + "'";
             ok = false;
           }
-        } catch(runtime_error& e) {
+        } catch(std::runtime_error& e) {
           errorMessage = "Could not find group with ID '" + groupIDString + "'";
           ok = false;
         }
@@ -777,7 +777,7 @@ namespace dss {
         }
         return callDeviceInterface(_method, _parameter, _connection, interface, _session);
       } else {
-        stringstream sstream;
+        std::stringstream sstream;
         sstream << "{ ok: " << ToJSONValue(ok) << ", message: " << ToJSONValue(errorMessage) << " }";
         return sstream.str();
       }
@@ -799,7 +799,7 @@ namespace dss {
         m_Sessions[token] = Session(token);
         return "{" + ToJSONValue("token") + ": " + ToJSONValue(token) + "}";
       } else if(endsWith(_method, "/getCircuits")) {
-        stringstream sstream;
+        std::stringstream sstream;
         sstream << "{ " << ToJSONValue("circuits") << ": [";
         bool first = true;
         vector<Modulator*>& modulators = getDSS().getApartment().getModulators();
@@ -821,7 +821,7 @@ namespace dss {
         sstream << "]}";
         return JSONOk(sstream.str());
       } else if(endsWith(_method, "/getName")) {
-        stringstream sstream;
+        std::stringstream sstream;
         sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(getDSS().getApartment().getName()) << "}";
         return JSONOk(sstream.str());
       } else if(endsWith(_method, "/setName")) {
@@ -847,7 +847,7 @@ namespace dss {
         try {
           Zone& zone = getDSS().getApartment().getZone(zoneID);
           pZone = &zone;
-        } catch(runtime_error& e) {
+        } catch(std::runtime_error& e) {
           ok = false;
           errorMessage = "Could not find zone with id '" + zoneIDString + "'";
         }
@@ -859,7 +859,7 @@ namespace dss {
       try {
         Zone& zone = getDSS().getApartment().getZone(zoneName);
         pZone = &zone;
-      } catch(runtime_error& e) {
+      } catch(std::runtime_error& e) {
         ok = false;
         errorMessage = "Could not find zone named '" + zoneName + "'";
       }
@@ -876,9 +876,9 @@ namespace dss {
           pGroup = pZone->getGroup(groupName);
           if(pGroup == NULL) {
             // TODO: this might better be done by the zone
-            throw runtime_error("dummy");
+            throw std::runtime_error("dummy");
           }
-        } catch(runtime_error& e) {
+        } catch(std::runtime_error& e) {
           errorMessage = "Could not find group with name '" + groupName + "'";
           ok = false;
         }
@@ -889,13 +889,13 @@ namespace dss {
             pGroup = pZone->getGroup(groupID);
             if(pGroup == NULL) {
               // TODO: this might better be done by the zone
-              throw runtime_error("dummy");
+              throw std::runtime_error("dummy");
             }
           } else {
             errorMessage = "Could not parse group id '" + groupIDString + "'";
             ok = false;
           }
-        } catch(runtime_error& e) {
+        } catch(std::runtime_error& e) {
           errorMessage = "Could not find group with ID '" + groupIDString + "'";
           ok = false;
         }
@@ -922,11 +922,11 @@ namespace dss {
             // should never reach here because ok, would be false
             assert(false);
           }
-          stringstream sstream;
+          std::stringstream sstream;
           sstream << "{" << ToJSONValue("scene") << ":" << ToJSONValue(lastScene) << "}";
           return JSONOk(sstream.str());
         } else if(endsWith(_method, "/getName")) {
-          stringstream sstream;
+          std::stringstream sstream;
           sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(pZone->getName()) << "}";
           return JSONOk(sstream.str());
         } else if(endsWith(_method, "/setName")) {
@@ -958,7 +958,7 @@ namespace dss {
         try {
           Device& device = getDSS().getApartment().getDeviceByDSID(deviceDSID);
           pDevice = &device;
-        } catch(runtime_error& e) {
+        } catch(std::runtime_error& e) {
           ok = false;
           errorMessage = "Could not find device with dsid '" + deviceDSIDString + "'";
         }
@@ -970,7 +970,7 @@ namespace dss {
       try {
         Device& device = getDSS().getApartment().getDeviceByName(deviceName);
         pDevice = &device;
-      } catch(runtime_error&  e) {
+      } catch(std::runtime_error&  e) {
         ok = false;
         errorMessage = "Could not find device named '" + deviceName + "'";
       }
@@ -983,7 +983,7 @@ namespace dss {
         return callDeviceInterface(_method, _parameter, _connection, pDevice, _session);
       } else if(beginsWith(_method, "device/getGroups")) {
         int numGroups = pDevice->getGroupsCount();
-        stringstream sstream;
+        std::stringstream sstream;
         sstream << "{ " << ToJSONValue("groups") << ": [";
         bool first = true;
         for(int iGroup = 0; iGroup < numGroups; iGroup++) {
@@ -997,7 +997,7 @@ namespace dss {
             if(!group.getName().empty()) {
               sstream << ", " << ToJSONValue("name") << ":" << ToJSONValue(group.getName());
             }
-          } catch (runtime_error&) {
+          } catch(std::runtime_error&) {
             log("Group only present at device level");
           }
           sstream << "}";
@@ -1005,11 +1005,11 @@ namespace dss {
         sstream << "]}";
         return sstream.str();
       } else if(beginsWith(_method, "device/getState")) {
-        stringstream sstream;
+        std::stringstream sstream;
         sstream << "{ " << ToJSONValue("isOn") << ":" << ToJSONValue(pDevice->isOn()) << " }";
         return JSONOk(sstream.str());
       } else if(beginsWith(_method, "device/getName")) {
-        stringstream sstream;
+        std::stringstream sstream;
         sstream << "{ " << ToJSONValue("name") << ":" << ToJSONValue(pDevice->getName()) << " }";
         return JSONOk(sstream.str());
       } else if(beginsWith(_method, "device/setName")) {
@@ -1047,11 +1047,16 @@ namespace dss {
         if(_parameter["lastValue"] == "true") {
           lastValue = true;
         }
-        uint8_t result = pDevice->dsLinkSend(iValue, lastValue, writeOnly);
+        uint8_t result;
+        try {
+          result = pDevice->dsLinkSend(iValue, lastValue, writeOnly);
+        } catch(std::runtime_error& e) {
+          return ResultToJSON(false, std::string("Error: ") + e.what());
+        }
         if(writeOnly) {
           return ResultToJSON(true);
         } else {
-          stringstream sstream;
+          std::stringstream sstream;
           sstream << "{" << ToJSONValue("value") << ":" << ToJSONValue(result) << "}";
           return JSONOk(sstream.str());
         }
@@ -1082,7 +1087,7 @@ namespace dss {
         modulator.setName(_parameter["newName"]);
         return ResultToJSON(true);
       } else if(endsWith(_method, "circuit/getEnergyBorder")) {
-        stringstream sstream;
+        std::stringstream sstream;
         sstream << "{" << ToJSONValue("orange") << ":" << ToJSONValue(modulator.getEnergyLevelOrange());
         sstream << "," << ToJSONValue("red") << ":" << ToJSONValue(modulator.getEnergyLevelRed());
         sstream << "}";
@@ -1094,7 +1099,7 @@ namespace dss {
       } else {
         _handled = false;
       }
-    } catch(runtime_error&) {
+    } catch(std::runtime_error&) {
       return ResultToJSON(false, "could not find modulator with given dsid");
     }
     return "";
@@ -1215,7 +1220,7 @@ namespace dss {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
       try {
-        stringstream sstream;
+        std::stringstream sstream;
         sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getStringValue()) << "}";
         return JSONOk(sstream.str());
       } catch(PropertyTypeMismatch& ex) {
@@ -1226,7 +1231,7 @@ namespace dss {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
       try {
-        stringstream sstream;
+        std::stringstream sstream;
         sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getIntegerValue()) << "}";
         return JSONOk(sstream.str());
       } catch(PropertyTypeMismatch& ex) {
@@ -1237,7 +1242,7 @@ namespace dss {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
       try {
-        stringstream sstream;
+        std::stringstream sstream;
         sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getBoolValue()) << "}";
         return JSONOk(sstream.str());
       } catch(PropertyTypeMismatch& ex) {
@@ -1294,7 +1299,7 @@ namespace dss {
       if(node == NULL) {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
-      stringstream sstream;
+      std::stringstream sstream;
       sstream << "[";
       bool first = true;
       for(int iChild = 0; iChild < node->getChildCount(); iChild++) {
@@ -1313,7 +1318,7 @@ namespace dss {
       if(node == NULL) {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
-      stringstream sstream;
+      std::stringstream sstream;
       sstream << ":" << ToJSONValue("type") << ":" << ToJSONValue(getValueTypeAsString(node->getValueType())) << "}";
       return JSONOk(sstream.str());
     } else {
@@ -1375,7 +1380,7 @@ namespace dss {
             } catch(ItemNotFoundException&) {
               return ResultToJSON(false, "Could not find zone");
             }
-          } catch(runtime_error&) {
+          } catch(std::runtime_error&) {
             ok = false;
           }
         }
@@ -1468,7 +1473,7 @@ namespace dss {
           default:
             return ResultToJSON(false, "Invalid button nr (range is 1..9)");
           }
-        } catch(runtime_error&) {
+        } catch(std::runtime_error&) {
           return ResultToJSON(false, "Could not find zone");
         }
       } else {
@@ -1509,10 +1514,10 @@ namespace dss {
       frame->setCommand(command);
       for(int iByte = 0; iByte < length; iByte++) {
         uint8_t byte = strToIntDef(_parameter[string("payload_") + intToString(iByte+1)], 0xFF);
-        cout << "b" << dec << iByte << ": " << hex << (int)byte << "\n";
+        std::cout << "b" << std::dec << iByte << ": " << std::hex << (int)byte << "\n";
         frame->getPayload().add<uint8_t>(byte);
       }
-      cout << dec <<"done" << endl;
+      std::cout << std::dec << "done" << std::endl;
       DS485Interface* intf = &DSS::getInstance()->getDS485Interface();
       DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
       if(proxy != NULL) {
@@ -1531,7 +1536,7 @@ namespace dss {
     if(endsWith(_method, "/getResolutions")) {
       _handled = true;
       std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = getDSS().getMetering().getConfig();
-      stringstream sstream;
+      std::stringstream sstream;
       sstream << "{" << ToJSONValue("resolutions") << ":" << "[";
       for(unsigned int iConfig = 0; iConfig < meteringConfig.size(); iConfig++) {
         boost::shared_ptr<MeteringConfigChain> cConfig = meteringConfig[iConfig];
@@ -1548,7 +1553,7 @@ namespace dss {
       return JSONOk(sstream.str());
     } else if(endsWith(_method, "/getSeries")) {
       _handled = true;
-      stringstream sstream;
+      std::stringstream sstream;
       sstream << "{ " << ToJSONValue("series") << ": [";
       bool first = true;
       vector<Modulator*>& modulators = getDSS().getApartment().getModulators();
@@ -1582,7 +1587,7 @@ namespace dss {
         if(!(deviceDSID == NullDSID)) {
           try {
             getDSS().getApartment().getModulatorByDSID(deviceDSID);
-          } catch(runtime_error& e) {
+          } catch(std::runtime_error& e) {
             return ResultToJSON(false, "Could not find device with dsid '" + deviceDSIDString + "'");
           }
         } else {
@@ -1627,7 +1632,7 @@ namespace dss {
             boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(seriesPath));
             std::deque<CurrentValue>* values = s->getExpandedValues();
             bool first = true;
-            stringstream sstream;
+            std::stringstream sstream;
             sstream << "{ " ;
             sstream << ToJSONValue("dsmid") << ":" << ToJSONValue(deviceDSIDString) << ",";
             sstream << ToJSONValue("type") << ":" << ToJSONValue(typeString) << ",";

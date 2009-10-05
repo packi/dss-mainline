@@ -25,8 +25,6 @@
 #include <cassert>
 #include <iostream>
 
-using namespace std;
-
 namespace dss {
 
   Logger* Logger::m_Instance = NULL;
@@ -53,8 +51,8 @@ namespace dss {
   } // severityToString<const char*>
 
   template <>
-  const string SeverityToString(const aLogSeverity _severity) {
-    return string(SeverityToString<const char*>(_severity));
+  const std::string SeverityToString(const aLogSeverity _severity) {
+    return std::string(SeverityToString<const char*>(_severity));
   } // severityToString<const string>
 
   template <>
@@ -76,8 +74,8 @@ namespace dss {
   } // severityToString<const wchar_t*>
 
   template <>
-  const wstring SeverityToString(const aLogSeverity _severity) {
-    return wstring(SeverityToString<const wchar_t*>(_severity));
+  const std::wstring SeverityToString(const aLogSeverity _severity) {
+    return std::wstring(SeverityToString<const wchar_t*>(_severity));
   } // severityToString<const wstring>
 
   Logger::Logger()
@@ -100,7 +98,7 @@ namespace dss {
     }
   }
 
-  void Logger::log(const string& _message, const aLogSeverity _severity) {
+  void Logger::log(const std::string& _message, const aLogSeverity _severity) {
     time_t now = time( NULL );
     struct tm t;
 #ifdef WIN32
@@ -108,18 +106,18 @@ namespace dss {
 #else
     localtime_r( &now, &t );
 #endif
-    m_logTarget->outputStream() << "[" << dateToISOString<string>(&t) << "]"
-                                << SeverityToString<const string>(_severity) 
-                                << " " << _message << endl;
+    m_logTarget->outputStream() << "[" << dateToISOString<std::string>(&t) << "]"
+                                << SeverityToString<const std::string>(_severity)
+                                << " " << _message << std::endl;
   } // log
 
   void Logger::log(const char* _message, const aLogSeverity _severity) {
-    log(string(_message), _severity);
+    log(std::string(_message), _severity);
   } // log
 
   void Logger::log(const LogChannel& _channel, const std::string& _message, const aLogSeverity _severity) {
     if(_channel.maylog(_severity)) {
-      log(string("[") + _channel.getName() + "] " + _message, _severity);
+      log(std::string("[") + _channel.getName() + "] " + _message, _severity);
     }
   } // log
 

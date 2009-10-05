@@ -135,7 +135,7 @@ namespace dss {
               modulator = new DSModulatorSim(this);
               modulator->initializeFromNode(node);
               m_Modulators.push_back(modulator);
-            } catch(runtime_error&) {
+            } catch(std::runtime_error&) {
               delete modulator;
             }
           }
@@ -200,7 +200,7 @@ namespace dss {
         }
       }
     } catch(const std::exception& ex) {
-      log(string("Error loading plugins: '") + ex.what() + "'");
+      log(std::string("Error loading plugins: '") + ex.what() + "'");
     }
   } // loadPlugins
 
@@ -323,7 +323,7 @@ namespace dss {
               m_DeviceNames[busid] = iParam.getChildren()[0].getContent();
             }
           }
-        } catch(runtime_error&) {
+        } catch(std::runtime_error&) {
         }
         if(newDSID != NULL) {
           m_SimulatedDevices.push_back(newDSID);
@@ -412,7 +412,7 @@ namespace dss {
 
   void DSModulatorSim::groupCallScene(const int _zoneID, const int _groupID, const int _sceneID) {
 	vector<DSIDInterface*> dsids;
-	m_LastCalledSceneForZoneAndGroup[make_pair(_zoneID, _groupID)] = _sceneID;
+	m_LastCalledSceneForZoneAndGroup[std::make_pair(_zoneID, _groupID)] = _sceneID;
 	if(_groupID == GroupIDBroadcast) {
 	  if(_zoneID == 0) {
 	    dsids = m_SimulatedDevices;
@@ -693,8 +693,8 @@ namespace dss {
             case FunctionModulatorGetZoneIdForInd:
               {
                 uint8_t index = pd.get<uint16_t>();
-                map< const int, std::vector<DSIDInterface*> >::iterator it = m_Zones.begin();
-                advance(it, index);
+                std::map< const int, std::vector<DSIDInterface*> >::iterator it = m_Zones.begin();
+                std::advance(it, index);
                 response = createResponse(cmdFrame, cmdNr);
                 response->getPayload().add<uint16_t>(it->first);
                 distributeFrame(response);
@@ -767,7 +767,7 @@ namespace dss {
                 int zoneID = pd.get<uint16_t>();
                 int groupID = pd.get<uint16_t>();
                 response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(m_LastCalledSceneForZoneAndGroup[make_pair(zoneID, groupID)]);
+                response->getPayload().add<uint16_t>(m_LastCalledSceneForZoneAndGroup[std::make_pair(zoneID, groupID)]);
                 distributeFrame(response);
               }
               break;
@@ -893,7 +893,7 @@ namespace dss {
                 uint16_t zoneID = pd.get<uint16_t>();
                 response = createResponse(cmdFrame, cmdNr);
                 bool isValid = true;
-                for(map< const int, std::vector<DSIDInterface*> >::iterator iZoneEntry = m_Zones.begin(), e = m_Zones.end();
+                for(std::map< const int, std::vector<DSIDInterface*> >::iterator iZoneEntry = m_Zones.begin(), e = m_Zones.end();
                     iZoneEntry != e; ++iZoneEntry)
                 {
                   if(iZoneEntry->first == zoneID) {
@@ -942,8 +942,9 @@ namespace dss {
                 uint16_t valueToSend = pd.get<uint16_t>();
                 uint16_t flags = pd.get<uint16_t>();    
                 
-                uint8_t value = dev.dsLinkSend(valueToSend, flags);
-                if((flags & DSLinkSendWriteOnly) == 0) {
+                bool handled = false;
+                uint8_t value = dev.dsLinkSend(valueToSend, flags, handled);
+                if(handled && ((flags & DSLinkSendWriteOnly) == 0)) {
                   response = createReply(cmdFrame);
                   response->setCommand(CommandRequest);
                   response->getPayload().add<uint8_t>(FunctionDSLinkReceive);
@@ -959,8 +960,8 @@ namespace dss {
           }
         }
       }
-    } catch(runtime_error& e) {
-      Logger::getInstance()->log(string("DSModulatorSim: Exeption while processing packet. Message: '") + e.what() + "'");
+    } catch(std::runtime_error& e) {
+      Logger::getInstance()->log(std::string("DSModulatorSim: Exeption while processing packet. Message: '") + e.what() + "'");
     }
   } // process
 
@@ -1009,7 +1010,7 @@ namespace dss {
         return **ipSimDev;
       }
     }
-    throw runtime_error(string("could not find device with id: ") + intToString(_shortAddress));
+    throw std::runtime_error(std::string("could not find device with id: ") + intToString(_shortAddress));
   } // lookupDevice
 
   int DSModulatorSim::getID() const {
@@ -1047,8 +1048,8 @@ namespace dss {
       }
       ++iCreator;
     }
-    Logger::getInstance()->log(string("Could not find creator for DSID type '") + _identifier + "'");
-    throw runtime_error(string("Could not find creator for DSID type '") + _identifier + "'");
+    Logger::getInstance()->log(std::string("Could not find creator for DSID type '") + _identifier + "'");
+    throw std::runtime_error(std::string("Could not find creator for DSID type '") + _identifier + "'");
   } // createDSID
 
   void DSIDFactory::registerCreator(DSIDCreator* _creator) {

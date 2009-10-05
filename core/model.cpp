@@ -66,8 +66,7 @@ namespace dss {
     m_LastCalledScene(SceneOff),
     m_Consumption(0),
     m_pPropertyNode()
-  {
-  }
+  { } // ctor
 
   void Device::publishToPropertyTree() {
     if(m_pPropertyNode == NULL) {
@@ -85,7 +84,7 @@ namespace dss {
         }
       }
     }
-  }
+  } // publishToPropertyTree
 
   void Device::turnOn() {
     DSS::getInstance()->getDS485Interface().sendCommand(cmdTurnOn, *this);
@@ -400,11 +399,11 @@ namespace dss {
   } // undoScene
 
   void Set::nextScene() {
-    throw runtime_error("Not yet implemented");
+    throw std::runtime_error("Not yet implemented");
   } // nextScene
 
   void Set::previousScene() {
-    throw runtime_error("Not yet implemented");
+    throw std::runtime_error("Not yet implemented");
   } // previousScene
 
   void Set::perform(IDeviceAction& _deviceAction) {
@@ -733,16 +732,11 @@ namespace dss {
     DS485Interface& interface = DSS::getInstance()->getDS485Interface();
     int modulatorID = _modulator.getBusID();
 
-    try {
-      ModulatorSpec_t spec = interface.getModulatorSpec(modulatorID);
-      _modulator.setSoftwareVersion(spec.get<1>());
-      _modulator.setHardwareVersion(spec.get<2>());
-      _modulator.setHardwareName(spec.get<3>());
-      _modulator.setDeviceType(spec.get<4>());
-    } catch(std::runtime_error& e) {
-      log(std::string("scanModulator: Error getting modulator spec: ") + e.what(), lsFatal);
-      return false;
-    }
+    ModulatorSpec_t spec = interface.getModulatorSpec(modulatorID);
+    _modulator.setSoftwareVersion(spec.get<1>());
+    _modulator.setHardwareVersion(spec.get<2>());
+    _modulator.setHardwareName(spec.get<3>());
+    _modulator.setDeviceType(spec.get<4>());
 
     int levelOrange, levelRed;
     if(interface.getEnergyBorder(modulatorID, levelOrange, levelRed)) {
@@ -787,31 +781,38 @@ namespace dss {
       vector<int> groupIDs = interface.getGroups(modulatorID, zoneID);
       foreach(int groupID, groupIDs) {
         log("    Found group with id: " + intToString(groupID));
-        vector<int> devingroup = interface.getDevicesInGroup(modulatorID, zoneID, groupID);
+        try {
+          vector<int> devingroup = interface.getDevicesInGroup(modulatorID, zoneID, groupID);
 
-        foreach(int devID, devingroup) {
-          try {
-            log("     Adding device " + intToString(devID) + " to group " + intToString(groupID));
-            Device& dev = getDeviceByShortAddress(_modulator, devID);
-            dev.addToGroup(groupID);
-            if(zone.getGroup(groupID) == NULL) {
-              log("     Adding new group to zone");
-              zone.addGroup(new Group(groupID, zone.getZoneID(), *this));
-            }
-            Group* pGroup = zone.getGroup(groupID);
-            pGroup->setIsPresent(true);
+          foreach(int devID, devingroup) {
             try {
-              Group& group = getGroup(groupID);
-              group.setIsPresent(true);
-            } catch(ItemNotFoundException&) {
-              Group* pGroup = new Group(groupID, 0, *this);
-              getZone(0).addGroup(pGroup);
+              log("     Adding device " + intToString(devID) + " to group " + intToString(groupID));
+              Device& dev = getDeviceByShortAddress(_modulator, devID);
+              dev.addToGroup(groupID);
+              if(zone.getGroup(groupID) == NULL) {
+                log("     Adding new group to zone");
+                zone.addGroup(new Group(groupID, zone.getZoneID(), *this));
+              }
+              Group* pGroup = zone.getGroup(groupID);
               pGroup->setIsPresent(true);
-              log("     Adding new group to zone 0");
+              try {
+                Group& group = getGroup(groupID);
+                group.setIsPresent(true);
+              } catch(ItemNotFoundException&) {
+                Group* pGroup = new Group(groupID, 0, *this);
+                getZone(0).addGroup(pGroup);
+                pGroup->setIsPresent(true);
+                log("     Adding new group to zone 0");
+              }
+            } catch(ItemNotFoundException& e) {
+              log("Could not find device with short-address " + intToString(devID) + " on modulator " + intToString(modulatorID), lsFatal);
             }
-          } catch(ItemNotFoundException& e) {
-            Logger::getInstance()->log("Could not find device with short-address " + intToString(devID) + " on modulator " + intToString(modulatorID), lsFatal);
           }
+        } catch(DS485ApiError& e) {
+          log("Error getting devices from group " + intToString(groupID) +
+              " on zone " + intToString(zoneID) +
+              " on modulator " + intToString(modulatorID) +
+              ". Message: " + e.what(), lsFatal);
         }
 
         // get last called scene for zone, group
@@ -825,7 +826,7 @@ namespace dss {
           } else {
             onGroupCallScene(zoneID, groupID, lastCalledScene);
           }
-        } catch(runtime_error& error) {
+        } catch(DS485ApiError& error) {
           log(string("Error getting last called scene '") + error.what() + "'", lsError);
         }
       }
@@ -882,7 +883,10 @@ namespace dss {
       }
       Modulator& modulator = allocateModulator(modDSID);
       modulator.setBusID(modulatorID);
-      if(!scanModulator(modulator)) {
+      try {
+        scanModulator(modulator);
+      } catch(DS485ApiError& e) {
+        log(std::string("Exception caught while scanning modulator: ") + e.what(), lsFatal);
         scheduleRescan();
       }
     }
@@ -1083,7 +1087,7 @@ namespace dss {
               if(!nameNode.getChildren().empty()) {
                 setName((nameNode.getChildren()[0]).getContent());
               }
-            } catch(runtime_error&) {
+            } catch(std::runtime_error&) {
             }
           }
         }
@@ -1464,10 +1468,10 @@ namespace dss {
           }
         }
       } else {
-        log("OnGroupCallScene: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'");
+        log("OnGroupCallScene: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'", lsError);
       }
     } catch(ItemNotFoundException& e) {
-      log("OnGroupCallScene: Could not find zone with id '" + intToString(_zoneID) + "'");
+      log("OnGroupCallScene: Could not find zone with id '" + intToString(_zoneID) + "'", lsError);
     }
 
   } // onGroupCallScene
@@ -1486,10 +1490,10 @@ namespace dss {
           devRef.getDevice().setLastCalledScene(_sceneID & 0x00ff);
         }
       } catch(ItemNotFoundException& e) {
-        log("OnDeviceCallScene: Could not find device with bus-id '" + intToString(_deviceID) + "' on modulator '" + intToString(_modulatorID) + "' scene:" + intToString(_sceneID));
+        log("OnDeviceCallScene: Could not find device with bus-id '" + intToString(_deviceID) + "' on modulator '" + intToString(_modulatorID) + "' scene:" + intToString(_sceneID), lsError);
       }
     } catch(ItemNotFoundException& e) {
-      log("OnDeviceCallScene: Could not find modulator with bus-id '" + intToString(_modulatorID) + "'");
+      log("OnDeviceCallScene: Could not find modulator with bus-id '" + intToString(_modulatorID) + "'", lsError);
     }
   } // onDeviceCallScene
 
@@ -1511,7 +1515,7 @@ namespace dss {
     try {
       Modulator& oldModulator = getModulatorByBusID(dev.getModulatorID());
       oldModulator.removeDevice(devRef);
-    } catch(runtime_error&) {
+    } catch(std::runtime_error&) {
     }
 
     // remove from old zone
@@ -1519,7 +1523,7 @@ namespace dss {
       Zone& oldZone = getZone(dev.getZoneID());
       oldZone.removeDevice(devRef);
       // TODO: check if the zone is empty on the modulator and remove it in that case
-    } catch(runtime_error&) {
+    } catch(std::runtime_error&) {
     }
 
     // update device
@@ -1595,11 +1599,11 @@ namespace dss {
           log("unknown interrupt mode '" + mode + "'", lsError);
         }
       } catch (ItemNotFoundException& ex) {
-        log("Apartment::onDSLinkInterrupt: Unknown device with ID " + intToString(_devID));
+        log("Apartment::onDSLinkInterrupt: Unknown device with ID " + intToString(_devID), lsFatal);
         return;
       }
     } catch(ItemNotFoundException& ex) {
-      log("Apartment::onDSLinkInterrupt: Unknown Modulator with ID " + intToString(_modID));
+      log("Apartment::onDSLinkInterrupt: Unknown Modulator with ID " + intToString(_modID), lsFatal);
       return;
     }
 
@@ -1684,7 +1688,7 @@ namespace dss {
   		try {
   		  Zone& oldZone = dev.getApartment().getZone(oldZoneID);
   		  oldZone.removeDevice(_device);
-  		} catch(runtime_error&) {
+  		} catch(std::runtime_error&) {
   		}
   	}
     if(!contains(m_Devices, _device)) {

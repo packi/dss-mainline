@@ -36,7 +36,7 @@ namespace dss {
   private:
     int m_LastValue;
     boost::shared_ptr<MeteringConfigChain> m_Config;
-    vector<boost::shared_ptr<Series<CurrentValue> > > m_Series;
+    std::vector<boost::shared_ptr<Series<CurrentValue> > > m_Series;
 
     SerialCom m_SerialCom;
     std::string m_MeteringStorageLocation;

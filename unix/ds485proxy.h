@@ -52,8 +52,6 @@ using namespace stdext;
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/shared_ptr.hpp>
 
-using namespace std;
-
 namespace dss {
 
   class DS485Proxy;
@@ -99,7 +97,7 @@ namespace dss {
     */
   class FrameBucketCollector : public FrameBucketBase {
   private:
-    deque<boost::shared_ptr<ReceivedFrame> > m_Frames;
+    std::deque<boost::shared_ptr<ReceivedFrame> > m_Frames;
     SyncEvent m_PacketHere;
     Mutex m_FramesMutex;
     bool m_SingleFrame;
@@ -152,6 +150,7 @@ namespace dss {
     CommandFrameSharedPtrVector m_IncomingFrames;
 
     ModulatorSpec_t modulatorSpecFromFrame(boost::shared_ptr<DS485CommandFrame> _frame);
+    void checkResultCode(const int _resultCode);
   protected:
     virtual void execute();
     virtual void doStart();
@@ -224,6 +223,6 @@ namespace dss {
     DS485Controller& getController() { return m_DS485Controller; }
   }; // DS485Proxy
 
-}
+} // namespace dss
 
 #endif

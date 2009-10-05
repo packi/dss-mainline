@@ -55,7 +55,7 @@ namespace dss {
     m_Handle = ::open(_serialPort, flags);
     if(m_Handle == -1) {
       perror("serial");
-      throw std::runtime_error(string("could not open port ") + m_PortDevName);
+      throw std::runtime_error(std::string("could not open port ") + m_PortDevName);
     }
 
 
@@ -81,22 +81,22 @@ namespace dss {
     }
     if(cfsetispeed(&m_CommSettings, rate) == -1) {
       perror("cfsetispeed");
-      throw std::runtime_error(string("could not set input speed of port ") + m_PortDevName);
+      throw std::runtime_error(std::string("could not set input speed of port ") + m_PortDevName);
     }
     if(cfsetospeed(&m_CommSettings, rate) == -1) {
       perror("cfsetospeed");
-      throw std::runtime_error(string("could not set ouput speed of port ") + m_PortDevName);
+      throw std::runtime_error(std::string("could not set ouput speed of port ") + m_PortDevName);
     }
 
     // flush remaining characters
     if(tcflush(m_Handle, TCIOFLUSH) == -1) {
       perror("tcflush");
-      throw std::runtime_error(string("could not flush port ") + m_PortDevName);
+      throw std::runtime_error(std::string("could not flush port ") + m_PortDevName);
     }
 
     if(tcsetattr(m_Handle, TCSANOW, &m_CommSettings) == -1) {
       perror("tcsetattr");
-      throw std::runtime_error(string("could not set attributes of port ") + m_PortDevName);
+      throw std::runtime_error(std::string("could not set attributes of port ") + m_PortDevName);
     }
     return true;
   } // open
@@ -173,12 +173,12 @@ namespace dss {
     return true;
   } // open
 
-  deque<char>& SerialComSim::getWrittenData() {
+  std::deque<char>& SerialComSim::getWrittenData() {
     return m_OutgoingData;
   } // getWrittenData
 
   void SerialComSim::putSimData(const std::string& _data) {
-    for(string::const_iterator iChar = _data.begin(), e = _data.end();
+    for(std::string::const_iterator iChar = _data.begin(), e = _data.end();
         iChar != e; ++iChar)
     {
       m_IncomingData.push_back(*iChar);

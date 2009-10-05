@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_SUITE(DS485)
 BOOST_AUTO_TEST_CASE(testFrameReader) {
   boost::scoped_ptr<DS485FrameReader> reader(new DS485FrameReader());
   boost::shared_ptr<SerialComSim> simPort(new SerialComSim());
-  string frame;
+  std::string frame;
 /*
   frame.push_back('\xFD');
   frame.push_back('\x05');
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(testFrameReader) {
 
   simPort->putSimData(frame);
   reader->setSerialCom(simPort);
-  //reader->execute();
+  delete reader->getFrame(1000);
 } // testFrameReader
 
 BOOST_AUTO_TEST_SUITE_END()

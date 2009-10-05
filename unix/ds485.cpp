@@ -34,8 +34,6 @@
 
 #include <boost/scoped_ptr.hpp>
 
-using namespace std;
-
 namespace dss {
 
   const unsigned char FrameStart = 0xFD;
@@ -83,15 +81,15 @@ namespace dss {
     return m_Data.size();
   } // size
 
-  const vector<unsigned char>& DS485Payload::toChar() const {
+  const std::vector<unsigned char>& DS485Payload::toChar() const {
     return m_Data;
   } // getData
 
 
   //================================================== DS485Header
 
-  vector<unsigned char> DS485Header::toChar() const {
-    vector<unsigned char> result;
+  std::vector<unsigned char> DS485Header::toChar() const {
+    std::vector<unsigned char> result;
     result.push_back(FrameStart);
     unsigned char tmp = (m_Destination << 2) | ((m_Broadcast & 0x01) << 1) | (m_Type & 0x01);
     result.push_back(tmp);
@@ -103,7 +101,7 @@ namespace dss {
 
   void DS485Header::fromChar(const unsigned char* _data, const int _len) {
     if(_len < 3) {
-      throw invalid_argument("_len must be > 3");
+      throw std::invalid_argument("_len must be > 3");
     }
     setDestination((_data[1] >> 2) & 0x3F);
     setBroadcast((_data[1] & 0x02) == 0x02);
@@ -114,8 +112,8 @@ namespace dss {
 
   //================================================== DS485Frame
 
-  vector<unsigned char> DS485Frame::toChar() const {
-    vector<unsigned char> result = m_Header.toChar();
+  std::vector<unsigned char> DS485Frame::toChar() const {
+    std::vector<unsigned char> result = m_Header.toChar();
     return result;
   } // toChar
 
@@ -136,8 +134,8 @@ namespace dss {
     getHeader().setType(1);
   } // ctor
 
-  vector<unsigned char> DS485CommandFrame::toChar() const {
-    vector<unsigned char> result = DS485Frame::toChar();
+  std::vector<unsigned char> DS485CommandFrame::toChar() const {
+    std::vector<unsigned char> result = DS485Frame::toChar();
     unsigned char tmp;
     if(m_Length == 0xFF) {
       tmp = (m_Command << 4) | (getPayload().size() & 0x0F);
@@ -146,7 +144,7 @@ namespace dss {
     }
     result.push_back(tmp);
 
-    const vector<unsigned char>& payload = getPayload().toChar();
+    const std::vector<unsigned char>& payload = getPayload().toChar();
     result.insert(result.end(), payload.begin(), payload.end());
     return result;
   } // toChar
@@ -183,8 +181,8 @@ namespace dss {
         //Logger::getInstance()->log(string("length:  ") + intToString((cmdFrame->getLength())));
         //Logger::getInstance()->log(string("msg nr:  ") + intToString(cmdFrame->getHeader().getCounter()));
       } else {
-        //cout << "+";
-        //flush(cout);
+        //std::cout << "+";
+        //flush(std::cout);
         //Logger::getInstance()->log("token received");
       }
     }
@@ -202,7 +200,7 @@ namespace dss {
   } // putCharOnWire
 
   bool DS485Controller::putFrameOnWire(const DS485Frame* _pFrame, bool _freeFrame) {
-    vector<unsigned char> chars = _pFrame->toChar();
+    std::vector<unsigned char> chars = _pFrame->toChar();
     uint16_t crc = 0x0000;
 
     unsigned int numChars = chars.size();
@@ -237,8 +235,8 @@ namespace dss {
       m_SerialCom->open(m_RS485DeviceName.c_str());
       m_FrameReader.setSerialCom(m_SerialCom);
       return true;
-    } catch(const runtime_error& _ex) {
-      Logger::getInstance()->log(string("Caught exception while opening serial port: ") + _ex.what(), lsFatal);
+    } catch(const std::runtime_error& _ex) {
+      Logger::getInstance()->log(std::string("Caught exception while opening serial port: ") + _ex.what(), lsFatal);
       return false;
     }
   } // resetSerialLine
@@ -281,7 +279,7 @@ namespace dss {
         continue;
       } else if(m_State == csCommError) {
         sleepMS(comErrorSleepTimeScaler++ * 500);
-        comErrorSleepTimeScaler = min(comErrorSleepTimeScaler, 60);
+        comErrorSleepTimeScaler = std::min(comErrorSleepTimeScaler, 60);
         if(resetSerialLine()) {
           doChangeState(csInitial);
         }
@@ -298,7 +296,7 @@ namespace dss {
             doChangeState(csDesignatedMaster);
           }
           comErrorSleepTimeScaler = 1;
-        } catch(const runtime_error&) {
+        } catch(const std::runtime_error&) {
           doChangeState(csCommError);
         }
         continue;
@@ -307,17 +305,17 @@ namespace dss {
       boost::scoped_ptr<DS485Frame> frame;
       try {
         frame.reset(getFrameFromWire());
-      } catch(const runtime_error&) {
+      } catch(const std::runtime_error&) {
         doChangeState(csCommError);
         continue;
       }
       if(frame.get() == NULL) {
         if(m_State != csDesignatedMaster) {
-          cout << "§";
+          std::cout << "§";
           missedFramesCounter++;
           if(missedFramesCounter == 50) {
             missedFramesCounter = 0;
-            cout << "haven't received any frames for 50 iterations, restarting..." << endl;
+            std::cout << "haven't received any frames for 50 iterations, restarting..." << std::endl;
             doChangeState(csInitial);
           }
         } else {
@@ -327,9 +325,9 @@ namespace dss {
         if(lastSentWasToken) {
           putFrameOnWire(token.get(), false);
           lastSentWasToken = false;
-          cout << "t(#)";
+          std::cout << "t(#)";
         }
-        flush(cout);
+        flush(std::cout);
       } else {
         DS485Header& header = frame->getHeader();
         DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(frame.get());
@@ -345,10 +343,10 @@ namespace dss {
         {
 /*
           Logger::getInstance()->log("packet not for me, discarding");
-          cout << "dest: " << (int)header.getDestination() << endl;
-          cout << "src:  " << (int)header.getSource() << endl;
+          std::cout << "dest: " << (int)header.getDestination() << std::endl;
+          std::cout << "src:  " << (int)header.getSource() << std::endl;
           if(cmdFrame != NULL) {
-            cout << "cmd:  " << CommandToString(cmdFrame->getCommand()) << endl;
+            std::cout << "cmd:  " << CommandToString(cmdFrame->getCommand()) << std::endl;
           }
 */
           continue;
@@ -364,9 +362,9 @@ namespace dss {
               frameToSend->setCommand(CommandGetAddressResponse);
               putFrameOnWire(frameToSend);
               if(header.isBroadcast()) {
-                cerr << "Get address request with bc-flag set" << endl;
+                std::cerr << "Get address request with bc-flag set" << std::endl;
               } else {
-                cout << "sent response to get address thingie" << endl;
+                std::cout << "sent response to get address thingie" << std::endl;
               }
               continue;
             }
@@ -391,17 +389,17 @@ namespace dss {
                     // don’t wait forever if we’re in slow-joining mode
                     numberOfJoinPacketsToWait = rand() % 10;
                   }
-                  cout << "** Waiting for " << numberOfJoinPacketsToWait << endl;
+                  std::cout << "** Waiting for " << numberOfJoinPacketsToWait << std::endl;
                 } else {
                   numberOfJoinPacketsToWait--;
                   if(numberOfJoinPacketsToWait == 0) {
                     m_StationID = 0x3F;
                     putFrameOnWire(solicitSuccessorResponseFrame.get(), false);
-                    //cout << "******* FRAME AWAY ******" << endl;
+                    //std::cout << "******* FRAME AWAY ******" << std::endl;
                     doChangeState(csSlaveJoining);
                     time(&responseSentAt);
                   }
-                  //cout << numberOfJoinPacketsToWait << endl;
+                  //std::cout << numberOfJoinPacketsToWait << std::endl;
                 }
               }
             }
@@ -416,7 +414,7 @@ namespace dss {
               frameToSend->getHeader().setSource(m_StationID);
               frameToSend->setCommand(CommandSetDeviceAddressResponse);
               putFrameOnWire(frameToSend);
-              cout << "### new address " << m_StationID << "\n";
+              std::cout << "### new address " << m_StationID << "\n";
             } else if(cmdFrame->getCommand() == CommandSetSuccessorAddressRequest) {
               if(header.getDestination() == m_StationID) {
                 handleSetSuccessor(cmdFrame);
@@ -427,7 +425,7 @@ namespace dss {
               time(&now);
               if((now - responseSentAt) > 1) {
                 doChangeState(csSlaveWaitingToJoin);
-                cerr << "çççççççççç haven't received my address" << endl;
+                std::cerr << "çççççççççç haven't received my address" << std::endl;
               }
             }
             if((m_StationID != 0x3F) && (m_NextStationID != 0xFF)) {
@@ -444,7 +442,7 @@ namespace dss {
           break;
         case csSlave:
           if(cmdFrame == NULL) {
-//            cout << "+";
+//            std::cout << "+";
             // it's a token
             if(!m_PendingFrames.empty() && (m_TokenCounter > 10)) {
 
@@ -452,7 +450,7 @@ namespace dss {
               m_PendingFramesGuard.lock();
               DS485CommandFrame& frameToSend = m_PendingFrames.front();
               putFrameOnWire(&frameToSend, false);
-              cout << "p%" << (int)frameToSend.getCommand() << "%e" << endl;
+              std::cout << "p%" << (int)frameToSend.getCommand() << "%e" << std::endl;
 
               // if not a broadcast, wait for ack, etc
               if(frameToSend.getHeader().isBroadcast()) {
@@ -463,22 +461,22 @@ namespace dss {
                 if(cmdAckFrame != NULL) {
                   if(cmdAckFrame->getCommand() == CommandAck) {
                     m_PendingFrames.erase(m_PendingFrames.begin());
-                    cout << "\ngot ack" << endl;
+                    std::cout << "\ngot ack" << std::endl;
                   } else {
                     m_PendingFrames.erase(m_PendingFrames.begin());
-                    cout << "\n&&&&got other" << endl;
+                    std::cout << "\n&&&&got other" << std::endl;
                     addToReceivedQueue(cmdAckFrame);
                   }
                 } else {
                   m_PendingFrames.erase(m_PendingFrames.begin());
-                  cout << "no ack received" << endl;
+                  std::cout << "no ack received" << std::endl;
                 }
               }
             }
             m_PendingFramesGuard.unlock();
             putFrameOnWire(token.get(), false);
-//            cout << ".";
-//            flush(cout);
+//            std::cout << ".";
+//            flush(std::cout);
             time(&tokenReceivedAt);
             m_TokenEvent.broadcast();
             m_TokenCounter++;
@@ -489,11 +487,11 @@ namespace dss {
             time_t now;
             time(&now);
             if((now - tokenReceivedAt) > 15) {
-              cerr << "restarting" << endl;
+              std::cerr << "restarting" << std::endl;
               doChangeState(csInitial);
               continue;
             }
-            cout << "f*" << (int)cmdFrame->getCommand() << "*";
+            std::cout << "f*" << (int)cmdFrame->getCommand() << "*";
 
             bool keep = false;
 
@@ -505,9 +503,9 @@ namespace dss {
                 ack->getHeader().setDestination(cmdFrame->getHeader().getSource());
                 ack->setCommand(CommandAck);
                 putFrameOnWire(ack);
-                cout << "a(res)";
+                std::cout << "a(res)";
               } else {
-                cout << "b";
+                std::cout << "b";
               }
               keep = true;
             } else if(cmdFrame->getCommand() == CommandRequest || cmdFrame->getCommand() == CommandEvent) {
@@ -517,7 +515,7 @@ namespace dss {
                 ack->getHeader().setDestination(cmdFrame->getHeader().getSource());
                 ack->setCommand(CommandAck);
                 putFrameOnWire(ack);
-                cout << "a(req)";
+                std::cout << "a(req)";
               }
               keep = true;
             } else if(cmdFrame->getCommand() == CommandSetSuccessorAddressRequest) {
@@ -526,14 +524,14 @@ namespace dss {
                 token->getHeader().setDestination(m_NextStationID);
               }
             } else {
-              cout << "&&&&&&&&&& unknown frame id: " << (int)cmdFrame->getCommand() << endl;
+              std::cout << "&&&&&&&&&& unknown frame id: " << (int)cmdFrame->getCommand() << std::endl;
             }
             if(keep) {
               // put in into the received queue
               addToReceivedQueue(cmdFrame);
-              cout << "k";
+              std::cout << "k";
             }
-            flush(cout);
+            flush(std::cout);
           }
           break;
         case csSlaveWaitingForFirstToken:
@@ -543,8 +541,8 @@ namespace dss {
               m_TokenCounter = 0;
               doChangeState(csSlave);
               time(&tokenReceivedAt);
-//              cout << ">";
-//              flush(cout);
+//              std::cout << ">";
+//              flush(std::cout);
             }
           }
           break;
@@ -553,7 +551,7 @@ namespace dss {
           doChangeState(csInitial);
           break;
         default:
-          throw runtime_error("invalid value for m_State");
+          throw std::runtime_error("invalid value for m_State");
         }
       }
     }
@@ -566,7 +564,7 @@ namespace dss {
     frameToSend->getHeader().setSource(m_StationID);
     frameToSend->setCommand(CommandSetSuccessorAddressResponse);
     putFrameOnWire(frameToSend);
-    cout << "### successor " << m_NextStationID << "\n";
+    std::cout << "### successor " << m_NextStationID << "\n";
   } // handleSetSuccessor
 
   // TODO: look into boost::weak_ptr
@@ -669,7 +667,7 @@ namespace dss {
       gettimeofday(&now, 0);
       int diffMS = (now.tv_sec - timeStarted.tv_sec) * 1000 + (now.tv_usec - timeStarted.tv_usec) / 1000;
       if(diffMS > _timeoutMS) {
-        flush(cout);
+        flush(std::cout);
         if(m_State == rsSynchronizing || m_ValidBytes == 0) {
           break;
         }
@@ -713,7 +711,7 @@ namespace dss {
             if(((unsigned char)currentChar == FrameStart) && !m_IsEscaped) {
               m_State = rsReadingHeader;
             } else {
-              cout << "?";
+              std::cout << "?";
             }
             break;
           }
@@ -742,8 +740,8 @@ namespace dss {
                 frame->getHeader().fromChar(m_ReceiveBuffer, m_ValidBytes);
                 m_NumberOfFramesReceived++;
 
-                //cout << "-";
-                //flush(cout);
+                //std::cout << "-";
+                //flush(std::cout);
                 m_State = rsSynchronizing;
                 return frame;
               }
@@ -773,7 +771,7 @@ namespace dss {
                 m_NumberOfCRCErrors++;
               } else {
                 //Logger::getInstance()->log("received packet, crc ok");
-                //cout << "#";
+                //std::cout << "#";
                 m_NumberOfFramesReceived++;
               }
               DS485CommandFrame* frame = new DS485CommandFrame();
@@ -783,8 +781,8 @@ namespace dss {
               for(int iByte = 0; iByte < m_MessageLength; iByte++) {
                 frame->getPayload().add<uint8_t>(static_cast<uint8_t>(m_ReceiveBuffer[iByte + 4]));
               }
-              //cout << "*" << frame->getCommand() << "*";
-              //flush(cout);
+              //std::cout << "*" << frame->getCommand() << "*";
+              //flush(std::cout);
 
               // the show must go on...
               m_MessageLength = -1;
@@ -805,14 +803,14 @@ namespace dss {
   } // addFrameCollector
 
   void DS485FrameProvider::removeFrameCollector(IDS485FrameCollector* _collector) {
-    vector<IDS485FrameCollector*>::iterator iCollector = find(m_FrameCollectors.begin(), m_FrameCollectors.end(), _collector);
+    std::vector<IDS485FrameCollector*>::iterator iCollector = find(m_FrameCollectors.begin(), m_FrameCollectors.end(), _collector);
     if(iCollector != m_FrameCollectors.end()) {
       m_FrameCollectors.erase(iCollector);
     }
   } // removeFrameCollector
 
   void DS485FrameProvider::distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
-    for(vector<IDS485FrameCollector*>::iterator iCollector = m_FrameCollectors.begin(), e = m_FrameCollectors.end();
+    for(std::vector<IDS485FrameCollector*>::iterator iCollector = m_FrameCollectors.begin(), e = m_FrameCollectors.end();
         iCollector != e; ++iCollector)
     {
       (*iCollector)->collectFrame(_frame);
@@ -869,7 +867,7 @@ namespace dss {
 
   //================================================== DS485FrameSniffer
 #ifndef __APPLE__
-  DS485FrameSniffer::DS485FrameSniffer(const string& _deviceName)
+  DS485FrameSniffer::DS485FrameSniffer(const std::string& _deviceName)
   {
      m_SerialCom.reset(new SerialCom());
      m_SerialCom->open(_deviceName.c_str());
@@ -889,21 +887,21 @@ namespace dss {
           double diffMS = ((thisFrame.tv_sec*1000.0 + thisFrame.tv_nsec/1000.0/1000.0) -
                            (lastFrame.tv_sec*1000.0 + lastFrame.tv_nsec/1000.0/1000.0));
 
-          cout << "+" << diffMS << "\n";
+          std::cout << "+" << diffMS << "\n";
 
           DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(frame.get());
           if(cmdFrame != NULL) {
             uint8_t cmd = cmdFrame->getCommand();
-            cout << "Command Frame: " << commandToString(cmd) <<  " " << "(" <<  (int)cmd << ") " << (int)frame->getHeader().getSource() << " -> " << (int)frame->getHeader().getDestination()  << "\n";
+            std::cout << "Command Frame: " << commandToString(cmd) <<  " " << "(" <<  (int)cmd << ") " << (int)frame->getHeader().getSource() << " -> " << (int)frame->getHeader().getDestination()  << "\n";
 
             if(cmd == CommandRequest || cmd == CommandResponse) {
               PayloadDissector pd(cmdFrame->getPayload());
-              cout << (int)pd.get<uint8_t>() << "\n";
+              std::cout << (int)pd.get<uint8_t>() << "\n";
             }
           } else {
-            cout << "token " << (int)frame->getHeader().getSource() << " -> " << (int)frame->getHeader().getDestination()  << "\n";
+            std::cout << "token " << (int)frame->getHeader().getSource() << " -> " << (int)frame->getHeader().getDestination()  << "\n";
           }
-          cout << "seq: " << (int)frame->getHeader().getCounter() << endl;
+          std::cout << "seq: " << (int)frame->getHeader().getCounter() << std::endl;
 
           lastFrame = thisFrame;
         }

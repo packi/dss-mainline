@@ -59,8 +59,6 @@
 #include <csignal>
 #endif
 
-using namespace std;
-
 namespace dss {
 
   //============================================= DSS
@@ -164,7 +162,7 @@ const char* DataDirectory = "data/";
           int val = strToInt(value);
           m_pPropertySystem->setIntValue(name, val, true);
           continue;
-        } catch(invalid_argument&) {
+        } catch(std::invalid_argument&) {
         }
 
         if(value == "true") {

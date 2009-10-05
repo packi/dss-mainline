@@ -88,8 +88,8 @@ namespace dss {
       vector<boost::shared_ptr<Series<CurrentValue> > > series;
       for(int iConfig = 0; iConfig < _config->size(); iConfig++) {
         // Load series from file
-        string fileName = m_MeteringStorageLocation + (*ipModulator)->getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
-        log(string("Metering::checkModulators: Trying to load series from '") + fileName + "'");
+        std::string fileName = m_MeteringStorageLocation + (*ipModulator)->getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
+        log("Metering::checkModulators: Trying to load series from '" + fileName + "'");
         if(fileExists(fileName)) {
           Timestamp startedLoadingSingle;
           boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(fileName));
@@ -99,7 +99,7 @@ namespace dss {
           if(s.get() != NULL) {
             series.push_back(s);
           } else {
-            log(string("Metering::checkModulators: Failed to load series"));
+            log("Metering::checkModulators: Failed to load series");
             return; // TODO: another strategy would be moving the file out of our way and just create an empty one
           }
         } else {
@@ -133,10 +133,14 @@ namespace dss {
 #ifdef LOG_TIMING
         Timestamp fetchingValue;
 #endif
-        if(_config->isEnergy()) {
-          value = (*ipModulator)->getEnergyMeterValue();
-        } else {
-          value = (*ipModulator)->getPowerConsumption();
+        try {
+          if(_config->isEnergy()) {
+            value = (*ipModulator)->getEnergyMeterValue();
+          } else {
+            value = (*ipModulator)->getPowerConsumption();
+          }
+        } catch(std::runtime_error& err) {
+          log("Could not poll modulator " + (*ipModulator)->getDSID().toString() + ". Message: " + err.what());
         }
 #ifdef LOG_TIMING
         cout << "fetching value: " << Timestamp().getDifference(fetchingValue) << endl;
@@ -157,9 +161,9 @@ namespace dss {
           Timestamp startedWritingSingle;
 #endif
           // Write series to file
-          string fileName = m_MeteringStorageLocation + (*ipModulator)->getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
+          std::string fileName = m_MeteringStorageLocation + (*ipModulator)->getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
           Series<CurrentValue>* s = series[iConfig].get();
-          log(string("Metering::checkModulators: Trying to save series to '") + fileName + "'");
+          log("Metering::checkModulators: Trying to save series to '" + fileName + "'");
           writer.writeToXML(*s, fileName);
 #ifdef LOG_TIMING
           cout << "writing single: " << Timestamp().getDifference(startedWritingSingle) << endl;

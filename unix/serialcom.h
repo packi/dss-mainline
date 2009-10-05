@@ -29,8 +29,6 @@
 
 #include "../core/mutex.h"
 
-using namespace std;
-
 namespace dss {
 
   class SerialComBase {

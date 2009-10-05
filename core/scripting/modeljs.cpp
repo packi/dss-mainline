@@ -477,9 +477,14 @@ namespace dss {
       if(argc > 2) {
         writeOnly = ctx->convertTo<bool>(argv[2]);
       }
-      value = ref->getDevice().dsLinkSend(value, lastByte, writeOnly);
-      *rval = INT_TO_JSVAL(value);
-      return JS_TRUE;
+      try {
+        value = ref->getDevice().dsLinkSend(value, lastByte, writeOnly);
+        *rval = INT_TO_JSVAL(value);
+        return JS_TRUE;
+      } catch(std::runtime_error&) {
+        JS_ReportError(cx, "Error receiving value");
+        return JS_FALSE;
+      }
     }
     return JS_FALSE;
   } // dev_dslink_send

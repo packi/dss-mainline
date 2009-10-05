@@ -121,7 +121,7 @@ namespace dss {
         Logger::getInstance()->log(string("EventInterpreterPluginJavascript::handleEvent: Could not find script: '") + scriptName + "'", lsError);
       }
     } else {
-      throw runtime_error("EventInterpreteRPluginJavascript::handleEvent: missing argument filename");
+      throw std::runtime_error("EventInterpreteRPluginJavascript::handleEvent: missing argument filename");
     }
   } // handleEvent
 

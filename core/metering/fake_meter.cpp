@@ -55,7 +55,7 @@ namespace dss {
         m_Series.push_back(newSeries);
     }
     // stitch up chain
-    for(vector<boost::shared_ptr<Series<CurrentValue> > >::reverse_iterator iSeries = m_Series.rbegin(), e = m_Series.rend();
+    for(std::vector<boost::shared_ptr<Series<CurrentValue> > >::reverse_iterator iSeries = m_Series.rbegin(), e = m_Series.rend();
       iSeries != e; ++iSeries)
     {
       if(iSeries != m_Series.rbegin()) {
@@ -70,7 +70,7 @@ namespace dss {
     }
     SeriesWriter<CurrentValue> writer;
 
-    string dev = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "device");
+    std::string dev = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "device");
     bool addJitter = getDSS().getPropertySystem().getBoolValue(getConfigPropertyBasePath() + "addJitter");
     int holdTime = rand() % 15;
     unsigned long holdValue = 2 + (rand() % 5) * 10000;
@@ -94,7 +94,11 @@ namespace dss {
       DateTime now;
       unsigned long consumption = 0;
       foreach(Modulator* modulator, getDSS().getApartment().getModulators()) {
-      	consumption += modulator->getPowerConsumption();
+        try {
+      	  consumption += modulator->getPowerConsumption();
+        } catch(std::runtime_error& err) {
+          log("Could not poll modulator " + modulator->getDSID().toString() + ". Message: " + err.what());
+        }
       }
       if(addJitter) {
         consumption += holdValue;
@@ -103,7 +107,7 @@ namespace dss {
 
       for(int iConfig = 0; iConfig < m_Config->size(); iConfig++) {
         // Write series to file
-        string fileName = m_MeteringStorageLocation + "metering_" + m_Config->getFilenameSuffix(iConfig) + ".xml";
+        std::string fileName = m_MeteringStorageLocation + "metering_" + m_Config->getFilenameSuffix(iConfig) + ".xml";
         Series<CurrentValue>* s = m_Series[iConfig].get();
         writer.writeToXML(*s, fileName);
       }

@@ -49,7 +49,7 @@ namespace dss {
   } // splitByModulator
 
 
-  typedef map<const Zone*, Set> HashMapZoneSet;
+  typedef std::map<const Zone*, Set> HashMapZoneSet;
 
   HashMapZoneSet splitByZone(const Set& _set) {
     HashMapZoneSet result;
@@ -78,97 +78,97 @@ namespace dss {
     }
 
 
-	if(_zone.getDevices().length() == _set.length()) {
-	  Logger::getInstance()->log(string("Optimization: Set contains all devices of zone ") + intToString(_zone.getZoneID()));
-      std::bitset<63> possibleGroups;
-      possibleGroups.set();
-      for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
-        possibleGroups &= _set[iDevice].getDevice().getGroupBitmask();
-	  }
-	  if(possibleGroups.any()) {
-        for(unsigned int iGroup = 0; iGroup < possibleGroups.size(); iGroup++) {
-          if(possibleGroups.test(iGroup)) {
-            Logger::getInstance()->log("Sending the command to group " + intToString(iGroup + 1));
-            fittingGroups.push_back(_zone.getGroup(iGroup + 1));
-            break;
+    if(_zone.getDevices().length() == _set.length()) {
+      Logger::getInstance()->log(string("Optimization: Set contains all devices of zone ") + intToString(_zone.getZoneID()));
+        std::bitset<63> possibleGroups;
+        possibleGroups.set();
+        for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
+          possibleGroups &= _set[iDevice].getDevice().getGroupBitmask();
+      }
+      if(possibleGroups.any()) {
+          for(unsigned int iGroup = 0; iGroup < possibleGroups.size(); iGroup++) {
+            if(possibleGroups.test(iGroup)) {
+              Logger::getInstance()->log("Sending the command to group " + intToString(iGroup + 1));
+              fittingGroups.push_back(_zone.getGroup(iGroup + 1));
+              break;
+            }
           }
+        } else {
+          Logger::getInstance()->log("Sending the command to broadcast group");
+          fittingGroups.push_back(_zone.getGroup(GroupIDBroadcast));
         }
       } else {
-        Logger::getInstance()->log("Sending the command to broadcast group");
-  	    fittingGroups.push_back(_zone.getGroup(GroupIDBroadcast));
-  	  }
-    } else {
-	    std::vector<Group*> unsuitableGroups;
-	    Set workingCopy = _set;
+        std::vector<Group*> unsuitableGroups;
+        Set workingCopy = _set;
 
-		while(!workingCopy.isEmpty()) {
-		  DeviceReference& ref = workingCopy.get(0);
-		  workingCopy.removeDevice(ref);
+      while(!workingCopy.isEmpty()) {
+        DeviceReference& ref = workingCopy.get(0);
+        workingCopy.removeDevice(ref);
 
-		  if(OptimizerDebug) {
-		    Logger::getInstance()->log("Working with device " + ref.getDSID().toString());
-		  }
+        if(OptimizerDebug) {
+          Logger::getInstance()->log("Working with device " + ref.getDSID().toString());
+        }
 
-		  bool foundGroup = false;
-		  for(int iGroup = 0; iGroup < ref.getDevice().getGroupsCount(); iGroup++) {
-			Group& g = ref.getDevice().getGroupByIndex(iGroup);
+        bool foundGroup = false;
+        for(int iGroup = 0; iGroup < ref.getDevice().getGroupsCount(); iGroup++) {
+        Group& g = ref.getDevice().getGroupByIndex(iGroup);
 
-  		    if(OptimizerDebug) {
-		      Logger::getInstance()->log("  Checking Group " + intToString(g.getID()));
-		    }
-			// continue if already found unsuitable
-			if(find(unsuitableGroups.begin(), unsuitableGroups.end(), &g) != unsuitableGroups.end()) {
-  		      if(OptimizerDebug) {
-		        Logger::getInstance()->log("  Group discarded before, continuing search");
-		      }
-			  continue;
-			}
+            if(OptimizerDebug) {
+            Logger::getInstance()->log("  Checking Group " + intToString(g.getID()));
+          }
+        // continue if already found unsuitable
+        if(find(unsuitableGroups.begin(), unsuitableGroups.end(), &g) != unsuitableGroups.end()) {
+              if(OptimizerDebug) {
+              Logger::getInstance()->log("  Group discarded before, continuing search");
+            }
+          continue;
+        }
 
-			// see if we've got a fit
-			bool groupFits = true;
-			Set devicesInGroup = _zone.getDevices().getByGroup(g);
-  		    if(OptimizerDebug) {
-		      Logger::getInstance()->log("    Group has " + intToString(devicesInGroup.length()) + " devices");
-		    }
-			for(int iDevice = 0; iDevice < devicesInGroup.length(); iDevice++) {
-			  if(!_set.contains(devicesInGroup.get(iDevice))) {
-				unsuitableGroups.push_back(&g);
-				groupFits = false;
-   		        if(OptimizerDebug) {
-		          Logger::getInstance()->log("    Original set does _not_ contain device " + devicesInGroup.get(iDevice).getDevice().getDSID().toString());
-		        }
-				break;
-			  }
-   		      if(OptimizerDebug) {
-		        Logger::getInstance()->log("    Original set contains device " + devicesInGroup.get(iDevice).getDevice().getDSID().toString());
-		      }
-			}
-			if(groupFits) {
-  		      if(OptimizerDebug) {
-		        Logger::getInstance()->log("  Found a fit " + intToString(g.getID()));
-		      }
-			  foundGroup = true;
-			  fittingGroups.push_back(&g);
-   		      if(OptimizerDebug) {
-		        Logger::getInstance()->log("  Removing devices from working copy");
-		      }
-			  while(!devicesInGroup.isEmpty()) {
-				workingCopy.removeDevice(devicesInGroup.get(0));
-			    devicesInGroup.removeDevice(devicesInGroup.get(0));
-			  }
-   		      if(OptimizerDebug) {
-		        Logger::getInstance()->log("  Done. (Removing devices from working copy)");
-		      }
-			  break;
-			}
-		  }
+        // see if we've got a fit
+        bool groupFits = true;
+        Set devicesInGroup = _zone.getDevices().getByGroup(g);
+            if(OptimizerDebug) {
+            Logger::getInstance()->log("    Group has " + intToString(devicesInGroup.length()) + " devices");
+          }
+        for(int iDevice = 0; iDevice < devicesInGroup.length(); iDevice++) {
+          if(!_set.contains(devicesInGroup.get(iDevice))) {
+          unsuitableGroups.push_back(&g);
+          groupFits = false;
+                if(OptimizerDebug) {
+                Logger::getInstance()->log("    Original set does _not_ contain device " + devicesInGroup.get(iDevice).getDevice().getDSID().toString());
+              }
+          break;
+          }
+              if(OptimizerDebug) {
+              Logger::getInstance()->log("    Original set contains device " + devicesInGroup.get(iDevice).getDevice().getDSID().toString());
+            }
+        }
+        if(groupFits) {
+              if(OptimizerDebug) {
+              Logger::getInstance()->log("  Found a fit " + intToString(g.getID()));
+            }
+          foundGroup = true;
+          fittingGroups.push_back(&g);
+              if(OptimizerDebug) {
+              Logger::getInstance()->log("  Removing devices from working copy");
+            }
+          while(!devicesInGroup.isEmpty()) {
+          workingCopy.removeDevice(devicesInGroup.get(0));
+            devicesInGroup.removeDevice(devicesInGroup.get(0));
+          }
+              if(OptimizerDebug) {
+              Logger::getInstance()->log("  Done. (Removing devices from working copy)");
+            }
+          break;
+        }
+      }
 
 		  // if no fitting group found
 		  if(!foundGroup) {
-			singleDevices.addDevice(ref);
+  	    singleDevices.addDevice(ref);
 		  }
-		}
-	}
+    }
+  }
     return FittingResultPerModulator(fittingGroups, singleDevices);
   }
 
@@ -218,7 +218,7 @@ namespace dss {
       }
     }
     return FittingResultPerModulator(fittingGroups, singleDevices);
-  }
+  } // bestFit
 
   DS485Proxy::DS485Proxy(DSS* _pDSS)
   : Thread("DS485Proxy"),
@@ -510,6 +510,57 @@ namespace dss {
     }
   } // isSimAddress
 
+  void DS485Proxy::checkResultCode(const int _resultCode) {
+    if(_resultCode < 0) {
+      std::string message = "Unknown Error";
+      switch(_resultCode) {
+      case kDS485NoIDForIndexFound:
+        message = "No ID for index found";
+        break;
+      case kDS485ZoneNotFound:
+        message = "Zone not found";
+        break;
+      case kDS485IndexOutOfBounds:
+        message = "Index out of bounds";
+        break;
+      case kDS485GroupIDOutOfBounds:
+        message = "Group ID out of bounds";
+        break;
+      case kDS485ZoneCannotBeDeleted:
+        message = "Zone can not be deleted";
+        break;
+      case kDS485OutOfMemory:
+        message = "dSM is out of memory";
+        break;
+      case kDS485RoomAlreadyExists:
+        message = "Room already exists";
+        break;
+      case kDS485InvalidDeviceID:
+        message = "Invalid device id";
+        break;
+      case kDS485CannotRemoveFromStandardGroup:
+        message = "Cannot remove device from standard group";
+        break;
+      case kDS485CannotDeleteStandardGroup:
+        message = "Cannot delete standard group";
+        break;
+      case kDS485DSIDIsNull:
+        message = "DSID is null";
+        break;
+      case kDS485ReservedRoomNumber:
+        message = "Room number is reserved";
+        break;
+      case kDS485DeviceNotFound:
+        message = "Device not found";
+        break;
+      case kDS485GroupNotFound:
+        message = "Group not found";
+        break;
+      }
+      throw DS485ApiError(message);
+    }
+  } // checkResultCode
+
   void DS485Proxy::setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) {
     DS485CommandFrame frame;
     frame.getHeader().setDestination(_device.getModulatorID());
@@ -546,7 +597,7 @@ namespace dss {
 
     std::string name;
     for(int i = 0; i < 6; i++) {
-      char c = static_cast<char>(pd.get<uint8_t>());
+      char c = char(pd.get<uint8_t>());
       if(c != '\0') {
         name += c;
       }
@@ -569,7 +620,7 @@ namespace dss {
     boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionGetTypeRequest);
     bucket->waitForFrames(1000);
 
-    map<int, bool> resultFrom;
+    std::map<int, bool> resultFrom;
 
     std::vector<ModulatorSpec_t> result;
     while(true) {
@@ -600,7 +651,7 @@ namespace dss {
     boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionGetTypeRequest);
 
     if(recFrame.get() == NULL) {
-      throw runtime_error("No frame received");
+      throw DS485ApiError("No frame received");
     }
 
     ModulatorSpec_t result = modulatorSpecFromFrame(recFrame->getFrame());
@@ -614,13 +665,13 @@ namespace dss {
     cmdFrame.setCommand(CommandRequest);
     cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetGroupsSize);
     cmdFrame.getPayload().add<uint16_t>(_zoneID);
-    int8_t res = static_cast<int8_t>(receiveSingleResult(cmdFrame, FunctionModulatorGetGroupsSize));
+    int8_t res = int8_t(receiveSingleResult(cmdFrame, FunctionModulatorGetGroupsSize));
     if(res < 0) {
       log("GetGroupCount: Negative group count received '" + intToString(res) +
           " on modulator " + intToString(_modulatorID) +
           " with zone " + intToString(_zoneID));
-      res = 0;
     }
+    checkResultCode(res);
     return res;
   } // getGroupCount
 
@@ -637,12 +688,13 @@ namespace dss {
       cmdFrame.getPayload().add<uint16_t>(_zoneID);
       cmdFrame.getPayload().add<uint16_t>(iGroup);
 
-      int8_t res = static_cast<int8_t>(receiveSingleResult(cmdFrame, FunctionZoneGetGroupIdForInd));
+      int8_t res = int8_t(receiveSingleResult(cmdFrame, FunctionZoneGetGroupIdForInd));
       if(res < 0) {
         log("GetGroups: Negative index received '" + intToString(res) + "' for index " + intToString(iGroup));
       } else {
         result.push_back(res);
       }
+      checkResultCode(res);
     }
 
     return result;
@@ -656,13 +708,14 @@ namespace dss {
     cmdFrame.getPayload().add<uint16_t>(_zoneID);
     cmdFrame.getPayload().add<uint16_t>(_groupID);
 
-    int16_t res = static_cast<int16_t>(receiveSingleResult16(cmdFrame, FunctionGroupGetDeviceCount));
+    int16_t res = int16_t(receiveSingleResult16(cmdFrame, FunctionGroupGetDeviceCount));
     if(res < 0) {
       log("GetDevicesInGroupCount: Negative count received '" + intToString(res) +
           "' on modulator " + intToString(_modulatorID) +
           " with zoneID " + intToString(_zoneID) + " in group " + intToString(_groupID));
-      res = 0;
     }
+    checkResultCode(res);
+
     return res;
   } // getDevicesInGroupCount
 
@@ -678,12 +731,13 @@ namespace dss {
       cmdFrame.getPayload().add<uint16_t>(_zoneID);
       cmdFrame.getPayload().add<uint16_t>(_groupID);
       cmdFrame.getPayload().add<uint16_t>(iDevice);
-      int16_t res = static_cast<int16_t>(receiveSingleResult16(cmdFrame, FunctionGroupGetDevKeyForInd));
+      int16_t res = int16_t(receiveSingleResult16(cmdFrame, FunctionGroupGetDevKeyForInd));
       if(res < 0) {
         log("GetDevicesInGroup: Negative device id received '" + intToString(res) + "' for index " + intToString(iDevice));
       } else {
         result.push_back(res);
       }
+      checkResultCode(res);
     }
 
     return result;
@@ -736,13 +790,14 @@ namespace dss {
       cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetZoneIdForInd);
       cmdFrame.getPayload().add<uint16_t>(iZone);
       log("GetZoneID");
-      int16_t tempResult = static_cast<int16_t>(receiveSingleResult16(cmdFrame, FunctionModulatorGetZoneIdForInd));
+      int16_t tempResult = int16_t(receiveSingleResult16(cmdFrame, FunctionModulatorGetZoneIdForInd));
       if(tempResult < 0) {
         log("GetZones: Negative zone id " + intToString(tempResult) + " received. Modulator: " + intToString(_modulatorID) + " index: " + intToString(iZone), lsError);
       } else {
         result.push_back(tempResult);
       }
-      log("receive ZoneID: " + uintToString((unsigned int)tempResult));
+      checkResultCode(tempResult);
+      log("received ZoneID: " + uintToString((unsigned int)tempResult));
     }
     return result;
   } // getZones
@@ -754,8 +809,9 @@ namespace dss {
     cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetZonesSize);
     log("GetZoneCount");
 
-    // TODO: check result-code
-    uint8_t result = receiveSingleResult(cmdFrame, FunctionModulatorGetZonesSize);
+    int8_t result = int8_t(
+        receiveSingleResult(cmdFrame, FunctionModulatorGetZonesSize));
+    checkResultCode(result);
     return result;
   } // getZoneCount
 
@@ -769,11 +825,11 @@ namespace dss {
 
     log(intToString(_modulatorID) + " " + intToString(_zoneID));
 
-    int16_t result = static_cast<int16_t>(receiveSingleResult16(cmdFrame, FunctionModulatorCountDevInZone));
+    int16_t result = int16_t(receiveSingleResult16(cmdFrame, FunctionModulatorCountDevInZone));
     if(result < 0) {
       log("GetDevicesCountInZone: negative count '" + intToString(result) + "'", lsError);
-      result = 0;
     }
+    checkResultCode(result);
 
     return result;
   } // getDevicesCountInZone
@@ -791,7 +847,9 @@ namespace dss {
       cmdFrame.getPayload().add<uint16_t>(_zoneID);
       cmdFrame.getPayload().add<uint16_t>(iDevice);
 
-      result.push_back(receiveSingleResult16(cmdFrame, FunctionModulatorDevKeyInZone));
+      uint16_t devID = receiveSingleResult16(cmdFrame, FunctionModulatorDevKeyInZone);
+      checkResultCode(int16_t(devID));
+      result.push_back(devID);
     }
     return result;
   } // getDevicesInZone
@@ -804,8 +862,8 @@ namespace dss {
     cmdFrame.getPayload().add<devid_t>(_deviceID);
     cmdFrame.getPayload().add<uint16_t>(_zoneID);
 
-    // TODO: check result-code
-    receiveSingleResult(cmdFrame, FunctionDeviceSetZoneID);
+    int16_t res = int16_t(receiveSingleResult(cmdFrame, FunctionDeviceSetZoneID));
+    checkResultCode(res);
   } // setZoneID
 
   void DS485Proxy::createZone(const int _modulatorID, const int _zoneID) {
@@ -815,8 +873,8 @@ namespace dss {
     cmdFrame.getPayload().add<uint8_t>(FunctionModulatorAddZone);
     cmdFrame.getPayload().add<uint16_t>(_zoneID);
 
-    // TODO: check result-code
-    receiveSingleResult(cmdFrame, FunctionModulatorAddZone);
+    int16_t res = int16_t(receiveSingleResult(cmdFrame, FunctionModulatorAddZone));
+    checkResultCode(res);
   } // createZone
 
   void DS485Proxy::removeZone(const int _modulatorID, const int _zoneID) {
@@ -826,8 +884,8 @@ namespace dss {
     cmdFrame.getPayload().add<uint8_t>(FunctionModulatorRemoveZone);
     cmdFrame.getPayload().add<uint16_t>(_zoneID);
 
-    // TODO: check result-code
-    receiveSingleResult(cmdFrame, FunctionModulatorAddZone);
+    int16_t res = int16_t(receiveSingleResult(cmdFrame, FunctionModulatorAddZone));
+    checkResultCode(res);
   } // removeZone
 
   dsid_t DS485Proxy::getDSIDOfDevice(const int _modulatorID, const int _deviceID) {
@@ -840,14 +898,15 @@ namespace dss {
 
     boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDeviceGetDSID);
     if(recFrame.get() == NULL) {
-      return NullDSID;
+      throw DS485ApiError("No frame received");
     }
 
     PayloadDissector pd(recFrame->getFrame()->getPayload());
     pd.get<uint8_t>(); // discard the function id
-    pd.get<uint16_t>(); // function result
+    int16_t res = int16_t(pd.get<uint16_t>());
+    checkResultCode(res);
     return pd.get<dsid_t>();
-  }
+  } // getDSIDOfDevice
 
   dsid_t DS485Proxy::getDSIDOfModulator(const int _modulatorID) {
     DS485CommandFrame cmdFrame;
@@ -859,12 +918,11 @@ namespace dss {
     boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionModulatorGetDSID);
     if(recFrame.get() == NULL) {
       log("GetDSIDOfModulator: received no result from " + intToString(_modulatorID), lsError);
-      return NullDSID;
+      throw DS485ApiError("No frame received");
     }
 
     PayloadDissector pd(recFrame->getFrame()->getPayload());
     pd.get<uint8_t>(); // discard the function id
-    //pd.get<uint8_t>(); // function result, don't know if that's sent though
     return pd.get<dsid_t>();
   } // getDSIDOfModulator
 
@@ -877,10 +935,11 @@ namespace dss {
     cmdFrame.getPayload().add<uint16_t>(_zoneID);
     cmdFrame.getPayload().add<uint16_t>(_groupID);
 
-    int16_t res = static_cast<int16_t>(receiveSingleResult16(cmdFrame, FunctionGroupGetLastCalledScene));
+    int16_t res = int16_t(receiveSingleResult16(cmdFrame, FunctionGroupGetLastCalledScene));
     if(res < 0) {
       log("DS485Proxy::getLastCalledScene: negative result received: " + intToString(res));
     }
+    checkResultCode(res);
     return res;
   } // getLastCalledScene
 
@@ -894,7 +953,7 @@ namespace dss {
     boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionModulatorGetPowerConsumption);
     if(recFrame.get() == NULL) {
       log("DS485Proxy::getPowerConsumption: received no results", lsError);
-      return 0;
+      throw DS485ApiError("No frame received");
     }
     if(recFrame->getFrame()->getHeader().getSource() != _modulatorID) {
       log("GetPowerConsumption: received result from wrong source");
@@ -914,7 +973,7 @@ namespace dss {
     boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionModulatorGetEnergyMeterValue);
     if(recFrame.get() == NULL) {
       log("DS485Proxy::getEnergyMeterValue: received no results", lsError);
-      return 0;
+      throw DS485ApiError("No frame received");
     }
     PayloadDissector pd(recFrame->getFrame()->getPayload());
     pd.get<uint8_t>(); // discard the function id
@@ -933,7 +992,7 @@ namespace dss {
 
     boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
     if(recFrame.get() == NULL) {
-      return false;
+      throw DS485ApiError("No frame received");
     }
 
     PayloadDissector pd(recFrame->getFrame()->getPayload());
@@ -957,21 +1016,24 @@ namespace dss {
       bucket->waitForFrame(10000);
       boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
       if(recFrame.get() == NULL) {
-        log("dsLinkSend: No packet received");
-        return 0;
+        log("dsLinkSend: No packet received", lsError);
+        throw DS485ApiError("No frame received");
       }
       PayloadDissector pd(recFrame->getFrame()->getPayload());
       pd.get<uint8_t>(); // discard the function id
       pd.get<uint16_t>(); // garbage
       devid_t devAddress = pd.get<uint16_t>(); // device address
       if(devAddress != _devAdr) {
-        log("dSLinkSend: Received answer for wrong device expected: " 
-            + intToString(_devAdr, true) + 
-            " got: " + intToString(devAddress, true));
+        std::string errStr =
+            "dSLinkSend: Received answer for wrong device expected: "+
+            intToString(_devAdr, true) +
+            " got: " + intToString(devAddress, true);
+        log(errStr, lsError);
+        throw DS485ApiError(errStr);
       }
       return pd.get<uint16_t>();
     }
-    log("dsLinkSend: Not waiting for response (waitOnly is set)");
+    log("dsLinkSend: Not waiting for response (writeOnly is set)");
     return 0;
   } // dsLinkSend
 
@@ -1009,7 +1071,7 @@ namespace dss {
     if(recFrame.get() != NULL) {
       return recFrame;
     } else {
-      throw runtime_error("received frame is NULL but bucket->isEmpty() returns false");
+      throw std::runtime_error("received frame is NULL but bucket->isEmpty() returns false");
     }
   } // receiveSingleFrame
 
@@ -1062,8 +1124,8 @@ namespace dss {
     try {
       m_DS485Controller.setDSID(dsid_t::fromString(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "dsid")));
       m_DS485Controller.run();
-    } catch (const runtime_error& _ex) {
-    	log(string("Caught exception while starting DS485Controlle: ") + _ex.what(), lsFatal);
+    } catch (const std::runtime_error& _ex) {
+    	log(string("Caught exception while starting DS485Controller: ") + _ex.what(), lsFatal);
     }
     // call Thread::run()
     run();

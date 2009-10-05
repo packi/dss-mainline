@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(testNonExistingXML) {
 
   try {
     interpreter.loadFromXML("data/iwillnever_be_a_subscription.xml");
-  } catch(runtime_error& e) {
+  } catch(std::runtime_error& e) {
   }
 
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(testSubscriptionXML) {
 
   try {
     interpreter.loadFromXML("data/testsubscriptions.xml");
-  } catch(runtime_error& e) {
+  } catch(std::runtime_error& e) {
   }
 
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 2);
@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
 
   try {
     interpreter.loadFromXML("data/testsubscriptions_DS485.xml");
-  } catch(runtime_error& e) {
+  } catch(std::runtime_error& e) {
   }
 
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 3);
