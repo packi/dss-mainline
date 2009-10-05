@@ -103,6 +103,10 @@ namespace dss {
     static void teardown();
 #endif
     static std::string versionString();
+    
+#ifndef WIN32
+    static void handleSignal(int signum);
+#endif
 
     aDSSState getState() const { return m_State; }
 

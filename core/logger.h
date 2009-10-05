@@ -52,6 +52,7 @@ class LogTarget;
     void log(const LogChannel& _channel, const std::string& _message, const aLogSeverity _severity = lsDebug);
     
     bool setLogTarget(boost::shared_ptr<LogTarget>& _logTarget);
+    bool reopenLogTarget();
     
   private:
     Logger();

@@ -55,6 +55,10 @@
 #include <string>
 #include <sstream>
 
+#ifndef WIN32
+#include <csignal>
+#endif
+
 using namespace std;
 
 namespace dss {
@@ -298,4 +302,20 @@ const char* DataDirectory = "data/";
     return ostr.str();
   }
 
+#ifndef WIN32
+  void DSS::handleSignal(int _signum) {
+    switch (_signum) {
+      case SIGUSR1: {
+        Logger::getInstance()->reopenLogTarget();
+        break;
+      }
+      default: {
+        std::ostringstream ostr;
+        ostr << "DSS::handleSignal(): unhandled signal " << _signum << endl;
+        Logger::getInstance()->log(ostr.str(), lsWarning);
+        break;
+      }
+    }
+  }
+#endif
 }

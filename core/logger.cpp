@@ -133,5 +133,9 @@ namespace dss {
     return false;
   } // setLogTarget
 
+  bool Logger::reopenLogTarget() {
+    m_logTarget->close();
+    return m_logTarget->open();
+  }
 
 }

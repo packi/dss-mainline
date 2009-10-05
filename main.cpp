@@ -80,6 +80,7 @@ int main (int argc, char* argv[]) {
   srand((getpid() << 16) ^ getuid() ^ time(0));
   // disable broken pipe signal
   signal(SIGPIPE, SIG_IGN);
+  signal(SIGUSR1, dss::DSS::handleSignal);
 #else
   srand( (int)time( (time_t)NULL ) );
   WSAData dat;
