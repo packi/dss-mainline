@@ -30,9 +30,11 @@
 using std::string;
 
 namespace dss {
+
   class SetBuilder {
   private:
     std::string m_SetDescription;
+    Apartment& m_Apartment;
   protected:
 	  Set restrictBy(const string& _identifier, const Set& _set, const Zone& _zone);
 	  Set restrictByFunction(const string& _functionName, unsigned int& _index, const Set& _set, const Zone& _zone);
@@ -40,9 +42,10 @@ namespace dss {
 	  std::string readParameter(unsigned int& _index);
 	  int readInt(unsigned int& _index);
 	  dsid_t readDSID(unsigned int& _index);
+	  std::string readString(unsigned int& _index);
 	  Set parseSet(unsigned int& _index, const Set& _set, const Zone& _context);
 	public:
-	  SetBuilder();
+	  SetBuilder(Apartment& _apartment);
 
 	  Set buildSet(const string& _setDescription, const Zone* _context);
   }; // SetBuilder

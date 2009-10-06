@@ -65,23 +65,6 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="FreeSet">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="FreeSetResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
   <element name="ApartmentCreateSetFromGroup">
    <complexType>
     <sequence>
@@ -94,7 +77,7 @@
   <element name="ApartmentCreateSetFromGroupResponse">
    <complexType>
     <sequence>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -111,7 +94,7 @@
   <element name="ApartmentCreateSetFromDeviceIDsResponse">
    <complexType>
     <sequence>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -128,23 +111,7 @@
   <element name="ApartmentCreateSetFromDeviceNamesResponse">
    <complexType>
     <sequence>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="ApartmentCreateEmptySet">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="ApartmentCreateEmptySetResponse">
-   <complexType>
-    <sequence>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -160,7 +127,7 @@
   <element name="ApartmentGetDevicesResponse">
    <complexType>
     <sequence>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -186,7 +153,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="name" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
@@ -195,7 +162,7 @@
   <element name="SetAddDeviceByNameResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -204,7 +171,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
@@ -213,7 +180,7 @@
   <element name="SetAddDeviceByIDResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -222,7 +189,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
@@ -231,7 +198,7 @@
   <element name="SetRemoveDeviceResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -240,8 +207,8 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID1" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID2" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec1" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="setSpec2" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
@@ -249,7 +216,7 @@
   <element name="SetCombineResponse">
    <complexType>
     <sequence>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -258,8 +225,8 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setIDToRemove" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="setSpecToRemove" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
@@ -267,7 +234,7 @@
   <element name="SetRemoveResponse">
    <complexType>
     <sequence>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -276,7 +243,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
@@ -285,7 +252,7 @@
   <element name="SetByGroupResponse">
    <complexType>
     <sequence>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -294,7 +261,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
@@ -361,7 +328,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
@@ -378,7 +345,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
@@ -395,7 +362,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
@@ -413,7 +380,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
@@ -431,7 +398,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
@@ -448,7 +415,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
@@ -465,7 +432,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="directionUp" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
@@ -484,7 +451,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
@@ -502,7 +469,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="value" type="xsd:double" minOccurs="1" maxOccurs="1"/>
      <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
@@ -521,7 +488,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
@@ -539,7 +506,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
@@ -1692,14 +1659,6 @@
  <part name="parameters" element="dss:SignOffResponse"/>
 </message>
 
-<message name="FreeSetRequest">
- <part name="parameters" element="dss:FreeSet"/>
-</message>
-
-<message name="FreeSetResponse">
- <part name="parameters" element="dss:FreeSetResponse"/>
-</message>
-
 <message name="ApartmentCreateSetFromGroupRequest">
  <part name="parameters" element="dss:ApartmentCreateSetFromGroup"/>
 </message>
@@ -1722,14 +1681,6 @@
 
 <message name="ApartmentCreateSetFromDeviceNamesResponse">
  <part name="parameters" element="dss:ApartmentCreateSetFromDeviceNamesResponse"/>
-</message>
-
-<message name="ApartmentCreateEmptySetRequest">
- <part name="parameters" element="dss:ApartmentCreateEmptySet"/>
-</message>
-
-<message name="ApartmentCreateEmptySetResponse">
- <part name="parameters" element="dss:ApartmentCreateEmptySetResponse"/>
 </message>
 
 <message name="ApartmentGetDevicesRequest">
@@ -2431,11 +2382,6 @@
   <input message="tns:SignOffRequest"/>
   <output message="tns:SignOffResponse"/>
  </operation>
- <operation name="FreeSet">
-  <documentation>Service definition of function dss__FreeSet</documentation>
-  <input message="tns:FreeSetRequest"/>
-  <output message="tns:FreeSetResponse"/>
- </operation>
  <operation name="ApartmentCreateSetFromGroup">
   <documentation>Service definition of function dss__ApartmentCreateSetFromGroup</documentation>
   <input message="tns:ApartmentCreateSetFromGroupRequest"/>
@@ -2450,11 +2396,6 @@
   <documentation>Service definition of function dss__ApartmentCreateSetFromDeviceNames</documentation>
   <input message="tns:ApartmentCreateSetFromDeviceNamesRequest"/>
   <output message="tns:ApartmentCreateSetFromDeviceNamesResponse"/>
- </operation>
- <operation name="ApartmentCreateEmptySet">
-  <documentation>Service definition of function dss__ApartmentCreateEmptySet</documentation>
-  <input message="tns:ApartmentCreateEmptySetRequest"/>
-  <output message="tns:ApartmentCreateEmptySetResponse"/>
  </operation>
  <operation name="ApartmentGetDevices">
   <documentation>Service definition of function dss__ApartmentGetDevices</documentation>
@@ -2908,15 +2849,6 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="FreeSet">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
  <operation name="ApartmentCreateSetFromGroup">
   <SOAP:operation soapAction=""/>
   <input>
@@ -2936,15 +2868,6 @@
   </output>
  </operation>
  <operation name="ApartmentCreateSetFromDeviceNames">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="ApartmentCreateEmptySet">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
   Device& dev4 = apt.allocateDevice(dsid_t(0,4));
   dev4.setShortAddress(4);
 
-  SetBuilder builder;
+  SetBuilder builder(apt);
   Set builderTest = builder.buildSet("yellow", &apt.getZone(0));
 
   BOOST_CHECK_EQUAL(1, builderTest.length());
@@ -282,6 +282,12 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
   BOOST_CHECK_EQUAL(3, builderTest.length());
 
   builderTest = builder.buildSet("remove(yellow)", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(3, builderTest.length());
+
+  builderTest = builder.buildSet("group('broadcast')", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(4, builderTest.length());
+
+  builderTest = builder.buildSet("group('broadcast').remove(dsid(1))", &apt.getZone(0));
   BOOST_CHECK_EQUAL(3, builderTest.length());
 } // testSetBuilder
 

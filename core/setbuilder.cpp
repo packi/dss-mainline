@@ -21,7 +21,6 @@
 
 #include "setbuilder.h"
 #include "base.h"
-#include "dss.h"
 
 #include <vector>
 #include <stdexcept>
@@ -31,8 +30,9 @@ using std::vector;
 
 namespace dss {
 
-  SetBuilder::SetBuilder() {
-
+  SetBuilder::SetBuilder(Apartment& _apartment)
+  : m_Apartment(_apartment)
+  {
   } // ctor
 
   void SetBuilder::skipWhitespace(unsigned int& _index) {
@@ -62,6 +62,19 @@ namespace dss {
     return dsid_t::fromString(trim(readParameter(_index)));
   } // readDSID
 
+  std::string SetBuilder::readString(unsigned int& _index) {
+    std::string result = trim(readParameter(_index));
+    if(result.size() >= 2) {
+      char first = result[0];
+      char last = result[result.size()-1];
+      if((first == '\'') && (last == '\'')) {
+        result = result.substr(1, result.size() - 2);
+        return result;
+      }
+    }
+    throw std::runtime_error("String should be enclosed by \"'\"");
+  } // readString
+
   Set SetBuilder::restrictByFunction(const string& _functionName, unsigned int& _index, const Set& _set, const Zone& _zone) {
     if(_index >= m_SetDescription.size()) {
       throw std::range_error("_index is out of bounds");
@@ -74,11 +87,21 @@ namespace dss {
       dsid_t dsid = readDSID(_index);
       result.addDevice(_set.getByDSID(dsid));
     } else if(_functionName == "zone") {
-      int zoneID = readInt(_index);
-      result = _set.getByZone(zoneID);
+      if(m_SetDescription[_index] == '\'') {
+        std::string zoneName = readString(_index);
+        result = _set.getByZone(zoneName);
+      } else {
+        int zoneID = readInt(_index);
+        result = _set.getByZone(zoneID);
+      }
     } else if(_functionName == "group") {
-      int groupID = readInt(_index);
-      result = _set.getByZone(groupID);
+      if(m_SetDescription[_index] == '\'') {
+        std::string groupName = readString(_index);
+        result = _set.getByGroup(groupName);
+      } else {
+        int groupID = readInt(_index);
+        result = _set.getByGroup(groupID);
+      }
     } else if(_functionName == "fid") {
       int fid = readInt(_index);
       result = _set.getByFunctionID(fid);
@@ -88,6 +111,17 @@ namespace dss {
     } else if(_functionName == "remove") {
       Set inner = parseSet(_index, _zone.getDevices(), _zone);
       result = _set.remove(inner);
+    } else if(_functionName == "addDevices") {
+      result = _set;
+      do {
+        if(m_SetDescription[_index] == '\'') {
+          std::string name = readString(_index);
+          result.addDevice(m_Apartment.getDeviceByName(name));
+        } else {
+          dsid_t dsid = readDSID(_index);
+          result.addDevice(m_Apartment.getDeviceByDSID(dsid));
+        }
+      } while(m_SetDescription[_index] == ',');
     }
     assert(m_SetDescription[_index] == ')' || m_SetDescription[_index] == ',');
     if(m_SetDescription[_index] == ',') {
@@ -138,7 +172,7 @@ namespace dss {
     string entry = m_SetDescription.substr(_index, pos + 1 - _index );
     if(entry == ".") {
       _index = pos + 1;
-      Set newRoot = DSS::getInstance()->getApartment().getDevices();
+      Set newRoot = m_Apartment.getDevices();
       return parseSet(_index, newRoot, _context);
     } else if(m_SetDescription[pos] == '(') {
       _index = pos + 1;
@@ -177,7 +211,7 @@ namespace dss {
 	  const Zone* context = _context;
     unsigned int index = 0;
 	  if((_context == NULL) || beginsWith(_setDescription, ".")) {
-		  context = &DSS::getInstance()->getApartment().getZone(0);
+		  context = &m_Apartment.getZone(0);
 		  result = context->getDevices();
 		  index = 0;
 	  } else {

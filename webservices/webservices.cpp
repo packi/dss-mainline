@@ -237,7 +237,12 @@ namespace dss {
     while(!m_Terminated) {
       struct soap* req = m_pServices->popPendingRequest();
       if(req != NULL) {
-        soap_serve(req);
+        try {
+          soap_serve(req);
+        } catch(std::runtime_error& err) {
+          Logger::getInstance()->log(string("WebserviceWorker::Execute: Caught exception:")
+                                     + err.what());
+        }
         soap_destroy(req);
         soap_end(req);
         soap_done(req);

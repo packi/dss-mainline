@@ -43,33 +43,6 @@
 
 namespace HASH_NAMESPACE
 {
-/*
-  template<> struct hash<const wchar_t*>  {
-    size_t operator()(const wchar_t* x) const {
-      size_t result = static_cast<size_t>(12342349871239342341ULL);
-      int len = wcslen(x);
-      for(;len >= 0; len--) {
-        result ^= static_cast<size_t>(*x++);
-        result += static_cast<size_t>(987243059872341ULL);
-      }
-      return result;
-    }
-  };
-
-  template<>
-  struct hash< std::wstring >  {
-    size_t operator()( const std::wstring& x ) const  {
-      return hash< const wchar_t* >()( x.c_str() );
-    }
-  };
-
-  template<>
-  struct hash< const std::wstring > {
-    size_t operator()( const std::wstring& x ) const {
-      return hash< const wchar_t* >()( x.c_str() );
-    }
-  };
-*/
   template<>
   struct hash<const std::string> {
     size_t operator()(const std::string& x) const {
@@ -118,6 +91,9 @@ namespace dss {
   bool endsWith(const std::string& str, const std::string& searchString);
   bool beginsWith(const std::string& str, const std::string& searchString);
 
+  std::string trim(const std::string& _str);
+  std::string join(const std::vector<std::string>& _strings, const std::string& _delimiter);
+
   std::string urlDecode(const std::string& _in);
 
   //============================================= Encoding helpers
@@ -128,7 +104,6 @@ namespace dss {
   uint16_t crc16(unsigned const char* _data, const int _size);
   uint16_t update_crc(uint16_t _crc, const unsigned char& c);
 
-  std::string trim(const std::string& _str);
 
   //============================================= Helper classes
 

@@ -170,10 +170,10 @@ BOOST_AUTO_TEST_CASE(testSubscriptionXML) {
 
 
 BOOST_AUTO_TEST_CASE(testSetBuilder) {
-  SetBuilder setBuilder;
-
   Apartment apt(NULL);
   apt.initialize();
+
+  SetBuilder setBuilder(apt);
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setName("dev1");
@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
 
   EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
   interpreter.addPlugin(plugin);
-  plugin = new EventInterpreterPluginDS485(&proxy, &interpreter);
+  plugin = new EventInterpreterPluginDS485(apt, &proxy, &interpreter);
   interpreter.addPlugin(plugin);
 
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);

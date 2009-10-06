@@ -426,6 +426,9 @@ namespace dss {
     /** Returns a subset that contains all devices belonging to Zone \a _zoneID. */
     Set getByZone(int _zoneID) const;
 
+    /** Returns a subset that contains all devices belonging to Zone \a _zoneName */
+    Set getByZone(const std::string& _zoneName) const;
+
     /** Returns a subset that contains all devices belonging to Modulator \a _modulatorID */
     Set getByModulator(const int _modulatorID) const;
     /** Returns a subset that contains all devices belonging to Modulator \a _modulator */

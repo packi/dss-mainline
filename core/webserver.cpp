@@ -1149,7 +1149,7 @@ namespace dss {
         sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
         return JSONOk(sstream.str());
       } else if(endsWith(_method, "/getDevices")) {
-        SetBuilder builder;
+        SetBuilder builder(getDSS().getApartment());
         Set set = builder.buildSet(self, NULL);
         return JSONOk("{" + ToJSONValue(set, "devices") + "}");
       } else if(endsWith(_method, "/add")) {
@@ -1181,7 +1181,7 @@ namespace dss {
         sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
         return JSONOk(sstream.str());
       } else if(isDeviceInterfaceCall(_method)) {
-        SetBuilder builder;
+        SetBuilder builder(getDSS().getApartment());
         Set set = builder.buildSet(self, NULL);
         return callDeviceInterface(_method, _parameter, _connection, &set, _session);
       } else {

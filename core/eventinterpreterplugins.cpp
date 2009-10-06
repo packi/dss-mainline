@@ -128,9 +128,10 @@ namespace dss {
 
   //================================================== EventInterpreterPluginDS485
 
-  EventInterpreterPluginDS485::EventInterpreterPluginDS485(DS485Interface* _pInterface, EventInterpreter* _pInterpreter)
+  EventInterpreterPluginDS485::EventInterpreterPluginDS485(Apartment& _apartment, DS485Interface* _pInterface, EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("bus_handler", _pInterpreter),
-    m_pInterface(_pInterface)
+    m_pInterface(_pInterface),
+    m_Apartment(_apartment)
   { } // ctor
 
   class SubscriptionOptionsDS485 : public SubscriptionOptions {
@@ -260,7 +261,7 @@ namespace dss {
       // else
       //   send to context's parent-entity (zone)
 
-      SetBuilder builder;
+      SetBuilder builder(m_Apartment);
       Set to;
       if(_event.hasPropertySet(EventPropertyLocation)) {
         to = builder.buildSet(_event.getPropertyByName(EventPropertyLocation), &_event.getRaisedAtZone());

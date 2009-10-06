@@ -15,42 +15,38 @@ typedef unsigned long long xsd__unsignedLong;
  * The token received will be used in any subsequent call. The ip/token pair
  * identifies a session. A Session will time out after n minutes of no activity (default 5).*/
 int dss__Authenticate(char* _userName, char* _password, int& token);
-/** Terminates a session. All resources allocate by the session (e.g. sets) will be
+/** Terminates a session. All resources allocate by the session will be
  * released. */
 int dss__SignOff(int _token, int& result);
-/** Frees the set (_setID) on the server. */
-int dss__FreeSet(int _token, int _setID, bool& result);
 
 /** Creates a set containing all devices which are contained in a group named _groupName.
  * @see dss__CreateEmptySet */
-int dss__ApartmentCreateSetFromGroup(int _token, char* _groupName, int& setID);
+int dss__ApartmentCreateSetFromGroup(int _token, char* _groupName, std::string& result);
 /** Creates a set containing all devices in the given array
  * @see dss__CreateEmptySet*/
-int dss__ApartmentCreateSetFromDeviceIDs(int _token, std::vector<std::string> _ids, int& setID);
+int dss__ApartmentCreateSetFromDeviceIDs(int _token, std::vector<std::string> _ids, std::string& result);
 /** Creates a set containing all devices in the given array */
-int dss__ApartmentCreateSetFromDeviceNames(int _token, std::vector<std::string> _names, int& setID);
-/** Creates an empty set.
- * The set is allocated on the server and must be freed either by a SignOff or a call to FreeSet.*/
-int dss__ApartmentCreateEmptySet(int _token, int& setID);
+int dss__ApartmentCreateSetFromDeviceNames(int _token, std::vector<std::string> _names, std::string& result);
 /** Creates a set containing all devices */
-int dss__ApartmentGetDevices(int _token, int& setID);
+int dss__ApartmentGetDevices(int _token, std::string& result);
+
 /** Returns the device ID for the given _deviceName */
 int dss__ApartmentGetDeviceIDByName(int _token, char* _deviceName, std::string& deviceID);
 
 /** Adds the given device to the set */
-int dss__SetAddDeviceByName(int _token, int _setID, char* _name, bool& result);
+int dss__SetAddDeviceByName(int _token, char* _setSpec, char* _name, std::string& result);
 /** Adds the given device to the set */
-int dss__SetAddDeviceByID(int _token, int _setID, char* _deviceID, bool& result);
+int dss__SetAddDeviceByID(int _token, char* _setSpec, char* _deviceID, std::string& result);
 /** Removes the device from the set */
-int dss__SetRemoveDevice(int _token, int _setID, char* _deviceID, bool& result);
+int dss__SetRemoveDevice(int _token, char* _setSpec, char* _deviceID, std::string& result);
 /** Combines two sets into another set */
-int dss__SetCombine(int _token, int _setID1, int _setID2, int& setID);
+int dss__SetCombine(int _token, char* _setSpec1, char* _setSpec2, std::string& result);
 /** Removes all devices contained in _SetIDToRemove from _setID and copies those into setID */
-int dss__SetRemove(int _token, int _setID, int _setIDToRemove, int& setID);
+int dss__SetRemove(int _token, char* _setSpec, char* _setSpecToRemove, std::string& result);
 /** Removes all devices which don't belong to the specified group */
-int dss__SetByGroup(int _token, int _setID, int _groupID, int& setID);
+int dss__SetByGroup(int _token, char* _setSpec, int _groupID, std::string& result);
 /** Returns an array containing all device ids contained in the given set */
-int dss__SetGetContainedDevices(int _token, int _setID, std::vector<std::string>& deviceIDs);
+int dss__SetGetContainedDevices(int _token, char* _setSpec, std::vector<std::string>& deviceIDs);
 
 /** Looks up the group id for the given group name */
 int dss__ApartmentGetGroupByName(int _token, char* _groupName, int& groupID);
@@ -64,34 +60,34 @@ int dss__ApartmentGetZoneIDs(int _token, std::vector<int>& zoneIDs);
 //--------------------------- Set
 
 /** Sends a turn on command to all devices contained in the set */
-int dss__SetTurnOn(int _token, int _setID, bool& result);
+int dss__SetTurnOn(int _token, char* _setSpec, bool& result);
 /** Sends a turn off command to all devices contained in the set */
-int dss__SetTurnOff(int _token, int _setID, bool& result);
+int dss__SetTurnOff(int _token, char* _setSpec, bool& result);
 /** Increases the param described by _paramID for each device contained in the set. If _paramID
  *  == -1 the default parameter will be increased. */
-int dss__SetIncreaseValue(int _token, int _setID, int _paramID, bool& result);
+int dss__SetIncreaseValue(int _token, char* _setSpec, int _paramID, bool& result);
 /** Decreases the param described by _paramID for each device contained in the set. If _paramID
  *  == -1 the default parameter will be decreased. */
-int dss__SetDecreaseValue(int _token, int _setID, int _paramID, bool& result);
+int dss__SetDecreaseValue(int _token, char* _setSpec, int _paramID, bool& result);
 
 /** Enables all previously disabled devices in the set. */
-int dss__SetEnable(int _token, int _setID, bool& result);
+int dss__SetEnable(int _token, char* _setSpec, bool& result);
 /** Disables all devices in the set. */
-int dss__SetDisable(int _token, int _setID, bool& result);
+int dss__SetDisable(int _token, char* _setSpec, bool& result);
 /** Starts dimming the given parameter on all devices contained in the set. If _directionUp is
  * true, the dimming will increase the parameter specified by _paramID. If _paramID == -1 the
  * default parameter will be dimmed */
-int dss__SetStartDim(int _token, int _setID, bool _directionUp, int _paramID, bool& result);
+int dss__SetStartDim(int _token, char* _setSpec, bool _directionUp, int _paramID, bool& result);
 /** Stops dimming the given parameter on all devices contained in the set. */
-int dss__SetEndDim(int _token, int _setID, int _paramID, bool& result);
+int dss__SetEndDim(int _token, char* _setSpec, int _paramID, bool& result);
 /** Sets the parameter specified by _paramID to _value. If _paramID == -1 the default parameter
  * will be set. */
-int dss__SetSetValue(int _token, int _setID, double _value, int _paramID, bool& result);
+int dss__SetSetValue(int _token, char* _setSpec, double _value, int _paramID, bool& result);
 
 /** Calls the scene _sceneNr on all devices contained int the set _setID. */
-int dss__SetCallScene(int _token, int _setID, int _sceneNr, bool& result);
+int dss__SetCallScene(int _token, char* _setSpec, int _sceneNr, bool& result);
 /** Saves the scene _sceneNr on all devices contained int the set _setID. */
-int dss__SetSaveScene(int _token, int _setID, int _sceneNr, bool& result);
+int dss__SetSaveScene(int _token, char* _setSpec, int _sceneNr, bool& result);
 
 //--------------------------- Apartment
 
@@ -242,10 +238,6 @@ int dss__GroupRemoveDevice(int _token, int _groupID, char* _deviceID, int& resul
 int dss__DeviceGetFunctionID(int _token, char* _deviceID, int& result);
 /** Returns the group id of the specified switch */
 int dss__SwitchGetGroupID(int _token, char* _deviceID, int& result);
-/** Simulates a key press on the specified switch and button
-  * @param _kind One of ("click", "touch", "touchend")
-  */
-//int dss__SwitchSimulateKeypress(int _token, char* _deviceID, int _buttonNr, char* _kind, bool& result);
 
 
 //==================================================== Events

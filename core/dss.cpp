@@ -205,7 +205,7 @@ const char* DataDirectory = "data/";
   void DSS::addDefaultInterpreterPlugins() {
     EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
-    plugin = new EventInterpreterPluginDS485(m_pDS485Interface.get(), m_pEventInterpreter.get());
+    plugin = new EventInterpreterPluginDS485(getApartment(), m_pDS485Interface.get(), m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterPluginJavascript(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);

@@ -53,9 +53,10 @@ namespace dss {
   class EventInterpreterPluginDS485 : public EventInterpreterPlugin {
   private:
     DS485Interface* m_pInterface;
+    Apartment& m_Apartment;
     string getParameter(XMLNodeList& _nodes, const string& _parameterName);
   public:
-    EventInterpreterPluginDS485(DS485Interface* _pInterface, EventInterpreter* _pInterpreter);
+    EventInterpreterPluginDS485(Apartment& _apartment, DS485Interface* _pInterface, EventInterpreter* _pInterpreter);
 
     virtual SubscriptionOptions* createOptionsFromXML(XMLNodeList& _nodes);
 

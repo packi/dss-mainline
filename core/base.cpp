@@ -26,6 +26,8 @@
 #include <cstring>
 #include <sstream>
 
+#include "foreach.h"
+
 namespace dss {
 
   //============================================= std::string parsing/formatting/conversion
@@ -211,6 +213,20 @@ namespace dss {
     return (lenStr >= lenSearch) &&
     (str.compare( 0, lenSearch, searchString ) == 0);
   } // beginsWith
+
+  std::string join(const std::vector<std::string>& _strings, const std::string& _delimiter) {
+    std::ostringstream sstream;
+    bool first = true;
+    foreach(const std::string& string, _strings) {
+      if(first) {
+        first = false;
+        sstream << string;
+      } else {
+        sstream << _delimiter << string;
+      }
+    }
+    return sstream.str();
+  } // join
 
 
 #define                 P_CCITT  0x8408

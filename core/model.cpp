@@ -472,7 +472,17 @@ namespace dss {
       // return a copy of this set if the broadcast zone was requested
       return *this;
     }
-  } // getByZone
+  } // getByZone(id)
+
+  Set Set::getByZone(const std::string& _zoneName) const {
+    Set result;
+    if(isEmpty()) {
+      return result;
+    } else {
+      Zone& zone = get(0).getDevice().getApartment().getZone(_zoneName);
+      return getByZone(zone.getZoneID());
+    }
+  } // getByZone(name)
 
   Set Set::getByModulator(const int _modulatorID) const {
     Set result;
