@@ -20,6 +20,7 @@
 */
 
 #include "dssim.h"
+#include "dsidsim.h"
 
 #include <dlfcn.h>
 
