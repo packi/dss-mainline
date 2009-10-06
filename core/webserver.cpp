@@ -304,11 +304,6 @@ namespace dss {
       .withDocumentation("Undos saving the scene value for sceneNr");
     clsDevice.addMethod("getConsumption")
       .withDocumentation("Returns the consumption of the device in mW.", "Note that this works only for simulated devices at the moment.");
-    clsDevice.addMethod("dsLinkSend")
-      .withParameter("value", "unsigned char", true)
-      .withParameter("lastValue", "boolean", false)
-      .withParameter("writeOnly", "boolean", false)
-      .withDocumentation("Sends a byte to the device.", "If writeOnly is true, the result of this function will be invalid.");
 
 
     RestfulClass& clsCircuit = api.addClass("circuit")
@@ -1038,35 +1033,6 @@ namespace dss {
 
         pDevice->setRawValue(value, parameterID, size);
         return JSONOk();
-      } else if(beginsWith(_method, "device/dSLinkSend")) {
-        int iValue = strToIntDef(_parameter["value"], -1);
-        if(iValue == -1) {
-          return ResultToJSON(false, "Missing parameter 'value'");
-        }
-        if(iValue < 0 || iValue > 0x00ff) {
-          return ResultToJSON(false, "Parameter 'value' is out of range (0-0xff)");
-        }
-        bool writeOnly = false;
-        bool lastValue = false;
-        if(_parameter["writeOnly"] == "true") {
-          writeOnly = true;
-        }
-        if(_parameter["lastValue"] == "true") {
-          lastValue = true;
-        }
-        uint8_t result;
-        try {
-          result = pDevice->dsLinkSend(iValue, lastValue, writeOnly);
-        } catch(std::runtime_error& e) {
-          return ResultToJSON(false, std::string("Error: ") + e.what());
-        }
-        if(writeOnly) {
-          return ResultToJSON(true);
-        } else {
-          std::stringstream sstream;
-          sstream << "{" << ToJSONValue("value") << ":" << ToJSONValue(result) << "}";
-          return JSONOk(sstream.str());
-        }
       } else {
         _handled = false;
         return "";
@@ -1540,6 +1506,53 @@ namespace dss {
         delete frame;
       }
       return ResultToJSON(true);
+    } else if(endsWith(_method, "debug/dSLinkSend")) {
+      string deviceDSIDString = _parameter["dsid"];
+      Device* pDevice = NULL;
+      if(!deviceDSIDString.empty()) {
+        dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
+        if(!(deviceDSID == NullDSID)) {
+          try {
+            Device& device = getDSS().getApartment().getDeviceByDSID(deviceDSID);
+            pDevice = &device;
+          } catch(std::runtime_error& e) {
+            return ResultToJSON(false ,"Could not find device with dsid '" + deviceDSIDString + "'");
+          }
+        } else {
+          return ResultToJSON(false, "Could not parse dsid '" + deviceDSIDString + "'");
+        }
+      } else {
+        return ResultToJSON(false, "Missing parameter 'dsid'");
+      }
+
+      int iValue = strToIntDef(_parameter["value"], -1);
+      if(iValue == -1) {
+        return ResultToJSON(false, "Missing parameter 'value'");
+      }
+      if(iValue < 0 || iValue > 0x00ff) {
+        return ResultToJSON(false, "Parameter 'value' is out of range (0-0xff)");
+      }
+      bool writeOnly = false;
+      bool lastValue = false;
+      if(_parameter["writeOnly"] == "true") {
+        writeOnly = true;
+      }
+      if(_parameter["lastValue"] == "true") {
+        lastValue = true;
+      }
+      uint8_t result;
+      try {
+        result = pDevice->dsLinkSend(iValue, lastValue, writeOnly);
+      } catch(std::runtime_error& e) {
+        return ResultToJSON(false, std::string("Error: ") + e.what());
+      }
+      if(writeOnly) {
+        return ResultToJSON(true);
+      } else {
+        std::stringstream sstream;
+        sstream << "{" << ToJSONValue("value") << ":" << ToJSONValue(result) << "}";
+        return JSONOk(sstream.str());
+      }
     } else {
       _handled = false;
       return "";
