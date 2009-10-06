@@ -7,7 +7,10 @@ APPNAME=$(basename $0)
 
 # target, commands, args
 function call_dss() {
-    URL=http://localhost:8080/json/$1/$2
+    if [ -z "$DSS_HOST" ]; then
+	DSS_HOST=localhost
+    fi
+    URL=http://$DSS_HOST:8080/json/$1/$2
     shift; shift
 
     if [ -n "$1" ]; then
