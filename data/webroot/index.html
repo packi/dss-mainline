@@ -68,10 +68,19 @@ function ApartmentRenderer(into) {
       $('numDevs').innerHTML = devTotal;
     }
   }
+}
 
+function SystemRenderer(into) {
+  var self = this;
+  self.system = new System();
+
+  this.render = function() {
+	$(into).innerHTML = self.system.version();
+  }
 }
 
 var apt = null;
+var sysinfo = null;
 
 
 	function turnOn(devid) {
@@ -125,6 +134,9 @@ var apt = null;
     function doOnload() {
       apt = new ApartmentRenderer("bla");
       apt.render();
+
+      sysinfo = new SystemRenderer("sysinfo");
+      sysinfo.render();
     }
 </script>
   </head>
@@ -137,5 +149,6 @@ var apt = null;
 	<div class="container">
         <div id="bla">(loading...)</div>
 	</div>
+      <div class="container" id="sysinfo">dss</div>
   </body>
 </html>

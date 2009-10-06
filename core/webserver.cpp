@@ -352,6 +352,11 @@ namespace dss {
        .withParameter("location", "string", false)
        .withDocumentation("Raises an event", "The context describes the source of the event. The location, if provided, defines where any action that is taken "
            "by any subscription should happen.");
+    
+    RestfulClass& clsSystem = api.addClass("system");
+    clsSystem.addMethod("version")
+      .withDocumentation("Returns the dss version", 
+                         "This method returns the version string of the dss");
 
     RestfulClass& clsSet = api.addClass("set")
         .withInstanceParameter("self", "string", false);
@@ -1330,6 +1335,17 @@ namespace dss {
     return result;
   } // handleEventCall
 
+  string WebServer::handleSystemCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
+    _handled = true;
+    string result;
+    if(endsWith(_method, "/version")) {
+      return ResultToJSON(true, DSS::getInstance()->versionString());
+    } else {
+      _handled = false;
+    }
+    return result;
+  } // handleEventCall
+
   string WebServer::handleStructureCall(const std::string& _method,
                                         HashMapConstStringString& _parameter,
                                         struct mg_connection* _connection,
@@ -1765,6 +1781,8 @@ namespace dss {
       result = self.handlePropertyCall(method, paramMap, _connection, handled, session);
     } else if(beginsWith(method, "event/")) {
       result = self.handleEventCall(method, paramMap, _connection, handled, session);
+    } else if(beginsWith(method, "system/")) {
+      result = self.handleSystemCall(method, paramMap, _connection, handled, session);
     } else if(beginsWith(method, "structure/")) {
       result = self.handleStructureCall(method, paramMap, _connection, handled, session);
     } else if(beginsWith(method, "sim/")) {

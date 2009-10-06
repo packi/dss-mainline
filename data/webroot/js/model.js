@@ -59,6 +59,17 @@ var Group = Class.create({
   }
 }); // Group
 
+var System = Class.create({
+  sendSyncRequest: function(_functionName, _parameter) {
+      return DSS.sendSyncRequest("system/" + _functionName, _parameter);
+    },
+
+    version: function() {
+      var respObj = this.sendSyncRequest("version", {});
+      return respObj.message;
+    }
+}); // System
+
 var Apartment = Class.create({
 	initialize: function() {
 		this.zones = [];
