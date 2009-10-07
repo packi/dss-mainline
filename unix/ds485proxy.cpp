@@ -733,15 +733,11 @@ namespace dss {
       cmdFrame.getPayload().add<uint16_t>(iDevice);
       int16_t res = int16_t(receiveSingleResult16(cmdFrame, FunctionGroupGetDevKeyForInd));
       if(res < 0) {
-        log("GetDevicesInGroup: Negative device id received '" + intToString(res) + "' for index " + intToString(iDevice), lsFatal);
+        log("GetDevicesInGroup: Negative device id received '" + intToString(res) + "' for index " + intToString(iDevice));
       } else {
         result.push_back(res);
       }
-      try {
-        checkResultCode(res);
-      } catch(DS485ApiError& err) {
-        log(std::string("Error reported back by dSM: ") + err.what(), lsFatal);
-      }
+      checkResultCode(res);
     }
 
     return result;
