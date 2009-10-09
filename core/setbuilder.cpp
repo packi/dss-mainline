@@ -139,17 +139,29 @@ namespace dss {
       Set result;
       result.addDevice(ref);
       return result;
-    } catch(std::exception&) {
+    } catch(ItemNotFoundException&) {
     }
 
-    // TODO: we might need to query zone 0 for the identifier too
+    // check for a local group
     Group* grp = _zone.getGroup(_identifier);
     if(grp != NULL) {
       Set result = _set.getByGroup(*grp);
       return result;
     }
+
+    // check for a global group
+    try {
+      return _set.getByGroup(_identifier);
+    } catch(ItemNotFoundException&) {
+    }
+
+    // check for a zone name
+    try {
+      return _set.getByZone(_identifier);
+    } catch(ItemNotFoundException&) {
+    }
+
     // return empty set
-    // TODO: throw exception?
     Set result;
     return result;
   } // restrictBy
