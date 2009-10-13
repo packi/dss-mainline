@@ -51,6 +51,8 @@
 #include "metering/fake_meter.h"
 #include "foreach.h"
 
+#include "unix/systeminfo.h"
+
 #include <cassert>
 #include <string>
 #include <sstream>
@@ -253,6 +255,9 @@ const char* DataDirectory = "data/";
     }
     
     dss::Logger::getInstance()->log(versionString(), lsInfo);
+
+    SystemInfo info;
+    info.collect();
 
     m_State = ssInitializingSubsystems;
     std::for_each(m_Subsystems.begin(), m_Subsystems.end(), InitializeSubsystem);
