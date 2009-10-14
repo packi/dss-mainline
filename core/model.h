@@ -551,6 +551,11 @@ namespace dss {
     /** Returns the meter value in Wh */
     unsigned long getEnergyMeterValue();
 
+    /** Returns the last consumption in mW returned from dS485 Bus, but never request it*/
+    unsigned long getCachedPowerConsumption();
+    /** Returns the last meter value in Wh returned from dS485 Bus, but never request it*/
+    unsigned long getCachedEnergyMeterValue();
+    
     /** Returns the orange energy level */
     int getEnergyLevelOrange() const { return m_EnergyLevelOrange; }
     /** Returns the red energy level */

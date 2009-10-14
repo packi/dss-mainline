@@ -1678,7 +1678,15 @@ namespace dss {
     return m_EnergyMeterValue;
   } // getEnergyMeterValue
 
+  unsigned long Modulator::getCachedPowerConsumption() {
+    return m_PowerConsumption;
+  } // getPowerConsumption
 
+  unsigned long Modulator::getCachedEnergyMeterValue() {
+    return m_EnergyMeterValue;
+  } // getEnergyMeterValue
+
+  
   //================================================== Zone
 
   Zone::~Zone() {
