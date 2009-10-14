@@ -21,15 +21,27 @@
 
 #include "systeminfo.h"
 
+#ifdef linux
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <netinet/in.h>
+#endif
+
 #include <arpa/inet.h>
+
+#ifdef __APPLE__
+#include <ifaddrs.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <net/if_dl.h>
+#endif
+
 #include <cstring>
 
 #include "core/logger.h"
 #include "core/dss.h"
 #include "core/propertysystem.h"
+#include "core/base.h"
 
 namespace dss {
 
@@ -111,7 +123,7 @@ namespace dss {
     close(sock);
   } // enumerateInterfaces
 #else
-bool SystemInfo::enumerateInterfaces() {
+void SystemInfo::enumerateInterfaces() {
   PropertySystem& propSys = DSS::getInstance()->getPropertySystem();
   PropertyNodePtr hostNode = propSys.createProperty("/system/host");
   PropertyNodePtr interfacesNode = hostNode->createProperty("interfaces");
@@ -121,27 +133,34 @@ bool SystemInfo::enumerateInterfaces() {
   if(getifaddrs(&pIfAddrs) == 0) {
     struct ifaddrs* pCurrent = pIfAddrs;
     while(pCurrent != NULL) {
-      cout << pCurrent->ifa_name << endl;
-      if(_interface.empty() || _interface == pCurrent->ifa_name) {
-        bcopy(pCurrent->ifa_addr, _buf, 6);
-
-        char mac[32];
-        for(int j=0, k=0; j<6; j++) {
-            k+=snprintf(mac+k, sizeof(mac)-k-1, j ? ":%02X" : "%02X",
-                pCurrent->ifa_addr[j]);
+      PropertyNodePtr intfNode = interfacesNode->createProperty(pCurrent->ifa_name);
+      if(pCurrent->ifa_addr->sa_family == AF_LINK) {
+        struct sockaddr_dl* addrDL = (struct sockaddr_dl*)pCurrent->ifa_addr;
+        char* mac = link_ntoa(addrDL);
+        if(mac != NULL) {
+          std::string macStr = mac;
+          std::string ifName = pCurrent->ifa_name;
+          if(macStr != ifName) {
+            if(beginsWith(macStr, ifName)) {
+              macStr = macStr.substr(ifName.length());
+              if(beginsWith(macStr, ":")) {
+                macStr = macStr.substr(1);
+              }
+            }
+            intfNode->createProperty("mac")->setStringValue(macStr);
+          }
         }
-        mac[sizeof(mac)-1]='\0';
-
-        PropertyNodePtr intfNode = interfacesNode->createProperty(pCurrent->ifa_name);
-        intfNode->createProperty("mac")->setStringValue(mac);
-        //intfNode->createProperty("ip")->setStringValue(ipToString(pCurrent));
-        intfNode->createProperty("netmask")->setStringValue(ipToString(pCurrent->ifa_netmask));
+      } else {
+        intfNode->createProperty("ip")->setStringValue(ipToString(pCurrent->ifa_addr));
+        if(pCurrent->ifa_netmask != NULL) {
+          intfNode->createProperty("netmask")->setStringValue(ipToString(pCurrent->ifa_netmask));
+        }
       }
+
       pCurrent = pCurrent->ifa_next;
     }
   }
   freeifaddrs(pIfAddrs);
-  return false;
 }
 #endif
 
