@@ -566,28 +566,30 @@ namespace dss {
     return sstream.str();
   } // toJSONValue(Group)
 
-  string ToJSONValue(Zone& _zone) {
+  string ToJSONValue(Zone& _zone, bool _includeDevices = true) {
     std::stringstream sstream;
     sstream << "{ \"id\": " << _zone.getZoneID() << ",";
     string name = _zone.getName();
     if(name.size() == 0) {
       name = string("Zone ") + intToString(_zone.getZoneID());
     }
-    sstream << "\"name\": " << ToJSONValue(name) << ", ";
-    sstream << "\"isPresent\": " << ToJSONValue(_zone.isPresent()) << ", ";
+    sstream << ToJSONValue("name") << ": " << ToJSONValue(name) << ", ";
+    sstream << ToJSONValue("isPresent") << ": " << ToJSONValue(_zone.isPresent()) << ", ";
 
-    Set devices = _zone.getDevices();
-    sstream << ToJSONValue(devices, "devices");
-    sstream << "," << ToJSONValue("groups") << ": [";
-    bool first = true;
-    foreach(Group* pGroup, _zone.getGroups()) {
-      if(!first) {
-        sstream << ",";
+    if(_includeDevices) {
+      Set devices = _zone.getDevices();
+      sstream << ToJSONValue(devices, "devices");
+      sstream << "," << ToJSONValue("groups") << ": [";
+      bool first = true;
+      foreach(Group* pGroup, _zone.getGroups()) {
+        if(!first) {
+          sstream << ",";
+        }
+        first = false;
+        sstream  << ToJSONValue(*pGroup);
       }
-      first = false;
-      sstream  << ToJSONValue(*pGroup);
+      sstream << "] ";
     }
-    sstream << "] ";
 
     sstream << "} ";
     return sstream.str();
@@ -1795,7 +1797,11 @@ namespace dss {
 
     if(!handled) {
       emitHTTPHeader(404, _connection, "application/json");
-      result = "{ ok: " + ToJSONValue(false) + ", message: " + ToJSONValue("Call to unknown function") + " }";
+      std::ostringstream sstream;
+      sstream << "{" << ToJSONValue("ok") << ":" << ToJSONValue(false) << ",";
+      sstream << ToJSONValue("message") << ":" << ToJSONValue("Call to unknown function");
+      sstream << "}";
+      result = sstream.str();
       self.log("Unknown function '" + method + "'", lsError);
     } else {
       emitHTTPHeader(200, _connection, "application/json");
