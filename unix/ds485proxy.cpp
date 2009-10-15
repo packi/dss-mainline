@@ -25,10 +25,13 @@
 #include "core/dss.h"
 #include "core/logger.h"
 #include "core/ds485const.h"
-#include "core/sim/dssim.h"
 #include "core/event.h"
 #include "core/propertysystem.h"
 #include "core/foreach.h"
+
+#ifdef WITH_SIM
+#include "core/sim/dssim.h"
+#endif
 
 #include <sstream>
 
@@ -250,10 +253,12 @@ namespace dss {
 
   bool DS485Proxy::isReady() {
 	  return isRunning()
+#ifdef WITH_SIM
+	         &&  DSS::getInstance()->getSimulation().isReady() // allow the simulation to run on it's own
+#endif
 	         && ((m_DS485Controller.getState() == csSlave) ||
 	             (m_DS485Controller.getState() == csDesignatedMaster) ||
-	             (m_DS485Controller.getState() == csError)) // allow the simulation to run on it's own
-	         &&  DSS::getInstance()->getSimulation().isReady();
+	             (m_DS485Controller.getState() == csError)); 
   } // isReady
 
   FittingResult DS485Proxy::bestFit(const Set& _set) {
@@ -460,15 +465,19 @@ namespace dss {
   } // sendCommand(device)
 
   void DS485Proxy::sendFrame(DS485CommandFrame& _frame) {
-    bool broadcast = _frame.getHeader().isBroadcast();
-    bool sim = isSimAddress(_frame.getHeader().getDestination());
     _frame.setFrameSource(fsDSS);
+    bool broadcast = _frame.getHeader().isBroadcast();
+#ifdef WITH_SIM
+    bool sim = isSimAddress(_frame.getHeader().getDestination());
     if(broadcast || sim) {
       log("Sending packet to sim");
       if(DSS::hasInstance()) {
         getDSS().getSimulation().process(_frame);
       }
     }
+#else
+    bool sim = false;
+#endif
     if(broadcast || !sim) {
       if((m_DS485Controller.getState() == csSlave) || (m_DS485Controller.getState() == csMaster)) {
         log("Sending packet to hardware");
@@ -500,8 +509,9 @@ namespace dss {
     boost::shared_ptr<FrameBucketCollector> result(new FrameBucketCollector(this, _functionID, sourceID));
     sendFrame(_frame);
     return result;
-  }
+  } // sendFrameAndInstallBucket
 
+#ifdef WITH_SIM
   bool DS485Proxy::isSimAddress(const uint8_t _addr) {
     if(DSS::hasInstance()) {
       return getDSS().getSimulation().isSimAddress(_addr);
@@ -509,6 +519,7 @@ namespace dss {
       return true;
     }
   } // isSimAddress
+#endif
 
   void DS485Proxy::checkResultCode(const int _resultCode) {
     if(_resultCode < 0) {
@@ -1119,9 +1130,11 @@ namespace dss {
   void DS485Proxy::initialize() {
     Subsystem::initialize();
     m_DS485Controller.addFrameCollector(this);
+#ifdef WITH_SIM
     if(DSS::hasInstance()) {
       getDSS().getSimulation().addFrameCollector(this);
     }
+#endif
   }
 
   void DS485Proxy::doStart() {
@@ -1321,9 +1334,11 @@ namespace dss {
 
             PayloadDissector pd(frame->getPayload());
 
+#ifdef WITH_SIM
             if(frame->getFrameSource() == fsWire) {
               getDSS().getSimulation().process(*frame.get());
             }
+#endif
             if(functionID == FunctionZoneAddDevice) {
               log("New device");
               pd.get<uint8_t>(); // function id

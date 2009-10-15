@@ -22,6 +22,10 @@
 #ifndef _DS485_PROXY_H_INCLUDED
 #define _DS485_PROXY_H_INCLUDED
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <bitset>
 
 #include "core/model.h"
@@ -130,7 +134,9 @@ namespace dss {
                      public    IDS485FrameCollector {
   private:
     FittingResult bestFit(const Set& _set);
+#ifdef WITH_SIM
     bool isSimAddress(const uint8_t _addr);
+#endif
 
     /** Returns a single frame or NULL if none should arrive within the timeout (1000ms) */
     boost::shared_ptr<ReceivedFrame> receiveSingleFrame(DS485CommandFrame& _frame, uint8_t _functionID);
