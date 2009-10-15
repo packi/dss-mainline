@@ -24,6 +24,8 @@
 #include "core/base.h"
 #include "core/logger.h"
 #include "core/ds485const.h"
+#include "core/dss.h"
+#include "core/propertysystem.h"
 
 #include <stdexcept>
 #include <sstream>
@@ -252,6 +254,7 @@ namespace dss {
     m_StationID = 0xFF;
     time_t responseSentAt;
     time_t tokenReceivedAt;
+    m_DSID = dsid_t::fromString(DSS::getInstance()->getPropertySystem().getStringValue("/system/dsid"));
 
     // prepare token frame
     boost::scoped_ptr<DS485Frame> token(new DS485Frame());

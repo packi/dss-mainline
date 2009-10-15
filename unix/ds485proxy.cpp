@@ -244,7 +244,7 @@ namespace dss {
       _pDSS->getPropertySystem().createProperty(getPropertyBasePath() + "state")
             ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, std::string>(m_DS485Controller, &DS485Controller::getStateAsString));
 
-      _pDSS->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "dsid", "3504175FE0000000DEADBEEF", true, false);
+      _pDSS->getPropertySystem().setStringValue("/system/dsid", "3504175FE0000000DEADBEEF", true, false);
     }
   } // ctor
 
