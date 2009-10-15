@@ -1356,8 +1356,6 @@ namespace dss {
     _handled = true;
     StructureManipulator manipulator(getDSS().getDS485Interface(), getDSS().getApartment());
     if(endsWith(_method, "structure/zoneAddDevice")) {
-      bool ok = true;
-
       string devidStr = _parameter["devid"];
       if(!devidStr.empty()) {
         dsid_t devid = dsid::fromString(devidStr);
@@ -1378,11 +1376,11 @@ namespace dss {
             } catch(ItemNotFoundException&) {
               return ResultToJSON(false, "Could not find zone");
             }
-          } catch(std::runtime_error&) {
-            ok = false;
+          } catch(std::runtime_error& err) {
+            return ResultToJSON(false, err.what());
           }
         }
-        return ResultToJSON(ok, "");
+        return ResultToJSON(true);
       } else {
         return ResultToJSON(false, "Need parameter devid");
       }
