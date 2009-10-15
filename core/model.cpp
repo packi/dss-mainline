@@ -1063,7 +1063,8 @@ namespace dss {
   } // run
 
   void Apartment::addModelEvent(ModelEvent* _pEvent) {
-    if(m_IsInitializing) {
+    // filter out dirty events, as this will rewrite apartment.xml
+    if(m_IsInitializing && (_pEvent->getEventType() == ModelEvent::etModelDirty)) {
       delete _pEvent;
     } else {
       m_ModelEventsMutex.lock();
