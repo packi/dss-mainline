@@ -107,6 +107,9 @@ int main (int argc, char* argv[]) {
 #endif
       ("prop", po::value<vector<string> >(), "sets a property")
       ("version,v", "print version information and exit")
+#ifndef __APPLE__ // daemon() is marked as deprecated on OS X
+      ("daemonize,d", "start as a daemon")
+#endif
   ;
 
   po::variables_map vm;
@@ -146,6 +149,10 @@ int main (int argc, char* argv[]) {
     snifferDev = vm["sniff"].as<string>();
   }
 
+#ifndef __APPLE__
+  bool daemonize = vm.count("daemonize") != 0;
+#endif
+
 #ifdef WITH_TESTS
   cout << "compiled WITH_TESTS" << endl;
   if(runTests) {
@@ -167,6 +174,15 @@ int main (int argc, char* argv[]) {
     if(!quitAfterTests) {
       // start DSS
       dss::DSS::getInstance()->initialize(properties);
+#ifndef __APPLE__
+      if(daemonize) {
+        int result = daemon(1,0);
+        if(result != 0) {
+          perror("daemon()");
+          return 0;
+        }
+      }
+#endif
       dss::DSS::getInstance()->run();
     }
     if(dss::DSS::hasInstance()) {
