@@ -63,6 +63,10 @@ namespace dss {
   : m_pImpl(new DS485ClientImpl)
   { } // ctor
 
+  DS485Client::~DS485Client() {
+    delete m_pImpl;
+  } // dtor
+
   void DS485Client::sendFrameDiscardResult(DS485CommandFrame& _frame) {
     DSS::getInstance()->getDS485Interface().sendFrame(_frame);
   } // sendFrameDiscardResult

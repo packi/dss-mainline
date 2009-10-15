@@ -25,7 +25,6 @@
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 
 namespace dss {
 
@@ -35,6 +34,7 @@ namespace dss {
   class __attribute__ ((visibility("default"))) DS485Client {
   public:
     DS485Client();
+    ~DS485Client();
 
     typedef void (*FrameCallback_t)(boost::shared_ptr<DS485CommandFrame>);
 
@@ -49,7 +49,7 @@ namespace dss {
     /** Unsubscribes the first description that matches \a _functionID and \a _source. */
     void unsubscribeFrom(int _functionID, int _source);
   private:
-    boost::scoped_ptr<DS485ClientImpl> m_pImpl;
+    DS485ClientImpl* m_pImpl;
   }; // DS485Client
 }
 
