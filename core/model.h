@@ -656,9 +656,11 @@ namespace dss {
     DeviceVector m_Devices;
     std::vector<const Modulator*> m_Modulators;
     std::vector<Group*> m_Groups;
+    int m_FirstZoneOnModulator;
   public:
   	Zone(const int _id)
-  	: m_ZoneID(_id)
+  	: m_ZoneID(_id),
+          m_FirstZoneOnModulator(-1)
   	{}
     virtual ~Zone();
     virtual Set getDevices() const;
@@ -692,6 +694,13 @@ namespace dss {
     int getZoneID() const;
     /** Sets the zones id */
     void setZoneID(const int _value);
+
+    /** Returns the ID of the modulator the zone is the first 
+      * zone on.
+      * @return The modulator id, or -1 
+      */
+    int getFirstZoneOnModulator() { return m_FirstZoneOnModulator; }
+    void setFirstZoneOnModulator(const int _value) { m_FirstZoneOnModulator = _value; }
 
     /** Returns a list of the modulators the zone is registered with. */
     std::vector<int> getModulators() const;

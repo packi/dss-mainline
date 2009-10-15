@@ -574,9 +574,14 @@ namespace dss {
       name = string("Zone ") + intToString(_zone.getZoneID());
     }
     sstream << ToJSONValue("name") << ": " << ToJSONValue(name) << ", ";
-    sstream << ToJSONValue("isPresent") << ": " << ToJSONValue(_zone.isPresent()) << ", ";
+    sstream << ToJSONValue("isPresent") << ": " << ToJSONValue(_zone.isPresent());
+    if(_zone.getFirstZoneOnModulator() != -1) {
+      sstream << ", " << ToJSONValue("firstZoneOnModulator") 
+              << ": " << ToJSONValue(_zone.getFirstZoneOnModulator());
+    }
 
     if(_includeDevices) {
+      sstream << ", ";
       Set devices = _zone.getDevices();
       sstream << ToJSONValue(devices, "devices");
       sstream << "," << ToJSONValue("groups") << ": [";

@@ -755,12 +755,17 @@ namespace dss {
     }
     _modulator.setIsPresent(true);
 
+    bool firstZone = true;
     vector<int> zoneIDs = interface.getZones(modulatorID);
     foreach(int zoneID, zoneIDs) {
       log("  Found zone with id: " + intToString(zoneID));
       Zone& zone = allocateZone(zoneID);
       zone.addToModulator(_modulator);
       zone.setIsPresent(true);
+      if(firstZone) {
+        zone.setFirstZoneOnModulator(modulatorID);
+        firstZone = false;
+      }
 
       vector<int> devices = interface.getDevicesInZone(modulatorID, zoneID);
       foreach(int devID, devices) {
