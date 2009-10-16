@@ -1326,15 +1326,29 @@ namespace dss {
       string name = _parameter["name"];
       string location = _parameter["location"];
       string context = _parameter["context"];
+      string parameter = _parameter["parameter"];
 
-      boost::shared_ptr<Event> e(new Event(name));
+      boost::shared_ptr<Event> evt(new Event(name));
       if(!context.empty()) {
-        e->setContext(context);
+        evt->setContext(context);
       }
       if(!location.empty()) {
-        e->setLocation(location);
+        evt->setLocation(location);
       }
-      getDSS().getEventQueue().pushEvent(e);
+      std::vector<std::string> params = dss::splitString(parameter, ';');
+      for(std::vector<std::string>::iterator iParam = params.begin(), e = params.end();
+          iParam != e; ++iParam)
+      {
+        std::vector<std::string> nameValue = dss::splitString(*iParam, '=');
+        if(nameValue.size() == 2) {
+          dss::Logger::getInstance()->log("WebServer::handleEventCall: Got parameter '" + nameValue[0] + "'='" + nameValue[1] + "'");
+          evt->setProperty(nameValue[0], nameValue[1]);
+        } else {
+          dss::Logger::getInstance()->log(string("Invalid parameter found WebServer::handleEventCall: ") + *iParam );
+        }
+      }
+      
+      getDSS().getEventQueue().pushEvent(evt);
       return ResultToJSON(true);
     } else {
       _handled = false;
