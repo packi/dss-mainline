@@ -467,6 +467,10 @@ namespace dss {
       return result;
     }
   } // count
+  
+  int PropertyNode::size() const {
+    return m_ChildNodes.size();
+  } // size
 
   void PropertyNode::clearValue() {
     if(m_PropVal.valueType == vTypeString) {

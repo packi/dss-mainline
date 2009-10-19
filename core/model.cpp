@@ -238,7 +238,16 @@ namespace dss {
       if((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
         std::string basePath = "zones/zone" + intToString(m_ZoneID);
         if(m_pAliasNode == NULL) {
+          PropertyNodePtr node = m_pApartment->getPropertyNode()->getProperty(basePath + "/" + m_DSID.toString());
+          if(node != NULL) {
+            Logger::getInstance()->log("Device::setZoneID: Target node for device " + m_DSID.toString() + " already exists", lsError);
+            if(node->size() > 0) {
+              Logger::getInstance()->log("Device::setZoneID: Target node for device " + m_DSID.toString() + " has children", lsFatal);
+              return;
+            }
+          }
           m_pAliasNode = m_pApartment->getPropertyNode()->createProperty(basePath + "/" + m_DSID.toString());
+          
           m_pAliasNode->alias(m_pPropertyNode);
         } else {
           PropertyNodePtr base = m_pApartment->getPropertyNode()->getProperty(basePath);

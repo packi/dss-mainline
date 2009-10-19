@@ -367,6 +367,7 @@ namespace dss {
      * @return The child or NULL if not found */
     PropertyNodePtr getProperty(const std::string& _propPath);
     int count(const std::string& _propertyName);
+    int size() const;
 
     /** Sets the value as string. */
     void setStringValue(const char* _value);
