@@ -923,6 +923,8 @@ namespace dss {
         devices.perform(action);
       }
     }
+    boost::shared_ptr<Event> modulatorReadyEvent(new Event("datamodel_changed"));
+    getDSS().getEventQueue().pushEvent(modulatorReadyEvent);
   } // initializeFromBus
 
   void Apartment::newModulator(int _modulatorBusID) {
@@ -951,8 +953,16 @@ namespace dss {
   } // lostModulator
 
   void Apartment::modulatorReady(int _modulatorBusID) {
-    log("Modulator with id: " + intToString(_modulatorBusID) + " is ready");
+    log("Modulator with id: " + intToString(_modulatorBusID) + " is ready", lsInfo);
     initializeFromBus();
+    try { 
+      Modulator& mod = getModulatorByBusID(_modulatorBusID);
+      boost::shared_ptr<Event> modulatorReadyEvent(new Event("modulator_ready"));
+      modulatorReadyEvent->setProperty("modulator", mod.getDSID().toString());
+      getDSS().getEventQueue().pushEvent(modulatorReadyEvent);
+    } catch(ItemNotFoundException&) {
+      Logger::getInstance()->log("modulatorReady: Could not get DSID of modulator", lsFatal);
+    }
   } // modulatorReady
 
   void Apartment::handleModelEvents() {
@@ -1044,6 +1054,11 @@ namespace dss {
   }
 
   void Apartment::execute() {
+    {
+      boost::shared_ptr<Event> runningEvent(new Event("running"));
+      getDSS().getEventQueue().pushEvent(runningEvent);
+    }
+
     // load devices/modulators/etc. from a config-file
     std::string configFileName = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile");
     if(!fileExists(configFileName)) {
@@ -1051,6 +1066,12 @@ namespace dss {
     } else {
       readConfigurationFromXML(configFileName);
     }
+    
+    {
+      boost::shared_ptr<Event> configReadEvent(new Event("config_read"));
+      getDSS().getEventQueue().pushEvent(configReadEvent);
+    }
+
 
     DS485Interface& interface = DSS::getInstance()->getDS485Interface();
 
@@ -1058,6 +1079,11 @@ namespace dss {
 
     while(!interface.isReady() && !m_Terminated) {
       sleepMS(1000);
+    }
+
+    {
+      boost::shared_ptr<Event> readyEvent(new Event("interface_ready"));
+      getDSS().getEventQueue().pushEvent(readyEvent);
     }
 
     log("Apartment::execute: Interface is ready, enumerating model", lsInfo);
@@ -1573,6 +1599,13 @@ namespace dss {
     foreach(int iGroup, groups) {
       log("  Adding to Group: " + intToString(iGroup));
       dev.addToGroup(iGroup);
+    }
+    
+    {
+      boost::shared_ptr<Event> readyEvent(new Event("new_device"));
+      readyEvent->setProperty("device", dsid.toString());
+      readyEvent->setProperty("zone", intToString(_zoneID));
+      getDSS().getEventQueue().pushEvent(readyEvent);
     }
   } // onAddDevice
 
