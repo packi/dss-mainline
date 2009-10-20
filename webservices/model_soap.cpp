@@ -337,7 +337,7 @@ int dss__ApartmentGetZoneByName(struct soap *soap, int _token,  char* _zoneName,
   }
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
   try {
-    zoneID = apt.getZone(_zoneName).getZoneID();
+    zoneID = apt.getZone(_zoneName).getID();
   } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Could not find zone", NULL);
   }
@@ -356,7 +356,7 @@ int dss__ApartmentGetZoneIDs(struct soap *soap, int _token, std::vector<int>& zo
 //  zoneIDs.__size = numZones;
   //zoneIDs.__ptr = (long unsigned int*)soap_malloc(soap, numZones * sizeof(long unsigned int));
   for(int iZoneID = 0; iZoneID < numZones; iZoneID++) {
-    zoneIDs.push_back(zones[iZoneID]->getZoneID());
+    zoneIDs.push_back(zones[iZoneID]->getID());
   }
 
   return SOAP_OK;

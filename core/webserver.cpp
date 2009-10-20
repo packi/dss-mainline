@@ -568,10 +568,10 @@ namespace dss {
 
   string ToJSONValue(Zone& _zone, bool _includeDevices = true) {
     std::stringstream sstream;
-    sstream << "{ \"id\": " << _zone.getZoneID() << ",";
+    sstream << "{ \"id\": " << _zone.getID() << ",";
     string name = _zone.getName();
     if(name.size() == 0) {
-      name = string("Zone ") + intToString(_zone.getZoneID());
+      name = string("Zone ") + intToString(_zone.getID());
     }
     sstream << ToJSONValue("name") << ": " << ToJSONValue(name) << ", ";
     sstream << ToJSONValue("isPresent") << ": " << ToJSONValue(_zone.isPresent());
@@ -629,7 +629,7 @@ namespace dss {
         ipZone != e; ++ipZone)
     {
       Zone* pZone = *ipZone;
-      if(pZone->getZoneID() == 0) {
+      if(pZone->getID() == 0) {
         // zone 0 holds all devices, so we're going to skip it
         continue;
       }

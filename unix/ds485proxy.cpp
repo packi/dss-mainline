@@ -77,12 +77,12 @@ namespace dss {
     Set singleDevices;
 
     if(OptimizerDebug) {
-      Logger::getInstance()->log("Finding fit for zone " + intToString(_zone.getZoneID()));
+      Logger::getInstance()->log("Finding fit for zone " + intToString(_zone.getID()));
     }
 
 
     if(_zone.getDevices().length() == _set.length()) {
-      Logger::getInstance()->log(string("Optimization: Set contains all devices of zone ") + intToString(_zone.getZoneID()));
+      Logger::getInstance()->log(string("Optimization: Set contains all devices of zone ") + intToString(_zone.getID()));
         std::bitset<63> possibleGroups;
         possibleGroups.set();
         for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
@@ -314,7 +314,7 @@ namespace dss {
       toZone = 0;
       log("sendCommand(Zone,GroupID): Only one zone present, sending frame to broadcast zone");
     } else {
-      toZone = _zone.getZoneID();
+      toZone = _zone.getID();
     }
     if(_cmd == cmdTurnOn) {
       frame.getPayload().add<uint8_t>(FunctionGroupCallScene);
@@ -322,21 +322,21 @@ namespace dss {
       frame.getPayload().add<uint16_t>(_groupID);
       frame.getPayload().add<uint16_t>(SceneMax);
       sendFrame(frame);
-      log("turn on: zone " + intToString(_zone.getZoneID()) + " group: " + intToString(_groupID));
+      log("turn on: zone " + intToString(_zone.getID()) + " group: " + intToString(_groupID));
     } else if(_cmd == cmdTurnOff) {
       frame.getPayload().add<uint8_t>(FunctionGroupCallScene);
       frame.getPayload().add<uint16_t>(toZone);
       frame.getPayload().add<uint16_t>(_groupID);
       frame.getPayload().add<uint16_t>(SceneMin);
       sendFrame(frame);
-      log("turn off: zone " + intToString(_zone.getZoneID()) + " group: " + intToString(_groupID));
+      log("turn off: zone " + intToString(_zone.getID()) + " group: " + intToString(_groupID));
     } else if(_cmd == cmdCallScene) {
       frame.getPayload().add<uint8_t>(FunctionGroupCallScene);
       frame.getPayload().add<uint16_t>(toZone);
       frame.getPayload().add<uint16_t>(_groupID);
       frame.getPayload().add<uint16_t>(_param);
       sendFrame(frame);
-      log("call scene: zone " + intToString(_zone.getZoneID()) + " group: " + intToString(_groupID));
+      log("call scene: zone " + intToString(_zone.getID()) + " group: " + intToString(_groupID));
     } else if(_cmd == cmdSaveScene) {
       frame.getPayload().add<uint8_t>(FunctionGroupSaveScene);
       frame.getPayload().add<uint16_t>(toZone);

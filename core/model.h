@@ -691,7 +691,7 @@ namespace dss {
     void removeGroup(UserGroup* _group);
 
     /** Returns the zones id */
-    int getZoneID() const;
+    int getID() const;
     /** Sets the zones id */
     void setZoneID(const int _value);
 
@@ -963,7 +963,7 @@ namespace __gnu_cxx
   template<>
   struct hash<const dss::Zone*>  {
     size_t operator()(const dss::Zone* x) const  {
-      return x->getZoneID();
+      return x->getID();
     }
   };
 }

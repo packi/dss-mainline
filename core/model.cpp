@@ -489,7 +489,7 @@ namespace dss {
       return result;
     } else {
       Zone& zone = get(0).getDevice().getApartment().getZone(_zoneName);
-      return getByZone(zone.getZoneID());
+      return getByZone(zone.getID());
     }
   } // getByZone(name)
 
@@ -710,7 +710,7 @@ namespace dss {
   } // start
 
   void Apartment::addDefaultGroupsToZone(Zone& _zone) {
-    int zoneID = _zone.getZoneID();
+    int zoneID = _zone.getID();
 
     Group* grp = new Group(GroupIDBroadcast, zoneID, *this);
     grp->setName("broadcast");
@@ -815,7 +815,7 @@ namespace dss {
               dev.addToGroup(groupID);
               if(zone.getGroup(groupID) == NULL) {
                 log("     Adding new group to zone");
-                zone.addGroup(new Group(groupID, zone.getZoneID(), *this));
+                zone.addGroup(new Group(groupID, zone.getID(), *this));
               }
               Group* pGroup = zone.getGroup(groupID);
               pGroup->setIsPresent(true);
@@ -1238,7 +1238,7 @@ namespace dss {
 
   void ZoneToXML(const Zone* _pZone, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
     AutoPtr<Element> pZoneNode = _pDocument->createElement("zone");
-    pZoneNode->setAttribute("id", intToString(_pZone->getZoneID()));
+    pZoneNode->setAttribute("id", intToString(_pZone->getID()));
     if(!_pZone->getName().empty()) {
       AutoPtr<Element> pNameNode = _pDocument->createElement("name");
       AutoPtr<Text> txtNode = _pDocument->createTextNode(_pZone->getName());
@@ -1375,7 +1375,7 @@ namespace dss {
 
   Zone& Apartment::getZone(const int _id) {
     foreach(Zone* zone, m_Zones) {
-      if(zone->getZoneID() == _id) {
+      if(zone->getID() == _id) {
         return *zone;
       }
     }
@@ -1469,7 +1469,7 @@ namespace dss {
     }
 
     foreach(Zone* zone, m_Zones) {
-  		if(zone->getZoneID() == _zoneID) {
+  		if(zone->getID() == _zoneID) {
   			return *zone;
   		}
   	}
@@ -1821,9 +1821,9 @@ namespace dss {
     return NULL;
   } // getGroup
 
-  int Zone::getZoneID() const {
+  int Zone::getID() const {
     return m_ZoneID;
-  } // getZoneID
+  } // getID
 
   void Zone::setZoneID(const int _value) {
     m_ZoneID = _value;

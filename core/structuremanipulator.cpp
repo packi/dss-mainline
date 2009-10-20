@@ -18,7 +18,7 @@ namespace dss {
     if(!_modulator.isPresent()) {
       throw std::runtime_error("Need modulator to be present");
     }
-    m_Interface.createZone(_modulator.getBusID(), _zone.getZoneID());
+    m_Interface.createZone(_modulator.getBusID(), _zone.getID());
     _zone.addToModulator(_modulator);
     _zone.setIsPresent(true);
   } // createZone
@@ -32,8 +32,8 @@ namespace dss {
     if(!_zone.registeredOnModulator(targetModulator)) {
       createZone(targetModulator, _zone);
     }
-    m_Interface.setZoneID(targetModulator.getBusID(), _device.getShortAddress(), _zone.getZoneID());
-    _device.setZoneID(_zone.getZoneID());
+    m_Interface.setZoneID(targetModulator.getBusID(), _device.getShortAddress(), _zone.getID());
+    _device.setZoneID(_zone.getID());
     DeviceReference ref(_device, m_Apartment);
     _zone.addDevice(ref);
 
@@ -54,7 +54,7 @@ namespace dss {
     if(presentDevicesInZoneOfModulator.length() != 0) {
       throw std::runtime_error("cannot delete zone if there are still devices present");
     }
-    m_Interface.removeZone(_modulator.getBusID(), _zone.getZoneID());
+    m_Interface.removeZone(_modulator.getBusID(), _zone.getID());
     _zone.removeFromModulator(_modulator);
     if(_zone.getModulators().empty()) {
       _zone.setIsPresent(false);
