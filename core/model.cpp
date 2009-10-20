@@ -881,9 +881,12 @@ namespace dss {
       // bus-id, sw-version, hw-version, name, device-id
       int modulatorID = modulatorSpec.get<0>();
       log("Found modulator with id: " + intToString(modulatorID));
-      dsid_t modDSID = interface.getDSIDOfModulator(modulatorID);
-      if(modDSID == NullDSID) {
-        log("Could not get DSID of modulator with last known bus-id: " + intToString(modulatorID), lsFatal);
+      dsid_t modDSID;
+      try {
+        modDSID = interface.getDSIDOfModulator(modulatorID);
+      } catch(DS485ApiError& err) {
+        log("Could not get DSID of modulator with last known bus-id: " + intToString(modulatorID)
+            + ". Message: " + err.what(), lsFatal);
         scheduleRescan();
         continue;
       }
@@ -898,13 +901,16 @@ namespace dss {
       // bus-id, sw-version, hw-version, name, device-id
       int modulatorID = modulatorSpec.get<0>();
       log("Found modulator with id: " + intToString(modulatorID));
-      dsid_t modDSID = interface.getDSIDOfModulator(modulatorID);
-      log("  DSID: " + modDSID.toString());
-      if(modDSID == NullDSID) {
-        log("Could not get DSID of modulator with last known bus-id: " + intToString(modulatorID), lsFatal);
+      dsid_t modDSID;
+      try {
+        modDSID = interface.getDSIDOfModulator(modulatorID);
+      } catch(DS485ApiError& err) {
+        log("Could not get DSID of modulator with last known bus-id: " + intToString(modulatorID)
+            + ". Message: " + err.what(), lsFatal);
         scheduleRescan();
         continue;
       }
+      log("  DSID: " + modDSID.toString());
       Modulator& modulator = allocateModulator(modDSID);
       modulator.setBusID(modulatorID);
       try {
@@ -936,13 +942,17 @@ namespace dss {
       // bus-id, sw-version, hw-version, name, device-id
       int modulatorID = modulatorSpec.get<0>();
       log("Found modulator with id: " + intToString(modulatorID));
-      dsid_t modDSID = interface.getDSIDOfModulator(modulatorID);
-      log("  DSID: " + modDSID.toString());
-      if(modDSID == NullDSID) {
-        log("Could not get DSID of modulator with last known bus-id: " + intToString(modulatorID), lsFatal);
+      dsid_t modDSID;
+      try {
+        modDSID = interface.getDSIDOfModulator(modulatorID);
+      } catch(DS485ApiError& err) {
+        log("newModulator: Could not get DSID of modulator with last known bus-id: " 
+            + intToString(_modulatorBusID)
+            + ". Message: " + err.what(), lsFatal);
         scheduleRescan();
-        continue;
+        return;
       }
+      log("  DSID: " + modDSID.toString());
       Modulator& modulator = allocateModulator(modDSID);
       modulator.setBusID(modulatorID);
     }
