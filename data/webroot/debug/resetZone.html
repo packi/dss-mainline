@@ -1,0 +1,71 @@
+<html>
+  <head>
+    <title>digitalStrom - Server</title>
+<script type="text/javascript" language="JavaScript">
+function onModelLoaded() {
+}
+</script>
+	<script src="../js/lib/prototype/prototype.js" language="JavaScript" type="text/javascript"></script>
+	<script src="../js/model.js" language="JavaScript" type="text/javascript"></script>
+	<link rel="stylesheet" type="text/css" href="../main.css"/>
+	<script type="text/javascript" language="JavaScript">
+
+function ApartmentRenderer(into) {
+  var self = this;
+  self.apartment = new Apartment();
+  self.apartment.fetch();
+
+  this.render = function() {
+    var zonelist = "<ul>"
+    self.apartment.zones.each(
+      function(zone) {
+        if(zone.id == 0) {
+          devTotal = zone.devices.length;
+          return;
+        }
+        zonelist += "<li>" + zone.name + '&nbsp;[<a href="#" onclick="clearZone(\'' + zone.id + '\')">Clear Zone</a>]';
+      }
+    );
+    zonelist += "</ul>";
+    $(into).innerHTML = zonelist;
+  }
+}
+
+function SystemRenderer(into) {
+  var self = this;
+  self.system = new System();
+
+  this.render = function() {
+	$(into).innerHTML = self.system.version();
+  }
+}
+
+var apt = null;
+var sysinfo = null;
+
+
+	function clearZone(_zoneID) {
+	  DSS.sendSyncRequest("debug/resetZone", {zoneID: _zoneID});
+	}
+
+    function doOnload() {
+      apt = new ApartmentRenderer("bla");
+      apt.render();
+
+      sysinfo = new SystemRenderer("sysinfo");
+      sysinfo.render();
+    }
+</script>
+  </head>
+  <body onload="doOnload()">
+    <h1>Welcome to the dSS!</h1>
+    <div class="container">
+		<div class="item"><a href="browse/">Browse properties</a></div>
+		<div class="item">Connected devices: <span id="numDevs">(...loading...)</span></div>
+	</div>
+	<div class="container">
+        <div id="bla">(loading...)</div>
+	</div>
+      <div class="container" id="sysinfo">dss</div>
+  </body>
+</html>

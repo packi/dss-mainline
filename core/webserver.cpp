@@ -1588,6 +1588,29 @@ namespace dss {
         sstream << "{" << ToJSONValue("value") << ":" << ToJSONValue(result) << "}";
         return JSONOk(sstream.str());
       }
+    } else if(endsWith(_method, "debug/resetZone")) {
+      std::string zoneIDStr = _parameter["zoneID"];
+      int zoneID;
+      try {
+        zoneID = strToInt(zoneIDStr);
+      } catch(std::runtime_error&) {
+        return ResultToJSON(false, "Could not parse Zone ID");
+      }
+      DS485CommandFrame* frame = new DS485CommandFrame();
+      frame->getHeader().setBroadcast(true);
+      frame->getHeader().setDestination(0);
+      frame->setCommand(CommandRequest);
+      frame->getPayload().add<uint8_t>(FunctionZoneRemoveAllDevicesFromZone);
+      frame->getPayload().add<uint8_t>(zoneID);
+      DS485Interface* intf = &DSS::getInstance()->getDS485Interface();
+      DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
+      if(proxy != NULL) {
+        proxy->sendFrame(*frame);
+        return ResultToJSON(true, "Please restart your dSMs");
+      } else {
+        delete frame;
+        return ResultToJSON(false, "Proxy has a wrong type or is null");
+      }
     } else {
       _handled = false;
       return "";
