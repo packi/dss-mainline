@@ -1762,7 +1762,7 @@ namespace dss {
   void Zone::addDevice(DeviceReference& _device) {
     const Device& dev = _device.getDevice();
   	int oldZoneID = dev.getZoneID();
-  	if(oldZoneID != -1) {
+  	if((oldZoneID != -1) && (oldZoneID != 0)) {
   		try {
   		  Zone& oldZone = dev.getApartment().getZone(oldZoneID);
   		  oldZone.removeDevice(_device);
@@ -1771,11 +1771,8 @@ namespace dss {
   	}
     if(!contains(m_Devices, _device)) {
       m_Devices.push_back(_device);
-      if(!dev.getApartment().isInitializing()) {
-        DSS::getInstance()->getDS485Interface().setZoneID(dev.getModulatorID(), dev.getShortAddress(), m_ZoneID);
-      }
     } else {
-      Logger::getInstance()->log("Zone::addDevice: DUPLICATE DEVICE Detected Zone: " + intToString(m_ZoneID) + " device: " + _device.getDSID().toString(), lsFatal);
+      Logger::getInstance()->log("Zone::addDevice: DUPLICATE DEVICE Detected Zone: " + intToString(m_ZoneID) + " device: " + _device.getDSID().toString(), lsWarning);
     }
     _device.getDevice().setZoneID(m_ZoneID);
   } // addDevice
