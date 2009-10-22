@@ -1580,11 +1580,13 @@ namespace dss {
     }
 
     // remove from old zone
-    try {
-      Zone& oldZone = getZone(dev.getZoneID());
-      oldZone.removeDevice(devRef);
-      // TODO: check if the zone is empty on the modulator and remove it in that case
-    } catch(std::runtime_error&) {
+    if(dev.getZoneID() != 0) {
+      try {
+        Zone& oldZone = getZone(dev.getZoneID());
+        oldZone.removeDevice(devRef);
+        // TODO: check if the zone is empty on the modulator and remove it in that case
+      } catch(std::runtime_error&) {
+      }
     }
 
     // update device
