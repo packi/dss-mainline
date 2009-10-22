@@ -320,7 +320,7 @@ namespace dss {
         dsid_t dsid = dsid_t::fromString(dsidString);
         DSLinkInterrupSender* sender = new DSLinkInterrupSender(dsid, ext);
         sender->run();
-      } catch(std::runtime_error&) {
+      } catch(std::invalid_argument&) {
         Logger::getInstance()->log("Could not parse DSID");
       }
 
