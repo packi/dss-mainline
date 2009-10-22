@@ -1772,7 +1772,10 @@ namespace dss {
     if(!contains(m_Devices, _device)) {
       m_Devices.push_back(_device);
     } else {
-      Logger::getInstance()->log("Zone::addDevice: DUPLICATE DEVICE Detected Zone: " + intToString(m_ZoneID) + " device: " + _device.getDSID().toString(), lsWarning);
+      // don't warn about multiple additions to zone 0
+      if(m_ZoneID != 0) {
+        Logger::getInstance()->log("Zone::addDevice: DUPLICATE DEVICE Detected Zone: " + intToString(m_ZoneID) + " device: " + _device.getDSID().toString(), lsWarning);
+      }
     }
     _device.getDevice().setZoneID(m_ZoneID);
   } // addDevice
