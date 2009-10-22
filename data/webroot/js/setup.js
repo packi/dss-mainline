@@ -29,18 +29,27 @@ Ext.onReady(function(){
 	// create the data store
 	var deviceStore = new Ext.data.Store({
 		fields : deviceFields,
-		reader : deviceReader//,
-		// data: deviceData
+		reader : deviceReader
 	});
 	
 	var deviceCols = [
 		{id: 'id', header: "id",  width: 50, sortable: true, dataIndex: 'id'},
-		{id: 'name', header: "name", width: 50, sortable: true, dataIndex: 'name'},
+		{id: 'name', header: "name", width: 50, sortable: true, dataIndex: 'name', editable: true, editor: new Ext.form.TextField()},
 		{header: "on", width: 50, sortable: true, dataIndex: 'on'},
 		{header: "circuit", width: 50, sortable: true, dataIndex: 'circuit'},
 		{header: "modulator", width: 50, sortable: true, dataIndex: 'modulator'},
 		{header: "zone", width: 50, sortable: true, dataIndex: 'zone'},
 	];
+	
+	var editor = new Ext.ux.grid.RowEditor({
+		saveText: 'Update'
+	});
+	
+	editor.on('afteredit', function() {
+		console.log('a device has been edited');
+		deviceStore.commitChanges();
+		filterDevices();
+	});
 	
 	var deviceGrid = new Ext.grid.GridPanel({
 		store            : deviceStore,
@@ -51,7 +60,12 @@ Ext.onReady(function(){
 		autoExpandColumn : 'id',
 		width            : 500,
 		region           : 'center',
-		title            : 'Devices'
+		title            : 'Devices',
+		plugins          : [editor]
+	});
+	
+	deviceGrid.on('rowcontextmenu', function() {
+		console.log('rowcontextmenu');
 	});
 	
 	var zoneRecord = Ext.data.Record.create([
@@ -105,9 +119,26 @@ Ext.onReady(function(){
 					zonePanel.setTitle("Zones (" + l + ' zone' + s + ' selected)');
 					filterDevices();
 				}
+			},
+			containerclick: {
+				fn: function() {
+					console.log('container click');
+				}
+			},
+			click: {
+				fn: function() {
+					console.log('click event');
+				}
 			}
 		}
 	});
+	
+	zoneView.on('contextmenu', function() {
+// 			e.stopEvent();
+			console.log("context");
+// 			e.preventDefault();
+		}
+	);
 	
 	function filterDevices() {
 		var selectedZones = zoneView.getSelectedRecords();
@@ -136,7 +167,7 @@ Ext.onReady(function(){
 	var createZoneAction = new Ext.Action({
 		text: "New Zone",
 		handler: function() {
-			Ext.Msg.prompt('Name', 'Name:', function(btn, text){
+			Ext.Msg.prompt('Create new zone', 'Name for new Zone:', function(btn, text){
 				if (btn == 'ok'){
 					for(var i = 0; i <= zoneStore.data.length; i++) {
 						if(zoneStore.findExact('id', i) === -1) {
