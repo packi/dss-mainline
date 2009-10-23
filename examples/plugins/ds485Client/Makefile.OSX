@@ -1,0 +1,11 @@
+
+
+all:	webserver_plugin_ds485client.so install
+
+webserver_plugin_ds485client.so:	webserver_plugin_ds485client.o
+	g++ -dynamiclib -undefined dynamic_lookup -single_module -o webserver_plugin_ds485client.so *.o
+webserver_plugin_ds485client.o:	webserver_plugin_ds485client.cpp 
+	g++ -I../../../  -I/opt/local/include -g3 -O0 -Wall -fPIC -c webserver_plugin_ds485client.cpp
+
+install:	webserver_plugin_ds485client.so
+	cp webserver_plugin_ds485client.so ../../../data/webplugins/
