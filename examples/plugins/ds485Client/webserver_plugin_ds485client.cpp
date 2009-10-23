@@ -1,8 +1,8 @@
-#include <cstdlib>
+#include <stdlib.h>
 #include <iostream>
 
-#include "core/base.h"
 #include "core/web/plugin/webserver_plugin.h" 
+#include "core/base.h"
 #include "core/datetools.h" 
 #include "core/dss.h" 
 #include "core/model.h" 
@@ -16,7 +16,7 @@ int plugin_getversion() {
   return WEBSERVER_PLUGIN_API_VERSION;
 }
 
-bool plugin_handlerequest(const std::string& _uri, dss::HashMapConstStringString& _parameter, std::string& result) {
+bool plugin_handlerequest(const std::string& _uri, dss::HashMapConstStringString& _parameter, dss::DSS& _dss, std::string& result) {
   std::cout << "in plugin_handlerequest" << std::endl;
   if(endsWith(_uri, "/send")) {
     DS485Client oClient;
