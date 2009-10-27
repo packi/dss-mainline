@@ -580,6 +580,9 @@ namespace dss {
         case 4:
           *rval = INT_TO_JSVAL(dev->getDevice().getModulatorID());
           return JS_TRUE;
+        case 5:
+          *rval = INT_TO_JSVAL(dev->getDevice().getFunctionID());
+          return JS_TRUE;
       }
     }
     return JS_FALSE;
@@ -605,6 +608,7 @@ namespace dss {
     {"name", 2, 0, dev_JSGet},
     {"zoneID", 3, 0, dev_JSGet},
     {"circuitID", 4, 0, dev_JSGet},
+    {"functionID", 5, 0, dev_JSGet},
     {NULL}
   };
 
