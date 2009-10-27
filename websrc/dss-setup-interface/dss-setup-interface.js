@@ -1,4 +1,5 @@
 //= require <dSS/ZoneBrowser>
+//= require <dSS/SystemPropertyTree>
 
 Ext.onReady(function(){
 	Ext.get('start').remove();
@@ -22,6 +23,10 @@ Ext.onReady(function(){
 						title: 'Zones',
 						xtype: 'dsszonebrowser',
 						ref: 'zonebrowser'
+					},{
+						title: 'System Properties',
+						xtype: 'dsssystempropertytree',
+						ref: 'systempropertytree'
 					}
 				]
 			}]

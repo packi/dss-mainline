@@ -433,6 +433,130 @@ dSS.ZoneBrowser = Ext.extend(Ext.Panel, {
 });
 
 Ext.reg('dsszonebrowser', dSS.ZoneBrowser);
+Ext.namespace('dSS', 'dSS.tree');
+
+dSS.tree.PropertyTreeLoader = Ext.extend(Ext.tree.TreeLoader, {
+	constructor: function(config) {
+
+		Ext.apply(this, { dataUrl: '/json/property/getChildren', requestMethod: 'GET' });
+		dSS.data.DeviceStore.superclass.constructor.call(this, arguments);
+	},
+	requestData: function(node, callback, scope){
+		if(this.fireEvent("beforeload", this, node, callback) !== false){
+			this.transId = Ext.Ajax.request({
+				method:this.requestMethod,
+					url: this.dataUrl||this.url,
+					success: this.handleResponse,
+					failure: this.handleFailure,
+					scope: this,
+					argument: {callback: callback, node: node, scope: scope},
+					params: this.getParams(node)
+				});
+		}else{
+			this.runCallback(callback, scope || node, []);
+		}
+	},
+	processResponse : function(response, node, callback, scope){
+		var json = response.responseText;
+		try {
+			var o = response.responseData || Ext.decode(json);
+			o = o.result;
+			node.beginUpdate();
+			for(var i = 0, len = o.length; i < len; i++){
+				var rawNode = o[i];
+				rawNode.text = rawNode.name;
+				rawNode.leaf = rawNode.type ===  'none' ? false : true;
+				rawNode.path = node.attributes.path === '/' ?
+					node.attributes.path + rawNode.name : node.attributes.path + '/' + rawNode.name;
+				var n = this.createNode(rawNode);
+				if(n){
+					node.appendChild(n);
+				}
+			}
+			node.endUpdate();
+			this.runCallback(callback, scope || node, [node]);
+		}catch(e){
+			this.handleFailure(response);
+		}
+	},
+	getParams: function(node) {
+		var buf = [];
+		buf.push('path', '=', encodeURIComponent(node.attributes.path));
+		return buf.join('');
+	}
+});
+
+Ext.namespace('dSS');
+
+dSS.SystemPropertyTree = Ext.extend(Ext.Panel, {
+	initComponent: function() {
+
+		Ext.apply(this, {
+			layout: 'border',
+			items: [{
+					xtype: 'treepanel',
+					ref: 'propertytree',
+					region: 'center',
+					width: 225, // give east and west regions a width
+					minSize: 175,
+					maxSize: 400,
+					autoScroll: true,
+					animate: true,
+					enableDD: false,
+					containerScroll: true,
+					border: false,
+					loader: new dSS.tree.PropertyTreeLoader(),
+					root: new Ext.tree.AsyncTreeNode({
+						expanded: false,
+						path: '/',
+						type: 'none',
+						text: 'dSS',
+						leaf: false,
+					}),
+					rootVisible: true,
+					listeners: {
+						append: this.handleAppend
+					}
+				}
+			]
+		});
+
+		dSS.ZoneBrowser.superclass.initComponent.apply(this, arguments);
+	},
+	handleAppend: function(tree, parent, node, index) {
+		if (node.attributes.type === 'none') return;
+		var url = "/json/property/";
+		switch(node.attributes.type) {
+			case 'string':
+				url += 'getString';
+				break;
+			case 'integer':
+				url += 'getInteger';
+				break;
+			case 'boolean':
+				url += 'getBoolean';
+				break;
+			default:
+				return;
+		}
+		Ext.Ajax.request({
+			url: url,
+			params: { path: node.attributes.path },
+			method: 'GET',
+			success: function(response, opts) {
+				var obj = Ext.decode(response.responseText);
+				if(obj.ok === true) {
+					node.setText(node.text + " : " + obj.result.value);
+				}
+			},
+			failure: function(response, opts) {
+				console.log('server-side failure with status code ' + response.status);
+			}
+		});
+	}
+});
+
+Ext.reg('dsssystempropertytree', dSS.SystemPropertyTree);
 
 Ext.onReady(function(){
 	Ext.get('start').remove();
@@ -456,6 +580,10 @@ Ext.onReady(function(){
 						title: 'Zones',
 						xtype: 'dsszonebrowser',
 						ref: 'zonebrowser'
+					},{
+						title: 'System Properties',
+						xtype: 'dsssystempropertytree',
+						ref: 'systempropertytree'
 					}
 				]
 			}]
