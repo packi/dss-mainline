@@ -804,6 +804,13 @@ namespace dss {
 
       vector<int> groupIDs = interface.getGroups(modulatorID, zoneID);
       foreach(int groupID, groupIDs) {
+        if(groupID == 0) {
+          log("    Group ID is zero, bailing out... (modulatorID: " 
+              + intToString(modulatorID) + 
+              "zoneID: " + intToString(zoneID) + ")",
+              lsError);
+          continue;
+        }
         log("    Found group with id: " + intToString(groupID));
         try {
           vector<int> devingroup = interface.getDevicesInGroup(modulatorID, zoneID, groupID);
