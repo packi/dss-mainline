@@ -65,7 +65,8 @@ namespace dss {
     m_pApartment(_pApartment),
     m_LastCalledScene(SceneOff),
     m_Consumption(0),
-    m_pPropertyNode()
+    m_LastDiscovered(DateTime::NullDate),
+    m_FirstSeen(DateTime::NullDate)
   { } // ctor
 
   void Device::publishToPropertyTree() {
@@ -214,6 +215,7 @@ namespace dss {
   void Device::setShortAddress(const devid_t _shortAddress) {
     m_ShortAddress = _shortAddress;
     publishToPropertyTree();
+    m_LastDiscovered = DateTime();
   } // setShortAddress
 
   dsid_t Device::getDSID() const {
@@ -1179,11 +1181,18 @@ namespace dss {
         } catch(XMLException& e) {
           /* discard node not found exceptions */
         }
-
+        
+        DateTime firstSeen; 
+        std::string firstSeenStr = iNode->getAttributes()["firstSeen"];
+        if(!firstSeenStr.empty()) {
+          firstSeen = DateTime(dateFromISOString(firstSeenStr.c_str()));
+        }
+        
         Device& newDevice = allocateDevice(dsid);
         if(!name.empty()) {
           newDevice.setName(name);
         }
+        newDevice.setFirstSeen(firstSeen);
       }
     }
   } // loadDevices
@@ -1238,7 +1247,8 @@ namespace dss {
       AutoPtr<Text> txtNode = _pDocument->createTextNode(_pDevice->getName());
       pNameNode->appendChild(txtNode);
       pDeviceNode->appendChild(pNameNode);
-    }
+    }    
+    pDeviceNode->setAttribute("firstSeen", _pDevice->getFirstSeen());
 
     _parentNode->appendChild(pDeviceNode);
   } // deviceToXML
@@ -1452,6 +1462,7 @@ namespace dss {
     }
 
     Device* pResult = new Device(_dsid, this);
+    pResult->setFirstSeen(DateTime());
     m_Devices.push_back(pResult);
     DeviceReference devRef(*pResult, *this);
     getZone(0).addDevice(devRef);

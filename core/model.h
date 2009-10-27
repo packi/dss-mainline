@@ -220,10 +220,11 @@ namespace dss {
     int m_FunctionID;
     int m_LastCalledScene;
     unsigned long m_Consumption;
+    DateTime m_LastDiscovered;
+    DateTime m_FirstSeen;
 
     PropertyNodePtr m_pPropertyNode;
     PropertyNodePtr m_pAliasNode;
-
   protected:
     /** Publishes the device to the property tree.
      * @see DSS::getPropertySystem */
@@ -329,6 +330,10 @@ namespace dss {
     void setZoneID(const int _value);
     /** Returns the apartment the device resides in. */
     Apartment& getApartment() const;
+    
+    const DateTime& getLastDiscovered() const { return m_LastDiscovered; }
+    const DateTime& getFirstSeen() const { return m_FirstSeen; }
+    void setFirstSeen(const DateTime& _value) { m_FirstSeen = _value; }
 
     virtual unsigned long getPowerConsumption();
 

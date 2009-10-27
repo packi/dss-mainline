@@ -525,6 +525,8 @@ namespace dss {
             << ", \"circuitID\":" << ToJSONValue(_device.getDevice().getModulatorID())
             << ", \"busID\":"  << ToJSONValue(_device.getDevice().getShortAddress())
             << ", \"isPresent\":"  << ToJSONValue(_device.getDevice().isPresent())
+            << ", \"lastDiscovered\":"  << ToJSONValue(int(_device.getDevice().getLastDiscovered().secondsSinceEpoch()))
+            << ", \"firstSeen\":"  << ToJSONValue(int(_device.getDevice().getFirstSeen().secondsSinceEpoch()))
             << ", \"on\": " << ToJSONValue(_device.isOn()) << " }";
     return sstream.str();
   } // toJSONValue(DeviceReference)
