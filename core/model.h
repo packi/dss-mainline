@@ -792,7 +792,6 @@ namespace dss {
     void loadDevices(XMLNode& _node);
     void loadModulators(XMLNode& _node);
     void loadZones(XMLNode& _node);
-    Modulator& allocateModulator(const dsid_t _dsid);
 
     void addDefaultGroupsToZone(Zone& _zone);
     /** Starts the event-processing */
@@ -842,8 +841,11 @@ namespace dss {
     /** Allocates a zone and returns a reference to it. Should a zone with
       * the given _zoneID already exist, a reference to the existing zone will
       * be returned.
+      * NOTE: Outside code should never call this function
       */
     Zone& allocateZone(int _zoneID);
+    
+    Modulator& allocateModulator(const dsid_t _dsid);
 
     /** Returns a Modulator by name */
     Modulator& getModulator(const std::string& _modName);
@@ -864,6 +866,10 @@ namespace dss {
 
     /** Returns wheter the apartment is still initializing or already running. */
     bool isInitializing() const { return m_IsInitializing; }
+    
+    void removeZone(int _zoneID);
+    void removeDevice(dsid_t _device);
+    void removeModulator(dsid_t _modulator);
 
     void initializeFromBus();
     bool scanModulator(Modulator& _modulator);

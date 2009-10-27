@@ -1404,7 +1404,6 @@ namespace dss {
         return ResultToJSON(false, "Need parameter devid");
       }
     } else if(endsWith(_method, "structure/addZone")) {
-      bool ok = false;
       int zoneID = -1;
 
       string zoneIDStr = _parameter["zoneID"];
@@ -1413,11 +1412,33 @@ namespace dss {
       }
       if(zoneID != -1) {
         getDSS().getApartment().allocateZone(zoneID);
-        ok = true;
       } else {
-        ResultToJSON(false, "could not find zone");
+        return ResultToJSON(false, "could not find zone");
       }
       return ResultToJSON(true, "");
+    } else if(endsWith(_method, "structure/removeZone")) {
+      int zoneID = -1;
+      
+      string zoneIDStr = _parameter["zoneID"];
+      if(!zoneIDStr.empty()) {
+        zoneID = strToIntDef(zoneIDStr, -1);
+      }
+      if(zoneID != -1) {
+        try {
+          Zone& zone = getDSS().getApartment().getZone(zoneID);
+          if(zone.getFirstZoneOnModulator() != -1) {
+            return ResultToJSON(false, "Cannot delete a primary zone");
+          }
+          if(zone.getDevices().length() > 0) {
+            return ResultToJSON(false, "Cannot delete a non-empty zone");
+          }
+          return JSONOk();
+        } catch(ItemNotFoundException&) {
+          return ResultToJSON(false, "Could not find zone");
+        }
+      } else {
+        return ResultToJSON(false, "Missing parameter zoneID");
+      }
     } else {
       _handled = false;
       return "";

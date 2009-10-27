@@ -1480,6 +1480,42 @@ namespace dss {
   	return *zone;
   } // allocateZone
 
+  void Apartment::removeZone(int _zoneID) {
+    for(std::vector<Zone*>::iterator ipZone = m_Zones.begin(), e = m_Zones.end();
+        ipZone != e; ++ipZone) {
+      Zone* pZone = *ipZone;
+      if(pZone->getID() == _zoneID) {
+        m_Zones.erase(ipZone);
+        delete pZone;
+        return;
+      }
+    }
+  } // removeZone
+  
+  void Apartment::removeDevice(dsid_t _device) {
+    for(std::vector<Device*>::iterator ipDevice = m_Devices.begin(), e = m_Devices.end();
+        ipDevice != e; ++ipDevice) {
+      Device* pDevice = *ipDevice;
+      if(pDevice->getDSID() == _device) {
+        m_Devices.erase(ipDevice);
+        delete pDevice;
+        return;
+      }
+    }
+  } // removeDevice
+  
+  void Apartment::removeModulator(dsid_t _modulator) {
+    for(std::vector<Modulator*>::iterator ipModulator = m_Modulators.begin(), e = m_Modulators.end();
+        ipModulator != e; ++ipModulator) {
+      Modulator* pModulator = *ipModulator;
+      if(pModulator->getDSID() == _modulator) {
+        m_Modulators.erase(ipModulator);
+        delete pModulator;
+        return;
+      }
+    }
+  } // removeModulator
+
   class SetLastCalledSceneAction : public IDeviceAction {
   protected:
     int m_SceneID;

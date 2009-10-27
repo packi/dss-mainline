@@ -291,4 +291,51 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
   BOOST_CHECK_EQUAL(3, builderTest.length());
 } // testSetBuilder
 
+BOOST_AUTO_TEST_CASE(testRemoval) {
+  Apartment apt(NULL);
+  apt.initialize();
+
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
+  dev1.getGroupBitmask().set(GroupIDYellow - 1);
+  
+  SetBuilder builder(apt);
+  BOOST_CHECK_EQUAL(1, builder.buildSet(".yellow", NULL).length());
+  
+  apt.removeDevice(dev1.getDSID());
+  BOOST_CHECK_EQUAL(0, builder.buildSet(".yellow", NULL).length()); 
+  
+  apt.allocateZone(1);
+  try {
+    apt.getZone(1);
+    BOOST_CHECK(true);
+  } catch(ItemNotFoundException&) {
+    BOOST_CHECK_MESSAGE(false, "Zone does not exist");
+  }
+  
+  apt.removeZone(1);
+  try {
+    apt.getZone(1);
+    BOOST_CHECK_MESSAGE(false, "Zone still exists");
+  } catch(ItemNotFoundException&) {
+    BOOST_CHECK(true);
+  }
+  
+  apt.allocateModulator(dsid_t(1,0));
+  try {
+    apt.getModulatorByDSID(dsid_t(1,0));
+    BOOST_CHECK(true);
+  } catch(ItemNotFoundException&) {
+    BOOST_CHECK_MESSAGE(false, "Modulator not found");
+  }
+  
+  apt.removeModulator(dsid_t(1,0));
+  try {
+    apt.getModulatorByDSID(dsid_t(1,0));
+    BOOST_CHECK_MESSAGE(false, "Modulator still exists");
+  } catch(ItemNotFoundException&) {
+    BOOST_CHECK(true);
+  }
+} // testRemoval
+
 BOOST_AUTO_TEST_SUITE_END()
