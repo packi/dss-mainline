@@ -446,7 +446,7 @@ namespace dss {
   }
 
   void WebServer::emitHTTPHeader(int _code, struct mg_connection* _connection, const std::string& _contentType) {
-    std::stringstream sstream;
+    std::ostringstream sstream;
     sstream << "HTTP/1.1 " << _code << ' ' << httpCodeToMessage(_code) << "\r\n";
     sstream << "Content-Type: " << _contentType << "; charset=utf-8\r\n\r\n";
     string tmp = sstream.str();
@@ -494,7 +494,7 @@ namespace dss {
   } // toJSONValue(const char*)
 
   string WebServer::ResultToJSON(const bool _ok, const string& _message) {
-    std::stringstream sstream;
+    std::ostringstream sstream;
     sstream << "{ " << ToJSONValue("ok") << ":" << ToJSONValue(_ok);
     if(!_message.empty()) {
       sstream << ", " << ToJSONValue("message") << ":" << ToJSONValue(_message);
@@ -507,7 +507,7 @@ namespace dss {
   } // resultToJSON
 
   string JSONOk(const string& _innerResult = "") {
-    std::stringstream sstream;
+    std::ostringstream sstream;
     sstream << "{ " << ToJSONValue("ok") << ":" << ToJSONValue(true);
     if(!_innerResult.empty()) {
       sstream << ", " << ToJSONValue("result")<<  ": " << _innerResult;
@@ -517,7 +517,7 @@ namespace dss {
   }
 
   string ToJSONValue(const DeviceReference& _device) {
-    std::stringstream sstream;
+    std::ostringstream sstream;
     sstream << "{ \"id\": \"" << _device.getDSID().toString() << "\""
             << ", \"isSwitch\": " << ToJSONValue(_device.hasSwitch())
             << ", \"name\": " << ToJSONValue(_device.getDevice().getName())
@@ -532,7 +532,7 @@ namespace dss {
   } // toJSONValue(DeviceReference)
 
   string ToJSONValue(const Set& _set, const string& _arrayName) {
-    std::stringstream sstream;
+    std::ostringstream sstream;
     sstream << ToJSONValue(_arrayName) << ":[";
     bool firstDevice = true;
     for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
@@ -549,7 +549,7 @@ namespace dss {
   } // toJSONValue(Set,Name)
 
   string ToJSONValue(const Group& _group) {
-    std::stringstream sstream;
+    std::ostringstream sstream;
     sstream << "{ " << ToJSONValue("id") << ": " << ToJSONValue(_group.getID()) << ",";
     sstream << ToJSONValue("name") << ": " << ToJSONValue(_group.getName()) << ", ";
     sstream << ToJSONValue("isPresent") << ": " << ToJSONValue(_group.isPresent()) << ", ";
@@ -569,7 +569,7 @@ namespace dss {
   } // toJSONValue(Group)
 
   string ToJSONValue(Zone& _zone, bool _includeDevices = true) {
-    std::stringstream sstream;
+    std::ostringstream sstream;
     sstream << "{ \"id\": " << _zone.getID() << ",";
     string name = _zone.getName();
     if(name.size() == 0) {
@@ -603,7 +603,7 @@ namespace dss {
   } // toJSONValue(Zone)
 
   string ToJSONValue(Apartment& _apartment) {
-  	std::stringstream sstream;
+  	std::ostringstream sstream;
   	sstream << "{ \"apartment\": { \"zones\": [";
 	  vector<Zone*>& zones = _apartment.getZones();
 	  bool first = true;
@@ -647,7 +647,7 @@ namespace dss {
 
   template<>
   string ToJSONArray(const vector<int>& _v) {
-    std::stringstream arr;
+    std::ostringstream arr;
     arr << "[";
     bool first = true;
     vector<int>::const_iterator iV;
@@ -790,7 +790,7 @@ namespace dss {
         }
         return callDeviceInterface(_method, _parameter, _connection, interface, _session);
       } else {
-        std::stringstream sstream;
+        std::ostringstream sstream;
         sstream << "{ ok: " << ToJSONValue(ok) << ", message: " << ToJSONValue(errorMessage) << " }";
         return sstream.str();
       }
@@ -812,7 +812,7 @@ namespace dss {
         m_Sessions[token] = Session(token);
         return "{" + ToJSONValue("token") + ": " + ToJSONValue(token) + "}";
       } else if(endsWith(_method, "/getCircuits")) {
-        std::stringstream sstream;
+        std::ostringstream sstream;
         sstream << "{ " << ToJSONValue("circuits") << ": [";
         bool first = true;
         vector<Modulator*>& modulators = getDSS().getApartment().getModulators();
@@ -834,7 +834,7 @@ namespace dss {
         sstream << "]}";
         return JSONOk(sstream.str());
       } else if(endsWith(_method, "/getName")) {
-        std::stringstream sstream;
+        std::ostringstream sstream;
         sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(getDSS().getApartment().getName()) << "}";
         return JSONOk(sstream.str());
       } else if(endsWith(_method, "/setName")) {
@@ -938,11 +938,11 @@ namespace dss {
             // should never reach here because ok, would be false
             assert(false);
           }
-          std::stringstream sstream;
+          std::ostringstream sstream;
           sstream << "{" << ToJSONValue("scene") << ":" << ToJSONValue(lastScene) << "}";
           return JSONOk(sstream.str());
         } else if(endsWith(_method, "/getName")) {
-          std::stringstream sstream;
+          std::ostringstream sstream;
           sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(pZone->getName()) << "}";
           return JSONOk(sstream.str());
         } else if(endsWith(_method, "/setName")) {
@@ -999,7 +999,7 @@ namespace dss {
         return callDeviceInterface(_method, _parameter, _connection, pDevice, _session);
       } else if(beginsWith(_method, "device/getGroups")) {
         int numGroups = pDevice->getGroupsCount();
-        std::stringstream sstream;
+        std::ostringstream sstream;
         sstream << "{ " << ToJSONValue("groups") << ": [";
         bool first = true;
         for(int iGroup = 0; iGroup < numGroups; iGroup++) {
@@ -1021,11 +1021,11 @@ namespace dss {
         sstream << "]}";
         return sstream.str();
       } else if(beginsWith(_method, "device/getState")) {
-        std::stringstream sstream;
+        std::ostringstream sstream;
         sstream << "{ " << ToJSONValue("isOn") << ":" << ToJSONValue(pDevice->isOn()) << " }";
         return JSONOk(sstream.str());
       } else if(beginsWith(_method, "device/getName")) {
-        std::stringstream sstream;
+        std::ostringstream sstream;
         sstream << "{ " << ToJSONValue("name") << ":" << ToJSONValue(pDevice->getName()) << " }";
         return JSONOk(sstream.str());
       } else if(beginsWith(_method, "device/setName")) {
@@ -1074,7 +1074,7 @@ namespace dss {
         modulator.setName(_parameter["newName"]);
         return ResultToJSON(true);
       } else if(endsWith(_method, "circuit/getEnergyBorder")) {
-        std::stringstream sstream;
+        std::ostringstream sstream;
         sstream << "{" << ToJSONValue("orange") << ":" << ToJSONValue(modulator.getEnergyLevelOrange());
         sstream << "," << ToJSONValue("red") << ":" << ToJSONValue(modulator.getEnergyLevelRed());
         sstream << "}";
@@ -1124,7 +1124,7 @@ namespace dss {
           return ResultToJSON(false, "missing either zoneID or zoneName");
         }
 
-        std::stringstream sstream;
+        std::ostringstream sstream;
         sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
         return JSONOk(sstream.str());
       } else if(endsWith(_method, "/byGroup")) {
@@ -1140,7 +1140,7 @@ namespace dss {
           return ResultToJSON(false, "missing either groupID or groupName");
         }
 
-        std::stringstream sstream;
+        std::ostringstream sstream;
         sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
         return JSONOk(sstream.str());
       } else if(endsWith(_method, "/byDSID")) {
@@ -1154,7 +1154,7 @@ namespace dss {
           return ResultToJSON(false, "missing parameter dsid");
         }
 
-        std::stringstream sstream;
+        std::ostringstream sstream;
         sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
         return JSONOk(sstream.str());
       } else if(endsWith(_method, "/getDevices")) {
@@ -1172,7 +1172,7 @@ namespace dss {
         }
         additionalPart += "add(" + other + ")";
 
-        std::stringstream sstream;
+        std::ostringstream sstream;
         sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
         return JSONOk(sstream.str());
       } else if(endsWith(_method, "/subtract")) {
@@ -1186,7 +1186,7 @@ namespace dss {
         }
         additionalPart += "subtract(" + other + ")";
 
-        std::stringstream sstream;
+        std::ostringstream sstream;
         sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
         return JSONOk(sstream.str());
       } else if(isDeviceInterfaceCall(_method)) {
@@ -1214,7 +1214,7 @@ namespace dss {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
       try {
-        std::stringstream sstream;
+        std::ostringstream sstream;
         sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getStringValue()) << "}";
         return JSONOk(sstream.str());
       } catch(PropertyTypeMismatch& ex) {
@@ -1225,7 +1225,7 @@ namespace dss {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
       try {
-        std::stringstream sstream;
+        std::ostringstream sstream;
         sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getIntegerValue()) << "}";
         return JSONOk(sstream.str());
       } catch(PropertyTypeMismatch& ex) {
@@ -1236,7 +1236,7 @@ namespace dss {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
       try {
-        std::stringstream sstream;
+        std::ostringstream sstream;
         sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getBoolValue()) << "}";
         return JSONOk(sstream.str());
       } catch(PropertyTypeMismatch& ex) {
@@ -1293,7 +1293,7 @@ namespace dss {
       if(node == NULL) {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
-      std::stringstream sstream;
+      std::ostringstream sstream;
       sstream << "[";
       bool first = true;
       for(int iChild = 0; iChild < node->getChildCount(); iChild++) {
@@ -1312,7 +1312,7 @@ namespace dss {
       if(node == NULL) {
         return ResultToJSON(false, "Could not find node named '" + propName + "'");
       }
-      std::stringstream sstream;
+      std::ostringstream sstream;
       sstream << ":" << ToJSONValue("type") << ":" << ToJSONValue(getValueTypeAsString(node->getValueType())) << "}";
       return JSONOk(sstream.str());
     } else {
@@ -1607,7 +1607,7 @@ namespace dss {
       if(writeOnly) {
         return ResultToJSON(true);
       } else {
-        std::stringstream sstream;
+        std::ostringstream sstream;
         sstream << "{" << ToJSONValue("value") << ":" << ToJSONValue(result) << "}";
         return JSONOk(sstream.str());
       }
@@ -1690,7 +1690,7 @@ namespace dss {
     if(endsWith(_method, "/getResolutions")) {
       _handled = true;
       std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = getDSS().getMetering().getConfig();
-      std::stringstream sstream;
+      std::ostringstream sstream;
       sstream << "{" << ToJSONValue("resolutions") << ":" << "[";
       for(unsigned int iConfig = 0; iConfig < meteringConfig.size(); iConfig++) {
         boost::shared_ptr<MeteringConfigChain> cConfig = meteringConfig[iConfig];
@@ -1707,7 +1707,7 @@ namespace dss {
       return JSONOk(sstream.str());
     } else if(endsWith(_method, "/getSeries")) {
       _handled = true;
-      std::stringstream sstream;
+      std::ostringstream sstream;
       sstream << "{ " << ToJSONValue("series") << ": [";
       bool first = true;
       vector<Modulator*>& modulators = getDSS().getApartment().getModulators();
@@ -1786,7 +1786,7 @@ namespace dss {
             boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(seriesPath));
             std::deque<CurrentValue>* values = s->getExpandedValues();
             bool first = true;
-            std::stringstream sstream;
+            std::ostringstream sstream;
             sstream << "{ " ;
             sstream << ToJSONValue("dsmid") << ":" << ToJSONValue(deviceDSIDString) << ",";
             sstream << ToJSONValue("type") << ":" << ToJSONValue(typeString) << ",";
@@ -1933,7 +1933,7 @@ namespace dss {
     }
     mg_printf(_connection, "<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><body>");
 
-    std::stringstream stream;
+    std::ostringstream stream;
     stream << "<h1>" << path << "</h1>";
     stream << "<ul>";
     PropertyNodePtr node = DSS::getInstance()->getPropertySystem().getProperty(path);
