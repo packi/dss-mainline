@@ -384,7 +384,7 @@ namespace dss {
     }
     try {
       XMLNode& paramNode = _node.getChildByName("parameter");
-      if(opts.get() == NULL) {
+      if(opts == NULL) {
         opts.reset(new SubscriptionOptions());
       }
       opts->loadParameterFromXML(paramNode);

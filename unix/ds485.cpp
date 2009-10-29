@@ -312,7 +312,7 @@ namespace dss {
         doChangeState(csCommError);
         continue;
       }
-      if(frame.get() == NULL) {
+      if(frame == NULL) {
         if(m_State != csDesignatedMaster) {
           std::cout << "§";
           missedFramesCounter++;

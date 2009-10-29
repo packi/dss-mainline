@@ -636,7 +636,7 @@ namespace dss {
     std::vector<ModulatorSpec_t> result;
     while(true) {
       boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
-      if(recFrame.get() == NULL) {
+      if(recFrame == NULL) {
         break;
       }
       int source = recFrame->getFrame()->getHeader().getSource();
@@ -661,7 +661,7 @@ namespace dss {
 
     boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionGetTypeRequest);
 
-    if(recFrame.get() == NULL) {
+    if(recFrame == NULL) {
       throw DS485ApiError("No frame received");
     }
 
@@ -773,7 +773,7 @@ namespace dss {
 
     while(true) {
       boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
-      if(recFrame.get() == NULL) {
+      if(recFrame == NULL) {
         break;
       }
 
@@ -912,7 +912,7 @@ namespace dss {
     log("Proxy: GetDSIDOfDevice");
 
     boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDeviceGetDSID);
-    if(recFrame.get() == NULL) {
+    if(recFrame == NULL) {
       throw DS485ApiError("No frame received");
     }
 
@@ -931,7 +931,7 @@ namespace dss {
     log(string("Proxy: GetDSIDOfModulator ") + intToString(_modulatorID));
 
     boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionModulatorGetDSID);
-    if(recFrame.get() == NULL) {
+    if(recFrame == NULL) {
       log("GetDSIDOfModulator: received no result from " + intToString(_modulatorID), lsError);
       throw DS485ApiError("No frame received");
     }
@@ -966,7 +966,7 @@ namespace dss {
     log(string("Proxy: GetPowerConsumption ") + intToString(_modulatorID));
 
     boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionModulatorGetPowerConsumption);
-    if(recFrame.get() == NULL) {
+    if(recFrame == NULL) {
       log("DS485Proxy::getPowerConsumption: received no results", lsError);
       throw DS485ApiError("No frame received");
     }
@@ -986,7 +986,7 @@ namespace dss {
     log(string("Proxy: GetEnergyMeterValue ") + intToString(_modulatorID));
 
     boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionModulatorGetEnergyMeterValue);
-    if(recFrame.get() == NULL) {
+    if(recFrame == NULL) {
       log("DS485Proxy::getEnergyMeterValue: received no results", lsError);
       throw DS485ApiError("No frame received");
     }
@@ -1006,7 +1006,7 @@ namespace dss {
     bucket->waitForFrame(1000);
 
     boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
-    if(recFrame.get() == NULL) {
+    if(recFrame == NULL) {
       throw DS485ApiError("No frame received");
     }
 
@@ -1030,7 +1030,7 @@ namespace dss {
       boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionDSLinkReceive);
       bucket->waitForFrame(10000);
       boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
-      if(recFrame.get() == NULL) {
+      if(recFrame == NULL) {
         log("dsLinkSend: No packet received", lsError);
         throw DS485ApiError("No frame received");
       }

@@ -352,7 +352,7 @@ namespace dss {
       if(_childNode.get() == this) {
         throw std::runtime_error("Adding self as child node");
       }
-      if(_childNode.get() == NULL) {
+      if(_childNode == NULL) {
         throw std::runtime_error("Adding NULL as child node");
       }
       if(_childNode->m_ParentNode != NULL) {

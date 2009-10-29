@@ -86,7 +86,7 @@ namespace dss {
   }
 
   int Subsystem::getLogSeverity() const {
-    if(m_pLogChannel.get() == NULL) {
+    if(m_pLogChannel == NULL) {
       return 0;
     } else {
       return m_pLogChannel->getMinimumSeverity();
