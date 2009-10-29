@@ -5,7 +5,7 @@ Ext.namespace('dSS');
 dSS.ZonePanel = Ext.extend(Ext.Panel, {
 	initComponent: function() {
 		Ext.apply(this, {
-			title:'Zones',
+			title:'Rooms',
 			layout: 'border',
 			items: [{ xtype: 'dsszoneview', ref: 'zoneView', region: 'center'}]
 			//tbar: ['->', createZoneAction, reloadAction]
@@ -17,15 +17,21 @@ dSS.ZonePanel = Ext.extend(Ext.Panel, {
 	},
 	
 	buildTopToolbar: function() {
-		return ['->',
-			{
-				text: 'New Zone',
+		return [{
+				//text: 'New Zone',
 				iconCls: 'newZoneAction',
 				handler: this.createNewZone,
 				scope: this
 			},
 			{
-				text: 'Reload',
+				//text: 'Edit Room
+				iconCls: 'editZoneAction',
+				handler: this.editZone,
+				scope: this
+			},
+			'->',
+			{
+				//text: 'Reload',
 				iconCls: 'reloadAction',
 				handler: this.reload,
 				scope: this
@@ -33,9 +39,46 @@ dSS.ZonePanel = Ext.extend(Ext.Panel, {
 		];
 	},
 	
+	editZone: function() {
+		var zoneStore = this.zoneView.getStore();
+		if(this.zoneView.getSelectionCount() !== 1) {
+			return;
+		} else {
+			var record = this.zoneView.getSelectedRecords()[0];
+			Ext.Msg.prompt('Rename room', 'New name for room:', function(btn, text){
+				if(text !== record.get('name')) {
+					Ext.Ajax.request({
+						url: '/json/zone/setName',
+						disableCaching: true,
+						method: "GET",
+						params: { id: record.get('id'),
+											newName: text},
+						success: function(result, request) {
+							try {
+								var jsonData = Ext.util.JSON.decode(result.responseText);
+								if(jsonData.ok) {
+									record.set('name', text);
+									record.commit();
+								} else {
+									Ext.MessageBox.alert('Error', 'Could not rename room');
+								}
+							}
+							catch (err) {
+								Ext.MessageBox.alert('Error', 'Could not rename room');
+							}
+						},
+						failure: function(result, request) {
+							Ext.MessageBox.alert('Error', 'Could not rename room');
+						},
+					});
+				}
+			}, this, false, record.get('name'));
+		}
+	},
+	
 	createNewZone: function() {
 		var zoneStore = this.zoneView.getStore();
-		Ext.Msg.prompt('Create new zone', 'Name for new Zone:', function(btn, text){
+		Ext.Msg.prompt('Create new room', 'Name for new room:', function(btn, text){
 			if (btn == 'ok'){
 				for(var i = 0; i <= zoneStore.data.length; i++) {
 					if(zoneStore.findExact('id', i) === -1) {

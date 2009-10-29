@@ -59,7 +59,7 @@ dSS.ZoneBrowser = Ext.extend(Ext.Panel, {
 			}
 			zones.push({
 				id: zone.id,
-				name: zone.id === 0 ? 'Uncategorized' : zone.name
+				name: zone.name ? zone.name : 'No name'
 			});
 			Ext.each(zone.devices, function(device) {
 				for(var i = 0; i < devices.length; i++) {
