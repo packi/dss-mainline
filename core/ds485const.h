@@ -100,6 +100,8 @@ namespace dss {
   const uint8_t FunctionModulatorGetDSID = 0x91;
   const uint8_t FunctionModulatorGetPowerConsumption = 0x94;
   const uint8_t FunctionModulatorGetEnergyMeterValue = 0x95;
+  
+  const uint8_t FunctionDeviceGetTransmissionQuality = 0x9f;
 
   const uint8_t FunctionDeviceGetFunctionID = 0x66;
   const uint8_t FunctionDeviceGetName = 0x68;

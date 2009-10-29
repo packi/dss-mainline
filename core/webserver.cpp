@@ -1611,6 +1611,52 @@ namespace dss {
         sstream << "{" << ToJSONValue("value") << ":" << ToJSONValue(result) << "}";
         return JSONOk(sstream.str());
       }
+    } else if(endsWith(_method, "debug/pingDevice")) {
+      string deviceDSIDString = _parameter["dsid"];
+      if(deviceDSIDString.empty()) {
+        return ResultToJSON(false, "Missing parameter 'dsid'");
+      }
+      try {
+        dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
+        Device& device = getDSS().getApartment().getDeviceByDSID(deviceDSID);
+        DS485CommandFrame* frame = new DS485CommandFrame();
+        frame->getHeader().setBroadcast(true);
+        frame->getHeader().setDestination(device.getModulatorID());
+        frame->setCommand(CommandRequest);
+        frame->getPayload().add<uint8_t>(FunctionDeviceGetTransmissionQuality);
+        frame->getPayload().add<uint8_t>(device.getShortAddress());
+        DS485Interface* intf = &DSS::getInstance()->getDS485Interface();
+        DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
+        if(proxy != NULL) {
+          boost::shared_ptr<FrameBucketCollector> bucket = proxy->sendFrameAndInstallBucket(*frame, FunctionDeviceGetTransmissionQuality);
+          bucket->waitForFrame(1000);
+
+          boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
+          if(recFrame == NULL) {
+            return ResultToJSON(false, "No result received");
+          }
+          PayloadDissector pd(recFrame->getFrame()->getPayload());
+          pd.get<uint8_t>();
+          int errC = int(pd.get<uint16_t>());
+          if(errC < 0) {
+            return ResultToJSON(false, "dSM reported error-code: " + intToString(errC));
+          }
+          pd.get<uint16_t>(); // device address
+          int qualityHK = pd.get<uint16_t>();
+          int qualityRK = pd.get<uint16_t>();
+          std::ostringstream sstream;
+          sstream << "{" << ToJSONValue("qualityHK") << ":" << ToJSONValue(qualityHK) << ",";
+          sstream << ToJSONValue("qualityRK") << ":" << ToJSONValue(qualityRK) << "}";
+          return JSONOk(sstream.str());
+        } else {
+          delete frame;
+          return ResultToJSON(false, "Proxy has a wrong type or is null");
+        }              
+      } catch(ItemNotFoundException&) {
+        return ResultToJSON(false ,"Could not find device with dsid '" + deviceDSIDString + "'");
+      } catch(std::invalid_argument&) {
+        return ResultToJSON(false, "Could not parse dsid '" + deviceDSIDString + "'");
+      }
     } else if(endsWith(_method, "debug/resetZone")) {
       std::string zoneIDStr = _parameter["zoneID"];
       int zoneID;
