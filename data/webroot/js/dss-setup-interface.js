@@ -4,7 +4,8 @@ dSS.data.ZoneStore = Ext.extend(Ext.data.Store, {
 	constructor: function(config) {
 		var zoneRecord = Ext.data.Record.create([
 			{name:"name"},
-			{name:"id"}
+			{name:"id"},
+			{name:"primary"}
 		]);
 
 		var zoneReader = new Ext.data.JsonReader(
@@ -27,7 +28,12 @@ dSS.ZoneView = Ext.extend(Ext.DataView, {
 		var zoneTemplate = new Ext.XTemplate(
 			'<tpl for=".">',
 				'<div class="zone-wrap {css}" id="zone-{id}">',
-					'<span>{name}</span>',
+					'<span>',
+						'{name}',
+						'<tpl if="primary === true">',
+							' *',
+						'</tpl>',
+					'</span>',
 				'</div>',
 			'</tpl>',
 			'<div class="x-clear"></div>'
@@ -395,6 +401,7 @@ dSS.ZoneBrowser = Ext.extend(Ext.Panel, {
 			zones.push({
 				id: zone.id,
 				name: zone.name ? zone.name : 'No name'
+				primary: zone['firstZoneOnModulator'] !== undefined ? true : false
 			});
 			Ext.each(zone.devices, function(device) {
 				for(var i = 0; i < devices.length; i++) {

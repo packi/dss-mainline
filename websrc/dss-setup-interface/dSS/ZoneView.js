@@ -8,7 +8,12 @@ dSS.ZoneView = Ext.extend(Ext.DataView, {
 		var zoneTemplate = new Ext.XTemplate(
 			'<tpl for=".">',
 				'<div class="zone-wrap {css}" id="zone-{id}">',
-					'<span>{name}</span>',
+					'<span>',
+						'{name}',
+						'<tpl if="primary === true">',
+							' *',
+						'</tpl>',
+					'</span>',
 				'</div>',
 			'</tpl>',
 			'<div class="x-clear"></div>'

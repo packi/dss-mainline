@@ -60,6 +60,7 @@ dSS.ZoneBrowser = Ext.extend(Ext.Panel, {
 			zones.push({
 				id: zone.id,
 				name: zone.name ? zone.name : 'No name'
+				primary: zone['firstZoneOnModulator'] !== undefined ? true : false
 			});
 			Ext.each(zone.devices, function(device) {
 				for(var i = 0; i < devices.length; i++) {
