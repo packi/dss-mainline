@@ -2007,39 +2007,43 @@ namespace dss {
   } // getDevices
 
   void Group::turnOn() {
-    getDevices().turnOn();
+    callScene(SceneMax);
   } // turnOn
 
   void Group::turnOff() {
-    getDevices().turnOff();
+    callScene(SceneMin);
   } // turnOff
 
   void Group::increaseValue(const int _parameterNr) {
-    getDevices().increaseValue(_parameterNr);
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseValue, m_Apartment.getZone(m_ZoneID), m_GroupID, _parameterNr);
   } // increaseValue
 
   void Group::decreaseValue(const int _parameterNr) {
-    getDevices().decreaseValue(_parameterNr);
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseValue, m_Apartment.getZone(m_ZoneID), m_GroupID, _parameterNr);
   } // decreaseValue
 
   void Group::enable() {
-    getDevices().enable();
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdEnable, m_Apartment.getZone(m_ZoneID), m_GroupID);
   } // enable
 
   void Group::disable() {
-    getDevices().disable();
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdDisable, m_Apartment.getZone(m_ZoneID), m_GroupID);
   } // disable
 
   void Group::startDim(bool _directionUp, const int _parameterNr)  {
-    getDevices().startDim(_directionUp, _parameterNr);
+    if(_directionUp) {
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimUp, m_Apartment.getZone(m_ZoneID), m_GroupID, _parameterNr);
+    } else {
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimDown, m_Apartment.getZone(m_ZoneID), m_GroupID, _parameterNr);
+    }
   } // startDim
 
   void Group::endDim(const int _parameterNr) {
-    getDevices().endDim(_parameterNr);
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdStopDim, m_Apartment.getZone(m_ZoneID), m_GroupID, _parameterNr);
   } // endDim
 
   void Group::setValue(const double _value, int _parameterNr) {
-    getDevices().setValue(_value, _parameterNr);
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, m_Apartment.getZone(m_ZoneID), m_GroupID, static_cast<int>(_value));
   } // setValue
 
   Group& Group::operator=(const Group& _other) {
@@ -2056,15 +2060,15 @@ namespace dss {
     if(SceneHelper::rememberScene(_sceneNr & 0x00ff)) {
       m_LastCalledScene = _sceneNr & 0x00ff;
     }
-    getDevices().callScene(_sceneNr);
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdCallScene, m_Apartment.getZone(m_ZoneID), m_GroupID, _sceneNr);
   } // callScene
 
   void Group::saveScene(const int _sceneNr) {
-    getDevices().saveScene(_sceneNr);
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdSaveScene, m_Apartment.getZone(m_ZoneID), m_GroupID, _sceneNr);
   } // saveScene
 
   void Group::undoScene(const int _sceneNr) {
-    getDevices().undoScene(_sceneNr);
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdUndoScene, m_Apartment.getZone(m_ZoneID), m_GroupID, _sceneNr);
   } // undoScene
 
   unsigned long Group::getPowerConsumption() {
