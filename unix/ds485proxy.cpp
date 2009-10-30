@@ -309,13 +309,7 @@ namespace dss {
     frame.getHeader().setBroadcast(true);
     frame.getHeader().setType(1);
     frame.setCommand(CommandRequest);
-    int toZone;
-    if(getDSS().getApartment().getZones().size() == 2 /* zone 0 + another zone */) {
-      toZone = 0;
-      log("sendCommand(Zone,GroupID): Only one zone present, sending frame to broadcast zone");
-    } else {
-      toZone = _zone.getID();
-    }
+    int toZone = _zone.getID();
     if(_cmd == cmdTurnOn) {
       frame.getPayload().add<uint8_t>(FunctionGroupCallScene);
       frame.getPayload().add<uint16_t>(toZone);
