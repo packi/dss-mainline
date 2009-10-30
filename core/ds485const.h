@@ -95,33 +95,34 @@ namespace dss {
   const uint8_t FunctionDeviceGetOnOff = 0x61;
   const uint8_t FunctionDeviceGetParameterValue = 0x62;
   const uint8_t FunctionDeviceGetDSID = 0x65;
+  const uint8_t FunctionDeviceGetFunctionID = 0x66;
   const uint8_t FunctionDeviceGetGroups = 0x67;
-
+  const uint8_t FunctionDeviceGetName = 0x68;
+  const uint8_t FunctionDeviceGetVersion = 0x69;
+  
+  const uint8_t FunctionGetTypeRequest = 0x90;
   const uint8_t FunctionModulatorGetDSID = 0x91;
   const uint8_t FunctionModulatorGetPowerConsumption = 0x94;
   const uint8_t FunctionModulatorGetEnergyMeterValue = 0x95;
-  
+  const uint8_t FunctionModulatorSetEnergyLevel = 0x96;
+  const uint8_t FunctionModulatorGetEnergyLevel = 0x97;
+
   const uint8_t FunctionDeviceGetTransmissionQuality = 0x9f;
 
-  const uint8_t FunctionDeviceGetFunctionID = 0x66;
-  const uint8_t FunctionDeviceGetName = 0x68;
-
-  const uint8_t FunctionGetTypeRequest = 0x90;
-
-  const uint8_t FunctionModulatorGetEnergyBorder = 0x97;
-
-  const uint8_t FunctionDSLinkConfigWrite = 0xa0;
-  const uint8_t FunctionDSLinkConfigRead = 0xa1;
+  const uint8_t FunctionMeterSynchronisation = 0xa0;
+  
+  const uint8_t FunctionDSLinkConfigWrite = 0xc0;
+  const uint8_t FunctionDSLinkConfigRead = 0xc1;
   const uint8_t FunctionDSLinkSendDevice = 0xc2;
+  const uint8_t FunctionDSLinkReceive = 0xc3;
   const uint8_t FunctionDSLinkSendGroup = 0xc4;
   const uint8_t DSLinkSendLastByte = 0x01;
   const uint8_t DSLinkSendWriteOnly = 0x02;
-  const uint8_t FunctionDSLinkReceive = 0xc3;
-  const uint8_t FunctionDSLinkInterrupt = 0x85;
   
   const uint8_t EventNewDS485Device = 0x80;
   const uint8_t EventLostDS485Device = 0x81;
   const uint8_t EventDeviceReady = 0x82;
+  const uint8_t EventDSLinkInterrupt = 0x85;
 
   // Scene constants for devices
   const uint8_t SceneOff = 0x00;

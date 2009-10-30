@@ -993,9 +993,9 @@ namespace dss {
     DS485CommandFrame cmdFrame;
     cmdFrame.getHeader().setDestination(_modulatorID);
     cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetEnergyBorder);
+    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetEnergyLevel);
 
-    boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionModulatorGetEnergyBorder);
+    boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionModulatorGetEnergyLevel);
 
     bucket->waitForFrame(1000);
 
@@ -1243,6 +1243,9 @@ namespace dss {
     case FunctionGetTypeRequest:
       return "Function Get Type";
 
+    case FunctionMeterSynchronisation:
+      return "Function Meter Synchronization";
+
     case FunctionDeviceGetFunctionID:
       return "Function Device Get Function ID";
     case FunctionDSLinkConfigWrite:
@@ -1255,7 +1258,7 @@ namespace dss {
       return "Function dSLink Send Group";
     case FunctionDSLinkReceive:
       return "Function dSLink Receive";
-    case FunctionDSLinkInterrupt:
+    case EventDSLinkInterrupt:
       return "Function DSLink Interrupt";
       
     case FunctionZoneAddDevice:
@@ -1378,7 +1381,7 @@ namespace dss {
               pEvent->addParameter(devID);
               pEvent->addParameter(sceneID);
               getDSS().getApartment().addModelEvent(pEvent);
-            } else if(functionID == FunctionDSLinkInterrupt) {
+            } else if(functionID == EventDSLinkInterrupt) {
               pd.get<uint8_t>(); // functionID
               uint16_t devID = pd.get<uint16_t>();
               uint16_t priority = pd.get<uint16_t>();

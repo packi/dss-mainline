@@ -928,7 +928,7 @@ namespace dss {
                 distributeFrame(response);
               }
               break;
-            case FunctionModulatorGetEnergyBorder:
+            case FunctionModulatorGetEnergyLevel:
               {
                 response = createResponse(cmdFrame, cmdNr);
                 response->getPayload().add<uint16_t>(m_EnergyLevelOrange);
@@ -977,7 +977,7 @@ namespace dss {
     result->getHeader().setBroadcast(true);
     result->getHeader().setCounter(0);
     result->setCommand(CommandEvent);
-    result->getPayload().add<uint8_t>(FunctionDSLinkInterrupt);
+    result->getPayload().add<uint8_t>(EventDSLinkInterrupt);
     result->getPayload().add<devid_t>(_shortAddress);
     distributeFrame(result);
   } // dSLinkInterrupt
