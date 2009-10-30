@@ -1041,9 +1041,11 @@ namespace dss {
         throw DS485ApiError(errStr);
       }
       return pd.get<uint16_t>();
+    } else {
+      sendFrame(cmdFrame);
+      log("dsLinkSend: Not waiting for response (writeOnly is set)");
+      return 0;
     }
-    log("dsLinkSend: Not waiting for response (writeOnly is set)");
-    return 0;
   } // dsLinkSend
 
   void DS485Proxy::addToGroup(const int _modulatorID, const int _groupID, const int _deviceID) {
