@@ -43,7 +43,7 @@ namespace dss {
   } // ctor
 
   int DSIDSim::getConsumption() {
-    return (int)((m_CurrentValue / 255.0) * m_SimpleConsumption) + (rand() % 100);
+    return (int) 0; //((m_CurrentValue / 255.0) * m_SimpleConsumption) + (rand() % 100);
   }
 
   void DSIDSim::callScene(const int _sceneNr) {
