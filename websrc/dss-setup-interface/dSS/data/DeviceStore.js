@@ -10,6 +10,7 @@ dSS.data.DeviceStore = Ext.extend(Ext.data.Store, {
 			{name:"circuit"},
 			{name:"modulator"},
 			{name:"zone"},
+			{name:"isPresent"},
 			{name:"firstSeen"},
 			{name:"lastDiscovered"}
 		]);
@@ -22,10 +23,16 @@ dSS.data.DeviceStore = Ext.extend(Ext.data.Store, {
 			deviceRecord
 		);
 		
-		Ext.apply(this, { reader: deviceReader, sortInfo: {
-    field: 'firstSeen',
-    direction: 'DESC' // or 'DESC' (case sensitive for local sorting)
-}});
+		Ext.apply(
+			this,
+			{
+				reader: deviceReader,
+				sortInfo: {
+					field: 'firstSeen',
+					direction: 'DESC' // or 'DESC' (case sensitive for local sorting)
+				}
+			}
+		);
 		dSS.data.DeviceStore.superclass.constructor.call(this, arguments);
 	}
 });

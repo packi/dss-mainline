@@ -277,6 +277,7 @@ dSS.data.DeviceStore = Ext.extend(Ext.data.Store, {
 			{name:"circuit"},
 			{name:"modulator"},
 			{name:"zone"},
+			{name:"isPresent"},
 			{name:"firstSeen"},
 			{name:"lastDiscovered"}
 		]);
@@ -288,10 +289,16 @@ dSS.data.DeviceStore = Ext.extend(Ext.data.Store, {
 			deviceRecord
 		);
 
-		Ext.apply(this, { reader: deviceReader, sortInfo: {
-    field: 'firstSeen',
-    direction: 'DESC' // or 'DESC' (case sensitive for local sorting)
-}});
+		Ext.apply(
+			this,
+			{
+				reader: deviceReader,
+				sortInfo: {
+					field: 'firstSeen',
+					direction: 'DESC' // or 'DESC' (case sensitive for local sorting)
+				}
+			}
+		);
 		dSS.data.DeviceStore.superclass.constructor.call(this, arguments);
 	}
 });
@@ -312,15 +319,6 @@ dSS.grid.DevicePanel = Ext.extend(Ext.grid.GridPanel, {
 			{header: "last discovered", width: 150, sortable: true, dataIndex: 'lastDiscovered', xtype: 'datecolumn', format: 'c'}
 		];
 
-		var editor = new Ext.ux.grid.RowEditor({
-			saveText: 'Update'
-		});
-
-		editor.on('afteredit', function() {
-			deviceStore.commitChanges();
-			filterDevices();
-		});
-
 		var deviceStore = new dSS.data.DeviceStore();
 
 		Ext.apply(this, {
@@ -331,10 +329,16 @@ dSS.grid.DevicePanel = Ext.extend(Ext.grid.GridPanel, {
 			stripeRows       : true,
 			forceFit         : true,
 			title            : 'Devices',
-			plugins          : [editor],
 			viewConfig: {
-        autoFill: true
-       }
+				autoFill: true,
+				getRowClass: function(record, index) {
+					var c = record.get('isPresent');
+					if (c === false) {
+						return 'nonPresentDevice';
+					}
+					return '';
+				}
+			}
 		});
 
 		dSS.grid.DevicePanel.superclass.initComponent.apply(this, arguments);
@@ -543,9 +547,9 @@ dSS.tree.PropertyTreeLoader = Ext.extend(Ext.tree.TreeLoader, {
 	}
 });
 
-Ext.namespace('dSS');
+Ext.namespace('dSS', 'dSS.system');
 
-dSS.SystemPropertyTree = Ext.extend(Ext.Panel, {
+dSS.system.PropertyTree = Ext.extend(Ext.Panel, {
 	initComponent: function() {
 
 		Ext.apply(this, {
@@ -613,7 +617,80 @@ dSS.SystemPropertyTree = Ext.extend(Ext.Panel, {
 	}
 });
 
-Ext.reg('dsssystempropertytree', dSS.SystemPropertyTree);
+Ext.reg('dsssystempropertytree', dSS.system.PropertyTree);
+
+Ext.namespace('dSS');
+
+dSS.SystemPanel = Ext.extend(Ext.Panel, {
+	initComponent: function() {
+
+		var tabRecord = Ext.data.Record.create([
+			{ name:"title" }
+		]);
+
+		var tabStore = new Ext.data.Store({}, tabRecord);
+
+
+		var contentPanel = {
+			ref: 'contentPanel',
+			region: 'center',
+			layout: 'card',
+			activeItem: 0,
+			border: false,
+			items: [
+				{
+					title: 'Property Tree',
+					xtype: 'dsssystempropertytree',
+					ref: 'systemPropertyTree'
+				}
+			]
+		};
+
+		Ext.apply(this, {
+			layout: 'border',
+			items: [ {
+					xtype: 'listview',
+					title: 'System',
+					ref: 'listView',
+					store: tabStore,
+					singleSelect: true,
+					region: 'west',
+					hideHeaders: true,
+					width: 275,
+					columns: [{
+						header: 'name',
+						dataIndex: 'title'
+					}]
+				},
+				contentPanel
+			]
+		});
+
+		dSS.ZoneBrowser.superclass.initComponent.apply(this, arguments);
+		this.on(
+			'activate',
+			function(component) {
+				this.contentPanel.items.each(function(item) {
+					var tab = new tabRecord({title: item.title});
+					tabStore.add([tab]);
+				}, this);
+				this.listView.select(0, false, true);
+			},
+			this
+		);
+		this.items.get(0).on(
+			'selectionchange',
+			function(listView, selections) {
+				if(selections.length === 1) {
+					this.contentPanel.layout.setActiveItem(selections[0].viewIndex);
+				}
+			},
+			this
+		);
+	}
+});
+
+Ext.reg('dsssystempanel', dSS.SystemPanel);
 
 Ext.onReady(function(){
 	Ext.get('start').remove();
@@ -636,11 +713,12 @@ Ext.onReady(function(){
 					{
 						title: 'Zones',
 						xtype: 'dsszonebrowser',
-						ref: 'zonebrowser'
+						ref: 'zoneBrowser'
 					},{
 						title: 'System Properties',
-						xtype: 'dsssystempropertytree',
-						ref: 'systempropertytree'
+						xtype: 'dsssystempanel',
+						ref: 'systemPanel',
+						id: 'hurz'
 					}
 				]
 			}]

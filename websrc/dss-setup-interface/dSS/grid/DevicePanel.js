@@ -16,16 +16,6 @@ dSS.grid.DevicePanel = Ext.extend(Ext.grid.GridPanel, {
 			{header: "last discovered", width: 150, sortable: true, dataIndex: 'lastDiscovered', xtype: 'datecolumn', format: 'c'}
 		];
 		
-		var editor = new Ext.ux.grid.RowEditor({
-			saveText: 'Update'
-		});
-		
-		editor.on('afteredit', function() {
-			//console.log('a device has been edited');
-			deviceStore.commitChanges();
-			filterDevices();
-		});
-		
 		var deviceStore = new dSS.data.DeviceStore();
 		
 		Ext.apply(this, {
@@ -35,12 +25,17 @@ dSS.grid.DevicePanel = Ext.extend(Ext.grid.GridPanel, {
 			enableDragDrop   : true,
 			stripeRows       : true,
 			forceFit         : true,
-//			autoExpandColumn : 'name',
 			title            : 'Devices',
-			plugins          : [editor],
 			viewConfig: {
-        autoFill: true
-       }
+				autoFill: true,
+				getRowClass: function(record, index) {
+					var c = record.get('isPresent');
+					if (c === false) {
+						return 'nonPresentDevice';
+					}
+					return '';
+				}
+			}
 		});
 		
 		dSS.grid.DevicePanel.superclass.initComponent.apply(this, arguments);

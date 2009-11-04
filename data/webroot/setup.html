@@ -9,10 +9,6 @@
 		<script type="text/javascript" src="js/lib/extjs/adapter/ext/ext-base-debug.js"></script>
 		<script type="text/javascript" src="js/lib/extjs/ext-all-debug.js"></script>
 		
-		<!-- ExtJS extensions -->
-		<script type="text/javascript" src="js/DataView-more.js"></script>
-		<script type="text/javascript" src="js/lib/extjs/examples/ux/RowEditor.js"></script>
-		
 		<script type="text/javascript" src="js/dss-setup-interface.js"></script>
 		<style>
 			.zone-wrap{
@@ -34,7 +30,11 @@
 			
 			.x-panel-body{
 				background: white;
-				font: 11px Arial, Helvetica, sans-serif;
+				font: 14px Arial, Helvetica, sans-serif;
+			}
+			
+			.x-grid3-hd-row td, .x-grid3-row td, .x-grid3-summary-row td {
+				font-size: 14px;
 			}
 			
 			.reloadAction {
@@ -47,6 +47,10 @@
 			
 			.editZoneAction {
 				background-image: url(images/edit.gif) !important;
+			}
+			
+			.nonPresentDevice table {
+				color: #505050;
 			}
 		</style>
 	</head>

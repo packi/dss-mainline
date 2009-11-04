@@ -1,8 +1,8 @@
 //= require <dSS/tree/PropertyTreeLoader>
 
-Ext.namespace('dSS');
+Ext.namespace('dSS', 'dSS.system');
 
-dSS.SystemPropertyTree = Ext.extend(Ext.Panel, {
+dSS.system.PropertyTree = Ext.extend(Ext.Panel, {
 	initComponent: function() {
 		
 		Ext.apply(this, {
@@ -70,4 +70,4 @@ dSS.SystemPropertyTree = Ext.extend(Ext.Panel, {
 	}
 });
 
-Ext.reg('dsssystempropertytree', dSS.SystemPropertyTree);
+Ext.reg('dsssystempropertytree', dSS.system.PropertyTree);
