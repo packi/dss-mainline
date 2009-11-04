@@ -44,15 +44,13 @@ dSS.ZoneView = Ext.extend(Ext.DataView, {
 		Ext.apply(this, {
 			store: zoneStore,
 			tpl: zoneTemplate,
-			multiSelect: true,
+			singleSelect: true,
+			multiSelect: false,
 			layout: 'fit',
 			style: "overflow: auto",
 			overClass:'x-view-over',
 			itemSelector:'div.zone-wrap',
-			emptyText: 'No Rooms to display',
-			plugins: [
-				new Ext.DataView.DragSelector()
-			]
+			emptyText: 'No Rooms to display'
 		});
 
 		dSS.ZoneView.superclass.initComponent.apply(this, arguments);
@@ -94,8 +92,8 @@ dSS.ZoneView = Ext.extend(Ext.DataView, {
 								disableCaching: true,
 								method: "GET",
 								scope: zoneView,
-								params: {		devid: currentDevice.data.id,
-														zone:  record.data.id
+								params: {		devid: currentDevice.get('id'),
+														zone:  record.get('id')
 												},
 								success: function(result, request) {
 									try {
