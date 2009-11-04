@@ -6,12 +6,14 @@ dSS.grid.DevicePanel = Ext.extend(Ext.grid.GridPanel, {
 	initComponent: function() {
 		
 		var deviceCols = [
-			{id: 'id', header: "id",  width: 50, sortable: true, dataIndex: 'id'},
-			{id: 'name', header: "name", width: 50, sortable: true, dataIndex: 'name', editable: true, editor: new Ext.form.TextField()},
+			{id: 'id', header: "id",  width: 150, sortable: true, dataIndex: 'id'},
+			{id: 'name', header: "name", width: 150, sortable: true, dataIndex: 'name', editable: true, editor: new Ext.form.TextField()},
 			{header: "on", width: 50, sortable: true, dataIndex: 'on'},
-			{header: "circuit", width: 50, sortable: true, dataIndex: 'circuit'},
-			{header: "modulator", width: 50, sortable: true, dataIndex: 'modulator'},
+			{header: "circuit", width: 100, sortable: true, dataIndex: 'circuit'},
+			{header: "modulator", width: 150, sortable: true, dataIndex: 'modulator'},
 			{header: "zone", width: 50, sortable: true, dataIndex: 'zone'},
+			{header: "first seen", width: 150, sortable: true, dataIndex: 'firstSeen', xtype: 'datecolumn', format: 'c'},
+			{header: "last discovered", width: 150, sortable: true, dataIndex: 'lastDiscovered', xtype: 'datecolumn', format: 'c'}
 		];
 		
 		var editor = new Ext.ux.grid.RowEditor({
@@ -32,9 +34,13 @@ dSS.grid.DevicePanel = Ext.extend(Ext.grid.GridPanel, {
 			ddGroup          : "zoneDeviceDD",
 			enableDragDrop   : true,
 			stripeRows       : true,
-			autoExpandColumn : 'id',
+			forceFit         : true,
+//			autoExpandColumn : 'name',
 			title            : 'Devices',
-			plugins          : [editor]
+			plugins          : [editor],
+			viewConfig: {
+        autoFill: true
+       }
 		});
 		
 		dSS.grid.DevicePanel.superclass.initComponent.apply(this, arguments);

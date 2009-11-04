@@ -42,7 +42,7 @@ dSS.ZoneBrowser = Ext.extend(Ext.Panel, {
 		}
 		this.devicePanel.getStore().filterBy(function(record) {
 			for(var i = 0; i < selectedZones.length; i++) {
-				if(record.data.zone == selectedZones[i].data.id) {
+				if(record.get('zone') === selectedZones[i].get('id')) {
 					return true;
 				}
 			}
@@ -54,6 +54,8 @@ dSS.ZoneBrowser = Ext.extend(Ext.Panel, {
 		Ext.each(structure.apartment.zones, function(zone) {
 			if(zone.id === 0) { // Skip zone 0
 				Ext.each(zone.devices, function(device) {
+					device.firstSeen = Date.parseDate(device.firstSeen, "U");
+					device.lastDiscovered =  Date.parseDate(device.lastDiscovered, "U");
 					devices.push(device);
 				});
 			}
