@@ -98,9 +98,6 @@ namespace dss {
 
   //============================================= Encoding helpers
 
-  bool fileExists( const char* _fileName );
-  bool fileExists( const std::string& _fileName );
-
   uint16_t crc16(unsigned const char* _data, const int _size);
   uint16_t update_crc(uint16_t _crc, const unsigned char& c);
 

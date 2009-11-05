@@ -28,6 +28,8 @@
 #include "seriespersistence.h"
 #include "core/foreach.h"
 
+#include <boost/filesystem.hpp>
+
 namespace dss {
 
   //================================================== Metering
@@ -90,7 +92,7 @@ namespace dss {
         // Load series from file
         std::string fileName = m_MeteringStorageLocation + (*ipModulator)->getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
         log("Metering::checkModulators: Trying to load series from '" + fileName + "'");
-        if(fileExists(fileName)) {
+        if(boost::filesystem::exists(fileName)) {
           Timestamp startedLoadingSingle;
           boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(fileName));
 #ifdef LOG_TIMING

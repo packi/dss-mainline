@@ -29,6 +29,7 @@
 #include "scripting/modeljs.h"
 
 #include <boost/scoped_ptr.hpp>
+#include <boost/filesystem.hpp>
 
 namespace dss {
 
@@ -72,7 +73,7 @@ namespace dss {
   void EventInterpreterPluginJavascript::handleEvent(Event& _event, const EventSubscription& _subscription) {
     if(_subscription.getOptions().hasParameter("filename")) {
       string scriptName = _subscription.getOptions().getParameter("filename");
-      if(fileExists(scriptName)) {
+      if(boost::filesystem::exists(scriptName)) {
 
         if(!m_Environment.isInitialized()) {
           m_Environment.initialize();
@@ -106,7 +107,7 @@ namespace dss {
           ScriptObject subscriptionObj(*ctx, NULL);
           raisedEvent.setProperty("subscription", &subscriptionObj);
           subscriptionObj.setProperty<const std::string&>("name", _subscription.getEventName());
-          
+
           ctx->evaluateScript<void>(scriptName);
 
           if(ctx->getKeepContext()) {

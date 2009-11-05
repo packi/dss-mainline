@@ -96,7 +96,7 @@ namespace dss {
         if(scriptFileNode != NULL) {
           if(simIDNode != NULL) {
             std::string scriptFile = scriptFileNode->getAsString();
-            if(!fileExists(scriptFile)) {
+            if(!boost::filesystem::exists(scriptFile)) {
               log("DSSim::initialize: cannot find script file '" + scriptFile + "', skipping", lsError);
               continue;
             }

@@ -41,6 +41,7 @@
 #include <sstream>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/filesystem.hpp>
 
 namespace dss {
   //============================================= WebServer
@@ -1781,7 +1782,7 @@ namespace dss {
         } else {
           seriesPath = storageLocation + deviceDSIDString + "_" + fileSuffix + ".xml";
           log("_Trying to load series from " + seriesPath);
-          if(fileExists(seriesPath)) {
+          if(boost::filesystem::exists(seriesPath)) {
             SeriesReader<CurrentValue> reader;
             boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(seriesPath));
             std::deque<CurrentValue>* values = s->getExpandedValues();

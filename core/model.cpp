@@ -33,6 +33,8 @@
 
 #include <fstream>
 
+#include <boost/filesystem.hpp>
+
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Attr.h>
@@ -1080,7 +1082,7 @@ namespace dss {
 
     // load devices/modulators/etc. from a config-file
     std::string configFileName = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile");
-    if(!fileExists(configFileName)) {
+    if(!boost::filesystem::exists(configFileName)) {
       Logger::getInstance()->log(string("Apartment::execute: Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
     } else {
       readConfigurationFromXML(configFileName);

@@ -23,6 +23,8 @@
 
 #include <fstream>
 
+#include <boost/filesystem.hpp>
+
 namespace dss {
   //============================================= XMLNode
 
@@ -240,7 +242,7 @@ namespace dss {
   }
 
   XMLDocument& XMLDocumentFileReader::getDocument() {
-    if(!fileExists(m_URI.c_str())) {
+    if(!boost::filesystem::exists(m_URI.c_str())) {
       throw XMLException(std::string("XMLDocumentFileReader::getDocument: File '") + m_URI + "' does not exist");
     }
 

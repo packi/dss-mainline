@@ -311,30 +311,6 @@ namespace dss {
     return result;
   } // cRC16
 
-  //================================================== File utilities
-
-  bool fileExists( const std::string& _fileName ) {
-    return fileExists(_fileName.c_str());
-  } // fileExists
-
-  bool fileExists( const char* _fileName ) {
-    #ifdef WIN32
-      return (FileAge( _fileName ) != -1);
-    #else
-      #ifdef __GNU__
-        return euidaccess( _fileName, F_OK ) == 0;
-      #else
-        struct stat buf;
-        if( lstat( _fileName, &buf ) != -1 ) {
-          int fileType = (buf.st_mode & S_IFMT);
-          return fileType  == S_IFREG;
-        } else {
-          return false;
-        }
-      #endif
-    #endif
-  } // fileExists
-
   //================================================== System utilities
 
   void sleepSeconds( const unsigned int _seconds ) {

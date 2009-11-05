@@ -30,6 +30,8 @@
 
 #include <dlfcn.h>
 
+#include <boost/filesystem.hpp>
+
 namespace dss {
 
   WebServerPlugin::WebServerPlugin(const std::string& _uri, const std::string& _file)
@@ -46,7 +48,7 @@ namespace dss {
   void WebServerPlugin::load() {
     assert(m_Handle == NULL);
     Logger::getInstance()->log("WebServerPlugin::load(): Trying to load \"" + m_File + "\"", lsInfo);
-    if(!fileExists(m_File)) {
+    if(!boost::filesystem::exists(m_File)) {
       throw std::runtime_error(std::string("Plugin '") + m_File + "' does not exist.");
     }
     m_Handle = dlopen(m_File.c_str(), RTLD_LAZY);

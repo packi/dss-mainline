@@ -33,6 +33,8 @@
 #include <set>
 #include <iostream>
 
+#include <boost/filesystem.hpp>
+
 using std::set;
 using std::cout;
 
@@ -300,7 +302,7 @@ namespace dss {
     const int apartmentConfigVersion = 1;
     Logger::getInstance()->log(string("EventInterpreter: Loading subscriptions from '") + _fileName + "'");
 
-    if(fileExists(_fileName)) {
+    if(boost::filesystem::exists(_fileName)) {
       XMLDocumentFileReader reader(_fileName);
 
       XMLNode rootNode = reader.getDocument().getRootNode();
