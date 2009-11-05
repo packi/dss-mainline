@@ -68,6 +68,7 @@ SET(REQUIRED_LIBS ${REQUIRED_LIBS} PocoFoundation PocoNet)
 
 # header tests
 INCLUDE(CheckIncludeFiles)
+INCLUDE(CheckIncludeFileCXX)
 
 CHECK_INCLUDE_FILES(dns_sd.h HAVE_DNS_SD)
 CHECK_INCLUDE_FILES(avahi-client/publish.h HAVE_AVAHI)
@@ -114,6 +115,16 @@ FIND_LIBRARY(LIBICAL ical)
 IF(${LIBICAL} MATCHES "LIBICAL-NOTFOUND")
   MESSAGE(FATAL_ERROR "libical libical is required: library libical not found")
 ENDIF(${LIBICAL} MATCHES "LIBICAL-NOTFOUND")
+
+# check for libpoco headers and library
+CHECK_INCLUDE_FILE_CXX(Poco/XML/XML.h HAVE_POCOXML_H)
+IF(NOT HAVE_POCOXML_H)
+  MESSAGE(FATAL_ERROR "poco library is required: PocoXML.h not found")
+ENDIF(NOT HAVE_POCOXML_H)
+FIND_LIBRARY(POCOXML PocoXML)
+IF(${POCOXML} MATCHES "POCOXML-NOTFOUND")
+  MESSAGE(FATAL_ERROR "poco is required: library PocoXML not found")
+ENDIF(${POCOXML} MATCHES "POCOXML-NOTFOUND")
 
 # generate config.h header file
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
