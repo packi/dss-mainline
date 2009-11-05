@@ -35,12 +35,18 @@ function call_dss() {
 }
 
 usage() {
-    if [ -n "$target_command" ]; then
-	echo "Unknown target/command combination"
-    elif [ -n "$target" ]; then
-	echo "Command missing for target '$target'"
+
+    if [ -n "$1" ]; then
+	echo "Usage: $APPNAME $target $target_command $*"
+    else
+	if [ -n "$target_command" ]; then
+	    echo "Unknown target/command combination"
+	elif [ -n "$target" ]; then
+	    echo "Command missing for target '$target'"
+	fi
+	
+	echo "Usage: $APPNAME <target> <command> <args>"
     fi
-    echo "Usage: $APPNAME <target> <command> <args>"
     echo ""
     echo "Supported commands:"
     echo "  device:"
@@ -58,6 +64,11 @@ usage() {
     echo "    callScene | <scene #>"
     echo "    setName | <new name>"
     echo "  Example: $APPNAME apartment callScene 5"
+}
+
+fatal_usage() {
+    usage $*
+    exit 1
 }
 
 command="$1_$2"
@@ -83,10 +94,12 @@ case "$command" in
     ## zone commands
     #
     "zone_turnOn"|"zone_turnOff")
-        call_dss "$target" "$target_command" "id=$1"
+        [ -z "$2" ] && fatal_usage "<zoneid> <group id>"
+        call_dss "$target" "$target_command" "id=$1" "groupID=$2"
 	;;
     "zone_callScene")
-        call_dss "$target" "$target_command" "id=$1" "sceneNr=$2"
+        [ -z "$3" ] && fatal_usage "<zoneid> <scene#> <group id>"
+        call_dss "$target" "$target_command" "id=$1" "sceneNr=$2" "groupID=$3"
 	;;
     "zone_getConsumption")
         PRINT_RESULT="yes" call_dss "$target" "$target_command" "id=$1" "sceneNr=$2"
@@ -96,10 +109,12 @@ case "$command" in
     ## apartment
     #
     "apartment_turnOn"|"apartment_turnOff")
-        call_dss "$target" "$target_command"
+        [ -z "$1" ] && fatal_usage "<group id>"
+        call_dss "$target" "$target_command" "groupID=$1"
 	;;
     "apartment_callScene")
-        call_dss "$target" "$target_command" "sceneNr=$1"
+        [ -z "$2" ] && fatal_usage "<scene#> <group id>"
+        call_dss "$target" "$target_command" "sceneNr=$1" "groupID=$2"
 	;;
     "apartment_getName"|"apartment_getConsumption")
         PRINT_RESULT="yes" call_dss "$target" "$target_command"
@@ -115,8 +130,7 @@ case "$command" in
         PRINT_RESULT="yes" call_dss "$target" "$target_command"
 	;;
     *)
-        usage
-	exit 1
+        fatal_usage
 	;;
 esac
 
