@@ -173,17 +173,20 @@ int main (int argc, char* argv[]) {
   } else {
     if(!quitAfterTests) {
       // start DSS
-      dss::DSS::getInstance()->initialize(properties);
+      if (dss::DSS::getInstance()->initialize(properties)) {
 #ifndef __APPLE__
-      if(daemonize) {
-        int result = daemon(1,0);
-        if(result != 0) {
-          perror("daemon()");
-          return 0;
+        if(daemonize) {
+          int result = daemon(1,0);
+          if(result != 0) {
+            perror("daemon()");
+            return 0;
+          }
         }
-      }
 #endif
-      dss::DSS::getInstance()->run();
+        dss::DSS::getInstance()->run();
+      } else {
+        dss::Logger::getInstance()->log("Failed to initialize dss. Exiting", lsFatal);
+      }
     }
     if(dss::DSS::hasInstance()) {
       dss::DSS::shutdown();

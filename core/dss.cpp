@@ -119,7 +119,7 @@ const char* DataDirectory = "data/";
     }
   } // setDataDirectory
 
-  void DSS::initialize(const vector<string>& _properties) {
+  bool DSS::initialize(const vector<string>& _properties) {
     m_State = ssCreatingSubsystems;
 
     m_pDS485Interface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this));
@@ -180,6 +180,34 @@ const char* DataDirectory = "data/";
         m_pPropertySystem->setStringValue(name, value, true);
       }
     }
+
+    // -- setup logging
+    if(!loadConfig()) {
+      Logger::getInstance()->log("Could not parse config file", lsFatal);
+      return false;
+    }
+
+    // see whether we have a log file set in config.xml, and set the
+    // log target accordingly
+    PropertyNodePtr pNode = getPropertySystem().getProperty("/config/logfile");
+    if (pNode) {
+      std::string logFileName = pNode->getStringValue();
+      Logger::getInstance()->log("Logging to file: " + logFileName, lsInfo);
+
+      boost::shared_ptr<dss::LogTarget>
+        logTarget(new dss::FileLogTarget(logFileName));
+      if (!dss::Logger::getInstance()->setLogTarget(logTarget)) {
+        Logger::getInstance()->log("Failed to open logfile '" + 
+                                   logFileName + "'", lsFatal);
+        return false;
+      }
+    } else {
+      Logger::getInstance()->log("No logfile configured, logging to stdout", 
+                                 lsInfo);
+    }
+
+
+    return true;
   }
 
 #ifdef WITH_TESTS
@@ -230,31 +258,7 @@ const char* DataDirectory = "data/";
 
   void DSS::run() {
     Logger::getInstance()->log("DSS starting up....", lsInfo);
-    if(!loadConfig()) {
-      Logger::getInstance()->log("Could not parse config file", lsFatal);
-      return;
-    }
-    
-    // see whether we have a log file set in config.xml, and set the
-    // log target accordingly
-    PropertyNodePtr pNode = getPropertySystem().getProperty("/config/logfile");
-    if (pNode) {
-      std::string logFileName = pNode->getStringValue();      
-      Logger::getInstance()->log("Logging to file: " + logFileName, lsInfo);
-      
-      boost::shared_ptr<dss::LogTarget> 
-        logTarget(new dss::FileLogTarget(logFileName));
-      if (!dss::Logger::getInstance()->setLogTarget(logTarget)) {
-        Logger::getInstance()->log("Failed to open logfile '" + logFileName + 
-                                   "'; exiting", lsFatal);
-        return;
-      }
-    } else {
-      Logger::getInstance()->log("No logfile configured, logging to stdout", 
-                                 lsInfo);
-    }
-    
-    dss::Logger::getInstance()->log(versionString(), lsInfo);
+    Logger::getInstance()->log(versionString(), lsInfo);
 
     SystemInfo info;
     info.collect();

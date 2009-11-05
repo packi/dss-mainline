@@ -93,7 +93,7 @@ namespace dss {
     int getUptime() const;
   public:
     ~DSS();
-    void initialize(const std::vector<std::string>& _properties);
+    bool initialize(const std::vector<std::string>& _properties);
     void run();
 
     static DSS* getInstance();
