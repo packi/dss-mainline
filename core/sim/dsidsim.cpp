@@ -28,7 +28,7 @@ namespace dss {
   : DSIDInterface(_simulator, _dsid, _shortAddress),
     m_Enabled(true),
     m_CurrentValue(0),
-    m_SimpleConsumption(25 * 1000)
+    m_SimpleConsumption(0)
   {
     m_ValuesForScene.resize(255);
     m_ValuesForScene[SceneOff] = 0;
@@ -43,7 +43,26 @@ namespace dss {
   } // ctor
 
   int DSIDSim::getConsumption() {
-    return (int) 0; //((m_CurrentValue / 255.0) * m_SimpleConsumption) + (rand() % 100);
+	int _simpleConsumption=0;
+	int _minConsumption=0;
+	int _maxConsumption=0;
+	int _jitterConsumption=0;
+	// simple consumption calculation: just provide an max value, interpolated by currentvalue and some jitter
+	// only for backward compatiliby
+	if (getConfigParameter("SimpleConsumption")!="")
+		_simpleConsumption= (int) ((m_CurrentValue / 255.0) * strToInt(getConfigParameter("SimpleConsumption"))) + (rand() % 100);
+	  
+	if (getConfigParameter("MinConsumption")!="")
+		_minConsumption=strToInt(getConfigParameter("MinConsumption"));
+		
+	if (getConfigParameter("MaxConsumption")!="")
+		_maxConsumption= (int) ((m_CurrentValue / 255.0) * (strToInt(getConfigParameter("MaxConsumption")) - _minConsumption) );
+
+	if (getConfigParameter("JitterConsumption")!="")
+		_jitterConsumption= (int) (rand() % strToInt(getConfigParameter("JitterConsumption")));
+	_jitterConsumption =_jitterConsumption - (_jitterConsumption/2);
+	
+    return (int) _simpleConsumption + _minConsumption + _maxConsumption + _jitterConsumption; //((m_CurrentValue / 255.0) * m_SimpleConsumption) + (rand() % 100);
   }
 
   void DSIDSim::callScene(const int _sceneNr) {
