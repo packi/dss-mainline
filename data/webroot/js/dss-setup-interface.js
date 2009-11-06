@@ -403,10 +403,58 @@ dSS.grid.DevicePanel = Ext.extend(Ext.grid.GridPanel, {
 
 		this.on(
 			'rowcontextmenu',
-			function() {
+			function(grid, rowIndex, event) {
+				event.preventDefault();
+				event.stopEvent();
+				if(!this.contextMenu) {
+					this.contextMenu = new Ext.menu.Menu({});
+				} else {
+					this.contextMenu.removeAll();
+				}
+
+				var menuItem = new Ext.menu.Item({
+					text: 'Edit Device',
+					icon: '/images/page_white_edit.png',
+					handler: this.editDevice.createDelegate(this, rowIndex, true)
+				});
+				this.contextMenu.add(menuItem)
+				var xy = event.getXY();
+				this.contextMenu.showAt(xy);
 			},
 			this
 		);
+	},
+	editDevice: function(item, event, rowIndex) {
+		var record = this.getStore().getAt(rowIndex);
+		debugger;
+		Ext.Msg.prompt('Edit device', 'Name:', function(btn, text){
+			if(text !== record.get('name')) {
+				Ext.Ajax.request({
+					url: '/json/device/setName',
+					disableCaching: true,
+					method: "GET",
+					params: { dsid: record.get('id'),
+										newName: text},
+					success: function(result, request) {
+						try {
+							var jsonData = Ext.util.JSON.decode(result.responseText);
+							if(jsonData.ok) {
+								record.set('name', text);
+								record.commit();
+							} else {
+								Ext.MessageBox.alert('Error', 'Could not rename device');
+							}
+						}
+						catch (err) {
+							Ext.MessageBox.alert('Error', 'Could not rename device');
+						}
+					},
+					failure: function(result, request) {
+						Ext.MessageBox.alert('Error', 'Could not rename device');
+					},
+				});
+			}
+		}, this, false, record.get('name'));
 	}
 });
 
