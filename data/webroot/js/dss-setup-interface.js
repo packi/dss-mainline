@@ -366,10 +366,19 @@ Ext.namespace('dSS', 'dSS.grid');
 dSS.grid.DevicePanel = Ext.extend(Ext.grid.GridPanel, {
 	initComponent: function() {
 
+		var stateRenderer = function(value, metaData, record, rowIndex, colIndex, store) {
+			if(record.get('on')) {
+				metaData.css = 'isOn';
+			} else {
+				metaData.css = 'isOff';
+			}
+			return String.format('<img class="padding-img" src="{0}"/>',Ext.BLANK_IMAGE_URL);
+		};
+
 		var deviceCols = [
+			{header: "on", width: 14, resizable: false, sortable: true, dataIndex: 'on', renderer: stateRenderer},
 			{id: 'id', header: "id",  width: 150, sortable: true, dataIndex: 'id'},
 			{id: 'name', header: "name", width: 150, sortable: true, dataIndex: 'name', editable: true, editor: new Ext.form.TextField()},
-			{header: "on", width: 50, sortable: true, dataIndex: 'on'},
 			{header: "circuit", width: 100, sortable: true, dataIndex: 'circuit'},
 			{header: "modulator", width: 150, sortable: true, dataIndex: 'modulator'},
 			{header: "zone", width: 50, sortable: true, dataIndex: 'zone'},
@@ -423,10 +432,36 @@ dSS.grid.DevicePanel = Ext.extend(Ext.grid.GridPanel, {
 			},
 			this
 		);
+
+		this.on(
+			'cellclick',
+			function (grid, rowIndex, columnIndex, event) {
+				if(columnIndex === 0) {
+					var record = this.getStore().getAt(rowIndex);
+					Ext.Ajax.request({
+						url: record.get('on') ? '/json/device/turnOff' : '/json/device/turnOn',
+						disableCaching: true,
+						method: "GET",
+						params: { dsid: record.get('id') },
+						success: function(result, request) {
+							try {
+								var jsonData = Ext.util.JSON.decode(result.responseText);
+								if(jsonData.ok) {
+									record.set('on', record.get('on') ? false : true );
+									record.commit();
+								}
+							} catch(err) {
+								Ext.MessageBox.alert('Error', err);
+							}
+						}
+					});
+				}
+			},
+			this
+		);
 	},
 	editDevice: function(item, event, rowIndex) {
 		var record = this.getStore().getAt(rowIndex);
-		debugger;
 		Ext.Msg.prompt('Edit device', 'Name:', function(btn, text){
 			if(text !== record.get('name')) {
 				Ext.Ajax.request({
