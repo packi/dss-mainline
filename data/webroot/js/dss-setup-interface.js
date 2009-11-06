@@ -119,6 +119,64 @@ dSS.ZoneView = Ext.extend(Ext.DataView, {
 			},
 			this
 		);
+
+		this.on(
+			'contextmenu',
+			function(view, index, node, event) {
+				event.preventDefault();
+				event.stopEvent();
+				if(!this.contextMenu) {
+					this.contextMenu = new Ext.menu.Menu({});
+				} else {
+					this.contextMenu.removeAll();
+				}
+
+				var menuItem = new Ext.menu.Item({
+					text: 'Delete Room',
+					icon: '/images/delete.png',
+					handler: this.removeZone.createDelegate(this, index, true)
+				});
+				this.contextMenu.add(menuItem)
+				var xy = event.getXY();
+				this.contextMenu.showAt(xy);
+			},
+			this
+		);
+	},
+	removeZone: function(item, event, index) {
+		var record = this.getStore().getAt(index);
+		if(record.get('primary') == true) {
+			Ext.MessageBox.alert('Error', 'You cannot delete a primary room.');
+			return;
+		}
+		var deviceStore = this.findParentByType('dsszonebrowser').devicePanel.getStore();
+		if(deviceStore.query('zone', record.get('id')).getCount() > 0) {
+			Ext.MessageBox.alert('Error', 'You cannot delete a non empty room.');
+			return;
+		}
+
+		Ext.Ajax.request({
+			url: '/json/structure/removeZone',
+			disableCaching: true,
+			method: "GET",
+			scope: this,
+			params: { zoneID: record.get('id') },
+			success: function(result, request) {
+				try {
+					var jsonData = Ext.util.JSON.decode(result.responseText);
+					if(jsonData.ok) {
+						this.getStore().removeAt(index);
+					} else {
+						Ext.MessageBox.alert('Error', 'Could not remove room "' + record.get('name') + '"');
+					}
+				} catch (err) {
+						Ext.MessageBox.alert('Error', 'Could not move device "' + record.get('name') + '"');
+				}
+			},
+			failure: function(result, request) {
+				Ext.MessageBox.alert('Error', 'Could not remove room "' + record.get('name') + '"');
+			},
+		})
 	}
 });
 
