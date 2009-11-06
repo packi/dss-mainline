@@ -127,7 +127,7 @@ dSS.grid.DevicePanel = Ext.extend(Ext.grid.GridPanel, {
 					},
 					failure: function(result, request) {
 						Ext.MessageBox.alert('Error', 'Could not rename device');
-					},
+					}
 				});
 			}
 		}, this, false, record.get('name'));

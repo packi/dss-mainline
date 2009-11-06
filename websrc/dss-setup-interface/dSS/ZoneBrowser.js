@@ -110,7 +110,7 @@ dSS.ZoneBrowser = Ext.extend(Ext.Panel, {
 			},
 			failure: function(result, request) {
 				Ext.MessageBox.alert('AJAX Error', 'Could not load "' + request.url + '"');
-			},
+			}
 		});
 	},
 	loadCircuits: function() {
@@ -130,7 +130,7 @@ dSS.ZoneBrowser = Ext.extend(Ext.Panel, {
 			},
 			failure: function(result, request) {
 				Ext.MessageBox.alert('AJAX Error', 'Could not load "' + request.url + '"');
-			},
+			}
 		});
 	},
 	loadData: function() {

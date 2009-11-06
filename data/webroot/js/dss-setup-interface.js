@@ -110,7 +110,7 @@ dSS.ZoneView = Ext.extend(Ext.DataView, {
 								},
 								failure: function(result, request) {
 									Ext.MessageBox.alert('Error', 'Could not move device "' + device.data.dsid + '"');
-								},
+								}
 							});
 						});
 						return true;
@@ -175,7 +175,7 @@ dSS.ZoneView = Ext.extend(Ext.DataView, {
 			},
 			failure: function(result, request) {
 				Ext.MessageBox.alert('Error', 'Could not remove room "' + record.get('name') + '"');
-			},
+			}
 		})
 	}
 });
@@ -247,7 +247,7 @@ dSS.ZonePanel = Ext.extend(Ext.Panel, {
 						},
 						failure: function(result, request) {
 							Ext.MessageBox.alert('Error', 'Could not rename room');
-						},
+						}
 					});
 				}
 			}, this, false, record.get('name'));
@@ -298,7 +298,7 @@ dSS.ZonePanel = Ext.extend(Ext.Panel, {
 										},
 										failure: function(result, request) {
 											Ext.MessageBox.alert('Error', 'Could not create Zone');
-										},
+										}
 									});
 
 
@@ -310,7 +310,7 @@ dSS.ZonePanel = Ext.extend(Ext.Panel, {
 							},
 							failure: function(result, request) {
 								Ext.MessageBox.alert('Error', 'Could not create Zone');
-							},
+							}
 						});
 						return;
 					}
@@ -486,7 +486,7 @@ dSS.grid.DevicePanel = Ext.extend(Ext.grid.GridPanel, {
 					},
 					failure: function(result, request) {
 						Ext.MessageBox.alert('Error', 'Could not rename device');
-					},
+					}
 				});
 			}
 		}, this, false, record.get('name'));
@@ -604,7 +604,7 @@ dSS.ZoneBrowser = Ext.extend(Ext.Panel, {
 			},
 			failure: function(result, request) {
 				Ext.MessageBox.alert('AJAX Error', 'Could not load "' + request.url + '"');
-			},
+			}
 		});
 	},
 	loadCircuits: function() {
@@ -624,7 +624,7 @@ dSS.ZoneBrowser = Ext.extend(Ext.Panel, {
 			},
 			failure: function(result, request) {
 				Ext.MessageBox.alert('AJAX Error', 'Could not load "' + request.url + '"');
-			},
+			}
 		});
 	},
 	loadData: function() {
@@ -713,12 +713,10 @@ dSS.system.PropertyTree = Ext.extend(Ext.Panel, {
 						path: '/',
 						type: 'none',
 						text: 'dSS',
-						leaf: false,
+						leaf: false
 					}),
 					rootVisible: true,
-					listeners: {
-						append: this.handleAppend
-					}
+					listeners: { append: this.handleAppend }
 				}
 			]
 		});

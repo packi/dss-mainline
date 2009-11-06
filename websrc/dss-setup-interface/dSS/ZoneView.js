@@ -92,7 +92,7 @@ dSS.ZoneView = Ext.extend(Ext.DataView, {
 								},
 								failure: function(result, request) {
 									Ext.MessageBox.alert('Error', 'Could not move device "' + device.data.dsid + '"');
-								},
+								}
 							});
 						});
 						return true;
@@ -157,7 +157,7 @@ dSS.ZoneView = Ext.extend(Ext.DataView, {
 			},
 			failure: function(result, request) {
 				Ext.MessageBox.alert('Error', 'Could not remove room "' + record.get('name') + '"');
-			},
+			}
 		})
 	}
 });

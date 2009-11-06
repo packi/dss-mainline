@@ -69,7 +69,7 @@ dSS.ZonePanel = Ext.extend(Ext.Panel, {
 						},
 						failure: function(result, request) {
 							Ext.MessageBox.alert('Error', 'Could not rename room');
-						},
+						}
 					});
 				}
 			}, this, false, record.get('name'));
@@ -120,7 +120,7 @@ dSS.ZonePanel = Ext.extend(Ext.Panel, {
 										},
 										failure: function(result, request) {
 											Ext.MessageBox.alert('Error', 'Could not create Zone');
-										},
+										}
 									});
 									
 									
@@ -132,7 +132,7 @@ dSS.ZonePanel = Ext.extend(Ext.Panel, {
 							},
 							failure: function(result, request) {
 								Ext.MessageBox.alert('Error', 'Could not create Zone');
-							},
+							}
 						});
 						return;
 					}

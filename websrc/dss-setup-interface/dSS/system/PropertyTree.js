@@ -25,12 +25,10 @@ dSS.system.PropertyTree = Ext.extend(Ext.Panel, {
 						path: '/',
 						type: 'none',
 						text: 'dSS',
-						leaf: false,
+						leaf: false
 					}),
 					rootVisible: true,
-					listeners: {
-						append: this.handleAppend
-					}
+					listeners: { append: this.handleAppend }
 				}
 			]
 		});
