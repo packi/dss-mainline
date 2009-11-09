@@ -1435,6 +1435,7 @@ namespace dss {
           if(zone.getDevices().length() > 0) {
             return ResultToJSON(false, "Cannot delete a non-empty zone");
           }
+          getDSS().getApartment().removeZone(zoneID);
           return JSONOk();
         } catch(ItemNotFoundException&) {
           return ResultToJSON(false, "Could not find zone");
