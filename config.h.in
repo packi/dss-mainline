@@ -4,6 +4,7 @@
 #define DSS_VERSION "0.6-dev"
 
 /* SpiderMonkey API header */
+#cmakedefine HAVE_STDINT
 #cmakedefine HAVE_MOZJS_JSAPI_H
 #cmakedefine HAVE_JS_JSAPI_H
 #cmakedefine HAVE_LIBICAL_ICAL_H

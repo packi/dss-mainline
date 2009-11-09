@@ -70,6 +70,8 @@ SET(REQUIRED_LIBS ${REQUIRED_LIBS} PocoFoundation PocoNet)
 INCLUDE(CheckIncludeFiles)
 INCLUDE(CheckIncludeFileCXX)
 
+CHECK_INCLUDE_FILES(stdint.h HAVE_STDINT)
+
 CHECK_INCLUDE_FILES(dns_sd.h HAVE_DNS_SD)
 CHECK_INCLUDE_FILES(avahi-client/publish.h HAVE_AVAHI)
 

@@ -25,7 +25,27 @@
 #ifndef MONGOOSE_HEADER_INCLUDED
 #define	MONGOOSE_HEADER_INCLUDED
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
+#include <time.h>
+
+typedef int bool_t;
+#if defined(HAVE_STDINT)
+#include <stdint.h>
+#else
+typedef unsigned int		uint32_t;
+typedef unsigned short		uint16_t;
+#if _MSC_VER > 1200
+typedef unsigned __int64	uint64_t;
+#else
+/* VC6 cannot cast double to unsigned __int64, needed by print_dir_entry() */
+typedef __int64	uint64_t;
+#endif /* _MSC_VER */
+#endif /* HAVE_STDINT */
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -241,6 +261,18 @@ void mg_free(char *var);
  * Return Mongoose version.
  */
 const char *mg_version(void);
+
+/*
+ * Structure used by mg_stat() function. Uses 64 bit file length.
+ */
+struct mgstat {
+	bool_t		is_directory;	/* Directory marker		*/
+	uint64_t	size;		/* File size			*/
+	time_t		mtime;		/* Modification time		*/
+};
+
+int mg_stat(const char *path, struct mgstat *stp);
+void mg_send_file(struct mg_connection *conn, const char *path, struct mgstat *stp);
 
 
 /*
