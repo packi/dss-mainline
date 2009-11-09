@@ -426,6 +426,7 @@ namespace dss {
 
     mg_set_uri_callback(m_mgContext, "/browse/*", &httpBrowseProperties, NULL);
     mg_set_uri_callback(m_mgContext, "/json/*", &jsonHandler, NULL);
+    mg_set_uri_callback(m_mgContext, "/download/*", &downloadHandler, NULL);
 
     loadPlugins();
 
@@ -1361,13 +1362,12 @@ namespace dss {
 
   string WebServer::handleSystemCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     _handled = true;
-    string result;
     if(endsWith(_method, "/version")) {
       return ResultToJSON(true, DSS::getInstance()->versionString());
     } else {
       _handled = false;
+      return std::string();
     }
-    return result;
   } // handleEventCall
 
   string WebServer::handleStructureCall(const std::string& _method,
@@ -1918,6 +1918,39 @@ namespace dss {
     }
     mg_write(_connection, result.c_str(), result.length());
   } // jsonHandler
+
+  void WebServer::downloadHandler(struct mg_connection* _connection,
+                                  const struct mg_request_info* _info, 
+                                  void* _userData) {
+    const std::string kURLID = "/download/";
+    std::string uri = _info->uri;
+
+    std::string givenFileName = uri.substr(uri.find(kURLID) + kURLID.size());
+
+    WebServer& self = DSS::getInstance()->getWebServer();
+    self.log("Processing call to download/" + givenFileName);
+
+    // TODO: make the files-node readonly as this might pose a security threat
+    //       (you could download any file on the disk if you add it as a subnode
+    //        of files)
+    PropertyNodePtr filesNode = self.getDSS().getPropertySystem().getProperty(
+                                    self.getConfigPropertyBasePath() + "files"
+                                );
+    std::string fileName;
+    if(filesNode != NULL) {
+      PropertyNodePtr fileNode = filesNode->getProperty(givenFileName);
+      if(fileNode != NULL) {
+        fileName = fileNode->getStringValue();
+      }
+    }
+    self.log("Using local file: " + fileName);
+    struct mgstat st;
+    if(mg_stat(fileName.c_str(), &st) != 0) {
+      self.log("Not found");
+      memset(&st, '\0', sizeof(st));
+    }
+    mg_send_file(_connection, fileName.c_str(), &st);
+  } // downloadHandler
 
   void WebServer::httpBrowseProperties(struct mg_connection* _connection,
                                        const struct mg_request_info* _info,

@@ -82,6 +82,9 @@ namespace dss {
     static void jsonHandler(struct mg_connection* _connection,
                             const struct mg_request_info* _info, 
                             void* _userData);
+    static void downloadHandler(struct mg_connection* _connection,
+                            const struct mg_request_info* _info, 
+                            void* _userData);
 
       static void emitHTTPHeader(int _code, struct mg_connection* _connection, const std::string& _contentType = "text/html");
   protected:
