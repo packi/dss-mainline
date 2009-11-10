@@ -601,6 +601,7 @@ dSS.ZoneBrowser = Ext.extend(Ext.Panel, {
 				catch (err) {
 					Ext.MessageBox.alert('AJAX Error', 'Error loading apartment structure: "' + err + '"');
 				}
+				this.loadCircuits();
 			},
 			failure: function(result, request) {
 				Ext.MessageBox.alert('AJAX Error', 'Could not load "' + request.url + '"');
@@ -629,7 +630,6 @@ dSS.ZoneBrowser = Ext.extend(Ext.Panel, {
 	},
 	loadData: function() {
 		this.loadStructure();
-		this.loadCircuits();
 	}
 
 });
