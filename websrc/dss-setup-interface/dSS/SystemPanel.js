@@ -51,12 +51,16 @@ dSS.SystemPanel = Ext.extend(Ext.Panel, {
 		this.on(
 			'activate',
 			function(component) {
+				if(this.initializedTabs) {
+					return;
+				}
 				// for each item in contentPanel
 				this.contentPanel.items.each(function(item) {
 					var tab = new tabRecord({title: item.title});
 					tabStore.add([tab]);
 				}, this);
 				this.listView.select(0, false, true);
+				this.initializedTabs = true;
 			},
 			this
 		);

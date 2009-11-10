@@ -293,7 +293,7 @@ dSS.ZonePanel = Ext.extend(Ext.Panel, {
 												}
 											}
 											catch (err) {
-												Ext.MessageBox.alert('Error', 'Could not create Zone');
+												Ext.MessageBox.alert('Error', 'Could not create Zone: ' + err);
 											}
 										},
 										failure: function(result, request) {
@@ -809,11 +809,15 @@ dSS.SystemPanel = Ext.extend(Ext.Panel, {
 		this.on(
 			'activate',
 			function(component) {
+				if(this.initializedTabs) {
+					return;
+				}
 				this.contentPanel.items.each(function(item) {
 					var tab = new tabRecord({title: item.title});
 					tabStore.add([tab]);
 				}, this);
 				this.listView.select(0, false, true);
+				this.initializedTabs = true;
 			},
 			this
 		);

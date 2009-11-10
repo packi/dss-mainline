@@ -115,7 +115,7 @@ dSS.ZonePanel = Ext.extend(Ext.Panel, {
 												}
 											}
 											catch (err) {
-												Ext.MessageBox.alert('Error', 'Could not create Zone');
+												Ext.MessageBox.alert('Error', 'Could not create Zone: ' + err);
 											}
 										},
 										failure: function(result, request) {
