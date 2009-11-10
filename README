@@ -1,44 +1,31 @@
-This is a pre-release (aka snapshot of the subversion repos). Expect the program to destroy all your data.
+digitalSTROM Server - dSS
 
-If that doesn't scare you, lets see what is needed to build the digitalSTROM Server (dSS).
+   This is a pre-release (aka snapshot of the subversion repos). Expect
+the program to destroy all your data.
 
-== Preriquisites ==
+Building
+========
 
-The following libraries and their respective headers and development libraries have to be present on your
-system:
+   See the INSTALL document for information on how to build the dSS.
 
-* libxml
-* boost
-* poco
-* gsoap
-* libical
-* spidermonkey
-* dns_sd or avahi
+Running
+=======
 
-== Building & Running ==
+   Assuming you are in the build directory after building the dSS you can
+run it using
 
-After you've installed these libraries issue the following command to build your system:
+   (cd ..; build/dss)
 
-(cd build; cmake .. && make)
+Using
+=====
 
-This should generate the "dss" executable. Run it using
+   After starting the dSS it will open up a webserver at port 8080. So if
+you point your webserver to:
 
-(cd ..; build/dss)
+   http://localhost:8080/
 
-= CMake Options =
+you'll be greeted by a enumeration of the devices currently connected.
 
--DWITH_DATADIR=path 
- specifies the default location of the data directory.
--DWITH_TESTS=[yes|no] 
- include tests in the build.
--DWITH_SIM=[yes|no] 
- include the simulation in the build
--DCMAKE_BUILD_TYPE=[Release|Debug]
-
-== Using ==
-
-After starting the dSS it will open up a webserver at port 8080. So if you point your webserver to:
-http://localhost:8080/ you'll be greeted by a enumeration of the devices currently connected.
-
-Everything is served out of dss/data/webroot. There is a JavaScript API located in webroot/js/model.js. The
-code in there should be enough "documentation" for an interested developer.
+   Everything is served out of dss/data/webroot. There is a JavaScript API
+located in webroot/js/model.js. The code in there should be enough 
+"documentation" for an interested developer.

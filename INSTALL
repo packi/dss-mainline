@@ -1,0 +1,51 @@
+Installation Instructions
+*************************
+
+   This is a pre-release (aka snapshot of the subversion repos). Expect
+the program to destroy all your data.
+
+   If that doesn't scare you, lets see what is needed to build the 
+digitalSTROM Server (dSS).
+
+Prerequisites
+=============
+
+   The following libraries and their respective headers and development
+libraries have to be present on your system:
+
+   * libxml
+   * boost
+   * poco
+   * gsoap
+   * libical
+   * spidermonkey
+   * dns_sd or avahi
+
+Installation
+============
+
+   After you've installed these libraries issue the following command to
+build your system:
+
+   (cd build; cmake .. && make)
+
+   This should generate the "dss" executable.
+
+CMake Options
+=============
+
+   -DWITH_DATADIR=path 
+      Specifie the default location of the data directory.
+
+   -DWITH_TESTS=[yes|no] 
+      Include tests in the build.
+
+   -DWITH_SIM=[yes|no] 
+      Include the simulation in the build
+
+   -DCMAKE_BUILD_TYPE=[Release|Debug]
+
+Running & Using
+===============
+
+   See the README document for information on how to run and use the dss.
