@@ -43,8 +43,8 @@ echo "/* do not edit, modifications will be overwritten */" \
 	>> $TARGETDIR/$BUILD_INFO
 
 
-echo "#define DSS_RCS_REVISION \"$rcs_rev\""    >> $TARGETDIR/$BUILD_INFO
-echo "#define DSS_RCS_URL      \"$rcs_root\""   >> $TARGETDIR/$BUILD_INFO
-echo "#define DSS_BUILD_USER   \"$(whoami)\""   >> $TARGETDIR/$BUILD_INFO
-echo "#define DSS_BUILD_HOST   \"$(hostname)\"" >> $TARGETDIR/$BUILD_INFO
-echo "#define DSS_BUILD_DATE   \"$(date)\""     >> $TARGETDIR/$BUILD_INFO
+echo "#define DSS_RCS_REVISION \"$rcs_rev\""       >> $TARGETDIR/$BUILD_INFO
+echo "#define DSS_RCS_URL      \"$rcs_root\""      >> $TARGETDIR/$BUILD_INFO
+echo "#define DSS_BUILD_USER   \"$(whoami)\""      >> $TARGETDIR/$BUILD_INFO
+echo "#define DSS_BUILD_HOST   \"$(hostname)\""    >> $TARGETDIR/$BUILD_INFO
+echo "#define DSS_BUILD_DATE   \"$(TZ=UTC date)\"" >> $TARGETDIR/$BUILD_INFO
