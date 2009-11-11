@@ -1436,6 +1436,7 @@ namespace dss {
             return ResultToJSON(false, "Cannot delete a non-empty zone");
           }
           getDSS().getApartment().removeZone(zoneID);
+          getDSS().getApartment().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
           return JSONOk();
         } catch(ItemNotFoundException&) {
           return ResultToJSON(false, "Could not find zone");
