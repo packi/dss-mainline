@@ -986,7 +986,7 @@ namespace dss {
     }
     PayloadDissector pd(recFrame->getFrame()->getPayload());
     pd.get<uint8_t>(); // discard the function id
-    return pd.get<uint16_t>();
+    return pd.get<uint32_t>();
   } // getEnergyMeterValue
 
   bool DS485Proxy::getEnergyBorder(const int _modulatorID, int& _lower, int& _upper) {

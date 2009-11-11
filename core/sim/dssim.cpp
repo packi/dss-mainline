@@ -885,7 +885,7 @@ namespace dss {
             case FunctionModulatorGetEnergyMeterValue:
               {
                 response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(0);
+                response->getPayload().add<uint32_t>(0);
                 distributeFrame(response);
               }
               break;
