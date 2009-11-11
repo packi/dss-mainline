@@ -900,7 +900,6 @@ namespace dss {
                   if(iZoneEntry->first == zoneID) {
                     response->getPayload().add<uint16_t>(static_cast<uint16_t>(-7));
                     isValid = false;
-                    break;
                   }
                 }
                 if(isValid) {
