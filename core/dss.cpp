@@ -259,6 +259,7 @@ const char* DataDirectory = "data/";
   void DSS::run() {
     Logger::getInstance()->log("DSS starting up....", lsInfo);
     Logger::getInstance()->log(versionString(), lsInfo);
+    Logger::getInstance()->log("Using data directory '" + getDataDirectory() + "'", lsInfo);
 
     SystemInfo info;
     info.collect();
