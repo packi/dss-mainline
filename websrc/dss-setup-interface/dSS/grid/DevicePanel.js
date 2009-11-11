@@ -15,7 +15,7 @@ dSS.grid.DevicePanel = Ext.extend(Ext.grid.GridPanel, {
 		};
 		
 		var deviceCols = [
-			{header: "on", width: 14, resizable: false, sortable: true, dataIndex: 'on', renderer: stateRenderer},
+			{header: "on", width: 30, resizable: false, sortable: true, dataIndex: 'on', renderer: stateRenderer},
 			{id: 'id', header: "id",  width: 150, sortable: true, dataIndex: 'id'},
 			{id: 'name', header: "name", width: 150, sortable: true, dataIndex: 'name', editable: true, editor: new Ext.form.TextField()},
 			{header: "circuit", width: 100, sortable: true, dataIndex: 'circuit'},

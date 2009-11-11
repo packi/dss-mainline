@@ -6,7 +6,7 @@ dSS.data.ZoneStore = Ext.extend(Ext.data.Store, {
 		var zoneRecord = Ext.data.Record.create([
 			{name:"name"},
 			{name:"id"},
-			{name:"primary"}
+			{name:"primary", defaultValue: false}
 		]);
 		
 		// a json reader to read the zone data

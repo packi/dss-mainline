@@ -105,13 +105,9 @@ dSS.ZonePanel = Ext.extend(Ext.Panel, {
 											try {
 												var jsonData = Ext.util.JSON.decode(result.responseText);
 												if(jsonData.ok) {
-												
-												
-													var newZone = new zoneStore.recordType({id: i, name: text}, i);
-													zoneStore.insert(i, newZone);
-												
-												
-												
+													zoneStore.loadData({zones: [{id: i, name: text}]}, true);
+												} else {
+													Ext.MessageBox.alert('Error', 'Could not create Zone: ' + json.message);
 												}
 											}
 											catch (err) {

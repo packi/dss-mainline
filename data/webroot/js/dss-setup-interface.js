@@ -5,7 +5,7 @@ dSS.data.ZoneStore = Ext.extend(Ext.data.Store, {
 		var zoneRecord = Ext.data.Record.create([
 			{name:"name"},
 			{name:"id"},
-			{name:"primary"}
+			{name:"primary", defaultValue: false}
 		]);
 
 		var zoneReader = new Ext.data.JsonReader(
@@ -100,7 +100,7 @@ dSS.ZoneView = Ext.extend(Ext.DataView, {
 										var jsonData = Ext.util.JSON.decode(result.responseText);
 										if(jsonData.ok) {
 											currentDevice.set("zone", record.data.id);
-											this.getStore().commitChanges();
+											currentDevice.store.commitChanges();
 											this.findParentByType('dsszonebrowser').filterDevices();
 										}
 									}
@@ -283,13 +283,9 @@ dSS.ZonePanel = Ext.extend(Ext.Panel, {
 											try {
 												var jsonData = Ext.util.JSON.decode(result.responseText);
 												if(jsonData.ok) {
-
-
-													var newZone = new zoneStore.recordType({id: i, name: text}, i);
-													zoneStore.insert(i, newZone);
-
-
-
+													zoneStore.loadData({zones: [{id: i, name: text}]}, true);
+												} else {
+													Ext.MessageBox.alert('Error', 'Could not create Zone: ' + json.message);
 												}
 											}
 											catch (err) {
@@ -376,7 +372,7 @@ dSS.grid.DevicePanel = Ext.extend(Ext.grid.GridPanel, {
 		};
 
 		var deviceCols = [
-			{header: "on", width: 14, resizable: false, sortable: true, dataIndex: 'on', renderer: stateRenderer},
+			{header: "on", width: 30, resizable: false, sortable: true, dataIndex: 'on', renderer: stateRenderer},
 			{id: 'id', header: "id",  width: 150, sortable: true, dataIndex: 'id'},
 			{id: 'name', header: "name", width: 150, sortable: true, dataIndex: 'name', editable: true, editor: new Ext.form.TextField()},
 			{header: "circuit", width: 100, sortable: true, dataIndex: 'circuit'},

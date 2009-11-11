@@ -82,7 +82,7 @@ dSS.ZoneView = Ext.extend(Ext.DataView, {
 										var jsonData = Ext.util.JSON.decode(result.responseText);
 										if(jsonData.ok) {
 											currentDevice.set("zone", record.data.id);
-											this.getStore().commitChanges();
+											currentDevice.store.commitChanges();
 											this.findParentByType('dsszonebrowser').filterDevices();
 										}
 									}
