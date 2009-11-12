@@ -1,0 +1,3 @@
+[submodule "websrc"]
+	path = websrc
+	url = http://developer.digitalstrom.org/sources/websrc.git
