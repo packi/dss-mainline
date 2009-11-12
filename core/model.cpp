@@ -65,6 +65,7 @@ namespace dss {
     m_ShortAddress(ShortAddressStaleDevice),
     m_ZoneID(0),
     m_pApartment(_pApartment),
+    m_FunctionID(0),
     m_LastCalledScene(SceneOff),
     m_Consumption(0),
     m_LastDiscovered(DateTime::NullDate),
