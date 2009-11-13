@@ -28,6 +28,7 @@
 <option id="gnu.cpp.compiler.option.preprocessor.preprocess.1231112907" name="Preprocess only (-E)" superClass="gnu.cpp.compiler.option.preprocessor.preprocess"/>
 <option id="gnu.cpp.compiler.option.preprocessor.def.701665023" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="XP_UNIX"/>
+<listOptionValue builtIn="false" value="HAVE_STDINT"/>
 <listOptionValue builtIn="false" value="HAVE_LIBICAL_ICAL_H"/>
 <listOptionValue builtIn="false" value="USE_DNS_SD"/>
 <listOptionValue builtIn="false" value="WITH_TESTS"/>
@@ -60,7 +61,9 @@
 <option id="gnu.c.compiler.exe.debug.option.debugging.level.2066773453" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.c.compiler.option.preprocessor.nostdinc.2028946356" name="Do not search system directories (-nostdinc)" superClass="gnu.c.compiler.option.preprocessor.nostdinc"/>
 <option id="gnu.c.compiler.option.preprocessor.preprocess.99927572" name="Preprocess only (-E)" superClass="gnu.c.compiler.option.preprocessor.preprocess"/>
-<option id="gnu.c.compiler.option.preprocessor.def.symbols.971916440" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols"/>
+<option id="gnu.c.compiler.option.preprocessor.def.symbols.971916440" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="HAVE_STDINT"/>
+</option>
 <option id="gnu.c.compiler.option.preprocessor.undef.symbol.1011559478" name="Undefined symbols (-U)" superClass="gnu.c.compiler.option.preprocessor.undef.symbol"/>
 <option id="gnu.c.compiler.option.include.paths.272503253" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths"/>
 <option id="gnu.c.compiler.option.optimization.flags.1073155397" name="Other optimization flags" superClass="gnu.c.compiler.option.optimization.flags"/>
