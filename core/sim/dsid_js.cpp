@@ -56,7 +56,7 @@ namespace dss {
           }
         }
       } catch(ScriptException& e) {
-        Logger::getInstance()->log("DSIDJS: Could not get 'self' object");
+        Logger::getInstance()->log(std::string("DSIDJS: Could not get 'self' object: ") + e.what());
       }
     }
 
