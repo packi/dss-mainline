@@ -84,12 +84,19 @@ namespace dss {
   class FrameBucketBase {
   public:
     FrameBucketBase(DS485Proxy* _proxy, int _functionID, int _sourceID);
-    virtual ~FrameBucketBase();
+    virtual ~FrameBucketBase() {}
 
     int getFunctionID() const { return m_FunctionID; }
     int getSourceID() const { return m_SourceID; }
 
     virtual bool addFrame(boost::shared_ptr<ReceivedFrame> _frame) = 0;
+
+    /** Registers the bucket at m_pProxy */
+    void addToProxy();
+    /** Removes the bucket from m_pProxy */
+    void removeFromProxy();
+    /** Static function to be used from a boost::shared_ptr as a deleter. */
+    static void removeFromProxyAndDelete(FrameBucketBase* _obj);
   private:
     DS485Proxy* m_pProxy;
     int m_FunctionID;

@@ -104,7 +104,8 @@ namespace dss {
     DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(&DSS::getInstance()->getDS485Interface());
     assert(proxy != NULL);
 
-    boost::shared_ptr<FrameBucketBase> bucket(new FrameBucketCallback(proxy, _functionID, _source, _callback));
+    boost::shared_ptr<FrameBucketBase> bucket(new FrameBucketCallback(proxy, _functionID, _source, _callback), FrameBucketBase::removeFromProxyAndDelete);
+    bucket->addToProxy();
     m_pImpl->buckets.push_back(bucket);
   } // subscribeTo
 

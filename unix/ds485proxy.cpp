@@ -500,7 +500,8 @@ namespace dss {
 
   boost::shared_ptr<FrameBucketCollector> DS485Proxy::sendFrameAndInstallBucket(DS485CommandFrame& _frame, const int _functionID) {
     int sourceID = _frame.getHeader().isBroadcast() ? -1 :  _frame.getHeader().getDestination();
-    boost::shared_ptr<FrameBucketCollector> result(new FrameBucketCollector(this, _functionID, sourceID));
+    boost::shared_ptr<FrameBucketCollector> result(new FrameBucketCollector(this, _functionID, sourceID), FrameBucketBase::removeFromProxyAndDelete);
+    result->addToProxy();
     sendFrame(_frame);
     return result;
   } // sendFrameAndInstallBucket
@@ -1493,14 +1494,23 @@ namespace dss {
     m_FunctionID(_functionID),
     m_SourceID(_sourceID)
   {
-    Logger::getInstance()->log("Bucket: Registering for fid: " + intToString(_functionID) + " sid: " + intToString(_sourceID));
-    m_pProxy->addFrameBucket(this);
+    assert(m_pProxy != NULL);
   } // ctor
 
-  FrameBucketBase::~FrameBucketBase() {
+  void FrameBucketBase::addToProxy() {
+    Logger::getInstance()->log("Bucket: Registering for fid: " + intToString(m_FunctionID) + " sid: " + intToString(m_SourceID));
+    m_pProxy->addFrameBucket(this);
+  } // addToProxy
+
+  void FrameBucketBase::removeFromProxyAndDelete(FrameBucketBase* _obj) {
+    _obj->removeFromProxy();
+    delete _obj;
+  } // remove_from_proxy_and_delete
+
+  void FrameBucketBase::removeFromProxy() {
     Logger::getInstance()->log("Bucket: Removing for fid: " + intToString(m_FunctionID) + " sid: " + intToString(m_SourceID));
     m_pProxy->removeFrameBucket(this);
-  } // dtor
+  } // removeFromProxy
 
 
   //================================================== FrameBucket
