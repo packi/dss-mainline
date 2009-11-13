@@ -13,6 +13,14 @@
           <value>example.js-device</value>
         </property>
       </property>
+      <property name="temperature_sensor">
+        <property name="script-file" type="string">
+          <value>data/temperature_sensor.js</value>
+        </property>
+        <property name="id" type="string">
+          <value>example.temperature_sensor</value>
+        </property>
+     </property>
     </property>
 
 <!--
