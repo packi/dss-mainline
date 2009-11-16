@@ -28,7 +28,8 @@ git clone --depth 1 $GIT_REPO $TARGET_DIR
 cd dss-$DSS_RELEASE_VERSION
 git branch $DSS_RELEASE_BRANCH origin/$DSS_RELEASE_BRANCH
 git checkout $DSS_RELEASE_BRANCH
-
+git rev-parse HEAD > .dss_git_version
+git branch|grep ^*|sed -e 's|^\*\s*||' > .dss_git_branch
 
 git submodule update --init
 ./websrc/tools/build_and_copy_weblibs.sh websrc data/webroot/js/
