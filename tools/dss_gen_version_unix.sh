@@ -14,26 +14,23 @@ if [ -z "$TARGETDIR" ] ; then
   exit 1
 fi
 
-rcs_rev="REV_UNDEFINED"
-rcs_root="URL_UNDEFINED"
-if [ -d $BASEDIR/.svn ]; then
-  rcs_rev=$(svnversion $BASEDIR)
-  rcs_root=$(svn info $BASEDIR|grep ^URL:|sed -e 's|URL:\s*||')
-elif [ -d $BASEDIR/.git ]; then
-  if [ -d $BASEDIR/.git/svn ]; then
-    rcs_rev=svn-$(git svn info|grep ^Revision:| sed -e 's|Revision:\s*||')+
-    rcs_root=$(git svn info|grep ^URL:|sed -e 's|URL:\s*||')    
-  else
-    rcs_root=$(git branch|grep ^*)
-  fi
-  rcs_rev="${rcs_rev}git:$(git rev-parse HEAD)"
+rcs_rev="-"
+rcs_root="-"
+if [ -d $BASEDIR/.git ]; then
+  rcs_rev="git:$(git rev-parse HEAD)"
+  rcs_root=$(git branch|grep ^*|sed -e 's|^\*\s*||')
+  
   rcs_st=$(git status $BASEDIR|grep modified:)
   if [ -n "$rcs_st" ]; then
     rcs_rev="$rcs_rev-dirty"
   fi
-elif [ -d $BASEDIR/.hg ]; then
-  rcs_rev=$(hg identify) # already contains the '+' marked when modified
-  rcs_root=$(hg branch)
+else
+  if [ -f $BASEDIR/.dss_git_version ]; then
+    rcs_rev=$(cat $BASEDIR/.dss_git_version)
+  fi
+  if [ -f $BASEDIR/.dss_git_branch ]; then
+    rcs_root=$(cat $BASEDIR/.dss_git_branch)
+  fi
 fi
 
 
