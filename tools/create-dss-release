@@ -1,0 +1,39 @@
+#!/bin/sh
+#
+# Create a dss release tarball from git, including webroot customizations
+#
+# Johannes Winkelmann, johannes.winkelmann@aizo.com
+
+# Ubuntu specific: add sprocketize to path
+export PATH=$PATH:/var/lib/gems/1.8/bin/
+
+
+GIT_REPO=ssh://git@developer.digitalstrom.org/home/git/sources/dss.git
+
+if [ -z "$2" ]; then
+	echo "Usage: $(basename $0) <release version string> <git branch name>"
+	exit 1
+fi
+
+DSS_RELEASE_VERSION=$1
+DSS_RELEASE_BRANCH=$2
+TARGET_DIR=dss-$DSS_RELEASE_VERSION
+
+if [ -d "$TARGET_DIR" ]; then
+	echo "Target '$TARGET_DIR' exists; please remove first; exiting"
+	exit 2
+fi
+
+git clone --depth 1 $GIT_REPO $TARGET_DIR
+cd dss-$DSS_RELEASE_VERSION
+git branch $DSS_RELEASE_BRANCH origin/$DSS_RELEASE_BRANCH
+git checkout $DSS_RELEASE_BRANCH
+
+
+git submodule update --init
+./websrc/tools/build_and_copy_weblibs.sh websrc data/webroot/js/
+
+# clean up release tarball
+
+cd ..
+tar cvzf dss-$DSS_RELEASE_VERSION{.tar.gz,} --exclude=\*/.git* --exclude=\*/websrc\*
