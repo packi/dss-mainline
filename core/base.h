@@ -25,6 +25,7 @@
 
 #include <string>
 #include <vector>
+#include <stdint.h>
 
 #ifndef WIN32
   #include <ext/hash_map>
