@@ -22,7 +22,7 @@ export LANG=C
 set -e
 
 # print env information
-PACKAGES="gsoap libxml-2.0 mozilla-js"
+PACKAGES="gsoap libxml-2.0"
 for p in $PACKAGES; do
 	echo -n "$p: "
 	pkg-config --modversion $p
