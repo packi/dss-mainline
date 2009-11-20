@@ -1427,6 +1427,27 @@ namespace dss {
             log(string("Response for: ") + FunctionIDToString(functionID));
             boost::shared_ptr<ReceivedFrame> rf(new ReceivedFrame(m_DS485Controller.getTokenCount(), frame));
 
+            PayloadDissector pd2(frame->getPayload());
+            pd2.get<uint8_t>();
+            if (functionID == FunctionModulatorGetPowerConsumption) {   
+              /* hard optimized */
+              //getDSS().getApartment().getModulatorByBusID((int)(frame->getHeader().getSource())).setPowerConsumption(pd2.get<uint32_t>());
+                int modID = frame->getHeader().getSource();
+                ModelEvent* pEvent = new ModelEvent(ModelEvent::etPowerConsumption);
+                pEvent->addParameter(modID);
+                pEvent->addParameter(pd2.get<uint32_t>());
+                getDSS().getApartment().addModelEvent(pEvent);
+            }
+            if (functionID == FunctionModulatorGetEnergyMeterValue) {
+              /* hard optimized */
+              //getDSS().getApartment().getModulatorByBusID((int)(frame->getHeader().getSource())).setEnergyMeterValue(pd2.get<uint32_t>());
+                int modID = frame->getHeader().getSource();
+                ModelEvent* pEvent = new ModelEvent(ModelEvent::etEnergyMeterValue);
+                pEvent->addParameter(modID);
+                pEvent->addParameter(pd2.get<uint32_t>());
+                getDSS().getApartment().addModelEvent(pEvent);
+            }
+
             bool bucketFound = false;
             // search for a bucket to put the frame in
             m_FrameBucketsGuard.lock();

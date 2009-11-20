@@ -556,6 +556,12 @@ namespace dss {
     /** Returns the meter value in Wh */
     unsigned long getEnergyMeterValue();
 
+
+    /** set the consumption in mW */
+    void setPowerConsumption(unsigned long _value);
+    /** set the meter value in Wh */
+    void setEnergyMeterValue(unsigned long _value);
+
     /** Returns the last consumption in mW returned from dS485 Bus, but never request it*/
     unsigned long getCachedPowerConsumption();
     /** Returns the last meter value in Wh returned from dS485 Bus, but never request it*/
@@ -750,7 +756,9 @@ namespace dss {
                    etNewModulator, /**< A new modulator has joined the bus */
                    etLostModulator, /**< We've lost a modulator on the bus */
                    etModulatorReady, /**< A modulator has completed its scanning cycle and is now ready */
-                   etBusReady /**< The bus transitioned into ready state */
+                   etBusReady, /**< The bus transitioned into ready state */
+                   etPowerConsumption, /**< Powerconsumption message happened */
+                   etEnergyMeterValue /**< Powerconsumption message happened */
                  } EventType;
   private:
     EventType m_EventType;
@@ -805,6 +813,8 @@ namespace dss {
     void newModulator(int _modulatorBusID);
     void lostModulator(int _modulatorBusID);
     void modulatorReady(int _modulatorBusID);
+    void setPowerConsumption(int _modulatorBusID, unsigned long _value);
+    void setEnergyMeterValue(int _modulatorBusID, unsigned long _value);
     void scheduleRescan();
   protected:
     virtual void doStart();

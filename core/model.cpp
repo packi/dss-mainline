@@ -987,6 +987,14 @@ namespace dss {
     }
   } // modulatorReady
 
+  void Apartment::setPowerConsumption(int _modulatorBusID, unsigned long _value) {
+    getModulatorByBusID(_modulatorBusID).setPowerConsumption(_value);
+  } // powerConsumption
+
+  void Apartment::setEnergyMeterValue(int _modulatorBusID, unsigned long _value) {
+    getModulatorByBusID(_modulatorBusID).setEnergyMeterValue(_value);
+  } // energyMeterValue
+
   void Apartment::handleModelEvents() {
     if(!m_ModelEvents.empty()) {
       ModelEvent& event = m_ModelEvents.front();
@@ -1047,6 +1055,22 @@ namespace dss {
         log("Got bus ready event.", lsInfo);
         initializeFromBus();
         break;
+      case ModelEvent::etPowerConsumption:
+        if(event.getParameterCount() != 2) {
+          log("Expected exactly 2 parameter for ModelEvent::etPowerConsumption");
+        } else {
+          setPowerConsumption(event.getParameter(0), event.getParameter(1));
+        }
+        break;
+      case ModelEvent::etEnergyMeterValue:
+        if(event.getParameterCount() != 2) {
+          log("Expected exactly 2 parameter for ModelEvent::etEnergyMeterValue");
+        } else {
+          setEnergyMeterValue(event.getParameter(0), event.getParameter(1));
+        }
+        break;
+
+
       default:
         assert(false);
         break;
@@ -1794,6 +1818,23 @@ namespace dss {
     }
     return m_EnergyMeterValue;
   } // getEnergyMeterValue
+
+
+  /** set the consumption in mW */
+  void Modulator::setPowerConsumption(unsigned long _value)
+  {
+    DateTime now;
+    m_PowerConsumptionAge = now;
+    m_PowerConsumption = _value;
+  }
+
+  /** set the meter value in Wh */
+  void Modulator::setEnergyMeterValue(unsigned long _value)
+  {
+    DateTime now;
+    m_EnergyMeterValueAge = now;
+    m_EnergyMeterValue = _value;
+  }
 
   unsigned long Modulator::getCachedPowerConsumption() {
     return m_PowerConsumption;
