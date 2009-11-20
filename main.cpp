@@ -29,6 +29,7 @@
 #include "core/base.h"
 #include "core/dss.h"
 #include "core/logger.h"
+#include "core/ds485client.h"
 #include "unix/ds485.h"
 #ifdef WITH_TESTS
 #include "tests/tests.h"
@@ -201,6 +202,11 @@ int main (int argc, char* argv[]) {
   xmlCleanupParser();
 #endif
   free(tzNameCopy);
+
+  
+  // force the DS485Client symbols to be contained in the dss binary
+  // Also see redmine ticket #54
+  dss::DS485Client* __attribute__ ((unused)) pClient = new dss::DS485Client();
 
   return 0;
 }
