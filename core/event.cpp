@@ -529,7 +529,7 @@ namespace dss {
       }
       if(next == DateTime::NullDate) {
         Logger::getInstance()->log("EventRunner: Removing event");
-        m_ScheduledEvents.erase(ipSchedEvt++);
+        ipSchedEvt = m_ScheduledEvents.erase(ipSchedEvt);
         continue;
       }
       result = std::min(result, next);
