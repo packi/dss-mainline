@@ -519,8 +519,8 @@ namespace dss {
     }
 
     m_EventsMutex.lock();
-    for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
-        ipSchedEvt != e; )
+    for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin();
+        ipSchedEvt != m_ScheduledEvents.end(); )
     {
       DateTime next = ipSchedEvt->getSchedule().getNextOccurence(now);
       if(DebugEventRunner) {
