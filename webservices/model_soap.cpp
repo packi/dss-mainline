@@ -247,7 +247,7 @@ int dss__SetAddDeviceByID(struct soap *soap, int _token, char* _setSpec, char* _
     if(!result.empty()) {
       result += ".";
     }
-    result += "addDevice(" + devRef.getDSID().toString() + ")";
+    result += "dsid(" + devRef.getDSID().toString() + ")";
   } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Could not find device", NULL);
   }
