@@ -289,6 +289,9 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
 
   builderTest = builder.buildSet("group('broadcast').remove(dsid(1))", &apt.getZone(0));
   BOOST_CHECK_EQUAL(3, builderTest.length());
+
+  builderTest = builder.buildSet("empty().addDevices(1,2,3)", &apt.getZone(0));
+  BOOST_CHECK_EQUAL(3, builderTest.length());
 } // testSetBuilder
 
 BOOST_AUTO_TEST_CASE(testRemoval) {

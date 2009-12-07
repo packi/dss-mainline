@@ -111,9 +111,14 @@ namespace dss {
     } else if(_functionName == "remove") {
       Set inner = parseSet(_index, _zone.getDevices(), _zone);
       result = _set.remove(inner);
+    } else if(_functionName == "empty") {
+      // nop
     } else if(_functionName == "addDevices") {
       result = _set;
       do {
+        if(m_SetDescription[_index] == ',') {
+          _index++;
+        }
         if(m_SetDescription[_index] == '\'') {
           std::string name = readString(_index);
           result.addDevice(m_Apartment.getDeviceByName(name));
