@@ -978,6 +978,7 @@ namespace dss {
     result->setCommand(CommandEvent);
     result->getPayload().add<uint8_t>(EventDSLinkInterrupt);
     result->getPayload().add<devid_t>(_shortAddress);
+    result->getPayload().add<uint16_t>(0); // priority
     distributeFrame(result);
   } // dSLinkInterrupt
 

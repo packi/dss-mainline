@@ -103,17 +103,20 @@ namespace dss {
     DS485Payload m_Payload;
     aFrameSource m_FrameSource;
   public:
-    DS485Frame() {};
-    virtual ~DS485Frame() {};
-    DS485Header& getHeader() { return m_Header; };
+    DS485Frame()
+    : m_FrameSource(fsDSS)
+    {}
+    virtual ~DS485Frame() {}
 
-    virtual std::vector<unsigned char> toChar() const;
+    DS485Header& getHeader() { return m_Header; }
 
     DS485Payload& getPayload();
     const DS485Payload& getPayload() const;
 
     aFrameSource getFrameSource() const { return m_FrameSource; }
     void setFrameSource(aFrameSource _value) { m_FrameSource = _value; }
+
+    virtual std::vector<unsigned char> toChar() const;
   }; // DS485Frame
 
   class DS485CommandFrame : public DS485Frame {
