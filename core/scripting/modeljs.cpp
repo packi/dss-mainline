@@ -205,9 +205,17 @@ namespace dss {
       JSString* str = JS_ValueToString(cx, argv[0]);
       if(str != NULL) {
         std::string dsid = JS_GetStringBytes(str);
-        DeviceReference result = set->getByDSID(dsid_t::fromString(dsid));
-        JSObject* resultObj = ext->createJSDevice(*ctx, result);
-        *rval = OBJECT_TO_JSVAL(resultObj);
+        try {
+          DeviceReference result = set->getByDSID(dsid_t::fromString(dsid));
+          JSObject* resultObj = ext->createJSDevice(*ctx, result);
+          *rval = OBJECT_TO_JSVAL(resultObj);
+          return JS_TRUE;
+        } catch(std::invalid_argument&) {
+          Logger::getInstance()->log("JS: set.byDSID: Could not parse dsid: '" + dsid + "'", lsError);
+        } catch(ItemNotFoundException&) {
+          Logger::getInstance()->log("JS: set.byDSID: Device with dsid '" + dsid + "' not found", lsWarning);
+        }
+        *rval = JSVAL_NULL;
         return JS_TRUE;
       }
     }
