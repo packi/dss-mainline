@@ -94,7 +94,7 @@ namespace dss {
     } catch(std::runtime_error& e) {
       delete plugin;
       plugin = NULL;
-      log(string("Cought exception while loading: ") + e.what(), lsError);
+      log(string("Caught exception while loading: ") + e.what(), lsError);
       return;
     }
     m_Plugins.push_back(plugin);

@@ -197,7 +197,7 @@ namespace dss {
             }
           }
         } catch (const std::exception & ex) {
-          log("LoadPlugins: Cought exception while loading " + dir_itr->leaf() + " '" + ex.what() + "'", lsError);
+          log("LoadPlugins: Caught exception while loading " + dir_itr->leaf() + " '" + ex.what() + "'", lsError);
         }
       }
     } catch(const std::exception& ex) {

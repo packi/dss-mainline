@@ -115,7 +115,7 @@ namespace dss {
             Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: keeping script " + scriptName + " in memory", lsInfo);
           }
         } catch(ScriptException& e) {
-          Logger::getInstance()->log(string("EventInterpreterPluginJavascript::handleEvent: Cought event while running/parsing script '")
+          Logger::getInstance()->log(string("EventInterpreterPluginJavascript::handleEvent: Caught event while running/parsing script '")
                               + scriptName + "'. Message: " + e.what(), lsError);
         }
       } else {
