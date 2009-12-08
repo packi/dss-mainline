@@ -203,9 +203,43 @@ namespace dss {
     assert(m_pEventListener != NULL);
   } // createListener
 
-  bool WebServiceSession::waitForEvent(const int _timeoutMS) {
+  bool WebServiceSession::waitForEvent(const int _timeoutMS, soap* _soapRequest) {
     createListener();
-    return m_pEventListener->waitForEvent(_timeoutMS);
+    const int kSocketDisconnectTimeoutMS = 200;
+    bool timedOut = false;
+    bool result = false;
+    int timeoutMSLeft = _timeoutMS;
+    while(!timedOut && !result) {
+      // check if we're still connected
+      uint8_t tmp;
+      int res = recv(_soapRequest->socket, &tmp, 1,  MSG_PEEK | MSG_DONTWAIT);
+      if(res == -1) {
+        if((errno != EAGAIN) && (errno != EINTR) && (errno != EWOULDBLOCK)) {
+          Logger::getInstance()->log("WebServiceSession::waitForEvent: lost connection", lsInfo);
+          break;
+        }
+      } else if(res == 0) {
+        // if we were still connected, recv would return -1 with an errno listed above or 1
+        Logger::getInstance()->log("WebServiceSession::waitForEvent: lost connection", lsInfo);
+        break;
+      }
+      // calculate the length of our wait
+      int waitTime;
+      if(_timeoutMS == -1) {
+        timedOut = true;
+        waitTime = 0;
+      } else if(_timeoutMS != 0) {
+        waitTime = std::min(timeoutMSLeft, kSocketDisconnectTimeoutMS);
+        timeoutMSLeft -= waitTime;
+        timedOut = (timeoutMSLeft == 0);
+      } else {
+        waitTime = kSocketDisconnectTimeoutMS;
+        timedOut = false;
+      }
+      // wait for the event
+      result = m_pEventListener->waitForEvent(waitTime);
+    }
+    return result;
   } // waitForEvent
 
   Event WebServiceSession::popEvent() {

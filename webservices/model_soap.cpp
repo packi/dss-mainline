@@ -1157,7 +1157,7 @@ int dss__EventWaitFor(struct soap *soap, int _token, int _timeout, std::vector<d
     return getResult;
   }
 
-  session->waitForEvent(_timeout);
+  session->waitForEvent(_timeout, soap);
 
   while(session->hasEvent()) {
     dss::Event origEvent = session->popEvent();

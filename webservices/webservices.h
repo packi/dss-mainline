@@ -37,7 +37,7 @@ namespace dss {
     bool isOwner(soap* _soapRequest);
 
     WebServiceSession& operator=(const WebServiceSession& _other);
-    bool waitForEvent(const int _timeoutMS);
+    bool waitForEvent(const int _timeoutMS, soap* _soapRequest);
     Event popEvent();
     bool hasEvent();
 
