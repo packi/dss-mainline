@@ -528,7 +528,7 @@ namespace dss {
 
   JSFunctionSpec device_interface_methods[] = {
     {"turnOn", dev_turn_on, 0, 0, 0},
-    {"turnOff", dev_turn_on, 0, 0, 0},
+    {"turnOff", dev_turn_off, 0, 0, 0},
     {"enable", dev_enable, 0, 0, 0},
     {"disable", dev_disable, 0, 0, 0},
     {"startDim", dev_start_dim, 1, 0, 0},
