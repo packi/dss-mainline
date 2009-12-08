@@ -39,7 +39,6 @@ namespace dss {
         m_PendingRequests.push_back(req_copy);
         m_RequestsMutex.unlock();
         m_RequestArrived.signal();
-//        m_Service.serve();
       }
     }
   } // execute
