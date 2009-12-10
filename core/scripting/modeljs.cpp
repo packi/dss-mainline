@@ -549,7 +549,7 @@ namespace dss {
     {"saveScene", dev_save_scene, 1, 0, 0},
     {"undoScene", dev_undo_scene, 1, 0, 0},
     {"dSLinkSend", dev_dslink_send, 3, 0, 0},
-    {NULL}
+    {NULL, NULL, 0, 0, 0}
   };
 
   JSObject* ModelScriptContextExtension::createJSSet(ScriptContext& _ctx, Set& _set) {
@@ -591,6 +591,9 @@ namespace dss {
         case 5:
           *rval = INT_TO_JSVAL(dev->getDevice().getFunctionID());
           return JS_TRUE;
+        case 6:
+          *rval = INT_TO_JSVAL(dev->getDevice().getLastCalledScene());
+          return JS_TRUE;
       }
     }
     return JS_FALSE;
@@ -617,7 +620,8 @@ namespace dss {
     {"zoneID", 3, 0, dev_JSGet},
     {"circuitID", 4, 0, dev_JSGet},
     {"functionID", 5, 0, dev_JSGet},
-    {NULL}
+    {"lastCalledScene", 6, 0, dev_JSGet},
+    {NULL, 0, 0, NULL, NULL}
   };
 
   JSObject* ModelScriptContextExtension::createJSDevice(ScriptContext& _ctx, Device& _dev) {

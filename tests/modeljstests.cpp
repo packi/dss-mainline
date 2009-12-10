@@ -97,7 +97,10 @@ BOOST_AUTO_TEST_CASE(testDevices) {
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("var devs = getDevices();\n"
-                      "var f = function(dev) { print(dev.name); }\n"
+                      "var f = function(dev) {\n"
+                      "  print(dev.name);\n"
+                      "  print('lastCalledScene: ',dev.lastCalledScene);\n"
+                      "}\n"
                       "devs.perform(f)\n");
 } // testDevices
 
