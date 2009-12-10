@@ -414,8 +414,8 @@ namespace dss {
   : m_EventRunner(NULL)
   { } // ctor
 
-  void EventQueue::pushEvent(boost::shared_ptr<Event> _event) {
-    Logger::getInstance()->log(string("EventQueue: New event '") + _event->getName() + "' in queue...", lsInfo);
+  boost::shared_ptr<Schedule> EventQueue::scheduleFromEvent(boost::shared_ptr<Event> _event) {
+    boost::shared_ptr<Schedule> result;
     if(_event->hasPropertySet(EventPropertyTime)) {
       DateTime when;
       bool validDate = false;
@@ -423,31 +423,44 @@ namespace dss {
       if(timeStr.size() >= 2) {
         // relative time
         if(timeStr[0] == '+') {
-          string timeOffset = timeStr.substr(1, string::npos);
+          std::string timeOffset = timeStr.substr(1, string::npos);
           int offset = strToIntDef(timeOffset, -1);
           if(offset >= 0) {
             when = when.addSeconds(offset);
             validDate = true;
           } else {
-            Logger::getInstance()->log(string("EventQueue::pushEvent: Could not parse offset or offset is below zero: '") + timeOffset + "'", lsError);
+            Logger::getInstance()->log(string("EventQueue::scheduleFromEvent: Could not parse offset or offset is below zero: '") + timeOffset + "'", lsError);
           }
         } else {
           try {
             when = DateTime::fromISO(timeStr);
             validDate = true;
           } catch(std::runtime_error& e) {
-            Logger::getInstance()->log(string("EventQueue::pushEvent: Invalid time specified '") + timeStr + "' error: " + e.what(), lsError);
+            Logger::getInstance()->log(string("EventQueue::scheduleFromEvent: Invalid time specified '") + timeStr + "' error: " + e.what(), lsError);
           }
         }
       }
       if(validDate) {
-        Logger::getInstance()->log(string("EventQueue::pushEvent: Event has a valid time, rescheduling at ") + (string)when, lsInfo);
-        boost::shared_ptr<Schedule> sched(new StaticSchedule(when));
-        ScheduledEvent* scheduledEvent = new ScheduledEvent(_event, sched);
-        m_EventRunner->addEvent(scheduledEvent);
+        Logger::getInstance()->log(string("EventQueue::scheduleFromEvent: Event has a valid time, rescheduling at ") + (string)when, lsInfo);
+        result.reset(new StaticSchedule(when));
       } else {
-        Logger::getInstance()->log("EventQueue::pushEvent: Dropping event with invalid time", lsError);
+        Logger::getInstance()->log("EventQueue::scheduleFromEvent: Dropping event with invalid time", lsError);
       }
+    } else if(_event->hasPropertySet(EventPropertyICalStartTime) && _event->hasPropertySet(EventPropertyICalRRule)) {
+      std::string timeStr = _event->getPropertyByName(EventPropertyICalStartTime);
+      std::string rRuleStr = _event->getPropertyByName(EventPropertyICalRRule);
+      Logger::getInstance()->log(string("EventQueue::schedleFromEvent: Event has a ICalRule rescheduling at ") + timeStr + " with Rule " + rRuleStr, lsInfo);
+      result.reset(new ICalSchedule(rRuleStr, timeStr));
+    }
+    return result;
+  } // scheduleFromEvent
+
+  void EventQueue::pushEvent(boost::shared_ptr<Event> _event) {
+    Logger::getInstance()->log(string("EventQueue: New event '") + _event->getName() + "' in queue...", lsInfo);
+    boost::shared_ptr<Schedule> schedule = scheduleFromEvent(_event);
+    if(schedule != NULL) {
+      ScheduledEvent* scheduledEvent = new ScheduledEvent(_event, schedule);
+      m_EventRunner->addEvent(scheduledEvent);
     } else {
       m_QueueMutex.lock();
       m_EventQueue.push(_event);
@@ -592,6 +605,12 @@ namespace dss {
           boost::shared_ptr<Event> evt = ipSchedEvt->getEvent();
           if(evt->hasPropertySet(EventPropertyTime)) {
             evt->unsetProperty(EventPropertyTime);
+          }
+          if(evt->hasPropertySet(EventPropertyICalStartTime)) {
+            evt->unsetProperty(EventPropertyICalStartTime);
+          }
+          if(evt->hasPropertySet(EventPropertyICalRRule)) {
+            evt->unsetProperty(EventPropertyICalRRule);
           }
           m_EventQueue->pushEvent(evt);
         } else {
@@ -740,5 +759,7 @@ namespace dss {
   const char* EventPropertyLocation = "location";
   const char* EventPropertyContext = "context";
   const char* EventPropertyTime = "time";
+  const char* EventPropertyICalStartTime = "iCalStartTime";
+  const char* EventPropertyICalRRule = "iCalRRule";
 
 } // namespace dss

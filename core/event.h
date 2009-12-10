@@ -235,6 +235,7 @@ namespace dss {
     Mutex m_QueueMutex;
 
     EventRunner* m_EventRunner;
+    boost::shared_ptr<Schedule> scheduleFromEvent(boost::shared_ptr<Event> _event);
   public:
     EventQueue();
     void pushEvent(boost::shared_ptr<Event> _event);
@@ -349,6 +350,8 @@ namespace dss {
   extern const char* EventPropertyLocation;
   extern const char* EventPropertyContext;
   extern const char* EventPropertyTime;
+  extern const char* EventPropertyICalStartTime;
+  extern const char* EventPropertyICalRRule;
 
 } // namespace dss
 
