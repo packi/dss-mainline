@@ -1359,15 +1359,12 @@ namespace dss {
               uint16_t zoneID = pd.get<uint16_t>();
               uint16_t groupID = pd.get<uint16_t>();
               uint16_t sceneID = pd.get<uint16_t>();
-              if((sceneID & 0x00ff) == SceneBell) {
-                boost::shared_ptr<Event> evt(new Event("bell"));
-                getDSS().getEventQueue().pushEvent(evt);
-              } else if((sceneID & 0x00ff) == SceneAlarm) {
-                boost::shared_ptr<Event> evt(new Event("alarm"));
-                getDSS().getEventQueue().pushEvent(evt);
-              } else if((sceneID & 0x00ff) == ScenePanic) {
-                boost::shared_ptr<Event> evt(new Event("panic"));
-                getDSS().getEventQueue().pushEvent(evt);
+              if(frame->getCommand() == CommandRequest) {
+                boost::shared_ptr<Event> sceneEvent(new Event("callScene"));
+                sceneEvent->setProperty("sceneID", intToString(sceneID & 0x00ff));
+                sceneEvent->setProperty("groupID", intToString(groupID));
+                sceneEvent->setProperty("zoneID", intToString(zoneID));
+                getDSS().getEventQueue().pushEvent(sceneEvent);
               }
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etCallSceneGroup);
               pEvent->addParameter(zoneID);

@@ -46,14 +46,39 @@
   <subscription event-name="darker" handler-name="bus_handler">
     <send type="decreaseValue" />
   </subscription>
- <subscription event-name="model_ready" handler-name="javascript">
-   <parameter>
+  <subscription event-name="model_ready" handler-name="javascript">
+    <parameter>
       <parameter name="filename">data/handle_temperature_sensor_events.js</parameter>
     </parameter>
- </subscription>
+  </subscription>
   <subscription event-name="model_ready" handler-name="javascript">
     <parameter>
       <parameter name="filename">data/initialize.js</parameter>
     </parameter>
+  </subscription>
+  <!-- Standard events -->
+  <subscription event-name="callScene" handler-name="raise_event">
+    <parameter>
+      <parameter name="event_name">bell</parameter>
+    </parameter>
+    <filter match="all">
+      <property-filter type="matches" value="41" property="sceneID" />
+    </filter>
+  </subscription>
+  <subscription event-name="callScene" handler-name="raise_event">
+    <parameter>
+      <parameter name="event_name">alarm</parameter>
+    </parameter>
+    <filter match="all">
+      <property-filter type="matches" value="42" property="sceneID" />
+    </filter>
+  </subscription>
+  <subscription event-name="callScene" handler-name="raise_event">
+    <parameter>
+      <parameter name="event_name">panic</parameter>
+    </parameter>
+    <filter match="all">
+      <property-filter type="matches" value="43" property="sceneID" />
+    </filter>
   </subscription>
 </subscriptions> 
