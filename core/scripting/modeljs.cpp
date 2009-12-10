@@ -980,7 +980,7 @@ namespace dss {
         case vTypeNone:
           *rval = JSVAL_VOID;
         default:
-          assert(false);
+          *rval = JSVAL_NULL;
         }
       }
       return JS_TRUE;
