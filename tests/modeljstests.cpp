@@ -63,8 +63,16 @@ BOOST_AUTO_TEST_CASE(testSets) {
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
+  dev1.setModulatorID(1);
+  dev1.addToGroup(1);
+  dev1.setIsPresent(true);
+  dev1.setZoneID(1);
   Device& dev2 = apt.allocateDevice(dsid_t(0,2));
   dev2.setShortAddress(2);
+  dev2.setModulatorID(1);
+  dev2.addToGroup(1);
+  dev2.setIsPresent(false);
+  dev2.setZoneID(2);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
@@ -77,6 +85,37 @@ BOOST_AUTO_TEST_CASE(testSets) {
   BOOST_CHECK_EQUAL(2, length);
 
   ctx->evaluate<void>("var devs = getDevices(); var devs2 = getDevices(); devs.combine(devs2)");
+
+  length = ctx->evaluate<int>("getDevices().byZone(1).length()");
+  BOOST_CHECK_EQUAL(1, length);
+
+  length = ctx->evaluate<int>("getDevices().byZone(2).length()");
+  BOOST_CHECK_EQUAL(1, length);
+
+  length = ctx->evaluate<int>("getDevices().byGroup(1).length()");
+  BOOST_CHECK_EQUAL(2, length);
+
+  length = ctx->evaluate<int>("getDevices().byGroup('yellow').length()");
+  BOOST_CHECK_EQUAL(2, length);
+
+  length = ctx->evaluate<int>("getDevices().byGroup('asdf').length()");
+  BOOST_CHECK_EQUAL(0, length);
+
+  length = ctx->evaluate<int>("getDevices().byDSMeter(1).length()");
+  BOOST_CHECK_EQUAL(2, length);
+
+  length = ctx->evaluate<int>("getDevices().byPresence(false).length()");
+  BOOST_CHECK_EQUAL(1, length);
+
+  length = ctx->evaluate<int>("getDevices().byPresence(true).length()");
+  BOOST_CHECK_EQUAL(1, length);
+
+  // invalid types
+  length = ctx->evaluate<int>("getDevices().byZone(1.1).length()");
+  BOOST_CHECK_EQUAL(0, length);
+
+  length = ctx->evaluate<int>("getDevices().byGroup(1.1).length()");
+  BOOST_CHECK_EQUAL(0, length);
 } // testSets
 
 BOOST_AUTO_TEST_CASE(testDevices) {

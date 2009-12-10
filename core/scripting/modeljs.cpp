@@ -234,10 +234,120 @@ namespace dss {
         JSObject* resultObj = ext->createJSSet(*ctx, result);
         *rval = OBJECT_TO_JSVAL(resultObj);
         return JS_TRUE;
+      } else {
+        Logger::getInstance()->log("JS: set_by_functionid: Could not parse parameter1 as integer", lsWarning);
       }
     }
     return JS_FALSE;
   } // set_by_functionid
+
+  JSBool set_by_zone(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if((ext != NULL) && (set != NULL) && (argc >= 1)) {
+      bool ok = false;
+      Set result;
+      try {
+        if(JSVAL_IS_INT(argv[0])) {
+          result = set->getByZone(JSVAL_TO_INT(argv[0]));
+          ok = true;
+        } else {
+          JSString* str = JS_ValueToString(cx, argv[0]);
+          if(str != NULL) {
+            std::string zonename = JS_GetStringBytes(str);
+            result = set->getByZone(zonename);
+            ok = true;
+          }
+        }
+      } catch(ItemNotFoundException&) {
+        ok = true; // return an empty set if the zone hasn't been found
+        Logger::getInstance()->log("JS: set_by_zone: Zone not found", lsWarning);
+      }
+      if(ok) {
+        JSObject* resultObj = ext->createJSSet(*ctx, result);
+        *rval = OBJECT_TO_JSVAL(resultObj);
+      } else {
+        *rval = JSVAL_NULL;
+      }
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // set_by_zone
+
+  JSBool set_by_group(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if((ext != NULL) && (set != NULL) && (argc >= 1)) {
+      bool ok = false;
+      Set result;
+      try {
+        if(JSVAL_IS_INT(argv[0])) {
+          result = set->getByGroup(JSVAL_TO_INT(argv[0]));
+          ok = true;
+        } else {
+          JSString* str = JS_ValueToString(cx, argv[0]);
+          if(str != NULL) {
+            std::string groupname = JS_GetStringBytes(str);
+            result = set->getByGroup(groupname);
+            ok = true;
+          }
+        }
+      } catch(ItemNotFoundException&) {
+        ok = true; // return an empty set if the group hasn't been found
+        Logger::getInstance()->log("JS: set_by_group: Group not found", lsWarning);
+      }
+      if(ok) {
+        JSObject* resultObj = ext->createJSSet(*ctx, result);
+        *rval = OBJECT_TO_JSVAL(resultObj);
+      } else {
+        *rval = JSVAL_NULL;
+      }
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // set_by_group
+
+  JSBool set_by_dsmeter(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if((ext != NULL) && (set != NULL) && (argc >= 1)) {
+      try {
+        int dsmeterID = ctx->convertTo<int>(argv[0]);
+        Set result = set->getByModulator(dsmeterID);
+        JSObject* resultObj = ext->createJSSet(*ctx, result);
+        *rval = OBJECT_TO_JSVAL(resultObj);
+        return JS_TRUE;
+      } catch(ScriptException& e) {
+        Logger::getInstance()->log(std::string("JS: set_by_dsmeter: ") + e.what(), lsWarning);
+      }
+    }
+    return JS_FALSE;
+  } // set_by_dsmeter
+
+  JSBool set_by_presence(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if((ext != NULL) && (set != NULL) && (argc >= 1)) {
+      try {
+        bool presence = ctx->convertTo<bool>(argv[0]);
+        Set result = set->getByPresence(presence);
+        JSObject* resultObj = ext->createJSSet(*ctx, result);
+        *rval = OBJECT_TO_JSVAL(resultObj);
+        return JS_TRUE;
+      } catch(ScriptException& e) {
+        Logger::getInstance()->log(std::string("JS: set_by_presence: ") + e.what(), lsWarning);
+      }
+    }
+    return JS_FALSE;
+  } // set_by_presence
 
   JSBool set_JSGet(JSContext *cx, JSObject *obj, jsval id, jsval *rval) {
     Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
@@ -267,6 +377,10 @@ namespace dss {
     {"byName", set_by_name, 1, 0, 0},
     {"byDSID", set_by_dsid, 1, 0, 0},
     {"byFunctionID", set_by_functionid, 1, 0, 0},
+    {"byZone", set_by_zone, 1, 0, 0},
+    {"byDSMeter", set_by_dsmeter, 1, 0, 0},
+    {"byGroup", set_by_group, 1, 0, 0},
+    {"byPresence", set_by_presence, 1, 0, 0},
     {NULL},
   };
 
