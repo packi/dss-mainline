@@ -649,7 +649,7 @@ namespace dss {
   ModulatorSpec_t DS485Proxy::getModulatorSpec(const int _modulatorID) {
     DS485CommandFrame cmdFrame;
     cmdFrame.getHeader().setDestination(_modulatorID);
-    cmdFrame.getHeader().setBroadcast(true);
+    cmdFrame.getHeader().setBroadcast(false);
     cmdFrame.setCommand(CommandRequest);
     cmdFrame.getPayload().add<uint8_t>(FunctionGetTypeRequest);
     log("Proxy: getModulatorSpec");
