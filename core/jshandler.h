@@ -215,6 +215,8 @@ namespace dss {
 
     template<class t>
     t callFunctionByReference(jsval _function, ScriptFunctionParameterList& _parameter);
+
+    JSObject* getJSObject() { return m_pObject; }
   }; // ScriptObject
 
   class ScriptContextAttachedObject {
