@@ -38,7 +38,7 @@ namespace dss {
   : Subsystem(_pDSS, "Metering"),
     Thread("Metering")
   {
-    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "storageLocation", getDSS().getDataDirectory() + "webroot/metering/", true);
+    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "storageLocation", getDSS().getWebrootDirectory() + "metering/", true);
     boost::shared_ptr<MeteringConfigChain> configConsumption(new MeteringConfigChain(false, 1, "mW"));
     configConsumption->setComment("Consumption in mW");
     configConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_seconds",        2, 400)));

@@ -80,7 +80,9 @@ namespace dss {
     boost::shared_ptr<EventQueue> m_pEventQueue;
     boost::shared_ptr<Metering> m_pMetering;
     boost::shared_ptr<FakeMeter> m_pFakeMeter;
-    std::string m_DataDirectory;
+    std::string m_dataDirectory;
+    std::string m_configDirectory;
+    std::string m_webrootDirectory;
 
     aDSSState m_State;
 
@@ -123,8 +125,12 @@ namespace dss {
     WebServer& getWebServer() { return *m_pWebServer; }
     EventInterpreter& getEventInterpreter() { return *m_pEventInterpreter; }
 
-    const std::string& getDataDirectory() const { return m_DataDirectory; }
+    const std::string& getDataDirectory() const { return m_dataDirectory; }
+    const std::string& getConfigDirectory() const { return m_configDirectory; }
+    const std::string& getWebrootDirectory() const { return m_webrootDirectory; }
     void setDataDirectory(const std::string& _value);
+    void setConfigDirectory(const std::string& _value);
+    void setWebrootDirectory(const std::string& _value);
   }; // DSS
 
 }
