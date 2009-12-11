@@ -258,4 +258,19 @@ BOOST_AUTO_TEST_CASE(testListener) {
   BOOST_CHECK_EQUAL(propSys->getBoolValue(kTriggerPath), true);
 } // testListener
 
+BOOST_AUTO_TEST_CASE(testFlags) {
+  boost::scoped_ptr<PropertySystem> propSys(new PropertySystem());
+  PropertyNodePtr node = propSys->createProperty("/testing");
+
+  BOOST_CHECK(node->hasFlag(PropertyNode::Readable));
+  BOOST_CHECK(node->hasFlag(PropertyNode::Writeable));
+  BOOST_CHECK(!node->hasFlag(PropertyNode::Archive));
+
+  node->setFlag(PropertyNode::Archive, false);
+  BOOST_CHECK(!node->hasFlag(PropertyNode::Archive));
+
+  node->setFlag(PropertyNode::Archive, true);
+  BOOST_CHECK(node->hasFlag(PropertyNode::Archive));
+} // testFlags
+
 BOOST_AUTO_TEST_SUITE_END()

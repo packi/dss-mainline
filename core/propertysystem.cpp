@@ -131,7 +131,6 @@ namespace dss {
     return versionOK;
   } // loadFromXML
 
-
   bool PropertySystem::saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode) const {
     int rc;
     xmlTextWriterPtr writer;
@@ -160,7 +159,7 @@ namespace dss {
       return false;
     }
 
-    root->saveAsXML(writer);
+    root->saveAsXML(writer, 0);
 
     rc = xmlTextWriterEndElement(writer);
     if(rc < 0) {
@@ -177,7 +176,6 @@ namespace dss {
     return true;
   } // saveToXML
 
-
   PropertyNodePtr PropertySystem::getProperty(const std::string& _propPath) const {
     if(_propPath[ 0 ] != '/') {
       return PropertyNodePtr();
@@ -189,7 +187,6 @@ namespace dss {
     }
     return m_RootNode->getProperty(propPath);
   } // getProperty
-
 
   PropertyNodePtr PropertySystem::createProperty(const std::string& _propPath) {
     if(_propPath[ 0 ] != '/') {
@@ -286,7 +283,8 @@ namespace dss {
       m_Name(_name),
       m_LinkedToProxy(false),
       m_Aliased(false),
-      m_Index(_index)
+      m_Index(_index),
+      m_Flags(Readable | Writeable)
   {
     memset(&m_PropVal, '\0', sizeof(aPropertyValue));
   } // ctor
@@ -754,7 +752,7 @@ namespace dss {
     }
   }
 
-  bool PropertyNode::saveAsXML(xmlTextWriterPtr _writer) {
+  bool PropertyNode::saveAsXML(xmlTextWriterPtr _writer, const int _flagsMask) {
     int rc = xmlTextWriterStartElement(_writer, (xmlChar*)"property");
     if(rc < 0) {
       return false;
@@ -776,8 +774,10 @@ namespace dss {
 
     for(PropertyList::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end(); ++it) {
-      if(!(*it)->saveAsXML(_writer)) {
-        return false;
+      if((_flagsMask == Flag(0)) || (*it)->hasFlag(Flag(_flagsMask))) {
+        if(!(*it)->saveAsXML(_writer, _flagsMask)) {
+          return false;
+        }
       }
     }
 

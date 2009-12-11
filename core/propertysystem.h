@@ -75,7 +75,7 @@ namespace dss {
     ~PropertySystem();
 
     /** Loads a subtree from XML.
-     * Everything in the XML has to be relatove to _rootNode. */
+     * Everything in the XML has to be relative to _rootNode. */
     bool loadFromXML(const std::string& _fileName, PropertyNodePtr _rootNode);
     /** Saves a subtree to XML. */
     bool saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode) const;
@@ -325,6 +325,12 @@ namespace dss {
 
   /** The heart of the PropertySystem. */
   class PropertyNode : public boost::enable_shared_from_this<PropertyNode> {
+  public:
+    enum Flag {
+      Readable = 1 << 0, /**< Node is readable */
+      Writeable = 1 << 1, /**< Node is writeable */
+      Archive = 1 << 2 /**< Node will get written to XML (hint only) */
+    };
   private:
     aPropertyValue m_PropVal;
     union {
@@ -342,6 +348,7 @@ namespace dss {
     bool m_Aliased;
     PropertyNode* m_AliasTarget;
     int m_Index;
+    int m_Flags;
   private:
     void clearValue();
 
@@ -403,6 +410,9 @@ namespace dss {
     /** Returns the type of the property. */
     aValueType getValueType();
 
+    bool hasFlag(Flag _flag) const { return (m_Flags & _flag) == _flag; }
+    void setFlag(Flag _flag, bool _value) { _value ? m_Flags |= _flag : m_Flags &= ~_flag; }
+
     void alias(PropertyNodePtr _target);
 
     // proxy support
@@ -461,7 +471,7 @@ namespace dss {
     }
   public:
     /** Writes the node to XML */
-    bool saveAsXML(xmlTextWriterPtr _writer);
+    bool saveAsXML(xmlTextWriterPtr _writer, const int _flagsMask);
     /** Loads the node from XML */
     bool loadFromNode(xmlNode* _pNode);
   }; // PropertyNode
