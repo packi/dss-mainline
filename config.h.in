@@ -14,6 +14,8 @@
 #cmakedefine WITH_SIM
 #cmakedefine WITH_TESTS
 #cmakedefine WITH_DATADIR "${WITH_DATADIR}"
+#cmakedefine WITH_CONFIGDIR "${WITH_CONFIGDIR}"
+#cmakedefine WITH_WEBROOTDIR "${WITH_WEBROOTDIR}"
 #cmakedefine WITH_BONJOUR
 #cmakedefine WITH_GCOV
 

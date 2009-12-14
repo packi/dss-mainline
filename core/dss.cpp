@@ -71,17 +71,35 @@ const char* DataDirectory = WITH_DATADIR;
 const char* DataDirectory = "data/";
 #endif
 
+#ifdef WITH_CONFIGDIR
+const char* ConfigDirectory = WITH_CONFIGDIR;
+#else
+const char* ConfigDirectory = "data/";
+#endif
+
+#ifdef WITH_WEBROOTDIR
+const char* WebrootDirectory = WITH_WEBROOTDIR;
+#else
+const char* WebrootDirectory = "data/webroot";
+#endif
+
   DSS::DSS()
   {
     m_State = ssInvalid;
     m_pPropertySystem = boost::shared_ptr<PropertySystem>(new PropertySystem);
     setDataDirectory(DataDirectory);
+    setConfigDirectory(ConfigDirectory);
+    setWebrootDirectory(WebrootDirectory);
 
     m_TimeStarted = time(NULL);
     m_pPropertySystem->createProperty("/system/uptime")->linkToProxy(
         PropertyProxyMemberFunction<DSS,int>(*this, &DSS::getUptime));
     m_pPropertySystem->createProperty("/config/datadirectory")->linkToProxy(
         PropertyProxyMemberFunction<DSS,string>(*this, &DSS::getDataDirectory, &DSS::setDataDirectory));
+    m_pPropertySystem->createProperty("/config/configdirectory")->linkToProxy(
+        PropertyProxyMemberFunction<DSS,string>(*this, &DSS::getConfigDirectory, &DSS::setConfigDirectory));
+    m_pPropertySystem->createProperty("/config/webrootdirectory")->linkToProxy(
+        PropertyProxyMemberFunction<DSS,string>(*this, &DSS::getWebrootDirectory, &DSS::setWebrootDirectory));
   } // ctor
 
   DSS::~DSS() {
@@ -113,11 +131,27 @@ const char* DataDirectory = "data/";
 
   void DSS::setDataDirectory(const string& _value) {
     if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
-      m_DataDirectory = _value + "/";
+      m_dataDirectory = _value + "/";
     } else {
-      m_DataDirectory = _value;
+      m_dataDirectory = _value;
     }
   } // setDataDirectory
+
+  void DSS::setConfigDirectory(const string& _value) {
+    if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
+      m_configDirectory = _value + "/";
+    } else {
+      m_configDirectory = _value;
+    }
+  }
+
+  void DSS::setWebrootDirectory(const string& _value) {
+    if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
+      m_webrootDirectory = _value + "/";
+    } else {
+      m_webrootDirectory = _value;
+    }
+  }
 
   bool DSS::initialize(const vector<string>& _properties) {
     m_State = ssCreatingSubsystems;
@@ -259,7 +293,10 @@ const char* DataDirectory = "data/";
   void DSS::run() {
     Logger::getInstance()->log("DSS starting up....", lsInfo);
     Logger::getInstance()->log(versionString(), lsInfo);
-    Logger::getInstance()->log("Using data directory '" + getDataDirectory() + "'", lsInfo);
+    Logger::getInstance()->log("Configuration: ", lsInfo);
+    Logger::getInstance()->log("  data:   '" + getDataDirectory() + "'", lsInfo);
+    Logger::getInstance()->log("  config: '" + getConfigDirectory() + "'", lsInfo);
+    Logger::getInstance()->log("  webroot '" + getWebrootDirectory() + "'", lsInfo);
 
     SystemInfo info;
     info.collect();
@@ -292,7 +329,7 @@ const char* DataDirectory = "data/";
   bool DSS::loadConfig() {
     m_State = ssLoadingConfig;
     Logger::getInstance()->log("Loading config", lsInfo);
-    return getPropertySystem().loadFromXML(getDataDirectory() + "config.xml", getPropertySystem().getProperty("/config"));
+    return getPropertySystem().loadFromXML(getConfigDirectory() + "config.xml", getPropertySystem().getProperty("/config"));
   } // loadConfig
 
 

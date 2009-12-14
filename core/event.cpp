@@ -184,7 +184,7 @@ namespace dss {
   void EventInterpreter::initialize() {
     Subsystem::initialize();
     if(DSS::hasInstance()) {
-      getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptionfile", getDSS().getDataDirectory() + "subscriptions.xml", true, false);
+      getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptionfile", getDSS().getConfigDirectory() + "subscriptions.xml", true, false);
     }
   } // initialize
 
