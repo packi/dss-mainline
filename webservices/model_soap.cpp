@@ -6,6 +6,7 @@
 #include "core/sim/dssim.h"
 #include "core/propertysystem.h"
 #include "core/setbuilder.h"
+#include "core/foreach.h"
 
 #include <vector>
 #include <string>
@@ -368,7 +369,10 @@ int dss__ApartmentRescan(struct soap *soap, int _token, bool& result) {
   }
 
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
-  apt.initializeFromBus();
+  std::vector<dss::Modulator*> mods = apt.getModulators();
+  foreach(dss::Modulator* pModulator, mods) {
+    pModulator->setIsValid(false);
+  }
 
   return SOAP_OK;
 } // dss__ApartmentRescan

@@ -843,7 +843,10 @@ namespace dss {
         getDSS().getApartment().setName(_parameter["newName"]);
         result = ResultToJSON(true);
       } else if(endsWith(_method, "/rescan")) {
-        getDSS().getApartment().initializeFromBus();
+        std::vector<Modulator*> mods = getDSS().getApartment().getModulators();
+        foreach(Modulator* pModulator, mods) {
+          pModulator->setIsValid(false);
+        }
         result = ResultToJSON(true);
       } else {
         _handled = false;

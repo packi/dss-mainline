@@ -1239,9 +1239,12 @@ namespace dss {
 
     case FunctionModulatorGetPowerConsumption:
     	return "Function Modulator Get PowerConsumption";
-
     case FunctionModulatorGetEnergyMeterValue:
       return "Function Modulator Get Energy-Meter Value";
+    case FunctionModulatorGetEnergyLevel:
+      return "Function Modulator Get Energy-Level";
+    case FunctionModulatorSetEnergyLevel:
+      return "Function Modulator Set Energy-Level";
 
     case FunctionGetTypeRequest:
       return "Function Get Type";
@@ -1264,6 +1267,7 @@ namespace dss {
     case EventDSLinkInterrupt:
       return "Function DSLink Interrupt";
       
+
     case FunctionZoneAddDevice:
       return "Function Zone Add Device";
     case FunctionZoneRemoveDevice:
@@ -1434,8 +1438,7 @@ namespace dss {
                 pEvent->addParameter(modID);
                 pEvent->addParameter(pd2.get<uint32_t>());
                 getDSS().getApartment().addModelEvent(pEvent);
-            }
-            if (functionID == FunctionModulatorGetEnergyMeterValue) {
+            } else if (functionID == FunctionModulatorGetEnergyMeterValue) {
               /* hard optimized */
               //getDSS().getApartment().getModulatorByBusID((int)(frame->getHeader().getSource())).setEnergyMeterValue(pd2.get<uint32_t>());
                 int modID = frame->getHeader().getSource();
@@ -1443,6 +1446,17 @@ namespace dss {
                 pEvent->addParameter(modID);
                 pEvent->addParameter(pd2.get<uint32_t>());
                 getDSS().getApartment().addModelEvent(pEvent);
+            } else if (functionID == FunctionModulatorGetDSID) {
+              int sourceID = frame->getHeader().getSource();
+              ModelEvent* pEvent = new ModelEvent(ModelEvent::etDS485DeviceDiscovered);
+              pEvent->addParameter(sourceID);
+              pEvent->addParameter(((pd2.get<uint8_t>() << 8) & 0xff00) | (pd2.get<uint8_t>() & 0x00ff));
+              pEvent->addParameter(((pd2.get<uint8_t>() << 8) & 0xff00) | (pd2.get<uint8_t>() & 0x00ff));
+              pEvent->addParameter(((pd2.get<uint8_t>() << 8) & 0xff00) | (pd2.get<uint8_t>() & 0x00ff));
+              pEvent->addParameter(((pd2.get<uint8_t>() << 8) & 0xff00) | (pd2.get<uint8_t>() & 0x00ff));
+              pEvent->addParameter(((pd2.get<uint8_t>() << 8) & 0xff00) | (pd2.get<uint8_t>() & 0x00ff));
+              pEvent->addParameter(((pd2.get<uint8_t>() << 8) & 0xff00) | (pd2.get<uint8_t>() & 0x00ff));
+              getDSS().getApartment().addModelEvent(pEvent);
             }
 
             bool bucketFound = false;

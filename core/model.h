@@ -532,6 +532,7 @@ namespace dss {
     int m_SoftwareVersion;
     std::string m_HardwareName;
     int m_DeviceType;
+    bool m_IsValid;
   public:
     /** Constructs a modulator with the given dsid. */
     Modulator(const dsid_t _dsid);
@@ -586,6 +587,10 @@ namespace dss {
     void setHardwareName(const std::string& _value) { m_HardwareName = _value; }
     int getDeviceType() { return m_DeviceType; }
     void setDeviceType(const int _value) { m_DeviceType = _value; }
+
+    /** Returns true if the modulator has been read-out completely. */
+    bool isValid() const { return m_IsValid; }
+    void setIsValid(const bool _value) { m_IsValid = _value; }
   }; // Modulator
 
   /** Represents a predefined group */
@@ -758,7 +763,8 @@ namespace dss {
                    etModulatorReady, /**< A modulator has completed its scanning cycle and is now ready */
                    etBusReady, /**< The bus transitioned into ready state */
                    etPowerConsumption, /**< Powerconsumption message happened */
-                   etEnergyMeterValue /**< Powerconsumption message happened */
+                   etEnergyMeterValue, /**< Powerconsumption message happened */
+                   etDS485DeviceDiscovered, /**< A new device has been discovered on the bus */
                  } EventType;
   private:
     EventType m_EventType;
@@ -810,12 +816,10 @@ namespace dss {
     /** Starts the event-processing */
     virtual void execute();
     void handleModelEvents();
-    void newModulator(int _modulatorBusID);
-    void lostModulator(int _modulatorBusID);
     void modulatorReady(int _modulatorBusID);
     void setPowerConsumption(int _modulatorBusID, unsigned long _value);
     void setEnergyMeterValue(int _modulatorBusID, unsigned long _value);
-    void scheduleRescan();
+    void discoverDS485Devices();
   protected:
     virtual void doStart();
   public:
@@ -886,7 +890,6 @@ namespace dss {
     void removeDevice(dsid_t _device);
     void removeModulator(dsid_t _modulator);
 
-    void initializeFromBus();
     bool scanModulator(Modulator& _modulator);
   public:
 
