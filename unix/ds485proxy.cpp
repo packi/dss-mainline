@@ -801,12 +801,14 @@ namespace dss {
       cmdFrame.getPayload().add<uint16_t>(iZone);
       log("GetZoneID");
       int16_t tempResult = int16_t(receiveSingleResult16(cmdFrame, FunctionModulatorGetZoneIdForInd));
-      if(tempResult < 0) {
+      // TODO: The following line is a workaround as described in #246
+      if((tempResult < 0) && (tempResult > -20)) {
         log("GetZones: Negative zone id " + intToString(tempResult) + " received. Modulator: " + intToString(_modulatorID) + " index: " + intToString(iZone), lsError);
+        // TODO: take this line outside the if-clause after the dSM-API has been reworked
+        checkResultCode(tempResult);
       } else {
         result.push_back(tempResult);
       }
-      checkResultCode(tempResult);
       log("received ZoneID: " + uintToString((unsigned int)tempResult));
     }
     return result;
