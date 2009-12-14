@@ -168,7 +168,8 @@ namespace dss {
   const int GroupIDBlack = 8;
   const int GroupIDWhite = 9;
   const int GroupIDDisplay = 10;
-  const int GroupIDMax = GroupIDDisplay;
+  const int GroupIDStandardMax = GroupIDDisplay;
+  const int GroupIDMax = 64;
 
   const int FunctionIDDevice = 0;
   const int FunctionIDSwitch = 1;

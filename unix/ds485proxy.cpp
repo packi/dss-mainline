@@ -678,6 +678,10 @@ namespace dss {
           " with zone " + intToString(_zoneID));
     }
     checkResultCode(res);
+    // Every modulator should provide all standard-groups
+    if(res < GroupIDStandardMax) {
+      res = GroupIDStandardMax;
+    }
     return res;
   } // getGroupCount
 
