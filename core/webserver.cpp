@@ -63,7 +63,7 @@ namespace dss {
     log("Starting Webserver...");
     m_mgContext = mg_start();
 
-    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "webroot", getDSS().getDataDirectory() + "webroot/", true, false);
+    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "webroot", getDSS().getWebrootDirectory(), true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "ports", "8080", true, false);
 
     setupAPI();

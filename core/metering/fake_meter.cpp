@@ -118,7 +118,7 @@ namespace dss {
     Subsystem::initialize();
 
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "device", "/dev/ttyS2", true, false);
-    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "storageLocation", getDSS().getDataDirectory()+"webroot/metering/", true, false);
+    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "storageLocation", getDSS().getWebrootDirectory()+"metering/", true, false);
     getDSS().getPropertySystem().setBoolValue(getConfigPropertyBasePath() + "addJitter", false, true, false);
   }
 

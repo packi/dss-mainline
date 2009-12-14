@@ -1,0 +1,89 @@
+#!/bin/sh
+#
+# dss supervision script
+# Johannes Winkelmann, johannes.winkelmann@aizo.com
+
+# -- configuration
+SLEEP_TIME_SECONDS=300 # 5*60
+RESTART_COMMAND="/etc/init.d/dss restart"
+RESTART_LOG= #/tmp/dss_supervisor.log
+
+VERBOSE=0
+
+
+# -- helper functions
+log() {
+    echo "$(TZ=UTC date): $*" >> $RESTART_LOG
+}
+
+restart_dss() {
+    reason=$1
+    if [ -n "$RESTART_LOG" ]; then
+	log "Restarting dss; reason: $reason"
+    fi
+    $RESTART_COMMAND 
+}
+
+print_info() {
+    [ $VERBOSE -eq 1 ] && echo $1
+}
+
+
+# -- check functions
+
+# check functions must return a non zero value if they detected an
+# error condition and took some action
+
+check_socket() {
+    # make sure that we have a socket on port $1 in LISTEN state; be
+    # aware that this check is rather naive in that it doesn't look
+    # at the process name, so it might be in fact another process
+    # listening on this port
+
+    port=$1
+    name=$2
+    
+    count=$(netstat -an 2>/dev/null|grep ":$port"|grep -c LISTEN)
+    if [ $count -eq 0 ]; then
+	print_info "$name listener (port $port) unavailable; restarting dss"
+	restart_dss "$name listener (port $port) unavailable"
+	return 1
+    fi
+
+    return 0
+}
+
+check_soap() {
+    check_socket 8081 "SOAP"
+    return $?
+}
+
+check_http() {
+    check_socket 8080 "HTTP"
+    return $?
+}
+
+
+## -- main loop
+
+for arg in $*; do
+    case "$arg" in
+	"-v"|"--verbose")
+	VERBOSE=1
+	;;
+    esac
+done
+
+CHECKS="soap http" # register additional checks here
+while true; do
+    for check in $CHECKS; do
+	print_info "Running $check check"
+	check_$check
+	if [ $? -ne 0 ]; then
+	    # error condition: go to sleep before running the next test
+	    break
+	fi
+    done
+    
+    sleep $SLEEP_TIME_SECONDS
+done
