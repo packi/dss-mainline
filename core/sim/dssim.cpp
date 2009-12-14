@@ -845,6 +845,7 @@ namespace dss {
 
                 // format: (8,7,6,5,4,3,2,1) (16,15,14,13,12,11,10,9), etc...
                 unsigned char bytes[8];
+                memset(bytes, '\0', sizeof(bytes));
                 foreach(int groupID, groupsList) {
                   if(groupID != 0) {
                     int iBit = (groupID - 1) % 8;

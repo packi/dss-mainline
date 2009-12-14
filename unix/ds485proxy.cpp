@@ -700,11 +700,11 @@ namespace dss {
 
       int8_t res = int8_t(receiveSingleResult(cmdFrame, FunctionZoneGetGroupIdForInd));
       if(res < 0) {
-        log("GetGroups: Negative index received '" + intToString(res) + "' for index " + intToString(iGroup));
+        log("GetGroups: Negative index received '" + intToString(res) + "' for index " + intToString(iGroup), lsFatal);
       } else {
         result.push_back(res);
       }
-      checkResultCode(res);
+      //checkResultCode(res);
     }
 
     return result;
@@ -1239,6 +1239,8 @@ namespace dss {
       return "Function Device Get Parameter Value";
     case  FunctionDeviceGetDSID:
       return "Function Device Get DSID";
+    case FunctionDeviceGetGroups:
+      return "Function Device Get Groups";
 
     case FunctionModulatorGetDSID:
       return "Function Modulator Get DSID";

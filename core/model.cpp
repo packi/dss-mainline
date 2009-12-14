@@ -835,6 +835,14 @@ namespace dss {
         dev.setModulatorID(modulatorID);
         dev.setZoneID(zoneID);
         dev.setFunctionID(functionID);
+
+        std::vector<int> groupIdperDevices = interface.getGroupsOfDevice(modulatorID, devID);
+        vector<int> groupIDsPerDevice = interface.getGroupsOfDevice(modulatorID,devID);
+        foreach(int groupID, groupIDsPerDevice) {
+          log(string("scanModulator: adding device ") + intToString(devID) + " to group " + intToString(groupID));
+          dev.addToGroup(groupID);
+        }
+
         DeviceReference devRef(dev, *this);
         zone.addDevice(devRef);
         _modulator.addDevice(devRef);
@@ -857,40 +865,18 @@ namespace dss {
           continue;
         }
         log("scanModulator:    Found group with id: " + intToString(groupID));
+        if(zone.getGroup(groupID) == NULL) {
+          log(" scanModulator:    Adding new group to zone");
+          zone.addGroup(new Group(groupID, zone.getID(), *this));
+        }
         try {
-          vector<int> devingroup = interface.getDevicesInGroup(modulatorID, zoneID, groupID);
-
-          foreach(int devID, devingroup) {
-            try {
-              log("scanModulator:     Adding device " + intToString(devID) + " to group " + intToString(groupID));
-              Device& dev = getDeviceByShortAddress(_modulator, devID);
-              dev.addToGroup(groupID);
-              if(zone.getGroup(groupID) == NULL) {
-                log(" scanModulator:    Adding new group to zone");
-                zone.addGroup(new Group(groupID, zone.getID(), *this));
-              }
-              Group* pGroup = zone.getGroup(groupID);
-              pGroup->setIsPresent(true);
-              try {
-                Group& group = getGroup(groupID);
-                group.setIsPresent(true);
-              } catch(ItemNotFoundException&) {
-                Group* pGroup = new Group(groupID, 0, *this);
-                getZone(0).addGroup(pGroup);
-                pGroup->setIsPresent(true);
-                log("scanModulator:     Adding new group to zone 0");
-                return false;
-              }
-            } catch(ItemNotFoundException& e) {
-              log("scanModulator: Could not find device with short-address " + intToString(devID) + " on modulator " + intToString(modulatorID), lsFatal);
-              return false;
-            }
-          }
-        } catch(DS485ApiError& e) {
-          log("scanModulator: Error getting devices from group " + intToString(groupID) +
-              " on zone " + intToString(zoneID) +
-              " on modulator " + intToString(modulatorID) +
-              ". Message: " + e.what(), lsFatal);
+          Group& group = getGroup(groupID);
+          group.setIsPresent(true);
+        } catch(ItemNotFoundException&) {
+          Group* pGroup = new Group(groupID, 0, *this);
+          getZone(0).addGroup(pGroup);
+          pGroup->setIsPresent(true);
+          log("scanModulator:     Adding new group to zone 0");
           return false;
         }
 
