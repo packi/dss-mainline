@@ -734,6 +734,15 @@ namespace dss {
       valueElem->setNodeValue(getAsString());
       elem->appendChild(valueElem);
     }
+    if(hasFlag(Archive)) {
+      elem->setAttribute("archive", "true");
+    }
+    if(hasFlag(Readable)) {
+      elem->setAttribute("readable", "true");
+    }
+    if(hasFlag(Writeable)) {
+      elem->setAttribute("writeable", "true");
+    }
 
     for(PropertyList::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end(); ++it) {
@@ -778,6 +787,15 @@ namespace dss {
             }
           }
         }
+      }
+      if(elem->hasAttribute("writeable")) {
+        setFlag(Writeable, elem->getAttribute("writeable") == "true");
+      }
+      if(elem->hasAttribute("readable")) {
+        setFlag(Readable, elem->getAttribute("readable") == "true");
+      }
+      if(elem->hasAttribute("archive")) {
+        setFlag(Archive, elem->getAttribute("archive") == "true");
       }
       Node* curNode = _pNode->firstChild();
       while(curNode != NULL) {
