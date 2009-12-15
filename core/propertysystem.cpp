@@ -22,57 +22,43 @@
 
 #include "propertysystem.h"
 
-#include "base.h"
-
 #include <iostream>
 #include <sstream>
 #include <algorithm>
 #include <cassert>
 #include <cstring>
+#include <fstream>
 
-#include "foreach.h"
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Attr.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/ProcessingInstruction.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/XML/XMLWriter.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/SAX/InputSource.h>
+
+using Poco::XML::Document;
+using Poco::XML::Attr;
+using Poco::XML::Text;
+using Poco::XML::ProcessingInstruction;
+using Poco::XML::DOMWriter;
+using Poco::XML::DOMParser;
+using Poco::XML::XMLWriter;
+using Poco::XML::Element;
+using Poco::XML::Node;
+using Poco::XML::AutoPtr;
+using Poco::XML::InputSource;
+
+#include "core/base.h"
+#include "core/foreach.h"
+#include "core/logger.h"
 
 namespace dss {
 
   const int PROPERTY_FORMAT_VERSION = 1;
-#define XML_ENCODING "utf-8"
-
-  xmlAttr* xmlSearchAttr(xmlNode* _pNode, xmlChar* _name) {
-    xmlAttr* curAttr = _pNode->properties;
-
-    while (curAttr != NULL) {
-      if (curAttr->type == XML_ATTRIBUTE_NODE) {
-        if (strcmp((char*) curAttr->name, (char*) _name) == 0) {
-          return curAttr;
-        }
-      }
-      curAttr = curAttr->next;
-    };
-
-    return NULL;
-  } // xmlSearchAttr
-
-  xmlNode* xmlSearchNode(xmlNode* _pNode, const char* _name, bool _recurse) {
-    xmlNode* result = _pNode->children;
-
-    while (result != NULL) {
-      if (result->type == XML_ELEMENT_NODE) {
-        if (strcmp((char*) result->name, _name) == 0) {
-          break;
-        } else {
-          if (_recurse) {
-            xmlNode* propRes = xmlSearchNode(result, _name, true);
-            if (propRes != NULL) {
-              result = propRes;
-              break;
-            }
-          }
-        }
-      }
-      result = result->next;
-    }
-    return result;
-  } // xmlSearchNode
 
   //=============================================== PropertySystem
 
@@ -85,93 +71,77 @@ namespace dss {
 
   bool PropertySystem::loadFromXML(const std::string& _fileName,
                                    PropertyNodePtr _rootNode) {
-    xmlDoc* doc = NULL;
-    xmlNode *rootElem = NULL;
-
-    PropertyNodePtr rootNode = _rootNode;
-    if (rootNode == NULL) {
-      rootNode = getRootNode();
+    PropertyNodePtr root = _rootNode;
+    if (root == NULL) {
+      root = getRootNode();
     }
 
-    doc = xmlParseFile(_fileName.c_str());
-    if (doc == NULL) {
-      std::cerr << "Error loading properties from \"" << _fileName << "\"" << std::endl;
+    std::ifstream inFile(_fileName.c_str());
+
+    InputSource input(inFile);
+    DOMParser parser;
+    AutoPtr<Document> pDoc = parser.parse(&input);
+    Element* rootNode = pDoc->documentElement();
+    if(rootNode->localName() != "properties") {
+      Logger::getInstance()->log("PropertySystem::loadFromXML: root node must be named properties, got: '" + rootNode->localName() + "'", lsError);
       return false;
     }
-    rootElem = xmlDocGetRootElement(doc);
+    if(!rootNode->hasAttribute("version")) {
+      Logger::getInstance()->log("PropertySystem::loadFromXML: missing version attribute", lsError);
+      return false;
+    }
 
-    bool versionOK = false;
-    if (strcmp((char*) rootElem->name, "properties") == 0) {
-      xmlAttr* versionAttr = xmlSearchAttr(rootElem, (xmlChar*) "version");
-      if ((versionAttr != NULL) && (versionAttr->children->content != NULL)) {
-        if (atoi((char*) versionAttr->children->content)
-            == PROPERTY_FORMAT_VERSION) {
-          versionOK = true;
-          if ((rootElem->children != NULL)) {
-            xmlNode* curNode = rootElem->children;
-            // search for the first property node and go on from there
-            while (curNode != NULL) {
-              if ((curNode->type == XML_ELEMENT_NODE)
-                  && (strcmp((char*) curNode->name, "property") == 0)) {
-                rootNode->loadFromNode(curNode);
-                break;
-              }
-              curNode = curNode->next;
-            }
-          }
-        }
+    if(strToIntDef(rootNode->getAttribute("version"),-1) != PROPERTY_FORMAT_VERSION) {
+      Logger::getInstance()->log(std::string("PropertySystem::loadFromXML: Version mismatch, expected ") + intToString(PROPERTY_FORMAT_VERSION) + " got " + rootNode->getAttribute("version"),
+                                 lsError);
+      return false;
+    }
+
+    Node* node = rootNode->firstChild();
+    while(node != NULL) {
+      if(node->localName() == "property") {
+        return root->loadFromNode(node);
       }
-    }
-    if (!versionOK) {
-      std::cerr << "Version mismatch while loading properties from \"" << _fileName
-          << "\"" << std::endl;
-      xmlFreeDoc(doc);
+      node = node->nextSibling();
     }
 
-    return versionOK;
+    return false;
   } // loadFromXML
 
   bool PropertySystem::saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode) const {
-    int rc;
-    xmlTextWriterPtr writer;
+    AutoPtr<Document> pDoc = new Document;
+
+    AutoPtr<ProcessingInstruction> pXMLHeader = pDoc->createProcessingInstruction("xml", "version='1.0' encoding='utf-8'");
+    pDoc->appendChild(pXMLHeader);
+
+    AutoPtr<Element> pRoot = pDoc->createElement("properties");
+    pRoot->setAttribute("version", intToString(PROPERTY_FORMAT_VERSION));
+    pDoc->appendChild(pRoot);
+
     PropertyNodePtr root = _rootNode;
-    if (root == NULL) {
+    if(root == NULL) {
       root = m_RootNode;
     }
+    root->saveAsXML(pDoc, pRoot, 0);
 
-    writer = xmlNewTextWriterFilename(_fileName.c_str(), 0);
-    if (writer == NULL) {
-      return false;
+    // TODO: factor those line into a function as it's a copy of
+    //       model.cpp/seriespersistance.cpp/metering.cpp
+    std::string tmpOut = _fileName + ".tmp";
+    std::ofstream ofs(tmpOut.c_str());
+
+    if(ofs) {
+      DOMWriter writer;
+      writer.setNewLine("\n");
+      writer.setOptions(XMLWriter::PRETTY_PRINT);
+      writer.writeNode(ofs, pDoc);
+
+      ofs.close();
+
+      // move it to the desired location
+      rename(tmpOut.c_str(), _fileName.c_str());
+    } else {
+      Logger::getInstance()->log("Could not open file '" + tmpOut + "' for writing", lsFatal);
     }
-
-    rc = xmlTextWriterStartDocument(writer, NULL, XML_ENCODING, NULL);
-    if(rc < 0) {
-      return false;
-    }
-
-    rc = xmlTextWriterStartElement(writer, (xmlChar*)"properties");
-    if(rc < 0) {
-      return false;
-    }
-
-    rc = xmlTextWriterWriteFormatAttribute(writer, (xmlChar*)"version", "%d", PROPERTY_FORMAT_VERSION);
-    if(rc < 0) {
-      return false;
-    }
-
-    root->saveAsXML(writer, 0);
-
-    rc = xmlTextWriterEndElement(writer);
-    if(rc < 0) {
-      return false;
-    }
-
-    rc = xmlTextWriterEndDocument(writer);
-    if(rc < 0) {
-      return false;
-    }
-
-    xmlFreeTextWriter(writer);
 
     return true;
   } // saveToXML
@@ -752,68 +722,56 @@ namespace dss {
     }
   }
 
-  bool PropertyNode::saveAsXML(xmlTextWriterPtr _writer, const int _flagsMask) {
-    int rc = xmlTextWriterStartElement(_writer, (xmlChar*)"property");
-    if(rc < 0) {
-      return false;
-    }
+  bool PropertyNode::saveAsXML(AutoPtr<Document>& _doc, AutoPtr<Element>& _parent, const int _flagsMask) {
+    AutoPtr<Element> elem = _doc->createElement("property");
+    _parent->appendChild(elem);
 
-    rc = xmlTextWriterWriteAttribute(_writer, (xmlChar*)"type", (xmlChar*)getValueTypeAsString(getValueType()));
-    if(rc < 0) {
-      return false;
-    }
-
-    rc = xmlTextWriterWriteAttribute(_writer, (xmlChar*)"name", (xmlChar*)getDisplayName().c_str());
-    if(rc < 0) {
-      return false;
-    }
+    elem->setAttribute("type",getValueTypeAsString(getValueType()));
+    elem->setAttribute("name", getDisplayName());
 
     if(getValueType() != vTypeNone) {
-      xmlTextWriterWriteElement(_writer, (xmlChar*)"value", (xmlChar*)getAsString().c_str());
+      AutoPtr<Element> valueElem = _doc->createElement("value");
+      valueElem->setNodeValue(getAsString());
+      elem->appendChild(valueElem);
     }
 
     for(PropertyList::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end(); ++it) {
       if((_flagsMask == Flag(0)) || (*it)->hasFlag(Flag(_flagsMask))) {
-        if(!(*it)->saveAsXML(_writer, _flagsMask)) {
+        if(!(*it)->saveAsXML(_doc, elem, _flagsMask)) {
           return false;
         }
       }
     }
 
-    rc = xmlTextWriterEndElement(_writer);
-    if(rc < 0) {
-      return false;
-    }
     return true;
   } // saveAsXML
 
-  bool PropertyNode::loadFromNode(xmlNode* _pNode) {
-    xmlAttr* nameAttr = xmlSearchAttr(_pNode, (xmlChar*)"name");
-    xmlAttr* typeAttr = xmlSearchAttr(_pNode, (xmlChar*)"type");
+  bool PropertyNode::loadFromNode(Node* _pNode) {
+    Element* elem = dynamic_cast<Element*>(_pNode);
 
-    if(nameAttr != NULL) {
-      std::string propName = (char*)nameAttr->children->content;
+    if(elem->hasAttribute("name")) {
+      std::string propName = elem->getAttribute("name");
       propName = dss::getProperty(propName);
       getAndRemoveIndexFromPropertyName(propName);
       if(m_Name.length() > 0) {
         assert(m_Name == propName);
       }
       m_Name = propName;
-      if(typeAttr != NULL) {
-        aValueType valueType = getValueTypeFromString((char*)typeAttr->children->content);
+      if(elem->hasAttribute("type")) {
+        aValueType valueType = getValueTypeFromString(elem->getAttribute("type").c_str());
         if(valueType != vTypeNone) {
-          xmlNode* valueNode = xmlSearchNode(_pNode, "value", false);
+          Element* valueNode = elem->getChildElement("value");
           if(valueNode != NULL) {
             switch(valueType) {
               case vTypeString:
-                setStringValue((char*)valueNode->children->content);
+                setStringValue(valueNode->firstChild()->getNodeValue());
                 break;
               case vTypeInteger:
-                setIntegerValue(atoi((char*)valueNode->children->content));
+                setIntegerValue(strToInt(valueNode->firstChild()->getNodeValue()));
                 break;
               case vTypeBoolean:
-                setBooleanValue(strcmp((char*)valueNode->children->content, "true") == 0);
+                setBooleanValue(valueNode->firstChild()->getNodeValue() == "true");
                 break;
               default:
                 assert(false);
@@ -821,16 +779,16 @@ namespace dss {
           }
         }
       }
-      xmlNode* curNode = _pNode->children;
+      Node* curNode = _pNode->firstChild();
       while(curNode != NULL) {
-        if(curNode->type == XML_ELEMENT_NODE && strcmp((char*)curNode->name, "property") == 0) {
-          nameAttr = xmlSearchAttr(curNode, (xmlChar*)"name");
-          if(nameAttr != NULL) {
-            PropertyNodePtr candidate = createProperty(std::string((char*)nameAttr->children->content));
+        if(curNode->localName() == "property") {
+          Element* curElem = dynamic_cast<Element*>(curNode);
+          if((curElem != NULL) && curElem->hasAttribute("name")) {
+            PropertyNodePtr candidate = createProperty(curElem->getAttribute("name"));
             candidate->loadFromNode(curNode);
           }
         }
-        curNode = curNode->next;
+        curNode = curNode->nextSibling();
       }
       return true;
     }

@@ -23,9 +23,6 @@
 #ifndef NEUROPROPERTYSYSTEM_H
 #define NEUROPROPERTYSYSTEM_H
 
-#include <libxml/tree.h>
-#include <libxml/xmlwriter.h>
-
 #include <boost/mpl/if.hpp>
 #include <boost/type_traits/is_class.hpp>
 
@@ -34,6 +31,16 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+
+namespace Poco {
+  namespace XML {
+    class Document;
+    class Node;
+    class Element;
+  }
+  template<class C>
+  class AutoPtr;
+}
 
 namespace dss {
 
@@ -471,9 +478,9 @@ namespace dss {
     }
   public:
     /** Writes the node to XML */
-    bool saveAsXML(xmlTextWriterPtr _writer, const int _flagsMask);
+    bool saveAsXML(Poco::AutoPtr<Poco::XML::Document>& _doc, Poco::AutoPtr<Poco::XML::Element>& _parent, const int _flagsMask);
     /** Loads the node from XML */
-    bool loadFromNode(xmlNode* _pNode);
+    bool loadFromNode(Poco::XML::Node* _node);
   }; // PropertyNode
 
   /** Exception that gets thrown if a incompatible assignment would take place. */
