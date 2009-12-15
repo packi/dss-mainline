@@ -1286,6 +1286,10 @@ namespace dss {
       return "Event New DS485 Device";
     case EventLostDS485Device:
       return "Event Lost DS485 Device";
+    case EventDeviceReceivedTelegramShort:
+      return "Event Telegram Short";
+    case EventDeviceReceivedTelegramLong:
+      return "Event Telegram Long";
     case EventDeviceReady:
       return "Event Device Ready";    
     }
@@ -1403,6 +1407,38 @@ namespace dss {
               pEvent->addParameter(devID);
               pEvent->addParameter(priority);
               getDSS().getApartment().addModelEvent(pEvent);
+            } else if(functionID == EventDeviceReceivedTelegramShort) {
+              pd.get<uint8_t>(); // function id
+              uint16_t p1 = pd.get<uint16_t>();
+              uint16_t p2 = pd.get<uint16_t>();
+              uint16_t p3 = pd.get<uint16_t>();
+              uint16_t address = p1 & 0x007F;
+              uint16_t buttonNumber = p2 & 0x000F;
+              uint16_t kind = p3 & 0x000F;
+              boost::shared_ptr<Event> buttonEvt(new Event("buttonPressed"));
+              buttonEvt->setProperty("address", intToString(address));
+              buttonEvt->setProperty("buttonNumber", intToString(buttonNumber));
+              buttonEvt->setProperty("kind", intToString(kind));
+              getDSS().getEventQueue().pushEvent(buttonEvt);
+            } else if(functionID == EventDeviceReceivedTelegramLong) {
+              pd.get<uint8_t>(); // function id
+              pd.get<uint16_t>();
+              uint16_t p2 = pd.get<uint16_t>();
+              uint16_t p3 = pd.get<uint16_t>();
+              uint16_t p4 = pd.get<uint16_t>();
+              uint16_t address = ((p3&0x0f00) | (p4&0x00f0) | (p4&0x000f))>>2;
+              uint16_t subqualifier = ((p4 & 0xf000)>>12);
+              uint8_t mainqualifier = (p4&0x0f00)>>8;
+              uint16_t data = ((p2 &0x0f00)<< 4)&0xf000;
+              data |= ((p3&0x00f0) << 4) &0x0f00;
+              data |= ((p3 &0x000f)<<4)&0x00f0;
+              data |= ((p3&0xf000)>> 12) &0x000f;
+              boost::shared_ptr<Event> telEvt(new Event("deviceReceivedTelegram"));
+              telEvt->setProperty("data", intToString(data));
+              telEvt->setProperty("address", intToString(address));
+              telEvt->setProperty("subqualifier", intToString(subqualifier));
+              telEvt->setProperty("mainqualifier", intToString(mainqualifier));
+              getDSS().getEventQueue().pushEvent(telEvt);
             } else if(functionID == EventNewDS485Device) {
               pd.get<uint8_t>(); // functionID
               int modID = pd.get<uint16_t>();

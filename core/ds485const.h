@@ -122,6 +122,8 @@ namespace dss {
   const uint8_t EventNewDS485Device = 0x80;
   const uint8_t EventLostDS485Device = 0x81;
   const uint8_t EventDeviceReady = 0x82;
+  const uint8_t EventDeviceReceivedTelegramShort = 0x83;
+  const uint8_t EventDeviceReceivedTelegramLong = 0x84;
   const uint8_t EventDSLinkInterrupt = 0x85;
 
   // Scene constants for devices
