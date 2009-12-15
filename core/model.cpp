@@ -26,7 +26,6 @@
 #include "dss.h"
 #include "logger.h"
 #include "propertysystem.h"
-#include "xmlwrapper.h"
 #include "event.h"
 
 #include "foreach.h"
@@ -37,12 +36,15 @@
 
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
+#include <Poco/DOM/Node.h>
 #include <Poco/DOM/Attr.h>
 #include <Poco/DOM/Text.h>
 #include <Poco/DOM/ProcessingInstruction.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/DOMParser.h>
 #include <Poco/XML/XMLWriter.h>
+#include <Poco/SAX/InputSource.h>
 
 using Poco::XML::Document;
 using Poco::XML::Element;
@@ -51,7 +53,10 @@ using Poco::XML::Text;
 using Poco::XML::ProcessingInstruction;
 using Poco::XML::AutoPtr;
 using Poco::XML::DOMWriter;
+using Poco::XML::DOMParser;
 using Poco::XML::XMLWriter;
+using Poco::XML::InputSource;
+using Poco::XML::Node;
 
 namespace dss {
 
@@ -1139,30 +1144,35 @@ namespace dss {
   const int ApartmentConfigVersion = 1;
 
   void Apartment::readConfigurationFromXML(const std::string& _fileName) {
-    XMLDocumentFileReader reader(_fileName);
     setName("dSS");
+    std::ifstream inFile(_fileName.c_str());
 
-    XMLNode rootNode = reader.getDocument().getRootNode();
-    if(rootNode.getName() == "config") {
-      if(strToInt(rootNode.getAttributes()["version"]) == ApartmentConfigVersion) {
-        XMLNodeList nodes = rootNode.getChildren();
-        for(XMLNodeList::iterator iNode = nodes.begin(); iNode != nodes.end(); ++iNode) {
-          std::string nodeName = iNode->getName();
+    InputSource input(inFile);
+    DOMParser parser;
+    AutoPtr<Document> pDoc = parser.parse(&input);
+    Element* rootNode = pDoc->documentElement();
+
+    if(rootNode->localName() == "config") {
+      if(rootNode->hasAttribute("version") && (strToInt(rootNode->getAttribute("version")) == ApartmentConfigVersion)) {
+        Node* curNode = rootNode->firstChild();
+        while(curNode != NULL) {
+          std::string nodeName = curNode->localName();
           if(nodeName == "devices") {
-            loadDevices(*iNode);
+            loadDevices(curNode);
           } else if(nodeName == "modulators") {
-            loadModulators(*iNode);
+            loadModulators(curNode);
           } else if(nodeName == "zones") {
-            loadZones(*iNode);
+            loadZones(curNode);
           } else if(nodeName == "apartment") {
-            try {
-              XMLNode& nameNode = iNode->getChildByName("name");
-              if(!nameNode.getChildren().empty()) {
-                setName((nameNode.getChildren()[0]).getContent());
+            Element* elem = dynamic_cast<Element*>(curNode);
+            if(elem != NULL) {
+              Element* nameElem = elem->getChildElement("name");
+              if(nameElem->hasChildNodes()) {
+                setName(nameElem->firstChild()->nodeValue());
               }
-            } catch(std::runtime_error&) {
             }
           }
+          curNode = curNode->nextSibling();
         }
       } else {
         log("Config file has the wrong version");
@@ -1170,75 +1180,76 @@ namespace dss {
     }
   } // readConfigurationFromXML
 
-  void Apartment::loadDevices(XMLNode& _node) {
-    XMLNodeList devices = _node.getChildren();
-    for(XMLNodeList::iterator iNode = devices.begin(); iNode != devices.end(); ++iNode) {
-      if(iNode->getName() == "device") {
-        dsid_t dsid = dsid_t::fromString(iNode->getAttributes()["dsid"]);
-        std::string name;
-        try {
-          XMLNode& nameNode = iNode->getChildByName("name");
-          if(!nameNode.getChildren().empty()) {
-            name = (nameNode.getChildren()[0]).getContent();
+  void Apartment::loadDevices(Node* _node) {
+    Node* curNode = _node->firstChild();
+    while(curNode != NULL) {
+      if(curNode->localName() == "device") {
+        Element* elem = dynamic_cast<Element*>(curNode);
+        if((elem != NULL) && elem->hasAttribute("dsid")) {
+          dsid_t dsid = dsid_t::fromString(elem->getAttribute("dsid"));
+          std::string name;
+          Element* nameElem = elem->getChildElement("name");
+          if((nameElem != NULL) && nameElem->hasChildNodes()) {
+            name = nameElem->firstChild()->nodeValue();
           }
-        } catch(XMLException& e) {
-          /* discard node not found exceptions */
+
+          DateTime firstSeen;
+          if(elem->hasAttribute("firstSeen")) {
+            firstSeen = DateTime(dateFromISOString(elem->getAttribute("firstSeen").c_str()));
+          }
+
+          Device& newDevice = allocateDevice(dsid);
+          if(!name.empty()) {
+            newDevice.setName(name);
+          }
+          newDevice.setFirstSeen(firstSeen);
         }
-        
-        DateTime firstSeen; 
-        std::string firstSeenStr = iNode->getAttributes()["firstSeen"];
-        if(!firstSeenStr.empty()) {
-          firstSeen = DateTime(dateFromISOString(firstSeenStr.c_str()));
-        }
-        
-        Device& newDevice = allocateDevice(dsid);
-        if(!name.empty()) {
-          newDevice.setName(name);
-        }
-        newDevice.setFirstSeen(firstSeen);
       }
+      curNode = curNode->nextSibling();
     }
   } // loadDevices
 
-  void Apartment::loadModulators(XMLNode& _node) {
-    XMLNodeList modulators = _node.getChildren();
-    for(XMLNodeList::iterator iModulator = modulators.begin(); iModulator != modulators.end(); ++iModulator) {
-      if(iModulator->getName() == "modulator") {
-        dsid_t id = dsid_t::fromString(iModulator->getAttributes()["id"]);
-        std::string name;
-        try {
-          XMLNode& nameNode = iModulator->getChildByName("name");
-          if(!nameNode.getChildren().empty()) {
-            name = (nameNode.getChildren()[0]).getContent();
+  void Apartment::loadModulators(Node* _node) {
+    Node* curNode = _node->firstChild();
+    while(curNode != NULL) {
+      if(curNode->localName() == "modulator") {
+        Element* elem = dynamic_cast<Element*>(curNode);
+        if((elem != NULL) && elem->hasAttribute("id")) {
+          dsid_t id = dsid_t::fromString(elem->getAttribute("id"));
+          std::string name;
+          Element* nameElem = elem->getChildElement("name");
+          if((nameElem != NULL) && nameElem->hasChildNodes()) {
+            name = nameElem->firstChild()->nodeValue();
           }
-        } catch(XMLException&) {
-        }
-        Modulator& newModulator = allocateModulator(id);
-        if(!name.empty()) {
-          newModulator.setName(name);
+          Modulator& newModulator = allocateModulator(id);
+          if(!name.empty()) {
+            newModulator.setName(name);
+          }
         }
       }
+      curNode = curNode->nextSibling();
     }
   } // loadModulators
 
-  void Apartment::loadZones(XMLNode& _node) {
-    XMLNodeList zones = _node.getChildren();
-    for(XMLNodeList::iterator iZone = zones.begin(); iZone != zones.end(); ++iZone) {
-      if(iZone->getName() == "zone") {
-        int id = strToInt(iZone->getAttributes()["id"]);
-        std::string name;
-        try {
-          XMLNode& nameNode = iZone->getChildByName("name");
-          if(!nameNode.getChildren().empty()) {
-            name = (nameNode.getChildren()[0]).getContent();
+  void Apartment::loadZones(Node* _node) {
+    Node* curNode = _node->firstChild();
+    while(curNode != NULL) {
+      if(curNode->localName() == "zone") {
+        Element* elem = dynamic_cast<Element*>(curNode);
+        if((elem != NULL) && elem->hasAttribute("id")) {
+          int id = strToInt(elem->getAttribute("id"));
+          std::string name;
+          Element* nameElem = elem->getChildElement("name");
+          if((nameElem != NULL) && nameElem->hasChildNodes()) {
+            name = nameElem->firstChild()->nodeValue();
           }
-        } catch(XMLException&) {
-        }
-        Zone& newZone = allocateZone(id);
-        if(!name.empty()) {
-          newZone.setName(name);
+          Zone& newZone = allocateZone(id);
+          if(!name.empty()) {
+            newZone.setName(name);
+          }
         }
       }
+      curNode = curNode->nextSibling();
     }
   } // loadZones
 

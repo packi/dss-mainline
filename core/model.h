@@ -40,6 +40,12 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
+namespace Poco {
+  namespace XML {
+    class Node;
+  }
+}
+
 namespace dss {
 
   class Device;
@@ -49,7 +55,6 @@ namespace dss {
   class Group;
   class Modulator;
   class PropertyNode;
-  class XMLNode;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   class PhysicalModelItem {
@@ -808,9 +813,9 @@ namespace dss {
     SyncEvent m_NewModelEvent;
     int m_RescanBusIn;
   private:
-    void loadDevices(XMLNode& _node);
-    void loadModulators(XMLNode& _node);
-    void loadZones(XMLNode& _node);
+    void loadDevices(Poco::XML::Node* _node);
+    void loadModulators(Poco::XML::Node* _node);
+    void loadZones(Poco::XML::Node* _node);
 
     void addDefaultGroupsToZone(Zone& _zone);
     /** Starts the event-processing */
