@@ -113,6 +113,8 @@ namespace dss {
     bool hasParameter(const string& _name) const;
 
     void loadParameterFromXML(XMLNode& _node);
+
+    const Properties& getParameters() const { return m_Parameters; }
   }; // SubscriptionOptions
 
 

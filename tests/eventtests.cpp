@@ -77,6 +77,8 @@ BOOST_AUTO_TEST_CASE(testSubscription) {
 
   boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
   opts->setParameter("event_name", "event1");
+  opts->setParameter("test_override", "always testing");
+  opts->setParameter("test2_default", "defaults to that");
   boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", interpreter, opts));
   interpreter.subscribe(subscription);
 

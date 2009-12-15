@@ -27,6 +27,7 @@
 #include "setbuilder.h"
 #include "dss.h"
 #include "scripting/modeljs.h"
+#include "core/foreach.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/filesystem.hpp>
@@ -52,6 +53,7 @@ namespace dss {
         newEvent->setTime(timeParam);
       }
     }
+    applyOptionsWithSuffix(_subscription.getOptions(), "_default", newEvent);
     if(_subscription.getOptions().hasParameter(EventPropertyLocation)) {
       string location = _subscription.getOptions().getParameter(EventPropertyLocation);
       if(!location.empty()) {
@@ -59,9 +61,21 @@ namespace dss {
         newEvent->setLocation(location);
       }
     }
+    applyOptionsWithSuffix(_subscription.getOptions(), "_override", newEvent);
     newEvent->setProperties(_event.getProperties());
     getEventInterpreter().getQueue().pushEvent(newEvent);
   } // handleEvent
+
+  void EventInterpreterPluginRaiseEvent::applyOptionsWithSuffix(const SubscriptionOptions& _options, const std::string& _suffix, boost::shared_ptr<Event> _event) {
+    const HashMapConstStringString sourceMap = _options.getParameters().getContainer();
+    typedef const std::pair<const std::string, string> tItem;
+    foreach(tItem kv, sourceMap) {
+      if(endsWith(kv.first, _suffix)) {
+        std::string propName = kv.first.substr(0, kv.first.length() - _suffix.length());
+        _event->setProperty(propName, kv.second);
+      }
+    }
+  } // applyOptionsWithSuffix
 
 
   //================================================== EventInterpreterPluginJavascript
