@@ -479,8 +479,12 @@ namespace dss {
   public:
     /** Writes the node to XML */
     bool saveAsXML(Poco::AutoPtr<Poco::XML::Document>& _doc, Poco::AutoPtr<Poco::XML::Element>& _parent, const int _flagsMask);
+    /** Saves the nodes children to XML */
+    bool saveChildrenAsXML(Poco::AutoPtr<Poco::XML::Document>& _doc, Poco::AutoPtr<Poco::XML::Element>& _parent, const int _flagsMask);
     /** Loads the node from XML */
     bool loadFromNode(Poco::XML::Node* _node);
+    /** Loads children from XML */
+    bool loadChildrenFromNode(Poco::XML::Node* _node);
   }; // PropertyNode
 
   /** Exception that gets thrown if a incompatible assignment would take place. */

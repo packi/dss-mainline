@@ -231,9 +231,6 @@ namespace dss {
     PropertyNodePtr m_pPropertyNode;
     PropertyNodePtr m_pAliasNode;
   protected:
-    /** Publishes the device to the property tree.
-     * @see DSS::getPropertySystem */
-    void publishToPropertyTree();
     /** Sends the application a note that something has changed.
      * This will cause the \c apartment.xml to be updated. */
     void dirty();
@@ -346,7 +343,12 @@ namespace dss {
      * the result of the function is not defined. */
     uint8_t dsLinkSend(uint8_t _value, bool _lastByte, bool _writeOnly);
 
+    const PropertyNodePtr& getPropertyNode() const { return m_pPropertyNode; }
     PropertyNodePtr getPropertyNode() { return m_pPropertyNode; }
+
+    /** Publishes the device to the property tree.
+     * @see DSS::getPropertySystem */
+    void publishToPropertyTree();
 
     /** Returns wheter two devices are equal.
      * Devices are considered equal if their DSID are a match.*/

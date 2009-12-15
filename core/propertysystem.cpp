@@ -731,7 +731,8 @@ namespace dss {
 
     if(getValueType() != vTypeNone) {
       AutoPtr<Element> valueElem = _doc->createElement("value");
-      valueElem->setNodeValue(getAsString());
+      AutoPtr<Text> textElem = _doc->createTextNode(getAsString());
+      valueElem->appendChild(textElem);
       elem->appendChild(valueElem);
     }
     if(hasFlag(Archive)) {
@@ -744,17 +745,20 @@ namespace dss {
       elem->setAttribute("writeable", "true");
     }
 
+    return saveChildrenAsXML(_doc, elem, _flagsMask);
+  } // saveAsXML
+
+  bool PropertyNode::saveChildrenAsXML(Poco::AutoPtr<Poco::XML::Document>& _doc, Poco::AutoPtr<Poco::XML::Element>& _parent, const int _flagsMask) {
     for(PropertyList::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end(); ++it) {
       if((_flagsMask == Flag(0)) || (*it)->hasFlag(Flag(_flagsMask))) {
-        if(!(*it)->saveAsXML(_doc, elem, _flagsMask)) {
+        if(!(*it)->saveAsXML(_doc, _parent, _flagsMask)) {
           return false;
         }
       }
     }
-
     return true;
-  } // saveAsXML
+  } // saveChildrenAsXML
 
   bool PropertyNode::loadFromNode(Node* _pNode) {
     Element* elem = dynamic_cast<Element*>(_pNode);
@@ -797,21 +801,25 @@ namespace dss {
       if(elem->hasAttribute("archive")) {
         setFlag(Archive, elem->getAttribute("archive") == "true");
       }
-      Node* curNode = _pNode->firstChild();
-      while(curNode != NULL) {
-        if(curNode->localName() == "property") {
-          Element* curElem = dynamic_cast<Element*>(curNode);
-          if((curElem != NULL) && curElem->hasAttribute("name")) {
-            PropertyNodePtr candidate = createProperty(curElem->getAttribute("name"));
-            candidate->loadFromNode(curNode);
-          }
-        }
-        curNode = curNode->nextSibling();
-      }
-      return true;
+      return loadChildrenFromNode(_pNode);
     }
     return false;
   } // loadFromNode
+
+  bool PropertyNode::loadChildrenFromNode(Poco::XML::Node* _node) {
+    Node* curNode = _node->firstChild();
+    while(curNode != NULL) {
+      if(curNode->localName() == "property") {
+        Element* curElem = dynamic_cast<Element*>(curNode);
+        if((curElem != NULL) && curElem->hasAttribute("name")) {
+          PropertyNodePtr candidate = createProperty(curElem->getAttribute("name"));
+          candidate->loadFromNode(curNode);
+        }
+      }
+      curNode = curNode->nextSibling();
+    }
+    return true;
+  } // loadChildrenFromNode
 
   void PropertyNode::propertyChanged() {
     notifyListeners(&PropertyListener::propertyChanged);

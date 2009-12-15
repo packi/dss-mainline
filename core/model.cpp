@@ -79,17 +79,18 @@ namespace dss {
 
   void Device::publishToPropertyTree() {
     if(m_pPropertyNode == NULL) {
-      // don't publish stale devices for now
-      if(m_ShortAddress == ShortAddressStaleDevice) {
-        return;
-      } else {
-        if(m_pApartment->getPropertyNode() != NULL) {
-          m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/" + m_DSID.toString());
-//          m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
-          m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyReference<string>(m_Name));
-          m_pPropertyNode->createProperty("ModulatorID")->linkToProxy(PropertyProxyReference<int>(m_ModulatorID, false));
-          m_pPropertyNode->createProperty("ZoneID")->linkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
-          m_pPropertyNode->createProperty("interrupt/mode")->setStringValue("ignore");
+      if(m_pApartment->getPropertyNode() != NULL) {
+        m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/" + m_DSID.toString());
+//        m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
+        m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyReference<string>(m_Name));
+        m_pPropertyNode->createProperty("ModulatorID")->linkToProxy(PropertyProxyReference<int>(m_ModulatorID, false));
+        m_pPropertyNode->createProperty("ZoneID")->linkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
+        if(m_pPropertyNode->getProperty("interrupt/mode") == NULL) {
+          PropertyNodePtr interruptNode = m_pPropertyNode->createProperty("interrupt");
+          interruptNode->setFlag(PropertyNode::Archive, true);
+          PropertyNodePtr interruptModeNode = interruptNode->createProperty("mode");
+          interruptModeNode->setStringValue("ignore");
+          interruptModeNode->setFlag(PropertyNode::Archive, true);
         }
       }
     }
@@ -1203,6 +1204,11 @@ namespace dss {
             newDevice.setName(name);
           }
           newDevice.setFirstSeen(firstSeen);
+          Element* propertiesElem = elem->getChildElement("properties");
+          if(propertiesElem != NULL) {
+            newDevice.publishToPropertyTree();
+            newDevice.getPropertyNode()->loadChildrenFromNode(propertiesElem);
+          }
         }
       }
       curNode = curNode->nextSibling();
@@ -1263,6 +1269,11 @@ namespace dss {
       pDeviceNode->appendChild(pNameNode);
     }    
     pDeviceNode->setAttribute("firstSeen", _pDevice->getFirstSeen());
+    if(_pDevice->getPropertyNode() != NULL) {
+      AutoPtr<Element> pPropertiesNode = _pDocument->createElement("properties");
+      pDeviceNode->appendChild(pPropertiesNode);
+      _pDevice->getPropertyNode()->saveChildrenAsXML(_pDocument, pPropertiesNode, PropertyNode::Archive);
+    }
 
     _parentNode->appendChild(pDeviceNode);
   } // deviceToXML
