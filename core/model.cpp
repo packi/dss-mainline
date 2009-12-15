@@ -1092,7 +1092,7 @@ namespace dss {
     // load devices/modulators/etc. from a config-file
     std::string configFileName = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile");
     if(!boost::filesystem::exists(configFileName)) {
-      Logger::getInstance()->log(string("Apartment::execute: Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
+      log(string("Apartment::execute: Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
     } else {
       readConfigurationFromXML(configFileName);
     }
@@ -1165,7 +1165,7 @@ namespace dss {
           }
         }
       } else {
-        Logger::getInstance()->log("Config file has the wrong version");
+        log("Config file has the wrong version");
       }
     }
   } // readConfigurationFromXML
@@ -1334,7 +1334,7 @@ namespace dss {
       // move it to the desired location
       rename(tmpOut.c_str(), _fileName.c_str());
     } else {
-      Logger::getInstance()->log("Could not open file '" + tmpOut + "' for writing", lsFatal);
+      log("Could not open file '" + tmpOut + "' for writing", lsFatal);
     }
   } // writeConfigurationToXML
 
