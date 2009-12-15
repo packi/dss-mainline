@@ -164,10 +164,22 @@ ENDIF(WITH_TESTS)
 
 ADD_EXECUTABLE(dss main.cpp namespaces.cpp)
 
+## -- install targets:
 INSTALL(TARGETS dss RUNTIME DESTINATION bin)
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data/ DESTINATION ${WITH_DATADIR}
-        PATTERN "/webroot/js/lib/extjs/docs" EXCLUDE
-        PATTERN "/webroot/js/lib/extjs/examples" EXCLUDE
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data/
+		  DESTINATION ${WITH_DATADIR}
+		  PATTERN "webroot" EXCLUDE
+		  PATTERN "*.xml" EXCLUDE
+		  PATTERN "*.js"
+		  )
+
+
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data/webroot/ DESTINATION ${WITH_WEBROOTDIR})
+INSTALL(FILES
+          ${CMAKE_CURRENT_SOURCE_DIR}/data/config.xml
+          ${CMAKE_CURRENT_SOURCE_DIR}/data/subscriptions.xml
+          ${CMAKE_CURRENT_SOURCE_DIR}/data/sim.xml
+	DESTINATION ${WITH_CONFIGDIR}
        )
 
 
