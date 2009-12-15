@@ -21,7 +21,6 @@
 
 #include "seriespersistence.h"
 
-#include "core/xmlwrapper.h"
 #include "core/logger.h"
 #include "core/foreach.h"
 

@@ -23,7 +23,6 @@
 #define SERIES_H_INCLUDED
 
 #include "core/datetools.h"
-#include "core/xmlwrapper.h"
 #include "core/ds485types.h"
 
 #include <Poco/DOM/Document.h>
@@ -81,13 +80,6 @@ namespace dss {
         m_Min = _other.getMin();
       }
     } // mergeWith
-
-    virtual void readFromXMLNode(XMLNode& _node) {
-      m_TimeStamp = DateTime(dateFromISOString(_node.getAttributes()["timestamp"].c_str()));
-      m_Min = strToDouble(_node.getChildByName("min").getChildren()[0].getContent());
-      m_Max = strToDouble(_node.getChildByName("max").getChildren()[0].getContent());
-      m_Value = strToDouble(_node.getChildByName("value").getChildren()[0].getContent());
-    } // readFromXMLNode
 
     virtual void readFromXMLNode(Node* _node) {
       Element* elem = dynamic_cast<Element*>(_node);

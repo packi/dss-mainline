@@ -30,7 +30,6 @@
 
 #include "dss.h"
 #include "logger.h"
-#include "xmlwrapper.h"
 #include "propertysystem.h"
 #include "scripting/modeljs.h"
 #include "eventinterpreterplugins.h"
