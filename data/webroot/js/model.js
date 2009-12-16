@@ -78,6 +78,7 @@ var Apartment = Class.create({
 	fetch: function() {
 		var self = this;
 		var structure = self.sendSyncRequest("getStructure", {});
+		self.zones = [];
 		structure.apartment.zones.each(function(zone) {
 			var zoneObj = new Zone(zone.id, zone.name);
 			self.zones.push(zoneObj);
