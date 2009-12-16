@@ -234,7 +234,7 @@ namespace dss {
       std::cout << "renaming: " << Timestamp().getDifference(renaming) << std::endl;
 #endif
     } else {
-      Logger::getInstance()->log("Could not open file for writing");
+      Logger::getInstance()->log("Could not open file '" + tmpOut + "' for writing", lsFatal);
     }
 
     return true;
