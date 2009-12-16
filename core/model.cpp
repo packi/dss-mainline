@@ -336,6 +336,9 @@ namespace dss {
     return DSS::getInstance()->getDS485Interface().dSLinkSend(m_ModulatorID, m_ShortAddress, _value, flags);
   } // dsLinkSend
 
+  int Device::getSensorValue(const int _sensorID) {
+    return DSS::getInstance()->getDS485Interface().getSensorValue(*this,_sensorID);
+  } // getSensorValue
 
   //================================================== Set
 

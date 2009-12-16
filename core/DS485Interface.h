@@ -143,6 +143,7 @@ namespace dss {
     virtual std::vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param = -1) = 0;
     
     virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) = 0;
+    virtual int getSensorValue(const Device& _device, const int _sensorID) = 0;
   };
 
   class DS485ApiError : public DSSException {

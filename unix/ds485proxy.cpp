@@ -1018,6 +1018,56 @@ namespace dss {
     return true;
   } // getEnergyBorder
 
+  int DS485Proxy::getSensorValue(const Device& _device, const int _sensorID) {
+    DS485CommandFrame cmdFrame;
+    cmdFrame.getHeader().setDestination(_device.getModulatorID());
+    cmdFrame.getHeader().setBroadcast(false);
+    cmdFrame.getHeader().setType(1);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionDeviceGetSensorValue);
+    cmdFrame.getPayload().add<uint16_t>(_device.getShortAddress());
+    cmdFrame.getPayload().add<uint16_t>(_sensorID);
+    log("GetSensorValue");
+
+    boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionDeviceGetSensorValue);
+    bucket->waitForFrame(2000);
+    boost::shared_ptr<ReceivedFrame> recFrame;
+    if(bucket->isEmpty()) {
+      log(string("received no ack for request getSensorValue"));
+      throw DS485ApiError("no Ack for sensorValue");
+    } else if(bucket->getFrameCount() == 1) {
+        // first frame received, wait for the next frame
+      recFrame= bucket->popFrame();
+      bucket->waitForFrame(2000);
+    } else
+        recFrame= bucket->popFrame();
+    // first frame is only request ack;
+
+    PayloadDissector pd(recFrame->getFrame()->getPayload());
+    pd.get<uint8_t>(); // discard functionID
+    checkResultCode((int)pd.get<uint16_t>()); // check first ack
+
+    if(bucket->isEmpty()) {
+        // no next frame after additional waiting.
+        throw DS485ApiError("no Answer for sensorValue");
+    }
+
+    recFrame = bucket->popFrame();
+
+    if(recFrame.get() != NULL) {
+        PayloadDissector pd(recFrame->getFrame()->getPayload());
+        pd.get<uint8_t>(); // discard functionID
+        pd.get<uint16_t>();
+        pd.get<uint16_t>();
+        checkResultCode((int)pd.get<uint16_t>()); // check sensorvalue
+        int result = int(pd.get<uint16_t>());
+        log(string("result ") + intToString(result));
+        return result;
+    } else {
+      throw std::runtime_error("received frame is NULL but bucket->isEmpty() returns false");
+    }
+  } // getSensorValue
+
   uint8_t DS485Proxy::dSLinkSend(const int _modulatorID, devid_t _devAdr, uint8_t _value, uint8_t _flags) {
     DS485CommandFrame cmdFrame;
     cmdFrame.getHeader().setDestination(_modulatorID);
@@ -1241,6 +1291,8 @@ namespace dss {
       return "Function Device Get DSID";
     case FunctionDeviceGetGroups:
       return "Function Device Get Groups";
+    case FunctionDeviceGetSensorValue:
+      return "Function Device Get Sensor Value";
 
     case FunctionModulatorGetDSID:
       return "Function Modulator Get DSID";

@@ -232,6 +232,7 @@ namespace dss {
     virtual std::vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param = -1);
 
     void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size);
+    virtual int getSensorValue(const Device& _device, const int _sensorID);
     //------------------------------------------------ Helpers
     DS485Controller& getController() { return m_DS485Controller; }
   }; // DS485Proxy
