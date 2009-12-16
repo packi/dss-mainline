@@ -342,6 +342,7 @@ namespace dss {
     /** Sends a byte to the device using dsLink. If \a _writeOnly is \c true,
      * the result of the function is not defined. */
     uint8_t dsLinkSend(uint8_t _value, bool _lastByte, bool _writeOnly);
+    int getSensorValue(const int _sensorID);
 
     const PropertyNodePtr& getPropertyNode() const { return m_pPropertyNode; }
     PropertyNodePtr getPropertyNode() { return m_pPropertyNode; }

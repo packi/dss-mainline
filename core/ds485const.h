@@ -97,8 +97,8 @@ namespace dss {
   const uint8_t FunctionDeviceGetDSID = 0x65;
   const uint8_t FunctionDeviceGetFunctionID = 0x66;
   const uint8_t FunctionDeviceGetGroups = 0x67;
-  const uint8_t FunctionDeviceGetName = 0x68;
-  const uint8_t FunctionDeviceGetVersion = 0x69;
+  const uint8_t FunctionDeviceGetVersion = 0x68;
+  const uint8_t FunctionDeviceGetSensorValue = 0x69;
   
   const uint8_t FunctionGetTypeRequest = 0x90;
   const uint8_t FunctionModulatorGetDSID = 0x91;

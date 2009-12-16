@@ -27,6 +27,7 @@
 #include "core/dss.h"
 #include "core/logger.h"
 #include "core/propertysystem.h"
+#include "core/DS485Interface.h"
 
 namespace dss {
   const std::string ModelScriptcontextExtensionName = "modelextension";
@@ -611,6 +612,26 @@ namespace dss {
     return JS_FALSE;
   } // dev_dslink_send
 
+  JSBool dev_get_sensor_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ScriptObject self(obj, *ctx);
+    if(self.is("device")) {
+      DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+      if(argc == 1) {
+        try {
+          int sensorValue = ctx->convertTo<int>(argv[0]);
+          int retValue= (intf->getDevice().getSensorValue(sensorValue));
+          *rval = INT_TO_JSVAL(retValue);
+        } catch(const DS485ApiError&) {
+          *rval = JSVAL_NULL;
+        }
+        return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  } // dev_get_last_called_scene
+
   class JSDeviceAction : public IDeviceAction {
   private:
     jsval m_Function;
@@ -663,6 +684,7 @@ namespace dss {
     {"saveScene", dev_save_scene, 1, 0, 0},
     {"undoScene", dev_undo_scene, 1, 0, 0},
     {"dSLinkSend", dev_dslink_send, 3, 0, 0},
+    {"getSensorValue", dev_get_sensor_value, 1, 0, 0},
     {NULL, NULL, 0, 0, 0}
   };
 

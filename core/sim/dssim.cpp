@@ -666,14 +666,6 @@ namespace dss {
                 distributeFrame(response);
               }
               break;
-            case FunctionDeviceGetName:
-              {
-                devid_t devID = pd.get<devid_t>();
-                std::string name = m_DeviceNames[devID];
-                response = createResponse(cmdFrame, cmdNr);
-
-              }
-              break;
             case FunctionDeviceGetParameterValue:
               {
                 int devID = pd.get<uint16_t>();
