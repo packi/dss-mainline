@@ -310,71 +310,46 @@ namespace dss {
     frame.getHeader().setType(1);
     frame.setCommand(CommandRequest);
     int toZone = _zone.getID();
+    int param = _param;
+    const int kNoParam = -1;
     if(_cmd == cmdTurnOn) {
       frame.getPayload().add<uint8_t>(FunctionGroupCallScene);
-      frame.getPayload().add<uint16_t>(toZone);
-      frame.getPayload().add<uint16_t>(_groupID);
-      frame.getPayload().add<uint16_t>(SceneMax);
-      sendFrame(frame);
+      param = SceneMax;
       log("turn on: zone " + intToString(_zone.getID()) + " group: " + intToString(_groupID));
     } else if(_cmd == cmdTurnOff) {
       frame.getPayload().add<uint8_t>(FunctionGroupCallScene);
-      frame.getPayload().add<uint16_t>(toZone);
-      frame.getPayload().add<uint16_t>(_groupID);
-      frame.getPayload().add<uint16_t>(SceneMin);
-      sendFrame(frame);
+      param = SceneMin;
       log("turn off: zone " + intToString(_zone.getID()) + " group: " + intToString(_groupID));
     } else if(_cmd == cmdCallScene) {
       frame.getPayload().add<uint8_t>(FunctionGroupCallScene);
-      frame.getPayload().add<uint16_t>(toZone);
-      frame.getPayload().add<uint16_t>(_groupID);
-      frame.getPayload().add<uint16_t>(_param);
-      sendFrame(frame);
       log("call scene: zone " + intToString(_zone.getID()) + " group: " + intToString(_groupID));
     } else if(_cmd == cmdSaveScene) {
       frame.getPayload().add<uint8_t>(FunctionGroupSaveScene);
-      frame.getPayload().add<uint16_t>(toZone);
-      frame.getPayload().add<uint16_t>(_groupID);
-      frame.getPayload().add<uint16_t>(_param);
-      sendFrame(frame);
     } else if(_cmd == cmdUndoScene) {
       frame.getPayload().add<uint8_t>(FunctionGroupUndoScene);
-      frame.getPayload().add<uint16_t>(toZone);
-      frame.getPayload().add<uint16_t>(_groupID);
-      frame.getPayload().add<uint16_t>(_param);
-      sendFrame(frame);
     } else if(_cmd == cmdStartDimUp) {
       frame.getPayload().add<uint8_t>(FunctionGroupStartDimInc);
-      frame.getPayload().add<uint16_t>(toZone);
-      frame.getPayload().add<uint16_t>(_groupID);
-      sendFrame(frame);
     } else if(_cmd == cmdStartDimDown) {
       frame.getPayload().add<uint8_t>(FunctionGroupStartDimDec);
-      frame.getPayload().add<uint16_t>(toZone);
-      frame.getPayload().add<uint16_t>(_groupID);
-      sendFrame(frame);
     } else if(_cmd == cmdStopDim) {
       frame.getPayload().add<uint8_t>(FunctionGroupEndDim);
-      frame.getPayload().add<uint16_t>(toZone);
-      frame.getPayload().add<uint16_t>(_groupID);
-      sendFrame(frame);
     } else if(_cmd == cmdIncreaseValue) {
       frame.getPayload().add<uint8_t>(FunctionGroupIncreaseValue);
-      frame.getPayload().add<uint16_t>(toZone);
-      frame.getPayload().add<uint16_t>(_groupID);
-      sendFrame(frame);
+      param = kNoParam;
     } else if(_cmd == cmdDecreaseValue) {
       frame.getPayload().add<uint8_t>(FunctionGroupDecreaseValue);
-      frame.getPayload().add<uint16_t>(toZone);
-      frame.getPayload().add<uint16_t>(_groupID);
-      sendFrame(frame);
+      param = kNoParam;
     } else if(_cmd == cmdSetValue) {
       frame.getPayload().add<uint8_t>(FunctionGroupSetValue);
-      frame.getPayload().add<devid_t>(toZone);
-      frame.getPayload().add<devid_t>(_groupID);
-      frame.getPayload().add<devid_t>(_param);
-      sendFrame(frame);
+    } else {
+      throw std::invalid_argument("DS485Proxy::sendCommand: Unknown command " + intToString(_cmd));
     }
+    frame.getPayload().add<uint16_t>(toZone);
+    frame.getPayload().add<uint16_t>(_groupID);
+    if(param != kNoParam) {
+      frame.getPayload().add<uint16_t>(param);
+    }
+    sendFrame(frame);
     return result;
   } // sendCommand(zone, group)
 
