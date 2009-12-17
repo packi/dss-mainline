@@ -1630,12 +1630,12 @@ namespace dss {
         frame->getHeader().setDestination(device.getModulatorID());
         frame->setCommand(CommandRequest);
         frame->getPayload().add<uint8_t>(FunctionDeviceGetTransmissionQuality);
-        frame->getPayload().add<uint8_t>(device.getShortAddress());
+        frame->getPayload().add<uint16_t>(device.getShortAddress());
         DS485Interface* intf = &DSS::getInstance()->getDS485Interface();
         DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
         if(proxy != NULL) {
           boost::shared_ptr<FrameBucketCollector> bucket = proxy->sendFrameAndInstallBucket(*frame, FunctionDeviceGetTransmissionQuality);
-          bucket->waitForFrame(1000);
+          bucket->waitForFrame(2000);
 
           boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
           if(recFrame == NULL) {
