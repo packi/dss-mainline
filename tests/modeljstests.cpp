@@ -67,12 +67,16 @@ BOOST_AUTO_TEST_CASE(testSets) {
   dev1.addToGroup(1);
   dev1.setIsPresent(true);
   dev1.setZoneID(1);
+  dev1.setName("dev1");
+  dev1.setFunctionID(1);
   Device& dev2 = apt.allocateDevice(dsid_t(0,2));
   dev2.setShortAddress(2);
   dev2.setModulatorID(1);
   dev2.addToGroup(1);
   dev2.setIsPresent(false);
   dev2.setZoneID(2);
+  dev2.setName("dev2");
+  dev2.setFunctionID(1);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
@@ -109,6 +113,21 @@ BOOST_AUTO_TEST_CASE(testSets) {
 
   length = ctx->evaluate<int>("getDevices().byPresence(true).length()");
   BOOST_CHECK_EQUAL(1, length);
+
+  length = ctx->evaluate<int>("getDevices().remove(getDevices().byZone(1)).byZone(1).length()");
+  BOOST_CHECK_EQUAL(0, length);
+
+  length = ctx->evaluate<int>("getDevices().remove(getDevices().byZone(1)).byZone(1).length()");
+  BOOST_CHECK_EQUAL(0, length);
+
+  std::string name = ctx->evaluate<std::string>("getDevices().byName('dev1').name");
+  BOOST_CHECK_EQUAL("dev1", name);
+
+  name = ctx->evaluate<std::string>("getDevices().byDSID('2').name");
+  BOOST_CHECK_EQUAL("dev2", name);
+
+  length = ctx->evaluate<int>("getDevices().byFunctionID(1).length()");
+  BOOST_CHECK_EQUAL(2, length);
 
   // invalid types
   length = ctx->evaluate<int>("getDevices().byZone(1.1).length()");

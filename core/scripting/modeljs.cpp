@@ -248,30 +248,23 @@ namespace dss {
 
     ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
     if((ext != NULL) && (set != NULL) && (argc >= 1)) {
-      bool ok = false;
       Set result;
       try {
         if(JSVAL_IS_INT(argv[0])) {
           result = set->getByZone(JSVAL_TO_INT(argv[0]));
-          ok = true;
         } else {
           JSString* str = JS_ValueToString(cx, argv[0]);
           if(str != NULL) {
             std::string zonename = JS_GetStringBytes(str);
             result = set->getByZone(zonename);
-            ok = true;
           }
         }
       } catch(ItemNotFoundException&) {
-        ok = true; // return an empty set if the zone hasn't been found
+        // return an empty set if the zone hasn't been found
         Logger::getInstance()->log("JS: set_by_zone: Zone not found", lsWarning);
       }
-      if(ok) {
-        JSObject* resultObj = ext->createJSSet(*ctx, result);
-        *rval = OBJECT_TO_JSVAL(resultObj);
-      } else {
-        *rval = JSVAL_NULL;
-      }
+      JSObject* resultObj = ext->createJSSet(*ctx, result);
+      *rval = OBJECT_TO_JSVAL(resultObj);
       return JS_TRUE;
     }
     return JS_FALSE;
