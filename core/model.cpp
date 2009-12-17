@@ -886,7 +886,6 @@ namespace dss {
           getZone(0).addGroup(pGroup);
           pGroup->setIsPresent(true);
           log("scanModulator:     Adding new group to zone 0");
-          return false;
         }
 
         // get last called scene for zone, group
@@ -902,7 +901,6 @@ namespace dss {
           }
         } catch(DS485ApiError& error) {
           log(std::string("scanModulator: Error getting last called scene '") + error.what() + "'", lsError);
-          return false;
         }
       }
     }
