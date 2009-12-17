@@ -273,7 +273,7 @@ namespace dss {
         try {
           soap_serve(req);
         } catch(std::runtime_error& err) {
-          Logger::getInstance()->log(string("WebserviceWorker::Execute: Caught exception:")
+          Logger::getInstance()->log(std::string("WebserviceWorker::Execute: Caught exception:")
                                      + err.what());
         }
         soap_destroy(req);

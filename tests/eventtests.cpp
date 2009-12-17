@@ -195,11 +195,11 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
 
   res = setBuilder.buildSet("dev1", &apt.getZone(0));
   BOOST_CHECK_EQUAL(res.length(), 1);
-  BOOST_CHECK_EQUAL(res.get(0).getDevice().getName(), string("dev1"));
+  BOOST_CHECK_EQUAL(res.get(0).getDevice().getName(), std::string("dev1"));
 
   res = setBuilder.buildSet("dev2", &apt.getZone(0));
   BOOST_CHECK_EQUAL(res.length(), 1);
-  BOOST_CHECK_EQUAL(res.get(0).getDevice().getName(), string("dev2"));
+  BOOST_CHECK_EQUAL(res.get(0).getDevice().getName(), std::string("dev2"));
 } // testSetBuilder
 
 BOOST_AUTO_TEST_CASE(testDS485Events) {

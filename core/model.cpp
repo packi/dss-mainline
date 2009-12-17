@@ -82,7 +82,7 @@ namespace dss {
       if(m_pApartment->getPropertyNode() != NULL) {
         m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/" + m_DSID.toString());
 //        m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
-        m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyReference<string>(m_Name));
+        m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyReference<std::string>(m_Name));
         m_pPropertyNode->createProperty("ModulatorID")->linkToProxy(PropertyProxyReference<int>(m_ModulatorID, false));
         m_pPropertyNode->createProperty("ZoneID")->linkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
         if(m_pPropertyNode->getProperty("interrupt/mode") == NULL) {
@@ -577,7 +577,7 @@ namespace dss {
   DeviceReference Set::getByBusID(const devid_t _id) const {
     Set resultSet = getSubset(ByIDSelector(_id));
     if(resultSet.length() == 0) {
-      throw ItemNotFoundException(string("with busid ") + intToString(_id));
+      throw ItemNotFoundException(std::string("with busid ") + intToString(_id));
     }
     return resultSet.m_ContainedDevices.front();
   } // getByBusID
@@ -848,7 +848,7 @@ namespace dss {
         std::vector<int> groupIdperDevices = interface.getGroupsOfDevice(modulatorID, devID);
         vector<int> groupIDsPerDevice = interface.getGroupsOfDevice(modulatorID,devID);
         foreach(int groupID, groupIDsPerDevice) {
-          log(string("scanModulator: adding device ") + intToString(devID) + " to group " + intToString(groupID));
+          log(std::string("scanModulator: adding device ") + intToString(devID) + " to group " + intToString(groupID));
           dev.addToGroup(groupID);
         }
 
@@ -901,7 +901,7 @@ namespace dss {
             onGroupCallScene(zoneID, groupID, lastCalledScene);
           }
         } catch(DS485ApiError& error) {
-          log(string("scanModulator: Error getting last called scene '") + error.what() + "'", lsError);
+          log(std::string("scanModulator: Error getting last called scene '") + error.what() + "'", lsError);
           return false;
         }
       }
@@ -1101,7 +1101,7 @@ namespace dss {
     // load devices/modulators/etc. from a config-file
     std::string configFileName = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile");
     if(!boost::filesystem::exists(configFileName)) {
-      log(string("Apartment::execute: Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
+      log(std::string("Apartment::execute: Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
     } else {
       readConfigurationFromXML(configFileName);
     }
@@ -1722,12 +1722,12 @@ namespace dss {
         if(modeNode == NULL) {
           return;
         }
-        string mode = modeNode->getStringValue();
+        std::string mode = modeNode->getStringValue();
         if(mode == "ignore") {
           log("ignoring interrupt");
         } else if(mode == "raise_event") {
           log("raising interrupt as event");
-          string eventName = "dslink_interrupt";
+          std::string eventName = "dslink_interrupt";
           PropertyNodePtr eventNameNode = deviceNode->getProperty("interrupt/event/name");
           if(eventNameNode == NULL) {
             log("no node called 'interrupt/event' found, assuming name is 'dslink_interrupt'");
@@ -1739,7 +1739,7 @@ namespace dss {
           DeviceReference devRef(device, *this);
           boost::shared_ptr<Event> evt(new Event(eventName, &devRef));
           evt->setProperty("device", device.getDSID().toString());
-          string priorityString = "unknown";
+          std::string priorityString = "unknown";
           if(_priority == 0) {
             priorityString = "normal";
           } else if(_priority == 1) {

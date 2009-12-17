@@ -56,7 +56,7 @@ namespace dss {
   private:
     DS485Interface* m_pInterface;
     Apartment& m_Apartment;
-    string getParameter(XMLNodeList& _nodes, const string& _parameterName);
+    std::string getParameter(XMLNodeList& _nodes, const std::string& _parameterName);
   public:
     EventInterpreterPluginDS485(Apartment& _apartment, DS485Interface* _pInterface, EventInterpreter* _pInterpreter);
 

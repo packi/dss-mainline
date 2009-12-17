@@ -94,11 +94,11 @@ const char* WebrootDirectory = "data/webroot";
     m_pPropertySystem->createProperty("/system/uptime")->linkToProxy(
         PropertyProxyMemberFunction<DSS,int>(*this, &DSS::getUptime));
     m_pPropertySystem->createProperty("/config/datadirectory")->linkToProxy(
-        PropertyProxyMemberFunction<DSS,string>(*this, &DSS::getDataDirectory, &DSS::setDataDirectory));
+        PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getDataDirectory, &DSS::setDataDirectory));
     m_pPropertySystem->createProperty("/config/configdirectory")->linkToProxy(
-        PropertyProxyMemberFunction<DSS,string>(*this, &DSS::getConfigDirectory, &DSS::setConfigDirectory));
+        PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getConfigDirectory, &DSS::setConfigDirectory));
     m_pPropertySystem->createProperty("/config/webrootdirectory")->linkToProxy(
-        PropertyProxyMemberFunction<DSS,string>(*this, &DSS::getWebrootDirectory, &DSS::setWebrootDirectory));
+        PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getWebrootDirectory, &DSS::setWebrootDirectory));
   } // ctor
 
   DSS::~DSS() {
@@ -128,7 +128,7 @@ const char* WebrootDirectory = "data/webroot";
     return (int)difftime( time( NULL ), m_TimeStarted );
   } // getUptime
 
-  void DSS::setDataDirectory(const string& _value) {
+  void DSS::setDataDirectory(const std::string& _value) {
     if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
       m_dataDirectory = _value + "/";
     } else {
@@ -136,7 +136,7 @@ const char* WebrootDirectory = "data/webroot";
     }
   } // setDataDirectory
 
-  void DSS::setConfigDirectory(const string& _value) {
+  void DSS::setConfigDirectory(const std::string& _value) {
     if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
       m_configDirectory = _value + "/";
     } else {
@@ -144,7 +144,7 @@ const char* WebrootDirectory = "data/webroot";
     }
   }
 
-  void DSS::setWebrootDirectory(const string& _value) {
+  void DSS::setWebrootDirectory(const std::string& _value) {
     if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
       m_webrootDirectory = _value + "/";
     } else {
@@ -152,7 +152,7 @@ const char* WebrootDirectory = "data/webroot";
     }
   }
 
-  bool DSS::initialize(const vector<string>& _properties) {
+  bool DSS::initialize(const vector<std::string>& _properties) {
     m_State = ssCreatingSubsystems;
 
     m_pDS485Interface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this));
@@ -184,14 +184,14 @@ const char* WebrootDirectory = "data/webroot";
     m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner);
     m_pEventQueue = boost::shared_ptr<EventQueue>(new EventQueue);
 
-    foreach(string propLine, _properties) {
-      string::size_type pos = propLine.find("=");
-      if(pos == string::npos) {
+    foreach(std::string propLine, _properties) {
+      std::string::size_type pos = propLine.find("=");
+      if(pos == std::string::npos) {
         Logger::getInstance()->log("invalid property specified on commandline (format is name=value): '" + propLine + "'", lsError);
         abort();
       } else {
-        string name = propLine.substr(0, pos);
-        string value = propLine.substr(pos+1, string::npos);
+        std::string name = propLine.substr(0, pos);
+        std::string value = propLine.substr(pos+1, std::string::npos);
         Logger::getInstance()->log("Setting property '" + name + "' to '" + value + "'", lsInfo);
         try {
           int val = strToInt(value);

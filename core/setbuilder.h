@@ -27,8 +27,6 @@
 
 #include <string>
 
-using std::string;
-
 namespace dss {
 
   class SetBuilder {
@@ -36,8 +34,8 @@ namespace dss {
     std::string m_SetDescription;
     Apartment& m_Apartment;
   protected:
-	  Set restrictBy(const string& _identifier, const Set& _set, const Zone& _zone);
-	  Set restrictByFunction(const string& _functionName, unsigned int& _index, const Set& _set, const Zone& _zone);
+	  Set restrictBy(const std::string& _identifier, const Set& _set, const Zone& _zone);
+	  Set restrictByFunction(const std::string& _functionName, unsigned int& _index, const Set& _set, const Zone& _zone);
 	  void skipWhitespace(unsigned int& _index);
 	  std::string readParameter(unsigned int& _index);
 	  int readInt(unsigned int& _index);
@@ -47,7 +45,7 @@ namespace dss {
 	public:
 	  SetBuilder(Apartment& _apartment);
 
-	  Set buildSet(const string& _setDescription, const Zone* _context);
+	  Set buildSet(const std::string& _setDescription, const Zone* _context);
   }; // SetBuilder
 
 } // namespace dss

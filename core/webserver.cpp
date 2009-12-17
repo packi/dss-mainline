@@ -94,7 +94,7 @@ namespace dss {
     } catch(std::runtime_error& e) {
       delete plugin;
       plugin = NULL;
-      log(string("Caught exception while loading: ") + e.what(), lsError);
+      log(std::string("Caught exception while loading: ") + e.what(), lsError);
       return;
     }
     m_Plugins.push_back(plugin);
@@ -326,14 +326,14 @@ namespace dss {
     RestfulClass& clsProp = api.addClass("property")
         .withInstanceParameter("path", "string", true);
     clsProp.addMethod("getString")
-        .withDocumentation("Returns the string value of the property", "This will fail if the property is not of type 'string'.");
+        .withDocumentation("Returns the std::string value of the property", "This will fail if the property is not of type 'string'.");
     clsProp.addMethod("getInteger")
         .withDocumentation("Returns the integer value of the property", "This will fail if the property is not of type 'integer'.");
     clsProp.addMethod("getBoolean")
         .withDocumentation("Returns the boolean value of the property", "This will fail if the property is not of type 'boolean'.");
     clsProp.addMethod("setString")
         .withParameter("value", "string", true)
-        .withDocumentation("Sets the string value of the property", "This will fail if the property is not of type 'string'.");
+        .withDocumentation("Sets the std::string value of the property", "This will fail if the property is not of type 'string'.");
     clsProp.addMethod("setInteger")
         .withParameter("value", "integer", true)
         .withDocumentation("Sets the integer value of the property", "This will fail if the property is not of type 'integer'.");
@@ -357,7 +357,7 @@ namespace dss {
     RestfulClass& clsSystem = api.addClass("system");
     clsSystem.addMethod("version")
       .withDocumentation("Returns the dss version", 
-                         "This method returns the version string of the dss");
+                         "This method returns the version std::string of the dss");
 
     RestfulClass& clsSet = api.addClass("set")
         .withInstanceParameter("self", "string", false);
@@ -416,11 +416,11 @@ namespace dss {
   } // setupAPI
 
   void WebServer::doStart() {
-    string ports = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "ports");
+    std::string ports = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "ports");
     log("Webserver: Listening on port(s) " + ports);
     mg_set_option(m_mgContext, "ports", ports.c_str());
 
-    string aliases = string("/=") + DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "webroot");
+    std::string aliases = std::string("/=") + DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "webroot");
     log("Webserver: Configured aliases: " + aliases);
     mg_set_option(m_mgContext, "aliases", aliases.c_str());
 
@@ -451,16 +451,16 @@ namespace dss {
     std::ostringstream sstream;
     sstream << "HTTP/1.1 " << _code << ' ' << httpCodeToMessage(_code) << "\r\n";
     sstream << "Content-Type: " << _contentType << "; charset=utf-8\r\n\r\n";
-    string tmp = sstream.str();
+    std::string tmp = sstream.str();
     mg_write(_connection, tmp.c_str(), tmp.length());
   } // emitHTTPHeader
 
   HashMapConstStringString parseParameter(const char* _params) {
     HashMapConstStringString result;
     if(_params != NULL) {
-      vector<string> paramList = splitString(_params, '&');
-      for(vector<string>::iterator iParam = paramList.begin(); iParam != paramList.end(); ++iParam) {
-        vector<string> nameValue = splitString(*iParam, '=');
+      vector<std::string> paramList = splitString(_params, '&');
+      for(vector<std::string>::iterator iParam = paramList.begin(); iParam != paramList.end(); ++iParam) {
+        vector<std::string> nameValue = splitString(*iParam, '=');
         if(nameValue.size() != 2) {
           result[*iParam] = "";
         } else {
@@ -471,15 +471,15 @@ namespace dss {
     return result;
   } // parseParameter
 
-  string ToJSONValue(const int& _value) {
+  std::string ToJSONValue(const int& _value) {
     return intToString(_value);
   } // toJSONValue(int)
 
-  string ToJSONValue(const double& _value) {
+  std::string ToJSONValue(const double& _value) {
     return doubleToString(_value);
   } // toJSONValue(double)
 
-  string ToJSONValue(const bool& _value) {
+  std::string ToJSONValue(const bool& _value) {
     if(_value) {
       return "true";
     } else {
@@ -487,15 +487,15 @@ namespace dss {
     }
   } // toJSONValue(bool)
 
-  string ToJSONValue(const string& _value) {
-    return string("\"") + _value + '"';
-  } // toJSONValue(const string&)
+  std::string ToJSONValue(const std::string& _value) {
+    return std::string("\"") + _value + '"';
+  } // toJSONValue(const std::string&)
 
-  string ToJSONValue(const char* _value) {
-    return ToJSONValue(string(_value));
+  std::string ToJSONValue(const char* _value) {
+    return ToJSONValue(std::string(_value));
   } // toJSONValue(const char*)
 
-  string WebServer::ResultToJSON(const bool _ok, const string& _message) {
+  std::string WebServer::ResultToJSON(const bool _ok, const std::string& _message) {
     std::ostringstream sstream;
     sstream << "{ " << ToJSONValue("ok") << ":" << ToJSONValue(_ok);
     if(!_message.empty()) {
@@ -508,7 +508,7 @@ namespace dss {
     return sstream.str();
   } // resultToJSON
 
-  string JSONOk(const string& _innerResult = "") {
+  std::string JSONOk(const std::string& _innerResult = "") {
     std::ostringstream sstream;
     sstream << "{ " << ToJSONValue("ok") << ":" << ToJSONValue(true);
     if(!_innerResult.empty()) {
@@ -518,7 +518,7 @@ namespace dss {
     return sstream.str();
   }
 
-  string ToJSONValue(const DeviceReference& _device) {
+  std::string ToJSONValue(const DeviceReference& _device) {
     std::ostringstream sstream;
     sstream << "{ \"id\": \"" << _device.getDSID().toString() << "\""
             << ", \"isSwitch\": " << ToJSONValue(_device.hasSwitch())
@@ -533,7 +533,7 @@ namespace dss {
     return sstream.str();
   } // toJSONValue(DeviceReference)
 
-  string ToJSONValue(const Set& _set, const string& _arrayName) {
+  std::string ToJSONValue(const Set& _set, const std::string& _arrayName) {
     std::ostringstream sstream;
     sstream << ToJSONValue(_arrayName) << ":[";
     bool firstDevice = true;
@@ -550,7 +550,7 @@ namespace dss {
     return sstream.str();
   } // toJSONValue(Set,Name)
 
-  string ToJSONValue(const Group& _group) {
+  std::string ToJSONValue(const Group& _group) {
     std::ostringstream sstream;
     sstream << "{ " << ToJSONValue("id") << ": " << ToJSONValue(_group.getID()) << ",";
     sstream << ToJSONValue("name") << ": " << ToJSONValue(_group.getName()) << ", ";
@@ -570,12 +570,12 @@ namespace dss {
     return sstream.str();
   } // toJSONValue(Group)
 
-  string ToJSONValue(Zone& _zone, bool _includeDevices = true) {
+  std::string ToJSONValue(Zone& _zone, bool _includeDevices = true) {
     std::ostringstream sstream;
     sstream << "{ \"id\": " << _zone.getID() << ",";
-    string name = _zone.getName();
+    std::string name = _zone.getName();
     if(name.size() == 0) {
-      name = string("Zone ") + intToString(_zone.getID());
+      name = std::string("Zone ") + intToString(_zone.getID());
     }
     sstream << ToJSONValue("name") << ": " << ToJSONValue(name) << ", ";
     sstream << ToJSONValue("isPresent") << ": " << ToJSONValue(_zone.isPresent());
@@ -604,7 +604,7 @@ namespace dss {
     return sstream.str();
   } // toJSONValue(Zone)
 
-  string ToJSONValue(Apartment& _apartment) {
+  std::string ToJSONValue(Apartment& _apartment) {
   	std::ostringstream sstream;
   	sstream << "{ \"apartment\": { \"zones\": [";
 	  vector<Zone*>& zones = _apartment.getZones();
@@ -645,10 +645,10 @@ namespace dss {
   } // getUnassignedDevices
 
   template<class t>
-  string ToJSONArray(const vector<t>& _v);
+  std::string ToJSONArray(const vector<t>& _v);
 
   template<>
-  string ToJSONArray(const vector<int>& _v) {
+  std::string ToJSONArray(const vector<int>& _v) {
     std::ostringstream arr;
     arr << "[";
     bool first = true;
@@ -667,9 +667,9 @@ namespace dss {
     return arr.str();
   } // toJSONArray<int>
 
-  string WebServer::callDeviceInterface(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, IDeviceInterface* _interface, Session* _session) {
+  std::string WebServer::callDeviceInterface(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, IDeviceInterface* _interface, Session* _session) {
     bool ok = true;
-    string errorString;
+    std::string errorString;
     assert(_interface != NULL);
     if(endsWith(_method, "/turnOn")) {
       _interface->turnOn();
@@ -684,7 +684,7 @@ namespace dss {
     } else if(endsWith(_method, "/disable")) {
       _interface->disable();
     } else if(endsWith(_method, "/startDim")) {
-      string direction = _parameter["direction"];
+      std::string direction = _parameter["direction"];
       if(direction == "up") {
         _interface->startDim(true);
       } else {
@@ -701,7 +701,7 @@ namespace dss {
         _interface->setValue(value);
       }
     } else if(endsWith(_method, "/callScene")) {
-      string sceneStr = _parameter["sceneNr"];
+      std::string sceneStr = _parameter["sceneNr"];
       int sceneID = strToIntDef(sceneStr, -1);
       if(sceneID != -1) {
         _interface->callScene(sceneID);
@@ -710,7 +710,7 @@ namespace dss {
         ok = false;
       }
     } else if(endsWith(_method, "/saveScene")) {
-      string sceneStr = _parameter["sceneNr"];
+      std::string sceneStr = _parameter["sceneNr"];
       int sceneID = strToIntDef(sceneStr, -1);
       if(sceneID != -1) {
         _interface->saveScene(sceneID);
@@ -719,7 +719,7 @@ namespace dss {
         ok = false;
       }
     } else if(endsWith(_method, "/undoScene")) {
-      string sceneStr = _parameter["sceneNr"];
+      std::string sceneStr = _parameter["sceneNr"];
       int sceneID = strToIntDef(sceneStr, -1);
       if(sceneID != -1) {
         _interface->undoScene(sceneID);
@@ -749,9 +749,9 @@ namespace dss {
         || endsWith(_method, "/getConsumption");
   } // isDeviceInterfaceCall
 
-  string WebServer::handleApartmentCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
+  std::string WebServer::handleApartmentCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     bool ok = true;
-    string errorMessage;
+    std::string errorMessage;
     _handled = true;
     if(endsWith(_method, "/getConsumption")) {
       int accumulatedConsumption = 0;
@@ -761,8 +761,8 @@ namespace dss {
       return "{ " + ToJSONValue("consumption") + ": " +  uintToString(accumulatedConsumption) +"}";
     } else if(isDeviceInterfaceCall(_method)) {
       IDeviceInterface* interface = NULL;
-      string groupName = _parameter["groupName"];
-      string groupIDString = _parameter["groupID"];
+      std::string groupName = _parameter["groupName"];
+      std::string groupIDString = _parameter["groupID"];
       if(!groupName.empty()) {
         try {
           Group& grp = getDSS().getApartment().getGroup(groupName);
@@ -797,7 +797,7 @@ namespace dss {
         return sstream.str();
       }
     } else {
-      string result;
+      std::string result;
       if(endsWith(_method, "/getStructure")) {
         result = ToJSONValue(getDSS().getApartment());
       } else if(endsWith(_method, "/getDevices")) {
@@ -855,12 +855,12 @@ namespace dss {
     }
   } // handleApartmentCall
 
-  string WebServer::handleZoneCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
+  std::string WebServer::handleZoneCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     bool ok = true;
-    string errorMessage;
+    std::string errorMessage;
     _handled = true;
-    string zoneName = _parameter["name"];
-    string zoneIDString = _parameter["id"];
+    std::string zoneName = _parameter["name"];
+    std::string zoneIDString = _parameter["id"];
     Zone* pZone = NULL;
     if(!zoneIDString.empty()) {
       int zoneID = strToIntDef(zoneIDString, -1);
@@ -890,8 +890,8 @@ namespace dss {
     }
     if(ok) {
       Group* pGroup = NULL;
-      string groupName = _parameter["groupName"];
-      string groupIDString = _parameter["groupID"];
+      std::string groupName = _parameter["groupName"];
+      std::string groupIDString = _parameter["groupID"];
       if(!groupName.empty()) {
         try {
           pGroup = pZone->getGroup(groupName);
@@ -966,12 +966,12 @@ namespace dss {
     }
   } // handleZoneCall
 
-  string WebServer::handleDeviceCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
+  std::string WebServer::handleDeviceCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     bool ok = true;
-    string errorMessage;
+    std::string errorMessage;
     _handled = true;
-    string deviceName = _parameter["name"];
-    string deviceDSIDString = _parameter["dsid"];
+    std::string deviceName = _parameter["name"];
+    std::string deviceDSIDString = _parameter["dsid"];
     Device* pDevice = NULL;
     if(!deviceDSIDString.empty()) {
       dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
@@ -1061,9 +1061,9 @@ namespace dss {
     }
   } // handleDeviceCall
 
-  string WebServer::handleCircuitCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
+  std::string WebServer::handleCircuitCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     _handled = true;
-    string idString = _parameter["id"];
+    std::string idString = _parameter["id"];
     if(idString.empty()) {
       return ResultToJSON(false, "missing parameter id");
     }
@@ -1105,7 +1105,7 @@ namespace dss {
   } // handleCircuitCall
 
 
-  string WebServer::handleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
+  std::string WebServer::handleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     _handled = true;
     if(endsWith(_method, "/fromApartment")) {
       _handled = true;
@@ -1206,9 +1206,9 @@ namespace dss {
     return "";
   } // handleSetCall
 
-  string WebServer::handlePropertyCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
+  std::string WebServer::handlePropertyCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     _handled = true;
-    string propName = _parameter["path"];
+    std::string propName = _parameter["path"];
     if(propName.empty()) {
       return ResultToJSON(false, "Need parameter \'path\' for property operations");
     }
@@ -1223,7 +1223,7 @@ namespace dss {
         sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getStringValue()) << "}";
         return JSONOk(sstream.str());
       } catch(PropertyTypeMismatch& ex) {
-        return ResultToJSON(false, string("Error getting property: '") + ex.what() + "'");
+        return ResultToJSON(false, std::string("Error getting property: '") + ex.what() + "'");
       }
     } else if(endsWith(_method, "/getInteger")) {
       if(node == NULL) {
@@ -1234,7 +1234,7 @@ namespace dss {
         sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getIntegerValue()) << "}";
         return JSONOk(sstream.str());
       } catch(PropertyTypeMismatch& ex) {
-        return ResultToJSON(false, string("Error getting property: '") + ex.what() + "'");
+        return ResultToJSON(false, std::string("Error getting property: '") + ex.what() + "'");
       }
     } else if(endsWith(_method, "/getBoolean")) {
       if(node == NULL) {
@@ -1245,21 +1245,21 @@ namespace dss {
         sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getBoolValue()) << "}";
         return JSONOk(sstream.str());
       } catch(PropertyTypeMismatch& ex) {
-        return ResultToJSON(false, string("Error getting property: '") + ex.what() + "'");
+        return ResultToJSON(false, std::string("Error getting property: '") + ex.what() + "'");
       }
     } else if(endsWith(_method, "/setString")) {
-      string value = _parameter["value"];
+      std::string value = _parameter["value"];
       if(node == NULL) {
         node = getDSS().getPropertySystem().createProperty(propName);
       }
       try {
         node->setStringValue(value);
       } catch(PropertyTypeMismatch& ex) {
-        return ResultToJSON(false, string("Error setting property: '") + ex.what() + "'");
+        return ResultToJSON(false, std::string("Error setting property: '") + ex.what() + "'");
       }
       return JSONOk();
     } else if(endsWith(_method, "/setBoolean")) {
-      string strValue = _parameter["value"];
+      std::string strValue = _parameter["value"];
       bool value;
       if(strValue == "true") {
         value = true;
@@ -1274,16 +1274,16 @@ namespace dss {
       try {
         node->setBooleanValue(value);
       } catch(PropertyTypeMismatch& ex) {
-        return ResultToJSON(false, string("Error setting property: '") + ex.what() + "'");
+        return ResultToJSON(false, std::string("Error setting property: '") + ex.what() + "'");
       }
       return JSONOk();
     } else if(endsWith(_method, "/setInteger")) {
-      string strValue = _parameter["value"];
+      std::string strValue = _parameter["value"];
       int value;
       try {
         value = strToInt(strValue);
       } catch(...) {
-        return ResultToJSON(false, "Could not convert parameter 'value' to string. Got: '" + strValue + "'");
+        return ResultToJSON(false, "Could not convert parameter 'value' to std::string. Got: '" + strValue + "'");
       }
       if(node == NULL) {
         node = getDSS().getPropertySystem().createProperty(propName);
@@ -1291,7 +1291,7 @@ namespace dss {
       try {
         node->setIntegerValue(value);
       } catch(PropertyTypeMismatch& ex) {
-        return ResultToJSON(false, string("Error setting property: '") + ex.what() + "'");
+        return ResultToJSON(false, std::string("Error setting property: '") + ex.what() + "'");
       }
       return JSONOk();
     } else if(endsWith(_method, "/getChildren")) {
@@ -1326,14 +1326,14 @@ namespace dss {
     return "";
   } // handlePropertyCall
 
-  string WebServer::handleEventCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
+  std::string WebServer::handleEventCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     _handled = true;
-    string result;
+    std::string result;
     if(endsWith(_method, "/raise")) {
-      string name = _parameter["name"];
-      string location = _parameter["location"];
-      string context = _parameter["context"];
-      string parameter = _parameter["parameter"];
+      std::string name = _parameter["name"];
+      std::string location = _parameter["location"];
+      std::string context = _parameter["context"];
+      std::string parameter = _parameter["parameter"];
 
       boost::shared_ptr<Event> evt(new Event(name));
       if(!context.empty()) {
@@ -1351,7 +1351,7 @@ namespace dss {
           dss::Logger::getInstance()->log("WebServer::handleEventCall: Got parameter '" + nameValue[0] + "'='" + nameValue[1] + "'");
           evt->setProperty(nameValue[0], nameValue[1]);
         } else {
-          dss::Logger::getInstance()->log(string("Invalid parameter found WebServer::handleEventCall: ") + *iParam );
+          dss::Logger::getInstance()->log(std::string("Invalid parameter found WebServer::handleEventCall: ") + *iParam );
         }
       }
       
@@ -1363,7 +1363,7 @@ namespace dss {
     return result;
   } // handleEventCall
 
-  string WebServer::handleSystemCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
+  std::string WebServer::handleSystemCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     _handled = true;
     if(endsWith(_method, "/version")) {
       return ResultToJSON(true, DSS::getInstance()->versionString());
@@ -1373,7 +1373,7 @@ namespace dss {
     }
   } // handleEventCall
 
-  string WebServer::handleStructureCall(const std::string& _method,
+  std::string WebServer::handleStructureCall(const std::string& _method,
                                         HashMapConstStringString& _parameter,
                                         struct mg_connection* _connection,
                                         bool& _handled,
@@ -1381,7 +1381,7 @@ namespace dss {
     _handled = true;
     StructureManipulator manipulator(getDSS().getDS485Interface(), getDSS().getApartment());
     if(endsWith(_method, "structure/zoneAddDevice")) {
-      string devidStr = _parameter["devid"];
+      std::string devidStr = _parameter["devid"];
       if(!devidStr.empty()) {
         dsid_t devid = dsid::fromString(devidStr);
 
@@ -1390,7 +1390,7 @@ namespace dss {
           return ResultToJSON(false, "cannot add nonexisting device to a zone");
         }
 
-        string zoneIDStr = _parameter["zone"];
+        std::string zoneIDStr = _parameter["zone"];
         if(!zoneIDStr.empty()) {
           try {
             int zoneID = strToInt(zoneIDStr);
@@ -1412,7 +1412,7 @@ namespace dss {
     } else if(endsWith(_method, "structure/addZone")) {
       int zoneID = -1;
 
-      string zoneIDStr = _parameter["zoneID"];
+      std::string zoneIDStr = _parameter["zoneID"];
       if(!zoneIDStr.empty()) {
         zoneID = strToIntDef(zoneIDStr, -1);
       }
@@ -1425,7 +1425,7 @@ namespace dss {
     } else if(endsWith(_method, "structure/removeZone")) {
       int zoneID = -1;
       
-      string zoneIDStr = _parameter["zoneID"];
+      std::string zoneIDStr = _parameter["zoneID"];
       if(!zoneIDStr.empty()) {
         zoneID = strToIntDef(zoneIDStr, -1);
       }
@@ -1453,7 +1453,7 @@ namespace dss {
     }
   } // handleStructureCall
 
-  string WebServer::handleSimCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
+  std::string WebServer::handleSimCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     _handled = true;
     if(beginsWith(_method, "sim/switch")) {
       if(endsWith(_method, "/switch/pressed")) {
@@ -1525,8 +1525,8 @@ namespace dss {
         return "";
       }
     } else if(beginsWith(_method, "sim/addDevice")) {
-      string type = _parameter["type"];
-      string dsidStr = _parameter["dsid"];
+      std::string type = _parameter["type"];
+      std::string dsidStr = _parameter["dsid"];
       // TODO: not finished yet ;)
     } else {
       _handled = false;
@@ -1534,7 +1534,7 @@ namespace dss {
     return "";
   } // handleSimCall
 
-  string WebServer::handleDebugCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
+  std::string WebServer::handleDebugCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     _handled = true;
     if(endsWith(_method, "/sendFrame")) {
       int destination = strToIntDef(_parameter["destination"],0) & 0x3F;
@@ -1557,7 +1557,7 @@ namespace dss {
       frame->getHeader().setCounter(counter);
       frame->setCommand(command);
       for(int iByte = 0; iByte < length; iByte++) {
-        uint8_t byte = strToIntDef(_parameter[string("payload_") + intToString(iByte+1)], 0xFF);
+        uint8_t byte = strToIntDef(_parameter[std::string("payload_") + intToString(iByte+1)], 0xFF);
         std::cout << "b" << std::dec << iByte << ": " << std::hex << (int)byte << "\n";
         frame->getPayload().add<uint8_t>(byte);
       }
@@ -1571,7 +1571,7 @@ namespace dss {
       }
       return ResultToJSON(true);
     } else if(endsWith(_method, "debug/dSLinkSend")) {
-      string deviceDSIDString = _parameter["dsid"];
+      std::string deviceDSIDString = _parameter["dsid"];
       Device* pDevice = NULL;
       if(!deviceDSIDString.empty()) {
         dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
@@ -1618,7 +1618,7 @@ namespace dss {
         return JSONOk(sstream.str());
       }
     } else if(endsWith(_method, "debug/pingDevice")) {
-      string deviceDSIDString = _parameter["dsid"];
+      std::string deviceDSIDString = _parameter["dsid"];
       if(deviceDSIDString.empty()) {
         return ResultToJSON(false, "Missing parameter 'dsid'");
       }
@@ -1692,7 +1692,7 @@ namespace dss {
     }
   } // handleDebugCall
 
-  string WebServer::handleMeteringCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
+  std::string WebServer::handleMeteringCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
     if(endsWith(_method, "/getResolutions")) {
       _handled = true;
       std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = getDSS().getMetering().getConfig();
@@ -1831,7 +1831,7 @@ namespace dss {
       WebServerPlugin* plugin = static_cast<WebServerPlugin*>(_userData);
       WebServer& self = DSS::getInstance()->getWebServer();
 
-      string uri = _info->uri;
+      std::string uri = _info->uri;
       self.log("Plugin: Processing call to " + uri);
 
       self.pluginCalled(_connection, _info, *plugin, uri);
@@ -1844,7 +1844,7 @@ namespace dss {
                                const std::string& _uri) {
     HashMapConstStringString paramMap = parseParameter(_info->query_string);
 
-    string result;
+    std::string result;
     if(plugin.handleRequest(_uri, paramMap, getDSS(), result)) {
       emitHTTPHeader(200, _connection, "text/plain");
       mg_write(_connection, result.c_str(), result.length());
@@ -1857,18 +1857,18 @@ namespace dss {
   void WebServer::jsonHandler(struct mg_connection* _connection,
                               const struct mg_request_info* _info,
                               void* _userData) {
-    const string urlid = "/json/";
-    string uri = _info->uri;
+    const std::string urlid = "/json/";
+    std::string uri = _info->uri;
 
     HashMapConstStringString paramMap = parseParameter(_info->query_string);
 
-    string method = uri.substr(uri.find(urlid) + urlid.size());
+    std::string method = uri.substr(uri.find(urlid) + urlid.size());
 
     WebServer& self = DSS::getInstance()->getWebServer();
     self.log("Processing call to " + method);
 
     Session* session = NULL;
-    string tokenStr = paramMap["token"];
+    std::string tokenStr = paramMap["token"];
     if(!tokenStr.empty()) {
       int token = strToIntDef(tokenStr, -1);
       if(token != -1) {
@@ -1882,7 +1882,7 @@ namespace dss {
       }
     }
 
-    string result;
+    std::string result;
     bool handled = false;
     if(beginsWith(method, "apartment/")) {
       result = self.handleApartmentCall(method, paramMap, _connection, handled, session);
@@ -1962,11 +1962,11 @@ namespace dss {
                                        void* _userData) {
     emitHTTPHeader(200, _connection);
 
-    const string urlid = "/browse";
-    string uri = _info->uri;
+    const std::string urlid = "/browse";
+    std::string uri = _info->uri;
     HashMapConstStringString paramMap = parseParameter(_info->query_string);
 
-    string path = uri.substr(uri.find(urlid) + urlid.size());
+    std::string path = uri.substr(uri.find(urlid) + urlid.size());
     if(path.empty()) {
       path = "/";
     }
@@ -2007,7 +2007,7 @@ namespace dss {
     }
 
     stream << "</ul></body></html>";
-    string tmp = stream.str();
+    std::string tmp = stream.str();
     mg_write(_connection, tmp.c_str(), tmp.length());
   } // httpBrowseProperties
 

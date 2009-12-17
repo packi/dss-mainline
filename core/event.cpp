@@ -42,7 +42,7 @@ namespace dss {
 
   //================================================== Event
 
-  Event::Event(const string& _name)
+  Event::Event(const std::string& _name)
   : m_Name(_name),
     m_RaiseLocation(erlApartment),
     m_RaisedAtZone(NULL),
@@ -51,7 +51,7 @@ namespace dss {
     reset();
   } // ctor
 
-  Event::Event(const string& _name, Zone* _zone)
+  Event::Event(const std::string& _name, Zone* _zone)
   : m_Name(_name),
     m_RaiseLocation(erlZone),
     m_RaisedAtZone(_zone),
@@ -60,7 +60,7 @@ namespace dss {
     reset();
   } // ctor
 
-  Event::Event(const string& _name, DeviceReference* _reference)
+  Event::Event(const std::string& _name, DeviceReference* _reference)
   : m_Name(_name),
     m_RaiseLocation(erlDevice),
     m_RaisedAtZone(NULL),
@@ -87,7 +87,7 @@ namespace dss {
     m_TimeSet = false;
   } // reset
 
-  const string& Event::getPropertyByName(const string& _name) const {
+  const std::string& Event::getPropertyByName(const std::string& _name) const {
     if(_name == EventPropertyName) {
       return m_Name;
     } else if(_name == EventPropertyLocation) {
@@ -100,7 +100,7 @@ namespace dss {
     return m_Properties.get(_name, "");
   } // getPropertyByName
 
-  bool Event::hasPropertySet(const string& _name) const {
+  bool Event::hasPropertySet(const std::string& _name) const {
     if(_name == EventPropertyName) {
       return true;
     } else if(_name == EventPropertyLocation) {
@@ -113,7 +113,7 @@ namespace dss {
     return m_Properties.has(_name);
   } // hasPropertySet
 
-  void Event::unsetProperty(const string& _name) {
+  void Event::unsetProperty(const std::string& _name) {
     if(_name == EventPropertyLocation) {
       m_LocationSet = false;
       m_Location = "";
@@ -128,7 +128,7 @@ namespace dss {
     }
   } // unsetProperty
 
-  bool Event::setProperty(const string& _name, const string& _value) {
+  bool Event::setProperty(const std::string& _name, const std::string& _value) {
     if(!_name.empty()) {
       if(_name == EventPropertyLocation) {
         m_LocationSet = true;
@@ -211,7 +211,7 @@ namespace dss {
         boost::shared_ptr<Event> toProcess = m_Queue->popEvent();
         if(toProcess.get() != NULL) {
 
-          Logger::getInstance()->log(string("EventInterpreter: Got event from queue: '") + toProcess->getName() + "'", lsInfo);
+          Logger::getInstance()->log(std::string("EventInterpreter: Got event from queue: '") + toProcess->getName() + "'", lsInfo);
           for(HashMapConstStringString::const_iterator iParam = toProcess->getProperties().getContainer().begin(), e = toProcess->getProperties().getContainer().end();
               iParam != e; ++iParam)
           {
@@ -223,32 +223,32 @@ namespace dss {
           {
             if((*ipSubscription)->matches(*toProcess)) {
               bool called = false;
-              Logger::getInstance()->log(string("EventInterpreter: Subscription '") + (*ipSubscription)->getID() + "' matches event");
+              Logger::getInstance()->log(std::string("EventInterpreter: Subscription '") + (*ipSubscription)->getID() + "' matches event");
 
               EventInterpreterPlugin* plugin = getPluginByName((*ipSubscription)->getHandlerName());
               if(plugin != NULL) {
-                Logger::getInstance()->log(string("EventInterpreter: Found handler '") + plugin->getName() + "' calling...");
+                Logger::getInstance()->log(std::string("EventInterpreter: Found handler '") + plugin->getName() + "' calling...");
                 plugin->handleEvent(*toProcess, **ipSubscription);
                 called = true;
                 Logger::getInstance()->log("EventInterpreter: called.");
               }
               if(!called) {
-                Logger::getInstance()->log(string("EventInterpreter: Could not find handler '") + (*ipSubscription)->getHandlerName(), lsInfo);
+                Logger::getInstance()->log(std::string("EventInterpreter: Could not find handler '") + (*ipSubscription)->getHandlerName(), lsInfo);
               }
 
             } else {
-              Logger::getInstance()->log(string("EventInterpreter: No match on subscription '") + (*ipSubscription)->getID() + "'");
+              Logger::getInstance()->log(std::string("EventInterpreter: No match on subscription '") + (*ipSubscription)->getID() + "'");
             }
           }
 
           m_EventsProcessed++;
-          Logger::getInstance()->log(string("EventInterpreter: Done processing event '") + toProcess->getName() + "'", lsInfo);
+          Logger::getInstance()->log(std::string("EventInterpreter: Done processing event '") + toProcess->getName() + "'", lsInfo);
         }
       }
     }
   } // execute
 
-  EventInterpreterPlugin* EventInterpreter::getPluginByName(const string& _name) {
+  EventInterpreterPlugin* EventInterpreter::getPluginByName(const std::string& _name) {
     for(vector<EventInterpreterPlugin*>::iterator ipPlugin = m_Plugins.begin(), e = m_Plugins.end();
         ipPlugin != e; ++ipPlugin)
     {
@@ -265,7 +265,7 @@ namespace dss {
     m_Subscriptions.push_back(_subscription);
   } // subscribe
 
-  void EventInterpreter::unsubscribe(const string& _subscriptionID) {
+  void EventInterpreter::unsubscribe(const std::string& _subscriptionID) {
     for(vector< boost::shared_ptr<EventSubscription> >::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
         ipSubscription != e; ++ipSubscription)
     {
@@ -298,9 +298,9 @@ namespace dss {
     return result;
   } // uniqueSubscriptionID
 
-  void EventInterpreter::loadFromXML(const string& _fileName) {
+  void EventInterpreter::loadFromXML(const std::string& _fileName) {
     const int apartmentConfigVersion = 1;
-    Logger::getInstance()->log(string("EventInterpreter: Loading subscriptions from '") + _fileName + "'");
+    Logger::getInstance()->log(std::string("EventInterpreter: Loading subscriptions from '") + _fileName + "'");
 
     if(boost::filesystem::exists(_fileName)) {
       XMLDocumentFileReader reader(_fileName);
@@ -310,7 +310,7 @@ namespace dss {
         if(strToIntDef(rootNode.getAttributes()["version"], -1) == apartmentConfigVersion) {
           XMLNodeList nodes = rootNode.getChildren();
           for(XMLNodeList::iterator iNode = nodes.begin(); iNode != nodes.end(); ++iNode) {
-            string nodeName = iNode->getName();
+            std::string nodeName = iNode->getName();
             if(nodeName == "subscription") {
               loadSubscription(*iNode);
             }
@@ -321,7 +321,7 @@ namespace dss {
   } // loadFromXML
 
   void EventInterpreter::loadFilter(XMLNode& _node, EventSubscription& _subscription) {
-    string matchType = _node.getAttributes()["match"];
+    std::string matchType = _node.getAttributes()["match"];
     if(matchType == "all") {
       _subscription.setFilterOption(EventSubscription::foMatchAll);
     } else if(matchType == "none") {
@@ -329,15 +329,15 @@ namespace dss {
     } else if(matchType == "one") {
       _subscription.setFilterOption(EventSubscription::foMatchOne);
     } else {
-      Logger::getInstance()->log(string("EventInterpreter::loadFilter: Could not determine the match-type (\"") + matchType + "\", reverting to 'all'", lsError);
+      Logger::getInstance()->log(std::string("EventInterpreter::loadFilter: Could not determine the match-type (\"") + matchType + "\", reverting to 'all'", lsError);
     }
     XMLNodeList nodes = _node.getChildren();
     for(XMLNodeList::iterator iNode = nodes.begin(); iNode != nodes.end(); ++iNode) {
-      string nodeName = iNode->getName();
+      std::string nodeName = iNode->getName();
       if(nodeName == "property-filter") {
         EventPropertyFilter* filter = NULL;
-        string filterType = iNode->getAttributes()["type"];
-        string propertyName = iNode->getAttributes()["property"];
+        std::string filterType = iNode->getAttributes()["type"];
+        std::string propertyName = iNode->getAttributes()["property"];
         if(filterType.empty() || propertyName.empty()) {
           Logger::getInstance()->log("EventInterpreter::loadFilter: Missing type and/or property-name", lsFatal);
         } else {
@@ -346,7 +346,7 @@ namespace dss {
           } else if(filterType == "missing") {
             filter = new EventPropertyMissingFilter(propertyName);
           } else if(filterType == "matches") {
-            string matchValue = iNode->getAttributes()["value"];
+            std::string matchValue = iNode->getAttributes()["value"];
             filter = new EventPropertyMatchFilter(propertyName, matchValue);
           } else {
             Logger::getInstance()->log("Unknown property-filter type", lsError);
@@ -360,8 +360,8 @@ namespace dss {
   } // loadFilter
 
   void EventInterpreter::loadSubscription(XMLNode& _node) {
-    string evtName = _node.getAttributes()["event-name"];
-    string handlerName = _node.getAttributes()["handler-name"];
+    std::string evtName = _node.getAttributes()["event-name"];
+    std::string handlerName = _node.getAttributes()["handler-name"];
 
     if(evtName.size() == 0) {
       Logger::getInstance()->log("EventInterpreter::loadSubscription: empty event-name, skipping this subscription", lsWarning);
@@ -378,7 +378,7 @@ namespace dss {
 
     EventInterpreterPlugin* plugin = getPluginByName(handlerName);
     if(plugin == NULL) {
-      Logger::getInstance()->log(string("EventInterpreter::loadSubscription: could not find plugin for handler-name '") + handlerName + "'", lsWarning);
+      Logger::getInstance()->log(std::string("EventInterpreter::loadSubscription: could not find plugin for handler-name '") + handlerName + "'", lsWarning);
       Logger::getInstance()->log(       "EventInterpreter::loadSubscription: Still generating a subscription but w/o inner parameter", lsWarning);
     } else {
       opts.reset(plugin->createOptionsFromXML(_node.getChildren()));
@@ -419,29 +419,29 @@ namespace dss {
     if(_event->hasPropertySet(EventPropertyTime)) {
       DateTime when;
       bool validDate = false;
-      string timeStr = _event->getPropertyByName(EventPropertyTime);
+      std::string timeStr = _event->getPropertyByName(EventPropertyTime);
       if(timeStr.size() >= 2) {
         // relative time
         if(timeStr[0] == '+') {
-          std::string timeOffset = timeStr.substr(1, string::npos);
+          std::string timeOffset = timeStr.substr(1, std::string::npos);
           int offset = strToIntDef(timeOffset, -1);
           if(offset >= 0) {
             when = when.addSeconds(offset);
             validDate = true;
           } else {
-            Logger::getInstance()->log(string("EventQueue::scheduleFromEvent: Could not parse offset or offset is below zero: '") + timeOffset + "'", lsError);
+            Logger::getInstance()->log(std::string("EventQueue::scheduleFromEvent: Could not parse offset or offset is below zero: '") + timeOffset + "'", lsError);
           }
         } else {
           try {
             when = DateTime::fromISO(timeStr);
             validDate = true;
           } catch(std::runtime_error& e) {
-            Logger::getInstance()->log(string("EventQueue::scheduleFromEvent: Invalid time specified '") + timeStr + "' error: " + e.what(), lsError);
+            Logger::getInstance()->log(std::string("EventQueue::scheduleFromEvent: Invalid time specified '") + timeStr + "' error: " + e.what(), lsError);
           }
         }
       }
       if(validDate) {
-        Logger::getInstance()->log(string("EventQueue::scheduleFromEvent: Event has a valid time, rescheduling at ") + (string)when, lsInfo);
+        Logger::getInstance()->log(std::string("EventQueue::scheduleFromEvent: Event has a valid time, rescheduling at ") + (std::string)when, lsInfo);
         result.reset(new StaticSchedule(when));
       } else {
         Logger::getInstance()->log("EventQueue::scheduleFromEvent: Dropping event with invalid time", lsError);
@@ -449,14 +449,14 @@ namespace dss {
     } else if(_event->hasPropertySet(EventPropertyICalStartTime) && _event->hasPropertySet(EventPropertyICalRRule)) {
       std::string timeStr = _event->getPropertyByName(EventPropertyICalStartTime);
       std::string rRuleStr = _event->getPropertyByName(EventPropertyICalRRule);
-      Logger::getInstance()->log(string("EventQueue::schedleFromEvent: Event has a ICalRule rescheduling at ") + timeStr + " with Rule " + rRuleStr, lsInfo);
+      Logger::getInstance()->log(std::string("EventQueue::schedleFromEvent: Event has a ICalRule rescheduling at ") + timeStr + " with Rule " + rRuleStr, lsInfo);
       result.reset(new ICalSchedule(rRuleStr, timeStr));
     }
     return result;
   } // scheduleFromEvent
 
   void EventQueue::pushEvent(boost::shared_ptr<Event> _event) {
-    Logger::getInstance()->log(string("EventQueue: New event '") + _event->getName() + "' in queue...", lsInfo);
+    Logger::getInstance()->log(std::string("EventQueue: New event '") + _event->getName() + "' in queue...", lsInfo);
     boost::shared_ptr<Schedule> schedule = scheduleFromEvent(_event);
     if(schedule != NULL) {
       ScheduledEvent* scheduledEvent = new ScheduledEvent(_event, schedule);
@@ -537,8 +537,8 @@ namespace dss {
     {
       DateTime next = ipSchedEvt->getSchedule().getNextOccurence(now);
       if(DebugEventRunner) {
-        Logger::getInstance()->log(string("next:   ") + (string)next);
-        Logger::getInstance()->log(string("result: ") + (string)result);
+        Logger::getInstance()->log(std::string("next:   ") + (std::string)next);
+        Logger::getInstance()->log(std::string("result: ") + (std::string)result);
       }
       if(next == DateTime::NullDate) {
         Logger::getInstance()->log("EventRunner: Removing event");
@@ -547,7 +547,7 @@ namespace dss {
       }
       result = std::min(result, next);
       if(DebugEventRunner) {
-        Logger::getInstance()->log(string("chosen: ") + (string)result);
+        Logger::getInstance()->log(std::string("chosen: ") + (std::string)result);
       }
       ++ipSchedEvt;
     }
@@ -625,7 +625,7 @@ namespace dss {
 
   //================================================== EventSubscription
 
-  EventSubscription::EventSubscription(const string& _eventName, const string& _handlerName, EventInterpreter& _interpreter, boost::shared_ptr<SubscriptionOptions> _options)
+  EventSubscription::EventSubscription(const std::string& _eventName, const std::string& _handlerName, EventInterpreter& _interpreter, boost::shared_ptr<SubscriptionOptions> _options)
   : m_EventName(_eventName),
     m_HandlerName(_handlerName),
     m_SubscriptionOptions(_options)
@@ -672,25 +672,25 @@ namespace dss {
   SubscriptionOptions::~SubscriptionOptions()
   { } // dtor
 
-  const string& SubscriptionOptions::getParameter(const string& _name) const {
+  const std::string& SubscriptionOptions::getParameter(const std::string& _name) const {
     return m_Parameters.get(_name);
   } // getParameter
 
-  bool SubscriptionOptions::hasParameter(const string& _name) const {
+  bool SubscriptionOptions::hasParameter(const std::string& _name) const {
     return m_Parameters.has(_name);
   } // hasParameter
 
-  void SubscriptionOptions::setParameter(const string& _name, const string& _value) {
+  void SubscriptionOptions::setParameter(const std::string& _name, const std::string& _value) {
     m_Parameters.set(_name, _value);
   } // setParameter
 
   void SubscriptionOptions::loadParameterFromXML(XMLNode& _node) {
     XMLNodeList nodes = _node.getChildren();
     for(XMLNodeList::iterator iNode = nodes.begin(); iNode != nodes.end(); ++iNode) {
-      string nodeName = iNode->getName();
+      std::string nodeName = iNode->getName();
       if(nodeName == "parameter") {
-        string value;
-        string name;
+        std::string value;
+        std::string name;
         if(!iNode->getChildren().empty()) {
           value = iNode->getChildren()[0].getContent();
         }
@@ -705,7 +705,7 @@ namespace dss {
 
   //================================================== EventInterpreterPlugin
 
-  EventInterpreterPlugin::EventInterpreterPlugin(const string& _name, EventInterpreter* _interpreter)
+  EventInterpreterPlugin::EventInterpreterPlugin(const std::string& _name, EventInterpreter* _interpreter)
   : m_Name(_name),
     m_pInterpreter(_interpreter)
   { } // ctor
@@ -716,7 +716,7 @@ namespace dss {
 
   //================================================== EventPropertyFilter
 
-  EventPropertyFilter::EventPropertyFilter(const string& _propertyName)
+  EventPropertyFilter::EventPropertyFilter(const std::string& _propertyName)
   : m_PropertyName(_propertyName)
   { } // ctor
 
@@ -733,7 +733,7 @@ namespace dss {
 
   //================================================== EventPropertyExistsFilter
 
-  EventPropertyExistsFilter::EventPropertyExistsFilter(const string& _propertyName)
+  EventPropertyExistsFilter::EventPropertyExistsFilter(const std::string& _propertyName)
   : EventPropertyFilter(_propertyName)
   { } // ctor
 
@@ -744,7 +744,7 @@ namespace dss {
 
   //================================================= EventPropertyMissingFilter
 
-  EventPropertyMissingFilter::EventPropertyMissingFilter(const string& _propertyName)
+  EventPropertyMissingFilter::EventPropertyMissingFilter(const std::string& _propertyName)
   : EventPropertyFilter(_propertyName)
   { } // ctor
 
