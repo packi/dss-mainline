@@ -163,7 +163,7 @@ namespace dss {
   JSFunctionSpec global_methods[] = {
     {"print", global_print, 1, 0, 0},
     {"keepContext", global_keepContext, 0, 0, 0},
-    {NULL},
+    JS_FS_END
   };
 
   ScriptContext::ScriptContext(ScriptEnvironment& _env, JSContext* _pContext)
@@ -212,11 +212,6 @@ namespace dss {
     }
   } // removeAttachedObject
 
-  template<>
-  jsval ScriptContext::convertTo(const jsval& _val) {
-    return _val;
-  } // convertTo<jsval>
- 
   template<>
   int ScriptContext::convertTo(const jsval& _val) {
     if(JSVAL_IS_NUMBER(_val)) {
@@ -277,8 +272,7 @@ namespace dss {
     return false;
   } // raisePendingExceptions
 
-  template <>
-  jsval ScriptContext::evaluateScript(const std::string& _fileName) {
+  jsval ScriptContext::doEvaluateScript(const std::string& _fileName) {
     AssertLocked(this);
 
     std::ifstream in(_fileName.c_str());
@@ -297,35 +291,34 @@ namespace dss {
       raisePendingExceptions();
       throw ScriptException("Error executing script");
     }
-  } // evaluateScript
+  } // doEvaluateScript
 
   template <>
   void ScriptContext::evaluateScript(const std::string& _script) {
-    evaluateScript<jsval>(_script);
+    doEvaluateScript(_script);
   } // evaluateScript<void>
 
   template <>
   int ScriptContext::evaluateScript(const std::string& _script) {
-    return convertTo<int>(evaluateScript<jsval>(_script));
+    return convertTo<int>(doEvaluateScript(_script));
   } // evaluateScript<int>
 
   template <>
   double ScriptContext::evaluateScript(const std::string& _script) {
-    return convertTo<double>(evaluateScript<jsval>(_script));
+    return convertTo<double>(doEvaluateScript(_script));
   } // evaluateScript<double>
 
   template <>
   std::string ScriptContext::evaluateScript(const std::string& _script) {
-    return convertTo<std::string>(evaluateScript<jsval>(_script));
+    return convertTo<std::string>(doEvaluateScript(_script));
   } // evaluateScript<std::string>
 
   template <>
   bool ScriptContext::evaluateScript(const std::string& _script) {
-    return convertTo<bool>(evaluateScript<jsval>(_script));
+    return convertTo<bool>(doEvaluateScript(_script));
   } // evaluateScript<bool>
 
-  template <>
-  jsval ScriptContext::evaluate(const std::string& _script) {
+  jsval ScriptContext::doEvaluate(const std::string& _script) {
     AssertLocked(this);
 
     const char* filename = "temporary_script";
@@ -338,31 +331,31 @@ namespace dss {
       raisePendingExceptions();
       throw ScriptException("Error executing script");
     }
-  } // evaluate
+  } // doEvaluate
   
   template <>
   void ScriptContext::evaluate(const std::string& _script) {
-    evaluate<jsval>(_script);
+    doEvaluate(_script);
   } // evaluate<void>
 
   template <>
   int ScriptContext::evaluate(const std::string& _script) {
-    return convertTo<int>(evaluate<jsval>(_script));
+    return convertTo<int>(doEvaluate(_script));
   } // evaluate<int>
 
   template <>
   double ScriptContext::evaluate(const std::string& _script) {
-    return convertTo<double>(evaluate<jsval>(_script));
+    return convertTo<double>(doEvaluate(_script));
   } // evaluate<double>
 
   template <>
   std::string ScriptContext::evaluate(const std::string& _script) {
-    return convertTo<std::string>(evaluate<jsval>(_script));
+    return convertTo<std::string>(doEvaluate(_script));
   } // evaluate<std::string>
 
   template <>
   bool ScriptContext::evaluate(const std::string& _script) {
-    return convertTo<bool>(evaluate<jsval>(_script));
+    return convertTo<bool>(doEvaluate(_script));
   } // evaluate<bool>
 
 
@@ -370,11 +363,6 @@ namespace dss {
 
 
   //================================================== ScriptFunctionParameterList
-
-  template<>
-  void ScriptFunctionParameterList::add(jsval _value) {
-    m_Parameter.push_back(_value);
-  } // add<jsval>
 
   template<>
   void ScriptFunctionParameterList::add(int _value) {
@@ -388,7 +376,11 @@ namespace dss {
 
   template<>
   void ScriptFunctionParameterList::add(double _value) {
-    m_Parameter.push_back(DOUBLE_TO_JSVAL(_value));
+    jsval val;
+    if(JS_NewNumberValue(m_Context.getJSContext(), _value, &val) == JS_TRUE) {
+      m_Parameter.push_back(val);
+    }
+    throw ScriptException("ScriptFunctionParameterList::add<double>: Could not allocate double value");
   } // add<double>
 
   template<>
@@ -432,8 +424,7 @@ namespace dss {
     m_pObject = JS_NewObject(m_Context.getJSContext(), NULL, NULL, parentObj);
   } // ctor
 
-  template<>
-  jsval ScriptObject::getProperty(const std::string& _name) {
+  jsval ScriptObject::doGetProperty(const std::string& _name) {
     AssertLocked objLock(&m_Context);
     JSBool found;
     if(!JS_HasProperty(m_Context.getJSContext(), m_pObject, _name.c_str(), &found)) {
@@ -449,41 +440,40 @@ namespace dss {
     } else {
       throw ScriptException(std::string("Could not find property ") + _name);
     }
-  } // getProperty<jsval>
+  } // doGetProperty
 
   template<>
   std::string ScriptObject::getProperty(const std::string& _name) {
-    jsval value = getProperty<jsval>(_name);
+    jsval value = doGetProperty(_name);
     return m_Context.convertTo<std::string>(value);
   } // getProperty<string>
 
   template<>
   int ScriptObject::getProperty(const std::string& _name) {
-    jsval value = getProperty<jsval>(_name);
+    jsval value = doGetProperty(_name);
     return m_Context.convertTo<int>(value);
   } // getProperty<string>
 
   template<>
   double ScriptObject::getProperty(const std::string& _name) {
-    jsval value = getProperty<jsval>(_name);
+    jsval value = doGetProperty(_name);
     return m_Context.convertTo<double>(value);
   } // getProperty<double>
 
   template<>
   bool ScriptObject::getProperty(const std::string& _name) {
-    jsval value = getProperty<jsval>(_name);
+    jsval value = doGetProperty(_name);
     return m_Context.convertTo<bool>(value);
   } // getProperty<bool>
 
-  template<>
-  void ScriptObject::setProperty(const std::string& _name, jsval _value) {
+  void ScriptObject::doSetProperty(const std::string& _name, jsval _value) {
     JS_SetProperty(m_Context.getJSContext(), m_pObject, _name.c_str(), &_value);
-  } // setProperty<jsval>
+  } // doSetProperty
 
   template<>
   void ScriptObject::setProperty(const std::string& _name, const std::string& _value) {
     JSString* str = JS_NewStringCopyN(m_Context.getJSContext(), _value.c_str(), _value.size());
-    setProperty(_name, STRING_TO_JSVAL(str));
+    doSetProperty(_name, STRING_TO_JSVAL(str));
   } // setProperty<std::string>
 
   template<>
@@ -498,13 +488,13 @@ namespace dss {
     if(!JS_NewNumberValue(m_Context.getJSContext(), _value, &val)) {
       throw ScriptException("could not allocate number");
     }
-    setProperty(_name, val);
+    doSetProperty(_name, val);
   } // setProperty<int>
 
   template<>
   void ScriptObject::setProperty(const std::string& _name, ScriptObject* _value) {
     assert(_value != NULL);
-    setProperty(_name, OBJECT_TO_JSVAL(_value->m_pObject));
+    doSetProperty(_name, OBJECT_TO_JSVAL(_value->m_pObject));
   } // setProperty<ScriptObject>
 
   bool ScriptObject::is(const std::string& _className) {
@@ -515,8 +505,7 @@ namespace dss {
     return getProperty<std::string>("className");
   } // getClassName
 
-  template<>
-  jsval ScriptObject::callFunctionByName(const std::string& _functionName,
+  jsval ScriptObject::doCallFunctionByName(const std::string& _functionName,
                                          ScriptFunctionParameterList& _parameter) {
     AssertLocked objLock(&m_Context);
     int paramc = _parameter.size();
@@ -533,40 +522,39 @@ namespace dss {
       m_Context.raisePendingExceptions();
       throw ScriptException("Error running function");
     }
-  } // callFunctionByName<jsval>
+  } // doCallFunctionByName
 
   template<>
   void ScriptObject::callFunctionByName(const std::string& _functionName,
                                                 ScriptFunctionParameterList& _parameter) {
-    callFunctionByName<jsval>(_functionName, _parameter);
+    doCallFunctionByName(_functionName, _parameter);
   } // callFunctionByName<void>
 
   template<>
   int ScriptObject::callFunctionByName(const std::string& _functionName,
                                                 ScriptFunctionParameterList& _parameter) {
-    return m_Context.convertTo<int>(callFunctionByName<jsval>(_functionName, _parameter));
+    return m_Context.convertTo<int>(doCallFunctionByName(_functionName, _parameter));
   } // callFunctionByName<int>
 
   template<>
   double ScriptObject::callFunctionByName(const std::string& _functionName,
                                                 ScriptFunctionParameterList& _parameter) {
-    return m_Context.convertTo<double>(callFunctionByName<jsval>(_functionName, _parameter));
+    return m_Context.convertTo<double>(doCallFunctionByName(_functionName, _parameter));
   } // callFunctionByName<double>
 
   template<>
   bool ScriptObject::callFunctionByName(const std::string& _functionName,
                                                 ScriptFunctionParameterList& _parameter) {
-    return m_Context.convertTo<bool>(callFunctionByName<jsval>(_functionName, _parameter));
+    return m_Context.convertTo<bool>(doCallFunctionByName(_functionName, _parameter));
   } // callFunctionByName<bool>
 
   template<>
   std::string ScriptObject::callFunctionByName(const std::string& _functionName,
                                                 ScriptFunctionParameterList& _parameter) {
-    return m_Context.convertTo<std::string>(callFunctionByName<jsval>(_functionName, _parameter));
+    return m_Context.convertTo<std::string>(doCallFunctionByName(_functionName, _parameter));
   } // callFunctionByName<std::string>
 
-  template<>
-  jsval ScriptObject::callFunctionByReference(jsval _function,
+  jsval ScriptObject::doCallFunctionByReference(jsval _function,
                                               ScriptFunctionParameterList& _parameter) {
     AssertLocked objLock(&m_Context);
     int paramc = _parameter.size();
@@ -583,36 +571,36 @@ namespace dss {
       m_Context.raisePendingExceptions();
       throw ScriptException("Error running function");
     }
-  } // callFunctionByReference<jsval>
+  } // doCallFunctionByReference
 
   template<>
   void ScriptObject::callFunctionByReference(jsval _function,
                                              ScriptFunctionParameterList& _parameter) {
-    callFunctionByReference<jsval>(_function, _parameter);
+    doCallFunctionByReference(_function, _parameter);
   } // callFunctionByReference<void>
 
   template<>
   int ScriptObject::callFunctionByReference(jsval _function,
                                             ScriptFunctionParameterList& _parameter) {
-    return m_Context.convertTo<int>(callFunctionByReference<jsval>(_function, _parameter));
+    return m_Context.convertTo<int>(doCallFunctionByReference(_function, _parameter));
   } // callFunctionByReference<int>
 
   template<>
   double ScriptObject::callFunctionByReference(jsval _function,
                                                ScriptFunctionParameterList& _parameter) {
-    return m_Context.convertTo<double>(callFunctionByReference<jsval>(_function, _parameter));
+    return m_Context.convertTo<double>(doCallFunctionByReference(_function, _parameter));
   } // callFunctionByReference<double>
 
   template<>
   bool ScriptObject::callFunctionByReference(jsval _function,
                                              ScriptFunctionParameterList& _parameter) {
-    return m_Context.convertTo<bool>(callFunctionByReference<jsval>(_function, _parameter));
+    return m_Context.convertTo<bool>(doCallFunctionByReference(_function, _parameter));
   } // callFunctionByReference<bool>
 
   template<>
   std::string ScriptObject::callFunctionByReference(jsval _function,
                                                     ScriptFunctionParameterList& _parameter) {
-    return m_Context.convertTo<std::string>(callFunctionByReference<jsval>(_function, _parameter));
+    return m_Context.convertTo<std::string>(doCallFunctionByReference(_function, _parameter));
   } // callFunctionByReference<std::string>
 
 } // namespace dss

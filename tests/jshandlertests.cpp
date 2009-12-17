@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(testCallingFunctions) {
   env->initialize();
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  jsval res = ctx->evaluate<jsval>("dev = { func: function(a,b,c) { return { e: a, f: b, g: c }; } }; dev");
+  jsval res = ctx->doEvaluate("dev = { func: function(a,b,c) { return { e: a, f: b, g: c }; } }; dev");
 
   BOOST_ASSERT(JSVAL_IS_OBJECT(res));
 
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(testCallingFunctions) {
   list.add<int>(1);
   list.add<bool>(false);
 
-  res = obj.callFunctionByName<jsval>("func", list);
+  res = obj.doCallFunctionByName("func", list);
 
   BOOST_ASSERT(JSVAL_IS_OBJECT(res));
   ScriptObject resObj(JSVAL_TO_OBJECT(res), *ctx);

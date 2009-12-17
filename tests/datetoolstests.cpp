@@ -172,6 +172,7 @@ BOOST_AUTO_TEST_CASE(testDynamicSchedule) {
   BOOST_CHECK_EQUAL(when.addMinute(10), v[2]);
 } // testDynamicSchedule
 
+#if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
 BOOST_AUTO_TEST_CASE(testDynamicScheduleICal) {
   ICalSchedule sched("FREQ=MINUTELY;INTERVAL=2", "20080505T080000Z");
 
@@ -184,6 +185,7 @@ BOOST_AUTO_TEST_CASE(testDynamicScheduleICal) {
   DateTime nextRecurr = sched.getNextOccurence(startPlusOneSec);
   BOOST_CHECK_EQUAL(startTime.addMinute(2), nextRecurr);
 } // testDynamicScheduleICal
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
 

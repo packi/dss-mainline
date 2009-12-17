@@ -28,12 +28,14 @@
 
 #include <iostream>
 
-#define JS_THREADSAFE
-
-#ifdef HAVE_MOZJS_JSAPI_H
+#if defined(HAVE_JSAPI_H)
+#include <jsapi.h>
+#elif defined(HAVE_MOZJS_JSAPI_H)
 #include <mozjs/jsapi.h>
-#else
+#elif defined(HAVE_JS_JSAPI_H)
 #include <js/jsapi.h>
+#else
+#error Could not find spidermonkey
 #endif
 
 #include <boost/ptr_container/ptr_vector.hpp>
@@ -89,6 +91,7 @@ namespace dss {
     bool m_KeepContext;
     std::vector<ScriptContextAttachedObject*> m_AttachedObjects;
     static void jsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er);
+    jsval doEvaluateScript(const std::string& _fileName);
   public:
     ScriptContext(ScriptEnvironment& _env, JSContext* _pContext);
     virtual ~ScriptContext();
@@ -96,6 +99,8 @@ namespace dss {
     /** Evaluates the given script */  
     template <class t>
     t evaluate(const std::string& _script);
+    // FIXME: Workaround a compiler issue that interprets typeof jsval == typeof int
+    jsval doEvaluate(const std::string& _script);
 
     /** Evaluates the given file */
     template <class t>
@@ -189,6 +194,9 @@ namespace dss {
   private:
     JSObject* m_pObject;
     ScriptContext& m_Context;
+    jsval doGetProperty(const std::string& _name);
+    void doSetProperty(const std::string& _name, jsval _value);
+    jsval doCallFunctionByReference(jsval _function, ScriptFunctionParameterList& _parameter);
   public:
     ScriptObject(JSObject* _pObject, ScriptContext& _context);
     ScriptObject(ScriptContext& _context, ScriptObject* _pParent);
@@ -212,6 +220,8 @@ namespace dss {
 
     template<class t>
     t callFunctionByName(const std::string& _functionName, ScriptFunctionParameterList& _parameter);
+    // FIXME: work around a compiler issue (typeof jsval == typeof int)
+    jsval doCallFunctionByName(const std::string& _functionName, ScriptFunctionParameterList& _parameter);
 
     template<class t>
     t callFunctionByReference(jsval _function, ScriptFunctionParameterList& _parameter);
@@ -225,6 +235,38 @@ namespace dss {
       std::cout << "destroying attached object" << std::endl;
     }
   }; // ScriptContextAttachedObject
+
+
+/*
+ * Initializer macro for a JSFunctionSpec array element. This is the original
+ * kind of native function specifier initializer. Use JS_FN ("fast native", see
+ * JSFastNative in jspubtd.h) for all functions that do not need a stack frame
+ * when activated.
+ */
+#ifndef JS_FS
+#define JS_FS(name,call,nargs,flags,extra)                                    \
+    {name, call, nargs, flags, extra}
+#endif
+
+/*
+ * "Fast native" initializer macro for a JSFunctionSpec array element. Use this
+ * in preference to JS_FS if the native in question does not need its own stack
+ * frame when activated.
+ */
+#ifndef JS_FN
+#define JS_FN(name,fastcall,nargs,flags)                                      \
+    JS_FS(name, (JSNative)(fastcall), nargs,                                  \
+          (flags) | JSFUN_FAST_NATIVE | JSFUN_STUB_GSOPS, 0)
+#endif
+
+/*
+ * Terminating sentinel initializer to put at the end of a JSFunctionSpec array
+ * that's passed to JS_DefineFunctions or JS_InitClass.
+ */
+#ifndef JS_FS_END
+#define JS_FS_END JS_FS(NULL,NULL,0,0,0)
+#endif
+
 
 } // namespace dss
 
