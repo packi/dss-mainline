@@ -77,8 +77,6 @@ namespace dss {
 
     /** Returns the day of month */
     int getDay() const;
-    /** Returns the week */
-    int getWeek() const;
     /** Returns the month */
     int getMonth() const;
     /** Returns the year */

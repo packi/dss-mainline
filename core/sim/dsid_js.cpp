@@ -213,7 +213,7 @@ namespace dss {
       return 0;
     } // getFunctionID
 
-    virtual void setConfigParameter(const string& _name, const string& _value) {
+    virtual void setConfigParameter(const std::string& _name, const std::string& _value) {
       if(m_pSelf != NULL) {
         try {
           ScriptFunctionParameterList param(*m_pContext);
@@ -226,7 +226,7 @@ namespace dss {
       }
     } // setConfigParameter
 
-    virtual string getConfigParameter(const string& _name) const {
+    virtual std::string getConfigParameter(const std::string& _name) const {
       if(m_pSelf != NULL) {
         try {
           ScriptFunctionParameterList param(*m_pContext);

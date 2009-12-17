@@ -75,7 +75,7 @@ namespace dss {
     throw std::runtime_error("String should be enclosed by \"'\"");
   } // readString
 
-  Set SetBuilder::restrictByFunction(const string& _functionName, unsigned int& _index, const Set& _set, const Zone& _zone) {
+  Set SetBuilder::restrictByFunction(const std::string& _functionName, unsigned int& _index, const Set& _set, const Zone& _zone) {
     if(_index >= m_SetDescription.size()) {
       throw std::range_error("_index is out of bounds");
     }
@@ -186,7 +186,7 @@ namespace dss {
     } else if(pos == m_SetDescription.size() - 1) {
       end = true;
     }
-    string entry = m_SetDescription.substr(_index, pos + 1 - _index );
+    std::string entry = m_SetDescription.substr(_index, pos + 1 - _index );
     if(entry == ".") {
       _index = pos + 1;
       Set newRoot = m_Apartment.getDevices();

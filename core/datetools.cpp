@@ -99,10 +99,6 @@ namespace dss {
     return m_DateTime.tm_mday;
   } // getDay
 
-  int DateTime::getWeek() const {
-    return -1;
-  } // getWeek
-
   int DateTime::getMonth() const {
     return m_DateTime.tm_mon;
   } // getMonth

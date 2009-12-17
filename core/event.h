@@ -35,9 +35,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-using std::string;
-using std::queue;
-
 namespace dss {
 
   //================================================== Forward declarations
@@ -58,12 +55,12 @@ namespace dss {
 
   class Event {
   private:
-    string m_Name;
-    string m_Location;
+    std::string m_Name;
+    std::string m_Location;
     bool m_LocationSet;
-    string m_Context;
+    std::string m_Context;
     bool m_ContextSet;
-    string m_Time;
+    std::string m_Time;
     bool m_TimeSet;
     EventRaiseLocation m_RaiseLocation;
     Zone* m_RaisedAtZone;
@@ -73,23 +70,23 @@ namespace dss {
   private:
     void reset();
   public:
-    Event(const string& _name, Zone* _context);
-    Event(const string& _name, DeviceReference* _ref);
-    Event(const string& _name);
+    Event(const std::string& _name, Zone* _context);
+    Event(const std::string& _name, DeviceReference* _ref);
+    Event(const std::string& _name);
     Event();
 
     ~Event();
 
-    const string& getName() const { return m_Name; }
+    const std::string& getName() const { return m_Name; }
 
-    const string& getPropertyByName(const string& _name) const;
-    bool hasPropertySet(const string& _name) const;
-    void unsetProperty(const string& _name);
-    bool setProperty(const string& _name, const string& _value);
+    const std::string& getPropertyByName(const std::string& _name) const;
+    bool hasPropertySet(const std::string& _name) const;
+    void unsetProperty(const std::string& _name);
+    bool setProperty(const std::string& _name, const std::string& _value);
 
-    void setLocation(const string& _value) { m_Location = _value; m_LocationSet = true; }
-    void setContext(const string& _value) { m_Context = _value; m_ContextSet = true; }
-    void setTime(const string& _value) { m_Time = _value; m_TimeSet = true; }
+    void setLocation(const std::string& _value) { m_Location = _value; m_LocationSet = true; }
+    void setContext(const std::string& _value) { m_Context = _value; m_ContextSet = true; }
+    void setTime(const std::string& _value) { m_Time = _value; m_TimeSet = true; }
 
     const Zone& getRaisedAtZone() const;
     const DeviceReference& getRaisedAtDevice() const { return *m_RaisedAtDevice; }
@@ -108,9 +105,9 @@ namespace dss {
     SubscriptionOptions();
     virtual ~SubscriptionOptions();
 
-    const string& getParameter(const string& _name) const;
-    void setParameter(const string& _name, const string& _value);
-    bool hasParameter(const string& _name) const;
+    const std::string& getParameter(const std::string& _name) const;
+    void setParameter(const std::string& _name, const std::string& _value);
+    bool hasParameter(const std::string& _name) const;
 
     void loadParameterFromXML(XMLNode& _node);
 
@@ -122,12 +119,12 @@ namespace dss {
 
   class EventPropertyFilter {
   private:
-    string m_PropertyName;
+    std::string m_PropertyName;
   public:
-    EventPropertyFilter(const string& _propertyName);
+    EventPropertyFilter(const std::string& _propertyName);
     virtual ~EventPropertyFilter() {}
 
-    const string& getPropertyName() const { return m_PropertyName; }
+    const std::string& getPropertyName() const { return m_PropertyName; }
 
     virtual bool matches(const Event& _event) = 0;
   }; // EventPropertyFilter
@@ -137,9 +134,9 @@ namespace dss {
 
   class EventPropertyMatchFilter : public EventPropertyFilter {
   private:
-    string m_Value;
+    std::string m_Value;
   public:
-    EventPropertyMatchFilter(const string& _propertyName, const string& _value)
+    EventPropertyMatchFilter(const std::string& _propertyName, const std::string& _value)
     : EventPropertyFilter(_propertyName), m_Value(_value) {}
 
     virtual ~EventPropertyMatchFilter() {}
@@ -152,7 +149,7 @@ namespace dss {
 
   class EventPropertyExistsFilter : public EventPropertyFilter {
   public:
-    EventPropertyExistsFilter(const string& _propertyName);
+    EventPropertyExistsFilter(const std::string& _propertyName);
     virtual ~EventPropertyExistsFilter() {};
 
     virtual bool matches(const Event& _event);
@@ -163,7 +160,7 @@ namespace dss {
 
   class EventPropertyMissingFilter : public EventPropertyFilter {
   public:
-    EventPropertyMissingFilter(const string& _propertyName);
+    EventPropertyMissingFilter(const std::string& _propertyName);
     virtual ~EventPropertyMissingFilter() {};
 
     virtual bool matches(const Event& _event);
@@ -180,24 +177,24 @@ namespace dss {
       foMatchOne
     } EventPropertyFilterOption;
   private:
-    string m_EventName;
-    string m_HandlerName;
-    string m_ID;
+    std::string m_EventName;
+    std::string m_HandlerName;
+    std::string m_ID;
     boost::shared_ptr<SubscriptionOptions> m_SubscriptionOptions;
     boost::ptr_vector<EventPropertyFilter> m_Filter;
     EventPropertyFilterOption m_FilterOption;
   protected:
     void initialize();
   public:
-    EventSubscription(const string& _eventName, const string& _handlerName, EventInterpreter& _interpreter, boost::shared_ptr<SubscriptionOptions> _options);
+    EventSubscription(const std::string& _eventName, const std::string& _handlerName, EventInterpreter& _interpreter, boost::shared_ptr<SubscriptionOptions> _options);
 
     ~EventSubscription();
 
-    void setEventName(const string& _value) { m_EventName = _value; }
-    const string& getEventName() const { return m_EventName; }
-    void setHandlerName(const string& _value) { m_HandlerName = _value; }
-    const string& getHandlerName() const { return m_HandlerName; }
-    const string& getID() const { return m_ID; }
+    void setEventName(const std::string& _value) { m_EventName = _value; }
+    const std::string& getEventName() const { return m_EventName; }
+    void setHandlerName(const std::string& _value) { m_HandlerName = _value; }
+    const std::string& getHandlerName() const { return m_HandlerName; }
+    const std::string& getID() const { return m_ID; }
 
     SubscriptionOptions& getOptions() { return *m_SubscriptionOptions.get(); }
     const SubscriptionOptions& getOptions() const { return *m_SubscriptionOptions.get(); }
@@ -213,15 +210,15 @@ namespace dss {
 
   class EventInterpreterPlugin {
   private:
-    string m_Name;
+    std::string m_Name;
     EventInterpreter* const m_pInterpreter;
   protected:
     EventInterpreter& getEventInterpreter() { return *m_pInterpreter; }
   public:
-    EventInterpreterPlugin(const string& _name, EventInterpreter* _interpreter);
+    EventInterpreterPlugin(const std::string& _name, EventInterpreter* _interpreter);
     virtual ~EventInterpreterPlugin() {}
 
-    const string& getName() const { return m_Name; }
+    const std::string& getName() const { return m_Name; }
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription) = 0;
 
     virtual SubscriptionOptions* createOptionsFromXML(XMLNodeList& _nodes);
@@ -232,7 +229,7 @@ namespace dss {
 
   class EventQueue {
   private:
-    queue< boost::shared_ptr<Event> > m_EventQueue;
+    std::queue< boost::shared_ptr<Event> > m_EventQueue;
     SyncEvent m_EntryInQueueEvt;
     Mutex m_QueueMutex;
 
@@ -307,9 +304,9 @@ namespace dss {
     EventInterpreterPlugin* getPluginByName(const std::string& _name);
 
     void subscribe(boost::shared_ptr<EventSubscription> _subscription);
-    void unsubscribe(const string& _subscriptionID);
+    void unsubscribe(const std::string& _subscriptionID);
 
-    void loadFromXML(const string& _fileName);
+    void loadFromXML(const std::string& _fileName);
     std::string uniqueSubscriptionID(const std::string& _proposal);
 
     int getEventsProcessed() const { return m_EventsProcessed; }
@@ -330,7 +327,7 @@ namespace dss {
   private:
     boost::shared_ptr<Event> m_Event;
     boost::shared_ptr<Schedule> m_Schedule;
-    string m_Name;
+    std::string m_Name;
   public:
     ScheduledEvent(boost::shared_ptr<Event> _pEvt, boost::shared_ptr<Schedule> _pSchedule)
     : m_Event(_pEvt), m_Schedule(_pSchedule) {};
@@ -340,9 +337,9 @@ namespace dss {
     /** Returns the associated Schedule */
     Schedule& getSchedule() const { return *m_Schedule; }
     /** Returns the name of this ScheduledEvent */
-    const string& getName() const { return m_Name; }
+    const std::string& getName() const { return m_Name; }
     /** Sets the name of this ScheduledEvent */
-    void setName(const string& _value) { m_Name = _value; }
+    void setName(const std::string& _value) { m_Name = _value; }
   }; // ScheduledEvent
 
 

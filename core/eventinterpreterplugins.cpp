@@ -21,6 +21,10 @@
 
 #include "eventinterpreterplugins.h"
 
+#include <Poco/Net/MailMessage.h>
+#include <Poco/Net/SMTPClientSession.h>
+#include <Poco/Net/MailRecipient.h>
+
 #include "base.h"
 #include "logger.h"
 #include "DS485Interface.h"
@@ -47,7 +51,7 @@ namespace dss {
   void EventInterpreterPluginRaiseEvent::handleEvent(Event& _event, const EventSubscription& _subscription) {
     boost::shared_ptr<Event> newEvent(new Event(_subscription.getOptions().getParameter("event_name")));
     if(_subscription.getOptions().hasParameter("time")) {
-      string timeParam = _subscription.getOptions().getParameter("time");
+      std::string timeParam = _subscription.getOptions().getParameter("time");
       if(!timeParam.empty()) {
         Logger::getInstance()->log("RaiseEvent: Event has time");
         newEvent->setTime(timeParam);
@@ -55,7 +59,7 @@ namespace dss {
     }
     applyOptionsWithSuffix(_subscription.getOptions(), "_default", newEvent);
     if(_subscription.getOptions().hasParameter(EventPropertyLocation)) {
-      string location = _subscription.getOptions().getParameter(EventPropertyLocation);
+      std::string location = _subscription.getOptions().getParameter(EventPropertyLocation);
       if(!location.empty()) {
         Logger::getInstance()->log("RaiseEvent: Event has location");
         newEvent->setLocation(location);
@@ -68,7 +72,7 @@ namespace dss {
 
   void EventInterpreterPluginRaiseEvent::applyOptionsWithSuffix(const SubscriptionOptions& _options, const std::string& _suffix, boost::shared_ptr<Event> _event) {
     const HashMapConstStringString sourceMap = _options.getParameters().getContainer();
-    typedef const std::pair<const std::string, string> tItem;
+    typedef const std::pair<const std::string, std::string> tItem;
     foreach(tItem kv, sourceMap) {
       if(endsWith(kv.first, _suffix)) {
         std::string propName = kv.first.substr(0, kv.first.length() - _suffix.length());
@@ -86,7 +90,7 @@ namespace dss {
 
   void EventInterpreterPluginJavascript::handleEvent(Event& _event, const EventSubscription& _subscription) {
     if(_subscription.getOptions().hasParameter("filename")) {
-      string scriptName = _subscription.getOptions().getParameter("filename");
+      std::string scriptName = _subscription.getOptions().getParameter("filename");
       if(boost::filesystem::exists(scriptName)) {
 
         if(!m_Environment.isInitialized()) {
@@ -129,11 +133,11 @@ namespace dss {
             Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: keeping script " + scriptName + " in memory", lsInfo);
           }
         } catch(ScriptException& e) {
-          Logger::getInstance()->log(string("EventInterpreterPluginJavascript::handleEvent: Caught event while running/parsing script '")
+          Logger::getInstance()->log(std::string("EventInterpreterPluginJavascript::handleEvent: Caught event while running/parsing script '")
                               + scriptName + "'. Message: " + e.what(), lsError);
         }
       } else {
-        Logger::getInstance()->log(string("EventInterpreterPluginJavascript::handleEvent: Could not find script: '") + scriptName + "'", lsError);
+        Logger::getInstance()->log(std::string("EventInterpreterPluginJavascript::handleEvent: Could not find script: '") + scriptName + "'", lsError);
       }
     } else {
       throw std::runtime_error("EventInterpreteRPluginJavascript::handleEvent: missing argument filename");
@@ -154,8 +158,8 @@ namespace dss {
     DS485Command m_Command;
     int m_ParameterIndex;
     int m_SceneIndex;
-    string m_To;
-    string m_Context;
+    std::string m_To;
+    std::string m_Context;
   public:
     SubscriptionOptionsDS485()
     : m_ParameterIndex(-1), m_SceneIndex(-1)
@@ -167,17 +171,17 @@ namespace dss {
     void setParameterIndex(const int _value) { m_ParameterIndex = _value; }
     int getParameterIndex() const { return m_ParameterIndex; }
 
-    void setTo(const string& _value) { m_To = _value; }
-    const string& GetTo() const { return m_To; }
+    void setTo(const std::string& _value) { m_To = _value; }
+    const std::string& GetTo() const { return m_To; }
 
-    void setContext(const string& _value) { m_Context = _value; }
-    const string& getContext() const { return m_Context; }
+    void setContext(const std::string& _value) { m_Context = _value; }
+    const std::string& getContext() const { return m_Context; }
 
     void setSceneIndex(const int _value) { m_SceneIndex = _value; }
     int getSceneIndex() const { return m_SceneIndex; }
   };
 
-  string EventInterpreterPluginDS485::getParameter(XMLNodeList& _nodes, const string& _parameterName) {
+  std::string EventInterpreterPluginDS485::getParameter(XMLNodeList& _nodes, const std::string& _parameterName) {
     for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
         iNode != e; ++iNode)
     {
@@ -199,8 +203,8 @@ namespace dss {
         iNode != e; ++iNode)
     {
       if(iNode->getName() == "send") {
-        string typeName = iNode->getAttributes()["type"];
-        string paramName = "";
+        std::string typeName = iNode->getAttributes()["type"];
+        std::string paramName = "";
         bool needParam = false;
         if(typeName == "turnOn") {
           result->setCommand(cmdTurnOn);
@@ -241,15 +245,15 @@ namespace dss {
           result->setCommand(cmdDecreaseParam);
           paramName = "parameter";
         } else {
-          Logger::getInstance()->log(string("unknown command: ") + typeName);
+          Logger::getInstance()->log(std::string("unknown command: ") + typeName);
           delete result;
           return NULL;
         }
 
         if(!paramName.empty()) {
-          string paramValue = getParameter(iNode->getChildren(), paramName);
+          std::string paramValue = getParameter(iNode->getChildren(), paramName);
           if(paramValue.size() == 0 && needParam) {
-            Logger::getInstance()->log(string("bus_handler: Needed parameter '") + paramName + "' not found in subscription for type '" + typeName + "'", lsError);
+            Logger::getInstance()->log(std::string("bus_handler: Needed parameter '") + paramName + "' not found in subscription for type '" + typeName + "'", lsError);
           }
 
           if(paramName == "parameter") {
@@ -351,5 +355,95 @@ namespace dss {
   void EventInterpreterInternalRelay::removeSubscription(const std::string& _subscriptionID) {
     m_IDTargetMap[_subscriptionID] = NULL;
   } // removeSubscription
+
+  //================================================== EventInterpreterPluginEmail
+
+  EventInterpreterPluginEmail::EventInterpreterPluginEmail(EventInterpreter* _pInterpreter)
+  : EventInterpreterPlugin("send_email", _pInterpreter)
+  { } // ctor
+
+  void EventInterpreterPluginEmail::handleEvent(Event& _event, const EventSubscription& _subscription) {
+    std::string emailServer;
+    std::string login;
+    std::string password;
+    std::string sender;
+    std::string receiver;
+    std::string body;
+    std::string subject;
+    if(_event.hasPropertySet("email_server")) {
+      emailServer=_event.getPropertyByName("email_server");
+    } else if(_subscription.getOptions().hasParameter("email_server")) {
+      emailServer=_subscription.getOptions().getParameter("email_server");
+    } else {
+      return;
+    }
+
+    if(_event.hasPropertySet("login")) {
+      login=_event.getPropertyByName("login");
+    } else if(_subscription.getOptions().hasParameter("login")) {
+      login=_subscription.getOptions().getParameter("login");
+    } else {
+      return;
+    }
+
+    if(_event.hasPropertySet("password")) {
+      password=_event.getPropertyByName("password");
+    } else if(_subscription.getOptions().hasParameter("password")) {
+      password=_subscription.getOptions().getParameter("password");
+    } else {
+      return;
+    }
+
+    if(_event.hasPropertySet("sender")) {
+      sender=_event.getPropertyByName("sender");
+    } else if(_subscription.getOptions().hasParameter("sender")) {
+      sender=_subscription.getOptions().getParameter("sender");
+    } else {
+      return;
+    }
+
+    if(_event.hasPropertySet("receiver")) {
+      receiver=_event.getPropertyByName("receiver");
+    } else if(_subscription.getOptions().hasParameter("receiver")) {
+      receiver=_subscription.getOptions().getParameter("receiver");
+    } else {
+      return;
+    }
+
+    if (_event.hasPropertySet("body")) {
+      body=_event.getPropertyByName("body");
+    } else if(_subscription.getOptions().hasParameter("body")) {
+      body=_subscription.getOptions().getParameter("body");
+    } else {
+      return;
+    }
+
+    if(_event.hasPropertySet("subject")) {
+      subject=_event.getPropertyByName("subject");
+    } else if(_subscription.getOptions().hasParameter("subject")) {
+      subject=_subscription.getOptions().getParameter("subject");
+    } else {
+      return;
+    }
+
+    try {
+      Logger::getInstance()->log("EventInterpreterPluginEmail::handleEvent: Sending Email", lsInfo);
+      Poco::Net::MailMessage message;
+      message.setSender(sender);
+      message.addRecipient(Poco::Net::MailRecipient(Poco::Net::MailRecipient::PRIMARY_RECIPIENT, receiver));
+      message.setSubject(subject);
+      message.setContent(body);
+      Logger::getInstance()->log("EventInterpreterPluginEmail::handleEvent: host "+ emailServer, lsInfo);
+      Poco::Net::SMTPClientSession session(emailServer);
+      session.login(Poco::Net::SMTPClientSession::AUTH_LOGIN, login, password);
+      session.sendMessage(message);
+      session.close();
+    }
+    catch (Poco::Exception& exc)
+    {
+      Logger::getInstance()->log("exc.displayText()=" + exc.displayText(), lsFatal);
+    }
+  } // handleEvent
+
 
 } // namespace dss

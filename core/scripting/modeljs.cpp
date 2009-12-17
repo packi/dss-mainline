@@ -435,7 +435,7 @@ namespace dss {
     ScriptObject self(obj, *ctx);
     if(self.is("set") || self.is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      intf->turnOn();
+      intf->disable();
       *rval = INT_TO_JSVAL(0);
       return JS_TRUE;
     }

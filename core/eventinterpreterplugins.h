@@ -56,7 +56,7 @@ namespace dss {
   private:
     DS485Interface* m_pInterface;
     Apartment& m_Apartment;
-    string getParameter(XMLNodeList& _nodes, const string& _parameterName);
+    std::string getParameter(XMLNodeList& _nodes, const std::string& _parameterName);
   public:
     EventInterpreterPluginDS485(Apartment& _apartment, DS485Interface* _pInterface, EventInterpreter* _pInterpreter);
 
@@ -100,6 +100,14 @@ namespace dss {
   private:
     HASH_NAMESPACE::hash_map<const std::string, EventRelayTarget*> m_IDTargetMap;
   }; // EventInterpreterInternalRelay
+
+  class EventInterpreterPluginEmail : public EventInterpreterPlugin {
+   private:
+   public:
+       EventInterpreterPluginEmail(EventInterpreter* _pInterpreter);
+
+     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+   }; // EventInterpreterPluginEmail
 
 } // namespace dss
 

@@ -54,6 +54,74 @@ BOOST_AUTO_TEST_CASE(testSimpleDates) {
   BOOST_CHECK_EQUAL(dt3.getYear(), 2007);
 } // testSimpleDates
 
+BOOST_AUTO_TEST_CASE(testAddingMonth) {
+  DateTime dt;
+  DateTime dt2 = dt.addMonth(1);
+
+  assert(dt2.after(dt));
+  assert(!dt2.before(dt));
+  assert(dt.before(dt2));
+  assert(!dt.after(dt2));
+
+  BOOST_CHECK(dt2.after(dt));
+  BOOST_CHECK(!dt2.before(dt));
+  BOOST_CHECK(dt.before(dt2));
+  BOOST_CHECK(!dt.after(dt2));
+} // testAddingMonth
+
+BOOST_AUTO_TEST_CASE(testISODate) {
+  DateTime dt = DateTime::fromISO("20080506T080102Z");
+  BOOST_CHECK_EQUAL(2008, dt.getYear());
+  BOOST_CHECK_EQUAL(4, dt.getMonth()); // zero based
+  BOOST_CHECK_EQUAL(6, dt.getDay());
+  BOOST_CHECK_EQUAL(8, dt.getHour());
+  BOOST_CHECK_EQUAL(1, dt.getMinute());
+  BOOST_CHECK_EQUAL(2, dt.getSecond());
+} // testISODate
+
+BOOST_AUTO_TEST_CASE(testTooshortISODate) {
+  BOOST_CHECK_THROW(DateTime::fromISO("20080506T080102"), std::invalid_argument);
+} // testISODate
+
+BOOST_AUTO_TEST_CASE(testMonthOutOfRange) {
+  BOOST_CHECK_THROW(DateTime::fromISO("20083006T080102Z"), std::invalid_argument);
+} // testMonthOutOfRange
+
+BOOST_AUTO_TEST_CASE(testMissingTISODate) {
+  BOOST_CHECK_THROW(DateTime::fromISO("20080506X080102Z"), std::invalid_argument);
+} // testMissingTISODate
+
+BOOST_AUTO_TEST_CASE(testHourOutOfRangeISODate) {
+  BOOST_CHECK_THROW(DateTime::fromISO("20080506T250102Z"), std::invalid_argument);
+} // testHourOutOfRangeISODate
+
+BOOST_AUTO_TEST_CASE(testMinuteOutOfRangeISODate) {
+  BOOST_CHECK_THROW(DateTime::fromISO("20080506T086202Z"), std::invalid_argument);
+} // testMinuteOutOfRangeISODate
+
+BOOST_AUTO_TEST_CASE(testSecondsOutOfRangeISODate) {
+  BOOST_CHECK_THROW(DateTime::fromISO("20080506T080162Z"), std::invalid_argument);
+} // testSecondOutOfRangeISODate
+
+BOOST_AUTO_TEST_CASE(testGetDayOfYear) {
+  BOOST_CHECK_EQUAL(1, DateTime::fromISO("20090102T100000Z").getDayOfYear()); // zero based
+} // testGetDayOfYear
+
+BOOST_AUTO_TEST_CASE(testSetters) {
+  DateTime dt;
+  dt.setDay(1);
+  dt.setMonth(2);
+  dt.setYear(2009);
+  dt.setHour(3);
+  dt.setMinute(4);
+  dt.setSecond(5);
+  dt.validate();
+  DateTime other;
+  other.setDate(1, 2, 2009);
+  other.setTime(3,4,5);
+  BOOST_CHECK_EQUAL(dt, other);
+} // testSetters
+
 BOOST_AUTO_TEST_CASE(testAddingComparing) {
   DateTime dt;
   DateTime dt2 = dt.addHour(1);

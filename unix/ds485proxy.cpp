@@ -82,7 +82,7 @@ namespace dss {
 
 
     if(_zone.getDevices().length() == _set.length()) {
-      Logger::getInstance()->log(string("Optimization: Set contains all devices of zone ") + intToString(_zone.getID()));
+      Logger::getInstance()->log(std::string("Optimization: Set contains all devices of zone ") + intToString(_zone.getID()));
         std::bitset<63> possibleGroups;
         possibleGroups.set();
         for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
@@ -593,13 +593,13 @@ namespace dss {
     } else if(devID == 1) {
       log("Found dSM");
     } else {
-      log(string("Found unknown device (") + intToString(devID, true) + ")");
+      log(std::string("Found unknown device (") + intToString(devID, true) + ")");
     }
     uint16_t hwVersion = (pd.get<uint8_t>() << 8) | pd.get<uint8_t>();
     uint16_t swVersion = (pd.get<uint8_t>() << 8) | pd.get<uint8_t>();
 
-    log(string("  HW-Version: ") + intToString(hwVersion >> 8) + "." + intToString(hwVersion & 0x00FF));
-    log(string("  SW-Version: ") + intToString(swVersion >> 8) + "." + intToString(swVersion & 0x00FF));
+    log(std::string("  HW-Version: ") + intToString(hwVersion >> 8) + "." + intToString(hwVersion & 0x00FF));
+    log(std::string("  SW-Version: ") + intToString(swVersion >> 8) + "." + intToString(swVersion & 0x00FF));
 
     std::string name;
     for(int i = 0; i < 6; i++) {
@@ -608,7 +608,7 @@ namespace dss {
         name += c;
       }
     }
-    log(string("  Name:      \"") + name + "\"");
+    log(std::string("  Name:      \"") + name + "\"");
 
     // bus-id, sw-version, hw-version, name, device-id
     ModulatorSpec_t spec(source, swVersion, hwVersion, name, devID);
@@ -636,7 +636,7 @@ namespace dss {
       }
       int source = recFrame->getFrame()->getHeader().getSource();
       if(resultFrom[source]) {
-        log(string("already received result from ") + intToString(source));
+        log(std::string("already received result from ") + intToString(source));
         continue;
       }
       ModulatorSpec_t spec = modulatorSpecFromFrame(recFrame->getFrame());
@@ -689,7 +689,7 @@ namespace dss {
     std::vector<int> result;
 
     int numGroups = getGroupCount(_modulatorID, _zoneID);
-    log(string("Modulator has ") + intToString(numGroups) + " groups");
+    log(std::string("Modulator has ") + intToString(numGroups) + " groups");
     for(int iGroup = 0; iGroup < numGroups; iGroup++) {
       DS485CommandFrame cmdFrame;
       cmdFrame.getHeader().setDestination(_modulatorID);
@@ -796,7 +796,7 @@ namespace dss {
     std::vector<int> result;
 
     int numZones = getZoneCount(_modulatorID);
-    log(string("Modulator has ") + intToString(numZones) + " zones");
+    log(std::string("Modulator has ") + intToString(numZones) + " zones");
     for(int iZone = 0; iZone < numZones; iZone++) {
       DS485CommandFrame cmdFrame;
       cmdFrame.getHeader().setDestination(_modulatorID);
@@ -854,7 +854,7 @@ namespace dss {
     std::vector<int> result;
 
     int numDevices = getDevicesCountInZone(_modulatorID, _zoneID);
-    log(string("Found ") + intToString(numDevices) + " in zone.");
+    log(std::string("Found ") + intToString(numDevices) + " in zone.");
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
       DS485CommandFrame cmdFrame;
       cmdFrame.getHeader().setDestination(_modulatorID);
@@ -929,7 +929,7 @@ namespace dss {
     cmdFrame.getHeader().setDestination(_modulatorID);
     cmdFrame.setCommand(CommandRequest);
     cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetDSID);
-    log(string("Proxy: GetDSIDOfModulator ") + intToString(_modulatorID));
+    log(std::string("Proxy: GetDSIDOfModulator ") + intToString(_modulatorID));
 
     boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionModulatorGetDSID);
     if(recFrame == NULL) {
@@ -947,7 +947,7 @@ namespace dss {
     cmdFrame.getHeader().setDestination(_modulatorID);
     cmdFrame.setCommand(CommandRequest);
     cmdFrame.getPayload().add<uint8_t>(FunctionGroupGetLastCalledScene);
-    log(string("Proxy: GetLastCalledScene ") + intToString(_modulatorID));
+    log(std::string("Proxy: GetLastCalledScene ") + intToString(_modulatorID));
     cmdFrame.getPayload().add<uint16_t>(_zoneID);
     cmdFrame.getPayload().add<uint16_t>(_groupID);
 
@@ -964,7 +964,7 @@ namespace dss {
     cmdFrame.getHeader().setDestination(_modulatorID);
     cmdFrame.setCommand(CommandRequest);
     cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetPowerConsumption);
-    log(string("Proxy: GetPowerConsumption ") + intToString(_modulatorID));
+    log(std::string("Proxy: GetPowerConsumption ") + intToString(_modulatorID));
 
     boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionModulatorGetPowerConsumption);
     if(recFrame == NULL) {
@@ -984,7 +984,7 @@ namespace dss {
     cmdFrame.getHeader().setDestination(_modulatorID);
     cmdFrame.setCommand(CommandRequest);
     cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetEnergyMeterValue);
-    log(string("Proxy: GetEnergyMeterValue ") + intToString(_modulatorID));
+    log(std::string("Proxy: GetEnergyMeterValue ") + intToString(_modulatorID));
 
     boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionModulatorGetEnergyMeterValue);
     if(recFrame == NULL) {
@@ -1033,7 +1033,7 @@ namespace dss {
     bucket->waitForFrame(2000);
     boost::shared_ptr<ReceivedFrame> recFrame;
     if(bucket->isEmpty()) {
-      log(string("received no ack for request getSensorValue"));
+      log(std::string("received no ack for request getSensorValue"));
       throw DS485ApiError("no Ack for sensorValue");
     } else if(bucket->getFrameCount() == 1) {
         // first frame received, wait for the next frame
@@ -1061,7 +1061,7 @@ namespace dss {
         pd.get<uint16_t>();
         checkResultCode((int)pd.get<uint16_t>()); // check sensorvalue
         int result = int(pd.get<uint16_t>());
-        log(string("result ") + intToString(result));
+        log(std::string("result ") + intToString(result));
         return result;
     } else {
       throw std::runtime_error("received frame is NULL but bucket->isEmpty() returns false");
@@ -1126,10 +1126,10 @@ namespace dss {
     bucket->waitForFrame(1000);
 
     if(bucket->isEmpty()) {
-      log(string("received no results for request (") + FunctionIDToString(_functionID) + ")");
+      log(std::string("received no results for request (") + FunctionIDToString(_functionID) + ")");
       return boost::shared_ptr<ReceivedFrame>();
     } else if(bucket->getFrameCount() > 1) {
-      log(string("received multiple results (") + intToString(bucket->getFrameCount()) + ") for request (" + FunctionIDToString(_functionID) + ")");
+      log(std::string("received multiple results (") + intToString(bucket->getFrameCount()) + ") for request (" + FunctionIDToString(_functionID) + ")");
       // TODO: check
       return bucket->popFrame();
     }
@@ -1195,7 +1195,7 @@ namespace dss {
       m_DS485Controller.setDSID(dsid_t::fromString(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "dsid")));
       m_DS485Controller.run();
     } catch (const std::runtime_error& _ex) {
-    	log(string("Caught exception while starting DS485Controller: ") + _ex.what(), lsFatal);
+    	log(std::string("Caught exception while starting DS485Controller: ") + _ex.what(), lsFatal);
     }
     // call Thread::run()
     run();
@@ -1521,7 +1521,7 @@ namespace dss {
             sstream << " from " << int(frame->getHeader().getSource());
             log(sstream.str());
 
-            log(string("Response for: ") + FunctionIDToString(functionID));
+            log(std::string("Response for: ") + FunctionIDToString(functionID));
             boost::shared_ptr<ReceivedFrame> rf(new ReceivedFrame(m_DS485Controller.getTokenCount(), frame));
 
             PayloadDissector pd2(frame->getPayload());
@@ -1582,7 +1582,7 @@ namespace dss {
     uint8_t commandID = _frame->getCommand();
     if(commandID != CommandResponse && commandID != CommandRequest && commandID != CommandEvent) {
       log("discarded non response/request/command frame", lsInfo);
-      log(string("frame type ") + commandToString(commandID));
+      log(std::string("frame type ") + commandToString(commandID));
     } else {
       m_IncomingFramesGuard.lock();
       m_IncomingFrames.push_back(_frame);

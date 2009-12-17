@@ -27,9 +27,9 @@ int NotAuthorized(struct soap *soap) {
 bool IsAuthorized(struct soap *soap, const int _token) {
   bool result = dss::DSS::getInstance()->getWebServices().isAuthorized(soap, _token);
   if(result) {
-    dss::Logger::getInstance()->log(string("User with token '") + dss::intToString(_token) + "' is authorized");
+    dss::Logger::getInstance()->log(std::string("User with token '") + dss::intToString(_token) + "' is authorized");
   } else {
-    dss::Logger::getInstance()->log(string("User with token '") + dss::intToString(_token) + "' is *not* authorized", lsWarning);
+    dss::Logger::getInstance()->log(std::string("User with token '") + dss::intToString(_token) + "' is *not* authorized", lsWarning);
   }
   return result;
 } // isAuthorized
@@ -209,7 +209,7 @@ int dss__ApartmentGetDeviceIDByName(struct soap *soap, int _token,  char* _devic
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
   try {
     dss::dsid_t dsid = apt.getDevices().getByName(_deviceName).getDSID();
-    string asString = dsid.toString();
+    std::string asString = dsid.toString();
     deviceID = soap_strdup(soap, asString.c_str());
   } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Could not find device", NULL);
@@ -1009,9 +1009,9 @@ int dss__SwitchSimulateKeypress(struct soap *soap, int _token, char* _deviceID, 
   dss::DSIDSimSwitch* sw = NULL;
   if(simDev != NULL && (sw = dynamic_cast<dss::DSIDSimSwitch*>(simDev)) != NULL) {
     dss::ButtonPressKind kind = dss::Click;
-    if(string(_kind) == "touch") {
+    if(std::string(_kind) == "touch") {
       kind = dss::Touch;
-    } else if(string(_kind) == "touchend") {
+    } else if(std::string(_kind) == "touchend") {
       kind = dss::TouchEnd;
     }
     dss::DSS::getInstance()->getSimulation().processButtonPress(*sw, _buttonNr, kind);
@@ -1132,16 +1132,16 @@ int dss__EventRaise(struct soap *soap, int _token, char* _eventName, char* _cont
       evt->setContext(_context);
     }
     if(_parameter != NULL && strlen(_parameter) > 0) {
-      vector<string> params = dss::splitString(_parameter, ';');
-      for(vector<string>::iterator iParam = params.begin(), e = params.end();
+      vector<std::string> params = dss::splitString(_parameter, ';');
+      for(vector<std::string>::iterator iParam = params.begin(), e = params.end();
           iParam != e; ++iParam)
       {
-        vector<string> nameValue = dss::splitString(*iParam, '=');
+        vector<std::string> nameValue = dss::splitString(*iParam, '=');
         if(nameValue.size() == 2) {
           dss::Logger::getInstance()->log("SOAP::eventRaise: Got parameter '" + nameValue[0] + "'='" + nameValue[1] + "'");
           evt->setProperty(nameValue[0], nameValue[1]);
         } else {
-          dss::Logger::getInstance()->log(string("Invalid parameter found SOAP::eventRaise: ") + *iParam );
+          dss::Logger::getInstance()->log(std::string("Invalid parameter found SOAP::eventRaise: ") + *iParam );
         }
       }
     }
