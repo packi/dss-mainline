@@ -101,6 +101,14 @@ namespace dss {
     HASH_NAMESPACE::hash_map<const std::string, EventRelayTarget*> m_IDTargetMap;
   }; // EventInterpreterInternalRelay
 
+  class EventInterpreterPluginEmail : public EventInterpreterPlugin {
+   private:
+   public:
+       EventInterpreterPluginEmail(EventInterpreter* _pInterpreter);
+
+     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+   }; // EventInterpreterPluginEmail
+
 } // namespace dss
 
 #endif /* EVENTINTERPRETERPLUGINS_H_ */

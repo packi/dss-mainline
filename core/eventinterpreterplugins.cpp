@@ -21,6 +21,10 @@
 
 #include "eventinterpreterplugins.h"
 
+#include <Poco/Net/MailMessage.h>
+#include <Poco/Net/SMTPClientSession.h>
+#include <Poco/Net/MailRecipient.h>
+
 #include "base.h"
 #include "logger.h"
 #include "DS485Interface.h"
@@ -351,5 +355,95 @@ namespace dss {
   void EventInterpreterInternalRelay::removeSubscription(const std::string& _subscriptionID) {
     m_IDTargetMap[_subscriptionID] = NULL;
   } // removeSubscription
+
+  //================================================== EventInterpreterPluginEmail
+
+  EventInterpreterPluginEmail::EventInterpreterPluginEmail(EventInterpreter* _pInterpreter)
+  : EventInterpreterPlugin("send_email", _pInterpreter)
+  { } // ctor
+
+  void EventInterpreterPluginEmail::handleEvent(Event& _event, const EventSubscription& _subscription) {
+    std::string emailServer;
+    std::string login;
+    std::string password;
+    std::string sender;
+    std::string receiver;
+    std::string body;
+    std::string subject;
+    if(_event.hasPropertySet("email_server")) {
+      emailServer=_event.getPropertyByName("email_server");
+    } else if(_subscription.getOptions().hasParameter("email_server")) {
+      emailServer=_subscription.getOptions().getParameter("email_server");
+    } else {
+      return;
+    }
+
+    if(_event.hasPropertySet("login")) {
+      login=_event.getPropertyByName("login");
+    } else if(_subscription.getOptions().hasParameter("login")) {
+      login=_subscription.getOptions().getParameter("login");
+    } else {
+      return;
+    }
+
+    if(_event.hasPropertySet("password")) {
+      password=_event.getPropertyByName("password");
+    } else if(_subscription.getOptions().hasParameter("password")) {
+      password=_subscription.getOptions().getParameter("password");
+    } else {
+      return;
+    }
+
+    if(_event.hasPropertySet("sender")) {
+      sender=_event.getPropertyByName("sender");
+    } else if(_subscription.getOptions().hasParameter("sender")) {
+      sender=_subscription.getOptions().getParameter("sender");
+    } else {
+      return;
+    }
+
+    if(_event.hasPropertySet("receiver")) {
+      receiver=_event.getPropertyByName("receiver");
+    } else if(_subscription.getOptions().hasParameter("receiver")) {
+      receiver=_subscription.getOptions().getParameter("receiver");
+    } else {
+      return;
+    }
+
+    if (_event.hasPropertySet("body")) {
+      body=_event.getPropertyByName("body");
+    } else if(_subscription.getOptions().hasParameter("body")) {
+      body=_subscription.getOptions().getParameter("body");
+    } else {
+      return;
+    }
+
+    if(_event.hasPropertySet("subject")) {
+      subject=_event.getPropertyByName("subject");
+    } else if(_subscription.getOptions().hasParameter("subject")) {
+      subject=_subscription.getOptions().getParameter("subject");
+    } else {
+      return;
+    }
+
+    try {
+      Logger::getInstance()->log("EventInterpreterPluginEmail::handleEvent: Sending Email", lsInfo);
+      Poco::Net::MailMessage message;
+      message.setSender(sender);
+      message.addRecipient(Poco::Net::MailRecipient(Poco::Net::MailRecipient::PRIMARY_RECIPIENT, receiver));
+      message.setSubject(subject);
+      message.setContent(body);
+      Logger::getInstance()->log("EventInterpreterPluginEmail::handleEvent: host "+ emailServer, lsInfo);
+      Poco::Net::SMTPClientSession session(emailServer);
+      session.login(Poco::Net::SMTPClientSession::AUTH_LOGIN, login, password);
+      session.sendMessage(message);
+      session.close();
+    }
+    catch (Poco::Exception& exc)
+    {
+      Logger::getInstance()->log("exc.displayText()=" + exc.displayText(), lsFatal);
+    }
+  } // handleEvent
+
 
 } // namespace dss
