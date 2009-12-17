@@ -7,6 +7,7 @@
 #cmakedefine HAVE_STDINT
 #cmakedefine HAVE_MOZJS_JSAPI_H
 #cmakedefine HAVE_JS_JSAPI_H
+#cmakedefine HAVE_JSAPI_H
 #cmakedefine HAVE_LIBICAL_ICAL_H
 #cmakedefine HAVE_ICAL_H
 #cmakedefine HAVE_DNS_SD
