@@ -211,12 +211,12 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
   queue.setEventRunner(&runner);
   runner.setEventQueue(&queue);
 
-  DSModulatorSim modSim(NULL);
-  DS485Proxy proxy(NULL);
-  proxy.initialize();
-
   Apartment apt(NULL);
   apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485Proxy proxy(NULL, &apt);
+  proxy.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setName("dev1");

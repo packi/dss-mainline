@@ -223,10 +223,13 @@ namespace dss {
     return FittingResultPerModulator(fittingGroups, singleDevices);
   } // bestFit
 
-  DS485Proxy::DS485Proxy(DSS* _pDSS)
+  DS485Proxy::DS485Proxy(DSS* _pDSS, Apartment* _pApartment)
   : Thread("DS485Proxy"),
-    Subsystem(_pDSS, "DS485Proxy")
+    Subsystem(_pDSS, "DS485Proxy"),
+    m_pApartment(_pApartment),
+    m_InitializeDS485Controller(true)
   {
+    assert(_pApartment != NULL);
     if(_pDSS != NULL) {
       _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "rs485devicename")
             ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, std::string>(m_DS485Controller, &DS485Controller::getRS485DeviceName, &DS485Controller::setRS485DeviceName));
@@ -1166,11 +1169,13 @@ namespace dss {
   }
 
   void DS485Proxy::doStart() {
-    try {
-      m_DS485Controller.setDSID(dsid_t::fromString(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "dsid")));
-      m_DS485Controller.run();
-    } catch (const std::runtime_error& _ex) {
-    	log(std::string("Caught exception while starting DS485Controller: ") + _ex.what(), lsFatal);
+    if(m_InitializeDS485Controller) {
+      try {
+        m_DS485Controller.setDSID(dsid_t::fromString(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "dsid")));
+        m_DS485Controller.run();
+      } catch (const std::runtime_error& _ex) {
+        log(std::string("Caught exception while starting DS485Controller: ") + _ex.what(), lsFatal);
+      }
     }
     // call Thread::run()
     run();
@@ -1323,6 +1328,10 @@ namespace dss {
     return "";
   } // functionIDToString
 
+  void DS485Proxy::raiseModelEvent(ModelEvent* _pEvent) {
+    m_pApartment->addModelEvent(_pEvent);
+  } // raiseModelEvent
+
   void DS485Proxy::execute() {
     signalEvent();
     
@@ -1333,7 +1342,7 @@ namespace dss {
       if(currentState != lastState) {
         if((currentState == csSlave) || (currentState == csMaster)) {
           ModelEvent* pEvent = new ModelEvent(ModelEvent::etBusReady);
-          getDSS().getApartment().addModelEvent(pEvent);
+          raiseModelEvent(pEvent);
         }
         lastState = currentState;
       }
@@ -1396,7 +1405,7 @@ namespace dss {
               pEvent->addParameter(zoneID);
               pEvent->addParameter(devID);
               pEvent->addParameter(functionID);
-              getDSS().getApartment().addModelEvent(pEvent);
+              raiseModelEvent(pEvent);
             } else if(functionID == FunctionGroupCallScene) {
               pd.get<uint8_t>(); // function id
               uint16_t zoneID = pd.get<uint16_t>();
@@ -1407,13 +1416,15 @@ namespace dss {
                 sceneEvent->setProperty("sceneID", intToString(sceneID & 0x00ff));
                 sceneEvent->setProperty("groupID", intToString(groupID));
                 sceneEvent->setProperty("zoneID", intToString(zoneID));
-                getDSS().getEventQueue().pushEvent(sceneEvent);
+                if(DSS::hasInstance()) {
+                  getDSS().getEventQueue().pushEvent(sceneEvent);
+                }
               }
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etCallSceneGroup);
               pEvent->addParameter(zoneID);
               pEvent->addParameter(groupID);
               pEvent->addParameter(sceneID);
-              getDSS().getApartment().addModelEvent(pEvent);
+              raiseModelEvent(pEvent);
             } else if(functionID == FunctionDeviceCallScene) {
               pd.get<uint8_t>(); // functionID
               uint16_t devID = pd.get<uint16_t>();
@@ -1423,7 +1434,7 @@ namespace dss {
               pEvent->addParameter(modID);
               pEvent->addParameter(devID);
               pEvent->addParameter(sceneID);
-              getDSS().getApartment().addModelEvent(pEvent);
+              raiseModelEvent(pEvent);
             } else if(functionID == EventDSLinkInterrupt) {
               pd.get<uint8_t>(); // functionID
               uint16_t devID = pd.get<uint16_t>();
@@ -1433,7 +1444,7 @@ namespace dss {
               pEvent->addParameter(modID);
               pEvent->addParameter(devID);
               pEvent->addParameter(priority);
-              getDSS().getApartment().addModelEvent(pEvent);
+              raiseModelEvent(pEvent);
             } else if(functionID == EventDeviceReceivedTelegramShort) {
               pd.get<uint8_t>(); // function id
               uint16_t p1 = pd.get<uint16_t>();
@@ -1471,18 +1482,18 @@ namespace dss {
               int modID = pd.get<uint16_t>();
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etNewModulator);
               pEvent->addParameter(modID);
-              getDSS().getApartment().addModelEvent(pEvent);
+              raiseModelEvent(pEvent);
             } else if(functionID == EventLostDS485Device) {
               pd.get<uint8_t>(); // functionID
               int modID = pd.get<uint16_t>();
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etLostModulator);
               pEvent->addParameter(modID);
-              getDSS().getApartment().addModelEvent(pEvent);
+              raiseModelEvent(pEvent);
             } else if(functionID == EventDeviceReady) {
               int modID = frame->getHeader().getDestination();
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etModulatorReady);
               pEvent->addParameter(modID);
-              getDSS().getApartment().addModelEvent(pEvent);
+              raiseModelEvent(pEvent);
             }
           } else {
             std::ostringstream sstream;
@@ -1508,7 +1519,7 @@ namespace dss {
                 ModelEvent* pEvent = new ModelEvent(ModelEvent::etPowerConsumption);
                 pEvent->addParameter(modID);
                 pEvent->addParameter(pd2.get<uint32_t>());
-                getDSS().getApartment().addModelEvent(pEvent);
+                raiseModelEvent(pEvent);
             } else if (functionID == FunctionModulatorGetEnergyMeterValue) {
               /* hard optimized */
               //getDSS().getApartment().getModulatorByBusID((int)(frame->getHeader().getSource())).setEnergyMeterValue(pd2.get<uint32_t>());
@@ -1516,7 +1527,7 @@ namespace dss {
                 ModelEvent* pEvent = new ModelEvent(ModelEvent::etEnergyMeterValue);
                 pEvent->addParameter(modID);
                 pEvent->addParameter(pd2.get<uint32_t>());
-                getDSS().getApartment().addModelEvent(pEvent);
+                raiseModelEvent(pEvent);
             } else if (functionID == FunctionModulatorGetDSID) {
               int sourceID = frame->getHeader().getSource();
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etDS485DeviceDiscovered);
@@ -1527,7 +1538,7 @@ namespace dss {
               pEvent->addParameter(((pd2.get<uint8_t>() << 8) & 0xff00) | (pd2.get<uint8_t>() & 0x00ff));
               pEvent->addParameter(((pd2.get<uint8_t>() << 8) & 0xff00) | (pd2.get<uint8_t>() & 0x00ff));
               pEvent->addParameter(((pd2.get<uint8_t>() << 8) & 0xff00) | (pd2.get<uint8_t>() & 0x00ff));
-              getDSS().getApartment().addModelEvent(pEvent);
+              raiseModelEvent(pEvent);
             }
 
             bool bucketFound = false;

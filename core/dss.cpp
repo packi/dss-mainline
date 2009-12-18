@@ -155,11 +155,11 @@ const char* WebrootDirectory = "data/webroot";
   bool DSS::initialize(const vector<std::string>& _properties) {
     m_State = ssCreatingSubsystems;
 
-    m_pDS485Interface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this));
-    m_Subsystems.push_back(dynamic_cast<DS485Proxy*>(m_pDS485Interface.get()));
-
     m_pApartment = boost::shared_ptr<Apartment>(new Apartment(this));
     m_Subsystems.push_back(m_pApartment.get());
+
+    m_pDS485Interface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this, m_pApartment.get()));
+    m_Subsystems.push_back(dynamic_cast<DS485Proxy*>(m_pDS485Interface.get()));
 
     m_pWebServer = boost::shared_ptr<WebServer>(new WebServer(this));
     m_Subsystems.push_back(m_pWebServer.get());

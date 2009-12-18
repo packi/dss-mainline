@@ -26,10 +26,73 @@
 #include "core/model.h"
 #include "core/setbuilder.h"
 #include "core/ds485const.h"
+#include "unix/ds485proxy.h"
+#include "core/sim/dssim.h"
+#include "core/dss.h"
 
 using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(Model)
+
+BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
+  Apartment apt(NULL);
+  apt.initialize();
+
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
+  dev1.setName("dev1");
+  dev1.setModulatorID(1);
+
+  Device& dev2 = apt.allocateDevice(dsid_t(0,1));
+  BOOST_CHECK_EQUAL(dev1.getShortAddress(), dev2.getShortAddress());
+  BOOST_CHECK_EQUAL(dev1.getName(), dev2.getName());
+  BOOST_CHECK_EQUAL(dev1.getModulatorID(), dev2.getModulatorID());
+} // testApartmentAllocateDeviceReturnsTheSameDeviceForDSID
+
+BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByShortAddress) {
+  Apartment apt(NULL);
+  apt.initialize();
+
+  Modulator& mod = apt.allocateModulator(dsid_t(0,2));
+  mod.setBusID(1);
+
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
+  dev1.setName("dev1");
+  dev1.setModulatorID(1);
+
+  BOOST_CHECK_EQUAL("dev1", apt.getDeviceByShortAddress(mod, 1).getName());
+} // testApartmentGetDeviceByShortAddress
+
+BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByName) {
+  Apartment apt(NULL);
+  apt.initialize();
+
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setName("dev1");
+
+  BOOST_CHECK_EQUAL("dev1", apt.getDeviceByName("dev1").getName());
+} // testApartmentGetDeviceByName
+
+BOOST_AUTO_TEST_CASE(testApartmentGetModulatorByName) {
+  Apartment apt(NULL);
+  apt.initialize();
+
+  Modulator& mod = apt.allocateModulator(dsid_t(0,2));
+  mod.setName("mod1");
+
+  BOOST_CHECK_EQUAL("mod1", apt.getModulator("mod1").getName());
+} // testApartmentGetModulatorByName
+
+BOOST_AUTO_TEST_CASE(testApartmentGetModulatorByBusID) {
+  Apartment apt(NULL);
+  apt.initialize();
+
+  Modulator& mod = apt.allocateModulator(dsid_t(0,2));
+  mod.setBusID(1);
+
+  BOOST_CHECK_EQUAL(1, apt.getModulatorByBusID(1).getBusID());
+} // testApartmentGetModulatorByBusID
 
 BOOST_AUTO_TEST_CASE(testZoneMoving) {
   Apartment apt(NULL);
@@ -340,5 +403,47 @@ BOOST_AUTO_TEST_CASE(testRemoval) {
     BOOST_CHECK(true);
   }
 } // testRemoval
+
+BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
+  Apartment apt(NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485Proxy proxy(NULL, &apt);
+  proxy.setInitializeDS485Controller(false);
+  proxy.initialize();
+
+  proxy.start();
+  apt.start();
+  while(apt.isInitializing()) {
+    sleepMS(100);
+  }
+
+  Modulator& mod = apt.allocateModulator(dsid_t(0,3));
+  mod.setBusID(76);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setName("dev1");
+  dev1.setShortAddress(1);
+  dev1.setModulatorID(76);
+  DeviceReference devRef1(dev1, apt);
+  mod.addDevice(devRef1);
+  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2.setName("dev2");
+  dev2.setShortAddress(2);
+  dev2.setModulatorID(76);
+
+//  dev1.callScene(Scene1);
+  proxy.sendCommand(cmdCallScene, dev1, Scene1);
+  sleepMS(500);
+  BOOST_CHECK_EQUAL(Scene1, dev1.getLastCalledScene());
+  proxy.sendCommand(cmdCallScene, apt.getZone(0), apt.getGroup(0), Scene2);
+  sleepMS(500);
+  BOOST_CHECK_EQUAL(Scene2, dev1.getLastCalledScene());
+  BOOST_CHECK_EQUAL(Scene2, dev2.getLastCalledScene());
+  proxy.terminate();
+  apt.terminate();
+  sleepMS(1500);
+  DSS::teardown();
+} // testCallScenePropagation
 
 BOOST_AUTO_TEST_SUITE_END()

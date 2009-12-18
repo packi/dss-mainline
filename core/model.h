@@ -55,6 +55,7 @@ namespace dss {
   class Group;
   class Modulator;
   class PropertyNode;
+  class Event;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   class PhysicalModelItem {
@@ -802,7 +803,7 @@ namespace dss {
                     public DeviceContainer,
                     public Subsystem,
                     public LockableObject,
-                    private Thread
+                    public Thread
   {
   private:
     std::vector<Zone*> m_Zones;
@@ -815,20 +816,20 @@ namespace dss {
     boost::ptr_vector<ModelEvent> m_ModelEvents;
     Mutex m_ModelEventsMutex;
     SyncEvent m_NewModelEvent;
-    int m_RescanBusIn;
   private:
     void loadDevices(Poco::XML::Node* _node);
     void loadModulators(Poco::XML::Node* _node);
     void loadZones(Poco::XML::Node* _node);
 
     void addDefaultGroupsToZone(Zone& _zone);
-    /** Starts the event-processing */
-    virtual void execute();
     void handleModelEvents();
     void modulatorReady(int _modulatorBusID);
     void setPowerConsumption(int _modulatorBusID, unsigned long _value);
     void setEnergyMeterValue(int _modulatorBusID, unsigned long _value);
     void discoverDS485Devices();
+
+    void raiseEvent(boost::shared_ptr<Event> _pEvent);
+    void waitForInterface();
   protected:
     virtual void doStart();
   public:
@@ -842,8 +843,10 @@ namespace dss {
 
     /** Loads the datamodel and marks the contained items as "stale" */
     void readConfigurationFromXML(const std::string& _fileName);
+    void readConfiguration();
 
     void writeConfigurationToXML(const std::string& _fileName);
+    void writeConfiguration();
 
     /** Returns a reference to the device with the DSID \a _dsid */
     Device& getDeviceByDSID(const dsid_t _dsid) const;
@@ -920,6 +923,8 @@ namespace dss {
      *  Adds the device to the model. */
     void onAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID);
     void onDSLinkInterrupt(const int _modID, const int _devID, const int _priority);
+    /** Starts the event-processing */
+    virtual void execute();
   }; // Apartment
 
   //============================================= Helper definitions

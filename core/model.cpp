@@ -696,8 +696,7 @@ namespace dss {
   : Subsystem(_pDSS, "Apartment"),
     Thread("Apartment"),
     m_IsInitializing(true),
-    m_pPropertyNode(),
-    m_RescanBusIn(-1)
+    m_pPropertyNode()
   { } // ctor
 
   Apartment::~Apartment() {
@@ -917,7 +916,7 @@ namespace dss {
         if(scanModulator(mod)) {
           boost::shared_ptr<Event> modulatorReadyEvent(new Event("modulator_ready"));
           modulatorReadyEvent->setProperty("modulator", mod.getDSID().toString());
-          getDSS().getEventQueue().pushEvent(modulatorReadyEvent);
+          raiseEvent(modulatorReadyEvent);
         }
       } catch(DS485ApiError& e) {
         log(std::string("Exception caught while scanning modulator " + intToString(_modulatorBusID) + " : ") + e.what(), lsFatal);
@@ -952,8 +951,16 @@ namespace dss {
     requestFrame.getHeader().setDestination(0);
     requestFrame.setCommand(CommandRequest);
     requestFrame.getPayload().add<uint8_t>(FunctionModulatorGetDSID);
-    DSS::getInstance()->getDS485Interface().sendFrame(requestFrame);
+    if(DSS::hasInstance()) {
+      DSS::getInstance()->getDS485Interface().sendFrame(requestFrame);
+    }
   } // discoverDS485Devices
+
+  void Apartment::writeConfiguration() {
+    if(DSS::hasInstance()) {
+      writeConfigurationToXML(DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile"));
+    }
+  } // writeConfiguration
 
   void Apartment::handleModelEvents() {
     if(!m_ModelEvents.empty()) {
@@ -981,7 +988,7 @@ namespace dss {
         }
         break;
       case ModelEvent::etModelDirty:
-        writeConfigurationToXML(DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile"));
+        writeConfiguration();
         break;
       case ModelEvent::etDSLinkInterrupt:
         if(event.getParameterCount() != 3) {
@@ -1084,44 +1091,59 @@ namespace dss {
 
         {
           boost::shared_ptr<Event> readyEvent(new Event("model_ready"));
-          getDSS().getEventQueue().pushEvent(readyEvent);
+          raiseEvent(readyEvent);
         }
       }
     }
   } // handleModelEvents
 
+  void Apartment::readConfiguration() {
+    if(DSS::hasInstance()) {
+      std::string configFileName = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile");
+      if(!boost::filesystem::exists(configFileName)) {
+        log(std::string("Apartment::execute: Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
+      } else {
+        readConfigurationFromXML(configFileName);
+      }
+    }
+  } // readConfiguration
+
+  void Apartment::raiseEvent(boost::shared_ptr<Event> _pEvent) {
+    if(DSS::hasInstance()) {
+      getDSS().getEventQueue().pushEvent(_pEvent);
+    }
+  } // raiseEvent
+
+  void Apartment::waitForInterface() {
+    if(DSS::hasInstance()) {
+      DS485Interface& interface = DSS::getInstance()->getDS485Interface();
+
+      log("Apartment::execute: Waiting for interface to get ready", lsInfo);
+
+      while(!interface.isReady() && !m_Terminated) {
+        sleepMS(1000);
+      }
+    }
+
+    boost::shared_ptr<Event> readyEvent(new Event("interface_ready"));
+    raiseEvent(readyEvent);
+  } // waitForInterface
+
   void Apartment::execute() {
     {
       boost::shared_ptr<Event> runningEvent(new Event("running"));
-      getDSS().getEventQueue().pushEvent(runningEvent);
+      raiseEvent(runningEvent);
     }
 
     // load devices/modulators/etc. from a config-file
-    std::string configFileName = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile");
-    if(!boost::filesystem::exists(configFileName)) {
-      log(std::string("Apartment::execute: Could not open config-file for apartment: '") + configFileName + "'", lsWarning);
-    } else {
-      readConfigurationFromXML(configFileName);
-    }
-    
+    readConfiguration();
+
     {
       boost::shared_ptr<Event> configReadEvent(new Event("config_read"));
-      getDSS().getEventQueue().pushEvent(configReadEvent);
+      raiseEvent(configReadEvent);
     }
 
-
-    DS485Interface& interface = DSS::getInstance()->getDS485Interface();
-
-    log("Apartment::execute: Waiting for interface to get ready", lsInfo);
-
-    while(!interface.isReady() && !m_Terminated) {
-      sleepMS(1000);
-    }
-
-    {
-      boost::shared_ptr<Event> readyEvent(new Event("interface_ready"));
-      getDSS().getEventQueue().pushEvent(readyEvent);
-    }
+    waitForInterface();
 
     log("Apartment::execute: Interface is ready, enumerating model", lsInfo);
     discoverDS485Devices();
@@ -1697,7 +1719,7 @@ namespace dss {
       boost::shared_ptr<Event> readyEvent(new Event("new_device"));
       readyEvent->setProperty("device", dsid.toString());
       readyEvent->setProperty("zone", intToString(_zoneID));
-      getDSS().getEventQueue().pushEvent(readyEvent);
+      raiseEvent(readyEvent);
     }
   } // onAddDevice
 
@@ -1744,7 +1766,7 @@ namespace dss {
             priorityString = "high";
           }
           evt->setProperty("priority", priorityString);
-          getDSS().getEventQueue().pushEvent(evt);
+          raiseEvent(evt);
         } else {
           log("unknown interrupt mode '" + mode + "'", lsError);
         }

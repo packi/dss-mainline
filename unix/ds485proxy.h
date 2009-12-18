@@ -135,7 +135,7 @@ namespace dss {
 
   typedef std::vector<boost::shared_ptr<DS485CommandFrame> > CommandFrameSharedPtrVector;
 
-  class DS485Proxy : protected Thread,
+  class DS485Proxy : public    Thread,
                      public    Subsystem,
                      public    DS485Interface,
                      public    IDS485FrameCollector {
@@ -156,22 +156,26 @@ namespace dss {
 
     DS485Controller m_DS485Controller;
     SyncEvent m_ProxyEvent;
+    Apartment* m_pApartment;
 
     SyncEvent m_PacketHere;
     Mutex m_IncomingFramesGuard;
     Mutex m_FrameBucketsGuard;
     CommandFrameSharedPtrVector m_IncomingFrames;
+    bool m_InitializeDS485Controller;
 
     ModulatorSpec_t modulatorSpecFromFrame(boost::shared_ptr<DS485CommandFrame> _frame);
     void checkResultCode(const int _resultCode);
+    void raiseModelEvent(ModelEvent* _pEvent);
   protected:
-    virtual void execute();
     virtual void doStart();
   public:
-    DS485Proxy(DSS* _pDSS);
+    DS485Proxy(DSS* _pDSS, Apartment* _pApartment);
     virtual ~DS485Proxy() {};
 
     virtual bool isReady();
+    void setInitializeDS485Controller(const bool _value) { m_InitializeDS485Controller = _value; }
+    virtual void execute();
 
     virtual void sendFrame(DS485CommandFrame& _frame);
     boost::shared_ptr<FrameBucketCollector> sendFrameAndInstallBucket(DS485CommandFrame& _frame, const int _functionID);
