@@ -333,6 +333,11 @@ namespace dss {
         flush(std::cout);
       } else {
         DS485Header& header = frame->getHeader();
+
+        if (header.getSource() == m_StationID) {
+          continue;
+        }
+
         DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(frame.get());
         lastSentWasToken = false;
         missedFramesCounter = 0;
@@ -460,7 +465,13 @@ namespace dss {
                 m_PendingFrames.erase(m_PendingFrames.begin());
               } else {
                 boost::shared_ptr<DS485Frame> ackFrame(m_FrameReader.getFrame(50));
+
                 DS485CommandFrame* cmdAckFrame = dynamic_cast<DS485CommandFrame*>(ackFrame.get());
+                if (cmdAckFrame->getHeader().getSource() == m_StationID) {
+                  ackFrame.reset( m_FrameReader.getFrame(50) );
+                }
+
+                cmdAckFrame = dynamic_cast<DS485CommandFrame*>(ackFrame.get());
                 if(cmdAckFrame != NULL) {
                   if(cmdAckFrame->getCommand() == CommandAck) {
                     m_PendingFrames.erase(m_PendingFrames.begin());
