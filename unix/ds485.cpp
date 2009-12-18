@@ -382,8 +382,7 @@ namespace dss {
         case csSlaveWaitingToJoin:
           {
             if(cmdFrame != NULL) {
-              if((cmdFrame->getCommand() == CommandSolicitSuccessorRequest) ||
-                 (cmdFrame->getCommand() == CommandSolicitSuccessorRequestLong)) {
+              if(cmdFrame->getCommand() == CommandSolicitSuccessorRequestLong) {
                 // if it's the first of it's kind, determine how many we've got to skip
                 if(numberOfJoinPacketsToWait == -1) {
                   if(cmdFrame->getCommand() == CommandSolicitSuccessorRequest) {
@@ -426,16 +425,17 @@ namespace dss {
               // check if our response has timed-out
               time_t now;
               time(&now);
-              if((now - responseSentAt) > 1) {
-                doChangeState(csSlaveWaitingToJoin);
-                std::cerr << "çççççççççç haven't received my address" << std::endl;
+              if((now - responseSentAt) > 5) {
+                doChangeState(csInitial);
+                Logger::getInstance()->log("DS485: startup timeout", lsError);
               }
             }
             if((m_StationID != 0x3F) && (m_NextStationID != 0xFF)) {
-              Logger::getInstance()->log("######### successfully joined the network", lsInfo);
+              Logger::getInstance()->log("DS485: joined network", lsInfo);
               token->getHeader().setDestination(m_NextStationID);
               token->getHeader().setSource(m_StationID);
               doChangeState(csSlaveWaitingForFirstToken);
+              time(&tokenReceivedAt);
             }
           }
           break;
@@ -523,6 +523,10 @@ namespace dss {
                 std::cout << "a(req)";
               }
               keep = true;
+            } else if(cmdFrame->getCommand() == CommandSolicitSuccessorRequest) {
+              std::cout << "SSRS -> reset" << std::endl;
+              flush(std::cout);
+              doChangeState(csInitial);
             } else if(cmdFrame->getCommand() == CommandSetSuccessorAddressRequest) {
               if(header.getDestination() == m_StationID) {
                 handleSetSuccessor(cmdFrame);
@@ -540,14 +544,24 @@ namespace dss {
           }
           break;
         case csSlaveWaitingForFirstToken:
-          if(cmdFrame == NULL) {
-            if(header.getDestination() == m_StationID) {
-              putFrameOnWire(token.get(), false);
-              m_TokenCounter = 0;
-              doChangeState(csSlave);
-              time(&tokenReceivedAt);
-//              std::cout << ">";
-//              flush(std::cout);
+          {
+            if(cmdFrame == NULL) {
+              if(header.getDestination() == m_StationID) {
+                putFrameOnWire(token.get(), false);
+                m_TokenCounter = 0;
+                doChangeState(csSlave);
+                time(&tokenReceivedAt);
+                std::cout << "DS485: Got first TOKEN" << std::endl;
+                flush(std::cout);
+              }
+            }
+            // Handle timeout
+            time_t now;
+            time(&now);
+            if((now - tokenReceivedAt) > 15) {
+              std::cerr << "DS485: Wait for token timeout, restarting" << std::endl;
+              doChangeState(csInitial);
+              continue;
             }
           }
           break;
