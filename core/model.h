@@ -801,6 +801,7 @@ namespace dss {
   class Apartment : public boost::noncopyable,
                     public DeviceContainer,
                     public Subsystem,
+                    public LockableObject,
                     private Thread
   {
   private:

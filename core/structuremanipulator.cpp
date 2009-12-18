@@ -15,6 +15,7 @@
 namespace dss {
 
   void StructureManipulator::createZone(Modulator& _modulator, Zone& _zone) {
+    AssertLocked apartmentLocked(&m_Apartment);
     if(!_modulator.isPresent()) {
       throw std::runtime_error("Need modulator to be present");
     }
@@ -24,6 +25,7 @@ namespace dss {
   } // createZone
 
   void StructureManipulator::addDeviceToZone(Device& _device, Zone& _zone) {
+    AssertLocked apartmentLocked(&m_Apartment);
     if(!_device.isPresent()) {
       throw std::runtime_error("Need device to be present");
     }
@@ -50,6 +52,7 @@ namespace dss {
   } // addDeviceToZone
 
   void StructureManipulator::removeZoneOnModulator(Zone& _zone, Modulator& _modulator) {
+    AssertLocked apartmentLocked(&m_Apartment);
     Set presentDevicesInZoneOfModulator = _zone.getDevices().getByModulator(_modulator).getByPresence(true);
     if(presentDevicesInZoneOfModulator.length() != 0) {
       throw std::runtime_error("cannot delete zone if there are still devices present");
