@@ -174,7 +174,7 @@ namespace dss {
   } // setRS485DeviceName
 
   DS485Frame* DS485Controller::getFrameFromWire() {
-    DS485Frame* result = m_FrameReader.getFrame(100);
+    DS485Frame* result = m_FrameReader.getFrame(200);
     if(result != NULL) {
       DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(result);
       if(cmdFrame != NULL) {
@@ -274,7 +274,7 @@ namespace dss {
     while(!m_Terminated) {
 
       if(m_State == csInitial) {
-        senseTimeMS = (rand() % 1000) + 100;
+        senseTimeMS = (rand() % 1000) + 2500;
         numberOfJoinPacketsToWait = -1;
         m_TokenCounter = 0;
         lastSentWasToken = false;
