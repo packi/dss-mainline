@@ -41,6 +41,25 @@
 #include "dsid_js.h"
 #include "dsid_plugin.h"
 
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Node.h>
+#include <Poco/DOM/Attr.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/SAX/InputSource.h>
+#include <Poco/SAX/SAXException.h>
+
+using Poco::XML::Document;
+using Poco::XML::Element;
+using Poco::XML::Attr;
+using Poco::XML::Text;
+using Poco::XML::ProcessingInstruction;
+using Poco::XML::AutoPtr;
+using Poco::XML::DOMParser;
+using Poco::XML::InputSource;
+using Poco::XML::Node;
 
 namespace fs = boost::filesystem;
 
@@ -121,31 +140,37 @@ namespace dss {
 
   void DSSim::loadFromConfig() {
     const int theConfigFileVersion = 1;
-    std::string filename = getConfigPropertyBasePath() + "configfile";
-    XMLDocumentFileReader reader(getDSS().getPropertySystem().getStringValue(filename));
-    XMLNode rootNode = reader.getDocument().getRootNode();
+    std::string filename = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile");
+    std::ifstream inFile(filename.c_str());
 
-    if(rootNode.getName() == "simulation") {
-      std::string fileVersionStr = rootNode.getAttributes()["version"];
-      if(strToIntDef(fileVersionStr, -1) == theConfigFileVersion) {
-        XMLNodeList& modulators = rootNode.getChildren();
-        foreach(XMLNode& node, modulators) {
-          if(node.getName() == "modulator") {
-            DSModulatorSim* modulator = NULL;
-            try {
-              modulator = new DSModulatorSim(this);
-              modulator->initializeFromNode(node);
-              m_Modulators.push_back(modulator);
-            } catch(std::runtime_error&) {
-              delete modulator;
+    try {
+      InputSource input(inFile);
+      DOMParser parser;
+      AutoPtr<Document> pDoc = parser.parse(&input);
+      Element* rootNode = pDoc->documentElement();
+
+      if(rootNode->localName() == "simulation") {
+        if(rootNode->hasAttribute("version") && (strToInt(rootNode->getAttribute("version")) == theConfigFileVersion)) {
+          Node* curNode = rootNode->firstChild();
+          while(curNode != NULL) {
+            if(curNode->localName() == "modulator") {
+              DSModulatorSim* modulator = NULL;
+              try {
+                modulator = new DSModulatorSim(this);
+                modulator->initializeFromNode(curNode);
+                m_Modulators.push_back(modulator);
+              } catch(std::runtime_error&) {
+                delete modulator;
+              }
             }
+            curNode = curNode->nextSibling();
           }
         }
       } else {
-        log("Version mismatch, or missing version attribute. Expected ''" + intToString(theConfigFileVersion) + "'" + fileVersionStr + "' ");
+        log(filename + " must have a root-node named 'simulation'", lsFatal);
       }
-    } else {
-      log(filename + " must have a root-node named 'simulation'", lsFatal);
+    } catch(Poco::XML::SAXParseException& e) {
+      log("Error parsing file: " + filename + ". message: " + e.message());
     }
   } // loadFromConfig
 
@@ -256,75 +281,77 @@ namespace dss {
     m_pSimulation->log(_message, _severity);
   } // log
 
-  bool DSModulatorSim::initializeFromNode(XMLNode& _node) {
-    HashMapConstStringString& attrs = _node.getAttributes();
-    if(attrs["busid"].size() != 0) {
-      m_ID = strToIntDef(attrs["busid"], 70);
+  bool DSModulatorSim::initializeFromNode(Node* _node) {
+    Element* elem = dynamic_cast<Element*>(_node);
+    if(elem == NULL) {
+      return false;
     }
-    if(attrs["dsid"].size() != 0) {
-      m_ModulatorDSID = dsid_t::fromString(attrs["dsid"]);
+    if(elem->hasAttribute("busid")) {
+      m_ID = strToIntDef(elem->getAttribute("busid"), 70);
+    }
+    if(elem->hasAttribute("dsid")) {
+      m_ModulatorDSID = dsid_t::fromString(elem->getAttribute("dsid"));
       m_ModulatorDSID.upper = (m_ModulatorDSID.upper & 0x000000000000000Fll) | DSIDHeader;
       m_ModulatorDSID.lower = (m_ModulatorDSID.lower & 0x002FFFFF) | SimulationPrefix;
     }
-    m_EnergyLevelOrange = strToIntDef(attrs["orange"], m_EnergyLevelOrange);
-    m_EnergyLevelRed = strToIntDef(attrs["red"], m_EnergyLevelRed);
-    try {
-      XMLNode& nameNode = _node.getChildByName("name");
-      if(!nameNode.getChildren().empty()) {
-        m_Name = nameNode.getChildren()[0].getContent();
-      }
-    } catch(XMLException&) {
+    if(elem->hasAttribute("orange")) {
+      m_EnergyLevelOrange = strToIntDef(elem->getAttribute("orange"), m_EnergyLevelOrange);
+    }
+    if(elem->hasAttribute("red")) {
+      m_EnergyLevelRed = strToIntDef(elem->getAttribute("red"), m_EnergyLevelRed);
+    }
+    Element* nameElem = elem->getChildElement("name");
+    if(nameElem != NULL && nameElem->hasChildNodes()) {
+      m_Name = nameElem->firstChild()->nodeValue();
     }
 
-    XMLNodeList& nodes = _node.getChildren();
-    loadDevices(nodes, 0);
-    loadGroups(nodes, 0);
-    loadZones(nodes);
+    loadDevices(_node, 0);
+    loadGroups(_node, 0);
+    loadZones(_node);
     return true;
   } // initializeFromNode
 
-  void DSModulatorSim::loadDevices(XMLNodeList& _nodes, const int _zoneID) {
-    for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
-        iNode != e; ++iNode)
-    {
-      if(iNode->getName() == "device") {
-        HashMapConstStringString& attrs = iNode->getAttributes();
+  void DSModulatorSim::loadDevices(Node* _node, const int _zoneID) {
+    Node* curNode = _node->firstChild();
+    while(curNode != NULL) {
+      Element* elem = dynamic_cast<Element*>(curNode);
+      if(curNode->localName() == "device" && elem != NULL) {
         dsid_t dsid = NullDSID;
         int busid = -1;
-        if(!attrs["dsid"].empty()) {
-          dsid = dsid_t::fromString(attrs["dsid"]);
+        if(elem->hasAttribute("dsid")) {
+          dsid = dsid_t::fromString(elem->getAttribute("dsid"));
           dsid.upper = (dsid.upper & 0x000000000000000Fll) | DSIDHeader;
           dsid.lower = (dsid.lower & 0x002FFFFF) | SimulationPrefix;
         }
-        if(!attrs["busid"].empty()) {
-          busid = strToInt(attrs["busid"]);
+        if(elem->hasAttribute("busid")) {
+          busid = strToInt(elem->getAttribute("busid"));
         }
         if((dsid == NullDSID) || (busid == -1)) {
           log("missing dsid or busid of device");
           continue;
         }
         std::string type = "standard.simple";
-        if(!attrs["type"].empty()) {
-          type = attrs["type"];
+        if(elem->hasAttribute("type")) {
+          type = elem->getAttribute("type");
         }
 
         DSIDInterface* newDSID = m_pSimulation->getDSIDFactory().createDSID(type, dsid, busid, *this);
-        try {
-          foreach(XMLNode& iParam, iNode->getChildren()) {
-            if(iParam.getName() == "parameter") {
-              std::string paramName = iParam.getAttributes()["name"];
-              std::string paramValue = iParam.getChildren()[0].getContent();
-              if(paramName.empty()) {
-                log("Missing attribute name of parameter node");
-                continue;
+        Node* childNode = curNode->firstChild();
+        while(childNode != NULL) {
+          if(childNode->localName() == "parameter") {
+            Element* childElem = dynamic_cast<Element*>(childNode);
+            if(childElem != NULL) {
+              if(childElem->hasAttribute("name") && childElem->hasChildNodes()) {
+                std::string paramName = childElem->getAttribute("name");
+                std::string paramValue = childElem->firstChild()->getNodeValue();
+                log("LoadDevices:   Found parameter '" + paramName + "' with value '" + paramValue + "'");
+                newDSID->setConfigParameter(paramName, paramValue);
               }
-              log("LoadDevices:   Found parameter '" + paramName + "' with value '" + paramValue + "'");
-              newDSID->setConfigParameter(paramName, paramValue);
-            } else if(iParam.getName() == "name") {
-              m_DeviceNames[busid] = iParam.getChildren()[0].getContent();
             }
+          } else if(childNode->localName() == "name" && childNode->hasChildNodes()) {
+            m_DeviceNames[busid] = childNode->firstChild()->nodeValue();
           }
-        } catch(std::runtime_error&) {
+          childNode = childNode->nextSibling();
         }
         if(newDSID != NULL) {
           m_SimulatedDevices.push_back(newDSID);
@@ -337,9 +364,11 @@ namespace dss {
           DSIDSimSwitch* sw = dynamic_cast<DSIDSimSwitch*>(newDSID);
           if(sw != NULL) {
             log("LoadDevices:   it's a switch");
-            if(attrs["bell"] == "true") {
-              sw->setIsBell(true);
-              log("LoadDevices:   switch is bell");
+            if(elem->hasAttribute("bell")) {
+              sw->setIsBell(elem->getAttribute("bell") == "true");
+              if(sw->isBell()) {
+                log("LoadDevices:   switch is bell");
+              }
             }
           }
 
@@ -349,35 +378,37 @@ namespace dss {
           log("LoadDevices: could not create instance for type \"" + type + "\"");
         }
       }
+      curNode = curNode->nextSibling();
     }
   } // loadDevices
 
-  void DSModulatorSim::loadGroups(XMLNodeList& _nodes, const int _zoneID) {
-    for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
-        iNode != e; ++iNode)
-    {
-      if(iNode->getName() == "group") {
-        HashMapConstStringString& attrs = iNode->getAttributes();
-        if(!attrs["id"].empty()) {
-          int groupID = strToIntDef(attrs["id"], -1);
-          XMLNodeList& children = iNode->getChildren();
-          for(XMLNodeList::iterator iChildNode = children.begin(), e = children.end();
-              iChildNode != e; ++iChildNode)
-          {
-            if(iChildNode->getName() == "device") {
-              attrs = iChildNode->getAttributes();
-              if(!attrs["busid"].empty()) {
-                unsigned long busID = strToUInt(attrs["busid"]);
-                DSIDInterface& dev = lookupDevice(busID);
-                addDeviceToGroup(&dev, groupID);
-                log("LoadGroups: Adding device " + attrs["busid"] + " to group " + intToString(groupID) + " in zone " + intToString(_zoneID));
+  void DSModulatorSim::loadGroups(Node* _node, const int _zoneID) {
+    Node* curNode = _node->firstChild();
+    while(curNode != NULL) {
+      if(curNode->localName() == "group") {
+        Element* elem = dynamic_cast<Element*>(curNode);
+        if(elem != NULL) {
+          if(elem->hasAttribute("id")) {
+            int groupID = strToIntDef(elem->getAttribute("id"), -1);
+            Node* childNode = curNode->firstChild();
+            while(childNode != NULL) {
+              if(childNode->localName() == "device") {
+                Element* childElem = dynamic_cast<Element*>(childNode);
+                if(childElem->hasAttribute("busid")) {
+                  unsigned long busID = strToUInt(childElem->getAttribute("busid"));
+                  DSIDInterface& dev = lookupDevice(busID);
+                  addDeviceToGroup(&dev, groupID);
+                  log("LoadGroups: Adding device " + intToString(busID) + " to group " + intToString(groupID) + " in zone " + intToString(_zoneID));
+                }
               }
+              childNode = childNode->nextSibling();
             }
+          } else {
+            log("LoadGroups: Could not find attribute id of group, skipping entry", lsError);
           }
-        } else {
-          log("LoadGroups: Could not find attribute id of group, skipping entry", lsError);
         }
       }
+      curNode = curNode->nextSibling();
     }
   } // loadGroups
 
@@ -386,24 +417,24 @@ namespace dss {
     m_GroupsPerDevice[_device->getShortAddress()].push_back(_groupID);
   } // addDeviceToGroup
 
-  void DSModulatorSim::loadZones(XMLNodeList& _nodes) {
-    for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
-        iNode != e; ++iNode)
-    {
-      if(iNode->getName() == "zone") {
-        HashMapConstStringString& attrs = iNode->getAttributes();
+  void DSModulatorSim::loadZones(Node* _node) {
+    Node* curNode = _node->firstChild();
+    while(curNode != NULL) {
+      if(curNode->localName() == "zone") {
+        Element* elem = dynamic_cast<Element*>(curNode);
         int zoneID = -1;
-        if(!attrs["id"].empty()) {
-          zoneID = strToIntDef(attrs["id"], -1);
+        if(elem != NULL && elem->hasAttribute("id")) {
+          zoneID = strToIntDef(elem->getAttribute("id"), -1);
         }
         if(zoneID != -1) {
           log("LoadZones: found zone (" + intToString(zoneID) + ")");
-          loadDevices(iNode->getChildren(), zoneID);
-          loadGroups(iNode->getChildren(), zoneID);
+          loadDevices(curNode, zoneID);
+          loadGroups(curNode, zoneID);
         } else {
           log("LoadZones: could not find/parse id for zone");
         }
       }
+      curNode = curNode->nextSibling();
     }
   } // loadZones
 

@@ -25,13 +25,18 @@
 #include "core/ds485types.h"
 #include "core/ds485const.h"
 #include "unix/ds485.h"
-#include "core/xmlwrapper.h"
 #include "core/subsystem.h"
 
 #include <map>
 #include <vector>
 
 #include <boost/ptr_container/ptr_vector.hpp>
+
+namespace Poco {
+  namespace XML {
+    class Node;
+  }
+}
 
 namespace dss {
   class DS485Frame;
@@ -107,9 +112,9 @@ namespace dss {
     std::string m_Name;
   private:
     void addDeviceToGroup(DSIDInterface* _device, int _groupID);
-    void loadDevices(XMLNodeList& _nodes, const int _zoneID);
-    void loadGroups(XMLNodeList& _nodes, const int _zoneID);
-    void loadZones(XMLNodeList& _nodes);
+    void loadDevices(Poco::XML::Node* _node, const int _zoneID);
+    void loadGroups(Poco::XML::Node* _node, const int _zoneID);
+    void loadZones(Poco::XML::Node* _node);
 
     DSIDInterface& lookupDevice(const devid_t _id);
     boost::shared_ptr<DS485CommandFrame> createResponse(DS485CommandFrame& _request, uint8_t _functionID) const;
@@ -136,7 +141,7 @@ namespace dss {
     DSModulatorSim(DSSim* _pSimulator);
     virtual ~DSModulatorSim() {}
 
-    bool initializeFromNode(XMLNode& _node);
+    bool initializeFromNode(Poco::XML::Node* _node);
 
     int getID() const;
 

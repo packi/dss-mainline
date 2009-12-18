@@ -24,6 +24,8 @@
 
 #include "dssim.h"
 
+#include "core/base.h"
+
 namespace dss {
 
   class DSIDSim : public DSIDInterface {
