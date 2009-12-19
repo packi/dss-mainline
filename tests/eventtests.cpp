@@ -105,6 +105,7 @@ BOOST_AUTO_TEST_CASE(testEmptySubscriptionXML) {
   EventQueue queue;
   EventInterpreter interpreter(NULL);
   interpreter.setEventQueue(&queue);
+  interpreter.initialize();
 
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 
@@ -115,6 +116,7 @@ BOOST_AUTO_TEST_CASE(testEmptySubscriptionXML) {
 
 BOOST_AUTO_TEST_CASE(testNonExistingXML) {
   EventInterpreter interpreter(NULL);
+  interpreter.initialize();
 
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 

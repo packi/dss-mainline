@@ -24,7 +24,6 @@
 
 #include "base.h"
 #include "logger.h"
-#include "xmlwrapper.h"
 #include "dss.h"
 #include "propertysystem.h"
 
@@ -34,6 +33,26 @@
 #include <iostream>
 
 #include <boost/filesystem.hpp>
+
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Node.h>
+#include <Poco/DOM/Attr.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/SAX/InputSource.h>
+#include <Poco/SAX/SAXException.h>
+
+using Poco::XML::Document;
+using Poco::XML::Element;
+using Poco::XML::Attr;
+using Poco::XML::Text;
+using Poco::XML::ProcessingInstruction;
+using Poco::XML::AutoPtr;
+using Poco::XML::DOMParser;
+using Poco::XML::InputSource;
+using Poco::XML::Node;
 
 using std::set;
 using std::cout;
@@ -299,112 +318,153 @@ namespace dss {
   } // uniqueSubscriptionID
 
   void EventInterpreter::loadFromXML(const std::string& _fileName) {
-    const int apartmentConfigVersion = 1;
+    const int eventConfigVersion = 1;
     Logger::getInstance()->log(std::string("EventInterpreter: Loading subscriptions from '") + _fileName + "'");
 
-    if(boost::filesystem::exists(_fileName)) {
-      XMLDocumentFileReader reader(_fileName);
+    std::ifstream inFile(_fileName.c_str());
 
-      XMLNode rootNode = reader.getDocument().getRootNode();
-      if(rootNode.getName() == "subscriptions") {
-        if(strToIntDef(rootNode.getAttributes()["version"], -1) == apartmentConfigVersion) {
-          XMLNodeList nodes = rootNode.getChildren();
-          for(XMLNodeList::iterator iNode = nodes.begin(); iNode != nodes.end(); ++iNode) {
-            std::string nodeName = iNode->getName();
-            if(nodeName == "subscription") {
-              loadSubscription(*iNode);
+    try {
+      InputSource input(inFile);
+      DOMParser parser;
+      AutoPtr<Document> pDoc = parser.parse(&input);
+      Element* rootNode = pDoc->documentElement();
+
+      if(rootNode->localName() == "subscriptions") {
+        if(rootNode->hasAttribute("version") && (strToInt(rootNode->getAttribute("version")) == eventConfigVersion)) {
+          Node* curNode = rootNode->firstChild();
+          while(curNode != NULL) {
+            if(curNode->localName() == "subscription") {
+	            loadSubscription(curNode);
             }
+            curNode = curNode->nextSibling();
           }
         }
+      } else {
+        log(_fileName + " must have a root-node named 'subscriptions'", lsFatal);
       }
+    } catch(Poco::XML::SAXParseException& e) {
+      log("Error parsing file: " + _fileName + ". message: " + e.message(), lsFatal);
     }
   } // loadFromXML
 
-  void EventInterpreter::loadFilter(XMLNode& _node, EventSubscription& _subscription) {
-    std::string matchType = _node.getAttributes()["match"];
-    if(matchType == "all") {
-      _subscription.setFilterOption(EventSubscription::foMatchAll);
-    } else if(matchType == "none") {
-      _subscription.setFilterOption(EventSubscription::foMatchNone);
-    } else if(matchType == "one") {
-      _subscription.setFilterOption(EventSubscription::foMatchOne);
-    } else {
-      Logger::getInstance()->log(std::string("EventInterpreter::loadFilter: Could not determine the match-type (\"") + matchType + "\", reverting to 'all'", lsError);
-    }
-    XMLNodeList nodes = _node.getChildren();
-    for(XMLNodeList::iterator iNode = nodes.begin(); iNode != nodes.end(); ++iNode) {
-      std::string nodeName = iNode->getName();
-      if(nodeName == "property-filter") {
-        EventPropertyFilter* filter = NULL;
-        std::string filterType = iNode->getAttributes()["type"];
-        std::string propertyName = iNode->getAttributes()["property"];
-        if(filterType.empty() || propertyName.empty()) {
-          Logger::getInstance()->log("EventInterpreter::loadFilter: Missing type and/or property-name", lsFatal);
+  void EventInterpreter::loadFilter(Node* _node, EventSubscription& _subscription) {
+    if(_node != NULL) {    
+      Element* elem = dynamic_cast<Element*>(_node);
+      if(elem != NULL) {
+        std::string matchType = elem->getAttribute("match");
+        if(matchType == "all") {
+          _subscription.setFilterOption(EventSubscription::foMatchAll);
+        } else if(matchType == "none") {
+          _subscription.setFilterOption(EventSubscription::foMatchNone);
+        } else if(matchType == "one") {
+          _subscription.setFilterOption(EventSubscription::foMatchOne);
         } else {
-          if(filterType == "exists") {
-            filter = new EventPropertyExistsFilter(propertyName);
-          } else if(filterType == "missing") {
-            filter = new EventPropertyMissingFilter(propertyName);
-          } else if(filterType == "matches") {
-            std::string matchValue = iNode->getAttributes()["value"];
-            filter = new EventPropertyMatchFilter(propertyName, matchValue);
-          } else {
-            Logger::getInstance()->log("Unknown property-filter type", lsError);
-          }
+          log(std::string("loadFilter: Could not determine the match-type (\"") + matchType + "\", reverting to 'all'", lsError);
+          _subscription.setFilterOption(EventSubscription::foMatchAll);
         }
-        if(filter != NULL) {
-          _subscription.addPropertyFilter(filter);
+      }
+
+      Node* curNode = _node->firstChild();
+      while(curNode != NULL) {
+        std::string nodeName = curNode->localName();
+        if(nodeName == "property-filter") {
+          loadPropertyFilter(curNode, _subscription);
         }
+        curNode = curNode->nextSibling();
       }
     }
   } // loadFilter
 
-  void EventInterpreter::loadSubscription(XMLNode& _node) {
-    std::string evtName = _node.getAttributes()["event-name"];
-    std::string handlerName = _node.getAttributes()["handler-name"];
-
-    if(evtName.size() == 0) {
-      Logger::getInstance()->log("EventInterpreter::loadSubscription: empty event-name, skipping this subscription", lsWarning);
-      return;
-    }
-
-    if(handlerName.size() == 0) {
-      Logger::getInstance()->log("EventInterpreter::loadSubscription: empty handler-name, skipping this subscription", lsWarning);
-      return;
-    }
-
-    boost::shared_ptr<SubscriptionOptions> opts;
-    bool hadOpts = false;
-
-    EventInterpreterPlugin* plugin = getPluginByName(handlerName);
-    if(plugin == NULL) {
-      Logger::getInstance()->log(std::string("EventInterpreter::loadSubscription: could not find plugin for handler-name '") + handlerName + "'", lsWarning);
-      Logger::getInstance()->log(       "EventInterpreter::loadSubscription: Still generating a subscription but w/o inner parameter", lsWarning);
-    } else {
-      opts.reset(plugin->createOptionsFromXML(_node.getChildren()));
-      hadOpts = true;
-    }
-    try {
-      XMLNode& paramNode = _node.getChildByName("parameter");
-      if(opts == NULL) {
-        opts.reset(new SubscriptionOptions());
+  void EventInterpreter::loadPropertyFilter(Node* _pNode, EventSubscription& _subscription) {
+    Element* elem = dynamic_cast<Element*>(_pNode);
+    if(elem != NULL) {
+      EventPropertyFilter* filter = NULL;
+      std::string filterType;
+      if(elem->hasAttribute("type")) {
+        filterType = elem->getAttribute("type");
       }
-      opts->loadParameterFromXML(paramNode);
-    } catch(std::runtime_error& e) {
-      // only delete options created in the try-part...
-      if(!hadOpts) {
-        opts.reset();
+      std::string propertyName;
+      if(elem->hasAttribute("property")) {
+        propertyName = elem->getAttribute("property");
+      }
+      if(filterType.empty() || propertyName.empty()) {
+        Logger::getInstance()->log("EventInterpreter::loadProperty: Missing type and/or property-name", lsFatal);
+      } else {
+        if(filterType == "exists") {
+          filter = new EventPropertyExistsFilter(propertyName);
+        } else if(filterType == "missing") {
+          filter = new EventPropertyMissingFilter(propertyName);
+        } else if(filterType == "matches") {
+          std::string matchValue;
+          if(elem->hasAttribute("value")) {
+            matchValue = elem->getAttribute("value");
+          }
+          filter = new EventPropertyMatchFilter(propertyName, matchValue);
+        } else {
+          Logger::getInstance()->log("Unknown property-filter type", lsError);
+        }
+      }
+      if(filter != NULL) {
+        _subscription.addPropertyFilter(filter);
       }
     }
+  } // loadPropertyFilter
+  
+  void EventInterpreter::loadSubscription(Node* _node) {
+    Element* elem = dynamic_cast<Element*>(_node);
+    if(elem != NULL) {    
+      std::string evtName;
+      if(elem->hasAttribute("event-name")) {
+        evtName = elem->getAttribute("event-name");
+      }
+      std::string handlerName;
+      if(elem->hasAttribute("handler-name")) {
+        handlerName = elem->getAttribute("handler-name");
+      }
 
-    boost::shared_ptr<EventSubscription> subscription(new EventSubscription(evtName, handlerName, *this, opts));
-    try {
-      XMLNode& filterNode = _node.getChildByName("filter");
-      loadFilter(filterNode, *subscription);
-    } catch(std::runtime_error& e) {
+      if(evtName.size() == 0) {
+        Logger::getInstance()->log("EventInterpreter::loadSubscription: empty event-name, skipping this subscription", lsWarning);
+        return;
+      }
+
+      if(handlerName.size() == 0) {
+        Logger::getInstance()->log("EventInterpreter::loadSubscription: empty handler-name, skipping this subscription", lsWarning);
+        return;
+      }
+
+      boost::shared_ptr<SubscriptionOptions> opts;
+      bool hadOpts = false;
+
+      EventInterpreterPlugin* plugin = getPluginByName(handlerName);
+      if(plugin == NULL) {
+        Logger::getInstance()->log(std::string("EventInterpreter::loadSubscription: could not find plugin for handler-name '") + handlerName + "'", lsWarning);
+        Logger::getInstance()->log(       "EventInterpreter::loadSubscription: Still generating a subscription but w/o inner parameter", lsWarning);
+      } else {
+        opts.reset(plugin->createOptionsFromXML(_node));
+        hadOpts = true;
+      }
+      try {
+        Element* paramElem = elem->getChildElement("parameter");
+        if(opts == NULL) {
+          opts.reset(new SubscriptionOptions());
+        }
+        opts->loadParameterFromXML(paramElem);
+      } catch(std::runtime_error& e) {
+        // only delete options created in the try-part...
+        if(!hadOpts) {
+          opts.reset();
+        }
+      }
+
+      boost::shared_ptr<EventSubscription> subscription(new EventSubscription(evtName, handlerName, *this, opts));
+      try {
+        Element* filterElem = elem->getChildElement("filter");
+        loadFilter(filterElem, *subscription);
+      } catch(std::runtime_error& e) {
+      }
+
+      subscribe(subscription);
     }
-
-    subscribe(subscription);
   } // loadSubsription
 
 
@@ -684,20 +744,26 @@ namespace dss {
     m_Parameters.set(_name, _value);
   } // setParameter
 
-  void SubscriptionOptions::loadParameterFromXML(XMLNode& _node) {
-    XMLNodeList nodes = _node.getChildren();
-    for(XMLNodeList::iterator iNode = nodes.begin(); iNode != nodes.end(); ++iNode) {
-      std::string nodeName = iNode->getName();
-      if(nodeName == "parameter") {
-        std::string value;
-        std::string name;
-        if(!iNode->getChildren().empty()) {
-          value = iNode->getChildren()[0].getContent();
+  void SubscriptionOptions::loadParameterFromXML(Node* _node) {
+    if(_node !=  NULL) {
+      Node* curNode = _node->firstChild();
+      while(curNode != NULL) {
+        std::string nodeName = curNode->localName();
+        if(nodeName == "parameter") {
+          Element* elem = dynamic_cast<Element*>(curNode);
+          if(elem != NULL) {
+            std::string value;
+            std::string name;
+            if(curNode->hasChildNodes()) {
+              value = curNode->firstChild()->getNodeValue();
+            }
+            name = elem->getAttribute("name");
+            if(!name.empty()) {
+              setParameter(name, value);
+            }
+          }
         }
-        name = iNode->getAttributes()["name"];
-        if(!name.empty()) {
-          setParameter(name, value);
-        }
+        curNode = curNode->nextSibling();
       }
     }
   } // loadParameterFromXML
@@ -710,9 +776,10 @@ namespace dss {
     m_pInterpreter(_interpreter)
   { } // ctor
 
-  SubscriptionOptions* EventInterpreterPlugin::createOptionsFromXML(XMLNodeList& _nodes) {
+  SubscriptionOptions* EventInterpreterPlugin::createOptionsFromXML(Node* _node) {
     return NULL;
   } // createOptionsFromXML
+
 
   //================================================== EventPropertyFilter
 

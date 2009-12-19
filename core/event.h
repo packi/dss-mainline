@@ -27,13 +27,18 @@
 #include "thread.h"
 #include "syncevent.h"
 #include "mutex.h"
-#include "xmlwrapper.h"
 
 #include <string>
 #include <queue>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+
+namespace Poco {
+  namespace XML {
+    class Node;
+  }
+}
 
 namespace dss {
 
@@ -109,7 +114,7 @@ namespace dss {
     void setParameter(const std::string& _name, const std::string& _value);
     bool hasParameter(const std::string& _name) const;
 
-    void loadParameterFromXML(XMLNode& _node);
+    void loadParameterFromXML(Poco::XML::Node* _node);
 
     const Properties& getParameters() const { return m_Parameters; }
   }; // SubscriptionOptions
@@ -221,7 +226,7 @@ namespace dss {
     const std::string& getName() const { return m_Name; }
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription) = 0;
 
-    virtual SubscriptionOptions* createOptionsFromXML(XMLNodeList& _nodes);
+    virtual SubscriptionOptions* createOptionsFromXML(Poco::XML::Node* _node);
   }; // EventInterpreterPlugin
 
 
@@ -287,8 +292,9 @@ namespace dss {
     EventRunner* m_EventRunner;
     int m_EventsProcessed;
   private:
-    void loadSubscription(XMLNode& _node);
-    void loadFilter(XMLNode& _node, EventSubscription& _subscription);
+    void loadSubscription(Poco::XML::Node* _node);
+    void loadFilter(Poco::XML::Node* _node, EventSubscription& _subscription);
+    void loadPropertyFilter(Poco::XML::Node* _pNode, EventSubscription& _subscription);
     boost::shared_ptr<EventSubscription> subscriptionByID(const std::string& _name);
   protected:
     virtual void doStart();

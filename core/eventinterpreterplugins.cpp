@@ -36,6 +36,12 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/filesystem.hpp>
 
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Node.h>
+
+using Poco::XML::Element;
+using Poco::XML::Node;
+
 namespace dss {
 
 
@@ -181,88 +187,92 @@ namespace dss {
     int getSceneIndex() const { return m_SceneIndex; }
   };
 
-  std::string EventInterpreterPluginDS485::getParameter(XMLNodeList& _nodes, const std::string& _parameterName) {
-    for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
-        iNode != e; ++iNode)
-    {
-      if(iNode->getName() == "parameter") {
-        if(iNode->getAttributes()["name"] == _parameterName) {
-          XMLNodeList& children = iNode->getChildren();
-          if(!children.empty()) {
-            return children[0].getContent();
+  std::string EventInterpreterPluginDS485::getParameter(Node* _node, const std::string& _parameterName) {
+    Node* curNode = _node->firstChild();
+    while(curNode != NULL) {
+      if(curNode->localName() == "parameter") {
+        Element* elem = dynamic_cast<Element*>(curNode);
+        if(elem->getAttribute("name") == _parameterName) {
+          if(elem->hasChildNodes()) {
+            return elem->firstChild()->getNodeValue();
           }
         }
       }
+      curNode = curNode->nextSibling();
     }
     return "";
   } // getParameter
 
-  SubscriptionOptions* EventInterpreterPluginDS485::createOptionsFromXML(XMLNodeList& _nodes) {
+  SubscriptionOptions* EventInterpreterPluginDS485::createOptionsFromXML(Node* _node) {
     SubscriptionOptionsDS485* result = new SubscriptionOptionsDS485();
-    for(XMLNodeList::iterator iNode = _nodes.begin(), e = _nodes.end();
-        iNode != e; ++iNode)
-    {
-      if(iNode->getName() == "send") {
-        std::string typeName = iNode->getAttributes()["type"];
-        std::string paramName = "";
-        bool needParam = false;
-        if(typeName == "turnOn") {
-          result->setCommand(cmdTurnOn);
-        } else if(typeName == "turnOff") {
-          result->setCommand(cmdTurnOff);
-        } else if(typeName == "dimUp") {
-          result->setCommand(cmdStartDimUp);
-          paramName = "parameter";
-        } else if(typeName == "stopDim") {
-          result->setCommand(cmdStopDim);
-          paramName = "parameter";
-        } else if(typeName == "callScene") {
-          result->setCommand(cmdCallScene);
-          paramName = "scene";
-          needParam = true;
-        } else if(typeName == "saveScene") {
-          result->setCommand(cmdSaveScene);
-          paramName = "scene";
-          needParam = true;
-        } else if(typeName == "undoScene") {
-          result->setCommand(cmdUndoScene);
-          paramName = "scene";
-          needParam = true;
-        } else if(typeName == "increaseValue") {
-          result->setCommand(cmdIncreaseValue);
-          paramName = "parameter";
-        } else if(typeName == "decreaseValue") {
-          result->setCommand(cmdDecreaseValue);
-          paramName = "parameter";
-        } else if(typeName == "enable") {
-          result->setCommand(cmdEnable);
-        } else if(typeName == "disable") {
-          result->setCommand(cmdDisable);
-        } else if(typeName == "increaseParameter") {
-          result->setCommand(cmdIncreaseParam);
-          paramName = "parameter";
-        } else if(typeName == "decreaseParameter") {
-          result->setCommand(cmdDecreaseParam);
-          paramName = "parameter";
-        } else {
-          Logger::getInstance()->log(std::string("unknown command: ") + typeName);
-          delete result;
-          return NULL;
-        }
-
-        if(!paramName.empty()) {
-          std::string paramValue = getParameter(iNode->getChildren(), paramName);
-          if(paramValue.size() == 0 && needParam) {
-            Logger::getInstance()->log(std::string("bus_handler: Needed parameter '") + paramName + "' not found in subscription for type '" + typeName + "'", lsError);
+    
+    Node* curNode = _node->firstChild();
+    while(curNode != NULL) {
+      if(curNode->localName() == "send") {
+        Element* elem = dynamic_cast<Element*>(curNode);
+        if(elem != NULL) {
+          std::string typeName = elem->getAttribute("type");
+          std::string paramName = "";
+          bool needParam = false;
+          if(typeName == "turnOn") {
+            result->setCommand(cmdTurnOn);
+          } else if(typeName == "turnOff") {
+            result->setCommand(cmdTurnOff);
+          } else if(typeName == "dimUp") {
+            result->setCommand(cmdStartDimUp);
+            paramName = "parameter";
+          } else if(typeName == "stopDim") {
+            result->setCommand(cmdStopDim);
+            paramName = "parameter";
+          } else if(typeName == "callScene") {
+            result->setCommand(cmdCallScene);
+            paramName = "scene";
+            needParam = true;
+          } else if(typeName == "saveScene") {
+            result->setCommand(cmdSaveScene);
+            paramName = "scene";
+            needParam = true;
+          } else if(typeName == "undoScene") {
+            result->setCommand(cmdUndoScene);
+            paramName = "scene";
+            needParam = true;
+          } else if(typeName == "increaseValue") {
+            result->setCommand(cmdIncreaseValue);
+            paramName = "parameter";
+          } else if(typeName == "decreaseValue") {
+            result->setCommand(cmdDecreaseValue);
+            paramName = "parameter";
+          } else if(typeName == "enable") {
+            result->setCommand(cmdEnable);
+          } else if(typeName == "disable") {
+            result->setCommand(cmdDisable);
+          } else if(typeName == "increaseParameter") {
+            result->setCommand(cmdIncreaseParam);
+            paramName = "parameter";
+          } else if(typeName == "decreaseParameter") {
+            result->setCommand(cmdDecreaseParam);
+            paramName = "parameter";
+          } else {
+            Logger::getInstance()->log(std::string("unknown command: ") + typeName);
+            delete result;
+            return NULL;
           }
 
-          if(paramName == "parameter") {
-            result->setParameterIndex(strToIntDef(paramValue, -1));
-          } else if(paramName == "scene") {
-            result->setSceneIndex(strToIntDef(paramValue, -1));
+          if(!paramName.empty()) {
+            std::string paramValue = getParameter(curNode, paramName);
+            if(paramValue.size() == 0 && needParam) {
+              Logger::getInstance()->log(std::string("bus_handler: Needed parameter '") + paramName + "' not found in subscription for type '" + typeName + "'", lsError);
+            }
+
+            if(paramName == "parameter") {
+              result->setParameterIndex(strToIntDef(paramValue, -1));
+            } else if(paramName == "scene") {
+              result->setSceneIndex(strToIntDef(paramValue, -1));
+            }
           }
         }
       }
+      curNode = curNode->nextSibling();
     }
 
     return result;

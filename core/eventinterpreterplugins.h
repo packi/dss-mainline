@@ -56,11 +56,11 @@ namespace dss {
   private:
     DS485Interface* m_pInterface;
     Apartment& m_Apartment;
-    std::string getParameter(XMLNodeList& _nodes, const std::string& _parameterName);
+    std::string getParameter(Poco::XML::Node* _node, const std::string& _parameterName);
   public:
     EventInterpreterPluginDS485(Apartment& _apartment, DS485Interface* _pInterface, EventInterpreter* _pInterpreter);
 
-    virtual SubscriptionOptions* createOptionsFromXML(XMLNodeList& _nodes);
+    virtual SubscriptionOptions* createOptionsFromXML(Poco::XML::Node* _node);
 
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   }; // EventInterpreterPluginDS485
