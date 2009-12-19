@@ -35,32 +35,116 @@ int testGetter() {
   return 2;
 }
 
+template<class t>
 class PropTest {
 private:
-  int m_Value;
+  t m_Value;
 public:
-  PropTest(const int _value) :
+  PropTest(const t _value) :
     m_Value(_value) {
   }
 
-  void setValue(int _value) {
+  void setValue(t _value) {
     m_Value = _value;
 #ifdef VERBOSE_TESTS
     cout << "PropTest::setValue new value: " << _value << endl;
 #endif
   }
 
-  int getValue() const {
+  t getValue() const {
     return m_Value;
   }
 };
 
+class PropTestString {
+private:
+  std::string m_Value;
+public:
+  PropTestString(const std::string& _value) :
+    m_Value(_value) {
+  }
+
+  void setValue(const std::string& _value) {
+    m_Value = _value;
+#ifdef VERBOSE_TESTS
+    cout << "PropTestString::setValue new value: " << _value << endl;
+#endif
+  }
+
+  const std::string& getValue() const {
+    return m_Value;
+  }
+};
 
 #include "../core/propertysystem.h"
 
 using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(PropertySystemTests)
+
+BOOST_AUTO_TEST_CASE(testBoolProxy) {
+  PropertySystem propSys;
+  PropertyNodePtr prop = propSys.createProperty("/value");
+  
+  PropTest<bool> t(true);
+  PropertyProxyMemberFunction<class PropTest<bool>, bool> 
+    proxy(t, &PropTest<bool>::getValue, &PropTest<bool>::setValue);
+  prop->linkToProxy(proxy);
+  
+  BOOST_CHECK_EQUAL(true, proxy.getValue());
+  BOOST_CHECK_EQUAL(true, prop->getBoolValue());
+
+  prop->setBooleanValue(false);
+  BOOST_CHECK_EQUAL(false, proxy.getValue());
+  BOOST_CHECK_EQUAL(false, prop->getBoolValue());
+} // testBoolProxy
+
+BOOST_AUTO_TEST_CASE(testIntProxy) {
+  PropertySystem propSys;
+  PropertyNodePtr prop = propSys.createProperty("/value");
+  
+  PropTest<int> t(7);
+  PropertyProxyMemberFunction<class PropTest<int>, int> 
+    proxy(t, &PropTest<int>::getValue, &PropTest<int>::setValue);
+  prop->linkToProxy(proxy);
+
+  BOOST_CHECK_EQUAL(7, proxy.getValue());
+  BOOST_CHECK_EQUAL(7, prop->getIntegerValue());
+
+  prop->setIntegerValue(false);
+  BOOST_CHECK_EQUAL(false, proxy.getValue());
+  BOOST_CHECK_EQUAL(false, prop->getIntegerValue());
+} // testIntProxy
+
+BOOST_AUTO_TEST_CASE(testStringProxy) {
+  PropertySystem propSys;
+  PropertyNodePtr prop = propSys.createProperty("/value");
+  
+  PropTestString t("initial");
+  PropertyProxyMemberFunction<class PropTestString, std::string> 
+    proxy(t, &PropTestString::getValue, &PropTestString::setValue);
+  prop->linkToProxy(proxy);
+
+  BOOST_CHECK_EQUAL("initial", proxy.getValue());
+  BOOST_CHECK_EQUAL("initial", prop->getStringValue());
+
+  prop->setStringValue("testValue");
+  BOOST_CHECK_EQUAL("testValue", proxy.getValue());
+  BOOST_CHECK_EQUAL("testValue", prop->getStringValue());
+} // testStringProxy
+
+
+BOOST_AUTO_TEST_CASE(testPropertyNodeSize) {
+  PropertySystem propSys;
+  BOOST_CHECK_EQUAL(0, propSys.getRootNode()->size());
+
+  PropertyNodePtr prop = propSys.createProperty("/node");
+  
+  BOOST_CHECK_EQUAL(1, propSys.getRootNode()->size());
+  propSys.getRootNode()->removeChild(prop);
+
+  BOOST_CHECK_EQUAL(0, propSys.getRootNode()->size());
+} // testPropertyNodeSize
 
 BOOST_AUTO_TEST_CASE(testPropertySystem) {
   boost::scoped_ptr<PropertySystem> propSys(new PropertySystem());
@@ -140,17 +224,17 @@ BOOST_AUTO_TEST_CASE(testPropertySystem) {
   propND1->unlinkProxy();
 
   // test pointer to member, readonly
-  PropTest t(2);
-  PropertyProxyMemberFunction<class PropTest, int> to(t, &PropTest::getValue);
+  PropTest<int> t(2);
+  PropertyProxyMemberFunction<class PropTest<int>, int> to(t, &PropTest<int>::getValue);
   propND1->linkToProxy(to);
   BOOST_CHECK_EQUAL(2, propND1->getIntegerValue());
   propND1->setIntegerValue(5);
   BOOST_CHECK_EQUAL(2, propND1->getIntegerValue());
   propND1->unlinkProxy();
 
-  PropertyProxyMemberFunction<class PropTest, int> to2(t,
-                                                       &PropTest::getValue,
-                                                       &PropTest::setValue);
+  PropertyProxyMemberFunction<class PropTest<int>, int> to2(t,
+                                                       &PropTest<int>::getValue,
+                                                       &PropTest<int>::setValue);
   propND1->linkToProxy(to2);
   BOOST_CHECK_EQUAL(2, propND1->getIntegerValue());
   propND1->setIntegerValue(5);
@@ -272,5 +356,33 @@ BOOST_AUTO_TEST_CASE(testFlags) {
   node->setFlag(PropertyNode::Archive, true);
   BOOST_CHECK(node->hasFlag(PropertyNode::Archive));
 } // testFlags
+
+BOOST_AUTO_TEST_CASE(testPropertyNodeGetAsString) {
+  PropertySystem propSys;
+  
+  PropertyNodePtr intNode = propSys.createProperty("/int");
+  intNode->setIntegerValue(1);
+  BOOST_CHECK_EQUAL("1", intNode->getAsString());
+
+  PropertyNodePtr boolNode = propSys.createProperty("/bool");
+  boolNode->setBooleanValue(true);
+  BOOST_CHECK_EQUAL("true", boolNode->getAsString());
+  boolNode->setBooleanValue(false);
+  BOOST_CHECK_EQUAL("false", boolNode->getAsString());
+  
+  PropertyNodePtr stringNode = propSys.createProperty("/string");
+  stringNode->setStringValue("test");
+  BOOST_CHECK_EQUAL("test", stringNode->getAsString());
+  
+  PropertyNodePtr noneNode = propSys.createProperty("/none");
+  BOOST_CHECK_EQUAL("", noneNode->getAsString());  
+} // testPropertyNodeGetAsString
+
+BOOST_AUTO_TEST_CASE(testValueTypeFromAndToString) {
+  BOOST_CHECK_EQUAL(vTypeBoolean, getValueTypeFromString(getValueTypeAsString(vTypeBoolean)));
+  BOOST_CHECK_EQUAL(vTypeInteger, getValueTypeFromString(getValueTypeAsString(vTypeInteger)));
+  BOOST_CHECK_EQUAL(vTypeString, getValueTypeFromString(getValueTypeAsString(vTypeString)));
+  BOOST_CHECK_EQUAL(vTypeNone, getValueTypeFromString(getValueTypeAsString(vTypeNone)));
+} // testValueTypeFromAndToString
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -60,16 +60,46 @@ BOOST_AUTO_TEST_CASE(testUrlDecode) {
                        urlDecode("sourceid=1&schedule=FREQ%3DMINUTELY%3BINTERVAL%3D1&start=20080520T080000Z"));
 } // teturlDecode
 
-BOOST_AUTO_TEST_CASE(testConversions) {
+BOOST_AUTO_TEST_CASE(testStrToInt) {
   BOOST_CHECK_EQUAL(1, strToInt("1"));
   BOOST_CHECK_EQUAL(1, strToInt("0x1"));
   BOOST_CHECK_EQUAL(10, strToInt("0xa"));
 
+  BOOST_CHECK_THROW(strToInt("asdf"), std::invalid_argument);
+  BOOST_CHECK_THROW(strToInt(""), std::invalid_argument);
+  BOOST_CHECK_THROW(strToInt(" "), std::invalid_argument);
+} // testStrToInt
+
+BOOST_AUTO_TEST_CASE(testStrToIntDef) {
   BOOST_CHECK_EQUAL(-1, strToIntDef("", -1));
   BOOST_CHECK_EQUAL(-1, strToIntDef(" ", -1));
   BOOST_CHECK_EQUAL(-1, strToIntDef("gfdfg", -1));
   BOOST_CHECK_EQUAL(1, strToIntDef("1", -1));
-} // testConversions
+} // testStrToIntDef
+
+BOOST_AUTO_TEST_CASE(testStrToUInt) {
+  BOOST_CHECK_EQUAL(7, strToUInt("7"));
+
+  BOOST_CHECK_THROW(strToUInt("asdf"), std::invalid_argument);
+  BOOST_CHECK_THROW(strToUInt(""), std::invalid_argument);
+  BOOST_CHECK_THROW(strToUInt(" "), std::invalid_argument);
+}
+
+BOOST_AUTO_TEST_CASE(testStrToDouble) {
+  BOOST_CHECK_EQUAL(0.0, strToDouble("0.0"));
+  BOOST_CHECK_EQUAL(-1.0, strToDouble("asdf", -1.0));
+  BOOST_CHECK_EQUAL(1.0, strToDouble("1.00", -1.0));
+  BOOST_CHECK_THROW(strToDouble("asdf"), std::invalid_argument);
+} // testStrToDouble
+
+BOOST_AUTO_TEST_CASE(testUintToString) {
+  BOOST_CHECK_EQUAL("0", uintToString(0));
+  BOOST_CHECK_EQUAL("2222", uintToString(2222));
+} // testUintToString
+
+BOOST_AUTO_TEST_CASE(testUnsignedLongIntToHexString) {
+  BOOST_CHECK_EQUAL("42", unsignedLongIntToHexString(0x42));
+} // testUnsignedLongIntToHexString
 
 BOOST_AUTO_TEST_CASE(testTrim) {
   // reductions to zero-std::string
@@ -137,8 +167,42 @@ BOOST_AUTO_TEST_CASE(testSplitString) {
   BOOST_CHECK_EQUAL((size_t)2, result.size());
   BOOST_CHECK_EQUAL(std::string("a"), result[0]);
   BOOST_CHECK_EQUAL(std::string("b"), result[1]);
-
 } // testSplitString
+
+BOOST_AUTO_TEST_CASE(testJoinOneElement) {
+  std::vector<std::string> vec;
+  vec.push_back("test");
+  BOOST_CHECK_EQUAL("test", join(vec, ","));
+}
+
+BOOST_AUTO_TEST_CASE(testJoinNoElement) {
+  std::vector<std::string> vec;
+  BOOST_CHECK_EQUAL("", join(vec, ","));
+}
+
+BOOST_AUTO_TEST_CASE(testJoinMoreElements) {
+  std::vector<std::string> vec;
+  vec.push_back("test");
+  vec.push_back("test2");
+  vec.push_back("test3");
+  BOOST_CHECK_EQUAL("test,test2,test3", join(vec, ","));
+}
+
+BOOST_AUTO_TEST_CASE(testProperties) {
+  Properties props;
+  BOOST_CHECK(!props.has("key"));
+  props.set("key", "value");
+  BOOST_CHECK(props.has("key"));
+  BOOST_CHECK_EQUAL("value", props.get("key"));
+  
+  BOOST_CHECK_THROW(props.get("nonexisting"), std::runtime_error);
+  BOOST_CHECK_EQUAL("default", props.get("nonexisting", "default"));
+  
+  BOOST_CHECK_EQUAL(true, props.unset("key"));
+  BOOST_CHECK(!props.has("key"));
+  
+  BOOST_CHECK_EQUAL(false, props.unset("key"));
+}
 
 BOOST_AUTO_TEST_CASE(testISODate) {
   char c = 'C';
