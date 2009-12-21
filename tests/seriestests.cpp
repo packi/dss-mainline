@@ -33,7 +33,7 @@ using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(SeriesTests)
 
-// calculates N + (N-1) + (N-2) from N to N-limit
+// calculates N + (N-1) + (N-2) + ... from N to N-limit
 // we could use the following formula but using MTP is way cooler ;-)
 // N * (N-1)/2 - (N-limit)*(N-limit - 1)/2
 template <int N, int limit>
