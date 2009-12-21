@@ -1394,7 +1394,7 @@ namespace dss {
         if(!zoneIDStr.empty()) {
           try {
             int zoneID = strToInt(zoneIDStr);
-            DeviceReference devRef(dev, DSS::getInstance()->getApartment());
+            DeviceReference devRef(dev, &DSS::getInstance()->getApartment());
             try {
               Zone& zone = getDSS().getApartment().getZone(zoneID);
               manipulator.addDeviceToZone(dev, zone);

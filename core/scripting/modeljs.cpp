@@ -754,7 +754,7 @@ namespace dss {
   };
 
   JSObject* ModelScriptContextExtension::createJSDevice(ScriptContext& _ctx, Device& _dev) {
-    DeviceReference ref(_dev.getDSID(), m_Apartment);
+    DeviceReference ref(_dev.getDSID(), &m_Apartment);
     return createJSDevice(_ctx, ref);
   } // createJSDevice
 
@@ -762,7 +762,7 @@ namespace dss {
     JSObject* result = JS_NewObject(_ctx.getJSContext(), &dev_class, NULL, NULL);
     JS_DefineFunctions(_ctx.getJSContext(), result, device_interface_methods);
     JS_DefineProperties(_ctx.getJSContext(), result, dev_properties);
-    DeviceReference* innerObj = new DeviceReference(_ref.getDSID(), _ref.getDevice().getApartment());
+    DeviceReference* innerObj = new DeviceReference(_ref.getDSID(), &_ref.getDevice().getApartment());
     // make an explicit copy
     *innerObj = _ref;
     JS_SetPrivate(_ctx.getJSContext(), result, innerObj);

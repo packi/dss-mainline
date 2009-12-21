@@ -76,4 +76,22 @@ BOOST_AUTO_TEST_CASE(testCallingFunctions) {
   BOOST_CHECK_EQUAL(resObj.getProperty<bool>("g"), false);
 }
 
+BOOST_AUTO_TEST_CASE(testLongerScript) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("print('dummy.js, running');\n"
+                      "\n"
+                      "var pi = 3.14;\n"
+                      "var r = 5;\n"
+                      "var x = 1984;\n"
+                      "\n"
+                      "var area = pi * r * r;\n"
+                      "var division = x / r;\n"
+                      "\n"
+                      "print('area: ' + area);\n"
+                      "print('divison: ' + division);");
+} // testLongerScript
+
 BOOST_AUTO_TEST_SUITE_END()

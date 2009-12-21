@@ -119,50 +119,6 @@ namespace dss {
     const HashMapConstStringString& getContainer() const { return m_Container; }
   };
 
-  template <typename resCls>
-  class ResourceHolder {
-  protected:
-    resCls* m_Resource;
-
-    resCls* release() {
-      resCls* result = m_Resource;
-      m_Resource = NULL;
-      return result;
-    }
-  public:
-    explicit ResourceHolder(resCls* _resource = NULL) : m_Resource(_resource) {}
-
-    ResourceHolder(ResourceHolder<resCls>& _other)
-    : m_Resource(_other.release())
-    {
-    }
-
-    ResourceHolder<resCls>& operator=(ResourceHolder<resCls>& _rhs) {
-      m_Resource = _rhs.release();
-      return *this;
-    }
-
-  }; // ResourceHolder
-
-  class Finalizable {
-  public:
-    virtual void finalize() = 0;
-    virtual ~Finalizable() {}
-  }; // Finalizable
-
-  class Finalizer {
-  private:
-    Finalizable& m_Finalizable;
-  public:
-    Finalizer(Finalizable& _finalizable)
-    : m_Finalizable(_finalizable)
-    {}
-
-    virtual ~Finalizer() {
-      m_Finalizable.finalize();
-    }
-  };
-
   template<class t>
   void scrubVector(std::vector<t*>& _vector) {
     while(!_vector.empty()) {

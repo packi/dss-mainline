@@ -20,8 +20,8 @@
 */
 
 #include "model.h"
-#include "DS485Interface.h"
 
+#include "DS485Interface.h"
 #include "ds485const.h"
 #include "dss.h"
 #include "logger.h"
@@ -97,47 +97,47 @@ namespace dss {
   } // publishToPropertyTree
 
   void Device::turnOn() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdTurnOn, *this);
+    m_pApartment->sendCommand(cmdTurnOn, *this);
   } // turnOn
 
   void Device::turnOff() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdTurnOff, *this);
+    m_pApartment->sendCommand(cmdTurnOff, *this);
   } // turnOff
 
   void Device::increaseValue(const int _parameterNr) {
     if(_parameterNr == -1) {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseValue, *this);
+      m_pApartment->sendCommand(cmdIncreaseValue, *this);
     } else {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseParam, *this);
+      m_pApartment->sendCommand(cmdIncreaseParam, *this);
     }
   } // increaseValue
 
   void Device::decreaseValue(const int _parameterNr) {
     if(_parameterNr == -1) {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseValue, *this);
+      m_pApartment->sendCommand(cmdDecreaseValue, *this);
     } else {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseParam, *this);
+      m_pApartment->sendCommand(cmdDecreaseParam, *this);
     }
   } // decreaseValue
 
   void Device::enable() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdEnable, *this);
+    m_pApartment->sendCommand(cmdEnable, *this);
   } // enable
 
   void Device::disable() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdDisable, *this);
+    m_pApartment->sendCommand(cmdDisable, *this);
   } // disable
 
   void Device::startDim(const bool _directionUp, const int _parameterNr) {
     if(_directionUp) {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimUp, *this);
+      m_pApartment->sendCommand(cmdStartDimUp, *this);
     } else {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimDown, *this);
+      m_pApartment->sendCommand(cmdStartDimDown, *this);
     }
   } // startDim
 
   void Device::endDim(const int _parameterNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdStopDim, *this);
+    m_pApartment->sendCommand(cmdStopDim, *this);
   } // endDim
 
   bool Device::isOn() const {
@@ -161,7 +161,7 @@ namespace dss {
 
   void Device::setValue(const double _value, const int _parameterNr) {
     if(_parameterNr == -1) {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, *this, static_cast<int>(_value));
+      m_pApartment->sendCommand(cmdSetValue, *this, static_cast<int>(_value));
     } else {
       DSS::getInstance()->getDS485Interface().setValueDevice(*this, (int)_value, _parameterNr, 1);
     }
@@ -177,15 +177,15 @@ namespace dss {
   } // getValue
 
   void Device::callScene(const int _sceneNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdCallScene, *this, _sceneNr);
+    m_pApartment->sendCommand(cmdCallScene, *this, _sceneNr);
   } // callScene
 
   void Device::saveScene(const int _sceneNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdSaveScene, *this, _sceneNr);
+    m_pApartment->sendCommand(cmdSaveScene, *this, _sceneNr);
   } // saveScene
 
   void Device::undoScene(const int _sceneNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdUndoScene, *this, _sceneNr);
+    m_pApartment->sendCommand(cmdUndoScene, *this, _sceneNr);
   } // undoScene
 
   void Device::nextScene() {
@@ -346,7 +346,7 @@ namespace dss {
   } // ctor
 
   Set::Set(Device& _device) {
-    m_ContainedDevices.push_back(DeviceReference(_device, _device.getApartment()));
+    m_ContainedDevices.push_back(DeviceReference(_device, &_device.getApartment()));
   } // ctor(Device)
 
   Set::Set(DeviceVector _devices) {
@@ -634,7 +634,7 @@ namespace dss {
   } // contains
 
   bool Set::contains(const Device& _device) const {
-    return contains(DeviceReference(_device, _device.getApartment()));
+    return contains(DeviceReference(_device, &_device.getApartment()));
   } // contains
 
   void Set::addDevice(const DeviceReference& _device) {
@@ -644,7 +644,7 @@ namespace dss {
   } // addDevice
 
   void Set::addDevice(const Device& _device) {
-    addDevice(DeviceReference(_device, _device.getApartment()));
+    addDevice(DeviceReference(_device, &_device.getApartment()));
   } // addDevice
 
   void Set::removeDevice(const DeviceReference& _device) {
@@ -655,7 +655,7 @@ namespace dss {
   } // removeDevice
 
   void Set::removeDevice(const Device& _device) {
-    removeDevice(DeviceReference(_device, _device.getApartment()));
+    removeDevice(DeviceReference(_device, &_device.getApartment()));
   } // removeDevice
 
   const DeviceReference& Set::get(int _index) const {
@@ -690,13 +690,15 @@ namespace dss {
     return out;
   } // operator<<
 
+
   //================================================== Apartment
 
-  Apartment::Apartment(DSS* _pDSS)
+  Apartment::Apartment(DSS* _pDSS, DS485Interface* _pDS485Interface)
   : Subsystem(_pDSS, "Apartment"),
     Thread("Apartment"),
     m_IsInitializing(true),
-    m_pPropertyNode()
+    m_pPropertyNode(),
+    m_pDS485Interface(_pDS485Interface)
   { } // ctor
 
   Apartment::~Apartment() {
@@ -851,7 +853,7 @@ namespace dss {
           dev.addToGroup(groupID);
         }
 
-        DeviceReference devRef(dev, *this);
+        DeviceReference devRef(dev, this);
         zone.addDevice(devRef);
         _modulator.addDevice(devRef);
         dev.setIsPresent(true);
@@ -1423,7 +1425,7 @@ namespace dss {
   Set Apartment::getDevices() const {
     DeviceVector devs;
     foreach(Device* dev, m_Devices) {
-      devs.push_back(DeviceReference(*dev, *this));
+      devs.push_back(DeviceReference(*dev, this));
     }
 
     return Set(devs);
@@ -1503,7 +1505,7 @@ namespace dss {
     // search for existing device
     foreach(Device* device, m_Devices) {
       if(device->getDSID() == _dsid) {
-        DeviceReference devRef(*device, *this);
+        DeviceReference devRef(*device, this);
         getZone(0).addDevice(devRef);
         return *device;
       }
@@ -1512,7 +1514,7 @@ namespace dss {
     Device* pResult = new Device(_dsid, this);
     pResult->setFirstSeen(DateTime());
     m_Devices.push_back(pResult);
-    DeviceReference devRef(*pResult, *this);
+    DeviceReference devRef(*pResult, this);
     getZone(0).addDevice(devRef);
     return *pResult;
   } // allocateDevice
@@ -1670,7 +1672,7 @@ namespace dss {
 
     dsid_t dsid = getDSS().getDS485Interface().getDSIDOfDevice(_modID, _devID);
     Device& dev = allocateDevice(dsid);
-    DeviceReference devRef(dev, *this);
+    DeviceReference devRef(dev, this);
 
     log("  DSID:      " + dsid.toString());
 
@@ -1756,7 +1758,7 @@ namespace dss {
           }
 
           // create event to be raised
-          DeviceReference devRef(device, *this);
+          DeviceReference devRef(device, this);
           boost::shared_ptr<Event> evt(new Event(eventName, &devRef));
           evt->setProperty("device", device.getDSID().toString());
           std::string priorityString = "unknown";
@@ -1778,9 +1780,17 @@ namespace dss {
       log("Apartment::onDSLinkInterrupt: Unknown Modulator with ID " + intToString(_modID), lsFatal);
       return;
     }
-
   } // onDSLinkInterrupt
 
+  void Apartment::sendCommand(DS485Command _command, const Device& _device, int _parameter) {
+    if(m_pDS485Interface != NULL) {
+      m_pDS485Interface->sendCommand(_command, _device, _parameter);
+    } else {
+      throw std::runtime_error("Apartment::sendCommand: DS485Interface is NULL");
+    }    
+  } // sendCommand
+
+  
   //================================================== Modulator
 
   Modulator::Modulator(const dsid_t _dsid)
@@ -2158,15 +2168,15 @@ namespace dss {
   {
   } // ctor(copy)
 
-  DeviceReference::DeviceReference(const dsid_t _dsid, const Apartment& _apartment)
+  DeviceReference::DeviceReference(const dsid_t _dsid, const Apartment* _apartment)
   : m_DSID(_dsid),
-    m_Apartment(&_apartment)
+    m_Apartment(_apartment)
   {
   } // ctor(dsid)
 
-  DeviceReference::DeviceReference(const Device& _device, const Apartment& _apartment)
+  DeviceReference::DeviceReference(const Device& _device, const Apartment* _apartment)
   : m_DSID(_device.getDSID()),
-    m_Apartment(&_apartment)
+    m_Apartment(_apartment)
   {
   } // ctor(device)
 

@@ -47,6 +47,27 @@ namespace Poco {
 }
 
 namespace dss {
+  /** Commands to be transmitted either to a set, group or a single device. */
+  typedef enum {
+    cmdTurnOn,
+    cmdTurnOff,
+    cmdStartDimUp,
+    cmdStartDimDown,
+    cmdStopDim,
+    cmdCallScene,
+    cmdSaveScene,
+    cmdUndoScene,
+    cmdIncreaseValue,
+    cmdDecreaseValue,
+    cmdEnable,
+    cmdDisable,
+    cmdIncreaseParam,
+    cmdDecreaseParam,
+    cmdGetOnOff,
+    cmdGetValue,
+    cmdSetValue,
+    cmdGetFunctionID
+  } DS485Command;
 
   class Device;
   class Set;
@@ -56,6 +77,7 @@ namespace dss {
   class Modulator;
   class PropertyNode;
   class Event;
+  class DS485Interface;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   class PhysicalModelItem {
@@ -148,8 +170,8 @@ namespace dss {
   public:
     /** Copy constructor */
     DeviceReference(const DeviceReference& _copy);
-    DeviceReference(const dsid_t _dsid, const Apartment& _apartment);
-    DeviceReference(const Device& _device, const Apartment& _apartment);
+    DeviceReference(const dsid_t _dsid, const Apartment* _apartment);
+    DeviceReference(const Device& _device, const Apartment* _apartment);
     virtual ~DeviceReference() {};
 
     /** Returns a reference to the referenced device
@@ -816,6 +838,7 @@ namespace dss {
     boost::ptr_vector<ModelEvent> m_ModelEvents;
     Mutex m_ModelEventsMutex;
     SyncEvent m_NewModelEvent;
+    DS485Interface* m_pDS485Interface;
   private:
     void loadDevices(Poco::XML::Node* _node);
     void loadModulators(Poco::XML::Node* _node);
@@ -833,7 +856,7 @@ namespace dss {
   protected:
     virtual void doStart();
   public:
-    Apartment(DSS* _pDSS);
+    Apartment(DSS* _pDSS, DS485Interface* _pDS485Interface);
     virtual ~Apartment();
 
     virtual void initialize();
@@ -925,6 +948,9 @@ namespace dss {
     void onDSLinkInterrupt(const int _modID, const int _devID, const int _priority);
     /** Starts the event-processing */
     virtual void execute();
+  public:
+    void sendCommand(DS485Command _command, const Device& _device, int _parameter = -1);
+    void setDS485Interface(DS485Interface* _value) { m_pDS485Interface = _value; }
   }; // Apartment
 
   //============================================= Helper definitions

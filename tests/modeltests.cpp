@@ -35,7 +35,7 @@ using namespace dss;
 BOOST_AUTO_TEST_SUITE(Model)
 
 BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
-  Apartment apt(NULL);
+  Apartment apt(NULL, NULL);
   apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
 } // testApartmentAllocateDeviceReturnsTheSameDeviceForDSID
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByShortAddress) {
-  Apartment apt(NULL);
+  Apartment apt(NULL, NULL);
   apt.initialize();
 
   Modulator& mod = apt.allocateModulator(dsid_t(0,2));
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByShortAddress) {
 } // testApartmentGetDeviceByShortAddress
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByName) {
-  Apartment apt(NULL);
+  Apartment apt(NULL, NULL);
   apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByName) {
 } // testApartmentGetDeviceByName
 
 BOOST_AUTO_TEST_CASE(testApartmentGetModulatorByName) {
-  Apartment apt(NULL);
+  Apartment apt(NULL, NULL);
   apt.initialize();
 
   Modulator& mod = apt.allocateModulator(dsid_t(0,2));
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(testApartmentGetModulatorByName) {
 } // testApartmentGetModulatorByName
 
 BOOST_AUTO_TEST_CASE(testApartmentGetModulatorByBusID) {
-  Apartment apt(NULL);
+  Apartment apt(NULL, NULL);
   apt.initialize();
 
   Modulator& mod = apt.allocateModulator(dsid_t(0,2));
@@ -95,21 +95,21 @@ BOOST_AUTO_TEST_CASE(testApartmentGetModulatorByBusID) {
 } // testApartmentGetModulatorByBusID
 
 BOOST_AUTO_TEST_CASE(testZoneMoving) {
-  Apartment apt(NULL);
+  Apartment apt(NULL, NULL);
   apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
-  DeviceReference devRef1(dev1, apt);
+  DeviceReference devRef1(dev1, &apt);
   Device& dev2 = apt.allocateDevice(dsid_t(0,2));
   dev2.setShortAddress(2);
-  DeviceReference devRef2(dev2, apt);
+  DeviceReference devRef2(dev2, &apt);
   Device& dev3 = apt.allocateDevice(dsid_t(0,3));
   dev3.setShortAddress(3);
-  DeviceReference devRef3(dev3, apt);
+  DeviceReference devRef3(dev3, &apt);
   Device& dev4 = apt.allocateDevice(dsid_t(0,4));
   dev4.setShortAddress(4);
-  DeviceReference devRef4(dev4, apt);
+  DeviceReference devRef4(dev4, &apt);
 
   Zone& zone1 = apt.allocateZone(1);
   zone1.addDevice(devRef1);
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
 } // testZoneMoving
 
 BOOST_AUTO_TEST_CASE(testSet) {
-  Apartment apt(NULL);
+  Apartment apt(NULL, NULL);
   apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(testSet) {
 } // testSet
 
 BOOST_AUTO_TEST_CASE(testSetBuilder) {
-  Apartment apt(NULL);
+  Apartment apt(NULL, NULL);
   apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
@@ -358,7 +358,7 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
 } // testSetBuilder
 
 BOOST_AUTO_TEST_CASE(testRemoval) {
-  Apartment apt(NULL);
+  Apartment apt(NULL, NULL);
   apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
@@ -405,7 +405,7 @@ BOOST_AUTO_TEST_CASE(testRemoval) {
 } // testRemoval
 
 BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
-  Apartment apt(NULL);
+  Apartment apt(NULL, NULL);
   apt.initialize();
 
   DSModulatorSim modSim(NULL);
@@ -425,7 +425,7 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   dev1.setName("dev1");
   dev1.setShortAddress(1);
   dev1.setModulatorID(76);
-  DeviceReference devRef1(dev1, apt);
+  DeviceReference devRef1(dev1, &apt);
   mod.addDevice(devRef1);
   Device& dev2 = apt.allocateDevice(dsid_t(0,2));
   dev2.setName("dev2");
@@ -445,5 +445,351 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   sleepMS(1500);
   DSS::teardown();
 } // testCallScenePropagation
+
+
+  /** Interface to be implemented by any implementation of the DS485 interface */
+  class DS485InterfaceTest : public DS485Interface {
+  public:
+    /** Returns true when the interface is ready to transmit user generated DS485Packets */
+    virtual bool isReady() { return true; }
+
+    virtual void sendFrame(DS485CommandFrame& _frame) {}
+
+    //------------------------------------------------ Specialized Commands (system)
+    /** Returns an std::vector containing the modulator-spec of all modulators present. */
+    virtual std::vector<ModulatorSpec_t> getModulators() { return std::vector<ModulatorSpec_t>(); }
+
+    /** Returns the modulator-spec for a modulator */
+    virtual ModulatorSpec_t getModulatorSpec(const int _modulatorID) { return ModulatorSpec_t(); }
+
+    /** Returns a std::vector conatining the zone-ids of the specified modulator */
+    virtual std::vector<int> getZones(const int _modulatorID) { return std::vector<int>(); }
+    /** Returns the count of the zones of the specified modulator */
+    virtual int getZoneCount(const int _modulatorID) { return 0; }
+    /** Returns the bus-ids of the devices present in the given zone of the specified modulator */
+    virtual std::vector<int> getDevicesInZone(const int _modulatorID, const int _zoneID) { return std::vector<int>(); }
+    /** Returns the count of devices present in the given zone of the specified modulator */
+    virtual int getDevicesCountInZone(const int _modulatorID, const int _zoneID) { return 0; }
+
+    /** Adds the given device to the specified zone. */
+    virtual void setZoneID(const int _modulatorID, const devid_t _deviceID, const int _zoneID) {}
+
+    /** Creates a new Zone on the given modulator */
+    virtual void createZone(const int _modulatorID, const int _zoneID) {}
+
+    /** Removes the zone \a _zoneID on the modulator \a _modulatorID */
+    virtual void removeZone(const int _modulatorID, const int _zoneID) {}
+
+    /** Returns the count of groups present in the given zone of the specifid modulator */
+    virtual int getGroupCount(const int _modulatorID, const int _zoneID) { return 0; }
+    /** Returns the a std::vector containing the group-ids of the given zone on the specified modulator */
+    virtual std::vector<int> getGroups(const int _modulatorID, const int _zoneID) { return std::vector<int>(); }
+    /** Returns the count of devices present in the given group */
+    virtual int getDevicesInGroupCount(const int _modulatorID, const int _zoneID, const int _groupID) { return 0; }
+    /** Returns a std::vector containing the bus-ids of the devices present in the given group */
+    virtual std::vector<int> getDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID) { return std::vector<int>(); }
+
+    virtual std::vector<int> getGroupsOfDevice(const int _modulatorID, const int _deviceID) { return std::vector<int>(); }
+
+    /** Adds a device to a given group */
+    virtual void addToGroup(const int _modulatorID, const int _groupID, const int _deviceID) {}
+    /** Removes a device from a given group */
+    virtual void removeFromGroup(const int _modulatorID, const int _groupID, const int _deviceID) {}
+
+    /** Adds a user group */
+    virtual int addUserGroup(const int _modulatorID) { return 0; }
+    /** Removes a user group */
+    virtual void removeUserGroup(const int _modulatorID, const int _groupID) {}
+
+    /** Returns the DSID of a given device */
+    virtual dsid_t getDSIDOfDevice(const int _modulatorID, const int _deviceID) { return NullDSID; }
+    /** Returns the DSID of a given modulator */
+    virtual dsid_t getDSIDOfModulator(const int _modulatorID) { return NullDSID; }
+
+    virtual int getLastCalledScene(const int _modulatorID, const int _zoneID, const int _groupID) { return 0;}
+
+    //------------------------------------------------ Metering
+
+    /** Returns the current power-consumption in mW */
+    virtual unsigned long getPowerConsumption(const int _modulatorID) { return 0; }
+
+    /** Returns the meter value in Wh */
+    virtual unsigned long getEnergyMeterValue(const int _modulatorID) { return 0; }
+
+    virtual bool getEnergyBorder(const int _modulatorID, int& _lower, int& _upper) { _lower = 0; _upper = 0; return false; }
+
+    //------------------------------------------------ UDI
+    virtual uint8_t dSLinkSend(const int _modulatorID, devid_t _devAdr, uint8_t _value, uint8_t _flags) { return 0; }
+
+    //------------------------------------------------ Device manipulation
+
+    DS485Command m_LastCommand;
+    DS485Command getLastCommand() const { return m_LastCommand; }
+    void setLastCommand(DS485Command _value) { m_LastCommand = _value; }
+    virtual std::vector<int> sendCommand(DS485Command _cmd, const Set& _set, int _param = -1) { return std::vector<int>(); }
+    virtual std::vector<int> sendCommand(DS485Command _cmd, const Device& _device, int _param = -1) {
+      setLastCommand(_cmd);
+      return std::vector<int>();
+    }
+    virtual std::vector<int> sendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param = -1) { return std::vector<int>(); }
+    virtual std::vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param = -1) { return std::vector<int>(); }
+    virtual std::vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param = -1) { return std::vector<int>(); }
+
+    virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) {}
+    virtual int getSensorValue(const Device& _device, const int _sensorID) { return 0; }
+  };
+
+
+BOOST_AUTO_TEST_CASE(testTurnOn) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  apt.setDS485Interface(&proxy);
+
+  proxy.setLastCommand(cmdTurnOff);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.turnOn();
+  BOOST_CHECK_EQUAL(cmdTurnOn, proxy.getLastCommand());
+  proxy.setLastCommand(cmdTurnOff);
+  DeviceReference devRef1(dev1, &apt);
+  devRef1.turnOn();
+  BOOST_CHECK_EQUAL(cmdTurnOn, proxy.getLastCommand());
+}
+
+BOOST_AUTO_TEST_CASE(testTurnOff) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  apt.setDS485Interface(&proxy);
+
+  proxy.setLastCommand(cmdTurnOn);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.turnOff();
+  BOOST_CHECK_EQUAL(cmdTurnOff, proxy.getLastCommand());
+  proxy.setLastCommand(cmdTurnOn);
+  DeviceReference devRef1(dev1, &apt);
+  devRef1.turnOff();
+  BOOST_CHECK_EQUAL(cmdTurnOff, proxy.getLastCommand());
+}
+
+BOOST_AUTO_TEST_CASE(testDisable) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  apt.setDS485Interface(&proxy);
+
+  proxy.setLastCommand(cmdTurnOff);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.disable();
+  BOOST_CHECK_EQUAL(cmdDisable, proxy.getLastCommand());
+  proxy.setLastCommand(cmdTurnOff);
+  DeviceReference devRef1(dev1, &apt);
+  devRef1.disable();
+  BOOST_CHECK_EQUAL(cmdDisable, proxy.getLastCommand());
+}
+
+BOOST_AUTO_TEST_CASE(testEnable) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  apt.setDS485Interface(&proxy);
+
+  proxy.setLastCommand(cmdTurnOff);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.enable();
+  BOOST_CHECK_EQUAL(cmdEnable, proxy.getLastCommand());
+  proxy.setLastCommand(cmdTurnOff);
+  DeviceReference devRef1(dev1, &apt);
+  devRef1.enable();
+  BOOST_CHECK_EQUAL(cmdEnable, proxy.getLastCommand());
+}
+
+BOOST_AUTO_TEST_CASE(testIncreaseValue) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  apt.setDS485Interface(&proxy);
+
+  proxy.setLastCommand(cmdTurnOff);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.increaseValue();
+  BOOST_CHECK_EQUAL(cmdIncreaseValue, proxy.getLastCommand());
+  proxy.setLastCommand(cmdTurnOff);
+  DeviceReference devRef1(dev1, &apt);
+  devRef1.increaseValue();
+  BOOST_CHECK_EQUAL(cmdIncreaseValue, proxy.getLastCommand());
+}
+
+BOOST_AUTO_TEST_CASE(testDecreaseValue) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  apt.setDS485Interface(&proxy);
+
+  proxy.setLastCommand(cmdTurnOff);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.decreaseValue();
+  BOOST_CHECK_EQUAL(cmdDecreaseValue, proxy.getLastCommand());
+  proxy.setLastCommand(cmdTurnOff);
+  DeviceReference devRef1(dev1, &apt);
+  devRef1.decreaseValue();
+  BOOST_CHECK_EQUAL(cmdDecreaseValue, proxy.getLastCommand());
+}
+
+BOOST_AUTO_TEST_CASE(testStartDimUp) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  apt.setDS485Interface(&proxy);
+
+  proxy.setLastCommand(cmdTurnOff);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.startDim(true);
+  BOOST_CHECK_EQUAL(cmdStartDimUp, proxy.getLastCommand());
+  proxy.setLastCommand(cmdTurnOff);
+  DeviceReference devRef1(dev1, &apt);
+  devRef1.startDim(true);
+  BOOST_CHECK_EQUAL(cmdStartDimUp, proxy.getLastCommand());
+}
+
+BOOST_AUTO_TEST_CASE(testStartDimDown) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  apt.setDS485Interface(&proxy);
+
+  proxy.setLastCommand(cmdTurnOff);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.startDim(false);
+  BOOST_CHECK_EQUAL(cmdStartDimDown, proxy.getLastCommand());
+  proxy.setLastCommand(cmdTurnOff);
+  DeviceReference devRef1(dev1, &apt);
+  devRef1.startDim(false);
+  BOOST_CHECK_EQUAL(cmdStartDimDown, proxy.getLastCommand());
+}
+
+BOOST_AUTO_TEST_CASE(testEndDim) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  apt.setDS485Interface(&proxy);
+
+  proxy.setLastCommand(cmdTurnOff);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.endDim();
+  BOOST_CHECK_EQUAL(cmdStopDim, proxy.getLastCommand());
+  proxy.setLastCommand(cmdTurnOff);
+  DeviceReference devRef1(dev1, &apt);
+  devRef1.endDim();
+  BOOST_CHECK_EQUAL(cmdStopDim, proxy.getLastCommand());
+}
+
+BOOST_AUTO_TEST_CASE(testCallScene) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  apt.setDS485Interface(&proxy);
+
+  proxy.setLastCommand(cmdTurnOff);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.callScene(Scene1);
+  BOOST_CHECK_EQUAL(cmdCallScene, proxy.getLastCommand());
+  proxy.setLastCommand(cmdTurnOff);
+  DeviceReference devRef1(dev1, &apt);
+  devRef1.callScene(Scene1);
+  BOOST_CHECK_EQUAL(cmdCallScene, proxy.getLastCommand());
+}
+
+BOOST_AUTO_TEST_CASE(testSaveScene) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  apt.setDS485Interface(&proxy);
+
+  proxy.setLastCommand(cmdTurnOff);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.saveScene(Scene1);
+  BOOST_CHECK_EQUAL(cmdSaveScene, proxy.getLastCommand());
+  proxy.setLastCommand(cmdTurnOff);
+  DeviceReference devRef1(dev1, &apt);
+  devRef1.saveScene(Scene1);
+  BOOST_CHECK_EQUAL(cmdSaveScene, proxy.getLastCommand());
+}
+
+BOOST_AUTO_TEST_CASE(testUndoScene) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  apt.setDS485Interface(&proxy);
+
+  proxy.setLastCommand(cmdTurnOff);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.undoScene(Scene1);
+  BOOST_CHECK_EQUAL(cmdUndoScene, proxy.getLastCommand());
+  proxy.setLastCommand(cmdTurnOff);
+  DeviceReference devRef1(dev1, &apt);
+  devRef1.undoScene(Scene1);
+  BOOST_CHECK_EQUAL(cmdUndoScene, proxy.getLastCommand());
+}
+
+BOOST_AUTO_TEST_CASE(testNextScene) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  apt.setDS485Interface(&proxy);
+
+  proxy.setLastCommand(cmdTurnOff);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.nextScene();
+  BOOST_CHECK_EQUAL(cmdCallScene, proxy.getLastCommand());
+  proxy.setLastCommand(cmdTurnOff);
+  DeviceReference devRef1(dev1, &apt);
+  devRef1.nextScene();
+  BOOST_CHECK_EQUAL(cmdCallScene, proxy.getLastCommand());
+}
+
+BOOST_AUTO_TEST_CASE(testPreviousScene) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  apt.setDS485Interface(&proxy);
+
+  proxy.setLastCommand(cmdTurnOff);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.previousScene();
+  BOOST_CHECK_EQUAL(cmdCallScene, proxy.getLastCommand());
+  proxy.setLastCommand(cmdTurnOff);
+  DeviceReference devRef1(dev1, &apt);
+  devRef1.previousScene();
+  BOOST_CHECK_EQUAL(cmdCallScene, proxy.getLastCommand());
+}
 
 BOOST_AUTO_TEST_SUITE_END()

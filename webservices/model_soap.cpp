@@ -58,7 +58,7 @@ int AuthorizeAndGetDevice(struct soap *soap, const int _token, char* _devID, dss
   }
 
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
-  result = dss::DeviceReference(FromSOAP(_devID), apt);
+  result = dss::DeviceReference(FromSOAP(_devID), &apt);
   try {
     result.getDevice();
   } catch(dss::ItemNotFoundException& _ex) {

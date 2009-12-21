@@ -37,7 +37,7 @@ using namespace dss;
 BOOST_AUTO_TEST_SUITE(ModelJS)
 
 BOOST_AUTO_TEST_CASE(testBasics) {
-  Apartment apt(NULL);
+  Apartment apt(NULL, NULL);
   apt.setName("my apartment");
 
 
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(testBasics) {
 } // testBasics
 
 BOOST_AUTO_TEST_CASE(testSets) {
-  Apartment apt(NULL);
+  Apartment apt(NULL, NULL);
   apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(testSets) {
 } // testSets
 
 BOOST_AUTO_TEST_CASE(testDevices) {
-  Apartment apt(NULL);
+  Apartment apt(NULL, NULL);
   apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(testDevices) {
 } // testDevices
 
 BOOST_AUTO_TEST_CASE(testEvents) {
-  Apartment apt(NULL);
+  Apartment apt(NULL, NULL);
   apt.initialize();
 
   Device& dev = apt.allocateDevice(dsid_t(0,1));
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(testEvents) {
 } // testEvents
 
 BOOST_AUTO_TEST_CASE(testSubscriptions) {
-  Apartment apt(NULL);
+  Apartment apt(NULL, NULL);
   apt.initialize();
 
   Device& dev = apt.allocateDevice(dsid_t(0,1));

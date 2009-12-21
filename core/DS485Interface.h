@@ -33,28 +33,6 @@
 
 namespace dss {
 
-	/** Commands to be transmitted either to a set, group or a single device. */
-	typedef enum {
-	  cmdTurnOn,
-	  cmdTurnOff,
-	  cmdStartDimUp,
-	  cmdStartDimDown,
-	  cmdStopDim,
-	  cmdCallScene,
-	  cmdSaveScene,
-	  cmdUndoScene,
-	  cmdIncreaseValue,
-	  cmdDecreaseValue,
-	  cmdEnable,
-	  cmdDisable,
-	  cmdIncreaseParam,
-	  cmdDecreaseParam,
-	  cmdGetOnOff,
-	  cmdGetValue,
-	  cmdSetValue,
-	  cmdGetFunctionID
-	} DS485Command;
-
 	typedef boost::tuple<int, int, int, std::string, int> ModulatorSpec_t; // bus-id, sw-version, hw-version, name, device-id
 
   /** Interface to be implemented by any implementation of the DS485 interface */

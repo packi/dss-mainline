@@ -36,7 +36,7 @@ namespace dss {
     }
     m_Interface.setZoneID(targetModulator.getBusID(), _device.getShortAddress(), _zone.getID());
     _device.setZoneID(_zone.getID());
-    DeviceReference ref(_device, m_Apartment);
+    DeviceReference ref(_device, &m_Apartment);
     _zone.addDevice(ref);
 
     // check if we can remove the zone from the modulator
