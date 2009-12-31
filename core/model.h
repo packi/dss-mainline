@@ -78,6 +78,8 @@ namespace dss {
   class PropertyNode;
   class Event;
   class DS485Interface;
+  class BusRequest;
+  class BusRequestDispatcher;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   class PhysicalModelItem {
@@ -89,7 +91,7 @@ namespace dss {
     { }
 
     bool isPresent() const { return m_IsPresent; }
-    void setIsPresent(const bool _value) { m_IsPresent = _value; }
+    virtual void setIsPresent(const bool _value) { m_IsPresent = _value; }
   };
 
   /** Interface to a single or multiple devices.
@@ -839,6 +841,7 @@ namespace dss {
     Mutex m_ModelEventsMutex;
     SyncEvent m_NewModelEvent;
     DS485Interface* m_pDS485Interface;
+    BusRequestDispatcher* m_pBusRequestDispatcher;
   private:
     void loadDevices(Poco::XML::Node* _node);
     void loadModulators(Poco::XML::Node* _node);
@@ -951,6 +954,8 @@ namespace dss {
   public:
     void sendCommand(DS485Command _command, const Device& _device, int _parameter = -1);
     void setDS485Interface(DS485Interface* _value) { m_pDS485Interface = _value; }
+    void setBusRequestDispatcher(BusRequestDispatcher* _value) { m_pBusRequestDispatcher = _value; }
+    void dispatchRequest(boost::shared_ptr<BusRequest> _pRequest);
   }; // Apartment
 
   //============================================= Helper definitions

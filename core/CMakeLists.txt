@@ -11,3 +11,5 @@ metering/metering.cpp metering/series.cpp metering/seriespersistence.cpp
 metering/fake_meter.cpp vfs/vfs.cpp web/restful.cpp web/restfulapiwriter.cpp
 web/webserverplugin.cpp)
 
+
+add_subdirectory(ds485)

@@ -29,6 +29,7 @@
 #include "unix/ds485proxy.h"
 #include "core/sim/dssim.h"
 #include "core/dss.h"
+#include "core/ds485/ds485busrequestdispatcher.h"
 
 using namespace dss;
 
@@ -452,8 +453,31 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   public:
     /** Returns true when the interface is ready to transmit user generated DS485Packets */
     virtual bool isReady() { return true; }
-
-    virtual void sendFrame(DS485CommandFrame& _frame) {}
+    
+    int getLastFunctionID() const { return m_LastFunctionID; }
+    void setLastFunctionID(const int _value) { m_LastFunctionID = _value; }
+    int getParameter1() const { return m_Parameter1; }
+    int getParameter2() const { return m_Parameter2; }
+    int getParameter3() const { return m_Parameter3; }
+    virtual void sendFrame(DS485CommandFrame& _frame) {
+      PayloadDissector pd(_frame.getPayload());
+      m_LastFunctionID = pd.get<uint8_t>();
+      if(!pd.isEmpty()) {
+        m_Parameter1 = pd.get<uint16_t>();
+      } else {
+        m_Parameter1 = 0xffff;
+      }
+      if(!pd.isEmpty()) {
+        m_Parameter2 = pd.get<uint16_t>();
+      } else {
+        m_Parameter2 = 0xffff;
+      } 
+      if(!pd.isEmpty()) {
+        m_Parameter3 = pd.get<uint16_t>();
+      } else {
+        m_Parameter3 = 0xffff;
+      }
+    }
 
     //------------------------------------------------ Specialized Commands (system)
     /** Returns an std::vector containing the modulator-spec of all modulators present. */
@@ -523,7 +547,6 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
 
     //------------------------------------------------ Device manipulation
 
-    DS485Command m_LastCommand;
     DS485Command getLastCommand() const { return m_LastCommand; }
     void setLastCommand(DS485Command _value) { m_LastCommand = _value; }
     virtual std::vector<int> sendCommand(DS485Command _cmd, const Set& _set, int _param = -1) { return std::vector<int>(); }
@@ -537,6 +560,12 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
 
     virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) {}
     virtual int getSensorValue(const Device& _device, const int _sensorID) { return 0; }
+  private:
+    int m_LastFunctionID;
+    DS485Command m_LastCommand;
+    uint16_t m_Parameter1;
+    uint16_t m_Parameter2;
+    uint16_t m_Parameter3;
   };
 
 
@@ -546,16 +575,24 @@ BOOST_AUTO_TEST_CASE(testTurnOn) {
 
   DSModulatorSim modSim(NULL);
   DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
   apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
 
-  proxy.setLastCommand(cmdTurnOff);
+  proxy.setLastFunctionID(-1);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
   dev1.turnOn();
-  BOOST_CHECK_EQUAL(cmdTurnOn, proxy.getLastCommand());
-  proxy.setLastCommand(cmdTurnOff);
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(SceneMax, proxy.getParameter2());
+  proxy.setLastFunctionID(-1);
   DeviceReference devRef1(dev1, &apt);
   devRef1.turnOn();
-  BOOST_CHECK_EQUAL(cmdTurnOn, proxy.getLastCommand());
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(SceneMax, proxy.getParameter2());
 }
 
 BOOST_AUTO_TEST_CASE(testTurnOff) {
@@ -564,16 +601,24 @@ BOOST_AUTO_TEST_CASE(testTurnOff) {
 
   DSModulatorSim modSim(NULL);
   DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
   apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
 
-  proxy.setLastCommand(cmdTurnOn);
+  proxy.setLastFunctionID(-1);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
   dev1.turnOff();
-  BOOST_CHECK_EQUAL(cmdTurnOff, proxy.getLastCommand());
-  proxy.setLastCommand(cmdTurnOn);
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(SceneMin, proxy.getParameter2());
+  proxy.setLastFunctionID(-1);
   DeviceReference devRef1(dev1, &apt);
   devRef1.turnOff();
-  BOOST_CHECK_EQUAL(cmdTurnOff, proxy.getLastCommand());
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(SceneMin, proxy.getParameter2());
 }
 
 BOOST_AUTO_TEST_CASE(testDisable) {
@@ -708,16 +753,24 @@ BOOST_AUTO_TEST_CASE(testCallScene) {
 
   DSModulatorSim modSim(NULL);
   DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
   apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
 
-  proxy.setLastCommand(cmdTurnOff);
+  proxy.setLastFunctionID(-1);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
   dev1.callScene(Scene1);
-  BOOST_CHECK_EQUAL(cmdCallScene, proxy.getLastCommand());
-  proxy.setLastCommand(cmdTurnOff);
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
+  proxy.setLastFunctionID(-1);
   DeviceReference devRef1(dev1, &apt);
   devRef1.callScene(Scene1);
-  BOOST_CHECK_EQUAL(cmdCallScene, proxy.getLastCommand());
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
 }
 
 BOOST_AUTO_TEST_CASE(testSaveScene) {
@@ -726,16 +779,24 @@ BOOST_AUTO_TEST_CASE(testSaveScene) {
 
   DSModulatorSim modSim(NULL);
   DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
   apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
 
-  proxy.setLastCommand(cmdTurnOff);
+  proxy.setLastFunctionID(-1);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
   dev1.saveScene(Scene1);
-  BOOST_CHECK_EQUAL(cmdSaveScene, proxy.getLastCommand());
-  proxy.setLastCommand(cmdTurnOff);
+  BOOST_CHECK_EQUAL(FunctionDeviceSaveScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
+  proxy.setLastFunctionID(-1);
   DeviceReference devRef1(dev1, &apt);
   devRef1.saveScene(Scene1);
-  BOOST_CHECK_EQUAL(cmdSaveScene, proxy.getLastCommand());
+  BOOST_CHECK_EQUAL(FunctionDeviceSaveScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
 }
 
 BOOST_AUTO_TEST_CASE(testUndoScene) {
@@ -744,16 +805,24 @@ BOOST_AUTO_TEST_CASE(testUndoScene) {
 
   DSModulatorSim modSim(NULL);
   DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
   apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
 
-  proxy.setLastCommand(cmdTurnOff);
+  proxy.setLastFunctionID(-1);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
   dev1.undoScene(Scene1);
-  BOOST_CHECK_EQUAL(cmdUndoScene, proxy.getLastCommand());
-  proxy.setLastCommand(cmdTurnOff);
+  BOOST_CHECK_EQUAL(FunctionDeviceUndoScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
+  proxy.setLastFunctionID(-1);
   DeviceReference devRef1(dev1, &apt);
   devRef1.undoScene(Scene1);
-  BOOST_CHECK_EQUAL(cmdUndoScene, proxy.getLastCommand());
+  BOOST_CHECK_EQUAL(FunctionDeviceUndoScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
 }
 
 BOOST_AUTO_TEST_CASE(testNextScene) {
@@ -762,16 +831,22 @@ BOOST_AUTO_TEST_CASE(testNextScene) {
 
   DSModulatorSim modSim(NULL);
   DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
   apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
 
-  proxy.setLastCommand(cmdTurnOff);
+  proxy.setLastFunctionID(-1);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
   dev1.nextScene();
-  BOOST_CHECK_EQUAL(cmdCallScene, proxy.getLastCommand());
-  proxy.setLastCommand(cmdTurnOff);
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  proxy.setLastFunctionID(-1);
   DeviceReference devRef1(dev1, &apt);
   devRef1.nextScene();
-  BOOST_CHECK_EQUAL(cmdCallScene, proxy.getLastCommand());
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
 }
 
 BOOST_AUTO_TEST_CASE(testPreviousScene) {
@@ -780,16 +855,22 @@ BOOST_AUTO_TEST_CASE(testPreviousScene) {
 
   DSModulatorSim modSim(NULL);
   DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
   apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
 
-  proxy.setLastCommand(cmdTurnOff);
+  proxy.setLastFunctionID(-1);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
   dev1.previousScene();
-  BOOST_CHECK_EQUAL(cmdCallScene, proxy.getLastCommand());
-  proxy.setLastCommand(cmdTurnOff);
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  proxy.setLastFunctionID(-1);
   DeviceReference devRef1(dev1, &apt);
   devRef1.previousScene();
-  BOOST_CHECK_EQUAL(cmdCallScene, proxy.getLastCommand());
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

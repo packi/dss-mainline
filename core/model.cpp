@@ -30,6 +30,9 @@
 
 #include "foreach.h"
 
+#include "core/busrequestdispatcher.h"
+#include "core/busrequest.h"
+
 #include <fstream>
 
 #include <boost/filesystem.hpp>
@@ -97,11 +100,11 @@ namespace dss {
   } // publishToPropertyTree
 
   void Device::turnOn() {
-    m_pApartment->sendCommand(cmdTurnOn, *this);
+    callScene(SceneMax);
   } // turnOn
 
   void Device::turnOff() {
-    m_pApartment->sendCommand(cmdTurnOff, *this);
+    callScene(SceneMin);
   } // turnOff
 
   void Device::increaseValue(const int _parameterNr) {
@@ -177,15 +180,24 @@ namespace dss {
   } // getValue
 
   void Device::callScene(const int _sceneNr) {
-    m_pApartment->sendCommand(cmdCallScene, *this, _sceneNr);
+    boost::shared_ptr<CallSceneCommandBusRequest> request(new CallSceneCommandBusRequest());
+    request->setTarget(this);
+    request->setSceneID(_sceneNr);
+    m_pApartment->dispatchRequest(request);
   } // callScene
 
   void Device::saveScene(const int _sceneNr) {
-    m_pApartment->sendCommand(cmdSaveScene, *this, _sceneNr);
+    boost::shared_ptr<SaveSceneCommandBusRequest> request(new SaveSceneCommandBusRequest());
+    request->setTarget(this);
+    request->setSceneID(_sceneNr);
+    m_pApartment->dispatchRequest(request);
   } // saveScene
 
   void Device::undoScene(const int _sceneNr) {
-    m_pApartment->sendCommand(cmdUndoScene, *this, _sceneNr);
+    boost::shared_ptr<UndoSceneCommandBusRequest> request(new UndoSceneCommandBusRequest());
+    request->setTarget(this);
+    request->setSceneID(_sceneNr);
+    m_pApartment->dispatchRequest(request);
   } // undoScene
 
   void Device::nextScene() {
@@ -698,7 +710,8 @@ namespace dss {
     Thread("Apartment"),
     m_IsInitializing(true),
     m_pPropertyNode(),
-    m_pDS485Interface(_pDS485Interface)
+    m_pDS485Interface(_pDS485Interface),
+    m_pBusRequestDispatcher(NULL)
   { } // ctor
 
   Apartment::~Apartment() {
@@ -1789,6 +1802,14 @@ namespace dss {
       throw std::runtime_error("Apartment::sendCommand: DS485Interface is NULL");
     }    
   } // sendCommand
+  
+  void Apartment::dispatchRequest(boost::shared_ptr<BusRequest> _pRequest) {
+    if(m_pBusRequestDispatcher != NULL) {
+      m_pBusRequestDispatcher->dispatchRequest(_pRequest);
+    } else {
+      throw std::runtime_error("Apartment::dispatchRequest: m_pBusRequestDispatcher is NULL");
+    }
+  } // dispatchRequest
 
   
   //================================================== Modulator

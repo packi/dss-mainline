@@ -1,14 +1,14 @@
 add_library(tests basetests.cpp  datetoolstests.cpp  ds485tests.cpp
 	eventtests.cpp  modeljstests.cpp  modeltests.cpp
-	propertysystemtests.cpp  scriptstest.cpp  seriestests.cpp tests.cpp)
+	propertysystemtests.cpp  scriptstest.cpp  seriestests.cpp tests.cpp busrequesttests.cpp)
 
 add_executable( dsstests EXCLUDE_FROM_ALL testrunner.cpp ../namespaces.cpp
 	basetests.cpp  datetoolstests.cpp  ds485tests.cpp
         eventtests.cpp  modeljstests.cpp  modeltests.cpp
-        propertysystemtests.cpp  scriptstest.cpp
+        propertysystemtests.cpp  scriptstest.cpp busrequesttests.cpp
 	seriestests.cpp jshandlertests.cpp)
 
-target_link_libraries(dsstests ${BOOST_TEST_LIB} core unix webservices 
+target_link_libraries(dsstests ${BOOST_TEST_LIB} core ds485 unix webservices 
 	pthread mongoose ${REQUIRED_LIBS})
 
 add_custom_target( test

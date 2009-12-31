@@ -1,0 +1,1 @@
+add_library(ds485 ds485busrequestdispatcher.cpp)
