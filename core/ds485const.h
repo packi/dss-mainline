@@ -83,7 +83,8 @@ namespace dss {
   const uint8_t FunctionDeviceStartDimInc = 0x45;
   const uint8_t FunctionDeviceStartDimDec = 0x46;
   const uint8_t FunctionDeviceEndDim = 0x47;
-
+  const uint8_t FunctionDeviceDisable = 0x48;
+  const uint8_t FunctionDeviceEnable = 0x49;
 
   const uint8_t FunctionDeviceSetParameterValue = 0x4B;
   const uint8_t FunctionDeviceIncreaseValue  = 0x4C;

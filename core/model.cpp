@@ -83,12 +83,6 @@ namespace dss {
   void decreaseValue(const int _parameterNr) {
   }
 
-  void enable() {
-  }
-  
-  void disable() {
-  }
-
   void startDim(const bool _directionUp, const int _parameterNr = -1) {
   }
   void endDim(const int _parameterNr = -1);
@@ -170,11 +164,15 @@ namespace dss {
   } // decreaseValue
 
   void Device::enable() {
-    m_pApartment->sendCommand(cmdEnable, *this);
+    boost::shared_ptr<EnableDeviceCommandBusRequest> request(new EnableDeviceCommandBusRequest());
+    request->setTarget(this);
+    m_pApartment->dispatchRequest(request);
   } // enable
 
   void Device::disable() {
-    m_pApartment->sendCommand(cmdDisable, *this);
+    boost::shared_ptr<DisableDeviceCommandBusRequest> request(new DisableDeviceCommandBusRequest());
+    request->setTarget(this);
+    m_pApartment->dispatchRequest(request);
   } // disable
 
   void Device::startDim(const bool _directionUp, const int _parameterNr) {
@@ -417,14 +415,6 @@ namespace dss {
       DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseParam, *this);
     }
   } // decreaseValue
-
-  void Set::enable() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdEnable, *this);
-  } // enable
-
-  void Set::disable() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdDisable, *this);
-  } // disable
 
   void Set::startDim(bool _directionUp, const int _parameterNr) {
     if(_directionUp) {
@@ -2047,14 +2037,6 @@ namespace dss {
     DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseValue, *this, GroupIDBroadcast, _parameterNr);
   } // decreaseValue
 
-  void Zone::enable() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdEnable, *this, GroupIDBroadcast);
-  } // enable
-
-  void Zone::disable() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdDisable, *this, GroupIDBroadcast);
-  } // disable
-
   void Zone::startDim(const bool _directionUp, const int _parameterNr) {
     if(_directionUp) {
       DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimUp, *this, GroupIDBroadcast, _parameterNr);
@@ -2135,14 +2117,6 @@ namespace dss {
   void Group::decreaseValue(const int _parameterNr) {
     DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseValue, m_pApartment->getZone(m_ZoneID), m_GroupID, _parameterNr);
   } // decreaseValue
-
-  void Group::enable() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdEnable, m_pApartment->getZone(m_ZoneID), m_GroupID);
-  } // enable
-
-  void Group::disable() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdDisable, m_pApartment->getZone(m_ZoneID), m_GroupID);
-  } // disable
 
   void Group::startDim(bool _directionUp, const int _parameterNr)  {
     if(_directionUp) {

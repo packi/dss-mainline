@@ -32,9 +32,6 @@ namespace dss {
     : m_pRequest(_pRequest)
     { }
 
-    virtual int getNumberAddressParameter() { return 0; }
-    virtual uint16_t getAddressParameter(int _parameter) { return 0; }
-
   protected:
     BusRequest* getRequest() {
       return m_pRequest;
@@ -43,7 +40,65 @@ namespace dss {
      BusRequest* m_pRequest;
   };
 
+  class DeviceCommandPacketBuilderHints : public PacketBuilderHints {
+  public:
+    DeviceCommandPacketBuilderHints(DeviceCommandBusRequest* _pRequest)
+    : PacketBuilderHints(_pRequest)
+    {}
+    
+    virtual int getNumberAddressParameter() {
+      return 1;
+    }
 
+    virtual int getFunctionID() {
+      return m_FunctionID;
+    }
+
+    virtual int getNumberOfParameter() {
+      return 0;
+    }
+
+    virtual uint16_t getParameter(int _parameter) {
+      return 0;
+    }
+
+    virtual uint16_t getAddressParameter(int _parameter) {
+      if(_parameter == 0) {
+        return getDevice()->getShortAddress();
+      }
+      throw std::runtime_error("getAddressParameter: failed to get address parameter nr. " + intToString(_parameter));
+    }
+
+    virtual uint16_t getTarget() {
+      return getDevice()->getModulatorID();
+    }
+
+    virtual bool isBroadcast() {
+      return false;
+    }
+
+    void setFunctionID(uint16_t _value) {
+      m_FunctionID = _value;
+    }
+  private:
+    Device* getDevice() {
+      return ((DeviceCommandBusRequest*)getRequest())->getTarget();
+    }
+  private:
+    uint16_t m_FunctionID;
+  };
+
+  PacketBuilderHintsBase* EnableDeviceCommandBusRequest::getBuilderHints() {
+    DeviceCommandPacketBuilderHints* result = new DeviceCommandPacketBuilderHints(this);
+    result->setFunctionID(FunctionDeviceEnable);
+    return result;
+  }
+
+  PacketBuilderHintsBase* DisableDeviceCommandBusRequest::getBuilderHints() {
+    DeviceCommandPacketBuilderHints* result = new DeviceCommandPacketBuilderHints(this);
+    result->setFunctionID(FunctionDeviceDisable);
+    return result;
+  }
   
   class CommandBusRequestPacketBuilderHints : public PacketBuilderHints {
   public:
@@ -111,13 +166,6 @@ namespace dss {
       m_FunctionIDForGroup = _value;
     }
 
-    virtual int getNumberOfParameter() {
-      return 0;
-    }
-
-    virtual uint16_t getParameter(int _parameter) {
-      return 0;
-    }
   private:
     void determineTypeOfTarget() {
       PhysicalModelItem* pTarget = ((CommandBusRequest*)getRequest())->getTarget();

@@ -242,10 +242,6 @@ namespace dss {
           } else if(typeName == "decreaseValue") {
             result->setCommand(cmdDecreaseValue);
             paramName = "parameter";
-          } else if(typeName == "enable") {
-            result->setCommand(cmdEnable);
-          } else if(typeName == "disable") {
-            result->setCommand(cmdDisable);
           } else if(typeName == "increaseParameter") {
             result->setCommand(cmdIncreaseParam);
             paramName = "parameter";

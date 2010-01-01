@@ -25,6 +25,7 @@
 
 namespace dss {
   class AddressableModelItem;
+  class Device;
   
   class PacketBuilderHintsBase {
   public:
@@ -48,6 +49,24 @@ namespace dss {
     AddressableModelItem* getTarget() const { return m_pTarget; }
   private:
     AddressableModelItem* m_pTarget;
+  };
+
+  class DeviceCommandBusRequest : public BusRequest {
+  public:
+    void setTarget(Device* _value) { m_pTarget = _value; }
+    Device* getTarget() const { return m_pTarget; }
+  private:
+    Device* m_pTarget;
+  };
+  
+  class EnableDeviceCommandBusRequest : public DeviceCommandBusRequest {
+  public:
+    virtual PacketBuilderHintsBase* getBuilderHints();
+  };
+
+  class DisableDeviceCommandBusRequest : public DeviceCommandBusRequest {
+  public:
+    virtual PacketBuilderHintsBase* getBuilderHints();
   };
 
   class SceneCommandBusRequest : public CommandBusRequest {

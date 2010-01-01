@@ -413,9 +413,9 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
     ScriptObject self(obj, *ctx);
-    if(self.is("set") || self.is("device")) {
-      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      intf->enable();
+    if(self.is("device")) {
+      DeviceReference* dev = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+      dev->enable();
       *rval = INT_TO_JSVAL(0);
       return JS_TRUE;
     }
@@ -426,9 +426,9 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
     ScriptObject self(obj, *ctx);
-    if(self.is("set") || self.is("device")) {
-      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      intf->disable();
+    if(self.is("device")) {
+      DeviceReference* dev = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
+      dev->disable();
       *rval = INT_TO_JSVAL(0);
       return JS_TRUE;
     }

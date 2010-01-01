@@ -660,43 +660,54 @@ BOOST_AUTO_TEST_CASE(testTurnOffGroup) {
   BOOST_CHECK_EQUAL(0x0, proxy.getParameter1()); // zone 0
   BOOST_CHECK_EQUAL(0x1, proxy.getParameter2()); // group 1
   BOOST_CHECK_EQUAL(SceneMin, proxy.getParameter3());
+}
+
+BOOST_AUTO_TEST_CASE(testEnableDevice) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
+  apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
+
   proxy.setLastFunctionID(-1);
-}
-
-BOOST_AUTO_TEST_CASE(testDisable) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSModulatorSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  apt.setDS485Interface(&proxy);
-
-  proxy.setLastCommand(cmdTurnOff);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
-  dev1.disable();
-  BOOST_CHECK_EQUAL(cmdDisable, proxy.getLastCommand());
-  proxy.setLastCommand(cmdTurnOff);
-  DeviceReference devRef1(dev1, &apt);
-  devRef1.disable();
-  BOOST_CHECK_EQUAL(cmdDisable, proxy.getLastCommand());
-}
-
-BOOST_AUTO_TEST_CASE(testEnable) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSModulatorSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  apt.setDS485Interface(&proxy);
-
-  proxy.setLastCommand(cmdTurnOff);
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
   dev1.enable();
-  BOOST_CHECK_EQUAL(cmdEnable, proxy.getLastCommand());
-  proxy.setLastCommand(cmdTurnOff);
+  BOOST_CHECK_EQUAL(FunctionDeviceEnable, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  proxy.setLastFunctionID(-1);
   DeviceReference devRef1(dev1, &apt);
   devRef1.enable();
-  BOOST_CHECK_EQUAL(cmdEnable, proxy.getLastCommand());
+  BOOST_CHECK_EQUAL(FunctionDeviceEnable, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+}
+
+BOOST_AUTO_TEST_CASE(testDisableDevice) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
+  apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
+
+  proxy.setLastFunctionID(-1);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
+  dev1.disable();
+  BOOST_CHECK_EQUAL(FunctionDeviceDisable, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  proxy.setLastFunctionID(-1);
+  DeviceReference devRef1(dev1, &apt);
+  devRef1.disable();
+  BOOST_CHECK_EQUAL(FunctionDeviceDisable, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
 }
 
 BOOST_AUTO_TEST_CASE(testIncreaseValue) {

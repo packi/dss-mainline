@@ -59,8 +59,6 @@ namespace dss {
     cmdUndoScene,
     cmdIncreaseValue,
     cmdDecreaseValue,
-    cmdEnable,
-    cmdDisable,
     cmdIncreaseParam,
     cmdDecreaseParam,
     cmdGetOnOff,
@@ -116,14 +114,6 @@ namespace dss {
      */
     virtual void decreaseValue(const int _parameterNr = -1) = 0;
 
-    /** Enables a previously disabled device.
-     */
-    virtual void enable() = 0;
-    /** Disables a device.
-      * A disabled device may only react to enable().
-      */
-    virtual void disable() = 0;
-
     /** Starts dimming the given parameter.
      * If _directionUp is true, the value gets increased over time. Else its getting decreased.
      */
@@ -171,9 +161,6 @@ namespace dss {
 /*
     virtual void increaseValue(const int _parameterNr = -1);
     virtual void decreaseValue(const int _parameterNr = -1);
-
-    virtual void enable();
-    virtual void disable();
 
     virtual void startDim(const bool _directionUp, const int _parameterNr = -1);
     virtual void endDim(const int _parameterNr = -1);
@@ -235,8 +222,8 @@ namespace dss {
     virtual void increaseValue(const int _parameterNr = -1);
     virtual void decreaseValue(const int _parameterNr = -1);
 
-    virtual void enable();
-    virtual void disable();
+    void enable();
+    void disable();
 
     /** Returns wheter the device is turned on.
      * @note The detection is soly based on the last called scene. As soon as we've
@@ -294,8 +281,8 @@ namespace dss {
     virtual void increaseValue(const int _parameterNr = -1);
     virtual void decreaseValue(const int _parameterNr = -1);
 
-    virtual void enable();
-    virtual void disable();
+    void enable();
+    void disable();
 
     /** @copydoc DeviceReference::isOn() */
     virtual bool isOn() const;
@@ -446,9 +433,6 @@ namespace dss {
 
     virtual void increaseValue(const int _parameterNr = -1);
     virtual void decreaseValue(const int _parameterNr = -1);
-
-    virtual void enable();
-    virtual void disable();
 
     virtual void startDim(bool _directionUp, const int _parameterNr = -1);
     virtual void endDim(const int _parameterNr = -1);
@@ -667,9 +651,6 @@ namespace dss {
     virtual void increaseValue(const int _parameterNr = -1);
     virtual void decreaseValue(const int _parameterNr = -1);
 
-    virtual void enable();
-    virtual void disable();
-
     virtual void startDim(bool _directionUp, const int _parameterNr = -1);
     virtual void endDim(const int _parameterNr = -1);
     virtual void setValue(const double _value, int _parameterNr = -1);
@@ -773,9 +754,6 @@ namespace dss {
 
     virtual void increaseValue(const int _parameterNr = -1);
     virtual void decreaseValue(const int _parameterNr = -1);
-
-    virtual void enable();
-    virtual void disable();
 
     virtual void startDim(bool _directionUp, const int _parameterNr = -1);
     virtual void endDim(const int _parameterNr = -1);
