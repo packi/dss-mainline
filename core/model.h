@@ -49,8 +49,6 @@ namespace Poco {
 namespace dss {
   /** Commands to be transmitted either to a set, group or a single device. */
   typedef enum {
-    cmdTurnOn,
-    cmdTurnOff,
     cmdStartDimUp,
     cmdStartDimDown,
     cmdStopDim,
@@ -99,11 +97,11 @@ namespace dss {
     /** Turns the device on.
      *  This will invoke scene "max".
      */
-    virtual void turnOn() = 0;
+    virtual void turnOn();
     /** Turns the device off.
      * This will invoke scene "min"
      */
-    virtual void turnOff() = 0;
+    virtual void turnOff();
 
     /** Increases the value of the given parameter by one,
      * If no parameter gets passed, it will increase the default value of the device(s).
@@ -156,8 +154,6 @@ namespace dss {
   public:
     AddressableModelItem(Apartment* _pApartment);
     
-    virtual void turnOn();
-    virtual void turnOff();
 /*
     virtual void increaseValue(const int _parameterNr = -1);
     virtual void decreaseValue(const int _parameterNr = -1);
@@ -215,9 +211,6 @@ namespace dss {
     /** Returns the name of the referenced device.
      * @note This will lookup the device. */
     std::string getName() const;
-
-    virtual void turnOn();
-    virtual void turnOff();
 
     virtual void increaseValue(const int _parameterNr = -1);
     virtual void decreaseValue(const int _parameterNr = -1);
@@ -427,9 +420,6 @@ namespace dss {
     /** Constructor for a set containing \a _devices. */
     Set(DeviceVector _devices);
     virtual ~Set() {};
-
-    virtual void turnOn();
-    virtual void turnOff();
 
     virtual void increaseValue(const int _parameterNr = -1);
     virtual void decreaseValue(const int _parameterNr = -1);
@@ -748,9 +738,6 @@ namespace dss {
     /** Returns a list of the modulators the zone is registered with. */
     std::vector<int> getModulators() const;
     bool registeredOnModulator(const Modulator& _modulator) const;
-
-    virtual void turnOn();
-    virtual void turnOff();
 
     virtual void increaseValue(const int _parameterNr = -1);
     virtual void decreaseValue(const int _parameterNr = -1);

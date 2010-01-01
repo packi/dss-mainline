@@ -64,18 +64,22 @@ using Poco::XML::Node;
 namespace dss {
 
   //================================================== AddressableModelItem
+
+  void IDeviceInterface::turnOn() {
+    callScene(SceneMax);
+  }
+
+  void IDeviceInterface::turnOff() {
+    callScene(SceneMin);
+  }
+
+  
+  //================================================== AddressableModelItem
  
   AddressableModelItem::AddressableModelItem(Apartment* _pApartment)
   : m_pApartment(_pApartment)
   {} // ctor
  
-  void AddressableModelItem::turnOn() {
-    callScene(SceneMax) ;
-  } // turnOn
-  
-  void AddressableModelItem::turnOff() {
-    callScene(SceneMin);
-  } // turnOff
  /*
   void increaseValue(const int _parameterNr) {
   }
@@ -391,14 +395,6 @@ namespace dss {
   Set::Set(const Set& _copy) {
     m_ContainedDevices = _copy.m_ContainedDevices;
   }
-
-  void Set::turnOn() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdTurnOn, *this);
-  } // turnOn
-
-  void Set::turnOff() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdTurnOff, *this);
-  } // turnOff
 
   void Set::increaseValue(const int _parameterNr) {
     if(_parameterNr == -1) {
@@ -2021,14 +2017,6 @@ namespace dss {
     return find(m_Modulators.begin(), m_Modulators.end(), &_modulator) != m_Modulators.end();
   } // registeredOnModulator
 
-  void Zone::turnOn() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdTurnOn, *this, GroupIDBroadcast);
-  } // turnOn
-
-  void Zone::turnOff() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdTurnOff, *this, GroupIDBroadcast);
-  } // turnOff
-
   void Zone::increaseValue(const int _parameterNr) {
     DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseValue, *this, GroupIDBroadcast, _parameterNr);
   } // increaseValue
@@ -2198,14 +2186,6 @@ namespace dss {
   std::string DeviceReference::getName() const {
     return getDevice().getName();
   } //getName
-
-  void DeviceReference::turnOn() {
-    getDevice().turnOn();
-  } // turnOn
-
-  void DeviceReference::turnOff() {
-    getDevice().turnOff();
-  } // turnOff
 
   void DeviceReference::increaseValue(const int _parameterNr) {
     getDevice().increaseValue(_parameterNr);

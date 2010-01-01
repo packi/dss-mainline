@@ -718,11 +718,11 @@ BOOST_AUTO_TEST_CASE(testIncreaseValue) {
   DS485InterfaceTest proxy;
   apt.setDS485Interface(&proxy);
 
-  proxy.setLastCommand(cmdTurnOff);
+  proxy.setLastCommand(cmdGetFunctionID);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.increaseValue();
   BOOST_CHECK_EQUAL(cmdIncreaseValue, proxy.getLastCommand());
-  proxy.setLastCommand(cmdTurnOff);
+  proxy.setLastCommand(cmdGetFunctionID);
   DeviceReference devRef1(dev1, &apt);
   devRef1.increaseValue();
   BOOST_CHECK_EQUAL(cmdIncreaseValue, proxy.getLastCommand());
@@ -736,11 +736,11 @@ BOOST_AUTO_TEST_CASE(testDecreaseValue) {
   DS485InterfaceTest proxy;
   apt.setDS485Interface(&proxy);
 
-  proxy.setLastCommand(cmdTurnOff);
+  proxy.setLastCommand(cmdGetFunctionID);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.decreaseValue();
   BOOST_CHECK_EQUAL(cmdDecreaseValue, proxy.getLastCommand());
-  proxy.setLastCommand(cmdTurnOff);
+  proxy.setLastCommand(cmdGetFunctionID);
   DeviceReference devRef1(dev1, &apt);
   devRef1.decreaseValue();
   BOOST_CHECK_EQUAL(cmdDecreaseValue, proxy.getLastCommand());
@@ -754,11 +754,11 @@ BOOST_AUTO_TEST_CASE(testStartDimUp) {
   DS485InterfaceTest proxy;
   apt.setDS485Interface(&proxy);
 
-  proxy.setLastCommand(cmdTurnOff);
+  proxy.setLastCommand(cmdGetFunctionID);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.startDim(true);
   BOOST_CHECK_EQUAL(cmdStartDimUp, proxy.getLastCommand());
-  proxy.setLastCommand(cmdTurnOff);
+  proxy.setLastCommand(cmdGetFunctionID);
   DeviceReference devRef1(dev1, &apt);
   devRef1.startDim(true);
   BOOST_CHECK_EQUAL(cmdStartDimUp, proxy.getLastCommand());
@@ -772,11 +772,11 @@ BOOST_AUTO_TEST_CASE(testStartDimDown) {
   DS485InterfaceTest proxy;
   apt.setDS485Interface(&proxy);
 
-  proxy.setLastCommand(cmdTurnOff);
+  proxy.setLastCommand(cmdGetFunctionID);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.startDim(false);
   BOOST_CHECK_EQUAL(cmdStartDimDown, proxy.getLastCommand());
-  proxy.setLastCommand(cmdTurnOff);
+  proxy.setLastCommand(cmdGetFunctionID);
   DeviceReference devRef1(dev1, &apt);
   devRef1.startDim(false);
   BOOST_CHECK_EQUAL(cmdStartDimDown, proxy.getLastCommand());
@@ -790,11 +790,11 @@ BOOST_AUTO_TEST_CASE(testEndDim) {
   DS485InterfaceTest proxy;
   apt.setDS485Interface(&proxy);
 
-  proxy.setLastCommand(cmdTurnOff);
+  proxy.setLastCommand(cmdGetFunctionID);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.endDim();
   BOOST_CHECK_EQUAL(cmdStopDim, proxy.getLastCommand());
-  proxy.setLastCommand(cmdTurnOff);
+  proxy.setLastCommand(cmdGetFunctionID);
   DeviceReference devRef1(dev1, &apt);
   devRef1.endDim();
   BOOST_CHECK_EQUAL(cmdStopDim, proxy.getLastCommand());

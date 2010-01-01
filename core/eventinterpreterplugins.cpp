@@ -214,11 +214,7 @@ namespace dss {
           std::string typeName = elem->getAttribute("type");
           std::string paramName = "";
           bool needParam = false;
-          if(typeName == "turnOn") {
-            result->setCommand(cmdTurnOn);
-          } else if(typeName == "turnOff") {
-            result->setCommand(cmdTurnOff);
-          } else if(typeName == "dimUp") {
+          if(typeName == "dimUp") {
             result->setCommand(cmdStartDimUp);
             paramName = "parameter";
           } else if(typeName == "stopDim") {

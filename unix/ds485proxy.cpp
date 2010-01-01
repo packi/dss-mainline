@@ -315,15 +315,7 @@ namespace dss {
     int toZone = _zone.getID();
     int param = _param;
     const int kNoParam = -1;
-    if(_cmd == cmdTurnOn) {
-      frame.getPayload().add<uint8_t>(FunctionGroupCallScene);
-      param = SceneMax;
-      log("turn on: zone " + intToString(_zone.getID()) + " group: " + intToString(_groupID));
-    } else if(_cmd == cmdTurnOff) {
-      frame.getPayload().add<uint8_t>(FunctionGroupCallScene);
-      param = SceneMin;
-      log("turn off: zone " + intToString(_zone.getID()) + " group: " + intToString(_groupID));
-    } else if(_cmd == cmdCallScene) {
+    if(_cmd == cmdCallScene) {
       frame.getPayload().add<uint8_t>(FunctionGroupCallScene);
       log("call scene: zone " + intToString(_zone.getID()) + " group: " + intToString(_groupID));
     } else if(_cmd == cmdSaveScene) {
@@ -371,17 +363,7 @@ namespace dss {
     frame.getHeader().setBroadcast(false);
     frame.getHeader().setType(1);
     frame.setCommand(CommandRequest);
-    if(_cmd == cmdTurnOn) {
-      frame.getPayload().add<uint8_t>(FunctionDeviceCallScene);
-      frame.getPayload().add<devid_t>(_id);
-      frame.getPayload().add<uint16_t>(SceneMax);
-      sendFrame(frame);
-    } else if(_cmd == cmdTurnOff) {
-      frame.getPayload().add<uint8_t>(FunctionDeviceCallScene);
-      frame.getPayload().add<devid_t>(_id);
-      frame.getPayload().add<uint16_t>(SceneMin);
-      sendFrame(frame);
-    } else if(_cmd == cmdGetOnOff) {
+    if(_cmd == cmdGetOnOff) {
       frame.getPayload().add<uint8_t>(FunctionDeviceGetOnOff);
       frame.getPayload().add<uint16_t>(_id);
       uint8_t res = receiveSingleResult(frame, FunctionDeviceGetOnOff);
