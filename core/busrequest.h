@@ -24,7 +24,8 @@
 #include <stdint.h>
 
 namespace dss {
-  class PhysicalModelItem;
+  class AddressableModelItem;
+  
   class PacketBuilderHintsBase {
   public:
     virtual int getFunctionID() = 0;
@@ -43,10 +44,10 @@ namespace dss {
 
   class CommandBusRequest : public BusRequest {
   public:
-    void setTarget(PhysicalModelItem* _value) { m_pTarget = _value; }
-    PhysicalModelItem* getTarget() const { return m_pTarget; }
+    void setTarget(AddressableModelItem* _value) { m_pTarget = _value; }
+    AddressableModelItem* getTarget() const { return m_pTarget; }
   private:
-    PhysicalModelItem* m_pTarget;
+    AddressableModelItem* m_pTarget;
   };
 
   class SceneCommandBusRequest : public CommandBusRequest {

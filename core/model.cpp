@@ -63,16 +63,70 @@ using Poco::XML::Node;
 
 namespace dss {
 
+  //================================================== AddressableModelItem
+ 
+  AddressableModelItem::AddressableModelItem(Apartment* _pApartment)
+  : m_pApartment(_pApartment)
+  {} // ctor
+ 
+  void AddressableModelItem::turnOn() {
+    callScene(SceneMax) ;
+  } // turnOn
+  
+  void AddressableModelItem::turnOff() {
+    callScene(SceneMin);
+  } // turnOff
+ /*
+  void increaseValue(const int _parameterNr) {
+  }
+  
+  void decreaseValue(const int _parameterNr) {
+  }
 
+  void enable() {
+  }
+  
+  void disable() {
+  }
+
+  void startDim(const bool _directionUp, const int _parameterNr = -1) {
+  }
+  void endDim(const int _parameterNr = -1);
+  void setValue(const double _value, const int _parameterNr = -1);
+*/
+  void AddressableModelItem::callScene(const int _sceneNr) {
+    boost::shared_ptr<CallSceneCommandBusRequest> request(new CallSceneCommandBusRequest());
+    request->setTarget(this);
+    request->setSceneID(_sceneNr);
+    m_pApartment->dispatchRequest(request);
+  } // callScene
+
+  void AddressableModelItem::saveScene(const int _sceneNr) {
+    boost::shared_ptr<SaveSceneCommandBusRequest> request(new SaveSceneCommandBusRequest());
+    request->setTarget(this);
+    request->setSceneID(_sceneNr);
+    m_pApartment->dispatchRequest(request);
+  } // saveScene
+
+  void AddressableModelItem::undoScene(const int _sceneNr) {
+    boost::shared_ptr<UndoSceneCommandBusRequest> request(new UndoSceneCommandBusRequest());
+    request->setTarget(this);
+    request->setSceneID(_sceneNr);
+    m_pApartment->dispatchRequest(request);
+  } // undoScene
+/*
+  void nextScene();
+  void previousScene();
+*/
   //================================================== Device
 
   const devid_t ShortAddressStaleDevice = 0xFFFF;
 
   Device::Device(dsid_t _dsid, Apartment* _pApartment)
-  : m_DSID(_dsid),
+  : AddressableModelItem(_pApartment),
+    m_DSID(_dsid),
     m_ShortAddress(ShortAddressStaleDevice),
     m_ZoneID(0),
-    m_pApartment(_pApartment),
     m_FunctionID(0),
     m_LastCalledScene(SceneOff),
     m_Consumption(0),
@@ -98,14 +152,6 @@ namespace dss {
       }
     }
   } // publishToPropertyTree
-
-  void Device::turnOn() {
-    callScene(SceneMax);
-  } // turnOn
-
-  void Device::turnOff() {
-    callScene(SceneMin);
-  } // turnOff
 
   void Device::increaseValue(const int _parameterNr) {
     if(_parameterNr == -1) {
@@ -178,27 +224,6 @@ namespace dss {
     vector<int> res = DSS::getInstance()->getDS485Interface().sendCommand(cmdGetValue, *this, _parameterNr);
     return res.front();
   } // getValue
-
-  void Device::callScene(const int _sceneNr) {
-    boost::shared_ptr<CallSceneCommandBusRequest> request(new CallSceneCommandBusRequest());
-    request->setTarget(this);
-    request->setSceneID(_sceneNr);
-    m_pApartment->dispatchRequest(request);
-  } // callScene
-
-  void Device::saveScene(const int _sceneNr) {
-    boost::shared_ptr<SaveSceneCommandBusRequest> request(new SaveSceneCommandBusRequest());
-    request->setTarget(this);
-    request->setSceneID(_sceneNr);
-    m_pApartment->dispatchRequest(request);
-  } // saveScene
-
-  void Device::undoScene(const int _sceneNr) {
-    boost::shared_ptr<UndoSceneCommandBusRequest> request(new UndoSceneCommandBusRequest());
-    request->setTarget(this);
-    request->setSceneID(_sceneNr);
-    m_pApartment->dispatchRequest(request);
-  } // undoScene
 
   void Device::nextScene() {
     callScene(SceneHelper::getNextScene(m_LastCalledScene));
@@ -2084,7 +2109,7 @@ namespace dss {
   //============================================= Group
 
   Group::Group(const int _id, const int _zoneID, Apartment& _apartment)
-  : m_Apartment(_apartment),
+  : AddressableModelItem(&_apartment),
     m_ZoneID(_zoneID),
     m_GroupID(_id),
     m_LastCalledScene(SceneOff)
@@ -2100,52 +2125,43 @@ namespace dss {
   } // getZoneID
 
   Set Group::getDevices() const {
-    return m_Apartment.getDevices().getByZone(m_ZoneID).getByGroup(m_GroupID);
+    return m_pApartment->getDevices().getByZone(m_ZoneID).getByGroup(m_GroupID);
   } // getDevices
 
-  void Group::turnOn() {
-    callScene(SceneMax);
-  } // turnOn
-
-  void Group::turnOff() {
-    callScene(SceneMin);
-  } // turnOff
-
   void Group::increaseValue(const int _parameterNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseValue, m_Apartment.getZone(m_ZoneID), m_GroupID, _parameterNr);
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseValue, m_pApartment->getZone(m_ZoneID), m_GroupID, _parameterNr);
   } // increaseValue
 
   void Group::decreaseValue(const int _parameterNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseValue, m_Apartment.getZone(m_ZoneID), m_GroupID, _parameterNr);
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseValue, m_pApartment->getZone(m_ZoneID), m_GroupID, _parameterNr);
   } // decreaseValue
 
   void Group::enable() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdEnable, m_Apartment.getZone(m_ZoneID), m_GroupID);
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdEnable, m_pApartment->getZone(m_ZoneID), m_GroupID);
   } // enable
 
   void Group::disable() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdDisable, m_Apartment.getZone(m_ZoneID), m_GroupID);
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdDisable, m_pApartment->getZone(m_ZoneID), m_GroupID);
   } // disable
 
   void Group::startDim(bool _directionUp, const int _parameterNr)  {
     if(_directionUp) {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimUp, m_Apartment.getZone(m_ZoneID), m_GroupID, _parameterNr);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimUp, m_pApartment->getZone(m_ZoneID), m_GroupID, _parameterNr);
     } else {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimDown, m_Apartment.getZone(m_ZoneID), m_GroupID, _parameterNr);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimDown, m_pApartment->getZone(m_ZoneID), m_GroupID, _parameterNr);
     }
   } // startDim
 
   void Group::endDim(const int _parameterNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdStopDim, m_Apartment.getZone(m_ZoneID), m_GroupID, _parameterNr);
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdStopDim, m_pApartment->getZone(m_ZoneID), m_GroupID, _parameterNr);
   } // endDim
 
   void Group::setValue(const double _value, int _parameterNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, m_Apartment.getZone(m_ZoneID), m_GroupID, static_cast<int>(_value));
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, m_pApartment->getZone(m_ZoneID), m_GroupID, static_cast<int>(_value));
   } // setValue
 
   Group& Group::operator=(const Group& _other) {
     m_Devices = _other.m_Devices;
-    //m_Apartment = _other.m_Apartment;
     m_GroupID = _other.m_GroupID;
     m_ZoneID = _other.m_ZoneID;
     return *this;
@@ -2157,16 +2173,8 @@ namespace dss {
     if(SceneHelper::rememberScene(_sceneNr & 0x00ff)) {
       m_LastCalledScene = _sceneNr & 0x00ff;
     }
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdCallScene, m_Apartment.getZone(m_ZoneID), m_GroupID, _sceneNr);
+    AddressableModelItem::callScene(_sceneNr);
   } // callScene
-
-  void Group::saveScene(const int _sceneNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdSaveScene, m_Apartment.getZone(m_ZoneID), m_GroupID, _sceneNr);
-  } // saveScene
-
-  void Group::undoScene(const int _sceneNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdUndoScene, m_Apartment.getZone(m_ZoneID), m_GroupID, _sceneNr);
-  } // undoScene
 
   unsigned long Group::getPowerConsumption() {
     return getDevices().getPowerConsumption();

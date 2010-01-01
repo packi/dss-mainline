@@ -159,8 +159,37 @@ namespace dss {
     virtual void previousScene() = 0;
 
     virtual ~IDeviceInterface() {};
-  };
+  }; // IDeviceInterface
 
+  class AddressableModelItem : public PhysicalModelItem,
+                               public IDeviceInterface {
+  public:
+    AddressableModelItem(Apartment* _pApartment);
+    
+    virtual void turnOn();
+    virtual void turnOff();
+/*
+    virtual void increaseValue(const int _parameterNr = -1);
+    virtual void decreaseValue(const int _parameterNr = -1);
+
+    virtual void enable();
+    virtual void disable();
+
+    virtual void startDim(const bool _directionUp, const int _parameterNr = -1);
+    virtual void endDim(const int _parameterNr = -1);
+    virtual void setValue(const double _value, const int _parameterNr = -1);
+*/
+    virtual void callScene(const int _sceneNr);
+    virtual void saveScene(const int _sceneNr);
+    virtual void undoScene(const int _sceneNr);
+/*
+    virtual void nextScene();
+    virtual void previousScene();
+*/
+  protected:
+    Apartment* m_pApartment;
+  }; // AddressableModelItem
+  
   /** Internal reference to a device.
    * A DeviceReference is virtually interchangable with a device. It is used in places
      where a reference to a device is needed.
@@ -235,8 +264,7 @@ namespace dss {
   typedef boost::tuple<double, double, double> DeviceLocation;
 
   /** Represents a dsID */
-  class Device : public IDeviceInterface,
-                 public PhysicalModelItem,
+  class Device : public AddressableModelItem,
                  public boost::noncopyable {
   private:
     std::string m_Name;
@@ -244,7 +272,6 @@ namespace dss {
     devid_t m_ShortAddress;
     int m_ModulatorID;
     int m_ZoneID;
-    Apartment* m_pApartment;
     std::bitset<63> m_GroupBitmask;
     std::vector<int> m_Groups;
     int m_FunctionID;
@@ -264,9 +291,6 @@ namespace dss {
     Device(const dsid_t _dsid, Apartment* _pApartment);
     virtual ~Device() {};
 
-    virtual void turnOn();
-    virtual void turnOff();
-
     virtual void increaseValue(const int _parameterNr = -1);
     virtual void decreaseValue(const int _parameterNr = -1);
 
@@ -283,10 +307,6 @@ namespace dss {
     /** Returns the value of _parameterNr.
      * @note not yet implemented */
     double getValue(const int _parameterNr = -1);
-
-    virtual void callScene(const int _sceneNr);
-    virtual void saveScene(const int _sceneNr);
-    virtual void undoScene(const int _sceneNr);
 
     virtual void nextScene();
     virtual void previousScene();
@@ -628,11 +648,9 @@ namespace dss {
 
   /** Represents a predefined group */
   class Group : public DeviceContainer,
-                public IDeviceInterface,
-                public PhysicalModelItem  {
+                public AddressableModelItem {
   protected:
     DeviceVector m_Devices;
-    Apartment& m_Apartment;
     int m_ZoneID;
     int m_GroupID;
     int m_LastCalledScene;
@@ -646,9 +664,6 @@ namespace dss {
     int getID() const;
     int getZoneID() const;
 
-    virtual void turnOn();
-    virtual void turnOff();
-
     virtual void increaseValue(const int _parameterNr = -1);
     virtual void decreaseValue(const int _parameterNr = -1);
 
@@ -660,8 +675,6 @@ namespace dss {
     virtual void setValue(const double _value, int _parameterNr = -1);
 
     virtual void callScene(const int _sceneNr);
-    virtual void saveScene(const int _sceneNr);
-    virtual void undoScene(const int _sceneNr);
 
     virtual void nextScene();
     virtual void previousScene();
