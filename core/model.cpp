@@ -2018,43 +2018,35 @@ namespace dss {
   } // registeredOnModulator
 
   void Zone::increaseValue(const int _parameterNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseValue, *this, GroupIDBroadcast, _parameterNr);
+    getGroup(GroupIDBroadcast)->increaseValue(_parameterNr);
   } // increaseValue
 
   void Zone::decreaseValue(const int _parameterNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseValue, *this, GroupIDBroadcast, _parameterNr);
+    getGroup(GroupIDBroadcast)->decreaseValue(_parameterNr);
   } // decreaseValue
 
   void Zone::startDim(const bool _directionUp, const int _parameterNr) {
-    if(_directionUp) {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimUp, *this, GroupIDBroadcast, _parameterNr);
-    } else {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimDown, *this, GroupIDBroadcast, _parameterNr);
-    }
+    getGroup(GroupIDBroadcast)->startDim(_directionUp, _parameterNr);
   } // startDim
 
   void Zone::endDim(const int _parameterNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdStopDim, *this, GroupIDBroadcast, _parameterNr);
+    getGroup(GroupIDBroadcast)->endDim(_parameterNr);
   } // endDim
 
   void Zone::setValue(const double _value, const int _parameterNr) {
-    if(_parameterNr == -1) {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, *this, GroupIDBroadcast, static_cast<int>(_value));
-    } else {
-      throw std::runtime_error("Can't set arbitrary parameter on a zone");
-    }
+    getGroup(GroupIDBroadcast)->setValue(_value, _parameterNr);
   } // setValue
 
   void Zone::callScene(const int _sceneNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdCallScene, *this, GroupIDBroadcast, _sceneNr);
+    getGroup(GroupIDBroadcast)->callScene(_sceneNr);
   } // callScene
 
   void Zone::saveScene(const int _sceneNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdSaveScene, *this, GroupIDBroadcast, _sceneNr);
+    getGroup(GroupIDBroadcast)->saveScene(_sceneNr);
   } // saveScene
 
   void Zone::undoScene(const int _sceneNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdUndoScene, *this, GroupIDBroadcast, _sceneNr);
+    getGroup(GroupIDBroadcast)->undoScene(_sceneNr);
   } // undoScene
 
   unsigned long Zone::getPowerConsumption() {
@@ -2062,17 +2054,11 @@ namespace dss {
   } // getPowerConsumption
 
   void Zone::nextScene() {
-    Group* broadcastGroup = getGroup(0);
-    if(broadcastGroup != NULL) {
-      broadcastGroup->nextScene();
-    }
+    getGroup(GroupIDBroadcast)->nextScene();
   } // nextScene
 
   void Zone::previousScene() {
-    Group* broadcastGroup = getGroup(0);
-    if(broadcastGroup != NULL) {
-      broadcastGroup->previousScene();
-    }
+    getGroup(GroupIDBroadcast)->previousScene();
   } // previousScene
 
 
