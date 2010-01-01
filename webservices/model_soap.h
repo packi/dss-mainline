@@ -70,10 +70,6 @@ int dss__SetIncreaseValue(int _token, char* _setSpec, int _paramID, bool& result
  *  == -1 the default parameter will be decreased. */
 int dss__SetDecreaseValue(int _token, char* _setSpec, int _paramID, bool& result);
 
-/** Enables all previously disabled devices in the set. */
-int dss__SetEnable(int _token, char* _setSpec, bool& result);
-/** Disables all devices in the set. */
-int dss__SetDisable(int _token, char* _setSpec, bool& result);
 /** Starts dimming the given parameter on all devices contained in the set. If _directionUp is
  * true, the dimming will increase the parameter specified by _paramID. If _paramID == -1 the
  * default parameter will be dimmed */
@@ -102,10 +98,6 @@ int dss__ApartmentIncreaseValue(int _token, int _groupID, int _paramID, bool& re
  *  == -1 the default parameter will be decreased. */
 int dss__ApartmentDecreaseValue(int _token, int _groupID, int _paramID, bool& result);
 
-/** Enables all previously disabled devices in the group. */
-int dss__ApartmentEnable(int _token, int _groupID, bool& result);
-/** Disables all devices in the group. */
-int dss__ApartmentDisable(int _token, int _groupID, bool& result);
 /** Starts dimming the given parameter on all devices contained in the group. If _directionUp is
  * true, the dimming will increase the parameter specified by _paramID. If _paramID == -1 the
  * default parameter will be dimmed */
@@ -141,10 +133,6 @@ int dss__ZoneIncreaseValue(int _token, int _zoneID, int _groupID, int _paramID, 
  *  == -1 the default parameter will be decreased. */
 int dss__ZoneDecreaseValue(int _token, int _zoneID, int _groupID, int _paramID, bool& result);
 
-/** Enables all previously disabled devices in the zone/group. */
-int dss__ZoneEnable(int _token, int _zoneID, int _groupID, bool& result);
-/** Disables all devices in the zone/group. */
-int dss__ZoneDisable(int _token, int _zoneID, int _groupID, bool& result);
 /** Starts dimming the given parameter on all devices contained in the group/zone. If _directionUp is
  * true, the dimming will increase the parameter specified by _paramID. If _paramID == -1 the
  * default parameter will be dimmed */

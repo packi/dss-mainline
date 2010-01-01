@@ -24,7 +24,7 @@
   xmlns="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="unqualified"
   attributeFormDefault="unqualified">
-  <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
   <complexType name="Event">
    <sequence>
      <element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
@@ -394,40 +394,6 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="SetEnable">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="SetEnableResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="SetDisable">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="SetDisableResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
   <element name="SetStartDim">
    <complexType>
     <sequence>
@@ -583,40 +549,6 @@
   </element>
   <!-- operation response element -->
   <element name="ApartmentDecreaseValueResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="ApartmentEnable">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="ApartmentEnableResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="ApartmentDisable">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="ApartmentDisableResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -816,42 +748,6 @@
   </element>
   <!-- operation response element -->
   <element name="ZoneDecreaseValueResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="ZoneEnable">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="ZoneEnableResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="ZoneDisable">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="ZoneDisableResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -1811,22 +1707,6 @@
  <part name="parameters" element="dss:SetDecreaseValueResponse"/>
 </message>
 
-<message name="SetEnableRequest">
- <part name="parameters" element="dss:SetEnable"/>
-</message>
-
-<message name="SetEnableResponse">
- <part name="parameters" element="dss:SetEnableResponse"/>
-</message>
-
-<message name="SetDisableRequest">
- <part name="parameters" element="dss:SetDisable"/>
-</message>
-
-<message name="SetDisableResponse">
- <part name="parameters" element="dss:SetDisableResponse"/>
-</message>
-
 <message name="SetStartDimRequest">
  <part name="parameters" element="dss:SetStartDim"/>
 </message>
@@ -1897,22 +1777,6 @@
 
 <message name="ApartmentDecreaseValueResponse">
  <part name="parameters" element="dss:ApartmentDecreaseValueResponse"/>
-</message>
-
-<message name="ApartmentEnableRequest">
- <part name="parameters" element="dss:ApartmentEnable"/>
-</message>
-
-<message name="ApartmentEnableResponse">
- <part name="parameters" element="dss:ApartmentEnableResponse"/>
-</message>
-
-<message name="ApartmentDisableRequest">
- <part name="parameters" element="dss:ApartmentDisable"/>
-</message>
-
-<message name="ApartmentDisableResponse">
- <part name="parameters" element="dss:ApartmentDisableResponse"/>
 </message>
 
 <message name="ApartmentStartDimRequest">
@@ -2001,22 +1865,6 @@
 
 <message name="ZoneDecreaseValueResponse">
  <part name="parameters" element="dss:ZoneDecreaseValueResponse"/>
-</message>
-
-<message name="ZoneEnableRequest">
- <part name="parameters" element="dss:ZoneEnable"/>
-</message>
-
-<message name="ZoneEnableResponse">
- <part name="parameters" element="dss:ZoneEnableResponse"/>
-</message>
-
-<message name="ZoneDisableRequest">
- <part name="parameters" element="dss:ZoneDisable"/>
-</message>
-
-<message name="ZoneDisableResponse">
- <part name="parameters" element="dss:ZoneDisableResponse"/>
 </message>
 
 <message name="ZoneStartDimRequest">
@@ -2477,16 +2325,6 @@
   <input message="tns:SetDecreaseValueRequest"/>
   <output message="tns:SetDecreaseValueResponse"/>
  </operation>
- <operation name="SetEnable">
-  <documentation>Service definition of function dss__SetEnable</documentation>
-  <input message="tns:SetEnableRequest"/>
-  <output message="tns:SetEnableResponse"/>
- </operation>
- <operation name="SetDisable">
-  <documentation>Service definition of function dss__SetDisable</documentation>
-  <input message="tns:SetDisableRequest"/>
-  <output message="tns:SetDisableResponse"/>
- </operation>
  <operation name="SetStartDim">
   <documentation>Service definition of function dss__SetStartDim</documentation>
   <input message="tns:SetStartDimRequest"/>
@@ -2531,16 +2369,6 @@
   <documentation>Service definition of function dss__ApartmentDecreaseValue</documentation>
   <input message="tns:ApartmentDecreaseValueRequest"/>
   <output message="tns:ApartmentDecreaseValueResponse"/>
- </operation>
- <operation name="ApartmentEnable">
-  <documentation>Service definition of function dss__ApartmentEnable</documentation>
-  <input message="tns:ApartmentEnableRequest"/>
-  <output message="tns:ApartmentEnableResponse"/>
- </operation>
- <operation name="ApartmentDisable">
-  <documentation>Service definition of function dss__ApartmentDisable</documentation>
-  <input message="tns:ApartmentDisableRequest"/>
-  <output message="tns:ApartmentDisableResponse"/>
  </operation>
  <operation name="ApartmentStartDim">
   <documentation>Service definition of function dss__ApartmentStartDim</documentation>
@@ -2596,16 +2424,6 @@
   <documentation>Service definition of function dss__ZoneDecreaseValue</documentation>
   <input message="tns:ZoneDecreaseValueRequest"/>
   <output message="tns:ZoneDecreaseValueResponse"/>
- </operation>
- <operation name="ZoneEnable">
-  <documentation>Service definition of function dss__ZoneEnable</documentation>
-  <input message="tns:ZoneEnableRequest"/>
-  <output message="tns:ZoneEnableResponse"/>
- </operation>
- <operation name="ZoneDisable">
-  <documentation>Service definition of function dss__ZoneDisable</documentation>
-  <input message="tns:ZoneDisableRequest"/>
-  <output message="tns:ZoneDisableResponse"/>
  </operation>
  <operation name="ZoneStartDim">
   <documentation>Service definition of function dss__ZoneStartDim</documentation>
@@ -3020,24 +2838,6 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="SetEnable">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="SetDisable">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
  <operation name="SetStartDim">
   <SOAP:operation soapAction=""/>
   <input>
@@ -3111,24 +2911,6 @@
   </output>
  </operation>
  <operation name="ApartmentDecreaseValue">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="ApartmentEnable">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="ApartmentDisable">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -3228,24 +3010,6 @@
   </output>
  </operation>
  <operation name="ZoneDecreaseValue">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="ZoneEnable">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="ZoneDisable">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -3653,7 +3417,7 @@
 </binding>
 
 <service name="dss">
- <documentation>gSOAP 2.7.10 generated service definition</documentation>
+ <documentation>gSOAP 2.7.9l generated service definition</documentation>
  <port name="dss" binding="tns:dss">
   <SOAP:address location="http://localhost:8081"/>
  </port>

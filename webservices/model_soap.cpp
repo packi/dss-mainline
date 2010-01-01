@@ -454,28 +454,6 @@ int dss__SetDecreaseValue(struct soap *soap, int _token, char* _setSpec, int _pa
   return SOAP_OK;
 }
 
-int dss__SetEnable(struct soap *soap, int _token, char* _setSpec, bool& result) {
-  dss::Set set;
-  int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  set.enable();
-  result = true;
-  return SOAP_OK;
-}
-
-int dss__SetDisable(struct soap *soap, int _token, char* _setSpec, bool& result) {
-  dss::Set set;
-  int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  set.disable();
-  result = true;
-  return SOAP_OK;
-}
-
 int dss__SetStartDim(struct soap *soap, int _token, char* _setSpec, bool _directionUp, int _paramID, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
@@ -588,28 +566,6 @@ int dss__ApartmentDecreaseValue(struct soap *soap, int _token, int _groupID, int
   return SOAP_OK;
 }
 
-int dss__ApartmentEnable(struct soap *soap, int _token, int _groupID, bool& result) {
-  dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
-  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  group.enable();
-  result = true;
-  return SOAP_OK;
-}
-
-int dss__ApartmentDisable(struct soap *soap, int _token, int _groupID, bool& result) {
-  dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
-  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  group.disable();
-  result = true;
-  return SOAP_OK;
-}
-
 int dss__ApartmentStartDim(struct soap *soap, int _token, int _groupID, bool _directionUp, int _paramID, bool& result) {
   dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
@@ -718,28 +674,6 @@ int dss__ZoneDecreaseValue(struct soap *soap, int _token, int _zoneID, int _grou
     return getResult;
   }
   group.decreaseValue(_paramID);
-  result = true;
-  return SOAP_OK;
-}
-
-int dss__ZoneEnable(struct soap *soap, int _token, int _zoneID, int _groupID, bool& result) {
-  dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
-  int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  group.enable();
-  result = true;
-  return SOAP_OK;
-}
-
-int dss__ZoneDisable(struct soap *soap, int _token, int _zoneID, int _groupID, bool& result) {
-  dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
-  int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  group.disable();
   result = true;
   return SOAP_OK;
 }

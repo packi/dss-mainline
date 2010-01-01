@@ -679,10 +679,6 @@ namespace dss {
       _interface->increaseValue();
     } else if(endsWith(_method, "/decreaseValue")) {
       _interface->decreaseValue();
-    } else if(endsWith(_method, "/enable")) {
-      _interface->enable();
-    } else if(endsWith(_method, "/disable")) {
-      _interface->disable();
     } else if(endsWith(_method, "/startDim")) {
       std::string direction = _parameter["direction"];
       if(direction == "up") {
@@ -738,8 +734,6 @@ namespace dss {
         || endsWith(_method, "/turnOff")
         || endsWith(_method, "/increaseValue")
         || endsWith(_method, "/decreaseValue")
-        || endsWith(_method, "/enable")
-        || endsWith(_method, "/disable")
         || endsWith(_method, "/startDim")
         || endsWith(_method, "/endDim")
         || endsWith(_method, "/setValue")
@@ -1036,6 +1030,10 @@ namespace dss {
       } else if(beginsWith(_method, "device/setName")) {
         pDevice->setName(_parameter["newName"]);
         return ResultToJSON(true);
+      } else if(endsWith(_method, "device/enable")) {
+        pDevice->enable();
+      } else if(endsWith(_method, "device/disable")) {
+        pDevice->disable();
       } else if(beginsWith(_method, "device/setRawValue")) {
         int value = strToIntDef(_parameter["value"], -1);
         if(value == -1) {
