@@ -165,8 +165,7 @@ namespace dss {
     Apartment* m_pApartment;
   }; // AddressableModelItem
 
-  class NonAddressableModelItem : public PhysicalModelItem,
-                                  public IDeviceInterface {
+  class NonAddressableModelItem : public IDeviceInterface {
   public:
     virtual void increaseValue();
     virtual void decreaseValue();
@@ -415,7 +414,7 @@ namespace dss {
     * contained devices.
     * Only references to devices will be stored.
    */
-  class Set : public IDeviceInterface {
+  class Set : public NonAddressableModelItem {
   private:
     DeviceVector m_ContainedDevices;
   public:
@@ -431,16 +430,9 @@ namespace dss {
     Set(DeviceVector _devices);
     virtual ~Set() {};
 
-    virtual void increaseValue();
-    virtual void decreaseValue();
-
     virtual void startDim(bool _directionUp, const int _parameterNr = -1);
     virtual void endDim(const int _parameterNr = -1);
     virtual void setValue(const double _value, int _parameterNr = -1);
-
-    virtual void callScene(const int _sceneNr);
-    virtual void saveScene(const int _sceneNr);
-    virtual void undoScene(const int _sceneNr);
 
     /** Performs the given action on all contained devices */
     void perform(IDeviceAction& _deviceAction);
@@ -529,6 +521,8 @@ namespace dss {
     virtual void previousScene();
 
     virtual unsigned long getPowerConsumption();
+  protected:
+    virtual std::vector<AddressableModelItem*> splitIntoAddressableItems();
   }; // Set
 
 
@@ -689,6 +683,7 @@ namespace dss {
    */
   class Zone : public DeviceContainer,
                public NonAddressableModelItem,
+               public PhysicalModelItem,
                public boost::noncopyable {
   private:
     int m_ZoneID;

@@ -431,14 +431,6 @@ namespace dss {
     m_ContainedDevices = _copy.m_ContainedDevices;
   }
 
-  void Set::increaseValue() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseValue, *this);
-  } // increaseValue
-
-  void Set::decreaseValue() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseValue, *this);
-  } // decreaseValue
-
   void Set::startDim(bool _directionUp, const int _parameterNr) {
     if(_directionUp) {
       DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimUp, *this);
@@ -458,18 +450,6 @@ namespace dss {
       throw std::runtime_error("Can't set arbitrary parameter on a set");
     }
   } // setValue
-
-  void Set::callScene(const int _sceneNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdCallScene, *this, _sceneNr);
-  } // callScene
-
-  void Set::saveScene(const int _sceneNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdSaveScene, *this, _sceneNr);
-  } // saveScene
-
-  void Set::undoScene(const int _sceneNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdUndoScene, *this, _sceneNr);
-  } // undoScene
 
   void Set::nextScene() {
     throw std::runtime_error("Not yet implemented");
@@ -741,6 +721,175 @@ namespace dss {
   } // operator<<
 
 
+  class SetSplitter {
+  public:
+    typedef hash_map<const Zone*, std::pair< std::vector<Group*>, Set> > FittingResult;
+    typedef std::vector<AddressableModelItem*> ModelItemVector;
+
+    static std::vector<AddressableModelItem*> splitUp(Set& _set) {
+      std::vector<AddressableModelItem*> result;
+      if(_set.length() == 1) {
+        log("Optimization: Set contains only one device");
+        result.push_back(&_set.get(0).getDevice());
+      } else if(_set.length() > 0) {
+        Apartment& apt = _set.get(0).getDevice().getApartment();
+        if(_set.length() == apt.getDevices().length()) {
+          log("Optimization: Set contains all devices of apartment");
+          result.push_back(apt.getZone(0).getGroup(0));
+        } else {
+          result = bestFit(_set);
+        }
+        
+      }
+      return result;
+    }
+  private:
+    typedef std::pair<std::vector<Group*>, Set> FittingResultPerModulator;
+    typedef std::map<const Zone*, Set> HashMapZoneSet;
+    static const bool OptimizerDebug = false;
+    
+    static ModelItemVector bestFit(const Set& _set) {
+      ModelItemVector result;
+      HashMapZoneSet zoneToSet = splitByZone(_set);
+
+      std::back_insert_iterator<ModelItemVector> insertionIterator(result);
+      for(HashMapZoneSet::iterator it = zoneToSet.begin(); it != zoneToSet.end(); ++it) {
+        ModelItemVector resultPart = bestFit(*(it->first), it->second);        
+        std::copy(resultPart.begin(), resultPart.end(), insertionIterator);
+      }
+
+      return result;
+    } // bestFit(const Set&)
+
+    /** Returns a hash map that contains all zones and the devices in that zone in a set */
+    static HashMapZoneSet splitByZone(const Set& _set) {
+      HashMapZoneSet result;
+      for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
+        const Device& dev = _set.get(iDevice).getDevice();
+        Zone& zone = dev.getApartment().getZone(dev.getZoneID());
+        result[&zone].addDevice(dev);
+      }
+      return result;
+    } // splitByZone
+
+    /** Tries to find a large group containing all devices and a list of devices to
+        address all items in the set*/
+    static ModelItemVector bestFit(const Zone& _zone, const Set& _set) {
+      Set workingCopy = _set;
+
+      ModelItemVector result;
+
+      if(OptimizerDebug) {
+        Logger::getInstance()->log("Finding fit for zone " + intToString(_zone.getID()));
+      }
+
+      if(_zone.getDevices().length() == _set.length()) {
+        Logger::getInstance()->log(std::string("Optimization: Set contains all devices of zone ") + intToString(_zone.getID()));
+        result.push_back(findGroupContainingAllDevices(_set, _zone));
+      } else {
+        std::vector<Group*> unsuitableGroups;
+        Set workingCopy = _set;
+
+        while(!workingCopy.isEmpty()) {
+          DeviceReference& ref = workingCopy.get(0);
+          workingCopy.removeDevice(ref);
+
+          if(OptimizerDebug) {
+            Logger::getInstance()->log("Working with device " + ref.getDSID().toString());
+          }
+
+          bool foundGroup = false;
+          for(int iGroup = 0; iGroup < ref.getDevice().getGroupsCount(); iGroup++) {
+            Group& g = ref.getDevice().getGroupByIndex(iGroup);
+
+            if(OptimizerDebug) {
+              Logger::getInstance()->log("  Checking Group " + intToString(g.getID()));
+            }
+            // continue if already found unsuitable
+            if(find(unsuitableGroups.begin(), unsuitableGroups.end(), &g) != unsuitableGroups.end()) {
+              if(OptimizerDebug) {
+                Logger::getInstance()->log("  Group discarded before, continuing search");
+              }
+              continue;
+            }
+
+            // see if we've got a fit
+            bool groupFits = true;
+            Set devicesInGroup = _zone.getDevices().getByGroup(g);
+            if(OptimizerDebug) {
+              Logger::getInstance()->log("    Group has " + intToString(devicesInGroup.length()) + " devices");
+            }
+            for(int iDevice = 0; iDevice < devicesInGroup.length(); iDevice++) {
+              if(!_set.contains(devicesInGroup.get(iDevice))) {
+                unsuitableGroups.push_back(&g);
+                groupFits = false;
+                if(OptimizerDebug) {
+                  Logger::getInstance()->log("    Original set does _not_ contain device " + devicesInGroup.get(iDevice).getDevice().getDSID().toString());
+                }
+                break;
+              }
+              if(OptimizerDebug) {
+                Logger::getInstance()->log("    Original set contains device " + devicesInGroup.get(iDevice).getDevice().getDSID().toString());
+              }
+            }
+            if(groupFits) {
+              if(OptimizerDebug) {
+                Logger::getInstance()->log("  Found a fit " + intToString(g.getID()));
+              }
+              foundGroup = true;
+              result.push_back(&g);
+              if(OptimizerDebug) {
+                Logger::getInstance()->log("  Removing devices from working copy");
+              }
+              while(!devicesInGroup.isEmpty()) {
+                workingCopy.removeDevice(devicesInGroup.get(0));
+                devicesInGroup.removeDevice(devicesInGroup.get(0));
+              }
+              if(OptimizerDebug) {
+                Logger::getInstance()->log("  Done. (Removing devices from working copy)");
+              }
+              break;
+            }
+          }
+
+          // if no fitting group found
+          if(!foundGroup) {
+            result.push_back(&ref.getDevice());
+          }
+        }
+      }
+      return result;
+    }
+
+    static Group* findGroupContainingAllDevices(const Set& _set, const Zone& _zone) {
+      std::bitset<63> possibleGroups;
+      possibleGroups.set();
+      for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
+        possibleGroups &= _set[iDevice].getDevice().getGroupBitmask();
+      }
+      if(possibleGroups.any()) {
+        for(unsigned int iGroup = 0; iGroup < possibleGroups.size(); iGroup++) {
+          if(possibleGroups.test(iGroup)) {
+            Logger::getInstance()->log("Sending the command to group " + intToString(iGroup + 1));
+            return _zone.getGroup(iGroup + 1);
+          }
+        }
+        assert(false); // can't come here or we've detected a bug in std::bitvector.any()
+      } else {
+        Logger::getInstance()->log("Sending the command to broadcast group");
+        return _zone.getGroup(GroupIDBroadcast);
+      }
+    }
+  private:
+    static void log(const std::string& _line) {
+      Logger::getInstance()->log(_line);
+    }
+  };
+
+  std::vector<AddressableModelItem*> Set::splitIntoAddressableItems() {
+    return SetSplitter::splitUp(*this);
+  } // splitIntoAddressableItems
+  
   //================================================== Apartment
 
   Apartment::Apartment(DSS* _pDSS, DS485Interface* _pDS485Interface)

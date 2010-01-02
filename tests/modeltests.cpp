@@ -1050,6 +1050,81 @@ BOOST_AUTO_TEST_CASE(testUndoSceneZone) {
   BOOST_CHECK_EQUAL(Scene1, proxy.getParameter3());
 }
 
+BOOST_AUTO_TEST_CASE(callUndoSceneSet) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
+  apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
+  proxy.setLastFunctionID(-1);
+
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
+  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2.setShortAddress(2);
+  Set set;
+  set.addDevice(dev1);
+  set.callScene(Scene1);
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
+  proxy.setLastFunctionID(-1);
+}
+
+BOOST_AUTO_TEST_CASE(testSaveSceneSet) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
+  apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
+  proxy.setLastFunctionID(-1);
+
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
+  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2.setShortAddress(2);
+  Set set;
+  set.addDevice(dev1);
+  set.saveScene(Scene1);
+  BOOST_CHECK_EQUAL(FunctionDeviceSaveScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
+  proxy.setLastFunctionID(-1);
+}
+
+BOOST_AUTO_TEST_CASE(testUndoSceneSet) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
+  apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
+  proxy.setLastFunctionID(-1);
+
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
+  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2.setShortAddress(2);
+  Set set;
+  set.addDevice(dev1);
+  set.undoScene(Scene1);
+  BOOST_CHECK_EQUAL(FunctionDeviceUndoScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
+  proxy.setLastFunctionID(-1);
+}
+
 BOOST_AUTO_TEST_CASE(testNextSceneDevice) {
   Apartment apt(NULL, NULL);
   apt.initialize();

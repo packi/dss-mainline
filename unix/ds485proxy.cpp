@@ -39,19 +39,6 @@ namespace dss {
 
   const char* FunctionIDToString(const int _functionID); // internal forward declaration
 
-  typedef hash_map<const Modulator*, Set> HashMapModulatorSet;
-
-  HashMapModulatorSet splitByModulator(const Set& _set) {
-    HashMapModulatorSet result;
-    for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
-      const DeviceReference& dev = _set.get(iDevice);
-      Modulator& mod = dev.getDevice().getApartment().getModulatorByBusID(dev.getDevice().getModulatorID());
-      result[&mod].addDevice(dev);
-    }
-    return result;
-  } // splitByModulator
-
-
   typedef std::map<const Zone*, Set> HashMapZoneSet;
 
   HashMapZoneSet splitByZone(const Set& _set) {
