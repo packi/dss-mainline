@@ -393,11 +393,7 @@ int dss__CircuitRescan(struct soap *soap, int _token, char* _dsid, bool& result)
   }
   try {
     dss::Modulator& mod = apt.getModulatorByDSID(dsid);
-    try {
-      result = apt.scanModulator(mod);
-    } catch(std::runtime_error&) {
-      soap_receiver_fault(soap, "Error scanning bus", NULL);
-    }
+    mod.setIsValid(false);
   } catch(dss::ItemNotFoundException&) {
     return soap_sender_fault(soap, "Could not find modulator", NULL);
   }

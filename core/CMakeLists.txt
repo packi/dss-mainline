@@ -13,3 +13,4 @@ web/webserverplugin.cpp)
 
 
 add_subdirectory(ds485)
+add_subdirectory(model)

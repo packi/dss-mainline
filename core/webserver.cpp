@@ -1089,12 +1089,8 @@ namespace dss {
       } else if(endsWith(_method, "/getEnergyMeterValue")) {
         return JSONOk("{ " + ToJSONValue("metervalue") + ": " +  uintToString(modulator.getEnergyMeterValue()) +"}");
       } else if(endsWith(_method, "/rescan")) {
-        try {
-          getDSS().getApartment().scanModulator(modulator);
-          return ResultToJSON(true);
-        } catch(std::runtime_error& err) {
-          return ResultToJSON(false, err.what());
-        }
+        modulator.setIsValid(false);
+        return ResultToJSON(true);
       } else {
         _handled = false;
       }

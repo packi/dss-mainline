@@ -194,7 +194,7 @@ INSTALL(FILES
        )
 
 
-TARGET_LINK_LIBRARIES(dss ${TEST_LIB} ${BOOST_TEST_LIB} core ds485 unix webservices pthread
+TARGET_LINK_LIBRARIES(dss ${TEST_LIB} ${BOOST_TEST_LIB} core ds485 model unix webservices pthread
 	mongoose ${REQUIRED_LIBS})
 
 

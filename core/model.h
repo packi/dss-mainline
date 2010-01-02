@@ -874,8 +874,6 @@ namespace dss {
     void removeZone(int _zoneID);
     void removeDevice(dsid_t _device);
     void removeModulator(dsid_t _modulator);
-
-    bool scanModulator(Modulator& _modulator);
   public:
 
     /** Returns the root-node for the apartment tree */

@@ -33,6 +33,8 @@
 #include "core/busrequestdispatcher.h"
 #include "core/busrequest.h"
 
+#include "core/model/busscanner.h"
+
 #include <fstream>
 
 #include <boost/filesystem.hpp>
@@ -957,156 +959,13 @@ namespace dss {
     _zone.addGroup(grp);
   } // addDefaultGroupsToZone
 
-  bool Apartment::scanModulator(Modulator& _modulator) {
-    _modulator.setIsPresent(true);
-    _modulator.setIsValid(false);
-
-    DS485Interface& interface = DSS::getInstance()->getDS485Interface();
-    int modulatorID = _modulator.getBusID();
-
-    log("scanModulator: Start " + intToString(modulatorID) , lsInfo);
-    vector<int> zoneIDs;
-    try {
-      zoneIDs = interface.getZones(modulatorID);
-    } catch(DS485ApiError& e) {
-      log("scanModulator: Error getting ZoneIDs", lsFatal);
-      return false;
-    }
-
-    int levelOrange, levelRed;
-    try {
-      if(interface.getEnergyBorder(modulatorID, levelOrange, levelRed)) {
-        _modulator.setEnergyLevelOrange(levelOrange);
-        _modulator.setEnergyLevelRed(levelRed);
-      }
-    } catch(DS485ApiError& e) {
-      log("scanModulator: Error getting EnergyLevels", lsFatal);
-      return false;
-    }
-
-    try {
-      ModulatorSpec_t spec = interface.getModulatorSpec(modulatorID);
-      _modulator.setSoftwareVersion(spec.get<1>());
-      _modulator.setHardwareVersion(spec.get<2>());
-      _modulator.setHardwareName(spec.get<3>());
-      _modulator.setDeviceType(spec.get<4>());
-    } catch(DS485ApiError& e) {
-      log("scanModulator: Error getting dSMSpecs", lsFatal);
-      return false;
-    }
-
-    bool firstZone = true;
-    foreach(int zoneID, zoneIDs) {
-      log("scanModulator:  Found zone with id: " + intToString(zoneID));
-      Zone& zone = allocateZone(zoneID);
-      zone.addToModulator(_modulator);
-      zone.setIsPresent(true);
-      if(firstZone) {
-        zone.setFirstZoneOnModulator(modulatorID);
-        firstZone = false;
-      }
-      vector<int> devices;
-      try {
-        devices = interface.getDevicesInZone(modulatorID, zoneID);
-      } catch(DS485ApiError& e) {
-        log("scanModulator: Error getting getDevicesInZone", lsFatal);
-        return false;
-      }
-      foreach(int devID, devices) {
-        dsid_t dsid;
-        try {
-          dsid = interface.getDSIDOfDevice(modulatorID, devID);
-        } catch(DS485ApiError& e) {
-            log("scanModulator: Error getting getDSIDOfDevice", lsFatal);
-            return false;
-        }
-
-        int functionID = 0;
-        try {
-          functionID = interface.deviceGetFunctionID(devID, modulatorID);
-        } catch(DS485ApiError& e) {
-          log("scanModulator: Error getting cmdGetFunctionID", lsFatal);
-          return false;
-        }
-        log("scanModulator:    Found device with id: " + intToString(devID));
-        log("scanModulator:    DSID:        " + dsid.toString());
-        log("scanModulator:    Function ID: " + unsignedLongIntToHexString(functionID));
-        Device& dev = allocateDevice(dsid);
-        dev.setShortAddress(devID);
-        dev.setModulatorID(modulatorID);
-        dev.setZoneID(zoneID);
-        dev.setFunctionID(functionID);
-
-        std::vector<int> groupIdperDevices = interface.getGroupsOfDevice(modulatorID, devID);
-        vector<int> groupIDsPerDevice = interface.getGroupsOfDevice(modulatorID,devID);
-        foreach(int groupID, groupIDsPerDevice) {
-          log(std::string("scanModulator: adding device ") + intToString(devID) + " to group " + intToString(groupID));
-          dev.addToGroup(groupID);
-        }
-
-        DeviceReference devRef(dev, this);
-        zone.addDevice(devRef);
-        _modulator.addDevice(devRef);
-        dev.setIsPresent(true);
-      }
-      vector<int> groupIDs;
-      try {
-        groupIDs = interface.getGroups(modulatorID, zoneID);
-      } catch(DS485ApiError& e) {
-        log("scanModulator: Error getting getGroups", lsFatal);
-        return false;
-      }
-
-      foreach(int groupID, groupIDs) {
-        if(groupID == 0) {
-          log("scanModulator:    Group ID is zero, bailing out... (modulatorID: "
-              + intToString(modulatorID) + 
-              "zoneID: " + intToString(zoneID) + ")",
-              lsError);
-          continue;
-        }
-        log("scanModulator:    Found group with id: " + intToString(groupID));
-        if(zone.getGroup(groupID) == NULL) {
-          log(" scanModulator:    Adding new group to zone");
-          zone.addGroup(new Group(groupID, zone.getID(), *this));
-        }
-        try {
-          Group& group = getGroup(groupID);
-          group.setIsPresent(true);
-        } catch(ItemNotFoundException&) {
-          Group* pGroup = new Group(groupID, 0, *this);
-          getZone(0).addGroup(pGroup);
-          pGroup->setIsPresent(true);
-          log("scanModulator:     Adding new group to zone 0");
-        }
-
-        // get last called scene for zone, group
-        try {
-          int lastCalledScene = interface.getLastCalledScene(modulatorID, zoneID, groupID);
-          Group* pGroup = zone.getGroup(groupID);
-          assert(pGroup != NULL);
-          log("scanModulator: zoneID: " + intToString(zoneID) + " groupID: " + intToString(groupID) + " lastScene: " + intToString(lastCalledScene));
-          if(lastCalledScene < 0 || lastCalledScene > MaxSceneNumber) {
-            log("scanModulator: _sceneID is out of bounds. zoneID: " + intToString(zoneID) + " groupID: " + intToString(groupID) + " scene: " + intToString(lastCalledScene), lsError);
-          } else {
-            onGroupCallScene(zoneID, groupID, lastCalledScene);
-          }
-        } catch(DS485ApiError& error) {
-          log(std::string("scanModulator: Error getting last called scene '") + error.what() + "'", lsError);
-        }
-      }
-    }
-    _modulator.setIsValid(true);
-    return true;
-
-  } // scanModulator
-
   void Apartment::modulatorReady(int _modulatorBusID) {
     log("Modulator with id: " + intToString(_modulatorBusID) + " is ready", lsInfo);
     try {
       try {
         Modulator& mod = getModulatorByBusID(_modulatorBusID);
-        if(scanModulator(mod)) {
+        BusScanner scanner(*m_pDS485Interface, *this);
+        if(scanner.scanModulator(mod)) {
           boost::shared_ptr<Event> modulatorReadyEvent(new Event("modulator_ready"));
           modulatorReadyEvent->setProperty("modulator", mod.getDSID().toString());
           raiseEvent(modulatorReadyEvent);
