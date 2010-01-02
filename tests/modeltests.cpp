@@ -411,8 +411,11 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
 
   DSModulatorSim modSim(NULL);
   DS485Proxy proxy(NULL, &apt);
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
   proxy.setInitializeDS485Controller(false);
   proxy.initialize();
+  apt.setBusRequestDispatcher(&dispatcher);
 
   proxy.start();
   apt.start();
@@ -433,11 +436,10 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   dev2.setShortAddress(2);
   dev2.setModulatorID(76);
 
-//  dev1.callScene(Scene1);
-  proxy.sendCommand(cmdCallScene, dev1, Scene1);
+  dev1.callScene(Scene1);
   sleepMS(500);
   BOOST_CHECK_EQUAL(Scene1, dev1.getLastCalledScene());
-  proxy.sendCommand(cmdCallScene, apt.getZone(0), apt.getGroup(0), Scene2);
+  apt.getZone(0).callScene(Scene2);
   sleepMS(500);
   BOOST_CHECK_EQUAL(Scene2, dev1.getLastCalledScene());
   BOOST_CHECK_EQUAL(Scene2, dev2.getLastCalledScene());

@@ -52,11 +52,6 @@ namespace dss {
     cmdStartDimUp,
     cmdStartDimDown,
     cmdStopDim,
-    cmdCallScene,
-    cmdSaveScene,
-    cmdUndoScene,
-    cmdIncreaseValue,
-    cmdDecreaseValue,
     cmdGetValue,
     cmdSetValue,
     cmdGetFunctionID

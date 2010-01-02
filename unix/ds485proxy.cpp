@@ -302,25 +302,12 @@ namespace dss {
     int toZone = _zone.getID();
     int param = _param;
     const int kNoParam = -1;
-    if(_cmd == cmdCallScene) {
-      frame.getPayload().add<uint8_t>(FunctionGroupCallScene);
-      log("call scene: zone " + intToString(_zone.getID()) + " group: " + intToString(_groupID));
-    } else if(_cmd == cmdSaveScene) {
-      frame.getPayload().add<uint8_t>(FunctionGroupSaveScene);
-    } else if(_cmd == cmdUndoScene) {
-      frame.getPayload().add<uint8_t>(FunctionGroupUndoScene);
-    } else if(_cmd == cmdStartDimUp) {
+    if(_cmd == cmdStartDimUp) {
       frame.getPayload().add<uint8_t>(FunctionGroupStartDimInc);
     } else if(_cmd == cmdStartDimDown) {
       frame.getPayload().add<uint8_t>(FunctionGroupStartDimDec);
     } else if(_cmd == cmdStopDim) {
       frame.getPayload().add<uint8_t>(FunctionGroupEndDim);
-    } else if(_cmd == cmdIncreaseValue) {
-      frame.getPayload().add<uint8_t>(FunctionGroupIncreaseValue);
-      param = kNoParam;
-    } else if(_cmd == cmdDecreaseValue) {
-      frame.getPayload().add<uint8_t>(FunctionGroupDecreaseValue);
-      param = kNoParam;
     } else if(_cmd == cmdSetValue) {
       frame.getPayload().add<uint8_t>(FunctionGroupSetValue);
     } else {
@@ -368,29 +355,6 @@ namespace dss {
           result.push_back(pd.get<uint16_t>());
         }
       }
-    } else if(_cmd == cmdCallScene) {
-      frame.getPayload().add<uint8_t>(FunctionDeviceCallScene);
-      frame.getPayload().add<devid_t>(_id);
-      frame.getPayload().add<uint16_t>(_param);
-      sendFrame(frame);
-    } else if(_cmd == cmdSaveScene) {
-      frame.getPayload().add<uint8_t>(FunctionDeviceSaveScene);
-      frame.getPayload().add<devid_t>(_id);
-      frame.getPayload().add<uint16_t>(_param);
-      sendFrame(frame);
-    } else if(_cmd == cmdUndoScene) {
-      frame.getPayload().add<uint8_t>(FunctionDeviceUndoScene);
-      frame.getPayload().add<devid_t>(_id);
-      frame.getPayload().add<uint16_t>(_param);
-      sendFrame(frame);
-    } else if(_cmd == cmdIncreaseValue) {
-      frame.getPayload().add<uint8_t>(FunctionDeviceIncreaseValue);
-      frame.getPayload().add<devid_t>(_id);
-      sendFrame(frame);
-    } else if(_cmd == cmdDecreaseValue) {
-      frame.getPayload().add<uint8_t>(FunctionDeviceDecreaseValue);
-      frame.getPayload().add<devid_t>(_id);
-      sendFrame(frame);
     } else if(_cmd == cmdSetValue) {
       frame.getPayload().add<uint8_t>(FunctionDeviceSetValue);
       frame.getPayload().add<devid_t>(_id);

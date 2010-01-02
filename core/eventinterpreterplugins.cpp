@@ -220,24 +220,6 @@ namespace dss {
           } else if(typeName == "stopDim") {
             result->setCommand(cmdStopDim);
             paramName = "parameter";
-          } else if(typeName == "callScene") {
-            result->setCommand(cmdCallScene);
-            paramName = "scene";
-            needParam = true;
-          } else if(typeName == "saveScene") {
-            result->setCommand(cmdSaveScene);
-            paramName = "scene";
-            needParam = true;
-          } else if(typeName == "undoScene") {
-            result->setCommand(cmdUndoScene);
-            paramName = "scene";
-            needParam = true;
-          } else if(typeName == "increaseValue") {
-            result->setCommand(cmdIncreaseValue);
-            paramName = "parameter";
-          } else if(typeName == "decreaseValue") {
-            result->setCommand(cmdDecreaseValue);
-            paramName = "parameter";
           } else {
             Logger::getInstance()->log(std::string("unknown command: ") + typeName);
             delete result;
@@ -288,10 +270,7 @@ namespace dss {
         }
       }
 
-      if(cmd == cmdCallScene || cmd == cmdSaveScene || cmd == cmdUndoScene) {
-        m_pInterface->sendCommand(cmd, to, options->getSceneIndex());
-      } else if(cmd == cmdIncreaseValue || cmd == cmdDecreaseValue ||
-                cmd == cmdStartDimUp || cmd == cmdStartDimDown || cmd == cmdStopDim)
+      if(cmd == cmdStartDimUp || cmd == cmdStartDimDown || cmd == cmdStopDim)
       {
         m_pInterface->sendCommand(cmd, to, options->getParameterIndex());
       } else {
