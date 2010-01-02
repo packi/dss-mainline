@@ -45,6 +45,7 @@ namespace dss {
   class EventInterpreter;
   class Apartment;
   class WebServices;
+  class DS485BusRequestDispatcher;
 #ifdef WITH_SIM
   class DSSim;
 #endif
@@ -80,6 +81,7 @@ namespace dss {
     boost::shared_ptr<EventQueue> m_pEventQueue;
     boost::shared_ptr<Metering> m_pMetering;
     boost::shared_ptr<FakeMeter> m_pFakeMeter;
+    boost::shared_ptr<DS485BusRequestDispatcher> m_pBusDispatcher;
     std::string m_dataDirectory;
     std::string m_configDirectory;
     std::string m_webrootDirectory;

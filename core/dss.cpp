@@ -36,6 +36,7 @@
 #ifdef __GNUC__
 #include "../unix/ds485proxy.h"
 #endif
+#include "core/ds485/ds485busrequestdispatcher.h"
 
 #include "webserver.h"
 #ifdef WITH_BONJOUR
@@ -161,7 +162,11 @@ const char* WebrootDirectory = "data/webroot";
     m_pDS485Interface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this, m_pApartment.get()));
     m_Subsystems.push_back(dynamic_cast<DS485Proxy*>(m_pDS485Interface.get()));
 
+    m_pBusDispatcher = boost::shared_ptr<DS485BusRequestDispatcher>(new DS485BusRequestDispatcher());
+    m_pBusDispatcher->setProxy(m_pDS485Interface.get());
+    
     m_pApartment->setDS485Interface(m_pDS485Interface.get());
+    m_pApartment->setBusRequestDispatcher(m_pBusDispatcher.get());
 
     m_pWebServer = boost::shared_ptr<WebServer>(new WebServer(this));
     m_Subsystems.push_back(m_pWebServer.get());
