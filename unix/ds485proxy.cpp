@@ -363,12 +363,7 @@ namespace dss {
     frame.getHeader().setBroadcast(false);
     frame.getHeader().setType(1);
     frame.setCommand(CommandRequest);
-    if(_cmd == cmdGetOnOff) {
-      frame.getPayload().add<uint8_t>(FunctionDeviceGetOnOff);
-      frame.getPayload().add<uint16_t>(_id);
-      uint8_t res = receiveSingleResult(frame, FunctionDeviceGetOnOff);
-      result.push_back(res);
-    } else if(_cmd == cmdGetValue) {
+    if(_cmd == cmdGetValue) {
       frame.getPayload().add<uint8_t>(FunctionDeviceGetParameterValue);
       frame.getPayload().add<uint16_t>(_id);
       frame.getPayload().add<uint16_t>(_param);

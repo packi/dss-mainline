@@ -57,7 +57,6 @@ namespace dss {
     cmdUndoScene,
     cmdIncreaseValue,
     cmdDecreaseValue,
-    cmdGetOnOff,
     cmdGetValue,
     cmdSetValue,
     cmdGetFunctionID
