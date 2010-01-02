@@ -1032,8 +1032,10 @@ namespace dss {
         return ResultToJSON(true);
       } else if(endsWith(_method, "device/enable")) {
         pDevice->enable();
+        return ResultToJSON(true);
       } else if(endsWith(_method, "device/disable")) {
         pDevice->disable();
+        return ResultToJSON(true);
       } else if(beginsWith(_method, "device/setRawValue")) {
         int value = strToIntDef(_parameter["value"], -1);
         if(value == -1) {
