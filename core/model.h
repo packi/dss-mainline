@@ -145,8 +145,7 @@ namespace dss {
   class AddressableModelItem : public PhysicalModelItem,
                                public IDeviceInterface {
   public:
-    AddressableModelItem(Apartment* _pApartment);
-    
+    AddressableModelItem(Apartment* _pApartment);  
 
     virtual void increaseValue();
     virtual void decreaseValue();
@@ -165,6 +164,27 @@ namespace dss {
   protected:
     Apartment* m_pApartment;
   }; // AddressableModelItem
+
+  class NonAddressableModelItem : public PhysicalModelItem,
+                                  public IDeviceInterface {
+  public:
+    virtual void increaseValue();
+    virtual void decreaseValue();
+/*
+    virtual void startDim(const bool _directionUp, const int _parameterNr = -1);
+    virtual void endDim(const int _parameterNr = -1);
+    virtual void setValue(const double _value, const int _parameterNr = -1);
+*/
+    virtual void callScene(const int _sceneNr);
+    virtual void saveScene(const int _sceneNr);
+    virtual void undoScene(const int _sceneNr);
+/*
+    virtual void nextScene();
+    virtual void previousScene();
+*/
+  protected:
+    virtual std::vector<AddressableModelItem*> splitIntoAddressableItems() = 0;
+  }; // NonAddressableModelItem
   
   /** Internal reference to a device.
    * A DeviceReference is virtually interchangable with a device. It is used in places
@@ -668,8 +688,7 @@ namespace dss {
    * A Zone houses multiple devices. It can span over multiple modulators.
    */
   class Zone : public DeviceContainer,
-               public IDeviceInterface,
-               public PhysicalModelItem,
+               public NonAddressableModelItem,
                public boost::noncopyable {
   private:
     int m_ZoneID;
@@ -726,16 +745,9 @@ namespace dss {
     std::vector<int> getModulators() const;
     bool registeredOnModulator(const Modulator& _modulator) const;
 
-    virtual void increaseValue();
-    virtual void decreaseValue();
-
     virtual void startDim(bool _directionUp, const int _parameterNr = -1);
     virtual void endDim(const int _parameterNr = -1);
     virtual void setValue(const double _value, int _parameterNr = -1);
-
-    virtual void callScene(const int _sceneNr);
-    virtual void saveScene(const int _sceneNr);
-    virtual void undoScene(const int _sceneNr);
 
     virtual void nextScene();
     virtual void previousScene();
@@ -743,6 +755,8 @@ namespace dss {
     virtual unsigned long getPowerConsumption();
     /** Returns a vector of groups present on the zone. */
     std::vector<Group*> getGroups() { return m_Groups; }
+  protected:
+    virtual std::vector<AddressableModelItem*> splitIntoAddressableItems();
   }; // Zone
 
 

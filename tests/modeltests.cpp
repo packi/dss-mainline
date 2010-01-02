@@ -758,6 +758,46 @@ BOOST_AUTO_TEST_CASE(testDecreaseValueDevice) {
   BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
 }
 
+BOOST_AUTO_TEST_CASE(testDecreaseValueZone) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
+  apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
+
+  Zone& zone = apt.allocateZone(1);
+
+  proxy.setLastFunctionID(-1);
+  zone.decreaseValue();
+  BOOST_CHECK_EQUAL(FunctionGroupDecreaseValue, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1()); // zone id
+  BOOST_CHECK_EQUAL(0x0, proxy.getParameter2()); // group id (broadcast)
+}
+
+BOOST_AUTO_TEST_CASE(testIncreaseValueZone) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
+  apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
+
+  Zone& zone = apt.allocateZone(1);
+
+  proxy.setLastFunctionID(-1);
+  zone.increaseValue();
+  BOOST_CHECK_EQUAL(FunctionGroupIncreaseValue, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1()); // zone id
+  BOOST_CHECK_EQUAL(0x0, proxy.getParameter2()); // group id (broadcast)
+}
+
 BOOST_AUTO_TEST_CASE(testStartDimUp) {
   Apartment apt(NULL, NULL);
   apt.initialize();
@@ -947,6 +987,66 @@ BOOST_AUTO_TEST_CASE(testUndoSceneGroup) {
   BOOST_CHECK_EQUAL(FunctionGroupUndoScene, proxy.getLastFunctionID());
   BOOST_CHECK_EQUAL(0x0, proxy.getParameter1()); // zone 0
   BOOST_CHECK_EQUAL(0x1, proxy.getParameter2()); // group 1
+  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter3());
+}
+
+BOOST_AUTO_TEST_CASE(testCallSceneZone) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
+  apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
+
+  proxy.setLastFunctionID(-1);
+  Zone& zone = apt.allocateZone(1);
+  zone.callScene(Scene1);
+  BOOST_CHECK_EQUAL(FunctionGroupCallScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1()); // zone 1
+  BOOST_CHECK_EQUAL(0x0, proxy.getParameter2()); // group 0
+  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter3());
+}
+
+BOOST_AUTO_TEST_CASE(testSaveSceneZone) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
+  apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
+
+  proxy.setLastFunctionID(-1);
+  Zone& zone = apt.allocateZone(1);
+  zone.saveScene(Scene1);
+  BOOST_CHECK_EQUAL(FunctionGroupSaveScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1()); // zone 1
+  BOOST_CHECK_EQUAL(0x0, proxy.getParameter2()); // group 0
+  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter3());
+}
+
+BOOST_AUTO_TEST_CASE(testUndoSceneZone) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  DSModulatorSim modSim(NULL);
+  DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
+  apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
+
+  proxy.setLastFunctionID(-1);
+  Zone& zone = apt.allocateZone(1);
+  zone.undoScene(Scene1);
+  BOOST_CHECK_EQUAL(FunctionGroupUndoScene, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1()); // zone 1
+  BOOST_CHECK_EQUAL(0x0, proxy.getParameter2()); // group 0
   BOOST_CHECK_EQUAL(Scene1, proxy.getParameter3());
 }
 

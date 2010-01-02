@@ -63,7 +63,7 @@ using Poco::XML::Node;
 
 namespace dss {
 
-  //================================================== AddressableModelItem
+  //================================================== IDeviceInterface
 
   void IDeviceInterface::turnOn() {
     callScene(SceneMax);
@@ -121,6 +121,51 @@ namespace dss {
 /*
   void nextScene();
   void previousScene();
+*/
+
+  //================================================== NonAddressableModelItem
+
+  void NonAddressableModelItem::increaseValue() {
+    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
+    foreach(AddressableModelItem* item, items) {
+      item->increaseValue();
+    }
+  } // increaseValue
+
+  void NonAddressableModelItem::decreaseValue() {
+    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
+    foreach(AddressableModelItem* item, items) {
+      item->decreaseValue();
+    }
+  } // decreaseValue
+/*
+    virtual void startDim(const bool _directionUp, const int _parameterNr = -1);
+    virtual void endDim(const int _parameterNr = -1);
+    virtual void setValue(const double _value, const int _parameterNr = -1);
+*/
+  void NonAddressableModelItem::callScene(const int _sceneNr) {
+    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
+    foreach(AddressableModelItem* item, items) {
+      item->callScene(_sceneNr);
+    }
+  } // callScene
+    
+  void NonAddressableModelItem::saveScene(const int _sceneNr) {
+    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
+    foreach(AddressableModelItem* item, items) {
+      item->saveScene(_sceneNr);
+    }
+  } // saveScene
+    
+  void NonAddressableModelItem::undoScene(const int _sceneNr) {
+    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
+    foreach(AddressableModelItem* item, items) {
+      item->undoScene(_sceneNr);
+    }
+  } // undoScene
+/*
+    virtual void nextScene();
+    virtual void previousScene();
 */
   //================================================== Device
 
@@ -1999,14 +2044,6 @@ namespace dss {
     return find(m_Modulators.begin(), m_Modulators.end(), &_modulator) != m_Modulators.end();
   } // registeredOnModulator
 
-  void Zone::increaseValue() {
-    getGroup(GroupIDBroadcast)->increaseValue();
-  } // increaseValue
-
-  void Zone::decreaseValue() {
-    getGroup(GroupIDBroadcast)->decreaseValue();
-  } // decreaseValue
-
   void Zone::startDim(const bool _directionUp, const int _parameterNr) {
     getGroup(GroupIDBroadcast)->startDim(_directionUp, _parameterNr);
   } // startDim
@@ -2018,18 +2055,6 @@ namespace dss {
   void Zone::setValue(const double _value, const int _parameterNr) {
     getGroup(GroupIDBroadcast)->setValue(_value, _parameterNr);
   } // setValue
-
-  void Zone::callScene(const int _sceneNr) {
-    getGroup(GroupIDBroadcast)->callScene(_sceneNr);
-  } // callScene
-
-  void Zone::saveScene(const int _sceneNr) {
-    getGroup(GroupIDBroadcast)->saveScene(_sceneNr);
-  } // saveScene
-
-  void Zone::undoScene(const int _sceneNr) {
-    getGroup(GroupIDBroadcast)->undoScene(_sceneNr);
-  } // undoScene
 
   unsigned long Zone::getPowerConsumption() {
     return getDevices().getPowerConsumption();
@@ -2043,7 +2068,13 @@ namespace dss {
     getGroup(GroupIDBroadcast)->previousScene();
   } // previousScene
 
+  std::vector<AddressableModelItem*> Zone::splitIntoAddressableItems() {
+    std::vector<AddressableModelItem*> result;
+    result.push_back(getGroup(GroupIDBroadcast));
+    return result;
+  } // splitIntoAddressableItems
 
+  
   //============================================= Group
 
   Group::Group(const int _id, const int _zoneID, Apartment& _apartment)
