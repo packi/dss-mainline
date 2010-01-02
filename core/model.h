@@ -49,9 +49,6 @@ namespace Poco {
 namespace dss {
   /** Commands to be transmitted either to a set, group or a single device. */
   typedef enum {
-    cmdStartDimUp,
-    cmdStartDimDown,
-    cmdStopDim,
     cmdGetValue,
     cmdSetValue,
     cmdGetFunctionID
@@ -144,9 +141,10 @@ namespace dss {
 
     virtual void increaseValue();
     virtual void decreaseValue();
-/*
+
     virtual void startDim(const bool _directionUp);
     virtual void endDim();
+/*
     virtual void setValue(const double _value, const int _parameterNr = -1);
 */
     virtual void callScene(const int _sceneNr);
@@ -164,9 +162,10 @@ namespace dss {
   public:
     virtual void increaseValue();
     virtual void decreaseValue();
-/*
+
     virtual void startDim(const bool _directionUp);
     virtual void endDim();
+/*    
     virtual void setValue(const double _value, const int _parameterNr = -1);
 */
     virtual void callScene(const int _sceneNr);
@@ -284,8 +283,6 @@ namespace dss {
     /** @copydoc DeviceReference::isOn() */
     virtual bool isOn() const;
 
-    virtual void startDim(const bool _directionUp);
-    virtual void endDim();
     virtual void setValue(const double _value, const int _parameterNr = -1);
     void setRawValue(const uint16_t _value, const int _parameterNr, const int _size);
     /** Returns the value of _parameterNr.
@@ -425,8 +422,6 @@ namespace dss {
     Set(DeviceVector _devices);
     virtual ~Set() {};
 
-    virtual void startDim(const bool _directionUp);
-    virtual void endDim();
     virtual void setValue(const double _value, int _parameterNr = -1);
 
     /** Performs the given action on all contained devices */
@@ -637,8 +632,6 @@ namespace dss {
     int getID() const;
     int getZoneID() const;
 
-    virtual void startDim(const bool _directionUp);
-    virtual void endDim();
     virtual void setValue(const double _value, int _parameterNr = -1);
 
     virtual void callScene(const int _sceneNr);
@@ -735,8 +728,6 @@ namespace dss {
     std::vector<int> getModulators() const;
     bool registeredOnModulator(const Modulator& _modulator) const;
 
-    virtual void startDim(const bool _directionUp);
-    virtual void endDim();
     virtual void setValue(const double _value, int _parameterNr = -1);
 
     virtual void nextScene();

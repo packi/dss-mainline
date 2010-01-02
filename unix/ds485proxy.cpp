@@ -302,13 +302,7 @@ namespace dss {
     int toZone = _zone.getID();
     int param = _param;
     const int kNoParam = -1;
-    if(_cmd == cmdStartDimUp) {
-      frame.getPayload().add<uint8_t>(FunctionGroupStartDimInc);
-    } else if(_cmd == cmdStartDimDown) {
-      frame.getPayload().add<uint8_t>(FunctionGroupStartDimDec);
-    } else if(_cmd == cmdStopDim) {
-      frame.getPayload().add<uint8_t>(FunctionGroupEndDim);
-    } else if(_cmd == cmdSetValue) {
+    if(_cmd == cmdSetValue) {
       frame.getPayload().add<uint8_t>(FunctionGroupSetValue);
     } else {
       throw std::invalid_argument("DS485Proxy::sendCommand: Unknown command " + intToString(_cmd));

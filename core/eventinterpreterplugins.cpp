@@ -214,17 +214,7 @@ namespace dss {
           std::string typeName = elem->getAttribute("type");
           std::string paramName = "";
           bool needParam = false;
-          if(typeName == "dimUp") {
-            result->setCommand(cmdStartDimUp);
-            paramName = "parameter";
-          } else if(typeName == "stopDim") {
-            result->setCommand(cmdStopDim);
-            paramName = "parameter";
-          } else {
-            Logger::getInstance()->log(std::string("unknown command: ") + typeName);
-            delete result;
-            return NULL;
-          }
+          // TODO: add functionality back
 
           if(!paramName.empty()) {
             std::string paramValue = getParameter(curNode, paramName);
@@ -249,7 +239,7 @@ namespace dss {
   void EventInterpreterPluginDS485::handleEvent(Event& _event, const EventSubscription& _subscription) {
     const SubscriptionOptionsDS485* options = dynamic_cast<const SubscriptionOptionsDS485*>(&_subscription.getOptions());
     if(options != NULL) {
-      DS485Command cmd = options->getCommand();
+//      DS485Command cmd = options->getCommand();
 
 
       // determine location
@@ -269,14 +259,7 @@ namespace dss {
           to = _event.getRaisedAtZone().getDevices();
         }
       }
-
-      if(cmd == cmdStartDimUp || cmd == cmdStartDimDown || cmd == cmdStopDim)
-      {
-        m_pInterface->sendCommand(cmd, to, options->getParameterIndex());
-      } else {
-        Logger::getInstance()->log("EventInterpreterPluginDS485::handleEvent: sending...");
-        m_pInterface->sendCommand(cmd, to, 0);
-      }
+      // TODO: add functionality
     } else {
       Logger::getInstance()->log("EventInterpreterPluginDS485::handleEvent: Options are not of type SubscriptionOptionsDS485, ignoring", lsError);
     }

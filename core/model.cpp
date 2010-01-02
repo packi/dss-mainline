@@ -92,10 +92,25 @@ namespace dss {
     request->setTarget(this);
     m_pApartment->dispatchRequest(request);
   }
+
+  void AddressableModelItem::startDim(const bool _directionUp) {
+    boost::shared_ptr<CommandBusRequest> request;
+    if(_directionUp) {
+      request.reset(new StartDimUpCommandBusRequest());
+    } else {
+      request.reset(new StartDimDownCommandBusRequest());
+    }
+    request->setTarget(this);
+    m_pApartment->dispatchRequest(request);
+  } // startDim
+  
+  void AddressableModelItem::endDim() {
+    boost::shared_ptr<CommandBusRequest> request(new EndDimCommandBusRequest());
+    request->setTarget(this);
+    m_pApartment->dispatchRequest(request);
+  } // endDim
+  
 /*
-  void startDim(const bool _directionUp) {
-  }
-  void endDim();
   void setValue(const double _value, const int _parameterNr = -1);
 */
   void AddressableModelItem::callScene(const int _sceneNr) {
@@ -138,10 +153,21 @@ namespace dss {
       item->decreaseValue();
     }
   } // decreaseValue
-/*
-    virtual void startDim(const bool _directionUp);
-    virtual void endDim();
-    virtual void setValue(const double _value, const int _parameterNr = -1);
+
+  void NonAddressableModelItem::startDim(const bool _directionUp) {
+    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
+    foreach(AddressableModelItem* item, items) {
+      item->startDim(_directionUp);
+    }
+  } // startDim
+  
+  void NonAddressableModelItem::endDim() {
+    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
+    foreach(AddressableModelItem* item, items) {
+      item->endDim();
+    }
+  } // endDim
+/*    virtual void setValue(const double _value, const int _parameterNr = -1);
 */
   void NonAddressableModelItem::callScene(const int _sceneNr) {
     std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
@@ -213,18 +239,6 @@ namespace dss {
     request->setTarget(this);
     m_pApartment->dispatchRequest(request);
   } // disable
-
-  void Device::startDim(const bool _directionUp) {
-    if(_directionUp) {
-      m_pApartment->sendCommand(cmdStartDimUp, *this);
-    } else {
-      m_pApartment->sendCommand(cmdStartDimDown, *this);
-    }
-  } // startDim
-
-  void Device::endDim() {
-    m_pApartment->sendCommand(cmdStopDim, *this);
-  } // endDim
 
   bool Device::isOn() const {
     return (m_LastCalledScene != SceneOff) &&
@@ -430,18 +444,6 @@ namespace dss {
   Set::Set(const Set& _copy) {
     m_ContainedDevices = _copy.m_ContainedDevices;
   }
-
-  void Set::startDim(bool _directionUp) {
-    if(_directionUp) {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimUp, *this);
-    } else {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimDown, *this);
-    }
-  } // startDim
-
-  void Set::endDim() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdStopDim, *this);
-  } // endDim
 
   void Set::setValue(const double _value, int _parameterNr) {
     if(_parameterNr == -1) {
@@ -2193,14 +2195,6 @@ namespace dss {
     return find(m_Modulators.begin(), m_Modulators.end(), &_modulator) != m_Modulators.end();
   } // registeredOnModulator
 
-  void Zone::startDim(const bool _directionUp) {
-    getGroup(GroupIDBroadcast)->startDim(_directionUp);
-  } // startDim
-
-  void Zone::endDim() {
-    getGroup(GroupIDBroadcast)->endDim();
-  } // endDim
-
   void Zone::setValue(const double _value, const int _parameterNr) {
     getGroup(GroupIDBroadcast)->setValue(_value, _parameterNr);
   } // setValue
@@ -2245,18 +2239,6 @@ namespace dss {
   Set Group::getDevices() const {
     return m_pApartment->getDevices().getByZone(m_ZoneID).getByGroup(m_GroupID);
   } // getDevices
-
-  void Group::startDim(bool _directionUp)  {
-    if(_directionUp) {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimUp, m_pApartment->getZone(m_ZoneID), m_GroupID);
-    } else {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimDown, m_pApartment->getZone(m_ZoneID), m_GroupID);
-    }
-  } // startDim
-
-  void Group::endDim() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdStopDim, m_pApartment->getZone(m_ZoneID), m_GroupID);
-  } // endDim
 
   void Group::setValue(const double _value, int _parameterNr) {
     DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, m_pApartment->getZone(m_ZoneID), m_GroupID, static_cast<int>(_value));

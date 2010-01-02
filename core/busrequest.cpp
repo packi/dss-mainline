@@ -248,5 +248,27 @@ namespace dss {
     result->setFunctionIDForGroup(FunctionGroupDecreaseValue);
     return result;
   } // getBuilderHints
+
+  PacketBuilderHintsBase* StartDimUpCommandBusRequest::getBuilderHints() {
+    CommandBusRequestPacketBuilderHints* result = new CommandBusRequestPacketBuilderHints(this);
+    result->setFunctionIDForDevice(FunctionDeviceStartDimInc);
+    result->setFunctionIDForGroup(FunctionGroupStartDimInc);
+    return result;
+  } // getBuilderHints
+
+  PacketBuilderHintsBase* StartDimDownCommandBusRequest::getBuilderHints() {
+    CommandBusRequestPacketBuilderHints* result = new CommandBusRequestPacketBuilderHints(this);
+    result->setFunctionIDForDevice(FunctionDeviceStartDimDec);
+    result->setFunctionIDForGroup(FunctionGroupStartDimDec);
+    return result;
+  } // getBuilderHints
+
+  PacketBuilderHintsBase* EndDimCommandBusRequest::getBuilderHints() {
+    CommandBusRequestPacketBuilderHints* result = new CommandBusRequestPacketBuilderHints(this);
+    result->setFunctionIDForDevice(FunctionDeviceEndDim);
+    result->setFunctionIDForGroup(FunctionGroupEndDim);
+    return result;
+  } // getBuilderHints
+
  
 } // namespace dss

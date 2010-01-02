@@ -98,6 +98,18 @@ namespace dss {
     virtual PacketBuilderHintsBase* getBuilderHints();
   };
 
+  class StartDimUpCommandBusRequest : public CommandBusRequest {
+    virtual PacketBuilderHintsBase* getBuilderHints();
+  };
+  
+  class StartDimDownCommandBusRequest : public CommandBusRequest {
+    virtual PacketBuilderHintsBase* getBuilderHints();
+  };
+
+  class EndDimCommandBusRequest : public CommandBusRequest {
+    virtual PacketBuilderHintsBase* getBuilderHints();
+  };
+
 }
 
 #endif // BUSREQUEST_H
