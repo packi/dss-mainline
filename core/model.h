@@ -100,13 +100,9 @@ namespace dss {
      */
     virtual void turnOff();
 
-    /** Increases the value of the given parameter by one,
-     * If no parameter gets passed, it will increase the default value of the device(s).
-     */
+    /** Increases the main value (e.g. brightness) */
     virtual void increaseValue() = 0;
-    /** Decreases the value of the given parameter by one.
-     * If no parameter gets passed, it will decrease the default value of the device(s).
-     */
+    /** Decreases the main value (e.g. brightness) */
     virtual void decreaseValue() = 0;
 
     /** Starts dimming the given parameter.
