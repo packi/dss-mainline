@@ -93,9 +93,9 @@ namespace dss {
     m_pApartment->dispatchRequest(request);
   }
 /*
-  void startDim(const bool _directionUp, const int _parameterNr = -1) {
+  void startDim(const bool _directionUp) {
   }
-  void endDim(const int _parameterNr = -1);
+  void endDim();
   void setValue(const double _value, const int _parameterNr = -1);
 */
   void AddressableModelItem::callScene(const int _sceneNr) {
@@ -139,8 +139,8 @@ namespace dss {
     }
   } // decreaseValue
 /*
-    virtual void startDim(const bool _directionUp, const int _parameterNr = -1);
-    virtual void endDim(const int _parameterNr = -1);
+    virtual void startDim(const bool _directionUp);
+    virtual void endDim();
     virtual void setValue(const double _value, const int _parameterNr = -1);
 */
   void NonAddressableModelItem::callScene(const int _sceneNr) {
@@ -214,7 +214,7 @@ namespace dss {
     m_pApartment->dispatchRequest(request);
   } // disable
 
-  void Device::startDim(const bool _directionUp, const int _parameterNr) {
+  void Device::startDim(const bool _directionUp) {
     if(_directionUp) {
       m_pApartment->sendCommand(cmdStartDimUp, *this);
     } else {
@@ -222,7 +222,7 @@ namespace dss {
     }
   } // startDim
 
-  void Device::endDim(const int _parameterNr) {
+  void Device::endDim() {
     m_pApartment->sendCommand(cmdStopDim, *this);
   } // endDim
 
@@ -431,7 +431,7 @@ namespace dss {
     m_ContainedDevices = _copy.m_ContainedDevices;
   }
 
-  void Set::startDim(bool _directionUp, const int _parameterNr) {
+  void Set::startDim(bool _directionUp) {
     if(_directionUp) {
       DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimUp, *this);
     } else {
@@ -439,7 +439,7 @@ namespace dss {
     }
   } // startDim
 
-  void Set::endDim(const int _parameterNr) {
+  void Set::endDim() {
     DSS::getInstance()->getDS485Interface().sendCommand(cmdStopDim, *this);
   } // endDim
 
@@ -2193,12 +2193,12 @@ namespace dss {
     return find(m_Modulators.begin(), m_Modulators.end(), &_modulator) != m_Modulators.end();
   } // registeredOnModulator
 
-  void Zone::startDim(const bool _directionUp, const int _parameterNr) {
-    getGroup(GroupIDBroadcast)->startDim(_directionUp, _parameterNr);
+  void Zone::startDim(const bool _directionUp) {
+    getGroup(GroupIDBroadcast)->startDim(_directionUp);
   } // startDim
 
-  void Zone::endDim(const int _parameterNr) {
-    getGroup(GroupIDBroadcast)->endDim(_parameterNr);
+  void Zone::endDim() {
+    getGroup(GroupIDBroadcast)->endDim();
   } // endDim
 
   void Zone::setValue(const double _value, const int _parameterNr) {
@@ -2246,16 +2246,16 @@ namespace dss {
     return m_pApartment->getDevices().getByZone(m_ZoneID).getByGroup(m_GroupID);
   } // getDevices
 
-  void Group::startDim(bool _directionUp, const int _parameterNr)  {
+  void Group::startDim(bool _directionUp)  {
     if(_directionUp) {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimUp, m_pApartment->getZone(m_ZoneID), m_GroupID, _parameterNr);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimUp, m_pApartment->getZone(m_ZoneID), m_GroupID);
     } else {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimDown, m_pApartment->getZone(m_ZoneID), m_GroupID, _parameterNr);
+      DSS::getInstance()->getDS485Interface().sendCommand(cmdStartDimDown, m_pApartment->getZone(m_ZoneID), m_GroupID);
     }
   } // startDim
 
-  void Group::endDim(const int _parameterNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdStopDim, m_pApartment->getZone(m_ZoneID), m_GroupID, _parameterNr);
+  void Group::endDim() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdStopDim, m_pApartment->getZone(m_ZoneID), m_GroupID);
   } // endDim
 
   void Group::setValue(const double _value, int _parameterNr) {
@@ -2343,12 +2343,12 @@ namespace dss {
     getDevice().disable();
   } // disable
 
-  void DeviceReference::startDim(const bool _directionUp, const int _parameterNr) {
-    getDevice().startDim(_directionUp, _parameterNr);
+  void DeviceReference::startDim(const bool _directionUp) {
+    getDevice().startDim(_directionUp);
   } // startDim
 
-  void DeviceReference::endDim(const int _parameterNr) {
-    getDevice().endDim(_parameterNr);
+  void DeviceReference::endDim() {
+    getDevice().endDim();
   } // endDim
 
   void DeviceReference::setValue(const double _value, const int _parameterNr) {

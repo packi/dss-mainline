@@ -103,11 +103,11 @@ namespace dss {
     /** Starts dimming the given parameter.
      * If _directionUp is true, the value gets increased over time. Else its getting decreased.
      */
-    virtual void startDim(bool _directionUp, const int _parameterNr = -1) = 0;
+    virtual void startDim(const bool _directionUp) = 0;
     /** Stops the dimming */
-    virtual void endDim(const int _parameterNr = -1)= 0;
+    virtual void endDim() = 0;
     /** Sets the value of the given parameter */
-    virtual void setValue(const double _value, int _parameterNr = -1) = 0;
+    virtual void setValue(const double _value, const int _parameterNr = -1) = 0;
 
 
     /** Sets the scene on the device.
@@ -145,8 +145,8 @@ namespace dss {
     virtual void increaseValue();
     virtual void decreaseValue();
 /*
-    virtual void startDim(const bool _directionUp, const int _parameterNr = -1);
-    virtual void endDim(const int _parameterNr = -1);
+    virtual void startDim(const bool _directionUp);
+    virtual void endDim();
     virtual void setValue(const double _value, const int _parameterNr = -1);
 */
     virtual void callScene(const int _sceneNr);
@@ -165,8 +165,8 @@ namespace dss {
     virtual void increaseValue();
     virtual void decreaseValue();
 /*
-    virtual void startDim(const bool _directionUp, const int _parameterNr = -1);
-    virtual void endDim(const int _parameterNr = -1);
+    virtual void startDim(const bool _directionUp);
+    virtual void endDim();
     virtual void setValue(const double _value, const int _parameterNr = -1);
 */
     virtual void callScene(const int _sceneNr);
@@ -231,8 +231,8 @@ namespace dss {
      */
     virtual bool isOn() const;
 
-    virtual void startDim(const bool _directionUp, const int _parameterNr = -1);
-    virtual void endDim(const int _parameterNr = -1);
+    virtual void startDim(const bool _directionUp);
+    virtual void endDim();
     virtual void setValue(const double _value, const int _parameterNr = -1);
 
     virtual void callScene(const int _sceneNr);
@@ -284,8 +284,8 @@ namespace dss {
     /** @copydoc DeviceReference::isOn() */
     virtual bool isOn() const;
 
-    virtual void startDim(const bool _directionUp, const int _parameterNr = -1);
-    virtual void endDim(const int _parameterNr = -1);
+    virtual void startDim(const bool _directionUp);
+    virtual void endDim();
     virtual void setValue(const double _value, const int _parameterNr = -1);
     void setRawValue(const uint16_t _value, const int _parameterNr, const int _size);
     /** Returns the value of _parameterNr.
@@ -425,8 +425,8 @@ namespace dss {
     Set(DeviceVector _devices);
     virtual ~Set() {};
 
-    virtual void startDim(bool _directionUp, const int _parameterNr = -1);
-    virtual void endDim(const int _parameterNr = -1);
+    virtual void startDim(const bool _directionUp);
+    virtual void endDim();
     virtual void setValue(const double _value, int _parameterNr = -1);
 
     /** Performs the given action on all contained devices */
@@ -637,8 +637,8 @@ namespace dss {
     int getID() const;
     int getZoneID() const;
 
-    virtual void startDim(bool _directionUp, const int _parameterNr = -1);
-    virtual void endDim(const int _parameterNr = -1);
+    virtual void startDim(const bool _directionUp);
+    virtual void endDim();
     virtual void setValue(const double _value, int _parameterNr = -1);
 
     virtual void callScene(const int _sceneNr);
@@ -735,8 +735,8 @@ namespace dss {
     std::vector<int> getModulators() const;
     bool registeredOnModulator(const Modulator& _modulator) const;
 
-    virtual void startDim(bool _directionUp, const int _parameterNr = -1);
-    virtual void endDim(const int _parameterNr = -1);
+    virtual void startDim(const bool _directionUp);
+    virtual void endDim();
     virtual void setValue(const double _value, int _parameterNr = -1);
 
     virtual void nextScene();

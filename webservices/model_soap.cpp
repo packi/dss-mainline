@@ -454,24 +454,24 @@ int dss__SetDecreaseValue(struct soap *soap, int _token, char* _setSpec, bool& r
   return SOAP_OK;
 }
 
-int dss__SetStartDim(struct soap *soap, int _token, char* _setSpec, bool _directionUp, int _paramID, bool& result) {
+int dss__SetStartDim(struct soap *soap, int _token, char* _setSpec, bool _directionUp, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.startDim(_directionUp, _paramID);
+  set.startDim(_directionUp);
   result = true;
   return SOAP_OK;
 }
 
-int dss__SetEndDim(struct soap *soap, int _token, char* _setSpec, int _paramID, bool& result) {
+int dss__SetEndDim(struct soap *soap, int _token, char* _setSpec, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.endDim(_paramID);
+  set.endDim();
   result = true;
   return SOAP_OK;
 }
@@ -566,24 +566,24 @@ int dss__ApartmentDecreaseValue(struct soap *soap, int _token, int _groupID, boo
   return SOAP_OK;
 }
 
-int dss__ApartmentStartDim(struct soap *soap, int _token, int _groupID, bool _directionUp, int _paramID, bool& result) {
+int dss__ApartmentStartDim(struct soap *soap, int _token, int _groupID, bool _directionUp, bool& result) {
   dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group.startDim(_directionUp, _paramID);
+  group.startDim(_directionUp);
   result = true;
   return SOAP_OK;
 }
 
-int dss__ApartmentEndDim(struct soap *soap, int _token, int _groupID, int _paramID, bool& result) {
+int dss__ApartmentEndDim(struct soap *soap, int _token, int _groupID, bool& result) {
   dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group.endDim(_paramID);
+  group.endDim();
   result = true;
   return SOAP_OK;
 }
@@ -678,24 +678,24 @@ int dss__ZoneDecreaseValue(struct soap *soap, int _token, int _zoneID, int _grou
   return SOAP_OK;
 }
 
-int dss__ZoneStartDim(struct soap *soap, int _token, int _zoneID, int _groupID, bool _directionUp, int _paramID, bool& result) {
+int dss__ZoneStartDim(struct soap *soap, int _token, int _zoneID, int _groupID, bool _directionUp, bool& result) {
   dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group.startDim(_directionUp, _paramID);
+  group.startDim(_directionUp);
   result = true;
   return SOAP_OK;
 }
 
-int dss__ZoneEndDim(struct soap *soap, int _token, int _zoneID, int _groupID, int _paramID, bool& result) {
+int dss__ZoneEndDim(struct soap *soap, int _token, int _zoneID, int _groupID, bool& result) {
   dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group.endDim(_paramID);
+  group.endDim();
   result = true;
   return SOAP_OK;
 }
@@ -812,24 +812,24 @@ int dss__DeviceDisable(struct soap *soap, int _token, char* _deviceID, bool& res
   return SOAP_OK;
 }
 
-int dss__DeviceStartDim(struct soap *soap, int _token, char* _deviceID, bool _directionUp, int _paramID, bool& result) {
+int dss__DeviceStartDim(struct soap *soap, int _token, char* _deviceID, bool _directionUp, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dev.startDim(_directionUp, _paramID);
+  dev.startDim(_directionUp);
   result = true;
   return SOAP_OK;
 }
 
-int dss__DeviceEndDim(struct soap *soap, int _token, char* _deviceID, int _paramID, bool& result) {
+int dss__DeviceEndDim(struct soap *soap, int _token, char* _deviceID, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dev.endDim(_paramID);
+  dev.endDim();
   result = true;
   return SOAP_OK;
 }

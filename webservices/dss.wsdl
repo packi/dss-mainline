@@ -398,7 +398,6 @@
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="directionUp" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -416,7 +415,6 @@
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -558,7 +556,6 @@
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="directionUp" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -576,7 +573,6 @@
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -756,7 +752,6 @@
      <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="directionUp" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -775,7 +770,6 @@
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -954,7 +948,6 @@
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="directionUp" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -972,7 +965,6 @@
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>

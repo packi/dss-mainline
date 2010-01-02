@@ -7,7 +7,7 @@
 
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.9l 2010-01-02 12:08:16 GMT")
+SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.9l 2010-01-02 15:38:23 GMT")
 
 
 #ifndef WITH_NOGLOBAL
@@ -12467,7 +12467,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceEndDim(struct soap *soap, str
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
 	soap_default_string(soap, &a->_deviceID);
-	soap_default_int(soap, &a->_paramID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceEndDim(struct soap *soap, const struct dss__DeviceEndDim *a)
@@ -12492,8 +12491,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceEndDim(struct soap *soap, const ch
 		return soap->error;
 	if (soap_out_string(soap, "deviceID", -1, &a->_deviceID, ""))
 		return soap->error;
-	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
-		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
 
@@ -12507,7 +12504,7 @@ SOAP_FMAC3 struct dss__DeviceEndDim * SOAP_FMAC4 soap_get_dss__DeviceEndDim(stru
 
 SOAP_FMAC3 struct dss__DeviceEndDim * SOAP_FMAC4 soap_in_dss__DeviceEndDim(struct soap *soap, const char *tag, struct dss__DeviceEndDim *a, const char *type)
 {
-	short soap_flag__token = 1, soap_flag__deviceID = 1, soap_flag__paramID = 1;
+	short soap_flag__token = 1, soap_flag__deviceID = 1;
 	if (soap_element_begin_in(soap, tag, 0, type))
 		return NULL;
 	a = (struct dss__DeviceEndDim *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DeviceEndDim, sizeof(struct dss__DeviceEndDim), 0, NULL, NULL, NULL);
@@ -12528,11 +12525,6 @@ SOAP_FMAC3 struct dss__DeviceEndDim * SOAP_FMAC4 soap_in_dss__DeviceEndDim(struc
 				{	soap_flag__deviceID--;
 					continue;
 				}
-			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
-				{	soap_flag__paramID--;
-					continue;
-				}
 			if (soap->error == SOAP_TAG_MISMATCH)
 				soap->error = soap_ignore_element(soap);
 			if (soap->error == SOAP_NO_TAG)
@@ -12548,7 +12540,7 @@ SOAP_FMAC3 struct dss__DeviceEndDim * SOAP_FMAC4 soap_in_dss__DeviceEndDim(struc
 		if (soap->body && soap_element_end_in(soap, tag))
 			return NULL;
 	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__paramID > 0))
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0))
 	{	soap->error = SOAP_OCCURS;
 		return NULL;
 	}
@@ -12711,7 +12703,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceStartDim(struct soap *soap, s
 	soap_default_int(soap, &a->_token);
 	soap_default_string(soap, &a->_deviceID);
 	soap_default_bool(soap, &a->_directionUp);
-	soap_default_int(soap, &a->_paramID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceStartDim(struct soap *soap, const struct dss__DeviceStartDim *a)
@@ -12738,8 +12729,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceStartDim(struct soap *soap, const 
 		return soap->error;
 	if (soap_out_bool(soap, "directionUp", -1, &a->_directionUp, ""))
 		return soap->error;
-	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
-		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
 
@@ -12753,7 +12742,7 @@ SOAP_FMAC3 struct dss__DeviceStartDim * SOAP_FMAC4 soap_get_dss__DeviceStartDim(
 
 SOAP_FMAC3 struct dss__DeviceStartDim * SOAP_FMAC4 soap_in_dss__DeviceStartDim(struct soap *soap, const char *tag, struct dss__DeviceStartDim *a, const char *type)
 {
-	short soap_flag__token = 1, soap_flag__deviceID = 1, soap_flag__directionUp = 1, soap_flag__paramID = 1;
+	short soap_flag__token = 1, soap_flag__deviceID = 1, soap_flag__directionUp = 1;
 	if (soap_element_begin_in(soap, tag, 0, type))
 		return NULL;
 	a = (struct dss__DeviceStartDim *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DeviceStartDim, sizeof(struct dss__DeviceStartDim), 0, NULL, NULL, NULL);
@@ -12779,11 +12768,6 @@ SOAP_FMAC3 struct dss__DeviceStartDim * SOAP_FMAC4 soap_in_dss__DeviceStartDim(s
 				{	soap_flag__directionUp--;
 					continue;
 				}
-			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
-				{	soap_flag__paramID--;
-					continue;
-				}
 			if (soap->error == SOAP_TAG_MISMATCH)
 				soap->error = soap_ignore_element(soap);
 			if (soap->error == SOAP_NO_TAG)
@@ -12799,7 +12783,7 @@ SOAP_FMAC3 struct dss__DeviceStartDim * SOAP_FMAC4 soap_in_dss__DeviceStartDim(s
 		if (soap->body && soap_element_end_in(soap, tag))
 			return NULL;
 	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__directionUp > 0 || soap_flag__paramID > 0))
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__directionUp > 0))
 	{	soap->error = SOAP_OCCURS;
 		return NULL;
 	}
@@ -15130,7 +15114,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ZoneEndDim(struct soap *soap, struc
 	soap_default_int(soap, &a->_token);
 	soap_default_int(soap, &a->_zoneID);
 	soap_default_int(soap, &a->_groupID);
-	soap_default_int(soap, &a->_paramID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ZoneEndDim(struct soap *soap, const struct dss__ZoneEndDim *a)
@@ -15156,8 +15139,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ZoneEndDim(struct soap *soap, const char
 		return soap->error;
 	if (soap_out_int(soap, "groupID", -1, &a->_groupID, ""))
 		return soap->error;
-	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
-		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
 
@@ -15171,7 +15152,7 @@ SOAP_FMAC3 struct dss__ZoneEndDim * SOAP_FMAC4 soap_get_dss__ZoneEndDim(struct s
 
 SOAP_FMAC3 struct dss__ZoneEndDim * SOAP_FMAC4 soap_in_dss__ZoneEndDim(struct soap *soap, const char *tag, struct dss__ZoneEndDim *a, const char *type)
 {
-	short soap_flag__token = 1, soap_flag__zoneID = 1, soap_flag__groupID = 1, soap_flag__paramID = 1;
+	short soap_flag__token = 1, soap_flag__zoneID = 1, soap_flag__groupID = 1;
 	if (soap_element_begin_in(soap, tag, 0, type))
 		return NULL;
 	a = (struct dss__ZoneEndDim *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__ZoneEndDim, sizeof(struct dss__ZoneEndDim), 0, NULL, NULL, NULL);
@@ -15197,11 +15178,6 @@ SOAP_FMAC3 struct dss__ZoneEndDim * SOAP_FMAC4 soap_in_dss__ZoneEndDim(struct so
 				{	soap_flag__groupID--;
 					continue;
 				}
-			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
-				{	soap_flag__paramID--;
-					continue;
-				}
 			if (soap->error == SOAP_TAG_MISMATCH)
 				soap->error = soap_ignore_element(soap);
 			if (soap->error == SOAP_NO_TAG)
@@ -15217,7 +15193,7 @@ SOAP_FMAC3 struct dss__ZoneEndDim * SOAP_FMAC4 soap_in_dss__ZoneEndDim(struct so
 		if (soap->body && soap_element_end_in(soap, tag))
 			return NULL;
 	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__zoneID > 0 || soap_flag__groupID > 0 || soap_flag__paramID > 0))
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__zoneID > 0 || soap_flag__groupID > 0))
 	{	soap->error = SOAP_OCCURS;
 		return NULL;
 	}
@@ -15381,7 +15357,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ZoneStartDim(struct soap *soap, str
 	soap_default_int(soap, &a->_zoneID);
 	soap_default_int(soap, &a->_groupID);
 	soap_default_bool(soap, &a->_directionUp);
-	soap_default_int(soap, &a->_paramID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ZoneStartDim(struct soap *soap, const struct dss__ZoneStartDim *a)
@@ -15409,8 +15384,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ZoneStartDim(struct soap *soap, const ch
 		return soap->error;
 	if (soap_out_bool(soap, "directionUp", -1, &a->_directionUp, ""))
 		return soap->error;
-	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
-		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
 
@@ -15424,7 +15397,7 @@ SOAP_FMAC3 struct dss__ZoneStartDim * SOAP_FMAC4 soap_get_dss__ZoneStartDim(stru
 
 SOAP_FMAC3 struct dss__ZoneStartDim * SOAP_FMAC4 soap_in_dss__ZoneStartDim(struct soap *soap, const char *tag, struct dss__ZoneStartDim *a, const char *type)
 {
-	short soap_flag__token = 1, soap_flag__zoneID = 1, soap_flag__groupID = 1, soap_flag__directionUp = 1, soap_flag__paramID = 1;
+	short soap_flag__token = 1, soap_flag__zoneID = 1, soap_flag__groupID = 1, soap_flag__directionUp = 1;
 	if (soap_element_begin_in(soap, tag, 0, type))
 		return NULL;
 	a = (struct dss__ZoneStartDim *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__ZoneStartDim, sizeof(struct dss__ZoneStartDim), 0, NULL, NULL, NULL);
@@ -15455,11 +15428,6 @@ SOAP_FMAC3 struct dss__ZoneStartDim * SOAP_FMAC4 soap_in_dss__ZoneStartDim(struc
 				{	soap_flag__directionUp--;
 					continue;
 				}
-			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
-				{	soap_flag__paramID--;
-					continue;
-				}
 			if (soap->error == SOAP_TAG_MISMATCH)
 				soap->error = soap_ignore_element(soap);
 			if (soap->error == SOAP_NO_TAG)
@@ -15475,7 +15443,7 @@ SOAP_FMAC3 struct dss__ZoneStartDim * SOAP_FMAC4 soap_in_dss__ZoneStartDim(struc
 		if (soap->body && soap_element_end_in(soap, tag))
 			return NULL;
 	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__zoneID > 0 || soap_flag__groupID > 0 || soap_flag__directionUp > 0 || soap_flag__paramID > 0))
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__zoneID > 0 || soap_flag__groupID > 0 || soap_flag__directionUp > 0))
 	{	soap->error = SOAP_OCCURS;
 		return NULL;
 	}
@@ -17800,7 +17768,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentEndDim(struct soap *soap, 
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
 	soap_default_int(soap, &a->_groupID);
-	soap_default_int(soap, &a->_paramID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentEndDim(struct soap *soap, const struct dss__ApartmentEndDim *a)
@@ -17824,8 +17791,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ApartmentEndDim(struct soap *soap, const
 		return soap->error;
 	if (soap_out_int(soap, "groupID", -1, &a->_groupID, ""))
 		return soap->error;
-	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
-		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
 
@@ -17839,7 +17804,7 @@ SOAP_FMAC3 struct dss__ApartmentEndDim * SOAP_FMAC4 soap_get_dss__ApartmentEndDi
 
 SOAP_FMAC3 struct dss__ApartmentEndDim * SOAP_FMAC4 soap_in_dss__ApartmentEndDim(struct soap *soap, const char *tag, struct dss__ApartmentEndDim *a, const char *type)
 {
-	short soap_flag__token = 1, soap_flag__groupID = 1, soap_flag__paramID = 1;
+	short soap_flag__token = 1, soap_flag__groupID = 1;
 	if (soap_element_begin_in(soap, tag, 0, type))
 		return NULL;
 	a = (struct dss__ApartmentEndDim *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__ApartmentEndDim, sizeof(struct dss__ApartmentEndDim), 0, NULL, NULL, NULL);
@@ -17860,11 +17825,6 @@ SOAP_FMAC3 struct dss__ApartmentEndDim * SOAP_FMAC4 soap_in_dss__ApartmentEndDim
 				{	soap_flag__groupID--;
 					continue;
 				}
-			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
-				{	soap_flag__paramID--;
-					continue;
-				}
 			if (soap->error == SOAP_TAG_MISMATCH)
 				soap->error = soap_ignore_element(soap);
 			if (soap->error == SOAP_NO_TAG)
@@ -17880,7 +17840,7 @@ SOAP_FMAC3 struct dss__ApartmentEndDim * SOAP_FMAC4 soap_in_dss__ApartmentEndDim
 		if (soap->body && soap_element_end_in(soap, tag))
 			return NULL;
 	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__groupID > 0 || soap_flag__paramID > 0))
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__groupID > 0))
 	{	soap->error = SOAP_OCCURS;
 		return NULL;
 	}
@@ -18043,7 +18003,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentStartDim(struct soap *soap
 	soap_default_int(soap, &a->_token);
 	soap_default_int(soap, &a->_groupID);
 	soap_default_bool(soap, &a->_directionUp);
-	soap_default_int(soap, &a->_paramID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentStartDim(struct soap *soap, const struct dss__ApartmentStartDim *a)
@@ -18069,8 +18028,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ApartmentStartDim(struct soap *soap, con
 		return soap->error;
 	if (soap_out_bool(soap, "directionUp", -1, &a->_directionUp, ""))
 		return soap->error;
-	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
-		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
 
@@ -18084,7 +18041,7 @@ SOAP_FMAC3 struct dss__ApartmentStartDim * SOAP_FMAC4 soap_get_dss__ApartmentSta
 
 SOAP_FMAC3 struct dss__ApartmentStartDim * SOAP_FMAC4 soap_in_dss__ApartmentStartDim(struct soap *soap, const char *tag, struct dss__ApartmentStartDim *a, const char *type)
 {
-	short soap_flag__token = 1, soap_flag__groupID = 1, soap_flag__directionUp = 1, soap_flag__paramID = 1;
+	short soap_flag__token = 1, soap_flag__groupID = 1, soap_flag__directionUp = 1;
 	if (soap_element_begin_in(soap, tag, 0, type))
 		return NULL;
 	a = (struct dss__ApartmentStartDim *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__ApartmentStartDim, sizeof(struct dss__ApartmentStartDim), 0, NULL, NULL, NULL);
@@ -18110,11 +18067,6 @@ SOAP_FMAC3 struct dss__ApartmentStartDim * SOAP_FMAC4 soap_in_dss__ApartmentStar
 				{	soap_flag__directionUp--;
 					continue;
 				}
-			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
-				{	soap_flag__paramID--;
-					continue;
-				}
 			if (soap->error == SOAP_TAG_MISMATCH)
 				soap->error = soap_ignore_element(soap);
 			if (soap->error == SOAP_NO_TAG)
@@ -18130,7 +18082,7 @@ SOAP_FMAC3 struct dss__ApartmentStartDim * SOAP_FMAC4 soap_in_dss__ApartmentStar
 		if (soap->body && soap_element_end_in(soap, tag))
 			return NULL;
 	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__groupID > 0 || soap_flag__directionUp > 0 || soap_flag__paramID > 0))
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__groupID > 0 || soap_flag__directionUp > 0))
 	{	soap->error = SOAP_OCCURS;
 		return NULL;
 	}
@@ -19965,7 +19917,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__SetEndDim(struct soap *soap, struct
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_int(soap, &a->_token);
 	soap_default_string(soap, &a->_setSpec);
-	soap_default_int(soap, &a->_paramID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__SetEndDim(struct soap *soap, const struct dss__SetEndDim *a)
@@ -19990,8 +19941,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__SetEndDim(struct soap *soap, const char 
 		return soap->error;
 	if (soap_out_string(soap, "setSpec", -1, &a->_setSpec, ""))
 		return soap->error;
-	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
-		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
 
@@ -20005,7 +19954,7 @@ SOAP_FMAC3 struct dss__SetEndDim * SOAP_FMAC4 soap_get_dss__SetEndDim(struct soa
 
 SOAP_FMAC3 struct dss__SetEndDim * SOAP_FMAC4 soap_in_dss__SetEndDim(struct soap *soap, const char *tag, struct dss__SetEndDim *a, const char *type)
 {
-	short soap_flag__token = 1, soap_flag__setSpec = 1, soap_flag__paramID = 1;
+	short soap_flag__token = 1, soap_flag__setSpec = 1;
 	if (soap_element_begin_in(soap, tag, 0, type))
 		return NULL;
 	a = (struct dss__SetEndDim *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__SetEndDim, sizeof(struct dss__SetEndDim), 0, NULL, NULL, NULL);
@@ -20026,11 +19975,6 @@ SOAP_FMAC3 struct dss__SetEndDim * SOAP_FMAC4 soap_in_dss__SetEndDim(struct soap
 				{	soap_flag__setSpec--;
 					continue;
 				}
-			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
-				{	soap_flag__paramID--;
-					continue;
-				}
 			if (soap->error == SOAP_TAG_MISMATCH)
 				soap->error = soap_ignore_element(soap);
 			if (soap->error == SOAP_NO_TAG)
@@ -20046,7 +19990,7 @@ SOAP_FMAC3 struct dss__SetEndDim * SOAP_FMAC4 soap_in_dss__SetEndDim(struct soap
 		if (soap->body && soap_element_end_in(soap, tag))
 			return NULL;
 	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__paramID > 0))
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0))
 	{	soap->error = SOAP_OCCURS;
 		return NULL;
 	}
@@ -20209,7 +20153,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__SetStartDim(struct soap *soap, stru
 	soap_default_int(soap, &a->_token);
 	soap_default_string(soap, &a->_setSpec);
 	soap_default_bool(soap, &a->_directionUp);
-	soap_default_int(soap, &a->_paramID);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__SetStartDim(struct soap *soap, const struct dss__SetStartDim *a)
@@ -20236,8 +20179,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__SetStartDim(struct soap *soap, const cha
 		return soap->error;
 	if (soap_out_bool(soap, "directionUp", -1, &a->_directionUp, ""))
 		return soap->error;
-	if (soap_out_int(soap, "paramID", -1, &a->_paramID, ""))
-		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
 
@@ -20251,7 +20192,7 @@ SOAP_FMAC3 struct dss__SetStartDim * SOAP_FMAC4 soap_get_dss__SetStartDim(struct
 
 SOAP_FMAC3 struct dss__SetStartDim * SOAP_FMAC4 soap_in_dss__SetStartDim(struct soap *soap, const char *tag, struct dss__SetStartDim *a, const char *type)
 {
-	short soap_flag__token = 1, soap_flag__setSpec = 1, soap_flag__directionUp = 1, soap_flag__paramID = 1;
+	short soap_flag__token = 1, soap_flag__setSpec = 1, soap_flag__directionUp = 1;
 	if (soap_element_begin_in(soap, tag, 0, type))
 		return NULL;
 	a = (struct dss__SetStartDim *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__SetStartDim, sizeof(struct dss__SetStartDim), 0, NULL, NULL, NULL);
@@ -20277,11 +20218,6 @@ SOAP_FMAC3 struct dss__SetStartDim * SOAP_FMAC4 soap_in_dss__SetStartDim(struct 
 				{	soap_flag__directionUp--;
 					continue;
 				}
-			if (soap_flag__paramID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_paramID, "xsd:int"))
-				{	soap_flag__paramID--;
-					continue;
-				}
 			if (soap->error == SOAP_TAG_MISMATCH)
 				soap->error = soap_ignore_element(soap);
 			if (soap->error == SOAP_NO_TAG)
@@ -20297,7 +20233,7 @@ SOAP_FMAC3 struct dss__SetStartDim * SOAP_FMAC4 soap_in_dss__SetStartDim(struct 
 		if (soap->body && soap_element_end_in(soap, tag))
 			return NULL;
 	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__directionUp > 0 || soap_flag__paramID > 0))
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__directionUp > 0))
 	{	soap->error = SOAP_OCCURS;
 		return NULL;
 	}

@@ -86,9 +86,9 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__SetIncreaseValue(struct soap*, int _token, char *
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__SetDecreaseValue(struct soap*, int _token, char *_setSpec, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetStartDim(struct soap*, int _token, char *_setSpec, bool _directionUp, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetStartDim(struct soap*, int _token, char *_setSpec, bool _directionUp, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetEndDim(struct soap*, int _token, char *_setSpec, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetEndDim(struct soap*, int _token, char *_setSpec, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__SetSetValue(struct soap*, int _token, char *_setSpec, double _value, int _paramID, bool &result);
 
@@ -104,9 +104,9 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentIncreaseValue(struct soap*, int _token, 
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentDecreaseValue(struct soap*, int _token, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentStartDim(struct soap*, int _token, int _groupID, bool _directionUp, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentStartDim(struct soap*, int _token, int _groupID, bool _directionUp, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentEndDim(struct soap*, int _token, int _groupID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentEndDim(struct soap*, int _token, int _groupID, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentSetValue(struct soap*, int _token, int _groupID, double _value, int _paramID, bool &result);
 
@@ -126,9 +126,9 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneIncreaseValue(struct soap*, int _token, int _
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneDecreaseValue(struct soap*, int _token, int _zoneID, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneStartDim(struct soap*, int _token, int _zoneID, int _groupID, bool _directionUp, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneStartDim(struct soap*, int _token, int _zoneID, int _groupID, bool _directionUp, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneEndDim(struct soap*, int _token, int _zoneID, int _groupID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneEndDim(struct soap*, int _token, int _zoneID, int _groupID, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSetValue(struct soap*, int _token, int _zoneID, int _groupID, double _value, int _paramID, bool &result);
 
@@ -148,9 +148,9 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceEnable(struct soap*, int _token, char *_dev
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceDisable(struct soap*, int _token, char *_deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceStartDim(struct soap*, int _token, char *_deviceID, bool _directionUp, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceStartDim(struct soap*, int _token, char *_deviceID, bool _directionUp, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceEndDim(struct soap*, int _token, char *_deviceID, int _paramID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceEndDim(struct soap*, int _token, char *_deviceID, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSetValue(struct soap*, int _token, char *_deviceID, double _value, int _paramID, bool &result);
 

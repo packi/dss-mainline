@@ -68,12 +68,11 @@ int dss__SetIncreaseValue(int _token, char* _setSpec, bool& result);
 /** Decreases the main value (e.g. brightness) for each device contained in the set. */
 int dss__SetDecreaseValue(int _token, char* _setSpec, bool& result);
 
-/** Starts dimming the given parameter on all devices contained in the set. If _directionUp is
- * true, the dimming will increase the parameter specified by _paramID. If _paramID == -1 the
- * default parameter will be dimmed */
-int dss__SetStartDim(int _token, char* _setSpec, bool _directionUp, int _paramID, bool& result);
-/** Stops dimming the given parameter on all devices contained in the set. */
-int dss__SetEndDim(int _token, char* _setSpec, int _paramID, bool& result);
+/** Starts dimming the main parameter (e.g. brightness) on all devices contained in the set. If _directionUp is
+ * true, the dimming will increase the parameter */
+int dss__SetStartDim(int _token, char* _setSpec, bool _directionUp, bool& result);
+/** Stops dimming on all devices contained in the set. */
+int dss__SetEndDim(int _token, char* _setSpec, bool& result);
 /** Sets the parameter specified by _paramID to _value. If _paramID == -1 the default parameter
  * will be set. */
 int dss__SetSetValue(int _token, char* _setSpec, double _value, int _paramID, bool& result);
@@ -94,12 +93,11 @@ int dss__ApartmentIncreaseValue(int _token, int _groupID, bool& result);
 /** Decreases the main value (e.g. brightness) for each device contained in the group. */
 int dss__ApartmentDecreaseValue(int _token, int _groupID, bool& result);
 
-/** Starts dimming the given parameter on all devices contained in the group. If _directionUp is
- * true, the dimming will increase the parameter specified by _paramID. If _paramID == -1 the
- * default parameter will be dimmed */
-int dss__ApartmentStartDim(int _token, int _groupID, bool _directionUp, int _paramID, bool& result);
+/** Starts dimming the main parameter on all devices contained in the group. If _directionUp is
+ * true, the dimming will increase the parameter. */
+int dss__ApartmentStartDim(int _token, int _groupID, bool _directionUp, bool& result);
 /** Stops dimming the given parameter on all devices contained in the group. */
-int dss__ApartmentEndDim(int _token, int _groupID, int _paramID, bool& result);
+int dss__ApartmentEndDim(int _token, int _groupID, bool& result);
 /** Sets the parameter specified by _paramID to _value. If _paramID == -1 the default parameter
  * will be set. */
 int dss__ApartmentSetValue(int _token, int _groupID, double _value, int _paramID, bool& result);
@@ -127,12 +125,11 @@ int dss__ZoneIncreaseValue(int _token, int _zoneID, int _groupID, bool& result);
 /** Decreases the main value (e.g. brightness) for each device contained in the zone/group. */
 int dss__ZoneDecreaseValue(int _token, int _zoneID, int _groupID, bool& result);
 
-/** Starts dimming the given parameter on all devices contained in the group/zone. If _directionUp is
- * true, the dimming will increase the parameter specified by _paramID. If _paramID == -1 the
- * default parameter will be dimmed */
-int dss__ZoneStartDim(int _token, int _zoneID, int _groupID, bool _directionUp, int _paramID, bool& result);
-/** Stops dimming the given parameter on all devices contained in the zone/group. */
-int dss__ZoneEndDim(int _token, int _zoneID, int _groupID, int _paramID, bool& result);
+/** Starts dimming the main parameter (e.g. brightness) on all devices contained in the group/zone. If _directionUp is
+ * true, the dimming will increase the parameter. */
+int dss__ZoneStartDim(int _token, int _zoneID, int _groupID, bool _directionUp, bool& result);
+/** Stops dimming on all devices contained in the zone/group. */
+int dss__ZoneEndDim(int _token, int _zoneID, int _groupID, bool& result);
 /** Sets the parameter specified by _paramID to _value. If _paramID == -1 the default parameter
  * will be set. */
 int dss__ZoneSetValue(int _token, int _zoneID, int _groupID, double _value, int _paramID, bool& result);
@@ -156,13 +153,11 @@ int dss__DeviceDecreaseValue(int _token, char* _deviceID, bool& result);
 int dss__DeviceEnable(int _token, char* _deviceID, bool& result);
 /** Disables the device. */
 int dss__DeviceDisable(int _token, char* _deviceID, bool& result);
-/** Starts dimming the given parameter. If _directionUp is true, the dimming will increase
- * the parameter specified by _paramID. If _paramID == -1 the default parameter will be
- * dimmed. */
-int dss__DeviceStartDim(int _token, char* _deviceID, bool _directionUp, int _paramID, bool& result);
-/** Stops dimming the given parameter. If _parameterID == -1 dimming the default parameter
- * will be stopped. */
-int dss__DeviceEndDim(int _token, char* _deviceID, int _paramID, bool& result);
+/** Starts dimming the main parameter (e.g. brightness). If _directionUp is true, the dimming will increase
+ * the parameter. */
+int dss__DeviceStartDim(int _token, char* _deviceID, bool _directionUp, bool& result);
+/** Stops dimming. */
+int dss__DeviceEndDim(int _token, char* _deviceID, bool& result);
 /** Sets the value of the parameter _paramID to _value. If _paramID == -1 the default parameter
  * will be set. */
 int dss__DeviceSetValue(int _token, char* _deviceID, double _value, int _paramID, bool& result);
