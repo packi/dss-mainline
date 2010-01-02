@@ -35,6 +35,8 @@
 
 #include "core/model/busscanner.h"
 
+#include "core/model/scenehelper.h"
+
 #include <fstream>
 
 #include <boost/filesystem.hpp>
@@ -272,11 +274,11 @@ namespace dss {
   } // hasSwitch
 
   void Device::setRawValue(const uint16_t _value, const int _parameterNr, const int _size) {
-    DSS::getInstance()->getDS485Interface().setValueDevice(*this, _value, _parameterNr, _size);
+    m_pApartment->getDeviceBusInterface()->setValueDevice(*this, _value, _parameterNr, _size);
   } // setRawValue
 
   double Device::getValue(const int _parameterNr) {
-    return DSS::getInstance()->getDS485Interface().deviceGetParameterValue(m_ShortAddress, m_ModulatorID,  _parameterNr);
+    return m_pApartment->getDeviceBusInterface()->deviceGetParameterValue(m_ShortAddress, m_ModulatorID,  _parameterNr);
   } // getValue
 
   void Device::nextScene() {
@@ -424,11 +426,11 @@ namespace dss {
     if(_writeOnly) {
       flags |= DSLinkSendWriteOnly;
     }
-    return DSS::getInstance()->getDS485Interface().dSLinkSend(m_ModulatorID, m_ShortAddress, _value, flags);
+    return m_pApartment->getDeviceBusInterface()->dSLinkSend(m_ModulatorID, m_ShortAddress, _value, flags);
   } // dsLinkSend
 
   int Device::getSensorValue(const int _sensorID) {
-    return DSS::getInstance()->getDS485Interface().getSensorValue(*this,_sensorID);
+    return m_pApartment->getDeviceBusInterface()->getSensorValue(*this,_sensorID);
   } // getSensorValue
 
   //================================================== Set
@@ -964,7 +966,7 @@ namespace dss {
     try {
       try {
         Modulator& mod = getModulatorByBusID(_modulatorBusID);
-        BusScanner scanner(*m_pDS485Interface, *this);
+        BusScanner scanner(*m_pDS485Interface->getStructureQueryBusInterface(), *this);
         if(scanner.scanModulator(mod)) {
           boost::shared_ptr<Event> modulatorReadyEvent(new Event("modulator_ready"));
           modulatorReadyEvent->setProperty("modulator", mod.getDSID().toString());
@@ -1720,7 +1722,7 @@ namespace dss {
     log("  BusID:     " + intToString(_devID));
     log("  FID:       " + intToString(_functionID));
 
-    dsid_t dsid = getDSS().getDS485Interface().getDSIDOfDevice(_modID, _devID);
+    dsid_t dsid = getDSS().getDS485Interface().getStructureQueryBusInterface()->getDSIDOfDevice(_modID, _devID);
     Device& dev = allocateDevice(dsid);
     DeviceReference devRef(dev, this);
 
@@ -1761,7 +1763,7 @@ namespace dss {
 
     // get groups of device
     dev.resetGroups();
-    vector<int> groups = getDSS().getDS485Interface().getGroupsOfDevice(_modID, _devID);
+    vector<int> groups = m_pDS485Interface->getStructureQueryBusInterface()->getGroupsOfDevice(_modID, _devID);
     foreach(int iGroup, groups) {
       log("  Adding to Group: " + intToString(iGroup));
       dev.addToGroup(iGroup);
@@ -1839,6 +1841,10 @@ namespace dss {
       throw std::runtime_error("Apartment::dispatchRequest: m_pBusRequestDispatcher is NULL");
     }
   } // dispatchRequest
+
+  DeviceBusInterface* Apartment::getDeviceBusInterface() {
+    return m_pDS485Interface->getDeviceBusInterface();
+  } // getDeviceBusInterface
 
   
   //================================================== Modulator
@@ -2201,6 +2207,9 @@ namespace dss {
     getDevice().previousScene();
   }
 
+
+  //================================================== DeviceContainer
+  
   void DeviceContainer::setName(const std::string& _name) {
     if(m_Name != _name) {
       m_Name = _name;
@@ -2209,76 +2218,5 @@ namespace dss {
       }
     }
   }
-
-  //================================================== Utils
-
-  unsigned int SceneHelper::getNextScene(const unsigned int _currentScene) {
-    switch(_currentScene) {
-    case ScenePanic:
-    case SceneStandBy:
-    case SceneDeepOff:
-    case SceneOff:
-    case Scene1:
-      return Scene2;
-    case Scene2:
-      return Scene3;
-    case Scene3:
-      return Scene4;
-    case Scene4:
-      return Scene2;
-    default:
-      return Scene1;
-    }
-  } // getNextScene
-
-  unsigned int SceneHelper::getPreviousScene(const unsigned int _currentScene) {
-    switch(_currentScene) {
-    case ScenePanic:
-    case SceneStandBy:
-    case SceneDeepOff:
-    case SceneOff:
-    case Scene1:
-      return Scene4;
-    case Scene2:
-      return Scene4;
-    case Scene3:
-      return Scene2;
-    case Scene4:
-      return Scene3;
-    default:
-      return Scene1;
-    }
-  } // getPreviousScene
-
-  bool SceneHelper::m_Initialized = false;
-  std::bitset<64> SceneHelper::m_ZonesToIgnore;
-
-  void SceneHelper::initialize() {
-    m_Initialized = true;
-    m_ZonesToIgnore.reset();
-    m_ZonesToIgnore.set(SceneInc);
-    m_ZonesToIgnore.set(SceneDec);
-    m_ZonesToIgnore.set(SceneStop);
-    m_ZonesToIgnore.set(SceneBell);
-    m_ZonesToIgnore.set(SceneEnergyOverload);
-    m_ZonesToIgnore.set(SceneEnergyHigh);
-    m_ZonesToIgnore.set(SceneEnergyMiddle);
-    m_ZonesToIgnore.set(SceneEnergyLow);
-    m_ZonesToIgnore.set(SceneEnergyClassA);
-    m_ZonesToIgnore.set(SceneEnergyClassB);
-    m_ZonesToIgnore.set(SceneEnergyClassC);
-    m_ZonesToIgnore.set(SceneEnergyClassD);
-    m_ZonesToIgnore.set(SceneEnergyClassE);
-    m_ZonesToIgnore.set(SceneLocalOff);
-    m_ZonesToIgnore.set(SceneLocalOn);
-  }
-
-  bool SceneHelper::rememberScene(const unsigned int _scene) {
-    if(!m_Initialized) {
-      initialize();
-      assert(m_Initialized);
-    }
-    return !m_ZonesToIgnore.test(_scene);
-  } // rememberScene
 
 }

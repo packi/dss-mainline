@@ -26,19 +26,19 @@
 
 namespace dss {
 
-  class DS485Interface;
+  class StructureQueryBusInterface;
   class Apartment;
   class Modulator;
   
   class BusScanner {
   public:
-    BusScanner(DS485Interface& _interface, Apartment& _apartment);
+    BusScanner(StructureQueryBusInterface& _interface, Apartment& _apartment);
     bool scanModulator(Modulator& _modulator);
   private:
     void log(const std::string& _line, aLogSeverity _severity = lsDebug);
   private:
     Apartment& m_Apartment;
-    DS485Interface& m_Interface;
+    StructureQueryBusInterface& m_Interface;
   };
 
 } // namespace dss

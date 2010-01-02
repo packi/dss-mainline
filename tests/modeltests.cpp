@@ -451,7 +451,9 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
 
 
   /** Interface to be implemented by any implementation of the DS485 interface */
-  class DS485InterfaceTest : public DS485Interface {
+  class DS485InterfaceTest : public DS485Interface,
+                             public DeviceBusInterface,
+                             public StructureQueryBusInterface {
   public:
     /** Returns true when the interface is ready to transmit user generated DS485Packets */
     virtual bool isReady() { return true; }
@@ -480,6 +482,10 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
         m_Parameter3 = 0xffff;
       }
     }
+
+    virtual DeviceBusInterface* getDeviceBusInterface() { return this; }
+    virtual StructureQueryBusInterface* getStructureQueryBusInterface() { return this; }
+
 
     //------------------------------------------------ Specialized Commands (system)
     /** Returns an std::vector containing the modulator-spec of all modulators present. */

@@ -136,6 +136,8 @@ namespace dss {
   class DS485Proxy : public    Thread,
                      public    Subsystem,
                      public    DS485Interface,
+                     public    DeviceBusInterface,
+                     public    StructureQueryBusInterface,
                      public    IDS485FrameCollector {
   private:
 #ifdef WITH_SIM
@@ -169,6 +171,9 @@ namespace dss {
   public:
     DS485Proxy(DSS* _pDSS, Apartment* _pApartment);
     virtual ~DS485Proxy() {};
+
+    virtual DeviceBusInterface* getDeviceBusInterface() { return this; }
+    virtual StructureQueryBusInterface* getStructureQueryBusInterface() { return this; }
 
     virtual bool isReady();
     void setInitializeDS485Controller(const bool _value) { m_InitializeDS485Controller = _value; }

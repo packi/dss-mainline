@@ -1,1 +1,1 @@
-add_library(model busscanner.cpp)
+add_library(model scenehelper.cpp busscanner.cpp)

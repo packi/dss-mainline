@@ -28,7 +28,7 @@
 
 namespace dss {
   
-  BusScanner::BusScanner(DS485Interface& _interface, Apartment& _apartment)
+  BusScanner::BusScanner(StructureQueryBusInterface& _interface, Apartment& _apartment)
   : m_Apartment(_apartment),
     m_Interface(_interface)
   {

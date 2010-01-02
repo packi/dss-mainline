@@ -58,6 +58,7 @@ namespace dss {
   class DS485Interface;
   class BusRequest;
   class BusRequestDispatcher;
+  class DeviceBusInterface;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   class PhysicalModelItem {
@@ -898,6 +899,7 @@ namespace dss {
     virtual void execute();
   public:
     void setDS485Interface(DS485Interface* _value) { m_pDS485Interface = _value; }
+    DeviceBusInterface* getDeviceBusInterface();
     void setBusRequestDispatcher(BusRequestDispatcher* _value) { m_pBusRequestDispatcher = _value; }
     void dispatchRequest(boost::shared_ptr<BusRequest> _pRequest);
   }; // Apartment
@@ -922,30 +924,6 @@ namespace dss {
     ItemNotFoundException(const std::string& _name) : DSSException(std::string("Could not find item ") + _name) {};
     ~ItemNotFoundException() throw() {}
   };
-
-  /** Helper functions for scene management. */
-  class SceneHelper {
-  private:
-    static std::bitset<64> m_ZonesToIgnore;
-    static bool m_Initialized;
-
-    static void initialize();
-  public:
-    /** Returns wheter to remember a scene.
-     * Certain scenes represent events thus they won't have to be remembered.
-     */
-    static bool rememberScene(const unsigned int _sceneID);
-    /** Returns the next scene based on _currentScene.
-     * From off to Scene1 -> Scene2 -> Scene3 -> Scene4 -> Scene1...
-     * \param _currentScene Scene now active.
-     */
-    static unsigned int getNextScene(const unsigned int _currentScene);
-    /** Returns the previous scene based on _currentScene.
-     * From off to Scene1 -> Scene4 -> Scene3 -> Scene2 -> Scene1...
-     * \param _currentScene Scene now active.
-     */
-    static unsigned int getPreviousScene(const unsigned int _currentScene);
-  }; // SceneHelper
 
 }
 
