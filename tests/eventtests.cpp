@@ -27,7 +27,7 @@
 #include "../core/eventinterpreterplugins.h"
 #include "../core/setbuilder.h"
 #include "../core/sim/dssim.h"
-#include "../unix/ds485proxy.h"
+#include "core/ds485/ds485proxy.h"
 
 using namespace dss;
 

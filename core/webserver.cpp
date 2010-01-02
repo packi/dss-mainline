@@ -24,7 +24,7 @@
 #include "model.h"
 #include "dss.h"
 #include "event.h"
-#include "unix/ds485proxy.h"
+#include "core/ds485/ds485proxy.h"
 #include "sim/dssim.h"
 #include "propertysystem.h"
 #include "foreach.h"

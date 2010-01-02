@@ -23,7 +23,7 @@
 #define _DS485_H_INCLUDED
 
 #include "core/thread.h"
-#include "serialcom.h"
+#include "unix/serialcom.h"
 #include "core/ds485types.h"
 #include "core/syncevent.h"
 

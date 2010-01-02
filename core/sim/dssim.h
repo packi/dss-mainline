@@ -24,7 +24,7 @@
 
 #include "core/ds485types.h"
 #include "core/ds485const.h"
-#include "unix/ds485.h"
+#include "core/ds485/ds485.h"
 #include "core/subsystem.h"
 
 #include <map>

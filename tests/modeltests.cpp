@@ -26,7 +26,7 @@
 #include "core/model.h"
 #include "core/setbuilder.h"
 #include "core/ds485const.h"
-#include "unix/ds485proxy.h"
+#include "core/ds485/ds485proxy.h"
 #include "core/sim/dssim.h"
 #include "core/dss.h"
 #include "core/ds485/ds485busrequestdispatcher.h"

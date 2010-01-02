@@ -23,7 +23,7 @@
 
 #include "core/dss.h"
 #include "core/foreach.h"
-#include "unix/ds485proxy.h"
+#include "core/ds485/ds485proxy.h"
 
 namespace dss {
 

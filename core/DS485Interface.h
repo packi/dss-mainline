@@ -23,7 +23,7 @@
 #define DS485INTERFACE_H_
 
 #include "ds485types.h"
-#include "unix/ds485.h"
+#include "core/ds485/ds485.h"
 #include "model.h"
 #include "base.h"
 

@@ -30,7 +30,7 @@
 #include "core/dss.h"
 #include "core/logger.h"
 #include "core/ds485client.h"
-#include "unix/ds485.h"
+#include "core/ds485/ds485.h"
 #ifdef WITH_TESTS
 #include "tests/tests.h"
 #endif

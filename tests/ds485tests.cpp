@@ -25,7 +25,7 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include "../unix/ds485.h"
+#include "core/ds485/ds485.h"
 
 using namespace dss;
 

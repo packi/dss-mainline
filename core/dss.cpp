@@ -33,9 +33,7 @@
 #include "propertysystem.h"
 #include "scripting/modeljs.h"
 #include "eventinterpreterplugins.h"
-#ifdef __GNUC__
-#include "../unix/ds485proxy.h"
-#endif
+#include "core/ds485/ds485proxy.h"
 #include "core/ds485/ds485busrequestdispatcher.h"
 
 #include "webserver.h"
