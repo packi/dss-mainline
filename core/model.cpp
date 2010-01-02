@@ -110,9 +110,13 @@ namespace dss {
     m_pApartment->dispatchRequest(request);
   } // endDim
   
-/*
-  void setValue(const double _value, const int _parameterNr = -1);
-*/
+  void AddressableModelItem::setValue(const double _value) {
+    boost::shared_ptr<SetValueCommandBusRequest> request(new SetValueCommandBusRequest());
+    request->setTarget(this);
+    request->setValue(_value);
+    m_pApartment->dispatchRequest(request);
+  } // setValue
+
   void AddressableModelItem::callScene(const int _sceneNr) {
     boost::shared_ptr<CallSceneCommandBusRequest> request(new CallSceneCommandBusRequest());
     request->setTarget(this);
@@ -167,8 +171,14 @@ namespace dss {
       item->endDim();
     }
   } // endDim
-/*    virtual void setValue(const double _value, const int _parameterNr = -1);
-*/
+
+  void NonAddressableModelItem::setValue(const double _value) {
+    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
+    foreach(AddressableModelItem* item, items) {
+      item->setValue(_value);
+    }
+  } // setValue
+
   void NonAddressableModelItem::callScene(const int _sceneNr) {
     std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
     foreach(AddressableModelItem* item, items) {
@@ -259,21 +269,12 @@ namespace dss {
     return getFunctionID() == FunctionIDSwitch;
   } // hasSwitch
 
-  void Device::setValue(const double _value, const int _parameterNr) {
-    if(_parameterNr == -1) {
-      m_pApartment->sendCommand(cmdSetValue, *this, static_cast<int>(_value));
-    } else {
-      DSS::getInstance()->getDS485Interface().setValueDevice(*this, (int)_value, _parameterNr, 1);
-    }
-  } // setValue
-
   void Device::setRawValue(const uint16_t _value, const int _parameterNr, const int _size) {
     DSS::getInstance()->getDS485Interface().setValueDevice(*this, _value, _parameterNr, _size);
   } // setRawValue
 
   double Device::getValue(const int _parameterNr) {
-    vector<int> res = DSS::getInstance()->getDS485Interface().sendCommand(cmdGetValue, *this, _parameterNr);
-    return res.front();
+    return DSS::getInstance()->getDS485Interface().deviceGetParameterValue(m_ShortAddress, m_ModulatorID,  _parameterNr);
   } // getValue
 
   void Device::nextScene() {
@@ -444,14 +445,6 @@ namespace dss {
   Set::Set(const Set& _copy) {
     m_ContainedDevices = _copy.m_ContainedDevices;
   }
-
-  void Set::setValue(const double _value, int _parameterNr) {
-    if(_parameterNr == -1) {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, *this, (int)_value);
-    } else {
-      throw std::runtime_error("Can't set arbitrary parameter on a set");
-    }
-  } // setValue
 
   void Set::nextScene() {
     throw std::runtime_error("Not yet implemented");
@@ -1028,16 +1021,12 @@ namespace dss {
             return false;
         }
 
-        vector<int> results;
+        int functionID = 0;
         try {
-          results = interface.sendCommand(cmdGetFunctionID, devID, modulatorID);
+          functionID = interface.deviceGetFunctionID(devID, modulatorID);
         } catch(DS485ApiError& e) {
           log("scanModulator: Error getting cmdGetFunctionID", lsFatal);
           return false;
-        }
-        int functionID = 0;
-        if(results.size() == 1) {
-          functionID = results.front();
         }
         log("scanModulator:    Found device with id: " + intToString(devID));
         log("scanModulator:    DSID:        " + dsid.toString());
@@ -1984,14 +1973,6 @@ namespace dss {
     }
   } // onDSLinkInterrupt
 
-  void Apartment::sendCommand(DS485Command _command, const Device& _device, int _parameter) {
-    if(m_pDS485Interface != NULL) {
-      m_pDS485Interface->sendCommand(_command, _device, _parameter);
-    } else {
-      throw std::runtime_error("Apartment::sendCommand: DS485Interface is NULL");
-    }    
-  } // sendCommand
-  
   void Apartment::dispatchRequest(boost::shared_ptr<BusRequest> _pRequest) {
     if(m_pBusRequestDispatcher != NULL) {
       m_pBusRequestDispatcher->dispatchRequest(_pRequest);
@@ -2195,10 +2176,6 @@ namespace dss {
     return find(m_Modulators.begin(), m_Modulators.end(), &_modulator) != m_Modulators.end();
   } // registeredOnModulator
 
-  void Zone::setValue(const double _value, const int _parameterNr) {
-    getGroup(GroupIDBroadcast)->setValue(_value, _parameterNr);
-  } // setValue
-
   unsigned long Zone::getPowerConsumption() {
     return getDevices().getPowerConsumption();
   } // getPowerConsumption
@@ -2239,10 +2216,6 @@ namespace dss {
   Set Group::getDevices() const {
     return m_pApartment->getDevices().getByZone(m_ZoneID).getByGroup(m_GroupID);
   } // getDevices
-
-  void Group::setValue(const double _value, int _parameterNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdSetValue, m_pApartment->getZone(m_ZoneID), m_GroupID, static_cast<int>(_value));
-  } // setValue
 
   Group& Group::operator=(const Group& _other) {
     m_Devices = _other.m_Devices;
@@ -2333,8 +2306,8 @@ namespace dss {
     getDevice().endDim();
   } // endDim
 
-  void DeviceReference::setValue(const double _value, const int _parameterNr) {
-    getDevice().setValue(_value, _parameterNr);
+  void DeviceReference::setValue(const double _value) {
+    getDevice().setValue(_value);
   } // setValue
 
   bool DeviceReference::isOn() const {

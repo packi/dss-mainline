@@ -110,6 +110,20 @@ namespace dss {
     virtual PacketBuilderHintsBase* getBuilderHints();
   };
 
+  class SetValueCommandBusRequest : public CommandBusRequest {
+  public:
+    void setValue(const int _value) {
+      m_Value = _value;
+    }
+
+    uint16_t getValue() const {
+      return m_Value;
+    }
+  private:
+    virtual PacketBuilderHintsBase* getBuilderHints();
+  private:
+    uint16_t m_Value;
+  };
 }
 
 #endif // BUSREQUEST_H

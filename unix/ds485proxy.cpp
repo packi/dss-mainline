@@ -39,177 +39,6 @@ namespace dss {
 
   const char* FunctionIDToString(const int _functionID); // internal forward declaration
 
-  typedef std::map<const Zone*, Set> HashMapZoneSet;
-
-  HashMapZoneSet splitByZone(const Set& _set) {
-    HashMapZoneSet result;
-    for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
-      const DeviceReference& devRef = _set.get(iDevice);
-      const Device& dev = devRef.getDevice();
-      Zone& zone = dev.getApartment().getZone(dev.getZoneID());
-      result[&zone].addDevice(dev);
-    }
-    return result;
-  } // splitByZone
-
-  typedef std::pair<std::vector<Group*>, Set> FittingResultPerModulator;
-
-  const bool OptimizerDebug = true;
-
-  /** Precondition: _set contains only devices of _zone */
-  FittingResultPerModulator bestFit(const Zone& _zone, const Set& _set) {
-    Set workingCopy = _set;
-
-    std::vector<Group*> fittingGroups;
-    Set singleDevices;
-
-    if(OptimizerDebug) {
-      Logger::getInstance()->log("Finding fit for zone " + intToString(_zone.getID()));
-    }
-
-
-    if(_zone.getDevices().length() == _set.length()) {
-      Logger::getInstance()->log(std::string("Optimization: Set contains all devices of zone ") + intToString(_zone.getID()));
-        std::bitset<63> possibleGroups;
-        possibleGroups.set();
-        for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
-          possibleGroups &= _set[iDevice].getDevice().getGroupBitmask();
-      }
-      if(possibleGroups.any()) {
-          for(unsigned int iGroup = 0; iGroup < possibleGroups.size(); iGroup++) {
-            if(possibleGroups.test(iGroup)) {
-              Logger::getInstance()->log("Sending the command to group " + intToString(iGroup + 1));
-              fittingGroups.push_back(_zone.getGroup(iGroup + 1));
-              break;
-            }
-          }
-        } else {
-          Logger::getInstance()->log("Sending the command to broadcast group");
-          fittingGroups.push_back(_zone.getGroup(GroupIDBroadcast));
-        }
-      } else {
-        std::vector<Group*> unsuitableGroups;
-        Set workingCopy = _set;
-
-      while(!workingCopy.isEmpty()) {
-        DeviceReference& ref = workingCopy.get(0);
-        workingCopy.removeDevice(ref);
-
-        if(OptimizerDebug) {
-          Logger::getInstance()->log("Working with device " + ref.getDSID().toString());
-        }
-
-        bool foundGroup = false;
-        for(int iGroup = 0; iGroup < ref.getDevice().getGroupsCount(); iGroup++) {
-        Group& g = ref.getDevice().getGroupByIndex(iGroup);
-
-            if(OptimizerDebug) {
-            Logger::getInstance()->log("  Checking Group " + intToString(g.getID()));
-          }
-        // continue if already found unsuitable
-        if(find(unsuitableGroups.begin(), unsuitableGroups.end(), &g) != unsuitableGroups.end()) {
-              if(OptimizerDebug) {
-              Logger::getInstance()->log("  Group discarded before, continuing search");
-            }
-          continue;
-        }
-
-        // see if we've got a fit
-        bool groupFits = true;
-        Set devicesInGroup = _zone.getDevices().getByGroup(g);
-            if(OptimizerDebug) {
-            Logger::getInstance()->log("    Group has " + intToString(devicesInGroup.length()) + " devices");
-          }
-        for(int iDevice = 0; iDevice < devicesInGroup.length(); iDevice++) {
-          if(!_set.contains(devicesInGroup.get(iDevice))) {
-          unsuitableGroups.push_back(&g);
-          groupFits = false;
-                if(OptimizerDebug) {
-                Logger::getInstance()->log("    Original set does _not_ contain device " + devicesInGroup.get(iDevice).getDevice().getDSID().toString());
-              }
-          break;
-          }
-              if(OptimizerDebug) {
-              Logger::getInstance()->log("    Original set contains device " + devicesInGroup.get(iDevice).getDevice().getDSID().toString());
-            }
-        }
-        if(groupFits) {
-              if(OptimizerDebug) {
-              Logger::getInstance()->log("  Found a fit " + intToString(g.getID()));
-            }
-          foundGroup = true;
-          fittingGroups.push_back(&g);
-              if(OptimizerDebug) {
-              Logger::getInstance()->log("  Removing devices from working copy");
-            }
-          while(!devicesInGroup.isEmpty()) {
-          workingCopy.removeDevice(devicesInGroup.get(0));
-            devicesInGroup.removeDevice(devicesInGroup.get(0));
-          }
-              if(OptimizerDebug) {
-              Logger::getInstance()->log("  Done. (Removing devices from working copy)");
-            }
-          break;
-        }
-      }
-
-		  // if no fitting group found
-		  if(!foundGroup) {
-  	    singleDevices.addDevice(ref);
-		  }
-    }
-  }
-    return FittingResultPerModulator(fittingGroups, singleDevices);
-  }
-
-  FittingResultPerModulator bestFit(const Modulator& _modulator, const Set& _set) {
-    Set workingCopy = _set;
-
-    std::vector<Group*> unsuitableGroups;
-    std::vector<Group*> fittingGroups;
-    Set singleDevices;
-
-    while(!workingCopy.isEmpty()) {
-      DeviceReference& ref = workingCopy.get(0);
-      workingCopy.removeDevice(ref);
-
-      bool foundGroup = false;
-      for(int iGroup = 0; iGroup < ref.getDevice().getGroupsCount(); iGroup++) {
-        Group& g = ref.getDevice().getGroupByIndex(iGroup);
-
-        // continue if already found unsuitable
-        if(find(unsuitableGroups.begin(), unsuitableGroups.end(), &g) != unsuitableGroups.end()) {
-          continue;
-        }
-
-        // see if we've got a fit
-        bool groupFits = true;
-        Set devicesInGroup = _modulator.getDevices().getByGroup(g);
-        for(int iDevice = 0; iDevice < devicesInGroup.length(); iDevice++) {
-          if(!_set.contains(devicesInGroup.get(iDevice))) {
-            unsuitableGroups.push_back(&g);
-            groupFits = false;
-            break;
-          }
-        }
-        if(groupFits) {
-          foundGroup = true;
-          fittingGroups.push_back(&g);
-          while(!devicesInGroup.isEmpty()) {
-            workingCopy.removeDevice(devicesInGroup.get(0));
-          }
-          break;
-        }
-      }
-
-      // if no fitting group found
-      if(!foundGroup) {
-        singleDevices.addDevice(ref);
-      }
-    }
-    return FittingResultPerModulator(fittingGroups, singleDevices);
-  } // bestFit
-
   DS485Proxy::DS485Proxy(DSS* _pDSS, Apartment* _pApartment)
   : Thread("DS485Proxy"),
     Subsystem(_pDSS, "DS485Proxy"),
@@ -251,112 +80,40 @@ namespace dss {
 	             (m_DS485Controller.getState() == csError)); 
   } // isReady
 
-  FittingResult DS485Proxy::bestFit(const Set& _set) {
-    FittingResult result;
-    HashMapZoneSet zoneToSet = splitByZone(_set);
-
-    for(HashMapZoneSet::iterator it = zoneToSet.begin(); it != zoneToSet.end(); ++it) {
-      result[it->first] = dss::bestFit(*(it->first), it->second);
-    }
-
-    return result;
-  } // bestFit(const Set&)
-
-  std::vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Set& _set, int _param) {
-    if(_set.length() == 1) {
-      log("Optimization: Set contains only one device");
-      return sendCommand(_cmd, _set.get(0).getDevice(), _param);
-    } else if(_set.length() > 0) {
-      Apartment& apt = _set.get(0).getDevice().getApartment();
-      if(_set.length() == apt.getDevices().length()) {
-        log("Optimization: Set contains all devices of apartment");
-        return sendCommand(_cmd, apt.getZone(0), apt.getGroup(GroupIDBroadcast), _param);
-      }
-    }
-
-    std::vector<int> result;
-    FittingResult fittedResult = bestFit(_set);
-    for(FittingResult::iterator iResult = fittedResult.begin(); iResult != fittedResult.end(); ++iResult) {
-      const Zone* zone = iResult->first;
-      FittingResultPerModulator res = iResult->second;
-      std::vector<Group*> groups = res.first;
-      for(vector<Group*>::iterator ipGroup = groups.begin(); ipGroup != groups.end(); ++ipGroup) {
-        sendCommand(_cmd, *zone, **ipGroup, _param);
-      }
-      Set& set = res.second;
-      for(int iDevice = 0; iDevice < set.length(); iDevice++) {
-        sendCommand(_cmd, set.get(iDevice).getDevice(), _param);
-      }
-    }
-    return result;
-  } // sendCommand
-
-  std::vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param) {
-    std::vector<int> result;
-
-    DS485CommandFrame frame;
-    frame.getHeader().setDestination(0);
-    frame.getHeader().setBroadcast(true);
-    frame.getHeader().setType(1);
-    frame.setCommand(CommandRequest);
-    int toZone = _zone.getID();
-    int param = _param;
-    const int kNoParam = -1;
-    if(_cmd == cmdSetValue) {
-      frame.getPayload().add<uint8_t>(FunctionGroupSetValue);
-    } else {
-      throw std::invalid_argument("DS485Proxy::sendCommand: Unknown command " + intToString(_cmd));
-    }
-    frame.getPayload().add<uint16_t>(toZone);
-    frame.getPayload().add<uint16_t>(_groupID);
-    if(param != kNoParam) {
-      frame.getPayload().add<uint16_t>(param);
-    }
-    sendFrame(frame);
-    return result;
-  } // sendCommand(zone, group)
-
-  std::vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param) {
-    return sendCommand(_cmd, _zone, _group.getID(), _param);
-  } // sendCommand
-
-  std::vector<int> DS485Proxy::sendCommand(DS485Command _cmd, const Device& _device, int _param) {
-    return sendCommand(_cmd, _device.getShortAddress(), _device.getModulatorID(), _param);
-  } // sendCommand
-
-  std::vector<int> DS485Proxy::sendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param) {
-    std::vector<int> result;
+  uint16_t DS485Proxy::deviceGetParameterValue(devid_t _id, uint8_t _modulatorID, int _paramID) {
     DS485CommandFrame frame;
     frame.getHeader().setDestination(_modulatorID);
     frame.getHeader().setBroadcast(false);
     frame.getHeader().setType(1);
     frame.setCommand(CommandRequest);
-    if(_cmd == cmdGetValue) {
-      frame.getPayload().add<uint8_t>(FunctionDeviceGetParameterValue);
-      frame.getPayload().add<uint16_t>(_id);
-      frame.getPayload().add<uint16_t>(_param);
-      uint8_t res = receiveSingleResult(frame, FunctionDeviceGetParameterValue);
-      result.push_back(res);
-    } else if(_cmd == cmdGetFunctionID) {
-      frame.getPayload().add<uint8_t>(FunctionDeviceGetFunctionID);
-      frame.getPayload().add<devid_t>(_id);
+    frame.getPayload().add<uint8_t>(FunctionDeviceGetParameterValue);
+    frame.getPayload().add<uint16_t>(_id);
+    frame.getPayload().add<uint16_t>(_paramID);
+    uint8_t res = receiveSingleResult(frame, FunctionDeviceGetParameterValue);
+    return res;
+  } // deviceGetParameterValue
 
-      boost::shared_ptr<ReceivedFrame> resFrame = receiveSingleFrame(frame, FunctionDeviceGetFunctionID);
-      if(resFrame.get() != NULL) {
-        PayloadDissector pd(resFrame->getFrame()->getPayload());
-        pd.get<uint8_t>(); // skip the function id
-        if(pd.get<uint16_t>() == 0x0001) {
-          result.push_back(pd.get<uint16_t>());
-        }
+  uint16_t DS485Proxy::deviceGetFunctionID(devid_t _id, uint8_t _modulatorID) {
+    DS485CommandFrame frame;
+    frame.getHeader().setDestination(_modulatorID);
+    frame.getHeader().setBroadcast(false);
+    frame.getHeader().setType(1);
+    frame.setCommand(CommandRequest);
+    frame.getPayload().add<uint8_t>(FunctionDeviceGetFunctionID);
+    frame.getPayload().add<devid_t>(_id);
+
+    uint16_t result;
+    boost::shared_ptr<ReceivedFrame> resFrame = receiveSingleFrame(frame, FunctionDeviceGetFunctionID);
+    if(resFrame.get() != NULL) {
+      PayloadDissector pd(resFrame->getFrame()->getPayload());
+      pd.get<uint8_t>(); // skip the function id
+      if(pd.get<uint16_t>() == 0x0001) {
+        result = pd.get<uint16_t>();
+        checkResultCode(result);
       }
-    } else if(_cmd == cmdSetValue) {
-      frame.getPayload().add<uint8_t>(FunctionDeviceSetValue);
-      frame.getPayload().add<devid_t>(_id);
-      frame.getPayload().add<devid_t>(_param);
-      sendFrame(frame);
     }
     return result;
-  } // sendCommand(device)
+  } // deviceGetFunctionID
 
   void DS485Proxy::sendFrame(DS485CommandFrame& _frame) {
     _frame.setFrameSource(fsDSS);

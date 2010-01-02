@@ -161,7 +161,6 @@ namespace dss {
 
   class SubscriptionOptionsDS485 : public SubscriptionOptions {
   private:
-    DS485Command m_Command;
     int m_ParameterIndex;
     int m_SceneIndex;
     std::string m_To;
@@ -170,9 +169,6 @@ namespace dss {
     SubscriptionOptionsDS485()
     : m_ParameterIndex(-1), m_SceneIndex(-1)
     { }
-
-    void setCommand(const DS485Command _value) { m_Command = _value; }
-    DS485Command getCommand() const { return m_Command; }
 
     void setParameterIndex(const int _value) { m_ParameterIndex = _value; }
     int getParameterIndex() const { return m_ParameterIndex; }

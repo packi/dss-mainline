@@ -47,13 +47,6 @@ namespace Poco {
 }
 
 namespace dss {
-  /** Commands to be transmitted either to a set, group or a single device. */
-  typedef enum {
-    cmdGetValue,
-    cmdSetValue,
-    cmdGetFunctionID
-  } DS485Command;
-
   class Device;
   class Set;
   class DeviceContainer;
@@ -104,7 +97,7 @@ namespace dss {
     /** Stops the dimming */
     virtual void endDim() = 0;
     /** Sets the value of the given parameter */
-    virtual void setValue(const double _value, const int _parameterNr = -1) = 0;
+    virtual void setValue(const double _value) = 0;
 
 
     /** Sets the scene on the device.
@@ -144,9 +137,9 @@ namespace dss {
 
     virtual void startDim(const bool _directionUp);
     virtual void endDim();
-/*
-    virtual void setValue(const double _value, const int _parameterNr = -1);
-*/
+
+    virtual void setValue(const double _value);
+
     virtual void callScene(const int _sceneNr);
     virtual void saveScene(const int _sceneNr);
     virtual void undoScene(const int _sceneNr);
@@ -165,9 +158,9 @@ namespace dss {
 
     virtual void startDim(const bool _directionUp);
     virtual void endDim();
-/*    
-    virtual void setValue(const double _value, const int _parameterNr = -1);
-*/
+
+    virtual void setValue(const double _value);
+
     virtual void callScene(const int _sceneNr);
     virtual void saveScene(const int _sceneNr);
     virtual void undoScene(const int _sceneNr);
@@ -218,6 +211,8 @@ namespace dss {
      * @note This will lookup the device. */
     std::string getName() const;
 
+    virtual void setValue(const double _value);
+    
     virtual void increaseValue();
     virtual void decreaseValue();
 
@@ -232,7 +227,6 @@ namespace dss {
 
     virtual void startDim(const bool _directionUp);
     virtual void endDim();
-    virtual void setValue(const double _value, const int _parameterNr = -1);
 
     virtual void callScene(const int _sceneNr);
     virtual void saveScene(const int _sceneNr);
@@ -283,7 +277,6 @@ namespace dss {
     /** @copydoc DeviceReference::isOn() */
     virtual bool isOn() const;
 
-    virtual void setValue(const double _value, const int _parameterNr = -1);
     void setRawValue(const uint16_t _value, const int _parameterNr, const int _size);
     /** Returns the value of _parameterNr.
      * @note not yet implemented */
@@ -421,8 +414,6 @@ namespace dss {
     /** Constructor for a set containing \a _devices. */
     Set(DeviceVector _devices);
     virtual ~Set() {};
-
-    virtual void setValue(const double _value, int _parameterNr = -1);
 
     /** Performs the given action on all contained devices */
     void perform(IDeviceAction& _deviceAction);
@@ -632,8 +623,6 @@ namespace dss {
     int getID() const;
     int getZoneID() const;
 
-    virtual void setValue(const double _value, int _parameterNr = -1);
-
     virtual void callScene(const int _sceneNr);
 
     virtual void nextScene();
@@ -727,8 +716,6 @@ namespace dss {
     /** Returns a list of the modulators the zone is registered with. */
     std::vector<int> getModulators() const;
     bool registeredOnModulator(const Modulator& _modulator) const;
-
-    virtual void setValue(const double _value, int _parameterNr = -1);
 
     virtual void nextScene();
     virtual void previousScene();
@@ -912,7 +899,6 @@ namespace dss {
     /** Starts the event-processing */
     virtual void execute();
   public:
-    void sendCommand(DS485Command _command, const Device& _device, int _parameter = -1);
     void setDS485Interface(DS485Interface* _value) { m_pDS485Interface = _value; }
     void setBusRequestDispatcher(BusRequestDispatcher* _value) { m_pBusRequestDispatcher = _value; }
     void dispatchRequest(boost::shared_ptr<BusRequest> _pRequest);

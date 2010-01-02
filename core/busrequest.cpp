@@ -167,13 +167,16 @@ namespace dss {
     }
 
     virtual int getNumberOfParameter() {
-      return 0;
+      return m_Parameter.size();
     }
 
     virtual uint16_t getParameter(int _parameter) {
-      throw std::out_of_range("_parameter out of range");
+      return m_Parameter.at(_parameter);
     }
 
+    void addParameter(uint16_t _parameter) {
+      m_Parameter.push_back(_parameter);
+    }
   private:
     void determineTypeOfTarget() {
       PhysicalModelItem* pTarget = ((CommandBusRequest*)getRequest())->getTarget();
@@ -187,12 +190,13 @@ namespace dss {
 
     bool targetIsDevice() {
       return m_pDevice != NULL;
-    }
+    }   
   private:
     Group* m_pGroup;
     Device* m_pDevice;
     int m_FunctionIDForGroup;
     int m_FunctionIDForDevice;
+    std::vector<uint16_t> m_Parameter;
   }; // CommandBusRequestPacketBuilderHints
   
   class SceneCommandPacketBuilderHints : public CommandBusRequestPacketBuilderHints {
@@ -270,5 +274,12 @@ namespace dss {
     return result;
   } // getBuilderHints
 
- 
+  PacketBuilderHintsBase* SetValueCommandBusRequest::getBuilderHints() {
+    CommandBusRequestPacketBuilderHints* result = new CommandBusRequestPacketBuilderHints(this);
+    result->setFunctionIDForDevice(FunctionDeviceSetValue);
+    result->setFunctionIDForGroup(FunctionGroupSetValue);
+    result->addParameter(m_Value);
+    return result;
+  } // getBuilderHints
+  
 } // namespace dss

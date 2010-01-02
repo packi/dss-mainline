@@ -109,16 +109,11 @@ namespace dss {
     virtual bool getEnergyBorder(const int _modulatorID, int& _lower, int& _upper) = 0;
 
     //------------------------------------------------ UDI
-    //virtual void dSLinkConfigWrite(devid_t _devAdr, uint8_t _index, uint8_t _value) = 0;
-    //virtual bool dSLinkConfigRead(devid_t _devAdr, uint8_t _index, uint8_t& value) = 0;
     virtual uint8_t dSLinkSend(const int _modulatorID, devid_t _devAdr, uint8_t _value, uint8_t _flags) = 0;
 
     //------------------------------------------------ Device manipulation
-    virtual std::vector<int> sendCommand(DS485Command _cmd, const Set& _set, int _param = -1) = 0;
-    virtual std::vector<int> sendCommand(DS485Command _cmd, const Device& _device, int _param = -1) = 0;
-    virtual std::vector<int> sendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param = -1) = 0;
-    virtual std::vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param = -1) = 0;
-    virtual std::vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param = -1) = 0;
+    virtual uint16_t deviceGetParameterValue(devid_t _id, uint8_t _modulatorID, int _paramID) = 0;
+    virtual uint16_t deviceGetFunctionID(devid_t _id, uint8_t _modulatorID) = 0;
     
     virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) = 0;
     virtual int getSensorValue(const Device& _device, const int _sensorID) = 0;

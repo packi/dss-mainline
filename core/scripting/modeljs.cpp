@@ -496,12 +496,9 @@ namespace dss {
     ScriptObject self(obj, *ctx);
     if(self.is("set") || self.is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      double value = ctx->convertTo<double>(argv[0]);
-      if(argc == 1) {
+      if(argc >= 1) {
+        double value = ctx->convertTo<double>(argv[0]);
         intf->setValue(value);
-      } else if(argc >= 2) {
-        int parameterNr = ctx->convertTo<int>(argv[1]);
-        intf->setValue(value, parameterNr);
       }
       *rval = INT_TO_JSVAL(0);
       return JS_TRUE;

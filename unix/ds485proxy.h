@@ -59,8 +59,6 @@ using namespace stdext;
 namespace dss {
 
   class DS485Proxy;
-  typedef hash_map<const Zone*, std::pair< std::vector<Group*>, Set> > FittingResult;
-
 
   /** A ReceivedFrame stores a boost::shared_ptr to the frame as well as the token-counter
    *  of its arrival.
@@ -140,7 +138,6 @@ namespace dss {
                      public    DS485Interface,
                      public    IDS485FrameCollector {
   private:
-    FittingResult bestFit(const Set& _set);
 #ifdef WITH_SIM
     bool isSimAddress(const uint8_t _addr);
 #endif
@@ -228,12 +225,9 @@ namespace dss {
     //------------------------------------------------ UDI
     virtual uint8_t dSLinkSend(const int _modulatorID, devid_t _devAdr, uint8_t _value, uint8_t _flags);
 
-    //------------------------------------------------ Device manipulation
-    virtual std::vector<int> sendCommand(DS485Command _cmd, const Set& _set, int _param);
-    virtual std::vector<int> sendCommand(DS485Command _cmd, const Device& _device, int _param);
-    virtual std::vector<int> sendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param);
-    virtual std::vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param);
-    virtual std::vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param = -1);
+    //------------------------------------------------ Device
+    virtual uint16_t deviceGetParameterValue(devid_t _id, uint8_t _modulatorID, int _paramID);
+    virtual uint16_t deviceGetFunctionID(devid_t _id, uint8_t _modulatorID);
 
     void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size);
     virtual int getSensorValue(const Device& _device, const int _sensorID);

@@ -547,24 +547,15 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
     //------------------------------------------------ UDI
     virtual uint8_t dSLinkSend(const int _modulatorID, devid_t _devAdr, uint8_t _value, uint8_t _flags) { return 0; }
 
+    //------------------------------------------------ Device    
+    virtual uint16_t deviceGetParameterValue(devid_t _id, uint8_t _modulatorID, int _paramID) { return 0; }
+    virtual uint16_t deviceGetFunctionID(devid_t _id, uint8_t _modulatorID) { return 0; }
+
     //------------------------------------------------ Device manipulation
-
-    DS485Command getLastCommand() const { return m_LastCommand; }
-    void setLastCommand(DS485Command _value) { m_LastCommand = _value; }
-    virtual std::vector<int> sendCommand(DS485Command _cmd, const Set& _set, int _param = -1) { return std::vector<int>(); }
-    virtual std::vector<int> sendCommand(DS485Command _cmd, const Device& _device, int _param = -1) {
-      setLastCommand(_cmd);
-      return std::vector<int>();
-    }
-    virtual std::vector<int> sendCommand(DS485Command _cmd, devid_t _id, uint8_t _modulatorID, int _param = -1) { return std::vector<int>(); }
-    virtual std::vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, Group& _group, int _param = -1) { return std::vector<int>(); }
-    virtual std::vector<int> sendCommand(DS485Command _cmd, const Zone& _zone, uint8_t _groupID, int _param = -1) { return std::vector<int>(); }
-
     virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) {}
     virtual int getSensorValue(const Device& _device, const int _sensorID) { return 0; }
   private:
     int m_LastFunctionID;
-    DS485Command m_LastCommand;
     uint16_t m_Parameter1;
     uint16_t m_Parameter2;
     uint16_t m_Parameter3;

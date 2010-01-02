@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.9l 2010-01-02 15:38:23 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.9l 2010-01-02 16:20:00 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -1202,7 +1202,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetSetValue(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__SetSetValue(soap, soap_tmp_dss__SetSetValue._token, soap_tmp_dss__SetSetValue._setSpec, soap_tmp_dss__SetSetValue._value, soap_tmp_dss__SetSetValue._paramID, soap_tmp_dss__SetSetValueResponse.result);
+	soap->error = dss__SetSetValue(soap, soap_tmp_dss__SetSetValue._token, soap_tmp_dss__SetSetValue._setSpec, soap_tmp_dss__SetSetValue._value, soap_tmp_dss__SetSetValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1571,7 +1571,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentSetValue(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__ApartmentSetValue(soap, soap_tmp_dss__ApartmentSetValue._token, soap_tmp_dss__ApartmentSetValue._groupID, soap_tmp_dss__ApartmentSetValue._value, soap_tmp_dss__ApartmentSetValue._paramID, soap_tmp_dss__ApartmentSetValueResponse.result);
+	soap->error = dss__ApartmentSetValue(soap, soap_tmp_dss__ApartmentSetValue._token, soap_tmp_dss__ApartmentSetValue._groupID, soap_tmp_dss__ApartmentSetValue._value, soap_tmp_dss__ApartmentSetValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2022,7 +2022,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneSetValue(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__ZoneSetValue(soap, soap_tmp_dss__ZoneSetValue._token, soap_tmp_dss__ZoneSetValue._zoneID, soap_tmp_dss__ZoneSetValue._groupID, soap_tmp_dss__ZoneSetValue._value, soap_tmp_dss__ZoneSetValue._paramID, soap_tmp_dss__ZoneSetValueResponse.result);
+	soap->error = dss__ZoneSetValue(soap, soap_tmp_dss__ZoneSetValue._token, soap_tmp_dss__ZoneSetValue._zoneID, soap_tmp_dss__ZoneSetValue._groupID, soap_tmp_dss__ZoneSetValue._value, soap_tmp_dss__ZoneSetValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2473,7 +2473,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceSetValue(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__DeviceSetValue(soap, soap_tmp_dss__DeviceSetValue._token, soap_tmp_dss__DeviceSetValue._deviceID, soap_tmp_dss__DeviceSetValue._value, soap_tmp_dss__DeviceSetValue._paramID, soap_tmp_dss__DeviceSetValueResponse.result);
+	soap->error = dss__DeviceSetValue(soap, soap_tmp_dss__DeviceSetValue._token, soap_tmp_dss__DeviceSetValue._deviceID, soap_tmp_dss__DeviceSetValue._value, soap_tmp_dss__DeviceSetValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);

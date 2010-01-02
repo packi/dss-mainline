@@ -476,13 +476,13 @@ int dss__SetEndDim(struct soap *soap, int _token, char* _setSpec, bool& result) 
   return SOAP_OK;
 }
 
-int dss__SetSetValue(struct soap *soap, int _token, char* _setSpec, double _value, int _paramID, bool& result) {
+int dss__SetSetValue(struct soap *soap, int _token, char* _setSpec, double _value, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.setValue(_value, _paramID);
+  set.setValue(_value);
   result = true;
   return SOAP_OK;
 }
@@ -588,13 +588,13 @@ int dss__ApartmentEndDim(struct soap *soap, int _token, int _groupID, bool& resu
   return SOAP_OK;
 }
 
-int dss__ApartmentSetValue(struct soap *soap, int _token, int _groupID, double _value, int _paramID, bool& result) {
+int dss__ApartmentSetValue(struct soap *soap, int _token, int _groupID, double _value, bool& result) {
   dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group.setValue(_value, _paramID);
+  group.setValue(_value);
   result = true;
   return SOAP_OK;
 }
@@ -700,13 +700,13 @@ int dss__ZoneEndDim(struct soap *soap, int _token, int _zoneID, int _groupID, bo
   return SOAP_OK;
 }
 
-int dss__ZoneSetValue(struct soap *soap, int _token, int _zoneID, int _groupID, double _value, int _paramID, bool& result) {
+int dss__ZoneSetValue(struct soap *soap, int _token, int _zoneID, int _groupID, double _value, bool& result) {
   dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group.setValue(_value, _paramID);
+  group.setValue(_value);
   result = true;
   return SOAP_OK;
 }
@@ -834,13 +834,13 @@ int dss__DeviceEndDim(struct soap *soap, int _token, char* _deviceID, bool& resu
   return SOAP_OK;
 }
 
-int dss__DeviceSetValue(struct soap *soap, int _token, char* _deviceID, double _value, int _paramID, bool& result) {
+int dss__DeviceSetValue(struct soap *soap, int _token, char* _deviceID, double _value, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dev.setValue(_value, _paramID);
+  dev.setValue(_value);
   result = true;
   return SOAP_OK;
 }
