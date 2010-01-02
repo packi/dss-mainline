@@ -710,40 +710,52 @@ BOOST_AUTO_TEST_CASE(testDisableDevice) {
   BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
 }
 
-BOOST_AUTO_TEST_CASE(testIncreaseValue) {
+BOOST_AUTO_TEST_CASE(testIncreaseValueDevice) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
   DSModulatorSim modSim(NULL);
   DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
   apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
 
-  proxy.setLastCommand(cmdGetFunctionID);
+  proxy.setLastFunctionID(-1);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
   dev1.increaseValue();
-  BOOST_CHECK_EQUAL(cmdIncreaseValue, proxy.getLastCommand());
-  proxy.setLastCommand(cmdGetFunctionID);
+  BOOST_CHECK_EQUAL(FunctionDeviceIncreaseValue, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  proxy.setLastFunctionID(-1);
   DeviceReference devRef1(dev1, &apt);
   devRef1.increaseValue();
-  BOOST_CHECK_EQUAL(cmdIncreaseValue, proxy.getLastCommand());
+  BOOST_CHECK_EQUAL(FunctionDeviceIncreaseValue, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
 }
 
-BOOST_AUTO_TEST_CASE(testDecreaseValue) {
+BOOST_AUTO_TEST_CASE(testDecreaseValueDevice) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
   DSModulatorSim modSim(NULL);
   DS485InterfaceTest proxy;
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setProxy(&proxy);
   apt.setDS485Interface(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
 
-  proxy.setLastCommand(cmdGetFunctionID);
+  proxy.setLastFunctionID(-1);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
   dev1.decreaseValue();
-  BOOST_CHECK_EQUAL(cmdDecreaseValue, proxy.getLastCommand());
-  proxy.setLastCommand(cmdGetFunctionID);
+  BOOST_CHECK_EQUAL(FunctionDeviceDecreaseValue, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  proxy.setLastFunctionID(-1);
   DeviceReference devRef1(dev1, &apt);
   devRef1.decreaseValue();
-  BOOST_CHECK_EQUAL(cmdDecreaseValue, proxy.getLastCommand());
+  BOOST_CHECK_EQUAL(FunctionDeviceDecreaseValue, proxy.getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
 }
 
 BOOST_AUTO_TEST_CASE(testStartDimUp) {

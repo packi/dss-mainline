@@ -147,10 +147,10 @@ namespace dss {
   public:
     AddressableModelItem(Apartment* _pApartment);
     
-/*
+
     virtual void increaseValue();
     virtual void decreaseValue();
-
+/*
     virtual void startDim(const bool _directionUp, const int _parameterNr = -1);
     virtual void endDim(const int _parameterNr = -1);
     virtual void setValue(const double _value, const int _parameterNr = -1);
@@ -263,9 +263,6 @@ namespace dss {
     /** Creates and initializes a device. */
     Device(const dsid_t _dsid, Apartment* _pApartment);
     virtual ~Device() {};
-
-    virtual void increaseValue();
-    virtual void decreaseValue();
 
     void enable();
     void disable();
@@ -630,9 +627,6 @@ namespace dss {
     /** Returns the id of the group */
     int getID() const;
     int getZoneID() const;
-
-    virtual void increaseValue();
-    virtual void decreaseValue();
 
     virtual void startDim(bool _directionUp, const int _parameterNr = -1);
     virtual void endDim(const int _parameterNr = -1);

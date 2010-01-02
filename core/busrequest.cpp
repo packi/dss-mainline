@@ -166,6 +166,14 @@ namespace dss {
       m_FunctionIDForGroup = _value;
     }
 
+    virtual int getNumberOfParameter() {
+      return 0;
+    }
+
+    virtual uint16_t getParameter(int _parameter) {
+      throw std::out_of_range("_parameter out of range");
+    }
+
   private:
     void determineTypeOfTarget() {
       PhysicalModelItem* pTarget = ((CommandBusRequest*)getRequest())->getTarget();
@@ -226,5 +234,19 @@ namespace dss {
     result->setFunctionIDForGroup(FunctionGroupUndoScene);
     return result;
   } // getBuilderHints
-  
+
+  PacketBuilderHintsBase* IncreaseValueCommandBusRequest::getBuilderHints() {
+    CommandBusRequestPacketBuilderHints* result = new CommandBusRequestPacketBuilderHints(this);
+    result->setFunctionIDForDevice(FunctionDeviceIncreaseValue);
+    result->setFunctionIDForGroup(FunctionGroupIncreaseValue);
+    return result;
+  } // getBuilderHints
+
+  PacketBuilderHintsBase* DecreaseValueCommandBusRequest::getBuilderHints() {
+    CommandBusRequestPacketBuilderHints* result = new CommandBusRequestPacketBuilderHints(this);
+    result->setFunctionIDForDevice(FunctionDeviceDecreaseValue);
+    result->setFunctionIDForGroup(FunctionGroupDecreaseValue);
+    return result;
+  } // getBuilderHints
+ 
 } // namespace dss

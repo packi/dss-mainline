@@ -80,13 +80,19 @@ namespace dss {
   : m_pApartment(_pApartment)
   {} // ctor
  
- /*
-  void increaseValue() {
+ 
+  void AddressableModelItem::increaseValue() {
+    boost::shared_ptr<IncreaseValueCommandBusRequest> request(new IncreaseValueCommandBusRequest());
+    request->setTarget(this);
+    m_pApartment->dispatchRequest(request);
   }
   
-  void decreaseValue() {
+  void AddressableModelItem::decreaseValue() {
+    boost::shared_ptr<DecreaseValueCommandBusRequest> request(new DecreaseValueCommandBusRequest());
+    request->setTarget(this);
+    m_pApartment->dispatchRequest(request);
   }
-
+/*
   void startDim(const bool _directionUp, const int _parameterNr = -1) {
   }
   void endDim(const int _parameterNr = -1);
@@ -150,14 +156,6 @@ namespace dss {
       }
     }
   } // publishToPropertyTree
-
-  void Device::increaseValue() {
-    m_pApartment->sendCommand(cmdIncreaseValue, *this);
-  } // increaseValue
-
-  void Device::decreaseValue() {
-    m_pApartment->sendCommand(cmdDecreaseValue, *this);
-  } // decreaseValue
 
   void Device::enable() {
     boost::shared_ptr<EnableDeviceCommandBusRequest> request(new EnableDeviceCommandBusRequest());
@@ -2067,14 +2065,6 @@ namespace dss {
   Set Group::getDevices() const {
     return m_pApartment->getDevices().getByZone(m_ZoneID).getByGroup(m_GroupID);
   } // getDevices
-
-  void Group::increaseValue() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseValue, m_pApartment->getZone(m_ZoneID), m_GroupID);
-  } // increaseValue
-
-  void Group::decreaseValue() {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseValue, m_pApartment->getZone(m_ZoneID), m_GroupID);
-  } // decreaseValue
 
   void Group::startDim(bool _directionUp, const int _parameterNr)  {
     if(_directionUp) {

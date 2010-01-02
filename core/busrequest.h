@@ -89,6 +89,15 @@ namespace dss {
   class UndoSceneCommandBusRequest : public SceneCommandBusRequest {
     virtual PacketBuilderHintsBase* getBuilderHints();
   };
+
+  class IncreaseValueCommandBusRequest : public CommandBusRequest {
+    virtual PacketBuilderHintsBase* getBuilderHints();
+  };
+
+  class DecreaseValueCommandBusRequest : public CommandBusRequest {
+    virtual PacketBuilderHintsBase* getBuilderHints();
+  };
+
 }
 
 #endif // BUSREQUEST_H
