@@ -81,10 +81,10 @@ namespace dss {
   {} // ctor
  
  /*
-  void increaseValue(const int _parameterNr) {
+  void increaseValue() {
   }
   
-  void decreaseValue(const int _parameterNr) {
+  void decreaseValue() {
   }
 
   void startDim(const bool _directionUp, const int _parameterNr = -1) {
@@ -151,20 +151,12 @@ namespace dss {
     }
   } // publishToPropertyTree
 
-  void Device::increaseValue(const int _parameterNr) {
-    if(_parameterNr == -1) {
-      m_pApartment->sendCommand(cmdIncreaseValue, *this);
-    } else {
-      m_pApartment->sendCommand(cmdIncreaseParam, *this);
-    }
+  void Device::increaseValue() {
+    m_pApartment->sendCommand(cmdIncreaseValue, *this);
   } // increaseValue
 
-  void Device::decreaseValue(const int _parameterNr) {
-    if(_parameterNr == -1) {
-      m_pApartment->sendCommand(cmdDecreaseValue, *this);
-    } else {
-      m_pApartment->sendCommand(cmdDecreaseParam, *this);
-    }
+  void Device::decreaseValue() {
+    m_pApartment->sendCommand(cmdDecreaseValue, *this);
   } // decreaseValue
 
   void Device::enable() {
@@ -396,20 +388,12 @@ namespace dss {
     m_ContainedDevices = _copy.m_ContainedDevices;
   }
 
-  void Set::increaseValue(const int _parameterNr) {
-    if(_parameterNr == -1) {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseValue, *this);
-    } else {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseParam, *this);
-    }
+  void Set::increaseValue() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseValue, *this);
   } // increaseValue
 
-  void Set::decreaseValue(const int _parameterNr) {
-    if(_parameterNr == -1) {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseValue, *this);
-    } else {
-      DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseParam, *this);
-    }
+  void Set::decreaseValue() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseValue, *this);
   } // decreaseValue
 
   void Set::startDim(bool _directionUp, const int _parameterNr) {
@@ -2017,12 +2001,12 @@ namespace dss {
     return find(m_Modulators.begin(), m_Modulators.end(), &_modulator) != m_Modulators.end();
   } // registeredOnModulator
 
-  void Zone::increaseValue(const int _parameterNr) {
-    getGroup(GroupIDBroadcast)->increaseValue(_parameterNr);
+  void Zone::increaseValue() {
+    getGroup(GroupIDBroadcast)->increaseValue();
   } // increaseValue
 
-  void Zone::decreaseValue(const int _parameterNr) {
-    getGroup(GroupIDBroadcast)->decreaseValue(_parameterNr);
+  void Zone::decreaseValue() {
+    getGroup(GroupIDBroadcast)->decreaseValue();
   } // decreaseValue
 
   void Zone::startDim(const bool _directionUp, const int _parameterNr) {
@@ -2084,12 +2068,12 @@ namespace dss {
     return m_pApartment->getDevices().getByZone(m_ZoneID).getByGroup(m_GroupID);
   } // getDevices
 
-  void Group::increaseValue(const int _parameterNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseValue, m_pApartment->getZone(m_ZoneID), m_GroupID, _parameterNr);
+  void Group::increaseValue() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdIncreaseValue, m_pApartment->getZone(m_ZoneID), m_GroupID);
   } // increaseValue
 
-  void Group::decreaseValue(const int _parameterNr) {
-    DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseValue, m_pApartment->getZone(m_ZoneID), m_GroupID, _parameterNr);
+  void Group::decreaseValue() {
+    DSS::getInstance()->getDS485Interface().sendCommand(cmdDecreaseValue, m_pApartment->getZone(m_ZoneID), m_GroupID);
   } // decreaseValue
 
   void Group::startDim(bool _directionUp, const int _parameterNr)  {
@@ -2173,12 +2157,12 @@ namespace dss {
     return getDevice().getName();
   } //getName
 
-  void DeviceReference::increaseValue(const int _parameterNr) {
-    getDevice().increaseValue(_parameterNr);
+  void DeviceReference::increaseValue() {
+    getDevice().increaseValue();
   } // increaseValue
 
-  void DeviceReference::decreaseValue(const int _parameterNr) {
-    getDevice().decreaseValue(_parameterNr);
+  void DeviceReference::decreaseValue() {
+    getDevice().decreaseValue();
   } // decreaseValue
 
   void DeviceReference::enable() {

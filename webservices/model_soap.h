@@ -63,12 +63,10 @@ int dss__ApartmentGetZoneIDs(int _token, std::vector<int>& zoneIDs);
 int dss__SetTurnOn(int _token, char* _setSpec, bool& result);
 /** Sends a turn off command to all devices contained in the set */
 int dss__SetTurnOff(int _token, char* _setSpec, bool& result);
-/** Increases the param described by _paramID for each device contained in the set. If _paramID
- *  == -1 the default parameter will be increased. */
-int dss__SetIncreaseValue(int _token, char* _setSpec, int _paramID, bool& result);
-/** Decreases the param described by _paramID for each device contained in the set. If _paramID
- *  == -1 the default parameter will be decreased. */
-int dss__SetDecreaseValue(int _token, char* _setSpec, int _paramID, bool& result);
+/** Increases the main value (e.g. brightness) for each device contained in the set. */
+int dss__SetIncreaseValue(int _token, char* _setSpec, bool& result);
+/** Decreases the main value (e.g. brightness) for each device contained in the set. */
+int dss__SetDecreaseValue(int _token, char* _setSpec, bool& result);
 
 /** Starts dimming the given parameter on all devices contained in the set. If _directionUp is
  * true, the dimming will increase the parameter specified by _paramID. If _paramID == -1 the
@@ -91,12 +89,10 @@ int dss__SetSaveScene(int _token, char* _setSpec, int _sceneNr, bool& result);
 int dss__ApartmentTurnOn(int _token, int _groupID, bool& result);
 /** Sends a turn off command to all devices contained in the group */
 int dss__ApartmentTurnOff(int _token, int _groupID, bool& result);
-/** Increases the param described by _paramID for each device contained in the group. If _paramID
- *  == -1 the default parameter will be increased. */
-int dss__ApartmentIncreaseValue(int _token, int _groupID, int _paramID, bool& result);
-/** Decreases the param described by _paramID for each device contained in the group. If _paramID
- *  == -1 the default parameter will be decreased. */
-int dss__ApartmentDecreaseValue(int _token, int _groupID, int _paramID, bool& result);
+/** Increases the main value (e.g. brightness) for each device contained in the group. */
+int dss__ApartmentIncreaseValue(int _token, int _groupID, bool& result);
+/** Decreases the main value (e.g. brightness) for each device contained in the group. */
+int dss__ApartmentDecreaseValue(int _token, int _groupID, bool& result);
 
 /** Starts dimming the given parameter on all devices contained in the group. If _directionUp is
  * true, the dimming will increase the parameter specified by _paramID. If _paramID == -1 the
@@ -126,12 +122,10 @@ int dss__CircuitRescan(int _token, char* _dsid, bool& result);
 int dss__ZoneTurnOn(int _token, int _zoneID, int _groupID, bool& result);
 /** Sends a turn off command to all devices contained in the group */
 int dss__ZoneTurnOff(int _token, int _zoneID, int _groupID, bool& result);
-/** Increases the param described by _paramID for each device contained in the zone/group. If _paramID
- *  == -1 the default parameter will be increased. */
-int dss__ZoneIncreaseValue(int _token, int _zoneID, int _groupID, int _paramID, bool& result);
-/** Decreases the param described by _paramID for each device contained in the zone/group. If _paramID
- *  == -1 the default parameter will be decreased. */
-int dss__ZoneDecreaseValue(int _token, int _zoneID, int _groupID, int _paramID, bool& result);
+/** Increases the main value (e.g. brightness) for each device contained in the zone/group. */
+int dss__ZoneIncreaseValue(int _token, int _zoneID, int _groupID, bool& result);
+/** Decreases the main value (e.g. brightness) for each device contained in the zone/group. */
+int dss__ZoneDecreaseValue(int _token, int _zoneID, int _groupID, bool& result);
 
 /** Starts dimming the given parameter on all devices contained in the group/zone. If _directionUp is
  * true, the dimming will increase the parameter specified by _paramID. If _paramID == -1 the
@@ -154,12 +148,10 @@ int dss__ZoneSaveScene(int _token, int _zoneID, int _groupID, int _sceneNr, bool
 int dss__DeviceTurnOn(int _token, char* _deviceID, bool& result);
 /** Sends a turn off command to the device. */
 int dss__DeviceTurnOff(int _token, char* _deviceID, bool& result);
-/** Increases the parameter specified by _paramID on the device. If _paramID == -1
- * the default parameter will be increased */
-int dss__DeviceIncreaseValue(int _token, char* _deviceID, int _paramID, bool& result);
-/** Decreases the parameter specified by _paramID on the device. If _paramID == -1
- * the default parameter will be decreased */
-int dss__DeviceDecreaseValue(int _token, char* _deviceID, int _paramID, bool& result);
+/** Increases the main value (e.g. brightness) on the device. */
+int dss__DeviceIncreaseValue(int _token, char* _deviceID, bool& result);
+/** Decreases the main value (e.g. brightness) on the device. */
+int dss__DeviceDecreaseValue(int _token, char* _deviceID, bool& result);
 /** Enables the device. */
 int dss__DeviceEnable(int _token, char* _deviceID, bool& result);
 /** Disables the device. */

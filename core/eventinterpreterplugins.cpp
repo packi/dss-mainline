@@ -238,12 +238,6 @@ namespace dss {
           } else if(typeName == "decreaseValue") {
             result->setCommand(cmdDecreaseValue);
             paramName = "parameter";
-          } else if(typeName == "increaseParameter") {
-            result->setCommand(cmdIncreaseParam);
-            paramName = "parameter";
-          } else if(typeName == "decreaseParameter") {
-            result->setCommand(cmdDecreaseParam);
-            paramName = "parameter";
           } else {
             Logger::getInstance()->log(std::string("unknown command: ") + typeName);
             delete result;
@@ -296,8 +290,7 @@ namespace dss {
 
       if(cmd == cmdCallScene || cmd == cmdSaveScene || cmd == cmdUndoScene) {
         m_pInterface->sendCommand(cmd, to, options->getSceneIndex());
-      } else if(cmd == cmdIncreaseParam || cmd == cmdDecreaseParam ||
-                cmd == cmdIncreaseValue || cmd == cmdDecreaseValue ||
+      } else if(cmd == cmdIncreaseValue || cmd == cmdDecreaseValue ||
                 cmd == cmdStartDimUp || cmd == cmdStartDimDown || cmd == cmdStopDim)
       {
         m_pInterface->sendCommand(cmd, to, options->getParameterIndex());

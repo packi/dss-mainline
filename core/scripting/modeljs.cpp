@@ -441,12 +441,7 @@ namespace dss {
     ScriptObject self(obj, *ctx);
     if(self.is("set") || self.is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      if(argc == 0) {
-        intf->increaseValue();
-      } else if(argc >= 1) {
-        int parameterNr = ctx->convertTo<int>(argv[0]);
-        intf->increaseValue(parameterNr);
-      }
+      intf->increaseValue();
       *rval = INT_TO_JSVAL(0);
       return JS_TRUE;
     }
@@ -459,12 +454,7 @@ namespace dss {
     ScriptObject self(obj, *ctx);
     if(self.is("set") || self.is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      if(argc == 0) {
-        intf->decreaseValue();
-      } else if(argc >= 1) {
-        int parameterNr = ctx->convertTo<int>(argv[0]);
-        intf->decreaseValue(parameterNr);
-      }
+      intf->decreaseValue();
       *rval = INT_TO_JSVAL(0);
       return JS_TRUE;
     }

@@ -57,8 +57,6 @@ namespace dss {
     cmdUndoScene,
     cmdIncreaseValue,
     cmdDecreaseValue,
-    cmdIncreaseParam,
-    cmdDecreaseParam,
     cmdGetOnOff,
     cmdGetValue,
     cmdSetValue,
@@ -106,11 +104,11 @@ namespace dss {
     /** Increases the value of the given parameter by one,
      * If no parameter gets passed, it will increase the default value of the device(s).
      */
-    virtual void increaseValue(const int _parameterNr = -1) = 0;
+    virtual void increaseValue() = 0;
     /** Decreases the value of the given parameter by one.
      * If no parameter gets passed, it will decrease the default value of the device(s).
      */
-    virtual void decreaseValue(const int _parameterNr = -1) = 0;
+    virtual void decreaseValue() = 0;
 
     /** Starts dimming the given parameter.
      * If _directionUp is true, the value gets increased over time. Else its getting decreased.
@@ -155,8 +153,8 @@ namespace dss {
     AddressableModelItem(Apartment* _pApartment);
     
 /*
-    virtual void increaseValue(const int _parameterNr = -1);
-    virtual void decreaseValue(const int _parameterNr = -1);
+    virtual void increaseValue();
+    virtual void decreaseValue();
 
     virtual void startDim(const bool _directionUp, const int _parameterNr = -1);
     virtual void endDim(const int _parameterNr = -1);
@@ -212,8 +210,8 @@ namespace dss {
      * @note This will lookup the device. */
     std::string getName() const;
 
-    virtual void increaseValue(const int _parameterNr = -1);
-    virtual void decreaseValue(const int _parameterNr = -1);
+    virtual void increaseValue();
+    virtual void decreaseValue();
 
     void enable();
     void disable();
@@ -271,8 +269,8 @@ namespace dss {
     Device(const dsid_t _dsid, Apartment* _pApartment);
     virtual ~Device() {};
 
-    virtual void increaseValue(const int _parameterNr = -1);
-    virtual void decreaseValue(const int _parameterNr = -1);
+    virtual void increaseValue();
+    virtual void decreaseValue();
 
     void enable();
     void disable();
@@ -421,8 +419,8 @@ namespace dss {
     Set(DeviceVector _devices);
     virtual ~Set() {};
 
-    virtual void increaseValue(const int _parameterNr = -1);
-    virtual void decreaseValue(const int _parameterNr = -1);
+    virtual void increaseValue();
+    virtual void decreaseValue();
 
     virtual void startDim(bool _directionUp, const int _parameterNr = -1);
     virtual void endDim(const int _parameterNr = -1);
@@ -638,8 +636,8 @@ namespace dss {
     int getID() const;
     int getZoneID() const;
 
-    virtual void increaseValue(const int _parameterNr = -1);
-    virtual void decreaseValue(const int _parameterNr = -1);
+    virtual void increaseValue();
+    virtual void decreaseValue();
 
     virtual void startDim(bool _directionUp, const int _parameterNr = -1);
     virtual void endDim(const int _parameterNr = -1);
@@ -739,8 +737,8 @@ namespace dss {
     std::vector<int> getModulators() const;
     bool registeredOnModulator(const Modulator& _modulator) const;
 
-    virtual void increaseValue(const int _parameterNr = -1);
-    virtual void decreaseValue(const int _parameterNr = -1);
+    virtual void increaseValue();
+    virtual void decreaseValue();
 
     virtual void startDim(bool _directionUp, const int _parameterNr = -1);
     virtual void endDim(const int _parameterNr = -1);

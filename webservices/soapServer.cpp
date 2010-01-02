@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.9l 2010-01-01 21:13:08 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.9l 2010-01-02 12:08:16 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -1038,7 +1038,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetIncreaseValue(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__SetIncreaseValue(soap, soap_tmp_dss__SetIncreaseValue._token, soap_tmp_dss__SetIncreaseValue._setSpec, soap_tmp_dss__SetIncreaseValue._paramID, soap_tmp_dss__SetIncreaseValueResponse.result);
+	soap->error = dss__SetIncreaseValue(soap, soap_tmp_dss__SetIncreaseValue._token, soap_tmp_dss__SetIncreaseValue._setSpec, soap_tmp_dss__SetIncreaseValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1079,7 +1079,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetDecreaseValue(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__SetDecreaseValue(soap, soap_tmp_dss__SetDecreaseValue._token, soap_tmp_dss__SetDecreaseValue._setSpec, soap_tmp_dss__SetDecreaseValue._paramID, soap_tmp_dss__SetDecreaseValueResponse.result);
+	soap->error = dss__SetDecreaseValue(soap, soap_tmp_dss__SetDecreaseValue._token, soap_tmp_dss__SetDecreaseValue._setSpec, soap_tmp_dss__SetDecreaseValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1407,7 +1407,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentIncreaseValue(struct soap *so
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__ApartmentIncreaseValue(soap, soap_tmp_dss__ApartmentIncreaseValue._token, soap_tmp_dss__ApartmentIncreaseValue._groupID, soap_tmp_dss__ApartmentIncreaseValue._paramID, soap_tmp_dss__ApartmentIncreaseValueResponse.result);
+	soap->error = dss__ApartmentIncreaseValue(soap, soap_tmp_dss__ApartmentIncreaseValue._token, soap_tmp_dss__ApartmentIncreaseValue._groupID, soap_tmp_dss__ApartmentIncreaseValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1448,7 +1448,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentDecreaseValue(struct soap *so
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__ApartmentDecreaseValue(soap, soap_tmp_dss__ApartmentDecreaseValue._token, soap_tmp_dss__ApartmentDecreaseValue._groupID, soap_tmp_dss__ApartmentDecreaseValue._paramID, soap_tmp_dss__ApartmentDecreaseValueResponse.result);
+	soap->error = dss__ApartmentDecreaseValue(soap, soap_tmp_dss__ApartmentDecreaseValue._token, soap_tmp_dss__ApartmentDecreaseValue._groupID, soap_tmp_dss__ApartmentDecreaseValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1858,7 +1858,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneIncreaseValue(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__ZoneIncreaseValue(soap, soap_tmp_dss__ZoneIncreaseValue._token, soap_tmp_dss__ZoneIncreaseValue._zoneID, soap_tmp_dss__ZoneIncreaseValue._groupID, soap_tmp_dss__ZoneIncreaseValue._paramID, soap_tmp_dss__ZoneIncreaseValueResponse.result);
+	soap->error = dss__ZoneIncreaseValue(soap, soap_tmp_dss__ZoneIncreaseValue._token, soap_tmp_dss__ZoneIncreaseValue._zoneID, soap_tmp_dss__ZoneIncreaseValue._groupID, soap_tmp_dss__ZoneIncreaseValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -1899,7 +1899,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneDecreaseValue(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__ZoneDecreaseValue(soap, soap_tmp_dss__ZoneDecreaseValue._token, soap_tmp_dss__ZoneDecreaseValue._zoneID, soap_tmp_dss__ZoneDecreaseValue._groupID, soap_tmp_dss__ZoneDecreaseValue._paramID, soap_tmp_dss__ZoneDecreaseValueResponse.result);
+	soap->error = dss__ZoneDecreaseValue(soap, soap_tmp_dss__ZoneDecreaseValue._token, soap_tmp_dss__ZoneDecreaseValue._zoneID, soap_tmp_dss__ZoneDecreaseValue._groupID, soap_tmp_dss__ZoneDecreaseValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2227,7 +2227,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceIncreaseValue(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__DeviceIncreaseValue(soap, soap_tmp_dss__DeviceIncreaseValue._token, soap_tmp_dss__DeviceIncreaseValue._deviceID, soap_tmp_dss__DeviceIncreaseValue._paramID, soap_tmp_dss__DeviceIncreaseValueResponse.result);
+	soap->error = dss__DeviceIncreaseValue(soap, soap_tmp_dss__DeviceIncreaseValue._token, soap_tmp_dss__DeviceIncreaseValue._deviceID, soap_tmp_dss__DeviceIncreaseValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
@@ -2268,7 +2268,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceDecreaseValue(struct soap *soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__DeviceDecreaseValue(soap, soap_tmp_dss__DeviceDecreaseValue._token, soap_tmp_dss__DeviceDecreaseValue._deviceID, soap_tmp_dss__DeviceDecreaseValue._paramID, soap_tmp_dss__DeviceDecreaseValueResponse.result);
+	soap->error = dss__DeviceDecreaseValue(soap, soap_tmp_dss__DeviceDecreaseValue._token, soap_tmp_dss__DeviceDecreaseValue._deviceID, soap_tmp_dss__DeviceDecreaseValueResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);

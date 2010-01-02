@@ -432,24 +432,24 @@ int dss__SetTurnOff(struct soap *soap, int _token, char* _setSpec, bool& result)
   return SOAP_OK;
 }
 
-int dss__SetIncreaseValue(struct soap *soap, int _token, char* _setSpec, int _paramID, bool& result) {
+int dss__SetIncreaseValue(struct soap *soap, int _token, char* _setSpec, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.increaseValue(_paramID);
+  set.increaseValue();
   result = true;
   return SOAP_OK;
 }
 
-int dss__SetDecreaseValue(struct soap *soap, int _token, char* _setSpec, int _paramID, bool& result) {
+int dss__SetDecreaseValue(struct soap *soap, int _token, char* _setSpec, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.decreaseValue(_paramID);
+  set.decreaseValue();
   result = true;
   return SOAP_OK;
 }
@@ -544,24 +544,24 @@ int dss__ApartmentTurnOff(struct soap *soap, int _token, int _groupID, bool& res
   return SOAP_OK;
 }
 
-int dss__ApartmentIncreaseValue(struct soap *soap, int _token, int _groupID, int _paramID, bool& result) {
+int dss__ApartmentIncreaseValue(struct soap *soap, int _token, int _groupID, bool& result) {
   dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group.increaseValue(_paramID);
+  group.increaseValue();
   result = true;
   return SOAP_OK;
 }
 
-int dss__ApartmentDecreaseValue(struct soap *soap, int _token, int _groupID, int _paramID, bool& result) {
+int dss__ApartmentDecreaseValue(struct soap *soap, int _token, int _groupID, bool& result) {
   dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group.decreaseValue(_paramID);
+  group.decreaseValue();
   result = true;
   return SOAP_OK;
 }
@@ -656,24 +656,24 @@ int dss__ZoneTurnOff(struct soap *soap, int _token, int _zoneID, int _groupID, b
   return SOAP_OK;
 }
 
-int dss__ZoneIncreaseValue(struct soap *soap, int _token, int _zoneID, int _groupID, int _paramID, bool& result) {
+int dss__ZoneIncreaseValue(struct soap *soap, int _token, int _zoneID, int _groupID, bool& result) {
   dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group.increaseValue(_paramID);
+  group.increaseValue();
   result = true;
   return SOAP_OK;
 }
 
-int dss__ZoneDecreaseValue(struct soap *soap, int _token, int _zoneID, int _groupID, int _paramID, bool& result) {
+int dss__ZoneDecreaseValue(struct soap *soap, int _token, int _zoneID, int _groupID, bool& result) {
   dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group.decreaseValue(_paramID);
+  group.decreaseValue();
   result = true;
   return SOAP_OK;
 }
@@ -768,24 +768,24 @@ int dss__DeviceTurnOff(struct soap *soap, int _token, char* _deviceID, bool& res
   return SOAP_OK;
 }
 
-int dss__DeviceIncreaseValue(struct soap *soap, int _token, char* _deviceID, int _paramID, bool& result) {
+int dss__DeviceIncreaseValue(struct soap *soap, int _token, char* _deviceID, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dev.increaseValue(_paramID);
+  dev.increaseValue();
   result = true;
   return SOAP_OK;
 }
 
-int dss__DeviceDecreaseValue(struct soap *soap, int _token, char* _deviceID, int _paramID, bool& result) {
+int dss__DeviceDecreaseValue(struct soap *soap, int _token, char* _deviceID, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dev.decreaseValue(_paramID);
+  dev.decreaseValue();
   result = true;
   return SOAP_OK;
 }
