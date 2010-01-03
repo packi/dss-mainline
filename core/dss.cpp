@@ -37,7 +37,7 @@
 #include "core/ds485/ds485busrequestdispatcher.h"
 #include "core/model/apartment.h"
 
-#include "webserver.h"
+#include "core/web/webserver.h"
 #ifdef WITH_BONJOUR
   #include "bonjour.h"
 #endif

@@ -20,19 +20,26 @@
 */
 
 #include "webserver.h"
-#include "logger.h"
-#include "dss.h"
-#include "event.h"
+
+#include <iostream>
+#include <sstream>
+
+#include <boost/shared_ptr.hpp>
+#include <boost/filesystem.hpp>
+
+#include "core/logger.h"
+#include "core/dss.h"
+#include "core/event.h"
 #include "core/ds485/ds485proxy.h"
-#include "sim/dssim.h"
-#include "propertysystem.h"
-#include "foreach.h"
+#include "core/sim/dssim.h"
+#include "core/propertysystem.h"
+#include "core/foreach.h"
 #include "core/web/restful.h"
 #include "core/web/restfulapiwriter.h"
-#include "metering/metering.h"
-#include "metering/series.h"
-#include "metering/seriespersistence.h"
-#include "web/webserverplugin.h"
+#include "core/metering/metering.h"
+#include "core/metering/series.h"
+#include "core/metering/seriespersistence.h"
+#include "core/web/webserverplugin.h"
 #include "core/setbuilder.h"
 #include "core/structuremanipulator.h"
 #include "core/model/modelevent.h"
@@ -45,12 +52,6 @@
 #include "core/model/zone.h"
 #include "core/model/group.h"
 #include "core/model/modulator.h"
-
-#include <iostream>
-#include <sstream>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/filesystem.hpp>
 
 namespace dss {
   //============================================= WebServer

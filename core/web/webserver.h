@@ -24,9 +24,9 @@
 
 #include <mongoose/mongoose.h>
 
-#include "base.h"
-#include "subsystem.h"
-#include "session.h"
+#include "core/base.h"
+#include "core/subsystem.h"
+#include "core/session.h"
 
 #include <string>
 
