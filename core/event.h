@@ -23,13 +23,16 @@
 #ifndef EVENT_H_
 #define EVENT_H_
 
-#include "model.h"
+#include "base.h"
+#include "datetools.h"
 #include "thread.h"
 #include "syncevent.h"
 #include "mutex.h"
+#include "subsystem.h"
 
 #include <string>
 #include <queue>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
@@ -47,6 +50,8 @@ namespace dss {
   class EventInterpreter;
   class ScheduledEvent;
   class EventRunner;
+  class Zone;
+  class DeviceReference;
 
   //================================================== Class definitions
 
@@ -286,8 +291,8 @@ namespace dss {
   class EventInterpreter : public Subsystem,
                            public Thread {
   private:
-    vector< boost::shared_ptr<EventSubscription> > m_Subscriptions;
-    vector<EventInterpreterPlugin*> m_Plugins;
+    std::vector< boost::shared_ptr<EventSubscription> > m_Subscriptions;
+    std::vector<EventInterpreterPlugin*> m_Plugins;
     EventQueue* m_Queue;
     EventRunner* m_EventRunner;
     int m_EventsProcessed;

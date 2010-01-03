@@ -35,6 +35,7 @@
 #include "eventinterpreterplugins.h"
 #include "core/ds485/ds485proxy.h"
 #include "core/ds485/ds485busrequestdispatcher.h"
+#include "core/model/apartment.h"
 
 #include "webserver.h"
 #ifdef WITH_BONJOUR

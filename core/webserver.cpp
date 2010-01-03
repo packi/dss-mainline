@@ -21,7 +21,6 @@
 
 #include "webserver.h"
 #include "logger.h"
-#include "model.h"
 #include "dss.h"
 #include "event.h"
 #include "core/ds485/ds485proxy.h"
@@ -36,6 +35,16 @@
 #include "web/webserverplugin.h"
 #include "core/setbuilder.h"
 #include "core/structuremanipulator.h"
+#include "core/model/modelevent.h"
+
+#include "core/model/apartment.h"
+#include "core/model/set.h"
+#include "core/model/device.h"
+#include "core/model/devicereference.h"
+#include "core/model/set.h"
+#include "core/model/zone.h"
+#include "core/model/group.h"
+#include "core/model/modulator.h"
 
 #include <iostream>
 #include <sstream>

@@ -24,8 +24,9 @@
 #include "core/dss.h"
 #include "core/propertysystem.h"
 #include "seriespersistence.h"
-#include "core/model.h"
 #include "core/foreach.h"
+#include "core/model/apartment.h"
+#include "core/model/modulator.h"
 
 #include <cmath>
 

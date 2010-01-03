@@ -23,12 +23,16 @@
 #ifndef SETBUILDER_H_
 #define SETBUILDER_H_
 
-#include "model.h"
-
 #include <string>
+
+#include "core/ds485types.h"
 
 namespace dss {
 
+  class Zone;
+  class Apartment;
+  class Set;
+  
   class SetBuilder {
   private:
     std::string m_SetDescription;

@@ -26,10 +26,6 @@
 #include "config.h"
 #endif
 
-#include <bitset>
-
-#include "core/model.h"
-
 #include "core/ds485types.h"
 #include "ds485.h"
 #include "core/syncevent.h"
@@ -59,6 +55,8 @@ using namespace stdext;
 namespace dss {
 
   class DS485Proxy;
+  class Apartment;
+  class ModelEvent;
 
   /** A ReceivedFrame stores a boost::shared_ptr to the frame as well as the token-counter
    *  of its arrival.

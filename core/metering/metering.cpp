@@ -27,6 +27,8 @@
 #include "core/propertysystem.h"
 #include "seriespersistence.h"
 #include "core/foreach.h"
+#include "core/model/modulator.h"
+#include "core/model/apartment.h"
 
 #include <boost/filesystem.hpp>
 
@@ -87,7 +89,7 @@ namespace dss {
       Timestamp checkingModulator;
       Timestamp startedLoading;
 #endif
-      vector<boost::shared_ptr<Series<CurrentValue> > > series;
+      std::vector<boost::shared_ptr<Series<CurrentValue> > > series;
       for(int iConfig = 0; iConfig < _config->size(); iConfig++) {
         // Load series from file
         std::string fileName = m_MeteringStorageLocation + (*ipModulator)->getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
@@ -117,7 +119,7 @@ namespace dss {
 #endif
 
       // stitch up chain
-      for(vector<boost::shared_ptr<Series<CurrentValue> > >::reverse_iterator iSeries = series.rbegin(), e = series.rend();
+      for(std::vector<boost::shared_ptr<Series<CurrentValue> > >::reverse_iterator iSeries = series.rbegin(), e = series.rend();
           iSeries != e; ++iSeries)
       {
         if(iSeries != series.rbegin()) {

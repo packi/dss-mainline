@@ -28,6 +28,11 @@
 #include "core/logger.h"
 #include "core/propertysystem.h"
 #include "core/DS485Interface.h"
+#include "core/model/device.h"
+#include "core/model/devicereference.h"
+#include "core/model/apartment.h"
+#include "core/model/set.h"
+
 
 namespace dss {
   const std::string ModelScriptcontextExtensionName = "modelextension";

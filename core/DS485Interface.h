@@ -24,7 +24,6 @@
 
 #include "ds485types.h"
 #include "core/ds485/ds485.h"
-#include "model.h"
 #include "base.h"
 
 #include <string>
@@ -33,6 +32,8 @@
 
 namespace dss {
 
+  class Device;
+  
 	typedef boost::tuple<int, int, int, std::string, int> ModulatorSpec_t; // bus-id, sw-version, hw-version, name, device-id
 
   class DeviceBusInterface {

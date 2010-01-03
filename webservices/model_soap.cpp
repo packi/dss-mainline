@@ -1,3 +1,7 @@
+#include <vector>
+#include <string>
+#include <boost/shared_ptr.hpp>
+
 #include "soapH.h"
 #include "core/dss.h"
 #include "core/logger.h"
@@ -7,10 +11,14 @@
 #include "core/propertysystem.h"
 #include "core/setbuilder.h"
 #include "core/foreach.h"
-
-#include <vector>
-#include <string>
-#include <boost/shared_ptr.hpp>
+#include "core/model/apartment.h"
+#include "core/model/set.h"
+#include "core/model/device.h"
+#include "core/model/devicereference.h"
+#include "core/model/set.h"
+#include "core/model/zone.h"
+#include "core/model/group.h"
+#include "core/model/modulator.h"
 
 inline dss::dsid_t FromSOAP(const char* _dsid) {
   dss::dsid_t result = dss::dsid_t::fromString(_dsid);
@@ -1062,11 +1070,11 @@ int dss__EventRaise(struct soap *soap, int _token, char* _eventName, char* _cont
       evt->setContext(_context);
     }
     if(_parameter != NULL && strlen(_parameter) > 0) {
-      vector<std::string> params = dss::splitString(_parameter, ';');
-      for(vector<std::string>::iterator iParam = params.begin(), e = params.end();
+      std::vector<std::string> params = dss::splitString(_parameter, ';');
+      for(std::vector<std::string>::iterator iParam = params.begin(), e = params.end();
           iParam != e; ++iParam)
       {
-        vector<std::string> nameValue = dss::splitString(*iParam, '=');
+        std::vector<std::string> nameValue = dss::splitString(*iParam, '=');
         if(nameValue.size() == 2) {
           dss::Logger::getInstance()->log("SOAP::eventRaise: Got parameter '" + nameValue[0] + "'='" + nameValue[1] + "'");
           evt->setProperty(nameValue[0], nameValue[1]);

@@ -21,10 +21,17 @@
 
 #include "busscanner.h"
 
+#include <vector>
+
 #include "core/DS485Interface.h"
-#include "core/model.h"
 #include "core/foreach.h"
 #include "core/ds485const.h"
+
+#include "modulator.h"
+#include "device.h"
+#include "group.h"
+#include "apartment.h"
+#include "zone.h"
 
 namespace dss {
   
@@ -41,7 +48,7 @@ namespace dss {
     int modulatorID = _modulator.getBusID();
 
     log("scanModulator: Start " + intToString(modulatorID) , lsInfo);
-    vector<int> zoneIDs;
+    std::vector<int> zoneIDs;
     try {
       zoneIDs = m_Interface.getZones(modulatorID);
     } catch(DS485ApiError& e) {
@@ -81,7 +88,7 @@ namespace dss {
         zone.setFirstZoneOnModulator(modulatorID);
         firstZone = false;
       }
-      vector<int> devices;
+      std::vector<int> devices;
       try {
         devices = m_Interface.getDevicesInZone(modulatorID, zoneID);
       } catch(DS485ApiError& e) {
@@ -114,7 +121,7 @@ namespace dss {
         dev.setFunctionID(functionID);
 
         std::vector<int> groupIdperDevices = m_Interface.getGroupsOfDevice(modulatorID, devID);
-        vector<int> groupIDsPerDevice = m_Interface.getGroupsOfDevice(modulatorID,devID);
+        std::vector<int> groupIDsPerDevice = m_Interface.getGroupsOfDevice(modulatorID,devID);
         foreach(int groupID, groupIDsPerDevice) {
           log(std::string("scanModulator: adding device ") + intToString(devID) + " to group " + intToString(groupID));
           dev.addToGroup(groupID);
@@ -125,7 +132,7 @@ namespace dss {
         _modulator.addDevice(devRef);
         dev.setIsPresent(true);
       }
-      vector<int> groupIDs;
+      std::vector<int> groupIDs;
       try {
         groupIDs = m_Interface.getGroups(modulatorID, zoneID);
       } catch(DS485ApiError& e) {

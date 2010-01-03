@@ -23,10 +23,16 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include "../core/event.h"
-#include "../core/eventinterpreterplugins.h"
-#include "../core/setbuilder.h"
-#include "../core/sim/dssim.h"
+#include "core/event.h"
+#include "core/eventinterpreterplugins.h"
+#include "core/setbuilder.h"
+#include "core/sim/dssim.h"
+#include "core/model/apartment.h"
+#include "core/model/device.h"
+#include "core/model/devicereference.h"
+#include "core/model/zone.h"
+#include "core/model/group.h"
+#include "core/model/set.h"
 #include "core/ds485/ds485proxy.h"
 
 using namespace dss;

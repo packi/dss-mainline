@@ -18,7 +18,7 @@
 */
 
 #include "ds485busrequestdispatcher.h"
-#include "core/busrequest.h"
+#include "core/model/busrequest.h"
 #include "core/ds485/ds485.h"
 #include "core/foreach.h"
 #include "core/ds485const.h"

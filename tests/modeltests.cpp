@@ -23,7 +23,12 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include "core/model.h"
+#include "core/model/device.h"
+#include "core/model/apartment.h"
+#include "core/model/modulator.h"
+#include "core/model/devicereference.h"
+#include "core/model/zone.h"
+#include "core/model/set.h"
 #include "core/setbuilder.h"
 #include "core/ds485const.h"
 #include "core/ds485/ds485proxy.h"

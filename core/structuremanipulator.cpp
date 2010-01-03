@@ -7,8 +7,13 @@
 
 #include "structuremanipulator.h"
 
-#include "model.h"
 #include "DS485Interface.h"
+#include "mutex.h"
+#include "core/model/device.h"
+#include "core/model/apartment.h"
+#include "core/model/modulator.h"
+#include "core/model/zone.h"
+#include "core/model/set.h"
 
 #include <stdexcept>
 

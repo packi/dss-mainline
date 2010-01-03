@@ -19,8 +19,9 @@
 */
 
 #include "busrequest.h"
-#include "core/model.h"
 #include "core/ds485const.h"
+#include "core/model/device.h"
+#include "core/model/group.h"
 
 #include <cassert>
 

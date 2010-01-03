@@ -8,7 +8,7 @@ add_executable( dsstests EXCLUDE_FROM_ALL testrunner.cpp ../namespaces.cpp
         propertysystemtests.cpp  scriptstest.cpp busrequesttests.cpp
 	seriestests.cpp jshandlertests.cpp)
 
-target_link_libraries(dsstests ${BOOST_TEST_LIB} core ds485 unix webservices 
+target_link_libraries(dsstests ${BOOST_TEST_LIB} core ds485 unix webservices model
 	pthread mongoose ${REQUIRED_LIBS})
 
 add_custom_target( test

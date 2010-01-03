@@ -5,7 +5,6 @@
 #include "core/base.h"
 #include "core/datetools.h" 
 #include "core/dss.h" 
-#include "core/model.h" 
 #include "core/ds485client.h" 
 #include "unix/ds485.h" 
 #include "core/ds485const.h" 

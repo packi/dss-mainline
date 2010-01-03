@@ -22,10 +22,11 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include "core/busrequest.h"
-#include "core/model.h"
+#include "core/model/busrequest.h"
 #include "core/ds485const.h"
 #include "core/busrequestdispatcher.h"
+#include "core/model/apartment.h"
+#include "core/model/device.h"
 
 using namespace dss;
 

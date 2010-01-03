@@ -20,11 +20,16 @@
 */
 
 #include "setbuilder.h"
-#include "base.h"
 
 #include <vector>
 #include <stdexcept>
 #include <cassert>
+
+#include "base.h"
+#include "core/model/set.h"
+#include "core/model/zone.h"
+#include "core/model/apartment.h"
+#include "core/model/group.h"
 
 using std::vector;
 

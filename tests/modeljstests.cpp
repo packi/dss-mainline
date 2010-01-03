@@ -27,6 +27,8 @@
 #include "core/event.h"
 #include "core/eventinterpreterplugins.h"
 #include "core/propertysystem.h"
+#include "core/model/apartment.h"
+#include "core/model/device.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <memory>

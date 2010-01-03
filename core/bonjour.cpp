@@ -23,7 +23,6 @@
 #include "bonjour.h"
 #include "core/propertysystem.h"
 #include "core/dss.h"
-#include "core/model.h"
 #include "core/base.h"
 
 #include <arpa/inet.h>

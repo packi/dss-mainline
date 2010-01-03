@@ -27,11 +27,14 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include "core/jshandler.h"
-#include "core/model.h"
 #include "core/event.h"
 #include "core/propertysystem.h"
 
 namespace dss {
+
+  class Set;
+  class Device;
+  class Apartment;
 
   /** This class extends a ScriptContext to contain the JS-API of the Apartment */
   class ModelScriptContextExtension : public ScriptExtension {

@@ -1,7 +1,6 @@
 #ifndef WEBSERVICES_H_
 #define WEBSERVICES_H_
 
-#include "core/model.h"
 #include "webservices/soapdssObject.h"
 #include "core/thread.h"
 #include "core/datetools.h"

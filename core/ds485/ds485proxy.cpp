@@ -21,13 +21,16 @@
 
 #include "ds485proxy.h"
 
-#include "core/model.h"
 #include "core/dss.h"
 #include "core/logger.h"
 #include "core/ds485const.h"
 #include "core/event.h"
 #include "core/propertysystem.h"
 #include "core/foreach.h"
+
+#include "core/model/modelevent.h"
+#include "core/model/device.h"
+#include "core/model/apartment.h"
 
 #ifdef WITH_SIM
 #include "core/sim/dssim.h"

@@ -32,6 +32,8 @@
 #include "dss.h"
 #include "scripting/modeljs.h"
 #include "core/foreach.h"
+#include "core/model/set.h"
+#include "core/model/zone.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/filesystem.hpp>

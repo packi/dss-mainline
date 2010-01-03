@@ -22,12 +22,15 @@
 
 #include "event.h"
 
-#include "base.h"
 #include "logger.h"
 #include "dss.h"
 #include "propertysystem.h"
 
 #include "foreach.h"
+#include "core/model/apartment.h"
+#include "core/model/device.h"
+#include "core/model/devicereference.h"
+#include "core/model/set.h"
 
 #include <set>
 #include <iostream>
@@ -237,7 +240,7 @@ namespace dss {
             Logger::getInstance()->log("EventInterpreter:  Parameter '" + iParam->first + "' = '" + iParam->second + "'");
           }
 
-          for(vector< boost::shared_ptr<EventSubscription> >::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
+          for(std::vector< boost::shared_ptr<EventSubscription> >::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
               ipSubscription != e; ++ipSubscription)
           {
             if((*ipSubscription)->matches(*toProcess)) {
@@ -268,7 +271,7 @@ namespace dss {
   } // execute
 
   EventInterpreterPlugin* EventInterpreter::getPluginByName(const std::string& _name) {
-    for(vector<EventInterpreterPlugin*>::iterator ipPlugin = m_Plugins.begin(), e = m_Plugins.end();
+    for(std::vector<EventInterpreterPlugin*>::iterator ipPlugin = m_Plugins.begin(), e = m_Plugins.end();
         ipPlugin != e; ++ipPlugin)
     {
       if((*ipPlugin)->getName() == _name) {
@@ -285,7 +288,7 @@ namespace dss {
   } // subscribe
 
   void EventInterpreter::unsubscribe(const std::string& _subscriptionID) {
-    for(vector< boost::shared_ptr<EventSubscription> >::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
+    for(std::vector< boost::shared_ptr<EventSubscription> >::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
         ipSubscription != e; ++ipSubscription)
     {
       if((*ipSubscription)->getID() == _subscriptionID) {
@@ -297,7 +300,7 @@ namespace dss {
 
   boost::shared_ptr<EventSubscription> EventInterpreter::subscriptionByID(const std::string& _subscriptionID) {
     boost::shared_ptr<EventSubscription> result;
-    for(vector< boost::shared_ptr<EventSubscription> >::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
+    for(std::vector< boost::shared_ptr<EventSubscription> >::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
         ipSubscription != e; ++ipSubscription)
     {
       if((*ipSubscription)->getID() == _subscriptionID) {
