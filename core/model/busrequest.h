@@ -24,6 +24,8 @@
 
 #include <stdint.h>
 
+#include <boost/shared_ptr.hpp>
+
 namespace dss {
   class AddressableModelItem;
   class Device;
@@ -43,7 +45,7 @@ namespace dss {
 
   class BusRequest {
   public:
-    virtual PacketBuilderHintsBase* getBuilderHints() = 0;
+    virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints() = 0;
     virtual ~BusRequest() {}; // please the compiler (virtual dtor)
   };
 
@@ -65,12 +67,12 @@ namespace dss {
   
   class EnableDeviceCommandBusRequest : public DeviceCommandBusRequest {
   public:
-    virtual PacketBuilderHintsBase* getBuilderHints();
+    virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   };
 
   class DisableDeviceCommandBusRequest : public DeviceCommandBusRequest {
   public:
-    virtual PacketBuilderHintsBase* getBuilderHints();
+    virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   };
 
   class SceneCommandBusRequest : public CommandBusRequest {
@@ -83,35 +85,35 @@ namespace dss {
 
   class CallSceneCommandBusRequest : public SceneCommandBusRequest {
   public:
-    virtual PacketBuilderHintsBase* getBuilderHints();
+    virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   };
 
   class SaveSceneCommandBusRequest : public SceneCommandBusRequest {
-    virtual PacketBuilderHintsBase* getBuilderHints();
+    virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   };
   
   class UndoSceneCommandBusRequest : public SceneCommandBusRequest {
-    virtual PacketBuilderHintsBase* getBuilderHints();
+    virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   };
 
   class IncreaseValueCommandBusRequest : public CommandBusRequest {
-    virtual PacketBuilderHintsBase* getBuilderHints();
+    virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   };
 
   class DecreaseValueCommandBusRequest : public CommandBusRequest {
-    virtual PacketBuilderHintsBase* getBuilderHints();
+    virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   };
 
   class StartDimUpCommandBusRequest : public CommandBusRequest {
-    virtual PacketBuilderHintsBase* getBuilderHints();
+    virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   };
   
   class StartDimDownCommandBusRequest : public CommandBusRequest {
-    virtual PacketBuilderHintsBase* getBuilderHints();
+    virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   };
 
   class EndDimCommandBusRequest : public CommandBusRequest {
-    virtual PacketBuilderHintsBase* getBuilderHints();
+    virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   };
 
   class SetValueCommandBusRequest : public CommandBusRequest {
@@ -124,7 +126,7 @@ namespace dss {
       return m_Value;
     }
   private:
-    virtual PacketBuilderHintsBase* getBuilderHints();
+    virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   private:
     uint16_t m_Value;
   };

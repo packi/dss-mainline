@@ -1377,7 +1377,7 @@ namespace dss {
           if(boost::filesystem::exists(seriesPath)) {
             SeriesReader<CurrentValue> reader;
             boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(seriesPath));
-            std::deque<CurrentValue>* values = s->getExpandedValues();
+            boost::shared_ptr<std::deque<CurrentValue> > values = s->getExpandedValues();
             bool first = true;
             std::ostringstream sstream;
             sstream << "{ " ;
@@ -1394,7 +1394,6 @@ namespace dss {
               sstream << "[" << iValue->getTimeStamp().secondsSinceEpoch()  << "," << iValue->getValue() << "]";
             }
             sstream << "]}";
-            delete values;
             return JSONOk(sstream.str());
           } else {
             return ResultToJSON(false, "No data-file for '" + typeString + "' and resolution '" + resolutionString + "'");

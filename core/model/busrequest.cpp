@@ -90,16 +90,16 @@ namespace dss {
     uint16_t m_FunctionID;
   };
 
-  PacketBuilderHintsBase* EnableDeviceCommandBusRequest::getBuilderHints() {
+  boost::shared_ptr<PacketBuilderHintsBase> EnableDeviceCommandBusRequest::getBuilderHints() {
     DeviceCommandPacketBuilderHints* result = new DeviceCommandPacketBuilderHints(this);
     result->setFunctionID(FunctionDeviceEnable);
-    return result;
+    return boost::shared_ptr<PacketBuilderHintsBase>(result);
   }
 
-  PacketBuilderHintsBase* DisableDeviceCommandBusRequest::getBuilderHints() {
+  boost::shared_ptr<PacketBuilderHintsBase> DisableDeviceCommandBusRequest::getBuilderHints() {
     DeviceCommandPacketBuilderHints* result = new DeviceCommandPacketBuilderHints(this);
     result->setFunctionID(FunctionDeviceDisable);
-    return result;
+    return boost::shared_ptr<PacketBuilderHintsBase>(result);
   }
   
   class CommandBusRequestPacketBuilderHints : public PacketBuilderHints {
@@ -220,68 +220,68 @@ namespace dss {
     }
   };
   
-  PacketBuilderHintsBase* CallSceneCommandBusRequest::getBuilderHints() {
+  boost::shared_ptr<PacketBuilderHintsBase> CallSceneCommandBusRequest::getBuilderHints() {
     SceneCommandPacketBuilderHints* result = new SceneCommandPacketBuilderHints(this);
     result->setFunctionIDForDevice(FunctionDeviceCallScene);
     result->setFunctionIDForGroup(FunctionGroupCallScene);
-    return result;
+    return boost::shared_ptr<PacketBuilderHintsBase>(result);
   } // getBuilderHints
 
-  PacketBuilderHintsBase* SaveSceneCommandBusRequest::getBuilderHints() {
+  boost::shared_ptr<PacketBuilderHintsBase> SaveSceneCommandBusRequest::getBuilderHints() {
     SceneCommandPacketBuilderHints* result = new SceneCommandPacketBuilderHints(this);
     result->setFunctionIDForDevice(FunctionDeviceSaveScene);
     result->setFunctionIDForGroup(FunctionGroupSaveScene);
-    return result;
+    return boost::shared_ptr<PacketBuilderHintsBase>(result);
   } // getBuilderHints
 
-  PacketBuilderHintsBase* UndoSceneCommandBusRequest::getBuilderHints() {
+  boost::shared_ptr<PacketBuilderHintsBase> UndoSceneCommandBusRequest::getBuilderHints() {
     SceneCommandPacketBuilderHints* result = new SceneCommandPacketBuilderHints(this);
     result->setFunctionIDForDevice(FunctionDeviceUndoScene);
     result->setFunctionIDForGroup(FunctionGroupUndoScene);
-    return result;
+    return boost::shared_ptr<PacketBuilderHintsBase>(result);
   } // getBuilderHints
 
-  PacketBuilderHintsBase* IncreaseValueCommandBusRequest::getBuilderHints() {
+  boost::shared_ptr<PacketBuilderHintsBase> IncreaseValueCommandBusRequest::getBuilderHints() {
     CommandBusRequestPacketBuilderHints* result = new CommandBusRequestPacketBuilderHints(this);
     result->setFunctionIDForDevice(FunctionDeviceIncreaseValue);
     result->setFunctionIDForGroup(FunctionGroupIncreaseValue);
-    return result;
+    return boost::shared_ptr<PacketBuilderHintsBase>(result);
   } // getBuilderHints
 
-  PacketBuilderHintsBase* DecreaseValueCommandBusRequest::getBuilderHints() {
+  boost::shared_ptr<PacketBuilderHintsBase> DecreaseValueCommandBusRequest::getBuilderHints() {
     CommandBusRequestPacketBuilderHints* result = new CommandBusRequestPacketBuilderHints(this);
     result->setFunctionIDForDevice(FunctionDeviceDecreaseValue);
     result->setFunctionIDForGroup(FunctionGroupDecreaseValue);
-    return result;
+    return boost::shared_ptr<PacketBuilderHintsBase>(result);
   } // getBuilderHints
 
-  PacketBuilderHintsBase* StartDimUpCommandBusRequest::getBuilderHints() {
+  boost::shared_ptr<PacketBuilderHintsBase> StartDimUpCommandBusRequest::getBuilderHints() {
     CommandBusRequestPacketBuilderHints* result = new CommandBusRequestPacketBuilderHints(this);
     result->setFunctionIDForDevice(FunctionDeviceStartDimInc);
     result->setFunctionIDForGroup(FunctionGroupStartDimInc);
-    return result;
+    return boost::shared_ptr<PacketBuilderHintsBase>(result);
   } // getBuilderHints
 
-  PacketBuilderHintsBase* StartDimDownCommandBusRequest::getBuilderHints() {
+  boost::shared_ptr<PacketBuilderHintsBase> StartDimDownCommandBusRequest::getBuilderHints() {
     CommandBusRequestPacketBuilderHints* result = new CommandBusRequestPacketBuilderHints(this);
     result->setFunctionIDForDevice(FunctionDeviceStartDimDec);
     result->setFunctionIDForGroup(FunctionGroupStartDimDec);
-    return result;
+    return boost::shared_ptr<PacketBuilderHintsBase>(result);
   } // getBuilderHints
 
-  PacketBuilderHintsBase* EndDimCommandBusRequest::getBuilderHints() {
+  boost::shared_ptr<PacketBuilderHintsBase> EndDimCommandBusRequest::getBuilderHints() {
     CommandBusRequestPacketBuilderHints* result = new CommandBusRequestPacketBuilderHints(this);
     result->setFunctionIDForDevice(FunctionDeviceEndDim);
     result->setFunctionIDForGroup(FunctionGroupEndDim);
-    return result;
+    return boost::shared_ptr<PacketBuilderHintsBase>(result);
   } // getBuilderHints
 
-  PacketBuilderHintsBase* SetValueCommandBusRequest::getBuilderHints() {
+  boost::shared_ptr<PacketBuilderHintsBase> SetValueCommandBusRequest::getBuilderHints() {
     CommandBusRequestPacketBuilderHints* result = new CommandBusRequestPacketBuilderHints(this);
     result->setFunctionIDForDevice(FunctionDeviceSetValue);
     result->setFunctionIDForGroup(FunctionGroupSetValue);
     result->addParameter(m_Value);
-    return result;
+    return boost::shared_ptr<PacketBuilderHintsBase>(result);
   } // getBuilderHints
   
 } // namespace dss

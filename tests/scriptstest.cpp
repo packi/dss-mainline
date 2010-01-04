@@ -61,9 +61,9 @@ BOOST_AUTO_TEST_CASE(testMultipleIterations) {
 } // testMultipleIterations
 
 BOOST_AUTO_TEST_CASE(testExceptionHandling) {
-  ScriptEnvironment* env = new ScriptEnvironment();
+  boost::shared_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
-  ScriptContext* ctx = env->getContext();
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   try {
     ctx->evaluate<double>("x = {}; x.what = 'bla'; x.toString = function() { return 'bla'; }; throw x; x = 10;");
     BOOST_CHECK(false);

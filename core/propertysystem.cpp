@@ -271,6 +271,22 @@ namespace dss {
     {
       (*it)->alias(PropertyNodePtr());
     }
+    if(m_LinkedToProxy) {
+      m_LinkedToProxy = false;
+      switch(m_PropVal.valueType) {
+      case vTypeInteger:
+        delete m_Proxy.intProxy;
+        break;
+      case vTypeString:
+        delete m_Proxy.stringProxy;
+        break;
+      case vTypeBoolean:
+        delete m_Proxy.boolProxy;
+        break;
+      case vTypeNone:
+        break;
+      }
+    }
     // remove from alias targets list
     if(m_Aliased) {
       m_Aliased = false;

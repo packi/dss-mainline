@@ -371,7 +371,7 @@ unsigned int numberOfElements = 0;
   BOOST_CHECK_EQUAL( numberOfElements, N );
 
   /* test expanded values */
-  queue_type_ *queueExpanded = daily.getExpandedValues();
+  boost::shared_ptr<queue_type_> queueExpanded = daily.getExpandedValues();
   numberOfElements = 0;
   for (queue_type_::const_iterator iter = queueExpanded->begin();
        iter != queueExpanded->end();
@@ -485,9 +485,8 @@ BOOST_AUTO_TEST_CASE(expansion) {
     minutely.addValue(iValue, testStart.addMinute((iValue-1)*2));
   }
   
-  std::deque<AdderValue>* expanded = minutely.getExpandedValues();
+  boost::shared_ptr<std::deque<AdderValue> > expanded = minutely.getExpandedValues();
   BOOST_CHECK_EQUAL( (size_t)9, expanded->size() );
-  delete expanded;
 } // expansion
 
 BOOST_AUTO_TEST_CASE(expansionToPresent) {
@@ -502,12 +501,11 @@ BOOST_AUTO_TEST_CASE(expansionToPresent) {
     minutely.addValue(iValue, testStart.addMinute((iValue-1)*2));
   }
   
-  std::deque<AdderValue>* expanded = minutely.getExpandedValues();
+  boost::shared_ptr<std::deque<AdderValue> > expanded = minutely.getExpandedValues();
   BOOST_CHECK_EQUAL( (size_t)10, expanded->size() );
   for(std::deque<AdderValue>::iterator iValue = expanded->begin(), e = expanded->end(); iValue != e; iValue++) {
     BOOST_CHECK_EQUAL( (size_t)5, iValue->getValue() );
   }
-  delete expanded;
 } // expansion
 
 BOOST_AUTO_TEST_SUITE_END()

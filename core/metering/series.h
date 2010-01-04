@@ -259,8 +259,9 @@ namespace dss {
     const std::string& get(const std::string& _key) const { return m_Properties.get(_key); }
     const Properties& getProperties() const { return m_Properties; }
     
-    std::deque<value_type>* getExpandedValues() {
-      std::deque<value_type>* expandedQueue = new std::deque<value_type>;
+    boost::shared_ptr<std::deque<value_type> > getExpandedValues() {
+      boost::shared_ptr<std::deque<value_type> > result(new std::deque<value_type>);
+      std::deque<value_type>* expandedQueue = result.get();
       
       typename QueueType::iterator iValue = m_Values.begin(), e = m_Values.end();
 
@@ -278,7 +279,7 @@ namespace dss {
         }
         iCurrentTimeStamp = iCurrentTimeStamp.addSeconds(-m_Resolution);
       }
-      return expandedQueue;
+      return result;
     }
 
   }; // Series

@@ -30,7 +30,7 @@
 namespace dss {
 
   void DS485BusRequestDispatcher::dispatchRequest(boost::shared_ptr<BusRequest> _pRequest) {
-    PacketBuilderHintsBase* hints = _pRequest->getBuilderHints();
+    boost::shared_ptr<PacketBuilderHintsBase> hints = _pRequest->getBuilderHints();
     boost::shared_ptr<DS485CommandFrame> frame(new DS485CommandFrame());
     frame->getHeader().setBroadcast(hints->isBroadcast());
     frame->getHeader().setDestination(hints->getTarget());
