@@ -1,6 +1,7 @@
 /*
     Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
-    Copyright (c) 2009 futureLAB AG, Winterthur, Switzerland
+
+    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
     This file is part of digitalSTROM Server.
 
@@ -17,8 +18,6 @@
     You should have received a copy of the GNU General Public License
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 
-    Last change $Date: 2009-06-30 13:56:46 +0200 (Tue, 30 Jun 2009) $
-    by $Author: pstaehlin $
 */
 
 #ifndef RESTFUL_H_INCLUDED

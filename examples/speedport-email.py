@@ -2,7 +2,8 @@
 
 #
 #    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
-#    Copyright (c) 2009 aizo ag, Schlieren, Switzerland
+#
+#    Author: Roman Koehler, aizo ag
 #
 #    This file is part of digitalSTROM Server
 #

@@ -10,11 +10,11 @@ Upstream Author(s):
 
 Copyright:
 
-    Copyright (C) 2008, 2009 by digitalSTROM.org
+    Copyright (C) 2008 - 2010 by digitalSTROM.org
 
 License:
 
-    GPLv2
+    GPLv3
 
 The Debian packaging is copyright 2009, Johannes Winkelmann <johannes.winkelmann@aizo.com> and
 is licensed under the GPL, see `/usr/share/common-licenses/GPL'.

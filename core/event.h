@@ -1,7 +1,7 @@
 /*
     Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
-    Copyright (c) 2009 futureLAB AG, Winterthur, Switzerland
-    Copyright (c) 2008 Patrick Staehlin <me@packi.ch>
+
+    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
     This file is part of digitalSTROM Server.
 
