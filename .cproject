@@ -28,6 +28,7 @@
 <option id="gnu.cpp.compiler.option.preprocessor.preprocess.1231112907" name="Preprocess only (-E)" superClass="gnu.cpp.compiler.option.preprocessor.preprocess"/>
 <option id="gnu.cpp.compiler.option.preprocessor.def.701665023" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="XP_UNIX"/>
+<listOptionValue builtIn="false" value="HAVE_MOZJS_JSAPI_H"/>
 <listOptionValue builtIn="false" value="HAVE_STDINT"/>
 <listOptionValue builtIn="false" value="HAVE_LIBICAL_ICAL_H"/>
 <listOptionValue builtIn="false" value="USE_DNS_SD"/>
