@@ -139,6 +139,7 @@ namespace dss {
     const boost::ptr_vector<RestfulMethod>& getStaticMethods() const { return m_StaticMethods; }
     const std::string& getDocumentationShort() const { return m_DocumentationShort; }
     const std::string& getDocumentationLong() const { return m_DocumentationLong; }
+    bool hasMethod(const std::string& _name);
   }; // RestfulClass
 
   class RestfulAPI {
@@ -154,6 +155,8 @@ namespace dss {
     }
 
     const boost::ptr_vector<RestfulClass>& getClasses() const { return m_Classes; }
+
+    bool hasClass(const std::string& _name);
   }; // RestfulAPI
 
   class RestfulParameterType {
@@ -193,8 +196,47 @@ namespace dss {
   }; // RestfulParameterTypeInteger
 
   class RestfulRequest {
+  public:
+    RestfulRequest(const std::string& _request, const HashMapConstStringString& _parameter)
+    : m_Parameter(_parameter)
+    {
+      splitIntoMethodAndClass(_request);
+    }
+
+    const std::string& getClass() const {
+      return m_Class;
+    } // getClass
+
+    const std::string& getMethod() const {
+      return m_Method;
+    } // getMethod
+
+    const std::string& getParameter(const std::string& _name) const {
+      HashMapConstStringString::const_iterator iEntry = m_Parameter.find(_name);
+      if(iEntry != m_Parameter.end()) {
+        return iEntry->second;
+      } else {
+        return "";
+      }
+    } // getParameter
   private:
-  }; // RestfulRequest
+    void splitIntoMethodAndClass(const std::string& _request) {
+      size_t pos = _request.find('/');
+      m_Class = _request.substr(0, pos);
+      m_Method = _request.substr(pos+1, std::string::npos);
+    } // splitIntoMethodAndClass
+  private:
+    std::string m_Class;
+    std::string m_Method;
+    HashMapConstStringString m_Parameter;
+  };
+
+  class Session;
+  
+  class RestfulRequestHandler {
+  public:
+    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session) = 0;
+  };
 
 } // namespace dss
 

@@ -1,6 +1,6 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
-    Copyright (c) 2009 futureLAB AG, Winterthur, Switzerland
+    Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2010 futureLAB AG, Winterthur, Switzerland
 
     This file is part of digitalSTROM Server.
 
@@ -17,32 +17,18 @@
     You should have received a copy of the GNU General Public License
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 
-    Last change $Date: 2009-06-30 13:56:46 +0200 (Tue, 30 Jun 2009) $
-    by $Author: pstaehlin $
 */
 
-#include "restful.h"
-
-#include "core/foreach.h"
+#ifndef WEBSERVERAPI_H
+#define WEBSERVERAPI_H
 
 namespace dss {
 
-  bool RestfulAPI::hasClass(const std::string& _name) {
-    foreach(RestfulClass& cls, m_Classes) {
-      if(cls.getName() == _name) {
-        return true;
-      }
-    }
-    return false;
-  } // hasClass
-
-  bool RestfulClass::hasMethod(const std::string& _name) {
-    foreach(RestfulMethod& method, m_Methods) {
-      if(method.getName() == _name) {
-        return true;
-      }
-    }
-    return false;
-  } // hasMethod
+  class RestfulAPI;
   
-} // namespace dss
+  class WebServerAPI {
+  public:
+    static RestfulAPI createRestfulAPI();
+  };
+}
+#endif // WEBSERVERAPI_H

@@ -48,10 +48,10 @@
 #include "core/model/set.h"
 #include "core/model/device.h"
 #include "core/model/devicereference.h"
-#include "core/model/set.h"
 #include "core/model/zone.h"
 #include "core/model/group.h"
 #include "core/model/modulator.h"
+#include "webserverapi.h"
 
 namespace dss {
   //============================================= WebServer
@@ -77,6 +77,7 @@ namespace dss {
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "ports", "8080", true, false);
 
     setupAPI();
+    instantiateHandlers();
   } // initialize
 
   void WebServer::loadPlugins() {
@@ -114,314 +115,7 @@ namespace dss {
   } // loadPlugin
 
   void WebServer::setupAPI() {
-    RestfulAPI api;
-    RestfulClass& clsApartment = api.addClass("apartment")
-       .withDocumentation("A wrapper for global functions as well as adressing all devices connected to the dSS");
-    clsApartment.addMethod("getName")
-      .withDocumentation("Returns the name of the apartment");
-    clsApartment.addMethod("setName")
-      .withParameter("newName", "string", true)
-      .withDocumentation("Sets the name of the apartment to newName");
-    clsApartment.addMethod("turnOn")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Turns on all devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsApartment.addMethod("turnOff")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Turns off all devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsApartment.addMethod("increaseValue")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Increases the main value on all devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsApartment.addMethod("decreaseValue")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Decreases the main value on all devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsApartment.addMethod("enable")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Enables all devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsApartment.addMethod("disable")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Disables all devices of the apartment.", "A disabled device will react only to an enable call. If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsApartment.addMethod("startDim")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withParameter("direction", "string", false)
-      .withDocumentation("Starts dimming the devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsApartment.addMethod("endDim")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Stops dimming the devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsApartment.addMethod("setValue")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withParameter("value", "integer", true)
-      .withDocumentation("Sets the output value of all devices of the apartment to value.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsApartment.addMethod("callScene")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Calls the scene sceneNr on all devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsApartment.addMethod("saveScene")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Saves the current output value to sceneNr.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsApartment.addMethod("undoScene")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Undos setting the value of sceneNr.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsApartment.addMethod("getConsumption")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Returns the consumption of all devices in the apartment in mW.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsApartment.addMethod("getStructure")
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Returns an object containing the structure of the apartment.");
-    clsApartment.addMethod("getDevices")
-      .withParameter("unassigned", "boolean", false)
-      .withDocumentation("Returns the list of devices in the apartment.", "If unassigned is true, only devices that are not assigned to a zone get returned");
-    clsApartment.addStaticMethod("login")
-      .withDocumentation("Returns a session token");
-    clsApartment.addMethod("getCircuits")
-      .withDocumentation("Returns a list of the circuits present in the apartment");
-    clsApartment.addMethod("rescan")
-      .withDocumentation("Rescans all circuits of the apartment");
-
-    RestfulClass& clsZone = api.addClass("zone")
-        .withInstanceParameter("id", "integer", false)
-        .withInstanceParameter("name", "string", false)
-        .requireOneOf("id", "name");
-    clsZone.addMethod("getName")
-      .withDocumentation("Returns the name of the zone.");
-    clsZone.addMethod("setName")
-      .withParameter("newName", "string", true)
-      .withDocumentation("Sets the name of the zone to newName.");
-    clsZone.addMethod("turnOn")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Turns on all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsZone.addMethod("turnOff")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Turns off all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsZone.addMethod("increaseValue")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Increases the main value of all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsZone.addMethod("decreaseValue")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Decreases the main value of all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsZone.addMethod("enable")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Enables all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsZone.addMethod("disable")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Disables all devices in the zone.", "Disabled devices will react only to a enable call. If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsZone.addMethod("startDim")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withParameter("direction", "string", false)
-      .withDocumentation("Starts dimming the main value of all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsZone.addMethod("endDim")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Stops dimming of all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsZone.addMethod("setValue")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withParameter("value", "integer", true)
-      .withDocumentation("Sets the output value of all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsZone.addMethod("callScene")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Sets the scene sceneNr on all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsZone.addMethod("saveScene")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Saves the current output value to sceneNr of all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsZone.addMethod("undoScene")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Undos the setting of a scene value.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsZone.addMethod("getConsumption")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Returns the consumption of all devices in the zone in mW.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-
-    RestfulClass& clsDevice = api.addClass("device")
-        .withInstanceParameter("dsid", "integer", false)
-        .withInstanceParameter("name", "string", false)
-        .requireOneOf("dsid", "name");
-    clsDevice.addMethod("getName")
-       .withDocumentation("Returns the name of the device");
-    clsDevice.addMethod("setName")
-      .withParameter("newName", "string", true)
-      .withDocumentation("Sets the name of the device to newName");
-    clsDevice.addMethod("getGroups")
-      .withDocumentation("Returns an array of groups the device is in");
-    clsDevice.addMethod("getState")
-      .withDocumentation("Returns the state of the device");
-    clsDevice.addMethod("getLocation")
-      .withDocumentation("Returns the location of the device.");
-    clsDevice.addMethod("setLocation")
-      .withParameter("x", "double", false)
-      .withParameter("y", "double", false)
-      .withParameter("z", "double", false)
-      .withDocumentation("Sets the location of the device.");
-    clsDevice.addMethod("turnOn")
-      .withDocumentation("Turns on the device.", "This will call SceneMax on the device.");
-    clsDevice.addMethod("turnOff")
-      .withDocumentation("Turns off the device.", "This will call SceneMin on the device.");
-    clsDevice.addMethod("increaseValue")
-      .withDocumentation("Increases the default value of the device.");
-    clsDevice.addMethod("decreaseValue")
-      .withDocumentation("Decreases the default value of the device.");
-    clsDevice.addMethod("enable")
-      .withDocumentation("Enables the device.");
-    clsDevice.addMethod("disable")
-      .withDocumentation("Disables the device.", "A disabled device will only react to enable calls.");
-    clsDevice.addMethod("startDim")
-      .withParameter("direction", "string", false)
-      .withDocumentation("Starts dimming the device.", "If direction equals 'up' it will dim up, otherwise down.");
-    clsDevice.addMethod("endDim")
-      .withDocumentation("Stops dimming.");
-    clsDevice.addMethod("setValue")
-      .withParameter("value", "double", true)
-      .withDocumentation("Sets the output value of the device to value");
-    clsDevice.addMethod("setRawValue")
-      .withParameter("value", "integer", true)
-      .withParameter("parameterID", "integer", true)
-      .withParameter("size", "integer", true)
-      .withDocumentation("Sets the value of register parameterID to value");
-    clsDevice.addMethod("callScene")
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Calls scene sceneNr on the device.");
-    clsDevice.addMethod("saveScene")
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Saves the current outputvalue to sceneNr.");
-    clsDevice.addMethod("undoScene")
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Undos saving the scene value for sceneNr");
-    clsDevice.addMethod("getConsumption")
-      .withDocumentation("Returns the consumption of the device in mW.", "Note that this works only for simulated devices at the moment.");
-
-
-    RestfulClass& clsCircuit = api.addClass("circuit")
-       .withInstanceParameter("id", "dsid", true);
-    clsCircuit.addMethod("getName")
-       .withDocumentation("Returns the name of the circuit.");
-    clsCircuit.addMethod("setName")
-       .withParameter("newName", "string", true)
-       .withDocumentation("Sets the name of the circuit to newName.");
-    clsCircuit.addMethod("getEnergyBorder")
-       .withDocumentation("Returns the energy borders (orange, red).");
-    clsCircuit.addMethod("getConsumption")
-       .withDocumentation("Returns the consumption of all connected devices in mW");
-    clsCircuit.addMethod("getEnergyMeterValue")
-       .withDocumentation("Returns the meter-value in Wh");
-    clsCircuit.addMethod("rescan")
-       .withDocumentation("Rescans the circuit");
-
-    RestfulClass& clsProp = api.addClass("property")
-        .withInstanceParameter("path", "string", true);
-    clsProp.addMethod("getString")
-        .withDocumentation("Returns the std::string value of the property", "This will fail if the property is not of type 'string'.");
-    clsProp.addMethod("getInteger")
-        .withDocumentation("Returns the integer value of the property", "This will fail if the property is not of type 'integer'.");
-    clsProp.addMethod("getBoolean")
-        .withDocumentation("Returns the boolean value of the property", "This will fail if the property is not of type 'boolean'.");
-    clsProp.addMethod("setString")
-        .withParameter("value", "string", true)
-        .withDocumentation("Sets the std::string value of the property", "This will fail if the property is not of type 'string'.");
-    clsProp.addMethod("setInteger")
-        .withParameter("value", "integer", true)
-        .withDocumentation("Sets the integer value of the property", "This will fail if the property is not of type 'integer'.");
-    clsProp.addMethod("setBoolean")
-        .withParameter("value", "boolean", true)
-        .withDocumentation("Sets the boolean value of the property", "This will fail if the property is not of type 'boolean'.");
-    clsProp.addMethod("getChildren")
-        .withParameter("value", "string", true)
-        .withDocumentation("Returns an array of the nodes children");
-    clsProp.addMethod("setString")
-        .withDocumentation("Returns the type of the node");
-
-    RestfulClass& clsEvent = api.addClass("event");
-    clsEvent.addMethod("raise")
-       .withParameter("name", "string", true)
-       .withParameter("context", "string", false)
-       .withParameter("location", "string", false)
-       .withDocumentation("Raises an event", "The context describes the source of the event. The location, if provided, defines where any action that is taken "
-           "by any subscription should happen.");
-    
-    RestfulClass& clsSystem = api.addClass("system");
-    clsSystem.addMethod("version")
-      .withDocumentation("Returns the dss version", 
-                         "This method returns the version std::string of the dss");
-
-    RestfulClass& clsSet = api.addClass("set")
-        .withInstanceParameter("self", "string", false);
-    clsSet.addMethod("fromApartment")
-        .withDocumentation("Creates a set that contains all devices of the apartment");
-    clsSet.addMethod("byZone")
-        .withParameter("zoneID", "integer", false)
-        .withParameter("zoneName", "string", false)
-        .withDocumentation("Restricts the set to the given zone");
-    clsSet.addMethod("byGroup")
-        .withParameter("groupID", "integer", false)
-        .withParameter("groupName", "integer", false)
-        .withDocumentation("Restricts the set to the given group");
-    clsSet.addMethod("byDSID")
-        .withParameter("dsid", "dsid", true)
-        .withDocumentation("Restricts the set to the given dsid");
-    clsSet.addMethod("add")
-        .withParameter("other", "string", true)
-        .withDocumentation("Combines the set self with other");
-    clsSet.addMethod("subtract")
-        .withParameter("other", "string", true)
-        .withDocumentation("Subtracts the set self from other");
-    clsSet.addMethod("turnOn")
-        .withDocumentation("Turns on all devices of the set.");
-    clsSet.addMethod("turnOff")
-        .withDocumentation("Turns off all devices of the set.");
-    clsSet.addMethod("increaseValue")
-        .withDocumentation("Increases the main value on all devices of the set.");
-    clsSet.addMethod("decreaseValue")
-        .withDocumentation("Decreases the main value on all devices of the set.");
-    clsSet.addMethod("enable")
-        .withDocumentation("Enables all devices of the set.");
-    clsSet.addMethod("disable")
-        .withDocumentation("Disables all devices of the set.", "A disabled device will react only to an enable call.");
-    clsSet.addMethod("startDim")
-      .withParameter("direction", "string", false)
-      .withDocumentation("Starts dimming the devices of the set.");
-    clsSet.addMethod("endDim")
-      .withDocumentation("Stops dimming the devices of the set.");
-    clsSet.addMethod("setValue")
-      .withParameter("value", "integer", true)
-      .withDocumentation("Sets the output value of all devices of the set to value.");
-    clsSet.addMethod("callScene")
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Calls the scene sceneNr on all devices of the set.");
-    clsSet.addMethod("saveScene")
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Saves the current output value to sceneNr.");
-    clsSet.addMethod("undoScene")
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Undoes setting the value of sceneNr.");
-    clsApartment.addMethod("getConsumption")
-      .withDocumentation("Returns the consumption of all devices in the set in mW.");
-
+    RestfulAPI api = WebServerAPI::createRestfulAPI();
     RestfulAPIWriter::writeToXML(api, "doc/json_api.xml");
   } // setupAPI
 
@@ -505,7 +199,7 @@ namespace dss {
     return ToJSONValue(std::string(_value));
   } // toJSONValue(const char*)
 
-  std::string WebServer::ResultToJSON(const bool _ok, const std::string& _message) {
+  std::string ResultToJSON(const bool _ok, const std::string& _message = "") {
     std::ostringstream sstream;
     sstream << "{ " << ToJSONValue("ok") << ":" << ToJSONValue(_ok);
     if(!_message.empty()) {
@@ -513,7 +207,7 @@ namespace dss {
     }
     sstream << "}";
     if(!_ok) {
-      log("JSON call failed: '" + _message + "'");
+      Logger::getInstance()->log("JSON call failed: '" + _message + "'");
     }
     return sstream.str();
   } // resultToJSON
@@ -677,194 +371,218 @@ namespace dss {
     return arr.str();
   } // toJSONArray<int>
 
-  std::string WebServer::callDeviceInterface(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, IDeviceInterface* _interface, Session* _session) {
-    bool ok = true;
-    std::string errorString;
-    assert(_interface != NULL);
-    if(endsWith(_method, "/turnOn")) {
-      _interface->turnOn();
-    } else if(endsWith(_method, "/turnOff")) {
-      _interface->turnOff();
-    } else if(endsWith(_method, "/increaseValue")) {
-      _interface->increaseValue();
-    } else if(endsWith(_method, "/decreaseValue")) {
-      _interface->decreaseValue();
-    } else if(endsWith(_method, "/startDim")) {
-      std::string direction = _parameter["direction"];
-      if(direction == "up") {
-        _interface->startDim(true);
-      } else {
-        _interface->startDim(false);
-      }
-    } else if(endsWith(_method, "/endDim")) {
-      _interface->endDim();
-    } else if(endsWith(_method, "/setValue")) {
-      int value = strToIntDef(_parameter["value"], -1);
-      if(value == -1) {
-        errorString = "invalid or missing parameter value: '" + _parameter["value"] + "'";
-        ok = false;
-      } else {
-        _interface->setValue(value);
-      }
-    } else if(endsWith(_method, "/callScene")) {
-      std::string sceneStr = _parameter["sceneNr"];
-      int sceneID = strToIntDef(sceneStr, -1);
-      if(sceneID != -1) {
-        _interface->callScene(sceneID);
-      } else {
-        errorString = "invalid sceneNr: '" + sceneStr + "'";
-        ok = false;
-      }
-    } else if(endsWith(_method, "/saveScene")) {
-      std::string sceneStr = _parameter["sceneNr"];
-      int sceneID = strToIntDef(sceneStr, -1);
-      if(sceneID != -1) {
-        _interface->saveScene(sceneID);
-      } else {
-        errorString = "invalid sceneNr: '" + sceneStr + "'";
-        ok = false;
-      }
-    } else if(endsWith(_method, "/undoScene")) {
-      std::string sceneStr = _parameter["sceneNr"];
-      int sceneID = strToIntDef(sceneStr, -1);
-      if(sceneID != -1) {
-        _interface->undoScene(sceneID);
-      } else {
-        errorString = "invalid sceneNr: '" + sceneStr + "'";
-        ok = false;
-      }
-    } else if(endsWith(_method, "/getConsumption")) {
-      return "{ " + ToJSONValue("consumption") + ": " +  uintToString(_interface->getPowerConsumption()) +"}";
+  class WebServerRequestHandler : public RestfulRequestHandler {
+  protected:
+    DSS& getDSS() {
+      return *DSS::getInstance();
     }
-    return ResultToJSON(ok, errorString);
-  } // callDeviceInterface
 
-  bool WebServer::isDeviceInterfaceCall(const std::string& _method) {
-    return endsWith(_method, "/turnOn")
-        || endsWith(_method, "/turnOff")
-        || endsWith(_method, "/increaseValue")
-        || endsWith(_method, "/decreaseValue")
-        || endsWith(_method, "/startDim")
-        || endsWith(_method, "/endDim")
-        || endsWith(_method, "/setValue")
-        || endsWith(_method, "/callScene")
-        || endsWith(_method, "/saveScene")
-        || endsWith(_method, "/undoScene")
-        || endsWith(_method, "/getConsumption");
-  } // isDeviceInterfaceCall
+    void log(const std::string& _line, aLogSeverity _severity = lsDebug) {
+      Logger::getInstance()->log("RequestHandler: " + _line, _severity);
+    }
+  }; // WebServerRequestHandler
 
-  std::string WebServer::handleApartmentCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
-    bool ok = true;
-    std::string errorMessage;
-    _handled = true;
-    if(endsWith(_method, "/getConsumption")) {
-      int accumulatedConsumption = 0;
-      foreach(Modulator* pModulator, getDSS().getApartment().getModulators()) {
-        accumulatedConsumption += pModulator->getPowerConsumption();
-      }
-      return "{ " + ToJSONValue("consumption") + ": " +  uintToString(accumulatedConsumption) +"}";
-    } else if(isDeviceInterfaceCall(_method)) {
-      IDeviceInterface* interface = NULL;
-      std::string groupName = _parameter["groupName"];
-      std::string groupIDString = _parameter["groupID"];
-      if(!groupName.empty()) {
-        try {
-          Group& grp = getDSS().getApartment().getGroup(groupName);
-          interface = &grp;
-        } catch(std::runtime_error& e) {
-          errorMessage = "Could not find group with name '" + groupName + "'";
+  class DeviceInterfaceRequestHandler : public WebServerRequestHandler {
+  public:
+    std::string handleDeviceInterfaceRequest(const RestfulRequest& _request, IDeviceInterface* _interface) {
+      bool ok = true;
+      std::string errorString;
+      assert(_interface != NULL);
+      if(_request.getMethod() == "turnOn") {
+        _interface->turnOn();
+      } else if(_request.getMethod() == "turnOff") {
+        _interface->turnOff();
+      } else if(_request.getMethod() == "increaseValue") {
+        _interface->increaseValue();
+      } else if(_request.getMethod() == "decreaseValue") {
+        _interface->decreaseValue();
+      } else if(_request.getMethod() == "startDim") {
+        std::string direction = _request.getParameter("direction");
+        if(direction == "up") {
+          _interface->startDim(true);
+        } else {
+          _interface->startDim(false);
+        }
+      } else if(_request.getMethod() == "endDim") {
+        _interface->endDim();
+      } else if(_request.getMethod() == "setValue") {
+        std::string valueStr = _request.getParameter("value");
+        int value = strToIntDef(valueStr, -1);
+        if(value == -1) {
+          errorString = "invalid or missing parameter value: '" + valueStr + "'";
+          ok = false;
+        } else {
+          _interface->setValue(value);
+        }
+      } else if(_request.getMethod() == "callScene") {
+        std::string sceneStr = _request.getParameter("sceneNr");
+        int sceneID = strToIntDef(sceneStr, -1);
+        if(sceneID != -1) {
+          _interface->callScene(sceneID);
+        } else {
+          errorString = "invalid sceneNr: '" + sceneStr + "'";
           ok = false;
         }
-      } else if(!groupIDString.empty()) {
-        try {
-          int groupID = strToIntDef(groupIDString, -1);
-          if(groupID != -1) {
-            Group& grp = getDSS().getApartment().getGroup(groupID);
+      } else if(_request.getMethod() == "saveScene") {
+        std::string sceneStr = _request.getParameter("sceneNr");
+        int sceneID = strToIntDef(sceneStr, -1);
+        if(sceneID != -1) {
+          _interface->saveScene(sceneID);
+        } else {
+          errorString = "invalid sceneNr: '" + sceneStr + "'";
+          ok = false;
+        }
+      } else if(_request.getMethod() == "undoScene") {
+        std::string sceneStr = _request.getParameter("sceneNr");
+        int sceneID = strToIntDef(sceneStr, -1);
+        if(sceneID != -1) {
+          _interface->undoScene(sceneID);
+        } else {
+          errorString = "invalid sceneNr: '" + sceneStr + "'";
+          ok = false;
+        }
+      } else if(_request.getMethod() == "getConsumption") {
+        return "{ " + ToJSONValue("consumption") + ": " +  uintToString(_interface->getPowerConsumption()) +"}";
+      }
+      return ResultToJSON(ok, errorString);
+    } // handleRequest
+
+  protected:
+    bool isDeviceInterfaceCall(const RestfulRequest& _request) {
+      return endsWith(_request.getMethod(), "turnOn")
+          || endsWith(_request.getMethod(), "turnOff")
+          || endsWith(_request.getMethod(), "increaseValue")
+          || endsWith(_request.getMethod(), "decreaseValue")
+          || endsWith(_request.getMethod(), "startDim")
+          || endsWith(_request.getMethod(), "endDim")
+          || endsWith(_request.getMethod(), "setValue")
+          || endsWith(_request.getMethod(), "callScene")
+          || endsWith(_request.getMethod(), "saveScene")
+          || endsWith(_request.getMethod(), "undoScene")
+          || endsWith(_request.getMethod(), "getConsumption");
+    } // isDeviceInterfaceCall
+  };
+
+  class ApartmentRequestHandler : public DeviceInterfaceRequestHandler {
+  public:
+    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session) {
+      bool ok = true;
+      std::string errorMessage;
+      if(_request.getMethod() == "getConsumption") {
+        int accumulatedConsumption = 0;
+        foreach(Modulator* pModulator, getDSS().getApartment().getModulators()) {
+          accumulatedConsumption += pModulator->getPowerConsumption();
+        }
+        return "{ " + ToJSONValue("consumption") + ": " +  uintToString(accumulatedConsumption) +"}";
+      } else if(isDeviceInterfaceCall(_request)) {
+        IDeviceInterface* interface = NULL;
+        std::string groupName = _request.getParameter("groupName");
+        std::string groupIDString = _request.getParameter("groupID");
+        if(!groupName.empty()) {
+          try {
+            Group& grp = getDSS().getApartment().getGroup(groupName);
             interface = &grp;
-          } else {
-            errorMessage = "Could not parse group id '" + groupIDString + "'";
+          } catch(std::runtime_error& e) {
+            errorMessage = "Could not find group with name '" + groupName + "'";
             ok = false;
           }
-        } catch(std::runtime_error& e) {
-          errorMessage = "Could not find group with ID '" + groupIDString + "'";
-          ok = false;
-        }
-      }
-      if(ok) {
-        if(interface == NULL) {
-          interface = &getDSS().getApartment().getGroup(GroupIDBroadcast);
-        }
-        return callDeviceInterface(_method, _parameter, _connection, interface, _session);
-      } else {
-        std::ostringstream sstream;
-        sstream << "{ ok: " << ToJSONValue(ok) << ", message: " << ToJSONValue(errorMessage) << " }";
-        return sstream.str();
-      }
-    } else {
-      std::string result;
-      if(endsWith(_method, "/getStructure")) {
-        result = ToJSONValue(getDSS().getApartment());
-      } else if(endsWith(_method, "/getDevices")) {
-        Set devices;
-        if(_parameter["unassigned"].empty()) {
-          devices = getDSS().getApartment().getDevices();
-        } else {
-          devices = GetUnassignedDevices();
-        }
-
-        result = "{" + ToJSONValue(devices, "devices") + "}";
-      } else if(endsWith(_method, "/login")) {
-        int token = m_LastSessionID;
-        m_Sessions[token] = Session(token);
-        return "{" + ToJSONValue("token") + ": " + ToJSONValue(token) + "}";
-      } else if(endsWith(_method, "/getCircuits")) {
-        std::ostringstream sstream;
-        sstream << "{ " << ToJSONValue("circuits") << ": [";
-        bool first = true;
-        vector<Modulator*>& modulators = getDSS().getApartment().getModulators();
-        foreach(Modulator* modulator, modulators) {
-          if(!first) {
-            sstream << ",";
+        } else if(!groupIDString.empty()) {
+          try {
+            int groupID = strToIntDef(groupIDString, -1);
+            if(groupID != -1) {
+              Group& grp = getDSS().getApartment().getGroup(groupID);
+              interface = &grp;
+            } else {
+              errorMessage = "Could not parse group id '" + groupIDString + "'";
+              ok = false;
+            }
+          } catch(std::runtime_error& e) {
+            errorMessage = "Could not find group with ID '" + groupIDString + "'";
+            ok = false;
           }
-          first = false;
-          sstream << "{ " << ToJSONValue("name") << ": " << ToJSONValue(modulator->getName());
-          sstream << ", " << ToJSONValue("dsid") << ": " << ToJSONValue(modulator->getDSID().toString());
-          sstream << ", " << ToJSONValue("busid") << ": " << ToJSONValue(modulator->getBusID());
-          sstream << ", " << ToJSONValue("hwVersion") << ": " << ToJSONValue(modulator->getHardwareVersion());
-          sstream << ", " << ToJSONValue("swVersion") << ": " << ToJSONValue(modulator->getSoftwareVersion());
-          sstream << ", " << ToJSONValue("hwName") << ": " << ToJSONValue(modulator->getHardwareName());
-          sstream << ", " << ToJSONValue("deviceType") << ": " << ToJSONValue(modulator->getDeviceType());
-          sstream << ", " << ToJSONValue("isPresent") << ": " << ToJSONValue(modulator->isPresent());
-          sstream << "}";
         }
-        sstream << "]}";
-        return JSONOk(sstream.str());
-      } else if(endsWith(_method, "/getName")) {
-        std::ostringstream sstream;
-        sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(getDSS().getApartment().getName()) << "}";
-        return JSONOk(sstream.str());
-      } else if(endsWith(_method, "/setName")) {
-        getDSS().getApartment().setName(_parameter["newName"]);
-        result = ResultToJSON(true);
-      } else if(endsWith(_method, "/rescan")) {
-        std::vector<Modulator*> mods = getDSS().getApartment().getModulators();
-        foreach(Modulator* pModulator, mods) {
-          pModulator->setIsValid(false);
+        if(ok) {
+          if(interface == NULL) {
+            interface = &getDSS().getApartment().getGroup(GroupIDBroadcast);
+          }
+          return handleDeviceInterfaceRequest(_request, interface);
+        } else {
+          std::ostringstream sstream;
+          sstream << "{ ok: " << ToJSONValue(ok) << ", message: " << ToJSONValue(errorMessage) << " }";
+          return sstream.str();
         }
-        result = ResultToJSON(true);
       } else {
-        _handled = false;
-      }
-      return result;
-    }
-  } // handleApartmentCall
+        std::string result;
+        if(_request.getMethod() == "getStructure") {
+          result = ToJSONValue(getDSS().getApartment());
+        } else if(_request.getMethod() == "getDevices") {
+          Set devices;
+          if(_request.getParameter("unassigned").empty()) {
+            devices = getDSS().getApartment().getDevices();
+          } else {
+            devices = GetUnassignedDevices();
+          }
 
-  std::string WebServer::handleZoneCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
+          result = "{" + ToJSONValue(devices, "devices") + "}";
+/* TODO: re-enable
+        } else if(_request.getMethod() == "login") {
+          int token = m_LastSessionID;
+          m_Sessions[token] = Session(token);
+          return "{" + ToJSONValue("token") + ": " + ToJSONValue(token) + "}";
+*/
+        } else if(_request.getMethod() == "getCircuits") {
+          std::ostringstream sstream;
+          sstream << "{ " << ToJSONValue("circuits") << ": [";
+          bool first = true;
+          vector<Modulator*>& modulators = getDSS().getApartment().getModulators();
+          foreach(Modulator* modulator, modulators) {
+            if(!first) {
+              sstream << ",";
+            }
+            first = false;
+            sstream << "{ " << ToJSONValue("name") << ": " << ToJSONValue(modulator->getName());
+            sstream << ", " << ToJSONValue("dsid") << ": " << ToJSONValue(modulator->getDSID().toString());
+            sstream << ", " << ToJSONValue("busid") << ": " << ToJSONValue(modulator->getBusID());
+            sstream << ", " << ToJSONValue("hwVersion") << ": " << ToJSONValue(modulator->getHardwareVersion());
+            sstream << ", " << ToJSONValue("swVersion") << ": " << ToJSONValue(modulator->getSoftwareVersion());
+            sstream << ", " << ToJSONValue("hwName") << ": " << ToJSONValue(modulator->getHardwareName());
+            sstream << ", " << ToJSONValue("deviceType") << ": " << ToJSONValue(modulator->getDeviceType());
+            sstream << ", " << ToJSONValue("isPresent") << ": " << ToJSONValue(modulator->isPresent());
+            sstream << "}";
+          }
+          sstream << "]}";
+          return JSONOk(sstream.str());
+        } else if(_request.getMethod() == "getName") {
+          std::ostringstream sstream;
+          sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(getDSS().getApartment().getName()) << "}";
+          return JSONOk(sstream.str());
+        } else if(_request.getMethod() == "setName") {
+          getDSS().getApartment().setName(_request.getParameter("newName"));
+          result = ResultToJSON(true);
+        } else if(_request.getMethod() == "rescan") {
+          std::vector<Modulator*> mods = getDSS().getApartment().getModulators();
+          foreach(Modulator* pModulator, mods) {
+            pModulator->setIsValid(false);
+          }
+          result = ResultToJSON(true);
+        } else {
+          throw std::runtime_error("Unhandled function");
+        }
+        return result;
+      }
+    } // handleApartmentCall
+  };
+
+  class ZoneRequestHandler : public DeviceInterfaceRequestHandler {
+  public:
+    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session);
+  }; // ZoneRequestHandler
+
+  std::string ZoneRequestHandler::handleRequest(const RestfulRequest& _request, Session* _session) {
     bool ok = true;
     std::string errorMessage;
-    _handled = true;
-    std::string zoneName = _parameter["name"];
-    std::string zoneIDString = _parameter["id"];
+    std::string zoneName = _request.getParameter("name");
+    std::string zoneIDString = _request.getParameter("id");
     Zone* pZone = NULL;
     if(!zoneIDString.empty()) {
       int zoneID = strToIntDef(zoneIDString, -1);
@@ -894,8 +612,8 @@ namespace dss {
     }
     if(ok) {
       Group* pGroup = NULL;
-      std::string groupName = _parameter["groupName"];
-      std::string groupIDString = _parameter["groupID"];
+      std::string groupName = _request.getParameter("groupName");
+      std::string groupIDString = _request.getParameter("groupID");
       if(!groupName.empty()) {
         try {
           pGroup = pZone->getGroup(groupName);
@@ -926,7 +644,7 @@ namespace dss {
         }
       }
       if(ok) {
-        if(isDeviceInterfaceCall(_method)) {
+        if(isDeviceInterfaceCall(_request)) {
           IDeviceInterface* interface = NULL;
           if(pGroup != NULL) {
             interface = pGroup;
@@ -935,9 +653,9 @@ namespace dss {
             if(interface == NULL) {
               interface = pZone;
             }
-            return callDeviceInterface(_method, _parameter, _connection, interface, _session);
+            return handleDeviceInterfaceRequest(_request, interface);
           }
-        } else if(endsWith(_method, "/getLastCalledScene")) {
+        } else if(_request.getMethod() == "getLastCalledScene") {
           int lastScene = 0;
           if(pGroup != NULL) {
             lastScene = pGroup->getLastCalledScene();
@@ -950,16 +668,15 @@ namespace dss {
           std::ostringstream sstream;
           sstream << "{" << ToJSONValue("scene") << ":" << ToJSONValue(lastScene) << "}";
           return JSONOk(sstream.str());
-        } else if(endsWith(_method, "/getName")) {
+        } else if(_request.getMethod() == "getName") {
           std::ostringstream sstream;
           sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(pZone->getName()) << "}";
           return JSONOk(sstream.str());
-        } else if(endsWith(_method, "/setName")) {
-          pZone->setName(_parameter["newName"]);
+        } else if(_request.getMethod() == "setName") {
+          pZone->setName(_request.getParameter("newName"));
           return ResultToJSON(true);
         } else {
-          _handled = false;
-          return "";
+          throw std::runtime_error("Unhandled function");
         }
       }
     }
@@ -968,616 +685,16 @@ namespace dss {
     } else {
       return "";
     }
-  } // handleZoneCall
-
-  std::string WebServer::handleDeviceCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
-    bool ok = true;
-    std::string errorMessage;
-    _handled = true;
-    std::string deviceName = _parameter["name"];
-    std::string deviceDSIDString = _parameter["dsid"];
-    Device* pDevice = NULL;
-    if(!deviceDSIDString.empty()) {
-      dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
-      if(!(deviceDSID == NullDSID)) {
-        try {
-          Device& device = getDSS().getApartment().getDeviceByDSID(deviceDSID);
-          pDevice = &device;
-        } catch(std::runtime_error& e) {
-          ok = false;
-          errorMessage = "Could not find device with dsid '" + deviceDSIDString + "'";
-        }
-      } else {
-        ok = false;
-        errorMessage = "Could not parse dsid '" + deviceDSIDString + "'";
-      }
-    } else if(!deviceName.empty()) {
-      try {
-        Device& device = getDSS().getApartment().getDeviceByName(deviceName);
-        pDevice = &device;
-      } catch(std::runtime_error&  e) {
-        ok = false;
-        errorMessage = "Could not find device named '" + deviceName + "'";
-      }
-    } else {
-      ok = false;
-      errorMessage = "Need parameter name or dsid to identify device";
-    }
-    if(ok) {
-      if(isDeviceInterfaceCall(_method)) {
-        return callDeviceInterface(_method, _parameter, _connection, pDevice, _session);
-      } else if(beginsWith(_method, "device/getGroups")) {
-        int numGroups = pDevice->getGroupsCount();
-        std::ostringstream sstream;
-        sstream << "{ " << ToJSONValue("groups") << ": [";
-        bool first = true;
-        for(int iGroup = 0; iGroup < numGroups; iGroup++) {
-          if(!first) {
-            sstream << ", ";
-          }
-          first = false;
-          try {
-            Group& group = pDevice->getGroupByIndex(iGroup);
-            sstream << "{ " << ToJSONValue("id") << ":" << group.getID();
-            if(!group.getName().empty()) {
-              sstream << ", " << ToJSONValue("name") << ":" << ToJSONValue(group.getName());
-            }
-          } catch(std::runtime_error&) {
-            log("Group only present at device level");
-          }
-          sstream << "}";
-        }
-        sstream << "]}";
-        return sstream.str();
-      } else if(beginsWith(_method, "device/getState")) {
-        std::ostringstream sstream;
-        sstream << "{ " << ToJSONValue("isOn") << ":" << ToJSONValue(pDevice->isOn()) << " }";
-        return JSONOk(sstream.str());
-      } else if(beginsWith(_method, "device/getName")) {
-        std::ostringstream sstream;
-        sstream << "{ " << ToJSONValue("name") << ":" << ToJSONValue(pDevice->getName()) << " }";
-        return JSONOk(sstream.str());
-      } else if(beginsWith(_method, "device/setName")) {
-        pDevice->setName(_parameter["newName"]);
-        return ResultToJSON(true);
-      } else if(endsWith(_method, "device/enable")) {
-        pDevice->enable();
-        return ResultToJSON(true);
-      } else if(endsWith(_method, "device/disable")) {
-        pDevice->disable();
-        return ResultToJSON(true);
-      } else if(beginsWith(_method, "device/setRawValue")) {
-        int value = strToIntDef(_parameter["value"], -1);
-        if(value == -1) {
-          return ResultToJSON(false, "Invalid or missing parameter 'value'");
-        }
-        int parameterID = strToIntDef(_parameter["parameterID"], -1);
-        if(parameterID == -1) {
-          return ResultToJSON(false, "Invalid or missing parameter 'parameterID'");
-        }
-        int size = strToIntDef(_parameter["size"], -1);
-        if(size == -1) {
-          return ResultToJSON(false, "Invalid or missing parameter 'size'");
-        }
-
-        pDevice->setRawValue(value, parameterID, size);
-        return JSONOk();
-      } else {
-        _handled = false;
-        return "";
-      }
-    } else {
-      return ResultToJSON(ok, errorMessage);
-    }
-  } // handleDeviceCall
-
-  std::string WebServer::handleCircuitCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
-    _handled = true;
-    std::string idString = _parameter["id"];
-    if(idString.empty()) {
-      return ResultToJSON(false, "missing parameter id");
-    }
-    dsid_t dsid = dsid_t::fromString(idString);
-    if(dsid == NullDSID) {
-      return ResultToJSON(false, "could not parse dsid");
-    }
-    try {
-      Modulator& modulator = getDSS().getApartment().getModulatorByDSID(dsid);
-      if(endsWith(_method, "circuit/getName")) {
-        return JSONOk("{ " + ToJSONValue("name") + ": " + ToJSONValue(modulator.getName()) + "}");
-      } else if(endsWith(_method, "circuit/setName")) {
-        modulator.setName(_parameter["newName"]);
-        return ResultToJSON(true);
-      } else if(endsWith(_method, "circuit/getEnergyBorder")) {
-        std::ostringstream sstream;
-        sstream << "{" << ToJSONValue("orange") << ":" << ToJSONValue(modulator.getEnergyLevelOrange());
-        sstream << "," << ToJSONValue("red") << ":" << ToJSONValue(modulator.getEnergyLevelRed());
-        sstream << "}";
-        return JSONOk(sstream.str());
-      } else if(endsWith(_method, "/getConsumption")) {
-        return JSONOk("{ " + ToJSONValue("consumption") + ": " +  uintToString(modulator.getPowerConsumption()) +"}");
-      } else if(endsWith(_method, "/getEnergyMeterValue")) {
-        return JSONOk("{ " + ToJSONValue("metervalue") + ": " +  uintToString(modulator.getEnergyMeterValue()) +"}");
-      } else if(endsWith(_method, "/rescan")) {
-        modulator.setIsValid(false);
-        return ResultToJSON(true);
-      } else {
-        _handled = false;
-      }
-    } catch(std::runtime_error&) {
-      return ResultToJSON(false, "could not find modulator with given dsid");
-    }
-    return "";
-  } // handleCircuitCall
+  } // handleRequest
 
 
-  std::string WebServer::handleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
-    _handled = true;
-    if(endsWith(_method, "/fromApartment")) {
-      _handled = true;
-      return JSONOk("{'self': '.'}");
-    } else {
-      std::string self = trim(_parameter["self"]);
-      if(self.empty()) {
-        return ResultToJSON(false, "missing parameter 'self'");
-      }
-
-      if(endsWith(_method, "/byZone")) {
-        std::string additionalPart;
-        if(self != ".") {
-          additionalPart = ".";
-        }
-        if(!_parameter["zoneID"].empty()) {
-          additionalPart += "zone(" + _parameter["zoneID"] + ")";
-        } else if(!_parameter["zoneName"].empty()) {
-          additionalPart += _parameter["zoneName"];
-        } else {
-          return ResultToJSON(false, "missing either zoneID or zoneName");
-        }
-
-        std::ostringstream sstream;
-        sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
-        return JSONOk(sstream.str());
-      } else if(endsWith(_method, "/byGroup")) {
-        std::string additionalPart;
-        if(self != ".") {
-          additionalPart = ".";
-        }
-        if(!_parameter["groupID"].empty()) {
-          additionalPart += "group(" + _parameter["groupID"] + ")";
-        } else if(!_parameter["groupName"].empty()) {
-          additionalPart += _parameter["groupName"];
-        } else {
-          return ResultToJSON(false, "missing either groupID or groupName");
-        }
-
-        std::ostringstream sstream;
-        sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
-        return JSONOk(sstream.str());
-      } else if(endsWith(_method, "/byDSID")) {
-        std::string additionalPart;
-        if(self != ".") {
-          additionalPart = ".";
-        }
-        if(!_parameter["dsid"].empty()) {
-          additionalPart += "dsid(" + _parameter["dsid"] + ")";
-        } else {
-          return ResultToJSON(false, "missing parameter dsid");
-        }
-
-        std::ostringstream sstream;
-        sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
-        return JSONOk(sstream.str());
-      } else if(endsWith(_method, "/getDevices")) {
-        SetBuilder builder(getDSS().getApartment());
-        Set set = builder.buildSet(self, NULL);
-        return JSONOk("{" + ToJSONValue(set, "devices") + "}");
-      } else if(endsWith(_method, "/add")) {
-        std::string other = _parameter["other"];
-        if(other.empty()) {
-          return ResultToJSON(false, "missing parameter other");
-        }
-        std::string additionalPart;
-        if(self != ".") {
-          additionalPart = ".";
-        }
-        additionalPart += "add(" + other + ")";
-
-        std::ostringstream sstream;
-        sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
-        return JSONOk(sstream.str());
-      } else if(endsWith(_method, "/subtract")) {
-        std::string other = _parameter["other"];
-        if(other.empty()) {
-          return ResultToJSON(false, "missing parameter other");
-        }
-        std::string additionalPart;
-        if(self != ".") {
-          additionalPart = ".";
-        }
-        additionalPart += "subtract(" + other + ")";
-
-        std::ostringstream sstream;
-        sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
-        return JSONOk(sstream.str());
-      } else if(isDeviceInterfaceCall(_method)) {
-        SetBuilder builder(getDSS().getApartment());
-        Set set = builder.buildSet(self, NULL);
-        return callDeviceInterface(_method, _parameter, _connection, &set, _session);
-      } else {
-        _handled = false;
-      }
-
-    }
-    return "";
-  } // handleSetCall
-
-  std::string WebServer::handlePropertyCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
-    _handled = true;
-    std::string propName = _parameter["path"];
-    if(propName.empty()) {
-      return ResultToJSON(false, "Need parameter \'path\' for property operations");
-    }
-    PropertyNodePtr node = getDSS().getPropertySystem().getProperty(propName);
-
-    if(endsWith(_method, "/getString")) {
-      if(node == NULL) {
-        return ResultToJSON(false, "Could not find node named '" + propName + "'");
-      }
-      try {
-        std::ostringstream sstream;
-        sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getStringValue()) << "}";
-        return JSONOk(sstream.str());
-      } catch(PropertyTypeMismatch& ex) {
-        return ResultToJSON(false, std::string("Error getting property: '") + ex.what() + "'");
-      }
-    } else if(endsWith(_method, "/getInteger")) {
-      if(node == NULL) {
-        return ResultToJSON(false, "Could not find node named '" + propName + "'");
-      }
-      try {
-        std::ostringstream sstream;
-        sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getIntegerValue()) << "}";
-        return JSONOk(sstream.str());
-      } catch(PropertyTypeMismatch& ex) {
-        return ResultToJSON(false, std::string("Error getting property: '") + ex.what() + "'");
-      }
-    } else if(endsWith(_method, "/getBoolean")) {
-      if(node == NULL) {
-        return ResultToJSON(false, "Could not find node named '" + propName + "'");
-      }
-      try {
-        std::ostringstream sstream;
-        sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getBoolValue()) << "}";
-        return JSONOk(sstream.str());
-      } catch(PropertyTypeMismatch& ex) {
-        return ResultToJSON(false, std::string("Error getting property: '") + ex.what() + "'");
-      }
-    } else if(endsWith(_method, "/setString")) {
-      std::string value = _parameter["value"];
-      if(node == NULL) {
-        node = getDSS().getPropertySystem().createProperty(propName);
-      }
-      try {
-        node->setStringValue(value);
-      } catch(PropertyTypeMismatch& ex) {
-        return ResultToJSON(false, std::string("Error setting property: '") + ex.what() + "'");
-      }
-      return JSONOk();
-    } else if(endsWith(_method, "/setBoolean")) {
-      std::string strValue = _parameter["value"];
-      bool value;
-      if(strValue == "true") {
-        value = true;
-      } else if(strValue == "false") {
-        value = false;
-      } else {
-        return ResultToJSON(false, "Expected 'true' or 'false' for parameter 'value' but got: '" + strValue + "'");
-      }
-      if(node == NULL) {
-        node = getDSS().getPropertySystem().createProperty(propName);
-      }
-      try {
-        node->setBooleanValue(value);
-      } catch(PropertyTypeMismatch& ex) {
-        return ResultToJSON(false, std::string("Error setting property: '") + ex.what() + "'");
-      }
-      return JSONOk();
-    } else if(endsWith(_method, "/setInteger")) {
-      std::string strValue = _parameter["value"];
-      int value;
-      try {
-        value = strToInt(strValue);
-      } catch(...) {
-        return ResultToJSON(false, "Could not convert parameter 'value' to std::string. Got: '" + strValue + "'");
-      }
-      if(node == NULL) {
-        node = getDSS().getPropertySystem().createProperty(propName);
-      }
-      try {
-        node->setIntegerValue(value);
-      } catch(PropertyTypeMismatch& ex) {
-        return ResultToJSON(false, std::string("Error setting property: '") + ex.what() + "'");
-      }
-      return JSONOk();
-    } else if(endsWith(_method, "/getChildren")) {
-      if(node == NULL) {
-        return ResultToJSON(false, "Could not find node named '" + propName + "'");
-      }
-      std::ostringstream sstream;
-      sstream << "[";
-      bool first = true;
-      for(int iChild = 0; iChild < node->getChildCount(); iChild++) {
-        if(!first) {
-          sstream << ",";
-        }
-        first = false;
-        PropertyNodePtr cnode = node->getChild(iChild);
-        sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(cnode->getName());
-        sstream << "," << ToJSONValue("type") << ":" << ToJSONValue(getValueTypeAsString(cnode->getValueType()));
-        sstream << "}";
-      }
-      sstream << "]";
-      return JSONOk(sstream.str());
-    } else if(endsWith(_method, "/getType")) {
-      if(node == NULL) {
-        return ResultToJSON(false, "Could not find node named '" + propName + "'");
-      }
-      std::ostringstream sstream;
-      sstream << ":" << ToJSONValue("type") << ":" << ToJSONValue(getValueTypeAsString(node->getValueType())) << "}";
-      return JSONOk(sstream.str());
-    } else {
-      _handled = false;
-    }
-    return "";
-  } // handlePropertyCall
-
-  std::string WebServer::handleEventCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
-    _handled = true;
-    std::string result;
-    if(endsWith(_method, "/raise")) {
-      std::string name = _parameter["name"];
-      std::string location = _parameter["location"];
-      std::string context = _parameter["context"];
-      std::string parameter = _parameter["parameter"];
-
-      boost::shared_ptr<Event> evt(new Event(name));
-      if(!context.empty()) {
-        evt->setContext(context);
-      }
-      if(!location.empty()) {
-        evt->setLocation(location);
-      }
-      std::vector<std::string> params = dss::splitString(parameter, ';');
-      for(std::vector<std::string>::iterator iParam = params.begin(), e = params.end();
-          iParam != e; ++iParam)
-      {
-        std::vector<std::string> nameValue = dss::splitString(*iParam, '=');
-        if(nameValue.size() == 2) {
-          dss::Logger::getInstance()->log("WebServer::handleEventCall: Got parameter '" + nameValue[0] + "'='" + nameValue[1] + "'");
-          evt->setProperty(nameValue[0], nameValue[1]);
-        } else {
-          dss::Logger::getInstance()->log(std::string("Invalid parameter found WebServer::handleEventCall: ") + *iParam );
-        }
-      }
-      
-      getDSS().getEventQueue().pushEvent(evt);
-      return ResultToJSON(true);
-    } else {
-      _handled = false;
-    }
-    return result;
-  } // handleEventCall
-
-  std::string WebServer::handleSystemCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
-    _handled = true;
-    if(endsWith(_method, "/version")) {
-      return ResultToJSON(true, DSS::getInstance()->versionString());
-    } else {
-      _handled = false;
-      return std::string();
-    }
-  } // handleEventCall
-
-  std::string WebServer::handleStructureCall(const std::string& _method,
-                                        HashMapConstStringString& _parameter,
-                                        struct mg_connection* _connection,
-                                        bool& _handled,
-                                        Session* _session) {
-    _handled = true;
-    StructureManipulator manipulator(getDSS().getDS485Interface(), getDSS().getApartment());
-    if(endsWith(_method, "structure/zoneAddDevice")) {
-      std::string devidStr = _parameter["devid"];
-      if(!devidStr.empty()) {
-        dsid_t devid = dsid::fromString(devidStr);
-
-        Device& dev = DSS::getInstance()->getApartment().getDeviceByDSID(devid);
-        if(!dev.isPresent()) {
-          return ResultToJSON(false, "cannot add nonexisting device to a zone");
-        }
-
-        std::string zoneIDStr = _parameter["zone"];
-        if(!zoneIDStr.empty()) {
-          try {
-            int zoneID = strToInt(zoneIDStr);
-            DeviceReference devRef(dev, &DSS::getInstance()->getApartment());
-            try {
-              Zone& zone = getDSS().getApartment().getZone(zoneID);
-              manipulator.addDeviceToZone(dev, zone);
-            } catch(ItemNotFoundException&) {
-              return ResultToJSON(false, "Could not find zone");
-            }
-          } catch(std::runtime_error& err) {
-            return ResultToJSON(false, err.what());
-          }
-        }
-        return ResultToJSON(true);
-      } else {
-        return ResultToJSON(false, "Need parameter devid");
-      }
-    } else if(endsWith(_method, "structure/addZone")) {
-      int zoneID = -1;
-
-      std::string zoneIDStr = _parameter["zoneID"];
-      if(!zoneIDStr.empty()) {
-        zoneID = strToIntDef(zoneIDStr, -1);
-      }
-      if(zoneID != -1) {
-        getDSS().getApartment().allocateZone(zoneID);
-      } else {
-        return ResultToJSON(false, "could not find zone");
-      }
-      return ResultToJSON(true, "");
-    } else if(endsWith(_method, "structure/removeZone")) {
-      int zoneID = -1;
-      
-      std::string zoneIDStr = _parameter["zoneID"];
-      if(!zoneIDStr.empty()) {
-        zoneID = strToIntDef(zoneIDStr, -1);
-      }
-      if(zoneID != -1) {
-        try {
-          Zone& zone = getDSS().getApartment().getZone(zoneID);
-          if(zone.getFirstZoneOnModulator() != -1) {
-            return ResultToJSON(false, "Cannot delete a primary zone");
-          }
-          if(zone.getDevices().length() > 0) {
-            return ResultToJSON(false, "Cannot delete a non-empty zone");
-          }
-          getDSS().getApartment().removeZone(zoneID);
-          getDSS().getApartment().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
-          return JSONOk();
-        } catch(ItemNotFoundException&) {
-          return ResultToJSON(false, "Could not find zone");
-        }
-      } else {
-        return ResultToJSON(false, "Missing parameter zoneID");
-      }
-    } else {
-      _handled = false;
-      return "";
-    }
-  } // handleStructureCall
-
-  std::string WebServer::handleSimCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
-    _handled = true;
-    if(beginsWith(_method, "sim/switch")) {
-      if(endsWith(_method, "/switch/pressed")) {
-        int buttonNr = strToIntDef(_parameter["buttonnr"], -1);
-        if(buttonNr == -1) {
-          return ResultToJSON(false, "Invalid button number");
-        }
-
-        int zoneID = strToIntDef(_parameter["zoneID"], -1);
-        if(zoneID == -1) {
-          return ResultToJSON(false, "Could not parse zoneID");
-        }
-        int groupID = strToIntDef(_parameter["groupID"], -1);
-        if(groupID == -1) {
-          return ResultToJSON(false, "Could not parse groupID");
-        }
-        try {
-          Zone& zone = getDSS().getApartment().getZone(zoneID);
-          Group* pGroup = zone.getGroup(groupID);
-
-          if(pGroup == NULL) {
-            return ResultToJSON(false, "Could not find group");
-          }
-
-          switch(buttonNr) {
-          case 1: // upper-left
-          case 3: // upper-right
-          case 7: // lower-left
-          case 9: // lower-right
-            break;
-          case 2: // up
-            pGroup->increaseValue();
-            break;
-          case 8: // down
-            pGroup->decreaseValue();
-            break;
-          case 4: // left
-            pGroup->previousScene();
-            break;
-          case 6: // right
-            pGroup->nextScene();
-            break;
-          case 5:
-            {
-              if(groupID == GroupIDGreen) {
-                getDSS().getApartment().getGroup(0).callScene(SceneBell);
-              } else if(groupID == GroupIDRed){
-                getDSS().getApartment().getGroup(0).callScene(SceneAlarm);
-              } else {
-                const int lastScene = pGroup->getLastCalledScene();
-                if(lastScene == SceneOff || lastScene == SceneDeepOff ||
-                   lastScene == SceneStandBy || lastScene == ScenePanic)
-                {
-                  pGroup->callScene(Scene1);
-                } else {
-                  pGroup->callScene(SceneOff);
-                }
-              }
-            }
-            break;
-          default:
-            return ResultToJSON(false, "Invalid button nr (range is 1..9)");
-          }
-        } catch(std::runtime_error&) {
-          return ResultToJSON(false, "Could not find zone");
-        }
-      } else {
-        _handled = false;
-        return "";
-      }
-    } else if(beginsWith(_method, "sim/addDevice")) {
-      std::string type = _parameter["type"];
-      std::string dsidStr = _parameter["dsid"];
-      // TODO: not finished yet ;)
-    } else {
-      _handled = false;
-    }
-    return "";
-  } // handleSimCall
-
-  std::string WebServer::handleDebugCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
-    _handled = true;
-    if(endsWith(_method, "/sendFrame")) {
-      int destination = strToIntDef(_parameter["destination"],0) & 0x3F;
-      bool broadcast = _parameter["broadcast"] == "true";
-      int counter = strToIntDef(_parameter["counter"], 0x00) & 0x03;
-      int command = strToIntDef(_parameter["command"], 0x09 /* request */) & 0x00FF;
-      int length = strToIntDef(_parameter["length"], 0x00) & 0x0F;
-
-      std::cout
-           << "sending frame: "
-           << "\ndest:    " << destination
-           << "\nbcst:    " << broadcast
-           << "\ncntr:    " << counter
-           << "\ncmd :    " << command
-           << "\nlen :    " << length << std::endl;
-
-      DS485CommandFrame* frame = new DS485CommandFrame();
-      frame->getHeader().setBroadcast(broadcast);
-      frame->getHeader().setDestination(destination);
-      frame->getHeader().setCounter(counter);
-      frame->setCommand(command);
-      for(int iByte = 0; iByte < length; iByte++) {
-        uint8_t byte = strToIntDef(_parameter[std::string("payload_") + intToString(iByte+1)], 0xFF);
-        std::cout << "b" << std::dec << iByte << ": " << std::hex << (int)byte << "\n";
-        frame->getPayload().add<uint8_t>(byte);
-      }
-      std::cout << std::dec << "done" << std::endl;
-      DS485Interface* intf = &DSS::getInstance()->getDS485Interface();
-      DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
-      if(proxy != NULL) {
-        proxy->sendFrame(*frame);
-      } else {
-        delete frame;
-      }
-      return ResultToJSON(true);
-    } else if(endsWith(_method, "debug/dSLinkSend")) {
-      std::string deviceDSIDString = _parameter["dsid"];
+  class DeviceRequestHandler : public DeviceInterfaceRequestHandler {
+  public:
+    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session) {
+      bool ok = true;
+      std::string errorMessage;
+      std::string deviceName = _request.getParameter("name");
+      std::string deviceDSIDString = _request.getParameter("dsid");
       Device* pDevice = NULL;
       if(!deviceDSIDString.empty()) {
         dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
@@ -1586,250 +703,877 @@ namespace dss {
             Device& device = getDSS().getApartment().getDeviceByDSID(deviceDSID);
             pDevice = &device;
           } catch(std::runtime_error& e) {
-            return ResultToJSON(false ,"Could not find device with dsid '" + deviceDSIDString + "'");
+            ok = false;
+            errorMessage = "Could not find device with dsid '" + deviceDSIDString + "'";
+          }
+        } else {
+          ok = false;
+          errorMessage = "Could not parse dsid '" + deviceDSIDString + "'";
+        }
+      } else if(!deviceName.empty()) {
+        try {
+          Device& device = getDSS().getApartment().getDeviceByName(deviceName);
+          pDevice = &device;
+        } catch(std::runtime_error&  e) {
+          ok = false;
+          errorMessage = "Could not find device named '" + deviceName + "'";
+        }
+      } else {
+        ok = false;
+        errorMessage = "Need parameter name or dsid to identify device";
+      }
+      if(ok) {
+        if(isDeviceInterfaceCall(_request)) {
+          return handleDeviceInterfaceRequest(_request, pDevice);
+        } else if(_request.getMethod() == "getGroups") {
+          int numGroups = pDevice->getGroupsCount();
+          std::ostringstream sstream;
+          sstream << "{ " << ToJSONValue("groups") << ": [";
+          bool first = true;
+          for(int iGroup = 0; iGroup < numGroups; iGroup++) {
+            if(!first) {
+              sstream << ", ";
+            }
+            first = false;
+            try {
+              Group& group = pDevice->getGroupByIndex(iGroup);
+              sstream << "{ " << ToJSONValue("id") << ":" << group.getID();
+              if(!group.getName().empty()) {
+                sstream << ", " << ToJSONValue("name") << ":" << ToJSONValue(group.getName());
+              }
+            } catch(std::runtime_error&) {
+              Logger::getInstance()->log("DeviceRequestHandler: Group only present at device level");
+            }
+            sstream << "}";
+          }
+          sstream << "]}";
+          return sstream.str();
+        } else if(_request.getMethod() == "getState") {
+          std::ostringstream sstream;
+          sstream << "{ " << ToJSONValue("isOn") << ":" << ToJSONValue(pDevice->isOn()) << " }";
+          return JSONOk(sstream.str());
+        } else if(_request.getMethod() == "getName") {
+          std::ostringstream sstream;
+          sstream << "{ " << ToJSONValue("name") << ":" << ToJSONValue(pDevice->getName()) << " }";
+          return JSONOk(sstream.str());
+        } else if(_request.getMethod() == "setName") {
+          pDevice->setName(_request.getParameter("newName"));
+          return ResultToJSON(true);
+        } else if(_request.getMethod() == "enable") {
+          pDevice->enable();
+          return ResultToJSON(true);
+        } else if(_request.getMethod() == "disable") {
+          pDevice->disable();
+          return ResultToJSON(true);
+        } else if(_request.getMethod() == "setRawValue") {
+          int value = strToIntDef(_request.getParameter("value"), -1);
+          if(value == -1) {
+            return ResultToJSON(false, "Invalid or missing parameter 'value'");
+          }
+          int parameterID = strToIntDef(_request.getParameter("parameterID"), -1);
+          if(parameterID == -1) {
+            return ResultToJSON(false, "Invalid or missing parameter 'parameterID'");
+          }
+          int size = strToIntDef(_request.getParameter("size"), -1);
+          if(size == -1) {
+            return ResultToJSON(false, "Invalid or missing parameter 'size'");
+          }
+
+          pDevice->setRawValue(value, parameterID, size);
+          return JSONOk();
+        } else {
+          throw std::runtime_error("Unhandled function");
+        }
+      } else {
+        return ResultToJSON(ok, errorMessage);
+      }
+    } // handleRequest
+  }; // DeviceRequestHandler
+
+  class CircuitRequestHandler : public WebServerRequestHandler {
+  public:
+    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session) {
+      std::string idString = _request.getParameter("id");
+      if(idString.empty()) {
+        return ResultToJSON(false, "missing parameter id");
+      }
+      dsid_t dsid = dsid_t::fromString(idString);
+      if(dsid == NullDSID) {
+        return ResultToJSON(false, "could not parse dsid");
+      }
+      try {
+        Modulator& modulator = getDSS().getApartment().getModulatorByDSID(dsid);
+        if(_request.getMethod() == "getName") {
+          return JSONOk("{ " + ToJSONValue("name") + ": " + ToJSONValue(modulator.getName()) + "}");
+        } else if(_request.getMethod() == "setName") {
+          modulator.setName(_request.getParameter("newName"));
+          return ResultToJSON(true);
+        } else if(_request.getMethod() == "getEnergyBorder") {
+          std::ostringstream sstream;
+          sstream << "{" << ToJSONValue("orange") << ":" << ToJSONValue(modulator.getEnergyLevelOrange());
+          sstream << "," << ToJSONValue("red") << ":" << ToJSONValue(modulator.getEnergyLevelRed());
+          sstream << "}";
+          return JSONOk(sstream.str());
+        } else if(_request.getMethod() == "getConsumption") {
+          return JSONOk("{ " + ToJSONValue("consumption") + ": " +  uintToString(modulator.getPowerConsumption()) +"}");
+        } else if(_request.getMethod() == "getEnergyMeterValue") {
+          return JSONOk("{ " + ToJSONValue("metervalue") + ": " +  uintToString(modulator.getEnergyMeterValue()) +"}");
+        } else if(_request.getMethod() == "rescan") {
+          modulator.setIsValid(false);
+          return ResultToJSON(true);
+        } else {
+          throw std::runtime_error("Unhandled function");
+        }
+      } catch(std::runtime_error&) {
+        return ResultToJSON(false, "could not find modulator with given dsid");
+      }
+      return "";
+    } // handleRequest
+  }; // CircuitRequestHandler
+
+  class SetRequestHandler : public DeviceInterfaceRequestHandler {
+  public:
+    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session) {
+      if(_request.getMethod() == "fromApartment") {
+        return JSONOk("{'self': '.'}");
+      } else {
+        std::string self = trim(_request.getParameter("self"));
+        if(self.empty()) {
+          return ResultToJSON(false, "missing parameter 'self'");
+        }
+
+        if(_request.getMethod() == "byZone") {
+          std::string additionalPart;
+          if(self != ".") {
+            additionalPart = ".";
+          }
+          if(!_request.getParameter("zoneID").empty()) {
+            additionalPart += "zone(" + _request.getParameter("zoneID") + ")";
+          } else if(!_request.getParameter("zoneName").empty()) {
+            additionalPart += _request.getParameter("zoneName");
+          } else {
+            return ResultToJSON(false, "missing either zoneID or zoneName");
+          }
+
+          std::ostringstream sstream;
+          sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
+          return JSONOk(sstream.str());
+        } else if(_request.getMethod() == "byGroup") {
+          std::string additionalPart;
+          if(self != ".") {
+            additionalPart = ".";
+          }
+          if(!_request.getParameter("groupID").empty()) {
+            additionalPart += "group(" + _request.getParameter("groupID") + ")";
+          } else if(!_request.getParameter("groupName").empty()) {
+            additionalPart += _request.getParameter("groupName");
+          } else {
+            return ResultToJSON(false, "missing either groupID or groupName");
+          }
+
+          std::ostringstream sstream;
+          sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
+          return JSONOk(sstream.str());
+        } else if(_request.getMethod() == "byDSID") {
+          std::string additionalPart;
+          if(self != ".") {
+            additionalPart = ".";
+          }
+          if(!_request.getParameter("dsid").empty()) {
+            additionalPart += "dsid(" + _request.getParameter("dsid") + ")";
+          } else {
+            return ResultToJSON(false, "missing parameter dsid");
+          }
+
+          std::ostringstream sstream;
+          sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
+          return JSONOk(sstream.str());
+        } else if(_request.getMethod() == "getDevices") {
+          SetBuilder builder(getDSS().getApartment());
+          Set set = builder.buildSet(self, NULL);
+          return JSONOk("{" + ToJSONValue(set, "devices") + "}");
+        } else if(_request.getMethod() == "add") {
+          std::string other = _request.getParameter("other");
+          if(other.empty()) {
+            return ResultToJSON(false, "missing parameter other");
+          }
+          std::string additionalPart;
+          if(self != ".") {
+            additionalPart = ".";
+          }
+          additionalPart += "add(" + other + ")";
+
+          std::ostringstream sstream;
+          sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
+          return JSONOk(sstream.str());
+        } else if(_request.getMethod() == "subtract") {
+          std::string other = _request.getParameter("other");
+          if(other.empty()) {
+            return ResultToJSON(false, "missing parameter other");
+          }
+          std::string additionalPart;
+          if(self != ".") {
+            additionalPart = ".";
+          }
+          additionalPart += "subtract(" + other + ")";
+
+          std::ostringstream sstream;
+          sstream << "{" << ToJSONValue("self") << ":" << ToJSONValue(self + additionalPart) << "}";
+          return JSONOk(sstream.str());
+        } else if(isDeviceInterfaceCall(_request)) {
+          SetBuilder builder(getDSS().getApartment());
+          Set set = builder.buildSet(self, NULL);
+          return handleDeviceInterfaceRequest(_request, &set);
+        } else {
+          throw std::runtime_error("Unhandled function");
+        }
+
+      }
+      return "";
+    } // handleRequest
+  }; // SetRequestHandler
+
+  class PropertyRequestHandler : public WebServerRequestHandler {
+  public:
+    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session) {
+      std::string propName = _request.getParameter("path");
+      if(propName.empty()) {
+        return ResultToJSON(false, "Need parameter \'path\' for property operations");
+      }
+      PropertyNodePtr node = getDSS().getPropertySystem().getProperty(propName);
+
+      if(_request.getMethod() == "getString") {
+        if(node == NULL) {
+          return ResultToJSON(false, "Could not find node named '" + propName + "'");
+        }
+        try {
+          std::ostringstream sstream;
+          sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getStringValue()) << "}";
+          return JSONOk(sstream.str());
+        } catch(PropertyTypeMismatch& ex) {
+          return ResultToJSON(false, std::string("Error getting property: '") + ex.what() + "'");
+        }
+      } else if(_request.getMethod() == "getInteger") {
+        if(node == NULL) {
+          return ResultToJSON(false, "Could not find node named '" + propName + "'");
+        }
+        try {
+          std::ostringstream sstream;
+          sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getIntegerValue()) << "}";
+          return JSONOk(sstream.str());
+        } catch(PropertyTypeMismatch& ex) {
+          return ResultToJSON(false, std::string("Error getting property: '") + ex.what() + "'");
+        }
+      } else if(_request.getMethod() == "getBoolean") {
+        if(node == NULL) {
+          return ResultToJSON(false, "Could not find node named '" + propName + "'");
+        }
+        try {
+          std::ostringstream sstream;
+          sstream << "{ " << ToJSONValue("value") << ": " << ToJSONValue(node->getBoolValue()) << "}";
+          return JSONOk(sstream.str());
+        } catch(PropertyTypeMismatch& ex) {
+          return ResultToJSON(false, std::string("Error getting property: '") + ex.what() + "'");
+        }
+      } else if(_request.getMethod() == "setString") {
+        std::string value = _request.getParameter("value");
+        if(node == NULL) {
+          node = getDSS().getPropertySystem().createProperty(propName);
+        }
+        try {
+          node->setStringValue(value);
+        } catch(PropertyTypeMismatch& ex) {
+          return ResultToJSON(false, std::string("Error setting property: '") + ex.what() + "'");
+        }
+        return JSONOk();
+      } else if(_request.getMethod() == "setBoolean") {
+        std::string strValue = _request.getParameter("value");
+        bool value;
+        if(strValue == "true") {
+          value = true;
+        } else if(strValue == "false") {
+          value = false;
+        } else {
+          return ResultToJSON(false, "Expected 'true' or 'false' for parameter 'value' but got: '" + strValue + "'");
+        }
+        if(node == NULL) {
+          node = getDSS().getPropertySystem().createProperty(propName);
+        }
+        try {
+          node->setBooleanValue(value);
+        } catch(PropertyTypeMismatch& ex) {
+          return ResultToJSON(false, std::string("Error setting property: '") + ex.what() + "'");
+        }
+        return JSONOk();
+      } else if(_request.getMethod() == "setInteger") {
+        std::string strValue = _request.getParameter("value");
+        int value;
+        try {
+          value = strToInt(strValue);
+        } catch(...) {
+          return ResultToJSON(false, "Could not convert parameter 'value' to std::string. Got: '" + strValue + "'");
+        }
+        if(node == NULL) {
+          node = getDSS().getPropertySystem().createProperty(propName);
+        }
+        try {
+          node->setIntegerValue(value);
+        } catch(PropertyTypeMismatch& ex) {
+          return ResultToJSON(false, std::string("Error setting property: '") + ex.what() + "'");
+        }
+        return JSONOk();
+      } else if(_request.getMethod() == "getChildren") {
+        if(node == NULL) {
+          return ResultToJSON(false, "Could not find node named '" + propName + "'");
+        }
+        std::ostringstream sstream;
+        sstream << "[";
+        bool first = true;
+        for(int iChild = 0; iChild < node->getChildCount(); iChild++) {
+          if(!first) {
+            sstream << ",";
+          }
+          first = false;
+          PropertyNodePtr cnode = node->getChild(iChild);
+          sstream << "{" << ToJSONValue("name") << ":" << ToJSONValue(cnode->getName());
+          sstream << "," << ToJSONValue("type") << ":" << ToJSONValue(getValueTypeAsString(cnode->getValueType()));
+          sstream << "}";
+        }
+        sstream << "]";
+        return JSONOk(sstream.str());
+      } else if(_request.getMethod() == "getType") {
+        if(node == NULL) {
+          return ResultToJSON(false, "Could not find node named '" + propName + "'");
+        }
+        std::ostringstream sstream;
+        sstream << ":" << ToJSONValue("type") << ":" << ToJSONValue(getValueTypeAsString(node->getValueType())) << "}";
+        return JSONOk(sstream.str());
+      } else {
+        throw std::runtime_error("Unhandled function");
+      }
+      return "";
+    } // handleRequest
+  }; // PropertyRequestHandler
+
+  class EventRequestHandler : public WebServerRequestHandler {
+  public:
+    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session) {
+      if(_request.getMethod() == "raise") {
+        std::string name = _request.getParameter("name");
+        std::string location = _request.getParameter("location");
+        std::string context = _request.getParameter("context");
+        std::string parameter = _request.getParameter("parameter");
+
+        boost::shared_ptr<Event> evt(new Event(name));
+        if(!context.empty()) {
+          evt->setContext(context);
+        }
+        if(!location.empty()) {
+          evt->setLocation(location);
+        }
+        std::vector<std::string> params = dss::splitString(parameter, ';');
+        for(std::vector<std::string>::iterator iParam = params.begin(), e = params.end();
+            iParam != e; ++iParam)
+        {
+          std::vector<std::string> nameValue = dss::splitString(*iParam, '=');
+          if(nameValue.size() == 2) {
+            dss::Logger::getInstance()->log("WebServer::handleEventCall: Got parameter '" + nameValue[0] + "'='" + nameValue[1] + "'");
+            evt->setProperty(nameValue[0], nameValue[1]);
+          } else {
+            dss::Logger::getInstance()->log(std::string("Invalid parameter found WebServer::handleEventCall: ") + *iParam );
+          }
+        }
+
+        getDSS().getEventQueue().pushEvent(evt);
+        return ResultToJSON(true);
+      } else {
+        throw std::runtime_error("Unhandled function");
+      }
+    } // handleRequest
+  }; // EventRequestHandler
+
+  class SystemRequestHandler : public WebServerRequestHandler {
+  public:
+    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session) {
+      if(_request.getMethod() == "version") {
+        return ResultToJSON(true, DSS::getInstance()->versionString());
+      }
+      throw std::runtime_error("Unhandled function");
+    } // handleRequest
+  }; // SystemRequestHandler
+
+  class StructureRequestHandler : public WebServerRequestHandler {
+  public:
+    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session) {
+      StructureManipulator manipulator(getDSS().getDS485Interface(), getDSS().getApartment());
+      if(_request.getMethod() == "zoneAddDevice") {
+        std::string devidStr = _request.getParameter("devid");
+        if(!devidStr.empty()) {
+          dsid_t devid = dsid::fromString(devidStr);
+
+          Device& dev = DSS::getInstance()->getApartment().getDeviceByDSID(devid);
+          if(!dev.isPresent()) {
+            return ResultToJSON(false, "cannot add nonexisting device to a zone");
+          }
+
+          std::string zoneIDStr = _request.getParameter("zone");
+          if(!zoneIDStr.empty()) {
+            try {
+              int zoneID = strToInt(zoneIDStr);
+              DeviceReference devRef(dev, &DSS::getInstance()->getApartment());
+              try {
+                Zone& zone = getDSS().getApartment().getZone(zoneID);
+                manipulator.addDeviceToZone(dev, zone);
+              } catch(ItemNotFoundException&) {
+                return ResultToJSON(false, "Could not find zone");
+              }
+            } catch(std::runtime_error& err) {
+              return ResultToJSON(false, err.what());
+            }
+          }
+          return ResultToJSON(true);
+        } else {
+          return ResultToJSON(false, "Need parameter devid");
+        }
+      } else if(_request.getMethod() == "addZone") {
+        int zoneID = -1;
+
+        std::string zoneIDStr = _request.getParameter("zoneID");
+        if(!zoneIDStr.empty()) {
+          zoneID = strToIntDef(zoneIDStr, -1);
+        }
+        if(zoneID != -1) {
+          getDSS().getApartment().allocateZone(zoneID);
+        } else {
+          return ResultToJSON(false, "could not find zone");
+        }
+        return ResultToJSON(true, "");
+      } else if(_request.getMethod() == "removeZone") {
+        int zoneID = -1;
+
+        std::string zoneIDStr = _request.getParameter("zoneID");
+        if(!zoneIDStr.empty()) {
+          zoneID = strToIntDef(zoneIDStr, -1);
+        }
+        if(zoneID != -1) {
+          try {
+            Zone& zone = getDSS().getApartment().getZone(zoneID);
+            if(zone.getFirstZoneOnModulator() != -1) {
+              return ResultToJSON(false, "Cannot delete a primary zone");
+            }
+            if(zone.getDevices().length() > 0) {
+              return ResultToJSON(false, "Cannot delete a non-empty zone");
+            }
+            getDSS().getApartment().removeZone(zoneID);
+            getDSS().getApartment().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+            return JSONOk();
+          } catch(ItemNotFoundException&) {
+            return ResultToJSON(false, "Could not find zone");
+          }
+        } else {
+          return ResultToJSON(false, "Missing parameter zoneID");
+        }
+      } else {
+        throw std::runtime_error("Unhandled function");
+      }
+    } // handleRequest
+  }; // StructureRequestHandler
+
+  class SimRequestHandler : public WebServerRequestHandler {
+  public:
+    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session) {
+      if(_request.getMethod() == "switch") {
+        if(_request.getMethod() == "switch/pressed") {
+          int buttonNr = strToIntDef(_request.getParameter("buttonnr"), -1);
+          if(buttonNr == -1) {
+            return ResultToJSON(false, "Invalid button number");
+          }
+
+          int zoneID = strToIntDef(_request.getParameter("zoneID"), -1);
+          if(zoneID == -1) {
+            return ResultToJSON(false, "Could not parse zoneID");
+          }
+          int groupID = strToIntDef(_request.getParameter("groupID"), -1);
+          if(groupID == -1) {
+            return ResultToJSON(false, "Could not parse groupID");
+          }
+          try {
+            Zone& zone = getDSS().getApartment().getZone(zoneID);
+            Group* pGroup = zone.getGroup(groupID);
+
+            if(pGroup == NULL) {
+              return ResultToJSON(false, "Could not find group");
+            }
+
+            switch(buttonNr) {
+            case 1: // upper-left
+            case 3: // upper-right
+            case 7: // lower-left
+            case 9: // lower-right
+              break;
+            case 2: // up
+              pGroup->increaseValue();
+              break;
+            case 8: // down
+              pGroup->decreaseValue();
+              break;
+            case 4: // left
+              pGroup->previousScene();
+              break;
+            case 6: // right
+              pGroup->nextScene();
+              break;
+            case 5:
+              {
+                if(groupID == GroupIDGreen) {
+                  getDSS().getApartment().getGroup(0).callScene(SceneBell);
+                } else if(groupID == GroupIDRed){
+                  getDSS().getApartment().getGroup(0).callScene(SceneAlarm);
+                } else {
+                  const int lastScene = pGroup->getLastCalledScene();
+                  if(lastScene == SceneOff || lastScene == SceneDeepOff ||
+                    lastScene == SceneStandBy || lastScene == ScenePanic)
+                  {
+                    pGroup->callScene(Scene1);
+                  } else {
+                    pGroup->callScene(SceneOff);
+                  }
+                }
+              }
+              break;
+            default:
+              return ResultToJSON(false, "Invalid button nr (range is 1..9)");
+            }
+          } catch(std::runtime_error&) {
+            return ResultToJSON(false, "Could not find zone");
+          }
+        }
+      } else if(_request.getMethod() == "addDevice") {
+        //std::string type = _parameter["type"];
+        //std::string dsidStr = _parameter["dsid"];
+        // TODO: not finished yet ;)
+        return "";
+      }
+      throw std::runtime_error("Unhandled function");
+    } // handleRequest
+  }; // SimRequestHandler
+
+  class DebugRequestHandler : public WebServerRequestHandler {
+  public:
+    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session) {
+      if(_request.getMethod() == "sendFrame") {
+        int destination = strToIntDef(_request.getParameter("destination"),0) & 0x3F;
+        bool broadcast = _request.getParameter("broadcast") == "true";
+        int counter = strToIntDef(_request.getParameter("counter"), 0x00) & 0x03;
+        int command = strToIntDef(_request.getParameter("command"), 0x09 /* request */) & 0x00FF;
+        int length = strToIntDef(_request.getParameter("length"), 0x00) & 0x0F;
+
+        std::cout
+            << "sending frame: "
+            << "\ndest:    " << destination
+            << "\nbcst:    " << broadcast
+            << "\ncntr:    " << counter
+            << "\ncmd :    " << command
+            << "\nlen :    " << length << std::endl;
+
+        DS485CommandFrame* frame = new DS485CommandFrame();
+        frame->getHeader().setBroadcast(broadcast);
+        frame->getHeader().setDestination(destination);
+        frame->getHeader().setCounter(counter);
+        frame->setCommand(command);
+        for(int iByte = 0; iByte < length; iByte++) {
+          uint8_t byte = strToIntDef(_request.getParameter(std::string("payload_") + intToString(iByte+1)), 0xFF);
+          std::cout << "b" << std::dec << iByte << ": " << std::hex << (int)byte << "\n";
+          frame->getPayload().add<uint8_t>(byte);
+        }
+        std::cout << std::dec << "done" << std::endl;
+        DS485Interface* intf = &DSS::getInstance()->getDS485Interface();
+        DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
+        if(proxy != NULL) {
+          proxy->sendFrame(*frame);
+        } else {
+          delete frame;
+        }
+        return ResultToJSON(true);
+      } else if(_request.getMethod() == "dSLinkSend") {
+        std::string deviceDSIDString =_request.getParameter("dsid");
+        Device* pDevice = NULL;
+        if(!deviceDSIDString.empty()) {
+          dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
+          if(!(deviceDSID == NullDSID)) {
+            try {
+              Device& device = getDSS().getApartment().getDeviceByDSID(deviceDSID);
+              pDevice = &device;
+            } catch(std::runtime_error& e) {
+              return ResultToJSON(false ,"Could not find device with dsid '" + deviceDSIDString + "'");
+            }
+          } else {
+            return ResultToJSON(false, "Could not parse dsid '" + deviceDSIDString + "'");
+          }
+        } else {
+          return ResultToJSON(false, "Missing parameter 'dsid'");
+        }
+
+        int iValue = strToIntDef(_request.getParameter("value"), -1);
+        if(iValue == -1) {
+          return ResultToJSON(false, "Missing parameter 'value'");
+        }
+        if(iValue < 0 || iValue > 0x00ff) {
+          return ResultToJSON(false, "Parameter 'value' is out of range (0-0xff)");
+        }
+        bool writeOnly = false;
+        bool lastValue = false;
+        if(_request.getParameter("writeOnly") == "true") {
+          writeOnly = true;
+        }
+        if(_request.getParameter("lastValue") == "true") {
+          lastValue = true;
+        }
+        uint8_t result;
+        try {
+          result = pDevice->dsLinkSend(iValue, lastValue, writeOnly);
+        } catch(std::runtime_error& e) {
+          return ResultToJSON(false, std::string("Error: ") + e.what());
+        }
+        if(writeOnly) {
+          return ResultToJSON(true);
+        } else {
+          std::ostringstream sstream;
+          sstream << "{" << ToJSONValue("value") << ":" << ToJSONValue(result) << "}";
+          return JSONOk(sstream.str());
+        }
+      } else if(_request.getMethod() == "pingDevice") {
+        std::string deviceDSIDString = _request.getParameter("dsid");
+        if(deviceDSIDString.empty()) {
+          return ResultToJSON(false, "Missing parameter 'dsid'");
+        }
+        try {
+          dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
+          Device& device = getDSS().getApartment().getDeviceByDSID(deviceDSID);
+          DS485CommandFrame* frame = new DS485CommandFrame();
+          frame->getHeader().setBroadcast(true);
+          frame->getHeader().setDestination(device.getModulatorID());
+          frame->setCommand(CommandRequest);
+          frame->getPayload().add<uint8_t>(FunctionDeviceGetTransmissionQuality);
+          frame->getPayload().add<uint16_t>(device.getShortAddress());
+          DS485Interface* intf = &DSS::getInstance()->getDS485Interface();
+          DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
+          if(proxy != NULL) {
+            boost::shared_ptr<FrameBucketCollector> bucket = proxy->sendFrameAndInstallBucket(*frame, FunctionDeviceGetTransmissionQuality);
+            bucket->waitForFrame(2000);
+
+            boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
+            if(recFrame == NULL) {
+              return ResultToJSON(false, "No result received");
+            }
+            PayloadDissector pd(recFrame->getFrame()->getPayload());
+            pd.get<uint8_t>();
+            int errC = int(pd.get<uint16_t>());
+            if(errC < 0) {
+              return ResultToJSON(false, "dSM reported error-code: " + intToString(errC));
+            }
+            pd.get<uint16_t>(); // device address
+            int qualityHK = pd.get<uint16_t>();
+            int qualityRK = pd.get<uint16_t>();
+            std::ostringstream sstream;
+            sstream << "{" << ToJSONValue("qualityHK") << ":" << ToJSONValue(qualityHK) << ",";
+            sstream << ToJSONValue("qualityRK") << ":" << ToJSONValue(qualityRK) << "}";
+            return JSONOk(sstream.str());
+          } else {
+            delete frame;
+            return ResultToJSON(false, "Proxy has a wrong type or is null");
+          }
+        } catch(ItemNotFoundException&) {
+          return ResultToJSON(false ,"Could not find device with dsid '" + deviceDSIDString + "'");
+        } catch(std::invalid_argument&) {
+          return ResultToJSON(false, "Could not parse dsid '" + deviceDSIDString + "'");
+        }
+      } else if(_request.getMethod() == "resetZone") {
+        std::string zoneIDStr = _request.getParameter("zoneID");
+        int zoneID;
+        try {
+          zoneID = strToInt(zoneIDStr);
+        } catch(std::runtime_error&) {
+          return ResultToJSON(false, "Could not parse Zone ID");
+        }
+        DS485CommandFrame* frame = new DS485CommandFrame();
+        frame->getHeader().setBroadcast(true);
+        frame->getHeader().setDestination(0);
+        frame->setCommand(CommandRequest);
+        frame->getPayload().add<uint8_t>(FunctionZoneRemoveAllDevicesFromZone);
+        frame->getPayload().add<uint8_t>(zoneID);
+        DS485Interface* intf = &DSS::getInstance()->getDS485Interface();
+        DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
+        if(proxy != NULL) {
+          proxy->sendFrame(*frame);
+          return ResultToJSON(true, "Please restart your dSMs");
+        } else {
+          delete frame;
+          return ResultToJSON(false, "Proxy has a wrong type or is null");
+        }
+      }
+      throw std::runtime_error("Unhandled function");
+    } // handleRequest
+  }; // DebugRequestHandler
+
+    class MeteringRequestHandler : public WebServerRequestHandler {
+    public:
+      virtual std::string handleRequest(const RestfulRequest& _request, Session* _session) {
+      if(_request.getMethod() == "getResolutions") {
+        std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = getDSS().getMetering().getConfig();
+        std::ostringstream sstream;
+        sstream << "{" << ToJSONValue("resolutions") << ":" << "[";
+        for(unsigned int iConfig = 0; iConfig < meteringConfig.size(); iConfig++) {
+          boost::shared_ptr<MeteringConfigChain> cConfig = meteringConfig[iConfig];
+          for(int jConfig = 0; jConfig < cConfig->size(); jConfig++) {
+            sstream << "{" << ToJSONValue("type") << ":" << (cConfig->isEnergy() ? ToJSONValue("energy") : ToJSONValue("consumption") ) << ","
+                    << ToJSONValue("unit") << ":" << ToJSONValue(cConfig->getUnit()) << ","
+                    << ToJSONValue("resolution") << ":" << ToJSONValue(cConfig->getResolution(jConfig)) << "}";
+            if(jConfig < cConfig->size() && iConfig < meteringConfig.size()) {
+              sstream << ",";
+            }
+          }
+        }
+        sstream << "]"  << "}";
+        return JSONOk(sstream.str());
+      } else if(_request.getMethod() == "getSeries") {
+        std::ostringstream sstream;
+        sstream << "{ " << ToJSONValue("series") << ": [";
+        bool first = true;
+        vector<Modulator*>& modulators = getDSS().getApartment().getModulators();
+        foreach(Modulator* modulator, modulators) {
+          if(!first) {
+            sstream << ",";
+          }
+          first = false;
+          sstream << "{ " << ToJSONValue("dsid") << ": " << ToJSONValue(modulator->getDSID().toString());
+          sstream << ", " << ToJSONValue("type") << ": " << ToJSONValue("energy");
+          sstream << "},";
+          sstream << "{ " << ToJSONValue("dsid") << ": " << ToJSONValue(modulator->getDSID().toString());
+          sstream << ", " << ToJSONValue("type") << ": " << ToJSONValue("consumption");
+          sstream << "}";
+        }
+        sstream << "]}";
+        return JSONOk(sstream.str());
+      } else if(_request.getMethod() == "getValues") { //?dsid=;n=,resolution=,type=
+        std::string errorMessage;
+        std::string deviceDSIDString = _request.getParameter("dsid");
+        std::string resolutionString = _request.getParameter("resolution");
+        std::string typeString = _request.getParameter("type");
+        std::string fileSuffix;
+        std::string storageLocation;
+        std::string seriesPath;
+        int resolution;
+        bool energy;
+        if(!deviceDSIDString.empty()) {
+          dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
+          if(!(deviceDSID == NullDSID)) {
+            try {
+              getDSS().getApartment().getModulatorByDSID(deviceDSID);
+            } catch(std::runtime_error& e) {
+              return ResultToJSON(false, "Could not find device with dsid '" + deviceDSIDString + "'");
+            }
+          } else {
+          return ResultToJSON(false, "Could not parse dsid '" + deviceDSIDString + "'");
           }
         } else {
           return ResultToJSON(false, "Could not parse dsid '" + deviceDSIDString + "'");
         }
-      } else {
-        return ResultToJSON(false, "Missing parameter 'dsid'");
-      }
-
-      int iValue = strToIntDef(_parameter["value"], -1);
-      if(iValue == -1) {
-        return ResultToJSON(false, "Missing parameter 'value'");
-      }
-      if(iValue < 0 || iValue > 0x00ff) {
-        return ResultToJSON(false, "Parameter 'value' is out of range (0-0xff)");
-      }
-      bool writeOnly = false;
-      bool lastValue = false;
-      if(_parameter["writeOnly"] == "true") {
-        writeOnly = true;
-      }
-      if(_parameter["lastValue"] == "true") {
-        lastValue = true;
-      }
-      uint8_t result;
-      try {
-        result = pDevice->dsLinkSend(iValue, lastValue, writeOnly);
-      } catch(std::runtime_error& e) {
-        return ResultToJSON(false, std::string("Error: ") + e.what());
-      }
-      if(writeOnly) {
-        return ResultToJSON(true);
-      } else {
-        std::ostringstream sstream;
-        sstream << "{" << ToJSONValue("value") << ":" << ToJSONValue(result) << "}";
-        return JSONOk(sstream.str());
-      }
-    } else if(endsWith(_method, "debug/pingDevice")) {
-      std::string deviceDSIDString = _parameter["dsid"];
-      if(deviceDSIDString.empty()) {
-        return ResultToJSON(false, "Missing parameter 'dsid'");
-      }
-      try {
-        dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
-        Device& device = getDSS().getApartment().getDeviceByDSID(deviceDSID);
-        DS485CommandFrame* frame = new DS485CommandFrame();
-        frame->getHeader().setBroadcast(true);
-        frame->getHeader().setDestination(device.getModulatorID());
-        frame->setCommand(CommandRequest);
-        frame->getPayload().add<uint8_t>(FunctionDeviceGetTransmissionQuality);
-        frame->getPayload().add<uint16_t>(device.getShortAddress());
-        DS485Interface* intf = &DSS::getInstance()->getDS485Interface();
-        DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
-        if(proxy != NULL) {
-          boost::shared_ptr<FrameBucketCollector> bucket = proxy->sendFrameAndInstallBucket(*frame, FunctionDeviceGetTransmissionQuality);
-          bucket->waitForFrame(2000);
-
-          boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
-          if(recFrame == NULL) {
-            return ResultToJSON(false, "No result received");
-          }
-          PayloadDissector pd(recFrame->getFrame()->getPayload());
-          pd.get<uint8_t>();
-          int errC = int(pd.get<uint16_t>());
-          if(errC < 0) {
-            return ResultToJSON(false, "dSM reported error-code: " + intToString(errC));
-          }
-          pd.get<uint16_t>(); // device address
-          int qualityHK = pd.get<uint16_t>();
-          int qualityRK = pd.get<uint16_t>();
-          std::ostringstream sstream;
-          sstream << "{" << ToJSONValue("qualityHK") << ":" << ToJSONValue(qualityHK) << ",";
-          sstream << ToJSONValue("qualityRK") << ":" << ToJSONValue(qualityRK) << "}";
-          return JSONOk(sstream.str());
+        resolution = strToIntDef(resolutionString, -1);
+        if(resolution == -1) {
+          return ResultToJSON(false, "Need could not parse resolution '" + resolutionString + "'");
+        }
+        if(typeString.empty()) {
+          return ResultToJSON(false, "Need a type, 'energy' or 'consumption'");
         } else {
-          delete frame;
-          return ResultToJSON(false, "Proxy has a wrong type or is null");
-        }              
-      } catch(ItemNotFoundException&) {
-        return ResultToJSON(false ,"Could not find device with dsid '" + deviceDSIDString + "'");
-      } catch(std::invalid_argument&) {
-        return ResultToJSON(false, "Could not parse dsid '" + deviceDSIDString + "'");
-      }
-    } else if(endsWith(_method, "debug/resetZone")) {
-      std::string zoneIDStr = _parameter["zoneID"];
-      int zoneID;
-      try {
-        zoneID = strToInt(zoneIDStr);
-      } catch(std::runtime_error&) {
-        return ResultToJSON(false, "Could not parse Zone ID");
-      }
-      DS485CommandFrame* frame = new DS485CommandFrame();
-      frame->getHeader().setBroadcast(true);
-      frame->getHeader().setDestination(0);
-      frame->setCommand(CommandRequest);
-      frame->getPayload().add<uint8_t>(FunctionZoneRemoveAllDevicesFromZone);
-      frame->getPayload().add<uint8_t>(zoneID);
-      DS485Interface* intf = &DSS::getInstance()->getDS485Interface();
-      DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
-      if(proxy != NULL) {
-        proxy->sendFrame(*frame);
-        return ResultToJSON(true, "Please restart your dSMs");
-      } else {
-        delete frame;
-        return ResultToJSON(false, "Proxy has a wrong type or is null");
-      }
-    } else {
-      _handled = false;
-      return "";
-    }
-  } // handleDebugCall
-
-  std::string WebServer::handleMeteringCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session) {
-    if(endsWith(_method, "/getResolutions")) {
-      _handled = true;
-      std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = getDSS().getMetering().getConfig();
-      std::ostringstream sstream;
-      sstream << "{" << ToJSONValue("resolutions") << ":" << "[";
-      for(unsigned int iConfig = 0; iConfig < meteringConfig.size(); iConfig++) {
-        boost::shared_ptr<MeteringConfigChain> cConfig = meteringConfig[iConfig];
-        for(int jConfig = 0; jConfig < cConfig->size(); jConfig++) {
-          sstream << "{" << ToJSONValue("type") << ":" << (cConfig->isEnergy() ? ToJSONValue("energy") : ToJSONValue("consumption") ) << ","
-                  << ToJSONValue("unit") << ":" << ToJSONValue(cConfig->getUnit()) << ","
-                  << ToJSONValue("resolution") << ":" << ToJSONValue(cConfig->getResolution(jConfig)) << "}";
-          if(jConfig < cConfig->size() && iConfig < meteringConfig.size()) {
-            sstream << ",";
-          }
-        }
-      }
-      sstream << "]"  << "}";
-      return JSONOk(sstream.str());
-    } else if(endsWith(_method, "/getSeries")) {
-      _handled = true;
-      std::ostringstream sstream;
-      sstream << "{ " << ToJSONValue("series") << ": [";
-      bool first = true;
-      vector<Modulator*>& modulators = getDSS().getApartment().getModulators();
-      foreach(Modulator* modulator, modulators) {
-        if(!first) {
-          sstream << ",";
-        }
-        first = false;
-        sstream << "{ " << ToJSONValue("dsid") << ": " << ToJSONValue(modulator->getDSID().toString());
-        sstream << ", " << ToJSONValue("type") << ": " << ToJSONValue("energy");
-        sstream << "},";
-        sstream << "{ " << ToJSONValue("dsid") << ": " << ToJSONValue(modulator->getDSID().toString());
-        sstream << ", " << ToJSONValue("type") << ": " << ToJSONValue("consumption");
-        sstream << "}";
-      }
-      sstream << "]}";
-      return JSONOk(sstream.str());
-    } else if(endsWith(_method, "/getValues")) { //?dsid=;n=,resolution=,type=
-      _handled = true;
-      std::string errorMessage;
-      std::string deviceDSIDString = _parameter["dsid"];
-      std::string resolutionString = _parameter["resolution"];
-      std::string typeString = _parameter["type"];
-      std::string fileSuffix;
-      std::string storageLocation;
-      std::string seriesPath;
-      int resolution;
-      bool energy;
-      if(!deviceDSIDString.empty()) {
-        dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
-        if(!(deviceDSID == NullDSID)) {
-          try {
-            getDSS().getApartment().getModulatorByDSID(deviceDSID);
-          } catch(std::runtime_error& e) {
-            return ResultToJSON(false, "Could not find device with dsid '" + deviceDSIDString + "'");
-          }
-        } else {
-         return ResultToJSON(false, "Could not parse dsid '" + deviceDSIDString + "'");
-        }
-      } else {
-        return ResultToJSON(false, "Could not parse dsid '" + deviceDSIDString + "'");
-      }
-      resolution = strToIntDef(resolutionString, -1);
-      if(resolution == -1) {
-        return ResultToJSON(false, "Need could not parse resolution '" + resolutionString + "'");
-      }
-      if(typeString.empty()) {
-        return ResultToJSON(false, "Need a type, 'energy' or 'consumption'");
-      } else {
-        if(typeString == "consumption") {
-          energy = false;
-        } else if(typeString == "energy") {
-          energy = true;
-        } else {
-          return ResultToJSON(false, "Invalide type '" + typeString + "'");
-        }
-      }
-      if(!resolutionString.empty()) {
-        std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = getDSS().getMetering().getConfig();
-        storageLocation = getDSS().getMetering().getStorageLocation();
-        for(unsigned int iConfig = 0; iConfig < meteringConfig.size(); iConfig++) {
-          boost::shared_ptr<MeteringConfigChain> cConfig = meteringConfig[iConfig];
-          for(int jConfig = 0; jConfig < cConfig->size(); jConfig++) {
-            if(cConfig->isEnergy() == energy && cConfig->getResolution(jConfig) == resolution) {
-              fileSuffix = cConfig->getFilenameSuffix(jConfig);
-            }
-          }
-        }
-        if(fileSuffix.empty()) {
-          return ResultToJSON(false, "No data for '" + typeString + "' and resolution '" + resolutionString + "'");
-        } else {
-          seriesPath = storageLocation + deviceDSIDString + "_" + fileSuffix + ".xml";
-          log("_Trying to load series from " + seriesPath);
-          if(boost::filesystem::exists(seriesPath)) {
-            SeriesReader<CurrentValue> reader;
-            boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(seriesPath));
-            std::deque<CurrentValue>* values = s->getExpandedValues();
-            bool first = true;
-            std::ostringstream sstream;
-            sstream << "{ " ;
-            sstream << ToJSONValue("dsmid") << ":" << ToJSONValue(deviceDSIDString) << ",";
-            sstream << ToJSONValue("type") << ":" << ToJSONValue(typeString) << ",";
-            sstream << ToJSONValue("resolution") << ":" << ToJSONValue(resolutionString) << ",";
-            sstream << ToJSONValue("values") << ": [";
-            for(std::deque<CurrentValue>::iterator iValue = values->begin(), e = values->end(); iValue != e; iValue++)
-            {
-              if(!first) {
-                sstream << ",";
-              }
-              first = false;
-              sstream << "[" << iValue->getTimeStamp().secondsSinceEpoch()  << "," << iValue->getValue() << "]";
-            }
-            sstream << "]}";
-            delete values;
-            return JSONOk(sstream.str());
+          if(typeString == "consumption") {
+            energy = false;
+          } else if(typeString == "energy") {
+            energy = true;
           } else {
-            return ResultToJSON(false, "No data-file for '" + typeString + "' and resolution '" + resolutionString + "'");
+            return ResultToJSON(false, "Invalide type '" + typeString + "'");
           }
         }
-      } else {
-        return ResultToJSON(false, "Could not parse resolution '" + resolutionString + "'");
+        if(!resolutionString.empty()) {
+          std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = getDSS().getMetering().getConfig();
+          storageLocation = getDSS().getMetering().getStorageLocation();
+          for(unsigned int iConfig = 0; iConfig < meteringConfig.size(); iConfig++) {
+            boost::shared_ptr<MeteringConfigChain> cConfig = meteringConfig[iConfig];
+            for(int jConfig = 0; jConfig < cConfig->size(); jConfig++) {
+              if(cConfig->isEnergy() == energy && cConfig->getResolution(jConfig) == resolution) {
+                fileSuffix = cConfig->getFilenameSuffix(jConfig);
+              }
+            }
+          }
+          if(fileSuffix.empty()) {
+            return ResultToJSON(false, "No data for '" + typeString + "' and resolution '" + resolutionString + "'");
+          } else {
+            seriesPath = storageLocation + deviceDSIDString + "_" + fileSuffix + ".xml";
+            log("_Trying to load series from " + seriesPath);
+            if(boost::filesystem::exists(seriesPath)) {
+              SeriesReader<CurrentValue> reader;
+              boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(seriesPath));
+              std::deque<CurrentValue>* values = s->getExpandedValues();
+              bool first = true;
+              std::ostringstream sstream;
+              sstream << "{ " ;
+              sstream << ToJSONValue("dsmid") << ":" << ToJSONValue(deviceDSIDString) << ",";
+              sstream << ToJSONValue("type") << ":" << ToJSONValue(typeString) << ",";
+              sstream << ToJSONValue("resolution") << ":" << ToJSONValue(resolutionString) << ",";
+              sstream << ToJSONValue("values") << ": [";
+              for(std::deque<CurrentValue>::iterator iValue = values->begin(), e = values->end(); iValue != e; iValue++)
+              {
+                if(!first) {
+                  sstream << ",";
+                }
+                first = false;
+                sstream << "[" << iValue->getTimeStamp().secondsSinceEpoch()  << "," << iValue->getValue() << "]";
+              }
+              sstream << "]}";
+              delete values;
+              return JSONOk(sstream.str());
+            } else {
+              return ResultToJSON(false, "No data-file for '" + typeString + "' and resolution '" + resolutionString + "'");
+            }
+          }
+        } else {
+          return ResultToJSON(false, "Could not parse resolution '" + resolutionString + "'");
+        }
+      } else if(_request.getMethod() == "getAggregatedValues") { //?set=;n=,resolution=;type=
+        // TODO: implement
       }
-    } else if(endsWith(_method, "/getAggregatedValues")) { //?set=;n=,resolution=;type=
-      _handled = false;
-      return "";
-    }
-    _handled = false;
-    return "";
-  } // handleMeteringCall
+      throw std::runtime_error("Unhandled function");
+    } // handleRequest
+  }; // MeteringRequestHandler
 
+  const char* kHandlerApartment = "apartment";
+  const char* kHandlerZone = "zone";
+  const char* kHandlerDevice = "device";
+  const char* kHandlerCircuit = "circuit";
+  const char* kHandlerSet = "set";
+  const char* kHandlerProperty = "property";
+  const char* kHandlerEvent = "event";
+  const char* kHandlerSystem = "system";
+  const char* kHandlerStructure = "structure";
+  const char* kHandlerSim = "sim";
+  const char* kHandlerDebug = "debug";
+  const char* kHandlerMetering = "metering";
+
+  void WebServer::instantiateHandlers() {
+    m_Handlers[kHandlerApartment] = new ApartmentRequestHandler();
+    m_Handlers[kHandlerZone] = new ZoneRequestHandler();
+    m_Handlers[kHandlerDevice] = new DeviceRequestHandler();
+    m_Handlers[kHandlerCircuit] = new CircuitRequestHandler();
+    m_Handlers[kHandlerSet] = new SetRequestHandler();
+    m_Handlers[kHandlerProperty] = new PropertyRequestHandler();
+    m_Handlers[kHandlerEvent] = new EventRequestHandler();
+    m_Handlers[kHandlerSystem] = new SystemRequestHandler();
+    m_Handlers[kHandlerStructure] = new StructureRequestHandler();
+    m_Handlers[kHandlerSim] = new SimRequestHandler();
+    m_Handlers[kHandlerDebug] = new DebugRequestHandler();
+    m_Handlers[kHandlerMetering] = new MeteringRequestHandler();
+  } // instantiateHandlers
+  
   void WebServer::httpPluginCallback(struct mg_connection* _connection,
                                      const struct mg_request_info* _info,
                                      void* _userData) {
@@ -1870,6 +1614,8 @@ namespace dss {
 
     std::string method = uri.substr(uri.find(urlid) + urlid.size());
 
+    RestfulRequest request(method, paramMap);
+
     WebServer& self = DSS::getInstance()->getWebServer();
     self.log("Processing call to " + method);
 
@@ -1889,34 +1635,10 @@ namespace dss {
     }
 
     std::string result;
-    bool handled = false;
-    if(beginsWith(method, "apartment/")) {
-      result = self.handleApartmentCall(method, paramMap, _connection, handled, session);
-    } else if(beginsWith(method, "zone/")) {
-      result = self.handleZoneCall(method, paramMap, _connection, handled, session);
-    } else if(beginsWith(method, "device/")) {
-      result = self.handleDeviceCall(method, paramMap, _connection, handled, session);
-    } else if(beginsWith(method, "circuit/")) {
-      result = self.handleCircuitCall(method, paramMap, _connection, handled, session);
-    } else if(beginsWith(method, "set/")) {
-      result = self.handleSetCall(method, paramMap, _connection, handled, session);
-    } else if(beginsWith(method, "property/")) {
-      result = self.handlePropertyCall(method, paramMap, _connection, handled, session);
-    } else if(beginsWith(method, "event/")) {
-      result = self.handleEventCall(method, paramMap, _connection, handled, session);
-    } else if(beginsWith(method, "system/")) {
-      result = self.handleSystemCall(method, paramMap, _connection, handled, session);
-    } else if(beginsWith(method, "structure/")) {
-      result = self.handleStructureCall(method, paramMap, _connection, handled, session);
-    } else if(beginsWith(method, "sim/")) {
-      result = self.handleSimCall(method, paramMap, _connection, handled, session);
-    } else if(beginsWith(method, "debug/")) {
-      result = self.handleDebugCall(method, paramMap, _connection, handled, session);
-    } else if(beginsWith(method, "metering/")) {
-      result = self.handleMeteringCall(method, paramMap, _connection, handled, session);
-    }
-
-    if(!handled) {
+    if(self.m_Handlers[request.getClass()] != NULL) {
+      result = self.m_Handlers[request.getClass()]->handleRequest(request, session);
+      emitHTTPHeader(200, _connection, "application/json");
+    } else {
       emitHTTPHeader(404, _connection, "application/json");
       std::ostringstream sstream;
       sstream << "{" << ToJSONValue("ok") << ":" << ToJSONValue(false) << ",";
@@ -1924,8 +1646,6 @@ namespace dss {
       sstream << "}";
       result = sstream.str();
       self.log("Unknown function '" + method + "'", lsError);
-    } else {
-      emitHTTPHeader(200, _connection, "application/json");
     }
     mg_write(_connection, result.c_str(), result.length());
   } // jsonHandler

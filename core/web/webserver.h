@@ -38,6 +38,7 @@ namespace dss {
   class IDeviceInterface;
   class PropertyNode;
   class WebServerPlugin;
+  class RestfulRequestHandler;
 
   typedef boost::ptr_map<const int, Session> SessionByID;
 
@@ -47,28 +48,14 @@ namespace dss {
     int m_LastSessionID;
     SessionByID m_Sessions;
     boost::ptr_vector<WebServerPlugin> m_Plugins;
+    __gnu_cxx::hash_map<const std::string, RestfulRequestHandler*> m_Handlers;
   private:
     void setupAPI();
     void loadPlugin(PropertyNode& _node);
     void loadPlugins();
-    std::string ResultToJSON(const bool _ok, const std::string& _message = "");
+    void instantiateHandlers();
   protected:
-    bool isDeviceInterfaceCall(const std::string& _method);
-    std::string callDeviceInterface(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, IDeviceInterface* _interface, Session* _session);
-
-    std::string handleApartmentCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
-    std::string handleZoneCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
-    std::string handleDeviceCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
-    std::string handleSetCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
-    std::string handlePropertyCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
-    std::string handleEventCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
-    std::string handleSystemCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
-    std::string handleCircuitCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
-    std::string handleStructureCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
-    std::string handleSimCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
-    std::string handleDebugCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
-    std::string handleMeteringCall(const std::string& _method, HashMapConstStringString& _parameter, struct mg_connection* _connection, bool& _handled, Session* _session);
-    void pluginCalled(struct mg_connection* _connection, 
+    void pluginCalled(struct mg_connection* _connection,
                       const struct mg_request_info* _info,
                       WebServerPlugin& plugin, 
                       const std::string& _uri);
