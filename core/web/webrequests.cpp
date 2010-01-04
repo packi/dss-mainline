@@ -316,17 +316,17 @@ namespace dss {
   } // handleRequest
 
   bool DeviceInterfaceRequestHandler::isDeviceInterfaceCall(const RestfulRequest& _request) {
-    return endsWith(_request.getMethod(), "turnOn")
-        || endsWith(_request.getMethod(), "turnOff")
-        || endsWith(_request.getMethod(), "increaseValue")
-        || endsWith(_request.getMethod(), "decreaseValue")
-        || endsWith(_request.getMethod(), "startDim")
-        || endsWith(_request.getMethod(), "endDim")
-        || endsWith(_request.getMethod(), "setValue")
-        || endsWith(_request.getMethod(), "callScene")
-        || endsWith(_request.getMethod(), "saveScene")
-        || endsWith(_request.getMethod(), "undoScene")
-        || endsWith(_request.getMethod(), "getConsumption");
+    return _request.getMethod() == "turnOn"
+        || _request.getMethod() == "turnOff"
+        || _request.getMethod() == "increaseValue"
+        || _request.getMethod() == "decreaseValue"
+        || _request.getMethod() == "startDim"
+        || _request.getMethod() == "endDim"
+        || _request.getMethod() == "setValue"
+        || _request.getMethod() == "callScene"
+        || _request.getMethod() == "saveScene"
+        || _request.getMethod() == "undoScene"
+        || _request.getMethod() == "getConsumption";
   } // isDeviceInterfaceCall
 
 
