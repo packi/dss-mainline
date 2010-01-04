@@ -40,6 +40,7 @@
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Node.h>
+#include <Poco/Exception.h>
 
 using Poco::XML::Element;
 using Poco::XML::Node;
