@@ -91,7 +91,6 @@ namespace dss {
     bool m_KeepContext;
     std::vector<ScriptContextAttachedObject*> m_AttachedObjects;
     static void jsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er);
-    jsval doEvaluateScript(const std::string& _fileName);
   public:
     ScriptContext(ScriptEnvironment& _env, JSContext* _pContext);
     virtual ~ScriptContext();
@@ -105,6 +104,8 @@ namespace dss {
     /** Evaluates the given file */
     template <class t>
     t evaluateScript(const std::string& _fileName);
+    // FIXME: Workaround a compiler issue that interprets typeof jsval == typeof int
+    jsval doEvaluateScript(const std::string& _fileName);
 
     /** Returns a pointer to the JSContext */
     JSContext* getJSContext() { return m_pContext; }
