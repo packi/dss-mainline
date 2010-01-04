@@ -24,6 +24,7 @@
 #include "core/propertysystem.h"
 #include "core/dss.h"
 #include "core/base.h"
+#include "core/model/apartment.h"
 
 #include <arpa/inet.h>
 
