@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(testStrToIntDef) {
 } // testStrToIntDef
 
 BOOST_AUTO_TEST_CASE(testStrToUInt) {
-  BOOST_CHECK_EQUAL(7, strToUInt("7"));
+  BOOST_CHECK_EQUAL(7, int(strToUInt("7")));
 
   BOOST_CHECK_THROW(strToUInt("asdf"), std::invalid_argument);
   BOOST_CHECK_THROW(strToUInt(""), std::invalid_argument);

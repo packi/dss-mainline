@@ -32,6 +32,8 @@ namespace dss {
     : m_IsPresent(false)
     { }
 
+    virtual ~PhysicalModelItem() {}; // please the compiler (virtual dtor)
+
     bool isPresent() const { return m_IsPresent; }
     virtual void setIsPresent(const bool _value) { m_IsPresent = _value; }
   };

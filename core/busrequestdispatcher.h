@@ -29,6 +29,7 @@ namespace dss {
   class BusRequestDispatcher {
   public:
     virtual void dispatchRequest(boost::shared_ptr<BusRequest> _pRequest) = 0;
+    virtual ~BusRequestDispatcher() {}; // please the compiler (virtual dtor)
   }; // BusRequestDispatcher
 
 } // namespace dss

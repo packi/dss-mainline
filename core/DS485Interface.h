@@ -46,6 +46,8 @@ namespace dss {
 
     virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) = 0;
     virtual int getSensorValue(const Device& _device, const int _sensorID) = 0;
+
+    virtual ~DeviceBusInterface() {}; // please the compiler (virtual dtor)
   }; // DeviceBusInterface
 
   class StructureQueryBusInterface {
@@ -85,6 +87,8 @@ namespace dss {
 
     virtual uint16_t deviceGetFunctionID(devid_t _id, uint8_t _modulatorID) = 0;
     virtual bool getEnergyBorder(const int _modulatorID, int& _lower, int& _upper) = 0;
+
+    virtual ~StructureQueryBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureQueryBusInterface
   
   /** Interface to be implemented by any implementation of the DS485 interface */

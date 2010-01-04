@@ -212,11 +212,12 @@ namespace dss {
     } // getMethod
 
     const std::string& getParameter(const std::string& _name) const {
+      static const std::string& kEmptyString = "";
       HashMapConstStringString::const_iterator iEntry = m_Parameter.find(_name);
       if(iEntry != m_Parameter.end()) {
         return iEntry->second;
       } else {
-        return "";
+        return kEmptyString;
       }
     } // getParameter
   private:
@@ -236,6 +237,7 @@ namespace dss {
   class RestfulRequestHandler {
   public:
     virtual std::string handleRequest(const RestfulRequest& _request, Session* _session) = 0;
+    virtual ~RestfulRequestHandler() {}; // please the compiler (virtual dtor)
   };
 
 } // namespace dss

@@ -36,11 +36,14 @@ namespace dss {
     virtual bool isBroadcast() = 0;
     virtual int getNumberOfParameter() = 0;
     virtual uint16_t getParameter(int _parameter) = 0;
+
+    virtual ~PacketBuilderHintsBase() {}; // please the compiler (virtual dtor)
   };
 
   class BusRequest {
   public:
     virtual PacketBuilderHintsBase* getBuilderHints() = 0;
+    virtual ~BusRequest() {}; // please the compiler (virtual dtor)
   };
 
   class CommandBusRequest : public BusRequest {

@@ -67,7 +67,7 @@ namespace dss {
   void AddressableModelItem::setValue(const double _value) {
     boost::shared_ptr<SetValueCommandBusRequest> request(new SetValueCommandBusRequest());
     request->setTarget(this);
-    request->setValue(_value);
+    request->setValue(int(_value));
     m_pApartment->dispatchRequest(request);
   } // setValue
 

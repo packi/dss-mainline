@@ -41,7 +41,7 @@ namespace dss {
 
     virtual void initialize() {
       try {
-        jsval res = m_pContext->evaluateScript<jsval>(m_FileName);
+        jsval res = m_pContext->doEvaluateScript(m_FileName);
         if(JSVAL_IS_OBJECT(res)) {
           m_pJSThis = JSVAL_TO_OBJECT(res);
           m_pSelf.reset(new ScriptObject(m_pJSThis, *m_pContext));
