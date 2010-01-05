@@ -38,12 +38,7 @@
 #include "core/thread.h"
 #include "core/syncevent.h"
 #include "core/DS485Interface.h"
-
-namespace Poco {
-  namespace XML {
-    class Node;
-  }
-}
+#include "modelpersistence.h"
 
 namespace dss {
 
@@ -81,10 +76,6 @@ namespace dss {
     DS485Interface* m_pDS485Interface;
     BusRequestDispatcher* m_pBusRequestDispatcher;
   private:
-    void loadDevices(Poco::XML::Node* _node);
-    void loadModulators(Poco::XML::Node* _node);
-    void loadZones(Poco::XML::Node* _node);
-
     void addDefaultGroupsToZone(Zone& _zone);
     void handleModelEvents();
     void modulatorReady(int _modulatorBusID);
@@ -94,6 +85,9 @@ namespace dss {
 
     void raiseEvent(boost::shared_ptr<Event> _pEvent);
     void waitForInterface();
+
+    void readConfiguration();
+    void writeConfiguration();
   protected:
     virtual void doStart();
   public:
@@ -105,13 +99,6 @@ namespace dss {
     /** Returns a set containing all devices of the set */
     virtual Set getDevices() const;
 
-    /** Loads the datamodel and marks the contained items as "stale" */
-    void readConfigurationFromXML(const std::string& _fileName);
-    void readConfiguration();
-
-    void writeConfigurationToXML(const std::string& _fileName);
-    void writeConfiguration();
-
     /** Returns a reference to the device with the DSID \a _dsid */
     Device& getDeviceByDSID(const dsid_t _dsid) const;
     /** @copydoc getDeviceByDSID */
@@ -120,7 +107,7 @@ namespace dss {
     Device& getDeviceByName(const std::string& _name);
     /** Returns a device by it's short-address and modulator */
     Device& getDeviceByShortAddress(const Modulator& _modulator, const devid_t _deviceID) const;
-
+    std::vector<Device*>& getDevicesVector() { return m_Devices; }
     /** Allocates a device and returns a reference to it.
      *  If there is a stale device with the same dsid, this device gets "activated"
      */
