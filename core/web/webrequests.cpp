@@ -107,7 +107,7 @@ namespace dss {
             << ", \"isSwitch\": " << ToJSONValue(_device.hasSwitch())
             << ", \"name\": " << ToJSONValue(_device.getDevice().getName())
             << ", \"fid\": " << ToJSONValue(_device.getDevice().getFunctionID())
-            << ", \"circuitID\":" << ToJSONValue(_device.getDevice().getModulatorID())
+            << ", \"circuitID\":" << ToJSONValue(_device.getDevice().getDSMeterID())
             << ", \"busID\":"  << ToJSONValue(_device.getDevice().getShortAddress())
             << ", \"isPresent\":"  << ToJSONValue(_device.getDevice().isPresent())
             << ", \"lastDiscovered\":"  << ToJSONValue(int(_device.getDevice().getLastDiscovered().secondsSinceEpoch()))
@@ -162,9 +162,9 @@ namespace dss {
     }
     sstream << ToJSONValue("name") << ": " << ToJSONValue(name) << ", ";
     sstream << ToJSONValue("isPresent") << ": " << ToJSONValue(_zone.isPresent());
-    if(_zone.getFirstZoneOnModulator() != -1) {
-      sstream << ", " << ToJSONValue("firstZoneOnModulator")
-              << ": " << ToJSONValue(_zone.getFirstZoneOnModulator());
+    if(_zone.getFirstZoneOnDSMeter() != -1) {
+      sstream << ", " << ToJSONValue("firstZoneOnDSMeter")
+              << ": " << ToJSONValue(_zone.getFirstZoneOnDSMeter());
     }
 
     if(_includeDevices) {
@@ -337,8 +337,8 @@ namespace dss {
     std::string errorMessage;
     if(_request.getMethod() == "getConsumption") {
       int accumulatedConsumption = 0;
-      foreach(Modulator* pModulator, getDSS().getApartment().getModulators()) {
-        accumulatedConsumption += pModulator->getPowerConsumption();
+      foreach(DSMeter* pDSMeter, getDSS().getApartment().getDSMeters()) {
+        accumulatedConsumption += pDSMeter->getPowerConsumption();
       }
       return "{ " + ToJSONValue("consumption") + ": " +  uintToString(accumulatedConsumption) +"}";
     } else if(isDeviceInterfaceCall(_request)) {
@@ -401,20 +401,20 @@ namespace dss {
         std::ostringstream sstream;
         sstream << "{ " << ToJSONValue("circuits") << ": [";
         bool first = true;
-        vector<Modulator*>& modulators = getDSS().getApartment().getModulators();
-        foreach(Modulator* modulator, modulators) {
+        vector<DSMeter*>& dsMeters = getDSS().getApartment().getDSMeters();
+        foreach(DSMeter* dsMeter, dsMeters) {
           if(!first) {
             sstream << ",";
           }
           first = false;
-          sstream << "{ " << ToJSONValue("name") << ": " << ToJSONValue(modulator->getName());
-          sstream << ", " << ToJSONValue("dsid") << ": " << ToJSONValue(modulator->getDSID().toString());
-          sstream << ", " << ToJSONValue("busid") << ": " << ToJSONValue(modulator->getBusID());
-          sstream << ", " << ToJSONValue("hwVersion") << ": " << ToJSONValue(modulator->getHardwareVersion());
-          sstream << ", " << ToJSONValue("swVersion") << ": " << ToJSONValue(modulator->getSoftwareVersion());
-          sstream << ", " << ToJSONValue("hwName") << ": " << ToJSONValue(modulator->getHardwareName());
-          sstream << ", " << ToJSONValue("deviceType") << ": " << ToJSONValue(modulator->getDeviceType());
-          sstream << ", " << ToJSONValue("isPresent") << ": " << ToJSONValue(modulator->isPresent());
+          sstream << "{ " << ToJSONValue("name") << ": " << ToJSONValue(dsMeter->getName());
+          sstream << ", " << ToJSONValue("dsid") << ": " << ToJSONValue(dsMeter->getDSID().toString());
+          sstream << ", " << ToJSONValue("busid") << ": " << ToJSONValue(dsMeter->getBusID());
+          sstream << ", " << ToJSONValue("hwVersion") << ": " << ToJSONValue(dsMeter->getHardwareVersion());
+          sstream << ", " << ToJSONValue("swVersion") << ": " << ToJSONValue(dsMeter->getSoftwareVersion());
+          sstream << ", " << ToJSONValue("hwName") << ": " << ToJSONValue(dsMeter->getHardwareName());
+          sstream << ", " << ToJSONValue("deviceType") << ": " << ToJSONValue(dsMeter->getDeviceType());
+          sstream << ", " << ToJSONValue("isPresent") << ": " << ToJSONValue(dsMeter->isPresent());
           sstream << "}";
         }
         sstream << "]}";
@@ -427,9 +427,9 @@ namespace dss {
         getDSS().getApartment().setName(_request.getParameter("newName"));
         result = ResultToJSON(true);
       } else if(_request.getMethod() == "rescan") {
-        std::vector<Modulator*> mods = getDSS().getApartment().getModulators();
-        foreach(Modulator* pModulator, mods) {
-          pModulator->setIsValid(false);
+        std::vector<DSMeter*> mods = getDSS().getApartment().getDSMeters();
+        foreach(DSMeter* pDSMeter, mods) {
+          pDSMeter->setIsValid(false);
         }
         result = ResultToJSON(true);
       } else {
@@ -666,30 +666,30 @@ namespace dss {
       return ResultToJSON(false, "could not parse dsid");
     }
     try {
-      Modulator& modulator = getDSS().getApartment().getModulatorByDSID(dsid);
+      DSMeter& dsMeter = getDSS().getApartment().getDSMeterByDSID(dsid);
       if(_request.getMethod() == "getName") {
-        return JSONOk("{ " + ToJSONValue("name") + ": " + ToJSONValue(modulator.getName()) + "}");
+        return JSONOk("{ " + ToJSONValue("name") + ": " + ToJSONValue(dsMeter.getName()) + "}");
       } else if(_request.getMethod() == "setName") {
-        modulator.setName(_request.getParameter("newName"));
+        dsMeter.setName(_request.getParameter("newName"));
         return ResultToJSON(true);
       } else if(_request.getMethod() == "getEnergyBorder") {
         std::ostringstream sstream;
-        sstream << "{" << ToJSONValue("orange") << ":" << ToJSONValue(modulator.getEnergyLevelOrange());
-        sstream << "," << ToJSONValue("red") << ":" << ToJSONValue(modulator.getEnergyLevelRed());
+        sstream << "{" << ToJSONValue("orange") << ":" << ToJSONValue(dsMeter.getEnergyLevelOrange());
+        sstream << "," << ToJSONValue("red") << ":" << ToJSONValue(dsMeter.getEnergyLevelRed());
         sstream << "}";
         return JSONOk(sstream.str());
       } else if(_request.getMethod() == "getConsumption") {
-        return JSONOk("{ " + ToJSONValue("consumption") + ": " +  uintToString(modulator.getPowerConsumption()) +"}");
+        return JSONOk("{ " + ToJSONValue("consumption") + ": " +  uintToString(dsMeter.getPowerConsumption()) +"}");
       } else if(_request.getMethod() == "getEnergyMeterValue") {
-        return JSONOk("{ " + ToJSONValue("metervalue") + ": " +  uintToString(modulator.getEnergyMeterValue()) +"}");
+        return JSONOk("{ " + ToJSONValue("metervalue") + ": " +  uintToString(dsMeter.getEnergyMeterValue()) +"}");
       } else if(_request.getMethod() == "rescan") {
-        modulator.setIsValid(false);
+        dsMeter.setIsValid(false);
         return ResultToJSON(true);
       } else {
         throw std::runtime_error("Unhandled function");
       }
     } catch(std::runtime_error&) {
-      return ResultToJSON(false, "could not find modulator with given dsid");
+      return ResultToJSON(false, "could not find dsMeter with given dsid");
     }
     return "";
   } // handleRequest
@@ -1022,7 +1022,7 @@ namespace dss {
       if(zoneID != -1) {
         try {
           Zone& zone = getDSS().getApartment().getZone(zoneID);
-          if(zone.getFirstZoneOnModulator() != -1) {
+          if(zone.getFirstZoneOnDSMeter() != -1) {
             return ResultToJSON(false, "Cannot delete a primary zone");
           }
           if(zone.getDevices().length() > 0) {
@@ -1216,7 +1216,7 @@ namespace dss {
         Device& device = getDSS().getApartment().getDeviceByDSID(deviceDSID);
         DS485CommandFrame* frame = new DS485CommandFrame();
         frame->getHeader().setBroadcast(true);
-        frame->getHeader().setDestination(device.getModulatorID());
+        frame->getHeader().setDestination(device.getDSMeterID());
         frame->setCommand(CommandRequest);
         frame->getPayload().add<uint8_t>(FunctionDeviceGetTransmissionQuality);
         frame->getPayload().add<uint16_t>(device.getShortAddress());
@@ -1304,16 +1304,16 @@ namespace dss {
       std::ostringstream sstream;
       sstream << "{ " << ToJSONValue("series") << ": [";
       bool first = true;
-      vector<Modulator*>& modulators = getDSS().getApartment().getModulators();
-      foreach(Modulator* modulator, modulators) {
+      vector<DSMeter*>& dsMeters = getDSS().getApartment().getDSMeters();
+      foreach(DSMeter* dsMeter, dsMeters) {
         if(!first) {
           sstream << ",";
         }
         first = false;
-        sstream << "{ " << ToJSONValue("dsid") << ": " << ToJSONValue(modulator->getDSID().toString());
+        sstream << "{ " << ToJSONValue("dsid") << ": " << ToJSONValue(dsMeter->getDSID().toString());
         sstream << ", " << ToJSONValue("type") << ": " << ToJSONValue("energy");
         sstream << "},";
-        sstream << "{ " << ToJSONValue("dsid") << ": " << ToJSONValue(modulator->getDSID().toString());
+        sstream << "{ " << ToJSONValue("dsid") << ": " << ToJSONValue(dsMeter->getDSID().toString());
         sstream << ", " << ToJSONValue("type") << ": " << ToJSONValue("consumption");
         sstream << "}";
       }
@@ -1333,7 +1333,7 @@ namespace dss {
         dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
         if(!(deviceDSID == NullDSID)) {
           try {
-            getDSS().getApartment().getModulatorByDSID(deviceDSID);
+            getDSS().getApartment().getDSMeterByDSID(deviceDSID);
           } catch(std::runtime_error& e) {
             return ResultToJSON(false, "Could not find device with dsid '" + deviceDSIDString + "'");
           }

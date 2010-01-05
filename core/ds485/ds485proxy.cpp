@@ -84,9 +84,9 @@ namespace dss {
 	             (m_DS485Controller.getState() == csError)); 
   } // isReady
 
-  uint16_t DS485Proxy::deviceGetParameterValue(devid_t _id, uint8_t _modulatorID, int _paramID) {
+  uint16_t DS485Proxy::deviceGetParameterValue(devid_t _id, uint8_t _dsMeterID, int _paramID) {
     DS485CommandFrame frame;
-    frame.getHeader().setDestination(_modulatorID);
+    frame.getHeader().setDestination(_dsMeterID);
     frame.getHeader().setBroadcast(false);
     frame.getHeader().setType(1);
     frame.setCommand(CommandRequest);
@@ -97,9 +97,9 @@ namespace dss {
     return res;
   } // deviceGetParameterValue
 
-  uint16_t DS485Proxy::deviceGetFunctionID(devid_t _id, uint8_t _modulatorID) {
+  uint16_t DS485Proxy::deviceGetFunctionID(devid_t _id, uint8_t _dsMeterID) {
     DS485CommandFrame frame;
-    frame.getHeader().setDestination(_modulatorID);
+    frame.getHeader().setDestination(_dsMeterID);
     frame.getHeader().setBroadcast(false);
     frame.getHeader().setType(1);
     frame.setCommand(CommandRequest);
@@ -230,7 +230,7 @@ namespace dss {
 
   void DS485Proxy::setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) {
     DS485CommandFrame frame;
-    frame.getHeader().setDestination(_device.getModulatorID());
+    frame.getHeader().setDestination(_device.getDSMeterID());
     frame.getHeader().setBroadcast(false);
     frame.getHeader().setType(1);
     frame.setCommand(CommandRequest);
@@ -242,7 +242,7 @@ namespace dss {
     sendFrame(frame);
   } // setValueDevice
   
-  ModulatorSpec_t DS485Proxy::modulatorSpecFromFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
+  DSMeterSpec_t DS485Proxy::dsMeterSpecFromFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
     int source = _frame->getHeader().getSource();
 
     PayloadDissector pd(_frame->getPayload());
@@ -272,16 +272,16 @@ namespace dss {
     log(std::string("  Name:      \"") + name + "\"");
 
     // bus-id, sw-version, hw-version, name, device-id
-    ModulatorSpec_t spec(source, swVersion, hwVersion, name, devID);
+    DSMeterSpec_t spec(source, swVersion, hwVersion, name, devID);
     return spec;
-  } // modulatorSpecFromFrame
+  } // dsMeterSpecFromFrame
 
-  std::vector<ModulatorSpec_t> DS485Proxy::getModulators() {
+  std::vector<DSMeterSpec_t> DS485Proxy::getDSMeters() {
     DS485CommandFrame cmdFrame;
     cmdFrame.getHeader().setDestination(0);
     cmdFrame.getHeader().setBroadcast(true);
     cmdFrame.setCommand(CommandRequest);
-    log("Proxy: GetModulators");
+    log("Proxy: GetDSMeters");
 
     cmdFrame.getPayload().add<uint8_t>(FunctionGetTypeRequest);
     boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionGetTypeRequest);
@@ -289,7 +289,7 @@ namespace dss {
 
     std::map<int, bool> resultFrom;
 
-    std::vector<ModulatorSpec_t> result;
+    std::vector<DSMeterSpec_t> result;
     while(true) {
       boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
       if(recFrame == NULL) {
@@ -300,20 +300,20 @@ namespace dss {
         log(std::string("already received result from ") + intToString(source));
         continue;
       }
-      ModulatorSpec_t spec = modulatorSpecFromFrame(recFrame->getFrame());
+      DSMeterSpec_t spec = dsMeterSpecFromFrame(recFrame->getFrame());
       result.push_back(spec);
     }
 
     return result;
-  } // getModulators
+  } // getDSMeters
 
-  ModulatorSpec_t DS485Proxy::getModulatorSpec(const int _modulatorID) {
+  DSMeterSpec_t DS485Proxy::getDSMeterSpec(const int _dsMeterID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setDestination(_dsMeterID);
     cmdFrame.getHeader().setBroadcast(false);
     cmdFrame.setCommand(CommandRequest);
     cmdFrame.getPayload().add<uint8_t>(FunctionGetTypeRequest);
-    log("Proxy: getModulatorSpec");
+    log("Proxy: getDSMeterSpec");
 
     boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionGetTypeRequest);
 
@@ -321,39 +321,39 @@ namespace dss {
       throw DS485ApiError("No frame received");
     }
 
-    ModulatorSpec_t result = modulatorSpecFromFrame(recFrame->getFrame());
+    DSMeterSpec_t result = dsMeterSpecFromFrame(recFrame->getFrame());
 
     return result;
-  } // getModulatorSpec
+  } // getDSMeterSpec
 
-  int DS485Proxy::getGroupCount(const int _modulatorID, const int _zoneID) {
+  int DS485Proxy::getGroupCount(const int _dsMeterID, const int _zoneID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setDestination(_dsMeterID);
     cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetGroupsSize);
+    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetGroupsSize);
     cmdFrame.getPayload().add<uint16_t>(_zoneID);
-    int8_t res = int8_t(receiveSingleResult(cmdFrame, FunctionModulatorGetGroupsSize));
+    int8_t res = int8_t(receiveSingleResult(cmdFrame, FunctionDSMeterGetGroupsSize));
     if(res < 0) {
       log("GetGroupCount: Negative group count received '" + intToString(res) +
-          " on modulator " + intToString(_modulatorID) +
+          " on dsMeter " + intToString(_dsMeterID) +
           " with zone " + intToString(_zoneID));
     }
     checkResultCode(res);
-    // Every modulator should provide all standard-groups
+    // Every dsMeter should provide all standard-groups
     if(res < GroupIDStandardMax) {
       res = GroupIDStandardMax;
     }
     return res;
   } // getGroupCount
 
-  std::vector<int> DS485Proxy::getGroups(const int _modulatorID, const int _zoneID) {
+  std::vector<int> DS485Proxy::getGroups(const int _dsMeterID, const int _zoneID) {
     std::vector<int> result;
 
-    int numGroups = getGroupCount(_modulatorID, _zoneID);
-    log(std::string("Modulator has ") + intToString(numGroups) + " groups");
+    int numGroups = getGroupCount(_dsMeterID, _zoneID);
+    log(std::string("DSMeter has ") + intToString(numGroups) + " groups");
     for(int iGroup = 0; iGroup < numGroups; iGroup++) {
       DS485CommandFrame cmdFrame;
-      cmdFrame.getHeader().setDestination(_modulatorID);
+      cmdFrame.getHeader().setDestination(_dsMeterID);
       cmdFrame.setCommand(CommandRequest);
       cmdFrame.getPayload().add<uint8_t>(FunctionZoneGetGroupIdForInd);
       cmdFrame.getPayload().add<uint16_t>(_zoneID);
@@ -371,9 +371,9 @@ namespace dss {
     return result;
   } // getGroups
 
-  int DS485Proxy::getDevicesInGroupCount(const int _modulatorID, const int _zoneID, const int _groupID) {
+  int DS485Proxy::getDevicesInGroupCount(const int _dsMeterID, const int _zoneID, const int _groupID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setDestination(_dsMeterID);
     cmdFrame.setCommand(CommandRequest);
     cmdFrame.getPayload().add<uint8_t>(FunctionGroupGetDeviceCount);
     cmdFrame.getPayload().add<uint16_t>(_zoneID);
@@ -382,7 +382,7 @@ namespace dss {
     int16_t res = int16_t(receiveSingleResult16(cmdFrame, FunctionGroupGetDeviceCount));
     if(res < 0) {
       log("GetDevicesInGroupCount: Negative count received '" + intToString(res) +
-          "' on modulator " + intToString(_modulatorID) +
+          "' on dsMeter " + intToString(_dsMeterID) +
           " with zoneID " + intToString(_zoneID) + " in group " + intToString(_groupID));
     }
     checkResultCode(res);
@@ -390,13 +390,13 @@ namespace dss {
     return res;
   } // getDevicesInGroupCount
 
-  std::vector<int> DS485Proxy::getDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID) {
+  std::vector<int> DS485Proxy::getDevicesInGroup(const int _dsMeterID, const int _zoneID, const int _groupID) {
     std::vector<int> result;
 
-    int numDevices = getDevicesInGroupCount(_modulatorID, _zoneID, _groupID);
+    int numDevices = getDevicesInGroupCount(_dsMeterID, _zoneID, _groupID);
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
       DS485CommandFrame cmdFrame;
-      cmdFrame.getHeader().setDestination(_modulatorID);
+      cmdFrame.getHeader().setDestination(_dsMeterID);
       cmdFrame.setCommand(CommandRequest);
       cmdFrame.getPayload().add<uint8_t>(FunctionGroupGetDevKeyForInd);
       cmdFrame.getPayload().add<uint16_t>(_zoneID);
@@ -418,11 +418,11 @@ namespace dss {
     return result;
   } // getDevicesInGroup
 
-  std::vector<int> DS485Proxy::getGroupsOfDevice(const int _modulatorID, const int _deviceID) {
+  std::vector<int> DS485Proxy::getGroupsOfDevice(const int _dsMeterID, const int _deviceID) {
     std::vector<int> result;
 
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setDestination(_dsMeterID);
     cmdFrame.setCommand(CommandRequest);
     cmdFrame.getPayload().add<uint8_t>(FunctionDeviceGetGroups);
     cmdFrame.getPayload().add<uint16_t>(_deviceID);
@@ -453,22 +453,22 @@ namespace dss {
     return result;
   } // getGroupsOfDevice
 
-  std::vector<int> DS485Proxy::getZones(const int _modulatorID) {
+  std::vector<int> DS485Proxy::getZones(const int _dsMeterID) {
     std::vector<int> result;
 
-    int numZones = getZoneCount(_modulatorID);
-    log(std::string("Modulator has ") + intToString(numZones) + " zones");
+    int numZones = getZoneCount(_dsMeterID);
+    log(std::string("DSMeter has ") + intToString(numZones) + " zones");
     for(int iZone = 0; iZone < numZones; iZone++) {
       DS485CommandFrame cmdFrame;
-      cmdFrame.getHeader().setDestination(_modulatorID);
+      cmdFrame.getHeader().setDestination(_dsMeterID);
       cmdFrame.setCommand(CommandRequest);
-      cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetZoneIdForInd);
+      cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetZoneIdForInd);
       cmdFrame.getPayload().add<uint16_t>(iZone);
       log("GetZoneID");
-      int16_t tempResult = int16_t(receiveSingleResult16(cmdFrame, FunctionModulatorGetZoneIdForInd));
+      int16_t tempResult = int16_t(receiveSingleResult16(cmdFrame, FunctionDSMeterGetZoneIdForInd));
       // TODO: The following line is a workaround as described in #246
       if((tempResult < 0) && (tempResult > -20)) {
-        log("GetZones: Negative zone id " + intToString(tempResult) + " received. Modulator: " + intToString(_modulatorID) + " index: " + intToString(iZone), lsError);
+        log("GetZones: Negative zone id " + intToString(tempResult) + " received. DSMeter: " + intToString(_dsMeterID) + " index: " + intToString(iZone), lsError);
         // TODO: take this line outside the if-clause after the dSM-API has been reworked
         checkResultCode(tempResult);
       } else {
@@ -479,30 +479,30 @@ namespace dss {
     return result;
   } // getZones
 
-  int DS485Proxy::getZoneCount(const int _modulatorID) {
+  int DS485Proxy::getZoneCount(const int _dsMeterID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setDestination(_dsMeterID);
     cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetZonesSize);
+    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetZonesSize);
     log("GetZoneCount");
 
     int8_t result = int8_t(
-        receiveSingleResult(cmdFrame, FunctionModulatorGetZonesSize));
+        receiveSingleResult(cmdFrame, FunctionDSMeterGetZonesSize));
     checkResultCode(result);
     return result;
   } // getZoneCount
 
-  int DS485Proxy::getDevicesCountInZone(const int _modulatorID, const int _zoneID) {
+  int DS485Proxy::getDevicesCountInZone(const int _dsMeterID, const int _zoneID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setDestination(_dsMeterID);
     cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorCountDevInZone);
+    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterCountDevInZone);
     cmdFrame.getPayload().add<uint16_t>(_zoneID);
     log("GetDevicesCountInZone");
 
-    log(intToString(_modulatorID) + " " + intToString(_zoneID));
+    log(intToString(_dsMeterID) + " " + intToString(_zoneID));
 
-    int16_t result = int16_t(receiveSingleResult16(cmdFrame, FunctionModulatorCountDevInZone));
+    int16_t result = int16_t(receiveSingleResult16(cmdFrame, FunctionDSMeterCountDevInZone));
     if(result < 0) {
       log("GetDevicesCountInZone: negative count '" + intToString(result) + "'", lsError);
     }
@@ -511,29 +511,29 @@ namespace dss {
     return result;
   } // getDevicesCountInZone
 
-  std::vector<int> DS485Proxy::getDevicesInZone(const int _modulatorID, const int _zoneID) {
+  std::vector<int> DS485Proxy::getDevicesInZone(const int _dsMeterID, const int _zoneID) {
     std::vector<int> result;
 
-    int numDevices = getDevicesCountInZone(_modulatorID, _zoneID);
+    int numDevices = getDevicesCountInZone(_dsMeterID, _zoneID);
     log(std::string("Found ") + intToString(numDevices) + " in zone.");
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
       DS485CommandFrame cmdFrame;
-      cmdFrame.getHeader().setDestination(_modulatorID);
+      cmdFrame.getHeader().setDestination(_dsMeterID);
       cmdFrame.setCommand(CommandRequest);
-      cmdFrame.getPayload().add<uint8_t>(FunctionModulatorDevKeyInZone);
+      cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterDevKeyInZone);
       cmdFrame.getPayload().add<uint16_t>(_zoneID);
       cmdFrame.getPayload().add<uint16_t>(iDevice);
 
-      uint16_t devID = receiveSingleResult16(cmdFrame, FunctionModulatorDevKeyInZone);
+      uint16_t devID = receiveSingleResult16(cmdFrame, FunctionDSMeterDevKeyInZone);
       checkResultCode(int16_t(devID));
       result.push_back(devID);
     }
     return result;
   } // getDevicesInZone
 
-  void DS485Proxy::setZoneID(const int _modulatorID, const devid_t _deviceID, const int _zoneID) {
+  void DS485Proxy::setZoneID(const int _dsMeterID, const devid_t _deviceID, const int _zoneID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setDestination(_dsMeterID);
     cmdFrame.setCommand(CommandRequest);
     cmdFrame.getPayload().add<uint8_t>(FunctionDeviceSetZoneID);
     cmdFrame.getPayload().add<devid_t>(_deviceID);
@@ -543,31 +543,31 @@ namespace dss {
     checkResultCode(res);
   } // setZoneID
 
-  void DS485Proxy::createZone(const int _modulatorID, const int _zoneID) {
+  void DS485Proxy::createZone(const int _dsMeterID, const int _zoneID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setDestination(_dsMeterID);
     cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorAddZone);
+    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterAddZone);
     cmdFrame.getPayload().add<uint16_t>(_zoneID);
 
-    int16_t res = int16_t(receiveSingleResult(cmdFrame, FunctionModulatorAddZone));
+    int16_t res = int16_t(receiveSingleResult(cmdFrame, FunctionDSMeterAddZone));
     checkResultCode(res);
   } // createZone
 
-  void DS485Proxy::removeZone(const int _modulatorID, const int _zoneID) {
+  void DS485Proxy::removeZone(const int _dsMeterID, const int _zoneID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setDestination(_dsMeterID);
     cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorRemoveZone);
+    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterRemoveZone);
     cmdFrame.getPayload().add<uint16_t>(_zoneID);
 
-    int16_t res = int16_t(receiveSingleResult(cmdFrame, FunctionModulatorAddZone));
+    int16_t res = int16_t(receiveSingleResult(cmdFrame, FunctionDSMeterAddZone));
     checkResultCode(res);
   } // removeZone
 
-  dsid_t DS485Proxy::getDSIDOfDevice(const int _modulatorID, const int _deviceID) {
+  dsid_t DS485Proxy::getDSIDOfDevice(const int _dsMeterID, const int _deviceID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setDestination(_dsMeterID);
     cmdFrame.setCommand(CommandRequest);
     cmdFrame.getPayload().add<uint8_t>(FunctionDeviceGetDSID);
     cmdFrame.getPayload().add<uint16_t>(_deviceID);
@@ -585,30 +585,30 @@ namespace dss {
     return pd.get<dsid_t>();
   } // getDSIDOfDevice
 
-  dsid_t DS485Proxy::getDSIDOfModulator(const int _modulatorID) {
+  dsid_t DS485Proxy::getDSIDOfDSMeter(const int _dsMeterID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setDestination(_dsMeterID);
     cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetDSID);
-    log(std::string("Proxy: GetDSIDOfModulator ") + intToString(_modulatorID));
+    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetDSID);
+    log(std::string("Proxy: GetDSIDOfDSMeter ") + intToString(_dsMeterID));
 
-    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionModulatorGetDSID);
+    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDSMeterGetDSID);
     if(recFrame == NULL) {
-      log("GetDSIDOfModulator: received no result from " + intToString(_modulatorID), lsError);
+      log("GetDSIDOfDSMeter: received no result from " + intToString(_dsMeterID), lsError);
       throw DS485ApiError("No frame received");
     }
 
     PayloadDissector pd(recFrame->getFrame()->getPayload());
     pd.get<uint8_t>(); // discard the function id
     return pd.get<dsid_t>();
-  } // getDSIDOfModulator
+  } // getDSIDOfDSMeter
 
-  int DS485Proxy::getLastCalledScene(const int _modulatorID, const int _zoneID, const int _groupID) {
+  int DS485Proxy::getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setDestination(_dsMeterID);
     cmdFrame.setCommand(CommandRequest);
     cmdFrame.getPayload().add<uint8_t>(FunctionGroupGetLastCalledScene);
-    log(std::string("Proxy: GetLastCalledScene ") + intToString(_modulatorID));
+    log(std::string("Proxy: GetLastCalledScene ") + intToString(_dsMeterID));
     cmdFrame.getPayload().add<uint16_t>(_zoneID);
     cmdFrame.getPayload().add<uint16_t>(_groupID);
 
@@ -620,19 +620,19 @@ namespace dss {
     return res;
   } // getLastCalledScene
 
-  unsigned long DS485Proxy::getPowerConsumption(const int _modulatorID) {
+  unsigned long DS485Proxy::getPowerConsumption(const int _dsMeterID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setDestination(_dsMeterID);
     cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetPowerConsumption);
-    log(std::string("Proxy: GetPowerConsumption ") + intToString(_modulatorID));
+    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetPowerConsumption);
+    log(std::string("Proxy: GetPowerConsumption ") + intToString(_dsMeterID));
 
-    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionModulatorGetPowerConsumption);
+    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDSMeterGetPowerConsumption);
     if(recFrame == NULL) {
       log("DS485Proxy::getPowerConsumption: received no results", lsError);
       throw DS485ApiError("No frame received");
     }
-    if(recFrame->getFrame()->getHeader().getSource() != _modulatorID) {
+    if(recFrame->getFrame()->getHeader().getSource() != _dsMeterID) {
       log("GetPowerConsumption: received result from wrong source");
     }
     PayloadDissector pd(recFrame->getFrame()->getPayload());
@@ -640,14 +640,14 @@ namespace dss {
     return pd.get<uint32_t>();
   } // getPowerConsumption
 
-  unsigned long DS485Proxy::getEnergyMeterValue(const int _modulatorID) {
+  unsigned long DS485Proxy::getEnergyMeterValue(const int _dsMeterID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setDestination(_dsMeterID);
     cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetEnergyMeterValue);
-    log(std::string("Proxy: GetEnergyMeterValue ") + intToString(_modulatorID));
+    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetEnergyMeterValue);
+    log(std::string("Proxy: GetEnergyMeterValue ") + intToString(_dsMeterID));
 
-    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionModulatorGetEnergyMeterValue);
+    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDSMeterGetEnergyMeterValue);
     if(recFrame == NULL) {
       log("DS485Proxy::getEnergyMeterValue: received no results", lsError);
       throw DS485ApiError("No frame received");
@@ -657,13 +657,13 @@ namespace dss {
     return pd.get<uint32_t>();
   } // getEnergyMeterValue
 
-  bool DS485Proxy::getEnergyBorder(const int _modulatorID, int& _lower, int& _upper) {
+  bool DS485Proxy::getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setDestination(_dsMeterID);
     cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionModulatorGetEnergyLevel);
+    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetEnergyLevel);
 
-    boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionModulatorGetEnergyLevel);
+    boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionDSMeterGetEnergyLevel);
 
     bucket->waitForFrame(1000);
 
@@ -681,7 +681,7 @@ namespace dss {
 
   int DS485Proxy::getSensorValue(const Device& _device, const int _sensorID) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_device.getModulatorID());
+    cmdFrame.getHeader().setDestination(_device.getDSMeterID());
     cmdFrame.getHeader().setBroadcast(false);
     cmdFrame.getHeader().setType(1);
     cmdFrame.setCommand(CommandRequest);
@@ -729,9 +729,9 @@ namespace dss {
     }
   } // getSensorValue
 
-  uint8_t DS485Proxy::dSLinkSend(const int _modulatorID, devid_t _devAdr, uint8_t _value, uint8_t _flags) {
+  uint8_t DS485Proxy::dSLinkSend(const int _dsMeterID, devid_t _devAdr, uint8_t _value, uint8_t _flags) {
     DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_modulatorID);
+    cmdFrame.getHeader().setDestination(_dsMeterID);
     cmdFrame.setCommand(CommandRequest);
     cmdFrame.getPayload().add<uint8_t>(FunctionDSLinkSendDevice);
     cmdFrame.getPayload().add<uint16_t>(_devAdr);
@@ -766,19 +766,19 @@ namespace dss {
     }
   } // dsLinkSend
 
-  void DS485Proxy::addToGroup(const int _modulatorID, const int _groupID, const int _deviceID) {
+  void DS485Proxy::addToGroup(const int _dsMeterID, const int _groupID, const int _deviceID) {
 
   } // addToGroup
 
-  void DS485Proxy::removeFromGroup(const int _modulatorID, const int _groupID, const int _deviceID) {
+  void DS485Proxy::removeFromGroup(const int _dsMeterID, const int _groupID, const int _deviceID) {
 
   } // removeFromGroup
 
-  int DS485Proxy::addUserGroup(const int _modulatorID) {
+  int DS485Proxy::addUserGroup(const int _dsMeterID) {
     return 0;
   } // addUserGroup
 
-  void DS485Proxy::removeUserGroup(const int _modulatorID, const int _groupID) {
+  void DS485Proxy::removeUserGroup(const int _dsMeterID, const int _groupID) {
 
   } // removeUserGroup
 
@@ -874,26 +874,26 @@ namespace dss {
 
   const char* FunctionIDToString(const int _functionID) {
     switch(_functionID) {
-    case  FunctionModulatorAddZone:
-      return "Modulator Add Zone";
-    case  FunctionModulatorRemoveZone:
-      return "Modulator Remove Zone";
-    case  FunctionModulatorRemoveAllZones:
-      return "Modulator Remove All Zones";
-    case  FunctionModulatorCountDevInZone:
-      return "Modulator Count Dev In Zone";
-    case  FunctionModulatorDevKeyInZone:
-      return "Modulator Dev Key In Zone";
-    case  FunctionModulatorGetGroupsSize:
-      return "Modulator Get Groups Size";
-    case  FunctionModulatorGetZonesSize:
-      return "Modulator Get Zones Size";
-    case  FunctionModulatorGetZoneIdForInd:
-      return "Modulator Get Zone Id For Index";
-    case  FunctionModulatorAddToGroup:
-      return "Modulator Add To Group";
-    case  FunctionModulatorRemoveFromGroup:
-      return "Modulator Remove From Group";
+    case  FunctionDSMeterAddZone:
+      return "DSMeter Add Zone";
+    case  FunctionDSMeterRemoveZone:
+      return "DSMeter Remove Zone";
+    case  FunctionDSMeterRemoveAllZones:
+      return "DSMeter Remove All Zones";
+    case  FunctionDSMeterCountDevInZone:
+      return "DSMeter Count Dev In Zone";
+    case  FunctionDSMeterDevKeyInZone:
+      return "DSMeter Dev Key In Zone";
+    case  FunctionDSMeterGetGroupsSize:
+      return "DSMeter Get Groups Size";
+    case  FunctionDSMeterGetZonesSize:
+      return "DSMeter Get Zones Size";
+    case  FunctionDSMeterGetZoneIdForInd:
+      return "DSMeter Get Zone Id For Index";
+    case  FunctionDSMeterAddToGroup:
+      return "DSMeter Add To Group";
+    case  FunctionDSMeterRemoveFromGroup:
+      return "DSMeter Remove From Group";
     case  FunctionGroupAddDeviceToGroup:
       return "Group Add Device";
     case  FunctionGroupRemoveDeviceFromGroup:
@@ -957,17 +957,17 @@ namespace dss {
     case FunctionDeviceGetSensorValue:
       return "Function Device Get Sensor Value";
 
-    case FunctionModulatorGetDSID:
-      return "Function Modulator Get DSID";
+    case FunctionDSMeterGetDSID:
+      return "Function DSMeter Get DSID";
 
-    case FunctionModulatorGetPowerConsumption:
-    	return "Function Modulator Get PowerConsumption";
-    case FunctionModulatorGetEnergyMeterValue:
-      return "Function Modulator Get Energy-Meter Value";
-    case FunctionModulatorGetEnergyLevel:
-      return "Function Modulator Get Energy-Level";
-    case FunctionModulatorSetEnergyLevel:
-      return "Function Modulator Set Energy-Level";
+    case FunctionDSMeterGetPowerConsumption:
+    	return "Function DSMeter Get PowerConsumption";
+    case FunctionDSMeterGetEnergyMeterValue:
+      return "Function DSMeter Get Energy-Meter Value";
+    case FunctionDSMeterGetEnergyLevel:
+      return "Function DSMeter Get Energy-Level";
+    case FunctionDSMeterSetEnergyLevel:
+      return "Function DSMeter Set Energy-Level";
 
     case FunctionGetTypeRequest:
       return "Function Get Type";
@@ -1163,18 +1163,18 @@ namespace dss {
             } else if(functionID == EventNewDS485Device) {
               pd.get<uint8_t>(); // functionID
               int modID = pd.get<uint16_t>();
-              ModelEvent* pEvent = new ModelEvent(ModelEvent::etNewModulator);
+              ModelEvent* pEvent = new ModelEvent(ModelEvent::etNewDSMeter);
               pEvent->addParameter(modID);
               raiseModelEvent(pEvent);
             } else if(functionID == EventLostDS485Device) {
               pd.get<uint8_t>(); // functionID
               int modID = pd.get<uint16_t>();
-              ModelEvent* pEvent = new ModelEvent(ModelEvent::etLostModulator);
+              ModelEvent* pEvent = new ModelEvent(ModelEvent::etLostDSMeter);
               pEvent->addParameter(modID);
               raiseModelEvent(pEvent);
             } else if(functionID == EventDeviceReady) {
               int modID = frame->getHeader().getDestination();
-              ModelEvent* pEvent = new ModelEvent(ModelEvent::etModulatorReady);
+              ModelEvent* pEvent = new ModelEvent(ModelEvent::etDSMeterReady);
               pEvent->addParameter(modID);
               raiseModelEvent(pEvent);
             }
@@ -1195,23 +1195,23 @@ namespace dss {
 
             PayloadDissector pd2(frame->getPayload());
             pd2.get<uint8_t>();
-            if (functionID == FunctionModulatorGetPowerConsumption) {   
+            if (functionID == FunctionDSMeterGetPowerConsumption) {   
               /* hard optimized */
-              //getDSS().getApartment().getModulatorByBusID((int)(frame->getHeader().getSource())).setPowerConsumption(pd2.get<uint32_t>());
+              //getDSS().getApartment().getDSMeterByBusID((int)(frame->getHeader().getSource())).setPowerConsumption(pd2.get<uint32_t>());
                 int modID = frame->getHeader().getSource();
                 ModelEvent* pEvent = new ModelEvent(ModelEvent::etPowerConsumption);
                 pEvent->addParameter(modID);
                 pEvent->addParameter(pd2.get<uint32_t>());
                 raiseModelEvent(pEvent);
-            } else if (functionID == FunctionModulatorGetEnergyMeterValue) {
+            } else if (functionID == FunctionDSMeterGetEnergyMeterValue) {
               /* hard optimized */
-              //getDSS().getApartment().getModulatorByBusID((int)(frame->getHeader().getSource())).setEnergyMeterValue(pd2.get<uint32_t>());
+              //getDSS().getApartment().getDSMeterByBusID((int)(frame->getHeader().getSource())).setEnergyMeterValue(pd2.get<uint32_t>());
                 int modID = frame->getHeader().getSource();
                 ModelEvent* pEvent = new ModelEvent(ModelEvent::etEnergyMeterValue);
                 pEvent->addParameter(modID);
                 pEvent->addParameter(pd2.get<uint32_t>());
                 raiseModelEvent(pEvent);
-            } else if (functionID == FunctionModulatorGetDSID) {
+            } else if (functionID == FunctionDSMeterGetDSID) {
               int sourceID = frame->getHeader().getSource();
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etDS485DeviceDiscovered);
               pEvent->addParameter(sourceID);

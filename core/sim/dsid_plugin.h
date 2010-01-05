@@ -34,7 +34,7 @@ namespace dss {
   public:
     DSIDPluginCreator(void* _soHandle, const char* _pluginName);
 
-    virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator);
+    virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter);
   }; // DSIDPluginCreator
 
 } // namespace dss

@@ -46,7 +46,7 @@ namespace dss {
     std::string m_Name;
     dsid_t m_DSID;
     devid_t m_ShortAddress;
-    int m_ModulatorID;
+    int m_DSMeterID;
     int m_ZoneID;
     std::bitset<63> m_GroupBitmask;
     std::vector<int> m_Groups;
@@ -136,10 +136,10 @@ namespace dss {
     void setShortAddress(const devid_t _shortAddress);
     /** Returns the DSID of the device */
     dsid_t getDSID() const;
-    /** Returns the id of the modulator the device is connected to */
-    int getModulatorID() const;
-    /** Sets the modulatorID of the device. */
-    void setModulatorID(const int _modulatorID);
+    /** Returns the id of the dsMeter the device is connected to */
+    int getDSMeterID() const;
+    /** Sets the dsMeterID of the device. */
+    void setDSMeterID(const int _dsMeterID);
 
     /** Returns the zone ID the device resides in. */
     int getZoneID() const;

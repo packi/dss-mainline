@@ -72,7 +72,7 @@ namespace dss {
     }
 
     virtual uint16_t getTarget() {
-      return getDevice()->getModulatorID();
+      return getDevice()->getDSMeterID();
     }
 
     virtual bool isBroadcast() {
@@ -131,7 +131,7 @@ namespace dss {
 
     virtual uint16_t getTarget() {
       if(targetIsDevice()) {
-        return m_pDevice->getModulatorID();
+        return m_pDevice->getDSMeterID();
       }
       return 0;
     }

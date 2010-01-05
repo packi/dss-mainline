@@ -38,8 +38,8 @@ namespace dss {
 
   Zone::~Zone() {
     scrubVector(m_Groups);
-    // we don't own our modulators
-    m_Modulators.clear();
+    // we don't own our dsMeters
+    m_DSMeters.clear();
   } // dtor
 
   Set Zone::getDevices() const {
@@ -118,29 +118,29 @@ namespace dss {
     m_ZoneID = _value;
   } // setZoneID
 
-  void Zone::addToModulator(const Modulator& _modulator) {
-    // make sure the zone is connected to the modulator
-    if(find(m_Modulators.begin(), m_Modulators.end(), &_modulator) == m_Modulators.end()) {
-      m_Modulators.push_back(&_modulator);
+  void Zone::addToDSMeter(const DSMeter& _dsMeter) {
+    // make sure the zone is connected to the dsMeter
+    if(find(m_DSMeters.begin(), m_DSMeters.end(), &_dsMeter) == m_DSMeters.end()) {
+      m_DSMeters.push_back(&_dsMeter);
     }
-  } // addToModulator
+  } // addToDSMeter
 
-  void Zone::removeFromModulator(const Modulator& _modulator) {
-    m_Modulators.erase(find(m_Modulators.begin(), m_Modulators.end(), &_modulator));
-  } // removeFromModulator
+  void Zone::removeFromDSMeter(const DSMeter& _dsMeter) {
+    m_DSMeters.erase(find(m_DSMeters.begin(), m_DSMeters.end(), &_dsMeter));
+  } // removeFromDSMeter
 
-  std::vector<int> Zone::getModulators() const {
+  std::vector<int> Zone::getDSMeters() const {
     std::vector<int> result;
-    for(std::vector<const Modulator*>::const_iterator iModulator = m_Modulators.begin(), e = m_Modulators.end();
-        iModulator != e; ++iModulator) {
-      result.push_back((*iModulator)->getBusID());
+    for(std::vector<const DSMeter*>::const_iterator iDSMeter = m_DSMeters.begin(), e = m_DSMeters.end();
+        iDSMeter != e; ++iDSMeter) {
+      result.push_back((*iDSMeter)->getBusID());
     }
     return result;
-  } // getModulators
+  } // getDSMeters
 
-  bool Zone::registeredOnModulator(const Modulator& _modulator) const {
-    return find(m_Modulators.begin(), m_Modulators.end(), &_modulator) != m_Modulators.end();
-  } // registeredOnModulator
+  bool Zone::registeredOnDSMeter(const DSMeter& _dsMeter) const {
+    return find(m_DSMeters.begin(), m_DSMeters.end(), &_dsMeter) != m_DSMeters.end();
+  } // registeredOnDSMeter
 
   unsigned long Zone::getPowerConsumption() {
     return getDevices().getPowerConsumption();

@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(testSets) {
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
-  dev1.setModulatorID(1);
+  dev1.setDSMeterID(1);
   dev1.addToGroup(1);
   dev1.setIsPresent(true);
   dev1.setZoneID(1);
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(testSets) {
   dev1.setFunctionID(1);
   Device& dev2 = apt.allocateDevice(dsid_t(0,2));
   dev2.setShortAddress(2);
-  dev2.setModulatorID(1);
+  dev2.setDSMeterID(1);
   dev2.addToGroup(1);
   dev2.setIsPresent(false);
   dev2.setZoneID(2);

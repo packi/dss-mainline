@@ -478,7 +478,7 @@ namespace dss {
                     m_PendingFrames.erase(m_PendingFrames.begin());
                     std::cout << "\ngot ack" << std::endl;
                   } else if(cmdAckFrame->getCommand() == CommandBusy) {
-                    std::cout << "\nmodulator is busy" << std::endl;
+                    std::cout << "\ndsMeter is busy" << std::endl;
                   } else {
                     m_PendingFrames.erase(m_PendingFrames.begin());
                     std::cout << "\n&&&&got other" << std::endl;

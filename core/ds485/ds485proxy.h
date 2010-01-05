@@ -162,7 +162,7 @@ namespace dss {
     CommandFrameSharedPtrVector m_IncomingFrames;
     bool m_InitializeDS485Controller;
 
-    ModulatorSpec_t modulatorSpecFromFrame(boost::shared_ptr<DS485CommandFrame> _frame);
+    DSMeterSpec_t dsMeterSpecFromFrame(boost::shared_ptr<DS485CommandFrame> _frame);
     void checkResultCode(const int _resultCode);
     void raiseModelEvent(ModelEvent* _pEvent);
   protected:
@@ -192,46 +192,46 @@ namespace dss {
     void removeFrameBucket(FrameBucketBase* _bucket);
 
     //------------------------------------------------ Specialized Commands (system)
-    virtual std::vector<ModulatorSpec_t> getModulators();
-    virtual ModulatorSpec_t getModulatorSpec(const int _modulatorID);
+    virtual std::vector<DSMeterSpec_t> getDSMeters();
+    virtual DSMeterSpec_t getDSMeterSpec(const int _dsMeterID);
 
-    virtual std::vector<int> getZones(const int _modulatorID);
-    virtual int getZoneCount(const int _modulatorID);
-    virtual std::vector<int> getDevicesInZone(const int _modulatorID, const int _zoneID);
-    virtual int getDevicesCountInZone(const int _modulatorID, const int _zoneID);
+    virtual std::vector<int> getZones(const int _dsMeterID);
+    virtual int getZoneCount(const int _dsMeterID);
+    virtual std::vector<int> getDevicesInZone(const int _dsMeterID, const int _zoneID);
+    virtual int getDevicesCountInZone(const int _dsMeterID, const int _zoneID);
 
-    virtual void setZoneID(const int _modulatorID, const devid_t _deviceID, const int _zoneID);
-    virtual void createZone(const int _modulatorID, const int _zoneID);
-    virtual void removeZone(const int _modulatorID, const int _zoneID);
+    virtual void setZoneID(const int _dsMeterID, const devid_t _deviceID, const int _zoneID);
+    virtual void createZone(const int _dsMeterID, const int _zoneID);
+    virtual void removeZone(const int _dsMeterID, const int _zoneID);
 
-    virtual int getGroupCount(const int _modulatorID, const int _zoneID);
-    virtual std::vector<int> getGroups(const int _modulatorID, const int _zoneID);
-    virtual int getDevicesInGroupCount(const int _modulatorID, const int _zoneID, const int _groupID);
-    virtual std::vector<int> getDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID);
+    virtual int getGroupCount(const int _dsMeterID, const int _zoneID);
+    virtual std::vector<int> getGroups(const int _dsMeterID, const int _zoneID);
+    virtual int getDevicesInGroupCount(const int _dsMeterID, const int _zoneID, const int _groupID);
+    virtual std::vector<int> getDevicesInGroup(const int _dsMeterID, const int _zoneID, const int _groupID);
 
-    virtual std::vector<int> getGroupsOfDevice(const int _modulatorID, const int _deviceID);
+    virtual std::vector<int> getGroupsOfDevice(const int _dsMeterID, const int _deviceID);
 
-    virtual void addToGroup(const int _modulatorID, const int _groupID, const int _deviceID);
-    virtual void removeFromGroup(const int _modulatorID, const int _groupID, const int _deviceID);
+    virtual void addToGroup(const int _dsMeterID, const int _groupID, const int _deviceID);
+    virtual void removeFromGroup(const int _dsMeterID, const int _groupID, const int _deviceID);
 
-    virtual int addUserGroup(const int _modulatorID);
-    virtual void removeUserGroup(const int _modulatorID, const int _groupID);
+    virtual int addUserGroup(const int _dsMeterID);
+    virtual void removeUserGroup(const int _dsMeterID, const int _groupID);
 
-    virtual dsid_t getDSIDOfDevice(const int _modulatorID, const int _deviceID);
-    virtual dsid_t getDSIDOfModulator(const int _modulatorID);
+    virtual dsid_t getDSIDOfDevice(const int _dsMeterID, const int _deviceID);
+    virtual dsid_t getDSIDOfDSMeter(const int _dsMeterID);
 
-    virtual int getLastCalledScene(const int _modulatorID, const int _zoneID, const int _groupID);
+    virtual int getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID);
 
-    virtual unsigned long getPowerConsumption(const int _modulatorID);
-    virtual unsigned long getEnergyMeterValue(const int _modulatorID);
-    virtual bool getEnergyBorder(const int _modulatorID, int& _lower, int& _upper);
+    virtual unsigned long getPowerConsumption(const int _dsMeterID);
+    virtual unsigned long getEnergyMeterValue(const int _dsMeterID);
+    virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper);
 
     //------------------------------------------------ UDI
-    virtual uint8_t dSLinkSend(const int _modulatorID, devid_t _devAdr, uint8_t _value, uint8_t _flags);
+    virtual uint8_t dSLinkSend(const int _dsMeterID, devid_t _devAdr, uint8_t _value, uint8_t _flags);
 
     //------------------------------------------------ Device
-    virtual uint16_t deviceGetParameterValue(devid_t _id, uint8_t _modulatorID, int _paramID);
-    virtual uint16_t deviceGetFunctionID(devid_t _id, uint8_t _modulatorID);
+    virtual uint16_t deviceGetParameterValue(devid_t _id, uint8_t _dsMeterID, int _paramID);
+    virtual uint16_t deviceGetFunctionID(devid_t _id, uint8_t _dsMeterID);
 
     void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size);
     virtual int getSensorValue(const Device& _device, const int _sensorID);

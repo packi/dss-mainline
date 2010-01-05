@@ -30,7 +30,7 @@ namespace dss {
 
   class Device;
   class Group;
-  class Modulator;
+  class DSMeter;
   
   /** Abstract interface to select certain Devices from a set */
   class IDeviceSelector {
@@ -78,15 +78,15 @@ namespace dss {
      */
     Set getSubset(const IDeviceSelector& _selector) const;
     /** Returns a subset of the devices which are member of the given group
-    * Note that these groups could be spanned over multiple modulators.
+    * Note that these groups could be spanned over multiple dsMeters.
      */
     Set getByGroup(int _groupNr) const;
     /** Returns a subset of the devices which are member of the given group
-     * Note that these groups could be spanned over multiple modulators.
+     * Note that these groups could be spanned over multiple dsMeters.
      */
     Set getByGroup(const Group& _group) const;
     /** Returns a subset of the devices which are member of the given group
-     * Note that these groups could be spanned over multiple modulators.
+     * Note that these groups could be spanned over multiple dsMeters.
      */
     Set getByGroup(const std::string& _name) const;
 
@@ -99,10 +99,10 @@ namespace dss {
     /** Returns a subset that contains all devices belonging to Zone \a _zoneName */
     Set getByZone(const std::string& _zoneName) const;
 
-    /** Returns a subset that contains all devices belonging to Modulator \a _modulatorID */
-    Set getByModulator(const int _modulatorID) const;
-    /** Returns a subset that contains all devices belonging to Modulator \a _modulator */
-    Set getByModulator(const Modulator& _modulator) const;
+    /** Returns a subset that contains all devices belonging to DSMeter \a _dsMeterID */
+    Set getByDSMeter(const int _dsMeterID) const;
+    /** Returns a subset that contains all devices belonging to DSMeter \a _dsMeter */
+    Set getByDSMeter(const DSMeter& _dsMeter) const;
 
     /** Returns a subset that contains all devices that have the presence state of \a _present */
     Set getByPresence(const bool _present) const;

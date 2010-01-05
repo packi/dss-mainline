@@ -44,7 +44,7 @@ namespace dss {
     std::string m_MeteringStorageLocation;
     std::vector<boost::shared_ptr<MeteringConfigChain> > m_Config;
   private:
-    void checkModulators(boost::shared_ptr<MeteringConfigChain> _config);
+    void checkDSMeters(boost::shared_ptr<MeteringConfigChain> _config);
 
     virtual void execute();
   protected:

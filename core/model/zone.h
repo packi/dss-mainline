@@ -33,14 +33,14 @@
 #include "physicalmodelitem.h"
 
 namespace dss {
-  class Modulator;
+  class DSMeter;
   class Group;
   class UserGroup;
   class Set;
   class DeviceReference;
  
     /** Represents a Zone.
-   * A Zone houses multiple devices. It can span over multiple modulators.
+   * A Zone houses multiple devices. It can span over multiple dsMeters.
    */
   class Zone : public DeviceContainer,
                public NonAddressableModelItem,
@@ -49,21 +49,21 @@ namespace dss {
   private:
     int m_ZoneID;
     DeviceVector m_Devices;
-    std::vector<const Modulator*> m_Modulators;
+    std::vector<const DSMeter*> m_DSMeters;
     std::vector<Group*> m_Groups;
-    int m_FirstZoneOnModulator;
+    int m_FirstZoneOnDSMeter;
   public:
     Zone(const int _id)
     : m_ZoneID(_id),
-          m_FirstZoneOnModulator(-1)
+          m_FirstZoneOnDSMeter(-1)
     {}
     virtual ~Zone();
     virtual Set getDevices() const;
 
-    /** Adds the Zone to a modulator. */
-    void addToModulator(const Modulator& _modulator);
-    /** Removes the Zone from a modulator. */
-    void removeFromModulator(const Modulator& _modulator);
+    /** Adds the Zone to a dsMeter. */
+    void addToDSMeter(const DSMeter& _dsMeter);
+    /** Removes the Zone from a dsMeter. */
+    void removeFromDSMeter(const DSMeter& _dsMeter);
 
     /** Adds a device to the zone.
      * This will permanently add the device to the zone.
@@ -90,16 +90,16 @@ namespace dss {
     /** Sets the zones id */
     void setZoneID(const int _value);
 
-    /** Returns the ID of the modulator the zone is the first
+    /** Returns the ID of the dsMeter the zone is the first
       * zone on.
-      * @return The modulator id, or -1
+      * @return The dsMeter id, or -1
       */
-    int getFirstZoneOnModulator() { return m_FirstZoneOnModulator; }
-    void setFirstZoneOnModulator(const int _value) { m_FirstZoneOnModulator = _value; }
+    int getFirstZoneOnDSMeter() { return m_FirstZoneOnDSMeter; }
+    void setFirstZoneOnDSMeter(const int _value) { m_FirstZoneOnDSMeter = _value; }
 
-    /** Returns a list of the modulators the zone is registered with. */
-    std::vector<int> getModulators() const;
-    bool registeredOnModulator(const Modulator& _modulator) const;
+    /** Returns a list of the dsMeters the zone is registered with. */
+    std::vector<int> getDSMeters() const;
+    bool registeredOnDSMeter(const DSMeter& _dsMeter) const;
 
     virtual void nextScene();
     virtual void previousScene();

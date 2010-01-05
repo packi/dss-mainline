@@ -31,7 +31,7 @@ namespace dss {
   /** Bus id of a device */
   typedef uint16_t devid_t;
 
-  /** DSID of a device/modulator */
+  /** DSID of a device/dsMeter */
 
   typedef struct dsid{
     uint64_t upper;

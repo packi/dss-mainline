@@ -43,7 +43,7 @@
 namespace dss {
 
   class Zone;
-  class Modulator;
+  class DSMeter;
   class Device;
   class Group;
   class Event;
@@ -64,7 +64,7 @@ namespace dss {
   {
   private:
     std::vector<Zone*> m_Zones;
-    std::vector<Modulator*> m_Modulators;
+    std::vector<DSMeter*> m_DSMeters;
     std::vector<Device*> m_Devices;
     bool m_IsInitializing;
 
@@ -78,9 +78,9 @@ namespace dss {
   private:
     void addDefaultGroupsToZone(Zone& _zone);
     void handleModelEvents();
-    void modulatorReady(int _modulatorBusID);
-    void setPowerConsumption(int _modulatorBusID, unsigned long _value);
-    void setEnergyMeterValue(int _modulatorBusID, unsigned long _value);
+    void dsMeterReady(int _dsMeterBusID);
+    void setPowerConsumption(int _dsMeterBusID, unsigned long _value);
+    void setEnergyMeterValue(int _dsMeterBusID, unsigned long _value);
     void discoverDS485Devices();
 
     void raiseEvent(boost::shared_ptr<Event> _pEvent);
@@ -105,8 +105,8 @@ namespace dss {
     Device& getDeviceByDSID(const dsid_t _dsid);
     /** Returns a reference to the device with the name \a _name*/
     Device& getDeviceByName(const std::string& _name);
-    /** Returns a device by it's short-address and modulator */
-    Device& getDeviceByShortAddress(const Modulator& _modulator, const devid_t _deviceID) const;
+    /** Returns a device by it's short-address and dsMeter */
+    Device& getDeviceByShortAddress(const DSMeter& _dsMeter, const devid_t _deviceID) const;
     std::vector<Device*>& getDevicesVector() { return m_Devices; }
     /** Allocates a device and returns a reference to it.
      *  If there is a stale device with the same dsid, this device gets "activated"
@@ -127,16 +127,16 @@ namespace dss {
       */
     Zone& allocateZone(int _zoneID);
 
-    Modulator& allocateModulator(const dsid_t _dsid);
+    DSMeter& allocateDSMeter(const dsid_t _dsid);
 
-    /** Returns a Modulator by name */
-    Modulator& getModulator(const std::string& _modName);
-    /** Returns a Modulator by DSID  */
-    Modulator& getModulatorByDSID(const dsid_t _dsid);
-    /** Returns a Modulator by bus-id */
-    Modulator& getModulatorByBusID(const int _busID);
-    /** Returns a vector of all modulators */
-    std::vector<Modulator*>& getModulators();
+    /** Returns a DSMeter by name */
+    DSMeter& getDSMeter(const std::string& _modName);
+    /** Returns a DSMeter by DSID  */
+    DSMeter& getDSMeterByDSID(const dsid_t _dsid);
+    /** Returns a DSMeter by bus-id */
+    DSMeter& getDSMeterByBusID(const int _busID);
+    /** Returns a vector of all dsMeters */
+    std::vector<DSMeter*>& getDSMeters();
 
     /** Returns a Group by name */
     Group& getGroup(const std::string& _name);
@@ -151,7 +151,7 @@ namespace dss {
 
     void removeZone(int _zoneID);
     void removeDevice(dsid_t _device);
-    void removeModulator(dsid_t _modulator);
+    void removeDSMeter(dsid_t _dsMeter);
   public:
 
     /** Returns the root-node for the apartment tree */
@@ -167,7 +167,7 @@ namespace dss {
     void onGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
     /** Called by the DS485Proxy if a device-call-scene frame was intercepted.
      *  Updates the state of the device. */
-    void onDeviceCallScene(const int _modulatorID, const int _deviceID, const int _sceneID);
+    void onDeviceCallScene(const int _dsMeterID, const int _deviceID, const int _sceneID);
     /** Called by the DS485Proxy if an add-device frame was intercepted.
      *  Adds the device to the model. */
     void onAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID);

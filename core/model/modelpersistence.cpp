@@ -81,8 +81,8 @@ namespace dss {
           std::string nodeName = curNode->localName();
           if(nodeName == "devices") {
             loadDevices(curNode);
-          } else if(nodeName == "modulators") {
-            loadModulators(curNode);
+          } else if(nodeName == "dsMeters") {
+            loadDSMeters(curNode);
           } else if(nodeName == "zones") {
             loadZones(curNode);
           } else if(nodeName == "apartment") {
@@ -136,10 +136,10 @@ namespace dss {
     }
   } // loadDevices
 
-  void ModelPersistence::loadModulators(Node* _node) {
+  void ModelPersistence::loadDSMeters(Node* _node) {
     Node* curNode = _node->firstChild();
     while(curNode != NULL) {
-      if(curNode->localName() == "modulator") {
+      if(curNode->localName() == "dsMeter") {
         Element* elem = dynamic_cast<Element*>(curNode);
         if((elem != NULL) && elem->hasAttribute("id")) {
           dsid_t id = dsid_t::fromString(elem->getAttribute("id"));
@@ -148,15 +148,15 @@ namespace dss {
           if((nameElem != NULL) && nameElem->hasChildNodes()) {
             name = nameElem->firstChild()->nodeValue();
           }
-          Modulator& newModulator = m_Apartment.allocateModulator(id);
+          DSMeter& newDSMeter = m_Apartment.allocateDSMeter(id);
           if(!name.empty()) {
-            newModulator.setName(name);
+            newDSMeter.setName(name);
           }
         }
       }
       curNode = curNode->nextSibling();
     }
-  } // loadModulators
+  } // loadDSMeters
 
   void ModelPersistence::loadZones(Node* _node) {
     Node* curNode = _node->firstChild();
@@ -211,17 +211,17 @@ namespace dss {
     _parentNode->appendChild(pZoneNode);
   } // zoneToXML
 
-  void modulatorToXML(const Modulator* _pModulator, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
-    AutoPtr<Element> pModulatorNode = _pDocument->createElement("modulator");
-    pModulatorNode->setAttribute("id", _pModulator->getDSID().toString());
-    if(!_pModulator->getName().empty()) {
+  void dsMeterToXML(const DSMeter* _pDSMeter, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
+    AutoPtr<Element> pDSMeterNode = _pDocument->createElement("dsMeter");
+    pDSMeterNode->setAttribute("id", _pDSMeter->getDSID().toString());
+    if(!_pDSMeter->getName().empty()) {
       AutoPtr<Element> pNameNode = _pDocument->createElement("name");
-      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pModulator->getName());
+      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pDSMeter->getName());
       pNameNode->appendChild(txtNode);
-      pModulatorNode->appendChild(pNameNode);
+      pDSMeterNode->appendChild(pNameNode);
     }
-    _parentNode->appendChild(pModulatorNode);
-  } // modulatorToXML
+    _parentNode->appendChild(pDSMeterNode);
+  } // dsMeterToXML
 
   void ModelPersistence::writeConfigurationToXML(const std::string& _fileName) {
     m_Apartment.log("Writing apartment config to '" + _fileName + "'", lsInfo);
@@ -256,11 +256,11 @@ namespace dss {
       zoneToXML(pZone, pZones, pDoc);
     }
 
-    // modulators
-    AutoPtr<Element> pModulators = pDoc->createElement("modulators");
-    pRoot->appendChild(pModulators);
-    foreach(Modulator* pModulator, m_Apartment.getModulators()) {
-      modulatorToXML(pModulator, pModulators, pDoc);
+    // dsMeters
+    AutoPtr<Element> pDSMeters = pDoc->createElement("dsMeters");
+    pRoot->appendChild(pDSMeters);
+    foreach(DSMeter* pDSMeter, m_Apartment.getDSMeters()) {
+      dsMeterToXML(pDSMeter, pDSMeters, pDoc);
     }
 
     std::string tmpOut = _fileName + ".tmp";

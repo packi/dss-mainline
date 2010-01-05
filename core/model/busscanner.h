@@ -29,12 +29,12 @@ namespace dss {
 
   class StructureQueryBusInterface;
   class Apartment;
-  class Modulator;
+  class DSMeter;
   
   class BusScanner {
   public:
     BusScanner(StructureQueryBusInterface& _interface, Apartment& _apartment);
-    bool scanModulator(Modulator& _modulator);
+    bool scanDSMeter(DSMeter& _dsMeter);
   private:
     void log(const std::string& _line, aLogSeverity _severity = lsDebug);
   private:

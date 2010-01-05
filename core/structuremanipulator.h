@@ -27,7 +27,7 @@ namespace dss {
 
   class Apartment;
   class DS485Interface;
-  class Modulator;
+  class DSMeter;
   class Device;
   class Zone;
 
@@ -40,9 +40,9 @@ namespace dss {
     : m_Apartment(_apartment), m_Interface(_interface)
     { } // ctor
 
-    void createZone(Modulator& _modulator, Zone& _zone);
+    void createZone(DSMeter& _dsMeter, Zone& _zone);
     void addDeviceToZone(Device& _device, Zone& _zone);
-    void removeZoneOnModulator(Zone& _zone, Modulator& _modulator);
+    void removeZoneOnDSMeter(Zone& _zone, DSMeter& _dsMeter);
   }; // StructureManipulator
 
 

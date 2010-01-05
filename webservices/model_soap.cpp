@@ -97,31 +97,31 @@ int AuthorizeAndGetDevice(struct soap *soap, const int _token, char* _devID, dss
   return SOAP_OK;
 } // authorizeAndGetDevice
 
-int AuthorizeAndGetModulator(struct soap *soap, const int _token, char* _modulatorDSID, dss::Modulator& result) {
+int AuthorizeAndGetDSMeter(struct soap *soap, const int _token, char* _dsMeterDSID, dss::DSMeter& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
   try {
-    result = apt.getModulatorByDSID(FromSOAP(_modulatorDSID));
+    result = apt.getDSMeterByDSID(FromSOAP(_dsMeterDSID));
   } catch(dss::ItemNotFoundException& _ex) {
-    return soap_receiver_fault(soap, "Modulator not found", NULL);
+    return soap_receiver_fault(soap, "DSMeter not found", NULL);
   }
   return SOAP_OK;
-} // authorizeAndGetModulator
+} // authorizeAndGetDSMeter
 
-int AuthorizeAndGetModulatorByBusID(struct soap *soap, const int _token, int _modulatorID, dss::Modulator& result) {
+int AuthorizeAndGetDSMeterByBusID(struct soap *soap, const int _token, int _dsMeterID, dss::DSMeter& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
   try {
-    result = apt.getModulatorByBusID(_modulatorID);
+    result = apt.getDSMeterByBusID(_dsMeterID);
   } catch(dss::ItemNotFoundException& _ex) {
-    return soap_receiver_fault(soap, "Modulator not found", NULL);
+    return soap_receiver_fault(soap, "DSMeter not found", NULL);
   }
   return SOAP_OK;
-} // authorizeAndGetModulatorID
+} // authorizeAndGetDSMeterID
 
 int AuthorizeAndGetGroup(struct soap *soap, const int _token, const int _groupID, dss::Group& result) {
   if(!IsAuthorized(soap, _token)) {
@@ -399,9 +399,9 @@ int dss__ApartmentRescan(struct soap *soap, int _token, bool& result) {
   }
 
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
-  std::vector<dss::Modulator*> mods = apt.getModulators();
-  foreach(dss::Modulator* pModulator, mods) {
-    pModulator->setIsValid(false);
+  std::vector<dss::DSMeter*> mods = apt.getDSMeters();
+  foreach(dss::DSMeter* pDSMeter, mods) {
+    pDSMeter->setIsValid(false);
   }
 
   return SOAP_OK;
@@ -422,10 +422,10 @@ int dss__CircuitRescan(struct soap *soap, int _token, char* _dsid, bool& result)
     return soap_sender_fault(soap, "Error parsing dsid", NULL);
   }
   try {
-    dss::Modulator& mod = apt.getModulatorByDSID(dsid);
+    dss::DSMeter& mod = apt.getDSMeterByDSID(dsid);
     mod.setIsValid(false);
   } catch(dss::ItemNotFoundException&) {
-    return soap_sender_fault(soap, "Could not find modulator", NULL);
+    return soap_sender_fault(soap, "Could not find dsMeter", NULL);
   }
 
   return SOAP_OK;
@@ -995,41 +995,41 @@ int dss__DeviceGetZoneID(struct soap *soap, int _token, char* _deviceID, int& re
 
 //==================================================== Information
 
-int dss__ModulatorGetPowerConsumption(struct soap *soap, int _token, int _modulatorID, unsigned long& result) {
-  dss::Modulator mod(dss::NullDSID);
-  int getResult = AuthorizeAndGetModulatorByBusID(soap, _token, _modulatorID, mod);
+int dss__DSMeterGetPowerConsumption(struct soap *soap, int _token, int _dsMeterID, unsigned long& result) {
+  dss::DSMeter mod(dss::NullDSID);
+  int getResult = AuthorizeAndGetDSMeterByBusID(soap, _token, _dsMeterID, mod);
   if(getResult != SOAP_OK) {
     return getResult;
   }
 
   result = mod.getPowerConsumption();
   return SOAP_OK;
-} // dss__ModulatorGetPowerConsumption
+} // dss__DSMeterGetPowerConsumption
 
 
 //==================================================== Organization
 
 //These calls may be restricted to privileged users.
 
-int dss__ApartmentGetModulatorIDs(struct soap *soap, int _token, std::vector<std::string>& ids) {
+int dss__ApartmentGetDSMeterIDs(struct soap *soap, int _token, std::vector<std::string>& ids) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
 
-  std::vector<dss::Modulator*>& modulators = apt.getModulators();
+  std::vector<dss::DSMeter*>& dsMeters = apt.getDSMeters();
 
-  for(unsigned int iModulator = 0; iModulator < modulators.size(); iModulator++) {
-    dss::dsid_t dsid = modulators[iModulator]->getDSID();
+  for(unsigned int iDSMeter = 0; iDSMeter < dsMeters.size(); iDSMeter++) {
+    dss::dsid_t dsid = dsMeters[iDSMeter]->getDSID();
     ids.push_back(dsid.toString());
   }
 
   return SOAP_OK;
 }
 
-int dss__ModulatorGetName(struct soap *soap, int _token, char* _modulatorID, std::string& name) {
-  dss::Modulator mod(dss::NullDSID);
-  int getResult = AuthorizeAndGetModulator(soap, _token, _modulatorID, mod);
+int dss__DSMeterGetName(struct soap *soap, int _token, char* _dsMeterID, std::string& name) {
+  dss::DSMeter mod(dss::NullDSID);
+  int getResult = AuthorizeAndGetDSMeter(soap, _token, _dsMeterID, mod);
   if(getResult != SOAP_OK) {
     return getResult;
   }

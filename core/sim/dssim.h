@@ -42,7 +42,7 @@ namespace Poco {
 namespace dss {
   class DS485Frame;
   class DSIDInterface;
-  class DSModulatorSim;
+  class DSDSMeterSim;
 
   class DSIDCreator {
   private:
@@ -52,14 +52,14 @@ namespace dss {
     virtual ~DSIDCreator() {};
 
     const std::string& getIdentifier() const { return m_Identifier; }
-    virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) = 0;
+    virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) = 0;
   };
 
   class DSIDFactory {
   private:
     boost::ptr_vector<DSIDCreator> m_RegisteredCreators;
   public:
-    DSIDInterface* createDSID(const std::string& _identifier, const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator);
+    DSIDInterface* createDSID(const std::string& _identifier, const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter);
 
     void registerCreator(DSIDCreator* _creator);
   };
@@ -69,7 +69,7 @@ namespace dss {
   private:
     DSIDFactory m_DSIDFactory;
     bool m_Initialized;
-    boost::ptr_vector<DSModulatorSim> m_Modulators;
+    boost::ptr_vector<DSDSMeterSim> m_DSMeters;
   private:
     void loadPlugins();
 
@@ -94,13 +94,13 @@ namespace dss {
 
   typedef std::map< const std::pair<const int, const int>,  std::vector<DSIDInterface*> > IntPairToDSIDSimVector;
 
-  class DSModulatorSim {
+  class DSDSMeterSim {
   private:
     DSSim* m_pSimulation;
     int m_EnergyLevelOrange;
     int m_EnergyLevelRed;
     int m_ID;
-    dsid_t m_ModulatorDSID;
+    dsid_t m_DSMeterDSID;
     std::vector<DSIDInterface*> m_SimulatedDevices;
     std::map< const int, std::vector<DSIDInterface*> > m_Zones;
     IntPairToDSIDSimVector m_DevicesOfGroupInZone;
@@ -139,8 +139,8 @@ namespace dss {
     virtual void doStart() {}
     void log(const std::string& _message, aLogSeverity _severity = lsDebug);
   public:
-    DSModulatorSim(DSSim* _pSimulator);
-    virtual ~DSModulatorSim() {}
+    DSDSMeterSim(DSSim* _pSimulator);
+    virtual ~DSDSMeterSim() {}
 
     bool initializeFromNode(Poco::XML::Node* _node);
 
@@ -150,16 +150,16 @@ namespace dss {
 
     DSIDInterface* getSimulatedDevice(const dsid_t _dsid);
     void dSLinkInterrupt(devid_t _shortAddress) const;
-  }; // DSModulatorSim
+  }; // DSDSMeterSim
 
   class DSIDInterface {
   private:
     dsid_t m_DSID;
     devid_t m_ShortAddress;
-    const DSModulatorSim& m_Simulator;
+    const DSDSMeterSim& m_Simulator;
     int m_ZoneID;
   public:
-    DSIDInterface(const DSModulatorSim& _simulator, dsid_t _dsid, devid_t _shortAddress)
+    DSIDInterface(const DSDSMeterSim& _simulator, dsid_t _dsid, devid_t _shortAddress)
     : m_DSID(_dsid), m_ShortAddress(_shortAddress), m_Simulator(_simulator) {}
 
     virtual ~DSIDInterface() {}
@@ -204,7 +204,7 @@ namespace dss {
       return 0;
     }
 
-    /** Signals the modulator that a interrupt has occurred */
+    /** Signals the dsMeter that a interrupt has occurred */
     void dSLinkInterrupt() {
       m_Simulator.dSLinkInterrupt(m_ShortAddress);
     }

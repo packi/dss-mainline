@@ -868,89 +868,89 @@ SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__ApartmentAllocateZoneResponse(struct
 SOAP_FMAC3 struct dss__ApartmentAllocateZoneResponse * SOAP_FMAC4 soap_instantiate_dss__ApartmentAllocateZoneResponse(struct soap*, int, const char*, const char*, size_t*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentAllocateZoneResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_dss__ModulatorGetName
-#define SOAP_TYPE_dss__ModulatorGetName (218)
+#ifndef SOAP_TYPE_dss__DSMeterGetName
+#define SOAP_TYPE_dss__DSMeterGetName (218)
 #endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ModulatorGetName(struct soap*, struct dss__ModulatorGetName *);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ModulatorGetName(struct soap*, const struct dss__ModulatorGetName *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__ModulatorGetName(struct soap*, const struct dss__ModulatorGetName *, const char*, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ModulatorGetName(struct soap*, const char*, int, const struct dss__ModulatorGetName *, const char*);
-SOAP_FMAC3 struct dss__ModulatorGetName * SOAP_FMAC4 soap_get_dss__ModulatorGetName(struct soap*, struct dss__ModulatorGetName *, const char*, const char*);
-SOAP_FMAC3 struct dss__ModulatorGetName * SOAP_FMAC4 soap_in_dss__ModulatorGetName(struct soap*, const char*, struct dss__ModulatorGetName *, const char*);
-SOAP_FMAC5 struct dss__ModulatorGetName * SOAP_FMAC6 soap_new_dss__ModulatorGetName(struct soap*, int);
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__ModulatorGetName(struct soap*, struct dss__ModulatorGetName*);
-SOAP_FMAC3 struct dss__ModulatorGetName * SOAP_FMAC4 soap_instantiate_dss__ModulatorGetName(struct soap*, int, const char*, const char*, size_t*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ModulatorGetName(struct soap*, int, int, void*, size_t, const void*, size_t);
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DSMeterGetName(struct soap*, struct dss__DSMeterGetName *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DSMeterGetName(struct soap*, const struct dss__DSMeterGetName *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DSMeterGetName(struct soap*, const struct dss__DSMeterGetName *, const char*, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DSMeterGetName(struct soap*, const char*, int, const struct dss__DSMeterGetName *, const char*);
+SOAP_FMAC3 struct dss__DSMeterGetName * SOAP_FMAC4 soap_get_dss__DSMeterGetName(struct soap*, struct dss__DSMeterGetName *, const char*, const char*);
+SOAP_FMAC3 struct dss__DSMeterGetName * SOAP_FMAC4 soap_in_dss__DSMeterGetName(struct soap*, const char*, struct dss__DSMeterGetName *, const char*);
+SOAP_FMAC5 struct dss__DSMeterGetName * SOAP_FMAC6 soap_new_dss__DSMeterGetName(struct soap*, int);
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DSMeterGetName(struct soap*, struct dss__DSMeterGetName*);
+SOAP_FMAC3 struct dss__DSMeterGetName * SOAP_FMAC4 soap_instantiate_dss__DSMeterGetName(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DSMeterGetName(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_dss__ModulatorGetNameResponse
-#define SOAP_TYPE_dss__ModulatorGetNameResponse (217)
+#ifndef SOAP_TYPE_dss__DSMeterGetNameResponse
+#define SOAP_TYPE_dss__DSMeterGetNameResponse (217)
 #endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ModulatorGetNameResponse(struct soap*, struct dss__ModulatorGetNameResponse *);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ModulatorGetNameResponse(struct soap*, const struct dss__ModulatorGetNameResponse *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__ModulatorGetNameResponse(struct soap*, const struct dss__ModulatorGetNameResponse *, const char*, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ModulatorGetNameResponse(struct soap*, const char*, int, const struct dss__ModulatorGetNameResponse *, const char*);
-SOAP_FMAC3 struct dss__ModulatorGetNameResponse * SOAP_FMAC4 soap_get_dss__ModulatorGetNameResponse(struct soap*, struct dss__ModulatorGetNameResponse *, const char*, const char*);
-SOAP_FMAC3 struct dss__ModulatorGetNameResponse * SOAP_FMAC4 soap_in_dss__ModulatorGetNameResponse(struct soap*, const char*, struct dss__ModulatorGetNameResponse *, const char*);
-SOAP_FMAC5 struct dss__ModulatorGetNameResponse * SOAP_FMAC6 soap_new_dss__ModulatorGetNameResponse(struct soap*, int);
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__ModulatorGetNameResponse(struct soap*, struct dss__ModulatorGetNameResponse*);
-SOAP_FMAC3 struct dss__ModulatorGetNameResponse * SOAP_FMAC4 soap_instantiate_dss__ModulatorGetNameResponse(struct soap*, int, const char*, const char*, size_t*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ModulatorGetNameResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DSMeterGetNameResponse(struct soap*, struct dss__DSMeterGetNameResponse *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DSMeterGetNameResponse(struct soap*, const struct dss__DSMeterGetNameResponse *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DSMeterGetNameResponse(struct soap*, const struct dss__DSMeterGetNameResponse *, const char*, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DSMeterGetNameResponse(struct soap*, const char*, int, const struct dss__DSMeterGetNameResponse *, const char*);
+SOAP_FMAC3 struct dss__DSMeterGetNameResponse * SOAP_FMAC4 soap_get_dss__DSMeterGetNameResponse(struct soap*, struct dss__DSMeterGetNameResponse *, const char*, const char*);
+SOAP_FMAC3 struct dss__DSMeterGetNameResponse * SOAP_FMAC4 soap_in_dss__DSMeterGetNameResponse(struct soap*, const char*, struct dss__DSMeterGetNameResponse *, const char*);
+SOAP_FMAC5 struct dss__DSMeterGetNameResponse * SOAP_FMAC6 soap_new_dss__DSMeterGetNameResponse(struct soap*, int);
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DSMeterGetNameResponse(struct soap*, struct dss__DSMeterGetNameResponse*);
+SOAP_FMAC3 struct dss__DSMeterGetNameResponse * SOAP_FMAC4 soap_instantiate_dss__DSMeterGetNameResponse(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DSMeterGetNameResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_dss__ApartmentGetModulatorIDs
-#define SOAP_TYPE_dss__ApartmentGetModulatorIDs (215)
+#ifndef SOAP_TYPE_dss__ApartmentGetDSMeterIDs
+#define SOAP_TYPE_dss__ApartmentGetDSMeterIDs (215)
 #endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentGetModulatorIDs(struct soap*, struct dss__ApartmentGetModulatorIDs *);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentGetModulatorIDs(struct soap*, const struct dss__ApartmentGetModulatorIDs *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__ApartmentGetModulatorIDs(struct soap*, const struct dss__ApartmentGetModulatorIDs *, const char*, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ApartmentGetModulatorIDs(struct soap*, const char*, int, const struct dss__ApartmentGetModulatorIDs *, const char*);
-SOAP_FMAC3 struct dss__ApartmentGetModulatorIDs * SOAP_FMAC4 soap_get_dss__ApartmentGetModulatorIDs(struct soap*, struct dss__ApartmentGetModulatorIDs *, const char*, const char*);
-SOAP_FMAC3 struct dss__ApartmentGetModulatorIDs * SOAP_FMAC4 soap_in_dss__ApartmentGetModulatorIDs(struct soap*, const char*, struct dss__ApartmentGetModulatorIDs *, const char*);
-SOAP_FMAC5 struct dss__ApartmentGetModulatorIDs * SOAP_FMAC6 soap_new_dss__ApartmentGetModulatorIDs(struct soap*, int);
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__ApartmentGetModulatorIDs(struct soap*, struct dss__ApartmentGetModulatorIDs*);
-SOAP_FMAC3 struct dss__ApartmentGetModulatorIDs * SOAP_FMAC4 soap_instantiate_dss__ApartmentGetModulatorIDs(struct soap*, int, const char*, const char*, size_t*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentGetModulatorIDs(struct soap*, int, int, void*, size_t, const void*, size_t);
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentGetDSMeterIDs(struct soap*, struct dss__ApartmentGetDSMeterIDs *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentGetDSMeterIDs(struct soap*, const struct dss__ApartmentGetDSMeterIDs *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__ApartmentGetDSMeterIDs(struct soap*, const struct dss__ApartmentGetDSMeterIDs *, const char*, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ApartmentGetDSMeterIDs(struct soap*, const char*, int, const struct dss__ApartmentGetDSMeterIDs *, const char*);
+SOAP_FMAC3 struct dss__ApartmentGetDSMeterIDs * SOAP_FMAC4 soap_get_dss__ApartmentGetDSMeterIDs(struct soap*, struct dss__ApartmentGetDSMeterIDs *, const char*, const char*);
+SOAP_FMAC3 struct dss__ApartmentGetDSMeterIDs * SOAP_FMAC4 soap_in_dss__ApartmentGetDSMeterIDs(struct soap*, const char*, struct dss__ApartmentGetDSMeterIDs *, const char*);
+SOAP_FMAC5 struct dss__ApartmentGetDSMeterIDs * SOAP_FMAC6 soap_new_dss__ApartmentGetDSMeterIDs(struct soap*, int);
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__ApartmentGetDSMeterIDs(struct soap*, struct dss__ApartmentGetDSMeterIDs*);
+SOAP_FMAC3 struct dss__ApartmentGetDSMeterIDs * SOAP_FMAC4 soap_instantiate_dss__ApartmentGetDSMeterIDs(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentGetDSMeterIDs(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_dss__ApartmentGetModulatorIDsResponse
-#define SOAP_TYPE_dss__ApartmentGetModulatorIDsResponse (214)
+#ifndef SOAP_TYPE_dss__ApartmentGetDSMeterIDsResponse
+#define SOAP_TYPE_dss__ApartmentGetDSMeterIDsResponse (214)
 #endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentGetModulatorIDsResponse(struct soap*, struct dss__ApartmentGetModulatorIDsResponse *);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentGetModulatorIDsResponse(struct soap*, const struct dss__ApartmentGetModulatorIDsResponse *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__ApartmentGetModulatorIDsResponse(struct soap*, const struct dss__ApartmentGetModulatorIDsResponse *, const char*, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ApartmentGetModulatorIDsResponse(struct soap*, const char*, int, const struct dss__ApartmentGetModulatorIDsResponse *, const char*);
-SOAP_FMAC3 struct dss__ApartmentGetModulatorIDsResponse * SOAP_FMAC4 soap_get_dss__ApartmentGetModulatorIDsResponse(struct soap*, struct dss__ApartmentGetModulatorIDsResponse *, const char*, const char*);
-SOAP_FMAC3 struct dss__ApartmentGetModulatorIDsResponse * SOAP_FMAC4 soap_in_dss__ApartmentGetModulatorIDsResponse(struct soap*, const char*, struct dss__ApartmentGetModulatorIDsResponse *, const char*);
-SOAP_FMAC5 struct dss__ApartmentGetModulatorIDsResponse * SOAP_FMAC6 soap_new_dss__ApartmentGetModulatorIDsResponse(struct soap*, int);
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__ApartmentGetModulatorIDsResponse(struct soap*, struct dss__ApartmentGetModulatorIDsResponse*);
-SOAP_FMAC3 struct dss__ApartmentGetModulatorIDsResponse * SOAP_FMAC4 soap_instantiate_dss__ApartmentGetModulatorIDsResponse(struct soap*, int, const char*, const char*, size_t*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentGetModulatorIDsResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentGetDSMeterIDsResponse(struct soap*, struct dss__ApartmentGetDSMeterIDsResponse *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentGetDSMeterIDsResponse(struct soap*, const struct dss__ApartmentGetDSMeterIDsResponse *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__ApartmentGetDSMeterIDsResponse(struct soap*, const struct dss__ApartmentGetDSMeterIDsResponse *, const char*, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ApartmentGetDSMeterIDsResponse(struct soap*, const char*, int, const struct dss__ApartmentGetDSMeterIDsResponse *, const char*);
+SOAP_FMAC3 struct dss__ApartmentGetDSMeterIDsResponse * SOAP_FMAC4 soap_get_dss__ApartmentGetDSMeterIDsResponse(struct soap*, struct dss__ApartmentGetDSMeterIDsResponse *, const char*, const char*);
+SOAP_FMAC3 struct dss__ApartmentGetDSMeterIDsResponse * SOAP_FMAC4 soap_in_dss__ApartmentGetDSMeterIDsResponse(struct soap*, const char*, struct dss__ApartmentGetDSMeterIDsResponse *, const char*);
+SOAP_FMAC5 struct dss__ApartmentGetDSMeterIDsResponse * SOAP_FMAC6 soap_new_dss__ApartmentGetDSMeterIDsResponse(struct soap*, int);
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__ApartmentGetDSMeterIDsResponse(struct soap*, struct dss__ApartmentGetDSMeterIDsResponse*);
+SOAP_FMAC3 struct dss__ApartmentGetDSMeterIDsResponse * SOAP_FMAC4 soap_instantiate_dss__ApartmentGetDSMeterIDsResponse(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentGetDSMeterIDsResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_dss__ModulatorGetPowerConsumption
-#define SOAP_TYPE_dss__ModulatorGetPowerConsumption (212)
+#ifndef SOAP_TYPE_dss__DSMeterGetPowerConsumption
+#define SOAP_TYPE_dss__DSMeterGetPowerConsumption (212)
 #endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ModulatorGetPowerConsumption(struct soap*, struct dss__ModulatorGetPowerConsumption *);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ModulatorGetPowerConsumption(struct soap*, const struct dss__ModulatorGetPowerConsumption *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__ModulatorGetPowerConsumption(struct soap*, const struct dss__ModulatorGetPowerConsumption *, const char*, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ModulatorGetPowerConsumption(struct soap*, const char*, int, const struct dss__ModulatorGetPowerConsumption *, const char*);
-SOAP_FMAC3 struct dss__ModulatorGetPowerConsumption * SOAP_FMAC4 soap_get_dss__ModulatorGetPowerConsumption(struct soap*, struct dss__ModulatorGetPowerConsumption *, const char*, const char*);
-SOAP_FMAC3 struct dss__ModulatorGetPowerConsumption * SOAP_FMAC4 soap_in_dss__ModulatorGetPowerConsumption(struct soap*, const char*, struct dss__ModulatorGetPowerConsumption *, const char*);
-SOAP_FMAC5 struct dss__ModulatorGetPowerConsumption * SOAP_FMAC6 soap_new_dss__ModulatorGetPowerConsumption(struct soap*, int);
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__ModulatorGetPowerConsumption(struct soap*, struct dss__ModulatorGetPowerConsumption*);
-SOAP_FMAC3 struct dss__ModulatorGetPowerConsumption * SOAP_FMAC4 soap_instantiate_dss__ModulatorGetPowerConsumption(struct soap*, int, const char*, const char*, size_t*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ModulatorGetPowerConsumption(struct soap*, int, int, void*, size_t, const void*, size_t);
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DSMeterGetPowerConsumption(struct soap*, struct dss__DSMeterGetPowerConsumption *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DSMeterGetPowerConsumption(struct soap*, const struct dss__DSMeterGetPowerConsumption *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DSMeterGetPowerConsumption(struct soap*, const struct dss__DSMeterGetPowerConsumption *, const char*, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DSMeterGetPowerConsumption(struct soap*, const char*, int, const struct dss__DSMeterGetPowerConsumption *, const char*);
+SOAP_FMAC3 struct dss__DSMeterGetPowerConsumption * SOAP_FMAC4 soap_get_dss__DSMeterGetPowerConsumption(struct soap*, struct dss__DSMeterGetPowerConsumption *, const char*, const char*);
+SOAP_FMAC3 struct dss__DSMeterGetPowerConsumption * SOAP_FMAC4 soap_in_dss__DSMeterGetPowerConsumption(struct soap*, const char*, struct dss__DSMeterGetPowerConsumption *, const char*);
+SOAP_FMAC5 struct dss__DSMeterGetPowerConsumption * SOAP_FMAC6 soap_new_dss__DSMeterGetPowerConsumption(struct soap*, int);
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DSMeterGetPowerConsumption(struct soap*, struct dss__DSMeterGetPowerConsumption*);
+SOAP_FMAC3 struct dss__DSMeterGetPowerConsumption * SOAP_FMAC4 soap_instantiate_dss__DSMeterGetPowerConsumption(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DSMeterGetPowerConsumption(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_dss__ModulatorGetPowerConsumptionResponse
-#define SOAP_TYPE_dss__ModulatorGetPowerConsumptionResponse (211)
+#ifndef SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse
+#define SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse (211)
 #endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ModulatorGetPowerConsumptionResponse(struct soap*, struct dss__ModulatorGetPowerConsumptionResponse *);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ModulatorGetPowerConsumptionResponse(struct soap*, const struct dss__ModulatorGetPowerConsumptionResponse *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__ModulatorGetPowerConsumptionResponse(struct soap*, const struct dss__ModulatorGetPowerConsumptionResponse *, const char*, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ModulatorGetPowerConsumptionResponse(struct soap*, const char*, int, const struct dss__ModulatorGetPowerConsumptionResponse *, const char*);
-SOAP_FMAC3 struct dss__ModulatorGetPowerConsumptionResponse * SOAP_FMAC4 soap_get_dss__ModulatorGetPowerConsumptionResponse(struct soap*, struct dss__ModulatorGetPowerConsumptionResponse *, const char*, const char*);
-SOAP_FMAC3 struct dss__ModulatorGetPowerConsumptionResponse * SOAP_FMAC4 soap_in_dss__ModulatorGetPowerConsumptionResponse(struct soap*, const char*, struct dss__ModulatorGetPowerConsumptionResponse *, const char*);
-SOAP_FMAC5 struct dss__ModulatorGetPowerConsumptionResponse * SOAP_FMAC6 soap_new_dss__ModulatorGetPowerConsumptionResponse(struct soap*, int);
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__ModulatorGetPowerConsumptionResponse(struct soap*, struct dss__ModulatorGetPowerConsumptionResponse*);
-SOAP_FMAC3 struct dss__ModulatorGetPowerConsumptionResponse * SOAP_FMAC4 soap_instantiate_dss__ModulatorGetPowerConsumptionResponse(struct soap*, int, const char*, const char*, size_t*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ModulatorGetPowerConsumptionResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DSMeterGetPowerConsumptionResponse(struct soap*, struct dss__DSMeterGetPowerConsumptionResponse *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DSMeterGetPowerConsumptionResponse(struct soap*, const struct dss__DSMeterGetPowerConsumptionResponse *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DSMeterGetPowerConsumptionResponse(struct soap*, const struct dss__DSMeterGetPowerConsumptionResponse *, const char*, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DSMeterGetPowerConsumptionResponse(struct soap*, const char*, int, const struct dss__DSMeterGetPowerConsumptionResponse *, const char*);
+SOAP_FMAC3 struct dss__DSMeterGetPowerConsumptionResponse * SOAP_FMAC4 soap_get_dss__DSMeterGetPowerConsumptionResponse(struct soap*, struct dss__DSMeterGetPowerConsumptionResponse *, const char*, const char*);
+SOAP_FMAC3 struct dss__DSMeterGetPowerConsumptionResponse * SOAP_FMAC4 soap_in_dss__DSMeterGetPowerConsumptionResponse(struct soap*, const char*, struct dss__DSMeterGetPowerConsumptionResponse *, const char*);
+SOAP_FMAC5 struct dss__DSMeterGetPowerConsumptionResponse * SOAP_FMAC6 soap_new_dss__DSMeterGetPowerConsumptionResponse(struct soap*, int);
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DSMeterGetPowerConsumptionResponse(struct soap*, struct dss__DSMeterGetPowerConsumptionResponse*);
+SOAP_FMAC3 struct dss__DSMeterGetPowerConsumptionResponse * SOAP_FMAC4 soap_instantiate_dss__DSMeterGetPowerConsumptionResponse(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DSMeterGetPowerConsumptionResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__DeviceGetZoneID
 #define SOAP_TYPE_dss__DeviceGetZoneID (208)

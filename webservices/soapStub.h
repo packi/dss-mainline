@@ -1319,65 +1319,65 @@ public:
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__ModulatorGetPowerConsumptionResponse
-#define SOAP_TYPE_dss__ModulatorGetPowerConsumptionResponse (211)
-/* dss:ModulatorGetPowerConsumptionResponse */
-struct dss__ModulatorGetPowerConsumptionResponse
+#ifndef SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse
+#define SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse (211)
+/* dss:DSMeterGetPowerConsumptionResponse */
+struct dss__DSMeterGetPowerConsumptionResponse
 {
 public:
 	unsigned long result;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:unsignedInt */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__ModulatorGetPowerConsumption
-#define SOAP_TYPE_dss__ModulatorGetPowerConsumption (212)
-/* dss:ModulatorGetPowerConsumption */
-struct dss__ModulatorGetPowerConsumption
+#ifndef SOAP_TYPE_dss__DSMeterGetPowerConsumption
+#define SOAP_TYPE_dss__DSMeterGetPowerConsumption (212)
+/* dss:DSMeterGetPowerConsumption */
+struct dss__DSMeterGetPowerConsumption
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	int _modulatorID;	/* required element of type xsd:int */
+	int _dsMeterID;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__ApartmentGetModulatorIDsResponse
-#define SOAP_TYPE_dss__ApartmentGetModulatorIDsResponse (214)
-/* dss:ApartmentGetModulatorIDsResponse */
-struct dss__ApartmentGetModulatorIDsResponse
+#ifndef SOAP_TYPE_dss__ApartmentGetDSMeterIDsResponse
+#define SOAP_TYPE_dss__ApartmentGetDSMeterIDsResponse (214)
+/* dss:ApartmentGetDSMeterIDsResponse */
+struct dss__ApartmentGetDSMeterIDsResponse
 {
 public:
 	std::vector<std::string >ids;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:string */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__ApartmentGetModulatorIDs
-#define SOAP_TYPE_dss__ApartmentGetModulatorIDs (215)
-/* dss:ApartmentGetModulatorIDs */
-struct dss__ApartmentGetModulatorIDs
+#ifndef SOAP_TYPE_dss__ApartmentGetDSMeterIDs
+#define SOAP_TYPE_dss__ApartmentGetDSMeterIDs (215)
+/* dss:ApartmentGetDSMeterIDs */
+struct dss__ApartmentGetDSMeterIDs
 {
 public:
 	int _token;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__ModulatorGetNameResponse
-#define SOAP_TYPE_dss__ModulatorGetNameResponse (217)
-/* dss:ModulatorGetNameResponse */
-struct dss__ModulatorGetNameResponse
+#ifndef SOAP_TYPE_dss__DSMeterGetNameResponse
+#define SOAP_TYPE_dss__DSMeterGetNameResponse (217)
+/* dss:DSMeterGetNameResponse */
+struct dss__DSMeterGetNameResponse
 {
 public:
 	std::string name;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:string */
 };
 #endif
 
-#ifndef SOAP_TYPE_dss__ModulatorGetName
-#define SOAP_TYPE_dss__ModulatorGetName (218)
-/* dss:ModulatorGetName */
-struct dss__ModulatorGetName
+#ifndef SOAP_TYPE_dss__DSMeterGetName
+#define SOAP_TYPE_dss__DSMeterGetName (218)
+/* dss:DSMeterGetName */
+struct dss__DSMeterGetName
 {
 public:
 	int _token;	/* required element of type xsd:int */
-	char *_modulatorID;	/* optional element of type xsd:string */
+	char *_dsMeterID;	/* optional element of type xsd:string */
 };
 #endif
 
@@ -2114,11 +2114,11 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetName(struct soap*, int _token, char *_de
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetZoneID(struct soap*, int _token, char *_deviceID, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ModulatorGetPowerConsumption(struct soap*, int _token, int _modulatorID, unsigned long &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterGetPowerConsumption(struct soap*, int _token, int _dsMeterID, unsigned long &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetModulatorIDs(struct soap*, int _token, std::vector<std::string >&ids);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetDSMeterIDs(struct soap*, int _token, std::vector<std::string >&ids);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ModulatorGetName(struct soap*, int _token, char *_modulatorID, std::string &name);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterGetName(struct soap*, int _token, char *_dsMeterID, std::string &name);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentAllocateZone(struct soap*, int _token, int &zoneID);
 
@@ -2294,11 +2294,11 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetName(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetZoneID(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ModulatorGetPowerConsumption(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DSMeterGetPowerConsumption(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetModulatorIDs(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetDSMeterIDs(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ModulatorGetName(struct soap*);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DSMeterGetName(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentAllocateZone(struct soap*);
 

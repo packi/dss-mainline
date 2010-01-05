@@ -48,25 +48,25 @@ BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.setName("dev1");
-  dev1.setModulatorID(1);
+  dev1.setDSMeterID(1);
 
   Device& dev2 = apt.allocateDevice(dsid_t(0,1));
   BOOST_CHECK_EQUAL(dev1.getShortAddress(), dev2.getShortAddress());
   BOOST_CHECK_EQUAL(dev1.getName(), dev2.getName());
-  BOOST_CHECK_EQUAL(dev1.getModulatorID(), dev2.getModulatorID());
+  BOOST_CHECK_EQUAL(dev1.getDSMeterID(), dev2.getDSMeterID());
 } // testApartmentAllocateDeviceReturnsTheSameDeviceForDSID
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByShortAddress) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  Modulator& mod = apt.allocateModulator(dsid_t(0,2));
+  DSMeter& mod = apt.allocateDSMeter(dsid_t(0,2));
   mod.setBusID(1);
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.setName("dev1");
-  dev1.setModulatorID(1);
+  dev1.setDSMeterID(1);
 
   BOOST_CHECK_EQUAL("dev1", apt.getDeviceByShortAddress(mod, 1).getName());
 } // testApartmentGetDeviceByShortAddress
@@ -81,25 +81,25 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByName) {
   BOOST_CHECK_EQUAL("dev1", apt.getDeviceByName("dev1").getName());
 } // testApartmentGetDeviceByName
 
-BOOST_AUTO_TEST_CASE(testApartmentGetModulatorByName) {
+BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByName) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  Modulator& mod = apt.allocateModulator(dsid_t(0,2));
+  DSMeter& mod = apt.allocateDSMeter(dsid_t(0,2));
   mod.setName("mod1");
 
-  BOOST_CHECK_EQUAL("mod1", apt.getModulator("mod1").getName());
-} // testApartmentGetModulatorByName
+  BOOST_CHECK_EQUAL("mod1", apt.getDSMeter("mod1").getName());
+} // testApartmentGetDSMeterByName
 
-BOOST_AUTO_TEST_CASE(testApartmentGetModulatorByBusID) {
+BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByBusID) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  Modulator& mod = apt.allocateModulator(dsid_t(0,2));
+  DSMeter& mod = apt.allocateDSMeter(dsid_t(0,2));
   mod.setBusID(1);
 
-  BOOST_CHECK_EQUAL(1, apt.getModulatorByBusID(1).getBusID());
-} // testApartmentGetModulatorByBusID
+  BOOST_CHECK_EQUAL(1, apt.getDSMeterByBusID(1).getBusID());
+} // testApartmentGetDSMeterByBusID
 
 BOOST_AUTO_TEST_CASE(testZoneMoving) {
   Apartment apt(NULL, NULL);
@@ -394,18 +394,18 @@ BOOST_AUTO_TEST_CASE(testRemoval) {
     BOOST_CHECK(true);
   }
   
-  apt.allocateModulator(dsid_t(1,0));
+  apt.allocateDSMeter(dsid_t(1,0));
   try {
-    apt.getModulatorByDSID(dsid_t(1,0));
+    apt.getDSMeterByDSID(dsid_t(1,0));
     BOOST_CHECK(true);
   } catch(ItemNotFoundException&) {
-    BOOST_CHECK_MESSAGE(false, "Modulator not found");
+    BOOST_CHECK_MESSAGE(false, "DSMeter not found");
   }
   
-  apt.removeModulator(dsid_t(1,0));
+  apt.removeDSMeter(dsid_t(1,0));
   try {
-    apt.getModulatorByDSID(dsid_t(1,0));
-    BOOST_CHECK_MESSAGE(false, "Modulator still exists");
+    apt.getDSMeterByDSID(dsid_t(1,0));
+    BOOST_CHECK_MESSAGE(false, "DSMeter still exists");
   } catch(ItemNotFoundException&) {
     BOOST_CHECK(true);
   }
@@ -415,7 +415,7 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485Proxy proxy(NULL, &apt);
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -429,18 +429,18 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
     sleepMS(100);
   }
 
-  Modulator& mod = apt.allocateModulator(dsid_t(0,3));
+  DSMeter& mod = apt.allocateDSMeter(dsid_t(0,3));
   mod.setBusID(76);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setName("dev1");
   dev1.setShortAddress(1);
-  dev1.setModulatorID(76);
+  dev1.setDSMeterID(76);
   DeviceReference devRef1(dev1, &apt);
   mod.addDevice(devRef1);
   Device& dev2 = apt.allocateDevice(dsid_t(0,2));
   dev2.setName("dev2");
   dev2.setShortAddress(2);
-  dev2.setModulatorID(76);
+  dev2.setDSMeterID(76);
 
   dev1.callScene(Scene1);
   sleepMS(500);
@@ -494,74 +494,74 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
 
 
     //------------------------------------------------ Specialized Commands (system)
-    /** Returns an std::vector containing the modulator-spec of all modulators present. */
-    virtual std::vector<ModulatorSpec_t> getModulators() { return std::vector<ModulatorSpec_t>(); }
+    /** Returns an std::vector containing the dsMeter-spec of all dsMeters present. */
+    virtual std::vector<DSMeterSpec_t> getDSMeters() { return std::vector<DSMeterSpec_t>(); }
 
-    /** Returns the modulator-spec for a modulator */
-    virtual ModulatorSpec_t getModulatorSpec(const int _modulatorID) { return ModulatorSpec_t(); }
+    /** Returns the dsMeter-spec for a dsMeter */
+    virtual DSMeterSpec_t getDSMeterSpec(const int _dsMeterID) { return DSMeterSpec_t(); }
 
-    /** Returns a std::vector conatining the zone-ids of the specified modulator */
-    virtual std::vector<int> getZones(const int _modulatorID) { return std::vector<int>(); }
-    /** Returns the count of the zones of the specified modulator */
-    virtual int getZoneCount(const int _modulatorID) { return 0; }
-    /** Returns the bus-ids of the devices present in the given zone of the specified modulator */
-    virtual std::vector<int> getDevicesInZone(const int _modulatorID, const int _zoneID) { return std::vector<int>(); }
-    /** Returns the count of devices present in the given zone of the specified modulator */
-    virtual int getDevicesCountInZone(const int _modulatorID, const int _zoneID) { return 0; }
+    /** Returns a std::vector conatining the zone-ids of the specified dsMeter */
+    virtual std::vector<int> getZones(const int _dsMeterID) { return std::vector<int>(); }
+    /** Returns the count of the zones of the specified dsMeter */
+    virtual int getZoneCount(const int _dsMeterID) { return 0; }
+    /** Returns the bus-ids of the devices present in the given zone of the specified dsMeter */
+    virtual std::vector<int> getDevicesInZone(const int _dsMeterID, const int _zoneID) { return std::vector<int>(); }
+    /** Returns the count of devices present in the given zone of the specified dsMeter */
+    virtual int getDevicesCountInZone(const int _dsMeterID, const int _zoneID) { return 0; }
 
     /** Adds the given device to the specified zone. */
-    virtual void setZoneID(const int _modulatorID, const devid_t _deviceID, const int _zoneID) {}
+    virtual void setZoneID(const int _dsMeterID, const devid_t _deviceID, const int _zoneID) {}
 
-    /** Creates a new Zone on the given modulator */
-    virtual void createZone(const int _modulatorID, const int _zoneID) {}
+    /** Creates a new Zone on the given dsMeter */
+    virtual void createZone(const int _dsMeterID, const int _zoneID) {}
 
-    /** Removes the zone \a _zoneID on the modulator \a _modulatorID */
-    virtual void removeZone(const int _modulatorID, const int _zoneID) {}
+    /** Removes the zone \a _zoneID on the dsMeter \a _dsMeterID */
+    virtual void removeZone(const int _dsMeterID, const int _zoneID) {}
 
-    /** Returns the count of groups present in the given zone of the specifid modulator */
-    virtual int getGroupCount(const int _modulatorID, const int _zoneID) { return 0; }
-    /** Returns the a std::vector containing the group-ids of the given zone on the specified modulator */
-    virtual std::vector<int> getGroups(const int _modulatorID, const int _zoneID) { return std::vector<int>(); }
+    /** Returns the count of groups present in the given zone of the specifid dsMeter */
+    virtual int getGroupCount(const int _dsMeterID, const int _zoneID) { return 0; }
+    /** Returns the a std::vector containing the group-ids of the given zone on the specified dsMeter */
+    virtual std::vector<int> getGroups(const int _dsMeterID, const int _zoneID) { return std::vector<int>(); }
     /** Returns the count of devices present in the given group */
-    virtual int getDevicesInGroupCount(const int _modulatorID, const int _zoneID, const int _groupID) { return 0; }
+    virtual int getDevicesInGroupCount(const int _dsMeterID, const int _zoneID, const int _groupID) { return 0; }
     /** Returns a std::vector containing the bus-ids of the devices present in the given group */
-    virtual std::vector<int> getDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID) { return std::vector<int>(); }
+    virtual std::vector<int> getDevicesInGroup(const int _dsMeterID, const int _zoneID, const int _groupID) { return std::vector<int>(); }
 
-    virtual std::vector<int> getGroupsOfDevice(const int _modulatorID, const int _deviceID) { return std::vector<int>(); }
+    virtual std::vector<int> getGroupsOfDevice(const int _dsMeterID, const int _deviceID) { return std::vector<int>(); }
 
     /** Adds a device to a given group */
-    virtual void addToGroup(const int _modulatorID, const int _groupID, const int _deviceID) {}
+    virtual void addToGroup(const int _dsMeterID, const int _groupID, const int _deviceID) {}
     /** Removes a device from a given group */
-    virtual void removeFromGroup(const int _modulatorID, const int _groupID, const int _deviceID) {}
+    virtual void removeFromGroup(const int _dsMeterID, const int _groupID, const int _deviceID) {}
 
     /** Adds a user group */
-    virtual int addUserGroup(const int _modulatorID) { return 0; }
+    virtual int addUserGroup(const int _dsMeterID) { return 0; }
     /** Removes a user group */
-    virtual void removeUserGroup(const int _modulatorID, const int _groupID) {}
+    virtual void removeUserGroup(const int _dsMeterID, const int _groupID) {}
 
     /** Returns the DSID of a given device */
-    virtual dsid_t getDSIDOfDevice(const int _modulatorID, const int _deviceID) { return NullDSID; }
-    /** Returns the DSID of a given modulator */
-    virtual dsid_t getDSIDOfModulator(const int _modulatorID) { return NullDSID; }
+    virtual dsid_t getDSIDOfDevice(const int _dsMeterID, const int _deviceID) { return NullDSID; }
+    /** Returns the DSID of a given dsMeter */
+    virtual dsid_t getDSIDOfDSMeter(const int _dsMeterID) { return NullDSID; }
 
-    virtual int getLastCalledScene(const int _modulatorID, const int _zoneID, const int _groupID) { return 0;}
+    virtual int getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID) { return 0;}
 
     //------------------------------------------------ Metering
 
     /** Returns the current power-consumption in mW */
-    virtual unsigned long getPowerConsumption(const int _modulatorID) { return 0; }
+    virtual unsigned long getPowerConsumption(const int _dsMeterID) { return 0; }
 
     /** Returns the meter value in Wh */
-    virtual unsigned long getEnergyMeterValue(const int _modulatorID) { return 0; }
+    virtual unsigned long getEnergyMeterValue(const int _dsMeterID) { return 0; }
 
-    virtual bool getEnergyBorder(const int _modulatorID, int& _lower, int& _upper) { _lower = 0; _upper = 0; return false; }
+    virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) { _lower = 0; _upper = 0; return false; }
 
     //------------------------------------------------ UDI
-    virtual uint8_t dSLinkSend(const int _modulatorID, devid_t _devAdr, uint8_t _value, uint8_t _flags) { return 0; }
+    virtual uint8_t dSLinkSend(const int _dsMeterID, devid_t _devAdr, uint8_t _value, uint8_t _flags) { return 0; }
 
     //------------------------------------------------ Device    
-    virtual uint16_t deviceGetParameterValue(devid_t _id, uint8_t _modulatorID, int _paramID) { return 0; }
-    virtual uint16_t deviceGetFunctionID(devid_t _id, uint8_t _modulatorID) { return 0; }
+    virtual uint16_t deviceGetParameterValue(devid_t _id, uint8_t _dsMeterID, int _paramID) { return 0; }
+    virtual uint16_t deviceGetFunctionID(devid_t _id, uint8_t _dsMeterID) { return 0; }
 
     //------------------------------------------------ Device manipulation
     virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) {}
@@ -578,7 +578,7 @@ BOOST_AUTO_TEST_CASE(testTurnOnDevice) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -604,7 +604,7 @@ BOOST_AUTO_TEST_CASE(testTurnOnGroup) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -625,7 +625,7 @@ BOOST_AUTO_TEST_CASE(testTurnOffDevice) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -651,7 +651,7 @@ BOOST_AUTO_TEST_CASE(testTurnOffGroup) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -671,7 +671,7 @@ BOOST_AUTO_TEST_CASE(testEnableDevice) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -695,7 +695,7 @@ BOOST_AUTO_TEST_CASE(testDisableDevice) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -719,7 +719,7 @@ BOOST_AUTO_TEST_CASE(testIncreaseValueDevice) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -743,7 +743,7 @@ BOOST_AUTO_TEST_CASE(testDecreaseValueDevice) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -767,7 +767,7 @@ BOOST_AUTO_TEST_CASE(testDecreaseValueZone) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -787,7 +787,7 @@ BOOST_AUTO_TEST_CASE(testIncreaseValueZone) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -807,7 +807,7 @@ BOOST_AUTO_TEST_CASE(testStartDimUp) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -831,7 +831,7 @@ BOOST_AUTO_TEST_CASE(testStartDimDown) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -855,7 +855,7 @@ BOOST_AUTO_TEST_CASE(testEndDim) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -879,7 +879,7 @@ BOOST_AUTO_TEST_CASE(testCallSceneDevice) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -905,7 +905,7 @@ BOOST_AUTO_TEST_CASE(testSaveSceneDevice) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -931,7 +931,7 @@ BOOST_AUTO_TEST_CASE(testUndoSceneDevice) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -957,7 +957,7 @@ BOOST_AUTO_TEST_CASE(testCallSceneGroup) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -977,7 +977,7 @@ BOOST_AUTO_TEST_CASE(testSaveSceneGroup) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -997,7 +997,7 @@ BOOST_AUTO_TEST_CASE(testUndoSceneGroup) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -1017,7 +1017,7 @@ BOOST_AUTO_TEST_CASE(testCallSceneZone) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -1037,7 +1037,7 @@ BOOST_AUTO_TEST_CASE(testSaveSceneZone) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -1057,7 +1057,7 @@ BOOST_AUTO_TEST_CASE(testUndoSceneZone) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -1077,7 +1077,7 @@ BOOST_AUTO_TEST_CASE(callUndoSceneSet) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -1102,7 +1102,7 @@ BOOST_AUTO_TEST_CASE(testSaveSceneSet) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -1127,7 +1127,7 @@ BOOST_AUTO_TEST_CASE(testUndoSceneSet) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -1152,7 +1152,7 @@ BOOST_AUTO_TEST_CASE(testNextSceneDevice) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);
@@ -1176,7 +1176,7 @@ BOOST_AUTO_TEST_CASE(testPreviousSceneDevice) {
   Apartment apt(NULL, NULL);
   apt.initialize();
 
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485InterfaceTest proxy;
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setProxy(&proxy);

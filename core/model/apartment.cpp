@@ -65,7 +65,7 @@ namespace dss {
   Apartment::~Apartment() {
     scrubVector(m_Devices);
     scrubVector(m_Zones);
-    scrubVector(m_Modulators);
+    scrubVector(m_DSMeters);
   } // dtor
 
   void Apartment::initialize() {
@@ -123,50 +123,50 @@ namespace dss {
     _zone.addGroup(grp);
   } // addDefaultGroupsToZone
 
-  void Apartment::modulatorReady(int _modulatorBusID) {
-    log("Modulator with id: " + intToString(_modulatorBusID) + " is ready", lsInfo);
+  void Apartment::dsMeterReady(int _dsMeterBusID) {
+    log("DSMeter with id: " + intToString(_dsMeterBusID) + " is ready", lsInfo);
     try {
       try {
-        Modulator& mod = getModulatorByBusID(_modulatorBusID);
+        DSMeter& mod = getDSMeterByBusID(_dsMeterBusID);
         BusScanner scanner(*m_pDS485Interface->getStructureQueryBusInterface(), *this);
-        if(scanner.scanModulator(mod)) {
-          boost::shared_ptr<Event> modulatorReadyEvent(new Event("modulator_ready"));
-          modulatorReadyEvent->setProperty("modulator", mod.getDSID().toString());
-          raiseEvent(modulatorReadyEvent);
+        if(scanner.scanDSMeter(mod)) {
+          boost::shared_ptr<Event> dsMeterReadyEvent(new Event("dsMeter_ready"));
+          dsMeterReadyEvent->setProperty("dsMeter", mod.getDSID().toString());
+          raiseEvent(dsMeterReadyEvent);
         }
       } catch(DS485ApiError& e) {
-        log(std::string("Exception caught while scanning modulator " + intToString(_modulatorBusID) + " : ") + e.what(), lsFatal);
+        log(std::string("Exception caught while scanning dsMeter " + intToString(_dsMeterBusID) + " : ") + e.what(), lsFatal);
 
-        ModelEvent* pEvent = new ModelEvent(ModelEvent::etModulatorReady);
-        pEvent->addParameter(_modulatorBusID);
+        ModelEvent* pEvent = new ModelEvent(ModelEvent::etDSMeterReady);
+        pEvent->addParameter(_dsMeterBusID);
         addModelEvent(pEvent);
       }
     } catch(ItemNotFoundException& e) {
-      log("No modulator for bus-id (" + intToString(_modulatorBusID) + ") found, re-discovering devices");
+      log("No dsMeter for bus-id (" + intToString(_dsMeterBusID) + ") found, re-discovering devices");
       discoverDS485Devices();
     }
-  } // modulatorReady
+  } // dsMeterReady
 
-  void Apartment::setPowerConsumption(int _modulatorBusID, unsigned long _value) {
-    getModulatorByBusID(_modulatorBusID).setPowerConsumption(_value);
+  void Apartment::setPowerConsumption(int _dsMeterBusID, unsigned long _value) {
+    getDSMeterByBusID(_dsMeterBusID).setPowerConsumption(_value);
   } // powerConsumption
 
-  void Apartment::setEnergyMeterValue(int _modulatorBusID, unsigned long _value) {
-    getModulatorByBusID(_modulatorBusID).setEnergyMeterValue(_value);
+  void Apartment::setEnergyMeterValue(int _dsMeterBusID, unsigned long _value) {
+    getDSMeterByBusID(_dsMeterBusID).setEnergyMeterValue(_value);
   } // energyMeterValue
 
   void Apartment::discoverDS485Devices() {
-    // temporary mark all modulators as absent
-    foreach(Modulator* pModulator, m_Modulators) {
-      pModulator->setIsPresent(false);
+    // temporary mark all dsMeters as absent
+    foreach(DSMeter* pDSMeter, m_DSMeters) {
+      pDSMeter->setIsPresent(false);
     }
 
-    // Request the dsid of all modulators
+    // Request the dsid of all dsMeters
     DS485CommandFrame requestFrame;
     requestFrame.getHeader().setBroadcast(true);
     requestFrame.getHeader().setDestination(0);
     requestFrame.setCommand(CommandRequest);
-    requestFrame.getPayload().add<uint8_t>(FunctionModulatorGetDSID);
+    requestFrame.getPayload().add<uint8_t>(FunctionDSMeterGetDSID);
     if(DSS::hasInstance()) {
       DSS::getInstance()->getDS485Interface().sendFrame(requestFrame);
     }
@@ -214,18 +214,18 @@ namespace dss {
           onDSLinkInterrupt(event.getParameter(0), event.getParameter(1), event.getParameter(2));
         }
         break;
-      case ModelEvent::etNewModulator:
+      case ModelEvent::etNewDSMeter:
         discoverDS485Devices();
         break;
-      case ModelEvent::etLostModulator:
+      case ModelEvent::etLostDSMeter:
         discoverDS485Devices();
         break;
-      case ModelEvent::etModulatorReady:
+      case ModelEvent::etDSMeterReady:
         if(event.getParameterCount() != 1) {
-          log("Expected exactly 1 parameter for ModelEvent::etModulatorReady");
+          log("Expected exactly 1 parameter for ModelEvent::etDSMeterReady");
         } else {
           try{
-            Modulator& mod = getModulatorByBusID(event.getParameter(0));
+            DSMeter& mod = getDSMeterByBusID(event.getParameter(0));
             mod.setIsPresent(true);
             mod.setIsValid(false);
           } catch(ItemNotFoundException& e) {
@@ -265,16 +265,16 @@ namespace dss {
                          ((uint32_t(event.getParameter(5)) & 0x00ffff) << 16) | (uint32_t(event.getParameter(6)) & 0x00ffff));
           log ("Discovered device with busID: " + intToString(busID) + " and dsid: " + newDSID.toString());
           try{
-             getModulatorByDSID(newDSID).setBusID(busID);
+             getDSMeterByDSID(newDSID).setBusID(busID);
              log ("dSM present");
-             getModulatorByDSID(newDSID).setIsPresent(true);
+             getDSMeterByDSID(newDSID).setIsPresent(true);
           } catch(ItemNotFoundException& e) {
              log ("dSM not present");
-             Modulator& modulator = allocateModulator(newDSID);
-             modulator.setBusID(busID);
-             modulator.setIsPresent(true);
-             modulator.setIsValid(false);
-             ModelEvent* pEvent = new ModelEvent(ModelEvent::etModulatorReady);
+             DSMeter& dsMeter = allocateDSMeter(newDSID);
+             dsMeter.setBusID(busID);
+             dsMeter.setIsPresent(true);
+             dsMeter.setIsValid(false);
+             ModelEvent* pEvent = new ModelEvent(ModelEvent::etDSMeterReady);
              pEvent->addParameter(busID);
              addModelEvent(pEvent);
           }
@@ -291,10 +291,10 @@ namespace dss {
     } else {
       m_NewModelEvent.waitFor(1000);
       bool hadToUpdate = false;
-      foreach(Modulator* pModulator, m_Modulators) {
-        if(pModulator->isPresent()) {
-          if(!pModulator->isValid()) {
-            modulatorReady(pModulator->getBusID());
+      foreach(DSMeter* pDSMeter, m_DSMeters) {
+        if(pDSMeter->isPresent()) {
+          if(!pDSMeter->isValid()) {
+            dsMeterReady(pDSMeter->getBusID());
             hadToUpdate = true;
             break;
           }
@@ -349,7 +349,7 @@ namespace dss {
       raiseEvent(runningEvent);
     }
 
-    // load devices/modulators/etc. from a config-file
+    // load devices/dsMeters/etc. from a config-file
     readConfiguration();
 
     {
@@ -397,10 +397,10 @@ namespace dss {
     throw ItemNotFoundException(_dsid.toString());
   } // getDeviceByShortAddress
 
-  Device& Apartment::getDeviceByShortAddress(const Modulator& _modulator, const devid_t _deviceID) const {
+  Device& Apartment::getDeviceByShortAddress(const DSMeter& _dsMeter, const devid_t _deviceID) const {
     foreach(Device* dev, m_Devices) {
       if((dev->getShortAddress() == _deviceID) &&
-          (_modulator.getBusID() == dev->getModulatorID())) {
+          (_dsMeter.getBusID() == dev->getDSMeterID())) {
         return *dev;
       }
     }
@@ -447,36 +447,36 @@ namespace dss {
     return m_Zones;
   } // getZones
 
-  Modulator& Apartment::getModulator(const std::string& _modName) {
-    foreach(Modulator* modulator, m_Modulators) {
-      if(modulator->getName() == _modName) {
-        return *modulator;
+  DSMeter& Apartment::getDSMeter(const std::string& _modName) {
+    foreach(DSMeter* dsMeter, m_DSMeters) {
+      if(dsMeter->getName() == _modName) {
+        return *dsMeter;
       }
     }
     throw ItemNotFoundException(_modName);
-  } // getModulator(name)
+  } // getDSMeter(name)
 
-  Modulator& Apartment::getModulatorByBusID(const int _busId) {
-    foreach(Modulator* modulator, m_Modulators) {
-      if(modulator->getBusID() == _busId) {
-        return *modulator;
+  DSMeter& Apartment::getDSMeterByBusID(const int _busId) {
+    foreach(DSMeter* dsMeter, m_DSMeters) {
+      if(dsMeter->getBusID() == _busId) {
+        return *dsMeter;
       }
     }
     throw ItemNotFoundException(intToString(_busId));
-  } // getModulatorByBusID
+  } // getDSMeterByBusID
 
-  Modulator& Apartment::getModulatorByDSID(const dsid_t _dsid) {
-    foreach(Modulator* modulator, m_Modulators) {
-      if(modulator->getDSID() == _dsid) {
-        return *modulator;
+  DSMeter& Apartment::getDSMeterByDSID(const dsid_t _dsid) {
+    foreach(DSMeter* dsMeter, m_DSMeters) {
+      if(dsMeter->getDSID() == _dsid) {
+        return *dsMeter;
       }
     }
     throw ItemNotFoundException(_dsid.toString());
-  } // getModulatorByDSID
+  } // getDSMeterByDSID
 
-  std::vector<Modulator*>& Apartment::getModulators() {
-    return m_Modulators;
-  } // getModulators
+  std::vector<DSMeter*>& Apartment::getDSMeters() {
+    return m_DSMeters;
+  } // getDSMeters
 
   // Group queries
   Group& Apartment::getGroup(const std::string& _name) {
@@ -513,17 +513,17 @@ namespace dss {
     return *pResult;
   } // allocateDevice
 
-  Modulator& Apartment::allocateModulator(const dsid_t _dsid) {
-    foreach(Modulator* modulator, m_Modulators) {
-      if((modulator)->getDSID() == _dsid) {
-        return *modulator;
+  DSMeter& Apartment::allocateDSMeter(const dsid_t _dsid) {
+    foreach(DSMeter* dsMeter, m_DSMeters) {
+      if((dsMeter)->getDSID() == _dsid) {
+        return *dsMeter;
       }
     }
 
-    Modulator* pResult = new Modulator(_dsid);
-    m_Modulators.push_back(pResult);
+    DSMeter* pResult = new DSMeter(_dsid);
+    m_DSMeters.push_back(pResult);
     return *pResult;
-  } // allocateModulator
+  } // allocateDSMeter
 
   Zone& Apartment::allocateZone(int _zoneID) {
     if(getPropertyNode() != NULL) {
@@ -566,17 +566,17 @@ namespace dss {
     }
   } // removeDevice
 
-  void Apartment::removeModulator(dsid_t _modulator) {
-    for(std::vector<Modulator*>::iterator ipModulator = m_Modulators.begin(), e = m_Modulators.end();
-        ipModulator != e; ++ipModulator) {
-      Modulator* pModulator = *ipModulator;
-      if(pModulator->getDSID() == _modulator) {
-        m_Modulators.erase(ipModulator);
-        delete pModulator;
+  void Apartment::removeDSMeter(dsid_t _dsMeter) {
+    for(std::vector<DSMeter*>::iterator ipDSMeter = m_DSMeters.begin(), e = m_DSMeters.end();
+        ipDSMeter != e; ++ipDSMeter) {
+      DSMeter* pDSMeter = *ipDSMeter;
+      if(pDSMeter->getDSID() == _dsMeter) {
+        m_DSMeters.erase(ipDSMeter);
+        delete pDSMeter;
         return;
       }
     }
-  } // removeModulator
+  } // removeDSMeter
 
   class SetLastCalledSceneAction : public IDeviceAction {
   protected:
@@ -635,31 +635,31 @@ namespace dss {
 
   } // onGroupCallScene
 
-  void Apartment::onDeviceCallScene(const int _modulatorID, const int _deviceID, const int _sceneID) {
+  void Apartment::onDeviceCallScene(const int _dsMeterID, const int _deviceID, const int _sceneID) {
     try {
       if(_sceneID < 0 || _sceneID > MaxSceneNumber) {
-        log("onDeviceCallScene: _sceneID is out of bounds. modulator-id '" + intToString(_modulatorID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID), lsError);
+        log("onDeviceCallScene: _sceneID is out of bounds. dsMeter-id '" + intToString(_dsMeterID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID), lsError);
         return;
       }
-      Modulator& mod = getModulatorByBusID(_modulatorID);
+      DSMeter& mod = getDSMeterByBusID(_dsMeterID);
       try {
-        log("OnDeviceCallScene: modulator-id '" + intToString(_modulatorID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID));
+        log("OnDeviceCallScene: dsMeter-id '" + intToString(_dsMeterID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID));
         DeviceReference devRef = mod.getDevices().getByBusID(_deviceID);
         if(SceneHelper::rememberScene(_sceneID & 0x00ff)) {
           devRef.getDevice().setLastCalledScene(_sceneID & 0x00ff);
         }
       } catch(ItemNotFoundException& e) {
-        log("OnDeviceCallScene: Could not find device with bus-id '" + intToString(_deviceID) + "' on modulator '" + intToString(_modulatorID) + "' scene:" + intToString(_sceneID), lsError);
+        log("OnDeviceCallScene: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + intToString(_dsMeterID) + "' scene:" + intToString(_sceneID), lsError);
       }
     } catch(ItemNotFoundException& e) {
-      log("OnDeviceCallScene: Could not find modulator with bus-id '" + intToString(_modulatorID) + "'", lsError);
+      log("OnDeviceCallScene: Could not find dsMeter with bus-id '" + intToString(_dsMeterID) + "'", lsError);
     }
   } // onDeviceCallScene
 
   void Apartment::onAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID) {
     // get full dsid
     log("New Device found");
-    log("  Modulator: " + intToString(_modID));
+    log("  DSMeter: " + intToString(_modID));
     log("  Zone:      " + intToString(_zoneID));
     log("  BusID:     " + intToString(_devID));
     log("  FID:       " + intToString(_functionID));
@@ -670,10 +670,10 @@ namespace dss {
 
     log("  DSID:      " + dsid.toString());
 
-    // remove from old modulator
+    // remove from old dsMeter
     try {
-      Modulator& oldModulator = getModulatorByBusID(dev.getModulatorID());
-      oldModulator.removeDevice(devRef);
+      DSMeter& oldDSMeter = getDSMeterByBusID(dev.getDSMeterID());
+      oldDSMeter.removeDevice(devRef);
     } catch(std::runtime_error&) {
     }
 
@@ -682,25 +682,25 @@ namespace dss {
       try {
         Zone& oldZone = getZone(dev.getZoneID());
         oldZone.removeDevice(devRef);
-        // TODO: check if the zone is empty on the modulator and remove it in that case
+        // TODO: check if the zone is empty on the dsMeter and remove it in that case
       } catch(std::runtime_error&) {
       }
     }
 
     // update device
-    dev.setModulatorID(_modID);
+    dev.setDSMeterID(_modID);
     dev.setZoneID(_zoneID);
     dev.setShortAddress(_devID);
     dev.setFunctionID(_functionID);
     dev.setIsPresent(true);
 
-    // add to new modulator
-    Modulator& modulator = getModulatorByBusID(_modID);
-    modulator.addDevice(devRef);
+    // add to new dsMeter
+    DSMeter& dsMeter = getDSMeterByBusID(_modID);
+    dsMeter.addDevice(devRef);
 
     // add to new zone
     Zone& newZone = allocateZone(_zoneID);
-    newZone.addToModulator(modulator);
+    newZone.addToDSMeter(dsMeter);
     newZone.addDevice(devRef);
 
     // get groups of device
@@ -722,14 +722,14 @@ namespace dss {
   void Apartment::onDSLinkInterrupt(const int _modID, const int _devID, const int _priority) {
     // get full dsid
     log("dSLinkInterrupt:");
-    log("  Modulator: " + intToString(_modID));
+    log("  DSMeter: " + intToString(_modID));
     log("  DevID:     " + intToString(_devID));
     log("  Priority:  " + intToString(_priority));
 
     try {
-      Modulator& modulator = getModulatorByBusID(_modID);
+      DSMeter& dsMeter = getDSMeterByBusID(_modID);
       try {
-        Device& device = getDeviceByShortAddress(modulator, _devID);
+        Device& device = getDeviceByShortAddress(dsMeter, _devID);
         PropertyNodePtr deviceNode = device.getPropertyNode();
         if(deviceNode == NULL) {
           return;
@@ -771,7 +771,7 @@ namespace dss {
         return;
       }
     } catch(ItemNotFoundException& ex) {
-      log("Apartment::onDSLinkInterrupt: Unknown Modulator with ID " + intToString(_modID), lsFatal);
+      log("Apartment::onDSLinkInterrupt: Unknown DSMeter with ID " + intToString(_modID), lsFatal);
       return;
     }
   } // onDSLinkInterrupt

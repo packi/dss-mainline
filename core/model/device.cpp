@@ -53,7 +53,7 @@ namespace dss {
         m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/" + m_DSID.toString());
 //        m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
         m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyReference<std::string>(m_Name));
-        m_pPropertyNode->createProperty("ModulatorID")->linkToProxy(PropertyProxyReference<int>(m_ModulatorID, false));
+        m_pPropertyNode->createProperty("DSMeterID")->linkToProxy(PropertyProxyReference<int>(m_DSMeterID, false));
         m_pPropertyNode->createProperty("ZoneID")->linkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
         if(m_pPropertyNode->getProperty("interrupt/mode") == NULL) {
           PropertyNodePtr interruptNode = m_pPropertyNode->createProperty("interrupt");
@@ -102,7 +102,7 @@ namespace dss {
   } // setRawValue
 
   double Device::getValue(const int _parameterNr) {
-    return m_pApartment->getDeviceBusInterface()->deviceGetParameterValue(m_ShortAddress, m_ModulatorID,  _parameterNr);
+    return m_pApartment->getDeviceBusInterface()->deviceGetParameterValue(m_ShortAddress, m_DSMeterID,  _parameterNr);
   } // getValue
 
   void Device::nextScene() {
@@ -148,13 +148,13 @@ namespace dss {
     return m_DSID;
   } // getDSID;
 
-  int Device::getModulatorID() const {
-    return m_ModulatorID;
-  } // getModulatorID
+  int Device::getDSMeterID() const {
+    return m_DSMeterID;
+  } // getDSMeterID
 
-  void Device::setModulatorID(const int _modulatorID) {
-    m_ModulatorID = _modulatorID;
-  } // setModulatorID
+  void Device::setDSMeterID(const int _dsMeterID) {
+    m_DSMeterID = _dsMeterID;
+  } // setDSMeterID
 
   int Device::getZoneID() const {
     return m_ZoneID;
@@ -250,7 +250,7 @@ namespace dss {
     if(_writeOnly) {
       flags |= DSLinkSendWriteOnly;
     }
-    return m_pApartment->getDeviceBusInterface()->dSLinkSend(m_ModulatorID, m_ShortAddress, _value, flags);
+    return m_pApartment->getDeviceBusInterface()->dSLinkSend(m_DSMeterID, m_ShortAddress, _value, flags);
   } // dsLinkSend
 
   int Device::getSensorValue(const int _sensorID) {

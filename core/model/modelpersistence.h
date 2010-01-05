@@ -45,7 +45,7 @@ namespace dss {
     void writeConfigurationToXML(const std::string& _fileName);
   private:
     void loadDevices(Poco::XML::Node* _node);
-    void loadModulators(Poco::XML::Node* _node);
+    void loadDSMeters(Poco::XML::Node* _node);
     void loadZones(Poco::XML::Node* _node);
   private:
     Apartment& m_Apartment;

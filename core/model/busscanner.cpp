@@ -42,116 +42,116 @@ namespace dss {
   {
   }
 
-  bool BusScanner::scanModulator(Modulator& _modulator) {
-    _modulator.setIsPresent(true);
-    _modulator.setIsValid(false);
+  bool BusScanner::scanDSMeter(DSMeter& _dsMeter) {
+    _dsMeter.setIsPresent(true);
+    _dsMeter.setIsValid(false);
 
-    int modulatorID = _modulator.getBusID();
+    int dsMeterID = _dsMeter.getBusID();
 
-    log("scanModulator: Start " + intToString(modulatorID) , lsInfo);
+    log("scanDSMeter: Start " + intToString(dsMeterID) , lsInfo);
     std::vector<int> zoneIDs;
     try {
-      zoneIDs = m_Interface.getZones(modulatorID);
+      zoneIDs = m_Interface.getZones(dsMeterID);
     } catch(DS485ApiError& e) {
-      log("scanModulator: Error getting ZoneIDs", lsFatal);
+      log("scanDSMeter: Error getting ZoneIDs", lsFatal);
       return false;
     }
 
     int levelOrange, levelRed;
     try {
-      if(m_Interface.getEnergyBorder(modulatorID, levelOrange, levelRed)) {
-        _modulator.setEnergyLevelOrange(levelOrange);
-        _modulator.setEnergyLevelRed(levelRed);
+      if(m_Interface.getEnergyBorder(dsMeterID, levelOrange, levelRed)) {
+        _dsMeter.setEnergyLevelOrange(levelOrange);
+        _dsMeter.setEnergyLevelRed(levelRed);
       }
     } catch(DS485ApiError& e) {
-      log("scanModulator: Error getting EnergyLevels", lsFatal);
+      log("scanDSMeter: Error getting EnergyLevels", lsFatal);
       return false;
     }
 
     try {
-      ModulatorSpec_t spec = m_Interface.getModulatorSpec(modulatorID);
-      _modulator.setSoftwareVersion(spec.get<1>());
-      _modulator.setHardwareVersion(spec.get<2>());
-      _modulator.setHardwareName(spec.get<3>());
-      _modulator.setDeviceType(spec.get<4>());
+      DSMeterSpec_t spec = m_Interface.getDSMeterSpec(dsMeterID);
+      _dsMeter.setSoftwareVersion(spec.get<1>());
+      _dsMeter.setHardwareVersion(spec.get<2>());
+      _dsMeter.setHardwareName(spec.get<3>());
+      _dsMeter.setDeviceType(spec.get<4>());
     } catch(DS485ApiError& e) {
-      log("scanModulator: Error getting dSMSpecs", lsFatal);
+      log("scanDSMeter: Error getting dSMSpecs", lsFatal);
       return false;
     }
 
     bool firstZone = true;
     foreach(int zoneID, zoneIDs) {
-      log("scanModulator:  Found zone with id: " + intToString(zoneID));
+      log("scanDSMeter:  Found zone with id: " + intToString(zoneID));
       Zone& zone = m_Apartment.allocateZone(zoneID);
-      zone.addToModulator(_modulator);
+      zone.addToDSMeter(_dsMeter);
       zone.setIsPresent(true);
       if(firstZone) {
-        zone.setFirstZoneOnModulator(modulatorID);
+        zone.setFirstZoneOnDSMeter(dsMeterID);
         firstZone = false;
       }
       std::vector<int> devices;
       try {
-        devices = m_Interface.getDevicesInZone(modulatorID, zoneID);
+        devices = m_Interface.getDevicesInZone(dsMeterID, zoneID);
       } catch(DS485ApiError& e) {
-        log("scanModulator: Error getting getDevicesInZone", lsFatal);
+        log("scanDSMeter: Error getting getDevicesInZone", lsFatal);
         return false;
       }
       foreach(int devID, devices) {
         dsid_t dsid;
         try {
-          dsid = m_Interface.getDSIDOfDevice(modulatorID, devID);
+          dsid = m_Interface.getDSIDOfDevice(dsMeterID, devID);
         } catch(DS485ApiError& e) {
-            log("scanModulator: Error getting getDSIDOfDevice", lsFatal);
+            log("scanDSMeter: Error getting getDSIDOfDevice", lsFatal);
             return false;
         }
 
         int functionID = 0;
         try {
-          functionID = m_Interface.deviceGetFunctionID(devID, modulatorID);
+          functionID = m_Interface.deviceGetFunctionID(devID, dsMeterID);
         } catch(DS485ApiError& e) {
-          log("scanModulator: Error getting cmdGetFunctionID", lsFatal);
+          log("scanDSMeter: Error getting cmdGetFunctionID", lsFatal);
           return false;
         }
-        log("scanModulator:    Found device with id: " + intToString(devID));
-        log("scanModulator:    DSID:        " + dsid.toString());
-        log("scanModulator:    Function ID: " + unsignedLongIntToHexString(functionID));
+        log("scanDSMeter:    Found device with id: " + intToString(devID));
+        log("scanDSMeter:    DSID:        " + dsid.toString());
+        log("scanDSMeter:    Function ID: " + unsignedLongIntToHexString(functionID));
         Device& dev = m_Apartment.allocateDevice(dsid);
         dev.setShortAddress(devID);
-        dev.setModulatorID(modulatorID);
+        dev.setDSMeterID(dsMeterID);
         dev.setZoneID(zoneID);
         dev.setFunctionID(functionID);
 
-        std::vector<int> groupIdperDevices = m_Interface.getGroupsOfDevice(modulatorID, devID);
-        std::vector<int> groupIDsPerDevice = m_Interface.getGroupsOfDevice(modulatorID,devID);
+        std::vector<int> groupIdperDevices = m_Interface.getGroupsOfDevice(dsMeterID, devID);
+        std::vector<int> groupIDsPerDevice = m_Interface.getGroupsOfDevice(dsMeterID,devID);
         foreach(int groupID, groupIDsPerDevice) {
-          log(std::string("scanModulator: adding device ") + intToString(devID) + " to group " + intToString(groupID));
+          log(std::string("scanDSMeter: adding device ") + intToString(devID) + " to group " + intToString(groupID));
           dev.addToGroup(groupID);
         }
 
         DeviceReference devRef(dev, &m_Apartment);
         zone.addDevice(devRef);
-        _modulator.addDevice(devRef);
+        _dsMeter.addDevice(devRef);
         dev.setIsPresent(true);
       }
       std::vector<int> groupIDs;
       try {
-        groupIDs = m_Interface.getGroups(modulatorID, zoneID);
+        groupIDs = m_Interface.getGroups(dsMeterID, zoneID);
       } catch(DS485ApiError& e) {
-        log("scanModulator: Error getting getGroups", lsFatal);
+        log("scanDSMeter: Error getting getGroups", lsFatal);
         return false;
       }
 
       foreach(int groupID, groupIDs) {
         if(groupID == 0) {
-          log("scanModulator:    Group ID is zero, bailing out... (modulatorID: "
-              + intToString(modulatorID) +
+          log("scanDSMeter:    Group ID is zero, bailing out... (dsMeterID: "
+              + intToString(dsMeterID) +
               "zoneID: " + intToString(zoneID) + ")",
               lsError);
           continue;
         }
-        log("scanModulator:    Found group with id: " + intToString(groupID));
+        log("scanDSMeter:    Found group with id: " + intToString(groupID));
         if(zone.getGroup(groupID) == NULL) {
-          log(" scanModulator:    Adding new group to zone");
+          log(" scanDSMeter:    Adding new group to zone");
           zone.addGroup(new Group(groupID, zone.getID(), m_Apartment));
         }
         try {
@@ -161,29 +161,29 @@ namespace dss {
           Group* pGroup = new Group(groupID, 0, m_Apartment);
           m_Apartment.getZone(0).addGroup(pGroup);
           pGroup->setIsPresent(true);
-          log("scanModulator:     Adding new group to zone 0");
+          log("scanDSMeter:     Adding new group to zone 0");
         }
 
         // get last called scene for zone, group
         try {
-          int lastCalledScene = m_Interface.getLastCalledScene(modulatorID, zoneID, groupID);
+          int lastCalledScene = m_Interface.getLastCalledScene(dsMeterID, zoneID, groupID);
           Group* pGroup = zone.getGroup(groupID);
           assert(pGroup != NULL);
-          log("scanModulator: zoneID: " + intToString(zoneID) + " groupID: " + intToString(groupID) + " lastScene: " + intToString(lastCalledScene));
+          log("scanDSMeter: zoneID: " + intToString(zoneID) + " groupID: " + intToString(groupID) + " lastScene: " + intToString(lastCalledScene));
           if(lastCalledScene < 0 || lastCalledScene > MaxSceneNumber) {
-            log("scanModulator: _sceneID is out of bounds. zoneID: " + intToString(zoneID) + " groupID: " + intToString(groupID) + " scene: " + intToString(lastCalledScene), lsError);
+            log("scanDSMeter: _sceneID is out of bounds. zoneID: " + intToString(zoneID) + " groupID: " + intToString(groupID) + " scene: " + intToString(lastCalledScene), lsError);
           } else {
             m_Apartment.onGroupCallScene(zoneID, groupID, lastCalledScene);
           }
         } catch(DS485ApiError& error) {
-          log(std::string("scanModulator: Error getting last called scene '") + error.what() + "'", lsError);
+          log(std::string("scanDSMeter: Error getting last called scene '") + error.what() + "'", lsError);
         }
       }
     }
-    _modulator.setIsValid(true);
+    _dsMeter.setIsValid(true);
     return true;
 
-  } // scanModulator
+  } // scanDSMeter
 
   void BusScanner::log(const std::string& _line, aLogSeverity _severity) {
     Logger::getInstance()->log(_line, _severity);

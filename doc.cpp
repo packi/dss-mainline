@@ -100,7 +100,7 @@ The simulation has it's own configuration:
 \verbatim
 <?xml version="1.0"?>
 <sim>
-  <modulator busid="70" dsid="10">
+  <dsMeter busid="70" dsid="10">
     <zone id="1"> <!-- id can be omitted, in fact zone may be omitted if there's only one zone -->
       <device dsid="1" busid="1" type="standard.switch" />
       <device dsid="2" busid="2" type="example.vlc_remote" />
@@ -119,13 +119,13 @@ The simulation has it's own configuration:
         <device busid="5" />
       </group>
     </zone>
-  </modulator>
-  <modulator ...>
-  </modulator>
+  </dsMeter>
+  <dsMeter ...>
+  </dsMeter>
 </sim>
 \endverbatim
 
-The \c sim tag encloses multiple modulators. In the \c modulator tag the modulators busid (as in DS485 bus address) as well as its dsid get specified. The dsid as it's written there is actually expanded in the loader to be a "simulation" address and thus prefixed with 3504175fe0000000ffc. This applies for all dsids in this config file.
+The \c sim tag encloses multiple dsMeters. In the \c dsMeter tag the dsMeters busid (as in DS485 bus address) as well as its dsid get specified. The dsid as it's written there is actually expanded in the loader to be a "simulation" address and thus prefixed with 3504175fe0000000ffc. This applies for all dsids in this config file.
 
 The device-type defines what object gets instanciated by the simulated dSM. There are two built-in dSIDs "standard.simple" a device that behaves like a light bulb and "standard.switch" which simulates a 9 button switch.
 If the type of a device is not specified it defaults to "standard.simple".

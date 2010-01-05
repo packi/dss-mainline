@@ -319,7 +319,7 @@ namespace dss {
     if((ext != NULL) && (set != NULL) && (argc >= 1)) {
       try {
         int dsmeterID = ctx->convertTo<int>(argv[0]);
-        Set result = set->getByModulator(dsmeterID);
+        Set result = set->getByDSMeter(dsmeterID);
         JSObject* resultObj = ext->createJSSet(*ctx, result);
         *rval = OBJECT_TO_JSVAL(resultObj);
         return JS_TRUE;
@@ -700,7 +700,7 @@ namespace dss {
           *rval = INT_TO_JSVAL(dev->getDevice().getZoneID());
           return JS_TRUE;
         case 4:
-          *rval = INT_TO_JSVAL(dev->getDevice().getModulatorID());
+          *rval = INT_TO_JSVAL(dev->getDevice().getDSMeterID());
           return JS_TRUE;
         case 5:
           *rval = INT_TO_JSVAL(dev->getDevice().getFunctionID());

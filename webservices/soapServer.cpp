@@ -193,12 +193,12 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__DeviceGetName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetZoneID"))
 		return soap_serve_dss__DeviceGetZoneID(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:ModulatorGetPowerConsumption"))
-		return soap_serve_dss__ModulatorGetPowerConsumption(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentGetModulatorIDs"))
-		return soap_serve_dss__ApartmentGetModulatorIDs(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:ModulatorGetName"))
-		return soap_serve_dss__ModulatorGetName(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DSMeterGetPowerConsumption"))
+		return soap_serve_dss__DSMeterGetPowerConsumption(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentGetDSMeterIDs"))
+		return soap_serve_dss__ApartmentGetDSMeterIDs(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DSMeterGetName"))
+		return soap_serve_dss__DSMeterGetName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentAllocateZone"))
 		return soap_serve_dss__ApartmentAllocateZone(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentDeleteZone"))
@@ -2710,30 +2710,30 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetZoneID(struct soap *soap)
 	return soap_closesock(soap);
 }
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ModulatorGetPowerConsumption(struct soap *soap)
-{	struct dss__ModulatorGetPowerConsumption soap_tmp_dss__ModulatorGetPowerConsumption;
-	struct dss__ModulatorGetPowerConsumptionResponse soap_tmp_dss__ModulatorGetPowerConsumptionResponse;
-	soap_default_dss__ModulatorGetPowerConsumptionResponse(soap, &soap_tmp_dss__ModulatorGetPowerConsumptionResponse);
-	soap_default_dss__ModulatorGetPowerConsumption(soap, &soap_tmp_dss__ModulatorGetPowerConsumption);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DSMeterGetPowerConsumption(struct soap *soap)
+{	struct dss__DSMeterGetPowerConsumption soap_tmp_dss__DSMeterGetPowerConsumption;
+	struct dss__DSMeterGetPowerConsumptionResponse soap_tmp_dss__DSMeterGetPowerConsumptionResponse;
+	soap_default_dss__DSMeterGetPowerConsumptionResponse(soap, &soap_tmp_dss__DSMeterGetPowerConsumptionResponse);
+	soap_default_dss__DSMeterGetPowerConsumption(soap, &soap_tmp_dss__DSMeterGetPowerConsumption);
 	soap->encodingStyle = NULL;
-	if (!soap_get_dss__ModulatorGetPowerConsumption(soap, &soap_tmp_dss__ModulatorGetPowerConsumption, "dss:ModulatorGetPowerConsumption", NULL))
+	if (!soap_get_dss__DSMeterGetPowerConsumption(soap, &soap_tmp_dss__DSMeterGetPowerConsumption, "dss:DSMeterGetPowerConsumption", NULL))
 		return soap->error;
 	if (soap_body_end_in(soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__ModulatorGetPowerConsumption(soap, soap_tmp_dss__ModulatorGetPowerConsumption._token, soap_tmp_dss__ModulatorGetPowerConsumption._modulatorID, soap_tmp_dss__ModulatorGetPowerConsumptionResponse.result);
+	soap->error = dss__DSMeterGetPowerConsumption(soap, soap_tmp_dss__DSMeterGetPowerConsumption._token, soap_tmp_dss__DSMeterGetPowerConsumption._dsMeterID, soap_tmp_dss__DSMeterGetPowerConsumptionResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
-	soap_serialize_dss__ModulatorGetPowerConsumptionResponse(soap, &soap_tmp_dss__ModulatorGetPowerConsumptionResponse);
+	soap_serialize_dss__DSMeterGetPowerConsumptionResponse(soap, &soap_tmp_dss__DSMeterGetPowerConsumptionResponse);
 	if (soap_begin_count(soap))
 		return soap->error;
 	if (soap->mode & SOAP_IO_LENGTH)
 	{	if (soap_envelope_begin_out(soap)
 		 || soap_putheader(soap)
 		 || soap_body_begin_out(soap)
-		 || soap_put_dss__ModulatorGetPowerConsumptionResponse(soap, &soap_tmp_dss__ModulatorGetPowerConsumptionResponse, "dss:ModulatorGetPowerConsumptionResponse", "")
+		 || soap_put_dss__DSMeterGetPowerConsumptionResponse(soap, &soap_tmp_dss__DSMeterGetPowerConsumptionResponse, "dss:DSMeterGetPowerConsumptionResponse", "")
 		 || soap_body_end_out(soap)
 		 || soap_envelope_end_out(soap))
 			 return soap->error;
@@ -2743,7 +2743,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ModulatorGetPowerConsumption(struct so
 	 || soap_envelope_begin_out(soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
-	 || soap_put_dss__ModulatorGetPowerConsumptionResponse(soap, &soap_tmp_dss__ModulatorGetPowerConsumptionResponse, "dss:ModulatorGetPowerConsumptionResponse", "")
+	 || soap_put_dss__DSMeterGetPowerConsumptionResponse(soap, &soap_tmp_dss__DSMeterGetPowerConsumptionResponse, "dss:DSMeterGetPowerConsumptionResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -2751,30 +2751,30 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ModulatorGetPowerConsumption(struct so
 	return soap_closesock(soap);
 }
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetModulatorIDs(struct soap *soap)
-{	struct dss__ApartmentGetModulatorIDs soap_tmp_dss__ApartmentGetModulatorIDs;
-	struct dss__ApartmentGetModulatorIDsResponse soap_tmp_dss__ApartmentGetModulatorIDsResponse;
-	soap_default_dss__ApartmentGetModulatorIDsResponse(soap, &soap_tmp_dss__ApartmentGetModulatorIDsResponse);
-	soap_default_dss__ApartmentGetModulatorIDs(soap, &soap_tmp_dss__ApartmentGetModulatorIDs);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetDSMeterIDs(struct soap *soap)
+{	struct dss__ApartmentGetDSMeterIDs soap_tmp_dss__ApartmentGetDSMeterIDs;
+	struct dss__ApartmentGetDSMeterIDsResponse soap_tmp_dss__ApartmentGetDSMeterIDsResponse;
+	soap_default_dss__ApartmentGetDSMeterIDsResponse(soap, &soap_tmp_dss__ApartmentGetDSMeterIDsResponse);
+	soap_default_dss__ApartmentGetDSMeterIDs(soap, &soap_tmp_dss__ApartmentGetDSMeterIDs);
 	soap->encodingStyle = NULL;
-	if (!soap_get_dss__ApartmentGetModulatorIDs(soap, &soap_tmp_dss__ApartmentGetModulatorIDs, "dss:ApartmentGetModulatorIDs", NULL))
+	if (!soap_get_dss__ApartmentGetDSMeterIDs(soap, &soap_tmp_dss__ApartmentGetDSMeterIDs, "dss:ApartmentGetDSMeterIDs", NULL))
 		return soap->error;
 	if (soap_body_end_in(soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__ApartmentGetModulatorIDs(soap, soap_tmp_dss__ApartmentGetModulatorIDs._token, soap_tmp_dss__ApartmentGetModulatorIDsResponse.ids);
+	soap->error = dss__ApartmentGetDSMeterIDs(soap, soap_tmp_dss__ApartmentGetDSMeterIDs._token, soap_tmp_dss__ApartmentGetDSMeterIDsResponse.ids);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
-	soap_serialize_dss__ApartmentGetModulatorIDsResponse(soap, &soap_tmp_dss__ApartmentGetModulatorIDsResponse);
+	soap_serialize_dss__ApartmentGetDSMeterIDsResponse(soap, &soap_tmp_dss__ApartmentGetDSMeterIDsResponse);
 	if (soap_begin_count(soap))
 		return soap->error;
 	if (soap->mode & SOAP_IO_LENGTH)
 	{	if (soap_envelope_begin_out(soap)
 		 || soap_putheader(soap)
 		 || soap_body_begin_out(soap)
-		 || soap_put_dss__ApartmentGetModulatorIDsResponse(soap, &soap_tmp_dss__ApartmentGetModulatorIDsResponse, "dss:ApartmentGetModulatorIDsResponse", "")
+		 || soap_put_dss__ApartmentGetDSMeterIDsResponse(soap, &soap_tmp_dss__ApartmentGetDSMeterIDsResponse, "dss:ApartmentGetDSMeterIDsResponse", "")
 		 || soap_body_end_out(soap)
 		 || soap_envelope_end_out(soap))
 			 return soap->error;
@@ -2784,7 +2784,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetModulatorIDs(struct soap *
 	 || soap_envelope_begin_out(soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
-	 || soap_put_dss__ApartmentGetModulatorIDsResponse(soap, &soap_tmp_dss__ApartmentGetModulatorIDsResponse, "dss:ApartmentGetModulatorIDsResponse", "")
+	 || soap_put_dss__ApartmentGetDSMeterIDsResponse(soap, &soap_tmp_dss__ApartmentGetDSMeterIDsResponse, "dss:ApartmentGetDSMeterIDsResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -2792,30 +2792,30 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetModulatorIDs(struct soap *
 	return soap_closesock(soap);
 }
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ModulatorGetName(struct soap *soap)
-{	struct dss__ModulatorGetName soap_tmp_dss__ModulatorGetName;
-	struct dss__ModulatorGetNameResponse soap_tmp_dss__ModulatorGetNameResponse;
-	soap_default_dss__ModulatorGetNameResponse(soap, &soap_tmp_dss__ModulatorGetNameResponse);
-	soap_default_dss__ModulatorGetName(soap, &soap_tmp_dss__ModulatorGetName);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DSMeterGetName(struct soap *soap)
+{	struct dss__DSMeterGetName soap_tmp_dss__DSMeterGetName;
+	struct dss__DSMeterGetNameResponse soap_tmp_dss__DSMeterGetNameResponse;
+	soap_default_dss__DSMeterGetNameResponse(soap, &soap_tmp_dss__DSMeterGetNameResponse);
+	soap_default_dss__DSMeterGetName(soap, &soap_tmp_dss__DSMeterGetName);
 	soap->encodingStyle = NULL;
-	if (!soap_get_dss__ModulatorGetName(soap, &soap_tmp_dss__ModulatorGetName, "dss:ModulatorGetName", NULL))
+	if (!soap_get_dss__DSMeterGetName(soap, &soap_tmp_dss__DSMeterGetName, "dss:DSMeterGetName", NULL))
 		return soap->error;
 	if (soap_body_end_in(soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__ModulatorGetName(soap, soap_tmp_dss__ModulatorGetName._token, soap_tmp_dss__ModulatorGetName._modulatorID, soap_tmp_dss__ModulatorGetNameResponse.name);
+	soap->error = dss__DSMeterGetName(soap, soap_tmp_dss__DSMeterGetName._token, soap_tmp_dss__DSMeterGetName._dsMeterID, soap_tmp_dss__DSMeterGetNameResponse.name);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
-	soap_serialize_dss__ModulatorGetNameResponse(soap, &soap_tmp_dss__ModulatorGetNameResponse);
+	soap_serialize_dss__DSMeterGetNameResponse(soap, &soap_tmp_dss__DSMeterGetNameResponse);
 	if (soap_begin_count(soap))
 		return soap->error;
 	if (soap->mode & SOAP_IO_LENGTH)
 	{	if (soap_envelope_begin_out(soap)
 		 || soap_putheader(soap)
 		 || soap_body_begin_out(soap)
-		 || soap_put_dss__ModulatorGetNameResponse(soap, &soap_tmp_dss__ModulatorGetNameResponse, "dss:ModulatorGetNameResponse", "")
+		 || soap_put_dss__DSMeterGetNameResponse(soap, &soap_tmp_dss__DSMeterGetNameResponse, "dss:DSMeterGetNameResponse", "")
 		 || soap_body_end_out(soap)
 		 || soap_envelope_end_out(soap))
 			 return soap->error;
@@ -2825,7 +2825,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ModulatorGetName(struct soap *soap)
 	 || soap_envelope_begin_out(soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
-	 || soap_put_dss__ModulatorGetNameResponse(soap, &soap_tmp_dss__ModulatorGetNameResponse, "dss:ModulatorGetNameResponse", "")
+	 || soap_put_dss__DSMeterGetNameResponse(soap, &soap_tmp_dss__DSMeterGetNameResponse, "dss:DSMeterGetNameResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

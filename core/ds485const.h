@@ -44,16 +44,16 @@ namespace dss {
   const uint8_t CommandEvent = 0x0f;
 
   // dSS => dSM function constants
-  const uint8_t FunctionModulatorAddZone = 0x00;
-  const uint8_t FunctionModulatorRemoveZone = 0x01;
-  const uint8_t FunctionModulatorRemoveAllZones = 0x02;
-  const uint8_t FunctionModulatorCountDevInZone = 0x03;
-  const uint8_t FunctionModulatorDevKeyInZone = 0x04;
-  const uint8_t FunctionModulatorGetGroupsSize = 0x05;
-  const uint8_t FunctionModulatorGetZonesSize  = 0x06;
-  const uint8_t FunctionModulatorGetZoneIdForInd = 0x07;
-  const uint8_t FunctionModulatorAddToGroup = 0x08;
-  const uint8_t FunctionModulatorRemoveFromGroup = 0x09;
+  const uint8_t FunctionDSMeterAddZone = 0x00;
+  const uint8_t FunctionDSMeterRemoveZone = 0x01;
+  const uint8_t FunctionDSMeterRemoveAllZones = 0x02;
+  const uint8_t FunctionDSMeterCountDevInZone = 0x03;
+  const uint8_t FunctionDSMeterDevKeyInZone = 0x04;
+  const uint8_t FunctionDSMeterGetGroupsSize = 0x05;
+  const uint8_t FunctionDSMeterGetZonesSize  = 0x06;
+  const uint8_t FunctionDSMeterGetZoneIdForInd = 0x07;
+  const uint8_t FunctionDSMeterAddToGroup = 0x08;
+  const uint8_t FunctionDSMeterRemoveFromGroup = 0x09;
   const uint8_t FunctionGroupAddDeviceToGroup = 0x10;
   const uint8_t FunctionGroupRemoveDeviceFromGroup = 0x11;
   const uint8_t FunctionGroupGetDeviceCount = 0x12;
@@ -103,11 +103,11 @@ namespace dss {
   const uint8_t FunctionDeviceGetSensorValue = 0x69;
   
   const uint8_t FunctionGetTypeRequest = 0x90;
-  const uint8_t FunctionModulatorGetDSID = 0x91;
-  const uint8_t FunctionModulatorGetPowerConsumption = 0x94;
-  const uint8_t FunctionModulatorGetEnergyMeterValue = 0x95;
-  const uint8_t FunctionModulatorSetEnergyLevel = 0x96;
-  const uint8_t FunctionModulatorGetEnergyLevel = 0x97;
+  const uint8_t FunctionDSMeterGetDSID = 0x91;
+  const uint8_t FunctionDSMeterGetPowerConsumption = 0x94;
+  const uint8_t FunctionDSMeterGetEnergyMeterValue = 0x95;
+  const uint8_t FunctionDSMeterSetEnergyLevel = 0x96;
+  const uint8_t FunctionDSMeterGetEnergyLevel = 0x97;
 
   const uint8_t FunctionDeviceGetTransmissionQuality = 0x9f;
 
@@ -180,7 +180,7 @@ namespace dss {
 
   const uint64_t DSIDHeader = 0x3504175FE0000000ll;
 
-  // error codes as received by the modulator
+  // error codes as received by the dsMeter
   const int kDS485Ok = 1;
   const int kDS485NoIDForIndexFound = -1;
   const int kDS485ZoneNotFound = -2;

@@ -21,7 +21,7 @@ int plugin_getversion() {
 bool dataRequest(DSS& _dss, HashMapConstStringString& _parameter,
 		std::string& result) {
 	std::stringstream sStream;
-	std::vector<Modulator*>& modulators = _dss.getApartment().getModulators();
+	std::vector<DSMeter*>& dsMeters = _dss.getApartment().getDSMeters();
 	std::vector<Zone*>& zones = _dss.getApartment().getZones();
 	
 	sStream << "{\"Name\":\""<<_dss.getApartment().getName() <<"\",";
@@ -64,22 +64,22 @@ bool dataRequest(DSS& _dss, HashMapConstStringString& _parameter,
 
 	sStream << "],\"Circuit\":[ ";
 
-	bool firstModulator = true;
-	for (std::vector<Modulator*>::iterator ipModulator =
-			modulators.begin(), endModulator = modulators.end(); ipModulator
-			!= endModulator; ++ipModulator) {
-		if (firstModulator) {
-			firstModulator = false;
+	bool firstDSMeter = true;
+	for (std::vector<DSMeter*>::iterator ipDSMeter =
+			dsMeters.begin(), endDSMeter = dsMeters.end(); ipDSMeter
+			!= endDSMeter; ++ipDSMeter) {
+		if (firstDSMeter) {
+			firstDSMeter = false;
 		} else {
 			sStream << ",";
 		}
 
-		sStream << "{\"Name\":\""<<(*ipModulator)->getName() <<"\",";
-		sStream << "\"dSID\":\"" << (*ipModulator)->getDSID().toString() << "\",";
-		sStream << "\"HardwareVersion\":\"" << (*ipModulator)->getHardwareVersion() << "\",";
-		sStream << "\"SoftwareVersion\":\"" << (*ipModulator)->getSoftwareVersion() << "\",";
-		sStream << "\"orangeEnergyLevel\":" << (*ipModulator)->getEnergyLevelOrange() << ",";
-		sStream << "\"redEnergyLevel\":" << (*ipModulator)->getEnergyLevelRed() << "";
+		sStream << "{\"Name\":\""<<(*ipDSMeter)->getName() <<"\",";
+		sStream << "\"dSID\":\"" << (*ipDSMeter)->getDSID().toString() << "\",";
+		sStream << "\"HardwareVersion\":\"" << (*ipDSMeter)->getHardwareVersion() << "\",";
+		sStream << "\"SoftwareVersion\":\"" << (*ipDSMeter)->getSoftwareVersion() << "\",";
+		sStream << "\"orangeEnergyLevel\":" << (*ipDSMeter)->getEnergyLevelOrange() << ",";
+		sStream << "\"redEnergyLevel\":" << (*ipDSMeter)->getEnergyLevelRed() << "";
 		sStream << "}";
 	}
 	sStream << "]}";
@@ -92,7 +92,7 @@ bool steadyCallRequest(DSS& _dss, HashMapConstStringString& _parameter,
 		std::string& result) {
 	bool energyAnfrage=strToIntDef(_parameter["parameter"], -1) & 0x01;
 	bool lastSceneAnfrage=strToIntDef(_parameter["parameter"], -1) & 0x02;
-	bool firstModulator;
+	bool firstDSMeter;
 	DS485Client oClient; 
 	DS485CommandFrame frame;
 
@@ -108,22 +108,22 @@ bool steadyCallRequest(DSS& _dss, HashMapConstStringString& _parameter,
 	    oClient.sendFrameDiscardResult(frame);  
 		
 		
-		std::vector<Modulator*>& modulators = _dss.getApartment().getModulators();
+		std::vector<DSMeter*>& dsMeters = _dss.getApartment().getDSMeters();
 
 		sStream << "\"Energy\":[";
 
-		firstModulator = true;
-		for (std::vector<Modulator*>::iterator ipModulator =
-				modulators.begin(), endModulator = modulators.end(); ipModulator
-				!= endModulator; ++ipModulator) {
-			if (firstModulator) {
-				firstModulator = false;
+		firstDSMeter = true;
+		for (std::vector<DSMeter*>::iterator ipDSMeter =
+				dsMeters.begin(), endDSMeter = dsMeters.end(); ipDSMeter
+				!= endDSMeter; ++ipDSMeter) {
+			if (firstDSMeter) {
+				firstDSMeter = false;
 			} else {
 				sStream << ",";
 			}
 
-			sStream << "{\"dSID\":\""<< (*ipModulator)->getDSID().toString() <<"\",";
-			sStream << "\"value\":" << (*ipModulator)->getCachedPowerConsumption() << "}";
+			sStream << "{\"dSID\":\""<< (*ipDSMeter)->getDSID().toString() <<"\",";
+			sStream << "\"value\":" << (*ipDSMeter)->getCachedPowerConsumption() << "}";
 		}
 		
 		sStream << "]";

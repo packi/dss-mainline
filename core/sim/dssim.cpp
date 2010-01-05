@@ -76,8 +76,8 @@ namespace dss {
 
     virtual ~DSIDSimCreator() {};
 
-    virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
-      return new DSIDSim(_modulator, _dsid, _shortAddress);
+    virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
+      return new DSIDSim(_dsMeter, _dsid, _shortAddress);
     }
   };
 
@@ -91,8 +91,8 @@ namespace dss {
 
     virtual ~DSIDSimSwitchCreator() {};
 
-    virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
-      return new DSIDSimSwitch(_modulator, _dsid, _shortAddress, 9);
+    virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
+      return new DSIDSimSwitch(_dsMeter, _dsid, _shortAddress, 9);
     }
   };
 
@@ -154,14 +154,14 @@ namespace dss {
         if(rootNode->hasAttribute("version") && (strToInt(rootNode->getAttribute("version")) == theConfigFileVersion)) {
           Node* curNode = rootNode->firstChild();
           while(curNode != NULL) {
-            if(curNode->localName() == "modulator") {
-              DSModulatorSim* modulator = NULL;
+            if(curNode->localName() == "dsMeter") {
+              DSDSMeterSim* dsMeter = NULL;
               try {
-                modulator = new DSModulatorSim(this);
-                modulator->initializeFromNode(curNode);
-                m_Modulators.push_back(modulator);
+                dsMeter = new DSDSMeterSim(this);
+                dsMeter->initializeFromNode(curNode);
+                m_DSMeters.push_back(dsMeter);
               } catch(std::runtime_error&) {
-                delete modulator;
+                delete dsMeter;
               }
             }
             curNode = curNode->nextSibling();
@@ -236,8 +236,8 @@ namespace dss {
   } // ready
 
   bool DSSim::isSimAddress(const uint8_t _address) {
-    foreach(DSModulatorSim& modulator, m_Modulators) {
-      if(modulator.getID() == _address) {
+    foreach(DSDSMeterSim& dsMeter, m_DSMeters) {
+      if(dsMeter.getID() == _address) {
         return true;
       }
     }
@@ -245,8 +245,8 @@ namespace dss {
   } // isSimAddress
 
   void DSSim::process(DS485Frame& _frame) {
-    foreach(DSModulatorSim& modulator, m_Modulators) {
-      modulator.process(_frame);
+    foreach(DSDSMeterSim& dsMeter, m_DSMeters) {
+      dsMeter.process(_frame);
     }
   } // process
 
@@ -256,8 +256,8 @@ namespace dss {
 
   DSIDInterface* DSSim::getSimulatedDevice(const dsid_t& _dsid) {
     DSIDInterface* result = NULL;
-    foreach(DSModulatorSim& modulator, m_Modulators) {
-      result = modulator.getSimulatedDevice(_dsid);
+    foreach(DSDSMeterSim& dsMeter, m_DSMeters) {
+      result = dsMeter.getSimulatedDevice(_dsid);
       if(result != NULL) {
         break;
       }
@@ -266,23 +266,23 @@ namespace dss {
   } // getSimulatedDevice
 
 
-  //================================================== DSModulatorSim
+  //================================================== DSDSMeterSim
 
-  DSModulatorSim::DSModulatorSim(DSSim* _pSimulation)
+  DSDSMeterSim::DSDSMeterSim(DSSim* _pSimulation)
   : m_pSimulation(_pSimulation),
     m_EnergyLevelOrange(200),
     m_EnergyLevelRed(400)
   {
-    m_ModulatorDSID = dsid_t(DSIDHeader, SimulationPrefix);
+    m_DSMeterDSID = dsid_t(DSIDHeader, SimulationPrefix);
     m_ID = 70;
     m_Name = "Simulated dSM";
-  } // dSModulatorSim
+  } // dSDSMeterSim
 
-  void DSModulatorSim::log(const std::string& _message, aLogSeverity _severity) {
+  void DSDSMeterSim::log(const std::string& _message, aLogSeverity _severity) {
     m_pSimulation->log(_message, _severity);
   } // log
 
-  bool DSModulatorSim::initializeFromNode(Node* _node) {
+  bool DSDSMeterSim::initializeFromNode(Node* _node) {
     Element* elem = dynamic_cast<Element*>(_node);
     if(elem == NULL) {
       return false;
@@ -291,9 +291,9 @@ namespace dss {
       m_ID = strToIntDef(elem->getAttribute("busid"), 70);
     }
     if(elem->hasAttribute("dsid")) {
-      m_ModulatorDSID = dsid_t::fromString(elem->getAttribute("dsid"));
-      m_ModulatorDSID.upper = (m_ModulatorDSID.upper & 0x000000000000000Fll) | DSIDHeader;
-      m_ModulatorDSID.lower = (m_ModulatorDSID.lower & 0x002FFFFF) | SimulationPrefix;
+      m_DSMeterDSID = dsid_t::fromString(elem->getAttribute("dsid"));
+      m_DSMeterDSID.upper = (m_DSMeterDSID.upper & 0x000000000000000Fll) | DSIDHeader;
+      m_DSMeterDSID.lower = (m_DSMeterDSID.lower & 0x002FFFFF) | SimulationPrefix;
     }
     if(elem->hasAttribute("orange")) {
       m_EnergyLevelOrange = strToIntDef(elem->getAttribute("orange"), m_EnergyLevelOrange);
@@ -312,7 +312,7 @@ namespace dss {
     return true;
   } // initializeFromNode
 
-  void DSModulatorSim::loadDevices(Node* _node, const int _zoneID) {
+  void DSDSMeterSim::loadDevices(Node* _node, const int _zoneID) {
     Node* curNode = _node->firstChild();
     while(curNode != NULL) {
       Element* elem = dynamic_cast<Element*>(curNode);
@@ -383,7 +383,7 @@ namespace dss {
     }
   } // loadDevices
 
-  void DSModulatorSim::loadGroups(Node* _node, const int _zoneID) {
+  void DSDSMeterSim::loadGroups(Node* _node, const int _zoneID) {
     Node* curNode = _node->firstChild();
     while(curNode != NULL) {
       if(curNode->localName() == "group") {
@@ -413,12 +413,12 @@ namespace dss {
     }
   } // loadGroups
 
-  void DSModulatorSim::addDeviceToGroup(DSIDInterface* _device, int _groupID) {
+  void DSDSMeterSim::addDeviceToGroup(DSIDInterface* _device, int _groupID) {
     m_DevicesOfGroupInZone[std::pair<const int, const int>(_device->getZoneID(), _groupID)].push_back(_device);
     m_GroupsPerDevice[_device->getShortAddress()].push_back(_groupID);
   } // addDeviceToGroup
 
-  void DSModulatorSim::loadZones(Node* _node) {
+  void DSDSMeterSim::loadZones(Node* _node) {
     Node* curNode = _node->firstChild();
     while(curNode != NULL) {
       if(curNode->localName() == "zone") {
@@ -439,11 +439,11 @@ namespace dss {
     }
   } // loadZones
 
-  void DSModulatorSim::deviceCallScene(int _deviceID, const int _sceneID) {
+  void DSDSMeterSim::deviceCallScene(int _deviceID, const int _sceneID) {
     lookupDevice(_deviceID).callScene(_sceneID);
   } // deviceCallScene
 
-  void DSModulatorSim::groupCallScene(const int _zoneID, const int _groupID, const int _sceneID) {
+  void DSDSMeterSim::groupCallScene(const int _zoneID, const int _groupID, const int _sceneID) {
     std::vector<DSIDInterface*> dsids;
     m_LastCalledSceneForZoneAndGroup[std::make_pair(_zoneID, _groupID)] = _sceneID;
     if(_groupID == GroupIDBroadcast) {
@@ -465,11 +465,11 @@ namespace dss {
     }
   } // groupCallScene
 
-  void DSModulatorSim::deviceSaveScene(int _deviceID, const int _sceneID) {
+  void DSDSMeterSim::deviceSaveScene(int _deviceID, const int _sceneID) {
     lookupDevice(_deviceID).saveScene(_sceneID);
   } // deviceSaveScene
 
-  void DSModulatorSim::groupSaveScene(const int _zoneID, const int _groupID, const int _sceneID) {
+  void DSDSMeterSim::groupSaveScene(const int _zoneID, const int _groupID, const int _sceneID) {
     std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
       std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
@@ -481,11 +481,11 @@ namespace dss {
     }
   } // groupSaveScene
 
-  void DSModulatorSim::deviceUndoScene(int _deviceID, const int _sceneID) {
+  void DSDSMeterSim::deviceUndoScene(int _deviceID, const int _sceneID) {
     lookupDevice(_deviceID).undoScene(_sceneID);
   } // deviceUndoScene
 
-  void DSModulatorSim::groupUndoScene(const int _zoneID, const int _groupID, const int _sceneID) {
+  void DSDSMeterSim::groupUndoScene(const int _zoneID, const int _groupID, const int _sceneID) {
     std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
       std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
@@ -497,7 +497,7 @@ namespace dss {
     }
   } // groupUndoScene
 
-  void DSModulatorSim::groupStartDim(const int _zoneID, const int _groupID, bool _up, int _parameterNr) {
+  void DSDSMeterSim::groupStartDim(const int _zoneID, const int _groupID, bool _up, int _parameterNr) {
     std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
       std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
@@ -509,7 +509,7 @@ namespace dss {
     }
   } // groupStartDim
 
-  void DSModulatorSim::groupEndDim(const int _zoneID, const int _groupID, const int _parameterNr) {
+  void DSDSMeterSim::groupEndDim(const int _zoneID, const int _groupID, const int _parameterNr) {
     std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
       std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
@@ -521,7 +521,7 @@ namespace dss {
     }
   } // groupEndDim
 
-  void DSModulatorSim::groupDecValue(const int _zoneID, const int _groupID, const int _parameterNr) {
+  void DSDSMeterSim::groupDecValue(const int _zoneID, const int _groupID, const int _parameterNr) {
     std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
       std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
@@ -533,7 +533,7 @@ namespace dss {
     }
   } // groupDecValue
 
-  void DSModulatorSim::groupIncValue(const int _zoneID, const int _groupID, const int _parameterNr) {
+  void DSDSMeterSim::groupIncValue(const int _zoneID, const int _groupID, const int _parameterNr) {
     std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
       std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
@@ -545,7 +545,7 @@ namespace dss {
     }
   } // groupIncValue
 
-  void DSModulatorSim::groupSetValue(const int _zoneID, const int _groupID, const int _value) {
+  void DSDSMeterSim::groupSetValue(const int _zoneID, const int _groupID, const int _value) {
     std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
       std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
@@ -557,7 +557,7 @@ namespace dss {
     }
   } // groupSetValue
 
-  void DSModulatorSim::process(DS485Frame& _frame) {
+  void DSDSMeterSim::process(DS485Frame& _frame) {
     const uint8_t HeaderTypeToken = 0;
     const uint8_t HeaderTypeCommand = 1;
 
@@ -708,14 +708,14 @@ namespace dss {
                 distributeFrame(response);
               }
               break;
-            case FunctionModulatorGetZonesSize:
+            case FunctionDSMeterGetZonesSize:
               {
                 response = createResponse(cmdFrame, cmdNr);
                 response->getPayload().add<uint16_t>(m_Zones.size());
                 distributeFrame(response);
               }
               break;
-            case FunctionModulatorGetZoneIdForInd:
+            case FunctionDSMeterGetZoneIdForInd:
               {
                 uint8_t index = pd.get<uint16_t>();
                 std::map< const int, std::vector<DSIDInterface*> >::iterator it = m_Zones.begin();
@@ -725,7 +725,7 @@ namespace dss {
                 distributeFrame(response);
               }
               break;
-            case FunctionModulatorCountDevInZone:
+            case FunctionDSMeterCountDevInZone:
               {
                 uint16_t index = pd.get<uint16_t>();
                 response = createResponse(cmdFrame, cmdNr);
@@ -733,7 +733,7 @@ namespace dss {
                 distributeFrame(response);
               }
               break;
-            case FunctionModulatorDevKeyInZone:
+            case FunctionDSMeterDevKeyInZone:
               {
                 uint16_t zoneID = pd.get<uint16_t>();
                 uint16_t deviceIndex = pd.get<devid_t>();
@@ -742,7 +742,7 @@ namespace dss {
                 distributeFrame(response);
               }
               break;
-            case FunctionModulatorGetGroupsSize:
+            case FunctionDSMeterGetGroupsSize:
               {
                 response = createResponse(cmdFrame, cmdNr);
                 int zoneID = pd.get<uint16_t>();
@@ -759,10 +759,10 @@ namespace dss {
                 distributeFrame(response);
               }
               break;
-            case FunctionModulatorGetDSID:
+            case FunctionDSMeterGetDSID:
               {
                 response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<dsid_t>(m_ModulatorDSID);
+                response->getPayload().add<dsid_t>(m_DSMeterDSID);
                 distributeFrame(response);
               }
               break;
@@ -896,7 +896,7 @@ namespace dss {
                 distributeFrame(response);
               }
               break;
-            case FunctionModulatorGetPowerConsumption:
+            case FunctionDSMeterGetPowerConsumption:
               {
                 response = createResponse(cmdFrame, cmdNr);
                 uint32_t val = 0;
@@ -907,14 +907,14 @@ namespace dss {
                 distributeFrame(response);
               }
               break;
-            case FunctionModulatorGetEnergyMeterValue:
+            case FunctionDSMeterGetEnergyMeterValue:
               {
                 response = createResponse(cmdFrame, cmdNr);
                 response->getPayload().add<uint32_t>(0);
                 distributeFrame(response);
               }
               break;
-            case FunctionModulatorAddZone:
+            case FunctionDSMeterAddZone:
               {
                 uint16_t zoneID = pd.get<uint16_t>();
                 response = createResponse(cmdFrame, cmdNr);
@@ -952,7 +952,7 @@ namespace dss {
                 distributeFrame(response);
               }
               break;
-            case FunctionModulatorGetEnergyLevel:
+            case FunctionDSMeterGetEnergyLevel:
               {
                 response = createResponse(cmdFrame, cmdNr);
                 response->getPayload().add<uint16_t>(m_EnergyLevelOrange);
@@ -986,15 +986,15 @@ namespace dss {
         }
       }
     } catch(std::runtime_error& e) {
-      Logger::getInstance()->log(std::string("DSModulatorSim: Exeption while processing packet. Message: '") + e.what() + "'");
+      Logger::getInstance()->log(std::string("DSDSMeterSim: Exeption while processing packet. Message: '") + e.what() + "'");
     }
   } // process
 
-  void DSModulatorSim::distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) const {
+  void DSDSMeterSim::distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) const {
     m_pSimulation->distributeFrame(_frame);
   } // distributeFrame
 
-  void DSModulatorSim::dSLinkInterrupt(devid_t _shortAddress) const {
+  void DSDSMeterSim::dSLinkInterrupt(devid_t _shortAddress) const {
     boost::shared_ptr<DS485CommandFrame> result(new DS485CommandFrame());
     result->getHeader().setDestination(0);
     result->getHeader().setSource(m_ID);
@@ -1007,7 +1007,7 @@ namespace dss {
     distributeFrame(result);
   } // dSLinkInterrupt
 
-  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::createReply(DS485CommandFrame& _request) const {
+  boost::shared_ptr<DS485CommandFrame> DSDSMeterSim::createReply(DS485CommandFrame& _request) const {
     boost::shared_ptr<DS485CommandFrame> result(new DS485CommandFrame());
     result->getHeader().setDestination(_request.getHeader().getSource());
     result->getHeader().setSource(m_ID);
@@ -1016,21 +1016,21 @@ namespace dss {
     return result;
   } // createReply
 
-  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::createAck(DS485CommandFrame& _request, uint8_t _functionID) const {
+  boost::shared_ptr<DS485CommandFrame> DSDSMeterSim::createAck(DS485CommandFrame& _request, uint8_t _functionID) const {
     boost::shared_ptr<DS485CommandFrame> result = createReply(_request);
     result->setCommand(CommandAck);
     result->getPayload().add(_functionID);
     return result;
   } // createAck
 
-  boost::shared_ptr<DS485CommandFrame> DSModulatorSim::createResponse(DS485CommandFrame& _request, uint8_t _functionID) const {
+  boost::shared_ptr<DS485CommandFrame> DSDSMeterSim::createResponse(DS485CommandFrame& _request, uint8_t _functionID) const {
     boost::shared_ptr<DS485CommandFrame> result = createReply(_request);
     result->setCommand(CommandResponse);
     result->getPayload().add(_functionID);
     return result;
   } // createResponse
 
-  DSIDInterface& DSModulatorSim::lookupDevice(const devid_t _shortAddress) {
+  DSIDInterface& DSDSMeterSim::lookupDevice(const devid_t _shortAddress) {
     for(std::vector<DSIDInterface*>::iterator ipSimDev = m_SimulatedDevices.begin(); ipSimDev != m_SimulatedDevices.end(); ++ipSimDev) {
       if((*ipSimDev)->getShortAddress() == _shortAddress)  {
         return **ipSimDev;
@@ -1039,11 +1039,11 @@ namespace dss {
     throw std::runtime_error(std::string("could not find device with id: ") + intToString(_shortAddress));
   } // lookupDevice
 
-  int DSModulatorSim::getID() const {
+  int DSDSMeterSim::getID() const {
     return m_ID;
   } // getID
 
-  DSIDInterface* DSModulatorSim::getSimulatedDevice(const dsid_t _dsid) {
+  DSIDInterface* DSDSMeterSim::getSimulatedDevice(const dsid_t _dsid) {
     for(std::vector<DSIDInterface*>::iterator iDSID = m_SimulatedDevices.begin(), e = m_SimulatedDevices.end();
         iDSID != e; ++iDSID)
     {
@@ -1064,13 +1064,13 @@ namespace dss {
 
   //================================================== DSIDFactory
 
-  DSIDInterface* DSIDFactory::createDSID(const std::string& _identifier, const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
+  DSIDInterface* DSIDFactory::createDSID(const std::string& _identifier, const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
     boost::ptr_vector<DSIDCreator>::iterator
     iCreator = m_RegisteredCreators.begin(),
     e = m_RegisteredCreators.end();
     while(iCreator != e) {
       if(iCreator->getIdentifier() == _identifier) {
-        return iCreator->createDSID(_dsid, _shortAddress, _modulator);
+        return iCreator->createDSID(_dsid, _shortAddress, _dsMeter);
       }
       ++iCreator;
     }

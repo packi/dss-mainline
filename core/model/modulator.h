@@ -34,8 +34,8 @@
 
 namespace dss {
 
-  /** Represents a Modulator */
-  class Modulator : public DeviceContainer,
+  /** Represents a DSMeter */
+  class DSMeter : public DeviceContainer,
                     public PhysicalModelItem {
   private:
     dsid_t m_DSID;
@@ -53,19 +53,19 @@ namespace dss {
     int m_DeviceType;
     bool m_IsValid;
   public:
-    /** Constructs a modulator with the given dsid. */
-    Modulator(const dsid_t _dsid);
-    virtual ~Modulator() {};
+    /** Constructs a dsMeter with the given dsid. */
+    DSMeter(const dsid_t _dsid);
+    virtual ~DSMeter() {};
     virtual Set getDevices() const;
 
-    /** Returns the DSID of the Modulator */
+    /** Returns the DSID of the DSMeter */
     dsid_t getDSID() const;
-    /** Returns the bus id of the Modulator */
+    /** Returns the bus id of the DSMeter */
     int getBusID() const;
-    /** Sets the bus id of the Modulator */
+    /** Sets the bus id of the DSMeter */
     void setBusID(const int _busID);
 
-    /** Adds a DeviceReference to the modulators devices list */
+    /** Adds a DeviceReference to the dsMeters devices list */
     void addDevice(const DeviceReference& _device);
 
     /** Removes the device identified by the reference. */
@@ -92,10 +92,10 @@ namespace dss {
     /** Returns the red energy level */
     int getEnergyLevelRed() const { return m_EnergyLevelRed; }
     /** Sets the orange energy level.
-     * @note This has no effect on the modulator as of now. */
+     * @note This has no effect on the dsMeter as of now. */
     void setEnergyLevelRed(const int _value) { m_EnergyLevelRed = _value; }
     /** Sets the red energy level.
-     * @note This has no effect on the modulator as of now. */
+     * @note This has no effect on the dsMeter as of now. */
     void setEnergyLevelOrange(const int _value) { m_EnergyLevelOrange = _value; }
 
     int getHardwareVersion() const { return m_HardwareVersion; }
@@ -107,10 +107,10 @@ namespace dss {
     int getDeviceType() { return m_DeviceType; }
     void setDeviceType(const int _value) { m_DeviceType = _value; }
 
-    /** Returns true if the modulator has been read-out completely. */
+    /** Returns true if the dsMeter has been read-out completely. */
     bool isValid() const { return m_IsValid; }
     void setIsValid(const bool _value) { m_IsValid = _value; }
-  }; // Modulator
+  }; // DSMeter
 
   
 } // namespace dss

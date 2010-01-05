@@ -70,7 +70,7 @@ namespace dss {
 
 //#define LOG_TIMING
 
-  void Metering::checkModulators(boost::shared_ptr<MeteringConfigChain> _config) {
+  void Metering::checkDSMeters(boost::shared_ptr<MeteringConfigChain> _config) {
     SeriesReader<CurrentValue> reader;
     SeriesWriter<CurrentValue> writer;
 
@@ -79,22 +79,22 @@ namespace dss {
 #ifdef LOG_TIMING
     Timestamp checkingAll;
 #endif
-    std::vector<Modulator*>& modulators = DSS::getInstance()->getApartment().getModulators();
-    for(std::vector<Modulator*>::iterator ipModulator = modulators.begin(), e = modulators.end();
-        ipModulator != e; ++ipModulator)
+    std::vector<DSMeter*>& dsMeters = DSS::getInstance()->getApartment().getDSMeters();
+    for(std::vector<DSMeter*>::iterator ipDSMeter = dsMeters.begin(), e = dsMeters.end();
+        ipDSMeter != e; ++ipDSMeter)
     {
-      if(!(*ipModulator)->isPresent()) {
+      if(!(*ipDSMeter)->isPresent()) {
         continue;
       }
 #ifdef LOG_TIMING
-      Timestamp checkingModulator;
+      Timestamp checkingDSMeter;
       Timestamp startedLoading;
 #endif
       std::vector<boost::shared_ptr<Series<CurrentValue> > > series;
       for(int iConfig = 0; iConfig < _config->size(); iConfig++) {
         // Load series from file
-        std::string fileName = m_MeteringStorageLocation + (*ipModulator)->getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
-        log("Metering::checkModulators: Trying to load series from '" + fileName + "'");
+        std::string fileName = m_MeteringStorageLocation + (*ipDSMeter)->getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
+        log("Metering::checkDSMeters: Trying to load series from '" + fileName + "'");
         if(boost::filesystem::exists(fileName)) {
           Timestamp startedLoadingSingle;
           boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(fileName));
@@ -104,14 +104,14 @@ namespace dss {
           if(s.get() != NULL) {
             series.push_back(s);
           } else {
-            log("Metering::checkModulators: Failed to load series");
+            log("Metering::checkDSMeters: Failed to load series");
             return; // TODO: another strategy would be moving the file out of our way and just create an empty one
           }
         } else {
           boost::shared_ptr<Series<CurrentValue> > newSeries((new Series<CurrentValue>(_config->getResolution(iConfig), _config->getNumberOfValues(iConfig))));
           newSeries->setUnit(_config->getUnit());
           newSeries->setComment(_config->getComment());
-          newSeries->setFromDSID((*ipModulator)->getDSID());
+          newSeries->setFromDSID((*ipDSMeter)->getDSID());
           series.push_back(newSeries);
         }
       }
@@ -128,9 +128,9 @@ namespace dss {
         }
       }
       if(series.empty()) {
-        log("Metering::checkModulators: No series configured, check your config");
+        log("Metering::checkDSMeters: No series configured, check your config");
       } else {
-        log("Metering::checkModulators: Series loaded, updating");
+        log("Metering::checkDSMeters: Series loaded, updating");
         // Update series
 
         unsigned long value;
@@ -140,12 +140,12 @@ namespace dss {
 #endif
         try {
           if(_config->isEnergy()) {
-            value = (*ipModulator)->getEnergyMeterValue();
+            value = (*ipDSMeter)->getEnergyMeterValue();
           } else {
-            value = (*ipModulator)->getPowerConsumption();
+            value = (*ipDSMeter)->getPowerConsumption();
           }
         } catch(std::runtime_error& err) {
-          log("Could not poll modulator " + (*ipModulator)->getDSID().toString() + ". Message: " + err.what());
+          log("Could not poll dsMeter " + (*ipDSMeter)->getDSID().toString() + ". Message: " + err.what());
         }
 #ifdef LOG_TIMING
         cout << "fetching value: " << Timestamp().getDifference(fetchingValue) << endl;
@@ -160,15 +160,15 @@ namespace dss {
         Timestamp startedWriting;
 #endif
         // Store series
-        log("Metering::checkModulators: Writing series back...");
+        log("Metering::checkDSMeters: Writing series back...");
         for(int iConfig = 0; iConfig < _config->size(); iConfig++) {
 #ifdef LOG_TIMING
           Timestamp startedWritingSingle;
 #endif
           // Write series to file
-          std::string fileName = m_MeteringStorageLocation + (*ipModulator)->getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
+          std::string fileName = m_MeteringStorageLocation + (*ipDSMeter)->getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
           Series<CurrentValue>* s = series[iConfig].get();
-          log("Metering::checkModulators: Trying to save series to '" + fileName + "'");
+          log("Metering::checkDSMeters: Trying to save series to '" + fileName + "'");
           writer.writeToXML(*s, fileName);
 #ifdef LOG_TIMING
           cout << "writing single: " << Timestamp().getDifference(startedWritingSingle) << endl;
@@ -179,32 +179,32 @@ namespace dss {
 #endif
       }
 #ifdef LOG_TIMING
-      cout << "checkingModulator: " << Timestamp().getDifference(checkingModulator) << endl;
+      cout << "checkingDSMeter: " << Timestamp().getDifference(checkingDSMeter) << endl;
 #endif
     }
 #ifdef LOG_TIMING
     cout << "checking all: " << Timestamp().getDifference(checkingAll) << endl;
 #endif
-  } // checkModulators
+  } // checkDSMeters
 
   //#undef LOG_TIMING
 
   void Metering::execute() {
-    // check modulators periodically
+    // check dsMeters periodically
     while(DSS::getInstance()->getApartment().isInitializing()) {
       sleepSeconds(1);
     }
     while(!m_Terminated) {
       int sleepTimeSec = 60000;
 
-      log("Metering::execute: Checking modulators");
+      log("Metering::execute: Checking dsMeters");
       for(unsigned int iConfig = 0; iConfig < m_Config.size(); iConfig++) {
         if(m_Config[iConfig]->needsRun()) {
-          checkModulators(m_Config[iConfig]);
+          checkDSMeters(m_Config[iConfig]);
         }
         sleepTimeSec = std::min(sleepTimeSec, m_Config[iConfig]->getCheckIntervalSeconds());
       }
-      log("Metering::execute: Done checking modulators");
+      log("Metering::execute: Done checking dsMeters");
       sleepSeconds(sleepTimeSec);
     }
   } // execute

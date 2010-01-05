@@ -35,15 +35,15 @@ namespace dss {
 
   class Device;
   
-	typedef boost::tuple<int, int, int, std::string, int> ModulatorSpec_t; // bus-id, sw-version, hw-version, name, device-id
+	typedef boost::tuple<int, int, int, std::string, int> DSMeterSpec_t; // bus-id, sw-version, hw-version, name, device-id
 
   class DeviceBusInterface {
   public:
     //------------------------------------------------ UDI
-    virtual uint8_t dSLinkSend(const int _modulatorID, devid_t _devAdr, uint8_t _value, uint8_t _flags) = 0;
+    virtual uint8_t dSLinkSend(const int _dsMeterID, devid_t _devAdr, uint8_t _value, uint8_t _flags) = 0;
 
     //------------------------------------------------ Device manipulation
-    virtual uint16_t deviceGetParameterValue(devid_t _id, uint8_t _modulatorID, int _paramID) = 0;
+    virtual uint16_t deviceGetParameterValue(devid_t _id, uint8_t _dsMeterID, int _paramID) = 0;
 
     virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) = 0;
     virtual int getSensorValue(const Device& _device, const int _sensorID) = 0;
@@ -53,41 +53,41 @@ namespace dss {
 
   class StructureQueryBusInterface {
   public:
-    /** Returns an std::vector containing the modulator-spec of all modulators present. */
-    virtual std::vector<ModulatorSpec_t> getModulators() = 0;
+    /** Returns an std::vector containing the dsMeter-spec of all dsMeters present. */
+    virtual std::vector<DSMeterSpec_t> getDSMeters() = 0;
 
-    /** Returns the modulator-spec for a modulator */
-    virtual ModulatorSpec_t getModulatorSpec(const int _modulatorID) = 0;
+    /** Returns the dsMeter-spec for a dsMeter */
+    virtual DSMeterSpec_t getDSMeterSpec(const int _dsMeterID) = 0;
 
-    /** Returns a std::vector conatining the zone-ids of the specified modulator */
-    virtual std::vector<int> getZones(const int _modulatorID) = 0;
-    /** Returns the count of the zones of the specified modulator */
-    virtual int getZoneCount(const int _modulatorID) = 0;
-    /** Returns the bus-ids of the devices present in the given zone of the specified modulator */
-    virtual std::vector<int> getDevicesInZone(const int _modulatorID, const int _zoneID) = 0;
-    /** Returns the count of devices present in the given zone of the specified modulator */
-    virtual int getDevicesCountInZone(const int _modulatorID, const int _zoneID) = 0;
+    /** Returns a std::vector conatining the zone-ids of the specified dsMeter */
+    virtual std::vector<int> getZones(const int _dsMeterID) = 0;
+    /** Returns the count of the zones of the specified dsMeter */
+    virtual int getZoneCount(const int _dsMeterID) = 0;
+    /** Returns the bus-ids of the devices present in the given zone of the specified dsMeter */
+    virtual std::vector<int> getDevicesInZone(const int _dsMeterID, const int _zoneID) = 0;
+    /** Returns the count of devices present in the given zone of the specified dsMeter */
+    virtual int getDevicesCountInZone(const int _dsMeterID, const int _zoneID) = 0;
 
-    /** Returns the count of groups present in the given zone of the specifid modulator */
-    virtual int getGroupCount(const int _modulatorID, const int _zoneID) = 0;
-    /** Returns the a std::vector containing the group-ids of the given zone on the specified modulator */
-    virtual std::vector<int> getGroups(const int _modulatorID, const int _zoneID) = 0;
+    /** Returns the count of groups present in the given zone of the specifid dsMeter */
+    virtual int getGroupCount(const int _dsMeterID, const int _zoneID) = 0;
+    /** Returns the a std::vector containing the group-ids of the given zone on the specified dsMeter */
+    virtual std::vector<int> getGroups(const int _dsMeterID, const int _zoneID) = 0;
     /** Returns the count of devices present in the given group */
-    virtual int getDevicesInGroupCount(const int _modulatorID, const int _zoneID, const int _groupID) = 0;
+    virtual int getDevicesInGroupCount(const int _dsMeterID, const int _zoneID, const int _groupID) = 0;
     /** Returns a std::vector containing the bus-ids of the devices present in the given group */
-    virtual std::vector<int> getDevicesInGroup(const int _modulatorID, const int _zoneID, const int _groupID) = 0;
+    virtual std::vector<int> getDevicesInGroup(const int _dsMeterID, const int _zoneID, const int _groupID) = 0;
 
-    virtual std::vector<int> getGroupsOfDevice(const int _modulatorID, const int _deviceID) = 0;
+    virtual std::vector<int> getGroupsOfDevice(const int _dsMeterID, const int _deviceID) = 0;
 
     /** Returns the DSID of a given device */
-    virtual dsid_t getDSIDOfDevice(const int _modulatorID, const int _deviceID) = 0;
-    /** Returns the DSID of a given modulator */
-    virtual dsid_t getDSIDOfModulator(const int _modulatorID) = 0;
+    virtual dsid_t getDSIDOfDevice(const int _dsMeterID, const int _deviceID) = 0;
+    /** Returns the DSID of a given dsMeter */
+    virtual dsid_t getDSIDOfDSMeter(const int _dsMeterID) = 0;
 
-    virtual int getLastCalledScene(const int _modulatorID, const int _zoneID, const int _groupID) = 0;
+    virtual int getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID) = 0;
 
-    virtual uint16_t deviceGetFunctionID(devid_t _id, uint8_t _modulatorID) = 0;
-    virtual bool getEnergyBorder(const int _modulatorID, int& _lower, int& _upper) = 0;
+    virtual uint16_t deviceGetFunctionID(devid_t _id, uint8_t _dsMeterID) = 0;
+    virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) = 0;
 
     virtual ~StructureQueryBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureQueryBusInterface
@@ -108,31 +108,31 @@ namespace dss {
     //------------------------------------------------ Specialized Commands (system)
 
     /** Adds the given device to the specified zone. */
-    virtual void setZoneID(const int _modulatorID, const devid_t _deviceID, const int _zoneID) = 0;
+    virtual void setZoneID(const int _dsMeterID, const devid_t _deviceID, const int _zoneID) = 0;
 
-    /** Creates a new Zone on the given modulator */
-    virtual void createZone(const int _modulatorID, const int _zoneID) = 0;
+    /** Creates a new Zone on the given dsMeter */
+    virtual void createZone(const int _dsMeterID, const int _zoneID) = 0;
 
-    /** Removes the zone \a _zoneID on the modulator \a _modulatorID */
-    virtual void removeZone(const int _modulatorID, const int _zoneID) = 0;
+    /** Removes the zone \a _zoneID on the dsMeter \a _dsMeterID */
+    virtual void removeZone(const int _dsMeterID, const int _zoneID) = 0;
 
     /** Adds a device to a given group */
-    virtual void addToGroup(const int _modulatorID, const int _groupID, const int _deviceID) = 0;
+    virtual void addToGroup(const int _dsMeterID, const int _groupID, const int _deviceID) = 0;
     /** Removes a device from a given group */
-    virtual void removeFromGroup(const int _modulatorID, const int _groupID, const int _deviceID) = 0;
+    virtual void removeFromGroup(const int _dsMeterID, const int _groupID, const int _deviceID) = 0;
 
     /** Adds a user group */
-    virtual int addUserGroup(const int _modulatorID) = 0;
+    virtual int addUserGroup(const int _dsMeterID) = 0;
     /** Removes a user group */
-    virtual void removeUserGroup(const int _modulatorID, const int _groupID) = 0;
+    virtual void removeUserGroup(const int _dsMeterID, const int _groupID) = 0;
 
 
     //------------------------------------------------ Metering
     /** Returns the current power-consumption in mW */
-    virtual unsigned long getPowerConsumption(const int _modulatorID) = 0;
+    virtual unsigned long getPowerConsumption(const int _dsMeterID) = 0;
 
     /** Returns the meter value in Wh */
-    virtual unsigned long getEnergyMeterValue(const int _modulatorID) = 0;
+    virtual unsigned long getEnergyMeterValue(const int _dsMeterID) = 0;
   };
 
   class DS485ApiError : public DSSException {

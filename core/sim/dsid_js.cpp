@@ -30,7 +30,7 @@ namespace dss {
 
   class DSIDJS : public DSIDInterface {
   public:
-    DSIDJS(const DSModulatorSim& _simulator, dsid_t _dsid,
+    DSIDJS(const DSDSMeterSim& _simulator, dsid_t _dsid,
            devid_t _shortAddress, boost::shared_ptr<ScriptContext> _pContext,
            const std::string& _fileName)
     : DSIDInterface(_simulator, _dsid, _shortAddress),
@@ -354,9 +354,9 @@ namespace dss {
     m_pScriptEnvironment->addExtension(new DSIDScriptExtension(m_Simulator));
   } // ctor
 
-  DSIDInterface* DSIDJSCreator::createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSModulatorSim& _modulator) {
+  DSIDInterface* DSIDJSCreator::createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
     boost::shared_ptr<ScriptContext> pContext(m_pScriptEnvironment->getContext());
-    DSIDJS* result = new DSIDJS(_modulator, _dsid, _shortAddress, pContext, m_FileName);
+    DSIDJS* result = new DSIDJS(_dsMeter, _dsid, _shortAddress, pContext, m_FileName);
     return result;
   } // createDSID
 

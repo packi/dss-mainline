@@ -37,14 +37,14 @@ namespace dss {
     time_t m_DimmStartTime;
     bool m_DimmingUp;
     std::vector<int> m_Parameters;
-    DSModulatorSim* m_Modulator;
+    DSDSMeterSim* m_DSMeter;
     std::vector<uint8_t> m_ValuesForScene;
     uint8_t m_CurrentValue;
     int m_DimTimeMS;
     int m_SimpleConsumption;
     Properties m_ConfigParameter;
   public:
-    DSIDSim(const DSModulatorSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress);
+    DSIDSim(const DSDSMeterSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress);
     virtual ~DSIDSim() {}
 
     virtual void callScene(const int _sceneNr);
@@ -78,7 +78,7 @@ namespace dss {
     int m_DefaultColor;
     bool m_IsBell;
   public:
-    DSIDSimSwitch(const DSModulatorSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress, const int _numButtons)
+    DSIDSimSwitch(const DSDSMeterSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress, const int _numButtons)
     : DSIDSim(_simulator, _dsid, _shortAddress),
       m_NumberOfButtons(_numButtons),
       m_DefaultColor(GroupIDYellow),

@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
   runner.setEventQueue(&queue);
 
   Apartment apt(NULL, NULL);
-  DSModulatorSim modSim(NULL);
+  DSDSMeterSim modSim(NULL);
   DS485Proxy proxy(NULL, &apt);
   apt.setDS485Interface(&proxy);
 

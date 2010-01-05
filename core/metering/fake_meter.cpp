@@ -95,11 +95,11 @@ namespace dss {
 
       DateTime now;
       unsigned long consumption = 0;
-      foreach(Modulator* modulator, getDSS().getApartment().getModulators()) {
+      foreach(DSMeter* dsMeter, getDSS().getApartment().getDSMeters()) {
         try {
-      	  consumption += modulator->getPowerConsumption();
+      	  consumption += dsMeter->getPowerConsumption();
         } catch(std::runtime_error& err) {
-          log("Could not poll modulator " + modulator->getDSID().toString() + ". Message: " + err.what());
+          log("Could not poll dsMeter " + dsMeter->getDSID().toString() + ". Message: " + err.what());
         }
       }
       if(addJitter) {

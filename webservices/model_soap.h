@@ -202,16 +202,16 @@ int dss__DeviceGetZoneID(int _token, char* _deviceID, int& result);
 
 //==================================================== Information
 
-int dss__ModulatorGetPowerConsumption(int _token, int _modulatorID, xsd__unsignedInt& result);
+int dss__DSMeterGetPowerConsumption(int _token, int _dsMeterID, xsd__unsignedInt& result);
 
 //==================================================== Organization
 
 //These calls may be restricted to privileged users.
 
-/** Returns an integer array of modulators known to the dss. */
-int dss__ApartmentGetModulatorIDs(int _token, std::vector<std::string>& ids);
-/** Retuns the name of the given modulator. */
-int dss__ModulatorGetName(int _token, char* _modulatorID, std::string& name);
+/** Returns an integer array of dsMeters known to the dss. */
+int dss__ApartmentGetDSMeterIDs(int _token, std::vector<std::string>& ids);
+/** Retuns the name of the given dsMeter. */
+int dss__DSMeterGetName(int _token, char* _dsMeterID, std::string& name);
 /** Allocates a zone */
 int dss__ApartmentAllocateZone(int _token, int& zoneID);
 /** Deletes a previously allocated zone. */

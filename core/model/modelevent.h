@@ -38,9 +38,9 @@ namespace dss {
                    etNewDevice,       /**< A new device has been detected */
                    etModelDirty,      /**< A parameter that will be stored in \c apartment.xml has been changed. */
                    etDSLinkInterrupt,  /**< An interrupt has occured */
-                   etNewModulator, /**< A new modulator has joined the bus */
-                   etLostModulator, /**< We've lost a modulator on the bus */
-                   etModulatorReady, /**< A modulator has completed its scanning cycle and is now ready */
+                   etNewDSMeter, /**< A new dsMeter has joined the bus */
+                   etLostDSMeter, /**< We've lost a dsMeter on the bus */
+                   etDSMeterReady, /**< A dsMeter has completed its scanning cycle and is now ready */
                    etBusReady, /**< The bus transitioned into ready state */
                    etPowerConsumption, /**< Powerconsumption message happened */
                    etEnergyMeterValue, /**< Powerconsumption message happened */

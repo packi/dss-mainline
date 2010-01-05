@@ -151,19 +151,19 @@ namespace dss {
     }
   } // getByZone(name)
 
-  Set Set::getByModulator(const int _modulatorID) const {
+  Set Set::getByDSMeter(const int _dsMeterID) const {
     Set result;
     foreach(const DeviceReference& dev, m_ContainedDevices) {
-      if(dev.getDevice().getModulatorID() == _modulatorID) {
+      if(dev.getDevice().getDSMeterID() == _dsMeterID) {
         result.addDevice(dev);
       }
     }
     return result;
-  } // getByModulator
+  } // getByDSMeter
 
-  Set Set::getByModulator(const Modulator& _modulator) const {
-    return getByModulator(_modulator.getBusID());
-  } // getByModulator
+  Set Set::getByDSMeter(const DSMeter& _dsMeter) const {
+    return getByDSMeter(_dsMeter.getBusID());
+  } // getByDSMeter
 
   Set Set::getByFunctionID(const int _functionID) const {
     Set result;
@@ -357,7 +357,7 @@ namespace dss {
       return result;
     }
   private:
-    typedef std::pair<std::vector<Group*>, Set> FittingResultPerModulator;
+    typedef std::pair<std::vector<Group*>, Set> FittingResultPerDSMeter;
     typedef std::map<const Zone*, Set> HashMapZoneSet;
     static const bool OptimizerDebug = false;
 
