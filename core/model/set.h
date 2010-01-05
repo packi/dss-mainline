@@ -111,7 +111,8 @@ namespace dss {
      */
     DeviceReference getByName(const std::string& _name) const;
     /** Returns the device indicated by \a _busid */
-    DeviceReference getByBusID(const devid_t _busid) const;
+    DeviceReference getByBusID(const devid_t _busid, const int _dsMeterID) const;
+    DeviceReference getByBusID(const devid_t _busid, const DSMeter& _meter) const;
 
     /** Returns the device indicated by \a _dsid */
     DeviceReference getByDSID(const dsid_t _dsid)  const;

@@ -209,21 +209,29 @@ namespace dss {
   class ByIDSelector : public IDeviceSelector {
   private:
     const devid_t m_ID;
+    const int m_DSMeterID;
   public:
-    ByIDSelector(const devid_t _id) : m_ID(_id) {}
+    ByIDSelector(const devid_t _id, const int _dsMeterID)
+    : m_ID(_id), m_DSMeterID(_dsMeterID)
+    {}
     virtual ~ByIDSelector() {};
 
     virtual bool selectDevice(const Device& _device) const {
-      return _device.getShortAddress() == m_ID;
+      return (_device.getShortAddress() == m_ID) &&
+             (_device.getDSMeterID() == m_DSMeterID);
     }
   };
 
-  DeviceReference Set::getByBusID(const devid_t _id) const {
-    Set resultSet = getSubset(ByIDSelector(_id));
+  DeviceReference Set::getByBusID(const devid_t _id, const int _dsMeterID) const {
+    Set resultSet = getSubset(ByIDSelector(_id, _dsMeterID));
     if(resultSet.length() == 0) {
       throw ItemNotFoundException(std::string("with busid ") + intToString(_id));
     }
     return resultSet.m_ContainedDevices.front();
+  } // getByBusID
+
+  DeviceReference Set::getByBusID(const devid_t _busid, const DSMeter& _meter) const {
+    return getByBusID(_busid, _meter.getBusID());
   } // getByBusID
 
   class ByDSIDSelector : public IDeviceSelector {

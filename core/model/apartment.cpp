@@ -644,7 +644,7 @@ namespace dss {
       DSMeter& mod = getDSMeterByBusID(_dsMeterID);
       try {
         log("OnDeviceCallScene: dsMeter-id '" + intToString(_dsMeterID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID));
-        DeviceReference devRef = mod.getDevices().getByBusID(_deviceID);
+        DeviceReference devRef = mod.getDevices().getByBusID(_deviceID, _dsMeterID);
         if(SceneHelper::rememberScene(_sceneID & 0x00ff)) {
           devRef.getDevice().setLastCalledScene(_sceneID & 0x00ff);
         }

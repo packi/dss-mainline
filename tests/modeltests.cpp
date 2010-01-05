@@ -56,6 +56,38 @@ BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
   BOOST_CHECK_EQUAL(dev1.getDSMeterID(), dev2.getDSMeterID());
 } // testApartmentAllocateDeviceReturnsTheSameDeviceForDSID
 
+BOOST_AUTO_TEST_CASE(testSetGetByBusID) {
+  Apartment apt(NULL, NULL);
+  apt.initialize();
+
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
+  dev1.setName("dev1");
+  dev1.setDSMeterID(1);
+
+  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2.setShortAddress(1);
+  dev2.setName("dev2");
+  dev2.setDSMeterID(2);
+
+  DSMeter& mod1 = apt.allocateDSMeter(dsid_t(0,3));
+  mod1.setBusID(1);
+
+  DSMeter& mod2 = apt.allocateDSMeter(dsid_t(0,4));
+  mod2.setBusID(2);
+  BOOST_CHECK_EQUAL(apt.getDevices().getByBusID(1, 1).getName(), dev1.getName());
+  BOOST_CHECK_THROW(apt.getDevices().getByBusID(2, 1), ItemNotFoundException);
+
+  BOOST_CHECK_EQUAL(apt.getDevices().getByBusID(1, mod1).getName(), dev1.getName());
+  BOOST_CHECK_THROW(apt.getDevices().getByBusID(2, mod1), ItemNotFoundException);
+
+  BOOST_CHECK_EQUAL(apt.getDevices().getByBusID(1, 2).getName(), dev2.getName());
+  BOOST_CHECK_THROW(apt.getDevices().getByBusID(2, 2), ItemNotFoundException);
+
+  BOOST_CHECK_EQUAL(apt.getDevices().getByBusID(1, mod2).getName(), dev2.getName());
+  BOOST_CHECK_THROW(apt.getDevices().getByBusID(2, mod2), ItemNotFoundException);
+} // testSetGetByBusID
+
 BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByShortAddress) {
   Apartment apt(NULL, NULL);
   apt.initialize();
@@ -107,15 +139,19 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
+  dev1.setDSMeterID(1);
   DeviceReference devRef1(dev1, &apt);
   Device& dev2 = apt.allocateDevice(dsid_t(0,2));
   dev2.setShortAddress(2);
+  dev2.setDSMeterID(1);
   DeviceReference devRef2(dev2, &apt);
   Device& dev3 = apt.allocateDevice(dsid_t(0,3));
   dev3.setShortAddress(3);
+  dev3.setDSMeterID(1);
   DeviceReference devRef3(dev3, &apt);
   Device& dev4 = apt.allocateDevice(dsid_t(0,4));
   dev4.setShortAddress(4);
+  dev4.setDSMeterID(1);
   DeviceReference devRef4(dev4, &apt);
 
   Zone& zone1 = apt.allocateZone(1);
@@ -126,10 +162,10 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
 
   Set allDevices = apt.getDevices();
 
-  BOOST_CHECK_EQUAL(dev1, allDevices.getByBusID(1).getDevice());
-  BOOST_CHECK_EQUAL(dev2, allDevices.getByBusID(2).getDevice());
-  BOOST_CHECK_EQUAL(dev3, allDevices.getByBusID(3).getDevice());
-  BOOST_CHECK_EQUAL(dev4, allDevices.getByBusID(4).getDevice());
+  BOOST_CHECK_EQUAL(dev1, allDevices.getByBusID(1, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev2, allDevices.getByBusID(2, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev3, allDevices.getByBusID(3, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev4, allDevices.getByBusID(4, 1).getDevice());
 
   BOOST_CHECK_EQUAL(4, zone1.getDevices().length());
 
@@ -142,12 +178,12 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
 
   // check that the devices are moved correctly in the zones datamodel
   Set zone1Devices = zone1.getDevices();
-  BOOST_CHECK_EQUAL(dev1, zone1Devices.getByBusID(1).getDevice());
-  BOOST_CHECK_EQUAL(dev3, zone1Devices.getByBusID(3).getDevice());
+  BOOST_CHECK_EQUAL(dev1, zone1Devices.getByBusID(1, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev3, zone1Devices.getByBusID(3, 1).getDevice());
 
   Set zone2Devices = zone2.getDevices();
-  BOOST_CHECK_EQUAL(dev2, zone2Devices.getByBusID(2).getDevice());
-  BOOST_CHECK_EQUAL(dev4, zone2Devices.getByBusID(4).getDevice());
+  BOOST_CHECK_EQUAL(dev2, zone2Devices.getByBusID(2, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev4, zone2Devices.getByBusID(4, 1).getDevice());
 
   // check the datamodel of the devices
   BOOST_CHECK_EQUAL(1, dev1.getZoneID());
@@ -159,12 +195,12 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
   // check that the groups are set up correctly
   // (this should be the case if all test above passed)
   Set zone1Group0Devices = zone1.getGroup(GroupIDBroadcast)->getDevices();
-  BOOST_CHECK_EQUAL(dev1, zone1Group0Devices.getByBusID(1).getDevice());
-  BOOST_CHECK_EQUAL(dev3, zone1Group0Devices.getByBusID(3).getDevice());
+  BOOST_CHECK_EQUAL(dev1, zone1Group0Devices.getByBusID(1, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev3, zone1Group0Devices.getByBusID(3, 1).getDevice());
 
   Set zone2Group0Devices = zone2.getGroup(GroupIDBroadcast)->getDevices();
-  BOOST_CHECK_EQUAL(dev2, zone2Group0Devices.getByBusID(2).getDevice());
-  BOOST_CHECK_EQUAL(dev4, zone2Group0Devices.getByBusID(4).getDevice());
+  BOOST_CHECK_EQUAL(dev2, zone2Group0Devices.getByBusID(2, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev4, zone2Group0Devices.getByBusID(4, 1).getDevice());
 } // testZoneMoving
 
 BOOST_AUTO_TEST_CASE(testSet) {
@@ -173,19 +209,23 @@ BOOST_AUTO_TEST_CASE(testSet) {
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
+  dev1.setDSMeterID(1);
   Device& dev2 = apt.allocateDevice(dsid_t(0,2));
   dev2.setShortAddress(2);
+  dev2.setDSMeterID(1);
   Device& dev3 = apt.allocateDevice(dsid_t(0,3));
   dev3.setShortAddress(3);
+  dev3.setDSMeterID(1);
   Device& dev4 = apt.allocateDevice(dsid_t(0,4));
   dev4.setShortAddress(4);
+  dev4.setDSMeterID(1);
 
   Set allDevices = apt.getDevices();
 
-  BOOST_CHECK_EQUAL(dev1, allDevices.getByBusID(1).getDevice());
-  BOOST_CHECK_EQUAL(dev2, allDevices.getByBusID(2).getDevice());
-  BOOST_CHECK_EQUAL(dev3, allDevices.getByBusID(3).getDevice());
-  BOOST_CHECK_EQUAL(dev4, allDevices.getByBusID(4).getDevice());
+  BOOST_CHECK_EQUAL(dev1, allDevices.getByBusID(1, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev2, allDevices.getByBusID(2, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev3, allDevices.getByBusID(3, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev4, allDevices.getByBusID(4, 1).getDevice());
 
   Set setdev1 = Set(dev1);
 
@@ -195,38 +235,30 @@ BOOST_AUTO_TEST_CASE(testSet) {
 
   BOOST_CHECK_EQUAL(false, allMinusDev1.contains(dev1));
 
-  /*
-  try {
-    allMinusDev1.getByBusID(1);
-    BOOST_CHECK(false);
-  } catch(ItemNotFoundException& e) {
-    BOOST_CHECK(true);
-  }*/
-
-  BOOST_CHECK_EQUAL(dev2, allMinusDev1.getByBusID(2).getDevice());
-  BOOST_CHECK_EQUAL(dev3, allMinusDev1.getByBusID(3).getDevice());
-  BOOST_CHECK_EQUAL(dev4, allMinusDev1.getByBusID(4).getDevice());
+  BOOST_CHECK_EQUAL(dev2, allMinusDev1.getByBusID(2, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev3, allMinusDev1.getByBusID(3, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev4, allMinusDev1.getByBusID(4, 1).getDevice());
 
   // check that the other sets are not afected by our operation
   BOOST_CHECK_EQUAL(1, setdev1.length());
-  BOOST_CHECK_EQUAL(dev1, setdev1.getByBusID(1).getDevice());
+  BOOST_CHECK_EQUAL(dev1, setdev1.getByBusID(1, 1).getDevice());
 
   BOOST_CHECK_EQUAL(4, allDevices.length());
-  BOOST_CHECK_EQUAL(dev1, allDevices.getByBusID(1).getDevice());
-  BOOST_CHECK_EQUAL(dev2, allDevices.getByBusID(2).getDevice());
-  BOOST_CHECK_EQUAL(dev3, allDevices.getByBusID(3).getDevice());
-  BOOST_CHECK_EQUAL(dev4, allDevices.getByBusID(4).getDevice());
+  BOOST_CHECK_EQUAL(dev1, allDevices.getByBusID(1, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev2, allDevices.getByBusID(2, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev3, allDevices.getByBusID(3, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev4, allDevices.getByBusID(4, 1).getDevice());
 
   Set allRecombined = allMinusDev1.combine(setdev1);
 
   BOOST_CHECK_EQUAL(4, allRecombined.length());
-  BOOST_CHECK_EQUAL(dev1, allRecombined.getByBusID(1).getDevice());
-  BOOST_CHECK_EQUAL(dev2, allRecombined.getByBusID(2).getDevice());
-  BOOST_CHECK_EQUAL(dev3, allRecombined.getByBusID(3).getDevice());
-  BOOST_CHECK_EQUAL(dev4, allRecombined.getByBusID(4).getDevice());
+  BOOST_CHECK_EQUAL(dev1, allRecombined.getByBusID(1, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev2, allRecombined.getByBusID(2, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev3, allRecombined.getByBusID(3, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev4, allRecombined.getByBusID(4, 1).getDevice());
 
   BOOST_CHECK_EQUAL(1, setdev1.length());
-  BOOST_CHECK_EQUAL(dev1, setdev1.getByBusID(1).getDevice());
+  BOOST_CHECK_EQUAL(dev1, setdev1.getByBusID(1, 1).getDevice());
 
   allRecombined = allRecombined.combine(setdev1);
   BOOST_CHECK_EQUAL(4, allRecombined.length());
@@ -236,17 +268,17 @@ BOOST_AUTO_TEST_CASE(testSet) {
 
   allRecombined = allRecombined.combine(allRecombined);
   BOOST_CHECK_EQUAL(4, allRecombined.length());
-  BOOST_CHECK_EQUAL(dev1, allRecombined.getByBusID(1).getDevice());
-  BOOST_CHECK_EQUAL(dev2, allRecombined.getByBusID(2).getDevice());
-  BOOST_CHECK_EQUAL(dev3, allRecombined.getByBusID(3).getDevice());
-  BOOST_CHECK_EQUAL(dev4, allRecombined.getByBusID(4).getDevice());
+  BOOST_CHECK_EQUAL(dev1, allRecombined.getByBusID(1, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev2, allRecombined.getByBusID(2, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev3, allRecombined.getByBusID(3, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev4, allRecombined.getByBusID(4, 1).getDevice());
 
   allMinusDev1 = allRecombined;
   allMinusDev1.removeDevice(dev1);
   BOOST_CHECK_EQUAL(3, allMinusDev1.length());
-  BOOST_CHECK_EQUAL(dev2, allMinusDev1.getByBusID(2).getDevice());
-  BOOST_CHECK_EQUAL(dev3, allMinusDev1.getByBusID(3).getDevice());
-  BOOST_CHECK_EQUAL(dev4, allMinusDev1.getByBusID(4).getDevice());
+  BOOST_CHECK_EQUAL(dev2, allMinusDev1.getByBusID(2, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev3, allMinusDev1.getByBusID(3, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev4, allMinusDev1.getByBusID(4, 1).getDevice());
 } // testSet
 
 BOOST_AUTO_TEST_CASE(testSetBuilder) {
