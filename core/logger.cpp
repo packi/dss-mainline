@@ -22,6 +22,7 @@
 
 #include "logger.h"
 #include "base.h"
+#include "foreach.h"
 
 #include <cassert>
 #include <iostream>
@@ -29,6 +30,8 @@
 namespace dss {
 
   Logger* Logger::m_Instance = NULL;
+  Mutex Logger::m_handlerListMutex = Mutex();
+  std::list<LogHandler *> Logger::m_handlerList = std::list<LogHandler *>();
 
   template <class t>
   t SeverityToString(const aLogSeverity _severity);
@@ -102,14 +105,26 @@ namespace dss {
   void Logger::log(const std::string& _message, const aLogSeverity _severity) {
     time_t now = time( NULL );
     struct tm t;
+    std::string logMessage;
 #ifdef WIN32
     localtime_s( &t, &now );
 #else
     localtime_r( &now, &t );
 #endif
-    m_logTarget->outputStream() << "[" << dateToISOString<std::string>(&t) << "]"
-                                << SeverityToString<const std::string>(_severity)
-                                << " " << _message << std::endl;
+
+    logMessage = "[" + dateToISOString<std::string>(&t) + "]"
+    	         + SeverityToString<const std::string>(_severity)
+    	         + " " + _message + "\n";
+
+    m_logTarget->outputStream() << logMessage; // only for backward compatibility
+
+/*
+    m_handlerListMutex.lock();
+    foreach(LogHandler *h,m_handlerList) {
+      h->handle(logMessage);
+    }
+    m_handlerListMutex.unlock();
+*/
   } // log
 
   void Logger::log(const char* _message, const aLogSeverity _severity) {
@@ -137,4 +152,19 @@ namespace dss {
     return m_logTarget->open();
   }
 
+
+  void Logger::registerHandler(LogHandler& _logHandler) {
+	  m_handlerListMutex.lock();
+	  m_handlerList.push_back(&_logHandler);
+	  m_handlerListMutex.unlock();
+  } //registerHandler
+
+  void Logger::deregisterHandler(LogHandler& _logHandler) {
+	  m_handlerListMutex.lock();
+	  std::list<LogHandler *>::iterator it = find(m_handlerList.begin(), m_handlerList.end(), &_logHandler);
+	  if (it != m_handlerList.end()) {
+		  m_handlerList.erase(it);
+	  }
+	  m_handlerListMutex.unlock();
+  } // deregisterHandler
 }

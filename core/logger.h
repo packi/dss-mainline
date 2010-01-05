@@ -28,6 +28,8 @@
 #include <fstream>
 #include <iostream>
 #include <boost/shared_ptr.hpp>
+#include <list>
+#include "mutex.h"
 
 typedef enum {
   lsDebug = 0,
@@ -41,6 +43,7 @@ namespace dss {
 
 class LogChannel;
 class LogTarget;
+class LogHandler;
 
   class Logger {
   public:
@@ -55,6 +58,9 @@ class LogTarget;
     bool setLogTarget(boost::shared_ptr<LogTarget>& _logTarget);
     bool reopenLogTarget();
     
+    void registerHandler(LogHandler& _logHandler);
+    void deregisterHandler(LogHandler& _logHandler);
+
   private:
     Logger();
     
@@ -62,6 +68,8 @@ class LogTarget;
     
     boost::shared_ptr<LogTarget> m_logTarget;
 
+    static Mutex m_handlerListMutex;
+    static std::list<LogHandler *> m_handlerList;
   }; // Logger
 
   class LogChannel {
@@ -125,6 +133,52 @@ private:
   bool m_fileOpen;
   std::ofstream m_fileOutputStream;
 }; // FileLogTarget
+
+class LogHandler {
+public:
+  virtual void handle(const std::string &_message) = 0;
+
+  virtual ~LogHandler() {};
+}; // LogHandler
+
+class CoutLogHandler : public LogHandler {
+public:
+  void handle(const std::string &_message) {
+    std::cout << _message;
+  }
+
+  ~CoutLogHandler() {}
+}; // CoutLogHandler
+
+class FileLogHandler : public LogHandler {
+public:
+  FileLogHandler(const std::string& _fileName) : m_fileName(_fileName) {};
+  ~FileLogHandler() {};
+
+  void handle(const std::string &_message) {
+    m_fileOutputStream << _message;
+  }
+
+  virtual bool open() {
+    m_fileOutputStream.open(m_fileName.c_str(), std::ios::out|std::ios::app);
+    m_fileOpen = true;
+    m_fileOutputStream << "-- File opened" << std::endl;
+    return m_fileOutputStream.good();
+  }
+
+  virtual void close() {
+    if(m_fileOpen) {
+      m_fileOutputStream << "-- File closed" << std::endl;
+      m_fileOutputStream.close();
+      m_fileOpen = false;
+    }
+  }
+
+private:
+  std::string m_fileName;
+  bool m_fileOpen;
+  std::ofstream m_fileOutputStream;
+}; // FileLogHandler
 
 }
 
