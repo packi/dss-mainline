@@ -118,13 +118,11 @@ namespace dss {
 
     m_logTarget->outputStream() << logMessage; // only for backward compatibility
 
-/*
     m_handlerListMutex.lock();
     foreach(LogHandler *h,m_handlerList) {
       h->handle(logMessage);
     }
     m_handlerListMutex.unlock();
-*/
   } // log
 
   void Logger::log(const char* _message, const aLogSeverity _severity) {
