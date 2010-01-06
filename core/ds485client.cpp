@@ -69,7 +69,7 @@ namespace dss {
   } // dtor
 
   void DS485Client::sendFrameDiscardResult(DS485CommandFrame& _frame) {
-    DSS::getInstance()->getDS485Interface().sendFrame(_frame);
+    DSS::getInstance()->getDS485Interface().getFrameSenderInterface()->sendFrame(_frame);
   } // sendFrameDiscardResult
 
   boost::shared_ptr<DS485CommandFrame> DS485Client::sendFrameSingleResult(DS485CommandFrame& _frame, int _functionID, int _timeoutMS) {

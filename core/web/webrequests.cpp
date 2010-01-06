@@ -969,7 +969,7 @@ namespace dss {
   //=========================================== StructureRequestHandler
 
   std::string StructureRequestHandler::handleRequest(const RestfulRequest& _request, Session* _session) {
-    StructureManipulator manipulator(getDSS().getDS485Interface(), getDSS().getApartment());
+    StructureManipulator manipulator(*getDSS().getDS485Interface().getStructureModifyingBusInterface(), getDSS().getApartment());
     if(_request.getMethod() == "zoneAddDevice") {
       std::string devidStr = _request.getParameter("devid");
       if(!devidStr.empty()) {

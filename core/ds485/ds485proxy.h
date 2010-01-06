@@ -137,6 +137,9 @@ namespace dss {
                      public    DS485Interface,
                      public    DeviceBusInterface,
                      public    StructureQueryBusInterface,
+                     public    MeteringBusInterface,
+                     public    StructureModifyingBusInterface,
+                     public    FrameSenderInterface,
                      public    IDS485FrameCollector {
   private:
 #ifdef WITH_SIM
@@ -173,6 +176,9 @@ namespace dss {
 
     virtual DeviceBusInterface* getDeviceBusInterface() { return this; }
     virtual StructureQueryBusInterface* getStructureQueryBusInterface() { return this; }
+    virtual MeteringBusInterface* getMeteringBusInterface() { return this; }
+    virtual StructureModifyingBusInterface* getStructureModifyingBusInterface() { return this; }
+    virtual FrameSenderInterface* getFrameSenderInterface() { return this; }
 
     virtual bool isReady();
     void setInitializeDS485Controller(const bool _value) { m_InitializeDS485Controller = _value; }

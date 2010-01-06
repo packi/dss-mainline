@@ -92,21 +92,8 @@ namespace dss {
     virtual ~StructureQueryBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureQueryBusInterface
   
-  /** Interface to be implemented by any implementation of the DS485 interface */
-  class DS485Interface {
+  class StructureModifyingBusInterface {
   public:
-    virtual ~DS485Interface() {};
-
-    virtual DeviceBusInterface* getDeviceBusInterface() = 0;
-    virtual StructureQueryBusInterface* getStructureQueryBusInterface() = 0;
-
-    /** Returns true when the interface is ready to transmit user generated DS485Packets */
-    virtual bool isReady() = 0;
-
-    virtual void sendFrame(DS485CommandFrame& _frame) = 0;
-
-    //------------------------------------------------ Specialized Commands (system)
-
     /** Adds the given device to the specified zone. */
     virtual void setZoneID(const int _dsMeterID, const devid_t _deviceID, const int _zoneID) = 0;
 
@@ -126,13 +113,40 @@ namespace dss {
     /** Removes a user group */
     virtual void removeUserGroup(const int _dsMeterID, const int _groupID) = 0;
 
+    virtual ~StructureModifyingBusInterface() {}; // please the compiler (virtual dtor)
+  }; // StructureModifyingBusInterface
 
-    //------------------------------------------------ Metering
+  class MeteringBusInterface {
+  public:
     /** Returns the current power-consumption in mW */
     virtual unsigned long getPowerConsumption(const int _dsMeterID) = 0;
 
     /** Returns the meter value in Wh */
     virtual unsigned long getEnergyMeterValue(const int _dsMeterID) = 0;
+
+    virtual ~MeteringBusInterface() {}; // please the compiler (virtual dtor)
+  }; // MeteringBusInterface
+
+  class FrameSenderInterface {
+  public:
+    virtual void sendFrame(DS485CommandFrame& _frame) = 0;
+
+    virtual ~FrameSenderInterface() {}; // please the compiler (virtual dtor)
+  }; // FrameSender
+
+  /** Interface to be implemented by any implementation of the DS485 interface */
+  class DS485Interface {
+  public:
+    virtual ~DS485Interface() {};
+
+    virtual DeviceBusInterface* getDeviceBusInterface() = 0;
+    virtual StructureQueryBusInterface* getStructureQueryBusInterface() = 0;
+    virtual MeteringBusInterface* getMeteringBusInterface() = 0;
+    virtual StructureModifyingBusInterface* getStructureModifyingBusInterface() = 0;
+    virtual FrameSenderInterface* getFrameSenderInterface() = 0;
+
+    /** Returns true when the interface is ready to transmit user generated DS485Packets */
+    virtual bool isReady() = 0;
   };
 
   class DS485ApiError : public DSSException {

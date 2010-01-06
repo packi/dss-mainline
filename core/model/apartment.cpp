@@ -168,7 +168,7 @@ namespace dss {
     requestFrame.setCommand(CommandRequest);
     requestFrame.getPayload().add<uint8_t>(FunctionDSMeterGetDSID);
     if(DSS::hasInstance()) {
-      DSS::getInstance()->getDS485Interface().sendFrame(requestFrame);
+      DSS::getInstance()->getDS485Interface().getFrameSenderInterface()->sendFrame(requestFrame);
     }
   } // discoverDS485Devices
 

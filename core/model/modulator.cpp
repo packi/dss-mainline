@@ -74,7 +74,7 @@ namespace dss {
   unsigned long DSMeter::getPowerConsumption() {
     DateTime now;
     if(!now.addSeconds(-1).before(m_PowerConsumptionAge)) {
-      m_PowerConsumption =  DSS::getInstance()->getDS485Interface().getPowerConsumption(m_BusID);
+      m_PowerConsumption =  DSS::getInstance()->getDS485Interface().getMeteringBusInterface()->getPowerConsumption(m_BusID);
       m_PowerConsumptionAge = now;
     }
     return m_PowerConsumption;
@@ -83,7 +83,7 @@ namespace dss {
   unsigned long DSMeter::getEnergyMeterValue() {
     DateTime now;
     if(!now.addSeconds(-1).before(m_EnergyMeterValueAge)) {
-      m_EnergyMeterValue = DSS::getInstance()->getDS485Interface().getEnergyMeterValue(m_BusID);
+      m_EnergyMeterValue = DSS::getInstance()->getDS485Interface().getMeteringBusInterface()->getEnergyMeterValue(m_BusID);
       m_EnergyMeterValueAge = now;
     }
     return m_EnergyMeterValue;

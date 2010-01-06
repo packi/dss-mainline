@@ -24,6 +24,8 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
+#include <boost/scoped_ptr.hpp>
+
 #include "core/model/device.h"
 #include "core/model/apartment.h"
 #include "core/model/modulator.h"
@@ -450,7 +452,7 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   DSDSMeterSim modSim(NULL);
   DS485Proxy proxy(NULL, &apt);
   DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
+  dispatcher.setFrameSender(proxy.getFrameSenderInterface());
   proxy.setInitializeDS485Controller(false);
   proxy.initialize();
   apt.setBusRequestDispatcher(&dispatcher);
@@ -488,744 +490,377 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
 } // testCallScenePropagation
 
 
-  /** Interface to be implemented by any implementation of the DS485 interface */
-  class DS485InterfaceTest : public DS485Interface,
-                             public DeviceBusInterface,
-                             public StructureQueryBusInterface {
-  public:
-    /** Returns true when the interface is ready to transmit user generated DS485Packets */
-    virtual bool isReady() { return true; }
-    
-    int getLastFunctionID() const { return m_LastFunctionID; }
-    void setLastFunctionID(const int _value) { m_LastFunctionID = _value; }
-    int getParameter1() const { return m_Parameter1; }
-    int getParameter2() const { return m_Parameter2; }
-    int getParameter3() const { return m_Parameter3; }
-    virtual void sendFrame(DS485CommandFrame& _frame) {
-      PayloadDissector pd(_frame.getPayload());
-      m_LastFunctionID = pd.get<uint8_t>();
-      if(!pd.isEmpty()) {
-        m_Parameter1 = pd.get<uint16_t>();
-      } else {
-        m_Parameter1 = 0xffff;
-      }
-      if(!pd.isEmpty()) {
-        m_Parameter2 = pd.get<uint16_t>();
-      } else {
-        m_Parameter2 = 0xffff;
-      } 
-      if(!pd.isEmpty()) {
-        m_Parameter3 = pd.get<uint16_t>();
-      } else {
-        m_Parameter3 = 0xffff;
-      }
+class FrameSenderTester : public FrameSenderInterface {
+public:
+  int getLastFunctionID() const { return m_LastFunctionID; }
+  void setLastFunctionID(const int _value) { m_LastFunctionID = _value; }
+  int getParameter1() const { return m_Parameter1; }
+  int getParameter2() const { return m_Parameter2; }
+  int getParameter3() const { return m_Parameter3; }
+  virtual void sendFrame(DS485CommandFrame& _frame) {
+    PayloadDissector pd(_frame.getPayload());
+    m_LastFunctionID = pd.get<uint8_t>();
+    if(!pd.isEmpty()) {
+      m_Parameter1 = pd.get<uint16_t>();
+    } else {
+      m_Parameter1 = 0xffff;
     }
+    if(!pd.isEmpty()) {
+      m_Parameter2 = pd.get<uint16_t>();
+    } else {
+      m_Parameter2 = 0xffff;
+    }
+    if(!pd.isEmpty()) {
+      m_Parameter3 = pd.get<uint16_t>();
+    } else {
+      m_Parameter3 = 0xffff;
+    }
+  }
+private:
+  int m_LastFunctionID;
+  uint16_t m_Parameter1;
+  uint16_t m_Parameter2;
+  uint16_t m_Parameter3;
+}; // FrameSenderTester
 
-    virtual DeviceBusInterface* getDeviceBusInterface() { return this; }
-    virtual StructureQueryBusInterface* getStructureQueryBusInterface() { return this; }
+class TestModelFixture {
+public:
+  TestModelFixture() {
+    m_pApartment.reset(new Apartment(NULL, NULL));
+    m_pApartment->initialize();
+    m_pFrameSender.reset(new FrameSenderTester());
+    m_pDispatcher.reset(new DS485BusRequestDispatcher());
+    m_pDispatcher->setFrameSender(m_pFrameSender.get());
+    m_pApartment->setBusRequestDispatcher(m_pDispatcher.get());
+    m_pFrameSender->setLastFunctionID(-1);
+  }
 
+  boost::scoped_ptr<Apartment> m_pApartment;
+  boost::scoped_ptr<FrameSenderTester> m_pFrameSender;
+  boost::scoped_ptr<DS485BusRequestDispatcher> m_pDispatcher;
+};
 
-    //------------------------------------------------ Specialized Commands (system)
-    /** Returns an std::vector containing the dsMeter-spec of all dsMeters present. */
-    virtual std::vector<DSMeterSpec_t> getDSMeters() { return std::vector<DSMeterSpec_t>(); }
-
-    /** Returns the dsMeter-spec for a dsMeter */
-    virtual DSMeterSpec_t getDSMeterSpec(const int _dsMeterID) { return DSMeterSpec_t(); }
-
-    /** Returns a std::vector conatining the zone-ids of the specified dsMeter */
-    virtual std::vector<int> getZones(const int _dsMeterID) { return std::vector<int>(); }
-    /** Returns the count of the zones of the specified dsMeter */
-    virtual int getZoneCount(const int _dsMeterID) { return 0; }
-    /** Returns the bus-ids of the devices present in the given zone of the specified dsMeter */
-    virtual std::vector<int> getDevicesInZone(const int _dsMeterID, const int _zoneID) { return std::vector<int>(); }
-    /** Returns the count of devices present in the given zone of the specified dsMeter */
-    virtual int getDevicesCountInZone(const int _dsMeterID, const int _zoneID) { return 0; }
-
-    /** Adds the given device to the specified zone. */
-    virtual void setZoneID(const int _dsMeterID, const devid_t _deviceID, const int _zoneID) {}
-
-    /** Creates a new Zone on the given dsMeter */
-    virtual void createZone(const int _dsMeterID, const int _zoneID) {}
-
-    /** Removes the zone \a _zoneID on the dsMeter \a _dsMeterID */
-    virtual void removeZone(const int _dsMeterID, const int _zoneID) {}
-
-    /** Returns the count of groups present in the given zone of the specifid dsMeter */
-    virtual int getGroupCount(const int _dsMeterID, const int _zoneID) { return 0; }
-    /** Returns the a std::vector containing the group-ids of the given zone on the specified dsMeter */
-    virtual std::vector<int> getGroups(const int _dsMeterID, const int _zoneID) { return std::vector<int>(); }
-    /** Returns the count of devices present in the given group */
-    virtual int getDevicesInGroupCount(const int _dsMeterID, const int _zoneID, const int _groupID) { return 0; }
-    /** Returns a std::vector containing the bus-ids of the devices present in the given group */
-    virtual std::vector<int> getDevicesInGroup(const int _dsMeterID, const int _zoneID, const int _groupID) { return std::vector<int>(); }
-
-    virtual std::vector<int> getGroupsOfDevice(const int _dsMeterID, const int _deviceID) { return std::vector<int>(); }
-
-    /** Adds a device to a given group */
-    virtual void addToGroup(const int _dsMeterID, const int _groupID, const int _deviceID) {}
-    /** Removes a device from a given group */
-    virtual void removeFromGroup(const int _dsMeterID, const int _groupID, const int _deviceID) {}
-
-    /** Adds a user group */
-    virtual int addUserGroup(const int _dsMeterID) { return 0; }
-    /** Removes a user group */
-    virtual void removeUserGroup(const int _dsMeterID, const int _groupID) {}
-
-    /** Returns the DSID of a given device */
-    virtual dsid_t getDSIDOfDevice(const int _dsMeterID, const int _deviceID) { return NullDSID; }
-    /** Returns the DSID of a given dsMeter */
-    virtual dsid_t getDSIDOfDSMeter(const int _dsMeterID) { return NullDSID; }
-
-    virtual int getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID) { return 0;}
-
-    //------------------------------------------------ Metering
-
-    /** Returns the current power-consumption in mW */
-    virtual unsigned long getPowerConsumption(const int _dsMeterID) { return 0; }
-
-    /** Returns the meter value in Wh */
-    virtual unsigned long getEnergyMeterValue(const int _dsMeterID) { return 0; }
-
-    virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) { _lower = 0; _upper = 0; return false; }
-
-    //------------------------------------------------ UDI
-    virtual uint8_t dSLinkSend(const int _dsMeterID, devid_t _devAdr, uint8_t _value, uint8_t _flags) { return 0; }
-
-    //------------------------------------------------ Device    
-    virtual uint16_t deviceGetParameterValue(devid_t _id, uint8_t _dsMeterID, int _paramID) { return 0; }
-    virtual uint16_t deviceGetFunctionID(devid_t _id, uint8_t _dsMeterID) { return 0; }
-
-    //------------------------------------------------ Device manipulation
-    virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) {}
-    virtual int getSensorValue(const Device& _device, const int _sensorID) { return 0; }
-  private:
-    int m_LastFunctionID;
-    uint16_t m_Parameter1;
-    uint16_t m_Parameter2;
-    uint16_t m_Parameter3;
-  };
-
-
-BOOST_AUTO_TEST_CASE(testTurnOnDevice) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(testTurnOnDevice, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.turnOn();
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  BOOST_CHECK_EQUAL(SceneMax, proxy.getParameter2());
-  proxy.setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, &apt);
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  BOOST_CHECK_EQUAL(SceneMax, m_pFrameSender->getParameter2());
+  m_pFrameSender->setLastFunctionID(-1);
+  DeviceReference devRef1(dev1, m_pApartment.get());
   devRef1.turnOn();
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  BOOST_CHECK_EQUAL(SceneMax, proxy.getParameter2());
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  BOOST_CHECK_EQUAL(SceneMax, m_pFrameSender->getParameter2());
 }
 
-BOOST_AUTO_TEST_CASE(testTurnOnGroup) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Group& group = apt.getGroup(1);
+BOOST_FIXTURE_TEST_CASE(testTurnOnGroup, TestModelFixture) {
+  Group& group = m_pApartment->getGroup(1);
   group.turnOn();
-  BOOST_CHECK_EQUAL(FunctionGroupCallScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x0, proxy.getParameter1()); // zone 0
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter2()); // group 1
-  BOOST_CHECK_EQUAL(SceneMax, proxy.getParameter3());
-  proxy.setLastFunctionID(-1);
+  BOOST_CHECK_EQUAL(FunctionGroupCallScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter1()); // zone 0
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter2()); // group 1
+  BOOST_CHECK_EQUAL(SceneMax, m_pFrameSender->getParameter3());
 }
 
-BOOST_AUTO_TEST_CASE(testTurnOffDevice) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(testTurnOffDevice, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.turnOff();
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  BOOST_CHECK_EQUAL(SceneMin, proxy.getParameter2());
-  proxy.setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, &apt);
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  BOOST_CHECK_EQUAL(SceneMin, m_pFrameSender->getParameter2());
+  m_pFrameSender->setLastFunctionID(-1);
+  DeviceReference devRef1(dev1, m_pApartment.get());
   devRef1.turnOff();
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  BOOST_CHECK_EQUAL(SceneMin, proxy.getParameter2());
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  BOOST_CHECK_EQUAL(SceneMin, m_pFrameSender->getParameter2());
 }
 
-BOOST_AUTO_TEST_CASE(testTurnOffGroup) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Group& group = apt.getGroup(1);
+BOOST_FIXTURE_TEST_CASE(testTurnOffGroup, TestModelFixture) {
+  Group& group = m_pApartment->getGroup(1);
   group.turnOff();
-  BOOST_CHECK_EQUAL(FunctionGroupCallScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x0, proxy.getParameter1()); // zone 0
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter2()); // group 1
-  BOOST_CHECK_EQUAL(SceneMin, proxy.getParameter3());
+  BOOST_CHECK_EQUAL(FunctionGroupCallScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter1()); // zone 0
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter2()); // group 1
+  BOOST_CHECK_EQUAL(SceneMin, m_pFrameSender->getParameter3());
 }
 
-BOOST_AUTO_TEST_CASE(testEnableDevice) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(testEnableDevice, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.enable();
-  BOOST_CHECK_EQUAL(FunctionDeviceEnable, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  proxy.setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, &apt);
+  BOOST_CHECK_EQUAL(FunctionDeviceEnable, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  m_pFrameSender->setLastFunctionID(-1);
+  DeviceReference devRef1(dev1, m_pApartment.get());
   devRef1.enable();
-  BOOST_CHECK_EQUAL(FunctionDeviceEnable, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(FunctionDeviceEnable, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
 }
 
-BOOST_AUTO_TEST_CASE(testDisableDevice) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(testDisableDevice, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.disable();
-  BOOST_CHECK_EQUAL(FunctionDeviceDisable, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  proxy.setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, &apt);
+  BOOST_CHECK_EQUAL(FunctionDeviceDisable, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  m_pFrameSender->setLastFunctionID(-1);
+  DeviceReference devRef1(dev1, m_pApartment.get());
   devRef1.disable();
-  BOOST_CHECK_EQUAL(FunctionDeviceDisable, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(FunctionDeviceDisable, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
 }
 
-BOOST_AUTO_TEST_CASE(testIncreaseValueDevice) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(testIncreaseValueDevice, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.increaseValue();
-  BOOST_CHECK_EQUAL(FunctionDeviceIncreaseValue, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  proxy.setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, &apt);
+  BOOST_CHECK_EQUAL(FunctionDeviceIncreaseValue, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  m_pFrameSender->setLastFunctionID(-1);
+  DeviceReference devRef1(dev1, m_pApartment.get());
   devRef1.increaseValue();
-  BOOST_CHECK_EQUAL(FunctionDeviceIncreaseValue, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(FunctionDeviceIncreaseValue, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
 }
 
-BOOST_AUTO_TEST_CASE(testDecreaseValueDevice) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(testDecreaseValueDevice, TestModelFixture) {
+  m_pFrameSender->setLastFunctionID(-1);
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.decreaseValue();
-  BOOST_CHECK_EQUAL(FunctionDeviceDecreaseValue, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  proxy.setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, &apt);
+  BOOST_CHECK_EQUAL(FunctionDeviceDecreaseValue, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  m_pFrameSender->setLastFunctionID(-1);
+  DeviceReference devRef1(dev1, m_pApartment.get());
   devRef1.decreaseValue();
-  BOOST_CHECK_EQUAL(FunctionDeviceDecreaseValue, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(FunctionDeviceDecreaseValue, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
 }
 
-BOOST_AUTO_TEST_CASE(testDecreaseValueZone) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  Zone& zone = apt.allocateZone(1);
-
-  proxy.setLastFunctionID(-1);
+BOOST_FIXTURE_TEST_CASE(testDecreaseValueZone, TestModelFixture) {
+  Zone& zone = m_pApartment->allocateZone(1);
   zone.decreaseValue();
-  BOOST_CHECK_EQUAL(FunctionGroupDecreaseValue, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1()); // zone id
-  BOOST_CHECK_EQUAL(0x0, proxy.getParameter2()); // group id (broadcast)
+  BOOST_CHECK_EQUAL(FunctionGroupDecreaseValue, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1()); // zone id
+  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter2()); // group id (broadcast)
 }
 
-BOOST_AUTO_TEST_CASE(testIncreaseValueZone) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  Zone& zone = apt.allocateZone(1);
-
-  proxy.setLastFunctionID(-1);
+BOOST_FIXTURE_TEST_CASE(testIncreaseValueZone, TestModelFixture) {
+  Zone& zone = m_pApartment->allocateZone(1);
   zone.increaseValue();
-  BOOST_CHECK_EQUAL(FunctionGroupIncreaseValue, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1()); // zone id
-  BOOST_CHECK_EQUAL(0x0, proxy.getParameter2()); // group id (broadcast)
+  BOOST_CHECK_EQUAL(FunctionGroupIncreaseValue, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1()); // zone id
+  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter2()); // group id (broadcast)
 }
 
-BOOST_AUTO_TEST_CASE(testStartDimUp) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(testStartDimUp, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.startDim(true);
-  BOOST_CHECK_EQUAL(FunctionDeviceStartDimInc, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  proxy.setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, &apt);
+  BOOST_CHECK_EQUAL(FunctionDeviceStartDimInc, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  m_pFrameSender->setLastFunctionID(-1);
+  DeviceReference devRef1(dev1, m_pApartment.get());
   devRef1.startDim(true);
-  BOOST_CHECK_EQUAL(FunctionDeviceStartDimInc, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(FunctionDeviceStartDimInc, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
 }
 
-BOOST_AUTO_TEST_CASE(testStartDimDown) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(testStartDimDown, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.startDim(false);
-  BOOST_CHECK_EQUAL(FunctionDeviceStartDimDec, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  proxy.setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, &apt);
+  BOOST_CHECK_EQUAL(FunctionDeviceStartDimDec, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  m_pFrameSender->setLastFunctionID(-1);
+  DeviceReference devRef1(dev1, m_pApartment.get());
   devRef1.startDim(false);
-  BOOST_CHECK_EQUAL(FunctionDeviceStartDimDec, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(FunctionDeviceStartDimDec, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
 }
 
-BOOST_AUTO_TEST_CASE(testEndDim) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(testEndDim, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.endDim();
-  BOOST_CHECK_EQUAL(FunctionDeviceEndDim, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  proxy.setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, &apt);
+  BOOST_CHECK_EQUAL(FunctionDeviceEndDim, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  m_pFrameSender->setLastFunctionID(-1);
+  DeviceReference devRef1(dev1, m_pApartment.get());
   devRef1.endDim();
-  BOOST_CHECK_EQUAL(FunctionDeviceEndDim, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(FunctionDeviceEndDim, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
 }
 
-BOOST_AUTO_TEST_CASE(testCallSceneDevice) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(testCallSceneDevice, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.callScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
-  proxy.setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, &apt);
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
+  m_pFrameSender->setLastFunctionID(-1);
+  DeviceReference devRef1(dev1, m_pApartment.get());
   devRef1.callScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
 }
 
-BOOST_AUTO_TEST_CASE(testSaveSceneDevice) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(testSaveSceneDevice, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.saveScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceSaveScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
-  proxy.setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, &apt);
+  BOOST_CHECK_EQUAL(FunctionDeviceSaveScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
+  m_pFrameSender->setLastFunctionID(-1);
+  DeviceReference devRef1(dev1, m_pApartment.get());
   devRef1.saveScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceSaveScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
+  BOOST_CHECK_EQUAL(FunctionDeviceSaveScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
 }
 
-BOOST_AUTO_TEST_CASE(testUndoSceneDevice) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(testUndoSceneDevice, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.undoScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceUndoScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
-  proxy.setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, &apt);
+  BOOST_CHECK_EQUAL(FunctionDeviceUndoScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
+  m_pFrameSender->setLastFunctionID(-1);
+  DeviceReference devRef1(dev1, m_pApartment.get());
   devRef1.undoScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceUndoScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
+  BOOST_CHECK_EQUAL(FunctionDeviceUndoScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
 }
 
-BOOST_AUTO_TEST_CASE(testCallSceneGroup) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Group& group = apt.getGroup(1);
+BOOST_FIXTURE_TEST_CASE(testCallSceneGroup, TestModelFixture) {
+  Group& group = m_pApartment->getGroup(1);
   group.callScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionGroupCallScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x0, proxy.getParameter1()); // zone 0
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter2()); // group 1
-  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter3());
+  BOOST_CHECK_EQUAL(FunctionGroupCallScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter1()); // zone 0
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter2()); // group 1
+  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter3());
 }
 
-BOOST_AUTO_TEST_CASE(testSaveSceneGroup) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Group& group = apt.getGroup(1);
+BOOST_FIXTURE_TEST_CASE(testSaveSceneGroup, TestModelFixture) {
+  Group& group = m_pApartment->getGroup(1);
   group.saveScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionGroupSaveScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x0, proxy.getParameter1()); // zone 0
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter2()); // group 1
-  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter3());
+  BOOST_CHECK_EQUAL(FunctionGroupSaveScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter1()); // zone 0
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter2()); // group 1
+  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter3());
 }
 
-BOOST_AUTO_TEST_CASE(testUndoSceneGroup) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Group& group = apt.getGroup(1);
+BOOST_FIXTURE_TEST_CASE(testUndoSceneGroup, TestModelFixture) {
+  Group& group = m_pApartment->getGroup(1);
   group.undoScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionGroupUndoScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x0, proxy.getParameter1()); // zone 0
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter2()); // group 1
-  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter3());
+  BOOST_CHECK_EQUAL(FunctionGroupUndoScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter1()); // zone 0
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter2()); // group 1
+  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter3());
 }
 
-BOOST_AUTO_TEST_CASE(testCallSceneZone) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Zone& zone = apt.allocateZone(1);
+BOOST_FIXTURE_TEST_CASE(testCallSceneZone, TestModelFixture) {
+  Zone& zone = m_pApartment->allocateZone(1);
   zone.callScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionGroupCallScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1()); // zone 1
-  BOOST_CHECK_EQUAL(0x0, proxy.getParameter2()); // group 0
-  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter3());
+  BOOST_CHECK_EQUAL(FunctionGroupCallScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1()); // zone 1
+  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter2()); // group 0
+  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter3());
 }
 
-BOOST_AUTO_TEST_CASE(testSaveSceneZone) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Zone& zone = apt.allocateZone(1);
+BOOST_FIXTURE_TEST_CASE(testSaveSceneZone, TestModelFixture) {
+  Zone& zone = m_pApartment->allocateZone(1);
   zone.saveScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionGroupSaveScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1()); // zone 1
-  BOOST_CHECK_EQUAL(0x0, proxy.getParameter2()); // group 0
-  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter3());
+  BOOST_CHECK_EQUAL(FunctionGroupSaveScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1()); // zone 1
+  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter2()); // group 0
+  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter3());
 }
 
-BOOST_AUTO_TEST_CASE(testUndoSceneZone) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Zone& zone = apt.allocateZone(1);
+BOOST_FIXTURE_TEST_CASE(testUndoSceneZone, TestModelFixture) {
+  Zone& zone = m_pApartment->allocateZone(1);
   zone.undoScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionGroupUndoScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1()); // zone 1
-  BOOST_CHECK_EQUAL(0x0, proxy.getParameter2()); // group 0
-  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter3());
+  BOOST_CHECK_EQUAL(FunctionGroupUndoScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1()); // zone 1
+  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter2()); // group 0
+  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter3());
 }
 
-BOOST_AUTO_TEST_CASE(callUndoSceneSet) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-  proxy.setLastFunctionID(-1);
-
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(callUndoSceneSet, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
-  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+  Device& dev2 = m_pApartment->allocateDevice(dsid_t(0,2));
   dev2.setShortAddress(2);
   Set set;
   set.addDevice(dev1);
   set.callScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
-  proxy.setLastFunctionID(-1);
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
+  m_pFrameSender->setLastFunctionID(-1);
 }
 
-BOOST_AUTO_TEST_CASE(testSaveSceneSet) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-  proxy.setLastFunctionID(-1);
-
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(testSaveSceneSet, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
-  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+  Device& dev2 = m_pApartment->allocateDevice(dsid_t(0,2));
   dev2.setShortAddress(2);
   Set set;
   set.addDevice(dev1);
   set.saveScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceSaveScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
-  proxy.setLastFunctionID(-1);
+  BOOST_CHECK_EQUAL(FunctionDeviceSaveScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
+  m_pFrameSender->setLastFunctionID(-1);
 }
 
-BOOST_AUTO_TEST_CASE(testUndoSceneSet) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-  proxy.setLastFunctionID(-1);
-
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(testUndoSceneSet, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
-  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+  Device& dev2 = m_pApartment->allocateDevice(dsid_t(0,2));
   dev2.setShortAddress(2);
   Set set;
   set.addDevice(dev1);
   set.undoScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceUndoScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, proxy.getParameter2());
-  proxy.setLastFunctionID(-1);
+  BOOST_CHECK_EQUAL(FunctionDeviceUndoScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
+  m_pFrameSender->setLastFunctionID(-1);
 }
 
-BOOST_AUTO_TEST_CASE(testNextSceneDevice) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(testNextSceneDevice, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.nextScene();
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  proxy.setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, &apt);
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  m_pFrameSender->setLastFunctionID(-1);
+  DeviceReference devRef1(dev1, m_pApartment.get());
   devRef1.nextScene();
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
 }
 
-BOOST_AUTO_TEST_CASE(testPreviousSceneDevice) {
-  Apartment apt(NULL, NULL);
-  apt.initialize();
-
-  DSDSMeterSim modSim(NULL);
-  DS485InterfaceTest proxy;
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setProxy(&proxy);
-  apt.setDS485Interface(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
-
-  proxy.setLastFunctionID(-1);
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+BOOST_FIXTURE_TEST_CASE(testPreviousSceneDevice, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.previousScene();
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
-  proxy.setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, &apt);
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  m_pFrameSender->setLastFunctionID(-1);
+  DeviceReference devRef1(dev1, m_pApartment.get());
   devRef1.previousScene();
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, proxy.getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, proxy.getParameter1());
+  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

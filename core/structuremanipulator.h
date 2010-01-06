@@ -26,7 +26,7 @@
 namespace dss {
 
   class Apartment;
-  class DS485Interface;
+  class StructureModifyingBusInterface;
   class DSMeter;
   class Device;
   class Zone;
@@ -34,9 +34,9 @@ namespace dss {
   class StructureManipulator {
   private:
     Apartment& m_Apartment;
-    DS485Interface& m_Interface;
+    StructureModifyingBusInterface& m_Interface;
   public:
-    StructureManipulator(DS485Interface& _interface, Apartment& _apartment)
+    StructureManipulator(StructureModifyingBusInterface& _interface, Apartment& _apartment)
     : m_Apartment(_apartment), m_Interface(_interface)
     { } // ctor
 

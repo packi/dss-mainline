@@ -163,7 +163,7 @@ const char* WebrootDirectory = "data/webroot";
     m_Subsystems.push_back(dynamic_cast<DS485Proxy*>(m_pDS485Interface.get()));
 
     m_pBusDispatcher = boost::shared_ptr<DS485BusRequestDispatcher>(new DS485BusRequestDispatcher());
-    m_pBusDispatcher->setProxy(m_pDS485Interface.get());
+    m_pBusDispatcher->setFrameSender(m_pDS485Interface->getFrameSenderInterface());
     
     m_pApartment->setDS485Interface(m_pDS485Interface.get());
     m_pApartment->setBusRequestDispatcher(m_pBusDispatcher.get());

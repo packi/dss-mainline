@@ -27,16 +27,16 @@
 
 namespace dss {
 
-  class DS485Interface;
+  class FrameSenderInterface;
   
   class DS485BusRequestDispatcher : public BusRequestDispatcher {
   public:
     virtual void dispatchRequest(boost::shared_ptr<BusRequest> _pRequest);
-    void setProxy(DS485Interface* _pInterface) {
+    void setFrameSender(FrameSenderInterface* _pInterface) {
       m_pInterface = _pInterface;
     }
   private:
-    DS485Interface* m_pInterface;
+    FrameSenderInterface* m_pInterface;
   }; // DS485BusRequestDispatcher
 
 } // namespace dss
