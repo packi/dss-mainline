@@ -156,7 +156,7 @@ const char* WebrootDirectory = "data/webroot";
   bool DSS::initialize(const vector<std::string>& _properties) {
     m_State = ssCreatingSubsystems;
 
-    m_pApartment = boost::shared_ptr<Apartment>(new Apartment(this, NULL));
+    m_pApartment = boost::shared_ptr<Apartment>(new Apartment(this));
     m_Subsystems.push_back(m_pApartment.get());
 
     m_pDS485Interface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this, m_pApartment.get()));

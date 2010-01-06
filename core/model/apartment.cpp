@@ -53,12 +53,12 @@ namespace dss {
 
   //================================================== Apartment
 
-  Apartment::Apartment(DSS* _pDSS, DS485Interface* _pDS485Interface)
+  Apartment::Apartment(DSS* _pDSS)
   : Subsystem(_pDSS, "Apartment"),
     Thread("Apartment"),
     m_IsInitializing(true),
     m_pPropertyNode(),
-    m_pDS485Interface(_pDS485Interface),
+    m_pDS485Interface(NULL),
     m_pBusRequestDispatcher(NULL)
   { } // ctor
 

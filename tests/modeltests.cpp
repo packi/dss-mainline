@@ -44,7 +44,7 @@ using namespace dss;
 BOOST_AUTO_TEST_SUITE(Model)
 
 BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
-  Apartment apt(NULL, NULL);
+  Apartment apt(NULL);
   apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
 } // testApartmentAllocateDeviceReturnsTheSameDeviceForDSID
 
 BOOST_AUTO_TEST_CASE(testSetGetByBusID) {
-  Apartment apt(NULL, NULL);
+  Apartment apt(NULL);
   apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(testSetGetByBusID) {
 } // testSetGetByBusID
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByShortAddress) {
-  Apartment apt(NULL, NULL);
+  Apartment apt(NULL);
   apt.initialize();
 
   DSMeter& mod = apt.allocateDSMeter(dsid_t(0,2));
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByShortAddress) {
 } // testApartmentGetDeviceByShortAddress
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByName) {
-  Apartment apt(NULL, NULL);
+  Apartment apt(NULL);
   apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByName) {
 } // testApartmentGetDeviceByName
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByName) {
-  Apartment apt(NULL, NULL);
+  Apartment apt(NULL);
   apt.initialize();
 
   DSMeter& mod = apt.allocateDSMeter(dsid_t(0,2));
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByName) {
 } // testApartmentGetDSMeterByName
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByBusID) {
-  Apartment apt(NULL, NULL);
+  Apartment apt(NULL);
   apt.initialize();
 
   DSMeter& mod = apt.allocateDSMeter(dsid_t(0,2));
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByBusID) {
 } // testApartmentGetDSMeterByBusID
 
 BOOST_AUTO_TEST_CASE(testZoneMoving) {
-  Apartment apt(NULL, NULL);
+  Apartment apt(NULL);
   apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
 } // testZoneMoving
 
 BOOST_AUTO_TEST_CASE(testSet) {
-  Apartment apt(NULL, NULL);
+  Apartment apt(NULL);
   apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE(testSet) {
 } // testSet
 
 BOOST_AUTO_TEST_CASE(testSetBuilder) {
-  Apartment apt(NULL, NULL);
+  Apartment apt(NULL);
   apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
@@ -399,7 +399,7 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
 } // testSetBuilder
 
 BOOST_AUTO_TEST_CASE(testRemoval) {
-  Apartment apt(NULL, NULL);
+  Apartment apt(NULL);
   apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
@@ -446,7 +446,7 @@ BOOST_AUTO_TEST_CASE(testRemoval) {
 } // testRemoval
 
 BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
-  Apartment apt(NULL, NULL);
+  Apartment apt(NULL);
   apt.initialize();
 
   DSDSMeterSim modSim(NULL);
@@ -526,7 +526,7 @@ private:
 class TestModelFixture {
 public:
   TestModelFixture() {
-    m_pApartment.reset(new Apartment(NULL, NULL));
+    m_pApartment.reset(new Apartment(NULL));
     m_pApartment->initialize();
     m_pFrameSender.reset(new FrameSenderTester());
     m_pDispatcher.reset(new DS485BusRequestDispatcher());

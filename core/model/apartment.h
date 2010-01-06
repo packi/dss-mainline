@@ -91,7 +91,7 @@ namespace dss {
   protected:
     virtual void doStart();
   public:
-    Apartment(DSS* _pDSS, DS485Interface* _pDS485Interface);
+    Apartment(DSS* _pDSS);
     virtual ~Apartment();
 
     virtual void initialize();

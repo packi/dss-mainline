@@ -48,7 +48,7 @@ private:
 };
 
 BOOST_AUTO_TEST_CASE(testRequestReachesDispatcher) {
-  Apartment apt(NULL, NULL);
+  Apartment apt(NULL);
   apt.initialize();
   Device& d1 = apt.allocateDevice(dsid_t(0,1));
   TestDispatcher dispatcher;

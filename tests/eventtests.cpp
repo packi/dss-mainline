@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(testSubscriptionXML) {
 
 
 BOOST_AUTO_TEST_CASE(testSetBuilder) {
-  Apartment apt(NULL, NULL);
+  Apartment apt(NULL);
   apt.initialize();
 
   SetBuilder setBuilder(apt);
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
   queue.setEventRunner(&runner);
   runner.setEventQueue(&queue);
 
-  Apartment apt(NULL, NULL);
+  Apartment apt(NULL);
   DSDSMeterSim modSim(NULL);
   DS485Proxy proxy(NULL, &apt);
   apt.setDS485Interface(&proxy);
