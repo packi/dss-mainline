@@ -28,6 +28,7 @@
 #include "core/foreach.h"
 #include "core/model/apartment.h"
 #include "core/model/modulator.h"
+#include "core/model/modelmaintenance.h"
 
 #include <cmath>
 
@@ -67,7 +68,7 @@ namespace dss {
   }
 
   void FakeMeter::execute() {
-    while(getDSS().getApartment().isInitializing()) {
+    while(getDSS().getModelMaintenance().isInitializing()) {
       sleepSeconds(1);
     }
     SeriesWriter<CurrentValue> writer;

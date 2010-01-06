@@ -30,6 +30,8 @@
 #include "core/foreach.h"
 #include "core/model/modulator.h"
 #include "core/model/apartment.h"
+#include "core/model/modelmaintenance.h"
+
 
 #include <boost/filesystem.hpp>
 
@@ -191,7 +193,7 @@ namespace dss {
 
   void Metering::execute() {
     // check dsMeters periodically
-    while(DSS::getInstance()->getApartment().isInitializing()) {
+    while(DSS::getInstance()->getModelMaintenance().isInitializing()) {
       sleepSeconds(1);
     }
     while(!m_Terminated) {

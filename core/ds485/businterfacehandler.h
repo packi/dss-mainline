@@ -30,7 +30,7 @@
 
 namespace dss {
 
-  class Apartment;
+  class ModelMaintenance;
   class FrameBucketBase;
   class ModelEvent;
 
@@ -40,7 +40,7 @@ namespace dss {
                               public Subsystem,
                               public IDS485FrameCollector {
   public:
-    BusInterfaceHandler(DSS* _pDSS, Apartment& _apartment);
+    BusInterfaceHandler(DSS* _pDSS, ModelMaintenance& _modelMaintenance);
     virtual void execute();
     virtual void initialize();
 
@@ -53,7 +53,7 @@ namespace dss {
   private:
     void raiseModelEvent(ModelEvent* _pEvent);
   private:
-    Apartment& m_Apartment;
+    ModelMaintenance& m_ModelMaintenance;
     Mutex m_IncomingFramesGuard;
     Mutex m_FrameBucketsGuard;
     SyncEvent m_PacketHere;

@@ -25,6 +25,7 @@
 #include "core/dss.h"
 #include "modelevent.h"
 #include "apartment.h"
+#include "modelmaintenance.h"
 
 namespace dss {
 
@@ -34,7 +35,7 @@ namespace dss {
     if(m_Name != _name) {
       m_Name = _name;
       if(DSS::hasInstance()) {
-        DSS::getInstance()->getApartment().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+        DSS::getInstance()->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
       }
     }
   }

@@ -54,11 +54,11 @@ using namespace stdext;
 
 namespace dss {
 
-  class Apartment;
   class ModelEvent;
   class FrameBucketBase;
   class FrameBucketCollector;
   class BusInterfaceHandler;
+  class ModelMaintenance;
 
   class DS485Proxy : public    Subsystem,
                      public    DS485Interface,
@@ -80,7 +80,7 @@ namespace dss {
 
     BusInterfaceHandler* m_pBusInterfaceHandler;
     DS485Controller m_DS485Controller;
-    Apartment* m_pApartment;
+    ModelMaintenance* m_pModelMaintenance;
 
     bool m_InitializeDS485Controller;
 
@@ -90,7 +90,7 @@ namespace dss {
   protected:
     virtual void doStart();
   public:
-    DS485Proxy(DSS* _pDSS, Apartment* _pApartment);
+    DS485Proxy(DSS* _pDSS, ModelMaintenance* _pModelMaintenance);
     virtual ~DS485Proxy() {};
 
     void setBusInterfaceHandler(BusInterfaceHandler* _value) { m_pBusInterfaceHandler = _value; }

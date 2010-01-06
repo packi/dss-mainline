@@ -62,7 +62,6 @@ BOOST_AUTO_TEST_CASE(testBasics) {
 
 BOOST_AUTO_TEST_CASE(testSets) {
   Apartment apt(NULL);
-  apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
@@ -142,7 +141,6 @@ BOOST_AUTO_TEST_CASE(testSets) {
 
 BOOST_AUTO_TEST_CASE(testDevices) {
   Apartment apt(NULL);
-  apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
@@ -167,7 +165,6 @@ BOOST_AUTO_TEST_CASE(testDevices) {
 
 BOOST_AUTO_TEST_CASE(testEvents) {
   Apartment apt(NULL);
-  apt.initialize();
 
   Device& dev = apt.allocateDevice(dsid_t(0,1));
   dev.setShortAddress(1);
@@ -202,7 +199,6 @@ BOOST_AUTO_TEST_CASE(testEvents) {
 
 BOOST_AUTO_TEST_CASE(testSubscriptions) {
   Apartment apt(NULL);
-  apt.initialize();
 
   Device& dev = apt.allocateDevice(dsid_t(0,1));
   dev.setShortAddress(1);

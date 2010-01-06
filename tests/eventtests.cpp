@@ -29,6 +29,7 @@
 #include "core/setbuilder.h"
 #include "core/sim/dssim.h"
 #include "core/model/apartment.h"
+#include "core/model/modelmaintenance.h"
 #include "core/model/device.h"
 #include "core/model/devicereference.h"
 #include "core/model/zone.h"
@@ -182,7 +183,6 @@ BOOST_AUTO_TEST_CASE(testSubscriptionXML) {
 
 BOOST_AUTO_TEST_CASE(testSetBuilder) {
   Apartment apt(NULL);
-  apt.initialize();
 
   SetBuilder setBuilder(apt);
 
@@ -221,11 +221,11 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
   runner.setEventQueue(&queue);
 
   Apartment apt(NULL);
+  ModelMaintenance maintenance(NULL);
   DSDSMeterSim modSim(NULL);
-  DS485Proxy proxy(NULL, &apt);
+  DS485Proxy proxy(NULL, &maintenance);
   apt.setDS485Interface(&proxy);
 
-  apt.initialize();
   proxy.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));

@@ -43,6 +43,7 @@
 #include "core/model/group.h"
 #include "core/model/modulator.h"
 #include "core/model/modelevent.h"
+#include "core/model/modelmaintenance.h"
 
 #include "core/metering/metering.h"
 #include "core/metering/series.h"
@@ -1030,7 +1031,7 @@ namespace dss {
             return ResultToJSON(false, "Cannot delete a non-empty zone");
           }
           getDSS().getApartment().removeZone(zoneID);
-          getDSS().getApartment().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+          getDSS().getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
           return JSONOk();
         } catch(ItemNotFoundException&) {
           return ResultToJSON(false, "Could not find zone");

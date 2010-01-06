@@ -48,6 +48,7 @@ namespace dss {
   class WebServices;
   class DS485BusRequestDispatcher;
   class BusInterfaceHandler;
+  class ModelMaintenance;
 #ifdef WITH_SIM
   class DSSim;
 #endif
@@ -85,6 +86,7 @@ namespace dss {
     boost::shared_ptr<FakeMeter> m_pFakeMeter;
     boost::shared_ptr<DS485BusRequestDispatcher> m_pBusDispatcher;
     boost::shared_ptr<BusInterfaceHandler> m_pBusInterfaceHandler;
+    boost::shared_ptr<ModelMaintenance> m_pModelMaintenance;
     std::string m_dataDirectory;
     std::string m_configDirectory;
     std::string m_webrootDirectory;
@@ -130,6 +132,7 @@ namespace dss {
     WebServer& getWebServer() { return *m_pWebServer; }
     EventInterpreter& getEventInterpreter() { return *m_pEventInterpreter; }
     BusInterfaceHandler& getBusInterfaceHandler() { return *m_pBusInterfaceHandler; }
+    ModelMaintenance& getModelMaintenance() { return *m_pModelMaintenance; }
 
     const std::string& getDataDirectory() const { return m_dataDirectory; }
     const std::string& getConfigDirectory() const { return m_configDirectory; }

@@ -26,7 +26,8 @@
 
 #include "core/foreach.h"
 #include "core/dss.h"
-#include "core/model/apartment.h"
+#include "core/model/modelevent.h"
+#include "core/model/modelmaintenance.h"
 #include "core/ds485const.h"
 #include "core/event.h"
 #include "core/ds485/framebucketbase.h"
@@ -38,9 +39,9 @@ namespace dss {
 
   //================================================== BusInterfaceHandler
 
-  BusInterfaceHandler::BusInterfaceHandler(DSS* _pDSS, Apartment& _apartment)
+  BusInterfaceHandler::BusInterfaceHandler(DSS* _pDSS, ModelMaintenance& _apartment)
   : Subsystem(_pDSS, "BusInterfaceHandler"),
-    m_Apartment(_apartment)
+    m_ModelMaintenance(_apartment)
   {}
 
   void BusInterfaceHandler::initialize() {
@@ -267,7 +268,7 @@ namespace dss {
   } // execute
 
   void BusInterfaceHandler::raiseModelEvent(ModelEvent* _pEvent) {
-    m_Apartment.addModelEvent(_pEvent);
+    m_ModelMaintenance.addModelEvent(_pEvent);
   } // raiseModelEvent
 
   void BusInterfaceHandler::collectFrame(boost::shared_ptr<DS485CommandFrame> _frame) {

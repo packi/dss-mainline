@@ -39,6 +39,7 @@
 #include "core/ds485/ds485proxy.h"
 #include "core/ds485/ds485busrequestdispatcher.h"
 #include "core/ds485/businterfacehandler.h"
+#include "core/model/modelmaintenance.h"
 
 using namespace dss;
 
@@ -46,7 +47,6 @@ BOOST_AUTO_TEST_SUITE(Model)
 
 BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
   Apartment apt(NULL);
-  apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
@@ -61,7 +61,6 @@ BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
 
 BOOST_AUTO_TEST_CASE(testSetGetByBusID) {
   Apartment apt(NULL);
-  apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
@@ -93,7 +92,6 @@ BOOST_AUTO_TEST_CASE(testSetGetByBusID) {
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByShortAddress) {
   Apartment apt(NULL);
-  apt.initialize();
 
   DSMeter& mod = apt.allocateDSMeter(dsid_t(0,2));
   mod.setBusID(1);
@@ -108,7 +106,6 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByShortAddress) {
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByName) {
   Apartment apt(NULL);
-  apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setName("dev1");
@@ -118,7 +115,6 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByName) {
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByName) {
   Apartment apt(NULL);
-  apt.initialize();
 
   DSMeter& mod = apt.allocateDSMeter(dsid_t(0,2));
   mod.setName("mod1");
@@ -128,7 +124,6 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByName) {
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByBusID) {
   Apartment apt(NULL);
-  apt.initialize();
 
   DSMeter& mod = apt.allocateDSMeter(dsid_t(0,2));
   mod.setBusID(1);
@@ -138,7 +133,6 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByBusID) {
 
 BOOST_AUTO_TEST_CASE(testZoneMoving) {
   Apartment apt(NULL);
-  apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
@@ -208,7 +202,6 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
 
 BOOST_AUTO_TEST_CASE(testSet) {
   Apartment apt(NULL);
-  apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
@@ -286,7 +279,6 @@ BOOST_AUTO_TEST_CASE(testSet) {
 
 BOOST_AUTO_TEST_CASE(testSetBuilder) {
   Apartment apt(NULL);
-  apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
@@ -401,7 +393,6 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
 
 BOOST_AUTO_TEST_CASE(testRemoval) {
   Apartment apt(NULL);
-  apt.initialize();
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
@@ -448,13 +439,15 @@ BOOST_AUTO_TEST_CASE(testRemoval) {
 
 BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   Apartment apt(NULL);
-  apt.initialize();
 
   DSDSMeterSim modSim(NULL);
-  DS485Proxy proxy(NULL, &apt);
   DS485BusRequestDispatcher dispatcher;
+  ModelMaintenance maintenance(NULL);
+  maintenance.setApartment(&apt);
+  maintenance.initialize();
+  DS485Proxy proxy(NULL, &maintenance);
   dispatcher.setFrameSender(proxy.getFrameSenderInterface());
-  BusInterfaceHandler busHandler(NULL, apt);
+  BusInterfaceHandler busHandler(NULL, maintenance);
   proxy.setBusInterfaceHandler(&busHandler);
   proxy.setInitializeDS485Controller(false);
   proxy.initialize();
@@ -462,8 +455,8 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   busHandler.initialize();
 
   busHandler.start();
-  apt.start();
-  while(apt.isInitializing()) {
+  maintenance.start();
+  while(maintenance.isInitializing()) {
     sleepMS(100);
   }
 
@@ -488,7 +481,7 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   BOOST_CHECK_EQUAL(Scene2, dev1.getLastCalledScene());
   BOOST_CHECK_EQUAL(Scene2, dev2.getLastCalledScene());
   busHandler.terminate();
-  apt.terminate();
+  maintenance.terminate();
   sleepMS(1500);
   DSS::teardown();
 } // testCallScenePropagation
@@ -531,7 +524,6 @@ class TestModelFixture {
 public:
   TestModelFixture() {
     m_pApartment.reset(new Apartment(NULL));
-    m_pApartment->initialize();
     m_pFrameSender.reset(new FrameSenderTester());
     m_pDispatcher.reset(new DS485BusRequestDispatcher());
     m_pDispatcher->setFrameSender(m_pFrameSender.get());

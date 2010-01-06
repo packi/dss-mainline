@@ -97,7 +97,7 @@ namespace dss {
           curNode = curNode->nextSibling();
         }
       } else {
-        m_Apartment.log("Config file has the wrong version");
+        Logger::getInstance()->log("Config file has the wrong version");
       }
     }
   } // readConfigurationFromXML
@@ -224,7 +224,7 @@ namespace dss {
   } // dsMeterToXML
 
   void ModelPersistence::writeConfigurationToXML(const std::string& _fileName) {
-    m_Apartment.log("Writing apartment config to '" + _fileName + "'", lsInfo);
+    Logger::getInstance()->log("Writing apartment config to '" + _fileName + "'", lsInfo);
     AutoPtr<Document> pDoc = new Document;
 
     AutoPtr<ProcessingInstruction> pXMLHeader = pDoc->createProcessingInstruction("xml", "version='1.0' encoding='utf-8'");
@@ -277,7 +277,7 @@ namespace dss {
       // move it to the desired location
       rename(tmpOut.c_str(), _fileName.c_str());
     } else {
-      m_Apartment.log("Could not open file '" + tmpOut + "' for writing", lsFatal);
+      Logger::getInstance()->log("Could not open file '" + tmpOut + "' for writing", lsFatal);
     }
   } // writeConfigurationToXML
 

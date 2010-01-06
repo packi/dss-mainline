@@ -31,7 +31,7 @@
 
 #include "core/model/modelevent.h"
 #include "core/model/device.h"
-#include "core/model/apartment.h"
+#include "core/model/modelmaintenance.h"
 
 #include "core/ds485/framebucketcollector.h"
 #include "core/ds485/businterfacehandler.h"
@@ -46,12 +46,12 @@ namespace dss {
 
   const char* FunctionIDToString(const int _functionID); // internal forward declaration
 
-  DS485Proxy::DS485Proxy(DSS* _pDSS, Apartment* _pApartment)
+  DS485Proxy::DS485Proxy(DSS* _pDSS, ModelMaintenance* _pModelMaintenance)
   : Subsystem(_pDSS, "DS485Proxy"),
-    m_pApartment(_pApartment),
+    m_pModelMaintenance(_pModelMaintenance),
     m_InitializeDS485Controller(true)
   {
-    assert(_pApartment != NULL);
+    assert(_pModelMaintenance != NULL);
     if(_pDSS != NULL) {
       _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "rs485devicename")
             ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, std::string>(m_DS485Controller, &DS485Controller::getRS485DeviceName, &DS485Controller::setRS485DeviceName));
@@ -876,7 +876,7 @@ namespace dss {
 
   void DS485Proxy::busReady() {
     ModelEvent* pEvent = new ModelEvent(ModelEvent::etBusReady);
-    m_pApartment->addModelEvent(pEvent);
+    m_pModelMaintenance->addModelEvent(pEvent);
   } // busReady
 
 

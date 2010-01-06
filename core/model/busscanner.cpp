@@ -33,12 +33,14 @@
 #include "group.h"
 #include "apartment.h"
 #include "zone.h"
+#include "modelmaintenance.h"
 
 namespace dss {
   
-  BusScanner::BusScanner(StructureQueryBusInterface& _interface, Apartment& _apartment)
+  BusScanner::BusScanner(StructureQueryBusInterface& _interface, Apartment& _apartment, ModelMaintenance& _maintenance)
   : m_Apartment(_apartment),
-    m_Interface(_interface)
+    m_Interface(_interface),
+    m_Maintenance(_maintenance)
   {
   }
 
@@ -173,7 +175,7 @@ namespace dss {
           if(lastCalledScene < 0 || lastCalledScene > MaxSceneNumber) {
             log("scanDSMeter: _sceneID is out of bounds. zoneID: " + intToString(zoneID) + " groupID: " + intToString(groupID) + " scene: " + intToString(lastCalledScene), lsError);
           } else {
-            m_Apartment.onGroupCallScene(zoneID, groupID, lastCalledScene);
+            m_Maintenance.onGroupCallScene(zoneID, groupID, lastCalledScene);
           }
         } catch(DS485ApiError& error) {
           log(std::string("scanDSMeter: Error getting last called scene '") + error.what() + "'", lsError);

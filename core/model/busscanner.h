@@ -30,16 +30,18 @@ namespace dss {
   class StructureQueryBusInterface;
   class Apartment;
   class DSMeter;
+  class ModelMaintenance;
   
   class BusScanner {
   public:
-    BusScanner(StructureQueryBusInterface& _interface, Apartment& _apartment);
+    BusScanner(StructureQueryBusInterface& _interface, Apartment& _apartment, ModelMaintenance& _maintenance);
     bool scanDSMeter(DSMeter& _dsMeter);
   private:
     void log(const std::string& _line, aLogSeverity _severity = lsDebug);
   private:
     Apartment& m_Apartment;
     StructureQueryBusInterface& m_Interface;
+    ModelMaintenance& m_Maintenance;
   };
 
 } // namespace dss

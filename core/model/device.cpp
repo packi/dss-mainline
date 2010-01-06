@@ -28,6 +28,7 @@
 #include "core/model/scenehelper.h"
 #include "core/model/modelevent.h"
 #include "core/model/apartment.h"
+#include "core/model/modelmaintenance.h"
 
 namespace dss {
 
@@ -125,8 +126,10 @@ namespace dss {
   } // setName
 
   void Device::dirty() {
-    if(m_pApartment != NULL) {
-      m_pApartment->addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    if((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
+      m_pApartment->getModelMaintenance()->addModelEvent(
+          new ModelEvent(ModelEvent::etModelDirty)
+      );
     }
   } // dirty
 

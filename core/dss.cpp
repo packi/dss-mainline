@@ -38,6 +38,7 @@
 #include "core/ds485/businterfacehandler.h"
 #include "core/ds485/ds485busrequestdispatcher.h"
 #include "core/model/apartment.h"
+#include "core/model/modelmaintenance.h"
 
 #include "core/web/webserver.h"
 #ifdef WITH_BONJOUR
@@ -158,9 +159,12 @@ const char* WebrootDirectory = "data/webroot";
     m_State = ssCreatingSubsystems;
 
     m_pApartment = boost::shared_ptr<Apartment>(new Apartment(this));
-    m_Subsystems.push_back(m_pApartment.get());
 
-    m_pDS485Interface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this, m_pApartment.get()));
+    m_pModelMaintenance = boost::shared_ptr<ModelMaintenance>(new ModelMaintenance(this));
+    m_Subsystems.push_back(m_pModelMaintenance.get());
+    m_pModelMaintenance->setApartment(m_pApartment.get());
+
+    m_pDS485Interface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this, m_pModelMaintenance.get()));
     m_Subsystems.push_back(dynamic_cast<DS485Proxy*>(m_pDS485Interface.get()));
 
     m_pBusDispatcher = boost::shared_ptr<DS485BusRequestDispatcher>(new DS485BusRequestDispatcher());
@@ -169,7 +173,7 @@ const char* WebrootDirectory = "data/webroot";
     m_pApartment->setDS485Interface(m_pDS485Interface.get());
     m_pApartment->setBusRequestDispatcher(m_pBusDispatcher.get());
 
-    m_pBusInterfaceHandler = boost::shared_ptr<BusInterfaceHandler>(new BusInterfaceHandler(this, getApartment()));
+    m_pBusInterfaceHandler = boost::shared_ptr<BusInterfaceHandler>(new BusInterfaceHandler(this, getModelMaintenance()));
     m_Subsystems.push_back(m_pBusInterfaceHandler.get());
     dynamic_cast<DS485Proxy*>(m_pDS485Interface.get())->setBusInterfaceHandler(m_pBusInterfaceHandler.get());
 
