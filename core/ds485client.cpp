@@ -25,6 +25,7 @@
 #include "core/dss.h"
 #include "core/foreach.h"
 #include "core/ds485/ds485proxy.h"
+#include "core/ds485/framebucketcollector.h"
 
 namespace dss {
 

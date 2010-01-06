@@ -55,64 +55,10 @@ using namespace stdext;
 
 namespace dss {
 
-  class DS485Proxy;
   class Apartment;
   class ModelEvent;
-
-  /** A frame bucket gets notified on every frame that matches any given
-   *  function-/source-id pair.
-   *  If \a m_SourceID is -1 every source matches. */
-  class FrameBucketBase {
-  public:
-    FrameBucketBase(DS485Proxy* _proxy, int _functionID, int _sourceID);
-    virtual ~FrameBucketBase() {}
-
-    int getFunctionID() const { return m_FunctionID; }
-    int getSourceID() const { return m_SourceID; }
-
-    virtual bool addFrame(boost::shared_ptr<DS485CommandFrame> _frame) = 0;
-
-    /** Registers the bucket at m_pProxy */
-    void addToProxy();
-    /** Removes the bucket from m_pProxy */
-    void removeFromProxy();
-    /** Static function to be used from a boost::shared_ptr as a deleter. */
-    static void removeFromProxyAndDelete(FrameBucketBase* _obj);
-  private:
-    DS485Proxy* m_pProxy;
-    int m_FunctionID;
-    int m_SourceID;
-  }; // FrameBucketBase
-
-
-  /** FrameBucketCollector holds its received frames in a queue.
-    */
-  class FrameBucketCollector : public FrameBucketBase {
-  private:
-    std::deque<boost::shared_ptr<DS485CommandFrame> > m_Frames;
-    SyncEvent m_PacketHere;
-    Mutex m_FramesMutex;
-    bool m_SingleFrame;
-  public:
-    FrameBucketCollector(DS485Proxy* _proxy, int _functionID, int _sourceID);
-    virtual ~FrameBucketCollector() { }
-
-    /** Adds a DS485CommandFrame to the frames queue */
-    virtual bool addFrame(boost::shared_ptr<DS485CommandFrame> _frame);
-    /** Returns the least recently received item int the queue.
-     * The pointer will contain NULL if isEmpty() returns true. */
-    boost::shared_ptr<DS485CommandFrame> popFrame();
-
-    /** Waits for frames to arrive for \a _timeoutMS */
-    void waitForFrames(int _timeoutMS);
-    /** Waits for a frame to arrive in \a _timeoutMS.
-     * If a frame arrives earlier, the function returns */
-    bool waitForFrame(int _timeoutMS);
-
-    int getFrameCount() const;
-    bool isEmpty() const;
-  }; // FrameBucketCollector
-
+  class FrameBucketBase;
+  class FrameBucketCollector;
 
   typedef std::vector<boost::shared_ptr<DS485CommandFrame> > CommandFrameSharedPtrVector;
 
@@ -225,8 +171,6 @@ namespace dss {
 
     void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size);
     virtual int getSensorValue(const Device& _device, const int _sensorID);
-    //------------------------------------------------ Helpers
-    DS485Controller& getController() { return m_DS485Controller; }
   }; // DS485Proxy
 
 } // namespace dss

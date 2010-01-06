@@ -30,6 +30,7 @@
 
 #include "core/event.h"
 #include "core/ds485/ds485proxy.h"
+#include "core/ds485/framebucketcollector.h"
 #include "core/sim/dssim.h"
 #include "core/propertysystem.h"
 #include "core/foreach.h"

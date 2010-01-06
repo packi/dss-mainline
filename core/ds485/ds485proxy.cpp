@@ -33,6 +33,8 @@
 #include "core/model/device.h"
 #include "core/model/apartment.h"
 
+#include "core/ds485/framebucketcollector.h"
+
 #ifdef WITH_SIM
 #include "core/sim/dssim.h"
 #endif
@@ -1274,90 +1276,5 @@ namespace dss {
     m_FrameBucketsGuard.unlock();
   } // removeFrameBucket
 
-  //================================================== FrameBucketBase
-
-  FrameBucketBase::FrameBucketBase(DS485Proxy* _proxy, int _functionID, int _sourceID)
-  : m_pProxy(_proxy),
-    m_FunctionID(_functionID),
-    m_SourceID(_sourceID)
-  {
-    assert(m_pProxy != NULL);
-  } // ctor
-
-  void FrameBucketBase::addToProxy() {
-    Logger::getInstance()->log("Bucket: Registering for fid: " + intToString(m_FunctionID) + " sid: " + intToString(m_SourceID));
-    m_pProxy->addFrameBucket(this);
-  } // addToProxy
-
-  void FrameBucketBase::removeFromProxyAndDelete(FrameBucketBase* _obj) {
-    _obj->removeFromProxy();
-    delete _obj;
-  } // remove_from_proxy_and_delete
-
-  void FrameBucketBase::removeFromProxy() {
-    Logger::getInstance()->log("Bucket: Removing for fid: " + intToString(m_FunctionID) + " sid: " + intToString(m_SourceID));
-    m_pProxy->removeFrameBucket(this);
-  } // removeFromProxy
-
-
-  //================================================== FrameBucket
-
-  FrameBucketCollector::FrameBucketCollector(DS485Proxy* _proxy, int _functionID, int _sourceID)
-  : FrameBucketBase(_proxy, _functionID, _sourceID),
-    m_SingleFrame(false)
-  { } // ctor
-
-  bool FrameBucketCollector::addFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
-    bool result = false;
-    m_FramesMutex.lock();
-    if(!m_SingleFrame || m_Frames.empty()) {
-      m_Frames.push_back(_frame);
-      result = true;
-    }
-    m_FramesMutex.unlock();
-
-    if(result) {
-      m_PacketHere.signal();
-    }
-    return result;
-  } // addFrame
-
-  boost::shared_ptr<DS485CommandFrame> FrameBucketCollector::popFrame() {
-    boost::shared_ptr<DS485CommandFrame> result;
-
-    m_FramesMutex.lock();
-    if(!m_Frames.empty()) {
-      result = m_Frames.front();
-      m_Frames.pop_front();
-    }
-    m_FramesMutex.unlock();
-    return result;
-  } // popFrame
-
-  void FrameBucketCollector::waitForFrames(int _timeoutMS) {
-    sleepMS(_timeoutMS);
-  } // waitForFrames
-
-  bool FrameBucketCollector::waitForFrame(int _timeoutMS) {
-    m_SingleFrame = true;
-    if(m_Frames.empty()) {
-      Logger::getInstance()->log("FrameBucket::waitForFrame: Waiting for frame");
-      if(m_PacketHere.waitFor(_timeoutMS)) {
-        Logger::getInstance()->log("FrameBucket::waitForFrame: Got frame");
-      } else {
-        Logger::getInstance()->log("FrameBucket::waitForFrame: No frame received");
-        return false;
-      }
-    }
-    return true;
-  } // waitForFrame
-
-  int FrameBucketCollector::getFrameCount() const {
-    return m_Frames.size();
-  } // getFrameCount
-
-  bool FrameBucketCollector::isEmpty() const {
-    return m_Frames.empty();
-  } // isEmpty
 
 }
