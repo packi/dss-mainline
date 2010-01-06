@@ -154,7 +154,7 @@ namespace dss {
         if(rootNode->hasAttribute("version") && (strToInt(rootNode->getAttribute("version")) == theConfigFileVersion)) {
           Node* curNode = rootNode->firstChild();
           while(curNode != NULL) {
-            if(curNode->localName() == "dsMeter") {
+            if(curNode->localName() == "modulator") {
               DSDSMeterSim* dsMeter = NULL;
               try {
                 dsMeter = new DSDSMeterSim(this);

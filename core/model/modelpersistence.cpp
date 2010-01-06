@@ -81,7 +81,7 @@ namespace dss {
           std::string nodeName = curNode->localName();
           if(nodeName == "devices") {
             loadDevices(curNode);
-          } else if(nodeName == "dsMeters") {
+          } else if(nodeName == "modulators") {
             loadDSMeters(curNode);
           } else if(nodeName == "zones") {
             loadZones(curNode);
@@ -139,7 +139,7 @@ namespace dss {
   void ModelPersistence::loadDSMeters(Node* _node) {
     Node* curNode = _node->firstChild();
     while(curNode != NULL) {
-      if(curNode->localName() == "dsMeter") {
+      if(curNode->localName() == "modulators") {
         Element* elem = dynamic_cast<Element*>(curNode);
         if((elem != NULL) && elem->hasAttribute("id")) {
           dsid_t id = dsid_t::fromString(elem->getAttribute("id"));
@@ -212,7 +212,7 @@ namespace dss {
   } // zoneToXML
 
   void dsMeterToXML(const DSMeter* _pDSMeter, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
-    AutoPtr<Element> pDSMeterNode = _pDocument->createElement("dsMeter");
+    AutoPtr<Element> pDSMeterNode = _pDocument->createElement("modulator");
     pDSMeterNode->setAttribute("id", _pDSMeter->getDSID().toString());
     if(!_pDSMeter->getName().empty()) {
       AutoPtr<Element> pNameNode = _pDocument->createElement("name");
