@@ -49,8 +49,8 @@ namespace dss {
       assert(_callback != NULL);
     } // ctor
 
-    virtual bool addFrame(boost::shared_ptr<ReceivedFrame> _frame) {
-      m_callBack(_frame->getFrame());
+    virtual bool addFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
+      m_callBack(_frame);
       return false;
     } // addFrame
   private:
@@ -79,7 +79,7 @@ namespace dss {
     boost::shared_ptr<DS485CommandFrame> result;
     boost::shared_ptr<FrameBucketCollector> bucket = proxy->sendFrameAndInstallBucket(_frame, _functionID);
     if(bucket->waitForFrame(_timeoutMS)) {
-      result = bucket->popFrame()->getFrame();
+      result = bucket->popFrame();
     }
     return result;
   } // sendFrameSingleResult
@@ -92,9 +92,9 @@ namespace dss {
     bucket->waitForFrame(_timeoutMS);
 
     std::vector<boost::shared_ptr<DS485CommandFrame> > result;
-    boost::shared_ptr<ReceivedFrame> frame;
+    boost::shared_ptr<DS485CommandFrame> frame;
     while((frame = bucket->popFrame()) != NULL) {
-      result.push_back(frame->getFrame());
+      result.push_back(frame);
     }
     return result;
   } // sendFrameMultipleResults

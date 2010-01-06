@@ -22,10 +22,6 @@
 
 #include "apartment.h"
 
-#include <fstream>
-
-#include <boost/filesystem.hpp>
-
 #include "core/DS485Interface.h"
 #include "core/ds485const.h"
 #include "core/dss.h"
@@ -167,8 +163,8 @@ namespace dss {
     requestFrame.getHeader().setDestination(0);
     requestFrame.setCommand(CommandRequest);
     requestFrame.getPayload().add<uint8_t>(FunctionDSMeterGetDSID);
-    if(DSS::hasInstance()) {
-      DSS::getInstance()->getDS485Interface().getFrameSenderInterface()->sendFrame(requestFrame);
+    if(m_pDS485Interface != NULL) {
+      m_pDS485Interface->getFrameSenderInterface()->sendFrame(requestFrame);
     }
   } // discoverDS485Devices
 
@@ -664,7 +660,7 @@ namespace dss {
     log("  BusID:     " + intToString(_devID));
     log("  FID:       " + intToString(_functionID));
 
-    dsid_t dsid = getDSS().getDS485Interface().getStructureQueryBusInterface()->getDSIDOfDevice(_modID, _devID);
+    dsid_t dsid = m_pDS485Interface->getStructureQueryBusInterface()->getDSIDOfDevice(_modID, _devID);
     Device& dev = allocateDevice(dsid);
     DeviceReference devRef(dev, this);
 

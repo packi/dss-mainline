@@ -107,9 +107,9 @@ namespace dss {
     frame.getPayload().add<devid_t>(_id);
 
     uint16_t result;
-    boost::shared_ptr<ReceivedFrame> resFrame = receiveSingleFrame(frame, FunctionDeviceGetFunctionID);
+    boost::shared_ptr<DS485CommandFrame> resFrame = receiveSingleFrame(frame, FunctionDeviceGetFunctionID);
     if(resFrame.get() != NULL) {
-      PayloadDissector pd(resFrame->getFrame()->getPayload());
+      PayloadDissector pd(resFrame->getPayload());
       pd.get<uint8_t>(); // skip the function id
       if(pd.get<uint16_t>() == 0x0001) {
         result = pd.get<uint16_t>();
@@ -291,16 +291,16 @@ namespace dss {
 
     std::vector<DSMeterSpec_t> result;
     while(true) {
-      boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
+      boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
       if(recFrame == NULL) {
         break;
       }
-      int source = recFrame->getFrame()->getHeader().getSource();
+      int source = recFrame->getHeader().getSource();
       if(resultFrom[source]) {
         log(std::string("already received result from ") + intToString(source));
         continue;
       }
-      DSMeterSpec_t spec = dsMeterSpecFromFrame(recFrame->getFrame());
+      DSMeterSpec_t spec = dsMeterSpecFromFrame(recFrame);
       result.push_back(spec);
     }
 
@@ -315,13 +315,13 @@ namespace dss {
     cmdFrame.getPayload().add<uint8_t>(FunctionGetTypeRequest);
     log("Proxy: getDSMeterSpec");
 
-    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionGetTypeRequest);
+    boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionGetTypeRequest);
 
     if(recFrame == NULL) {
       throw DS485ApiError("No frame received");
     }
 
-    DSMeterSpec_t result = dsMeterSpecFromFrame(recFrame->getFrame());
+    DSMeterSpec_t result = dsMeterSpecFromFrame(recFrame);
 
     return result;
   } // getDSMeterSpec
@@ -432,12 +432,12 @@ namespace dss {
     bucket->waitForFrame(1000);
 
     while(true) {
-      boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
+      boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
       if(recFrame == NULL) {
         break;
       }
 
-      PayloadDissector pd(recFrame->getFrame()->getPayload());
+      PayloadDissector pd(recFrame->getPayload());
       pd.get<uint8_t>(); // discard the function id
       pd.get<uint16_t>(); // function result
 
@@ -573,12 +573,12 @@ namespace dss {
     cmdFrame.getPayload().add<uint16_t>(_deviceID);
     log("Proxy: GetDSIDOfDevice");
 
-    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDeviceGetDSID);
+    boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDeviceGetDSID);
     if(recFrame == NULL) {
       throw DS485ApiError("No frame received");
     }
 
-    PayloadDissector pd(recFrame->getFrame()->getPayload());
+    PayloadDissector pd(recFrame->getPayload());
     pd.get<uint8_t>(); // discard the function id
     int16_t res = int16_t(pd.get<uint16_t>());
     checkResultCode(res);
@@ -592,13 +592,13 @@ namespace dss {
     cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetDSID);
     log(std::string("Proxy: GetDSIDOfDSMeter ") + intToString(_dsMeterID));
 
-    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDSMeterGetDSID);
+    boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDSMeterGetDSID);
     if(recFrame == NULL) {
       log("GetDSIDOfDSMeter: received no result from " + intToString(_dsMeterID), lsError);
       throw DS485ApiError("No frame received");
     }
 
-    PayloadDissector pd(recFrame->getFrame()->getPayload());
+    PayloadDissector pd(recFrame->getPayload());
     pd.get<uint8_t>(); // discard the function id
     return pd.get<dsid_t>();
   } // getDSIDOfDSMeter
@@ -627,15 +627,15 @@ namespace dss {
     cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetPowerConsumption);
     log(std::string("Proxy: GetPowerConsumption ") + intToString(_dsMeterID));
 
-    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDSMeterGetPowerConsumption);
+    boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDSMeterGetPowerConsumption);
     if(recFrame == NULL) {
       log("DS485Proxy::getPowerConsumption: received no results", lsError);
       throw DS485ApiError("No frame received");
     }
-    if(recFrame->getFrame()->getHeader().getSource() != _dsMeterID) {
+    if(recFrame->getHeader().getSource() != _dsMeterID) {
       log("GetPowerConsumption: received result from wrong source");
     }
-    PayloadDissector pd(recFrame->getFrame()->getPayload());
+    PayloadDissector pd(recFrame->getPayload());
     pd.get<uint8_t>(); // discard the function id
     return pd.get<uint32_t>();
   } // getPowerConsumption
@@ -647,12 +647,12 @@ namespace dss {
     cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetEnergyMeterValue);
     log(std::string("Proxy: GetEnergyMeterValue ") + intToString(_dsMeterID));
 
-    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDSMeterGetEnergyMeterValue);
+    boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDSMeterGetEnergyMeterValue);
     if(recFrame == NULL) {
       log("DS485Proxy::getEnergyMeterValue: received no results", lsError);
       throw DS485ApiError("No frame received");
     }
-    PayloadDissector pd(recFrame->getFrame()->getPayload());
+    PayloadDissector pd(recFrame->getPayload());
     pd.get<uint8_t>(); // discard the function id
     return pd.get<uint32_t>();
   } // getEnergyMeterValue
@@ -667,12 +667,12 @@ namespace dss {
 
     bucket->waitForFrame(1000);
 
-    boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
+    boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
     if(recFrame == NULL) {
       throw DS485ApiError("No frame received");
     }
 
-    PayloadDissector pd(recFrame->getFrame()->getPayload());
+    PayloadDissector pd(recFrame->getPayload());
     pd.get<uint8_t>(); // discard the function id
     _lower = pd.get<uint16_t>();
     _upper = pd.get<uint16_t>();
@@ -692,7 +692,7 @@ namespace dss {
 
     boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionDeviceGetSensorValue);
     bucket->waitForFrame(2000);
-    boost::shared_ptr<ReceivedFrame> recFrame;
+    boost::shared_ptr<DS485CommandFrame> recFrame;
     if(bucket->isEmpty()) {
       log(std::string("received no ack for request getSensorValue"));
       throw DS485ApiError("no Ack for sensorValue");
@@ -704,7 +704,7 @@ namespace dss {
         recFrame= bucket->popFrame();
     // first frame is only request ack;
 
-    PayloadDissector pd(recFrame->getFrame()->getPayload());
+    PayloadDissector pd(recFrame->getPayload());
     pd.get<uint8_t>(); // discard functionID
     checkResultCode((int)pd.get<uint16_t>()); // check first ack
 
@@ -716,7 +716,7 @@ namespace dss {
     recFrame = bucket->popFrame();
 
     if(recFrame.get() != NULL) {
-        PayloadDissector pd(recFrame->getFrame()->getPayload());
+        PayloadDissector pd(recFrame->getPayload());
         pd.get<uint8_t>(); // discard functionID
         pd.get<uint16_t>();
         pd.get<uint16_t>();
@@ -741,12 +741,12 @@ namespace dss {
     if((_flags & DSLinkSendWriteOnly) == 0) {
       boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionDSLinkReceive);
       bucket->waitForFrame(10000);
-      boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
+      boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
       if(recFrame == NULL) {
         log("dsLinkSend: No packet received", lsError);
         throw DS485ApiError("No frame received");
       }
-      PayloadDissector pd(recFrame->getFrame()->getPayload());
+      PayloadDissector pd(recFrame->getPayload());
       pd.get<uint8_t>(); // discard the function id
       pd.get<uint16_t>(); // garbage
       devid_t devAddress = pd.get<uint16_t>(); // device address
@@ -782,20 +782,20 @@ namespace dss {
 
   } // removeUserGroup
 
-  boost::shared_ptr<ReceivedFrame> DS485Proxy::receiveSingleFrame(DS485CommandFrame& _frame, uint8_t _functionID) {
+  boost::shared_ptr<DS485CommandFrame> DS485Proxy::receiveSingleFrame(DS485CommandFrame& _frame, uint8_t _functionID) {
     boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(_frame, _functionID);
     bucket->waitForFrame(1000);
 
     if(bucket->isEmpty()) {
       log(std::string("received no results for request (") + FunctionIDToString(_functionID) + ")");
-      return boost::shared_ptr<ReceivedFrame>();
+      return boost::shared_ptr<DS485CommandFrame>();
     } else if(bucket->getFrameCount() > 1) {
       log(std::string("received multiple results (") + intToString(bucket->getFrameCount()) + ") for request (" + FunctionIDToString(_functionID) + ")");
       // TODO: check
       return bucket->popFrame();
     }
 
-    boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
+    boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
 
     if(recFrame.get() != NULL) {
       return recFrame;
@@ -805,10 +805,10 @@ namespace dss {
   } // receiveSingleFrame
 
   uint8_t DS485Proxy::receiveSingleResult(DS485CommandFrame& _frame, const uint8_t _functionID) {
-    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(_frame, _functionID);
+    boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(_frame, _functionID);
 
     if(recFrame.get() != NULL) {
-      PayloadDissector pd(recFrame->getFrame()->getPayload());
+      PayloadDissector pd(recFrame->getPayload());
       uint8_t functionID = pd.get<uint8_t>();
       if(functionID != _functionID) {
         log("function ids are different", lsFatal);
@@ -821,10 +821,10 @@ namespace dss {
   } // receiveSingleResult
 
   uint16_t DS485Proxy::receiveSingleResult16(DS485CommandFrame& _frame, const uint8_t _functionID) {
-    boost::shared_ptr<ReceivedFrame> recFrame = receiveSingleFrame(_frame, _functionID);
+    boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(_frame, _functionID);
 
     if(recFrame.get() != NULL) {
-      PayloadDissector pd(recFrame->getFrame()->getPayload());
+      PayloadDissector pd(recFrame->getPayload());
       uint8_t functionID = pd.get<uint8_t>();
       if(functionID != _functionID) {
         log("function ids are different");
@@ -1191,7 +1191,6 @@ namespace dss {
             log(sstream.str());
 
             log(std::string("Response for: ") + FunctionIDToString(functionID));
-            boost::shared_ptr<ReceivedFrame> rf(new ReceivedFrame(m_DS485Controller.getTokenCount(), frame));
 
             PayloadDissector pd2(frame->getPayload());
             pd2.get<uint8_t>();
@@ -1230,7 +1229,7 @@ namespace dss {
             foreach(FrameBucketBase* bucket, m_FrameBuckets) {
               if(bucket->getFunctionID() == functionID) {
                 if((bucket->getSourceID() == -1) || (bucket->getSourceID() == frame->getHeader().getSource())) {
-                  if(bucket->addFrame(rf)) {
+                  if(bucket->addFrame(frame)) {
                     bucketFound = true;
                   }
                 }
@@ -1275,15 +1274,6 @@ namespace dss {
     m_FrameBucketsGuard.unlock();
   } // removeFrameBucket
 
-  //================================================== receivedFrame
-
-  ReceivedFrame::ReceivedFrame(const int _receivedAt, boost::shared_ptr<DS485CommandFrame> _frame)
-  : m_ReceivedAtToken(_receivedAt),
-    m_Frame(_frame)
-  {
-  } // ctor
-
-
   //================================================== FrameBucketBase
 
   FrameBucketBase::FrameBucketBase(DS485Proxy* _proxy, int _functionID, int _sourceID)
@@ -1317,7 +1307,7 @@ namespace dss {
     m_SingleFrame(false)
   { } // ctor
 
-  bool FrameBucketCollector::addFrame(boost::shared_ptr<ReceivedFrame> _frame) {
+  bool FrameBucketCollector::addFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
     bool result = false;
     m_FramesMutex.lock();
     if(!m_SingleFrame || m_Frames.empty()) {
@@ -1332,8 +1322,8 @@ namespace dss {
     return result;
   } // addFrame
 
-  boost::shared_ptr<ReceivedFrame> FrameBucketCollector::popFrame() {
-    boost::shared_ptr<ReceivedFrame> result;
+  boost::shared_ptr<DS485CommandFrame> FrameBucketCollector::popFrame() {
+    boost::shared_ptr<DS485CommandFrame> result;
 
     m_FramesMutex.lock();
     if(!m_Frames.empty()) {

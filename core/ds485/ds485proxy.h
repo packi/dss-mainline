@@ -59,22 +59,6 @@ namespace dss {
   class Apartment;
   class ModelEvent;
 
-  /** A ReceivedFrame stores a boost::shared_ptr to the frame as well as the token-counter
-   *  of its arrival.
-   */
-  class ReceivedFrame {
-  private:
-    int m_ReceivedAtToken;
-    boost::shared_ptr<DS485CommandFrame> m_Frame;
-  public:
-    ReceivedFrame(const int _receivedAt, boost::shared_ptr<DS485CommandFrame> _frame);
-    boost::shared_ptr<DS485CommandFrame> getFrame() { return m_Frame; };
-
-    /** Returns the arrival time in (owned) tokens */
-    int getReceivedAt() const { return m_ReceivedAtToken; };
-  }; // ReceivedFrame
-
-
   /** A frame bucket gets notified on every frame that matches any given
    *  function-/source-id pair.
    *  If \a m_SourceID is -1 every source matches. */
@@ -86,7 +70,7 @@ namespace dss {
     int getFunctionID() const { return m_FunctionID; }
     int getSourceID() const { return m_SourceID; }
 
-    virtual bool addFrame(boost::shared_ptr<ReceivedFrame> _frame) = 0;
+    virtual bool addFrame(boost::shared_ptr<DS485CommandFrame> _frame) = 0;
 
     /** Registers the bucket at m_pProxy */
     void addToProxy();
@@ -105,7 +89,7 @@ namespace dss {
     */
   class FrameBucketCollector : public FrameBucketBase {
   private:
-    std::deque<boost::shared_ptr<ReceivedFrame> > m_Frames;
+    std::deque<boost::shared_ptr<DS485CommandFrame> > m_Frames;
     SyncEvent m_PacketHere;
     Mutex m_FramesMutex;
     bool m_SingleFrame;
@@ -113,11 +97,11 @@ namespace dss {
     FrameBucketCollector(DS485Proxy* _proxy, int _functionID, int _sourceID);
     virtual ~FrameBucketCollector() { }
 
-    /** Adds a ReceivedFrame to the frames queue */
-    virtual bool addFrame(boost::shared_ptr<ReceivedFrame> _frame);
+    /** Adds a DS485CommandFrame to the frames queue */
+    virtual bool addFrame(boost::shared_ptr<DS485CommandFrame> _frame);
     /** Returns the least recently received item int the queue.
      * The pointer will contain NULL if isEmpty() returns true. */
-    boost::shared_ptr<ReceivedFrame> popFrame();
+    boost::shared_ptr<DS485CommandFrame> popFrame();
 
     /** Waits for frames to arrive for \a _timeoutMS */
     void waitForFrames(int _timeoutMS);
@@ -147,7 +131,7 @@ namespace dss {
 #endif
 
     /** Returns a single frame or NULL if none should arrive within the timeout (1000ms) */
-    boost::shared_ptr<ReceivedFrame> receiveSingleFrame(DS485CommandFrame& _frame, uint8_t _functionID);
+    boost::shared_ptr<DS485CommandFrame> receiveSingleFrame(DS485CommandFrame& _frame, uint8_t _functionID);
     uint8_t receiveSingleResult(DS485CommandFrame& _frame, const uint8_t _functionID);
     uint16_t receiveSingleResult16(DS485CommandFrame& _frame, const uint8_t _functionID);
 

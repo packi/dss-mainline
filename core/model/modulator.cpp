@@ -91,16 +91,14 @@ namespace dss {
 
 
   /** set the consumption in mW */
-  void DSMeter::setPowerConsumption(unsigned long _value)
-  {
+  void DSMeter::setPowerConsumption(unsigned long _value) {
     DateTime now;
     m_PowerConsumptionAge = now;
     m_PowerConsumption = _value;
   }
 
   /** set the meter value in Wh */
-  void DSMeter::setEnergyMeterValue(unsigned long _value)
-  {
+  void DSMeter::setEnergyMeterValue(unsigned long _value)  {
     DateTime now;
     m_EnergyMeterValueAge = now;
     m_EnergyMeterValue = _value;

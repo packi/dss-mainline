@@ -1226,11 +1226,11 @@ namespace dss {
           boost::shared_ptr<FrameBucketCollector> bucket = proxy->sendFrameAndInstallBucket(*frame, FunctionDeviceGetTransmissionQuality);
           bucket->waitForFrame(2000);
 
-          boost::shared_ptr<ReceivedFrame> recFrame = bucket->popFrame();
+          boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
           if(recFrame == NULL) {
             return ResultToJSON(false, "No result received");
           }
-          PayloadDissector pd(recFrame->getFrame()->getPayload());
+          PayloadDissector pd(recFrame->getPayload());
           pd.get<uint8_t>();
           int errC = int(pd.get<uint16_t>());
           if(errC < 0) {
