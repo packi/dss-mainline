@@ -1,1 +1,2 @@
-add_library(ds485 ds485busrequestdispatcher.cpp ds485.cpp ds485proxy.cpp framebucketbase.cpp framebucketcollector.cpp)
+add_library(ds485 ds485busrequestdispatcher.cpp ds485.cpp ds485proxy.cpp
+	framebucketbase.cpp framebucketcollector.cpp businterfacehandler.cpp)

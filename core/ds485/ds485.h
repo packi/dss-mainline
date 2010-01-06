@@ -26,7 +26,6 @@
 #include "core/thread.h"
 #include "unix/serialcom.h"
 #include "core/ds485types.h"
-#include "core/syncevent.h"
 
 #include <vector>
 #include <string>
@@ -210,6 +209,12 @@ namespace dss {
     int getNumberOfCRCErrors() const { return m_NumberOfCRCErrors; }
   }; // FrameReader
 
+  class BusReadyCallbackInterface {
+  public:
+    virtual ~BusReadyCallbackInterface() {}
+    virtual void busReady() = 0;
+  };
+
   class DS485Controller : public Thread,
                           public DS485FrameProvider {
   private:
@@ -224,10 +229,8 @@ namespace dss {
     boost::ptr_vector<DS485CommandFrame> m_PendingFrames;
     Mutex m_PendingFramesGuard;
     boost::shared_ptr<SerialCom> m_SerialCom;
-    SyncEvent m_ControllerEvent;
-    SyncEvent m_CommandFrameEvent;
-    SyncEvent m_TokenEvent;
     dsid_t m_DSID;
+    BusReadyCallbackInterface* m_pBusReadyCallback;
   private:
     DS485Frame* getFrameFromWire();
     bool putFrameOnWire(const DS485Frame* _pFrame, bool _freeFrame = true);
@@ -247,9 +250,6 @@ namespace dss {
     const std::string& getRS485DeviceName() const { return m_RS485DeviceName; }
 
     void enqueueFrame(DS485CommandFrame& _frame);
-    bool waitForEvent(const int _timeoutMS);
-    void waitForCommandFrame();
-    void waitForToken();
 
     aControllerState getState() const;
     int getTokenCount() const { return m_TokenCounter; };
@@ -263,6 +263,8 @@ namespace dss {
     int getStationID() const { return m_StationID; }
 
     void setDSID(const dsid_t& _value) { m_DSID = _value; }
+
+    void setBusReadyCallback(BusReadyCallbackInterface* _value) { m_pBusReadyCallback = _value; }
   }; // DS485Controller
 
   class IDS485FrameCollector {

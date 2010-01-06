@@ -34,8 +34,6 @@
 
 namespace dss {
 
-  class DS485Proxy;
-
   /** FrameBucketCollector holds its received frames in a queue.
     */
   class FrameBucketCollector : public FrameBucketBase {
@@ -45,7 +43,7 @@ namespace dss {
     Mutex m_FramesMutex;
     bool m_SingleFrame;
   public:
-    FrameBucketCollector(DS485Proxy* _proxy, int _functionID, int _sourceID);
+    FrameBucketCollector(BusInterfaceHandler* _proxy, int _functionID, int _sourceID);
     virtual ~FrameBucketCollector() { }
 
     /** Adds a DS485CommandFrame to the frames queue */

@@ -158,7 +158,8 @@ namespace dss {
   DS485Controller::DS485Controller()
   : Thread("DS485Controller"),
     m_State(csInitial),
-    m_RS485DeviceName("/dev/ttyUSB0")
+    m_RS485DeviceName("/dev/ttyUSB0"),
+    m_pBusReadyCallback(NULL)
   {
     m_DSID.upper = DSIDHeader;
     m_DSID.lower = 0xDEADBEEF;
@@ -495,7 +496,6 @@ namespace dss {
 //            std::cout << ".";
 //            flush(std::cout);
             time(&tokenReceivedAt);
-            m_TokenEvent.broadcast();
             m_TokenCounter++;
             lastSentWasToken = true;
           } else {
@@ -608,8 +608,6 @@ namespace dss {
     (*frame) = *_frame;
     frame->setFrameSource(fsWire);
     distributeFrame(frame);
-    // Signal our listeners
-    m_CommandFrameEvent.signal();
   } // addToReceivedQueue
 
   void DS485Controller::doChangeState(aControllerState _newState) {
@@ -619,8 +617,11 @@ namespace dss {
       if(m_State == csInitial) {
         m_NextStationID = 0xFF;
         m_StationID = 0xFF;
+      } else if((m_State == csSlave) || (m_State == csMaster)) {
+        if(m_pBusReadyCallback != NULL) {
+          m_pBusReadyCallback->busReady();
+        }
       }
-      m_ControllerEvent.signal();
     }
   } // doChangeState
 
@@ -634,10 +635,6 @@ namespace dss {
     m_PendingFramesGuard.unlock();
   } // enqueueFrame
 
-  bool DS485Controller::waitForEvent(const int _timeoutMS) {
-    return m_ControllerEvent.waitFor(_timeoutMS);
-  } // waitForEvent
-
   aControllerState DS485Controller::getState() const {
     return m_State;
   } // getState
@@ -645,14 +642,6 @@ namespace dss {
   const std::string& DS485Controller::getStateAsString() const {
     return m_StateString;
   } // getStateAsString
-
-  void DS485Controller::waitForCommandFrame() {
-    m_CommandFrameEvent.waitFor();
-  } // waitForCommandFrame
-
-  void DS485Controller::waitForToken() {
-    m_TokenEvent.waitFor();
-  } // waitForToken
 
 
   //================================================== DS485FrameReader

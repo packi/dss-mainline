@@ -43,7 +43,7 @@ namespace dss {
 
   class FrameBucketCallback : public FrameBucketBase {
   public:
-    FrameBucketCallback(DS485Proxy* _proxy, int _functionID, int _sourceID, DS485Client::FrameCallback_t _callback)
+    FrameBucketCallback(BusInterfaceHandler* _proxy, int _functionID, int _sourceID, DS485Client::FrameCallback_t _callback)
     : FrameBucketBase(_proxy, _functionID, _sourceID),
       m_callBack(_callback)
     {
@@ -103,10 +103,9 @@ namespace dss {
   void DS485Client::subscribeTo(int _functionID, int _source, FrameCallback_t _callback) {
     assert(_callback != NULL);
 
-    DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(&DSS::getInstance()->getDS485Interface());
-    assert(proxy != NULL);
+    BusInterfaceHandler* handler = &DSS::getInstance()->getBusInterfaceHandler();
 
-    boost::shared_ptr<FrameBucketBase> bucket(new FrameBucketCallback(proxy, _functionID, _source, _callback), FrameBucketBase::removeFromProxyAndDelete);
+    boost::shared_ptr<FrameBucketBase> bucket(new FrameBucketCallback(handler, _functionID, _source, _callback), FrameBucketBase::removeFromProxyAndDelete);
     bucket->addToProxy();
     m_pImpl->buckets.push_back(bucket);
   } // subscribeTo

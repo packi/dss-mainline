@@ -35,6 +35,7 @@
 #include "scripting/modeljs.h"
 #include "eventinterpreterplugins.h"
 #include "core/ds485/ds485proxy.h"
+#include "core/ds485/businterfacehandler.h"
 #include "core/ds485/ds485busrequestdispatcher.h"
 #include "core/model/apartment.h"
 
@@ -167,6 +168,10 @@ const char* WebrootDirectory = "data/webroot";
     
     m_pApartment->setDS485Interface(m_pDS485Interface.get());
     m_pApartment->setBusRequestDispatcher(m_pBusDispatcher.get());
+
+    m_pBusInterfaceHandler = boost::shared_ptr<BusInterfaceHandler>(new BusInterfaceHandler(this, getApartment()));
+    m_Subsystems.push_back(m_pBusInterfaceHandler.get());
+    dynamic_cast<DS485Proxy*>(m_pDS485Interface.get())->setBusInterfaceHandler(m_pBusInterfaceHandler.get());
 
     m_pWebServer = boost::shared_ptr<WebServer>(new WebServer(this));
     m_Subsystems.push_back(m_pWebServer.get());

@@ -29,7 +29,6 @@
 
 #include "core/ds485types.h"
 #include "ds485.h"
-#include "core/syncevent.h"
 #include "core/DS485Interface.h"
 #include "core/subsystem.h"
 #include "core/mutex.h"
@@ -59,18 +58,16 @@ namespace dss {
   class ModelEvent;
   class FrameBucketBase;
   class FrameBucketCollector;
+  class BusInterfaceHandler;
 
-  typedef std::vector<boost::shared_ptr<DS485CommandFrame> > CommandFrameSharedPtrVector;
-
-  class DS485Proxy : public    Thread,
-                     public    Subsystem,
+  class DS485Proxy : public    Subsystem,
                      public    DS485Interface,
                      public    DeviceBusInterface,
                      public    StructureQueryBusInterface,
                      public    MeteringBusInterface,
                      public    StructureModifyingBusInterface,
                      public    FrameSenderInterface,
-                     public    IDS485FrameCollector {
+                     private   BusReadyCallbackInterface {
   private:
 #ifdef WITH_SIM
     bool isSimAddress(const uint8_t _addr);
@@ -81,28 +78,22 @@ namespace dss {
     uint8_t receiveSingleResult(DS485CommandFrame& _frame, const uint8_t _functionID);
     uint16_t receiveSingleResult16(DS485CommandFrame& _frame, const uint8_t _functionID);
 
-    std::vector<FrameBucketBase*> m_FrameBuckets;
-
-    void signalEvent();
-
+    BusInterfaceHandler* m_pBusInterfaceHandler;
     DS485Controller m_DS485Controller;
-    SyncEvent m_ProxyEvent;
     Apartment* m_pApartment;
 
-    SyncEvent m_PacketHere;
-    Mutex m_IncomingFramesGuard;
-    Mutex m_FrameBucketsGuard;
-    CommandFrameSharedPtrVector m_IncomingFrames;
     bool m_InitializeDS485Controller;
 
     DSMeterSpec_t dsMeterSpecFromFrame(boost::shared_ptr<DS485CommandFrame> _frame);
     void checkResultCode(const int _resultCode);
-    void raiseModelEvent(ModelEvent* _pEvent);
+    virtual void busReady();
   protected:
     virtual void doStart();
   public:
     DS485Proxy(DSS* _pDSS, Apartment* _pApartment);
     virtual ~DS485Proxy() {};
+
+    void setBusInterfaceHandler(BusInterfaceHandler* _value) { m_pBusInterfaceHandler = _value; }
 
     virtual DeviceBusInterface* getDeviceBusInterface() { return this; }
     virtual StructureQueryBusInterface* getStructureQueryBusInterface() { return this; }
@@ -112,20 +103,12 @@ namespace dss {
 
     virtual bool isReady();
     void setInitializeDS485Controller(const bool _value) { m_InitializeDS485Controller = _value; }
-    virtual void execute();
 
     virtual void sendFrame(DS485CommandFrame& _frame);
     boost::shared_ptr<FrameBucketCollector> sendFrameAndInstallBucket(DS485CommandFrame& _frame, const int _functionID);
-    void installBucket(boost::shared_ptr<FrameBucketBase> _bucket);
 
     //------------------------------------------------ Handling
     virtual void initialize();
-    void waitForProxyEvent();
-
-    virtual void collectFrame(boost::shared_ptr<DS485CommandFrame> _frame);
-
-    void addFrameBucket(FrameBucketBase* _bucket);
-    void removeFrameBucket(FrameBucketBase* _bucket);
 
     //------------------------------------------------ Specialized Commands (system)
     virtual std::vector<DSMeterSpec_t> getDSMeters();

@@ -26,13 +26,13 @@
 
 #include "core/base.h"
 #include "core/logger.h"
-#include "ds485proxy.h"
+#include "businterfacehandler.h"
 
 namespace dss {
 
   //================================================== FrameBucketBase
 
-  FrameBucketBase::FrameBucketBase(DS485Proxy* _proxy, int _functionID, int _sourceID)
+  FrameBucketBase::FrameBucketBase(BusInterfaceHandler* _proxy, int _functionID, int _sourceID)
   : m_pProxy(_proxy),
     m_FunctionID(_functionID),
     m_SourceID(_sourceID)

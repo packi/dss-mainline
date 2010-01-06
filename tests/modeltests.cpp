@@ -33,11 +33,12 @@
 #include "core/model/zone.h"
 #include "core/model/set.h"
 #include "core/setbuilder.h"
-#include "core/ds485const.h"
-#include "core/ds485/ds485proxy.h"
 #include "core/sim/dssim.h"
 #include "core/dss.h"
+#include "core/ds485const.h"
+#include "core/ds485/ds485proxy.h"
 #include "core/ds485/ds485busrequestdispatcher.h"
+#include "core/ds485/businterfacehandler.h"
 
 using namespace dss;
 
@@ -453,11 +454,14 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   DS485Proxy proxy(NULL, &apt);
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setFrameSender(proxy.getFrameSenderInterface());
+  BusInterfaceHandler busHandler(NULL, apt);
+  proxy.setBusInterfaceHandler(&busHandler);
   proxy.setInitializeDS485Controller(false);
   proxy.initialize();
   apt.setBusRequestDispatcher(&dispatcher);
+  busHandler.initialize();
 
-  proxy.start();
+  busHandler.start();
   apt.start();
   while(apt.isInitializing()) {
     sleepMS(100);
@@ -483,7 +487,7 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   sleepMS(500);
   BOOST_CHECK_EQUAL(Scene2, dev1.getLastCalledScene());
   BOOST_CHECK_EQUAL(Scene2, dev2.getLastCalledScene());
-  proxy.terminate();
+  busHandler.terminate();
   apt.terminate();
   sleepMS(1500);
   DSS::teardown();
