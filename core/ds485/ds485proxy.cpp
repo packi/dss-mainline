@@ -86,7 +86,7 @@ namespace dss {
 #else
              true;
 #endif
-    bool selfReady = m_pBusInterfaceHandler != NULL ? m_pBusInterfaceHandler->isRunning() : true;
+    bool selfReady = (m_pBusInterfaceHandler != NULL) ? m_pBusInterfaceHandler->isRunning() : true;
     bool controllerReady =
         ((m_DS485Controller.getState() == csSlave) ||
         (m_DS485Controller.getState() == csDesignatedMaster) ||
@@ -871,6 +871,7 @@ namespace dss {
       try {
         m_DS485Controller.setDSID(dsid_t::fromString(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "dsid")));
         m_DS485Controller.setBusReadyCallback(boost::bind(&DS485Proxy::busReady,this));
+        m_DS485Controller.run();
       } catch (const std::runtime_error& _ex) {
         log(std::string("Caught exception while starting DS485Controller: ") + _ex.what(), lsFatal);
       }
