@@ -158,8 +158,7 @@ namespace dss {
   DS485Controller::DS485Controller()
   : Thread("DS485Controller"),
     m_State(csInitial),
-    m_RS485DeviceName("/dev/ttyUSB0"),
-    m_pBusReadyCallback(NULL)
+    m_RS485DeviceName("/dev/ttyUSB0")
   {
     m_DSID.upper = DSIDHeader;
     m_DSID.lower = 0xDEADBEEF;
@@ -618,8 +617,8 @@ namespace dss {
         m_NextStationID = 0xFF;
         m_StationID = 0xFF;
       } else if((m_State == csSlave) || (m_State == csMaster)) {
-        if(m_pBusReadyCallback != NULL) {
-          m_pBusReadyCallback->busReady();
+        if(m_BusReadyCallback) {
+          m_BusReadyCallback();
         }
       }
     }

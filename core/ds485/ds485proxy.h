@@ -66,8 +66,7 @@ namespace dss {
                      public    StructureQueryBusInterface,
                      public    MeteringBusInterface,
                      public    StructureModifyingBusInterface,
-                     public    FrameSenderInterface,
-                     private   BusReadyCallbackInterface {
+                     public    FrameSenderInterface {
   private:
 #ifdef WITH_SIM
     bool isSimAddress(const uint8_t _addr);
@@ -86,7 +85,7 @@ namespace dss {
 
     DSMeterSpec_t dsMeterSpecFromFrame(boost::shared_ptr<DS485CommandFrame> _frame);
     void checkResultCode(const int _resultCode);
-    virtual void busReady();
+    void busReady();
   protected:
     virtual void doStart();
   public:

@@ -22,6 +22,9 @@
 
 #include "ds485proxy.h"
 
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
+
 #include "core/dss.h"
 #include "core/logger.h"
 #include "core/ds485const.h"
@@ -861,13 +864,13 @@ namespace dss {
       }
 #endif
     }
-  }
+  } // initialize
 
   void DS485Proxy::doStart() {
     if(m_InitializeDS485Controller) {
       try {
         m_DS485Controller.setDSID(dsid_t::fromString(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "dsid")));
-        m_DS485Controller.setBusReadyCallback(this);
+        m_DS485Controller.setBusReadyCallback(boost::bind(&DS485Proxy::busReady,this));
       } catch (const std::runtime_error& _ex) {
         log(std::string("Caught exception while starting DS485Controller: ") + _ex.what(), lsFatal);
       }

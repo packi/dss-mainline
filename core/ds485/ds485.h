@@ -32,6 +32,7 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
 
 namespace dss {
 
@@ -209,12 +210,6 @@ namespace dss {
     int getNumberOfCRCErrors() const { return m_NumberOfCRCErrors; }
   }; // FrameReader
 
-  class BusReadyCallbackInterface {
-  public:
-    virtual ~BusReadyCallbackInterface() {}
-    virtual void busReady() = 0;
-  };
-
   class DS485Controller : public Thread,
                           public DS485FrameProvider {
   private:
@@ -230,7 +225,8 @@ namespace dss {
     Mutex m_PendingFramesGuard;
     boost::shared_ptr<SerialCom> m_SerialCom;
     dsid_t m_DSID;
-    BusReadyCallbackInterface* m_pBusReadyCallback;
+    typedef boost::function<void()> BusReadyCallback;
+    BusReadyCallback m_BusReadyCallback;
   private:
     DS485Frame* getFrameFromWire();
     bool putFrameOnWire(const DS485Frame* _pFrame, bool _freeFrame = true);
@@ -264,7 +260,7 @@ namespace dss {
 
     void setDSID(const dsid_t& _value) { m_DSID = _value; }
 
-    void setBusReadyCallback(BusReadyCallbackInterface* _value) { m_pBusReadyCallback = _value; }
+    void setBusReadyCallback(BusReadyCallback _value) { m_BusReadyCallback = _value; }
   }; // DS485Controller
 
   class IDS485FrameCollector {
