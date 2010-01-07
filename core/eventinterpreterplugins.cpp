@@ -38,6 +38,8 @@
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Node.h>
@@ -165,26 +167,17 @@ namespace dss {
 
   class SubscriptionOptionsDS485 : public SubscriptionOptions {
   private:
-    int m_ParameterIndex;
-    int m_SceneIndex;
-    std::string m_To;
-    std::string m_Context;
+    typedef boost::function<void(Set&)> Command;
+    Command m_Command;
   public:
-    SubscriptionOptionsDS485()
-    : m_ParameterIndex(-1), m_SceneIndex(-1)
-    { }
+    void execute(Set& _set) const {
+      assert(m_Command);
+      m_Command(_set);
+    }
 
-    void setParameterIndex(const int _value) { m_ParameterIndex = _value; }
-    int getParameterIndex() const { return m_ParameterIndex; }
-
-    void setTo(const std::string& _value) { m_To = _value; }
-    const std::string& GetTo() const { return m_To; }
-
-    void setContext(const std::string& _value) { m_Context = _value; }
-    const std::string& getContext() const { return m_Context; }
-
-    void setSceneIndex(const int _value) { m_SceneIndex = _value; }
-    int getSceneIndex() const { return m_SceneIndex; }
+    void setCommand(Command _command) {
+      m_Command = _command;
+    }
   };
 
   std::string EventInterpreterPluginDS485::getParameter(Node* _node, const std::string& _parameterName) {
@@ -200,6 +193,7 @@ namespace dss {
       }
       curNode = curNode->nextSibling();
     }
+    Logger::getInstance()->log(std::string("bus_handler: Needed parameter '") + _parameterName + "' not found", lsError);
     return "";
   } // getParameter
 
@@ -212,22 +206,34 @@ namespace dss {
         Element* elem = dynamic_cast<Element*>(curNode);
         if(elem != NULL) {
           std::string typeName = elem->getAttribute("type");
-          std::string paramName = "";
-          bool needParam = false;
-          // TODO: add functionality back
 
-          if(!paramName.empty()) {
-            std::string paramValue = getParameter(curNode, paramName);
-            if(paramValue.size() == 0 && needParam) {
-              Logger::getInstance()->log(std::string("bus_handler: Needed parameter '") + paramName + "' not found in subscription for type '" + typeName + "'", lsError);
-            }
-
-            if(paramName == "parameter") {
-              result->setParameterIndex(strToIntDef(paramValue, -1));
-            } else if(paramName == "scene") {
-              result->setSceneIndex(strToIntDef(paramValue, -1));
-            }
+          if(typeName == "turnOn") {
+            result->setCommand(boost::bind(&Set::turnOn, _1));
+          } else if(typeName == "turnOff") {
+            result->setCommand(boost::bind(&Set::turnOff, _1));
+          } else if(typeName == "dimUp") {
+            result->setCommand(boost::bind(&Set::startDim, _1, true));
+          } else if(typeName == "stopDim") {
+            result->setCommand(boost::bind(&Set::endDim, _1));
+          } else if(typeName == "increaseValue") {
+            result->setCommand(boost::bind(&Set::increaseValue, _1));
+          } else if(typeName == "decreaseValue") {
+            result->setCommand(boost::bind(&Set::decreaseValue, _1));
+          } else if(typeName == "callScene") {
+            int sceneNr = strToInt(getParameter(curNode, "scene"));
+            result->setCommand(boost::bind(&Set::callScene, _1, sceneNr));
+          } else if(typeName == "saveScene") {
+            int sceneNr = strToInt(getParameter(curNode, "scene"));
+            result->setCommand(boost::bind(&Set::callScene, _1, sceneNr));
+          } else if(typeName == "undoScene") {
+            int sceneNr = strToInt(getParameter(curNode, "scene"));
+            result->setCommand(boost::bind(&Set::callScene, _1, sceneNr));
+          } else {
+            Logger::getInstance()->log(std::string("unknown command: ") + typeName);
+            delete result;
+            return NULL;
           }
+
         }
       }
       curNode = curNode->nextSibling();
@@ -239,15 +245,6 @@ namespace dss {
   void EventInterpreterPluginDS485::handleEvent(Event& _event, const EventSubscription& _subscription) {
     const SubscriptionOptionsDS485* options = dynamic_cast<const SubscriptionOptionsDS485*>(&_subscription.getOptions());
     if(options != NULL) {
-//      DS485Command cmd = options->getCommand();
-
-
-      // determine location
-      // if a location is given
-      //   evaluate relative to context
-      // else
-      //   send to context's parent-entity (zone)
-
       SetBuilder builder(m_Apartment);
       Set to;
       if(_event.hasPropertySet(EventPropertyLocation)) {
@@ -259,7 +256,7 @@ namespace dss {
           to = _event.getRaisedAtZone().getDevices();
         }
       }
-      // TODO: add functionality
+      options->execute(to);
     } else {
       Logger::getInstance()->log("EventInterpreterPluginDS485::handleEvent: Options are not of type SubscriptionOptionsDS485, ignoring", lsError);
     }
