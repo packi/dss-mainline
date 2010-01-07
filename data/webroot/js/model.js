@@ -77,9 +77,9 @@ var Apartment = Class.create({
 	
 	fetch: function() {
 		var self = this;
-		var structure = self.sendSyncRequest("getStructure", {});
+		var response = self.sendSyncRequest("getStructure", {});
 		self.zones = [];
-		structure.apartment.zones.each(function(zone) {
+		response.result.apartment.zones.each(function(zone) {
 			var zoneObj = new Zone(zone.id, zone.name);
 			self.zones.push(zoneObj);
 			zone.devices.each(function(device) {
@@ -557,7 +557,7 @@ var Set = Class.create({
   getDevices: function() {
     var respObj = this.sendSyncRequest("getDevices", this.getParameterForSetCall());
     if(respObj.ok) {
-      return respObj.result.devices;
+      return respObj.result;
     }
     return undefined;
   }

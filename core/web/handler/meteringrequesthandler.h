@@ -20,18 +20,19 @@
 
 */
 
-#ifndef WEBSERVERAPI_H
-#define WEBSERVERAPI_H
 
-#include <boost/shared_ptr.hpp>
+#ifndef METERINGREQUESTHANDLER_H_
+#define METERINGREQUESTHANDLER_H_
+
+#include "core/web/webrequests.h"
 
 namespace dss {
 
-  class RestfulAPI;
-  
-  class WebServerAPI {
+  class MeteringRequestHandler : public WebServerRequestHandlerJSON {
   public:
-    static boost::shared_ptr<RestfulAPI> createRestfulAPI();
-  };
-}
-#endif // WEBSERVERAPI_H
+    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
+  }; // MeteringRequestHandler
+
+} // namespace dss
+
+#endif /* METERINGREQUESTHANDLER_H_ */

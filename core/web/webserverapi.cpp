@@ -26,9 +26,9 @@
 
 namespace dss {
  
-  RestfulAPI WebServerAPI::createRestfulAPI() {
-    RestfulAPI api;
-    RestfulClass& clsApartment = api.addClass("apartment")
+  boost::shared_ptr<RestfulAPI> WebServerAPI::createRestfulAPI() {
+    boost::shared_ptr<RestfulAPI> api(new RestfulAPI());
+    RestfulClass& clsApartment = api->addClass("apartment")
        .withDocumentation("A wrapper for global functions as well as adressing all devices connected to the dSS");
     clsApartment.addMethod("getName")
       .withDocumentation("Returns the name of the apartment");
@@ -105,7 +105,7 @@ namespace dss {
     clsApartment.addMethod("rescan")
       .withDocumentation("Rescans all circuits of the apartment");
 
-    RestfulClass& clsZone = api.addClass("zone")
+    RestfulClass& clsZone = api->addClass("zone")
         .withInstanceParameter("id", "integer", false)
         .withInstanceParameter("name", "string", false)
         .requireOneOf("id", "name");
@@ -172,7 +172,7 @@ namespace dss {
       .withParameter("groupName", "string", false)
       .withDocumentation("Returns the consumption of all devices in the zone in mW.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
 
-    RestfulClass& clsDevice = api.addClass("device")
+    RestfulClass& clsDevice = api->addClass("device")
         .withInstanceParameter("dsid", "integer", false)
         .withInstanceParameter("name", "string", false)
         .requireOneOf("dsid", "name");
@@ -230,7 +230,7 @@ namespace dss {
       .withDocumentation("Returns the consumption of the device in mW.", "Note that this works only for simulated devices at the moment.");
 
 
-    RestfulClass& clsCircuit = api.addClass("circuit")
+    RestfulClass& clsCircuit = api->addClass("circuit")
        .withInstanceParameter("id", "dsid", true);
     clsCircuit.addMethod("getName")
        .withDocumentation("Returns the name of the circuit.");
@@ -246,7 +246,7 @@ namespace dss {
     clsCircuit.addMethod("rescan")
        .withDocumentation("Rescans the circuit");
 
-    RestfulClass& clsProp = api.addClass("property")
+    RestfulClass& clsProp = api->addClass("property")
         .withInstanceParameter("path", "string", true);
     clsProp.addMethod("getString")
         .withDocumentation("Returns the std::string value of the property", "This will fail if the property is not of type 'string'.");
@@ -269,7 +269,7 @@ namespace dss {
     clsProp.addMethod("setString")
         .withDocumentation("Returns the type of the node");
 
-    RestfulClass& clsEvent = api.addClass("event");
+    RestfulClass& clsEvent = api->addClass("event");
     clsEvent.addMethod("raise")
        .withParameter("name", "string", true)
        .withParameter("context", "string", false)
@@ -277,12 +277,12 @@ namespace dss {
        .withDocumentation("Raises an event", "The context describes the source of the event. The location, if provided, defines where any action that is taken "
            "by any subscription should happen.");
 
-    RestfulClass& clsSystem = api.addClass("system");
+    RestfulClass& clsSystem = api->addClass("system");
     clsSystem.addMethod("version")
       .withDocumentation("Returns the dss version",
                          "This method returns the version std::string of the dss");
 
-    RestfulClass& clsSet = api.addClass("set")
+    RestfulClass& clsSet = api->addClass("set")
         .withInstanceParameter("self", "string", false);
     clsSet.addMethod("fromApartment")
         .withDocumentation("Creates a set that contains all devices of the apartment");

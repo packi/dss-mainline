@@ -33,7 +33,16 @@
 #include "core/web/webrequests.h"
 #include "core/web/webserverplugin.h"
 
+#include "core/web/handler/debugrequesthandler.h"
+#include "core/web/handler/systemrequesthandler.h"
+#include "core/web/handler/simrequesthandler.h"
+#include "core/web/handler/meteringrequesthandler.h"
+#include "core/web/handler/structurerequesthandler.h"
+#include "core/web/handler/eventrequesthandler.h"
+#include "core/web/handler/propertyrequesthandler.h"
+
 #include "webserverapi.h"
+#include "json.h"
 
 namespace dss {
   //============================================= WebServer
@@ -97,8 +106,8 @@ namespace dss {
   } // loadPlugin
 
   void WebServer::setupAPI() {
-    RestfulAPI api = WebServerAPI::createRestfulAPI();
-    RestfulAPIWriter::writeToXML(api, "doc/json_api.xml");
+    m_pAPI = WebServerAPI::createRestfulAPI();
+    RestfulAPIWriter::writeToXML(*m_pAPI, "doc/json_api.xml");
   } // setupAPI
 
   void WebServer::doStart() {
@@ -247,8 +256,16 @@ namespace dss {
 
     std::string result;
     if(self.m_Handlers[request.getClass()] != NULL) {
-      result = self.m_Handlers[request.getClass()]->handleRequest(request, session);
-      emitHTTPHeader(200, _connection, "application/json");
+      try {
+        result = self.m_Handlers[request.getClass()]->handleRequest(request, session);
+        emitHTTPHeader(200, _connection, "application/json");
+      } catch(std::runtime_error& e) {
+        emitHTTPHeader(500, _connection, "application/json");
+        JSONObject resultObj;
+        resultObj.addProperty("ok", false);
+        resultObj.addProperty("message", e.what());
+        result = resultObj.toString();
+      }
     } else {
       emitHTTPHeader(404, _connection, "application/json");
       std::ostringstream sstream;

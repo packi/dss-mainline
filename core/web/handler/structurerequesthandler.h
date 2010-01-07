@@ -20,18 +20,18 @@
 
 */
 
-#ifndef WEBSERVERAPI_H
-#define WEBSERVERAPI_H
+#ifndef STRUCTUREREQUESTHANDLER_H_
+#define STRUCTUREREQUESTHANDLER_H_
 
-#include <boost/shared_ptr.hpp>
+#include "core/web/webrequests.h"
 
 namespace dss {
 
-  class RestfulAPI;
-  
-  class WebServerAPI {
+  class StructureRequestHandler : public WebServerRequestHandlerJSON {
   public:
-    static boost::shared_ptr<RestfulAPI> createRestfulAPI();
-  };
-}
-#endif // WEBSERVERAPI_H
+    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
+  }; // StructureRequestHandler
+
+} // namespace dss
+
+#endif /* STRUCTUREREQUESTHANDLER_H_ */

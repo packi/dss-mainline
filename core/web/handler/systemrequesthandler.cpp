@@ -20,18 +20,21 @@
 
 */
 
-#ifndef WEBSERVERAPI_H
-#define WEBSERVERAPI_H
+#include "systemrequesthandler.h"
 
-#include <boost/shared_ptr.hpp>
+#include "core/web/json.h"
+#include "core/dss.h"
 
 namespace dss {
 
-  class RestfulAPI;
-  
-  class WebServerAPI {
-  public:
-    static boost::shared_ptr<RestfulAPI> createRestfulAPI();
-  };
-}
-#endif // WEBSERVERAPI_H
+  //=========================================== SystemRequestHandler
+
+  boost::shared_ptr<JSONObject> SystemRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
+    if(_request.getMethod() == "version") {
+      return success(DSS::getInstance()->versionString());
+    }
+    throw std::runtime_error("Unhandled function");
+  } // handleRequest
+
+
+} // namespace dss

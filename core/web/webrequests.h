@@ -26,6 +26,7 @@
 #include "core/web/restful.h"
 
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 #include "core/logger.h"
 #include "core/dss.h"
@@ -33,6 +34,8 @@
 namespace dss {
 
   class IDeviceInterface;
+  class JSONObject;
+  class JSONElement;
   
   class WebServerRequestHandler : public RestfulRequestHandler {
   protected:
@@ -45,9 +48,20 @@ namespace dss {
     }
   }; // WebServerRequestHandler
 
-  class DeviceInterfaceRequestHandler : public WebServerRequestHandler {
+  class WebServerRequestHandlerJSON : public WebServerRequestHandler {
+  protected:
+    boost::shared_ptr<JSONObject> success();
+    boost::shared_ptr<JSONObject> success(boost::shared_ptr<JSONElement> _innerResult);
+    boost::shared_ptr<JSONObject> success(const std::string& _message);
+    boost::shared_ptr<JSONObject> failure(const std::string& _message = "");
   public:
-    std::string handleDeviceInterfaceRequest(const RestfulRequest& _request, IDeviceInterface* _interface);
+    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session);
+    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session) = 0;
+  }; // WebServerRequestHandlerJSON
+
+  class DeviceInterfaceRequestHandler : public WebServerRequestHandlerJSON {
+  public:
+    boost::shared_ptr<JSONObject> handleDeviceInterfaceRequest(const RestfulRequest& _request, IDeviceInterface* _interface);
 
   protected:
     bool isDeviceInterfaceCall(const RestfulRequest& _request);
@@ -55,63 +69,28 @@ namespace dss {
 
   class ApartmentRequestHandler : public DeviceInterfaceRequestHandler {
   public:
-    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session);
+    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
   };
 
   class ZoneRequestHandler : public DeviceInterfaceRequestHandler {
   public:
-    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session);
+    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
   }; // ZoneRequestHandler
 
   class DeviceRequestHandler : public DeviceInterfaceRequestHandler {
   public:
-    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session);
+    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
   }; // DeviceRequestHandler
 
-  class CircuitRequestHandler : public WebServerRequestHandler {
+  class CircuitRequestHandler : public WebServerRequestHandlerJSON {
   public:
-    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session);
+    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
   }; // CircuitRequestHandler
 
   class SetRequestHandler : public DeviceInterfaceRequestHandler {
   public:
-    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session);
+    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
   }; // SetRequestHandler
-
-  class PropertyRequestHandler : public WebServerRequestHandler {
-  public:
-    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session);
-  }; // PropertyRequestHandler
-
-  class EventRequestHandler : public WebServerRequestHandler {
-  public:
-    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session);
-  }; // EventRequestHandler
-
-  class SystemRequestHandler : public WebServerRequestHandler {
-  public:
-    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session);
-  }; // SystemRequestHandler
-
-  class StructureRequestHandler : public WebServerRequestHandler {
-  public:
-    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session);
-  }; // StructureRequestHandler
-
-  class SimRequestHandler : public WebServerRequestHandler {
-  public:
-    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session);
-  }; // SimRequestHandler
-
-  class DebugRequestHandler : public WebServerRequestHandler {
-  public:
-    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session);
-  }; // DebugRequestHandler
-
-  class MeteringRequestHandler : public WebServerRequestHandler {
-  public:
-    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session);
-  }; // MeteringRequestHandler
 
 
 }

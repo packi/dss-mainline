@@ -59,6 +59,10 @@ namespace dss {
     return m_DSID;
   } // getID
 
+  int DeviceReference::getFunctionID() const {
+    return getDevice().getFunctionID();
+  } // getFunctionID
+
   std::string DeviceReference::getName() const {
     return getDevice().getName();
   } //getName

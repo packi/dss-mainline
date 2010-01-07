@@ -33,6 +33,7 @@
 
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace dss {
 
@@ -40,6 +41,7 @@ namespace dss {
   class PropertyNode;
   class WebServerPlugin;
   class RestfulRequestHandler;
+  class RestfulAPI;
 
   typedef boost::ptr_map<const int, Session> SessionByID;
 
@@ -50,6 +52,7 @@ namespace dss {
     SessionByID m_Sessions;
     boost::ptr_vector<WebServerPlugin> m_Plugins;
     __gnu_cxx::hash_map<const std::string, RestfulRequestHandler*> m_Handlers;
+    boost::shared_ptr<RestfulAPI> m_pAPI;
   private:
     void setupAPI();
     void loadPlugin(PropertyNode& _node);
