@@ -36,6 +36,7 @@
 #include "core/model/group.h"
 #include "core/model/set.h"
 #include "core/ds485/ds485proxy.h"
+#include "core/ds485/ds485busrequestdispatcher.h"
 
 using namespace dss;
 
@@ -220,11 +221,16 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
   queue.setEventRunner(&runner);
   runner.setEventQueue(&queue);
 
-  Apartment apt(NULL);
   ModelMaintenance maintenance(NULL);
+  Apartment apt(NULL);
+  maintenance.setApartment(&apt);
   DSDSMeterSim modSim(NULL);
   DS485Proxy proxy(NULL, &maintenance);
   apt.setDS485Interface(&proxy);
+  DS485BusRequestDispatcher dispatcher;
+  dispatcher.setFrameSender(&proxy);
+  apt.setBusRequestDispatcher(&dispatcher);
+
 
   proxy.initialize();
 

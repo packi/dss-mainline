@@ -51,6 +51,7 @@ namespace dss {
 
   DS485Proxy::DS485Proxy(DSS* _pDSS, ModelMaintenance* _pModelMaintenance)
   : Subsystem(_pDSS, "DS485Proxy"),
+    m_pBusInterfaceHandler(NULL),
     m_pModelMaintenance(_pModelMaintenance),
     m_InitializeDS485Controller(true)
   {
