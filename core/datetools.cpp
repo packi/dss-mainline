@@ -169,7 +169,7 @@ namespace dss {
   } // setTime
 
   void DateTime::clearDate() {
-    setDate(0,0,1900);
+    setDate(1, 0, 1900);
   } // clearDate
 
   void DateTime::clearTime() {

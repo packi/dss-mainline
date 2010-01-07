@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_SUITE(DateTools)
 BOOST_AUTO_TEST_CASE(testSimpleDates) {
   DateTime dt;
   dt.clear();
-  BOOST_CHECK_EQUAL(dt.getDay(), 0);
+  BOOST_CHECK_EQUAL(dt.getDay(), 1);
   BOOST_CHECK_EQUAL(dt.getMonth(), 0);
   BOOST_CHECK_EQUAL(dt.getYear(), 1900);
   BOOST_CHECK_EQUAL(dt.getSecond(), 0);
