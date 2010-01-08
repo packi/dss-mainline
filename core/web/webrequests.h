@@ -38,11 +38,6 @@ namespace dss {
   
   class WebServerRequestHandler : public RestfulRequestHandler {
   protected:
-
-    DSS& getDSS() {
-      return *DSS::getInstance();
-    }
-
     void log(const std::string& _line, aLogSeverity _severity = lsDebug) {
       Logger::getInstance()->log("RequestHandler: " + _line, _severity);
     }

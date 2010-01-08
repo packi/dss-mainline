@@ -27,9 +27,14 @@
 
 namespace dss {
 
+  class Apartment;
+  
   class SimRequestHandler : public WebServerRequestHandlerJSON {
   public:
+    SimRequestHandler(Apartment& _apartment);
     virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
+  private:
+    Apartment& m_Apartment;  
   }; // SimRequestHandler
 
 } // namespace dss

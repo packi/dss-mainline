@@ -27,9 +27,14 @@
 
 namespace dss {
 
+  class PropertySystem;
+  
   class PropertyRequestHandler : public WebServerRequestHandlerJSON {
   public:
+    PropertyRequestHandler(PropertySystem& _propertySystem);
     virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
+  private:
+    PropertySystem& m_PropertySystem;
   }; // PropertyRequestHandler
 
 } // namespace dss

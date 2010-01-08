@@ -22,7 +22,6 @@
 
 #include "simrequesthandler.h"
 
-#include "core/dss.h"
 #include "core/ds485const.h"
 #include "core/model/group.h"
 #include "core/model/zone.h"
@@ -32,6 +31,10 @@ namespace dss {
 
 
   //=========================================== SimRequestHandler
+  
+  SimRequestHandler::SimRequestHandler(Apartment& _apartment)
+  : m_Apartment(_apartment)
+  { }
 
   boost::shared_ptr<JSONObject> SimRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
     if(_request.getMethod() == "switch") {
@@ -50,7 +53,7 @@ namespace dss {
           return failure("Could not parse groupID");
         }
         try {
-          Zone& zone = getDSS().getApartment().getZone(zoneID);
+          Zone& zone = m_Apartment.getZone(zoneID);
           Group* pGroup = zone.getGroup(groupID);
 
           if(pGroup == NULL) {
@@ -78,9 +81,9 @@ namespace dss {
           case 5:
             {
               if(groupID == GroupIDGreen) {
-                getDSS().getApartment().getGroup(0).callScene(SceneBell);
+                m_Apartment.getGroup(0).callScene(SceneBell);
               } else if(groupID == GroupIDRed){
-                getDSS().getApartment().getGroup(0).callScene(SceneAlarm);
+                m_Apartment.getGroup(0).callScene(SceneAlarm);
               } else {
                 const int lastScene = pGroup->getLastCalledScene();
                 if(lastScene == SceneOff || lastScene == SceneDeepOff ||

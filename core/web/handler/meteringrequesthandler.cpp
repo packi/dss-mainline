@@ -26,7 +26,6 @@
 #include <vector>
 
 #include "core/foreach.h"
-#include "core/dss.h"
 
 #include "core/metering/metering.h"
 #include "core/metering/series.h"
@@ -42,10 +41,16 @@ namespace dss {
 
 
   //=========================================== MeteringRequestHandler
+  
+  MeteringRequestHandler::MeteringRequestHandler(Apartment& _apartment, Metering& _metering)
+  : m_Apartment(_apartment),
+    m_Metering(_metering)
+  { }
+
 
   boost::shared_ptr<JSONObject> MeteringRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
     if(_request.getMethod() == "getResolutions") {
-      std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = getDSS().getMetering().getConfig();
+      std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = m_Metering.getConfig();
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       boost::shared_ptr<JSONArrayBase> resolutions(new JSONArrayBase());
       resultObj->addElement("resolutions", resolutions);
@@ -67,7 +72,7 @@ namespace dss {
       boost::shared_ptr<JSONArrayBase> series(new JSONArrayBase());
       resultObj->addElement("series", series);
 
-      std::vector<DSMeter*>& dsMeters = getDSS().getApartment().getDSMeters();
+      std::vector<DSMeter*>& dsMeters = m_Apartment.getDSMeters();
       foreach(DSMeter* dsMeter, dsMeters) {
         boost::shared_ptr<JSONObject> energyEntry(new JSONObject());
         series->addElement("", energyEntry);
@@ -93,7 +98,7 @@ namespace dss {
         dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
         if(!(deviceDSID == NullDSID)) {
           try {
-            getDSS().getApartment().getDSMeterByDSID(deviceDSID);
+            m_Apartment.getDSMeterByDSID(deviceDSID);
           } catch(std::runtime_error& e) {
             return failure("Could not find device with dsid '" + deviceDSIDString + "'");
           }
@@ -119,8 +124,8 @@ namespace dss {
         }
       }
       if(!resolutionString.empty()) {
-        std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = getDSS().getMetering().getConfig();
-        storageLocation = getDSS().getMetering().getStorageLocation();
+        std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = m_Metering.getConfig();
+        storageLocation = m_Metering.getStorageLocation();
         for(unsigned int iConfig = 0; iConfig < meteringConfig.size(); iConfig++) {
           boost::shared_ptr<MeteringConfigChain> cConfig = meteringConfig[iConfig];
           for(int jConfig = 0; jConfig < cConfig->size(); jConfig++) {

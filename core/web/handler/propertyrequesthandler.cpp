@@ -23,7 +23,6 @@
 #include "propertyrequesthandler.h"
 
 #include "core/propertysystem.h"
-#include "core/dss.h"
 
 #include "core/web/json.h"
 
@@ -31,13 +30,17 @@ namespace dss {
 
 
   //=========================================== PropertyRequestHandler
+  
+  PropertyRequestHandler::PropertyRequestHandler(PropertySystem& _propertySystem)
+  : m_PropertySystem(_propertySystem)
+  { }
 
   boost::shared_ptr<JSONObject> PropertyRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
     std::string propName = _request.getParameter("path");
     if(propName.empty()) {
       return failure("Need parameter 'path' for property operations");
     }
-    PropertyNodePtr node = getDSS().getPropertySystem().getProperty(propName);
+    PropertyNodePtr node = m_PropertySystem.getProperty(propName);
 
     if(_request.getMethod() == "getString") {
       if(node == NULL) {
@@ -75,7 +78,7 @@ namespace dss {
     } else if(_request.getMethod() == "setString") {
       std::string value = _request.getParameter("value");
       if(node == NULL) {
-        node = getDSS().getPropertySystem().createProperty(propName);
+        node = m_PropertySystem.createProperty(propName);
       }
       try {
         node->setStringValue(value);
@@ -94,7 +97,7 @@ namespace dss {
         return failure("Expected 'true' or 'false' for parameter 'value' but got: '" + strValue + "'");
       }
       if(node == NULL) {
-        node = getDSS().getPropertySystem().createProperty(propName);
+        node = m_PropertySystem.createProperty(propName);
       }
       try {
         node->setBooleanValue(value);
@@ -111,7 +114,7 @@ namespace dss {
         return failure("Could not convert parameter 'value' to std::string. Got: '" + strValue + "'");
       }
       if(node == NULL) {
-        node = getDSS().getPropertySystem().createProperty(propName);
+        node = m_PropertySystem.createProperty(propName);
       }
       try {
         node->setIntegerValue(value);

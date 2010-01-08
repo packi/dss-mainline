@@ -23,8 +23,6 @@
 
 #include "zonerequesthandler.h"
 
-#include "core/dss.h"
-
 #include "core/model/zone.h"
 #include "core/model/apartment.h"
 
@@ -34,6 +32,11 @@ namespace dss {
 
 
   //=========================================== ZoneRequestHandler
+
+  ZoneRequestHandler::ZoneRequestHandler(Apartment& _apartment)
+  : m_Apartment(_apartment)
+  { }
+
 
   boost::shared_ptr<JSONObject> ZoneRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
     bool ok = true;
@@ -45,7 +48,7 @@ namespace dss {
       int zoneID = strToIntDef(zoneIDString, -1);
       if(zoneID != -1) {
         try {
-          Zone& zone = getDSS().getApartment().getZone(zoneID);
+          Zone& zone = m_Apartment.getZone(zoneID);
           pZone = &zone;
         } catch(std::runtime_error& e) {
           ok = false;
@@ -57,7 +60,7 @@ namespace dss {
       }
     } else if(!zoneName.empty()) {
       try {
-        Zone& zone = getDSS().getApartment().getZone(zoneName);
+        Zone& zone = m_Apartment.getZone(zoneName);
         pZone = &zone;
       } catch(std::runtime_error& e) {
         ok = false;

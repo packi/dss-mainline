@@ -46,6 +46,8 @@
 #include "core/web/handler/setrequesthandler.h"
 #include "core/web/handler/zonerequesthandler.h"
 
+#include "core/DS485Interface.h"
+
 #include "webserverapi.h"
 #include "json.h"
 
@@ -186,17 +188,22 @@ namespace dss {
 
   void WebServer::instantiateHandlers() {
     m_Handlers[kHandlerApartment] = new ApartmentRequestHandler(getDSS().getApartment());
-    m_Handlers[kHandlerZone] = new ZoneRequestHandler();
+    m_Handlers[kHandlerZone] = new ZoneRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerDevice] = new DeviceRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerCircuit] = new CircuitRequestHandler(getDSS().getApartment());
-    m_Handlers[kHandlerSet] = new SetRequestHandler();
-    m_Handlers[kHandlerProperty] = new PropertyRequestHandler();
+    m_Handlers[kHandlerSet] = new SetRequestHandler(getDSS().getApartment());
+    m_Handlers[kHandlerProperty] = new PropertyRequestHandler(getDSS().getPropertySystem());
     m_Handlers[kHandlerEvent] = new EventRequestHandler(getDSS().getEventQueue());
     m_Handlers[kHandlerSystem] = new SystemRequestHandler();
-    m_Handlers[kHandlerStructure] = new StructureRequestHandler();
-    m_Handlers[kHandlerSim] = new SimRequestHandler();
+    m_Handlers[kHandlerStructure] = 
+      new StructureRequestHandler(
+        getDSS().getApartment(), 
+        getDSS().getModelMaintenance(), 
+        *getDSS().getDS485Interface().getStructureModifyingBusInterface()
+      );
+    m_Handlers[kHandlerSim] = new SimRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerDebug] = new DebugRequestHandler(getDSS());
-    m_Handlers[kHandlerMetering] = new MeteringRequestHandler();
+    m_Handlers[kHandlerMetering] = new MeteringRequestHandler(getDSS().getApartment(), getDSS().getMetering());
   } // instantiateHandlers
   
   void WebServer::httpPluginCallback(struct mg_connection* _connection,

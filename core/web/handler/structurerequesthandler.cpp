@@ -24,7 +24,6 @@
 
 #include "core/web/json.h"
 
-#include "core/dss.h"
 #include "core/DS485Interface.h"
 #include "core/structuremanipulator.h"
 
@@ -39,9 +38,15 @@ namespace dss {
 
 
   //=========================================== StructureRequestHandler
+  
+  StructureRequestHandler::StructureRequestHandler(Apartment& _apartment, ModelMaintenance& _modelMaintenance, StructureModifyingBusInterface& _interface)
+  : m_Apartment(_apartment),
+    m_ModelMaintenance(_modelMaintenance),
+    m_Interface(_interface)
+  { }
 
   boost::shared_ptr<JSONObject> StructureRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
-    StructureManipulator manipulator(*getDSS().getDS485Interface().getStructureModifyingBusInterface(), getDSS().getApartment());
+    StructureManipulator manipulator(m_Interface, m_Apartment);
     if(_request.getMethod() == "zoneAddDevice") {
       std::string devidStr = _request.getParameter("devid");
       if(!devidStr.empty()) {
@@ -58,7 +63,7 @@ namespace dss {
             int zoneID = strToInt(zoneIDStr);
             DeviceReference devRef(dev, &DSS::getInstance()->getApartment());
             try {
-              Zone& zone = getDSS().getApartment().getZone(zoneID);
+              Zone& zone = m_Apartment.getZone(zoneID);
               manipulator.addDeviceToZone(dev, zone);
             } catch(ItemNotFoundException&) {
               return failure("Could not find zone");
@@ -79,7 +84,7 @@ namespace dss {
         zoneID = strToIntDef(zoneIDStr, -1);
       }
       if(zoneID != -1) {
-        getDSS().getApartment().allocateZone(zoneID);
+        m_Apartment.allocateZone(zoneID);
       } else {
         return failure("could not find zone");
       }
@@ -93,15 +98,15 @@ namespace dss {
       }
       if(zoneID != -1) {
         try {
-          Zone& zone = getDSS().getApartment().getZone(zoneID);
+          Zone& zone = m_Apartment.getZone(zoneID);
           if(zone.getFirstZoneOnDSMeter() != -1) {
             return failure("Cannot delete a primary zone");
           }
           if(zone.getDevices().length() > 0) {
             return failure("Cannot delete a non-empty zone");
           }
-          getDSS().getApartment().removeZone(zoneID);
-          getDSS().getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+          m_Apartment.removeZone(zoneID);
+          m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
           return success();
         } catch(ItemNotFoundException&) {
           return failure("Could not find zone");

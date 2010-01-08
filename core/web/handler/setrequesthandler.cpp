@@ -26,7 +26,6 @@
 #include "core/model/apartment.h"
 #include "core/model/set.h"
 
-#include "core/dss.h"
 #include "core/setbuilder.h"
 
 #include "jsonhelper.h"
@@ -34,6 +33,10 @@
 namespace dss {
 
   //=========================================== SetRequestHandler
+  
+  SetRequestHandler::SetRequestHandler(Apartment& _apartment)
+  : m_Apartment(_apartment)
+  { }
 
   boost::shared_ptr<JSONObject> SetRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
     if(_request.getMethod() == "fromApartment") {
@@ -93,7 +96,7 @@ namespace dss {
         resultObj->addProperty("self", self + additionalPart);
         return success(resultObj);
       } else if(_request.getMethod() == "getDevices") {
-        SetBuilder builder(getDSS().getApartment());
+        SetBuilder builder(m_Apartment);
         Set set = builder.buildSet(self, NULL);
         return success(toJSON(set));
       } else if(_request.getMethod() == "add") {
@@ -125,7 +128,7 @@ namespace dss {
         resultObj->addProperty("self", self + additionalPart);
         return success(resultObj);
       } else if(isDeviceInterfaceCall(_request)) {
-        SetBuilder builder(getDSS().getApartment());
+        SetBuilder builder(m_Apartment);
         Set set = builder.buildSet(self, NULL);
         return handleDeviceInterfaceRequest(_request, &set);
       } else {

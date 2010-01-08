@@ -26,10 +26,14 @@
 #include "deviceinterfacerequesthandler.h"
 
 namespace dss {
+  class Apartment;
 
   class SetRequestHandler : public DeviceInterfaceRequestHandler {
   public:
+    SetRequestHandler(Apartment& _apartment);
     virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
+  public:
+    Apartment& m_Apartment;
   }; // SetRequestHandler
 
 } // namespace dss

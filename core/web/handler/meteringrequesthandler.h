@@ -27,10 +27,17 @@
 #include "core/web/webrequests.h"
 
 namespace dss {
+  
+  class Metering;
+  class Apartment;
 
   class MeteringRequestHandler : public WebServerRequestHandlerJSON {
   public:
+    MeteringRequestHandler(Apartment& _apartment, Metering& _metering);
     virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
+  private:
+    Apartment& m_Apartment;
+    Metering& m_Metering;
   }; // MeteringRequestHandler
 
 } // namespace dss
