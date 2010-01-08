@@ -1194,13 +1194,10 @@ namespace dss {
     m_pFunctionObject(_functionObj),
     m_Function(_function),
     m_Identifier(_identifier)
-  {
-    JS_AddRoot(_pContext->getJSContext(), &m_Function);
-  } // ctor
+  { } // ctor
 
   PropertyScriptListener::~PropertyScriptListener() {
     m_pExtension->removeListener(m_Identifier);
-    JS_RemoveRoot(m_pContext->getJSContext(), &m_Function);
   } // dtor
 
   void PropertyScriptListener::createScriptObject() {
