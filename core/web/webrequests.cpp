@@ -303,12 +303,13 @@ namespace dss {
 */
       } else if(_request.getMethod() == "getCircuits") {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        boost::shared_ptr<JSONArrayBase> circuits;
+        boost::shared_ptr<JSONArrayBase> circuits(new JSONArrayBase());
 
-        resultObj->addProperty("circuits", circuits);
+        resultObj->addElement("circuits", circuits);
         vector<DSMeter*>& dsMeters = getDSS().getApartment().getDSMeters();
         foreach(DSMeter* dsMeter, dsMeters) {
           boost::shared_ptr<JSONObject> circuit(new JSONObject());
+          circuits->addElement("", circuit);
           circuit->addProperty("name", dsMeter->getName());
           circuit->addProperty("dsid", dsMeter->getDSID().toString());
           circuit->addProperty("busid", dsMeter->getBusID());
