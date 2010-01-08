@@ -34,10 +34,10 @@ public:
                Poco::Net::StreamSocket sock(sa);
                Poco::Net::SocketStream str(sock);
 
-               std::cout << "before sending: " << _command << std::endl;
+               Logger::getInstance()->log("before sending: " + _command);
                str << _command << "\r\n" << std::flush;
                str << "logout\r\n" << std::flush;
-               std::cout << "done sending" << std::endl;
+               Logger::getInstance()->log("done sending");
 
                sock.close();
        } catch (Poco::Exception& exc) {

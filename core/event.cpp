@@ -34,6 +34,7 @@
 
 #include <set>
 #include <iostream>
+#include <sstream>
 
 #include <boost/filesystem.hpp>
 
@@ -58,7 +59,6 @@ using Poco::XML::InputSource;
 using Poco::XML::Node;
 
 using std::set;
-using std::cout;
 
 namespace dss {
 
@@ -648,9 +648,12 @@ namespace dss {
 
   bool EventRunner::raisePendingEvents(DateTime& _from, int _deltaSeconds) {
     bool result = false;
+    std::ostringstream logSStream;
     DateTime virtualNow = _from.addSeconds(-_deltaSeconds/2);
     if(DebugEventRunner) {
-      cout << "vNow:    " << virtualNow << std::endl;
+      logSStream << "vNow:    " << virtualNow;
+      Logger::getInstance()->log(logSStream.str());
+      logSStream.str("");
     }
 
     m_EventsMutex.lock();
@@ -659,8 +662,10 @@ namespace dss {
     {
       DateTime nextOccurence = ipSchedEvt->getSchedule().getNextOccurence(virtualNow);
       if(DebugEventRunner) {
-        cout << "nextOcc: " << nextOccurence << std::endl;
-        cout << "diff:    " << nextOccurence.difference(virtualNow) << std::endl;
+        logSStream << "nextOcc: " << nextOccurence << "; "
+                   << "diff:    " << nextOccurence.difference(virtualNow);
+        Logger::getInstance()->log(logSStream.str());
+        logSStream.str("");
       }
       if(abs(nextOccurence.difference(virtualNow)) <= _deltaSeconds/2) {
         result = true;

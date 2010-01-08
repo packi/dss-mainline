@@ -144,6 +144,10 @@ namespace dss {
     AutoPtr<Document> pDoc = new Document;
 
 #ifdef LOG_TIMING
+    std::stringstream logSStream;
+#endif
+
+#ifdef LOG_TIMING
     Timestamp buildingXML;
 #endif
     AutoPtr<ProcessingInstruction> pXMLHeader = pDoc->createProcessingInstruction("xml", "version='1.0' encoding='utf-8'");
@@ -202,8 +206,12 @@ namespace dss {
       pValues->appendChild(elem);
     }
 #ifdef LOG_TIMING
-    std::cout << "building xml: " << Timestamp().getDifference(buildingXML) << std::endl;
+    logSStream << "building xml: " << Timestamp().getDifference(buildingXML);
+    Logger::getInstance()->log(logSStream.str());
+    logSStream.str("");
+#endif
 
+#ifdef LOG_TIMING
     Timestamp writingXML;
 #endif
     // write it to a temporary site first
@@ -225,14 +233,20 @@ namespace dss {
       ofs.close();
 
 #ifdef LOG_TIMING
-      std::cout << "writing xml: " << Timestamp().getDifference(writingXML) << std::endl;
+      logSStream << "writing xml: " << Timestamp().getDifference(writingXML);
+      Logger::getInstance()->log(logSStream.str());
+      logSStream.str("");
+#endif
 
+#ifdef LOG_TIMING
       Timestamp renaming;
 #endif
       // move it to the desired location
       rename(tmpOut.c_str(), _path.c_str());
 #ifdef LOG_TIMING
-      std::cout << "renaming: " << Timestamp().getDifference(renaming) << std::endl;
+      logSStream << "renaming: " << Timestamp().getDifference(renaming) << std::endl;
+      Logger::getInstance()->log(logSStream.str());
+      logSStream.str("");
 #endif
     } else {
       Logger::getInstance()->log("Could not open file '" + tmpOut + "' for writing", lsFatal);

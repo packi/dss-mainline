@@ -36,6 +36,7 @@
 #include "../../core/sim/plugin/pluginmedia.h"
 #include "../../core/ds485const.h"
 #include "../../core/base.h"
+#include "../../core/logger.h"
 
 class DSIDSlimSlaveRemote : public DSIDMedia {
 private:
@@ -53,23 +54,33 @@ public:
     virtual ~DSIDSlimSlaveRemote() {}
 
     virtual void sendCommand(const std::string& _command) {
+      std::stringstream logMessage;
       try {
         if(m_PlayerMACHeader.empty()) {
-         std::cerr << "Parameter playerMAC not specified. NOT sending command " << _command << std::endl;
+          logMessage << "Parameter playerMAC not specified. NOT sending command " << _command;
+          Logger::getInstance()->log(logMessage.str());
+          logMessage.str("");
         }
         Poco::Net::SocketAddress sa(m_RemoteHost, m_RemotePort);
         Poco::Net::StreamSocket sock(sa);
         Poco::Net::SocketStream str(sock);
 
-        std::cout << "before sending: " << _command << std::endl;
+        logMessage << "before sending: " << _command;
+        Logger::getInstance()->log(logMessage.str());
+        logMessage.str("");
+
         str << m_PlayerMACHeader << " ";
         str << _command << "\n" << std::flush;
-        std::cout << m_PlayerMACHeader << " " << _command << std::endl;
-        std::cout << "done sending" << std::endl;
+
+        logMessage << m_PlayerMACHeader << " " << _command;
+        Logger::getInstance()->log(logMessage.str());
+        logMessage.str("");
+
+        Logger::getInstance()->log("done sending");
 
         sock.close();
        } catch (Poco::Exception& exc) {
-               std::cerr << "******** [slim_slave.so] exception caught: " << exc.displayText() << std::endl;
+	   Logger::getInstance()->log("[slim_slave.so] exception caught: " + exc.displayText(), lsError);
        }
     }
 
@@ -117,10 +128,10 @@ public:
       } else if(_name == "host") {
         m_RemoteHost = _value;
       } else if(_name == "playermac") {
-        std::cout << "config-param: " << _value << std::endl;
+        Logger::getInstance()->log("config-param: " +  _value);
         m_PlayerMACHeader = _value;
         dss::replaceAll(m_PlayerMACHeader, ":", "%3A");
-        std::cout << "after: " << m_PlayerMACHeader << std::endl;
+        Logger::getInstance()->log("after: " + m_PlayerMACHeader);
       } else if(_name == "volume") {
         m_DefaultVolume = dss::strToInt(_value);
       }

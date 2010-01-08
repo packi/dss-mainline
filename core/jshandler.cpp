@@ -115,10 +115,13 @@ namespace dss {
 
     while (len > 0 && (line[len-1] == '\r' || line[len-1] == '\n')){ line[len-1]='\0'; len--; }
 
-    printf("JS Error: %s\nFile: %s:%u\n", msg, er->filename, er->lineno);
+
+    std::ostringstream logSStream;
+    logSStream << "JS Error: " << msg << " in file: " << er->filename << ":" << er->lineno;
     if (line[0]){
-      printf("%s\n%s\n", line, pointer);
+      logSStream << "; line: " << line << "; pointer: " << pointer;
     }
+    Logger::getInstance()->log(logSStream.str(), lsError);
 
     free(pointer);
     free(line);

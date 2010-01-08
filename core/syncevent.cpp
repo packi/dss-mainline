@@ -109,7 +109,7 @@ bool SyncEvent::waitFor( int _timeoutMS ) {
   int result = pthread_cond_timedwait( &m_Condition, m_ConditionMutex.getMutex(), &timeout );
   m_ConditionMutex.unlock();
   if(result != ETIMEDOUT && result != 0) {
-    //perror("SyncEvent::waitFor");
+    //Logger::getInstance()->log("SyncEvent::waitFor", lsError);
   }
   return !(result == ETIMEDOUT);
 #else

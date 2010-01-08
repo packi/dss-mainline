@@ -63,7 +63,7 @@ pair<string, string> parse_prop(const string& s) {
 int main (int argc, char* argv[]) {
 
   if (!setlocale(LC_CTYPE, "")) {
-    cerr << "Can't set the specified locale! Check LANG, LC_CTYPE, LC_ALL." << endl;
+    dss::Logger::getInstance()->log("Can't set the specified locale! Check LANG, LC_CTYPE, LC_ALL.", lsError);
     return 1;
   }
 

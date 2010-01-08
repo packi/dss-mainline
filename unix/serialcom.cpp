@@ -23,6 +23,7 @@
 #include "serialcom.h"
 
 #include "../core/base.h"
+#include "../core/logger.h"
 
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -56,7 +57,7 @@ namespace dss {
     }
     m_Handle = ::open(_serialPort, flags);
     if(m_Handle == -1) {
-      perror("serial");
+      Logger::getInstance()->log("serial", lsError);
       throw std::runtime_error(std::string("could not open port ") + m_PortDevName);
     }
 
@@ -82,22 +83,22 @@ namespace dss {
       throw std::runtime_error("Invalid value of speed");
     }
     if(cfsetispeed(&m_CommSettings, rate) == -1) {
-      perror("cfsetispeed");
+      Logger::getInstance()->log("cfsetispeed", lsError);
       throw std::runtime_error(std::string("could not set input speed of port ") + m_PortDevName);
     }
     if(cfsetospeed(&m_CommSettings, rate) == -1) {
-      perror("cfsetospeed");
+      Logger::getInstance()->log("cfsetospeed", lsError);
       throw std::runtime_error(std::string("could not set ouput speed of port ") + m_PortDevName);
     }
 
     // flush remaining characters
     if(tcflush(m_Handle, TCIOFLUSH) == -1) {
-      perror("tcflush");
+      Logger::getInstance()->log("tcflush", lsError);
       throw std::runtime_error(std::string("could not flush port ") + m_PortDevName);
     }
 
     if(tcsetattr(m_Handle, TCSANOW, &m_CommSettings) == -1) {
-      perror("tcsetattr");
+      Logger::getInstance()->log("tcsetattr", lsError);
       throw std::runtime_error(std::string("could not set attributes of port ") + m_PortDevName);
     }
     return true;
@@ -134,7 +135,7 @@ namespace dss {
         } else {
           close(m_Handle);
           m_Handle = -1;
-          perror("SerialCom::getCharTimeout read");
+          Logger::getInstance()->log("SerialCom::getCharTimeout read", lsError);
           throw std::runtime_error("read failed");
         }
       }
@@ -144,7 +145,7 @@ namespace dss {
     } else {
       close(m_Handle);
       m_Handle = -1;
-      perror("SerialCom::getCharTimeout() select");
+      Logger::getInstance()->log("SerialCom::getCharTimeout() select", lsError);
       throw std::runtime_error("select failed");
     }
     return false;
@@ -164,7 +165,7 @@ namespace dss {
     if(ret != 1) {
       close(m_Handle);
       m_Handle = -1;
-      perror("SerialCom::putChar");
+      Logger::getInstance()->log("SerialCom::putChar", lsError);
       throw std::runtime_error("error writing to serial port");
     }
   } // putChar

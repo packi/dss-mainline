@@ -81,7 +81,7 @@ namespace dss {
 
     sock = socket(PF_INET, SOCK_STREAM, 0);
     if(sock < 0) {
-      perror("socket()");
+      Logger::getInstance()->log("socket()", lsError);
       return;
     }
 
@@ -89,7 +89,7 @@ namespace dss {
     ifc.ifc_len = sizeof(buf);
     ifc.ifc_buf = buf;
     if(ioctl(sock,  SIOCGIFCONF, &ifc) < 0) {
-      perror("ioctl(SIOCGIFCONF)");
+      Logger::getInstance()->log("ioctl(SIOCGIFCONF)", lsError);
       return;
     }
 
@@ -109,7 +109,7 @@ namespace dss {
       mac[sizeof(mac)-1]='\0';
 
       if(ioctl(sock, SIOCGIFNETMASK, pRequest) < 0) {
-        perror("ioctl(SIOCGIFNETMASK)");
+        Logger::getInstance()->log("ioctl(SIOCGIFNETMASK)", lsError);
         continue;
       }
       sa = &(pRequest->ifr_netmask);

@@ -44,6 +44,7 @@
 
 #include "base.h"
 #include "mutex.h"
+#include "logger.h"
 
 namespace dss {
 
@@ -234,7 +235,7 @@ namespace dss {
   class ScriptContextAttachedObject {
   public:
     ~ScriptContextAttachedObject() {
-      std::cout << "destroying attached object" << std::endl;
+      Logger::getInstance()->log("destroying attached object");
     }
   }; // ScriptContextAttachedObject
 

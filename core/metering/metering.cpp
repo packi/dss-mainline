@@ -35,6 +35,10 @@
 
 #include <boost/filesystem.hpp>
 
+#ifdef LOG_TIMING
+  #include <sstream>
+#endif
+
 namespace dss {
 
   //================================================== Metering
@@ -77,6 +81,9 @@ namespace dss {
     SeriesWriter<CurrentValue> writer;
 
     _config->running();
+#ifdef LOG_TIMING
+    std::ostringstream logSStream;
+#endif
 
 #ifdef LOG_TIMING
     Timestamp checkingAll;
@@ -101,7 +108,9 @@ namespace dss {
           Timestamp startedLoadingSingle;
           boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(fileName));
 #ifdef LOG_TIMING
-          cout << "loading single: " <<  Timestamp().getDifference(startedLoadingSingle) << endl;
+          logSStream << "loading single: " << Timestamp().getDifference(startedLoadingSingle);
+          log(logSStream.str());
+          logSStream.str("");
 #endif
           if(s.get() != NULL) {
             series.push_back(s);
@@ -118,7 +127,9 @@ namespace dss {
         }
       }
 #ifdef LOG_TIMING
-      cout << "loading: " << Timestamp().getDifference(startedLoading) << endl;
+      logSStream << "loading: " << Timestamp().getDifference(startedLoading);
+      log(logMessage.str());
+      logSStream.str("");
 #endif
 
       // stitch up chain
@@ -150,12 +161,19 @@ namespace dss {
           log("Could not poll dsMeter " + (*ipDSMeter)->getDSID().toString() + ". Message: " + err.what());
         }
 #ifdef LOG_TIMING
-        cout << "fetching value: " << Timestamp().getDifference(fetchingValue) << endl;
+        logSStream << "fetching value: " << Timestamp().getDifference(fetchingValue);
+        log(logSStream.str());
+        logSStream.str("");
+#endif
+
+#ifdef LOG_TIMING
         Timestamp startedAddingValue;
 #endif
         series[0]->addValue(value, timeRequested);
 #ifdef LOG_TIMING
-        cout << "adding value: " << Timestamp().getDifference(startedAddingValue) << endl;
+        logSStream << "adding value: " << Timestamp().getDifference(startedAddingValue);
+        log(logSStream.str());
+        logSStream.str("");
 #endif
 
 #ifdef LOG_TIMING
@@ -173,19 +191,27 @@ namespace dss {
           log("Metering::checkDSMeters: Trying to save series to '" + fileName + "'");
           writer.writeToXML(*s, fileName);
 #ifdef LOG_TIMING
-          cout << "writing single: " << Timestamp().getDifference(startedWritingSingle) << endl;
+          logSStream << "writing single: " << Timestamp().getDifference(startedWritingSingle) << endl;
+          log(logSStream.str());
+          logSStream.str("");
 #endif
         }
 #ifdef LOG_TIMING
-        cout << "writing: " << Timestamp().getDifference(startedWriting) << endl;
+        logSStream << "writing: " << Timestamp().getDifference(startedWriting) << endl;
+        log(logSStream.str());
+        logSStream.str("");
 #endif
       }
 #ifdef LOG_TIMING
-      cout << "checkingDSMeter: " << Timestamp().getDifference(checkingDSMeter) << endl;
+      logSStream << "checkingDSMeter: " << Timestamp().getDifference(checkingDSMeter) << endl;
+      log(logSStream.str());
+      logSStream.str("");
 #endif
     }
 #ifdef LOG_TIMING
-    cout << "checking all: " << Timestamp().getDifference(checkingAll) << endl;
+    logSStream << "checking all: " << Timestamp().getDifference(checkingAll) << endl;
+    log(logSStream.str());
+    logSStream.str("");
 #endif
   } // checkDSMeters
 

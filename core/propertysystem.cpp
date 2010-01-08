@@ -472,7 +472,7 @@ namespace dss {
         if(m_PropVal.valueType == vTypeString) {
           m_Proxy.stringProxy->setValue(_value);
         } else {
-          std::cerr << "*** setting std::string on a non std::string property";
+          Logger::getInstance()->log("*** setting std::string on a non std::string property", lsError);
           throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
         }
       } else {
@@ -498,7 +498,7 @@ namespace dss {
         if(m_PropVal.valueType == vTypeInteger) {
           m_Proxy.intProxy->setValue(_value);
         } else {
-          std::cerr << "*** setting integer on a non integer property";
+          Logger::getInstance()->log("*** setting integer on a non integer property", lsError);
           throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
         }
       } else {
@@ -518,7 +518,7 @@ namespace dss {
         if(m_PropVal.valueType == vTypeBoolean) {
           m_Proxy.boolProxy->setValue(_value);
         } else {
-          std::cerr << "*** setting bool on a non booleanproperty";
+          Logger::getInstance()->log("*** setting bool on a non booleanproperty");
           throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
         }
       } else {
@@ -541,7 +541,7 @@ namespace dss {
           return m_PropVal.actualValue.pString;
         }
       } else {
-        std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
+//        std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
         throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
       }
     }
@@ -558,7 +558,7 @@ namespace dss {
           return m_PropVal.actualValue.integer;
         }
       } else {
-        std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
+ //       std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
         throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
       }
     }
@@ -575,7 +575,7 @@ namespace dss {
           return m_PropVal.actualValue.boolean;
         }
       } else {
-        std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
+//        std::cerr << "Property-Type mismatch: " << m_Name << std::endl;
         throw PropertyTypeMismatch("Property-Type mismatch: " + m_Name);
       }
     }

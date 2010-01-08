@@ -22,6 +22,8 @@
 
 #include "debugrequesthandler.h"
 
+#include <sstream>
+
 #include "core/web/json.h"
 
 #include "core/ds485/ds485.h"
@@ -41,6 +43,7 @@ namespace dss {
   //=========================================== DebugRequestHandler
 
   boost::shared_ptr<JSONObject> DebugRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
+    std::ostringstream logSStream;
     if(_request.getMethod() == "sendFrame") {
       int destination = strToIntDef(_request.getParameter("destination"),0) & 0x3F;
       bool broadcast = _request.getParameter("broadcast") == "true";
@@ -48,13 +51,16 @@ namespace dss {
       int command = strToIntDef(_request.getParameter("command"), 0x09 /* request */) & 0x00FF;
       int length = strToIntDef(_request.getParameter("length"), 0x00) & 0x0F;
 
-      std::cout
+      logSStream
           << "sending frame: "
           << "\ndest:    " << destination
           << "\nbcst:    " << broadcast
           << "\ncntr:    " << counter
           << "\ncmd :    " << command
-          << "\nlen :    " << length << std::endl;
+          << "\nlen :    " << length;
+
+      Logger::getInstance()->log(logSStream.str());
+      logSStream.str("");
 
       DS485CommandFrame* frame = new DS485CommandFrame();
       frame->getHeader().setBroadcast(broadcast);
@@ -63,10 +69,18 @@ namespace dss {
       frame->setCommand(command);
       for(int iByte = 0; iByte < length; iByte++) {
         uint8_t byte = strToIntDef(_request.getParameter(std::string("payload_") + intToString(iByte+1)), 0xFF);
-        std::cout << "b" << std::dec << iByte << ": " << std::hex << (int)byte << "\n";
+
+        logSStream << "b" << std::dec << iByte << ": " << std::hex << (int)byte << "\n";
+        Logger::getInstance()->log(logSStream.str());
+        logSStream.str("");
+
         frame->getPayload().add<uint8_t>(byte);
       }
-      std::cout << std::dec << "done" << std::endl;
+
+      logSStream << std::dec << "done" << std::endl;
+      Logger::getInstance()->log(logSStream.str());
+      logSStream.str("");
+
       DS485Interface* intf = &DSS::getInstance()->getDS485Interface();
       DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
       if(proxy != NULL) {

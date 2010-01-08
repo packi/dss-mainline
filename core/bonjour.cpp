@@ -25,6 +25,7 @@
 #include "core/propertysystem.h"
 #include "core/dss.h"
 #include "core/base.h"
+#include "core/logger.h"
 #include "core/model/apartment.h"
 
 #include <arpa/inet.h>
@@ -61,7 +62,7 @@ namespace dss {
     void *context )
   {
     if(errorCode != kDNSServiceErr_NoError) {
-      std::cerr << "error received in browse callback" << std::endl;
+      Logger::getInstance()->log("error received in browse callback", lsError);
     }
   } // registerCallback
 #endif
@@ -85,7 +86,7 @@ static void entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state,
     switch (state) {
         case AVAHI_ENTRY_GROUP_ESTABLISHED :
             /* The entry group has been established successfully */
-            fprintf(stderr, "Service '%s' successfully established.\n", name);
+            Logger::getInstance()->log(std::string("Service '") + name + "' successfully established.", lsInfo)
             break;
 
         case AVAHI_ENTRY_GROUP_COLLISION : {
@@ -97,7 +98,7 @@ static void entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state,
             avahi_free(name);
             name = n;
 
-            fprintf(stderr, "Service name collision, renaming service to '%s'\n", name);
+            Logger::getInstance()->log(std::string("Service name collision, renaming service to '") + name + "'", lsError);
 
             /* And recreate the services */
             create_services(avahi_entry_group_get_client(g));
@@ -106,7 +107,7 @@ static void entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state,
 
         case AVAHI_ENTRY_GROUP_FAILURE :
 
-            fprintf(stderr, "Entry group failure: %s\n", avahi_strerror(avahi_client_errno(avahi_entry_group_get_client(g))));
+            Logger::getInstance()->log(std::string("Entry group failure: ") + avahi_strerror(avahi_client_errno(avahi_entry_group_get_client(g))), lsError);
 
             /* Some kind of failure happened while we were registering our services */
             avahi_simple_poll_quit(simple_poll);
@@ -128,7 +129,7 @@ static void create_services(AvahiClient *c) {
 
     if (!group)
         if (!(group = avahi_entry_group_new(c, entry_group_callback, NULL))) {
-            fprintf(stderr, "avahi_entry_group_new() failed: %s\n", avahi_strerror(avahi_client_errno(c)));
+		Logger::getInstance()->log(std::string("avahi_entry_group_new() failed: ") + avahi_strerror(avahi_client_errno(c)), lsError);
             goto fail;
         }
 
@@ -136,7 +137,7 @@ static void create_services(AvahiClient *c) {
      * because it was reset previously, add our entries.  */
 
     if (avahi_entry_group_is_empty(group)) {
-        fprintf(stderr, "Adding service '%s'\n", name);
+        Logger::getInstance()->log("Adding service '" + name + "'", lsInfo);
 
         /* We will now add two services and one subtype to the entry
          * group. The two services have the same name, but differ in
@@ -151,13 +152,13 @@ static void create_services(AvahiClient *c) {
             if (ret == AVAHI_ERR_COLLISION)
                 goto collision;
 
-            fprintf(stderr, "Failed to add _dssweb._tcp service: %s\n", avahi_strerror(ret));
+            Logger::getInstance()->log(std::string("Failed to add _dssweb._tcp service: ") + avahi_strerror(ret), lsError);
             goto fail;
         }
 
         /* Tell the server to register the service */
         if ((ret = avahi_entry_group_commit(group)) < 0) {
-            fprintf(stderr, "Failed to commit entry group: %s\n", avahi_strerror(ret));
+            Logger::getInstance()->log(std::string("Failed to commit entry group: ") + avahi_strerror(ret), lsError);
             goto fail;
         }
     }
@@ -172,7 +173,7 @@ collision:
     avahi_free(name);
     name = n;
 
-    fprintf(stderr, "Service name collision, renaming service to '%s'\n", name);
+    Logger::getInstance()->log(std::string("Service name collision, renaming service to '") + name + "'", lsInfo);
 
     avahi_entry_group_reset(group);
 
@@ -198,7 +199,7 @@ static void client_callback(AvahiClient *c, AvahiClientState state, AVAHI_GCC_UN
 
         case AVAHI_CLIENT_FAILURE:
 
-            fprintf(stderr, "Client failure: %s\n", avahi_strerror(avahi_client_errno(c)));
+            Logger::getInstance()->log(std::string("Client failure: ") + avahi_strerror(avahi_client_errno(c)), lsError);
             avahi_simple_poll_quit(simple_poll);
 
             break;
@@ -238,7 +239,7 @@ static void client_callback(AvahiClient *c, AvahiClientState state, AVAHI_GCC_UN
 
     /* Allocate main loop object */
     if (!(simple_poll = avahi_simple_poll_new())) {
-        fprintf(stderr, "Failed to create simple poll object.\n");
+        Logger::getInstance->log("Failed to create simple poll object.", lsError);
         goto fail;
     }
 
@@ -249,7 +250,7 @@ static void client_callback(AvahiClient *c, AvahiClientState state, AVAHI_GCC_UN
 
     /* Check wether creating the client object succeeded */
     if (!client) {
-        fprintf(stderr, "Failed to create client: %s\n", avahi_strerror(error));
+        Logger::getInstance()->log(std::string("Failed to create client: ") + avahi_strerror(error), lsError);
         goto fail;
     }
 
@@ -298,4 +299,3 @@ fail:
   } // execute
 
 }
-
