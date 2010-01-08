@@ -40,6 +40,11 @@
 #include "core/web/handler/structurerequesthandler.h"
 #include "core/web/handler/eventrequesthandler.h"
 #include "core/web/handler/propertyrequesthandler.h"
+#include "core/web/handler/apartmentrequesthandler.h"
+#include "core/web/handler/circuitrequesthandler.h"
+#include "core/web/handler/devicerequesthandler.h"
+#include "core/web/handler/setrequesthandler.h"
+#include "core/web/handler/zonerequesthandler.h"
 
 #include "webserverapi.h"
 #include "json.h"

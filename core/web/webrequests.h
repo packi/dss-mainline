@@ -33,7 +33,6 @@
 
 namespace dss {
 
-  class IDeviceInterface;
   class JSONObject;
   class JSONElement;
   
@@ -59,38 +58,6 @@ namespace dss {
     virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session) = 0;
   }; // WebServerRequestHandlerJSON
 
-  class DeviceInterfaceRequestHandler : public WebServerRequestHandlerJSON {
-  public:
-    boost::shared_ptr<JSONObject> handleDeviceInterfaceRequest(const RestfulRequest& _request, IDeviceInterface* _interface);
-
-  protected:
-    bool isDeviceInterfaceCall(const RestfulRequest& _request);
-  };
-
-  class ApartmentRequestHandler : public DeviceInterfaceRequestHandler {
-  public:
-    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
-  };
-
-  class ZoneRequestHandler : public DeviceInterfaceRequestHandler {
-  public:
-    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
-  }; // ZoneRequestHandler
-
-  class DeviceRequestHandler : public DeviceInterfaceRequestHandler {
-  public:
-    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
-  }; // DeviceRequestHandler
-
-  class CircuitRequestHandler : public WebServerRequestHandlerJSON {
-  public:
-    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
-  }; // CircuitRequestHandler
-
-  class SetRequestHandler : public DeviceInterfaceRequestHandler {
-  public:
-    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
-  }; // SetRequestHandler
 
 
 }
