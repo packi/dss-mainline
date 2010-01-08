@@ -23,13 +23,17 @@
 #include "eventrequesthandler.h"
 
 #include "core/web/json.h"
+
 #include "core/event.h"
 #include "core/base.h"
-#include "core/dss.h"
 
 namespace dss {
 
   //=========================================== EventRequestHandler
+
+  EventRequestHandler::EventRequestHandler(EventQueue& _queue)
+  : m_Queue(_queue)
+  { }
 
   boost::shared_ptr<JSONObject> EventRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
     if(_request.getMethod() == "raise") {
@@ -58,7 +62,7 @@ namespace dss {
         }
       }
 
-      getDSS().getEventQueue().pushEvent(evt);
+      m_Queue.pushEvent(evt);
       return success();
     }
     throw std::runtime_error("Unhandled function");

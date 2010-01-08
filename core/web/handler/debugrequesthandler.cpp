@@ -42,6 +42,10 @@ namespace dss {
 
   //=========================================== DebugRequestHandler
 
+  DebugRequestHandler::DebugRequestHandler(DSS& _dss)
+  : m_DSS(_dss)
+  { }
+
   boost::shared_ptr<JSONObject> DebugRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
     std::ostringstream logSStream;
     if(_request.getMethod() == "sendFrame") {
@@ -96,7 +100,7 @@ namespace dss {
         dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
         if(!(deviceDSID == NullDSID)) {
           try {
-            Device& device = getDSS().getApartment().getDeviceByDSID(deviceDSID);
+            Device& device = m_DSS.getApartment().getDeviceByDSID(deviceDSID);
             pDevice = &device;
           } catch(std::runtime_error& e) {
             return failure("Could not find device with dsid '" + deviceDSIDString + "'");
@@ -143,14 +147,16 @@ namespace dss {
       }
       try {
         dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
-        Device& device = getDSS().getApartment().getDeviceByDSID(deviceDSID);
+        Device& device = m_DSS.getApartment().getDeviceByDSID(deviceDSID);
+        // TODO: move this code somewhere else (might also relax the requirement
+        //       having DSS as constructor parameter)
         DS485CommandFrame* frame = new DS485CommandFrame();
         frame->getHeader().setBroadcast(true);
         frame->getHeader().setDestination(device.getDSMeterID());
         frame->setCommand(CommandRequest);
         frame->getPayload().add<uint8_t>(FunctionDeviceGetTransmissionQuality);
         frame->getPayload().add<uint16_t>(device.getShortAddress());
-        DS485Interface* intf = &DSS::getInstance()->getDS485Interface();
+        DS485Interface* intf = &m_DSS.getDS485Interface();
         DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
         if(proxy != NULL) {
           boost::shared_ptr<FrameBucketCollector> bucket = proxy->sendFrameAndInstallBucket(*frame, FunctionDeviceGetTransmissionQuality);

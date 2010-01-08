@@ -28,12 +28,15 @@
 namespace dss {
 
   class Set;
+  class Apartment;
 
   class ApartmentRequestHandler : public DeviceInterfaceRequestHandler {
   public:
+    ApartmentRequestHandler(Apartment& _apartment);
     virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
   private:
     Set getUnassignedDevices();
+    Apartment& m_Apartment;
   }; // ApartmentRequestHandler
 
 } // namespace dss

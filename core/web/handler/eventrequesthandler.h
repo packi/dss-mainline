@@ -27,9 +27,14 @@
 
 namespace dss {
 
+  class EventQueue;
+
   class EventRequestHandler : public WebServerRequestHandlerJSON {
   public:
+    EventRequestHandler(EventQueue& _queue);
     virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
+  private:
+    EventQueue& m_Queue;
   }; // StructureRequestHandler
 
 } // namespace dss

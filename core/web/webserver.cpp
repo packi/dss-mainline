@@ -185,17 +185,17 @@ namespace dss {
   const char* kHandlerMetering = "metering";
 
   void WebServer::instantiateHandlers() {
-    m_Handlers[kHandlerApartment] = new ApartmentRequestHandler();
+    m_Handlers[kHandlerApartment] = new ApartmentRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerZone] = new ZoneRequestHandler();
-    m_Handlers[kHandlerDevice] = new DeviceRequestHandler();
-    m_Handlers[kHandlerCircuit] = new CircuitRequestHandler();
+    m_Handlers[kHandlerDevice] = new DeviceRequestHandler(getDSS().getApartment());
+    m_Handlers[kHandlerCircuit] = new CircuitRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerSet] = new SetRequestHandler();
     m_Handlers[kHandlerProperty] = new PropertyRequestHandler();
-    m_Handlers[kHandlerEvent] = new EventRequestHandler();
+    m_Handlers[kHandlerEvent] = new EventRequestHandler(getDSS().getEventQueue());
     m_Handlers[kHandlerSystem] = new SystemRequestHandler();
     m_Handlers[kHandlerStructure] = new StructureRequestHandler();
     m_Handlers[kHandlerSim] = new SimRequestHandler();
-    m_Handlers[kHandlerDebug] = new DebugRequestHandler();
+    m_Handlers[kHandlerDebug] = new DebugRequestHandler(getDSS());
     m_Handlers[kHandlerMetering] = new MeteringRequestHandler();
   } // instantiateHandlers
   

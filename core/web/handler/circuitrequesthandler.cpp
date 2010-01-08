@@ -22,8 +22,6 @@
 
 #include "circuitrequesthandler.h"
 
-#include "core/dss.h"
-
 #include "core/model/modulator.h"
 #include "core/model/apartment.h"
 
@@ -33,6 +31,10 @@ namespace dss {
 
 
   //=========================================== CircuitRequestHandler
+
+  CircuitRequestHandler::CircuitRequestHandler(Apartment& _apartment)
+  : m_Apartment(_apartment)
+  { }
 
   boost::shared_ptr<JSONObject> CircuitRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
     std::string idString = _request.getParameter("id");
@@ -44,7 +46,7 @@ namespace dss {
       return failure("could not parse dsid");
     }
     try {
-      DSMeter& dsMeter = getDSS().getApartment().getDSMeterByDSID(dsid);
+      DSMeter& dsMeter = m_Apartment.getDSMeterByDSID(dsid);
       if(_request.getMethod() == "getName") {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
         resultObj->addProperty("name", dsMeter.getName());

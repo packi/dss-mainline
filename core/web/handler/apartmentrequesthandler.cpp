@@ -23,7 +23,6 @@
 #include "apartmentrequesthandler.h"
 
 #include "core/foreach.h"
-#include "core/dss.h"
 #include "core/ds485const.h"
 
 #include "core/web/json.h"
@@ -42,11 +41,15 @@ namespace dss {
 
   //=========================================== ApartmentRequestHandler
 
+  ApartmentRequestHandler::ApartmentRequestHandler(Apartment& _apartment)
+  : m_Apartment(_apartment)
+  { }
+
   boost::shared_ptr<JSONObject> ApartmentRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
     std::string errorMessage;
     if(_request.getMethod() == "getConsumption") {
       int accumulatedConsumption = 0;
-      foreach(DSMeter* pDSMeter, getDSS().getApartment().getDSMeters()) {
+      foreach(DSMeter* pDSMeter, m_Apartment.getDSMeters()) {
         accumulatedConsumption += pDSMeter->getPowerConsumption();
       }
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
@@ -58,7 +61,7 @@ namespace dss {
       std::string groupIDString = _request.getParameter("groupID");
       if(!groupName.empty()) {
         try {
-          Group& grp = getDSS().getApartment().getGroup(groupName);
+          Group& grp = m_Apartment.getGroup(groupName);
           interface = &grp;
         } catch(std::runtime_error& e) {
           return failure("Could not find group with name '" + groupName + "'");
@@ -67,7 +70,7 @@ namespace dss {
         try {
           int groupID = strToIntDef(groupIDString, -1);
           if(groupID != -1) {
-            Group& grp = getDSS().getApartment().getGroup(groupID);
+            Group& grp = m_Apartment.getGroup(groupID);
             interface = &grp;
           } else {
             return failure("Could not parse group id '" + groupIDString + "'");
@@ -77,17 +80,17 @@ namespace dss {
         }
       }
       if(interface != NULL) {
-        interface = &getDSS().getApartment().getGroup(GroupIDBroadcast);
+        interface = &m_Apartment.getGroup(GroupIDBroadcast);
         return success();
       }
       return failure("No interface");
     } else {
       if(_request.getMethod() == "getStructure") {
-        return success(toJSON(getDSS().getApartment()));
+        return success(toJSON(m_Apartment));
       } else if(_request.getMethod() == "getDevices") {
         Set devices;
         if(_request.getParameter("unassigned").empty()) {
-          devices = getDSS().getApartment().getDevices();
+          devices = m_Apartment.getDevices();
         } else {
           devices = getUnassignedDevices();
         }
@@ -104,7 +107,7 @@ namespace dss {
         boost::shared_ptr<JSONArrayBase> circuits(new JSONArrayBase());
 
         resultObj->addElement("circuits", circuits);
-        std::vector<DSMeter*>& dsMeters = getDSS().getApartment().getDSMeters();
+        std::vector<DSMeter*>& dsMeters = m_Apartment.getDSMeters();
         foreach(DSMeter* dsMeter, dsMeters) {
           boost::shared_ptr<JSONObject> circuit(new JSONObject());
           circuits->addElement("", circuit);
@@ -120,13 +123,13 @@ namespace dss {
         return success(resultObj);
       } else if(_request.getMethod() == "getName") {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        resultObj->addProperty("name", getDSS().getApartment().getName());
+        resultObj->addProperty("name", m_Apartment.getName());
         return success(resultObj);
       } else if(_request.getMethod() == "setName") {
-        getDSS().getApartment().setName(_request.getParameter("newName"));
+        m_Apartment.setName(_request.getParameter("newName"));
         return success();
       } else if(_request.getMethod() == "rescan") {
-        std::vector<DSMeter*> mods = getDSS().getApartment().getDSMeters();
+        std::vector<DSMeter*> mods = m_Apartment.getDSMeters();
         foreach(DSMeter* pDSMeter, mods) {
           pDSMeter->setIsValid(false);
         }

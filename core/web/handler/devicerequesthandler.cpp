@@ -22,8 +22,6 @@
 
 #include "devicerequesthandler.h"
 
-#include "core/dss.h"
-
 #include "core/model/apartment.h"
 #include "core/model/device.h"
 
@@ -33,6 +31,10 @@ namespace dss {
 
 
   //=========================================== DeviceRequestHandler
+
+  DeviceRequestHandler::DeviceRequestHandler(Apartment& _apartment)
+  : m_Apartment(_apartment)
+  { }
 
   boost::shared_ptr<JSONObject> DeviceRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
     bool ok = true;
@@ -44,7 +46,7 @@ namespace dss {
       dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
       if(!(deviceDSID == NullDSID)) {
         try {
-          Device& device = getDSS().getApartment().getDeviceByDSID(deviceDSID);
+          Device& device = m_Apartment.getDeviceByDSID(deviceDSID);
           pDevice = &device;
         } catch(std::runtime_error& e) {
           ok = false;
@@ -56,7 +58,7 @@ namespace dss {
       }
     } else if(!deviceName.empty()) {
       try {
-        Device& device = getDSS().getApartment().getDeviceByName(deviceName);
+        Device& device = m_Apartment.getDeviceByName(deviceName);
         pDevice = &device;
       } catch(std::runtime_error&  e) {
         ok = false;

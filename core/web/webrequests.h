@@ -38,6 +38,7 @@ namespace dss {
   
   class WebServerRequestHandler : public RestfulRequestHandler {
   protected:
+
     DSS& getDSS() {
       return *DSS::getInstance();
     }
