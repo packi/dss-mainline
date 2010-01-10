@@ -26,7 +26,11 @@
 
 #include <boost/scoped_ptr.hpp>
 
+#include "core/foreach.h"
+#include "core/base.h"
+
 #include "core/ds485/ds485.h"
+#include "core/ds485types.h"
 
 using namespace dss;
 
@@ -36,28 +40,6 @@ BOOST_AUTO_TEST_CASE(testFrameReader) {
   boost::scoped_ptr<DS485FrameReader> reader(new DS485FrameReader());
   boost::shared_ptr<SerialComSim> simPort(new SerialComSim());
   std::string frame;
-/*
-  frame.push_back('\xFD');
-  frame.push_back('\x05');
-  frame.push_back('\x00');
-  frame.push_back('\x71');
-  frame.push_back('\x00');
-  frame.push_back('\x99');
-  frame.push_back('\x64');
-*/
-  /* Working frame
-
-  frame.push_back('\xFD');
-  frame.push_back('\x01');
-  frame.push_back('\x00');
-  frame.push_back('\x14');
-  frame.push_back('\xce');
-  frame.push_back('\x01');
-  frame.push_back('\x00');
-  frame.push_back('\x00');
-  frame.push_back('\x39');
-  frame.push_back('\x24');
-   */
 
   /* Captured frames */
   frame.push_back('\xFD');
@@ -126,5 +108,73 @@ BOOST_AUTO_TEST_CASE(testFrameReader) {
   reader->setSerialCom(simPort);
   delete reader->getFrame(1000);
 } // testFrameReader
+
+BOOST_AUTO_TEST_CASE(testFrameReadWrite) {
+  DS485CommandFrame cmdFrameOrigin;
+  cmdFrameOrigin.getHeader().setBroadcast(true);
+  cmdFrameOrigin.getHeader().setCounter(0x02);
+  cmdFrameOrigin.getHeader().setDestination(0x03);
+  cmdFrameOrigin.getHeader().setSource(0x04);
+  
+  std::string frameAsString;
+  std::vector<unsigned char> frameAsVector = cmdFrameOrigin.toChar();
+  uint16_t crc = 0x0000;
+  foreach(unsigned char c, frameAsVector) {
+    crc = update_crc(crc, c);
+    frameAsString.push_back(c);
+  }
+  unsigned char c = static_cast<unsigned char>(crc & 0xFF);
+  frameAsString.push_back(c);
+  c = static_cast<unsigned char>((crc >> 8) & 0xFF);
+  frameAsString.push_back(c);
+
+  
+  boost::shared_ptr<SerialComSim> simPort(new SerialComSim);
+  simPort->putSimData(frameAsString);
+  
+  DS485FrameReader reader;
+  reader.setSerialCom(simPort);
+  BOOST_CHECK_EQUAL(reader.getNumberOfCRCErrors(), 0);
+  BOOST_CHECK_EQUAL(reader.getNumberOfFramesReceived(), 0);
+  BOOST_CHECK_EQUAL(reader.getNumberOfIncompleteFramesReceived(), 0);
+  
+  DS485Frame* pFrame = reader.getFrame(1000);
+  DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(pFrame);
+  BOOST_REQUIRE(cmdFrame != NULL);
+
+  BOOST_CHECK_EQUAL(reader.getNumberOfCRCErrors(), 0);
+  BOOST_CHECK_EQUAL(reader.getNumberOfFramesReceived(), 1);
+  BOOST_CHECK_EQUAL(reader.getNumberOfIncompleteFramesReceived(), 0);
+
+  BOOST_CHECK_EQUAL(cmdFrame->getHeader().isBroadcast(), cmdFrameOrigin.getHeader().isBroadcast());
+  BOOST_CHECK_EQUAL(cmdFrame->getHeader().getCounter(),cmdFrameOrigin.getHeader().getCounter());
+  BOOST_CHECK_EQUAL(cmdFrame->getHeader().getDestination(),cmdFrameOrigin.getHeader().getDestination());
+  BOOST_CHECK_EQUAL(cmdFrame->getHeader().getSource(),cmdFrameOrigin.getHeader().getSource());  
+} // testFrameReadWrite
+
+BOOST_AUTO_TEST_CASE(testPayloadIsEmpty) {
+  DS485Payload payload;
+  BOOST_CHECK_EQUAL(payload.size(), 0);
+} // testFrameReadWrite
+
+BOOST_AUTO_TEST_CASE(testPayload) {
+  DS485Payload payload;
+  payload.add<uint8_t>(0x01);
+  BOOST_CHECK_EQUAL(payload.size(), 1);
+  payload.add<uint16_t>(0xbeef);
+  BOOST_CHECK_EQUAL(payload.size(), 3);
+  payload.add<uint32_t>(0xaabbccdd);
+  BOOST_CHECK_EQUAL(payload.size(), 7);
+  dsid_t dsid(0x001122334455667788ll, 0xeeff9900);
+  payload.add(dsid);
+  BOOST_CHECK_EQUAL(payload.size(), 19);
+  
+  PayloadDissector pd(payload);
+  BOOST_CHECK_EQUAL(pd.get<uint8_t>(), 0x01);
+  BOOST_CHECK_EQUAL(pd.get<uint16_t>(), 0xbeef);
+  BOOST_CHECK_EQUAL(pd.get<uint32_t>(), 0xaabbccdd);
+  BOOST_CHECK_EQUAL(pd.get<dsid_t>().toString(), dsid.toString());
+  BOOST_CHECK(pd.isEmpty());
+} // testPayload
 
 BOOST_AUTO_TEST_SUITE_END()

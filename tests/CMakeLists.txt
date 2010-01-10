@@ -1,10 +1,10 @@
 add_library(tests basetests.cpp  datetoolstests.cpp  ds485tests.cpp
-	eventtests.cpp  modeljstests.cpp  modeltests.cpp
+	eventtests.cpp  modeljstests.cpp  modeltests.cpp devicetests.cpp
 	propertysystemtests.cpp  scriptstest.cpp  seriestests.cpp tests.cpp busrequesttests.cpp restfulapitests.cpp)
 
 add_executable( dsstests EXCLUDE_FROM_ALL testrunner.cpp ../namespaces.cpp
 	basetests.cpp  datetoolstests.cpp  jsontests.cpp ds485tests.cpp
-        eventtests.cpp  modeljstests.cpp  modeltests.cpp
+        eventtests.cpp  modeljstests.cpp  modeltests.cpp devicetests.cpp
         propertysystemtests.cpp  scriptstest.cpp busrequesttests.cpp
 	seriestests.cpp jshandlertests.cpp restfulapitests.cpp)
 

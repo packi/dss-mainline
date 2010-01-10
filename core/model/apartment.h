@@ -136,8 +136,6 @@ namespace dss {
     PropertyNodePtr getPropertyNode() { return m_pPropertyNode; }
     void setModelMaintenance(ModelMaintenance* _value) { m_pModelMaintenance = _value; }
     ModelMaintenance* getModelMaintenance() { return m_pModelMaintenance; }
-    void setPowerConsumption(int _dsMeterBusID, unsigned long _value);
-    void setEnergyMeterValue(int _dsMeterBusID, unsigned long _value);
   }; // Apartment
   
   /** Exception that will be thrown if a given item could not be found */

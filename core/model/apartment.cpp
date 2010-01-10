@@ -108,14 +108,6 @@ namespace dss {
     _zone.addGroup(grp);
   } // addDefaultGroupsToZone
 
-  void Apartment::setPowerConsumption(int _dsMeterBusID, unsigned long _value) {
-    getDSMeterByBusID(_dsMeterBusID).setPowerConsumption(_value);
-  } // powerConsumption
-
-  void Apartment::setEnergyMeterValue(int _dsMeterBusID, unsigned long _value) {
-    getDSMeterByBusID(_dsMeterBusID).setEnergyMeterValue(_value);
-  } // energyMeterValue
-
   Device& Apartment::getDeviceByDSID(const dsid_t _dsid) const {
     foreach(Device* dev, m_Devices) {
       if(dev->getDSID() == _dsid) {

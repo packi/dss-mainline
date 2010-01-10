@@ -58,11 +58,6 @@ namespace dss {
   } // add<devid_t>
 
   template<>
-  void DS485Payload::add(bool _data) {
-    m_Data.push_back(_data);
-  } // add<bool>
-
-  template<>
   void DS485Payload::add(uint32_t _data) {
     add<uint16_t>((_data >>  0) & 0x0000FFFF);
     add<uint16_t>((_data >> 16) & 0x0000FFFF);
