@@ -23,6 +23,7 @@
 #include "dsid_js.h"
 #include "core/jshandler.h"
 #include "core/scripting/modeljs.h"
+#include "core/scripting/propertyscriptextension.h"
 #include "core/dss.h"
 #include "core/thread.h"
 

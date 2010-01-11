@@ -91,52 +91,6 @@ namespace dss {
     JSObject* createJSSubscription(ScriptContext& _ctx, boost::shared_ptr<EventSubscription> _subscription);
   }; // EventScriptExtension
   
-  class PropertySystem;
-  class PropertyNode;
-  class PropertyScriptExtension;
-  
-  class PropertyScriptListener : public PropertyListener,
-                                 public ScriptContextAttachedObject {
-  public:
-    PropertyScriptListener(PropertyScriptExtension* _pExtension, ScriptContext* _pContext, JSObject* _functionObj, jsval _function, const std::string& _identifier);
-    virtual ~PropertyScriptListener();
-
-    virtual void propertyChanged(PropertyNodePtr _changedNode);
-    virtual void propertyRemoved(PropertyNodePtr _parent, PropertyNodePtr _child);
-    virtual void propertyAdded(PropertyNodePtr _parent, PropertyNodePtr _child);
-
-    const std::string& getIdentifier() const { return m_Identifier; }
-  private:
-    void doOnChange(PropertyNodePtr _changedNode);
-    void createScriptObject();
-  private:
-    PropertyScriptExtension* m_pExtension;
-    ScriptContext* m_pContext;
-    JSObject* m_pFunctionObject;
-    jsval m_Function;
-    std::string m_Identifier;
-    boost::scoped_ptr<ScriptObject> m_pScriptObject;
-  }; // PropertyScriptListener
-  
-  class PropertyScriptExtension : public ScriptExtension {
-  public:
-    PropertyScriptExtension(PropertySystem& _propertySystem);
-    virtual ~PropertyScriptExtension() {}
-    
-    virtual void extendContext(ScriptContext& _context);
-    
-    PropertySystem& getPropertySystem() { return m_PropertySystem; }
-    
-    JSObject* createJSProperty(ScriptContext& _ctx, boost::shared_ptr<PropertyNode> _node);
-    std::string produceListenerID();
-    void addListener(PropertyScriptListener* _pListener);
-    void removeListener(const std::string& _identifier);
-  private:
-    PropertySystem& m_PropertySystem;
-    std::vector<PropertyScriptListener*> m_Listeners;
-    int m_NextListenerID;
-  }; // PropertyScriptExtension
-
 }
 
 #endif
