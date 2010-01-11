@@ -37,7 +37,7 @@ namespace dss {
   { } // ctor
 
   JSBool global_prop_setProperty(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    if(argc > 2) {
+    if(argc < 2) {
       Logger::getInstance()->log("JS: global_prop_setProperty: need two arguments: property-path & value", lsError);
     } else {
       ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -72,7 +72,7 @@ namespace dss {
   } // global_prop_setProperty
 
   JSBool global_prop_getProperty(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    if(argc > 1) {
+    if(argc < 1) {
       Logger::getInstance()->log("JS: global_prop_getProperty: need one argument: property-path", lsError);
     } else {
       ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -108,7 +108,7 @@ namespace dss {
   } // global_prop_getProperty
 
   JSBool global_prop_setListener(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    if(argc > 2) {
+    if(argc < 2) {
       Logger::getInstance()->log("JS: global_prop_setListener: need two arguments: property-path &  callback", lsError);
     } else {
       ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -136,8 +136,8 @@ namespace dss {
   } // global_prop_setListener
 
   JSBool global_prop_removeListener(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    if(argc > 2) {
-      Logger::getInstance()->log("JS: global_prop_removeListener: need two arguments: listener-id", lsError);
+    if(argc < 1) {
+      Logger::getInstance()->log("JS: global_prop_removeListener: need one argument: listener-id", lsError);
     } else {
       ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
@@ -156,7 +156,7 @@ namespace dss {
     {"getProperty", global_prop_getProperty, 1, 0, 0},
     {"setListener", global_prop_setListener, 2, 0, 0},
     {"removeListener", global_prop_removeListener, 1, 0, 0},
-    {NULL},
+    {NULL, NULL, 0, 0, 0},
   };
 
   void PropertyScriptExtension::extendContext(ScriptContext& _context) {
