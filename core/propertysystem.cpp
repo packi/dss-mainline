@@ -41,6 +41,8 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/SAX/InputSource.h>
 
+#include <boost/filesystem.hpp>
+
 using Poco::XML::Document;
 using Poco::XML::Attr;
 using Poco::XML::Text;
@@ -72,6 +74,12 @@ namespace dss {
 
   bool PropertySystem::loadFromXML(const std::string& _fileName,
                                    PropertyNodePtr _rootNode) {
+    if (!boost::filesystem::exists(_fileName)) {
+      Logger::getInstance()->log(std::string("PropertySystem::loadFromXML: No such file ") + _fileName,
+                                 lsError);
+      return false;
+    }
+    
     PropertyNodePtr root = _rootNode;
     if (root == NULL) {
       root = getRootNode();
@@ -452,7 +460,7 @@ namespace dss {
       return result;
     }
   } // count
-  
+
   int PropertyNode::size() const {
     return m_ChildNodes.size();
   } // size
