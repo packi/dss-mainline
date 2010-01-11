@@ -149,13 +149,79 @@ namespace dss {
       return JS_TRUE;
     }
     return JS_FALSE;
-  } // global_prop_setListener
+  } // global_prop_removeListener
+
+  JSBool global_prop_setFlag(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    if(argc < 3) {
+      Logger::getInstance()->log("JS: global_prop_setFlag: need three arguments: prop-path, flag, value", lsError);
+    } else {
+      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+      PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+      std::string propName = ctx->convertTo<std::string>(argv[0]);
+      PropertyNodePtr node = ext->getPropertySystem().getProperty(propName);
+      std::string flagName = ctx->convertTo<std::string>(argv[1]);
+      bool value = ctx->convertTo<bool>(argv[2]);
+      PropertyNode::Flag flag;
+      if(flagName == "ARCHIVE") {
+        flag = PropertyNode::Archive;
+      } else if(flagName == "WRITEABLE") {
+        flag = PropertyNode::Writeable;
+      } else if(flagName == "READABLE") {
+        flag = PropertyNode::Readable;
+      } else {
+        Logger::getInstance()->log("JS: global_prop_setFlag: Invalid value for flag: " + flagName, lsError);
+        *rval = JSVAL_TRUE;
+        return JS_TRUE;
+      }
+
+      node->setFlag(flag, value);
+      *rval = JSVAL_TRUE;
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // global_prop_setFlag
+
+  JSBool global_prop_hasFlag(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    if(argc < 2) {
+      Logger::getInstance()->log("JS: global_prop_hasFlag: need three arguments: prop-path, flag", lsError);
+    } else {
+      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+      PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+      std::string propName = ctx->convertTo<std::string>(argv[0]);
+      PropertyNodePtr node = ext->getPropertySystem().getProperty(propName);
+      std::string flagName = ctx->convertTo<std::string>(argv[1]);
+      PropertyNode::Flag flag;
+      if(flagName == "ARCHIVE") {
+        flag = PropertyNode::Archive;
+      } else if(flagName == "WRITEABLE") {
+        flag = PropertyNode::Writeable;
+      } else if(flagName == "READABLE") {
+        flag = PropertyNode::Readable;
+      } else {
+        Logger::getInstance()->log("JS: global_prop_hasFlag: Invalid value for flag: " + flagName, lsError);
+        *rval = JSVAL_NULL;
+        return JS_TRUE;
+      }
+
+      if(node->hasFlag(flag)) {
+        *rval = JSVAL_TRUE;
+      } else {
+        *rval = JSVAL_FALSE;
+      }
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // global_prop_setFlag
 
   JSFunctionSpec prop_global_methods[] = {
     {"setProperty", global_prop_setProperty, 2, 0, 0},
     {"getProperty", global_prop_getProperty, 1, 0, 0},
     {"setListener", global_prop_setListener, 2, 0, 0},
     {"removeListener", global_prop_removeListener, 1, 0, 0},
+    {"setFlag", global_prop_setFlag, 3, 0, 0},
+    {"hasFlag", global_prop_hasFlag, 2, 0, 0},
     {NULL, NULL, 0, 0, 0},
   };
 

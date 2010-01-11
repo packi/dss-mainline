@@ -392,4 +392,30 @@ BOOST_AUTO_TEST_CASE(testThreading) {
   ctx->evaluate<void>("removeListener(l1); removeListener(l2);");
 } // testThreading
 
+BOOST_AUTO_TEST_CASE(testPropertyFlags) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  PropertyNodePtr node1 = propSys.createProperty("/testing");
+
+  ctx->evaluate<void>("setFlag('/testing', 'ARCHIVE', true);");
+  BOOST_CHECK_EQUAL(node1->hasFlag(PropertyNode::Archive), true);
+  bool res = ctx->evaluate<bool>("hasFlag('/testing', 'ARCHIVE')");
+  BOOST_CHECK_EQUAL(res, true);
+
+  ctx->evaluate<void>("setFlag('/testing', 'READABLE', false);");
+  BOOST_CHECK_EQUAL(node1->hasFlag(PropertyNode::Readable), false);
+  res = ctx->evaluate<bool>("hasFlag('/testing', 'READABLE')");
+  BOOST_CHECK_EQUAL(res, false);
+
+  ctx->evaluate<void>("setFlag('/testing', 'WRITEABLE', false);");
+  BOOST_CHECK_EQUAL(node1->hasFlag(PropertyNode::Writeable), false);
+  res = ctx->evaluate<bool>("hasFlag('/testing', 'WRITEABLE')");
+  BOOST_CHECK_EQUAL(res, false);
+} // testPropertyFlags
+
 BOOST_AUTO_TEST_SUITE_END()
