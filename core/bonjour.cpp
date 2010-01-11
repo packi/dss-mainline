@@ -86,7 +86,7 @@ static void entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state,
     switch (state) {
         case AVAHI_ENTRY_GROUP_ESTABLISHED :
             /* The entry group has been established successfully */
-            Logger::getInstance()->log(std::string("Service '") + name + "' successfully established.", lsInfo)
+            Logger::getInstance()->log(std::string("Service '") + name + "' successfully established.", lsInfo);
             break;
 
         case AVAHI_ENTRY_GROUP_COLLISION : {
@@ -137,7 +137,7 @@ static void create_services(AvahiClient *c) {
      * because it was reset previously, add our entries.  */
 
     if (avahi_entry_group_is_empty(group)) {
-        Logger::getInstance()->log("Adding service '" + name + "'", lsInfo);
+        Logger::getInstance()->log(std::string("Adding service '") + name + "'", lsInfo);
 
         /* We will now add two services and one subtype to the entry
          * group. The two services have the same name, but differ in
@@ -239,7 +239,7 @@ static void client_callback(AvahiClient *c, AvahiClientState state, AVAHI_GCC_UN
 
     /* Allocate main loop object */
     if (!(simple_poll = avahi_simple_poll_new())) {
-        Logger::getInstance->log("Failed to create simple poll object.", lsError);
+        Logger::getInstance()->log("Failed to create simple poll object.", lsError);
         goto fail;
     }
 
