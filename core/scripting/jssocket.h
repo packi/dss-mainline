@@ -23,6 +23,10 @@
 #ifndef JSSOCKET_H_
 #define JSSOCKET_H_
 
+#include <vector>
+
+#include <boost/shared_ptr.hpp>
+
 #include "core/jshandler.h"
 
 namespace dss {
@@ -34,13 +38,13 @@ namespace dss {
     SocketScriptContextExtension();
 
     virtual void extendContext(ScriptContext& _context);
-    void removeSocketHelper(SocketHelper& _helper);
-    void addSocketHelper(SocketHelper& _helper);
+    void removeSocketHelper(boost::shared_ptr<SocketHelper> _helper);
+    void addSocketHelper(boost::shared_ptr<SocketHelper> _helper);
 
 //    JSObject* createJSSocket(ScriptContext& _ctx);
   private:
     Mutex m_SocketHelperMutex;
-    typedef boost::ptr_vector<SocketHelper> SocketHelperVector;
+    typedef std::vector<boost::shared_ptr<SocketHelper> > SocketHelperVector;
     SocketHelperVector m_SocketHelper;
   }; // SocketScriptExtension
 

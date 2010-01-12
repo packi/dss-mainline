@@ -27,19 +27,70 @@
 #include "core/scripting/jssocket.h"
 
 #include <boost/scoped_ptr.hpp>
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+
+#include "core/thread.h"
 
 using namespace std;
 using namespace dss;
+using boost::asio::ip::tcp;
 
 BOOST_AUTO_TEST_SUITE(SocketJS)
+
+class TestListener : public Thread {
+public:
+  TestListener(int _port) 
+  : m_IOService(),
+    m_Endpoint(tcp::v4(), _port),
+    m_Acceptor(m_IOService, m_Endpoint)
+  {
+    boost::shared_ptr<tcp::socket> sock(new tcp::socket(m_IOService));
+    m_Acceptor.async_accept(*sock, boost::bind(&TestListener::handleConnection, this, sock));
+  }
+  
+  virtual void execute() {
+    while(!m_Terminated) {
+      m_IOService.run();
+    }
+  }
+  
+  std::string m_DataReceived;  
+  boost::asio::io_service m_IOService;
+private:
+  
+  void handleConnection(boost::shared_ptr<tcp::socket> _sock) {
+    char data[100];
+    boost::system::error_code error;
+    _sock->read_some(boost::asio::buffer(data), error);
+    if(error == boost::asio::error::eof) {
+      return; 
+    } else if(!error) {
+      m_DataReceived = data;
+    }
+  }
+  
+  tcp::endpoint m_Endpoint;
+  tcp::acceptor m_Acceptor;
+};
+
 
 BOOST_AUTO_TEST_CASE(testBasics) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
   ScriptExtension* ext = new SocketScriptContextExtension();
   env->addExtension(ext);
+  
+  TestListener listener(1234);
+  listener.run();
 
-//  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("TcpSocket.sendTo('127.0.0.1', 1234, 'hello');");
+  sleepSeconds(2);
+  BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
+  listener.m_IOService.stop();
+  listener.terminate();
+  sleepSeconds(2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

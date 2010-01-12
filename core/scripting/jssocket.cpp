@@ -27,6 +27,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 using boost::asio::ip::tcp;
 
@@ -39,7 +40,9 @@ namespace dss {
                         public Thread {
   public:
     virtual void execute() {
-      m_IOService.run();
+      while(!m_Terminated) {
+        m_IOService.run();
+      }
     }
 
     boost::asio::io_service& getIOService() {
@@ -63,17 +66,28 @@ namespace dss {
   //================================================== SocketHelper
 
   class SocketHelper {
+  public:
+    SocketHelper(SocketScriptContextExtension& _extension)
+    : m_Extension(_extension)
+    { }
+  protected:
+    SocketScriptContextExtension& m_Extension;
   }; // SocketHelper
 
-  class SocketHelperSendOneShot {
+  class SocketHelperSendOneShot : public SocketHelper,
+                                  public boost::enable_shared_from_this<SocketHelperSendOneShot> {
   public:
-    SocketHelperSendOneShot(const std::string& _host, int _port, const std::string& _data)
-    : m_Socket(BoostIORunner::getInstance().getIOService()),
-      m_IOService(BoostIORunner::getInstance().getIOService()),
-      m_Data(_data)
+    SocketHelperSendOneShot(SocketScriptContextExtension& _extension)
+    : SocketHelper(_extension),
+      m_Socket(BoostIORunner::getInstance().getIOService()),
+      m_IOService(BoostIORunner::getInstance().getIOService())
     {
+    }
+    
+    void sendTo(const std::string& _host, int _port, const std::string& _data) {
+      m_Data = _data;
       tcp::resolver resolver(m_IOService);
-      tcp::resolver::query query(_host, _port);
+      tcp::resolver::query query(_host, intToString(_port));
       tcp::resolver::iterator iterator = resolver.resolve(query);
 
       tcp::endpoint endpoint = *iterator;
@@ -112,8 +126,8 @@ namespace dss {
       } else {
         // call js callback(false)
       }
-      // terminate, remove from helper-list of extension
       do_close();
+      m_Extension.removeSocketHelper(shared_from_this());
     }
 
     void do_close() {
@@ -122,7 +136,7 @@ namespace dss {
   private:
     tcp::socket m_Socket;
     boost::asio::io_service& m_IOService;
-    const std::string& m_Data;
+    std::string m_Data;
   }; // SocketHelperOneShot
 
   //================================================== SocketScriptContextExtension
@@ -161,27 +175,27 @@ namespace dss {
 
   JSBool tcpSocket_sendTo(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
- //   SocketScriptContextExtension* ext =
-//        dynamic_cast<SocketScriptContextExtension*>(ctx->getEnvironment().getExtension(SocketScriptExtensionName));
+    SocketScriptContextExtension* ext =
+       dynamic_cast<SocketScriptContextExtension*>(ctx->getEnvironment().getExtension(SocketScriptExtensionName));
 
     if(argc >= 3) {
       try {
         std::string host = ctx->convertTo<std::string>(argv[0]);
-        int port = ctx->convertTo<int>(argv[2]);
+        int port = ctx->convertTo<int>(argv[1]);
         std::string data = ctx->convertTo<std::string>(argv[2]);
-
-        tcp::resolver resolver(BoostIORunner::getInstance().getIOService());
-        tcp::resolver::query query(host, port);
-        tcp::resolver::iterator iterator = resolver.resolve(query);
 
         if(!BoostIORunner::getInstance().isRunning()) {
           BoostIORunner::getInstance().run();
         }
+	
+	boost::shared_ptr<SocketHelperSendOneShot> helper(new SocketHelperSendOneShot(*ext));
+	ext->addSocketHelper(helper);
 
+	helper->sendTo(host, port, data);
 
         *rval = JSVAL_TRUE;
         return JS_TRUE;
-      } catch(const ScriptException&) {
+      } catch(const ScriptException& e) {
       }
     }
     return JS_FALSE;
@@ -213,18 +227,18 @@ namespace dss {
                  tcpSocket_construct, 0, tcpSocket_properties, tcpSocket_methods, NULL, tcpSocket_static_methods);
   } // extendContext
 
-  void SocketScriptContextExtension::removeSocketHelper(SocketHelper& _helper) {
+  void SocketScriptContextExtension::removeSocketHelper(boost::shared_ptr<SocketHelper> _helper) {
     m_SocketHelperMutex.lock();
-//    SocketHelperVector::iterator it = std::find(m_SocketHelper.begin(), m_SocketHelper.end(), _helper);
-//    if(it != m_SocketHelper.end()) {
-//      m_SocketHelper.erase(it);
-//    }
+    SocketHelperVector::iterator it = std::find(m_SocketHelper.begin(), m_SocketHelper.end(), _helper);
+    if(it != m_SocketHelper.end()) {
+      m_SocketHelper.erase(it);
+    }
     m_SocketHelperMutex.unlock();
   } // removeSocketHelper
 
-  void SocketScriptContextExtension::addSocketHelper(SocketHelper& _helper) {
+  void SocketScriptContextExtension::addSocketHelper(boost::shared_ptr<SocketHelper> _helper) {
     m_SocketHelperMutex.lock();
-    m_SocketHelper.push_back(&_helper);
+    m_SocketHelper.push_back(_helper);
     m_SocketHelperMutex.unlock();
   } // addSocketHelper
 
