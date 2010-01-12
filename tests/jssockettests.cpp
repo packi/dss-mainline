@@ -41,7 +41,8 @@ BOOST_AUTO_TEST_SUITE(SocketJS)
 class TestListener : public Thread {
 public:
   TestListener(int _port) 
-  : m_IOService(),
+  : Thread("TestListener"),
+    m_IOService(),
     m_Endpoint(tcp::v4(), _port),
     m_Acceptor(m_IOService, m_Endpoint)
   {
@@ -50,9 +51,7 @@ public:
   }
   
   virtual void execute() {
-    while(!m_Terminated) {
-      m_IOService.run();
-    }
+    m_IOService.run();
   }
   
   std::string m_DataReceived;  
@@ -75,7 +74,6 @@ private:
   tcp::acceptor m_Acceptor;
 };
 
-/*
 BOOST_AUTO_TEST_CASE(testBasics) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
@@ -84,15 +82,11 @@ BOOST_AUTO_TEST_CASE(testBasics) {
   
   TestListener listener(1234);
   listener.run();
-  sleepMS(500);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("TcpSocket.sendTo('127.0.0.1', 1234, 'hello');");
-  sleepMS(1500);
+  sleepMS(250);
   BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
-  listener.m_IOService.stop();
-  listener.terminate();
-  sleepMS(500);
 }
-*/
+
 BOOST_AUTO_TEST_SUITE_END()

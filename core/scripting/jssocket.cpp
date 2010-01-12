@@ -85,6 +85,7 @@ namespace dss {
     }
     
     void sendTo(const std::string& _host, int _port, const std::string& _data) {
+      Logger::getInstance()->log("sendTo");
       m_Data = _data;
       tcp::resolver resolver(m_IOService);
       tcp::resolver::query query(_host, intToString(_port));
@@ -184,15 +185,14 @@ namespace dss {
         int port = ctx->convertTo<int>(argv[1]);
         std::string data = ctx->convertTo<std::string>(argv[2]);
 
+        boost::shared_ptr<SocketHelperSendOneShot> helper(new SocketHelperSendOneShot(*ext));
+        ext->addSocketHelper(helper);
+
+        helper->sendTo(host, port, data);
+
         if(!BoostIORunner::getInstance().isRunning()) {
           BoostIORunner::getInstance().run();
         }
-	
-	boost::shared_ptr<SocketHelperSendOneShot> helper(new SocketHelperSendOneShot(*ext));
-	ext->addSocketHelper(helper);
-
-	helper->sendTo(host, port, data);
-
         *rval = JSVAL_TRUE;
         return JS_TRUE;
       } catch(const ScriptException& e) {
