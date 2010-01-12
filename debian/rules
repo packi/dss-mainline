@@ -76,11 +76,19 @@ binary-arch: install
 	dh_fixperms
 #	dh_perl
 #	dh_makeshlibs
+
+
+# 	fix permissions
+	chgrp dialout debian/dss/usr/share/dss/data
+	chmod g+w debian/dss/usr/share/dss/data
+
 	dh_installdeb
 	dh_shlibdeps
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
+
+
 
 binary: binary-indep binary-arch
 .PHONY: build clean binary-indep binary-arch binary install 

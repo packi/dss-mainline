@@ -1,3 +1,9 @@
+dss (0.7.5) unstable; urgency=low
+
+  * Update to dss 0.7.5
+
+ -- Johannes Winkelmann <johannes.winkelmann@aizo.com>  Thu, 17 Sep 2009 17:06:07 +0200
+
 dss (0.5-dev-1) unstable; urgency=low
 
   * Initial release
