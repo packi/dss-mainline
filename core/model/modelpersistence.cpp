@@ -33,6 +33,7 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/XML/XMLWriter.h>
 #include <Poco/SAX/InputSource.h>
+#include <Poco/SAX/SAXException.h>
 
 #include "core/foreach.h"
 #include "core/base.h"
@@ -71,7 +72,18 @@ namespace dss {
 
     InputSource input(inFile);
     DOMParser parser;
-    AutoPtr<Document> pDoc = parser.parse(&input);
+    AutoPtr<Document> pDoc;
+    try {
+      pDoc = parser.parse(&input);
+    } catch (Poco::XML::SAXParseException& spe) {
+      // Note that we can hit this case both if it's invalid XML and
+      // when the file doesn't exist at all
+      Logger::getInstance()->log(std::string("ModelPersistence::readConfigurationFromXML: "
+                                             "Parse error in Model configuration: ") + 
+                                 _fileName + ": " + spe.message(), lsError);
+      return;
+    }
+
     Element* rootNode = pDoc->documentElement();
 
     if(rootNode->localName() == "config") {
