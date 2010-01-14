@@ -412,7 +412,7 @@ namespace dss {
         Set workingCopy = _set;
 
         while(!workingCopy.isEmpty()) {
-          DeviceReference& ref = workingCopy.get(0);
+          DeviceReference ref = workingCopy.get(0);
           workingCopy.removeDevice(ref);
 
           if(OptimizerDebug) {
