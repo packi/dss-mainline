@@ -229,17 +229,19 @@ namespace dss {
   }
 
   Set SetBuilder::buildSet(const std::string& _setDescription, const Zone* _context) {
-	  Set result;
-	  m_SetDescription = _setDescription;
-	  const Zone* context = _context;
+    Set result;
+    m_SetDescription = _setDescription;
+    const Zone* context = _context;
     unsigned int index = 0;
-	  if((_context == NULL) || beginsWith(_setDescription, ".")) {
-		  context = &m_Apartment.getZone(0);
-		  result = context->getDevices();
-		  index = 0;
-	  } else {
-		  result = _context->getDevices();
-	  }
+    if(beginsWith(_setDescription, ".")) {
+      context = &m_Apartment.getZone(0);
+      result = context->getDevices();
+      index = 1;
+    } else if(_context != NULL) {
+      result = _context->getDevices();
+    } else {
+      context = &m_Apartment.getZone(0);
+    }
     result = parseSet(index, result, *context);
 
     return result;

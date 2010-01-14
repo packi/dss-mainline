@@ -90,6 +90,31 @@ BOOST_AUTO_TEST_CASE(testSetGetByBusID) {
   BOOST_CHECK_THROW(apt.getDevices().getByBusID(2, mod2), ItemNotFoundException);
 } // testSetGetByBusID
 
+BOOST_AUTO_TEST_CASE(testSetRemoveDevice) {
+  Apartment apt(NULL);
+
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(1);
+  dev1.setName("dev1");
+
+  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2.setShortAddress(2);
+  dev2.setName("dev2");
+  
+  Set set;
+  set.addDevice(dev1);
+  set.addDevice(dev2);
+  
+  BOOST_CHECK_EQUAL(set.length(), 2);
+  BOOST_CHECK_EQUAL(set.get(0).getDevice(), dev1);
+  BOOST_CHECK_EQUAL(set.get(1).getDevice(), dev2);
+  
+  set.removeDevice(dev1);
+  
+  BOOST_CHECK_EQUAL(set.length(), 1);
+  BOOST_CHECK_EQUAL(set.get(0).getDevice(), dev2);
+} // testSetRemoveDevice
+
 BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByShortAddress) {
   Apartment apt(NULL);
 
@@ -389,6 +414,21 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
 
   builderTest = builder.buildSet("empty().addDevices(1,2,3)", &apt.getZone(0));
   BOOST_CHECK_EQUAL(3, builderTest.length());
+
+  builderTest = builder.buildSet("addDevices(1)", NULL);
+  BOOST_CHECK_EQUAL(1, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+
+  builderTest = builder.buildSet("addDevices(1,2)", NULL);
+  BOOST_CHECK_EQUAL(2, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+  BOOST_CHECK_EQUAL(dev2, builderTest.get(1).getDevice());
+
+  builderTest = builder.buildSet("addDevices(1,2,3)", NULL);
+  BOOST_CHECK_EQUAL(3, builderTest.length());
+  BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
+  BOOST_CHECK_EQUAL(dev2, builderTest.get(1).getDevice());
+  BOOST_CHECK_EQUAL(dev3, builderTest.get(2).getDevice());
 } // testSetBuilder
 
 BOOST_AUTO_TEST_CASE(testRemoval) {
@@ -472,6 +512,14 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   dev2.setName("dev2");
   dev2.setShortAddress(2);
   dev2.setDSMeterID(76);
+  DeviceReference devRef2(dev2, &apt);
+  mod.addDevice(devRef2);
+  Device& dev3 = apt.allocateDevice(dsid_t(0,3));
+  dev3.setName("dev3");
+  dev3.setShortAddress(3);
+  dev3.setDSMeterID(76);
+  DeviceReference devRef3(dev3, &apt);
+  mod.addDevice(devRef3);
 
   dev1.callScene(Scene1);
   sleepMS(500);
@@ -480,6 +528,15 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   sleepMS(500);
   BOOST_CHECK_EQUAL(Scene2, dev1.getLastCalledScene());
   BOOST_CHECK_EQUAL(Scene2, dev2.getLastCalledScene());
+  
+  Set set;
+  set.addDevice(dev3);
+  set.addDevice(dev2);
+  set.callScene(Scene3);
+  sleepMS(500);
+  BOOST_CHECK_EQUAL(Scene2, dev1.getLastCalledScene());
+  BOOST_CHECK_EQUAL(Scene3, dev2.getLastCalledScene());
+  BOOST_CHECK_EQUAL(Scene3, dev3.getLastCalledScene());  
   busHandler.terminate();
   maintenance.terminate();
   sleepMS(1500);
