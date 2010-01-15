@@ -37,7 +37,7 @@ namespace dss {
   { }
 
   boost::shared_ptr<JSONObject> SimRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
-    if(_request.getMethod() == "switch") {
+    if(beginsWith(_request.getMethod(), "switch")) {
       if(_request.getMethod() == "switch/pressed") {
         int buttonNr = strToIntDef(_request.getParameter("buttonnr"), -1);
         if(buttonNr == -1) {
