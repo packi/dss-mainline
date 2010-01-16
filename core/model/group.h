@@ -33,7 +33,6 @@ namespace dss {
   class Group : public DeviceContainer,
                 public AddressableModelItem {
   protected:
-    DeviceVector m_Devices;
     int m_ZoneID;
     int m_GroupID;
     int m_LastCalledScene;

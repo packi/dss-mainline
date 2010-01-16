@@ -51,7 +51,6 @@ namespace dss {
   } // getDevices
 
   Group& Group::operator=(const Group& _other) {
-    m_Devices = _other.m_Devices;
     m_GroupID = _other.m_GroupID;
     m_ZoneID = _other.m_ZoneID;
     return *this;
