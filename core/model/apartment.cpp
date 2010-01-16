@@ -283,11 +283,17 @@ namespace dss {
     }
   } // removeZone
 
-  void Apartment::removeDevice(dsid_t _device) {
+  void Apartment::removeDevice(dsid_t _device) {    
     for(std::vector<Device*>::iterator ipDevice = m_Devices.begin(), e = m_Devices.end();
         ipDevice != e; ++ipDevice) {
       Device* pDevice = *ipDevice;
       if(pDevice->getDSID() == _device) {
+	int zoneID = pDevice->getZoneID();
+	DeviceReference devRef = DeviceReference(*pDevice, this);
+	if(zoneID != 0) {
+	  getZone(zoneID).removeDevice(devRef);
+	}
+	getZone(0).removeDevice(devRef);
         m_Devices.erase(ipDevice);
         delete pDevice;
         return;
