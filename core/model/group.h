@@ -58,8 +58,6 @@ namespace dss {
     /** @copydoc Device::setLastCalledScene */
     void setLastCalledScene(const int _value) { m_LastCalledScene = _value; }
 
-    /** Compares a group to another group.
-     * Two groups are considered equal if they belong to the same group and zone. */
     Group& operator=(const Group& _other);
   }; // Group
 
