@@ -38,6 +38,7 @@ namespace dss {
   class PropertyNode;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
   class Group;
+  class DSMeter;
 
   /** Represents a dsID */
   class Device : public AddressableModelItem,
@@ -46,8 +47,9 @@ namespace dss {
     std::string m_Name;
     dsid_t m_DSID;
     devid_t m_ShortAddress;
-    int m_DSMeterID;
     int m_ZoneID;
+    int m_DSMeterID;
+    dsid_t m_LastKnownMeterDSID;
     std::bitset<63> m_GroupBitmask;
     std::vector<int> m_Groups;
     int m_FunctionID;
@@ -138,8 +140,8 @@ namespace dss {
     dsid_t getDSID() const;
     /** Returns the id of the dsMeter the device is connected to */
     int getDSMeterID() const;
-    /** Sets the dsMeterID of the device. */
-    void setDSMeterID(const int _dsMeterID);
+    const dsid_t& getLastKnownDSMeterDSID() const;
+    void setDSMeter(const DSMeter& _dsMeter);
 
     /** Returns the zone ID the device resides in. */
     int getZoneID() const;

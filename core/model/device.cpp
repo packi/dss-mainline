@@ -29,6 +29,7 @@
 #include "core/model/modelevent.h"
 #include "core/model/apartment.h"
 #include "core/model/modelmaintenance.h"
+#include "core/model/modulator.h"
 
 namespace dss {
 
@@ -41,6 +42,8 @@ namespace dss {
     m_DSID(_dsid),
     m_ShortAddress(ShortAddressStaleDevice),
     m_ZoneID(0),
+    m_DSMeterID(-1),
+    m_LastKnownMeterDSID(NullDSID),
     m_FunctionID(0),
     m_LastCalledScene(SceneOff),
     m_Consumption(0),
@@ -155,8 +158,13 @@ namespace dss {
     return m_DSMeterID;
   } // getDSMeterID
 
-  void Device::setDSMeterID(const int _dsMeterID) {
-    m_DSMeterID = _dsMeterID;
+  const dsid_t& Device::getLastKnownDSMeterDSID() const {
+    return m_LastKnownMeterDSID;
+  } // getLastKnownDSMeterDSID
+
+  void Device::setDSMeter(const DSMeter& _dsMeter) {
+    m_DSMeterID = _dsMeter.getBusID();
+    m_LastKnownMeterDSID = _dsMeter.getDSID();
   } // setDSMeterID
 
   int Device::getZoneID() const {

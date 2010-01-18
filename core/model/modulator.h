@@ -36,7 +36,7 @@ namespace dss {
 
   /** Represents a DSMeter */
   class DSMeter : public DeviceContainer,
-                    public PhysicalModelItem {
+                  public PhysicalModelItem {
   private:
     dsid_t m_DSID;
     int m_BusID;

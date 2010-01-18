@@ -31,6 +31,7 @@
 #include "core/propertysystem.h"
 #include "core/model/apartment.h"
 #include "core/model/device.h"
+#include "core/model/modulator.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <memory>
@@ -64,9 +65,12 @@ BOOST_AUTO_TEST_CASE(testBasics) {
 BOOST_AUTO_TEST_CASE(testSets) {
   Apartment apt(NULL);
 
+  DSMeter& meter = apt.allocateDSMeter(dsid_t(0,10));
+  meter.setBusID(1);
+
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
-  dev1.setDSMeterID(1);
+  dev1.setDSMeter(meter);
   dev1.addToGroup(1);
   dev1.setIsPresent(true);
   dev1.setZoneID(1);
@@ -74,7 +78,7 @@ BOOST_AUTO_TEST_CASE(testSets) {
   dev1.setFunctionID(1);
   Device& dev2 = apt.allocateDevice(dsid_t(0,2));
   dev2.setShortAddress(2);
-  dev2.setDSMeterID(1);
+  dev2.setDSMeter(meter);
   dev2.addToGroup(1);
   dev2.setIsPresent(false);
   dev2.setZoneID(2);

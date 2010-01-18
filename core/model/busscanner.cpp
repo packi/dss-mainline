@@ -119,7 +119,7 @@ namespace dss {
         log("scanDSMeter:    Function ID: " + unsignedLongIntToHexString(functionID));
         Device& dev = m_Apartment.allocateDevice(dsid);
         dev.setShortAddress(devID);
-        dev.setDSMeterID(dsMeterID);
+        dev.setDSMeter(_dsMeter);
         dev.setZoneID(zoneID);
         dev.setFunctionID(functionID);
 

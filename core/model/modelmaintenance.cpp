@@ -429,15 +429,15 @@ namespace dss {
       }
     }
 
+    DSMeter& dsMeter = m_pApartment->getDSMeterByBusID(_modID);
+
     // update device
-    dev.setDSMeterID(_modID);
+    dev.setDSMeter(dsMeter);
     dev.setZoneID(_zoneID);
     dev.setShortAddress(_devID);
     dev.setFunctionID(_functionID);
     dev.setIsPresent(true);
 
-    // add to new dsMeter
-    DSMeter& dsMeter = m_pApartment->getDSMeterByBusID(_modID);
     dsMeter.addDevice(devRef);
 
     // add to new zone

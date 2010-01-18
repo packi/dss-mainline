@@ -48,10 +48,13 @@ BOOST_AUTO_TEST_SUITE(Model)
 BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
   Apartment apt(NULL);
 
+  DSMeter& meter = apt.allocateDSMeter(dsid_t(0,10));
+  meter.setBusID(1);
+
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.setName("dev1");
-  dev1.setDSMeterID(1);
+  dev1.setDSMeter(meter);
 
   Device& dev2 = apt.allocateDevice(dsid_t(0,1));
   BOOST_CHECK_EQUAL(dev1.getShortAddress(), dev2.getShortAddress());
@@ -62,15 +65,20 @@ BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
 BOOST_AUTO_TEST_CASE(testSetGetByBusID) {
   Apartment apt(NULL);
 
+  DSMeter& meter1 = apt.allocateDSMeter(dsid_t(0,10));
+  meter1.setBusID(1);
+  DSMeter& meter2 = apt.allocateDSMeter(dsid_t(0,11));
+  meter2.setBusID(2);
+
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.setName("dev1");
-  dev1.setDSMeterID(1);
+  dev1.setDSMeter(meter1);
 
   Device& dev2 = apt.allocateDevice(dsid_t(0,2));
   dev2.setShortAddress(1);
   dev2.setName("dev2");
-  dev2.setDSMeterID(2);
+  dev2.setDSMeter(meter2);
 
   DSMeter& mod1 = apt.allocateDSMeter(dsid_t(0,3));
   mod1.setBusID(1);
@@ -115,6 +123,22 @@ BOOST_AUTO_TEST_CASE(testSetRemoveDevice) {
   BOOST_CHECK_EQUAL(set.get(0).getDevice(), dev2);
 } // testSetRemoveDevice
 
+BOOST_AUTO_TEST_CASE(testDeviceLastKnownDSMeterDSIDWorks) {
+  Apartment apt(NULL);
+
+  DSMeter& mod = apt.allocateDSMeter(dsid_t(0,10));
+  mod.setBusID(1);
+
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+
+  BOOST_CHECK_EQUAL(dev1.getLastKnownDSMeterDSID().toString(), NullDSID.toString());
+
+  dev1.setDSMeter(mod);
+
+  BOOST_CHECK_EQUAL(dev1.getDSMeterID(), 1);
+  BOOST_CHECK_EQUAL(dev1.getLastKnownDSMeterDSID().toString(), dsid_t(0,10).toString());
+} // testDeviceLastKnownDSMeterDSIDWorks
+
 BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByShortAddress) {
   Apartment apt(NULL);
 
@@ -124,7 +148,7 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByShortAddress) {
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.setName("dev1");
-  dev1.setDSMeterID(1);
+  dev1.setDSMeter(mod);
 
   BOOST_CHECK_EQUAL("dev1", apt.getDeviceByShortAddress(mod, 1).getName());
 } // testApartmentGetDeviceByShortAddress
@@ -159,21 +183,25 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByBusID) {
 BOOST_AUTO_TEST_CASE(testZoneMoving) {
   Apartment apt(NULL);
 
+  DSMeter& meter = apt.allocateDSMeter(dsid_t(0,10));
+  meter.setBusID(1);
+
+
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
-  dev1.setDSMeterID(1);
+  dev1.setDSMeter(meter);
   DeviceReference devRef1(dev1, &apt);
   Device& dev2 = apt.allocateDevice(dsid_t(0,2));
   dev2.setShortAddress(2);
-  dev2.setDSMeterID(1);
+  dev2.setDSMeter(meter);
   DeviceReference devRef2(dev2, &apt);
   Device& dev3 = apt.allocateDevice(dsid_t(0,3));
   dev3.setShortAddress(3);
-  dev3.setDSMeterID(1);
+  dev3.setDSMeter(meter);
   DeviceReference devRef3(dev3, &apt);
   Device& dev4 = apt.allocateDevice(dsid_t(0,4));
   dev4.setShortAddress(4);
-  dev4.setDSMeterID(1);
+  dev4.setDSMeter(meter);
   DeviceReference devRef4(dev4, &apt);
 
   Zone& zone1 = apt.allocateZone(1);
@@ -228,18 +256,21 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
 BOOST_AUTO_TEST_CASE(testSet) {
   Apartment apt(NULL);
 
+  DSMeter& meter = apt.allocateDSMeter(dsid_t(0,10));
+  meter.setBusID(1);
+
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
-  dev1.setDSMeterID(1);
+  dev1.setDSMeter(meter);
   Device& dev2 = apt.allocateDevice(dsid_t(0,2));
   dev2.setShortAddress(2);
-  dev2.setDSMeterID(1);
+  dev2.setDSMeter(meter);
   Device& dev3 = apt.allocateDevice(dsid_t(0,3));
   dev3.setShortAddress(3);
-  dev3.setDSMeterID(1);
+  dev3.setDSMeter(meter);
   Device& dev4 = apt.allocateDevice(dsid_t(0,4));
   dev4.setShortAddress(4);
-  dev4.setDSMeterID(1);
+  dev4.setDSMeter(meter);
 
   Set allDevices = apt.getDevices();
 
@@ -505,19 +536,19 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setName("dev1");
   dev1.setShortAddress(1);
-  dev1.setDSMeterID(76);
+  dev1.setDSMeter(mod);
   DeviceReference devRef1(dev1, &apt);
   mod.addDevice(devRef1);
   Device& dev2 = apt.allocateDevice(dsid_t(0,2));
   dev2.setName("dev2");
   dev2.setShortAddress(2);
-  dev2.setDSMeterID(76);
+  dev2.setDSMeter(mod);
   DeviceReference devRef2(dev2, &apt);
   mod.addDevice(devRef2);
   Device& dev3 = apt.allocateDevice(dsid_t(0,3));
   dev3.setName("dev3");
   dev3.setShortAddress(3);
-  dev3.setDSMeterID(76);
+  dev3.setDSMeter(mod);
   DeviceReference devRef3(dev3, &apt);
   mod.addDevice(devRef3);
 
