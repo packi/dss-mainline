@@ -23,6 +23,7 @@
 #include "simrequesthandler.h"
 
 #include "core/ds485const.h"
+#include "core/model/modelconst.h"
 #include "core/model/group.h"
 #include "core/model/zone.h"
 #include "core/model/apartment.h"

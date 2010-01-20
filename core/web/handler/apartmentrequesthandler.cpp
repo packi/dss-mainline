@@ -24,6 +24,7 @@
 
 #include "core/foreach.h"
 #include "core/ds485const.h"
+#include "core/model/modelconst.h"
 
 #include "core/web/json.h"
 

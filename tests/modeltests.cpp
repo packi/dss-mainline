@@ -36,6 +36,7 @@
 #include "core/sim/dssim.h"
 #include "core/dss.h"
 #include "core/ds485const.h"
+#include "core/model/modelconst.h"
 #include "core/ds485/ds485proxy.h"
 #include "core/ds485/ds485busrequestdispatcher.h"
 #include "core/ds485/businterfacehandler.h"

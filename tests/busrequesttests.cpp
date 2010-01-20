@@ -25,6 +25,7 @@
 
 #include "core/model/busrequest.h"
 #include "core/ds485const.h"
+#include "core/model/modelconst.h"
 #include "core/busrequestdispatcher.h"
 #include "core/model/apartment.h"
 #include "core/model/device.h"

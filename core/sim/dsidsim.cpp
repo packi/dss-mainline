@@ -21,6 +21,7 @@
 */
 
 #include "dsidsim.h"
+#include "core/model/modelconst.h"
 
 namespace dss {
   //================================================== DSIDSim

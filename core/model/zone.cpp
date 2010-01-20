@@ -27,6 +27,7 @@
 #include "core/base.h"
 #include "core/logger.h"
 #include "core/ds485const.h"
+#include "core/model/modelconst.h"
 #include "set.h"
 #include "device.h"
 #include "apartment.h"

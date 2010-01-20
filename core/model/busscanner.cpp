@@ -27,6 +27,8 @@
 #include "core/DS485Interface.h"
 #include "core/foreach.h"
 #include "core/ds485const.h"
+#include "core/model/modelconst.h"
+
 
 #include "modulator.h"
 #include "device.h"

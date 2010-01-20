@@ -32,6 +32,7 @@
 #include <boost/filesystem.hpp>
 
 #include "core/ds485const.h"
+#include "core/model/modelconst.h"
 #include "core/base.h"
 #include "core/logger.h"
 #include "core/dss.h"

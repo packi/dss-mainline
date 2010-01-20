@@ -23,6 +23,7 @@
 #include "device.h"
 
 #include "core/ds485const.h"
+#include "core/model/modelconst.h"
 #include "core/model/busrequest.h"
 #include "core/propertysystem.h"
 #include "core/model/scenehelper.h"

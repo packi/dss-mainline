@@ -24,6 +24,7 @@
 
 #include "core/DS485Interface.h"
 #include "core/ds485const.h"
+#include "core/model/modelconst.h"
 #include "core/dss.h"
 #include "core/logger.h"
 #include "core/propertysystem.h"

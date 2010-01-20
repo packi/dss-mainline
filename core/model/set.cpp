@@ -39,6 +39,7 @@ using namespace stdext;
 #include "core/logger.h"
 #include "core/foreach.h"
 #include "core/ds485const.h"
+#include "core/model/modelconst.h"
 
 #include "device.h"
 #include "group.h"

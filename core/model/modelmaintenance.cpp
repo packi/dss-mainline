@@ -32,6 +32,8 @@
 #include "core/DS485Interface.h"
 #include "core/propertysystem.h"
 #include "core/ds485const.h"
+#include "core/model/modelconst.h"
+
 
 #include "apartment.h"
 #include "zone.h"
