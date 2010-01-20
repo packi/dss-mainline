@@ -48,6 +48,7 @@ namespace dss {
     dsid_t m_DSID;
     devid_t m_ShortAddress;
     int m_ZoneID;
+    int m_LastKnownZoneID;
     int m_DSMeterID;
     dsid_t m_LastKnownMeterDSID;
     std::bitset<63> m_GroupBitmask;
@@ -141,12 +142,15 @@ namespace dss {
     /** Returns the id of the dsMeter the device is connected to */
     int getDSMeterID() const;
     const dsid_t& getLastKnownDSMeterDSID() const;
+    void setLastKnownDSMeterDSID(const dsid_t& _value);
     void setDSMeter(const DSMeter& _dsMeter);
 
     /** Returns the zone ID the device resides in. */
     int getZoneID() const;
     /** Sets the zone ID of the device. */
     void setZoneID(const int _value);
+    int getLastKnownZoneID() const;
+    void setLastKnownZoneID(const int _value);
     /** Returns the apartment the device resides in. */
     Apartment& getApartment() const;
 

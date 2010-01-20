@@ -43,6 +43,7 @@ namespace dss {
     m_DSID(_dsid),
     m_ShortAddress(ShortAddressStaleDevice),
     m_ZoneID(0),
+    m_LastKnownZoneID(0),
     m_DSMeterID(-1),
     m_LastKnownMeterDSID(NullDSID),
     m_FunctionID(0),
@@ -159,6 +160,10 @@ namespace dss {
     return m_DSMeterID;
   } // getDSMeterID
 
+  void Device::setLastKnownDSMeterDSID(const dsid_t& _value) {
+    m_LastKnownMeterDSID = _value;
+  } // setLastKnownDSMeterDSID
+
   const dsid_t& Device::getLastKnownDSMeterDSID() const {
     return m_LastKnownMeterDSID;
   } // getLastKnownDSMeterDSID
@@ -174,6 +179,9 @@ namespace dss {
 
   void Device::setZoneID(const int _value) {
     if(_value != m_ZoneID) {
+      if(_value != 0) {
+        m_LastKnownZoneID = _value;
+      }
       m_ZoneID = _value;
       if((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
         std::string basePath = "zones/zone" + intToString(m_ZoneID);
@@ -199,6 +207,14 @@ namespace dss {
       }
     }
   } // setZoneID
+
+  int Device::getLastKnownZoneID() const {
+    return m_LastKnownZoneID;
+  } // getLastKnownZoneID
+
+  void Device::setLastKnownZoneID(const int _value) {
+    m_LastKnownZoneID = _value;
+  } // setLastKnownZoneID
 
   int Device:: getGroupIdByIndex(const int _index) const {
     return m_Groups[_index];
