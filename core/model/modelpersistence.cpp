@@ -132,11 +132,23 @@ namespace dss {
             firstSeen = DateTime(dateFromISOString(elem->getAttribute("firstSeen").c_str()));
           }
 
+          dsid_t lastKnownDsMeter = NullDSID;
+          if(elem->hasAttribute("lastKnownDSMeter")) {
+            lastKnownDsMeter = dsid_t::fromString(elem->getAttribute("lastKnownDSMeter"));
+          }
+
+          int lastKnownZoneID = 0;
+          if(elem->hasAttribute("lastKnownZoneID")) {
+            lastKnownZoneID = strToIntDef("lastKnownZoneID", 0);
+          }
+
           Device& newDevice = m_Apartment.allocateDevice(dsid);
           if(!name.empty()) {
             newDevice.setName(name);
           }
           newDevice.setFirstSeen(firstSeen);
+          newDevice.setLastKnownDSMeterDSID(lastKnownDsMeter);
+          newDevice.setLastKnownZoneID(lastKnownZoneID);
           Element* propertiesElem = elem->getChildElement("properties");
           if(propertiesElem != NULL) {
             newDevice.publishToPropertyTree();
@@ -202,6 +214,12 @@ namespace dss {
       pDeviceNode->appendChild(pNameNode);
     }
     pDeviceNode->setAttribute("firstSeen", _pDevice->getFirstSeen());
+    if(_pDevice->getLastKnownDSMeterDSID() != NullDSID) {
+      pDeviceNode->setAttribute("lastKnownDSMeter", _pDevice->getLastKnownDSMeterDSID().toString());
+    }
+    if(_pDevice->getLastKnownZoneID() != 0) {
+      pDeviceNode->setAttribute("lastKnownZoneID", intToString(_pDevice->getLastKnownZoneID()));
+    }
     if(_pDevice->getPropertyNode() != NULL) {
       AutoPtr<Element> pPropertiesNode = _pDocument->createElement("properties");
       pDeviceNode->appendChild(pPropertiesNode);
