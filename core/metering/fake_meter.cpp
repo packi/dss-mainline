@@ -98,7 +98,7 @@ namespace dss {
       unsigned long consumption = 0;
       foreach(DSMeter* dsMeter, getDSS().getApartment().getDSMeters()) {
         try {
-      	  consumption += dsMeter->getPowerConsumption();
+      	  consumption += dsMeter->getCachedPowerConsumption();
         } catch(std::runtime_error& err) {
           log("Could not poll dsMeter " + dsMeter->getDSID().toString() + ". Message: " + err.what());
         }
