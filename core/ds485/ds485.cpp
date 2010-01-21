@@ -154,7 +154,8 @@ namespace dss {
   DS485Controller::DS485Controller()
   : Thread("DS485Controller"),
     m_State(csInitial),
-    m_RS485DeviceName("/dev/ttyUSB0")
+    m_RS485DeviceName("/dev/ttyUSB0"),
+    m_DenyJoiningAsShortDevice(false)
   {
     m_DSID.upper = DSIDHeader;
     m_DSID.lower = 0xDEADBEEF;
@@ -384,7 +385,9 @@ namespace dss {
         case csSlaveWaitingToJoin:
           {
             if(cmdFrame != NULL) {
-              if(cmdFrame->getCommand() == CommandSolicitSuccessorRequestLong) {
+              bool isSolicitRequestLong = cmdFrame->getCommand() == CommandSolicitSuccessorRequestLong;
+              bool isSolicitRequestShort = cmdFrame->getCommand() == CommandSolicitSuccessorRequest;
+              if(isSolicitRequestLong || (isSolicitRequestShort && !m_DenyJoiningAsShortDevice)) {
                 // if it's the first of it's kind, determine how many we've got to skip
                 if(numberOfJoinPacketsToWait == -1) {
                   if(cmdFrame->getCommand() == CommandSolicitSuccessorRequest) {

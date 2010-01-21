@@ -227,6 +227,7 @@ namespace dss {
     dsid_t m_DSID;
     typedef boost::function<void()> BusReadyCallback;
     BusReadyCallback m_BusReadyCallback;
+    bool m_DenyJoiningAsShortDevice;
   private:
     DS485Frame* getFrameFromWire();
     bool putFrameOnWire(const DS485Frame* _pFrame, bool _freeFrame = true);
@@ -261,6 +262,7 @@ namespace dss {
     void setDSID(const dsid_t& _value) { m_DSID = _value; }
 
     void setBusReadyCallback(BusReadyCallback _value) { m_BusReadyCallback = _value; }
+    void setDenyJoiningAsShortDevice(const bool _value) { m_DenyJoiningAsShortDevice = _value; }
   }; // DS485Controller
 
   class IDS485FrameCollector {

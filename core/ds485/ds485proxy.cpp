@@ -77,6 +77,7 @@ namespace dss {
             ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, std::string>(m_DS485Controller, &DS485Controller::getStateAsString));
 
       _pDSS->getPropertySystem().setStringValue("/system/dsid", "3504175FE0000000DEADBEEF", true, false);
+      _pDSS->getPropertySystem().setBoolValue(getPropertyBasePath() + "denyJoiningAsShortDevice", false, true, false);
     }
   } // ctor
 
@@ -870,6 +871,7 @@ namespace dss {
   void DS485Proxy::doStart() {
     if(m_InitializeDS485Controller) {
       try {
+        m_DS485Controller.setDenyJoiningAsShortDevice(getDSS().getPropertySystem().getBoolValue(getConfigPropertyBasePath() + "denyJoiningAsShortDevice"));
         m_DS485Controller.setDSID(dsid_t::fromString(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "dsid")));
         m_DS485Controller.setBusReadyCallback(boost::bind(&DS485Proxy::busReady,this));
         m_DS485Controller.run();
