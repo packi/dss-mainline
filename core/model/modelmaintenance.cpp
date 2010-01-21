@@ -194,20 +194,20 @@ namespace dss {
         if(event.getParameterCount() != 2) {
           log("Expected exactly 2 parameter for ModelEvent::etPowerConsumption");
         } else {
-	  int meterID = event.getParameter(0);
-	  int consumption = event.getParameter(1);
-	  DSMeter& meter = m_pApartment->getDSMeterByBusID(meterID);
-	  meter.setPowerConsumption(consumption);
+          int meterID = event.getParameter(0);
+          int consumption = event.getParameter(1);
+          DSMeter& meter = m_pApartment->getDSMeterByBusID(meterID);
+          meter.setPowerConsumption(consumption);
         }
         break;
       case ModelEvent::etEnergyMeterValue:
         if(event.getParameterCount() != 2) {
           log("Expected exactly 2 parameter for ModelEvent::etEnergyMeterValue");
         } else {
-	  int meterID = event.getParameter(0);
-	  int value = event.getParameter(1);
-	  DSMeter& meter = m_pApartment->getDSMeterByBusID(meterID);
-	  meter.setEnergyMeterValue(value);
+          int meterID = event.getParameter(0);
+          int value = event.getParameter(1);
+          DSMeter& meter = m_pApartment->getDSMeterByBusID(meterID);
+          meter.setEnergyMeterValue(value);
         }
         break;
       case ModelEvent::etDS485DeviceDiscovered:
