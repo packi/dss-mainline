@@ -26,6 +26,7 @@
 #include "core/thread.h"
 #include "core/subsystem.h"
 #include "core/datetools.h"
+#include "core/mutex.h"
 
 #include <string>
 #include <vector>
@@ -35,6 +36,23 @@ namespace dss {
 
   class MeteringConfig;
   class MeteringConfigChain;
+  class DSMeter;
+  class MeteringValue;
+  class MeteringBusInterface;
+
+  class MeteringValue {
+  public:
+    MeteringValue(DSMeter* _pMeter, int _value, DateTime& _sampledAt)
+    : m_pMeter(_pMeter), m_Value(_value), m_SampledAt(_sampledAt)
+    {}
+    DSMeter& getDSMeter() const { return *m_pMeter; }
+    int getValue() const { return m_Value; }
+    const DateTime& getSampledAt() const { return m_SampledAt; }
+  private:
+    DSMeter* m_pMeter;
+    int m_Value;
+    DateTime m_SampledAt;
+  };
 
   class Metering : public Subsystem,
                    private Thread {
@@ -42,9 +60,17 @@ namespace dss {
     int m_MeterEnergyCheckIntervalSeconds;
     int m_MeterConsumptionCheckIntervalSeconds;
     std::string m_MeteringStorageLocation;
-    std::vector<boost::shared_ptr<MeteringConfigChain> > m_Config;
+    boost::shared_ptr<MeteringConfigChain> m_ConfigEnergy;
+    boost::shared_ptr<MeteringConfigChain> m_ConfigConsumption;
+    std::vector<MeteringConfigChain*> m_Config;
+    std::vector<MeteringValue> m_ConsumptionValues;
+    std::vector<MeteringValue> m_EnergyValues;
+    Mutex m_ValuesMutex;
+    MeteringBusInterface* m_pMeteringBusInterface;
+    void processValue(MeteringValue _value, boost::shared_ptr<MeteringConfigChain> _config);
+    void processValues(std::vector<MeteringValue>& _values, boost::shared_ptr<MeteringConfigChain> _config);
   private:
-    void checkDSMeters(boost::shared_ptr<MeteringConfigChain> _config);
+    void checkDSMeters(MeteringConfigChain* _pConfig);
 
     virtual void execute();
   protected:
@@ -52,9 +78,12 @@ namespace dss {
   public:
     Metering(DSS* _pDSS);
     virtual ~Metering() {};
-    
-    const std::vector<boost::shared_ptr<MeteringConfigChain> > getConfig() const { return m_Config; }
+
+    const std::vector<MeteringConfigChain*> getConfig() const { return m_Config; }
     const std::string& getStorageLocation() const { return m_MeteringStorageLocation; }
+    void postConsumptionEvent(dss::DSMeter& _meter, int _value, DateTime _sampledAt);
+    void postEnergyEvent(dss::DSMeter& _meter, int _value, DateTime _sampledAt);
+    void setMeteringBusInterface(MeteringBusInterface* _value) { m_pMeteringBusInterface = _value; }
   }; // Metering
 
   class MeteringConfig {
@@ -84,7 +113,8 @@ namespace dss {
     std::vector<boost::shared_ptr<MeteringConfig> > m_Chain;
   public:
     MeteringConfigChain(bool _isEnergy, int _checkIntervalSeconds, const std::string& _unit)
-    : m_IsEnergy(_isEnergy), m_CheckIntervalSeconds(_checkIntervalSeconds), m_Unit(_unit)
+    : m_IsEnergy(_isEnergy), m_CheckIntervalSeconds(_checkIntervalSeconds),
+      m_LastRun(DateTime()), m_Unit(_unit)
     { }
 
     void addConfig(boost::shared_ptr<MeteringConfig> _config);

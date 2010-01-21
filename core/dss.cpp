@@ -169,7 +169,7 @@ const char* WebrootDirectory = "data/webroot";
 
     m_pBusDispatcher = boost::shared_ptr<DS485BusRequestDispatcher>(new DS485BusRequestDispatcher());
     m_pBusDispatcher->setFrameSender(m_pDS485Interface->getFrameSenderInterface());
-    
+
     m_pApartment->setDS485Interface(m_pDS485Interface.get());
     m_pApartment->setBusRequestDispatcher(m_pBusDispatcher.get());
 
@@ -193,6 +193,8 @@ const char* WebrootDirectory = "data/webroot";
 
     m_pMetering = boost::shared_ptr<Metering>(new Metering(this));
     m_Subsystems.push_back(m_pMetering.get());
+    m_pMetering->setMeteringBusInterface(m_pDS485Interface->getMeteringBusInterface());
+    m_pModelMaintenance->setMetering(m_pMetering.get());
 
     m_pFakeMeter = boost::shared_ptr<FakeMeter>(new FakeMeter(this));
     m_Subsystems.push_back(m_pFakeMeter.get());
@@ -246,12 +248,12 @@ const char* WebrootDirectory = "data/webroot";
       boost::shared_ptr<dss::LogTarget>
         logTarget(new dss::FileLogTarget(logFileName));
       if (!dss::Logger::getInstance()->setLogTarget(logTarget)) {
-        Logger::getInstance()->log("Failed to open logfile '" + 
+        Logger::getInstance()->log("Failed to open logfile '" +
                                    logFileName + "'", lsFatal);
         return false;
       }
     } else {
-      Logger::getInstance()->log("No logfile configured, logging to stdout", 
+      Logger::getInstance()->log("No logfile configured, logging to stdout",
                                  lsInfo);
     }
 

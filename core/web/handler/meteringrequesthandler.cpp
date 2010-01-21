@@ -41,7 +41,7 @@ namespace dss {
 
 
   //=========================================== MeteringRequestHandler
-  
+
   MeteringRequestHandler::MeteringRequestHandler(Apartment& _apartment, Metering& _metering)
   : m_Apartment(_apartment),
     m_Metering(_metering)
@@ -50,12 +50,12 @@ namespace dss {
 
   boost::shared_ptr<JSONObject> MeteringRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
     if(_request.getMethod() == "getResolutions") {
-      std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = m_Metering.getConfig();
+      std::vector<MeteringConfigChain*> meteringConfig = m_Metering.getConfig();
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       boost::shared_ptr<JSONArrayBase> resolutions(new JSONArrayBase());
       resultObj->addElement("resolutions", resolutions);
 
-      foreach(boost::shared_ptr<MeteringConfigChain> pChain, meteringConfig) {
+      foreach(MeteringConfigChain* pChain, meteringConfig) {
         for(int iConfig = 0; iConfig < pChain->size(); iConfig++) {
           boost::shared_ptr<JSONObject> resolution(new JSONObject());
           resolutions->addElement("", resolution);
@@ -124,10 +124,10 @@ namespace dss {
         }
       }
       if(!resolutionString.empty()) {
-        std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = m_Metering.getConfig();
+        std::vector<MeteringConfigChain*> meteringConfig = m_Metering.getConfig();
         storageLocation = m_Metering.getStorageLocation();
         for(unsigned int iConfig = 0; iConfig < meteringConfig.size(); iConfig++) {
-          boost::shared_ptr<MeteringConfigChain> cConfig = meteringConfig[iConfig];
+          MeteringConfigChain* cConfig = meteringConfig[iConfig];
           for(int jConfig = 0; jConfig < cConfig->size(); jConfig++) {
             if(cConfig->isEnergy() == energy && cConfig->getResolution(jConfig) == resolution) {
               fileSuffix = cConfig->getFilenameSuffix(jConfig);

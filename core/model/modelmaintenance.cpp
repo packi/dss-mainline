@@ -33,6 +33,7 @@
 #include "core/propertysystem.h"
 #include "core/ds485const.h"
 #include "core/model/modelconst.h"
+#include "core/metering/metering.h"
 
 
 #include "apartment.h"
@@ -50,7 +51,9 @@ namespace dss {
   ModelMaintenance::ModelMaintenance(DSS* _pDSS)
   : Subsystem(_pDSS, "Apartment"),
     Thread("Apartment"),
-    m_IsInitializing(true)
+    m_IsInitializing(true),
+    m_pApartment(NULL),
+    m_pMetering(NULL)
   { }
 
   void ModelMaintenance::initialize() {
@@ -195,9 +198,10 @@ namespace dss {
           log("Expected exactly 2 parameter for ModelEvent::etPowerConsumption");
         } else {
           int meterID = event.getParameter(0);
-          int consumption = event.getParameter(1);
+          int value = event.getParameter(1);
           DSMeter& meter = m_pApartment->getDSMeterByBusID(meterID);
-          meter.setPowerConsumption(consumption);
+          meter.setPowerConsumption(value);
+          m_pMetering->postConsumptionEvent(meter, value, DateTime());
         }
         break;
       case ModelEvent::etEnergyMeterValue:
@@ -208,6 +212,7 @@ namespace dss {
           int value = event.getParameter(1);
           DSMeter& meter = m_pApartment->getDSMeterByBusID(meterID);
           meter.setEnergyMeterValue(value);
+          m_pMetering->postEnergyEvent(meter, value, DateTime());
         }
         break;
       case ModelEvent::etDS485DeviceDiscovered:
@@ -526,5 +531,10 @@ namespace dss {
       m_pApartment->setModelMaintenance(this);
     }
   } // setApartment
+
+  void ModelMaintenance::setMetering(Metering* _value) {
+    m_pMetering = _value;
+  } // setMetering
+
 
 } // namespace dss

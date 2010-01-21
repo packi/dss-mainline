@@ -36,6 +36,7 @@ namespace dss {
   class Apartment;
   class ModelEvent;
   class Event;
+  class Metering;
 
 
   class ModelMaintenance : public Subsystem,
@@ -58,6 +59,7 @@ namespace dss {
 
     bool isInitializing() const { return m_IsInitializing; }
     void setApartment(Apartment* _value);
+    void setMetering(Metering* _value);
   protected:
     virtual void doStart();
   private:
@@ -83,6 +85,7 @@ namespace dss {
     Mutex m_ModelEventsMutex;
     SyncEvent m_NewModelEvent;
     Apartment* m_pApartment;
+    Metering* m_pMetering;
   }; // ModelMaintenance
 
 }
