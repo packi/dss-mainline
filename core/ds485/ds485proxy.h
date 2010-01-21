@@ -142,6 +142,8 @@ namespace dss {
 
     virtual unsigned long getPowerConsumption(const int _dsMeterID);
     virtual unsigned long getEnergyMeterValue(const int _dsMeterID);
+    virtual void requestEnergyMeterValue();
+    virtual void requestPowerConsumption();
     virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper);
 
     //------------------------------------------------ UDI

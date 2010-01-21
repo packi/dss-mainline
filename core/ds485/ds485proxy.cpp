@@ -256,7 +256,7 @@ namespace dss {
     frame.getPayload().add<uint16_t>(_value);
     sendFrame(frame);
   } // setValueDevice
-  
+
   DSMeterSpec_t DS485Proxy::dsMeterSpecFromFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
     int source = _frame->getHeader().getSource();
 
@@ -655,6 +655,15 @@ namespace dss {
     return pd.get<uint32_t>();
   } // getPowerConsumption
 
+  void DS485Proxy::requestPowerConsumption() {
+    DS485CommandFrame cmdFrame;
+    cmdFrame.getHeader().setDestination(0);
+    cmdFrame.getHeader().setBroadcast(true);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetPowerConsumption);
+    sendFrame(cmdFrame);
+  } // requestPowerConsumption
+
   unsigned long DS485Proxy::getEnergyMeterValue(const int _dsMeterID) {
     DS485CommandFrame cmdFrame;
     cmdFrame.getHeader().setDestination(_dsMeterID);
@@ -671,6 +680,15 @@ namespace dss {
     pd.get<uint8_t>(); // discard the function id
     return pd.get<uint32_t>();
   } // getEnergyMeterValue
+
+  void DS485Proxy::requestEnergyMeterValue() {
+    DS485CommandFrame cmdFrame;
+    cmdFrame.getHeader().setDestination(0);
+    cmdFrame.getHeader().setBroadcast(true);
+    cmdFrame.setCommand(CommandRequest);
+    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetEnergyMeterValue);
+    sendFrame(cmdFrame);
+  } // requestEnergyMeterValue
 
   bool DS485Proxy::getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) {
     DS485CommandFrame cmdFrame;

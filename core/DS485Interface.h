@@ -120,9 +120,13 @@ namespace dss {
   public:
     /** Returns the current power-consumption in mW */
     virtual unsigned long getPowerConsumption(const int _dsMeterID) = 0;
+    /** Sends a message to all devices to report their power consumption */
+    virtual void requestPowerConsumption() = 0;
 
     /** Returns the meter value in Wh */
     virtual unsigned long getEnergyMeterValue(const int _dsMeterID) = 0;
+    /** Sends a message to all devices to report their energy value */
+    virtual void requestEnergyMeterValue() = 0;
 
     virtual ~MeteringBusInterface() {}; // please the compiler (virtual dtor)
   }; // MeteringBusInterface
