@@ -29,6 +29,7 @@
 
 namespace dss {
 
+
   //================================================== DSMeter
 
   DSMeter::DSMeter(const dsid_t _dsid)
@@ -89,7 +90,6 @@ namespace dss {
     return m_EnergyMeterValue;
   } // getEnergyMeterValue
 
-
   /** set the consumption in mW */
   void DSMeter::setPowerConsumption(unsigned long _value) {
     DateTime now;
@@ -111,6 +111,5 @@ namespace dss {
   unsigned long DSMeter::getCachedEnergyMeterValue() {
     return m_EnergyMeterValue;
   } // getEnergyMeterValue
-
 
 } // namespace dss

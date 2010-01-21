@@ -51,18 +51,10 @@ namespace dss {
      */
     void addModelEvent(ModelEvent* _pEvent);
 
-    /** Called by the DS485Proxy if a group-call-scene frame was intercepted.
-     *  Updates the state of all devices contained in the group. */
-    void onGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
-    /** Called by the DS485Proxy if a device-call-scene frame was intercepted.
-     *  Updates the state of the device. */
-    void onDeviceCallScene(const int _dsMeterID, const int _deviceID, const int _sceneID);
-    /** Called by the DS485Proxy if an add-device frame was intercepted.
-     *  Adds the device to the model. */
-    void onAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID);
-    void onDSLinkInterrupt(const int _modID, const int _devID, const int _priority);
     /** Starts the event-processing */
     virtual void execute();
+
+    void onGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
 
     bool isInitializing() const { return m_IsInitializing; }
     void setApartment(Apartment* _value);
@@ -78,6 +70,10 @@ namespace dss {
     void writeConfiguration();
 
     void raiseEvent(boost::shared_ptr<Event> _pEvent);
+
+    void onDeviceCallScene(const int _dsMeterID, const int _deviceID, const int _sceneID);
+    void onAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID);
+    void onDSLinkInterrupt(const int _modID, const int _devID, const int _priority);
   private:
     bool m_IsInitializing;
 
