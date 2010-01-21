@@ -217,21 +217,17 @@ namespace dss {
             PayloadDissector pd2(frame->getPayload());
             pd2.get<uint8_t>();
             if (functionID == FunctionDSMeterGetPowerConsumption) {
-              /* hard optimized */
-              //getDSS().getApartment().getDSMeterByBusID((int)(frame->getHeader().getSource())).setPowerConsumption(pd2.get<uint32_t>());
-                int modID = frame->getHeader().getSource();
-                ModelEvent* pEvent = new ModelEvent(ModelEvent::etPowerConsumption);
-                pEvent->addParameter(modID);
-                pEvent->addParameter(pd2.get<uint32_t>());
-                raiseModelEvent(pEvent);
+              int modID = frame->getHeader().getSource();
+              ModelEvent* pEvent = new ModelEvent(ModelEvent::etPowerConsumption);
+              pEvent->addParameter(modID);
+              pEvent->addParameter(pd2.get<uint32_t>());
+              raiseModelEvent(pEvent);
             } else if (functionID == FunctionDSMeterGetEnergyMeterValue) {
-              /* hard optimized */
-              //getDSS().getApartment().getDSMeterByBusID((int)(frame->getHeader().getSource())).setEnergyMeterValue(pd2.get<uint32_t>());
-                int modID = frame->getHeader().getSource();
-                ModelEvent* pEvent = new ModelEvent(ModelEvent::etEnergyMeterValue);
-                pEvent->addParameter(modID);
-                pEvent->addParameter(pd2.get<uint32_t>());
-                raiseModelEvent(pEvent);
+              int modID = frame->getHeader().getSource();
+              ModelEvent* pEvent = new ModelEvent(ModelEvent::etEnergyMeterValue);
+              pEvent->addParameter(modID);
+              pEvent->addParameter(pd2.get<uint32_t>());
+              raiseModelEvent(pEvent);
             } else if (functionID == FunctionDSMeterGetDSID) {
               int sourceID = frame->getHeader().getSource();
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etDS485DeviceDiscovered);
