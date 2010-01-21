@@ -467,8 +467,10 @@ namespace dss {
                 boost::shared_ptr<DS485Frame> ackFrame(m_FrameReader.getFrame(50));
 
                 DS485CommandFrame* cmdAckFrame = dynamic_cast<DS485CommandFrame*>(ackFrame.get());
-                if (cmdAckFrame->getHeader().getSource() == m_StationID) {
-                  ackFrame.reset( m_FrameReader.getFrame(50) );
+                if(cmdAckFrame != NULL) {
+                  if(cmdAckFrame->getHeader().getSource() == m_StationID) {
+                    ackFrame.reset( m_FrameReader.getFrame(50) );
+                  }
                 }
 
                 cmdAckFrame = dynamic_cast<DS485CommandFrame*>(ackFrame.get());
