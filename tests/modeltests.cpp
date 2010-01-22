@@ -109,17 +109,17 @@ BOOST_AUTO_TEST_CASE(testSetRemoveDevice) {
   Device& dev2 = apt.allocateDevice(dsid_t(0,2));
   dev2.setShortAddress(2);
   dev2.setName("dev2");
-  
+
   Set set;
   set.addDevice(dev1);
   set.addDevice(dev2);
-  
+
   BOOST_CHECK_EQUAL(set.length(), 2);
   BOOST_CHECK_EQUAL(set.get(0).getDevice(), dev1);
   BOOST_CHECK_EQUAL(set.get(1).getDevice(), dev2);
-  
+
   set.removeDevice(dev1);
-  
+
   BOOST_CHECK_EQUAL(set.length(), 1);
   BOOST_CHECK_EQUAL(set.get(0).getDevice(), dev2);
 } // testSetRemoveDevice
@@ -496,13 +496,13 @@ BOOST_AUTO_TEST_CASE(testRemoval) {
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
   dev1.getGroupBitmask().set(GroupIDYellow - 1);
-  
+
   SetBuilder builder(apt);
   BOOST_CHECK_EQUAL(1, builder.buildSet(".yellow", NULL).length());
-  
+
   apt.removeDevice(dev1.getDSID());
-  BOOST_CHECK_EQUAL(0, builder.buildSet(".yellow", NULL).length()); 
-  
+  BOOST_CHECK_EQUAL(0, builder.buildSet(".yellow", NULL).length());
+
   apt.allocateZone(1);
   try {
     apt.getZone(1);
@@ -510,7 +510,7 @@ BOOST_AUTO_TEST_CASE(testRemoval) {
   } catch(ItemNotFoundException&) {
     BOOST_CHECK_MESSAGE(false, "Zone does not exist");
   }
-  
+
   apt.removeZone(1);
   try {
     apt.getZone(1);
@@ -518,7 +518,7 @@ BOOST_AUTO_TEST_CASE(testRemoval) {
   } catch(ItemNotFoundException&) {
     BOOST_CHECK(true);
   }
-  
+
   apt.allocateDSMeter(dsid_t(1,0));
   try {
     apt.getDSMeterByDSID(dsid_t(1,0));
@@ -526,7 +526,7 @@ BOOST_AUTO_TEST_CASE(testRemoval) {
   } catch(ItemNotFoundException&) {
     BOOST_CHECK_MESSAGE(false, "DSMeter not found");
   }
-  
+
   apt.removeDSMeter(dsid_t(1,0));
   try {
     apt.getDSMeterByDSID(dsid_t(1,0));
@@ -587,7 +587,7 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   sleepMS(500);
   BOOST_CHECK_EQUAL(Scene2, dev1.getLastCalledScene());
   BOOST_CHECK_EQUAL(Scene2, dev2.getLastCalledScene());
-  
+
   Set set;
   set.addDevice(dev3);
   set.addDevice(dev2);
@@ -595,7 +595,7 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   sleepMS(500);
   BOOST_CHECK_EQUAL(Scene2, dev1.getLastCalledScene());
   BOOST_CHECK_EQUAL(Scene3, dev2.getLastCalledScene());
-  BOOST_CHECK_EQUAL(Scene3, dev3.getLastCalledScene());  
+  BOOST_CHECK_EQUAL(Scene3, dev3.getLastCalledScene());
   busHandler.terminate();
   maintenance.terminate();
   sleepMS(1500);
