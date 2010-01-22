@@ -181,37 +181,6 @@ BOOST_AUTO_TEST_CASE(testSubscriptionXML) {
   sleep(1);
 } // testSubscriptionXML
 
-
-BOOST_AUTO_TEST_CASE(testSetBuilder) {
-  Apartment apt(NULL);
-
-  SetBuilder setBuilder(apt);
-
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
-  dev1.setName("dev1");
-  dev1.setShortAddress(1);
-  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
-  dev2.setName("dev2");
-  dev2.setShortAddress(2);
-  Device& dev3 = apt.allocateDevice(dsid_t(0,3));
-  dev3.setName("dev3");
-  dev3.setShortAddress(3);
-  Device& dev4 = apt.allocateDevice(dsid_t(0,4));
-  dev4.setName("dev4");
-  dev4.setShortAddress(4);
-
-  Set res = setBuilder.buildSet("", &apt.getZone(0));
-  BOOST_CHECK_EQUAL(res.length(), 4);
-
-  res = setBuilder.buildSet("dev1", &apt.getZone(0));
-  BOOST_CHECK_EQUAL(res.length(), 1);
-  BOOST_CHECK_EQUAL(res.get(0).getDevice().getName(), std::string("dev1"));
-
-  res = setBuilder.buildSet("dev2", &apt.getZone(0));
-  BOOST_CHECK_EQUAL(res.length(), 1);
-  BOOST_CHECK_EQUAL(res.get(0).getDevice().getName(), std::string("dev2"));
-} // testSetBuilder
-
 BOOST_AUTO_TEST_CASE(testDS485Events) {
   EventQueue queue;
   EventRunner runner;
