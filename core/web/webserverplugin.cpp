@@ -31,8 +31,6 @@
 
 #include <dlfcn.h>
 
-#include <boost/filesystem.hpp>
-
 namespace dss {
 
   WebServerPlugin::WebServerPlugin(const std::string& _uri, const std::string& _file)

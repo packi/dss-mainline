@@ -36,8 +36,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <boost/filesystem.hpp>
-
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Node.h>

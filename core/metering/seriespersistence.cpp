@@ -25,10 +25,6 @@
 #include "core/logger.h"
 #include "core/foreach.h"
 
-#include <boost/filesystem.hpp>
-
-namespace fs = boost::filesystem;
-
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Attr.h>

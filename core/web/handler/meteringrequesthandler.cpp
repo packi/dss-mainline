@@ -22,7 +22,6 @@
 
 #include "meteringrequesthandler.h"
 
-#include <boost/filesystem.hpp>
 #include <vector>
 
 #include "core/foreach.h"

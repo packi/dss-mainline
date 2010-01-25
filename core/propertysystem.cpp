@@ -41,8 +41,6 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/SAX/InputSource.h>
 
-#include <boost/filesystem.hpp>
-
 using Poco::XML::Document;
 using Poco::XML::Attr;
 using Poco::XML::Text;
