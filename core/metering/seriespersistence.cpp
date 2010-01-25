@@ -74,6 +74,10 @@ namespace dss {
     Timestamp parsing;
 
     std::ifstream inFile(_fileName.c_str());
+    if(!inFile.is_open()) {
+      Logger::getInstance()->log("SeriesReader::readFromXML: could not open file: '" + _fileName + "'");
+      return NULL;
+    }
 
     InputSource input(inFile);
     Series<T>* result = NULL;

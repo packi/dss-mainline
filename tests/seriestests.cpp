@@ -508,4 +508,10 @@ BOOST_AUTO_TEST_CASE(expansionToPresent) {
   }
 } // expansion
 
+BOOST_AUTO_TEST_CASE(testReadingNonexistentFile) {
+  SeriesReader<CurrentValue> reader;
+  Series<CurrentValue>* series = reader.readFromXML("idontexistandneverwill.xml");
+  BOOST_CHECK(series == NULL);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
