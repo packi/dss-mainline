@@ -49,9 +49,6 @@ namespace dss {
   void WebServerPlugin::load() {
     assert(m_Handle == NULL);
     Logger::getInstance()->log("WebServerPlugin::load(): Trying to load \"" + m_File + "\"", lsInfo);
-    if(!boost::filesystem::exists(m_File)) {
-      throw std::runtime_error(std::string("Plugin '") + m_File + "' does not exist.");
-    }
     m_Handle = dlopen(m_File.c_str(), RTLD_LAZY);
     if(m_Handle == NULL) {
       Logger::getInstance()->log("WebServerPlugin::load(): Could not load plugin \"" + m_File + "\" message: " + dlerror(), lsError);
