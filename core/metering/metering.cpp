@@ -32,9 +32,6 @@
 #include "core/model/apartment.h"
 #include "core/model/modelmaintenance.h"
 
-
-#include <boost/filesystem.hpp>
-
 #ifdef LOG_TIMING
   #include <sstream>
 #endif
@@ -96,23 +93,19 @@ namespace dss {
       // Load series from file
       std::string fileName = m_MeteringStorageLocation + _value.getDSMeter().getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
       log("Metering::processValue: Trying to load series from '" + fileName + "'");
-      if(boost::filesystem::exists(fileName)) {
-        #ifdef LOG_TIMING
-        Timestamp startedLoadingSingle;
-        #endif
-        boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(fileName));
+      #ifdef LOG_TIMING
+      Timestamp startedLoadingSingle;
+      #endif
+      boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(fileName));
+      if(s != NULL) {
         #ifdef LOG_TIMING
         logSStream << "loading single: " << Timestamp().getDifference(startedLoadingSingle);
         log(logSStream.str());
         logSStream.str("");
         #endif
-        if(s.get() != NULL) {
-          series.push_back(s);
-        } else {
-          log("Metering::processValue: Failed to load series");
-          return; // TODO: another strategy would be moving the file out of our way and just create an empty one
-        }
+        series.push_back(s);
       } else {
+        log("Metering::processValue: Failed to load series, creating a new one", lsWarning);
         boost::shared_ptr<Series<CurrentValue> > newSeries((new Series<CurrentValue>(_config->getResolution(iConfig), _config->getNumberOfValues(iConfig))));
         newSeries->setUnit(_config->getUnit());
         newSeries->setComment(_config->getComment());
