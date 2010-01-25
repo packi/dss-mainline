@@ -48,6 +48,8 @@ namespace dss {
   private:
     ScriptEnvironment m_Environment;
     std::vector<boost::shared_ptr<ScriptContext> > m_KeptContexts;
+  private:
+    void initializeEnvironment();
   public:
     EventInterpreterPluginJavascript(EventInterpreter* _pInterpreter);
 

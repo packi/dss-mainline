@@ -107,13 +107,7 @@ namespace dss {
       if(boost::filesystem::exists(scriptName)) {
 
         if(!m_Environment.isInitialized()) {
-          m_Environment.initialize();
-          ScriptExtension* ext = new ModelScriptContextExtension(DSS::getInstance()->getApartment());
-          m_Environment.addExtension(ext);
-          ext = new EventScriptExtension(DSS::getInstance()->getEventQueue(), getEventInterpreter());
-          m_Environment.addExtension(ext);
-          ext = new PropertyScriptExtension(DSS::getInstance()->getPropertySystem());
-          m_Environment.addExtension(ext);
+          initializeEnvironment();
         }
 
         try {
@@ -156,6 +150,18 @@ namespace dss {
       throw std::runtime_error("EventInterpreteRPluginJavascript::handleEvent: missing argument filename");
     }
   } // handleEvent
+
+  void EventInterpreterPluginJavascript::initializeEnvironment() {
+    m_Environment.initialize();
+    if(DSS::hasInstance()) {
+      ScriptExtension* ext = new ModelScriptContextExtension(DSS::getInstance()->getApartment());
+      m_Environment.addExtension(ext);
+      ext = new EventScriptExtension(DSS::getInstance()->getEventQueue(), getEventInterpreter());
+      m_Environment.addExtension(ext);
+      ext = new PropertyScriptExtension(DSS::getInstance()->getPropertySystem());
+      m_Environment.addExtension(ext);
+    }
+  } // initializeEnvironment
 
 
   //================================================== EventInterpreterPluginDS485
