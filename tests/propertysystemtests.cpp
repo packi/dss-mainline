@@ -386,4 +386,9 @@ BOOST_AUTO_TEST_CASE(testValueTypeFromAndToString) {
   BOOST_CHECK_EQUAL(vTypeNone, getValueTypeFromString(getValueTypeAsString(vTypeNone)));
 } // testValueTypeFromAndToString
 
+BOOST_AUTO_TEST_CASE(testReadingFromNonexistentFile) {
+  boost::scoped_ptr<PropertySystem> propSys(new PropertySystem());
+  BOOST_CHECK_EQUAL(propSys->loadFromXML("idontexistandneverwill.xml", PropertyNodePtr()), false);
+} // testReadingFromNonexistentFile
+
 BOOST_AUTO_TEST_SUITE_END()

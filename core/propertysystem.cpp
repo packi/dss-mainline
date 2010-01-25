@@ -74,18 +74,17 @@ namespace dss {
 
   bool PropertySystem::loadFromXML(const std::string& _fileName,
                                    PropertyNodePtr _rootNode) {
-    if (!boost::filesystem::exists(_fileName)) {
-      Logger::getInstance()->log(std::string("PropertySystem::loadFromXML: No such file ") + _fileName,
-                                 lsError);
-      return false;
-    }
-    
     PropertyNodePtr root = _rootNode;
     if (root == NULL) {
       root = getRootNode();
     }
 
     std::ifstream inFile(_fileName.c_str());
+    if(!inFile.is_open()) {
+      Logger::getInstance()->log(std::string("PropertySystem::loadFromXML: Could not open file ") + _fileName,
+                                 lsError);
+      return false;
+    }
 
     InputSource input(inFile);
     DOMParser parser;
