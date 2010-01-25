@@ -61,6 +61,7 @@ namespace dss {
 
     PropertyNodePtr m_pPropertyNode;
     PropertyNodePtr m_pAliasNode;
+    PropertyNodePtr m_TagsNode;
   protected:
     /** Sends the application a note that something has changed.
      * This will cause the \c apartment.xml to be updated. */
@@ -171,6 +172,10 @@ namespace dss {
     /** Publishes the device to the property tree.
      * @see DSS::getPropertySystem */
     void publishToPropertyTree();
+
+    bool hasTag(const std::string& _tagName);
+    void addTag(const std::string& _tagName);
+    void removeTag(const std::string& _tagName);
 
     /** Returns wheter two devices are equal.
      * Devices are considered equal if their DSID are a match.*/

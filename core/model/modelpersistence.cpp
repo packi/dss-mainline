@@ -79,7 +79,7 @@ namespace dss {
       // Note that we can hit this case both if it's invalid XML and
       // when the file doesn't exist at all
       Logger::getInstance()->log(std::string("ModelPersistence::readConfigurationFromXML: "
-                                             "Parse error in Model configuration: ") + 
+                                             "Parse error in Model configuration: ") +
                                  _fileName + ": " + spe.message(), lsError);
       return;
     }
@@ -151,7 +151,6 @@ namespace dss {
           newDevice.setLastKnownZoneID(lastKnownZoneID);
           Element* propertiesElem = elem->getChildElement("properties");
           if(propertiesElem != NULL) {
-            newDevice.publishToPropertyTree();
             newDevice.getPropertyNode()->loadChildrenFromNode(propertiesElem);
           }
         }

@@ -68,6 +68,8 @@ namespace dss {
           interruptModeNode->setStringValue("ignore");
           interruptModeNode->setFlag(PropertyNode::Archive, true);
         }
+        m_TagsNode = m_pPropertyNode->createProperty("tags");
+        m_TagsNode->setFlag(PropertyNode::Archive, true);
       }
     }
   } // publishToPropertyTree
@@ -285,5 +287,28 @@ namespace dss {
     return m_pApartment->getDeviceBusInterface()->getSensorValue(*this,_sensorID);
   } // getSensorValue
 
+  bool Device::hasTag(const std::string& _tagName) {
+    if(m_TagsNode != NULL) {
+      return m_TagsNode->getPropertyByName(_tagName) != NULL;
+    }
+    return false;
+  } // hasTag
+
+  void Device::addTag(const std::string& _tagName) {
+    if(!hasTag(_tagName)) {
+      if(m_TagsNode != NULL) {
+        PropertyNodePtr pNode = m_TagsNode->createProperty(_tagName);
+        pNode->setFlag(PropertyNode::Archive, true);
+      }
+    }
+  } // addTag
+
+  void Device::removeTag(const std::string& _tagName) {
+    if(hasTag(_tagName)) {
+      if(m_TagsNode != NULL) {
+        m_TagsNode->removeChild(m_TagsNode->getPropertyByName(_tagName));
+      }
+    }
+  } // removeTag
 
 } // namespace dss

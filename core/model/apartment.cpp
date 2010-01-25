@@ -221,20 +221,23 @@ namespace dss {
   } // getGroup(id)
 
   Device& Apartment::allocateDevice(const dsid_t _dsid) {
+    Device* pResult = NULL;
     // search for existing device
     foreach(Device* device, m_Devices) {
       if(device->getDSID() == _dsid) {
-        DeviceReference devRef(*device, this);
-        getZone(0).addDevice(devRef);
-        return *device;
+        pResult = device;
+        break;
       }
     }
 
-    Device* pResult = new Device(_dsid, this);
-    pResult->setFirstSeen(DateTime());
-    m_Devices.push_back(pResult);
+    if(pResult == NULL) {
+      pResult = new Device(_dsid, this);
+      pResult->setFirstSeen(DateTime());
+      m_Devices.push_back(pResult);
+    }
     DeviceReference devRef(*pResult, this);
     getZone(0).addDevice(devRef);
+    pResult->publishToPropertyTree();
     return *pResult;
   } // allocateDevice
 

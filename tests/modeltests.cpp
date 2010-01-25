@@ -990,4 +990,28 @@ BOOST_AUTO_TEST_CASE(testZoneNodes) {
   BOOST_CHECK(syst.getProperty("/apartment/zones/zone0") != NULL);
 } // testZoneNodes
 
+BOOST_AUTO_TEST_CASE(testTags) {
+  Apartment apt(NULL);
+  PropertySystem syst;
+  apt.setPropertySystem(&syst);
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+
+  BOOST_CHECK_EQUAL(dev1.hasTag("aTag"), false);
+
+  dev1.addTag("aTag");
+  BOOST_CHECK_EQUAL(dev1.hasTag("aTag"), true);
+  BOOST_CHECK_EQUAL(dev1.hasTag("anotherTag"), false);
+
+  dev1.addTag("anotherTag");
+  BOOST_CHECK_EQUAL(dev1.hasTag("aTag"), true);
+  BOOST_CHECK_EQUAL(dev1.hasTag("anotherTag"), true);
+
+  dev1.removeTag("anotherTag");
+  BOOST_CHECK_EQUAL(dev1.hasTag("aTag"), true);
+  BOOST_CHECK_EQUAL(dev1.hasTag("anotherTag"), false);
+
+  dev1.removeTag("aTag");
+  BOOST_CHECK_EQUAL(dev1.hasTag("aTag"), false);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
