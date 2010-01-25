@@ -95,4 +95,12 @@ BOOST_AUTO_TEST_CASE(testLongerScript) {
                       "print('divison: ' + division);");
 } // testLongerScript
 
+BOOST_AUTO_TEST_CASE(testNonexistingScriptRaisesException) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  BOOST_CHECK_THROW(ctx->evaluateScript<void>("idontexistandneverwill.js"), ScriptException);
+} // testNonexistingScriptRaisesException
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -104,47 +104,43 @@ namespace dss {
   void EventInterpreterPluginJavascript::handleEvent(Event& _event, const EventSubscription& _subscription) {
     if(_subscription.getOptions().hasParameter("filename")) {
       std::string scriptName = _subscription.getOptions().getParameter("filename");
-      if(boost::filesystem::exists(scriptName)) {
 
-        if(!m_Environment.isInitialized()) {
-          initializeEnvironment();
+      if(!m_Environment.isInitialized()) {
+        initializeEnvironment();
+      }
+
+      try {
+        boost::shared_ptr<ScriptContext> ctx(m_Environment.getContext());
+        ScriptObject raisedEvent(*ctx, NULL);
+        raisedEvent.setProperty<const std::string&>("name", _event.getName());
+        ctx->getRootObject().setProperty("raisedEvent", &raisedEvent);
+
+        // add raisedEvent.parameter
+        ScriptObject param(*ctx, NULL);
+        const HashMapConstStringString& props =  _event.getProperties().getContainer();
+        for(HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end();
+            iParam != e; ++iParam)
+        {
+          Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: setting parameter " + iParam->first +
+                                      " to " + iParam->second);
+          param.setProperty<const std::string&>(iParam->first, iParam->second);
         }
+        raisedEvent.setProperty("parameter", &param);
 
-        try {
-          boost::shared_ptr<ScriptContext> ctx(m_Environment.getContext());
-          ScriptObject raisedEvent(*ctx, NULL);
-          raisedEvent.setProperty<const std::string&>("name", _event.getName());
-          ctx->getRootObject().setProperty("raisedEvent", &raisedEvent);
+        // add raisedEvent.subscription
+        ScriptObject subscriptionObj(*ctx, NULL);
+        raisedEvent.setProperty("subscription", &subscriptionObj);
+        subscriptionObj.setProperty<const std::string&>("name", _subscription.getEventName());
 
-          // add raisedEvent.parameter
-          ScriptObject param(*ctx, NULL);
-          const HashMapConstStringString& props =  _event.getProperties().getContainer();
-          for(HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end();
-              iParam != e; ++iParam)
-          {
-            Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: setting parameter " + iParam->first +
-                                       " to " + iParam->second);
-            param.setProperty<const std::string&>(iParam->first, iParam->second);
-          }
-          raisedEvent.setProperty("parameter", &param);
+        ctx->evaluateScript<void>(scriptName);
 
-          // add raisedEvent.subscription
-          ScriptObject subscriptionObj(*ctx, NULL);
-          raisedEvent.setProperty("subscription", &subscriptionObj);
-          subscriptionObj.setProperty<const std::string&>("name", _subscription.getEventName());
-
-          ctx->evaluateScript<void>(scriptName);
-
-          if(ctx->getKeepContext()) {
-            m_KeptContexts.push_back(ctx);
-            Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: keeping script " + scriptName + " in memory", lsInfo);
-          }
-        } catch(ScriptException& e) {
-          Logger::getInstance()->log(std::string("EventInterpreterPluginJavascript::handleEvent: Caught event while running/parsing script '")
-                              + scriptName + "'. Message: " + e.what(), lsError);
+        if(ctx->getKeepContext()) {
+          m_KeptContexts.push_back(ctx);
+          Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: keeping script " + scriptName + " in memory", lsInfo);
         }
-      } else {
-        Logger::getInstance()->log(std::string("EventInterpreterPluginJavascript::handleEvent: Could not find script: '") + scriptName + "'", lsError);
+      } catch(ScriptException& e) {
+        Logger::getInstance()->log(std::string("EventInterpreterPluginJavascript::handleEvent: Caught event while running/parsing script '")
+                            + scriptName + "'. Message: " + e.what(), lsError);
       }
     } else {
       throw std::runtime_error("EventInterpreteRPluginJavascript::handleEvent: missing argument filename");

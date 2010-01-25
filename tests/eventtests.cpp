@@ -256,4 +256,16 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
   sleep(1);
 } // testDS485Events
 
+BOOST_AUTO_TEST_CASE(testEventHandlerJavascriptDoesntLeakExceptionsWithNonexistingFile) {
+  EventInterpreter interpreter(NULL);
+  EventInterpreterPluginJavascript* plugin = new EventInterpreterPluginJavascript(&interpreter);
+  interpreter.addPlugin(plugin);
+
+  boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
+  opts->setParameter("filename", "idontexistandneverwill.js");
+  EventSubscription subscription("testEvent", "javascript", interpreter, opts);
+  Event evt("testEvent");
+  plugin->handleEvent(evt, subscription);
+} // testEventHandlerJavascriptDoesntLeakExceptionsWithNonexistingFile
+
 BOOST_AUTO_TEST_SUITE_END()

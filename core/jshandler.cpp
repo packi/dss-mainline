@@ -259,7 +259,7 @@ namespace dss {
     }
     throw ScriptException("Value is not of type double");
   }
-  
+
   bool ScriptContext::raisePendingExceptions() {
     if(JS_IsExceptionPending(m_pContext)) {
       jsval exval;
@@ -271,7 +271,7 @@ namespace dss {
           throw ScriptRuntimeException(std::string("Caught Exception while executing script: ") + errmsgBytes, std::string(errmsgBytes));
         }
       }
-      throw ScriptException("Exception was pending after script execution, but couldnt get it from the vm");  
+      throw ScriptException("Exception was pending after script execution, but couldnt get it from the vm");
     }
     return false;
   } // raisePendingExceptions
@@ -280,6 +280,9 @@ namespace dss {
     AssertLocked(this);
 
     std::ifstream in(_fileName.c_str());
+    if(!in.is_open()) {
+      throw ScriptException("Could not open script-file: '" + _fileName + "'");
+    }
     std::string line;
     std::stringstream sstream;
     while(std::getline(in,line)) {
@@ -336,7 +339,7 @@ namespace dss {
       throw ScriptException("Error executing script");
     }
   } // doEvaluate
-  
+
   template <>
   void ScriptContext::evaluate(const std::string& _script) {
     doEvaluate(_script);
