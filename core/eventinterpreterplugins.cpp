@@ -200,7 +200,7 @@ namespace dss {
 
   SubscriptionOptions* EventInterpreterPluginDS485::createOptionsFromXML(Node* _node) {
     SubscriptionOptionsDS485* result = new SubscriptionOptionsDS485();
-    
+
     Node* curNode = _node->firstChild();
     while(curNode != NULL) {
       if(curNode->localName() == "send") {

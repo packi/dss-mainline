@@ -351,7 +351,7 @@ namespace dss {
   } // loadFromXML
 
   void EventInterpreter::loadFilter(Node* _node, EventSubscription& _subscription) {
-    if(_node != NULL) {    
+    if(_node != NULL) {
       Element* elem = dynamic_cast<Element*>(_node);
       if(elem != NULL) {
         std::string matchType = elem->getAttribute("match");
@@ -412,10 +412,10 @@ namespace dss {
       }
     }
   } // loadPropertyFilter
-  
+
   void EventInterpreter::loadSubscription(Node* _node) {
     Element* elem = dynamic_cast<Element*>(_node);
-    if(elem != NULL) {    
+    if(elem != NULL) {
       std::string evtName;
       if(elem->hasAttribute("event-name")) {
         evtName = elem->getAttribute("event-name");

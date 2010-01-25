@@ -86,12 +86,12 @@ BOOST_AUTO_TEST_SUITE(PropertySystemTests)
 BOOST_AUTO_TEST_CASE(testBoolProxy) {
   PropertySystem propSys;
   PropertyNodePtr prop = propSys.createProperty("/value");
-  
+
   PropTest<bool> t(true);
-  PropertyProxyMemberFunction<class PropTest<bool>, bool> 
+  PropertyProxyMemberFunction<class PropTest<bool>, bool>
     proxy(t, &PropTest<bool>::getValue, &PropTest<bool>::setValue);
   prop->linkToProxy(proxy);
-  
+
   BOOST_CHECK_EQUAL(true, proxy.getValue());
   BOOST_CHECK_EQUAL(true, prop->getBoolValue());
 
@@ -103,9 +103,9 @@ BOOST_AUTO_TEST_CASE(testBoolProxy) {
 BOOST_AUTO_TEST_CASE(testIntProxy) {
   PropertySystem propSys;
   PropertyNodePtr prop = propSys.createProperty("/value");
-  
+
   PropTest<int> t(7);
-  PropertyProxyMemberFunction<class PropTest<int>, int> 
+  PropertyProxyMemberFunction<class PropTest<int>, int>
     proxy(t, &PropTest<int>::getValue, &PropTest<int>::setValue);
   prop->linkToProxy(proxy);
 
@@ -120,9 +120,9 @@ BOOST_AUTO_TEST_CASE(testIntProxy) {
 BOOST_AUTO_TEST_CASE(testStringProxy) {
   PropertySystem propSys;
   PropertyNodePtr prop = propSys.createProperty("/value");
-  
+
   PropTestString t("initial");
-  PropertyProxyMemberFunction<class PropTestString, std::string> 
+  PropertyProxyMemberFunction<class PropTestString, std::string>
     proxy(t, &PropTestString::getValue, &PropTestString::setValue);
   prop->linkToProxy(proxy);
 
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(testPropertyNodeSize) {
   BOOST_CHECK_EQUAL(0, propSys.getRootNode()->size());
 
   PropertyNodePtr prop = propSys.createProperty("/node");
-  
+
   BOOST_CHECK_EQUAL(1, propSys.getRootNode()->size());
   propSys.getRootNode()->removeChild(prop);
 
@@ -360,7 +360,7 @@ BOOST_AUTO_TEST_CASE(testFlags) {
 
 BOOST_AUTO_TEST_CASE(testPropertyNodeGetAsString) {
   PropertySystem propSys;
-  
+
   PropertyNodePtr intNode = propSys.createProperty("/int");
   intNode->setIntegerValue(1);
   BOOST_CHECK_EQUAL("1", intNode->getAsString());
@@ -370,13 +370,13 @@ BOOST_AUTO_TEST_CASE(testPropertyNodeGetAsString) {
   BOOST_CHECK_EQUAL("true", boolNode->getAsString());
   boolNode->setBooleanValue(false);
   BOOST_CHECK_EQUAL("false", boolNode->getAsString());
-  
+
   PropertyNodePtr stringNode = propSys.createProperty("/string");
   stringNode->setStringValue("test");
   BOOST_CHECK_EQUAL("test", stringNode->getAsString());
-  
+
   PropertyNodePtr noneNode = propSys.createProperty("/none");
-  BOOST_CHECK_EQUAL("", noneNode->getAsString());  
+  BOOST_CHECK_EQUAL("", noneNode->getAsString());
 } // testPropertyNodeGetAsString
 
 BOOST_AUTO_TEST_CASE(testValueTypeFromAndToString) {

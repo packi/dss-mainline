@@ -32,7 +32,7 @@
 namespace dss {
 
   class Apartment;
-  
+
   class EventInterpreterPluginRaiseEvent : public EventInterpreterPlugin {
   private:
     void applyOptionsWithSuffix(const SubscriptionOptions& _options, const std::string& _suffix, boost::shared_ptr<Event> _event);

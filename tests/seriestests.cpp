@@ -185,10 +185,10 @@ BOOST_AUTO_TEST_CASE(sparcity2) {
   for(int iVal = 0; iVal < resolution; iVal++) {
     secondly2.addValue(iVal, testStart.addSeconds(resolution*iVal));
   }
-  
+
   now = now.addSeconds( -(now.secondsSinceEpoch() % resolution) );
   secondly2.addValue(0, now);
-  
+
   BOOST_CHECK_EQUAL((size_t)1, secondly2.getValues().size());
 } // sparcity2
 
@@ -239,9 +239,9 @@ BOOST_AUTO_TEST_CASE(readWrite) {
   BOOST_CHECK_EQUAL( 5.0, series->getValues().front().getMax() );
   BOOST_CHECK_EQUAL( std::string("my comment"), series->getComment() );
   BOOST_CHECK_EQUAL( std::string("kW"), series->getUnit() );
-  
+
   boost::filesystem::remove_all("data/tmptest.xml");
-  
+
   delete series;
 } // testReadWrite
 
@@ -253,7 +253,7 @@ BOOST_AUTO_TEST_CASE(readWriteExtended) {
 
 
   DateTime now;
-  DateTime startTime(static_cast<time_t>(now.secondsSinceEpoch() - 
+  DateTime startTime(static_cast<time_t>(now.secondsSinceEpoch() -
         now.secondsSinceEpoch() % (5*60)));
 
   Series<CurrentValue> five(5 * 60, 10);
@@ -318,7 +318,7 @@ BOOST_AUTO_TEST_CASE(readWriteExtended) {
     writer.writeToXML(*pMinutely, "data/tmptest_minutely.xml");
     writer.writeToXML(*pFive, "data/tmptest_five_minutely.xml");
   }
-  
+
   boost::filesystem::remove_all("data/tmptest_2seconds.xml");
   boost::filesystem::remove_all("data/tmptest_minutely.xml");
   boost::filesystem::remove_all("data/tmptest_five_minutely.xml");
@@ -460,7 +460,7 @@ BOOST_AUTO_TEST_CASE(wrapping) {
 
   double val = SeriesAdder<60,60>::value;
   BOOST_CHECK_EQUAL( val, hourly.getValues().front().getValue() );
-  
+
   minutely.addValue(61, testStart.addMinute(60));
 
   BOOST_CHECK_EQUAL( (size_t)2, hourly.getValues().size() );
@@ -469,7 +469,7 @@ BOOST_AUTO_TEST_CASE(wrapping) {
   writer.writeToXML(minutely, "data/tmpminutely.xml");
 
   BOOST_CHECK_EQUAL( (size_t)2, hourly.getValues().size() );
-  
+
   boost::filesystem::remove_all("data/tmpminutely.xml");
 } // testWrapping
 
@@ -479,12 +479,12 @@ BOOST_AUTO_TEST_CASE(expansion) {
   DateTime now;
   DateTime testStart(static_cast<time_t>(now.secondsSinceEpoch() -
         now.secondsSinceEpoch() % 60));
-  
+
   // add values 1..60 to minutely (60 values)
   for(int iValue = 1; iValue <= 5; iValue++) {
     minutely.addValue(iValue, testStart.addMinute((iValue-1)*2));
   }
-  
+
   boost::shared_ptr<std::deque<AdderValue> > expanded = minutely.getExpandedValues();
   BOOST_CHECK_EQUAL( (size_t)9, expanded->size() );
 } // expansion
@@ -495,12 +495,12 @@ BOOST_AUTO_TEST_CASE(expansionToPresent) {
   DateTime now;
   DateTime testStart(static_cast<time_t>(now.secondsSinceEpoch() -
         now.secondsSinceEpoch() % 60 - 19 * 60));
-  
+
   // add values 1..60 to minutely (60 values)
   for(int iValue = 1; iValue <= 5; iValue++) {
     minutely.addValue(iValue, testStart.addMinute((iValue-1)*2));
   }
-  
+
   boost::shared_ptr<std::deque<AdderValue> > expanded = minutely.getExpandedValues();
   BOOST_CHECK_EQUAL( (size_t)10, expanded->size() );
   for(std::deque<AdderValue>::iterator iValue = expanded->begin(), e = expanded->end(); iValue != e; iValue++) {
