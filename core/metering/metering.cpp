@@ -97,7 +97,9 @@ namespace dss {
       std::string fileName = m_MeteringStorageLocation + _value.getDSMeter().getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
       log("Metering::processValue: Trying to load series from '" + fileName + "'");
       if(boost::filesystem::exists(fileName)) {
+        #ifdef LOG_TIMING
         Timestamp startedLoadingSingle;
+        #endif
         boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(fileName));
         #ifdef LOG_TIMING
         logSStream << "loading single: " << Timestamp().getDifference(startedLoadingSingle);
