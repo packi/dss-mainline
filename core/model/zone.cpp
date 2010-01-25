@@ -28,6 +28,7 @@
 #include "core/logger.h"
 #include "core/ds485const.h"
 #include "core/model/modelconst.h"
+#include "core/propertysystem.h"
 #include "set.h"
 #include "device.h"
 #include "apartment.h"
@@ -160,5 +161,13 @@ namespace dss {
     result.push_back(getGroup(GroupIDBroadcast));
     return result;
   } // splitIntoAddressableItems
-  
+
+  void Zone::publishToPropertyTree() {
+    if(m_pPropertyNode == NULL) {
+      if(m_pApartment->getPropertyNode() != NULL) {
+        m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone" + intToString(m_ZoneID));
+      }
+    }
+  } // publishToPropertyTree
+
 } // namespace dss

@@ -41,6 +41,7 @@
 #include "core/ds485/ds485busrequestdispatcher.h"
 #include "core/ds485/businterfacehandler.h"
 #include "core/model/modelmaintenance.h"
+#include "core/propertysystem.h"
 
 using namespace dss;
 
@@ -974,5 +975,19 @@ BOOST_FIXTURE_TEST_CASE(testPreviousSceneDevice, TestModelFixture) {
   BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
   BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
 }
+
+BOOST_AUTO_TEST_CASE(testApartmentCreatesRootNode) {
+  Apartment apt(NULL);
+  PropertySystem syst;
+  apt.setPropertySystem(&syst);
+  BOOST_CHECK(syst.getProperty("/apartment") != NULL);
+} // testApartmentCreatesRootNode
+
+BOOST_AUTO_TEST_CASE(testZoneNodes) {
+  Apartment apt(NULL);
+  PropertySystem syst;
+  apt.setPropertySystem(&syst);
+  BOOST_CHECK(syst.getProperty("/apartment/zones/zone0") != NULL);
+} // testZoneNodes
 
 BOOST_AUTO_TEST_SUITE_END()

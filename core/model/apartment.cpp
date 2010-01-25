@@ -25,7 +25,6 @@
 #include "core/DS485Interface.h"
 #include "core/ds485const.h"
 #include "core/model/modelconst.h"
-#include "core/dss.h"
 #include "core/logger.h"
 #include "core/propertysystem.h"
 #include "core/event.h"
@@ -53,16 +52,12 @@ namespace dss {
   Apartment::Apartment(DSS* _pDSS)
   : m_pDS485Interface(NULL),
     m_pBusRequestDispatcher(NULL),
-    m_pModelMaintenance(NULL)
+    m_pModelMaintenance(NULL),
+    m_pPropertySystem(NULL)
   {
-    if(_pDSS != NULL) {
-      m_pPropertyNode = DSS::getInstance()->getPropertySystem().createProperty("/apartment");
-    }
     // create default (broadcast) zone
-    Zone* zoneZero = new Zone(0);
-    addDefaultGroupsToZone(*zoneZero);
-    m_Zones.push_back(zoneZero);
-    zoneZero->setIsPresent(true);
+    Zone& zoneZero = allocateZone(0);
+    zoneZero.setIsPresent(true);
   } // ctor
 
   Apartment::~Apartment() {
@@ -256,20 +251,21 @@ namespace dss {
   } // allocateDSMeter
 
   Zone& Apartment::allocateZone(int _zoneID) {
-    if(getPropertyNode() != NULL) {
-      getPropertyNode()->createProperty("zones/zone" + intToString(_zoneID));
-    }
-
+    Zone* result = NULL;
     foreach(Zone* zone, m_Zones) {
       if(zone->getID() == _zoneID) {
-        return *zone;
+        result = zone;
+        break;
       }
     }
 
-    Zone* zone = new Zone(_zoneID);
-    m_Zones.push_back(zone);
-    addDefaultGroupsToZone(*zone);
-    return *zone;
+    if(result == NULL) {
+      result = new Zone(_zoneID, this);
+      addDefaultGroupsToZone(*result);
+      m_Zones.push_back(result);
+    }
+    result->publishToPropertyTree();
+    return *result;
   } // allocateZone
 
   void Apartment::removeZone(int _zoneID) {
@@ -284,17 +280,17 @@ namespace dss {
     }
   } // removeZone
 
-  void Apartment::removeDevice(dsid_t _device) {    
+  void Apartment::removeDevice(dsid_t _device) {
     for(std::vector<Device*>::iterator ipDevice = m_Devices.begin(), e = m_Devices.end();
         ipDevice != e; ++ipDevice) {
       Device* pDevice = *ipDevice;
       if(pDevice->getDSID() == _device) {
-	int zoneID = pDevice->getZoneID();
-	DeviceReference devRef = DeviceReference(*pDevice, this);
-	if(zoneID != 0) {
-	  getZone(zoneID).removeDevice(devRef);
-	}
-	getZone(0).removeDevice(devRef);
+        int zoneID = pDevice->getZoneID();
+        DeviceReference devRef = DeviceReference(*pDevice, this);
+        if(zoneID != 0) {
+          getZone(zoneID).removeDevice(devRef);
+        }
+        getZone(0).removeDevice(devRef);
         m_Devices.erase(ipDevice);
         delete pDevice;
         return;
@@ -326,5 +322,14 @@ namespace dss {
     return m_pDS485Interface->getDeviceBusInterface();
   } // getDeviceBusInterface
 
+  void Apartment::setPropertySystem(PropertySystem* _value) {
+    m_pPropertySystem = _value;
+    if(m_pPropertySystem != NULL) {
+      m_pPropertyNode = m_pPropertySystem->createProperty("/apartment");
+      foreach(Zone* pZone, m_Zones) {
+        pZone->publishToPropertyTree();
+      }
+    }
+  } // setPropertySystem
 
 } // namespace dss

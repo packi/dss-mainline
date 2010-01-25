@@ -285,5 +285,5 @@ namespace dss {
     return m_pApartment->getDeviceBusInterface()->getSensorValue(*this,_sensorID);
   } // getSensorValue
 
-  
+
 } // namespace dss

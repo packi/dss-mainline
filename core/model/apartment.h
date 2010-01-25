@@ -50,6 +50,7 @@ namespace dss {
   class BusRequestDispatcher;
   class BusRequest;
   class ModelMaintenance;
+  class PropertySystem;
 
   /** Represents an Apartment
     * This is the root of the datamodel of the dss. The Apartment is responsible for delivering
@@ -68,6 +69,7 @@ namespace dss {
     BusRequestDispatcher* m_pBusRequestDispatcher;
     PropertyNodePtr m_pPropertyNode;
     ModelMaintenance* m_pModelMaintenance;
+    PropertySystem* m_pPropertySystem;
   private:
     void addDefaultGroupsToZone(Zone& _zone);
   public:
@@ -136,8 +138,10 @@ namespace dss {
     PropertyNodePtr getPropertyNode() { return m_pPropertyNode; }
     void setModelMaintenance(ModelMaintenance* _value) { m_pModelMaintenance = _value; }
     ModelMaintenance* getModelMaintenance() { return m_pModelMaintenance; }
+    void setPropertySystem(PropertySystem* _value);
+    PropertySystem* getPropertySystem() { return m_pPropertySystem; }
   }; // Apartment
-  
+
   /** Exception that will be thrown if a given item could not be found */
   class ItemNotFoundException : public DSSException {
   public:

@@ -26,6 +26,7 @@
 #include <vector>
 
 #include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "modeltypes.h"
 #include "devicecontainer.h"
@@ -33,12 +34,15 @@
 #include "physicalmodelitem.h"
 
 namespace dss {
+  class Apartment;
   class DSMeter;
   class Group;
   class UserGroup;
   class Set;
   class DeviceReference;
- 
+  class PropertyNode;
+  typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
+
     /** Represents a Zone.
    * A Zone houses multiple devices. It can span over multiple dsMeters.
    */
@@ -52,10 +56,13 @@ namespace dss {
     std::vector<const DSMeter*> m_DSMeters;
     std::vector<Group*> m_Groups;
     int m_FirstZoneOnDSMeter;
+    Apartment* m_pApartment;
+    PropertyNodePtr m_pPropertyNode;
   public:
-    Zone(const int _id)
+    Zone(const int _id, Apartment* _pApartment)
     : m_ZoneID(_id),
-          m_FirstZoneOnDSMeter(-1)
+      m_FirstZoneOnDSMeter(-1),
+      m_pApartment(_pApartment)
     {}
     virtual ~Zone();
     virtual Set getDevices() const;
@@ -103,6 +110,8 @@ namespace dss {
 
     virtual void nextScene();
     virtual void previousScene();
+
+    void publishToPropertyTree();
 
     virtual unsigned long getPowerConsumption();
     /** Returns a vector of groups present on the zone. */

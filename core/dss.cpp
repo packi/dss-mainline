@@ -162,6 +162,7 @@ const char* WebrootDirectory = "data/webroot";
     m_Subsystems.push_back(m_pModelMaintenance.get());
 
     m_pApartment = boost::shared_ptr<Apartment>(new Apartment(this));
+    m_pApartment->setPropertySystem(m_pPropertySystem.get());
     m_pModelMaintenance->setApartment(m_pApartment.get());
 
     m_pDS485Interface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this, m_pModelMaintenance.get()));
