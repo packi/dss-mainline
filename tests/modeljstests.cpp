@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(testProperties) {
   ctx->evaluate<void>("setProperty('/testing', 1)");
   BOOST_CHECK_EQUAL(ctx->evaluate<int>("getProperty('/testing')"), 1);
   BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 1);
-  
+
   propSys.setIntValue("/testing", 2);
   BOOST_CHECK_EQUAL(ctx->evaluate<int>("getProperty('/testing')"), 2);
 }
@@ -317,9 +317,9 @@ BOOST_AUTO_TEST_CASE(testReentrancy) {
                             "other_ident = setListener('/triggered', function() { setProperty('/itWorks', true); } ); "
                             "listener_ident = setListener('/testing', function(changedNode) { setProperty('/triggered', true); }); "
       );
-      
+
   propSys.setBoolValue("/testing", true);
-  
+
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/itWorks"), true);
 
   // TODO: find out why it crashes w/o those lines
@@ -332,18 +332,18 @@ BOOST_AUTO_TEST_CASE(testReentrancy) {
 
 class TestThreadingThread : public Thread {
 public:
-  TestThreadingThread(PropertyNodePtr _node) 
+  TestThreadingThread(PropertyNodePtr _node)
   : Thread("TestThreadingThread"),
     m_pNode(_node)
   {
   }
-  
+
   virtual void execute() {
     while(!m_Terminated) {
       m_pNode->setIntegerValue(2);
     }
   }
-  
+
 private:
   PropertyNodePtr m_pNode;
 }; // TestThreadingThread
@@ -360,33 +360,33 @@ BOOST_AUTO_TEST_CASE(testThreading) {
                       "l1 = setListener('/testing1', function() { setProperty('/itWorks', true); } ); "
                       "l2 = setListener('/testing2', function() { setProperty('/itWorks', true); } ); "
       );
-      
+
   PropertyNodePtr node1 = propSys.getProperty("/testing1");
   PropertyNodePtr node2 = propSys.getProperty("/testing2");
-  
+
   // different nodes
   {
     TestThreadingThread t1(node1);
     TestThreadingThread t2(node2);
     t1.run();
     t2.run();
-  
+
     sleepSeconds(1);
-  
+
     t1.terminate();
     t2.terminate();
     sleepMS(500);
   }
-  
+
   // same node
   {
     TestThreadingThread t1(node1);
     TestThreadingThread t2(node1);
     t1.run();
     t2.run();
-  
+
     sleepSeconds(1);
-  
+
     t1.terminate();
     t2.terminate();
     sleepMS(500);

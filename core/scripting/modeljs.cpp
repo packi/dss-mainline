@@ -696,7 +696,7 @@ namespace dss {
         case 2:
           *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, dev->getDevice().getName().c_str()));
           return JS_TRUE;
-        case 3: 
+        case 3:
           *rval = INT_TO_JSVAL(dev->getDevice().getZoneID());
           return JS_TRUE;
         case 4:
