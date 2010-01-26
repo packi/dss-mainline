@@ -101,6 +101,54 @@ namespace dss {
   class SocketHelperInstance : public SocketHelper,
                                public boost::enable_shared_from_this<SocketHelperInstance> {
   public:
+    SocketHelperInstance(SocketScriptContextExtension& _extension)
+    : SocketHelper(_extension),
+      m_Socket(getIOService())
+    { }
+
+    void connectTo(const std::string& _host, int _port) {
+      tcp::resolver resolver(getIOService());
+      tcp::resolver::query query(_host, intToString(_port));
+      tcp::resolver::iterator iterator = resolver.resolve(query);
+
+      tcp::endpoint endpoint = *iterator;
+      m_Socket.async_connect(endpoint,
+                             boost::bind(&SocketHelperInstance::connectionCallback, this,
+                                         boost::asio::placeholders::error, ++iterator));
+                                         startIOThread();
+    }
+  private:
+    void connectionCallback(const boost::system::error_code& error,
+                        tcp::resolver::iterator endpoint_iterator) {
+      if (!error) {
+        success();
+      } else if (endpoint_iterator != tcp::resolver::iterator()) {
+        m_Socket.close();
+        tcp::endpoint endpoint = *endpoint_iterator;
+        m_Socket.async_connect(endpoint,
+                               boost::bind(&SocketHelperInstance::connectionCallback, this,
+                                           boost::asio::placeholders::error, ++endpoint_iterator));
+      } else {
+        Logger::getInstance()->log("SocketHelperInstance::connectionCallback: failed: " + error.message());
+        failure();
+      }
+    }
+
+    void success() {
+      callCallback(true);
+    }
+
+    void failure() {
+      callCallback(false);
+    }
+
+    void callCallback(bool _result) {
+      ScriptFunctionParameterList param(getContext());
+      param.add<bool>(_result);
+      callCallbackWithArguments(param);
+    }
+  private:
+    tcp::socket m_Socket;
   }; // SocketHelperInstance
 
   class SocketHelperSendOneShot : public SocketHelper,
@@ -179,11 +227,19 @@ namespace dss {
   { }
 
   void tcpSocket_finalize(JSContext *cx, JSObject *obj) {
+    SocketHelperInstance* pInstance = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
+    JS_SetPrivate(cx, obj, NULL);
+    delete pInstance;
   } // tcpSocket_finalize
 
   JSBool tcpSocket_construct(JSContext *cx, JSObject *obj, uintN argc,
                              jsval *argv, jsval *rval) {
-      return JS_TRUE;
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    SocketScriptContextExtension* ext =
+      dynamic_cast<SocketScriptContextExtension*>(ctx->getEnvironment().getExtension(SocketScriptExtensionName));
+    SocketHelperInstance* inst = new SocketHelperInstance(*ext);
+    JS_SetPrivate(cx, obj, inst);
+    return JS_TRUE;
   } // tcpSocket_construct
 
   static JSClass tcpSocket_class = {
@@ -194,9 +250,38 @@ namespace dss {
     JS_ConvertStub,  tcpSocket_finalize, JSCLASS_NO_OPTIONAL_MEMBERS
   }; // tcpSocket_class
 
+  JSBool tcpSocket_connect(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
+    assert(pInst != NULL);
+    if(argc >= 2) {
+      try {
+        std::string host = ctx->convertTo<std::string>(argv[0]);
+        int port = ctx->convertTo<int>(argv[1]);
+
+        pInst->setContext(ctx);
+
+        // check if we've been given a callback
+        if(argc >= 3) {
+          boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(obj, *ctx));
+          pInst->setCallbackObject(scriptObj);
+          pInst->setCallbackFunction(argv[2]);
+        }
+
+        pInst->connectTo(host, port);
+        *rval = JSVAL_TRUE;
+        return JS_TRUE;
+      } catch(const ScriptException& e) {
+        Logger::getInstance()->log(std::string("tcpSocket_connect: Caught script exception: ") + e.what());
+      }
+    }
+    return JS_FALSE;
+  } // tcpSocket_connect
+
+
   JSFunctionSpec tcpSocket_methods[] = {
   //  {"send", tcpSocket_send, 2, 0, 0},
-  //  {"connect", tcpSocket_connect, 3, 0, 0},
+    {"connect", tcpSocket_connect, 3, 0, 0},
   //  {"receive", tcpSocket_receive, 2, 0, 0},
   //  {"bind", tcpSocket_bind, 2, 0, 0},
   //  {"accept", tcpSocket_send, 1, 0, 0},

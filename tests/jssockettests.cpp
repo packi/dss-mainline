@@ -44,7 +44,9 @@ public:
   : m_IOService(),
     m_Endpoint(tcp::v4(), _port),
     m_Acceptor(m_IOService),
-    m_RunsLeft(0)
+    m_RunsLeft(0),
+    m_QuitAfterConnect(false),
+    m_ConnectionCount(0)
   {
     m_Acceptor.open(m_Endpoint.protocol());
     m_Acceptor.set_option(tcp::acceptor::reuse_address(true));
@@ -68,19 +70,29 @@ public:
     m_RunsLeft = _value;
   }
 
+  void setQuitAfterConnect(bool _value) {
+    m_QuitAfterConnect = _value;
+  }
+
+  int getConnectionCount() const {
+    return m_ConnectionCount;
+  }
+
   std::string m_DataReceived;
 private:
 
   void handleConnection(boost::shared_ptr<tcp::socket> _sock) {
-    char data[100];
-    boost::system::error_code error;
-    size_t length = _sock->read_some(boost::asio::buffer(data), error);
-    if(error == boost::asio::error::eof) {
-      return;
-    } else if(!error) {
-      m_DataReceived.append(data, length);
-      Logger::getInstance()->log("Got data");
+    if(!m_QuitAfterConnect) {
+      char data[100];
+      boost::system::error_code error;
+      size_t length = _sock->read_some(boost::asio::buffer(data), error);
+      if(error == boost::asio::error::eof) {
+        return;
+      } else if(!error) {
+        m_DataReceived.append(data, length);
+      }
     }
+    m_ConnectionCount = 1;
     _sock->close();
     if(m_RunsLeft > 0) {
       m_RunsLeft--;
@@ -94,6 +106,8 @@ private:
   tcp::acceptor m_Acceptor;
   int m_RunsLeft;
   boost::thread m_IOServiceThread;
+  bool m_QuitAfterConnect;
+  int m_ConnectionCount;
 };
 
 BOOST_AUTO_TEST_CASE(testBasics) {
@@ -164,5 +178,36 @@ BOOST_AUTO_TEST_CASE(testSendSocketCallback) {
     listener.m_DataReceived.clear();
   }
 } // testSendSocketCallback
+
+BOOST_AUTO_TEST_CASE(testSocketConnect) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new SocketScriptContextExtension();
+  env->addExtension(ext);
+
+  TestListener listener(1234);
+  listener.setQuitAfterConnect(true);
+  listener.run();
+  sleepMS(50);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("socket = new TcpSocket();\n"
+                      "socket.connect('localhost', 1234);");
+  sleepMS(250);
+  BOOST_CHECK_EQUAL(listener.getConnectionCount(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(testSocketConnectFailure) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new SocketScriptContextExtension();
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("socket = new TcpSocket();\n"
+  "socket.connect('localhost', 1234);");
+  sleepMS(250);
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
