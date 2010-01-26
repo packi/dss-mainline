@@ -144,6 +144,40 @@ BOOST_AUTO_TEST_CASE(testSets) {
   BOOST_CHECK_EQUAL(0, length);
 } // testSets
 
+BOOST_AUTO_TEST_CASE(testSetTags) {
+  Apartment apt(NULL);
+  PropertySystem propSys;
+  apt.setPropertySystem(&propSys);
+
+  DSMeter& meter = apt.allocateDSMeter(dsid_t(0,10));
+  meter.setBusID(1);
+
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.addTag("dev1");
+  dev1.addTag("device");
+  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2.addTag("dev2");
+  dev2.addTag("device");
+
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ModelScriptContextExtension* ext = new ModelScriptContextExtension(apt);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  int length = ctx->evaluate<int>("var devs = getDevices().byTag('dev1'); devs.length()");
+  BOOST_CHECK_EQUAL(length, 1);
+
+  length = ctx->evaluate<int>("var devs = getDevices().byTag('dev2'); devs.length()");
+  BOOST_CHECK_EQUAL(length, 1);
+
+  length = ctx->evaluate<int>("var devs = getDevices().byTag('device'); devs.length()");
+  BOOST_CHECK_EQUAL(length, 2);
+
+  length = ctx->evaluate<int>("var devs = getDevices().byTag('nonexisting'); devs.length()");
+  BOOST_CHECK_EQUAL(length, 0);
+}
+
 BOOST_AUTO_TEST_CASE(testDevices) {
   Apartment apt(NULL);
 

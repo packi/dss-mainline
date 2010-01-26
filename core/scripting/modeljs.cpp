@@ -349,6 +349,25 @@ namespace dss {
     return JS_FALSE;
   } // set_by_presence
 
+  JSBool set_by_tag(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if((ext != NULL) && (set != NULL) && (argc >= 1)) {
+      try {
+        std::string tagName = ctx->convertTo<std::string>(argv[0]);
+        Set result = set->getByTag(tagName);
+        JSObject* resultObj = ext->createJSSet(*ctx, result);
+        *rval = OBJECT_TO_JSVAL(resultObj);
+        return JS_TRUE;
+      } catch(ScriptException& e) {
+        Logger::getInstance()->log(std::string("JS: set_by_tag: ") + e.what(), lsWarning);
+      }
+    }
+    return JS_FALSE;
+  } // set_by_tag
+
   JSBool set_JSGet(JSContext *cx, JSObject *obj, jsval id, jsval *rval) {
     Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
 
@@ -381,6 +400,7 @@ namespace dss {
     {"byDSMeter", set_by_dsmeter, 1, 0, 0},
     {"byGroup", set_by_group, 1, 0, 0},
     {"byPresence", set_by_presence, 1, 0, 0},
+    {"byTag", set_by_tag, 1, 0, 0},
     {NULL},
   };
 
