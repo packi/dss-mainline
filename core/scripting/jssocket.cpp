@@ -22,46 +22,16 @@
 
 #include "jssocket.h"
 
-#include "core/thread.h"
-
 #include <boost/noncopyable.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/thread.hpp>
 
 using boost::asio::ip::tcp;
 
 namespace dss {
 
-
-  //================================================== BoostIORunner
-
-  class BoostIORunner : private boost::noncopyable,
-                        public Thread {
-  public:
-    virtual void execute() {
-      while(!m_Terminated) {
-        m_IOService.run();
-      }
-    }
-
-    boost::asio::io_service& getIOService() {
-      return m_IOService;
-    }
-
-    static BoostIORunner& getInstance() {
-      if(m_pInstance == NULL) {
-        m_pInstance = new BoostIORunner();
-      }
-      return *m_pInstance;
-    }
-  private:
-    static BoostIORunner* m_pInstance;
-    boost::asio::io_service m_IOService;
-    BoostIORunner() : Thread("BoostIORunner") {}
-  };
-
-  BoostIORunner* BoostIORunner::m_pInstance = NULL;
 
   //================================================== SocketHelper
 
@@ -79,13 +49,16 @@ namespace dss {
   public:
     SocketHelperSendOneShot(SocketScriptContextExtension& _extension)
     : SocketHelper(_extension),
-      m_Socket(BoostIORunner::getInstance().getIOService()),
-      m_IOService(BoostIORunner::getInstance().getIOService())
+      m_IOService(),
+      m_Socket(m_IOService)
     {
     }
-    
+
+    ~SocketHelperSendOneShot() {
+      m_IOServiceThread.join();
+    }
+
     void sendTo(const std::string& _host, int _port, const std::string& _data) {
-      Logger::getInstance()->log("sendTo");
       m_Data = _data;
       tcp::resolver resolver(m_IOService);
       tcp::resolver::query query(_host, intToString(_port));
@@ -95,6 +68,7 @@ namespace dss {
       m_Socket.async_connect(endpoint,
           boost::bind(&SocketHelperSendOneShot::handle_connect, this,
             boost::asio::placeholders::error, ++iterator));
+      m_IOServiceThread = boost::thread(boost::bind(&boost::asio::io_service::run, &m_IOService));
     }
 
     void write()
@@ -135,9 +109,10 @@ namespace dss {
       m_Socket.close();
     }
   private:
+    boost::asio::io_service m_IOService;
     tcp::socket m_Socket;
-    boost::asio::io_service& m_IOService;
     std::string m_Data;
+    boost::thread m_IOServiceThread;
   }; // SocketHelperOneShot
 
   //================================================== SocketScriptContextExtension
@@ -190,9 +165,6 @@ namespace dss {
 
         helper->sendTo(host, port, data);
 
-        if(!BoostIORunner::getInstance().isRunning()) {
-          BoostIORunner::getInstance().run();
-        }
         *rval = JSVAL_TRUE;
         return JS_TRUE;
       } catch(const ScriptException& e) {

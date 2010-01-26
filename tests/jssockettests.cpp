@@ -29,8 +29,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
-
-#include "core/thread.h"
+#include <boost/thread.hpp>
 
 using namespace std;
 using namespace dss;
@@ -38,40 +37,62 @@ using boost::asio::ip::tcp;
 
 BOOST_AUTO_TEST_SUITE(SocketJS)
 
-class TestListener : public Thread {
+class TestListener {
 public:
-  TestListener(int _port) 
-  : Thread("TestListener"),
-    m_IOService(),
+  TestListener(int _port)
+  : m_IOService(),
     m_Endpoint(tcp::v4(), _port),
-    m_Acceptor(m_IOService, m_Endpoint)
+    m_Acceptor(m_IOService),
+    m_RunsLeft(0)
   {
+    m_Acceptor.open(m_Endpoint.protocol());
+    m_Acceptor.set_option(tcp::acceptor::reuse_address(true));
+    m_Acceptor.bind(m_Endpoint);
+    m_Acceptor.listen();
     boost::shared_ptr<tcp::socket> sock(new tcp::socket(m_IOService));
     m_Acceptor.async_accept(*sock, boost::bind(&TestListener::handleConnection, this, sock));
   }
-  
-  virtual void execute() {
-    m_IOService.run();
+
+  void run() {
+    m_IOServiceThread = boost::thread(boost::bind(&boost::asio::io_service::run, &m_IOService));
   }
-  
-  std::string m_DataReceived;  
-  boost::asio::io_service m_IOService;
+
+  virtual ~TestListener() {
+    m_Acceptor.close();
+    m_IOServiceThread.join();
+    Logger::getInstance()->log("~TestListener");
+  }
+
+  void setRuns(const int _value) {
+    m_RunsLeft = _value;
+  }
+
+  std::string m_DataReceived;
 private:
-  
+
   void handleConnection(boost::shared_ptr<tcp::socket> _sock) {
     char data[100];
     boost::system::error_code error;
     size_t length = _sock->read_some(boost::asio::buffer(data), error);
     if(error == boost::asio::error::eof) {
-      return; 
+      return;
     } else if(!error) {
       m_DataReceived.append(data, length);
+      Logger::getInstance()->log("Got data");
     }
     _sock->close();
+    if(m_RunsLeft > 0) {
+      m_RunsLeft--;
+      boost::shared_ptr<tcp::socket> sock(new tcp::socket(m_IOService));
+      m_Acceptor.async_accept(*sock, boost::bind(&TestListener::handleConnection, this, sock));
+    }
   }
-  
+
+  boost::asio::io_service m_IOService;
   tcp::endpoint m_Endpoint;
   tcp::acceptor m_Acceptor;
+  int m_RunsLeft;
+  boost::thread m_IOServiceThread;
 };
 
 BOOST_AUTO_TEST_CASE(testBasics) {
@@ -79,14 +100,37 @@ BOOST_AUTO_TEST_CASE(testBasics) {
   env->initialize();
   ScriptExtension* ext = new SocketScriptContextExtension();
   env->addExtension(ext);
-  
+
   TestListener listener(1234);
   listener.run();
+  sleepMS(50);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("TcpSocket.sendTo('127.0.0.1', 1234, 'hello');");
   sleepMS(250);
   BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
-}
+} // testBasics
+
+BOOST_AUTO_TEST_CASE(testRepeatability) {
+  const int kRuns = 3;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new SocketScriptContextExtension();
+  env->addExtension(ext);
+
+  TestListener listener(1234);
+  listener.setRuns(kRuns);
+  listener.run();
+  sleepMS(50);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  for(int iRun = 0; iRun < kRuns; iRun++) {
+    ctx->evaluate<void>("TcpSocket.sendTo('127.0.0.1', 1234, 'hello');");
+    sleepMS(250);
+    BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
+    listener.m_DataReceived.clear();
+  }
+} // testRepeatbility
+
 
 BOOST_AUTO_TEST_SUITE_END()
