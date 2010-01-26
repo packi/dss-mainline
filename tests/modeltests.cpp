@@ -125,6 +125,38 @@ BOOST_AUTO_TEST_CASE(testSetRemoveDevice) {
   BOOST_CHECK_EQUAL(set.get(0).getDevice(), dev2);
 } // testSetRemoveDevice
 
+BOOST_AUTO_TEST_CASE(testSetTags) {
+  Apartment apt(NULL);
+  PropertySystem propSys;
+  apt.setPropertySystem(&propSys);
+
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.addTag("dev1");
+  dev1.addTag("device");
+
+  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2.addTag("dev2");
+  dev2.addTag("device");
+
+  Set set = apt.getDevices();
+
+  Set subset = set.getByTag("dev1");
+  BOOST_CHECK_EQUAL(subset.length(), 1);
+  BOOST_CHECK_EQUAL(subset[0].getDevice(), dev1);
+
+  subset = set.getByTag("dev2");
+  BOOST_CHECK_EQUAL(subset.length(), 1);
+  BOOST_CHECK_EQUAL(subset[0].getDevice(), dev2);
+
+  subset = set.getByTag("device");
+  BOOST_CHECK_EQUAL(subset.length(), 2);
+  BOOST_CHECK_EQUAL(subset[0].getDevice(), dev1);
+  BOOST_CHECK_EQUAL(subset[1].getDevice(), dev2);
+
+  subset = set.getByTag("nonexisting");
+  BOOST_CHECK_EQUAL(subset.length(), 0);
+} // testSetTags
+
 BOOST_AUTO_TEST_CASE(testDeviceLastKnownDSMeterDSIDWorks) {
   Apartment apt(NULL);
 

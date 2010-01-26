@@ -287,7 +287,7 @@ namespace dss {
     return m_pApartment->getDeviceBusInterface()->getSensorValue(*this,_sensorID);
   } // getSensorValue
 
-  bool Device::hasTag(const std::string& _tagName) {
+  bool Device::hasTag(const std::string& _tagName) const {
     if(m_TagsNode != NULL) {
       return m_TagsNode->getPropertyByName(_tagName) != NULL;
     }

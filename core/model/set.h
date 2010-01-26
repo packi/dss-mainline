@@ -31,7 +31,7 @@ namespace dss {
   class Device;
   class Group;
   class DSMeter;
-  
+
   /** Abstract interface to select certain Devices from a set */
   class IDeviceSelector {
   public:
@@ -48,7 +48,7 @@ namespace dss {
     virtual bool perform(Device& _device) = 0;
     virtual ~IDeviceAction() {}
   };
-  
+
   /** A set holds an arbitrary list of devices.
     * A Command sent to an instance of this class will replicate the command to all
     * contained devices.
@@ -107,6 +107,8 @@ namespace dss {
     /** Returns a subset that contains all devices that have the presence state of \a _present */
     Set getByPresence(const bool _present) const;
 
+    Set getByTag(const std::string& _tagName) const;
+
     /** Returns the device indicated by _name
      */
     DeviceReference getByName(const std::string& _name) const;
@@ -162,7 +164,7 @@ namespace dss {
     virtual std::vector<AddressableModelItem*> splitIntoAddressableItems();
   }; // Set
 
-  
+
 } // namespace dss
 
 #endif // SET_H

@@ -173,7 +173,7 @@ namespace dss {
      * @see DSS::getPropertySystem */
     void publishToPropertyTree();
 
-    bool hasTag(const std::string& _tagName);
+    bool hasTag(const std::string& _tagName) const;
     void addTag(const std::string& _tagName);
     void removeTag(const std::string& _tagName);
 

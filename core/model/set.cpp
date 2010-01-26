@@ -25,7 +25,7 @@
 #include <stdexcept>
 // hash_map,map used by SetSplitter
 #include <map>
-#ifndef WIN32 
+#ifndef WIN32
 #include <ext/hash_map>
 #else
 #include <hash_map>
@@ -185,6 +185,16 @@ namespace dss {
     }
     return result;
   } // getByPresence
+
+  Set Set::getByTag(const std::string& _tagName) const {
+    Set result;
+    foreach(const DeviceReference& dev, m_ContainedDevices) {
+      if(dev.getDevice().hasTag(_tagName)) {
+        result.addDevice(dev);
+      }
+    }
+    return result;
+  } // getByTag
 
   class ByNameSelector : public IDeviceSelector {
   private:
