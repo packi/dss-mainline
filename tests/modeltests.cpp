@@ -523,6 +523,37 @@ BOOST_AUTO_TEST_CASE(testSetBuilderDeviceByName) {
   BOOST_CHECK_EQUAL(res.get(0).getDevice().getName(), std::string("dev2"));
 } // testSetBuilder
 
+BOOST_AUTO_TEST_CASE(testSetBuilderTag) {
+  Apartment apt(NULL);
+  PropertySystem propSys;
+  apt.setPropertySystem(&propSys);
+
+  SetBuilder setBuilder(apt);
+
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.addTag("dev1");
+  dev1.addTag("device");
+  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2.addTag("dev2");
+  dev2.addTag("device");
+
+  Set result = setBuilder.buildSet(".tag('dev1')", NULL);
+  BOOST_CHECK_EQUAL(result.length(), 1);
+  BOOST_CHECK_EQUAL(result[0].getDevice(), dev1);
+
+  result = setBuilder.buildSet(".tag('dev2')", NULL);
+  BOOST_CHECK_EQUAL(result.length(), 1);
+  BOOST_CHECK_EQUAL(result[0].getDevice(), dev2);
+
+  result = setBuilder.buildSet(".tag('device')", NULL);
+  BOOST_CHECK_EQUAL(result.length(), 2);
+  BOOST_CHECK_EQUAL(result[0].getDevice(), dev1);
+  BOOST_CHECK_EQUAL(result[1].getDevice(), dev2);
+
+  result = setBuilder.buildSet(".tag('nonexisting')", NULL);
+  BOOST_CHECK_EQUAL(result.length(), 0);
+} // testSetBuilderTag
+
 BOOST_AUTO_TEST_CASE(testRemoval) {
   Apartment apt(NULL);
 

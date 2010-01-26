@@ -111,6 +111,9 @@ namespace dss {
     } else if(_functionName == "fid") {
       int fid = readInt(_index);
       result = _set.getByFunctionID(fid);
+    } else if(_functionName == "tag") {
+      std::string tagName = readString(_index);
+      result = _set.getByTag(tagName);
     } else if(_functionName == "add") {
       Set inner = parseSet(_index, _zone.getDevices(), _zone);
       result = _set.combine(inner);
