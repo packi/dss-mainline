@@ -115,7 +115,23 @@ namespace dss {
       m_Socket.async_connect(endpoint,
                              boost::bind(&SocketHelperInstance::connectionCallback, this,
                                          boost::asio::placeholders::error, ++iterator));
-                                         startIOThread();
+      startIOThread();
+    }
+
+    void send(const std::string& _data) {
+      m_Data = _data;
+      boost::asio::async_write(m_Socket,
+                               boost::asio::buffer(m_Data.c_str(),
+                                                   m_Data.size()),
+                               boost::bind(&SocketHelperInstance::sendCallback,
+                                           this,
+                                           boost::asio::placeholders::error,
+                                           boost::asio::placeholders::bytes_transferred));
+      startIOThread();
+    }
+
+    bool isConnected() {
+      return m_Socket.is_open();
     }
   private:
     void connectionCallback(const boost::system::error_code& error,
@@ -130,6 +146,18 @@ namespace dss {
                                            boost::asio::placeholders::error, ++endpoint_iterator));
       } else {
         Logger::getInstance()->log("SocketHelperInstance::connectionCallback: failed: " + error.message());
+        failure();
+      }
+    } // connectionCallback
+
+    void sendCallback(const boost::system::error_code& error, std::size_t bytesTransfered) {
+      if(!error) {
+        if(bytesTransfered == m_Data.size()) {
+          m_Data.clear();
+          success();
+        }
+      } else {
+        Logger::getInstance()->log("SocketHelperInstance::sendCallback: error: " + error.message());
         failure();
       }
     }
@@ -149,6 +177,7 @@ namespace dss {
     }
   private:
     tcp::socket m_Socket;
+    std::string m_Data;
   }; // SocketHelperInstance
 
   class SocketHelperSendOneShot : public SocketHelper,
@@ -278,9 +307,39 @@ namespace dss {
     return JS_FALSE;
   } // tcpSocket_connect
 
+  JSBool tcpSocket_send(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
+    assert(pInst != NULL);
+    if(pInst->isConnected()) {
+      if(argc >= 1) {
+        try {
+          std::string data = ctx->convertTo<std::string>(argv[0]);
+
+          pInst->setContext(ctx);
+
+          // check if we've been given a callback
+          if(argc >= 2) {
+            boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(obj, *ctx));
+            pInst->setCallbackObject(scriptObj);
+            pInst->setCallbackFunction(argv[1]);
+          }
+
+          pInst->send(data);
+          *rval = JSVAL_TRUE;
+          return JS_TRUE;
+        } catch(const ScriptException& e) {
+          Logger::getInstance()->log(std::string("tcpSocket_send: Caught script exception: ") + e.what());
+        }
+      }
+    } else {
+      Logger::getInstance()->log("tcpSocket_send: not connected, please call connect first", lsError);
+    }
+    return JS_FALSE;
+  } // tcpSocket_send
 
   JSFunctionSpec tcpSocket_methods[] = {
-  //  {"send", tcpSocket_send, 2, 0, 0},
+    {"send", tcpSocket_send, 2, 0, 0},
     {"connect", tcpSocket_connect, 3, 0, 0},
   //  {"receive", tcpSocket_receive, 2, 0, 0},
   //  {"bind", tcpSocket_bind, 2, 0, 0},

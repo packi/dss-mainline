@@ -110,7 +110,7 @@ private:
   int m_ConnectionCount;
 };
 
-BOOST_AUTO_TEST_CASE(testBasics) {
+BOOST_AUTO_TEST_CASE(testTcpSocketSendTo) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
   ScriptExtension* ext = new SocketScriptContextExtension();
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(testBasics) {
   BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
 } // testBasics
 
-BOOST_AUTO_TEST_CASE(testRepeatability) {
+BOOST_AUTO_TEST_CASE(testTcpSocketSendToRepeatability) {
   const int kRuns = 3;
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
@@ -208,6 +208,29 @@ BOOST_AUTO_TEST_CASE(testSocketConnectFailure) {
   "socket.connect('localhost', 1234);");
   sleepMS(250);
 }
+
+BOOST_AUTO_TEST_CASE(testSocketSend) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new SocketScriptContextExtension();
+  env->addExtension(ext);
+
+  TestListener listener(1234);
+  listener.run();
+  sleepMS(50);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("socket = new TcpSocket();\n"
+                      "socket.connect('localhost', 1234,\n"
+                      "      function(success) {\n"
+                      "        if(success) {\n"
+                      "          socket.send('hello');\n"
+                      "        }\n"
+                      "      }\n"
+                      ");");
+  sleepMS(250);
+  BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
+} // testSocketSend
 
 
 BOOST_AUTO_TEST_SUITE_END()
