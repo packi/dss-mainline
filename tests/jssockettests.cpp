@@ -24,12 +24,13 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include "core/scripting/jssocket.h"
-
 #include <boost/scoped_ptr.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
+
+#include "core/scripting/jssocket.h"
+#include "core/foreach.h"
 
 using namespace std;
 using namespace dss;
@@ -132,5 +133,36 @@ BOOST_AUTO_TEST_CASE(testRepeatability) {
   }
 } // testRepeatbility
 
+BOOST_AUTO_TEST_CASE(testSendSocketCallback) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new SocketScriptContextExtension();
+  env->addExtension(ext);
+
+  std::vector<std::string> testScripts;
+  testScripts.push_back("TcpSocket.sendTo('127.0.0.1', 1234, 'hello', function(success) { callCount++; });");
+  testScripts.push_back("TcpSocket.sendTo('127.0.0.1', 1234, 'hello', function() { callCount++; });");
+  testScripts.push_back("TcpSocket.sendTo('127.0.0.1', 1234, 'hello', function(success, otherstuff) { callCount++; });");
+
+  TestListener listener(1234);
+  listener.setRuns(testScripts.size());
+  listener.run();
+  sleepMS(50);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->getRootObject().setProperty<int>("callCount", 0);
+  int callCount = 0;
+
+  foreach(std::string testScript, testScripts) {
+    callCount++;
+    ctx->evaluate<void>(testScript);
+    sleepMS(250);
+    BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
+    int newCount = ctx->getRootObject().getProperty<int>("callCount");
+    BOOST_CHECK_EQUAL(newCount, callCount);
+    callCount = newCount;
+    listener.m_DataReceived.clear();
+  }
+} // testSendSocketCallback
 
 BOOST_AUTO_TEST_SUITE_END()

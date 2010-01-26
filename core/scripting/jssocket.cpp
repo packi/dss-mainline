@@ -38,29 +38,83 @@ namespace dss {
   class SocketHelper {
   public:
     SocketHelper(SocketScriptContextExtension& _extension)
-    : m_Extension(_extension)
+    : m_Extension(_extension),
+      m_IOService()
     { }
+
+    ~SocketHelper() {
+      m_IOServiceThread.join();
+    }
+
+    void setContext(ScriptContext* _value) {
+      m_pContext = _value;
+    }
+
+    void setCallbackObject(boost::shared_ptr<ScriptObject> _value) {
+      m_pCallbackObject = _value;
+    }
+
+    void setCallbackFunction(jsval _value) {
+      m_CallbackFunction = _value;
+    }
+
+    bool hasCallback() const {
+      return m_pCallbackObject != NULL;
+    }
+
+    void callCallbackWithArguments(ScriptFunctionParameterList& _list) {
+      if(hasCallback()) {
+        try {
+          m_pCallbackObject->callFunctionByReference<void>(m_CallbackFunction, _list);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(
+               std::string("SocketHelper::callCallbackWithArguments: Exception caught: ")
+               + e.what(), lsError);
+        }
+        m_pCallbackObject.reset();
+      }
+    }
+
+    ScriptContext& getContext() const {
+      assert(m_pContext != NULL);
+      return *m_pContext;
+    }
+
+    void startIOThread() {
+      m_IOServiceThread = boost::thread(boost::bind(&boost::asio::io_service::run, &m_IOService));
+    }
+
+    boost::asio::io_service& getIOService() {
+      return m_IOService;
+    }
+
   protected:
     SocketScriptContextExtension& m_Extension;
+  private:
+    boost::asio::io_service m_IOService;
+    boost::thread m_IOServiceThread;
+    ScriptContext* m_pContext;
+    boost::shared_ptr<ScriptObject> m_pCallbackObject;
+    jsval m_CallbackFunction;
   }; // SocketHelper
+
+  class SocketHelperInstance : public SocketHelper,
+                               public boost::enable_shared_from_this<SocketHelperInstance> {
+  public:
+  }; // SocketHelperInstance
 
   class SocketHelperSendOneShot : public SocketHelper,
                                   public boost::enable_shared_from_this<SocketHelperSendOneShot> {
   public:
     SocketHelperSendOneShot(SocketScriptContextExtension& _extension)
     : SocketHelper(_extension),
-      m_IOService(),
-      m_Socket(m_IOService)
+      m_Socket(getIOService())
     {
-    }
-
-    ~SocketHelperSendOneShot() {
-      m_IOServiceThread.join();
     }
 
     void sendTo(const std::string& _host, int _port, const std::string& _data) {
       m_Data = _data;
-      tcp::resolver resolver(m_IOService);
+      tcp::resolver resolver(getIOService());
       tcp::resolver::query query(_host, intToString(_port));
       tcp::resolver::iterator iterator = resolver.resolve(query);
 
@@ -68,7 +122,7 @@ namespace dss {
       m_Socket.async_connect(endpoint,
           boost::bind(&SocketHelperSendOneShot::handle_connect, this,
             boost::asio::placeholders::error, ++iterator));
-      m_IOServiceThread = boost::thread(boost::bind(&boost::asio::io_service::run, &m_IOService));
+      startIOThread();
     }
 
     void write()
@@ -85,7 +139,7 @@ namespace dss {
         tcp::resolver::iterator endpoint_iterator)
     {
       if (!error) {
-        m_IOService.post(boost::bind(&SocketHelperSendOneShot::write, this));
+        getIOService().post(boost::bind(&SocketHelperSendOneShot::write, this));
       } else if (endpoint_iterator != tcp::resolver::iterator()) {
         m_Socket.close();
         tcp::endpoint endpoint = *endpoint_iterator;
@@ -96,10 +150,13 @@ namespace dss {
     }
 
     void handle_write(const boost::system::error_code& error) {
-      if(!error) {
-        // call js callback(true)
-      } else {
-        // call js callback(false)
+      if(hasCallback()) {
+        ScriptFunctionParameterList params(getContext());
+        params.add<bool>(!error);
+        callCallbackWithArguments(params);
+        if(error) {
+          Logger::getInstance()->log("SocketHelperSendOneShot::handle_write: " + error.message());
+        }
       }
       do_close();
       m_Extension.removeSocketHelper(shared_from_this());
@@ -109,10 +166,8 @@ namespace dss {
       m_Socket.close();
     }
   private:
-    boost::asio::io_service m_IOService;
     tcp::socket m_Socket;
     std::string m_Data;
-    boost::thread m_IOServiceThread;
   }; // SocketHelperOneShot
 
   //================================================== SocketScriptContextExtension
@@ -162,12 +217,21 @@ namespace dss {
 
         boost::shared_ptr<SocketHelperSendOneShot> helper(new SocketHelperSendOneShot(*ext));
         ext->addSocketHelper(helper);
+        helper->setContext(ctx);
+
+        // check if we've been given a callback
+        if(argc > 3) {
+          boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(obj, *ctx));
+          helper->setCallbackObject(scriptObj);
+          helper->setCallbackFunction(argv[3]);
+        }
 
         helper->sendTo(host, port, data);
 
         *rval = JSVAL_TRUE;
         return JS_TRUE;
       } catch(const ScriptException& e) {
+        Logger::getInstance()->log(std::string("tcpSocket_sendTo: Caught script exception: ") + e.what());
       }
     }
     return JS_FALSE;
