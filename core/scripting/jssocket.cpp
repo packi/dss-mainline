@@ -65,16 +65,21 @@ namespace dss {
 
     void callCallbackWithArguments(ScriptFunctionParameterList& _list) {
       if(hasCallback()) {
+        // copy callback data so we can clear the originals
+        boost::shared_ptr<ScriptObject> pCallbackObjectCopy = m_pCallbackObject;
+        jsval callbackFunctionCopy = m_CallbackFunction;
+        // clear callback objects before calling the callback, we might overwrite
+        // data if we do that afterwards
+        m_pCallbackObject.reset();
+        m_CallbackFunction = JSVAL_NULL;
         try {
-          m_pCallbackObject->callFunctionByReference<void>(m_CallbackFunction, _list);
+          pCallbackObjectCopy->callFunctionByReference<void>(callbackFunctionCopy, _list);
         } catch(ScriptException& e) {
           Logger::getInstance()->log(
                std::string("SocketHelper::callCallbackWithArguments: Exception caught: ")
                + e.what(), lsError);
         }
       }
-      m_pCallbackObject.reset();
-      m_CallbackFunction = JSVAL_NULL;
     }
 
     ScriptContext& getContext() const {
