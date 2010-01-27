@@ -130,6 +130,10 @@ namespace dss {
       startIOThread();
     }
 
+    void close() {
+      m_Socket.close();
+    }
+
     bool isConnected() {
       return m_Socket.is_open();
     }
@@ -338,13 +342,21 @@ namespace dss {
     return JS_FALSE;
   } // tcpSocket_send
 
+  JSBool tcpSocket_close(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
+    assert(pInst != NULL);
+    pInst->close();
+    *rval = JSVAL_TRUE;
+    return JS_TRUE;
+  } // tcpSocket_connect
+
   JSFunctionSpec tcpSocket_methods[] = {
     {"send", tcpSocket_send, 2, 0, 0},
     {"connect", tcpSocket_connect, 3, 0, 0},
   //  {"receive", tcpSocket_receive, 2, 0, 0},
   //  {"bind", tcpSocket_bind, 2, 0, 0},
   //  {"accept", tcpSocket_send, 1, 0, 0},
-  //  {"close", tcpSocket_close, 0, 0, 0},
+    {"close", tcpSocket_close, 0, 0, 0},
     {NULL, NULL, 0, 0, 0},
   }; // tcpSockets_methods
 

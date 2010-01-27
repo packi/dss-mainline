@@ -232,5 +232,28 @@ BOOST_AUTO_TEST_CASE(testSocketSend) {
   BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
 } // testSocketSend
 
+BOOST_AUTO_TEST_CASE(testSocketClose) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new SocketScriptContextExtension();
+  env->addExtension(ext);
+
+  TestListener listener(1234);
+  listener.run();
+  sleepMS(50);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("socket = new TcpSocket();\n"
+                      "socket.connect('localhost', 1234,\n"
+                      "      function(success) {\n"
+                      "        if(success) {\n"
+                      "          socket.send('hello');\n"
+                      "          socket.close();\n"
+                      "        }\n"
+                      "      }\n"
+                      ");");
+  sleepMS(250);
+  BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
+} // testSocketClose
 
 BOOST_AUTO_TEST_SUITE_END()
