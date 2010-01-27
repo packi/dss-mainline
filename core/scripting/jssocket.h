@@ -40,8 +40,6 @@ namespace dss {
     virtual void extendContext(ScriptContext& _context);
     void removeSocketHelper(boost::shared_ptr<SocketHelper> _helper);
     void addSocketHelper(boost::shared_ptr<SocketHelper> _helper);
-
-//    JSObject* createJSSocket(ScriptContext& _ctx);
   private:
     Mutex m_SocketHelperMutex;
     typedef std::vector<boost::shared_ptr<SocketHelper> > SocketHelperVector;
