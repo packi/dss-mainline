@@ -482,7 +482,7 @@ namespace dss {
       log("GetZoneID");
       int16_t tempResult = int16_t(receiveSingleResult16(cmdFrame, FunctionDSMeterGetZoneIdForInd));
       // TODO: The following line is a workaround as described in #246
-      if((tempResult < 0) && (tempResult > -20)) {
+      if((tempResult <= 0) && (tempResult > -20)) {
         log("GetZones: Negative zone id " + intToString(tempResult) + " received. DSMeter: " + intToString(_dsMeterID) + " index: " + intToString(iZone), lsError);
         // TODO: take this line outside the if-clause after the dSM-API has been reworked
         checkResultCode(tempResult);
