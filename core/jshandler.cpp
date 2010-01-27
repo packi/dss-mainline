@@ -490,6 +490,11 @@ namespace dss {
   } // setProperty<const char*>
 
   template<>
+  void ScriptObject::setProperty(const std::string& _name, bool _value) {
+    doSetProperty(_name, _value ? JSVAL_TRUE : JSVAL_FALSE);
+  }
+
+  template<>
   void ScriptObject::setProperty(const std::string& _name, int _value) {
     jsval val;
     if(!JS_NewNumberValue(m_Context.getJSContext(), _value, &val)) {
