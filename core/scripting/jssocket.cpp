@@ -39,7 +39,8 @@ namespace dss {
   public:
     SocketHelper(SocketScriptContextExtension& _extension)
     : m_Extension(_extension),
-      m_IOService()
+      m_IOService(),
+      m_CallbackFunction(JSVAL_NULL)
     { }
 
     ~SocketHelper() {
@@ -59,7 +60,7 @@ namespace dss {
     }
 
     bool hasCallback() const {
-      return m_pCallbackObject != NULL;
+      return (m_pCallbackObject != NULL) && (m_CallbackFunction != JSVAL_NULL);
     }
 
     void callCallbackWithArguments(ScriptFunctionParameterList& _list) {
@@ -71,8 +72,9 @@ namespace dss {
                std::string("SocketHelper::callCallbackWithArguments: Exception caught: ")
                + e.what(), lsError);
         }
-        m_pCallbackObject.reset();
       }
+      m_pCallbackObject.reset();
+      m_CallbackFunction = JSVAL_NULL;
     }
 
     ScriptContext& getContext() const {
@@ -158,11 +160,11 @@ namespace dss {
       if(!error) {
         if(bytesTransfered == m_Data.size()) {
           m_Data.clear();
-          success();
+          callSizeCallback(bytesTransfered);
         }
       } else {
         Logger::getInstance()->log("SocketHelperInstance::sendCallback: error: " + error.message());
-        failure();
+        callSizeCallback(-1);
       }
     }
 
@@ -177,6 +179,12 @@ namespace dss {
     void callCallback(bool _result) {
       ScriptFunctionParameterList param(getContext());
       param.add<bool>(_result);
+      callCallbackWithArguments(param);
+    }
+
+    void callSizeCallback(int _result) {
+      ScriptFunctionParameterList param(getContext());
+      param.add<int>(_result);
       callCallbackWithArguments(param);
     }
   private:

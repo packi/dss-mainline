@@ -46,14 +46,15 @@ public:
     m_Acceptor(m_IOService),
     m_RunsLeft(0),
     m_QuitAfterConnect(false),
-    m_ConnectionCount(0)
+    m_ConnectionCount(0),
+    m_Echo(false)
   {
     m_Acceptor.open(m_Endpoint.protocol());
     m_Acceptor.set_option(tcp::acceptor::reuse_address(true));
     m_Acceptor.bind(m_Endpoint);
     m_Acceptor.listen();
-    boost::shared_ptr<tcp::socket> sock(new tcp::socket(m_IOService));
-    m_Acceptor.async_accept(*sock, boost::bind(&TestListener::handleConnection, this, sock));
+    m_Socket.reset(new tcp::socket(m_IOService));
+    m_Acceptor.async_accept(*m_Socket, boost::bind(&TestListener::handleConnection, this, m_Socket));
   }
 
   void run() {
@@ -78,27 +79,54 @@ public:
     return m_ConnectionCount;
   }
 
+  void setEcho(bool _value) {
+    m_Echo = _value;
+  }
+
   std::string m_DataReceived;
 private:
 
   void handleConnection(boost::shared_ptr<tcp::socket> _sock) {
     if(!m_QuitAfterConnect) {
-      char data[100];
       boost::system::error_code error;
-      size_t length = _sock->read_some(boost::asio::buffer(data), error);
+      size_t length = _sock->read_some(boost::asio::buffer(m_Data, kMaxDataLength), error);
       if(error == boost::asio::error::eof) {
         return;
       } else if(!error) {
-        m_DataReceived.append(data, length);
+        m_DataReceived.append(m_Data, length);
+        if(m_Echo) {
+          sendEcho(_sock, length);
+        }
       }
     }
-    m_ConnectionCount = 1;
-    _sock->close();
+    m_ConnectionCount++;
+    if(!m_Echo) {
+      nextConnection();
+    }
+  }
+
+  void nextConnection() {
+    m_Socket->close();
     if(m_RunsLeft > 0) {
       m_RunsLeft--;
-      boost::shared_ptr<tcp::socket> sock(new tcp::socket(m_IOService));
-      m_Acceptor.async_accept(*sock, boost::bind(&TestListener::handleConnection, this, sock));
+      m_Socket.reset(new tcp::socket(m_IOService));
+      m_Acceptor.async_accept(*m_Socket, boost::bind(&TestListener::handleConnection, this, m_Socket));
     }
+  } // nextConnection
+
+  void sendEcho(boost::shared_ptr<tcp::socket> _socket, int _length) {
+    boost::asio::async_write(
+      *_socket,
+      boost::asio::buffer(m_Data, _length),
+      boost::bind(&TestListener::handleWritten, this, _socket, boost::asio::placeholders::error)
+    );
+  }
+
+  void handleWritten(boost::shared_ptr<tcp::socket> _socket, const boost::system::error_code& _error) {
+    if(!_error) {
+    } else {
+    }
+    nextConnection();
   }
 
   boost::asio::io_service m_IOService;
@@ -108,6 +136,10 @@ private:
   boost::thread m_IOServiceThread;
   bool m_QuitAfterConnect;
   int m_ConnectionCount;
+  bool m_Echo;
+  enum { kMaxDataLength = 100 };
+  char m_Data[kMaxDataLength];
+  boost::shared_ptr<tcp::socket> m_Socket;
 };
 
 BOOST_AUTO_TEST_CASE(testTcpSocketSendTo) {
@@ -191,9 +223,13 @@ BOOST_AUTO_TEST_CASE(testSocketConnect) {
   sleepMS(50);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->getRootObject().setProperty<bool>("result", false);
   ctx->evaluate<void>("socket = new TcpSocket();\n"
-                      "socket.connect('localhost', 1234);");
+                      "socket.connect('localhost', 1234,\n"
+                      "  function(success) { result = success; }\n"
+                      ");");
   sleepMS(250);
+  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
   BOOST_CHECK_EQUAL(listener.getConnectionCount(), 1);
 }
 
@@ -204,9 +240,13 @@ BOOST_AUTO_TEST_CASE(testSocketConnectFailure) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->getRootObject().setProperty<bool>("result", true);
   ctx->evaluate<void>("socket = new TcpSocket();\n"
-  "socket.connect('localhost', 1234);");
+                      "socket.connect('localhost', 1234,\n"
+                      "  function(success) { result = success; }\n"
+                      ");");
   sleepMS(250);
+  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), false);
 }
 
 BOOST_AUTO_TEST_CASE(testSocketSend) {
@@ -218,18 +258,23 @@ BOOST_AUTO_TEST_CASE(testSocketSend) {
   TestListener listener(1234);
   listener.run();
   sleepMS(50);
-
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->getRootObject().setProperty<int>("bytesSent", 0);
   ctx->evaluate<void>("socket = new TcpSocket();\n"
                       "socket.connect('localhost', 1234,\n"
                       "      function(success) {\n"
                       "        if(success) {\n"
-                      "          socket.send('hello');\n"
+                      "          socket.send('hello',\n"
+                      "            function(sent) {\n"
+                      "              bytesSent = sent;\n"
+                      "            }\n"
+                      "          );\n"
                       "        }\n"
                       "      }\n"
                       ");");
   sleepMS(250);
   BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
+  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("bytesSent"), 5);
 } // testSocketSend
 
 BOOST_AUTO_TEST_CASE(testSocketClose) {
@@ -244,11 +289,13 @@ BOOST_AUTO_TEST_CASE(testSocketClose) {
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("socket = new TcpSocket();\n"
-                      "socket.connect('localhost', 1234,\n"
+                      "socket.connect('127.0.0.1', 1234,\n"
                       "      function(success) {\n"
                       "        if(success) {\n"
-                      "          socket.send('hello');\n"
-                      "          socket.close();\n"
+                      "          socket.send('hello', \n"
+                      "           function(bytesSent) {\n"
+                      "             socket.close();\n"
+                      "           });\n"
                       "        }\n"
                       "      }\n"
                       ");");
