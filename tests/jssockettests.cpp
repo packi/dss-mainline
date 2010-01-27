@@ -123,9 +123,6 @@ private:
   }
 
   void handleWritten(boost::shared_ptr<tcp::socket> _socket, const boost::system::error_code& _error) {
-    if(!_error) {
-    } else {
-    }
     nextConnection();
   }
 
@@ -302,5 +299,42 @@ BOOST_AUTO_TEST_CASE(testSocketClose) {
   sleepMS(250);
   BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
 } // testSocketClose
+
+BOOST_AUTO_TEST_CASE(testSocketReceive) {
+  std::string script =
+    "socket = new TcpSocket();\n"
+    "socket.connect('localhost', 1234,\n"
+    "  function(success) {\n"
+    "    if(success === true) {\n"
+    "      socket.send('hello world',\n"
+    "        function(bytesSent) {\n"
+    "          socket.receive(11,\n"
+    "            function(data) {\n"
+    "              print('received: ', data);\n"
+    "              result = data;\n"
+    "              socket.close();\n"
+    "            }\n"
+    "          );\n"
+    "        }\n"
+    "      );\n"
+    "    }\n"
+    "  }\n"
+    ");\n";
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new SocketScriptContextExtension();
+  env->addExtension(ext);
+
+  TestListener listener(1234);
+  listener.setEcho(true);
+  listener.run();
+  sleepMS(50);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->getRootObject().setProperty<const char*>("result", "");
+  ctx->evaluate<void>(script);
+  sleepMS(500);
+  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<std::string>("result"), "hello world");
+} // testSocketReceive
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -128,17 +128,33 @@ namespace dss {
     void send(const std::string& _data) {
       m_Data = _data;
       boost::asio::async_write(m_Socket,
-                               boost::asio::buffer(m_Data.c_str(),
-                                                   m_Data.size()),
-                               boost::bind(&SocketHelperInstance::sendCallback,
-                                           this,
-                                           boost::asio::placeholders::error,
-                                           boost::asio::placeholders::bytes_transferred));
+        boost::asio::buffer(
+          m_Data.c_str(),
+          m_Data.size()),
+        boost::bind(
+          &SocketHelperInstance::sendCallback,
+          this,
+          boost::asio::placeholders::error,
+          boost::asio::placeholders::bytes_transferred));
       startIOThread();
     }
 
     void close() {
       m_Socket.close();
+    }
+
+    void receive(const int _numberOfBytes) {
+      m_BytesToRead = std::min(_numberOfBytes, int(kMaxDataLength));
+      boost::asio::async_read(
+        m_Socket,
+        boost::asio::buffer(
+          m_DataBuffer,
+          m_BytesToRead),
+        boost::bind(&SocketHelperInstance::readCallback,
+                    this,
+                    boost::asio::placeholders::error,
+                    boost::asio::placeholders::bytes_transferred));
+      startIOThread();
     }
 
     bool isConnected() {
@@ -173,6 +189,19 @@ namespace dss {
       }
     }
 
+    void readCallback(const boost::system::error_code& error, std::size_t bytesTransfered) {
+      if(!error) {
+        if(bytesTransfered == m_BytesToRead) {
+          std::string result(m_DataBuffer, m_BytesToRead);
+          callDataCallback(result);
+          m_BytesToRead = 0;
+        }
+      } else {
+        Logger::getInstance()->log("SocketHelperInstance::readCallback: error: " + error.message());
+        callDataCallback("");
+      }
+    }
+
     void success() {
       callCallback(true);
     }
@@ -192,9 +221,18 @@ namespace dss {
       param.add<int>(_result);
       callCallbackWithArguments(param);
     }
+
+    void callDataCallback(const std::string& _result) {
+      ScriptFunctionParameterList param(getContext());
+      param.add<std::string>(_result);
+      callCallbackWithArguments(param);
+    }
   private:
     tcp::socket m_Socket;
     std::string m_Data;
+    enum { kMaxDataLength = 1024 };
+    char m_DataBuffer[kMaxDataLength];
+    std::size_t m_BytesToRead;
   }; // SocketHelperInstance
 
   class SocketHelperSendOneShot : public SocketHelper,
@@ -355,6 +393,37 @@ namespace dss {
     return JS_FALSE;
   } // tcpSocket_send
 
+  JSBool tcpSocket_receive(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
+    assert(pInst != NULL);
+    if(pInst->isConnected()) {
+      if(argc >= 1) {
+        try {
+          int size = ctx->convertTo<int>(argv[0]);
+
+          pInst->setContext(ctx);
+
+          // check if we've been given a callback
+          if(argc >= 2) {
+            boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(obj, *ctx));
+            pInst->setCallbackObject(scriptObj);
+            pInst->setCallbackFunction(argv[1]);
+          }
+
+          pInst->receive(size);
+          *rval = JSVAL_TRUE;
+          return JS_TRUE;
+        } catch(const ScriptException& e) {
+          Logger::getInstance()->log(std::string("tcpSocket_receive: Caught script exception: ") + e.what());
+        }
+      }
+    } else {
+      Logger::getInstance()->log("tcpSocket_receive: not connected, please call connect first", lsError);
+    }
+    return JS_FALSE;
+  } // tcpSocket_receive
+
   JSBool tcpSocket_close(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
     assert(pInst != NULL);
@@ -366,7 +435,7 @@ namespace dss {
   JSFunctionSpec tcpSocket_methods[] = {
     {"send", tcpSocket_send, 2, 0, 0},
     {"connect", tcpSocket_connect, 3, 0, 0},
-  //  {"receive", tcpSocket_receive, 2, 0, 0},
+    {"receive", tcpSocket_receive, 2, 0, 0},
   //  {"bind", tcpSocket_bind, 2, 0, 0},
   //  {"accept", tcpSocket_send, 1, 0, 0},
     {"close", tcpSocket_close, 0, 0, 0},
