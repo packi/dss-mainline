@@ -57,52 +57,19 @@ namespace dss {
       if(!m_IncomingFrames.empty() || m_PacketHere.waitFor(50)) {
         while(!m_IncomingFrames.empty()) {
           m_IncomingFramesGuard.lock();
-          // process packets and put them into a functionID-hash
           boost::shared_ptr<DS485CommandFrame> frame = m_IncomingFrames.front();
           m_IncomingFrames.erase(m_IncomingFrames.begin());
           m_IncomingFramesGuard.unlock();
           log("R");
 
-          const std::vector<unsigned char>& ch = frame->getPayload().toChar();
-          if(ch.size() < 1) {
+          if(frame->getPayload().size() < 1) {
             log("received Command Frame w/o function identifier", lsFatal);
             continue;
           }
 
-          uint8_t functionID = ch.front();
-          std::string functionIDStr = FunctionIDToString(functionID);
-          if(functionIDStr.empty()) {
-            functionIDStr = "Function id: " + intToString(functionID, true);
-          }
-          std::ostringstream sstream;
-          switch (frame->getCommand()) {
-          case CommandResponse:
-            sstream << "Got response: ";
-            break;
-          case CommandRequest:
-            sstream << "Got request : ";
-            break;
-          case CommandEvent:
-            sstream << "Got event   : ";
-            break;
-          }
-          sstream << functionIDStr << " from " << int(frame->getHeader().getSource()) << " ";
-          if(frame->getFrameSource() == fsWire) {
-            sstream << "(wire) ";
-          } else {
-            sstream << "(dss ) ";
-          }
-          PayloadDissector pdDump(frame->getPayload());
-          pdDump.get<uint8_t>();
-          while (!pdDump.isEmpty()) {
-            uint16_t data = pdDump.get<uint16_t>();
-            sstream << "0x" << std::hex << std::uppercase << (unsigned int) data << " ";
-          }
-          sstream << std::dec;
-          log(sstream.str());
-
-          // handling requests and events
+          // handle requests and events
           PayloadDissector pd(frame->getPayload());
+          uint8_t functionID = pd.get<uint8_t>();
           if((frame->getCommand() == CommandRequest) || (frame->getCommand() == CommandEvent)) {
 
 #ifdef WITH_SIM
@@ -112,7 +79,6 @@ namespace dss {
 #endif
             // dSMeter Events
             if(functionID == FunctionZoneAddDevice) {
-              pd.get<uint8_t>(); // function id
               int modID = frame->getHeader().getSource();
               int zoneID = pd.get<uint16_t>();
               int devID = pd.get<uint16_t>();
@@ -125,7 +91,6 @@ namespace dss {
               pEvent->addParameter(functionID);
               raiseModelEvent(pEvent);
             } else if(functionID == FunctionGroupCallScene) {
-              pd.get<uint8_t>(); // function id
               uint16_t zoneID = pd.get<uint16_t>();
               uint16_t groupID = pd.get<uint16_t>();
               uint16_t sceneID = pd.get<uint16_t>();
@@ -144,7 +109,6 @@ namespace dss {
               pEvent->addParameter(sceneID);
               raiseModelEvent(pEvent);
             } else if(functionID == FunctionDeviceCallScene) {
-              pd.get<uint8_t>(); // functionID
               uint16_t devID = pd.get<uint16_t>();
               uint16_t sceneID = pd.get<uint16_t>();
               int modID = frame->getHeader().getDestination();
@@ -154,7 +118,6 @@ namespace dss {
               pEvent->addParameter(sceneID);
               raiseModelEvent(pEvent);
             } else if(functionID == EventDSLinkInterrupt) {
-              pd.get<uint8_t>(); // functionID
               uint16_t devID = pd.get<uint16_t>();
               uint16_t priority = pd.get<uint16_t>();
               int modID = frame->getHeader().getSource();
@@ -166,13 +129,11 @@ namespace dss {
             }
              // dS485 Bus Events
             else if(functionID == EventNewDS485Device) {
-              pd.get<uint8_t>(); // functionID
               int modID = pd.get<uint16_t>();
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etNewDSMeter);
               pEvent->addParameter(modID);
               raiseModelEvent(pEvent);
             } else if(functionID == EventLostDS485Device) {
-              pd.get<uint8_t>(); // functionID
               int modID = pd.get<uint16_t>();
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etLostDSMeter);
               pEvent->addParameter(modID);
@@ -186,7 +147,6 @@ namespace dss {
             // dSMeter Unhandled Events
             else if(functionID == EventDeviceReceivedTelegramShort) {
               int modID = frame->getHeader().getSource();
-              pd.get<uint8_t>(); // function id
               uint16_t address = pd.get<uint16_t>();
               uint16_t buttonNumber = pd.get<uint16_t>();
               uint16_t buttonKind = pd.get<uint16_t>();
@@ -209,7 +169,6 @@ namespace dss {
               getDSS().getEventQueue().pushEvent(telEvt);
             } else if(functionID == EventDeviceReceivedTelegramLong) {
               int modID = frame->getHeader().getSource();
-              pd.get<uint8_t>(); // function id
               uint16_t mainqualifier = pd.get<uint16_t>();
               uint16_t subqualifier = pd.get<uint16_t>();
               uint16_t address = pd.get<uint16_t>();
@@ -234,11 +193,10 @@ namespace dss {
             }
           }
 
-          // handling responses
+          // handle responses
           if(frame->getCommand() == CommandResponse) {
             PayloadDissector pd2(frame->getPayload());
             int modID = frame->getHeader().getSource();
-            pd2.get<uint8_t>();
             if(functionID == FunctionDSMeterGetPowerConsumption) {
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etPowerConsumption);
               pEvent->addParameter(modID);
@@ -253,7 +211,7 @@ namespace dss {
             }
           }
 
-          // handling further buckets
+          // handle further buckets
           if((frame->getCommand() == CommandResponse) || (frame->getCommand() == CommandEvent)) {
             bool bucketFound = false;
             // search for a bucket to put the frame in
@@ -276,15 +234,10 @@ namespace dss {
           if((frame->getCommand() == CommandResponse) && (functionID == FunctionDSMeterGetDSID)) {
             int sourceID = frame->getHeader().getSource();
             ModelEvent* pEvent = new ModelEvent(ModelEvent::etDS485DeviceDiscovered);
-            PayloadDissector pd2(frame->getPayload());
-            pd2.get<uint8_t>();
             pEvent->addParameter(sourceID);
-            pEvent->addParameter(((pd2.get<uint8_t>() << 8) & 0xff00) | (pd2.get<uint8_t>() & 0x00ff));
-            pEvent->addParameter(((pd2.get<uint8_t>() << 8) & 0xff00) | (pd2.get<uint8_t>() & 0x00ff));
-            pEvent->addParameter(((pd2.get<uint8_t>() << 8) & 0xff00) | (pd2.get<uint8_t>() & 0x00ff));
-            pEvent->addParameter(((pd2.get<uint8_t>() << 8) & 0xff00) | (pd2.get<uint8_t>() & 0x00ff));
-            pEvent->addParameter(((pd2.get<uint8_t>() << 8) & 0xff00) | (pd2.get<uint8_t>() & 0x00ff));
-            pEvent->addParameter(((pd2.get<uint8_t>() << 8) & 0xff00) | (pd2.get<uint8_t>() & 0x00ff));
+            for(int iDSIDPart = 0; iDSIDPart < 6; iDSIDPart++) {
+              pEvent->addParameter(((pd.get<uint8_t>() << 8) & 0xff00) | (pd.get<uint8_t>() & 0x00ff));
+            }
             raiseModelEvent(pEvent);
           }
 
@@ -292,6 +245,40 @@ namespace dss {
       }
     }
   } // execute
+
+  void BusInterfaceHandler::dumpFrame(boost::shared_ptr<DS485CommandFrame> _pFrame) {
+    uint8_t functionID = _pFrame->getPayload().toChar().front();
+    std::string functionIDStr = FunctionIDToString(functionID);
+    if(functionIDStr.empty()) {
+      functionIDStr = "Function id: " + intToString(functionID, true);
+    }
+    std::ostringstream sstream;
+    switch (_pFrame->getCommand()) {
+    case CommandResponse:
+      sstream << "Got response: ";
+      break;
+    case CommandRequest:
+      sstream << "Got request : ";
+      break;
+    case CommandEvent:
+      sstream << "Got event   : ";
+      break;
+    }
+    sstream << functionIDStr << " from " << int(_pFrame->getHeader().getSource()) << " ";
+    if(_pFrame->getFrameSource() == fsWire) {
+      sstream << "(wire) ";
+    } else {
+      sstream << "(dss ) ";
+    }
+    PayloadDissector pdDump(_pFrame->getPayload());
+    pdDump.get<uint8_t>();
+    while (!pdDump.isEmpty()) {
+      uint16_t data = pdDump.get<uint16_t>();
+      sstream << "0x" << std::hex << std::uppercase << (unsigned int) data << " ";
+    }
+    sstream << std::dec;
+    log(sstream.str());
+  } // dumpFrame
 
   void BusInterfaceHandler::raiseModelEvent(ModelEvent* _pEvent) {
     m_ModelMaintenance.addModelEvent(_pEvent);

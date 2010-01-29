@@ -52,6 +52,7 @@ namespace dss {
     virtual void doStart();
   private:
     void raiseModelEvent(ModelEvent* _pEvent);
+    void dumpFrame(boost::shared_ptr<DS485CommandFrame> _pFrame);
   private:
     ModelMaintenance& m_ModelMaintenance;
     Mutex m_IncomingFramesGuard;
