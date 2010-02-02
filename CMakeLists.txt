@@ -171,9 +171,11 @@ IF(WITH_TESTS)
   SET(BOOST_TEST_LIB boost_unit_test_framework-mt)
   SET(TEST_LIB tests)
   ADD_SUBDIRECTORY(tests)
+  ADD_DEPENDENCIES(dsstests build_info.h)
 ENDIF(WITH_TESTS)
 
 ADD_EXECUTABLE(dss main.cpp namespaces.cpp)
+ADD_DEPENDENCIES(dss build_info.h)
 
 ## -- install targets:
 INSTALL(TARGETS dss RUNTIME DESTINATION bin)
