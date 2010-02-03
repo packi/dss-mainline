@@ -31,7 +31,17 @@
 using boost::asio::ip::tcp;
 
 namespace dss {
+  void tcpSocket_finalize(JSContext *cx, JSObject *obj);
+  JSBool tcpSocket_construct(JSContext *cx, JSObject *obj, uintN argc,
+                             jsval *argv, jsval *rval);
 
+  static JSClass tcpSocket_class = {
+    "TcpSocket", JSCLASS_HAS_PRIVATE,
+    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
+    JS_EnumerateStandardClasses,
+    JS_ResolveStub,
+    JS_ConvertStub,  tcpSocket_finalize, JSCLASS_NO_OPTIONAL_MEMBERS
+  }; // tcpSocket_class
 
   //================================================== SocketHelper
 
@@ -131,9 +141,19 @@ namespace dss {
                                public boost::enable_shared_from_this<SocketHelperInstance> {
   public:
     SocketHelperInstance(SocketScriptContextExtension& _extension)
-    : SocketHelper(_extension),
-      m_Socket(getIOService())
+    : SocketHelper(_extension)
     { }
+
+    ~SocketHelperInstance() {
+      if(isConnected()) {
+        close();
+      }
+      m_pSocket.reset();
+      if(m_pAcceptor != NULL) {
+        m_pAcceptor->close();
+      }
+      m_pAcceptor.reset();
+    }
 
     void connectTo(const std::string& _host, int _port) {
       tcp::resolver resolver(getIOService());
@@ -141,15 +161,20 @@ namespace dss {
       tcp::resolver::iterator iterator = resolver.resolve(query);
 
       tcp::endpoint endpoint = *iterator;
-      m_Socket.async_connect(endpoint,
-                             boost::bind(&SocketHelperInstance::connectionCallback, this,
-                                         boost::asio::placeholders::error, ++iterator));
+      m_pSocket.reset(new tcp::socket(getIOService()));
+      m_pSocket->async_connect(
+        endpoint,
+        boost::bind(
+          &SocketHelperInstance::connectionCallback,
+          this,
+          boost::asio::placeholders::error,
+          ++iterator));
       startIOThread();
     }
 
     void send(const std::string& _data) {
       m_Data = _data;
-      boost::asio::async_write(m_Socket,
+      boost::asio::async_write(*m_pSocket,
         boost::asio::buffer(
           m_Data.c_str(),
           m_Data.size()),
@@ -162,13 +187,13 @@ namespace dss {
     }
 
     void close() {
-      m_Socket.close();
+      m_pSocket->close();
     }
 
     void receive(const int _numberOfBytes) {
       m_BytesToRead = std::min(_numberOfBytes, int(kMaxDataLength));
       boost::asio::async_read(
-        m_Socket,
+        *m_pSocket,
         boost::asio::buffer(
           m_DataBuffer,
           m_BytesToRead),
@@ -180,19 +205,45 @@ namespace dss {
     }
 
     bool isConnected() {
-      return m_Socket.is_open();
+      return (m_pSocket != NULL) && m_pSocket->is_open();
     }
+
+    void bind(const int _port) {
+      try {
+        tcp::endpoint endpoint(tcp::v4(), _port);
+        m_pAcceptor.reset(new tcp::acceptor(getIOService()));
+        m_pAcceptor->open(endpoint.protocol());
+        m_pAcceptor->set_option(tcp::acceptor::reuse_address(true));
+        m_pAcceptor->bind(endpoint);
+        m_pAcceptor->listen();
+        success();
+      } catch(boost::system::system_error& error) {
+        Logger::getInstance()->log("SocketHelperInstance::bind: Caught exception: " + error.code().message(), lsFatal);
+        failure();
+      }
+    }
+
+    void accept() {
+      if(m_pSocket == NULL && m_pAcceptor != NULL) {
+        createSocket();
+        m_pAcceptor->async_accept(*m_pSocket, boost::bind(&SocketHelperInstance::acceptCallback, this, boost::asio::placeholders::error));
+        startIOThread();
+      } else {
+        Logger::getInstance()->log("SocketHelperInstance::accept: Please call bind first", lsFatal);
+      }
+    }
+
   private:
     void connectionCallback(const boost::system::error_code& error,
-                        tcp::resolver::iterator endpoint_iterator) {
+                            tcp::resolver::iterator endpoint_iterator) {
       if (!error) {
         success();
       } else if (endpoint_iterator != tcp::resolver::iterator()) {
-        m_Socket.close();
+        m_pSocket->close();
         tcp::endpoint endpoint = *endpoint_iterator;
-        m_Socket.async_connect(endpoint,
-                               boost::bind(&SocketHelperInstance::connectionCallback, this,
-                                           boost::asio::placeholders::error, ++endpoint_iterator));
+        m_pSocket->async_connect(endpoint,
+                                 boost::bind(&SocketHelperInstance::connectionCallback, this,
+                                             boost::asio::placeholders::error, ++endpoint_iterator));
       } else {
         Logger::getInstance()->log("SocketHelperInstance::connectionCallback: failed: " + error.message());
         failure();
@@ -224,6 +275,32 @@ namespace dss {
       }
     }
 
+    void acceptCallback(const boost::system::error_code& error) {
+      if(!error) {
+        if(hasCallback()) {
+          JSObject* socketObj = JS_ConstructObject(getContext().getJSContext(), &tcpSocket_class, NULL, NULL);
+          SocketHelperInstance* pInstance = static_cast<SocketHelperInstance*>(JS_GetPrivate(getContext().getJSContext(), socketObj));
+          assert(pInstance != NULL);
+
+          pInstance->m_pSocket = m_pSocket;
+          pInstance->setIOService(getIOServicePtr());
+          m_pSocket.reset();
+          ScriptFunctionParameterList list(getContext());
+          list.addJSVal(OBJECT_TO_JSVAL(socketObj));
+          callCallbackWithArguments(list);
+        }
+      } else {
+        Logger::getInstance()->log("SocketHelperInstance::acceptCallback: error: " + error.message());
+        ScriptFunctionParameterList list(getContext());
+        list.addJSVal(JSVAL_NULL);
+        callCallbackWithArguments(list);
+      }
+    }
+
+    void createSocket() {
+      m_pSocket.reset(new tcp::socket(getIOService()));
+    }
+
     void success() {
       callCallback(true);
     }
@@ -250,11 +327,12 @@ namespace dss {
       callCallbackWithArguments(param);
     }
   private:
-    tcp::socket m_Socket;
+    boost::shared_ptr<tcp::socket> m_pSocket;
     std::string m_Data;
     enum { kMaxDataLength = 1024 };
     char m_DataBuffer[kMaxDataLength];
     std::size_t m_BytesToRead;
+    boost::shared_ptr<tcp::acceptor> m_pAcceptor;
   }; // SocketHelperInstance
 
   class SocketHelperSendOneShot : public SocketHelper,
@@ -262,8 +340,15 @@ namespace dss {
   public:
     SocketHelperSendOneShot(SocketScriptContextExtension& _extension)
     : SocketHelper(_extension),
-      m_Socket(getIOService())
+      m_pSocket(new tcp::socket(getIOService()))
     {
+    }
+
+    ~SocketHelperSendOneShot() {
+      if(m_pSocket->is_open()) {
+        m_pSocket->close();
+      }
+      m_pSocket.reset();
     }
 
     void sendTo(const std::string& _host, int _port, const std::string& _data) {
@@ -273,7 +358,7 @@ namespace dss {
       tcp::resolver::iterator iterator = resolver.resolve(query);
 
       tcp::endpoint endpoint = *iterator;
-      m_Socket.async_connect(endpoint,
+      m_pSocket->async_connect(endpoint,
           boost::bind(&SocketHelperSendOneShot::handle_connect, this,
             boost::asio::placeholders::error, ++iterator));
       startIOThread();
@@ -281,7 +366,7 @@ namespace dss {
 
     void write()
     {
-      boost::asio::async_write(m_Socket,
+      boost::asio::async_write(*m_pSocket,
           boost::asio::buffer(m_Data.c_str(),
             m_Data.size()),
           boost::bind(&SocketHelperSendOneShot::handle_write, this,
@@ -295,9 +380,9 @@ namespace dss {
       if (!error) {
         getIOService().post(boost::bind(&SocketHelperSendOneShot::write, this));
       } else if (endpoint_iterator != tcp::resolver::iterator()) {
-        m_Socket.close();
+        m_pSocket->close();
         tcp::endpoint endpoint = *endpoint_iterator;
-        m_Socket.async_connect(endpoint,
+        m_pSocket->async_connect(endpoint,
             boost::bind(&SocketHelperSendOneShot::handle_connect, this,
               boost::asio::placeholders::error, ++endpoint_iterator));
       }
@@ -317,10 +402,10 @@ namespace dss {
     }
 
     void do_close() {
-      m_Socket.close();
+      m_pSocket->close();
     }
   private:
-    tcp::socket m_Socket;
+    boost::shared_ptr<tcp::socket> m_pSocket;
     std::string m_Data;
   }; // SocketHelperOneShot
 
@@ -347,14 +432,6 @@ namespace dss {
     JS_SetPrivate(cx, obj, inst);
     return JS_TRUE;
   } // tcpSocket_construct
-
-  static JSClass tcpSocket_class = {
-    "TcpSocket", JSCLASS_HAS_PRIVATE,
-    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
-    JS_EnumerateStandardClasses,
-    JS_ResolveStub,
-    JS_ConvertStub,  tcpSocket_finalize, JSCLASS_NO_OPTIONAL_MEMBERS
-  }; // tcpSocket_class
 
   JSBool tcpSocket_connect(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -446,6 +523,56 @@ namespace dss {
     return JS_FALSE;
   } // tcpSocket_receive
 
+  JSBool tcpSocket_bind(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
+    assert(pInst != NULL);
+    if(argc >= 1) {
+      try {
+        int port = ctx->convertTo<int>(argv[0]);
+
+        pInst->setContext(ctx);
+
+        // check if we've been given a callback
+        if(argc >= 2) {
+          boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(obj, *ctx));
+          pInst->setCallbackObject(scriptObj);
+          pInst->setCallbackFunction(argv[1]);
+        }
+
+        pInst->bind(port);
+        *rval = JSVAL_TRUE;
+        return JS_TRUE;
+      } catch(const ScriptException& e) {
+        Logger::getInstance()->log(std::string("tcpSocket_bind: Caught script exception: ") + e.what());
+      }
+    }
+    return JS_FALSE;
+  } // tcpSocket_bind
+
+  JSBool tcpSocket_accept(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
+    assert(pInst != NULL);
+    try {
+      pInst->setContext(ctx);
+
+      // check if we've been given a callback
+      if(argc >= 1) {
+        boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(obj, *ctx));
+        pInst->setCallbackObject(scriptObj);
+        pInst->setCallbackFunction(argv[0]);
+      }
+
+      pInst->accept();
+      *rval = JSVAL_TRUE;
+      return JS_TRUE;
+    } catch(const ScriptException& e) {
+      Logger::getInstance()->log(std::string("tcpSocket_accept: Caught script exception: ") + e.what());
+    }
+    return JS_FALSE;
+  } // tcpSocket_accept
+
   JSBool tcpSocket_close(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
     assert(pInst != NULL);
@@ -458,8 +585,8 @@ namespace dss {
     {"send", tcpSocket_send, 2, 0, 0},
     {"connect", tcpSocket_connect, 3, 0, 0},
     {"receive", tcpSocket_receive, 2, 0, 0},
-  //  {"bind", tcpSocket_bind, 2, 0, 0},
-  //  {"accept", tcpSocket_send, 1, 0, 0},
+    {"bind", tcpSocket_bind, 2, 0, 0},
+    {"accept", tcpSocket_accept, 1, 0, 0},
     {"close", tcpSocket_close, 0, 0, 0},
     {NULL, NULL, 0, 0, 0},
   }; // tcpSockets_methods

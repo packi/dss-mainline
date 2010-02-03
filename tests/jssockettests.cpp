@@ -337,4 +337,59 @@ BOOST_AUTO_TEST_CASE(testSocketReceive) {
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<std::string>("result"), "hello world");
 } // testSocketReceive
 
+
+void runScript(const std::string& _script) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new SocketScriptContextExtension();
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->getRootObject().setProperty<const char*>("result", "");
+  ctx->evaluate<void>(_script);
+  sleepMS(500);
+  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<std::string>("result"), "hello world");
+}
+
+BOOST_AUTO_TEST_CASE(testSocketServer) {
+  std::string serverScript =
+    "var handleIncomingSocket = function(incomingSocket) {\n"
+    "  incomingSocket.receive(11,\n"
+    "    function(line) {\n"
+    "      print('received: ', line);\n"
+    "      result = line;"
+    "    }\n"
+    "  );\n"
+    "};\n"
+    "\n"
+    "socket = new TcpSocket();\n"
+    "socket.bind(\n"
+    "  1234,\n"
+    "  function(success) {\n"
+    "    if(success === true) {\n"
+    "      socket.accept(handleIncomingSocket);\n"
+    "    }\n"
+    "  }\n"
+    ");\n";
+  std::string clientScript =
+    "var connected = function(success) {\n"
+    "  if(success === true) {\n"
+    "    socket.send('hello world',\n"
+    "      function() {\n"
+    "        result = 'hello world';\n"
+    "        socket.close();\n"
+    "      }\n"
+    "    );\n"
+    "  }\n"
+    "}\n"
+    "socket = new TcpSocket();\n"
+    "socket.connect('localhost', 1234, connected);\n";
+
+  boost::thread serverThread = boost::thread(boost::bind(&runScript, serverScript));
+  sleepMS(250);
+  boost::thread clientThread = boost::thread(boost::bind(&runScript, clientScript));
+  clientThread.join();
+  serverThread.join();
+} // testSocketServer
+
 BOOST_AUTO_TEST_SUITE_END()
