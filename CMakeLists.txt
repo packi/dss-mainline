@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.6)
 project(DSS)
 
 option(WITH_TESTS "Include test-suite" ON)
@@ -62,24 +62,26 @@ include(CheckIncludeFiles)
 include(CheckIncludeFileCXX)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
-set(REQUIRED_LIBS)
+set(REQUIRED_LIBS dl)
 
 check_include_files(stdint.h HAVE_STDINT)
 
-# check for optional avahi
+# check for a library providing zeroconf (avahi/dnssd)
 find_package(Avahi)
 include_directories(${AVAHI_INCLUDE_DIRS})
-set(REQUIRED_LIBS ${REQUIRED_LIBS} ${AVAHI_LIBRARIES} dl)
-
-check_include_files(avahi-client/publish.h HAVE_AVAHI)
-if(${HAVE_AVAHI} MATCHES 1) 
+set(REQUIRED_LIBS ${REQUIRED_LIBS} ${AVAHI_LIBRARIES})
+if(AVAHI_FOUND)
   set(WITH_BONJOUR 1)
-endif(${HAVE_AVAHI} MATCHES 1)
-
-check_include_files(dns_sd.h HAVE_DNS_SD)
-if(${HAVE_DNS_SD} MATCHES 1)
-  set(WITH_BONJOUR 1)
-endif(${HAVE_DNS_SD} MATCHES 1)
+  set(HAVE_AVAHI 1)
+else(AVAHI_FOUND)
+  find_package(DNSSD)
+  include_directories(${DNSSD_INCLUDE_DIRS})
+  set(REQUIRED_LIBS ${REQUIRED_LIBS} ${DNSSD_LIBRARIES})
+  if(DNSSD_FOUND)
+    set(WITH_BONJOUR 1)
+    set(HAVE_DNS_SD 1)
+  endif(DNSSD_FOUND)
+endif(AVAHI_FOUND)
 
 # check for SpiderMonkey headers and library
 set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DXP_UNIX)
@@ -120,21 +122,25 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 add_definitions(-DHAVE_CONFIG_H)
 
-# check for Boost
-set(Boost_USE_MULTITHREADED ON)
-find_package(Boost 1.36.0 COMPONENTS filesystem system program_options)
-set(REQUIRED_LIBS ${REQUIRED_LIBS} ${Boost_LIBRARIES})
+set(BOOST_REQUIRED_LIBS filesystem system program_options)
 
 # check for Boost unit testing
+if(WITH_TESTS)
+  set(BOOST_REQUIRED_LIBS unit_test_framework ${BOOST_REQUIRED_LIBS})
+endif(WITH_TESTS)
+
+# check for Boost
+set(Boost_USE_MULTITHREADED ON)
+find_package(Boost 1.35.0 COMPONENTS ${BOOST_REQUIRED_LIBS})
+set(REQUIRED_LIBS ${Boost_LIBRARIES} ${REQUIRED_LIBS})
+
+#include test-directory if needed
 set(TEST_LIB)
-if(WITH_TESTS) 
-  find_package(Boost 1.36.0 COMPONENTS unit_test_framework)
-  set(REQUIRED_LIBS ${REQUIRED_LIBS} ${Boost_LIBRARIES})
+if(WITH_TESTS)
   set(TEST_LIB tests)
   add_subdirectory(tests)
   add_dependencies(dsstests build_info.h)
 endif(WITH_TESTS)
-
 
 add_subdirectory(core)
 add_subdirectory(unix)
@@ -145,10 +151,7 @@ add_subdirectory(doc)
 
 add_executable(dss main.cpp namespaces.cpp)
 target_link_libraries(dss ${TEST_LIB} core ds485 model unix webservices mongoose
-                          ${Boost_LIBRARIES} ${LIBXML2_LIBRARIES} ${LIBICAL_LIBRARIES}
-                          ${GSOAP_LIBRARIES} ${SPIDERMONKEY_LIBRARIES}
-                          ${POCO_LIBRARY} PocoFoundation PocoNet
-                          ${AVAHI_LIBRARIES} dl)
+			  ${REQUIRED_LIBS})
 add_dependencies(dss build_info.h)
 
 ## -- install targets:
