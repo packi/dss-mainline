@@ -39,11 +39,13 @@ namespace dss {
   public:
     SocketHelper(SocketScriptContextExtension& _extension)
     : m_Extension(_extension),
-      m_IOService(),
       m_CallbackFunction(JSVAL_NULL)
     { }
 
     ~SocketHelper() {
+      if(m_IOService != NULL) {
+        m_IOService->stop();
+      }
       m_IOServiceThread.join();
     }
 
@@ -88,17 +90,37 @@ namespace dss {
     }
 
     void startIOThread() {
-      m_IOServiceThread = boost::thread(boost::bind(&boost::asio::io_service::run, &m_IOService));
+      ensureIOServiceAvailable();
+      if(!m_IOServiceThread.joinable()) {
+        m_IOServiceThread = boost::thread(boost::bind(&boost::asio::io_service::run, m_IOService));
+      } else {
+        Logger::getInstance()->log("Not spawning a thread");
+      }
     }
 
     boost::asio::io_service& getIOService() {
+      ensureIOServiceAvailable();
+      return *m_IOService;
+    }
+
+    boost::shared_ptr<boost::asio::io_service> getIOServicePtr() {
       return m_IOService;
+    }
+
+    void setIOService(boost::shared_ptr<boost::asio::io_service> _value) {
+      m_IOService = _value;
     }
 
   protected:
     SocketScriptContextExtension& m_Extension;
   private:
-    boost::asio::io_service m_IOService;
+    void ensureIOServiceAvailable() {
+      if(m_IOService == NULL) {
+        m_IOService.reset(new boost::asio::io_service());
+      }
+    }
+  private:
+    boost::shared_ptr<boost::asio::io_service> m_IOService;
     boost::thread m_IOServiceThread;
     ScriptContext* m_pContext;
     boost::shared_ptr<ScriptObject> m_pCallbackObject;
