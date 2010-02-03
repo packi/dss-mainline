@@ -497,8 +497,9 @@ namespace dss {
   }; // tcpSocket_properties
 
   void SocketScriptContextExtension::extendContext(ScriptContext& _context) {
-    JS_InitClass(_context.getJSContext(), _context.getRootObject().getJSObject(), NULL, &tcpSocket_class,
-                 tcpSocket_construct, 0, tcpSocket_properties, tcpSocket_methods, NULL, tcpSocket_static_methods);
+    JS_InitClass(_context.getJSContext(), _context.getRootObject().getJSObject(),
+                 NULL, &tcpSocket_class, tcpSocket_construct, 0, tcpSocket_properties,
+                 tcpSocket_methods, NULL, tcpSocket_static_methods);
   } // extendContext
 
   void SocketScriptContextExtension::removeSocketHelper(boost::shared_ptr<SocketHelper> _helper) {
@@ -515,6 +516,5 @@ namespace dss {
     m_SocketHelper.push_back(_helper);
     m_SocketHelperMutex.unlock();
   } // addSocketHelper
-
 
 } // namespace dss

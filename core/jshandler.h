@@ -97,7 +97,7 @@ namespace dss {
     ScriptContext(ScriptEnvironment& _env, JSContext* _pContext);
     virtual ~ScriptContext();
 
-    /** Evaluates the given script */  
+    /** Evaluates the given script */
     template <class t>
     t evaluate(const std::string& _script);
     // FIXME: Workaround a compiler issue that interprets typeof jsval == typeof int
