@@ -409,6 +409,9 @@ namespace dss {
     m_Parameter.push_back(STRING_TO_JSVAL(str));
   } // add<std::string&>
 
+  void ScriptFunctionParameterList::addJSVal(jsval _value) {
+    m_Parameter.push_back(_value);
+  } // addJSVal
 
   //================================================== ScriptObject
 

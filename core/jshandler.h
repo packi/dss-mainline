@@ -185,6 +185,9 @@ namespace dss {
     template<class t>
     void add(t _value);
 
+    // FIXME: work around a compiler issue (typeof jsval == typeof int)
+    void addJSVal(jsval _value);
+
     int size() { return m_Parameter.size(); }
     jsval get(const int _index) { return m_Parameter.at(_index); }
   private:
