@@ -409,6 +409,9 @@ namespace dss {
     m_Parameter.push_back(STRING_TO_JSVAL(str));
   } // add<std::string&>
 
+  void ScriptFunctionParameterList::addJSVal(jsval _value) {
+    m_Parameter.push_back(_value);
+  } // addJSVal
 
   //================================================== ScriptObject
 
@@ -488,6 +491,11 @@ namespace dss {
     std::string str(_value);
     setProperty<const std::string&>(_name, str);
   } // setProperty<const char*>
+
+  template<>
+  void ScriptObject::setProperty(const std::string& _name, bool _value) {
+    doSetProperty(_name, _value ? JSVAL_TRUE : JSVAL_FALSE);
+  }
 
   template<>
   void ScriptObject::setProperty(const std::string& _name, int _value) {
