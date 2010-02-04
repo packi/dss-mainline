@@ -131,7 +131,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 add_definitions(-DHAVE_CONFIG_H)
 
-set(BOOST_REQUIRED_LIBS filesystem system program_options)
+set(BOOST_REQUIRED_LIBS thread filesystem system program_options)
 
 # check for Boost unit testing
 if(WITH_TESTS)
