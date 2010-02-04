@@ -49,7 +49,7 @@ namespace dss {
     devid_t m_ShortAddress;
     int m_ZoneID;
     int m_LastKnownZoneID;
-    int m_DSMeterID;
+    dsid_t m_DSMeterDSID;
     dsid_t m_LastKnownMeterDSID;
     std::bitset<63> m_GroupBitmask;
     std::vector<int> m_Groups;

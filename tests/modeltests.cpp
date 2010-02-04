@@ -214,6 +214,22 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByBusID) {
   BOOST_CHECK_EQUAL(1, apt.getDSMeterByBusID(1).getBusID());
 } // testApartmentGetDSMeterByBusID
 
+BOOST_AUTO_TEST_CASE(testDeviceTracksMetersBusID) {
+  Apartment apt(NULL);
+
+  DSMeter& mod = apt.allocateDSMeter(dsid_t(0,10));
+  mod.setBusID(1);
+
+  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1.setDSMeter(mod);
+
+  BOOST_CHECK_EQUAL(1, dev1.getDSMeterID());
+
+  mod.setBusID(2);
+
+  BOOST_CHECK_EQUAL(2, dev1.getDSMeterID());
+} // testDeviceTracksMeterID
+
 BOOST_AUTO_TEST_CASE(testZoneMoving) {
   Apartment apt(NULL);
 
