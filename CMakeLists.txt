@@ -56,6 +56,11 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   endif(WITH_GCOV)
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} /opt/local/include)
+  link_directories(/opt/local/lib)
+  set(CMAKE_OSX_ARCHITECTURES "x86_64")
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 # header tests
 include(CheckIncludeFiles)
@@ -87,10 +92,14 @@ endif(AVAHI_FOUND)
 set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DXP_UNIX)
 find_package(SpiderMonkey REQUIRED)
 include_directories(${SPIDERMONKEY_INCLUDE_DIRS})
+set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${SPIDERMONKEY_INCLUDE_DIRS})
 check_include_files(mozjs/jsapi.h HAVE_MOZJS_JSAPI_H)
 check_include_files(js/jsapi.h HAVE_JS_JSAPI_H)
 check_include_files(jsapi.h HAVE_JSAPI_H)
 set(REQUIRED_LIBS ${REQUIRED_LIBS} ${SPIDERMONKEY_LIBRARIES})
+if(DEFINED SPIDERMONKEY_LIBRARY_DIRS)
+  link_directories(${SPIDERMONKEY_LIBRARY_DIRS})
+endif()
 
 # check for gsoap headers and library
 find_package(GSOAP REQUIRED)
