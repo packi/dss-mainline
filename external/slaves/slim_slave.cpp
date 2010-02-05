@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <map>
+#include <sstream>
 
 #include <pthread.h>
 
@@ -58,7 +59,7 @@ public:
       try {
         if(m_PlayerMACHeader.empty()) {
           logMessage << "Parameter playerMAC not specified. NOT sending command " << _command;
-          Logger::getInstance()->log(logMessage.str());
+          dss::Logger::getInstance()->log(logMessage.str());
           logMessage.str("");
         }
         Poco::Net::SocketAddress sa(m_RemoteHost, m_RemotePort);
@@ -66,21 +67,21 @@ public:
         Poco::Net::SocketStream str(sock);
 
         logMessage << "before sending: " << _command;
-        Logger::getInstance()->log(logMessage.str());
+        dss::Logger::getInstance()->log(logMessage.str());
         logMessage.str("");
 
         str << m_PlayerMACHeader << " ";
         str << _command << "\n" << std::flush;
 
         logMessage << m_PlayerMACHeader << " " << _command;
-        Logger::getInstance()->log(logMessage.str());
+        dss::Logger::getInstance()->log(logMessage.str());
         logMessage.str("");
 
-        Logger::getInstance()->log("done sending");
+        dss::Logger::getInstance()->log("done sending");
 
         sock.close();
        } catch (Poco::Exception& exc) {
-	   Logger::getInstance()->log("[slim_slave.so] exception caught: " + exc.displayText(), lsError);
+	   dss::Logger::getInstance()->log("[slim_slave.so] exception caught: " + exc.displayText(), lsError);
        }
     }
 
@@ -128,10 +129,10 @@ public:
       } else if(_name == "host") {
         m_RemoteHost = _value;
       } else if(_name == "playermac") {
-        Logger::getInstance()->log("config-param: " +  _value);
+        dss::Logger::getInstance()->log("config-param: " +  _value);
         m_PlayerMACHeader = _value;
         dss::replaceAll(m_PlayerMACHeader, ":", "%3A");
-        Logger::getInstance()->log("after: " + m_PlayerMACHeader);
+        dss::Logger::getInstance()->log("after: " + m_PlayerMACHeader);
       } else if(_name == "volume") {
         m_DefaultVolume = dss::strToInt(_value);
       }
