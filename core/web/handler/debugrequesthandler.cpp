@@ -151,7 +151,7 @@ namespace dss {
         // TODO: move this code somewhere else (might also relax the requirement
         //       having DSS as constructor parameter)
         DS485CommandFrame* frame = new DS485CommandFrame();
-        frame->getHeader().setBroadcast(true);
+        frame->getHeader().setBroadcast(false);
         frame->getHeader().setDestination(device.getDSMeterID());
         frame->setCommand(CommandRequest);
         frame->getPayload().add<uint8_t>(FunctionDeviceGetTransmissionQuality);
@@ -160,7 +160,7 @@ namespace dss {
         DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
         if(proxy != NULL) {
           boost::shared_ptr<FrameBucketCollector> bucket = proxy->sendFrameAndInstallBucket(*frame, FunctionDeviceGetTransmissionQuality);
-          bucket->waitForFrame(2000);
+          bucket->waitForFrame(5000);
 
           boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
           if(recFrame == NULL) {

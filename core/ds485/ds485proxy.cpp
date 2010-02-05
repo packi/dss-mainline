@@ -300,7 +300,7 @@ namespace dss {
 
     cmdFrame.getPayload().add<uint8_t>(FunctionGetTypeRequest);
     boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionGetTypeRequest);
-    bucket->waitForFrames(1000);
+    bucket->waitForFrames(5000);
 
     std::map<int, bool> resultFrom;
 
@@ -444,7 +444,7 @@ namespace dss {
 
     boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionDeviceGetGroups);
 
-    bucket->waitForFrame(1000);
+    bucket->waitForFrame(5000);
 
     while(true) {
       boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
@@ -482,7 +482,7 @@ namespace dss {
       log("GetZoneID");
       int16_t tempResult = int16_t(receiveSingleResult16(cmdFrame, FunctionDSMeterGetZoneIdForInd));
       // TODO: The following line is a workaround as described in #246
-      if((tempResult < 0) && (tempResult > -20)) {
+      if((tempResult <= 0) && (tempResult > -20)) {
         log("GetZones: Negative zone id " + intToString(tempResult) + " received. DSMeter: " + intToString(_dsMeterID) + " index: " + intToString(iZone), lsError);
         // TODO: take this line outside the if-clause after the dSM-API has been reworked
         checkResultCode(tempResult);
@@ -698,7 +698,7 @@ namespace dss {
 
     boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionDSMeterGetEnergyLevel);
 
-    bucket->waitForFrame(1000);
+    bucket->waitForFrame(5000);
 
     boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
     if(recFrame == NULL) {
@@ -724,7 +724,7 @@ namespace dss {
     log("GetSensorValue");
 
     boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionDeviceGetSensorValue);
-    bucket->waitForFrame(2000);
+    bucket->waitForFrame(5000);
     boost::shared_ptr<DS485CommandFrame> recFrame;
     if(bucket->isEmpty()) {
       log(std::string("received no ack for request getSensorValue"));
@@ -732,7 +732,7 @@ namespace dss {
     } else if(bucket->getFrameCount() == 1) {
         // first frame received, wait for the next frame
       recFrame= bucket->popFrame();
-      bucket->waitForFrame(2000);
+      bucket->waitForFrame(5000);
     } else
         recFrame= bucket->popFrame();
     // first frame is only request ack;
@@ -817,7 +817,7 @@ namespace dss {
 
   boost::shared_ptr<DS485CommandFrame> DS485Proxy::receiveSingleFrame(DS485CommandFrame& _frame, uint8_t _functionID) {
     boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(_frame, _functionID);
-    bucket->waitForFrame(1000);
+    bucket->waitForFrame(5000);
 
     if(bucket->isEmpty()) {
       log(std::string("received no results for request (") + FunctionIDToString(_functionID) + ")");

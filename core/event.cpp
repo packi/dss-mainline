@@ -256,8 +256,6 @@ namespace dss {
                 Logger::getInstance()->log(std::string("EventInterpreter: Could not find handler '") + (*ipSubscription)->getHandlerName(), lsInfo);
               }
 
-            } else {
-              Logger::getInstance()->log(std::string("EventInterpreter: No match on subscription '") + (*ipSubscription)->getID() + "'");
             }
           }
 
