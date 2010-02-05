@@ -44,7 +44,7 @@ namespace dss {
     m_ShortAddress(ShortAddressStaleDevice),
     m_ZoneID(0),
     m_LastKnownZoneID(0),
-    m_DSMeterID(-1),
+    m_DSMeterDSID(NullDSID),
     m_LastKnownMeterDSID(NullDSID),
     m_FunctionID(0),
     m_LastCalledScene(SceneOff),
@@ -59,7 +59,7 @@ namespace dss {
         m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/" + m_DSID.toString());
 //        m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
         m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyReference<std::string>(m_Name));
-        m_pPropertyNode->createProperty("DSMeterID")->linkToProxy(PropertyProxyReference<int>(m_DSMeterID, false));
+        m_pPropertyNode->createProperty("DSMeterID")->linkToProxy(PropertyProxyMemberFunction<Device,int>(*this, &Device::getDSMeterID, false));
         m_pPropertyNode->createProperty("ZoneID")->linkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
         if(m_pPropertyNode->getProperty("interrupt/mode") == NULL) {
           PropertyNodePtr interruptNode = m_pPropertyNode->createProperty("interrupt");
@@ -110,7 +110,7 @@ namespace dss {
   } // setRawValue
 
   double Device::getValue(const int _parameterNr) {
-    return m_pApartment->getDeviceBusInterface()->deviceGetParameterValue(m_ShortAddress, m_DSMeterID,  _parameterNr);
+    return m_pApartment->getDeviceBusInterface()->deviceGetParameterValue(m_ShortAddress, getDSMeterID(),  _parameterNr);
   } // getValue
 
   void Device::nextScene() {
@@ -159,7 +159,11 @@ namespace dss {
   } // getDSID;
 
   int Device::getDSMeterID() const {
-    return m_DSMeterID;
+    if(m_DSMeterDSID != NullDSID) {
+      return m_pApartment->getDSMeterByDSID(m_DSMeterDSID).getBusID();
+    } else {
+      return -1;
+    }
   } // getDSMeterID
 
   void Device::setLastKnownDSMeterDSID(const dsid_t& _value) {
@@ -171,9 +175,9 @@ namespace dss {
   } // getLastKnownDSMeterDSID
 
   void Device::setDSMeter(const DSMeter& _dsMeter) {
-    m_DSMeterID = _dsMeter.getBusID();
+    m_DSMeterDSID = _dsMeter.getDSID();
     m_LastKnownMeterDSID = _dsMeter.getDSID();
-  } // setDSMeterID
+  } // setDSMeter
 
   int Device::getZoneID() const {
     return m_ZoneID;
@@ -280,7 +284,7 @@ namespace dss {
     if(_writeOnly) {
       flags |= DSLinkSendWriteOnly;
     }
-    return m_pApartment->getDeviceBusInterface()->dSLinkSend(m_DSMeterID, m_ShortAddress, _value, flags);
+    return m_pApartment->getDeviceBusInterface()->dSLinkSend(getDSMeterID(), m_ShortAddress, _value, flags);
   } // dsLinkSend
 
   int Device::getSensorValue(const int _sensorID) {
