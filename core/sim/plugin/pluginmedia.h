@@ -24,7 +24,7 @@
 #define __PLUGINBASE_H_INCLUDED
 
 #include "pluginbase.h"
-#include "../../ds485const.h"
+#include "../../model/modelconst.h"
 
 #include <pthread.h>
 

@@ -23,7 +23,9 @@
 #ifndef DS485GROUPSCENECONST_H_
 #define DS485GROUPSCENECONST_H_
 
-// Scene constants for devices
+namespace dss {
+
+  // Scene constants for devices
   const uint8_t SceneOff = 0x00;
   const uint8_t Scene1 = 0x05;
   const uint8_t Scene2 = 0x11;
@@ -70,4 +72,5 @@
   const int GroupIDStandardMax = GroupIDDisplay;
   const int GroupIDMax = 64;
 
+} // namespace dss
 #endif
