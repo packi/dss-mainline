@@ -355,7 +355,7 @@ namespace dss {
   } // addChild
 
   const std::string& PropertyNode::getDisplayName() const {
-    if(m_ParentNode->count(m_Name) > 1) {
+    if(m_ParentNode && (m_ParentNode->count(m_Name) > 1)) {
       std::stringstream sstr;
       sstr << getName() << "[" << m_Index << "]" << std::endl;
       m_DisplayName = sstr.str();
