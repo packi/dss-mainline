@@ -109,6 +109,10 @@ int main (int argc, char* argv[]) {
 #endif
       ("prop", po::value<vector<string> >(), "sets a property")
       ("version,v", "print version information and exit")
+      ("datadir,D", po::value<string>(), "set data directory")
+      ("webrootdir,w", po::value<string>(), "set webroot directory")
+      ("configdir,c", po::value<string>(), "set config directory")
+      ("config,C", po::value<string>(), "set configuration file to use")
 #ifndef __APPLE__ // daemon() is marked as deprecated on OS X
       ("daemonize,d", "start as a daemon")
 #endif
@@ -143,6 +147,26 @@ int main (int argc, char* argv[]) {
       properties = vm["prop"].as< vector<string> >();
   }
 
+  if(vm.count("datadir")) {
+    properties.push_back("/config/datadirectory=" + 
+                         vm["datadir"].as<string>());
+  }
+
+  if(vm.count("webrootdir")) {
+    properties.push_back("/config/webrootdirectory=" + 
+                          vm["webrootdir"].as<string>());
+  }
+
+  if(vm.count("configdir")) {
+    properties.push_back("/config/configdirectory=" + 
+                         vm["configdir"].as<string>());
+  }
+
+  string config_file;
+  if(vm.count("config")) {
+    config_file = vm["config"].as<string>();
+  }
+
   string snifferDev;
   bool startSniffer = false;
 
@@ -175,7 +199,7 @@ int main (int argc, char* argv[]) {
   } else {
     if(!quitAfterTests) {
       // start DSS
-      if (dss::DSS::getInstance()->initialize(properties)) {
+      if (dss::DSS::getInstance()->initialize(properties, config_file)) {
 #ifndef __APPLE__
         if(daemonize) {
           int result = daemon(1,0);

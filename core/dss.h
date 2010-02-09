@@ -96,13 +96,14 @@ namespace dss {
     /// Private constructor for singleton
     DSS();
 
-    bool loadConfig();
+    bool loadConfig(const std::string& _configFile);
+    bool parseProperties(const std::vector<std::string>& _properties);
     void addDefaultInterpreterPlugins();
 
     int getUptime() const;
   public:
     ~DSS();
-    bool initialize(const std::vector<std::string>& _properties);
+    bool initialize(const std::vector<std::string>& _properties, const std::string& _configFile);
     void run();
 
     static DSS* getInstance();
