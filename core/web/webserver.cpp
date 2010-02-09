@@ -72,7 +72,7 @@ namespace dss {
     m_mgContext = mg_start();
 
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "webroot", getDSS().getWebrootDirectory(), true, false);
-    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "ports", "8080", true, false);
+    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "ports", 8080, true, false);
 
     setupAPI();
     instantiateHandlers();
@@ -118,7 +118,7 @@ namespace dss {
   } // setupAPI
 
   void WebServer::doStart() {
-    std::string ports = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "ports");
+    std::string ports = intToString(DSS::getInstance()->getPropertySystem().getIntValue(getConfigPropertyBasePath() + "ports"));
     log("Webserver: Listening on port(s) " + ports);
     mg_set_option(m_mgContext, "ports", ports.c_str());
 

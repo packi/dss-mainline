@@ -144,7 +144,7 @@ static void create_services(AvahiClient *c) {
          * the service type (IPP vs. BSD LPR). Only services with the
          * same name should be put in the same entry group. */
 
-        int serverPort = strToInt(DSS::getInstance()->getPropertySystem().getStringValue("/config/subsystems/WebServer/ports"));
+        int serverPort = DSS::getInstance()->getPropertySystem().getIntValue("/config/subsystems/WebServer/ports");
 
         /* Add the service for IPP */
         if ((ret = avahi_entry_group_add_service(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, (AvahiPublishFlags)0, name, "_dssweb._tcp", NULL, NULL, serverPort, NULL, NULL, NULL)) < 0) {
@@ -272,7 +272,7 @@ fail:
 #endif
 #ifdef USE_DNS_SD
     DNSServiceErrorType err;
-    int serverPort = strToInt(DSS::getInstance()->getPropertySystem().getStringValue("/config/subsystems/WebServer/ports"));
+    int serverPort = DSS::getInstance()->getPropertySystem().getIntValue("/config/subsystems/WebServer/ports");
 
     memset(&m_RegisterReference, '\0', sizeof(m_RegisterReference));
 
