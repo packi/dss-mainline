@@ -115,8 +115,13 @@ int main (int argc, char* argv[]) {
   ;
 
   po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).options(desc).extra_parser(parse_prop)
+  try {
+    po::store(po::command_line_parser(argc, argv).options(desc).extra_parser(parse_prop)
           .run(), vm);
+  } catch (const po::error& e) {
+    cout << "Error parsing command line: " << e.what() << endl;
+    return 1;
+  }
   po::notify(vm);
 
   if (vm.count("help")) {
