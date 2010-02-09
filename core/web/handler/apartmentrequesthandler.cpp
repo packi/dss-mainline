@@ -80,11 +80,12 @@ namespace dss {
           return failure("Could not find group with ID '" + groupIDString + "'");
         }
       }
-      if(interface != NULL) {
+      if(interface == NULL) {
         interface = &m_Apartment.getGroup(GroupIDBroadcast);
-        return success();
       }
-      return failure("No interface");
+    
+      return handleDeviceInterfaceRequest(_request, interface);
+
     } else {
       if(_request.getMethod() == "getStructure") {
         return success(toJSON(m_Apartment));
