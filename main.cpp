@@ -53,7 +53,7 @@ using namespace std;
 namespace po = boost::program_options;
 
 pair<string, string> parse_prop(const string& s) {
-    if (s.find("--prop") == 0) {
+    if ((s.find("--prop") == 0) && (s.length() >=7)) {
       return make_pair("prop", s.substr(7));
     } else {
       return make_pair(string(), string());

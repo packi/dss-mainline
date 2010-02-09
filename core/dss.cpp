@@ -207,7 +207,7 @@ const char* WebrootDirectory = "data/webroot";
       std::string::size_type pos = propLine.find("=");
       if(pos == std::string::npos) {
         Logger::getInstance()->log("invalid property specified on commandline (format is name=value): '" + propLine + "'", lsError);
-        abort();
+        return false;
       } else {
         std::string name = propLine.substr(0, pos);
         std::string value = propLine.substr(pos+1, std::string::npos);
