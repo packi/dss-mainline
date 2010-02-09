@@ -3,8 +3,6 @@ CONFIGURE_FILE(doxygen_webservices.conf.in
 	${CMAKE_CURRENT_BINARY_DIR}/doxygen_webservices.conf)
 
 
-ADD_SUBDIRECTORY(images)
-
 SET(INTERNAL_HTML_TARGET ${CMAKE_CURRENT_BINARY_DIR}/internal/html/index.html)
 
 ADD_CUSTOM_COMMAND(

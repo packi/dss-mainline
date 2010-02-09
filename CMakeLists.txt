@@ -1,185 +1,171 @@
-CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
-PROJECT(DSS)
+cmake_minimum_required(VERSION 2.6)
+project(DSS)
 
-OPTION(WITH_TESTS "Include test-suite" ON)
-OPTION(WITH_SIM "Compile and start the simulation" ON)
-OPTION(WITH_GCOV "Compile coverage information into the dss" OFF)
+option(WITH_TESTS "Include test-suite" ON)
+option(WITH_SIM "Compile and start the simulation" ON)
+option(WITH_GCOV "Compile coverage information into the dss" OFF)
 
-IF(NOT WITH_DATADIR)
-  SET(WITH_DATADIR "${CMAKE_INSTALL_PREFIX}/share/dss/data" CACHE FILEPATH "Data directory")
-ENDIF(NOT WITH_DATADIR)
+if(NOT WITH_DATADIR)
+  set(WITH_DATADIR "${CMAKE_INSTALL_PREFIX}/share/dss/data" CACHE FILEPATH "Data directory")
+endif(NOT WITH_DATADIR)
 
-IF(NOT WITH_CONFIGDIR)
-  SET(WITH_CONFIGDIR "${WITH_DATADIR}" CACHE FILEPATH "Config directory")
-ENDIF(NOT WITH_CONFIGDIR)
+if(NOT WITH_CONFIGDIR)
+  set(WITH_CONFIGDIR "${WITH_DATADIR}" CACHE FILEPATH "Config directory")
+endif(NOT WITH_CONFIGDIR)
 
-IF(NOT WITH_WEBROOTDIR)
-  SET(WITH_WEBROOTDIR "${WITH_DATADIR}/webroot" CACHE FILEPATH "Webroot directory")
-ENDIF(NOT WITH_WEBROOTDIR)
+if(NOT WITH_WEBROOTDIR)
+  set(WITH_WEBROOTDIR "${WITH_DATADIR}/webroot" CACHE FILEPATH "Webroot directory")
+endif(NOT WITH_WEBROOTDIR)
 
-SET(DSS_GEN_VERSION_CMD "")
-IF(WIN32)
-  SET(DSS_GEN_VERSION_CMD "tools/dss_gen_version_win32.bat")
-ENDIF(WIN32)
-IF(UNIX)
-  SET(DSS_GEN_VERSION_CMD "tools/dss_gen_version_unix.sh")
-ENDIF(UNIX)
+set(DSS_GEN_VERSION_CMD "")
+if(WIN32)
+  set(DSS_GEN_VERSION_CMD "tools/dss_gen_version_win32.bat")
+endif(WIN32)
+if(UNIX)
+  set(DSS_GEN_VERSION_CMD "tools/dss_gen_version_unix.sh")
+endif(UNIX)
 
-ADD_CUSTOM_TARGET(build_info.h ALL
+add_custom_target(build_info.h ALL
 	COMMAND ${DSS_GEN_VERSION_CMD} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
-ADD_DEFINITIONS(-DHAVE_BUILD_INFO_H)
+add_definitions(-DHAVE_BUILD_INFO_H)
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-SET(REQUIRED_LIBS)
 
-INCLUDE (${CMAKE_ROOT}/Modules/FindLibXml2.cmake)
-IF (LIBXML2_FOUND)
-  INCLUDE_DIRECTORIES (${LIBXML2_INCLUDE_DIR})
-  SET(REQUIRED_LIBS ${REQUIRED_LIBS} ${LIBXML2_LIBRARIES})
-ELSE (LIBXML2_FOUND)
-  MESSAGE (FATAL_ERROR "Cannot build without LibXML2. Please install LibXML2.")
-ENDIF (LIBXML2_FOUND)
+add_definitions(-DXP_UNIX -DUSE_LIBXML -DNO_CGI)
+add_definitions(-Wall)
+include_directories(external)
+include_directories(${DSS_SOURCE_DIR})
 
-ADD_DEFINITIONS(-DXP_UNIX -DUSE_LIBXML -DNO_CGI)
-ADD_DEFINITIONS(-Wall)
-INCLUDE_DIRECTORIES(external)
-INCLUDE_DIRECTORIES(${DSS_SOURCE_DIR})
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  include(CheckCXXCompilerFlag)
+  check_cxx_compiler_flag("-Wno-deprecated" HAVE_WNO_DEPRECATED)
+  if(HAVE_WNO_DEPRECATED)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated")
+  endif(HAVE_WNO_DEPRECATED)
+ 
+  #check_cxx_compiler_flag("-Wold-style-cast" HAVE_WOLD_STYLE_CAST)
+  #if(HAVE_WOLD_STYLE_CAST)
+  #  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wold-style-cast")
+  #endif(HAVE_WOLD_STYLE_CAST)
+  if(WITH_GCOV)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+    set(CMAKE_LDFLAGS "${CMAKE_LDFLAGS} -fprofile-arcs -ftest-coverage")
+  endif(WITH_GCOV)
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  INCLUDE_DIRECTORIES(/opt/local/include)
-  SET(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} /opt/local/include)
-  LINK_DIRECTORIES(/opt/local/lib)
-  SET(REQUIRED_LIBS ${REQUIRED_LIBS} boost_thread-mt boost_filesystem-mt boost_system-mt boost_program_options-mt PocoFoundation PocoNet)
-  SET(DNS_SD_LIB)
-ELSE(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  SET(REQUIRED_LIBS ${REQUIRED_LIBS} boost_thread-mt boost_filesystem-mt boost_program_options-mt rt)
-ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  INCLUDE(CheckCXXCompilerFlag)
-  CHECK_CXX_COMPILER_FLAG("-Wno-deprecated" HAVE_WNO_DEPRECATED)
-  IF(HAVE_WNO_DEPRECATED)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated")
-  ENDIF(HAVE_WNO_DEPRECATED)
-  
-  #CHECK_CXX_COMPILER_FLAG("-Wold-style-cast" HAVE_WOLD_STYLE_CAST)
-  #IF(HAVE_WOLD_STYLE_CAST)
-  #  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wold-style-cast")
-  #ENDIF(HAVE_WOLD_STYLE_CAST)
-  IF(WITH_GCOV)
-    SET(REQUIRED_LIBS ${REQUIRED_LIBS} gcov)
-  ENDIF(WITH_GCOV)
-ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-
-SET(REQUIRED_LIBS ${REQUIRED_LIBS} PocoFoundation PocoNet)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} /opt/local/include)
+  link_directories(/opt/local/lib)
+  set(CMAKE_OSX_ARCHITECTURES "x86_64")
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 # header tests
-INCLUDE(CheckIncludeFiles)
-INCLUDE(CheckIncludeFileCXX)
+include(CheckIncludeFiles)
+include(CheckIncludeFileCXX)
 
-CHECK_INCLUDE_FILES(stdint.h HAVE_STDINT)
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
+set(REQUIRED_LIBS dl)
 
-CHECK_INCLUDE_FILES(dns_sd.h HAVE_DNS_SD)
-CHECK_INCLUDE_FILES(avahi-client/publish.h HAVE_AVAHI)
+check_include_files(stdint.h HAVE_STDINT)
 
-IF(${HAVE_AVAHI} MATCHES 1) 
-  SET(DNS_SD_LIB avahi-common avahi-client)
-  SET(WITH_BONJOUR 1)
-ENDIF(${HAVE_AVAHI} MATCHES 1)
+# check for a library providing zeroconf (avahi/dnssd)
+find_package(Avahi)
+include_directories(${AVAHI_INCLUDE_DIRS})
+set(REQUIRED_LIBS ${REQUIRED_LIBS} ${AVAHI_LIBRARIES})
+if(AVAHI_FOUND)
+  set(WITH_BONJOUR 1)
+  set(HAVE_AVAHI 1)
+else(AVAHI_FOUND)
+  find_package(DNSSD)
+  include_directories(${DNSSD_INCLUDE_DIRS})
+  set(REQUIRED_LIBS ${REQUIRED_LIBS} ${DNSSD_LIBRARIES})
+  if(DNSSD_FOUND)
+    set(WITH_BONJOUR 1)
+    set(HAVE_DNS_SD 1)
+  endif(DNSSD_FOUND)
+endif(AVAHI_FOUND)
 
-IF(${HAVE_DNS_SD} MATCHES 1)
-  SET(WITH_BONJOUR 1)
-  IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    SET(DNS_SD_LIB dns_sd)
-  ENDIF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-ENDIF(${HAVE_DNS_SD} MATCHES 1)
-
-# check for SpiderMonkey API header
-SET(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DXP_UNIX)
-CHECK_INCLUDE_FILES(mozjs/jsapi.h HAVE_MOZJS_JSAPI_H)
-CHECK_INCLUDE_FILES(js/jsapi.h HAVE_JS_JSAPI_H)
-# check for SpiderMonkey Library
-FIND_LIBRARY(MOZJS mozjs)
-IF(${MOZJS} MATCHES "MOZJS-NOTFOUND")
-  FIND_LIBRARY(MOZJS js)
-  IF(${MOZJS} MATCHES "MOZJS-NOTFOUND")
-    # try finding xulrunner
-    INCLUDE(FindPkgConfig)
-    pkg_search_module(MOZJS REQUIRED libxul-unstable)
-    SET(MOZJS ${MOZJS_LIBRARIES})
-    INCLUDE_DIRECTORIES(${MOZJS_INCLUDE_DIRS})
-    SET(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${MOZJS_INCLUDE_DIRS})
-    CHECK_INCLUDE_FILES(jsapi.h HAVE_JSAPI_H)
-    LINK_DIRECTORIES(${MOZJS_LIBRARY_DIRS})
-  ENDIF(${MOZJS} MATCHES "MOZJS-NOTFOUND")
-ENDIF(${MOZJS} MATCHES "MOZJS-NOTFOUND")
+# check for SpiderMonkey headers and library
+set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DXP_UNIX)
+find_package(SpiderMonkey REQUIRED)
+include_directories(${SPIDERMONKEY_INCLUDE_DIRS})
+set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${SPIDERMONKEY_INCLUDE_DIRS})
+check_include_files(mozjs/jsapi.h HAVE_MOZJS_JSAPI_H)
+check_include_files(js/jsapi.h HAVE_JS_JSAPI_H)
+check_include_files(jsapi.h HAVE_JSAPI_H)
+set(REQUIRED_LIBS ${REQUIRED_LIBS} ${SPIDERMONKEY_LIBRARIES})
+if(DEFINED SPIDERMONKEY_LIBRARY_DIRS)
+  link_directories(${SPIDERMONKEY_LIBRARY_DIRS})
+endif()
 
 # check for gsoap headers and library
-CHECK_INCLUDE_FILES(stdsoap2.h HAVE_STDSOAP2_H)
-IF(NOT HAVE_STDSOAP2_H)
-  MESSAGE(FATAL_ERROR "gsoap library is required: stdsoap2.h header not found")
-ENDIF(NOT HAVE_STDSOAP2_H)
-FIND_LIBRARY(GSOAPPP "gsoap++")
-IF(${GSOAPPP} MATCHES "GSOAPPP-NOTFOUND")
-  MESSAGE(FATAL_ERROR "gsoap library is required: library gsoap++ not found")
-ENDIF(${GSOAPPP} MATCHES "GSOAPPP-NOTFOUND")
+find_package(GSOAP REQUIRED)
+include_directories(${GSOAP_INCLUDE_DIRS})
+check_include_files(stdsoap2.h HAVE_STDSOAP2_H)
+set(REQUIRED_LIBS ${REQUIRED_LIBS} ${GSOAP_LIBRARIES})
 
 # check for libical headers and library
-CHECK_INCLUDE_FILES(libical/ical.h HAVE_LIBICAL_ICAL_H)
-CHECK_INCLUDE_FILES(ical.h HAVE_ICAL_H)
-IF(NOT HAVE_ICAL_H AND NOT HAVE_LIBICAL_ICAL_H)
-  MESSAGE(FATAL_ERROR "libical library is required: ical.h not found")
-ENDIF(NOT HAVE_ICAL_H AND NOT HAVE_LIBICAL_ICAL_H)
-FIND_LIBRARY(LIBICAL ical)
-IF(${LIBICAL} MATCHES "LIBICAL-NOTFOUND")
-  MESSAGE(FATAL_ERROR "libical libical is required: library libical not found")
-ENDIF(${LIBICAL} MATCHES "LIBICAL-NOTFOUND")
+find_package(Libical REQUIRED)
+include_directories(${LIBICAL_INCLUDE_DIRS})
+check_include_files(libical/ical.h HAVE_LIBICAL_ICAL_H)
+set(REQUIRED_LIBS ${REQUIRED_LIBS} ${LIBICAL_LIBRARIES})
 
 # check for libpoco headers and library
-CHECK_INCLUDE_FILE_CXX(Poco/XML/XML.h HAVE_POCOXML_H)
-IF(NOT HAVE_POCOXML_H)
-  MESSAGE(FATAL_ERROR "poco library is required: PocoXML.h not found")
-ENDIF(NOT HAVE_POCOXML_H)
-FIND_LIBRARY(POCOXML PocoXML)
-IF(${POCOXML} MATCHES "POCOXML-NOTFOUND")
-  MESSAGE(FATAL_ERROR "poco is required: library PocoXML not found")
-ENDIF(${POCOXML} MATCHES "POCOXML-NOTFOUND")
+find_package(Poco REQUIRED)
+include_directories(${POCO_INCLUDE_DIRS})
+set(REQUIRED_LIBS ${REQUIRED_LIBS} ${POCO_LIBRARIES} PocoFoundation PocoNet)
+
+# check for libxml
+find_package(LibXml2 REQUIRED)
+include_directories(${LIBXML2_INCLUDE_DIR})
+set(REQUIRED_LIBS ${REQUIRED_LIBS} ${LIBXML2_LIBRARIES})
+
+# check for pthread
+find_package(Threads REQUIRED)
 
 # generate config.h header file
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-ADD_DEFINITIONS(-DHAVE_CONFIG_H)
+add_definitions(-DHAVE_CONFIG_H)
 
-ADD_SUBDIRECTORY(core)
-ADD_SUBDIRECTORY(unix)
-ADD_SUBDIRECTORY(webservices)
-ADD_SUBDIRECTORY(external)
-ADD_SUBDIRECTORY(doc)
+set(BOOST_REQUIRED_LIBS thread filesystem system program_options)
 
-LINK_DIRECTORIES(${DSS_BINARY_DIR}/core ${DSS_BINARY_DIR}/unix ${DSS_BINARY_DIR}/tests)
+# check for Boost unit testing
+if(WITH_TESTS)
+  set(BOOST_REQUIRED_LIBS unit_test_framework ${BOOST_REQUIRED_LIBS})
+endif(WITH_TESTS)
+
+# check for Boost
+set(Boost_USE_MULTITHREADED ON)
+find_package(Boost 1.35.0 COMPONENTS ${BOOST_REQUIRED_LIBS})
+set(REQUIRED_LIBS ${Boost_LIBRARIES} ${REQUIRED_LIBS})
+
+#include test-directory if needed
+set(TEST_LIB)
+if(WITH_TESTS)
+  set(TEST_LIB tests)
+  add_subdirectory(tests)
+  add_dependencies(dsstests build_info.h)
+endif(WITH_TESTS)
+
+add_subdirectory(core)
+add_subdirectory(unix)
+add_subdirectory(webservices)
+add_subdirectory(external)
+add_subdirectory(doc)
 
 
-SET(REQUIRED_LIBS ${REQUIRED_LIBS} ${GSOAPPP} PocoXML ${MOZJS} ${DNS_SD_LIB}
-	${BOOST_TEST_LIB} dl ${LIBICAL})
-
-SET(BOOST_TEST_LIB)
-SET(TEST_LIB)
-IF(WITH_TESTS) 
-  SET(BOOST_TEST_LIB boost_unit_test_framework-mt)
-  SET(TEST_LIB tests)
-  ADD_SUBDIRECTORY(tests)
-  ADD_DEPENDENCIES(dsstests build_info.h)
-ENDIF(WITH_TESTS)
-
-ADD_EXECUTABLE(dss main.cpp namespaces.cpp)
-ADD_DEPENDENCIES(dss build_info.h)
+add_executable(dss main.cpp namespaces.cpp)
+target_link_libraries(dss ${TEST_LIB} core ds485 model unix webservices mongoose
+			  ${REQUIRED_LIBS})
+add_dependencies(dss build_info.h)
 
 ## -- install targets:
-INSTALL(TARGETS dss RUNTIME DESTINATION bin)
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data/
+install(TARGETS dss RUNTIME DESTINATION bin)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data/
 		  DESTINATION ${WITH_DATADIR}
 		  PATTERN "webroot" EXCLUDE
 		  PATTERN "*.xml" EXCLUDE
@@ -187,8 +173,8 @@ INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data/
 		  )
 
 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data/webroot/ DESTINATION ${WITH_WEBROOTDIR})
-INSTALL(FILES
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data/webroot/ DESTINATION ${WITH_WEBROOTDIR})
+install(FILES
           ${CMAKE_CURRENT_SOURCE_DIR}/data/config.xml
           ${CMAKE_CURRENT_SOURCE_DIR}/data/subscriptions.xml
           ${CMAKE_CURRENT_SOURCE_DIR}/data/sim.xml
@@ -196,11 +182,7 @@ INSTALL(FILES
        )
 
 
-TARGET_LINK_LIBRARIES(dss ${TEST_LIB} ${BOOST_TEST_LIB} core ds485 model unix webservices pthread
-	mongoose ${REQUIRED_LIBS})
-
-
-ADD_CUSTOM_TARGET(debian
+add_custom_target(debian
 	COMMAND dpkg-buildpackage -rfakeroot
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
