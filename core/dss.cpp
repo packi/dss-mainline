@@ -155,7 +155,42 @@ const char* WebrootDirectory = "data/webroot";
     }
   }
 
-  bool DSS::initialize(const vector<std::string>& _properties) {
+  bool DSS::parseProperties(const std::vector<std::string>& _properties) {
+    foreach(std::string propLine, _properties) {
+      std::string::size_type pos = propLine.find("=");
+      if(pos == std::string::npos) {
+        Logger::getInstance()->log("invalid property specified on commandline (format is name=value): '" + propLine + "'", lsError);
+        return false;
+      } else {
+        std::string name = propLine.substr(0, pos);
+        std::string value = propLine.substr(pos+1, std::string::npos);
+        Logger::getInstance()->log("Setting property '" + name + "' to '" + value + "'", lsInfo);
+        try {
+          int val = strToInt(value);
+          m_pPropertySystem->setIntValue(name, val, true);
+          continue;
+        } catch(std::invalid_argument&) {
+        }
+
+        if(value == "true") {
+          m_pPropertySystem->setBoolValue(name, true, true);
+          continue;
+        }
+
+        if(value == "false") {
+          m_pPropertySystem->setBoolValue(name, false, true);
+          continue;
+        }
+
+        m_pPropertySystem->setStringValue(name, value, true);
+      }
+    }
+
+    return true;
+  }
+
+
+  bool DSS::initialize(const vector<std::string>& _properties, const std::string& _configFile) {
     m_State = ssCreatingSubsystems;
 
     m_pModelMaintenance = boost::shared_ptr<ModelMaintenance>(new ModelMaintenance(this));
@@ -203,41 +238,17 @@ const char* WebrootDirectory = "data/webroot";
     m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner);
     m_pEventQueue = boost::shared_ptr<EventQueue>(new EventQueue);
 
-    foreach(std::string propLine, _properties) {
-      std::string::size_type pos = propLine.find("=");
-      if(pos == std::string::npos) {
-        Logger::getInstance()->log("invalid property specified on commandline (format is name=value): '" + propLine + "'", lsError);
-        return false;
-      } else {
-        std::string name = propLine.substr(0, pos);
-        std::string value = propLine.substr(pos+1, std::string::npos);
-        Logger::getInstance()->log("Setting property '" + name + "' to '" + value + "'", lsInfo);
-        try {
-          int val = strToInt(value);
-          m_pPropertySystem->setIntValue(name, val, true);
-          continue;
-        } catch(std::invalid_argument&) {
-        }
-
-        if(value == "true") {
-          m_pPropertySystem->setBoolValue(name, true, true);
-          continue;
-        }
-
-        if(value == "false") {
-          m_pPropertySystem->setBoolValue(name, false, true);
-          continue;
-        }
-
-        m_pPropertySystem->setStringValue(name, value, true);
-      }
-    }
+    parseProperties(_properties);
 
     // -- setup logging
-    if(!loadConfig()) {
+    if(!loadConfig(_configFile)) {
       Logger::getInstance()->log("Could not parse config file", lsFatal);
       return false;
     }
+
+    // we need to parse the properties twice to ensure that command line
+    // options override config.xml
+    parseProperties(_properties);
 
     // see whether we have a log file set in config.xml, and set the
     // log target accordingly
@@ -346,10 +357,14 @@ const char* WebrootDirectory = "data/webroot";
     delete inst;
   } // shutdown
 
-  bool DSS::loadConfig() {
+  bool DSS::loadConfig(const std::string& _configFile) {
     m_State = ssLoadingConfig;
     Logger::getInstance()->log("Loading config", lsInfo);
-    return getPropertySystem().loadFromXML(getConfigDirectory() + "config.xml", getPropertySystem().getProperty("/config"));
+    if(_configFile.length() > 0) {
+      return getPropertySystem().loadFromXML(_configFile, getPropertySystem().getProperty("/config"));
+    } else {
+      return getPropertySystem().loadFromXML(getConfigDirectory() + "config.xml", getPropertySystem().getProperty("/config"));
+    }
   } // loadConfig
 
 
