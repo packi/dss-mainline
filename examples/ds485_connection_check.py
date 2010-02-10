@@ -25,7 +25,7 @@ from suds.client import Client
 import time
 import smtplib
 
-url = 'http://localhost:8080/dss.wsdl'
+url = 'https://localhost:8080/dss.wsdl'
 mailserver = 'smtp.changemeserver.somwhere'
 mailfrom = 'dss@localhost'
 mailto = [ 'jemand@irgendwo.domain' ]

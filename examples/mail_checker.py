@@ -26,7 +26,7 @@ import imaplib
 import re
 import time
 
-url = 'http://localhost:8080/dss.wsdl'
+url = 'https://localhost:8080/dss.wsdl'
 mailHost = ''
 mailPort = 993
 mailUser = ''

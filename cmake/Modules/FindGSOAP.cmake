@@ -1,4 +1,4 @@
-find_library(GSOAP_LIBRARY NAMES gsoap++)
+find_library(GSOAP_LIBRARY NAMES gsoapssl++)
 find_path(GSOAP_INCLUDE_DIR stdsoap2.h)
 
 include(FindPackageHandleStandardArgs)
