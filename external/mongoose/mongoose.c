@@ -160,8 +160,13 @@ typedef struct DIR {
 #include <dirent.h>
 #include <dlfcn.h>
 #include <pthread.h>
+#ifndef __APPLE__
 #define	SSL_LIB			"libssl.so"
 #define	CRYPTO_LIB		"libcrypto.so"
+#else
+#define	SSL_LIB			"libssl.dylib"
+#define	CRYPTO_LIB		"libcrypto.dylib"
+#endif
 #define	DIRSEP			'/'
 #define	IS_DIRSEP_CHAR(c)	((c) == '/')
 #define	O_BINARY		0
@@ -4022,10 +4027,10 @@ set_ssl_option(struct mg_context *ctx, const char *pem)
 
 	if (CTX != NULL && SSL_CTX_use_certificate_file(
 	    CTX, pem, SSL_FILETYPE_PEM) == 0)
-		cry(fc(ctx), "%s: cannot open %s", __func__, pem);
+		cry(fc(ctx), "%s: cannot open %s (using cert file)", __func__, pem);
 	else if (CTX != NULL && SSL_CTX_use_PrivateKey_file(
 	    CTX, pem, SSL_FILETYPE_PEM) == 0)
-		cry(fc(ctx), "%s: cannot open %s", NULL, pem);
+		cry(fc(ctx), "%s: cannot open %s (using privkey file)", NULL, pem);
 	else
 		retval = TRUE;
 
