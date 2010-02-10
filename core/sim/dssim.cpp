@@ -977,8 +977,8 @@ namespace dss {
                 devid_t devID = pd.get<devid_t>();
                 DSIDInterface& dev = lookupDevice(devID);
                 uint16_t valueToSend = pd.get<uint16_t>();
-                uint16_t flags = pd.get<uint16_t>();    
-                
+                uint16_t flags = pd.get<uint16_t>();
+
                 bool handled = false;
                 uint8_t value = dev.dsLinkSend(valueToSend, flags, handled);
                 if(handled && ((flags & DSLinkSendWriteOnly) == 0)) {
