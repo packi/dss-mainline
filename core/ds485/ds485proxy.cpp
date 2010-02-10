@@ -59,6 +59,7 @@ namespace dss {
     if(_pDSS != NULL) {
       _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "rs485devicename")
             ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, std::string>(m_DS485Controller, &DS485Controller::getRS485DeviceName, &DS485Controller::setRS485DeviceName));
+      _pDSS->getPropertySystem().setBoolValue(getConfigPropertyBasePath() + "denyJoiningAsShortDevice", false, true, false);
 
       _pDSS->getPropertySystem().createProperty(getPropertyBasePath() + "tokensReceived")
             ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, int>(m_DS485Controller, &DS485Controller::getTokenCount));
@@ -77,7 +78,6 @@ namespace dss {
             ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, std::string>(m_DS485Controller, &DS485Controller::getStateAsString));
 
       _pDSS->getPropertySystem().setStringValue("/system/dsid", "3504175FE0000000DEADBEEF", true, false);
-      _pDSS->getPropertySystem().setBoolValue(getPropertyBasePath() + "denyJoiningAsShortDevice", false, true, false);
     }
   } // ctor
 
