@@ -24,6 +24,7 @@
 #define DSSIMJS_H_
 
 #include <string>
+#include <vector>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -34,11 +35,11 @@ namespace dss {
 
   class DSIDJSCreator : public DSIDCreator {
   public:
-    DSIDJSCreator(const std::string& _fileName, const std::string& _pluginName, DSSim& _simulator);
+    DSIDJSCreator(const std::vector<std::string>& _fileNames, const std::string& _pluginName, DSSim& _simulator);
     virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter);
   private:
     boost::scoped_ptr<ScriptEnvironment> m_pScriptEnvironment;
-    std::string m_FileName;
+    std::vector<std::string> m_FileNames;
     DSSim& m_Simulator;
   }; // DSIDPluginCreator
 

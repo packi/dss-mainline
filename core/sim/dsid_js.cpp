@@ -26,6 +26,7 @@
 #include "core/scripting/propertyscriptextension.h"
 #include "core/dss.h"
 #include "core/thread.h"
+#include "core/foreach.h"
 
 namespace dss {
 
@@ -33,17 +34,20 @@ namespace dss {
   public:
     DSIDJS(const DSDSMeterSim& _simulator, dsid_t _dsid,
            devid_t _shortAddress, boost::shared_ptr<ScriptContext> _pContext,
-           const std::string& _fileName)
+           const std::vector<std::string>& _fileNames)
     : DSIDInterface(_simulator, _dsid, _shortAddress),
       m_pContext(_pContext),
-      m_FileName(_fileName)
+      m_FileNames(_fileNames)
     {}
 
     virtual ~DSIDJS() {}
 
     virtual void initialize() {
       try {
-        jsval res = m_pContext->doEvaluateScript(m_FileName);
+        jsval res = JSVAL_NULL;
+        foreach(std::string script, m_FileNames) {
+          res = m_pContext->doEvaluateScript(script);
+        }
         if(JSVAL_IS_OBJECT(res)) {
           m_pJSThis = JSVAL_TO_OBJECT(res);
           m_pSelf.reset(new ScriptObject(m_pJSThis, *m_pContext));
@@ -262,7 +266,7 @@ namespace dss {
     boost::shared_ptr<ScriptContext> m_pContext;
     JSObject* m_pJSThis;
     boost::shared_ptr<ScriptObject> m_pSelf;
-    std::string m_FileName;
+    const std::vector<std::string>& m_FileNames;
   }; // DSIDJS
 
 
@@ -344,10 +348,10 @@ namespace dss {
 
   //================================================== DSIDJSCreator
 
-  DSIDJSCreator::DSIDJSCreator(const std::string& _fileName, const std::string& _pluginName, DSSim& _simulator)
+  DSIDJSCreator::DSIDJSCreator(const std::vector<std::string>& _fileNames, const std::string& _pluginName, DSSim& _simulator)
   : DSIDCreator(_pluginName),
     m_pScriptEnvironment(new ScriptEnvironment()),
-    m_FileName(_fileName),
+    m_FileNames(_fileNames),
     m_Simulator(_simulator)
   {
     m_pScriptEnvironment->initialize();
@@ -357,7 +361,7 @@ namespace dss {
 
   DSIDInterface* DSIDJSCreator::createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
     boost::shared_ptr<ScriptContext> pContext(m_pScriptEnvironment->getContext());
-    DSIDJS* result = new DSIDJS(_dsMeter, _dsid, _shortAddress, pContext, m_FileName);
+    DSIDJS* result = new DSIDJS(_dsMeter, _dsid, _shortAddress, pContext, m_FileNames);
     return result;
   } // createDSID
 
