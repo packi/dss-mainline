@@ -787,13 +787,11 @@ namespace dss {
             if(m_ValidBytes == (m_MessageLength + TheFrameHeaderSize + TheCRCSize)) {
               uint16_t dataCRC = crc16(m_ReceiveBuffer, m_ValidBytes);
               if(dataCRC != 0) {
-                Logger::getInstance()->log("*********** crc mismatch.", lsError);
+                Logger::getInstance()->log("dS485: CRC Mismatch.", lsError);
                 m_NumberOfCRCErrors++;
-              } else {
-                //Logger::getInstance()->log("received packet, crc ok");
-                //std::cout << "#";
-                m_NumberOfFramesReceived++;
+                return NULL;
               }
+              m_NumberOfFramesReceived++;
               DS485CommandFrame* frame = new DS485CommandFrame();
               frame->getHeader().fromChar(m_ReceiveBuffer, m_ValidBytes);
               frame->setLength(m_ReceiveBuffer[3] & 0x0F);
