@@ -41,6 +41,8 @@ namespace Poco {
 }
 
 namespace dss {
+  class PropertyNode;
+  typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
   class DS485Frame;
   class DSIDInterface;
   class DSDSMeterSim;
@@ -75,6 +77,7 @@ namespace dss {
     void loadPlugins();
 
     void loadFromConfig();
+    void createJSPluginFrom(PropertyNodePtr _node);
   protected:
     virtual void doStart() {}
   public:

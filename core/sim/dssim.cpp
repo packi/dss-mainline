@@ -111,24 +111,7 @@ namespace dss {
     PropertyNodePtr pNode = getDSS().getPropertySystem().getProperty(getConfigPropertyBasePath() + "js-devices");
     if(pNode != NULL) {
       for(int iNode = 0; iNode < pNode->getChildCount(); iNode++) {
-        PropertyNodePtr pChildNode = pNode->getChild(iNode);
-        PropertyNodePtr scriptFileNode = pChildNode->getPropertyByName("script-file");
-        PropertyNodePtr simIDNode = pChildNode->getPropertyByName("id");
-        if(scriptFileNode != NULL) {
-          if(simIDNode != NULL) {
-            std::string scriptFile = scriptFileNode->getAsString();
-            if(!boost::filesystem::exists(scriptFile)) {
-              log("DSSim::initialize: cannot find script file '" + scriptFile + "', skipping", lsError);
-              continue;
-            }
-            log("Found js-device with script '" + scriptFile + "' and id: '" + simIDNode->getAsString() + "'", lsInfo);
-            m_DSIDFactory.registerCreator(new DSIDJSCreator(scriptFile, simIDNode->getAsString(), *this));
-          } else {
-            log("DSSim::initialize: Missing property id", lsError);
-          }
-        } else {
-          log("DSSim::initialize: Missing property script-file", lsError);
-        }
+        createJSPluginFrom(pNode->getChild(iNode));
       }
     }
 
@@ -139,6 +122,34 @@ namespace dss {
 
     m_Initialized = true;
   } // initialize
+
+  void DSSim::createJSPluginFrom(PropertyNodePtr _node) {
+    PropertyNodePtr simIDNode = _node->getPropertyByName("id");
+    if(simIDNode == NULL) {
+      log("DSSim::createJSPluginFrom: Missing property id", lsError);
+      return;
+    }
+    std::string simID = simIDNode->getAsString();
+    log("DSSim::createJSPluginFrom: Found device with id: " + simID, lsInfo);
+    std::vector<std::string> scripts;
+    for(int iNode = 0; iNode < _node->getChildCount(); iNode++) {
+      PropertyNodePtr childNode = _node->getChild(iNode);
+      if(childNode->getName() == "script-file") {
+        std::string scriptFile = childNode->getAsString();
+        log("DSSim::createJSPluginFrom:   adding script-file: " + scriptFile, lsInfo);
+        if(!boost::filesystem::exists(scriptFile)) {
+          log("DSSim::createJSPluginFrom: cannot find script file '" + scriptFile + "', skipping device " + simID, lsError);
+          return;
+        }
+        scripts.push_back(scriptFile);
+      }
+    }
+    if(!scripts.empty()) {
+      m_DSIDFactory.registerCreator(new DSIDJSCreator(scripts, simID, *this));
+    } else {
+      log("DSSim::createJSPluginFrom: Missing property script-file", lsError);
+    }
+  } // createJSPluginFrom
 
   void DSSim::loadFromConfig() {
     const int theConfigFileVersion = 1;
@@ -966,8 +977,8 @@ namespace dss {
                 devid_t devID = pd.get<devid_t>();
                 DSIDInterface& dev = lookupDevice(devID);
                 uint16_t valueToSend = pd.get<uint16_t>();
-                uint16_t flags = pd.get<uint16_t>();    
-                
+                uint16_t flags = pd.get<uint16_t>();
+
                 bool handled = false;
                 uint8_t value = dev.dsLinkSend(valueToSend, flags, handled);
                 if(handled && ((flags & DSLinkSendWriteOnly) == 0)) {
