@@ -10,7 +10,7 @@ function call_dss() {
     if [ -z "$DSS_HOST" ]; then
 	DSS_HOST=localhost
     fi
-    URL=http://$DSS_HOST:8080/json/$1/$2
+    URL=https://$DSS_HOST:8080/json/$1/$2
     shift; shift
 
     if [ -n "$1" ]; then
@@ -22,7 +22,7 @@ function call_dss() {
 	shift
     done
     
-    result=$(wget -q -O - $URL)
+    result=$(wget --no-check-certificate -q -O - $URL)
     if [ -n "$(echo $result|grep '"ok":false')" ]; then
 	echo $result|sed -e 's|.*message\":\"||g' -e 's|\"}$||g'
 	exit 1
