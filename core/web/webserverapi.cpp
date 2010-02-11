@@ -334,6 +334,25 @@ namespace dss {
       .withDocumentation("Undoes setting the value of sceneNr.");
     clsApartment.addMethod("getConsumption")
       .withDocumentation("Returns the consumption of all devices in the set in mW.");
+
+    RestfulClass& clsStructure = api->addClass("structure");
+    clsStructure.addMethod("zoneAddDevice")
+       .withParameter("devid", "integer", true)
+       .withParameter("zone", "integer", true)
+       .withDocumentation("Adds a device to zone");
+
+    clsStructure.addMethod("addZone")
+        .withParameter("zoneID", "integer", true)
+        .withDocumentation("Adds a zone with the given id");
+
+    clsStructure.addMethod("removeZone")
+        .withParameter("zoneID", "integer", true)
+        .withDocumentation("Removes a zone with the given id");
+
+    clsStructure.addMethod("removeDevice")
+        .withParameter("devID", "integer", true)
+        .withDocumentation("Removes a device.", "Only devices that are no longer present (isPresent flag is not set) can be removed.");
+    
     return api;
   } // createRestfulAPI
 
