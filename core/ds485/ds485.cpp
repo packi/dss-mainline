@@ -728,7 +728,7 @@ namespace dss {
         switch(m_State) {
           case rsSynchronizing:
           {
-            if(((unsigned char)currentChar == FrameStart) && !m_IsEscaped) {
+            if((unsigned char)currentChar == FrameStart) {
               m_State = rsReadingHeader;
             } else {
               std::cout << "?";
