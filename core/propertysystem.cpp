@@ -40,6 +40,7 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/SAX/InputSource.h>
+#include <Poco/SAX/SAXException.h>
 
 using Poco::XML::Document;
 using Poco::XML::Attr;
@@ -86,7 +87,14 @@ namespace dss {
 
     InputSource input(inFile);
     DOMParser parser;
-    AutoPtr<Document> pDoc = parser.parse(&input);
+    AutoPtr<Document> pDoc;
+    try {
+      pDoc = parser.parse(&input);
+    } catch (Poco::XML::SAXParseException& e) {
+      Logger::getInstance()->log("PropertySystem::loadFromXML:  " + _fileName 
+                                 + ": " + e.message(), lsError);
+      return false;
+    }
     Element* rootNode = pDoc->documentElement();
     if(rootNode->localName() != "properties") {
       Logger::getInstance()->log("PropertySystem::loadFromXML: root node must be named properties, got: '" + rootNode->localName() + "'", lsError);
