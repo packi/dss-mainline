@@ -563,10 +563,14 @@ namespace dss {
                 flush(std::cout);
               }
             }
+            else {
+              // any command frame indicates there are still devices joining
+              time(&tokenReceivedAt);
+            }
             // Handle timeout
             time_t now;
             time(&now);
-            if((now - tokenReceivedAt) > 15) {
+            if((now - tokenReceivedAt) > 20) {
               std::cerr << "DS485: Wait for token timeout, restarting" << std::endl;
               doChangeState(csInitial);
               continue;
