@@ -263,7 +263,7 @@ namespace dss {
     solicitSuccessorResponseFrame->setCommand(CommandSolicitSuccessorResponse);
     solicitSuccessorResponseFrame->getPayload().add(m_DSID);
 
-    int senseTimeMS = 0;
+    int senseTimeMS = (rand() % 1000) + 2500;
     int numberOfJoinPacketsToWait = -1;
     bool lastSentWasToken = false;
     int comErrorSleepTimeScaler = 1;
