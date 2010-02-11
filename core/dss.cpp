@@ -376,8 +376,7 @@ const char* WebrootDirectory = "data/webroot";
 #endif
 #ifdef HAVE_BUILD_INFO_H
     ostr << " (" << DSS_RCS_REVISION << ")"
-         << " (" << DSS_BUILD_USER << "@" << DSS_BUILD_HOST << ")"
-         << " " << DSS_BUILD_DATE;
+         << " (" << DSS_BUILD_USER << "@" << DSS_BUILD_HOST << ")";
 #endif
     return ostr.str();
   }
