@@ -341,24 +341,6 @@ namespace dss {
         lastSentWasToken = false;
         missedFramesCounter = 0;
 
-        // discard packets which are not addressed to us
-        if(!header.isBroadcast() &&
-           (header.getDestination() != m_StationID) &&
-              (m_State == csSlave ||
-               m_State == csMaster)
-          )
-        {
-/*
-          Logger::getInstance()->log("packet not for me, discarding");
-          std::cout << "dest: " << (int)header.getDestination() << std::endl;
-          std::cout << "src:  " << (int)header.getSource() << std::endl;
-          if(cmdFrame != NULL) {
-            std::cout << "cmd:  " << CommandToString(cmdFrame->getCommand()) << std::endl;
-          }
-*/
-          continue;
-        }
-
         // handle cases in which we're obliged to act on disregarding our current state
         if(cmdFrame != NULL) {
           if(cmdFrame->getCommand() == CommandGetAddressRequest) {
@@ -371,7 +353,23 @@ namespace dss {
               Logger::getInstance()->log("DS485: received get address request");
               continue;
             }
+          } else if(cmdFrame->getCommand() == CommandSolicitSuccessorRequest) {
+            if (m_State == csSlave || m_State == csMaster) {
+              Logger::getInstance()->log("DS485: bus is reorganizing, restart", lsError);
+              doChangeState(csInitial);
+              continue;
+            }
           }
+        }
+
+        // discard packets which are not addressed to us
+        if(!header.isBroadcast() &&
+           (header.getDestination() != m_StationID) &&
+              (m_State == csSlave ||
+               m_State == csMaster)
+          )
+        {
+          continue;
         }
 
         switch(m_State) {
