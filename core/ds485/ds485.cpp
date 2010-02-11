@@ -476,11 +476,13 @@ namespace dss {
                     m_PendingFrames.erase(m_PendingFrames.begin());
                     std::cout << "\ngot ack" << std::endl;
                   } else if(cmdAckFrame->getCommand() == CommandBusy) {
-                    std::cout << "\ndsMeter is busy" << std::endl;
-                  } else {
+                    std::cout << "\ngot busy" << std::endl;
+                  } else if(cmdAckFrame->getCommand() == CommandResponse) {
+                    std::cout << "\ngot response" << std::endl;
                     m_PendingFrames.erase(m_PendingFrames.begin());
-                    std::cout << "\n&&&&got other" << std::endl;
                     addToReceivedQueue(cmdAckFrame);
+                  } else {
+                    std::cout << "\ngot invalid response" << std::endl;
                   }
                 } else {
                   m_PendingFrames.erase(m_PendingFrames.begin());
