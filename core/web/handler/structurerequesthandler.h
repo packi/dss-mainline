@@ -39,6 +39,12 @@ namespace dss {
     Apartment& m_Apartment;
     ModelMaintenance& m_ModelMaintenance;
     StructureModifyingBusInterface& m_Interface;
+
+    boost::shared_ptr<JSONObject> zoneAddDevice(const RestfulRequest& _request);
+    boost::shared_ptr<JSONObject> removeDevice(const RestfulRequest& _request);
+    boost::shared_ptr<JSONObject> addZone(const RestfulRequest& _request);
+    boost::shared_ptr<JSONObject> removeZone(const RestfulRequest& _request);
+
   }; // StructureRequestHandler
 
 } // namespace dss
