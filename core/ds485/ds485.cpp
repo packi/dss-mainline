@@ -263,7 +263,7 @@ namespace dss {
     solicitSuccessorResponseFrame->setCommand(CommandSolicitSuccessorResponse);
     solicitSuccessorResponseFrame->getPayload().add(m_DSID);
 
-    int senseTimeMS = 0;
+    int senseTimeMS = (rand() % 1000) + 2500;
     int numberOfJoinPacketsToWait = -1;
     bool lastSentWasToken = false;
     int comErrorSleepTimeScaler = 1;
@@ -288,12 +288,12 @@ namespace dss {
       } else if(m_State == csSensing) {
         try {
           if(m_FrameReader.senseTraffic(senseTimeMS)) {
-            Logger::getInstance()->log("Sensed traffic on the line, changing to csSlaveWaitingToJoin");
+            Logger::getInstance()->log("DS485: Sensed traffic on the line");
             // wait some time for the first frame and skip it...
             delete m_FrameReader.getFrame(1000);
             doChangeState(csSlaveWaitingToJoin);
           } else {
-            Logger::getInstance()->log("No traffic on line, I'll be your master today");
+            Logger::getInstance()->log("DS485: No traffic on the line");
             doChangeState(csDesignatedMaster);
           }
           comErrorSleepTimeScaler = 1;
@@ -316,7 +316,7 @@ namespace dss {
           missedFramesCounter++;
           if(missedFramesCounter == 50) {
             missedFramesCounter = 0;
-            std::cout << "haven't received any frames for 50 iterations, restarting..." << std::endl;
+            Logger::getInstance()->log("DS485: No traffic on the line, restarting");
             doChangeState(csInitial);
           }
         } else {
@@ -332,6 +332,7 @@ namespace dss {
       } else {
         DS485Header& header = frame->getHeader();
 
+        // discard own echo packets
         if (header.getSource() == m_StationID) {
           continue;
         }
@@ -339,24 +340,6 @@ namespace dss {
         DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(frame.get());
         lastSentWasToken = false;
         missedFramesCounter = 0;
-
-        // discard packets which are not addressed to us
-        if(!header.isBroadcast() &&
-           (header.getDestination() != m_StationID) &&
-              (m_State == csSlave ||
-               m_State == csMaster)
-          )
-        {
-/*
-          Logger::getInstance()->log("packet not for me, discarding");
-          std::cout << "dest: " << (int)header.getDestination() << std::endl;
-          std::cout << "src:  " << (int)header.getSource() << std::endl;
-          if(cmdFrame != NULL) {
-            std::cout << "cmd:  " << CommandToString(cmdFrame->getCommand()) << std::endl;
-          }
-*/
-          continue;
-        }
 
         // handle cases in which we're obliged to act on disregarding our current state
         if(cmdFrame != NULL) {
@@ -367,14 +350,26 @@ namespace dss {
               frameToSend->getHeader().setSource(m_StationID);
               frameToSend->setCommand(CommandGetAddressResponse);
               putFrameOnWire(frameToSend);
-              if(header.isBroadcast()) {
-                std::cerr << "Get address request with bc-flag set" << std::endl;
-              } else {
-                std::cout << "sent response to get address thingie" << std::endl;
-              }
+              Logger::getInstance()->log("DS485: received get address request");
+              continue;
+            }
+          } else if(cmdFrame->getCommand() == CommandSolicitSuccessorRequest) {
+            if (m_State == csSlave || m_State == csMaster) {
+              Logger::getInstance()->log("DS485: bus is reorganizing, restart", lsError);
+              doChangeState(csInitial);
               continue;
             }
           }
+        }
+
+        // discard packets which are not addressed to us
+        if(!header.isBroadcast() &&
+           (header.getDestination() != m_StationID) &&
+              (m_State == csSlave ||
+               m_State == csMaster)
+          )
+        {
+          continue;
         }
 
         switch(m_State) {
@@ -421,7 +416,7 @@ namespace dss {
               frameToSend->getHeader().setSource(m_StationID);
               frameToSend->setCommand(CommandSetDeviceAddressResponse);
               putFrameOnWire(frameToSend);
-              std::cout << "### new address " << m_StationID << "\n";
+              Logger::getInstance()->log("DS485: got address " + intToString(m_StationID), lsInfo);
             } else if(cmdFrame->getCommand() == CommandSetSuccessorAddressRequest) {
               if(header.getDestination() == m_StationID) {
                 handleSetSuccessor(cmdFrame);
@@ -431,12 +426,12 @@ namespace dss {
               time_t now;
               time(&now);
               if((now - responseSentAt) > 5) {
-                doChangeState(csInitial);
                 Logger::getInstance()->log("DS485: startup timeout", lsError);
+                doChangeState(csInitial);
               }
             }
             if((m_StationID != 0x3F) && (m_NextStationID != 0xFF)) {
-              Logger::getInstance()->log("DS485: joined network", lsInfo);
+              Logger::getInstance()->log("DS485: linked into network", lsInfo);
               token->getHeader().setDestination(m_NextStationID);
               token->getHeader().setSource(m_StationID);
               doChangeState(csSlaveWaitingForFirstToken);
@@ -479,11 +474,13 @@ namespace dss {
                     m_PendingFrames.erase(m_PendingFrames.begin());
                     std::cout << "\ngot ack" << std::endl;
                   } else if(cmdAckFrame->getCommand() == CommandBusy) {
-                    std::cout << "\ndsMeter is busy" << std::endl;
-                  } else {
+                    std::cout << "\ngot busy" << std::endl;
+                  } else if(cmdAckFrame->getCommand() == CommandResponse) {
+                    std::cout << "\ngot response" << std::endl;
                     m_PendingFrames.erase(m_PendingFrames.begin());
-                    std::cout << "\n&&&&got other" << std::endl;
                     addToReceivedQueue(cmdAckFrame);
+                  } else {
+                    std::cout << "\ngot invalid response" << std::endl;
                   }
                 } else {
                   m_PendingFrames.erase(m_PendingFrames.begin());
@@ -504,7 +501,7 @@ namespace dss {
             time_t now;
             time(&now);
             if((now - tokenReceivedAt) > 15) {
-              std::cerr << "restarting" << std::endl;
+              Logger::getInstance()->log("DS485: Token timeout, restarting", lsError);
               doChangeState(csInitial);
               continue;
             }
@@ -536,8 +533,7 @@ namespace dss {
               }
               keep = true;
             } else if(cmdFrame->getCommand() == CommandSolicitSuccessorRequest) {
-              std::cout << "SSRS -> reset" << std::endl;
-              flush(std::cout);
+              Logger::getInstance()->log("DS485: bus is reorganizing, restart", lsError);
               doChangeState(csInitial);
             } else if(cmdFrame->getCommand() == CommandSetSuccessorAddressRequest) {
               if(header.getDestination() == m_StationID) {
@@ -567,10 +563,14 @@ namespace dss {
                 flush(std::cout);
               }
             }
+            else {
+              // any command frame indicates there are still devices joining
+              time(&tokenReceivedAt);
+            }
             // Handle timeout
             time_t now;
             time(&now);
-            if((now - tokenReceivedAt) > 15) {
+            if((now - tokenReceivedAt) > 20) {
               std::cerr << "DS485: Wait for token timeout, restarting" << std::endl;
               doChangeState(csInitial);
               continue;
@@ -612,6 +612,9 @@ namespace dss {
 
   void DS485Controller::doChangeState(aControllerState _newState) {
     if(_newState != m_State) {
+      Logger::getInstance()->log("DS485Controller::doStateChange: " +
+          std::string(controllerStateToString(m_State)) + " -> " + std::string(controllerStateToString(_newState)),
+          lsInfo);
       m_State = _newState;
       m_StateString = controllerStateToString(m_State);
       if(m_State == csInitial) {
@@ -720,7 +723,7 @@ namespace dss {
         m_ReceiveBuffer[m_ValidBytes++] = currentChar;
 
         if(m_ValidBytes == TheReceiveBufferSizeBytes) {
-          Logger::getInstance()->log("receive buffer overflowing, resyncing", lsInfo);
+          Logger::getInstance()->log("dS485: receive buffer overflowing, resyncing", lsInfo);
           m_State = rsSynchronizing;
           m_ValidBytes = 0;
         }
@@ -728,7 +731,7 @@ namespace dss {
         switch(m_State) {
           case rsSynchronizing:
           {
-            if(((unsigned char)currentChar == FrameStart) && !m_IsEscaped) {
+            if((unsigned char)currentChar == FrameStart) {
               m_State = rsReadingHeader;
             } else {
               std::cout << "?";
@@ -787,13 +790,11 @@ namespace dss {
             if(m_ValidBytes == (m_MessageLength + TheFrameHeaderSize + TheCRCSize)) {
               uint16_t dataCRC = crc16(m_ReceiveBuffer, m_ValidBytes);
               if(dataCRC != 0) {
-                Logger::getInstance()->log("*********** crc mismatch.", lsError);
+                Logger::getInstance()->log("dS485: CRC Mismatch.", lsError);
                 m_NumberOfCRCErrors++;
-              } else {
-                //Logger::getInstance()->log("received packet, crc ok");
-                //std::cout << "#";
-                m_NumberOfFramesReceived++;
+                return NULL;
               }
+              m_NumberOfFramesReceived++;
               DS485CommandFrame* frame = new DS485CommandFrame();
               frame->getHeader().fromChar(m_ReceiveBuffer, m_ValidBytes);
               frame->setLength(m_ReceiveBuffer[3] & 0x0F);
