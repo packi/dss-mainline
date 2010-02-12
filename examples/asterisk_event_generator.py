@@ -27,7 +27,7 @@ from suds.client import Client
 import telnetlib
 import time
 
-url = 'http://localhost:8080/dss.wsdl'
+url = 'https://localhost:8080/dss.wsdl'
 asteriskHost = 'asterisk.futurelab.ch'
 asteriskPort = 5038
 

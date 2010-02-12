@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009, 2010 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -20,7 +21,12 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
 #include "webservices.h"
+#include "core/propertysystem.h"
 
 #include <cassert>
 #include <cstdlib>
@@ -47,8 +53,27 @@ namespace dss {
     run();
   } // doStart
 
+  void WebServices::initialize() {
+    Subsystem::initialize();
+    log("Starting GSOAP services...");
+
+    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "port", 8081, true, false);
+    getDSS().getPropertySystem().setStringValue(
+       getConfigPropertyBasePath() + "sslcert", 
+         getDSS().getPropertySystem().getStringValue("/config/configdirectory")
+            + "dsscert.pem" , true, false);
+  }
+
   void WebServices::execute() {
-    m_Service.bind(NULL, 8081, 10);
+    std::string sslcert = getDSS().getPropertySystem().getStringValue(
+                                  getConfigPropertyBasePath() + "sslcert");
+    if (m_Service.ssl_server_context(SOAP_SSL_DEFAULT, sslcert.c_str(),
+          NULL, sslcert.c_str(), NULL, NULL, NULL, "dss")) {
+      Logger::getInstance()->log("WebService::execute: could not set ssl server context! ", lsFatal);
+    }
+      
+    m_Service.bind(NULL, getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "port"), 10);
+      
     for(int iWorker = 0; iWorker < 4; iWorker++) {
       m_Workers.push_back(new WebServicesWorker(this));
       m_Workers.back().run();
@@ -57,6 +82,20 @@ namespace dss {
       int socket = m_Service.accept();
       if(socket != SOAP_INVALID_SOCKET) {
         struct soap* req_copy = soap_copy(&m_Service);
+        if (!req_copy) {
+          soap_closesock(req_copy);
+          continue;
+        }
+
+        if (soap_ssl_accept(req_copy)) {
+          soap_print_fault(req_copy, stderr);
+          Logger::getInstance()->log("WebService::execute: SSL request failed!", lsError);
+          soap_destroy(req_copy);
+          soap_end(req_copy);
+          soap_free(req_copy);
+          continue;
+        }
+
         m_RequestsMutex.lock();
         m_PendingRequests.push_back(req_copy);
         m_RequestsMutex.unlock();

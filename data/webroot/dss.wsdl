@@ -3655,7 +3655,7 @@
 <service name="dss">
  <documentation>gSOAP 2.7.10 generated service definition</documentation>
  <port name="dss" binding="tns:dss">
-  <SOAP:address location="http://localhost:8081"/>
+  <SOAP:address location="https://localhost:8081"/>
  </port>
 </service>
 
