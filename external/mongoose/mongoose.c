@@ -160,6 +160,7 @@ typedef struct DIR {
 #include <dirent.h>
 #include <dlfcn.h>
 #include <pthread.h>
+#include <inttypes.h>
 #ifndef __APPLE__
 #define	SSL_LIB			"libssl.so"
 #define	CRYPTO_LIB		"libcrypto.so"
@@ -177,7 +178,13 @@ typedef struct DIR {
 #define	mg_rename(x, y)		rename(x, y)
 #define	ERRNO			errno
 #define	INVALID_SOCKET		(-1)
-#define UINT64_FMT		"ll"
+// this fixes warnings on 64bit systems, it would be better to use PRIu64 here,
+// then however the code should be changed too, the current approach is 
+// compatible with the current code and does not require any further changes
+//#define UINT64_FMT           "ll"
+//#define UINT64_FMT           PRIu64 
+#define UINT64_FMT             __PRI64_PREFIX
+
 typedef int SOCKET;
 
 #endif /* End of Windows and UNIX specific includes */
