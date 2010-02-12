@@ -178,11 +178,9 @@ typedef struct DIR {
 #define	mg_rename(x, y)		rename(x, y)
 #define	ERRNO			errno
 #define	INVALID_SOCKET		(-1)
-// this fixes warnings on 64bit systems, it would be better to use PRIu64 here,
+// This fixes warnings on 64bit systems, it would be better to use PRIu64 here,
 // then however the code should be changed too, the current approach is 
-// compatible with the current code and does not require any further changes
-//#define UINT64_FMT           "ll"
-//#define UINT64_FMT           PRIu64 
+// compatible with the current code and does not require any further changes.
 #define UINT64_FMT             __PRI64_PREFIX
 
 typedef int SOCKET;
