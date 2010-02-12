@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
 
     Author: Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org> 
 

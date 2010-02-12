@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009, 2010 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -64,14 +65,10 @@ namespace dss {
   }
 
   void WebServices::execute() {
-    if (m_Service.ssl_server_context(
-          SOAP_SSL_DEFAULT,
-          getDSS().getPropertySystem().getStringValue(
-                      getConfigPropertyBasePath() + "sslcert").c_str(),
-          NULL, 
-          getDSS().getPropertySystem().getStringValue(
-                      getConfigPropertyBasePath() + "sslcert").c_str(), 
-          NULL, NULL, NULL, "dss")) {
+    std::string sslcert = getDSS().getPropertySystem().getStringValue(
+                                  getConfigPropertyBasePath() + "sslcert");
+    if (m_Service.ssl_server_context(SOAP_SSL_DEFAULT, sslcert.c_str(),
+          NULL, sslcert.c_str(), NULL, NULL, NULL, "dss")) {
       Logger::getInstance()->log("WebService::execute: could not set ssl server context! ", lsFatal);
     }
       
