@@ -39,31 +39,23 @@ namespace dss {
     : DSIDInterface(_simulator, _dsid, _shortAddress),
       m_pContext(_pContext),
       m_FileNames(_fileNames)
-    {}
+    {
+      createJSDevice();
+    }
 
     virtual ~DSIDJS() {}
 
     virtual void initialize() {
-      try {
-        jsval res = JSVAL_NULL;
-        foreach(std::string script, m_FileNames) {
-          res = m_pContext->doEvaluateScript(script);
+      if(m_pSelf != NULL) {
+        ScriptFunctionParameterList param(*m_pContext);
+        param.add(getDSID().toString());
+        param.add(getShortAddress());
+        param.add(getZoneID());
+        try {
+          m_pSelf->callFunctionByName<void>("initialize", param);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'initialize' ") + e.what(), lsError);
         }
-        if(JSVAL_IS_OBJECT(res)) {
-          m_pJSThis = JSVAL_TO_OBJECT(res);
-          m_pSelf.reset(new ScriptObject(m_pJSThis, *m_pContext));
-          ScriptFunctionParameterList param(*m_pContext);
-          param.add(getDSID().toString());
-          param.add(getShortAddress());
-          param.add(getZoneID());
-          try {
-            m_pSelf->callFunctionByName<void>("initialize", param);
-          } catch(ScriptException& e) {
-            Logger::getInstance()->log(std::string("DSIDJS: Error calling 'initialize'") + e.what(), lsError);
-          }
-        }
-      } catch(ScriptException& e) {
-        Logger::getInstance()->log(std::string("DSIDJS: Could not get 'self' object: ") + e.what());
       }
     }
 
@@ -263,6 +255,25 @@ namespace dss {
       }
       return 0;
     } // dsLinkSend
+
+  private:
+
+    void createJSDevice() {
+      try {
+        jsval res = JSVAL_NULL;
+        foreach(std::string script, m_FileNames) {
+          Logger::getInstance()->log("DSIDJS::initialize: Evaluating :'" + script + "'");
+          res = m_pContext->doEvaluateScript(script);
+        }
+        if(JSVAL_IS_OBJECT(res)) {
+          m_pJSThis = JSVAL_TO_OBJECT(res);
+          m_pSelf.reset(new ScriptObject(m_pJSThis, *m_pContext));
+        }
+      } catch(ScriptException& e) {
+        Logger::getInstance()->log(std::string("DSIDJS: Could not get 'self' object: ") + e.what());
+      }
+    } // createJSDevice
+
   private:
     boost::shared_ptr<ScriptContext> m_pContext;
     JSObject* m_pJSThis;
