@@ -413,7 +413,7 @@ namespace dss {
 
   //================================================== SocketScriptContextExtension
 
-  const std::string SocketScriptExtensionName = "propertyextension";
+  const std::string SocketScriptExtensionName = "socketextension";
 
   SocketScriptContextExtension::SocketScriptContextExtension()
   : ScriptExtension(SocketScriptExtensionName)
@@ -597,6 +597,7 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     SocketScriptContextExtension* ext =
        dynamic_cast<SocketScriptContextExtension*>(ctx->getEnvironment().getExtension(SocketScriptExtensionName));
+    assert(ext != NULL);
 
     if(argc >= 3) {
       try {
