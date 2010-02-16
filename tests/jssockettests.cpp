@@ -29,6 +29,7 @@
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 
+#include "core/scripting/scriptobject.h"
 #include "core/scripting/jssocket.h"
 #include "core/foreach.h"
 

@@ -90,7 +90,15 @@ namespace dss {
     JSObject* createJSEvent(ScriptContext& _ctx, boost::shared_ptr<Event> _event);
     JSObject* createJSSubscription(ScriptContext& _ctx, boost::shared_ptr<EventSubscription> _subscription);
   }; // EventScriptExtension
-  
+
+  class ModelConstantsScriptExtension : public ScriptExtension {
+  public:
+    ModelConstantsScriptExtension();
+    virtual ~ModelConstantsScriptExtension() {}
+
+    virtual void extendContext(ScriptContext& _context);
+  }; // ModelConstantsScriptExtension
+
 }
 
 #endif

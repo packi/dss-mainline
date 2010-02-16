@@ -27,7 +27,8 @@
 
 #include <string>
 
-#include "../core/jshandler.h"
+#include "core/jshandler.h"
+#include "core/scripting/scriptobject.h"
 
 using namespace dss;
 
@@ -102,5 +103,33 @@ BOOST_AUTO_TEST_CASE(testNonexistingScriptRaisesException) {
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
   BOOST_CHECK_THROW(ctx->evaluateScript<void>("idontexistandneverwill.js"), ScriptException);
 } // testNonexistingScriptRaisesException
+
+BOOST_AUTO_TEST_CASE(testSetTimeoutNoFunction) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("var result = false; setTimeout(0);");
+} // testSetTimeoutNoFunction
+
+BOOST_AUTO_TEST_CASE(testSetTimeoutZeroDelay) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("var result = false; setTimeout(0, function() {  result = true; } );");
+  sleepMS(50);
+  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
+} // testSetTimeoutZeroDelay
+
+BOOST_AUTO_TEST_CASE(testSetTimeoutNormalDelay) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("var result = false; setTimeout(10, function() {  result = true; } );");
+  sleepMS(75);
+  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
+} // testSetTimeoutNormalDelay
 
 BOOST_AUTO_TEST_SUITE_END()

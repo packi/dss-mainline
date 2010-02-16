@@ -21,7 +21,29 @@
           <value>example.temperature_sensor</value>
         </property>
      </property>
+     <property name="slim_player">
+       <property name="script-file[0]" type="string">
+         <value>../jslib/dsid.js</value>
+       </property>
+       <property name="script-file[1]" type="string">
+         <value>../examples/plugins/js/slimplayer.js</value>
+       </property>
+       <property name="id" type="string">
+         <value>example.slim_player</value>
+       </property>
     </property>
+     <property name="vlc_player">
+       <property name="script-file[0]" type="string">
+         <value>../jslib/dsid.js</value>
+       </property>
+       <property name="script-file[1]" type="string">
+         <value>../examples/plugins/js/vlc.js</value>
+       </property>
+       <property name="id" type="string">
+         <value>example.vlc_player</value>
+       </property>
+    </property>
+  </property>
 
 <!--
     <property name="logfile" type="string">
@@ -42,7 +64,7 @@
     <property name="subsystems/WebServer/webroot" type="string">
       <value>/mnt/webroot/</value>
     </property>
--->    
+-->
     <property name="subsystems/WebServer/plugins/testplugin">
       <property name="file" type="string">
         <value>data/webplugins/webserver_plugin.so</value>
@@ -50,7 +72,7 @@
       <property name="uri" type="string">
         <value>/test/*</value>
       </property>
-    </property>    
+    </property>
     <property name="subsystems/FakeMeter/enabled" type="boolean">
       <value>false</value>
     </property>

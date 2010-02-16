@@ -25,6 +25,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "core/scripting/modeljs.h"
+#include "core/scripting/scriptobject.h"
 #include "core/scripting/propertyscriptextension.h"
 #include "core/event.h"
 #include "core/eventinterpreterplugins.h"
@@ -32,6 +33,7 @@
 #include "core/model/apartment.h"
 #include "core/model/device.h"
 #include "core/model/modulator.h"
+#include "core/model/modelconst.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <memory>
@@ -201,6 +203,20 @@ BOOST_AUTO_TEST_CASE(testDevices) {
                       "}\n"
                       "devs.perform(f)\n");
 } // testDevices
+
+BOOST_AUTO_TEST_CASE(testSceneConstants) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ModelConstantsScriptExtension* ext = new ModelConstantsScriptExtension();
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("var result = Scene.User1;");
+  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("result"), Scene1);
+
+  ctx->evaluate<void>("result = Scene.Alarm;");
+  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("result"), SceneAlarm);
+} // testSceneConstants
 
 BOOST_AUTO_TEST_CASE(testEvents) {
   Apartment apt(NULL);

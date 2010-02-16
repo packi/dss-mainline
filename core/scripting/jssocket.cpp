@@ -30,6 +30,8 @@
 
 using boost::asio::ip::tcp;
 
+#include "core/scripting/scriptobject.h"
+
 namespace dss {
   void tcpSocket_finalize(JSContext *cx, JSObject *obj);
   JSBool tcpSocket_construct(JSContext *cx, JSObject *obj, uintN argc,
@@ -411,7 +413,7 @@ namespace dss {
 
   //================================================== SocketScriptContextExtension
 
-  const std::string SocketScriptExtensionName = "propertyextension";
+  const std::string SocketScriptExtensionName = "socketextension";
 
   SocketScriptContextExtension::SocketScriptContextExtension()
   : ScriptExtension(SocketScriptExtensionName)
@@ -595,6 +597,7 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     SocketScriptContextExtension* ext =
        dynamic_cast<SocketScriptContextExtension*>(ctx->getEnvironment().getExtension(SocketScriptExtensionName));
+    assert(ext != NULL);
 
     if(argc >= 3) {
       try {
