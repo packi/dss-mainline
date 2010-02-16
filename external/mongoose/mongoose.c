@@ -178,10 +178,7 @@ typedef struct DIR {
 #define	mg_rename(x, y)		rename(x, y)
 #define	ERRNO			errno
 #define	INVALID_SOCKET		(-1)
-// This fixes warnings on 64bit systems, it would be better to use PRIu64 here,
-// then however the code should be changed too, the current approach is 
-// compatible with the current code and does not require any further changes.
-#define UINT64_FMT             __PRI64_PREFIX
+#define UINT64_FMT          PRIu64
 
 typedef int SOCKET;
 
@@ -2754,14 +2751,14 @@ mg_send_file(struct mg_connection *conn, const char *path, struct mgstat *stp)
 	r1 = r2 = 0;
 	hdr = mg_get_header(conn, "Range");
 	if (hdr != NULL && (n = sscanf(hdr,
-	    "bytes=%" UINT64_FMT "u-%" UINT64_FMT "u", &r1, &r2)) > 0) {
+	    "bytes=%" UINT64_FMT "-%" UINT64_FMT, &r1, &r2)) > 0) {
 		conn->request_info.status_code = 206;
 		(void) fseeko(fp, (off_t) r1, SEEK_SET);
 		cl = n == 2 ? r2 - r1 + 1: cl - r1;
 		(void) mg_snprintf(conn, range, sizeof(range),
 		    "Content-Range: bytes "
-		    "%" UINT64_FMT "u-%"
-		    UINT64_FMT "u/%" UINT64_FMT "u\r\n",
+		    "%" UINT64_FMT "-%"
+		    UINT64_FMT "/%" UINT64_FMT "\r\n",
 		    r1, r1 + cl - 1, stp->size);
 		msg = "Partial Content";
 	}
@@ -2778,7 +2775,7 @@ mg_send_file(struct mg_connection *conn, const char *path, struct mgstat *stp)
 	    "Last-Modified: %s\r\n"
 	    "Etag: \"%s\"\r\n"
 	    "Content-Type: %.*s\r\n"
-	    "Content-Length: %" UINT64_FMT "u\r\n"
+	    "Content-Length: %" UINT64_FMT "\r\n"
 	    "Connection: close\r\n"
 	    "Accept-Ranges: bytes\r\n"
 	    "%s\r\n",
@@ -3794,7 +3791,7 @@ log_access(const struct mg_connection *conn)
 	flockfile(conn->ctx->access_log);
 
 	(void) fprintf(conn->ctx->access_log,
-	    "%s - %s [%s] \"%s %s HTTP/%s\" %d %" UINT64_FMT "u",
+	    "%s - %s [%s] \"%s %s HTTP/%s\" %d %" UINT64_FMT,
 	    inet_ntoa(conn->client.rsa.u.sin.sin_addr),
 	    ri->remote_user == NULL ? "-" : ri->remote_user,
 	    date,
