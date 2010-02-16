@@ -23,6 +23,7 @@
 #include "dsid_js.h"
 #include "core/jshandler.h"
 #include "core/scripting/modeljs.h"
+#include "core/scripting/jssocket.h"
 #include "core/scripting/scriptobject.h"
 #include "core/scripting/propertyscriptextension.h"
 #include "core/dss.h"
@@ -369,6 +370,8 @@ namespace dss {
     m_pScriptEnvironment->initialize();
     m_pScriptEnvironment->addExtension(new PropertyScriptExtension(DSS::getInstance()->getPropertySystem()));
     m_pScriptEnvironment->addExtension(new DSIDScriptExtension(m_Simulator));
+    m_pScriptEnvironment->addExtension(new ModelConstantsScriptExtension());
+    m_pScriptEnvironment->addExtension(new SocketScriptContextExtension());
   } // ctor
 
   DSIDInterface* DSIDJSCreator::createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
