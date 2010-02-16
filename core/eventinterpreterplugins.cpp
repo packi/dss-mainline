@@ -156,6 +156,8 @@ namespace dss {
       m_Environment.addExtension(ext);
       ext = new PropertyScriptExtension(DSS::getInstance()->getPropertySystem());
       m_Environment.addExtension(ext);
+      ext = new ModelConstantsScriptExtension();
+      m_Environment.addExtension(ext);
     }
   } // initializeEnvironment
 

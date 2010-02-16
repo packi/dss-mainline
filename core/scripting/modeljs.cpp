@@ -33,6 +33,7 @@
 #include "core/model/devicereference.h"
 #include "core/model/apartment.h"
 #include "core/model/set.h"
+#include "core/model/modelconst.h"
 #include "core/scripting/scriptobject.h"
 
 
@@ -1030,7 +1031,6 @@ namespace dss {
     {NULL}
   };
 
-
   JSObject* EventScriptExtension::createJSSubscription(ScriptContext& _ctx, boost::shared_ptr<EventSubscription> _subscription) {
     JSObject* result = JS_NewObject(_ctx.getJSContext(), &subscription_class, NULL, NULL);
     JS_DefineFunctions(_ctx.getJSContext(), result, subscription_methods);
@@ -1042,5 +1042,51 @@ namespace dss {
     return result;
   }
 
+  //================================================== ModelConstantsScriptExtension
+
+  const std::string ModelConstantsScriptExtensionName = "modelconstantsextension";
+
+  ModelConstantsScriptExtension::ModelConstantsScriptExtension()
+  : ScriptExtension(ModelConstantsScriptExtensionName)
+  { }
+
+  static JSClass scene_class = {
+    "Scene", JSCLASS_HAS_PRIVATE,
+    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
+    JS_EnumerateStandardClasses,
+    JS_ResolveStub,
+    JS_ConvertStub,  JS_FinalizeStub, JSCLASS_NO_OPTIONAL_MEMBERS
+  }; // scene_class
+
+  JSBool scene_JSGetStatic(JSContext *cx, JSObject *obj, jsval id, jsval *rval) {
+    *rval = id;
+    return JS_TRUE;
+  } // scene_JSGetStatic
+
+  static JSPropertySpec scene_properties[] = {
+    {"User1", Scene1, 0, scene_JSGetStatic},
+    {"User2", Scene2, 0, scene_JSGetStatic},
+    {"User3", Scene3, 0, scene_JSGetStatic},
+    {"User4", Scene4, 0, scene_JSGetStatic},
+    {"Min", SceneMin, 0, scene_JSGetStatic},
+    {"Max", SceneMax, 0, scene_JSGetStatic},
+    {"DeepOff", SceneDeepOff, 0, scene_JSGetStatic},
+    {"Off", SceneOff, 0, scene_JSGetStatic},
+    {"StandBy", SceneStandBy, 0, scene_JSGetStatic},
+    {"Bell", SceneBell, 0, scene_JSGetStatic},
+    {"Panic", ScenePanic, 0, scene_JSGetStatic},
+    {"Alarm", SceneAlarm, 0, scene_JSGetStatic},
+    {NULL, 0, 0, NULL, NULL}
+  };
+
+  JSBool scene_construct(JSContext *cx, JSObject *obj, uintN argc,
+                        jsval *argv, jsval *rval) {
+    return JS_FALSE;
+  } // scene_construct
+
+  void ModelConstantsScriptExtension::extendContext(ScriptContext& _context) {
+    JS_InitClass(_context.getJSContext(), JS_GetGlobalObject(_context.getJSContext()), NULL,
+                 &scene_class, &scene_construct, 0, NULL, NULL, scene_properties, NULL);
+  } // extendedJSContext
 
 } // namespace
