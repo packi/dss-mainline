@@ -31,6 +31,7 @@
 #include "DS485Interface.h"
 #include "setbuilder.h"
 #include "dss.h"
+#include "core/scripting/scriptobject.h"
 #include "core/scripting/modeljs.h"
 #include "core/scripting/propertyscriptextension.h"
 #include "core/foreach.h"

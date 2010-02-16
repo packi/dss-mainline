@@ -33,6 +33,7 @@
 #include "core/model/devicereference.h"
 #include "core/model/apartment.h"
 #include "core/model/set.h"
+#include "core/scripting/scriptobject.h"
 
 
 namespace dss {

@@ -195,46 +195,6 @@ namespace dss {
     std::vector<jsval> m_Parameter;
   }; // ScriptFunctionParameterList
 
-  /** A ScriptObject is a wrapper for a JavaScript object. */
-  class ScriptObject {
-  private:
-    JSObject* m_pObject;
-    ScriptContext& m_Context;
-    jsval doGetProperty(const std::string& _name);
-    void doSetProperty(const std::string& _name, jsval _value);
-    jsval doCallFunctionByReference(jsval _function, ScriptFunctionParameterList& _parameter);
-  public:
-    ScriptObject(JSObject* _pObject, ScriptContext& _context);
-    ScriptObject(ScriptContext& _context, ScriptObject* _pParent);
-
-    /** Returns the objects "classname" property. This property must be
-      * present for this call to succeed.
-      */
-    const std::string getClassName();
-    /** Compares the objects classname to _className.
-      * @see getClassName
-      */
-    bool is(const std::string& _className);
-
-    /** Returns the property named \a _name as type \a t */
-    template<class t>
-    t getProperty(const std::string& _name);
-
-    /** Sets the property named \a _name to \a _value */
-    template<class t>
-    void setProperty(const std::string& _name, t _value);
-
-    template<class t>
-    t callFunctionByName(const std::string& _functionName, ScriptFunctionParameterList& _parameter);
-    // FIXME: work around a compiler issue (typeof jsval == typeof int)
-    jsval doCallFunctionByName(const std::string& _functionName, ScriptFunctionParameterList& _parameter);
-
-    template<class t>
-    t callFunctionByReference(jsval _function, ScriptFunctionParameterList& _parameter);
-
-    JSObject* getJSObject() { return m_pObject; }
-  }; // ScriptObject
-
   class ScriptContextAttachedObject {
   public:
     ~ScriptContextAttachedObject() {

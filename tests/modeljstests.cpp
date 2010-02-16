@@ -25,6 +25,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "core/scripting/modeljs.h"
+#include "core/scripting/scriptobject.h"
 #include "core/scripting/propertyscriptextension.h"
 #include "core/event.h"
 #include "core/eventinterpreterplugins.h"

@@ -30,6 +30,8 @@
 
 using boost::asio::ip::tcp;
 
+#include "core/scripting/scriptobject.h"
+
 namespace dss {
   void tcpSocket_finalize(JSContext *cx, JSObject *obj);
   JSBool tcpSocket_construct(JSContext *cx, JSObject *obj, uintN argc,

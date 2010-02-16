@@ -23,6 +23,7 @@
 #include "propertyscriptextension.h"
 
 #include "core/propertysystem.h"
+#include "core/scripting/scriptobject.h"
 
 namespace dss {
 

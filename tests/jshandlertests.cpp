@@ -27,7 +27,8 @@
 
 #include <string>
 
-#include "../core/jshandler.h"
+#include "core/jshandler.h"
+#include "core/scripting/scriptobject.h"
 
 using namespace dss;
 
