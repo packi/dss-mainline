@@ -28,13 +28,15 @@
 namespace dss {
 
   class Apartment;
+  class ModelMaintenance;
 
   class CircuitRequestHandler : public WebServerRequestHandlerJSON {
   public:
-    CircuitRequestHandler(Apartment& _apartment);
+    CircuitRequestHandler(Apartment& _apartment, ModelMaintenance& _modelMaintenance);
     virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
   private:
     Apartment& m_Apartment;
+    ModelMaintenance& m_ModelMaintenance;
   }; // CircuitRequestHandler
 
 } // namespace dss

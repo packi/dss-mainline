@@ -193,7 +193,9 @@ namespace dss {
     m_Handlers[kHandlerApartment] = new ApartmentRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerZone] = new ZoneRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerDevice] = new DeviceRequestHandler(getDSS().getApartment());
-    m_Handlers[kHandlerCircuit] = new CircuitRequestHandler(getDSS().getApartment());
+    m_Handlers[kHandlerCircuit] = new CircuitRequestHandler(
+            getDSS().getApartment(),
+            getDSS().getModelMaintenance());
     m_Handlers[kHandlerSet] = new SetRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerProperty] = new PropertyRequestHandler(getDSS().getPropertySystem());
     m_Handlers[kHandlerEvent] = new EventRequestHandler(getDSS().getEventQueue());

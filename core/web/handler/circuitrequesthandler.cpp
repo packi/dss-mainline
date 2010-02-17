@@ -26,14 +26,15 @@
 #include "core/model/apartment.h"
 
 #include "core/web/json.h"
+#include "core/model/modelmaintenance.h"
 
 namespace dss {
 
 
   //=========================================== CircuitRequestHandler
 
-  CircuitRequestHandler::CircuitRequestHandler(Apartment& _apartment)
-  : m_Apartment(_apartment)
+  CircuitRequestHandler::CircuitRequestHandler(Apartment& _apartment, ModelMaintenance& _modelMaintenance)
+  : m_Apartment(_apartment), m_ModelMaintenance(_modelMaintenance)
   { }
 
   boost::shared_ptr<JSONObject> CircuitRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
@@ -53,6 +54,7 @@ namespace dss {
         return success(resultObj);
       } else if(_request.getMethod() == "setName") {
         dsMeter.setName(_request.getParameter("newName"));
+        m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
         return success();
       } else if(_request.getMethod() == "getEnergyBorder") {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
