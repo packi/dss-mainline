@@ -29,6 +29,9 @@ function ApartmentRenderer(into) {
           devTotal = zone.devices.length;
           return;
         }
+	if(zone.name == "") {
+	  zone.name = "Zone " + zone.id;
+	}
         zonelist += "<li>" + zone.name + '&nbsp;[<a href="#" onclick="turnOnZone(\'' + zone.id + '\')">Turn On</a>';
         zonelist += '&nbsp;|&nbsp;<a href="#" onclick="turnOffZone(\'' + zone.id + '\')">Turn Off</a>]</li><ul>';
         zone.devices.each(function(device) {
