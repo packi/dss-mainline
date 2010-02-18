@@ -79,11 +79,7 @@ namespace dss {
   boost::shared_ptr<JSONObject> toJSON(Zone& _zone, bool _includeDevices) {
     boost::shared_ptr<JSONObject> result(new JSONObject());
     result->addProperty("id", _zone.getID());
-    std::string name = _zone.getName();
-    if(name.empty()) {
-      name = std::string("Zone ") + intToString(_zone.getID());
-    }
-    result->addProperty("name", name);
+    result->addProperty("name", _zone.getName());
     result->addProperty("isPresent", _zone.isPresent());
     if(_zone.getFirstZoneOnDSMeter() != -1) {
       result->addProperty("firstZoneOnDSMeter", _zone.getFirstZoneOnDSMeter());
