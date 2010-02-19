@@ -172,7 +172,9 @@ namespace dss {
                 dsMeter = new DSDSMeterSim(this);
                 dsMeter->initializeFromNode(curNode);
                 m_DSMeters.push_back(dsMeter);
-              } catch(std::runtime_error&) {
+              } catch(std::runtime_error& e) {
+                // TODO: abort loading and return with this error, see #316
+                log("Could not initialize from '" + filename + "'. message: " + e.what(), lsError);
                 delete dsMeter;
               }
             }
