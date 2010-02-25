@@ -391,4 +391,15 @@ BOOST_AUTO_TEST_CASE(testReadingFromNonexistentFile) {
   BOOST_CHECK_EQUAL(propSys->loadFromXML("idontexistandneverwill.xml", PropertyNodePtr()), false);
 } // testReadingFromNonexistentFile
 
+BOOST_AUTO_TEST_CASE(testAddChildMovesNode) {
+  PropertySystem propSys;
+  PropertyNodePtr source = propSys.createProperty("/source");
+  source->createProperty("subnode");
+  PropertyNodePtr target = propSys.createProperty("/target");
+
+  target->addChild(source);
+
+  BOOST_CHECK_EQUAL(propSys.getProperty("/target/source"), source);
+} // testAddChildMovesNode
+
 BOOST_AUTO_TEST_SUITE_END()

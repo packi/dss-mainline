@@ -25,6 +25,7 @@
 #define NEUROPROPERTYSYSTEM_H
 
 #include <boost/mpl/if.hpp>
+#include <boost/mpl/and.hpp>
 #include <boost/type_traits/is_class.hpp>
 
 #include <stdexcept>
@@ -255,12 +256,15 @@ namespace dss {
 
   /** PropertyProxy that links to a member function.
    * Cls is the type of the class that we're linking against. */
-  template<class Cls, class T>
+  template<class Cls, class T, bool constIfClass = true, bool constGetter = true>
   class PropertyProxyMemberFunction: public PropertyProxy<T> {
   private:
-    // magic ahead: if the type of T is a class, expect a const-reference, else expect a copy of the value
-    typedef typename boost::mpl::if_c<boost::is_class<T>::value, const T&, T>::type (Cls::*aGetterType)() const;
-    typedef void (Cls::*aSetterType)(typename boost::mpl::if_c<boost::is_class<T>::value, const T&, const T>::type);
+    // magic ahead: if the type of T is a class, expect a const-reference (unless constIfClass is false), else expect a copy of the value
+    typedef typename boost::mpl::if_c<boost::mpl::and_<boost::is_class<T>, boost::mpl::bool_<constIfClass> >::value, const T&, T>::type aConvertedValueType;
+    typedef aConvertedValueType (Cls::*aConstGetterType)() const;
+    typedef aConvertedValueType (Cls::*aNonConstGetterType)();
+    typedef typename boost::mpl::if_c<constGetter, aConstGetterType, aNonConstGetterType>::type aGetterType;
+    typedef void (Cls::*aSetterType)(aConvertedValueType);
     Cls* m_Obj;
     const Cls* m_ConstObj;
     aGetterType m_GetterPtr;
@@ -275,7 +279,6 @@ namespace dss {
     : m_Obj(NULL), m_ConstObj(&_obj), m_GetterPtr(_getter), m_SetterPtr(NULL)
     { }
 
-
     virtual ~PropertyProxyMemberFunction() {
     }
 
@@ -288,20 +291,20 @@ namespace dss {
         }
       }
       return PropertyProxy<T>::DefaultValue;
-    } // GetValue
+    } // getValue
 
     virtual void setValue(T _value) {
       if (m_SetterPtr != NULL && m_Obj != NULL) {
         (*m_Obj.*m_SetterPtr)(_value);
       }
-    } // SetValue
+    } // getValue
 
     virtual PropertyProxyMemberFunction* clone() const {
       if(m_Obj != NULL) {
-        return new PropertyProxyMemberFunction<Cls, T> (*m_Obj, m_GetterPtr,
+        return new PropertyProxyMemberFunction<Cls, T, constIfClass, constGetter> (*m_Obj, m_GetterPtr,
                                                         m_SetterPtr);
       } else {
-        return new PropertyProxyMemberFunction<Cls, T> (*m_ConstObj, m_GetterPtr);
+        return new PropertyProxyMemberFunction<Cls, T, constIfClass, constGetter> (*m_ConstObj, m_GetterPtr);
       }
     }
   }; // PropertyProxyMemberFunction
@@ -408,8 +411,6 @@ namespace dss {
 
     /** Recursively adds a child-node. */
     PropertyNodePtr createProperty(const std::string& _propPath);
-    /** Moves this node to \a _path. */
-    void moveTo(const std::string& _path);
 
     /** Returns a child node by name.
      * Or NULL if not found.*/
@@ -444,8 +445,14 @@ namespace dss {
     /** Returns a child node by index. */
     PropertyNodePtr getChild(const int _index) { return m_Aliased ? m_AliasTarget->m_ChildNodes.at(_index) : m_ChildNodes.at(_index); }
 
+    /** Adds \a _childNode as a child to this node.
+        If the node already has a parent, the node will be moved here. */
     void addChild(PropertyNodePtr _childNode);
     PropertyNodePtr removeChild(PropertyNodePtr _childNode);
+
+    /** Returns the parent node of this node.
+        @note Don't store this node anywhere */
+    PropertyNode* getParentNode() { return m_ParentNode; }
 
     /** Notifies all listeners that the value of this property has changed */
     void propertyChanged();

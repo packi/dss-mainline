@@ -91,7 +91,7 @@ namespace dss {
     try {
       pDoc = parser.parse(&input);
     } catch (Poco::XML::SAXParseException& e) {
-      Logger::getInstance()->log("PropertySystem::loadFromXML:  " + _fileName 
+      Logger::getInstance()->log("PropertySystem::loadFromXML:  " + _fileName
                                  + ": " + e.message(), lsError);
       return false;
     }
@@ -750,7 +750,7 @@ namespace dss {
         return nextNode;
       }
     }
-  }
+  } // createProperty
 
   bool PropertyNode::saveAsXML(AutoPtr<Document>& _doc, AutoPtr<Element>& _parent, const int _flagsMask) {
     AutoPtr<Element> elem = _doc->createElement("property");
