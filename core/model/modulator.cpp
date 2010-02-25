@@ -25,21 +25,57 @@
 #include "core/dss.h"
 #include "core/logger.h"
 #include "core/DS485Interface.h"
+#include "core/propertysystem.h"
 #include "set.h"
+#include "apartment.h"
 
 namespace dss {
 
 
   //================================================== DSMeter
 
-  DSMeter::DSMeter(const dsid_t _dsid)
+  DSMeter::DSMeter(const dsid_t _dsid, Apartment* _pApartment)
   : m_DSID(_dsid),
     m_BusID(0xFF),
     m_PowerConsumption(0),
     m_EnergyMeterValue(0),
-    m_IsValid(false)
+    m_IsValid(false),
+    m_pApartment(_pApartment)
   {
+    publishToPropertyTree();
   } // ctor
+
+  void DSMeter::publishToPropertyTree() {
+    assert(m_pPropertyNode == NULL);
+    if((m_pApartment != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
+      m_pPropertyNode =
+        m_pApartment->getPropertyNode()->createProperty("dSMeters/" + m_DSID.toString());
+      m_pPropertyNode->createProperty("busID")
+        ->linkToProxy(PropertyProxyReference<int>(m_BusID, false));
+      m_pPropertyNode->createProperty("powerConsumption")
+        ->linkToProxy(PropertyProxyReference<int>(m_PowerConsumption, false));
+      m_pPropertyNode->createProperty("powerConsumptionAge")
+      ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_PowerConsumptionAge, &DateTime::toString));
+      m_pPropertyNode->createProperty("energyMeterValue")
+        ->linkToProxy(PropertyProxyReference<int>(m_EnergyMeterValue, false));
+      m_pPropertyNode->createProperty("isValid")
+        ->linkToProxy(PropertyProxyReference<bool>(m_IsValid, false));
+      m_pPropertyNode->createProperty("energyLevelRed")
+        ->linkToProxy(PropertyProxyReference<int>(m_EnergyLevelRed, false));
+      m_pPropertyNode->createProperty("energyLevelOrange")
+        ->linkToProxy(PropertyProxyReference<int>(m_EnergyLevelOrange, false));
+      m_pPropertyNode->createProperty("hardwareVersion")
+        ->linkToProxy(PropertyProxyReference<int>(m_HardwareVersion, false));
+      m_pPropertyNode->createProperty("softwareVersion")
+        ->linkToProxy(PropertyProxyReference<int>(m_SoftwareVersion, false));
+      m_pPropertyNode->createProperty("deviceType")
+        ->linkToProxy(PropertyProxyReference<int>(m_DeviceType, false));
+      m_pPropertyNode->createProperty("hardwareName")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_HardwareName, false));
+      m_pPropertyNode->createProperty("name")
+        ->linkToProxy(PropertyProxyMemberFunction<DSMeter, std::string>(*this, &DSMeter::getName, &DSMeter::setName));
+    }
+  } // publishToPropertyTree
 
   Set DSMeter::getDevices() const {
     return m_ConnectedDevices;

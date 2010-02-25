@@ -996,7 +996,7 @@ int dss__DeviceGetZoneID(struct soap *soap, int _token, char* _deviceID, int& re
 //==================================================== Information
 
 int dss__DSMeterGetPowerConsumption(struct soap *soap, int _token, int _dsMeterID, unsigned long& result) {
-  dss::DSMeter mod(dss::NullDSID);
+  dss::DSMeter mod(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDSMeterByBusID(soap, _token, _dsMeterID, mod);
   if(getResult != SOAP_OK) {
     return getResult;
@@ -1028,7 +1028,7 @@ int dss__ApartmentGetDSMeterIDs(struct soap *soap, int _token, std::vector<std::
 }
 
 int dss__DSMeterGetName(struct soap *soap, int _token, char* _dsMeterID, std::string& name) {
-  dss::DSMeter mod(dss::NullDSID);
+  dss::DSMeter mod(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDSMeter(soap, _token, _dsMeterID, mod);
   if(getResult != SOAP_OK) {
     return getResult;

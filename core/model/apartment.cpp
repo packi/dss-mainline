@@ -248,7 +248,7 @@ namespace dss {
       }
     }
 
-    DSMeter* pResult = new DSMeter(_dsid);
+    DSMeter* pResult = new DSMeter(_dsid, this);
     m_DSMeters.push_back(pResult);
     return *pResult;
   } // allocateDSMeter
@@ -264,10 +264,12 @@ namespace dss {
 
     if(result == NULL) {
       result = new Zone(_zoneID, this);
+      result->publishToPropertyTree();
       addDefaultGroupsToZone(*result);
       m_Zones.push_back(result);
+    } else {
+      result->publishToPropertyTree();
     }
-    result->publishToPropertyTree();
     return *result;
   } // allocateZone
 

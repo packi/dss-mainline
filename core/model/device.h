@@ -95,7 +95,7 @@ namespace dss {
     bool hasSwitch() const;
 
     /** Returns the name of the device. */
-    std::string getName() const;
+    const std::string& getName() const;
     /** Sets the name of the device.
      * @note This will cause the apartment to store
      * \c apartment.xml
@@ -144,7 +144,7 @@ namespace dss {
     int getDSMeterID() const;
     const dsid_t& getLastKnownDSMeterDSID() const;
     void setLastKnownDSMeterDSID(const dsid_t& _value);
-    void setDSMeter(const DSMeter& _dsMeter);
+    void setDSMeter(DSMeter& _dsMeter);
 
     /** Returns the zone ID the device resides in. */
     int getZoneID() const;

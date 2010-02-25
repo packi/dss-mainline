@@ -68,9 +68,9 @@ namespace dss {
     virtual Set getDevices() const;
 
     /** Adds the Zone to a dsMeter. */
-    void addToDSMeter(const DSMeter& _dsMeter);
+    void addToDSMeter(DSMeter& _dsMeter);
     /** Removes the Zone from a dsMeter. */
-    void removeFromDSMeter(const DSMeter& _dsMeter);
+    void removeFromDSMeter(DSMeter& _dsMeter);
 
     /** Adds a device to the zone.
      * This will permanently add the device to the zone.
@@ -104,9 +104,8 @@ namespace dss {
     int getFirstZoneOnDSMeter() { return m_FirstZoneOnDSMeter; }
     void setFirstZoneOnDSMeter(const int _value) { m_FirstZoneOnDSMeter = _value; }
 
-    /** Returns a list of the dsMeters the zone is registered with. */
-    std::vector<int> getDSMeters() const;
     bool registeredOnDSMeter(const DSMeter& _dsMeter) const;
+    bool isRegisteredOnAnyMeter() const;
 
     virtual void nextScene();
     virtual void previousScene();

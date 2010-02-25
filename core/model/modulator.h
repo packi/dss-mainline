@@ -26,6 +26,8 @@
 
 #include <string>
 
+#include <boost/shared_ptr.hpp>
+
 #include "devicecontainer.h"
 #include "physicalmodelitem.h"
 #include "core/ds485types.h"
@@ -33,6 +35,9 @@
 #include "core/datetools.h"
 
 namespace dss {
+  class PropertyNode;
+  typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
+  class Apartment;
 
   /** Represents a DSMeter */
   class DSMeter : public DeviceContainer,
@@ -52,9 +57,13 @@ namespace dss {
     std::string m_HardwareName;
     int m_DeviceType;
     bool m_IsValid;
+    PropertyNodePtr m_pPropertyNode;
+    Apartment* m_pApartment;
+  private:
+    void publishToPropertyTree();
   public:
     /** Constructs a dsMeter with the given dsid. */
-    DSMeter(const dsid_t _dsid);
+    DSMeter(const dsid_t _dsid, Apartment* _pApartment);
     virtual ~DSMeter() {};
     virtual Set getDevices() const;
 
@@ -110,9 +119,11 @@ namespace dss {
     /** Returns true if the dsMeter has been read-out completely. */
     bool isValid() const { return m_IsValid; }
     void setIsValid(const bool _value) { m_IsValid = _value; }
+
+    PropertyNodePtr getPropertyNode() { return m_pPropertyNode; }
   }; // DSMeter
 
-  
+
 } // namespace dss
 
 

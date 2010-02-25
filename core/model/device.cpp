@@ -57,9 +57,8 @@ namespace dss {
     if(m_pPropertyNode == NULL) {
       if(m_pApartment->getPropertyNode() != NULL) {
         m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/" + m_DSID.toString());
-//        m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
-        m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyReference<std::string>(m_Name));
-        m_pPropertyNode->createProperty("DSMeterID")->linkToProxy(PropertyProxyMemberFunction<Device,int>(*this, &Device::getDSMeterID, false));
+        m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
+        m_pPropertyNode->createProperty("DSMeterID")->linkToProxy(PropertyProxyMemberFunction<Device,int>(*this, &Device::getDSMeterID));
         m_pPropertyNode->createProperty("ZoneID")->linkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
         if(m_pPropertyNode->getProperty("interrupt/mode") == NULL) {
           PropertyNodePtr interruptNode = m_pPropertyNode->createProperty("interrupt");
@@ -121,7 +120,7 @@ namespace dss {
     callScene(SceneHelper::getNextScene(m_LastCalledScene));
   } // previousScene
 
-  std::string Device::getName() const {
+  const std::string& Device::getName() const {
     return m_Name;
   } // getName
 
@@ -174,9 +173,23 @@ namespace dss {
     return m_LastKnownMeterDSID;
   } // getLastKnownDSMeterDSID
 
-  void Device::setDSMeter(const DSMeter& _dsMeter) {
+  void Device::setDSMeter(DSMeter& _dsMeter) {
+    PropertyNodePtr alias;
+    std::string devicePath = "devices/" + m_DSID.toString();
+    if((m_pPropertyNode != NULL) && (m_DSMeterDSID != NullDSID)) {
+      alias = m_pApartment->getDSMeterByDSID(m_DSMeterDSID).getPropertyNode()->getProperty(devicePath);
+    }
     m_DSMeterDSID = _dsMeter.getDSID();
     m_LastKnownMeterDSID = _dsMeter.getDSID();
+    if(m_pPropertyNode != NULL) {
+      PropertyNodePtr target = _dsMeter.getPropertyNode()->createProperty("devices");
+      if(alias != NULL) {
+        target->addChild(alias);
+      } else {
+        alias = target->createProperty(m_DSID.toString());
+        alias->alias(m_pPropertyNode);
+      }
+    }
   } // setDSMeter
 
   int Device::getZoneID() const {

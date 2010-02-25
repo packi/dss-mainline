@@ -74,12 +74,23 @@ namespace dss {
       throw std::runtime_error("Zone::addGroup: ZoneID of _group does not match own");
     }
     m_Groups.push_back(_group);
+    if(m_pPropertyNode != NULL) {
+      PropertyNodePtr groupNode = m_pPropertyNode->createProperty("groups/" + intToString(_group->getID()));
+      groupNode->createProperty("lastCalledScene")
+        ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*_group, &Group::getLastCalledScene));
+    }
   } // addGroup
 
   void Zone::removeGroup(UserGroup* _group) {
     std::vector<Group*>::iterator it = find(m_Groups.begin(), m_Groups.end(), _group);
     if(it != m_Groups.end()) {
       m_Groups.erase(it);
+    }
+    if(m_pPropertyNode != NULL) {
+      PropertyNodePtr groupNode = m_pPropertyNode->getProperty("groups/" + intToString(_group->getID()));
+      if(groupNode != NULL) {
+        groupNode->getParentNode()->removeChild(groupNode);
+      }
     }
   } // removeGroup
 
@@ -120,29 +131,34 @@ namespace dss {
     m_ZoneID = _value;
   } // setZoneID
 
-  void Zone::addToDSMeter(const DSMeter& _dsMeter) {
+  void Zone::addToDSMeter(DSMeter& _dsMeter) {
     // make sure the zone is connected to the dsMeter
     if(find(m_DSMeters.begin(), m_DSMeters.end(), &_dsMeter) == m_DSMeters.end()) {
       m_DSMeters.push_back(&_dsMeter);
+      if(_dsMeter.getPropertyNode() != NULL) {
+        PropertyNodePtr alias = _dsMeter.getPropertyNode()->createProperty("zones/" + intToString(m_ZoneID));
+        alias->alias(m_pPropertyNode);
+      }
     }
   } // addToDSMeter
 
-  void Zone::removeFromDSMeter(const DSMeter& _dsMeter) {
+  void Zone::removeFromDSMeter(DSMeter& _dsMeter) {
     m_DSMeters.erase(find(m_DSMeters.begin(), m_DSMeters.end(), &_dsMeter));
-  } // removeFromDSMeter
-
-  std::vector<int> Zone::getDSMeters() const {
-    std::vector<int> result;
-    for(std::vector<const DSMeter*>::const_iterator iDSMeter = m_DSMeters.begin(), e = m_DSMeters.end();
-        iDSMeter != e; ++iDSMeter) {
-      result.push_back((*iDSMeter)->getBusID());
+    if(_dsMeter.getPropertyNode() != NULL) {
+      PropertyNodePtr alias = _dsMeter.getPropertyNode()->getProperty("zones/" + intToString(m_ZoneID));
+      if(alias != NULL) {
+        alias->getParentNode()->removeChild(alias);
+      }
     }
-    return result;
-  } // getDSMeters
+  } // removeFromDSMeter
 
   bool Zone::registeredOnDSMeter(const DSMeter& _dsMeter) const {
     return find(m_DSMeters.begin(), m_DSMeters.end(), &_dsMeter) != m_DSMeters.end();
   } // registeredOnDSMeter
+
+  bool Zone::isRegisteredOnAnyMeter() const {
+    return !m_DSMeters.empty();
+  } // isRegisteredOnAnyMeter
 
   unsigned long Zone::getPowerConsumption() {
     return getDevices().getPowerConsumption();
@@ -166,6 +182,8 @@ namespace dss {
     if(m_pPropertyNode == NULL) {
       if(m_pApartment->getPropertyNode() != NULL) {
         m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone" + intToString(m_ZoneID));
+        m_pPropertyNode->createProperty("name")
+          ->linkToProxy(PropertyProxyMemberFunction<Zone, std::string>(*this, &Zone::getName, &Zone::setName));
       }
     }
   } // publishToPropertyTree

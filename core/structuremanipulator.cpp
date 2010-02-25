@@ -79,7 +79,7 @@ namespace dss {
     }
     m_Interface.removeZone(_dsMeter.getBusID(), _zone.getID());
     _zone.removeFromDSMeter(_dsMeter);
-    if(_zone.getDSMeters().empty()) {
+    if(_zone.isRegisteredOnAnyMeter()) {
       _zone.setIsPresent(false);
     }
   } // removeZoneOnDSMeter

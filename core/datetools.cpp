@@ -235,8 +235,12 @@ namespace dss {
   } // operator<<
 
   DateTime::operator std::string() const {
-    return dateToISOString<std::string>(&m_DateTime);
+    return toString();
   } // operator std::string()
+
+  std::string DateTime::toString() const {
+    return dateToISOString<std::string>(&m_DateTime);
+  } // toString
 
   std::ostream& operator<<(std::ostream& out, const DateTime& _dt) {
     _dt << out;
