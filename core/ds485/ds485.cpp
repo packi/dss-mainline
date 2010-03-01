@@ -723,7 +723,7 @@ namespace dss {
         m_ReceiveBuffer[m_ValidBytes++] = currentChar;
 
         if(m_ValidBytes == TheReceiveBufferSizeBytes) {
-          Logger::getInstance()->log("dS485: receive buffer overflowing, resyncing", lsInfo);
+          Logger::getInstance()->log("dS485: Receive buffer overflowing, resyncing. The RS485 polarity might be wrong if this error occurs consistently!", lsInfo);
           m_State = rsSynchronizing;
           m_ValidBytes = 0;
         }
