@@ -18,7 +18,8 @@ web/handler/structurerequesthandler.cpp web/handler/eventrequesthandler.cpp
 web/handler/propertyrequesthandler.cpp web/handler/deviceinterfacerequesthandler.cpp
 web/handler/circuitrequesthandler.cpp web/handler/zonerequesthandler.cpp
 web/handler/devicerequesthandler.cpp web/handler/apartmentrequesthandler.cpp
-web/handler/setrequesthandler.cpp web/handler/jsonhelper.cpp)
+web/handler/setrequesthandler.cpp web/handler/jsonhelper.cpp
+web/handler/subscriptionrequesthandler.cpp)
 
 
 add_subdirectory(ds485)

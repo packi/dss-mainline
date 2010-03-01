@@ -45,6 +45,7 @@
 #include "core/web/handler/devicerequesthandler.h"
 #include "core/web/handler/setrequesthandler.h"
 #include "core/web/handler/zonerequesthandler.h"
+#include "core/web/handler/subscriptionrequesthandler.h"
 
 #include "core/DS485Interface.h"
 
@@ -188,6 +189,7 @@ namespace dss {
   const char* kHandlerSim = "sim";
   const char* kHandlerDebug = "debug";
   const char* kHandlerMetering = "metering";
+  const char* kHandlerSubscription = "subscription";
 
   void WebServer::instantiateHandlers() {
     m_Handlers[kHandlerApartment] = new ApartmentRequestHandler(getDSS().getApartment());
@@ -200,17 +202,18 @@ namespace dss {
     m_Handlers[kHandlerProperty] = new PropertyRequestHandler(getDSS().getPropertySystem());
     m_Handlers[kHandlerEvent] = new EventRequestHandler(getDSS().getEventQueue());
     m_Handlers[kHandlerSystem] = new SystemRequestHandler();
-    m_Handlers[kHandlerStructure] = 
+    m_Handlers[kHandlerStructure] =
       new StructureRequestHandler(
-        getDSS().getApartment(), 
-        getDSS().getModelMaintenance(), 
+        getDSS().getApartment(),
+        getDSS().getModelMaintenance(),
         *getDSS().getDS485Interface().getStructureModifyingBusInterface()
       );
     m_Handlers[kHandlerSim] = new SimRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerDebug] = new DebugRequestHandler(getDSS());
     m_Handlers[kHandlerMetering] = new MeteringRequestHandler(getDSS().getApartment(), getDSS().getMetering());
+    m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());
   } // instantiateHandlers
-  
+
   void WebServer::httpPluginCallback(struct mg_connection* _connection,
                                      const struct mg_request_info* _info,
                                      void* _userData) {
@@ -296,7 +299,7 @@ namespace dss {
   } // jsonHandler
 
   void WebServer::downloadHandler(struct mg_connection* _connection,
-                                  const struct mg_request_info* _info, 
+                                  const struct mg_request_info* _info,
                                   void* _userData) {
     const std::string kURLID = "/download/";
     std::string uri = _info->uri;

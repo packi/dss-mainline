@@ -291,7 +291,8 @@ namespace dss {
   class EventInterpreter : public Subsystem,
                            public Thread {
   private:
-    std::vector< boost::shared_ptr<EventSubscription> > m_Subscriptions;
+    typedef std::vector< boost::shared_ptr<EventSubscription> > SubscriptionVector;
+    SubscriptionVector m_Subscriptions;
     std::vector<EventInterpreterPlugin*> m_Plugins;
     EventQueue* m_Queue;
     EventRunner* m_EventRunner;
@@ -325,7 +326,8 @@ namespace dss {
     void setEventQueue(EventQueue* _queue) { m_Queue = _queue; }
     EventRunner& getEventRunner() { return *m_EventRunner; }
     void setEventRunner(EventRunner* _runner) { m_EventRunner = _runner; }
-    int getNumberOfSubscriptions() { return m_Subscriptions.size(); }
+    int getNumberOfSubscriptions() const { return m_Subscriptions.size(); }
+    SubscriptionVector getSubscriptions() const { return m_Subscriptions; }
   }; // EventInterpreter
 
 

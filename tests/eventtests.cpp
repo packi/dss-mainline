@@ -268,4 +268,41 @@ BOOST_AUTO_TEST_CASE(testEventHandlerJavascriptDoesntLeakExceptionsWithNonexisti
   plugin->handleEvent(evt, subscription);
 } // testEventHandlerJavascriptDoesntLeakExceptionsWithNonexistingFile
 
+BOOST_AUTO_TEST_CASE(testRemovingSubscription) {
+  EventQueue queue;
+  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+  interpreter.setEventQueue(&queue);
+  interpreter.setEventRunner(&runner);
+  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
+  interpreter.addPlugin(plugin);
+
+  interpreter.run();
+
+  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+
+  boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
+  opts->setParameter("event_name", "event1");
+  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", interpreter, opts));
+  interpreter.subscribe(subscription);
+
+  queue.pushEvent(pEvent);
+
+  sleepMS(100);
+
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
+
+  interpreter.unsubscribe(subscription->getID());
+
+  queue.pushEvent(pEvent);
+
+  sleepMS(100);
+
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 3);
+
+  queue.shutdown();
+  interpreter.terminate();
+  sleepMS(1200);
+} // testRemovingSubscription
+
 BOOST_AUTO_TEST_SUITE_END()

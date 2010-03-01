@@ -247,8 +247,12 @@ namespace dss {
 
               EventInterpreterPlugin* plugin = getPluginByName((*ipSubscription)->getHandlerName());
               if(plugin != NULL) {
-                Logger::getInstance()->log(std::string("EventInterpreter: Found handler '") + plugin->getName() + "' calling...");
-                plugin->handleEvent(*toProcess, **ipSubscription);
+                Logger::getInstance()->log("EventInterpreter: Found handler '" + plugin->getName() + "' calling...");
+                try {
+                  plugin->handleEvent(*toProcess, **ipSubscription);
+                } catch(std::runtime_error& e) {
+                  Logger::getInstance()->log(std::string("Caught exception while handling event: ") + e.what(), lsError);
+                }
                 called = true;
                 Logger::getInstance()->log("EventInterpreter: called.");
               }
