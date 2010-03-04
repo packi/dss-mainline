@@ -34,6 +34,9 @@ git branch|grep ^*|sed -e 's|^\*\s*||' > .dss_git_branch
 git submodule update --init
 ./websrc/tools/build_and_copy_weblibs.sh websrc data/webroot/js/
 
+# copy WSDL file
+cp webservices/dss.wsdl data/webroot
+
 # clean up release tarball
 
 cd ..
