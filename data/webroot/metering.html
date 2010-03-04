@@ -3,12 +3,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-		<script type="text/javascript" src="js/lib/jquery/jquery.js"></script>
+		<script type="text/javascript" src="js/lib/jquery/jquery.min.js"></script>
 		<script type="text/javascript" src="js/lib/prototype/prototype.js"></script>
 		<!-- [if IE]>
-			<script type="text/javascript" src="js/lib/flot/excanvas.pack.js"></script>
+			<script type="text/javascript" src="js/lib/flot/excanvas.min.js"></script>
 		<![endif] -->
-		<script type="text/javascript" src="js/lib/flot/jquery.flot.pack.js"></script>
+		<script type="text/javascript" src="js/lib/flot/jquery.flot.min.js"></script>
 		<script type="text/javascript" src="js/DSGraph.js"></script>
 		<script type="text/javascript" src="js/DSMainMeterReport.js"></script>
 		<script type="text/javascript" src="js/model.js"></script>
@@ -21,7 +21,7 @@ jQuery(document).ready(function() {
 	var apart = new Apartment();
 	apart.fetch();
 	var circuits = apart.getCircuits();
-	
+
 	jQuery("#series").append("<li id=\"meter\">Main Meter<\/li>");
 	jQuery("h2").css({fontSize: "x-large"});
 	jQuery("#series").css({fontSize: "medium"});
@@ -30,7 +30,7 @@ jQuery(document).ready(function() {
 		jQuery(this).css({color: "red"});
 		graph.setDSM("metering");
 	});
-	
+
 	jQuery(circuits).each(function() {
 		var id = this.dsid;
 		if(this.name !== "") {
@@ -44,7 +44,7 @@ jQuery(document).ready(function() {
 			graph.setDSM(id);
 		});
 	});
-	
+
 	jQuery("#graphSelector > li").each(function() {
 		jQuery(this).click(function() {
 			jQuery("#graphSelector li.selected").removeClass("selected");
@@ -68,11 +68,11 @@ jQuery(document).ready(function() {
 			}
 		})
 	});
-	
+
 	graph = new DSGraph(circuits[0].dsid);
 	jQuery("#" + circuits[0].dsid).css({color: "red"});
 	graph.start();
-	
+
 	jQuery("#showRawXML").click(function() {
 		jQuery("#rawDataOverlay").css({
 				display: "block",
