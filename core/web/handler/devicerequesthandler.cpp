@@ -103,6 +103,28 @@ namespace dss {
       } else if(_request.getMethod() == "setName") {
         pDevice->setName(_request.getParameter("newName"));
         return success();
+      } else if(_request.getMethod() == "addTag") {
+        std::string tagName = _request.getParameter("tag");
+        if(tagName.empty()) {
+          return failure("missing parameter 'tag'");
+        }
+        pDevice->addTag(tagName);
+        return success();
+      } else if(_request.getMethod() == "removeTag") {
+        std::string tagName = _request.getParameter("tag");
+        if(tagName.empty()) {
+          return failure("missing parameter 'tag'");
+        }
+        pDevice->removeTag(tagName);
+        return success();
+      } else if(_request.getMethod() == "hasTag") {
+        std::string tagName = _request.getParameter("tag");
+        if(tagName.empty()) {
+          return failure("missing parameter 'tag'");
+        }
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        resultObj->addProperty("hasTag", pDevice->hasTag(tagName));
+        return resultObj;
       } else if(_request.getMethod() == "enable") {
         pDevice->enable();
         return success();

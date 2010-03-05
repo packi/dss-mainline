@@ -316,6 +316,7 @@ namespace dss {
       if(m_TagsNode != NULL) {
         PropertyNodePtr pNode = m_TagsNode->createProperty(_tagName);
         pNode->setFlag(PropertyNode::Archive, true);
+        dirty();
       }
     }
   } // addTag
@@ -324,6 +325,7 @@ namespace dss {
     if(hasTag(_tagName)) {
       if(m_TagsNode != NULL) {
         m_TagsNode->removeChild(m_TagsNode->getPropertyByName(_tagName));
+        dirty();
       }
     }
   } // removeTag

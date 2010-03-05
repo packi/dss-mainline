@@ -25,7 +25,7 @@
 #include "restful.h"
 
 namespace dss {
- 
+
   boost::shared_ptr<RestfulAPI> WebServerAPI::createRestfulAPI() {
     boost::shared_ptr<RestfulAPI> api(new RestfulAPI());
     RestfulClass& clsApartment = api->addClass("apartment")
@@ -185,13 +185,6 @@ namespace dss {
       .withDocumentation("Returns an array of groups the device is in");
     clsDevice.addMethod("getState")
       .withDocumentation("Returns the state of the device");
-    clsDevice.addMethod("getLocation")
-      .withDocumentation("Returns the location of the device.");
-    clsDevice.addMethod("setLocation")
-      .withParameter("x", "double", false)
-      .withParameter("y", "double", false)
-      .withParameter("z", "double", false)
-      .withDocumentation("Sets the location of the device.");
     clsDevice.addMethod("turnOn")
       .withDocumentation("Turns on the device.", "This will call SceneMax on the device.");
     clsDevice.addMethod("turnOff")
@@ -228,7 +221,15 @@ namespace dss {
       .withDocumentation("Undos saving the scene value for sceneNr");
     clsDevice.addMethod("getConsumption")
       .withDocumentation("Returns the consumption of the device in mW.", "Note that this works only for simulated devices at the moment.");
-
+    clsDevice.addMethod("addTag")
+      .withParameter("tag", "string", true)
+      .withDocumentation("Adds the tag 'tag'");
+    clsDevice.addMethod("removeTag")
+      .withParameter("tag", "string", true)
+      .withDocumentation("Removes the tag 'tag'");
+    clsDevice.addMethod("hasTag")
+      .withParameter("tag", "string", true)
+      .withDocumentation("Returns hasTag: true if tagged 'tag'");
 
     RestfulClass& clsCircuit = api->addClass("circuit")
        .withInstanceParameter("id", "dsid", true);
@@ -352,7 +353,7 @@ namespace dss {
     clsStructure.addMethod("removeDevice")
         .withParameter("devID", "integer", true)
         .withDocumentation("Removes a device.", "Only devices that are no longer present (isPresent flag is not set) can be removed.");
-    
+
     return api;
   } // createRestfulAPI
 
