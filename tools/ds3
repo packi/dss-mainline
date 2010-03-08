@@ -55,7 +55,7 @@ usage() {
     echo "  Example: $APPNAME device getState 3504175fe0000000000012e7"
     echo ""
     echo "  zone:"
-    echo "    turnOn, turnOff | <zone id>"
+    echo "    turnOn, turnOff, increaseValue, decreaseValue | <zone id>"
     echo "    callScene | <zone id> <scene #>"
     echo "  Example: $APPNAME zone turnOn 172"
     echo ""
@@ -93,7 +93,8 @@ case "$command" in
     ###
     ## zone commands
     #
-    "zone_turnOn"|"zone_turnOff")
+    "zone_turnOn"|"zone_turnOff"|\
+    "apartment_increaseValue"|"apartment_decreaseValue")
         [ -z "$2" ] && fatal_usage "<zoneid> <group id>"
         call_dss "$target" "$target_command" "id=$1" "groupID=$2"
 	;;
