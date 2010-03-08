@@ -46,16 +46,6 @@
   <subscription event-name="darker" handler-name="bus_handler">
     <send type="decreaseValue" />
   </subscription>
-  <subscription event-name="model_ready" handler-name="javascript">
-    <parameter>
-      <parameter name="filename">data/handle_temperature_sensor_events.js</parameter>
-    </parameter>
-  </subscription>
-  <subscription event-name="model_ready" handler-name="javascript">
-    <parameter>
-      <parameter name="filename">data/initialize.js</parameter>
-    </parameter>
-  </subscription>
   <!-- Standard events -->
   <subscription event-name="callScene" handler-name="raise_event">
     <parameter>
