@@ -246,6 +246,9 @@ namespace dss {
        .withDocumentation("Returns the meter-value in Wh");
     clsCircuit.addMethod("rescan")
        .withDocumentation("Rescans the circuit");
+    clsCircuit.addMethod("removeInactiveDevices")
+       .withParameter("id", "dsid", true)
+       .withDocumentation("Removed all inactive devices from a modulator");
 
     RestfulClass& clsProp = api->addClass("property")
         .withInstanceParameter("path", "string", true);
