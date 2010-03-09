@@ -47,7 +47,7 @@ namespace dss {
     DeviceCommandPacketBuilderHints(DeviceCommandBusRequest* _pRequest)
     : PacketBuilderHints(_pRequest)
     {}
-    
+
     virtual int getNumberAddressParameter() {
       return 1;
     }
@@ -267,7 +267,7 @@ namespace dss {
     int m_FunctionIDForDevice;
     std::vector<uint16_t> m_Parameter;
   }; // CommandBusRequestPacketBuilderHints
-  
+
   class SceneCommandPacketBuilderHints : public CommandBusRequestPacketBuilderHints {
   public:
     SceneCommandPacketBuilderHints(SceneCommandBusRequest* _pRequest)
@@ -286,7 +286,7 @@ namespace dss {
       throw std::out_of_range("_parameter out of range");
     }
   };
-  
+
   boost::shared_ptr<PacketBuilderHintsBase> CallSceneCommandBusRequest::getBuilderHints() {
     SceneCommandPacketBuilderHints* result = new SceneCommandPacketBuilderHints(this);
     result->setFunctionIDForDevice(FunctionDeviceCallScene);
