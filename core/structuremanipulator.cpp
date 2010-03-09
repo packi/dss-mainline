@@ -84,4 +84,8 @@ namespace dss {
     }
   } // removeZoneOnDSMeter
 
+  void StructureManipulator::removeInactiveDevices(DSMeter& _dsMeter) {
+    m_Interface.removeInactiveDevices(_dsMeter.getBusID());
+  }
+
 } // namespace dss

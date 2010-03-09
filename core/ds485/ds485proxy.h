@@ -135,6 +135,8 @@ namespace dss {
     virtual int addUserGroup(const int _dsMeterID);
     virtual void removeUserGroup(const int _dsMeterID, const int _groupID);
 
+    virtual void removeInactiveDevices(const int _dsMeterID);
+
     virtual dsid_t getDSIDOfDevice(const int _dsMeterID, const int _deviceID);
     virtual dsid_t getDSIDOfDSMeter(const int _dsMeterID);
 

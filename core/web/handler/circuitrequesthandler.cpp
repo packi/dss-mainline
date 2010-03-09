@@ -72,13 +72,6 @@ namespace dss {
       } else if(_request.getMethod() == "rescan") {
         dsMeter.setIsValid(false);
         return success();
-      } else if (_request.getMethod() == "removeInactiveDevices") {
-        std::string idString = _request.getParameter("id");
-        if(idString.empty()) {
-          return failure("missing parameter id");
-        }
-        /// \todo implement on ds485 level
-        return success();
       } else {
         throw std::runtime_error("Unhandled function");
       }

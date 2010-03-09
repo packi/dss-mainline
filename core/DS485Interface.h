@@ -113,6 +113,9 @@ namespace dss {
     /** Removes a user group */
     virtual void removeUserGroup(const int _dsMeterID, const int _groupID) = 0;
 
+    /** Removes all inactive (!isPresent) devices from the dSM */
+    virtual void removeInactiveDevices(const int _dsMeterID) = 0;
+
     virtual ~StructureModifyingBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureModifyingBusInterface
 

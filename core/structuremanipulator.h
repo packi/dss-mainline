@@ -43,6 +43,7 @@ namespace dss {
     void createZone(DSMeter& _dsMeter, Zone& _zone);
     void addDeviceToZone(Device& _device, Zone& _zone);
     void removeZoneOnDSMeter(Zone& _zone, DSMeter& _dsMeter);
+    void removeInactiveDevices(DSMeter& _dsMeter);
   }; // StructureManipulator
 
 
