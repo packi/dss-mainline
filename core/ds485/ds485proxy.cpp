@@ -815,6 +815,15 @@ namespace dss {
 
   } // removeUserGroup
 
+  void DS485Proxy::removeInactiveDevices(const int _dsMeterID) {
+    DS485CommandFrame frame;
+    frame.getHeader().setBroadcast(false);
+    frame.getHeader().setDestination(_dsMeterID);
+    frame.setCommand(CommandRequest);
+    frame.getPayload().add<uint8_t>(FunctionRemoveInactiveDevices);
+    sendFrame(frame);
+  }
+
   boost::shared_ptr<DS485CommandFrame> DS485Proxy::receiveSingleFrame(DS485CommandFrame& _frame, uint8_t _functionID) {
     boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(_frame, _functionID);
     bucket->waitForFrame(5000);

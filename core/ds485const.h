@@ -76,6 +76,8 @@ namespace dss {
   const uint8_t FunctionZoneRemoveDevice = 0x31;
   const uint8_t FunctionDeviceAddToGroup = 0x34;
   const uint8_t FunctionZoneRemoveAllDevicesFromZone = 0x35;
+  
+  const uint8_t FunctionRemoveInactiveDevices = 0x37;
 
   const uint8_t FunctionDeviceCallScene = 0x42;
   const uint8_t FunctionDeviceSaveScene = 0x43;

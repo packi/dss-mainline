@@ -354,6 +354,10 @@ namespace dss {
         .withParameter("devID", "integer", true)
         .withDocumentation("Removes a device.", "Only devices that are no longer present (isPresent flag is not set) can be removed.");
 
+    clsStructure.addMethod("removeInactiveDevices")
+       .withParameter("id", "dsid", true)
+       .withDocumentation("Removed all inactive devices from a modulator");
+
     return api;
   } // createRestfulAPI
 

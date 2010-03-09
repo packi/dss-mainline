@@ -129,7 +129,7 @@ namespace dss {
         return failure("Cannot remove present device");
       }
      
-      DSS::getInstance()->getApartment().removeDevice(devID);
+      m_Apartment.removeDevice(devID);
       m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
       return success();
     }
@@ -137,15 +137,56 @@ namespace dss {
     return failure("Missing devID");
   }
 
+  boost::shared_ptr<JSONObject> StructureRequestHandler::removeInactiveDevices(const RestfulRequest& _request) {
+    StructureManipulator manipulator(m_Interface, m_Apartment);
+    std::string id = _request.getParameter("id");
+    if(id.empty()) {
+      return failure("missing parameter id");
+    }
+
+    dsid_t dID = dsid::fromString(id);
+
+    DSMeter& dsMeter = m_Apartment.getDSMeterByDSID(dID);
+    
+    manipulator.removeInactiveDevices(dsMeter);
+
+    Set all = m_Apartment.getDevices();
+    
+    if(all.length() <= 0) {
+      return success();
+    }
+
+    Set byMeter = all.getByDSMeter(dsMeter);
+    if (byMeter.length() <= 0) {
+      return success();
+    }
+
+    Set notPresent = byMeter.getByPresence(false);
+    if(notPresent.length() <= 0) {
+      return success();
+    }
+
+    for(int i = 0; i < notPresent.length(); i++) {
+      const DeviceReference& d = notPresent.get(i);
+      m_Apartment.removeDevice(d.getDSID());
+    }
+
+    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+
+    return success();
+  }
+
   boost::shared_ptr<JSONObject> StructureRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
     if(_request.getMethod() == "zoneAddDevice") {
-        return zoneAddDevice(_request);
+      return zoneAddDevice(_request);
     } else if(_request.getMethod() == "removeDevice") {
-        return removeDevice(_request);
+      return removeDevice(_request);
     } else if(_request.getMethod() == "addZone") {
-        return addZone(_request);
-  } else if(_request.getMethod() == "removeZone") {
-        return removeZone(_request);
+      return addZone(_request);
+    } else if(_request.getMethod() == "removeZone") {
+      return removeZone(_request);
+    } else if (_request.getMethod() == "removeInactiveDevices") {
+      return removeInactiveDevices(_request);
     } else {
       throw std::runtime_error("Unhandled function");
     }
