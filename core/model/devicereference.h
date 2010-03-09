@@ -28,10 +28,10 @@
 #include "deviceinterface.h"
 
 namespace dss {
-  
+
   class Apartment;
   class Device;
-  
+
     /** Internal reference to a device.
    * A DeviceReference is virtually interchangable with a device. It is used in places
      where a reference to a device is needed.
@@ -94,6 +94,8 @@ namespace dss {
 
     virtual void nextScene();
     virtual void previousScene();
+
+    virtual void blink();
 
     virtual unsigned long getPowerConsumption();
  }; // DeviceReference

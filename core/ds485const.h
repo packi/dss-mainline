@@ -92,6 +92,8 @@ namespace dss {
   const uint8_t FunctionDeviceDecreaseValue  = 0x4D;
   const uint8_t FunctionDeviceSetValue  = 0x50;
 
+  const uint8_t FunctionBlink = 0x52;
+
   const uint8_t FunctionDeviceSetZoneID = 0x4F;
 
   const uint8_t FunctionDeviceGetOnOff = 0x61;

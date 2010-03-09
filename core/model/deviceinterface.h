@@ -24,7 +24,7 @@
 #define DEVICEINTERFACE_H
 
 namespace dss {
-  
+
   /** Interface to a single or multiple devices.
    */
   class IDeviceInterface {
@@ -76,6 +76,8 @@ namespace dss {
      * @see dss::SceneHelper::getPreviousScene
      */
     virtual void previousScene() = 0;
+
+    virtual void blink() = 0;
 
     virtual ~IDeviceInterface() {};
   }; // IDeviceInterface

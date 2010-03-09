@@ -97,6 +97,9 @@ namespace dss {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("consumption", _interface->getPowerConsumption());
       return success(resultObj);
+    } else if(_request.getMethod() == "blink") {
+      _interface->blink();
+      return success();
     }
     throw std::runtime_error("Unknown function");
   } // handleRequest
@@ -112,7 +115,8 @@ namespace dss {
         || _request.getMethod() == "callScene"
         || _request.getMethod() == "saveScene"
         || _request.getMethod() == "undoScene"
-        || _request.getMethod() == "getConsumption";
+        || _request.getMethod() == "getConsumption"
+        || _request.getMethod() == "blink";
   } // isDeviceInterfaceCall
 
 } // namespace dss

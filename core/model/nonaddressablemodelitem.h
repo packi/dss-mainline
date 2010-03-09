@@ -29,7 +29,7 @@
 namespace dss {
 
   class AddressableModelItem;
-  
+
   class NonAddressableModelItem : public IDeviceInterface {
   public:
     virtual void increaseValue();
@@ -43,10 +43,8 @@ namespace dss {
     virtual void callScene(const int _sceneNr);
     virtual void saveScene(const int _sceneNr);
     virtual void undoScene(const int _sceneNr);
-/*
-    virtual void nextScene();
-    virtual void previousScene();
-*/
+
+    virtual void blink();
   protected:
     virtual std::vector<AddressableModelItem*> splitIntoAddressableItems() = 0;
   }; // NonAddressableModelItem

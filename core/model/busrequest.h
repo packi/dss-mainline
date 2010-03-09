@@ -130,6 +130,10 @@ namespace dss {
   private:
     uint16_t m_Value;
   };
+
+  class BlinkCommandBusRequest : public CommandBusRequest {
+    virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
+  };
 }
 
 #endif // BUSREQUEST_H

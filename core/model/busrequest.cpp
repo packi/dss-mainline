@@ -101,20 +101,114 @@ namespace dss {
     result->setFunctionID(FunctionDeviceDisable);
     return boost::shared_ptr<PacketBuilderHintsBase>(result);
   }
-  
-  class CommandBusRequestPacketBuilderHints : public PacketBuilderHints {
+
+  class CommandBusRequestPacketBuilderHintsBase : public PacketBuilderHints {
   public:
-    
-    CommandBusRequestPacketBuilderHints(CommandBusRequest* _pRequest)
+    CommandBusRequestPacketBuilderHintsBase(CommandBusRequest* _pRequest)
     : PacketBuilderHints(_pRequest),
       m_pGroup(NULL),
-      m_pDevice(NULL),
-      m_FunctionIDForGroup(-1),
-      m_FunctionIDForDevice(-1)
+      m_pDevice(NULL)
     {
       determineTypeOfTarget();
     }
-    
+
+    virtual uint16_t getTarget() {
+      if(targetIsDevice()) {
+        return m_pDevice->getDSMeterID();
+      }
+      return 0;
+    }
+
+    virtual bool isBroadcast() {
+      return targetIsGroup();
+    }
+  protected:
+    bool targetIsGroup() {
+      return m_pGroup != NULL;
+    }
+
+    bool targetIsDevice() {
+      return m_pDevice != NULL;
+    }
+
+    Device* getDevice() {
+      return m_pDevice;
+    }
+
+    Group* getGroup() {
+      return m_pGroup;
+    }
+  private:
+    void determineTypeOfTarget() {
+      PhysicalModelItem* pTarget = ((CommandBusRequest*)getRequest())->getTarget();
+      m_pGroup = dynamic_cast<Group*>(pTarget);
+      m_pDevice = dynamic_cast<Device*>(pTarget);
+    }
+  private:
+    Group* m_pGroup;
+    Device* m_pDevice;
+  }; // CommandBusRequestPacketBuilderHintsBase
+
+  class DeviceGroupCommandPacketBuilderHints : public CommandBusRequestPacketBuilderHintsBase {
+  public:
+    DeviceGroupCommandPacketBuilderHints(CommandBusRequest* _pRequest)
+    : CommandBusRequestPacketBuilderHintsBase(_pRequest)
+    {}
+
+    virtual int getNumberAddressParameter() {
+      if(targetIsDevice()) {
+        return 2;
+      } else {
+        return 3;
+      }
+    }
+
+    virtual uint16_t getAddressParameter(int _parameter) {
+      if(_parameter == 0) {
+        return targetIsGroup() ? 0 : 1;
+      } if(_parameter == 1) {
+        if(targetIsDevice()) {
+          return getDevice()->getShortAddress();
+        } else if(targetIsGroup()) {
+          return getGroup()->getZoneID();
+        }
+      } else if(_parameter == 2) {
+        if(targetIsGroup()) {
+          return getGroup()->getID();
+        }
+      }
+      throw std::runtime_error("getAddressParameter: failed to get address parameter nr. " + intToString(_parameter));
+    }
+
+    void setFunctionID(int _functionID) {
+      m_FunctionID = _functionID;
+    }
+
+    virtual int getFunctionID() {
+      return m_FunctionID;
+    }
+
+    virtual int getNumberOfParameter() {
+      return 0;
+    }
+
+    virtual uint16_t getParameter(int _parameter) {
+      return 0;
+    }
+  private:
+    int m_FunctionID;
+  };
+
+  class CommandBusRequestPacketBuilderHints : public CommandBusRequestPacketBuilderHintsBase {
+  public:
+
+    CommandBusRequestPacketBuilderHints(CommandBusRequest* _pRequest)
+    : CommandBusRequestPacketBuilderHintsBase(_pRequest),
+      m_FunctionIDForGroup(-1),
+      m_FunctionIDForDevice(-1)
+    {
+    }
+
     virtual int getFunctionID() {
       if(targetIsGroup()) {
         return m_FunctionIDForGroup;
@@ -123,17 +217,6 @@ namespace dss {
       } else {
         assert(false);
       }
-    }
-
-    virtual bool isBroadcast() {
-      return targetIsGroup();
-    }
-
-    virtual uint16_t getTarget() {
-      if(targetIsDevice()) {
-        return m_pDevice->getDSMeterID();
-      }
-      return 0;
     }
 
     virtual int getNumberAddressParameter() {
@@ -148,13 +231,13 @@ namespace dss {
     virtual uint16_t getAddressParameter(int _parameter) {
       if(_parameter == 0) {
         if(targetIsDevice()) {
-          return m_pDevice->getShortAddress();
+          return getDevice()->getShortAddress();
         } else if(targetIsGroup()) {
-          return m_pGroup->getZoneID();
+          return getGroup()->getZoneID();
         }
       } else if(_parameter == 1) {
         if(targetIsGroup()) {
-          return m_pGroup->getID();
+          return getGroup()->getID();
         }
       }
       throw std::runtime_error("getAddressParameter: failed to get address parameter nr. " + intToString(_parameter));
@@ -180,22 +263,6 @@ namespace dss {
       m_Parameter.push_back(_parameter);
     }
   private:
-    void determineTypeOfTarget() {
-      PhysicalModelItem* pTarget = ((CommandBusRequest*)getRequest())->getTarget();
-      m_pGroup = dynamic_cast<Group*>(pTarget);
-      m_pDevice = dynamic_cast<Device*>(pTarget);
-    }
-
-    bool targetIsGroup() {
-      return m_pGroup != NULL;
-    }
-
-    bool targetIsDevice() {
-      return m_pDevice != NULL;
-    }   
-  private:
-    Group* m_pGroup;
-    Device* m_pDevice;
     int m_FunctionIDForGroup;
     int m_FunctionIDForDevice;
     std::vector<uint16_t> m_Parameter;
@@ -283,5 +350,11 @@ namespace dss {
     result->addParameter(m_Value);
     return boost::shared_ptr<PacketBuilderHintsBase>(result);
   } // getBuilderHints
-  
+
+  boost::shared_ptr<PacketBuilderHintsBase> BlinkCommandBusRequest::getBuilderHints() {
+    DeviceGroupCommandPacketBuilderHints* result = new DeviceGroupCommandPacketBuilderHints(this);
+    result->setFunctionID(FunctionBlink);
+    return boost::shared_ptr<PacketBuilderHintsBase>(result);
+  } // getBuilderHints
+
 } // namespace dss

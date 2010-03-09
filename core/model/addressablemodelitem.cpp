@@ -92,9 +92,11 @@ namespace dss {
     request->setSceneID(_sceneNr);
     m_pApartment->dispatchRequest(request);
   } // undoScene
-/*
-  void nextScene();
-  void previousScene();
-*/
-  
+
+  void AddressableModelItem::blink() {
+    boost::shared_ptr<BlinkCommandBusRequest> request(new BlinkCommandBusRequest());
+    request->setTarget(this);
+    m_pApartment->dispatchRequest(request);
+  } // blink
+
 } // namespace dss

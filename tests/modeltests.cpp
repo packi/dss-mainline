@@ -1029,6 +1029,20 @@ BOOST_FIXTURE_TEST_CASE(testUndoSceneSet, TestModelFixture) {
   m_pFrameSender->setLastFunctionID(-1);
 }
 
+BOOST_FIXTURE_TEST_CASE(testBlinkSet, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,2));
+  dev1.setShortAddress(2);
+  Device& dev2 = m_pApartment->allocateDevice(dsid_t(0,3));
+  dev2.setShortAddress(3);
+  Set set;
+  set.addDevice(dev1);
+  set.blink();
+  BOOST_CHECK_EQUAL(FunctionBlink, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  BOOST_CHECK_EQUAL(2, m_pFrameSender->getParameter2());
+  m_pFrameSender->setLastFunctionID(-1);
+}
+
 BOOST_FIXTURE_TEST_CASE(testNextSceneDevice, TestModelFixture) {
   Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
@@ -1053,6 +1067,21 @@ BOOST_FIXTURE_TEST_CASE(testPreviousSceneDevice, TestModelFixture) {
   devRef1.previousScene();
   BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
   BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+}
+
+BOOST_FIXTURE_TEST_CASE(testBlinkDevice, TestModelFixture) {
+  Device& dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
+  dev1.setShortAddress(2);
+  dev1.blink();
+  BOOST_CHECK_EQUAL(FunctionBlink, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  BOOST_CHECK_EQUAL(0x2, m_pFrameSender->getParameter2());
+  m_pFrameSender->setLastFunctionID(-1);
+  DeviceReference devRef1(dev1, m_pApartment.get());
+  devRef1.blink();
+  BOOST_CHECK_EQUAL(FunctionBlink, m_pFrameSender->getLastFunctionID());
+  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
+  BOOST_CHECK_EQUAL(0x2, m_pFrameSender->getParameter2());
 }
 
 BOOST_AUTO_TEST_CASE(testApartmentCreatesRootNode) {

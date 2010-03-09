@@ -84,9 +84,12 @@ namespace dss {
       item->undoScene(_sceneNr);
     }
   } // undoScene
-/*
-    virtual void nextScene();
-    virtual void previousScene();
-*/
+
+  void NonAddressableModelItem::blink() {
+    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
+    foreach(AddressableModelItem* item, items) {
+      item->blink();
+    }
+  }
 
 } // namespace dss
