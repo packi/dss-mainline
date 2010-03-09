@@ -28,7 +28,7 @@ function call_dss() {
 	exit 1
     else
 	if [ -n "$PRINT_RESULT" ]; then
-	    echo $result|sed -e 's|.*,\s*||' -e 's|\s*}$||'
+	    echo $result|sed -e 's|.*,\s*||' -e 's|\s*}$|}|'
 	fi
     fi
     return 0
@@ -55,12 +55,12 @@ usage() {
     echo "  Example: $APPNAME device getState 3504175fe0000000000012e7"
     echo ""
     echo "  zone:"
-    echo "    turnOn, turnOff | <zone id>"
+    echo "    turnOn, turnOff, increaseValue, decreaseValue | <zone id>"
     echo "    callScene | <zone id> <scene #>"
     echo "  Example: $APPNAME zone turnOn 172"
     echo ""
     echo "  apartment"
-    echo "    turnOn, turnOff, getName, getConsumption"
+    echo "    turnOn, turnOff, getName, getConsumption, increaseValue, decreaseValue"
     echo "    callScene | <scene #>"
     echo "    setName | <new name>"
     echo "  Example: $APPNAME apartment callScene 5"
@@ -93,7 +93,8 @@ case "$command" in
     ###
     ## zone commands
     #
-    "zone_turnOn"|"zone_turnOff")
+    "zone_turnOn"|"zone_turnOff"|\
+    "apartment_increaseValue"|"apartment_decreaseValue")
         [ -z "$2" ] && fatal_usage "<zoneid> <group id>"
         call_dss "$target" "$target_command" "id=$1" "groupID=$2"
 	;;
@@ -116,7 +117,8 @@ case "$command" in
         [ -z "$2" ] && fatal_usage "<scene#> <group id>"
         call_dss "$target" "$target_command" "sceneNr=$1" "groupID=$2"
 	;;
-    "apartment_getName"|"apartment_getConsumption")
+    "apartment_getName"|"apartment_getConsumption"|\
+    "apartment_increaseValue"|"apartment_decreaseValue")
         PRINT_RESULT="yes" call_dss "$target" "$target_command"
 	;;
     "apartment_setName")
