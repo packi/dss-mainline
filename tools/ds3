@@ -23,6 +23,11 @@ function call_dss() {
     done
     
     result=$(wget --no-check-certificate -q -O - $URL)
+    if [ $? != 0 ]; then
+	echo "Could not connect to $DSS_HOST"
+	exit 1
+    fi
+    
     if [ -n "$(echo $result|grep '"ok":false')" ]; then
 	echo $result|sed -e 's|.*message\":\"||g' -e 's|\"}$||g'
 	exit 1
