@@ -127,4 +127,8 @@ namespace dss {
     getDevice().previousScene();
   }
 
+  void DeviceReference::blink() {
+    getDevice().blink();
+  }
+
 } // namespace dss

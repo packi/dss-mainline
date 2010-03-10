@@ -29,7 +29,7 @@
 namespace dss {
   class AddressableModelItem;
   class Device;
-  
+
   class PacketBuilderHintsBase {
   public:
     virtual int getFunctionID() = 0;
@@ -64,7 +64,7 @@ namespace dss {
   private:
     Device* m_pTarget;
   };
-  
+
   class EnableDeviceCommandBusRequest : public DeviceCommandBusRequest {
   public:
     virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
@@ -91,7 +91,7 @@ namespace dss {
   class SaveSceneCommandBusRequest : public SceneCommandBusRequest {
     virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   };
-  
+
   class UndoSceneCommandBusRequest : public SceneCommandBusRequest {
     virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   };
@@ -107,7 +107,7 @@ namespace dss {
   class StartDimUpCommandBusRequest : public CommandBusRequest {
     virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   };
-  
+
   class StartDimDownCommandBusRequest : public CommandBusRequest {
     virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   };
@@ -129,6 +129,10 @@ namespace dss {
     virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   private:
     uint16_t m_Value;
+  };
+
+  class BlinkCommandBusRequest : public CommandBusRequest {
+    virtual boost::shared_ptr<PacketBuilderHintsBase> getBuilderHints();
   };
 }
 

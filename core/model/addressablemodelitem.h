@@ -30,7 +30,7 @@
 namespace dss {
 
   class Apartment;
-  
+
   class AddressableModelItem : public PhysicalModelItem,
                                public IDeviceInterface {
   public:
@@ -47,10 +47,8 @@ namespace dss {
     virtual void callScene(const int _sceneNr);
     virtual void saveScene(const int _sceneNr);
     virtual void undoScene(const int _sceneNr);
-/*
-    virtual void nextScene();
-    virtual void previousScene();
-*/
+
+    virtual void blink();
   protected:
     Apartment* m_pApartment;
   }; // AddressableModelItem

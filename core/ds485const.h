@@ -94,6 +94,8 @@ namespace dss {
   const uint8_t FunctionDeviceDecreaseValue  = 0x4D;
   const uint8_t FunctionDeviceSetValue  = 0x50;
 
+  const uint8_t FunctionBlink = 0x52;
+
   const uint8_t FunctionDeviceSetZoneID = 0x4F;
 
   const uint8_t FunctionDeviceGetOnOff = 0x61;
@@ -103,7 +105,7 @@ namespace dss {
   const uint8_t FunctionDeviceGetGroups = 0x67;
   const uint8_t FunctionDeviceGetVersion = 0x68;
   const uint8_t FunctionDeviceGetSensorValue = 0x69;
-  
+
   const uint8_t FunctionGetTypeRequest = 0x90;
   const uint8_t FunctionDSMeterGetDSID = 0x91;
   const uint8_t FunctionDSMeterGetPowerConsumption = 0x94;
@@ -114,7 +116,7 @@ namespace dss {
   const uint8_t FunctionDeviceGetTransmissionQuality = 0x9f;
 
   const uint8_t FunctionMeterSynchronisation = 0xa0;
-  
+
   const uint8_t FunctionDSLinkConfigWrite = 0xc0;
   const uint8_t FunctionDSLinkConfigRead = 0xc1;
   const uint8_t FunctionDSLinkSendDevice = 0xc2;
@@ -122,7 +124,7 @@ namespace dss {
   const uint8_t FunctionDSLinkSendGroup = 0xc4;
   const uint8_t DSLinkSendLastByte = 0x01;
   const uint8_t DSLinkSendWriteOnly = 0x02;
-  
+
   const uint8_t EventNewDS485Device = 0x80;
   const uint8_t EventLostDS485Device = 0x81;
   const uint8_t EventDeviceReady = 0x82;
