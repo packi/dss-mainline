@@ -187,6 +187,43 @@ namespace dss {
     return JS_FALSE;
   } // set_remove
 
+  class JSDeviceAction : public IDeviceAction {
+    private:
+      jsval m_Function;
+      ScriptContext& m_Context;
+      ModelScriptContextExtension& m_Extension;
+    public:
+      JSDeviceAction(jsval _function, ScriptContext& _ctx, ModelScriptContextExtension& _ext)
+      : m_Function(_function), m_Context(_ctx), m_Extension(_ext) {}
+
+      virtual ~JSDeviceAction() {};
+
+      virtual bool perform(Device& _device) {
+        jsval rval;
+        JSObject* device = m_Extension.createJSDevice(m_Context, _device);
+        jsval dev = OBJECT_TO_JSVAL(device);
+        JS_CallFunctionValue(m_Context.getJSContext(), JS_GetGlobalObject(m_Context.getJSContext()), m_Function, 1, &dev, &rval);
+        return true;
+      }
+  };
+
+  JSBool set_perform(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    ScriptObject self(obj, *ctx);
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if(self.is("set")) {
+      Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+      if(argc == 1) {
+        JSDeviceAction act = JSDeviceAction(argv[0], *ctx, *ext);
+        set->perform(act);
+      }
+      *rval = INT_TO_JSVAL(0);
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // set_perform
+
   JSBool set_by_name(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
@@ -395,6 +432,7 @@ namespace dss {
     {"length", set_length, 0, 0, 0},
     {"combine", set_combine, 1, 0, 0},
     {"remove", set_remove, 1, 0, 0},
+    {"perform", set_perform, 1, 0, 0},
     {"byName", set_by_name, 1, 0, 0},
     {"byDSID", set_by_dsid, 1, 0, 0},
     {"byFunctionID", set_by_functionid, 1, 0, 0},
@@ -588,12 +626,12 @@ namespace dss {
     ScriptObject self(obj, *ctx);
     if(self.is("device")) {
       DeviceReference* ref = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
-      int value = ctx->convertTo<int>(argv[0]);
-      bool writeOnly = false;
-      bool lastByte = false;
       if(argc == 0) {
         return JS_FALSE;
       }
+      int value = ctx->convertTo<int>(argv[0]);
+      bool lastByte = false;
+      bool writeOnly = false;
       if(argc > 1) {
         lastByte = ctx->convertTo<bool>(argv[1]);
       }
@@ -632,43 +670,6 @@ namespace dss {
     return JS_FALSE;
   } // dev_get_last_called_scene
 
-  class JSDeviceAction : public IDeviceAction {
-  private:
-    jsval m_Function;
-    ScriptContext& m_Context;
-    ModelScriptContextExtension& m_Extension;
-  public:
-    JSDeviceAction(jsval _function, ScriptContext& _ctx, ModelScriptContextExtension& _ext)
-    : m_Function(_function), m_Context(_ctx), m_Extension(_ext) {}
-
-    virtual ~JSDeviceAction() {};
-
-    virtual bool perform(Device& _device) {
-      jsval rval;
-      JSObject* device = m_Extension.createJSDevice(m_Context, _device);
-      jsval dev = OBJECT_TO_JSVAL(device);
-      JS_CallFunctionValue(m_Context.getJSContext(), JS_GetGlobalObject(m_Context.getJSContext()), m_Function, 1, &dev, &rval);
-      return true;
-    }
-  };
-
-  JSBool dev_perform(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    ScriptObject self(obj, *ctx);
-
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    if(self.is("set")) {
-      Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
-      if(argc == 1) {
-        JSDeviceAction act = JSDeviceAction(argv[0], *ctx, *ext);
-        set->perform(act);
-      }
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
-    }
-    return JS_FALSE;
-  }
-
   JSFunctionSpec device_interface_methods[] = {
     {"turnOn", dev_turn_on, 0, 0, 0},
     {"turnOff", dev_turn_off, 0, 0, 0},
@@ -677,7 +678,6 @@ namespace dss {
     {"startDim", dev_start_dim, 1, 0, 0},
     {"endDim", dev_end_dim, 0, 0, 0},
     {"setValue", dev_set_value, 0, 0, 0},
-    {"perform", dev_perform, 1, 0, 0},
     {"increaseValue", dev_increase_value, 0, 0, 0},
     {"decreaseValue", dev_decrease_value, 0, 0, 0},
     {"callScene", dev_call_scene, 1, 0, 0},
