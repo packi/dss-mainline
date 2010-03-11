@@ -29,12 +29,12 @@
 #include "core/subsystem.h"
 #include "core/thread.h"
 #include "core/syncevent.h"
+#include "core/model/modelevent.h"
 
 namespace dss {
   class PropertyNode;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
   class Apartment;
-  class ModelEvent;
   class Event;
   class Metering;
 
@@ -64,6 +64,7 @@ namespace dss {
     virtual void doStart();
   private:
     void handleModelEvents();
+    void eraseModelEventsFromQueue(ModelEvent::EventType _type);
     void dsMeterReady(int _dsMeterBusID);
     void discoverDS485Devices();
     void waitForInterface();

@@ -136,6 +136,7 @@ namespace dss {
 
   void ModelMaintenance::handleModelEvents() {
     if(!m_ModelEvents.empty()) {
+      bool eraseEventFromList = true;
       ModelEvent& event = m_ModelEvents.front();
       switch(event.getEventType()) {
       case ModelEvent::etNewDevice:
@@ -160,6 +161,8 @@ namespace dss {
         }
         break;
       case ModelEvent::etModelDirty:
+        eraseModelEventsFromQueue(ModelEvent::etModelDirty);
+        eraseEventFromList = false;
         writeConfiguration();
         break;
       case ModelEvent::etDSLinkInterrupt:
@@ -170,9 +173,15 @@ namespace dss {
         }
         break;
       case ModelEvent::etNewDSMeter:
+        eraseModelEventsFromQueue(ModelEvent::etNewDSMeter);
+        eraseModelEventsFromQueue(ModelEvent::etLostDSMeter);
+        eraseEventFromList = false;
         discoverDS485Devices();
         break;
       case ModelEvent::etLostDSMeter:
+        eraseModelEventsFromQueue(ModelEvent::etLostDSMeter);
+        eraseModelEventsFromQueue(ModelEvent::etNewDSMeter);
+        eraseEventFromList = false;
         discoverDS485Devices();
         break;
       case ModelEvent::etDSMeterReady:
@@ -248,9 +257,11 @@ namespace dss {
         break;
       }
 
-      m_ModelEventsMutex.lock();
-      m_ModelEvents.erase(m_ModelEvents.begin());
-      m_ModelEventsMutex.unlock();
+      if(eraseEventFromList) {
+        m_ModelEventsMutex.lock();
+        m_ModelEvents.erase(m_ModelEvents.begin());
+        m_ModelEventsMutex.unlock();
+      }
     } else {
       m_NewModelEvent.waitFor(1000);
       bool hadToUpdate = false;
@@ -276,6 +287,18 @@ namespace dss {
       }
     }
   } // handleModelEvents
+
+  void ModelMaintenance::eraseModelEventsFromQueue(ModelEvent::EventType _type) {
+    m_ModelEventsMutex.lock();
+    for(boost::ptr_vector<ModelEvent>::iterator it = m_ModelEvents.begin(); it != m_ModelEvents.end(); ) {
+      if(it->getEventType() == ModelEvent::etModelDirty) {
+        it = m_ModelEvents.erase(it);
+      } else {
+        ++it;
+      }
+    }
+    m_ModelEventsMutex.unlock();
+  } // eraseModelEventsFromQueue
 
   void ModelMaintenance::dsMeterReady(int _dsMeterBusID) {
     log("DSMeter with id: " + intToString(_dsMeterBusID) + " is ready", lsInfo);
