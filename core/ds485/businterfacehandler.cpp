@@ -195,18 +195,17 @@ namespace dss {
 
           // handle responses
           if(frame->getCommand() == CommandResponse) {
-            PayloadDissector pd2(frame->getPayload());
             int modID = frame->getHeader().getSource();
             if(functionID == FunctionDSMeterGetPowerConsumption) {
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etPowerConsumption);
               pEvent->addParameter(modID);
-              pEvent->addParameter(pd2.get<uint32_t>());
+              pEvent->addParameter(pd.get<uint32_t>());
               raiseModelEvent(pEvent);
             }
             if(functionID == FunctionDSMeterGetEnergyMeterValue) {
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etEnergyMeterValue);
               pEvent->addParameter(modID);
-              pEvent->addParameter(pd2.get<uint32_t>());
+              pEvent->addParameter(pd.get<uint32_t>());
               raiseModelEvent(pEvent);
             }
           }
