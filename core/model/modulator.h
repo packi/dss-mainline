@@ -49,9 +49,9 @@ namespace dss {
     int m_EnergyLevelOrange;
     int m_EnergyLevelRed;
     int m_PowerConsumption;
-    DateTime m_PowerConsumptionAge;
+    DateTime m_PowerConsumptionTimeStamp;
     int m_EnergyMeterValue;
-    DateTime m_EnergyMeterValueAge;
+    DateTime m_EnergyMeterValueTimeStamp;
     int m_HardwareVersion;
     int m_SoftwareVersion;
     std::string m_HardwareName;
@@ -93,8 +93,15 @@ namespace dss {
 
     /** Returns the last consumption in mW returned from dS485 Bus, but never request it*/
     unsigned long getCachedPowerConsumption();
+
+    /** Returns timestamp of the last consumption measurement */
+    const DateTime& getCachedPowerConsumptionTimeStamp() const;
+
     /** Returns the last meter value in Wh returned from dS485 Bus, but never request it*/
     unsigned long getCachedEnergyMeterValue();
+
+    /** Returns timestamp of the last energy measurement */
+    const DateTime& getCachedEnergyMeterTimeStamp() const;
 
     /** Returns the orange energy level */
     int getEnergyLevelOrange() const { return m_EnergyLevelOrange; }
