@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions name="dss"
- targetNamespace="http://localhost:8080/dss.wsdl"
- xmlns:tns="http://localhost:8080/dss.wsdl"
+ targetNamespace="https://localhost:8080/dss.wsdl"
+ xmlns:tns="https://localhost:8080/dss.wsdl"
  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -24,7 +24,7 @@
   xmlns="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="unqualified"
   attributeFormDefault="unqualified">
-  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
   <complexType name="Event">
    <sequence>
      <element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
@@ -1080,16 +1080,16 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="ModulatorGetPowerConsumption">
+  <element name="DSMeterGetPowerConsumption">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="modulatorID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="dsMeterID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="ModulatorGetPowerConsumptionResponse">
+  <element name="DSMeterGetPowerConsumptionResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
@@ -1097,7 +1097,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="ApartmentGetModulatorIDs">
+  <element name="ApartmentGetDSMeterIDs">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1105,7 +1105,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="ApartmentGetModulatorIDsResponse">
+  <element name="ApartmentGetDSMeterIDsResponse">
    <complexType>
     <sequence>
      <element name="ids" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
@@ -1113,16 +1113,16 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="ModulatorGetName">
+  <element name="DSMeterGetName">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="modulatorID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="dsMeterID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="ModulatorGetNameResponse">
+  <element name="DSMeterGetNameResponse">
    <complexType>
     <sequence>
      <element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
@@ -1999,28 +1999,28 @@
  <part name="parameters" element="dss:DeviceGetZoneIDResponse"/>
 </message>
 
-<message name="ModulatorGetPowerConsumptionRequest">
- <part name="parameters" element="dss:ModulatorGetPowerConsumption"/>
+<message name="DSMeterGetPowerConsumptionRequest">
+ <part name="parameters" element="dss:DSMeterGetPowerConsumption"/>
 </message>
 
-<message name="ModulatorGetPowerConsumptionResponse">
- <part name="parameters" element="dss:ModulatorGetPowerConsumptionResponse"/>
+<message name="DSMeterGetPowerConsumptionResponse">
+ <part name="parameters" element="dss:DSMeterGetPowerConsumptionResponse"/>
 </message>
 
-<message name="ApartmentGetModulatorIDsRequest">
- <part name="parameters" element="dss:ApartmentGetModulatorIDs"/>
+<message name="ApartmentGetDSMeterIDsRequest">
+ <part name="parameters" element="dss:ApartmentGetDSMeterIDs"/>
 </message>
 
-<message name="ApartmentGetModulatorIDsResponse">
- <part name="parameters" element="dss:ApartmentGetModulatorIDsResponse"/>
+<message name="ApartmentGetDSMeterIDsResponse">
+ <part name="parameters" element="dss:ApartmentGetDSMeterIDsResponse"/>
 </message>
 
-<message name="ModulatorGetNameRequest">
- <part name="parameters" element="dss:ModulatorGetName"/>
+<message name="DSMeterGetNameRequest">
+ <part name="parameters" element="dss:DSMeterGetName"/>
 </message>
 
-<message name="ModulatorGetNameResponse">
- <part name="parameters" element="dss:ModulatorGetNameResponse"/>
+<message name="DSMeterGetNameResponse">
+ <part name="parameters" element="dss:DSMeterGetNameResponse"/>
 </message>
 
 <message name="ApartmentAllocateZoneRequest">
@@ -2500,20 +2500,20 @@
   <input message="tns:DeviceGetZoneIDRequest"/>
   <output message="tns:DeviceGetZoneIDResponse"/>
  </operation>
- <operation name="ModulatorGetPowerConsumption">
-  <documentation>Service definition of function dss__ModulatorGetPowerConsumption</documentation>
-  <input message="tns:ModulatorGetPowerConsumptionRequest"/>
-  <output message="tns:ModulatorGetPowerConsumptionResponse"/>
+ <operation name="DSMeterGetPowerConsumption">
+  <documentation>Service definition of function dss__DSMeterGetPowerConsumption</documentation>
+  <input message="tns:DSMeterGetPowerConsumptionRequest"/>
+  <output message="tns:DSMeterGetPowerConsumptionResponse"/>
  </operation>
- <operation name="ApartmentGetModulatorIDs">
-  <documentation>Service definition of function dss__ApartmentGetModulatorIDs</documentation>
-  <input message="tns:ApartmentGetModulatorIDsRequest"/>
-  <output message="tns:ApartmentGetModulatorIDsResponse"/>
+ <operation name="ApartmentGetDSMeterIDs">
+  <documentation>Service definition of function dss__ApartmentGetDSMeterIDs</documentation>
+  <input message="tns:ApartmentGetDSMeterIDsRequest"/>
+  <output message="tns:ApartmentGetDSMeterIDsResponse"/>
  </operation>
- <operation name="ModulatorGetName">
-  <documentation>Service definition of function dss__ModulatorGetName</documentation>
-  <input message="tns:ModulatorGetNameRequest"/>
-  <output message="tns:ModulatorGetNameResponse"/>
+ <operation name="DSMeterGetName">
+  <documentation>Service definition of function dss__DSMeterGetName</documentation>
+  <input message="tns:DSMeterGetNameRequest"/>
+  <output message="tns:DSMeterGetNameResponse"/>
  </operation>
  <operation name="ApartmentAllocateZone">
   <documentation>Service definition of function dss__ApartmentAllocateZone</documentation>
@@ -3169,7 +3169,7 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="ModulatorGetPowerConsumption">
+ <operation name="DSMeterGetPowerConsumption">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -3178,7 +3178,7 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="ApartmentGetModulatorIDs">
+ <operation name="ApartmentGetDSMeterIDs">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -3187,7 +3187,7 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="ModulatorGetName">
+ <operation name="DSMeterGetName">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -3397,9 +3397,9 @@
 </binding>
 
 <service name="dss">
- <documentation>gSOAP 2.7.9l generated service definition</documentation>
+ <documentation>gSOAP 2.7.15 generated service definition</documentation>
  <port name="dss" binding="tns:dss">
-  <SOAP:address location="http://localhost:8081"/>
+  <SOAP:address location="https://localhost:8081"/>
  </port>
 </service>
 
