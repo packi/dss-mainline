@@ -480,7 +480,8 @@ namespace dss {
                     m_PendingFrames.erase(m_PendingFrames.begin());
                     addToReceivedQueue(cmdAckFrame);
                   } else {
-                    std::cout << "\ngot invalid response" << std::endl;
+                    std::cout << "\ngot invalid response, erasing frame" << std::endl;
+                    m_PendingFrames.erase(m_PendingFrames.begin());
                   }
                 } else {
                   m_PendingFrames.erase(m_PendingFrames.begin());
