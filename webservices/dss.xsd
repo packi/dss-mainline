@@ -8,7 +8,7 @@
   xmlns="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="unqualified"
   attributeFormDefault="unqualified">
-  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
   <complexType name="Event">
    <sequence>
      <element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
@@ -1064,16 +1064,16 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="ModulatorGetPowerConsumption">
+  <element name="DSMeterGetPowerConsumption">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="modulatorID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="dsMeterID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="ModulatorGetPowerConsumptionResponse">
+  <element name="DSMeterGetPowerConsumptionResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
@@ -1081,7 +1081,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="ApartmentGetModulatorIDs">
+  <element name="ApartmentGetDSMeterIDs">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1089,7 +1089,7 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="ApartmentGetModulatorIDsResponse">
+  <element name="ApartmentGetDSMeterIDsResponse">
    <complexType>
     <sequence>
      <element name="ids" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
@@ -1097,16 +1097,16 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="ModulatorGetName">
+  <element name="DSMeterGetName">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="modulatorID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="dsMeterID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="ModulatorGetNameResponse">
+  <element name="DSMeterGetNameResponse">
    <complexType>
     <sequence>
      <element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>

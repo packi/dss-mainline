@@ -21,8 +21,8 @@
 */
 
 //gsoap dss service name: dss
-//gsoap dss service namespace: http://localhost:8080/dss.wsdl
-//gsoap dss service port: http://localhost:8081
+//gsoap dss service namespace: https://localhost:8080/dss.wsdl
+//gsoap dss service port: https://localhost:8081
 //gsoap dss schema namespace:  urn:dss:1.0
 //gsoap dss service type: MyType
 

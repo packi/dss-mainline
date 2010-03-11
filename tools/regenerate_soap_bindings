@@ -1,0 +1,14 @@
+#!/bin/sh
+
+INPUT=model_soap.h
+
+if [ ! -f "$INPUT" ]; then
+    echo "Input file '$INPUT' not found in current working dir. Exiting"
+    exit 1
+fi
+
+if [ -d /usr/include/gsoap ]; then
+  soapcpp2 -I/usr/include/gsoap/ -SLx $INPUT
+else
+  soapcpp2 -SLx $INPUT
+fi
