@@ -357,6 +357,16 @@ namespace dss {
     clsStructure.addMethod("removeInactiveDevices")
        .withParameter("id", "dsid", true)
        .withDocumentation("Removed all inactive devices from a modulator");
+    
+    RestfulClass& clsMetering = api->addClass("metering");
+    clsMetering.addMethod("getResolutions")
+      .withDocumentation("Returns all resolutions stored on this dSS");
+    clsMetering.addMethod("getSeries");
+    clsMetering.addMethod("getValues");
+    clsMetering.addMethod("getLatest")
+      .withParameter("type", "string", true)
+      .withParameter("from", "string", true)
+      .withDocumentation("Returns cached energy meter value (in Wh) or cached power consumption value (in mW). The type parameter defines what should be returned, valid types are 'energy' and 'consumption'. The from parameter follows the set-syntax, currently it only supports: .meters(dsid1,dsid2,...)");
 
     return api;
   } // createRestfulAPI

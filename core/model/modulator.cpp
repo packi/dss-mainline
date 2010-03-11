@@ -55,7 +55,7 @@ namespace dss {
       m_pPropertyNode->createProperty("powerConsumption")
         ->linkToProxy(PropertyProxyReference<int>(m_PowerConsumption, false));
       m_pPropertyNode->createProperty("powerConsumptionAge")
-      ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_PowerConsumptionAge, &DateTime::toString));
+      ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_PowerConsumptionTimeStamp, &DateTime::toString));
       m_pPropertyNode->createProperty("energyMeterValue")
         ->linkToProxy(PropertyProxyReference<int>(m_EnergyMeterValue, false));
       m_pPropertyNode->createProperty("isValid")
@@ -110,18 +110,18 @@ namespace dss {
 
   unsigned long DSMeter::getPowerConsumption() {
     DateTime now;
-    if(!now.addSeconds(-1).before(m_PowerConsumptionAge)) {
+    if(!now.addSeconds(-1).before(m_PowerConsumptionTimeStamp)) {
       m_PowerConsumption =  DSS::getInstance()->getDS485Interface().getMeteringBusInterface()->getPowerConsumption(m_BusID);
-      m_PowerConsumptionAge = now;
+      m_PowerConsumptionTimeStamp = now;
     }
     return m_PowerConsumption;
   } // getPowerConsumption
 
   unsigned long DSMeter::getEnergyMeterValue() {
     DateTime now;
-    if(!now.addSeconds(-1).before(m_EnergyMeterValueAge)) {
+    if(!now.addSeconds(-1).before(m_EnergyMeterValueTimeStamp)) {
       m_EnergyMeterValue = DSS::getInstance()->getDS485Interface().getMeteringBusInterface()->getEnergyMeterValue(m_BusID);
-      m_EnergyMeterValueAge = now;
+      m_EnergyMeterValueTimeStamp = now;
     }
     return m_EnergyMeterValue;
   } // getEnergyMeterValue
@@ -129,14 +129,14 @@ namespace dss {
   /** set the consumption in mW */
   void DSMeter::setPowerConsumption(unsigned long _value) {
     DateTime now;
-    m_PowerConsumptionAge = now;
+    m_PowerConsumptionTimeStamp = now;
     m_PowerConsumption = _value;
   }
 
   /** set the meter value in Wh */
   void DSMeter::setEnergyMeterValue(unsigned long _value)  {
     DateTime now;
-    m_EnergyMeterValueAge = now;
+    m_EnergyMeterValueTimeStamp = now;
     m_EnergyMeterValue = _value;
   }
 
@@ -144,8 +144,15 @@ namespace dss {
     return m_PowerConsumption;
   } // getPowerConsumption
 
+  const DateTime& DSMeter::getCachedPowerConsumptionTimeStamp() const {
+    return m_PowerConsumptionTimeStamp;
+  }
+
   unsigned long DSMeter::getCachedEnergyMeterValue() {
     return m_EnergyMeterValue;
   } // getEnergyMeterValue
 
+  const DateTime& DSMeter::getCachedEnergyMeterTimeStamp() const {
+    return m_EnergyMeterValueTimeStamp;
+  }
 } // namespace dss
