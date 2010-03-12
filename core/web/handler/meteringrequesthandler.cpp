@@ -170,7 +170,7 @@ namespace dss {
       return failure("Could not parse resolution '" + resolutionString + "'");
     }
   }
-  
+ 
   boost::shared_ptr<JSONObject> MeteringRequestHandler::getLatest(const RestfulRequest& _request) {
     std::string from = _request.getParameter("from");
     std::string type = _request.getParameter("type");
@@ -195,37 +195,54 @@ namespace dss {
       return failure("Invalid 'from' value");
     }
 
-    std::vector<std::string> dsids = dss::splitString(from, ',', true);
+    std::vector<DSMeter*> meters;
+
+    if((from.length() == 3) && (from == "all")) {
+      meters = m_Apartment.getDSMeters();
+    } else {
+      std::vector<std::string> dsids = dss::splitString(from, ',', true);
+      for(size_t i = 0; i < dsids.size(); i++) {
+        std::string strId = dsids.at(i);
+        if(strId.empty()) {
+          return failure("Invalid dsid in 'from' value: " + strId);
+        }
+
+        dsid_t dsid;
+        try {
+          dsid = dsid_t::fromString(strId);
+        } catch(std::invalid_argument&) {
+          return failure("Invalid dsid in 'from' value: " + strId);
+        }
+     
+        try {
+          DSMeter& dsMeter = m_Apartment.getDSMeterByDSID(dsid);
+          meters.push_back(&dsMeter);
+        } catch (std::runtime_error&) {
+          return failure("Could not find dsMeter with given dsid.");
+        }
+
+      }//for
+    }
 
     boost::shared_ptr<JSONObject> resultObj(new JSONObject());
     boost::shared_ptr<JSONArrayBase> modulators(new JSONArrayBase());
-    resultObj->addElement("", modulators);
+    resultObj->addElement("values", modulators);
 
-    for(size_t i = 0; i < dsids.size(); i++) {
-      std::string strId = dsids.at(i);
-      if(strId.empty()) {
-        return failure("Invalid dsid in 'from' value: " + strId);
-      }
-      
-      dsid_t dsid;
-      try {
-        dsid_t dsid = dsid_t::fromString(strId);
-      } catch(std::invalid_argument&) {
-        return failure("Invalid dsid in 'from' value: " + strId);
-      }
+    bool isEnergy = (type == "energy");
 
+    for(size_t i = 0; i < meters.size(); i++) {
       try {
-        DSMeter& dsMeter = m_Apartment.getDSMeterByDSID(dsid);
+        DSMeter* dsMeter = meters.at(i);
         boost::shared_ptr<JSONObject> modulator(new JSONObject());
 
-        modulator->addProperty("dsid", dsMeter.getDSID().toString());
-        modulator->addProperty("value", type == "energy" ? dsMeter.getCachedEnergyMeterValue() : dsMeter.getCachedPowerConsumption());
+        modulator->addProperty("dsid", dsMeter->getDSID().toString());
+        modulator->addProperty("value", isEnergy ? dsMeter->getCachedEnergyMeterValue() : dsMeter->getCachedPowerConsumption());
 
-        modulator->addProperty("date", type == "energy" ? dsMeter.getCachedEnergyMeterTimeStamp().toString() : dsMeter.getCachedPowerConsumptionTimeStamp().toString());
+        modulator->addProperty("date", isEnergy ? dsMeter->getCachedEnergyMeterTimeStamp().toString() : dsMeter->getCachedPowerConsumptionTimeStamp().toString());
 
         modulators->addElement("", modulator);
       } catch (std::runtime_error&) {
-        return failure("Could not find dsMeter with given dsid");
+        return failure("Could not apply properties to JSON object.");
       }
     }
     return success(resultObj);
