@@ -197,7 +197,7 @@ namespace dss {
 
     std::vector<DSMeter*> meters;
 
-    if((from.length() == 3) && (from == "all")) {
+    if(from == "all") {
       meters = m_Apartment.getDSMeters();
     } else {
       std::vector<std::string> dsids = dss::splitString(from, ',', true);
