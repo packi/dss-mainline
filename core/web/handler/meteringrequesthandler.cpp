@@ -170,7 +170,7 @@ namespace dss {
       return failure("Could not parse resolution '" + resolutionString + "'");
     }
   }
- 
+
   boost::shared_ptr<JSONObject> MeteringRequestHandler::getLatest(const RestfulRequest& _request) {
     std::string from = _request.getParameter("from");
     std::string type = _request.getParameter("type");
@@ -213,7 +213,7 @@ namespace dss {
         } catch(std::invalid_argument&) {
           return failure("Invalid dsid in 'from' value: " + strId);
         }
-     
+
         try {
           DSMeter& dsMeter = m_Apartment.getDSMeterByDSID(dsid);
           meters.push_back(&dsMeter);
