@@ -31,7 +31,7 @@
 #include "subsystem.h"
 
 #include <string>
-#include <queue>
+#include <deque>
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
@@ -239,7 +239,7 @@ namespace dss {
 
   class EventQueue {
   private:
-    std::queue< boost::shared_ptr<Event> > m_EventQueue;
+    std::deque< boost::shared_ptr<Event> > m_EventQueue;
     SyncEvent m_EntryInQueueEvt;
     Mutex m_QueueMutex;
 
@@ -347,6 +347,7 @@ namespace dss {
 
     /** Returns the event that will be raised */
     boost::shared_ptr<Event> getEvent() { return m_Event; }
+    const boost::shared_ptr<Event> getEvent() const { return m_Event; }
     /** Returns the associated Schedule */
     Schedule& getSchedule() const { return *m_Schedule; }
     /** Returns the name of this ScheduledEvent */

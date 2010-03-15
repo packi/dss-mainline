@@ -305,4 +305,96 @@ BOOST_AUTO_TEST_CASE(testRemovingSubscription) {
   sleepMS(1200);
 } // testRemovingSubscription
 
+BOOST_AUTO_TEST_CASE(testUniqueEventsWork) {
+  EventQueue queue;
+
+  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+
+  queue.pushEvent(pEvent);
+
+  boost::shared_ptr<Event> pEvent2(new Event("my_event"));
+  pEvent2->setProperty("unique", "yes");
+
+  queue.pushEvent(pEvent2);
+
+  BOOST_CHECK(queue.popEvent() != NULL);
+  BOOST_CHECK(queue.popEvent() == NULL);
+} // testUniqueEventsWork
+
+BOOST_AUTO_TEST_CASE(testUniqueEventsDontBreakRegularOnes) {
+  EventQueue queue;
+
+  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+
+  queue.pushEvent(pEvent);
+
+  boost::shared_ptr<Event> pEvent2(new Event("my_other_event"));
+  pEvent2->setProperty("unique", "yes");
+
+  queue.pushEvent(pEvent2);
+
+  BOOST_CHECK(queue.popEvent() != NULL);
+  BOOST_CHECK(queue.popEvent() != NULL);
+} // testUniqueEventsDontBreakRegularOnes
+
+BOOST_AUTO_TEST_CASE(testUniqueEventsCopyProperties) {
+  EventQueue queue;
+
+  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+
+  boost::shared_ptr<Event> pEvent2(new Event("my_event"));
+  pEvent2->setProperty("unique", "yes");
+  pEvent2->setProperty("aProperty", "aValue");
+
+  queue.pushEvent(pEvent2);
+
+  boost::shared_ptr<Event> pEventFromQueue = queue.popEvent();
+  BOOST_CHECK(pEventFromQueue != NULL);
+  BOOST_CHECK_EQUAL(pEventFromQueue->hasPropertySet("aProperty"), true);
+  BOOST_CHECK_EQUAL(pEventFromQueue->getPropertyByName("aProperty"), "aValue");
+} // testUniqueEventsCopyProperties
+
+BOOST_AUTO_TEST_CASE(testUniqueEventsOverwriteProperties) {
+  EventQueue queue;
+
+  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  pEvent->setProperty("aProperty", "SomeValue");
+
+  queue.pushEvent(pEvent);
+
+  boost::shared_ptr<Event> pEvent2(new Event("my_event"));
+  pEvent2->setProperty("unique", "yes");
+  pEvent2->setProperty("aProperty", "aValue");
+
+  queue.pushEvent(pEvent2);
+
+  boost::shared_ptr<Event> pEventFromQueue = queue.popEvent();
+  BOOST_CHECK(pEventFromQueue != NULL);
+  BOOST_CHECK_EQUAL(pEventFromQueue->hasPropertySet("aProperty"), true);
+  BOOST_CHECK_EQUAL(pEventFromQueue->getPropertyByName("aProperty"), "aValue");
+} // testUniqueEventsOverwriteProperties
+
+BOOST_AUTO_TEST_CASE(testUniqueEventsOverwritesTimeProperty) {
+  EventQueue queue;
+  EventRunner runner;
+  queue.setEventRunner(&runner);
+
+  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  pEvent->setProperty("time", "+2");
+
+  queue.pushEvent(pEvent);
+  BOOST_CHECK_EQUAL(runner.getSize(), 1);
+
+  boost::shared_ptr<Event> pEvent2(new Event("my_event"));
+  pEvent2->setProperty("unique", "yes");
+  pEvent2->setProperty("time", "+2");
+
+  queue.pushEvent(pEvent2);
+
+  BOOST_CHECK_EQUAL(runner.getSize(), 1);
+  const ScheduledEvent& eventFromQueue = runner.getEvent(0);
+  BOOST_CHECK_EQUAL(eventFromQueue.getEvent()->hasPropertySet("time"), true);
+  BOOST_CHECK_EQUAL(eventFromQueue.getEvent()->getPropertyByName("time"), "+2");
+} // testUniqueEventsOverwritesTimeProperty
+
 BOOST_AUTO_TEST_SUITE_END()
