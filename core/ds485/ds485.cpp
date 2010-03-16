@@ -562,6 +562,7 @@ namespace dss {
                 time(&tokenReceivedAt);
                 std::cout << "DS485: Got first TOKEN" << std::endl;
                 flush(std::cout);
+                m_PendingFrames.clear();        // clear any pending tx packets
               }
             }
             else {
