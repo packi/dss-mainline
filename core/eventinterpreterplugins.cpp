@@ -34,6 +34,7 @@
 #include "core/scripting/scriptobject.h"
 #include "core/scripting/modeljs.h"
 #include "core/scripting/propertyscriptextension.h"
+#include "core/scripting/jssocket.h"
 #include "core/foreach.h"
 #include "core/model/set.h"
 #include "core/model/zone.h"
@@ -157,6 +158,8 @@ namespace dss {
       ext = new PropertyScriptExtension(DSS::getInstance()->getPropertySystem());
       m_Environment.addExtension(ext);
       ext = new ModelConstantsScriptExtension();
+      m_Environment.addExtension(ext);
+      ext = new SocketScriptContextExtension();
       m_Environment.addExtension(ext);
     }
   } // initializeEnvironment
