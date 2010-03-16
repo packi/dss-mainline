@@ -201,7 +201,7 @@ namespace dss {
       frame->getHeader().setDestination(0);
       frame->setCommand(CommandRequest);
       frame->getPayload().add<uint8_t>(FunctionZoneRemoveAllDevicesFromZone);
-      frame->getPayload().add<uint8_t>(zoneID);
+      frame->getPayload().add<uint16_t>(zoneID);
       DS485Interface* intf = &DSS::getInstance()->getDS485Interface();
       DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
       if(proxy != NULL) {
