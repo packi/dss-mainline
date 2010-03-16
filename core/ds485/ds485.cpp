@@ -474,6 +474,7 @@ namespace dss {
                     m_PendingFrames.erase(m_PendingFrames.begin());
                     std::cout << "\ngot ack" << std::endl;
                   } else if(cmdAckFrame->getCommand() == CommandBusy) {
+                    m_PendingFrames.erase(m_PendingFrames.begin());
                     std::cout << "\ngot busy" << std::endl;
                   } else if(cmdAckFrame->getCommand() == CommandResponse) {
                     std::cout << "\ngot response" << std::endl;
