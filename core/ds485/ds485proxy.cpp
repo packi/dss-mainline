@@ -147,27 +147,35 @@ namespace dss {
     bool sim = false;
 #endif
     if(broadcast || !sim) {
-      if((m_DS485Controller.getState() == csSlave) || (m_DS485Controller.getState() == csMaster)) {
-        log("Sending packet to hardware");
-       	m_DS485Controller.enqueueFrame(_frame);
+      std::ostringstream sstream;
+      sstream << "DEST:";
+      if(broadcast) {
+        sstream << "*";
       }
-    }
-    std::ostringstream sstream;
-    sstream << "Frame content: ";
-    PayloadDissector pd(_frame.getPayload());
-    while(!pd.isEmpty()) {
-      uint8_t data = pd.get<uint8_t>();
-      sstream << "(0x" << std::hex << (unsigned int)data << ", " << std::dec << (int)data << "d)";
-    }
-    sstream << std::dec;
-    sstream << " to " << int(_frame.getHeader().getDestination());
-    if(broadcast) {
-      sstream << " as broadcast";
-    }
-    log(sstream.str());
+      sstream << "0x" << std::hex << std::uppercase << int(_frame.getHeader().getDestination());
 
+      PayloadDissector pdDump(_frame.getPayload());
+      uint8_t cmd = pdDump.get<uint8_t>();
+      sstream << ", CMD:0x" << std::hex << std::uppercase << (unsigned int)cmd << ", ";
+      int iParameter=1;
+      while(!pdDump.isEmpty()) {
+        uint16_t data = pdDump.get<uint16_t>();
+        sstream << " P" << iParameter++ << ":0x" << std::hex << std::uppercase << data;
+      }
+      sstream << std::dec;
+
+      if((m_DS485Controller.getState() == csSlave) || (m_DS485Controller.getState() == csMaster)) {
+        log("DS485Proxy: Enqueue packet");
+        m_DS485Controller.enqueueFrame(_frame);
+      }
+      else {
+        log("DS485Proxy: Discard packet");
+      }
+      log(sstream.str());
+    }
     boost::shared_ptr<DS485CommandFrame> pFrame(new DS485CommandFrame);
     *pFrame = _frame;
+
     // relay the frame to update our state
     if(m_pBusInterfaceHandler != NULL) {
       m_pBusInterfaceHandler->collectFrame(pFrame);
