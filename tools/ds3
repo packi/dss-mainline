@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # DSS shell (ds3) - simple shell interface to the dss json api
 # Johannes Winkelmann, johannes.winkelmann@aizo.com
@@ -6,7 +6,7 @@
 APPNAME=$(basename $0)
 
 # target, commands, args
-function call_dss() {
+call_dss() {
     if [ -z "$DSS_HOST" ]; then
 	DSS_HOST=localhost
     fi
