@@ -160,18 +160,25 @@ namespace dss {
         DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
         if(proxy != NULL) {
           boost::shared_ptr<FrameBucketCollector> bucket = proxy->sendFrameAndInstallBucket(*frame, FunctionDeviceGetTransmissionQuality);
-          bucket->waitForFrame(5000);
+          boost::shared_ptr<DS485CommandFrame> recFrame;
+          int rval;
+          do {
+            bucket->waitForFrame(2500);
+            recFrame = bucket->popFrame();
+            if(recFrame == NULL) {
+              return failure("No result received");
+            }
+            PayloadDissector pd(recFrame->getPayload());
+            pd.get<uint8_t>();
+            rval = int(pd.get<uint16_t>());
+            if(rval < 0) {
+              return failure("dSM reported error-code: " + intToString(rval));
+            }
+          } while (rval != 2);
 
-          boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
-          if(recFrame == NULL) {
-            return failure("No result received");
-          }
           PayloadDissector pd(recFrame->getPayload());
           pd.get<uint8_t>();
-          int errC = int(pd.get<uint16_t>());
-          if(errC < 0) {
-            return failure("dSM reported error-code: " + intToString(errC));
-          }
+          pd.get<uint16_t>(); // response index
           pd.get<uint16_t>(); // device address
           int qualityHK = pd.get<uint16_t>();
           int qualityRK = pd.get<uint16_t>();
