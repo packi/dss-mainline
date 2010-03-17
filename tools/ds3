@@ -22,7 +22,7 @@ call_dss() {
 	shift
     done
     
-    result=$(wget --no-check-certificate -q -O - $URL)
+    result=$(curl -s -k $URL)
     if [ $? != 0 ]; then
 	echo "Could not connect to $DSS_HOST"
 	exit 1
