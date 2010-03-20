@@ -62,6 +62,7 @@ namespace dss {
   } // popFrame
 
   void FrameBucketCollector::waitForFrames(int _timeoutMS) {
+    m_SingleFrame = false;
     sleepMS(_timeoutMS);
   } // waitForFrames
 

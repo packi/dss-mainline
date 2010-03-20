@@ -44,6 +44,7 @@ class SyncEvent{
 #ifndef WIN32
     Mutex m_ConditionMutex;
     pthread_cond_t m_Condition;
+    bool m_State;
 #else
     HANDLE m_EventHandle;
 #endif

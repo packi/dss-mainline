@@ -40,6 +40,7 @@ SyncEvent::SyncEvent()
 #else
   m_EventHandle = CreateEvent( NULL, false, false, NULL );
 #endif
+  m_State = 0;
 }
 
 
@@ -57,6 +58,7 @@ void SyncEvent::signal() {
 #ifndef WIN32
   m_ConditionMutex.lock();
 
+  m_State = 1;
   assert( pthread_cond_signal( &m_Condition ) == 0 );
 
   m_ConditionMutex.unlock();
@@ -69,6 +71,7 @@ void SyncEvent::broadcast() {
 #ifndef WIN32
   m_ConditionMutex.lock();
 
+  m_State = 1;
   assert(pthread_cond_broadcast(&m_Condition) == 0);
 
   m_ConditionMutex.unlock();
@@ -80,15 +83,21 @@ void SyncEvent::broadcast() {
 
 int SyncEvent::waitFor() {
 #ifndef WIN32
+  int result;
+
   m_ConditionMutex.lock();
 
-  int result = pthread_cond_wait( &m_Condition, m_ConditionMutex.getMutex() );
+  m_State = 0;
+  result = 0;
+  while( result == 0 && !m_State) {
+    result = pthread_cond_wait( &m_Condition, m_ConditionMutex.getMutex() );
+  }
 
   m_ConditionMutex.unlock();
-  if( result != ETIMEDOUT && result != 0 ) {
-    assert( false );
+  if (result < 0) {
+    return false;
   }
-  return result;
+  return true;
 #else
   return WaitForSingleObject( m_EventHandle, INFINITE );
 #endif
@@ -101,17 +110,28 @@ bool SyncEvent::waitFor( int _timeoutMS ) {
   struct timespec timeout;
   int timeoutSec = _timeoutMS / 1000;
   int timeoutMSec = _timeoutMS - 1000 * timeoutSec;
+  int result;
 
   m_ConditionMutex.lock();
   gettimeofday( &now, NULL );
   timeout.tv_sec = now.tv_sec + timeoutSec;
   timeout.tv_nsec = (now.tv_usec + timeoutMSec * 1000) * 1000;
-  int result = pthread_cond_timedwait( &m_Condition, m_ConditionMutex.getMutex(), &timeout );
-  m_ConditionMutex.unlock();
-  if(result != ETIMEDOUT && result != 0) {
-    //Logger::getInstance()->log("SyncEvent::waitFor", lsError);
+  if (timeout.tv_nsec > 1000000000) {
+    timeout.tv_sec += 1;
+    timeout.tv_nsec -= 1000000000;
   }
-  return !(result == ETIMEDOUT);
+
+  m_State = 0;
+  result = 0;
+  while (result == 0 && !m_State) {
+    result = pthread_cond_timedwait( &m_Condition, m_ConditionMutex.getMutex(), &timeout );
+  }
+
+  m_ConditionMutex.unlock();
+  if (result < 0) {
+    return false;
+  }
+  return m_State;
 #else
   return WaitForSingleObject( m_EventHandle, _timeoutMS ) == WAIT_OBJECT_0;
 #endif
