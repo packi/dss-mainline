@@ -41,6 +41,7 @@
 #include "core/model/zone.h"
 #include "core/model/group.h"
 #include "core/model/modulator.h"
+#include "core/structuremanipulator.h"
 
 inline dss::dsid_t FromSOAP(const char* _dsid) {
   dss::dsid_t result = dss::dsid_t::fromString(_dsid);
@@ -960,58 +961,11 @@ int dss__DeviceGetFunctionID(struct soap *soap, int _token, char* _deviceID, int
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
-	return getResult;
+    return getResult;
   }
   result = dev.getDevice().getFunctionID();
   return SOAP_OK;
 } // dss__DeviceGetFunctionID
-
-int dss__SwitchGetGroupID(struct soap *soap, int _token, char* _deviceID, int& result) {
- /*
-  dss::DeviceReference devRef(dss::NullDSID, NULL);
-  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, devRef);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  dss::DSIDInterface* simDev = dss::DSS::getInstance()->getSimulation().getSimulatedDevice(FromSOAP(_deviceID));
-  dss::DSIDSimSwitch* sw = NULL;
-  if(simDev != NULL && (sw = dynamic_cast<dss::DSIDSimSwitch*>(simDev)) != NULL) {
-  	result = dss::DSS::getInstance()->getSimulation().getGroupForSwitch(sw);
-  } else {
-    dss::Device& dev = devRef.getDevice();
-    for(int iGroup = 1; iGroup < 9; iGroup++) {
-      if(dev.isInGroup(iGroup)) {
-        result = iGroup;
-        break;
-      }
-    }
-  }
-  */
-  return SOAP_OK;
-} // dss__SwitchGetGroupID
-
-int dss__SwitchSimulateKeypress(struct soap *soap, int _token, char* _deviceID, int _buttonNr, char* _kind, bool& result) {
-/*
-  dss::DeviceReference dev(dss::NullDSID, NULL);
-  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  dss::DSIDInterface* simDev = dss::DSS::getInstance()->getSimulation().getSimulatedDevice(FromSOAP(_deviceID));
-  dss::DSIDSimSwitch* sw = NULL;
-  if(simDev != NULL && (sw = dynamic_cast<dss::DSIDSimSwitch*>(simDev)) != NULL) {
-    dss::ButtonPressKind kind = dss::Click;
-    if(std::string(_kind) == "touch") {
-      kind = dss::Touch;
-    } else if(std::string(_kind) == "touchend") {
-      kind = dss::TouchEnd;
-    }
-    dss::DSS::getInstance()->getSimulation().processButtonPress(*sw, _buttonNr, kind);
-    return SOAP_OK;
-  }
-  */
-  return soap_sender_fault(soap, "Could not find switch", NULL);
-} // dss__SwitchSimulateKeypress
 
 int dss__DeviceGetZoneID(struct soap *soap, int _token, char* _deviceID, int& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
@@ -1090,14 +1044,6 @@ int dss__ApartmentDeleteZone(struct soap *soap, int _token, int _zoneID, int& re
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
-int dss__Zone_AddDevice(struct soap *soap, int _token, int _zoneID, char* _deviceID, int& result) {
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
-}
-
-int dss__Zone_RemoveDevice(struct soap *soap, int _token, int _zoneID, char* _deviceID, int& result) {
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
-}
-
 int dss__ZoneSetName(struct soap *soap, int _token, int _zoneID, char* _name, bool& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
@@ -1125,22 +1071,6 @@ int dss__ZoneGetName(struct soap *soap, int _token, int _zoneID, std::string& re
   }
   return SOAP_OK;
 } // dss__ZoneGetName
-
-int dss__ApartmentAllocateUserGroup(struct soap *soap, int _token, int& groupID) {
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
-}
-
-int dss__GroupRemoveUserGroup(struct soap *soap, int _token, int _groupID, int& result) {
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
-}
-
-int dss__GroupAddDevice(struct soap *soap, int _token, int _groupID, char* _deviceID, int& result) {
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
-}
-
-int dss__GroupRemoveDevice(struct soap *soap, int _token, int _groupID, char* _deviceID, int& result) {
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
-}
 
 int dss__GroupSetName(struct soap *soap, int _token, int _zoneID, int _groupID, char* _name, bool& result) {
   dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
@@ -1368,4 +1298,23 @@ int dss__PropertyGetChildren(struct soap *soap, int _token, std::string _propert
 
   return SOAP_OK;
 } // dss__PropertyGetChildren
+
+int dss__StructureAddDeviceToZone(struct soap *soap, int _token, char* _deviceID, int _zoneID, bool& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+  dss::DSS& dssRef = *dss::DSS::getInstance();
+  dss::Apartment& aptRef = dssRef.getApartment();
+
+  try {
+    dss::Device& dev = aptRef.getDeviceByDSID(dss::dsid_t::fromString(_deviceID));
+    dss::Zone& zone = aptRef.getZone(_zoneID);
+    dss::StructureManipulator manipulator(*dssRef.getDS485Interface().getStructureModifyingBusInterface(),
+                                          aptRef);
+    manipulator.addDeviceToZone(dev, zone);
+  } catch(std::runtime_error& _ex) {
+    return soap_receiver_fault(soap, "Error handling request", NULL);
+  }
+  return SOAP_OK;
+} // dss__StructureAddDeviceToZone
 

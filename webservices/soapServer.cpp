@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2010-03-25 15:30:04 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2010-03-25 15:45:40 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -211,30 +211,16 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__ApartmentAllocateZone(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentDeleteZone"))
 		return soap_serve_dss__ApartmentDeleteZone(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Zone-AddDevice"))
-		return soap_serve_dss__Zone_AddDevice(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Zone-RemoveDevice"))
-		return soap_serve_dss__Zone_RemoveDevice(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ZoneSetName"))
 		return soap_serve_dss__ZoneSetName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ZoneGetName"))
 		return soap_serve_dss__ZoneGetName(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentAllocateUserGroup"))
-		return soap_serve_dss__ApartmentAllocateUserGroup(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:GroupRemoveUserGroup"))
-		return soap_serve_dss__GroupRemoveUserGroup(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:GroupAddDevice"))
-		return soap_serve_dss__GroupAddDevice(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:GroupRemoveDevice"))
-		return soap_serve_dss__GroupRemoveDevice(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:GroupSetName"))
 		return soap_serve_dss__GroupSetName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:GroupGetName"))
 		return soap_serve_dss__GroupGetName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetFunctionID"))
 		return soap_serve_dss__DeviceGetFunctionID(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:SwitchGetGroupID"))
-		return soap_serve_dss__SwitchGetGroupID(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:EventRaise"))
 		return soap_serve_dss__EventRaise(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:EventWaitFor"))
@@ -257,6 +243,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__PropertyGetBool(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:PropertyGetChildren"))
 		return soap_serve_dss__PropertyGetChildren(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:StructureAddDeviceToZone"))
+		return soap_serve_dss__StructureAddDeviceToZone(soap);
 	return soap->error = SOAP_NO_METHOD;
 }
 #endif
@@ -3093,88 +3081,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentDeleteZone(struct soap *soap)
 	return soap_closesock(soap);
 }
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Zone_AddDevice(struct soap *soap)
-{	struct dss__Zone_AddDevice soap_tmp_dss__Zone_AddDevice;
-	struct dss__Zone_AddDeviceResponse soap_tmp_dss__Zone_AddDeviceResponse;
-	soap_default_dss__Zone_AddDeviceResponse(soap, &soap_tmp_dss__Zone_AddDeviceResponse);
-	soap_default_dss__Zone_AddDevice(soap, &soap_tmp_dss__Zone_AddDevice);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Zone_AddDevice(soap, &soap_tmp_dss__Zone_AddDevice, "dss:Zone-AddDevice", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Zone_AddDevice(soap, soap_tmp_dss__Zone_AddDevice._token, soap_tmp_dss__Zone_AddDevice._zoneID, soap_tmp_dss__Zone_AddDevice._deviceID, soap_tmp_dss__Zone_AddDeviceResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Zone_AddDeviceResponse(soap, &soap_tmp_dss__Zone_AddDeviceResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Zone_AddDeviceResponse(soap, &soap_tmp_dss__Zone_AddDeviceResponse, "dss:Zone-AddDeviceResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Zone_AddDeviceResponse(soap, &soap_tmp_dss__Zone_AddDeviceResponse, "dss:Zone-AddDeviceResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Zone_RemoveDevice(struct soap *soap)
-{	struct dss__Zone_RemoveDevice soap_tmp_dss__Zone_RemoveDevice;
-	struct dss__Zone_RemoveDeviceResponse soap_tmp_dss__Zone_RemoveDeviceResponse;
-	soap_default_dss__Zone_RemoveDeviceResponse(soap, &soap_tmp_dss__Zone_RemoveDeviceResponse);
-	soap_default_dss__Zone_RemoveDevice(soap, &soap_tmp_dss__Zone_RemoveDevice);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Zone_RemoveDevice(soap, &soap_tmp_dss__Zone_RemoveDevice, "dss:Zone-RemoveDevice", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__Zone_RemoveDevice(soap, soap_tmp_dss__Zone_RemoveDevice._token, soap_tmp_dss__Zone_RemoveDevice._zoneID, soap_tmp_dss__Zone_RemoveDevice._deviceID, soap_tmp_dss__Zone_RemoveDeviceResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__Zone_RemoveDeviceResponse(soap, &soap_tmp_dss__Zone_RemoveDeviceResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Zone_RemoveDeviceResponse(soap, &soap_tmp_dss__Zone_RemoveDeviceResponse, "dss:Zone-RemoveDeviceResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Zone_RemoveDeviceResponse(soap, &soap_tmp_dss__Zone_RemoveDeviceResponse, "dss:Zone-RemoveDeviceResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneSetName(struct soap *soap)
 {	struct dss__ZoneSetName soap_tmp_dss__ZoneSetName;
 	struct dss__ZoneSetNameResponse soap_tmp_dss__ZoneSetNameResponse;
@@ -3250,170 +3156,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneGetName(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__ZoneGetNameResponse(soap, &soap_tmp_dss__ZoneGetNameResponse, "dss:ZoneGetNameResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentAllocateUserGroup(struct soap *soap)
-{	struct dss__ApartmentAllocateUserGroup soap_tmp_dss__ApartmentAllocateUserGroup;
-	struct dss__ApartmentAllocateUserGroupResponse soap_tmp_dss__ApartmentAllocateUserGroupResponse;
-	soap_default_dss__ApartmentAllocateUserGroupResponse(soap, &soap_tmp_dss__ApartmentAllocateUserGroupResponse);
-	soap_default_dss__ApartmentAllocateUserGroup(soap, &soap_tmp_dss__ApartmentAllocateUserGroup);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__ApartmentAllocateUserGroup(soap, &soap_tmp_dss__ApartmentAllocateUserGroup, "dss:ApartmentAllocateUserGroup", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__ApartmentAllocateUserGroup(soap, soap_tmp_dss__ApartmentAllocateUserGroup._token, soap_tmp_dss__ApartmentAllocateUserGroupResponse.groupID);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__ApartmentAllocateUserGroupResponse(soap, &soap_tmp_dss__ApartmentAllocateUserGroupResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__ApartmentAllocateUserGroupResponse(soap, &soap_tmp_dss__ApartmentAllocateUserGroupResponse, "dss:ApartmentAllocateUserGroupResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__ApartmentAllocateUserGroupResponse(soap, &soap_tmp_dss__ApartmentAllocateUserGroupResponse, "dss:ApartmentAllocateUserGroupResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__GroupRemoveUserGroup(struct soap *soap)
-{	struct dss__GroupRemoveUserGroup soap_tmp_dss__GroupRemoveUserGroup;
-	struct dss__GroupRemoveUserGroupResponse soap_tmp_dss__GroupRemoveUserGroupResponse;
-	soap_default_dss__GroupRemoveUserGroupResponse(soap, &soap_tmp_dss__GroupRemoveUserGroupResponse);
-	soap_default_dss__GroupRemoveUserGroup(soap, &soap_tmp_dss__GroupRemoveUserGroup);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__GroupRemoveUserGroup(soap, &soap_tmp_dss__GroupRemoveUserGroup, "dss:GroupRemoveUserGroup", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__GroupRemoveUserGroup(soap, soap_tmp_dss__GroupRemoveUserGroup._token, soap_tmp_dss__GroupRemoveUserGroup._groupID, soap_tmp_dss__GroupRemoveUserGroupResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__GroupRemoveUserGroupResponse(soap, &soap_tmp_dss__GroupRemoveUserGroupResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__GroupRemoveUserGroupResponse(soap, &soap_tmp_dss__GroupRemoveUserGroupResponse, "dss:GroupRemoveUserGroupResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__GroupRemoveUserGroupResponse(soap, &soap_tmp_dss__GroupRemoveUserGroupResponse, "dss:GroupRemoveUserGroupResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__GroupAddDevice(struct soap *soap)
-{	struct dss__GroupAddDevice soap_tmp_dss__GroupAddDevice;
-	struct dss__GroupAddDeviceResponse soap_tmp_dss__GroupAddDeviceResponse;
-	soap_default_dss__GroupAddDeviceResponse(soap, &soap_tmp_dss__GroupAddDeviceResponse);
-	soap_default_dss__GroupAddDevice(soap, &soap_tmp_dss__GroupAddDevice);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__GroupAddDevice(soap, &soap_tmp_dss__GroupAddDevice, "dss:GroupAddDevice", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__GroupAddDevice(soap, soap_tmp_dss__GroupAddDevice._token, soap_tmp_dss__GroupAddDevice._groupID, soap_tmp_dss__GroupAddDevice._deviceID, soap_tmp_dss__GroupAddDeviceResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__GroupAddDeviceResponse(soap, &soap_tmp_dss__GroupAddDeviceResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__GroupAddDeviceResponse(soap, &soap_tmp_dss__GroupAddDeviceResponse, "dss:GroupAddDeviceResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__GroupAddDeviceResponse(soap, &soap_tmp_dss__GroupAddDeviceResponse, "dss:GroupAddDeviceResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__GroupRemoveDevice(struct soap *soap)
-{	struct dss__GroupRemoveDevice soap_tmp_dss__GroupRemoveDevice;
-	struct dss__GroupRemoveDeviceResponse soap_tmp_dss__GroupRemoveDeviceResponse;
-	soap_default_dss__GroupRemoveDeviceResponse(soap, &soap_tmp_dss__GroupRemoveDeviceResponse);
-	soap_default_dss__GroupRemoveDevice(soap, &soap_tmp_dss__GroupRemoveDevice);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__GroupRemoveDevice(soap, &soap_tmp_dss__GroupRemoveDevice, "dss:GroupRemoveDevice", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__GroupRemoveDevice(soap, soap_tmp_dss__GroupRemoveDevice._token, soap_tmp_dss__GroupRemoveDevice._groupID, soap_tmp_dss__GroupRemoveDevice._deviceID, soap_tmp_dss__GroupRemoveDeviceResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__GroupRemoveDeviceResponse(soap, &soap_tmp_dss__GroupRemoveDeviceResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__GroupRemoveDeviceResponse(soap, &soap_tmp_dss__GroupRemoveDeviceResponse, "dss:GroupRemoveDeviceResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__GroupRemoveDeviceResponse(soap, &soap_tmp_dss__GroupRemoveDeviceResponse, "dss:GroupRemoveDeviceResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -3537,47 +3279,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetFunctionID(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__DeviceGetFunctionIDResponse(soap, &soap_tmp_dss__DeviceGetFunctionIDResponse, "dss:DeviceGetFunctionIDResponse", "")
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SwitchGetGroupID(struct soap *soap)
-{	struct dss__SwitchGetGroupID soap_tmp_dss__SwitchGetGroupID;
-	struct dss__SwitchGetGroupIDResponse soap_tmp_dss__SwitchGetGroupIDResponse;
-	soap_default_dss__SwitchGetGroupIDResponse(soap, &soap_tmp_dss__SwitchGetGroupIDResponse);
-	soap_default_dss__SwitchGetGroupID(soap, &soap_tmp_dss__SwitchGetGroupID);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__SwitchGetGroupID(soap, &soap_tmp_dss__SwitchGetGroupID, "dss:SwitchGetGroupID", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__SwitchGetGroupID(soap, soap_tmp_dss__SwitchGetGroupID._token, soap_tmp_dss__SwitchGetGroupID._deviceID, soap_tmp_dss__SwitchGetGroupIDResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__SwitchGetGroupIDResponse(soap, &soap_tmp_dss__SwitchGetGroupIDResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__SwitchGetGroupIDResponse(soap, &soap_tmp_dss__SwitchGetGroupIDResponse, "dss:SwitchGetGroupIDResponse", "")
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__SwitchGetGroupIDResponse(soap, &soap_tmp_dss__SwitchGetGroupIDResponse, "dss:SwitchGetGroupIDResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -4029,6 +3730,47 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__PropertyGetChildren(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__PropertyGetChildrenResponse(soap, &soap_tmp_dss__PropertyGetChildrenResponse, "dss:PropertyGetChildrenResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__StructureAddDeviceToZone(struct soap *soap)
+{	struct dss__StructureAddDeviceToZone soap_tmp_dss__StructureAddDeviceToZone;
+	struct dss__StructureAddDeviceToZoneResponse soap_tmp_dss__StructureAddDeviceToZoneResponse;
+	soap_default_dss__StructureAddDeviceToZoneResponse(soap, &soap_tmp_dss__StructureAddDeviceToZoneResponse);
+	soap_default_dss__StructureAddDeviceToZone(soap, &soap_tmp_dss__StructureAddDeviceToZone);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__StructureAddDeviceToZone(soap, &soap_tmp_dss__StructureAddDeviceToZone, "dss:StructureAddDeviceToZone", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__StructureAddDeviceToZone(soap, soap_tmp_dss__StructureAddDeviceToZone._token, soap_tmp_dss__StructureAddDeviceToZone._deviceID, soap_tmp_dss__StructureAddDeviceToZone._zoneID, soap_tmp_dss__StructureAddDeviceToZoneResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__StructureAddDeviceToZoneResponse(soap, &soap_tmp_dss__StructureAddDeviceToZoneResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__StructureAddDeviceToZoneResponse(soap, &soap_tmp_dss__StructureAddDeviceToZoneResponse, "dss:StructureAddDeviceToZoneResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__StructureAddDeviceToZoneResponse(soap, &soap_tmp_dss__StructureAddDeviceToZoneResponse, "dss:StructureAddDeviceToZoneResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

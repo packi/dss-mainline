@@ -223,29 +223,15 @@ int dss__DSMeterSetName(int _token, char* _dsMeterID, char*  _name, bool& result
 int dss__ApartmentAllocateZone(int _token, int& zoneID);
 /** Deletes a previously allocated zone. */
 int dss__ApartmentDeleteZone(int _token, int _zoneID, int& result);
-/** Adds a device to a zone */
-int dss__Zone_AddDevice(int _token, int _zoneID, char* _deviceID, int& result);
-/** Removes a device from a zone */
-int dss__Zone_RemoveDevice(int _token, int _zoneID, char* _deviceID, int& result);
 /** Sets the name of a zone to _name */
 int dss__ZoneSetName(int _token, int _zoneID, char* _name, bool& result);
 /** Returns the name of a zone */
 int dss__ZoneGetName(int _token, int _zoneID, std::string& result);
-/** Allocates a user-defined group. */
-int dss__ApartmentAllocateUserGroup(int _token, int& groupID);
-/** Revmoes a previously allocated group. */
-int dss__GroupRemoveUserGroup(int _token, int _groupID, int& result);
-/** Adds a device to the given group. */
-int dss__GroupAddDevice(int _token, int _groupID, char* _deviceID, int& result);
-/** Removes a device from the given group. */
-int dss__GroupRemoveDevice(int _token, int _groupID, char* _deviceID, int& result);
 int dss__GroupSetName(int _token, int _zoneID, int _groupID, char* _name, bool& result);
 int dss__GroupGetName(int _token, int _zoneID, int _groupID, std::string& result);
 
 /** Returns the function id of the specified device */
 int dss__DeviceGetFunctionID(int _token, char* _deviceID, int& result);
-/** Returns the group id of the specified switch */
-int dss__SwitchGetGroupID(int _token, char* _deviceID, int& result);
 
 
 //==================================================== Events
@@ -276,3 +262,6 @@ int dss__PropertyGetBool(int _token, std::string _propertyName, bool& result);
 int dss__PropertyGetChildren(int _token, std::string _propertyName, std::vector<std::string>& result);
 
 
+//==================================================== Structure
+
+int dss__StructureAddDeviceToZone(int _token, char* _deviceID, int _zoneID, bool& result);

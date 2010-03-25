@@ -182,29 +182,15 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentAllocateZone(struct soap*, int _token, i
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentDeleteZone(struct soap*, int _token, int _zoneID, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Zone_AddDevice(struct soap*, int _token, int _zoneID, char *_deviceID, int &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__Zone_RemoveDevice(struct soap*, int _token, int _zoneID, char *_deviceID, int &result);
-
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSetName(struct soap*, int _token, int _zoneID, char *_name, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneGetName(struct soap*, int _token, int _zoneID, std::string &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentAllocateUserGroup(struct soap*, int _token, int &groupID);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__GroupRemoveUserGroup(struct soap*, int _token, int _groupID, int &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__GroupAddDevice(struct soap*, int _token, int _groupID, char *_deviceID, int &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__GroupRemoveDevice(struct soap*, int _token, int _groupID, char *_deviceID, int &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__GroupSetName(struct soap*, int _token, int _zoneID, int _groupID, char *_name, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__GroupGetName(struct soap*, int _token, int _zoneID, int _groupID, std::string &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetFunctionID(struct soap*, int _token, char *_deviceID, int &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__SwitchGetGroupID(struct soap*, int _token, char *_deviceID, int &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__EventRaise(struct soap*, int _token, char *_eventName, char *_context, char *_parameter, char *_location, bool &result);
 
@@ -227,5 +213,7 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetString(struct soap*, int _token, std::
 SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetBool(struct soap*, int _token, std::string _propertyName, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetChildren(struct soap*, int _token, std::string _propertyName, std::vector<std::string >&result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__StructureAddDeviceToZone(struct soap*, int _token, char *_deviceID, int _zoneID, bool &result);
 
 #endif

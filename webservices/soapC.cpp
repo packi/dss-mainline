@@ -7,7 +7,7 @@
 
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2010-03-25 15:30:05 GMT")
+SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2010-03-25 15:45:40 GMT")
 
 
 #ifndef WITH_NOGLOBAL
@@ -181,6 +181,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_dss__Event(soap, NULL, NULL, "dss:Event");
 	case SOAP_TYPE_std__string:
 		return soap_in_std__string(soap, NULL, NULL, "xsd:string");
+	case SOAP_TYPE_dss__StructureAddDeviceToZone:
+		return soap_in_dss__StructureAddDeviceToZone(soap, NULL, NULL, "dss:StructureAddDeviceToZone");
+	case SOAP_TYPE_dss__StructureAddDeviceToZoneResponse:
+		return soap_in_dss__StructureAddDeviceToZoneResponse(soap, NULL, NULL, "dss:StructureAddDeviceToZoneResponse");
 	case SOAP_TYPE_dss__PropertyGetChildren:
 		return soap_in_dss__PropertyGetChildren(soap, NULL, NULL, "dss:PropertyGetChildren");
 	case SOAP_TYPE_dss__PropertyGetChildrenResponse:
@@ -225,10 +229,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_dss__EventRaise(soap, NULL, NULL, "dss:EventRaise");
 	case SOAP_TYPE_dss__EventRaiseResponse:
 		return soap_in_dss__EventRaiseResponse(soap, NULL, NULL, "dss:EventRaiseResponse");
-	case SOAP_TYPE_dss__SwitchGetGroupID:
-		return soap_in_dss__SwitchGetGroupID(soap, NULL, NULL, "dss:SwitchGetGroupID");
-	case SOAP_TYPE_dss__SwitchGetGroupIDResponse:
-		return soap_in_dss__SwitchGetGroupIDResponse(soap, NULL, NULL, "dss:SwitchGetGroupIDResponse");
 	case SOAP_TYPE_dss__DeviceGetFunctionID:
 		return soap_in_dss__DeviceGetFunctionID(soap, NULL, NULL, "dss:DeviceGetFunctionID");
 	case SOAP_TYPE_dss__DeviceGetFunctionIDResponse:
@@ -241,22 +241,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_dss__GroupSetName(soap, NULL, NULL, "dss:GroupSetName");
 	case SOAP_TYPE_dss__GroupSetNameResponse:
 		return soap_in_dss__GroupSetNameResponse(soap, NULL, NULL, "dss:GroupSetNameResponse");
-	case SOAP_TYPE_dss__GroupRemoveDevice:
-		return soap_in_dss__GroupRemoveDevice(soap, NULL, NULL, "dss:GroupRemoveDevice");
-	case SOAP_TYPE_dss__GroupRemoveDeviceResponse:
-		return soap_in_dss__GroupRemoveDeviceResponse(soap, NULL, NULL, "dss:GroupRemoveDeviceResponse");
-	case SOAP_TYPE_dss__GroupAddDevice:
-		return soap_in_dss__GroupAddDevice(soap, NULL, NULL, "dss:GroupAddDevice");
-	case SOAP_TYPE_dss__GroupAddDeviceResponse:
-		return soap_in_dss__GroupAddDeviceResponse(soap, NULL, NULL, "dss:GroupAddDeviceResponse");
-	case SOAP_TYPE_dss__GroupRemoveUserGroup:
-		return soap_in_dss__GroupRemoveUserGroup(soap, NULL, NULL, "dss:GroupRemoveUserGroup");
-	case SOAP_TYPE_dss__GroupRemoveUserGroupResponse:
-		return soap_in_dss__GroupRemoveUserGroupResponse(soap, NULL, NULL, "dss:GroupRemoveUserGroupResponse");
-	case SOAP_TYPE_dss__ApartmentAllocateUserGroup:
-		return soap_in_dss__ApartmentAllocateUserGroup(soap, NULL, NULL, "dss:ApartmentAllocateUserGroup");
-	case SOAP_TYPE_dss__ApartmentAllocateUserGroupResponse:
-		return soap_in_dss__ApartmentAllocateUserGroupResponse(soap, NULL, NULL, "dss:ApartmentAllocateUserGroupResponse");
 	case SOAP_TYPE_dss__ZoneGetName:
 		return soap_in_dss__ZoneGetName(soap, NULL, NULL, "dss:ZoneGetName");
 	case SOAP_TYPE_dss__ZoneGetNameResponse:
@@ -265,14 +249,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_dss__ZoneSetName(soap, NULL, NULL, "dss:ZoneSetName");
 	case SOAP_TYPE_dss__ZoneSetNameResponse:
 		return soap_in_dss__ZoneSetNameResponse(soap, NULL, NULL, "dss:ZoneSetNameResponse");
-	case SOAP_TYPE_dss__Zone_RemoveDevice:
-		return soap_in_dss__Zone_RemoveDevice(soap, NULL, NULL, "dss:Zone-RemoveDevice");
-	case SOAP_TYPE_dss__Zone_RemoveDeviceResponse:
-		return soap_in_dss__Zone_RemoveDeviceResponse(soap, NULL, NULL, "dss:Zone-RemoveDeviceResponse");
-	case SOAP_TYPE_dss__Zone_AddDevice:
-		return soap_in_dss__Zone_AddDevice(soap, NULL, NULL, "dss:Zone-AddDevice");
-	case SOAP_TYPE_dss__Zone_AddDeviceResponse:
-		return soap_in_dss__Zone_AddDeviceResponse(soap, NULL, NULL, "dss:Zone-AddDeviceResponse");
 	case SOAP_TYPE_dss__ApartmentDeleteZone:
 		return soap_in_dss__ApartmentDeleteZone(soap, NULL, NULL, "dss:ApartmentDeleteZone");
 	case SOAP_TYPE_dss__ApartmentDeleteZoneResponse:
@@ -612,6 +588,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		{	*type = SOAP_TYPE_bool;
 			return soap_in_bool(soap, NULL, NULL, NULL);
 		}
+		if (!soap_match_tag(soap, t, "dss:StructureAddDeviceToZone"))
+		{	*type = SOAP_TYPE_dss__StructureAddDeviceToZone;
+			return soap_in_dss__StructureAddDeviceToZone(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:StructureAddDeviceToZoneResponse"))
+		{	*type = SOAP_TYPE_dss__StructureAddDeviceToZoneResponse;
+			return soap_in_dss__StructureAddDeviceToZoneResponse(soap, NULL, NULL, NULL);
+		}
 		if (!soap_match_tag(soap, t, "dss:PropertyGetChildren"))
 		{	*type = SOAP_TYPE_dss__PropertyGetChildren;
 			return soap_in_dss__PropertyGetChildren(soap, NULL, NULL, NULL);
@@ -700,14 +684,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		{	*type = SOAP_TYPE_dss__EventRaiseResponse;
 			return soap_in_dss__EventRaiseResponse(soap, NULL, NULL, NULL);
 		}
-		if (!soap_match_tag(soap, t, "dss:SwitchGetGroupID"))
-		{	*type = SOAP_TYPE_dss__SwitchGetGroupID;
-			return soap_in_dss__SwitchGetGroupID(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:SwitchGetGroupIDResponse"))
-		{	*type = SOAP_TYPE_dss__SwitchGetGroupIDResponse;
-			return soap_in_dss__SwitchGetGroupIDResponse(soap, NULL, NULL, NULL);
-		}
 		if (!soap_match_tag(soap, t, "dss:DeviceGetFunctionID"))
 		{	*type = SOAP_TYPE_dss__DeviceGetFunctionID;
 			return soap_in_dss__DeviceGetFunctionID(soap, NULL, NULL, NULL);
@@ -732,38 +708,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		{	*type = SOAP_TYPE_dss__GroupSetNameResponse;
 			return soap_in_dss__GroupSetNameResponse(soap, NULL, NULL, NULL);
 		}
-		if (!soap_match_tag(soap, t, "dss:GroupRemoveDevice"))
-		{	*type = SOAP_TYPE_dss__GroupRemoveDevice;
-			return soap_in_dss__GroupRemoveDevice(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:GroupRemoveDeviceResponse"))
-		{	*type = SOAP_TYPE_dss__GroupRemoveDeviceResponse;
-			return soap_in_dss__GroupRemoveDeviceResponse(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:GroupAddDevice"))
-		{	*type = SOAP_TYPE_dss__GroupAddDevice;
-			return soap_in_dss__GroupAddDevice(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:GroupAddDeviceResponse"))
-		{	*type = SOAP_TYPE_dss__GroupAddDeviceResponse;
-			return soap_in_dss__GroupAddDeviceResponse(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:GroupRemoveUserGroup"))
-		{	*type = SOAP_TYPE_dss__GroupRemoveUserGroup;
-			return soap_in_dss__GroupRemoveUserGroup(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:GroupRemoveUserGroupResponse"))
-		{	*type = SOAP_TYPE_dss__GroupRemoveUserGroupResponse;
-			return soap_in_dss__GroupRemoveUserGroupResponse(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:ApartmentAllocateUserGroup"))
-		{	*type = SOAP_TYPE_dss__ApartmentAllocateUserGroup;
-			return soap_in_dss__ApartmentAllocateUserGroup(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:ApartmentAllocateUserGroupResponse"))
-		{	*type = SOAP_TYPE_dss__ApartmentAllocateUserGroupResponse;
-			return soap_in_dss__ApartmentAllocateUserGroupResponse(soap, NULL, NULL, NULL);
-		}
 		if (!soap_match_tag(soap, t, "dss:ZoneGetName"))
 		{	*type = SOAP_TYPE_dss__ZoneGetName;
 			return soap_in_dss__ZoneGetName(soap, NULL, NULL, NULL);
@@ -779,22 +723,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		if (!soap_match_tag(soap, t, "dss:ZoneSetNameResponse"))
 		{	*type = SOAP_TYPE_dss__ZoneSetNameResponse;
 			return soap_in_dss__ZoneSetNameResponse(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Zone-RemoveDevice"))
-		{	*type = SOAP_TYPE_dss__Zone_RemoveDevice;
-			return soap_in_dss__Zone_RemoveDevice(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Zone-RemoveDeviceResponse"))
-		{	*type = SOAP_TYPE_dss__Zone_RemoveDeviceResponse;
-			return soap_in_dss__Zone_RemoveDeviceResponse(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Zone-AddDevice"))
-		{	*type = SOAP_TYPE_dss__Zone_AddDevice;
-			return soap_in_dss__Zone_AddDevice(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "dss:Zone-AddDeviceResponse"))
-		{	*type = SOAP_TYPE_dss__Zone_AddDeviceResponse;
-			return soap_in_dss__Zone_AddDeviceResponse(soap, NULL, NULL, NULL);
 		}
 		if (!soap_match_tag(soap, t, "dss:ApartmentDeleteZone"))
 		{	*type = SOAP_TYPE_dss__ApartmentDeleteZone;
@@ -1452,6 +1380,10 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return ((dss__Event *)ptr)->soap_out(soap, tag, id, "dss:Event");
 	case SOAP_TYPE_std__string:
 		return soap_out_std__string(soap, tag, id, (const std::string *)ptr, "xsd:string");
+	case SOAP_TYPE_dss__StructureAddDeviceToZone:
+		return soap_out_dss__StructureAddDeviceToZone(soap, tag, id, (const struct dss__StructureAddDeviceToZone *)ptr, "dss:StructureAddDeviceToZone");
+	case SOAP_TYPE_dss__StructureAddDeviceToZoneResponse:
+		return soap_out_dss__StructureAddDeviceToZoneResponse(soap, tag, id, (const struct dss__StructureAddDeviceToZoneResponse *)ptr, "dss:StructureAddDeviceToZoneResponse");
 	case SOAP_TYPE_dss__PropertyGetChildren:
 		return soap_out_dss__PropertyGetChildren(soap, tag, id, (const struct dss__PropertyGetChildren *)ptr, "dss:PropertyGetChildren");
 	case SOAP_TYPE_dss__PropertyGetChildrenResponse:
@@ -1496,10 +1428,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_dss__EventRaise(soap, tag, id, (const struct dss__EventRaise *)ptr, "dss:EventRaise");
 	case SOAP_TYPE_dss__EventRaiseResponse:
 		return soap_out_dss__EventRaiseResponse(soap, tag, id, (const struct dss__EventRaiseResponse *)ptr, "dss:EventRaiseResponse");
-	case SOAP_TYPE_dss__SwitchGetGroupID:
-		return soap_out_dss__SwitchGetGroupID(soap, tag, id, (const struct dss__SwitchGetGroupID *)ptr, "dss:SwitchGetGroupID");
-	case SOAP_TYPE_dss__SwitchGetGroupIDResponse:
-		return soap_out_dss__SwitchGetGroupIDResponse(soap, tag, id, (const struct dss__SwitchGetGroupIDResponse *)ptr, "dss:SwitchGetGroupIDResponse");
 	case SOAP_TYPE_dss__DeviceGetFunctionID:
 		return soap_out_dss__DeviceGetFunctionID(soap, tag, id, (const struct dss__DeviceGetFunctionID *)ptr, "dss:DeviceGetFunctionID");
 	case SOAP_TYPE_dss__DeviceGetFunctionIDResponse:
@@ -1512,22 +1440,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_dss__GroupSetName(soap, tag, id, (const struct dss__GroupSetName *)ptr, "dss:GroupSetName");
 	case SOAP_TYPE_dss__GroupSetNameResponse:
 		return soap_out_dss__GroupSetNameResponse(soap, tag, id, (const struct dss__GroupSetNameResponse *)ptr, "dss:GroupSetNameResponse");
-	case SOAP_TYPE_dss__GroupRemoveDevice:
-		return soap_out_dss__GroupRemoveDevice(soap, tag, id, (const struct dss__GroupRemoveDevice *)ptr, "dss:GroupRemoveDevice");
-	case SOAP_TYPE_dss__GroupRemoveDeviceResponse:
-		return soap_out_dss__GroupRemoveDeviceResponse(soap, tag, id, (const struct dss__GroupRemoveDeviceResponse *)ptr, "dss:GroupRemoveDeviceResponse");
-	case SOAP_TYPE_dss__GroupAddDevice:
-		return soap_out_dss__GroupAddDevice(soap, tag, id, (const struct dss__GroupAddDevice *)ptr, "dss:GroupAddDevice");
-	case SOAP_TYPE_dss__GroupAddDeviceResponse:
-		return soap_out_dss__GroupAddDeviceResponse(soap, tag, id, (const struct dss__GroupAddDeviceResponse *)ptr, "dss:GroupAddDeviceResponse");
-	case SOAP_TYPE_dss__GroupRemoveUserGroup:
-		return soap_out_dss__GroupRemoveUserGroup(soap, tag, id, (const struct dss__GroupRemoveUserGroup *)ptr, "dss:GroupRemoveUserGroup");
-	case SOAP_TYPE_dss__GroupRemoveUserGroupResponse:
-		return soap_out_dss__GroupRemoveUserGroupResponse(soap, tag, id, (const struct dss__GroupRemoveUserGroupResponse *)ptr, "dss:GroupRemoveUserGroupResponse");
-	case SOAP_TYPE_dss__ApartmentAllocateUserGroup:
-		return soap_out_dss__ApartmentAllocateUserGroup(soap, tag, id, (const struct dss__ApartmentAllocateUserGroup *)ptr, "dss:ApartmentAllocateUserGroup");
-	case SOAP_TYPE_dss__ApartmentAllocateUserGroupResponse:
-		return soap_out_dss__ApartmentAllocateUserGroupResponse(soap, tag, id, (const struct dss__ApartmentAllocateUserGroupResponse *)ptr, "dss:ApartmentAllocateUserGroupResponse");
 	case SOAP_TYPE_dss__ZoneGetName:
 		return soap_out_dss__ZoneGetName(soap, tag, id, (const struct dss__ZoneGetName *)ptr, "dss:ZoneGetName");
 	case SOAP_TYPE_dss__ZoneGetNameResponse:
@@ -1536,14 +1448,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_dss__ZoneSetName(soap, tag, id, (const struct dss__ZoneSetName *)ptr, "dss:ZoneSetName");
 	case SOAP_TYPE_dss__ZoneSetNameResponse:
 		return soap_out_dss__ZoneSetNameResponse(soap, tag, id, (const struct dss__ZoneSetNameResponse *)ptr, "dss:ZoneSetNameResponse");
-	case SOAP_TYPE_dss__Zone_RemoveDevice:
-		return soap_out_dss__Zone_RemoveDevice(soap, tag, id, (const struct dss__Zone_RemoveDevice *)ptr, "dss:Zone-RemoveDevice");
-	case SOAP_TYPE_dss__Zone_RemoveDeviceResponse:
-		return soap_out_dss__Zone_RemoveDeviceResponse(soap, tag, id, (const struct dss__Zone_RemoveDeviceResponse *)ptr, "dss:Zone-RemoveDeviceResponse");
-	case SOAP_TYPE_dss__Zone_AddDevice:
-		return soap_out_dss__Zone_AddDevice(soap, tag, id, (const struct dss__Zone_AddDevice *)ptr, "dss:Zone-AddDevice");
-	case SOAP_TYPE_dss__Zone_AddDeviceResponse:
-		return soap_out_dss__Zone_AddDeviceResponse(soap, tag, id, (const struct dss__Zone_AddDeviceResponse *)ptr, "dss:Zone-AddDeviceResponse");
 	case SOAP_TYPE_dss__ApartmentDeleteZone:
 		return soap_out_dss__ApartmentDeleteZone(soap, tag, id, (const struct dss__ApartmentDeleteZone *)ptr, "dss:ApartmentDeleteZone");
 	case SOAP_TYPE_dss__ApartmentDeleteZoneResponse:
@@ -1851,6 +1755,12 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 	case SOAP_TYPE_std__string:
 		soap_serialize_std__string(soap, (const std::string *)ptr);
 		break;
+	case SOAP_TYPE_dss__StructureAddDeviceToZone:
+		soap_serialize_dss__StructureAddDeviceToZone(soap, (const struct dss__StructureAddDeviceToZone *)ptr);
+		break;
+	case SOAP_TYPE_dss__StructureAddDeviceToZoneResponse:
+		soap_serialize_dss__StructureAddDeviceToZoneResponse(soap, (const struct dss__StructureAddDeviceToZoneResponse *)ptr);
+		break;
 	case SOAP_TYPE_dss__PropertyGetChildren:
 		soap_serialize_dss__PropertyGetChildren(soap, (const struct dss__PropertyGetChildren *)ptr);
 		break;
@@ -1917,12 +1827,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 	case SOAP_TYPE_dss__EventRaiseResponse:
 		soap_serialize_dss__EventRaiseResponse(soap, (const struct dss__EventRaiseResponse *)ptr);
 		break;
-	case SOAP_TYPE_dss__SwitchGetGroupID:
-		soap_serialize_dss__SwitchGetGroupID(soap, (const struct dss__SwitchGetGroupID *)ptr);
-		break;
-	case SOAP_TYPE_dss__SwitchGetGroupIDResponse:
-		soap_serialize_dss__SwitchGetGroupIDResponse(soap, (const struct dss__SwitchGetGroupIDResponse *)ptr);
-		break;
 	case SOAP_TYPE_dss__DeviceGetFunctionID:
 		soap_serialize_dss__DeviceGetFunctionID(soap, (const struct dss__DeviceGetFunctionID *)ptr);
 		break;
@@ -1941,30 +1845,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 	case SOAP_TYPE_dss__GroupSetNameResponse:
 		soap_serialize_dss__GroupSetNameResponse(soap, (const struct dss__GroupSetNameResponse *)ptr);
 		break;
-	case SOAP_TYPE_dss__GroupRemoveDevice:
-		soap_serialize_dss__GroupRemoveDevice(soap, (const struct dss__GroupRemoveDevice *)ptr);
-		break;
-	case SOAP_TYPE_dss__GroupRemoveDeviceResponse:
-		soap_serialize_dss__GroupRemoveDeviceResponse(soap, (const struct dss__GroupRemoveDeviceResponse *)ptr);
-		break;
-	case SOAP_TYPE_dss__GroupAddDevice:
-		soap_serialize_dss__GroupAddDevice(soap, (const struct dss__GroupAddDevice *)ptr);
-		break;
-	case SOAP_TYPE_dss__GroupAddDeviceResponse:
-		soap_serialize_dss__GroupAddDeviceResponse(soap, (const struct dss__GroupAddDeviceResponse *)ptr);
-		break;
-	case SOAP_TYPE_dss__GroupRemoveUserGroup:
-		soap_serialize_dss__GroupRemoveUserGroup(soap, (const struct dss__GroupRemoveUserGroup *)ptr);
-		break;
-	case SOAP_TYPE_dss__GroupRemoveUserGroupResponse:
-		soap_serialize_dss__GroupRemoveUserGroupResponse(soap, (const struct dss__GroupRemoveUserGroupResponse *)ptr);
-		break;
-	case SOAP_TYPE_dss__ApartmentAllocateUserGroup:
-		soap_serialize_dss__ApartmentAllocateUserGroup(soap, (const struct dss__ApartmentAllocateUserGroup *)ptr);
-		break;
-	case SOAP_TYPE_dss__ApartmentAllocateUserGroupResponse:
-		soap_serialize_dss__ApartmentAllocateUserGroupResponse(soap, (const struct dss__ApartmentAllocateUserGroupResponse *)ptr);
-		break;
 	case SOAP_TYPE_dss__ZoneGetName:
 		soap_serialize_dss__ZoneGetName(soap, (const struct dss__ZoneGetName *)ptr);
 		break;
@@ -1976,18 +1856,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 		break;
 	case SOAP_TYPE_dss__ZoneSetNameResponse:
 		soap_serialize_dss__ZoneSetNameResponse(soap, (const struct dss__ZoneSetNameResponse *)ptr);
-		break;
-	case SOAP_TYPE_dss__Zone_RemoveDevice:
-		soap_serialize_dss__Zone_RemoveDevice(soap, (const struct dss__Zone_RemoveDevice *)ptr);
-		break;
-	case SOAP_TYPE_dss__Zone_RemoveDeviceResponse:
-		soap_serialize_dss__Zone_RemoveDeviceResponse(soap, (const struct dss__Zone_RemoveDeviceResponse *)ptr);
-		break;
-	case SOAP_TYPE_dss__Zone_AddDevice:
-		soap_serialize_dss__Zone_AddDevice(soap, (const struct dss__Zone_AddDevice *)ptr);
-		break;
-	case SOAP_TYPE_dss__Zone_AddDeviceResponse:
-		soap_serialize_dss__Zone_AddDeviceResponse(soap, (const struct dss__Zone_AddDeviceResponse *)ptr);
 		break;
 	case SOAP_TYPE_dss__ApartmentDeleteZone:
 		soap_serialize_dss__ApartmentDeleteZone(soap, (const struct dss__ApartmentDeleteZone *)ptr);
@@ -2702,14 +2570,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_dss__ApartmentDeleteZoneResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__ApartmentDeleteZone:
 		return (void*)soap_instantiate_dss__ApartmentDeleteZone(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Zone_AddDeviceResponse:
-		return (void*)soap_instantiate_dss__Zone_AddDeviceResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Zone_AddDevice:
-		return (void*)soap_instantiate_dss__Zone_AddDevice(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Zone_RemoveDeviceResponse:
-		return (void*)soap_instantiate_dss__Zone_RemoveDeviceResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__Zone_RemoveDevice:
-		return (void*)soap_instantiate_dss__Zone_RemoveDevice(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__ZoneSetNameResponse:
 		return (void*)soap_instantiate_dss__ZoneSetNameResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__ZoneSetName:
@@ -2718,22 +2578,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_dss__ZoneGetNameResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__ZoneGetName:
 		return (void*)soap_instantiate_dss__ZoneGetName(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__ApartmentAllocateUserGroupResponse:
-		return (void*)soap_instantiate_dss__ApartmentAllocateUserGroupResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__ApartmentAllocateUserGroup:
-		return (void*)soap_instantiate_dss__ApartmentAllocateUserGroup(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__GroupRemoveUserGroupResponse:
-		return (void*)soap_instantiate_dss__GroupRemoveUserGroupResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__GroupRemoveUserGroup:
-		return (void*)soap_instantiate_dss__GroupRemoveUserGroup(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__GroupAddDeviceResponse:
-		return (void*)soap_instantiate_dss__GroupAddDeviceResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__GroupAddDevice:
-		return (void*)soap_instantiate_dss__GroupAddDevice(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__GroupRemoveDeviceResponse:
-		return (void*)soap_instantiate_dss__GroupRemoveDeviceResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__GroupRemoveDevice:
-		return (void*)soap_instantiate_dss__GroupRemoveDevice(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__GroupSetNameResponse:
 		return (void*)soap_instantiate_dss__GroupSetNameResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__GroupSetName:
@@ -2746,10 +2590,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_dss__DeviceGetFunctionIDResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__DeviceGetFunctionID:
 		return (void*)soap_instantiate_dss__DeviceGetFunctionID(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__SwitchGetGroupIDResponse:
-		return (void*)soap_instantiate_dss__SwitchGetGroupIDResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_dss__SwitchGetGroupID:
-		return (void*)soap_instantiate_dss__SwitchGetGroupID(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__Event:
 		return (void*)soap_instantiate_dss__Event(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__EventRaiseResponse:
@@ -2796,6 +2636,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_dss__PropertyGetChildrenResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__PropertyGetChildren:
 		return (void*)soap_instantiate_dss__PropertyGetChildren(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__StructureAddDeviceToZoneResponse:
+		return (void*)soap_instantiate_dss__StructureAddDeviceToZoneResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__StructureAddDeviceToZone:
+		return (void*)soap_instantiate_dss__StructureAddDeviceToZone(soap, -1, type, arrayType, n);
 #ifndef WITH_NOGLOBAL
 	case SOAP_TYPE_SOAP_ENV__Header:
 		return (void*)soap_instantiate_SOAP_ENV__Header(soap, -1, type, arrayType, n);
@@ -3663,30 +3507,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 		else
 			delete[] (struct dss__ApartmentDeleteZone*)p->ptr;
 		break;
-	case SOAP_TYPE_dss__Zone_AddDeviceResponse:
-		if (p->size < 0)
-			delete (struct dss__Zone_AddDeviceResponse*)p->ptr;
-		else
-			delete[] (struct dss__Zone_AddDeviceResponse*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Zone_AddDevice:
-		if (p->size < 0)
-			delete (struct dss__Zone_AddDevice*)p->ptr;
-		else
-			delete[] (struct dss__Zone_AddDevice*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Zone_RemoveDeviceResponse:
-		if (p->size < 0)
-			delete (struct dss__Zone_RemoveDeviceResponse*)p->ptr;
-		else
-			delete[] (struct dss__Zone_RemoveDeviceResponse*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__Zone_RemoveDevice:
-		if (p->size < 0)
-			delete (struct dss__Zone_RemoveDevice*)p->ptr;
-		else
-			delete[] (struct dss__Zone_RemoveDevice*)p->ptr;
-		break;
 	case SOAP_TYPE_dss__ZoneSetNameResponse:
 		if (p->size < 0)
 			delete (struct dss__ZoneSetNameResponse*)p->ptr;
@@ -3710,54 +3530,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 			delete (struct dss__ZoneGetName*)p->ptr;
 		else
 			delete[] (struct dss__ZoneGetName*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__ApartmentAllocateUserGroupResponse:
-		if (p->size < 0)
-			delete (struct dss__ApartmentAllocateUserGroupResponse*)p->ptr;
-		else
-			delete[] (struct dss__ApartmentAllocateUserGroupResponse*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__ApartmentAllocateUserGroup:
-		if (p->size < 0)
-			delete (struct dss__ApartmentAllocateUserGroup*)p->ptr;
-		else
-			delete[] (struct dss__ApartmentAllocateUserGroup*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__GroupRemoveUserGroupResponse:
-		if (p->size < 0)
-			delete (struct dss__GroupRemoveUserGroupResponse*)p->ptr;
-		else
-			delete[] (struct dss__GroupRemoveUserGroupResponse*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__GroupRemoveUserGroup:
-		if (p->size < 0)
-			delete (struct dss__GroupRemoveUserGroup*)p->ptr;
-		else
-			delete[] (struct dss__GroupRemoveUserGroup*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__GroupAddDeviceResponse:
-		if (p->size < 0)
-			delete (struct dss__GroupAddDeviceResponse*)p->ptr;
-		else
-			delete[] (struct dss__GroupAddDeviceResponse*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__GroupAddDevice:
-		if (p->size < 0)
-			delete (struct dss__GroupAddDevice*)p->ptr;
-		else
-			delete[] (struct dss__GroupAddDevice*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__GroupRemoveDeviceResponse:
-		if (p->size < 0)
-			delete (struct dss__GroupRemoveDeviceResponse*)p->ptr;
-		else
-			delete[] (struct dss__GroupRemoveDeviceResponse*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__GroupRemoveDevice:
-		if (p->size < 0)
-			delete (struct dss__GroupRemoveDevice*)p->ptr;
-		else
-			delete[] (struct dss__GroupRemoveDevice*)p->ptr;
 		break;
 	case SOAP_TYPE_dss__GroupSetNameResponse:
 		if (p->size < 0)
@@ -3794,18 +3566,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 			delete (struct dss__DeviceGetFunctionID*)p->ptr;
 		else
 			delete[] (struct dss__DeviceGetFunctionID*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__SwitchGetGroupIDResponse:
-		if (p->size < 0)
-			delete (struct dss__SwitchGetGroupIDResponse*)p->ptr;
-		else
-			delete[] (struct dss__SwitchGetGroupIDResponse*)p->ptr;
-		break;
-	case SOAP_TYPE_dss__SwitchGetGroupID:
-		if (p->size < 0)
-			delete (struct dss__SwitchGetGroupID*)p->ptr;
-		else
-			delete[] (struct dss__SwitchGetGroupID*)p->ptr;
 		break;
 	case SOAP_TYPE_dss__Event:
 		if (p->size < 0)
@@ -3944,6 +3704,18 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 			delete (struct dss__PropertyGetChildren*)p->ptr;
 		else
 			delete[] (struct dss__PropertyGetChildren*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__StructureAddDeviceToZoneResponse:
+		if (p->size < 0)
+			delete (struct dss__StructureAddDeviceToZoneResponse*)p->ptr;
+		else
+			delete[] (struct dss__StructureAddDeviceToZoneResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__StructureAddDeviceToZone:
+		if (p->size < 0)
+			delete (struct dss__StructureAddDeviceToZone*)p->ptr;
+		else
+			delete[] (struct dss__StructureAddDeviceToZone*)p->ptr;
 		break;
 	case SOAP_TYPE_SOAP_ENV__Header:
 		if (p->size < 0)
@@ -5335,6 +5107,249 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Header(struct soap *soap, int st,
 }
 
 #endif
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__StructureAddDeviceToZone(struct soap *soap, struct dss__StructureAddDeviceToZone *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_string(soap, &a->_deviceID);
+	soap_default_int(soap, &a->_zoneID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__StructureAddDeviceToZone(struct soap *soap, const struct dss__StructureAddDeviceToZone *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_string(soap, &a->_deviceID);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__StructureAddDeviceToZone(struct soap *soap, const struct dss__StructureAddDeviceToZone *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__StructureAddDeviceToZone);
+	if (soap_out_dss__StructureAddDeviceToZone(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__StructureAddDeviceToZone(struct soap *soap, const char *tag, int id, const struct dss__StructureAddDeviceToZone *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__StructureAddDeviceToZone), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_string(soap, "deviceID", -1, &a->_deviceID, ""))
+		return soap->error;
+	if (soap_out_int(soap, "zoneID", -1, &a->_zoneID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__StructureAddDeviceToZone * SOAP_FMAC4 soap_get_dss__StructureAddDeviceToZone(struct soap *soap, struct dss__StructureAddDeviceToZone *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__StructureAddDeviceToZone(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__StructureAddDeviceToZone * SOAP_FMAC4 soap_in_dss__StructureAddDeviceToZone(struct soap *soap, const char *tag, struct dss__StructureAddDeviceToZone *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__deviceID = 1, soap_flag__zoneID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__StructureAddDeviceToZone *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__StructureAddDeviceToZone, sizeof(struct dss__StructureAddDeviceToZone), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__StructureAddDeviceToZone(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__deviceID && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_deviceID, "xsd:string"))
+				{	soap_flag__deviceID--;
+					continue;
+				}
+			if (soap_flag__zoneID && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_zoneID, "xsd:int"))
+				{	soap_flag__zoneID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__StructureAddDeviceToZone *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__StructureAddDeviceToZone, 0, sizeof(struct dss__StructureAddDeviceToZone), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__zoneID > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__StructureAddDeviceToZone * SOAP_FMAC6 soap_new_dss__StructureAddDeviceToZone(struct soap *soap, int n)
+{	return soap_instantiate_dss__StructureAddDeviceToZone(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__StructureAddDeviceToZone(struct soap *soap, struct dss__StructureAddDeviceToZone *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__StructureAddDeviceToZone * SOAP_FMAC4 soap_instantiate_dss__StructureAddDeviceToZone(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__StructureAddDeviceToZone(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__StructureAddDeviceToZone, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__StructureAddDeviceToZone;
+		if (size)
+			*size = sizeof(struct dss__StructureAddDeviceToZone);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__StructureAddDeviceToZone[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__StructureAddDeviceToZone);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__StructureAddDeviceToZone*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__StructureAddDeviceToZone(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__StructureAddDeviceToZone %p -> %p\n", q, p));
+	*(struct dss__StructureAddDeviceToZone*)p = *(struct dss__StructureAddDeviceToZone*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__StructureAddDeviceToZoneResponse(struct soap *soap, struct dss__StructureAddDeviceToZoneResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__StructureAddDeviceToZoneResponse(struct soap *soap, const struct dss__StructureAddDeviceToZoneResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__StructureAddDeviceToZoneResponse(struct soap *soap, const struct dss__StructureAddDeviceToZoneResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__StructureAddDeviceToZoneResponse);
+	if (soap_out_dss__StructureAddDeviceToZoneResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__StructureAddDeviceToZoneResponse(struct soap *soap, const char *tag, int id, const struct dss__StructureAddDeviceToZoneResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__StructureAddDeviceToZoneResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__StructureAddDeviceToZoneResponse * SOAP_FMAC4 soap_get_dss__StructureAddDeviceToZoneResponse(struct soap *soap, struct dss__StructureAddDeviceToZoneResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__StructureAddDeviceToZoneResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__StructureAddDeviceToZoneResponse * SOAP_FMAC4 soap_in_dss__StructureAddDeviceToZoneResponse(struct soap *soap, const char *tag, struct dss__StructureAddDeviceToZoneResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__StructureAddDeviceToZoneResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__StructureAddDeviceToZoneResponse, sizeof(struct dss__StructureAddDeviceToZoneResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__StructureAddDeviceToZoneResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__StructureAddDeviceToZoneResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__StructureAddDeviceToZoneResponse, 0, sizeof(struct dss__StructureAddDeviceToZoneResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__StructureAddDeviceToZoneResponse * SOAP_FMAC6 soap_new_dss__StructureAddDeviceToZoneResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__StructureAddDeviceToZoneResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__StructureAddDeviceToZoneResponse(struct soap *soap, struct dss__StructureAddDeviceToZoneResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__StructureAddDeviceToZoneResponse * SOAP_FMAC4 soap_instantiate_dss__StructureAddDeviceToZoneResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__StructureAddDeviceToZoneResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__StructureAddDeviceToZoneResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__StructureAddDeviceToZoneResponse;
+		if (size)
+			*size = sizeof(struct dss__StructureAddDeviceToZoneResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__StructureAddDeviceToZoneResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__StructureAddDeviceToZoneResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__StructureAddDeviceToZoneResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__StructureAddDeviceToZoneResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__StructureAddDeviceToZoneResponse %p -> %p\n", q, p));
+	*(struct dss__StructureAddDeviceToZoneResponse*)p = *(struct dss__StructureAddDeviceToZoneResponse*)q;
+}
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertyGetChildren(struct soap *soap, struct dss__PropertyGetChildren *a)
 {
@@ -7987,241 +8002,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__EventRaiseResponse(struct soap *soap, 
 	*(struct dss__EventRaiseResponse*)p = *(struct dss__EventRaiseResponse*)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__SwitchGetGroupID(struct soap *soap, struct dss__SwitchGetGroupID *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->_token);
-	soap_default_string(soap, &a->_deviceID);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__SwitchGetGroupID(struct soap *soap, const struct dss__SwitchGetGroupID *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_serialize_string(soap, &a->_deviceID);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__SwitchGetGroupID(struct soap *soap, const struct dss__SwitchGetGroupID *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__SwitchGetGroupID);
-	if (soap_out_dss__SwitchGetGroupID(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__SwitchGetGroupID(struct soap *soap, const char *tag, int id, const struct dss__SwitchGetGroupID *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__SwitchGetGroupID), type))
-		return soap->error;
-	if (soap_out_int(soap, "token", -1, &a->_token, ""))
-		return soap->error;
-	if (soap_out_string(soap, "deviceID", -1, &a->_deviceID, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__SwitchGetGroupID * SOAP_FMAC4 soap_get_dss__SwitchGetGroupID(struct soap *soap, struct dss__SwitchGetGroupID *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__SwitchGetGroupID(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__SwitchGetGroupID * SOAP_FMAC4 soap_in_dss__SwitchGetGroupID(struct soap *soap, const char *tag, struct dss__SwitchGetGroupID *a, const char *type)
-{
-	short soap_flag__token = 1, soap_flag__deviceID = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__SwitchGetGroupID *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__SwitchGetGroupID, sizeof(struct dss__SwitchGetGroupID), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__SwitchGetGroupID(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
-				{	soap_flag__token--;
-					continue;
-				}
-			if (soap_flag__deviceID && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-				if (soap_in_string(soap, NULL, &a->_deviceID, "xsd:string"))
-				{	soap_flag__deviceID--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__SwitchGetGroupID *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__SwitchGetGroupID, 0, sizeof(struct dss__SwitchGetGroupID), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__SwitchGetGroupID * SOAP_FMAC6 soap_new_dss__SwitchGetGroupID(struct soap *soap, int n)
-{	return soap_instantiate_dss__SwitchGetGroupID(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__SwitchGetGroupID(struct soap *soap, struct dss__SwitchGetGroupID *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__SwitchGetGroupID * SOAP_FMAC4 soap_instantiate_dss__SwitchGetGroupID(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__SwitchGetGroupID(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__SwitchGetGroupID, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__SwitchGetGroupID;
-		if (size)
-			*size = sizeof(struct dss__SwitchGetGroupID);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__SwitchGetGroupID[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__SwitchGetGroupID);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__SwitchGetGroupID*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__SwitchGetGroupID(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__SwitchGetGroupID %p -> %p\n", q, p));
-	*(struct dss__SwitchGetGroupID*)p = *(struct dss__SwitchGetGroupID*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__SwitchGetGroupIDResponse(struct soap *soap, struct dss__SwitchGetGroupIDResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->result);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__SwitchGetGroupIDResponse(struct soap *soap, const struct dss__SwitchGetGroupIDResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__SwitchGetGroupIDResponse(struct soap *soap, const struct dss__SwitchGetGroupIDResponse *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__SwitchGetGroupIDResponse);
-	if (soap_out_dss__SwitchGetGroupIDResponse(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__SwitchGetGroupIDResponse(struct soap *soap, const char *tag, int id, const struct dss__SwitchGetGroupIDResponse *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__SwitchGetGroupIDResponse), type))
-		return soap->error;
-	if (soap_out_int(soap, "result", -1, &a->result, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__SwitchGetGroupIDResponse * SOAP_FMAC4 soap_get_dss__SwitchGetGroupIDResponse(struct soap *soap, struct dss__SwitchGetGroupIDResponse *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__SwitchGetGroupIDResponse(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__SwitchGetGroupIDResponse * SOAP_FMAC4 soap_in_dss__SwitchGetGroupIDResponse(struct soap *soap, const char *tag, struct dss__SwitchGetGroupIDResponse *a, const char *type)
-{
-	short soap_flag_result = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__SwitchGetGroupIDResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__SwitchGetGroupIDResponse, sizeof(struct dss__SwitchGetGroupIDResponse), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__SwitchGetGroupIDResponse(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, "result", &a->result, "xsd:int"))
-				{	soap_flag_result--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__SwitchGetGroupIDResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__SwitchGetGroupIDResponse, 0, sizeof(struct dss__SwitchGetGroupIDResponse), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__SwitchGetGroupIDResponse * SOAP_FMAC6 soap_new_dss__SwitchGetGroupIDResponse(struct soap *soap, int n)
-{	return soap_instantiate_dss__SwitchGetGroupIDResponse(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__SwitchGetGroupIDResponse(struct soap *soap, struct dss__SwitchGetGroupIDResponse *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__SwitchGetGroupIDResponse * SOAP_FMAC4 soap_instantiate_dss__SwitchGetGroupIDResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__SwitchGetGroupIDResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__SwitchGetGroupIDResponse, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__SwitchGetGroupIDResponse;
-		if (size)
-			*size = sizeof(struct dss__SwitchGetGroupIDResponse);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__SwitchGetGroupIDResponse[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__SwitchGetGroupIDResponse);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__SwitchGetGroupIDResponse*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__SwitchGetGroupIDResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__SwitchGetGroupIDResponse %p -> %p\n", q, p));
-	*(struct dss__SwitchGetGroupIDResponse*)p = *(struct dss__SwitchGetGroupIDResponse*)q;
-}
-
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceGetFunctionID(struct soap *soap, struct dss__DeviceGetFunctionID *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
@@ -8951,952 +8731,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__GroupSetNameResponse(struct soap *soap
 	*(struct dss__GroupSetNameResponse*)p = *(struct dss__GroupSetNameResponse*)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__GroupRemoveDevice(struct soap *soap, struct dss__GroupRemoveDevice *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_groupID);
-	soap_default_string(soap, &a->_deviceID);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__GroupRemoveDevice(struct soap *soap, const struct dss__GroupRemoveDevice *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_serialize_string(soap, &a->_deviceID);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__GroupRemoveDevice(struct soap *soap, const struct dss__GroupRemoveDevice *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__GroupRemoveDevice);
-	if (soap_out_dss__GroupRemoveDevice(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__GroupRemoveDevice(struct soap *soap, const char *tag, int id, const struct dss__GroupRemoveDevice *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__GroupRemoveDevice), type))
-		return soap->error;
-	if (soap_out_int(soap, "token", -1, &a->_token, ""))
-		return soap->error;
-	if (soap_out_int(soap, "groupID", -1, &a->_groupID, ""))
-		return soap->error;
-	if (soap_out_string(soap, "deviceID", -1, &a->_deviceID, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__GroupRemoveDevice * SOAP_FMAC4 soap_get_dss__GroupRemoveDevice(struct soap *soap, struct dss__GroupRemoveDevice *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__GroupRemoveDevice(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__GroupRemoveDevice * SOAP_FMAC4 soap_in_dss__GroupRemoveDevice(struct soap *soap, const char *tag, struct dss__GroupRemoveDevice *a, const char *type)
-{
-	short soap_flag__token = 1, soap_flag__groupID = 1, soap_flag__deviceID = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__GroupRemoveDevice *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__GroupRemoveDevice, sizeof(struct dss__GroupRemoveDevice), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__GroupRemoveDevice(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
-				{	soap_flag__token--;
-					continue;
-				}
-			if (soap_flag__groupID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_groupID, "xsd:int"))
-				{	soap_flag__groupID--;
-					continue;
-				}
-			if (soap_flag__deviceID && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-				if (soap_in_string(soap, NULL, &a->_deviceID, "xsd:string"))
-				{	soap_flag__deviceID--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__GroupRemoveDevice *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__GroupRemoveDevice, 0, sizeof(struct dss__GroupRemoveDevice), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__groupID > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__GroupRemoveDevice * SOAP_FMAC6 soap_new_dss__GroupRemoveDevice(struct soap *soap, int n)
-{	return soap_instantiate_dss__GroupRemoveDevice(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__GroupRemoveDevice(struct soap *soap, struct dss__GroupRemoveDevice *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__GroupRemoveDevice * SOAP_FMAC4 soap_instantiate_dss__GroupRemoveDevice(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__GroupRemoveDevice(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__GroupRemoveDevice, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__GroupRemoveDevice;
-		if (size)
-			*size = sizeof(struct dss__GroupRemoveDevice);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__GroupRemoveDevice[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__GroupRemoveDevice);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__GroupRemoveDevice*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__GroupRemoveDevice(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__GroupRemoveDevice %p -> %p\n", q, p));
-	*(struct dss__GroupRemoveDevice*)p = *(struct dss__GroupRemoveDevice*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__GroupRemoveDeviceResponse(struct soap *soap, struct dss__GroupRemoveDeviceResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->result);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__GroupRemoveDeviceResponse(struct soap *soap, const struct dss__GroupRemoveDeviceResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__GroupRemoveDeviceResponse(struct soap *soap, const struct dss__GroupRemoveDeviceResponse *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__GroupRemoveDeviceResponse);
-	if (soap_out_dss__GroupRemoveDeviceResponse(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__GroupRemoveDeviceResponse(struct soap *soap, const char *tag, int id, const struct dss__GroupRemoveDeviceResponse *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__GroupRemoveDeviceResponse), type))
-		return soap->error;
-	if (soap_out_int(soap, "result", -1, &a->result, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__GroupRemoveDeviceResponse * SOAP_FMAC4 soap_get_dss__GroupRemoveDeviceResponse(struct soap *soap, struct dss__GroupRemoveDeviceResponse *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__GroupRemoveDeviceResponse(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__GroupRemoveDeviceResponse * SOAP_FMAC4 soap_in_dss__GroupRemoveDeviceResponse(struct soap *soap, const char *tag, struct dss__GroupRemoveDeviceResponse *a, const char *type)
-{
-	short soap_flag_result = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__GroupRemoveDeviceResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__GroupRemoveDeviceResponse, sizeof(struct dss__GroupRemoveDeviceResponse), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__GroupRemoveDeviceResponse(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, "result", &a->result, "xsd:int"))
-				{	soap_flag_result--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__GroupRemoveDeviceResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__GroupRemoveDeviceResponse, 0, sizeof(struct dss__GroupRemoveDeviceResponse), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__GroupRemoveDeviceResponse * SOAP_FMAC6 soap_new_dss__GroupRemoveDeviceResponse(struct soap *soap, int n)
-{	return soap_instantiate_dss__GroupRemoveDeviceResponse(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__GroupRemoveDeviceResponse(struct soap *soap, struct dss__GroupRemoveDeviceResponse *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__GroupRemoveDeviceResponse * SOAP_FMAC4 soap_instantiate_dss__GroupRemoveDeviceResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__GroupRemoveDeviceResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__GroupRemoveDeviceResponse, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__GroupRemoveDeviceResponse;
-		if (size)
-			*size = sizeof(struct dss__GroupRemoveDeviceResponse);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__GroupRemoveDeviceResponse[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__GroupRemoveDeviceResponse);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__GroupRemoveDeviceResponse*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__GroupRemoveDeviceResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__GroupRemoveDeviceResponse %p -> %p\n", q, p));
-	*(struct dss__GroupRemoveDeviceResponse*)p = *(struct dss__GroupRemoveDeviceResponse*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__GroupAddDevice(struct soap *soap, struct dss__GroupAddDevice *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_groupID);
-	soap_default_string(soap, &a->_deviceID);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__GroupAddDevice(struct soap *soap, const struct dss__GroupAddDevice *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_serialize_string(soap, &a->_deviceID);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__GroupAddDevice(struct soap *soap, const struct dss__GroupAddDevice *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__GroupAddDevice);
-	if (soap_out_dss__GroupAddDevice(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__GroupAddDevice(struct soap *soap, const char *tag, int id, const struct dss__GroupAddDevice *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__GroupAddDevice), type))
-		return soap->error;
-	if (soap_out_int(soap, "token", -1, &a->_token, ""))
-		return soap->error;
-	if (soap_out_int(soap, "groupID", -1, &a->_groupID, ""))
-		return soap->error;
-	if (soap_out_string(soap, "deviceID", -1, &a->_deviceID, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__GroupAddDevice * SOAP_FMAC4 soap_get_dss__GroupAddDevice(struct soap *soap, struct dss__GroupAddDevice *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__GroupAddDevice(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__GroupAddDevice * SOAP_FMAC4 soap_in_dss__GroupAddDevice(struct soap *soap, const char *tag, struct dss__GroupAddDevice *a, const char *type)
-{
-	short soap_flag__token = 1, soap_flag__groupID = 1, soap_flag__deviceID = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__GroupAddDevice *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__GroupAddDevice, sizeof(struct dss__GroupAddDevice), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__GroupAddDevice(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
-				{	soap_flag__token--;
-					continue;
-				}
-			if (soap_flag__groupID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_groupID, "xsd:int"))
-				{	soap_flag__groupID--;
-					continue;
-				}
-			if (soap_flag__deviceID && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-				if (soap_in_string(soap, NULL, &a->_deviceID, "xsd:string"))
-				{	soap_flag__deviceID--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__GroupAddDevice *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__GroupAddDevice, 0, sizeof(struct dss__GroupAddDevice), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__groupID > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__GroupAddDevice * SOAP_FMAC6 soap_new_dss__GroupAddDevice(struct soap *soap, int n)
-{	return soap_instantiate_dss__GroupAddDevice(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__GroupAddDevice(struct soap *soap, struct dss__GroupAddDevice *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__GroupAddDevice * SOAP_FMAC4 soap_instantiate_dss__GroupAddDevice(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__GroupAddDevice(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__GroupAddDevice, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__GroupAddDevice;
-		if (size)
-			*size = sizeof(struct dss__GroupAddDevice);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__GroupAddDevice[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__GroupAddDevice);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__GroupAddDevice*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__GroupAddDevice(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__GroupAddDevice %p -> %p\n", q, p));
-	*(struct dss__GroupAddDevice*)p = *(struct dss__GroupAddDevice*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__GroupAddDeviceResponse(struct soap *soap, struct dss__GroupAddDeviceResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->result);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__GroupAddDeviceResponse(struct soap *soap, const struct dss__GroupAddDeviceResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__GroupAddDeviceResponse(struct soap *soap, const struct dss__GroupAddDeviceResponse *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__GroupAddDeviceResponse);
-	if (soap_out_dss__GroupAddDeviceResponse(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__GroupAddDeviceResponse(struct soap *soap, const char *tag, int id, const struct dss__GroupAddDeviceResponse *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__GroupAddDeviceResponse), type))
-		return soap->error;
-	if (soap_out_int(soap, "result", -1, &a->result, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__GroupAddDeviceResponse * SOAP_FMAC4 soap_get_dss__GroupAddDeviceResponse(struct soap *soap, struct dss__GroupAddDeviceResponse *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__GroupAddDeviceResponse(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__GroupAddDeviceResponse * SOAP_FMAC4 soap_in_dss__GroupAddDeviceResponse(struct soap *soap, const char *tag, struct dss__GroupAddDeviceResponse *a, const char *type)
-{
-	short soap_flag_result = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__GroupAddDeviceResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__GroupAddDeviceResponse, sizeof(struct dss__GroupAddDeviceResponse), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__GroupAddDeviceResponse(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, "result", &a->result, "xsd:int"))
-				{	soap_flag_result--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__GroupAddDeviceResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__GroupAddDeviceResponse, 0, sizeof(struct dss__GroupAddDeviceResponse), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__GroupAddDeviceResponse * SOAP_FMAC6 soap_new_dss__GroupAddDeviceResponse(struct soap *soap, int n)
-{	return soap_instantiate_dss__GroupAddDeviceResponse(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__GroupAddDeviceResponse(struct soap *soap, struct dss__GroupAddDeviceResponse *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__GroupAddDeviceResponse * SOAP_FMAC4 soap_instantiate_dss__GroupAddDeviceResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__GroupAddDeviceResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__GroupAddDeviceResponse, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__GroupAddDeviceResponse;
-		if (size)
-			*size = sizeof(struct dss__GroupAddDeviceResponse);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__GroupAddDeviceResponse[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__GroupAddDeviceResponse);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__GroupAddDeviceResponse*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__GroupAddDeviceResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__GroupAddDeviceResponse %p -> %p\n", q, p));
-	*(struct dss__GroupAddDeviceResponse*)p = *(struct dss__GroupAddDeviceResponse*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__GroupRemoveUserGroup(struct soap *soap, struct dss__GroupRemoveUserGroup *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_groupID);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__GroupRemoveUserGroup(struct soap *soap, const struct dss__GroupRemoveUserGroup *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__GroupRemoveUserGroup(struct soap *soap, const struct dss__GroupRemoveUserGroup *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__GroupRemoveUserGroup);
-	if (soap_out_dss__GroupRemoveUserGroup(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__GroupRemoveUserGroup(struct soap *soap, const char *tag, int id, const struct dss__GroupRemoveUserGroup *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__GroupRemoveUserGroup), type))
-		return soap->error;
-	if (soap_out_int(soap, "token", -1, &a->_token, ""))
-		return soap->error;
-	if (soap_out_int(soap, "groupID", -1, &a->_groupID, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__GroupRemoveUserGroup * SOAP_FMAC4 soap_get_dss__GroupRemoveUserGroup(struct soap *soap, struct dss__GroupRemoveUserGroup *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__GroupRemoveUserGroup(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__GroupRemoveUserGroup * SOAP_FMAC4 soap_in_dss__GroupRemoveUserGroup(struct soap *soap, const char *tag, struct dss__GroupRemoveUserGroup *a, const char *type)
-{
-	short soap_flag__token = 1, soap_flag__groupID = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__GroupRemoveUserGroup *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__GroupRemoveUserGroup, sizeof(struct dss__GroupRemoveUserGroup), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__GroupRemoveUserGroup(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
-				{	soap_flag__token--;
-					continue;
-				}
-			if (soap_flag__groupID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_groupID, "xsd:int"))
-				{	soap_flag__groupID--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__GroupRemoveUserGroup *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__GroupRemoveUserGroup, 0, sizeof(struct dss__GroupRemoveUserGroup), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__groupID > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__GroupRemoveUserGroup * SOAP_FMAC6 soap_new_dss__GroupRemoveUserGroup(struct soap *soap, int n)
-{	return soap_instantiate_dss__GroupRemoveUserGroup(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__GroupRemoveUserGroup(struct soap *soap, struct dss__GroupRemoveUserGroup *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__GroupRemoveUserGroup * SOAP_FMAC4 soap_instantiate_dss__GroupRemoveUserGroup(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__GroupRemoveUserGroup(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__GroupRemoveUserGroup, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__GroupRemoveUserGroup;
-		if (size)
-			*size = sizeof(struct dss__GroupRemoveUserGroup);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__GroupRemoveUserGroup[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__GroupRemoveUserGroup);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__GroupRemoveUserGroup*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__GroupRemoveUserGroup(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__GroupRemoveUserGroup %p -> %p\n", q, p));
-	*(struct dss__GroupRemoveUserGroup*)p = *(struct dss__GroupRemoveUserGroup*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__GroupRemoveUserGroupResponse(struct soap *soap, struct dss__GroupRemoveUserGroupResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->result);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__GroupRemoveUserGroupResponse(struct soap *soap, const struct dss__GroupRemoveUserGroupResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__GroupRemoveUserGroupResponse(struct soap *soap, const struct dss__GroupRemoveUserGroupResponse *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__GroupRemoveUserGroupResponse);
-	if (soap_out_dss__GroupRemoveUserGroupResponse(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__GroupRemoveUserGroupResponse(struct soap *soap, const char *tag, int id, const struct dss__GroupRemoveUserGroupResponse *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__GroupRemoveUserGroupResponse), type))
-		return soap->error;
-	if (soap_out_int(soap, "result", -1, &a->result, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__GroupRemoveUserGroupResponse * SOAP_FMAC4 soap_get_dss__GroupRemoveUserGroupResponse(struct soap *soap, struct dss__GroupRemoveUserGroupResponse *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__GroupRemoveUserGroupResponse(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__GroupRemoveUserGroupResponse * SOAP_FMAC4 soap_in_dss__GroupRemoveUserGroupResponse(struct soap *soap, const char *tag, struct dss__GroupRemoveUserGroupResponse *a, const char *type)
-{
-	short soap_flag_result = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__GroupRemoveUserGroupResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__GroupRemoveUserGroupResponse, sizeof(struct dss__GroupRemoveUserGroupResponse), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__GroupRemoveUserGroupResponse(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, "result", &a->result, "xsd:int"))
-				{	soap_flag_result--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__GroupRemoveUserGroupResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__GroupRemoveUserGroupResponse, 0, sizeof(struct dss__GroupRemoveUserGroupResponse), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__GroupRemoveUserGroupResponse * SOAP_FMAC6 soap_new_dss__GroupRemoveUserGroupResponse(struct soap *soap, int n)
-{	return soap_instantiate_dss__GroupRemoveUserGroupResponse(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__GroupRemoveUserGroupResponse(struct soap *soap, struct dss__GroupRemoveUserGroupResponse *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__GroupRemoveUserGroupResponse * SOAP_FMAC4 soap_instantiate_dss__GroupRemoveUserGroupResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__GroupRemoveUserGroupResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__GroupRemoveUserGroupResponse, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__GroupRemoveUserGroupResponse;
-		if (size)
-			*size = sizeof(struct dss__GroupRemoveUserGroupResponse);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__GroupRemoveUserGroupResponse[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__GroupRemoveUserGroupResponse);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__GroupRemoveUserGroupResponse*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__GroupRemoveUserGroupResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__GroupRemoveUserGroupResponse %p -> %p\n", q, p));
-	*(struct dss__GroupRemoveUserGroupResponse*)p = *(struct dss__GroupRemoveUserGroupResponse*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentAllocateUserGroup(struct soap *soap, struct dss__ApartmentAllocateUserGroup *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->_token);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentAllocateUserGroup(struct soap *soap, const struct dss__ApartmentAllocateUserGroup *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__ApartmentAllocateUserGroup(struct soap *soap, const struct dss__ApartmentAllocateUserGroup *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__ApartmentAllocateUserGroup);
-	if (soap_out_dss__ApartmentAllocateUserGroup(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ApartmentAllocateUserGroup(struct soap *soap, const char *tag, int id, const struct dss__ApartmentAllocateUserGroup *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__ApartmentAllocateUserGroup), type))
-		return soap->error;
-	if (soap_out_int(soap, "token", -1, &a->_token, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__ApartmentAllocateUserGroup * SOAP_FMAC4 soap_get_dss__ApartmentAllocateUserGroup(struct soap *soap, struct dss__ApartmentAllocateUserGroup *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__ApartmentAllocateUserGroup(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__ApartmentAllocateUserGroup * SOAP_FMAC4 soap_in_dss__ApartmentAllocateUserGroup(struct soap *soap, const char *tag, struct dss__ApartmentAllocateUserGroup *a, const char *type)
-{
-	short soap_flag__token = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__ApartmentAllocateUserGroup *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__ApartmentAllocateUserGroup, sizeof(struct dss__ApartmentAllocateUserGroup), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__ApartmentAllocateUserGroup(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
-				{	soap_flag__token--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__ApartmentAllocateUserGroup *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__ApartmentAllocateUserGroup, 0, sizeof(struct dss__ApartmentAllocateUserGroup), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__ApartmentAllocateUserGroup * SOAP_FMAC6 soap_new_dss__ApartmentAllocateUserGroup(struct soap *soap, int n)
-{	return soap_instantiate_dss__ApartmentAllocateUserGroup(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__ApartmentAllocateUserGroup(struct soap *soap, struct dss__ApartmentAllocateUserGroup *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__ApartmentAllocateUserGroup * SOAP_FMAC4 soap_instantiate_dss__ApartmentAllocateUserGroup(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__ApartmentAllocateUserGroup(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__ApartmentAllocateUserGroup, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__ApartmentAllocateUserGroup;
-		if (size)
-			*size = sizeof(struct dss__ApartmentAllocateUserGroup);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__ApartmentAllocateUserGroup[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__ApartmentAllocateUserGroup);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__ApartmentAllocateUserGroup*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentAllocateUserGroup(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__ApartmentAllocateUserGroup %p -> %p\n", q, p));
-	*(struct dss__ApartmentAllocateUserGroup*)p = *(struct dss__ApartmentAllocateUserGroup*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentAllocateUserGroupResponse(struct soap *soap, struct dss__ApartmentAllocateUserGroupResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->groupID);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentAllocateUserGroupResponse(struct soap *soap, const struct dss__ApartmentAllocateUserGroupResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__ApartmentAllocateUserGroupResponse(struct soap *soap, const struct dss__ApartmentAllocateUserGroupResponse *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__ApartmentAllocateUserGroupResponse);
-	if (soap_out_dss__ApartmentAllocateUserGroupResponse(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ApartmentAllocateUserGroupResponse(struct soap *soap, const char *tag, int id, const struct dss__ApartmentAllocateUserGroupResponse *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__ApartmentAllocateUserGroupResponse), type))
-		return soap->error;
-	if (soap_out_int(soap, "groupID", -1, &a->groupID, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__ApartmentAllocateUserGroupResponse * SOAP_FMAC4 soap_get_dss__ApartmentAllocateUserGroupResponse(struct soap *soap, struct dss__ApartmentAllocateUserGroupResponse *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__ApartmentAllocateUserGroupResponse(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__ApartmentAllocateUserGroupResponse * SOAP_FMAC4 soap_in_dss__ApartmentAllocateUserGroupResponse(struct soap *soap, const char *tag, struct dss__ApartmentAllocateUserGroupResponse *a, const char *type)
-{
-	short soap_flag_groupID = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__ApartmentAllocateUserGroupResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__ApartmentAllocateUserGroupResponse, sizeof(struct dss__ApartmentAllocateUserGroupResponse), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__ApartmentAllocateUserGroupResponse(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag_groupID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, "groupID", &a->groupID, "xsd:int"))
-				{	soap_flag_groupID--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__ApartmentAllocateUserGroupResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__ApartmentAllocateUserGroupResponse, 0, sizeof(struct dss__ApartmentAllocateUserGroupResponse), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_groupID > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__ApartmentAllocateUserGroupResponse * SOAP_FMAC6 soap_new_dss__ApartmentAllocateUserGroupResponse(struct soap *soap, int n)
-{	return soap_instantiate_dss__ApartmentAllocateUserGroupResponse(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__ApartmentAllocateUserGroupResponse(struct soap *soap, struct dss__ApartmentAllocateUserGroupResponse *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__ApartmentAllocateUserGroupResponse * SOAP_FMAC4 soap_instantiate_dss__ApartmentAllocateUserGroupResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__ApartmentAllocateUserGroupResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__ApartmentAllocateUserGroupResponse, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__ApartmentAllocateUserGroupResponse;
-		if (size)
-			*size = sizeof(struct dss__ApartmentAllocateUserGroupResponse);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__ApartmentAllocateUserGroupResponse[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__ApartmentAllocateUserGroupResponse);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__ApartmentAllocateUserGroupResponse*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentAllocateUserGroupResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__ApartmentAllocateUserGroupResponse %p -> %p\n", q, p));
-	*(struct dss__ApartmentAllocateUserGroupResponse*)p = *(struct dss__ApartmentAllocateUserGroupResponse*)q;
-}
-
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ZoneGetName(struct soap *soap, struct dss__ZoneGetName *a)
 {
 	(void)soap; (void)a; /* appease -Wall -Werror */
@@ -10373,492 +9207,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ZoneSetNameResponse(struct soap *soap,
 {
 	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__ZoneSetNameResponse %p -> %p\n", q, p));
 	*(struct dss__ZoneSetNameResponse*)p = *(struct dss__ZoneSetNameResponse*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Zone_RemoveDevice(struct soap *soap, struct dss__Zone_RemoveDevice *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_zoneID);
-	soap_default_string(soap, &a->_deviceID);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Zone_RemoveDevice(struct soap *soap, const struct dss__Zone_RemoveDevice *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_serialize_string(soap, &a->_deviceID);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Zone_RemoveDevice(struct soap *soap, const struct dss__Zone_RemoveDevice *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Zone_RemoveDevice);
-	if (soap_out_dss__Zone_RemoveDevice(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Zone_RemoveDevice(struct soap *soap, const char *tag, int id, const struct dss__Zone_RemoveDevice *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Zone_RemoveDevice), type))
-		return soap->error;
-	if (soap_out_int(soap, "token", -1, &a->_token, ""))
-		return soap->error;
-	if (soap_out_int(soap, "zoneID", -1, &a->_zoneID, ""))
-		return soap->error;
-	if (soap_out_string(soap, "deviceID", -1, &a->_deviceID, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Zone_RemoveDevice * SOAP_FMAC4 soap_get_dss__Zone_RemoveDevice(struct soap *soap, struct dss__Zone_RemoveDevice *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Zone_RemoveDevice(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Zone_RemoveDevice * SOAP_FMAC4 soap_in_dss__Zone_RemoveDevice(struct soap *soap, const char *tag, struct dss__Zone_RemoveDevice *a, const char *type)
-{
-	short soap_flag__token = 1, soap_flag__zoneID = 1, soap_flag__deviceID = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Zone_RemoveDevice *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Zone_RemoveDevice, sizeof(struct dss__Zone_RemoveDevice), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Zone_RemoveDevice(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
-				{	soap_flag__token--;
-					continue;
-				}
-			if (soap_flag__zoneID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_zoneID, "xsd:int"))
-				{	soap_flag__zoneID--;
-					continue;
-				}
-			if (soap_flag__deviceID && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-				if (soap_in_string(soap, NULL, &a->_deviceID, "xsd:string"))
-				{	soap_flag__deviceID--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Zone_RemoveDevice *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Zone_RemoveDevice, 0, sizeof(struct dss__Zone_RemoveDevice), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__zoneID > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Zone_RemoveDevice * SOAP_FMAC6 soap_new_dss__Zone_RemoveDevice(struct soap *soap, int n)
-{	return soap_instantiate_dss__Zone_RemoveDevice(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Zone_RemoveDevice(struct soap *soap, struct dss__Zone_RemoveDevice *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Zone_RemoveDevice * SOAP_FMAC4 soap_instantiate_dss__Zone_RemoveDevice(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Zone_RemoveDevice(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Zone_RemoveDevice, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Zone_RemoveDevice;
-		if (size)
-			*size = sizeof(struct dss__Zone_RemoveDevice);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Zone_RemoveDevice[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Zone_RemoveDevice);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Zone_RemoveDevice*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Zone_RemoveDevice(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Zone_RemoveDevice %p -> %p\n", q, p));
-	*(struct dss__Zone_RemoveDevice*)p = *(struct dss__Zone_RemoveDevice*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Zone_RemoveDeviceResponse(struct soap *soap, struct dss__Zone_RemoveDeviceResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->result);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Zone_RemoveDeviceResponse(struct soap *soap, const struct dss__Zone_RemoveDeviceResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Zone_RemoveDeviceResponse(struct soap *soap, const struct dss__Zone_RemoveDeviceResponse *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Zone_RemoveDeviceResponse);
-	if (soap_out_dss__Zone_RemoveDeviceResponse(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Zone_RemoveDeviceResponse(struct soap *soap, const char *tag, int id, const struct dss__Zone_RemoveDeviceResponse *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Zone_RemoveDeviceResponse), type))
-		return soap->error;
-	if (soap_out_int(soap, "result", -1, &a->result, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Zone_RemoveDeviceResponse * SOAP_FMAC4 soap_get_dss__Zone_RemoveDeviceResponse(struct soap *soap, struct dss__Zone_RemoveDeviceResponse *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Zone_RemoveDeviceResponse(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Zone_RemoveDeviceResponse * SOAP_FMAC4 soap_in_dss__Zone_RemoveDeviceResponse(struct soap *soap, const char *tag, struct dss__Zone_RemoveDeviceResponse *a, const char *type)
-{
-	short soap_flag_result = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Zone_RemoveDeviceResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Zone_RemoveDeviceResponse, sizeof(struct dss__Zone_RemoveDeviceResponse), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Zone_RemoveDeviceResponse(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, "result", &a->result, "xsd:int"))
-				{	soap_flag_result--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Zone_RemoveDeviceResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Zone_RemoveDeviceResponse, 0, sizeof(struct dss__Zone_RemoveDeviceResponse), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Zone_RemoveDeviceResponse * SOAP_FMAC6 soap_new_dss__Zone_RemoveDeviceResponse(struct soap *soap, int n)
-{	return soap_instantiate_dss__Zone_RemoveDeviceResponse(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Zone_RemoveDeviceResponse(struct soap *soap, struct dss__Zone_RemoveDeviceResponse *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Zone_RemoveDeviceResponse * SOAP_FMAC4 soap_instantiate_dss__Zone_RemoveDeviceResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Zone_RemoveDeviceResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Zone_RemoveDeviceResponse, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Zone_RemoveDeviceResponse;
-		if (size)
-			*size = sizeof(struct dss__Zone_RemoveDeviceResponse);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Zone_RemoveDeviceResponse[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Zone_RemoveDeviceResponse);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Zone_RemoveDeviceResponse*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Zone_RemoveDeviceResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Zone_RemoveDeviceResponse %p -> %p\n", q, p));
-	*(struct dss__Zone_RemoveDeviceResponse*)p = *(struct dss__Zone_RemoveDeviceResponse*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Zone_AddDevice(struct soap *soap, struct dss__Zone_AddDevice *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->_token);
-	soap_default_int(soap, &a->_zoneID);
-	soap_default_string(soap, &a->_deviceID);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Zone_AddDevice(struct soap *soap, const struct dss__Zone_AddDevice *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_serialize_string(soap, &a->_deviceID);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Zone_AddDevice(struct soap *soap, const struct dss__Zone_AddDevice *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Zone_AddDevice);
-	if (soap_out_dss__Zone_AddDevice(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Zone_AddDevice(struct soap *soap, const char *tag, int id, const struct dss__Zone_AddDevice *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Zone_AddDevice), type))
-		return soap->error;
-	if (soap_out_int(soap, "token", -1, &a->_token, ""))
-		return soap->error;
-	if (soap_out_int(soap, "zoneID", -1, &a->_zoneID, ""))
-		return soap->error;
-	if (soap_out_string(soap, "deviceID", -1, &a->_deviceID, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Zone_AddDevice * SOAP_FMAC4 soap_get_dss__Zone_AddDevice(struct soap *soap, struct dss__Zone_AddDevice *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Zone_AddDevice(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Zone_AddDevice * SOAP_FMAC4 soap_in_dss__Zone_AddDevice(struct soap *soap, const char *tag, struct dss__Zone_AddDevice *a, const char *type)
-{
-	short soap_flag__token = 1, soap_flag__zoneID = 1, soap_flag__deviceID = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Zone_AddDevice *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Zone_AddDevice, sizeof(struct dss__Zone_AddDevice), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Zone_AddDevice(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
-				{	soap_flag__token--;
-					continue;
-				}
-			if (soap_flag__zoneID && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, NULL, &a->_zoneID, "xsd:int"))
-				{	soap_flag__zoneID--;
-					continue;
-				}
-			if (soap_flag__deviceID && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-				if (soap_in_string(soap, NULL, &a->_deviceID, "xsd:string"))
-				{	soap_flag__deviceID--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Zone_AddDevice *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Zone_AddDevice, 0, sizeof(struct dss__Zone_AddDevice), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0 || soap_flag__zoneID > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Zone_AddDevice * SOAP_FMAC6 soap_new_dss__Zone_AddDevice(struct soap *soap, int n)
-{	return soap_instantiate_dss__Zone_AddDevice(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Zone_AddDevice(struct soap *soap, struct dss__Zone_AddDevice *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Zone_AddDevice * SOAP_FMAC4 soap_instantiate_dss__Zone_AddDevice(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Zone_AddDevice(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Zone_AddDevice, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Zone_AddDevice;
-		if (size)
-			*size = sizeof(struct dss__Zone_AddDevice);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Zone_AddDevice[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Zone_AddDevice);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Zone_AddDevice*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Zone_AddDevice(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Zone_AddDevice %p -> %p\n", q, p));
-	*(struct dss__Zone_AddDevice*)p = *(struct dss__Zone_AddDevice*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Zone_AddDeviceResponse(struct soap *soap, struct dss__Zone_AddDeviceResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_int(soap, &a->result);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Zone_AddDeviceResponse(struct soap *soap, const struct dss__Zone_AddDeviceResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__Zone_AddDeviceResponse(struct soap *soap, const struct dss__Zone_AddDeviceResponse *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__Zone_AddDeviceResponse);
-	if (soap_out_dss__Zone_AddDeviceResponse(soap, tag, id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Zone_AddDeviceResponse(struct soap *soap, const char *tag, int id, const struct dss__Zone_AddDeviceResponse *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__Zone_AddDeviceResponse), type))
-		return soap->error;
-	if (soap_out_int(soap, "result", -1, &a->result, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct dss__Zone_AddDeviceResponse * SOAP_FMAC4 soap_get_dss__Zone_AddDeviceResponse(struct soap *soap, struct dss__Zone_AddDeviceResponse *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_dss__Zone_AddDeviceResponse(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 struct dss__Zone_AddDeviceResponse * SOAP_FMAC4 soap_in_dss__Zone_AddDeviceResponse(struct soap *soap, const char *tag, struct dss__Zone_AddDeviceResponse *a, const char *type)
-{
-	short soap_flag_result = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct dss__Zone_AddDeviceResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__Zone_AddDeviceResponse, sizeof(struct dss__Zone_AddDeviceResponse), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_dss__Zone_AddDeviceResponse(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_int(soap, "result", &a->result, "xsd:int"))
-				{	soap_flag_result--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct dss__Zone_AddDeviceResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__Zone_AddDeviceResponse, 0, sizeof(struct dss__Zone_AddDeviceResponse), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC5 struct dss__Zone_AddDeviceResponse * SOAP_FMAC6 soap_new_dss__Zone_AddDeviceResponse(struct soap *soap, int n)
-{	return soap_instantiate_dss__Zone_AddDeviceResponse(soap, n, NULL, NULL, NULL);
-}
-
-SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__Zone_AddDeviceResponse(struct soap *soap, struct dss__Zone_AddDeviceResponse *p)
-{	soap_delete(soap, p);
-}
-
-SOAP_FMAC3 struct dss__Zone_AddDeviceResponse * SOAP_FMAC4 soap_instantiate_dss__Zone_AddDeviceResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__Zone_AddDeviceResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__Zone_AddDeviceResponse, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)new struct dss__Zone_AddDeviceResponse;
-		if (size)
-			*size = sizeof(struct dss__Zone_AddDeviceResponse);
-	}
-	else
-	{	cp->ptr = (void*)new struct dss__Zone_AddDeviceResponse[n];
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct dss__Zone_AddDeviceResponse);
-	}
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct dss__Zone_AddDeviceResponse*)cp->ptr;
-}
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Zone_AddDeviceResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__Zone_AddDeviceResponse %p -> %p\n", q, p));
-	*(struct dss__Zone_AddDeviceResponse*)p = *(struct dss__Zone_AddDeviceResponse*)q;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentDeleteZone(struct soap *soap, struct dss__ApartmentDeleteZone *a)

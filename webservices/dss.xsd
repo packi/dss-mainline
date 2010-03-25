@@ -1216,42 +1216,6 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Zone-AddDevice">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Zone-AddDeviceResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Zone-RemoveDevice">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Zone-RemoveDeviceResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
   <element name="ZoneSetName">
    <complexType>
     <sequence>
@@ -1283,75 +1247,6 @@
    <complexType>
     <sequence>
      <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="ApartmentAllocateUserGroup">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="ApartmentAllocateUserGroupResponse">
-   <complexType>
-    <sequence>
-     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="GroupRemoveUserGroup">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="GroupRemoveUserGroupResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="GroupAddDevice">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="GroupAddDeviceResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="GroupRemoveDevice">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="GroupRemoveDeviceResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -1403,23 +1298,6 @@
   </element>
   <!-- operation response element -->
   <element name="DeviceGetFunctionIDResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="SwitchGetGroupID">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="SwitchGetGroupIDResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1619,6 +1497,24 @@
    <complexType>
     <sequence>
      <element name="result" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="StructureAddDeviceToZone">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="StructureAddDeviceToZoneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
