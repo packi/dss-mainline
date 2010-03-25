@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2010-03-25 15:04:08 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2010-03-25 15:30:04 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -87,6 +87,10 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__ApartmentGetDevices(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentGetDeviceIDByName"))
 		return soap_serve_dss__ApartmentGetDeviceIDByName(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentGetName"))
+		return soap_serve_dss__ApartmentGetName(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentSetName"))
+		return soap_serve_dss__ApartmentSetName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:SetAddDeviceByName"))
 		return soap_serve_dss__SetAddDeviceByName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:SetAddDeviceByID"))
@@ -191,6 +195,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__DeviceSaveScene(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetName"))
 		return soap_serve_dss__DeviceGetName(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceSetName"))
+		return soap_serve_dss__DeviceSetName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetZoneID"))
 		return soap_serve_dss__DeviceGetZoneID(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DSMeterGetPowerConsumption"))
@@ -199,6 +205,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__ApartmentGetDSMeterIDs(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DSMeterGetName"))
 		return soap_serve_dss__DSMeterGetName(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DSMeterSetName"))
+		return soap_serve_dss__DSMeterSetName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentAllocateZone"))
 		return soap_serve_dss__ApartmentAllocateZone(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentDeleteZone"))
@@ -219,6 +227,10 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__GroupAddDevice(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:GroupRemoveDevice"))
 		return soap_serve_dss__GroupRemoveDevice(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:GroupSetName"))
+		return soap_serve_dss__GroupSetName(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:GroupGetName"))
+		return soap_serve_dss__GroupGetName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetFunctionID"))
 		return soap_serve_dss__DeviceGetFunctionID(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:SwitchGetGroupID"))
@@ -529,6 +541,88 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetDeviceIDByName(struct soap
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__ApartmentGetDeviceIDByNameResponse(soap, &soap_tmp_dss__ApartmentGetDeviceIDByNameResponse, "dss:ApartmentGetDeviceIDByNameResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentGetName(struct soap *soap)
+{	struct dss__ApartmentGetName soap_tmp_dss__ApartmentGetName;
+	struct dss__ApartmentGetNameResponse soap_tmp_dss__ApartmentGetNameResponse;
+	soap_default_dss__ApartmentGetNameResponse(soap, &soap_tmp_dss__ApartmentGetNameResponse);
+	soap_default_dss__ApartmentGetName(soap, &soap_tmp_dss__ApartmentGetName);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__ApartmentGetName(soap, &soap_tmp_dss__ApartmentGetName, "dss:ApartmentGetName", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__ApartmentGetName(soap, soap_tmp_dss__ApartmentGetName._token, soap_tmp_dss__ApartmentGetNameResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__ApartmentGetNameResponse(soap, &soap_tmp_dss__ApartmentGetNameResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__ApartmentGetNameResponse(soap, &soap_tmp_dss__ApartmentGetNameResponse, "dss:ApartmentGetNameResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__ApartmentGetNameResponse(soap, &soap_tmp_dss__ApartmentGetNameResponse, "dss:ApartmentGetNameResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentSetName(struct soap *soap)
+{	struct dss__ApartmentSetName soap_tmp_dss__ApartmentSetName;
+	struct dss__ApartmentSetNameResponse soap_tmp_dss__ApartmentSetNameResponse;
+	soap_default_dss__ApartmentSetNameResponse(soap, &soap_tmp_dss__ApartmentSetNameResponse);
+	soap_default_dss__ApartmentSetName(soap, &soap_tmp_dss__ApartmentSetName);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__ApartmentSetName(soap, &soap_tmp_dss__ApartmentSetName, "dss:ApartmentSetName", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__ApartmentSetName(soap, soap_tmp_dss__ApartmentSetName._token, soap_tmp_dss__ApartmentSetName._name, soap_tmp_dss__ApartmentSetNameResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__ApartmentSetNameResponse(soap, &soap_tmp_dss__ApartmentSetNameResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__ApartmentSetNameResponse(soap, &soap_tmp_dss__ApartmentSetNameResponse, "dss:ApartmentSetNameResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__ApartmentSetNameResponse(soap, &soap_tmp_dss__ApartmentSetNameResponse, "dss:ApartmentSetNameResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -2671,6 +2765,47 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetName(struct soap *soap)
 	return soap_closesock(soap);
 }
 
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceSetName(struct soap *soap)
+{	struct dss__DeviceSetName soap_tmp_dss__DeviceSetName;
+	struct dss__DeviceSetNameResponse soap_tmp_dss__DeviceSetNameResponse;
+	soap_default_dss__DeviceSetNameResponse(soap, &soap_tmp_dss__DeviceSetNameResponse);
+	soap_default_dss__DeviceSetName(soap, &soap_tmp_dss__DeviceSetName);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DeviceSetName(soap, &soap_tmp_dss__DeviceSetName, "dss:DeviceSetName", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DeviceSetName(soap, soap_tmp_dss__DeviceSetName._token, soap_tmp_dss__DeviceSetName._deviceID, soap_tmp_dss__DeviceSetName._name, soap_tmp_dss__DeviceSetNameResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DeviceSetNameResponse(soap, &soap_tmp_dss__DeviceSetNameResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DeviceSetNameResponse(soap, &soap_tmp_dss__DeviceSetNameResponse, "dss:DeviceSetNameResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DeviceSetNameResponse(soap, &soap_tmp_dss__DeviceSetNameResponse, "dss:DeviceSetNameResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetZoneID(struct soap *soap)
 {	struct dss__DeviceGetZoneID soap_tmp_dss__DeviceGetZoneID;
 	struct dss__DeviceGetZoneIDResponse soap_tmp_dss__DeviceGetZoneIDResponse;
@@ -2828,6 +2963,47 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DSMeterGetName(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__DSMeterGetNameResponse(soap, &soap_tmp_dss__DSMeterGetNameResponse, "dss:DSMeterGetNameResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DSMeterSetName(struct soap *soap)
+{	struct dss__DSMeterSetName soap_tmp_dss__DSMeterSetName;
+	struct dss__DSMeterSetNameResponse soap_tmp_dss__DSMeterSetNameResponse;
+	soap_default_dss__DSMeterSetNameResponse(soap, &soap_tmp_dss__DSMeterSetNameResponse);
+	soap_default_dss__DSMeterSetName(soap, &soap_tmp_dss__DSMeterSetName);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DSMeterSetName(soap, &soap_tmp_dss__DSMeterSetName, "dss:DSMeterSetName", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DSMeterSetName(soap, soap_tmp_dss__DSMeterSetName._token, soap_tmp_dss__DSMeterSetName._dsMeterID, soap_tmp_dss__DSMeterSetName._name, soap_tmp_dss__DSMeterSetNameResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DSMeterSetNameResponse(soap, &soap_tmp_dss__DSMeterSetNameResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DSMeterSetNameResponse(soap, &soap_tmp_dss__DSMeterSetNameResponse, "dss:DSMeterSetNameResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DSMeterSetNameResponse(soap, &soap_tmp_dss__DSMeterSetNameResponse, "dss:DSMeterSetNameResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -3238,6 +3414,88 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__GroupRemoveDevice(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__GroupRemoveDeviceResponse(soap, &soap_tmp_dss__GroupRemoveDeviceResponse, "dss:GroupRemoveDeviceResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__GroupSetName(struct soap *soap)
+{	struct dss__GroupSetName soap_tmp_dss__GroupSetName;
+	struct dss__GroupSetNameResponse soap_tmp_dss__GroupSetNameResponse;
+	soap_default_dss__GroupSetNameResponse(soap, &soap_tmp_dss__GroupSetNameResponse);
+	soap_default_dss__GroupSetName(soap, &soap_tmp_dss__GroupSetName);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__GroupSetName(soap, &soap_tmp_dss__GroupSetName, "dss:GroupSetName", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__GroupSetName(soap, soap_tmp_dss__GroupSetName._token, soap_tmp_dss__GroupSetName._zoneID, soap_tmp_dss__GroupSetName._groupID, soap_tmp_dss__GroupSetName._name, soap_tmp_dss__GroupSetNameResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__GroupSetNameResponse(soap, &soap_tmp_dss__GroupSetNameResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__GroupSetNameResponse(soap, &soap_tmp_dss__GroupSetNameResponse, "dss:GroupSetNameResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__GroupSetNameResponse(soap, &soap_tmp_dss__GroupSetNameResponse, "dss:GroupSetNameResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__GroupGetName(struct soap *soap)
+{	struct dss__GroupGetName soap_tmp_dss__GroupGetName;
+	struct dss__GroupGetNameResponse soap_tmp_dss__GroupGetNameResponse;
+	soap_default_dss__GroupGetNameResponse(soap, &soap_tmp_dss__GroupGetNameResponse);
+	soap_default_dss__GroupGetName(soap, &soap_tmp_dss__GroupGetName);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__GroupGetName(soap, &soap_tmp_dss__GroupGetName, "dss:GroupGetName", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__GroupGetName(soap, soap_tmp_dss__GroupGetName._token, soap_tmp_dss__GroupGetName._zoneID, soap_tmp_dss__GroupGetName._groupID, soap_tmp_dss__GroupGetNameResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__GroupGetNameResponse(soap, &soap_tmp_dss__GroupGetNameResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__GroupGetNameResponse(soap, &soap_tmp_dss__GroupGetNameResponse, "dss:GroupGetNameResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__GroupGetNameResponse(soap, &soap_tmp_dss__GroupGetNameResponse, "dss:GroupGetNameResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

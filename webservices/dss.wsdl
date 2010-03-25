@@ -149,6 +149,39 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="ApartmentGetName">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ApartmentGetNameResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ApartmentSetName">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="name" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ApartmentSetNameResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="SetAddDeviceByName">
    <complexType>
     <sequence>
@@ -1063,6 +1096,24 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="DeviceSetName">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="name" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceSetNameResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="DeviceGetZoneID">
    <complexType>
     <sequence>
@@ -1126,6 +1177,24 @@
    <complexType>
     <sequence>
      <element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DSMeterSetName">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="dsMeterID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="name" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DSMeterSetNameResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -1299,6 +1368,43 @@
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="GroupSetName">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="name" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="GroupSetNameResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="GroupGetName">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="GroupGetNameResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -1590,6 +1696,22 @@
 
 <message name="ApartmentGetDeviceIDByNameResponse">
  <part name="parameters" element="dss:ApartmentGetDeviceIDByNameResponse"/>
+</message>
+
+<message name="ApartmentGetNameRequest">
+ <part name="parameters" element="dss:ApartmentGetName"/>
+</message>
+
+<message name="ApartmentGetNameResponse">
+ <part name="parameters" element="dss:ApartmentGetNameResponse"/>
+</message>
+
+<message name="ApartmentSetNameRequest">
+ <part name="parameters" element="dss:ApartmentSetName"/>
+</message>
+
+<message name="ApartmentSetNameResponse">
+ <part name="parameters" element="dss:ApartmentSetNameResponse"/>
 </message>
 
 <message name="SetAddDeviceByNameRequest">
@@ -2008,6 +2130,14 @@
  <part name="parameters" element="dss:DeviceGetNameResponse"/>
 </message>
 
+<message name="DeviceSetNameRequest">
+ <part name="parameters" element="dss:DeviceSetName"/>
+</message>
+
+<message name="DeviceSetNameResponse">
+ <part name="parameters" element="dss:DeviceSetNameResponse"/>
+</message>
+
 <message name="DeviceGetZoneIDRequest">
  <part name="parameters" element="dss:DeviceGetZoneID"/>
 </message>
@@ -2038,6 +2168,14 @@
 
 <message name="DSMeterGetNameResponse">
  <part name="parameters" element="dss:DSMeterGetNameResponse"/>
+</message>
+
+<message name="DSMeterSetNameRequest">
+ <part name="parameters" element="dss:DSMeterSetName"/>
+</message>
+
+<message name="DSMeterSetNameResponse">
+ <part name="parameters" element="dss:DSMeterSetNameResponse"/>
 </message>
 
 <message name="ApartmentAllocateZoneRequest">
@@ -2118,6 +2256,22 @@
 
 <message name="GroupRemoveDeviceResponse">
  <part name="parameters" element="dss:GroupRemoveDeviceResponse"/>
+</message>
+
+<message name="GroupSetNameRequest">
+ <part name="parameters" element="dss:GroupSetName"/>
+</message>
+
+<message name="GroupSetNameResponse">
+ <part name="parameters" element="dss:GroupSetNameResponse"/>
+</message>
+
+<message name="GroupGetNameRequest">
+ <part name="parameters" element="dss:GroupGetName"/>
+</message>
+
+<message name="GroupGetNameResponse">
+ <part name="parameters" element="dss:GroupGetNameResponse"/>
 </message>
 
 <message name="DeviceGetFunctionIDRequest">
@@ -2259,6 +2413,16 @@
   <documentation>Service definition of function dss__ApartmentGetDeviceIDByName</documentation>
   <input message="tns:ApartmentGetDeviceIDByNameRequest"/>
   <output message="tns:ApartmentGetDeviceIDByNameResponse"/>
+ </operation>
+ <operation name="ApartmentGetName">
+  <documentation>Service definition of function dss__ApartmentGetName</documentation>
+  <input message="tns:ApartmentGetNameRequest"/>
+  <output message="tns:ApartmentGetNameResponse"/>
+ </operation>
+ <operation name="ApartmentSetName">
+  <documentation>Service definition of function dss__ApartmentSetName</documentation>
+  <input message="tns:ApartmentSetNameRequest"/>
+  <output message="tns:ApartmentSetNameResponse"/>
  </operation>
  <operation name="SetAddDeviceByName">
   <documentation>Service definition of function dss__SetAddDeviceByName</documentation>
@@ -2520,6 +2684,11 @@
   <input message="tns:DeviceGetNameRequest"/>
   <output message="tns:DeviceGetNameResponse"/>
  </operation>
+ <operation name="DeviceSetName">
+  <documentation>Service definition of function dss__DeviceSetName</documentation>
+  <input message="tns:DeviceSetNameRequest"/>
+  <output message="tns:DeviceSetNameResponse"/>
+ </operation>
  <operation name="DeviceGetZoneID">
   <documentation>Service definition of function dss__DeviceGetZoneID</documentation>
   <input message="tns:DeviceGetZoneIDRequest"/>
@@ -2539,6 +2708,11 @@
   <documentation>Service definition of function dss__DSMeterGetName</documentation>
   <input message="tns:DSMeterGetNameRequest"/>
   <output message="tns:DSMeterGetNameResponse"/>
+ </operation>
+ <operation name="DSMeterSetName">
+  <documentation>Service definition of function dss__DSMeterSetName</documentation>
+  <input message="tns:DSMeterSetNameRequest"/>
+  <output message="tns:DSMeterSetNameResponse"/>
  </operation>
  <operation name="ApartmentAllocateZone">
   <documentation>Service definition of function dss__ApartmentAllocateZone</documentation>
@@ -2589,6 +2763,16 @@
   <documentation>Service definition of function dss__GroupRemoveDevice</documentation>
   <input message="tns:GroupRemoveDeviceRequest"/>
   <output message="tns:GroupRemoveDeviceResponse"/>
+ </operation>
+ <operation name="GroupSetName">
+  <documentation>Service definition of function dss__GroupSetName</documentation>
+  <input message="tns:GroupSetNameRequest"/>
+  <output message="tns:GroupSetNameResponse"/>
+ </operation>
+ <operation name="GroupGetName">
+  <documentation>Service definition of function dss__GroupGetName</documentation>
+  <input message="tns:GroupGetNameRequest"/>
+  <output message="tns:GroupGetNameResponse"/>
  </operation>
  <operation name="DeviceGetFunctionID">
   <documentation>Service definition of function dss__DeviceGetFunctionID</documentation>
@@ -2714,6 +2898,24 @@
   </output>
  </operation>
  <operation name="ApartmentGetDeviceIDByName">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="ApartmentGetName">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="ApartmentSetName">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -3190,6 +3392,15 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
+ <operation name="DeviceSetName">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
  <operation name="DeviceGetZoneID">
   <SOAP:operation soapAction=""/>
   <input>
@@ -3218,6 +3429,15 @@
   </output>
  </operation>
  <operation name="DSMeterGetName">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="DSMeterSetName">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -3308,6 +3528,24 @@
   </output>
  </operation>
  <operation name="GroupRemoveDevice">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="GroupSetName">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="GroupGetName">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

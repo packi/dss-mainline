@@ -247,6 +247,26 @@ int dss__ApartmentGetDeviceIDByName(struct soap *soap, int _token,  char* _devic
   return SOAP_OK;
 }
 
+int dss__ApartmentGetName(struct soap *soap, int _token, std::string& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+  dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
+  result = apt.getName();
+  return SOAP_OK;
+} // dss__ApartmentGetName
+
+int dss__ApartmentSetName(struct soap *soap, int _token, char* _name, bool& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+  dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
+  apt.setName(_name);
+  result = true;
+  return SOAP_OK;
+} // dss__ApartmentSetName
+
+
 //==================================================== Set
 
 int dss__SetAddDeviceByName(struct soap *soap, int _token, char* _setSpec, char* _name, std::string& result) {
@@ -658,7 +678,8 @@ int dss__ApartmentUndoScene(struct soap *soap, int _token, int _groupID, int _sc
   return SOAP_OK;
 }
 
-//---------------------------------- Apartment
+
+//---------------------------------- Zone
 
 int dss__ZoneTurnOn(struct soap *soap, int _token, int _zoneID, int _groupID, bool& result) {
   dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
@@ -924,6 +945,17 @@ int dss__DeviceGetName(struct soap *soap, int _token, char* _deviceID, char** re
   return SOAP_OK;
 } // dss__DeviceGetName
 
+int dss__DeviceSetName(struct soap *soap, int _token, char* _deviceID, char* _name, bool& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  dev.getDevice().setName(_name);
+  result = true;
+  return SOAP_OK;
+} // dss__DeviceSetName
+
 int dss__DeviceGetFunctionID(struct soap *soap, int _token, char* _deviceID, int& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
@@ -1036,7 +1068,19 @@ int dss__DSMeterGetName(struct soap *soap, int _token, char* _dsMeterID, std::st
 
   name = mod.getName();
   return SOAP_OK;
-}
+} // dss__DSMeterGetName
+
+int dss__DSMeterSetName(struct soap *soap, int _token, char* _dsMeterID, char*  _name, bool& result) {
+  dss::DSMeter mod(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDSMeter(soap, _token, _dsMeterID, mod);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  mod.setName(_name);
+  result = true;
+  return SOAP_OK;
+} // dss__DSMeterSetName
 
 int dss__ApartmentAllocateZone(struct soap *soap, int _token, int& zoneID) {
   return soap_sender_fault(soap, "Not yet implemented", NULL);
@@ -1098,6 +1142,26 @@ int dss__GroupRemoveDevice(struct soap *soap, int _token, int _groupID, char* _d
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
+int dss__GroupSetName(struct soap *soap, int _token, int _zoneID, int _groupID, char* _name, bool& result) {
+  dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
+  int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group.setName(_name);
+  result = true;
+  return SOAP_OK;
+} // dss__GroupSetName
+
+int dss__GroupGetName(struct soap *soap, int _token, int _zoneID, int _groupID, std::string& result) {
+  dss::Group group(-1, 0, dss::DSS::getInstance()->getApartment());
+  int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  result = group.getName();
+  return SOAP_OK;
+} // dss__GroupGetName
 
 //==================================================== Events
 

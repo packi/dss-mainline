@@ -55,6 +55,9 @@ int dss__ApartmentGetDevices(int _token, std::string& result);
 /** Returns the device ID for the given _deviceName */
 int dss__ApartmentGetDeviceIDByName(int _token, char* _deviceName, std::string& deviceID);
 
+int dss__ApartmentGetName(int _token, std::string& result);
+int dss__ApartmentSetName(int _token, char* _name, bool& result);
+
 /** Adds the given device to the set */
 int dss__SetAddDeviceByName(int _token, char* _setSpec, char* _name, std::string& result);
 /** Adds the given device to the set */
@@ -195,6 +198,8 @@ int dss__DeviceSaveScene(int _token, char* _deviceID, int _sceneNr, bool& result
 
 /** Returns the name of a device */
 int dss__DeviceGetName(int _token, char* _deviceID, char** result);
+/** Sets the name of a device */
+int dss__DeviceSetName(int _token, char* _deviceID, char* _name, bool& result);
 
 /** Returns the zone id of the specified device */
 int dss__DeviceGetZoneID(int _token, char* _deviceID, int& result);
@@ -212,6 +217,8 @@ int dss__DSMeterGetPowerConsumption(int _token, int _dsMeterID, xsd__unsignedInt
 int dss__ApartmentGetDSMeterIDs(int _token, std::vector<std::string>& ids);
 /** Retuns the name of the given dsMeter. */
 int dss__DSMeterGetName(int _token, char* _dsMeterID, std::string& name);
+/** Sets the name of the given dsMeter. */
+int dss__DSMeterSetName(int _token, char* _dsMeterID, char*  _name, bool& result);
 /** Allocates a zone */
 int dss__ApartmentAllocateZone(int _token, int& zoneID);
 /** Deletes a previously allocated zone. */
@@ -232,6 +239,8 @@ int dss__GroupRemoveUserGroup(int _token, int _groupID, int& result);
 int dss__GroupAddDevice(int _token, int _groupID, char* _deviceID, int& result);
 /** Removes a device from the given group. */
 int dss__GroupRemoveDevice(int _token, int _groupID, char* _deviceID, int& result);
+int dss__GroupSetName(int _token, int _zoneID, int _groupID, char* _name, bool& result);
+int dss__GroupGetName(int _token, int _zoneID, int _groupID, std::string& result);
 
 /** Returns the function id of the specified device */
 int dss__DeviceGetFunctionID(int _token, char* _deviceID, int& result);
