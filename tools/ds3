@@ -27,13 +27,15 @@ call_dss() {
 	echo "Could not connect to $DSS_HOST"
 	exit 1
     fi
-    
+
     if [ -n "$(echo $result|grep '"ok":false')" ]; then
 	echo $result|sed -e 's|.*message\":\"||g' -e 's|\"}$||g'
 	exit 1
     else
 	if [ -n "$PRINT_RESULT" ]; then
 	    echo $result|sed -e 's|.*,\s*||' -e 's|\s*}$|}|'
+	elif [ -n "$PRINT_RAW" ]; then
+	    echo $result
 	fi
     fi
     return 0
@@ -85,7 +87,9 @@ case "$command" in
     ###
     ## device commands
     #
-    "device_turnOn"|"device_turnOff")
+    "device_turnOn"|"device_turnOff"|\
+	"device_increaseValue"|"device_decreaseValue"|\
+	"device_startDim"|"device_endDim")
          call_dss "device" "$target_command" "dsid=$1"
 	 ;;
     "device_getState"|"device_getName"|"device_getConsumption")
@@ -126,8 +130,19 @@ case "$command" in
     "apartment_increaseValue"|"apartment_decreaseValue")
         PRINT_RESULT="yes" call_dss "$target" "$target_command"
 	;;
+    "apartment_getStructure"|"apartment_getDevices")
+        PRINT_RAW="yes" call_dss "$target" "$target_command"
+	;;
     "apartment_setName")
         call_dss "$target" "$target_command" "newName=$1"
+	;;
+
+    ###
+    ## event
+    #
+    "event_raise")
+        [ -z "$1" ] && fatal_usage "<event name>"
+        call_dss "$target" "$target_command" "name=$1"
 	;;
 
     ###
