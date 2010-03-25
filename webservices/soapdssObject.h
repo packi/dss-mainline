@@ -178,7 +178,9 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__Zone_AddDevice(struct soap*, int _token, int _zon
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Zone_RemoveDevice(struct soap*, int _token, int _zoneID, char *_deviceID, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Zone_SetName(struct soap*, int _token, int _zoneID, char *_name, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSetName(struct soap*, int _token, int _zoneID, char *_name, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneGetName(struct soap*, int _token, int _zoneID, std::string &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentAllocateUserGroup(struct soap*, int _token, int &groupID);
 

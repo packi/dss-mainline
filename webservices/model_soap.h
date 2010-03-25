@@ -221,7 +221,9 @@ int dss__Zone_AddDevice(int _token, int _zoneID, char* _deviceID, int& result);
 /** Removes a device from a zone */
 int dss__Zone_RemoveDevice(int _token, int _zoneID, char* _deviceID, int& result);
 /** Sets the name of a zone to _name */
-int dss__Zone_SetName(int _token, int _zoneID, char* _name, int& result);
+int dss__ZoneSetName(int _token, int _zoneID, char* _name, bool& result);
+/** Returns the name of a zone */
+int dss__ZoneGetName(int _token, int _zoneID, std::string& result);
 /** Allocates a user-defined group. */
 int dss__ApartmentAllocateUserGroup(int _token, int& groupID);
 /** Revmoes a previously allocated group. */

@@ -1199,7 +1199,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Zone-SetName">
+  <element name="ZoneSetName">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1209,10 +1209,27 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Zone-SetNameResponse">
+  <element name="ZoneSetNameResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ZoneGetName">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ZoneGetNameResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -2055,12 +2072,20 @@
  <part name="parameters" element="dss:Zone-RemoveDeviceResponse"/>
 </message>
 
-<message name="Zone-SetNameRequest">
- <part name="parameters" element="dss:Zone-SetName"/>
+<message name="ZoneSetNameRequest">
+ <part name="parameters" element="dss:ZoneSetName"/>
 </message>
 
-<message name="Zone-SetNameResponse">
- <part name="parameters" element="dss:Zone-SetNameResponse"/>
+<message name="ZoneSetNameResponse">
+ <part name="parameters" element="dss:ZoneSetNameResponse"/>
+</message>
+
+<message name="ZoneGetNameRequest">
+ <part name="parameters" element="dss:ZoneGetName"/>
+</message>
+
+<message name="ZoneGetNameResponse">
+ <part name="parameters" element="dss:ZoneGetNameResponse"/>
 </message>
 
 <message name="ApartmentAllocateUserGroupRequest">
@@ -2535,10 +2560,15 @@
   <input message="tns:Zone-RemoveDeviceRequest"/>
   <output message="tns:Zone-RemoveDeviceResponse"/>
  </operation>
- <operation name="Zone-SetName">
-  <documentation>Service definition of function dss__Zone_SetName</documentation>
-  <input message="tns:Zone-SetNameRequest"/>
-  <output message="tns:Zone-SetNameResponse"/>
+ <operation name="ZoneSetName">
+  <documentation>Service definition of function dss__ZoneSetName</documentation>
+  <input message="tns:ZoneSetNameRequest"/>
+  <output message="tns:ZoneSetNameResponse"/>
+ </operation>
+ <operation name="ZoneGetName">
+  <documentation>Service definition of function dss__ZoneGetName</documentation>
+  <input message="tns:ZoneGetNameRequest"/>
+  <output message="tns:ZoneGetNameResponse"/>
  </operation>
  <operation name="ApartmentAllocateUserGroup">
   <documentation>Service definition of function dss__ApartmentAllocateUserGroup</documentation>
@@ -3232,7 +3262,16 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="Zone-SetName">
+ <operation name="ZoneSetName">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="ZoneGetName">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

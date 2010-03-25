@@ -134,7 +134,7 @@ int AuthorizeAndGetGroup(struct soap *soap, const int _token, const int _groupID
     return soap_receiver_fault(soap, "Group not found", NULL);
   }
   return SOAP_OK;
- } // authorizeAndGetGroup
+} // authorizeAndGetGroup
 
 int AuthorizeAndGetGroupOfZone(struct soap *soap, const int _token, const int _zoneID, const int _groupID, dss::Group& result) {
   if(!IsAuthorized(soap, _token)) {
@@ -151,7 +151,7 @@ int AuthorizeAndGetGroupOfZone(struct soap *soap, const int _token, const int _z
     return soap_receiver_fault(soap, "Zone not found", NULL);
   }
   return SOAP_OK;
- } // authorizeAndGetGroupOfZone
+} // authorizeAndGetGroupOfZone
 
 
 //==================================================== Callbacks
@@ -1054,9 +1054,33 @@ int dss__Zone_RemoveDevice(struct soap *soap, int _token, int _zoneID, char* _de
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
-int dss__Zone_SetName(struct soap *soap, int _token, int _zoneID, char* _name, int& result) {
-  return soap_sender_fault(soap, "Not yet implemented", NULL);
-}
+int dss__ZoneSetName(struct soap *soap, int _token, int _zoneID, char* _name, bool& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+  dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
+  try {
+    dss::Zone& zone = apt.getZone(_zoneID);
+    zone.setName(_name);
+  } catch(dss::ItemNotFoundException& _ex) {
+    return soap_receiver_fault(soap, "Zone not found", NULL);
+  }
+  return SOAP_OK;
+} // dss__ZoneSetName
+
+int dss__ZoneGetName(struct soap *soap, int _token, int _zoneID, std::string& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+  dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
+  try {
+    dss::Zone& zone = apt.getZone(_zoneID);
+    result = zone.getName();
+  } catch(dss::ItemNotFoundException& _ex) {
+    return soap_receiver_fault(soap, "Zone not found", NULL);
+  }
+  return SOAP_OK;
+} // dss__ZoneGetName
 
 int dss__ApartmentAllocateUserGroup(struct soap *soap, int _token, int& groupID) {
   return soap_sender_fault(soap, "Not yet implemented", NULL);

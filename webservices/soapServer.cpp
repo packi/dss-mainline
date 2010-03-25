@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2010-03-11 16:05:08 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2010-03-25 15:04:08 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -207,8 +207,10 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__Zone_AddDevice(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:Zone-RemoveDevice"))
 		return soap_serve_dss__Zone_RemoveDevice(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:Zone-SetName"))
-		return soap_serve_dss__Zone_SetName(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:ZoneSetName"))
+		return soap_serve_dss__ZoneSetName(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:ZoneGetName"))
+		return soap_serve_dss__ZoneGetName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentAllocateUserGroup"))
 		return soap_serve_dss__ApartmentAllocateUserGroup(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:GroupRemoveUserGroup"))
@@ -2997,30 +2999,30 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Zone_RemoveDevice(struct soap *soap)
 	return soap_closesock(soap);
 }
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Zone_SetName(struct soap *soap)
-{	struct dss__Zone_SetName soap_tmp_dss__Zone_SetName;
-	struct dss__Zone_SetNameResponse soap_tmp_dss__Zone_SetNameResponse;
-	soap_default_dss__Zone_SetNameResponse(soap, &soap_tmp_dss__Zone_SetNameResponse);
-	soap_default_dss__Zone_SetName(soap, &soap_tmp_dss__Zone_SetName);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneSetName(struct soap *soap)
+{	struct dss__ZoneSetName soap_tmp_dss__ZoneSetName;
+	struct dss__ZoneSetNameResponse soap_tmp_dss__ZoneSetNameResponse;
+	soap_default_dss__ZoneSetNameResponse(soap, &soap_tmp_dss__ZoneSetNameResponse);
+	soap_default_dss__ZoneSetName(soap, &soap_tmp_dss__ZoneSetName);
 	soap->encodingStyle = NULL;
-	if (!soap_get_dss__Zone_SetName(soap, &soap_tmp_dss__Zone_SetName, "dss:Zone-SetName", NULL))
+	if (!soap_get_dss__ZoneSetName(soap, &soap_tmp_dss__ZoneSetName, "dss:ZoneSetName", NULL))
 		return soap->error;
 	if (soap_body_end_in(soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__Zone_SetName(soap, soap_tmp_dss__Zone_SetName._token, soap_tmp_dss__Zone_SetName._zoneID, soap_tmp_dss__Zone_SetName._name, soap_tmp_dss__Zone_SetNameResponse.result);
+	soap->error = dss__ZoneSetName(soap, soap_tmp_dss__ZoneSetName._token, soap_tmp_dss__ZoneSetName._zoneID, soap_tmp_dss__ZoneSetName._name, soap_tmp_dss__ZoneSetNameResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
-	soap_serialize_dss__Zone_SetNameResponse(soap, &soap_tmp_dss__Zone_SetNameResponse);
+	soap_serialize_dss__ZoneSetNameResponse(soap, &soap_tmp_dss__ZoneSetNameResponse);
 	if (soap_begin_count(soap))
 		return soap->error;
 	if (soap->mode & SOAP_IO_LENGTH)
 	{	if (soap_envelope_begin_out(soap)
 		 || soap_putheader(soap)
 		 || soap_body_begin_out(soap)
-		 || soap_put_dss__Zone_SetNameResponse(soap, &soap_tmp_dss__Zone_SetNameResponse, "dss:Zone-SetNameResponse", "")
+		 || soap_put_dss__ZoneSetNameResponse(soap, &soap_tmp_dss__ZoneSetNameResponse, "dss:ZoneSetNameResponse", "")
 		 || soap_body_end_out(soap)
 		 || soap_envelope_end_out(soap))
 			 return soap->error;
@@ -3030,7 +3032,48 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__Zone_SetName(struct soap *soap)
 	 || soap_envelope_begin_out(soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
-	 || soap_put_dss__Zone_SetNameResponse(soap, &soap_tmp_dss__Zone_SetNameResponse, "dss:Zone-SetNameResponse", "")
+	 || soap_put_dss__ZoneSetNameResponse(soap, &soap_tmp_dss__ZoneSetNameResponse, "dss:ZoneSetNameResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneGetName(struct soap *soap)
+{	struct dss__ZoneGetName soap_tmp_dss__ZoneGetName;
+	struct dss__ZoneGetNameResponse soap_tmp_dss__ZoneGetNameResponse;
+	soap_default_dss__ZoneGetNameResponse(soap, &soap_tmp_dss__ZoneGetNameResponse);
+	soap_default_dss__ZoneGetName(soap, &soap_tmp_dss__ZoneGetName);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__ZoneGetName(soap, &soap_tmp_dss__ZoneGetName, "dss:ZoneGetName", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__ZoneGetName(soap, soap_tmp_dss__ZoneGetName._token, soap_tmp_dss__ZoneGetName._zoneID, soap_tmp_dss__ZoneGetNameResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__ZoneGetNameResponse(soap, &soap_tmp_dss__ZoneGetNameResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__ZoneGetNameResponse(soap, &soap_tmp_dss__ZoneGetNameResponse, "dss:ZoneGetNameResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__ZoneGetNameResponse(soap, &soap_tmp_dss__ZoneGetNameResponse, "dss:ZoneGetNameResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
