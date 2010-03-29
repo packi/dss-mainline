@@ -149,6 +149,39 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="ApartmentGetName">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ApartmentGetNameResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ApartmentSetName">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="name" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ApartmentSetNameResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="SetAddDeviceByName">
    <complexType>
     <sequence>
@@ -1063,6 +1096,24 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="DeviceSetName">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="name" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceSetNameResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="DeviceGetZoneID">
    <complexType>
     <sequence>
@@ -1130,6 +1181,24 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="DSMeterSetName">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="dsMeterID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="name" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DSMeterSetNameResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="ApartmentAllocateZone">
    <complexType>
     <sequence>
@@ -1163,43 +1232,7 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="Zone-AddDevice">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Zone-AddDeviceResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Zone-RemoveDevice">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="Zone-RemoveDeviceResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="Zone-SetName">
+  <element name="ZoneSetName">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1209,79 +1242,64 @@
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="Zone-SetNameResponse">
+  <element name="ZoneSetNameResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="ApartmentAllocateUserGroup">
+  <element name="ZoneGetName">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="ApartmentAllocateUserGroupResponse">
+  <element name="ZoneGetNameResponse">
    <complexType>
     <sequence>
-     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="GroupRemoveUserGroup">
+  <element name="GroupSetName">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="name" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="GroupRemoveUserGroupResponse">
+  <element name="GroupSetNameResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="GroupAddDevice">
+  <element name="GroupGetName">
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="GroupAddDeviceResponse">
+  <element name="GroupGetNameResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="GroupRemoveDevice">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="GroupRemoveDeviceResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -1296,23 +1314,6 @@
   </element>
   <!-- operation response element -->
   <element name="DeviceGetFunctionIDResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="SwitchGetGroupID">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="SwitchGetGroupIDResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
@@ -1515,6 +1516,24 @@
     </sequence>
    </complexType>
   </element>
+  <!-- operation request element -->
+  <element name="StructureAddDeviceToZone">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="StructureAddDeviceToZoneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
  </schema>
 
 </types>
@@ -1573,6 +1592,22 @@
 
 <message name="ApartmentGetDeviceIDByNameResponse">
  <part name="parameters" element="dss:ApartmentGetDeviceIDByNameResponse"/>
+</message>
+
+<message name="ApartmentGetNameRequest">
+ <part name="parameters" element="dss:ApartmentGetName"/>
+</message>
+
+<message name="ApartmentGetNameResponse">
+ <part name="parameters" element="dss:ApartmentGetNameResponse"/>
+</message>
+
+<message name="ApartmentSetNameRequest">
+ <part name="parameters" element="dss:ApartmentSetName"/>
+</message>
+
+<message name="ApartmentSetNameResponse">
+ <part name="parameters" element="dss:ApartmentSetNameResponse"/>
 </message>
 
 <message name="SetAddDeviceByNameRequest">
@@ -1991,6 +2026,14 @@
  <part name="parameters" element="dss:DeviceGetNameResponse"/>
 </message>
 
+<message name="DeviceSetNameRequest">
+ <part name="parameters" element="dss:DeviceSetName"/>
+</message>
+
+<message name="DeviceSetNameResponse">
+ <part name="parameters" element="dss:DeviceSetNameResponse"/>
+</message>
+
 <message name="DeviceGetZoneIDRequest">
  <part name="parameters" element="dss:DeviceGetZoneID"/>
 </message>
@@ -2023,6 +2066,14 @@
  <part name="parameters" element="dss:DSMeterGetNameResponse"/>
 </message>
 
+<message name="DSMeterSetNameRequest">
+ <part name="parameters" element="dss:DSMeterSetName"/>
+</message>
+
+<message name="DSMeterSetNameResponse">
+ <part name="parameters" element="dss:DSMeterSetNameResponse"/>
+</message>
+
 <message name="ApartmentAllocateZoneRequest">
  <part name="parameters" element="dss:ApartmentAllocateZone"/>
 </message>
@@ -2039,60 +2090,36 @@
  <part name="parameters" element="dss:ApartmentDeleteZoneResponse"/>
 </message>
 
-<message name="Zone-AddDeviceRequest">
- <part name="parameters" element="dss:Zone-AddDevice"/>
+<message name="ZoneSetNameRequest">
+ <part name="parameters" element="dss:ZoneSetName"/>
 </message>
 
-<message name="Zone-AddDeviceResponse">
- <part name="parameters" element="dss:Zone-AddDeviceResponse"/>
+<message name="ZoneSetNameResponse">
+ <part name="parameters" element="dss:ZoneSetNameResponse"/>
 </message>
 
-<message name="Zone-RemoveDeviceRequest">
- <part name="parameters" element="dss:Zone-RemoveDevice"/>
+<message name="ZoneGetNameRequest">
+ <part name="parameters" element="dss:ZoneGetName"/>
 </message>
 
-<message name="Zone-RemoveDeviceResponse">
- <part name="parameters" element="dss:Zone-RemoveDeviceResponse"/>
+<message name="ZoneGetNameResponse">
+ <part name="parameters" element="dss:ZoneGetNameResponse"/>
 </message>
 
-<message name="Zone-SetNameRequest">
- <part name="parameters" element="dss:Zone-SetName"/>
+<message name="GroupSetNameRequest">
+ <part name="parameters" element="dss:GroupSetName"/>
 </message>
 
-<message name="Zone-SetNameResponse">
- <part name="parameters" element="dss:Zone-SetNameResponse"/>
+<message name="GroupSetNameResponse">
+ <part name="parameters" element="dss:GroupSetNameResponse"/>
 </message>
 
-<message name="ApartmentAllocateUserGroupRequest">
- <part name="parameters" element="dss:ApartmentAllocateUserGroup"/>
+<message name="GroupGetNameRequest">
+ <part name="parameters" element="dss:GroupGetName"/>
 </message>
 
-<message name="ApartmentAllocateUserGroupResponse">
- <part name="parameters" element="dss:ApartmentAllocateUserGroupResponse"/>
-</message>
-
-<message name="GroupRemoveUserGroupRequest">
- <part name="parameters" element="dss:GroupRemoveUserGroup"/>
-</message>
-
-<message name="GroupRemoveUserGroupResponse">
- <part name="parameters" element="dss:GroupRemoveUserGroupResponse"/>
-</message>
-
-<message name="GroupAddDeviceRequest">
- <part name="parameters" element="dss:GroupAddDevice"/>
-</message>
-
-<message name="GroupAddDeviceResponse">
- <part name="parameters" element="dss:GroupAddDeviceResponse"/>
-</message>
-
-<message name="GroupRemoveDeviceRequest">
- <part name="parameters" element="dss:GroupRemoveDevice"/>
-</message>
-
-<message name="GroupRemoveDeviceResponse">
- <part name="parameters" element="dss:GroupRemoveDeviceResponse"/>
+<message name="GroupGetNameResponse">
+ <part name="parameters" element="dss:GroupGetNameResponse"/>
 </message>
 
 <message name="DeviceGetFunctionIDRequest">
@@ -2101,14 +2128,6 @@
 
 <message name="DeviceGetFunctionIDResponse">
  <part name="parameters" element="dss:DeviceGetFunctionIDResponse"/>
-</message>
-
-<message name="SwitchGetGroupIDRequest">
- <part name="parameters" element="dss:SwitchGetGroupID"/>
-</message>
-
-<message name="SwitchGetGroupIDResponse">
- <part name="parameters" element="dss:SwitchGetGroupIDResponse"/>
 </message>
 
 <message name="EventRaiseRequest">
@@ -2199,6 +2218,14 @@
  <part name="parameters" element="dss:PropertyGetChildrenResponse"/>
 </message>
 
+<message name="StructureAddDeviceToZoneRequest">
+ <part name="parameters" element="dss:StructureAddDeviceToZone"/>
+</message>
+
+<message name="StructureAddDeviceToZoneResponse">
+ <part name="parameters" element="dss:StructureAddDeviceToZoneResponse"/>
+</message>
+
 <portType name="MyType">
  <operation name="Authenticate">
   <documentation>Service definition of function dss__Authenticate</documentation>
@@ -2234,6 +2261,16 @@
   <documentation>Service definition of function dss__ApartmentGetDeviceIDByName</documentation>
   <input message="tns:ApartmentGetDeviceIDByNameRequest"/>
   <output message="tns:ApartmentGetDeviceIDByNameResponse"/>
+ </operation>
+ <operation name="ApartmentGetName">
+  <documentation>Service definition of function dss__ApartmentGetName</documentation>
+  <input message="tns:ApartmentGetNameRequest"/>
+  <output message="tns:ApartmentGetNameResponse"/>
+ </operation>
+ <operation name="ApartmentSetName">
+  <documentation>Service definition of function dss__ApartmentSetName</documentation>
+  <input message="tns:ApartmentSetNameRequest"/>
+  <output message="tns:ApartmentSetNameResponse"/>
  </operation>
  <operation name="SetAddDeviceByName">
   <documentation>Service definition of function dss__SetAddDeviceByName</documentation>
@@ -2495,6 +2532,11 @@
   <input message="tns:DeviceGetNameRequest"/>
   <output message="tns:DeviceGetNameResponse"/>
  </operation>
+ <operation name="DeviceSetName">
+  <documentation>Service definition of function dss__DeviceSetName</documentation>
+  <input message="tns:DeviceSetNameRequest"/>
+  <output message="tns:DeviceSetNameResponse"/>
+ </operation>
  <operation name="DeviceGetZoneID">
   <documentation>Service definition of function dss__DeviceGetZoneID</documentation>
   <input message="tns:DeviceGetZoneIDRequest"/>
@@ -2515,6 +2557,11 @@
   <input message="tns:DSMeterGetNameRequest"/>
   <output message="tns:DSMeterGetNameResponse"/>
  </operation>
+ <operation name="DSMeterSetName">
+  <documentation>Service definition of function dss__DSMeterSetName</documentation>
+  <input message="tns:DSMeterSetNameRequest"/>
+  <output message="tns:DSMeterSetNameResponse"/>
+ </operation>
  <operation name="ApartmentAllocateZone">
   <documentation>Service definition of function dss__ApartmentAllocateZone</documentation>
   <input message="tns:ApartmentAllocateZoneRequest"/>
@@ -2525,50 +2572,30 @@
   <input message="tns:ApartmentDeleteZoneRequest"/>
   <output message="tns:ApartmentDeleteZoneResponse"/>
  </operation>
- <operation name="Zone-AddDevice">
-  <documentation>Service definition of function dss__Zone_AddDevice</documentation>
-  <input message="tns:Zone-AddDeviceRequest"/>
-  <output message="tns:Zone-AddDeviceResponse"/>
+ <operation name="ZoneSetName">
+  <documentation>Service definition of function dss__ZoneSetName</documentation>
+  <input message="tns:ZoneSetNameRequest"/>
+  <output message="tns:ZoneSetNameResponse"/>
  </operation>
- <operation name="Zone-RemoveDevice">
-  <documentation>Service definition of function dss__Zone_RemoveDevice</documentation>
-  <input message="tns:Zone-RemoveDeviceRequest"/>
-  <output message="tns:Zone-RemoveDeviceResponse"/>
+ <operation name="ZoneGetName">
+  <documentation>Service definition of function dss__ZoneGetName</documentation>
+  <input message="tns:ZoneGetNameRequest"/>
+  <output message="tns:ZoneGetNameResponse"/>
  </operation>
- <operation name="Zone-SetName">
-  <documentation>Service definition of function dss__Zone_SetName</documentation>
-  <input message="tns:Zone-SetNameRequest"/>
-  <output message="tns:Zone-SetNameResponse"/>
+ <operation name="GroupSetName">
+  <documentation>Service definition of function dss__GroupSetName</documentation>
+  <input message="tns:GroupSetNameRequest"/>
+  <output message="tns:GroupSetNameResponse"/>
  </operation>
- <operation name="ApartmentAllocateUserGroup">
-  <documentation>Service definition of function dss__ApartmentAllocateUserGroup</documentation>
-  <input message="tns:ApartmentAllocateUserGroupRequest"/>
-  <output message="tns:ApartmentAllocateUserGroupResponse"/>
- </operation>
- <operation name="GroupRemoveUserGroup">
-  <documentation>Service definition of function dss__GroupRemoveUserGroup</documentation>
-  <input message="tns:GroupRemoveUserGroupRequest"/>
-  <output message="tns:GroupRemoveUserGroupResponse"/>
- </operation>
- <operation name="GroupAddDevice">
-  <documentation>Service definition of function dss__GroupAddDevice</documentation>
-  <input message="tns:GroupAddDeviceRequest"/>
-  <output message="tns:GroupAddDeviceResponse"/>
- </operation>
- <operation name="GroupRemoveDevice">
-  <documentation>Service definition of function dss__GroupRemoveDevice</documentation>
-  <input message="tns:GroupRemoveDeviceRequest"/>
-  <output message="tns:GroupRemoveDeviceResponse"/>
+ <operation name="GroupGetName">
+  <documentation>Service definition of function dss__GroupGetName</documentation>
+  <input message="tns:GroupGetNameRequest"/>
+  <output message="tns:GroupGetNameResponse"/>
  </operation>
  <operation name="DeviceGetFunctionID">
   <documentation>Service definition of function dss__DeviceGetFunctionID</documentation>
   <input message="tns:DeviceGetFunctionIDRequest"/>
   <output message="tns:DeviceGetFunctionIDResponse"/>
- </operation>
- <operation name="SwitchGetGroupID">
-  <documentation>Service definition of function dss__SwitchGetGroupID</documentation>
-  <input message="tns:SwitchGetGroupIDRequest"/>
-  <output message="tns:SwitchGetGroupIDResponse"/>
  </operation>
  <operation name="EventRaise">
   <documentation>Service definition of function dss__EventRaise</documentation>
@@ -2624,6 +2651,11 @@
   <documentation>Service definition of function dss__PropertyGetChildren</documentation>
   <input message="tns:PropertyGetChildrenRequest"/>
   <output message="tns:PropertyGetChildrenResponse"/>
+ </operation>
+ <operation name="StructureAddDeviceToZone">
+  <documentation>Service definition of function dss__StructureAddDeviceToZone</documentation>
+  <input message="tns:StructureAddDeviceToZoneRequest"/>
+  <output message="tns:StructureAddDeviceToZoneResponse"/>
  </operation>
 </portType>
 
@@ -2684,6 +2716,24 @@
   </output>
  </operation>
  <operation name="ApartmentGetDeviceIDByName">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="ApartmentGetName">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="ApartmentSetName">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -3160,6 +3210,15 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
+ <operation name="DeviceSetName">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
  <operation name="DeviceGetZoneID">
   <SOAP:operation soapAction=""/>
   <input>
@@ -3196,6 +3255,15 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
+ <operation name="DSMeterSetName">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
  <operation name="ApartmentAllocateZone">
   <SOAP:operation soapAction=""/>
   <input>
@@ -3214,7 +3282,7 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="Zone-AddDevice">
+ <operation name="ZoneSetName">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -3223,7 +3291,7 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="Zone-RemoveDevice">
+ <operation name="ZoneGetName">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -3232,7 +3300,7 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="Zone-SetName">
+ <operation name="GroupSetName">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -3241,34 +3309,7 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="ApartmentAllocateUserGroup">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="GroupRemoveUserGroup">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="GroupAddDevice">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="GroupRemoveDevice">
+ <operation name="GroupGetName">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -3278,15 +3319,6 @@
   </output>
  </operation>
  <operation name="DeviceGetFunctionID">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="SwitchGetGroupID">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -3386,6 +3418,15 @@
   </output>
  </operation>
  <operation name="PropertyGetChildren">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="StructureAddDeviceToZone">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
