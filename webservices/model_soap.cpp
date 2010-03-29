@@ -44,7 +44,12 @@
 #include "core/structuremanipulator.h"
 
 inline dss::dsid_t FromSOAP(const char* _dsid) {
-  dss::dsid_t result = dss::dsid_t::fromString(_dsid);
+  dss::dsid_t result;
+  try {
+    result = dss::dsid_t::fromString(_dsid);
+  } catch (std::invalid_argument&) {
+    result = dss:NullDSID;
+  }
   return result;
 }
 
