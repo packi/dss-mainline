@@ -23,6 +23,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/filesystem.hpp>
 
 #include "core/event.h"
 #include "core/eventinterpreterplugins.h"
@@ -118,9 +119,15 @@ BOOST_AUTO_TEST_CASE(testEmptySubscriptionXML) {
 
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 
-  interpreter.loadFromXML("data/testsubscriptions_empty.xml");
+  std::string fileName = getTempDir() + "/testsubscriptions_empty.xml";
+  std::ofstream ofs(fileName.c_str());
+  ofs << "<?xml version=\"1.0\"?>\n<subscriptions version=\"1\">\n</subscriptions>";
+  ofs.close();
+
+  interpreter.loadFromXML(fileName);
 
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+  boost::filesystem::remove_all(fileName);
 } // testEmptySubscriptionXML
 
 BOOST_AUTO_TEST_CASE(testNonExistingXML) {
@@ -150,10 +157,25 @@ BOOST_AUTO_TEST_CASE(testSubscriptionXML) {
 
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 
-  try {
-    interpreter.loadFromXML("data/testsubscriptions.xml");
-  } catch(std::runtime_error& e) {
-  }
+  std::string fileName = getTempDir() + "/testsubscriptions.xml";
+  std::ofstream ofs(fileName.c_str());
+  ofs << "<?xml version=\"1.0\"?>\n"
+         "<subscriptions version=\"1\">\n"
+         "  <subscription event-name=\"event1\" handler-name=\"raise_event\">\n"
+         "    <parameter>\n"
+         "      <parameter name=\"event_name\">event2</parameter>\n"
+         "      <parameter name=\"time\">+2</parameter>\n"
+         "    </parameter>\n"
+         "  </subscription>\n"
+         "  <subscription event-name=\"event2\" handler-name=\"nonexisting\">\n"
+         "    <filter match=\"all\">\n"
+         "      <property-filter type=\"exists\" property=\"remote\" />\n"
+         "    </filter>\n"
+         "  </subscription>\n"
+         "</subscriptions>\n";
+  ofs.close();
+
+  interpreter.loadFromXML(fileName);
 
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 2);
 
@@ -179,6 +201,7 @@ BOOST_AUTO_TEST_CASE(testSubscriptionXML) {
   queue.shutdown();
   interpreter.terminate();
   sleep(1);
+  boost::filesystem::remove_all(fileName);
 } // testSubscriptionXML
 
 BOOST_AUTO_TEST_CASE(testDS485Events) {
@@ -224,12 +247,22 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
 
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 
-  try {
-    interpreter.loadFromXML("data/testsubscriptions_DS485.xml");
-  } catch(std::runtime_error& e) {
-  }
+  std::string fileName = getTempDir() + "/testsubscriptions_DS485.xml";
+  std::ofstream ofs(fileName.c_str());
+  ofs << "<?xml version=\"1.0\"?>\n"
+         "<subscriptions version=\"1\">\n"
+         "  <subscription event-name=\"event1\" handler-name=\"raise_event\">\n"
+         "    <parameter>\n"
+         "      <parameter name=\"event_name\">event2</parameter>\n"
+         "      <parameter name=\"time\">+10</parameter>\n"
+         "    </parameter>\n"
+         "  </subscription>\n"
+         "</subscriptions>\n";
+  ofs.close();
 
-  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 3);
+  interpreter.loadFromXML(fileName);
+
+  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 1);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 0);
 
@@ -254,6 +287,7 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
   queue.shutdown();
   interpreter.terminate();
   sleep(1);
+  boost::filesystem::remove_all(fileName);
 } // testDS485Events
 
 BOOST_AUTO_TEST_CASE(testEventHandlerJavascriptDoesntLeakExceptionsWithNonexistingFile) {

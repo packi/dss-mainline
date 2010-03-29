@@ -131,6 +131,8 @@ namespace dss {
   void sleepSeconds( const unsigned int _seconds );
   void sleepMS( const unsigned int _ms );
 
+  std::string getTempDir();
+
   //============================================= Exception
 
   class DSSException : public std::runtime_error {

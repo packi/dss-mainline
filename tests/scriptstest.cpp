@@ -23,6 +23,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/filesystem.hpp>
 
 #include "../core/jshandler.h"
 
@@ -40,9 +41,23 @@ BOOST_AUTO_TEST_CASE(testSimpleScripts) {
   double result = ctx->evaluate<double>("x = 10; print(x); x = x * x;");
   BOOST_CHECK_EQUAL(result, 100.0);
 
+  std::string fileName = getTempDir() + "/test.js";
+  std::ofstream ofs(fileName.c_str());
+  ofs << "function newTestObj() {\n"
+         "  var result = {};\n"
+         "  result.x = 10;\n"
+         "  return result;\n"
+         "}\n"
+         "\n"
+         "obj = newTestObj();\n"
+         "obj.x = obj.x * obj.x;\n"
+         "print(obj.x);\n"
+         "obj.x;\n";
+  ofs.close();
   ctx.reset(env.getContext());
-  result = ctx->evaluateScript<double>("data/test.js");
+  result = ctx->evaluateScript<double>(fileName);
   BOOST_CHECK_EQUAL(result, 100.0);
+  boost::filesystem::remove_all(fileName);
 
   ctx.reset(env.getContext());
   string sres = ctx->evaluate<string>("x = 'bla'; x = x + 'bla';");
@@ -52,12 +67,17 @@ BOOST_AUTO_TEST_CASE(testSimpleScripts) {
 BOOST_AUTO_TEST_CASE(testMultipleIterations) {
   ScriptEnvironment env;
   env.initialize();
+  std::string fileName = getTempDir() + "/test3.js";
+  std::ofstream ofs(fileName.c_str());
+  ofs << "var x = 0;\nx = x + 1;";
+  ofs.close();
   for(int i = 0; i < 100; i++) {
     boost::scoped_ptr<ScriptContext> ctx(env.getContext());
-    ctx->evaluateScript<void>("data/test3.js");
+    ctx->evaluateScript<void>(fileName);
     cout << ".";
   }
   cout << endl;
+  boost::filesystem::remove_all(fileName);
 } // testMultipleIterations
 
 BOOST_AUTO_TEST_CASE(testExceptionHandling) {
