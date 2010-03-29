@@ -103,6 +103,8 @@ namespace dss {
 
     const Properties& getProperties() const { return m_Properties; }
     void setProperties(const Properties& _value) { m_Properties = _value; }
+    /** Checks whether _other and this are the same regarding uniqueness */
+    bool isReplacementFor(const Event& _other);
   }; // Event
 
 

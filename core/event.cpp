@@ -179,6 +179,14 @@ namespace dss {
     }
   } // getRaisedAtZone
 
+  bool Event::isReplacementFor(const dss::Event& _other) {
+    bool sameName = getName() == _other.getName();
+    bool sameContext = getPropertyByName("context") == _other.getPropertyByName("context");
+    bool sameLocation = getPropertyByName("location") == _other.getPropertyByName("location");
+    return sameName && sameContext && sameLocation;
+  } // isReplacementFor
+
+
   //================================================== EventInterpreter
 
   EventInterpreter::EventInterpreter(DSS* _pDSS)
@@ -531,9 +539,7 @@ namespace dss {
         m_QueueMutex.lock();
 
         foreach(boost::shared_ptr<Event> pEvent, m_EventQueue) {
-          if(pEvent->getName() == _event->getName() &&
-            pEvent->getPropertyByName("context") == _event->getPropertyByName("context") &&
-            pEvent->getPropertyByName("location") == _event->getPropertyByName("location")) {
+          if(_event->isReplacementFor(*pEvent)) {
               pEvent->setProperties(_event->getProperties());
               if(_event->hasPropertySet("time")) {
                 pEvent->setTime(_event->getPropertyByName("time"));
@@ -605,9 +611,7 @@ namespace dss {
     bool addToQueue = true;
     if(!_scheduledEvent->getEvent()->getPropertyByName("unique").empty()) {
       foreach(ScheduledEvent& scheduledEvent, m_ScheduledEvents) {
-        if(scheduledEvent.getEvent()->getName() == _scheduledEvent->getEvent()->getName() &&
-           scheduledEvent.getEvent()->getPropertyByName("context") == _scheduledEvent->getEvent()->getPropertyByName("context") &&
-           scheduledEvent.getEvent()->getPropertyByName("location") == _scheduledEvent->getEvent()->getPropertyByName("location")) {
+        if(_scheduledEvent->getEvent()->isReplacementFor(*scheduledEvent.getEvent())) {
           scheduledEvent.getEvent()->setProperties(_scheduledEvent->getEvent()->getProperties());
           if(_scheduledEvent->getEvent()->hasPropertySet("time")) {
             scheduledEvent.getEvent()->setTime(_scheduledEvent->getEvent()->getPropertyByName("time"));
