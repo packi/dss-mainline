@@ -41,3 +41,54 @@ cp webservices/dss.wsdl data/webroot
 
 cd ..
 tar cvzf dss-$DSS_RELEASE_VERSION{.tar.gz,} --exclude=\*/.git* --exclude=\*/websrc\*
+
+
+
+# -- finally, try to build it, and let's create the documentation
+set -e
+
+rm -rf build-$DSS_RELEASE_VERSION
+mkdir build-$DSS_RELEASE_VERSION
+cd build-$DSS_RELEASE_VERSION
+cmake ../dss-$DSS_RELEASE_VERSION -DWITH_DATADIR=../dss-$DSS_RELEASE_VERSION/data
+
+make
+
+
+
+echo "Building documentation for dss v$DSS_RELEASE_VERSION"
+
+TARGET_DIR=../../dss-$DSS_RELEASE_VERSION-doc
+rm -rf $TARGET_DIR
+mkdir $TARGET_DIR
+
+# JSON
+echo "Running the dss now to generate json_api.xml"
+./dss &
+DSS_PID=$!
+sleep 1
+kill $DSS_PID
+
+cd doc
+cp ../../dss-$DSS_RELEASE_VERSION/doc/json_api.xslt .
+xsltproc json_api.xml > $TARGET_DIR/dss-$DSS_RELEASE_VERSION-json_api.html
+cp ../../dss-$DSS_RELEASE_VERSION/doc/doc.css $TARGET_DIR
+
+# SOAP
+make doc
+cp webservices/html/model__soap_8h.html \
+    $TARGET_DIR/dss-$DSS_RELEASE_VERSION-soap_api.html
+cp webservices/html/*.css $TARGET_DIR
+
+sed -i -e "s|model__soap_8h.html|dss-$DSS_RELEASE_VERSION-soap_api.html|g" \
+    $TARGET_DIR/dss-$DSS_RELEASE_VERSION-soap_api.html
+sed -i -e "s|Go to the source code of this file.||g" \
+    $TARGET_DIR/dss-$DSS_RELEASE_VERSION-soap_api.html
+sed -i -e "s|dss__||g" $TARGET_DIR/dss-$DSS_RELEASE_VERSION-soap_api.html
+
+# wsdl
+cp ../../dss-$DSS_RELEASE_VERSION/webservices/dss.wsdl \
+    $TARGET_DIR/dss-$DSS_RELEASE_VERSION.wsdl
+
+cd ../..
+rm -r build-$DSS_RELEASE_VERSION
