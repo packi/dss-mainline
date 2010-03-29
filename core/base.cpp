@@ -24,6 +24,7 @@
 
 #include <sys/stat.h>
 #include <cstring>
+#include <cstdio>
 #include <sstream>
 
 #include "foreach.h"
@@ -262,6 +263,11 @@ namespace dss {
 #else
     usleep( _ms * 1000 );
 #endif
+  }
+
+  std::string getTempDir() {
+    std::string result = P_tmpdir;
+    return result;
   }
 
   //================================================== Properties

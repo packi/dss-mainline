@@ -215,11 +215,12 @@ BOOST_AUTO_TEST_CASE(readWrite) {
   BOOST_CHECK_EQUAL( 5.0, secondly.getValues().front().getMax() );
 
   SeriesWriter<CurrentValue> writer;
-  writer.writeToXML(secondly, "data/tmptest.xml");
+  std::string fileName = getTempDir() + "/tmptest.xml";
+  writer.writeToXML(secondly, fileName);
 
   SeriesReader<CurrentValue> reader;
 
-  Series<CurrentValue>* series = reader.readFromXML("data/tmptest.xml");
+  Series<CurrentValue>* series = reader.readFromXML(fileName);
   BOOST_REQUIRE_MESSAGE( series != NULL, "reading series from file" );
   BOOST_CHECK_EQUAL( (size_t)2, series->getValues().size() );
   BOOST_CHECK_EQUAL( 2.0, series->getValues().front().getMin() );
@@ -228,10 +229,10 @@ BOOST_AUTO_TEST_CASE(readWrite) {
 
   series->setComment("my comment");
   series->setUnit("kW");
-  writer.writeToXML(*series, "data/tmptest.xml");
+  writer.writeToXML(*series, fileName);
   delete series;
 
-  series = reader.readFromXML("data/tmptest.xml");
+  series = reader.readFromXML(fileName);
   BOOST_REQUIRE_MESSAGE( series != NULL, "reading series from file" );
   BOOST_CHECK_EQUAL( (size_t)2, series->getValues().size() );
   BOOST_CHECK_EQUAL( 2.0, series->getValues().front().getMin() );
@@ -240,7 +241,7 @@ BOOST_AUTO_TEST_CASE(readWrite) {
   BOOST_CHECK_EQUAL( std::string("my comment"), series->getComment() );
   BOOST_CHECK_EQUAL( std::string("kW"), series->getUnit() );
 
-  boost::filesystem::remove_all("data/tmptest.xml");
+  boost::filesystem::remove_all(fileName);
 
   delete series;
 } // testReadWrite
@@ -262,9 +263,12 @@ BOOST_AUTO_TEST_CASE(readWriteExtended) {
 
   secondly2.addValue(values[0], startTime.addSeconds(delay[0]));
   SeriesWriter<CurrentValue> writer;
-  writer.writeToXML(secondly2, "data/tmptest_2seconds.xml");
-  writer.writeToXML(minutely, "data/tmptest_minutely.xml");
-  writer.writeToXML(five, "data/tmptest_five_minutely.xml");
+  std::string secondsFile = getTempDir() + "/tmptest_2seconds.xml";
+  writer.writeToXML(secondly2, secondsFile);
+  std::string minutelyFile = getTempDir() + "/tmptest_minutely.xml";
+  writer.writeToXML(minutely, minutelyFile);
+  std::string fiveMinutelyFile = getTempDir() + "/tmptest_five_minutely.xml";
+  writer.writeToXML(five, fiveMinutelyFile);
 
   size_t lastNumValsSeconds = secondly2.getValues().size();
   size_t lastNumValsMinutely = minutely.getValues().size();
@@ -280,9 +284,9 @@ BOOST_AUTO_TEST_CASE(readWriteExtended) {
 
     BOOST_TEST_MESSAGE("diff: " << diff << "\ncurDelay: " << curDelay);
 
-    boost::shared_ptr<Series<CurrentValue> > pFive(reader.readFromXML("data/tmptest_five_minutely.xml"));
-    boost::shared_ptr<Series<CurrentValue> > pMinutely(reader.readFromXML("data/tmptest_minutely.xml"));
-    boost::shared_ptr<Series<CurrentValue> > pSecondly2(reader.readFromXML("data/tmptest_2seconds.xml"));
+    boost::shared_ptr<Series<CurrentValue> > pFive(reader.readFromXML(fiveMinutelyFile));
+    boost::shared_ptr<Series<CurrentValue> > pMinutely(reader.readFromXML(minutelyFile));
+    boost::shared_ptr<Series<CurrentValue> > pSecondly2(reader.readFromXML(secondsFile));
 
 
     BOOST_TEST_MESSAGE("secondly last: " << lastNumValsSeconds << " current: " << pSecondly2->getValues().size());
@@ -314,14 +318,14 @@ BOOST_AUTO_TEST_CASE(readWriteExtended) {
     lastNumValsFive = pFive->getValues().size();
     lastTimeStamp = pSecondly2->getValues().front().getTimeStamp();
 
-    writer.writeToXML(*pSecondly2, "data/tmptest_2seconds.xml");
-    writer.writeToXML(*pMinutely, "data/tmptest_minutely.xml");
-    writer.writeToXML(*pFive, "data/tmptest_five_minutely.xml");
+    writer.writeToXML(*pSecondly2, secondsFile);
+    writer.writeToXML(*pMinutely, minutelyFile);
+    writer.writeToXML(*pFive, fiveMinutelyFile);
   }
 
-  boost::filesystem::remove_all("data/tmptest_2seconds.xml");
-  boost::filesystem::remove_all("data/tmptest_minutely.xml");
-  boost::filesystem::remove_all("data/tmptest_five_minutely.xml");
+  boost::filesystem::remove_all(secondsFile);
+  boost::filesystem::remove_all(minutelyFile);
+  boost::filesystem::remove_all(fiveMinutelyFile);
 } // testReadWriteExtended
 
 BOOST_AUTO_TEST_CASE(ImNotExactlySureWhatItestAtThisMoment) {
@@ -466,11 +470,12 @@ BOOST_AUTO_TEST_CASE(wrapping) {
   BOOST_CHECK_EQUAL( (size_t)2, hourly.getValues().size() );
 
   SeriesWriter<AdderValue> writer;
-  writer.writeToXML(minutely, "data/tmpminutely.xml");
+  std::string fileName = getTempDir() + "/tmpminutely.xml";
+  writer.writeToXML(minutely, fileName);
 
   BOOST_CHECK_EQUAL( (size_t)2, hourly.getValues().size() );
 
-  boost::filesystem::remove_all("data/tmpminutely.xml");
+  boost::filesystem::remove_all(fileName);
 } // testWrapping
 
 BOOST_AUTO_TEST_CASE(expansion) {
