@@ -48,7 +48,7 @@ inline dss::dsid_t FromSOAP(const char* _dsid) {
   try {
     result = dss::dsid_t::fromString(_dsid);
   } catch (std::invalid_argument&) {
-    result = dss:NullDSID;
+    result = dss::NullDSID;
   }
   return result;
 }
