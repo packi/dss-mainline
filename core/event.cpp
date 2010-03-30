@@ -179,6 +179,14 @@ namespace dss {
     }
   } // getRaisedAtZone
 
+  bool Event::isReplacementFor(const dss::Event& _other) {
+    bool sameName = getName() == _other.getName();
+    bool sameContext = getPropertyByName("context") == _other.getPropertyByName("context");
+    bool sameLocation = getPropertyByName("location") == _other.getPropertyByName("location");
+    return sameName && sameContext && sameLocation;
+  } // isReplacementFor
+
+
   //================================================== EventInterpreter
 
   EventInterpreter::EventInterpreter(DSS* _pDSS)
@@ -523,12 +531,31 @@ namespace dss {
     boost::shared_ptr<Schedule> schedule = scheduleFromEvent(_event);
     if(schedule != NULL) {
       ScheduledEvent* scheduledEvent = new ScheduledEvent(_event, schedule);
+      assert(m_EventRunner != NULL);
       m_EventRunner->addEvent(scheduledEvent);
     } else {
-      m_QueueMutex.lock();
-      m_EventQueue.push(_event);
-      m_QueueMutex.unlock();
-      m_EntryInQueueEvt.signal();
+      bool addToQueue = true;
+      if(!_event->getPropertyByName("unique").empty()) {
+        m_QueueMutex.lock();
+
+        foreach(boost::shared_ptr<Event> pEvent, m_EventQueue) {
+          if(_event->isReplacementFor(*pEvent)) {
+              pEvent->setProperties(_event->getProperties());
+              if(_event->hasPropertySet("time")) {
+                pEvent->setTime(_event->getPropertyByName("time"));
+              }
+              addToQueue = false;
+              break;
+          }
+        }
+        m_QueueMutex.unlock();
+      }
+      if(addToQueue) {
+        m_QueueMutex.lock();
+        m_EventQueue.push_back(_event);
+        m_QueueMutex.unlock();
+        m_EntryInQueueEvt.signal();
+      }
     }
   } // pushEvent
 
@@ -537,7 +564,7 @@ namespace dss {
     boost::shared_ptr<Event> result;
     if(!m_EventQueue.empty()) {
       result = m_EventQueue.front();
-      m_EventQueue.pop();
+      m_EventQueue.pop_front();
     }
     m_QueueMutex.unlock();
     return result;
@@ -581,7 +608,24 @@ namespace dss {
 
   void EventRunner::addEvent(ScheduledEvent* _scheduledEvent) {
     m_EventsMutex.lock();
-    m_ScheduledEvents.push_back(_scheduledEvent);
+    bool addToQueue = true;
+    if(!_scheduledEvent->getEvent()->getPropertyByName("unique").empty()) {
+      foreach(ScheduledEvent& scheduledEvent, m_ScheduledEvents) {
+        if(_scheduledEvent->getEvent()->isReplacementFor(*scheduledEvent.getEvent())) {
+          scheduledEvent.getEvent()->setProperties(_scheduledEvent->getEvent()->getProperties());
+          if(_scheduledEvent->getEvent()->hasPropertySet("time")) {
+            scheduledEvent.getEvent()->setTime(_scheduledEvent->getEvent()->getPropertyByName("time"));
+          }
+          addToQueue = false;
+          break;
+        }
+      }
+    }
+    if(addToQueue) {
+      m_ScheduledEvents.push_back(_scheduledEvent);
+    } else {
+      delete _scheduledEvent;
+    }
     m_EventsMutex.unlock();
     m_NewItem.signal();
   } // addEvent
