@@ -508,6 +508,9 @@ namespace dss {
             validDate = true;
           } catch(std::runtime_error& e) {
             Logger::getInstance()->log(std::string("EventQueue::scheduleFromEvent: Invalid time specified '") + timeStr + "' error: " + e.what(), lsError);
+          } 
+          catch(std::invalid_argument& e) {
+            Logger::getInstance()->log(std::string("EventQueue::scheduleFromEvent: Invalid time specified '") + timeStr + "' error: " + e.what(), lsError);
           }
         }
       }
