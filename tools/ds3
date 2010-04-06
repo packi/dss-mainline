@@ -67,7 +67,7 @@ usage() {
     echo "  Example: $APPNAME zone turnOn 172"
     echo ""
     echo "  apartment"
-    echo "    turnOn, turnOff, getName, getConsumption, increaseValue, decreaseValue"
+    echo "    turnOn, turnOff, getName, getConsumption, increaseValue, decreaseValue, rescan"
     echo "    callScene | <scene #>"
     echo "    setName | <new name>"
     echo "  Example: $APPNAME apartment callScene 5"
@@ -127,7 +127,8 @@ case "$command" in
         call_dss "$target" "$target_command" "sceneNr=$1" "groupID=$2"
 	;;
     "apartment_getName"|"apartment_getConsumption"|\
-    "apartment_increaseValue"|"apartment_decreaseValue")
+    "apartment_increaseValue"|"apartment_decreaseValue"|\
+    "apartment_rescan")
         PRINT_RESULT="yes" call_dss "$target" "$target_command"
 	;;
     "apartment_getStructure"|"apartment_getDevices")
