@@ -212,20 +212,7 @@ namespace dss {
 
           // handle further buckets
           if((frame->getCommand() == CommandResponse) || (frame->getCommand() == CommandEvent)) {
-            bool bucketFound = false;
-            // search for a bucket to put the frame in
-            m_FrameBucketsGuard.lock();
-            foreach(FrameBucketBase* bucket, m_FrameBuckets) {
-              if(bucket->getFunctionID() == functionID) {
-                if((bucket->getSourceID() == -1) || (bucket->getSourceID() == frame->getHeader().getSource())) {
-                  if(bucket->addFrame(frame)) {
-                    bucketFound = true;
-                  }
-                }
-              }
-            }
-            m_FrameBucketsGuard.unlock();
-            if(!bucketFound) {
+            if(!distributeFrame(frame, functionID)) {
               log("No bucket found for " + intToString(frame->getHeader().getSource()));
             }
           }
@@ -296,13 +283,38 @@ namespace dss {
     }
   } // collectFrame
 
-  void BusInterfaceHandler::addFrameBucket(FrameBucketBase* _bucket) {
+  void BusInterfaceHandler::doStart() {
+    // call Thread::run()
+    run();
+  } // doStart
+
+
+  //================================================== FrameBucketHolder
+
+  bool FrameBucketHolder::distributeFrame(boost::shared_ptr<DS485CommandFrame> _pFrame, int _functionID) {
+    bool bucketFound = false;
+    // search for a bucket to put the frame in
+    m_FrameBucketsGuard.lock();
+    foreach(FrameBucketBase* bucket, m_FrameBuckets) {
+      if(bucket->getFunctionID() == _functionID) {
+        if((bucket->getSourceID() == -1) || (bucket->getSourceID() == _pFrame->getHeader().getSource())) {
+          if(bucket->addFrame(_pFrame)) {
+            bucketFound = true;
+          }
+        }
+      }
+    }
+    m_FrameBucketsGuard.unlock();
+    return bucketFound;
+  } // distributeFrame
+
+  void FrameBucketHolder::addFrameBucket(FrameBucketBase* _bucket) {
     m_FrameBucketsGuard.lock();
     m_FrameBuckets.push_back(_bucket);
     m_FrameBucketsGuard.unlock();
   } // addFrameBucket
 
-  void BusInterfaceHandler::removeFrameBucket(FrameBucketBase* _bucket) {
+  void FrameBucketHolder::removeFrameBucket(FrameBucketBase* _bucket) {
     m_FrameBucketsGuard.lock();
     std::vector<FrameBucketBase*>::iterator pos = find(m_FrameBuckets.begin(), m_FrameBuckets.end(), _bucket);
     if(pos != m_FrameBuckets.end()) {
@@ -310,11 +322,6 @@ namespace dss {
     }
     m_FrameBucketsGuard.unlock();
   } // removeFrameBucket
-
-  void BusInterfaceHandler::doStart() {
-    // call Thread::run()
-    run();
-  } // doStart
 
 
   //================================================== Helper

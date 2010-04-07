@@ -34,18 +34,27 @@ namespace dss {
   class FrameBucketBase;
   class ModelEvent;
 
+  class FrameBucketHolder {
+  public:
+    void addFrameBucket(FrameBucketBase* _bucket);
+    void removeFrameBucket(FrameBucketBase* _bucket);
+
+    bool distributeFrame(boost::shared_ptr<DS485CommandFrame> _pFrame, int _functionID);
+  private:
+    std::vector<FrameBucketBase*> m_FrameBuckets;
+    Mutex m_FrameBucketsGuard;
+  }; // FrameBucketHolder
+
   typedef std::vector<boost::shared_ptr<DS485CommandFrame> > CommandFrameSharedPtrVector;
 
-  class BusInterfaceHandler : public Thread,
+  class BusInterfaceHandler : public FrameBucketHolder,
+                              public Thread,
                               public Subsystem,
                               public IDS485FrameCollector {
   public:
     BusInterfaceHandler(DSS* _pDSS, ModelMaintenance& _modelMaintenance);
     virtual void execute();
     virtual void initialize();
-
-    void addFrameBucket(FrameBucketBase* _bucket);
-    void removeFrameBucket(FrameBucketBase* _bucket);
 
     virtual void collectFrame(boost::shared_ptr<DS485CommandFrame> _frame);
   protected:
@@ -56,10 +65,8 @@ namespace dss {
   private:
     ModelMaintenance& m_ModelMaintenance;
     Mutex m_IncomingFramesGuard;
-    Mutex m_FrameBucketsGuard;
     SyncEvent m_PacketHere;
     CommandFrameSharedPtrVector m_IncomingFrames;
-    std::vector<FrameBucketBase*> m_FrameBuckets;
   };
 
 

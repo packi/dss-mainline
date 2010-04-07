@@ -26,6 +26,7 @@
 #include "core/foreach.h"
 #include "core/ds485/ds485proxy.h"
 #include "core/ds485/framebucketcollector.h"
+#include "core/ds485/businterfacehandler.h"
 
 namespace dss {
 
@@ -43,8 +44,8 @@ namespace dss {
 
   class FrameBucketCallback : public FrameBucketBase {
   public:
-    FrameBucketCallback(BusInterfaceHandler* _proxy, int _functionID, int _sourceID, DS485Client::FrameCallback_t _callback)
-    : FrameBucketBase(_proxy, _functionID, _sourceID),
+    FrameBucketCallback(FrameBucketHolder* _holder, int _functionID, int _sourceID, DS485Client::FrameCallback_t _callback)
+    : FrameBucketBase(_holder, _functionID, _sourceID),
       m_callBack(_callback)
     {
       assert(_callback != NULL);
@@ -103,10 +104,10 @@ namespace dss {
   void DS485Client::subscribeTo(int _functionID, int _source, FrameCallback_t _callback) {
     assert(_callback != NULL);
 
-    BusInterfaceHandler* handler = &DSS::getInstance()->getBusInterfaceHandler();
+    FrameBucketHolder* handler = &DSS::getInstance()->getBusInterfaceHandler();
 
-    boost::shared_ptr<FrameBucketBase> bucket(new FrameBucketCallback(handler, _functionID, _source, _callback), FrameBucketBase::removeFromProxyAndDelete);
-    bucket->addToProxy();
+    boost::shared_ptr<FrameBucketBase> bucket(new FrameBucketCallback(handler, _functionID, _source, _callback), FrameBucketBase::removeFromHolderAndDelete);
+    bucket->addToHolder();
     m_pImpl->buckets.push_back(bucket);
   } // subscribeTo
 
@@ -119,7 +120,7 @@ namespace dss {
         break;
       }
     }
-   } // unsubscribeFrom
+  } // unsubscribeFrom
 
 
 } // namespace dss

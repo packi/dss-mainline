@@ -45,6 +45,8 @@ namespace dss {
     /** Returns the property named \a _name as type \a t */
     template<class t>
     t getProperty(const std::string& _name);
+    // FIXME: work around a compiler issue (typeof jsval == typeof int)
+    jsval doGetProperty(const std::string& _name);
 
     /** Sets the property named \a _name to \a _value */
     template<class t>
@@ -59,10 +61,10 @@ namespace dss {
     t callFunctionByReference(jsval _function, ScriptFunctionParameterList& _parameter);
 
     JSObject* getJSObject() { return m_pObject; }
+    ScriptContext& getContext() { return m_Context; }
   private:
     JSObject* m_pObject;
     ScriptContext& m_Context;
-    jsval doGetProperty(const std::string& _name);
     void doSetProperty(const std::string& _name, jsval _value);
     jsval doCallFunctionByReference(jsval _function, ScriptFunctionParameterList& _parameter);
   }; // ScriptObject

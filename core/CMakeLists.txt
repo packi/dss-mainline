@@ -7,6 +7,7 @@ file(GLOB files *.cpp)
 
 add_library(core ${files} scripting/modeljs.cpp scripting/propertyscriptextension.cpp
 scripting/jssocket.cpp scripting/scriptobject.cpp
+scripting/ds485scriptextension.cpp
 sim/dssim.cpp sim/dsidsim.cpp
 sim/dsid_js.cpp sim/dsid_plugin.cpp web/webserverapi.cpp web/webrequests.cpp
 metering/metering.cpp metering/series.cpp metering/seriespersistence.cpp
