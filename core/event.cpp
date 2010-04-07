@@ -506,7 +506,7 @@ namespace dss {
           try {
             when = DateTime::fromISO(timeStr);
             validDate = true;
-          } catch(std::runtime_error& e) {
+          } catch(std::exception& e) {
             Logger::getInstance()->log(std::string("EventQueue::scheduleFromEvent: Invalid time specified '") + timeStr + "' error: " + e.what(), lsError);
           }
         }
