@@ -198,11 +198,11 @@ namespace dss {
       {
         try {
           if (fs::is_regular(dir_itr->status())) {
-            if(endsWith(dir_itr->leaf(), ".so")) {
+            if(endsWith(dir_itr->filename(), ".so")) {
               log("LoadPlugins: Trying to load '" + dir_itr->string() + "'", lsInfo);
               void* handle = dlopen(dir_itr->string().c_str(), RTLD_LAZY);
               if(handle == NULL) {
-                log("LoadPlugins: Could not load plugin \"" + dir_itr->leaf() + "\" message: " + dlerror(), lsError);
+                log("LoadPlugins: Could not load plugin \"" + dir_itr->filename() + "\" message: " + dlerror(), lsError);
                 continue;
               }
 
@@ -211,7 +211,7 @@ namespace dss {
               version = (int (*)())dlsym(handle, "dsid_getversion");
               char* error;
               if((error = dlerror()) != NULL) {
-                 log("LoadPlugins: Could not get symbol 'dsid_getversion' from plugin: \"" + dir_itr->leaf() + "\":" + error, lsError);
+                 log("LoadPlugins: Could not get symbol 'dsid_getversion' from plugin: \"" + dir_itr->filename() + "\":" + error, lsError);
                  continue;
               }
 
@@ -224,12 +224,12 @@ namespace dss {
               const char* (*get_name)();
               get_name = (const char*(*)())dlsym(handle, "dsid_get_plugin_name");
               if((error = dlerror()) != NULL) {
-                log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
+                log("LoadPlugins: could get name from \"" + dir_itr->filename() + "\":" + error, lsError);
                 continue;
               }
               const char* pluginName = (*get_name)();
               if(pluginName == NULL) {
-                log("LoadPlugins: could get name from \"" + dir_itr->leaf() + "\":" + error, lsError);
+                log("LoadPlugins: could get name from \"" + dir_itr->filename() + "\":" + error, lsError);
                 continue;
               }
               log("LoadPlugins: Plugin provides " + std::string(pluginName), lsInfo);
@@ -237,7 +237,7 @@ namespace dss {
             }
           }
         } catch (const std::exception & ex) {
-          log("LoadPlugins: Caught exception while loading " + dir_itr->leaf() + " '" + ex.what() + "'", lsError);
+          log("LoadPlugins: Caught exception while loading " + dir_itr->filename() + " '" + ex.what() + "'", lsError);
         }
       }
     } catch(const std::exception& ex) {
