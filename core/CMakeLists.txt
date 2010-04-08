@@ -10,7 +10,7 @@ scripting/jssocket.cpp scripting/scriptobject.cpp
 sim/dssim.cpp sim/dsidsim.cpp
 sim/dsid_js.cpp sim/dsid_plugin.cpp web/webserverapi.cpp web/webrequests.cpp
 metering/metering.cpp metering/series.cpp metering/seriespersistence.cpp
-metering/fake_meter.cpp vfs/vfs.cpp web/restful.cpp web/restfulapiwriter.cpp
+metering/fake_meter.cpp web/restful.cpp web/restfulapiwriter.cpp
 web/webserverplugin.cpp web/webserver.cpp web/json.cpp
 web/handler/debugrequesthandler.cpp web/handler/simrequesthandler.cpp
 web/handler/systemrequesthandler.cpp web/handler/meteringrequesthandler.cpp
