@@ -35,6 +35,8 @@
 #include "core/scripting/modeljs.h"
 #include "core/scripting/propertyscriptextension.h"
 #include "core/scripting/jssocket.h"
+#include "core/scripting/ds485scriptextension.h"
+#include "core/ds485/businterfacehandler.h"
 #include "core/foreach.h"
 #include "core/model/set.h"
 #include "core/model/zone.h"
@@ -161,6 +163,7 @@ namespace dss {
       m_Environment.addExtension(ext);
       ext = new SocketScriptContextExtension();
       m_Environment.addExtension(ext);
+      ext = new DS485ScriptExtension(*DSS::getInstance()->getDS485Interface().getFrameSenderInterface(), DSS::getInstance()->getBusInterfaceHandler());
     }
   } // initializeEnvironment
 
