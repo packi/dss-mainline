@@ -184,8 +184,8 @@ namespace dss {
 
   boost::shared_ptr<FrameBucketCollector> DS485Proxy::sendFrameAndInstallBucket(DS485CommandFrame& _frame, const int _functionID) {
     int sourceID = _frame.getHeader().isBroadcast() ? -1 :  _frame.getHeader().getDestination();
-    boost::shared_ptr<FrameBucketCollector> result(new FrameBucketCollector(&getDSS().getBusInterfaceHandler(), _functionID, sourceID), FrameBucketBase::removeFromProxyAndDelete);
-    result->addToProxy();
+    boost::shared_ptr<FrameBucketCollector> result(new FrameBucketCollector(&getDSS().getBusInterfaceHandler(), _functionID, sourceID), FrameBucketBase::removeFromHolderAndDelete);
+    result->addToHolder();
     sendFrame(_frame);
     return result;
   } // sendFrameAndInstallBucket

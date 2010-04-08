@@ -27,7 +27,7 @@
 
 namespace dss {
 
-  class BusInterfaceHandler;
+  class FrameBucketHolder;
   class DS485CommandFrame;
 
   /** A frame bucket gets notified on every frame that matches any given
@@ -35,7 +35,7 @@ namespace dss {
    *  If \a m_SourceID is -1 every source matches. */
   class FrameBucketBase {
   public:
-    FrameBucketBase(BusInterfaceHandler* _proxy, int _functionID, int _sourceID);
+    FrameBucketBase(FrameBucketHolder* _holder, int _functionID, int _sourceID);
     virtual ~FrameBucketBase() {}
 
     int getFunctionID() const { return m_FunctionID; }
@@ -43,14 +43,14 @@ namespace dss {
 
     virtual bool addFrame(boost::shared_ptr<DS485CommandFrame> _frame) = 0;
 
-    /** Registers the bucket at m_pProxy */
-    void addToProxy();
-    /** Removes the bucket from m_pProxy */
-    void removeFromProxy();
+    /** Registers the bucket at m_pHolder */
+    void addToHolder();
+    /** Removes the bucket from m_pHolder */
+    void removeFromHolder();
     /** Static function to be used from a boost::shared_ptr as a deleter. */
-    static void removeFromProxyAndDelete(FrameBucketBase* _obj);
+    static void removeFromHolderAndDelete(FrameBucketBase* _obj);
   private:
-    BusInterfaceHandler* m_pProxy;
+    FrameBucketHolder* m_pHolder;
     int m_FunctionID;
     int m_SourceID;
   }; // FrameBucketBase

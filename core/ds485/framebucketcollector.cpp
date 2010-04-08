@@ -29,8 +29,8 @@ namespace dss {
 
   //================================================== FrameBucketCollector
 
-  FrameBucketCollector::FrameBucketCollector(BusInterfaceHandler* _proxy, int _functionID, int _sourceID)
-  : FrameBucketBase(_proxy, _functionID, _sourceID),
+  FrameBucketCollector::FrameBucketCollector(FrameBucketHolder* _holder, int _functionID, int _sourceID)
+  : FrameBucketBase(_holder, _functionID, _sourceID),
     m_SingleFrame(false)
   { } // ctor
 

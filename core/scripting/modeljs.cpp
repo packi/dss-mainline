@@ -812,11 +812,10 @@ namespace dss {
             jsval vp;
             JS_GetMethodById(cx, paramObj, propID, &obj, &vp);
 
-            jsval vp2;
-
             val = JS_ValueToString(cx, vp);
             char* propValue = JS_GetStringBytes(val);
 
+            jsval vp2;
             JS_IdToValue(cx, propID, &vp2);
             val = JS_ValueToString(cx, vp2);
             char* propName = JS_GetStringBytes(val);

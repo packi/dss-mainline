@@ -32,27 +32,27 @@ namespace dss {
 
   //================================================== FrameBucketBase
 
-  FrameBucketBase::FrameBucketBase(BusInterfaceHandler* _proxy, int _functionID, int _sourceID)
-  : m_pProxy(_proxy),
+  FrameBucketBase::FrameBucketBase(FrameBucketHolder* _holder, int _functionID, int _sourceID)
+  : m_pHolder(_holder),
     m_FunctionID(_functionID),
     m_SourceID(_sourceID)
   {
-    assert(m_pProxy != NULL);
+    assert(m_pHolder != NULL);
   } // ctor
 
-  void FrameBucketBase::addToProxy() {
+  void FrameBucketBase::addToHolder() {
     Logger::getInstance()->log("Bucket: Registering for fid: " + intToString(m_FunctionID) + " sid: " + intToString(m_SourceID));
-    m_pProxy->addFrameBucket(this);
+    m_pHolder->addFrameBucket(this);
   } // addToProxy
 
-  void FrameBucketBase::removeFromProxyAndDelete(FrameBucketBase* _obj) {
-    _obj->removeFromProxy();
+  void FrameBucketBase::removeFromHolderAndDelete(FrameBucketBase* _obj) {
+    _obj->removeFromHolder();
     delete _obj;
   } // remove_from_proxy_and_delete
 
-  void FrameBucketBase::removeFromProxy() {
+  void FrameBucketBase::removeFromHolder() {
     Logger::getInstance()->log("Bucket: Removing for fid: " + intToString(m_FunctionID) + " sid: " + intToString(m_SourceID));
-    m_pProxy->removeFrameBucket(this);
+    m_pHolder->removeFrameBucket(this);
   } // removeFromProxy
 
 

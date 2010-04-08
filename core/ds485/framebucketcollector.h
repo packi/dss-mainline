@@ -43,7 +43,7 @@ namespace dss {
     Mutex m_FramesMutex;
     bool m_SingleFrame;
   public:
-    FrameBucketCollector(BusInterfaceHandler* _proxy, int _functionID, int _sourceID);
+    FrameBucketCollector(FrameBucketHolder* _holder, int _functionID, int _sourceID);
     virtual ~FrameBucketCollector() { }
 
     /** Adds a DS485CommandFrame to the frames queue */
