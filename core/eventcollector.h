@@ -46,6 +46,7 @@ namespace dss {
     bool hasEvent();
 
     virtual std::string subscribeTo(const std::string& _eventName);
+    virtual void unsubscribeFrom(const std::string& _subscriptionID);
 
   private:
     SyncEvent m_EventArrived;

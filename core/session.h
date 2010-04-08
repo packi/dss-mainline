@@ -28,15 +28,19 @@
 namespace dss {
 
   class Session {
-  private:
+  protected:
     int m_Token;
+    int m_UsageCount;
 
     DateTime m_LastTouched;
   public:
     Session() {}
     Session(const int _tokenID);
 
-    bool isStillValid();
+    virtual bool isStillValid();
+    bool isUsed();
+    void use();
+    void unuse();
     Session& operator=(const Session& _other);
   }; // Session
 

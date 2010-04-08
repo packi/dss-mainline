@@ -29,8 +29,7 @@ namespace dss {
 
   EventCollector::~EventCollector() {
     while(!m_Subscriptions.empty()) {
-      DSS::getInstance()->getEventInterpreter().unsubscribe(m_Subscriptions.front()->getID());
-      m_Subscriptions.erase(m_Subscriptions.begin());
+      unsubscribeFrom(m_Subscriptions.front()->getID());
     }
   } 
 
@@ -81,6 +80,18 @@ namespace dss {
 
     return subscription->getID();
   } // subscribeTo
-  
+
+  void EventCollector::unsubscribeFrom(const std::string& _subscriptionID)
+  {
+    for(size_t i = 0; i < m_Subscriptions.size(); i++){
+      if(m_Subscriptions.at(i)->getID() == _subscriptionID){
+        m_Subscriptions.erase(m_Subscriptions.begin()+i);
+        break;
+      }
+    }
+
+    EventRelayTarget::unsubscribeFrom(_subscriptionID);
+    DSS::getInstance()->getEventInterpreter().unsubscribe(_subscriptionID);
+  }
 }
 

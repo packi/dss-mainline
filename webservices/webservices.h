@@ -48,7 +48,7 @@ namespace dss {
     uint32_t m_OriginatorIP;
     boost::shared_ptr<EventCollector> m_pEventListener;
   private:
-    void createListener();
+    void createCollector();
   public:
     WebServiceSession() {}
     WebServiceSession(const int _tokenID, soap* _soapRequest);

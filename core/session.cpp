@@ -28,6 +28,7 @@ namespace dss {
   : m_Token(_tokenID)
   {
     m_LastTouched = DateTime();
+    m_UsageCount = 0;
   } // ctor
 
   bool Session::isStillValid() {
@@ -42,4 +43,18 @@ namespace dss {
     return *this;
   }
 
+  bool Session::isUsed() {
+    return (m_UsageCount != 0);
+  }
+
+  void Session::use() {
+    m_UsageCount++;
+  }
+
+  void Session::unuse() {
+    m_UsageCount--;
+    if(m_UsageCount < 0) {
+      m_UsageCount = 0;
+    }
+  }
 } // namespace dss

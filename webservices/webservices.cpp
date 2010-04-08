@@ -174,7 +174,7 @@ namespace dss {
     return *this;
   } // operator=
 
-  void WebServiceSession::createListener() {
+  void WebServiceSession::createCollector() {
     if(m_pEventListener == NULL) {
       EventInterpreterInternalRelay* pPlugin =
           dynamic_cast<EventInterpreterInternalRelay*>(
@@ -188,10 +188,10 @@ namespace dss {
       m_pEventListener.reset(new EventCollector(*pPlugin));
     }
     assert(m_pEventListener != NULL);
-  } // createListener
+  } // createCollector
 
   bool WebServiceSession::waitForEvent(const int _timeoutMS, soap* _soapRequest) {
-    createListener();
+    createCollector();
     const int kSocketDisconnectTimeoutMS = 200;
     bool timedOut = false;
     bool result = false;
@@ -230,17 +230,16 @@ namespace dss {
   } // waitForEvent
 
   Event WebServiceSession::popEvent() {
-    createListener();
+    createCollector();
     return m_pEventListener->popEvent();
   } // popEvent
 
   std::string WebServiceSession::subscribeTo(const std::string& _eventName) {
-    createListener();
     return m_pEventListener->subscribeTo(_eventName);
   } // subscribeTo
 
   bool WebServiceSession::hasEvent() {
-    createListener();
+    createCollector();
     return m_pEventListener->hasEvent();
   } // hasEvent
 
