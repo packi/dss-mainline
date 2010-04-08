@@ -101,6 +101,8 @@ namespace dss {
         m_PendingRequests.push_back(req_copy);
         m_RequestsMutex.unlock();
         m_RequestArrived.signal();
+      } else {
+        log("could not accept new connection!", lsError);
       }
     }
   } // execute
