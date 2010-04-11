@@ -29,6 +29,7 @@
 #include <vector>
 
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace dss {
 
@@ -235,7 +236,7 @@ namespace dss {
   
   class RestfulRequestHandler {
   public:
-    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session) = 0;
+    virtual std::string handleRequest(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) = 0;
     virtual ~RestfulRequestHandler() {}; // please the compiler (virtual dtor)
   };
 

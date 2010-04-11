@@ -34,7 +34,7 @@ namespace dss {
   class MeteringRequestHandler : public WebServerRequestHandlerJSON {
   public:
     MeteringRequestHandler(Apartment& _apartment, Metering& _metering);
-    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
+    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session>& _session);
   private:
     Apartment& m_Apartment;
     Metering& m_Metering;

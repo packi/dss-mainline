@@ -36,7 +36,7 @@ namespace dss {
   : m_Apartment(_apartment)
   { }
 
-  boost::shared_ptr<JSONObject> DeviceRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
+  boost::shared_ptr<JSONObject> DeviceRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
     bool ok = true;
     std::string errorMessage;
     std::string deviceName = _request.getParameter("name");

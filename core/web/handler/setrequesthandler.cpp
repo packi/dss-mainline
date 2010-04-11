@@ -38,7 +38,7 @@ namespace dss {
   : m_Apartment(_apartment)
   { }
 
-  boost::shared_ptr<JSONObject> SetRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
+  boost::shared_ptr<JSONObject> SetRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
     if(_request.getMethod() == "fromApartment") {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("self", ".");

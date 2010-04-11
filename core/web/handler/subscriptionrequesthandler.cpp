@@ -36,7 +36,7 @@ namespace dss {
   : m_EventInterpreter(_interpreter)
   { }
 
-  boost::shared_ptr<JSONObject> SubscriptionRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
+  boost::shared_ptr<JSONObject> SubscriptionRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
     if(_request.getMethod() == "list") {
       return list(_request, _session);
     } else if(_request.getMethod() == "remove") {
@@ -47,7 +47,7 @@ namespace dss {
     throw std::runtime_error("Unhandled function");
   } // handleRequest
 
-  boost::shared_ptr<JSONObject> SubscriptionRequestHandler::list(const RestfulRequest& _request, Session* _session) {
+  boost::shared_ptr<JSONObject> SubscriptionRequestHandler::list(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
     typedef boost::shared_ptr<EventSubscription> EventSubscriptionPtr;
     std::vector<EventSubscriptionPtr> subscriptionsList = m_EventInterpreter.getSubscriptions();
     boost::shared_ptr<JSONObject> result(new JSONObject());
@@ -70,7 +70,7 @@ namespace dss {
     return success(result);
   } // list
 
-  boost::shared_ptr<JSONObject> SubscriptionRequestHandler::remove(const RestfulRequest& _request, Session* _session) {
+  boost::shared_ptr<JSONObject> SubscriptionRequestHandler::remove(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
     std::string subscriptionID = _request.getParameter("id");
     if(subscriptionID.empty()) {
       return failure("Need parameter id");
@@ -79,7 +79,7 @@ namespace dss {
     return success();
   } // remove
 
-  boost::shared_ptr<JSONObject> SubscriptionRequestHandler::add(const RestfulRequest& _request, Session* _session) {
+  boost::shared_ptr<JSONObject> SubscriptionRequestHandler::add(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
     std::string eventName = _request.getParameter("eventName");
     std::string handlerName = _request.getParameter("handlerName");
     std::string optionsParameter = _request.getParameter("parameter");

@@ -31,7 +31,7 @@ namespace dss {
   class SetRequestHandler : public DeviceInterfaceRequestHandler {
   public:
     SetRequestHandler(Apartment& _apartment);
-    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
+    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session>& _session);
   public:
     Apartment& m_Apartment;
   }; // SetRequestHandler

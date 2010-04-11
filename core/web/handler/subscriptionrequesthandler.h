@@ -32,11 +32,11 @@ namespace dss {
   class SubscriptionRequestHandler : public WebServerRequestHandlerJSON {
   public:
     SubscriptionRequestHandler(EventInterpreter& _interpreter);
-    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session);
+    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session>& _session);
   private:
-    boost::shared_ptr<JSONObject> list(const RestfulRequest& _request, Session* _session);
-    boost::shared_ptr<JSONObject> remove(const RestfulRequest& _request, Session* _session);
-    boost::shared_ptr<JSONObject> add(const RestfulRequest& _request, Session* _session);
+    boost::shared_ptr<JSONObject> list(const RestfulRequest& _request, boost::shared_ptr<Session>& _session);
+    boost::shared_ptr<JSONObject> remove(const RestfulRequest& _request, boost::shared_ptr<Session>& _session);
+    boost::shared_ptr<JSONObject> add(const RestfulRequest& _request, boost::shared_ptr<Session>& _session);
   private:
     EventInterpreter& m_EventInterpreter;
   }; // StructureRequestHandler

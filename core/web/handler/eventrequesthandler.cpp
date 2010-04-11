@@ -1,7 +1,8 @@
 /*
     Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -72,12 +73,12 @@ namespace dss {
   }
 
   // name=EventName&sid=EventSubscriptionID
-  boost::shared_ptr<JSONObject> EventRequestHandler::subscribe(const RestfulRequest& _request, Session* _session) {
+  boost::shared_ptr<JSONObject> EventRequestHandler::subscribe(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
     std::string name = _request.getParameter("name");
     std::string tokenStr = _request.getParameter("sid");
     int token;
 
-    if (_session == NULL) {
+    if (_session.get() == NULL) {
       return failure("Invalid session!");
     }
 
@@ -129,12 +130,12 @@ namespace dss {
   }
 
   // name=EventName&sid=EventSubscriptionID
-  boost::shared_ptr<JSONObject> EventRequestHandler::unsubscribe(const RestfulRequest& _request, Session* _session) {
+  boost::shared_ptr<JSONObject> EventRequestHandler::unsubscribe(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
     std::string name = _request.getParameter("name");
     std::string tokenStr = _request.getParameter("sid");
     int token;
 
-    if (_session == NULL) {
+    if (_session.get() == NULL) {
       return failure("Invalid session!");
     }
 
@@ -192,13 +193,13 @@ namespace dss {
   }
 
   // sid=SubscriptionID&timeout=0
-  boost::shared_ptr<JSONObject> EventRequestHandler::get(const RestfulRequest& _request, Session* _session) {
+  boost::shared_ptr<JSONObject> EventRequestHandler::get(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
     std::string tokenStr = _request.getParameter("sid");
     std::string timeoutStr = _request.getParameter("timeout");
     int timeout = 0;
     int token;
  
-    if (_session == NULL) {
+    if (_session.get() == NULL) {
       return failure("Invalid session!");
     }
 
@@ -252,7 +253,7 @@ namespace dss {
     return success(session->getEvents(timeout));
   }
 
-  boost::shared_ptr<JSONObject> EventRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
+  boost::shared_ptr<JSONObject> EventRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
     if(_request.getMethod() == "raise") {
       return raise(_request);
     } else if(_request.getMethod() == "subscribe") {
