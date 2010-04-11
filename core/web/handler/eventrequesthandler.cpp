@@ -27,6 +27,8 @@
 #include "core/event.h"
 #include "core/base.h"
 
+#include <boost/any.hpp>
+
 namespace dss {
 
   //=========================================== EventRequestHandler
@@ -69,122 +71,196 @@ namespace dss {
     return success();
   }
 
-  // name=EventName&token=Token
-  boost::shared_ptr<JSONObject> EventRequestHandler::subscribe(const RestfulRequest& _request) {
+  // name=EventName&sid=EventSubscriptionID
+  boost::shared_ptr<JSONObject> EventRequestHandler::subscribe(const RestfulRequest& _request, Session* _session) {
     std::string name = _request.getParameter("name");
-    std::string tokenStr = _request.getParameter("token");
+    std::string tokenStr = _request.getParameter("sid");
     int token;
+
+    if (_session == NULL) {
+      return failure("Invalid session!");
+    }
 
     if(name.empty()) {
       return failure("Missing event name!");
     }
 
     if(tokenStr.empty()) {
-      return failure("Missing event token!");
+      return failure("Missing event subscription id!");
     }
-
     try{
      token = strToInt(tokenStr); 
     }
     catch(std::invalid_argument& err) {
-      return failure("Could not parse token!");
+      return failure("Could not parse event subscription id!");
     }
+
+    boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
 
     m_eventsMutex.lock();
 
-    EventSubscriptionSessionByTokenID::iterator entry = m_SessionByTokenID.find(token);
-    if(entry == m_SessionByTokenID.end()){
-      EventSubscriptionSession session = EventSubscriptionSession(token);
-      m_SessionByTokenID[token] = session;
+    boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
+    
+    if ((a.get() == NULL) || (a->empty())) {
+      boost::shared_ptr<boost::any> b(new boost::any());
+      eventSessions = boost::shared_ptr<EventSubscriptionSessionByTokenID>(new EventSubscriptionSessionByTokenID());
+      *b = eventSessions;
+      _session->addData(std::string("eventSubscriptionIDs"), b);
+    } else {
+      try {
+        eventSessions = boost::any_cast<boost::shared_ptr<EventSubscriptionSessionByTokenID> >(*a);
+      } catch (boost::bad_any_cast& e) {
+        Logger::getInstance()->log("Fatal error: unexpected data type stored in session!", lsFatal);
+        assert(0);
+      }
     }
 
-    m_SessionByTokenID[token].subscribe(name);
+    EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(token);
+    if(entry == eventSessions->end()){
+        boost::shared_ptr<EventSubscriptionSession> session(new EventSubscriptionSession(token));
+      (*eventSessions)[token] = session;
+    }
+
+    (*eventSessions)[token]->subscribe(name);
     
     m_eventsMutex.unlock();
 
     return success();
   }
 
-  // name=EventName&token=Token
-  boost::shared_ptr<JSONObject> EventRequestHandler::unsubscribe(const RestfulRequest& _request) {
+  // name=EventName&sid=EventSubscriptionID
+  boost::shared_ptr<JSONObject> EventRequestHandler::unsubscribe(const RestfulRequest& _request, Session* _session) {
     std::string name = _request.getParameter("name");
-    std::string tokenStr = _request.getParameter("token");
+    std::string tokenStr = _request.getParameter("sid");
     int token;
+
+    if (_session == NULL) {
+      return failure("Invalid session!");
+    }
 
     if(name.empty()) {
       return failure("Missing event name!");
     }
 
     if(tokenStr.empty()) {
-      return failure("Missing event token!");
+      return failure("Missing event subscription id!");
     }
 
     try{
      token = strToInt(tokenStr); 
     }
     catch(std::invalid_argument& err) {
-      return failure("Could not parse token!");
+      return failure("Could not parse event subscription id!");
+    }
+
+    boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
+
+    boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
+    
+    if ((a.get() == NULL) || (a->empty())) {
+      return failure("Invalid session!");
+    } else {
+      try {
+        eventSessions = boost::any_cast<boost::shared_ptr<EventSubscriptionSessionByTokenID> >(*a);
+      } catch (boost::bad_any_cast& e) {
+        Logger::getInstance()->log("Fatal error: unexpected data type stored in session!", lsFatal);
+        assert(0);
+      }
     }
 
     m_eventsMutex.lock();
 
-    EventSubscriptionSessionByTokenID::iterator entry = m_SessionByTokenID.find(token);
-    if(entry == m_SessionByTokenID.end()){
+    EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(token);
+    if(entry == eventSessions->end()){
       m_eventsMutex.unlock();
       return failure("Token not found!");
     }
 
     try {
-      m_SessionByTokenID[token].unsubscribe(name);
+      (*eventSessions)[token]->unsubscribe(name);
     } catch(std::exception& e)
     {
       m_eventsMutex.unlock();
       return failure(e.what());
     }
-    
+   
+    eventSessions->erase(entry);
+
     m_eventsMutex.unlock();
 
     return success();
   }
 
-  // token=Token
-  boost::shared_ptr<JSONObject> EventRequestHandler::get(const RestfulRequest& _request) {
-    std::string tokenStr = _request.getParameter("token");
+  // sid=SubscriptionID&timeout=0
+  boost::shared_ptr<JSONObject> EventRequestHandler::get(const RestfulRequest& _request, Session* _session) {
+    std::string tokenStr = _request.getParameter("sid");
+    std::string timeoutStr = _request.getParameter("timeout");
+    int timeout = 0;
     int token;
  
-    if(tokenStr.empty()) {
-      return failure("Missing event token!");
+    if (_session == NULL) {
+      return failure("Invalid session!");
     }
 
-    try{
-     token = strToInt(tokenStr); 
+    if(tokenStr.empty()) {
+      return failure("Missing event subscription id!");
+    }
+
+    try {
+      token = strToInt(tokenStr); 
     }
     catch(std::invalid_argument& err) {
-      return failure("Could not parse token!");
+      return failure("Could not parse subsription id!");
     }
+
+    if(!timeoutStr.empty()) {
+      try {
+        timeout = strToInt(timeoutStr); 
+      }
+      catch(std::invalid_argument& err) {
+        return failure("Could not parse timeout parameter!");
+      }
+    }
+
+    boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
 
     m_eventsMutex.lock();
-    EventSubscriptionSessionByTokenID::iterator entry = m_SessionByTokenID.find(token);
-    if(entry == m_SessionByTokenID.end()){
+
+    boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
+    
+    if ((a.get() == NULL) || (a->empty())) {
       m_eventsMutex.unlock();
-      return failure("Token not found!");
+      return failure("Invalid session!");
+    } else {
+      try {
+        eventSessions = boost::any_cast<boost::shared_ptr<EventSubscriptionSessionByTokenID> >(*a);
+      } catch (boost::bad_any_cast& e) {
+        Logger::getInstance()->log("Fatal error: unexpected data type stored in session!", lsFatal);
+        assert(0);
+      }
     }
-    EventSubscriptionSession session = m_SessionByTokenID[token];
+
+    EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(token);
+    if(entry == eventSessions->end()){
+      m_eventsMutex.unlock();
+      return failure("Subsription id not found!");
+    }
+    
+    boost::shared_ptr<EventSubscriptionSession> session = (*eventSessions)[token];
     m_eventsMutex.unlock();
 
-    // blocks!!
-    return success(session.getEvents());
+    return success(session->getEvents(timeout));
   }
 
   boost::shared_ptr<JSONObject> EventRequestHandler::jsonHandleRequest(const RestfulRequest& _request, Session* _session) {
     if(_request.getMethod() == "raise") {
       return raise(_request);
     } else if(_request.getMethod() == "subscribe") {
-      return subscribe(_request);
+      return subscribe(_request, _session);
     } else if(_request.getMethod() == "unsubscribe") {
-      return unsubscribe(_request);
+      return unsubscribe(_request, _session);
     } else if(_request.getMethod() == "get") {
-      return get(_request);
+      return get(_request, _session);
     }
     throw std::runtime_error("Unhandled function");
   } // handleRequest
@@ -220,11 +296,11 @@ namespace dss {
     m_subscriptionMap.erase(_eventName);
   }
 
-  boost::shared_ptr<JSONObject> EventSubscriptionSession::getEvents()
+  boost::shared_ptr<JSONObject> EventSubscriptionSession::getEvents(const int _timeoutMS)
   {
     createCollector();
 
-    bool result = m_pEventCollector->waitForEvent(0);
+    m_pEventCollector->waitForEvent(_timeoutMS);
 
     boost::shared_ptr<JSONObject> resultObj(new JSONObject());
     boost::shared_ptr<JSONArrayBase> eventsArray(new JSONArrayBase);

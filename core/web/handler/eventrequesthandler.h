@@ -48,10 +48,7 @@ namespace dss {
     void subscribe(const std::string& _eventName);
     void unsubscribe(const std::string& _eventName);
     // blocks if no events are available
-    boost::shared_ptr<JSONObject> getEvents();
-//    Event popEvent();
-//    bool waitForEvent(const int _timeoutMS);
-//    bool hasEvent();
+    boost::shared_ptr<JSONObject> getEvents(const int _timeoutMS = 0);
   private:
     std::deque<Event> m_events;
     boost::shared_ptr<EventCollector> m_pEventCollector;
@@ -60,7 +57,7 @@ namespace dss {
     std::map <std::string, std::string> m_subscriptionMap;
   };
 
-  typedef boost::ptr_map<const int, EventSubscriptionSession> EventSubscriptionSessionByTokenID;
+  typedef boost::ptr_map<const int, boost::shared_ptr<EventSubscriptionSession> > EventSubscriptionSessionByTokenID;
 
   class EventRequestHandler : public WebServerRequestHandlerJSON {
   public:
@@ -69,12 +66,15 @@ namespace dss {
   private:
     EventQueue& m_Queue;
     Mutex m_eventsMutex;
+
+    // make use of the dataMap in the new session object (cookie stuff)
+
     EventSubscriptionSessionByTokenID m_SessionByTokenID;
 
     boost::shared_ptr<JSONObject> raise(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> subscribe(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> unsubscribe(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> get(const RestfulRequest& _request);
+    boost::shared_ptr<JSONObject> subscribe(const RestfulRequest& _request, Session* _session);
+    boost::shared_ptr<JSONObject> unsubscribe(const RestfulRequest& _request, Session* _session);
+    boost::shared_ptr<JSONObject> get(const RestfulRequest& _request, Session* _session);
   }; // StructureRequestHandler
 
 } // namespace dss
