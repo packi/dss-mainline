@@ -1,7 +1,8 @@
 /*
     Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>,
+             Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
