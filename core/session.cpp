@@ -57,4 +57,37 @@ namespace dss {
       m_UsageCount = 0;
     }
   }
+  void Session::addData(const std::string& _key, boost::shared_ptr<boost::any>& _value) {
+    m_DataMapMutex.lock();
+    dataMap[_key] = _value;
+    m_DataMapMutex.unlock();
+  }
+
+  boost::shared_ptr<boost::any>& Session::getData(const std::string& _key) {
+    m_DataMapMutex.lock();
+    boost::shared_ptr<boost::any>& rv = dataMap[_key];
+    m_DataMapMutex.unlock();
+    return rv;
+  }
+
+  bool Session::removeData(const std::string& _key) {
+    m_DataMapMutex.lock();
+    boost::ptr_map<std::string, boost::shared_ptr<boost::any> >::iterator i = dataMap.find(_key);
+    if(i != dataMap.end()) {
+      dataMap.erase(i);
+      m_DataMapMutex.unlock();
+      return true;
+    }
+
+    m_DataMapMutex.unlock();
+    return false;
+  }
+
+  int Session::getID() {
+    return m_Token;
+  }
+
+  void Session::touch() {
+    m_LastTouched = DateTime();
+  }
 } // namespace dss
