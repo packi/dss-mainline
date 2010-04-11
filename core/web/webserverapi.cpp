@@ -277,6 +277,18 @@ namespace dss {
        .withParameter("location", "string", false)
        .withDocumentation("Raises an event", "The context describes the source of the event. The location, if provided, defines where any action that is taken "
            "by any subscription should happen.");
+    clsEvent.addMethod("subscribe")
+        .withParameter("name", "string", true)
+        .withParameter("sid", "integer", true)
+        .withDocumentation("Subscribes to an event given by the name. The sid is a unique subscription id that is defined by the subscriber. It is possible to subscribe to several events, using the same subscription id, this allows to retrieve a grouped output of the events (i.e. get output of all subscribed by the given id)");
+    clsEvent.addMethod("unsubscribe")
+        .withParameter("name", "string", true)
+        .withParameter("sid", "integer", true)
+        .withDocumentation("Unsubscribes from an event given by the name. The sid is a unique subscription id that was used in the subscribe call.");
+    clsEvent.addMethod("get")
+        .withParameter("sid", "integer", true)
+        .withParameter("timeout", "integer", false)
+        .withDocumentation("Get event information and output. The sid is a unique subscription id that was used in the subscribe call. All events, subscribed with the given id will be handled by this call. A timout, in case no events are taken place, can be specified (in MS). By default the timeout is disabled: 0 (zero), if no events occur the call will block.");
 
     RestfulClass& clsSystem = api->addClass("system");
     clsSystem.addMethod("version")
