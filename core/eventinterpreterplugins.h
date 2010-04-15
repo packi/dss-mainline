@@ -86,9 +86,12 @@ namespace dss {
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription) = 0;
     virtual void subscribeTo(boost::shared_ptr<EventSubscription> _pSubscription);
     virtual void unsubscribeFrom(const std::string& _subscriptionID);
+  protected:
+    EventInterpreterInternalRelay& getRelay() { return m_Relay; }
   private:
     EventInterpreterInternalRelay& m_Relay;
-    std::vector<std::string> m_SubscriptionIDs;
+    typedef std::vector<boost::shared_ptr<EventSubscription> > SubscriptionPtrList;
+    SubscriptionPtrList m_Subscriptions;
   }; // EventRelayTarget
 
   class EventInterpreterInternalRelay : public EventInterpreterPlugin {
@@ -99,6 +102,7 @@ namespace dss {
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
 
     static const char* getPluginName() { return "internal_relay"; }
+    EventInterpreter& getEventInterpreter() { return EventInterpreterPlugin::getEventInterpreter(); }
   protected:
     friend class EventRelayTarget;
     void registerSubscription(EventRelayTarget* _pTarget, const std::string& _subscriptionID);

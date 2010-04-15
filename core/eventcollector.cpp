@@ -22,20 +22,13 @@
 */
 
 #include "eventcollector.h"
-#include "dss.h"
 
 namespace dss {
 
   EventCollector::EventCollector(EventInterpreterInternalRelay& _relay) : EventRelayTarget(_relay) {}
 
-  EventCollector::~EventCollector() {
-    while(!m_Subscriptions.empty()) {
-      unsubscribeFrom(m_Subscriptions.front()->getID());
-    }
-  } 
-
-  bool EventCollector::hasEvent() { 
-    return !m_PendingEvents.empty(); 
+  bool EventCollector::hasEvent() {
+    return !m_PendingEvents.empty();
   }
 
   void EventCollector::handleEvent(Event& _event, const EventSubscription& _subscription) {
@@ -70,29 +63,15 @@ namespace dss {
       new dss::EventSubscription(
             _eventName,
             EventInterpreterInternalRelay::getPluginName(),
-            DSS::getInstance()->getEventInterpreter(),
-            boost::shared_ptr<dss::SubscriptionOptions>()
+            getRelay().getEventInterpreter(),
+            boost::shared_ptr<SubscriptionOptions>()
       )
     );
 
     EventRelayTarget::subscribeTo(subscription);
-    m_Subscriptions.push_back(subscription);
-    DSS::getInstance()->getEventInterpreter().subscribe(subscription);
 
     return subscription->getID();
   } // subscribeTo
 
-  void EventCollector::unsubscribeFrom(const std::string& _subscriptionID)
-  {
-    for(size_t i = 0; i < m_Subscriptions.size(); i++){
-      if(m_Subscriptions.at(i)->getID() == _subscriptionID){
-        m_Subscriptions.erase(m_Subscriptions.begin()+i);
-        break;
-      }
-    }
-
-    EventRelayTarget::unsubscribeFrom(_subscriptionID);
-    DSS::getInstance()->getEventInterpreter().unsubscribe(_subscriptionID);
-  }
 }
 

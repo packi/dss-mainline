@@ -35,10 +35,10 @@
 
 
 namespace dss {
+
   class EventCollector : public EventRelayTarget {
   public:
     EventCollector(EventInterpreterInternalRelay& _relay);
-    ~EventCollector();
 
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
 
@@ -47,14 +47,12 @@ namespace dss {
     bool hasEvent();
 
     virtual std::string subscribeTo(const std::string& _eventName);
-    virtual void unsubscribeFrom(const std::string& _subscriptionID);
-
   private:
     SyncEvent m_EventArrived;
     Mutex m_PendingEventsMutex;
     std::vector<Event> m_PendingEvents;
-    std::vector<boost::shared_ptr<EventSubscription> > m_Subscriptions;
   }; // EventCollector
+
 } // dss namespace
 
 #endif//__EVENT_COLLECTOR_H__

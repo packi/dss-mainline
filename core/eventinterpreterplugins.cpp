@@ -281,22 +281,25 @@ namespace dss {
   //================================================== EventRelayTarget
 
   EventRelayTarget::~EventRelayTarget() {
-    while(!m_SubscriptionIDs.empty()) {
-      unsubscribeFrom(m_SubscriptionIDs.front());
+    while(!m_Subscriptions.empty()) {
+      unsubscribeFrom(m_Subscriptions.front()->getID());
     }
   } // dtor
 
   void EventRelayTarget::subscribeTo(boost::shared_ptr<EventSubscription> _pSubscription) {
     m_Relay.registerSubscription(this, _pSubscription->getID());
-    m_SubscriptionIDs.push_back(_pSubscription->getID());
+    m_Subscriptions.push_back(_pSubscription);
+    getRelay().getEventInterpreter().subscribe(_pSubscription);
   } // subscribeTo
 
   void EventRelayTarget::unsubscribeFrom(const std::string& _subscriptionID) {
     m_Relay.removeSubscription(_subscriptionID);
-    std::vector<std::string>::iterator it =
-      std::find(m_SubscriptionIDs.begin(), m_SubscriptionIDs.end(), _subscriptionID);
-    if(it != m_SubscriptionIDs.end()) {
-      m_SubscriptionIDs.erase(it);
+    SubscriptionPtrList::iterator it =
+      std::find_if(m_Subscriptions.begin(), m_Subscriptions.end(),
+                   boost::bind(&EventSubscription::getID, _1) == _subscriptionID);
+    getRelay().getEventInterpreter().unsubscribe(_subscriptionID);
+    if(it != m_Subscriptions.end()) {
+      m_Subscriptions.erase(it);
     }
   } // unsubscribeFrom
 

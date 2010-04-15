@@ -24,9 +24,12 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/bind.hpp>
 
 #include "core/event.h"
 #include "core/eventinterpreterplugins.h"
+#include "core/internaleventrelaytarget.h"
+#include "core/eventcollector.h"
 #include "core/setbuilder.h"
 #include "core/sim/dssim.h"
 #include "core/model/apartment.h"
@@ -430,5 +433,135 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsOverwritesTimeProperty) {
   BOOST_CHECK_EQUAL(eventFromQueue.getEvent()->hasPropertySet("time"), true);
   BOOST_CHECK_EQUAL(eventFromQueue.getEvent()->getPropertyByName("time"), "+2");
 } // testUniqueEventsOverwritesTimeProperty
+
+BOOST_AUTO_TEST_CASE(testEventCollector) {
+  EventQueue queue;
+  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+  interpreter.setEventQueue(&queue);
+  interpreter.setEventRunner(&runner);
+  EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(&interpreter);
+  interpreter.addPlugin(relay);
+
+  interpreter.run();
+
+  EventCollector collector(*relay);
+  std::string subscriptionID = collector.subscribeTo("my_event");
+
+  boost::shared_ptr<Event> pEvent(new Event("my_event"));
+  queue.pushEvent(pEvent);
+
+  sleepMS(20);
+
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 1);
+
+  BOOST_CHECK_EQUAL(collector.hasEvent(), true);
+
+  Event evt = collector.popEvent();
+  BOOST_CHECK_EQUAL(evt.getName(), "my_event");
+
+  pEvent.reset(new Event("event2"));
+  queue.pushEvent(pEvent);
+
+  sleepMS(20);
+
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
+
+  BOOST_CHECK_EQUAL(collector.hasEvent(), false);
+
+  collector.unsubscribeFrom(subscriptionID);
+
+  pEvent.reset(new Event("my_event"));
+  queue.pushEvent(pEvent);
+
+  sleepMS(20);
+
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 3);
+
+  BOOST_CHECK_EQUAL(collector.hasEvent(), false);
+
+  queue.shutdown();
+  interpreter.terminate();
+  sleepMS(1500);
+} // testEventCollector
+
+class InternalEventRelayTester {
+public:
+  InternalEventRelayTester()
+  : m_Counter(0)
+  {}
+
+  void onEvent(Event& _event, const EventSubscription& _subscription) {
+    if(_event.getName() == "one") {
+      m_Counter++;
+    } else if(_event.getName() == "two") {
+      m_Counter += 2;
+    } else {
+      BOOST_CHECK(false);
+    }
+  }
+
+  int getCounter() const { return m_Counter; }
+private:
+  int m_Counter;
+}; // InternalEventRelayTester
+
+BOOST_AUTO_TEST_CASE(testInternalEventRelay) {
+  EventQueue queue;
+  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+  interpreter.setEventQueue(&queue);
+  interpreter.setEventRunner(&runner);
+  EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(&interpreter);
+  interpreter.addPlugin(relay);
+
+  interpreter.run();
+
+  InternalEventRelayTarget target(*relay);
+  boost::shared_ptr<EventSubscription> subscriptionOne(
+    new dss::EventSubscription(
+               "one",
+               EventInterpreterInternalRelay::getPluginName(),
+               interpreter,
+               boost::shared_ptr<SubscriptionOptions>())
+  );
+  target.subscribeTo(subscriptionOne);
+  boost::shared_ptr<EventSubscription> subscriptionTwo(
+    new dss::EventSubscription(
+               "two",
+               EventInterpreterInternalRelay::getPluginName(),
+               interpreter,
+               boost::shared_ptr<SubscriptionOptions>())
+  );
+  target.subscribeTo(subscriptionTwo);
+
+  InternalEventRelayTester tester;
+  target.setCallback(boost::bind(&InternalEventRelayTester::onEvent, &tester, _1, _2));
+
+  boost::shared_ptr<Event> pEvent(new Event("one"));
+  queue.pushEvent(pEvent);
+
+  sleepMS(20);
+
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 1);
+  BOOST_CHECK_EQUAL(tester.getCounter(), 1);
+
+  queue.pushEvent(pEvent);
+
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
+  BOOST_CHECK_EQUAL(tester.getCounter(), 2);
+
+  pEvent.reset(new Event("two"));
+  queue.pushEvent(pEvent);
+
+  sleepMS(20);
+
+  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 3);
+  BOOST_CHECK_EQUAL(tester.getCounter(), 4);
+
+  queue.shutdown();
+  interpreter.terminate();
+  sleepMS(1500);
+}
 
 BOOST_AUTO_TEST_SUITE_END()
