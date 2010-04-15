@@ -37,7 +37,7 @@ namespace dss {
   : m_Apartment(_apartment)
   { }
 
-  boost::shared_ptr<JSONObject> SimRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
+  boost::shared_ptr<JSONObject> SimRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(beginsWith(_request.getMethod(), "switch")) {
       if(_request.getMethod() == "switch/pressed") {
         int buttonNr = strToIntDef(_request.getParameter("buttonnr"), -1);

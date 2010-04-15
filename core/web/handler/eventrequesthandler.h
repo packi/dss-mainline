@@ -63,7 +63,7 @@ namespace dss {
   class EventRequestHandler : public WebServerRequestHandlerJSON {
   public:
     EventRequestHandler(EventQueue& _queue);
-    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session>& _session);
+    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
   private:
     EventQueue& m_Queue;
     Mutex m_eventsMutex;
@@ -73,9 +73,9 @@ namespace dss {
     EventSubscriptionSessionByTokenID m_SessionByTokenID;
 
     boost::shared_ptr<JSONObject> raise(const RestfulRequest& _request);
-    boost::shared_ptr<JSONObject> subscribe(const RestfulRequest& _request, boost::shared_ptr<Session>& _session);
-    boost::shared_ptr<JSONObject> unsubscribe(const RestfulRequest& _request, boost::shared_ptr<Session>& _session);
-    boost::shared_ptr<JSONObject> get(const RestfulRequest& _request, boost::shared_ptr<Session>& _session);
+    boost::shared_ptr<JSONObject> subscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+    boost::shared_ptr<JSONObject> unsubscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+    boost::shared_ptr<JSONObject> get(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
   }; // StructureRequestHandler
 
 } // namespace dss

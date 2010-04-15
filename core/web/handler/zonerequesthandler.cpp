@@ -38,7 +38,7 @@ namespace dss {
   { }
 
 
-  boost::shared_ptr<JSONObject> ZoneRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
+  boost::shared_ptr<JSONObject> ZoneRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     bool ok = true;
     std::string errorMessage;
     std::string zoneName = _request.getParameter("name");

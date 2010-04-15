@@ -73,7 +73,7 @@ namespace dss {
   }
 
   // name=EventName&sid=EventSubscriptionID
-  boost::shared_ptr<JSONObject> EventRequestHandler::subscribe(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
+  boost::shared_ptr<JSONObject> EventRequestHandler::subscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::string name = _request.getParameter("name");
     std::string tokenStr = _request.getParameter("sid");
     int token;
@@ -130,7 +130,7 @@ namespace dss {
   }
 
   // name=EventName&sid=EventSubscriptionID
-  boost::shared_ptr<JSONObject> EventRequestHandler::unsubscribe(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
+  boost::shared_ptr<JSONObject> EventRequestHandler::unsubscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::string name = _request.getParameter("name");
     std::string tokenStr = _request.getParameter("sid");
     int token;
@@ -193,7 +193,7 @@ namespace dss {
   }
 
   // sid=SubscriptionID&timeout=0
-  boost::shared_ptr<JSONObject> EventRequestHandler::get(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
+  boost::shared_ptr<JSONObject> EventRequestHandler::get(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::string tokenStr = _request.getParameter("sid");
     std::string timeoutStr = _request.getParameter("timeout");
     int timeout = 0;
@@ -253,7 +253,7 @@ namespace dss {
     return success(session->getEvents(timeout));
   }
 
-  boost::shared_ptr<JSONObject> EventRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
+  boost::shared_ptr<JSONObject> EventRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(_request.getMethod() == "raise") {
       return raise(_request);
     } else if(_request.getMethod() == "subscribe") {

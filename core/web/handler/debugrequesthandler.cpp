@@ -46,7 +46,7 @@ namespace dss {
   : m_DSS(_dss)
   { }
 
-  boost::shared_ptr<JSONObject> DebugRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session>& _session) {
+  boost::shared_ptr<JSONObject> DebugRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::ostringstream logSStream;
     if(_request.getMethod() == "sendFrame") {
       int destination = strToIntDef(_request.getParameter("destination"),0) & 0x3F;

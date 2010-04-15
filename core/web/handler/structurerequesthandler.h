@@ -34,7 +34,7 @@ namespace dss {
   class StructureRequestHandler : public WebServerRequestHandlerJSON {
   public:
     StructureRequestHandler(Apartment& _apartment, ModelMaintenance& _modelMaintenance, StructureModifyingBusInterface& _interface);
-    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session>& _session);
+    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
   private:
     Apartment& m_Apartment;
     ModelMaintenance& m_ModelMaintenance;
