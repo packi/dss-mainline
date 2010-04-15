@@ -71,9 +71,10 @@ namespace dss {
           NULL, sslcert.c_str(), NULL, NULL, NULL, "dss")) {
       Logger::getInstance()->log("WebService::execute: could not set ssl server context! ", lsFatal);
     }
-      
-    m_Service.bind(NULL, getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "port"), 10);
-      
+
+    int soapServerSocket = m_Service.bind(NULL, getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "port"), 10);
+    assert(soapServerSocket != SOAP_INVALID_SOCKET && "Could not bind to SOAP port");
+
     for(int iWorker = 0; iWorker < 4; iWorker++) {
       m_Workers.push_back(new WebServicesWorker(this));
       m_Workers.back().run();
@@ -100,6 +101,8 @@ namespace dss {
         m_PendingRequests.push_back(req_copy);
         m_RequestsMutex.unlock();
         m_RequestArrived.signal();
+      } else {
+        log("could not accept new connection!", lsError);
       }
     }
   } // execute
