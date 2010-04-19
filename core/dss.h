@@ -90,6 +90,7 @@ namespace dss {
     std::string m_dataDirectory;
     std::string m_configDirectory;
     std::string m_webrootDirectory;
+    std::string m_logDirectory;
 
     aDSSState m_State;
 
@@ -138,9 +139,11 @@ namespace dss {
     const std::string& getDataDirectory() const { return m_dataDirectory; }
     const std::string& getConfigDirectory() const { return m_configDirectory; }
     const std::string& getWebrootDirectory() const { return m_webrootDirectory; }
+    const std::string& getLogDirectory() const { return m_logDirectory; }
     void setDataDirectory(const std::string& _value);
     void setConfigDirectory(const std::string& _value);
     void setWebrootDirectory(const std::string& _value);
+    void setLogDirectory(const std::string& _value);
   }; // DSS
 
 }
