@@ -730,6 +730,9 @@ namespace dss {
         case 6:
           *rval = INT_TO_JSVAL(dev->getDevice().getLastCalledScene());
           return JS_TRUE;
+        case 7:
+          *rval = INT_TO_JSVAL(dev->getDevice().getShortAddress());
+          return JS_TRUE;
       }
     }
     return JS_FALSE;
@@ -757,6 +760,7 @@ namespace dss {
     {"circuitID", 4, 0, dev_JSGet},
     {"functionID", 5, 0, dev_JSGet},
     {"lastCalledScene", 6, 0, dev_JSGet},
+    {"shortAddress", 7, 0, dev_JSGet},
     {NULL, 0, 0, NULL, NULL}
   };
 
