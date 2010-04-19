@@ -124,7 +124,7 @@ namespace dss {
   void WebServer::doStart() {
     std::string sslcert = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "sslcert");
     mg_set_option(m_mgContext, "ssl_cert", sslcert.c_str());
-    std::string ports = intToString(DSS::getInstance()->getPropertySystem().getIntValue(getConfigPropertyBasePath() + "ports"));//+"s";
+    std::string ports = intToString(DSS::getInstance()->getPropertySystem().getIntValue(getConfigPropertyBasePath() + "ports")) + "s";
     log("Webserver: Listening on port(s) " + ports);
     mg_set_option(m_mgContext, "ports", ports.c_str());
 
