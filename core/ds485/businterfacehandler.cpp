@@ -155,7 +155,7 @@ namespace dss {
               pEvent->addParameter(modID);
               raiseModelEvent(pEvent);
             } else if(functionID == EventDeviceReady) {
-              int modID = frame->getHeader().getDestination();
+              int modID = pd.get<uint16_t>();
               ModelEvent* pEvent = new ModelEvent(ModelEvent::etDSMeterReady);
               pEvent->addParameter(modID);
               raiseModelEvent(pEvent);
