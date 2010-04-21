@@ -278,9 +278,8 @@ namespace dss {
     }
     uint16_t hwVersion = (pd.get<uint8_t>() << 8) | pd.get<uint8_t>();
     uint16_t swVersion = (pd.get<uint8_t>() << 8) | pd.get<uint8_t>();
-
-    log(std::string("  HW-Version: ") + intToString(hwVersion >> 8) + "." + intToString(hwVersion & 0x00FF));
-    log(std::string("  SW-Version: ") + intToString(swVersion >> 8) + "." + intToString(swVersion & 0x00FF));
+    uint8_t features = 0;
+    uint8_t swVersionExt = 0;
 
     std::string name;
     for(int i = 0; i < 6; i++) {
@@ -290,6 +289,15 @@ namespace dss {
       }
     }
     log(std::string("  Name:      \"") + name + "\"");
+
+    if (!pd.isEmpty()) {
+      swVersionExt = pd.get<uint8_t>();
+      features = pd.get<uint8_t>();
+    }
+
+    log(std::string("  HW-Version: ") + intToString(hwVersion >> 8) + "." + intToString(hwVersion & 0x00FF));
+    log(std::string("  SW-Version: ") + intToString(swVersion >> 8) + "." + intToString(swVersion & 0x00FF) + "." + intToString(swVersionExt));
+    log(std::string("  Feature Flags: ") + intToString(features, true));
 
     // bus-id, sw-version, hw-version, name, device-id
     DSMeterSpec_t spec(source, swVersion, hwVersion, name, devID);
