@@ -36,6 +36,7 @@ namespace dss {
     ScriptLogger(const std::string& _logname);
     ~ScriptLogger();
     void log(const std::string& text);
+    void logln(const std::string& text);
 
   private:
     std::string m_fileName;

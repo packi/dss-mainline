@@ -32,7 +32,8 @@ along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 namespace dss {
   const std::string ScriptLoggerExtensionName = "scriptloggerextension";
 
-  JSBool ScriptLoggerExtension_log(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+
+  JSBool ScriptLoggerExtension_log_common(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval, bool newline) {
     JSString *str;
     ScriptContext *ctx = static_cast<ScriptContext *>(JS_GetContextPrivate(cx));
     ScriptLoggerExtension *ext = dynamic_cast<ScriptLoggerExtension*>(ctx->getEnvironment().getExtension(ScriptLoggerExtensionName));
@@ -61,13 +62,25 @@ namespace dss {
             JSString *logfile = JSVAL_TO_STRING(v);
             boost::shared_ptr<ScriptLogger>& l = ext->getLogger(JS_GetStringBytes(logfile));
             if (l != NULL) {
-                l->log(JS_GetStringBytes(str));
+                if (newline) {
+                  l->logln(JS_GetStringBytes(str));
+                } else {
+                  l->log(JS_GetStringBytes(str));
+                }
             }
         }
     }
 
   return JS_TRUE;
 }
+
+  JSBool ScriptLoggerExtension_log(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    return ScriptLoggerExtension_log_common(cx, obj, argc, argv, rval, false); 
+  }
+
+  JSBool ScriptLoggerExtension_logln(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    return ScriptLoggerExtension_log_common(cx, obj, argc, argv, rval, true); 
+  }
 
 // var logger = new Logger.getChannel("logfilename.log");
   JSBool ScriptLogger_construct(JSContext *cx, JSObject *obj, uintN argc,
@@ -116,6 +129,7 @@ namespace dss {
 
   static JSFunctionSpec ScriptLogger_methods[] = {
     {"log", ScriptLoggerExtension_log, 1, 0, 0},
+    {"logln", ScriptLoggerExtension_logln, 1, 0, 0},
     {NULL, NULL, 0, 0, 0},
   }; 
 
@@ -140,14 +154,22 @@ static JSFunctionSpec ScriptLogger_static_methods[] = {
   void ScriptLogger::log(const std::string& text) {
     Logger::getInstance()->log(text);
     if (m_f) {
+      struct tm t;
+      time_t now = time( NULL );
+      localtime_r( &now, &t );
+      std::string out = "[" + dateToISOString<std::string>(&t) + "] " + text;
       m_LogWriteMutex.lock();
-      size_t written = fwrite(text.c_str(), 1, text.size(), m_f);
+      size_t written = fwrite(out.c_str(), 1, out.size(), m_f);
       fflush(m_f);
       m_LogWriteMutex.unlock();
       if (written < text.size()) {
         throw std::runtime_error("Could not complete write operation to log file");
       }
     }
+  }
+
+  void ScriptLogger::logln(const std::string& text) {
+    log(text + "\n");
   }
 
   ScriptLogger::~ScriptLogger() {
