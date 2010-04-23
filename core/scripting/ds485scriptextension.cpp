@@ -127,6 +127,7 @@ namespace dss {
     result->getHeader().setSource(_object.getProperty<int>("source"));
     result->getHeader().setDestination(_object.getProperty<int>("destination"));
     result->getHeader().setType(_object.getProperty<int>("type"));
+    result->setCommand(_object.getProperty<int>("type"));
     int functionID = _object.getProperty<int>("functionID");
     result->getPayload().add<uint8_t>(functionID);
     jsval arrVal = _object.doGetProperty("payload");
