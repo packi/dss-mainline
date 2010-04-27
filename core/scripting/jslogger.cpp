@@ -62,6 +62,7 @@ namespace dss {
             JSString *logfile = JSVAL_TO_STRING(v);
             boost::shared_ptr<ScriptLogger>& l = ext->getLogger(JS_GetStringBytes(logfile));
             if (l != NULL) {
+                Logger::getInstance()->log(JS_GetStringBytes(str));
                 if (newline) {
                   l->logln(JS_GetStringBytes(str));
                 } else {
@@ -143,16 +144,16 @@ static JSFunctionSpec ScriptLogger_static_methods[] = {
     ///\todo check log name for validity, prevent attempts to switch 
     /// directories, etc.
   
-    // строку ниже стделать как надо 
     m_fileName = DSS::getInstance()->getLogDirectory() + _filename;
     m_f = fopen(m_fileName.c_str(), "a+");
     if (!m_f) {
       throw std::runtime_error("Could not open file " + m_fileName + " for writing");
     }
+    DSS::getInstance()->getPropertySystem().setStringValue("/system/js/logsfiles/" + _filename, DSS::getInstance()->getLogDirectory() + _filename, true, false);
+    DSS::getInstance()->getPropertySystem().setStringValue("/config/subsystems/WebServer/files/" + _filename, DSS::getInstance()->getLogDirectory() + _filename, true, false);
   }
 
   void ScriptLogger::log(const std::string& text) {
-    Logger::getInstance()->log(text);
     if (m_f) {
       struct tm t;
       time_t now = time( NULL );
