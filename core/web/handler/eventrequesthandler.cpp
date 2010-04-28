@@ -313,15 +313,13 @@ namespace dss {
       eventsArray->addElement("event", evtObj);
 
       evtObj->addProperty("name", evt.getName());
-      boost::shared_ptr<JSONArrayBase> evtprops(new JSONArrayBase);
+      boost::shared_ptr<JSONObject> evtprops(new JSONObject());
       evtObj->addElement("properties", evtprops);
 
       const dss::HashMapConstStringString& props =  evt.getProperties().getContainer();
       for(dss::HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam)
       {
-        boost::shared_ptr<JSONObject> property(new JSONObject());
-        property->addProperty(iParam->first, iParam->second);
-        evtprops->addElement("property", property);
+        evtprops->addProperty(iParam->first, iParam->second);
       }
     }
 
