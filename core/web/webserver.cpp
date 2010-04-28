@@ -117,6 +117,7 @@ namespace dss {
 
         if (S_ISREG(statbuf.st_mode)) {
           getDSS().getPropertySystem().setStringValue("/config/subsystems/WebServer/files/" + std::string(name), DSS::getInstance()->getJSLogDirectory() + std::string(name), true, false);
+          getDSS().getPropertySystem().setStringValue("/system/js/logsfiles/" + std::string(name), DSS::getInstance()->getJSLogDirectory() + std::string(name), true, false);
         }
       }
       closedir(dir);
