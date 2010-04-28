@@ -144,13 +144,13 @@ static JSFunctionSpec ScriptLogger_static_methods[] = {
     ///\todo check log name for validity, prevent attempts to switch 
     /// directories, etc.
   
-    m_fileName = DSS::getInstance()->getLogDirectory() + _filename;
+    m_fileName = DSS::getInstance()->getJSLogDirectory() + _filename;
     m_f = fopen(m_fileName.c_str(), "a+");
     if (!m_f) {
       throw std::runtime_error("Could not open file " + m_fileName + " for writing");
     }
-    DSS::getInstance()->getPropertySystem().setStringValue("/system/js/logsfiles/" + _filename, DSS::getInstance()->getLogDirectory() + _filename, true, false);
-    DSS::getInstance()->getPropertySystem().setStringValue("/config/subsystems/WebServer/files/" + _filename, DSS::getInstance()->getLogDirectory() + _filename, true, false);
+    DSS::getInstance()->getPropertySystem().setStringValue("/system/js/logsfiles/" + _filename, DSS::getInstance()->getJSLogDirectory() + _filename, true, false);
+    DSS::getInstance()->getPropertySystem().setStringValue("/config/subsystems/WebServer/files/" + _filename, DSS::getInstance()->getJSLogDirectory() + _filename, true, false);
   }
 
   void ScriptLogger::log(const std::string& text) {

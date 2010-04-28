@@ -98,7 +98,7 @@ const char* LogDirectory = "data/logs";
     setDataDirectory(DataDirectory);
     setConfigDirectory(ConfigDirectory);
     setWebrootDirectory(WebrootDirectory);
-    setLogDirectory(LogDirectory);
+    setJSLogDirectory(LogDirectory);
 
     m_TimeStarted = time(NULL);
     m_pPropertySystem->createProperty("/system/uptime")->linkToProxy(
@@ -109,8 +109,8 @@ const char* LogDirectory = "data/logs";
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getConfigDirectory, &DSS::setConfigDirectory));
     m_pPropertySystem->createProperty("/config/webrootdirectory")->linkToProxy(
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getWebrootDirectory, &DSS::setWebrootDirectory));
-    m_pPropertySystem->createProperty("/config/logdirectory")->linkToProxy(
-        PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getLogDirectory, &DSS::setLogDirectory));
+    m_pPropertySystem->createProperty("/config/jslogdirectory")->linkToProxy(
+        PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getJSLogDirectory, &DSS::setJSLogDirectory));
   } // ctor
 
   DSS::~DSS() {
@@ -164,11 +164,11 @@ const char* LogDirectory = "data/logs";
     }
   }
 
-  void DSS::setLogDirectory(const std::string& _value) {
+  void DSS::setJSLogDirectory(const std::string& _value) {
     if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
-      m_logDirectory = _value + "/";
+      m_jsLogDirectory = _value + "/";
     } else {
-      m_logDirectory = _value;
+      m_jsLogDirectory = _value;
     }
   }
 
