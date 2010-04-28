@@ -25,6 +25,11 @@
 
 #include <iostream>
 #include <sstream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <string.h>
 
 #include "core/logger.h"
 #include "core/dss.h"
@@ -77,7 +82,48 @@ namespace dss {
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "ports", 8080, true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "sslcert", getDSS().getPropertySystem().getStringValue("/config/configdirectory") + "dsscert.pem" , true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "files/apartment.xml", getDSS().getDataDirectory() + "apartment.xml", true, false);
-    
+
+    DIR* dir;
+    int ret;
+    struct stat statbuf;
+    struct dirent *dent;
+
+    dir = opendir(getDSS().getJSLogDirectory().c_str());
+
+    if (dir) {
+      while ((dent = readdir(dir)) != NULL) {
+        char *name = dent->d_name;
+        if (name[0] == '.') {
+          if (name[1] == 0) {
+            continue;
+          } else if (name[1] == '.' && name[2] == 0) {
+            continue;
+          }
+        }
+
+        // we only accept log files that have the .log/.LOG extension
+        size_t len = strlen(name);
+        if ((len < 4) || ((len >=4)  && 
+           ((strncmp(name + len - 4, ".log", 4) != 0) &&
+            (strncmp(name + len - 4, ".LOG", 4) != 0)))) {
+          continue;
+        }
+
+        std::string abspath = getDSS().getJSLogDirectory() + "/" + name;
+        ret = stat(abspath.c_str(), &statbuf);
+        if (ret != 0) {
+          continue;
+        }
+
+        if (S_ISREG(statbuf.st_mode)) {
+          getDSS().getPropertySystem().setStringValue("/config/subsystems/WebServer/files/" + std::string(name), DSS::getInstance()->getJSLogDirectory() + std::string(name), true, false);
+        }
+      }
+      closedir(dir);
+    } else {
+      log("Could not open JS log directory " + getDSS().getJSLogDirectory(), lsError);
+    }
+
     setupAPI();
     instantiateHandlers();
   } // initialize
