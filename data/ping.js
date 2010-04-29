@@ -91,7 +91,7 @@ function timedPing() {
   if ((raisedEvent.parameter.repeat > 0) && (raisedEvent.parameter.delay > 0)) {
     pingDelayHandler(ids);
     if (repeated < raisedEvent.parameter.repeat) {
-        setTimeout(raisedEvent.parameter.delay, timedPing);
+        setTimeout(parseInt(raisedEvent.parameter.delay) * 1000 /* msec */, timedPing);
     }
     repeated++;
   }
