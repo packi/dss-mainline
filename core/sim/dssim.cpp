@@ -30,6 +30,7 @@
 #include <iostream>
 
 #include <boost/filesystem.hpp>
+#include <boost/thread.hpp>
 
 #include "core/ds485const.h"
 #include "core/model/modelconst.h"
@@ -571,6 +572,11 @@ namespace dss {
     }
   } // groupSetValue
 
+  void DSDSMeterSim::sendDelayedResponse(boost::shared_ptr<DS485CommandFrame> _response, int _delayMS) {
+    sleepMS(_delayMS);
+    distributeFrame(_response);
+  }
+
   void DSDSMeterSim::process(DS485Frame& _frame) {
     const uint8_t HeaderTypeToken = 0;
     const uint8_t HeaderTypeCommand = 1;
@@ -585,6 +591,7 @@ namespace dss {
       } else if(header.getType() == HeaderTypeCommand) {
         DS485CommandFrame& cmdFrame = dynamic_cast<DS485CommandFrame&>(_frame);
         PayloadDissector pd(cmdFrame.getPayload());
+        Logger::getInstance()->log("command is " + intToString(cmdFrame.getCommand()));
         if((cmdFrame.getCommand() == CommandRequest) && !pd.isEmpty()) {
           int cmdNr = pd.get<uint8_t>();
           boost::shared_ptr<DS485CommandFrame> response;
@@ -992,6 +999,24 @@ namespace dss {
                   response->getPayload().add<uint16_t>(value);
                   distributeFrame(response);
                 }
+              }
+              break;
+            case FunctionDeviceGetTransmissionQuality:
+              {
+                Logger::getInstance()->log("###### Ping request received");
+                devid_t devID = pd.get<devid_t>();
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(1);
+                distributeFrame(response);
+                lookupDevice(devID);
+
+                // create delayed response
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(2);
+                response->getPayload().add<uint16_t>(devID);
+                response->getPayload().add<uint16_t>(rand() % 255);
+                response->getPayload().add<uint16_t>(rand() % 255);
+                boost::thread(boost::bind(&DSDSMeterSim::sendDelayedResponse, this, response, rand() % 2000));
               }
               break;
             default:

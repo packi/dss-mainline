@@ -229,4 +229,13 @@ namespace dss {
     return m_Context.convertTo<std::string>(doCallFunctionByReference(_function, _parameter));
   } // callFunctionByReference<std::string>
 
+  void ScriptObject::addRoot() {
+    JS_AddRoot(m_Context.getJSContext(), &m_pObject);
+  } // addRoot
+
+  void ScriptObject::removeRoot() {
+    JS_RemoveRoot(m_Context.getJSContext(), &m_pObject);
+  } // removeRoot
+
+
 } // namespace dss

@@ -257,7 +257,7 @@ BOOST_AUTO_TEST_CASE(testSocketSend) {
   listener.run();
   sleepMS(50);
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->getRootObject().setProperty<int>("bytesSent", 0);
+  ctx->getRootObject().setProperty<int>("bytesSent", 3);
   ctx->evaluate<void>("socket = new TcpSocket();\n"
                       "socket.connect('localhost', 1234,\n"
                       "      function(success) {\n"

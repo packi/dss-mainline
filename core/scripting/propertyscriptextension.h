@@ -46,11 +46,11 @@ namespace dss {
     void createScriptObject();
   private:
     PropertyScriptExtension* m_pExtension;
-    ScriptContext* m_pContext;
     JSObject* m_pFunctionObject;
     jsval m_Function;
     std::string m_Identifier;
     boost::scoped_ptr<ScriptObject> m_pScriptObject;
+    ScriptFunctionRooter m_FunctionRoot;
   }; // PropertyScriptListener
 
   class PropertyScriptExtension : public ScriptExtension {

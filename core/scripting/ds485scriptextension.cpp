@@ -70,56 +70,81 @@ namespace dss {
     m_FrameSender.sendFrame(*cmdFrame);
   } // sendFrame
 
+  class DS485ScriptFrameCatcher : public ScriptContextAttachedObject {
+  public:
+    DS485ScriptFrameCatcher(ScriptContext* _pContext, DS485ScriptExtension* _pExtension)
+    : ScriptContextAttachedObject(_pContext),
+      m_pExtension(_pExtension)
+    {
+    }
+
+    void waitForFrame(boost::shared_ptr<FrameBucketCollector> _bucket, boost::shared_ptr<ScriptObject> _callbackObject, jsval _function, int _timeout, boost::shared_ptr<ScriptFunctionRooter> _rootedFunction) {
+      bool goOn = true;
+      JSContext* cx = getContext()->getJSContext();
+      do {
+        bool hasFrame = _bucket->waitForFrame(_timeout);
+        try {
+          boost::shared_ptr<DS485CommandFrame> frame = _bucket->popFrame();
+          AssertLocked contextLock(getContext());
+          Logger::getInstance()->log("waitForFrame: got frame, aquiring request");
+          JS_SetContextThread(cx);
+          JSRequest req(cx);
+          Logger::getInstance()->log("waitForFrame: got frame, got request");
+          {
+            JSAutoLocalRootScope scope(cx);
+            ScriptFunctionParameterList paramList(_callbackObject->getContext());
+            if(hasFrame) {
+              JSObject* frameJSObj = JS_NewObject(cx, &DS485Frame_class, NULL, _callbackObject->getJSObject());
+              ScriptObject frameObj(frameJSObj, _callbackObject->getContext());
+              frameObj.setProperty("broadcast", frame->getHeader().isBroadcast());
+              frameObj.setProperty<int>("source", frame->getHeader().getSource());
+              frameObj.setProperty<int>("destination", frame->getHeader().getDestination());
+              PayloadDissector pd(frame->getPayload());
+              if(!pd.isEmpty()) {
+                int functionID = pd.get<uint8_t>();
+                frameObj.setProperty("functionID", functionID);
+                ScriptObject payloadObj(JS_NewArrayObject(cx, 0, NULL), _callbackObject->getContext());
+                frameObj.setProperty("payload", &payloadObj);
+                int iElem = 0;
+                while(!pd.isEmpty()) {
+                  int val = pd.get<uint16_t>();
+                  jsval jval = INT_TO_JSVAL(val);
+                  JS_SetElement(cx, payloadObj.getJSObject(), iElem, &jval);
+                  iElem++;
+                }
+              }
+              paramList.addJSVal(OBJECT_TO_JSVAL(frameJSObj));
+            } else {
+              paramList.addJSVal(JSVAL_NULL);
+            }
+            goOn = _callbackObject->callFunctionByReference<bool>(_function, paramList);
+          }
+          //JS_GC(cx);
+          req.endRequest();
+          JS_ClearContextThread(cx);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("DS485ScriptExtension::waitForFrame: Caught exception: ") + e.what(), lsError);
+          goOn = false;
+        }
+      } while(goOn);
+      m_pExtension->removeCallback(_bucket);
+      delete this;
+    } // waitForFrame
+
+  private:
+    DS485ScriptExtension* m_pExtension;
+  };
+
   void DS485ScriptExtension::setCallback(int _sourceID, int _functionID, boost::shared_ptr<ScriptObject> _callbackObject, jsval _function, int _timeout) {
     boost::shared_ptr<FrameBucketCollector> frameBucket(new FrameBucketCollector(&m_FrameBucketHolder, _functionID, _sourceID), FrameBucketBase::removeFromHolderAndDelete);
     frameBucket->addToHolder();
     m_CallbackMutex.lock();
     m_Callbacks.push_back(frameBucket);
     m_CallbackMutex.unlock();
-    boost::thread(boost::bind(&DS485ScriptExtension::waitForFrame, this, frameBucket, _callbackObject, _function, _timeout));
+    boost::shared_ptr<ScriptFunctionRooter> rootedFunction(new ScriptFunctionRooter(&_callbackObject->getContext(), _callbackObject->getJSObject(), _function));
+    DS485ScriptFrameCatcher* catcher = new DS485ScriptFrameCatcher(&_callbackObject->getContext(), this);
+    boost::thread(boost::bind(&DS485ScriptFrameCatcher::waitForFrame, catcher, frameBucket, _callbackObject, _function, _timeout, rootedFunction));
   } // setCallback
-
-  void DS485ScriptExtension::waitForFrame(boost::shared_ptr<FrameBucketCollector> _bucket, boost::shared_ptr<ScriptObject> _callbackObject, jsval _function, int _timeout) {
-    bool goOn = true;
-    do {
-      bool hasFrame = _bucket->waitForFrame(_timeout);
-      try {
-        boost::shared_ptr<DS485CommandFrame> frame = _bucket->popFrame();
-        JSContext* cx = _callbackObject->getContext().getJSContext();
-        AssertLocked(&_callbackObject->getContext());
-        ScriptFunctionParameterList paramList(_callbackObject->getContext());
-        if(hasFrame) {
-          JSObject* frameJSObj = JS_NewObject(cx, &DS485Frame_class, NULL, NULL);
-          ScriptObject frameObj(frameJSObj, _callbackObject->getContext());
-          frameObj.setProperty("broadcast", frame->getHeader().isBroadcast());
-          frameObj.setProperty<int>("source", frame->getHeader().getSource());
-          frameObj.setProperty<int>("destination", frame->getHeader().getDestination());
-          PayloadDissector pd(frame->getPayload());
-          if(!pd.isEmpty()) {
-            int functionID = pd.get<uint8_t>();
-            frameObj.setProperty("functionID", functionID);
-            ScriptObject payloadObj(JS_NewArrayObject(cx, 0, NULL), _callbackObject->getContext());
-            frameObj.setProperty("payload", &payloadObj);
-            int iElem = 0;
-            while(!pd.isEmpty()) {
-              int val = pd.get<uint16_t>();
-              jsval jval = INT_TO_JSVAL(val);
-              JS_SetElement(cx, payloadObj.getJSObject(), iElem, &jval);
-              iElem++;
-            }
-          }
-          paramList.addJSVal(OBJECT_TO_JSVAL(frameJSObj));
-        } else {
-          paramList.addJSVal(JSVAL_NULL);
-        }
-        goOn = _callbackObject->callFunctionByReference<bool>(_function, paramList);
-      } catch(ScriptException& e) {
-        Logger::getInstance()->log(std::string("DS485ScriptExtension::waitForFrame: Caught exception: ") + e.what(), lsError);
-        goOn = false;
-      }
-    } while(goOn);
-    removeCallback(_bucket);
-  } // waitForFrame
 
   boost::shared_ptr<DS485CommandFrame> DS485ScriptExtension::frameFromScriptObject(ScriptObject& _object) {
     boost::shared_ptr<DS485CommandFrame> result(new DS485CommandFrame);
@@ -149,11 +174,6 @@ namespace dss {
     return result;
   } // frameFromScriptObject
 
-/* DS485.sendFrame(frame, callback(frame) = NULL, timeout); // callback == NULL -> don't wait for answer, result bool, continue, quit
-                                                            // timeout
-   DS485.setCallback(callbackFrame(frame), functionID, source = -1);
-*/
-
   JSBool ds485_sendFrame(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     DS485ScriptExtension* ext =
@@ -174,7 +194,11 @@ namespace dss {
         }
         int timeout = 1000;
         if(argc >= 3) {
-          timeout = ctx->convertTo<int>(argv[2]);
+          Logger::getInstance()->log("Converting to int");
+          if(JSVAL_IS_NUMBER(argv[2])) {
+            timeout = ctx->convertTo<int>(argv[2]);
+          }
+          Logger::getInstance()->log("Done converting to int");
         }
 
         if((func != JSVAL_NULL) && (func != JSVAL_VOID)) {
@@ -223,8 +247,6 @@ namespace dss {
     }
     return JS_FALSE;
   } // ds485_setCallback
-
-
 
   JSFunctionSpec DS485_static_methods[] = {
     {"sendFrame", ds485_sendFrame, 3, 0, 0},

@@ -60,6 +60,9 @@ namespace dss {
     template<class t>
     t callFunctionByReference(jsval _function, ScriptFunctionParameterList& _parameter);
 
+    void addRoot();
+    void removeRoot();
+
     JSObject* getJSObject() { return m_pObject; }
     ScriptContext& getContext() { return m_Context; }
   private:

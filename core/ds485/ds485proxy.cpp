@@ -146,33 +146,30 @@ namespace dss {
 #else
     bool sim = false;
 #endif
-    if(broadcast || !sim) {
-      std::ostringstream sstream;
-      sstream << "DEST:";
-      if(broadcast) {
-        sstream << "*";
-      }
-      sstream << "0x" << std::hex << std::uppercase << int(_frame.getHeader().getDestination());
-
-      PayloadDissector pdDump(_frame.getPayload());
-      uint8_t cmd = pdDump.get<uint8_t>();
-      sstream << ", CMD:0x" << std::hex << std::uppercase << (unsigned int)cmd << ", ";
-      int iParameter=1;
-      while(!pdDump.isEmpty()) {
-        uint16_t data = pdDump.get<uint16_t>();
-        sstream << " P" << iParameter++ << ":0x" << std::hex << std::uppercase << data;
-      }
-      sstream << std::dec;
-
-      if((m_DS485Controller.getState() == csSlave) || (m_DS485Controller.getState() == csMaster)) {
-        log("DS485Proxy: Enqueue packet");
-        m_DS485Controller.enqueueFrame(_frame);
-      }
-      else {
-        log("DS485Proxy: Discard packet");
-      }
-      log(sstream.str());
+    std::ostringstream sstream;
+    sstream << "DEST:";
+    if(broadcast) {
+      sstream << "*";
     }
+    sstream << "0x" << std::hex << std::uppercase << int(_frame.getHeader().getDestination());
+
+    PayloadDissector pdDump(_frame.getPayload());
+    uint8_t cmd = pdDump.get<uint8_t>();
+    sstream << ", CMD:0x" << std::hex << std::uppercase << (unsigned int)cmd << ", ";
+    int iParameter=1;
+    while(!pdDump.isEmpty()) {
+      uint16_t data = pdDump.get<uint16_t>();
+      sstream << " P" << iParameter++ << ":0x" << std::hex << std::uppercase << data;
+    }
+    sstream << std::dec;
+
+    if((m_DS485Controller.getState() == csSlave) || (m_DS485Controller.getState() == csMaster)) {
+      log("DS485Proxy: Enqueue packet for sending over the wire");
+      m_DS485Controller.enqueueFrame(_frame);
+    } else {
+      log("DS485Proxy: Not putting packet on the wire");
+    }
+    log(sstream.str());
     boost::shared_ptr<DS485CommandFrame> pFrame(new DS485CommandFrame);
     *pFrame = _frame;
 

@@ -118,7 +118,9 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutZeroDelay) {
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("var result = false; setTimeout(0, function() {  result = true; } );");
-  sleepMS(50);
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
 } // testSetTimeoutZeroDelay
 
@@ -128,8 +130,24 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutNormalDelay) {
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("var result = false; setTimeout(10, function() {  result = true; } );");
-  sleepMS(75);
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
 } // testSetTimeoutNormalDelay
+
+BOOST_AUTO_TEST_CASE(testSetTimeoutGC) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("var result = false;\n"
+                      "var obj = { func: function() { result = true; } };"
+                      "setTimeout(10, function() { setTimeout(0, obj.func); } );");
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
+  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

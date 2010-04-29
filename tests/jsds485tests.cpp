@@ -83,7 +83,9 @@ BOOST_AUTO_TEST_CASE(testSendFrameWorksWithCallback) {
                       "frame.payload.push(0xaabb);\n"
                       "frame.payload.push(0xccdd);\n"
                       "DS485.sendFrame(frame, function() { return false; }, 10);");
-  sleepMS(20);
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
   BOOST_CHECK_EQUAL(frameSender.getCounter(), 1);
 }
 
@@ -103,7 +105,9 @@ BOOST_AUTO_TEST_CASE(testSendFrameWorksWithNoIncomingFrame) {
                       "frame.payload.push(0xaabb);\n"
                       "frame.payload.push(0xccdd);\n"
                       "DS485.sendFrame(frame, function(f) { if(f == null) { result = true; } return false; }, 5);");
-  sleepMS(30);
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
   BOOST_CHECK_EQUAL(frameSender.getCounter(), 1);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
 }
@@ -129,7 +133,9 @@ BOOST_AUTO_TEST_CASE(testSendFrameWorksWithIncomingFrame) {
   frame->getHeader().setSource(20);
   frame->getPayload().add<uint8_t>(10);
   bucketHolder.distributeFrame(frame, 10);
-  sleepMS(10);
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
   BOOST_CHECK_EQUAL(frameSender.getCounter(), 1);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
 }
@@ -156,7 +162,9 @@ BOOST_AUTO_TEST_CASE(testSendFrameWorksRepeatedlyWithIncomingFrame) {
   frame->getPayload().add<uint8_t>(10);
   bucketHolder.distributeFrame(frame, 10);
   bucketHolder.distributeFrame(frame, 10);
-  sleepMS(20);
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
   BOOST_CHECK_EQUAL(frameSender.getCounter(), 1);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("result"), 2);
 }
@@ -178,7 +186,9 @@ BOOST_AUTO_TEST_CASE(testSetCallbackWorks) {
   frame->getPayload().add<uint8_t>(10);
   bucketHolder.distributeFrame(frame, 10);
   bucketHolder.distributeFrame(frame, 10);
-  sleepMS(20);
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("result"), 2);
 }
 
