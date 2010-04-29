@@ -151,8 +151,7 @@ namespace dss {
     result->getHeader().setBroadcast(_object.getProperty<bool>("broadcast"));
     result->getHeader().setSource(_object.getProperty<int>("source"));
     result->getHeader().setDestination(_object.getProperty<int>("destination"));
-    result->getHeader().setType(_object.getProperty<int>("type"));
-    result->setCommand(_object.getProperty<int>("type"));
+    result->setCommand(_object.getProperty<int>("command"));
     int functionID = _object.getProperty<int>("functionID");
     result->getPayload().add<uint8_t>(functionID);
     jsval arrVal = _object.doGetProperty("payload");
@@ -277,7 +276,7 @@ namespace dss {
     ScriptObject payloadObj(JS_NewArrayObject(cx, 0, NULL), *ctx);
     objWrapper.setProperty("payload", &payloadObj);
     objWrapper.setProperty("functionID", -1);
-    objWrapper.setProperty<int>("type", CommandRequest);
+    objWrapper.setProperty<int>("command", CommandRequest);
     return JS_TRUE;
   } // DS485Frame_construct
 
