@@ -38,7 +38,7 @@ namespace dss {
                              jsval *argv, jsval *rval);
 
   static JSClass tcpSocket_class = {
-    "TcpSocket", JSCLASS_HAS_PRIVATE | JSCLASS_CONSTRUCT_PROTOTYPE,
+    "TcpSocket", JSCLASS_HAS_PRIVATE,
     JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
     JS_EnumerateStandardClasses,
     JS_ResolveStub,
@@ -80,14 +80,14 @@ namespace dss {
 
     void callCallbackWithArguments(ScriptFunctionParameterList& _list) {
       if(hasCallback()) {
+        JSAutoLocalRootScope rootScope(getContext().getJSContext());
         // copy callback data so we can clear the originals
         boost::shared_ptr<ScriptObject> pCallbackObjectCopy = m_pCallbackObject;
         jsval callbackFunctionCopy = m_CallbackFunction;
-        pCallbackObjectCopy->addRoot();
         boost::shared_ptr<ScriptFunctionRooter> functionRoot = m_pFunctionRooter;//(new ScriptFunctionRooter(m_pContext, callbackFunctionCopy));
         // clear callback objects before calling the callback, we might overwrite
         // data if we do that afterwards
-        m_pFunctionRooter.reset();
+        //m_pFunctionRooter.reset();
         m_pCallbackObject.reset();
         m_CallbackFunction = JSVAL_NULL;
         try {
@@ -99,9 +99,8 @@ namespace dss {
                std::string("SocketHelper::callCallbackWithArguments: Exception caught: ")
                + e.what(), lsError);
         }
-        pCallbackObjectCopy->removeRoot();
-        JS_GC(m_pContext->getJSContext());
       }
+      //JS_GC(m_pContext->getJSContext());
     }
 
     ScriptContext& getContext() const {
@@ -248,6 +247,7 @@ namespace dss {
     void connectionCallback(const boost::system::error_code& error,
                             tcp::resolver::iterator endpoint_iterator) {
       Logger::getInstance()->log("*** Connection callback");
+      AssertLocked lock(&getContext());
       JS_SetContextThread(getContext().getJSContext());
       JSRequest req(getContext().getJSContext());
       if (!error) {
@@ -269,6 +269,7 @@ namespace dss {
 
     void sendCallback(const boost::system::error_code& error, std::size_t bytesTransfered) {
       Logger::getInstance()->log("*** Send callback");
+      AssertLocked lock(&getContext());
       JS_SetContextThread(getContext().getJSContext());
       JSRequest req(getContext().getJSContext());
       if(!error) {
@@ -286,6 +287,7 @@ namespace dss {
     }
 
     void readCallback(const boost::system::error_code& error, std::size_t bytesTransfered) {
+      AssertLocked lock(&getContext());
       JS_SetContextThread(getContext().getJSContext());
       JSRequest req(getContext().getJSContext());
       if(!error) {
@@ -303,6 +305,7 @@ namespace dss {
     }
 
     void acceptCallback(const boost::system::error_code& error) {
+      AssertLocked lock(&getContext());
       JS_SetContextThread(getContext().getJSContext());
       JSRequest req(getContext().getJSContext());
       if(!error) {
@@ -341,18 +344,21 @@ namespace dss {
     }
 
     void callCallback(bool _result) {
+      JSAutoLocalRootScope rootScope(getContext().getJSContext());
       ScriptFunctionParameterList param(getContext());
       param.add<bool>(_result);
       callCallbackWithArguments(param);
     }
 
     void callSizeCallback(int _result) {
+      JSAutoLocalRootScope rootScope(getContext().getJSContext());
       ScriptFunctionParameterList param(getContext());
       param.add<int>(_result);
       callCallbackWithArguments(param);
     }
 
     void callDataCallback(const std::string& _result) {
+      JSAutoLocalRootScope rootScope(getContext().getJSContext());
       ScriptFunctionParameterList param(getContext());
       param.add<std::string>(_result);
       callCallbackWithArguments(param);
@@ -373,16 +379,20 @@ namespace dss {
     : SocketHelper(_extension),
       m_pSocket(new tcp::socket(getIOService()))
     {
+      Logger::getInstance()->log("Creating SocketHelperSendOneShot");
     }
 
     ~SocketHelperSendOneShot() {
+      Logger::getInstance()->log("Destroying SocketHelperSendOneShot");
       if(m_pSocket->is_open()) {
         m_pSocket->close();
       }
       m_pSocket.reset();
+      Logger::getInstance()->log("Done: Destroying SocketHelperSendOneShot");
     }
 
     void sendTo(const std::string& _host, int _port, const std::string& _data) {
+      Logger::getInstance()->log("SocketHelperSendOneShot::sendTo");
       m_Data = _data;
       tcp::resolver resolver(getIOService());
       tcp::resolver::query query(_host, intToString(_port));
@@ -397,17 +407,20 @@ namespace dss {
 
     void write()
     {
+      Logger::getInstance()->log("SocketHelperSendOneShot::write");
       boost::asio::async_write(*m_pSocket,
           boost::asio::buffer(m_Data.c_str(),
             m_Data.size()),
           boost::bind(&SocketHelperSendOneShot::handle_write, this,
             boost::asio::placeholders::error));
     }
+    void req();
 
   private:
     void handle_connect(const boost::system::error_code& error,
         tcp::resolver::iterator endpoint_iterator)
     {
+      Logger::getInstance()->log("SocketHelperSendOneShot::handle_connect");
       if (!error) {
         getIOService().post(boost::bind(&SocketHelperSendOneShot::write, this));
       } else if (endpoint_iterator != tcp::resolver::iterator()) {
@@ -420,6 +433,10 @@ namespace dss {
     }
 
     void handle_write(const boost::system::error_code& error) {
+      Logger::getInstance()->log("SocketHelperSendOneShot::handle_write");
+      {
+      AssertLocked lock(&getContext());
+      JS_SetContextThread(getContext().getJSContext());
       JSRequest req(getContext().getJSContext());
       if(hasCallback()) {
         ScriptFunctionParameterList params(getContext());
@@ -429,8 +446,13 @@ namespace dss {
           Logger::getInstance()->log("SocketHelperSendOneShot::handle_write: " + error.message());
         }
       }
+      req.endRequest();
+      JS_ClearContextThread(getContext().getJSContext());
+      }
       do_close();
+      Logger::getInstance()->log("SocketHelperSendOneShot::beforeRemoving");
       m_Extension.removeSocketHelper(shared_from_this());
+      Logger::getInstance()->log("SocketHelperSendOneShot::afterRemoving");
     }
 
     void do_close() {

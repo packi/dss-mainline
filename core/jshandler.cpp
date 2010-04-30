@@ -278,7 +278,6 @@ namespace dss {
     if (m_pRootObject == NULL) {
       throw ScriptException("Could not create root-object");
     }
-    JS_AddRoot(_pContext, &m_pRootObject);
     m_RootObject.reset(new ScriptObject(m_pRootObject, *this));
 
     JS_DefineFunctions(m_pContext, m_pRootObject, global_methods);
@@ -294,15 +293,15 @@ namespace dss {
 
   ScriptContext::~ScriptContext() {
     //scrubVector(m_AttachedObjects);
+    Logger::getInstance()->log("destroying script context " + intToString(int(this), true));
     if(!m_AttachedObjects.empty()) {
       Logger::getInstance()->log("Still have some attached objects (" + intToString(m_AttachedObjects.size()) + "). Memory leak?", lsError);
     }
-    JS_BeginRequest(m_pContext);
-    JS_RemoveRoot(m_pContext, &m_pRootObject);
-    JS_GC(m_pContext);
+//    JS_GC(m_pContext);
     JS_SetContextPrivate(m_pContext, NULL);
     JS_DestroyContext(m_pContext);
     m_pContext = NULL;
+    Logger::getInstance()->log("destroyed script context " + intToString(int(this), true));
   } // dtor
 
   void ScriptContext::attachObject(ScriptContextAttachedObject* _pObject) {
@@ -391,6 +390,7 @@ namespace dss {
     AssertLocked lock(this);
     JSRequest req(this);
 
+    JS_SetContextThread(m_pContext);
     const char* filename = "temporary_script";
     jsval rval;
     JSBool ok = JS_EvaluateScript(m_pContext, m_pRootObject, _script.c_str(), _script.size(),

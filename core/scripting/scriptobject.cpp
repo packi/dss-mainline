@@ -93,6 +93,7 @@ namespace dss {
 
   template<>
   void ScriptObject::setProperty(const std::string& _name, const std::string& _value) {
+    JSRequest req(&m_Context);
     JSString* str = JS_NewStringCopyN(m_Context.getJSContext(), _value.c_str(), _value.size());
     doSetProperty(_name, STRING_TO_JSVAL(str));
   } // setProperty<std::string>
@@ -105,11 +106,13 @@ namespace dss {
 
   template<>
   void ScriptObject::setProperty(const std::string& _name, bool _value) {
+    JSRequest req(&m_Context);
     doSetProperty(_name, _value ? JSVAL_TRUE : JSVAL_FALSE);
   }
 
   template<>
   void ScriptObject::setProperty(const std::string& _name, int _value) {
+    JSRequest req(&m_Context);
     jsval val;
     if(!JS_NewNumberValue(m_Context.getJSContext(), _value, &val)) {
       throw ScriptException("could not allocate number");
@@ -120,6 +123,7 @@ namespace dss {
   template<>
   void ScriptObject::setProperty(const std::string& _name, ScriptObject* _value) {
     assert(_value != NULL);
+    JSRequest req(&m_Context);
     doSetProperty(_name, OBJECT_TO_JSVAL(_value->m_pObject));
   } // setProperty<ScriptObject>
 

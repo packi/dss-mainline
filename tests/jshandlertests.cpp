@@ -39,7 +39,8 @@ BOOST_AUTO_TEST_CASE(testSimpleObject) {
   env->initialize();
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ScriptObject obj(*ctx, NULL);
+  ScriptObject obj(*ctx, &ctx->getRootObject());
+  //obj.addRoot();
   obj.setProperty("testing", 1);
   BOOST_CHECK_EQUAL(obj.getProperty<int>("testing"), 1);
   ctx->getRootObject().setProperty("obj", &obj);
@@ -48,7 +49,11 @@ BOOST_AUTO_TEST_CASE(testSimpleObject) {
   obj.setProperty("testing", 0);
   BOOST_CHECK_EQUAL(ctx->evaluate<int>("obj.testing"), 0);
 
+  Logger::getInstance()->log("setting property");
+  JS_SetContextThread(ctx->getJSContext());
   obj.setProperty("testing2", "test");
+  JS_ClearContextThread(ctx->getJSContext());
+  Logger::getInstance()->log("done setting property");
   BOOST_CHECK_EQUAL(obj.getProperty<std::string>("testing2"), "test");
   BOOST_CHECK_EQUAL(ctx->evaluate<std::string>("obj.testing2"), "test");
 } // testSimpleObject
@@ -62,6 +67,7 @@ BOOST_AUTO_TEST_CASE(testCallingFunctions) {
 
   BOOST_ASSERT(JSVAL_IS_OBJECT(res));
 
+  JS_SetContextThread(ctx->getJSContext());
   ScriptObject obj(JSVAL_TO_OBJECT(res), *ctx);
 
   ScriptFunctionParameterList list(*ctx);
@@ -76,6 +82,7 @@ BOOST_AUTO_TEST_CASE(testCallingFunctions) {
   BOOST_CHECK_EQUAL(resObj.getProperty<std::string>("e"), "testing");
   BOOST_CHECK_EQUAL(resObj.getProperty<int>("f"), 1);
   BOOST_CHECK_EQUAL(resObj.getProperty<bool>("g"), false);
+  JS_ClearContextThread(ctx->getJSContext());
 }
 
 BOOST_AUTO_TEST_CASE(testLongerScript) {

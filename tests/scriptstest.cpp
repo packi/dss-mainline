@@ -40,7 +40,12 @@ BOOST_AUTO_TEST_CASE(testSimpleScripts) {
   boost::scoped_ptr<ScriptContext> ctx(env.getContext());
   double result = ctx->evaluate<double>("x = 10; print(x); x = x * x;");
   BOOST_CHECK_EQUAL(result, 100.0);
+} // testSimpleScripts
 
+BOOST_AUTO_TEST_CASE(testSimpleScripts2) {
+  ScriptEnvironment env;
+  env.initialize();
+  boost::scoped_ptr<ScriptContext> ctx(env.getContext());
   std::string fileName = getTempDir() + "/test.js";
   std::ofstream ofs(fileName.c_str());
   ofs << "function newTestObj() {\n"
@@ -54,15 +59,19 @@ BOOST_AUTO_TEST_CASE(testSimpleScripts) {
          "print(obj.x);\n"
          "obj.x;\n";
   ofs.close();
-  ctx.reset(env.getContext());
-  result = ctx->evaluateScript<double>(fileName);
+  double result = ctx->evaluateScript<double>(fileName);
   BOOST_CHECK_EQUAL(result, 100.0);
   boost::filesystem::remove_all(fileName);
+} // testSimpleScripts2
 
-  ctx.reset(env.getContext());
+BOOST_AUTO_TEST_CASE(testSimpleScripts3) {
+  ScriptEnvironment env;
+  env.initialize();
+  boost::scoped_ptr<ScriptContext> ctx(env.getContext());
+
   string sres = ctx->evaluate<string>("x = 'bla'; x = x + 'bla';");
   BOOST_CHECK_EQUAL(sres, string("blabla"));
-} // testSimpleScripts
+} // testSimpleScripts3
 
 BOOST_AUTO_TEST_CASE(testMultipleIterations) {
   ScriptEnvironment env;
