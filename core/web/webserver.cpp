@@ -103,7 +103,7 @@ namespace dss {
 
         // we only accept log files that have the .log/.LOG extension
         size_t len = strlen(name);
-        if ((len < 4) || ((len >=4)  && 
+        if ((len < 4) || ((len >=4)  &&
            ((strncmp(name + len - 4, ".log", 4) != 0) &&
             (strncmp(name + len - 4, ".LOG", 4) != 0)))) {
           continue;
@@ -304,7 +304,7 @@ namespace dss {
     const char  *cookie;
     std::string setCookie;
     int token = -1;
-    boost::shared_ptr<Session> session; 
+    boost::shared_ptr<Session> session;
     std::string tokenStr;
 
     std::string uri = _info->uri;
@@ -337,9 +337,9 @@ namespace dss {
       }
     }
 
-    if ((cookie == NULL) || (token == -1) || (session.get() == NULL)){
+    if ((cookie == NULL) || (token == -1) || (session == NULL)){
       std::ostringstream sstream;
-      if ((cookie != NULL) && (session.get() != NULL)) {
+      if ((cookie != NULL) && (session != NULL)) {
         sstream << cookie;
       }
 

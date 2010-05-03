@@ -95,7 +95,7 @@ namespace dss {
   }
 
   void Subsystem::setLogSeverity(int _value) {
-    if(m_pLogChannel.get() != NULL) {
+    if(m_pLogChannel != NULL) {
       m_pLogChannel->setMinimumSeverity(static_cast<aLogSeverity>(_value));
     }
   }

@@ -121,7 +121,7 @@ namespace dss {
 
     uint16_t result;
     boost::shared_ptr<DS485CommandFrame> resFrame = receiveSingleFrame(frame, FunctionDeviceGetFunctionID);
-    if(resFrame.get() != NULL) {
+    if(resFrame != NULL) {
       PayloadDissector pd(resFrame->getPayload());
       pd.get<uint8_t>(); // skip the function id
       if(pd.get<uint16_t>() == 0x0001) {
@@ -753,7 +753,7 @@ namespace dss {
 
     recFrame = bucket->popFrame();
 
-    if(recFrame.get() != NULL) {
+    if(recFrame != NULL) {
         PayloadDissector pd(recFrame->getPayload());
         pd.get<uint8_t>(); // discard functionID
         pd.get<uint16_t>();
@@ -844,7 +844,7 @@ namespace dss {
 
     boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
 
-    if(recFrame.get() != NULL) {
+    if(recFrame != NULL) {
       return recFrame;
     } else {
       throw std::runtime_error("received frame is NULL but bucket->isEmpty() returns false");
@@ -854,7 +854,7 @@ namespace dss {
   uint8_t DS485Proxy::receiveSingleResult(DS485CommandFrame& _frame, const uint8_t _functionID) {
     boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(_frame, _functionID);
 
-    if(recFrame.get() != NULL) {
+    if(recFrame != NULL) {
       PayloadDissector pd(recFrame->getPayload());
       uint8_t functionID = pd.get<uint8_t>();
       if(functionID != _functionID) {
@@ -870,7 +870,7 @@ namespace dss {
   uint16_t DS485Proxy::receiveSingleResult16(DS485CommandFrame& _frame, const uint8_t _functionID) {
     boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(_frame, _functionID);
 
-    if(recFrame.get() != NULL) {
+    if(recFrame != NULL) {
       PayloadDissector pd(recFrame->getPayload());
       uint8_t functionID = pd.get<uint8_t>();
       if(functionID != _functionID) {

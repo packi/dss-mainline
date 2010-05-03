@@ -904,9 +904,9 @@ namespace dss {
     clock_gettime(CLOCK_REALTIME, &lastFrame);
     while(true) {
       boost::scoped_ptr<DS485Frame> frame(m_FrameReader.getFrame(500));
-      if(frame.get() != NULL){
+      if(frame != NULL){
         clock_gettime(CLOCK_REALTIME, &thisFrame);
-        if(frame.get() != NULL) {
+        if(frame != NULL) {
 
           double diffMS = ((thisFrame.tv_sec*1000.0 + thisFrame.tv_nsec/1000.0/1000.0) -
                            (lastFrame.tv_sec*1000.0 + lastFrame.tv_nsec/1000.0/1000.0));

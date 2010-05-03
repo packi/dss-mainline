@@ -78,7 +78,7 @@ namespace dss {
     std::string tokenStr = _request.getParameter("sid");
     int token;
 
-    if (_session.get() == NULL) {
+    if(_session == NULL) {
       return failure("Invalid session!");
     }
 
@@ -90,7 +90,7 @@ namespace dss {
       return failure("Missing event subscription id!");
     }
     try{
-     token = strToInt(tokenStr); 
+     token = strToInt(tokenStr);
     }
     catch(std::invalid_argument& err) {
       return failure("Could not parse event subscription id!");
@@ -101,8 +101,8 @@ namespace dss {
     m_eventsMutex.lock();
 
     boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
-    
-    if ((a.get() == NULL) || (a->empty())) {
+
+    if((a == NULL) || (a->empty())) {
       boost::shared_ptr<boost::any> b(new boost::any());
       eventSessions = boost::shared_ptr<EventSubscriptionSessionByTokenID>(new EventSubscriptionSessionByTokenID());
       *b = eventSessions;
@@ -123,7 +123,7 @@ namespace dss {
     }
 
     (*eventSessions)[token]->subscribe(name);
-    
+
     m_eventsMutex.unlock();
 
     return success();
@@ -135,7 +135,7 @@ namespace dss {
     std::string tokenStr = _request.getParameter("sid");
     int token;
 
-    if (_session.get() == NULL) {
+    if(_session == NULL) {
       return failure("Invalid session!");
     }
 
@@ -147,18 +147,17 @@ namespace dss {
       return failure("Missing event subscription id!");
     }
 
-    try{
-     token = strToInt(tokenStr); 
-    }
-    catch(std::invalid_argument& err) {
+    try {
+     token = strToInt(tokenStr);
+    } catch(std::invalid_argument& err) {
       return failure("Could not parse event subscription id!");
     }
 
     boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
 
     boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
-    
-    if ((a.get() == NULL) || (a->empty())) {
+
+    if((a == NULL) || (a->empty())) {
       return failure("Invalid session!");
     } else {
       try {
@@ -179,12 +178,11 @@ namespace dss {
 
     try {
       (*eventSessions)[token]->unsubscribe(name);
-    } catch(std::exception& e)
-    {
+    } catch(std::exception& e) {
       m_eventsMutex.unlock();
       return failure(e.what());
     }
-   
+
     eventSessions->erase(entry);
 
     m_eventsMutex.unlock();
@@ -198,8 +196,8 @@ namespace dss {
     std::string timeoutStr = _request.getParameter("timeout");
     int timeout = 0;
     int token;
- 
-    if (_session.get() == NULL) {
+
+    if(_session == NULL) {
       return failure("Invalid session!");
     }
 
@@ -208,17 +206,15 @@ namespace dss {
     }
 
     try {
-      token = strToInt(tokenStr); 
-    }
-    catch(std::invalid_argument& err) {
+      token = strToInt(tokenStr);
+    } catch(std::invalid_argument& err) {
       return failure("Could not parse subsription id!");
     }
 
     if(!timeoutStr.empty()) {
       try {
-        timeout = strToInt(timeoutStr); 
-      }
-      catch(std::invalid_argument& err) {
+        timeout = strToInt(timeoutStr);
+      } catch(std::invalid_argument& err) {
         return failure("Could not parse timeout parameter!");
       }
     }
@@ -228,8 +224,8 @@ namespace dss {
     m_eventsMutex.lock();
 
     boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
-    
-    if ((a.get() == NULL) || (a->empty())) {
+
+    if((a == NULL) || (a->empty())) {
       m_eventsMutex.unlock();
       return failure("Invalid session!");
     } else {
@@ -242,11 +238,11 @@ namespace dss {
     }
 
     EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(token);
-    if(entry == eventSessions->end()){
+    if(entry == eventSessions->end()) {
       m_eventsMutex.unlock();
       return failure("Subsription id not found!");
     }
-    
+
     boost::shared_ptr<EventSubscriptionSession> session = (*eventSessions)[token];
     m_eventsMutex.unlock();
 
@@ -282,7 +278,7 @@ namespace dss {
       unsubscribe(_eventName);
     } catch(std::runtime_error& err) {}
 
-    m_subscriptionMap[_eventName] = m_pEventCollector->subscribeTo(_eventName); 
+    m_subscriptionMap[_eventName] = m_pEventCollector->subscribeTo(_eventName);
   }
 
   void EventSubscriptionSession::unsubscribe(const std::string& _eventName) {
