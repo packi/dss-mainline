@@ -50,8 +50,8 @@ namespace dss {
     boost::shared_ptr<JSONObject> success(const std::string& _message);
     boost::shared_ptr<JSONObject> failure(const std::string& _message = "");
   public:
-    virtual std::string handleRequest(const RestfulRequest& _request, Session* _session);
-    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, Session* _session) = 0;
+    virtual std::string handleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) = 0;
   }; // WebServerRequestHandlerJSON
 
 

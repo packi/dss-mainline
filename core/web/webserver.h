@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009, 2010 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
@@ -28,6 +28,7 @@
 #include "core/base.h"
 #include "core/subsystem.h"
 #include "core/session.h"
+#include "core/sessionmanager.h"
 
 #include <string>
 
@@ -49,35 +50,36 @@ namespace dss {
   private:
     struct mg_context* m_mgContext;
     int m_LastSessionID;
-    SessionByID m_Sessions;
     boost::ptr_vector<WebServerPlugin> m_Plugins;
     __gnu_cxx::hash_map<const std::string, RestfulRequestHandler*> m_Handlers;
     boost::shared_ptr<RestfulAPI> m_pAPI;
+    SessionManager m_SessionManager;
   private:
     void setupAPI();
     void loadPlugin(PropertyNode& _node);
     void loadPlugins();
     void instantiateHandlers();
+    void publishJSLogfiles();
   protected:
     void pluginCalled(struct mg_connection* _connection,
                       const struct mg_request_info* _info,
-                      WebServerPlugin& plugin, 
+                      WebServerPlugin& plugin,
                       const std::string& _uri);
 
     static void httpPluginCallback(struct mg_connection* _connection,
-                                   const struct mg_request_info* _info, 
+                                   const struct mg_request_info* _info,
                                    void* _userData);
     static void httpBrowseProperties(struct mg_connection* _connection,
-                                   const struct mg_request_info* _info, 
+                                   const struct mg_request_info* _info,
                                    void* _userData);
     static void jsonHandler(struct mg_connection* _connection,
-                            const struct mg_request_info* _info, 
+                            const struct mg_request_info* _info,
                             void* _userData);
     static void downloadHandler(struct mg_connection* _connection,
-                            const struct mg_request_info* _info, 
+                            const struct mg_request_info* _info,
                             void* _userData);
 
-      static void emitHTTPHeader(int _code, struct mg_connection* _connection, const std::string& _contentType = "text/html");
+      static void emitHTTPHeader(int _code, struct mg_connection* _connection, const std::string& _contentType = "text/html", const std::string& _setCookie = "");
   protected:
     virtual void doStart();
   public:

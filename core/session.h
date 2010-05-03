@@ -24,19 +24,37 @@
 #define SESSION_H_INCLUDED
 
 #include "datetools.h"
+#include "mutex.h"
+
+#include <string>
+#include <boost/any.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/ptr_container/ptr_map.hpp>
 
 namespace dss {
-
   class Session {
-  private:
+  protected:
     int m_Token;
+    Mutex m_UseCountMutex;
+    int m_UsageCount;
 
     DateTime m_LastTouched;
+
+    Mutex m_DataMapMutex;
+    boost::ptr_map<std::string, boost::shared_ptr<boost::any> > dataMap;
   public:
     Session() {}
     Session(const int _tokenID);
 
-    bool isStillValid();
+    int getID();
+    virtual bool isStillValid();
+    bool isUsed();
+    void use();
+    void unuse();
+    void touch();
+    void addData(const std::string& _key, boost::shared_ptr<boost::any>& _value);
+    boost::shared_ptr<boost::any>& getData(const std::string& _key);
+    bool removeData(const std::string& _key);
     Session& operator=(const Session& _other);
   }; // Session
 

@@ -127,6 +127,7 @@ namespace dss {
     boost::shared_ptr<DS485CommandFrame> createReply(DS485CommandFrame& _request) const;
 
     void distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) const;
+    void sendDelayedResponse(boost::shared_ptr<DS485CommandFrame> _response, int _delayMS);
   private:
     void deviceCallScene(const int _deviceID, const int _sceneID);
     void groupCallScene(const int _zoneID, const int _groupID, const int _sceneID);

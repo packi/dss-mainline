@@ -237,7 +237,7 @@ namespace dss {
     while(!m_Terminated) {
       if(m_Queue->waitForEvent()) {
         boost::shared_ptr<Event> toProcess = m_Queue->popEvent();
-        if(toProcess.get() != NULL) {
+        if(toProcess != NULL) {
 
           Logger::getInstance()->log(std::string("EventInterpreter: Got event from queue: '") + toProcess->getName() + "'", lsInfo);
           for(HashMapConstStringString::const_iterator iParam = toProcess->getProperties().getContainer().begin(), e = toProcess->getProperties().getContainer().end();

@@ -28,6 +28,7 @@
 #endif
 
 #include <iostream>
+#include <cassert>
 
 #if defined(HAVE_JSAPI_H)
 #include <jsapi.h>
@@ -37,6 +38,10 @@
 #include <js/jsapi.h>
 #else
 #error Could not find spidermonkey
+#endif
+
+#ifndef JS_THREADSAFE
+#error Need threadsafe build of spidermonkey
 #endif
 
 #include <boost/ptr_container/ptr_vector.hpp>
@@ -121,6 +126,7 @@ namespace dss {
 
     void attachObject(ScriptContextAttachedObject* _pObject);
     void removeAttachedObject(ScriptContextAttachedObject* _pObject);
+    bool hasAttachedObjects() const { return !m_AttachedObjects.empty(); }
   public:
 
     /** Helper function to convert a jsval to a t. */
@@ -197,10 +203,73 @@ namespace dss {
 
   class ScriptContextAttachedObject {
   public:
-    ~ScriptContextAttachedObject() {
-      Logger::getInstance()->log("destroying attached object");
+    ScriptContextAttachedObject(ScriptContext* _pContext)
+    : m_pContext(_pContext)
+    {
+      assert(m_pContext != NULL);
+      m_pContext->attachObject(this);
     }
+    ~ScriptContextAttachedObject() {
+      Logger::getInstance()->log("destroying attached object " + intToString(int(this), true), lsDebug);
+      m_pContext->removeAttachedObject(this);
+    }
+
+    ScriptContext* getContext() { return m_pContext; }
+  private:
+    ScriptContext* m_pContext;
   }; // ScriptContextAttachedObject
+
+  /** Adds a JS-function callback to the root GC set and thus
+      save it from the GC. */
+  class ScriptFunctionRooter {
+  public:
+    ScriptFunctionRooter();
+    ScriptFunctionRooter(ScriptContext* _pContext, JSObject* _pObject, jsval _function);
+    ~ScriptFunctionRooter();
+
+    void rootFunction(ScriptContext* _pContext, JSObject* _pObject, jsval _function);
+  private:
+    JSObject* m_pObject;
+    JSObject* m_pFunction;
+    ScriptContext* m_pContext;
+  }; // ScriptFunctionRooter
+
+  class JSRequest {
+  public:
+    JSRequest(ScriptContext* _pContext)
+    : m_pContext(_pContext->getJSContext()),
+      m_NeedsEndRequest(true)
+    {
+      Logger::getInstance()->log("^^^ Beginning request for " + intToString(int(m_pContext), true));
+      assert(_pContext != NULL);
+      JS_BeginRequest(m_pContext);
+    }
+
+    JSRequest(JSContext* _pContext)
+    : m_pContext(_pContext),
+      m_NeedsEndRequest(true)
+    {
+      Logger::getInstance()->log("^^^ Beginning request for " + intToString(int(m_pContext), true));
+      assert(_pContext != NULL);
+      JS_BeginRequest(_pContext);
+    }
+
+    ~JSRequest() {
+      if(m_NeedsEndRequest) {
+        JS_EndRequest(m_pContext);
+        Logger::getInstance()->log("^^^ Ending request for " + intToString(int(m_pContext), true));
+      }
+    }
+
+    void endRequest() {
+      JS_EndRequest(m_pContext);
+      Logger::getInstance()->log("^^^ Ending request for " + intToString(int(m_pContext), true));
+      m_NeedsEndRequest = false;
+    }
+  private:
+    JSContext* m_pContext;
+    bool m_NeedsEndRequest;
+  };
 
 
 /*

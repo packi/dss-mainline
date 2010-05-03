@@ -242,6 +242,41 @@ namespace dss {
     return JS_FALSE;
   } // set_by_name
 
+  JSBool set_by_shortaddress(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if(ext != NULL && set != NULL && argc >= 2) {
+      try {
+        if (!JSVAL_IS_INT(argv[0])) {
+            Logger::getInstance()->log("JS: set_by_shortaddress: Could not parse circuit id as integer", lsWarning);
+            *rval = JSVAL_NULL;
+            return JS_FALSE;
+        }
+
+        if (!JSVAL_IS_INT(argv[2])) {
+            Logger::getInstance()->log("JS: set_by_shortaddress: Could not parse bus id as integer", lsWarning);
+            *rval = JSVAL_NULL;
+            return JS_FALSE;
+        }
+
+        int dsmeterID = JSVAL_TO_INT(argv[0]);
+        int busid = JSVAL_TO_INT(argv[1]); 
+        DeviceReference result = set->getByBusID(busid, dsmeterID);
+        JSObject* resultObj = ext->createJSDevice(*ctx, result);
+        *rval = OBJECT_TO_JSVAL(resultObj);
+        return JS_TRUE;
+      } catch(ItemNotFoundException&) {
+          Logger::getInstance()->log("JS: set.byShortAddress: Device not found", lsWarning);
+      }
+        *rval = JSVAL_NULL;
+        return JS_TRUE;
+      }
+    return JS_FALSE;
+  } // set_by_shortaddress
+
+
   JSBool set_by_dsid(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     Set* set = static_cast<Set*>(JS_GetPrivate(cx, obj));
@@ -441,6 +476,7 @@ namespace dss {
     {"byGroup", set_by_group, 1, 0, 0},
     {"byPresence", set_by_presence, 1, 0, 0},
     {"byTag", set_by_tag, 1, 0, 0},
+    {"byShortAddress", set_by_shortaddress, 2, 0, 0},
     {NULL},
   };
 
@@ -730,6 +766,9 @@ namespace dss {
         case 6:
           *rval = INT_TO_JSVAL(dev->getDevice().getLastCalledScene());
           return JS_TRUE;
+        case 7:
+          *rval = INT_TO_JSVAL(dev->getDevice().getShortAddress());
+          return JS_TRUE;
       }
     }
     return JS_FALSE;
@@ -757,6 +796,7 @@ namespace dss {
     {"circuitID", 4, 0, dev_JSGet},
     {"functionID", 5, 0, dev_JSGet},
     {"lastCalledScene", 6, 0, dev_JSGet},
+    {"shortAddress", 7, 0, dev_JSGet},
     {NULL, 0, 0, NULL, NULL}
   };
 

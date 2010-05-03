@@ -50,10 +50,9 @@ namespace dss {
     void sendFrame(ScriptObject& _frame, boost::shared_ptr<ScriptObject> _callbackObject, jsval _function, int _timeout);
     void setCallback(int _sourceID, int _functionID, boost::shared_ptr<ScriptObject> _callbackObject, jsval _function, int _timeout);
 
+    void removeCallback(boost::shared_ptr<FrameBucketCollector> _pCallback);
   private:
     boost::shared_ptr<DS485CommandFrame> frameFromScriptObject(ScriptObject& _object);
-    void waitForFrame(boost::shared_ptr<FrameBucketCollector>, boost::shared_ptr<ScriptObject> _callbackObject, jsval _function, int _timeout);
-    void removeCallback(boost::shared_ptr<FrameBucketCollector> _pCallback);
   private:
     boost::shared_ptr<DS485Client> m_pClient;
     FrameSenderInterface& m_FrameSender;

@@ -121,7 +121,7 @@ namespace dss {
 
     uint16_t result;
     boost::shared_ptr<DS485CommandFrame> resFrame = receiveSingleFrame(frame, FunctionDeviceGetFunctionID);
-    if(resFrame.get() != NULL) {
+    if(resFrame != NULL) {
       PayloadDissector pd(resFrame->getPayload());
       pd.get<uint8_t>(); // skip the function id
       if(pd.get<uint16_t>() == 0x0001) {
@@ -146,33 +146,30 @@ namespace dss {
 #else
     bool sim = false;
 #endif
-    if(broadcast || !sim) {
-      std::ostringstream sstream;
-      sstream << "DEST:";
-      if(broadcast) {
-        sstream << "*";
-      }
-      sstream << "0x" << std::hex << std::uppercase << int(_frame.getHeader().getDestination());
-
-      PayloadDissector pdDump(_frame.getPayload());
-      uint8_t cmd = pdDump.get<uint8_t>();
-      sstream << ", CMD:0x" << std::hex << std::uppercase << (unsigned int)cmd << ", ";
-      int iParameter=1;
-      while(!pdDump.isEmpty()) {
-        uint16_t data = pdDump.get<uint16_t>();
-        sstream << " P" << iParameter++ << ":0x" << std::hex << std::uppercase << data;
-      }
-      sstream << std::dec;
-
-      if((m_DS485Controller.getState() == csSlave) || (m_DS485Controller.getState() == csMaster)) {
-        log("DS485Proxy: Enqueue packet");
-        m_DS485Controller.enqueueFrame(_frame);
-      }
-      else {
-        log("DS485Proxy: Discard packet");
-      }
-      log(sstream.str());
+    std::ostringstream sstream;
+    sstream << "DEST:";
+    if(broadcast) {
+      sstream << "*";
     }
+    sstream << "0x" << std::hex << std::uppercase << int(_frame.getHeader().getDestination());
+
+    PayloadDissector pdDump(_frame.getPayload());
+    uint8_t cmd = pdDump.get<uint8_t>();
+    sstream << ", CMD:0x" << std::hex << std::uppercase << (unsigned int)cmd << ", ";
+    int iParameter=1;
+    while(!pdDump.isEmpty()) {
+      uint16_t data = pdDump.get<uint16_t>();
+      sstream << " P" << iParameter++ << ":0x" << std::hex << std::uppercase << data;
+    }
+    sstream << std::dec;
+
+    if((m_DS485Controller.getState() == csSlave) || (m_DS485Controller.getState() == csMaster)) {
+      log("DS485Proxy: Enqueue packet for sending over the wire");
+      m_DS485Controller.enqueueFrame(_frame);
+    } else {
+      log("DS485Proxy: Not putting packet on the wire");
+    }
+    log(sstream.str());
     boost::shared_ptr<DS485CommandFrame> pFrame(new DS485CommandFrame);
     *pFrame = _frame;
 
@@ -756,7 +753,7 @@ namespace dss {
 
     recFrame = bucket->popFrame();
 
-    if(recFrame.get() != NULL) {
+    if(recFrame != NULL) {
         PayloadDissector pd(recFrame->getPayload());
         pd.get<uint8_t>(); // discard functionID
         pd.get<uint16_t>();
@@ -847,7 +844,7 @@ namespace dss {
 
     boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
 
-    if(recFrame.get() != NULL) {
+    if(recFrame != NULL) {
       return recFrame;
     } else {
       throw std::runtime_error("received frame is NULL but bucket->isEmpty() returns false");
@@ -857,7 +854,7 @@ namespace dss {
   uint8_t DS485Proxy::receiveSingleResult(DS485CommandFrame& _frame, const uint8_t _functionID) {
     boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(_frame, _functionID);
 
-    if(recFrame.get() != NULL) {
+    if(recFrame != NULL) {
       PayloadDissector pd(recFrame->getPayload());
       uint8_t functionID = pd.get<uint8_t>();
       if(functionID != _functionID) {
@@ -873,7 +870,7 @@ namespace dss {
   uint16_t DS485Proxy::receiveSingleResult16(DS485CommandFrame& _frame, const uint8_t _functionID) {
     boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(_frame, _functionID);
 
-    if(recFrame.get() != NULL) {
+    if(recFrame != NULL) {
       PayloadDissector pd(recFrame->getPayload());
       uint8_t functionID = pd.get<uint8_t>();
       if(functionID != _functionID) {

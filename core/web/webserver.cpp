@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009, 2010 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -24,6 +25,13 @@
 
 #include <iostream>
 #include <sstream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <string.h>
+
+#include <boost/filesystem.hpp>
 
 #include "core/logger.h"
 #include "core/dss.h"
@@ -52,11 +60,13 @@
 #include "webserverapi.h"
 #include "json.h"
 
+namespace fs = boost::filesystem;
+
 namespace dss {
   //============================================= WebServer
 
   WebServer::WebServer(DSS* _pDSS)
-    : Subsystem(_pDSS, "WebServer"), m_mgContext(0)
+    : Subsystem(_pDSS, "WebServer"), m_mgContext(0), m_LastSessionID(0)
   {
   } // ctor
 
@@ -76,10 +86,37 @@ namespace dss {
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "ports", 8080, true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "sslcert", getDSS().getPropertySystem().getStringValue("/config/configdirectory") + "dsscert.pem" , true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "files/apartment.xml", getDSS().getDataDirectory() + "apartment.xml", true, false);
-    
+
+    publishJSLogfiles();
     setupAPI();
     instantiateHandlers();
   } // initialize
+
+  void WebServer::publishJSLogfiles() {
+    // pre-create the property as the gui accesses it on startup and gets upset if the node's not there
+    getDSS().getPropertySystem().createProperty("/system/js/logsfiles/");
+
+    std::string logDir = getDSS().getJSLogDirectory();
+    try {
+      fs::directory_iterator end_iter;
+      for(fs::directory_iterator dir_itr(logDir);
+          dir_itr != end_iter;
+          ++dir_itr)  {
+        if(fs::is_regular(dir_itr->status())) {
+          std::string fileName = dir_itr->filename();
+          if(endsWith(dir_itr->filename(), ".log") ||
+             endsWith(dir_itr->filename(), ".LOG")) {
+            std::string abspath = dir_itr->string();
+            getDSS().getPropertySystem().setStringValue("/config/subsystems/WebServer/files/" + std::string(fileName), abspath, true, false);
+            getDSS().getPropertySystem().setStringValue("/system/js/logsfiles/" + std::string(fileName), abspath, true, false);
+          }
+        }
+      }
+    } catch(std::exception& e) {
+      log("Directory for js logfiles does not exist: '" + logDir + "'", lsFatal);
+      abort(); // TODO: replace with a nice shutdown procedure but it's better to crash at startup than crashing at runtime
+    }
+  } // publishJSLogfiles
 
   void WebServer::loadPlugins() {
     PropertyNodePtr pluginsNode = getDSS().getPropertySystem().getProperty(getConfigPropertyBasePath() + "plugins");
@@ -123,7 +160,7 @@ namespace dss {
   void WebServer::doStart() {
     std::string sslcert = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "sslcert");
     mg_set_option(m_mgContext, "ssl_cert", sslcert.c_str());
-    std::string ports = intToString(DSS::getInstance()->getPropertySystem().getIntValue(getConfigPropertyBasePath() + "ports"))+"s";
+    std::string ports = intToString(DSS::getInstance()->getPropertySystem().getIntValue(getConfigPropertyBasePath() + "ports")) + "s";
     log("Webserver: Listening on port(s) " + ports);
     mg_set_option(m_mgContext, "ports", ports.c_str());
 
@@ -154,10 +191,14 @@ namespace dss {
     }
   }
 
-  void WebServer::emitHTTPHeader(int _code, struct mg_connection* _connection, const std::string& _contentType) {
+  void WebServer::emitHTTPHeader(int _code, struct mg_connection* _connection, const std::string& _contentType, const std::string& _setCookie) {
     std::ostringstream sstream;
     sstream << "HTTP/1.1 " << _code << ' ' << httpCodeToMessage(_code) << "\r\n";
-    sstream << "Content-Type: " << _contentType << "; charset=utf-8\r\n\r\n";
+    sstream << "Content-Type: " << _contentType << "; charset=utf-8\r\n";
+    if(!_setCookie.empty()) {
+      sstream << "Set-Cookie: " << _setCookie << "\r\n";
+    }
+    sstream << "\r\n";
     std::string tmp = sstream.str();
     mg_write(_connection, tmp.c_str(), tmp.length());
   } // emitHTTPHeader
@@ -249,8 +290,13 @@ namespace dss {
                               const struct mg_request_info* _info,
                               void* _userData) {
     const std::string urlid = "/json/";
-    std::string uri = _info->uri;
+    const char  *cookie;
+    std::string setCookie;
+    int token = -1;
+    boost::shared_ptr<Session> session;
+    std::string tokenStr;
 
+    std::string uri = _info->uri;
     HashMapConstStringString paramMap = parseParameter(_info->query_string);
 
     std::string method = uri.substr(uri.find(urlid) + urlid.size());
@@ -260,35 +306,54 @@ namespace dss {
     WebServer& self = DSS::getInstance()->getWebServer();
     self.log("Processing call to " + method);
 
-    Session* session = NULL;
-    std::string tokenStr = paramMap["token"];
-    if(!tokenStr.empty()) {
-      int token = strToIntDef(tokenStr, -1);
-      if(token != -1) {
-        SessionByID::iterator iEntry = self.m_Sessions.find(token);
-        if(iEntry != self.m_Sessions.end()) {
-          if(iEntry->second->isStillValid()) {
-            Session& s = *iEntry->second;
-            session = &s;
-          }
+    cookie = mg_get_header(_connection, "Cookie");
+
+    if (cookie != NULL) {
+      std::string c = cookie;
+      size_t t_start = c.find("token=");
+      if (t_start != std::string::npos) {
+        c = c.substr(t_start + strlen("token="));
+        size_t semi = c.find(';');
+        if (semi != std::string::npos) {
+          tokenStr = c.substr(0, semi);
+        } else {
+          tokenStr = c;
         }
+        token = strToIntDef(tokenStr, -1);
+        if(token != -1) {
+          session = self.m_SessionManager.getSession(token);
+        }//token != -1
       }
+    }
+
+    if ((cookie == NULL) || (token == -1) || (session == NULL)){
+      std::ostringstream sstream;
+      if ((cookie != NULL) && (session != NULL)) {
+        sstream << cookie;
+      }
+
+      token = self.m_SessionManager.registerSession();
+      session = self.m_SessionManager.getSession(token);
+      self.log("Registered new JSON session");
+
+      sstream << "token=" << token << ";" << "path=/";
+      setCookie = sstream.str();
     }
 
     std::string result;
     if(self.m_Handlers[request.getClass()] != NULL) {
       try {
         result = self.m_Handlers[request.getClass()]->handleRequest(request, session);
-        emitHTTPHeader(200, _connection, "application/json");
+        emitHTTPHeader(200, _connection, "application/json", setCookie);
       } catch(std::runtime_error& e) {
-        emitHTTPHeader(500, _connection, "application/json");
+        emitHTTPHeader(500, _connection, "application/json", setCookie);
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
       }
     } else {
-      emitHTTPHeader(404, _connection, "application/json");
+      emitHTTPHeader(404, _connection, "application/json", setCookie);
       std::ostringstream sstream;
       sstream << "{" << "\"ok\"" << ":" << "false" << ",";
       sstream << "\"message\"" << ":" << "\"Call to unknown function\"";

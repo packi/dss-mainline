@@ -101,6 +101,15 @@ if(DEFINED SPIDERMONKEY_LIBRARY_DIRS)
   link_directories(${SPIDERMONKEY_LIBRARY_DIRS})
 endif()
 
+include(GGLCheckFunctionExists)
+set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DJS_THREADSAFE)
+set(CMAKE_REQUIRED_LIBRARIES ${SPIDERMONKEY_LIBRARIES})
+set(CMAKE_REQUIRED_LINK_DIR ${SPIDERMONKEY_LIBRARY_DIRS})
+GGL_CHECK_FUNCTION_EXISTS(JS_ClearContextThread HAVE_THREADSAFE_JS)
+if(NOT HAVE_THREADSAFE_JS)
+  message (FATAL_ERROR "Need threadsafe build of spidermonkey (libjs)")
+endif()
+
 include(${CMAKE_ROOT}/Modules/FindOpenSSL.cmake)
 if (OPENSSL_FOUND)
   set(REQUIRED_LIBS ${REQUIRED_LIBS} ${OPENSSL_LIBRARIES})
@@ -109,6 +118,7 @@ else()
   MESSAGE (FATAL_ERROR "Cannot build without OpenSSL. Please install
                     OpenSSL")
 endif()
+add_definitions(-DJS_THREADSAFE)
 
 # check for gsoap headers and library
 find_package(GSOAP REQUIRED)
@@ -168,7 +178,7 @@ add_subdirectory(doc)
 
 
 add_executable(dss main.cpp namespaces.cpp)
-target_link_libraries(dss ${TEST_LIB} core ds485 model unix webservices mongoose
+target_link_libraries(dss ${TEST_LIB} core ds485 model unix webservices core mongoose
 			  ${REQUIRED_LIBS})
 add_dependencies(dss build_info.h)
 

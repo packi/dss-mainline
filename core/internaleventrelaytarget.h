@@ -20,21 +20,36 @@
 
 */
 
-#ifndef DEVICEREQUESTHANDLER_H_
-#define DEVICEREQUESTHANDLER_H_
+#ifndef INTERNALEVENTRELAYTARGET_H_
+#define INTERNALEVENTRELAYTARGET_H_
 
-#include "deviceinterfacerequesthandler.h"
+#include <boost/function.hpp>
+
+#include "core/event.h"
 
 namespace dss {
 
-  class DeviceRequestHandler : public DeviceInterfaceRequestHandler {
+  class InternalEventRelayTarget : public EventRelayTarget {
   public:
-    DeviceRequestHandler(Apartment& _apartment);
-    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+    InternalEventRelayTarget(EventInterpreterInternalRelay& _relay)
+    : EventRelayTarget(_relay)
+    { } // ctor
+
+    virtual void handleEvent(Event& _event, const EventSubscription& _subscription) {
+      if(m_Callback) {
+        m_Callback(_event, _subscription);
+      }
+    }
+
+    typedef boost::function<void (Event& _event, const EventSubscription& _subscription)> HandleEventCallBack;
+    virtual void setCallback(HandleEventCallBack _callback) {
+      m_Callback = _callback;
+    }
+
   private:
-    Apartment& m_Apartment;
-  }; // DeviceRequestHandler
+    HandleEventCallBack m_Callback;
+  }; // InternalEventRelayTarget
 
 }
 
-#endif /* DEVICEREQUESTHANDLER_H_ */
+#endif

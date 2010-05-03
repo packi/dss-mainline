@@ -28,6 +28,7 @@ namespace dss {
   : m_Token(_tokenID)
   {
     m_LastTouched = DateTime();
+    m_UsageCount = 0;
   } // ctor
 
   bool Session::isStillValid() {
@@ -40,6 +41,61 @@ namespace dss {
     m_LastTouched = _other.m_LastTouched;
 
     return *this;
+  }
+
+  bool Session::isUsed() {
+    m_UseCountMutex.lock();
+    bool result = (m_UsageCount != 0);
+    m_UseCountMutex.unlock();
+    return result;
+  }
+
+  void Session::use() {
+    m_UseCountMutex.lock();
+    m_UsageCount++;
+    m_UseCountMutex.unlock();
+  }
+
+  void Session::unuse() {
+    m_UseCountMutex.lock();
+    m_UsageCount--;
+    if(m_UsageCount < 0) {
+      m_UsageCount = 0;
+    }
+    m_UseCountMutex.unlock();
+  }
+  void Session::addData(const std::string& _key, boost::shared_ptr<boost::any>& _value) {
+    m_DataMapMutex.lock();
+    dataMap[_key] = _value;
+    m_DataMapMutex.unlock();
+  }
+
+  boost::shared_ptr<boost::any>& Session::getData(const std::string& _key) {
+    m_DataMapMutex.lock();
+    boost::shared_ptr<boost::any>& rv = dataMap[_key];
+    m_DataMapMutex.unlock();
+    return rv;
+  }
+
+  bool Session::removeData(const std::string& _key) {
+    bool result = false;
+    m_DataMapMutex.lock();
+    boost::ptr_map<std::string, boost::shared_ptr<boost::any> >::iterator i = dataMap.find(_key);
+    if(i != dataMap.end()) {
+      dataMap.erase(i);
+      result = true;
+    }
+
+    m_DataMapMutex.unlock();
+    return result;
+  }
+
+  int Session::getID() {
+    return m_Token;
+  }
+
+  void Session::touch() {
+    m_LastTouched = DateTime();
   }
 
 } // namespace dss

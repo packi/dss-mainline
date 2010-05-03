@@ -126,7 +126,6 @@ namespace dss {
             new PropertyScriptListener(ext, ctx, obj, argv[1], ident);
         ext->addListener(listener);
         node->addListener(listener);
-        ctx->attachObject(listener);
 
         JSString* str = JS_NewStringCopyZ(cx, ident.c_str());
         *rval = STRING_TO_JSVAL(str);
@@ -261,12 +260,14 @@ namespace dss {
                                                  JSObject* _functionObj,
                                                  jsval _function,
                                                  const std::string& _identifier)
-  : m_pExtension(_pExtension),
-    m_pContext(_pContext),
+  : ScriptContextAttachedObject(_pContext),
+    m_pExtension(_pExtension),
     m_pFunctionObject(_functionObj),
     m_Function(_function),
     m_Identifier(_identifier)
-  { } // ctor
+  {
+    m_FunctionRoot.rootFunction(getContext(), m_pFunctionObject, m_Function);
+  } // ctor
 
   PropertyScriptListener::~PropertyScriptListener() {
     m_pExtension->removeListener(m_Identifier);
@@ -274,7 +275,7 @@ namespace dss {
 
   void PropertyScriptListener::createScriptObject() {
     if(m_pScriptObject == NULL) {
-      m_pScriptObject.reset(new ScriptObject(m_pFunctionObject, *m_pContext));
+      m_pScriptObject.reset(new ScriptObject(m_pFunctionObject, *getContext()));
     }
     assert(m_pScriptObject != NULL);
   } // createScriptObject
@@ -290,15 +291,16 @@ namespace dss {
   } // propertyAdded
 
   void PropertyScriptListener::doOnChange(PropertyNodePtr _changedNode) {
-    AssertLocked locked(m_pContext);
+    AssertLocked locked(getContext());
     createScriptObject();
-    ScriptFunctionParameterList list(*m_pContext);
+    ScriptFunctionParameterList list(*getContext());
     list.add(_changedNode->getDisplayName());
     try {
       m_pScriptObject->callFunctionByReference<void>(m_Function, list);
     } catch(ScriptException& e) {
       Logger::getInstance()->log("PropertyScriptListener::doOnChange: Caught exception while calling handler: " + std::string(e.what()), lsFatal);
     }
+    JS_GC(getContext()->getJSContext());
   } // doOnChange
 
 }

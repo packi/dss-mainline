@@ -170,10 +170,12 @@ BOOST_AUTO_TEST_CASE(testTcpSocketSendToRepeatability) {
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
   for(int iRun = 0; iRun < kRuns; iRun++) {
+    Logger::getInstance()->log("Before run");
     ctx->evaluate<void>("TcpSocket.sendTo('127.0.0.1', 1234, 'hello');");
     sleepMS(250);
     BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
     listener.m_DataReceived.clear();
+    Logger::getInstance()->log("After run");
   }
 } // testRepeatbility
 
@@ -257,7 +259,7 @@ BOOST_AUTO_TEST_CASE(testSocketSend) {
   listener.run();
   sleepMS(50);
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->getRootObject().setProperty<int>("bytesSent", 0);
+  ctx->getRootObject().setProperty<int>("bytesSent", 3);
   ctx->evaluate<void>("socket = new TcpSocket();\n"
                       "socket.connect('localhost', 1234,\n"
                       "      function(success) {\n"

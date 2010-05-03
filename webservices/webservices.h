@@ -31,6 +31,7 @@
 #include "core/mutex.h"
 #include "core/syncevent.h"
 #include "core/event.h"
+#include "core/eventcollector.h"
 #include "core/eventinterpreterplugins.h"
 
 #include <deque>
@@ -42,14 +43,12 @@ namespace dss {
 
   class WebServicesWorker;
 
-  class WebServiceEventListener;
-
   class WebServiceSession : public Session {
   protected:
     uint32_t m_OriginatorIP;
-    boost::shared_ptr<WebServiceEventListener> m_pEventListener;
+    boost::shared_ptr<EventCollector> m_pEventListener;
   private:
-    void createListener();
+    void createCollector();
   public:
     WebServiceSession() {}
     WebServiceSession(const int _tokenID, soap* _soapRequest);
