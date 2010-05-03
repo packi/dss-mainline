@@ -240,6 +240,8 @@ namespace dss {
     : m_pContext(_pContext->getJSContext()),
       m_NeedsEndRequest(true)
     {
+      Logger::getInstance()->log("^^^ Beginning request for " + intToString(int(m_pContext), true));
+      assert(_pContext != NULL);
       JS_BeginRequest(m_pContext);
     }
 
@@ -247,6 +249,7 @@ namespace dss {
     : m_pContext(_pContext),
       m_NeedsEndRequest(true)
     {
+      Logger::getInstance()->log("^^^ Beginning request for " + intToString(int(m_pContext), true));
       assert(_pContext != NULL);
       JS_BeginRequest(_pContext);
     }
@@ -254,11 +257,13 @@ namespace dss {
     ~JSRequest() {
       if(m_NeedsEndRequest) {
         JS_EndRequest(m_pContext);
+        Logger::getInstance()->log("^^^ Ending request for " + intToString(int(m_pContext), true));
       }
     }
 
     void endRequest() {
       JS_EndRequest(m_pContext);
+      Logger::getInstance()->log("^^^ Ending request for " + intToString(int(m_pContext), true));
       m_NeedsEndRequest = false;
     }
   private:

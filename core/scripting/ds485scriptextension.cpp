@@ -87,7 +87,7 @@ namespace dss {
           boost::shared_ptr<DS485CommandFrame> frame = _bucket->popFrame();
           AssertLocked contextLock(getContext());
           Logger::getInstance()->log("waitForFrame: got frame, aquiring request");
-          JS_SetContextThread(cx);
+          //JS_SetContextThread(cx);
           JSRequest req(cx);
           Logger::getInstance()->log("waitForFrame: got frame, got request");
           {
@@ -121,7 +121,7 @@ namespace dss {
           }
           //JS_GC(cx);
           req.endRequest();
-          JS_ClearContextThread(cx);
+          //JS_ClearContextThread(cx);
         } catch(ScriptException& e) {
           Logger::getInstance()->log(std::string("DS485ScriptExtension::waitForFrame: Caught exception: ") + e.what(), lsError);
           goOn = false;

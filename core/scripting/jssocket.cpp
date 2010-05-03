@@ -248,7 +248,7 @@ namespace dss {
                             tcp::resolver::iterator endpoint_iterator) {
       Logger::getInstance()->log("*** Connection callback");
       AssertLocked lock(&getContext());
-      JS_SetContextThread(getContext().getJSContext());
+      //JS_SetContextThread(getContext().getJSContext());
       JSRequest req(getContext().getJSContext());
       if (!error) {
         success();
@@ -263,14 +263,14 @@ namespace dss {
         failure();
       }
       req.endRequest();
-      JS_ClearContextThread(getContext().getJSContext());
+      //JS_ClearContextThread(getContext().getJSContext());
       Logger::getInstance()->log("*** Done: Connection callback");
     } // connectionCallback
 
     void sendCallback(const boost::system::error_code& error, std::size_t bytesTransfered) {
       Logger::getInstance()->log("*** Send callback");
       AssertLocked lock(&getContext());
-      JS_SetContextThread(getContext().getJSContext());
+      //JS_SetContextThread(getContext().getJSContext());
       JSRequest req(getContext().getJSContext());
       if(!error) {
         if(bytesTransfered == m_Data.size()) {
@@ -282,13 +282,13 @@ namespace dss {
         callSizeCallback(-1);
       }
       req.endRequest();
-      JS_ClearContextThread(getContext().getJSContext());
+      //JS_ClearContextThread(getContext().getJSContext());
       Logger::getInstance()->log("*** Done: Send callback");
     }
 
     void readCallback(const boost::system::error_code& error, std::size_t bytesTransfered) {
       AssertLocked lock(&getContext());
-      JS_SetContextThread(getContext().getJSContext());
+      //JS_SetContextThread(getContext().getJSContext());
       JSRequest req(getContext().getJSContext());
       if(!error) {
         if(bytesTransfered == m_BytesToRead) {
@@ -301,12 +301,12 @@ namespace dss {
         callDataCallback("");
       }
       req.endRequest();
-      JS_ClearContextThread(getContext().getJSContext());
+      //JS_ClearContextThread(getContext().getJSContext());
     }
 
     void acceptCallback(const boost::system::error_code& error) {
       AssertLocked lock(&getContext());
-      JS_SetContextThread(getContext().getJSContext());
+      //JS_SetContextThread(getContext().getJSContext());
       JSRequest req(getContext().getJSContext());
       if(!error) {
         if(hasCallback()) {
@@ -328,7 +328,7 @@ namespace dss {
         callCallbackWithArguments(list);
       }
       req.endRequest();
-      JS_ClearContextThread(getContext().getJSContext());
+      //JS_ClearContextThread(getContext().getJSContext());
     }
 
     void createSocket() {
@@ -436,7 +436,7 @@ namespace dss {
       Logger::getInstance()->log("SocketHelperSendOneShot::handle_write");
       {
       AssertLocked lock(&getContext());
-      JS_SetContextThread(getContext().getJSContext());
+      //JS_SetContextThread(getContext().getJSContext());
       JSRequest req(getContext().getJSContext());
       if(hasCallback()) {
         ScriptFunctionParameterList params(getContext());
@@ -447,7 +447,7 @@ namespace dss {
         }
       }
       req.endRequest();
-      JS_ClearContextThread(getContext().getJSContext());
+      //JS_ClearContextThread(getContext().getJSContext());
       }
       do_close();
       Logger::getInstance()->log("SocketHelperSendOneShot::beforeRemoving");

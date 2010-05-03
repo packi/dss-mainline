@@ -217,14 +217,14 @@ namespace dss {
       AssertLocked ctxLock(getContext());
       Logger::getInstance()->log("setTimeout: aquiring request");
       JSContext* cx = getContext()->getJSContext();
-      JS_SetContextThread(cx);
+      //JS_SetContextThread(cx);
       JSRequest req(getContext());
       ScriptObject obj(_obj, *getContext());
       ScriptFunctionParameterList params(*getContext());
       obj.callFunctionByReference<void>(_function, params);
       //JS_GC(cx);
       req.endRequest();
-      JS_ClearContextThread(cx);
+      //JS_ClearContextThread(cx);
       Logger::getInstance()->log("setTimeout: releasing request");
       delete this;
     }
@@ -352,7 +352,7 @@ namespace dss {
     JSBool ok = JS_EvaluateScript(m_pContext, m_pRootObject, script.c_str(), script.size(),
                        _fileName.c_str(), 0, &rval);
     req.endRequest();
-    JS_ClearContextThread(m_pContext);
+    //JS_ClearContextThread(m_pContext);
     if(ok) {
       return rval;
     } else {
@@ -390,13 +390,13 @@ namespace dss {
     AssertLocked lock(this);
     JSRequest req(this);
 
-    JS_SetContextThread(m_pContext);
+    //JS_SetContextThread(m_pContext);
     const char* filename = "temporary_script";
     jsval rval;
     JSBool ok = JS_EvaluateScript(m_pContext, m_pRootObject, _script.c_str(), _script.size(),
                        filename, 0, &rval);
     req.endRequest();
-    JS_ClearContextThread(m_pContext);
+    //JS_ClearContextThread(m_pContext);
     if(ok) {
       return rval;
     } else {
