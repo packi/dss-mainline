@@ -31,6 +31,8 @@
 #include <dirent.h>
 #include <string.h>
 
+#include <boost/filesystem.hpp>
+
 #include "core/logger.h"
 #include "core/dss.h"
 #include "core/propertysystem.h"
@@ -58,6 +60,8 @@
 #include "webserverapi.h"
 #include "json.h"
 
+namespace fs = boost::filesystem;
+
 namespace dss {
   //============================================= WebServer
 
@@ -83,51 +87,36 @@ namespace dss {
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "sslcert", getDSS().getPropertySystem().getStringValue("/config/configdirectory") + "dsscert.pem" , true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "files/apartment.xml", getDSS().getDataDirectory() + "apartment.xml", true, false);
 
-    DIR* dir;
-    int ret;
-    struct stat statbuf;
-    struct dirent *dent;
-
-    dir = opendir(getDSS().getJSLogDirectory().c_str());
-
-    if (dir) {
-      while ((dent = readdir(dir)) != NULL) {
-        char *name = dent->d_name;
-        if (name[0] == '.') {
-          if (name[1] == 0) {
-            continue;
-          } else if (name[1] == '.' && name[2] == 0) {
-            continue;
-          }
-        }
-
-        // we only accept log files that have the .log/.LOG extension
-        size_t len = strlen(name);
-        if ((len < 4) || ((len >=4)  &&
-           ((strncmp(name + len - 4, ".log", 4) != 0) &&
-            (strncmp(name + len - 4, ".LOG", 4) != 0)))) {
-          continue;
-        }
-
-        std::string abspath = getDSS().getJSLogDirectory() + "/" + name;
-        ret = stat(abspath.c_str(), &statbuf);
-        if (ret != 0) {
-          continue;
-        }
-
-        if (S_ISREG(statbuf.st_mode)) {
-          getDSS().getPropertySystem().setStringValue("/config/subsystems/WebServer/files/" + std::string(name), DSS::getInstance()->getJSLogDirectory() + std::string(name), true, false);
-          getDSS().getPropertySystem().setStringValue("/system/js/logsfiles/" + std::string(name), DSS::getInstance()->getJSLogDirectory() + std::string(name), true, false);
-        }
-      }
-      closedir(dir);
-    } else {
-      log("Could not open JS log directory " + getDSS().getJSLogDirectory(), lsError);
-    }
-
+    publishJSLogfiles();
     setupAPI();
     instantiateHandlers();
   } // initialize
+
+  void WebServer::publishJSLogfiles() {
+    // pre-create the property as the gui accesses it on startup and gets upset if the node's not there
+    getDSS().getPropertySystem().createProperty("/system/js/logsfiles/");
+
+    std::string logDir = getDSS().getJSLogDirectory();
+    try {
+      fs::directory_iterator end_iter;
+      for(fs::directory_iterator dir_itr(logDir);
+          dir_itr != end_iter;
+          ++dir_itr)  {
+        if(fs::is_regular(dir_itr->status())) {
+          std::string fileName = dir_itr->filename();
+          if(endsWith(dir_itr->filename(), ".log") ||
+             endsWith(dir_itr->filename(), ".LOG")) {
+            std::string abspath = dir_itr->string();
+            getDSS().getPropertySystem().setStringValue("/config/subsystems/WebServer/files/" + std::string(fileName), abspath, true, false);
+            getDSS().getPropertySystem().setStringValue("/system/js/logsfiles/" + std::string(fileName), abspath, true, false);
+          }
+        }
+      }
+    } catch(std::exception& e) {
+      log("Directory for js logfiles does not exist: '" + logDir + "'", lsFatal);
+      abort(); // TODO: replace with a nice shutdown procedure but it's better to crash at startup than crashing at runtime
+    }
+  } // publishJSLogfiles
 
   void WebServer::loadPlugins() {
     PropertyNodePtr pluginsNode = getDSS().getPropertySystem().getProperty(getConfigPropertyBasePath() + "plugins");

@@ -59,23 +59,24 @@ namespace dss {
     void loadPlugin(PropertyNode& _node);
     void loadPlugins();
     void instantiateHandlers();
+    void publishJSLogfiles();
   protected:
     void pluginCalled(struct mg_connection* _connection,
                       const struct mg_request_info* _info,
-                      WebServerPlugin& plugin, 
+                      WebServerPlugin& plugin,
                       const std::string& _uri);
 
     static void httpPluginCallback(struct mg_connection* _connection,
-                                   const struct mg_request_info* _info, 
+                                   const struct mg_request_info* _info,
                                    void* _userData);
     static void httpBrowseProperties(struct mg_connection* _connection,
-                                   const struct mg_request_info* _info, 
+                                   const struct mg_request_info* _info,
                                    void* _userData);
     static void jsonHandler(struct mg_connection* _connection,
-                            const struct mg_request_info* _info, 
+                            const struct mg_request_info* _info,
                             void* _userData);
     static void downloadHandler(struct mg_connection* _connection,
-                            const struct mg_request_info* _info, 
+                            const struct mg_request_info* _info,
                             void* _userData);
 
       static void emitHTTPHeader(int _code, struct mg_connection* _connection, const std::string& _contentType = "text/html", const std::string& _setCookie = "");

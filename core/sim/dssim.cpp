@@ -195,8 +195,7 @@ namespace dss {
     try {
       for ( fs::directory_iterator dir_itr(getDSS().getDataDirectory() + "plugins");
             dir_itr != end_iter;
-            ++dir_itr )
-      {
+            ++dir_itr) {
         try {
           if (fs::is_regular(dir_itr->status())) {
             if(endsWith(dir_itr->filename(), ".so")) {
