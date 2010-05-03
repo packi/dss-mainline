@@ -44,18 +44,25 @@ namespace dss {
   }
 
   bool Session::isUsed() {
-    return (m_UsageCount != 0);
+    m_UseCountMutex.lock();
+    bool result = (m_UsageCount != 0);
+    m_UseCountMutex.unlock();
+    return result;
   }
 
   void Session::use() {
+    m_UseCountMutex.lock();
     m_UsageCount++;
+    m_UseCountMutex.unlock();
   }
 
   void Session::unuse() {
+    m_UseCountMutex.lock();
     m_UsageCount--;
     if(m_UsageCount < 0) {
       m_UsageCount = 0;
     }
+    m_UseCountMutex.unlock();
   }
   void Session::addData(const std::string& _key, boost::shared_ptr<boost::any>& _value) {
     m_DataMapMutex.lock();
@@ -71,16 +78,16 @@ namespace dss {
   }
 
   bool Session::removeData(const std::string& _key) {
+    bool result = false;
     m_DataMapMutex.lock();
     boost::ptr_map<std::string, boost::shared_ptr<boost::any> >::iterator i = dataMap.find(_key);
     if(i != dataMap.end()) {
       dataMap.erase(i);
-      m_DataMapMutex.unlock();
-      return true;
+      result = true;
     }
 
     m_DataMapMutex.unlock();
-    return false;
+    return result;
   }
 
   int Session::getID() {
@@ -90,4 +97,5 @@ namespace dss {
   void Session::touch() {
     m_LastTouched = DateTime();
   }
+
 } // namespace dss

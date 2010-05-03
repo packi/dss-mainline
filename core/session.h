@@ -35,13 +35,13 @@ namespace dss {
   class Session {
   protected:
     int m_Token;
+    Mutex m_UseCountMutex;
     int m_UsageCount;
 
     DateTime m_LastTouched;
 
     Mutex m_DataMapMutex;
     boost::ptr_map<std::string, boost::shared_ptr<boost::any> > dataMap;
-
   public:
     Session() {}
     Session(const int _tokenID);
