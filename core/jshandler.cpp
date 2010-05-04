@@ -216,7 +216,7 @@ namespace dss {
       sleepMS(_timeoutMS);
       AssertLocked ctxLock(getContext());
       Logger::getInstance()->log("setTimeout: aquiring request");
-      JSContext* cx = getContext()->getJSContext();
+      //JSContext* cx = getContext()->getJSContext();
       //JS_SetContextThread(cx);
       JSRequest req(getContext());
       ScriptObject obj(_obj, *getContext());
@@ -293,7 +293,6 @@ namespace dss {
 
   ScriptContext::~ScriptContext() {
     //scrubVector(m_AttachedObjects);
-    Logger::getInstance()->log("destroying script context " + intToString(int(this), true));
     if(!m_AttachedObjects.empty()) {
       Logger::getInstance()->log("Still have some attached objects (" + intToString(m_AttachedObjects.size()) + "). Memory leak?", lsError);
     }
@@ -301,16 +300,13 @@ namespace dss {
     JS_SetContextPrivate(m_pContext, NULL);
     JS_DestroyContext(m_pContext);
     m_pContext = NULL;
-    Logger::getInstance()->log("destroyed script context " + intToString(int(this), true));
   } // dtor
 
   void ScriptContext::attachObject(ScriptContextAttachedObject* _pObject) {
-    Logger::getInstance()->log("Attaching object " + intToString(int(_pObject), true), lsDebug);
     m_AttachedObjects.push_back(_pObject);
   } // attachObject
 
   void ScriptContext::removeAttachedObject(ScriptContextAttachedObject* _pObject) {
-    Logger::getInstance()->log("Removing attached object " + intToString(int(_pObject), true), lsDebug);
     std::vector<ScriptContextAttachedObject*>::iterator it =
        std::find(m_AttachedObjects.begin(), m_AttachedObjects.end(), _pObject);
     if(it != m_AttachedObjects.end()) {

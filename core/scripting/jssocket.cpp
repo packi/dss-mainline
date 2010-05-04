@@ -473,7 +473,6 @@ namespace dss {
 
   void tcpSocket_finalize(JSContext *cx, JSObject *obj) {
     JSRequest req(cx);
-    Logger::getInstance()->log("*** Finalizing socket " + intToString(int(cx), true) + " " + intToString(int(obj), true));
     SocketHelperInstance* pInstance = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
     JS_SetPrivate(cx, obj, NULL);
     delete pInstance;
