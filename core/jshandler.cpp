@@ -33,6 +33,9 @@
 #include "core/logger.h"
 #include "core/scripting/scriptobject.h"
 
+#include "core/dss.h"
+#include "core/propertysystem.h"
+
 namespace dss {
 
   //============================================= ScriptEnvironment
@@ -53,6 +56,8 @@ namespace dss {
     if (m_pRuntime == NULL) {
       throw ScriptException("Error creating environment");
     }
+    DSS::getInstance()->getPropertySystem().setIntValue("/system/js/ping/session", 0, true, true);
+    DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/ping/active", false, true, true);
   } // initialize
 
   bool ScriptEnvironment::isInitialized() {

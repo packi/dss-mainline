@@ -3,8 +3,19 @@ var LOGFILE_NAME = "ping.log"
 var l = new Logger(LOGFILE_NAME);
 
 var repeated = 0;
+var session = getProperty("/system/js/ping/session");
+session++;
+
+setProperty("/system/js/ping/session", session);
+l.logln("Set session " + session);
+
 
 function pingResultHandler(f, shortAddr) {
+
+  if (session != getProperty("/system/js/ping/session")) {
+    return false;
+  }
+
   if (f != null) {
     if (f.payload.length == 1) {
       if (f.payload[0] < 0) {
@@ -43,6 +54,10 @@ function pingResultHandler(f, shortAddr) {
 }
 
 function ping(device) {
+  if (session != getProperty("/system/js/ping/session")) {
+    return;
+  }
+
   var frame = new DS485Frame();
   frame.functionID = 0x9f; // FunctionDeviceGetTransmissionQuality
   frame.destination = device.circuitID;
@@ -62,7 +77,10 @@ function ping(device) {
  */
 
 function pingDelayHandler(ids) {
-  l.logln("Ping delay handler, ids length: " + ids.length);
+  if (session != getProperty("/system/js/ping/session")) {
+    return;
+  }
+
   for (i = 0; i < ids.length; i++)
   {
     l.logln("Pinging device with dsid: " + ids[i]);
@@ -82,7 +100,8 @@ function timedPing() {
 
   if ((raisedEvent.parameter.repeat > 0) && (raisedEvent.parameter.delay > 0)) {
     pingDelayHandler(ids);
-    if (repeated < raisedEvent.parameter.repeat) {
+    if ((repeated < raisedEvent.parameter.repeat) && 
+        (session == getProperty("/system/js/ping/session"))) {
         setTimeout(parseInt(raisedEvent.parameter.delay) * 1000 /* msec */, timedPing);
     }
     repeated++;
