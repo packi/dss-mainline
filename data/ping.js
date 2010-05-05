@@ -4,12 +4,8 @@ var l = new Logger(LOGFILE_NAME);
 
 var repeated = 0;
 
-function pingResultHandler(f) {
-  l.logln("Callback receivd, frame is: " + f);
-
+function pingResultHandler(f, shortAddr) {
   if (f != null) {
-    l.logln("Function id:    " + f.functionID);
-    l.logln("Payload length: " + f.payload.length);
     if (f.payload.length == 1) {
       if (f.payload[0] < 0) {
         l.logln("dSM returned error code: " + f.payload[0]);
@@ -17,23 +13,21 @@ function pingResultHandler(f) {
       }
 
       if (f.payload[0] != 2) {
-        l.logln("We need to get yet another frame");
-        // packi said - just return true until we get the data we need
+        // just return true until we get the data we need
         return true;
       }
     }
     
-    l.logln("PING RESPONSE from " + f.source);
+    var deviceShortAddr = f.payload[1];
+    if (deviceShortAddr != shortAddr) {
+      // ignore frames that are not for us
+      return true;
+    }
         
     var device = getDevices().byShortAddress(f.source, f.payload[1]);
 
-    l.logln("dsid:           " + device.dsid);
-    l.logln("device name:    " + device.name);
-    l.logln("response index: " + f.payload[0]);
-    l.logln("device address: " + f.payload[1]);
-    l.logln("quality HK:     " + f.payload[2]);
-    l.logln("quality RK:     " + f.payload[3]);
-    l.logln();
+    l.logln("Ping response from " + device.dsid + " " + device.name + 
+            " HK: " + f.payload[2] + " RK: " + f.payload[3]);
 
     var evt = new event("ping_result", { "send": f.payload[2], 
                                          "receive": f.payload[3],
@@ -44,18 +38,19 @@ function pingResultHandler(f) {
     evt.raise();
   } 
  
+
   return false;
 }
 
 function ping(device) {
-  l.logln("Sending frame\n");
   var frame = new DS485Frame();
   frame.functionID = 0x9f; // FunctionDeviceGetTransmissionQuality
-  l.logln("Destination: " + device.circuitID);
   frame.destination = device.circuitID;
   frame.broadcast = false;
   frame.payload.push(device.shortAddress);
-  DS485.sendFrame(frame, pingResultHandler, 5000);
+  DS485.sendFrame(frame, function(frame) { 
+                           return pingResultHandler(frame, device.shortAddress); 
+                         } , 5000);
 }
 
 /*
@@ -70,10 +65,8 @@ function pingDelayHandler(ids) {
   l.logln("Ping delay handler, ids length: " + ids.length);
   for (i = 0; i < ids.length; i++)
   {
-    l.logln("Processing dsid: " + ids[i]);
+    l.logln("Pinging device with dsid: " + ids[i]);
     var device = getDevices().byDSID(ids[i]);
-    l.logln("Circuit id: " + device.circuitID);
-    l.logln("Pinging device...");
     for (p = 0; p < raisedEvent.parameter.count; p++) {
       ping(device);
     }
@@ -81,7 +74,6 @@ function pingDelayHandler(ids) {
 }
 
 function timedPing() {
-  l.logln("Entering function timedPing, repeated value: " + repeated);
   var ids = raisedEvent.parameter.dsid.split(",");
   if (ids.length <= 0) {
     l.logln("Error: no dsid's to ping!");
@@ -103,6 +95,4 @@ function timedPing() {
 keepContext();
 
 timedPing(); 
-
-
 
