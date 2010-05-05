@@ -559,11 +559,11 @@ namespace dss {
               if(header.getDestination() == m_StationID) {
                 putFrameOnWire(token.get(), false);
                 m_TokenCounter = 0;
-                doChangeState(csSlave);
                 time(&tokenReceivedAt);
                 std::cout << "DS485: Got first TOKEN" << std::endl;
                 flush(std::cout);
                 m_PendingFrames.clear();        // clear any pending tx packets
+                doChangeState(csSlave);
               }
             }
             else {
