@@ -102,6 +102,19 @@ function pingDelayHandler(ids) {
 }
 
 function timedPing() {
+  if (session != getProperty("/system/js/ping/session")) {
+    l.logln("Aborting old ping session.");
+    return;
+  }
+
+  if (getProperty("/system/js/ping/active") === true) {
+    l.logln("A ping round is currently active, rescheduling our session...");
+    setTimeout(3*1000, timedPing);
+    return;
+  }
+
+  setProperty("/system/js/ping/active", true);
+
   var ids = raisedEvent.parameter.dsid.split(",");
   if (ids.length <= 0) {
     l.logln("Error: no dsid's to ping!");
@@ -112,12 +125,14 @@ function timedPing() {
     pingDelayHandler(ids);
     if ((repeated < raisedEvent.parameter.repeat) && 
         (session == getProperty("/system/js/ping/session"))) {
+        setProperty("/system/js/ping/active", false); 
         setTimeout(parseInt(raisedEvent.parameter.delay) * 1000 /* msec */, timedPing);
     }
     repeated++;
   }
   else {
     pingDelayHandler(ids);
+    setProperty("/system/js/ping/active", false); 
   }
 }
 
