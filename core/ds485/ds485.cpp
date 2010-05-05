@@ -265,7 +265,7 @@ namespace dss {
 
     int senseTimeMS = (rand() % 1000) + 2500;
     int numberOfJoinPacketsToWait = -1;
-    bool lastSentWasToken = false;
+    int lastSentWasToken = 0;
     int comErrorSleepTimeScaler = 1;
     int missedFramesCounter = 0;
 
@@ -275,7 +275,7 @@ namespace dss {
         senseTimeMS = (rand() % 1000) + 2500;
         numberOfJoinPacketsToWait = -1;
         m_TokenCounter = 0;
-        lastSentWasToken = false;
+        lastSentWasToken = 0;
         doChangeState(csSensing);
         continue;
       } else if(m_State == csCommError) {
@@ -325,8 +325,12 @@ namespace dss {
         // resend token after timeout
         if(lastSentWasToken) {
           putFrameOnWire(token.get(), false);
-          lastSentWasToken = false;
+          lastSentWasToken ++;
           std::cout << "t(#)";
+          if (lastSentWasToken > 3) {
+            std::cerr << "DS485: token passing timeout, restarting" << std::endl;
+            doChangeState(csInitial);
+          }
         }
         flush(std::cout);
       } else {
@@ -338,7 +342,7 @@ namespace dss {
         }
 
         DS485CommandFrame* cmdFrame = dynamic_cast<DS485CommandFrame*>(frame.get());
-        lastSentWasToken = false;
+        lastSentWasToken = 0;
         missedFramesCounter = 0;
 
         // handle cases in which we're obliged to act on disregarding our current state
@@ -496,7 +500,7 @@ namespace dss {
 //            flush(std::cout);
             time(&tokenReceivedAt);
             m_TokenCounter++;
-            lastSentWasToken = true;
+            lastSentWasToken = 1;
           } else {
 
             // Handle token timeout
