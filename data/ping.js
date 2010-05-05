@@ -7,8 +7,6 @@ var session = getProperty("/system/js/ping/session");
 session++;
 
 setProperty("/system/js/ping/session", session);
-l.logln("Set session " + session);
-
 
 function pingResultHandler(f, shortAddr) {
 
@@ -83,8 +81,20 @@ function pingDelayHandler(ids) {
 
   for (i = 0; i < ids.length; i++)
   {
-    l.logln("Pinging device with dsid: " + ids[i]);
+    // split may return an empty dsid after comma
+    if (ids[i].length <= 0) {
+      continue;
+    }
+    
     var device = getDevices().byDSID(ids[i]);
+
+    if (device === null) {
+      l.logln("Device with dsid: " + ids[i] + " not found");
+      continue;
+    }
+    
+    l.logln("Pinging device with dsid: " + ids[i] + " " + device.name);
+
     for (p = 0; p < raisedEvent.parameter.count; p++) {
       ping(device);
     }
