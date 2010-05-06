@@ -147,7 +147,7 @@ namespace dss {
     bool sim = false;
 #endif
     std::ostringstream sstream;
-    sstream << "DEST:";
+    sstream << "TX DEST:";
     if(broadcast) {
       sstream << "*";
     }
@@ -155,7 +155,7 @@ namespace dss {
 
     PayloadDissector pdDump(_frame.getPayload());
     uint8_t cmd = pdDump.get<uint8_t>();
-    sstream << ", CMD:0x" << std::hex << std::uppercase << (unsigned int)cmd << ", ";
+    sstream << ", CMD:0x" << std::hex << std::uppercase << (unsigned int)cmd << ",";
     int iParameter=1;
     while(!pdDump.isEmpty()) {
       uint16_t data = pdDump.get<uint16_t>();
@@ -164,10 +164,10 @@ namespace dss {
     sstream << std::dec;
 
     if((m_DS485Controller.getState() == csSlave) || (m_DS485Controller.getState() == csMaster)) {
-      log("DS485Proxy: Enqueue packet for sending over the wire");
+      log("Enqueue packet for sending over the wire");
       m_DS485Controller.enqueueFrame(_frame);
     } else {
-      log("DS485Proxy: Not putting packet on the wire");
+      log("Not putting packet on the wire");
     }
     log(sstream.str());
     boost::shared_ptr<DS485CommandFrame> pFrame(new DS485CommandFrame);

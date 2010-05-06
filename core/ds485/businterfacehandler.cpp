@@ -60,7 +60,23 @@ namespace dss {
           boost::shared_ptr<DS485CommandFrame> frame = m_IncomingFrames.front();
           m_IncomingFrames.erase(m_IncomingFrames.begin());
           m_IncomingFramesGuard.unlock();
-          log("R");
+
+          std::ostringstream sstream;
+          sstream << "RX DEST:";
+          sstream << "0x" << std::hex << std::uppercase << int(frame->getHeader().getDestination());
+          sstream << " SRC:";
+          sstream << "0x" << std::hex << std::uppercase << int(frame->getHeader().getSource());
+
+          PayloadDissector pdDump(frame->getPayload());
+          uint8_t cmd = pdDump.get<uint8_t>();
+          sstream << ", CMD:0x" << std::hex << std::uppercase << (unsigned int)cmd << ",";
+          int iParameter=1;
+          while(!pdDump.isEmpty()) {
+            uint16_t data = pdDump.get<uint16_t>();
+            sstream << " P" << iParameter++ << ":0x" << std::hex << std::uppercase << data;
+          }
+          sstream << std::dec;
+          log(sstream.str());
 
           if(frame->getPayload().size() < 1) {
             log("received Command Frame w/o function identifier", lsFatal);
