@@ -37,7 +37,7 @@
 #ifndef WIN32
 #define HASH_NAMESPACE __gnu_cxx
 #else
-#definne HASH_NAMESPACE stdext;
+#define HASH_NAMESPACE stdext;
 #endif
 
 #define HASH_MAP HASH_NAMESPACE::hash_map
