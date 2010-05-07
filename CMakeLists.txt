@@ -160,7 +160,11 @@ endif(WITH_TESTS)
 # check for Boost
 set(Boost_USE_MULTITHREADED ON)
 find_package(Boost 1.35.0 COMPONENTS ${BOOST_REQUIRED_LIBS})
-set(REQUIRED_LIBS ${Boost_LIBRARIES} ${REQUIRED_LIBS})
+if(Boost_FOUND)
+  set(REQUIRED_LIBS ${Boost_LIBRARIES} ${REQUIRED_LIBS})
+else()
+  MESSAGE (FATAL_ERROR "Cannot build without Boost.")
+endif()
 
 #include test-directory if needed
 set(TEST_LIB)
