@@ -36,6 +36,7 @@ namespace dss {
   class Set;
   class Device;
   class Apartment;
+  class DSMeter;
 
   /** This class extends a ScriptContext to contain the JS-API of the Apartment */
   class ModelScriptContextExtension : public ScriptExtension {
@@ -51,18 +52,21 @@ namespace dss {
     /** Returns a reference to the wrapped apartment */
     Apartment& getApartment() const { return m_Apartment; }
 
-    /** Creates a JSObject that wrapps a Set.
+    /** Creates a JSObject that wraps a Set.
       * @param _ctx Context in which to create the object
       * @param _set Reference to the \a Set being wrapped
       */
     JSObject* createJSSet(ScriptContext& _ctx, Set& _set);
-    /** Creates a JSObject that wrapps a Device.
+    /** Creates a JSObject that wraps a Device.
       * @param _ctx Context in which to create the object
       * @param _device Reference to the \a Device being wrapped
       */
     JSObject* createJSDevice(ScriptContext& _ctx, Device& _ref);
     /** @copydoc createJSDevice */
     JSObject* createJSDevice(ScriptContext& _ctx, DeviceReference& _ref);
+
+    /** Creates a JSObject that wraps a DSMeter */
+    JSObject* createJSMeter(ScriptContext& _ctx, DSMeter* _pMeter);
 
     template<class t>
     t convertTo(ScriptContext& _context, jsval val);

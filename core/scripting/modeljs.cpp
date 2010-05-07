@@ -33,6 +33,7 @@
 #include "core/model/devicereference.h"
 #include "core/model/apartment.h"
 #include "core/model/set.h"
+#include "core/model/modulator.h"
 #include "core/model/modelconst.h"
 #include "core/scripting/scriptobject.h"
 
@@ -127,10 +128,64 @@ namespace dss {
     return JS_TRUE;
   } // global_log
 
+  JSBool global_get_dsmeterbydsid(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    JSRequest req(ctx);
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if(ext != NULL) {
+      if(argc >= 1) {
+        dsid_t dsid = NullDSID;
+        try {
+          dsid =  dsid_t::fromString(ctx->convertTo<std::string>(argv[0]));
+        } catch(std::invalid_argument& e) {
+          Logger::getInstance()->log(std::string("Error converting dsid string to dsid") + e.what(), lsError);
+          return JS_FALSE;
+        }
+        try {
+          DSMeter& meter = ext->getApartment().getDSMeterByDSID(dsid);
+          JSObject* obj = ext->createJSMeter(*ctx, &meter);
+
+          *rval = OBJECT_TO_JSVAL(obj);
+        } catch(ItemNotFoundException& e) {
+          *rval = JSVAL_NULL;
+        }
+
+        return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  } // global_get_dsmeterbydsid
+
+  JSBool global_get_dsmeterbybusid(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    JSRequest req(ctx);
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if(ext != NULL) {
+      if(argc >= 1) {
+        int busid =  ctx->convertTo<int>(argv[0]);
+        try {
+          DSMeter& meter = ext->getApartment().getDSMeterByBusID(busid);
+          JSObject* obj = ext->createJSMeter(*ctx, &meter);
+          *rval = OBJECT_TO_JSVAL(obj);
+        } catch(ItemNotFoundException& e) {
+          *rval = JSVAL_NULL;
+        }
+
+
+        return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  } // global_get_dsmeterbybusid
+
   JSFunctionSpec model_global_methods[] = {
     {"getName", global_get_name, 0, 0, 0},
     {"setName", global_set_name, 1, 0, 0},
     {"getDevices", global_get_devices, 0, 0, 0},
+    {"getDSMeterByDSID", global_get_dsmeterbydsid, 1, 0, 0},
+    {"getDSMeterByBusID", global_get_dsmeterbybusid, 1, 0, 0},
     {"log", global_log, 1, 0, 0},
     {NULL},
   };
@@ -262,7 +317,7 @@ namespace dss {
         }
 
         int dsmeterID = JSVAL_TO_INT(argv[0]);
-        int busid = JSVAL_TO_INT(argv[1]); 
+        int busid = JSVAL_TO_INT(argv[1]);
         DeviceReference result = set->getByBusID(busid, dsmeterID);
         JSObject* resultObj = ext->createJSDevice(*ctx, result);
         *rval = OBJECT_TO_JSVAL(resultObj);
@@ -815,6 +870,56 @@ namespace dss {
     JS_SetPrivate(_ctx.getJSContext(), result, innerObj);
     return result;
   } // createJSDevice
+
+  static JSClass dsmeter_class = {
+    "DSMeter", JSCLASS_HAS_PRIVATE,
+    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
+    JS_EnumerateStandardClasses,
+    JS_ResolveStub,
+    JS_ConvertStub, JS_FinalizeStub, JSCLASS_NO_OPTIONAL_MEMBERS
+  };
+
+  JSBool dsmeter_JSGet(JSContext *cx, JSObject *obj, jsval id, jsval *rval) {
+    DSMeter* meter = static_cast<DSMeter*>(JS_GetPrivate(cx, obj));
+
+    if(meter != NULL) {
+      int opt = JSVAL_TO_INT(id);
+      switch(opt) {
+        case 0:
+          *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, "dsmeter"));
+          return JS_TRUE;
+        case 1:
+          {
+            // make a local reference so the std::string does not go out of scope
+            std::string tmp = meter->getDSID().toString();
+            *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, tmp.c_str()));
+          }
+          return JS_TRUE;
+        case 2:
+          *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, meter->getName().c_str()));
+          return JS_TRUE;
+        case 3:
+          *rval = INT_TO_JSVAL(meter->getBusID());
+          return JS_TRUE;
+      }
+    }
+    return JS_FALSE;
+  }
+
+  static JSPropertySpec dsmeter_properties[] = {
+    {"className", 0, 0, dsmeter_JSGet},
+    {"dsid", 1, 0, dsmeter_JSGet},
+    {"name", 2, 0, dsmeter_JSGet},
+    {"busID", 3, 0, dsmeter_JSGet},
+    {NULL, 0, 0, NULL, NULL}
+  };
+
+  JSObject* ModelScriptContextExtension::createJSMeter(ScriptContext& _ctx, DSMeter* _pMeter) {
+    JSObject* result = JS_NewObject(_ctx.getJSContext(), &dsmeter_class, NULL, NULL);
+    JS_DefineProperties(_ctx.getJSContext(), result, dsmeter_properties);
+    JS_SetPrivate(_ctx.getJSContext(), result, _pMeter);
+    return result;
+  } // createJSMeter
 
   //================================================== EventScriptExtension
 

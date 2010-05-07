@@ -204,6 +204,56 @@ BOOST_AUTO_TEST_CASE(testDevices) {
                       "devs.perform(f)\n");
 } // testDevices
 
+BOOST_AUTO_TEST_CASE(testGlobalDSMeterGetByBusID) {
+  Apartment apt(NULL);
+
+  DSMeter& meter1 = apt.allocateDSMeter(dsid_t(0,10));
+  meter1.setBusID(1);
+  meter1.setName("meter1");
+  DSMeter& meter2 = apt.allocateDSMeter(dsid_t(0,11));
+  meter2.setBusID(2);
+  meter2.setName("meter2");
+
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ModelScriptContextExtension* ext = new ModelScriptContextExtension(apt);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  std::string name = ctx->evaluate<std::string>("getDSMeterByBusID(1).name");
+  BOOST_CHECK_EQUAL(name, meter1.getName());
+
+  name = ctx->evaluate<std::string>("getDSMeterByBusID(2).name");
+  BOOST_CHECK_EQUAL(name, meter2.getName());
+
+  ctx->evaluate<void>("getDSMeterByBusID(123)");
+} // testGlobalDSMeterGetByBusID
+
+BOOST_AUTO_TEST_CASE(testGlobalDSMeterGetByDSID) {
+  Apartment apt(NULL);
+
+  DSMeter& meter1 = apt.allocateDSMeter(dsid_t(0,0xa));
+  meter1.setBusID(1);
+  meter1.setName("meter1");
+  DSMeter& meter2 = apt.allocateDSMeter(dsid_t(0,0xb));
+  meter2.setBusID(2);
+  meter2.setName("meter2");
+
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ModelScriptContextExtension* ext = new ModelScriptContextExtension(apt);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  std::string name = ctx->evaluate<std::string>("getDSMeterByDSID('a').name");
+  BOOST_CHECK_EQUAL(name, meter1.getName());
+
+  name = ctx->evaluate<std::string>("getDSMeterByDSID('b').name");
+  BOOST_CHECK_EQUAL(name, meter2.getName());
+
+  ctx->evaluate<void>("getDSMeterByDSID('123')");
+} // testGlobalDSMeterGetByDSID
+
 BOOST_AUTO_TEST_CASE(testSceneConstants) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
