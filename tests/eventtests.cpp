@@ -548,6 +548,8 @@ BOOST_AUTO_TEST_CASE(testInternalEventRelay) {
 
   queue.pushEvent(pEvent);
 
+  sleepMS(20);
+
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
   BOOST_CHECK_EQUAL(tester.getCounter(), 2);
 
