@@ -50,14 +50,17 @@ namespace dss {
     m_pRuntime = NULL;
   } // dtor
 
-
   void ScriptEnvironment::initialize() {
     m_pRuntime = JS_NewRuntime(8L * 1024L * 1024L);
     if (m_pRuntime == NULL) {
       throw ScriptException("Error creating environment");
     }
-    DSS::getInstance()->getPropertySystem().setIntValue("/system/js/ping/session", 0, true, true);
-    DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/ping/active", false, true, true);
+    if(DSS::hasInstance()) {
+      // TODO: move those lines into the ping script
+      DSS::getInstance()->getPropertySystem().setIntValue("/system/js/ping/session", 0, true, true);
+      DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/ping/active", false, true, true);
+      DSS::getInstance()->getPropertySystem().createProperty("/system/js/features/");
+    }
   } // initialize
 
   bool ScriptEnvironment::isInitialized() {
