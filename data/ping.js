@@ -64,6 +64,7 @@ function pingResultHandler(f, shortAddr) {
 
 function ping(device) {
   if (session != getProperty("/system/js/extendedPing/session")) {
+    log("This ping session became obsolete, aborting.");
     return;
   }
 
@@ -86,12 +87,13 @@ function ping(device) {
 */
 
 function pingDelayHandler(ids) {
-  if (session != getProperty("/system/js/extendedPing/session")) {
-    return;
-  }
-
   for (i = 0; i < ids.length; i++)
   {
+    if (session != getProperty("/system/js/extendedPing/session")) {
+        log("This ping session became obsolete, aborting.");
+        return;
+    }
+
     // split may return an empty dsid after comma
     if (ids[i].length <= 0) {
       continue;
