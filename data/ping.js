@@ -151,7 +151,8 @@ function timedPing() {
 if (raisedEvent.name == "ping") {
   keepContext();
 
-  l.logln("Starting extended ping session " + session);
+  l.logln("Starting extended ping session " + session + 
+          " ――――――――――――――――――――――――");
   log("Will ping following dsids:            " + raisedEvent.parameter.dsid);
   log("Round repetitions:                    " + raisedEvent.parameter.repeat);
   log("Delay between repetitions:            " + raisedEvent.parameter.delay + 
