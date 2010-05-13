@@ -56,9 +56,6 @@ namespace dss {
       throw ScriptException("Error creating environment");
     }
     if(DSS::hasInstance()) {
-      // TODO: move those lines into the ping script
-      DSS::getInstance()->getPropertySystem().setIntValue("/system/js/ping/session", 0, true, true);
-      DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/ping/active", false, true, true);
       DSS::getInstance()->getPropertySystem().createProperty("/system/js/features/");
     }
   } // initialize
