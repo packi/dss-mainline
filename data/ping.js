@@ -1,16 +1,27 @@
 var LOGFILE_NAME = "ping.log"
-
 var l = new Logger(LOGFILE_NAME);
 
+if (raisedEvent.name == "running") {
+  setProperty("/system/js/extendedPing/session", 0);
+  setProperty("/system/js/extendedPing/active", 0);
+  setProperty("/system/js/features/extendedPing", true);
+  l.logln("Extended ping script initialized");
+}
+
+
 var repeated = 0;
-var session = getProperty("/system/js/ping/session");
+var session = getProperty("/system/js/extendedPing/session");
 session++;
 
-setProperty("/system/js/ping/session", session);
+setProperty("/system/js/extendedPing/session", session);
+
+function log(logstring) {
+  l.logln("SESSION " + session + " | " + logstring);
+}
 
 function pingResultHandler(f, shortAddr) {
 
-  if (session != getProperty("/system/js/ping/session")) {
+  if (session != getProperty("/system/js/extendedPing/session")) {
     return false;
   }
 
@@ -35,7 +46,7 @@ function pingResultHandler(f, shortAddr) {
         
     var device = getDevices().byShortAddress(f.source, f.payload[1]);
 
-    l.logln("Ping response from " + device.dsid + " " + device.name + 
+    log("Ping response from " + device.dsid + " " + device.name + 
             " HK: " + f.payload[2] + " RK: " + f.payload[3]);
 
     var evt = new event("ping_result", { "send": f.payload[2], 
@@ -52,7 +63,7 @@ function pingResultHandler(f, shortAddr) {
 }
 
 function ping(device) {
-  if (session != getProperty("/system/js/ping/session")) {
+  if (session != getProperty("/system/js/extendedPing/session")) {
     return;
   }
 
@@ -75,7 +86,7 @@ function ping(device) {
 */
 
 function pingDelayHandler(ids) {
-  if (session != getProperty("/system/js/ping/session")) {
+  if (session != getProperty("/system/js/extendedPing/session")) {
     return;
   }
 
@@ -89,11 +100,11 @@ function pingDelayHandler(ids) {
     var device = getDevices().byDSID(ids[i]);
 
     if (device === null) {
-      l.logln("Device with dsid: " + ids[i] + " not found");
+      log("Device with dsid: " + ids[i] + " not found");
       continue;
     }
     
-    l.logln("Pinging device with dsid: " + ids[i] + " " + device.name);
+    log("Pinging device with dsid: " + ids[i] + " " + device.name);
 
     for (p = 0; p < raisedEvent.parameter.count; p++) {
       ping(device);
@@ -102,29 +113,31 @@ function pingDelayHandler(ids) {
 }
 
 function timedPing() {
-  if (session != getProperty("/system/js/ping/session")) {
-    l.logln("Aborting old ping session.");
+  if (session != getProperty("/system/js/extendedPing/session")) {
+    log("This ping session became obsolete, aborting.");
     return;
   }
 
   var ids = raisedEvent.parameter.dsid.split(",");
   if (ids.length <= 0) {
-    l.logln("Error: no dsid's to ping!");
+    log("Error: no dsid's to ping!");
     return;
   }
  
-  if (getProperty("/system/js/ping/active") === true) {
-    l.logln("A ping round is currently active, rescheduling our session...");
+  if (getProperty("/system/js/extendedPing/active") === true) {
+    log("Another ping round is currently active, rescheduling our session...");
     setTimeout(3*1000, timedPing);
     return;
   }
 
-  setProperty("/system/js/ping/active", true);
+  setProperty("/system/js/extendedPing/active", true);
+
+  log("Handling repetition #" + repeated);
 
   if ((raisedEvent.parameter.repeat > 0) && (raisedEvent.parameter.delay > 0)) {
     pingDelayHandler(ids);
     if ((repeated < raisedEvent.parameter.repeat) && 
-        (session == getProperty("/system/js/ping/session"))) {
+        (session == getProperty("/system/js/extendedPing/session"))) {
         setTimeout(parseInt(raisedEvent.parameter.delay) * 1000 /* msec */, timedPing);
     }
     repeated++;
@@ -132,15 +145,18 @@ function timedPing() {
     pingDelayHandler(ids);
   }
     
-  setProperty("/system/js/ping/active", false); 
+  setProperty("/system/js/extendedPing/active", false); 
 }
 
-keepContext();
+if (raisedEvent.name == "ping") {
+  keepContext();
 
-l.logln("Starting extended ping session for following dsids: " + raisedEvent.parameter.dsid);
-l.logln("Ping round repetitions:               "+ raisedEvent.parameter.repeat);
-l.logln("Delay (seconds) between repetitions:  "+ raisedEvent.parameter.delay);
-l.logln("Number of pings per device per round: "+ raisedEvent.parameter.count);
+  l.logln("Starting extended ping session " + session);
+  log("Will ping following dsids:            " + raisedEvent.parameter.dsid);
+  log("Round repetitions:                    " + raisedEvent.parameter.repeat);
+  log("Delay between repetitions:            " + raisedEvent.parameter.delay + 
+      " seconds");
+  log("Number of pings per device per round: " + raisedEvent.parameter.count);
 
-timedPing(); 
-
+  timedPing(); 
+}
