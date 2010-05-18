@@ -19,7 +19,7 @@ function log(logstring) {
   l.logln("SESSION " + session + " | " + logstring);
 }
 
-function pingResultHandler(f, shortAddr) {
+function pingResultHandler(f, shortAddr, dsid, name, index, count) {
 
   if (session != getProperty("/system/js/extendedPing/session")) {
     return false;
@@ -46,8 +46,8 @@ function pingResultHandler(f, shortAddr) {
         
     var device = getDevices().byShortAddress(f.source, f.payload[1]);
 
-    log("Ping response from " + device.dsid + " " + device.name + 
-            " HK: " + f.payload[2] + " RK: " + f.payload[3]);
+    log(index + count + "Ping response from  dsid: " + device.dsid + " " 
+        + device.name + " HK: " + f.payload[2] + " RK: " + f.payload[3]);
 
     var evt = new event("ping_result", { "send": f.payload[2], 
                                          "receive": f.payload[3],
@@ -56,13 +56,14 @@ function pingResultHandler(f, shortAddr) {
                                          "logfile": LOGFILE_NAME,
                                          "timestamp": new Date(Date.now()).toGMTString()});
     evt.raise();
-  } 
- 
+  } else {
+    log(index + count + "No  response  from  dsid: " + dsid + " " + name); 
+  }
 
   return false;
 }
 
-function ping(device) {
+function ping(device, index, count) {
   if (session != getProperty("/system/js/extendedPing/session")) {
     log("This ping session became obsolete, aborting.");
     return;
@@ -74,12 +75,17 @@ function ping(device) {
   frame.broadcast = false;
   frame.payload.push(device.shortAddress);
   DS485.sendFrame(frame, function(frame) { 
-                           return pingResultHandler(frame, device.shortAddress); 
+                           return pingResultHandler(frame, 
+                                                    device.shortAddress, 
+                                                    device.dsid,
+                                                    device.name,
+                                                    index,
+                                                    count); 
                          } , 5000);
 }
 
 /*
-    Parameters:
+    Paurameters:
         dsid    -   what device to ping
         delay   -   delay between pings
         repeat  -   how often to repeat
@@ -87,6 +93,10 @@ function ping(device) {
 */
 
 function pingDelayHandler(ids) {
+  var index = "";
+  if (raisedEvent.parameter.repeat > 0) {
+    index = "#" + (repeated + 1) + " ";
+  }
   for (i = 0; i < ids.length; i++)
   {
     if (session != getProperty("/system/js/extendedPing/session")) {
@@ -106,10 +116,14 @@ function pingDelayHandler(ids) {
       continue;
     }
     
-    log("Pinging device with dsid: " + ids[i] + " " + device.name);
 
+    var count = "";
     for (p = 0; p < raisedEvent.parameter.count; p++) {
-      ping(device);
+        if (raisedEvent.parameter.count > 1) {
+          count = " (" + (p+1) + ") "; 
+        }
+      log(index + count + "Pinging device with dsid: " + ids[i] + " " + device.name);
+      ping(device, index, count);
     }
   } // loop on dsid
 }
@@ -134,8 +148,6 @@ function timedPing() {
 
   setProperty("/system/js/extendedPing/active", true);
 
-  log("Handling repetition #" + repeated);
-
   if ((raisedEvent.parameter.repeat > 0) && (raisedEvent.parameter.delay > 0)) {
     pingDelayHandler(ids);
     if ((repeated < raisedEvent.parameter.repeat) && 
@@ -154,11 +166,11 @@ if (raisedEvent.name == "ping") {
   keepContext();
 
   l.logln("Starting extended ping session " + session + 
-          " ――――――――――――――――――――――――");
+          " ――――――――――――――――――――――――――――――――――――――――――――――――");
   log("Will ping following dsids:            " + raisedEvent.parameter.dsid);
   log("Round repetitions:                    " + raisedEvent.parameter.repeat);
   log("Delay between repetitions:            " + raisedEvent.parameter.delay + 
-      " seconds");
+      " sec.");
   log("Number of pings per device per round: " + raisedEvent.parameter.count);
 
   timedPing(); 
