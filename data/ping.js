@@ -1,4 +1,4 @@
-var LOGFILE_NAME = "ping.log"
+var LOGFILE_NAME = "ping.log";
 var l = new Logger(LOGFILE_NAME);
 
 if (raisedEvent.name == "running") {
