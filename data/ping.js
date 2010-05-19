@@ -54,6 +54,7 @@ function pingResultHandler(f, shortAddr, dsid, name, index, count) {
                                          "dsid": device.dsid,
                                          "name": device.name,
                                          "logfile": LOGFILE_NAME,
+                                         "reqindex" : index,
                                          "timestamp": new Date(Date.now()).toGMTString()});
     evt.raise();
   } else {
@@ -166,7 +167,7 @@ if (raisedEvent.name == "ping") {
   keepContext();
 
   l.logln("Starting extended ping session " + session + 
-          " ――――――――――――――――――――――――――――――――――――――――――――――――");
+          " ------------------------------------------------");
   log("Will ping following dsids:            " + raisedEvent.parameter.dsid);
   log("Round repetitions:                    " + raisedEvent.parameter.repeat);
   log("Delay between repetitions:            " + raisedEvent.parameter.delay + 
