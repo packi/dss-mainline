@@ -9,27 +9,108 @@ if (raisedEvent.name == "running") {
   l.logln("Extended ping script initialized");
 }
 
-
 var repeated = 0;
+var last_request = false;
+var ids = [];
 var session = getProperty("/system/js/settings/extendedPing/session");
 session++;
 
 setProperty("/system/js/settings/extendedPing/session", session);
 
+function stats(session) {
+  this.sentTotal = 0;
+  this.dsid = "";
+  this.callbacksTotal = 0;
+  this.receivedTotal = 0;
+  this.sendErr = [0,0,0,0,0,0,0];
+  this.recvMax = 0;
+  this.recvMin = 65535;
+  this.missedResponsesPercentage = 0;
+  this.device = null;
+  this.session = session;
+  this.summary = function() {
+    if (this.device === null) {
+      log("Ping summary is missing device information, ignoring");
+      return;
+    }
+
+    log("");
+    log("Summary for device " + this.device.dsid + " " + this.device.name);
+    log("---------------------------------------------------------");
+    log("        Total requests sent: " + this.sentTotal);
+    log("   Total responses received: " + this.receivedTotal);
+    log("");
+    for (var i = 0; i < this.sendErr.length; i++) {
+      log("                HK Errors " + i +": " + this.sendErr[i]);
+    }
+    log("");
+    log("  Worst received value (RK): " + this.recvMin);
+    log("   Best received value (RK): " + this.recvMax);
+    log("---------------------------------------------------------");
+    log("");
+  }
+}
+
+function devSt() {
+  this.devices = [];
+  this.getStats = function(dsid) {
+    var found = -1;
+    for (var i = 0; i < this.devices.length; i++) {
+      if ((this.devices[i].device != null) && 
+          (this.devices[i].device.dsid == dsid)) {
+        found = i;
+      }
+    }
+
+    if (found > -1) {
+      return this.devices[found];
+    } else {
+      return null; 
+    }
+  }
+
+  this.update = function(stats) {
+    var found = -1;
+    for (var i = 0; i < this.devices.length; i++) {
+      if ((this.devices[i].device != null) && 
+          (this.devices[i].device.dsid == stats.device.dsid)) {
+        found = i;
+      }
+    }
+
+    if (found > -1) {
+      this.devices[found] = stats;
+    } else {
+      this.devices.push(stats);
+    }
+  }
+
+  this.printAll = function() {
+    for (var i = 0; i < this.devices.length; i++) {
+      this.devices[i].summary();
+    }
+  }
+}
+
+var deviceStats = new devSt();
+
 function log(logstring) {
   l.logln("SESSION " + session + " | " + logstring);
 }
 
-function pingResultHandler(f, shortAddr, dsid, name, index, count) {
-
+function pingResultHandler(f, shortAddr, dsid, name, index) {
   if (session != getProperty("/system/js/settings/extendedPing/session")) {
+    log("This ping session became obsolete, aborting.");
+    deviceStats.printAll();
     return false;
   }
-
+    
+  var s = deviceStats.getStats(dsid);
+    
   if (f != null) {
     if (f.payload.length == 1) {
       if (f.payload[0] < 0) {
-        l.logln("dSM returned error code: " + f.payload[0]);
+        log("dSM returned error code: " + f.payload[0]);
         return false;
       }
 
@@ -47,7 +128,29 @@ function pingResultHandler(f, shortAddr, dsid, name, index, count) {
         
     var device = getDevices().byShortAddress(f.source, f.payload[1]);
 
-    log(index + count + "Ping response from  dsid: " + device.dsid + " " 
+    s = deviceStats.getStats(device.dsid);
+    if (s != null) {
+      s.receivedTotal++;
+      s.callbacksTotal++;
+
+      if (f.payload[3] > s.recvMax) {
+        s.recvMax = f.payload[3];
+      }
+
+      if (f.payload[3] < s.recvMin) {
+        s.recvMin = f.payload[3];
+      }
+
+      if (f.payload[2] < s.sendErr.length) {
+        s.sendErr[f.payload[2]]++;
+      }
+
+      deviceStats.update(s);
+    } else {
+      log("Error: summary object not available!");
+    }
+
+    log(index + "Ping response from  dsid: " + device.dsid + " " 
         + device.name + " HK: " + f.payload[2] + " RK: " + f.payload[3]);
 
     var evt = new event("ping_result", { "send": f.payload[2], 
@@ -59,17 +162,39 @@ function pingResultHandler(f, shortAddr, dsid, name, index, count) {
                                          "timestamp": new Date(Date.now()).toGMTString()});
     evt.raise();
   } else {
-    log(index + count + "No  response  from  dsid: " + dsid + " " + name); 
+    if (s === null) {
+      log("Error: summary object not available!");
+    } else {
+      s.callbacksTotal++;
+      deviceStats.update(s);
+    }
+    log("");
+    log(index + "** NO RESPONSE from dsid: " + dsid + " ****** " + name); 
+  }
+
+  if ((last_request === true) && (s.callbacksTotal >= s.sentTotal)) {
+    s.summary(dsid);
   }
 
   return false;
 }
 
-function ping(device, index, count) {
+function ping(device, index) {
   if (session != getProperty("/system/js/settings/extendedPing/session")) {
     log("This ping session became obsolete, aborting.");
+    deviceStats.printAll();
     return;
   }
+
+  var s = deviceStats.getStats(device.dsid);
+  if (s === null) {
+    s = new stats(session);
+    s.device = device;
+    s.dsid = device.dsid;
+  }
+
+  s.sentTotal++;
+  deviceStats.update(s);
 
   var frame = new DS485Frame();
   frame.functionID = 0x9f; // FunctionDeviceGetTransmissionQuality
@@ -81,8 +206,7 @@ function ping(device, index, count) {
                                                     device.shortAddress, 
                                                     device.dsid,
                                                     device.name,
-                                                    index,
-                                                    count); 
+                                                    index); 
                          } , 5000);
 }
 
@@ -91,16 +215,16 @@ function ping(device, index, count) {
         dsid    -   what device to ping
         delay   -   delay between pings
         repeat  -   how often to repeat
-        count   -   how many pings per cycle
 */
 
-function pingDelayHandler(ids) {
+function pingDelayHandler() {
   var index = "#" + (repeated + 1) + " ";
-  
-  for (i = 0; i < ids.length; i++)
+ 
+  for (var i = 0; i < ids.length; i++)
   {
     if (session != getProperty("/system/js/settings/extendedPing/session")) {
         log("This ping session became obsolete, aborting.");
+        deviceStats.printAll();
         return;
     }
 
@@ -115,31 +239,20 @@ function pingDelayHandler(ids) {
       log("Device with dsid: " + ids[i] + " not found");
       continue;
     }
-    
 
-    var count = "";
-    for (p = 0; p < raisedEvent.parameter.count; p++) {
-        if (raisedEvent.parameter.count > 1) {
-          count = " (" + (p+1) + ") "; 
-        }
-      log(index + count + "Pinging device with dsid: " + ids[i] + " " + device.name);
-      ping(device, index, count);
-    }
+    log(index + "Pinging device with dsid: " + ids[i] + " " + device.name);
+    ping(device, index);
   } // loop on dsid
 }
 
 function timedPing() {
   if (session != getProperty("/system/js/settings/extendedPing/session")) {
     log("This ping session became obsolete, aborting.");
+    deviceStats.printAll();
     return;
   }
 
-  var ids = raisedEvent.parameter.dsid.split(",");
-  if (ids.length <= 0) {
-    log("Error: no dsid's to ping!");
-    return;
-  }
- 
+
   if (getProperty("/system/js/settings/extendedPing/active") === true) {
     log("Another ping round is currently active, rescheduling our session...");
     setTimeout(3*1000, timedPing);
@@ -149,14 +262,21 @@ function timedPing() {
   setProperty("/system/js/settings/extendedPing/active", true);
 
   if ((raisedEvent.parameter.repeat > 0) && (raisedEvent.parameter.delay > 0)) {
-    pingDelayHandler(ids);
+    var one_more = false;
     if ((repeated < raisedEvent.parameter.repeat) && 
         (session == getProperty("/system/js/settings/extendedPing/session"))) {
+      one_more = true;
+    } else {
+      last_request = true;
+    }
+    pingDelayHandler();
+    if (one_more === true) {
         setTimeout(parseInt(raisedEvent.parameter.delay) * 1000 /* msec */, timedPing);
     }
     repeated++;
   } else {
-    pingDelayHandler(ids);
+    last_request = true;
+    pingDelayHandler();
   }
     
   setProperty("/system/js/settings/extendedPing/active", false); 
@@ -164,14 +284,19 @@ function timedPing() {
 
 if (raisedEvent.name == "ping") {
   keepContext();
-
+  l.logln("");
   l.logln("Starting extended ping session " + session + 
           " ------------------------------------------------");
-  log("Will ping following dsids:            " + raisedEvent.parameter.dsid);
-  log("Round repetitions:                    " + raisedEvent.parameter.repeat);
-  log("Delay between repetitions:            " + raisedEvent.parameter.delay + 
+  log("Will ping following dsids:  " + raisedEvent.parameter.dsid);
+  log("Round repetitions:          " + raisedEvent.parameter.repeat);
+  log("Delay between repetitions:  " + raisedEvent.parameter.delay + 
       " sec.");
-  log("Number of pings per device per round: " + raisedEvent.parameter.count);
+  last_request = false;
 
-  timedPing(); 
+  ids = raisedEvent.parameter.dsid.split(",");
+  if (ids.length <= 0) {
+    log("Error: no dsid's to ping!");
+  } else {
+    timedPing(); 
+  }
 }
