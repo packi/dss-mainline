@@ -2,18 +2,19 @@ var LOGFILE_NAME = "ping.log";
 var l = new Logger(LOGFILE_NAME);
 
 if (raisedEvent.name == "running") {
-  setProperty("/system/js/extendedPing/session", 0);
-  setProperty("/system/js/extendedPing/active", 0);
+  setProperty("/system/js/settings/extendedPing/session", 0);
+  setProperty("/system/js/settings/extendedPing/active", 0);
+  setProperty("/system/js/settings/extendedPing/logfile", LOGFILE_NAME);
   setProperty("/system/js/features/extendedPing", true);
   l.logln("Extended ping script initialized");
 }
 
 
 var repeated = 0;
-var session = getProperty("/system/js/extendedPing/session");
+var session = getProperty("/system/js/settings/extendedPing/session");
 session++;
 
-setProperty("/system/js/extendedPing/session", session);
+setProperty("/system/js/settings/extendedPing/session", session);
 
 function log(logstring) {
   l.logln("SESSION " + session + " | " + logstring);
@@ -21,7 +22,7 @@ function log(logstring) {
 
 function pingResultHandler(f, shortAddr, dsid, name, index, count) {
 
-  if (session != getProperty("/system/js/extendedPing/session")) {
+  if (session != getProperty("/system/js/settings/extendedPing/session")) {
     return false;
   }
 
@@ -65,7 +66,7 @@ function pingResultHandler(f, shortAddr, dsid, name, index, count) {
 }
 
 function ping(device, index, count) {
-  if (session != getProperty("/system/js/extendedPing/session")) {
+  if (session != getProperty("/system/js/settings/extendedPing/session")) {
     log("This ping session became obsolete, aborting.");
     return;
   }
@@ -94,13 +95,11 @@ function ping(device, index, count) {
 */
 
 function pingDelayHandler(ids) {
-  var index = "";
-  if (raisedEvent.parameter.repeat > 0) {
-    index = "#" + (repeated + 1) + " ";
-  }
+  var index = "#" + (repeated + 1) + " ";
+  
   for (i = 0; i < ids.length; i++)
   {
-    if (session != getProperty("/system/js/extendedPing/session")) {
+    if (session != getProperty("/system/js/settings/extendedPing/session")) {
         log("This ping session became obsolete, aborting.");
         return;
     }
@@ -130,7 +129,7 @@ function pingDelayHandler(ids) {
 }
 
 function timedPing() {
-  if (session != getProperty("/system/js/extendedPing/session")) {
+  if (session != getProperty("/system/js/settings/extendedPing/session")) {
     log("This ping session became obsolete, aborting.");
     return;
   }
@@ -141,18 +140,18 @@ function timedPing() {
     return;
   }
  
-  if (getProperty("/system/js/extendedPing/active") === true) {
+  if (getProperty("/system/js/settings/extendedPing/active") === true) {
     log("Another ping round is currently active, rescheduling our session...");
     setTimeout(3*1000, timedPing);
     return;
   }
 
-  setProperty("/system/js/extendedPing/active", true);
+  setProperty("/system/js/settings/extendedPing/active", true);
 
   if ((raisedEvent.parameter.repeat > 0) && (raisedEvent.parameter.delay > 0)) {
     pingDelayHandler(ids);
     if ((repeated < raisedEvent.parameter.repeat) && 
-        (session == getProperty("/system/js/extendedPing/session"))) {
+        (session == getProperty("/system/js/settings/extendedPing/session"))) {
         setTimeout(parseInt(raisedEvent.parameter.delay) * 1000 /* msec */, timedPing);
     }
     repeated++;
@@ -160,7 +159,7 @@ function timedPing() {
     pingDelayHandler(ids);
   }
     
-  setProperty("/system/js/extendedPing/active", false); 
+  setProperty("/system/js/settings/extendedPing/active", false); 
 }
 
 if (raisedEvent.name == "ping") {
