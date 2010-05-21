@@ -143,15 +143,15 @@ namespace dss {
         return success(obj);
       }
     } else if(_request.getMethod() == "pingDevice") {
-       if (DSS::getInstance()->getPropertySystem().getBoolValue("/system/js/ping/active") == true) {
-         return failure("Another ping round is currently active, please try again later!");
-       }
+      if (DSS::getInstance()->getPropertySystem().getBoolValue("/system/js/settings/extendedPing/active") == true) {
+        return failure("Another ping round is currently active, please try again later!");
+      }
       std::string deviceDSIDString = _request.getParameter("dsid");
       if(deviceDSIDString.empty()) {
         return failure("Missing parameter 'dsid'");
       }
       try {
-        DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/ping/active", true, true, true);
+        DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/settings/extendedPing/active", true, true, true);
         dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
         Device& device = m_DSS.getApartment().getDeviceByDSID(deviceDSID);
         // TODO: move this code somewhere else (might also relax the requirement
@@ -172,14 +172,14 @@ namespace dss {
             bucket->waitForFrame(2500);
             recFrame = bucket->popFrame();
             if(recFrame == NULL) {
-              DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/ping/active", false, true, true);
+              DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/settings/extendedPing/active", false, true, true);
               return failure("No result received");
             }
             PayloadDissector pd(recFrame->getPayload());
             pd.get<uint8_t>();
             rval = int(pd.get<uint16_t>());
             if(rval < 0) {
-              DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/ping/active", false, true, true);
+              DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/settings/extendedPing/active", false, true, true);
               return failure("dSM reported error-code: " + intToString(rval));
             }
           } while (rval != 2);
@@ -193,18 +193,18 @@ namespace dss {
           boost::shared_ptr<JSONObject> obj(new JSONObject());
           obj->addProperty("qualityHK", qualityHK);
           obj->addProperty("qualityRK", qualityRK);
-          DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/ping/active", false, true, true);
+          DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/settings/extendedPing/active", false, true, true);
           return success(obj);
         } else {
           delete frame;
-          DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/ping/active", false, true, true);
+          DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/settings/extendedPing/active", false, true, true);
           return failure("Proxy has a wrong type or is null");
         }
       } catch(ItemNotFoundException&) {
-        DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/ping/active", false, true, true);
+        DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/settings/extendedPing/active", false, true, true);
         return failure("Could not find device with dsid '" + deviceDSIDString + "'");
       } catch(std::invalid_argument&) {
-        DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/ping/active", false, true, true);
+        DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/settings/extendedPing/active", false, true, true);
         return failure( "Could not parse dsid '" + deviceDSIDString + "'");
       }
     } else if(_request.getMethod() == "resetZone") {
