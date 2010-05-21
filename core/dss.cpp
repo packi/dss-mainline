@@ -346,6 +346,7 @@ const char* LogDirectory = "data/logs";
     Logger::getInstance()->log("  data:   '" + getDataDirectory() + "'", lsInfo);
     Logger::getInstance()->log("  config: '" + getConfigDirectory() + "'", lsInfo);
     Logger::getInstance()->log("  webroot '" + getWebrootDirectory() + "'", lsInfo);
+    Logger::getInstance()->log("  log dir '" + getJSLogDirectory() + "'", lsInfo);
 
     SystemInfo info;
     info.collect();

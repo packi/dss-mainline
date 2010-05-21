@@ -17,6 +17,10 @@ if(NOT WITH_WEBROOTDIR)
   set(WITH_WEBROOTDIR "${WITH_DATADIR}/webroot" CACHE FILEPATH "Webroot directory")
 endif(NOT WITH_WEBROOTDIR)
 
+if(NOT WITH_LOGDIR)
+  set(WITH_LOGDIR "${WITH_DATADIR}/logs" CACHE FILEPATH "Log directory")
+endif(NOT WITH_LOGDIR)
+
 set(DSS_GEN_VERSION_CMD "")
 if(WIN32)
   set(DSS_GEN_VERSION_CMD "tools/dss_gen_version_win32.bat")
