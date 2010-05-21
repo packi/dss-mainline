@@ -19,12 +19,13 @@ setProperty("/system/js/settings/extendedPing/session", session);
 
 function stats(session) {
   this.sentTotal = 0;
-  this.dsid = "";
   this.callbacksTotal = 0;
   this.receivedTotal = 0;
+  this.dsid = "";
   this.sendErr = [0,0,0,0,0,0,0];
   this.recvMax = 0;
   this.recvMin = 65535;
+  this.recvSum = 0;
   this.missedResponsesPercentage = 0;
   this.device = null;
   this.session = session;
@@ -37,15 +38,18 @@ function stats(session) {
     log("");
     log("Summary for device " + this.device.dsid + " " + this.device.name);
     log("---------------------------------------------------------");
-    log("        Total requests sent: " + this.sentTotal);
-    log("   Total responses received: " + this.receivedTotal);
+    log("          Total requests sent: " + this.sentTotal);
+    log("     Total responses received: " + this.receivedTotal);
+    log("   Missed response percentage: " + 
+            Math.round((100-(this.receivedTotal / this.sentTotal)*100)) + "%");
     log("");
     for (var i = 0; i < this.sendErr.length; i++) {
-      log("                HK Errors " + i +": " + this.sendErr[i]);
+      log("                  HK Errors " + i +": " + this.sendErr[i]);
     }
     log("");
-    log("  Worst received value (RK): " + this.recvMin);
-    log("   Best received value (RK): " + this.recvMax);
+    log("    Worst received value (RK): " + this.recvMin);
+    log("     Best received value (RK): " + this.recvMax);
+    log(" Average received values (RK): " + (this.recvSum / this.receivedTotal));
     log("---------------------------------------------------------");
     log("");
   }
@@ -140,6 +144,8 @@ function pingResultHandler(f, shortAddr, dsid, name, index) {
       if (f.payload[3] < s.recvMin) {
         s.recvMin = f.payload[3];
       }
+
+      s.recvSum = s.recvSum + f.payload[3];
 
       if (f.payload[2] < s.sendErr.length) {
         s.sendErr[f.payload[2]]++;
