@@ -58,7 +58,7 @@ make
 
 echo "Building documentation for dss v$DSS_RELEASE_VERSION"
 
-TARGET_DIR=../../dss-$DSS_RELEASE_VERSION-doc
+TARGET_DIR=$PWD/../dss-$DSS_RELEASE_VERSION-doc
 rm -rf $TARGET_DIR
 mkdir $TARGET_DIR
 
