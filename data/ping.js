@@ -294,7 +294,8 @@ if (raisedEvent.name == "ping") {
   l.logln("Starting extended ping session " + session + 
           " ------------------------------------------------");
   log("Will ping following dsids:  " + raisedEvent.parameter.dsid);
-  log("Round repetitions:          " + raisedEvent.parameter.repeat);
+  log("Number of pings per device: " + raisedEvent.parameter.repeat);
+  raisedEvent.parameter.repeat--;
   log("Delay between repetitions:  " + raisedEvent.parameter.delay + 
       " sec.");
   last_request = false;
