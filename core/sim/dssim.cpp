@@ -31,6 +31,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
+#include <boost/bind.hpp>
 
 #include "core/ds485const.h"
 #include "core/model/modelconst.h"
