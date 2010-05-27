@@ -23,8 +23,8 @@ function stats(session) {
   this.receivedTotal = 0;
   this.dsid = "";
   this.sendErr = [0,0,0,0,0,0,0];
-  this.recvMax = 0;
-  this.recvMin = 65535;
+  this.recvMax = undefined;
+  this.recvMin = undefined;
   this.recvSum = 0;
   this.missedResponsesPercentage = 0;
   this.device = null;
@@ -47,9 +47,9 @@ function stats(session) {
       log("                  HK Errors " + i +": " + this.sendErr[i]);
     }
     log("");
-    log("    Worst received value (RK): " + this.recvMin);
-    log("     Best received value (RK): " + this.recvMax);
-    log(" Average received values (RK): " + (this.recvSum / this.receivedTotal));
+    log("    Worst received value (RK): " + ((this.recvMin === undefined) ? "none" : this.recvMin));
+    log("     Best received value (RK): " + ((this.recvMax === undefined) ? "none" : this.recvMax));
+    log(" Average received values (RK): " + (((this.receivedTotal == 0) || (this.recvSum == 0)) ? "none" : (this.recvSum / this.receivedTotal)));
     log("---------------------------------------------------------");
     log("");
   }
@@ -137,11 +137,11 @@ function pingResultHandler(f, shortAddr, dsid, name, index) {
       s.receivedTotal++;
       s.callbacksTotal++;
 
-      if (f.payload[3] > s.recvMax) {
+      if ((s.recvMax === undefined) || (f.payload[3] > s.recvMax)) {
         s.recvMax = f.payload[3];
       }
 
-      if (f.payload[3] < s.recvMin) {
+      if ((s.recvMin === undefined) || (f.payload[3] < s.recvMin)) {
         s.recvMin = f.payload[3];
       }
 
