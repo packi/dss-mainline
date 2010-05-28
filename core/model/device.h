@@ -54,6 +54,8 @@ namespace dss {
     std::bitset<63> m_GroupBitmask;
     std::vector<int> m_Groups;
     int m_FunctionID;
+    int m_ProductID;
+    int m_RevisionID;
     int m_LastCalledScene;
     unsigned long m_Consumption;
     DateTime m_LastDiscovered;
@@ -93,6 +95,20 @@ namespace dss {
     /** Sets the functionID to \a _value */
     void setFunctionID(const int _value);
     bool hasSwitch() const;
+
+    /** Returns the Product ID of the device.
+     * The Product ID identifies the manufacturer and type of device.
+     */
+    int getProductID() const;
+    /** Sets the ProductID to \a _value */
+    void setProductID(const int _value);
+
+    /** Returns the Revision ID of the device.
+     * The revision identifies the device hardware revision.
+     */
+    int getRevisionID() const;
+    /** Sets the ProductID to \a _value */
+    void setRevisionID(const int _value);
 
     /** Returns the name of the device. */
     const std::string& getName() const;

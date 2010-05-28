@@ -100,6 +100,22 @@ namespace dss {
     m_FunctionID = _value;
   } // setFunctionID
 
+  int Device::getProductID() const {
+    return m_ProductID;
+  } // getProductID
+
+  void Device::setProductID(const int _value) {
+    m_ProductID = _value;
+  } // setProductID
+
+  int Device::getRevisionID() const {
+    return m_RevisionID;
+  } // getRevisionID
+
+  void Device::setRevisionID(const int _value) {
+    m_RevisionID = _value;
+  } // setRevisionID
+
   bool Device::hasSwitch() const {
     return getFunctionID() == FunctionIDSwitch;
   } // hasSwitch

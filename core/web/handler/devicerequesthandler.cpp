@@ -71,6 +71,12 @@ namespace dss {
     if(ok) {
       if(isDeviceInterfaceCall(_request)) {
         return handleDeviceInterfaceRequest(_request, pDevice);
+      } else if(_request.getMethod() == "getSpec") {
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        resultObj->addProperty("functionid", pDevice->getFunctionID());
+        resultObj->addProperty("productid", pDevice->getProductID());
+        resultObj->addProperty("revisionid", pDevice->getRevisionID());
+        return success(resultObj);
       } else if(_request.getMethod() == "getGroups") {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
         int numGroups = pDevice->getGroupsCount();

@@ -110,20 +110,30 @@ namespace dss {
         }
 
         int functionID = 0;
+        int productID = 0;
+        int revisionID = 0;
         try {
-          functionID = m_Interface.deviceGetFunctionID(devID, dsMeterID);
+          DeviceSpec_t spec = m_Interface.deviceGetSpec(devID, dsMeterID);
+          functionID = spec.get<0>();
+          productID = spec.get<1>();
+          revisionID = spec.get<2>();
         } catch(DS485ApiError& e) {
-          log("scanDSMeter: Error getting cmdGetFunctionID", lsFatal);
+          log("scanDSMeter: Error getting device spec", lsFatal);
           return false;
         }
-        log("scanDSMeter:    Found device with id: " + intToString(devID));
+        log("scanDSMeter:    Found device with address: " + intToString(devID));
         log("scanDSMeter:    DSID:        " + dsid.toString());
-        log("scanDSMeter:    Function ID: " + unsignedLongIntToHexString(functionID));
+        log("scanDSMeter:    Function-ID: " + unsignedLongIntToHexString(functionID) +
+            ", Product-ID: " + unsignedLongIntToHexString(productID) +
+            ", Revision-ID: " + unsignedLongIntToHexString(revisionID)
+            );
         Device& dev = m_Apartment.allocateDevice(dsid);
         dev.setShortAddress(devID);
         dev.setDSMeter(_dsMeter);
         dev.setZoneID(zoneID);
         dev.setFunctionID(functionID);
+        dev.setProductID(productID);
+        dev.setRevisionID(revisionID);
 
         std::vector<int> groupIdperDevices = m_Interface.getGroupsOfDevice(dsMeterID, devID);
         std::vector<int> groupIDsPerDevice = m_Interface.getGroupsOfDevice(dsMeterID,devID);
