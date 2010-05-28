@@ -36,6 +36,9 @@
 #include <iostream>
 #include <sstream>
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Node.h>
@@ -213,6 +216,7 @@ namespace dss {
     Subsystem::initialize();
     if(DSS::hasInstance()) {
       getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptionfile", getDSS().getConfigDirectory() + "subscriptions.xml", true, false);
+      getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptiondir", getDSS().getConfigDirectory() + "subscriptions.d", true, false);
     }
   } // initialize
 
@@ -223,6 +227,18 @@ namespace dss {
   void EventInterpreter::execute() {
     if(DSS::hasInstance()) {
       loadFromXML(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptionfile"));
+      if (boost::filesystem::is_directory((getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptiondir")))) {
+        boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
+        for (boost::filesystem::directory_iterator itr(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptiondir"));
+             itr != end_itr;
+             ++itr )
+        {
+          if (boost::filesystem::is_regular_file(itr->status()) &&  (itr->path().extension() == ".xml"))
+          {
+            loadFromXML(itr->path().file_string());
+          }
+        }
+      }
     }
 
     if(m_Queue == NULL) {
