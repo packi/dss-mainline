@@ -98,6 +98,7 @@ namespace dss {
     DSS();
 
     bool loadConfig(const std::string& _configFile);
+    int loadConfigDir(const std::string& _configDir);
     bool parseProperties(const std::vector<std::string>& _properties);
     void addDefaultInterpreterPlugins();
 

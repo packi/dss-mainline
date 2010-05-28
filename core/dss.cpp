@@ -63,6 +63,9 @@
 #include <csignal>
 #endif
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+
 namespace dss {
 
   //============================================= DSS
@@ -376,14 +379,40 @@ const char* LogDirectory = "data/logs";
     delete inst;
   } // shutdown
 
+  int DSS::loadConfigDir(const std::string& _configDir) {
+    Logger::getInstance()->log("Loading config directory " + _configDir, lsInfo);
+
+    int n = 0;
+    if (!boost::filesystem::exists(_configDir)) return n;
+    boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
+      for (boost::filesystem::directory_iterator itr(_configDir);
+           itr != end_itr;
+           ++itr )
+      {
+        if (boost::filesystem::is_regular_file(itr->status()) &&  (itr->path().extension() == ".xml"))
+        {
+          Logger::getInstance()->log("Loading config from " + itr->path().file_string(), lsInfo);
+          if (getPropertySystem().loadFromXML(itr->path().file_string(), getPropertySystem().getProperty("/config")))
+            n++;
+        }
+      }
+      return n;
+  } // loadConfigDir
+
   bool DSS::loadConfig(const std::string& _configFile) {
     m_State = ssLoadingConfig;
-    Logger::getInstance()->log("Loading config", lsInfo);
-    if(_configFile.length() > 0) {
-      return getPropertySystem().loadFromXML(_configFile, getPropertySystem().getProperty("/config"));
-    } else {
-      return getPropertySystem().loadFromXML(getConfigDirectory() + "config.xml", getPropertySystem().getProperty("/config"));
-    }
+    std::string cfgFile;
+
+    if((_configFile.length() > 0) && boost::filesystem::exists(_configFile))
+      cfgFile = _configFile;
+    else
+      cfgFile = getConfigDirectory() + "config.xml";
+
+    Logger::getInstance()->log("Loading config file " + cfgFile, lsInfo);
+    getPropertySystem().loadFromXML(cfgFile, getPropertySystem().getProperty("/config"));
+
+    loadConfigDir(getConfigDirectory() + "config.d");
+    return true;
   } // loadConfig
 
 
