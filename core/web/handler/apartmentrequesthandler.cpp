@@ -48,6 +48,26 @@ namespace dss {
   : m_Apartment(_apartment), m_ModelMaintenance(_modelMaintenance)
   { }
 
+  boost::shared_ptr<JSONObject> ApartmentRequestHandler::removeInactiveMeters(const RestfulRequest& _request) {
+
+    std::vector<DSMeter*> dsMeters = m_Apartment.getDSMeters();
+
+    bool dirtyFlag = false;
+    for (int i = 0; i < dsMeters.size();i++) {
+      DSMeter* dsMeter = dsMeters.at(i);
+         if (!dsMeter->isPresent()) {
+        m_Apartment.removeDSMeter(dsMeter->getDSID());
+        dirtyFlag = true;
+      }
+    }
+
+    if (dirtyFlag) {
+      m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    }
+
+    return success();
+  }
+ 
   boost::shared_ptr<JSONObject> ApartmentRequestHandler::removeMeter(const RestfulRequest& _request) {
     std::string dsidStr = _request.getParameter("dsid");
     if(!dsidStr.empty()) {
@@ -160,6 +180,8 @@ namespace dss {
         return success();
       } else if(_request.getMethod() == "removeMeter") {
         return removeMeter(_request);
+      } else if(_request.getMethod() == "removeInactiveMeters") {
+        return removeInactiveMeters(_request);
       } else {
         throw std::runtime_error("Unhandled function");
       }

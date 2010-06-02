@@ -35,6 +35,7 @@ namespace dss {
   public:
     ApartmentRequestHandler(Apartment& _apartment, ModelMaintenance& _modelMaintenance);
     boost::shared_ptr<JSONObject> removeMeter(const RestfulRequest& _request);
+    boost::shared_ptr<JSONObject> removeInactiveMeters(const RestfulRequest& _request);
     virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
   private:
     Set getUnassignedDevices();
