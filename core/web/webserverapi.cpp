@@ -105,6 +105,13 @@ namespace dss {
     clsApartment.addMethod("rescan")
       .withDocumentation("Rescans all circuits of the apartment");
 
+    clsApartment.addMethod("removeMeter")
+      .withParameter("dsid", "integer", true)
+      .withDocumentation("Removes non present dSMs from the dSS.");
+
+    clsApartment.addMethod("removeInactiveMeters")
+      .withDocumentation("Removes all non present dSMs from the dSS.");
+
     RestfulClass& clsZone = api->addClass("zone")
         .withInstanceParameter("id", "integer", false)
         .withInstanceParameter("name", "string", false)
