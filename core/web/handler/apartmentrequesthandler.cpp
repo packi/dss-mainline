@@ -35,6 +35,7 @@
 #include "core/model/deviceinterface.h"
 #include "core/model/group.h"
 #include "core/model/set.h"
+#include "core/model/modelmaintenance.h"
 
 #include "jsonhelper.h"
 
@@ -42,9 +43,30 @@ namespace dss {
 
   //=========================================== ApartmentRequestHandler
 
-  ApartmentRequestHandler::ApartmentRequestHandler(Apartment& _apartment)
-  : m_Apartment(_apartment)
+  ApartmentRequestHandler::ApartmentRequestHandler(Apartment& _apartment, 
+          ModelMaintenance& _modelMaintenance)
+  : m_Apartment(_apartment), m_ModelMaintenance(_modelMaintenance)
   { }
+
+  boost::shared_ptr<JSONObject> ApartmentRequestHandler::removeMeter(const RestfulRequest& _request) {
+    std::string dsidStr = _request.getParameter("dsid");
+    if(!dsidStr.empty()) {
+      dsid_t meterID = dsid::fromString(dsidStr);
+
+      DSMeter& meter = DSS::getInstance()->getApartment().getDSMeterByDSID(meterID);
+
+      if(meter.isPresent()) {
+        return failure("Cannot remove present meter");
+      }
+
+      m_Apartment.removeDSMeter(meterID);
+      m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+      return success();
+    }
+
+    return failure("Missing dsid");
+  }
+  
 
   boost::shared_ptr<JSONObject> ApartmentRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::string errorMessage;
@@ -136,6 +158,8 @@ namespace dss {
           pDSMeter->setIsValid(false);
         }
         return success();
+      } else if(_request.getMethod() == "removeMeter") {
+        return removeMeter(_request);
       } else {
         throw std::runtime_error("Unhandled function");
       }
