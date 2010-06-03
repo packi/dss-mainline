@@ -53,9 +53,9 @@ namespace dss {
     std::vector<DSMeter*> dsMeters = m_Apartment.getDSMeters();
 
     bool dirtyFlag = false;
-    for (int i = 0; i < dsMeters.size();i++) {
+    for (size_t i = 0; i < dsMeters.size();i++) {
       DSMeter* dsMeter = dsMeters.at(i);
-         if (!dsMeter->isPresent()) {
+      if (!dsMeter->isPresent()) {
         m_Apartment.removeDSMeter(dsMeter->getDSID());
         dirtyFlag = true;
       }
@@ -70,23 +70,22 @@ namespace dss {
  
   boost::shared_ptr<JSONObject> ApartmentRequestHandler::removeMeter(const RestfulRequest& _request) {
     std::string dsidStr = _request.getParameter("dsid");
-    if(!dsidStr.empty()) {
-      dsid_t meterID = dsid::fromString(dsidStr);
-
-      DSMeter& meter = DSS::getInstance()->getApartment().getDSMeterByDSID(meterID);
-
-      if(meter.isPresent()) {
-        return failure("Cannot remove present meter");
-      }
-
-      m_Apartment.removeDSMeter(meterID);
-      m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
-      return success();
+    if(dsidStr.empty()) {
+      return failure("Missing dsid");
     }
 
-    return failure("Missing dsid");
+    dsid_t meterID = dsid::fromString(dsidStr);
+
+    DSMeter& meter = DSS::getInstance()->getApartment().getDSMeterByDSID(meterID);
+
+    if(meter.isPresent()) {
+      return failure("Cannot remove present meter");
+    }
+
+    m_Apartment.removeDSMeter(meterID);
+    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    return success();
   }
-  
 
   boost::shared_ptr<JSONObject> ApartmentRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::string errorMessage;
