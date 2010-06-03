@@ -88,10 +88,10 @@ const char* WebrootDirectory = WITH_WEBROOTDIR;
 const char* WebrootDirectory = "data/webroot";
 #endif
 
-#ifdef WITH_LOGDIR
-const char* LogDirectory = WITH_LOGDIR;
+#ifdef WITH_JSLOGDIR
+const char* JSLogDirectory = WITH_JSLOGDIR;
 #else
-const char* LogDirectory = "data/logs";
+const char* JSLogDirectory = "data/logs";
 #endif
 
   DSS::DSS()
@@ -101,7 +101,7 @@ const char* LogDirectory = "data/logs";
     setDataDirectory(DataDirectory);
     setConfigDirectory(ConfigDirectory);
     setWebrootDirectory(WebrootDirectory);
-    setJSLogDirectory(LogDirectory);
+    setJSLogDirectory(JSLogDirectory);
 
     m_TimeStarted = time(NULL);
     m_pPropertySystem->createProperty("/system/uptime")->linkToProxy(

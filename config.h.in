@@ -17,7 +17,7 @@
 #cmakedefine WITH_DATADIR "${WITH_DATADIR}"
 #cmakedefine WITH_CONFIGDIR "${WITH_CONFIGDIR}"
 #cmakedefine WITH_WEBROOTDIR "${WITH_WEBROOTDIR}"
-#cmakedefine WITH_LOGDIR "${WITH_LOGDIR}"
+#cmakedefine WITH_JSLOGDIR "${WITH_JSLOGDIR}"
 #cmakedefine WITH_BONJOUR
 #cmakedefine WITH_GCOV
 
