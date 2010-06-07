@@ -53,17 +53,17 @@ namespace dss {
 	// only for backward compatiliby
 	if (getConfigParameter("SimpleConsumption")!="")
 		_simpleConsumption= (int) ((m_CurrentValue / 255.0) * strToInt(getConfigParameter("SimpleConsumption"))) + (rand() % 100);
-	  
+
 	if (getConfigParameter("MinConsumption")!="")
 		_minConsumption=strToInt(getConfigParameter("MinConsumption"));
-		
+
 	if (getConfigParameter("MaxConsumption")!="")
 		_maxConsumption= (int) ((m_CurrentValue / 255.0) * (strToInt(getConfigParameter("MaxConsumption")) - _minConsumption) );
 
 	if (getConfigParameter("JitterConsumption")!="")
 		_jitterConsumption= (int) (rand() % strToInt(getConfigParameter("JitterConsumption")));
 	_jitterConsumption =_jitterConsumption - (_jitterConsumption/2);
-	
+
     return (int) _simpleConsumption + _minConsumption + _maxConsumption + _jitterConsumption; //((m_CurrentValue / 255.0) * m_SimpleConsumption) + (rand() % 100);
   }
 
@@ -138,6 +138,12 @@ namespace dss {
   } // getValue
 
   uint16_t DSIDSim::getFunctionID() {
+    if(m_ConfigParameter.has("functionID")) {
+      int result = strToIntDef(m_ConfigParameter.get("functionID"), -1);
+      if(result != -1) {
+        return result;
+      }
+    }
     return FunctionIDDevice;
   } // getFunctionID
 
