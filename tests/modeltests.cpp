@@ -1120,6 +1120,13 @@ BOOST_AUTO_TEST_CASE(testTags) {
 
   dev1.removeTag("aTag");
   BOOST_CHECK_EQUAL(dev1.hasTag("aTag"), false);
+
+  dev1.addTag("one");
+  dev1.addTag("two");
+  std::vector<std::string> tags = dev1.getTags();
+  BOOST_CHECK_EQUAL(tags.size(), 2);
+  BOOST_CHECK_EQUAL(tags[0], "one");
+  BOOST_CHECK_EQUAL(tags[1], "two");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
