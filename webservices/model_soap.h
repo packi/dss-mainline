@@ -204,6 +204,10 @@ int dss__DeviceSetName(int _token, char* _deviceID, char* _name, bool& result);
 /** Returns the zone id of the specified device */
 int dss__DeviceGetZoneID(int _token, char* _deviceID, int& result);
 
+int dss__DeviceAddTag(int _token, char* _deviceID, char* _tag, bool& result);
+int dss__DeviceRemoveTag(int _token, char* _deviceID, char* _tag, bool& result);
+int dss__DeviceHasTag(int _token, char* _deviceID, char* _tag, bool& result);
+int dss__DeviceGetTags(int _token, char* _deviceID, std::vector<std::string>& result);
 
 //==================================================== Information
 

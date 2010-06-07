@@ -983,6 +983,51 @@ int dss__DeviceGetZoneID(struct soap *soap, int _token, char* _deviceID, int& re
   return SOAP_OK;
 } // dss__DeviceGetZoneID
 
+int dss__DeviceAddTag(struct soap *soap, int _token, char* _deviceID, char* _tag, bool& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  dev.getDevice().addTag(_tag);
+  result = true;
+  return SOAP_OK;
+} // dss__DeviceAddTag
+
+int dss__DeviceRemoveTag(struct soap *soap, int _token, char* _deviceID, char* _tag, bool& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  dev.getDevice().removeTag(_tag);
+  result = true;
+  return SOAP_OK;
+} // dss__DeviceRemoveTag
+
+int dss__DeviceHasTag(struct soap *soap, int _token, char* _deviceID, char* _tag, bool& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  result = dev.getDevice().hasTag(_tag);
+  return SOAP_OK;
+} // dss__DeviceHasTag
+
+int dss__DeviceGetTags(struct soap *soap, int _token, char* _deviceID, std::vector<std::string>& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  result = dev.getDevice().getTags();
+  return SOAP_OK;
+} // dss__DeviceGetTags
 
 //==================================================== Information
 

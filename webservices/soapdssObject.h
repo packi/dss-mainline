@@ -27,7 +27,6 @@ class dssService : public soap
 	{"dss", "urn:dss:1.0", NULL, NULL},
 	{NULL, NULL, NULL, NULL}
 };
-        bind_flags = SO_REUSEADDR;
 	if (!this->namespaces) this->namespaces = namespaces; };
 	virtual ~dssService() { };
 	/// Bind service to port (returns master socket or SOAP_INVALID_SOCKET)
@@ -170,6 +169,14 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetName(struct soap*, int _token, char *_de
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSetName(struct soap*, int _token, char *_deviceID, char *_name, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetZoneID(struct soap*, int _token, char *_deviceID, int &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceAddTag(struct soap*, int _token, char *_deviceID, char *_tag, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceRemoveTag(struct soap*, int _token, char *_deviceID, char *_tag, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceHasTag(struct soap*, int _token, char *_deviceID, char *_tag, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetTags(struct soap*, int _token, char *_deviceID, std::vector<std::string >&result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterGetPowerConsumption(struct soap*, int _token, int _dsMeterID, unsigned long &result);
 

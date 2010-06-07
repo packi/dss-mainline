@@ -1131,6 +1131,77 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="DeviceAddTag">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="tag" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceAddTagResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceRemoveTag">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="tag" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceRemoveTagResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceHasTag">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="tag" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceHasTagResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceGetTags">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceGetTagsResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="DSMeterGetPowerConsumption">
    <complexType>
     <sequence>
@@ -2042,6 +2113,38 @@
  <part name="parameters" element="dss:DeviceGetZoneIDResponse"/>
 </message>
 
+<message name="DeviceAddTagRequest">
+ <part name="parameters" element="dss:DeviceAddTag"/>
+</message>
+
+<message name="DeviceAddTagResponse">
+ <part name="parameters" element="dss:DeviceAddTagResponse"/>
+</message>
+
+<message name="DeviceRemoveTagRequest">
+ <part name="parameters" element="dss:DeviceRemoveTag"/>
+</message>
+
+<message name="DeviceRemoveTagResponse">
+ <part name="parameters" element="dss:DeviceRemoveTagResponse"/>
+</message>
+
+<message name="DeviceHasTagRequest">
+ <part name="parameters" element="dss:DeviceHasTag"/>
+</message>
+
+<message name="DeviceHasTagResponse">
+ <part name="parameters" element="dss:DeviceHasTagResponse"/>
+</message>
+
+<message name="DeviceGetTagsRequest">
+ <part name="parameters" element="dss:DeviceGetTags"/>
+</message>
+
+<message name="DeviceGetTagsResponse">
+ <part name="parameters" element="dss:DeviceGetTagsResponse"/>
+</message>
+
 <message name="DSMeterGetPowerConsumptionRequest">
  <part name="parameters" element="dss:DSMeterGetPowerConsumption"/>
 </message>
@@ -2541,6 +2644,26 @@
   <documentation>Service definition of function dss__DeviceGetZoneID</documentation>
   <input message="tns:DeviceGetZoneIDRequest"/>
   <output message="tns:DeviceGetZoneIDResponse"/>
+ </operation>
+ <operation name="DeviceAddTag">
+  <documentation>Service definition of function dss__DeviceAddTag</documentation>
+  <input message="tns:DeviceAddTagRequest"/>
+  <output message="tns:DeviceAddTagResponse"/>
+ </operation>
+ <operation name="DeviceRemoveTag">
+  <documentation>Service definition of function dss__DeviceRemoveTag</documentation>
+  <input message="tns:DeviceRemoveTagRequest"/>
+  <output message="tns:DeviceRemoveTagResponse"/>
+ </operation>
+ <operation name="DeviceHasTag">
+  <documentation>Service definition of function dss__DeviceHasTag</documentation>
+  <input message="tns:DeviceHasTagRequest"/>
+  <output message="tns:DeviceHasTagResponse"/>
+ </operation>
+ <operation name="DeviceGetTags">
+  <documentation>Service definition of function dss__DeviceGetTags</documentation>
+  <input message="tns:DeviceGetTagsRequest"/>
+  <output message="tns:DeviceGetTagsResponse"/>
  </operation>
  <operation name="DSMeterGetPowerConsumption">
   <documentation>Service definition of function dss__DSMeterGetPowerConsumption</documentation>
@@ -3220,6 +3343,42 @@
   </output>
  </operation>
  <operation name="DeviceGetZoneID">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="DeviceAddTag">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="DeviceRemoveTag">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="DeviceHasTag">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="DeviceGetTags">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

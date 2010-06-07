@@ -7,7 +7,7 @@
 
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2010-03-25 15:45:40 GMT")
+SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2010-06-07 14:08:59 GMT")
 
 
 #ifndef WITH_NOGLOBAL
@@ -273,6 +273,22 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_dss__DSMeterGetPowerConsumption(soap, NULL, NULL, "dss:DSMeterGetPowerConsumption");
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse:
 		return soap_in_dss__DSMeterGetPowerConsumptionResponse(soap, NULL, NULL, "dss:DSMeterGetPowerConsumptionResponse");
+	case SOAP_TYPE_dss__DeviceGetTags:
+		return soap_in_dss__DeviceGetTags(soap, NULL, NULL, "dss:DeviceGetTags");
+	case SOAP_TYPE_dss__DeviceGetTagsResponse:
+		return soap_in_dss__DeviceGetTagsResponse(soap, NULL, NULL, "dss:DeviceGetTagsResponse");
+	case SOAP_TYPE_dss__DeviceHasTag:
+		return soap_in_dss__DeviceHasTag(soap, NULL, NULL, "dss:DeviceHasTag");
+	case SOAP_TYPE_dss__DeviceHasTagResponse:
+		return soap_in_dss__DeviceHasTagResponse(soap, NULL, NULL, "dss:DeviceHasTagResponse");
+	case SOAP_TYPE_dss__DeviceRemoveTag:
+		return soap_in_dss__DeviceRemoveTag(soap, NULL, NULL, "dss:DeviceRemoveTag");
+	case SOAP_TYPE_dss__DeviceRemoveTagResponse:
+		return soap_in_dss__DeviceRemoveTagResponse(soap, NULL, NULL, "dss:DeviceRemoveTagResponse");
+	case SOAP_TYPE_dss__DeviceAddTag:
+		return soap_in_dss__DeviceAddTag(soap, NULL, NULL, "dss:DeviceAddTag");
+	case SOAP_TYPE_dss__DeviceAddTagResponse:
+		return soap_in_dss__DeviceAddTagResponse(soap, NULL, NULL, "dss:DeviceAddTagResponse");
 	case SOAP_TYPE_dss__DeviceGetZoneID:
 		return soap_in_dss__DeviceGetZoneID(soap, NULL, NULL, "dss:DeviceGetZoneID");
 	case SOAP_TYPE_dss__DeviceGetZoneIDResponse:
@@ -771,6 +787,38 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		if (!soap_match_tag(soap, t, "dss:DSMeterGetPowerConsumptionResponse"))
 		{	*type = SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse;
 			return soap_in_dss__DSMeterGetPowerConsumptionResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:DeviceGetTags"))
+		{	*type = SOAP_TYPE_dss__DeviceGetTags;
+			return soap_in_dss__DeviceGetTags(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:DeviceGetTagsResponse"))
+		{	*type = SOAP_TYPE_dss__DeviceGetTagsResponse;
+			return soap_in_dss__DeviceGetTagsResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:DeviceHasTag"))
+		{	*type = SOAP_TYPE_dss__DeviceHasTag;
+			return soap_in_dss__DeviceHasTag(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:DeviceHasTagResponse"))
+		{	*type = SOAP_TYPE_dss__DeviceHasTagResponse;
+			return soap_in_dss__DeviceHasTagResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:DeviceRemoveTag"))
+		{	*type = SOAP_TYPE_dss__DeviceRemoveTag;
+			return soap_in_dss__DeviceRemoveTag(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:DeviceRemoveTagResponse"))
+		{	*type = SOAP_TYPE_dss__DeviceRemoveTagResponse;
+			return soap_in_dss__DeviceRemoveTagResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:DeviceAddTag"))
+		{	*type = SOAP_TYPE_dss__DeviceAddTag;
+			return soap_in_dss__DeviceAddTag(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:DeviceAddTagResponse"))
+		{	*type = SOAP_TYPE_dss__DeviceAddTagResponse;
+			return soap_in_dss__DeviceAddTagResponse(soap, NULL, NULL, NULL);
 		}
 		if (!soap_match_tag(soap, t, "dss:DeviceGetZoneID"))
 		{	*type = SOAP_TYPE_dss__DeviceGetZoneID;
@@ -1472,6 +1520,22 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_dss__DSMeterGetPowerConsumption(soap, tag, id, (const struct dss__DSMeterGetPowerConsumption *)ptr, "dss:DSMeterGetPowerConsumption");
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse:
 		return soap_out_dss__DSMeterGetPowerConsumptionResponse(soap, tag, id, (const struct dss__DSMeterGetPowerConsumptionResponse *)ptr, "dss:DSMeterGetPowerConsumptionResponse");
+	case SOAP_TYPE_dss__DeviceGetTags:
+		return soap_out_dss__DeviceGetTags(soap, tag, id, (const struct dss__DeviceGetTags *)ptr, "dss:DeviceGetTags");
+	case SOAP_TYPE_dss__DeviceGetTagsResponse:
+		return soap_out_dss__DeviceGetTagsResponse(soap, tag, id, (const struct dss__DeviceGetTagsResponse *)ptr, "dss:DeviceGetTagsResponse");
+	case SOAP_TYPE_dss__DeviceHasTag:
+		return soap_out_dss__DeviceHasTag(soap, tag, id, (const struct dss__DeviceHasTag *)ptr, "dss:DeviceHasTag");
+	case SOAP_TYPE_dss__DeviceHasTagResponse:
+		return soap_out_dss__DeviceHasTagResponse(soap, tag, id, (const struct dss__DeviceHasTagResponse *)ptr, "dss:DeviceHasTagResponse");
+	case SOAP_TYPE_dss__DeviceRemoveTag:
+		return soap_out_dss__DeviceRemoveTag(soap, tag, id, (const struct dss__DeviceRemoveTag *)ptr, "dss:DeviceRemoveTag");
+	case SOAP_TYPE_dss__DeviceRemoveTagResponse:
+		return soap_out_dss__DeviceRemoveTagResponse(soap, tag, id, (const struct dss__DeviceRemoveTagResponse *)ptr, "dss:DeviceRemoveTagResponse");
+	case SOAP_TYPE_dss__DeviceAddTag:
+		return soap_out_dss__DeviceAddTag(soap, tag, id, (const struct dss__DeviceAddTag *)ptr, "dss:DeviceAddTag");
+	case SOAP_TYPE_dss__DeviceAddTagResponse:
+		return soap_out_dss__DeviceAddTagResponse(soap, tag, id, (const struct dss__DeviceAddTagResponse *)ptr, "dss:DeviceAddTagResponse");
 	case SOAP_TYPE_dss__DeviceGetZoneID:
 		return soap_out_dss__DeviceGetZoneID(soap, tag, id, (const struct dss__DeviceGetZoneID *)ptr, "dss:DeviceGetZoneID");
 	case SOAP_TYPE_dss__DeviceGetZoneIDResponse:
@@ -1892,6 +1956,30 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 		break;
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse:
 		soap_serialize_dss__DSMeterGetPowerConsumptionResponse(soap, (const struct dss__DSMeterGetPowerConsumptionResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__DeviceGetTags:
+		soap_serialize_dss__DeviceGetTags(soap, (const struct dss__DeviceGetTags *)ptr);
+		break;
+	case SOAP_TYPE_dss__DeviceGetTagsResponse:
+		soap_serialize_dss__DeviceGetTagsResponse(soap, (const struct dss__DeviceGetTagsResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__DeviceHasTag:
+		soap_serialize_dss__DeviceHasTag(soap, (const struct dss__DeviceHasTag *)ptr);
+		break;
+	case SOAP_TYPE_dss__DeviceHasTagResponse:
+		soap_serialize_dss__DeviceHasTagResponse(soap, (const struct dss__DeviceHasTagResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__DeviceRemoveTag:
+		soap_serialize_dss__DeviceRemoveTag(soap, (const struct dss__DeviceRemoveTag *)ptr);
+		break;
+	case SOAP_TYPE_dss__DeviceRemoveTagResponse:
+		soap_serialize_dss__DeviceRemoveTagResponse(soap, (const struct dss__DeviceRemoveTagResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__DeviceAddTag:
+		soap_serialize_dss__DeviceAddTag(soap, (const struct dss__DeviceAddTag *)ptr);
+		break;
+	case SOAP_TYPE_dss__DeviceAddTagResponse:
+		soap_serialize_dss__DeviceAddTagResponse(soap, (const struct dss__DeviceAddTagResponse *)ptr);
 		break;
 	case SOAP_TYPE_dss__DeviceGetZoneID:
 		soap_serialize_dss__DeviceGetZoneID(soap, (const struct dss__DeviceGetZoneID *)ptr);
@@ -2546,6 +2634,22 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_dss__DeviceGetZoneIDResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__DeviceGetZoneID:
 		return (void*)soap_instantiate_dss__DeviceGetZoneID(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__DeviceAddTagResponse:
+		return (void*)soap_instantiate_dss__DeviceAddTagResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__DeviceAddTag:
+		return (void*)soap_instantiate_dss__DeviceAddTag(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__DeviceRemoveTagResponse:
+		return (void*)soap_instantiate_dss__DeviceRemoveTagResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__DeviceRemoveTag:
+		return (void*)soap_instantiate_dss__DeviceRemoveTag(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__DeviceHasTagResponse:
+		return (void*)soap_instantiate_dss__DeviceHasTagResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__DeviceHasTag:
+		return (void*)soap_instantiate_dss__DeviceHasTag(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__DeviceGetTagsResponse:
+		return (void*)soap_instantiate_dss__DeviceGetTagsResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__DeviceGetTags:
+		return (void*)soap_instantiate_dss__DeviceGetTags(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse:
 		return (void*)soap_instantiate_dss__DSMeterGetPowerConsumptionResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumption:
@@ -3434,6 +3538,54 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 			delete (struct dss__DeviceGetZoneID*)p->ptr;
 		else
 			delete[] (struct dss__DeviceGetZoneID*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__DeviceAddTagResponse:
+		if (p->size < 0)
+			delete (struct dss__DeviceAddTagResponse*)p->ptr;
+		else
+			delete[] (struct dss__DeviceAddTagResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__DeviceAddTag:
+		if (p->size < 0)
+			delete (struct dss__DeviceAddTag*)p->ptr;
+		else
+			delete[] (struct dss__DeviceAddTag*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__DeviceRemoveTagResponse:
+		if (p->size < 0)
+			delete (struct dss__DeviceRemoveTagResponse*)p->ptr;
+		else
+			delete[] (struct dss__DeviceRemoveTagResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__DeviceRemoveTag:
+		if (p->size < 0)
+			delete (struct dss__DeviceRemoveTag*)p->ptr;
+		else
+			delete[] (struct dss__DeviceRemoveTag*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__DeviceHasTagResponse:
+		if (p->size < 0)
+			delete (struct dss__DeviceHasTagResponse*)p->ptr;
+		else
+			delete[] (struct dss__DeviceHasTagResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__DeviceHasTag:
+		if (p->size < 0)
+			delete (struct dss__DeviceHasTag*)p->ptr;
+		else
+			delete[] (struct dss__DeviceHasTag*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__DeviceGetTagsResponse:
+		if (p->size < 0)
+			delete (struct dss__DeviceGetTagsResponse*)p->ptr;
+		else
+			delete[] (struct dss__DeviceGetTagsResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__DeviceGetTags:
+		if (p->size < 0)
+			delete (struct dss__DeviceGetTags*)p->ptr;
+		else
+			delete[] (struct dss__DeviceGetTags*)p->ptr;
 		break;
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse:
 		if (p->size < 0)
@@ -4411,7 +4563,7 @@ SOAP_FMAC1 std::string * SOAP_FMAC2 soap_in_std__string(struct soap *soap, const
 				s->assign(t);
 			else
 				return NULL;
-    }
+		}
 	}
 	else
 		s = (std::string*)soap_id_forward(soap, soap->href, soap_class_id_enter(soap, soap->id, s, SOAP_TYPE_std__string, sizeof(std::string), soap->type, soap->arrayType), 0, SOAP_TYPE_std__string, 0, sizeof(std::string), 0, soap_copy_std__string);
@@ -10601,6 +10753,967 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DSMeterGetPowerConsumptionResponse(str
 {
 	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DSMeterGetPowerConsumptionResponse %p -> %p\n", q, p));
 	*(struct dss__DSMeterGetPowerConsumptionResponse*)p = *(struct dss__DSMeterGetPowerConsumptionResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceGetTags(struct soap *soap, struct dss__DeviceGetTags *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_string(soap, &a->_deviceID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceGetTags(struct soap *soap, const struct dss__DeviceGetTags *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_string(soap, &a->_deviceID);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceGetTags(struct soap *soap, const struct dss__DeviceGetTags *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__DeviceGetTags);
+	if (soap_out_dss__DeviceGetTags(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceGetTags(struct soap *soap, const char *tag, int id, const struct dss__DeviceGetTags *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__DeviceGetTags), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_string(soap, "deviceID", -1, &a->_deviceID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__DeviceGetTags * SOAP_FMAC4 soap_get_dss__DeviceGetTags(struct soap *soap, struct dss__DeviceGetTags *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__DeviceGetTags(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__DeviceGetTags * SOAP_FMAC4 soap_in_dss__DeviceGetTags(struct soap *soap, const char *tag, struct dss__DeviceGetTags *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__deviceID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__DeviceGetTags *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DeviceGetTags, sizeof(struct dss__DeviceGetTags), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__DeviceGetTags(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__deviceID && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_deviceID, "xsd:string"))
+				{	soap_flag__deviceID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__DeviceGetTags *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__DeviceGetTags, 0, sizeof(struct dss__DeviceGetTags), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__DeviceGetTags * SOAP_FMAC6 soap_new_dss__DeviceGetTags(struct soap *soap, int n)
+{	return soap_instantiate_dss__DeviceGetTags(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceGetTags(struct soap *soap, struct dss__DeviceGetTags *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__DeviceGetTags * SOAP_FMAC4 soap_instantiate_dss__DeviceGetTags(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__DeviceGetTags(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__DeviceGetTags, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__DeviceGetTags;
+		if (size)
+			*size = sizeof(struct dss__DeviceGetTags);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__DeviceGetTags[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__DeviceGetTags);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__DeviceGetTags*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceGetTags(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DeviceGetTags %p -> %p\n", q, p));
+	*(struct dss__DeviceGetTags*)p = *(struct dss__DeviceGetTags*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceGetTagsResponse(struct soap *soap, struct dss__DeviceGetTagsResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_std__vectorTemplateOfstd__string(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceGetTagsResponse(struct soap *soap, const struct dss__DeviceGetTagsResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_std__vectorTemplateOfstd__string(soap, &a->result);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceGetTagsResponse(struct soap *soap, const struct dss__DeviceGetTagsResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__DeviceGetTagsResponse);
+	if (soap_out_dss__DeviceGetTagsResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceGetTagsResponse(struct soap *soap, const char *tag, int id, const struct dss__DeviceGetTagsResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__DeviceGetTagsResponse), type))
+		return soap->error;
+	if (soap_out_std__vectorTemplateOfstd__string(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__DeviceGetTagsResponse * SOAP_FMAC4 soap_get_dss__DeviceGetTagsResponse(struct soap *soap, struct dss__DeviceGetTagsResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__DeviceGetTagsResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__DeviceGetTagsResponse * SOAP_FMAC4 soap_in_dss__DeviceGetTagsResponse(struct soap *soap, const char *tag, struct dss__DeviceGetTagsResponse *a, const char *type)
+{
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__DeviceGetTagsResponse *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DeviceGetTagsResponse, sizeof(struct dss__DeviceGetTagsResponse), soap->type, soap->arrayType);
+	if (!a)
+		return NULL;
+	soap_default_dss__DeviceGetTagsResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_std__vectorTemplateOfstd__string(soap, "result", &a->result, "xsd:string"))
+					continue;
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__DeviceGetTagsResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__DeviceGetTagsResponse, 0, sizeof(struct dss__DeviceGetTagsResponse), 0, soap_copy_dss__DeviceGetTagsResponse);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__DeviceGetTagsResponse * SOAP_FMAC6 soap_new_dss__DeviceGetTagsResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__DeviceGetTagsResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceGetTagsResponse(struct soap *soap, struct dss__DeviceGetTagsResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__DeviceGetTagsResponse * SOAP_FMAC4 soap_instantiate_dss__DeviceGetTagsResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__DeviceGetTagsResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__DeviceGetTagsResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__DeviceGetTagsResponse;
+		if (size)
+			*size = sizeof(struct dss__DeviceGetTagsResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__DeviceGetTagsResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__DeviceGetTagsResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__DeviceGetTagsResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceGetTagsResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DeviceGetTagsResponse %p -> %p\n", q, p));
+	*(struct dss__DeviceGetTagsResponse*)p = *(struct dss__DeviceGetTagsResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceHasTag(struct soap *soap, struct dss__DeviceHasTag *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_string(soap, &a->_deviceID);
+	soap_default_string(soap, &a->_tag);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceHasTag(struct soap *soap, const struct dss__DeviceHasTag *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_string(soap, &a->_deviceID);
+	soap_serialize_string(soap, &a->_tag);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceHasTag(struct soap *soap, const struct dss__DeviceHasTag *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__DeviceHasTag);
+	if (soap_out_dss__DeviceHasTag(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceHasTag(struct soap *soap, const char *tag, int id, const struct dss__DeviceHasTag *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__DeviceHasTag), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_string(soap, "deviceID", -1, &a->_deviceID, ""))
+		return soap->error;
+	if (soap_out_string(soap, "tag", -1, &a->_tag, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__DeviceHasTag * SOAP_FMAC4 soap_get_dss__DeviceHasTag(struct soap *soap, struct dss__DeviceHasTag *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__DeviceHasTag(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__DeviceHasTag * SOAP_FMAC4 soap_in_dss__DeviceHasTag(struct soap *soap, const char *tag, struct dss__DeviceHasTag *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__deviceID = 1, soap_flag__tag = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__DeviceHasTag *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DeviceHasTag, sizeof(struct dss__DeviceHasTag), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__DeviceHasTag(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__deviceID && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_deviceID, "xsd:string"))
+				{	soap_flag__deviceID--;
+					continue;
+				}
+			if (soap_flag__tag && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_tag, "xsd:string"))
+				{	soap_flag__tag--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__DeviceHasTag *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__DeviceHasTag, 0, sizeof(struct dss__DeviceHasTag), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__DeviceHasTag * SOAP_FMAC6 soap_new_dss__DeviceHasTag(struct soap *soap, int n)
+{	return soap_instantiate_dss__DeviceHasTag(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceHasTag(struct soap *soap, struct dss__DeviceHasTag *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__DeviceHasTag * SOAP_FMAC4 soap_instantiate_dss__DeviceHasTag(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__DeviceHasTag(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__DeviceHasTag, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__DeviceHasTag;
+		if (size)
+			*size = sizeof(struct dss__DeviceHasTag);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__DeviceHasTag[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__DeviceHasTag);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__DeviceHasTag*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceHasTag(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DeviceHasTag %p -> %p\n", q, p));
+	*(struct dss__DeviceHasTag*)p = *(struct dss__DeviceHasTag*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceHasTagResponse(struct soap *soap, struct dss__DeviceHasTagResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceHasTagResponse(struct soap *soap, const struct dss__DeviceHasTagResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceHasTagResponse(struct soap *soap, const struct dss__DeviceHasTagResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__DeviceHasTagResponse);
+	if (soap_out_dss__DeviceHasTagResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceHasTagResponse(struct soap *soap, const char *tag, int id, const struct dss__DeviceHasTagResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__DeviceHasTagResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__DeviceHasTagResponse * SOAP_FMAC4 soap_get_dss__DeviceHasTagResponse(struct soap *soap, struct dss__DeviceHasTagResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__DeviceHasTagResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__DeviceHasTagResponse * SOAP_FMAC4 soap_in_dss__DeviceHasTagResponse(struct soap *soap, const char *tag, struct dss__DeviceHasTagResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__DeviceHasTagResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DeviceHasTagResponse, sizeof(struct dss__DeviceHasTagResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__DeviceHasTagResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__DeviceHasTagResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__DeviceHasTagResponse, 0, sizeof(struct dss__DeviceHasTagResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__DeviceHasTagResponse * SOAP_FMAC6 soap_new_dss__DeviceHasTagResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__DeviceHasTagResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceHasTagResponse(struct soap *soap, struct dss__DeviceHasTagResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__DeviceHasTagResponse * SOAP_FMAC4 soap_instantiate_dss__DeviceHasTagResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__DeviceHasTagResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__DeviceHasTagResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__DeviceHasTagResponse;
+		if (size)
+			*size = sizeof(struct dss__DeviceHasTagResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__DeviceHasTagResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__DeviceHasTagResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__DeviceHasTagResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceHasTagResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DeviceHasTagResponse %p -> %p\n", q, p));
+	*(struct dss__DeviceHasTagResponse*)p = *(struct dss__DeviceHasTagResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceRemoveTag(struct soap *soap, struct dss__DeviceRemoveTag *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_string(soap, &a->_deviceID);
+	soap_default_string(soap, &a->_tag);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceRemoveTag(struct soap *soap, const struct dss__DeviceRemoveTag *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_string(soap, &a->_deviceID);
+	soap_serialize_string(soap, &a->_tag);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceRemoveTag(struct soap *soap, const struct dss__DeviceRemoveTag *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__DeviceRemoveTag);
+	if (soap_out_dss__DeviceRemoveTag(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceRemoveTag(struct soap *soap, const char *tag, int id, const struct dss__DeviceRemoveTag *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__DeviceRemoveTag), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_string(soap, "deviceID", -1, &a->_deviceID, ""))
+		return soap->error;
+	if (soap_out_string(soap, "tag", -1, &a->_tag, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__DeviceRemoveTag * SOAP_FMAC4 soap_get_dss__DeviceRemoveTag(struct soap *soap, struct dss__DeviceRemoveTag *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__DeviceRemoveTag(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__DeviceRemoveTag * SOAP_FMAC4 soap_in_dss__DeviceRemoveTag(struct soap *soap, const char *tag, struct dss__DeviceRemoveTag *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__deviceID = 1, soap_flag__tag = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__DeviceRemoveTag *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DeviceRemoveTag, sizeof(struct dss__DeviceRemoveTag), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__DeviceRemoveTag(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__deviceID && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_deviceID, "xsd:string"))
+				{	soap_flag__deviceID--;
+					continue;
+				}
+			if (soap_flag__tag && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_tag, "xsd:string"))
+				{	soap_flag__tag--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__DeviceRemoveTag *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__DeviceRemoveTag, 0, sizeof(struct dss__DeviceRemoveTag), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__DeviceRemoveTag * SOAP_FMAC6 soap_new_dss__DeviceRemoveTag(struct soap *soap, int n)
+{	return soap_instantiate_dss__DeviceRemoveTag(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceRemoveTag(struct soap *soap, struct dss__DeviceRemoveTag *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__DeviceRemoveTag * SOAP_FMAC4 soap_instantiate_dss__DeviceRemoveTag(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__DeviceRemoveTag(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__DeviceRemoveTag, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__DeviceRemoveTag;
+		if (size)
+			*size = sizeof(struct dss__DeviceRemoveTag);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__DeviceRemoveTag[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__DeviceRemoveTag);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__DeviceRemoveTag*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceRemoveTag(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DeviceRemoveTag %p -> %p\n", q, p));
+	*(struct dss__DeviceRemoveTag*)p = *(struct dss__DeviceRemoveTag*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceRemoveTagResponse(struct soap *soap, struct dss__DeviceRemoveTagResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceRemoveTagResponse(struct soap *soap, const struct dss__DeviceRemoveTagResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceRemoveTagResponse(struct soap *soap, const struct dss__DeviceRemoveTagResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__DeviceRemoveTagResponse);
+	if (soap_out_dss__DeviceRemoveTagResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceRemoveTagResponse(struct soap *soap, const char *tag, int id, const struct dss__DeviceRemoveTagResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__DeviceRemoveTagResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__DeviceRemoveTagResponse * SOAP_FMAC4 soap_get_dss__DeviceRemoveTagResponse(struct soap *soap, struct dss__DeviceRemoveTagResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__DeviceRemoveTagResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__DeviceRemoveTagResponse * SOAP_FMAC4 soap_in_dss__DeviceRemoveTagResponse(struct soap *soap, const char *tag, struct dss__DeviceRemoveTagResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__DeviceRemoveTagResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DeviceRemoveTagResponse, sizeof(struct dss__DeviceRemoveTagResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__DeviceRemoveTagResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__DeviceRemoveTagResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__DeviceRemoveTagResponse, 0, sizeof(struct dss__DeviceRemoveTagResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__DeviceRemoveTagResponse * SOAP_FMAC6 soap_new_dss__DeviceRemoveTagResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__DeviceRemoveTagResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceRemoveTagResponse(struct soap *soap, struct dss__DeviceRemoveTagResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__DeviceRemoveTagResponse * SOAP_FMAC4 soap_instantiate_dss__DeviceRemoveTagResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__DeviceRemoveTagResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__DeviceRemoveTagResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__DeviceRemoveTagResponse;
+		if (size)
+			*size = sizeof(struct dss__DeviceRemoveTagResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__DeviceRemoveTagResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__DeviceRemoveTagResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__DeviceRemoveTagResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceRemoveTagResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DeviceRemoveTagResponse %p -> %p\n", q, p));
+	*(struct dss__DeviceRemoveTagResponse*)p = *(struct dss__DeviceRemoveTagResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceAddTag(struct soap *soap, struct dss__DeviceAddTag *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_string(soap, &a->_deviceID);
+	soap_default_string(soap, &a->_tag);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceAddTag(struct soap *soap, const struct dss__DeviceAddTag *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_string(soap, &a->_deviceID);
+	soap_serialize_string(soap, &a->_tag);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceAddTag(struct soap *soap, const struct dss__DeviceAddTag *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__DeviceAddTag);
+	if (soap_out_dss__DeviceAddTag(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceAddTag(struct soap *soap, const char *tag, int id, const struct dss__DeviceAddTag *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__DeviceAddTag), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_string(soap, "deviceID", -1, &a->_deviceID, ""))
+		return soap->error;
+	if (soap_out_string(soap, "tag", -1, &a->_tag, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__DeviceAddTag * SOAP_FMAC4 soap_get_dss__DeviceAddTag(struct soap *soap, struct dss__DeviceAddTag *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__DeviceAddTag(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__DeviceAddTag * SOAP_FMAC4 soap_in_dss__DeviceAddTag(struct soap *soap, const char *tag, struct dss__DeviceAddTag *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__deviceID = 1, soap_flag__tag = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__DeviceAddTag *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DeviceAddTag, sizeof(struct dss__DeviceAddTag), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__DeviceAddTag(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__deviceID && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_deviceID, "xsd:string"))
+				{	soap_flag__deviceID--;
+					continue;
+				}
+			if (soap_flag__tag && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_tag, "xsd:string"))
+				{	soap_flag__tag--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__DeviceAddTag *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__DeviceAddTag, 0, sizeof(struct dss__DeviceAddTag), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__DeviceAddTag * SOAP_FMAC6 soap_new_dss__DeviceAddTag(struct soap *soap, int n)
+{	return soap_instantiate_dss__DeviceAddTag(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceAddTag(struct soap *soap, struct dss__DeviceAddTag *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__DeviceAddTag * SOAP_FMAC4 soap_instantiate_dss__DeviceAddTag(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__DeviceAddTag(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__DeviceAddTag, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__DeviceAddTag;
+		if (size)
+			*size = sizeof(struct dss__DeviceAddTag);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__DeviceAddTag[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__DeviceAddTag);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__DeviceAddTag*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceAddTag(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DeviceAddTag %p -> %p\n", q, p));
+	*(struct dss__DeviceAddTag*)p = *(struct dss__DeviceAddTag*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceAddTagResponse(struct soap *soap, struct dss__DeviceAddTagResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceAddTagResponse(struct soap *soap, const struct dss__DeviceAddTagResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceAddTagResponse(struct soap *soap, const struct dss__DeviceAddTagResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__DeviceAddTagResponse);
+	if (soap_out_dss__DeviceAddTagResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceAddTagResponse(struct soap *soap, const char *tag, int id, const struct dss__DeviceAddTagResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__DeviceAddTagResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__DeviceAddTagResponse * SOAP_FMAC4 soap_get_dss__DeviceAddTagResponse(struct soap *soap, struct dss__DeviceAddTagResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__DeviceAddTagResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__DeviceAddTagResponse * SOAP_FMAC4 soap_in_dss__DeviceAddTagResponse(struct soap *soap, const char *tag, struct dss__DeviceAddTagResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__DeviceAddTagResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DeviceAddTagResponse, sizeof(struct dss__DeviceAddTagResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__DeviceAddTagResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__DeviceAddTagResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__DeviceAddTagResponse, 0, sizeof(struct dss__DeviceAddTagResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__DeviceAddTagResponse * SOAP_FMAC6 soap_new_dss__DeviceAddTagResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__DeviceAddTagResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceAddTagResponse(struct soap *soap, struct dss__DeviceAddTagResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__DeviceAddTagResponse * SOAP_FMAC4 soap_instantiate_dss__DeviceAddTagResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__DeviceAddTagResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__DeviceAddTagResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__DeviceAddTagResponse;
+		if (size)
+			*size = sizeof(struct dss__DeviceAddTagResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__DeviceAddTagResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__DeviceAddTagResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__DeviceAddTagResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceAddTagResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DeviceAddTagResponse %p -> %p\n", q, p));
+	*(struct dss__DeviceAddTagResponse*)p = *(struct dss__DeviceAddTagResponse*)q;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceGetZoneID(struct soap *soap, struct dss__DeviceGetZoneID *a)
