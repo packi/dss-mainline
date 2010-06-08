@@ -85,13 +85,13 @@ const char* ConfigDirectory = "data/";
 #ifdef WITH_WEBROOTDIR
 const char* WebrootDirectory = WITH_WEBROOTDIR;
 #else
-const char* WebrootDirectory = "data/webroot";
+const char* WebrootDirectory = "data/webroot/";
 #endif
 
 #ifdef WITH_JSLOGDIR
 const char* JSLogDirectory = WITH_JSLOGDIR;
 #else
-const char* JSLogDirectory = "data/logs";
+const char* JSLogDirectory = "data/logs/";
 #endif
 
   DSS::DSS()
@@ -143,36 +143,47 @@ const char* JSLogDirectory = "data/logs";
     return (int)difftime( time( NULL ), m_TimeStarted );
   } // getUptime
 
-  void DSS::setDataDirectory(const std::string& _value) {
-    if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
-      m_dataDirectory = _value + "/";
-    } else {
-      m_dataDirectory = _value;
+  bool DSS::isSaneDirectory(const std::string& _path) {
+    return boost::filesystem::is_directory(_path);
+  } // isSaneDirectory
+
+  std::string DSS::addTrailingBackslash(const std::string& _path) {
+    if(!_path.empty() && (_path.at(_path.length() - 1) != '/')) {
+      return _path+ "/";
     }
+    return _path;
+  } // addTrailingBackslash
+
+  void DSS::setDataDirectory(const std::string& _value) {
+    if((m_State != ssRunning) && !isSaneDirectory(_value)) {
+      Logger::getInstance()->log("Invalid data directory specified: '" + _value + "'", lsFatal);
+      abort();
+    }
+    m_dataDirectory = addTrailingBackslash(_value);
   } // setDataDirectory
 
   void DSS::setConfigDirectory(const std::string& _value) {
-    if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
-      m_configDirectory = _value + "/";
-    } else {
-      m_configDirectory = _value;
+    if((m_State != ssRunning) && !isSaneDirectory(_value)) {
+      Logger::getInstance()->log("Invalid config directory specified: '" + _value + "'", lsFatal);
+      abort();
     }
+    m_configDirectory = addTrailingBackslash(_value);
   }
 
   void DSS::setWebrootDirectory(const std::string& _value) {
-    if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
-      m_webrootDirectory = _value + "/";
-    } else {
-      m_webrootDirectory = _value;
+    if((m_State != ssRunning) && !isSaneDirectory(_value)) {
+      Logger::getInstance()->log("Invalid webroot directory specified: '" + _value + "'", lsFatal);
+      abort();
     }
+    m_webrootDirectory = addTrailingBackslash(_value);
   }
 
   void DSS::setJSLogDirectory(const std::string& _value) {
-    if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
-      m_jsLogDirectory = _value + "/";
-    } else {
-      m_jsLogDirectory = _value;
+    if((m_State != ssRunning) && !isSaneDirectory(_value)) {
+      Logger::getInstance()->log("Invalid js-log directory specified: '" + _value + "'", lsFatal);
+      abort();
     }
+    m_jsLogDirectory = addTrailingBackslash(_value);
   }
 
 
