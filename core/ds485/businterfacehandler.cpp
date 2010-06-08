@@ -447,6 +447,8 @@ namespace dss {
 
     case FunctionDeviceGetFunctionID:
       return "Function Device Get Function ID";
+    case FunctionDeviceGetVersion:
+      return "Function Device Get Version";
     case FunctionDSLinkConfigWrite:
       return "Function dSLink Config Write";
     case FunctionDSLinkConfigRead:

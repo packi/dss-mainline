@@ -150,8 +150,9 @@ namespace dss {
       PayloadDissector pd(resFrame->getPayload());
       pd.get<uint8_t>(); // skip the command id
       revision = pd.get<uint16_t>();
-      if (!pd.isEmpty())
+      if (!pd.isEmpty()) {
         product = pd.get<uint16_t>();
+      }
     }
 
     DeviceSpec_t spec(function, product, revision, _id);
