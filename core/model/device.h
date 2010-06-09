@@ -176,6 +176,7 @@ namespace dss {
     bool hasTag(const std::string& _tagName) const;
     void addTag(const std::string& _tagName);
     void removeTag(const std::string& _tagName);
+    std::vector<std::string> getTags();
 
     /** Returns wheter two devices are equal.
      * Devices are considered equal if their DSID are a match.*/

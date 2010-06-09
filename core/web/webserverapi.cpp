@@ -237,6 +237,8 @@ namespace dss {
     clsDevice.addMethod("hasTag")
       .withParameter("tag", "string", true)
       .withDocumentation("Returns hasTag: true if tagged 'tag'");
+    clsDevice.addMethod("getTags")
+      .withDocumentation("Returns an array of all tags of the device");
 
     RestfulClass& clsCircuit = api->addClass("circuit")
        .withInstanceParameter("id", "dsid", true);
@@ -376,7 +378,7 @@ namespace dss {
     clsStructure.addMethod("removeInactiveDevices")
        .withParameter("id", "dsid", true)
        .withDocumentation("Removed all inactive devices from a modulator");
-    
+
     RestfulClass& clsMetering = api->addClass("metering");
     clsMetering.addMethod("getResolutions")
       .withDocumentation("Returns all resolutions stored on this dSS");

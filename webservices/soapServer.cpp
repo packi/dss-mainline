@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2010-03-25 15:45:40 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2010-06-07 14:08:59 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -199,6 +199,14 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__DeviceSetName(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetZoneID"))
 		return soap_serve_dss__DeviceGetZoneID(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceAddTag"))
+		return soap_serve_dss__DeviceAddTag(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceRemoveTag"))
+		return soap_serve_dss__DeviceRemoveTag(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceHasTag"))
+		return soap_serve_dss__DeviceHasTag(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetTags"))
+		return soap_serve_dss__DeviceGetTags(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DSMeterGetPowerConsumption"))
 		return soap_serve_dss__DSMeterGetPowerConsumption(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentGetDSMeterIDs"))
@@ -2828,6 +2836,170 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetZoneID(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__DeviceGetZoneIDResponse(soap, &soap_tmp_dss__DeviceGetZoneIDResponse, "dss:DeviceGetZoneIDResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceAddTag(struct soap *soap)
+{	struct dss__DeviceAddTag soap_tmp_dss__DeviceAddTag;
+	struct dss__DeviceAddTagResponse soap_tmp_dss__DeviceAddTagResponse;
+	soap_default_dss__DeviceAddTagResponse(soap, &soap_tmp_dss__DeviceAddTagResponse);
+	soap_default_dss__DeviceAddTag(soap, &soap_tmp_dss__DeviceAddTag);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DeviceAddTag(soap, &soap_tmp_dss__DeviceAddTag, "dss:DeviceAddTag", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DeviceAddTag(soap, soap_tmp_dss__DeviceAddTag._token, soap_tmp_dss__DeviceAddTag._deviceID, soap_tmp_dss__DeviceAddTag._tag, soap_tmp_dss__DeviceAddTagResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DeviceAddTagResponse(soap, &soap_tmp_dss__DeviceAddTagResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DeviceAddTagResponse(soap, &soap_tmp_dss__DeviceAddTagResponse, "dss:DeviceAddTagResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DeviceAddTagResponse(soap, &soap_tmp_dss__DeviceAddTagResponse, "dss:DeviceAddTagResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceRemoveTag(struct soap *soap)
+{	struct dss__DeviceRemoveTag soap_tmp_dss__DeviceRemoveTag;
+	struct dss__DeviceRemoveTagResponse soap_tmp_dss__DeviceRemoveTagResponse;
+	soap_default_dss__DeviceRemoveTagResponse(soap, &soap_tmp_dss__DeviceRemoveTagResponse);
+	soap_default_dss__DeviceRemoveTag(soap, &soap_tmp_dss__DeviceRemoveTag);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DeviceRemoveTag(soap, &soap_tmp_dss__DeviceRemoveTag, "dss:DeviceRemoveTag", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DeviceRemoveTag(soap, soap_tmp_dss__DeviceRemoveTag._token, soap_tmp_dss__DeviceRemoveTag._deviceID, soap_tmp_dss__DeviceRemoveTag._tag, soap_tmp_dss__DeviceRemoveTagResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DeviceRemoveTagResponse(soap, &soap_tmp_dss__DeviceRemoveTagResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DeviceRemoveTagResponse(soap, &soap_tmp_dss__DeviceRemoveTagResponse, "dss:DeviceRemoveTagResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DeviceRemoveTagResponse(soap, &soap_tmp_dss__DeviceRemoveTagResponse, "dss:DeviceRemoveTagResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceHasTag(struct soap *soap)
+{	struct dss__DeviceHasTag soap_tmp_dss__DeviceHasTag;
+	struct dss__DeviceHasTagResponse soap_tmp_dss__DeviceHasTagResponse;
+	soap_default_dss__DeviceHasTagResponse(soap, &soap_tmp_dss__DeviceHasTagResponse);
+	soap_default_dss__DeviceHasTag(soap, &soap_tmp_dss__DeviceHasTag);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DeviceHasTag(soap, &soap_tmp_dss__DeviceHasTag, "dss:DeviceHasTag", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DeviceHasTag(soap, soap_tmp_dss__DeviceHasTag._token, soap_tmp_dss__DeviceHasTag._deviceID, soap_tmp_dss__DeviceHasTag._tag, soap_tmp_dss__DeviceHasTagResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DeviceHasTagResponse(soap, &soap_tmp_dss__DeviceHasTagResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DeviceHasTagResponse(soap, &soap_tmp_dss__DeviceHasTagResponse, "dss:DeviceHasTagResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DeviceHasTagResponse(soap, &soap_tmp_dss__DeviceHasTagResponse, "dss:DeviceHasTagResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetTags(struct soap *soap)
+{	struct dss__DeviceGetTags soap_tmp_dss__DeviceGetTags;
+	struct dss__DeviceGetTagsResponse soap_tmp_dss__DeviceGetTagsResponse;
+	soap_default_dss__DeviceGetTagsResponse(soap, &soap_tmp_dss__DeviceGetTagsResponse);
+	soap_default_dss__DeviceGetTags(soap, &soap_tmp_dss__DeviceGetTags);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DeviceGetTags(soap, &soap_tmp_dss__DeviceGetTags, "dss:DeviceGetTags", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DeviceGetTags(soap, soap_tmp_dss__DeviceGetTags._token, soap_tmp_dss__DeviceGetTags._deviceID, soap_tmp_dss__DeviceGetTagsResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DeviceGetTagsResponse(soap, &soap_tmp_dss__DeviceGetTagsResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DeviceGetTagsResponse(soap, &soap_tmp_dss__DeviceGetTagsResponse, "dss:DeviceGetTagsResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DeviceGetTagsResponse(soap, &soap_tmp_dss__DeviceGetTagsResponse, "dss:DeviceGetTagsResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

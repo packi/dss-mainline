@@ -330,4 +330,15 @@ namespace dss {
     }
   } // removeTag
 
+  std::vector<std::string> Device::getTags() {
+    std::vector<std::string> result;
+    if(m_TagsNode != NULL) {
+      int count = m_TagsNode->getChildCount();
+      for(int iNode = 0; iNode < count; iNode++) {
+        result.push_back(m_TagsNode->getChild(iNode)->getName());
+      }
+    }
+    return result;
+  } // getTags
+
 } // namespace dss

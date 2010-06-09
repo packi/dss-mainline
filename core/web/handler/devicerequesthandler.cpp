@@ -22,6 +22,8 @@
 
 #include "devicerequesthandler.h"
 
+#include <boost/bind.hpp>
+
 #include "core/model/apartment.h"
 #include "core/model/device.h"
 
@@ -124,6 +126,13 @@ namespace dss {
         }
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
         resultObj->addProperty("hasTag", pDevice->hasTag(tagName));
+        return resultObj;
+      } else if(_request.getMethod() == "getTags") {
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        boost::shared_ptr<JSONArray<std::string> > tagsObj(new JSONArray<std::string>());
+        resultObj->addElement("tags", tagsObj);
+        std::vector<std::string> tags = pDevice->getTags();
+        std::for_each(tags.begin(), tags.end(), boost::bind(&JSONArray<std::string>::add, tagsObj.get(), _1));
         return resultObj;
       } else if(_request.getMethod() == "enable") {
         pDevice->enable();
