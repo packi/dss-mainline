@@ -286,6 +286,77 @@ namespace dss {
     }
   } // pluginCalled
 
+  boost::ptr_map<std::string, std::string> WebServer::parseCookies(const char *_cookies) {
+      boost::ptr_map<std::string, std::string> result;
+
+      if ((_cookies == NULL) || (strlen(_cookies) == 0)) {
+        return result;
+      }
+
+      std::string c = _cookies;
+      std::string pairStr;
+      size_t semi = std::string::npos;
+
+      do {
+        semi = c.find(';');
+        if (semi != std::string::npos) {
+          pairStr = c.substr(0, semi);
+          c = c.substr(semi+1);
+        } else {
+          pairStr = c;
+        }
+
+        size_t eq = pairStr.find('=');
+        if (eq == std::string::npos) {
+          continue;
+        }
+
+        std::string key = pairStr.substr(0, eq);
+        std::string value = pairStr.substr(eq+1);
+
+        if (key.empty()) {
+          continue;
+        }
+
+        result[key] = value;
+
+
+      } while (semi != std::string::npos);
+
+
+      return result;
+  }
+
+  std::string WebServer::generateCookieString(boost::ptr_map<std::string, std::string> _cookies) {
+    std::string result = "";
+
+    boost::ptr_map<std::string, std::string>::iterator i;
+    std::string path;
+
+    for (i = _cookies.begin(); i != _cookies.end(); i++) {
+      if (i->first == "path") {
+        path = *i->second;
+        continue;
+      }
+
+      if (!result.empty()) {
+        result = result + "; ";
+      }
+
+      result = result + i->first + "=" + (*i->second);
+    }
+
+    if (!path.empty()) {
+      if (!result.empty()) {
+        result = result + "; ";
+      }
+
+      result = result + "path=" + path;      
+    }
+
+    return result;
+  }
+
   void WebServer::jsonHandler(struct mg_connection* _connection,
                               const struct mg_request_info* _info,
                               void* _userData) {
@@ -294,7 +365,6 @@ namespace dss {
     std::string setCookie;
     int token = -1;
     boost::shared_ptr<Session> session;
-    std::string tokenStr;
 
     std::string uri = _info->uri;
     HashMapConstStringString paramMap = parseParameter(_info->query_string);
@@ -309,35 +379,24 @@ namespace dss {
     cookie = mg_get_header(_connection, "Cookie");
 
     if (cookie != NULL) {
-      std::string c = cookie;
-      size_t t_start = c.find("token=");
-      if (t_start != std::string::npos) {
-        c = c.substr(t_start + strlen("token="));
-        size_t semi = c.find(';');
-        if (semi != std::string::npos) {
-          tokenStr = c.substr(0, semi);
-        } else {
-          tokenStr = c;
-        }
-        token = strToIntDef(tokenStr, -1);
-        if(token != -1) {
-          session = self.m_SessionManager.getSession(token);
-        }//token != -1
+      boost::ptr_map<std::string, std::string> cookies = self.parseCookies(cookie);
+      std::string& tokenStr = cookies["token"];
+      token = strToIntDef(tokenStr, -1);
+      if (token != -1) {
+        session = self.m_SessionManager.getSession(token);
       }
     }
 
     if ((cookie == NULL) || (token == -1) || (session == NULL)){
-      std::ostringstream sstream;
-      if ((cookie != NULL) && (session != NULL)) {
-        sstream << cookie;
-      }
 
       token = self.m_SessionManager.registerSession();
       session = self.m_SessionManager.getSession(token);
       self.log("Registered new JSON session");
 
-      sstream << "token=" << token << ";" << "path=/";
-      setCookie = sstream.str();
+      boost::ptr_map<std::string, std::string> cmap;
+      cmap["token"] = intToString(token);
+      cmap["path"] = "/";
+      setCookie = self.generateCookieString(cmap);
     }
 
     std::string result;

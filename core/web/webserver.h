@@ -60,6 +60,8 @@ namespace dss {
     void loadPlugins();
     void instantiateHandlers();
     void publishJSLogfiles();
+    boost::ptr_map<std::string, std::string> parseCookies(const char *cookies);
+    std::string generateCookieString(boost::ptr_map<std::string, std::string> cookies);
   protected:
     void pluginCalled(struct mg_connection* _connection,
                       const struct mg_request_info* _info,
@@ -79,7 +81,8 @@ namespace dss {
                             const struct mg_request_info* _info,
                             void* _userData);
 
-      static void emitHTTPHeader(int _code, struct mg_connection* _connection, const std::string& _contentType = "text/html", const std::string& _setCookie = "");
+    static void emitHTTPHeader(int _code, struct mg_connection* _connection, const std::string& _contentType = "text/html", const std::string& _setCookie = "");
+
   protected:
     virtual void doStart();
   public:
