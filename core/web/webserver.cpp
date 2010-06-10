@@ -399,6 +399,8 @@ namespace dss {
       setCookie = self.generateCookieString(cmap);
     }
 
+    session->touch();
+
     std::string result;
     if(self.m_Handlers[request.getClass()] != NULL) {
       try {
