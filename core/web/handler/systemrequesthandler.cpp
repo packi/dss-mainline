@@ -21,9 +21,12 @@
 */
 
 #include "systemrequesthandler.h"
+#include "core/datetools.h"
 
 #include "core/web/json.h"
 #include "core/dss.h"
+
+#include <sstream>
 
 namespace dss {
 
@@ -32,6 +35,10 @@ namespace dss {
   boost::shared_ptr<JSONObject> SystemRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(_request.getMethod() == "version") {
       return success(DSS::getInstance()->versionString());
+    } else if (_request.getMethod() == "time") {
+      std::stringstream s;
+      s << DateTime().secondsSinceEpoch();
+      return success(s.str());
     }
     throw std::runtime_error("Unhandled function");
   } // handleRequest
