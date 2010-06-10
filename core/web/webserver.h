@@ -53,7 +53,7 @@ namespace dss {
     boost::ptr_vector<WebServerPlugin> m_Plugins;
     __gnu_cxx::hash_map<const std::string, RestfulRequestHandler*> m_Handlers;
     boost::shared_ptr<RestfulAPI> m_pAPI;
-    SessionManager m_SessionManager;
+    boost::shared_ptr<SessionManager> m_SessionManager;
   private:
     void setupAPI();
     void loadPlugin(PropertyNode& _node);

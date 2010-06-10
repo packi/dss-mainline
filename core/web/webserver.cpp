@@ -86,6 +86,8 @@ namespace dss {
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "ports", 8080, true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "sslcert", getDSS().getPropertySystem().getStringValue("/config/configdirectory") + "dsscert.pem" , true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "files/apartment.xml", getDSS().getDataDirectory() + "apartment.xml", true, false);
+    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "sessionTimeout", 900, true, false);
+    m_SessionManager = boost::shared_ptr<SessionManager>(new SessionManager(getDSS().getEventQueue(), getDSS().getEventInterpreter(), getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "sessionTimeout")));
 
     publishJSLogfiles();
     setupAPI();
@@ -383,14 +385,14 @@ namespace dss {
       std::string& tokenStr = cookies["token"];
       token = strToIntDef(tokenStr, -1);
       if (token != -1) {
-        session = self.m_SessionManager.getSession(token);
+        session = self.m_SessionManager->getSession(token);
       }
     }
 
     if ((cookie == NULL) || (token == -1) || (session == NULL)){
 
-      token = self.m_SessionManager.registerSession();
-      session = self.m_SessionManager.getSession(token);
+      token = self.m_SessionManager->registerSession();
+      session = self.m_SessionManager->getSession(token);
       self.log("Registered new JSON session");
 
       boost::ptr_map<std::string, std::string> cmap;

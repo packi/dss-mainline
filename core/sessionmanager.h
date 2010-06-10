@@ -24,6 +24,7 @@
 #define __SESSION_MANAGER_H__
 
 #include "core/mutex.h"
+#include "core/event.h"
 #include "core/session.h"
 
 #include <string>
@@ -33,12 +34,12 @@
 namespace dss {
   class SessionManager {
   public:
-    SessionManager();
-    /// \brief Registers a new session, creates a new Session object
     /// \param Specifies how long a session can remain idle before it gets
     /// removed, value of 0 means - never remove.
+    SessionManager(EventQueue& _EventQueue, EventInterpreter& _eventInterpreter, const int _timeout = 0);
+    /// \brief Registers a new session, creates a new Session object
     /// \return session identifier
-    int registerSession(const int _timeout = 0);
+    int registerSession();
 
     /// \brief Returns the session object with the given id
     boost::shared_ptr<Session>& getSession(const int _id);
@@ -49,10 +50,18 @@ namespace dss {
     /// \brief Updates idle status of a session
     void touchSession(const int _id);
 
+    void cleanupSessions(Event& _event, const EventSubscription& _subscription);
+
   protected:
-    boost::ptr_map<const int, boost::shared_ptr<Session> > m_Sessions;
     int m_NextSessionID;
+    EventQueue& m_EventQueue;
+    EventInterpreter& m_EventInterpreter;
+    int m_timeout;
+
+    boost::ptr_map<const int, boost::shared_ptr<Session> > m_Sessions;
     Mutex m_MapMutex;
+
+    bool m_eventRunning;
   };
 }
 
