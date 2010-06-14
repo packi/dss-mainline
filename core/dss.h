@@ -104,6 +104,7 @@ namespace dss {
 
     int getUptime() const;
     bool isSaneDirectory(const std::string& _path);
+    bool checkDirectoriesExist();
     std::string addTrailingBackslash(const std::string& _path);
   public:
     ~DSS();
