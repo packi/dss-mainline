@@ -26,6 +26,8 @@
 #include "core/mutex.h"
 #include "core/event.h"
 #include "core/session.h"
+#include "core/eventinterpreterplugins.h"
+#include "core/internaleventrelaytarget.h"
 
 #include <string>
 #include <boost/shared_ptr.hpp>
@@ -61,7 +63,8 @@ namespace dss {
     boost::ptr_map<const int, boost::shared_ptr<Session> > m_Sessions;
     Mutex m_MapMutex;
 
-    bool m_eventRunning;
+    boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;
+    void sendCleanupEvent();
   };
 }
 

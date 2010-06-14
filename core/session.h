@@ -33,19 +33,11 @@
 
 namespace dss {
   class Session {
-  protected:
-    int m_Token;
-    Mutex m_UseCountMutex;
-    int m_UsageCount;
-
-    DateTime m_LastTouched;
-
-    Mutex m_DataMapMutex;
-    boost::ptr_map<std::string, boost::shared_ptr<boost::any> > dataMap;
   public:
     Session() {}
     Session(const int _tokenID);
-
+    
+    void setTimeout(const int _timeout);
     int getID();
     virtual bool isStillValid();
     bool isUsed();
@@ -56,6 +48,18 @@ namespace dss {
     boost::shared_ptr<boost::any>& getData(const std::string& _key);
     bool removeData(const std::string& _key);
     Session& operator=(const Session& _other);
+
+  protected:
+    int m_Token;
+    Mutex m_UseCountMutex;
+    int m_UsageCount;
+
+    DateTime m_LastTouched;
+
+    Mutex m_DataMapMutex;
+    boost::ptr_map<std::string, boost::shared_ptr<boost::any> > dataMap;
+
+    int m_SessionTimeoutSec;
   }; // Session
 
 

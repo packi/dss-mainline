@@ -29,11 +29,16 @@ namespace dss {
   {
     m_LastTouched = DateTime();
     m_UsageCount = 0;
+    m_SessionTimeoutSec = 30;
   } // ctor
 
+  void Session::setTimeout(const int _timeout) {
+    m_SessionTimeoutSec = _timeout;
+  }
+
   bool Session::isStillValid() {
-    //const int TheSessionTimeout = 5;
-    return true;//m_LastTouched.addMinute(TheSessionTimeout).after(DateTime());
+    printf("is session still valid?\n");
+    return (m_LastTouched.addSeconds(m_SessionTimeoutSec).after(DateTime()));
   } // isStillValid
 
   Session& Session::operator=(const Session& _other) {

@@ -22,39 +22,48 @@
 
 #include "logger.h"
 #include "sessionmanager.h"
-#include "eventinterpreterplugins.h"
-#include "internaleventrelaytarget.h"
 
 #include <boost/bind.hpp>
+#include <vector>
 
 namespace dss {
-  SessionManager::SessionManager(EventQueue& _EventQueue, EventInterpreter& _eventInterpreter, const int _timeout) : m_NextSessionID(0), m_EventQueue(_EventQueue), m_EventInterpreter(_eventInterpreter), m_timeout(_timeout), m_eventRunning(false)
+  SessionManager::SessionManager(EventQueue& _EventQueue, EventInterpreter& _eventInterpreter, const int _timeout) : m_NextSessionID(0), m_EventQueue(_EventQueue), m_EventInterpreter(_eventInterpreter), m_timeout(_timeout)
   {
   } 
 
+  void SessionManager::sendCleanupEvent() {
+    boost::shared_ptr<Event> pEvent(new Event("webSessionCleanup"));
+    //pEvent->setProperty("time", "+" + intToString(m_timeout));
+    pEvent->setProperty("time", "+10");
+    m_EventQueue.pushEvent(pEvent);
+  }
+
   int SessionManager::registerSession() {
     m_MapMutex.lock();
-    if (!m_eventRunning) {
-      EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(&m_EventInterpreter);
-      m_EventInterpreter.addPlugin(relay);
-      InternalEventRelayTarget target(*relay);
-      boost::shared_ptr<EventSubscription> cleanupEventSubscription(
-              new dss::EventSubscription(
-                  "webSessionCleanup",
-                  EventInterpreterInternalRelay::getPluginName(),
-                  m_EventInterpreter,
-                  boost::shared_ptr<SubscriptionOptions>())
-      );
-      target.subscribeTo(cleanupEventSubscription);
-      target.setCallback(boost::bind(&SessionManager::cleanupSessions, this, _1, _2));
-      boost::shared_ptr<Event> pEvent(new Event("webSessionCleanup"));
-      pEvent->setProperty("time", "+" + intToString(m_timeout));
-      //pEvent->setProperty("time", "+30");
-      m_EventQueue.pushEvent(pEvent);
-      m_eventRunning = true;
-    }
+    if (m_pRelayTarget == NULL) {
+      EventInterpreterInternalRelay* pRelay =
+        dynamic_cast<EventInterpreterInternalRelay*>(m_EventInterpreter.getPluginByName(EventInterpreterInternalRelay::getPluginName()));
+      m_pRelayTarget = boost::shared_ptr<InternalEventRelayTarget>(new InternalEventRelayTarget(*pRelay));
+      printf("Relay created\n");
+
+      if (m_pRelayTarget != NULL) {
+        printf("EVent created\n");
+        boost::shared_ptr<EventSubscription> cleanupEventSubscription(
+                new dss::EventSubscription(
+                    "webSessionCleanup",
+                    EventInterpreterInternalRelay::getPluginName(),
+                    m_EventInterpreter,
+                    boost::shared_ptr<SubscriptionOptions>())
+        );
+        m_pRelayTarget->subscribeTo(cleanupEventSubscription);
+        m_pRelayTarget->setCallback(boost::bind(&SessionManager::cleanupSessions, this, _1, _2));
+        this->sendCleanupEvent();
+      }
+    } 
 
     boost::shared_ptr<Session> s(new Session(m_NextSessionID++));
+    //s->setTimeout(m_timeout);
+    s->setTimeout(15);
     int id = s->getID();
     m_Sessions[id] = s;
     m_MapMutex.unlock();
@@ -89,7 +98,29 @@ namespace dss {
   }
 
   void SessionManager::cleanupSessions(Event& _event, const EventSubscription& _subscription) {
+    std::vector<int> erase_ids;
+    m_MapMutex.lock();
+    boost::ptr_map<const int, boost::shared_ptr<Session> >::iterator i;
+    for (i = m_Sessions.begin(); i != m_Sessions.end(); i++) {
+      if (i != m_Sessions.end()) {
+        if (!((*i->second)->isStillValid())) {
+          printf("Session timed out!\n");
+          erase_ids.push_back(i->first);
+        }
+      }
+      else {
+        printf("Session ok\n");
+      }
+    }
+
+    m_MapMutex.unlock();
+
+    for (size_t j = 0; j < erase_ids.size(); j++) {
+      removeSession(erase_ids.at(j));
+    }
+
     printf("UUUUUUUuuuuuuuuuuuuuuuuuuU\n");
+    this->sendCleanupEvent();
   }
 }
 
