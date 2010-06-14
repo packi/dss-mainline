@@ -118,7 +118,7 @@ namespace dss {
 
     EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(token);
     if(entry == eventSessions->end()){
-        boost::shared_ptr<EventSubscriptionSession> session(new EventSubscriptionSession(token));
+        boost::shared_ptr<EventSubscriptionSession> session(new EventSubscriptionSession(token, _session));
       (*eventSessions)[token] = session;
     }
 
@@ -262,9 +262,12 @@ namespace dss {
     throw std::runtime_error("Unhandled function");
   } // handleRequest
 
-  EventSubscriptionSession::EventSubscriptionSession() : Session() {}
+  EventSubscriptionSession::EventSubscriptionSession(boost::shared_ptr<Session> _parentSession) : Session() {
+    m_parentSession = _parentSession;
+  }
 
-  EventSubscriptionSession::EventSubscriptionSession(const int _tokenID) : Session(_tokenID) {
+  EventSubscriptionSession::EventSubscriptionSession(const int _tokenID, boost::shared_ptr<Session> _parentSession) : Session(_tokenID) {
+    m_parentSession = _parentSession;
   }
 
   int EventSubscriptionSession::getTokenID() {
@@ -297,7 +300,14 @@ namespace dss {
   {
     createCollector();
 
+    if (m_parentSession != NULL) {
+      m_parentSession->use();
+    }
     m_pEventCollector->waitForEvent(_timeoutMS);
+
+    if (m_parentSession != NULL) {
+      m_parentSession->unuse();
+    }
 
     boost::shared_ptr<JSONObject> resultObj(new JSONObject());
     boost::shared_ptr<JSONArrayBase> eventsArray(new JSONArrayBase);

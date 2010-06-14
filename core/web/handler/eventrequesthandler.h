@@ -42,8 +42,8 @@ namespace dss {
 
   class EventSubscriptionSession : public Session {
   public:
-      EventSubscriptionSession();
-      EventSubscriptionSession(const int _tokenID);
+      EventSubscriptionSession(boost::shared_ptr<Session> _parentSession);
+      EventSubscriptionSession(const int _tokenID, boost::shared_ptr<Session> _parentSession);
 //    virtual bool isStillValid();
     int getTokenID();
     void subscribe(const std::string& _eventName);
@@ -51,6 +51,7 @@ namespace dss {
     // blocks if no events are available
     boost::shared_ptr<JSONObject> getEvents(const int _timeoutMS = 0);
   private:
+    boost::shared_ptr<Session> m_parentSession;
     std::deque<Event> m_events;
     boost::shared_ptr<EventCollector> m_pEventCollector;
     void createCollector();
