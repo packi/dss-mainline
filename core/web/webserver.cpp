@@ -86,8 +86,8 @@ namespace dss {
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "ports", 8080, true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "sslcert", getDSS().getPropertySystem().getStringValue("/config/configdirectory") + "dsscert.pem" , true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "files/apartment.xml", getDSS().getDataDirectory() + "apartment.xml", true, false);
-    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "sessionTimeout", 900, true, false);
-    m_SessionManager = boost::shared_ptr<SessionManager>(new SessionManager(getDSS().getEventQueue(), getDSS().getEventInterpreter(), getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "sessionTimeout")));
+    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "sessionTimeoutMinutes", WEB_SESSION_TIMEOUT_MINUTES, true, false);
+    m_SessionManager = boost::shared_ptr<SessionManager>(new SessionManager(getDSS().getEventQueue(), getDSS().getEventInterpreter(), getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "sessionTimeoutMinutes")*60));
 
     publishJSLogfiles();
     setupAPI();

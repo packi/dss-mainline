@@ -58,7 +58,7 @@ namespace dss {
     int m_NextSessionID;
     EventQueue& m_EventQueue;
     EventInterpreter& m_EventInterpreter;
-    int m_timeout;
+    int m_timeoutSecs;
 
     boost::ptr_map<const int, boost::shared_ptr<Session> > m_Sessions;
     Mutex m_MapMutex;

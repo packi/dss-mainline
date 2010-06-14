@@ -27,14 +27,13 @@
 #include <vector>
 
 namespace dss {
-  SessionManager::SessionManager(EventQueue& _EventQueue, EventInterpreter& _eventInterpreter, const int _timeout) : m_NextSessionID(0), m_EventQueue(_EventQueue), m_EventInterpreter(_eventInterpreter), m_timeout(_timeout)
+  SessionManager::SessionManager(EventQueue& _EventQueue, EventInterpreter& _eventInterpreter, const int _timeout) : m_NextSessionID(0), m_EventQueue(_EventQueue), m_EventInterpreter(_eventInterpreter), m_timeoutSecs(_timeout)
   {
   } 
 
   void SessionManager::sendCleanupEvent() {
     boost::shared_ptr<Event> pEvent(new Event("webSessionCleanup"));
-    //pEvent->setProperty("time", "+" + intToString(m_timeout));
-    pEvent->setProperty("time", "+10");
+    pEvent->setProperty("time", "+" + intToString(m_timeoutSecs));
     m_EventQueue.pushEvent(pEvent);
   }
 
@@ -62,8 +61,7 @@ namespace dss {
     } 
 
     boost::shared_ptr<Session> s(new Session(m_NextSessionID++));
-    //s->setTimeout(m_timeout);
-    s->setTimeout(15);
+    s->setTimeout(m_timeoutSecs);
     int id = s->getID();
     m_Sessions[id] = s;
     m_MapMutex.unlock();
@@ -98,28 +96,24 @@ namespace dss {
   }
 
   void SessionManager::cleanupSessions(Event& _event, const EventSubscription& _subscription) {
-    std::vector<int> erase_ids;
     m_MapMutex.lock();
     boost::ptr_map<const int, boost::shared_ptr<Session> >::iterator i;
     for (i = m_Sessions.begin(); i != m_Sessions.end(); i++) {
       if (i != m_Sessions.end()) {
-        if (!((*i->second)->isStillValid())) {
-          printf("Session timed out!\n");
-          erase_ids.push_back(i->first);
+        boost::shared_ptr<Session>& s = m_Sessions[i->first];
+        if (s != NULL) {
+          if (!s->isStillValid()) {
+            m_Sessions.erase(i->first);
+          }
+        } else {
+          // when the session, for some reason, is NULL, we can get rid of
+          // the entry in the map anyway
+          m_Sessions.erase(i->first);
         }
-      }
-      else {
-        printf("Session ok\n");
       }
     }
 
     m_MapMutex.unlock();
-
-    for (size_t j = 0; j < erase_ids.size(); j++) {
-      removeSession(erase_ids.at(j));
-    }
-
-    printf("UUUUUUUuuuuuuuuuuuuuuuuuuU\n");
     this->sendCleanupEvent();
   }
 }

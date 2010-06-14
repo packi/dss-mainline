@@ -36,6 +36,8 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/shared_ptr.hpp>
 
+#define WEB_SESSION_TIMEOUT_MINUTES 15
+
 namespace dss {
 
   class IDeviceInterface;

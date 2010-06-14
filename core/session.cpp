@@ -37,8 +37,7 @@ namespace dss {
   }
 
   bool Session::isStillValid() {
-    printf("is session still valid?\n");
-    return (m_LastTouched.addSeconds(m_SessionTimeoutSec).after(DateTime()));
+    return (m_LastTouched.addSeconds(m_SessionTimeoutSec).after(DateTime()) && (!isUsed()));
   } // isStillValid
 
   Session& Session::operator=(const Session& _other) {
