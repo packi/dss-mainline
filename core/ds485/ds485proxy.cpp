@@ -132,6 +132,33 @@ namespace dss {
     return result;
   } // deviceGetFunctionID
 
+  DeviceSpec_t DS485Proxy::deviceGetSpec(devid_t _id, uint8_t _dsMeterID) {
+    uint16_t function = deviceGetFunctionID(_id, _dsMeterID);
+    uint16_t product = 0;
+    uint16_t revision = 0;
+
+    DS485CommandFrame frame;
+    frame.getHeader().setDestination(_dsMeterID);
+    frame.getHeader().setBroadcast(false);
+    frame.getHeader().setType(1);
+    frame.setCommand(CommandRequest);
+    frame.getPayload().add<uint8_t>(FunctionDeviceGetVersion);
+    frame.getPayload().add<devid_t>(_id);
+
+    boost::shared_ptr<DS485CommandFrame> resFrame = receiveSingleFrame(frame, FunctionDeviceGetVersion);
+    if(resFrame != NULL) {
+      PayloadDissector pd(resFrame->getPayload());
+      pd.get<uint8_t>(); // skip the command id
+      revision = pd.get<uint16_t>();
+      if (!pd.isEmpty()) {
+        product = pd.get<uint16_t>();
+      }
+    }
+
+    DeviceSpec_t spec(function, product, revision, _id);
+    return spec;
+  } // deviceGetSpec
+
   void DS485Proxy::sendFrame(DS485CommandFrame& _frame) {
     _frame.setFrameSource(fsDSS);
     bool broadcast = _frame.getHeader().isBroadcast();

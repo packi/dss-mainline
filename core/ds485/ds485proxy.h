@@ -154,6 +154,7 @@ namespace dss {
     //------------------------------------------------ Device
     virtual uint16_t deviceGetParameterValue(devid_t _id, uint8_t _dsMeterID, int _paramID);
     virtual uint16_t deviceGetFunctionID(devid_t _id, uint8_t _dsMeterID);
+    virtual DeviceSpec_t deviceGetSpec(devid_t _id, uint8_t _dsMeterID);
 
     void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size);
     virtual int getSensorValue(const Device& _device, const int _sensorID);

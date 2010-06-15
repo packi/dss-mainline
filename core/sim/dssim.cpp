@@ -695,6 +695,14 @@ namespace dss {
                 distributeFrame(response);
               }
               break;
+            case FunctionDeviceGetVersion:
+              {
+                response = createResponse(cmdFrame, cmdNr);
+                response->getPayload().add<uint16_t>(0x0000); // revision
+                response->getPayload().add<uint16_t>(0x0000); // product
+                distributeFrame(response);
+              }
+              break;
             case FunctionDeviceSetParameterValue:
               {
                 uint16_t devID = pd.get<uint16_t>();

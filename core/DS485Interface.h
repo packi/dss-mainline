@@ -35,7 +35,8 @@ namespace dss {
 
   class Device;
   
-	typedef boost::tuple<int, int, int, std::string, int> DSMeterSpec_t; // bus-id, sw-version, hw-version, name, device-id
+  typedef boost::tuple<int, int, int, std::string, int> DSMeterSpec_t; // bus-id, sw-version, hw-version, name, device-id
+  typedef boost::tuple<int, int, int, int> DeviceSpec_t; // function id, product id, revision, bus address
 
   class DeviceBusInterface {
   public:
@@ -85,9 +86,13 @@ namespace dss {
     virtual dsid_t getDSIDOfDSMeter(const int _dsMeterID) = 0;
 
     virtual int getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID) = 0;
-
-    virtual uint16_t deviceGetFunctionID(devid_t _id, uint8_t _dsMeterID) = 0;
     virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) = 0;
+
+    /** Returns the function ID of the device. */
+    virtual uint16_t deviceGetFunctionID(devid_t _id, uint8_t _dsMeterID) = 0;
+
+    /** Returns the function, product and revision id of the device. */
+    virtual DeviceSpec_t deviceGetSpec(devid_t _id, uint8_t _dsMeterID) = 0;
 
     virtual ~StructureQueryBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureQueryBusInterface
