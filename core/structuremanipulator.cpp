@@ -61,13 +61,17 @@ namespace dss {
 
     // check if we can remove the zone from the dsMeter
     if(oldZoneID != 0) {
+      Logger::getInstance()->log("StructureManipulator::addDeviceToZone: Removing device from old zone " + intToString(oldZoneID), lsInfo);
       Zone& oldZone = m_Apartment.getZone(oldZoneID);
       oldZone.removeDevice(ref);
 
       Set presentDevicesInZoneOfDSMeter = oldZone.getDevices().getByDSMeter(targetDSMeter).getByPresence(true);
       if(presentDevicesInZoneOfDSMeter.length() == 0) {
+        Logger::getInstance()->log("StructureManipulator::addDeviceToZone: Removing zone from meter " + targetDSMeter.getDSID().toString(), lsInfo);
         removeZoneOnDSMeter(oldZone, targetDSMeter);
       }
+    } else {
+      Logger::getInstance()->log("StructureManipulator::addDeviceToZone: No previous zone...", lsWarning);
     }
   } // addDeviceToZone
 
