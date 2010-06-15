@@ -616,7 +616,7 @@ namespace dss {
     cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterRemoveZone);
     cmdFrame.getPayload().add<uint16_t>(_zoneID);
 
-    int16_t res = int16_t(receiveSingleResult(cmdFrame, FunctionDSMeterAddZone));
+    int16_t res = int16_t(receiveSingleResult(cmdFrame, FunctionDSMeterRemoveZone));
     checkResultCode(res);
   } // removeZone
 
