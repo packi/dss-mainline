@@ -85,13 +85,13 @@ const char* ConfigDirectory = "data/";
 #ifdef WITH_WEBROOTDIR
 const char* WebrootDirectory = WITH_WEBROOTDIR;
 #else
-const char* WebrootDirectory = "data/webroot";
+const char* WebrootDirectory = "data/webroot/";
 #endif
 
 #ifdef WITH_JSLOGDIR
 const char* JSLogDirectory = WITH_JSLOGDIR;
 #else
-const char* JSLogDirectory = "data/logs";
+const char* JSLogDirectory = "data/logs/";
 #endif
 
   DSS::DSS()
@@ -143,38 +143,32 @@ const char* JSLogDirectory = "data/logs";
     return (int)difftime( time( NULL ), m_TimeStarted );
   } // getUptime
 
-  void DSS::setDataDirectory(const std::string& _value) {
-    if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
-      m_dataDirectory = _value + "/";
-    } else {
-      m_dataDirectory = _value;
+  bool DSS::isSaneDirectory(const std::string& _path) {
+    return boost::filesystem::is_directory(_path);
+  } // isSaneDirectory
+
+  std::string DSS::addTrailingBackslash(const std::string& _path) {
+    if(!_path.empty() && (_path.at(_path.length() - 1) != '/')) {
+      return _path+ "/";
     }
+    return _path;
+  } // addTrailingBackslash
+
+  void DSS::setDataDirectory(const std::string& _value) {
+    m_dataDirectory = addTrailingBackslash(_value);
   } // setDataDirectory
 
   void DSS::setConfigDirectory(const std::string& _value) {
-    if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
-      m_configDirectory = _value + "/";
-    } else {
-      m_configDirectory = _value;
-    }
-  }
+    m_configDirectory = addTrailingBackslash(_value);
+  } // setConfigDirectory
 
   void DSS::setWebrootDirectory(const std::string& _value) {
-    if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
-      m_webrootDirectory = _value + "/";
-    } else {
-      m_webrootDirectory = _value;
-    }
-  }
+    m_webrootDirectory = addTrailingBackslash(_value);
+  } // setWebrootDirectory
 
   void DSS::setJSLogDirectory(const std::string& _value) {
-    if(!_value.empty() && (_value.at(_value.length() - 1) != '/')) {
-      m_jsLogDirectory = _value + "/";
-    } else {
-      m_jsLogDirectory = _value;
-    }
-  }
-
+    m_jsLogDirectory = addTrailingBackslash(_value);
+  } // setJSLogDirectory
 
   bool DSS::parseProperties(const std::vector<std::string>& _properties) {
     foreach(std::string propLine, _properties) {
@@ -208,8 +202,7 @@ const char* JSLogDirectory = "data/logs";
     }
 
     return true;
-  }
-
+  } // parseProperties
 
   bool DSS::initialize(const vector<std::string>& _properties, const std::string& _configFile) {
     m_State = ssCreatingSubsystems;
@@ -290,9 +283,32 @@ const char* JSLogDirectory = "data/logs";
                                  lsInfo);
     }
 
+    return checkDirectoriesExist();
+  } // initialize
 
-    return true;
-  }
+  bool DSS::checkDirectoriesExist() {
+    bool sane = true;
+    if(!isSaneDirectory(m_dataDirectory)) {
+      Logger::getInstance()->log("Invalid data directory specified: '" + m_dataDirectory + "'", lsFatal);
+      sane = false;
+    }
+
+    if(!isSaneDirectory(m_configDirectory)) {
+      Logger::getInstance()->log("Invalid config directory specified: '" + m_configDirectory + "'", lsFatal);
+      sane = false;
+    }
+
+    if(!isSaneDirectory(m_webrootDirectory)) {
+      Logger::getInstance()->log("Invalid webroot directory specified: '" + m_webrootDirectory + "'", lsFatal);
+      sane = false;
+    }
+
+    if(!isSaneDirectory(m_jsLogDirectory)) {
+      Logger::getInstance()->log("Invalid js-log directory specified: '" + m_jsLogDirectory + "'", lsFatal);
+      sane = false;
+    }
+    return sane;
+  } // checkDirectoriesExist
 
 #ifdef WITH_TESTS
   void DSS::teardown() {

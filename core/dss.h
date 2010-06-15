@@ -103,6 +103,9 @@ namespace dss {
     void addDefaultInterpreterPlugins();
 
     int getUptime() const;
+    bool isSaneDirectory(const std::string& _path);
+    bool checkDirectoriesExist();
+    std::string addTrailingBackslash(const std::string& _path);
   public:
     ~DSS();
     bool initialize(const std::vector<std::string>& _properties, const std::string& _configFile);
