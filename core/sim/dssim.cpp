@@ -964,6 +964,32 @@ namespace dss {
                 distributeFrame(response);
               }
               break;
+            case FunctionDSMeterRemoveZone:
+              {
+                uint16_t zoneID = pd.get<uint16_t>();
+                response = createResponse(cmdFrame, cmdNr);
+                bool found;
+                for(std::map< const int, std::vector<DSIDInterface*> >::iterator iZoneEntry = m_Zones.begin(), e = m_Zones.end();
+                    iZoneEntry != e; ++iZoneEntry)
+                {
+                  if(iZoneEntry->first == zoneID) {
+                    if(iZoneEntry->second.empty()) {
+                      m_Zones.erase(iZoneEntry);
+                      response->getPayload().add<uint16_t>(1);
+                    } else {
+                      log("[DSMSim] Can't delete zone with id " + intToString(zoneID) + " as it still contains some devices.", lsError);
+                      response->getPayload().add<uint16_t>(static_cast<uint16_t>(-5));
+                    }
+                    found = true;
+                    break;
+                  }
+                }
+                if(!found) {
+                  response->getPayload().add<uint16_t>(static_cast<uint16_t>(-2));
+                }
+                distributeFrame(response);
+              }
+              break;
             case FunctionDeviceSetZoneID:
               {
                 devid_t devID = pd.get<devid_t>();
