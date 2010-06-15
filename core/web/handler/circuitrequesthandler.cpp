@@ -40,11 +40,11 @@ namespace dss {
   boost::shared_ptr<JSONObject> CircuitRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::string idString = _request.getParameter("id");
     if(idString.empty()) {
-      return failure("missing parameter id");
+      return failure("Missing parameter id");
     }
     dsid_t dsid = dsid_t::fromString(idString);
     if(dsid == NullDSID) {
-      return failure("could not parse dsid");
+      return failure("Could not parse dsid");
     }
     try {
       DSMeter& dsMeter = m_Apartment.getDSMeterByDSID(dsid);
@@ -67,7 +67,7 @@ namespace dss {
         return success(resultObj);
       } else if(_request.getMethod() == "getEnergyMeterValue") {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        resultObj->addProperty("metervalue", dsMeter.getEnergyMeterValue());
+        resultObj->addProperty("meterValue", dsMeter.getEnergyMeterValue());
         return success(resultObj);
       } else if(_request.getMethod() == "rescan") {
         dsMeter.setIsValid(false);
@@ -76,7 +76,7 @@ namespace dss {
         throw std::runtime_error("Unhandled function");
       }
     } catch(std::runtime_error&) {
-      return failure("could not find dsMeter with given dsid");
+      return failure("Could not find dSMeter with given dsid");
     }
   } // handleRequest
 

@@ -84,7 +84,7 @@ var Apartment = Class.create({
 			self.zones.push(zoneObj);
 			zone.devices.each(function(device) {
 			var deviceObj = new Device(device.id, device.name);
-				deviceObj.fid = device.fid;
+				deviceObj.fid = device.functionID;
 				deviceObj.busID = device.busID;
 				deviceObj.circuitID = device.circuitID;
 				zoneObj.devices.push(deviceObj);
@@ -127,21 +127,21 @@ var Apartment = Class.create({
 		this.sendRequest("turnOff", this.getParameterForDeviceCall(_group));
 	},
 	
-	callScene: function(_sceneNr, _group) {
+	callScene: function(_sceneNumber, _group) {
 		var parameter = this.getParameterForDeviceCall(_group);
-		parameter['sceneNr'] = _sceneNr;
+		parameter['sceneNumber'] = _sceneNumber;
 		this.sendRequest("callScene", parameter);
 	},
 	
-	saveScene: function(_sceneNr, _group) {
+	saveScene: function(_sceneNumber, _group) {
 		var parameter = this.getParameterForDeviceCall(_group);
-		parameter['sceneNr'] = _sceneNr;
+		parameter['sceneNumber'] = _sceneNumber;
 		this.sendRequest("saveScene", parameter);
 	},
 	
-	undoScene: function(_sceneNr, _group) {
+	undoScene: function(_sceneNumber, _group) {
 		var parameter = this.getParameterForDeviceCall(_group);
-		parameter['sceneNr'] = _sceneNr;
+		parameter['sceneNumber'] = _sceneNumber;
 		this.sendRequest("undoScene", parameter);
 	},
 	increaseValue: function(_group) {
@@ -229,21 +229,21 @@ var Zone = Class.create({
     this.sendRequest("turnOff", this.getParameterForDeviceCall(_group));
   },
 
-  callScene: function(_sceneNr, _group) {
+  callScene: function(_sceneNumber, _group) {
     var parameter = this.getParameterForDeviceCall(_group);
-    parameter['sceneNr'] = _sceneNr;
+    parameter['sceneNumber'] = _sceneNumber;
     this.sendRequest("callScene", parameter);
   },
 
-  saveScene: function(_sceneNr, _group) {
+  saveScene: function(_sceneNumber, _group) {
     var parameter = this.getParameterForDeviceCall(_group);
-    parameter['sceneNr'] = _sceneNr;
+    parameter['sceneNumber'] = _sceneNumber;
     this.sendRequest("saveScene", parameter);
   },
 
-  undoScene: function(_sceneNr, _group) {
+  undoScene: function(_sceneNumber, _group) {
     var parameter = this.getParameterForDeviceCall(_group);
-    parameter['sceneNr'] = _sceneNr;
+    parameter['sceneNumber'] = _sceneNumber;
     this.sendRequest("undoScene", parameter);
   },
 
@@ -336,21 +336,21 @@ var Device = Class.create({
     this.sendRequest("turnOff", this.getParameterForDeviceCall());
   },
 
-  callScene: function(_sceneNr) {
+  callScene: function(_sceneNumber) {
     var parameter = this.getParameterForDeviceCall();
-    parameter['sceneNr'] = _sceneNr;
+    parameter['sceneNumber'] = _sceneNumber;
     this.sendRequest("callScene", parameter);
   },
 
-  saveScene: function(_sceneNr) {
+  saveScene: function(_sceneNumber) {
     var parameter = this.getParameterForDeviceCall();
-    parameter['sceneNr'] = _sceneNr;
+    parameter['sceneNumber'] = _sceneNumber;
     this.sendRequest("saveScene", parameter);
   },
 
-  undoScene: function(_sceneNr) {
+  undoScene: function(_sceneNumber) {
     var parameter = this.getParameterForDeviceCall();
-    parameter['sceneNr'] = _sceneNr;
+    parameter['sceneNumber'] = _sceneNumber;
     this.sendRequest("undoScene", parameter);
   },
 
@@ -471,21 +471,21 @@ var Set = Class.create({
     this.sendRequest("turnOff", this.getParameterForSetCall());
   },
 
-  callScene: function(_sceneNr) {
+  callScene: function(_sceneNumber) {
     var parameter = this.getParameterForSetCall();
-    parameter['sceneNr'] = _sceneNr;
+    parameter['sceneNumber'] = _sceneNumber;
     this.sendRequest("callScene", parameter);
   },
 
-  saveScene: function(_sceneNr) {
+  saveScene: function(_sceneNumber) {
     var parameter = this.getParameterForSetCall();
-    parameter['sceneNr'] = _sceneNr;
+    parameter['sceneNumber'] = _sceneNumber;
     this.sendRequest("saveScene", parameter);
   },
 
-  undoScene: function(_sceneNr) {
+  undoScene: function(_sceneNumber) {
     var parameter = this.getParameterForSetCall();
-    parameter['sceneNr'] = _sceneNr;
+    parameter['sceneNumber'] = _sceneNumber;
     this.sendRequest("undoScene", parameter);
   },
 

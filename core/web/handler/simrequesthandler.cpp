@@ -40,7 +40,7 @@ namespace dss {
   boost::shared_ptr<JSONObject> SimRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(beginsWith(_request.getMethod(), "switch")) {
       if(_request.getMethod() == "switch/pressed") {
-        int buttonNr = strToIntDef(_request.getParameter("buttonnr"), -1);
+        int buttonNr = strToIntDef(_request.getParameter("buttonNumber"), -1);
         if(buttonNr == -1) {
           return failure("Invalid button number");
         }
@@ -109,7 +109,7 @@ namespace dss {
       //std::string type = _parameter["type"];
       //std::string dsidStr = _parameter["dsid"];
       // TODO: not finished yet ;)
-      return failure("not yet implemented");
+      return failure("Not yet implemented");
     }
     throw std::runtime_error("Unhandled function");
   } // handleRequest

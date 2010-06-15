@@ -40,9 +40,9 @@ namespace dss {
     result->addProperty("id", _device.getDSID().toString());
     result->addProperty("isSwitch", _device.hasSwitch());
     result->addProperty("name", _device.getName());
-    result->addProperty("fid", _device.getFunctionID());
-    result->addProperty("productrev", _device.getDevice().getRevisionID());
-    result->addProperty("productid", _device.getDevice().getProductID());
+    result->addProperty("functionID", _device.getFunctionID());
+    result->addProperty("productRevision", _device.getDevice().getRevisionID());
+    result->addProperty("productID", _device.getDevice().getProductID());
     result->addProperty("circuitID", _device.getDevice().getDSMeterID());
     result->addProperty("busID", _device.getDevice().getShortAddress());
     result->addProperty("isPresent", _device.getDevice().isPresent());
