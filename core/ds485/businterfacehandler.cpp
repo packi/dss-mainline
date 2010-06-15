@@ -61,22 +61,7 @@ namespace dss {
           m_IncomingFrames.erase(m_IncomingFrames.begin());
           m_IncomingFramesGuard.unlock();
 
-          std::ostringstream sstream;
-          sstream << "RX DEST:";
-          sstream << "0x" << std::hex << std::uppercase << int(frame->getHeader().getDestination());
-          sstream << " SRC:";
-          sstream << "0x" << std::hex << std::uppercase << int(frame->getHeader().getSource());
-
-          PayloadDissector pdDump(frame->getPayload());
-          uint8_t cmd = pdDump.get<uint8_t>();
-          sstream << ", CMD:0x" << std::hex << std::uppercase << (unsigned int)cmd << ",";
-          int iParameter=1;
-          while(!pdDump.isEmpty()) {
-            uint16_t data = pdDump.get<uint16_t>();
-            sstream << " P" << iParameter++ << ":0x" << std::hex << std::uppercase << data;
-          }
-          sstream << std::dec;
-          log(sstream.str());
+          dumpFrame(frame);
 
           if(frame->getPayload().size() < 1) {
             log("received Command Frame w/o function identifier", lsFatal);
@@ -268,17 +253,27 @@ namespace dss {
     }
     sstream << functionIDStr << " from " << int(_pFrame->getHeader().getSource()) << " ";
     if(_pFrame->getFrameSource() == fsWire) {
-      sstream << "(wire) ";
+      sstream << "(wire)";
     } else {
-      sstream << "(dss ) ";
+      sstream << "(dss)";
     }
+    log(sstream.str());
+
+    sstream.str("");
+
+    sstream << "RX DEST:";
+    sstream << "0x" << std::hex << std::uppercase << int(_pFrame->getHeader().getDestination());
+    sstream << " SRC:";
+    sstream << "0x" << std::hex << std::uppercase << int(_pFrame->getHeader().getSource());
+
     PayloadDissector pdDump(_pFrame->getPayload());
-    pdDump.get<uint8_t>();
-    while (!pdDump.isEmpty()) {
+    uint8_t cmd = pdDump.get<uint8_t>();
+    sstream << ", CMD:0x" << std::hex << std::uppercase << (unsigned int)cmd << ",";
+    int iParameter=1;
+    while(!pdDump.isEmpty()) {
       uint16_t data = pdDump.get<uint16_t>();
-      sstream << "0x" << std::hex << std::uppercase << (unsigned int) data << " ";
+      sstream << " P" << iParameter++ << ":0x" << std::hex << std::uppercase << data;
     }
-    sstream << std::dec;
     log(sstream.str());
   } // dumpFrame
 
