@@ -270,6 +270,14 @@ namespace dss {
     return result;
   }
 
+  std::string addTrailingBackslash(const std::string& _path) {
+    if(!_path.empty() && (_path.at(_path.length() - 1) != '/')) {
+      return _path+ "/";
+    }
+    return _path;
+  } // addTrailingBackslash
+
+
   //================================================== Properties
 
   bool Properties::has(const std::string& _key) const {

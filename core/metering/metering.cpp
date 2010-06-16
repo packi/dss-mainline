@@ -22,6 +22,8 @@
 
 #include "metering.h"
 
+#include <boost/filesystem.hpp>
+
 #include "core/dss.h"
 #include "core/logger.h"
 #include "core/DS485Interface.h"
@@ -69,6 +71,11 @@ namespace dss {
 
   void Metering::doStart() {
     m_MeteringStorageLocation = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "storageLocation");
+    m_MeteringStorageLocation = addTrailingBackslash(m_MeteringStorageLocation);
+    if(!boost::filesystem::is_directory(m_MeteringStorageLocation)) {
+      log("Metering directory (" + m_MeteringStorageLocation + ") does not seem exist, aborting...", lsFatal);
+      abort();
+    }
     log("Writing files to: " + m_MeteringStorageLocation);
     run();
   } // start

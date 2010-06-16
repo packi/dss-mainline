@@ -131,6 +131,7 @@ namespace dss {
   void sleepSeconds( const unsigned int _seconds );
   void sleepMS( const unsigned int _ms );
 
+  std::string addTrailingBackslash(const std::string& _path);
   std::string getTempDir();
 
   //============================================= Exception

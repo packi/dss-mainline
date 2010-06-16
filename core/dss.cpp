@@ -147,13 +147,6 @@ const char* JSLogDirectory = "data/logs/";
     return boost::filesystem::is_directory(_path);
   } // isSaneDirectory
 
-  std::string DSS::addTrailingBackslash(const std::string& _path) {
-    if(!_path.empty() && (_path.at(_path.length() - 1) != '/')) {
-      return _path+ "/";
-    }
-    return _path;
-  } // addTrailingBackslash
-
   void DSS::setDataDirectory(const std::string& _value) {
     m_dataDirectory = addTrailingBackslash(_value);
   } // setDataDirectory
