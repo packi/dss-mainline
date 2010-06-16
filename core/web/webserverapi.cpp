@@ -241,6 +241,10 @@ namespace dss {
       .withDocumentation("Returns hasTag: true if tagged 'tag'");
     clsDevice.addMethod("getTags")
       .withDocumentation("Returns an array of all tags of the device");
+    clsDevice.addMethod("lock")
+      .withDocumentation("Tells the dSM to never forget this device even if it's not found on the bus.");
+    clsDevice.addMethod("unlock")
+      .withDocumentation("Tells the dSM to that it's okay forget this device.");
 
     RestfulClass& clsCircuit = api->addClass("circuit")
        .withInstanceParameter("id", "dsid", true);

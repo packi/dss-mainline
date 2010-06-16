@@ -1053,6 +1053,24 @@ namespace dss {
                 boost::thread(boost::bind(&DSDSMeterSim::sendDelayedResponse, this, response, rand() % 2000));
               }
               break;
+            case FunctionDeviceLock:
+              {
+                devid_t devID = pd.get<devid_t>();
+                response = createResponse(cmdFrame, cmdNr);
+                DSIDInterface& simDev = lookupDevice(devID);
+                response->getPayload().add<uint16_t>(1);
+
+                int action = pd.get<uint16_t>();
+                if(action == 2) {
+                  bool locked = simDev.isLocked();
+                  response->getPayload().add<uint16_t>(locked ? 1 : 0);
+                } else {
+                  bool doLock = pd.get<uint16_t>() == 1;
+                  simDev.setIsLocked(doLock);
+                }
+                distributeFrame(response);
+              }
+              break;
             default:
               Logger::getInstance()->log("Invalid function id for sim: " + intToString(cmdNr), lsError);
           }

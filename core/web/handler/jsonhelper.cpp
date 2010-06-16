@@ -49,6 +49,7 @@ namespace dss {
     result->addProperty("lastDiscovered", _device.getDevice().getLastDiscovered());
     result->addProperty("firstSeen", _device.getDevice().getFirstSeen());
     result->addProperty("on", _device.getDevice().isOn());
+    result->addProperty("locked", _device.getDevice().getIsLockedInDSM());
     return result;
   } // toJSON(DeviceReference)
 

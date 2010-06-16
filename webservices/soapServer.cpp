@@ -6,7 +6,7 @@
 */
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2010-06-07 14:08:59 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.10 2010-06-16 12:25:54 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -207,6 +207,12 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__DeviceHasTag(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetTags"))
 		return soap_serve_dss__DeviceGetTags(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceLock"))
+		return soap_serve_dss__DeviceLock(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceUnlock"))
+		return soap_serve_dss__DeviceUnlock(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetIsLocked"))
+		return soap_serve_dss__DeviceGetIsLocked(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DSMeterGetPowerConsumption"))
 		return soap_serve_dss__DSMeterGetPowerConsumption(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentGetDSMeterIDs"))
@@ -3000,6 +3006,129 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetTags(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__DeviceGetTagsResponse(soap, &soap_tmp_dss__DeviceGetTagsResponse, "dss:DeviceGetTagsResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceLock(struct soap *soap)
+{	struct dss__DeviceLock soap_tmp_dss__DeviceLock;
+	struct dss__DeviceLockResponse soap_tmp_dss__DeviceLockResponse;
+	soap_default_dss__DeviceLockResponse(soap, &soap_tmp_dss__DeviceLockResponse);
+	soap_default_dss__DeviceLock(soap, &soap_tmp_dss__DeviceLock);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DeviceLock(soap, &soap_tmp_dss__DeviceLock, "dss:DeviceLock", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DeviceLock(soap, soap_tmp_dss__DeviceLock._token, soap_tmp_dss__DeviceLock._deviceID, soap_tmp_dss__DeviceLockResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DeviceLockResponse(soap, &soap_tmp_dss__DeviceLockResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DeviceLockResponse(soap, &soap_tmp_dss__DeviceLockResponse, "dss:DeviceLockResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DeviceLockResponse(soap, &soap_tmp_dss__DeviceLockResponse, "dss:DeviceLockResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceUnlock(struct soap *soap)
+{	struct dss__DeviceUnlock soap_tmp_dss__DeviceUnlock;
+	struct dss__DeviceUnlockResponse soap_tmp_dss__DeviceUnlockResponse;
+	soap_default_dss__DeviceUnlockResponse(soap, &soap_tmp_dss__DeviceUnlockResponse);
+	soap_default_dss__DeviceUnlock(soap, &soap_tmp_dss__DeviceUnlock);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DeviceUnlock(soap, &soap_tmp_dss__DeviceUnlock, "dss:DeviceUnlock", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DeviceUnlock(soap, soap_tmp_dss__DeviceUnlock._token, soap_tmp_dss__DeviceUnlock._deviceID, soap_tmp_dss__DeviceUnlockResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DeviceUnlockResponse(soap, &soap_tmp_dss__DeviceUnlockResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DeviceUnlockResponse(soap, &soap_tmp_dss__DeviceUnlockResponse, "dss:DeviceUnlockResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DeviceUnlockResponse(soap, &soap_tmp_dss__DeviceUnlockResponse, "dss:DeviceUnlockResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetIsLocked(struct soap *soap)
+{	struct dss__DeviceGetIsLocked soap_tmp_dss__DeviceGetIsLocked;
+	struct dss__DeviceGetIsLockedResponse soap_tmp_dss__DeviceGetIsLockedResponse;
+	soap_default_dss__DeviceGetIsLockedResponse(soap, &soap_tmp_dss__DeviceGetIsLockedResponse);
+	soap_default_dss__DeviceGetIsLocked(soap, &soap_tmp_dss__DeviceGetIsLocked);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DeviceGetIsLocked(soap, &soap_tmp_dss__DeviceGetIsLocked, "dss:DeviceGetIsLocked", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DeviceGetIsLocked(soap, soap_tmp_dss__DeviceGetIsLocked._token, soap_tmp_dss__DeviceGetIsLocked._deviceID, soap_tmp_dss__DeviceGetIsLockedResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DeviceGetIsLockedResponse(soap, &soap_tmp_dss__DeviceGetIsLockedResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DeviceGetIsLockedResponse(soap, &soap_tmp_dss__DeviceGetIsLockedResponse, "dss:DeviceGetIsLockedResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DeviceGetIsLockedResponse(soap, &soap_tmp_dss__DeviceGetIsLockedResponse, "dss:DeviceGetIsLockedResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

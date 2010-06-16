@@ -178,6 +178,12 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceHasTag(struct soap*, int _token, char *_dev
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetTags(struct soap*, int _token, char *_deviceID, std::vector<std::string >&result);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceLock(struct soap*, int _token, char *_deviceID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceUnlock(struct soap*, int _token, char *_deviceID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetIsLocked(struct soap*, int _token, char *_deviceID, bool &result);
+
 SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterGetPowerConsumption(struct soap*, int _token, int _dsMeterID, unsigned long &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetDSMeterIDs(struct soap*, int _token, std::vector<std::string >&ids);

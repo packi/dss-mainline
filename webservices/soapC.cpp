@@ -7,7 +7,7 @@
 
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2010-06-07 14:08:59 GMT")
+SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2010-06-16 12:25:54 GMT")
 
 
 #ifndef WITH_NOGLOBAL
@@ -273,6 +273,18 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_dss__DSMeterGetPowerConsumption(soap, NULL, NULL, "dss:DSMeterGetPowerConsumption");
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse:
 		return soap_in_dss__DSMeterGetPowerConsumptionResponse(soap, NULL, NULL, "dss:DSMeterGetPowerConsumptionResponse");
+	case SOAP_TYPE_dss__DeviceGetIsLocked:
+		return soap_in_dss__DeviceGetIsLocked(soap, NULL, NULL, "dss:DeviceGetIsLocked");
+	case SOAP_TYPE_dss__DeviceGetIsLockedResponse:
+		return soap_in_dss__DeviceGetIsLockedResponse(soap, NULL, NULL, "dss:DeviceGetIsLockedResponse");
+	case SOAP_TYPE_dss__DeviceUnlock:
+		return soap_in_dss__DeviceUnlock(soap, NULL, NULL, "dss:DeviceUnlock");
+	case SOAP_TYPE_dss__DeviceUnlockResponse:
+		return soap_in_dss__DeviceUnlockResponse(soap, NULL, NULL, "dss:DeviceUnlockResponse");
+	case SOAP_TYPE_dss__DeviceLock:
+		return soap_in_dss__DeviceLock(soap, NULL, NULL, "dss:DeviceLock");
+	case SOAP_TYPE_dss__DeviceLockResponse:
+		return soap_in_dss__DeviceLockResponse(soap, NULL, NULL, "dss:DeviceLockResponse");
 	case SOAP_TYPE_dss__DeviceGetTags:
 		return soap_in_dss__DeviceGetTags(soap, NULL, NULL, "dss:DeviceGetTags");
 	case SOAP_TYPE_dss__DeviceGetTagsResponse:
@@ -787,6 +799,30 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		if (!soap_match_tag(soap, t, "dss:DSMeterGetPowerConsumptionResponse"))
 		{	*type = SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse;
 			return soap_in_dss__DSMeterGetPowerConsumptionResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:DeviceGetIsLocked"))
+		{	*type = SOAP_TYPE_dss__DeviceGetIsLocked;
+			return soap_in_dss__DeviceGetIsLocked(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:DeviceGetIsLockedResponse"))
+		{	*type = SOAP_TYPE_dss__DeviceGetIsLockedResponse;
+			return soap_in_dss__DeviceGetIsLockedResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:DeviceUnlock"))
+		{	*type = SOAP_TYPE_dss__DeviceUnlock;
+			return soap_in_dss__DeviceUnlock(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:DeviceUnlockResponse"))
+		{	*type = SOAP_TYPE_dss__DeviceUnlockResponse;
+			return soap_in_dss__DeviceUnlockResponse(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:DeviceLock"))
+		{	*type = SOAP_TYPE_dss__DeviceLock;
+			return soap_in_dss__DeviceLock(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "dss:DeviceLockResponse"))
+		{	*type = SOAP_TYPE_dss__DeviceLockResponse;
+			return soap_in_dss__DeviceLockResponse(soap, NULL, NULL, NULL);
 		}
 		if (!soap_match_tag(soap, t, "dss:DeviceGetTags"))
 		{	*type = SOAP_TYPE_dss__DeviceGetTags;
@@ -1520,6 +1556,18 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_dss__DSMeterGetPowerConsumption(soap, tag, id, (const struct dss__DSMeterGetPowerConsumption *)ptr, "dss:DSMeterGetPowerConsumption");
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse:
 		return soap_out_dss__DSMeterGetPowerConsumptionResponse(soap, tag, id, (const struct dss__DSMeterGetPowerConsumptionResponse *)ptr, "dss:DSMeterGetPowerConsumptionResponse");
+	case SOAP_TYPE_dss__DeviceGetIsLocked:
+		return soap_out_dss__DeviceGetIsLocked(soap, tag, id, (const struct dss__DeviceGetIsLocked *)ptr, "dss:DeviceGetIsLocked");
+	case SOAP_TYPE_dss__DeviceGetIsLockedResponse:
+		return soap_out_dss__DeviceGetIsLockedResponse(soap, tag, id, (const struct dss__DeviceGetIsLockedResponse *)ptr, "dss:DeviceGetIsLockedResponse");
+	case SOAP_TYPE_dss__DeviceUnlock:
+		return soap_out_dss__DeviceUnlock(soap, tag, id, (const struct dss__DeviceUnlock *)ptr, "dss:DeviceUnlock");
+	case SOAP_TYPE_dss__DeviceUnlockResponse:
+		return soap_out_dss__DeviceUnlockResponse(soap, tag, id, (const struct dss__DeviceUnlockResponse *)ptr, "dss:DeviceUnlockResponse");
+	case SOAP_TYPE_dss__DeviceLock:
+		return soap_out_dss__DeviceLock(soap, tag, id, (const struct dss__DeviceLock *)ptr, "dss:DeviceLock");
+	case SOAP_TYPE_dss__DeviceLockResponse:
+		return soap_out_dss__DeviceLockResponse(soap, tag, id, (const struct dss__DeviceLockResponse *)ptr, "dss:DeviceLockResponse");
 	case SOAP_TYPE_dss__DeviceGetTags:
 		return soap_out_dss__DeviceGetTags(soap, tag, id, (const struct dss__DeviceGetTags *)ptr, "dss:DeviceGetTags");
 	case SOAP_TYPE_dss__DeviceGetTagsResponse:
@@ -1956,6 +2004,24 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 		break;
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse:
 		soap_serialize_dss__DSMeterGetPowerConsumptionResponse(soap, (const struct dss__DSMeterGetPowerConsumptionResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__DeviceGetIsLocked:
+		soap_serialize_dss__DeviceGetIsLocked(soap, (const struct dss__DeviceGetIsLocked *)ptr);
+		break;
+	case SOAP_TYPE_dss__DeviceGetIsLockedResponse:
+		soap_serialize_dss__DeviceGetIsLockedResponse(soap, (const struct dss__DeviceGetIsLockedResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__DeviceUnlock:
+		soap_serialize_dss__DeviceUnlock(soap, (const struct dss__DeviceUnlock *)ptr);
+		break;
+	case SOAP_TYPE_dss__DeviceUnlockResponse:
+		soap_serialize_dss__DeviceUnlockResponse(soap, (const struct dss__DeviceUnlockResponse *)ptr);
+		break;
+	case SOAP_TYPE_dss__DeviceLock:
+		soap_serialize_dss__DeviceLock(soap, (const struct dss__DeviceLock *)ptr);
+		break;
+	case SOAP_TYPE_dss__DeviceLockResponse:
+		soap_serialize_dss__DeviceLockResponse(soap, (const struct dss__DeviceLockResponse *)ptr);
 		break;
 	case SOAP_TYPE_dss__DeviceGetTags:
 		soap_serialize_dss__DeviceGetTags(soap, (const struct dss__DeviceGetTags *)ptr);
@@ -2650,6 +2716,18 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_dss__DeviceGetTagsResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__DeviceGetTags:
 		return (void*)soap_instantiate_dss__DeviceGetTags(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__DeviceLockResponse:
+		return (void*)soap_instantiate_dss__DeviceLockResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__DeviceLock:
+		return (void*)soap_instantiate_dss__DeviceLock(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__DeviceUnlockResponse:
+		return (void*)soap_instantiate_dss__DeviceUnlockResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__DeviceUnlock:
+		return (void*)soap_instantiate_dss__DeviceUnlock(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__DeviceGetIsLockedResponse:
+		return (void*)soap_instantiate_dss__DeviceGetIsLockedResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_dss__DeviceGetIsLocked:
+		return (void*)soap_instantiate_dss__DeviceGetIsLocked(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse:
 		return (void*)soap_instantiate_dss__DSMeterGetPowerConsumptionResponse(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumption:
@@ -3586,6 +3664,42 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 			delete (struct dss__DeviceGetTags*)p->ptr;
 		else
 			delete[] (struct dss__DeviceGetTags*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__DeviceLockResponse:
+		if (p->size < 0)
+			delete (struct dss__DeviceLockResponse*)p->ptr;
+		else
+			delete[] (struct dss__DeviceLockResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__DeviceLock:
+		if (p->size < 0)
+			delete (struct dss__DeviceLock*)p->ptr;
+		else
+			delete[] (struct dss__DeviceLock*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__DeviceUnlockResponse:
+		if (p->size < 0)
+			delete (struct dss__DeviceUnlockResponse*)p->ptr;
+		else
+			delete[] (struct dss__DeviceUnlockResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__DeviceUnlock:
+		if (p->size < 0)
+			delete (struct dss__DeviceUnlock*)p->ptr;
+		else
+			delete[] (struct dss__DeviceUnlock*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__DeviceGetIsLockedResponse:
+		if (p->size < 0)
+			delete (struct dss__DeviceGetIsLockedResponse*)p->ptr;
+		else
+			delete[] (struct dss__DeviceGetIsLockedResponse*)p->ptr;
+		break;
+	case SOAP_TYPE_dss__DeviceGetIsLocked:
+		if (p->size < 0)
+			delete (struct dss__DeviceGetIsLocked*)p->ptr;
+		else
+			delete[] (struct dss__DeviceGetIsLocked*)p->ptr;
 		break;
 	case SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse:
 		if (p->size < 0)
@@ -4563,7 +4677,7 @@ SOAP_FMAC1 std::string * SOAP_FMAC2 soap_in_std__string(struct soap *soap, const
 				s->assign(t);
 			else
 				return NULL;
-		}
+    }
 	}
 	else
 		s = (std::string*)soap_id_forward(soap, soap->href, soap_class_id_enter(soap, soap->id, s, SOAP_TYPE_std__string, sizeof(std::string), soap->type, soap->arrayType), 0, SOAP_TYPE_std__string, 0, sizeof(std::string), 0, soap_copy_std__string);
@@ -10753,6 +10867,711 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DSMeterGetPowerConsumptionResponse(str
 {
 	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DSMeterGetPowerConsumptionResponse %p -> %p\n", q, p));
 	*(struct dss__DSMeterGetPowerConsumptionResponse*)p = *(struct dss__DSMeterGetPowerConsumptionResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceGetIsLocked(struct soap *soap, struct dss__DeviceGetIsLocked *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_string(soap, &a->_deviceID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceGetIsLocked(struct soap *soap, const struct dss__DeviceGetIsLocked *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_string(soap, &a->_deviceID);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceGetIsLocked(struct soap *soap, const struct dss__DeviceGetIsLocked *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__DeviceGetIsLocked);
+	if (soap_out_dss__DeviceGetIsLocked(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceGetIsLocked(struct soap *soap, const char *tag, int id, const struct dss__DeviceGetIsLocked *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__DeviceGetIsLocked), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_string(soap, "deviceID", -1, &a->_deviceID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__DeviceGetIsLocked * SOAP_FMAC4 soap_get_dss__DeviceGetIsLocked(struct soap *soap, struct dss__DeviceGetIsLocked *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__DeviceGetIsLocked(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__DeviceGetIsLocked * SOAP_FMAC4 soap_in_dss__DeviceGetIsLocked(struct soap *soap, const char *tag, struct dss__DeviceGetIsLocked *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__deviceID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__DeviceGetIsLocked *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DeviceGetIsLocked, sizeof(struct dss__DeviceGetIsLocked), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__DeviceGetIsLocked(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__deviceID && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_deviceID, "xsd:string"))
+				{	soap_flag__deviceID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__DeviceGetIsLocked *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__DeviceGetIsLocked, 0, sizeof(struct dss__DeviceGetIsLocked), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__DeviceGetIsLocked * SOAP_FMAC6 soap_new_dss__DeviceGetIsLocked(struct soap *soap, int n)
+{	return soap_instantiate_dss__DeviceGetIsLocked(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceGetIsLocked(struct soap *soap, struct dss__DeviceGetIsLocked *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__DeviceGetIsLocked * SOAP_FMAC4 soap_instantiate_dss__DeviceGetIsLocked(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__DeviceGetIsLocked(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__DeviceGetIsLocked, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__DeviceGetIsLocked;
+		if (size)
+			*size = sizeof(struct dss__DeviceGetIsLocked);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__DeviceGetIsLocked[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__DeviceGetIsLocked);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__DeviceGetIsLocked*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceGetIsLocked(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DeviceGetIsLocked %p -> %p\n", q, p));
+	*(struct dss__DeviceGetIsLocked*)p = *(struct dss__DeviceGetIsLocked*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceGetIsLockedResponse(struct soap *soap, struct dss__DeviceGetIsLockedResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceGetIsLockedResponse(struct soap *soap, const struct dss__DeviceGetIsLockedResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceGetIsLockedResponse(struct soap *soap, const struct dss__DeviceGetIsLockedResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__DeviceGetIsLockedResponse);
+	if (soap_out_dss__DeviceGetIsLockedResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceGetIsLockedResponse(struct soap *soap, const char *tag, int id, const struct dss__DeviceGetIsLockedResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__DeviceGetIsLockedResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__DeviceGetIsLockedResponse * SOAP_FMAC4 soap_get_dss__DeviceGetIsLockedResponse(struct soap *soap, struct dss__DeviceGetIsLockedResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__DeviceGetIsLockedResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__DeviceGetIsLockedResponse * SOAP_FMAC4 soap_in_dss__DeviceGetIsLockedResponse(struct soap *soap, const char *tag, struct dss__DeviceGetIsLockedResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__DeviceGetIsLockedResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DeviceGetIsLockedResponse, sizeof(struct dss__DeviceGetIsLockedResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__DeviceGetIsLockedResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__DeviceGetIsLockedResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__DeviceGetIsLockedResponse, 0, sizeof(struct dss__DeviceGetIsLockedResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__DeviceGetIsLockedResponse * SOAP_FMAC6 soap_new_dss__DeviceGetIsLockedResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__DeviceGetIsLockedResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceGetIsLockedResponse(struct soap *soap, struct dss__DeviceGetIsLockedResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__DeviceGetIsLockedResponse * SOAP_FMAC4 soap_instantiate_dss__DeviceGetIsLockedResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__DeviceGetIsLockedResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__DeviceGetIsLockedResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__DeviceGetIsLockedResponse;
+		if (size)
+			*size = sizeof(struct dss__DeviceGetIsLockedResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__DeviceGetIsLockedResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__DeviceGetIsLockedResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__DeviceGetIsLockedResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceGetIsLockedResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DeviceGetIsLockedResponse %p -> %p\n", q, p));
+	*(struct dss__DeviceGetIsLockedResponse*)p = *(struct dss__DeviceGetIsLockedResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceUnlock(struct soap *soap, struct dss__DeviceUnlock *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_string(soap, &a->_deviceID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceUnlock(struct soap *soap, const struct dss__DeviceUnlock *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_string(soap, &a->_deviceID);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceUnlock(struct soap *soap, const struct dss__DeviceUnlock *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__DeviceUnlock);
+	if (soap_out_dss__DeviceUnlock(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceUnlock(struct soap *soap, const char *tag, int id, const struct dss__DeviceUnlock *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__DeviceUnlock), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_string(soap, "deviceID", -1, &a->_deviceID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__DeviceUnlock * SOAP_FMAC4 soap_get_dss__DeviceUnlock(struct soap *soap, struct dss__DeviceUnlock *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__DeviceUnlock(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__DeviceUnlock * SOAP_FMAC4 soap_in_dss__DeviceUnlock(struct soap *soap, const char *tag, struct dss__DeviceUnlock *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__deviceID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__DeviceUnlock *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DeviceUnlock, sizeof(struct dss__DeviceUnlock), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__DeviceUnlock(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__deviceID && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_deviceID, "xsd:string"))
+				{	soap_flag__deviceID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__DeviceUnlock *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__DeviceUnlock, 0, sizeof(struct dss__DeviceUnlock), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__DeviceUnlock * SOAP_FMAC6 soap_new_dss__DeviceUnlock(struct soap *soap, int n)
+{	return soap_instantiate_dss__DeviceUnlock(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceUnlock(struct soap *soap, struct dss__DeviceUnlock *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__DeviceUnlock * SOAP_FMAC4 soap_instantiate_dss__DeviceUnlock(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__DeviceUnlock(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__DeviceUnlock, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__DeviceUnlock;
+		if (size)
+			*size = sizeof(struct dss__DeviceUnlock);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__DeviceUnlock[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__DeviceUnlock);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__DeviceUnlock*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceUnlock(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DeviceUnlock %p -> %p\n", q, p));
+	*(struct dss__DeviceUnlock*)p = *(struct dss__DeviceUnlock*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceUnlockResponse(struct soap *soap, struct dss__DeviceUnlockResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceUnlockResponse(struct soap *soap, const struct dss__DeviceUnlockResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceUnlockResponse(struct soap *soap, const struct dss__DeviceUnlockResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__DeviceUnlockResponse);
+	if (soap_out_dss__DeviceUnlockResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceUnlockResponse(struct soap *soap, const char *tag, int id, const struct dss__DeviceUnlockResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__DeviceUnlockResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__DeviceUnlockResponse * SOAP_FMAC4 soap_get_dss__DeviceUnlockResponse(struct soap *soap, struct dss__DeviceUnlockResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__DeviceUnlockResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__DeviceUnlockResponse * SOAP_FMAC4 soap_in_dss__DeviceUnlockResponse(struct soap *soap, const char *tag, struct dss__DeviceUnlockResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__DeviceUnlockResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DeviceUnlockResponse, sizeof(struct dss__DeviceUnlockResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__DeviceUnlockResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__DeviceUnlockResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__DeviceUnlockResponse, 0, sizeof(struct dss__DeviceUnlockResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__DeviceUnlockResponse * SOAP_FMAC6 soap_new_dss__DeviceUnlockResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__DeviceUnlockResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceUnlockResponse(struct soap *soap, struct dss__DeviceUnlockResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__DeviceUnlockResponse * SOAP_FMAC4 soap_instantiate_dss__DeviceUnlockResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__DeviceUnlockResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__DeviceUnlockResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__DeviceUnlockResponse;
+		if (size)
+			*size = sizeof(struct dss__DeviceUnlockResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__DeviceUnlockResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__DeviceUnlockResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__DeviceUnlockResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceUnlockResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DeviceUnlockResponse %p -> %p\n", q, p));
+	*(struct dss__DeviceUnlockResponse*)p = *(struct dss__DeviceUnlockResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceLock(struct soap *soap, struct dss__DeviceLock *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_int(soap, &a->_token);
+	soap_default_string(soap, &a->_deviceID);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceLock(struct soap *soap, const struct dss__DeviceLock *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_string(soap, &a->_deviceID);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceLock(struct soap *soap, const struct dss__DeviceLock *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__DeviceLock);
+	if (soap_out_dss__DeviceLock(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceLock(struct soap *soap, const char *tag, int id, const struct dss__DeviceLock *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__DeviceLock), type))
+		return soap->error;
+	if (soap_out_int(soap, "token", -1, &a->_token, ""))
+		return soap->error;
+	if (soap_out_string(soap, "deviceID", -1, &a->_deviceID, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__DeviceLock * SOAP_FMAC4 soap_get_dss__DeviceLock(struct soap *soap, struct dss__DeviceLock *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__DeviceLock(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__DeviceLock * SOAP_FMAC4 soap_in_dss__DeviceLock(struct soap *soap, const char *tag, struct dss__DeviceLock *a, const char *type)
+{
+	short soap_flag__token = 1, soap_flag__deviceID = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__DeviceLock *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DeviceLock, sizeof(struct dss__DeviceLock), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__DeviceLock(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag__token && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_int(soap, NULL, &a->_token, "xsd:int"))
+				{	soap_flag__token--;
+					continue;
+				}
+			if (soap_flag__deviceID && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, NULL, &a->_deviceID, "xsd:string"))
+				{	soap_flag__deviceID--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__DeviceLock *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__DeviceLock, 0, sizeof(struct dss__DeviceLock), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag__token > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__DeviceLock * SOAP_FMAC6 soap_new_dss__DeviceLock(struct soap *soap, int n)
+{	return soap_instantiate_dss__DeviceLock(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceLock(struct soap *soap, struct dss__DeviceLock *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__DeviceLock * SOAP_FMAC4 soap_instantiate_dss__DeviceLock(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__DeviceLock(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__DeviceLock, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__DeviceLock;
+		if (size)
+			*size = sizeof(struct dss__DeviceLock);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__DeviceLock[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__DeviceLock);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__DeviceLock*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceLock(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DeviceLock %p -> %p\n", q, p));
+	*(struct dss__DeviceLock*)p = *(struct dss__DeviceLock*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceLockResponse(struct soap *soap, struct dss__DeviceLockResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_bool(soap, &a->result);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceLockResponse(struct soap *soap, const struct dss__DeviceLockResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceLockResponse(struct soap *soap, const struct dss__DeviceLockResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_dss__DeviceLockResponse);
+	if (soap_out_dss__DeviceLockResponse(soap, tag, id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceLockResponse(struct soap *soap, const char *tag, int id, const struct dss__DeviceLockResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_dss__DeviceLockResponse), type))
+		return soap->error;
+	if (soap_out_bool(soap, "result", -1, &a->result, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct dss__DeviceLockResponse * SOAP_FMAC4 soap_get_dss__DeviceLockResponse(struct soap *soap, struct dss__DeviceLockResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_dss__DeviceLockResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC3 struct dss__DeviceLockResponse * SOAP_FMAC4 soap_in_dss__DeviceLockResponse(struct soap *soap, const char *tag, struct dss__DeviceLockResponse *a, const char *type)
+{
+	short soap_flag_result = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct dss__DeviceLockResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_dss__DeviceLockResponse, sizeof(struct dss__DeviceLockResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_dss__DeviceLockResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_result && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_bool(soap, "result", &a->result, "xsd:boolean"))
+				{	soap_flag_result--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct dss__DeviceLockResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_dss__DeviceLockResponse, 0, sizeof(struct dss__DeviceLockResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_result > 0))
+	{	soap->error = SOAP_OCCURS;
+		return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC5 struct dss__DeviceLockResponse * SOAP_FMAC6 soap_new_dss__DeviceLockResponse(struct soap *soap, int n)
+{	return soap_instantiate_dss__DeviceLockResponse(soap, n, NULL, NULL, NULL);
+}
+
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceLockResponse(struct soap *soap, struct dss__DeviceLockResponse *p)
+{	soap_delete(soap, p);
+}
+
+SOAP_FMAC3 struct dss__DeviceLockResponse * SOAP_FMAC4 soap_instantiate_dss__DeviceLockResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_dss__DeviceLockResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_dss__DeviceLockResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)new struct dss__DeviceLockResponse;
+		if (size)
+			*size = sizeof(struct dss__DeviceLockResponse);
+	}
+	else
+	{	cp->ptr = (void*)new struct dss__DeviceLockResponse[n];
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct dss__DeviceLockResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct dss__DeviceLockResponse*)cp->ptr;
+}
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceLockResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct dss__DeviceLockResponse %p -> %p\n", q, p));
+	*(struct dss__DeviceLockResponse*)p = *(struct dss__DeviceLockResponse*)q;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceGetTags(struct soap *soap, struct dss__DeviceGetTags *a)
