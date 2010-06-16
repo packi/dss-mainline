@@ -163,9 +163,11 @@ namespace dss {
     devid_t m_ShortAddress;
     const DSDSMeterSim& m_Simulator;
     int m_ZoneID;
+    bool m_IsLocked;
   public:
     DSIDInterface(const DSDSMeterSim& _simulator, dsid_t _dsid, devid_t _shortAddress)
-    : m_DSID(_dsid), m_ShortAddress(_shortAddress), m_Simulator(_simulator) {}
+    : m_DSID(_dsid), m_ShortAddress(_shortAddress), m_Simulator(_simulator),
+      m_IsLocked(false) {}
 
     virtual ~DSIDInterface() {}
 
@@ -213,6 +215,9 @@ namespace dss {
     void dSLinkInterrupt() {
       m_Simulator.dSLinkInterrupt(m_ShortAddress);
     }
+
+    bool isLocked() const { return m_IsLocked; }
+    void setIsLocked(const bool _value) { m_IsLocked = _value; }
   }; // DSIDInterface
 
 
