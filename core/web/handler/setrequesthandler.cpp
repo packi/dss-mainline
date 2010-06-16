@@ -46,7 +46,7 @@ namespace dss {
     } else {
       std::string self = trim(_request.getParameter("self"));
       if(self.empty()) {
-        return failure("missing parameter 'self'");
+        return failure("Missing parameter 'self'");
       }
 
       if(_request.getMethod() == "byZone") {
@@ -59,7 +59,7 @@ namespace dss {
         } else if(!_request.getParameter("zoneName").empty()) {
           additionalPart += _request.getParameter("zoneName");
         } else {
-          return failure("missing either zoneID or zoneName");
+          return failure("Missing either zoneID or zoneName");
         }
 
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
@@ -75,7 +75,7 @@ namespace dss {
         } else if(!_request.getParameter("groupName").empty()) {
           additionalPart += _request.getParameter("groupName");
         } else {
-          return failure("missing either groupID or groupName");
+          return failure("Missing either groupID or groupName");
         }
 
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
@@ -89,7 +89,7 @@ namespace dss {
         if(!_request.getParameter("dsid").empty()) {
           additionalPart += "dsid(" + _request.getParameter("dsid") + ")";
         } else {
-          return failure("missing parameter dsid");
+          return failure("Missing parameter dsid");
         }
 
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
@@ -102,7 +102,7 @@ namespace dss {
       } else if(_request.getMethod() == "add") {
         std::string other = _request.getParameter("other");
         if(other.empty()) {
-          return failure("missing parameter other");
+          return failure("Missing parameter other");
         }
         std::string additionalPart;
         if(self != ".") {
@@ -116,7 +116,7 @@ namespace dss {
       } else if(_request.getMethod() == "subtract") {
         std::string other = _request.getParameter("other");
         if(other.empty()) {
-          return failure("missing parameter other");
+          return failure("Missing parameter other");
         }
         std::string additionalPart;
         if(self != ".") {

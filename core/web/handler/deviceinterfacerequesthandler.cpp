@@ -61,36 +61,36 @@ namespace dss {
       std::string valueStr = _request.getParameter("value");
       int value = strToIntDef(valueStr, -1);
       if(value == -1) {
-        return failure("invalid or missing parameter value: '" + valueStr + "'");
+        return failure("Invalid or missing parameter value: '" + valueStr + "'");
       } else {
         _interface->setValue(value);
       }
       return success();
     } else if(_request.getMethod() == "callScene") {
-      std::string sceneStr = _request.getParameter("sceneNr");
+      std::string sceneStr = _request.getParameter("sceneNumber");
       int sceneID = strToIntDef(sceneStr, -1);
       if(sceneID != -1) {
         _interface->callScene(sceneID);
       } else {
-        return failure("invalid sceneNr: '" + sceneStr + "'");
+        return failure("Invalid sceneNumber: '" + sceneStr + "'");
       }
       return success();
     } else if(_request.getMethod() == "saveScene") {
-      std::string sceneStr = _request.getParameter("sceneNr");
+      std::string sceneStr = _request.getParameter("sceneNumber");
       int sceneID = strToIntDef(sceneStr, -1);
       if(sceneID != -1) {
         _interface->saveScene(sceneID);
       } else {
-        return failure("invalid sceneNr: '" + sceneStr + "'");
+        return failure("Invalid sceneNumber: '" + sceneStr + "'");
       }
       return success();
     } else if(_request.getMethod() == "undoScene") {
-      std::string sceneStr = _request.getParameter("sceneNr");
+      std::string sceneStr = _request.getParameter("sceneNumber");
       int sceneID = strToIntDef(sceneStr, -1);
       if(sceneID != -1) {
         _interface->undoScene(sceneID);
       } else {
-        return failure("invalid sceneNr: '" + sceneStr + "'");
+        return failure("Invalid sceneNumber: '" + sceneStr + "'");
       }
       return success();
     } else if(_request.getMethod() == "getConsumption") {

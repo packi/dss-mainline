@@ -76,24 +76,24 @@ namespace dss {
     clsApartment.addMethod("callScene")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Calls the scene sceneNr on all devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
+      .withParameter("sceneNumber", "integer", true)
+      .withDocumentation("Calls the scene sceneNumber on all devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("saveScene")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Saves the current output value to sceneNr.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
+      .withParameter("sceneNumber", "integer", true)
+      .withDocumentation("Saves the current output value to sceneNumber.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("undoScene")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Undos setting the value of sceneNr.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
+      .withParameter("sceneNumber", "integer", true)
+      .withDocumentation("Undos setting the value of sceneNumber.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("getConsumption")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
       .withDocumentation("Returns the consumption of all devices in the apartment in mW.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("getStructure")
-      .withParameter("sceneNr", "integer", true)
+      .withParameter("sceneNumber", "integer", true)
       .withDocumentation("Returns an object containing the structure of the apartment.");
     clsApartment.addMethod("getDevices")
       .withParameter("unassigned", "boolean", false)
@@ -162,17 +162,17 @@ namespace dss {
     clsZone.addMethod("callScene")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Sets the scene sceneNr on all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
+      .withParameter("sceneNumber", "integer", true)
+      .withDocumentation("Sets the scene sceneNumber on all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("saveScene")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Saves the current output value to sceneNr of all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
+      .withParameter("sceneNumber", "integer", true)
+      .withDocumentation("Saves the current output value to sceneNumber of all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("undoScene")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
-      .withParameter("sceneNr", "integer", true)
+      .withParameter("sceneNumber", "integer", true)
       .withDocumentation("Undos the setting of a scene value.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("getConsumption")
       .withParameter("groupID", "integer", false)
@@ -188,6 +188,8 @@ namespace dss {
     clsDevice.addMethod("setName")
       .withParameter("newName", "string", true)
       .withDocumentation("Sets the name of the device to newName");
+    clsDevice.addMethod("getSpec")
+      .withDocumentation("Retrieves device information such as function, product and revision ids");
     clsDevice.addMethod("getGroups")
       .withDocumentation("Returns an array of groups the device is in");
     clsDevice.addMethod("getState")
@@ -218,14 +220,14 @@ namespace dss {
       .withParameter("size", "integer", true)
       .withDocumentation("Sets the value of register parameterID to value");
     clsDevice.addMethod("callScene")
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Calls scene sceneNr on the device.");
+      .withParameter("sceneNumber", "integer", true)
+      .withDocumentation("Calls scene sceneNumber on the device.");
     clsDevice.addMethod("saveScene")
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Saves the current outputvalue to sceneNr.");
+      .withParameter("sceneNumber", "integer", true)
+      .withDocumentation("Saves the current outputvalue to sceneNumber.");
     clsDevice.addMethod("undoScene")
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Undos saving the scene value for sceneNr");
+      .withParameter("sceneNumber", "integer", true)
+      .withDocumentation("Undos saving the scene value for sceneNumber");
     clsDevice.addMethod("getConsumption")
       .withDocumentation("Returns the consumption of the device in mW.", "Note that this works only for simulated devices at the moment.");
     clsDevice.addMethod("addTag")
@@ -288,16 +290,16 @@ namespace dss {
            "by any subscription should happen.");
     clsEvent.addMethod("subscribe")
         .withParameter("name", "string", true)
-        .withParameter("sid", "integer", true)
-        .withDocumentation("Subscribes to an event given by the name. The sid is a unique subscription id that is defined by the subscriber. It is possible to subscribe to several events, using the same subscription id, this allows to retrieve a grouped output of the events (i.e. get output of all subscribed by the given id)");
+        .withParameter("subscriptionID", "integer", true)
+        .withDocumentation("Subscribes to an event given by the name. The subscriptionID is a unique id that is defined by the subscriber. It is possible to subscribe to several events, using the same subscription id, this allows to retrieve a grouped output of the events (i.e. get output of all subscribed by the given id)");
     clsEvent.addMethod("unsubscribe")
         .withParameter("name", "string", true)
-        .withParameter("sid", "integer", true)
-        .withDocumentation("Unsubscribes from an event given by the name. The sid is a unique subscription id that was used in the subscribe call.");
+        .withParameter("subscriptionID", "integer", true)
+        .withDocumentation("Unsubscribes from an event given by the name. The subscriptionID is a unique id that was used in the subscribe call.");
     clsEvent.addMethod("get")
-        .withParameter("sid", "integer", true)
+        .withParameter("subscriptionID", "integer", true)
         .withParameter("timeout", "integer", false)
-        .withDocumentation("Get event information and output. The sid is a unique subscription id that was used in the subscribe call. All events, subscribed with the given id will be handled by this call. A timout, in case no events are taken place, can be specified (in MS). By default the timeout is disabled: 0 (zero), if no events occur the call will block.");
+        .withDocumentation("Get event information and output. The subscriptionID is a unique id that was used in the subscribe call. All events, subscribed with the given id will be handled by this call. A timout, in case no events are taken place, can be specified (in MS). By default the timeout is disabled: 0 (zero), if no events occur the call will block.");
 
     RestfulClass& clsSystem = api->addClass("system");
     clsSystem.addMethod("version")
@@ -348,20 +350,20 @@ namespace dss {
       .withParameter("value", "integer", true)
       .withDocumentation("Sets the output value of all devices of the set to value.");
     clsSet.addMethod("callScene")
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Calls the scene sceneNr on all devices of the set.");
+      .withParameter("sceneNumber", "integer", true)
+      .withDocumentation("Calls the scene sceneNumber on all devices of the set.");
     clsSet.addMethod("saveScene")
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Saves the current output value to sceneNr.");
+      .withParameter("sceneNumber", "integer", true)
+      .withDocumentation("Saves the current output value to sceneNumber.");
     clsSet.addMethod("undoScene")
-      .withParameter("sceneNr", "integer", true)
-      .withDocumentation("Undoes setting the value of sceneNr.");
+      .withParameter("sceneNumber", "integer", true)
+      .withDocumentation("Undoes setting the value of sceneNumber.");
     clsApartment.addMethod("getConsumption")
       .withDocumentation("Returns the consumption of all devices in the set in mW.");
 
     RestfulClass& clsStructure = api->addClass("structure");
     clsStructure.addMethod("zoneAddDevice")
-       .withParameter("devid", "integer", true)
+       .withParameter("deviceID", "integer", true)
        .withParameter("zone", "integer", true)
        .withDocumentation("Adds a device to zone");
 
@@ -374,7 +376,7 @@ namespace dss {
         .withDocumentation("Removes a zone with the given id");
 
     clsStructure.addMethod("removeDevice")
-        .withParameter("devID", "integer", true)
+        .withParameter("deviceID", "integer", true)
         .withDocumentation("Removes a device.", "Only devices that are no longer present (isPresent flag is not set) can be removed.");
 
     clsStructure.addMethod("removeInactiveDevices")

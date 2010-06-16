@@ -111,7 +111,7 @@ namespace dss {
     }
     resolution = strToIntDef(resolutionString, -1);
     if(resolution == -1) {
-      return failure("Need could not parse resolution '" + resolutionString + "'");
+      return failure("Could not parse resolution '" + resolutionString + "'");
     }
     if(typeString.empty()) {
       return failure("Need a type, 'energy' or 'consumption'");
@@ -121,7 +121,7 @@ namespace dss {
       } else if(typeString == "energy") {
         energy = true;
       } else {
-        return failure("Invalide type '" + typeString + "'");
+        return failure("Invalid type '" + typeString + "'");
       }
     }
     if(!resolutionString.empty()) {
@@ -139,14 +139,14 @@ namespace dss {
         return failure("No data for '" + typeString + "' and resolution '" + resolutionString + "'");
       } else {
         seriesPath = storageLocation + deviceDSIDString + "_" + fileSuffix + ".xml";
-        log("_Trying to load series from " + seriesPath);
+        log("Trying to load series from " + seriesPath);
         SeriesReader<CurrentValue> reader;
         boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(seriesPath));
         if(s == NULL) {
           boost::shared_ptr<std::deque<CurrentValue> > values = s->getExpandedValues();
 
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-          resultObj->addProperty("dsimid", deviceDSIDString);
+          resultObj->addProperty("dSSimID", deviceDSIDString);
           resultObj->addProperty("type", typeString);
           resultObj->addProperty("resolution", resolutionString);
           boost::shared_ptr<JSONArrayBase> valuesArray(new JSONArrayBase);

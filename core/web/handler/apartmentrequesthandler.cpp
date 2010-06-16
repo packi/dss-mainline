@@ -115,7 +115,7 @@ namespace dss {
             Group& grp = m_Apartment.getGroup(groupID);
             interface = &grp;
           } else {
-            return failure("Could not parse group id '" + groupIDString + "'");
+            return failure("Could not parse group ID '" + groupIDString + "'");
           }
         } catch(std::runtime_error& e) {
           return failure("Could not find group with ID '" + groupIDString + "'");
@@ -156,7 +156,7 @@ namespace dss {
           circuits->addElement("", circuit);
           circuit->addProperty("name", dsMeter->getName());
           circuit->addProperty("dsid", dsMeter->getDSID().toString());
-          circuit->addProperty("busid", dsMeter->getBusID());
+          circuit->addProperty("busID", dsMeter->getBusID());
           circuit->addProperty("hwVersion", dsMeter->getHardwareVersion());
           circuit->addProperty("swVersion", dsMeter->getSoftwareVersion());
           circuit->addProperty("hwName", dsMeter->getHardwareName());

@@ -94,7 +94,7 @@ namespace dss {
     foreach(std::string optionLine, optionLines) {
       std::vector<std::string> keyValue = splitString(optionLine, '=');
       if(keyValue.size() != 2) {
-        return failure("can't parse line: '" + optionLine + "' as key/value pair");
+        return failure("Can't parse line: '" + optionLine + "' as key/value pair");
       } else {
         opts->setParameter(keyValue[0], keyValue[1]);
       }

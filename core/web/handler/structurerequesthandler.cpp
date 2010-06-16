@@ -47,11 +47,11 @@ namespace dss {
 
   boost::shared_ptr<JSONObject> StructureRequestHandler::zoneAddDevice(const RestfulRequest& _request) {
     StructureManipulator manipulator(m_Interface, m_Apartment);
-    std::string devidStr = _request.getParameter("devid");
-    if(!devidStr.empty()) {
-      dsid_t devid = dsid::fromString(devidStr);
+    std::string deviceIDStr = _request.getParameter("deviceID");
+    if(!deviceIDStr.empty()) {
+      dsid_t deviceID = dsid::fromString(deviceIDStr);
 
-      Device& dev = DSS::getInstance()->getApartment().getDeviceByDSID(devid);
+      Device& dev = DSS::getInstance()->getApartment().getDeviceByDSID(deviceID);
       if(!dev.isPresent()) {
         return failure("cannot add nonexisting device to a zone");
       }
@@ -74,7 +74,7 @@ namespace dss {
       return success();
     }
 
-    return failure("Need parameter devid");
+    return failure("Need parameter deviceID");
   }
 
   boost::shared_ptr<JSONObject> StructureRequestHandler::addZone(const RestfulRequest& _request) {
@@ -120,28 +120,28 @@ namespace dss {
   }
 
   boost::shared_ptr<JSONObject> StructureRequestHandler::removeDevice(const RestfulRequest& _request) {
-    std::string devidStr = _request.getParameter("devID");
-    if(!devidStr.empty()) {
-      dsid_t devID = dsid::fromString(devidStr);
+    std::string deviceIDStr = _request.getParameter("deviceID");
+    if(!deviceIDStr.empty()) {
+      dsid_t deviceID = dsid::fromString(deviceIDStr);
 
-      Device& dev = DSS::getInstance()->getApartment().getDeviceByDSID(devID);
+      Device& dev = DSS::getInstance()->getApartment().getDeviceByDSID(deviceID);
       if(dev.isPresent()) {
         return failure("Cannot remove present device");
       }
      
-      m_Apartment.removeDevice(devID);
+      m_Apartment.removeDevice(deviceID);
       m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
       return success();
     }
     
-    return failure("Missing devID");
+    return failure("Missing deviceID");
   }
 
   boost::shared_ptr<JSONObject> StructureRequestHandler::removeInactiveDevices(const RestfulRequest& _request) {
     StructureManipulator manipulator(m_Interface, m_Apartment);
     std::string id = _request.getParameter("id");
     if(id.empty()) {
-      return failure("missing parameter id");
+      return failure("Missing parameter id");
     }
 
     dsid_t dID = dsid::fromString(id);
