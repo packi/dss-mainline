@@ -146,6 +146,12 @@ namespace dss {
       } else if(_request.getMethod() == "disable") {
         pDevice->disable();
         return success();
+      } else if(_request.getMethod() == "lock") {
+        pDevice->lock();
+        return success();
+      } else if(_request.getMethod() == "unlock") {
+        pDevice->unlock();
+        return success();
       } else if(_request.getMethod() == "setRawValue") {
         int value = strToIntDef(_request.getParameter("value"), -1);
         if(value == -1) {
