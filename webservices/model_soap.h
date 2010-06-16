@@ -208,6 +208,9 @@ int dss__DeviceAddTag(int _token, char* _deviceID, char* _tag, bool& result);
 int dss__DeviceRemoveTag(int _token, char* _deviceID, char* _tag, bool& result);
 int dss__DeviceHasTag(int _token, char* _deviceID, char* _tag, bool& result);
 int dss__DeviceGetTags(int _token, char* _deviceID, std::vector<std::string>& result);
+int dss__DeviceLock(int _token, char* _deviceID, bool& result);
+int dss__DeviceUnlock(int _token, char* _deviceID, bool& result);
+int dss__DeviceGetIsLocked(int _token, char* _deviceID, bool& result);
 
 //==================================================== Information
 

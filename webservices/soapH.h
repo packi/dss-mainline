@@ -137,7 +137,7 @@ SOAP_FMAC3 bool * SOAP_FMAC4 soap_in_bool(struct soap*, const char*, bool *, con
 SOAP_FMAC3S int SOAP_FMAC4S soap_s2bool(struct soap*, const char*, bool *);
 
 #ifndef SOAP_TYPE_dss__Event
-#define SOAP_TYPE_dss__Event (265)
+#define SOAP_TYPE_dss__Event (274)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__Event(struct soap*, const char*, int, const dss__Event *, const char*);
@@ -165,7 +165,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__string(struct soap*, int, int, void*, 
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Fault
-#define SOAP_TYPE_SOAP_ENV__Fault (311)
+#define SOAP_TYPE_SOAP_ENV__Fault (320)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Fault(struct soap*, struct SOAP_ENV__Fault *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Fault(struct soap*, const struct SOAP_ENV__Fault *);
@@ -183,7 +183,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Fault(struct soap*, int, int, voi
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Reason
-#define SOAP_TYPE_SOAP_ENV__Reason (310)
+#define SOAP_TYPE_SOAP_ENV__Reason (319)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Reason(struct soap*, struct SOAP_ENV__Reason *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Reason(struct soap*, const struct SOAP_ENV__Reason *);
@@ -201,7 +201,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Reason(struct soap*, int, int, vo
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Detail
-#define SOAP_TYPE_SOAP_ENV__Detail (307)
+#define SOAP_TYPE_SOAP_ENV__Detail (316)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Detail(struct soap*, struct SOAP_ENV__Detail *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Detail(struct soap*, const struct SOAP_ENV__Detail *);
@@ -219,7 +219,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Detail(struct soap*, int, int, vo
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Code
-#define SOAP_TYPE_SOAP_ENV__Code (305)
+#define SOAP_TYPE_SOAP_ENV__Code (314)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Code(struct soap*, struct SOAP_ENV__Code *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Code(struct soap*, const struct SOAP_ENV__Code *);
@@ -237,7 +237,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Code(struct soap*, int, int, void
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Header
-#define SOAP_TYPE_SOAP_ENV__Header (304)
+#define SOAP_TYPE_SOAP_ENV__Header (313)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Header(struct soap*, struct SOAP_ENV__Header *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Header(struct soap*, const struct SOAP_ENV__Header *);
@@ -253,7 +253,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Header(struct soap*, int, int, vo
 #endif
 
 #ifndef SOAP_TYPE_dss__StructureAddDeviceToZone
-#define SOAP_TYPE_dss__StructureAddDeviceToZone (303)
+#define SOAP_TYPE_dss__StructureAddDeviceToZone (312)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__StructureAddDeviceToZone(struct soap*, struct dss__StructureAddDeviceToZone *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__StructureAddDeviceToZone(struct soap*, const struct dss__StructureAddDeviceToZone *);
@@ -267,7 +267,7 @@ SOAP_FMAC3 struct dss__StructureAddDeviceToZone * SOAP_FMAC4 soap_instantiate_ds
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__StructureAddDeviceToZone(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__StructureAddDeviceToZoneResponse
-#define SOAP_TYPE_dss__StructureAddDeviceToZoneResponse (302)
+#define SOAP_TYPE_dss__StructureAddDeviceToZoneResponse (311)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__StructureAddDeviceToZoneResponse(struct soap*, struct dss__StructureAddDeviceToZoneResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__StructureAddDeviceToZoneResponse(struct soap*, const struct dss__StructureAddDeviceToZoneResponse *);
@@ -281,7 +281,7 @@ SOAP_FMAC3 struct dss__StructureAddDeviceToZoneResponse * SOAP_FMAC4 soap_instan
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__StructureAddDeviceToZoneResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__PropertyGetChildren
-#define SOAP_TYPE_dss__PropertyGetChildren (300)
+#define SOAP_TYPE_dss__PropertyGetChildren (309)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertyGetChildren(struct soap*, struct dss__PropertyGetChildren *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertyGetChildren(struct soap*, const struct dss__PropertyGetChildren *);
@@ -295,7 +295,7 @@ SOAP_FMAC3 struct dss__PropertyGetChildren * SOAP_FMAC4 soap_instantiate_dss__Pr
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertyGetChildren(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__PropertyGetChildrenResponse
-#define SOAP_TYPE_dss__PropertyGetChildrenResponse (299)
+#define SOAP_TYPE_dss__PropertyGetChildrenResponse (308)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertyGetChildrenResponse(struct soap*, struct dss__PropertyGetChildrenResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertyGetChildrenResponse(struct soap*, const struct dss__PropertyGetChildrenResponse *);
@@ -309,7 +309,7 @@ SOAP_FMAC3 struct dss__PropertyGetChildrenResponse * SOAP_FMAC4 soap_instantiate
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertyGetChildrenResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__PropertyGetBool
-#define SOAP_TYPE_dss__PropertyGetBool (297)
+#define SOAP_TYPE_dss__PropertyGetBool (306)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertyGetBool(struct soap*, struct dss__PropertyGetBool *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertyGetBool(struct soap*, const struct dss__PropertyGetBool *);
@@ -323,7 +323,7 @@ SOAP_FMAC3 struct dss__PropertyGetBool * SOAP_FMAC4 soap_instantiate_dss__Proper
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertyGetBool(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__PropertyGetBoolResponse
-#define SOAP_TYPE_dss__PropertyGetBoolResponse (296)
+#define SOAP_TYPE_dss__PropertyGetBoolResponse (305)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertyGetBoolResponse(struct soap*, struct dss__PropertyGetBoolResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertyGetBoolResponse(struct soap*, const struct dss__PropertyGetBoolResponse *);
@@ -337,7 +337,7 @@ SOAP_FMAC3 struct dss__PropertyGetBoolResponse * SOAP_FMAC4 soap_instantiate_dss
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertyGetBoolResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__PropertyGetString
-#define SOAP_TYPE_dss__PropertyGetString (294)
+#define SOAP_TYPE_dss__PropertyGetString (303)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertyGetString(struct soap*, struct dss__PropertyGetString *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertyGetString(struct soap*, const struct dss__PropertyGetString *);
@@ -351,7 +351,7 @@ SOAP_FMAC3 struct dss__PropertyGetString * SOAP_FMAC4 soap_instantiate_dss__Prop
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertyGetString(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__PropertyGetStringResponse
-#define SOAP_TYPE_dss__PropertyGetStringResponse (293)
+#define SOAP_TYPE_dss__PropertyGetStringResponse (302)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertyGetStringResponse(struct soap*, struct dss__PropertyGetStringResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertyGetStringResponse(struct soap*, const struct dss__PropertyGetStringResponse *);
@@ -365,7 +365,7 @@ SOAP_FMAC3 struct dss__PropertyGetStringResponse * SOAP_FMAC4 soap_instantiate_d
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertyGetStringResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__PropertyGetInt
-#define SOAP_TYPE_dss__PropertyGetInt (291)
+#define SOAP_TYPE_dss__PropertyGetInt (300)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertyGetInt(struct soap*, struct dss__PropertyGetInt *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertyGetInt(struct soap*, const struct dss__PropertyGetInt *);
@@ -379,7 +379,7 @@ SOAP_FMAC3 struct dss__PropertyGetInt * SOAP_FMAC4 soap_instantiate_dss__Propert
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertyGetInt(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__PropertyGetIntResponse
-#define SOAP_TYPE_dss__PropertyGetIntResponse (290)
+#define SOAP_TYPE_dss__PropertyGetIntResponse (299)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertyGetIntResponse(struct soap*, struct dss__PropertyGetIntResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertyGetIntResponse(struct soap*, const struct dss__PropertyGetIntResponse *);
@@ -393,7 +393,7 @@ SOAP_FMAC3 struct dss__PropertyGetIntResponse * SOAP_FMAC4 soap_instantiate_dss_
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertyGetIntResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__PropertySetBool
-#define SOAP_TYPE_dss__PropertySetBool (288)
+#define SOAP_TYPE_dss__PropertySetBool (297)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertySetBool(struct soap*, struct dss__PropertySetBool *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertySetBool(struct soap*, const struct dss__PropertySetBool *);
@@ -407,7 +407,7 @@ SOAP_FMAC3 struct dss__PropertySetBool * SOAP_FMAC4 soap_instantiate_dss__Proper
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertySetBool(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__PropertySetBoolResponse
-#define SOAP_TYPE_dss__PropertySetBoolResponse (287)
+#define SOAP_TYPE_dss__PropertySetBoolResponse (296)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertySetBoolResponse(struct soap*, struct dss__PropertySetBoolResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertySetBoolResponse(struct soap*, const struct dss__PropertySetBoolResponse *);
@@ -421,7 +421,7 @@ SOAP_FMAC3 struct dss__PropertySetBoolResponse * SOAP_FMAC4 soap_instantiate_dss
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertySetBoolResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__PropertySetString
-#define SOAP_TYPE_dss__PropertySetString (285)
+#define SOAP_TYPE_dss__PropertySetString (294)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertySetString(struct soap*, struct dss__PropertySetString *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertySetString(struct soap*, const struct dss__PropertySetString *);
@@ -435,7 +435,7 @@ SOAP_FMAC3 struct dss__PropertySetString * SOAP_FMAC4 soap_instantiate_dss__Prop
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertySetString(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__PropertySetStringResponse
-#define SOAP_TYPE_dss__PropertySetStringResponse (284)
+#define SOAP_TYPE_dss__PropertySetStringResponse (293)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertySetStringResponse(struct soap*, struct dss__PropertySetStringResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertySetStringResponse(struct soap*, const struct dss__PropertySetStringResponse *);
@@ -449,7 +449,7 @@ SOAP_FMAC3 struct dss__PropertySetStringResponse * SOAP_FMAC4 soap_instantiate_d
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertySetStringResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__PropertySetInt
-#define SOAP_TYPE_dss__PropertySetInt (282)
+#define SOAP_TYPE_dss__PropertySetInt (291)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertySetInt(struct soap*, struct dss__PropertySetInt *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertySetInt(struct soap*, const struct dss__PropertySetInt *);
@@ -463,7 +463,7 @@ SOAP_FMAC3 struct dss__PropertySetInt * SOAP_FMAC4 soap_instantiate_dss__Propert
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertySetInt(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__PropertySetIntResponse
-#define SOAP_TYPE_dss__PropertySetIntResponse (281)
+#define SOAP_TYPE_dss__PropertySetIntResponse (290)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertySetIntResponse(struct soap*, struct dss__PropertySetIntResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertySetIntResponse(struct soap*, const struct dss__PropertySetIntResponse *);
@@ -477,7 +477,7 @@ SOAP_FMAC3 struct dss__PropertySetIntResponse * SOAP_FMAC4 soap_instantiate_dss_
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertySetIntResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__PropertyGetType
-#define SOAP_TYPE_dss__PropertyGetType (279)
+#define SOAP_TYPE_dss__PropertyGetType (288)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertyGetType(struct soap*, struct dss__PropertyGetType *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertyGetType(struct soap*, const struct dss__PropertyGetType *);
@@ -491,7 +491,7 @@ SOAP_FMAC3 struct dss__PropertyGetType * SOAP_FMAC4 soap_instantiate_dss__Proper
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertyGetType(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__PropertyGetTypeResponse
-#define SOAP_TYPE_dss__PropertyGetTypeResponse (278)
+#define SOAP_TYPE_dss__PropertyGetTypeResponse (287)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__PropertyGetTypeResponse(struct soap*, struct dss__PropertyGetTypeResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__PropertyGetTypeResponse(struct soap*, const struct dss__PropertyGetTypeResponse *);
@@ -505,7 +505,7 @@ SOAP_FMAC3 struct dss__PropertyGetTypeResponse * SOAP_FMAC4 soap_instantiate_dss
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__PropertyGetTypeResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__EventSubscribeTo
-#define SOAP_TYPE_dss__EventSubscribeTo (276)
+#define SOAP_TYPE_dss__EventSubscribeTo (285)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__EventSubscribeTo(struct soap*, struct dss__EventSubscribeTo *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__EventSubscribeTo(struct soap*, const struct dss__EventSubscribeTo *);
@@ -519,7 +519,7 @@ SOAP_FMAC3 struct dss__EventSubscribeTo * SOAP_FMAC4 soap_instantiate_dss__Event
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__EventSubscribeTo(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__EventSubscribeToResponse
-#define SOAP_TYPE_dss__EventSubscribeToResponse (275)
+#define SOAP_TYPE_dss__EventSubscribeToResponse (284)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__EventSubscribeToResponse(struct soap*, struct dss__EventSubscribeToResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__EventSubscribeToResponse(struct soap*, const struct dss__EventSubscribeToResponse *);
@@ -533,7 +533,7 @@ SOAP_FMAC3 struct dss__EventSubscribeToResponse * SOAP_FMAC4 soap_instantiate_ds
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__EventSubscribeToResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__EventWaitFor
-#define SOAP_TYPE_dss__EventWaitFor (273)
+#define SOAP_TYPE_dss__EventWaitFor (282)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__EventWaitFor(struct soap*, struct dss__EventWaitFor *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__EventWaitFor(struct soap*, const struct dss__EventWaitFor *);
@@ -547,7 +547,7 @@ SOAP_FMAC3 struct dss__EventWaitFor * SOAP_FMAC4 soap_instantiate_dss__EventWait
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__EventWaitFor(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__EventWaitForResponse
-#define SOAP_TYPE_dss__EventWaitForResponse (272)
+#define SOAP_TYPE_dss__EventWaitForResponse (281)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__EventWaitForResponse(struct soap*, struct dss__EventWaitForResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__EventWaitForResponse(struct soap*, const struct dss__EventWaitForResponse *);
@@ -561,7 +561,7 @@ SOAP_FMAC3 struct dss__EventWaitForResponse * SOAP_FMAC4 soap_instantiate_dss__E
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__EventWaitForResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__EventRaise
-#define SOAP_TYPE_dss__EventRaise (268)
+#define SOAP_TYPE_dss__EventRaise (277)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__EventRaise(struct soap*, struct dss__EventRaise *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__EventRaise(struct soap*, const struct dss__EventRaise *);
@@ -575,7 +575,7 @@ SOAP_FMAC3 struct dss__EventRaise * SOAP_FMAC4 soap_instantiate_dss__EventRaise(
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__EventRaise(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__EventRaiseResponse
-#define SOAP_TYPE_dss__EventRaiseResponse (267)
+#define SOAP_TYPE_dss__EventRaiseResponse (276)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__EventRaiseResponse(struct soap*, struct dss__EventRaiseResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__EventRaiseResponse(struct soap*, const struct dss__EventRaiseResponse *);
@@ -589,7 +589,7 @@ SOAP_FMAC3 struct dss__EventRaiseResponse * SOAP_FMAC4 soap_instantiate_dss__Eve
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__EventRaiseResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__DeviceGetFunctionID
-#define SOAP_TYPE_dss__DeviceGetFunctionID (264)
+#define SOAP_TYPE_dss__DeviceGetFunctionID (273)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceGetFunctionID(struct soap*, struct dss__DeviceGetFunctionID *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceGetFunctionID(struct soap*, const struct dss__DeviceGetFunctionID *);
@@ -603,7 +603,7 @@ SOAP_FMAC3 struct dss__DeviceGetFunctionID * SOAP_FMAC4 soap_instantiate_dss__De
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceGetFunctionID(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__DeviceGetFunctionIDResponse
-#define SOAP_TYPE_dss__DeviceGetFunctionIDResponse (263)
+#define SOAP_TYPE_dss__DeviceGetFunctionIDResponse (272)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceGetFunctionIDResponse(struct soap*, struct dss__DeviceGetFunctionIDResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceGetFunctionIDResponse(struct soap*, const struct dss__DeviceGetFunctionIDResponse *);
@@ -617,7 +617,7 @@ SOAP_FMAC3 struct dss__DeviceGetFunctionIDResponse * SOAP_FMAC4 soap_instantiate
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceGetFunctionIDResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__GroupGetName
-#define SOAP_TYPE_dss__GroupGetName (261)
+#define SOAP_TYPE_dss__GroupGetName (270)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__GroupGetName(struct soap*, struct dss__GroupGetName *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__GroupGetName(struct soap*, const struct dss__GroupGetName *);
@@ -631,7 +631,7 @@ SOAP_FMAC3 struct dss__GroupGetName * SOAP_FMAC4 soap_instantiate_dss__GroupGetN
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__GroupGetName(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__GroupGetNameResponse
-#define SOAP_TYPE_dss__GroupGetNameResponse (260)
+#define SOAP_TYPE_dss__GroupGetNameResponse (269)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__GroupGetNameResponse(struct soap*, struct dss__GroupGetNameResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__GroupGetNameResponse(struct soap*, const struct dss__GroupGetNameResponse *);
@@ -645,7 +645,7 @@ SOAP_FMAC3 struct dss__GroupGetNameResponse * SOAP_FMAC4 soap_instantiate_dss__G
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__GroupGetNameResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__GroupSetName
-#define SOAP_TYPE_dss__GroupSetName (258)
+#define SOAP_TYPE_dss__GroupSetName (267)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__GroupSetName(struct soap*, struct dss__GroupSetName *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__GroupSetName(struct soap*, const struct dss__GroupSetName *);
@@ -659,7 +659,7 @@ SOAP_FMAC3 struct dss__GroupSetName * SOAP_FMAC4 soap_instantiate_dss__GroupSetN
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__GroupSetName(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__GroupSetNameResponse
-#define SOAP_TYPE_dss__GroupSetNameResponse (257)
+#define SOAP_TYPE_dss__GroupSetNameResponse (266)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__GroupSetNameResponse(struct soap*, struct dss__GroupSetNameResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__GroupSetNameResponse(struct soap*, const struct dss__GroupSetNameResponse *);
@@ -673,7 +673,7 @@ SOAP_FMAC3 struct dss__GroupSetNameResponse * SOAP_FMAC4 soap_instantiate_dss__G
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__GroupSetNameResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__ZoneGetName
-#define SOAP_TYPE_dss__ZoneGetName (255)
+#define SOAP_TYPE_dss__ZoneGetName (264)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ZoneGetName(struct soap*, struct dss__ZoneGetName *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ZoneGetName(struct soap*, const struct dss__ZoneGetName *);
@@ -687,7 +687,7 @@ SOAP_FMAC3 struct dss__ZoneGetName * SOAP_FMAC4 soap_instantiate_dss__ZoneGetNam
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ZoneGetName(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__ZoneGetNameResponse
-#define SOAP_TYPE_dss__ZoneGetNameResponse (254)
+#define SOAP_TYPE_dss__ZoneGetNameResponse (263)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ZoneGetNameResponse(struct soap*, struct dss__ZoneGetNameResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ZoneGetNameResponse(struct soap*, const struct dss__ZoneGetNameResponse *);
@@ -701,7 +701,7 @@ SOAP_FMAC3 struct dss__ZoneGetNameResponse * SOAP_FMAC4 soap_instantiate_dss__Zo
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ZoneGetNameResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__ZoneSetName
-#define SOAP_TYPE_dss__ZoneSetName (252)
+#define SOAP_TYPE_dss__ZoneSetName (261)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ZoneSetName(struct soap*, struct dss__ZoneSetName *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ZoneSetName(struct soap*, const struct dss__ZoneSetName *);
@@ -715,7 +715,7 @@ SOAP_FMAC3 struct dss__ZoneSetName * SOAP_FMAC4 soap_instantiate_dss__ZoneSetNam
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ZoneSetName(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__ZoneSetNameResponse
-#define SOAP_TYPE_dss__ZoneSetNameResponse (251)
+#define SOAP_TYPE_dss__ZoneSetNameResponse (260)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ZoneSetNameResponse(struct soap*, struct dss__ZoneSetNameResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ZoneSetNameResponse(struct soap*, const struct dss__ZoneSetNameResponse *);
@@ -729,7 +729,7 @@ SOAP_FMAC3 struct dss__ZoneSetNameResponse * SOAP_FMAC4 soap_instantiate_dss__Zo
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ZoneSetNameResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__ApartmentDeleteZone
-#define SOAP_TYPE_dss__ApartmentDeleteZone (249)
+#define SOAP_TYPE_dss__ApartmentDeleteZone (258)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentDeleteZone(struct soap*, struct dss__ApartmentDeleteZone *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentDeleteZone(struct soap*, const struct dss__ApartmentDeleteZone *);
@@ -743,7 +743,7 @@ SOAP_FMAC3 struct dss__ApartmentDeleteZone * SOAP_FMAC4 soap_instantiate_dss__Ap
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentDeleteZone(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__ApartmentDeleteZoneResponse
-#define SOAP_TYPE_dss__ApartmentDeleteZoneResponse (248)
+#define SOAP_TYPE_dss__ApartmentDeleteZoneResponse (257)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentDeleteZoneResponse(struct soap*, struct dss__ApartmentDeleteZoneResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentDeleteZoneResponse(struct soap*, const struct dss__ApartmentDeleteZoneResponse *);
@@ -757,7 +757,7 @@ SOAP_FMAC3 struct dss__ApartmentDeleteZoneResponse * SOAP_FMAC4 soap_instantiate
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentDeleteZoneResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__ApartmentAllocateZone
-#define SOAP_TYPE_dss__ApartmentAllocateZone (246)
+#define SOAP_TYPE_dss__ApartmentAllocateZone (255)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentAllocateZone(struct soap*, struct dss__ApartmentAllocateZone *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentAllocateZone(struct soap*, const struct dss__ApartmentAllocateZone *);
@@ -771,7 +771,7 @@ SOAP_FMAC3 struct dss__ApartmentAllocateZone * SOAP_FMAC4 soap_instantiate_dss__
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentAllocateZone(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__ApartmentAllocateZoneResponse
-#define SOAP_TYPE_dss__ApartmentAllocateZoneResponse (245)
+#define SOAP_TYPE_dss__ApartmentAllocateZoneResponse (254)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentAllocateZoneResponse(struct soap*, struct dss__ApartmentAllocateZoneResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentAllocateZoneResponse(struct soap*, const struct dss__ApartmentAllocateZoneResponse *);
@@ -785,7 +785,7 @@ SOAP_FMAC3 struct dss__ApartmentAllocateZoneResponse * SOAP_FMAC4 soap_instantia
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentAllocateZoneResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__DSMeterSetName
-#define SOAP_TYPE_dss__DSMeterSetName (243)
+#define SOAP_TYPE_dss__DSMeterSetName (252)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DSMeterSetName(struct soap*, struct dss__DSMeterSetName *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DSMeterSetName(struct soap*, const struct dss__DSMeterSetName *);
@@ -799,7 +799,7 @@ SOAP_FMAC3 struct dss__DSMeterSetName * SOAP_FMAC4 soap_instantiate_dss__DSMeter
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DSMeterSetName(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__DSMeterSetNameResponse
-#define SOAP_TYPE_dss__DSMeterSetNameResponse (242)
+#define SOAP_TYPE_dss__DSMeterSetNameResponse (251)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DSMeterSetNameResponse(struct soap*, struct dss__DSMeterSetNameResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DSMeterSetNameResponse(struct soap*, const struct dss__DSMeterSetNameResponse *);
@@ -813,7 +813,7 @@ SOAP_FMAC3 struct dss__DSMeterSetNameResponse * SOAP_FMAC4 soap_instantiate_dss_
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DSMeterSetNameResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__DSMeterGetName
-#define SOAP_TYPE_dss__DSMeterGetName (240)
+#define SOAP_TYPE_dss__DSMeterGetName (249)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DSMeterGetName(struct soap*, struct dss__DSMeterGetName *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DSMeterGetName(struct soap*, const struct dss__DSMeterGetName *);
@@ -827,7 +827,7 @@ SOAP_FMAC3 struct dss__DSMeterGetName * SOAP_FMAC4 soap_instantiate_dss__DSMeter
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DSMeterGetName(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__DSMeterGetNameResponse
-#define SOAP_TYPE_dss__DSMeterGetNameResponse (239)
+#define SOAP_TYPE_dss__DSMeterGetNameResponse (248)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DSMeterGetNameResponse(struct soap*, struct dss__DSMeterGetNameResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DSMeterGetNameResponse(struct soap*, const struct dss__DSMeterGetNameResponse *);
@@ -841,7 +841,7 @@ SOAP_FMAC3 struct dss__DSMeterGetNameResponse * SOAP_FMAC4 soap_instantiate_dss_
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DSMeterGetNameResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__ApartmentGetDSMeterIDs
-#define SOAP_TYPE_dss__ApartmentGetDSMeterIDs (237)
+#define SOAP_TYPE_dss__ApartmentGetDSMeterIDs (246)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentGetDSMeterIDs(struct soap*, struct dss__ApartmentGetDSMeterIDs *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentGetDSMeterIDs(struct soap*, const struct dss__ApartmentGetDSMeterIDs *);
@@ -855,7 +855,7 @@ SOAP_FMAC3 struct dss__ApartmentGetDSMeterIDs * SOAP_FMAC4 soap_instantiate_dss_
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentGetDSMeterIDs(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__ApartmentGetDSMeterIDsResponse
-#define SOAP_TYPE_dss__ApartmentGetDSMeterIDsResponse (236)
+#define SOAP_TYPE_dss__ApartmentGetDSMeterIDsResponse (245)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentGetDSMeterIDsResponse(struct soap*, struct dss__ApartmentGetDSMeterIDsResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentGetDSMeterIDsResponse(struct soap*, const struct dss__ApartmentGetDSMeterIDsResponse *);
@@ -869,7 +869,7 @@ SOAP_FMAC3 struct dss__ApartmentGetDSMeterIDsResponse * SOAP_FMAC4 soap_instanti
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentGetDSMeterIDsResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__DSMeterGetPowerConsumption
-#define SOAP_TYPE_dss__DSMeterGetPowerConsumption (234)
+#define SOAP_TYPE_dss__DSMeterGetPowerConsumption (243)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DSMeterGetPowerConsumption(struct soap*, struct dss__DSMeterGetPowerConsumption *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DSMeterGetPowerConsumption(struct soap*, const struct dss__DSMeterGetPowerConsumption *);
@@ -883,7 +883,7 @@ SOAP_FMAC3 struct dss__DSMeterGetPowerConsumption * SOAP_FMAC4 soap_instantiate_
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DSMeterGetPowerConsumption(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse
-#define SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse (233)
+#define SOAP_TYPE_dss__DSMeterGetPowerConsumptionResponse (242)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DSMeterGetPowerConsumptionResponse(struct soap*, struct dss__DSMeterGetPowerConsumptionResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DSMeterGetPowerConsumptionResponse(struct soap*, const struct dss__DSMeterGetPowerConsumptionResponse *);
@@ -895,6 +895,90 @@ SOAP_FMAC5 struct dss__DSMeterGetPowerConsumptionResponse * SOAP_FMAC6 soap_new_
 SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DSMeterGetPowerConsumptionResponse(struct soap*, struct dss__DSMeterGetPowerConsumptionResponse*);
 SOAP_FMAC3 struct dss__DSMeterGetPowerConsumptionResponse * SOAP_FMAC4 soap_instantiate_dss__DSMeterGetPowerConsumptionResponse(struct soap*, int, const char*, const char*, size_t*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DSMeterGetPowerConsumptionResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_dss__DeviceGetIsLocked
+#define SOAP_TYPE_dss__DeviceGetIsLocked (239)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceGetIsLocked(struct soap*, struct dss__DeviceGetIsLocked *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceGetIsLocked(struct soap*, const struct dss__DeviceGetIsLocked *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceGetIsLocked(struct soap*, const struct dss__DeviceGetIsLocked *, const char*, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceGetIsLocked(struct soap*, const char*, int, const struct dss__DeviceGetIsLocked *, const char*);
+SOAP_FMAC3 struct dss__DeviceGetIsLocked * SOAP_FMAC4 soap_get_dss__DeviceGetIsLocked(struct soap*, struct dss__DeviceGetIsLocked *, const char*, const char*);
+SOAP_FMAC3 struct dss__DeviceGetIsLocked * SOAP_FMAC4 soap_in_dss__DeviceGetIsLocked(struct soap*, const char*, struct dss__DeviceGetIsLocked *, const char*);
+SOAP_FMAC5 struct dss__DeviceGetIsLocked * SOAP_FMAC6 soap_new_dss__DeviceGetIsLocked(struct soap*, int);
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceGetIsLocked(struct soap*, struct dss__DeviceGetIsLocked*);
+SOAP_FMAC3 struct dss__DeviceGetIsLocked * SOAP_FMAC4 soap_instantiate_dss__DeviceGetIsLocked(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceGetIsLocked(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_dss__DeviceGetIsLockedResponse
+#define SOAP_TYPE_dss__DeviceGetIsLockedResponse (238)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceGetIsLockedResponse(struct soap*, struct dss__DeviceGetIsLockedResponse *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceGetIsLockedResponse(struct soap*, const struct dss__DeviceGetIsLockedResponse *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceGetIsLockedResponse(struct soap*, const struct dss__DeviceGetIsLockedResponse *, const char*, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceGetIsLockedResponse(struct soap*, const char*, int, const struct dss__DeviceGetIsLockedResponse *, const char*);
+SOAP_FMAC3 struct dss__DeviceGetIsLockedResponse * SOAP_FMAC4 soap_get_dss__DeviceGetIsLockedResponse(struct soap*, struct dss__DeviceGetIsLockedResponse *, const char*, const char*);
+SOAP_FMAC3 struct dss__DeviceGetIsLockedResponse * SOAP_FMAC4 soap_in_dss__DeviceGetIsLockedResponse(struct soap*, const char*, struct dss__DeviceGetIsLockedResponse *, const char*);
+SOAP_FMAC5 struct dss__DeviceGetIsLockedResponse * SOAP_FMAC6 soap_new_dss__DeviceGetIsLockedResponse(struct soap*, int);
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceGetIsLockedResponse(struct soap*, struct dss__DeviceGetIsLockedResponse*);
+SOAP_FMAC3 struct dss__DeviceGetIsLockedResponse * SOAP_FMAC4 soap_instantiate_dss__DeviceGetIsLockedResponse(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceGetIsLockedResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_dss__DeviceUnlock
+#define SOAP_TYPE_dss__DeviceUnlock (236)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceUnlock(struct soap*, struct dss__DeviceUnlock *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceUnlock(struct soap*, const struct dss__DeviceUnlock *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceUnlock(struct soap*, const struct dss__DeviceUnlock *, const char*, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceUnlock(struct soap*, const char*, int, const struct dss__DeviceUnlock *, const char*);
+SOAP_FMAC3 struct dss__DeviceUnlock * SOAP_FMAC4 soap_get_dss__DeviceUnlock(struct soap*, struct dss__DeviceUnlock *, const char*, const char*);
+SOAP_FMAC3 struct dss__DeviceUnlock * SOAP_FMAC4 soap_in_dss__DeviceUnlock(struct soap*, const char*, struct dss__DeviceUnlock *, const char*);
+SOAP_FMAC5 struct dss__DeviceUnlock * SOAP_FMAC6 soap_new_dss__DeviceUnlock(struct soap*, int);
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceUnlock(struct soap*, struct dss__DeviceUnlock*);
+SOAP_FMAC3 struct dss__DeviceUnlock * SOAP_FMAC4 soap_instantiate_dss__DeviceUnlock(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceUnlock(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_dss__DeviceUnlockResponse
+#define SOAP_TYPE_dss__DeviceUnlockResponse (235)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceUnlockResponse(struct soap*, struct dss__DeviceUnlockResponse *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceUnlockResponse(struct soap*, const struct dss__DeviceUnlockResponse *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceUnlockResponse(struct soap*, const struct dss__DeviceUnlockResponse *, const char*, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceUnlockResponse(struct soap*, const char*, int, const struct dss__DeviceUnlockResponse *, const char*);
+SOAP_FMAC3 struct dss__DeviceUnlockResponse * SOAP_FMAC4 soap_get_dss__DeviceUnlockResponse(struct soap*, struct dss__DeviceUnlockResponse *, const char*, const char*);
+SOAP_FMAC3 struct dss__DeviceUnlockResponse * SOAP_FMAC4 soap_in_dss__DeviceUnlockResponse(struct soap*, const char*, struct dss__DeviceUnlockResponse *, const char*);
+SOAP_FMAC5 struct dss__DeviceUnlockResponse * SOAP_FMAC6 soap_new_dss__DeviceUnlockResponse(struct soap*, int);
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceUnlockResponse(struct soap*, struct dss__DeviceUnlockResponse*);
+SOAP_FMAC3 struct dss__DeviceUnlockResponse * SOAP_FMAC4 soap_instantiate_dss__DeviceUnlockResponse(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceUnlockResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_dss__DeviceLock
+#define SOAP_TYPE_dss__DeviceLock (233)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceLock(struct soap*, struct dss__DeviceLock *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceLock(struct soap*, const struct dss__DeviceLock *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceLock(struct soap*, const struct dss__DeviceLock *, const char*, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceLock(struct soap*, const char*, int, const struct dss__DeviceLock *, const char*);
+SOAP_FMAC3 struct dss__DeviceLock * SOAP_FMAC4 soap_get_dss__DeviceLock(struct soap*, struct dss__DeviceLock *, const char*, const char*);
+SOAP_FMAC3 struct dss__DeviceLock * SOAP_FMAC4 soap_in_dss__DeviceLock(struct soap*, const char*, struct dss__DeviceLock *, const char*);
+SOAP_FMAC5 struct dss__DeviceLock * SOAP_FMAC6 soap_new_dss__DeviceLock(struct soap*, int);
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceLock(struct soap*, struct dss__DeviceLock*);
+SOAP_FMAC3 struct dss__DeviceLock * SOAP_FMAC4 soap_instantiate_dss__DeviceLock(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceLock(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_dss__DeviceLockResponse
+#define SOAP_TYPE_dss__DeviceLockResponse (232)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__DeviceLockResponse(struct soap*, struct dss__DeviceLockResponse *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__DeviceLockResponse(struct soap*, const struct dss__DeviceLockResponse *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_dss__DeviceLockResponse(struct soap*, const struct dss__DeviceLockResponse *, const char*, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__DeviceLockResponse(struct soap*, const char*, int, const struct dss__DeviceLockResponse *, const char*);
+SOAP_FMAC3 struct dss__DeviceLockResponse * SOAP_FMAC4 soap_get_dss__DeviceLockResponse(struct soap*, struct dss__DeviceLockResponse *, const char*, const char*);
+SOAP_FMAC3 struct dss__DeviceLockResponse * SOAP_FMAC4 soap_in_dss__DeviceLockResponse(struct soap*, const char*, struct dss__DeviceLockResponse *, const char*);
+SOAP_FMAC5 struct dss__DeviceLockResponse * SOAP_FMAC6 soap_new_dss__DeviceLockResponse(struct soap*, int);
+SOAP_FMAC5 void SOAP_FMAC6 soap_delete_dss__DeviceLockResponse(struct soap*, struct dss__DeviceLockResponse*);
+SOAP_FMAC3 struct dss__DeviceLockResponse * SOAP_FMAC4 soap_instantiate_dss__DeviceLockResponse(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__DeviceLockResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__DeviceGetTags
 #define SOAP_TYPE_dss__DeviceGetTags (230)
@@ -2775,7 +2859,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__AuthenticateResponse(struct soap*, int
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_PointerToSOAP_ENV__Reason
-#define SOAP_TYPE_PointerToSOAP_ENV__Reason (313)
+#define SOAP_TYPE_PointerToSOAP_ENV__Reason (322)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Reason(struct soap*, struct SOAP_ENV__Reason *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerToSOAP_ENV__Reason(struct soap*, struct SOAP_ENV__Reason *const*, const char*, const char*);
@@ -2788,7 +2872,7 @@ SOAP_FMAC3 struct SOAP_ENV__Reason ** SOAP_FMAC4 soap_in_PointerToSOAP_ENV__Reas
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_PointerToSOAP_ENV__Detail
-#define SOAP_TYPE_PointerToSOAP_ENV__Detail (312)
+#define SOAP_TYPE_PointerToSOAP_ENV__Detail (321)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Detail(struct soap*, struct SOAP_ENV__Detail *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerToSOAP_ENV__Detail(struct soap*, struct SOAP_ENV__Detail *const*, const char*, const char*);
@@ -2801,7 +2885,7 @@ SOAP_FMAC3 struct SOAP_ENV__Detail ** SOAP_FMAC4 soap_in_PointerToSOAP_ENV__Deta
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_PointerToSOAP_ENV__Code
-#define SOAP_TYPE_PointerToSOAP_ENV__Code (306)
+#define SOAP_TYPE_PointerToSOAP_ENV__Code (315)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Code(struct soap*, struct SOAP_ENV__Code *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerToSOAP_ENV__Code(struct soap*, struct SOAP_ENV__Code *const*, const char*, const char*);
@@ -2841,7 +2925,7 @@ SOAP_FMAC3 char ** SOAP_FMAC4 soap_get_string(struct soap*, char **, const char*
 SOAP_FMAC3 char * * SOAP_FMAC4 soap_in_string(struct soap*, const char*, char **, const char*);
 
 #ifndef SOAP_TYPE_std__vectorTemplateOfdss__Event
-#define SOAP_TYPE_std__vectorTemplateOfdss__Event (269)
+#define SOAP_TYPE_std__vectorTemplateOfdss__Event (278)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfdss__Event(struct soap*, std::vector<dss__Event >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfdss__Event(struct soap*, const std::vector<dss__Event >*);

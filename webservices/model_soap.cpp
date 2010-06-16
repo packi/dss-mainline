@@ -1029,6 +1029,50 @@ int dss__DeviceGetTags(struct soap *soap, int _token, char* _deviceID, std::vect
   return SOAP_OK;
 } // dss__DeviceGetTags
 
+int dss__DeviceLock(struct soap *soap, int _token, char* _deviceID, bool& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  try {
+    dev.getDevice().lock();
+    result = true;
+  } catch(std::exception& e) {
+    result = false;
+  }
+  return SOAP_OK;
+} // dss__DeviceLock
+
+int dss__DeviceUnlock(struct soap *soap, int _token, char* _deviceID, bool& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  try {
+    dev.getDevice().unlock();
+    result = true;
+  } catch(std::exception& e) {
+    result = false;
+  }
+  return SOAP_OK;
+} // dss__DeviceUnlock
+
+int dss__DeviceGetIsLocked(struct soap *soap, int _token, char* _deviceID, bool& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  result = dev.getDevice().getIsLockedInDSM();
+  return SOAP_OK;
+} // dss__DeviceGetIsLocked
+
+
 //==================================================== Information
 
 int dss__DSMeterGetPowerConsumption(struct soap *soap, int _token, int _dsMeterID, unsigned long& result) {

@@ -1202,6 +1202,57 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="DeviceLock">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceLockResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceUnlock">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceUnlockResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceGetIsLocked">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceGetIsLockedResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="DSMeterGetPowerConsumption">
    <complexType>
     <sequence>
@@ -2145,6 +2196,30 @@
  <part name="parameters" element="dss:DeviceGetTagsResponse"/>
 </message>
 
+<message name="DeviceLockRequest">
+ <part name="parameters" element="dss:DeviceLock"/>
+</message>
+
+<message name="DeviceLockResponse">
+ <part name="parameters" element="dss:DeviceLockResponse"/>
+</message>
+
+<message name="DeviceUnlockRequest">
+ <part name="parameters" element="dss:DeviceUnlock"/>
+</message>
+
+<message name="DeviceUnlockResponse">
+ <part name="parameters" element="dss:DeviceUnlockResponse"/>
+</message>
+
+<message name="DeviceGetIsLockedRequest">
+ <part name="parameters" element="dss:DeviceGetIsLocked"/>
+</message>
+
+<message name="DeviceGetIsLockedResponse">
+ <part name="parameters" element="dss:DeviceGetIsLockedResponse"/>
+</message>
+
 <message name="DSMeterGetPowerConsumptionRequest">
  <part name="parameters" element="dss:DSMeterGetPowerConsumption"/>
 </message>
@@ -2664,6 +2739,21 @@
   <documentation>Service definition of function dss__DeviceGetTags</documentation>
   <input message="tns:DeviceGetTagsRequest"/>
   <output message="tns:DeviceGetTagsResponse"/>
+ </operation>
+ <operation name="DeviceLock">
+  <documentation>Service definition of function dss__DeviceLock</documentation>
+  <input message="tns:DeviceLockRequest"/>
+  <output message="tns:DeviceLockResponse"/>
+ </operation>
+ <operation name="DeviceUnlock">
+  <documentation>Service definition of function dss__DeviceUnlock</documentation>
+  <input message="tns:DeviceUnlockRequest"/>
+  <output message="tns:DeviceUnlockResponse"/>
+ </operation>
+ <operation name="DeviceGetIsLocked">
+  <documentation>Service definition of function dss__DeviceGetIsLocked</documentation>
+  <input message="tns:DeviceGetIsLockedRequest"/>
+  <output message="tns:DeviceGetIsLockedResponse"/>
  </operation>
  <operation name="DSMeterGetPowerConsumption">
   <documentation>Service definition of function dss__DSMeterGetPowerConsumption</documentation>
@@ -3379,6 +3469,33 @@
   </output>
  </operation>
  <operation name="DeviceGetTags">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="DeviceLock">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="DeviceUnlock">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="DeviceGetIsLocked">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
