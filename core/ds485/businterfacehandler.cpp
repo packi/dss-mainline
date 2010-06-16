@@ -426,6 +426,8 @@ namespace dss {
       return "Function Device Get Groups";
     case FunctionDeviceGetSensorValue:
       return "Function Device Get Sensor Value";
+    case FunctionDeviceLock:
+      return "FunctionDeviceLock";
 
     case FunctionDSMeterGetDSID:
       return "Function DSMeter Get DSID";

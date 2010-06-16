@@ -50,7 +50,8 @@ namespace dss {
     m_LastCalledScene(SceneOff),
     m_Consumption(0),
     m_LastDiscovered(DateTime::NullDate),
-    m_FirstSeen(DateTime::NullDate)
+    m_FirstSeen(DateTime::NullDate),
+    m_IsLockedInDSM(false)
   { } // ctor
 
   void Device::publishToPropertyTree() {
@@ -319,6 +320,20 @@ namespace dss {
   int Device::getSensorValue(const int _sensorID) {
     return m_pApartment->getDeviceBusInterface()->getSensorValue(*this,_sensorID);
   } // getSensorValue
+
+  void Device::setIsLockedInDSM(const bool _value) {
+    m_IsLockedInDSM = _value;
+  } // setIsLockedInDSM
+
+  void Device::lock() {
+    m_pApartment->getDeviceBusInterface()->lockOrUnlockDevice(*this, true);
+    m_IsLockedInDSM = true;
+  } // lock
+
+  void Device::unlock() {
+    m_pApartment->getDeviceBusInterface()->lockOrUnlockDevice(*this, false);
+    m_IsLockedInDSM = false;
+  } // unlock
 
   bool Device::hasTag(const std::string& _tagName) const {
     if(m_TagsNode != NULL) {

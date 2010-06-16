@@ -60,6 +60,7 @@ namespace dss {
     unsigned long m_Consumption;
     DateTime m_LastDiscovered;
     DateTime m_FirstSeen;
+    bool m_IsLockedInDSM;
 
     PropertyNodePtr m_pPropertyNode;
     PropertyNodePtr m_pAliasNode;
@@ -188,6 +189,15 @@ namespace dss {
     /** Publishes the device to the property tree.
      * @see DSS::getPropertySystem */
     void publishToPropertyTree();
+
+    /** Returns wheter the dSM has been told to never forget
+        this device (cached value) */
+    bool getIsLockedInDSM() const { return m_IsLockedInDSM; }
+    void setIsLockedInDSM(const bool _value);
+    /** Tells the dSM to never forget a device. */
+    void lock();
+    /** Tells the dSM that it may forget a device if it's not present. */
+    void unlock();
 
     bool hasTag(const std::string& _tagName) const;
     void addTag(const std::string& _tagName);

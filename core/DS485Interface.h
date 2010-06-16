@@ -34,7 +34,7 @@
 namespace dss {
 
   class Device;
-  
+
   typedef boost::tuple<int, int, int, std::string, int> DSMeterSpec_t; // bus-id, sw-version, hw-version, name, device-id
   typedef boost::tuple<int, int, int, int> DeviceSpec_t; // function id, product id, revision, bus address
 
@@ -48,6 +48,8 @@ namespace dss {
 
     virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) = 0;
     virtual int getSensorValue(const Device& _device, const int _sensorID) = 0;
+    /** Tells the dSM to lock the device if \a _lock is true. */
+    virtual void lockOrUnlockDevice(const Device& _device, const bool _lock) = 0;
 
     virtual ~DeviceBusInterface() {}; // please the compiler (virtual dtor)
   }; // DeviceBusInterface
@@ -95,8 +97,9 @@ namespace dss {
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, uint8_t _dsMeterID) = 0;
 
     virtual ~StructureQueryBusInterface() {}; // please the compiler (virtual dtor)
+    virtual bool isLocked(const Device& _device) = 0;
   }; // StructureQueryBusInterface
-  
+
   class StructureModifyingBusInterface {
   public:
     /** Adds the given device to the specified zone. */

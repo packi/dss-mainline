@@ -38,7 +38,7 @@
 #include "modelmaintenance.h"
 
 namespace dss {
-  
+
   BusScanner::BusScanner(StructureQueryBusInterface& _interface, Apartment& _apartment, ModelMaintenance& _maintenance)
   : m_Apartment(_apartment),
     m_Interface(_interface),
@@ -118,7 +118,7 @@ namespace dss {
           productID = spec.get<1>();
           revisionID = spec.get<2>();
         } catch(DS485ApiError& e) {
-          log("scanDSMeter: Error getting device spec", lsFatal);
+          log(std::string("scanDSMeter: Error getting device spec ") + e.what(), lsFatal);
           return false;
         }
         log("scanDSMeter:    Found device with address: " + intToString(devID));
@@ -127,6 +127,7 @@ namespace dss {
             ", Product-ID: " + unsignedLongIntToHexString(productID) +
             ", Revision-ID: " + unsignedLongIntToHexString(revisionID)
             );
+
         Device& dev = m_Apartment.allocateDevice(dsid);
         dev.setShortAddress(devID);
         dev.setDSMeter(_dsMeter);
@@ -135,6 +136,14 @@ namespace dss {
         dev.setProductID(productID);
         dev.setRevisionID(revisionID);
 
+        try {
+          bool locked = m_Interface.isLocked(dev);
+          dev.setIsLockedInDSM(locked);
+
+          log(std::string("scanDSMeter:   Device is ") + (locked ? "locked" : "unlocked"));
+        } catch(DS485ApiError& e) {
+          log(std::string("scanDSMeter: Error getting devices lock state, not aborting scan (") + e.what() + ")", lsWarning);
+        }
         std::vector<int> groupIdperDevices = m_Interface.getGroupsOfDevice(dsMeterID, devID);
         std::vector<int> groupIDsPerDevice = m_Interface.getGroupsOfDevice(dsMeterID,devID);
         foreach(int groupID, groupIDsPerDevice) {

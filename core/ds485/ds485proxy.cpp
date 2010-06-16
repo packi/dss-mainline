@@ -159,6 +159,43 @@ namespace dss {
     return spec;
   } // deviceGetSpec
 
+  void DS485Proxy::lockOrUnlockDevice(const Device& _device, const bool _lock) {
+    DS485CommandFrame frame;
+    frame.getHeader().setDestination(_device.getDSMeterID());
+    frame.getHeader().setBroadcast(false);
+    frame.setCommand(CommandRequest);
+    frame.getPayload().add<uint8_t>(FunctionDeviceLock);
+    frame.getPayload().add<devid_t>(_device.getShortAddress());
+    if(_lock) {
+      frame.getPayload().add<uint16_t>(1);
+    } else {
+      frame.getPayload().add<uint16_t>(0);
+    }
+    int result = receiveSingleResult16(frame, FunctionDeviceLock);
+    checkResultCode(result);
+  } // lockOrUnlockDevice
+
+  bool DS485Proxy::isLocked(const Device& _device) {
+    DS485CommandFrame frame;
+    frame.getHeader().setDestination(_device.getDSMeterID());
+    frame.getHeader().setBroadcast(false);
+    frame.setCommand(CommandRequest);
+    frame.getPayload().add<uint8_t>(FunctionDeviceLock);
+    frame.getPayload().add<devid_t>(_device.getShortAddress());
+    frame.getPayload().add<uint16_t>(2);
+
+    boost::shared_ptr<DS485CommandFrame> resFrame = receiveSingleFrame(frame, FunctionDeviceLock);
+    if(resFrame != NULL) {
+      PayloadDissector pd(resFrame->getPayload());
+      pd.get<uint8_t>(); // skip the command id
+      int opResult = pd.get<uint16_t>();
+      checkResultCode(opResult);
+      int result = pd.get<uint16_t>();
+      return result == 1;
+    }
+    return false;
+  } // isLocked
+
   void DS485Proxy::sendFrame(DS485CommandFrame& _frame) {
     _frame.setFrameSource(fsDSS);
     bool broadcast = _frame.getHeader().isBroadcast();
