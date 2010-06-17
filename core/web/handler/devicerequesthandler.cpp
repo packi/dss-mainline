@@ -147,9 +147,15 @@ namespace dss {
         pDevice->disable();
         return success();
       } else if(_request.getMethod() == "lock") {
+        if (!pDevice->isPresent()) {
+          return failure("Device is not present");
+        }
         pDevice->lock();
         return success();
       } else if(_request.getMethod() == "unlock") {
+        if (!pDevice->isPresent()) {
+          return failure("Device is not present");
+        }
         pDevice->unlock();
         return success();
       } else if(_request.getMethod() == "setRawValue") {
