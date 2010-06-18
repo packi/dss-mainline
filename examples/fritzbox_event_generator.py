@@ -25,7 +25,7 @@ from suds.client import Client
 import telnetlib
 import time
 
-url = 'https://localhost:8080/dss.wsdl'
+url = 'http://localhost:8080/dss.wsdl'
 fritzBoxHost = 'fritz.box'
 fritzBoxPort = 1012
 filter = None
