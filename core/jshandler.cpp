@@ -319,6 +319,17 @@ namespace dss {
     }
   } // removeAttachedObject
 
+  ScriptContextAttachedObject* ScriptContext::getAttachedObjectByName(const std::string& _name) {
+    typedef std::vector<ScriptContextAttachedObject*>::iterator AttachedObjectIterator;
+    for(AttachedObjectIterator iObject = m_AttachedObjects.begin(), e = m_AttachedObjects.end();
+        iObject != e; ++iObject) {
+      if((*iObject)->getName() == _name) {
+        return *iObject;
+      }
+    }
+    return NULL;
+  } // getAttachedObjectByName
+
   bool ScriptContext::raisePendingExceptions() {
     if(JS_IsExceptionPending(m_pContext)) {
       jsval exval;
