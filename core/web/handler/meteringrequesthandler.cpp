@@ -146,7 +146,7 @@ namespace dss {
           boost::shared_ptr<std::deque<CurrentValue> > values = s->getExpandedValues();
 
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-          resultObj->addProperty("dSSimID", deviceDSIDString);
+          resultObj->addProperty("meterID", deviceDSIDString);
           resultObj->addProperty("type", typeString);
           resultObj->addProperty("resolution", resolutionString);
           boost::shared_ptr<JSONArrayBase> valuesArray(new JSONArrayBase);
