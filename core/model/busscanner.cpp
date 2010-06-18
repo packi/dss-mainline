@@ -144,8 +144,7 @@ namespace dss {
         } catch(DS485ApiError& e) {
           log(std::string("scanDSMeter: Error getting devices lock state, not aborting scan (") + e.what() + ")", lsWarning);
         }
-        std::vector<int> groupIdperDevices = m_Interface.getGroupsOfDevice(dsMeterID, devID);
-        std::vector<int> groupIDsPerDevice = m_Interface.getGroupsOfDevice(dsMeterID,devID);
+        std::vector<int> groupIDsPerDevice = m_Interface.getGroupsOfDevice(dsMeterID, devID);
         foreach(int groupID, groupIDsPerDevice) {
           log(std::string("scanDSMeter: adding device ") + intToString(devID) + " to group " + intToString(groupID));
           dev.addToGroup(groupID);
@@ -205,7 +204,6 @@ namespace dss {
     }
     _dsMeter.setIsValid(true);
     return true;
-
   } // scanDSMeter
 
   void BusScanner::log(const std::string& _line, aLogSeverity _severity) {
