@@ -2,8 +2,8 @@ var LOGFILE_NAME = "ping.log";
 var l = new Logger(LOGFILE_NAME);
 
 if (raisedEvent.name == "running") {
-  setProperty("/system/js/settings/extendedPing/session", 0);
-  setProperty("/system/js/settings/extendedPing/active", 0);
+  setProperty("/system/js/settings/extendedPing/session", -1);
+  setProperty("/system/js/settings/extendedPing/active", false);
   setProperty("/system/js/settings/extendedPing/logfile", LOGFILE_NAME);
   setProperty("/system/js/features/extendedPing", true);
   l.logln("Extended ping script initialized");
