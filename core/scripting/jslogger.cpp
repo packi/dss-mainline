@@ -78,11 +78,13 @@ namespace dss {
           dynamic_cast<ScriptLoggerContextWrapper*>(attachedObj);
         if(wrapper != NULL) {
           Logger::getInstance()->log(JS_GetStringBytes(str));
-            if(newline) {
-              wrapper->getLogger()->logln(JS_GetStringBytes(str));
-            } else {
-              wrapper->getLogger()->log(JS_GetStringBytes(str));
-            }
+          if(newline) {
+            wrapper->getLogger()->logln(JS_GetStringBytes(str));
+          } else {
+            wrapper->getLogger()->log(JS_GetStringBytes(str));
+          }
+        } else {
+          Logger::getInstance()->log("Could not find logger named: " + LoggerObjectName + logfileStr, lsWarning);
         }
       }
     }
@@ -193,6 +195,7 @@ namespace dss {
   } // logln
 
   ScriptLogger::~ScriptLogger() {
+    Logger::getInstance()->log("Destroying logger with filename: " + m_fileName);
     if(m_f) {
       fclose(m_f);
     }
@@ -204,7 +207,7 @@ namespace dss {
 
   ScriptLoggerExtension::ScriptLoggerExtension(const std::string _directory) 
   : ScriptExtension(ScriptLoggerExtensionName),
-    m_Directory(_directory)
+    m_Directory(addTrailingBackslash(_directory))
   { } // ctor
 
   ScriptLoggerExtension::~ScriptLoggerExtension() {
@@ -225,9 +228,9 @@ namespace dss {
     if(i == m_Loggers.end()) {
       result.reset(new ScriptLogger(m_Directory, _filename, this));
       boost::weak_ptr<ScriptLogger> loggerWeakPtr(result);
-      m_Loggers[_filename] = loggerWeakPtr;
+      m_Loggers[m_Directory + _filename] = loggerWeakPtr;
     } else {
-      result = m_Loggers[_filename].lock();
+      result = m_Loggers[m_Directory + _filename].lock();
     }
     m_MapMutex.unlock();
     return result;
@@ -239,7 +242,7 @@ namespace dss {
     if(i != m_Loggers.end()) {
       m_Loggers.erase(i);
     } else {
-      Logger::getInstance()->log("Tried to remove nonexistent logger!", lsWarning);
+      Logger::getInstance()->log("Tried to remove nonexistent logger '" + _filename + "' !", lsWarning);
     }
     m_MapMutex.unlock();
   } // removeLogger
