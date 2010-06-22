@@ -31,30 +31,38 @@ along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/ptr_container/ptr_map.hpp>
 
 namespace dss {
+
+  class ScriptLoggerExtension;
+
   class ScriptLogger {
   public:
-    ScriptLogger(const std::string& _logname);
+    ScriptLogger(const std::string& _filePath, 
+                 const std::string& _logname, 
+                 ScriptLoggerExtension* _pExtension);
     ~ScriptLogger();
     void log(const std::string& text);
     void logln(const std::string& text);
+    const std::string& getFileName() const { return m_fileName; }
 
   private:
     std::string m_fileName;
     FILE *m_f;
     Mutex m_LogWriteMutex;
+    ScriptLoggerExtension* m_pExtension;
   };
 
   class ScriptLoggerExtension : public ScriptExtension {
   public:
-    ScriptLoggerExtension();
+    ScriptLoggerExtension(const std::string _directory);
     virtual ~ScriptLoggerExtension();
     virtual void extendContext(ScriptContext& _context);
-    boost::shared_ptr<ScriptLogger>& getLogger(const std::string& _filename);
+    boost::shared_ptr<ScriptLogger> getLogger(const std::string& _filename);
     void removeLogger(const std::string& _filename);
 
   private:
-    boost::ptr_map<const std::string, boost::shared_ptr<ScriptLogger> > m_Loggers;
+    boost::ptr_map<const std::string, boost::weak_ptr<ScriptLogger> > m_Loggers;
     Mutex m_MapMutex;
+    const std::string m_Directory;
   };
 }
 
