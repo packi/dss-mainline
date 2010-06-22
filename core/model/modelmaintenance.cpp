@@ -459,6 +459,14 @@ namespace dss {
       }
     }
 
+    try {
+      bool locked = getDSS().getDS485Interface().getStructureQueryBusInterface()->isLocked(dev);
+      dev.setIsLockedInDSM(locked);
+      log(std::string("onAddDevice: Device is ") + (locked ? "locked" : "unlocked"));
+    } catch(DS485ApiError& e) {
+      log(std::string("onAddDevice: Error getting devices lock state, continuing (") + e.what() + ")", lsWarning);
+    }
+
     DSMeter& dsMeter = m_pApartment->getDSMeterByBusID(_modID);
 
     // update device

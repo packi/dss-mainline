@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions name="dss"
- targetNamespace="https://localhost:8080/dss.wsdl"
- xmlns:tns="https://localhost:8080/dss.wsdl"
+ targetNamespace="http://localhost:8080/dss.wsdl"
+ xmlns:tns="http://localhost:8080/dss.wsdl"
  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -3716,7 +3716,7 @@
 <service name="dss">
  <documentation>gSOAP 2.7.10 generated service definition</documentation>
  <port name="dss" binding="tns:dss">
-  <SOAP:address location="https://localhost:8081"/>
+  <SOAP:address location="http://localhost:8081"/>
  </port>
 </service>
 
