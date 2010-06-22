@@ -59,6 +59,8 @@ namespace dss {
     boost::shared_ptr<ScriptLogger> getLogger(const std::string& _filename);
     void removeLogger(const std::string& _filename);
 
+    int getNumberOfLoggers() const { return m_Loggers.size(); }
+
   private:
     boost::ptr_map<const std::string, boost::weak_ptr<ScriptLogger> > m_Loggers;
     Mutex m_MapMutex;
