@@ -442,6 +442,7 @@ public:
     while(!m_Terminated) {
       m_pNode->setIntegerValue(2);
     }
+    Logger::getInstance()->log("thread terminating");
   }
 
 private:
@@ -456,9 +457,10 @@ BOOST_AUTO_TEST_CASE(testThreading) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluate<void>("var func = setProperty('/testing1', 1); setProperty('/testing2', 1); "
-                      "l1 = setListener('/testing1', function() { setProperty('/itWorks', true); } ); "
-                      "l2 = setListener('/testing2', function() { setProperty('/itWorks', true); } ); "
+  ctx->evaluate<void>("setProperty('/testing1', 1); setProperty('/testing2', 1); "
+                      "var callbackFunc = function() { setProperty('/itworks', true); };"
+                      "var l1 = setListener('/testing1', callbackFunc); "
+                      "var l2 = setListener('/testing2', callbackFunc); "
       );
 
   PropertyNodePtr node1 = propSys.getProperty("/testing1");
@@ -466,6 +468,7 @@ BOOST_AUTO_TEST_CASE(testThreading) {
 
   // different nodes
   {
+    Logger::getInstance()->log("different nodes");
     TestThreadingThread t1(node1);
     TestThreadingThread t2(node2);
     t1.run();
@@ -480,6 +483,7 @@ BOOST_AUTO_TEST_CASE(testThreading) {
 
   // same node
   {
+    Logger::getInstance()->log("same node");
     TestThreadingThread t1(node1);
     TestThreadingThread t2(node1);
     t1.run();
