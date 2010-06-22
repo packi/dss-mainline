@@ -224,13 +224,14 @@ namespace dss {
   boost::shared_ptr<ScriptLogger> ScriptLoggerExtension::getLogger(const std::string& _filename) {
     boost::shared_ptr<ScriptLogger> result;
     m_MapMutex.lock();
-    boost::ptr_map<const std::string, boost::weak_ptr<ScriptLogger> >::iterator i = m_Loggers.find(_filename);
+    std::string loggerName = m_Directory + _filename;
+    boost::ptr_map<const std::string, boost::weak_ptr<ScriptLogger> >::iterator i = m_Loggers.find(loggerName);
     if(i == m_Loggers.end()) {
       result.reset(new ScriptLogger(m_Directory, _filename, this));
       boost::weak_ptr<ScriptLogger> loggerWeakPtr(result);
-      m_Loggers[m_Directory + _filename] = loggerWeakPtr;
+      m_Loggers[loggerName] = loggerWeakPtr;
     } else {
-      result = m_Loggers[m_Directory + _filename].lock();
+      result = m_Loggers[loggerName].lock();
     }
     m_MapMutex.unlock();
     return result;
