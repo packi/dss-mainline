@@ -297,7 +297,7 @@ namespace dss {
   } // ctor
 
   ScriptContext::~ScriptContext() {
-    //scrubVector(m_AttachedObjects);
+    scrubVector(m_AttachedObjects);
     if(!m_AttachedObjects.empty()) {
       Logger::getInstance()->log("Still have some attached objects (" + intToString(m_AttachedObjects.size()) + "). Memory leak?", lsError);
     }
