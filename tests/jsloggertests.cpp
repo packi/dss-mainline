@@ -23,10 +23,14 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/filesystem.hpp>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
+
+#include <iostream>
+#include <fstream>
 
 #include "core/base.h"
 #include "core/scripting/scriptobject.h"
@@ -36,6 +40,8 @@
 using namespace std;
 using namespace dss;
 
+namespace fs = boost::filesystem;
+
 BOOST_AUTO_TEST_SUITE(JSLogger)
 
 BOOST_AUTO_TEST_CASE(testOneLoggerGetsCleanedUp) {
@@ -44,9 +50,13 @@ BOOST_AUTO_TEST_CASE(testOneLoggerGetsCleanedUp) {
   ScriptLoggerExtension* ext = new ScriptLoggerExtension(getTempDir());
   env->addExtension(ext);
 
+  fs::remove(getTempDir() + "blalog");
+  fs::remove(getTempDir() + "blalog2");
+
   {
     boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-    ctx->evaluate<void>("var logger = new Logger('blalog');\n");
+    ctx->evaluate<void>("var logger = new Logger('blalog');\n"
+                        "logger.log('kraah');\n");
     BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 1); 
   }
   
@@ -66,11 +76,53 @@ BOOST_AUTO_TEST_CASE(testOneLoggerGetsCleanedUp) {
     boost::scoped_ptr<ScriptContext> ctx(env->getContext());
     ctx->evaluate<void>("var logger = new Logger('blalog');\n");
     BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 1); 
-    ctx->evaluate<void>("var logger2 = new Logger('blalog2');\n");
+    ctx->evaluate<void>("var logger2 = new Logger('blalog2');\n"
+                        "logger2.log('karkar');\n");
+
     BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 2); 
   }
   
-  BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 0); 
+  BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 0);
+
+  BOOST_CHECK(fs::exists(getTempDir() + "blalog"));
+  BOOST_CHECK(fs::exists(getTempDir() + "blalog2"));
+
+
+  std::string line;
+  std::string text;
+
+
+  if (fs::exists(getTempDir() + "blalog")) {
+    ifstream blalog(std::string(getTempDir() + "blalog").c_str());
+    if (blalog.is_open()) {
+      while (!blalog.eof()) {
+        getline(blalog, line);
+        text = text + line;
+      }
+      blalog.close();
+    }
+  }
+
+  BOOST_CHECK(text.find("kraah") != std::string::npos);
+
+  text.clear();
+  line.clear();
+
+  if (fs::exists(getTempDir() + "blalog2")) {
+    ifstream blalog(std::string(getTempDir() + "blalog2").c_str());
+    if (blalog.is_open()) {
+      while (!blalog.eof()) {
+        getline(blalog, line);
+        text = text + line;
+      }
+      blalog.close();
+    }
+  }
+
+  BOOST_CHECK(text.find("karkar") != std::string::npos);
+
+  fs::remove(getTempDir() + "blalog");
+  fs::remove(getTempDir() + "blalog2");
 }
 
 
