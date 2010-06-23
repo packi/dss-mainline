@@ -300,7 +300,8 @@ namespace dss {
     } catch(ScriptException& e) {
       Logger::getInstance()->log("PropertyScriptListener::doOnChange: Caught exception while calling handler: " + std::string(e.what()), lsFatal);
     }
-    JS_GC(getContext()->getJSContext());
+    // FIXME: temporary workaround for crash when setting property listeners
+    // JS_GC(getContext()->getJSContext()); 
   } // doOnChange
 
 }
