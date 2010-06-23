@@ -127,6 +127,7 @@ namespace dss {
     void attachObject(ScriptContextAttachedObject* _pObject);
     void removeAttachedObject(ScriptContextAttachedObject* _pObject);
     bool hasAttachedObjects() const { return !m_AttachedObjects.empty(); }
+    ScriptContextAttachedObject* getAttachedObjectByName(const std::string& _name);
   public:
 
     /** Helper function to convert a jsval to a t. */
@@ -209,13 +210,23 @@ namespace dss {
       assert(m_pContext != NULL);
       m_pContext->attachObject(this);
     }
-    ~ScriptContextAttachedObject() {
+
+    ScriptContextAttachedObject(ScriptContext* _pContext, const std::string& _name)
+    : m_pContext(_pContext), m_Name(_name)
+    {
+      assert(m_pContext != NULL);
+      m_pContext->attachObject(this);
+    }
+
+    virtual ~ScriptContextAttachedObject() {
       m_pContext->removeAttachedObject(this);
     }
 
     ScriptContext* getContext() { return m_pContext; }
+    const std::string& getName() const { return m_Name; }
   private:
     ScriptContext* m_pContext;
+    std::string m_Name;
   }; // ScriptContextAttachedObject
 
   /** Adds a JS-function callback to the root GC set and thus

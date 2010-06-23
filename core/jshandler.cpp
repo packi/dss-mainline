@@ -297,7 +297,7 @@ namespace dss {
   } // ctor
 
   ScriptContext::~ScriptContext() {
-    //scrubVector(m_AttachedObjects);
+    scrubVector(m_AttachedObjects);
     if(!m_AttachedObjects.empty()) {
       Logger::getInstance()->log("Still have some attached objects (" + intToString(m_AttachedObjects.size()) + "). Memory leak?", lsError);
     }
@@ -318,6 +318,17 @@ namespace dss {
       m_AttachedObjects.erase(it);
     }
   } // removeAttachedObject
+
+  ScriptContextAttachedObject* ScriptContext::getAttachedObjectByName(const std::string& _name) {
+    typedef std::vector<ScriptContextAttachedObject*>::iterator AttachedObjectIterator;
+    for(AttachedObjectIterator iObject = m_AttachedObjects.begin(), e = m_AttachedObjects.end();
+        iObject != e; ++iObject) {
+      if((*iObject)->getName() == _name) {
+        return *iObject;
+      }
+    }
+    return NULL;
+  } // getAttachedObjectByName
 
   bool ScriptContext::raisePendingExceptions() {
     if(JS_IsExceptionPending(m_pContext)) {
