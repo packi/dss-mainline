@@ -429,73 +429,24 @@ namespace dss {
   } // onDeviceCallScene
 
   void ModelMaintenance::onAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID) {
-    // get full dsid
     log("New Device found");
     log("  DSMeter: " + intToString(_modID));
     log("  Zone:      " + intToString(_zoneID));
     log("  BusID:     " + intToString(_devID));
     log("  FID:       " + intToString(_functionID));
 
-    dsid_t dsid = getDSS().getDS485Interface().getStructureQueryBusInterface()->getDSIDOfDevice(_modID, _devID);
-    Device& dev = m_pApartment->allocateDevice(dsid);
-    DeviceReference devRef(dev, m_pApartment);
-
-    log("  DSID:      " + dsid.toString());
-
-    // remove from old dsMeter
+    BusScanner
+      scanner(
+        *getDSS().getDS485Interface().getStructureQueryBusInterface(),
+        *m_pApartment,
+        *this
+      );
     try {
-      DSMeter& oldDSMeter = m_pApartment->getDSMeterByBusID(dev.getDSMeterID());
-      oldDSMeter.removeDevice(devRef);
-    } catch(std::runtime_error&) {
-    }
-
-    // remove from old zone
-    if(dev.getZoneID() != 0) {
-      try {
-        Zone& oldZone = m_pApartment->getZone(dev.getZoneID());
-        oldZone.removeDevice(devRef);
-        // TODO: check if the zone is empty on the dsMeter and remove it in that case
-      } catch(std::runtime_error&) {
-      }
-    }
-
-    try {
-      bool locked = getDSS().getDS485Interface().getStructureQueryBusInterface()->isLocked(dev);
-      dev.setIsLockedInDSM(locked);
-      log(std::string("onAddDevice: Device is ") + (locked ? "locked" : "unlocked"));
-    } catch(DS485ApiError& e) {
-      log(std::string("onAddDevice: Error getting devices lock state, continuing (") + e.what() + ")", lsWarning);
-    }
-
-    DSMeter& dsMeter = m_pApartment->getDSMeterByBusID(_modID);
-
-    // update device
-    dev.setDSMeter(dsMeter);
-    dev.setZoneID(_zoneID);
-    dev.setShortAddress(_devID);
-    dev.setFunctionID(_functionID);
-    dev.setIsPresent(true);
-
-    dsMeter.addDevice(devRef);
-
-    // add to new zone
-    Zone& newZone = m_pApartment->allocateZone(_zoneID);
-    newZone.addToDSMeter(dsMeter);
-    newZone.addDevice(devRef);
-
-    // get groups of device
-    dev.resetGroups();
-    std::vector<int> groups = getDSS().getDS485Interface().getStructureQueryBusInterface()->getGroupsOfDevice(_modID, _devID);
-    foreach(int iGroup, groups) {
-      log("  Adding to Group: " + intToString(iGroup));
-      dev.addToGroup(iGroup);
-    }
-
-    {
-      boost::shared_ptr<Event> readyEvent(new Event("new_device"));
-      readyEvent->setProperty("device", dsid.toString());
-      readyEvent->setProperty("zone", intToString(_zoneID));
-      raiseEvent(readyEvent);
+      DSMeter& dsMeter = m_pApartment->getDSMeterByBusID(_modID);
+      Zone& zone = m_pApartment->allocateZone(_zoneID);
+      scanner.scanDeviceOnBus(dsMeter, zone, _devID);
+    } catch(std::runtime_error& e) {
+      log(std::string("Error scanning device: ") + e.what());
     }
   } // onAddDevice
 

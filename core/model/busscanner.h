@@ -24,6 +24,7 @@
 #define BUSSCANNER_H
 
 #include "core/logger.h"
+#include "core/ds485types.h"
 
 namespace dss {
 
@@ -31,12 +32,16 @@ namespace dss {
   class Apartment;
   class DSMeter;
   class ModelMaintenance;
-  
+  class Zone;
+
   class BusScanner {
   public:
     BusScanner(StructureQueryBusInterface& _interface, Apartment& _apartment, ModelMaintenance& _maintenance);
     bool scanDSMeter(DSMeter& _dsMeter);
+    bool scanDeviceOnBus(DSMeter& _dsMeter, Zone& _zone, devid_t _shortAddress);
   private:
+    bool scanZone(DSMeter& _dsMeter, Zone& _zone);
+    bool scanGroupsOfZone(DSMeter& _dsMeter, Zone& _zone);
     void log(const std::string& _line, aLogSeverity _severity = lsDebug);
   private:
     Apartment& m_Apartment;
