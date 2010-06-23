@@ -36,9 +36,9 @@ namespace dss {
   class ScriptLoggerContextWrapper : public ScriptContextAttachedObject {
   public:
     ScriptLoggerContextWrapper(ScriptContext* _pContext, boost::shared_ptr<ScriptLogger> _logger)
-    : ScriptContextAttachedObject(_pContext, LoggerObjectName + _logger->getFileName()),
+    : ScriptContextAttachedObject(_pContext, LoggerObjectName + _logger->getLogName()),
       m_ScriptLogger(_logger)
-    {}
+    { }
 
     boost::shared_ptr<ScriptLogger> getLogger() { return m_ScriptLogger; }
   private:
@@ -163,14 +163,15 @@ namespace dss {
     /// directories, etc.
 
     m_pExtension = _pExtension;
-    m_fileName = _filePath + _filename;
-    m_f = fopen(m_fileName.c_str(), "a+");
+    m_logName = _filename;
+    std::string fileName = _filePath + _filename;
+    m_f = fopen(fileName.c_str(), "a+");
     if (!m_f) {
-      throw std::runtime_error("Could not open file " + m_fileName + " for writing");
+      throw std::runtime_error("Could not open file " + fileName + " for writing");
     }
     if(DSS::hasInstance()) {
-      DSS::getInstance()->getPropertySystem().setStringValue("/system/js/logsfiles/" + _filename, m_fileName, true, false);
-      DSS::getInstance()->getPropertySystem().setStringValue("/config/subsystems/WebServer/files/" + _filename, m_fileName, true, false);
+      DSS::getInstance()->getPropertySystem().setStringValue("/system/js/logsfiles/" + _filename, fileName, true, false);
+      DSS::getInstance()->getPropertySystem().setStringValue("/config/subsystems/WebServer/files/" + _filename, fileName, true, false);
     }
   } // ctor
 
@@ -195,11 +196,11 @@ namespace dss {
   } // logln
 
   ScriptLogger::~ScriptLogger() {
-    Logger::getInstance()->log("Destroying logger with filename: " + m_fileName);
+    Logger::getInstance()->log("Destroying logger with filename: " + m_logName);
     if(m_f) {
       fclose(m_f);
     }
-    m_pExtension->removeLogger(m_fileName);
+    m_pExtension->removeLogger(m_logName);
   } // dtor
 
   
@@ -224,14 +225,13 @@ namespace dss {
   boost::shared_ptr<ScriptLogger> ScriptLoggerExtension::getLogger(const std::string& _filename) {
     boost::shared_ptr<ScriptLogger> result;
     m_MapMutex.lock();
-    std::string loggerName = m_Directory + _filename;
-    boost::ptr_map<const std::string, boost::weak_ptr<ScriptLogger> >::iterator i = m_Loggers.find(loggerName);
+    boost::ptr_map<const std::string, boost::weak_ptr<ScriptLogger> >::iterator i = m_Loggers.find(_filename);
     if(i == m_Loggers.end()) {
       result.reset(new ScriptLogger(m_Directory, _filename, this));
       boost::weak_ptr<ScriptLogger> loggerWeakPtr(result);
-      m_Loggers[loggerName] = loggerWeakPtr;
+      m_Loggers[_filename] = loggerWeakPtr;
     } else {
-      result = m_Loggers[loggerName].lock();
+      result = m_Loggers[_filename].lock();
     }
     m_MapMutex.unlock();
     return result;

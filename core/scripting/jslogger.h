@@ -42,10 +42,10 @@ namespace dss {
     ~ScriptLogger();
     void log(const std::string& text);
     void logln(const std::string& text);
-    const std::string& getFileName() const { return m_fileName; }
+    const std::string& getLogName() const { return m_logName; }
 
   private:
-    std::string m_fileName;
+    std::string m_logName;
     FILE *m_f;
     Mutex m_LogWriteMutex;
     ScriptLoggerExtension* m_pExtension;
