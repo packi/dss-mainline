@@ -138,5 +138,18 @@ BOOST_AUTO_TEST_CASE(testJSONEscape) {
   BOOST_CHECK_EQUAL(value, "\"\\\\\\\"\\b\\f\\n\\r\\t\\u001B\"");
 }
 
+BOOST_AUTO_TEST_CASE(testGetElementByName) {
+  const std::string kElementName = "child";
+  boost::shared_ptr<JSONElement> parent(new JSONObject());
+  boost::shared_ptr<JSONElement> child(new JSONObject());
+  parent->addElement(kElementName, child);
+  BOOST_CHECK_EQUAL(parent->getElementByName(kElementName), child);
+}
+
+BOOST_AUTO_TEST_CASE(testGetElementByNameReturnsNull) {
+  const std::string kElementName = "child";
+  boost::shared_ptr<JSONElement> parent(new JSONObject());
+  BOOST_CHECK_EQUAL(parent->getElementByName(kElementName), boost::shared_ptr<JSONElement>());
+}
 
 BOOST_AUTO_TEST_SUITE_END()
