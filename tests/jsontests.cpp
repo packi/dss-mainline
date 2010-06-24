@@ -132,5 +132,11 @@ BOOST_AUTO_TEST_CASE(testObjectWithSubArray) {
   BOOST_CHECK_EQUAL(value, "{\"elements\":[1,2]}");
 }
 
+BOOST_AUTO_TEST_CASE(testJSONEscape) {
+  JSONValue<std::string> str("\\\"\b\f\n\r\t\e");
+  std::string value = str.toString();
+  BOOST_CHECK_EQUAL(value, "\"\\\\\\\"\\b\\f\\n\\r\\t\\u001B\"");
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
