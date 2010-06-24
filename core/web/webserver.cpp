@@ -147,10 +147,10 @@ namespace dss {
       log(std::string("Caught exception while loading: ") + e.what(), lsError);
       return;
     }
-    m_Plugins.push_back(plugin);
 
     log("Registering " + pFileNode->getStringValue() + " for URI '" + pURINode->getStringValue() + "'");
-    mg_set_uri_callback(m_mgContext, pURINode->getStringValue().c_str(), &httpPluginCallback, plugin);
+    
+    m_Plugins.push_back(plugin);
   } // loadPlugin
 
   void WebServer::setupAPI() {
@@ -167,9 +167,7 @@ namespace dss {
     log("Webserver: Configured aliases: " + aliases);
     mg_set_option(m_mgContext, "aliases", aliases.c_str());
 
-    mg_set_uri_callback(m_mgContext, "/browse/*", &httpBrowseProperties, NULL);
-    mg_set_uri_callback(m_mgContext, "/json/*", &jsonHandler, NULL);
-    mg_set_uri_callback(m_mgContext, "/download/*", &downloadHandler, NULL);
+    mg_set_callback(m_mgContext, MG_EVENT_NEW_REQUEST, &httpRequestCallback);
 
     loadPlugins();
 
@@ -254,20 +252,6 @@ namespace dss {
     m_Handlers[kHandlerMetering] = new MeteringRequestHandler(getDSS().getApartment(), getDSS().getMetering());
     m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());
   } // instantiateHandlers
-
-  void WebServer::httpPluginCallback(struct mg_connection* _connection,
-                                     const struct mg_request_info* _info,
-                                     void* _userData) {
-    if(_userData != NULL) {
-      WebServerPlugin* plugin = static_cast<WebServerPlugin*>(_userData);
-      WebServer& self = DSS::getInstance()->getWebServer();
-
-      std::string uri = _info->uri;
-      self.log("Plugin: Processing call to " + uri);
-
-      self.pluginCalled(_connection, _info, *plugin, uri);
-    }
-  } // httpPluginCallback
 
   void WebServer::pluginCalled(struct mg_connection* _connection,
                                const struct mg_request_info* _info,
@@ -356,9 +340,8 @@ namespace dss {
     return result;
   }
 
-  void WebServer::jsonHandler(struct mg_connection* _connection,
-                              const struct mg_request_info* _info,
-                              void* _userData) {
+  mg_error_t WebServer::jsonHandler(struct mg_connection* _connection,
+                              const struct mg_request_info* _info) {
     const std::string urlid = "/json/";
     const char  *cookie;
     std::string setCookie;
@@ -422,11 +405,11 @@ namespace dss {
       self.log("Unknown function '" + method + "'", lsError);
     }
     mg_write(_connection, result.c_str(), result.length());
+    return MG_SUCCESS;
   } // jsonHandler
 
-  void WebServer::downloadHandler(struct mg_connection* _connection,
-                                  const struct mg_request_info* _info,
-                                  void* _userData) {
+  mg_error_t WebServer::downloadHandler(struct mg_connection* _connection,
+                                  const struct mg_request_info* _info) {
     const std::string kURLID = "/download/";
     std::string uri = _info->uri;
 
@@ -455,11 +438,11 @@ namespace dss {
       memset(&st, '\0', sizeof(st));
     }
     mg_send_file(_connection, fileName.c_str(), &st);
+    return MG_SUCCESS;
   } // downloadHandler
 
-  void WebServer::httpBrowseProperties(struct mg_connection* _connection,
-                                       const struct mg_request_info* _info,
-                                       void* _userData) {
+  mg_error_t WebServer::httpBrowseProperties(struct mg_connection* _connection,
+                                       const struct mg_request_info* _info) {
     emitHTTPHeader(200, _connection);
 
     const std::string urlid = "/browse";
@@ -509,6 +492,33 @@ namespace dss {
     stream << "</ul></body></html>";
     std::string tmp = stream.str();
     mg_write(_connection, tmp.c_str(), tmp.length());
+    return MG_SUCCESS;
   } // httpBrowseProperties
 
+  mg_error_t WebServer::httpRequestCallback(struct mg_connection* _connection,
+                                      const struct mg_request_info* _info) {
+
+    std::string uri = _info->uri;
+
+    if (uri.find("/browse/") == 0) {
+      return httpBrowseProperties(_connection, _info);
+    } else if (uri.find("/json/") == 0) {
+      return jsonHandler(_connection, _info);
+    } else if (uri.find("/download/") == 0) {
+      return downloadHandler(_connection, _info);
+    } else {
+      WebServer& self = DSS::getInstance()->getWebServer();
+      if (self.m_Plugins.size() > 0) {
+        for (size_t i = 0; i < self.m_Plugins.size(); i++) {
+          if (uri.find(self.m_Plugins.at(i).getURI()) == 0) {
+            self.log("Plugin: Processing call to " + uri);
+            self.pluginCalled(_connection, _info, self.m_Plugins.at(i), uri);
+            return MG_SUCCESS;
+          }
+        } // for
+      }
+    }
+
+    return MG_NOT_FOUND;
+  }
 }

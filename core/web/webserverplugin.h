@@ -44,6 +44,7 @@ namespace dss {
     WebServerPlugin(const std::string& _uri, const std::string& _file);
     ~WebServerPlugin();
     void load();
+    const std::string& getURI();
     bool handleRequest(const std::string& _uri, HashMapConstStringString& _parameter, DSS& _dss, std::string& result);
   };
 

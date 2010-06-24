@@ -70,18 +70,14 @@ namespace dss {
                       WebServerPlugin& plugin,
                       const std::string& _uri);
 
-    static void httpPluginCallback(struct mg_connection* _connection,
-                                   const struct mg_request_info* _info,
-                                   void* _userData);
-    static void httpBrowseProperties(struct mg_connection* _connection,
-                                   const struct mg_request_info* _info,
-                                   void* _userData);
-    static void jsonHandler(struct mg_connection* _connection,
-                            const struct mg_request_info* _info,
-                            void* _userData);
-    static void downloadHandler(struct mg_connection* _connection,
-                            const struct mg_request_info* _info,
-                            void* _userData);
+    static mg_error_t httpBrowseProperties(struct mg_connection* _connection,
+                                   const struct mg_request_info* _info);
+    static mg_error_t jsonHandler(struct mg_connection* _connection,
+                           const struct mg_request_info* _info);
+    static mg_error_t downloadHandler(struct mg_connection* _connection,
+                               const struct mg_request_info* _info);
+    static mg_error_t httpRequestCallback(struct mg_connection* _connection,
+                                          const struct mg_request_info* _info);
 
     static void emitHTTPHeader(int _code, struct mg_connection* _connection, const std::string& _contentType = "text/html", const std::string& _setCookie = "");
 

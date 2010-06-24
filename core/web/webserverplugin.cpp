@@ -83,5 +83,8 @@ namespace dss {
     return false;
   } // handleRequest
 
+  const std::string& WebServerPlugin::getURI() {
+    return m_URI;
+  }
 
 } // namespace dss
