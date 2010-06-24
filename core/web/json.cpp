@@ -22,12 +22,16 @@
 
 #include "json.h"
 
+#include <iostream>
 #include <sstream>
 
 #include "core/foreach.h"
+#include "core/base.h"
 
 namespace dss {
 
+
+  std::string jsonEncode(const std::string& _value);
 
   //================================================== JSONElement
 
@@ -48,7 +52,7 @@ namespace dss {
         _out << ',';
       }
       first = false;
-      _out << '"' << namedElement.first << '"' << ':';
+      _out << '"' << jsonEncode(namedElement.first) << '"' << ':';
       namedElement.second->writeTo(_out);
     }
   }
@@ -113,7 +117,7 @@ namespace dss {
 
   template<>
   void JSONValue<std::string>::writeTo(std::stringstream& _out) {
-    _out << '"' << m_Value << '"';
+    _out << '"' << jsonEncode(m_Value) << '"';
   }
 
   template<>
@@ -137,5 +141,41 @@ namespace dss {
     writeElementsNoNamesTo(_out);
     _out << "]";
   }
+
+
+  //================================================== Helpers
+
+  std::string jsonEncode(const std::string& _value) {
+    std::ostringstream sstream;
+    for(int iChar = 0, end = _value.size(); iChar < end; iChar++) {
+      char c = _value[iChar];
+      if ((c == '\\') || (c == '"')) {
+        sstream << '\\' << c;
+      } else if (c == '\b') {
+        sstream << "\\b";
+      } else if (c == '\f') {
+        sstream << "\\f";
+      } else if (c == '\n') {
+        sstream << "\\n";
+      } else if (c == '\r') {
+        sstream << "\\r";
+      } else if (c == '\t') {
+        sstream << "\\t";
+      } else {
+        if(c < ' ') {
+          sstream << "\\u";
+          sstream.fill('0');
+          sstream.width(4);
+          sstream << std::hex << std::uppercase;
+          sstream << static_cast<int>(c);
+          sstream << std::nouppercase;
+          sstream.width(1);
+        } else {
+          sstream << c;
+        }
+      }
+    }
+    return sstream.str();
+  } // jsonEncode
 
 } // namespace dss
