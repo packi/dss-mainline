@@ -68,6 +68,15 @@ namespace dss {
     }
   }
 
+  boost::shared_ptr<JSONElement> JSONElement::getElementByName(const std::string& _name) {
+    foreach(NamedElement& namedElement, m_Elements) {
+      if(namedElement.first == _name) {
+        return namedElement.second;
+      }
+    }
+    return boost::shared_ptr<JSONElement>();
+  } // getElementByName
+
 
   //================================================== JSONObject
 
