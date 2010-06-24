@@ -23,6 +23,7 @@
 #include "debugrequesthandler.h"
 
 #include <sstream>
+#include <boost/scoped_ptr.hpp>
 
 #include "core/web/json.h"
 
@@ -215,7 +216,7 @@ namespace dss {
       } catch(std::runtime_error&) {
         return failure("Could not parse Zone ID");
       }
-      DS485CommandFrame* frame = new DS485CommandFrame();
+      boost::scoped_ptr<DS485CommandFrame> frame(new DS485CommandFrame());
       frame->getHeader().setBroadcast(true);
       frame->getHeader().setDestination(0);
       frame->setCommand(CommandRequest);
@@ -227,7 +228,6 @@ namespace dss {
         proxy->sendFrame(*frame);
         return success("Please restart your dSMs");
       } else {
-        delete frame;
         return failure("Proxy has a wrong type or is null");
       }
     }
