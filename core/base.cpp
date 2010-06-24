@@ -266,7 +266,7 @@ namespace dss {
   }
 
   std::string getTempDir() {
-    std::string result = P_tmpdir;
+    std::string result = addTrailingBackslash(P_tmpdir);
     return result;
   }
 
