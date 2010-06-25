@@ -157,7 +157,7 @@ namespace dss {
   std::string jsonEncode(const std::string& _value) {
     std::ostringstream sstream;
     for(int iChar = 0, end = _value.size(); iChar < end; iChar++) {
-      char c = _value[iChar];
+      unsigned char c = _value[iChar];
       if ((c == '\\') || (c == '"')) {
         sstream << '\\' << c;
       } else if (c == '\b') {
