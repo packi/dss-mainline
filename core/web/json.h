@@ -35,6 +35,7 @@ namespace dss {
   class JSONElement {
   public:
     void addElement(const std::string& _name, boost::shared_ptr<JSONElement> _object);
+    boost::shared_ptr<JSONElement> getElementByName(const std::string& _name);
     virtual ~JSONElement() {}
     std::string toString();
   protected:
@@ -61,6 +62,10 @@ namespace dss {
   class JSONValue : public JSONElement {
   public:
     JSONValue(T _value) : m_Value(_value) {}
+
+    const T& getValue() const {
+      return m_Value;
+    }
   protected:
     virtual void writeTo(std::stringstream& _out);
   private:
