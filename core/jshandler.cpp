@@ -495,22 +495,22 @@ namespace dss {
 
   ScriptFunctionRooter::ScriptFunctionRooter()
   : m_pObject(NULL),
-    m_pFunction(NULL),
+    m_Function(JSVAL_NULL),
     m_pContext(NULL)
   {} // ctor
 
   ScriptFunctionRooter::ScriptFunctionRooter(ScriptContext* _pContext, JSObject* _pObject, jsval _function)
   : m_pObject(NULL),
-    m_pFunction(NULL),
+    m_Function(JSVAL_NULL),
     m_pContext(NULL)
   {
     rootFunction(_pContext, _pObject, _function);
   } // ctor
 
   ScriptFunctionRooter::~ScriptFunctionRooter() {
-    if(m_pFunction != NULL) {
+    if(m_Function != JSVAL_NULL) {
       assert(m_pContext != NULL);
-      JS_RemoveRoot(m_pContext->getJSContext(), &m_pFunction);
+      JS_RemoveRoot(m_pContext->getJSContext(), &m_Function);
     }
     if(m_pObject != NULL) {
       assert(m_pContext != NULL);
@@ -523,9 +523,8 @@ namespace dss {
     m_pContext = _pContext;
     m_pObject = _pObject;
     JSContext* cx = m_pContext->getJSContext();
-    JSFunction* function = JS_ValueToFunction(cx, _function);
-    m_pFunction = JS_GetFunctionObject(function);
-    JS_AddRoot(cx, &m_pFunction);
+    m_Function = _function;
+    JS_AddRoot(cx, &m_Function);
     JS_AddRoot(cx, &m_pObject);
   } // rootFunction
 
