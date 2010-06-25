@@ -458,9 +458,8 @@ BOOST_AUTO_TEST_CASE(testThreading) {
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("setProperty('/testing1', 1); setProperty('/testing2', 1); "
-                      "var callbackFunc = function() { setProperty('/itworks', true); };"
-                      "var l1 = setListener('/testing1', callbackFunc); "
-                      "var l2 = setListener('/testing2', callbackFunc); "
+                      "var l1 = setListener('/testing1', function() { setProperty('/itworks', true); }); "
+                      "var l2 = setListener('/testing2', function() { setProperty('/itworks', true); }); "
       );
 
   PropertyNodePtr node1 = propSys.getProperty("/testing1");
