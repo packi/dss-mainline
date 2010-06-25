@@ -240,7 +240,7 @@ namespace dss {
     void rootFunction(ScriptContext* _pContext, JSObject* _pObject, jsval _function);
   private:
     JSObject* m_pObject;
-    JSObject* m_pFunction;
+    jsval m_Function;
     ScriptContext* m_pContext;
   }; // ScriptFunctionRooter
 
