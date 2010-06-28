@@ -357,6 +357,11 @@ namespace dss {
               Logger::getInstance()->log("DS485: received get address request");
               continue;
             }
+          } else if(cmdFrame->getCommand() == CommandSetSuccessorAddressRequest) {
+            if(header.getDestination() == m_StationID) {
+              handleSetSuccessor(cmdFrame);
+              token->getHeader().setDestination(m_NextStationID);
+            }
           } else if(cmdFrame->getCommand() == CommandSolicitSuccessorRequest) {
             if (m_State == csSlave || m_State == csMaster) {
               Logger::getInstance()->log("DS485: bus is reorganizing, restart", lsError);
