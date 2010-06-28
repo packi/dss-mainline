@@ -19,33 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *
- * $Id$
+ * $Id: mongoose.h 517 2010-05-03 12:54:59Z valenok $
  */
 
 #ifndef MONGOOSE_HEADER_INCLUDED
 #define	MONGOOSE_HEADER_INCLUDED
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <stdio.h>
-#include <time.h>
-
-typedef int bool_t;
-#if defined(HAVE_STDINT)
-#include <stdint.h>
-#else
-typedef unsigned int		uint32_t;
-typedef unsigned short		uint16_t;
-#if _MSC_VER > 1200
-typedef unsigned __int64	uint64_t;
-#else
-/* VC6 cannot cast double to unsigned __int64, needed by print_dir_entry() */
-typedef __int64	uint64_t;
-#endif /* _MSC_VER */
-#endif /* HAVE_STDINT */
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,34 +38,40 @@ struct mg_connection;	/* Handle for the individual connection	*/
  * It is passed to the user-specified callback function as a parameter.
  */
 struct mg_request_info {
-	char	*request_method;	/* "GET", "POST", etc	*/
-	char	*uri;			/* Normalized URI	*/
-	char	*http_version;		/* E.g. "1.0", "1.1"	*/
-	char	*query_string;		/* \0 - terminated	*/
-	char	*post_data;		/* POST data buffer	*/
-	char	*remote_user;		/* Authenticated user	*/
-	long	remote_ip;		/* Client's IP address	*/
-	int	remote_port;		/* Client's port	*/
-	int	post_data_len;		/* POST buffer length	*/
-	int	status_code;		/* HTTP status code	*/
-	int	num_headers;		/* Number of headers	*/
+	char	*request_method;	/* "GET", "POST", etc		*/
+	char	*uri;			/* Normalized URI		*/
+	char	*http_version;		/* E.g. "1.0", "1.1"		*/
+	char	*query_string;		/* \0 - terminated		*/
+	char	*post_data;		/* POST data buffer		*/
+	char	*remote_user;		/* Authenticated user		*/
+	char	*log_message;		/* Mongoose error log message	*/
+	long	remote_ip;		/* Client's IP address		*/
+	int	remote_port;		/* Client's port		*/
+	int	post_data_len;		/* POST buffer length		*/
+	int	status_code;		/* HTTP status code		*/
+	int	is_ssl;			/* 1 if SSL-ed, 0 if not	*/
+	int	num_headers;		/* Number of headers		*/
 	struct mg_header {
-		char	*name;		/* HTTP header name	*/
-		char	*value;		/* HTTP header value	*/
-	} http_headers[64];		/* Maximum 64 headers	*/
+		char	*name;		/* HTTP header name		*/
+		char	*value;		/* HTTP header value		*/
+	} http_headers[64];		/* Maximum 64 headers		*/
 };
 
 
 /*
- * User-defined callback function prototype for URI handling, error handling,
- * or logging server messages.
+ * Error codes for all functions that return 'int'.
  */
-typedef void (*mg_callback_t)(struct mg_connection *,
-		const struct mg_request_info *info, void *user_data);
+enum mg_error_t {
+	MG_ERROR,
+	MG_SUCCESS,
+	MG_NOT_FOUND,
+	MG_BUFFER_TOO_SMALL
+};
 
 
 /*
  * Start the web server.
+ *
  * This must be the first function called by the application.
  * It creates a serving thread, and returns a context structure that
  * can be used to alter the configuration, and stop the server.
@@ -97,6 +81,7 @@ struct mg_context *mg_start(void);
 
 /*
  * Stop the web server.
+ *
  * Must be called last, when an application wants to stop the web server and
  * release all associated resources. This function blocks until all Mongoose
  * threads are stopped. Context pointer becomes invalid.
@@ -105,114 +90,92 @@ void mg_stop(struct mg_context *);
 
 
 /*
- * Return current value of a particular option.
+ * Get the current value of a particular option.
+ *
+ * Return:
+ *  MG_SUCCESS, MG_NOT_FOUND, MG_BUFFER_TOO_SMALL
  */
-const char *mg_get_option(const struct mg_context *, const char *option_name);
+enum mg_error_t mg_get_option(struct mg_context *,
+		const char *option_name, char *buf, size_t buf_len);
 
 
 /*
  * Set a value for a particular option.
+ *
  * Mongoose makes an internal copy of the option value string, which must be
  * valid nul-terminated ASCII or UTF-8 string. It is safe to change any option
  * at any time. The order of setting various options is also irrelevant with
  * one exception: if "ports" option contains SSL listening ports, a "ssl_cert"
  * option must be set BEFORE the "ports" option.
- * Return value:
- *	-1 if option is unknown
- *	0  if mg_set_option() failed
- *	1  if mg_set_option() succeeded
+ *
+ * Return:
+ *  MG_ERROR, MG_SUCCESS, or MG_NOT_FOUND if option is unknown.
  */
-int mg_set_option(struct mg_context *, const char *opt_name, const char *value);
+enum mg_error_t mg_set_option(struct mg_context *,
+		const char *name, const char *value);
 
 
 /*
  * Add, edit or delete the entry in the passwords file.
+ *
  * This function allows an application to manipulate .htpasswd files on the
- * fly by adding, deleting and changing user records. This is one of the two
- * ways of implementing authentication on the server side. For another,
- * cookie-based way please refer to the examples/authentication.c in the
- * source tree.
+ * fly by adding, deleting and changing user records. This is one of the
+ * several ways of implementing authentication on the server side. For another,
+ * cookie-based way please refer to the examples/chat.c in the source tree.
+ *
  * If password is not NULL, entry is added (or modified if already exists).
- * If password is NULL, entry is deleted. Return:
- *	1 on success
- *	0 on error
+ * If password is NULL, entry is deleted.
+ *
+ * Return:
+ *  MG_ERROR, MG_SUCCESS
  */
-int mg_modify_passwords_file(struct mg_context *ctx, const char *file_name,
-		const char *user_name, const char *password);
+enum mg_error_t mg_modify_passwords_file(struct mg_context *ctx, 
+		const char *file_name, const char *user, const char *password);
 
 
 /*
- * Register URI handler.
- * It is possible to handle many URIs if using * in the uri_regex, which
- * matches zero or more characters. user_data pointer will be passed to the
- * handler as a third parameter. If func is NULL, then the previously installed
- * handler for this uri_regex is removed.
+ * Attach a callback function to certain event.
+ * Callback must return MG_SUCCESS or MG_ERROR.
+ *
+ * If callback returns MG_SUCCESS, that means that callback has processed the
+ * request by sending appropriate HTTP reply to the client. Mongoose treats
+ * the request as served.
+ *
+ * If callback returns MG_ERROR, that means that callback has not processed
+ * the request. Callback must not send any data to client in this case.
+ * Mongoose proceeds with request handling.
+ *
+ * NOTE: for MG_EVENT_SSL_PASSWORD event the callback must have
+ * int (*)(char *, int, int, void *) prototype. Refer to OpenSSL documentation
+ * for more details about the SSL password callback.
  */
-void mg_set_uri_callback(struct mg_context *ctx, const char *uri_regex,
-		mg_callback_t func, void *user_data);
+enum mg_event_t {
+	MG_EVENT_NEW_REQUEST,	/* New HTTP request has arrived		*/
+	MG_EVENT_HTTP_ERROR,	/* Mongoose is about to send HTTP error	*/
+	MG_EVENT_LOG,		/* Mongoose is about to log a message	*/
+	MG_EVENT_SSL_PASSWORD,	/* SSL certificate needs verification	*/
+	NUM_EVENTS
+};
+
+typedef enum mg_error_t (*mg_callback_t)(struct mg_connection *,
+		const struct mg_request_info *);
+
+void mg_set_callback(struct mg_context *, enum mg_event_t, mg_callback_t);
 
 
 /*
- * Register HTTP error handler.
- * An application may use that function if it wants to customize the error
- * page that user gets on the browser (for example, 404 File Not Found message).
- * It is possible to specify a error handler for all errors by passing 0 as
- * error_code. That '0' error handler must be set last, if more specific error
- * handlers are also used. The actual error code value can be taken from
- * the request info structure that is passed to the callback.
+ * Send data to the client.
  */
-void mg_set_error_callback(struct mg_context *ctx, int error_code,
-		mg_callback_t func, void *user_data);
-
-
-/*
- * Register authorization handler.
- * This function provides a mechanism to implement custom authorization,
- * for example cookie based (look at examples/authorization.c).
- * The callback function must analyze the request, and make its own judgement
- * on wether it should be authorized or not. After the decision is made, a
- * callback must call mg_authorize() if the request is authorized.
- */
-void mg_set_auth_callback(struct mg_context *ctx, const char *uri_regex,
-		mg_callback_t func, void *user_data);
-
-
-/*
- * Register log handler.
- * By default, Mongoose logs all error messages to stderr. If "error_log"
- * option is specified, the errors are written in the specified file. However,
- * if an application registers its own log handler, Mongoose will not log
- * anything but call the handler function, passing an error message as
- * "user_data" callback argument.
- */
-void mg_set_log_callback(struct mg_context *ctx, mg_callback_t func);
-
-
-/*
- * Register SSL password handler.
- * This is needed only if SSL certificate asks for a password. Instead of
- * prompting for a password on a console a specified function will be called.
- */
-typedef int (*mg_spcb_t)(char *buf, int num, int w, void *key);
-void mg_set_ssl_password_callback(struct mg_context *ctx, mg_spcb_t func);
-
-
-/*
- * Send data to the browser.
- * Return number of bytes sent. If the number of bytes sent is less then
- * requested or equals to -1, network error occured, usually meaning the
- * remote side has closed the connection.
- */
-int mg_write(struct mg_connection *, const void *buf, int len);
+int mg_write(struct mg_connection *, const void *buf, size_t len);
 
 
 /*
  * Send data to the browser using printf() semantics.
+ *
  * Works exactly like mg_write(), but allows to do message formatting.
- * Note that mg_printf() uses internal buffer of size MAX_REQUEST_SIZE
+ * Note that mg_printf() uses internal buffer of size IO_BUF_SIZE
  * (8 Kb by default) as temporary message storage for formatting. Do not
  * print data that is bigger than that, otherwise it will be truncated.
- * Return number of bytes sent.
  */
 int mg_printf(struct mg_connection *, const char *fmt, ...);
 
@@ -220,59 +183,68 @@ int mg_printf(struct mg_connection *, const char *fmt, ...);
 /*
  * Read data from the remote or local end.
  */
-int mg_read(struct mg_connection *, int local, void *buf, int len);
+int mg_read(struct mg_connection *, void *buf, size_t len);
 
 /*
  * Get the value of particular HTTP header.
+ *
  * This is a helper function. It traverses request_info->http_headers array,
  * and if the header is present in the array, returns its value. If it is
  * not present, NULL is returned.
  */
-const char *mg_get_header(const struct mg_connection *, const char *hdr_name);
-
-
-/*
- * Authorize the request.
- * See the documentation for mg_set_auth_callback() function.
- */
-void mg_authorize(struct mg_connection *);
+const char *mg_get_header(const struct mg_connection *, const char *name);
 
 
 /*
  * Get a value of particular form variable.
- * Both query string (whatever comes after '?' in the URL) and a POST buffer
- * are scanned. If a variable is specified in both query string and POST
- * buffer, POST buffer wins. Return value:
- *	NULL      if the variable is not found
- *	non-NULL  if found. NOTE: this returned value is dynamically allocated
- *		  and is subject to mg_free() when no longer needed. It is
- *		  an application's responsibility to mg_free() the variable.
+ *
+ * Either request_info->query_string or read POST data can be scanned.
+ * mg_get_qsvar() is convenience method to get variable from the query string.
+ * Destination buffer is guaranteed to be '\0' - terminated. In case of
+ * failure, dst[0] == '\0'.
+ *
+ * Return:
+ *  MG_SUCCESS    Variable value was successfully copied in the buffer.
+ *  MG_NOT_FOUND  Requested variable not found.
+ *  MG_BUFFER_TOO_SMALL  Destination buffer is too small to hold the value.
  */
-char *mg_get_var(const struct mg_connection *, const char *var_name);
+enum mg_error_t mg_get_var(const char *data, size_t data_len,
+		const char *var_name, char *buf, size_t buf_len);
+enum mg_error_t mg_get_qsvar(const struct mg_request_info *,
+		const char *var_name, char *buf, size_t buf_len);
 
 
 /*
- * Free up memory returned by mg_get_var().
+ * Fetch value of certain cookie variable into the destination buffer.
+ *
+ * Destination buffer is guaranteed to be '\0' - terminated. In case of
+ * failure, dst[0] == '\0'. Note that RFC allows many occurences of the same
+ * parameter. This function returns only first occurance.
+ *
+ * Return:
+ *  MG_SUCCESS    Cookie parameter was successfully copied in the buffer.
+ *  MG_NOT_FOUND  Either "Cookie:" header is not present at all, or the
+ *                requested parameter is not found.
+ *  MG_BUFFER_TOO_SMALL  Destination buffer is too small to hold the value.
  */
-void mg_free(char *var);
-
+enum mg_error_t mg_get_cookie(const struct mg_connection *,
+		const char *cookie_name, char *buf, size_t buf_len);
 
 /*
  * Return Mongoose version.
  */
 const char *mg_version(void);
 
-/*
- * Structure used by mg_stat() function. Uses 64 bit file length.
- */
-struct mgstat {
-	bool_t		is_directory;	/* Directory marker		*/
-	uint64_t	size;		/* File size			*/
-	time_t		mtime;		/* Modification time		*/
-};
 
-int mg_stat(const char *path, struct mgstat *stp);
-void mg_send_file(struct mg_connection *conn, const char *path, struct mgstat *stp);
+/*
+ * MD5 hash given strings.
+ * Buffer 'buf' must be 33 bytes long. Varargs is a NULL terminated list of
+ * asciiz strings. When function returns, buf will contain human-readable
+ * MD5 hash. Example:
+ *   char buf[33];
+ *   mg_md5(buf, "aa", "bb", NULL);
+ */
+void mg_md5(char *buf, ...);
 
 
 /*
