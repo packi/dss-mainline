@@ -175,6 +175,10 @@ BOOST_FIXTURE_TEST_CASE(testStartDimDown, Fixture) {
   testFunction("startDim", "direction", "down", "startDim(false)");
 }
 
+BOOST_FIXTURE_TEST_CASE(testEndDim, Fixture) {
+  testFunction("endDim");
+}
+
 BOOST_FIXTURE_TEST_CASE(testSetValue, Fixture) {
   testFunction("setValue", "value", "5");
 }
