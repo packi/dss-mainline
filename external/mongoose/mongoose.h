@@ -29,9 +29,26 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <stdio.h>
+#include <time.h>
+
 struct mg_context;	/* Handle for the HTTP service itself	*/
 struct mg_connection;	/* Handle for the individual connection	*/
 
+typedef int bool_t;
+#if defined(HAVE_STDINT)
+#include <stdint.h>
+#else
+typedef unsigned int		uint32_t;
+typedef unsigned short		uint16_t;
+typedef unsigned __int64	uint64_t;
+typedef __int64			int64_t;
+#define	INT64_MAX		9223372036854775807
+#endif /* HAVE_STDINT */
 
 /*
  * This structure contains full information about the HTTP request.
@@ -66,6 +83,15 @@ enum mg_error_t {
 	MG_SUCCESS,
 	MG_NOT_FOUND,
 	MG_BUFFER_TOO_SMALL
+};
+
+/*
+ * Structure used by mg_stat() function. Uses 64 bit file length.
+ */
+struct mgstat {
+	bool_t		is_directory;	/* Directory marker		*/
+	int64_t		size;		/* File size			*/
+	time_t		mtime;		/* Modification time		*/
 };
 
 
@@ -251,6 +277,10 @@ void mg_md5(char *buf, ...);
  * Print command line usage string.
  */
 void mg_show_usage_string(FILE *fp);
+
+int mg_stat(const char *path, struct mgstat *stp);
+
+void mg_send_file(struct mg_connection *conn, const char *path, struct mgstat *stp);
 
 #ifdef __cplusplus
 }

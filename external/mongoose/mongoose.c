@@ -38,7 +38,6 @@
 #include <fcntl.h>
 #endif /* !_WIN32_WCE */
 
-#include <time.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <assert.h>
@@ -46,7 +45,6 @@
 #include <ctype.h>
 #include <limits.h>
 #include <stddef.h>
-#include <stdio.h>
 
 #if defined(_WIN32)		/* Windows specific #includes and #defines */
 #define	_WIN32_WINNT	0x0400	/* To make it link in VS2005 */
@@ -150,16 +148,6 @@ static FILE *mg_fopen(const char *path, const char *mode);
 #define pthread_rwlock_wrlock pthread_mutex_lock
 #define pthread_rwlock_unlock pthread_mutex_unlock
 
-#if defined(HAVE_STDINT)
-#include <stdint.h>
-#else
-typedef unsigned int		uint32_t;
-typedef unsigned short		uint16_t;
-typedef unsigned __int64	uint64_t;
-typedef __int64			int64_t;
-#define	INT64_MAX		9223372036854775807
-#endif /* HAVE_STDINT */
-
 /*
  * POSIX dirent interface
  */
@@ -233,7 +221,6 @@ typedef int socklen_t;
 enum {FALSE, TRUE};
 #endif /* !FALSE */
 
-typedef int bool_t;
 typedef void * (*mg_thread_func_t)(void *);
 
 static const char *http_500_error = "Internal Server Error";
@@ -356,15 +343,6 @@ struct usa {
 struct vec {
 	const char	*ptr;
 	size_t		len;
-};
-
-/*
- * Structure used by mg_stat() function. Uses 64 bit file length.
- */
-struct mgstat {
-	bool_t		is_directory;	/* Directory marker		*/
-	int64_t		size;		/* File size			*/
-	time_t		mtime;		/* Modification time		*/
 };
 
 struct mg_option {
@@ -1038,7 +1016,7 @@ mg_fopen(const char *path, const char *mode)
 	return (_wfopen(wbuf, wmode));
 }
 
-static int
+int
 mg_stat(const char *path, struct mgstat *stp)
 {
 	int				ok = -1; /* Error */
@@ -1290,7 +1268,7 @@ set_non_blocking_mode(struct mg_connection *conn, SOCKET sock)
 
 #else
 
-static int
+int
 mg_stat(const char *path, struct mgstat *stp)
 {
 	struct stat	st;
@@ -2737,8 +2715,8 @@ parse_range_header(const char *header, int64_t *a, int64_t *b)
 /*
  * Send regular file contents.
  */
-static void
-send_file(struct mg_connection *conn, const char *path, struct mgstat *stp)
+void
+mg_send_file(struct mg_connection *conn, const char *path, struct mgstat *stp)
 {
 	char		date[64], lm[64], etag[64], range[64];
 	const char	*fmt = "%a, %d %b %Y %H:%M:%S %Z", *msg = "OK", *hdr;
@@ -3613,7 +3591,7 @@ analyze_request(struct mg_connection *conn)
 	} else if (is_not_modified(conn, &st)) {
 		send_error(conn, 304, "Not Modified", "");
 	} else {
-		send_file(conn, path, &st);
+		mg_send_file(conn, path, &st);
 	}
 }
 
