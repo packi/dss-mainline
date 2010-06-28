@@ -177,8 +177,15 @@ typedef struct DIR {
 #include <dirent.h>
 #include <dlfcn.h>
 #include <pthread.h>
+
+#ifndef __APPLE__
 #define	SSL_LIB			"libssl.so"
 #define	CRYPTO_LIB		"libcrypto.so"
+#else
+#define SSL_LIB         "libssl.dylib"
+#define CRYPTO_LIB      "libcrypto.dylib"
+#endif
+
 #define	DIRSEP			'/'
 #define	IS_DIRSEP_CHAR(c)	((c) == '/')
 #define	O_BINARY		0
