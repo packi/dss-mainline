@@ -683,6 +683,37 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
 } // testCallScenePropagation
 
 
+BOOST_AUTO_TEST_CASE(testMeteringDataFromUnknownMeter) {
+  Apartment apt(NULL);
+
+  DSDSMeterSim modSim(NULL);
+  DS485BusRequestDispatcher dispatcher;
+  ModelMaintenance maintenance(NULL);
+  maintenance.setApartment(&apt);
+  maintenance.initialize();
+
+
+  ModelEvent* pEvent = new ModelEvent(ModelEvent::etEnergyMeterValue);
+  pEvent->addParameter(55); // nonexisting modulator
+  pEvent->addParameter(123); // meter value
+
+  maintenance.addModelEvent(pEvent);
+
+  pEvent = new ModelEvent(ModelEvent::etPowerConsumption);
+  pEvent->addParameter(55); // nonexisting modulator
+  pEvent->addParameter(123); // meter value
+
+  maintenance.addModelEvent(pEvent);
+
+  maintenance.start();
+  while(maintenance.isInitializing()) {
+    sleepMS(100);
+  }
+
+  sleepMS(200);
+} // testMeteringDataFromUnknownMeter
+
+
 class FrameSenderTester : public FrameSenderInterface {
 public:
   int getLastFunctionID() const { return m_LastFunctionID; }

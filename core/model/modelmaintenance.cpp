@@ -208,9 +208,13 @@ namespace dss {
         } else {
           int meterID = event.getParameter(0);
           int value = event.getParameter(1);
-          DSMeter& meter = m_pApartment->getDSMeterByBusID(meterID);
-          meter.setPowerConsumption(value);
-          m_pMetering->postConsumptionEvent(meter, value, DateTime());
+          try {
+            DSMeter& meter = m_pApartment->getDSMeterByBusID(meterID);
+            meter.setPowerConsumption(value);
+            m_pMetering->postConsumptionEvent(meter, value, DateTime());
+          } catch(ItemNotFoundException& _e) {
+            log("Received metering data for unknown meter, discarding", lsWarning);
+          }
         }
         break;
       case ModelEvent::etEnergyMeterValue:
@@ -219,9 +223,13 @@ namespace dss {
         } else {
           int meterID = event.getParameter(0);
           int value = event.getParameter(1);
-          DSMeter& meter = m_pApartment->getDSMeterByBusID(meterID);
-          meter.setEnergyMeterValue(value);
-          m_pMetering->postEnergyEvent(meter, value, DateTime());
+          try {
+            DSMeter& meter = m_pApartment->getDSMeterByBusID(meterID);
+            meter.setEnergyMeterValue(value);
+            m_pMetering->postEnergyEvent(meter, value, DateTime());
+          } catch(ItemNotFoundException& _e) {
+            log("Received metering data for unknown meter, discarding", lsWarning);
+          }
         }
         break;
       case ModelEvent::etDS485DeviceDiscovered:
