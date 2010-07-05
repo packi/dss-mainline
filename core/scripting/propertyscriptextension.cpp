@@ -292,6 +292,7 @@ namespace dss {
 
   void PropertyScriptListener::doOnChange(PropertyNodePtr _changedNode) {
     AssertLocked locked(getContext());
+    JSRequest req(getContext());
     createScriptObject();
     ScriptFunctionParameterList list(*getContext());
     list.add(_changedNode->getDisplayName());
@@ -300,7 +301,7 @@ namespace dss {
     } catch(ScriptException& e) {
       Logger::getInstance()->log("PropertyScriptListener::doOnChange: Caught exception while calling handler: " + std::string(e.what()), lsFatal);
     }
-    JS_GC(getContext()->getJSContext());
+    JS_MaybeGC(getContext()->getJSContext());
   } // doOnChange
 
 }

@@ -48,6 +48,7 @@ namespace dss {
   JSBool ScriptLoggerExtension_log_common(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval, bool newline) {
     JSString *str;
     ScriptContext *ctx = static_cast<ScriptContext *>(JS_GetContextPrivate(cx));
+    JSRequest req(ctx);
     ScriptLoggerExtension *ext = dynamic_cast<ScriptLoggerExtension*>(ctx->getEnvironment().getExtension(ScriptLoggerExtensionName));
     assert(ext != NULL);
 
@@ -103,6 +104,7 @@ namespace dss {
                                 jsval *argv, jsval *rval) {
     JSString *str;
     ScriptContext *ctx = static_cast<ScriptContext *>(JS_GetContextPrivate(cx));
+    JSRequest req(ctx);
     ScriptLoggerExtension *ext = dynamic_cast<ScriptLoggerExtension*>(ctx->getEnvironment().getExtension(ScriptLoggerExtensionName));
     assert(ext != NULL);
 
