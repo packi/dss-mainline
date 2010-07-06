@@ -166,7 +166,7 @@ namespace dss {
       m_Environment.addExtension(ext);
       ext = new DS485ScriptExtension(*DSS::getInstance()->getDS485Interface().getFrameSenderInterface(), DSS::getInstance()->getBusInterfaceHandler());
       m_Environment.addExtension(ext);
-      ext = new ScriptLoggerExtension(DSS::getInstance()->getJSLogDirectory());
+      ext = new ScriptLoggerExtension(DSS::getInstance()->getJSLogDirectory(), DSS::getInstance()->getEventInterpreter());
       m_Environment.addExtension(ext);
     }
   } // initializeEnvironment

@@ -45,9 +45,20 @@ namespace fs = boost::filesystem;
 BOOST_AUTO_TEST_SUITE(JSLogger)
 
 BOOST_AUTO_TEST_CASE(testOneLoggerGetsCleanedUp) {
+  EventQueue queue;
+  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+
+  interpreter.setEventQueue(&queue);
+  interpreter.setEventRunner(&runner);
+  EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(&interpreter);
+  interpreter.addPlugin(relay);
+
+  interpreter.run();
+  
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
-  ScriptLoggerExtension* ext = new ScriptLoggerExtension(getTempDir());
+  ScriptLoggerExtension* ext = new ScriptLoggerExtension(getTempDir(), interpreter);
   env->addExtension(ext);
 
   fs::remove(getTempDir() + "blalog");
@@ -84,13 +95,28 @@ BOOST_AUTO_TEST_CASE(testOneLoggerGetsCleanedUp) {
 
   fs::remove(getTempDir() + "blalog");
   fs::remove(getTempDir() + "blalog2");
+
+  queue.shutdown();
+  interpreter.terminate();
+  sleepMS(1500);
 }
 
 
 BOOST_AUTO_TEST_CASE(testLogger) {
+  EventQueue queue;
+  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+
+  interpreter.setEventQueue(&queue);
+  interpreter.setEventRunner(&runner);
+  EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(&interpreter);
+  interpreter.addPlugin(relay);
+
+  interpreter.run();
+    
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
-  ScriptLoggerExtension* ext = new ScriptLoggerExtension(getTempDir());
+  ScriptLoggerExtension* ext = new ScriptLoggerExtension(getTempDir(), interpreter);
   env->addExtension(ext);
 
   fs::remove(getTempDir() + "blalog");
@@ -122,6 +148,63 @@ BOOST_AUTO_TEST_CASE(testLogger) {
   BOOST_CHECK(text.find("kraah") != std::string::npos);
 
   fs::remove(getTempDir() + "blalog");
+
+  queue.shutdown();
+  interpreter.terminate();
+  sleepMS(1500);
+}
+
+BOOST_AUTO_TEST_CASE(testLogrotate) {
+  EventQueue queue;
+  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+
+  interpreter.setEventQueue(&queue);
+  interpreter.setEventRunner(&runner);
+  EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(&interpreter);
+  interpreter.addPlugin(relay);
+
+  interpreter.run();
+    
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptLoggerExtension* ext = new ScriptLoggerExtension(getTempDir(), interpreter);
+  env->addExtension(ext);
+
+  fs::remove(getTempDir() + "blalog");
+
+  {
+    boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+    ctx->evaluate<void>("var logger = new Logger('blalog');\n"
+                        "logger.log('kraah');\n");
+  }
+  
+  BOOST_CHECK(fs::exists(getTempDir() + "blalog"));
+
+  fs::copy_file(getTempDir() + "blalog", "blalog1");
+  fs::remove(getTempDir() + "blalog");
+
+  boost::shared_ptr<Event> pEvent(new Event("SIGNAL"));
+  pEvent->setProperty("signum", "10");
+  queue.pushEvent(pEvent);
+
+  sleepMS(1000);
+
+  {
+    boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+    ctx->evaluate<void>("var logger = new Logger('blalog');\n"
+                        "logger.log('kraah');\n");
+  }
+  
+  BOOST_CHECK(fs::exists(getTempDir() + "blalog"));
+ 
+  fs::remove(getTempDir() + "blalog");
+  fs::remove(getTempDir() + "blalog1");
+
+  queue.shutdown();
+  interpreter.terminate();
+  sleepMS(1500);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+

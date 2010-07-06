@@ -27,6 +27,8 @@ along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 #include "core/propertysystem.h"
 
 #include <stdio.h>
+#include <signal.h>
+#include <boost/bind.hpp>
 
 #define LOG_OBJECT_IDENTIFIER   "logfile"
 namespace dss {
@@ -166,14 +168,14 @@ namespace dss {
 
     m_pExtension = _pExtension;
     m_logName = _filename;
-    std::string fileName = _filePath + _filename;
-    m_f = fopen(fileName.c_str(), "a+");
+    m_fileName = _filePath + _filename;
+    m_f = fopen(m_fileName.c_str(), "a+");
     if (!m_f) {
-      throw std::runtime_error("Could not open file " + fileName + " for writing");
+      throw std::runtime_error("Could not open file " + m_fileName + " for writing");
     }
     if(DSS::hasInstance()) {
-      DSS::getInstance()->getPropertySystem().setStringValue("/system/js/logsfiles/" + _filename, fileName, true, false);
-      DSS::getInstance()->getPropertySystem().setStringValue("/config/subsystems/WebServer/files/" + _filename, fileName, true, false);
+      DSS::getInstance()->getPropertySystem().setStringValue("/system/js/logsfiles/" + _filename, m_fileName, true, false);
+      DSS::getInstance()->getPropertySystem().setStringValue("/config/subsystems/WebServer/files/" + _filename, m_fileName, true, false);
     }
   } // ctor
 
@@ -197,6 +199,19 @@ namespace dss {
     log(text + "\n");
   } // logln
 
+  void ScriptLogger::reopenLogfile() {
+    if (m_f) {
+      m_LogWriteMutex.lock();
+      fclose(m_f);
+      m_f = fopen(m_fileName.c_str(), "a+");
+      if (!m_f) {
+        m_LogWriteMutex.unlock();
+        throw std::runtime_error("Could not open file " + m_fileName + " for writing");
+      }
+      m_LogWriteMutex.unlock();
+    }
+  }
+
   ScriptLogger::~ScriptLogger() {
     Logger::getInstance()->log("Destroying logger with filename: " + m_logName);
     if(m_f) {
@@ -208,13 +223,43 @@ namespace dss {
   
   //================================================== ScriptLoggerExtension
 
-  ScriptLoggerExtension::ScriptLoggerExtension(const std::string _directory) 
+  ScriptLoggerExtension::ScriptLoggerExtension(const std::string _directory, EventInterpreter& _eventInterpreter) 
   : ScriptExtension(ScriptLoggerExtensionName),
-    m_Directory(addTrailingBackslash(_directory))
-  { } // ctor
+    m_Directory(addTrailingBackslash(_directory)), m_EventInterpreter(_eventInterpreter)
+  {
+    EventInterpreterInternalRelay* pRelay =
+        dynamic_cast<EventInterpreterInternalRelay*>(m_EventInterpreter.getPluginByName(EventInterpreterInternalRelay::getPluginName()));
+      m_pRelayTarget = boost::shared_ptr<InternalEventRelayTarget>(new InternalEventRelayTarget(*pRelay));
+
+      if (m_pRelayTarget != NULL) {
+        boost::shared_ptr<EventSubscription> signalSubscription(
+                new dss::EventSubscription(
+                    "SIGNAL",
+                    EventInterpreterInternalRelay::getPluginName(),
+                    m_EventInterpreter,
+                    boost::shared_ptr<SubscriptionOptions>())
+        );
+        m_pRelayTarget->subscribeTo(signalSubscription);
+        m_pRelayTarget->setCallback(boost::bind(&ScriptLoggerExtension::reopenLogfiles, this, _1, _2));
+      }
+  } // ctor
 
   ScriptLoggerExtension::~ScriptLoggerExtension() {
   } // dtor
+
+  void ScriptLoggerExtension::reopenLogfiles(Event& _event, const EventSubscription& _subscription) {
+    int signal = strToIntDef( _event.getPropertyByName("signum"), -1);
+    if (signal == SIGUSR1) {
+      m_MapMutex.lock();
+      boost::ptr_map<const std::string, boost::weak_ptr<ScriptLogger> >::iterator i;
+      for (i = m_Loggers.begin(); i != m_Loggers.end(); i++) {
+        if (!i->second->expired()) {
+          i->second->lock()->reopenLogfile();
+        }
+      }
+      m_MapMutex.unlock();
+    }
+  }
 
   void ScriptLoggerExtension::extendContext(ScriptContext& _context) {
     JS_InitClass(_context.getJSContext(),
