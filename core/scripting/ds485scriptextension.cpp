@@ -178,6 +178,7 @@ namespace dss {
     DS485ScriptExtension* ext =
        dynamic_cast<DS485ScriptExtension*>(ctx->getEnvironment().getExtension(DS485ScriptExtensionName));
     assert(ext != NULL);
+    AssertLocked lock(ctx);
 
     if(argc >= 1) {
       try {
@@ -218,6 +219,7 @@ namespace dss {
 
   JSBool ds485_setCallback(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    AssertLocked lock(ctx);
     DS485ScriptExtension* ext =
     dynamic_cast<DS485ScriptExtension*>(ctx->getEnvironment().getExtension(DS485ScriptExtensionName));
     assert(ext != NULL);
@@ -269,6 +271,7 @@ namespace dss {
   JSBool DS485Frame_construct(JSContext *cx, JSObject *obj, uintN argc,
                               jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    AssertLocked lock(ctx);
     ScriptObject objWrapper(obj, *ctx);
     objWrapper.setProperty("source", -1);
     objWrapper.setProperty("broadcast", false);
