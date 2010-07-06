@@ -94,6 +94,9 @@ namespace dss {
 
     void distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame);
     DSIDInterface* getSimulatedDevice(const dsid_t& _dsid);
+
+    int getDSMeterCount() const { return m_DSMeters.size(); }
+    DSDSMeterSim& getDSMeter(const int _index) { return m_DSMeters[_index]; }
   }; // DSSim
 
   typedef std::map< const std::pair<const int, const int>,  std::vector<DSIDInterface*> > IntPairToDSIDSimVector;
@@ -116,7 +119,6 @@ namespace dss {
     std::map< const std::pair<const int, const int>, int> m_LastCalledSceneForZoneAndGroup;
     std::string m_Name;
   private:
-    void addDeviceToGroup(DSIDInterface* _device, int _groupID);
     void loadDevices(Poco::XML::Node* _node, const int _zoneID);
     void loadGroups(Poco::XML::Node* _node, const int _zoneID);
     void loadZones(Poco::XML::Node* _node);
@@ -150,11 +152,17 @@ namespace dss {
     bool initializeFromNode(Poco::XML::Node* _node);
 
     int getID() const;
+    void setID(const int _value) { m_ID = _value; }
+
+    void setDSID(const dsid_t& _value) { m_DSMeterDSID = _value; }
 
     void process(DS485Frame& _frame);
 
     DSIDInterface* getSimulatedDevice(const dsid_t _dsid);
+    void addSimulatedDevice(DSIDInterface* _device);
     void dSLinkInterrupt(devid_t _shortAddress) const;
+
+    void addDeviceToGroup(DSIDInterface* _device, int _groupID);
   }; // DSDSMeterSim
 
   class DSIDInterface {
