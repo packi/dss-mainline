@@ -32,6 +32,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <signal.h>
+
 #include "core/base.h"
 #include "core/scripting/scriptobject.h"
 #include "core/scripting/jslogger.h"
@@ -181,14 +183,15 @@ BOOST_AUTO_TEST_CASE(testLogrotate) {
   
   BOOST_CHECK(fs::exists(getTempDir() + "blalog"));
 
-  fs::copy_file(getTempDir() + "blalog", "blalog1");
+  fs::remove(getTempDir() + "blalog1");
+  fs::copy_file(getTempDir() + "blalog", getTempDir() + "blalog1");
   fs::remove(getTempDir() + "blalog");
 
   boost::shared_ptr<Event> pEvent(new Event("SIGNAL"));
-  pEvent->setProperty("signum", "10");
+  pEvent->setProperty("signum", intToString(SIGUSR1));
   queue.pushEvent(pEvent);
 
-  sleepMS(1000);
+  sleepMS(3000);
 
   {
     boost::scoped_ptr<ScriptContext> ctx(env->getContext());
@@ -203,7 +206,7 @@ BOOST_AUTO_TEST_CASE(testLogrotate) {
 
   queue.shutdown();
   interpreter.terminate();
-  sleepMS(1500);
+  sleepMS(2500);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
