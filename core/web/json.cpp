@@ -154,37 +154,73 @@ namespace dss {
 
   //================================================== Helpers
 
-  std::string jsonEncode(const std::string& _value) {
-    std::ostringstream sstream;
-    for(int iChar = 0, end = _value.size(); iChar < end; iChar++) {
-      unsigned char c = _value[iChar];
+  inline int findFirstNeedingEscape(const std::string& _value) {
+    int iChar = 0;
+    int end = _value.size();
+    for(; iChar < end; iChar++) {
+      char c = _value[iChar];
       if ((c == '\\') || (c == '"')) {
-        sstream << '\\' << c;
+        break;
       } else if (c == '\b') {
-        sstream << "\\b";
+        break;
       } else if (c == '\f') {
-        sstream << "\\f";
+        break;
       } else if (c == '\n') {
-        sstream << "\\n";
+        break;
       } else if (c == '\r') {
-        sstream << "\\r";
+        break;
       } else if (c == '\t') {
-        sstream << "\\t";
+        break;
       } else {
         if(c < ' ') {
-          sstream << "\\u";
-          sstream.fill('0');
-          sstream.width(4);
-          sstream << std::hex << std::uppercase;
-          sstream << static_cast<int>(c);
-          sstream << std::nouppercase;
-          sstream.width(1);
-        } else {
-          sstream << c;
+          break;
         }
       }
     }
-    return sstream.str();
+    if(iChar == end) {
+      return -1;
+    } else {
+      return iChar;
+    }
+  }
+
+  std::string jsonEncode(const std::string& _value) {
+    int firstToEscape = findFirstNeedingEscape(_value);
+    if(firstToEscape == -1) {
+      return _value;
+    } else {
+      std::ostringstream sstream;
+      sstream << _value.substr(0, firstToEscape);
+      for(int iChar = firstToEscape, end = _value.size(); iChar < end; iChar++) {
+        unsigned char c = _value[iChar];
+        if ((c == '\\') || (c == '"')) {
+          sstream << '\\' << c;
+        } else if (c == '\b') {
+          sstream << "\\b";
+        } else if (c == '\f') {
+          sstream << "\\f";
+        } else if (c == '\n') {
+          sstream << "\\n";
+        } else if (c == '\r') {
+          sstream << "\\r";
+        } else if (c == '\t') {
+          sstream << "\\t";
+        } else {
+          if(c < ' ') {
+            sstream << "\\u";
+            sstream.fill('0');
+            sstream.width(4);
+            sstream << std::hex << std::uppercase;
+            sstream << static_cast<int>(c);
+            sstream << std::nouppercase;
+            sstream.width(1);
+          } else {
+            sstream << c;
+          }
+        }
+      }
+      return sstream.str();
+    }
   } // jsonEncode
 
 } // namespace dss

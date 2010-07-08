@@ -138,6 +138,24 @@ BOOST_AUTO_TEST_CASE(testJSONEscape) {
   BOOST_CHECK_EQUAL(value, "\"\\\\\\\"\\b\\f\\n\\r\\t\\u001B\"");
 }
 
+BOOST_AUTO_TEST_CASE(testJSONEscapeMixedEnd) {
+  JSONValue<std::string> str("abc\n");
+  std::string value = str.toString();
+  BOOST_CHECK_EQUAL(value, "\"abc\\n\"");
+}
+
+BOOST_AUTO_TEST_CASE(testJSONEscapeMixedStart) {
+  JSONValue<std::string> str("\nabc");
+  std::string value = str.toString();
+  BOOST_CHECK_EQUAL(value, "\"\\nabc\"");
+}
+
+BOOST_AUTO_TEST_CASE(testJSONEscapeMixedMiddle) {
+  JSONValue<std::string> str("abc\ndef");
+  std::string value = str.toString();
+  BOOST_CHECK_EQUAL(value, "\"abc\\ndef\"");
+}
+
 BOOST_AUTO_TEST_CASE(testGetElementByName) {
   const std::string kElementName = "child";
   boost::shared_ptr<JSONElement> parent(new JSONObject());
