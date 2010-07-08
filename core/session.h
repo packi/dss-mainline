@@ -34,9 +34,8 @@
 namespace dss {
   class Session {
   public:
-    Session() {}
-    Session(const int _tokenID);
-    
+    Session(const int _tokenID = -1);
+
     void setTimeout(const int _timeout);
     int getID();
     virtual bool isStillValid();
