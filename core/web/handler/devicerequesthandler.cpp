@@ -38,151 +38,167 @@ namespace dss {
   : m_Apartment(_apartment)
   { }
 
-  boost::shared_ptr<JSONObject> DeviceRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
-    bool ok = true;
-    std::string errorMessage;
-    std::string deviceName = _request.getParameter("name");
+  class DeviceNotFoundException : public std::runtime_error {
+  public:
+    DeviceNotFoundException(const std::string& __arg)
+    : std::runtime_error(__arg)
+    { }
+  };
+
+  Device* DeviceRequestHandler::getDeviceFromRequest(const RestfulRequest& _request) {
+    Device* result = getDeviceByDSID(_request);
+    if(result == NULL) {
+      result = getDeviceByName(_request);
+    }
+    if(result == NULL) {
+      throw DeviceNotFoundException("Need parameter name or dsid to identify device");
+    }
+    return result;
+  } // getDeviceFromRequest
+
+  Device* DeviceRequestHandler::getDeviceByDSID(const RestfulRequest& _request) {
+    Device* result = NULL;
     std::string deviceDSIDString = _request.getParameter("dsid");
-    Device* pDevice = NULL;
     if(!deviceDSIDString.empty()) {
-      dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
-      if(!(deviceDSID == NullDSID)) {
+      try {
+        dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
         try {
           Device& device = m_Apartment.getDeviceByDSID(deviceDSID);
-          pDevice = &device;
+          result = &device;
         } catch(std::runtime_error& e) {
-          ok = false;
-          errorMessage = "Could not find device with dsid '" + deviceDSIDString + "'";
+          throw DeviceNotFoundException("Could not find device with dsid '" + deviceDSIDString + "'");
         }
-      } else {
-        ok = false;
-        errorMessage = "Could not parse dsid '" + deviceDSIDString + "'";
+      } catch(std::invalid_argument& e) {
+        throw DeviceNotFoundException("Could not parse dsid '" + deviceDSIDString + "'");
       }
-    } else if(!deviceName.empty()) {
-      try {
-        Device& device = m_Apartment.getDeviceByName(deviceName);
-        pDevice = &device;
-      } catch(std::runtime_error&  e) {
-        ok = false;
-        errorMessage = "Could not find device named '" + deviceName + "'";
-      }
-    } else {
-      ok = false;
-      errorMessage = "Need parameter name or dsid to identify device";
     }
-    if(ok) {
-      if(isDeviceInterfaceCall(_request)) {
-        return handleDeviceInterfaceRequest(_request, pDevice);
-      } else if(_request.getMethod() == "getSpec") {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        resultObj->addProperty("functionID", pDevice->getFunctionID());
-        resultObj->addProperty("productID", pDevice->getProductID());
-        resultObj->addProperty("revisionID", pDevice->getRevisionID());
-        return success(resultObj);
-      } else if(_request.getMethod() == "getGroups") {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        int numGroups = pDevice->getGroupsCount();
+    return result;
+  } // getDeviceByDSID
+  
+  Device* DeviceRequestHandler::getDeviceByName(const RestfulRequest& _request) {
+    Device* result = NULL;
+    std::string deviceName = _request.getParameter("name");
+    try {
+      Device& device = m_Apartment.getDeviceByName(deviceName);
+      result = &device;
+    } catch(std::runtime_error&  e) {
+      throw DeviceNotFoundException("Could not find device named '" + deviceName + "'");
+    }
+    return result;
+  } // getDeviceByName
 
-        boost::shared_ptr<JSONArrayBase> groups(new JSONArrayBase());
-        resultObj->addElement("groups", groups);
-        for(int iGroup = 0; iGroup < numGroups; iGroup++) {
-          try {
-            Group& group = pDevice->getGroupByIndex(iGroup);
-            boost::shared_ptr<JSONObject> groupObj(new JSONObject());
-            groups->addElement("", groupObj);
+  boost::shared_ptr<JSONObject> DeviceRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+    Device* pDevice = NULL;
+    try {
+      getDeviceFromRequest(_request);
+    } catch(DeviceNotFoundException& ex) {
+      return failure(ex.what());
+    }
+    if(isDeviceInterfaceCall(_request)) {
+      return handleDeviceInterfaceRequest(_request, pDevice);
+    } else if(_request.getMethod() == "getSpec") {
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("functionID", pDevice->getFunctionID());
+      resultObj->addProperty("productID", pDevice->getProductID());
+      resultObj->addProperty("revisionID", pDevice->getRevisionID());
+      return success(resultObj);
+    } else if(_request.getMethod() == "getGroups") {
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      int numGroups = pDevice->getGroupsCount();
 
-            groupObj->addProperty("id", group.getID());
-            if(!group.getName().empty()) {
-              groupObj->addProperty("name", group.getName());
-            }
-          } catch(std::runtime_error&) {
-            Logger::getInstance()->log("DeviceRequestHandler: Group only present at device level");
+      boost::shared_ptr<JSONArrayBase> groups(new JSONArrayBase());
+      resultObj->addElement("groups", groups);
+      for(int iGroup = 0; iGroup < numGroups; iGroup++) {
+        try {
+          Group& group = pDevice->getGroupByIndex(iGroup);
+          boost::shared_ptr<JSONObject> groupObj(new JSONObject());
+          groups->addElement("", groupObj);
+
+          groupObj->addProperty("id", group.getID());
+          if(!group.getName().empty()) {
+            groupObj->addProperty("name", group.getName());
           }
+        } catch(std::runtime_error&) {
+          Logger::getInstance()->log("DeviceRequestHandler: Group only present at device level");
         }
-        return success(resultObj);
-      } else if(_request.getMethod() == "getState") {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        resultObj->addProperty("isOn", pDevice->isOn());
-        return success(resultObj);
-      } else if(_request.getMethod() == "getName") {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        resultObj->addProperty("name", pDevice->getName());
-        return success(resultObj);
-      } else if(_request.getMethod() == "setName") {
-        pDevice->setName(_request.getParameter("newName"));
-        return success();
-      } else if(_request.getMethod() == "addTag") {
-        std::string tagName = _request.getParameter("tag");
-        if(tagName.empty()) {
-          return failure("missing parameter 'tag'");
-        }
-        pDevice->addTag(tagName);
-        return success();
-      } else if(_request.getMethod() == "removeTag") {
-        std::string tagName = _request.getParameter("tag");
-        if(tagName.empty()) {
-          return failure("missing parameter 'tag'");
-        }
-        pDevice->removeTag(tagName);
-        return success();
-      } else if(_request.getMethod() == "hasTag") {
-        std::string tagName = _request.getParameter("tag");
-        if(tagName.empty()) {
-          return failure("missing parameter 'tag'");
-        }
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        resultObj->addProperty("hasTag", pDevice->hasTag(tagName));
-        return resultObj;
-      } else if(_request.getMethod() == "getTags") {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        boost::shared_ptr<JSONArray<std::string> > tagsObj(new JSONArray<std::string>());
-        resultObj->addElement("tags", tagsObj);
-        std::vector<std::string> tags = pDevice->getTags();
-        std::for_each(tags.begin(), tags.end(), boost::bind(&JSONArray<std::string>::add, tagsObj.get(), _1));
-        return resultObj;
-      } else if(_request.getMethod() == "enable") {
-        pDevice->enable();
-        return success();
-      } else if(_request.getMethod() == "disable") {
-        pDevice->disable();
-        return success();
-      } else if(_request.getMethod() == "lock") {
-        if (!pDevice->isPresent()) {
-          return failure("Device is not present");
-        }
-        pDevice->lock();
-        return success();
-      } else if(_request.getMethod() == "unlock") {
-        if (!pDevice->isPresent()) {
-          return failure("Device is not present");
-        }
-        pDevice->unlock();
-        return success();
-      } else if(_request.getMethod() == "setRawValue") {
-        int value = strToIntDef(_request.getParameter("value"), -1);
-        if(value == -1) {
-          return failure("Invalid or missing parameter 'value'");
-        }
-        int parameterID = strToIntDef(_request.getParameter("parameterID"), -1);
-        if(parameterID == -1) {
-          return failure("Invalid or missing parameter 'parameterID'");
-        }
-        int size = strToIntDef(_request.getParameter("size"), -1);
-        if(size == -1) {
-          return failure("Invalid or missing parameter 'size'");
-        }
+      }
+      return success(resultObj);
+    } else if(_request.getMethod() == "getState") {
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("isOn", pDevice->isOn());
+      return success(resultObj);
+    } else if(_request.getMethod() == "getName") {
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("name", pDevice->getName());
+      return success(resultObj);
+    } else if(_request.getMethod() == "setName") {
+      pDevice->setName(_request.getParameter("newName"));
+      return success();
+    } else if(_request.getMethod() == "addTag") {
+      std::string tagName = _request.getParameter("tag");
+      if(tagName.empty()) {
+        return failure("missing parameter 'tag'");
+      }
+      pDevice->addTag(tagName);
+      return success();
+    } else if(_request.getMethod() == "removeTag") {
+      std::string tagName = _request.getParameter("tag");
+      if(tagName.empty()) {
+        return failure("missing parameter 'tag'");
+      }
+      pDevice->removeTag(tagName);
+      return success();
+    } else if(_request.getMethod() == "hasTag") {
+      std::string tagName = _request.getParameter("tag");
+      if(tagName.empty()) {
+        return failure("missing parameter 'tag'");
+      }
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("hasTag", pDevice->hasTag(tagName));
+      return resultObj;
+    } else if(_request.getMethod() == "getTags") {
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      boost::shared_ptr<JSONArray<std::string> > tagsObj(new JSONArray<std::string>());
+      resultObj->addElement("tags", tagsObj);
+      std::vector<std::string> tags = pDevice->getTags();
+      std::for_each(tags.begin(), tags.end(), boost::bind(&JSONArray<std::string>::add, tagsObj.get(), _1));
+      return resultObj;
+    } else if(_request.getMethod() == "enable") {
+      pDevice->enable();
+      return success();
+    } else if(_request.getMethod() == "disable") {
+      pDevice->disable();
+      return success();
+    } else if(_request.getMethod() == "lock") {
+      if (!pDevice->isPresent()) {
+        return failure("Device is not present");
+      }
+      pDevice->lock();
+      return success();
+    } else if(_request.getMethod() == "unlock") {
+      if (!pDevice->isPresent()) {
+        return failure("Device is not present");
+      }
+      pDevice->unlock();
+      return success();
+    } else if(_request.getMethod() == "setRawValue") {
+      int value = strToIntDef(_request.getParameter("value"), -1);
+      if(value == -1) {
+        return failure("Invalid or missing parameter 'value'");
+      }
+      int parameterID = strToIntDef(_request.getParameter("parameterID"), -1);
+      if(parameterID == -1) {
+        return failure("Invalid or missing parameter 'parameterID'");
+      }
+      int size = strToIntDef(_request.getParameter("size"), -1);
+      if(size == -1) {
+        return failure("Invalid or missing parameter 'size'");
+      }
 
-        pDevice->setRawValue(value, parameterID, size);
-        return success();
-      } else {
-        throw std::runtime_error("Unhandled function");
-      }
+      pDevice->setRawValue(value, parameterID, size);
+      return success();
     } else {
-      if(ok) {
-        return success();
-      } else {
-        return failure(errorMessage);
-      }
+      throw std::runtime_error("Unhandled function");
     }
   } // jsonHandleRequest
 

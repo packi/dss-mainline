@@ -27,10 +27,16 @@
 
 namespace dss {
 
+  class Device;
+
   class DeviceRequestHandler : public DeviceInterfaceRequestHandler {
   public:
     DeviceRequestHandler(Apartment& _apartment);
     virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+  private:
+    Device* getDeviceFromRequest(const RestfulRequest& _request);
+    Device* getDeviceByName(const RestfulRequest& _request);
+    Device* getDeviceByDSID(const RestfulRequest& _request);
   private:
     Apartment& m_Apartment;
   }; // DeviceRequestHandler
