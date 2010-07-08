@@ -21,6 +21,7 @@
 */
 
 #include "group.h"
+#include "zone.h"
 #include "scenehelper.h"
 #include "set.h"
 #include "apartment.h"
@@ -48,7 +49,7 @@ namespace dss {
   } // getZoneID
 
   Set Group::getDevices() const {
-    return m_pApartment->getDevices().getByZone(m_ZoneID).getByGroup(m_GroupID);
+    return m_pApartment->getZone(m_ZoneID).getDevices().getByGroup(m_GroupID);
   } // getDevices
 
   Group& Group::operator=(const Group& _other) {
