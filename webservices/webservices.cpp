@@ -162,6 +162,7 @@ namespace dss {
     bool timedOut = false;
     bool result = false;
     int timeoutMSLeft = _timeoutMS;
+    use();
     while(!timedOut && !result) {
       // check if we're still connected
       uint8_t tmp;
@@ -192,6 +193,7 @@ namespace dss {
       // wait for the event
       result = m_pEventListener->waitForEvent(waitTime);
     }
+    unuse();
     return result;
   } // waitForEvent
 
