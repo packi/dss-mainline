@@ -90,10 +90,11 @@ namespace dss {
   boost::shared_ptr<JSONObject> DeviceRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     Device* pDevice = NULL;
     try {
-      getDeviceFromRequest(_request);
+      pDevice = getDeviceFromRequest(_request);
     } catch(DeviceNotFoundException& ex) {
       return failure(ex.what());
     }
+    assert(pDevice != NULL);
     if(isDeviceInterfaceCall(_request)) {
       return handleDeviceInterfaceRequest(_request, pDevice);
     } else if(_request.getMethod() == "getSpec") {
@@ -132,8 +133,12 @@ namespace dss {
       resultObj->addProperty("name", pDevice->getName());
       return success(resultObj);
     } else if(_request.getMethod() == "setName") {
-      pDevice->setName(_request.getParameter("newName"));
-      return success();
+      if(_request.hasParameter("newName")) {
+        pDevice->setName(_request.getParameter("newName"));
+        return success();
+      } else {
+        return failure("missing parameter 'name'");
+      }
     } else if(_request.getMethod() == "addTag") {
       std::string tagName = _request.getParameter("tag");
       if(tagName.empty()) {
@@ -155,14 +160,14 @@ namespace dss {
       }
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("hasTag", pDevice->hasTag(tagName));
-      return resultObj;
+      return success(resultObj);
     } else if(_request.getMethod() == "getTags") {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       boost::shared_ptr<JSONArray<std::string> > tagsObj(new JSONArray<std::string>());
       resultObj->addElement("tags", tagsObj);
       std::vector<std::string> tags = pDevice->getTags();
       std::for_each(tags.begin(), tags.end(), boost::bind(&JSONArray<std::string>::add, tagsObj.get(), _1));
-      return resultObj;
+      return success(resultObj);
     } else if(_request.getMethod() == "enable") {
       pDevice->enable();
       return success();
