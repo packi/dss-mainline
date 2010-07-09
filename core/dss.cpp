@@ -440,6 +440,12 @@ const char* JSLogDirectory = "data/logs/";
 
 #ifndef WIN32
   void DSS::handleSignal(int _signum) {
+    if (DSS::hasInstance()) {
+      boost::shared_ptr<Event> pEvent(new Event("SIGNAL"));
+      pEvent->setProperty("signum", intToString(_signum));
+      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+    }
+
     switch (_signum) {
       case SIGUSR1: {
         Logger::getInstance()->reopenLogTarget();

@@ -26,6 +26,10 @@ along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 #include "core/mutex.h"
 #include "core/jshandler.h"
 
+#include "core/event.h"
+#include "core/eventinterpreterplugins.h"
+#include "core/internaleventrelaytarget.h"
+
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
@@ -43,17 +47,19 @@ namespace dss {
     void log(const std::string& text);
     void logln(const std::string& text);
     const std::string& getLogName() const { return m_logName; }
+    void reopenLogfile();
 
   private:
     std::string m_logName;
     FILE *m_f;
     Mutex m_LogWriteMutex;
     ScriptLoggerExtension* m_pExtension;
+    std::string m_fileName;
   };
 
   class ScriptLoggerExtension : public ScriptExtension {
   public:
-    ScriptLoggerExtension(const std::string _directory);
+    ScriptLoggerExtension(const std::string _directory, EventInterpreter& _eventInterpreter);
     virtual ~ScriptLoggerExtension();
     virtual void extendContext(ScriptContext& _context);
     boost::shared_ptr<ScriptLogger> getLogger(const std::string& _filename);
@@ -61,10 +67,14 @@ namespace dss {
 
     int getNumberOfLoggers() const { return m_Loggers.size(); }
 
+    void reopenLogfiles(Event& _event, const EventSubscription& _subscription);
+
   private:
     boost::ptr_map<const std::string, boost::weak_ptr<ScriptLogger> > m_Loggers;
     Mutex m_MapMutex;
     const std::string m_Directory;
+    boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;
+    EventInterpreter& m_EventInterpreter;
   };
 }
 
