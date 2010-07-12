@@ -36,6 +36,8 @@ namespace dss {
   public:
     void addElement(const std::string& _name, boost::shared_ptr<JSONElement> _object);
     boost::shared_ptr<JSONElement> getElementByName(const std::string& _name);
+    boost::shared_ptr<JSONElement> getElement(const int _index);
+    int getElementCount() const;
     virtual ~JSONElement() {}
     std::string toString();
   protected:

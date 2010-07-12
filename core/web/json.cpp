@@ -77,6 +77,14 @@ namespace dss {
     return boost::shared_ptr<JSONElement>();
   } // getElementByName
 
+  boost::shared_ptr<JSONElement> JSONElement::getElement(const int _index) {
+    return m_Elements.at(_index).second;
+  } // getElement
+
+  int JSONElement::getElementCount() const {
+    return m_Elements.size();
+  } // getElementCount
+
 
   //================================================== JSONObject
 

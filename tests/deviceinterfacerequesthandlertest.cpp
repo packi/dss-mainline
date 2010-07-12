@@ -24,6 +24,8 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
+#include "webfixture.h"
+
 #include "core/model/deviceinterface.h"
 #include "core/web/handler/deviceinterfacerequesthandler.h"
 #include "core/web/json.h"
@@ -106,7 +108,7 @@ public:
   }
 };
 
-class Fixture {
+class Fixture : public WebFixture {
 public:
 
   void testFunction(const std::string& _functionName) {
@@ -132,22 +134,9 @@ private:
     boost::shared_ptr<JSONObject> response = m_RequestHandler.handleDeviceInterfaceRequest(req, &dummy);
     BOOST_CHECK_EQUAL(dummy.getNumberOfCalls(), 1);
     BOOST_CHECK_EQUAL(dummy.getLastFunction(), _functionNameWithParams);
-    checkResponse(response);
+    testOkIs(response, true);
   }
 
-  void checkResponse(boost::shared_ptr<JSONObject> _obj) {
-    boost::shared_ptr<JSONElement> resultElem = _obj->getElementByName("ok");
-    if(resultElem == NULL) {
-      BOOST_CHECK(false);
-      return;
-    }
-    JSONValue<bool>* val = dynamic_cast<JSONValue<bool>*>(resultElem.get());
-    if(val == NULL) {
-      BOOST_CHECK(false);
-      return;
-    }
-    BOOST_CHECK_EQUAL(val->getValue(), true);
-  }
   DeviceInterfaceRequestHandlerValid m_RequestHandler;
 };
 
@@ -173,6 +162,10 @@ BOOST_FIXTURE_TEST_CASE(testStartDimUp, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testStartDimDown, Fixture) {
   testFunction("startDim", "direction", "down", "startDim(false)");
+}
+
+BOOST_FIXTURE_TEST_CASE(testEndDim, Fixture) {
+  testFunction("endDim");
 }
 
 BOOST_FIXTURE_TEST_CASE(testSetValue, Fixture) {

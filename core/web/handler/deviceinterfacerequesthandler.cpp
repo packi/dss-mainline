@@ -34,6 +34,7 @@ namespace dss {
 
   boost::shared_ptr<JSONObject> DeviceInterfaceRequestHandler::handleDeviceInterfaceRequest(const RestfulRequest& _request, IDeviceInterface* _interface) {
     assert(_interface != NULL);
+    assert(isDeviceInterfaceCall(_request));
     if(_request.getMethod() == "turnOn") {
       _interface->turnOn();
       return success();

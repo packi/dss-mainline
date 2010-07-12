@@ -47,6 +47,8 @@ namespace dss {
     m_DSMeterDSID(NullDSID),
     m_LastKnownMeterDSID(NullDSID),
     m_FunctionID(0),
+    m_ProductID(0),
+    m_RevisionID(0),
     m_LastCalledScene(SceneOff),
     m_Consumption(0),
     m_LastDiscovered(DateTime::NullDate),
@@ -122,7 +124,9 @@ namespace dss {
   } // hasSwitch
 
   void Device::setRawValue(const uint16_t _value, const int _parameterNr, const int _size) {
-    m_pApartment->getDeviceBusInterface()->setValueDevice(*this, _value, _parameterNr, _size);
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      m_pApartment->getDeviceBusInterface()->setValueDevice(*this, _value, _parameterNr, _size);
+    }
   } // setRawValue
 
   double Device::getValue(const int _parameterNr) {
@@ -326,13 +330,17 @@ namespace dss {
   } // setIsLockedInDSM
 
   void Device::lock() {
-    m_pApartment->getDeviceBusInterface()->lockOrUnlockDevice(*this, true);
-    m_IsLockedInDSM = true;
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      m_pApartment->getDeviceBusInterface()->lockOrUnlockDevice(*this, true);
+      m_IsLockedInDSM = true;
+    }
   } // lock
 
   void Device::unlock() {
-    m_pApartment->getDeviceBusInterface()->lockOrUnlockDevice(*this, false);
-    m_IsLockedInDSM = false;
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      m_pApartment->getDeviceBusInterface()->lockOrUnlockDevice(*this, false);
+      m_IsLockedInDSM = false;
+    }
   } // unlock
 
   bool Device::hasTag(const std::string& _tagName) const {

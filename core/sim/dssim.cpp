@@ -110,17 +110,19 @@ namespace dss {
     m_DSIDFactory.registerCreator(new DSIDSimCreator());
     m_DSIDFactory.registerCreator(new DSIDSimSwitchCreator());
 
-    PropertyNodePtr pNode = getDSS().getPropertySystem().getProperty(getConfigPropertyBasePath() + "js-devices");
-    if(pNode != NULL) {
-      for(int iNode = 0; iNode < pNode->getChildCount(); iNode++) {
-        createJSPluginFrom(pNode->getChild(iNode));
+    if(DSS::hasInstance()) {
+      PropertyNodePtr pNode = getDSS().getPropertySystem().getProperty(getConfigPropertyBasePath() + "js-devices");
+      if(pNode != NULL) {
+        for(int iNode = 0; iNode < pNode->getChildCount(); iNode++) {
+          createJSPluginFrom(pNode->getChild(iNode));
+        }
       }
+
+      getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "configfile", getDSS().getConfigDirectory() + "sim.xml", true, false);
+
+      loadPlugins();
+      loadFromConfig();
     }
-
-    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "configfile", getDSS().getConfigDirectory() + "sim.xml", true, false);
-
-    loadPlugins();
-    loadFromConfig();
 
     m_Initialized = true;
   } // initialize
@@ -1144,6 +1146,10 @@ namespace dss {
     }
     return NULL;
   } // getSimulatedDevice
+
+  void DSDSMeterSim::addSimulatedDevice(DSIDInterface* _device) {
+    m_SimulatedDevices.push_back(_device);
+  } // addSimulatedDevice
 
 
   //================================================== DSIDCreator

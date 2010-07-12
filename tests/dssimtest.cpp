@@ -20,27 +20,19 @@
 
 */
 
-#ifndef DEVICEREQUESTHANDLER_H_
-#define DEVICEREQUESTHANDLER_H_
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
 
-#include "deviceinterfacerequesthandler.h"
+#include "core/sim/dssim.h"
 
-namespace dss {
+using namespace dss;
 
-  class Device;
+BOOST_AUTO_TEST_SUITE(DSSimTest)
 
-  class DeviceRequestHandler : public DeviceInterfaceRequestHandler {
-  public:
-    DeviceRequestHandler(Apartment& _apartment);
-    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
-  private:
-    Device* getDeviceFromRequest(const RestfulRequest& _request);
-    Device* getDeviceByName(const RestfulRequest& _request);
-    Device* getDeviceByDSID(const RestfulRequest& _request);
-  private:
-    Apartment& m_Apartment;
-  }; // DeviceRequestHandler
-
+BOOST_AUTO_TEST_CASE(testConstruction) {
+  DSSim sim(NULL);
+  sim.initialize();
 }
 
-#endif /* DEVICEREQUESTHANDLER_H_ */
+BOOST_AUTO_TEST_SUITE_END()

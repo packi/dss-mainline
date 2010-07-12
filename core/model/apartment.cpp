@@ -324,7 +324,10 @@ namespace dss {
   } // dispatchRequest
 
   DeviceBusInterface* Apartment::getDeviceBusInterface() {
-    return m_pDS485Interface->getDeviceBusInterface();
+    if(m_pDS485Interface != NULL) {
+      return m_pDS485Interface->getDeviceBusInterface();
+    }
+    return NULL;
   } // getDeviceBusInterface
 
   void Apartment::setPropertySystem(PropertySystem* _value) {

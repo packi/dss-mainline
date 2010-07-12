@@ -220,6 +220,11 @@ namespace dss {
         return kEmptyString;
       }
     } // getParameter
+
+    bool hasParameter(const std::string& _name) const {
+      HashMapConstStringString::const_iterator iEntry = m_Parameter.find(_name);
+      return iEntry != m_Parameter.end();
+    } // hasParameter
   private:
     void splitIntoMethodAndClass(const std::string& _request) {
       size_t pos = _request.find('/');
