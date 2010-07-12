@@ -477,7 +477,7 @@ BOOST_AUTO_TEST_CASE(testThreading) {
 
     t1.terminate();
     t2.terminate();
-    sleepMS(500);
+    sleepMS(100);
   }
 
   // same node
@@ -492,7 +492,7 @@ BOOST_AUTO_TEST_CASE(testThreading) {
 
     t1.terminate();
     t2.terminate();
-    sleepMS(500);
+    sleepMS(100);
   }
 
   // TODO: find out why it crashes w/o those lines

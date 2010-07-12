@@ -42,7 +42,7 @@ namespace dss {
   class ModelMaintenance : public Subsystem,
                            public Thread {
   public:
-    ModelMaintenance(DSS* _pDSS);
+    ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS = 1000);
     virtual ~ModelMaintenance() {}
 
     virtual void initialize();
@@ -87,6 +87,7 @@ namespace dss {
     SyncEvent m_NewModelEvent;
     Apartment* m_pApartment;
     Metering* m_pMetering;
+    const int m_EventTimeoutMS;
   }; // ModelMaintenance
 
 }

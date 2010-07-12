@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(testSubscriptionXML) {
          "  <subscription event-name=\"event1\" handler-name=\"raise_event\">\n"
          "    <parameter>\n"
          "      <parameter name=\"event_name\">event2</parameter>\n"
-         "      <parameter name=\"time\">+2</parameter>\n"
+         "      <parameter name=\"time\">+1</parameter>\n"
          "    </parameter>\n"
          "  </subscription>\n"
          "  <subscription event-name=\"event2\" handler-name=\"nonexisting\">\n"
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(testSubscriptionXML) {
 
   runner.runOnce();
 
-  sleepMS(2500);
+  sleepMS(1200);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
 

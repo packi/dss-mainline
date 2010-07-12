@@ -621,7 +621,7 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
 
   DSDSMeterSim modSim(NULL);
   DS485BusRequestDispatcher dispatcher;
-  ModelMaintenance maintenance(NULL);
+  ModelMaintenance maintenance(NULL, 2);
   maintenance.setApartment(&apt);
   maintenance.initialize();
   DS485Proxy proxy(NULL, &maintenance);
@@ -636,7 +636,7 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   busHandler.start();
   maintenance.start();
   while(maintenance.isInitializing()) {
-    sleepMS(100);
+    sleepMS(2);
   }
 
   DSMeter& mod = apt.allocateDSMeter(dsid_t(0,3));
@@ -661,10 +661,10 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   mod.addDevice(devRef3);
 
   dev1.callScene(Scene1);
-  sleepMS(500);
+  sleepMS(5);
   BOOST_CHECK_EQUAL(Scene1, dev1.getLastCalledScene());
   apt.getZone(0).callScene(Scene2);
-  sleepMS(500);
+  sleepMS(5);
   BOOST_CHECK_EQUAL(Scene2, dev1.getLastCalledScene());
   BOOST_CHECK_EQUAL(Scene2, dev2.getLastCalledScene());
 
@@ -672,13 +672,13 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   set.addDevice(dev3);
   set.addDevice(dev2);
   set.callScene(Scene3);
-  sleepMS(500);
+  sleepMS(5);
   BOOST_CHECK_EQUAL(Scene2, dev1.getLastCalledScene());
   BOOST_CHECK_EQUAL(Scene3, dev2.getLastCalledScene());
   BOOST_CHECK_EQUAL(Scene3, dev3.getLastCalledScene());
   busHandler.terminate();
   maintenance.terminate();
-  sleepMS(1500);
+  sleepMS(75);
   DSS::teardown();
 } // testCallScenePropagation
 
@@ -688,7 +688,7 @@ BOOST_AUTO_TEST_CASE(testMeteringDataFromUnknownMeter) {
 
   DSDSMeterSim modSim(NULL);
   DS485BusRequestDispatcher dispatcher;
-  ModelMaintenance maintenance(NULL);
+  ModelMaintenance maintenance(NULL, 2);
   maintenance.setApartment(&apt);
   maintenance.initialize();
 
@@ -707,10 +707,10 @@ BOOST_AUTO_TEST_CASE(testMeteringDataFromUnknownMeter) {
 
   maintenance.start();
   while(maintenance.isInitializing()) {
-    sleepMS(100);
+    sleepMS(2);
   }
 
-  sleepMS(200);
+  sleepMS(5);
 } // testMeteringDataFromUnknownMeter
 
 

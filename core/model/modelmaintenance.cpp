@@ -48,12 +48,13 @@
 
 namespace dss {
 
-  ModelMaintenance::ModelMaintenance(DSS* _pDSS)
+  ModelMaintenance::ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS)
   : Subsystem(_pDSS, "Apartment"),
     Thread("Apartment"),
     m_IsInitializing(true),
     m_pApartment(NULL),
-    m_pMetering(NULL)
+    m_pMetering(NULL),
+    m_EventTimeoutMS(_eventTimeoutMS)
   { }
 
   void ModelMaintenance::initialize() {
@@ -271,7 +272,7 @@ namespace dss {
         m_ModelEventsMutex.unlock();
       }
     } else {
-      m_NewModelEvent.waitFor(1000);
+      m_NewModelEvent.waitFor(m_EventTimeoutMS);
       bool hadToUpdate = false;
       foreach(DSMeter* pDSMeter, m_pApartment->getDSMeters()) {
         if(pDSMeter->isPresent()) {
