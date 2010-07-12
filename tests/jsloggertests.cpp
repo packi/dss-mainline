@@ -47,7 +47,7 @@ namespace fs = boost::filesystem;
 BOOST_AUTO_TEST_SUITE(JSLogger)
 
 BOOST_AUTO_TEST_CASE(testOneLoggerGetsCleanedUp) {
-  EventQueue queue;
+  EventQueue queue(2);
   EventRunner runner;
   EventInterpreter interpreter(NULL);
 
@@ -100,12 +100,12 @@ BOOST_AUTO_TEST_CASE(testOneLoggerGetsCleanedUp) {
 
   queue.shutdown();
   interpreter.terminate();
-  sleepMS(1500);
+  sleepMS(5);
 }
 
 
 BOOST_AUTO_TEST_CASE(testLogger) {
-  EventQueue queue;
+  EventQueue queue(2);
   EventRunner runner;
   EventInterpreter interpreter(NULL);
 
@@ -153,11 +153,11 @@ BOOST_AUTO_TEST_CASE(testLogger) {
 
   queue.shutdown();
   interpreter.terminate();
-  sleepMS(1500);
+  sleepMS(5);
 }
 
 BOOST_AUTO_TEST_CASE(testLogrotate) {
-  EventQueue queue;
+  EventQueue queue(2);
   EventRunner runner;
   EventInterpreter interpreter(NULL);
 
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE(testLogrotate) {
   pEvent->setProperty("signum", intToString(SIGUSR1));
   queue.pushEvent(pEvent);
 
-  sleepMS(3000);
+  sleepMS(5);
 
   {
     boost::scoped_ptr<ScriptContext> ctx(env->getContext());
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(testLogrotate) {
 
   queue.shutdown();
   interpreter.terminate();
-  sleepMS(2500);
+  sleepMS(5);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

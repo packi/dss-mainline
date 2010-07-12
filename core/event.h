@@ -247,8 +247,9 @@ namespace dss {
 
     EventRunner* m_EventRunner;
     boost::shared_ptr<Schedule> scheduleFromEvent(boost::shared_ptr<Event> _event);
+    const int m_EventTimeoutMS;
   public:
-    EventQueue();
+    EventQueue(const int _eventTimeoutMS = 1000);
     void pushEvent(boost::shared_ptr<Event> _event);
     boost::shared_ptr<Event> popEvent();
     bool waitForEvent();

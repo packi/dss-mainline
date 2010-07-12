@@ -47,7 +47,7 @@ using namespace dss;
 BOOST_AUTO_TEST_SUITE(Events)
 
 BOOST_AUTO_TEST_CASE(testSimpleEvent) {
-  EventQueue queue;
+  EventQueue queue(2);
   EventRunner runner;
   EventInterpreter interpreter(NULL);
   interpreter.setEventQueue(&queue);
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(testSimpleEvent) {
 
   queue.pushEvent(pEvent);
 
-  sleep(1);
+  sleepMS(5);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 1);
 
@@ -66,17 +66,17 @@ BOOST_AUTO_TEST_CASE(testSimpleEvent) {
 
   queue.pushEvent(pEvent);
 
-  sleep(1);
+  sleepMS(5);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
 
   queue.shutdown();
   interpreter.terminate();
-  sleep(2);
+  sleepMS(5);
 } // testSimpleEvent
 
 BOOST_AUTO_TEST_CASE(testSubscription) {
-  EventQueue queue;
+  EventQueue queue(2);
   EventRunner runner;
   EventInterpreter interpreter(NULL);
   interpreter.setEventQueue(&queue);
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(testSubscription) {
 
   queue.pushEvent(pEvent);
 
-  sleep(1);
+  sleepMS(5);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
 
@@ -105,13 +105,13 @@ BOOST_AUTO_TEST_CASE(testSubscription) {
 
   queue.pushEvent(pEvent);
 
-  sleep(1);
+  sleepMS(5);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 3);
 
   queue.shutdown();
   interpreter.terminate();
-  sleep(2);
+  sleepMS(5);
 } // testSubscription
 
 BOOST_AUTO_TEST_CASE(testEmptySubscriptionXML) {
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(testNonExistingXML) {
 } // testNonExistingXML
 
 BOOST_AUTO_TEST_CASE(testSubscriptionXML) {
-  EventQueue queue;
+  EventQueue queue(2);
   EventRunner runner;
   EventInterpreter interpreter(NULL);
   interpreter.setEventQueue(&queue);
@@ -186,29 +186,29 @@ BOOST_AUTO_TEST_CASE(testSubscriptionXML) {
 
   interpreter.run();
 
-  sleep(1);
+  sleepMS(5);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 0);
 
   boost::shared_ptr<Event> evt(new Event("event1"));
   queue.pushEvent(evt);
 
-  sleep(1);
+  sleepMS(5);
 
   runner.runOnce();
 
-  sleep(3);
+  sleepMS(2500);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
 
   queue.shutdown();
   interpreter.terminate();
-  sleep(1);
+  sleepMS(5);
   boost::filesystem::remove_all(fileName);
 } // testSubscriptionXML
 
 BOOST_AUTO_TEST_CASE(testDS485Events) {
-  EventQueue queue;
+  EventQueue queue(5);
   EventRunner runner;
   EventInterpreter interpreter(NULL);
   interpreter.setEventQueue(&queue);
@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
 
   interpreter.run();
 
-  sleep(1);
+  sleepMS(5);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 0);
 
@@ -279,17 +279,17 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
   evt->setLocation("dev1");
   queue.pushEvent(evt);
 
-  sleep(1);
+  sleepMS(5);
 
   runner.runOnce();
 
-  sleep(1);
+  sleepMS(5);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 1);
 
   queue.shutdown();
   interpreter.terminate();
-  sleep(1);
+  sleepMS(5);
   boost::filesystem::remove_all(fileName);
 } // testDS485Events
 
@@ -306,7 +306,7 @@ BOOST_AUTO_TEST_CASE(testEventHandlerJavascriptDoesntLeakExceptionsWithNonexisti
 } // testEventHandlerJavascriptDoesntLeakExceptionsWithNonexistingFile
 
 BOOST_AUTO_TEST_CASE(testRemovingSubscription) {
-  EventQueue queue;
+  EventQueue queue(2);
   EventRunner runner;
   EventInterpreter interpreter(NULL);
   interpreter.setEventQueue(&queue);
@@ -325,7 +325,7 @@ BOOST_AUTO_TEST_CASE(testRemovingSubscription) {
 
   queue.pushEvent(pEvent);
 
-  sleepMS(100);
+  sleepMS(5);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
 
@@ -333,13 +333,13 @@ BOOST_AUTO_TEST_CASE(testRemovingSubscription) {
 
   queue.pushEvent(pEvent);
 
-  sleepMS(100);
+  sleepMS(5);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 3);
 
   queue.shutdown();
   interpreter.terminate();
-  sleepMS(1200);
+  sleepMS(5);
 } // testRemovingSubscription
 
 BOOST_AUTO_TEST_CASE(testUniqueEventsWork) {
@@ -435,7 +435,7 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsOverwritesTimeProperty) {
 } // testUniqueEventsOverwritesTimeProperty
 
 BOOST_AUTO_TEST_CASE(testEventCollector) {
-  EventQueue queue;
+  EventQueue queue(2);
   EventRunner runner;
   EventInterpreter interpreter(NULL);
   interpreter.setEventQueue(&queue);
@@ -451,7 +451,7 @@ BOOST_AUTO_TEST_CASE(testEventCollector) {
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
   queue.pushEvent(pEvent);
 
-  sleepMS(20);
+  sleepMS(5);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 1);
 
@@ -463,7 +463,7 @@ BOOST_AUTO_TEST_CASE(testEventCollector) {
   pEvent.reset(new Event("event2"));
   queue.pushEvent(pEvent);
 
-  sleepMS(20);
+  sleepMS(5);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
 
@@ -474,7 +474,7 @@ BOOST_AUTO_TEST_CASE(testEventCollector) {
   pEvent.reset(new Event("my_event"));
   queue.pushEvent(pEvent);
 
-  sleepMS(20);
+  sleepMS(5);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 3);
 
@@ -482,7 +482,7 @@ BOOST_AUTO_TEST_CASE(testEventCollector) {
 
   queue.shutdown();
   interpreter.terminate();
-  sleepMS(1500);
+  sleepMS(5);
 } // testEventCollector
 
 class InternalEventRelayTester {
@@ -507,7 +507,7 @@ private:
 }; // InternalEventRelayTester
 
 BOOST_AUTO_TEST_CASE(testInternalEventRelay) {
-  EventQueue queue;
+  EventQueue queue(2);
   EventRunner runner;
   EventInterpreter interpreter(NULL);
   interpreter.setEventQueue(&queue);
@@ -541,14 +541,14 @@ BOOST_AUTO_TEST_CASE(testInternalEventRelay) {
   boost::shared_ptr<Event> pEvent(new Event("one"));
   queue.pushEvent(pEvent);
 
-  sleepMS(20);
+  sleepMS(5);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 1);
   BOOST_CHECK_EQUAL(tester.getCounter(), 1);
 
   queue.pushEvent(pEvent);
 
-  sleepMS(20);
+  sleepMS(5);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
   BOOST_CHECK_EQUAL(tester.getCounter(), 2);
@@ -556,14 +556,14 @@ BOOST_AUTO_TEST_CASE(testInternalEventRelay) {
   pEvent.reset(new Event("two"));
   queue.pushEvent(pEvent);
 
-  sleepMS(20);
+  sleepMS(5);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 3);
   BOOST_CHECK_EQUAL(tester.getCounter(), 4);
 
   queue.shutdown();
   interpreter.terminate();
-  sleepMS(1500);
+  sleepMS(5);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -497,8 +497,9 @@ namespace dss {
 
   //================================================== EventQueue
 
-  EventQueue::EventQueue()
-  : m_EventRunner(NULL)
+  EventQueue::EventQueue(const int _eventTimeoutMS)
+  : m_EventRunner(NULL),
+    m_EventTimeoutMS(_eventTimeoutMS)
   { } // ctor
 
   boost::shared_ptr<Schedule> EventQueue::scheduleFromEvent(boost::shared_ptr<Event> _event) {
@@ -588,7 +589,7 @@ namespace dss {
 
   bool EventQueue::waitForEvent() {
     if(m_EventQueue.empty()) {
-      m_EntryInQueueEvt.waitFor(1000);
+      m_EntryInQueueEvt.waitFor(m_EventTimeoutMS);
     }
     return !m_EventQueue.empty();
   } // waitForEvent
