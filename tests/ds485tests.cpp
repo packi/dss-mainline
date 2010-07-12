@@ -32,6 +32,10 @@
 #include "core/ds485/ds485.h"
 #include "core/ds485types.h"
 
+#include "core/model/apartment.h"
+#include "core/model/modelmaintenance.h"
+#include "core/ds485/ds485proxy.h"
+
 using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(DS485)
@@ -176,5 +180,17 @@ BOOST_AUTO_TEST_CASE(testPayload) {
   BOOST_CHECK_EQUAL(pd.get<dsid_t>().toString(), dsid.toString());
   BOOST_CHECK(pd.isEmpty());
 } // testPayload
+
+BOOST_AUTO_TEST_CASE(testSendingFrameWithEmptyPayload) {
+  Apartment apt(NULL);
+  ModelMaintenance maintenance(NULL);
+  maintenance.setApartment(&apt);
+  maintenance.initialize();
+  DS485Proxy proxy(NULL, &maintenance);
+  proxy.setInitializeDS485Controller(false);
+  proxy.initialize();
+  DS485CommandFrame frame;
+  proxy.sendFrame(frame);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

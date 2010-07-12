@@ -218,12 +218,16 @@ namespace dss {
     sstream << "0x" << std::hex << std::uppercase << int(_frame.getHeader().getDestination());
 
     PayloadDissector pdDump(_frame.getPayload());
-    uint8_t cmd = pdDump.get<uint8_t>();
-    sstream << ", CMD:0x" << std::hex << std::uppercase << (unsigned int)cmd << ",";
-    int iParameter=1;
-    while(!pdDump.isEmpty()) {
-      uint16_t data = pdDump.get<uint16_t>();
-      sstream << " P" << iParameter++ << ":0x" << std::hex << std::uppercase << data;
+    if(!pdDump.isEmpty()) {
+      uint8_t cmd = pdDump.get<uint8_t>();
+      sstream << ", CMD:0x" << std::hex << std::uppercase << (unsigned int)cmd << ",";
+      int iParameter=1;
+      while(!pdDump.isEmpty()) {
+        uint16_t data = pdDump.get<uint16_t>();
+        sstream << " P" << iParameter++ << ":0x" << std::hex << std::uppercase << data;
+      }
+    } else {
+      sstream << " payload empty";
     }
     sstream << std::dec;
 
