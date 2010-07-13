@@ -24,9 +24,14 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
+#include <boost/filesystem.hpp>
+
 #include "core/web/restful.h"
+#include "core/web/webserverapi.h"
+#include "core/web/restfulapiwriter.h"
 
 using namespace dss;
+namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE(RestfulAPITests)
 
@@ -54,6 +59,16 @@ BOOST_AUTO_TEST_CASE(testRestfulRequest) {
 
   BOOST_CHECK_EQUAL(req.getClass(), "test");
   BOOST_CHECK_EQUAL(req.getMethod(), "method");
+}
+
+BOOST_AUTO_TEST_CASE(testRestfulAPIWriter) {
+  const std::string fileName = getTempDir() + "api.xml";
+  fs::remove(fileName);
+  WebServerAPI api;
+  RestfulAPIWriter::writeToXML(*api.createRestfulAPI(), fileName);
+
+  BOOST_CHECK(fs::exists(fileName));
+  fs::remove(fileName);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
