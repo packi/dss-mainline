@@ -47,13 +47,19 @@ namespace dss {
       BOOST_ASSERT(val->getValue() == _value);
     }
 
-    boost::shared_ptr<JSONObject> getResultObject(boost::shared_ptr<JSONObject> _response) {
-      testOkIs(_response, true);
-      boost::shared_ptr<JSONElement> resultElem = _response->getElementByName("result");
+    boost::shared_ptr<JSONObject> getSubObject(const std::string& _name, boost::shared_ptr<JSONElement> _elem) {
+      boost::shared_ptr<JSONElement> resultElem = _elem->getElementByName(_name);
       if(resultElem == NULL) {
         BOOST_ASSERT(false);
       }
       boost::shared_ptr<JSONObject> result = boost::dynamic_pointer_cast<JSONObject>(resultElem);
+      BOOST_ASSERT(result != NULL);
+      return result;
+    }
+
+    boost::shared_ptr<JSONObject> getResultObject(boost::shared_ptr<JSONObject> _response) {
+      testOkIs(_response, true);
+      boost::shared_ptr<JSONObject> result = getSubObject("result", _response);
       BOOST_ASSERT(result != NULL);
       return result;
     }

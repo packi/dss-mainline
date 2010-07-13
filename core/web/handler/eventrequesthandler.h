@@ -26,9 +26,6 @@
 
 #include "core/web/webrequests.h"
 #include "core/session.h"
-#include "core/event.h"
-#include "core/eventcollector.h"
-#include "core/eventinterpreterplugins.h"
 #include "core/mutex.h"
 
 #include <deque>
@@ -38,14 +35,15 @@
 
 namespace dss {
 
-  class EventQueue;
+  class Event;
+  class EventInterpreter;
+  class EventCollector;
 
   class EventSubscriptionSession : public Session {
   public:
-      EventSubscriptionSession(boost::shared_ptr<Session> _parentSession);
-      EventSubscriptionSession(const int _tokenID, boost::shared_ptr<Session> _parentSession);
-//    virtual bool isStillValid();
-    int getTokenID();
+    EventSubscriptionSession(EventInterpreter& _eventInterpreter, boost::shared_ptr<Session> _parentSession);
+    EventSubscriptionSession(EventInterpreter& _eventInterpreter, const int _tokenID, boost::shared_ptr<Session> _parentSession);
+
     void subscribe(const std::string& _eventName);
     void unsubscribe(const std::string& _eventName);
     // blocks if no events are available
@@ -55,18 +53,19 @@ namespace dss {
     std::deque<Event> m_events;
     boost::shared_ptr<EventCollector> m_pEventCollector;
     void createCollector();
-    // name, sid
+    // name, subscriptionID
     std::map <std::string, std::string> m_subscriptionMap;
+    EventInterpreter& m_EventInterpreter;
   };
 
   typedef boost::ptr_map<const int, boost::shared_ptr<EventSubscriptionSession> > EventSubscriptionSessionByTokenID;
 
   class EventRequestHandler : public WebServerRequestHandlerJSON {
   public:
-    EventRequestHandler(EventQueue& _queue);
+    EventRequestHandler(EventInterpreter& _queue);
     virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
   private:
-    EventQueue& m_Queue;
+    EventInterpreter& m_EventInterpreter;
     Mutex m_eventsMutex;
 
     // make use of the dataMap in the new session object (cookie stuff)

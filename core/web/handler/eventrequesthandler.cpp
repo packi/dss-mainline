@@ -23,19 +23,22 @@
 
 #include "eventrequesthandler.h"
 
+#include <boost/any.hpp>
+
+#include "core/base.h"
+
 #include "core/web/json.h"
 
 #include "core/event.h"
-#include "core/base.h"
-
-#include <boost/any.hpp>
+#include "core/eventcollector.h"
+#include "core/eventinterpreterplugins.h"
 
 namespace dss {
 
   //=========================================== EventRequestHandler
 
-  EventRequestHandler::EventRequestHandler(EventQueue& _queue)
-  : m_Queue(_queue)
+  EventRequestHandler::EventRequestHandler(EventInterpreter& _interpreter)
+  : m_EventInterpreter(_interpreter)
   { }
 
   boost::shared_ptr<JSONObject> EventRequestHandler::raise(const RestfulRequest& _request) {
@@ -59,16 +62,24 @@ namespace dss {
     for(std::vector<std::string>::iterator iParam = params.begin(), e = params.end();
         iParam != e; ++iParam)
     {
-      std::vector<std::string> nameValue = dss::splitString(*iParam, '=');
-      if(nameValue.size() == 2) {
-        dss::Logger::getInstance()->log("WebServer::handleEventCall: Got parameter '" + nameValue[0] + "'='" + nameValue[1] + "'");
-        evt->setProperty(nameValue[0], nameValue[1]);
-      } else {
-        dss::Logger::getInstance()->log(std::string("Invalid parameter found WebServer::handleEventCall: ") + *iParam );
+      bool ok = false;
+      std::string& keyValue = *iParam;
+      std::string::size_type delimPos = keyValue.find('=', 0);
+      if(delimPos != std::string::npos) {
+        std::string key = keyValue.substr(0, delimPos);
+        std::string value = keyValue.substr(delimPos + 1, std::string::npos);
+        if(!key.empty() && !value.empty()) {
+          dss::Logger::getInstance()->log("EventRequestHandler::raise: Got parameter '" + key + "'='" + value + "'");
+          evt->setProperty(key, value);
+          ok = true;
+        }
+      }
+      if(!ok) {
+        return failure("Invalid parameter found: " + keyValue);
       }
     }
 
-    m_Queue.pushEvent(evt);
+    m_EventInterpreter.getQueue().pushEvent(evt);
     return success();
   }
 
@@ -118,7 +129,7 @@ namespace dss {
 
     EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(token);
     if(entry == eventSessions->end()){
-        boost::shared_ptr<EventSubscriptionSession> session(new EventSubscriptionSession(token, _session));
+        boost::shared_ptr<EventSubscriptionSession> session(new EventSubscriptionSession(m_EventInterpreter, token, _session));
       (*eventSessions)[token] = session;
     }
 
@@ -208,7 +219,7 @@ namespace dss {
     try {
       token = strToInt(tokenStr);
     } catch(std::invalid_argument& err) {
-      return failure("Could not parse subsription id!");
+      return failure("Could not parse subscription id!");
     }
 
     if(!timeoutStr.empty()) {
@@ -240,7 +251,7 @@ namespace dss {
     EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(token);
     if(entry == eventSessions->end()) {
       m_eventsMutex.unlock();
-      return failure("Subsription id not found!");
+      return failure("Subscription id not found!");
     }
 
     boost::shared_ptr<EventSubscriptionSession> session = (*eventSessions)[token];
@@ -262,17 +273,20 @@ namespace dss {
     throw std::runtime_error("Unhandled function");
   } // handleRequest
 
-  EventSubscriptionSession::EventSubscriptionSession(boost::shared_ptr<Session> _parentSession) : Session() {
-    m_parentSession = _parentSession;
-  }
+  EventSubscriptionSession::EventSubscriptionSession(EventInterpreter& _eventInterpreter,
+                                                     boost::shared_ptr<Session> _parentSession)
+  : Session(),
+    m_parentSession(_parentSession),
+    m_EventInterpreter(_eventInterpreter)
+  { }
 
-  EventSubscriptionSession::EventSubscriptionSession(const int _tokenID, boost::shared_ptr<Session> _parentSession) : Session(_tokenID) {
-    m_parentSession = _parentSession;
-  }
-
-  int EventSubscriptionSession::getTokenID() {
-    return m_Token;
-  }
+  EventSubscriptionSession::EventSubscriptionSession(EventInterpreter& _eventInterpreter,
+                                                     const int _tokenID,
+                                                     boost::shared_ptr<Session> _parentSession)
+  : Session(_tokenID),
+    m_parentSession(_parentSession),
+    m_EventInterpreter(_eventInterpreter)
+  { }
 
   void EventSubscriptionSession::subscribe(const std::string& _eventName) {
     createCollector();
@@ -336,7 +350,7 @@ namespace dss {
     if(m_pEventCollector == NULL) {
       EventInterpreterInternalRelay* pPlugin =
           dynamic_cast<EventInterpreterInternalRelay*>(
-              DSS::getInstance()->getEventInterpreter().getPluginByName(
+              m_EventInterpreter.getPluginByName(
                 std::string(EventInterpreterInternalRelay::getPluginName())
               )
           );

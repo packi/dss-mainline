@@ -435,7 +435,7 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsOverwritesTimeProperty) {
 } // testUniqueEventsOverwritesTimeProperty
 
 BOOST_AUTO_TEST_CASE(testEventCollector) {
-  EventQueue queue(2);
+  EventQueue queue(1);
   EventRunner runner;
   EventInterpreter interpreter(NULL);
   interpreter.setEventQueue(&queue);

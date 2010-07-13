@@ -239,7 +239,7 @@ namespace dss {
             getDSS().getModelMaintenance());
     m_Handlers[kHandlerSet] = new SetRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerProperty] = new PropertyRequestHandler(getDSS().getPropertySystem());
-    m_Handlers[kHandlerEvent] = new EventRequestHandler(getDSS().getEventQueue());
+    m_Handlers[kHandlerEvent] = new EventRequestHandler(getDSS().getEventInterpreter());
     m_Handlers[kHandlerSystem] = new SystemRequestHandler();
     m_Handlers[kHandlerStructure] =
       new StructureRequestHandler(
