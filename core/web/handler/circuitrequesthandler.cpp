@@ -42,8 +42,10 @@ namespace dss {
     if(idString.empty()) {
       return failure("Missing parameter id");
     }
-    dsid_t dsid = dsid_t::fromString(idString);
-    if(dsid == NullDSID) {
+    dsid_t dsid = NullDSID;
+    try {
+      dsid = dsid_t::fromString(idString);
+    } catch(std::invalid_argument&) {
       return failure("Could not parse dsid");
     }
     try {
@@ -53,9 +55,13 @@ namespace dss {
         resultObj->addProperty("name", dsMeter.getName());
         return success(resultObj);
       } else if(_request.getMethod() == "setName") {
-        dsMeter.setName(_request.getParameter("newName"));
-        m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
-        return success();
+        if(_request.hasParameter("newName")) {
+          dsMeter.setName(_request.getParameter("newName"));
+          m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+          return success();
+        } else {
+          return failure("missing parameter newName");
+        }
       } else if(_request.getMethod() == "getEnergyBorder") {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
         resultObj->addProperty("orange", dsMeter.getEnergyLevelOrange());
@@ -75,7 +81,7 @@ namespace dss {
       } else {
         throw std::runtime_error("Unhandled function");
       }
-    } catch(std::runtime_error&) {
+    } catch(ItemNotFoundException&) {
       return failure("Could not find dSMeter with given dsid");
     }
   } // handleRequest
