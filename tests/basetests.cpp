@@ -24,8 +24,10 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include "../core/base.h"
-#include "../core/datetools.h"
+#include <boost/tuple/tuple.hpp>
+
+#include "core/base.h"
+#include "core/datetools.h"
 
 using namespace dss;
 
@@ -224,5 +226,34 @@ BOOST_AUTO_TEST_CASE(testISODate) {
 #endif
   BOOST_CHECK_EQUAL(instObj, parsedObj);
 } // testISODate
+
+BOOST_AUTO_TEST_CASE(testSplitIntoKeyValue) {
+  std::string key;
+  std::string value;
+
+  boost::tie(key, value) = splitIntoKeyValue("ab=cd");
+  BOOST_CHECK_EQUAL(key, "ab");
+  BOOST_CHECK_EQUAL(value, "cd");
+
+  boost::tie(key, value) = splitIntoKeyValue("ef=");
+  BOOST_CHECK_EQUAL(key, "ef");
+  BOOST_CHECK_EQUAL(value, "");
+
+  boost::tie(key, value) = splitIntoKeyValue("=gh");
+  BOOST_CHECK_EQUAL(key, "");
+  BOOST_CHECK_EQUAL(value, "gh");
+
+  boost::tie(key, value) = splitIntoKeyValue("");
+  BOOST_CHECK_EQUAL(key, "");
+  BOOST_CHECK_EQUAL(value, "");
+
+  boost::tie(key, value) = splitIntoKeyValue("test");
+  BOOST_CHECK_EQUAL(key, "");
+  BOOST_CHECK_EQUAL(value, "");
+
+  boost::tie(key, value) = splitIntoKeyValue("test=equals=success");
+  BOOST_CHECK_EQUAL(key, "test");
+  BOOST_CHECK_EQUAL(value, "equals=success");
+}
 
 BOOST_AUTO_TEST_SUITE_END()

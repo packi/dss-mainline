@@ -24,6 +24,7 @@
 #include "eventrequesthandler.h"
 
 #include <boost/any.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include "core/base.h"
 
@@ -62,19 +63,14 @@ namespace dss {
     for(std::vector<std::string>::iterator iParam = params.begin(), e = params.end();
         iParam != e; ++iParam)
     {
-      bool ok = false;
+      std::string key;
+      std::string value;
       std::string& keyValue = *iParam;
-      std::string::size_type delimPos = keyValue.find('=', 0);
-      if(delimPos != std::string::npos) {
-        std::string key = keyValue.substr(0, delimPos);
-        std::string value = keyValue.substr(delimPos + 1, std::string::npos);
-        if(!key.empty() && !value.empty()) {
-          dss::Logger::getInstance()->log("EventRequestHandler::raise: Got parameter '" + key + "'='" + value + "'");
-          evt->setProperty(key, value);
-          ok = true;
-        }
-      }
-      if(!ok) {
+      boost::tie(key, value) = splitIntoKeyValue(keyValue);
+      if(!key.empty() && !value.empty()) {
+        dss::Logger::getInstance()->log("EventRequestHandler::raise: Got parameter '" + key + "'='" + value + "'");
+        evt->setProperty(key, value);
+      } else {
         return failure("Invalid parameter found: " + keyValue);
       }
     }

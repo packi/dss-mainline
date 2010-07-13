@@ -205,11 +205,13 @@ namespace dss {
     if(_params != NULL) {
       std::vector<std::string> paramList = splitString(_params, '&');
       for(std::vector<std::string>::iterator iParam = paramList.begin(); iParam != paramList.end(); ++iParam) {
-        std::vector<std::string> nameValue = splitString(*iParam, '=');
-        if(nameValue.size() != 2) {
+        std::string key;
+        std::string value;
+        boost::tie(key, value) = splitIntoKeyValue(*iParam);
+        if(key.empty() || value.empty()) {
           result[*iParam] = "";
         } else {
-          result[urlDecode(nameValue.at(0))] = urlDecode(nameValue.at(1));
+          result[urlDecode(key)] = urlDecode(value);
         }
       }
     }

@@ -92,6 +92,8 @@ namespace dss {
   bool endsWith(const std::string& str, const std::string& searchString);
   bool beginsWith(const std::string& str, const std::string& searchString);
 
+  std::pair<std::string, std::string> splitIntoKeyValue(const std::string& _keyValue);
+
   std::string trim(const std::string& _str);
   std::string join(const std::vector<std::string>& _strings, const std::string& _delimiter);
 

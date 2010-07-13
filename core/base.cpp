@@ -215,6 +215,17 @@ namespace dss {
     (str.compare( 0, lenSearch, searchString ) == 0);
   } // beginsWith
 
+  std::pair<std::string, std::string> splitIntoKeyValue(const std::string& _keyValue) {
+    std::string key;
+    std::string value;
+    std::string::size_type delimPos = _keyValue.find('=', 0);
+    if(delimPos != std::string::npos) {
+      key = _keyValue.substr(0, delimPos);
+      value = _keyValue.substr(delimPos + 1, std::string::npos);
+    }
+    return std::make_pair(key, value);
+  } // splitIntoKeyValue
+
   std::string join(const std::vector<std::string>& _strings, const std::string& _delimiter) {
     std::ostringstream sstream;
     bool first = true;
