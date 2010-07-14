@@ -39,9 +39,7 @@
 #include "core/ds485/framebucketcollector.h"
 #include "core/ds485/businterfacehandler.h"
 
-#ifdef WITH_SIM
 #include "core/sim/dssim.h"
-#endif
 
 #include <sstream>
 
@@ -83,11 +81,7 @@ namespace dss {
 
   bool DS485Proxy::isReady() {
     bool simReady =
-#ifdef WITH_SIM
-             DSS::getInstance()->getSimulation().isReady(); // allow the simulation to run on it's own
-#else
-             true;
-#endif
+           DSS::getInstance()->getSimulation().isReady(); // allow the simulation to run on it's own
     bool selfReady = (m_pBusInterfaceHandler != NULL) ? m_pBusInterfaceHandler->isRunning() : true;
     bool controllerReady =
         ((m_DS485Controller.getState() == csSlave) ||
@@ -199,7 +193,6 @@ namespace dss {
   void DS485Proxy::sendFrame(DS485CommandFrame& _frame) {
     _frame.setFrameSource(fsDSS);
     bool broadcast = _frame.getHeader().isBroadcast();
-#ifdef WITH_SIM
     bool sim = isSimAddress(_frame.getHeader().getDestination());
     if(broadcast || sim) {
       log("Sending packet to sim");
@@ -207,9 +200,6 @@ namespace dss {
         getDSS().getSimulation().process(_frame);
       }
     }
-#else
-    bool sim = false;
-#endif
     std::ostringstream sstream;
     sstream << "TX DEST:";
     if(broadcast) {
@@ -255,7 +245,6 @@ namespace dss {
     return result;
   } // sendFrameAndInstallBucket
 
-#ifdef WITH_SIM
   bool DS485Proxy::isSimAddress(const uint8_t _addr) {
     if(DSS::hasInstance()) {
       return getDSS().getSimulation().isSimAddress(_addr);
@@ -263,7 +252,6 @@ namespace dss {
       return true;
     }
   } // isSimAddress
-#endif
 
   void DS485Proxy::checkResultCode(const int _resultCode) {
     if(_resultCode < 0) {
@@ -968,11 +956,9 @@ namespace dss {
     Subsystem::initialize();
     if(m_pBusInterfaceHandler != NULL) {
       m_DS485Controller.addFrameCollector(m_pBusInterfaceHandler);
-#ifdef WITH_SIM
       if(DSS::hasInstance()) {
         getDSS().getSimulation().addFrameCollector(m_pBusInterfaceHandler);
       }
-#endif
     }
   } // initialize
 

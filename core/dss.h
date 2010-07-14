@@ -49,9 +49,7 @@ namespace dss {
   class DS485BusRequestDispatcher;
   class BusInterfaceHandler;
   class ModelMaintenance;
-#ifdef WITH_SIM
   class DSSim;
-#endif
 
   typedef enum {
     ssInvalid,
@@ -75,9 +73,7 @@ namespace dss {
     boost::shared_ptr<DS485Interface> m_pDS485Interface;
     boost::shared_ptr<PropertySystem> m_pPropertySystem;
     boost::shared_ptr<Apartment> m_pApartment;
-#ifdef WITH_SIM
     boost::shared_ptr<DSSim> m_pSimulation;
-#endif
     boost::shared_ptr<EventRunner> m_pEventRunner;
     boost::shared_ptr<WebServices> m_pWebServices;
     boost::shared_ptr<EventInterpreter> m_pEventInterpreter;
@@ -126,9 +122,7 @@ namespace dss {
 
     DS485Interface& getDS485Interface() { return *m_pDS485Interface; }
     Apartment& getApartment() { return *m_pApartment; }
-#ifdef WITH_SIM
     DSSim& getSimulation() { return *m_pSimulation; }
-#endif
     EventRunner& getEventRunner() { return *m_pEventRunner; }
     WebServices& getWebServices() { return *m_pWebServices; }
     EventQueue& getEventQueue() { return *m_pEventQueue; }

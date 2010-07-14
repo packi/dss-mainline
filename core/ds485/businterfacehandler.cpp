@@ -73,11 +73,9 @@ namespace dss {
           uint8_t functionID = pd.get<uint8_t>();
           if((frame->getCommand() == CommandRequest) || (frame->getCommand() == CommandEvent)) {
 
-#ifdef WITH_SIM
             if(frame->getFrameSource() == fsWire) {
               getDSS().getSimulation().process(*frame.get());
             }
-#endif
             // dSMeter Events
             if(functionID == FunctionZoneAddDevice) {
               int modID = frame->getHeader().getSource();

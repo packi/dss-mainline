@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.6)
 project(DSS)
 
 option(WITH_TESTS "Include test-suite" ON)
-option(WITH_SIM "Compile and start the simulation" ON)
 option(WITH_GCOV "Compile coverage information into the dss" OFF)
 
 if(NOT WITH_DATADIR)

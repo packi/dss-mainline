@@ -44,9 +44,7 @@
 #ifdef WITH_BONJOUR
   #include "bonjour.h"
 #endif
-#ifdef WITH_SIM
-  #include "sim/dssim.h"
-#endif
+#include "sim/dssim.h"
 #include "webservices/webservices.h"
 #include "event.h"
 #include "metering/metering.h"
@@ -129,9 +127,7 @@ const char* JSLogDirectory = "data/logs/";
     m_pMetering.reset();
     m_pFakeMeter.reset();
 
-#ifdef WITH_SIM
     m_pSimulation.reset();
-#endif
 
     m_pDS485Interface.reset();
 
@@ -226,10 +222,8 @@ const char* JSLogDirectory = "data/logs/";
     m_pWebServices = boost::shared_ptr<WebServices>(new WebServices(this));
     m_Subsystems.push_back(m_pWebServices.get());
 
-#ifdef WITH_SIM
     m_pSimulation = boost::shared_ptr<DSSim>(new DSSim(this));
     m_Subsystems.push_back(m_pSimulation.get());
-#endif
 
     m_pEventInterpreter = boost::shared_ptr<EventInterpreter>(new EventInterpreter(this));
     m_Subsystems.push_back(m_pEventInterpreter.get());
