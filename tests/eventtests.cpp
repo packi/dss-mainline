@@ -541,14 +541,14 @@ BOOST_AUTO_TEST_CASE(testInternalEventRelay) {
   boost::shared_ptr<Event> pEvent(new Event("one"));
   queue.pushEvent(pEvent);
 
-  sleepMS(5);
+  sleepMS(10);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 1);
   BOOST_CHECK_EQUAL(tester.getCounter(), 1);
 
   queue.pushEvent(pEvent);
 
-  sleepMS(5);
+  sleepMS(10);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
   BOOST_CHECK_EQUAL(tester.getCounter(), 2);
@@ -556,14 +556,14 @@ BOOST_AUTO_TEST_CASE(testInternalEventRelay) {
   pEvent.reset(new Event("two"));
   queue.pushEvent(pEvent);
 
-  sleepMS(5);
+  sleepMS(10);
 
   BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 3);
   BOOST_CHECK_EQUAL(tester.getCounter(), 4);
 
   queue.shutdown();
   interpreter.terminate();
-  sleepMS(5);
+  sleepMS(10);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
