@@ -22,6 +22,9 @@
 
 #include "framebucketcollector.h"
 
+#include <boost/thread/locks.hpp>
+#include <boost/date_time/posix_time/posix_time_duration.hpp>
+
 #include "core/logger.h"
 #include "core/base.h"
 
@@ -36,28 +39,29 @@ namespace dss {
 
   bool FrameBucketCollector::addFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
     bool result = false;
-    m_FramesMutex.lock();
-    if(!m_SingleFrame || m_Frames.empty()) {
-      m_Frames.push_back(_frame);
-      result = true;
+    {
+      boost::mutex::scoped_lock lock(m_FramesMutex);
+      if(!m_SingleFrame || m_Frames.empty()) {
+        m_Frames.push_back(_frame);
+        result = true;
+      }
     }
-    m_FramesMutex.unlock();
-
     if(result) {
-      m_PacketHere.signal();
+      m_EmptyCondition.notify_one();
+      Logger::getInstance()->log("FrameBucket::addFrame:  fid: " + intToString(getFunctionID()) + " sid: " + intToString(getSourceID()));
     }
+
     return result;
   } // addFrame
 
   boost::shared_ptr<DS485CommandFrame> FrameBucketCollector::popFrame() {
     boost::shared_ptr<DS485CommandFrame> result;
 
-    m_FramesMutex.lock();
+    boost::mutex::scoped_lock lock(m_FramesMutex);
     if(!m_Frames.empty()) {
       result = m_Frames.front();
       m_Frames.pop_front();
     }
-    m_FramesMutex.unlock();
     return result;
   } // popFrame
 
@@ -66,25 +70,41 @@ namespace dss {
     sleepMS(_timeoutMS);
   } // waitForFrames
 
+
+  struct HasFrames {
+    std::deque<boost::shared_ptr<DS485CommandFrame> > & m_Frames;
+    HasFrames(std::deque<boost::shared_ptr<DS485CommandFrame> >& _frames)
+    : m_Frames(_frames)
+    {}
+
+    bool operator()() const {
+      return !m_Frames.empty();
+    }
+  };
+
   bool FrameBucketCollector::waitForFrame(int _timeoutMS) {
     m_SingleFrame = true;
-    if(m_Frames.empty()) {
-      Logger::getInstance()->log("FrameBucket::waitForFrame: Waiting for frame");
-      if(m_PacketHere.waitFor(_timeoutMS)) {
-        Logger::getInstance()->log("FrameBucket::waitForFrame: Got frame");
-      } else {
-        Logger::getInstance()->log("FrameBucket::waitForFrame: No frame received");
+    if(isEmpty()) {
+
+      boost::mutex::scoped_lock lock(m_FramesMutex);
+      if(!m_EmptyCondition.timed_wait(lock, boost::posix_time::milliseconds(_timeoutMS), HasFrames(m_Frames))) {
+        Logger::getInstance()->log("FrameBucketCollector::waitForFrame: No frame received");
         return false;
-      }
+      };
+
+      Logger::getInstance()->log("FrameBucketCollector::waitForFrame: Got frame");
+      return !m_Frames.empty();
     }
     return true;
   } // waitForFrame
 
   int FrameBucketCollector::getFrameCount() const {
+    boost::mutex::scoped_lock lock(m_FramesMutex);
     return m_Frames.size();
   } // getFrameCount
 
   bool FrameBucketCollector::isEmpty() const {
+    boost::mutex::scoped_lock lock(m_FramesMutex);
     return m_Frames.empty();
   } // isEmpty
 

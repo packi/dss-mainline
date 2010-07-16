@@ -4,7 +4,7 @@ add_library(tests basetests.cpp  datetoolstests.cpp  ds485tests.cpp
 	jsloggertests.cpp deviceinterfacerequesthandlertest.cpp jsontests.cpp
 	busrequesttests.cpp restfulapitests.cpp jssockettests.cpp jsds485tests.cpp
         dssimtest.cpp devicerequesthandlertest.cpp circuitrequesthandlertest.cpp
-        eventrequesthandlertest.cpp)
+        eventrequesthandlertest.cpp framebucketcollectortest.cpp)
 
 add_executable( dsstests EXCLUDE_FROM_ALL testrunner.cpp ../namespaces.cpp
 	basetests.cpp  datetoolstests.cpp  jsontests.cpp ds485tests.cpp
@@ -13,7 +13,7 @@ add_executable( dsstests EXCLUDE_FROM_ALL testrunner.cpp ../namespaces.cpp
 	propertysystemtests.cpp  scriptstest.cpp busrequesttests.cpp jsds485tests.cpp
 	seriestests.cpp jshandlertests.cpp restfulapitests.cpp jssockettests.cpp
         dssimtest.cpp devicerequesthandlertest.cpp circuitrequesthandlertest.cpp
-        eventrequesthandlertest.cpp)
+        eventrequesthandlertest.cpp framebucketcollectortest.cpp)
 
 target_link_libraries(dsstests core ds485 unix webservices model mongoose
                                ${REQUIRED_LIBS})

@@ -27,9 +27,10 @@
 #include <deque>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/condition_variable.hpp>
 
 #include "framebucketbase.h"
-#include "core/mutex.h"
 #include "core/syncevent.h"
 
 namespace dss {
@@ -40,7 +41,8 @@ namespace dss {
   private:
     std::deque<boost::shared_ptr<DS485CommandFrame> > m_Frames;
     SyncEvent m_PacketHere;
-    Mutex m_FramesMutex;
+    mutable boost::mutex m_FramesMutex;
+    boost::condition_variable m_EmptyCondition;
     bool m_SingleFrame;
   public:
     FrameBucketCollector(FrameBucketHolder* _holder, int _functionID, int _sourceID);
