@@ -32,6 +32,7 @@
 #include "core/model/apartment.h"
 #include "core/model/set.h"
 #include "core/ds485/businterfacehandler.h"
+#include "core/ds485/ds485busrequestdispatcher.h"
 
 using namespace dss;
 
@@ -116,6 +117,14 @@ public:
     return "nothing";
   }
 
+  const std::string& getCalledFunction() const {
+    return m_CalledFunction;
+  }
+
+  int getParameter() const {
+    return m_Parameter;
+  }
+
 private:
   void functionCalled(const std::string& _functionName, int _parameter = -1) const {
     m_CalledFunction = _functionName;
@@ -159,6 +168,10 @@ public:
     m_pDS485Proxy->setBusInterfaceHandler(m_pBusInterfaceHandler.get());
     m_pDS485Proxy->initialize();
 
+    m_pBusRequestDispatcher.reset(new DS485BusRequestDispatcher());
+    m_pBusRequestDispatcher->setFrameSender(m_pDS485Proxy->getFrameSenderInterface());
+
+    m_pApartment->setBusRequestDispatcher(m_pBusRequestDispatcher.get());
 
     std::string fileName = getTempDir() + "/sim.xml";
     std::ofstream ofs(fileName.c_str());
@@ -185,6 +198,8 @@ public:
     }
 
     sleepMS(100);
+
+    m_ValidDSID = DSSim::makeSimulatedDSID(dsid_t(0, 0x11));
   }
 
   ~Fixture() {
@@ -198,10 +213,25 @@ protected:
   boost::shared_ptr<DSSim> m_pSimulation;
   boost::shared_ptr<BusInterfaceHandler> m_pBusInterfaceHandler;
   boost::shared_ptr<DS485Proxy> m_pDS485Proxy;
+  boost::shared_ptr<DS485BusRequestDispatcher> m_pBusRequestDispatcher;
+  dsid_t m_ValidDSID;
 };
 
 BOOST_FIXTURE_TEST_CASE(testFixtureWorks, Fixture) {
   BOOST_CHECK_EQUAL(m_pApartment->getDevices().length(), 1);
+  BOOST_CHECK_EQUAL(m_pApartment->getDevices().get(0).getDSID().toString(), m_ValidDSID.toString());
+}
+
+BOOST_FIXTURE_TEST_CASE(testCallSceneReachesDevice, Fixture) {
+  DummyDevice* dev = dynamic_cast<DummyDevice*>(m_pSimulation->getSimulatedDevice(m_ValidDSID));
+  BOOST_ASSERT(dev != NULL);
+
+  const int kSceneNumber = 10;
+  m_pApartment->getDevices().callScene(kSceneNumber);
+  sleepMS(2);
+
+  BOOST_CHECK_EQUAL(dev->getCalledFunction(), "callScene");
+  BOOST_CHECK_EQUAL(dev->getParameter(), kSceneNumber);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
