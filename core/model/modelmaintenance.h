@@ -37,7 +37,8 @@ namespace dss {
   class Apartment;
   class Event;
   class Metering;
-
+  class FrameSenderInterface;
+  class StructureQueryBusInterface;
 
   class ModelMaintenance : public Subsystem,
                            public Thread {
@@ -60,6 +61,8 @@ namespace dss {
     bool isInitializing() const { return m_IsInitializing; }
     void setApartment(Apartment* _value);
     void setMetering(Metering* _value);
+    void setFrameSenderInterface(FrameSenderInterface* _value);
+    void setStructureQueryBusInterface(StructureQueryBusInterface* _value);
   protected:
     virtual void doStart();
   private:
@@ -88,6 +91,8 @@ namespace dss {
     Apartment* m_pApartment;
     Metering* m_pMetering;
     const int m_EventTimeoutMS;
+    FrameSenderInterface* m_pFrameSenderInterface;
+    StructureQueryBusInterface* m_pStructureQueryBusInterface;
   }; // ModelMaintenance
 
 }

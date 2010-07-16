@@ -59,6 +59,7 @@ namespace dss {
   class FrameBucketCollector;
   class BusInterfaceHandler;
   class ModelMaintenance;
+  class DSSim;
 
   class DS485Proxy : public    Subsystem,
                      public    DS485Interface,
@@ -78,6 +79,7 @@ namespace dss {
     BusInterfaceHandler* m_pBusInterfaceHandler;
     DS485Controller m_DS485Controller;
     ModelMaintenance* m_pModelMaintenance;
+    DSSim* m_pDSSim;
 
     bool m_InitializeDS485Controller;
 
@@ -87,7 +89,7 @@ namespace dss {
   protected:
     virtual void doStart();
   public:
-    DS485Proxy(DSS* _pDSS, ModelMaintenance* _pModelMaintenance);
+    DS485Proxy(DSS* _pDSS, ModelMaintenance* _pModelMaintenance, DSSim* _pDSSim);
     virtual ~DS485Proxy() {};
 
     void setBusInterfaceHandler(BusInterfaceHandler* _value) { m_pBusInterfaceHandler = _value; }

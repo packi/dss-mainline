@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
   Apartment apt(NULL);
   maintenance.setApartment(&apt);
   DSDSMeterSim modSim(NULL);
-  DS485Proxy proxy(NULL, &maintenance);
+  DS485Proxy proxy(NULL, &maintenance, NULL);
   apt.setDS485Interface(&proxy);
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setFrameSender(&proxy);

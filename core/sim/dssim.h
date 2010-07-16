@@ -85,6 +85,8 @@ namespace dss {
     virtual ~DSSim() {}
     virtual void initialize();
 
+    void loadFromFile(const std::string& _file);
+
     void process(DS485Frame& _frame);
     bool isSimAddress(const uint8_t _address);
 
@@ -97,6 +99,8 @@ namespace dss {
 
     int getDSMeterCount() const { return m_DSMeters.size(); }
     DSDSMeterSim& getDSMeter(const int _index) { return m_DSMeters[_index]; }
+
+    static dsid_t makeSimulatedDSID(const dsid_t& _dsid);
   }; // DSSim
 
   typedef std::map< const std::pair<const int, const int>,  std::vector<DSIDInterface*> > IntPairToDSIDSimVector;

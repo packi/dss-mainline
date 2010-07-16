@@ -33,7 +33,6 @@
 #include "core/model/zone.h"
 #include "core/model/set.h"
 #include "core/setbuilder.h"
-#include "core/sim/dssim.h"
 #include "core/dss.h"
 #include "core/ds485const.h"
 #include "core/model/modelconst.h"
@@ -619,12 +618,11 @@ BOOST_AUTO_TEST_CASE(testRemoval) {
 BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   Apartment apt(NULL);
 
-  DSDSMeterSim modSim(NULL);
   DS485BusRequestDispatcher dispatcher;
   ModelMaintenance maintenance(NULL, 2);
   maintenance.setApartment(&apt);
   maintenance.initialize();
-  DS485Proxy proxy(NULL, &maintenance);
+  DS485Proxy proxy(NULL, &maintenance, NULL);
   dispatcher.setFrameSender(proxy.getFrameSenderInterface());
   BusInterfaceHandler busHandler(NULL, maintenance);
   proxy.setBusInterfaceHandler(&busHandler);
@@ -686,7 +684,6 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
 BOOST_AUTO_TEST_CASE(testMeteringDataFromUnknownMeter) {
   Apartment apt(NULL);
 
-  DSDSMeterSim modSim(NULL);
   DS485BusRequestDispatcher dispatcher;
   ModelMaintenance maintenance(NULL, 2);
   maintenance.setApartment(&apt);

@@ -203,7 +203,10 @@ const char* JSLogDirectory = "data/logs/";
     m_pApartment->setPropertySystem(m_pPropertySystem.get());
     m_pModelMaintenance->setApartment(m_pApartment.get());
 
-    m_pDS485Interface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this, m_pModelMaintenance.get()));
+    m_pSimulation = boost::shared_ptr<DSSim>(new DSSim(this));
+    m_Subsystems.push_back(m_pSimulation.get());
+
+    m_pDS485Interface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this, m_pModelMaintenance.get(), m_pSimulation.get()));
     m_Subsystems.push_back(dynamic_cast<DS485Proxy*>(m_pDS485Interface.get()));
 
     m_pBusDispatcher = boost::shared_ptr<DS485BusRequestDispatcher>(new DS485BusRequestDispatcher());
@@ -221,9 +224,6 @@ const char* JSLogDirectory = "data/logs/";
 
     m_pWebServices = boost::shared_ptr<WebServices>(new WebServices(this));
     m_Subsystems.push_back(m_pWebServices.get());
-
-    m_pSimulation = boost::shared_ptr<DSSim>(new DSSim(this));
-    m_Subsystems.push_back(m_pSimulation.get());
 
     m_pEventInterpreter = boost::shared_ptr<EventInterpreter>(new EventInterpreter(this));
     m_Subsystems.push_back(m_pEventInterpreter.get());

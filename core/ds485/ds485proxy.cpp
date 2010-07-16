@@ -47,10 +47,11 @@ namespace dss {
 
   const char* FunctionIDToString(const int _functionID); // internal forward declaration
 
-  DS485Proxy::DS485Proxy(DSS* _pDSS, ModelMaintenance* _pModelMaintenance)
+  DS485Proxy::DS485Proxy(DSS* _pDSS, ModelMaintenance* _pModelMaintenance, DSSim* _pDSSim)
   : Subsystem(_pDSS, "DS485Proxy"),
     m_pBusInterfaceHandler(NULL),
     m_pModelMaintenance(_pModelMaintenance),
+    m_pDSSim(_pDSSim),
     m_InitializeDS485Controller(true)
   {
     assert(_pModelMaintenance != NULL);
@@ -80,15 +81,14 @@ namespace dss {
   } // ctor
 
   bool DS485Proxy::isReady() {
-    bool simReady =
-           DSS::getInstance()->getSimulation().isReady(); // allow the simulation to run on it's own
+    bool simReady = (m_pDSSim != NULL) ? m_pDSSim->isReady() : true;
     bool selfReady = (m_pBusInterfaceHandler != NULL) ? m_pBusInterfaceHandler->isRunning() : true;
     bool controllerReady =
         ((m_DS485Controller.getState() == csSlave) ||
-        (m_DS485Controller.getState() == csDesignatedMaster) ||
-        (m_DS485Controller.getState() == csError));
+         (m_DS485Controller.getState() == csDesignatedMaster) ||
+         (m_DS485Controller.getState() == csError));
 
-	  return simReady && selfReady && controllerReady;
+    return simReady && selfReady && controllerReady;
   } // isReady
 
   uint16_t DS485Proxy::deviceGetParameterValue(devid_t _id, uint8_t _dsMeterID, int _paramID) {
@@ -195,9 +195,9 @@ namespace dss {
     bool broadcast = _frame.getHeader().isBroadcast();
     bool sim = isSimAddress(_frame.getHeader().getDestination());
     if(broadcast || sim) {
-      log("Sending packet to sim");
-      if(DSS::hasInstance()) {
-        getDSS().getSimulation().process(_frame);
+      if(m_pDSSim != NULL) {
+        log("Sending packet to sim");
+        m_pDSSim->process(_frame);
       }
     }
     std::ostringstream sstream;
@@ -239,17 +239,17 @@ namespace dss {
 
   boost::shared_ptr<FrameBucketCollector> DS485Proxy::sendFrameAndInstallBucket(DS485CommandFrame& _frame, const int _functionID) {
     int sourceID = _frame.getHeader().isBroadcast() ? -1 :  _frame.getHeader().getDestination();
-    boost::shared_ptr<FrameBucketCollector> result(new FrameBucketCollector(&getDSS().getBusInterfaceHandler(), _functionID, sourceID), FrameBucketBase::removeFromHolderAndDelete);
+    boost::shared_ptr<FrameBucketCollector> result(new FrameBucketCollector(m_pBusInterfaceHandler, _functionID, sourceID), FrameBucketBase::removeFromHolderAndDelete);
     result->addToHolder();
     sendFrame(_frame);
     return result;
   } // sendFrameAndInstallBucket
 
   bool DS485Proxy::isSimAddress(const uint8_t _addr) {
-    if(DSS::hasInstance()) {
-      return getDSS().getSimulation().isSimAddress(_addr);
+    if(m_pDSSim != NULL) {
+      return m_pDSSim->isSimAddress(_addr);
     } else {
-      return true;
+      return false;
     }
   } // isSimAddress
 
@@ -956,8 +956,8 @@ namespace dss {
     Subsystem::initialize();
     if(m_pBusInterfaceHandler != NULL) {
       m_DS485Controller.addFrameCollector(m_pBusInterfaceHandler);
-      if(DSS::hasInstance()) {
-        getDSS().getSimulation().addFrameCollector(m_pBusInterfaceHandler);
+      if(m_pDSSim != NULL) {
+        m_pDSSim->addFrameCollector(m_pBusInterfaceHandler);
       }
     }
   } // initialize

@@ -54,7 +54,8 @@ namespace dss {
     m_IsInitializing(true),
     m_pApartment(NULL),
     m_pMetering(NULL),
-    m_EventTimeoutMS(_eventTimeoutMS)
+    m_EventTimeoutMS(_eventTimeoutMS),
+    m_pFrameSenderInterface(NULL)
   { }
 
   void ModelMaintenance::initialize() {
@@ -64,6 +65,8 @@ namespace dss {
     }
     if(DSS::hasInstance()) {
       DSS::getInstance()->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "configfile", getDSS().getDataDirectory() + "apartment.xml", true, false);
+      m_pFrameSenderInterface = DSS::getInstance()->getDS485Interface().getFrameSenderInterface();
+      m_pStructureQueryBusInterface = DSS::getInstance()->getDS485Interface().getStructureQueryBusInterface();
     }
   } // initialize
 
@@ -112,19 +115,19 @@ namespace dss {
 
 
   void ModelMaintenance::discoverDS485Devices() {
-    // temporary mark all dsMeters as absent
-    foreach(DSMeter* pDSMeter, m_pApartment->getDSMeters()) {
-      pDSMeter->setIsPresent(false);
-    }
+    if(m_pFrameSenderInterface != NULL) {
+      // temporary mark all dsMeters as absent
+      foreach(DSMeter* pDSMeter, m_pApartment->getDSMeters()) {
+        pDSMeter->setIsPresent(false);
+      }
 
-    // Request the dsid of all dsMeters
-    DS485CommandFrame requestFrame;
-    requestFrame.getHeader().setBroadcast(true);
-    requestFrame.getHeader().setDestination(0);
-    requestFrame.setCommand(CommandRequest);
-    requestFrame.getPayload().add<uint8_t>(FunctionDSMeterGetDSID);
-    if(DSS::hasInstance()) {
-      getDSS().getDS485Interface().getFrameSenderInterface()->sendFrame(requestFrame);
+      // Request the dsid of all dsMeters
+      DS485CommandFrame requestFrame;
+      requestFrame.getHeader().setBroadcast(true);
+      requestFrame.getHeader().setDestination(0);
+      requestFrame.setCommand(CommandRequest);
+      requestFrame.getPayload().add<uint8_t>(FunctionDSMeterGetDSID);
+      m_pFrameSenderInterface->sendFrame(requestFrame);
     }
   } // discoverDS485Devices
 
@@ -314,7 +317,7 @@ namespace dss {
     try {
       try {
         DSMeter& mod = m_pApartment->getDSMeterByBusID(_dsMeterBusID);
-        BusScanner scanner(*getDSS().getDS485Interface().getStructureQueryBusInterface(), *m_pApartment, *this);
+        BusScanner scanner(*m_pStructureQueryBusInterface, *m_pApartment, *this);
         if(scanner.scanDSMeter(mod)) {
           boost::shared_ptr<Event> dsMeterReadyEvent(new Event("dsMeter_ready"));
           dsMeterReadyEvent->setProperty("dsMeter", mod.getDSID().toString());
@@ -446,7 +449,7 @@ namespace dss {
 
     BusScanner
       scanner(
-        *getDSS().getDS485Interface().getStructureQueryBusInterface(),
+        *m_pStructureQueryBusInterface,
         *m_pApartment,
         *this
       );
@@ -527,5 +530,12 @@ namespace dss {
     m_pMetering = _value;
   } // setMetering
 
+  void ModelMaintenance::setFrameSenderInterface(FrameSenderInterface* _value) {
+    m_pFrameSenderInterface = _value;
+  } // setFrameSenderInterface
+
+  void ModelMaintenance::setStructureQueryBusInterface(StructureQueryBusInterface* _value) {
+    m_pStructureQueryBusInterface = _value;
+  } // setStructureQueryBusInterface
 
 } // namespace dss

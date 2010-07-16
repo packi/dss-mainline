@@ -156,9 +156,12 @@ namespace dss {
   } // createJSPluginFrom
 
   void DSSim::loadFromConfig() {
+    loadFromFile(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile"));
+  }
+
+  void DSSim::loadFromFile(const std::string& _fileName) {
     const int theConfigFileVersion = 1;
-    std::string filename = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile");
-    std::ifstream inFile(filename.c_str());
+    std::ifstream inFile(_fileName.c_str());
 
     try {
       InputSource input(inFile);
@@ -178,7 +181,7 @@ namespace dss {
                 m_DSMeters.push_back(dsMeter);
               } catch(std::runtime_error& e) {
                 // TODO: abort loading and return with this error, see #316
-                log("Could not initialize from '" + filename + "'. message: " + e.what(), lsError);
+                log("Could not initialize from '" + _fileName + "'. message: " + e.what(), lsError);
                 delete dsMeter;
               }
             }
@@ -186,10 +189,10 @@ namespace dss {
           }
         }
       } else {
-        log(filename + " must have a root-node named 'simulation'", lsFatal);
+        log(_fileName + " must have a root-node named 'simulation'", lsFatal);
       }
     } catch(Poco::XML::SAXParseException& e) {
-      log("Error parsing file: " + filename + ". message: " + e.message());
+      log("Error parsing file: " + _fileName + ". message: " + e.message());
     }
   } // loadFromConfig
 
@@ -282,6 +285,13 @@ namespace dss {
     return result;
   } // getSimulatedDevice
 
+  dsid_t DSSim::makeSimulatedDSID(const dsid_t& _dsid) {
+    dsid_t result = _dsid;
+    result.upper = (result.upper & 0x000000000000000Fll) | DSIDHeader;
+    result.lower = (result.lower & 0x002FFFFF) | SimulationPrefix;
+    return result;
+  }
+
 
   //================================================== DSDSMeterSim
 
@@ -290,7 +300,7 @@ namespace dss {
     m_EnergyLevelOrange(200),
     m_EnergyLevelRed(400)
   {
-    m_DSMeterDSID = dsid_t(DSIDHeader, SimulationPrefix);
+    m_DSMeterDSID = DSSim::makeSimulatedDSID(dsid_t());
     m_ID = 70;
     m_Name = "Simulated dSM";
   } // dSDSMeterSim
@@ -308,9 +318,7 @@ namespace dss {
       m_ID = strToIntDef(elem->getAttribute("busid"), 70);
     }
     if(elem->hasAttribute("dsid")) {
-      m_DSMeterDSID = dsid_t::fromString(elem->getAttribute("dsid"));
-      m_DSMeterDSID.upper = (m_DSMeterDSID.upper & 0x000000000000000Fll) | DSIDHeader;
-      m_DSMeterDSID.lower = (m_DSMeterDSID.lower & 0x002FFFFF) | SimulationPrefix;
+      m_DSMeterDSID = DSSim::makeSimulatedDSID(dsid_t::fromString(elem->getAttribute("dsid")));
     }
     if(elem->hasAttribute("orange")) {
       m_EnergyLevelOrange = strToIntDef(elem->getAttribute("orange"), m_EnergyLevelOrange);
@@ -337,9 +345,7 @@ namespace dss {
         dsid_t dsid = NullDSID;
         int busid = -1;
         if(elem->hasAttribute("dsid")) {
-          dsid = dsid_t::fromString(elem->getAttribute("dsid"));
-          dsid.upper = (dsid.upper & 0x000000000000000Fll) | DSIDHeader;
-          dsid.lower = (dsid.lower & 0x002FFFFF) | SimulationPrefix;
+          dsid = DSSim::makeSimulatedDSID(dsid_t::fromString(elem->getAttribute("dsid")));
         }
         if(elem->hasAttribute("busid")) {
           busid = strToInt(elem->getAttribute("busid"));
