@@ -32,8 +32,7 @@
 
 namespace dss {
 
-  class FakeMeter : public Subsystem,
-                    private Thread {
+  class FakeMeter : public ThreadedSubsystem {
   private:
     int m_LastValue;
     boost::shared_ptr<MeteringConfigChain> m_Config;

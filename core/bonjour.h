@@ -64,6 +64,7 @@ namespace dss {
   */
   class BonjourHandler : public Thread {
     private:
+      virtual void cleanup();
 #ifdef USE_AVAHI
 #endif
 #ifdef USE_DNS_SD

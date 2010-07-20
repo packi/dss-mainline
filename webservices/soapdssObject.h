@@ -9,6 +9,9 @@
 #define soapdssObject_H
 #include "soapH.h"
 
+// soap_accept() timeout in seconds
+#define SOAP_ACCEPT_TIMEOUT 4
+
 /******************************************************************************\
  *                                                                            *
  * Service Object                                                             *
@@ -28,6 +31,7 @@ class dssService : public soap
 	{NULL, NULL, NULL, NULL}
 };
         bind_flags = SO_REUSEADDR;
+        accept_timeout = SOAP_ACCEPT_TIMEOUT; // seconds
 	if (!this->namespaces) this->namespaces = namespaces; };
 	virtual ~dssService() { };
 	/// Bind service to port (returns master socket or SOAP_INVALID_SOCKET)

@@ -39,8 +39,7 @@ namespace dss {
   class Metering;
 
 
-  class ModelMaintenance : public Subsystem,
-                           public Thread {
+  class ModelMaintenance : public ThreadedSubsystem {
   public:
     ModelMaintenance(DSS* _pDSS);
     virtual ~ModelMaintenance() {}

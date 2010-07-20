@@ -34,8 +34,7 @@ namespace dss {
   //================================================== WebServices
 
   WebServices::WebServices(DSS* _pDSS)
-  : Subsystem(_pDSS, "WebServices"),
-    Thread("WebServices")
+  : ThreadedSubsystem(_pDSS, "WebServices", "WebServices")
   {
 
   } // ctor
@@ -64,9 +63,13 @@ namespace dss {
         m_PendingRequests.push_back(req_copy);
         m_RequestsMutex.unlock();
         m_RequestArrived.signal();
-      } else {
+      } else if (!((socket == -1) && (m_Service.error == SOAP_TCP_ERROR))) {
         log("could not accept new connection!", lsError);
       }
+    }
+
+    for (size_t i = 0; i < m_Workers.size(); i++) {
+      m_Workers.at(i).terminate();
     }
   } // execute
 

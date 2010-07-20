@@ -113,6 +113,7 @@ namespace dss {
     static DSS* getInstance();
     static bool hasInstance();
     static void shutdown();
+    void initiateShutdown();
 #ifdef WITH_TESTS
     static void teardown();
 #endif

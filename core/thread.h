@@ -73,6 +73,8 @@ public:
 
     /** Returns the name of the thread that got passed to the constructor */
     const char* getThreadIdentifier() { return m_Name; }
+private:
+    virtual void cleanup() {}
 }; //  Thread
 
 }

@@ -24,6 +24,7 @@
 #define SUBSYSTEM_H_
 
 #include "logger.h"
+#include "thread.h"
 
 #include <string>
 #include <boost/shared_ptr.hpp>
@@ -61,8 +62,18 @@ namespace dss {
 
     virtual void initialize();
     void start();
+    virtual void shutdown() {}
 
     void log(const std::string& _message, aLogSeverity _severity = lsDebug);
+
+    std::string getName() { return m_Name; }
+  };
+
+  class ThreadedSubsystem: public Subsystem, protected Thread {
+    public:
+      ThreadedSubsystem(DSS* _pDSS, const std::string& _name, const std::string& _threadName) : Subsystem(_pDSS, _name), Thread(_threadName.c_str()) {}
+      virtual void shutdown() { Thread::terminate(); }
+      bool isRunning() { return Thread::isRunning(); }
   };
 
 }; // namespace dss

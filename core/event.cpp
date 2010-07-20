@@ -603,9 +603,12 @@ namespace dss {
   const bool DebugEventRunner = true;
 
   EventRunner::EventRunner()
-  : m_EventQueue(NULL)
+  : m_EventQueue(NULL), m_shutdownFlag(false)
   { } // ctor
 
+  void EventRunner::shutdown() {
+    m_shutdownFlag = true;
+  }
   int EventRunner::getSize() const {
     return m_ScheduledEvents.size();
   } // getSize
@@ -679,7 +682,7 @@ namespace dss {
   } // getNextOccurence
 
   void EventRunner::run() {
-    while(true) {
+    while(!m_shutdownFlag) {
       runOnce();
     }
   } // run
