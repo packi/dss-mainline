@@ -270,7 +270,7 @@ namespace dss {
     SyncEvent m_NewItem;
     EventQueue* m_EventQueue;
     Mutex m_EventsMutex;
-    bool m_shutdownFlag;
+    bool m_ShutdownFlag;
   public:
     EventRunner();
 

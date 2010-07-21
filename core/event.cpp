@@ -603,11 +603,11 @@ namespace dss {
   const bool DebugEventRunner = true;
 
   EventRunner::EventRunner()
-  : m_EventQueue(NULL), m_shutdownFlag(false)
+  : m_EventQueue(NULL), m_ShutdownFlag(false)
   { } // ctor
 
   void EventRunner::shutdown() {
-    m_shutdownFlag = true;
+    m_ShutdownFlag = true;
   }
   int EventRunner::getSize() const {
     return m_ScheduledEvents.size();
@@ -682,7 +682,7 @@ namespace dss {
   } // getNextOccurence
 
   void EventRunner::run() {
-    while(!m_shutdownFlag) {
+    while(!m_ShutdownFlag) {
       runOnce();
     }
   } // run

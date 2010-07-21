@@ -54,7 +54,7 @@ ThreadStarterHelperFunc( void* _pThreadObj ) {
 } // threadStarterHelpFunc
 
 
-Thread::Thread(std::string _name )
+Thread::Thread(const std::string& _name )
   : m_ThreadHandle( 0 ),
     m_Name( _name ),
     m_FreeAtTermination( false ),
@@ -100,7 +100,6 @@ bool Thread::stop() {
 
 bool Thread::terminate() {
   if( !m_Terminated && (m_ThreadHandle != 0) ) {
-    cleanup();
     m_Terminated = true;
 #ifndef WIN32
     pthread_join( m_ThreadHandle, NULL );

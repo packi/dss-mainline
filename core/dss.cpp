@@ -386,6 +386,7 @@ const char* JSLogDirectory = "data/logs/";
 
     // shutdown all subsystems and services
 #ifdef WITH_BONJOUR
+    bonjour.quit();
     bonjour.terminate();
 #endif
 

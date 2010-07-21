@@ -230,7 +230,7 @@ static void client_callback(AvahiClient *c, AvahiClientState state, AVAHI_GCC_UN
 
 #endif
 
-  void BonjourHandler::cleanup() {
+  void BonjourHandler::quit() {
 #ifdef USE_AVAHI
     avahi_simple_poll_quit(simple_poll);
 #endif

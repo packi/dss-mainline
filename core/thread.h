@@ -50,7 +50,7 @@ protected:
   bool m_Terminated;
 public:
     /** Constructs a thread with the given name */
-    Thread(std::string _name = "");
+    Thread(const std::string& _name = "");
 
     virtual ~Thread();
 
@@ -74,9 +74,7 @@ public:
     bool isRunning() const { return m_Running; }
 
     /** Returns the name of the thread that got passed to the constructor */
-    std::string &getThreadIdentifier() { return m_Name; }
-private:
-    virtual void cleanup() {}
+    const std::string& getThreadIdentifier() { return m_Name; }
 }; //  Thread
 
 }
