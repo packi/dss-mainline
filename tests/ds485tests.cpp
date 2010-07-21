@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE(testSendingFrameWithEmptyPayload) {
   ModelMaintenance maintenance(NULL);
   maintenance.setApartment(&apt);
   maintenance.initialize();
-  DS485Proxy proxy(NULL, &maintenance);
+  DS485Proxy proxy(NULL, &maintenance, NULL);
   proxy.setInitializeDS485Controller(false);
   proxy.initialize();
   DS485CommandFrame frame;
