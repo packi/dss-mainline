@@ -43,7 +43,7 @@ namespace dss {
   //================================================== BusInterfaceHandler
 
   BusInterfaceHandler::BusInterfaceHandler(DSS* _pDSS, ModelMaintenance& _apartment)
-  : ThreadedSubsystem(_pDSS, "BusInterfaceHandler", "BusInterfaceHandler"),
+  : ThreadedSubsystem(_pDSS, "BusInterfaceHandler"),
     m_ModelMaintenance(_apartment)
   {}
 

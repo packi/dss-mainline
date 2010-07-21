@@ -35,7 +35,7 @@
 
 namespace dss {
   FakeMeter::FakeMeter(DSS* _pDSS)
-  : ThreadedSubsystem(_pDSS, "FakeMeter", "FakeMeter")
+  : ThreadedSubsystem(_pDSS, "FakeMeter")
   {
     m_Config.reset(new MeteringConfigChain(false, 1, "mW"));
     m_Config->setComment("Consumption in mW");

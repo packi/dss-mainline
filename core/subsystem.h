@@ -71,7 +71,7 @@ namespace dss {
 
   class ThreadedSubsystem: public Subsystem, protected Thread {
     public:
-      ThreadedSubsystem(DSS* _pDSS, const std::string& _name, const char* _threadName) : Subsystem(_pDSS, _name), Thread(_threadName) {}
+      ThreadedSubsystem(DSS* _pDSS, const std::string& _name) : Subsystem(_pDSS, _name), Thread(_name) {}
       virtual void shutdown() { Thread::terminate(); }
       bool isRunning() { return Thread::isRunning(); }
   };

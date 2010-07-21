@@ -49,7 +49,7 @@
 namespace dss {
 
   ModelMaintenance::ModelMaintenance(DSS* _pDSS)
-  : ThreadedSubsystem(_pDSS, "Apartment", "Apartment"),
+  : ThreadedSubsystem(_pDSS, "Apartment"),
     m_IsInitializing(true),
     m_pApartment(NULL),
     m_pMetering(NULL)

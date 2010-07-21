@@ -34,7 +34,7 @@ namespace dss {
   //================================================== WebServices
 
   WebServices::WebServices(DSS* _pDSS)
-  : ThreadedSubsystem(_pDSS, "WebServices", "WebServices")
+  : ThreadedSubsystem(_pDSS, "WebServices")
   {
 
   } // ctor
