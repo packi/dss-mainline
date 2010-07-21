@@ -74,7 +74,7 @@ namespace dss {
         newEvent->setTime(timeParam);
       }
     }
-    applyOptionsWithSuffix(_subscription.getOptions(), "_default", newEvent);
+    applyOptionsWithSuffix(_subscription.getOptions(), "_default", newEvent, false);
     if(_subscription.getOptions().hasParameter(EventPropertyLocation)) {
       std::string location = _subscription.getOptions().getParameter(EventPropertyLocation);
       if(!location.empty()) {
@@ -82,18 +82,21 @@ namespace dss {
         newEvent->setLocation(location);
       }
     }
-    applyOptionsWithSuffix(_subscription.getOptions(), "_override", newEvent);
-    newEvent->setProperties(_event.getProperties());
+    newEvent->applyProperties(_event.getProperties());
+    applyOptionsWithSuffix(_subscription.getOptions(), "_override", newEvent, true);
     getEventInterpreter().getQueue().pushEvent(newEvent);
   } // handleEvent
 
-  void EventInterpreterPluginRaiseEvent::applyOptionsWithSuffix(const SubscriptionOptions& _options, const std::string& _suffix, boost::shared_ptr<Event> _event) {
+  void EventInterpreterPluginRaiseEvent::applyOptionsWithSuffix(const SubscriptionOptions& _options, const std::string& _suffix, boost::shared_ptr<Event> _event, bool _onlyOverride) {
     const HashMapConstStringString sourceMap = _options.getParameters().getContainer();
     typedef const std::pair<const std::string, std::string> tItem;
     foreach(tItem kv, sourceMap) {
       if(endsWith(kv.first, _suffix)) {
         std::string propName = kv.first.substr(0, kv.first.length() - _suffix.length());
-        _event->setProperty(propName, kv.second);
+        if(_event->hasPropertySet(propName) || !_onlyOverride) {
+          Logger::getInstance()->log("RaiseEvent: setting property " + propName + " to " + kv.second);
+          _event->setProperty(propName, kv.second);
+        }
       }
     }
   } // applyOptionsWithSuffix

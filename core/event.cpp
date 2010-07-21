@@ -189,6 +189,14 @@ namespace dss {
     return sameName && sameContext && sameLocation;
   } // isReplacementFor
 
+  void Event::applyProperties(const Properties& _others) {
+    const HashMapConstStringString sourceMap = _others.getContainer();
+    typedef const std::pair<const std::string, std::string> tItem;
+    foreach(tItem kv, sourceMap) {
+      setProperty(kv.first, kv.second);
+    }
+  } // applyProperties
+
 
   //================================================== EventInterpreter
 
