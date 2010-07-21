@@ -10,7 +10,7 @@
 #include "soapH.h"
 
 // soap_accept() timeout in seconds
-#define SOAP_ACCEPT_TIMEOUT 4
+#define SOAP_ACCEPT_TIMEOUT 2
 
 /******************************************************************************\
  *                                                                            *
