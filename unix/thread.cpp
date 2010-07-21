@@ -41,7 +41,7 @@ ThreadStarterHelperFunc( void* _pThreadObj ) {
 
 	thObj->execute();
 
-  if(thObj->getThreadIdentifier() != NULL) {
+  if(!thObj->getThreadIdentifier().empty()) {
     Logger::getInstance()->log(std::string("Destroying thread: ") + thObj->getThreadIdentifier());
   } else {
     Logger::getInstance()->log("Destroying thread: (no name)");
@@ -54,7 +54,7 @@ ThreadStarterHelperFunc( void* _pThreadObj ) {
 } // threadStarterHelpFunc
 
 
-Thread::Thread(const char* _name )
+Thread::Thread(const std::string& _name )
   : m_ThreadHandle( 0 ),
     m_Name( _name ),
     m_FreeAtTermination( false ),
@@ -76,7 +76,7 @@ Thread::~Thread() {
 bool Thread::run() {
   assert( !m_Running );
   m_Running = true;
-  if( m_Name != NULL ) {
+  if( !m_Name.empty() ) {
     Logger::getInstance()->log(std::string("creating thread for \"") + m_Name + "\"");
   }
 #ifndef WIN32

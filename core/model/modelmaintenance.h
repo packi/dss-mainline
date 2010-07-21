@@ -40,8 +40,7 @@ namespace dss {
   class FrameSenderInterface;
   class StructureQueryBusInterface;
 
-  class ModelMaintenance : public Subsystem,
-                           public Thread {
+  class ModelMaintenance : public ThreadedSubsystem {
   public:
     ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS = 1000);
     virtual ~ModelMaintenance() {}

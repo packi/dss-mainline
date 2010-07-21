@@ -674,8 +674,8 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   BOOST_CHECK_EQUAL(Scene2, dev1.getLastCalledScene());
   BOOST_CHECK_EQUAL(Scene3, dev2.getLastCalledScene());
   BOOST_CHECK_EQUAL(Scene3, dev3.getLastCalledScene());
-  busHandler.terminate();
-  maintenance.terminate();
+  busHandler.shutdown();
+  maintenance.shutdown();
   sleepMS(75);
   DSS::teardown();
 } // testCallScenePropagation

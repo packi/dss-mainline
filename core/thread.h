@@ -29,6 +29,8 @@
 #include <windows.h>
 #endif
 
+#include <string>
+
 namespace dss {
 
 /** Wrapper for pthread- and Windows threads
@@ -41,14 +43,14 @@ private:
 #else
   HANDLE m_ThreadHandle;
 #endif
-  const char* m_Name;
+  std::string m_Name;
   bool m_FreeAtTermination;
   bool m_Running;
 protected:
   bool m_Terminated;
 public:
     /** Constructs a thread with the given name */
-    Thread(const char* _name = NULL);
+    Thread(const std::string& _name = "");
 
     virtual ~Thread();
 
@@ -72,7 +74,7 @@ public:
     bool isRunning() const { return m_Running; }
 
     /** Returns the name of the thread that got passed to the constructor */
-    const char* getThreadIdentifier() { return m_Name; }
+    const std::string& getThreadIdentifier() { return m_Name; }
 }; //  Thread
 
 }

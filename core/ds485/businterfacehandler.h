@@ -48,8 +48,7 @@ namespace dss {
   typedef std::vector<boost::shared_ptr<DS485CommandFrame> > CommandFrameSharedPtrVector;
 
   class BusInterfaceHandler : public FrameBucketHolder,
-                              public Thread,
-                              public Subsystem,
+                              public ThreadedSubsystem,
                               public IDS485FrameCollector {
   public:
     BusInterfaceHandler(DSS* _pDSS, ModelMaintenance& _modelMaintenance);

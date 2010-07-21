@@ -345,6 +345,9 @@ const char* JSLogDirectory = "data/logs/";
     _pSubsystem->start();
   }
 
+  void StopSubsystem(Subsystem* _pSubsystem) {
+    _pSubsystem->shutdown();
+  }
   void DSS::run() {
     Logger::getInstance()->log("DSS starting up....", lsInfo);
     Logger::getInstance()->log(versionString(), lsInfo);
@@ -374,7 +377,23 @@ const char* JSLogDirectory = "data/logs/";
 
     // pass control to the eventrunner
     m_pEventRunner->run();
+
+    // shutdown all subsystems and services
+#ifdef WITH_BONJOUR
+    bonjour.quit();
+    bonjour.terminate();
+#endif
+
+    m_State = ssTerminating;
+  
+    std::for_each(m_Subsystems.begin(), m_Subsystems.end(), StopSubsystem);
+    m_pEventQueue->shutdown();
+    m_pEventInterpreter->terminate();
   } // run
+
+  void DSS::initiateShutdown() {
+    m_pEventRunner->shutdown();
+  }
 
   void DSS::shutdown() {
     DSS* inst = m_Instance;
@@ -445,6 +464,12 @@ const char* JSLogDirectory = "data/logs/";
         Logger::getInstance()->reopenLogTarget();
         break;
       }
+      case SIGTERM:
+      case SIGINT:
+        if (DSS::hasInstance()) {
+            DSS::getInstance()->initiateShutdown();
+        }
+      break;
       default: {
         std::ostringstream ostr;
         ostr << "DSS::handleSignal(): unhandled signal " << _signum << std::endl;

@@ -54,8 +54,7 @@ namespace dss {
     DateTime m_SampledAt;
   };
 
-  class Metering : public Subsystem,
-                   private Thread {
+  class Metering : public ThreadedSubsystem {
   private:
     int m_MeterEnergyCheckIntervalSeconds;
     int m_MeterConsumptionCheckIntervalSeconds;

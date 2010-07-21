@@ -43,10 +43,8 @@ namespace dss {
       EventInterpreterInternalRelay* pRelay =
         dynamic_cast<EventInterpreterInternalRelay*>(m_EventInterpreter.getPluginByName(EventInterpreterInternalRelay::getPluginName()));
       m_pRelayTarget = boost::shared_ptr<InternalEventRelayTarget>(new InternalEventRelayTarget(*pRelay));
-      printf("Relay created\n");
 
       if (m_pRelayTarget != NULL) {
-        printf("EVent created\n");
         boost::shared_ptr<EventSubscription> cleanupEventSubscription(
                 new dss::EventSubscription(
                     "webSessionCleanup",

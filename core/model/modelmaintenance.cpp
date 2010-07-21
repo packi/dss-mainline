@@ -49,8 +49,7 @@
 namespace dss {
 
   ModelMaintenance::ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS)
-  : Subsystem(_pDSS, "Apartment"),
-    Thread("Apartment"),
+  : ThreadedSubsystem(_pDSS, "Apartment"),
     m_IsInitializing(true),
     m_pApartment(NULL),
     m_pMetering(NULL),

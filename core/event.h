@@ -271,6 +271,7 @@ namespace dss {
     SyncEvent m_NewItem;
     EventQueue* m_EventQueue;
     Mutex m_EventsMutex;
+    bool m_ShutdownFlag;
   public:
     EventRunner();
 
@@ -284,6 +285,7 @@ namespace dss {
 
     void run();
     bool runOnce();
+    void shutdown();
 
     void setEventQueue(EventQueue* _value) { m_EventQueue = _value; }
   }; // EventRunner

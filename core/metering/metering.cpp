@@ -43,8 +43,7 @@ namespace dss {
   //================================================== Metering
 
   Metering::Metering(DSS* _pDSS)
-  : Subsystem(_pDSS, "Metering"),
-    Thread("Metering"),
+  : ThreadedSubsystem(_pDSS, "Metering"),
     m_pMeteringBusInterface(NULL)
   {
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "storageLocation", getDSS().getWebrootDirectory() + "metering/", true);

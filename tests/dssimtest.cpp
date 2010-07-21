@@ -203,8 +203,8 @@ public:
   }
 
   ~Fixture() {
-    m_pBusInterfaceHandler->terminate();
-    m_pModelMaintenance->terminate();
+    m_pBusInterfaceHandler->shutdown();
+    m_pModelMaintenance->shutdown();
     sleepMS(60);
   }
 protected:

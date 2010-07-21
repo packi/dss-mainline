@@ -66,8 +66,7 @@ namespace dss {
 
   typedef boost::ptr_map<const int, WebServiceSession> WebServiceSessionByID;
 
-  class WebServices : public Subsystem,
-                      private Thread {
+  class WebServices : public ThreadedSubsystem {
   private:
     dssService m_Service;
     int m_LastSessionID;
