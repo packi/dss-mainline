@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009, 2010 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
@@ -46,45 +46,60 @@ using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(Events)
 
-BOOST_AUTO_TEST_CASE(testSimpleEvent) {
-  EventQueue queue(2);
-  EventRunner runner;
-  EventInterpreter interpreter(NULL);
-  interpreter.setEventQueue(&queue);
-  interpreter.setEventRunner(&runner);
-  interpreter.run();
+class NonRunningFixture {
+public:
+  NonRunningFixture() {
+    m_pQueue.reset(new EventQueue(2));
+    m_pRunner.reset(new EventRunner());
+    m_pEventInterpreter.reset(new EventInterpreter(NULL));
+    m_pEventInterpreter->setEventQueue(m_pQueue.get());
+    m_pEventInterpreter->setEventRunner(m_pRunner.get());
+    m_pQueue->setEventRunner(m_pRunner.get());
+    m_pRunner->setEventQueue(m_pQueue.get());
+    m_pEventInterpreter->initialize();
+  }
 
+protected:
+  boost::shared_ptr<EventQueue> m_pQueue;
+  boost::shared_ptr<EventRunner> m_pRunner;
+  boost::shared_ptr<EventInterpreter> m_pEventInterpreter;
+};
+
+class Fixture : public NonRunningFixture {
+public:
+  Fixture() {
+    m_pEventInterpreter->run();
+  }
+
+  ~Fixture() {
+    m_pQueue->shutdown();
+    m_pEventInterpreter->terminate();
+    sleepMS(5);
+  }
+};
+
+
+BOOST_FIXTURE_TEST_CASE(testSimpleEvent, Fixture) {
   boost::shared_ptr<Event> pEvent(new Event("event1"));
 
-  queue.pushEvent(pEvent);
+  m_pQueue->pushEvent(pEvent);
 
   sleepMS(5);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 1);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 1);
 
   pEvent.reset(new Event("event2"));
 
-  queue.pushEvent(pEvent);
+  m_pQueue->pushEvent(pEvent);
 
   sleepMS(5);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
-
-  queue.shutdown();
-  interpreter.terminate();
-  sleepMS(5);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
 } // testSimpleEvent
 
-BOOST_AUTO_TEST_CASE(testSubscription) {
-  EventQueue queue(2);
-  EventRunner runner;
-  EventInterpreter interpreter(NULL);
-  interpreter.setEventQueue(&queue);
-  interpreter.setEventRunner(&runner);
-  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
-  interpreter.addPlugin(plugin);
-
-  interpreter.run();
+BOOST_FIXTURE_TEST_CASE(testSubscription, Fixture) {
+  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
+  m_pEventInterpreter->addPlugin(plugin);
 
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
 
@@ -92,73 +107,54 @@ BOOST_AUTO_TEST_CASE(testSubscription) {
   opts->setParameter("event_name", "event1");
   opts->setParameter("test_override", "always testing");
   opts->setParameter("test2_default", "defaults to that");
-  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", interpreter, opts));
-  interpreter.subscribe(subscription);
+  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", *m_pEventInterpreter, opts));
+  m_pEventInterpreter->subscribe(subscription);
 
-  queue.pushEvent(pEvent);
+  m_pQueue->pushEvent(pEvent);
 
   sleepMS(5);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
 
   pEvent.reset(new Event("event2"));
 
-  queue.pushEvent(pEvent);
+  m_pQueue->pushEvent(pEvent);
 
   sleepMS(5);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 3);
-
-  queue.shutdown();
-  interpreter.terminate();
-  sleepMS(5);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 3);
 } // testSubscription
 
-BOOST_AUTO_TEST_CASE(testEmptySubscriptionXML) {
-  EventQueue queue;
-  EventInterpreter interpreter(NULL);
-  interpreter.setEventQueue(&queue);
-  interpreter.initialize();
-
-  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+BOOST_FIXTURE_TEST_CASE(testEmptySubscriptionXML, NonRunningFixture) {
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 0);
 
   std::string fileName = getTempDir() + "/testsubscriptions_empty.xml";
   std::ofstream ofs(fileName.c_str());
   ofs << "<?xml version=\"1.0\"?>\n<subscriptions version=\"1\">\n</subscriptions>";
   ofs.close();
 
-  interpreter.loadFromXML(fileName);
+  m_pEventInterpreter->loadFromXML(fileName);
 
-  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 0);
   boost::filesystem::remove_all(fileName);
 } // testEmptySubscriptionXML
 
-BOOST_AUTO_TEST_CASE(testNonExistingXML) {
-  EventInterpreter interpreter(NULL);
-  interpreter.initialize();
-
-  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+BOOST_FIXTURE_TEST_CASE(testNonExistingXML, NonRunningFixture) {
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 0);
 
   try {
-    interpreter.loadFromXML("data/iwillnever_be_a_subscription.xml");
+    m_pEventInterpreter->loadFromXML("data/iwillnever_be_a_subscription.xml");
   } catch(std::runtime_error& e) {
   }
 
-  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 0);
 } // testNonExistingXML
 
-BOOST_AUTO_TEST_CASE(testSubscriptionXML) {
-  EventQueue queue(2);
-  EventRunner runner;
-  EventInterpreter interpreter(NULL);
-  interpreter.setEventQueue(&queue);
-  interpreter.setEventRunner(&runner);
-  queue.setEventRunner(&runner);
-  runner.setEventQueue(&queue);
-  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
-  interpreter.addPlugin(plugin);
+BOOST_FIXTURE_TEST_CASE(testSubscriptionXML, Fixture) {
+  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
+  m_pEventInterpreter->addPlugin(plugin);
 
-  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 0);
 
   std::string fileName = getTempDir() + "/testsubscriptions.xml";
   std::ofstream ofs(fileName.c_str());
@@ -178,44 +174,29 @@ BOOST_AUTO_TEST_CASE(testSubscriptionXML) {
          "</subscriptions>\n";
   ofs.close();
 
-  interpreter.loadFromXML(fileName);
+  m_pEventInterpreter->loadFromXML(fileName);
 
-  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 2);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 2);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 0);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 0);
 
-  interpreter.run();
-
-  sleepMS(5);
-
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 0);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 0);
 
   boost::shared_ptr<Event> evt(new Event("event1"));
-  queue.pushEvent(evt);
+  m_pQueue->pushEvent(evt);
 
   sleepMS(5);
 
-  runner.runOnce();
+  m_pRunner->runOnce();
 
   sleepMS(1200);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
 
-  queue.shutdown();
-  interpreter.terminate();
-  sleepMS(5);
   boost::filesystem::remove_all(fileName);
 } // testSubscriptionXML
 
-BOOST_AUTO_TEST_CASE(testDS485Events) {
-  EventQueue queue(5);
-  EventRunner runner;
-  EventInterpreter interpreter(NULL);
-  interpreter.setEventQueue(&queue);
-  interpreter.setEventRunner(&runner);
-  queue.setEventRunner(&runner);
-  runner.setEventQueue(&queue);
-
+BOOST_FIXTURE_TEST_CASE(testDS485Events, Fixture) {
   ModelMaintenance maintenance(NULL);
   Apartment apt(NULL);
   maintenance.setApartment(&apt);
@@ -243,12 +224,12 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
   dev4.setShortAddress(4);
 
 
-  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
-  interpreter.addPlugin(plugin);
-  plugin = new EventInterpreterPluginDS485(apt, &proxy, &interpreter);
-  interpreter.addPlugin(plugin);
+  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
+  m_pEventInterpreter->addPlugin(plugin);
+  plugin = new EventInterpreterPluginDS485(apt, &proxy, m_pEventInterpreter.get());
+  m_pEventInterpreter->addPlugin(plugin);
 
-  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 0);
 
   std::string fileName = getTempDir() + "/testsubscriptions_DS485.xml";
   std::ofstream ofs(fileName.c_str());
@@ -263,34 +244,24 @@ BOOST_AUTO_TEST_CASE(testDS485Events) {
          "</subscriptions>\n";
   ofs.close();
 
-  interpreter.loadFromXML(fileName);
+  m_pEventInterpreter->loadFromXML(fileName);
+  boost::filesystem::remove_all(fileName);
 
-  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 1);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 1);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 0);
-
-  interpreter.run();
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 0);
 
   sleepMS(5);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 0);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 0);
 
   boost::shared_ptr<Event> evt(new Event("brighter", &apt.getZone(0)));
   evt->setLocation("dev1");
-  queue.pushEvent(evt);
+  m_pQueue->pushEvent(evt);
 
   sleepMS(5);
 
-  runner.runOnce();
-
-  sleepMS(5);
-
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 1);
-
-  queue.shutdown();
-  interpreter.terminate();
-  sleepMS(5);
-  boost::filesystem::remove_all(fileName);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 1);
 } // testDS485Events
 
 BOOST_AUTO_TEST_CASE(testEventHandlerJavascriptDoesntLeakExceptionsWithNonexistingFile) {
@@ -305,41 +276,30 @@ BOOST_AUTO_TEST_CASE(testEventHandlerJavascriptDoesntLeakExceptionsWithNonexisti
   plugin->handleEvent(evt, subscription);
 } // testEventHandlerJavascriptDoesntLeakExceptionsWithNonexistingFile
 
-BOOST_AUTO_TEST_CASE(testRemovingSubscription) {
-  EventQueue queue(2);
-  EventRunner runner;
-  EventInterpreter interpreter(NULL);
-  interpreter.setEventQueue(&queue);
-  interpreter.setEventRunner(&runner);
-  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
-  interpreter.addPlugin(plugin);
-
-  interpreter.run();
+BOOST_FIXTURE_TEST_CASE(testRemovingSubscription, Fixture) {
+  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
+  m_pEventInterpreter->addPlugin(plugin);
 
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
 
   boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
   opts->setParameter("event_name", "event1");
-  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", interpreter, opts));
-  interpreter.subscribe(subscription);
+  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", *m_pEventInterpreter, opts));
+  m_pEventInterpreter->subscribe(subscription);
 
-  queue.pushEvent(pEvent);
-
-  sleepMS(5);
-
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
-
-  interpreter.unsubscribe(subscription->getID());
-
-  queue.pushEvent(pEvent);
+  m_pQueue->pushEvent(pEvent);
 
   sleepMS(5);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 3);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
 
-  queue.shutdown();
-  interpreter.terminate();
+  m_pEventInterpreter->unsubscribe(subscription->getID());
+
+  m_pQueue->pushEvent(pEvent);
+
   sleepMS(5);
+
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 3);
 } // testRemovingSubscription
 
 BOOST_AUTO_TEST_CASE(testUniqueEventsWork) {
@@ -434,26 +394,19 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsOverwritesTimeProperty) {
   BOOST_CHECK_EQUAL(eventFromQueue.getEvent()->getPropertyByName("time"), "+2");
 } // testUniqueEventsOverwritesTimeProperty
 
-BOOST_AUTO_TEST_CASE(testEventCollector) {
-  EventQueue queue(1);
-  EventRunner runner;
-  EventInterpreter interpreter(NULL);
-  interpreter.setEventQueue(&queue);
-  interpreter.setEventRunner(&runner);
-  EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(&interpreter);
-  interpreter.addPlugin(relay);
-
-  interpreter.run();
+BOOST_FIXTURE_TEST_CASE(testEventCollector, Fixture) {
+  EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(m_pEventInterpreter.get());
+  m_pEventInterpreter->addPlugin(relay);
 
   EventCollector collector(*relay);
   std::string subscriptionID = collector.subscribeTo("my_event");
 
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
-  queue.pushEvent(pEvent);
+  m_pQueue->pushEvent(pEvent);
 
   sleepMS(5);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 1);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 1);
 
   BOOST_CHECK_EQUAL(collector.hasEvent(), true);
 
@@ -461,28 +414,24 @@ BOOST_AUTO_TEST_CASE(testEventCollector) {
   BOOST_CHECK_EQUAL(evt.getName(), "my_event");
 
   pEvent.reset(new Event("event2"));
-  queue.pushEvent(pEvent);
+  m_pQueue->pushEvent(pEvent);
 
   sleepMS(5);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
 
   BOOST_CHECK_EQUAL(collector.hasEvent(), false);
 
   collector.unsubscribeFrom(subscriptionID);
 
   pEvent.reset(new Event("my_event"));
-  queue.pushEvent(pEvent);
+  m_pQueue->pushEvent(pEvent);
 
   sleepMS(5);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 3);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 3);
 
   BOOST_CHECK_EQUAL(collector.hasEvent(), false);
-
-  queue.shutdown();
-  interpreter.terminate();
-  sleepMS(5);
 } // testEventCollector
 
 class InternalEventRelayTester {
@@ -506,23 +455,16 @@ private:
   int m_Counter;
 }; // InternalEventRelayTester
 
-BOOST_AUTO_TEST_CASE(testInternalEventRelay) {
-  EventQueue queue(2);
-  EventRunner runner;
-  EventInterpreter interpreter(NULL);
-  interpreter.setEventQueue(&queue);
-  interpreter.setEventRunner(&runner);
-  EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(&interpreter);
-  interpreter.addPlugin(relay);
-
-  interpreter.run();
+BOOST_FIXTURE_TEST_CASE(testInternalEventRelay, Fixture) {
+  EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(m_pEventInterpreter.get());
+  m_pEventInterpreter->addPlugin(relay);
 
   InternalEventRelayTarget target(*relay);
   boost::shared_ptr<EventSubscription> subscriptionOne(
     new dss::EventSubscription(
                "one",
                EventInterpreterInternalRelay::getPluginName(),
-               interpreter,
+               *m_pEventInterpreter,
                boost::shared_ptr<SubscriptionOptions>())
   );
   target.subscribeTo(subscriptionOne);
@@ -530,7 +472,7 @@ BOOST_AUTO_TEST_CASE(testInternalEventRelay) {
     new dss::EventSubscription(
                "two",
                EventInterpreterInternalRelay::getPluginName(),
-               interpreter,
+               *m_pEventInterpreter,
                boost::shared_ptr<SubscriptionOptions>())
   );
   target.subscribeTo(subscriptionTwo);
@@ -539,31 +481,27 @@ BOOST_AUTO_TEST_CASE(testInternalEventRelay) {
   target.setCallback(boost::bind(&InternalEventRelayTester::onEvent, &tester, _1, _2));
 
   boost::shared_ptr<Event> pEvent(new Event("one"));
-  queue.pushEvent(pEvent);
+  m_pQueue->pushEvent(pEvent);
 
   sleepMS(10);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 1);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 1);
   BOOST_CHECK_EQUAL(tester.getCounter(), 1);
 
-  queue.pushEvent(pEvent);
+  m_pQueue->pushEvent(pEvent);
 
   sleepMS(10);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
   BOOST_CHECK_EQUAL(tester.getCounter(), 2);
 
   pEvent.reset(new Event("two"));
-  queue.pushEvent(pEvent);
+  m_pQueue->pushEvent(pEvent);
 
   sleepMS(10);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 3);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 3);
   BOOST_CHECK_EQUAL(tester.getCounter(), 4);
-
-  queue.shutdown();
-  interpreter.terminate();
-  sleepMS(10);
 }
 
 class InternalEventRelayCollector {
@@ -581,199 +519,106 @@ private:
   boost::shared_ptr<Event> m_pCoughtEvent;
 }; // InternalEventRelayTester
 
-BOOST_AUTO_TEST_CASE(testOverrideOnlyOverrides) {
-  EventQueue queue(2);
-  EventRunner runner;
-  EventInterpreter interpreter(NULL);
-  interpreter.setEventQueue(&queue);
-  interpreter.setEventRunner(&runner);
-  EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(&interpreter);
-  interpreter.addPlugin(relay);
-  EventInterpreterPluginRaiseEvent* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
-  interpreter.addPlugin(plugin);
+class RelayEventFixture : public Fixture {
+public:
+  static const std::string kReraisedName;
 
-  interpreter.run();
+  RelayEventFixture() {
+    m_pRelay = new EventInterpreterInternalRelay(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(m_pRelay);
+    EventInterpreterPluginRaiseEvent* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
+    m_pEventInterpreter->addPlugin(plugin);
+    m_pTarget.reset( new InternalEventRelayTarget(*m_pRelay));
+    m_pSubscription.reset(
+      new dss::EventSubscription(
+                kReraisedName,
+                EventInterpreterInternalRelay::getPluginName(),
+                *m_pEventInterpreter,
+                boost::shared_ptr<SubscriptionOptions>())
+    );
 
-  const std::string kReraisedName = "reraised_event";
-  InternalEventRelayTarget target(*relay);
-  boost::shared_ptr<EventSubscription> subscriptionOne(
-    new dss::EventSubscription(
-               kReraisedName,
-               EventInterpreterInternalRelay::getPluginName(),
-               interpreter,
-               boost::shared_ptr<SubscriptionOptions>())
-  );
+    m_pTarget->subscribeTo(m_pSubscription);
 
+    m_pTarget->setCallback(boost::bind(&InternalEventRelayCollector::onEvent, &m_Tester, _1, _2));
+  }
+protected:
+  EventInterpreterInternalRelay* m_pRelay;
+  boost::shared_ptr<InternalEventRelayTarget> m_pTarget;
+  boost::shared_ptr<EventSubscription> m_pSubscription;
+  InternalEventRelayCollector m_Tester;
+};
+
+const std::string RelayEventFixture::kReraisedName = "reraised_event";
+
+BOOST_FIXTURE_TEST_CASE(testOverrideOnlyOverrides, RelayEventFixture) {
   boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
   opts->setParameter("event_name", kReraisedName);
   opts->setParameter("test_override", "always testing");
-  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", interpreter, opts));
-  interpreter.subscribe(subscription);
-
-  target.subscribeTo(subscriptionOne);
-
-  InternalEventRelayCollector tester;
-  target.setCallback(boost::bind(&InternalEventRelayCollector::onEvent, &tester, _1, _2));
+  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", *m_pEventInterpreter, opts));
+  m_pEventInterpreter->subscribe(subscription);
 
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
-  queue.pushEvent(pEvent);
+  m_pQueue->pushEvent(pEvent);
 
   sleepMS(10);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
-  BOOST_CHECK(tester.getCoughtEvent()->getPropertyByName("test").empty());
-
-  queue.shutdown();
-  interpreter.terminate();
-  sleepMS(10);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
+  BOOST_CHECK(m_Tester.getCoughtEvent()->getPropertyByName("test").empty());
 }
 
-BOOST_AUTO_TEST_CASE(testOverrideOverrides) {
-  EventQueue queue(2);
-  EventRunner runner;
-  EventInterpreter interpreter(NULL);
-  interpreter.setEventQueue(&queue);
-  interpreter.setEventRunner(&runner);
-  EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(&interpreter);
-  interpreter.addPlugin(relay);
-  EventInterpreterPluginRaiseEvent* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
-  interpreter.addPlugin(plugin);
-
-  interpreter.run();
-
-  const std::string kReraisedName = "reraised_event";
-  InternalEventRelayTarget target(*relay);
-  boost::shared_ptr<EventSubscription> subscriptionOne(
-    new dss::EventSubscription(
-               kReraisedName,
-               EventInterpreterInternalRelay::getPluginName(),
-               interpreter,
-               boost::shared_ptr<SubscriptionOptions>())
-  );
-
+BOOST_FIXTURE_TEST_CASE(testOverrideOverrides, RelayEventFixture) {
   boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
   opts->setParameter("event_name", kReraisedName);
   const std::string kTestValue = "always testing";
   opts->setParameter("test_override", kTestValue);
-  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", interpreter, opts));
-  interpreter.subscribe(subscription);
-
-  target.subscribeTo(subscriptionOne);
-
-  InternalEventRelayCollector tester;
-  target.setCallback(boost::bind(&InternalEventRelayCollector::onEvent, &tester, _1, _2));
+  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", *m_pEventInterpreter, opts));
+  m_pEventInterpreter->subscribe(subscription);
 
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
   pEvent->setProperty("test", "bla");
-  queue.pushEvent(pEvent);
+  m_pQueue->pushEvent(pEvent);
 
   sleepMS(10);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
-  BOOST_CHECK_EQUAL(tester.getCoughtEvent()->getPropertyByName("test"), kTestValue);
-
-  queue.shutdown();
-  interpreter.terminate();
-  sleepMS(10);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
+  BOOST_CHECK_EQUAL(m_Tester.getCoughtEvent()->getPropertyByName("test"), kTestValue);
 }
 
-BOOST_AUTO_TEST_CASE(testDefaultDoesntOverride) {
-  EventQueue queue(2);
-  EventRunner runner;
-  EventInterpreter interpreter(NULL);
-  interpreter.setEventQueue(&queue);
-  interpreter.setEventRunner(&runner);
-  EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(&interpreter);
-  interpreter.addPlugin(relay);
-  EventInterpreterPluginRaiseEvent* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
-  interpreter.addPlugin(plugin);
-
-  interpreter.run();
-
-  const std::string kReraisedName = "reraised_event";
-  InternalEventRelayTarget target(*relay);
-  boost::shared_ptr<EventSubscription> subscriptionOne(
-    new dss::EventSubscription(
-               kReraisedName,
-               EventInterpreterInternalRelay::getPluginName(),
-               interpreter,
-               boost::shared_ptr<SubscriptionOptions>())
-  );
-
+BOOST_FIXTURE_TEST_CASE(testDefaultDoesntOverride, RelayEventFixture) {
   boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
   opts->setParameter("event_name", kReraisedName);
   const std::string kTestValue = "always testing";
   opts->setParameter("test_default", kTestValue);
-  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", interpreter, opts));
-  interpreter.subscribe(subscription);
-
-  target.subscribeTo(subscriptionOne);
-
-  InternalEventRelayCollector tester;
-  target.setCallback(boost::bind(&InternalEventRelayCollector::onEvent, &tester, _1, _2));
+  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", *m_pEventInterpreter, opts));
+  m_pEventInterpreter->subscribe(subscription);
 
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
   const std::string kOriginalValue = "bla";
   pEvent->setProperty("test", kOriginalValue);
-  queue.pushEvent(pEvent);
+  m_pQueue->pushEvent(pEvent);
 
   sleepMS(10);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
-  BOOST_CHECK_EQUAL(tester.getCoughtEvent()->getPropertyByName("test"), kOriginalValue);
-
-  queue.shutdown();
-  interpreter.terminate();
-  sleepMS(10);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
+  BOOST_CHECK_EQUAL(m_Tester.getCoughtEvent()->getPropertyByName("test"), kOriginalValue);
 }
 
-BOOST_AUTO_TEST_CASE(testDefaultSetsDefault) {
-  EventQueue queue(2);
-  EventRunner runner;
-  EventInterpreter interpreter(NULL);
-  interpreter.setEventQueue(&queue);
-  interpreter.setEventRunner(&runner);
-  EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(&interpreter);
-  interpreter.addPlugin(relay);
-  EventInterpreterPluginRaiseEvent* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
-  interpreter.addPlugin(plugin);
-
-  interpreter.run();
-
-  const std::string kReraisedName = "reraised_event";
-  InternalEventRelayTarget target(*relay);
-  boost::shared_ptr<EventSubscription> subscriptionOne(
-    new dss::EventSubscription(
-               kReraisedName,
-               EventInterpreterInternalRelay::getPluginName(),
-               interpreter,
-               boost::shared_ptr<SubscriptionOptions>())
-  );
-
+BOOST_FIXTURE_TEST_CASE(testDefaultSetsDefault, RelayEventFixture) {
   boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
   opts->setParameter("event_name", kReraisedName);
   const std::string kTestValue = "always testing";
   opts->setParameter("test_default", kTestValue);
-  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", interpreter, opts));
-  interpreter.subscribe(subscription);
-
-  target.subscribeTo(subscriptionOne);
-
-  InternalEventRelayCollector tester;
-  target.setCallback(boost::bind(&InternalEventRelayCollector::onEvent, &tester, _1, _2));
+  boost::shared_ptr<EventSubscription> subscription(new EventSubscription("my_event", "raise_event", *m_pEventInterpreter, opts));
+  m_pEventInterpreter->subscribe(subscription);
 
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
   const std::string kOriginalValue = "bla";
-  queue.pushEvent(pEvent);
+  m_pQueue->pushEvent(pEvent);
 
   sleepMS(10);
 
-  BOOST_CHECK_EQUAL(interpreter.getEventsProcessed(), 2);
-  BOOST_CHECK_EQUAL(tester.getCoughtEvent()->getPropertyByName("test"), kTestValue);
-
-  queue.shutdown();
-  interpreter.terminate();
-  sleepMS(10);
+  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
+  BOOST_CHECK_EQUAL(m_Tester.getCoughtEvent()->getPropertyByName("test"), kTestValue);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
