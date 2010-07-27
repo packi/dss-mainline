@@ -297,11 +297,11 @@ namespace dss {
   } // ctor
 
   ScriptContext::~ScriptContext() {
-    scrubVector(m_AttachedObjects);
+    JS_GC(m_pContext);
     if(!m_AttachedObjects.empty()) {
       Logger::getInstance()->log("Still have some attached objects (" + intToString(m_AttachedObjects.size()) + "). Memory leak?", lsError);
     }
-//    JS_GC(m_pContext);
+    scrubVector(m_AttachedObjects);
     JS_SetContextPrivate(m_pContext, NULL);
     JS_DestroyContext(m_pContext);
     m_pContext = NULL;
