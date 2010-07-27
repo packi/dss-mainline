@@ -48,7 +48,7 @@ namespace dss {
     PropertyScriptExtension* m_pExtension;
     JSObject* m_pFunctionObject;
     jsval m_Function;
-    std::string m_Identifier;
+    const std::string m_Identifier;
     boost::scoped_ptr<ScriptObject> m_pScriptObject;
     ScriptFunctionRooter m_FunctionRoot;
   }; // PropertyScriptListener
@@ -56,7 +56,7 @@ namespace dss {
   class PropertyScriptExtension : public ScriptExtension {
   public:
     PropertyScriptExtension(PropertySystem& _propertySystem);
-    virtual ~PropertyScriptExtension() {}
+    virtual ~PropertyScriptExtension();
 
     virtual void extendContext(ScriptContext& _context);
 
@@ -65,7 +65,7 @@ namespace dss {
     JSObject* createJSProperty(ScriptContext& _ctx, boost::shared_ptr<PropertyNode> _node);
     std::string produceListenerID();
     void addListener(PropertyScriptListener* _pListener);
-    void removeListener(const std::string& _identifier);
+    void removeListener(const std::string& _identifier, bool _destroy = true);
   private:
     PropertySystem& m_PropertySystem;
     std::vector<PropertyScriptListener*> m_Listeners;

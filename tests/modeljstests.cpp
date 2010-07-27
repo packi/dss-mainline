@@ -362,7 +362,7 @@ BOOST_AUTO_TEST_CASE(testPropertyListener) {
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("setProperty('/testing', 1); setProperty('/triggered', false); "
-                      "listener_ident = setListener('/testing', function(changedNode) { setProperty('/triggered', true); }); "
+                      "var listener_ident = setListener('/testing', function(changedNode) { setProperty('/triggered', true); }); "
       );
 
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
@@ -414,15 +414,14 @@ BOOST_AUTO_TEST_CASE(testReentrancy) {
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("setProperty('/testing', 1); setProperty('/triggered', false); "
-                            "other_ident = setListener('/triggered', function() { setProperty('/itWorks', true); } ); "
-                            "listener_ident = setListener('/testing', function(changedNode) { setProperty('/triggered', true); }); "
+                      "var other_ident = setListener('/triggered', function() { setProperty('/itWorks', true); } ); "
+                      "var listener_ident = setListener('/testing', function(changedNode) { setProperty('/triggered', true); }); "
       );
 
   propSys.setBoolValue("/testing", true);
 
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/itWorks"), true);
 
-  // TODO: find out why it crashes w/o those lines
   ctx->evaluate<void>("removeListener(other_ident); "
                       "removeListener(listener_ident); "
       );
@@ -495,7 +494,6 @@ BOOST_AUTO_TEST_CASE(testThreading) {
     sleepMS(100);
   }
 
-  // TODO: find out why it crashes w/o those lines
   ctx->evaluate<void>("removeListener(l1); removeListener(l2);");
 } // testThreading
 
