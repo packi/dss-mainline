@@ -206,8 +206,7 @@ namespace dss {
   } // global_print
 
   JSBool global_keepContext(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    ctx->setKeepContext(true);
+    Logger::getInstance()->log("keepContext() is deprecated", lsWarning);
     return JS_TRUE;
   } // global_keepContext
 
@@ -271,8 +270,7 @@ namespace dss {
 
   ScriptContext::ScriptContext(ScriptEnvironment& _env, JSContext* _pContext)
   : m_Environment(_env),
-    m_pContext(_pContext),
-    m_KeepContext(false)
+    m_pContext(_pContext)
   {
     JSRequest req(m_pContext);
     JS_SetOptions(m_pContext, JSOPTION_VAROBJFIX | JSOPTION_DONT_REPORT_UNCAUGHT);

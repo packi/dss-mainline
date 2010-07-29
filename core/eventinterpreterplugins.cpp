@@ -141,9 +141,9 @@ namespace dss {
 
         ctx->evaluateScript<void>(scriptName);
 
-        if(ctx->getKeepContext()) {
+        if(ctx->hasAttachedObjects()) {
           m_KeptContexts.push_back(ctx);
-          Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: keeping script " + scriptName + " in memory", lsInfo);
+          Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: still has objects, keeping " + scriptName + " in memory", lsInfo);
         }
       } catch(ScriptException& e) {
         Logger::getInstance()->log(std::string("EventInterpreterPluginJavascript::handleEvent: Caught event while running/parsing script '")
@@ -153,6 +153,8 @@ namespace dss {
       throw std::runtime_error("EventInterpreteRPluginJavascript::handleEvent: missing argument filename");
     }
   } // handleEvent
+
+  const std::string EventInterpreterPluginJavascript::kCleanupScriptsEventName = "EventInterpreteRPluginJavascript_cleanupScripts";
 
   void EventInterpreterPluginJavascript::initializeEnvironment() {
     m_Environment.initialize();
@@ -171,8 +173,46 @@ namespace dss {
       m_Environment.addExtension(ext);
       ext = new ScriptLoggerExtension(DSS::getInstance()->getJSLogDirectory(), DSS::getInstance()->getEventInterpreter());
       m_Environment.addExtension(ext);
+      setupCleanupEvent();
     }
   } // initializeEnvironment
+
+  void EventInterpreterPluginJavascript::setupCleanupEvent() {
+    EventInterpreterInternalRelay* pRelay =
+      dynamic_cast<EventInterpreterInternalRelay*>(getEventInterpreter().getPluginByName(EventInterpreterInternalRelay::getPluginName()));
+    m_pRelayTarget = boost::shared_ptr<InternalEventRelayTarget>(new InternalEventRelayTarget(*pRelay));
+
+    boost::shared_ptr<EventSubscription> cleanupEventSubscription(
+            new dss::EventSubscription(
+                kCleanupScriptsEventName,
+                EventInterpreterInternalRelay::getPluginName(),
+                getEventInterpreter(),
+                boost::shared_ptr<SubscriptionOptions>())
+    );
+    m_pRelayTarget->subscribeTo(cleanupEventSubscription);
+    m_pRelayTarget->setCallback(boost::bind(&EventInterpreterPluginJavascript::cleanupTerminatedScripts, this, _1, _2));
+    sendCleanupEvent();
+  } // setupCleanupEvent
+
+  void EventInterpreterPluginJavascript::cleanupTerminatedScripts(Event& _event, const EventSubscription& _subscription) {
+    typedef std::vector<boost::shared_ptr<ScriptContext> >::iterator tScriptContextIterator;
+    tScriptContextIterator ipScriptContext = m_KeptContexts.begin();
+    while(ipScriptContext != m_KeptContexts.end()) {
+      if(!(*ipScriptContext)->hasAttachedObjects()) {
+        ipScriptContext = m_KeptContexts.erase(ipScriptContext);
+      } else {
+        ++ipScriptContext;
+      }
+    }
+    sendCleanupEvent();
+  } // cleanupTerminatedScripts
+
+  void EventInterpreterPluginJavascript::sendCleanupEvent() {
+    boost::shared_ptr<Event> pEvent(new Event(kCleanupScriptsEventName));
+    pEvent->setProperty("time", "+" + intToString(20));
+    getEventInterpreter().getQueue().pushEvent(pEvent);
+  } // sendCleanupEvent
+
 
 
   //================================================== EventInterpreterPluginDS485
