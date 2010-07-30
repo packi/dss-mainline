@@ -58,12 +58,12 @@
 #include <sstream>
 
 #ifndef WIN32
-#include <csignal>
+  #include <csignal>
 #endif
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-
+#include <boost/algorithm/string/finder.hpp>
 namespace dss {
 
   //============================================= DSS
