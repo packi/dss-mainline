@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 2.6)
 project(DSS)
 
-option(WITH_TESTS "Include test-suite" ON)
+if(WIN32)
+  option(WITH_TESTS "Include test-suite" OFF)
+else(WIN32)  
+  option(WITH_TESTS "Include test-suite" ON)
+endif(WIN32)
 option(WITH_GCOV "Compile coverage information into the dss" OFF)
 
 if(NOT WITH_DATADIR)
@@ -70,8 +74,11 @@ include(CheckIncludeFiles)
 include(CheckIncludeFileCXX)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
-set(REQUIRED_LIBS dl)
-
+if(WIN32)
+	set(REQUIRED_LIBS dl ws2_32 wsock32)
+else(WIN32)
+	set(REQUIRED_LIBS dl)
+endif(WIN32)
 check_include_files(stdint.h HAVE_STDINT)
 
 # check for a library providing zeroconf (avahi/dnssd)
@@ -175,8 +182,15 @@ add_subdirectory(doc)
 
 
 add_executable(dss main.cpp namespaces.cpp)
-target_link_libraries(dss ${TEST_LIB} core ds485 model unix webservices core mongoose
+			  
+IF(WIN32)
+    target_link_libraries(dss ${TEST_LIB} core ds485 model unix webservices core mongoose
 			  ${REQUIRED_LIBS})
+ELSE(WIN32)
+	target_link_libraries(dss ${TEST_LIB} core ds485 model unix webservices core mongoose
+			  ${REQUIRED_LIBS})
+ENDIF(WIN32)
+			  
 add_dependencies(dss build_info.h)
 
 ## -- install targets:

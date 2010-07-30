@@ -28,6 +28,11 @@
 #include <netinet/in.h>
 #endif
 
+#if defined(__CYGWIN__)
+#include <sys/ioctl.h>
+#endif
+
+
 #include <arpa/inet.h>
 
 #ifdef __APPLE__

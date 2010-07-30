@@ -96,10 +96,7 @@ const char* JSLogDirectory = "data/logs/";
   {
     m_State = ssInvalid;
     m_pPropertySystem = boost::shared_ptr<PropertySystem>(new PropertySystem);
-    setDataDirectory(DataDirectory);
-    setConfigDirectory(ConfigDirectory);
-    setWebrootDirectory(WebrootDirectory);
-    setJSLogDirectory(JSLogDirectory);
+    setupDirectories();
 
     m_TimeStarted = time(NULL);
     m_pPropertySystem->createProperty("/system/uptime")->linkToProxy(
@@ -134,6 +131,38 @@ const char* JSLogDirectory = "data/logs/";
 
     m_pApartment.reset();
   }
+
+  void DSS::setupDirectories()
+  {
+#if defined(__CYGWIN__)
+    char AppDataDir[259];
+    char WebDir[259];
+    char JSLogDir[259];
+    std::string aup = getenv("ALLUSERSPROFILE");
+	
+    if (std::string::npos != aup.std::string::find("ProgramData")) {
+      sprintf(AppDataDir, "%s\\digitalSTROM\\DssData", aup.c_str());
+    } else {
+      std::string apd = getenv("APPDATA");
+      int index = apd.std::string::find_last_of("\\");
+      aup.std::string::append(apd.std::string::substr(index));
+      sprintf(AppDataDir, "%s\\digitalSTROM\\DssData", aup.c_str());
+    }
+
+    sprintf(WebDir, "%s\\webroot",AppDataDir);
+    sprintf(JSLogDir, "%s\\logs",AppDataDir);
+
+    setDataDirectory(AppDataDir);
+    setConfigDirectory(AppDataDir);
+    setWebrootDirectory(WebDir);
+    setJSLogDirectory(JSLogDir);
+#else
+    setDataDirectory(DataDirectory);
+    setConfigDirectory(ConfigDirectory);
+    setWebrootDirectory(WebrootDirectory);
+    setJSLogDirectory(JSLogDirectory);
+#endif
+  } // setAppDirectories
 
   int DSS::getUptime() const {
     return (int)difftime( time( NULL ), m_TimeStarted );
@@ -385,7 +414,7 @@ const char* JSLogDirectory = "data/logs/";
 #endif
 
     m_State = ssTerminating;
-  
+
     std::for_each(m_Subsystems.begin(), m_Subsystems.end(), StopSubsystem);
     m_pEventQueue->shutdown();
     m_pEventInterpreter->terminate();

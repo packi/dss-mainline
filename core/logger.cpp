@@ -27,6 +27,10 @@
 #include <cassert>
 #include <iostream>
 
+#if defined(__CYGWIN__)
+#include <time.h>
+#endif
+
 namespace dss {
 
   Logger* Logger::m_Instance = NULL;

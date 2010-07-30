@@ -19,6 +19,9 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 
 */
+#if defined(__CYGWIN__)
+#define __USE_W32_SOCKETS 1
+#endif
 
 #include "jssocket.h"
 

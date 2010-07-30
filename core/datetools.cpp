@@ -156,7 +156,9 @@ namespace dss {
     m_DateTime.tm_mday = _day;
     m_DateTime.tm_mon = _month;
     m_DateTime.tm_year = _year - 1900;
+#if defined(__linux__)
     m_DateTime.tm_gmtoff = 0;
+#endif
     m_DateTime.tm_isdst = -1;
     mktime(&m_DateTime);
   } // setDate
