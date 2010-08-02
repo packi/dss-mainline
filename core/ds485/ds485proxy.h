@@ -92,6 +92,8 @@ namespace dss {
     DS485Proxy(DSS* _pDSS, ModelMaintenance* _pModelMaintenance, DSSim* _pDSSim);
     virtual ~DS485Proxy() {};
 
+    virtual void shutdown();
+
     void setBusInterfaceHandler(BusInterfaceHandler* _value) { m_pBusInterfaceHandler = _value; }
 
     virtual DeviceBusInterface* getDeviceBusInterface() { return this; }
