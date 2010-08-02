@@ -162,7 +162,7 @@ const char* JSLogDirectory = "data/logs/";
     setWebrootDirectory(WebrootDirectory);
     setJSLogDirectory(JSLogDirectory);
 #endif
-  } // setAppDirectories
+  } // setupDirectories
 
   int DSS::getUptime() const {
     return (int)difftime( time( NULL ), m_TimeStarted );
