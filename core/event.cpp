@@ -617,6 +617,7 @@ namespace dss {
 
   void EventRunner::shutdown() {
     m_ShutdownFlag = true;
+    m_NewItem.broadcast();
   }
   int EventRunner::getSize() const {
     return m_ScheduledEvents.size();
@@ -712,6 +713,9 @@ namespace dss {
       }
 
       if(!m_NewItem.waitFor(sleepSeconds * 1000)) {
+        if (m_ShutdownFlag) {
+          return false;
+        }
         return raisePendingEvents(m_WakeTime, 2);
       }
     }

@@ -980,5 +980,7 @@ namespace dss {
     m_pModelMaintenance->addModelEvent(pEvent);
   } // busReady
 
-
+  void DS485Proxy::shutdown() {
+    m_DS485Controller.terminate();
+  }
 } // namespace dss

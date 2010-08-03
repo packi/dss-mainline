@@ -89,6 +89,7 @@ namespace dss {
     std::string m_jsLogDirectory;
 
     aDSSState m_State;
+    bool m_ShutdownFlag;
 
     /// Private constructor for singleton
     DSS();

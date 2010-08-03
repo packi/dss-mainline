@@ -94,6 +94,7 @@ const char* JSLogDirectory = "data/logs/";
 
   DSS::DSS()
   {
+    m_ShutdownFlag = false;
     m_State = ssInvalid;
     m_pPropertySystem = boost::shared_ptr<PropertySystem>(new PropertySystem);
     setupDirectories();
@@ -404,8 +405,16 @@ const char* JSLogDirectory = "data/logs/";
 
     m_State = ssRunning;
 
-    // pass control to the eventrunner
-    m_pEventRunner->run();
+    if (!m_ShutdownFlag) {
+      // pass control to the eventrunner
+      m_pEventRunner->run();
+    }
+
+    m_State = ssTerminating;
+
+    std::for_each(m_Subsystems.begin(), m_Subsystems.end(), StopSubsystem);
+    m_pEventQueue->shutdown();
+    m_pEventInterpreter->terminate();
 
     // shutdown all subsystems and services
 #ifdef WITH_BONJOUR
@@ -413,15 +422,18 @@ const char* JSLogDirectory = "data/logs/";
     bonjour.terminate();
 #endif
 
-    m_State = ssTerminating;
 
-    std::for_each(m_Subsystems.begin(), m_Subsystems.end(), StopSubsystem);
-    m_pEventQueue->shutdown();
-    m_pEventInterpreter->terminate();
   } // run
 
   void DSS::initiateShutdown() {
-    m_pEventRunner->shutdown();
+    m_ShutdownFlag = true;
+    if (m_State != ssRunning) {
+      return;
+    }
+
+    if (m_pEventRunner != NULL) {
+      m_pEventRunner->shutdown();
+    }
   }
 
   void DSS::shutdown() {
