@@ -23,6 +23,7 @@
 #include "logger.h"
 #include "base.h"
 #include "foreach.h"
+#include "datetools.h"
 
 #include <cassert>
 #include <iostream>
@@ -107,16 +108,11 @@ namespace dss {
   }
 
   void Logger::log(const std::string& _message, const aLogSeverity _severity) {
-    time_t now = time( NULL );
-    struct tm t;
     std::string logMessage;
-#ifdef WIN32
-    localtime_s( &t, &now );
-#else
-    localtime_r( &now, &t );
-#endif
 
-    logMessage = "[" + dateToISOString<std::string>(&t) + "]"
+    DateTime d = DateTime();
+
+    logMessage = "[" + d.fromUTC().toString() + "]"
     	         + SeverityToString<const std::string>(_severity)
     	         + " " + _message + "\n";
 
