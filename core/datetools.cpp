@@ -386,7 +386,7 @@ namespace dss {
 
       struct tm tm;
       ical_to_tm(icalTime, tm);
-      current = DateTime::fromUTC(mktime(&tm));
+      current = DateTime(tm);
     } while(current.before(_from));
     icalrecur_iterator_free(it);
     it = NULL;
