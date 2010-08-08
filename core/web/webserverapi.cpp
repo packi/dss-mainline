@@ -310,7 +310,7 @@ namespace dss {
       .withDocumentation("Returns the dss version",
                          "This method returns the version std::string of the dss");
     clsSystem.addMethod("time")
-      .withDocumentation("Returns the dSS time in seconds since epoch");
+      .withDocumentation("Returns the dSS time in UTC seconds since epoch");
 
     RestfulClass& clsSet = api->addClass("set")
         .withInstanceParameter("self", "string", false);

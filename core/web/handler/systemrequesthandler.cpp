@@ -37,7 +37,7 @@ namespace dss {
       return success(DSS::getInstance()->versionString());
     } else if (_request.getMethod() == "time") {
       std::stringstream s;
-      s << DateTime().fromUTC().secondsSinceEpoch();
+      s << DateTime().secondsSinceEpoch();
       return success(s.str());
     }
     throw std::runtime_error("Unhandled function");
