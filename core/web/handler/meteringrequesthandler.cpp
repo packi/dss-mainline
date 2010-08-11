@@ -142,7 +142,7 @@ namespace dss {
         log("Trying to load series from " + seriesPath);
         SeriesReader<CurrentValue> reader;
         boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(seriesPath));
-        if(s == NULL) {
+        if(s != NULL) {
           boost::shared_ptr<std::deque<CurrentValue> > values = s->getExpandedValues();
 
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
@@ -163,7 +163,7 @@ namespace dss {
 
           return success(resultObj);
         } else {
-          return failure("No data-file for '" + typeString + "' and resolution '" + resolutionString + "'");
+          return failure("Could not parse/read data-file for '" + typeString + "' and resolution '" + resolutionString + "'");
         }
       }
     } else {
