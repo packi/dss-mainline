@@ -199,6 +199,7 @@ namespace dss {
     tScriptContextIterator ipScriptContext = m_KeptContexts.begin();
     while(ipScriptContext != m_KeptContexts.end()) {
       if(!(*ipScriptContext)->hasAttachedObjects()) {
+        Logger::getInstance()->log("cleanupTerminatedScripts: erasing script");
         ipScriptContext = m_KeptContexts.erase(ipScriptContext);
       } else {
         ++ipScriptContext;
@@ -212,7 +213,6 @@ namespace dss {
     pEvent->setProperty("time", "+" + intToString(20));
     getEventInterpreter().getQueue().pushEvent(pEvent);
   } // sendCleanupEvent
-
 
 
   //================================================== EventInterpreterPluginDS485
