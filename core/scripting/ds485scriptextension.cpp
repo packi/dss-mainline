@@ -119,7 +119,7 @@ namespace dss {
             }
             goOn = _callbackObject->callFunctionByReference<bool>(_function, paramList);
           }
-          //JS_GC(cx);
+          JS_GC(cx);
           req.endRequest();
           //JS_ClearContextThread(cx);
         } catch(ScriptException& e) {
