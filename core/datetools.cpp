@@ -26,7 +26,7 @@
 
 namespace dss {
 
-  static long int g_GMT_Offset = 0;
+  long int DateTime::kGMTOffset = 0;
 
   //================================================== DateTime
 
@@ -310,23 +310,23 @@ namespace dss {
   } // fromISO
 
   DateTime DateTime::fromUTC(const time_t& _time) {
-    return DateTime(_time - g_GMT_Offset);
+    return DateTime(_time - kGMTOffset);
   } // fromUTC
 
   DateTime DateTime::toUTC(const time_t& _time) {
-    return DateTime(_time + g_GMT_Offset);
+    return DateTime(_time + kGMTOffset);
   } // toUTC
 
   DateTime DateTime::fromUTC() {
-    return DateTime(mktime(&m_DateTime) - g_GMT_Offset);
+    return DateTime(mktime(&m_DateTime) - kGMTOffset);
   }
 
   DateTime DateTime::toUTC() {
-    return DateTime(mktime(&m_DateTime) + g_GMT_Offset);
+    return DateTime(mktime(&m_DateTime) + kGMTOffset);
   }
 
   void DateTime::configureUTCOffset(long int _offset) {
-      g_GMT_Offset = _offset;
+    kGMTOffset = _offset;
   }
 
   DateTime DateTime::NullDate(0);

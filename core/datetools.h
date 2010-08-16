@@ -52,6 +52,7 @@ namespace dss {
   class DateTime {
   private:
     struct tm m_DateTime;
+    static long int kGMTOffset;
   public:
     /** Initializes the instance to be equal to \a DateTime::NullDate */
     DateTime();
@@ -172,16 +173,16 @@ namespace dss {
       * time to UTC */
     static DateTime toUTC(const time_t& _time);
 
-    /** Assumes current DateTime instance to be in UTC and creates an 
+    /** Assumes current DateTime instance to be in UTC and creates an
      * instance a DateTime instance that is in local time */
     DateTime fromUTC();
 
-    /** Assumes current DateTime instance to be in local time and creates an 
+    /** Assumes current DateTime instance to be in local time and creates an
      * instance a DateTime instance that is in UTC */
     DateTime toUTC();
 
     /** Configures the offset between UTC and local time which will be used
-     * for all subsequent calculations; the offset mst be in seconds West 
+     * for all subsequent calculations; the offset mst be in seconds West
      * of GMT */
     static void configureUTCOffset(long int _offset);
   }; // DateTime
