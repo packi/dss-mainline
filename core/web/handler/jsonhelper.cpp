@@ -26,6 +26,8 @@
 
 #include "core/web/json.h"
 
+#include "core/datetools.h"
+
 #include "core/model/devicereference.h"
 #include "core/model/device.h"
 #include "core/model/set.h"
@@ -36,6 +38,8 @@
 namespace dss {
 
   boost::shared_ptr<JSONObject> toJSON(const DeviceReference& _device) {
+    DateTime tmp_date;
+
     boost::shared_ptr<JSONObject> result(new JSONObject());
     result->addProperty("id", _device.getDSID().toString());
     result->addProperty("isSwitch", _device.hasSwitch());
@@ -46,8 +50,13 @@ namespace dss {
     result->addProperty("circuitID", _device.getDevice().getDSMeterID());
     result->addProperty("busID", _device.getDevice().getShortAddress());
     result->addProperty("isPresent", _device.getDevice().isPresent());
-    result->addProperty("lastDiscovered", _device.getDevice().getLastDiscovered());
-    result->addProperty("firstSeen", _device.getDevice().getFirstSeen());
+
+    tmp_date = _device.getDevice().getLastDiscovered();
+    result->addProperty("lastDiscovered", tmp_date.fromUTC());
+
+    tmp_date = _device.getDevice().getFirstSeen();
+    result->addProperty("firstSeen", tmp_date.fromUTC());
+
     result->addProperty("on", _device.getDevice().isOn());
     result->addProperty("locked", _device.getDevice().getIsLockedInDSM());
     return result;

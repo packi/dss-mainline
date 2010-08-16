@@ -26,6 +26,8 @@
 
 namespace dss {
 
+  static long int g_GMT_Offset = 0;
+
   //================================================== DateTime
 
   DateTime::DateTime() {
@@ -296,17 +298,36 @@ namespace dss {
     tm.tm_hour = hour;
     tm.tm_min = min;
     tm.tm_sec = sec;
+    tm.tm_isdst = -1;
 
-    return DateTime::fromUTC(mktime(&tm));
+    // if string ends with "Z" it is in UTC, otherwise it is considered to
+    // be in local time
+    if(_isoStr.at(_isoStr.size()-1) != 'Z') {
+      return DateTime::toUTC(mktime(&tm));
+    } else {
+      return DateTime(tm);
+    }
   } // fromISO
 
   DateTime DateTime::fromUTC(const time_t& _time) {
-    return DateTime(_time - timezone);
+    return DateTime(_time - g_GMT_Offset);
   } // fromUTC
 
   DateTime DateTime::toUTC(const time_t& _time) {
-    return DateTime(_time + timezone);
+    return DateTime(_time + g_GMT_Offset);
   } // toUTC
+
+  DateTime DateTime::fromUTC() {
+    return DateTime(mktime(&m_DateTime) - g_GMT_Offset);
+  }
+
+  DateTime DateTime::toUTC() {
+    return DateTime(mktime(&m_DateTime) + g_GMT_Offset);
+  }
+
+  void DateTime::configureUTCOffset(long int _offset) {
+      g_GMT_Offset = _offset;
+  }
 
   DateTime DateTime::NullDate(0);
 
@@ -365,7 +386,7 @@ namespace dss {
 
       struct tm tm;
       ical_to_tm(icalTime, tm);
-      current = DateTime::fromUTC(mktime(&tm));
+      current = DateTime(tm);
     } while(current.before(_from));
     icalrecur_iterator_free(it);
     it = NULL;

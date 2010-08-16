@@ -165,7 +165,7 @@ function pingResultHandler(f, shortAddr, dsid, name, index) {
                                          "name": device.name,
                                          "logfile": LOGFILE_NAME,
                                          "reqindex" : index,
-                                         "timestamp": new Date(Date.now()).toGMTString()});
+                                         "timestamp": new Date(Date.now())});
     evt.raise();
   } else {
     if (s === null) {

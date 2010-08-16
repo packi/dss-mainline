@@ -25,6 +25,7 @@ along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 #include "core/dss.h"
 #include "core/logger.h"
 #include "core/propertysystem.h"
+#include "core/datetools.h"
 
 #include <stdio.h>
 #include <signal.h>
@@ -181,10 +182,9 @@ namespace dss {
 
   void ScriptLogger::log(const std::string& text) {
     if (m_f) {
-      struct tm t;
-      time_t now = time( NULL );
-      localtime_r( &now, &t );
-      std::string out = "[" + dateToISOString<std::string>(&t) + "] " + text;
+      DateTime timestamp = DateTime();
+
+      std::string out = "[" + timestamp.fromUTC().toString() + "] " + text;
       m_LogWriteMutex.lock();
       size_t written = fwrite(out.c_str(), 1, out.size(), m_f);
       fflush(m_f);
