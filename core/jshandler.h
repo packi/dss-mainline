@@ -120,6 +120,7 @@ namespace dss {
     void attachObject(ScriptContextAttachedObject* _pObject);
     void removeAttachedObject(ScriptContextAttachedObject* _pObject);
     bool hasAttachedObjects() const { return !m_AttachedObjects.empty(); }
+    int getAttachedObjectsCount() const { return m_AttachedObjects.size(); }
     ScriptContextAttachedObject* getAttachedObjectByName(const std::string& _name);
   public:
 

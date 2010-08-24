@@ -106,18 +106,44 @@ namespace dss {
 
   class ScriptContextWrapper {
   public:
-    ScriptContextWrapper(boost::shared_ptr<ScriptContext> _pContext)
+    ScriptContextWrapper(boost::shared_ptr<ScriptContext> _pContext, PropertyNodePtr _pRootNode, const std::string& _identifier)
     : m_pContext(_pContext)
-    { }
+    {
+      if((_pRootNode != NULL) && !_identifier.empty()) {
+        m_pPropertyNode = _pRootNode->createProperty(_identifier + "+");
+        m_pPropertyNode->createProperty("stopScript")->linkToProxy(
+          PropertyProxyMemberFunction<ScriptContextWrapper,bool>(*this, NULL, &ScriptContextWrapper::stopScript));
+        m_pPropertyNode->createProperty("startedAt")->linkToProxy(
+          PropertyProxyMemberFunction<DateTime, std::string, false>(m_StartTime, &DateTime::toString));
+        m_pPropertyNode->createProperty("attachedObjects")->linkToProxy(
+          PropertyProxyMemberFunction<ScriptContext,int>(*m_pContext, &ScriptContext::getAttachedObjectsCount));
+      }
+    }
 
-    boost::shared_ptr<ScriptContext> get() { return m_pContext; }
+    ~ScriptContextWrapper() {
+      m_pPropertyNode->getParentNode()->removeChild(m_pPropertyNode);
+    }
+
+    boost::shared_ptr<ScriptContext> get() {
+      return m_pContext;
+    }
+
     void addFile(const std::string& _name) {
       m_LoadedFiles.push_back(_name);
+      if(m_pPropertyNode != NULL) {
+        m_pPropertyNode->createProperty("files/file+")->setStringValue(_name);
+      }
+    }
+  private:
+    void stopScript(bool _value) {
+      // TODO: implement
+      Logger::getInstance()->log("Script would be stopped if this would have been implemented");
     }
   private:
     boost::shared_ptr<ScriptContext> m_pContext;
     DateTime m_StartTime;
     std::vector<std::string> m_LoadedFiles;
+    PropertyNodePtr m_pPropertyNode;
   };
 
   //================================================== EventInterpreterPluginJavascript
@@ -136,7 +162,11 @@ namespace dss {
 
       try {
         boost::shared_ptr<ScriptContext> ctx(m_Environment.getContext());
-        boost::shared_ptr<ScriptContextWrapper> wrapper(new ScriptContextWrapper(ctx));
+        std::string scriptID = _event.getPropertyByName("script_id");
+        if(scriptID.empty()) {
+          scriptID = _event.getName() + _subscription.getID();
+        }
+        boost::shared_ptr<ScriptContextWrapper> wrapper(new ScriptContextWrapper(ctx, m_pScriptRootNode, scriptID));
         ScriptObject raisedEvent(*ctx, NULL);
         raisedEvent.setProperty<const std::string&>("name", _event.getName());
         ctx->getRootObject().setProperty("raisedEvent", &raisedEvent);
@@ -194,6 +224,7 @@ namespace dss {
       ext = new ScriptLoggerExtension(DSS::getInstance()->getJSLogDirectory(), DSS::getInstance()->getEventInterpreter());
       m_Environment.addExtension(ext);
       setupCleanupEvent();
+      m_pScriptRootNode = DSS::getInstance()->getPropertySystem().createProperty("/scripts");
     }
   } // initializeEnvironment
 

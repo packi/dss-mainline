@@ -45,6 +45,8 @@ namespace dss {
   }; // EventInterpreterPluginRaiseEvent
 
   class ScriptContextWrapper;
+  class PropertyNode;
+  typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   class EventInterpreterPluginJavascript : public EventInterpreterPlugin {
   private:
@@ -52,6 +54,7 @@ namespace dss {
     std::vector<boost::shared_ptr<ScriptContextWrapper> > m_WrappedContexts;
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;
     static const std::string kCleanupScriptsEventName;
+    PropertyNodePtr m_pScriptRootNode;
   private:
     void initializeEnvironment();
     void setupCleanupEvent();
