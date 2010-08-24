@@ -102,6 +102,24 @@ namespace dss {
   } // applyOptionsWithSuffix
 
 
+  //================================================== ScriptContextWrapper
+
+  class ScriptContextWrapper {
+  public:
+    ScriptContextWrapper(boost::shared_ptr<ScriptContext> _pContext)
+    : m_pContext(_pContext)
+    { }
+
+    boost::shared_ptr<ScriptContext> get() { return m_pContext; }
+    void addFile(const std::string& _name) {
+      m_LoadedFiles.push_back(_name);
+    }
+  private:
+    boost::shared_ptr<ScriptContext> m_pContext;
+    DateTime m_StartTime;
+    std::vector<std::string> m_LoadedFiles;
+  };
+
   //================================================== EventInterpreterPluginJavascript
 
   EventInterpreterPluginJavascript::EventInterpreterPluginJavascript(EventInterpreter* _pInterpreter)
@@ -118,6 +136,7 @@ namespace dss {
 
       try {
         boost::shared_ptr<ScriptContext> ctx(m_Environment.getContext());
+        boost::shared_ptr<ScriptContextWrapper> wrapper(new ScriptContextWrapper(ctx));
         ScriptObject raisedEvent(*ctx, NULL);
         raisedEvent.setProperty<const std::string&>("name", _event.getName());
         ctx->getRootObject().setProperty("raisedEvent", &raisedEvent);
@@ -139,10 +158,11 @@ namespace dss {
         raisedEvent.setProperty("subscription", &subscriptionObj);
         subscriptionObj.setProperty<const std::string&>("name", _subscription.getEventName());
 
+        wrapper->addFile(scriptName);
         ctx->evaluateScript<void>(scriptName);
 
         if(ctx->hasAttachedObjects()) {
-          m_KeptContexts.push_back(ctx);
+          m_WrappedContexts.push_back(wrapper);
           Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: still has objects, keeping " + scriptName + " in memory", lsInfo);
         }
       } catch(ScriptException& e) {
@@ -195,14 +215,14 @@ namespace dss {
   } // setupCleanupEvent
 
   void EventInterpreterPluginJavascript::cleanupTerminatedScripts(Event& _event, const EventSubscription& _subscription) {
-    typedef std::vector<boost::shared_ptr<ScriptContext> >::iterator tScriptContextIterator;
-    tScriptContextIterator ipScriptContext = m_KeptContexts.begin();
-    while(ipScriptContext != m_KeptContexts.end()) {
-      if(!(*ipScriptContext)->hasAttachedObjects()) {
+    typedef std::vector<boost::shared_ptr<ScriptContextWrapper> >::iterator tScriptContextWrapperIterator;
+    tScriptContextWrapperIterator ipScriptContextWrapper = m_WrappedContexts.begin();
+    while(ipScriptContextWrapper != m_WrappedContexts.end()) {
+      if(!(*ipScriptContextWrapper)->get()->hasAttachedObjects()) {
         Logger::getInstance()->log("cleanupTerminatedScripts: erasing script");
-        ipScriptContext = m_KeptContexts.erase(ipScriptContext);
+        ipScriptContextWrapper = m_WrappedContexts.erase(ipScriptContextWrapper);
       } else {
-        ++ipScriptContext;
+        ++ipScriptContextWrapper;
       }
     }
     sendCleanupEvent();

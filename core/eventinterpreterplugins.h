@@ -44,11 +44,12 @@ namespace dss {
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   }; // EventInterpreterPluginRaiseEvent
 
+  class ScriptContextWrapper;
 
   class EventInterpreterPluginJavascript : public EventInterpreterPlugin {
   private:
     ScriptEnvironment m_Environment;
-    std::vector<boost::shared_ptr<ScriptContext> > m_KeptContexts;
+    std::vector<boost::shared_ptr<ScriptContextWrapper> > m_WrappedContexts;
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;
     static const std::string kCleanupScriptsEventName;
   private:
