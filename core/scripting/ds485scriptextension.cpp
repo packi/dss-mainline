@@ -81,6 +81,7 @@ namespace dss {
     void waitForFrame(boost::shared_ptr<FrameBucketCollector> _bucket, boost::shared_ptr<ScriptObject> _callbackObject, jsval _function, int _timeout, boost::shared_ptr<ScriptFunctionRooter> _rootedFunction) {
       bool goOn = true;
       JSContext* cx = getContext()->getJSContext();
+      boost::shared_ptr<ScriptContextAttachedObject> preventContextDestruction(new ScriptContextAttachedObject(getContext()));
       do {
         bool hasFrame = _bucket->waitForFrame(_timeout);
         try {
