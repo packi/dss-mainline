@@ -8,7 +8,8 @@
 export PATH=$PATH:/var/lib/gems/1.8/bin/
 
 
-GIT_REPO=git://gitorious.digitalstrom.org/dss/dss-mainline.git
+DSS_REPO=git://gitorious.digitalstrom.org/dss/dss-mainline.git
+WEBSRC_REPO=git://gitorious.digitalstrom.org/dss-websrc/dss-websrc-mainline.git
 
 if [ -z "$2" ]; then
 	echo "Usage: $(basename $0) <release version string> <git branch name>"
@@ -24,23 +25,34 @@ if [ -d "$TARGET_DIR" ]; then
 	exit 2
 fi
 
-git clone --depth 1 $GIT_REPO $TARGET_DIR
+git clone --depth 1 $DSS_REPO $TARGET_DIR
 cd dss-$DSS_RELEASE_VERSION
 git branch $DSS_RELEASE_BRANCH origin/$DSS_RELEASE_BRANCH
 git checkout $DSS_RELEASE_BRANCH
 git rev-parse HEAD > .dss_git_version
 git branch|grep ^*|sed -e 's|^\*\s*||' > .dss_git_branch
 
-git submodule update --init
-./websrc/tools/build_and_copy_weblibs.sh websrc data/webroot/js/
-
 # copy WSDL file
 cp webservices/dss.wsdl data/webroot
 
-# clean up release tarball
 
-cd ..
-tar cvzf dss-$DSS_RELEASE_VERSION{.tar.gz,} --exclude=\*/.git* --exclude=\*/websrc\*
+
+# checkout websrc
+git clone --depth 1 $WEBSRC_REPO
+cd dss-websrc-mainline
+autoreconf -i
+./configure --prefix=$(pwd)/install
+make
+make install
+cp -r ./install/share/dss-web/webroot/* ../data/webroot
+cd .. # websrc
+
+cd .. # dss
+
+tar cvzf dss-$DSS_RELEASE_VERSION{.tar.gz,} \
+    --exclude=\*/.git\* \
+    --exclude=\*/dss-websrc-mainline\* \
+    --exclude=\*/websrc\*
 
 
 
