@@ -134,11 +134,11 @@ namespace dss {
     }
 
   protected:
-    void blockingCallback() {
+    void startBlockingCall() {
       m_pAttachedObject.reset(new ScriptContextAttachedObject(&getContext()));
     }
 
-    void leavingBlockingCallback() {
+    void endBlockingCall() {
       m_pAttachedObject.reset();
     }
   protected:
@@ -191,7 +191,7 @@ namespace dss {
           this,
           boost::asio::placeholders::error,
           ++iterator));
-      blockingCallback();
+      startBlockingCall();
       startIOThread();
     }
 
@@ -206,13 +206,13 @@ namespace dss {
           this,
           boost::asio::placeholders::error,
           boost::asio::placeholders::bytes_transferred));
-      blockingCallback();
+      startBlockingCall();
       startIOThread();
     }
 
     void close() {
       m_pSocket->close();
-      leavingBlockingCallback();
+      endBlockingCall();
     }
 
     void receive(const int _numberOfBytes) {
@@ -226,7 +226,7 @@ namespace dss {
                     this,
                     boost::asio::placeholders::error,
                     boost::asio::placeholders::bytes_transferred));
-      blockingCallback();
+      startBlockingCall();
       startIOThread();
     }
 
@@ -253,7 +253,7 @@ namespace dss {
       if(m_pSocket == NULL && m_pAcceptor != NULL) {
         createSocket();
         m_pAcceptor->async_accept(*m_pSocket, boost::bind(&SocketHelperInstance::acceptCallback, this, boost::asio::placeholders::error));
-        blockingCallback();
+        startBlockingCall();
         startIOThread();
       } else {
         Logger::getInstance()->log("SocketHelperInstance::accept: Please call bind first", lsFatal);
@@ -265,7 +265,7 @@ namespace dss {
                             tcp::resolver::iterator endpoint_iterator) {
       Logger::getInstance()->log("*** Connection callback");
       AssertLocked lock(&getContext());
-      leavingBlockingCallback();
+      endBlockingCall();
       //JS_SetContextThread(getContext().getJSContext());
       JSRequest req(getContext().getJSContext());
       if (!error) {
@@ -288,7 +288,7 @@ namespace dss {
     void sendCallback(const boost::system::error_code& error, std::size_t bytesTransfered) {
       Logger::getInstance()->log("*** Send callback");
       AssertLocked lock(&getContext());
-      leavingBlockingCallback();
+      endBlockingCall();
       //JS_SetContextThread(getContext().getJSContext());
       JSRequest req(getContext().getJSContext());
       if(!error) {
@@ -311,13 +311,13 @@ namespace dss {
       JSRequest req(getContext().getJSContext());
       if(!error) {
         if(bytesTransfered == m_BytesToRead) {
-          leavingBlockingCallback();
+          endBlockingCall();
           std::string result(m_DataBuffer, m_BytesToRead);
           callDataCallback(result);
           m_BytesToRead = 0;
         }
       } else {
-        leavingBlockingCallback();
+        endBlockingCall();
         Logger::getInstance()->log("SocketHelperInstance::readCallback: error: " + error.message());
         callDataCallback("");
       }
@@ -327,7 +327,7 @@ namespace dss {
 
     void acceptCallback(const boost::system::error_code& error) {
       AssertLocked lock(&getContext());
-      leavingBlockingCallback();
+      endBlockingCall();
       //JS_SetContextThread(getContext().getJSContext());
       JSRequest req(getContext().getJSContext());
       if(!error) {
