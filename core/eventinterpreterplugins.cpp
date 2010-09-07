@@ -121,7 +121,9 @@ namespace dss {
     }
 
     ~ScriptContextWrapper() {
-      m_pPropertyNode->getParentNode()->removeChild(m_pPropertyNode);
+      if ((m_pPropertyNode != NULL) && (m_pPropertyNode->getParentNode() != NULL)) {
+        m_pPropertyNode->getParentNode()->removeChild(m_pPropertyNode);
+      }
     }
 
     boost::shared_ptr<ScriptContext> get() {
