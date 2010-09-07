@@ -37,6 +37,10 @@ namespace dss {
     m_NextListenerID(1)
   { } // ctor
 
+  PropertyScriptExtension::~PropertyScriptExtension() {
+    scrubVector(m_Listeners);
+  } // dtor
+
   JSBool global_prop_setProperty(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     if(argc < 2) {
       Logger::getInstance()->log("JS: global_prop_setProperty: need two arguments: property-path & value", lsError);
@@ -247,12 +251,16 @@ namespace dss {
     m_Listeners.push_back(_pListener);
   } // addListener
 
-  void PropertyScriptExtension::removeListener(const std::string& _identifier) {
+  void PropertyScriptExtension::removeListener(const std::string& _identifier, bool _destroy) {
     for(std::vector<PropertyScriptListener*>::iterator it = m_Listeners.begin(), e = m_Listeners.end();
         it != e; ++it) {
       if((*it)->getIdentifier() == _identifier) {
-        (*it)->unsubscribe();
+        PropertyScriptListener* pListener = *it;
+        pListener->unsubscribe();
         m_Listeners.erase(it);
+        if(_destroy) {
+          delete pListener;
+        }
         return;
       }
     }
@@ -276,8 +284,8 @@ namespace dss {
   } // ctor
 
   PropertyScriptListener::~PropertyScriptListener() {
-    m_pExtension->removeListener(m_Identifier);
-  } // dtor
+    m_pExtension->removeListener(m_Identifier, false);
+  }
 
   void PropertyScriptListener::createScriptObject() {
     if(m_pScriptObject == NULL) {

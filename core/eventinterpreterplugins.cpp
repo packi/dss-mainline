@@ -102,6 +102,50 @@ namespace dss {
   } // applyOptionsWithSuffix
 
 
+  //================================================== ScriptContextWrapper
+
+  class ScriptContextWrapper {
+  public:
+    ScriptContextWrapper(boost::shared_ptr<ScriptContext> _pContext, PropertyNodePtr _pRootNode, const std::string& _identifier)
+    : m_pContext(_pContext)
+    {
+      if((_pRootNode != NULL) && !_identifier.empty()) {
+        m_pPropertyNode = _pRootNode->createProperty(_identifier + "+");
+        m_pPropertyNode->createProperty("stopScript")->linkToProxy(
+          PropertyProxyMemberFunction<ScriptContextWrapper,bool>(*this, NULL, &ScriptContextWrapper::stopScript));
+        m_pPropertyNode->createProperty("startedAt")->linkToProxy(
+          PropertyProxyMemberFunction<DateTime, std::string, false>(m_StartTime, &DateTime::toString));
+        m_pPropertyNode->createProperty("attachedObjects")->linkToProxy(
+          PropertyProxyMemberFunction<ScriptContext,int>(*m_pContext, &ScriptContext::getAttachedObjectsCount));
+      }
+    }
+
+    ~ScriptContextWrapper() {
+      m_pPropertyNode->getParentNode()->removeChild(m_pPropertyNode);
+    }
+
+    boost::shared_ptr<ScriptContext> get() {
+      return m_pContext;
+    }
+
+    void addFile(const std::string& _name) {
+      m_LoadedFiles.push_back(_name);
+      if(m_pPropertyNode != NULL) {
+        m_pPropertyNode->createProperty("files/file+")->setStringValue(_name);
+      }
+    }
+  private:
+    void stopScript(bool _value) {
+      // TODO: implement
+      Logger::getInstance()->log("Script would be stopped if this would have been implemented");
+    }
+  private:
+    boost::shared_ptr<ScriptContext> m_pContext;
+    DateTime m_StartTime;
+    std::vector<std::string> m_LoadedFiles;
+    PropertyNodePtr m_pPropertyNode;
+  };
+
   //================================================== EventInterpreterPluginJavascript
 
   EventInterpreterPluginJavascript::EventInterpreterPluginJavascript(EventInterpreter* _pInterpreter)
@@ -118,6 +162,11 @@ namespace dss {
 
       try {
         boost::shared_ptr<ScriptContext> ctx(m_Environment.getContext());
+        std::string scriptID = _event.getPropertyByName("script_id");
+        if(scriptID.empty()) {
+          scriptID = _event.getName() + _subscription.getID();
+        }
+        boost::shared_ptr<ScriptContextWrapper> wrapper(new ScriptContextWrapper(ctx, m_pScriptRootNode, scriptID));
         ScriptObject raisedEvent(*ctx, NULL);
         raisedEvent.setProperty<const std::string&>("name", _event.getName());
         ctx->getRootObject().setProperty("raisedEvent", &raisedEvent);
@@ -139,11 +188,12 @@ namespace dss {
         raisedEvent.setProperty("subscription", &subscriptionObj);
         subscriptionObj.setProperty<const std::string&>("name", _subscription.getEventName());
 
+        wrapper->addFile(scriptName);
         ctx->evaluateScript<void>(scriptName);
 
-        if(ctx->getKeepContext()) {
-          m_KeptContexts.push_back(ctx);
-          Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: keeping script " + scriptName + " in memory", lsInfo);
+        if(ctx->hasAttachedObjects()) {
+          m_WrappedContexts.push_back(wrapper);
+          Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: still has objects, keeping " + scriptName + " in memory", lsInfo);
         }
       } catch(ScriptException& e) {
         Logger::getInstance()->log(std::string("EventInterpreterPluginJavascript::handleEvent: Caught event while running/parsing script '")
@@ -153,6 +203,8 @@ namespace dss {
       throw std::runtime_error("EventInterpreteRPluginJavascript::handleEvent: missing argument filename");
     }
   } // handleEvent
+
+  const std::string EventInterpreterPluginJavascript::kCleanupScriptsEventName = "EventInterpreteRPluginJavascript_cleanupScripts";
 
   void EventInterpreterPluginJavascript::initializeEnvironment() {
     m_Environment.initialize();
@@ -171,8 +223,47 @@ namespace dss {
       m_Environment.addExtension(ext);
       ext = new ScriptLoggerExtension(DSS::getInstance()->getJSLogDirectory(), DSS::getInstance()->getEventInterpreter());
       m_Environment.addExtension(ext);
+      setupCleanupEvent();
+      m_pScriptRootNode = DSS::getInstance()->getPropertySystem().createProperty("/scripts");
     }
   } // initializeEnvironment
+
+  void EventInterpreterPluginJavascript::setupCleanupEvent() {
+    EventInterpreterInternalRelay* pRelay =
+      dynamic_cast<EventInterpreterInternalRelay*>(getEventInterpreter().getPluginByName(EventInterpreterInternalRelay::getPluginName()));
+    m_pRelayTarget = boost::shared_ptr<InternalEventRelayTarget>(new InternalEventRelayTarget(*pRelay));
+
+    boost::shared_ptr<EventSubscription> cleanupEventSubscription(
+            new dss::EventSubscription(
+                kCleanupScriptsEventName,
+                EventInterpreterInternalRelay::getPluginName(),
+                getEventInterpreter(),
+                boost::shared_ptr<SubscriptionOptions>())
+    );
+    m_pRelayTarget->subscribeTo(cleanupEventSubscription);
+    m_pRelayTarget->setCallback(boost::bind(&EventInterpreterPluginJavascript::cleanupTerminatedScripts, this, _1, _2));
+    sendCleanupEvent();
+  } // setupCleanupEvent
+
+  void EventInterpreterPluginJavascript::cleanupTerminatedScripts(Event& _event, const EventSubscription& _subscription) {
+    typedef std::vector<boost::shared_ptr<ScriptContextWrapper> >::iterator tScriptContextWrapperIterator;
+    tScriptContextWrapperIterator ipScriptContextWrapper = m_WrappedContexts.begin();
+    while(ipScriptContextWrapper != m_WrappedContexts.end()) {
+      if(!(*ipScriptContextWrapper)->get()->hasAttachedObjects()) {
+        Logger::getInstance()->log("cleanupTerminatedScripts: erasing script");
+        ipScriptContextWrapper = m_WrappedContexts.erase(ipScriptContextWrapper);
+      } else {
+        ++ipScriptContextWrapper;
+      }
+    }
+    sendCleanupEvent();
+  } // cleanupTerminatedScripts
+
+  void EventInterpreterPluginJavascript::sendCleanupEvent() {
+    boost::shared_ptr<Event> pEvent(new Event(kCleanupScriptsEventName));
+    pEvent->setProperty("time", "+" + intToString(20));
+    getEventInterpreter().getQueue().pushEvent(pEvent);
+  } // sendCleanupEvent
 
 
   //================================================== EventInterpreterPluginDS485
