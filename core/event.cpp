@@ -38,6 +38,7 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/thread/locks.hpp>
 
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
@@ -270,7 +271,12 @@ namespace dss {
             Logger::getInstance()->log("EventInterpreter:  Parameter '" + iParam->first + "' = '" + iParam->second + "'");
           }
 
-          for(std::vector< boost::shared_ptr<EventSubscription> >::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
+          SubscriptionVector subscriptionsCopy;
+          {
+            boost::mutex::scoped_lock lock(m_SubscriptionsMutex);
+            subscriptionsCopy = m_Subscriptions;
+          }
+          for(SubscriptionVector::iterator ipSubscription = subscriptionsCopy.begin(), e = subscriptionsCopy.end();
               ipSubscription != e; ++ipSubscription)
           {
             if((*ipSubscription)->matches(*toProcess)) {
@@ -316,10 +322,12 @@ namespace dss {
   void EventInterpreter::subscribe(boost::shared_ptr<EventSubscription> _subscription) {
     assert(_subscription != NULL);
     assert(subscriptionByID(_subscription->getID()) == NULL);
+    boost::mutex::scoped_lock lock(m_SubscriptionsMutex);
     m_Subscriptions.push_back(_subscription);
   } // subscribe
 
   void EventInterpreter::unsubscribe(const std::string& _subscriptionID) {
+    boost::mutex::scoped_lock lock(m_SubscriptionsMutex);
     for(std::vector< boost::shared_ptr<EventSubscription> >::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
         ipSubscription != e; ++ipSubscription)
     {
@@ -332,6 +340,7 @@ namespace dss {
 
   boost::shared_ptr<EventSubscription> EventInterpreter::subscriptionByID(const std::string& _subscriptionID) {
     boost::shared_ptr<EventSubscription> result;
+    boost::mutex::scoped_lock lock(m_SubscriptionsMutex);
     for(std::vector< boost::shared_ptr<EventSubscription> >::iterator ipSubscription = m_Subscriptions.begin(), e = m_Subscriptions.end();
         ipSubscription != e; ++ipSubscription)
     {

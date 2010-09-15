@@ -36,6 +36,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/thread/mutex.hpp>
 
 namespace Poco {
   namespace XML {
@@ -299,6 +300,7 @@ namespace dss {
   private:
     typedef std::vector< boost::shared_ptr<EventSubscription> > SubscriptionVector;
     SubscriptionVector m_Subscriptions;
+    boost::mutex m_SubscriptionsMutex;
     std::vector<EventInterpreterPlugin*> m_Plugins;
     EventQueue* m_Queue;
     EventRunner* m_EventRunner;
