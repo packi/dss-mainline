@@ -570,7 +570,7 @@ namespace dss {
     } else {
       bool addToQueue = true;
       if(!_event->getPropertyByName("unique").empty()) {
-        m_QueueMutex.lock();
+        boost::mutex::scoped_lock lock(m_QueueMutex);
 
         foreach(boost::shared_ptr<Event> pEvent, m_EventQueue) {
           if(_event->isReplacementFor(*pEvent)) {
@@ -582,25 +582,23 @@ namespace dss {
               break;
           }
         }
-        m_QueueMutex.unlock();
       }
       if(addToQueue) {
-        m_QueueMutex.lock();
+        boost::mutex::scoped_lock lock(m_QueueMutex);
         m_EventQueue.push_back(_event);
-        m_QueueMutex.unlock();
+        lock.unlock();
         m_EntryInQueueEvt.signal();
       }
     }
   } // pushEvent
 
   boost::shared_ptr<Event> EventQueue::popEvent() {
-    m_QueueMutex.lock();
+    boost::mutex::scoped_lock lock(m_QueueMutex);
     boost::shared_ptr<Event> result;
     if(!m_EventQueue.empty()) {
       result = m_EventQueue.front();
       m_EventQueue.pop_front();
     }
-    m_QueueMutex.unlock();
     return result;
   } // popEvent
 
@@ -637,15 +635,14 @@ namespace dss {
   } // getEvent
 
   void EventRunner::removeEvent(const int _idx) {
-    m_EventsMutex.lock();
+    boost::mutex::scoped_lock lock(m_EventsMutex);
     boost::ptr_vector<ScheduledEvent>::iterator it = m_ScheduledEvents.begin();
     advance(it, _idx);
     m_ScheduledEvents.erase(it);
-    m_EventsMutex.unlock();
   } // removeEvent
 
   void EventRunner::addEvent(ScheduledEvent* _scheduledEvent) {
-    m_EventsMutex.lock();
+    boost::mutex::scoped_lock lock(m_EventsMutex);
     bool addToQueue = true;
     if(!_scheduledEvent->getEvent()->getPropertyByName("unique").empty()) {
       foreach(ScheduledEvent& scheduledEvent, m_ScheduledEvents) {
@@ -664,7 +661,7 @@ namespace dss {
     } else {
       delete _scheduledEvent;
     }
-    m_EventsMutex.unlock();
+    lock.unlock();
     m_NewItem.signal();
   } // addEvent
 
@@ -676,7 +673,7 @@ namespace dss {
       Logger::getInstance()->log("number in queue: " + intToString(getSize()));
     }
 
-    m_EventsMutex.lock();
+    boost::mutex::scoped_lock lock(m_EventsMutex);
     for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin();
         ipSchedEvt != m_ScheduledEvents.end(); )
     {
@@ -696,7 +693,6 @@ namespace dss {
       }
       ++ipSchedEvt;
     }
-    m_EventsMutex.unlock();
     return result;
   } // getNextOccurence
 
@@ -741,7 +737,7 @@ namespace dss {
       logSStream.str("");
     }
 
-    m_EventsMutex.lock();
+    boost::mutex::scoped_lock lock(m_EventsMutex);
     for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
         ipSchedEvt != e; ++ipSchedEvt)
     {
@@ -771,7 +767,6 @@ namespace dss {
         }
       }
     }
-    m_EventsMutex.unlock();
     return result;
   } // raisePendingEvents
 

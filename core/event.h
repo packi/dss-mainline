@@ -27,7 +27,6 @@
 #include "datetools.h"
 #include "thread.h"
 #include "syncevent.h"
-#include "mutex.h"
 #include "subsystem.h"
 
 #include <string>
@@ -245,7 +244,7 @@ namespace dss {
   private:
     std::deque< boost::shared_ptr<Event> > m_EventQueue;
     SyncEvent m_EntryInQueueEvt;
-    Mutex m_QueueMutex;
+    boost::mutex m_QueueMutex;
 
     EventRunner* m_EventRunner;
     boost::shared_ptr<Schedule> scheduleFromEvent(boost::shared_ptr<Event> _event);
@@ -272,7 +271,7 @@ namespace dss {
     DateTime m_WakeTime;
     SyncEvent m_NewItem;
     EventQueue* m_EventQueue;
-    Mutex m_EventsMutex;
+    boost::mutex m_EventsMutex;
     bool m_ShutdownFlag;
   public:
     EventRunner();
