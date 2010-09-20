@@ -42,9 +42,9 @@ namespace dss {
     : m_Apartment(_apartment), m_Interface(_interface)
     { } // ctor
 
-    void createZone(boost::shared_ptr<DSMeter> _dsMeter, Zone& _zone);
-    void addDeviceToZone(Device& _device, Zone& _zone);
-    void removeZoneOnDSMeter(Zone& _zone, boost::shared_ptr<DSMeter> _dsMeter);
+    void createZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone);
+    void addDeviceToZone(Device& _device, boost::shared_ptr<Zone> _zone);
+    void removeZoneOnDSMeter(boost::shared_ptr<Zone> _zone, boost::shared_ptr<DSMeter> _dsMeter);
     void removeInactiveDevices(boost::shared_ptr<DSMeter> _dsMeter);
   }; // StructureManipulator
 

@@ -193,9 +193,9 @@ namespace dss {
           if((nameElem != NULL) && nameElem->hasChildNodes()) {
             name = nameElem->firstChild()->nodeValue();
           }
-          Zone& newZone = m_Apartment.allocateZone(id);
+          boost::shared_ptr<Zone> newZone = m_Apartment.allocateZone(id);
           if(!name.empty()) {
-            newZone.setName(name);
+            newZone->setName(name);
           }
         }
       }
@@ -228,7 +228,7 @@ namespace dss {
     _parentNode->appendChild(pDeviceNode);
   } // deviceToXML
 
-  void zoneToXML(const Zone* _pZone, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
+  void zoneToXML(boost::shared_ptr<const Zone> _pZone, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
     AutoPtr<Element> pZoneNode = _pDocument->createElement("zone");
     pZoneNode->setAttribute("id", intToString(_pZone->getID()));
     if(!_pZone->getName().empty()) {
@@ -282,7 +282,7 @@ void dsMeterToXML(const boost::shared_ptr<DSMeter> _pDSMeter, AutoPtr<Element>& 
     // zones
     AutoPtr<Element> pZones = pDoc->createElement("zones");
     pRoot->appendChild(pZones);
-    foreach(Zone* pZone, m_Apartment.getZones()) {
+    foreach(boost::shared_ptr<Zone> pZone, m_Apartment.getZones()) {
       zoneToXML(pZone, pZones, pDoc);
     }
 

@@ -43,13 +43,12 @@ namespace dss {
     std::string errorMessage;
     std::string zoneName = _request.getParameter("name");
     std::string zoneIDString = _request.getParameter("id");
-    Zone* pZone = NULL;
+    boost::shared_ptr<Zone> pZone;
     if(!zoneIDString.empty()) {
       int zoneID = strToIntDef(zoneIDString, -1);
       if(zoneID != -1) {
         try {
-          Zone& zone = m_Apartment.getZone(zoneID);
-          pZone = &zone;
+          pZone = m_Apartment.getZone(zoneID);
         } catch(std::runtime_error& e) {
           ok = false;
           errorMessage = "Could not find zone with id '" + zoneIDString + "'";
@@ -60,8 +59,7 @@ namespace dss {
       }
     } else if(!zoneName.empty()) {
       try {
-        Zone& zone = m_Apartment.getZone(zoneName);
-        pZone = &zone;
+        pZone = m_Apartment.getZone(zoneName);
       } catch(std::runtime_error& e) {
         ok = false;
         errorMessage = "Could not find zone named '" + zoneName + "'";
@@ -111,7 +109,7 @@ namespace dss {
           }
           if(ok) {
             if(interface == NULL) {
-              interface = pZone;
+              interface = pZone.get();
             }
             return handleDeviceInterfaceRequest(_request, interface);
           }

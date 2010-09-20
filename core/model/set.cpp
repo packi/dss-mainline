@@ -147,8 +147,8 @@ namespace dss {
     if(isEmpty()) {
       return result;
     } else {
-      Zone& zone = get(0).getDevice().getApartment().getZone(_zoneName);
-      return getByZone(zone.getID());
+      boost::shared_ptr<Zone> zone = get(0).getDevice().getApartment().getZone(_zoneName);
+      return getByZone(zone->getID());
     }
   } // getByZone(name)
 
@@ -355,7 +355,7 @@ namespace dss {
 
   class SetSplitter {
   public:
-    typedef hash_map<const Zone*, std::pair< std::vector<Group*>, Set> > FittingResult;
+    typedef hash_map<boost::shared_ptr<const Zone>, std::pair< std::vector<Group*>, Set> > FittingResult;
     typedef std::vector<AddressableModelItem*> ModelItemVector;
 
     static std::vector<AddressableModelItem*> splitUp(Set& _set) {
@@ -367,7 +367,7 @@ namespace dss {
         Apartment& apt = _set.get(0).getDevice().getApartment();
         if(_set.length() == apt.getDevices().length()) {
           log("Optimization: Set contains all devices of apartment");
-          result.push_back(apt.getZone(0).getGroup(0));
+          result.push_back(apt.getZone(0)->getGroup(0));
         } else {
           result = bestFit(_set);
         }
@@ -377,7 +377,7 @@ namespace dss {
     }
   private:
     typedef std::pair<std::vector<Group*>, Set> FittingResultPerDSMeter;
-    typedef std::map<const Zone*, Set> HashMapZoneSet;
+    typedef std::map<boost::shared_ptr<const Zone>, Set> HashMapZoneSet;
     static const bool OptimizerDebug = false;
 
     static ModelItemVector bestFit(const Set& _set) {
@@ -398,8 +398,8 @@ namespace dss {
       HashMapZoneSet result;
       for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
         const Device& dev = _set.get(iDevice).getDevice();
-        Zone& zone = dev.getApartment().getZone(dev.getZoneID());
-        result[&zone].addDevice(dev);
+        boost::shared_ptr<Zone> zone = dev.getApartment().getZone(dev.getZoneID());
+        result[zone].addDevice(dev);
       }
       return result;
     } // splitByZone

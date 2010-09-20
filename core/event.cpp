@@ -69,13 +69,12 @@ namespace dss {
   Event::Event(const std::string& _name)
   : m_Name(_name),
     m_RaiseLocation(erlApartment),
-    m_RaisedAtZone(NULL),
     m_RaisedAtDevice(NULL)
   {
     reset();
   } // ctor
 
-  Event::Event(const std::string& _name, Zone* _zone)
+  Event::Event(const std::string& _name, boost::shared_ptr<Zone> _zone)
   : m_Name(_name),
     m_RaiseLocation(erlZone),
     m_RaisedAtZone(_zone),
@@ -87,7 +86,6 @@ namespace dss {
   Event::Event(const std::string& _name, DeviceReference* _reference)
   : m_Name(_name),
     m_RaiseLocation(erlDevice),
-    m_RaisedAtZone(NULL),
     m_RaisedAtDevice(NULL)
   {
     m_RaisedAtDevice = new DeviceReference(*_reference);
@@ -171,9 +169,9 @@ namespace dss {
     return false;
   }
 
-  const Zone& Event::getRaisedAtZone() const {
+  boost::shared_ptr<const Zone> Event::getRaisedAtZone() const {
     if(m_RaiseLocation == erlZone) {
-      return *m_RaisedAtZone;
+      return m_RaisedAtZone;
     } else if(m_RaiseLocation == erlDevice) {
       const Device& dev = m_RaisedAtDevice->getDevice();
       return dev.getApartment().getZone(dev.getZoneID());

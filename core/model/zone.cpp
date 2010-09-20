@@ -53,8 +53,8 @@ namespace dss {
     int oldZoneID = dev.getZoneID();
     if((oldZoneID != -1) && (oldZoneID != 0)) {
       try {
-        Zone& oldZone = dev.getApartment().getZone(oldZoneID);
-        oldZone.removeDevice(_device);
+        boost::shared_ptr<Zone> oldZone = dev.getApartment().getZone(oldZoneID);
+        oldZone->removeDevice(_device);
       } catch(std::runtime_error&) {
       }
     }

@@ -97,7 +97,7 @@ namespace dss {
         return success(resultObj);
       } else if(_request.getMethod() == "getDevices") {
         SetBuilder builder(m_Apartment);
-        Set set = builder.buildSet(self, NULL);
+        Set set = builder.buildSet(self, boost::shared_ptr<Zone>());
         return success(toJSON(set));
       } else if(_request.getMethod() == "add") {
         std::string other = _request.getParameter("other");
@@ -129,7 +129,7 @@ namespace dss {
         return success(resultObj);
       } else if(isDeviceInterfaceCall(_request)) {
         SetBuilder builder(m_Apartment);
-        Set set = builder.buildSet(self, NULL);
+        Set set = builder.buildSet(self, boost::shared_ptr<Zone>());
         return handleDeviceInterfaceRequest(_request, &set);
       } else {
         throw std::runtime_error("Unhandled function");

@@ -62,7 +62,7 @@ namespace dss {
           int zoneID = strToInt(zoneIDStr);
           DeviceReference devRef(dev, &DSS::getInstance()->getApartment());
           try {
-            Zone& zone = m_Apartment.getZone(zoneID);
+            boost::shared_ptr<Zone> zone = m_Apartment.getZone(zoneID);
             manipulator.addDeviceToZone(dev, zone);
           } catch(ItemNotFoundException&) {
             return failure("Could not find zone");
@@ -101,11 +101,11 @@ namespace dss {
     }
     if(zoneID != -1) {
       try {
-        Zone& zone = m_Apartment.getZone(zoneID);
-        if(zone.getFirstZoneOnDSMeter() != -1) {
+        boost::shared_ptr<Zone> zone = m_Apartment.getZone(zoneID);
+        if(zone->getFirstZoneOnDSMeter() != -1) {
           return failure("Cannot delete a primary zone");
         }
-        if(zone.getDevices().length() > 0) {
+        if(zone->getDevices().length() > 0) {
           return failure("Cannot delete a non-empty zone");
         }
         m_Apartment.removeZone(zoneID);

@@ -189,13 +189,13 @@ namespace dss {
 
   Set ApartmentRequestHandler::getUnassignedDevices() {
     Apartment& apt = DSS::getInstance()->getApartment();
-    Set devices = apt.getZone(0).getDevices();
+    Set devices = apt.getZone(0)->getDevices();
 
-    std::vector<Zone*>& zones = apt.getZones();
-    for(std::vector<Zone*>::iterator ipZone = zones.begin(), e = zones.end();
+    std::vector<boost::shared_ptr<Zone> > zones = apt.getZones();
+    for(std::vector<boost::shared_ptr<Zone> >::iterator ipZone = zones.begin(), e = zones.end();
         ipZone != e; ++ipZone)
     {
-      Zone* pZone = *ipZone;
+      boost::shared_ptr<Zone> pZone = *ipZone;
       if(pZone->getID() == 0) {
         // zone 0 holds all devices, so we're going to skip it
         continue;

@@ -255,7 +255,7 @@ BOOST_FIXTURE_TEST_CASE(testDS485Events, Fixture) {
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 0);
 
-  boost::shared_ptr<Event> evt(new Event("brighter", &apt.getZone(0)));
+  boost::shared_ptr<Event> evt(new Event("brighter", apt.getZone(0)));
   evt->setLocation("dev1");
   m_pQueue->pushEvent(evt);
 

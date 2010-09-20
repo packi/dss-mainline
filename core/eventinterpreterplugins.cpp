@@ -360,12 +360,12 @@ namespace dss {
       SetBuilder builder(m_Apartment);
       Set to;
       if(_event.hasPropertySet(EventPropertyLocation)) {
-        to = builder.buildSet(_event.getPropertyByName(EventPropertyLocation), &_event.getRaisedAtZone());
+        to = builder.buildSet(_event.getPropertyByName(EventPropertyLocation), _event.getRaisedAtZone());
       } else {
         if(_subscription.getOptions()->hasParameter(EventPropertyLocation)) {
-          to = builder.buildSet(_subscription.getOptions()->getParameter(EventPropertyLocation), NULL);
+          to = builder.buildSet(_subscription.getOptions()->getParameter(EventPropertyLocation), boost::shared_ptr<Zone>());
         } else {
-          to = _event.getRaisedAtZone().getDevices();
+          to = _event.getRaisedAtZone()->getDevices();
         }
       }
       options->execute(to);

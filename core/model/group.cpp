@@ -49,7 +49,7 @@ namespace dss {
   } // getZoneID
 
   Set Group::getDevices() const {
-    return m_pApartment->getZone(m_ZoneID).getDevices().getByGroup(m_GroupID);
+    return m_pApartment->getZone(m_ZoneID)->getDevices().getByGroup(m_GroupID);
   } // getDevices
 
   Group& Group::operator=(const Group& _other) {

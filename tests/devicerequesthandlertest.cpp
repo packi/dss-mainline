@@ -54,10 +54,10 @@ public:
     m_ProductID = 9;
     m_RevisionID = 3;
 
-    Zone& firstZone = m_pApartment->allocateZone(m_ValidZoneID);
+    boost::shared_ptr<Zone> firstZone = m_pApartment->allocateZone(m_ValidZoneID);
     Device& dev = m_pApartment->allocateDevice(m_ValidDSID);
     DeviceReference devRef(dev, m_pApartment.get());
-    firstZone.addDevice(devRef);
+    firstZone->addDevice(devRef);
     dev.setName(m_ValidName);
     dev.addToGroup(m_ValidGroupID);
     dev.setFunctionID(m_FunctionID);

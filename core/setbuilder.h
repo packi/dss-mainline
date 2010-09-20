@@ -25,6 +25,8 @@
 
 #include <string>
 
+#include <boost/shared_ptr.hpp>
+
 #include "core/ds485types.h"
 
 namespace dss {
@@ -38,18 +40,18 @@ namespace dss {
     std::string m_SetDescription;
     Apartment& m_Apartment;
   protected:
-	  Set restrictBy(const std::string& _identifier, const Set& _set, const Zone& _zone);
-	  Set restrictByFunction(const std::string& _functionName, unsigned int& _index, const Set& _set, const Zone& _zone);
-	  void skipWhitespace(unsigned int& _index);
-	  std::string readParameter(unsigned int& _index);
-	  int readInt(unsigned int& _index);
-	  dsid_t readDSID(unsigned int& _index);
-	  std::string readString(unsigned int& _index);
-	  Set parseSet(unsigned int& _index, const Set& _set, const Zone& _context);
-	public:
-	  SetBuilder(Apartment& _apartment);
+    Set restrictBy(const std::string& _identifier, const Set& _set, boost::shared_ptr<const Zone> _zone);
+    Set restrictByFunction(const std::string& _functionName, unsigned int& _index, const Set& _set, boost::shared_ptr<const Zone> _zone);
+    void skipWhitespace(unsigned int& _index);
+    std::string readParameter(unsigned int& _index);
+    int readInt(unsigned int& _index);
+    dsid_t readDSID(unsigned int& _index);
+    std::string readString(unsigned int& _index);
+    Set parseSet(unsigned int& _index, const Set& _set, boost::shared_ptr<const Zone> _context);
+  public:
+    SetBuilder(Apartment& _apartment);
 
-	  Set buildSet(const std::string& _setDescription, const Zone* _context);
+    Set buildSet(const std::string& _setDescription, boost::shared_ptr<const Zone> _context);
   }; // SetBuilder
 
 } // namespace dss

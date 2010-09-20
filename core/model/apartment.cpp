@@ -56,51 +56,50 @@ namespace dss {
     m_pPropertySystem(NULL)
   {
     // create default (broadcast) zone
-    Zone& zoneZero = allocateZone(0);
-    zoneZero.setIsPresent(true);
+    boost::shared_ptr<Zone> zoneZero = allocateZone(0);
+    zoneZero->setIsPresent(true);
   } // ctor
 
   Apartment::~Apartment() {
     scrubVector(m_Devices);
-    scrubVector(m_Zones);
   } // dtor
 
-  void Apartment::addDefaultGroupsToZone(Zone& _zone) {
-    int zoneID = _zone.getID();
+  void Apartment::addDefaultGroupsToZone(boost::shared_ptr<Zone> _zone) {
+    int zoneID = _zone->getID();
 
     Group* grp = new Group(GroupIDBroadcast, zoneID, *this);
     grp->setName("broadcast");
-    _zone.addGroup(grp);
+    _zone->addGroup(grp);
     grp = new Group(GroupIDYellow, zoneID, *this);
     grp->setName("yellow");
-    _zone.addGroup(grp);
+    _zone->addGroup(grp);
     grp = new Group(GroupIDGray, zoneID, *this);
     grp->setName("gray");
-    _zone.addGroup(grp);
+    _zone->addGroup(grp);
     grp = new Group(GroupIDBlue, zoneID, *this);
     grp->setName("blue");
-    _zone.addGroup(grp);
+    _zone->addGroup(grp);
     grp = new Group(GroupIDCyan, zoneID, *this);
     grp->setName("cyan");
-    _zone.addGroup(grp);
+    _zone->addGroup(grp);
     grp = new Group(GroupIDRed, zoneID, *this);
     grp->setName("red");
-    _zone.addGroup(grp);
+    _zone->addGroup(grp);
     grp = new Group(GroupIDViolet, zoneID, *this);
     grp->setName("magenta");
-    _zone.addGroup(grp);
+    _zone->addGroup(grp);
     grp = new Group(GroupIDGreen, zoneID, *this);
     grp->setName("green");
-    _zone.addGroup(grp);
+    _zone->addGroup(grp);
     grp = new Group(GroupIDBlack, zoneID, *this);
     grp->setName("black");
-    _zone.addGroup(grp);
+    _zone->addGroup(grp);
     grp = new Group(GroupIDWhite, zoneID, *this);
     grp->setName("white");
-    _zone.addGroup(grp);
+    _zone->addGroup(grp);
     grp = new Group(GroupIDDisplay, zoneID, *this);
     grp->setName("display");
-    _zone.addGroup(grp);
+    _zone->addGroup(grp);
   } // addDefaultGroupsToZone
 
   Device& Apartment::getDeviceByDSID(const dsid_t _dsid) const {
@@ -149,25 +148,25 @@ namespace dss {
     return Set(devs);
   } // getDevices
 
-  Zone& Apartment::getZone(const std::string& _zoneName) {
-    foreach(Zone* zone, m_Zones) {
+  boost::shared_ptr<Zone> Apartment::getZone(const std::string& _zoneName) {
+    foreach(boost::shared_ptr<Zone> zone, m_Zones) {
       if(zone->getName() == _zoneName) {
-        return *zone;
+        return zone;
       }
     }
     throw ItemNotFoundException(_zoneName);
   } // getZone(name)
 
-  Zone& Apartment::getZone(const int _id) {
-    foreach(Zone* zone, m_Zones) {
+  boost::shared_ptr<Zone> Apartment::getZone(const int _id) {
+    foreach(boost::shared_ptr<Zone> zone, m_Zones) {
       if(zone->getID() == _id) {
-        return *zone;
+        return zone;
       }
     }
     throw ItemNotFoundException(intToString(_id));
   } // getZone(id)
 
-  std::vector<Zone*>& Apartment::getZones() {
+  std::vector<boost::shared_ptr<Zone> > Apartment::getZones() {
     return m_Zones;
   } // getZones
 
@@ -204,7 +203,7 @@ namespace dss {
 
   // Group queries
   Group& Apartment::getGroup(const std::string& _name) {
-    Group* pResult = getZone(0).getGroup(_name);
+    Group* pResult = getZone(0)->getGroup(_name);
     if(pResult != NULL) {
       return *pResult;
     }
@@ -212,7 +211,7 @@ namespace dss {
   } // getGroup(name)
 
   Group& Apartment::getGroup(const int _id) {
-    Group* pResult = getZone(0).getGroup(_id);
+    Group* pResult = getZone(0)->getGroup(_id);
     if(pResult != NULL) {
       return *pResult;
     }
@@ -235,7 +234,7 @@ namespace dss {
       m_Devices.push_back(pResult);
     }
     DeviceReference devRef(*pResult, this);
-    getZone(0).addDevice(devRef);
+    getZone(0)->addDevice(devRef);
     pResult->publishToPropertyTree();
     return *pResult;
   } // allocateDevice
@@ -252,9 +251,9 @@ namespace dss {
     return pResult;
   } // allocateDSMeter
 
-  Zone& Apartment::allocateZone(int _zoneID) {
-    Zone* result = NULL;
-    foreach(Zone* zone, m_Zones) {
+  boost::shared_ptr<Zone> Apartment::allocateZone(int _zoneID) {
+    boost::shared_ptr<Zone> result;
+    foreach(boost::shared_ptr<Zone> zone, m_Zones) {
       if(zone->getID() == _zoneID) {
         result = zone;
         break;
@@ -262,23 +261,22 @@ namespace dss {
     }
 
     if(result == NULL) {
-      result = new Zone(_zoneID, this);
+      result.reset(new Zone(_zoneID, this));
       result->publishToPropertyTree();
-      addDefaultGroupsToZone(*result);
+      addDefaultGroupsToZone(result);
       m_Zones.push_back(result);
     } else {
       result->publishToPropertyTree();
     }
-    return *result;
+    return result;
   } // allocateZone
 
   void Apartment::removeZone(int _zoneID) {
-    for(std::vector<Zone*>::iterator ipZone = m_Zones.begin(), e = m_Zones.end();
+    for(std::vector<boost::shared_ptr<Zone> >::iterator ipZone = m_Zones.begin(), e = m_Zones.end();
         ipZone != e; ++ipZone) {
-      Zone* pZone = *ipZone;
+      boost::shared_ptr<Zone> pZone = *ipZone;
       if(pZone->getID() == _zoneID) {
         m_Zones.erase(ipZone);
-        delete pZone;
         return;
       }
     }
@@ -292,9 +290,9 @@ namespace dss {
         int zoneID = pDevice->getZoneID();
         DeviceReference devRef = DeviceReference(*pDevice, this);
         if(zoneID != 0) {
-          getZone(zoneID).removeDevice(devRef);
+          getZone(zoneID)->removeDevice(devRef);
         }
-        getZone(0).removeDevice(devRef);
+        getZone(0)->removeDevice(devRef);
         m_Devices.erase(ipDevice);
         delete pDevice;
         return;
@@ -332,7 +330,7 @@ namespace dss {
     m_pPropertySystem = _value;
     if(m_pPropertySystem != NULL) {
       m_pPropertyNode = m_pPropertySystem->createProperty("/apartment");
-      foreach(Zone* pZone, m_Zones) {
+      foreach(boost::shared_ptr<Zone> pZone, m_Zones) {
         pZone->publishToPropertyTree();
       }
     }

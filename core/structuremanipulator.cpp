@@ -34,38 +34,38 @@
 
 namespace dss {
 
-  void StructureManipulator::createZone(boost::shared_ptr<DSMeter> _dsMeter, Zone& _zone) {
+  void StructureManipulator::createZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone) {
     AssertLocked apartmentLocked(&m_Apartment);
     if(!_dsMeter->isPresent()) {
       throw std::runtime_error("Need dsMeter to be present");
     }
-    m_Interface.createZone(_dsMeter->getBusID(), _zone.getID());
-    _zone.addToDSMeter(_dsMeter);
-    _zone.setIsPresent(true);
+    m_Interface.createZone(_dsMeter->getBusID(), _zone->getID());
+    _zone->addToDSMeter(_dsMeter);
+    _zone->setIsPresent(true);
   } // createZone
 
-  void StructureManipulator::addDeviceToZone(Device& _device, Zone& _zone) {
+  void StructureManipulator::addDeviceToZone(Device& _device, boost::shared_ptr<Zone> _zone) {
     AssertLocked apartmentLocked(&m_Apartment);
     if(!_device.isPresent()) {
       throw std::runtime_error("Need device to be present");
     }
     int oldZoneID = _device.getZoneID();
     boost::shared_ptr<DSMeter> targetDSMeter = m_Apartment.getDSMeterByBusID(_device.getDSMeterID());
-    if(!_zone.registeredOnDSMeter(targetDSMeter)) {
+    if(!_zone->registeredOnDSMeter(targetDSMeter)) {
       createZone(targetDSMeter, _zone);
     }
-    m_Interface.setZoneID(targetDSMeter->getBusID(), _device.getShortAddress(), _zone.getID());
-    _device.setZoneID(_zone.getID());
+    m_Interface.setZoneID(targetDSMeter->getBusID(), _device.getShortAddress(), _zone->getID());
+    _device.setZoneID(_zone->getID());
     DeviceReference ref(_device, &m_Apartment);
-    _zone.addDevice(ref);
+    _zone->addDevice(ref);
 
     // check if we can remove the zone from the dsMeter
     if(oldZoneID != 0) {
       Logger::getInstance()->log("StructureManipulator::addDeviceToZone: Removing device from old zone " + intToString(oldZoneID), lsInfo);
-      Zone& oldZone = m_Apartment.getZone(oldZoneID);
-      oldZone.removeDevice(ref);
+      boost::shared_ptr<Zone> oldZone = m_Apartment.getZone(oldZoneID);
+      oldZone->removeDevice(ref);
 
-      Set presentDevicesInZoneOfDSMeter = oldZone.getDevices().getByDSMeter(targetDSMeter).getByPresence(true);
+      Set presentDevicesInZoneOfDSMeter = oldZone->getDevices().getByDSMeter(targetDSMeter).getByPresence(true);
       if(presentDevicesInZoneOfDSMeter.length() == 0) {
         Logger::getInstance()->log("StructureManipulator::addDeviceToZone: Removing zone from meter " + targetDSMeter->getDSID().toString(), lsInfo);
         removeZoneOnDSMeter(oldZone, targetDSMeter);
@@ -75,16 +75,16 @@ namespace dss {
     }
   } // addDeviceToZone
 
-  void StructureManipulator::removeZoneOnDSMeter(Zone& _zone, boost::shared_ptr<DSMeter> _dsMeter) {
+  void StructureManipulator::removeZoneOnDSMeter(boost::shared_ptr<Zone> _zone, boost::shared_ptr<DSMeter> _dsMeter) {
     AssertLocked apartmentLocked(&m_Apartment);
-    Set presentDevicesInZoneOfDSMeter = _zone.getDevices().getByDSMeter(_dsMeter).getByPresence(true);
+    Set presentDevicesInZoneOfDSMeter = _zone->getDevices().getByDSMeter(_dsMeter).getByPresence(true);
     if(presentDevicesInZoneOfDSMeter.length() != 0) {
       throw std::runtime_error("cannot delete zone if there are still devices present");
     }
-    m_Interface.removeZone(_dsMeter->getBusID(), _zone.getID());
-    _zone.removeFromDSMeter(_dsMeter);
-    if(_zone.isRegisteredOnAnyMeter()) {
-      _zone.setIsPresent(false);
+    m_Interface.removeZone(_dsMeter->getBusID(), _zone->getID());
+    _zone->removeFromDSMeter(_dsMeter);
+    if(_zone->isRegisteredOnAnyMeter()) {
+      _zone->setIsPresent(false);
     }
   } // removeZoneOnDSMeter
 

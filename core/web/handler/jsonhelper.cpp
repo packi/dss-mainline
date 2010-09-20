@@ -116,8 +116,8 @@ namespace dss {
     boost::shared_ptr<JSONArrayBase> zonesArr(new JSONArrayBase());
     apartment->addElement("zones", zonesArr);
 
-    std::vector<Zone*>& zones = _apartment.getZones();
-    foreach(Zone* pZone, zones) {
+    std::vector<boost::shared_ptr<Zone> > zones = _apartment.getZones();
+    foreach(boost::shared_ptr<Zone> pZone, zones) {
       zonesArr->addElement("", toJSON(*pZone));
     }
     return result;

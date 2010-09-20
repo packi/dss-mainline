@@ -253,11 +253,11 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
   dev4.setDSMeter(meter);
   DeviceReference devRef4(dev4, &apt);
 
-  Zone& zone1 = apt.allocateZone(1);
-  zone1.addDevice(devRef1);
-  zone1.addDevice(devRef2);
-  zone1.addDevice(devRef3);
-  zone1.addDevice(devRef4);
+  boost::shared_ptr<Zone> zone1 = apt.allocateZone(1);
+  zone1->addDevice(devRef1);
+  zone1->addDevice(devRef2);
+  zone1->addDevice(devRef3);
+  zone1->addDevice(devRef4);
 
   Set allDevices = apt.getDevices();
 
@@ -266,21 +266,21 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
   BOOST_CHECK_EQUAL(dev3, allDevices.getByBusID(3, 1).getDevice());
   BOOST_CHECK_EQUAL(dev4, allDevices.getByBusID(4, 1).getDevice());
 
-  BOOST_CHECK_EQUAL(4, zone1.getDevices().length());
+  BOOST_CHECK_EQUAL(4, zone1->getDevices().length());
 
-  Zone& zone2 = apt.allocateZone(2);
-  zone2.addDevice(devRef2);
-  zone2.addDevice(devRef4);
+  boost::shared_ptr<Zone> zone2 = apt.allocateZone(2);
+  zone2->addDevice(devRef2);
+  zone2->addDevice(devRef4);
 
-  BOOST_CHECK_EQUAL(2, zone1.getDevices().length());
-  BOOST_CHECK_EQUAL(2, zone2.getDevices().length());
+  BOOST_CHECK_EQUAL(2, zone1->getDevices().length());
+  BOOST_CHECK_EQUAL(2, zone2->getDevices().length());
 
   // check that the devices are moved correctly in the zones datamodel
-  Set zone1Devices = zone1.getDevices();
+  Set zone1Devices = zone1->getDevices();
   BOOST_CHECK_EQUAL(dev1, zone1Devices.getByBusID(1, 1).getDevice());
   BOOST_CHECK_EQUAL(dev3, zone1Devices.getByBusID(3, 1).getDevice());
 
-  Set zone2Devices = zone2.getDevices();
+  Set zone2Devices = zone2->getDevices();
   BOOST_CHECK_EQUAL(dev2, zone2Devices.getByBusID(2, 1).getDevice());
   BOOST_CHECK_EQUAL(dev4, zone2Devices.getByBusID(4, 1).getDevice());
 
@@ -293,11 +293,11 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
 
   // check that the groups are set up correctly
   // (this should be the case if all test above passed)
-  Set zone1Group0Devices = zone1.getGroup(GroupIDBroadcast)->getDevices();
+  Set zone1Group0Devices = zone1->getGroup(GroupIDBroadcast)->getDevices();
   BOOST_CHECK_EQUAL(dev1, zone1Group0Devices.getByBusID(1, 1).getDevice());
   BOOST_CHECK_EQUAL(dev3, zone1Group0Devices.getByBusID(3, 1).getDevice());
 
-  Set zone2Group0Devices = zone2.getGroup(GroupIDBroadcast)->getDevices();
+  Set zone2Group0Devices = zone2->getGroup(GroupIDBroadcast)->getDevices();
   BOOST_CHECK_EQUAL(dev2, zone2Group0Devices.getByBusID(2, 1).getDevice());
   BOOST_CHECK_EQUAL(dev4, zone2Group0Devices.getByBusID(4, 1).getDevice());
 } // testZoneMoving
@@ -397,114 +397,114 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
   dev4.setShortAddress(4);
 
   SetBuilder builder(apt);
-  Set builderTest = builder.buildSet("yellow", &apt.getZone(0));
+  Set builderTest = builder.buildSet("yellow", apt.getZone(0));
 
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("cyan", &apt.getZone(0));
+  builderTest = builder.buildSet("cyan", apt.getZone(0));
 
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev2, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("dsid(1)", &apt.getZone(0));
+  builderTest = builder.buildSet("dsid(1)", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("yellow.dsid(1)", &apt.getZone(0));
+  builderTest = builder.buildSet("yellow.dsid(1)", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("dsid(1).yellow", &apt.getZone(0));
+  builderTest = builder.buildSet("dsid(1).yellow", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("yellow.yellow.yellow.yellow.yellow.yellow.dsid(1)", &apt.getZone(0));
+  builderTest = builder.buildSet("yellow.yellow.yellow.yellow.yellow.yellow.dsid(1)", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet(" yellow ", &apt.getZone(0));
+  builderTest = builder.buildSet(" yellow ", apt.getZone(0));
 
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("\t\n\rcyan", &apt.getZone(0));
+  builderTest = builder.buildSet("\t\n\rcyan", apt.getZone(0));
 
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev2, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("dsid( 1)", &apt.getZone(0));
+  builderTest = builder.buildSet("dsid( 1)", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("dsid( 1 )", &apt.getZone(0));
+  builderTest = builder.buildSet("dsid( 1 )", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("dsid(1 )", &apt.getZone(0));
+  builderTest = builder.buildSet("dsid(1 )", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet(" dsid(1 ) ", &apt.getZone(0));
+  builderTest = builder.buildSet(" dsid(1 ) ", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("yellow .dsid(1)", &apt.getZone(0));
+  builderTest = builder.buildSet("yellow .dsid(1)", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("yellow. dsid(1)", &apt.getZone(0));
+  builderTest = builder.buildSet("yellow. dsid(1)", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("yellow . dsid(1)", &apt.getZone(0));
+  builderTest = builder.buildSet("yellow . dsid(1)", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("dsid(1) .yellow", &apt.getZone(0));
+  builderTest = builder.buildSet("dsid(1) .yellow", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("dsid(1). yellow", &apt.getZone(0));
+  builderTest = builder.buildSet("dsid(1). yellow", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("dsid(1) . yellow", &apt.getZone(0));
+  builderTest = builder.buildSet("dsid(1) . yellow", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("yellow .yellow. yellow . yellow  .yellow.  yellow \n.dsid(\t1)    ", &apt.getZone(0));
+  builderTest = builder.buildSet("yellow .yellow. yellow . yellow  .yellow.  yellow \n.dsid(\t1)    ", apt.getZone(0));
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("group(0).remove(dsid(1))", &apt.getZone(0));
+  builderTest = builder.buildSet("group(0).remove(dsid(1))", apt.getZone(0));
   BOOST_CHECK_EQUAL(3, builderTest.length());
 
-  builderTest = builder.buildSet("remove(dsid(1))", &apt.getZone(0));
+  builderTest = builder.buildSet("remove(dsid(1))", apt.getZone(0));
   BOOST_CHECK_EQUAL(3, builderTest.length());
 
-  builderTest = builder.buildSet("remove(yellow)", &apt.getZone(0));
+  builderTest = builder.buildSet("remove(yellow)", apt.getZone(0));
   BOOST_CHECK_EQUAL(3, builderTest.length());
 
-  builderTest = builder.buildSet("group('broadcast')", &apt.getZone(0));
+  builderTest = builder.buildSet("group('broadcast')", apt.getZone(0));
   BOOST_CHECK_EQUAL(4, builderTest.length());
 
-  builderTest = builder.buildSet("group('broadcast').remove(dsid(1))", &apt.getZone(0));
+  builderTest = builder.buildSet("group('broadcast').remove(dsid(1))", apt.getZone(0));
   BOOST_CHECK_EQUAL(3, builderTest.length());
 
-  builderTest = builder.buildSet("empty().addDevices(1,2,3)", &apt.getZone(0));
+  builderTest = builder.buildSet("empty().addDevices(1,2,3)", apt.getZone(0));
   BOOST_CHECK_EQUAL(3, builderTest.length());
 
-  builderTest = builder.buildSet("addDevices(1)", NULL);
+  builderTest = builder.buildSet("addDevices(1)", boost::shared_ptr<Zone>());
   BOOST_CHECK_EQUAL(1, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
 
-  builderTest = builder.buildSet("addDevices(1,2)", NULL);
+  builderTest = builder.buildSet("addDevices(1,2)", boost::shared_ptr<Zone>());
   BOOST_CHECK_EQUAL(2, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
   BOOST_CHECK_EQUAL(dev2, builderTest.get(1).getDevice());
 
-  builderTest = builder.buildSet("addDevices(1,2,3)", NULL);
+  builderTest = builder.buildSet("addDevices(1,2,3)", boost::shared_ptr<Zone>());
   BOOST_CHECK_EQUAL(3, builderTest.length());
   BOOST_CHECK_EQUAL(dev1, builderTest.get(0).getDevice());
   BOOST_CHECK_EQUAL(dev2, builderTest.get(1).getDevice());
@@ -526,14 +526,14 @@ BOOST_AUTO_TEST_CASE(testSetBuilderDeviceByName) {
   dev3.setName("dev3");
   dev3.setShortAddress(3);
 
-  Set res = setBuilder.buildSet("", &apt.getZone(0));
+  Set res = setBuilder.buildSet("", apt.getZone(0));
   BOOST_CHECK_EQUAL(res.length(), 3);
 
-  res = setBuilder.buildSet("dev1", &apt.getZone(0));
+  res = setBuilder.buildSet("dev1", apt.getZone(0));
   BOOST_CHECK_EQUAL(res.length(), 1);
   BOOST_CHECK_EQUAL(res.get(0).getDevice().getName(), std::string("dev1"));
 
-  res = setBuilder.buildSet("dev2", &apt.getZone(0));
+  res = setBuilder.buildSet("dev2", apt.getZone(0));
   BOOST_CHECK_EQUAL(res.length(), 1);
   BOOST_CHECK_EQUAL(res.get(0).getDevice().getName(), std::string("dev2"));
 } // testSetBuilder
@@ -552,20 +552,20 @@ BOOST_AUTO_TEST_CASE(testSetBuilderTag) {
   dev2.addTag("dev2");
   dev2.addTag("device");
 
-  Set result = setBuilder.buildSet(".tag('dev1')", NULL);
+  Set result = setBuilder.buildSet(".tag('dev1')", boost::shared_ptr<Zone>());
   BOOST_CHECK_EQUAL(result.length(), 1);
   BOOST_CHECK_EQUAL(result[0].getDevice(), dev1);
 
-  result = setBuilder.buildSet(".tag('dev2')", NULL);
+  result = setBuilder.buildSet(".tag('dev2')", boost::shared_ptr<Zone>());
   BOOST_CHECK_EQUAL(result.length(), 1);
   BOOST_CHECK_EQUAL(result[0].getDevice(), dev2);
 
-  result = setBuilder.buildSet(".tag('device')", NULL);
+  result = setBuilder.buildSet(".tag('device')", boost::shared_ptr<Zone>());
   BOOST_CHECK_EQUAL(result.length(), 2);
   BOOST_CHECK_EQUAL(result[0].getDevice(), dev1);
   BOOST_CHECK_EQUAL(result[1].getDevice(), dev2);
 
-  result = setBuilder.buildSet(".tag('nonexisting')", NULL);
+  result = setBuilder.buildSet(".tag('nonexisting')", boost::shared_ptr<Zone>());
   BOOST_CHECK_EQUAL(result.length(), 0);
 } // testSetBuilderTag
 
@@ -577,10 +577,10 @@ BOOST_AUTO_TEST_CASE(testRemoval) {
   dev1.getGroupBitmask().set(GroupIDYellow - 1);
 
   SetBuilder builder(apt);
-  BOOST_CHECK_EQUAL(1, builder.buildSet(".yellow", NULL).length());
+  BOOST_CHECK_EQUAL(1, builder.buildSet(".yellow", boost::shared_ptr<Zone>()).length());
 
   apt.removeDevice(dev1.getDSID());
-  BOOST_CHECK_EQUAL(0, builder.buildSet(".yellow", NULL).length());
+  BOOST_CHECK_EQUAL(0, builder.buildSet(".yellow", boost::shared_ptr<Zone>()).length());
 
   apt.allocateZone(1);
   try {
@@ -661,7 +661,7 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   dev1.callScene(Scene1);
   sleepMS(5);
   BOOST_CHECK_EQUAL(Scene1, dev1.getLastCalledScene());
-  apt.getZone(0).callScene(Scene2);
+  apt.getZone(0)->callScene(Scene2);
   sleepMS(5);
   BOOST_CHECK_EQUAL(Scene2, dev1.getLastCalledScene());
   BOOST_CHECK_EQUAL(Scene2, dev2.getLastCalledScene());
@@ -862,16 +862,16 @@ BOOST_FIXTURE_TEST_CASE(testDecreaseValueDevice, TestModelFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testDecreaseValueZone, TestModelFixture) {
-  Zone& zone = m_pApartment->allocateZone(1);
-  zone.decreaseValue();
+  boost::shared_ptr<Zone> zone = m_pApartment->allocateZone(1);
+  zone->decreaseValue();
   BOOST_CHECK_EQUAL(FunctionGroupDecreaseValue, m_pFrameSender->getLastFunctionID());
   BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1()); // zone id
   BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter2()); // group id (broadcast)
 }
 
 BOOST_FIXTURE_TEST_CASE(testIncreaseValueZone, TestModelFixture) {
-  Zone& zone = m_pApartment->allocateZone(1);
-  zone.increaseValue();
+  boost::shared_ptr<Zone> zone = m_pApartment->allocateZone(1);
+  zone->increaseValue();
   BOOST_CHECK_EQUAL(FunctionGroupIncreaseValue, m_pFrameSender->getLastFunctionID());
   BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1()); // zone id
   BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter2()); // group id (broadcast)
@@ -989,8 +989,8 @@ BOOST_FIXTURE_TEST_CASE(testUndoSceneGroup, TestModelFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testCallSceneZone, TestModelFixture) {
-  Zone& zone = m_pApartment->allocateZone(1);
-  zone.callScene(Scene1);
+  boost::shared_ptr<Zone> zone = m_pApartment->allocateZone(1);
+  zone->callScene(Scene1);
   BOOST_CHECK_EQUAL(FunctionGroupCallScene, m_pFrameSender->getLastFunctionID());
   BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1()); // zone 1
   BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter2()); // group 0
@@ -998,8 +998,8 @@ BOOST_FIXTURE_TEST_CASE(testCallSceneZone, TestModelFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testSaveSceneZone, TestModelFixture) {
-  Zone& zone = m_pApartment->allocateZone(1);
-  zone.saveScene(Scene1);
+  boost::shared_ptr<Zone> zone = m_pApartment->allocateZone(1);
+  zone->saveScene(Scene1);
   BOOST_CHECK_EQUAL(FunctionGroupSaveScene, m_pFrameSender->getLastFunctionID());
   BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1()); // zone 1
   BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter2()); // group 0
@@ -1007,8 +1007,8 @@ BOOST_FIXTURE_TEST_CASE(testSaveSceneZone, TestModelFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testUndoSceneZone, TestModelFixture) {
-  Zone& zone = m_pApartment->allocateZone(1);
-  zone.undoScene(Scene1);
+  boost::shared_ptr<Zone> zone = m_pApartment->allocateZone(1);
+  zone->undoScene(Scene1);
   BOOST_CHECK_EQUAL(FunctionGroupUndoScene, m_pFrameSender->getLastFunctionID());
   BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1()); // zone 1
   BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter2()); // group 0

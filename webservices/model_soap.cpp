@@ -84,7 +84,7 @@ int AuthorizeAndGetSet(struct soap *soap, const int _token, const char* _setSpec
   }
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
   dss::SetBuilder builder(apt);
-  result = builder.buildSet(_setSpec, NULL);
+  result = builder.buildSet(_setSpec, boost::shared_ptr<dss::Zone>());
   return SOAP_OK;
 } // authorizeAndGetSet
 
@@ -148,7 +148,7 @@ int AuthorizeAndGetGroupOfZone(struct soap *soap, const int _token, const int _z
   }
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
   try {
-    dss::Group* pResult = apt.getZone(_zoneID).getGroup(_groupID);
+    dss::Group* pResult = apt.getZone(_zoneID)->getGroup(_groupID);
     if(pResult == NULL) {
       return soap_receiver_fault(soap, "Group not found", NULL);
     }
@@ -394,7 +394,7 @@ int dss__ApartmentGetZoneByName(struct soap *soap, int _token,  char* _zoneName,
   }
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
   try {
-    zoneID = apt.getZone(_zoneName).getID();
+    zoneID = apt.getZone(_zoneName)->getID();
   } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Could not find zone", NULL);
   }
@@ -407,11 +407,9 @@ int dss__ApartmentGetZoneIDs(struct soap *soap, int _token, std::vector<int>& zo
   }
 
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
-  std::vector<dss::Zone*>& zones = apt.getZones();
+  std::vector<boost::shared_ptr<dss::Zone> > zones = apt.getZones();
 
   int numZones = zones.size();
-//  zoneIDs.__size = numZones;
-  //zoneIDs.__ptr = (long unsigned int*)soap_malloc(soap, numZones * sizeof(long unsigned int));
   for(int iZoneID = 0; iZoneID < numZones; iZoneID++) {
     zoneIDs.push_back(zones[iZoneID]->getID());
   }
@@ -1144,8 +1142,8 @@ int dss__ZoneSetName(struct soap *soap, int _token, int _zoneID, char* _name, bo
   }
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
   try {
-    dss::Zone& zone = apt.getZone(_zoneID);
-    zone.setName(_name);
+    boost::shared_ptr<dss::Zone> zone = apt.getZone(_zoneID);
+    zone->setName(_name);
   } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Zone not found", NULL);
   }
@@ -1158,8 +1156,8 @@ int dss__ZoneGetName(struct soap *soap, int _token, int _zoneID, std::string& re
   }
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
   try {
-    dss::Zone& zone = apt.getZone(_zoneID);
-    result = zone.getName();
+    boost::shared_ptr<dss::Zone> zone = apt.getZone(_zoneID);
+    result = zone->getName();
   } catch(dss::ItemNotFoundException& _ex) {
     return soap_receiver_fault(soap, "Zone not found", NULL);
   }
@@ -1402,7 +1400,7 @@ int dss__StructureAddDeviceToZone(struct soap *soap, int _token, char* _deviceID
 
   try {
     dss::Device& dev = aptRef.getDeviceByDSID(dss::dsid_t::fromString(_deviceID));
-    dss::Zone& zone = aptRef.getZone(_zoneID);
+    boost::shared_ptr<dss::Zone> zone = aptRef.getZone(_zoneID);
     dss::StructureManipulator manipulator(*dssRef.getDS485Interface().getStructureModifyingBusInterface(),
                                           aptRef);
     manipulator.addDeviceToZone(dev, zone);

@@ -61,7 +61,7 @@ namespace dss {
                     public LockableObject
   {
   private:
-    std::vector<Zone*> m_Zones;
+    std::vector<boost::shared_ptr<Zone> > m_Zones;
     std::vector<boost::shared_ptr<DSMeter> > m_DSMeters;
     std::vector<Device*> m_Devices;
 
@@ -71,7 +71,7 @@ namespace dss {
     ModelMaintenance* m_pModelMaintenance;
     PropertySystem* m_pPropertySystem;
   private:
-    void addDefaultGroupsToZone(Zone& _zone);
+    void addDefaultGroupsToZone(boost::shared_ptr<Zone> _zone);
   public:
     Apartment(DSS* _pDSS);
     virtual ~Apartment();
@@ -88,24 +88,22 @@ namespace dss {
     /** Returns a device by it's short-address and dsMeter */
     Device& getDeviceByShortAddress(boost::shared_ptr<const DSMeter> _dsMeter, const devid_t _deviceID) const;
     std::vector<Device*>& getDevicesVector() { return m_Devices; }
-    /** Allocates a device and returns a reference to it.
-     *  If there is a stale device with the same dsid, this device gets "activated"
-     */
+    /** Allocates a device and returns a reference to it. */
     Device& allocateDevice(const dsid_t _dsid);
 
     /** Returns the Zone by name */
-    Zone& getZone(const std::string& _zoneName);
+    boost::shared_ptr<Zone> getZone(const std::string& _zoneName);
     /** Returns the Zone by its id */
-    Zone& getZone(const int _id);
+    boost::shared_ptr<Zone> getZone(const int _id);
     /** Returns a vector of all zones */
-    std::vector<Zone*>& getZones();
+    std::vector<boost::shared_ptr<Zone> > getZones();
 
     /** Allocates a zone and returns a reference to it. Should a zone with
       * the given _zoneID already exist, a reference to the existing zone will
       * be returned.
       * NOTE: Outside code should never call this function
       */
-    Zone& allocateZone(int _zoneID);
+    boost::shared_ptr<Zone> allocateZone(int _zoneID);
 
     boost::shared_ptr<DSMeter> allocateDSMeter(const dsid_t _dsid);
 

@@ -381,22 +381,22 @@ namespace dss {
         log("onGroupCallScene: Scene number is out of bounds. zoneID: " + intToString(_zoneID) + " groupID: " + intToString(_groupID) + " scene: " + intToString(_sceneID), lsError);
         return;
       }
-      Zone& zone = m_pApartment->getZone(_zoneID);
-      Group* group = zone.getGroup(_groupID);
+      boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
+      Group* group = zone->getGroup(_groupID);
       if(group != NULL) {
         log("OnGroupCallScene: group-id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "' scene: " + intToString(_sceneID));
         if(SceneHelper::rememberScene(_sceneID & 0x00ff)) {
-          Set s = zone.getDevices().getByGroup(_groupID);
+          Set s = zone->getDevices().getByGroup(_groupID);
           SetLastCalledSceneAction act(_sceneID & 0x00ff);
           s.perform(act);
 
-          std::vector<Zone*> zonesToUpdate;
+          std::vector<boost::shared_ptr<Zone> > zonesToUpdate;
           if(_zoneID == 0) {
             zonesToUpdate = m_pApartment->getZones();
           } else {
-            zonesToUpdate.push_back(&zone);
+            zonesToUpdate.push_back(zone);
           }
-          foreach(Zone* pZone, zonesToUpdate) {
+          foreach(boost::shared_ptr<Zone> pZone, zonesToUpdate) {
             if(_groupID == 0) {
               foreach(Group* pGroup, pZone->getGroups()) {
                 pGroup->setLastCalledScene(_sceneID & 0x00ff);
@@ -454,7 +454,7 @@ namespace dss {
       );
     try {
       boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByBusID(_modID);
-      Zone& zone = m_pApartment->allocateZone(_zoneID);
+      boost::shared_ptr<Zone> zone = m_pApartment->allocateZone(_zoneID);
       scanner.scanDeviceOnBus(dsMeter, zone, _devID);
     } catch(std::runtime_error& e) {
       log(std::string("Error scanning device: ") + e.what());

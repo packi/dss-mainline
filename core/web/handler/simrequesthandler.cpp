@@ -54,8 +54,8 @@ namespace dss {
           return failure("Could not parse groupID");
         }
         try {
-          Zone& zone = m_Apartment.getZone(zoneID);
-          Group* pGroup = zone.getGroup(groupID);
+          boost::shared_ptr<Zone> zone = m_Apartment.getZone(zoneID);
+          Group* pGroup = zone->getGroup(groupID);
 
           if(pGroup == NULL) {
             return failure("Could not find group");
