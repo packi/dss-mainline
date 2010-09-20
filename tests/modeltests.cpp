@@ -49,8 +49,8 @@ BOOST_AUTO_TEST_SUITE(Model)
 BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
   Apartment apt(NULL);
 
-  DSMeter& meter = apt.allocateDSMeter(dsid_t(0,10));
-  meter.setBusID(1);
+  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsid_t(0,10));
+  meter->setBusID(1);
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
@@ -66,10 +66,10 @@ BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
 BOOST_AUTO_TEST_CASE(testSetGetByBusID) {
   Apartment apt(NULL);
 
-  DSMeter& meter1 = apt.allocateDSMeter(dsid_t(0,10));
-  meter1.setBusID(1);
-  DSMeter& meter2 = apt.allocateDSMeter(dsid_t(0,11));
-  meter2.setBusID(2);
+  boost::shared_ptr<DSMeter> meter1 = apt.allocateDSMeter(dsid_t(0,10));
+  meter1->setBusID(1);
+  boost::shared_ptr<DSMeter> meter2 = apt.allocateDSMeter(dsid_t(0,11));
+  meter2->setBusID(2);
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
@@ -81,11 +81,11 @@ BOOST_AUTO_TEST_CASE(testSetGetByBusID) {
   dev2.setName("dev2");
   dev2.setDSMeter(meter2);
 
-  DSMeter& mod1 = apt.allocateDSMeter(dsid_t(0,3));
-  mod1.setBusID(1);
+  boost::shared_ptr<DSMeter> mod1 = apt.allocateDSMeter(dsid_t(0,3));
+  mod1->setBusID(1);
 
-  DSMeter& mod2 = apt.allocateDSMeter(dsid_t(0,4));
-  mod2.setBusID(2);
+  boost::shared_ptr<DSMeter> mod2 = apt.allocateDSMeter(dsid_t(0,4));
+  mod2->setBusID(2);
   BOOST_CHECK_EQUAL(apt.getDevices().getByBusID(1, 1).getName(), dev1.getName());
   BOOST_CHECK_THROW(apt.getDevices().getByBusID(2, 1), ItemNotFoundException);
 
@@ -159,8 +159,8 @@ BOOST_AUTO_TEST_CASE(testSetTags) {
 BOOST_AUTO_TEST_CASE(testDeviceLastKnownDSMeterDSIDWorks) {
   Apartment apt(NULL);
 
-  DSMeter& mod = apt.allocateDSMeter(dsid_t(0,10));
-  mod.setBusID(1);
+  boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsid_t(0,10));
+  mod->setBusID(1);
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
 
@@ -175,8 +175,8 @@ BOOST_AUTO_TEST_CASE(testDeviceLastKnownDSMeterDSIDWorks) {
 BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByShortAddress) {
   Apartment apt(NULL);
 
-  DSMeter& mod = apt.allocateDSMeter(dsid_t(0,2));
-  mod.setBusID(1);
+  boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsid_t(0,2));
+  mod->setBusID(1);
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
@@ -198,33 +198,33 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByName) {
 BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByName) {
   Apartment apt(NULL);
 
-  DSMeter& mod = apt.allocateDSMeter(dsid_t(0,2));
-  mod.setName("mod1");
+  boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsid_t(0,2));
+  mod->setName("mod1");
 
-  BOOST_CHECK_EQUAL("mod1", apt.getDSMeter("mod1").getName());
+  BOOST_CHECK_EQUAL("mod1", apt.getDSMeter("mod1")->getName());
 } // testApartmentGetDSMeterByName
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByBusID) {
   Apartment apt(NULL);
 
-  DSMeter& mod = apt.allocateDSMeter(dsid_t(0,2));
-  mod.setBusID(1);
+  boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsid_t(0,2));
+  mod->setBusID(1);
 
-  BOOST_CHECK_EQUAL(1, apt.getDSMeterByBusID(1).getBusID());
+  BOOST_CHECK_EQUAL(1, apt.getDSMeterByBusID(1)->getBusID());
 } // testApartmentGetDSMeterByBusID
 
 BOOST_AUTO_TEST_CASE(testDeviceTracksMetersBusID) {
   Apartment apt(NULL);
 
-  DSMeter& mod = apt.allocateDSMeter(dsid_t(0,10));
-  mod.setBusID(1);
+  boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsid_t(0,10));
+  mod->setBusID(1);
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setDSMeter(mod);
 
   BOOST_CHECK_EQUAL(1, dev1.getDSMeterID());
 
-  mod.setBusID(2);
+  mod->setBusID(2);
 
   BOOST_CHECK_EQUAL(2, dev1.getDSMeterID());
 } // testDeviceTracksMeterID
@@ -232,8 +232,8 @@ BOOST_AUTO_TEST_CASE(testDeviceTracksMetersBusID) {
 BOOST_AUTO_TEST_CASE(testZoneMoving) {
   Apartment apt(NULL);
 
-  DSMeter& meter = apt.allocateDSMeter(dsid_t(0,10));
-  meter.setBusID(1);
+  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsid_t(0,10));
+  meter->setBusID(1);
 
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
@@ -305,8 +305,8 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
 BOOST_AUTO_TEST_CASE(testSet) {
   Apartment apt(NULL);
 
-  DSMeter& meter = apt.allocateDSMeter(dsid_t(0,10));
-  meter.setBusID(1);
+  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsid_t(0,10));
+  meter->setBusID(1);
 
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setShortAddress(1);
@@ -637,26 +637,26 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
     sleepMS(2);
   }
 
-  DSMeter& mod = apt.allocateDSMeter(dsid_t(0,3));
-  mod.setBusID(76);
+  boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsid_t(0,3));
+  mod->setBusID(76);
   Device& dev1 = apt.allocateDevice(dsid_t(0,1));
   dev1.setName("dev1");
   dev1.setShortAddress(1);
   dev1.setDSMeter(mod);
   DeviceReference devRef1(dev1, &apt);
-  mod.addDevice(devRef1);
+  mod->addDevice(devRef1);
   Device& dev2 = apt.allocateDevice(dsid_t(0,2));
   dev2.setName("dev2");
   dev2.setShortAddress(2);
   dev2.setDSMeter(mod);
   DeviceReference devRef2(dev2, &apt);
-  mod.addDevice(devRef2);
+  mod->addDevice(devRef2);
   Device& dev3 = apt.allocateDevice(dsid_t(0,3));
   dev3.setName("dev3");
   dev3.setShortAddress(3);
   dev3.setDSMeter(mod);
   DeviceReference devRef3(dev3, &apt);
-  mod.addDevice(devRef3);
+  mod->addDevice(devRef3);
 
   dev1.callScene(Scene1);
   sleepMS(5);

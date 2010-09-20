@@ -171,9 +171,9 @@ namespace dss {
           if((nameElem != NULL) && nameElem->hasChildNodes()) {
             name = nameElem->firstChild()->nodeValue();
           }
-          DSMeter& newDSMeter = m_Apartment.allocateDSMeter(id);
+          boost::shared_ptr<DSMeter> newDSMeter = m_Apartment.allocateDSMeter(id);
           if(!name.empty()) {
-            newDSMeter.setName(name);
+            newDSMeter->setName(name);
           }
         }
       }
@@ -240,7 +240,8 @@ namespace dss {
     _parentNode->appendChild(pZoneNode);
   } // zoneToXML
 
-  void dsMeterToXML(const DSMeter* _pDSMeter, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
+
+void dsMeterToXML(const boost::shared_ptr<DSMeter> _pDSMeter, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
     AutoPtr<Element> pDSMeterNode = _pDocument->createElement("dsMeter");
     pDSMeterNode->setAttribute("id", _pDSMeter->getDSID().toString());
     if(!_pDSMeter->getName().empty()) {
@@ -288,7 +289,7 @@ namespace dss {
     // dsMeters
     AutoPtr<Element> pDSMeters = pDoc->createElement("dsMeters");
     pRoot->appendChild(pDSMeters);
-    foreach(DSMeter* pDSMeter, m_Apartment.getDSMeters()) {
+    foreach(boost::shared_ptr<DSMeter> pDSMeter, m_Apartment.getDSMeters()) {
       dsMeterToXML(pDSMeter, pDSMeters, pDoc);
     }
 

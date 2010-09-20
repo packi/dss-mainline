@@ -97,7 +97,7 @@ namespace dss {
     std::vector<boost::shared_ptr<Series<CurrentValue> > > series;
     for(int iConfig = 0; iConfig < _config->size(); iConfig++) {
       // Load series from file
-      std::string fileName = m_MeteringStorageLocation + _value.getDSMeter().getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
+      std::string fileName = m_MeteringStorageLocation + _value.getDSMeter()->getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
       log("Metering::processValue: Trying to load series from '" + fileName + "'");
       #ifdef LOG_TIMING
       Timestamp startedLoadingSingle;
@@ -115,7 +115,7 @@ namespace dss {
         boost::shared_ptr<Series<CurrentValue> > newSeries((new Series<CurrentValue>(_config->getResolution(iConfig), _config->getNumberOfValues(iConfig))));
         newSeries->setUnit(_config->getUnit());
         newSeries->setComment(_config->getComment());
-        newSeries->setFromDSID(_value.getDSMeter().getDSID());
+        newSeries->setFromDSID(_value.getDSMeter()->getDSID());
         series.push_back(newSeries);
       }
     }
@@ -159,7 +159,7 @@ namespace dss {
         Timestamp startedWritingSingle;
         #endif
         // Write series to file
-        std::string fileName = m_MeteringStorageLocation + _value.getDSMeter().getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
+        std::string fileName = m_MeteringStorageLocation + _value.getDSMeter()->getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
         Series<CurrentValue>* s = series[iConfig].get();
         log("Metering::processValue: Trying to save series to '" + fileName + "'");
         writer.writeToXML(*s, fileName);
@@ -230,15 +230,15 @@ namespace dss {
     }
   } // processValues
 
-  void Metering::postConsumptionEvent(dss::DSMeter& _meter, int _value, DateTime _sampledAt) {
+  void Metering::postConsumptionEvent(boost::shared_ptr<DSMeter> _meter, int _value, DateTime _sampledAt) {
     m_ValuesMutex.lock();
-    m_ConsumptionValues.push_back(MeteringValue(&_meter, _value, _sampledAt));
+    m_ConsumptionValues.push_back(MeteringValue(_meter, _value, _sampledAt));
     m_ValuesMutex.unlock();
   } // postConsumptionEvent
 
-  void Metering::postEnergyEvent(dss::DSMeter& _meter, int _value, DateTime _sampledAt) {
+  void Metering::postEnergyEvent(boost::shared_ptr<DSMeter> _meter, int _value, DateTime _sampledAt) {
     m_ValuesMutex.lock();
-    m_EnergyValues.push_back(MeteringValue(&_meter, _value, _sampledAt));
+    m_EnergyValues.push_back(MeteringValue(_meter, _value, _sampledAt));
     m_ValuesMutex.unlock();
   } // postEnergyEvent
 

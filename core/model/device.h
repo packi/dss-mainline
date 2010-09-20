@@ -161,7 +161,7 @@ namespace dss {
     int getDSMeterID() const;
     const dsid_t& getLastKnownDSMeterDSID() const;
     void setLastKnownDSMeterDSID(const dsid_t& _value);
-    void setDSMeter(DSMeter& _dsMeter);
+    void setDSMeter(boost::shared_ptr<DSMeter> _dsMeter);
 
     /** Returns the zone ID the device resides in. */
     int getZoneID() const;

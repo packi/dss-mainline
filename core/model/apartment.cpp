@@ -63,7 +63,6 @@ namespace dss {
   Apartment::~Apartment() {
     scrubVector(m_Devices);
     scrubVector(m_Zones);
-    scrubVector(m_DSMeters);
   } // dtor
 
   void Apartment::addDefaultGroupsToZone(Zone& _zone) {
@@ -122,10 +121,10 @@ namespace dss {
     throw ItemNotFoundException(_dsid.toString());
   } // getDeviceByShortAddress
 
-  Device& Apartment::getDeviceByShortAddress(const DSMeter& _dsMeter, const devid_t _deviceID) const {
+  Device& Apartment::getDeviceByShortAddress(boost::shared_ptr<const DSMeter> _dsMeter, const devid_t _deviceID) const {
     foreach(Device* dev, m_Devices) {
       if((dev->getShortAddress() == _deviceID) &&
-          (_dsMeter.getBusID() == dev->getDSMeterID())) {
+          (_dsMeter->getBusID() == dev->getDSMeterID())) {
         return *dev;
       }
     }
@@ -172,34 +171,34 @@ namespace dss {
     return m_Zones;
   } // getZones
 
-  DSMeter& Apartment::getDSMeter(const std::string& _modName) {
-    foreach(DSMeter* dsMeter, m_DSMeters) {
+  boost::shared_ptr<DSMeter> Apartment::getDSMeter(const std::string& _modName) {
+    foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
       if(dsMeter->getName() == _modName) {
-        return *dsMeter;
+        return dsMeter;
       }
     }
     throw ItemNotFoundException(_modName);
   } // getDSMeter(name)
 
-  DSMeter& Apartment::getDSMeterByBusID(const int _busId) {
-    foreach(DSMeter* dsMeter, m_DSMeters) {
+  boost::shared_ptr<DSMeter> Apartment::getDSMeterByBusID(const int _busId) {
+    foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
       if(dsMeter->getBusID() == _busId) {
-        return *dsMeter;
+        return dsMeter;
       }
     }
     throw ItemNotFoundException(intToString(_busId));
   } // getDSMeterByBusID
 
-  DSMeter& Apartment::getDSMeterByDSID(const dsid_t _dsid) {
-    foreach(DSMeter* dsMeter, m_DSMeters) {
+  boost::shared_ptr<DSMeter> Apartment::getDSMeterByDSID(const dsid_t _dsid) {
+    foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
       if(dsMeter->getDSID() == _dsid) {
-        return *dsMeter;
+        return dsMeter;
       }
     }
     throw ItemNotFoundException(_dsid.toString());
   } // getDSMeterByDSID
 
-  std::vector<DSMeter*>& Apartment::getDSMeters() {
+  std::vector<boost::shared_ptr<DSMeter> >& Apartment::getDSMeters() {
     return m_DSMeters;
   } // getDSMeters
 
@@ -241,16 +240,16 @@ namespace dss {
     return *pResult;
   } // allocateDevice
 
-  DSMeter& Apartment::allocateDSMeter(const dsid_t _dsid) {
-    foreach(DSMeter* dsMeter, m_DSMeters) {
+  boost::shared_ptr<DSMeter> Apartment::allocateDSMeter(const dsid_t _dsid) {
+    foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
       if((dsMeter)->getDSID() == _dsid) {
-        return *dsMeter;
+        return dsMeter;
       }
     }
 
-    DSMeter* pResult = new DSMeter(_dsid, this);
+    boost::shared_ptr<DSMeter> pResult(new DSMeter(_dsid, this));
     m_DSMeters.push_back(pResult);
-    return *pResult;
+    return pResult;
   } // allocateDSMeter
 
   Zone& Apartment::allocateZone(int _zoneID) {
@@ -304,12 +303,11 @@ namespace dss {
   } // removeDevice
 
   void Apartment::removeDSMeter(dsid_t _dsMeter) {
-    for(std::vector<DSMeter*>::iterator ipDSMeter = m_DSMeters.begin(), e = m_DSMeters.end();
+    for(std::vector<boost::shared_ptr<DSMeter> >::iterator ipDSMeter = m_DSMeters.begin(), e = m_DSMeters.end();
         ipDSMeter != e; ++ipDSMeter) {
-      DSMeter* pDSMeter = *ipDSMeter;
+      boost::shared_ptr<DSMeter> pDSMeter = *ipDSMeter;
       if(pDSMeter->getDSID() == _dsMeter) {
         m_DSMeters.erase(ipDSMeter);
-        delete pDSMeter;
         return;
       }
     }

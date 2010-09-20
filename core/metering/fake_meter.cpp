@@ -94,7 +94,7 @@ namespace dss {
 
       DateTime now;
       unsigned long consumption = 0;
-      foreach(DSMeter* dsMeter, getDSS().getApartment().getDSMeters()) {
+      foreach(boost::shared_ptr<DSMeter> dsMeter, getDSS().getApartment().getDSMeters()) {
         try {
       	  consumption += dsMeter->getCachedPowerConsumption();
         } catch(std::runtime_error& err) {

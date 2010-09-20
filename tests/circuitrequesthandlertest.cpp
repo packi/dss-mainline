@@ -44,10 +44,10 @@ public:
     m_BorderRed = 100;
 
     m_pApartment.reset(new Apartment(NULL));
-    DSMeter& mod = m_pApartment->allocateDSMeter(m_ValidDSID);
-    mod.setName(m_ValidName);
-    mod.setEnergyLevelOrange(m_BorderOrange);
-    mod.setEnergyLevelRed(m_BorderRed);
+    boost::shared_ptr<DSMeter> mod = m_pApartment->allocateDSMeter(m_ValidDSID);
+    mod->setName(m_ValidName);
+    mod->setEnergyLevelOrange(m_BorderOrange);
+    mod->setEnergyLevelRed(m_BorderRed);
     m_pMaintenance.reset(new ModelMaintenance(NULL));
     m_pHandler.reset(new CircuitRequestHandler(*m_pApartment, *m_pMaintenance));
   }
@@ -130,18 +130,18 @@ BOOST_FIXTURE_TEST_CASE(testGetEnergyBorder, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testCircuitRescan, Fixture) {
   m_Params["id"] = m_ValidDSID.toString();
-  m_pApartment->getDSMeterByDSID(m_ValidDSID).setIsValid(true);
+  m_pApartment->getDSMeterByDSID(m_ValidDSID)->setIsValid(true);
   RestfulRequest req("circuit/rescan", m_Params);
   boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, true);
 
-  BOOST_CHECK_EQUAL(m_pApartment->getDSMeterByDSID(m_ValidDSID).isValid(), false);
+  BOOST_CHECK_EQUAL(m_pApartment->getDSMeterByDSID(m_ValidDSID)->isValid(), false);
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetPowerConsumption, Fixture) {
   m_Params["id"] = m_ValidDSID.toString();
   const long unsigned int kConsumption = 77;
-  m_pApartment->getDSMeterByDSID(m_ValidDSID).setPowerConsumption(kConsumption);
+  m_pApartment->getDSMeterByDSID(m_ValidDSID)->setPowerConsumption(kConsumption);
   RestfulRequest req("circuit/getConsumption", m_Params);
   boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
 
@@ -152,7 +152,7 @@ BOOST_FIXTURE_TEST_CASE(testGetPowerConsumption, Fixture) {
 BOOST_FIXTURE_TEST_CASE(testGetEnergyMeterValue, Fixture) {
   m_Params["id"] = m_ValidDSID.toString();
   const long unsigned int kMeterValue = 8888888;
-  m_pApartment->getDSMeterByDSID(m_ValidDSID).setEnergyMeterValue(kMeterValue);
+  m_pApartment->getDSMeterByDSID(m_ValidDSID)->setEnergyMeterValue(kMeterValue);
   RestfulRequest req("circuit/getEnergyMeterValue", m_Params);
   boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
 

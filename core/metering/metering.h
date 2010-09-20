@@ -42,14 +42,14 @@ namespace dss {
 
   class MeteringValue {
   public:
-    MeteringValue(DSMeter* _pMeter, int _value, DateTime& _sampledAt)
+    MeteringValue(boost::shared_ptr<DSMeter> _pMeter, int _value, DateTime& _sampledAt)
     : m_pMeter(_pMeter), m_Value(_value), m_SampledAt(_sampledAt)
     {}
-    DSMeter& getDSMeter() const { return *m_pMeter; }
+    boost::shared_ptr<DSMeter> getDSMeter() const { return m_pMeter; }
     int getValue() const { return m_Value; }
     const DateTime& getSampledAt() const { return m_SampledAt; }
   private:
-    DSMeter* m_pMeter;
+    boost::shared_ptr<DSMeter> m_pMeter;
     int m_Value;
     DateTime m_SampledAt;
   };
@@ -80,8 +80,8 @@ namespace dss {
 
     const std::vector<MeteringConfigChain*> getConfig() const { return m_Config; }
     const std::string& getStorageLocation() const { return m_MeteringStorageLocation; }
-    void postConsumptionEvent(dss::DSMeter& _meter, int _value, DateTime _sampledAt);
-    void postEnergyEvent(dss::DSMeter& _meter, int _value, DateTime _sampledAt);
+    void postConsumptionEvent(boost::shared_ptr<DSMeter> _meter, int _value, DateTime _sampledAt);
+    void postEnergyEvent(boost::shared_ptr<DSMeter> _meter, int _value, DateTime _sampledAt);
     void setMeteringBusInterface(MeteringBusInterface* _value) { m_pMeteringBusInterface = _value; }
   }; // Metering
 

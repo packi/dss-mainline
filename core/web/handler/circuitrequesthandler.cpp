@@ -49,14 +49,14 @@ namespace dss {
       return failure("Could not parse dsid");
     }
     try {
-      DSMeter& dsMeter = m_Apartment.getDSMeterByDSID(dsid);
+      boost::shared_ptr<DSMeter> dsMeter = m_Apartment.getDSMeterByDSID(dsid);
       if(_request.getMethod() == "getName") {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        resultObj->addProperty("name", dsMeter.getName());
+        resultObj->addProperty("name", dsMeter->getName());
         return success(resultObj);
       } else if(_request.getMethod() == "setName") {
         if(_request.hasParameter("newName")) {
-          dsMeter.setName(_request.getParameter("newName"));
+          dsMeter->setName(_request.getParameter("newName"));
           m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
           return success();
         } else {
@@ -64,19 +64,19 @@ namespace dss {
         }
       } else if(_request.getMethod() == "getEnergyBorder") {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        resultObj->addProperty("orange", dsMeter.getEnergyLevelOrange());
-        resultObj->addProperty("red", dsMeter.getEnergyLevelRed());
+        resultObj->addProperty("orange", dsMeter->getEnergyLevelOrange());
+        resultObj->addProperty("red", dsMeter->getEnergyLevelRed());
         return success(resultObj);
       } else if(_request.getMethod() == "getConsumption") {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        resultObj->addProperty("consumption", dsMeter.getPowerConsumption());
+        resultObj->addProperty("consumption", dsMeter->getPowerConsumption());
         return success(resultObj);
       } else if(_request.getMethod() == "getEnergyMeterValue") {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        resultObj->addProperty("meterValue", dsMeter.getEnergyMeterValue());
+        resultObj->addProperty("meterValue", dsMeter->getEnergyMeterValue());
         return success(resultObj);
       } else if(_request.getMethod() == "rescan") {
-        dsMeter.setIsValid(false);
+        dsMeter->setIsValid(false);
         return success();
       } else {
         throw std::runtime_error("Unhandled function");

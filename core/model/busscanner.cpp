@@ -48,11 +48,11 @@ namespace dss {
   {
   }
 
-  bool BusScanner::scanDSMeter(DSMeter& _dsMeter) {
-    _dsMeter.setIsPresent(true);
-    _dsMeter.setIsValid(false);
+  bool BusScanner::scanDSMeter(boost::shared_ptr<DSMeter> _dsMeter) {
+    _dsMeter->setIsPresent(true);
+    _dsMeter->setIsValid(false);
 
-    int dsMeterID = _dsMeter.getBusID();
+    int dsMeterID = _dsMeter->getBusID();
 
     log("scanDSMeter: Start " + intToString(dsMeterID) , lsInfo);
     std::vector<int> zoneIDs;
@@ -66,8 +66,8 @@ namespace dss {
     int levelOrange, levelRed;
     try {
       if(m_Interface.getEnergyBorder(dsMeterID, levelOrange, levelRed)) {
-        _dsMeter.setEnergyLevelOrange(levelOrange);
-        _dsMeter.setEnergyLevelRed(levelRed);
+        _dsMeter->setEnergyLevelOrange(levelOrange);
+        _dsMeter->setEnergyLevelRed(levelRed);
       }
     } catch(DS485ApiError& e) {
       log("scanDSMeter: Error getting EnergyLevels", lsFatal);
@@ -76,10 +76,10 @@ namespace dss {
 
     try {
       DSMeterSpec_t spec = m_Interface.getDSMeterSpec(dsMeterID);
-      _dsMeter.setSoftwareVersion(spec.get<1>());
-      _dsMeter.setHardwareVersion(spec.get<2>());
-      _dsMeter.setHardwareName(spec.get<3>());
-      _dsMeter.setDeviceType(spec.get<4>());
+      _dsMeter->setSoftwareVersion(spec.get<1>());
+      _dsMeter->setHardwareVersion(spec.get<2>());
+      _dsMeter->setHardwareName(spec.get<3>());
+      _dsMeter->setDeviceType(spec.get<4>());
     } catch(DS485ApiError& e) {
       log("scanDSMeter: Error getting dSMSpecs", lsFatal);
       return false;
@@ -99,14 +99,14 @@ namespace dss {
         return false;
       }
     }
-    _dsMeter.setIsValid(true);
+    _dsMeter->setIsValid(true);
     return true;
   } // scanDSMeter
 
-  bool BusScanner::scanZone(DSMeter& _dsMeter, Zone& _zone) {
+  bool BusScanner::scanZone(boost::shared_ptr<DSMeter> _dsMeter, Zone& _zone) {
     std::vector<int> devices;
     try {
-      devices = m_Interface.getDevicesInZone(_dsMeter.getBusID(), _zone.getID());
+      devices = m_Interface.getDevicesInZone(_dsMeter->getBusID(), _zone.getID());
     } catch(DS485ApiError& e) {
       log("scanDSMeter: Error getting getDevicesInZone", lsFatal);
       return false;
@@ -118,10 +118,10 @@ namespace dss {
     return scanGroupsOfZone(_dsMeter, _zone);
   } // scanZone
 
-  bool BusScanner::scanDeviceOnBus(DSMeter& _dsMeter, Zone& _zone, devid_t _shortAddress) {
+  bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, Zone& _zone, devid_t _shortAddress) {
     dsid_t dsid;
     try {
-      dsid = m_Interface.getDSIDOfDevice(_dsMeter.getBusID(), _shortAddress);
+      dsid = m_Interface.getDSIDOfDevice(_dsMeter->getBusID(), _shortAddress);
     } catch(DS485ApiError& e) {
         log("scanDeviceOnBus: Error getting getDSIDOfDevice", lsFatal);
         return false;
@@ -131,7 +131,7 @@ namespace dss {
     int productID = 0;
     int revisionID = 0;
     try {
-      DeviceSpec_t spec = m_Interface.deviceGetSpec(_shortAddress, _dsMeter.getBusID());
+      DeviceSpec_t spec = m_Interface.deviceGetSpec(_shortAddress, _dsMeter->getBusID());
       functionID = spec.get<0>();
       productID = spec.get<1>();
       revisionID = spec.get<2>();
@@ -151,8 +151,8 @@ namespace dss {
 
     // remove from old dsMeter
     try {
-      DSMeter& oldDSMeter = m_Apartment.getDSMeterByDSID(dev.getLastKnownDSMeterDSID());
-      oldDSMeter.removeDevice(devRef);
+      boost::shared_ptr<DSMeter> oldDSMeter = m_Apartment.getDSMeterByDSID(dev.getLastKnownDSMeterDSID());
+      oldDSMeter->removeDevice(devRef);
     } catch(std::runtime_error&) {
     }
 
@@ -183,7 +183,7 @@ namespace dss {
     }
 
     dev.resetGroups();
-    std::vector<int> groupIDsPerDevice = m_Interface.getGroupsOfDevice(_dsMeter.getBusID(), _shortAddress);
+    std::vector<int> groupIDsPerDevice = m_Interface.getGroupsOfDevice(_dsMeter->getBusID(), _shortAddress);
     foreach(int groupID, groupIDsPerDevice) {
       log(std::string("scanDeviceOnBus: adding device ") + intToString(_shortAddress) + " to group " + intToString(groupID));
       dev.addToGroup(groupID);
@@ -191,7 +191,7 @@ namespace dss {
 
     _zone.addToDSMeter(_dsMeter);
     _zone.addDevice(devRef);
-    _dsMeter.addDevice(devRef);
+    _dsMeter->addDevice(devRef);
     dev.setIsPresent(true);
 
     {
@@ -206,10 +206,10 @@ namespace dss {
     return true;
   } // scanDeviceOnBus
 
-  bool BusScanner::scanGroupsOfZone(DSMeter& _dsMeter, Zone& _zone) {
+  bool BusScanner::scanGroupsOfZone(boost::shared_ptr<DSMeter> _dsMeter, Zone& _zone) {
     std::vector<int> groupIDs;
     try {
-      groupIDs = m_Interface.getGroups(_dsMeter.getBusID(), _zone.getID());
+      groupIDs = m_Interface.getGroups(_dsMeter->getBusID(), _zone.getID());
     } catch(DS485ApiError& e) {
       log("scanDSMeter: Error getting getGroups", lsFatal);
       return false;
@@ -218,7 +218,7 @@ namespace dss {
     foreach(int groupID, groupIDs) {
       if(groupID == 0) {
         log("scanDSMeter:    Group ID is zero, bailing out... (dsMeterID: "
-            + intToString(_dsMeter.getBusID()) +
+            + intToString(_dsMeter->getBusID()) +
             "zoneID: " + intToString(_zone.getID()) + ")",
             lsError);
         continue;
@@ -240,7 +240,7 @@ namespace dss {
 
       // get last called scene for zone, group
       try {
-        int lastCalledScene = m_Interface.getLastCalledScene(_dsMeter.getBusID(), _zone.getID(), groupID);
+        int lastCalledScene = m_Interface.getLastCalledScene(_dsMeter->getBusID(), _zone.getID(), groupID);
         Group* pGroup = _zone.getGroup(groupID);
         assert(pGroup != NULL);
         log("scanDSMeter: zoneID: " + intToString(_zone.getID()) + " groupID: " + intToString(groupID) + " lastScene: " + intToString(lastCalledScene));

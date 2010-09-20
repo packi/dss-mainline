@@ -146,12 +146,12 @@ namespace dss {
 
     dsid_t dID = dsid::fromString(id);
 
-    DSMeter& dsMeter = m_Apartment.getDSMeterByDSID(dID);
-    
+    boost::shared_ptr<DSMeter> dsMeter = m_Apartment.getDSMeterByDSID(dID);
+
     manipulator.removeInactiveDevices(dsMeter);
 
     Set all = m_Apartment.getDevices();
-    
+
     if(all.length() <= 0) {
       return success();
     }

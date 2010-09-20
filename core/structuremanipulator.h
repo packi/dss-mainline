@@ -23,6 +23,8 @@
 #ifndef STRUCTUREMANIPULATOR_H_
 #define STRUCTUREMANIPULATOR_H_
 
+#include <boost/shared_ptr.hpp>
+
 namespace dss {
 
   class Apartment;
@@ -40,10 +42,10 @@ namespace dss {
     : m_Apartment(_apartment), m_Interface(_interface)
     { } // ctor
 
-    void createZone(DSMeter& _dsMeter, Zone& _zone);
+    void createZone(boost::shared_ptr<DSMeter> _dsMeter, Zone& _zone);
     void addDeviceToZone(Device& _device, Zone& _zone);
-    void removeZoneOnDSMeter(Zone& _zone, DSMeter& _dsMeter);
-    void removeInactiveDevices(DSMeter& _dsMeter);
+    void removeZoneOnDSMeter(Zone& _zone, boost::shared_ptr<DSMeter> _dsMeter);
+    void removeInactiveDevices(boost::shared_ptr<DSMeter> _dsMeter);
   }; // StructureManipulator
 
 

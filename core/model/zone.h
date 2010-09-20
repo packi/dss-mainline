@@ -53,7 +53,7 @@ namespace dss {
   private:
     int m_ZoneID;
     DeviceVector m_Devices;
-    std::vector<const DSMeter*> m_DSMeters;
+    std::vector<boost::shared_ptr<const DSMeter> > m_DSMeters;
     std::vector<Group*> m_Groups;
     int m_FirstZoneOnDSMeter;
     Apartment* m_pApartment;
@@ -68,9 +68,9 @@ namespace dss {
     virtual Set getDevices() const;
 
     /** Adds the Zone to a dsMeter. */
-    void addToDSMeter(DSMeter& _dsMeter);
+    void addToDSMeter(boost::shared_ptr<DSMeter> _dsMeter);
     /** Removes the Zone from a dsMeter. */
-    void removeFromDSMeter(DSMeter& _dsMeter);
+    void removeFromDSMeter(boost::shared_ptr<DSMeter> _dsMeter);
 
     /** Adds a device to the zone.
      * This will permanently add the device to the zone.
@@ -104,7 +104,7 @@ namespace dss {
     int getFirstZoneOnDSMeter() { return m_FirstZoneOnDSMeter; }
     void setFirstZoneOnDSMeter(const int _value) { m_FirstZoneOnDSMeter = _value; }
 
-    bool registeredOnDSMeter(const DSMeter& _dsMeter) const;
+    bool registeredOnDSMeter(boost::shared_ptr<const DSMeter> _dsMeter) const;
     bool isRegisteredOnAnyMeter() const;
 
     virtual void nextScene();

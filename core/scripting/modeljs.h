@@ -66,7 +66,7 @@ namespace dss {
     JSObject* createJSDevice(ScriptContext& _ctx, DeviceReference& _ref);
 
     /** Creates a JSObject that wraps a DSMeter */
-    JSObject* createJSMeter(ScriptContext& _ctx, DSMeter* _pMeter);
+    JSObject* createJSMeter(ScriptContext& _ctx, boost::shared_ptr<DSMeter> _pMeter);
 
     template<class t>
     t convertTo(ScriptContext& _context, jsval val);

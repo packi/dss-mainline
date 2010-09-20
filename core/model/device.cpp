@@ -180,7 +180,7 @@ namespace dss {
 
   int Device::getDSMeterID() const {
     if(m_DSMeterDSID != NullDSID) {
-      return m_pApartment->getDSMeterByDSID(m_DSMeterDSID).getBusID();
+      return m_pApartment->getDSMeterByDSID(m_DSMeterDSID)->getBusID();
     } else {
       return -1;
     }
@@ -194,16 +194,16 @@ namespace dss {
     return m_LastKnownMeterDSID;
   } // getLastKnownDSMeterDSID
 
-  void Device::setDSMeter(DSMeter& _dsMeter) {
+  void Device::setDSMeter(boost::shared_ptr<DSMeter> _dsMeter) {
     PropertyNodePtr alias;
     std::string devicePath = "devices/" + m_DSID.toString();
     if((m_pPropertyNode != NULL) && (m_DSMeterDSID != NullDSID)) {
-      alias = m_pApartment->getDSMeterByDSID(m_DSMeterDSID).getPropertyNode()->getProperty(devicePath);
+      alias = m_pApartment->getDSMeterByDSID(m_DSMeterDSID)->getPropertyNode()->getProperty(devicePath);
     }
-    m_DSMeterDSID = _dsMeter.getDSID();
-    m_LastKnownMeterDSID = _dsMeter.getDSID();
+    m_DSMeterDSID = _dsMeter->getDSID();
+    m_LastKnownMeterDSID = _dsMeter->getDSID();
     if(m_pPropertyNode != NULL) {
-      PropertyNodePtr target = _dsMeter.getPropertyNode()->createProperty("devices");
+      PropertyNodePtr target = _dsMeter->getPropertyNode()->createProperty("devices");
       if(alias != NULL) {
         target->addChild(alias);
       } else {

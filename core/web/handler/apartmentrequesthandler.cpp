@@ -50,11 +50,11 @@ namespace dss {
 
   boost::shared_ptr<JSONObject> ApartmentRequestHandler::removeInactiveMeters(const RestfulRequest& _request) {
 
-    std::vector<DSMeter*> dsMeters = m_Apartment.getDSMeters();
+    std::vector<boost::shared_ptr<DSMeter> > dsMeters = m_Apartment.getDSMeters();
 
     bool dirtyFlag = false;
     for (size_t i = 0; i < dsMeters.size();i++) {
-      DSMeter* dsMeter = dsMeters.at(i);
+      boost::shared_ptr<DSMeter> dsMeter = dsMeters.at(i);
       if (!dsMeter->isPresent()) {
         m_Apartment.removeDSMeter(dsMeter->getDSID());
         dirtyFlag = true;
@@ -76,9 +76,9 @@ namespace dss {
 
     dsid_t meterID = dsid::fromString(dsidStr);
 
-    DSMeter& meter = DSS::getInstance()->getApartment().getDSMeterByDSID(meterID);
+    boost::shared_ptr<DSMeter> meter = DSS::getInstance()->getApartment().getDSMeterByDSID(meterID);
 
-    if(meter.isPresent()) {
+    if(meter->isPresent()) {
       return failure("Cannot remove present meter");
     }
 
@@ -91,7 +91,7 @@ namespace dss {
     std::string errorMessage;
     if(_request.getMethod() == "getConsumption") {
       int accumulatedConsumption = 0;
-      foreach(DSMeter* pDSMeter, m_Apartment.getDSMeters()) {
+      foreach(boost::shared_ptr<DSMeter> pDSMeter, m_Apartment.getDSMeters()) {
         accumulatedConsumption += pDSMeter->getPowerConsumption();
       }
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
@@ -150,8 +150,8 @@ namespace dss {
         boost::shared_ptr<JSONArrayBase> circuits(new JSONArrayBase());
 
         resultObj->addElement("circuits", circuits);
-        std::vector<DSMeter*>& dsMeters = m_Apartment.getDSMeters();
-        foreach(DSMeter* dsMeter, dsMeters) {
+        std::vector<boost::shared_ptr<DSMeter> >& dsMeters = m_Apartment.getDSMeters();
+        foreach(boost::shared_ptr<DSMeter> dsMeter, dsMeters) {
           boost::shared_ptr<JSONObject> circuit(new JSONObject());
           circuits->addElement("", circuit);
           circuit->addProperty("name", dsMeter->getName());
@@ -172,8 +172,8 @@ namespace dss {
         m_Apartment.setName(_request.getParameter("newName"));
         return success();
       } else if(_request.getMethod() == "rescan") {
-        std::vector<DSMeter*> mods = m_Apartment.getDSMeters();
-        foreach(DSMeter* pDSMeter, mods) {
+        std::vector<boost::shared_ptr<DSMeter> > mods = m_Apartment.getDSMeters();
+        foreach(boost::shared_ptr<DSMeter> pDSMeter, mods) {
           pDSMeter->setIsValid(false);
         }
         return success();

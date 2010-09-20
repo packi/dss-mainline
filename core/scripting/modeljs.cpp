@@ -143,8 +143,8 @@ namespace dss {
           return JS_FALSE;
         }
         try {
-          DSMeter& meter = ext->getApartment().getDSMeterByDSID(dsid);
-          JSObject* obj = ext->createJSMeter(*ctx, &meter);
+          boost::shared_ptr<DSMeter> meter = ext->getApartment().getDSMeterByDSID(dsid);
+          JSObject* obj = ext->createJSMeter(*ctx, meter);
 
           *rval = OBJECT_TO_JSVAL(obj);
         } catch(ItemNotFoundException& e) {
@@ -166,8 +166,8 @@ namespace dss {
       if(argc >= 1) {
         int busid =  ctx->convertTo<int>(argv[0]);
         try {
-          DSMeter& meter = ext->getApartment().getDSMeterByBusID(busid);
-          JSObject* obj = ext->createJSMeter(*ctx, &meter);
+          boost::shared_ptr<DSMeter> meter = ext->getApartment().getDSMeterByBusID(busid);
+          JSObject* obj = ext->createJSMeter(*ctx, meter);
           *rval = OBJECT_TO_JSVAL(obj);
         } catch(ItemNotFoundException& e) {
           *rval = JSVAL_NULL;
@@ -871,16 +871,26 @@ namespace dss {
     return result;
   } // createJSDevice
 
+  struct meter_wrapper {
+    boost::shared_ptr<DSMeter> pMeter;
+  };
+
+  void finalize_meter(JSContext *cx, JSObject *obj) {
+    struct meter_wrapper* pDevice = static_cast<meter_wrapper*>(JS_GetPrivate(cx, obj));
+    JS_SetPrivate(cx, obj, NULL);
+    delete pDevice;
+  } // finalize_meter
+
   static JSClass dsmeter_class = {
     "DSMeter", JSCLASS_HAS_PRIVATE,
     JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
     JS_EnumerateStandardClasses,
     JS_ResolveStub,
-    JS_ConvertStub, JS_FinalizeStub, JSCLASS_NO_OPTIONAL_MEMBERS
+    JS_ConvertStub, finalize_meter, JSCLASS_NO_OPTIONAL_MEMBERS
   };
 
   JSBool dsmeter_JSGet(JSContext *cx, JSObject *obj, jsval id, jsval *rval) {
-    DSMeter* meter = static_cast<DSMeter*>(JS_GetPrivate(cx, obj));
+    boost::shared_ptr<DSMeter> meter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, obj))->pMeter;
 
     if(meter != NULL) {
       int opt = JSVAL_TO_INT(id);
@@ -914,10 +924,12 @@ namespace dss {
     {NULL, 0, 0, NULL, NULL}
   };
 
-  JSObject* ModelScriptContextExtension::createJSMeter(ScriptContext& _ctx, DSMeter* _pMeter) {
+  JSObject* ModelScriptContextExtension::createJSMeter(ScriptContext& _ctx, boost::shared_ptr<DSMeter> _pMeter) {
     JSObject* result = JS_NewObject(_ctx.getJSContext(), &dsmeter_class, NULL, NULL);
     JS_DefineProperties(_ctx.getJSContext(), result, dsmeter_properties);
-    JS_SetPrivate(_ctx.getJSContext(), result, _pMeter);
+    struct meter_wrapper* wrapper = new meter_wrapper;
+    wrapper->pMeter = _pMeter;
+    JS_SetPrivate(_ctx.getJSContext(), result, wrapper);
     return result;
   } // createJSMeter
 

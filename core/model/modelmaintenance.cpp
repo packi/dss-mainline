@@ -116,7 +116,7 @@ namespace dss {
   void ModelMaintenance::discoverDS485Devices() {
     if(m_pFrameSenderInterface != NULL) {
       // temporary mark all dsMeters as absent
-      foreach(DSMeter* pDSMeter, m_pApartment->getDSMeters()) {
+      foreach(boost::shared_ptr<DSMeter> pDSMeter, m_pApartment->getDSMeters()) {
         pDSMeter->setIsPresent(false);
       }
 
@@ -192,9 +192,9 @@ namespace dss {
           log("Expected exactly 1 parameter for ModelEvent::etDSMeterReady");
         } else {
           try{
-            DSMeter& mod = m_pApartment->getDSMeterByBusID(event.getParameter(0));
-            mod.setIsPresent(true);
-            mod.setIsValid(false);
+            boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByBusID(event.getParameter(0));
+            mod->setIsPresent(true);
+            mod->setIsValid(false);
           } catch(ItemNotFoundException& e) {
             log("dSM is ready, but it is not yet known, re-discovering devices");
             discoverDS485Devices();
@@ -212,8 +212,8 @@ namespace dss {
           int meterID = event.getParameter(0);
           int value = event.getParameter(1);
           try {
-            DSMeter& meter = m_pApartment->getDSMeterByBusID(meterID);
-            meter.setPowerConsumption(value);
+            boost::shared_ptr<DSMeter> meter = m_pApartment->getDSMeterByBusID(meterID);
+            meter->setPowerConsumption(value);
             m_pMetering->postConsumptionEvent(meter, value, DateTime());
           } catch(ItemNotFoundException& _e) {
             log("Received metering data for unknown meter, discarding", lsWarning);
@@ -227,8 +227,8 @@ namespace dss {
           int meterID = event.getParameter(0);
           int value = event.getParameter(1);
           try {
-            DSMeter& meter = m_pApartment->getDSMeterByBusID(meterID);
-            meter.setEnergyMeterValue(value);
+            boost::shared_ptr<DSMeter> meter = m_pApartment->getDSMeterByBusID(meterID);
+            meter->setEnergyMeterValue(value);
             m_pMetering->postEnergyEvent(meter, value, DateTime());
           } catch(ItemNotFoundException& _e) {
             log("Received metering data for unknown meter, discarding", lsWarning);
@@ -248,15 +248,15 @@ namespace dss {
                          ((uint32_t(event.getParameter(5)) & 0x00ffff) << 16) | (uint32_t(event.getParameter(6)) & 0x00ffff));
           log ("Discovered device with busID: " + intToString(busID) + " and dsid: " + newDSID.toString());
           try{
-             m_pApartment->getDSMeterByDSID(newDSID).setBusID(busID);
+             m_pApartment->getDSMeterByDSID(newDSID)->setBusID(busID);
              log ("dSM present");
-             m_pApartment->getDSMeterByDSID(newDSID).setIsPresent(true);
+             m_pApartment->getDSMeterByDSID(newDSID)->setIsPresent(true);
           } catch(ItemNotFoundException& e) {
              log ("dSM not present");
-             DSMeter& dsMeter = m_pApartment->allocateDSMeter(newDSID);
-             dsMeter.setBusID(busID);
-             dsMeter.setIsPresent(true);
-             dsMeter.setIsValid(false);
+             boost::shared_ptr<DSMeter> dsMeter = m_pApartment->allocateDSMeter(newDSID);
+             dsMeter->setBusID(busID);
+             dsMeter->setIsPresent(true);
+             dsMeter->setIsValid(false);
              ModelEvent* pEvent = new ModelEvent(ModelEvent::etDSMeterReady);
              pEvent->addParameter(busID);
              addModelEvent(pEvent);
@@ -276,7 +276,7 @@ namespace dss {
     } else {
       m_NewModelEvent.waitFor(m_EventTimeoutMS);
       bool hadToUpdate = false;
-      foreach(DSMeter* pDSMeter, m_pApartment->getDSMeters()) {
+      foreach(boost::shared_ptr<DSMeter> pDSMeter, m_pApartment->getDSMeters()) {
         if(pDSMeter->isPresent()) {
           if(!pDSMeter->isValid()) {
             dsMeterReady(pDSMeter->getBusID());
@@ -315,11 +315,11 @@ namespace dss {
     log("DSMeter with id: " + intToString(_dsMeterBusID) + " is ready", lsInfo);
     try {
       try {
-        DSMeter& mod = m_pApartment->getDSMeterByBusID(_dsMeterBusID);
+        boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByBusID(_dsMeterBusID);
         BusScanner scanner(*m_pStructureQueryBusInterface, *m_pApartment, *this);
         if(scanner.scanDSMeter(mod)) {
           boost::shared_ptr<Event> dsMeterReadyEvent(new Event("dsMeter_ready"));
-          dsMeterReadyEvent->setProperty("dsMeter", mod.getDSID().toString());
+          dsMeterReadyEvent->setProperty("dsMeter", mod->getDSID().toString());
           raiseEvent(dsMeterReadyEvent);
         }
       } catch(DS485ApiError& e) {
@@ -424,10 +424,10 @@ namespace dss {
         log("onDeviceCallScene: _sceneID is out of bounds. dsMeter-id '" + intToString(_dsMeterID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID), lsError);
         return;
       }
-      DSMeter& mod = m_pApartment->getDSMeterByBusID(_dsMeterID);
+      boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByBusID(_dsMeterID);
       try {
         log("OnDeviceCallScene: dsMeter-id '" + intToString(_dsMeterID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID));
-        DeviceReference devRef = mod.getDevices().getByBusID(_deviceID, _dsMeterID);
+        DeviceReference devRef = mod->getDevices().getByBusID(_deviceID, _dsMeterID);
         if(SceneHelper::rememberScene(_sceneID & 0x00ff)) {
           devRef.getDevice().setLastCalledScene(_sceneID & 0x00ff);
         }
@@ -453,7 +453,7 @@ namespace dss {
         *this
       );
     try {
-      DSMeter& dsMeter = m_pApartment->getDSMeterByBusID(_modID);
+      boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByBusID(_modID);
       Zone& zone = m_pApartment->allocateZone(_zoneID);
       scanner.scanDeviceOnBus(dsMeter, zone, _devID);
     } catch(std::runtime_error& e) {
@@ -469,7 +469,7 @@ namespace dss {
     log("  Priority:  " + intToString(_priority));
 
     try {
-      DSMeter& dsMeter = m_pApartment->getDSMeterByBusID(_modID);
+      boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByBusID(_modID);
       try {
         Device& device = m_pApartment->getDeviceByShortAddress(dsMeter, _devID);
         PropertyNodePtr deviceNode = device.getPropertyNode();

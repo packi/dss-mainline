@@ -131,29 +131,29 @@ namespace dss {
     m_ZoneID = _value;
   } // setZoneID
 
-  void Zone::addToDSMeter(DSMeter& _dsMeter) {
+  void Zone::addToDSMeter(boost::shared_ptr<DSMeter> _dsMeter) {
     // make sure the zone is connected to the dsMeter
-    if(find(m_DSMeters.begin(), m_DSMeters.end(), &_dsMeter) == m_DSMeters.end()) {
-      m_DSMeters.push_back(&_dsMeter);
-      if(_dsMeter.getPropertyNode() != NULL) {
-        PropertyNodePtr alias = _dsMeter.getPropertyNode()->createProperty("zones/" + intToString(m_ZoneID));
+    if(find(m_DSMeters.begin(), m_DSMeters.end(), _dsMeter) == m_DSMeters.end()) {
+      m_DSMeters.push_back(_dsMeter);
+      if(_dsMeter->getPropertyNode() != NULL) {
+        PropertyNodePtr alias = _dsMeter->getPropertyNode()->createProperty("zones/" + intToString(m_ZoneID));
         alias->alias(m_pPropertyNode);
       }
     }
   } // addToDSMeter
 
-  void Zone::removeFromDSMeter(DSMeter& _dsMeter) {
-    m_DSMeters.erase(find(m_DSMeters.begin(), m_DSMeters.end(), &_dsMeter));
-    if(_dsMeter.getPropertyNode() != NULL) {
-      PropertyNodePtr alias = _dsMeter.getPropertyNode()->getProperty("zones/" + intToString(m_ZoneID));
+  void Zone::removeFromDSMeter(boost::shared_ptr<DSMeter> _dsMeter) {
+    m_DSMeters.erase(find(m_DSMeters.begin(), m_DSMeters.end(), _dsMeter));
+    if(_dsMeter->getPropertyNode() != NULL) {
+      PropertyNodePtr alias = _dsMeter->getPropertyNode()->getProperty("zones/" + intToString(m_ZoneID));
       if(alias != NULL) {
         alias->getParentNode()->removeChild(alias);
       }
     }
   } // removeFromDSMeter
 
-  bool Zone::registeredOnDSMeter(const DSMeter& _dsMeter) const {
-    return find(m_DSMeters.begin(), m_DSMeters.end(), &_dsMeter) != m_DSMeters.end();
+  bool Zone::registeredOnDSMeter(boost::shared_ptr<const DSMeter> _dsMeter) const {
+    return find(m_DSMeters.begin(), m_DSMeters.end(), _dsMeter) != m_DSMeters.end();
   } // registeredOnDSMeter
 
   bool Zone::isRegisteredOnAnyMeter() const {

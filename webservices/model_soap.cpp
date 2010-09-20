@@ -103,7 +103,7 @@ int AuthorizeAndGetDevice(struct soap *soap, const int _token, char* _devID, dss
   return SOAP_OK;
 } // authorizeAndGetDevice
 
-int AuthorizeAndGetDSMeter(struct soap *soap, const int _token, char* _dsMeterDSID, dss::DSMeter& result) {
+int AuthorizeAndGetDSMeter(struct soap *soap, const int _token, char* _dsMeterDSID, boost::shared_ptr<dss::DSMeter>& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -116,7 +116,7 @@ int AuthorizeAndGetDSMeter(struct soap *soap, const int _token, char* _dsMeterDS
   return SOAP_OK;
 } // authorizeAndGetDSMeter
 
-int AuthorizeAndGetDSMeterByBusID(struct soap *soap, const int _token, int _dsMeterID, dss::DSMeter& result) {
+int AuthorizeAndGetDSMeterByBusID(struct soap *soap, const int _token, int _dsMeterID, boost::shared_ptr<dss::DSMeter>& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -425,8 +425,8 @@ int dss__ApartmentRescan(struct soap *soap, int _token, bool& result) {
   }
 
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
-  std::vector<dss::DSMeter*> mods = apt.getDSMeters();
-  foreach(dss::DSMeter* pDSMeter, mods) {
+  std::vector<boost::shared_ptr<dss::DSMeter> > mods = apt.getDSMeters();
+  foreach(boost::shared_ptr<dss::DSMeter> pDSMeter, mods) {
     pDSMeter->setIsValid(false);
   }
 
@@ -448,8 +448,8 @@ int dss__CircuitRescan(struct soap *soap, int _token, char* _dsid, bool& result)
     return soap_sender_fault(soap, "Error parsing dsid", NULL);
   }
   try {
-    dss::DSMeter& mod = apt.getDSMeterByDSID(dsid);
-    mod.setIsValid(false);
+    boost::shared_ptr<dss::DSMeter> mod = apt.getDSMeterByDSID(dsid);
+    mod->setIsValid(false);
   } catch(dss::ItemNotFoundException&) {
     return soap_sender_fault(soap, "Could not find dsMeter", NULL);
   }
@@ -1076,13 +1076,13 @@ int dss__DeviceGetIsLocked(struct soap *soap, int _token, char* _deviceID, bool&
 //==================================================== Information
 
 int dss__DSMeterGetPowerConsumption(struct soap *soap, int _token, int _dsMeterID, unsigned long& result) {
-  dss::DSMeter mod(dss::NullDSID, NULL);
+  boost::shared_ptr<dss::DSMeter> mod;
   int getResult = AuthorizeAndGetDSMeterByBusID(soap, _token, _dsMeterID, mod);
   if(getResult != SOAP_OK) {
     return getResult;
   }
 
-  result = mod.getPowerConsumption();
+  result = mod->getPowerConsumption();
   return SOAP_OK;
 } // dss__DSMeterGetPowerConsumption
 
@@ -1097,7 +1097,7 @@ int dss__ApartmentGetDSMeterIDs(struct soap *soap, int _token, std::vector<std::
   }
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
 
-  std::vector<dss::DSMeter*>& dsMeters = apt.getDSMeters();
+  std::vector<boost::shared_ptr<dss::DSMeter> >& dsMeters = apt.getDSMeters();
 
   for(unsigned int iDSMeter = 0; iDSMeter < dsMeters.size(); iDSMeter++) {
     dss::dsid_t dsid = dsMeters[iDSMeter]->getDSID();
@@ -1108,24 +1108,24 @@ int dss__ApartmentGetDSMeterIDs(struct soap *soap, int _token, std::vector<std::
 }
 
 int dss__DSMeterGetName(struct soap *soap, int _token, char* _dsMeterID, std::string& name) {
-  dss::DSMeter mod(dss::NullDSID, NULL);
+  boost::shared_ptr<dss::DSMeter> mod;
   int getResult = AuthorizeAndGetDSMeter(soap, _token, _dsMeterID, mod);
   if(getResult != SOAP_OK) {
     return getResult;
   }
 
-  name = mod.getName();
+  name = mod->getName();
   return SOAP_OK;
 } // dss__DSMeterGetName
 
 int dss__DSMeterSetName(struct soap *soap, int _token, char* _dsMeterID, char*  _name, bool& result) {
-  dss::DSMeter mod(dss::NullDSID, NULL);
+  boost::shared_ptr<dss::DSMeter> mod;
   int getResult = AuthorizeAndGetDSMeter(soap, _token, _dsMeterID, mod);
   if(getResult != SOAP_OK) {
     return getResult;
   }
 
-  mod.setName(_name);
+  mod->setName(_name);
   result = true;
   return SOAP_OK;
 } // dss__DSMeterSetName

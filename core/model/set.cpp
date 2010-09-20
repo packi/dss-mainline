@@ -162,8 +162,8 @@ namespace dss {
     return result;
   } // getByDSMeter
 
-  Set Set::getByDSMeter(const DSMeter& _dsMeter) const {
-    return getByDSMeter(_dsMeter.getBusID());
+  Set Set::getByDSMeter(boost::shared_ptr<const DSMeter> _dsMeter) const {
+    return getByDSMeter(_dsMeter->      getBusID());
   } // getByDSMeter
 
   Set Set::getByFunctionID(const int _functionID) const {
@@ -241,8 +241,8 @@ namespace dss {
     return resultSet.m_ContainedDevices.front();
   } // getByBusID
 
-  DeviceReference Set::getByBusID(const devid_t _busid, const DSMeter& _meter) const {
-    return getByBusID(_busid, _meter.getBusID());
+  DeviceReference Set::getByBusID(const devid_t _busid, boost::shared_ptr<const DSMeter> _meter) const {
+    return getByBusID(_busid, _meter->getBusID());
   } // getByBusID
 
   class ByDSIDSelector : public IDeviceSelector {

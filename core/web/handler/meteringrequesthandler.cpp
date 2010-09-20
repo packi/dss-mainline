@@ -71,8 +71,8 @@ namespace dss {
     boost::shared_ptr<JSONArrayBase> series(new JSONArrayBase());
     resultObj->addElement("series", series);
 
-    std::vector<DSMeter*>& dsMeters = m_Apartment.getDSMeters();
-    foreach(DSMeter* dsMeter, dsMeters) {
+    std::vector<boost::shared_ptr<DSMeter> >& dsMeters = m_Apartment.getDSMeters();
+    foreach(boost::shared_ptr<DSMeter> dsMeter, dsMeters) {
       boost::shared_ptr<JSONObject> energyEntry(new JSONObject());
       series->addElement("", energyEntry);
       energyEntry->addProperty("dsid", dsMeter->getDSID().toString());
@@ -196,7 +196,7 @@ namespace dss {
       return failure("Invalid 'from' value");
     }
 
-    std::vector<DSMeter*> meters;
+    std::vector<boost::shared_ptr<DSMeter> > meters;
 
     if(from == "all") {
       meters = m_Apartment.getDSMeters();
@@ -216,8 +216,8 @@ namespace dss {
         }
 
         try {
-          DSMeter& dsMeter = m_Apartment.getDSMeterByDSID(dsid);
-          meters.push_back(&dsMeter);
+          boost::shared_ptr<DSMeter> dsMeter = m_Apartment.getDSMeterByDSID(dsid);
+          meters.push_back(dsMeter);
         } catch (std::runtime_error&) {
           return failure("Could not find dsMeter with given dsid.");
         }
@@ -233,7 +233,7 @@ namespace dss {
 
     for(size_t i = 0; i < meters.size(); i++) {
       try {
-        DSMeter* dsMeter = meters.at(i);
+        boost::shared_ptr<DSMeter> dsMeter = meters.at(i);
         boost::shared_ptr<JSONObject> modulator(new JSONObject());
 
         modulator->addProperty("dsid", dsMeter->getDSID().toString());

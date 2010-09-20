@@ -62,7 +62,7 @@ namespace dss {
   {
   private:
     std::vector<Zone*> m_Zones;
-    std::vector<DSMeter*> m_DSMeters;
+    std::vector<boost::shared_ptr<DSMeter> > m_DSMeters;
     std::vector<Device*> m_Devices;
 
     DS485Interface* m_pDS485Interface;
@@ -86,7 +86,7 @@ namespace dss {
     /** Returns a reference to the device with the name \a _name*/
     Device& getDeviceByName(const std::string& _name);
     /** Returns a device by it's short-address and dsMeter */
-    Device& getDeviceByShortAddress(const DSMeter& _dsMeter, const devid_t _deviceID) const;
+    Device& getDeviceByShortAddress(boost::shared_ptr<const DSMeter> _dsMeter, const devid_t _deviceID) const;
     std::vector<Device*>& getDevicesVector() { return m_Devices; }
     /** Allocates a device and returns a reference to it.
      *  If there is a stale device with the same dsid, this device gets "activated"
@@ -107,16 +107,16 @@ namespace dss {
       */
     Zone& allocateZone(int _zoneID);
 
-    DSMeter& allocateDSMeter(const dsid_t _dsid);
+    boost::shared_ptr<DSMeter> allocateDSMeter(const dsid_t _dsid);
 
     /** Returns a DSMeter by name */
-    DSMeter& getDSMeter(const std::string& _modName);
+    boost::shared_ptr<DSMeter> getDSMeter(const std::string& _modName);
     /** Returns a DSMeter by DSID  */
-    DSMeter& getDSMeterByDSID(const dsid_t _dsid);
+    boost::shared_ptr<DSMeter> getDSMeterByDSID(const dsid_t _dsid);
     /** Returns a DSMeter by bus-id */
-    DSMeter& getDSMeterByBusID(const int _busID);
+    boost::shared_ptr<DSMeter> getDSMeterByBusID(const int _busID);
     /** Returns a vector of all dsMeters */
-    std::vector<DSMeter*>& getDSMeters();
+    std::vector<boost::shared_ptr<DSMeter> >& getDSMeters();
 
     /** Returns a Group by name */
     Group& getGroup(const std::string& _name);
