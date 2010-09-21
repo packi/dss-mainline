@@ -150,7 +150,7 @@ namespace dss {
         boost::shared_ptr<JSONArrayBase> circuits(new JSONArrayBase());
 
         resultObj->addElement("circuits", circuits);
-        std::vector<boost::shared_ptr<DSMeter> >& dsMeters = m_Apartment.getDSMeters();
+        std::vector<boost::shared_ptr<DSMeter> > dsMeters = m_Apartment.getDSMeters();
         foreach(boost::shared_ptr<DSMeter> dsMeter, dsMeters) {
           boost::shared_ptr<JSONObject> circuit(new JSONObject());
           circuits->addElement("", circuit);

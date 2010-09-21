@@ -197,7 +197,7 @@ namespace dss {
     throw ItemNotFoundException(_dsid.toString());
   } // getDSMeterByDSID
 
-  std::vector<boost::shared_ptr<DSMeter> >& Apartment::getDSMeters() {
+  std::vector<boost::shared_ptr<DSMeter> > Apartment::getDSMeters() {
     return m_DSMeters;
   } // getDSMeters
 

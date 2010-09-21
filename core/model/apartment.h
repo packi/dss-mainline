@@ -114,7 +114,7 @@ namespace dss {
     /** Returns a DSMeter by bus-id */
     boost::shared_ptr<DSMeter> getDSMeterByBusID(const int _busID);
     /** Returns a vector of all dsMeters */
-    std::vector<boost::shared_ptr<DSMeter> >& getDSMeters();
+    std::vector<boost::shared_ptr<DSMeter> > getDSMeters();
 
     /** Returns a Group by name */
     Group& getGroup(const std::string& _name);

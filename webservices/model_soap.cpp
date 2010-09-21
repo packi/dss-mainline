@@ -1095,7 +1095,7 @@ int dss__ApartmentGetDSMeterIDs(struct soap *soap, int _token, std::vector<std::
   }
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
 
-  std::vector<boost::shared_ptr<dss::DSMeter> >& dsMeters = apt.getDSMeters();
+  std::vector<boost::shared_ptr<dss::DSMeter> > dsMeters = apt.getDSMeters();
 
   for(unsigned int iDSMeter = 0; iDSMeter < dsMeters.size(); iDSMeter++) {
     dss::dsid_t dsid = dsMeters[iDSMeter]->getDSID();
