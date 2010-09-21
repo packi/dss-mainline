@@ -142,16 +142,16 @@ namespace dss {
             lastKnownZoneID = strToIntDef("lastKnownZoneID", 0);
           }
 
-          Device& newDevice = m_Apartment.allocateDevice(dsid);
+          boost::shared_ptr<Device> newDevice = m_Apartment.allocateDevice(dsid);
           if(!name.empty()) {
-            newDevice.setName(name);
+            newDevice->setName(name);
           }
-          newDevice.setFirstSeen(firstSeen);
-          newDevice.setLastKnownDSMeterDSID(lastKnownDsMeter);
-          newDevice.setLastKnownZoneID(lastKnownZoneID);
+          newDevice->setFirstSeen(firstSeen);
+          newDevice->setLastKnownDSMeterDSID(lastKnownDsMeter);
+          newDevice->setLastKnownZoneID(lastKnownZoneID);
           Element* propertiesElem = elem->getChildElement("properties");
           if(propertiesElem != NULL) {
-            newDevice.getPropertyNode()->loadChildrenFromNode(propertiesElem);
+            newDevice->getPropertyNode()->loadChildrenFromNode(propertiesElem);
           }
         }
       }
@@ -203,7 +203,7 @@ namespace dss {
     }
   } // loadZones
 
-  void deviceToXML(const Device* _pDevice, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
+  void deviceToXML(boost::shared_ptr<const Device> _pDevice, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
     AutoPtr<Element> pDeviceNode = _pDocument->createElement("device");
     pDeviceNode->setAttribute("dsid", _pDevice->getDSID().toString());
     if(!_pDevice->getName().empty()) {
@@ -275,7 +275,7 @@ void dsMeterToXML(const boost::shared_ptr<DSMeter> _pDSMeter, AutoPtr<Element>& 
     // devices
     AutoPtr<Element> pDevices = pDoc->createElement("devices");
     pRoot->appendChild(pDevices);
-    foreach(Device* pDevice, m_Apartment.getDevicesVector()) {
+    foreach(boost::shared_ptr<Device> pDevice, m_Apartment.getDevicesVector()) {
       deviceToXML(pDevice, pDevices, pDoc);
     }
 

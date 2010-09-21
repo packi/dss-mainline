@@ -98,13 +98,12 @@ namespace dss {
       resultObj->addProperty("consumption", accumulatedConsumption);
       return success(resultObj);
     } else if(isDeviceInterfaceCall(_request)) {
-      IDeviceInterface* interface = NULL;
+      boost::shared_ptr<IDeviceInterface> interface;
       std::string groupName = _request.getParameter("groupName");
       std::string groupIDString = _request.getParameter("groupID");
       if(!groupName.empty()) {
         try {
-          Group& grp = m_Apartment.getGroup(groupName);
-          interface = &grp;
+          interface = m_Apartment.getGroup(groupName);
         } catch(std::runtime_error& e) {
           return failure("Could not find group with name '" + groupName + "'");
         }
@@ -112,8 +111,7 @@ namespace dss {
         try {
           int groupID = strToIntDef(groupIDString, -1);
           if(groupID != -1) {
-            Group& grp = m_Apartment.getGroup(groupID);
-            interface = &grp;
+            interface = m_Apartment.getGroup(groupID);
           } else {
             return failure("Could not parse group ID '" + groupIDString + "'");
           }
@@ -122,9 +120,9 @@ namespace dss {
         }
       }
       if(interface == NULL) {
-        interface = &m_Apartment.getGroup(GroupIDBroadcast);
+        interface = m_Apartment.getGroup(GroupIDBroadcast);
       }
-    
+
       return handleDeviceInterfaceRequest(_request, interface);
 
     } else {

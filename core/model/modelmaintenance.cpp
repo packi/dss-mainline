@@ -369,8 +369,8 @@ namespace dss {
     : m_SceneID(_sceneID) {}
     virtual ~SetLastCalledSceneAction() {}
 
-    virtual bool perform(Device& _device) {
-      _device.setLastCalledScene(m_SceneID);
+    virtual bool perform(boost::shared_ptr<Device> _device) {
+      _device->setLastCalledScene(m_SceneID);
       return true;
     }
   };
@@ -382,7 +382,7 @@ namespace dss {
         return;
       }
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
-      Group* group = zone->getGroup(_groupID);
+      boost::shared_ptr<Group> group = zone->getGroup(_groupID);
       if(group != NULL) {
         log("OnGroupCallScene: group-id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "' scene: " + intToString(_sceneID));
         if(SceneHelper::rememberScene(_sceneID & 0x00ff)) {
@@ -398,11 +398,11 @@ namespace dss {
           }
           foreach(boost::shared_ptr<Zone> pZone, zonesToUpdate) {
             if(_groupID == 0) {
-              foreach(Group* pGroup, pZone->getGroups()) {
+              foreach(boost::shared_ptr<Group> pGroup, pZone->getGroups()) {
                 pGroup->setLastCalledScene(_sceneID & 0x00ff);
               }
             } else {
-              Group* pGroup = pZone->getGroup(_groupID);
+              boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
               if(pGroup != NULL) {
                 pGroup->setLastCalledScene(_sceneID & 0x00ff);
               }
@@ -429,7 +429,7 @@ namespace dss {
         log("OnDeviceCallScene: dsMeter-id '" + intToString(_dsMeterID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID));
         DeviceReference devRef = mod->getDevices().getByBusID(_deviceID, _dsMeterID);
         if(SceneHelper::rememberScene(_sceneID & 0x00ff)) {
-          devRef.getDevice().setLastCalledScene(_sceneID & 0x00ff);
+          devRef.getDevice()->setLastCalledScene(_sceneID & 0x00ff);
         }
       } catch(ItemNotFoundException& e) {
         log("OnDeviceCallScene: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + intToString(_dsMeterID) + "' scene:" + intToString(_sceneID), lsError);
@@ -471,8 +471,8 @@ namespace dss {
     try {
       boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByBusID(_modID);
       try {
-        Device& device = m_pApartment->getDeviceByShortAddress(dsMeter, _devID);
-        PropertyNodePtr deviceNode = device.getPropertyNode();
+        boost::shared_ptr<Device> device = m_pApartment->getDeviceByShortAddress(dsMeter, _devID);
+        PropertyNodePtr deviceNode = device->getPropertyNode();
         if(deviceNode == NULL) {
           return;
         }
@@ -496,7 +496,7 @@ namespace dss {
           // create event to be raised
           DeviceReference devRef(device, m_pApartment);
           boost::shared_ptr<Event> evt(new Event(eventName, &devRef));
-          evt->setProperty("device", device.getDSID().toString());
+          evt->setProperty("device", device->getDSID().toString());
           std::string priorityString = "unknown";
           if(_priority == 0) {
             priorityString = "normal";

@@ -24,6 +24,8 @@
 #ifndef ADDRESSABLEMODELITEM_H
 #define ADDRESSABLEMODELITEM_H
 
+#include <boost/enable_shared_from_this.hpp>
+
 #include "physicalmodelitem.h"
 #include "deviceinterface.h"
 
@@ -32,7 +34,8 @@ namespace dss {
   class Apartment;
 
   class AddressableModelItem : public PhysicalModelItem,
-                               public IDeviceInterface {
+                               public IDeviceInterface,
+                               public boost::enable_shared_from_this<AddressableModelItem> {
   public:
     AddressableModelItem(Apartment* _pApartment);
 

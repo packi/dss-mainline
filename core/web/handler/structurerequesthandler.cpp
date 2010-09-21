@@ -51,8 +51,8 @@ namespace dss {
     if(!deviceIDStr.empty()) {
       dsid_t deviceID = dsid::fromString(deviceIDStr);
 
-      Device& dev = DSS::getInstance()->getApartment().getDeviceByDSID(deviceID);
-      if(!dev.isPresent()) {
+      boost::shared_ptr<Device> dev = DSS::getInstance()->getApartment().getDeviceByDSID(deviceID);
+      if(!dev->isPresent()) {
         return failure("cannot add nonexisting device to a zone");
       }
 
@@ -124,16 +124,16 @@ namespace dss {
     if(!deviceIDStr.empty()) {
       dsid_t deviceID = dsid::fromString(deviceIDStr);
 
-      Device& dev = DSS::getInstance()->getApartment().getDeviceByDSID(deviceID);
-      if(dev.isPresent()) {
+      boost::shared_ptr<Device> dev = DSS::getInstance()->getApartment().getDeviceByDSID(deviceID);
+      if(dev->isPresent()) {
         return failure("Cannot remove present device");
       }
-     
+
       m_Apartment.removeDevice(deviceID);
       m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
       return success();
     }
-    
+
     return failure("Missing deviceID");
   }
 

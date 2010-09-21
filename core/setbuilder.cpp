@@ -157,9 +157,9 @@ namespace dss {
     }
 
     // check for a local group
-    Group* grp = _zone->getGroup(_identifier);
+    boost::shared_ptr<Group> grp = _zone->getGroup(_identifier);
     if(grp != NULL) {
-      Set result = _set.getByGroup(*grp);
+      Set result = _set.getByGroup(grp);
       return result;
     }
 

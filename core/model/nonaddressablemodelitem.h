@@ -24,6 +24,8 @@
 
 #include <vector>
 
+#include <boost/shared_ptr.hpp>
+
 #include "devicereference.h"
 
 namespace dss {
@@ -46,7 +48,7 @@ namespace dss {
 
     virtual void blink();
   protected:
-    virtual std::vector<AddressableModelItem*> splitIntoAddressableItems() = 0;
+    virtual std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems() = 0;
   }; // NonAddressableModelItem
 
 } // namespace dss

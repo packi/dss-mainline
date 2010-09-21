@@ -24,6 +24,8 @@
 #ifndef DEVICEREFERENCE_H
 #define DEVICEREFERENCE_H
 
+#include <boost/shared_ptr.hpp>
+
 #include "core/ds485types.h"
 #include "deviceinterface.h"
 
@@ -44,15 +46,15 @@ namespace dss {
     /** Copy constructor */
     DeviceReference(const DeviceReference& _copy);
     DeviceReference(const dsid_t _dsid, const Apartment* _apartment);
-    DeviceReference(const Device& _device, const Apartment* _apartment);
+    DeviceReference(boost::shared_ptr<const Device> _device, const Apartment* _apartment);
     virtual ~DeviceReference() {};
 
     /** Returns a reference to the referenced device
      * @note This accesses the apartment which has to be valid.
      */
-    Device& getDevice();
+    boost::shared_ptr<Device> getDevice();
     /** @copydoc getDevice() */
-    const Device& getDevice() const;
+    boost::shared_ptr<const Device> getDevice() const;
     /** Returns the DSID of the referenced device */
     dsid_t getDSID() const;
 

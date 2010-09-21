@@ -97,7 +97,7 @@ namespace dss {
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, uint8_t _dsMeterID) = 0;
 
     virtual ~StructureQueryBusInterface() {}; // please the compiler (virtual dtor)
-    virtual bool isLocked(const Device& _device) = 0;
+    virtual bool isLocked(boost::shared_ptr<const Device> _device) = 0;
   }; // StructureQueryBusInterface
 
   class StructureModifyingBusInterface {

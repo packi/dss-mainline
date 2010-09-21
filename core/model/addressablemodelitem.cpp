@@ -38,13 +38,13 @@ namespace dss {
 
   void AddressableModelItem::increaseValue() {
     boost::shared_ptr<IncreaseValueCommandBusRequest> request(new IncreaseValueCommandBusRequest());
-    request->setTarget(this);
+    request->setTarget(shared_from_this());
     m_pApartment->dispatchRequest(request);
   }
 
   void AddressableModelItem::decreaseValue() {
     boost::shared_ptr<DecreaseValueCommandBusRequest> request(new DecreaseValueCommandBusRequest());
-    request->setTarget(this);
+    request->setTarget(shared_from_this());
     m_pApartment->dispatchRequest(request);
   }
 
@@ -55,47 +55,47 @@ namespace dss {
     } else {
       request.reset(new StartDimDownCommandBusRequest());
     }
-    request->setTarget(this);
+    request->setTarget(shared_from_this());
     m_pApartment->dispatchRequest(request);
   } // startDim
 
   void AddressableModelItem::endDim() {
     boost::shared_ptr<CommandBusRequest> request(new EndDimCommandBusRequest());
-    request->setTarget(this);
+    request->setTarget(shared_from_this());
     m_pApartment->dispatchRequest(request);
   } // endDim
 
   void AddressableModelItem::setValue(const double _value) {
     boost::shared_ptr<SetValueCommandBusRequest> request(new SetValueCommandBusRequest());
-    request->setTarget(this);
+    request->setTarget(shared_from_this());
     request->setValue(int(_value));
     m_pApartment->dispatchRequest(request);
   } // setValue
 
   void AddressableModelItem::callScene(const int _sceneNr) {
     boost::shared_ptr<CallSceneCommandBusRequest> request(new CallSceneCommandBusRequest());
-    request->setTarget(this);
+    request->setTarget(shared_from_this());
     request->setSceneID(_sceneNr);
     m_pApartment->dispatchRequest(request);
   } // callScene
 
   void AddressableModelItem::saveScene(const int _sceneNr) {
     boost::shared_ptr<SaveSceneCommandBusRequest> request(new SaveSceneCommandBusRequest());
-    request->setTarget(this);
+    request->setTarget(shared_from_this());
     request->setSceneID(_sceneNr);
     m_pApartment->dispatchRequest(request);
   } // saveScene
 
   void AddressableModelItem::undoScene(const int _sceneNr) {
     boost::shared_ptr<UndoSceneCommandBusRequest> request(new UndoSceneCommandBusRequest());
-    request->setTarget(this);
+    request->setTarget(shared_from_this());
     request->setSceneID(_sceneNr);
     m_pApartment->dispatchRequest(request);
   } // undoScene
 
   void AddressableModelItem::blink() {
     boost::shared_ptr<BlinkCommandBusRequest> request(new BlinkCommandBusRequest());
-    request->setTarget(this);
+    request->setTarget(shared_from_this());
     m_pApartment->dispatchRequest(request);
   } // blink
 

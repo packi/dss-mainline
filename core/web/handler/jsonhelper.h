@@ -38,7 +38,7 @@ namespace dss {
 
   boost::shared_ptr<JSONObject> toJSON(const DeviceReference& _device);
   boost::shared_ptr<JSONArrayBase> toJSON(const Set& _set);
-  boost::shared_ptr<JSONObject> toJSON(const Group& _group);
+  boost::shared_ptr<JSONObject> toJSON(boost::shared_ptr<const Group> _group);
   boost::shared_ptr<JSONObject> toJSON(Zone& _zone, bool _includeDevices = true);
   boost::shared_ptr<JSONObject> toJSON(Apartment& _apartment);
 

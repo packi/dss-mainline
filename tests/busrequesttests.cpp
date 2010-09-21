@@ -50,11 +50,11 @@ private:
 
 BOOST_AUTO_TEST_CASE(testRequestReachesDispatcher) {
   Apartment apt(NULL);
-  Device& d1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> d1 = apt.allocateDevice(dsid_t(0,1));
   TestDispatcher dispatcher;
   apt.setBusRequestDispatcher(&dispatcher);
   boost::shared_ptr<CallSceneCommandBusRequest> request(new CallSceneCommandBusRequest());
-  request->setTarget(&d1);
+  request->setTarget(d1);
   request->setSceneID(SceneOff);
   
   BOOST_CHECK_EQUAL(0, dispatcher.requestCount());

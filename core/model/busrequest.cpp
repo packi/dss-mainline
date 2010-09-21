@@ -83,7 +83,7 @@ namespace dss {
       m_FunctionID = _value;
     }
   private:
-    Device* getDevice() {
+    boost::shared_ptr<Device> getDevice() {
       return ((DeviceCommandBusRequest*)getRequest())->getTarget();
     }
   private:
@@ -105,9 +105,7 @@ namespace dss {
   class CommandBusRequestPacketBuilderHintsBase : public PacketBuilderHints {
   public:
     CommandBusRequestPacketBuilderHintsBase(CommandBusRequest* _pRequest)
-    : PacketBuilderHints(_pRequest),
-      m_pGroup(NULL),
-      m_pDevice(NULL)
+    : PacketBuilderHints(_pRequest)
     {
       determineTypeOfTarget();
     }
@@ -131,22 +129,22 @@ namespace dss {
       return m_pDevice != NULL;
     }
 
-    Device* getDevice() {
+    boost::shared_ptr<Device> getDevice() {
       return m_pDevice;
     }
 
-    Group* getGroup() {
+    boost::shared_ptr<Group> getGroup() {
       return m_pGroup;
     }
   private:
     void determineTypeOfTarget() {
-      PhysicalModelItem* pTarget = ((CommandBusRequest*)getRequest())->getTarget();
-      m_pGroup = dynamic_cast<Group*>(pTarget);
-      m_pDevice = dynamic_cast<Device*>(pTarget);
+      boost::shared_ptr<PhysicalModelItem> pTarget = ((CommandBusRequest*)getRequest())->getTarget();
+      m_pGroup = boost::dynamic_pointer_cast<Group>(pTarget);
+      m_pDevice = boost::dynamic_pointer_cast<Device>(pTarget);
     }
   private:
-    Group* m_pGroup;
-    Device* m_pDevice;
+    boost::shared_ptr<Group> m_pGroup;
+    boost::shared_ptr<Device> m_pDevice;
   }; // CommandBusRequestPacketBuilderHintsBase
 
   class DeviceGroupCommandPacketBuilderHints : public CommandBusRequestPacketBuilderHintsBase {

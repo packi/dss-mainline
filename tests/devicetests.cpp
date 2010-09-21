@@ -35,37 +35,37 @@ BOOST_AUTO_TEST_SUITE(DeviceTests)
 
 BOOST_AUTO_TEST_CASE(testGroups) {
   Apartment apt(NULL);
-  Device& dev = apt.allocateDevice(dsid_t(0,1));
-  BOOST_CHECK_EQUAL(dev.getGroupsCount(), 0);
-  dev.resetGroups();
-  BOOST_CHECK_EQUAL(dev.getGroupsCount(), 0);
-  dev.addToGroup(1);
-  BOOST_CHECK_EQUAL(dev.getGroupsCount(), 1);
-  BOOST_CHECK_EQUAL(dev.getGroupIdByIndex(0), 1);
-  BOOST_CHECK_EQUAL(dev.getGroupByIndex(0).getID(), 1);
-  dev.addToGroup(2);
-  BOOST_CHECK_EQUAL(dev.getGroupsCount(), 2);
-  BOOST_CHECK_EQUAL(dev.getGroupIdByIndex(0), 1);
-  BOOST_CHECK_EQUAL(dev.getGroupByIndex(0).getID(), 1);
-  BOOST_CHECK_EQUAL(dev.getGroupIdByIndex(1), 2);
-  BOOST_CHECK_EQUAL(dev.getGroupByIndex(1).getID(), 2);
+  boost::shared_ptr<Device> dev = apt.allocateDevice(dsid_t(0,1));
+  BOOST_CHECK_EQUAL(dev->getGroupsCount(), 0);
+  dev->resetGroups();
+  BOOST_CHECK_EQUAL(dev->getGroupsCount(), 0);
+  dev->addToGroup(1);
+  BOOST_CHECK_EQUAL(dev->getGroupsCount(), 1);
+  BOOST_CHECK_EQUAL(dev->getGroupIdByIndex(0), 1);
+  BOOST_CHECK_EQUAL(dev->getGroupByIndex(0)->getID(), 1);
+  dev->addToGroup(2);
+  BOOST_CHECK_EQUAL(dev->getGroupsCount(), 2);
+  BOOST_CHECK_EQUAL(dev->getGroupIdByIndex(0), 1);
+  BOOST_CHECK_EQUAL(dev->getGroupByIndex(0)->getID(), 1);
+  BOOST_CHECK_EQUAL(dev->getGroupIdByIndex(1), 2);
+  BOOST_CHECK_EQUAL(dev->getGroupByIndex(1)->getID(), 2);
   // adding the device to the same groups again shouldn't change a thing
-  dev.addToGroup(1);
-  dev.addToGroup(2);
-  BOOST_CHECK_EQUAL(dev.getGroupsCount(), 2);
-  BOOST_CHECK_EQUAL(dev.getGroupIdByIndex(0), 1);
-  BOOST_CHECK_EQUAL(dev.getGroupByIndex(0).getID(), 1);
-  BOOST_CHECK_EQUAL(dev.getGroupIdByIndex(1), 2);
-  BOOST_CHECK_EQUAL(dev.getGroupByIndex(1).getID(), 2);
-  BOOST_CHECK(dev.getGroupBitmask().test(0));
-  BOOST_CHECK(dev.getGroupBitmask().test(1));
+  dev->addToGroup(1);
+  dev->addToGroup(2);
+  BOOST_CHECK_EQUAL(dev->getGroupsCount(), 2);
+  BOOST_CHECK_EQUAL(dev->getGroupIdByIndex(0), 1);
+  BOOST_CHECK_EQUAL(dev->getGroupByIndex(0)->getID(), 1);
+  BOOST_CHECK_EQUAL(dev->getGroupIdByIndex(1), 2);
+  BOOST_CHECK_EQUAL(dev->getGroupByIndex(1)->getID(), 2);
+  BOOST_CHECK(dev->getGroupBitmask().test(0));
+  BOOST_CHECK(dev->getGroupBitmask().test(1));
   
-  dev.removeFromGroup(1);
-  BOOST_CHECK_EQUAL(dev.getGroupsCount(), 1);
-  BOOST_CHECK_EQUAL(dev.getGroupIdByIndex(0), 2);
-  BOOST_CHECK_EQUAL(dev.getGroupByIndex(0).getID(), 2);
-  BOOST_CHECK(!dev.getGroupBitmask().test(0));
-  BOOST_CHECK(dev.getGroupBitmask().test(1));
+  dev->removeFromGroup(1);
+  BOOST_CHECK_EQUAL(dev->getGroupsCount(), 1);
+  BOOST_CHECK_EQUAL(dev->getGroupIdByIndex(0), 2);
+  BOOST_CHECK_EQUAL(dev->getGroupByIndex(0)->getID(), 2);
+  BOOST_CHECK(!dev->getGroupBitmask().test(0));
+  BOOST_CHECK(dev->getGroupBitmask().test(1));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

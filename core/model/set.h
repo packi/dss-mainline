@@ -39,7 +39,7 @@ namespace dss {
   public:
     /** The implementor should return true if the device should appear in the
      * resulting set. */
-    virtual bool selectDevice(const Device& _device) const = 0;
+    virtual bool selectDevice(boost::shared_ptr<const Device> _device) const = 0;
     virtual ~IDeviceSelector() {}
   };
 
@@ -47,7 +47,7 @@ namespace dss {
   class IDeviceAction {
   public:
     /** This action will be performed for every device contained in the set. */
-    virtual bool perform(Device& _device) = 0;
+    virtual bool perform(boost::shared_ptr<Device> _device) = 0;
     virtual ~IDeviceAction() {}
   };
 
@@ -65,7 +65,7 @@ namespace dss {
     /** Copy constructor. */
     Set(const Set& _copy);
     /** Constructor for a set containing only \a _device. */
-    Set(Device& _device);
+    Set(boost::shared_ptr<const Device> _device);
     /** Constructor for a set containing only \a _reference. */
     Set(DeviceReference& _reference);
     /** Constructor for a set containing \a _devices. */
@@ -86,7 +86,7 @@ namespace dss {
     /** Returns a subset of the devices which are member of the given group
      * Note that these groups could be spanned over multiple dsMeters.
      */
-    Set getByGroup(const Group& _group) const;
+    Set getByGroup(boost::shared_ptr<const Group> _group) const;
     /** Returns a subset of the devices which are member of the given group
      * Note that these groups could be spanned over multiple dsMeters.
      */
@@ -146,24 +146,24 @@ namespace dss {
     /** Returns true if the set contains \a _device */
     bool contains(const DeviceReference& _device) const;
     /** Returns true if the set contains \a _device */
-    bool contains(const Device& _device) const;
+    bool contains(boost::shared_ptr<const Device> _device) const;
 
     /** Adds the device \a _device to the set */
     void addDevice(const DeviceReference& _device);
     /** Adds the device \a _device to the set */
-    void addDevice(const Device& _device);
+    void addDevice(boost::shared_ptr<const Device> _device);
 
     /** Removes the device \a _device from the set */
     void removeDevice(const DeviceReference& _device);
     /** Removes the device \a _device from the set */
-    void removeDevice(const Device& _device);
+    void removeDevice(boost::shared_ptr<const Device> _device);
 
     virtual void nextScene();
     virtual void previousScene();
 
     virtual unsigned long getPowerConsumption();
   protected:
-    virtual std::vector<AddressableModelItem*> splitIntoAddressableItems();
+    virtual std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems();
   }; // Set
 
 

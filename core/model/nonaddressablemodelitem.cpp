@@ -30,64 +30,64 @@ namespace dss {
   //================================================== NonAddressableModelItem
 
   void NonAddressableModelItem::increaseValue() {
-    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
-    foreach(AddressableModelItem* item, items) {
+    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
+    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
       item->increaseValue();
     }
   } // increaseValue
 
   void NonAddressableModelItem::decreaseValue() {
-    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
-    foreach(AddressableModelItem* item, items) {
+    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
+    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
       item->decreaseValue();
     }
   } // decreaseValue
 
   void NonAddressableModelItem::startDim(const bool _directionUp) {
-    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
-    foreach(AddressableModelItem* item, items) {
+    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
+    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
       item->startDim(_directionUp);
     }
   } // startDim
 
   void NonAddressableModelItem::endDim() {
-    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
-    foreach(AddressableModelItem* item, items) {
+    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
+    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
       item->endDim();
     }
   } // endDim
 
   void NonAddressableModelItem::setValue(const double _value) {
-    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
-    foreach(AddressableModelItem* item, items) {
+    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
+    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
       item->setValue(_value);
     }
   } // setValue
 
   void NonAddressableModelItem::callScene(const int _sceneNr) {
-    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
-    foreach(AddressableModelItem* item, items) {
+    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
+    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
       item->callScene(_sceneNr);
     }
   } // callScene
 
   void NonAddressableModelItem::saveScene(const int _sceneNr) {
-    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
-    foreach(AddressableModelItem* item, items) {
+    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
+    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
       item->saveScene(_sceneNr);
     }
   } // saveScene
 
   void NonAddressableModelItem::undoScene(const int _sceneNr) {
-    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
-    foreach(AddressableModelItem* item, items) {
+    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
+    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
       item->undoScene(_sceneNr);
     }
   } // undoScene
 
   void NonAddressableModelItem::blink() {
-    std::vector<AddressableModelItem*> items = splitIntoAddressableItems();
-    foreach(AddressableModelItem* item, items) {
+    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
+    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
       item->blink();
     }
   }

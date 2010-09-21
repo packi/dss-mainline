@@ -63,7 +63,7 @@ namespace dss {
   private:
     std::vector<boost::shared_ptr<Zone> > m_Zones;
     std::vector<boost::shared_ptr<DSMeter> > m_DSMeters;
-    std::vector<Device*> m_Devices;
+    std::vector<boost::shared_ptr<Device> > m_Devices;
 
     DS485Interface* m_pDS485Interface;
     BusRequestDispatcher* m_pBusRequestDispatcher;
@@ -80,16 +80,16 @@ namespace dss {
     virtual Set getDevices() const;
 
     /** Returns a reference to the device with the DSID \a _dsid */
-    Device& getDeviceByDSID(const dsid_t _dsid) const;
+    boost::shared_ptr<Device> getDeviceByDSID(const dsid_t _dsid) const;
     /** @copydoc getDeviceByDSID */
-    Device& getDeviceByDSID(const dsid_t _dsid);
+    boost::shared_ptr<Device> getDeviceByDSID(const dsid_t _dsid);
     /** Returns a reference to the device with the name \a _name*/
-    Device& getDeviceByName(const std::string& _name);
+    boost::shared_ptr<Device> getDeviceByName(const std::string& _name);
     /** Returns a device by it's short-address and dsMeter */
-    Device& getDeviceByShortAddress(boost::shared_ptr<const DSMeter> _dsMeter, const devid_t _deviceID) const;
-    std::vector<Device*>& getDevicesVector() { return m_Devices; }
+    boost::shared_ptr<Device> getDeviceByShortAddress(boost::shared_ptr<const DSMeter> _dsMeter, const devid_t _deviceID) const;
+    std::vector<boost::shared_ptr<Device> > getDevicesVector() { return m_Devices; }
     /** Allocates a device and returns a reference to it. */
-    Device& allocateDevice(const dsid_t _dsid);
+    boost::shared_ptr<Device> allocateDevice(const dsid_t _dsid);
 
     /** Returns the Zone by name */
     boost::shared_ptr<Zone> getZone(const std::string& _zoneName);
@@ -117,9 +117,9 @@ namespace dss {
     std::vector<boost::shared_ptr<DSMeter> > getDSMeters();
 
     /** Returns a Group by name */
-    Group& getGroup(const std::string& _name);
+    boost::shared_ptr<Group> getGroup(const std::string& _name);
     /** Returns a Group by id */
-    Group& getGroup(const int _id);
+    boost::shared_ptr<Group> getGroup(const int _id);
 
     void removeZone(int _zoneID);
     void removeDevice(dsid_t _device);

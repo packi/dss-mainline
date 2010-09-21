@@ -54,8 +54,8 @@ namespace dss {
   Set::Set() {
   } // ctor
 
-  Set::Set(Device& _device) {
-    m_ContainedDevices.push_back(DeviceReference(_device, &_device.getApartment()));
+  Set::Set(boost::shared_ptr<const Device> _device) {
+    m_ContainedDevices.push_back(DeviceReference(_device, &_device->getApartment()));
   } // ctor(Device)
 
   Set::Set(DeviceVector _devices) {
@@ -100,8 +100,8 @@ namespace dss {
 
     virtual ~ByGroupSelector() {}
 
-    virtual bool selectDevice(const Device& _device) const {
-      return _device.isInGroup(m_GroupNr);
+    virtual bool selectDevice(boost::shared_ptr<const Device> _device) const {
+      return _device->isInGroup(m_GroupNr);
     }
   };
 
@@ -113,8 +113,8 @@ namespace dss {
     }
   } // getByGroup(id)
 
-  Set Set::getByGroup(const Group& _group) const {
-    return getByGroup(_group.getID());
+  Set Set::getByGroup(boost::shared_ptr<const Group> _group) const {
+    return getByGroup(_group->getID());
   } // getByGroup(ref)
 
   Set Set::getByGroup(const std::string& _name) const {
@@ -122,8 +122,8 @@ namespace dss {
     if(isEmpty()) {
       return result;
     } else {
-      Group& g = get(0).getDevice().getApartment().getGroup(_name);
-      return getByGroup(g.getID());
+      boost::shared_ptr<Group> g = get(0).getDevice()->getApartment().getGroup(_name);
+      return getByGroup(g->getID());
     }
   } // getByGroup(name)
 
@@ -131,7 +131,7 @@ namespace dss {
     if(_zoneID != 0) {
       Set result;
       foreach(const DeviceReference& dev, m_ContainedDevices) {
-        if(dev.getDevice().getZoneID() == _zoneID) {
+        if(dev.getDevice()->getZoneID() == _zoneID) {
           result.addDevice(dev);
         }
       }
@@ -147,7 +147,7 @@ namespace dss {
     if(isEmpty()) {
       return result;
     } else {
-      boost::shared_ptr<Zone> zone = get(0).getDevice().getApartment().getZone(_zoneName);
+      boost::shared_ptr<Zone> zone = get(0).getDevice()->getApartment().getZone(_zoneName);
       return getByZone(zone->getID());
     }
   } // getByZone(name)
@@ -155,7 +155,7 @@ namespace dss {
   Set Set::getByDSMeter(const int _dsMeterID) const {
     Set result;
     foreach(const DeviceReference& dev, m_ContainedDevices) {
-      if(dev.getDevice().getDSMeterID() == _dsMeterID) {
+      if(dev.getDevice()->getDSMeterID() == _dsMeterID) {
         result.addDevice(dev);
       }
     }
@@ -169,7 +169,7 @@ namespace dss {
   Set Set::getByFunctionID(const int _functionID) const {
     Set result;
     foreach(const DeviceReference& dev, m_ContainedDevices) {
-      if(dev.getDevice().getFunctionID() == _functionID) {
+      if(dev.getDevice()->getFunctionID() == _functionID) {
         result.addDevice(dev);
       }
     }
@@ -179,7 +179,7 @@ namespace dss {
   Set Set::getByPresence(const bool _presence) const {
     Set result;
     foreach(const DeviceReference& dev, m_ContainedDevices) {
-      if(dev.getDevice().isPresent()== _presence) {
+      if(dev.getDevice()->isPresent()== _presence) {
         result.addDevice(dev);
       }
     }
@@ -189,7 +189,7 @@ namespace dss {
   Set Set::getByTag(const std::string& _tagName) const {
     Set result;
     foreach(const DeviceReference& dev, m_ContainedDevices) {
-      if(dev.getDevice().hasTag(_tagName)) {
+      if(dev.getDevice()->hasTag(_tagName)) {
         result.addDevice(dev);
       }
     }
@@ -203,8 +203,8 @@ namespace dss {
     ByNameSelector(const std::string& _name) : m_Name(_name) {};
     virtual ~ByNameSelector() {};
 
-    virtual bool selectDevice(const Device& _device) const {
-      return _device.getName() == m_Name;
+    virtual bool selectDevice(boost::shared_ptr<const Device> _device) const {
+      return _device->getName() == m_Name;
     }
   };
 
@@ -227,9 +227,9 @@ namespace dss {
     {}
     virtual ~ByIDSelector() {};
 
-    virtual bool selectDevice(const Device& _device) const {
-      return (_device.getShortAddress() == m_ID) &&
-             (_device.getDSMeterID() == m_DSMeterID);
+    virtual bool selectDevice(boost::shared_ptr<const Device> _device) const {
+      return (_device->getShortAddress() == m_ID) &&
+             (_device->getDSMeterID() == m_DSMeterID);
     }
   };
 
@@ -252,8 +252,8 @@ namespace dss {
     ByDSIDSelector(const dsid_t _id) : m_ID(_id) {}
     virtual ~ByDSIDSelector() {};
 
-    virtual bool selectDevice(const Device& _device) const {
-      return _device.getDSID() == m_ID;
+    virtual bool selectDevice(boost::shared_ptr<const Device> _device) const {
+      return _device->getDSID() == m_ID;
     }
   };
 
@@ -296,8 +296,8 @@ namespace dss {
     return pos != m_ContainedDevices.end();
   } // contains
 
-  bool Set::contains(const Device& _device) const {
-    return contains(DeviceReference(_device, &_device.getApartment()));
+  bool Set::contains(boost::shared_ptr<const Device> _device) const {
+    return contains(DeviceReference(_device, &_device->getApartment()));
   } // contains
 
   void Set::addDevice(const DeviceReference& _device) {
@@ -306,8 +306,8 @@ namespace dss {
     }
   } // addDevice
 
-  void Set::addDevice(const Device& _device) {
-    addDevice(DeviceReference(_device, &_device.getApartment()));
+  void Set::addDevice(boost::shared_ptr<const Device> _device) {
+    addDevice(DeviceReference(_device, &_device->getApartment()));
   } // addDevice
 
   void Set::removeDevice(const DeviceReference& _device) {
@@ -317,8 +317,8 @@ namespace dss {
     }
   } // removeDevice
 
-  void Set::removeDevice(const Device& _device) {
-    removeDevice(DeviceReference(_device, &_device.getApartment()));
+  void Set::removeDevice(boost::shared_ptr<const Device> _device) {
+    removeDevice(DeviceReference(_device, &_device->getApartment()));
   } // removeDevice
 
   const DeviceReference& Set::get(int _index) const {
@@ -356,15 +356,15 @@ namespace dss {
   class SetSplitter {
   public:
     typedef hash_map<boost::shared_ptr<const Zone>, std::pair< std::vector<Group*>, Set> > FittingResult;
-    typedef std::vector<AddressableModelItem*> ModelItemVector;
+    typedef std::vector<boost::shared_ptr<AddressableModelItem> > ModelItemVector;
 
-    static std::vector<AddressableModelItem*> splitUp(Set& _set) {
-      std::vector<AddressableModelItem*> result;
+    static ModelItemVector splitUp(Set& _set) {
+      ModelItemVector result;
       if(_set.length() == 1) {
         log("Optimization: Set contains only one device");
-        result.push_back(&_set.get(0).getDevice());
+        result.push_back(_set.get(0).getDevice());
       } else if(_set.length() > 0) {
-        Apartment& apt = _set.get(0).getDevice().getApartment();
+        Apartment& apt = _set.get(0).getDevice()->getApartment();
         if(_set.length() == apt.getDevices().length()) {
           log("Optimization: Set contains all devices of apartment");
           result.push_back(apt.getZone(0)->getGroup(0));
@@ -397,8 +397,8 @@ namespace dss {
     static HashMapZoneSet splitByZone(const Set& _set) {
       HashMapZoneSet result;
       for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
-        const Device& dev = _set.get(iDevice).getDevice();
-        boost::shared_ptr<Zone> zone = dev.getApartment().getZone(dev.getZoneID());
+        boost::shared_ptr<const Device> dev = _set.get(iDevice).getDevice();
+        boost::shared_ptr<Zone> zone = dev->getApartment().getZone(dev->getZoneID());
         result[zone].addDevice(dev);
       }
       return result;
@@ -419,7 +419,7 @@ namespace dss {
         Logger::getInstance()->log(std::string("Optimization: Set contains all devices of zone ") + intToString(_zone.getID()));
         result.push_back(findGroupContainingAllDevices(_set, _zone));
       } else {
-        std::vector<Group*> unsuitableGroups;
+        std::vector<boost::shared_ptr<Group> > unsuitableGroups;
         Set workingCopy = _set;
 
         while(!workingCopy.isEmpty()) {
@@ -431,14 +431,14 @@ namespace dss {
           }
 
           bool foundGroup = false;
-          for(int iGroup = 0; iGroup < ref.getDevice().getGroupsCount(); iGroup++) {
-            Group& g = ref.getDevice().getGroupByIndex(iGroup);
+          for(int iGroup = 0; iGroup < ref.getDevice()->getGroupsCount(); iGroup++) {
+            boost::shared_ptr<Group> g = ref.getDevice()->getGroupByIndex(iGroup);
 
             if(OptimizerDebug) {
-              Logger::getInstance()->log("  Checking Group " + intToString(g.getID()));
+              Logger::getInstance()->log("  Checking Group " + intToString(g->getID()));
             }
             // continue if already found unsuitable
-            if(find(unsuitableGroups.begin(), unsuitableGroups.end(), &g) != unsuitableGroups.end()) {
+            if(find(unsuitableGroups.begin(), unsuitableGroups.end(), g) != unsuitableGroups.end()) {
               if(OptimizerDebug) {
                 Logger::getInstance()->log("  Group discarded before, continuing search");
               }
@@ -453,23 +453,23 @@ namespace dss {
             }
             for(int iDevice = 0; iDevice < devicesInGroup.length(); iDevice++) {
               if(!_set.contains(devicesInGroup.get(iDevice))) {
-                unsuitableGroups.push_back(&g);
+                unsuitableGroups.push_back(g);
                 groupFits = false;
                 if(OptimizerDebug) {
-                  Logger::getInstance()->log("    Original set does _not_ contain device " + devicesInGroup.get(iDevice).getDevice().getDSID().toString());
+                  Logger::getInstance()->log("    Original set does _not_ contain device " + devicesInGroup.get(iDevice).getDevice()->getDSID().toString());
                 }
                 break;
               }
               if(OptimizerDebug) {
-                Logger::getInstance()->log("    Original set contains device " + devicesInGroup.get(iDevice).getDevice().getDSID().toString());
+                Logger::getInstance()->log("    Original set contains device " + devicesInGroup.get(iDevice).getDevice()->getDSID().toString());
               }
             }
             if(groupFits) {
               if(OptimizerDebug) {
-                Logger::getInstance()->log("  Found a fit " + intToString(g.getID()));
+                Logger::getInstance()->log("  Found a fit " + intToString(g->getID()));
               }
               foundGroup = true;
-              result.push_back(&g);
+              result.push_back(g);
               if(OptimizerDebug) {
                 Logger::getInstance()->log("  Removing devices from working copy");
               }
@@ -486,18 +486,18 @@ namespace dss {
 
           // if no fitting group found
           if(!foundGroup) {
-            result.push_back(&ref.getDevice());
+            result.push_back(ref.getDevice());
           }
         }
       }
       return result;
     }
 
-    static Group* findGroupContainingAllDevices(const Set& _set, const Zone& _zone) {
+    static boost::shared_ptr<Group> findGroupContainingAllDevices(const Set& _set, const Zone& _zone) {
       std::bitset<63> possibleGroups;
       possibleGroups.set();
       for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
-        possibleGroups &= _set[iDevice].getDevice().getGroupBitmask();
+        possibleGroups &= _set[iDevice].getDevice()->getGroupBitmask();
       }
       if(possibleGroups.any()) {
         for(unsigned int iGroup = 0; iGroup < possibleGroups.size(); iGroup++) {
@@ -518,7 +518,7 @@ namespace dss {
     }
   };
 
-  std::vector<AddressableModelItem*> Set::splitIntoAddressableItems() {
+  std::vector<boost::shared_ptr<AddressableModelItem> > Set::splitIntoAddressableItems() {
     return SetSplitter::splitUp(*this);
   } // splitIntoAddressableItems
 

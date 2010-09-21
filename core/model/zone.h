@@ -54,7 +54,7 @@ namespace dss {
     int m_ZoneID;
     DeviceVector m_Devices;
     std::vector<boost::shared_ptr<const DSMeter> > m_DSMeters;
-    std::vector<Group*> m_Groups;
+    std::vector<boost::shared_ptr<Group> > m_Groups;
     int m_FirstZoneOnDSMeter;
     Apartment* m_pApartment;
     PropertyNodePtr m_pPropertyNode;
@@ -83,14 +83,14 @@ namespace dss {
     void removeDevice(const DeviceReference& _device);
 
     /** Returns the group with the name \a _name */
-    Group* getGroup(const std::string& _name) const;
+    boost::shared_ptr<Group> getGroup(const std::string& _name) const;
     /** Returns the group with the id \a _id */
-    Group* getGroup(const int _id) const;
+    boost::shared_ptr<Group> getGroup(const int _id) const;
 
     /** Adds a group to the zone */
-    void addGroup(Group* _group);
+    void addGroup(boost::shared_ptr<Group> _group);
     /** Removes a group from the zone */
-    void removeGroup(UserGroup* _group);
+    void removeGroup(boost::shared_ptr<UserGroup> _group);
 
     /** Returns the zones id */
     int getID() const;
@@ -114,9 +114,9 @@ namespace dss {
 
     virtual unsigned long getPowerConsumption();
     /** Returns a vector of groups present on the zone. */
-    std::vector<Group*> getGroups() { return m_Groups; }
+    std::vector<boost::shared_ptr<Group> > getGroups() { return m_Groups; }
   protected:
-    virtual std::vector<AddressableModelItem*> splitIntoAddressableItems();
+    virtual std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems();
   }; // Zone
 
 

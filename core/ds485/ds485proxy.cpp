@@ -169,13 +169,13 @@ namespace dss {
     checkResultCode(result);
   } // lockOrUnlockDevice
 
-  bool DS485Proxy::isLocked(const Device& _device) {
+  bool DS485Proxy::isLocked(boost::shared_ptr<const Device> _device) {
     DS485CommandFrame frame;
-    frame.getHeader().setDestination(_device.getDSMeterID());
+    frame.getHeader().setDestination(_device->getDSMeterID());
     frame.getHeader().setBroadcast(false);
     frame.setCommand(CommandRequest);
     frame.getPayload().add<uint8_t>(FunctionDeviceLock);
-    frame.getPayload().add<devid_t>(_device.getShortAddress());
+    frame.getPayload().add<devid_t>(_device->getShortAddress());
     frame.getPayload().add<uint16_t>(2);
 
     boost::shared_ptr<DS485CommandFrame> resFrame = receiveSingleFrame(frame, FunctionDeviceLock);

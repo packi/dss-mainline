@@ -130,7 +130,8 @@ namespace dss {
       } else if(isDeviceInterfaceCall(_request)) {
         SetBuilder builder(m_Apartment);
         Set set = builder.buildSet(self, boost::shared_ptr<Zone>());
-        return handleDeviceInterfaceRequest(_request, &set);
+        boost::shared_ptr<Set> pSet(new Set(set));
+        return handleDeviceInterfaceRequest(_request, pSet);
       } else {
         throw std::runtime_error("Unhandled function");
       }

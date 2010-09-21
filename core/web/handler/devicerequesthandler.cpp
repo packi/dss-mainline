@@ -45,8 +45,8 @@ namespace dss {
     { }
   };
 
-  Device* DeviceRequestHandler::getDeviceFromRequest(const RestfulRequest& _request) {
-    Device* result = getDeviceByDSID(_request);
+  boost::shared_ptr<Device> DeviceRequestHandler::getDeviceFromRequest(const RestfulRequest& _request) {
+    boost::shared_ptr<Device> result = getDeviceByDSID(_request);
     if(result == NULL) {
       result = getDeviceByName(_request);
     }
@@ -56,15 +56,14 @@ namespace dss {
     return result;
   } // getDeviceFromRequest
 
-  Device* DeviceRequestHandler::getDeviceByDSID(const RestfulRequest& _request) {
-    Device* result = NULL;
+  boost::shared_ptr<Device> DeviceRequestHandler::getDeviceByDSID(const RestfulRequest& _request) {
+    boost::shared_ptr<Device> result;
     std::string deviceDSIDString = _request.getParameter("dsid");
     if(!deviceDSIDString.empty()) {
       try {
         dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
         try {
-          Device& device = m_Apartment.getDeviceByDSID(deviceDSID);
-          result = &device;
+          result = m_Apartment.getDeviceByDSID(deviceDSID);
         } catch(std::runtime_error& e) {
           throw DeviceNotFoundException("Could not find device with dsid '" + deviceDSIDString + "'");
         }
@@ -74,13 +73,12 @@ namespace dss {
     }
     return result;
   } // getDeviceByDSID
-  
-  Device* DeviceRequestHandler::getDeviceByName(const RestfulRequest& _request) {
-    Device* result = NULL;
+
+  boost::shared_ptr<Device> DeviceRequestHandler::getDeviceByName(const RestfulRequest& _request) {
+    boost::shared_ptr<Device> result;
     std::string deviceName = _request.getParameter("name");
     try {
-      Device& device = m_Apartment.getDeviceByName(deviceName);
-      result = &device;
+      result = m_Apartment.getDeviceByName(deviceName);
     } catch(std::runtime_error&  e) {
       throw DeviceNotFoundException("Could not find device named '" + deviceName + "'");
     }
@@ -88,7 +86,7 @@ namespace dss {
   } // getDeviceByName
 
   boost::shared_ptr<JSONObject> DeviceRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
-    Device* pDevice = NULL;
+    boost::shared_ptr<Device> pDevice;
     try {
       pDevice = getDeviceFromRequest(_request);
     } catch(DeviceNotFoundException& ex) {
@@ -111,13 +109,13 @@ namespace dss {
       resultObj->addElement("groups", groups);
       for(int iGroup = 0; iGroup < numGroups; iGroup++) {
         try {
-          Group& group = pDevice->getGroupByIndex(iGroup);
+          boost::shared_ptr<Group> group = pDevice->getGroupByIndex(iGroup);
           boost::shared_ptr<JSONObject> groupObj(new JSONObject());
           groups->addElement("", groupObj);
 
-          groupObj->addProperty("id", group.getID());
-          if(!group.getName().empty()) {
-            groupObj->addProperty("name", group.getName());
+          groupObj->addProperty("id", group->getID());
+          if(!group->getName().empty()) {
+            groupObj->addProperty("name", group->getName());
           }
         } catch(std::runtime_error&) {
           Logger::getInstance()->log("DeviceRequestHandler: Group only present at device level");

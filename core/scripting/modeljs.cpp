@@ -253,7 +253,7 @@ namespace dss {
 
       virtual ~JSDeviceAction() {};
 
-      virtual bool perform(Device& _device) {
+      virtual bool perform(boost::shared_ptr<Device> _device) {
         jsval rval;
         JSObject* device = m_Extension.createJSDevice(m_Context, _device);
         jsval dev = OBJECT_TO_JSVAL(device);
@@ -730,7 +730,7 @@ namespace dss {
         writeOnly = ctx->convertTo<bool>(argv[2]);
       }
       try {
-        value = ref->getDevice().dsLinkSend(value, lastByte, writeOnly);
+        value = ref->getDevice()->dsLinkSend(value, lastByte, writeOnly);
         *rval = INT_TO_JSVAL(value);
         return JS_TRUE;
       } catch(std::runtime_error&) {
@@ -750,7 +750,7 @@ namespace dss {
       if(argc == 1) {
         try {
           int sensorValue = ctx->convertTo<int>(argv[0]);
-          int retValue= (intf->getDevice().getSensorValue(sensorValue));
+          int retValue= (intf->getDevice()->getSensorValue(sensorValue));
           *rval = INT_TO_JSVAL(retValue);
         } catch(const DS485ApiError&) {
           *rval = JSVAL_NULL;
@@ -807,22 +807,22 @@ namespace dss {
           }
           return JS_TRUE;
         case 2:
-          *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, dev->getDevice().getName().c_str()));
+          *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, dev->getDevice()->getName().c_str()));
           return JS_TRUE;
         case 3:
-          *rval = INT_TO_JSVAL(dev->getDevice().getZoneID());
+          *rval = INT_TO_JSVAL(dev->getDevice()->getZoneID());
           return JS_TRUE;
         case 4:
-          *rval = INT_TO_JSVAL(dev->getDevice().getDSMeterID());
+          *rval = INT_TO_JSVAL(dev->getDevice()->getDSMeterID());
           return JS_TRUE;
         case 5:
-          *rval = INT_TO_JSVAL(dev->getDevice().getFunctionID());
+          *rval = INT_TO_JSVAL(dev->getDevice()->getFunctionID());
           return JS_TRUE;
         case 6:
-          *rval = INT_TO_JSVAL(dev->getDevice().getLastCalledScene());
+          *rval = INT_TO_JSVAL(dev->getDevice()->getLastCalledScene());
           return JS_TRUE;
         case 7:
-          *rval = INT_TO_JSVAL(dev->getDevice().getShortAddress());
+          *rval = INT_TO_JSVAL(dev->getDevice()->getShortAddress());
           return JS_TRUE;
       }
     }
@@ -855,8 +855,8 @@ namespace dss {
     {NULL, 0, 0, NULL, NULL}
   };
 
-  JSObject* ModelScriptContextExtension::createJSDevice(ScriptContext& _ctx, Device& _dev) {
-    DeviceReference ref(_dev.getDSID(), &m_Apartment);
+  JSObject* ModelScriptContextExtension::createJSDevice(ScriptContext& _ctx, boost::shared_ptr<Device> _dev) {
+    DeviceReference ref(_dev, &m_Apartment);
     return createJSDevice(_ctx, ref);
   } // createJSDevice
 
@@ -864,7 +864,7 @@ namespace dss {
     JSObject* result = JS_NewObject(_ctx.getJSContext(), &dev_class, NULL, NULL);
     JS_DefineFunctions(_ctx.getJSContext(), result, device_interface_methods);
     JS_DefineProperties(_ctx.getJSContext(), result, dev_properties);
-    DeviceReference* innerObj = new DeviceReference(_ref.getDSID(), &_ref.getDevice().getApartment());
+    DeviceReference* innerObj = new DeviceReference(_ref.getDSID(), &_ref.getDevice()->getApartment());
     // make an explicit copy
     *innerObj = _ref;
     JS_SetPrivate(_ctx.getJSContext(), result, innerObj);

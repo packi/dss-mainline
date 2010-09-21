@@ -55,14 +55,14 @@ public:
     m_RevisionID = 3;
 
     boost::shared_ptr<Zone> firstZone = m_pApartment->allocateZone(m_ValidZoneID);
-    Device& dev = m_pApartment->allocateDevice(m_ValidDSID);
+    boost::shared_ptr<Device> dev = m_pApartment->allocateDevice(m_ValidDSID);
     DeviceReference devRef(dev, m_pApartment.get());
     firstZone->addDevice(devRef);
-    dev.setName(m_ValidName);
-    dev.addToGroup(m_ValidGroupID);
-    dev.setFunctionID(m_FunctionID);
-    dev.setProductID(m_ProductID);
-    dev.setRevisionID(m_RevisionID);
+    dev->setName(m_ValidName);
+    dev->addToGroup(m_ValidGroupID);
+    dev->setFunctionID(m_FunctionID);
+    dev->setProductID(m_ProductID);
+    dev->setRevisionID(m_RevisionID);
   }
 protected:
   boost::shared_ptr<Apartment> m_pApartment;
@@ -276,7 +276,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetTagsOneTag, Fixture) {
   const std::string& kTagName = "testing";
   HashMapConstStringString params;
   params["dsid"] = m_ValidDSID.toString();
-  m_pApartment->getDeviceByDSID(m_ValidDSID).addTag(kTagName);
+  m_pApartment->getDeviceByDSID(m_ValidDSID)->addTag(kTagName);
   RestfulRequest req("device/getTags", params);
   boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   boost::shared_ptr<JSONObject> result;
@@ -313,7 +313,7 @@ BOOST_FIXTURE_TEST_CASE(testLockNotPresent, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testLockPresent, Fixture) {
   HashMapConstStringString params;
-  m_pApartment->getDeviceByDSID(m_ValidDSID).setIsPresent(true);
+  m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/lock", params);
   boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -330,7 +330,7 @@ BOOST_FIXTURE_TEST_CASE(testUnlockNotPresent, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testUnlockPresent, Fixture) {
   HashMapConstStringString params;
-  m_pApartment->getDeviceByDSID(m_ValidDSID).setIsPresent(true);
+  m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/unlock", params);
   boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -339,7 +339,7 @@ BOOST_FIXTURE_TEST_CASE(testUnlockPresent, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testSetRawValueNoParams, Fixture) {
   HashMapConstStringString params;
-  m_pApartment->getDeviceByDSID(m_ValidDSID).setIsPresent(true);
+  m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/setRawValue", params);
   boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
@@ -348,7 +348,7 @@ BOOST_FIXTURE_TEST_CASE(testSetRawValueNoParams, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testSetRawValueInvalidValue, Fixture) {
   HashMapConstStringString params;
-  m_pApartment->getDeviceByDSID(m_ValidDSID).setIsPresent(true);
+  m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   params["value"] = "asdf";
   RestfulRequest req("device/setRawValue", params);
@@ -358,7 +358,7 @@ BOOST_FIXTURE_TEST_CASE(testSetRawValueInvalidValue, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testSetRawValueInvalidParameterID, Fixture) {
   HashMapConstStringString params;
-  m_pApartment->getDeviceByDSID(m_ValidDSID).setIsPresent(true);
+  m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   params["value"] = "1";
   params["parameterID"] = "asdf";
@@ -369,7 +369,7 @@ BOOST_FIXTURE_TEST_CASE(testSetRawValueInvalidParameterID, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testSetRawValueInvalidSize, Fixture) {
   HashMapConstStringString params;
-  m_pApartment->getDeviceByDSID(m_ValidDSID).setIsPresent(true);
+  m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   params["value"] = "1";
   params["parameterID"] = "1";
@@ -381,7 +381,7 @@ BOOST_FIXTURE_TEST_CASE(testSetRawValueInvalidSize, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testSetRawValue, Fixture) {
   HashMapConstStringString params;
-  m_pApartment->getDeviceByDSID(m_ValidDSID).setIsPresent(true);
+  m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   params["value"] = "1";
   params["parameterID"] = "1";

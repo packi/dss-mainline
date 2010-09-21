@@ -129,11 +129,11 @@ public:
   }
 private:
   void testFunction(const std::string& _functionName, const std::string& _functionNameWithParams, const HashMapConstStringString& _params) {
-    DeviceInterfaceDummy dummy;
+    boost::shared_ptr<DeviceInterfaceDummy> dummy(new DeviceInterfaceDummy);
     RestfulRequest req("bla/" + _functionName, _params);
-    boost::shared_ptr<JSONObject> response = m_RequestHandler.handleDeviceInterfaceRequest(req, &dummy);
-    BOOST_CHECK_EQUAL(dummy.getNumberOfCalls(), 1);
-    BOOST_CHECK_EQUAL(dummy.getLastFunction(), _functionNameWithParams);
+    boost::shared_ptr<JSONObject> response = m_RequestHandler.handleDeviceInterfaceRequest(req, dummy);
+    BOOST_CHECK_EQUAL(dummy->getNumberOfCalls(), 1);
+    BOOST_CHECK_EQUAL(dummy->getLastFunction(), _functionNameWithParams);
     testOkIs(response, true);
   }
 

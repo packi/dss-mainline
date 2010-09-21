@@ -210,18 +210,18 @@ BOOST_FIXTURE_TEST_CASE(testDS485Events, Fixture) {
 
   proxy.initialize();
 
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
-  dev1.setName("dev1");
-  dev1.setShortAddress(1);
-  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
-  dev2.setName("dev2");
-  dev2.setShortAddress(2);
-  Device& dev3 = apt.allocateDevice(dsid_t(0,3));
-  dev3.setName("dev3");
-  dev3.setShortAddress(3);
-  Device& dev4 = apt.allocateDevice(dsid_t(0,4));
-  dev4.setName("dev4");
-  dev4.setShortAddress(4);
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1->setName("dev1");
+  dev1->setShortAddress(1);
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2->setName("dev2");
+  dev2->setShortAddress(2);
+  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dsid_t(0,3));
+  dev3->setName("dev3");
+  dev3->setShortAddress(3);
+  boost::shared_ptr<Device> dev4 = apt.allocateDevice(dsid_t(0,4));
+  dev4->setName("dev4");
+  dev4->setShortAddress(4);
 
 
   EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());

@@ -55,7 +55,7 @@ namespace dss {
         }
         try {
           boost::shared_ptr<Zone> zone = m_Apartment.getZone(zoneID);
-          Group* pGroup = zone->getGroup(groupID);
+          boost::shared_ptr<Group> pGroup = zone->getGroup(groupID);
 
           if(pGroup == NULL) {
             return failure("Could not find group");
@@ -82,9 +82,9 @@ namespace dss {
           case 5:
             {
               if(groupID == GroupIDGreen) {
-                m_Apartment.getGroup(0).callScene(SceneBell);
+                m_Apartment.getGroup(0)->callScene(SceneBell);
               } else if(groupID == GroupIDRed){
-                m_Apartment.getGroup(0).callScene(SceneAlarm);
+                m_Apartment.getGroup(0)->callScene(SceneAlarm);
               } else {
                 const int lastScene = pGroup->getLastCalledScene();
                 if(lastScene == SceneOff || lastScene == SceneDeepOff ||

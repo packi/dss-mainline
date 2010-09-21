@@ -146,53 +146,53 @@ namespace dss {
         ", Revision-ID: " + unsignedLongIntToHexString(revisionID)
         );
 
-    Device& dev = m_Apartment.allocateDevice(dsid);
+    boost::shared_ptr<Device> dev = m_Apartment.allocateDevice(dsid);
     DeviceReference devRef(dev, &m_Apartment);
 
     // remove from old dsMeter
     try {
-      boost::shared_ptr<DSMeter> oldDSMeter = m_Apartment.getDSMeterByDSID(dev.getLastKnownDSMeterDSID());
+      boost::shared_ptr<DSMeter> oldDSMeter = m_Apartment.getDSMeterByDSID(dev->getLastKnownDSMeterDSID());
       oldDSMeter->removeDevice(devRef);
     } catch(std::runtime_error&) {
     }
 
     // remove from old zone
-    if(dev.getZoneID() != 0) {
+    if(dev->getZoneID() != 0) {
       try {
-        boost::shared_ptr<Zone> oldZone = m_Apartment.getZone(dev.getZoneID());
+        boost::shared_ptr<Zone> oldZone = m_Apartment.getZone(dev->getZoneID());
         oldZone->removeDevice(devRef);
         // TODO: check if the zone is empty on the dsMeter and remove it in that case
       } catch(std::runtime_error&) {
       }
     }
 
-    dev.setShortAddress(_shortAddress);
-    dev.setDSMeter(_dsMeter);
-    dev.setZoneID(_zone->getID());
-    dev.setFunctionID(functionID);
-    dev.setProductID(productID);
-    dev.setRevisionID(revisionID);
+    dev->setShortAddress(_shortAddress);
+    dev->setDSMeter(_dsMeter);
+    dev->setZoneID(_zone->getID());
+    dev->setFunctionID(functionID);
+    dev->setProductID(productID);
+    dev->setRevisionID(revisionID);
 
     try {
       bool locked = m_Interface.isLocked(dev);
-      dev.setIsLockedInDSM(locked);
+      dev->setIsLockedInDSM(locked);
 
       log(std::string("scanDeviceOnBus:   Device is ") + (locked ? "locked" : "unlocked"));
     } catch(DS485ApiError& e) {
       log(std::string("scanDeviceOnBus: Error getting devices lock state, not aborting scan (") + e.what() + ")", lsWarning);
     }
 
-    dev.resetGroups();
+    dev->resetGroups();
     std::vector<int> groupIDsPerDevice = m_Interface.getGroupsOfDevice(_dsMeter->getBusID(), _shortAddress);
     foreach(int groupID, groupIDsPerDevice) {
       log(std::string("scanDeviceOnBus: adding device ") + intToString(_shortAddress) + " to group " + intToString(groupID));
-      dev.addToGroup(groupID);
+      dev->addToGroup(groupID);
     }
 
     _zone->addToDSMeter(_dsMeter);
     _zone->addDevice(devRef);
     _dsMeter->addDevice(devRef);
-    dev.setIsPresent(true);
+    dev->setIsPresent(true);
 
     {
       boost::shared_ptr<Event> readyEvent(new Event("new_device"));
@@ -226,13 +226,14 @@ namespace dss {
       log("scanDSMeter:    Found group with id: " + intToString(groupID));
       if(_zone->getGroup(groupID) == NULL) {
         log(" scanDSMeter:    Adding new group to zone");
-        _zone->addGroup(new Group(groupID, _zone->getID(), m_Apartment));
+        boost::shared_ptr<Group> newGroup(new Group(groupID, _zone->getID(), m_Apartment));
+        _zone->addGroup(newGroup);
       }
       try {
-        Group& group = m_Apartment.getGroup(groupID);
-        group.setIsPresent(true);
+        boost::shared_ptr<Group> group = m_Apartment.getGroup(groupID);
+        group->setIsPresent(true);
       } catch(ItemNotFoundException&) {
-        Group* pGroup = new Group(groupID, 0, m_Apartment);
+        boost::shared_ptr<Group> pGroup(new Group(groupID, 0, m_Apartment));
         m_Apartment.getZone(0)->addGroup(pGroup);
         pGroup->setIsPresent(true);
         log("scanDSMeter:     Adding new group to zone 0");
@@ -241,7 +242,7 @@ namespace dss {
       // get last called scene for zone, group
       try {
         int lastCalledScene = m_Interface.getLastCalledScene(_dsMeter->getBusID(), _zone->getID(), groupID);
-        Group* pGroup = _zone->getGroup(groupID);
+        boost::shared_ptr<Group> pGroup = _zone->getGroup(groupID);
         assert(pGroup != NULL);
         log("scanDSMeter: zoneID: " + intToString(_zone->getID()) + " groupID: " + intToString(groupID) + " lastScene: " + intToString(lastCalledScene));
         if(lastCalledScene < 0 || lastCalledScene > MaxSceneNumber) {

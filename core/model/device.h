@@ -134,7 +134,7 @@ namespace dss {
     /** Returns the group id of the \a _index'th group */
     int getGroupIdByIndex(const int _index) const;
     /** Returns \a _index'th group of the device */
-    Group& getGroupByIndex(const int _index);
+    boost::shared_ptr<Group> getGroupByIndex(const int _index);
     /** Returns the number of groups the device is a member of */
     int getGroupsCount() const;
 

@@ -45,20 +45,20 @@ namespace dss {
     result->addProperty("isSwitch", _device.hasSwitch());
     result->addProperty("name", _device.getName());
     result->addProperty("functionID", _device.getFunctionID());
-    result->addProperty("productRevision", _device.getDevice().getRevisionID());
-    result->addProperty("productID", _device.getDevice().getProductID());
-    result->addProperty("circuitID", _device.getDevice().getDSMeterID());
-    result->addProperty("busID", _device.getDevice().getShortAddress());
-    result->addProperty("isPresent", _device.getDevice().isPresent());
+    result->addProperty("productRevision", _device.getDevice()->getRevisionID());
+    result->addProperty("productID", _device.getDevice()->getProductID());
+    result->addProperty("circuitID", _device.getDevice()->getDSMeterID());
+    result->addProperty("busID", _device.getDevice()->getShortAddress());
+    result->addProperty("isPresent", _device.getDevice()->isPresent());
 
-    tmp_date = _device.getDevice().getLastDiscovered();
+    tmp_date = _device.getDevice()->getLastDiscovered();
     result->addProperty("lastDiscovered", tmp_date.fromUTC());
 
-    tmp_date = _device.getDevice().getFirstSeen();
+    tmp_date = _device.getDevice()->getFirstSeen();
     result->addProperty("firstSeen", tmp_date.fromUTC());
 
-    result->addProperty("on", _device.getDevice().isOn());
-    result->addProperty("locked", _device.getDevice().getIsLockedInDSM());
+    result->addProperty("on", _device.getDevice()->isOn());
+    result->addProperty("locked", _device.getDevice()->getIsLockedInDSM());
     return result;
   } // toJSON(DeviceReference)
 
@@ -72,15 +72,15 @@ namespace dss {
     return result;
   } // toJSON(Set,Name)
 
-  boost::shared_ptr<JSONObject> toJSON(const Group& _group) {
+  boost::shared_ptr<JSONObject> toJSON(boost::shared_ptr<const Group> _group) {
     boost::shared_ptr<JSONObject> result(new JSONObject());
-    result->addProperty("id", _group.getID());
-    result->addProperty("name", _group.getName());
-    result->addProperty("isPresent", _group.isPresent());
+    result->addProperty("id", _group->getID());
+    result->addProperty("name", _group->getName());
+    result->addProperty("isPresent", _group->isPresent());
 
     boost::shared_ptr<JSONArrayBase> devicesArr(new JSONArrayBase());
     result->addElement("devices", devicesArr);
-    Set devices = _group.getDevices();
+    Set devices = _group->getDevices();
     for(int iDevice = 0; iDevice < devices.length(); iDevice++) {
       boost::shared_ptr<JSONObject> dev(new JSONObject());
       dev->addProperty("id", devices[iDevice].getDSID().toString());
@@ -101,8 +101,8 @@ namespace dss {
       result->addElement("devices", toJSON(_zone.getDevices()));
       boost::shared_ptr<JSONArrayBase> groups(new JSONArrayBase());
       result->addElement("groups", groups);
-      foreach(Group* pGroup, _zone.getGroups()) {
-        groups->addElement("", toJSON(*pGroup));
+      foreach(boost::shared_ptr<Group> pGroup, _zone.getGroups()) {
+        groups->addElement("", toJSON(pGroup));
       }
     }
 

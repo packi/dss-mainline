@@ -98,13 +98,12 @@ namespace dss {
       return success();
     } else if(_request.getMethod() == "dSLinkSend") {
       std::string deviceDSIDString =_request.getParameter("dsid");
-      Device* pDevice = NULL;
+      boost::shared_ptr<Device> pDevice;
       if(!deviceDSIDString.empty()) {
         dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
         if(!(deviceDSID == NullDSID)) {
           try {
-            Device& device = m_DSS.getApartment().getDeviceByDSID(deviceDSID);
-            pDevice = &device;
+            pDevice = m_DSS.getApartment().getDeviceByDSID(deviceDSID);
           } catch(std::runtime_error& e) {
             return failure("Could not find device with dsid '" + deviceDSIDString + "'");
           }
@@ -154,15 +153,15 @@ namespace dss {
       try {
         DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/settings/extendedPing/active", true, true, true);
         dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
-        Device& device = m_DSS.getApartment().getDeviceByDSID(deviceDSID);
+        boost::shared_ptr<Device> device = m_DSS.getApartment().getDeviceByDSID(deviceDSID);
         // TODO: move this code somewhere else (might also relax the requirement
         //       having DSS as constructor parameter)
         DS485CommandFrame* frame = new DS485CommandFrame();
         frame->getHeader().setBroadcast(false);
-        frame->getHeader().setDestination(device.getDSMeterID());
+        frame->getHeader().setDestination(device->getDSMeterID());
         frame->setCommand(CommandRequest);
         frame->getPayload().add<uint8_t>(FunctionDeviceGetTransmissionQuality);
-        frame->getPayload().add<uint16_t>(device.getShortAddress());
+        frame->getPayload().add<uint16_t>(device->getShortAddress());
         DS485Interface* intf = &m_DSS.getDS485Interface();
         DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
         if(proxy != NULL) {

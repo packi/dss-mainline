@@ -41,17 +41,17 @@ namespace dss {
   {
   } // ctor(dsid)
 
-  DeviceReference::DeviceReference(const Device& _device, const Apartment* _apartment)
-  : m_DSID(_device.getDSID()),
+  DeviceReference::DeviceReference(boost::shared_ptr<const Device> _device, const Apartment* _apartment)
+  : m_DSID(_device->getDSID()),
     m_Apartment(_apartment)
   {
   } // ctor(device)
 
-  Device& DeviceReference::getDevice() {
+  boost::shared_ptr<Device> DeviceReference::getDevice() {
     return m_Apartment->getDeviceByDSID(m_DSID);
   } // getDevice
 
-  const Device& DeviceReference::getDevice() const {
+  boost::shared_ptr<const Device> DeviceReference::getDevice() const {
     return m_Apartment->getDeviceByDSID(m_DSID);
   } // getDevice
 
@@ -60,75 +60,75 @@ namespace dss {
   } // getID
 
   int DeviceReference::getFunctionID() const {
-    return getDevice().getFunctionID();
+    return getDevice()->getFunctionID();
   } // getFunctionID
 
   std::string DeviceReference::getName() const {
-    return getDevice().getName();
+    return getDevice()->getName();
   } //getName
 
   void DeviceReference::increaseValue() {
-    getDevice().increaseValue();
+    getDevice()->increaseValue();
   } // increaseValue
 
   void DeviceReference::decreaseValue() {
-    getDevice().decreaseValue();
+    getDevice()->decreaseValue();
   } // decreaseValue
 
   void DeviceReference::enable() {
-    getDevice().enable();
+    getDevice()->enable();
   } // enable
 
   void DeviceReference::disable() {
-    getDevice().disable();
+    getDevice()->disable();
   } // disable
 
   void DeviceReference::startDim(const bool _directionUp) {
-    getDevice().startDim(_directionUp);
+    getDevice()->startDim(_directionUp);
   } // startDim
 
   void DeviceReference::endDim() {
-    getDevice().endDim();
+    getDevice()->endDim();
   } // endDim
 
   void DeviceReference::setValue(const double _value) {
-    getDevice().setValue(_value);
+    getDevice()->setValue(_value);
   } // setValue
 
   bool DeviceReference::isOn() const {
-    return getDevice().isOn();
+    return getDevice()->isOn();
   }
 
   bool DeviceReference::hasSwitch() const {
-    return getDevice().hasSwitch();
+    return getDevice()->hasSwitch();
   }
 
   void DeviceReference::callScene(const int _sceneNr) {
-    getDevice().callScene(_sceneNr);
+    getDevice()->callScene(_sceneNr);
   } // callScene
 
   void DeviceReference::saveScene(const int _sceneNr) {
-    getDevice().saveScene(_sceneNr);
+    getDevice()->saveScene(_sceneNr);
   } // saveScene
 
   void DeviceReference::undoScene(const int _sceneNr) {
-    getDevice().undoScene(_sceneNr);
+    getDevice()->undoScene(_sceneNr);
   } // undoScene
 
   unsigned long DeviceReference::getPowerConsumption() {
-    return getDevice().getPowerConsumption();
+    return getDevice()->getPowerConsumption();
   }
 
   void DeviceReference::nextScene() {
-    getDevice().nextScene();
+    getDevice()->nextScene();
   }
 
   void DeviceReference::previousScene() {
-    getDevice().previousScene();
+    getDevice()->previousScene();
   }
 
   void DeviceReference::blink() {
-    getDevice().blink();
+    getDevice()->blink();
   }
 
 } // namespace dss

@@ -69,7 +69,7 @@ namespace dss {
       errorMessage = "Need parameter name or id to identify zone";
     }
     if(ok) {
-      Group* pGroup = NULL;
+      boost::shared_ptr<Group> pGroup;
       std::string groupName = _request.getParameter("groupName");
       std::string groupIDString = _request.getParameter("groupID");
       if(!groupName.empty()) {
@@ -103,13 +103,13 @@ namespace dss {
       }
       if(ok) {
         if(isDeviceInterfaceCall(_request)) {
-          IDeviceInterface* interface = NULL;
+          boost::shared_ptr<IDeviceInterface> interface;
           if(pGroup != NULL) {
             interface = pGroup;
           }
           if(ok) {
             if(interface == NULL) {
-              interface = pZone.get();
+              interface = pZone;
             }
             return handleDeviceInterfaceRequest(_request, interface);
           }

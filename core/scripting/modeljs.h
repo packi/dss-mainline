@@ -61,7 +61,7 @@ namespace dss {
       * @param _ctx Context in which to create the object
       * @param _device Reference to the \a Device being wrapped
       */
-    JSObject* createJSDevice(ScriptContext& _ctx, Device& _ref);
+    JSObject* createJSDevice(ScriptContext& _ctx, boost::shared_ptr<Device> _ref);
     /** @copydoc createJSDevice */
     JSObject* createJSDevice(ScriptContext& _ctx, DeviceReference& _ref);
 

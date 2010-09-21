@@ -34,7 +34,7 @@ namespace dss {
 
   class DeviceInterfaceRequestHandler : public WebServerRequestHandlerJSON {
   public:
-    boost::shared_ptr<JSONObject> handleDeviceInterfaceRequest(const RestfulRequest& _request, IDeviceInterface* _interface);
+    boost::shared_ptr<JSONObject> handleDeviceInterfaceRequest(const RestfulRequest& _request, boost::shared_ptr<IDeviceInterface> _interface);
 
   protected:
     bool isDeviceInterfaceCall(const RestfulRequest& _request);

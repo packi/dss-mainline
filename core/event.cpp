@@ -173,8 +173,8 @@ namespace dss {
     if(m_RaiseLocation == erlZone) {
       return m_RaisedAtZone;
     } else if(m_RaiseLocation == erlDevice) {
-      const Device& dev = m_RaisedAtDevice->getDevice();
-      return dev.getApartment().getZone(dev.getZoneID());
+      boost::shared_ptr<const Device> dev = m_RaisedAtDevice->getDevice();
+      return dev->getApartment().getZone(dev->getZoneID());
     } else {
       // TODO: We should really try to get the apartment from elsewhere...
       return DSS::getInstance()->getApartment().getZone(0);

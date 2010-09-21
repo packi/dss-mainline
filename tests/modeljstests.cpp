@@ -70,22 +70,22 @@ BOOST_AUTO_TEST_CASE(testSets) {
   boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsid_t(0,10));
   meter->setBusID(1);
 
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
-  dev1.setShortAddress(1);
-  dev1.setDSMeter(meter);
-  dev1.addToGroup(1);
-  dev1.setIsPresent(true);
-  dev1.setZoneID(1);
-  dev1.setName("dev1");
-  dev1.setFunctionID(1);
-  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
-  dev2.setShortAddress(2);
-  dev2.setDSMeter(meter);
-  dev2.addToGroup(1);
-  dev2.setIsPresent(false);
-  dev2.setZoneID(2);
-  dev2.setName("dev2");
-  dev2.setFunctionID(1);
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1->setShortAddress(1);
+  dev1->setDSMeter(meter);
+  dev1->addToGroup(1);
+  dev1->setIsPresent(true);
+  dev1->setZoneID(1);
+  dev1->setName("dev1");
+  dev1->setFunctionID(1);
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2->setShortAddress(2);
+  dev2->setDSMeter(meter);
+  dev2->addToGroup(1);
+  dev2->setIsPresent(false);
+  dev2->setZoneID(2);
+  dev2->setName("dev2");
+  dev2->setFunctionID(1);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
@@ -154,12 +154,12 @@ BOOST_AUTO_TEST_CASE(testSetTags) {
   boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsid_t(0,10));
   meter->setBusID(1);
 
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
-  dev1.addTag("dev1");
-  dev1.addTag("device");
-  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
-  dev2.addTag("dev2");
-  dev2.addTag("device");
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1->addTag("dev1");
+  dev1->addTag("device");
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2->addTag("dev2");
+  dev2->addTag("device");
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
@@ -183,12 +183,12 @@ BOOST_AUTO_TEST_CASE(testSetTags) {
 BOOST_AUTO_TEST_CASE(testDevices) {
   Apartment apt(NULL);
 
-  Device& dev1 = apt.allocateDevice(dsid_t(0,1));
-  dev1.setShortAddress(1);
-  dev1.setName("dev1");
-  Device& dev2 = apt.allocateDevice(dsid_t(0,2));
-  dev2.setShortAddress(2);
-  dev2.setName("dev2");
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  dev1->setShortAddress(1);
+  dev1->setName("dev1");
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  dev2->setShortAddress(2);
+  dev2->setName("dev2");
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
@@ -271,9 +271,9 @@ BOOST_AUTO_TEST_CASE(testSceneConstants) {
 BOOST_AUTO_TEST_CASE(testEvents) {
   Apartment apt(NULL);
 
-  Device& dev = apt.allocateDevice(dsid_t(0,1));
-  dev.setShortAddress(1);
-  dev.setName("dev");
+  boost::shared_ptr<Device> dev = apt.allocateDevice(dsid_t(0,1));
+  dev->setShortAddress(1);
+  dev->setName("dev");
 
   EventQueue queue;
   EventRunner runner;
@@ -305,9 +305,9 @@ BOOST_AUTO_TEST_CASE(testEvents) {
 BOOST_AUTO_TEST_CASE(testSubscriptions) {
   Apartment apt(NULL);
 
-  Device& dev = apt.allocateDevice(dsid_t(0,1));
-  dev.setShortAddress(1);
-  dev.setName("dev");
+  boost::shared_ptr<Device> dev = apt.allocateDevice(dsid_t(0,1));
+  dev->setShortAddress(1);
+  dev->setName("dev");
 
   EventQueue queue;
   EventRunner runner;

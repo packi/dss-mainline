@@ -44,18 +44,18 @@ namespace dss {
     _zone->setIsPresent(true);
   } // createZone
 
-  void StructureManipulator::addDeviceToZone(Device& _device, boost::shared_ptr<Zone> _zone) {
+  void StructureManipulator::addDeviceToZone(boost::shared_ptr<Device> _device, boost::shared_ptr<Zone> _zone) {
     AssertLocked apartmentLocked(&m_Apartment);
-    if(!_device.isPresent()) {
+    if(!_device->isPresent()) {
       throw std::runtime_error("Need device to be present");
     }
-    int oldZoneID = _device.getZoneID();
-    boost::shared_ptr<DSMeter> targetDSMeter = m_Apartment.getDSMeterByBusID(_device.getDSMeterID());
+    int oldZoneID = _device->getZoneID();
+    boost::shared_ptr<DSMeter> targetDSMeter = m_Apartment.getDSMeterByBusID(_device->getDSMeterID());
     if(!_zone->registeredOnDSMeter(targetDSMeter)) {
       createZone(targetDSMeter, _zone);
     }
-    m_Interface.setZoneID(targetDSMeter->getBusID(), _device.getShortAddress(), _zone->getID());
-    _device.setZoneID(_zone->getID());
+    m_Interface.setZoneID(targetDSMeter->getBusID(), _device->getShortAddress(), _zone->getID());
+    _device->setZoneID(_zone->getID());
     DeviceReference ref(_device, &m_Apartment);
     _zone->addDevice(ref);
 

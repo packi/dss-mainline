@@ -158,7 +158,7 @@ namespace dss {
     virtual uint16_t deviceGetFunctionID(devid_t _id, uint8_t _dsMeterID);
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, uint8_t _dsMeterID);
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock);
-    virtual bool isLocked(const Device& _device);
+    virtual bool isLocked(boost::shared_ptr<const Device> _device);
 
     void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size);
     virtual int getSensorValue(const Device& _device, const int _sensorID);

@@ -51,18 +51,18 @@ namespace dss {
 
   class CommandBusRequest : public BusRequest {
   public:
-    void setTarget(AddressableModelItem* _value) { m_pTarget = _value; }
-    AddressableModelItem* getTarget() const { return m_pTarget; }
+    void setTarget(boost::shared_ptr<AddressableModelItem> _value) { m_pTarget = _value; }
+    boost::shared_ptr<AddressableModelItem> getTarget() const { return m_pTarget; }
   private:
-    AddressableModelItem* m_pTarget;
+    boost::shared_ptr<AddressableModelItem> m_pTarget;
   };
 
   class DeviceCommandBusRequest : public BusRequest {
   public:
-    void setTarget(Device* _value) { m_pTarget = _value; }
-    Device* getTarget() const { return m_pTarget; }
+    void setTarget(boost::shared_ptr<Device> _value) { m_pTarget = _value; }
+    boost::shared_ptr<Device> getTarget() const { return m_pTarget; }
   private:
-    Device* m_pTarget;
+    boost::shared_ptr<Device> m_pTarget;
   };
 
   class EnableDeviceCommandBusRequest : public DeviceCommandBusRequest {

@@ -39,7 +39,6 @@ namespace dss {
   //================================================== Zone
 
   Zone::~Zone() {
-    scrubVector(m_Groups);
     // we don't own our dsMeters
     m_DSMeters.clear();
   } // dtor
@@ -49,11 +48,11 @@ namespace dss {
   } // getDevices
 
   void Zone::addDevice(DeviceReference& _device) {
-    const Device& dev = _device.getDevice();
-    int oldZoneID = dev.getZoneID();
+    boost::shared_ptr<const Device> dev = _device.getDevice();
+    int oldZoneID = dev->getZoneID();
     if((oldZoneID != -1) && (oldZoneID != 0)) {
       try {
-        boost::shared_ptr<Zone> oldZone = dev.getApartment().getZone(oldZoneID);
+        boost::shared_ptr<Zone> oldZone = dev->getApartment().getZone(oldZoneID);
         oldZone->removeDevice(_device);
       } catch(std::runtime_error&) {
       }
@@ -66,10 +65,10 @@ namespace dss {
         Logger::getInstance()->log("Zone::addDevice: DUPLICATE DEVICE Detected Zone: " + intToString(m_ZoneID) + " device: " + _device.getDSID().toString(), lsWarning);
       }
     }
-    _device.getDevice().setZoneID(m_ZoneID);
+    _device.getDevice()->setZoneID(m_ZoneID);
   } // addDevice
 
-  void Zone::addGroup(Group* _group) {
+  void Zone::addGroup(boost::shared_ptr<Group> _group) {
     if(_group->getZoneID() != m_ZoneID) {
       throw std::runtime_error("Zone::addGroup: ZoneID of _group does not match own");
     }
@@ -81,8 +80,8 @@ namespace dss {
     }
   } // addGroup
 
-  void Zone::removeGroup(UserGroup* _group) {
-    std::vector<Group*>::iterator it = find(m_Groups.begin(), m_Groups.end(), _group);
+  void Zone::removeGroup(boost::shared_ptr<UserGroup> _group) {
+    std::vector<boost::shared_ptr<Group> >::iterator it = find(m_Groups.begin(), m_Groups.end(), _group);
     if(it != m_Groups.end()) {
       m_Groups.erase(it);
     }
@@ -101,26 +100,26 @@ namespace dss {
     }
   } // removeDevice
 
-  Group* Zone::getGroup(const std::string& _name) const {
-    for(std::vector<Group*>::const_iterator ipGroup = m_Groups.begin(), e = m_Groups.end();
+  boost::shared_ptr<Group> Zone::getGroup(const std::string& _name) const {
+    for(std::vector<boost::shared_ptr<Group> >::const_iterator ipGroup = m_Groups.begin(), e = m_Groups.end();
         ipGroup != e; ++ipGroup)
     {
         if((*ipGroup)->getName() == _name) {
           return *ipGroup;
         }
     }
-    return NULL;
+    return boost::shared_ptr<Group>();
   } // getGroup
 
-  Group* Zone::getGroup(const int _id) const {
-    for(std::vector<Group*>::const_iterator ipGroup = m_Groups.begin(), e = m_Groups.end();
+  boost::shared_ptr<Group> Zone::getGroup(const int _id) const {
+    for(std::vector<boost::shared_ptr<Group> >::const_iterator ipGroup = m_Groups.begin(), e = m_Groups.end();
         ipGroup != e; ++ipGroup)
     {
         if((*ipGroup)->getID() == _id) {
           return *ipGroup;
         }
     }
-    return NULL;
+    return boost::shared_ptr<Group>();
   } // getGroup
 
   int Zone::getID() const {
@@ -172,8 +171,8 @@ namespace dss {
     getGroup(GroupIDBroadcast)->previousScene();
   } // previousScene
 
-  std::vector<AddressableModelItem*> Zone::splitIntoAddressableItems() {
-    std::vector<AddressableModelItem*> result;
+  std::vector<boost::shared_ptr<AddressableModelItem> > Zone::splitIntoAddressableItems() {
+    std::vector<boost::shared_ptr<AddressableModelItem> > result;
     result.push_back(getGroup(GroupIDBroadcast));
     return result;
   } // splitIntoAddressableItems

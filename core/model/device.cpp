@@ -78,13 +78,15 @@ namespace dss {
 
   void Device::enable() {
     boost::shared_ptr<EnableDeviceCommandBusRequest> request(new EnableDeviceCommandBusRequest());
-    request->setTarget(this);
+    boost::shared_ptr<AddressableModelItem> modelItem = shared_from_this();
+    request->setTarget(boost::dynamic_pointer_cast<Device>(modelItem));
     m_pApartment->dispatchRequest(request);
   } // enable
 
   void Device::disable() {
     boost::shared_ptr<DisableDeviceCommandBusRequest> request(new DisableDeviceCommandBusRequest());
-    request->setTarget(this);
+    boost::shared_ptr<AddressableModelItem> modelItem = shared_from_this();
+    request->setTarget(boost::dynamic_pointer_cast<Device>(modelItem));
     m_pApartment->dispatchRequest(request);
   } // disable
 
@@ -260,7 +262,7 @@ namespace dss {
     return m_Groups[_index];
   } // getGroupIdByIndex
 
-  Group& Device::getGroupByIndex(const int _index) {
+  boost::shared_ptr<Group> Device::getGroupByIndex(const int _index) {
     return m_pApartment->getGroup(getGroupIdByIndex(_index));
   } // getGroupByIndex
 
