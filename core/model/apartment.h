@@ -121,9 +121,6 @@ namespace dss {
     /** Returns a Group by id */
     Group& getGroup(const int _id);
 
-    /** Allocates a group */
-    UserGroup& allocateGroup(const int _id);
-
     void removeZone(int _zoneID);
     void removeDevice(dsid_t _device);
     void removeDSMeter(dsid_t _dsMeter);
