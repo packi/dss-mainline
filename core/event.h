@@ -209,8 +209,8 @@ namespace dss {
     const std::string& getHandlerName() const { return m_HandlerName; }
     const std::string& getID() const { return m_ID; }
 
-    SubscriptionOptions& getOptions() { return *m_SubscriptionOptions.get(); }
-    const SubscriptionOptions& getOptions() const { return *m_SubscriptionOptions.get(); }
+    boost::shared_ptr<SubscriptionOptions> getOptions() { return m_SubscriptionOptions; }
+    boost::shared_ptr<const SubscriptionOptions> getOptions() const { return m_SubscriptionOptions; }
 
     void addPropertyFilter(EventPropertyFilter* _pPropertyFilter);
 
@@ -234,7 +234,7 @@ namespace dss {
     const std::string& getName() const { return m_Name; }
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription) = 0;
 
-    virtual SubscriptionOptions* createOptionsFromXML(Poco::XML::Node* _node);
+    virtual boost::shared_ptr<SubscriptionOptions> createOptionsFromXML(Poco::XML::Node* _node);
   }; // EventInterpreterPlugin
 
 

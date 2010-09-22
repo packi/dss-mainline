@@ -36,7 +36,7 @@ namespace dss {
 
   class EventInterpreterPluginRaiseEvent : public EventInterpreterPlugin {
   private:
-    void applyOptionsWithSuffix(const SubscriptionOptions& _options, const std::string& _suffix, boost::shared_ptr<Event> _event, bool _onlyOverride);
+    void applyOptionsWithSuffix(boost::shared_ptr<const SubscriptionOptions> _options, const std::string& _suffix, boost::shared_ptr<Event> _event, bool _onlyOverride);
   public:
     EventInterpreterPluginRaiseEvent(EventInterpreter* _pInterpreter);
     virtual ~EventInterpreterPluginRaiseEvent();
@@ -76,7 +76,7 @@ namespace dss {
   public:
     EventInterpreterPluginDS485(Apartment& _apartment, DS485Interface* _pInterface, EventInterpreter* _pInterpreter);
 
-    virtual SubscriptionOptions* createOptionsFromXML(Poco::XML::Node* _node);
+    virtual boost::shared_ptr<SubscriptionOptions> createOptionsFromXML(Poco::XML::Node* _node);
 
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   }; // EventInterpreterPluginDS485

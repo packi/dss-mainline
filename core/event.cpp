@@ -484,7 +484,7 @@ namespace dss {
         Logger::getInstance()->log(std::string("EventInterpreter::loadSubscription: could not find plugin for handler-name '") + handlerName + "'", lsWarning);
         Logger::getInstance()->log(       "EventInterpreter::loadSubscription: Still generating a subscription but w/o inner parameter", lsWarning);
       } else {
-        opts.reset(plugin->createOptionsFromXML(_node));
+        opts = plugin->createOptionsFromXML(_node);
         hadOpts = true;
       }
       try {
@@ -864,8 +864,8 @@ namespace dss {
     m_pInterpreter(_interpreter)
   { } // ctor
 
-  SubscriptionOptions* EventInterpreterPlugin::createOptionsFromXML(Node* _node) {
-    return NULL;
+  boost::shared_ptr<SubscriptionOptions> EventInterpreterPlugin::createOptionsFromXML(Node* _node) {
+    return boost::shared_ptr<SubscriptionOptions>();
   } // createOptionsFromXML
 
 
