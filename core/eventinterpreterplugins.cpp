@@ -66,17 +66,17 @@ namespace dss {
   { } // dtor
 
   void EventInterpreterPluginRaiseEvent::handleEvent(Event& _event, const EventSubscription& _subscription) {
-    boost::shared_ptr<Event> newEvent(new Event(_subscription.getOptions().getParameter("event_name")));
-    if(_subscription.getOptions().hasParameter("time")) {
-      std::string timeParam = _subscription.getOptions().getParameter("time");
+    boost::shared_ptr<Event> newEvent(new Event(_subscription.getOptions()->getParameter("event_name")));
+    if(_subscription.getOptions()->hasParameter("time")) {
+      std::string timeParam = _subscription.getOptions()->getParameter("time");
       if(!timeParam.empty()) {
         Logger::getInstance()->log("RaiseEvent: Event has time");
         newEvent->setTime(timeParam);
       }
     }
     applyOptionsWithSuffix(_subscription.getOptions(), "_default", newEvent, false);
-    if(_subscription.getOptions().hasParameter(EventPropertyLocation)) {
-      std::string location = _subscription.getOptions().getParameter(EventPropertyLocation);
+    if(_subscription.getOptions()->hasParameter(EventPropertyLocation)) {
+      std::string location = _subscription.getOptions()->getParameter(EventPropertyLocation);
       if(!location.empty()) {
         Logger::getInstance()->log("RaiseEvent: Event has location");
         newEvent->setLocation(location);
@@ -87,15 +87,17 @@ namespace dss {
     getEventInterpreter().getQueue().pushEvent(newEvent);
   } // handleEvent
 
-  void EventInterpreterPluginRaiseEvent::applyOptionsWithSuffix(const SubscriptionOptions& _options, const std::string& _suffix, boost::shared_ptr<Event> _event, bool _onlyOverride) {
-    const HashMapConstStringString sourceMap = _options.getParameters().getContainer();
-    typedef const std::pair<const std::string, std::string> tItem;
-    foreach(tItem kv, sourceMap) {
-      if(endsWith(kv.first, _suffix)) {
-        std::string propName = kv.first.substr(0, kv.first.length() - _suffix.length());
-        if(_event->hasPropertySet(propName) || !_onlyOverride) {
-          Logger::getInstance()->log("RaiseEvent: setting property " + propName + " to " + kv.second);
-          _event->setProperty(propName, kv.second);
+  void EventInterpreterPluginRaiseEvent::applyOptionsWithSuffix(boost::shared_ptr<const SubscriptionOptions> _options, const std::string& _suffix, boost::shared_ptr<Event> _event, bool _onlyOverride) {
+    if(_options != NULL) {
+      const HashMapConstStringString sourceMap = _options->getParameters().getContainer();
+      typedef const std::pair<const std::string, std::string> tItem;
+      foreach(tItem kv, sourceMap) {
+        if(endsWith(kv.first, _suffix)) {
+          std::string propName = kv.first.substr(0, kv.first.length() - _suffix.length());
+          if(_event->hasPropertySet(propName) || !_onlyOverride) {
+            Logger::getInstance()->log("RaiseEvent: setting property " + propName + " to " + kv.second);
+            _event->setProperty(propName, kv.second);
+          }
         }
       }
     }
@@ -155,8 +157,8 @@ namespace dss {
   { } // ctor
 
   void EventInterpreterPluginJavascript::handleEvent(Event& _event, const EventSubscription& _subscription) {
-    if(_subscription.getOptions().hasParameter("filename")) {
-      std::string scriptName = _subscription.getOptions().getParameter("filename");
+    if(_subscription.getOptions()->hasParameter("filename")) {
+      std::string scriptName = _subscription.getOptions()->getParameter("filename");
 
       if(!m_Environment.isInitialized()) {
         initializeEnvironment();
@@ -308,8 +310,8 @@ namespace dss {
     return "";
   } // getParameter
 
-  SubscriptionOptions* EventInterpreterPluginDS485::createOptionsFromXML(Node* _node) {
-    SubscriptionOptionsDS485* result = new SubscriptionOptionsDS485();
+  boost::shared_ptr<SubscriptionOptions> EventInterpreterPluginDS485::createOptionsFromXML(Node* _node) {
+    boost::shared_ptr<SubscriptionOptionsDS485> result(new SubscriptionOptionsDS485());
 
     Node* curNode = _node->firstChild();
     while(curNode != NULL) {
@@ -341,8 +343,7 @@ namespace dss {
             result->setCommand(boost::bind(&Set::callScene, _1, sceneNr));
           } else {
             Logger::getInstance()->log(std::string("unknown command: ") + typeName);
-            delete result;
-            return NULL;
+            return boost::shared_ptr<SubscriptionOptions>();
           }
 
         }
@@ -354,15 +355,15 @@ namespace dss {
   }
 
   void EventInterpreterPluginDS485::handleEvent(Event& _event, const EventSubscription& _subscription) {
-    const SubscriptionOptionsDS485* options = dynamic_cast<const SubscriptionOptionsDS485*>(&_subscription.getOptions());
+    boost::shared_ptr<const SubscriptionOptionsDS485> options = boost::dynamic_pointer_cast<const SubscriptionOptionsDS485>(_subscription.getOptions());
     if(options != NULL) {
       SetBuilder builder(m_Apartment);
       Set to;
       if(_event.hasPropertySet(EventPropertyLocation)) {
         to = builder.buildSet(_event.getPropertyByName(EventPropertyLocation), &_event.getRaisedAtZone());
       } else {
-        if(_subscription.getOptions().hasParameter(EventPropertyLocation)) {
-          to = builder.buildSet(_subscription.getOptions().getParameter(EventPropertyLocation), NULL);
+        if(_subscription.getOptions()->hasParameter(EventPropertyLocation)) {
+          to = builder.buildSet(_subscription.getOptions()->getParameter(EventPropertyLocation), NULL);
         } else {
           to = _event.getRaisedAtZone().getDevices();
         }
@@ -440,56 +441,56 @@ namespace dss {
     std::string subject;
     if(_event.hasPropertySet("email_server")) {
       emailServer=_event.getPropertyByName("email_server");
-    } else if(_subscription.getOptions().hasParameter("email_server")) {
-      emailServer=_subscription.getOptions().getParameter("email_server");
+    } else if(_subscription.getOptions()->hasParameter("email_server")) {
+      emailServer=_subscription.getOptions()->getParameter("email_server");
     } else {
       return;
     }
 
     if(_event.hasPropertySet("login")) {
       login=_event.getPropertyByName("login");
-    } else if(_subscription.getOptions().hasParameter("login")) {
-      login=_subscription.getOptions().getParameter("login");
+    } else if(_subscription.getOptions()->hasParameter("login")) {
+      login=_subscription.getOptions()->getParameter("login");
     } else {
       return;
     }
 
     if(_event.hasPropertySet("password")) {
       password=_event.getPropertyByName("password");
-    } else if(_subscription.getOptions().hasParameter("password")) {
-      password=_subscription.getOptions().getParameter("password");
+    } else if(_subscription.getOptions()->hasParameter("password")) {
+      password=_subscription.getOptions()->getParameter("password");
     } else {
       return;
     }
 
     if(_event.hasPropertySet("sender")) {
       sender=_event.getPropertyByName("sender");
-    } else if(_subscription.getOptions().hasParameter("sender")) {
-      sender=_subscription.getOptions().getParameter("sender");
+    } else if(_subscription.getOptions()->hasParameter("sender")) {
+      sender=_subscription.getOptions()->getParameter("sender");
     } else {
       return;
     }
 
     if(_event.hasPropertySet("receiver")) {
       receiver=_event.getPropertyByName("receiver");
-    } else if(_subscription.getOptions().hasParameter("receiver")) {
-      receiver=_subscription.getOptions().getParameter("receiver");
+    } else if(_subscription.getOptions()->hasParameter("receiver")) {
+      receiver=_subscription.getOptions()->getParameter("receiver");
     } else {
       return;
     }
 
     if (_event.hasPropertySet("body")) {
       body=_event.getPropertyByName("body");
-    } else if(_subscription.getOptions().hasParameter("body")) {
-      body=_subscription.getOptions().getParameter("body");
+    } else if(_subscription.getOptions()->hasParameter("body")) {
+      body=_subscription.getOptions()->getParameter("body");
     } else {
       return;
     }
 
     if(_event.hasPropertySet("subject")) {
       subject=_event.getPropertyByName("subject");
-    } else if(_subscription.getOptions().hasParameter("subject")) {
-      subject=_subscription.getOptions().getParameter("subject");
+    } else if(_subscription.getOptions()->hasParameter("subject")) {
+      subject=_subscription.getOptions()->getParameter("subject");
     } else {
       return;
     }

@@ -59,12 +59,14 @@ namespace dss {
       subscription->addProperty("id", pSubscription->getID());
       subscription->addProperty("handlerName", pSubscription->getHandlerName());
       subscription->addProperty("eventName", pSubscription->getEventName());
-      SubscriptionOptions opts = pSubscription->getOptions();
       boost::shared_ptr<JSONObject> optsObj(new JSONObject());
       subscription->addElement("options", optsObj);
-      HashMapConstStringString optsHash = opts.getParameters().getContainer();
-      foreach(HashMapConstStringString::reference option, optsHash) {
-        optsObj->addProperty(option.first, option.second);
+      boost::shared_ptr<const SubscriptionOptions> opts = pSubscription->getOptions();
+      if(opts != NULL) {
+        HashMapConstStringString optsHash = opts->getParameters().getContainer();
+        foreach(HashMapConstStringString::reference option, optsHash) {
+          optsObj->addProperty(option.first, option.second);
+        }
       }
     }
     return success(result);
