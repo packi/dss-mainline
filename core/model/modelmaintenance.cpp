@@ -494,8 +494,8 @@ namespace dss {
           }
 
           // create event to be raised
-          DeviceReference devRef(device, m_pApartment);
-          boost::shared_ptr<Event> evt(new Event(eventName, &devRef));
+          boost::shared_ptr<DeviceReference> devRef(new DeviceReference(device, m_pApartment));
+          boost::shared_ptr<Event> evt(new Event(eventName, devRef));
           evt->setProperty("device", device->getDSID().toString());
           std::string priorityString = "unknown";
           if(_priority == 0) {

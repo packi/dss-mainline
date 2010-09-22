@@ -68,8 +68,7 @@ namespace dss {
 
   Event::Event(const std::string& _name)
   : m_Name(_name),
-    m_RaiseLocation(erlApartment),
-    m_RaisedAtDevice(NULL)
+    m_RaiseLocation(erlApartment)
   {
     reset();
   } // ctor
@@ -77,18 +76,16 @@ namespace dss {
   Event::Event(const std::string& _name, boost::shared_ptr<Zone> _zone)
   : m_Name(_name),
     m_RaiseLocation(erlZone),
-    m_RaisedAtZone(_zone),
-    m_RaisedAtDevice(NULL)
+    m_RaisedAtZone(_zone)
   {
     reset();
   } // ctor
 
-  Event::Event(const std::string& _name, DeviceReference* _reference)
+  Event::Event(const std::string& _name, boost::shared_ptr<DeviceReference> _reference)
   : m_Name(_name),
-    m_RaiseLocation(erlDevice),
-    m_RaisedAtDevice(NULL)
+    m_RaiseLocation(erlDevice)
   {
-    m_RaisedAtDevice = new DeviceReference(*_reference);
+    m_RaisedAtDevice = _reference;
     reset();
   }
 
@@ -99,8 +96,6 @@ namespace dss {
   }
 
   Event::~Event() {
-    delete m_RaisedAtDevice;
-    m_RaisedAtDevice = NULL;
   }
 
   void Event::reset() {

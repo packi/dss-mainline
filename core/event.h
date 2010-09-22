@@ -74,14 +74,14 @@ namespace dss {
     bool m_TimeSet;
     EventRaiseLocation m_RaiseLocation;
     boost::shared_ptr<Zone> m_RaisedAtZone;
-    DeviceReference* m_RaisedAtDevice;
+    boost::shared_ptr<DeviceReference> m_RaisedAtDevice;
 
     Properties m_Properties;
   private:
     void reset();
   public:
     Event(const std::string& _name, boost::shared_ptr<Zone> _context);
-    Event(const std::string& _name, DeviceReference* _ref);
+    Event(const std::string& _name, boost::shared_ptr<DeviceReference> _ref);
     Event(const std::string& _name);
     Event();
 
