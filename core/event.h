@@ -27,7 +27,6 @@
 #include "datetools.h"
 #include "thread.h"
 #include "syncevent.h"
-#include "mutex.h"
 #include "subsystem.h"
 
 #include <string>
@@ -36,6 +35,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/thread/mutex.hpp>
 
 namespace Poco {
   namespace XML {
@@ -244,7 +244,7 @@ namespace dss {
   private:
     std::deque< boost::shared_ptr<Event> > m_EventQueue;
     SyncEvent m_EntryInQueueEvt;
-    Mutex m_QueueMutex;
+    boost::mutex m_QueueMutex;
 
     EventRunner* m_EventRunner;
     boost::shared_ptr<Schedule> scheduleFromEvent(boost::shared_ptr<Event> _event);
@@ -271,7 +271,7 @@ namespace dss {
     DateTime m_WakeTime;
     SyncEvent m_NewItem;
     EventQueue* m_EventQueue;
-    Mutex m_EventsMutex;
+    boost::mutex m_EventsMutex;
     bool m_ShutdownFlag;
   public:
     EventRunner();
@@ -299,6 +299,7 @@ namespace dss {
   private:
     typedef std::vector< boost::shared_ptr<EventSubscription> > SubscriptionVector;
     SubscriptionVector m_Subscriptions;
+    boost::mutex m_SubscriptionsMutex;
     std::vector<EventInterpreterPlugin*> m_Plugins;
     EventQueue* m_Queue;
     EventRunner* m_EventRunner;
