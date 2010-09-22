@@ -1,7 +1,8 @@
 /*
 Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
 
-Author: Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
+Authors: Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>,
+         Patrick Staehlin <pstaehlin@futurelab.ch>
 
 This file is part of digitalSTROM Server.
 
@@ -32,15 +33,16 @@ along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 #include <boost/bind.hpp>
 
 #define LOG_OBJECT_IDENTIFIER   "logfile"
+
 namespace dss {
+
   const std::string ScriptLoggerExtensionName = "scriptloggerextension";
 
   const std::string LoggerObjectName = "ScriptLoggerContextWrapper";
-  class ScriptLoggerContextWrapper : public ScriptContextAttachedObject {
+  class ScriptLoggerContextWrapper {
   public:
-    ScriptLoggerContextWrapper(ScriptContext* _pContext, boost::shared_ptr<ScriptLogger> _logger)
-    : ScriptContextAttachedObject(_pContext, LoggerObjectName + _logger->getLogName()),
-      m_ScriptLogger(_logger)
+    ScriptLoggerContextWrapper(boost::shared_ptr<ScriptLogger> _logger)
+    : m_ScriptLogger(_logger)
     { }
 
     boost::shared_ptr<ScriptLogger> getLogger() { return m_ScriptLogger; }
@@ -72,25 +74,17 @@ namespace dss {
       return JS_TRUE;
     }
 
-    jsval v;
-    if (JS_GetProperty(cx, obj, LOG_OBJECT_IDENTIFIER, &v) == JS_TRUE) {
-      if(v != JSVAL_VOID) {
-        JSString *logfile = JSVAL_TO_STRING(v);
-        std::string logfileStr = JS_GetStringBytes(logfile);
-        ScriptContextAttachedObject* attachedObj = ctx->getAttachedObjectByName(LoggerObjectName + logfileStr);
-        ScriptLoggerContextWrapper* wrapper =
-          dynamic_cast<ScriptLoggerContextWrapper*>(attachedObj);
-        if(wrapper != NULL) {
-          Logger::getInstance()->log(JS_GetStringBytes(str));
-          if(newline) {
-            wrapper->getLogger()->logln(JS_GetStringBytes(str));
-          } else {
-            wrapper->getLogger()->log(JS_GetStringBytes(str));
-          }
-        } else {
-          Logger::getInstance()->log("Could not find logger named: " + LoggerObjectName + logfileStr, lsWarning);
-        }
+    ScriptLoggerContextWrapper* wrapper = static_cast<ScriptLoggerContextWrapper*>(JS_GetPrivate(cx, obj));
+    if(wrapper != NULL) {
+      Logger::getInstance()->log(JS_GetStringBytes(str));
+      if(newline) {
+        wrapper->getLogger()->logln(JS_GetStringBytes(str));
+      } else {
+        wrapper->getLogger()->log(JS_GetStringBytes(str));
       }
+    } else {
+      Logger::getInstance()->log("ScriptLoggerExtension_log_common: wrapper is null!", lsFatal);
+      return JS_FALSE;
     }
     return JS_TRUE;
   }
@@ -124,13 +118,9 @@ namespace dss {
         }
 
         boost::shared_ptr<ScriptLogger> pLogger = ext->getLogger(JS_GetStringBytes(str));
-        ctx->attachObject(new ScriptLoggerContextWrapper(ctx, pLogger));
-        jsval v = STRING_TO_JSVAL(str);
-        JS_SetProperty(cx, obj, LOG_OBJECT_IDENTIFIER, &v);
-        JSBool foundp;
-        JS_SetPropertyAttributes(cx, obj, LOG_OBJECT_IDENTIFIER, JSPROP_READONLY, &foundp);
+        ScriptLoggerContextWrapper* wrapper = new ScriptLoggerContextWrapper(pLogger);
+        JS_SetPrivate(cx, obj, wrapper);
         return JS_TRUE;
-
       } catch(const ScriptException& e) {
         Logger::getInstance()->log(std::string("ScriptLogger: Caught script exception: ") + e.what());
       }
@@ -141,12 +131,19 @@ namespace dss {
     return JS_FALSE;
   }
 
+  void ScriptLogger_finalize(JSContext *cx, JSObject *obj) {
+    ScriptLoggerContextWrapper* pWrapper = static_cast<ScriptLoggerContextWrapper*>(JS_GetPrivate(cx, obj));
+    Logger::getInstance()->log("Finalizing ScriptLogger");
+    JS_SetPrivate(cx, obj, NULL);
+    delete pWrapper;
+  } // finalize_set
+
   static JSClass ScriptLogger_class = {
     "Logger", JSCLASS_HAS_PRIVATE,
     JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
     JS_EnumerateStandardClasses,
     JS_ResolveStub,
-    JS_ConvertStub,  JS_FinalizeStub, JSCLASS_NO_OPTIONAL_MEMBERS
+    JS_ConvertStub,  ScriptLogger_finalize, JSCLASS_NO_OPTIONAL_MEMBERS
   };
 
   static JSFunctionSpec ScriptLogger_methods[] = {
@@ -154,12 +151,6 @@ namespace dss {
     {"logln", ScriptLoggerExtension_logln, 1, 0, 0},
     {NULL, NULL, 0, 0, 0},
   };
-
-  static JSFunctionSpec ScriptLogger_static_methods[] = {
-    {"getChannel", ScriptLoggerExtension_log, 1, 0, 0},
-    {NULL, NULL, 0, 0, 0},
-  };
-
 
   ScriptLogger::ScriptLogger(const std::string& _filePath, 
                              const std::string& _filename, 
@@ -265,7 +256,7 @@ namespace dss {
     JS_InitClass(_context.getJSContext(),
                  _context.getRootObject().getJSObject(),
                 NULL, &ScriptLogger_class, ScriptLogger_construct, 1, NULL,
-                ScriptLogger_methods, NULL, ScriptLogger_static_methods);
+                ScriptLogger_methods, NULL, NULL);
 
   } // extendContext
 

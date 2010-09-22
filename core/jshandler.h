@@ -91,7 +91,6 @@ namespace dss {
     boost::scoped_ptr<ScriptObject> m_RootObject;
     ScriptEnvironment& m_Environment;
     JSContext* m_pContext;
-    bool m_KeepContext;
     std::vector<ScriptContextAttachedObject*> m_AttachedObjects;
     static void jsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er);
   public:
@@ -117,12 +116,11 @@ namespace dss {
     ScriptEnvironment& getEnvironment() { return m_Environment; }
     ScriptObject& getRootObject() { return *m_RootObject; }
     bool raisePendingExceptions();
-    bool getKeepContext() { return m_KeepContext; };
-    void setKeepContext(bool _value) { m_KeepContext = _value; }
 
     void attachObject(ScriptContextAttachedObject* _pObject);
     void removeAttachedObject(ScriptContextAttachedObject* _pObject);
     bool hasAttachedObjects() const { return !m_AttachedObjects.empty(); }
+    int getAttachedObjectsCount() const { return m_AttachedObjects.size(); }
     ScriptContextAttachedObject* getAttachedObjectByName(const std::string& _name);
   public:
 

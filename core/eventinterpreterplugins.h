@@ -32,6 +32,7 @@
 namespace dss {
 
   class Apartment;
+  class InternalEventRelayTarget;
 
   class EventInterpreterPluginRaiseEvent : public EventInterpreterPlugin {
   private:
@@ -43,13 +44,22 @@ namespace dss {
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   }; // EventInterpreterPluginRaiseEvent
 
+  class ScriptContextWrapper;
+  class PropertyNode;
+  typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   class EventInterpreterPluginJavascript : public EventInterpreterPlugin {
   private:
     ScriptEnvironment m_Environment;
-    std::vector<boost::shared_ptr<ScriptContext> > m_KeptContexts;
+    std::vector<boost::shared_ptr<ScriptContextWrapper> > m_WrappedContexts;
+    boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;
+    static const std::string kCleanupScriptsEventName;
+    PropertyNodePtr m_pScriptRootNode;
   private:
     void initializeEnvironment();
+    void setupCleanupEvent();
+    void cleanupTerminatedScripts(Event& _event, const EventSubscription& _subscription);
+    void sendCleanupEvent();
   public:
     EventInterpreterPluginJavascript(EventInterpreter* _pInterpreter);
 
