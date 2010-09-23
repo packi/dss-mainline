@@ -64,26 +64,26 @@ public:
  */
 class LockableObject {
   private:
-    Mutex m_LockMutex;
-    bool m_Locked;
+    mutable Mutex m_LockMutex;
+    mutable bool m_Locked;
 #ifdef WIN32
-	DWORD m_LockedBy;
+    mutable DWORD m_LockedBy;
 #else
-    pthread_t m_LockedBy;
+    mutable pthread_t m_LockedBy;
 #endif
   public:
     LockableObject();
     virtual ~LockableObject();
     /** Returns \c true if the object is locked */
-    bool isLocked();
+    bool isLocked() const;
     /** Returns \c true if the object is locked by the current thread */
-    bool isLockedCurrentThread();
+    bool isLockedCurrentThread() const;
     /** Acquires a lock.
      * @see Mutex::lock */
-    bool lock();
+    bool lock() const;
     /** Releases a lock.
      * @see Mutex::unlock */
-    bool unlock();
+    bool unlock() const;
 }; // LockableObject;
 
 /** Asserts that an object can be accessed from the current thread.
@@ -93,9 +93,9 @@ class LockableObject {
 class AssertLocked {
   private:
     bool m_OwnLock;
-    LockableObject* m_ObjRef;
+    const LockableObject* m_ObjRef;
   public:
-    AssertLocked( LockableObject* objToLock );
+    AssertLocked(const LockableObject* objToLock);
     ~AssertLocked();
 }; // LockAsserter
 

@@ -83,12 +83,12 @@ LockableObject::~LockableObject() {
 } // dtor
 
 
-bool LockableObject::isLocked() {
+bool LockableObject::isLocked() const {
   return m_Locked;
 } // isLocked
 
 
-bool LockableObject::lock() {
+bool LockableObject::lock() const {
   m_LockMutex.lock();
 #ifdef WIN32
   m_LockedBy = GetCurrentThreadId();
@@ -100,7 +100,7 @@ bool LockableObject::lock() {
 } // lock
 
 
-bool LockableObject::unlock() {
+bool LockableObject::unlock() const {
   m_Locked = false;
   m_LockedBy = 0;
   m_LockMutex.unlock();
@@ -108,12 +108,12 @@ bool LockableObject::unlock() {
 } // unlock
 
 
-bool LockableObject::isLockedCurrentThread() {
+bool LockableObject::isLockedCurrentThread() const {
   if( !m_Locked || m_LockedBy == 0 ) {
     return false;
   } else {
 #ifdef WIN32
-	  return GetCurrentThreadId() == m_LockedBy;
+    return GetCurrentThreadId() == m_LockedBy;
 #else
     return pthread_equal( pthread_self(), m_LockedBy ) != 0;
 #endif
@@ -123,7 +123,7 @@ bool LockableObject::isLockedCurrentThread() {
 
 //==================================================== AssertLocked
 
-AssertLocked::AssertLocked( LockableObject* objToLock )
+AssertLocked::AssertLocked(const LockableObject* objToLock)
   : m_ObjRef( objToLock )
 {
   if( objToLock->isLocked() && objToLock->isLockedCurrentThread() ) {
