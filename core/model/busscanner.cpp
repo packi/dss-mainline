@@ -224,11 +224,13 @@ namespace dss {
         continue;
       }
       log("scanDSMeter:    Found group with id: " + intToString(groupID));
-      if(_zone->getGroup(groupID) == NULL) {
+      boost::shared_ptr<Group> groupOnZone = _zone->getGroup(groupID);
+      if(groupOnZone == NULL) {
         log(" scanDSMeter:    Adding new group to zone");
-        boost::shared_ptr<Group> newGroup(new Group(groupID, _zone->getID(), m_Apartment));
-        _zone->addGroup(newGroup);
+        groupOnZone.reset(new Group(groupID, _zone->getID(), m_Apartment));
+        _zone->addGroup(groupOnZone);
       }
+      groupOnZone->setIsPresent(true);
       try {
         boost::shared_ptr<Group> group = m_Apartment.getGroup(groupID);
         group->setIsPresent(true);
