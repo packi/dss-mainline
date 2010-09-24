@@ -78,12 +78,11 @@ namespace dss {
     result->addProperty("name", _group->getName());
     result->addProperty("isPresent", _group->isPresent());
 
-    boost::shared_ptr<JSONArrayBase> devicesArr(new JSONArrayBase());
+    boost::shared_ptr<JSONArray<std::string> > devicesArr(new JSONArray<std::string>());
     result->addElement("devices", devicesArr);
     Set devices = _group->getDevices();
     for(int iDevice = 0; iDevice < devices.length(); iDevice++) {
-      boost::shared_ptr<JSONObject> dev(new JSONObject());
-      dev->addProperty("id", devices[iDevice].getDSID().toString());
+      devicesArr->add(devices[iDevice].getDSID().toString());
     }
     return result;
   } // toJSON(Group)
