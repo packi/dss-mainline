@@ -19,6 +19,9 @@
 #cmakedefine WITH_JSLOGDIR "${WITH_JSLOGDIR}"
 #cmakedefine WITH_BONJOUR
 #cmakedefine WITH_GCOV
+#cmakedefine HAVE_BACKTRACE
+#cmakedefine HAVE_BACKTRACE_SYMBOLS
+
 
 #endif /* DIGITAL_STROM_SERVER_CONFIG_H */
 

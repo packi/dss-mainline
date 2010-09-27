@@ -74,6 +74,7 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 # header tests
 include(CheckIncludeFiles)
 include(CheckIncludeFileCXX)
+include(CheckFunctionExists)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
 if(WIN32)
@@ -82,6 +83,10 @@ else(WIN32)
 	set(REQUIRED_LIBS dl)
 endif(WIN32)
 check_include_files(stdint.h HAVE_STDINT)
+
+# check for backtrace
+check_function_exists(backtrace HAVE_BACKTRACE)
+check_function_exists(backtrace_symbols HAVE_BACKTRACE_SYMBOLS)
 
 # check for a library providing zeroconf (avahi/dnssd)
 find_package(Avahi)
@@ -146,6 +151,7 @@ set(REQUIRED_LIBS ${REQUIRED_LIBS} ${LIBXML2_LIBRARIES})
 
 # check for pthread
 find_package(Threads REQUIRED)
+
 
 # generate config.h header file
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in

@@ -50,6 +50,7 @@
 #include "metering/metering.h"
 #include "metering/fake_meter.h"
 #include "foreach.h"
+#include "backtrace.h"
 
 #include "unix/systeminfo.h"
 
@@ -494,12 +495,6 @@ const char* JSLogDirectory = "data/logs/";
 
 #ifndef WIN32
   void DSS::handleSignal(int _signum) {
-    if (DSS::hasInstance()) {
-      boost::shared_ptr<Event> pEvent(new Event("SIGNAL"));
-      pEvent->setProperty("signum", intToString(_signum));
-      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
-    }
-
     switch (_signum) {
       case SIGUSR1: {
         Logger::getInstance()->reopenLogTarget();
@@ -511,12 +506,26 @@ const char* JSLogDirectory = "data/logs/";
             DSS::getInstance()->initiateShutdown();
         }
       break;
+      case SIGSEGV:
+        Logger::getInstance()->log("Cought SIGSEGV", lsFatal);
+        Backtrace::logBacktrace();
+        exit(EXIT_FAILURE);
+      case SIGABRT:
+        Logger::getInstance()->log("Cought SIGABRT", lsFatal);
+        Backtrace::logBacktrace();
+        exit(EXIT_FAILURE);
       default: {
         std::ostringstream ostr;
         ostr << "DSS::handleSignal(): unhandled signal " << _signum << std::endl;
         Logger::getInstance()->log(ostr.str(), lsWarning);
         break;
       }
+    }
+
+    if (DSS::hasInstance()) {
+      boost::shared_ptr<Event> pEvent(new Event("SIGNAL"));
+      pEvent->setProperty("signum", intToString(_signum));
+      DSS::getInstance()->getEventQueue().pushEvent(pEvent);
     }
   }
 #endif
