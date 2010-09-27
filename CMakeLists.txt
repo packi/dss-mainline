@@ -179,6 +179,10 @@ else()
   MESSAGE (FATAL_ERROR "Cannot build without Boost.")
 endif()
 
+if(CMAKE_HAVE_PTHREAD_CREATE)
+  set(REQUIRED_LIBS ${REQUIRED_LIBS} pthread)
+endif(CMAKE_HAVE_PTHREAD_CREATE)
+
 #include test-directory if needed
 set(TEST_LIB)
 if(WITH_TESTS)
@@ -193,13 +197,7 @@ add_subdirectory(webservices)
 add_subdirectory(external)
 add_subdirectory(doc)
 
-
 add_executable(dss main.cpp namespaces.cpp)
-
-if(CMAKE_HAVE_PTHREAD_CREATE)
-  set(REQUIRED_LIBS ${REQUIRED_LIBS} pthread)
-endif(CMAKE_HAVE_PTHREAD_CREATE)
-
 			  
 IF(WIN32)
     target_link_libraries(dss ${TEST_LIB} core ds485 model unix webservices core mongoose
