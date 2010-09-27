@@ -20,6 +20,10 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+#endif
+
 #include "ds485.h"
 
 #include "core/base.h"
@@ -899,7 +903,7 @@ namespace dss {
   }
 
   //================================================== DS485FrameSniffer
-#ifndef __APPLE__
+#ifdef HAVE_RT
   DS485FrameSniffer::DS485FrameSniffer(const std::string& _deviceName)
   {
      m_SerialCom.reset(new SerialCom());
