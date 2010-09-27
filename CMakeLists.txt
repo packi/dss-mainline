@@ -74,6 +74,7 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 # header tests
 include(CheckIncludeFiles)
 include(CheckIncludeFileCXX)
+include(CheckFunctionExists)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
 if(WIN32)
@@ -82,6 +83,16 @@ else(WIN32)
 	set(REQUIRED_LIBS dl)
 endif(WIN32)
 check_include_files(stdint.h HAVE_STDINT)
+
+# check for backtrace
+check_function_exists(backtrace HAVE_BACKTRACE)
+check_function_exists(backtrace_symbols HAVE_BACKTRACE_SYMBOLS)
+
+include(CheckLibraryExists)
+check_library_exists(rt clock_gettime "" HAVE_RT)
+if(HAVE_RT)
+  set(REQUIRED_LIBS ${REQUIRED_LIBS} rt)
+endif(HAVE_RT)
 
 # check for a library providing zeroconf (avahi/dnssd)
 find_package(Avahi)
@@ -113,6 +124,9 @@ if(DEFINED SPIDERMONKEY_LIBRARY_DIRS)
   link_directories(${SPIDERMONKEY_LIBRARY_DIRS})
 endif()
 
+# check for pthread
+find_package(Threads REQUIRED)
+
 include(GGLCheckFunctionExists)
 set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -DJS_THREADSAFE)
 set(CMAKE_REQUIRED_LIBRARIES ${SPIDERMONKEY_LIBRARIES})
@@ -143,9 +157,6 @@ set(REQUIRED_LIBS ${REQUIRED_LIBS} ${POCO_LIBRARIES} PocoFoundation PocoNet)
 find_package(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
 set(REQUIRED_LIBS ${REQUIRED_LIBS} ${LIBXML2_LIBRARIES})
-
-# check for pthread
-find_package(Threads REQUIRED)
 
 # generate config.h header file
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
@@ -184,6 +195,11 @@ add_subdirectory(doc)
 
 
 add_executable(dss main.cpp namespaces.cpp)
+
+if(CMAKE_HAVE_PTHREAD_CREATE)
+  set(REQUIRED_LIBS ${REQUIRED_LIBS} pthread)
+endif(CMAKE_HAVE_PTHREAD_CREATE)
+
 			  
 IF(WIN32)
     target_link_libraries(dss ${TEST_LIB} core ds485 model unix webservices core mongoose

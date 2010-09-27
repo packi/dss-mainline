@@ -100,6 +100,8 @@ int main (int argc, char* argv[]) {
   signal(SIGUSR1, dss::DSS::handleSignal);
   signal(SIGTERM, dss::DSS::handleSignal);
   signal(SIGINT, dss::DSS::handleSignal);
+  signal(SIGSEGV, dss::DSS::handleSignal);
+  signal(SIGABRT, dss::DSS::handleSignal);
 #else
   srand( (int)time( (time_t)NULL ) );
   WSAData dat;
