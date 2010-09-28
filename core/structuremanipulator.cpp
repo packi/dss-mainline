@@ -81,10 +81,14 @@ namespace dss {
     if(presentDevicesInZoneOfDSMeter.length() != 0) {
       throw std::runtime_error("cannot delete zone if there are still devices present");
     }
-    m_Interface.removeZone(_dsMeter->getBusID(), _zone->getID());
-    _zone->removeFromDSMeter(_dsMeter);
-    if(_zone->isRegisteredOnAnyMeter()) {
-      _zone->setIsPresent(false);
+    if(_zone->getFirstZoneOnDSMeter() != _dsMeter->getBusID()) {
+      m_Interface.removeZone(_dsMeter->getBusID(), _zone->getID());
+      _zone->removeFromDSMeter(_dsMeter);
+      if(_zone->isRegisteredOnAnyMeter()) {
+        _zone->setIsPresent(false);
+      }
+    } else {
+      Logger::getInstance()->log("Not removing zone as it's a primary zone on this meter", lsInfo);
     }
   } // removeZoneOnDSMeter
 
