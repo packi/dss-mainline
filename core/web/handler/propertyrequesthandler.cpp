@@ -142,6 +142,48 @@ namespace dss {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
       resultObj->addProperty("type", getValueTypeAsString(node->getValueType()));
       return success(resultObj);
+    } else if(_request.getMethod() == "setFlag") {
+      PropertyNode::Flag flag;
+      bool value;
+
+      if(node == NULL) {
+        return failure("Could not find node named '" + propName + "'");
+      }
+
+      std::string strFlag = _request.getParameter("flag");
+      if(strFlag == "READABLE") {
+        flag = PropertyNode::Readable;
+      } else if(strFlag == "WRITEABLE") {
+        flag = PropertyNode::Writeable;
+      } else if(strFlag == "ARCHIVE") {
+        flag = PropertyNode::Archive;
+      } else {
+        return failure("Expected 'READABLE', 'WRITABLE' or 'ARCHIVE' for parameter 'flag' but got: '" + strFlag + "'");
+      }
+
+      std::string strValue = _request.getParameter("value");
+      if(strValue == "true") {
+        value = true;
+      } else if(strValue == "false") {
+        value = false;
+      } else {
+        return failure("Expected 'true' or 'false' for parameter 'value' but got: '" + strValue + "'");
+      }
+
+      node->setFlag(flag, value);
+
+      return success();
+    } else if(_request.getMethod() == "getFlags") {
+      if(node == NULL) {
+        return failure("Could not find node named '" + propName + "'");
+      }
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("READABLE", node->hasFlag(PropertyNode::Readable));
+      resultObj->addProperty("WRITEABLE", node->hasFlag(PropertyNode::Writeable));
+      resultObj->addProperty("ARCHIVE", node->hasFlag(PropertyNode::Archive));
+
+      return success(resultObj);
     }
     throw std::runtime_error("Unhandled function");
   } // handleRequest

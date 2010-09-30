@@ -284,6 +284,12 @@ namespace dss {
         .withDocumentation("Returns an array of the nodes children");
     clsProp.addMethod("setString")
         .withDocumentation("Returns the type of the node");
+    clsProp.addMethod("setFlag")
+        .withParameter("flag", "string", true)
+        .withParameter("value", "boolean", true)
+        .withDocumentation("Sets flag to a given value, supported flags are READABLE, WRITEABLE and ARCHIVE");
+    clsProp.addMethod("getFlags")
+        .withDocumentation("Returns an array of flags and their values");
 
     RestfulClass& clsEvent = api->addClass("event");
     clsEvent.addMethod("raise")
