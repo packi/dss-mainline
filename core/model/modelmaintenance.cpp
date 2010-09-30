@@ -47,7 +47,35 @@
 #include "scenehelper.h"
 
 namespace dss {
-
+  //=============================================== ApartmentTreeListener
+  
+  /** Raises a ModelDirty event if something below the apartment node gets changed. */
+  class ApartmentTreeListener : public PropertyListener {
+  public:
+    ApartmentTreeListener(ModelMaintenance* _pModelMaintenance, Apartment* _pApartment) 
+    : m_pModelMaintenance(_pModelMaintenance),
+      m_pApartment(_pApartment)
+    {
+      if(m_pApartment->getPropertyNode() != NULL) {
+        m_pApartment->getPropertyNode()->addListener(this);
+      }
+    }
+    
+  protected:
+    virtual void propertyChanged(PropertyNodePtr _caller, PropertyNodePtr _changedNode) {
+      if(_changedNode->hasFlag(PropertyNode::Archive)) {
+        ModelEvent* pEvent = new ModelEvent(ModelEvent::etModelDirty);
+        m_pModelMaintenance->addModelEvent(pEvent);
+      }
+    }
+  private:
+    ModelMaintenance* m_pModelMaintenance;
+    Apartment* m_pApartment;
+  }; // ApartmentTreeListener
+ 
+  
+ //=============================================== ModelMaintenance
+ 
   ModelMaintenance::ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS)
   : ThreadedSubsystem(_pDSS, "Apartment"),
     m_IsInitializing(true),
@@ -106,6 +134,10 @@ namespace dss {
 
     log("Apartment::execute: Interface is ready, enumerating model", lsInfo);
     discoverDS485Devices();
+    
+    boost::shared_ptr<ApartmentTreeListener> treeListener 
+      = boost::shared_ptr<ApartmentTreeListener>(
+          new ApartmentTreeListener(this, m_pApartment));
 
     while(!m_Terminated) {
       handleModelEvents();
