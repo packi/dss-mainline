@@ -317,7 +317,7 @@ namespace dss {
   protected:
     friend class PropertyNode;
     /** Function that gets called if a property changes. */
-    virtual void propertyChanged(PropertyNodePtr _changedNode);
+    virtual void propertyChanged(PropertyNodePtr _caller, PropertyNodePtr _changedNode);
     virtual void propertyRemoved(PropertyNodePtr _parent, PropertyNodePtr _child);
     virtual void propertyAdded(PropertyNodePtr _parent, PropertyNodePtr _child);
 
@@ -367,7 +367,6 @@ namespace dss {
 
     void childAdded(PropertyNodePtr _child);
     void childRemoved(PropertyNodePtr _child);
-    void notifyListeners(void(PropertyListener::*_callback)(PropertyNodePtr));
     void notifyListeners(void(PropertyListener::*_callback)(PropertyNodePtr, PropertyNodePtr), PropertyNodePtr _node);
   public:
     PropertyNode(const char* _name, int _index = 0);
@@ -420,7 +419,7 @@ namespace dss {
     aValueType getValueType();
 
     bool hasFlag(Flag _flag) const { return (m_Flags & _flag) == _flag; }
-    void setFlag(Flag _flag, bool _value) { _value ? m_Flags |= _flag : m_Flags &= ~_flag; }
+    void setFlag(Flag _flag, bool _value);
 
     void alias(PropertyNodePtr _target);
 

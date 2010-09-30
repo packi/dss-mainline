@@ -320,7 +320,7 @@ public:
   TestListener(PropertySystem& _system, const std::string& _path)
   : m_System(_system), m_Path(_path) {}
 
-  virtual void propertyChanged(PropertyNodePtr _pChangedNode) {
+  virtual void propertyChanged(PropertyNodePtr _caller, PropertyNodePtr _pChangedNode) {
     m_System.setBoolValue(m_Path, true);
   }
 private:

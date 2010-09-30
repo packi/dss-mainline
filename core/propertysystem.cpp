@@ -59,7 +59,7 @@ using Poco::XML::InputSource;
 #include "core/logger.h"
 
 namespace dss {
-
+  
   const int PROPERTY_FORMAT_VERSION = 1;
 
   //=============================================== PropertySystem
@@ -683,6 +683,13 @@ namespace dss {
     return m_Aliased ? m_AliasTarget->m_PropVal.valueType : m_PropVal.valueType;
   } // getValueType
 
+  void PropertyNode::setFlag(Flag _flag, bool _value) { 
+    int oldFlags = m_Flags;
+    _value ? m_Flags |= _flag : m_Flags &= ~_flag; 
+    if(oldFlags != m_Flags) {
+      propertyChanged();
+    }
+  } // setFlag
 
   std::string PropertyNode::getAsString() {
     if(m_Aliased) {
@@ -852,7 +859,7 @@ namespace dss {
   } // loadChildrenFromNode
 
   void PropertyNode::propertyChanged() {
-    notifyListeners(&PropertyListener::propertyChanged);
+    notifyListeners(&PropertyListener::propertyChanged, shared_from_this());
   } // propertyChanged
 
   void PropertyNode::childAdded(PropertyNodePtr _child) {
@@ -862,31 +869,6 @@ namespace dss {
   void PropertyNode::childRemoved(PropertyNodePtr _child) {
     notifyListeners(&PropertyListener::propertyRemoved, _child);
   } // childRemoved
-
-  void PropertyNode::notifyListeners(void (PropertyListener::*_callback)(PropertyNodePtr)) {
-    bool notified = false;
-    if(!m_Listeners.empty()) {
-      // as the list might get modified in the listener code we need to iterate
-      // over a copy of our listeners
-      std::vector<PropertyListener*> copy = m_Listeners;
-      std::vector<PropertyListener*>::iterator it;
-      foreach(PropertyListener* pListener, copy) {
-        // check if the original list still contains the listener
-        if(contains(m_Listeners, pListener)) {
-          (pListener->*_callback)(shared_from_this());
-          notified = true;
-        }
-      }
-    }
-    if(!notified) {
-      if(m_ParentNode != NULL) {
-        m_ParentNode->notifyListeners(_callback);
-      }
-    }
-    foreach(PropertyNode* prop, m_AliasedBy) {
-      prop->notifyListeners(_callback);
-    }
-  } // notifyListeners
 
   void PropertyNode::notifyListeners(void (PropertyListener::*_callback)(PropertyNodePtr,PropertyNodePtr), PropertyNodePtr _node) {
     bool notified = false;
@@ -928,7 +910,7 @@ namespace dss {
     }
   } // unsubscribe
 
-  void PropertyListener::propertyChanged(PropertyNodePtr _changedNode) {
+  void PropertyListener::propertyChanged(PropertyNodePtr _caller, PropertyNodePtr _changedNode) {
   } // propertyChanged
 
   void PropertyListener::propertyRemoved(PropertyNodePtr _parent, PropertyNodePtr _child) {

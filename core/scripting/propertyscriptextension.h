@@ -36,7 +36,7 @@ namespace dss {
     PropertyScriptListener(PropertyScriptExtension* _pExtension, ScriptContext* _pContext, JSObject* _functionObj, jsval _function, const std::string& _identifier);
     virtual ~PropertyScriptListener();
 
-    virtual void propertyChanged(PropertyNodePtr _changedNode);
+    virtual void propertyChanged(PropertyNodePtr _caller, PropertyNodePtr _changedNode);
     virtual void propertyRemoved(PropertyNodePtr _parent, PropertyNodePtr _child);
     virtual void propertyAdded(PropertyNodePtr _parent, PropertyNodePtr _child);
 

@@ -294,7 +294,7 @@ namespace dss {
     assert(m_pScriptObject != NULL);
   } // createScriptObject
 
-  void PropertyScriptListener::propertyChanged(PropertyNodePtr _changedNode) {
+  void PropertyScriptListener::propertyChanged(PropertyNodePtr _caller, PropertyNodePtr _changedNode) {
     doOnChange(_changedNode);
   } // propertyChanged
 
