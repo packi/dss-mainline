@@ -32,8 +32,6 @@
 #include "core/model/modelevent.h"
 
 namespace dss {
-  class PropertyNode;
-  typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
   class Apartment;
   class Event;
   class Metering;
@@ -81,9 +79,7 @@ namespace dss {
     void onDSLinkInterrupt(const int _modID, const int _devID, const int _priority);
   private:
     bool m_IsInitializing;
-
-    PropertyNodePtr m_pPropertyNode;
-
+    
     boost::ptr_vector<ModelEvent> m_ModelEvents;
     Mutex m_ModelEventsMutex;
     SyncEvent m_NewModelEvent;
