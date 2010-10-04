@@ -34,7 +34,9 @@
 #include "core/ds485const.h"
 #include "core/event.h"
 #include "core/ds485/framebucketbase.h"
-#include "core/sim/dssim.h"
+
+// TODO: libdsm
+// #include "core/sim/dssim.h"
 
 namespace dss {
 

@@ -55,7 +55,7 @@
 #include "core/web/handler/zonerequesthandler.h"
 #include "core/web/handler/subscriptionrequesthandler.h"
 
-#include "core/DS485Interface.h"
+#include "core/businterface.h"
 
 #include "webserverapi.h"
 #include "json.h"
@@ -149,7 +149,7 @@ namespace dss {
     }
 
     log("Registering " + pFileNode->getStringValue() + " for URI '" + pURINode->getStringValue() + "'");
-    
+
     m_Plugins.push_back(plugin);
   } // loadPlugin
 
@@ -247,9 +247,10 @@ namespace dss {
       new StructureRequestHandler(
         getDSS().getApartment(),
         getDSS().getModelMaintenance(),
-        *getDSS().getDS485Interface().getStructureModifyingBusInterface()
+        *getDSS().getBusInterface().getStructureModifyingBusInterface()
       );
-    m_Handlers[kHandlerSim] = new SimRequestHandler(getDSS().getApartment());
+    // TODO: libdsm
+    // m_Handlers[kHandlerSim] = new SimRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerDebug] = new DebugRequestHandler(getDSS());
     m_Handlers[kHandlerMetering] = new MeteringRequestHandler(getDSS().getApartment(), getDSS().getMetering());
     m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());

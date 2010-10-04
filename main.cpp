@@ -30,8 +30,9 @@
 #include "core/base.h"
 #include "core/dss.h"
 #include "core/logger.h"
-#include "core/ds485client.h"
-#include "core/ds485/ds485.h"
+// TODO: libdsm
+// #include "core/ds485client.h"
+// #include "core/ds485/ds485.h"
 #include "core/datetools.h"
 #ifdef WITH_TESTS
 #include "tests/tests.h"
@@ -172,17 +173,17 @@ int main (int argc, char* argv[]) {
   }
 
   if(vm.count("datadir")) {
-    properties.push_back("/config/datadirectory=" + 
+    properties.push_back("/config/datadirectory=" +
                          vm["datadir"].as<string>());
   }
 
   if(vm.count("webrootdir")) {
-    properties.push_back("/config/webrootdirectory=" + 
+    properties.push_back("/config/webrootdirectory=" +
                           vm["webrootdir"].as<string>());
   }
 
   if(vm.count("configdir")) {
-    properties.push_back("/config/configdirectory=" + 
+    properties.push_back("/config/configdirectory=" +
                          vm["configdir"].as<string>());
   }
 
@@ -213,6 +214,9 @@ int main (int argc, char* argv[]) {
 #endif
 
   if(!quitAfterTests && startSniffer) {
+    
+#if 0 
+    // TODO: libdsm
 #ifndef __APPLE__
     dss::DS485FrameSniffer sniffer(snifferDev);
     sniffer.run();
@@ -220,6 +224,7 @@ int main (int argc, char* argv[]) {
       dss::sleepSeconds(10);
     }
 #endif
+#endif /* 0 */
   } else {
     if(!quitAfterTests) {
       // start DSS
@@ -252,10 +257,14 @@ int main (int argc, char* argv[]) {
 #endif
   free(tzNameCopy);
 
-  
+
+#if 0
+  // TODO: libdsm
+
   // force the DS485Client symbols to be contained in the dss binary
   // Also see redmine ticket #54
   dss::DS485Client* __attribute__ ((unused)) pClient = new dss::DS485Client();
+#endif
 
   return 0;
 }

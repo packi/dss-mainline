@@ -40,12 +40,12 @@ namespace dss {
    */
   class DeviceReference : public IDeviceInterface {
   private:
-    dsid_t m_DSID;
+    dss_dsid_t m_DSID;
     const Apartment* m_Apartment;
   public:
     /** Copy constructor */
     DeviceReference(const DeviceReference& _copy);
-    DeviceReference(const dsid_t _dsid, const Apartment* _apartment);
+    DeviceReference(const dss_dsid_t _dsid, const Apartment* _apartment);
     DeviceReference(boost::shared_ptr<const Device> _device, const Apartment* _apartment);
     virtual ~DeviceReference() {};
 
@@ -56,7 +56,7 @@ namespace dss {
     /** @copydoc getDevice() */
     boost::shared_ptr<const Device> getDevice() const;
     /** Returns the DSID of the referenced device */
-    dsid_t getDSID() const;
+    dss_dsid_t getDSID() const;
 
     /** Returns the function id.
      * @note This will lookup the device */

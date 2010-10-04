@@ -35,7 +35,9 @@
 #include "scripting/modeljs.h"
 #include "eventinterpreterplugins.h"
 #include "core/ds485/ds485proxy.h"
-#include "core/ds485/businterfacehandler.h"
+
+// TODO: libdsm
+// #include "core/ds485/businterfacehandler.h"
 #include "core/ds485/ds485busrequestdispatcher.h"
 #include "core/model/apartment.h"
 #include "core/model/modelmaintenance.h"
@@ -44,7 +46,9 @@
 #ifdef WITH_BONJOUR
   #include "bonjour.h"
 #endif
-#include "sim/dssim.h"
+
+// TODO: libdsm
+// #include "sim/dssim.h"
 #include "webservices/webservices.h"
 #include "event.h"
 #include "metering/metering.h"
@@ -128,7 +132,7 @@ const char* JSLogDirectory = "data/logs/";
 
     m_pSimulation.reset();
 
-    m_pDS485Interface.reset();
+    m_pBusInterface.reset();
 
 
     m_pApartment.reset();
@@ -234,21 +238,26 @@ const char* JSLogDirectory = "data/logs/";
     m_pApartment->setPropertySystem(m_pPropertySystem.get());
     m_pModelMaintenance->setApartment(m_pApartment.get());
 
+#if 0
+    // TODO: libdsm
     m_pSimulation = boost::shared_ptr<DSSim>(new DSSim(this));
     m_Subsystems.push_back(m_pSimulation.get());
+#endif
 
-    m_pDS485Interface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this, m_pModelMaintenance.get(), m_pSimulation.get()));
-    m_Subsystems.push_back(dynamic_cast<DS485Proxy*>(m_pDS485Interface.get()));
+    m_pBusInterface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this, m_pModelMaintenance.get(), m_pSimulation.get()));
+    m_Subsystems.push_back(dynamic_cast<DS485Proxy*>(m_pBusInterface.get()));
 
-    m_pBusDispatcher = boost::shared_ptr<DS485BusRequestDispatcher>(new DS485BusRequestDispatcher());
-    m_pBusDispatcher->setFrameSender(m_pDS485Interface->getFrameSenderInterface());
+    // TODO: libdsm
+    // m_pBusDispatcher = boost::shared_ptr<DS485BusRequestDispatcher>(new DS485BusRequestDispatcher());
+    // m_pBusDispatcher->setFrameSender(m_pBusInterface->getFrameSenderInterface());
 
-    m_pApartment->setDS485Interface(m_pDS485Interface.get());
+    m_pApartment->setBusInterface(m_pBusInterface.get());
     m_pApartment->setBusRequestDispatcher(m_pBusDispatcher.get());
 
-    m_pBusInterfaceHandler = boost::shared_ptr<BusInterfaceHandler>(new BusInterfaceHandler(this, getModelMaintenance()));
-    m_Subsystems.push_back(m_pBusInterfaceHandler.get());
-    dynamic_cast<DS485Proxy*>(m_pDS485Interface.get())->setBusInterfaceHandler(m_pBusInterfaceHandler.get());
+    // TODO: libdsm
+    // m_pBusInterfaceHandler = boost::shared_ptr<BusInterfaceHandler>(new BusInterfaceHandler(this, getModelMaintenance()));
+    // m_Subsystems.push_back(m_pBusInterfaceHandler.get());
+    // dynamic_cast<DS485Proxy*>(m_pBusInterface.get())->setBusInterfaceHandler(m_pBusInterfaceHandler.get());
 
     m_pWebServer = boost::shared_ptr<WebServer>(new WebServer(this));
     m_Subsystems.push_back(m_pWebServer.get());
@@ -261,7 +270,7 @@ const char* JSLogDirectory = "data/logs/";
 
     m_pMetering = boost::shared_ptr<Metering>(new Metering(this));
     m_Subsystems.push_back(m_pMetering.get());
-    m_pMetering->setMeteringBusInterface(m_pDS485Interface->getMeteringBusInterface());
+    m_pMetering->setMeteringBusInterface(m_pBusInterface->getMeteringBusInterface());
     m_pModelMaintenance->setMetering(m_pMetering.get());
 
     m_pFakeMeter = boost::shared_ptr<FakeMeter>(new FakeMeter(this));
@@ -353,7 +362,7 @@ const char* JSLogDirectory = "data/logs/";
   void DSS::addDefaultInterpreterPlugins() {
     EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
-    plugin = new EventInterpreterPluginDS485(getApartment(), m_pDS485Interface.get(), m_pEventInterpreter.get());
+    plugin = new EventInterpreterPluginDS485(getApartment(), m_pBusInterface.get(), m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);
     plugin = new EventInterpreterPluginJavascript(m_pEventInterpreter.get());
     m_pEventInterpreter->addPlugin(plugin);

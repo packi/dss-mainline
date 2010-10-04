@@ -34,7 +34,7 @@ namespace dss {
 
   class DSIDJS : public DSIDInterface {
   public:
-    DSIDJS(const DSDSMeterSim& _simulator, dsid_t _dsid,
+    DSIDJS(const DSDSMeterSim& _simulator, dss_dsid_t _dsid,
            devid_t _shortAddress, boost::shared_ptr<ScriptContext> _pContext,
            const std::vector<std::string>& _fileNames)
     : DSIDInterface(_simulator, _dsid, _shortAddress),
@@ -298,7 +298,7 @@ namespace dss {
 
     virtual void extendContext(ScriptContext& _context);
 
-    void dSLinkInterrupt(const dsid_t& _dsid) {
+    void dSLinkInterrupt(const dss_dsid_t& _dsid) {
       DSIDInterface* intf = m_Simulation.getSimulatedDevice(_dsid);
       if(intf != NULL) {
         intf->dSLinkInterrupt();
@@ -311,7 +311,7 @@ namespace dss {
 
   class DSLinkInterrupSender : public Thread {
   public:
-    DSLinkInterrupSender(dsid_t _dsid, DSIDScriptExtension* _ext)
+    DSLinkInterrupSender(dss_dsid_t _dsid, DSIDScriptExtension* _ext)
     : Thread("DSLinkInterruptSender"),
       m_DSID(_dsid), m_Ext(_ext)
     {
@@ -322,7 +322,7 @@ namespace dss {
       m_Ext->dSLinkInterrupt(m_DSID);
     }
   private:
-    dsid_t m_DSID;
+    dss_dsid_t m_DSID;
     DSIDScriptExtension* m_Ext;
   };
 
@@ -336,7 +336,7 @@ namespace dss {
       std::string dsidString = ctx->convertTo<std::string>(argv[0]);
 
       try {
-        dsid_t dsid = dsid_t::fromString(dsidString);
+        dss_dsid_t dsid = dss_dsid_t::fromString(dsidString);
         DSLinkInterrupSender* sender = new DSLinkInterrupSender(dsid, ext);
         sender->run();
       } catch(std::invalid_argument&) {
@@ -374,7 +374,7 @@ namespace dss {
     m_pScriptEnvironment->addExtension(new SocketScriptContextExtension());
   } // ctor
 
-  DSIDInterface* DSIDJSCreator::createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
+  DSIDInterface* DSIDJSCreator::createDSID(const dss_dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
     boost::shared_ptr<ScriptContext> pContext(m_pScriptEnvironment->getContext());
     DSIDJS* result = new DSIDJS(_dsMeter, _dsid, _shortAddress, pContext, m_FileNames);
     return result;

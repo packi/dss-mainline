@@ -26,7 +26,7 @@
 
 #include "core/dss.h"
 #include "core/logger.h"
-#include "core/DS485Interface.h"
+#include "core/businterface.h"
 #include "core/propertysystem.h"
 #include "seriespersistence.h"
 #include "core/foreach.h"

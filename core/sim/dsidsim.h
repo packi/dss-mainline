@@ -44,7 +44,7 @@ namespace dss {
     int m_SimpleConsumption;
     Properties m_ConfigParameter;
   public:
-    DSIDSim(const DSDSMeterSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress);
+    DSIDSim(const DSDSMeterSim& _simulator, const dss_dsid_t _dsid, const devid_t _shortAddress);
     virtual ~DSIDSim() {}
 
     virtual void callScene(const int _sceneNr);
@@ -78,7 +78,7 @@ namespace dss {
     int m_DefaultColor;
     bool m_IsBell;
   public:
-    DSIDSimSwitch(const DSDSMeterSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress, const int _numButtons)
+    DSIDSimSwitch(const DSDSMeterSim& _simulator, const dss_dsid_t _dsid, const devid_t _shortAddress, const int _numButtons)
     : DSIDSim(_simulator, _dsid, _shortAddress),
       m_NumberOfButtons(_numButtons),
       m_DefaultColor(GroupIDYellow),

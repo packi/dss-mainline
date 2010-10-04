@@ -26,7 +26,7 @@
 namespace dss {
   //================================================== DSIDSim
 
-  DSIDSim::DSIDSim(const DSDSMeterSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress)
+  DSIDSim::DSIDSim(const DSDSMeterSim& _simulator, const dss_dsid_t _dsid, const devid_t _shortAddress)
   : DSIDInterface(_simulator, _dsid, _shortAddress),
     m_Enabled(true),
     m_CurrentValue(0),

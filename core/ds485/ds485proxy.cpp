@@ -25,21 +25,26 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
+#include <digitalSTROM/dsm-api-v2/dsm-api-const.h>
+
 #include "core/dss.h"
 #include "core/logger.h"
 #include "core/ds485const.h"
 #include "core/event.h"
 #include "core/propertysystem.h"
 #include "core/foreach.h"
+#include "core/dsidhelper.h"
 
 #include "core/model/modelevent.h"
 #include "core/model/device.h"
 #include "core/model/modelmaintenance.h"
 
-#include "core/ds485/framebucketcollector.h"
-#include "core/ds485/businterfacehandler.h"
+// TODO: libdsm
+// #include "core/ds485/framebucketcollector.h"
+// #include "core/ds485/businterfacehandler.h"
 
-#include "core/sim/dssim.h"
+// TODO: libdsm
+// #include "core/sim/dssim.h"
 
 #include <sstream>
 
@@ -52,10 +57,15 @@ namespace dss {
     m_pBusInterfaceHandler(NULL),
     m_pModelMaintenance(_pModelMaintenance),
     m_pDSSim(_pDSSim),
+    m_dsmApiHandle(NULL),
     m_InitializeDS485Controller(true)
   {
     assert(_pModelMaintenance != NULL);
     if(_pDSS != NULL) {
+
+#if 0
+      // TODO: libdsm
+
       _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "rs485devicename")
             ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, std::string>(m_DS485Controller, &DS485Controller::getRS485DeviceName, &DS485Controller::setRS485DeviceName));
       _pDSS->getPropertySystem().setBoolValue(getConfigPropertyBasePath() + "denyJoiningAsShortDevice", false, true, false);
@@ -76,804 +86,401 @@ namespace dss {
       _pDSS->getPropertySystem().createProperty(getPropertyBasePath() + "state")
             ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, std::string>(m_DS485Controller, &DS485Controller::getStateAsString));
 
+#endif
+
       _pDSS->getPropertySystem().setStringValue("/system/dsid", "3504175FE0000000DEADBEEF", true, false);
     }
   } // ctor
 
   bool DS485Proxy::isReady() {
+#if 0
+    // TODO: libdsm
     bool simReady = (m_pDSSim != NULL) ? m_pDSSim->isReady() : true;
     bool selfReady = (m_pBusInterfaceHandler != NULL) ? m_pBusInterfaceHandler->isRunning() : true;
     bool controllerReady =
-        ((m_DS485Controller.getState() == csSlave) ||
-         (m_DS485Controller.getState() == csDesignatedMaster) ||
-         (m_DS485Controller.getState() == csError));
+      ((m_dsmApiController.getState() == csSlave) ||
+       (m_dsmApiController.getState() == csDesignatedMaster) ||
+       (m_dsmApiController.getState() == csError));
 
     return simReady && selfReady && controllerReady;
+#endif
+    return m_dsmApiReady;
   } // isReady
 
   uint16_t DS485Proxy::deviceGetParameterValue(devid_t _id, uint8_t _dsMeterID, int _paramID) {
-    DS485CommandFrame frame;
-    frame.getHeader().setDestination(_dsMeterID);
-    frame.getHeader().setBroadcast(false);
-    frame.getHeader().setType(1);
-    frame.setCommand(CommandRequest);
-    frame.getPayload().add<uint8_t>(FunctionDeviceGetParameterValue);
-    frame.getPayload().add<uint16_t>(_id);
-    frame.getPayload().add<uint16_t>(_paramID);
-    uint8_t res = receiveSingleResult(frame, FunctionDeviceGetParameterValue);
-    return res;
+    log("deviceGetParameterValue: not implemented yet");
+    return 0;
   } // deviceGetParameterValue
 
-  uint16_t DS485Proxy::deviceGetFunctionID(devid_t _id, uint8_t _dsMeterID) {
-    DS485CommandFrame frame;
-    frame.getHeader().setDestination(_dsMeterID);
-    frame.getHeader().setBroadcast(false);
-    frame.getHeader().setType(1);
-    frame.setCommand(CommandRequest);
-    frame.getPayload().add<uint8_t>(FunctionDeviceGetFunctionID);
-    frame.getPayload().add<devid_t>(_id);
+  DeviceSpec_t DS485Proxy::deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID) {
 
-    uint16_t result;
-    boost::shared_ptr<DS485CommandFrame> resFrame = receiveSingleFrame(frame, FunctionDeviceGetFunctionID);
-    if(resFrame != NULL) {
-      PayloadDissector pd(resFrame->getPayload());
-      pd.get<uint8_t>(); // skip the function id
-      if(pd.get<uint16_t>() == 0x0001) {
-        result = pd.get<uint16_t>();
-        checkResultCode(result);
-      }
-    }
-    return result;
-  } // deviceGetFunctionID
+    uint16_t functionId, productId, version;
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
+    int ret = DeviceInfo_by_device_id_sync(m_dsmApiHandle, dsmDSID, _id,
+                                           NULL, &functionId, &productId, &version,
+                                           NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    checkResultCode(ret);
 
-  DeviceSpec_t DS485Proxy::deviceGetSpec(devid_t _id, uint8_t _dsMeterID) {
-    uint16_t function = deviceGetFunctionID(_id, _dsMeterID);
-    uint16_t product = 0;
-    uint16_t revision = 0;
-
-    DS485CommandFrame frame;
-    frame.getHeader().setDestination(_dsMeterID);
-    frame.getHeader().setBroadcast(false);
-    frame.getHeader().setType(1);
-    frame.setCommand(CommandRequest);
-    frame.getPayload().add<uint8_t>(FunctionDeviceGetVersion);
-    frame.getPayload().add<devid_t>(_id);
-
-    boost::shared_ptr<DS485CommandFrame> resFrame = receiveSingleFrame(frame, FunctionDeviceGetVersion);
-    if(resFrame != NULL) {
-      PayloadDissector pd(resFrame->getPayload());
-      pd.get<uint8_t>(); // skip the command id
-      revision = pd.get<uint16_t>();
-      if (!pd.isEmpty()) {
-        product = pd.get<uint16_t>();
-      }
-    }
-
-    DeviceSpec_t spec(function, product, revision, _id);
+    DeviceSpec_t spec(functionId, productId, version, _id);
     return spec;
   } // deviceGetSpec
 
   void DS485Proxy::lockOrUnlockDevice(const Device& _device, const bool _lock) {
-    DS485CommandFrame frame;
-    frame.getHeader().setDestination(_device.getDSMeterID());
-    frame.getHeader().setBroadcast(false);
-    frame.setCommand(CommandRequest);
-    frame.getPayload().add<uint8_t>(FunctionDeviceLock);
-    frame.getPayload().add<devid_t>(_device.getShortAddress());
-    if(_lock) {
-      frame.getPayload().add<uint16_t>(1);
-    } else {
-      frame.getPayload().add<uint16_t>(0);
-    }
-    int result = receiveSingleResult16(frame, FunctionDeviceLock);
-    checkResultCode(result);
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+
+    int ret = DeviceProperties_set_locked_flag_sync(m_dsmApiHandle, dsmDSID,
+                                                    _device.getShortAddress(), _lock);
+    checkResultCode(ret);
   } // lockOrUnlockDevice
 
   bool DS485Proxy::isLocked(boost::shared_ptr<const Device> _device) {
-    DS485CommandFrame frame;
-    frame.getHeader().setDestination(_device->getDSMeterID());
-    frame.getHeader().setBroadcast(false);
-    frame.setCommand(CommandRequest);
-    frame.getPayload().add<uint8_t>(FunctionDeviceLock);
-    frame.getPayload().add<devid_t>(_device->getShortAddress());
-    frame.getPayload().add<uint16_t>(2);
 
-    boost::shared_ptr<DS485CommandFrame> resFrame = receiveSingleFrame(frame, FunctionDeviceLock);
-    if(resFrame != NULL) {
-      PayloadDissector pd(resFrame->getPayload());
-      pd.get<uint8_t>(); // skip the command id
-      int opResult = pd.get<uint16_t>();
-      checkResultCode(opResult);
-      int result = pd.get<uint16_t>();
-      return result == 1;
-    }
-    return false;
+    uint8_t locked;
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device->getDSMeterDSID(), dsmDSID);
+    int ret = DeviceInfo_by_device_id_sync(m_dsmApiHandle, dsmDSID, _device->getShortAddress(),
+                                           NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                                           &locked, NULL, NULL, NULL, NULL);
+    checkResultCode(ret);
+    return locked;
   } // isLocked
 
-  void DS485Proxy::sendFrame(DS485CommandFrame& _frame) {
-    _frame.setFrameSource(fsDSS);
-    bool broadcast = _frame.getHeader().isBroadcast();
-    bool sim = isSimAddress(_frame.getHeader().getDestination());
-    if(broadcast || sim) {
-      if(m_pDSSim != NULL) {
-        log("Sending packet to sim");
-        m_pDSSim->process(_frame);
-      }
-    }
-    std::ostringstream sstream;
-    sstream << "TX DEST:";
-    if(broadcast) {
-      sstream << "*";
-    }
-    sstream << "0x" << std::hex << std::uppercase << int(_frame.getHeader().getDestination());
-
-    PayloadDissector pdDump(_frame.getPayload());
-    if(!pdDump.isEmpty()) {
-      uint8_t cmd = pdDump.get<uint8_t>();
-      sstream << ", CMD:0x" << std::hex << std::uppercase << (unsigned int)cmd << ",";
-      int iParameter=1;
-      while(!pdDump.isEmpty()) {
-        uint16_t data = pdDump.get<uint16_t>();
-        sstream << " P" << iParameter++ << ":0x" << std::hex << std::uppercase << data;
-      }
-    } else {
-      sstream << " payload empty";
-    }
-    sstream << std::dec;
-
-    if((m_DS485Controller.getState() == csSlave) || (m_DS485Controller.getState() == csMaster)) {
-      log("Enqueue packet for sending over the wire");
-      m_DS485Controller.enqueueFrame(_frame);
-    } else {
-      log("Not putting packet on the wire");
-    }
-    log(sstream.str());
-    boost::shared_ptr<DS485CommandFrame> pFrame(new DS485CommandFrame);
-    *pFrame = _frame;
-
-    // relay the frame to update our state
-    if(m_pBusInterfaceHandler != NULL) {
-      m_pBusInterfaceHandler->collectFrame(pFrame);
-    }
-  } // sendFrame
-
-  boost::shared_ptr<FrameBucketCollector> DS485Proxy::sendFrameAndInstallBucket(DS485CommandFrame& _frame, const int _functionID) {
-    int sourceID = _frame.getHeader().isBroadcast() ? -1 :  _frame.getHeader().getDestination();
-    boost::shared_ptr<FrameBucketCollector> result(new FrameBucketCollector(m_pBusInterfaceHandler, _functionID, sourceID), FrameBucketBase::removeFromHolderAndDelete);
-    result->addToHolder();
-    sendFrame(_frame);
-    return result;
-  } // sendFrameAndInstallBucket
-
   bool DS485Proxy::isSimAddress(const uint8_t _addr) {
+#if 0
+    // TODO: libdsm
     if(m_pDSSim != NULL) {
       return m_pDSSim->isSimAddress(_addr);
     } else {
       return false;
     }
+#endif
+    return false;
   } // isSimAddress
 
   void DS485Proxy::checkResultCode(const int _resultCode) {
-    if(_resultCode < 0) {
+    if(_resultCode != ERROR_OK) {
       std::string message = "Unknown Error";
       switch(_resultCode) {
-      case kDS485NoIDForIndexFound:
-        message = "No ID for index found";
-        break;
-      case kDS485ZoneNotFound:
-        message = "Zone not found";
-        break;
-      case kDS485IndexOutOfBounds:
-        message = "Index out of bounds";
-        break;
-      case kDS485GroupIDOutOfBounds:
-        message = "Group ID out of bounds";
-        break;
-      case kDS485ZoneCannotBeDeleted:
-        message = "Zone can not be deleted";
-        break;
-      case kDS485OutOfMemory:
-        message = "dSM is out of memory";
-        break;
-      case kDS485RoomAlreadyExists:
-        message = "Room already exists";
-        break;
-      case kDS485InvalidDeviceID:
-        message = "Invalid device id";
-        break;
-      case kDS485CannotRemoveFromStandardGroup:
-        message = "Cannot remove device from standard group";
-        break;
-      case kDS485CannotDeleteStandardGroup:
-        message = "Cannot delete standard group";
-        break;
-      case kDS485DSIDIsNull:
-        message = "DSID is null";
-        break;
-      case kDS485ReservedRoomNumber:
-        message = "Room number is reserved";
-        break;
-      case kDS485DeviceNotFound:
-        message = "Device not found";
-        break;
-      case kDS485GroupNotFound:
-        message = "Group not found";
-        break;
+        case ERROR_WRONG_PARAMETER:
+          message = "Wrong parameter";
+          break;
+        case ERROR_ZONE_NOT_FOUND:
+          message = "Zone not found";
+          break;
+        case ERROR_DEVICE_NOT_FOUND:
+          message = "device not found";
+          break;
+        case ERROR_GROUP_NOT_FOUND:
+          message = "group not found";
+          break;
+        case ERROR_ZONE_CAN_NOT_BE_DELETED:
+          message = "zone can't be deleted";
+          break;
+        case ERROR_GROUP_CAN_NOT_BE_DELETED:
+          message = "group can't be deleted";
+          break;
+        case ERROR_DEVICE_CAN_NOT_BE_DELETED:
+          message = "device can't be deleted";
+          break;
+        case ERROR_NO_FURTHER_ZONES:
+          message = "no further zones";
+          break;
+        case ERROR_NO_FURTHER_GROUPS:
+          message = "no further groups";
+          break;
+        case ERROR_ZONE_ALREADY_EXISTS:
+          message = "zone already exists";
+          break;
+        case ERROR_GROUP_ALREADY_EXISTS:
+          message = "group already exists";
+          break;
+        case ERROR_ZONE_NOT_EMPTY:
+          message = "zone not empty";
+          break;
+        case ERROR_TIMEOUT:
+          message = "timeout";
+          break;
+        case ERROR_WRONG_SIZE:
+          message = "wrong size";
+          break;
+        case ERROR_WRONG_MSGID:
+          message = "wrong msgid";
+          break;
+        case ERROR_WRONG_MODIFIER:
+          message = "wrong modifier";
+          break;
+        case ERROR_WRONG_PACKET_NR:
+          message = "wrong packet number";
+          break;
+        case ERROR_WRONG_IMAGE_SIZE:
+          message = "wrong image size";
+          break;
+        case ERROR_NO_IMAGE_TRANSFER_ACTIVE:
+          message = "no image tranfer active";
+          break;
+        case ERROR_IMAGE_INVALID:
+          message = "image invalid";
+          break;
+        case ERROR_NO_CONFIG:
+          message = "no config";
+          break;
+        case ERROR_REQUEST_CAN_NOT_BE_EXECUTED:
+          message = "request can't be executed";
+          break;
       }
-      throw DS485ApiError(message);
+      throw BusApiError(message);
     }
   } // checkResultCode
 
   void DS485Proxy::setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) {
-    DS485CommandFrame frame;
-    frame.getHeader().setDestination(_device.getDSMeterID());
-    frame.getHeader().setBroadcast(false);
-    frame.getHeader().setType(1);
-    frame.setCommand(CommandRequest);
-    frame.getPayload().add<uint8_t>(FunctionDeviceSetParameterValue);
-    frame.getPayload().add<uint16_t>(_device.getShortAddress());
-    frame.getPayload().add<uint16_t>(_parameterID);
-    frame.getPayload().add<uint16_t>(_size - 1);
-    frame.getPayload().add<uint16_t>(_value);
-    sendFrame(frame);
+    log("Not implemented yet: setValueDevice()");
   } // setValueDevice
 
-  DSMeterSpec_t DS485Proxy::dsMeterSpecFromFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
-    int source = _frame->getHeader().getSource();
-
-    PayloadDissector pd(_frame->getPayload());
-    pd.get<uint8_t>();
-    uint16_t devID = pd.get<uint16_t>();
-    devID =  devID >> 8;
-    if(devID == 0) {
-      log("Found dSS");
-    } else if(devID == 1) {
-      log("Found dSM");
-    } else {
-      log(std::string("Found unknown device (") + intToString(devID, true) + ")");
-    }
-    uint16_t hwVersion = (pd.get<uint8_t>() << 8) | pd.get<uint8_t>();
-    uint16_t swVersion = (pd.get<uint8_t>() << 8) | pd.get<uint8_t>();
-    uint8_t features = 0;
-    uint8_t swVersionExt = 0;
-
-    std::string name;
-    for(int i = 0; i < 6; i++) {
-      char c = char(pd.get<uint8_t>());
-      if(c != '\0') {
-        name += c;
-      }
-    }
-    log(std::string("  Name:      \"") + name + "\"");
-
-    if (!pd.isEmpty()) {
-      swVersionExt = pd.get<uint8_t>();
-      features = pd.get<uint8_t>();
-    }
-
-    log(std::string("  HW-Version: ") + intToString(hwVersion >> 8) + "." + intToString(hwVersion & 0x00FF));
-    log(std::string("  SW-Version: ") + intToString(swVersion >> 8) + "." + intToString(swVersion & 0x00FF) + "." + intToString(swVersionExt));
-    log(std::string("  Feature Flags: ") + intToString(features, true));
-
-    // bus-id, sw-version, hw-version, name, device-id
-    DSMeterSpec_t spec(source, swVersion, hwVersion, name, devID);
-    return spec;
-  } // dsMeterSpecFromFrame
 
   std::vector<DSMeterSpec_t> DS485Proxy::getDSMeters() {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(0);
-    cmdFrame.getHeader().setBroadcast(true);
-    cmdFrame.setCommand(CommandRequest);
-    log("Proxy: GetDSMeters");
-
-    cmdFrame.getPayload().add<uint8_t>(FunctionGetTypeRequest);
-    boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionGetTypeRequest);
-    bucket->waitForFrames(5000);
-
-    std::map<int, bool> resultFrom;
-
     std::vector<DSMeterSpec_t> result;
-    while(true) {
-      boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
-      if(recFrame == NULL) {
-        break;
-      }
-      int source = recFrame->getHeader().getSource();
-      if(resultFrom[source]) {
-        log(std::string("already received result from ") + intToString(source));
+    dsid_t device_list[63];
+    dsid_t ownDSID;
+
+    // TODO: we could cache our own DSID
+    int ret = DsmApiGetOwnDSID(m_dsmApiHandle, &ownDSID);
+    checkResultCode(ret);
+
+    ret = DsmApiGetBusMembers(m_dsmApiHandle, device_list, 63);
+    checkResultCode(ret);
+
+    for (int i = 0; i < ret; ++i) {
+      // don't include ourself
+      if (IsEqualId(device_list[i], ownDSID)) {
         continue;
       }
-      DSMeterSpec_t spec = dsMeterSpecFromFrame(recFrame);
+      DSMeterSpec_t spec = getDSMeterSpec(device_list[i]);
       result.push_back(spec);
     }
-
     return result;
   } // getDSMeters
 
-  DSMeterSpec_t DS485Proxy::getDSMeterSpec(const int _dsMeterID) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_dsMeterID);
-    cmdFrame.getHeader().setBroadcast(false);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionGetTypeRequest);
-    log("Proxy: getDSMeterSpec");
+  DSMeterSpec_t DS485Proxy::getDSMeterSpec(dsid_t _dsMeterID) {
 
-    boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionGetTypeRequest);
+    uint32_t hwVersion;
+    uint32_t swVersion;
+    uint16_t apiVersion;
+    uint8_t dsidBuf[DSID_LEN];
+    uint8_t nameBuf[NAME_LEN];
+    int ret = dSMInfo_sync(m_dsmApiHandle, _dsMeterID,
+                           &hwVersion, &swVersion, &apiVersion, dsidBuf, nameBuf);
+    checkResultCode(ret);
 
-    if(recFrame == NULL) {
-      throw DS485ApiError("No frame received");
-    }
-
-    DSMeterSpec_t result = dsMeterSpecFromFrame(recFrame);
-
-    return result;
+    // convert to std::string
+    char nameStr[NAME_LEN];
+    memcpy(nameStr, nameBuf, NAME_LEN);
+    DSMeterSpec_t spec(_dsMeterID, swVersion, hwVersion, apiVersion, nameStr);
+    return spec;
   } // getDSMeterSpec
 
-  int DS485Proxy::getGroupCount(const int _dsMeterID, const int _zoneID) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_dsMeterID);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetGroupsSize);
-    cmdFrame.getPayload().add<uint16_t>(_zoneID);
-    int8_t res = int8_t(receiveSingleResult(cmdFrame, FunctionDSMeterGetGroupsSize));
-    if(res < 0) {
-      log("GetGroupCount: Negative group count received '" + intToString(res) +
-          " on dsMeter " + intToString(_dsMeterID) +
-          " with zone " + intToString(_zoneID));
-    }
-    checkResultCode(res);
-    // Every dsMeter should provide all standard-groups
-    if(res < GroupIDStandardMax) {
-      res = GroupIDStandardMax;
-    }
-    return res;
+  int DS485Proxy::getGroupCount(dsid_t _dsMeterID, const int _zoneID) {
+
+    uint16_t zoneId;
+    uint8_t virtualZoneId, numberOfGroups;
+    uint8_t name[NAME_LEN];
+
+    int ret = ZoneInfo_by_id_sync(m_dsmApiHandle, _dsMeterID, _zoneID,
+                                  &zoneId, &virtualZoneId, &numberOfGroups, name);
+    checkResultCode(ret);
+
+    // TODO: libdsm:
+    // assert 0 <= numberOfGroups < GroupIDStandardMax
+
+    return numberOfGroups;
   } // getGroupCount
 
-  std::vector<int> DS485Proxy::getGroups(const int _dsMeterID, const int _zoneID) {
+  std::vector<int> DS485Proxy::getGroups(dsid_t _dsMeterID, const int _zoneID) {
+
     std::vector<int> result;
 
     int numGroups = getGroupCount(_dsMeterID, _zoneID);
     log(std::string("DSMeter has ") + intToString(numGroups) + " groups");
+
+    uint8_t groupId;
     for(int iGroup = 0; iGroup < numGroups; iGroup++) {
-      DS485CommandFrame cmdFrame;
-      cmdFrame.getHeader().setDestination(_dsMeterID);
-      cmdFrame.setCommand(CommandRequest);
-      cmdFrame.getPayload().add<uint8_t>(FunctionZoneGetGroupIdForInd);
-      cmdFrame.getPayload().add<uint16_t>(_zoneID);
-      cmdFrame.getPayload().add<uint16_t>(iGroup);
+      int ret = ZoneGroupInfo_by_index_sync(m_dsmApiHandle, _dsMeterID, _zoneID, iGroup,
+                                            &groupId, NULL, NULL);
+      checkResultCode(ret);
 
-      int8_t res = int8_t(receiveSingleResult(cmdFrame, FunctionZoneGetGroupIdForInd));
-      if(res < 0) {
-        log("GetGroups: Negative index received '" + intToString(res) + "' for index " + intToString(iGroup), lsFatal);
-      } else {
-        result.push_back(res);
-      }
-      //checkResultCode(res);
+      result.push_back(groupId);
     }
-
     return result;
   } // getGroups
 
-  int DS485Proxy::getDevicesInGroupCount(const int _dsMeterID, const int _zoneID, const int _groupID) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_dsMeterID);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionGroupGetDeviceCount);
-    cmdFrame.getPayload().add<uint16_t>(_zoneID);
-    cmdFrame.getPayload().add<uint16_t>(_groupID);
-
-    int16_t res = int16_t(receiveSingleResult16(cmdFrame, FunctionGroupGetDeviceCount));
-    if(res < 0) {
-      log("GetDevicesInGroupCount: Negative count received '" + intToString(res) +
-          "' on dsMeter " + intToString(_dsMeterID) +
-          " with zoneID " + intToString(_zoneID) + " in group " + intToString(_groupID));
-    }
-    checkResultCode(res);
-
-    return res;
-  } // getDevicesInGroupCount
-
-  std::vector<int> DS485Proxy::getDevicesInGroup(const int _dsMeterID, const int _zoneID, const int _groupID) {
+  std::vector<int> DS485Proxy::getGroupsOfDevice(dsid_t _dsMeterID, const int _deviceID) {
+    uint8_t groups[GROUPS_LEN];
+    int ret = DeviceInfo_by_device_id_sync(m_dsmApiHandle, _dsMeterID, _deviceID,
+                                           NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                                           groups, NULL, NULL, NULL);
+    checkResultCode(ret);
     std::vector<int> result;
-
-    int numDevices = getDevicesInGroupCount(_dsMeterID, _zoneID, _groupID);
-    for(int iDevice = 0; iDevice < numDevices; iDevice++) {
-      DS485CommandFrame cmdFrame;
-      cmdFrame.getHeader().setDestination(_dsMeterID);
-      cmdFrame.setCommand(CommandRequest);
-      cmdFrame.getPayload().add<uint8_t>(FunctionGroupGetDevKeyForInd);
-      cmdFrame.getPayload().add<uint16_t>(_zoneID);
-      cmdFrame.getPayload().add<uint16_t>(_groupID);
-      cmdFrame.getPayload().add<uint16_t>(iDevice);
-      int16_t res = int16_t(receiveSingleResult16(cmdFrame, FunctionGroupGetDevKeyForInd));
-      if(res < 0) {
-        log("GetDevicesInGroup: Negative device id received '" + intToString(res) + "' for index " + intToString(iDevice), lsFatal);
-      } else {
-        result.push_back(res);
-      }
-      try {
-        checkResultCode(res);
-      } catch(DS485ApiError& err) {
-        log(std::string("Error reported back by dSM: ") + err.what(), lsFatal);
-      }
-    }
-
-    return result;
-  } // getDevicesInGroup
-
-  std::vector<int> DS485Proxy::getGroupsOfDevice(const int _dsMeterID, const int _deviceID) {
-    std::vector<int> result;
-
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_dsMeterID);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDeviceGetGroups);
-    cmdFrame.getPayload().add<uint16_t>(_deviceID);
-
-    boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionDeviceGetGroups);
-
-    bucket->waitForFrame(5000);
-
-    while(true) {
-      boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
-      if(recFrame == NULL) {
-        break;
-      }
-
-      PayloadDissector pd(recFrame->getPayload());
-      pd.get<uint8_t>(); // discard the function id
-      pd.get<uint16_t>(); // function result
-
-      for(int iByte = 0; iByte < 8; iByte++) {
-        uint8_t byte = pd.get<uint8_t>();
-        for(int iBit = 0; iBit < 8; iBit++) {
-          if(byte & (1 << iBit)) {
-            result.push_back((iByte * 8 + iBit) + 1);
-          }
+    for (int iByte = 0; iByte < GROUPS_LEN; iByte++) {
+      uint8_t byte = groups[iByte];
+      for(int iBit = 0; iBit < 8; iBit++) {
+        if(byte & (1 << iBit)) {
+          result.push_back((iByte * 8 + iBit) + 1);
         }
       }
     }
     return result;
   } // getGroupsOfDevice
 
-  std::vector<int> DS485Proxy::getZones(const int _dsMeterID) {
+  int DS485Proxy::getZoneCount(dsid_t _dsMeterID) {
+    uint8_t zoneCount;
+    int ret = ZoneCount_sync(m_dsmApiHandle, _dsMeterID, &zoneCount);
+    checkResultCode(ret);
+    return zoneCount;
+  } // getZoneCount
+
+  std::vector<int> DS485Proxy::getZones(dsid_t _dsMeterID) {
     std::vector<int> result;
 
     int numZones = getZoneCount(_dsMeterID);
     log(std::string("DSMeter has ") + intToString(numZones) + " zones");
+
+    uint16_t zoneId;
     for(int iZone = 0; iZone < numZones; iZone++) {
-      DS485CommandFrame cmdFrame;
-      cmdFrame.getHeader().setDestination(_dsMeterID);
-      cmdFrame.setCommand(CommandRequest);
-      cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetZoneIdForInd);
-      cmdFrame.getPayload().add<uint16_t>(iZone);
-      log("GetZoneID");
-      int16_t tempResult = int16_t(receiveSingleResult16(cmdFrame, FunctionDSMeterGetZoneIdForInd));
-      // TODO: The following line is a workaround as described in #246
-      if((tempResult <= 0) && (tempResult > -20)) {
-        log("GetZones: Negative zone id " + intToString(tempResult) + " received. DSMeter: " + intToString(_dsMeterID) + " index: " + intToString(iZone), lsError);
-        // TODO: take this line outside the if-clause after the dSM-API has been reworked
-        checkResultCode(tempResult);
-      } else {
-        result.push_back(tempResult);
-      }
-      log("received ZoneID: " + uintToString((unsigned int)tempResult));
+      int ret = ZoneInfo_by_index_sync(m_dsmApiHandle, _dsMeterID, iZone,
+                                       &zoneId, NULL, NULL, NULL);
+    checkResultCode(ret);
+
+      result.push_back(zoneId);
+      log("received ZoneID: " + uintToString(zoneId));
     }
     return result;
   } // getZones
 
-  int DS485Proxy::getZoneCount(const int _dsMeterID) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_dsMeterID);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetZonesSize);
-    log("GetZoneCount");
-
-    int8_t result = int8_t(
-        receiveSingleResult(cmdFrame, FunctionDSMeterGetZonesSize));
-    checkResultCode(result);
-    return result;
-  } // getZoneCount
-
-  int DS485Proxy::getDevicesCountInZone(const int _dsMeterID, const int _zoneID) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_dsMeterID);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterCountDevInZone);
-    cmdFrame.getPayload().add<uint16_t>(_zoneID);
-    log("GetDevicesCountInZone");
-
-    log(intToString(_dsMeterID) + " " + intToString(_zoneID));
-
-    int16_t result = int16_t(receiveSingleResult16(cmdFrame, FunctionDSMeterCountDevInZone));
-    if(result < 0) {
-      log("GetDevicesCountInZone: negative count '" + intToString(result) + "'", lsError);
-    }
-    checkResultCode(result);
-
-    return result;
+  int DS485Proxy::getDevicesCountInZone(dsid_t _dsMeterID, const int _zoneID) {
+    
+    uint16_t numberOfDevices;
+    int ret = ZoneDeviceCount_all_sync(m_dsmApiHandle, _dsMeterID, _zoneID, &numberOfDevices);
+    checkResultCode(ret);
+    
+    return numberOfDevices;
   } // getDevicesCountInZone
 
-  std::vector<int> DS485Proxy::getDevicesInZone(const int _dsMeterID, const int _zoneID) {
+  std::vector<int> DS485Proxy::getDevicesInZone(dsid_t _dsMeterID, const int _zoneID) {
+
     std::vector<int> result;
 
     int numDevices = getDevicesCountInZone(_dsMeterID, _zoneID);
     log(std::string("Found ") + intToString(numDevices) + " in zone.");
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
-      DS485CommandFrame cmdFrame;
-      cmdFrame.getHeader().setDestination(_dsMeterID);
-      cmdFrame.setCommand(CommandRequest);
-      cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterDevKeyInZone);
-      cmdFrame.getPayload().add<uint16_t>(_zoneID);
-      cmdFrame.getPayload().add<uint16_t>(iDevice);
-
-      uint16_t devID = receiveSingleResult16(cmdFrame, FunctionDSMeterDevKeyInZone);
-      checkResultCode(int16_t(devID));
-      result.push_back(devID);
+      uint16_t deviceId;
+      int ret = DeviceInfo_by_index_sync(m_dsmApiHandle, _dsMeterID, _zoneID, iDevice, &deviceId,
+                                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+      checkResultCode(ret);
+      result.push_back(deviceId);
     }
     return result;
   } // getDevicesInZone
 
-  void DS485Proxy::setZoneID(const int _dsMeterID, const devid_t _deviceID, const int _zoneID) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_dsMeterID);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDeviceSetZoneID);
-    cmdFrame.getPayload().add<devid_t>(_deviceID);
-    cmdFrame.getPayload().add<uint16_t>(_zoneID);
+  void DS485Proxy::setZoneID(dsid_t _dsMeterID, const devid_t _deviceID, const int _zoneID) {
 
-    int16_t res = int16_t(receiveSingleResult(cmdFrame, FunctionDeviceSetZoneID));
-    checkResultCode(res);
+    int ret = DeviceProperties_set_zone_sync(m_dsmApiHandle, _dsMeterID, _deviceID, _zoneID);
+    checkResultCode(ret);
   } // setZoneID
 
-  void DS485Proxy::createZone(const int _dsMeterID, const int _zoneID) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_dsMeterID);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterAddZone);
-    cmdFrame.getPayload().add<uint16_t>(_zoneID);
+  void DS485Proxy::createZone(dsid_t _dsMeterID, const int _zoneID) {
 
-    int16_t res = int16_t(receiveSingleResult(cmdFrame, FunctionDSMeterAddZone));
-    checkResultCode(res);
+    int ret = ZoneModify_add_sync(m_dsmApiHandle, _dsMeterID, _zoneID);
+    checkResultCode(ret);
   } // createZone
 
-  void DS485Proxy::removeZone(const int _dsMeterID, const int _zoneID) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_dsMeterID);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterRemoveZone);
-    cmdFrame.getPayload().add<uint16_t>(_zoneID);
-
-    int16_t res = int16_t(receiveSingleResult(cmdFrame, FunctionDSMeterRemoveZone));
-    checkResultCode(res);
+  void DS485Proxy::removeZone(dsid_t _dsMeterID, const int _zoneID) {
+    int ret = ZoneModify_remove_sync(m_dsmApiHandle, _dsMeterID, _zoneID);
+    checkResultCode(ret);
   } // removeZone
 
-  dsid_t DS485Proxy::getDSIDOfDevice(const int _dsMeterID, const int _deviceID) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_dsMeterID);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDeviceGetDSID);
-    cmdFrame.getPayload().add<uint16_t>(_deviceID);
-    log("Proxy: GetDSIDOfDevice");
+  dss_dsid_t DS485Proxy::getDSIDOfDevice(dsid_t _dsMeterID, const int _deviceID) {
 
-    boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDeviceGetDSID);
-    if(recFrame == NULL) {
-      throw DS485ApiError("No frame received");
-    }
+    dsid_t dsid;
+    int ret = DeviceInfo_by_index_sync(m_dsmApiHandle, _dsMeterID, 0 /* all devices */, _deviceID,
+                                       NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, dsid.id);
+    checkResultCode(ret);
 
-    PayloadDissector pd(recFrame->getPayload());
-    pd.get<uint8_t>(); // discard the function id
-    int16_t res = int16_t(pd.get<uint16_t>());
-    checkResultCode(res);
-    return pd.get<dsid_t>();
+    dss_dsid_t dss_dsid;
+    dsid_helper::toDssDsid(dsid, dss_dsid);
+    return dss_dsid;
   } // getDSIDOfDevice
 
-  dsid_t DS485Proxy::getDSIDOfDSMeter(const int _dsMeterID) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_dsMeterID);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetDSID);
-    log(std::string("Proxy: GetDSIDOfDSMeter ") + intToString(_dsMeterID));
-
-    boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDSMeterGetDSID);
-    if(recFrame == NULL) {
-      log("GetDSIDOfDSMeter: received no result from " + intToString(_dsMeterID), lsError);
-      throw DS485ApiError("No frame received");
-    }
-
-    PayloadDissector pd(recFrame->getPayload());
-    pd.get<uint8_t>(); // discard the function id
-    return pd.get<dsid_t>();
-  } // getDSIDOfDSMeter
-
   int DS485Proxy::getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_dsMeterID);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionGroupGetLastCalledScene);
-    log(std::string("Proxy: GetLastCalledScene ") + intToString(_dsMeterID));
-    cmdFrame.getPayload().add<uint16_t>(_zoneID);
-    cmdFrame.getPayload().add<uint16_t>(_groupID);
-
-    int16_t res = int16_t(receiveSingleResult16(cmdFrame, FunctionGroupGetLastCalledScene));
-    if(res < 0) {
-      log("DS485Proxy::getLastCalledScene: negative result received: " + intToString(res));
-    }
-    checkResultCode(res);
-    return res;
+    // TODO: libdsm-api
+    return 42;
   } // getLastCalledScene
 
-  unsigned long DS485Proxy::getPowerConsumption(const int _dsMeterID) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_dsMeterID);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetPowerConsumption);
-    log(std::string("Proxy: GetPowerConsumption ") + intToString(_dsMeterID));
+  unsigned long DS485Proxy::getPowerConsumption(dsid_t _dsMeterID) {
+    uint32_t power;
+    int ret = CircuitEnergyMeterValue_get_sync(m_dsmApiHandle, _dsMeterID, &power, NULL);
+    checkResultCode(ret);
 
-    boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDSMeterGetPowerConsumption);
-    if(recFrame == NULL) {
-      log("DS485Proxy::getPowerConsumption: received no results", lsError);
-      throw DS485ApiError("No frame received");
-    }
-    if(recFrame->getHeader().getSource() != _dsMeterID) {
-      log("GetPowerConsumption: received result from wrong source");
-    }
-    PayloadDissector pd(recFrame->getPayload());
-    pd.get<uint8_t>(); // discard the function id
-    return pd.get<uint32_t>();
+    return power;
   } // getPowerConsumption
 
   void DS485Proxy::requestPowerConsumption() {
+#if 0
+    // TODO: libdsm-api
+
     DS485CommandFrame cmdFrame;
     cmdFrame.getHeader().setDestination(0);
     cmdFrame.getHeader().setBroadcast(true);
     cmdFrame.setCommand(CommandRequest);
     cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetPowerConsumption);
     sendFrame(cmdFrame);
+#endif
   } // requestPowerConsumption
 
-  unsigned long DS485Proxy::getEnergyMeterValue(const int _dsMeterID) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_dsMeterID);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetEnergyMeterValue);
-    log(std::string("Proxy: GetEnergyMeterValue ") + intToString(_dsMeterID));
+  unsigned long DS485Proxy::getEnergyMeterValue(dsid_t _dsMeterID) {
+    uint32_t energy;
+    int ret = CircuitEnergyMeterValue_get_sync(m_dsmApiHandle, _dsMeterID, NULL, &energy);
+    checkResultCode(ret);
 
-    boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(cmdFrame, FunctionDSMeterGetEnergyMeterValue);
-    if(recFrame == NULL) {
-      log("DS485Proxy::getEnergyMeterValue: received no results", lsError);
-      throw DS485ApiError("No frame received");
-    }
-    PayloadDissector pd(recFrame->getPayload());
-    pd.get<uint8_t>(); // discard the function id
-    return pd.get<uint32_t>();
+    return energy;
   } // getEnergyMeterValue
 
   void DS485Proxy::requestEnergyMeterValue() {
+#if 0
+    // TODO: libdsm-api
+
     DS485CommandFrame cmdFrame;
     cmdFrame.getHeader().setDestination(0);
     cmdFrame.getHeader().setBroadcast(true);
     cmdFrame.setCommand(CommandRequest);
     cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetEnergyMeterValue);
     sendFrame(cmdFrame);
+#endif
   } // requestEnergyMeterValue
 
   bool DS485Proxy::getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_dsMeterID);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetEnergyLevel);
-
-    boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionDSMeterGetEnergyLevel);
-
-    bucket->waitForFrame(5000);
-
-    boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
-    if(recFrame == NULL) {
-      throw DS485ApiError("No frame received");
-    }
-
-    PayloadDissector pd(recFrame->getPayload());
-    pd.get<uint8_t>(); // discard the function id
-    _lower = pd.get<uint16_t>();
-    _upper = pd.get<uint16_t>();
-    return true;
+    log("getEnergyBorder(): not implemented yet");
+    return false;
   } // getEnergyBorder
 
   int DS485Proxy::getSensorValue(const Device& _device, const int _sensorID) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_device.getDSMeterID());
-    cmdFrame.getHeader().setBroadcast(false);
-    cmdFrame.getHeader().setType(1);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDeviceGetSensorValue);
-    cmdFrame.getPayload().add<uint16_t>(_device.getShortAddress());
-    cmdFrame.getPayload().add<uint16_t>(_sensorID);
-    log("GetSensorValue");
-
-    boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionDeviceGetSensorValue);
-    bucket->waitForFrame(5000);
-    boost::shared_ptr<DS485CommandFrame> recFrame;
-    if(bucket->isEmpty()) {
-      log(std::string("received no ack for request getSensorValue"));
-      throw DS485ApiError("no Ack for sensorValue");
-    } else if(bucket->getFrameCount() == 1) {
-        // first frame received, wait for the next frame
-      recFrame= bucket->popFrame();
-      bucket->waitForFrame(5000);
-    } else
-        recFrame= bucket->popFrame();
-    // first frame is only request ack;
-
-    PayloadDissector pd(recFrame->getPayload());
-    pd.get<uint8_t>(); // discard functionID
-    checkResultCode((int)pd.get<uint16_t>()); // check first ack
-
-    if(bucket->isEmpty()) {
-        // no next frame after additional waiting.
-        throw DS485ApiError("no Answer for sensorValue");
-    }
-
-    recFrame = bucket->popFrame();
-
-    if(recFrame != NULL) {
-        PayloadDissector pd(recFrame->getPayload());
-        pd.get<uint8_t>(); // discard functionID
-        pd.get<uint16_t>();
-        pd.get<uint16_t>();
-        checkResultCode((int)pd.get<uint16_t>()); // check sensorvalue
-        int result = int(pd.get<uint16_t>());
-        log(std::string("result ") + intToString(result));
-        return result;
-    } else {
-      throw std::runtime_error("received frame is NULL but bucket->isEmpty() returns false");
-    }
+    log("getSensorValue(): not implemented yet");
+    return 0;
   } // getSensorValue
 
   uint8_t DS485Proxy::dSLinkSend(const int _dsMeterID, devid_t _devAdr, uint8_t _value, uint8_t _flags) {
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(_dsMeterID);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDSLinkSendDevice);
-    cmdFrame.getPayload().add<uint16_t>(_devAdr);
-    cmdFrame.getPayload().add<uint16_t>(_value);
-    cmdFrame.getPayload().add<uint16_t>(_flags);
-
-    if((_flags & DSLinkSendWriteOnly) == 0) {
-      boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(cmdFrame, FunctionDSLinkReceive);
-      bucket->waitForFrame(10000);
-      boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
-      if(recFrame == NULL) {
-        log("dsLinkSend: No packet received", lsError);
-        throw DS485ApiError("No frame received");
-      }
-      PayloadDissector pd(recFrame->getPayload());
-      pd.get<uint8_t>(); // discard the function id
-      pd.get<uint16_t>(); // garbage
-      devid_t devAddress = pd.get<uint16_t>(); // device address
-      if(devAddress != _devAdr) {
-        std::string errStr =
-            "dSLinkSend: Received answer for wrong device expected: "+
-            intToString(_devAdr, true) +
-            " got: " + intToString(devAddress, true);
-        log(errStr, lsError);
-        throw DS485ApiError(errStr);
-      }
-      return pd.get<uint16_t>();
-    } else {
-      sendFrame(cmdFrame);
-      log("dsLinkSend: Not waiting for response (writeOnly is set)");
-      return 0;
-    }
+    log("dSLinkSend(): not implemented yet");
+    return 0;
   } // dsLinkSend
 
-  void DS485Proxy::addToGroup(const int _dsMeterID, const int _groupID, const int _deviceID) {
-
+  void DS485Proxy::addToGroup(dsid_t _dsMeterID, const int _groupID, const int _deviceID) {
+    int ret = DeviceGroupMembershipModify_add_sync(m_dsmApiHandle, _dsMeterID, _deviceID, _groupID);
+    checkResultCode(ret);
   } // addToGroup
 
-  void DS485Proxy::removeFromGroup(const int _dsMeterID, const int _groupID, const int _deviceID) {
-
+  void DS485Proxy::removeFromGroup(dsid_t _dsMeterID, const int _groupID, const int _deviceID) {
+    int ret = DeviceGroupMembershipModify_remove_sync(m_dsmApiHandle, _dsMeterID, _deviceID, _groupID);
+    checkResultCode(ret);
   } // removeFromGroup
 
   int DS485Proxy::addUserGroup(const int _dsMeterID) {
@@ -884,95 +491,40 @@ namespace dss {
 
   } // removeUserGroup
 
-  void DS485Proxy::removeInactiveDevices(const int _dsMeterID) {
-    DS485CommandFrame frame;
-    frame.getHeader().setBroadcast(false);
-    frame.getHeader().setDestination(_dsMeterID);
-    frame.setCommand(CommandRequest);
-    frame.getPayload().add<uint8_t>(FunctionRemoveInactiveDevices);
-    sendFrame(frame);
+  void DS485Proxy::removeInactiveDevices(dsid_t _dsMeterID) {
+
+    int ret = CircuitRemoveInactiveDevices_sync(m_dsmApiHandle, _dsMeterID);
+    checkResultCode(ret);
   }
-
-  boost::shared_ptr<DS485CommandFrame> DS485Proxy::receiveSingleFrame(DS485CommandFrame& _frame, uint8_t _functionID) {
-    boost::shared_ptr<FrameBucketCollector> bucket = sendFrameAndInstallBucket(_frame, _functionID);
-    bucket->waitForFrame(5000);
-
-    if(bucket->isEmpty()) {
-      log(std::string("received no results for request (") + FunctionIDToString(_functionID) + ")");
-      return boost::shared_ptr<DS485CommandFrame>();
-    } else if(bucket->getFrameCount() > 1) {
-      log(std::string("received multiple results (") + intToString(bucket->getFrameCount()) + ") for request (" + FunctionIDToString(_functionID) + ")");
-      // TODO: check
-      return bucket->popFrame();
-    }
-
-    boost::shared_ptr<DS485CommandFrame> recFrame = bucket->popFrame();
-
-    if(recFrame != NULL) {
-      return recFrame;
-    } else {
-      throw std::runtime_error("received frame is NULL but bucket->isEmpty() returns false");
-    }
-  } // receiveSingleFrame
-
-  uint8_t DS485Proxy::receiveSingleResult(DS485CommandFrame& _frame, const uint8_t _functionID) {
-    boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(_frame, _functionID);
-
-    if(recFrame != NULL) {
-      PayloadDissector pd(recFrame->getPayload());
-      uint8_t functionID = pd.get<uint8_t>();
-      if(functionID != _functionID) {
-        log("function ids are different", lsFatal);
-      }
-      uint8_t result = pd.get<uint8_t>();
-      return result;
-    } else {
-      return 0;
-    }
-  } // receiveSingleResult
-
-  uint16_t DS485Proxy::receiveSingleResult16(DS485CommandFrame& _frame, const uint8_t _functionID) {
-    boost::shared_ptr<DS485CommandFrame> recFrame = receiveSingleFrame(_frame, _functionID);
-
-    if(recFrame != NULL) {
-      PayloadDissector pd(recFrame->getPayload());
-      uint8_t functionID = pd.get<uint8_t>();
-      if(functionID != _functionID) {
-        log("function ids are different");
-      }
-      uint16_t result = pd.get<uint8_t>();
-      if(!pd.isEmpty()) {
-        result |= (pd.get<uint8_t>() << 8);
-      } else {
-        log("receiveSingleResult16: only received half of the data (8bit)", lsFatal);
-      }
-      return result;
-    } else {
-      return 0;
-    }
-  } // receiveSingleResult16
 
   void DS485Proxy::initialize() {
     Subsystem::initialize();
-    if(m_pBusInterfaceHandler != NULL) {
-      m_DS485Controller.addFrameCollector(m_pBusInterfaceHandler);
-      if(m_pDSSim != NULL) {
-        m_pDSSim->addFrameCollector(m_pBusInterfaceHandler);
-      }
+
+    m_dsmApiHandle = DsmApiInitialize();
+    if (!m_dsmApiHandle) {
+      log("Couldn't init dsmapi connection");
+      return;
     }
+
+    // TODO: libdsm
+    // read from config
+    std::string connection = "tcp:192.168.2.124:8442"; // tcp:localhost:8442
+
+    int result = DsmApiOpen(m_dsmApiHandle, connection.c_str(), 0);
+    if (result < 0) {
+      log("Couldn't open dsmapi connection");
+      return;
+    }
+    log("Successfully connected to " + connection);
+    
+    m_dsmApiReady = true;
   } // initialize
 
   void DS485Proxy::doStart() {
-    if(m_InitializeDS485Controller) {
-      try {
-        m_DS485Controller.setDenyJoiningAsShortDevice(getDSS().getPropertySystem().getBoolValue(getConfigPropertyBasePath() + "denyJoiningAsShortDevice"));
-        m_DS485Controller.setDSID(dsid_t::fromString(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "dsid")));
-        m_DS485Controller.setBusReadyCallback(boost::bind(&DS485Proxy::busReady,this));
-        m_DS485Controller.run();
-      } catch (const std::runtime_error& _ex) {
-        log(std::string("Caught exception while starting DS485Controller: ") + _ex.what(), lsFatal);
-      }
-    }
+    
+    log("***********************");
+    
+    busReady();
   } // doStart
 
   void DS485Proxy::busReady() {
@@ -981,6 +533,12 @@ namespace dss {
   } // busReady
 
   void DS485Proxy::shutdown() {
-    m_DS485Controller.terminate();
+    if (m_dsmApiReady) {
+      DsmApiClose(m_dsmApiHandle);
+      DsmApiCleanup(m_dsmApiHandle);
+
+      m_dsmApiHandle = NULL;
+    }
+    // m_DS485Controller.terminate();
   }
 } // namespace dss

@@ -36,7 +36,7 @@ namespace dss {
     const int m_Handle;
     struct dsid_interface* m_Interface;
   public:
-    DSIDPlugin(const DSDSMeterSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress, void* _soHandle, const int _handle)
+    DSIDPlugin(const DSDSMeterSim& _simulator, const dss_dsid_t _dsid, const devid_t _shortAddress, void* _soHandle, const int _handle)
     : DSIDInterface(_simulator, _dsid, _shortAddress),
       m_SOHandle(_soHandle),
       m_Handle(_handle)
@@ -179,7 +179,7 @@ namespace dss {
     }
   } // ctor
 
-  DSIDInterface* DSIDPluginCreator::createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
+  DSIDInterface* DSIDPluginCreator::createDSID(const dss_dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
     int handle = (*createInstance)();
     return new DSIDPlugin(_dsMeter, _dsid, _shortAddress, m_SOHandle, handle);
   } // createDSID

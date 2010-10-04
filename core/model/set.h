@@ -119,7 +119,7 @@ namespace dss {
     DeviceReference getByBusID(const devid_t _busid, boost::shared_ptr<const DSMeter> _meter) const;
 
     /** Returns the device indicated by \a _dsid */
-    DeviceReference getByDSID(const dsid_t _dsid)  const;
+    DeviceReference getByDSID(const dss_dsid_t _dsid)  const;
 
     /** Returns the number of devices contained in this set */
     int length() const;

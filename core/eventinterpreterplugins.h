@@ -66,15 +66,15 @@ namespace dss {
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
   }; // EventInterpreterPluginJavascript
 
-  class DS485Interface;
+  class BusInterface;
 
   class EventInterpreterPluginDS485 : public EventInterpreterPlugin {
   private:
-    DS485Interface* m_pInterface;
+    BusInterface* m_pInterface;
     Apartment& m_Apartment;
     std::string getParameter(Poco::XML::Node* _node, const std::string& _parameterName);
   public:
-    EventInterpreterPluginDS485(Apartment& _apartment, DS485Interface* _pInterface, EventInterpreter* _pInterpreter);
+    EventInterpreterPluginDS485(Apartment& _apartment, BusInterface* _pInterface, EventInterpreter* _pInterpreter);
 
     virtual boost::shared_ptr<SubscriptionOptions> createOptionsFromXML(Poco::XML::Node* _node);
 

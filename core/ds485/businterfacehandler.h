@@ -26,7 +26,8 @@
 #include "core/thread.h"
 #include "core/subsystem.h"
 #include "core/syncevent.h"
-#include "core/ds485/ds485.h"
+// TODO: libdsm
+// #include "core/ds485/ds485.h"
 
 namespace dss {
 
@@ -48,8 +49,7 @@ namespace dss {
   typedef std::vector<boost::shared_ptr<DS485CommandFrame> > CommandFrameSharedPtrVector;
 
   class BusInterfaceHandler : public FrameBucketHolder,
-                              public ThreadedSubsystem,
-                              public IDS485FrameCollector {
+                              public ThreadedSubsystem {
   public:
     BusInterfaceHandler(DSS* _pDSS, ModelMaintenance& _modelMaintenance);
     virtual void execute();

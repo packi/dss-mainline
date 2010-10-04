@@ -61,7 +61,7 @@ namespace dss {
     std::string deviceDSIDString = _request.getParameter("dsid");
     if(!deviceDSIDString.empty()) {
       try {
-        dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
+        dss_dsid_t deviceDSID = dss_dsid_t::fromString(deviceDSIDString);
         try {
           result = m_Apartment.getDeviceByDSID(deviceDSID);
         } catch(std::runtime_error& e) {

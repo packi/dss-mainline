@@ -26,7 +26,9 @@
 #include "core/ds485types.h"
 #include "core/ds485const.h"
 #include "core/model/modelconst.h"
-#include "core/ds485/ds485.h"
+
+// TODO: libdsm
+// #include "core/ds485/ds485.h"
 #include "core/subsystem.h"
 
 #include <map>
@@ -55,20 +57,19 @@ namespace dss {
     virtual ~DSIDCreator() {};
 
     const std::string& getIdentifier() const { return m_Identifier; }
-    virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) = 0;
+    virtual DSIDInterface* createDSID(const dss_dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) = 0;
   };
 
   class DSIDFactory {
   private:
     boost::ptr_vector<DSIDCreator> m_RegisteredCreators;
   public:
-    DSIDInterface* createDSID(const std::string& _identifier, const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter);
+    DSIDInterface* createDSID(const std::string& _identifier, const dss_dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter);
 
     void registerCreator(DSIDCreator* _creator);
   };
 
-  class DSSim : public Subsystem,
-                public DS485FrameProvider {
+  class DSSim : public Subsystem {
   private:
     DSIDFactory m_DSIDFactory;
     bool m_Initialized;
@@ -94,13 +95,14 @@ namespace dss {
 
     DSIDFactory& getDSIDFactory() { return m_DSIDFactory; }
 
-    void distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame);
-    DSIDInterface* getSimulatedDevice(const dsid_t& _dsid);
+    // TODO: libdsm
+    // void distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame);
+    DSIDInterface* getSimulatedDevice(const dss_dsid_t& _dsid);
 
     int getDSMeterCount() const { return m_DSMeters.size(); }
     DSDSMeterSim& getDSMeter(const int _index) { return m_DSMeters[_index]; }
 
-    static dsid_t makeSimulatedDSID(const dsid_t& _dsid);
+    static dss_dsid_t makeSimulatedDSID(const dss_dsid_t& _dsid);
   }; // DSSim
 
   typedef std::map< const std::pair<const int, const int>,  std::vector<DSIDInterface*> > IntPairToDSIDSimVector;
@@ -111,7 +113,7 @@ namespace dss {
     int m_EnergyLevelOrange;
     int m_EnergyLevelRed;
     int m_ID;
-    dsid_t m_DSMeterDSID;
+    dss_dsid_t m_DSMeterDSID;
     std::vector<DSIDInterface*> m_SimulatedDevices;
     std::map< const int, std::vector<DSIDInterface*> > m_Zones;
     IntPairToDSIDSimVector m_DevicesOfGroupInZone;
@@ -128,12 +130,14 @@ namespace dss {
     void loadZones(Poco::XML::Node* _node);
 
     DSIDInterface& lookupDevice(const devid_t _id);
-    boost::shared_ptr<DS485CommandFrame> createResponse(DS485CommandFrame& _request, uint8_t _functionID) const;
-    boost::shared_ptr<DS485CommandFrame> createAck(DS485CommandFrame& _request, uint8_t _functionID) const;
-    boost::shared_ptr<DS485CommandFrame> createReply(DS485CommandFrame& _request) const;
-
-    void distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) const;
-    void sendDelayedResponse(boost::shared_ptr<DS485CommandFrame> _response, int _delayMS);
+    
+    // TODO: libdsm
+    // boost::shared_ptr<DS485CommandFrame> createResponse(DS485CommandFrame& _request, uint8_t _functionID) const;
+    // boost::shared_ptr<DS485CommandFrame> createAck(DS485CommandFrame& _request, uint8_t _functionID) const;
+    // boost::shared_ptr<DS485CommandFrame> createReply(DS485CommandFrame& _request) const;
+    //
+    // void distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) const;
+    // void sendDelayedResponse(boost::shared_ptr<DS485CommandFrame> _response, int _delayMS);
   private:
     void deviceCallScene(const int _deviceID, const int _sceneID);
     void groupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
@@ -158,11 +162,11 @@ namespace dss {
     int getID() const;
     void setID(const int _value) { m_ID = _value; }
 
-    void setDSID(const dsid_t& _value) { m_DSMeterDSID = _value; }
+    void setDSID(const dss_dsid_t& _value) { m_DSMeterDSID = _value; }
 
     void process(DS485Frame& _frame);
 
-    DSIDInterface* getSimulatedDevice(const dsid_t _dsid);
+    DSIDInterface* getSimulatedDevice(const dss_dsid_t _dsid);
     void addSimulatedDevice(DSIDInterface* _device);
     void dSLinkInterrupt(devid_t _shortAddress) const;
 
@@ -171,13 +175,13 @@ namespace dss {
 
   class DSIDInterface {
   private:
-    dsid_t m_DSID;
+    dss_dsid_t m_DSID;
     devid_t m_ShortAddress;
     const DSDSMeterSim& m_Simulator;
     int m_ZoneID;
     bool m_IsLocked;
   public:
-    DSIDInterface(const DSDSMeterSim& _simulator, dsid_t _dsid, devid_t _shortAddress)
+    DSIDInterface(const DSDSMeterSim& _simulator, dss_dsid_t _dsid, devid_t _shortAddress)
     : m_DSID(_dsid), m_ShortAddress(_shortAddress), m_Simulator(_simulator),
       m_IsLocked(false) {}
 
@@ -185,7 +189,7 @@ namespace dss {
 
     virtual void initialize() {};
 
-    virtual dsid_t getDSID() const { return m_DSID; }
+    virtual dss_dsid_t getDSID() const { return m_DSID; }
     virtual devid_t getShortAddress() const { return m_ShortAddress; }
     virtual void setShortAddress(const devid_t _value) { m_ShortAddress = _value; }
 

@@ -247,9 +247,9 @@ namespace dss {
 
   class ByDSIDSelector : public IDeviceSelector {
   private:
-    const dsid_t m_ID;
+    const dss_dsid_t m_ID;
   public:
-    ByDSIDSelector(const dsid_t _id) : m_ID(_id) {}
+    ByDSIDSelector(const dss_dsid_t _id) : m_ID(_id) {}
     virtual ~ByDSIDSelector() {};
 
     virtual bool selectDevice(boost::shared_ptr<const Device> _device) const {
@@ -257,7 +257,7 @@ namespace dss {
     }
   };
 
-  DeviceReference Set::getByDSID(const dsid_t _dsid) const {
+  DeviceReference Set::getByDSID(const dss_dsid_t _dsid) const {
     Set resultSet = getSubset(ByDSIDSelector(_dsid));
     if(resultSet.length() == 0) {
       throw ItemNotFoundException("with dsid " + _dsid.toString());

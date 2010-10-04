@@ -28,16 +28,16 @@
 
 #include "base.h"
 #include "logger.h"
-#include "DS485Interface.h"
+#include "businterface.h"
 #include "setbuilder.h"
 #include "dss.h"
 #include "core/scripting/scriptobject.h"
 #include "core/scripting/modeljs.h"
 #include "core/scripting/propertyscriptextension.h"
 #include "core/scripting/jssocket.h"
-#include "core/scripting/ds485scriptextension.h"
 #include "core/scripting/jslogger.h"
-#include "core/ds485/businterfacehandler.h"
+// TODO: libdsm
+// #include "core/ds485/businterfacehandler.h"
 #include "core/foreach.h"
 #include "core/model/set.h"
 #include "core/model/zone.h"
@@ -227,8 +227,6 @@ namespace dss {
       m_Environment.addExtension(ext);
       ext = new SocketScriptContextExtension();
       m_Environment.addExtension(ext);
-      ext = new DS485ScriptExtension(*DSS::getInstance()->getDS485Interface().getFrameSenderInterface(), DSS::getInstance()->getBusInterfaceHandler());
-      m_Environment.addExtension(ext);
       ext = new ScriptLoggerExtension(DSS::getInstance()->getJSLogDirectory(), DSS::getInstance()->getEventInterpreter());
       m_Environment.addExtension(ext);
       setupCleanupEvent();
@@ -276,7 +274,7 @@ namespace dss {
 
   //================================================== EventInterpreterPluginDS485
 
-  EventInterpreterPluginDS485::EventInterpreterPluginDS485(Apartment& _apartment, DS485Interface* _pInterface, EventInterpreter* _pInterpreter)
+  EventInterpreterPluginDS485::EventInterpreterPluginDS485(Apartment& _apartment, BusInterface* _pInterface, EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin("bus_handler", _pInterpreter),
     m_pInterface(_pInterface),
     m_Apartment(_apartment)

@@ -28,7 +28,7 @@
 #include "core/dss.h"
 #include "core/logger.h"
 #include "core/propertysystem.h"
-#include "core/DS485Interface.h"
+#include "core/businterface.h"
 #include "core/model/device.h"
 #include "core/model/devicereference.h"
 #include "core/model/apartment.h"
@@ -135,9 +135,9 @@ namespace dss {
     ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
     if(ext != NULL) {
       if(argc >= 1) {
-        dsid_t dsid = NullDSID;
+        dss_dsid_t dsid = NullDSID;
         try {
-          dsid =  dsid_t::fromString(ctx->convertTo<std::string>(argv[0]));
+          dsid =  dss_dsid_t::fromString(ctx->convertTo<std::string>(argv[0]));
         } catch(std::invalid_argument& e) {
           Logger::getInstance()->log(std::string("Error converting dsid string to dsid") + e.what(), lsError);
           return JS_FALSE;
@@ -342,7 +342,7 @@ namespace dss {
       if(str != NULL) {
         std::string dsid = JS_GetStringBytes(str);
         try {
-          DeviceReference result = set->getByDSID(dsid_t::fromString(dsid));
+          DeviceReference result = set->getByDSID(dss_dsid_t::fromString(dsid));
           JSObject* resultObj = ext->createJSDevice(*ctx, result);
           *rval = OBJECT_TO_JSVAL(resultObj);
           return JS_TRUE;
@@ -752,7 +752,7 @@ namespace dss {
           int sensorValue = ctx->convertTo<int>(argv[0]);
           int retValue= (intf->getDevice()->getSensorValue(sensorValue));
           *rval = INT_TO_JSVAL(retValue);
-        } catch(const DS485ApiError&) {
+        } catch(const BusApiError&) {
           *rval = JSVAL_NULL;
         }
         return JS_TRUE;

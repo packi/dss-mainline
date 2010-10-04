@@ -43,7 +43,7 @@ namespace dss {
   class DSMeter : public DeviceContainer,
                   public PhysicalModelItem {
   private:
-    dsid_t m_DSID;
+    dss_dsid_t m_DSID;
     int m_BusID;
     DeviceVector m_ConnectedDevices;
     int m_EnergyLevelOrange;
@@ -54,8 +54,8 @@ namespace dss {
     DateTime m_EnergyMeterValueTimeStamp;
     int m_HardwareVersion;
     int m_SoftwareVersion;
+    int m_ApiVersion;
     std::string m_HardwareName;
-    int m_DeviceType;
     bool m_IsValid;
     PropertyNodePtr m_pPropertyNode;
     Apartment* m_pApartment;
@@ -63,12 +63,12 @@ namespace dss {
     void publishToPropertyTree();
   public:
     /** Constructs a dsMeter with the given dsid. */
-    DSMeter(const dsid_t _dsid, Apartment* _pApartment);
+    DSMeter(const dss_dsid_t _dsid, Apartment* _pApartment);
     virtual ~DSMeter() {};
     virtual Set getDevices() const;
 
     /** Returns the DSID of the DSMeter */
-    dsid_t getDSID() const;
+    dss_dsid_t getDSID() const;
     /** Returns the bus id of the DSMeter */
     int getBusID() const;
     /** Sets the bus id of the DSMeter */
@@ -118,10 +118,10 @@ namespace dss {
     void setHardwareVersion(const int _value) { m_HardwareVersion = _value; }
     int getSoftwareVersion() const { return m_SoftwareVersion; }
     void setSoftwareVersion(const int _value) { m_SoftwareVersion = _value; }
+    int getApiVersion() const { return m_ApiVersion; }
+    void setApiVersion(const int _value) { m_ApiVersion = _value; }
     std::string getHardwareName() const { return m_HardwareName; }
     void setHardwareName(const std::string& _value) { m_HardwareName = _value; }
-    int getDeviceType() { return m_DeviceType; }
-    void setDeviceType(const int _value) { m_DeviceType = _value; }
 
     /** Returns true if the dsMeter has been read-out completely. */
     bool isValid() const { return m_IsValid; }

@@ -25,6 +25,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <sstream>
 
 namespace dss {
 
@@ -59,10 +60,12 @@ namespace dss {
 
     std::string toString() const;
 
+    
     static dsid fromString(const std::string& _string);
-  } dsid_t;
+  } dss_dsid_t;
 
-  extern const dsid_t NullDSID;
+
+  extern const dss_dsid_t NullDSID;
 
   typedef enum  {
     Click,

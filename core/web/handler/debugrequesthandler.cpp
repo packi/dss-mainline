@@ -27,9 +27,10 @@
 
 #include "core/web/json.h"
 
-#include "core/ds485/ds485.h"
+// TODO: libdsm
+// #include "core/ds485/ds485.h"
+// #include "core/ds485/framebucketcollector.h"
 #include "core/ds485/ds485proxy.h"
-#include "core/ds485/framebucketcollector.h"
 
 #include "core/dss.h"
 #include "core/propertysystem.h"
@@ -52,6 +53,9 @@ namespace dss {
   boost::shared_ptr<JSONObject> DebugRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::ostringstream logSStream;
     if(_request.getMethod() == "sendFrame") {
+      
+#if 0
+      // TODO: libdsm
       int destination = strToIntDef(_request.getParameter("destination"),0) & 0x3F;
       bool broadcast = _request.getParameter("broadcast") == "true";
       int counter = strToIntDef(_request.getParameter("counter"), 0x00) & 0x03;
@@ -88,7 +92,7 @@ namespace dss {
       Logger::getInstance()->log(logSStream.str());
       logSStream.str("");
 
-      DS485Interface* intf = &DSS::getInstance()->getDS485Interface();
+      BusInterface* intf = &DSS::getInstance()->getBusInterface();
       DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
       if(proxy != NULL) {
         proxy->sendFrame(*frame);
@@ -96,11 +100,12 @@ namespace dss {
         delete frame;
       }
       return success();
+#endif
     } else if(_request.getMethod() == "dSLinkSend") {
       std::string deviceDSIDString =_request.getParameter("dsid");
       boost::shared_ptr<Device> pDevice;
       if(!deviceDSIDString.empty()) {
-        dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
+        dss_dsid_t deviceDSID = dss_dsid_t::fromString(deviceDSIDString);
         if(!(deviceDSID == NullDSID)) {
           try {
             pDevice = m_DSS.getApartment().getDeviceByDSID(deviceDSID);
@@ -143,6 +148,10 @@ namespace dss {
         return success(obj);
       }
     } else if(_request.getMethod() == "pingDevice") {
+      
+      
+#if 0
+      // TODO: libdsm
       if (DSS::getInstance()->getPropertySystem().getBoolValue("/system/js/settings/extendedPing/active") == true) {
         return failure("Another ping round is currently active, please try again later!");
       }
@@ -152,7 +161,7 @@ namespace dss {
       }
       try {
         DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/settings/extendedPing/active", true, true, true);
-        dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
+        dss_dsid_t deviceDSID = dss_dsid_t::fromString(deviceDSIDString);
         boost::shared_ptr<Device> device = m_DSS.getApartment().getDeviceByDSID(deviceDSID);
         // TODO: move this code somewhere else (might also relax the requirement
         //       having DSS as constructor parameter)
@@ -162,7 +171,7 @@ namespace dss {
         frame->setCommand(CommandRequest);
         frame->getPayload().add<uint8_t>(FunctionDeviceGetTransmissionQuality);
         frame->getPayload().add<uint16_t>(device->getShortAddress());
-        DS485Interface* intf = &m_DSS.getDS485Interface();
+        BusInterface* intf = &m_DSS.getBusInterface();
         DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
         if(proxy != NULL) {
           boost::shared_ptr<FrameBucketCollector> bucket = proxy->sendFrameAndInstallBucket(*frame, FunctionDeviceGetTransmissionQuality);
@@ -207,7 +216,12 @@ namespace dss {
         DSS::getInstance()->getPropertySystem().setBoolValue("/system/js/settings/extendedPing/active", false, true, true);
         return failure( "Could not parse dsid '" + deviceDSIDString + "'");
       }
+#endif
+      
     } else if(_request.getMethod() == "resetZone") {
+      
+#if 0
+      // TODO: libdsm
       std::string zoneIDStr = _request.getParameter("zoneID");
       int zoneID;
       try {
@@ -221,7 +235,7 @@ namespace dss {
       frame->setCommand(CommandRequest);
       frame->getPayload().add<uint8_t>(FunctionZoneRemoveAllDevicesFromZone);
       frame->getPayload().add<uint16_t>(zoneID);
-      DS485Interface* intf = &DSS::getInstance()->getDS485Interface();
+      BusInterface* intf = &DSS::getInstance()->getBusInterface();
       DS485Proxy* proxy = dynamic_cast<DS485Proxy*>(intf);
       if(proxy != NULL) {
         proxy->sendFrame(*frame);
@@ -229,6 +243,8 @@ namespace dss {
       } else {
         return failure("Proxy has a wrong type or is null");
       }
+#endif
+
     }
     throw std::runtime_error("Unhandled function");
   } // handleRequest

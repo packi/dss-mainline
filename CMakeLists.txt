@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 2.6)
 project(DSS)
 
-if(WIN32)
-  option(WITH_TESTS "Include test-suite" OFF)
-else(WIN32)  
-  option(WITH_TESTS "Include test-suite" ON)
-endif(WIN32)
+# TODO: libdsm
+### if(WIN32)
+###   option(WITH_TESTS "Include test-suite" OFF)
+### else(WIN32)  
+###   option(WITH_TESTS "Include test-suite" ON)
+### endif(WIN32)
 option(WITH_GCOV "Compile coverage information into the dss" OFF)
 
 if(NOT WITH_DATADIR)
@@ -168,9 +169,10 @@ add_definitions(-DHAVE_CONFIG_H)
 set(BOOST_REQUIRED_LIBS thread filesystem system program_options)
 
 # check for Boost unit testing
-if(WITH_TESTS)
-  set(BOOST_REQUIRED_LIBS unit_test_framework ${BOOST_REQUIRED_LIBS})
-endif(WITH_TESTS)
+# TODO: libdsm
+### if(WITH_TESTS)
+###   set(BOOST_REQUIRED_LIBS unit_test_framework ${BOOST_REQUIRED_LIBS})
+### endif(WITH_TESTS)
 
 # check for Boost
 set(Boost_USE_MULTITHREADED ON)
@@ -187,11 +189,16 @@ endif(CMAKE_HAVE_PTHREAD_CREATE)
 
 #include test-directory if needed
 set(TEST_LIB)
-if(WITH_TESTS)
-  set(TEST_LIB tests)
-  add_subdirectory(tests)
-  add_dependencies(dsstests build_info.h)
-endif(WITH_TESTS)
+# TODO: libdsm
+### if(WITH_TESTS)
+###   set(TEST_LIB tests)
+###   add_subdirectory(tests)
+###   add_dependencies(dsstests build_info.h)
+### endif(WITH_TESTS)
+
+# libdsm-api
+set(REQUIRED_LIBS ${REQUIRED_LIBS} dsm-api)
+
 
 add_subdirectory(core)
 add_subdirectory(unix)

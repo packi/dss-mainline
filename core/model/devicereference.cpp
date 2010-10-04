@@ -35,7 +35,7 @@ namespace dss {
   {
   } // ctor(copy)
 
-  DeviceReference::DeviceReference(const dsid_t _dsid, const Apartment* _apartment)
+  DeviceReference::DeviceReference(const dss_dsid_t _dsid, const Apartment* _apartment)
   : m_DSID(_dsid),
     m_Apartment(_apartment)
   {
@@ -55,7 +55,7 @@ namespace dss {
     return m_Apartment->getDeviceByDSID(m_DSID);
   } // getDevice
 
-  dsid_t DeviceReference::getDSID() const {
+  dss_dsid_t DeviceReference::getDSID() const {
     return m_DSID;
   } // getID
 

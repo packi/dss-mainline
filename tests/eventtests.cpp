@@ -202,7 +202,7 @@ BOOST_FIXTURE_TEST_CASE(testDS485Events, Fixture) {
   maintenance.setApartment(&apt);
   DSDSMeterSim modSim(NULL);
   DS485Proxy proxy(NULL, &maintenance, NULL);
-  apt.setDS485Interface(&proxy);
+  apt.setBusInterface(&proxy);
   DS485BusRequestDispatcher dispatcher;
   dispatcher.setFrameSender(&proxy);
   apt.setBusRequestDispatcher(&dispatcher);

@@ -35,7 +35,6 @@ namespace dss {
   class Apartment;
   class Event;
   class Metering;
-  class FrameSenderInterface;
   class StructureQueryBusInterface;
 
   class ModelMaintenance : public ThreadedSubsystem {
@@ -58,7 +57,6 @@ namespace dss {
     bool isInitializing() const { return m_IsInitializing; }
     void setApartment(Apartment* _value);
     void setMetering(Metering* _value);
-    void setFrameSenderInterface(FrameSenderInterface* _value);
     void setStructureQueryBusInterface(StructureQueryBusInterface* _value);
   protected:
     virtual void doStart();
@@ -79,14 +77,13 @@ namespace dss {
     void onDSLinkInterrupt(const int _modID, const int _devID, const int _priority);
   private:
     bool m_IsInitializing;
-    
+
     boost::ptr_vector<ModelEvent> m_ModelEvents;
     Mutex m_ModelEventsMutex;
     SyncEvent m_NewModelEvent;
     Apartment* m_pApartment;
     Metering* m_pMetering;
     const int m_EventTimeoutMS;
-    FrameSenderInterface* m_pFrameSenderInterface;
     StructureQueryBusInterface* m_pStructureQueryBusInterface;
   }; // ModelMaintenance
 

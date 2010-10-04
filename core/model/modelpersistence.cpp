@@ -120,7 +120,7 @@ namespace dss {
       if(curNode->localName() == "device") {
         Element* elem = dynamic_cast<Element*>(curNode);
         if((elem != NULL) && elem->hasAttribute("dsid")) {
-          dsid_t dsid = dsid_t::fromString(elem->getAttribute("dsid"));
+          dss_dsid_t dsid = dss_dsid_t::fromString(elem->getAttribute("dsid"));
           std::string name;
           Element* nameElem = elem->getChildElement("name");
           if((nameElem != NULL) && nameElem->hasChildNodes()) {
@@ -132,9 +132,9 @@ namespace dss {
             firstSeen = DateTime(dateFromISOString(elem->getAttribute("firstSeen").c_str()));
           }
 
-          dsid_t lastKnownDsMeter = NullDSID;
+          dss_dsid_t lastKnownDsMeter = NullDSID;
           if(elem->hasAttribute("lastKnownDSMeter")) {
-            lastKnownDsMeter = dsid_t::fromString(elem->getAttribute("lastKnownDSMeter"));
+            lastKnownDsMeter = dss_dsid_t::fromString(elem->getAttribute("lastKnownDSMeter"));
           }
 
           int lastKnownZoneID = 0;
@@ -165,7 +165,7 @@ namespace dss {
       if((curNode->localName() == "modulator") || (curNode->localName() == "dsMeter")) {
         Element* elem = dynamic_cast<Element*>(curNode);
         if((elem != NULL) && elem->hasAttribute("id")) {
-          dsid_t id = dsid_t::fromString(elem->getAttribute("id"));
+          dss_dsid_t id = dss_dsid_t::fromString(elem->getAttribute("id"));
           std::string name;
           Element* nameElem = elem->getChildElement("name");
           if((nameElem != NULL) && nameElem->hasChildNodes()) {

@@ -37,7 +37,7 @@
 #include "core/mutex.h"
 #include "core/thread.h"
 #include "core/syncevent.h"
-#include "core/DS485Interface.h"
+#include "core/businterface.h"
 
 namespace dss {
   class PropertyNode;
@@ -65,7 +65,7 @@ namespace dss {
     std::vector<boost::shared_ptr<DSMeter> > m_DSMeters;
     std::vector<boost::shared_ptr<Device> > m_Devices;
 
-    DS485Interface* m_pDS485Interface;
+    BusInterface* m_pBusInterface;
     BusRequestDispatcher* m_pBusRequestDispatcher;
     PropertyNodePtr m_pPropertyNode;
     ModelMaintenance* m_pModelMaintenance;
@@ -80,16 +80,16 @@ namespace dss {
     virtual Set getDevices() const;
 
     /** Returns a reference to the device with the DSID \a _dsid */
-    boost::shared_ptr<Device> getDeviceByDSID(const dsid_t _dsid) const;
+    boost::shared_ptr<Device> getDeviceByDSID(const dss_dsid_t _dsid) const;
     /** @copydoc getDeviceByDSID */
-    boost::shared_ptr<Device> getDeviceByDSID(const dsid_t _dsid);
+    boost::shared_ptr<Device> getDeviceByDSID(const dss_dsid_t _dsid);
     /** Returns a reference to the device with the name \a _name*/
     boost::shared_ptr<Device> getDeviceByName(const std::string& _name);
     /** Returns a device by it's short-address and dsMeter */
     boost::shared_ptr<Device> getDeviceByShortAddress(boost::shared_ptr<const DSMeter> _dsMeter, const devid_t _deviceID) const;
     std::vector<boost::shared_ptr<Device> > getDevicesVector() { return m_Devices; }
     /** Allocates a device and returns a reference to it. */
-    boost::shared_ptr<Device> allocateDevice(const dsid_t _dsid);
+    boost::shared_ptr<Device> allocateDevice(const dss_dsid_t _dsid);
 
     /** Returns the Zone by name */
     boost::shared_ptr<Zone> getZone(const std::string& _zoneName);
@@ -105,12 +105,12 @@ namespace dss {
       */
     boost::shared_ptr<Zone> allocateZone(int _zoneID);
 
-    boost::shared_ptr<DSMeter> allocateDSMeter(const dsid_t _dsid);
+    boost::shared_ptr<DSMeter> allocateDSMeter(const dss_dsid_t _dsid);
 
     /** Returns a DSMeter by name */
     boost::shared_ptr<DSMeter> getDSMeter(const std::string& _modName);
     /** Returns a DSMeter by DSID  */
-    boost::shared_ptr<DSMeter> getDSMeterByDSID(const dsid_t _dsid);
+    boost::shared_ptr<DSMeter> getDSMeterByDSID(const dss_dsid_t _dsid);
     /** Returns a DSMeter by bus-id */
     boost::shared_ptr<DSMeter> getDSMeterByBusID(const int _busID);
     /** Returns a vector of all dsMeters */
@@ -122,10 +122,10 @@ namespace dss {
     boost::shared_ptr<Group> getGroup(const int _id);
 
     void removeZone(int _zoneID);
-    void removeDevice(dsid_t _device);
-    void removeDSMeter(dsid_t _dsMeter);
+    void removeDevice(dss_dsid_t _device);
+    void removeDSMeter(dss_dsid_t _dsMeter);
   public:
-    void setDS485Interface(DS485Interface* _value) { m_pDS485Interface = _value; }
+    void setBusInterface(BusInterface* _value) { m_pBusInterface = _value; }
     DeviceBusInterface* getDeviceBusInterface();
     void setBusRequestDispatcher(BusRequestDispatcher* _value) { m_pBusRequestDispatcher = _value; }
     void dispatchRequest(boost::shared_ptr<BusRequest> _pRequest);

@@ -39,7 +39,7 @@
 #include "core/logger.h"
 #include "core/dss.h"
 #include "include/dsid_plugin.h"
-#include "core/DS485Interface.h"
+#include "core/businterface.h"
 #include "core/foreach.h"
 #include "core/propertysystem.h"
 #include "dsid_js.h"
@@ -79,7 +79,7 @@ namespace dss {
 
     virtual ~DSIDSimCreator() {};
 
-    virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
+    virtual DSIDInterface* createDSID(const dss_dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
       return new DSIDSim(_dsMeter, _dsid, _shortAddress);
     }
   };
@@ -94,7 +94,7 @@ namespace dss {
 
     virtual ~DSIDSimSwitchCreator() {};
 
-    virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
+    virtual DSIDInterface* createDSID(const dss_dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
       return new DSIDSimSwitch(_dsMeter, _dsid, _shortAddress, 9);
     }
   };
@@ -274,7 +274,7 @@ namespace dss {
     DS485FrameProvider::distributeFrame(_frame);
   } // distributeFrame
 
-  DSIDInterface* DSSim::getSimulatedDevice(const dsid_t& _dsid) {
+  DSIDInterface* DSSim::getSimulatedDevice(const dss_dsid_t& _dsid) {
     DSIDInterface* result = NULL;
     foreach(DSDSMeterSim& dsMeter, m_DSMeters) {
       result = dsMeter.getSimulatedDevice(_dsid);
@@ -285,8 +285,8 @@ namespace dss {
     return result;
   } // getSimulatedDevice
 
-  dsid_t DSSim::makeSimulatedDSID(const dsid_t& _dsid) {
-    dsid_t result = _dsid;
+  dss_dsid_t DSSim::makeSimulatedDSID(const dss_dsid_t& _dsid) {
+    dss_dsid_t result = _dsid;
     result.upper = (result.upper & 0x000000000000000Fll) | DSIDHeader;
     result.lower = (result.lower & 0x002FFFFF) | SimulationPrefix;
     return result;
@@ -300,7 +300,7 @@ namespace dss {
     m_EnergyLevelOrange(200),
     m_EnergyLevelRed(400)
   {
-    m_DSMeterDSID = DSSim::makeSimulatedDSID(dsid_t());
+    m_DSMeterDSID = DSSim::makeSimulatedDSID(dss_dsid_t());
     m_ID = 70;
     m_Name = "Simulated dSM";
   } // dSDSMeterSim
@@ -318,7 +318,7 @@ namespace dss {
       m_ID = strToIntDef(elem->getAttribute("busid"), 70);
     }
     if(elem->hasAttribute("dsid")) {
-      m_DSMeterDSID = DSSim::makeSimulatedDSID(dsid_t::fromString(elem->getAttribute("dsid")));
+      m_DSMeterDSID = DSSim::makeSimulatedDSID(dss_dsid_t::fromString(elem->getAttribute("dsid")));
     }
     if(elem->hasAttribute("orange")) {
       m_EnergyLevelOrange = strToIntDef(elem->getAttribute("orange"), m_EnergyLevelOrange);
@@ -342,10 +342,10 @@ namespace dss {
     while(curNode != NULL) {
       Element* elem = dynamic_cast<Element*>(curNode);
       if(curNode->localName() == "device" && elem != NULL) {
-        dsid_t dsid = NullDSID;
+        dss_dsid_t dsid = NullDSID;
         int busid = -1;
         if(elem->hasAttribute("dsid")) {
-          dsid = DSSim::makeSimulatedDSID(dsid_t::fromString(elem->getAttribute("dsid")));
+          dsid = DSSim::makeSimulatedDSID(dss_dsid_t::fromString(elem->getAttribute("dsid")));
         }
         if(elem->hasAttribute("busid")) {
           busid = strToInt(elem->getAttribute("busid"));
@@ -799,7 +799,7 @@ namespace dss {
             case FunctionDSMeterGetDSID:
               {
                 response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<dsid_t>(m_DSMeterDSID);
+                response->getPayload().add<dss_dsid_t>(m_DSMeterDSID);
                 distributeFrame(response);
               }
               break;
@@ -871,7 +871,7 @@ namespace dss {
                 int devID = pd.get<uint16_t>();
                 DSIDInterface& dev = lookupDevice(devID);
                 response->getPayload().add<uint16_t>(1); // return-code (device found, all well)
-                response->getPayload().add<dsid_t>(dev.getDSID());
+                response->getPayload().add<dss_dsid_t>(dev.getDSID());
                 distributeFrame(response);
               }
               break;
@@ -1142,7 +1142,7 @@ namespace dss {
     return m_ID;
   } // getID
 
-  DSIDInterface* DSDSMeterSim::getSimulatedDevice(const dsid_t _dsid) {
+  DSIDInterface* DSDSMeterSim::getSimulatedDevice(const dss_dsid_t _dsid) {
     for(std::vector<DSIDInterface*>::iterator iDSID = m_SimulatedDevices.begin(), e = m_SimulatedDevices.end();
         iDSID != e; ++iDSID)
     {
@@ -1167,7 +1167,7 @@ namespace dss {
 
   //================================================== DSIDFactory
 
-  DSIDInterface* DSIDFactory::createDSID(const std::string& _identifier, const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
+  DSIDInterface* DSIDFactory::createDSID(const std::string& _identifier, const dss_dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
     boost::ptr_vector<DSIDCreator>::iterator
     iCreator = m_RegisteredCreators.begin(),
     e = m_RegisteredCreators.end();

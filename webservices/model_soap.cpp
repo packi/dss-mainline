@@ -43,10 +43,10 @@
 #include "core/model/modulator.h"
 #include "core/structuremanipulator.h"
 
-inline dss::dsid_t FromSOAP(const char* _dsid) {
-  dss::dsid_t result;
+inline dss::dss_dsid_t FromSOAP(const char* _dsid) {
+  dss::dss_dsid_t result;
   try {
-    result = dss::dsid_t::fromString(_dsid);
+    result = dss::dss_dsid_t::fromString(_dsid);
   } catch (std::invalid_argument&) {
     result = dss::NullDSID;
   }
@@ -244,7 +244,7 @@ int dss__ApartmentGetDeviceIDByName(struct soap *soap, int _token,  char* _devic
   }
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
   try {
-    dss::dsid_t dsid = apt.getDevices().getByName(_deviceName).getDSID();
+    dss::dss_dsid_t dsid = apt.getDevices().getByName(_deviceName).getDSID();
     std::string asString = dsid.toString();
     deviceID = soap_strdup(soap, asString.c_str());
   } catch(dss::ItemNotFoundException& _ex) {
@@ -366,7 +366,7 @@ int dss__SetGetContainedDevices(struct soap* soap, int _token, char* _setSpec, s
 
   int numDevices = set.length();
   for(int iDeviceID = 0; iDeviceID < numDevices; iDeviceID++) {
-    dss::dsid_t dsid = set.get(iDeviceID).getDSID();
+    dss::dss_dsid_t dsid = set.get(iDeviceID).getDSID();
     deviceIDs.push_back(dsid.toString());
   }
 
@@ -439,9 +439,9 @@ int dss__CircuitRescan(struct soap *soap, int _token, char* _dsid, bool& result)
   }
 
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
-  dss::dsid_t dsid;
+  dss::dss_dsid_t dsid;
   try {
-    dsid = dss::dsid_t::fromString(_dsid);
+    dsid = dss::dss_dsid_t::fromString(_dsid);
   } catch(std::invalid_argument&) {
     return soap_sender_fault(soap, "Error parsing dsid", NULL);
   }
@@ -1098,7 +1098,7 @@ int dss__ApartmentGetDSMeterIDs(struct soap *soap, int _token, std::vector<std::
   std::vector<boost::shared_ptr<dss::DSMeter> > dsMeters = apt.getDSMeters();
 
   for(unsigned int iDSMeter = 0; iDSMeter < dsMeters.size(); iDSMeter++) {
-    dss::dsid_t dsid = dsMeters[iDSMeter]->getDSID();
+    dss::dss_dsid_t dsid = dsMeters[iDSMeter]->getDSID();
     ids.push_back(dsid.toString());
   }
 
@@ -1399,9 +1399,9 @@ int dss__StructureAddDeviceToZone(struct soap *soap, int _token, char* _deviceID
   dss::Apartment& aptRef = dssRef.getApartment();
 
   try {
-    boost::shared_ptr<dss::Device> dev = aptRef.getDeviceByDSID(dss::dsid_t::fromString(_deviceID));
+    boost::shared_ptr<dss::Device> dev = aptRef.getDeviceByDSID(dss::dss_dsid_t::fromString(_deviceID));
     boost::shared_ptr<dss::Zone> zone = aptRef.getZone(_zoneID);
-    dss::StructureManipulator manipulator(*dssRef.getDS485Interface().getStructureModifyingBusInterface(),
+    dss::StructureManipulator manipulator(*dssRef.getBusInterface().getStructureModifyingBusInterface(),
                                           aptRef);
     manipulator.addDeviceToZone(dev, zone);
   } catch(std::runtime_error& _ex) {

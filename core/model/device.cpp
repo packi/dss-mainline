@@ -38,7 +38,7 @@ namespace dss {
 
   const devid_t ShortAddressStaleDevice = 0xFFFF;
 
-  Device::Device(dsid_t _dsid, Apartment* _pApartment)
+  Device::Device(dss_dsid_t _dsid, Apartment* _pApartment)
   : AddressableModelItem(_pApartment),
     m_DSID(_dsid),
     m_ShortAddress(ShortAddressStaleDevice),
@@ -176,7 +176,7 @@ namespace dss {
     m_LastDiscovered = DateTime();
   } // setShortAddress
 
-  dsid_t Device::getDSID() const {
+  dss_dsid_t Device::getDSID() const {
     return m_DSID;
   } // getDSID;
 
@@ -188,11 +188,15 @@ namespace dss {
     }
   } // getDSMeterID
 
-  void Device::setLastKnownDSMeterDSID(const dsid_t& _value) {
+  dss_dsid_t Device::getDSMeterDSID() const {
+    return m_DSMeterDSID;
+  } // getDSMeterID
+
+  void Device::setLastKnownDSMeterDSID(const dss_dsid_t& _value) {
     m_LastKnownMeterDSID = _value;
   } // setLastKnownDSMeterDSID
 
-  const dsid_t& Device::getLastKnownDSMeterDSID() const {
+  const dss_dsid_t& Device::getLastKnownDSMeterDSID() const {
     return m_LastKnownMeterDSID;
   } // getLastKnownDSMeterDSID
 

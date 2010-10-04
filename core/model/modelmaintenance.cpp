@@ -29,7 +29,7 @@
 #include "core/base.h"
 #include "core/dss.h"
 #include "core/event.h"
-#include "core/DS485Interface.h"
+#include "core/businterface.h"
 #include "core/propertysystem.h"
 #include "core/ds485const.h"
 #include "core/model/modelconst.h"
@@ -48,11 +48,11 @@
 
 namespace dss {
   //=============================================== ApartmentTreeListener
-  
+
   /** Raises a ModelDirty event if something below the apartment node gets changed. */
   class ApartmentTreeListener : public PropertyListener {
   public:
-    ApartmentTreeListener(ModelMaintenance* _pModelMaintenance, Apartment* _pApartment) 
+    ApartmentTreeListener(ModelMaintenance* _pModelMaintenance, Apartment* _pApartment)
     : m_pModelMaintenance(_pModelMaintenance),
       m_pApartment(_pApartment)
     {
@@ -60,7 +60,7 @@ namespace dss {
         m_pApartment->getPropertyNode()->addListener(this);
       }
     }
-    
+
   protected:
     virtual void propertyChanged(PropertyNodePtr _caller, PropertyNodePtr _changedNode) {
       if(_changedNode->hasFlag(PropertyNode::Archive)) {
@@ -72,17 +72,16 @@ namespace dss {
     ModelMaintenance* m_pModelMaintenance;
     Apartment* m_pApartment;
   }; // ApartmentTreeListener
- 
-  
+
+
  //=============================================== ModelMaintenance
- 
+
   ModelMaintenance::ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS)
   : ThreadedSubsystem(_pDSS, "Apartment"),
     m_IsInitializing(true),
     m_pApartment(NULL),
     m_pMetering(NULL),
-    m_EventTimeoutMS(_eventTimeoutMS),
-    m_pFrameSenderInterface(NULL)
+    m_EventTimeoutMS(_eventTimeoutMS)
   { }
 
   void ModelMaintenance::initialize() {
@@ -92,8 +91,7 @@ namespace dss {
     }
     if(DSS::hasInstance()) {
       DSS::getInstance()->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "configfile", getDSS().getDataDirectory() + "apartment.xml", true, false);
-      m_pFrameSenderInterface = DSS::getInstance()->getDS485Interface().getFrameSenderInterface();
-      m_pStructureQueryBusInterface = DSS::getInstance()->getDS485Interface().getStructureQueryBusInterface();
+      m_pStructureQueryBusInterface = DSS::getInstance()->getBusInterface().getStructureQueryBusInterface();
     }
   } // initialize
 
@@ -103,7 +101,7 @@ namespace dss {
 
   void ModelMaintenance::waitForInterface() {
     if(DSS::hasInstance()) {
-      DS485Interface& interface = DSS::getInstance()->getDS485Interface();
+      BusInterface& interface = DSS::getInstance()->getBusInterface();
 
       log("Apartment::execute: Waiting for interface to get ready", lsInfo);
 
@@ -134,8 +132,8 @@ namespace dss {
 
     log("Apartment::execute: Interface is ready, enumerating model", lsInfo);
     discoverDS485Devices();
-    
-    boost::shared_ptr<ApartmentTreeListener> treeListener 
+
+    boost::shared_ptr<ApartmentTreeListener> treeListener
       = boost::shared_ptr<ApartmentTreeListener>(
           new ApartmentTreeListener(this, m_pApartment));
 
@@ -146,6 +144,8 @@ namespace dss {
 
 
   void ModelMaintenance::discoverDS485Devices() {
+    // TODO: libdsm
+#if 0
     if(m_pFrameSenderInterface != NULL) {
       // temporary mark all dsMeters as absent
       foreach(boost::shared_ptr<DSMeter> pDSMeter, m_pApartment->getDSMeters()) {
@@ -160,6 +160,7 @@ namespace dss {
       requestFrame.getPayload().add<uint8_t>(FunctionDSMeterGetDSID);
       m_pFrameSenderInterface->sendFrame(requestFrame);
     }
+#endif
   } // discoverDS485Devices
 
   void ModelMaintenance::writeConfiguration() {
@@ -276,7 +277,7 @@ namespace dss {
           dsidUpper |= (uint64_t(event.getParameter(2)) & 0x00ffff) << 32;
           dsidUpper |= (uint64_t(event.getParameter(3))  & 0x00ffff) << 16;
           dsidUpper |= (uint64_t(event.getParameter(4)) & 0x00ffff);
-          dsid_t newDSID(dsidUpper,
+          dss_dsid_t newDSID(dsidUpper,
                          ((uint32_t(event.getParameter(5)) & 0x00ffff) << 16) | (uint32_t(event.getParameter(6)) & 0x00ffff));
           log ("Discovered device with busID: " + intToString(busID) + " and dsid: " + newDSID.toString());
           try{
@@ -354,7 +355,7 @@ namespace dss {
           dsMeterReadyEvent->setProperty("dsMeter", mod->getDSID().toString());
           raiseEvent(dsMeterReadyEvent);
         }
-      } catch(DS485ApiError& e) {
+      } catch(BusApiError& e) {
         log(std::string("Exception caught while scanning dsMeter " + intToString(_dsMeterBusID) + " : ") + e.what(), lsFatal);
 
         ModelEvent* pEvent = new ModelEvent(ModelEvent::etDSMeterReady);
@@ -560,10 +561,6 @@ namespace dss {
   void ModelMaintenance::setMetering(Metering* _value) {
     m_pMetering = _value;
   } // setMetering
-
-  void ModelMaintenance::setFrameSenderInterface(FrameSenderInterface* _value) {
-    m_pFrameSenderInterface = _value;
-  } // setFrameSenderInterface
 
   void ModelMaintenance::setStructureQueryBusInterface(StructureQueryBusInterface* _value) {
     m_pStructureQueryBusInterface = _value;

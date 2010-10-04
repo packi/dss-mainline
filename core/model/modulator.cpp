@@ -24,8 +24,9 @@
 
 #include "core/dss.h"
 #include "core/logger.h"
-#include "core/DS485Interface.h"
+#include "core/businterface.h"
 #include "core/propertysystem.h"
+#include "core/dsidhelper.h"
 #include "set.h"
 #include "apartment.h"
 
@@ -34,7 +35,7 @@ namespace dss {
 
   //================================================== DSMeter
 
-  DSMeter::DSMeter(const dsid_t _dsid, Apartment* _pApartment)
+  DSMeter::DSMeter(const dss_dsid_t _dsid, Apartment* _pApartment)
   : m_DSID(_dsid),
     m_BusID(0xFF),
     m_PowerConsumption(0),
@@ -68,8 +69,8 @@ namespace dss {
         ->linkToProxy(PropertyProxyReference<int>(m_HardwareVersion, false));
       m_pPropertyNode->createProperty("softwareVersion")
         ->linkToProxy(PropertyProxyReference<int>(m_SoftwareVersion, false));
-      m_pPropertyNode->createProperty("deviceType")
-        ->linkToProxy(PropertyProxyReference<int>(m_DeviceType, false));
+      m_pPropertyNode->createProperty("apiVersion")
+        ->linkToProxy(PropertyProxyReference<int>(m_ApiVersion, false));
       m_pPropertyNode->createProperty("hardwareName")
         ->linkToProxy(PropertyProxyReference<std::string>(m_HardwareName, false));
       m_pPropertyNode->createProperty("name")
@@ -96,7 +97,7 @@ namespace dss {
     }
   } // removeDevice
 
-  dsid_t DSMeter::getDSID() const {
+  dss_dsid_t DSMeter::getDSID() const {
     return m_DSID;
   } // getDSID
 
@@ -111,7 +112,9 @@ namespace dss {
   unsigned long DSMeter::getPowerConsumption() {
     DateTime now;
     if(!now.addSeconds(-1).before(m_PowerConsumptionTimeStamp)) {
-      m_PowerConsumption =  DSS::getInstance()->getDS485Interface().getMeteringBusInterface()->getPowerConsumption(m_BusID);
+      dsid_t dsid;
+      dsid_helper::toDsmapiDsid(m_DSID, dsid);
+      m_PowerConsumption =  DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getPowerConsumption(dsid);
       m_PowerConsumptionTimeStamp = now;
     }
     return m_PowerConsumption;
@@ -120,7 +123,9 @@ namespace dss {
   unsigned long DSMeter::getEnergyMeterValue() {
     DateTime now;
     if(!now.addSeconds(-1).before(m_EnergyMeterValueTimeStamp)) {
-      m_EnergyMeterValue = DSS::getInstance()->getDS485Interface().getMeteringBusInterface()->getEnergyMeterValue(m_BusID);
+      dsid_t dsid;
+      dsid_helper::toDsmapiDsid(m_DSID, dsid);
+      m_EnergyMeterValue = DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getEnergyMeterValue(dsid);
       m_EnergyMeterValueTimeStamp = now;
     }
     return m_EnergyMeterValue;

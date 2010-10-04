@@ -45,12 +45,12 @@ namespace dss {
                  public boost::noncopyable {
   private:
     std::string m_Name;
-    dsid_t m_DSID;
+    dss_dsid_t m_DSID;
     devid_t m_ShortAddress;
     int m_ZoneID;
     int m_LastKnownZoneID;
-    dsid_t m_DSMeterDSID;
-    dsid_t m_LastKnownMeterDSID;
+    dss_dsid_t m_DSMeterDSID;
+    dss_dsid_t m_LastKnownMeterDSID;
     std::bitset<63> m_GroupBitmask;
     std::vector<int> m_Groups;
     int m_FunctionID;
@@ -71,7 +71,7 @@ namespace dss {
     void dirty();
   public:
     /** Creates and initializes a device. */
-    Device(const dsid_t _dsid, Apartment* _pApartment);
+    Device(const dss_dsid_t _dsid, Apartment* _pApartment);
     virtual ~Device() {};
 
     void enable();
@@ -156,11 +156,14 @@ namespace dss {
     /** Sets the short-address of the device. */
     void setShortAddress(const devid_t _shortAddress);
     /** Returns the DSID of the device */
-    dsid_t getDSID() const;
+    dss_dsid_t getDSID() const;
     /** Returns the id of the dsMeter the device is connected to */
     int getDSMeterID() const;
-    const dsid_t& getLastKnownDSMeterDSID() const;
-    void setLastKnownDSMeterDSID(const dsid_t& _value);
+    /** Returns the DSID of the dsMeter the device is connected to */
+    dss_dsid_t getDSMeterDSID() const;
+    
+    const dss_dsid_t& getLastKnownDSMeterDSID() const;
+    void setLastKnownDSMeterDSID(const dss_dsid_t& _value);
     void setDSMeter(boost::shared_ptr<DSMeter> _dsMeter);
 
     /** Returns the zone ID the device resides in. */

@@ -28,13 +28,16 @@
 #endif
 
 #include "core/ds485types.h"
-#include "ds485.h"
-#include "core/DS485Interface.h"
+
+// TODO_ libdsm
+#include "core/businterface.h"
 #include "core/subsystem.h"
 #include "core/mutex.h"
 
 #include <map>
 #include <vector>
+
+#include <digitalSTROM/dsm-api-v2/dsm-api.h>
 
 #ifndef WIN32
   #include <ext/hash_map>
@@ -62,28 +65,24 @@ namespace dss {
   class DSSim;
 
   class DS485Proxy : public    Subsystem,
-                     public    DS485Interface,
+// TODO:libdsm
+                     public    BusInterface,
                      public    DeviceBusInterface,
                      public    StructureQueryBusInterface,
                      public    MeteringBusInterface,
-                     public    StructureModifyingBusInterface,
-                     public    FrameSenderInterface {
+                     public    StructureModifyingBusInterface {
   private:
     bool isSimAddress(const uint8_t _addr);
 
-    /** Returns a single frame or NULL if none should arrive within the timeout (1000ms) */
-    boost::shared_ptr<DS485CommandFrame> receiveSingleFrame(DS485CommandFrame& _frame, uint8_t _functionID);
-    uint8_t receiveSingleResult(DS485CommandFrame& _frame, const uint8_t _functionID);
-    uint16_t receiveSingleResult16(DS485CommandFrame& _frame, const uint8_t _functionID);
-
     BusInterfaceHandler* m_pBusInterfaceHandler;
-    DS485Controller m_DS485Controller;
+    DsmApiHandle_t m_dsmApiController;
     ModelMaintenance* m_pModelMaintenance;
     DSSim* m_pDSSim;
+    DsmApiHandle_t m_dsmApiHandle;
+    bool m_dsmApiReady;
 
     bool m_InitializeDS485Controller;
 
-    DSMeterSpec_t dsMeterSpecFromFrame(boost::shared_ptr<DS485CommandFrame> _frame);
     void checkResultCode(const int _resultCode);
     void busReady();
   protected:
@@ -100,52 +99,44 @@ namespace dss {
     virtual StructureQueryBusInterface* getStructureQueryBusInterface() { return this; }
     virtual MeteringBusInterface* getMeteringBusInterface() { return this; }
     virtual StructureModifyingBusInterface* getStructureModifyingBusInterface() { return this; }
-    virtual FrameSenderInterface* getFrameSenderInterface() { return this; }
 
     virtual bool isReady();
-    void setInitializeDS485Controller(const bool _value) { m_InitializeDS485Controller = _value; }
-
-    virtual void sendFrame(DS485CommandFrame& _frame);
-    boost::shared_ptr<FrameBucketCollector> sendFrameAndInstallBucket(DS485CommandFrame& _frame, const int _functionID);
 
     //------------------------------------------------ Handling
     virtual void initialize();
 
     //------------------------------------------------ Specialized Commands (system)
     virtual std::vector<DSMeterSpec_t> getDSMeters();
-    virtual DSMeterSpec_t getDSMeterSpec(const int _dsMeterID);
+    virtual DSMeterSpec_t getDSMeterSpec(dsid_t _dsMeterID);
 
-    virtual std::vector<int> getZones(const int _dsMeterID);
-    virtual int getZoneCount(const int _dsMeterID);
-    virtual std::vector<int> getDevicesInZone(const int _dsMeterID, const int _zoneID);
-    virtual int getDevicesCountInZone(const int _dsMeterID, const int _zoneID);
+    virtual std::vector<int> getZones(dsid_t _dsMeterID);
+    virtual int getZoneCount(dsid_t _dsMeterID);
+    virtual std::vector<int> getDevicesInZone(dsid_t _dsMeterID, const int _zoneID);
+    virtual int getDevicesCountInZone(dsid_t _dsMeterID, const int _zoneID);
 
-    virtual void setZoneID(const int _dsMeterID, const devid_t _deviceID, const int _zoneID);
-    virtual void createZone(const int _dsMeterID, const int _zoneID);
-    virtual void removeZone(const int _dsMeterID, const int _zoneID);
+    virtual void setZoneID(dsid_t _dsMeterID, const devid_t _deviceID, const int _zoneID);
+    virtual void createZone(dsid_t _dsMeterID, const int _zoneID);
+    virtual void removeZone(dsid_t _dsMeterID, const int _zoneID);
 
-    virtual int getGroupCount(const int _dsMeterID, const int _zoneID);
-    virtual std::vector<int> getGroups(const int _dsMeterID, const int _zoneID);
-    virtual int getDevicesInGroupCount(const int _dsMeterID, const int _zoneID, const int _groupID);
-    virtual std::vector<int> getDevicesInGroup(const int _dsMeterID, const int _zoneID, const int _groupID);
+    virtual int getGroupCount(dsid_t _dsMeterID, const int _zoneID);
+    virtual std::vector<int> getGroups(dsid_t _dsMeterID, const int _zoneID);
 
-    virtual std::vector<int> getGroupsOfDevice(const int _dsMeterID, const int _deviceID);
+    virtual std::vector<int> getGroupsOfDevice(dsid_t _dsMeterID, const int _deviceID);
 
-    virtual void addToGroup(const int _dsMeterID, const int _groupID, const int _deviceID);
-    virtual void removeFromGroup(const int _dsMeterID, const int _groupID, const int _deviceID);
+    virtual void addToGroup(dsid_t _dsMeterID, const int _groupID, const int _deviceID);
+    virtual void removeFromGroup(dsid_t _dsMeterID, const int _groupID, const int _deviceID);
 
     virtual int addUserGroup(const int _dsMeterID);
     virtual void removeUserGroup(const int _dsMeterID, const int _groupID);
 
-    virtual void removeInactiveDevices(const int _dsMeterID);
+    virtual void removeInactiveDevices(dsid_t _dsMeterID);
 
-    virtual dsid_t getDSIDOfDevice(const int _dsMeterID, const int _deviceID);
-    virtual dsid_t getDSIDOfDSMeter(const int _dsMeterID);
+    virtual dss_dsid_t getDSIDOfDevice(dsid_t, const int _deviceID);
 
     virtual int getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID);
 
-    virtual unsigned long getPowerConsumption(const int _dsMeterID);
-    virtual unsigned long getEnergyMeterValue(const int _dsMeterID);
+    virtual unsigned long getPowerConsumption(dsid_t _dsMeterID);
+    virtual unsigned long getEnergyMeterValue(dsid_t _dsMeterID);
     virtual void requestEnergyMeterValue();
     virtual void requestPowerConsumption();
     virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper);
@@ -155,8 +146,7 @@ namespace dss {
 
     //------------------------------------------------ Device
     virtual uint16_t deviceGetParameterValue(devid_t _id, uint8_t _dsMeterID, int _paramID);
-    virtual uint16_t deviceGetFunctionID(devid_t _id, uint8_t _dsMeterID);
-    virtual DeviceSpec_t deviceGetSpec(devid_t _id, uint8_t _dsMeterID);
+    virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID);
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock);
     virtual bool isLocked(boost::shared_ptr<const Device> _device);
 

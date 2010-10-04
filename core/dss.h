@@ -37,7 +37,7 @@ namespace dss {
   class DSS;
   class Subsystem;
   class WebServer;
-  class DS485Interface;
+  class BusInterface;
   class PropertySystem;
   class Metering;
   class FakeMeter;
@@ -70,7 +70,7 @@ namespace dss {
     std::vector<Subsystem*> m_Subsystems;
     time_t m_TimeStarted;
     boost::shared_ptr<WebServer> m_pWebServer;
-    boost::shared_ptr<DS485Interface> m_pDS485Interface;
+    boost::shared_ptr<BusInterface> m_pBusInterface;
     boost::shared_ptr<PropertySystem> m_pPropertySystem;
     boost::shared_ptr<Apartment> m_pApartment;
     boost::shared_ptr<DSSim> m_pSimulation;
@@ -123,7 +123,7 @@ namespace dss {
 
     aDSSState getState() const { return m_State; }
 
-    DS485Interface& getDS485Interface() { return *m_pDS485Interface; }
+    BusInterface& getBusInterface() { return *m_pBusInterface; }
     Apartment& getApartment() { return *m_pApartment; }
     DSSim& getSimulation() { return *m_pSimulation; }
     EventRunner& getEventRunner() { return *m_pEventRunner; }
