@@ -32,6 +32,7 @@ dssSSLService::dssSSLService() : dssService()
 {
   CRYPTO_setup_locks();
   soap_init(this);
+  accept_timeout = SOAP_ACCEPT_TIMEOUT;
 }
 
 dssSSLService::~dssSSLService()
