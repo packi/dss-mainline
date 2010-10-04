@@ -11,6 +11,7 @@
       <device dsid="4" busid="4" type="standard.simple"/>
       <device dsid="13" busid="13" type="standard.simple"/>
 <!--      <device dsid="6" busid="6" type="standard.simple" bell="true"/> -->
+
       <group id="1">
         <device busid="4" />
         <device busid="13" />
@@ -28,6 +29,7 @@
     <zone id="172">
       <device dsid="7" busid="7" type="standard.simple">
       </device>
+
 <!--
       <device dsid="2" busid="2" type="example.vlc_remote"> 
         <parameter name="port">4212</parameter>

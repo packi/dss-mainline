@@ -50,7 +50,20 @@ namespace dss {
   void WebServices::initialize() {
     Subsystem::initialize();
     log("initializing WebServices");
-    int soapServerSocket = m_Service.bind(NULL, 8081, 10);
+    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "port", 8081, true, false);
+    getDSS().getPropertySystem().setStringValue(
+       getConfigPropertyBasePath() + "sslcert", 
+         getDSS().getPropertySystem().getStringValue("/config/configdirectory")
+            + "dsscert.pem" , true, false);
+    std::string sslcert = getDSS().getPropertySystem().getStringValue(
+                                  getConfigPropertyBasePath() + "sslcert");
+
+    if (m_Service.ssl_server_context(SOAP_SSL_DEFAULT, sslcert.c_str(),
+          NULL, sslcert.c_str(), NULL, NULL, NULL, "dss")) {
+      throw std::runtime_error("Could not set ssl server context!");
+    }
+
+    int soapServerSocket = m_Service.bind(NULL, getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "port"), 10);
     if (soapServerSocket == SOAP_INVALID_SOCKET) {
       throw std::runtime_error("Could not bind to SOAP port");
     }
@@ -65,6 +78,20 @@ namespace dss {
       int socket = m_Service.accept();
       if(socket != SOAP_INVALID_SOCKET) {
         struct soap* req_copy = soap_copy(&m_Service);
+        if (!req_copy) {
+          soap_closesock(req_copy);
+          continue;
+        }
+
+        if (soap_ssl_accept(req_copy)) {
+          soap_print_fault(req_copy, stderr);
+          Logger::getInstance()->log("WebService::execute: SSL request failed!", lsError);
+          soap_destroy(req_copy);
+          soap_end(req_copy);
+          soap_free(req_copy);
+          continue;
+        }
+
         m_RequestsMutex.lock();
         m_PendingRequests.push_back(req_copy);
         m_RequestsMutex.unlock();

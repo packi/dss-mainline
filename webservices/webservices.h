@@ -23,7 +23,7 @@
 #ifndef WEBSERVICES_H_
 #define WEBSERVICES_H_
 
-#include "webservices/soapdssObject.h"
+#include "webservices/soapdssSSLObject.h"
 #include "core/thread.h"
 #include "core/datetools.h"
 #include "core/subsystem.h"
@@ -68,7 +68,7 @@ namespace dss {
 
   class WebServices : public ThreadedSubsystem {
   private:
-    dssService m_Service;
+    dssSSLService m_Service;
     int m_LastSessionID;
     WebServiceSessionByID m_SessionByID;
     boost::ptr_vector<WebServicesWorker> m_Workers;
@@ -89,6 +89,7 @@ namespace dss {
 
     virtual void initialize();
     virtual void execute();
+    virtual void initialize();
 
     struct soap* popPendingRequest();
   }; // WebServices

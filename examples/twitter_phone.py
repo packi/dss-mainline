@@ -31,7 +31,7 @@ import time
 from twitter.api import Twitter, TwitterError
 import datetime
 
-url = 'http://localhost:8080/dss.wsdl'
+url = 'https://localhost:8080/dss.wsdl'
 twitterEmail = 'your@email.com'
 twitterPassword = 'yourPassword'
 

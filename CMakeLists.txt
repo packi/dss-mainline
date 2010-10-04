@@ -139,6 +139,16 @@ else()
   MESSAGE (FATAL_ERROR "Need SpiderMonkey (libjs) built with JS_THREADSAFE")
 endif()
 
+include(${CMAKE_ROOT}/Modules/FindOpenSSL.cmake)
+if (OPENSSL_FOUND)
+  set(REQUIRED_LIBS ${REQUIRED_LIBS} ${OPENSSL_LIBRARIES})
+  include_directories(${OPENSSL_INCLUDE_DIR})
+else()
+  MESSAGE (FATAL_ERROR "Cannot build without OpenSSL. Please install
+                    OpenSSL")
+endif()
+add_definitions(-DJS_THREADSAFE)
+
 # check for gsoap headers and library
 find_package(GSOAP REQUIRED)
 include_directories(${GSOAP_INCLUDE_DIRS})
