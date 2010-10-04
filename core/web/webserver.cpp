@@ -89,20 +89,28 @@ namespace dss {
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "webroot", getDSS().getWebrootDirectory(), true, false);
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "ports", 8080, true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "files/apartment.xml", getDSS().getDataDirectory() + "apartment.xml", true, false);
+    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "sslcert", getDSS().getPropertySystem().getStringValue("/config/configdirectory") + "dsscert.pem" , true, false);
 
-    std::string configPorts = intToString(DSS::getInstance()->getPropertySystem().getIntValue(getConfigPropertyBasePath() + "ports"));
+    std::string configPorts = intToString(DSS::getInstance()->getPropertySystem().getIntValue(getConfigPropertyBasePath() + "ports")) + "s";
     log("Webserver: Listening on port(s) " +configPorts);
 
     std::string configAliases = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "webroot");
-
     log("Webserver: Configured aliases: " + configAliases);
 
-    loadPlugins();
+    std::string sslCert = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "sslcert");
+    if (!boost::filesystem::exists(sslCert)) {
+      log("Webserver: could not find SSL certificate file " + sslCert, lsFatal);
+      abort(); // TODO: replace with a nice shutdown procedure but it's better to crash at startup than crashing at runtime
+    }
 
+    log("Webserver: Configured SSL certificate: " + sslCert);
+
+    loadPlugins();
 
     const char *mgOptions[] = {
       "document_root", configAliases.c_str(),
       "listening_ports", configPorts.c_str(),
+      "ssl_certificate", sslCert.c_str(),
       NULL
     };
 
