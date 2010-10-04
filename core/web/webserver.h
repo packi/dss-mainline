@@ -42,6 +42,7 @@ namespace dss {
 
   class IDeviceInterface;
   class PropertyNode;
+  class WebServerPlugin;
   class RestfulRequestHandler;
   class RestfulAPI;
 
@@ -51,24 +52,35 @@ namespace dss {
   private:
     struct mg_context* m_mgContext;
     int m_LastSessionID;
+    boost::ptr_vector<WebServerPlugin> m_Plugins;
     __gnu_cxx::hash_map<const std::string, RestfulRequestHandler*> m_Handlers;
     boost::shared_ptr<RestfulAPI> m_pAPI;
     boost::shared_ptr<SessionManager> m_SessionManager;
+
   private:
     void setupAPI();
+    void loadPlugin(PropertyNode& _node);
+    void loadPlugins();
     void instantiateHandlers();
     void publishJSLogfiles();
     boost::ptr_map<std::string, std::string> parseCookies(const char *cookies);
     std::string generateCookieString(boost::ptr_map<std::string, std::string> cookies);
   protected:
-    static mg_error_t httpBrowseProperties(struct mg_connection* _connection,
+
+    void pluginCalled(struct mg_connection* _connection,
+                      const struct mg_request_info* _info,
+                      WebServerPlugin& plugin,
+                      const std::string& _uri);
+
+    static void *httpBrowseProperties(struct mg_connection* _connection,
                                    const struct mg_request_info* _info);
-    static mg_error_t jsonHandler(struct mg_connection* _connection,
+    static void *jsonHandler(struct mg_connection* _connection,
                            const struct mg_request_info* _info);
-    static mg_error_t downloadHandler(struct mg_connection* _connection,
+    static void *downloadHandler(struct mg_connection* _connection,
                                const struct mg_request_info* _info);
-    static mg_error_t httpRequestCallback(struct mg_connection* _connection,
-                                          const struct mg_request_info* _info);
+    static void *httpRequestCallback(enum mg_event event, 
+                                     struct mg_connection* _connection,
+                                     const struct mg_request_info* _info);
 
     static void emitHTTPHeader(int _code, struct mg_connection* _connection, const std::string& _contentType = "text/html", const std::string& _setCookie = "");
 

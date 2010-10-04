@@ -39,6 +39,7 @@
 #include "core/web/restful.h"
 #include "core/web/restfulapiwriter.h"
 #include "core/web/webrequests.h"
+#include "core/web/webserverplugin.h"
 
 #include "core/web/handler/debugrequesthandler.h"
 #include "core/web/handler/systemrequesthandler.h"
@@ -54,7 +55,7 @@
 #include "core/web/handler/zonerequesthandler.h"
 #include "core/web/handler/subscriptionrequesthandler.h"
 
-#include "core/businterface.h"
+#include "core/DS485Interface.h"
 
 #include "webserverapi.h"
 #include "json.h"
@@ -62,6 +63,7 @@
 namespace fs = boost::filesystem;
 
 namespace dss {
+
   //============================================= WebServer
 
   WebServer::WebServer(DSS* _pDSS)
@@ -87,6 +89,30 @@ namespace dss {
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "webroot", getDSS().getWebrootDirectory(), true, false);
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "ports", 8080, true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "files/apartment.xml", getDSS().getDataDirectory() + "apartment.xml", true, false);
+
+    std::string configPorts = intToString(DSS::getInstance()->getPropertySystem().getIntValue(getConfigPropertyBasePath() + "ports"));
+    log("Webserver: Listening on port(s) " +configPorts);
+
+    std::string configAliases = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "webroot");
+
+    log("Webserver: Configured aliases: " + configAliases);
+
+    loadPlugins();
+
+
+    const char *mgOptions[] = {
+      "document_root", configAliases.c_str(),
+      "listening_ports", configPorts.c_str(),
+      NULL
+    };
+
+    m_mgContext = mg_start(&httpRequestCallback, mgOptions);
+    if (m_mgContext == NULL) {
+      log("Webserver: failed to start", lsFatal);
+      abort(); // TODO: replace with a nice shutdown procedure but it's better to crash at startup than crashing at runtime
+    }
+    log("Webserver started", lsInfo);
+
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "sessionTimeoutMinutes", WEB_SESSION_TIMEOUT_MINUTES, true, false);
     m_SessionManager = boost::shared_ptr<SessionManager>(new SessionManager(getDSS().getEventQueue(), getDSS().getEventInterpreter(), getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "sessionTimeoutMinutes")*60));
 
@@ -118,6 +144,40 @@ namespace dss {
     } catch(std::exception& e) {
       throw std::runtime_error("Directory for js logfiles does not exist: '" + logDir + "'");
     }
+  } // publishJSLogfiles
+
+  void WebServer::loadPlugins() {
+    PropertyNodePtr pluginsNode = getDSS().getPropertySystem().getProperty(getConfigPropertyBasePath() + "plugins");
+    if(pluginsNode != NULL) {
+      log("Found plugins node, trying to loading plugins", lsInfo);
+      pluginsNode->foreachChildOf(*this, &WebServer::loadPlugin);
+    }
+  } // loadPlugins
+
+  void WebServer::loadPlugin(PropertyNode& _node) {
+    PropertyNodePtr pFileNode = _node.getProperty("file");
+    PropertyNodePtr pURINode = _node.getProperty("uri");
+
+    if(pFileNode == NULL) {
+      log("loadPlugin: Missing subnode name 'file' on node " + _node.getDisplayName(), lsError);
+      return;
+    }
+    if(pURINode == NULL) {
+      log("loadPlugin: Missing subnode 'uri on node " + _node.getDisplayName(), lsError);
+    }
+    WebServerPlugin* plugin = new WebServerPlugin(pURINode->getStringValue(), pFileNode->getStringValue());
+    try {
+      plugin->load();
+    } catch(std::runtime_error& e) {
+      delete plugin;
+      plugin = NULL;
+      log(std::string("Caught exception while loading: ") + e.what(), lsError);
+      return;
+    }
+
+    log("Registering " + pFileNode->getStringValue() + " for URI '" + pURINode->getStringValue() + "'");
+    
+    m_Plugins.push_back(plugin);
   } // publishJSLogfiles
 
   void WebServer::setupAPI() {
@@ -212,13 +272,29 @@ namespace dss {
       new StructureRequestHandler(
         getDSS().getApartment(),
         getDSS().getModelMaintenance(),
-        *getDSS().getBusInterface().getStructureModifyingBusInterface()
+        *getDSS().getDS485Interface().getStructureModifyingBusInterface()
       );
     m_Handlers[kHandlerSim] = new SimRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerDebug] = new DebugRequestHandler(getDSS());
     m_Handlers[kHandlerMetering] = new MeteringRequestHandler(getDSS().getApartment(), getDSS().getMetering());
     m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());
   } // instantiateHandlers
+
+  void WebServer::pluginCalled(struct mg_connection* _connection,
+                               const struct mg_request_info* _info,
+                               WebServerPlugin& plugin,
+                               const std::string& _uri) {
+    HashMapConstStringString paramMap = parseParameter(_info->query_string);
+
+    std::string result;
+    if(plugin.handleRequest(_uri, paramMap, getDSS(), result)) {
+      emitHTTPHeader(200, _connection, "text/plain");
+      mg_write(_connection, result.c_str(), result.length());
+    } else {
+      emitHTTPHeader(500, _connection, "text/plain");
+      mg_printf(_connection, "error");
+    }
+  } // pluginCalled
 
   boost::ptr_map<std::string, std::string> WebServer::parseCookies(const char *_cookies) {
       boost::ptr_map<std::string, std::string> result;
@@ -291,7 +367,7 @@ namespace dss {
     return result;
   }
 
-  mg_error_t WebServer::jsonHandler(struct mg_connection* _connection,
+  void *WebServer::jsonHandler(struct mg_connection* _connection,
                               const struct mg_request_info* _info) {
     const std::string urlid = "/json/";
     const char  *cookie;
@@ -356,10 +432,10 @@ namespace dss {
       self.log("Unknown function '" + method + "'", lsError);
     }
     mg_write(_connection, result.c_str(), result.length());
-    return MG_SUCCESS;
+    return _connection;
   } // jsonHandler
 
-  mg_error_t WebServer::downloadHandler(struct mg_connection* _connection,
+  void *WebServer::downloadHandler(struct mg_connection* _connection,
                                   const struct mg_request_info* _info) {
     const std::string kURLID = "/download/";
     std::string uri = _info->uri;
@@ -383,16 +459,18 @@ namespace dss {
       }
     }
     self.log("Using local file: " + fileName);
-    struct mgstat st;
-    if(mg_stat(fileName.c_str(), &st) != 0) {
-      self.log("Not found");
-      memset(&st, '\0', sizeof(st));
+    if (boost::filesystem::exists(fileName)) {
+        FILE *fp = fopen(fileName.c_str(), "r");
+        if (fp != NULL)
+        {
+            mg_send_file(_connection, fp, fs::file_size(fileName));
+            fclose(fp);
+        }
     }
-    mg_send_file(_connection, fileName.c_str(), &st);
-    return MG_SUCCESS;
+    return _connection;
   } // downloadHandler
 
-  mg_error_t WebServer::httpBrowseProperties(struct mg_connection* _connection,
+  void *WebServer::httpBrowseProperties(struct mg_connection* _connection,
                                        const struct mg_request_info* _info) {
     emitHTTPHeader(200, _connection);
 
@@ -443,12 +521,15 @@ namespace dss {
     stream << "</ul></body></html>";
     std::string tmp = stream.str();
     mg_write(_connection, tmp.c_str(), tmp.length());
-    return MG_SUCCESS;
+    return _connection;
   } // httpBrowseProperties
 
-  mg_error_t WebServer::httpRequestCallback(struct mg_connection* _connection,
-                                      const struct mg_request_info* _info) {
-
+  void *WebServer::httpRequestCallback(enum mg_event event,
+                                       struct mg_connection* _connection,
+                                       const struct mg_request_info* _info) {
+    if (event != MG_NEW_REQUEST) {
+      return NULL;
+    }
     std::string uri = _info->uri;
 
     if (uri.find("/browse/") == 0) {
@@ -457,8 +538,19 @@ namespace dss {
       return jsonHandler(_connection, _info);
     } else if (uri.find("/download/") == 0) {
       return downloadHandler(_connection, _info);
+    } else {
+      WebServer& self = DSS::getInstance()->getWebServer();
+      if (self.m_Plugins.size() > 0) {
+        for (size_t i = 0; i < self.m_Plugins.size(); i++) {
+          if (uri.find(self.m_Plugins.at(i).getURI()) == 0) {
+            self.log("Plugin: Processing call to " + uri);
+            self.pluginCalled(_connection, _info, self.m_Plugins.at(i), uri);
+            return _connection;
+          }
+        } // for
+      }
     }
 
-    return MG_NOT_FOUND;
+    return NULL;
   }
 }
