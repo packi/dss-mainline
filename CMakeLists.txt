@@ -42,7 +42,7 @@ add_definitions(-DHAVE_BUILD_INFO_H)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 
-add_definitions(-DXP_UNIX -DUSE_LIBXML -DNO_CGI)
+add_definitions(-DXP_UNIX -DUSE_LIBXML)
 add_definitions(-Wall)
 include_directories(external)
 include_directories(${DSS_SOURCE_DIR})
