@@ -707,6 +707,7 @@ static const char *next_option(const char *list, struct vec *val,
   return list;
 }
 
+
 #if !defined(NO_CGI)
 static int match_extension(const char *path, const char *ext_list) {
   struct vec ext_vec;
@@ -2441,6 +2442,10 @@ static void send_file_data(struct mg_connection *conn, FILE *fp, int64_t len) {
     conn->num_bytes_sent += num_written;
     len -= num_written;
   }
+}
+
+void mg_send_file(struct mg_connection *conn, FILE *fp, int64_t len) {
+  send_file_data(conn, fp, len);    
 }
 
 static int parse_range_header(const char *header, int64_t *a, int64_t *b) {

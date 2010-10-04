@@ -21,6 +21,9 @@
 #ifndef MONGOOSE_HEADER_INCLUDED
 #define  MONGOOSE_HEADER_INCLUDED
 
+#include <stdio.h>
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -209,6 +212,8 @@ const char *mg_version(void);
 //   char buf[33];
 //   mg_md5(buf, "aa", "bb", NULL);
 void mg_md5(char *buf, ...);
+
+void mg_send_file(struct mg_connection *conn, FILE *fp, int64_t len);
 
 
 #ifdef __cplusplus
