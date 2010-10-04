@@ -373,6 +373,8 @@ const char* JSLogDirectory = "data/logs/";
   }
 
   void StopSubsystem(Subsystem* _pSubsystem) {
+    Logger::getInstance()->log("Shutting down subsystem: " +
+                               _pSubsystem->getName(), lsDebug);
     _pSubsystem->shutdown();
   }
 
