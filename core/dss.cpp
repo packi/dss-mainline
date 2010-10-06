@@ -495,6 +495,10 @@ const char* JSLogDirectory = "data/logs/";
 
 #ifndef WIN32
   void DSS::handleSignal(int _signum) {
+    static bool terminating = false;
+    if(terminating) {
+      return;
+    }
     switch (_signum) {
       case SIGUSR1: {
         Logger::getInstance()->reopenLogTarget();
@@ -502,15 +506,18 @@ const char* JSLogDirectory = "data/logs/";
       }
       case SIGTERM:
       case SIGINT:
+        terminating = true;
         if (DSS::hasInstance()) {
             DSS::getInstance()->initiateShutdown();
         }
       break;
       case SIGSEGV:
+        terminating = true;
         Logger::getInstance()->log("Cought SIGSEGV", lsFatal);
         Backtrace::logBacktrace();
         exit(EXIT_FAILURE);
       case SIGABRT:
+        terminating = true;
         Logger::getInstance()->log("Cought SIGABRT", lsFatal);
         Backtrace::logBacktrace();
         exit(EXIT_FAILURE);
