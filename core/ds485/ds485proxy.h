@@ -78,13 +78,34 @@ namespace dss {
     DsmApiHandle_t m_dsmApiController;
     ModelMaintenance* m_pModelMaintenance;
     DSSim* m_pDSSim;
+
     DsmApiHandle_t m_dsmApiHandle;
     bool m_dsmApiReady;
+    std::string m_connection;
 
     bool m_InitializeDS485Controller;
 
     void checkResultCode(const int _resultCode);
     void busReady();
+    
+    void setConnection(const std::string& _connection) { m_connection = _connection; }
+    const std::string& getConnection() const { return m_connection; }
+    
+    static void busChangeCallback(dsid_t *_id, int flag/*, void* _userData*/);
+    void handleBusChange(dsid_t *_id, int _flag);
+
+    static void busStateCallback(bus_state_t _state/*, void* _userData*/);
+    void handleBusState(bus_state_t _state);
+    
+    static void eventDeviceAccessibilityOffCallback(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
+                                                    uint32_t _deviceDSID, void* _userData);
+    void eventDeviceAccessibilityOff(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
+                                     uint32_t _deviceDSID);
+    static void eventDeviceAccessibilityOnCallback(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
+                                                   uint32_t _deviceDSID, void* _userData);
+    void eventDeviceAccessibilityOn(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
+                                    uint32_t _deviceDSID);
+
   protected:
     virtual void doStart();
   public:

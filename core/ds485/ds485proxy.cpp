@@ -48,6 +48,7 @@
 
 #include <sstream>
 
+
 namespace dss {
 
   const char* FunctionIDToString(const int _functionID); // internal forward declaration
@@ -57,14 +58,19 @@ namespace dss {
     m_pBusInterfaceHandler(NULL),
     m_pModelMaintenance(_pModelMaintenance),
     m_pDSSim(_pDSSim),
+    
     m_dsmApiHandle(NULL),
+    m_dsmApiReady(false),
+    m_connection("tcp://localhost:8442"),
     m_InitializeDS485Controller(true)
   {
     assert(_pModelMaintenance != NULL);
     if(_pDSS != NULL) {
-
+      
 #if 0
       // TODO: libdsm
+      
+      // read m_connection from config
 
       _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "rs485devicename")
             ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, std::string>(m_DS485Controller, &DS485Controller::getRS485DeviceName, &DS485Controller::setRS485DeviceName));
@@ -507,23 +513,28 @@ namespace dss {
     }
 
     // TODO: libdsm
-    // read from config
-    std::string connection = "tcp:192.168.2.124:8442"; // tcp:localhost:8442
-
-    int result = DsmApiOpen(m_dsmApiHandle, connection.c_str(), 0);
+    m_connection = "tcp://192.168.2.124:8442";
+      
+    int result = DsmApiOpen(m_dsmApiHandle, m_connection.c_str(), 0);
     if (result < 0) {
       log("Couldn't open dsmapi connection");
       return;
     }
-    log("Successfully connected to " + connection);
+    log("Successfully connected to " + m_connection);
     
+   
+    // register callbacks
+    DsmApiRegisterBusStateCallback(m_dsmApiHandle, DS485Proxy::busStateCallback);
+    DsmApiRegisterBusChangeCallback(m_dsmApiHandle, DS485Proxy::busChangeCallback);
+
+    DsmApiRegisterCallback(m_dsmApiHandle, EVENT_DEVICE_ACCESSIBILITY, EVENT_DEVICE_ACCESSIBILITY_ON, 
+                           (void*)DS485Proxy::eventDeviceAccessibilityOnCallback, this);
+    DsmApiRegisterCallback(m_dsmApiHandle, EVENT_DEVICE_ACCESSIBILITY, EVENT_DEVICE_ACCESSIBILITY_OFF, 
+                           (void*)DS485Proxy::eventDeviceAccessibilityOffCallback, this);
     m_dsmApiReady = true;
   } // initialize
 
-  void DS485Proxy::doStart() {
-    
-    log("***********************");
-    
+  void DS485Proxy::doStart() {    
     busReady();
   } // doStart
 
@@ -539,6 +550,70 @@ namespace dss {
 
       m_dsmApiHandle = NULL;
     }
-    // m_DS485Controller.terminate();
   }
+
+  void DS485Proxy::busStateCallback(bus_state_t state/*, void* userData*/) {
+    //static_cast<DS485Proxy*>(userData)->handleBusState(state);
+    static_cast<DS485Proxy*>(DSS::getInstance()->getBusInterface().getStructureQueryBusInterface())->handleBusState(state);
+  }
+
+  void DS485Proxy::handleBusState(bus_state_t state) {
+    switch (state) {
+      case DS485_ISOLATED:
+        log("STATE: ISOLATED");
+        break;
+      case DS485_CONNECTED:
+        log("STATE: CONNECTED");
+        break;
+      case DS485_ACTIVE:
+        log("STATE: ACTIVE");
+        break;
+      case DS485_JOIN:
+        log("STATE: JOIN");
+        break;
+      default:
+        log("STATE: *UNKNOWN*");
+        break;
+    }
+  }
+
+  void DS485Proxy::busChangeCallback(dsid_t *id, int flag/*, void* userData*/) {
+    //static_cast<DS485Proxy*>(userData)->handleBusChange(id, flag);
+    static_cast<DS485Proxy*>(DSS::getInstance()->getBusInterface().getStructureQueryBusInterface())->handleBusChange(id, flag);
+  }
+
+  void DS485Proxy::handleBusChange(dsid_t *id, int flag) {
+    std::string s = dsid_helper::toString(*id);
+    if (flag) {
+      s += "left";
+    }	else	{
+      s += "joined";
+    }
+    s += " bus";
+    
+    log(s);
+  }
+
+  void DS485Proxy::eventDeviceAccessibilityOffCallback(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
+                                                       uint32_t _deviceDSID, void* _userData) {
+    
+    static_cast<DS485Proxy*>(_userData)->eventDeviceAccessibilityOff(_errorCode, _deviceID, _zoneID, _deviceDSID);
+  }
+
+  void DS485Proxy::eventDeviceAccessibilityOff(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
+                                               uint32_t _deviceDSID) {
+    printf("Device 0x%08x (DeviceId: %d in Zone: %d) became inactive\n", _deviceDSID, _deviceID, _zoneID);
+  }
+
+  void DS485Proxy::eventDeviceAccessibilityOnCallback(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
+                                                      uint32_t _deviceDSID, void* _userData) {
+    static_cast<DS485Proxy*>(_userData)->eventDeviceAccessibilityOn(_errorCode, _deviceID, _zoneID, _deviceDSID);
+  }
+  
+  void DS485Proxy::eventDeviceAccessibilityOn(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
+                                              uint32_t _deviceDSID) {
+    printf("Device 0x%08x (DeviceId: %d in Zone: %d) became active\n", _deviceDSID, _deviceID, _zoneID);
+  }
+
+
 } // namespace dss
