@@ -524,8 +524,8 @@ namespace dss {
     
    
     // register callbacks
-    DsmApiRegisterBusStateCallback(m_dsmApiHandle, DS485Proxy::busStateCallback);
-    DsmApiRegisterBusChangeCallback(m_dsmApiHandle, DS485Proxy::busChangeCallback);
+    DsmApiRegisterBusStateCallback(m_dsmApiHandle, DS485Proxy::busStateCallback, this);
+    DsmApiRegisterBusChangeCallback(m_dsmApiHandle, DS485Proxy::busChangeCallback, this);
 
     DsmApiRegisterCallback(m_dsmApiHandle, EVENT_DEVICE_ACCESSIBILITY, EVENT_DEVICE_ACCESSIBILITY_ON, 
                            (void*)DS485Proxy::eventDeviceAccessibilityOnCallback, this);
@@ -552,13 +552,12 @@ namespace dss {
     }
   }
 
-  void DS485Proxy::busStateCallback(bus_state_t state/*, void* userData*/) {
-    //static_cast<DS485Proxy*>(userData)->handleBusState(state);
-    static_cast<DS485Proxy*>(DSS::getInstance()->getBusInterface().getStructureQueryBusInterface())->handleBusState(state);
+  void DS485Proxy::busStateCallback(void* _userData, bus_state_t _state) {
+    static_cast<DS485Proxy*>(_userData)->handleBusState(_state);
   }
 
-  void DS485Proxy::handleBusState(bus_state_t state) {
-    switch (state) {
+  void DS485Proxy::handleBusState(bus_state_t _state) {
+    switch (_state) {
       case DS485_ISOLATED:
         log("STATE: ISOLATED");
         break;
@@ -577,14 +576,12 @@ namespace dss {
     }
   }
 
-  void DS485Proxy::busChangeCallback(dsid_t *id, int flag/*, void* userData*/) {
-    //static_cast<DS485Proxy*>(userData)->handleBusChange(id, flag);
-    static_cast<DS485Proxy*>(DSS::getInstance()->getBusInterface().getStructureQueryBusInterface())->handleBusChange(id, flag);
+  void DS485Proxy::busChangeCallback(void* _userData, dsid_t *_id, int _flag) {
+    static_cast<DS485Proxy*>(_userData)->handleBusChange(_id, _flag);
   }
-
-  void DS485Proxy::handleBusChange(dsid_t *id, int flag) {
-    std::string s = dsid_helper::toString(*id);
-    if (flag) {
+  void DS485Proxy::handleBusChange(dsid_t *_id, int _flag) {
+    std::string s = dsid_helper::toString(*_id);
+    if (_flag) {
       s += "left";
     }	else	{
       s += "joined";

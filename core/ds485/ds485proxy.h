@@ -91,10 +91,10 @@ namespace dss {
     void setConnection(const std::string& _connection) { m_connection = _connection; }
     const std::string& getConnection() const { return m_connection; }
     
-    static void busChangeCallback(dsid_t *_id, int flag/*, void* _userData*/);
+    static void busChangeCallback(void* _userData, dsid_t *_id, int _flag);
     void handleBusChange(dsid_t *_id, int _flag);
 
-    static void busStateCallback(bus_state_t _state/*, void* _userData*/);
+    static void busStateCallback(void* _userData, bus_state_t _state);
     void handleBusState(bus_state_t _state);
     
     static void eventDeviceAccessibilityOffCallback(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
