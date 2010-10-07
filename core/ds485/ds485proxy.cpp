@@ -409,10 +409,10 @@ namespace dss {
   } // removeZone
 
   dss_dsid_t DS485Proxy::getDSIDOfDevice(dsid_t _dsMeterID, const int _deviceID) {
-
     dsid_t dsid;
-    int ret = DeviceInfo_by_index_sync(m_dsmApiHandle, _dsMeterID, 0 /* all devices */, _deviceID,
-                                       NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, dsid.id);
+    int ret = DeviceInfo_by_device_id_sync(m_dsmApiHandle, _dsMeterID, _deviceID,
+                                           NULL, NULL, NULL, NULL,
+                                           NULL, NULL, NULL, NULL, NULL, NULL, NULL, dsid.id);
     checkResultCode(ret);
 
     dss_dsid_t dss_dsid;
@@ -525,10 +525,12 @@ namespace dss {
     DsmApiRegisterBusStateCallback(m_dsmApiHandle, DS485Proxy::busStateCallback, this);
     DsmApiRegisterBusChangeCallback(m_dsmApiHandle, DS485Proxy::busChangeCallback, this);
 
+    EventDeviceAccessibility_off_callback_t evDevAccessOn = DS485Proxy::eventDeviceAccessibilityOnCallback;
     DsmApiRegisterCallback(m_dsmApiHandle, EVENT_DEVICE_ACCESSIBILITY, EVENT_DEVICE_ACCESSIBILITY_ON, 
-                           (void*)DS485Proxy::eventDeviceAccessibilityOnCallback, this);
+                           (void*)evDevAccessOn, this);
+    EventDeviceAccessibility_off_callback_t evDevAccessOff = DS485Proxy::eventDeviceAccessibilityOffCallback;
     DsmApiRegisterCallback(m_dsmApiHandle, EVENT_DEVICE_ACCESSIBILITY, EVENT_DEVICE_ACCESSIBILITY_OFF, 
-                           (void*)DS485Proxy::eventDeviceAccessibilityOffCallback, this);
+                           (void*)evDevAccessOff, this);
     m_dsmApiReady = true;
   } // initialize
 
@@ -589,8 +591,9 @@ namespace dss {
     log(s);
   }
 
-  void DS485Proxy::eventDeviceAccessibilityOffCallback(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
-                                                       uint32_t _deviceDSID, void* _userData) {
+  void DS485Proxy::eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData,
+                                                       uint16_t _deviceID, uint16_t _zoneID,
+                                                       uint32_t _deviceDSID) {
     
     static_cast<DS485Proxy*>(_userData)->eventDeviceAccessibilityOff(_errorCode, _deviceID, _zoneID, _deviceDSID);
   }
@@ -600,8 +603,8 @@ namespace dss {
     printf("Device 0x%08x (DeviceId: %d in Zone: %d) became inactive\n", _deviceDSID, _deviceID, _zoneID);
   }
 
-  void DS485Proxy::eventDeviceAccessibilityOnCallback(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
-                                                      uint32_t _deviceDSID, void* _userData) {
+  void DS485Proxy::eventDeviceAccessibilityOnCallback(uint8_t _errorCode, void* _userData, uint16_t _deviceID, uint16_t _zoneID,
+                                                      uint32_t _deviceDSID) {
     static_cast<DS485Proxy*>(_userData)->eventDeviceAccessibilityOn(_errorCode, _deviceID, _zoneID, _deviceDSID);
   }
   
@@ -614,7 +617,8 @@ namespace dss {
     pEvent->addParameter(functionID);
     raiseModelEvent(pEvent);
 #endif
-
+    
+    // Device 0x0000ffff (DeviceId: 3792 in Zone: 66) became active
     printf("Device 0x%08x (DeviceId: %d in Zone: %d) became active\n", _deviceDSID, _deviceID, _zoneID);
   }
 

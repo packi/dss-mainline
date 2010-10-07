@@ -65,7 +65,6 @@ namespace dss {
   class DSSim;
 
   class DS485Proxy : public    Subsystem,
-// TODO:libdsm
                      public    BusInterface,
                      public    DeviceBusInterface,
                      public    StructureQueryBusInterface,
@@ -97,12 +96,14 @@ namespace dss {
     static void busStateCallback(void* _userData, bus_state_t _state);
     void handleBusState(bus_state_t _state);
     
-    static void eventDeviceAccessibilityOffCallback(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
-                                                    uint32_t _deviceDSID, void* _userData);
+    static void eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData,
+                                                    uint16_t _deviceID, uint16_t _zoneID, 
+                                                    uint32_t _deviceDSID );
     void eventDeviceAccessibilityOff(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
                                      uint32_t _deviceDSID);
-    static void eventDeviceAccessibilityOnCallback(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
-                                                   uint32_t _deviceDSID, void* _userData);
+    static void eventDeviceAccessibilityOnCallback(uint8_t _errorCode, void* _userData, 
+                                                   uint16_t _deviceID, uint16_t _zoneID,
+                                                   uint32_t _deviceDSID);
     void eventDeviceAccessibilityOn(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
                                     uint32_t _deviceDSID);
 
