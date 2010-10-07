@@ -145,23 +145,14 @@ namespace dss {
 
 
   void ModelMaintenance::discoverDS485Devices() {
-    // TODO: libdsm
-#if 0
-    if(m_pFrameSenderInterface != NULL) {
-      // temporary mark all dsMeters as absent
-      foreach(boost::shared_ptr<DSMeter> pDSMeter, m_pApartment->getDSMeters()) {
-        pDSMeter->setIsPresent(false);
-      }
-
-      // Request the dsid of all dsMeters
-      DS485CommandFrame requestFrame;
-      requestFrame.getHeader().setBroadcast(true);
-      requestFrame.getHeader().setDestination(0);
-      requestFrame.setCommand(CommandRequest);
-      requestFrame.getPayload().add<uint8_t>(FunctionDSMeterGetDSID);
-      m_pFrameSenderInterface->sendFrame(requestFrame);
+    std::vector<DSMeterSpec_t> meters = m_pStructureQueryBusInterface->getDSMeters();
+    std::vector<DSMeterSpec_t>::iterator it = meters.begin();
+    for (; it != meters.end(); ++it) {
+      dss_dsid_t dsmDSID;
+      dsid_helper::toDssDsid(it->get<0>(), dsmDSID);
+      ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDS485DeviceDiscovered, dsmDSID);
+      addModelEvent(pEvent);
     }
-#endif
   } // discoverDS485Devices
 
   void ModelMaintenance::writeConfiguration() {
