@@ -42,6 +42,10 @@
 #error Could not find spidermonkey
 #endif
 
+#ifndef JS_THREADSAFE
+#error Need libjs with JS_THREADSAFE
+#endif
+
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -256,9 +260,7 @@ namespace dss {
       m_NeedsEndRequest(true)
     {
       assert(_pContext != NULL);
-#ifdef JS_THREADSAFE
       JS_BeginRequest(m_pContext);
-#endif
     }
 
     JSRequest(JSContext* _pContext)
@@ -266,23 +268,17 @@ namespace dss {
       m_NeedsEndRequest(true)
     {
       assert(_pContext != NULL);
-#ifdef JS_THREADSAFE
       JS_BeginRequest(_pContext);
-#endif
     }
 
     ~JSRequest() {
       if(m_NeedsEndRequest) {
-#ifdef JS_THREADSAFE
         JS_EndRequest(m_pContext);
-#endif
       }
     }
 
     void endRequest() {
-#ifdef JS_THREADSAFE
       JS_EndRequest(m_pContext);
-#endif
       m_NeedsEndRequest = false;
     }
   private:

@@ -133,7 +133,9 @@ set(CMAKE_REQUIRED_LIBRARIES ${SPIDERMONKEY_LIBRARIES})
 set(CMAKE_REQUIRED_LINK_DIR ${SPIDERMONKEY_LIBRARY_DIRS})
 GGL_CHECK_FUNCTION_EXISTS(JS_ClearContextThread HAVE_THREADSAFE_JS)
 if(HAVE_THREADSAFE_JS)
-	add_definitions(-DJS_THREADSAFE)
+  add_definitions(-DJS_THREADSAFE)
+else()
+  MESSAGE (FATAL_ERROR "Need SpiderMonkey (libjs) built with JS_THREADSAFE")
 endif()
 
 # check for gsoap headers and library
