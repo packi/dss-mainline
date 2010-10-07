@@ -162,11 +162,8 @@ namespace dss {
     virtual void requestPowerConsumption();
     virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper);
 
-    //------------------------------------------------ UDI
-    virtual uint8_t dSLinkSend(const int _dsMeterID, devid_t _devAdr, uint8_t _value, uint8_t _flags);
-
     //------------------------------------------------ Device
-    virtual uint16_t deviceGetParameterValue(devid_t _id, uint8_t _dsMeterID, int _paramID);
+    virtual uint16_t deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterID, int _paramID);
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID);
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock);
     virtual bool isLocked(boost::shared_ptr<const Device> _device);

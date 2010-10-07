@@ -111,8 +111,6 @@ namespace dss {
     boost::shared_ptr<DSMeter> getDSMeter(const std::string& _modName);
     /** Returns a DSMeter by DSID  */
     boost::shared_ptr<DSMeter> getDSMeterByDSID(const dss_dsid_t _dsid);
-    /** Returns a DSMeter by bus-id */
-    boost::shared_ptr<DSMeter> getDSMeterByBusID(const int _busID);
     /** Returns a vector of all dsMeters */
     std::vector<boost::shared_ptr<DSMeter> > getDSMeters();
 

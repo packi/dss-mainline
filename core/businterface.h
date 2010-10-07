@@ -44,11 +44,8 @@ namespace dss {
 
   class DeviceBusInterface {
   public:
-    //------------------------------------------------ UDI
-    virtual uint8_t dSLinkSend(const int _dsMeterID, devid_t _devAdr, uint8_t _value, uint8_t _flags) = 0;
-
     //------------------------------------------------ Device manipulation
-    virtual uint16_t deviceGetParameterValue(devid_t _id, uint8_t _dsMeterID, int _paramID) = 0;
+    virtual uint16_t deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterID, int _paramID) = 0;
 
     virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) = 0;
     virtual int getSensorValue(const Device& _device, const int _sensorID) = 0;

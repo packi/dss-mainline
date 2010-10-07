@@ -55,13 +55,13 @@ namespace dss {
     DeviceVector m_Devices;
     std::vector<boost::shared_ptr<const DSMeter> > m_DSMeters;
     std::vector<boost::shared_ptr<Group> > m_Groups;
-    int m_FirstZoneOnDSMeter;
+    dss_dsid_t m_FirstZoneOnDSMeter;
     Apartment* m_pApartment;
     PropertyNodePtr m_pPropertyNode;
   public:
     Zone(const int _id, Apartment* _pApartment)
     : m_ZoneID(_id),
-      m_FirstZoneOnDSMeter(-1),
+      m_FirstZoneOnDSMeter(NullDSID),
       m_pApartment(_pApartment)
     {}
     virtual ~Zone();
@@ -101,8 +101,8 @@ namespace dss {
       * zone on.
       * @return The dsMeter id, or -1
       */
-    int getFirstZoneOnDSMeter() { return m_FirstZoneOnDSMeter; }
-    void setFirstZoneOnDSMeter(const int _value) { m_FirstZoneOnDSMeter = _value; }
+    dss_dsid_t getFirstZoneOnDSMeter() { return m_FirstZoneOnDSMeter; }
+    void setFirstZoneOnDSMeter(const dss_dsid_t& _value) { m_FirstZoneOnDSMeter = _value; }
 
     bool registeredOnDSMeter(boost::shared_ptr<const DSMeter> _dsMeter) const;
     bool isRegisteredOnAnyMeter() const;

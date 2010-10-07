@@ -125,7 +125,7 @@ namespace dss {
     AssertLocked lock(this);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
       if((dev->getShortAddress() == _deviceID) &&
-          (_dsMeter->getBusID() == dev->getDSMeterID())) {
+          (_dsMeter->getDSID() == dev->getDSMeterDSID())) {
         return dev;
       }
     }
@@ -187,16 +187,6 @@ namespace dss {
     }
     throw ItemNotFoundException(_modName);
   } // getDSMeter(name)
-
-  boost::shared_ptr<DSMeter> Apartment::getDSMeterByBusID(const int _busId) {
-    AssertLocked lock(this);
-    foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
-      if(dsMeter->getBusID() == _busId) {
-        return dsMeter;
-      }
-    }
-    throw ItemNotFoundException(intToString(_busId));
-  } // getDSMeterByBusID
 
   boost::shared_ptr<DSMeter> Apartment::getDSMeterByDSID(const dss_dsid_t _dsid) {
     AssertLocked lock(this);

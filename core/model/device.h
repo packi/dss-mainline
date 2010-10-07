@@ -157,8 +157,6 @@ namespace dss {
     void setShortAddress(const devid_t _shortAddress);
     /** Returns the DSID of the device */
     dss_dsid_t getDSID() const;
-    /** Returns the id of the dsMeter the device is connected to */
-    int getDSMeterID() const;
     /** Returns the DSID of the dsMeter the device is connected to */
     dss_dsid_t getDSMeterDSID() const;
     
@@ -181,9 +179,6 @@ namespace dss {
 
     virtual unsigned long getPowerConsumption();
 
-    /** Sends a byte to the device using dsLink. If \a _writeOnly is \c true,
-     * the result of the function is not defined. */
-    uint8_t dsLinkSend(uint8_t _value, bool _lastByte, bool _writeOnly);
     int getSensorValue(const int _sensorID);
 
     const PropertyNodePtr& getPropertyNode() const { return m_pPropertyNode; }

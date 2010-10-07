@@ -154,7 +154,6 @@ namespace dss {
           circuits->addElement("", circuit);
           circuit->addProperty("name", dsMeter->getName());
           circuit->addProperty("dsid", dsMeter->getDSID().toString());
-          circuit->addProperty("busID", dsMeter->getBusID());
           circuit->addProperty("hwVersion", dsMeter->getHardwareVersion());
           circuit->addProperty("swVersion", dsMeter->getSoftwareVersion());
           circuit->addProperty("apiVersion", dsMeter->getApiVersion());

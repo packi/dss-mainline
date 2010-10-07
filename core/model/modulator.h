@@ -44,7 +44,6 @@ namespace dss {
                   public PhysicalModelItem {
   private:
     dss_dsid_t m_DSID;
-    int m_BusID;
     DeviceVector m_ConnectedDevices;
     int m_EnergyLevelOrange;
     int m_EnergyLevelRed;
@@ -69,10 +68,6 @@ namespace dss {
 
     /** Returns the DSID of the DSMeter */
     dss_dsid_t getDSID() const;
-    /** Returns the bus id of the DSMeter */
-    int getBusID() const;
-    /** Sets the bus id of the DSMeter */
-    void setBusID(const int _busID);
 
     /** Adds a DeviceReference to the dsMeters devices list */
     void addDevice(const DeviceReference& _device);

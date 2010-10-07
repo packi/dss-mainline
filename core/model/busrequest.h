@@ -26,6 +26,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "core/ds485types.h"
+
 namespace dss {
   class AddressableModelItem;
   class Device;
@@ -35,7 +37,7 @@ namespace dss {
     virtual int getFunctionID() = 0;
     virtual int getNumberAddressParameter() = 0;
     virtual uint16_t getAddressParameter(int _parameter) = 0;
-    virtual uint16_t getTarget() = 0;
+    virtual dss_dsid_t getTarget() = 0;
     virtual bool isBroadcast() = 0;
     virtual int getNumberOfParameter() = 0;
     virtual uint16_t getParameter(int _parameter) = 0;

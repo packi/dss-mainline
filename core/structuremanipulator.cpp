@@ -53,11 +53,11 @@ namespace dss {
       throw std::runtime_error("Need device to be present");
     }
     int oldZoneID = _device->getZoneID();
-    boost::shared_ptr<DSMeter> targetDSMeter = m_Apartment.getDSMeterByBusID(_device->getDSMeterID());
+    boost::shared_ptr<DSMeter> targetDSMeter = m_Apartment.getDSMeterByDSID(_device->getDSMeterDSID());
     if(!_zone->registeredOnDSMeter(targetDSMeter)) {
       createZone(targetDSMeter, _zone);
     }
-    
+
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(targetDSMeter->getDSID(), dsmDSID);
     m_Interface.setZoneID(dsmDSID, _device->getShortAddress(), _zone->getID());
@@ -87,8 +87,8 @@ namespace dss {
     if(presentDevicesInZoneOfDSMeter.length() != 0) {
       throw std::runtime_error("cannot delete zone if there are still devices present");
     }
-    if(_zone->getFirstZoneOnDSMeter() != _dsMeter->getBusID()) {
-      
+    if(_zone->getFirstZoneOnDSMeter() != _dsMeter->getDSID()) {
+
       dsid_t dsmDSID;
       dsid_helper::toDsmapiDsid(_dsMeter->getDSID(), dsmDSID);
       m_Interface.removeZone(dsmDSID, _zone->getID());

@@ -71,8 +71,8 @@ namespace dss {
       throw std::runtime_error("getAddressParameter: failed to get address parameter nr. " + intToString(_parameter));
     }
 
-    virtual uint16_t getTarget() {
-      return getDevice()->getDSMeterID();
+    virtual dss_dsid_t getTarget() {
+      return getDevice()->getDSMeterDSID();
     }
 
     virtual bool isBroadcast() {
@@ -110,11 +110,11 @@ namespace dss {
       determineTypeOfTarget();
     }
 
-    virtual uint16_t getTarget() {
+    virtual dss_dsid_t getTarget() {
       if(targetIsDevice()) {
-        return m_pDevice->getDSMeterID();
+        return m_pDevice->getDSMeterDSID();
       }
-      return 0;
+      return NullDSID;
     }
 
     virtual bool isBroadcast() {

@@ -37,7 +37,6 @@ namespace dss {
 
   DSMeter::DSMeter(const dss_dsid_t _dsid, Apartment* _pApartment)
   : m_DSID(_dsid),
-    m_BusID(0xFF),
     m_PowerConsumption(0),
     m_EnergyMeterValue(0),
     m_IsValid(false),
@@ -51,8 +50,6 @@ namespace dss {
     if((m_pApartment != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
       m_pPropertyNode =
         m_pApartment->getPropertyNode()->createProperty("dSMeters/" + m_DSID.toString());
-      m_pPropertyNode->createProperty("busID")
-        ->linkToProxy(PropertyProxyReference<int>(m_BusID, false));
       m_pPropertyNode->createProperty("powerConsumption")
         ->linkToProxy(PropertyProxyReference<int>(m_PowerConsumption, false));
       m_pPropertyNode->createProperty("powerConsumptionAge")
@@ -86,7 +83,8 @@ namespace dss {
     if(!contains(m_ConnectedDevices, _device)) {
       m_ConnectedDevices.push_back(_device);
     } else {
-      Logger::getInstance()->log("DSMeter::addDevice: DUPLICATE DEVICE Detected dsMeter: " + intToString(m_BusID) + " device: " + _device.getDSID().toString(), lsFatal);
+      Logger::getInstance()->log("DSMeter::addDevice: DUPLICATE DEVICE Detected dsMeter: " + 
+                                 m_DSID.toString() + " device: " + _device.getDSID().toString(), lsFatal);
     }
   } // addDevice
 
@@ -100,14 +98,6 @@ namespace dss {
   dss_dsid_t DSMeter::getDSID() const {
     return m_DSID;
   } // getDSID
-
-  int DSMeter::getBusID() const {
-    return m_BusID;
-  } // getBusID
-
-  void DSMeter::setBusID(const int _busID) {
-    m_BusID = _busID;
-  } // setBusID
 
   unsigned long DSMeter::getPowerConsumption() {
     DateTime now;

@@ -113,7 +113,7 @@ namespace dss {
     return m_dsmApiReady;
   } // isReady
 
-  uint16_t DS485Proxy::deviceGetParameterValue(devid_t _id, uint8_t _dsMeterID, int _paramID) {
+  uint16_t DS485Proxy::deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterDSID, int _paramID) {
     log("deviceGetParameterValue: not implemented yet");
     return 0;
   } // deviceGetParameterValue
@@ -255,7 +255,10 @@ namespace dss {
     checkResultCode(ret);
 
     ret = DsmApiGetBusMembers(m_dsmApiHandle, device_list, 63);
-    checkResultCode(ret);
+    if (ret < 0) {
+      // DsmApiGetBusMembers returns >= 0 on success
+      checkResultCode(ret);
+    }
 
     for (int i = 0; i < ret; ++i) {
       // don't include ourself
@@ -377,7 +380,7 @@ namespace dss {
     std::vector<int> result;
 
     int numDevices = getDevicesCountInZone(_dsMeterID, _zoneID);
-    log(std::string("Found ") + intToString(numDevices) + " in zone.");
+    log(std::string("Found ") + intToString(numDevices) + " devices in zone.");
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
       uint16_t deviceId;
       int ret = DeviceInfo_by_index_sync(m_dsmApiHandle, _dsMeterID, _zoneID, iDevice, &deviceId,
@@ -473,11 +476,6 @@ namespace dss {
     log("getSensorValue(): not implemented yet");
     return 0;
   } // getSensorValue
-
-  uint8_t DS485Proxy::dSLinkSend(const int _dsMeterID, devid_t _devAdr, uint8_t _value, uint8_t _flags) {
-    log("dSLinkSend(): not implemented yet");
-    return 0;
-  } // dsLinkSend
 
   void DS485Proxy::addToGroup(dsid_t _dsMeterID, const int _groupID, const int _deviceID) {
     int ret = DeviceGroupMembershipModify_add_sync(m_dsmApiHandle, _dsMeterID, _deviceID, _groupID);
@@ -609,6 +607,14 @@ namespace dss {
   
   void DS485Proxy::eventDeviceAccessibilityOn(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
                                               uint32_t _deviceDSID) {
+#if 0
+    ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etNewDevice, );
+    pEvent->addParameter(zoneID);
+    pEvent->addParameter(devID);
+    pEvent->addParameter(functionID);
+    raiseModelEvent(pEvent);
+#endif
+
     printf("Device 0x%08x (DeviceId: %d in Zone: %d) became active\n", _deviceDSID, _deviceID, _zoneID);
   }
 

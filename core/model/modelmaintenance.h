@@ -63,7 +63,7 @@ namespace dss {
   private:
     void handleModelEvents();
     void eraseModelEventsFromQueue(ModelEvent::EventType _type);
-    void dsMeterReady(int _dsMeterBusID);
+    void dsMeterReady(const dss_dsid_t& _dsMeterBusID);
     void discoverDS485Devices();
     void waitForInterface();
 
@@ -72,9 +72,8 @@ namespace dss {
 
     void raiseEvent(boost::shared_ptr<Event> _pEvent);
 
-    void onDeviceCallScene(const int _dsMeterID, const int _deviceID, const int _sceneID);
-    void onAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID);
-    void onDSLinkInterrupt(const int _modID, const int _devID, const int _priority);
+    void onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _sceneID);
+    void onAddDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID, const int _functionID);
   private:
     bool m_IsInitializing;
 

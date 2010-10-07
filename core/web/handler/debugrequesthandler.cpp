@@ -53,7 +53,7 @@ namespace dss {
   boost::shared_ptr<JSONObject> DebugRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::ostringstream logSStream;
     if(_request.getMethod() == "sendFrame") {
-      
+
 #if 0
       // TODO: libdsm
       int destination = strToIntDef(_request.getParameter("destination"),0) & 0x3F;
@@ -101,55 +101,9 @@ namespace dss {
       }
       return success();
 #endif
-    } else if(_request.getMethod() == "dSLinkSend") {
-      std::string deviceDSIDString =_request.getParameter("dsid");
-      boost::shared_ptr<Device> pDevice;
-      if(!deviceDSIDString.empty()) {
-        dss_dsid_t deviceDSID = dss_dsid_t::fromString(deviceDSIDString);
-        if(!(deviceDSID == NullDSID)) {
-          try {
-            pDevice = m_DSS.getApartment().getDeviceByDSID(deviceDSID);
-          } catch(std::runtime_error& e) {
-            return failure("Could not find device with dsid '" + deviceDSIDString + "'");
-          }
-        } else {
-          return failure("Could not parse dsid '" + deviceDSIDString + "'");
-        }
-      } else {
-        return failure("Missing parameter 'dsid'");
-      }
-
-      int iValue = strToIntDef(_request.getParameter("value"), -1);
-      if(iValue == -1) {
-        return failure("Missing parameter 'value'");
-      }
-      if(iValue < 0 || iValue > 0x00ff) {
-        return failure("Parameter 'value' is out of range (0-0xff)");
-      }
-      bool writeOnly = false;
-      bool lastValue = false;
-      if(_request.getParameter("writeOnly") == "true") {
-        writeOnly = true;
-      }
-      if(_request.getParameter("lastValue") == "true") {
-        lastValue = true;
-      }
-      uint8_t result;
-      try {
-        result = pDevice->dsLinkSend(iValue, lastValue, writeOnly);
-      } catch(std::runtime_error& e) {
-        return failure(std::string("Error: ") + e.what());
-      }
-      if(writeOnly) {
-        return success();
-      } else {
-        boost::shared_ptr<JSONObject> obj(new JSONObject());
-        obj->addProperty("value", result);
-        return success(obj);
-      }
     } else if(_request.getMethod() == "pingDevice") {
-      
-      
+
+
 #if 0
       // TODO: libdsm
       if (DSS::getInstance()->getPropertySystem().getBoolValue("/system/js/settings/extendedPing/active") == true) {
@@ -217,9 +171,9 @@ namespace dss {
         return failure( "Could not parse dsid '" + deviceDSIDString + "'");
       }
 #endif
-      
+
     } else if(_request.getMethod() == "resetZone") {
-      
+
 #if 0
       // TODO: libdsm
       std::string zoneIDStr = _request.getParameter("zoneID");
