@@ -30,6 +30,8 @@
 #include <iostream>
 #include <cassert>
 
+#include <boost/thread/mutex.hpp>
+
 #if defined(HAVE_JSAPI_H)
 #include <jsapi.h>
 #elif defined(HAVE_MOZJS_JSAPI_H)
@@ -44,7 +46,6 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "base.h"
-#include "mutex.h"
 #include "logger.h"
 
 namespace dss {
@@ -84,7 +85,7 @@ namespace dss {
   /** ScriptContext is a wrapper for a scripts execution context.
     * A script can either be loaded from a file or from
     * a std::string contained in memory. */
-  class ScriptContext : public LockableObject {
+  class ScriptContext {
   private:
     std::string m_FileName;
     JSObject* m_pRootObject;
@@ -92,7 +93,12 @@ namespace dss {
     ScriptEnvironment& m_Environment;
     JSContext* m_pContext;
     std::vector<ScriptContextAttachedObject*> m_AttachedObjects;
+    mutable boost::mutex m_AttachedObjectsMutex;
     static void jsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er);
+    mutable boost::mutex m_ContextMutex;
+    mutable boost::mutex m_LockDataMutex;
+    bool m_Locked;
+    pthread_t m_LockedBy;
   public:
     ScriptContext(ScriptEnvironment& _env, JSContext* _pContext);
     virtual ~ScriptContext();
@@ -122,6 +128,10 @@ namespace dss {
     bool hasAttachedObjects() const { return !m_AttachedObjects.empty(); }
     int getAttachedObjectsCount() const { return m_AttachedObjects.size(); }
     ScriptContextAttachedObject* getAttachedObjectByName(const std::string& _name);
+
+    void lock();
+    void unlock();
+    bool reentrantLock();
   public:
 
     /** Helper function to convert a jsval to a t. */
@@ -238,6 +248,7 @@ namespace dss {
     ScriptContext* m_pContext;
   }; // ScriptFunctionRooter
 
+
   class JSRequest {
   public:
     JSRequest(ScriptContext* _pContext)
@@ -279,6 +290,94 @@ namespace dss {
     bool m_NeedsEndRequest;
   };
 
+  class JSContextThread {
+  public:
+    JSContextThread(boost::shared_ptr<ScriptContext> _pContext)
+    : m_pContext(_pContext->getJSContext()),
+      m_NeedsEndRequest(true)
+    {
+      assert(m_pContext != NULL);
+      enter();
+    }
+
+    JSContextThread(ScriptContext* _pContext)
+    : m_pContext(_pContext->getJSContext()),
+      m_NeedsEndRequest(true)
+    {
+      assert(m_pContext != NULL);
+      enter();
+    }
+
+    JSContextThread(JSContext* _pContext)
+    : m_pContext(_pContext),
+      m_NeedsEndRequest(true)
+    {
+      assert(m_pContext != NULL);
+      enter();
+    }
+
+    ~JSContextThread() {
+      if(m_NeedsEndRequest) {
+        m_pRequest.reset();
+        JS_ClearContextThread(m_pContext);
+      }
+    }
+
+    void endRequest() {
+      m_pRequest.reset();
+      JS_ClearContextThread(m_pContext);
+      m_NeedsEndRequest = false;
+    }
+
+  private:
+    void enter() {
+      JS_SetContextThread(m_pContext);
+      m_pRequest.reset(new JSRequest(m_pContext));
+    }
+  private:
+    JSContext* m_pContext;
+    bool m_NeedsEndRequest;
+    boost::shared_ptr<JSRequest> m_pRequest;
+  }; // JSContextThread
+
+  class ScriptLock {
+  public:
+    ScriptLock(ScriptContext* _pContext, bool _reentrant = false)
+    : m_pContext(_pContext)
+    {
+      enter(_reentrant);
+    }
+
+    ScriptLock(boost::shared_ptr<ScriptContext> _pContext, bool _reentrant = false)
+    : m_pContext(_pContext.get())
+    {
+      enter(_reentrant);
+    }
+
+    ~ScriptLock() {
+      leave();
+    }
+
+    bool ownsLock() const { return m_OwnsLock; }
+  private:
+    void enter(bool _reentrant) {
+      if(!_reentrant) {
+        m_pContext->lock();
+        m_OwnsLock = true;
+      } else {
+        m_OwnsLock = m_pContext->reentrantLock();
+      }
+    }
+
+    void leave() {
+      if(m_OwnsLock) {
+        m_pContext->unlock();
+      }
+    }
+  private:
+    ScriptContext* m_pContext;
+    bool m_OwnsLock;
+  }; // ScriptLock
 
 /*
  * Initializer macro for a JSFunctionSpec array element. This is the original

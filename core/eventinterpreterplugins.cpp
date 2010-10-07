@@ -171,28 +171,32 @@ namespace dss {
           scriptID = _event.getName() + _subscription.getID();
         }
         boost::shared_ptr<ScriptContextWrapper> wrapper(new ScriptContextWrapper(ctx, m_pScriptRootNode, scriptID));
-        ScriptObject raisedEvent(*ctx, NULL);
-        raisedEvent.setProperty<const std::string&>("name", _event.getName());
-        ctx->getRootObject().setProperty("raisedEvent", &raisedEvent);
-
-        // add raisedEvent.parameter
-        ScriptObject param(*ctx, NULL);
-        const HashMapConstStringString& props =  _event.getProperties().getContainer();
-        for(HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end();
-            iParam != e; ++iParam)
         {
-          Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: setting parameter " + iParam->first +
-                                      " to " + iParam->second);
-          param.setProperty<const std::string&>(iParam->first, iParam->second);
+          JSContextThread th(ctx.get());
+
+          ScriptObject raisedEvent(*ctx, NULL);
+          raisedEvent.setProperty<const std::string&>("name", _event.getName());
+          ctx->getRootObject().setProperty("raisedEvent", &raisedEvent);
+
+          // add raisedEvent.parameter
+          ScriptObject param(*ctx, NULL);
+          const HashMapConstStringString& props =  _event.getProperties().getContainer();
+          for(HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end();
+              iParam != e; ++iParam)
+          {
+            Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: setting parameter " + iParam->first +
+                                        " to " + iParam->second);
+            param.setProperty<const std::string&>(iParam->first, iParam->second);
+          }
+          raisedEvent.setProperty("parameter", &param);
+
+          // add raisedEvent.subscription
+          ScriptObject subscriptionObj(*ctx, NULL);
+          raisedEvent.setProperty("subscription", &subscriptionObj);
+          subscriptionObj.setProperty<const std::string&>("name", _subscription.getEventName());
+
+          wrapper->addFile(scriptName);
         }
-        raisedEvent.setProperty("parameter", &param);
-
-        // add raisedEvent.subscription
-        ScriptObject subscriptionObj(*ctx, NULL);
-        raisedEvent.setProperty("subscription", &subscriptionObj);
-        subscriptionObj.setProperty<const std::string&>("name", _subscription.getEventName());
-
-        wrapper->addFile(scriptName);
         ctx->evaluateScript<void>(scriptName);
 
         if(ctx->hasAttachedObjects()) {

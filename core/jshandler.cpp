@@ -70,6 +70,7 @@ namespace dss {
 
   ScriptContext* ScriptEnvironment::getContext() {
     JSContext* context = JS_NewContext(m_pRuntime, 8192);
+    JSContextThread ct(context);
 
     ScriptContext* pResult = new ScriptContext(*this, context);
     for(boost::ptr_vector<ScriptExtension>::iterator ipExtension = m_Extensions.begin(); ipExtension != m_Extensions.end(); ++ipExtension) {
@@ -218,24 +219,19 @@ namespace dss {
 
     void timeout(int _timeoutMS, jsval _function, JSObject* _obj, boost::shared_ptr<ScriptFunctionRooter> _rooter) {
       sleepMS(_timeoutMS);
-      AssertLocked ctxLock(getContext());
-      Logger::getInstance()->log("setTimeout: aquiring request");
-      //JSContext* cx = getContext()->getJSContext();
-      //JS_SetContextThread(cx);
-      JSRequest req(getContext());
+      ScriptLock lock(getContext());
+      JSContextThread req(getContext());
       ScriptObject obj(_obj, *getContext());
       ScriptFunctionParameterList params(*getContext());
       obj.callFunctionByReference<void>(_function, params);
-      //JS_GC(cx);
-      req.endRequest();
-      //JS_ClearContextThread(cx);
-      Logger::getInstance()->log("setTimeout: releasing request");
+
+      _rooter.reset();
+      JS_MaybeGC(getContext()->getJSContext());
       delete this;
     }
   };
 
   JSBool global_setTimeout(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    JSRequest req(cx);
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     if(argc >= 2) {
       int timeoutMS;
@@ -247,14 +243,13 @@ namespace dss {
       }
       boost::shared_ptr<ScriptFunctionRooter> functionRoot(new ScriptFunctionRooter(ctx, obj, argv[1]));
       SessionAttachedTimeoutObject* pTimeoutObj = new SessionAttachedTimeoutObject(ctx);
-      req.endRequest();
       boost::thread(boost::bind(&SessionAttachedTimeoutObject::timeout, pTimeoutObj, timeoutMS, argv[1], obj, functionRoot));
     }
     return JS_TRUE;
   } // global_setTimeout
 
   static JSClass global_class = {
-    "global", JSCLASS_NEW_RESOLVE, /* use the new resolve hook */
+    "global", JSCLASS_NEW_RESOLVE | JSCLASS_GLOBAL_FLAGS, /* use the new resolve hook */
     JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
     JS_EnumerateStandardClasses,
     JS_ResolveStub,
@@ -270,10 +265,12 @@ namespace dss {
 
   ScriptContext::ScriptContext(ScriptEnvironment& _env, JSContext* _pContext)
   : m_Environment(_env),
-    m_pContext(_pContext)
+    m_pContext(_pContext),
+    m_Locked(false),
+    m_LockedBy(0)
   {
-    JSRequest req(m_pContext);
     JS_SetOptions(m_pContext, JSOPTION_VAROBJFIX | JSOPTION_DONT_REPORT_UNCAUGHT);
+    JS_SetVersion(m_pContext, JSVERSION_LATEST);
     JS_SetErrorReporter(m_pContext, jsErrorHandler);
 
     /* Create the global object. */
@@ -295,6 +292,8 @@ namespace dss {
   } // ctor
 
   ScriptContext::~ScriptContext() {
+    ScriptLock lock(this);
+    JSContextThread thread(this);
     JS_GC(m_pContext);
     if(!m_AttachedObjects.empty()) {
       Logger::getInstance()->log("Still have some attached objects (" + intToString(m_AttachedObjects.size()) + "). Memory leak?", lsError);
@@ -306,10 +305,13 @@ namespace dss {
   } // dtor
 
   void ScriptContext::attachObject(ScriptContextAttachedObject* _pObject) {
+    // TODO: check if this lock is really needed
+    boost::mutex::scoped_lock lock(m_AttachedObjectsMutex);
     m_AttachedObjects.push_back(_pObject);
   } // attachObject
 
   void ScriptContext::removeAttachedObject(ScriptContextAttachedObject* _pObject) {
+    boost::mutex::scoped_lock lock(m_AttachedObjectsMutex);
     std::vector<ScriptContextAttachedObject*>::iterator it =
        std::find(m_AttachedObjects.begin(), m_AttachedObjects.end(), _pObject);
     if(it != m_AttachedObjects.end()) {
@@ -318,6 +320,7 @@ namespace dss {
   } // removeAttachedObject
 
   ScriptContextAttachedObject* ScriptContext::getAttachedObjectByName(const std::string& _name) {
+    boost::mutex::scoped_lock lock(m_AttachedObjectsMutex);
     typedef std::vector<ScriptContextAttachedObject*>::iterator AttachedObjectIterator;
     for(AttachedObjectIterator iObject = m_AttachedObjects.begin(), e = m_AttachedObjects.end();
         iObject != e; ++iObject) {
@@ -345,8 +348,7 @@ namespace dss {
   } // raisePendingExceptions
 
   jsval ScriptContext::doEvaluateScript(const std::string& _fileName) {
-    AssertLocked lock(this);
-    JSRequest req(this);
+    ScriptLock lock(this);
 
     std::ifstream in(_fileName.c_str());
     if(!in.is_open()) {
@@ -357,12 +359,11 @@ namespace dss {
     while(std::getline(in,line)) {
       sstream << line << "\n";
     }
+    JSContextThread req(this);
     jsval rval;
     std::string script = sstream.str();
     JSBool ok = JS_EvaluateScript(m_pContext, m_pRootObject, script.c_str(), script.size(),
                        _fileName.c_str(), 0, &rval);
-    req.endRequest();
-    //JS_ClearContextThread(m_pContext);
     if(ok) {
       return rval;
     } else {
@@ -397,16 +398,13 @@ namespace dss {
   } // evaluateScript<bool>
 
   jsval ScriptContext::doEvaluate(const std::string& _script) {
-    AssertLocked lock(this);
-    JSRequest req(this);
+    ScriptLock lock(this);
+    JSContextThread thread(this);
 
-    //JS_SetContextThread(m_pContext);
     const char* filename = "temporary_script";
     jsval rval;
     JSBool ok = JS_EvaluateScript(m_pContext, m_pRootObject, _script.c_str(), _script.size(),
                        filename, 0, &rval);
-    req.endRequest();
-    //JS_ClearContextThread(m_pContext);
     if(ok) {
       return rval;
     } else {
@@ -440,6 +438,37 @@ namespace dss {
     return convertTo<bool>(doEvaluate(_script));
   } // evaluate<bool>
 
+  void ScriptContext::lock() {
+    m_ContextMutex.lock();
+    m_LockDataMutex.lock();
+    assert(!m_Locked);
+    assert(m_LockedBy == 0);
+    m_LockedBy = pthread_self();
+    m_Locked = true;
+    m_LockDataMutex.unlock();
+  } // lock
+  
+  void ScriptContext::unlock() {
+    m_LockDataMutex.lock();
+    assert(m_Locked);
+    m_LockedBy = 0;
+    m_Locked = false;
+    m_ContextMutex.unlock();
+    m_LockDataMutex.unlock();
+  } // unlock
+
+  bool ScriptContext::reentrantLock() {
+    bool result = true;
+    m_LockDataMutex.lock();
+    if(m_Locked && (m_LockedBy == pthread_self())) {
+      result = false;
+    }
+    m_LockDataMutex.unlock();
+    if(result == true) {
+      lock();
+    }
+    return result;
+  }
 
   //================================================== ScriptExtension
 
@@ -472,14 +501,12 @@ namespace dss {
 
   template<>
   void ScriptFunctionParameterList::add(const std::string& _value) {
-    AssertLocked objLock(&m_Context);
     JSString* str = JS_NewStringCopyN(m_Context.getJSContext(), _value.c_str(), _value.size());
     m_Parameter.push_back(STRING_TO_JSVAL(str));
   } // add<const std::string&>
 
   template<>
   void ScriptFunctionParameterList::add(std::string _value) {
-    AssertLocked objLock(&m_Context);
     JSString* str = JS_NewStringCopyN(m_Context.getJSContext(), _value.c_str(), _value.size());
     m_Parameter.push_back(STRING_TO_JSVAL(str));
   } // add<std::string&>
@@ -506,12 +533,13 @@ namespace dss {
   } // ctor
 
   ScriptFunctionRooter::~ScriptFunctionRooter() {
-    if(m_Function != JSVAL_NULL) {
+    if((m_Function != JSVAL_NULL) || (m_pObject != NULL)) {
       assert(m_pContext != NULL);
+    }
+    if(m_Function != JSVAL_NULL) {
       JS_RemoveRoot(m_pContext->getJSContext(), &m_Function);
     }
     if(m_pObject != NULL) {
-      assert(m_pContext != NULL);
       JS_RemoveRoot(m_pContext->getJSContext(), &m_pObject);
     }
   } // dtor

@@ -46,7 +46,6 @@ namespace dss {
       Logger::getInstance()->log("JS: global_prop_setProperty: need two arguments: property-path & value", lsError);
     } else {
       ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-      AssertLocked lock(ctx);
 
       PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
       std::string propName = ctx->convertTo<std::string>(argv[0]);
@@ -82,7 +81,6 @@ namespace dss {
       Logger::getInstance()->log("JS: global_prop_getProperty: need one argument: property-path", lsError);
     } else {
       ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-      AssertLocked lock(ctx);
 
       PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
       std::string propName = ctx->convertTo<std::string>(argv[0]);
@@ -119,7 +117,6 @@ namespace dss {
       Logger::getInstance()->log("JS: global_prop_setListener: need two arguments: property-path &  callback", lsError);
     } else {
       ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-      AssertLocked lock(ctx);
 
       PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
       std::string propName = ctx->convertTo<std::string>(argv[0]);
@@ -147,7 +144,6 @@ namespace dss {
       Logger::getInstance()->log("JS: global_prop_removeListener: need one argument: listener-id", lsError);
     } else {
       ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-      AssertLocked lock(ctx);
 
       PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
       std::string listenerIdent = ctx->convertTo<std::string>(argv[0]);
@@ -164,7 +160,6 @@ namespace dss {
       Logger::getInstance()->log("JS: global_prop_setFlag: need three arguments: prop-path, flag, value", lsError);
     } else {
       ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-      AssertLocked lock(ctx);
 
       PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
       std::string propName = ctx->convertTo<std::string>(argv[0]);
@@ -196,7 +191,6 @@ namespace dss {
       Logger::getInstance()->log("JS: global_prop_hasFlag: need three arguments: prop-path, flag", lsError);
     } else {
       ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-      AssertLocked lock(ctx);
 
       PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
       std::string propName = ctx->convertTo<std::string>(argv[0]);
@@ -305,8 +299,12 @@ namespace dss {
   } // propertyAdded
 
   void PropertyScriptListener::doOnChange(PropertyNodePtr _changedNode) {
-    AssertLocked locked(getContext());
-    JSRequest req(getContext());
+    ScriptLock lock(getContext(), true);
+    boost::shared_ptr<JSContextThread> req;
+    if(lock.ownsLock()) {
+      req.reset(new JSContextThread(getContext()));
+    }
+    JSAutoLocalRootScope rootScope(getContext()->getJSContext());
     createScriptObject();
     ScriptFunctionParameterList list(*getContext());
     list.add(_changedNode->getDisplayName());

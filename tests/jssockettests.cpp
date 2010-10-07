@@ -150,11 +150,11 @@ BOOST_AUTO_TEST_CASE(testTcpSocketSendTo) {
   listener.run();
   sleepMS(50);
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("TcpSocket.sendTo('127.0.0.1', 1234, 'hello');");
   sleepMS(250);
   BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
-} // testBasics
+} // testTcpSocketSendTo
 
 BOOST_AUTO_TEST_CASE(testTcpSocketSendToRepeatability) {
   const int kRuns = 3;
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(testTcpSocketSendToRepeatability) {
   listener.run();
   sleepMS(50);
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   for(int iRun = 0; iRun < kRuns; iRun++) {
     Logger::getInstance()->log("Before run");
     ctx->evaluate<void>("TcpSocket.sendTo('127.0.0.1', 1234, 'hello');");
@@ -195,8 +195,12 @@ BOOST_AUTO_TEST_CASE(testSendSocketCallback) {
   listener.run();
   sleepMS(50);
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->getRootObject().setProperty<int>("callCount", 0);
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  {
+    ScriptLock lock(ctx);
+    JSContextThread req(ctx);
+    ctx->getRootObject().setProperty<int>("callCount", 0);
+  }
   int callCount = 0;
 
   foreach(std::string testScript, testScripts) {
@@ -204,6 +208,8 @@ BOOST_AUTO_TEST_CASE(testSendSocketCallback) {
     ctx->evaluate<void>(testScript);
     sleepMS(250);
     BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
+    ScriptLock lock(ctx);
+    JSContextThread req(ctx);
     int newCount = ctx->getRootObject().getProperty<int>("callCount");
     BOOST_CHECK_EQUAL(newCount, callCount);
     callCount = newCount;
@@ -222,13 +228,15 @@ BOOST_AUTO_TEST_CASE(testSocketConnect) {
   listener.run();
   sleepMS(50);
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->getRootObject().setProperty<bool>("result", false);
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("socket = new TcpSocket();\n"
                       "socket.connect('localhost', 1234,\n"
                       "  function(success) { result = success; }\n"
                       ");");
   sleepMS(250);
+
+  ScriptLock lock(ctx);
+  JSContextThread req(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
   BOOST_CHECK_EQUAL(listener.getConnectionCount(), 1);
 }
@@ -239,13 +247,14 @@ BOOST_AUTO_TEST_CASE(testSocketConnectFailure) {
   ScriptExtension* ext = new SocketScriptContextExtension();
   env->addExtension(ext);
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->getRootObject().setProperty<bool>("result", true);
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("socket = new TcpSocket();\n"
                       "socket.connect('localhost', 1234,\n"
                       "  function(success) { result = success; }\n"
                       ");");
   sleepMS(250);
+  ScriptLock lock(ctx);
+  JSContextThread req(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), false);
 }
 
@@ -258,8 +267,7 @@ BOOST_AUTO_TEST_CASE(testSocketSend) {
   TestListener listener(1234);
   listener.run();
   sleepMS(50);
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->getRootObject().setProperty<int>("bytesSent", 3);
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("socket = new TcpSocket();\n"
                       "socket.connect('localhost', 1234,\n"
                       "      function(success) {\n"
@@ -273,6 +281,8 @@ BOOST_AUTO_TEST_CASE(testSocketSend) {
                       "      }\n"
                       ");");
   sleepMS(250);
+  ScriptLock lock(ctx);
+  JSContextThread req(ctx);
   BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("bytesSent"), 5);
 } // testSocketSend
@@ -287,7 +297,7 @@ BOOST_AUTO_TEST_CASE(testSocketClose) {
   listener.run();
   sleepMS(50);
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("socket = new TcpSocket();\n"
                       "socket.connect('127.0.0.1', 1234,\n"
                       "      function(success) {\n"
@@ -333,10 +343,11 @@ BOOST_AUTO_TEST_CASE(testSocketReceive) {
   listener.run();
   sleepMS(50);
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->getRootObject().setProperty<const char*>("result", "");
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>(script);
   sleepMS(500);
+  ScriptLock lock(ctx);
+  JSContextThread req(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<std::string>("result"), "hello world");
 } // testSocketReceive
 
@@ -347,10 +358,11 @@ void runScript(const std::string& _script) {
   ScriptExtension* ext = new SocketScriptContextExtension();
   env->addExtension(ext);
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->getRootObject().setProperty<const char*>("result", "");
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>(_script);
   sleepMS(500);
+  ScriptLock lock(ctx);
+  JSContextThread req(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<std::string>("result"), "hello world");
 }
 

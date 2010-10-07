@@ -264,10 +264,10 @@ namespace dss {
     void connectionCallback(const boost::system::error_code& error,
                             tcp::resolver::iterator endpoint_iterator) {
       Logger::getInstance()->log("*** Connection callback");
-      AssertLocked lock(&getContext());
+      ScriptLock lock(&getContext());
+      JSContextThread req(&getContext());
       endBlockingCall();
-      //JS_SetContextThread(getContext().getJSContext());
-      JSRequest req(getContext().getJSContext());
+
       if (!error) {
         success();
       } else if(endpoint_iterator != tcp::resolver::iterator()) {
@@ -287,10 +287,9 @@ namespace dss {
 
     void sendCallback(const boost::system::error_code& error, std::size_t bytesTransfered) {
       Logger::getInstance()->log("*** Send callback");
-      AssertLocked lock(&getContext());
+      ScriptLock lock(&getContext());
+      JSContextThread req(&getContext());
       endBlockingCall();
-      //JS_SetContextThread(getContext().getJSContext());
-      JSRequest req(getContext().getJSContext());
       if(!error) {
         if(bytesTransfered == m_Data.size()) {
           m_Data.clear();
@@ -300,15 +299,12 @@ namespace dss {
         Logger::getInstance()->log("SocketHelperInstance::sendCallback: error: " + error.message());
         callSizeCallback(-1);
       }
-      req.endRequest();
-      //JS_ClearContextThread(getContext().getJSContext());
       Logger::getInstance()->log("*** Done: Send callback");
     }
 
     void readCallback(const boost::system::error_code& error, std::size_t bytesTransfered) {
-      AssertLocked lock(&getContext());
-      //JS_SetContextThread(getContext().getJSContext());
-      JSRequest req(getContext().getJSContext());
+      ScriptLock lock(&getContext());
+      JSContextThread req(&getContext());
       if(!error) {
         if(bytesTransfered == m_BytesToRead) {
           endBlockingCall();
@@ -321,15 +317,12 @@ namespace dss {
         Logger::getInstance()->log("SocketHelperInstance::readCallback: error: " + error.message());
         callDataCallback("");
       }
-      req.endRequest();
-      //JS_ClearContextThread(getContext().getJSContext());
     }
 
     void acceptCallback(const boost::system::error_code& error) {
-      AssertLocked lock(&getContext());
+      ScriptLock lock(&getContext());
+      JSContextThread req(&getContext());
       endBlockingCall();
-      //JS_SetContextThread(getContext().getJSContext());
-      JSRequest req(getContext().getJSContext());
       if(!error) {
         if(hasCallback()) {
           JSObject* socketObj = JS_ConstructObject(getContext().getJSContext(), &tcpSocket_class, NULL, NULL);
@@ -349,8 +342,6 @@ namespace dss {
         list.addJSVal(JSVAL_NULL);
         callCallbackWithArguments(list);
       }
-      req.endRequest();
-      //JS_ClearContextThread(getContext().getJSContext());
     }
 
     void createSocket() {
@@ -455,20 +446,15 @@ namespace dss {
 
     void handle_write(const boost::system::error_code& error) {
       Logger::getInstance()->log("SocketHelperSendOneShot::handle_write");
-      {
-      AssertLocked lock(&getContext());
-      //JS_SetContextThread(getContext().getJSContext());
-      JSRequest req(getContext().getJSContext());
       if(hasCallback()) {
+        ScriptLock lock(&getContext());
+        JSContextThread req(&getContext());
         ScriptFunctionParameterList params(getContext());
         params.add<bool>(!error);
         callCallbackWithArguments(params);
         if(error) {
           Logger::getInstance()->log("SocketHelperSendOneShot::handle_write: " + error.message());
         }
-      }
-      req.endRequest();
-      //JS_ClearContextThread(getContext().getJSContext());
       }
       do_close();
       Logger::getInstance()->log("SocketHelperSendOneShot::beforeRemoving");
@@ -493,7 +479,6 @@ namespace dss {
   { }
 
   void tcpSocket_finalize(JSContext *cx, JSObject *obj) {
-    JSRequest req(cx);
     SocketHelperInstance* pInstance = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
     JS_SetPrivate(cx, obj, NULL);
     delete pInstance;
@@ -501,7 +486,6 @@ namespace dss {
 
   JSBool tcpSocket_construct(JSContext *cx, JSObject *obj, uintN argc,
                              jsval *argv, jsval *rval) {
-    JSRequest req(cx);
     Logger::getInstance()->log("*** Constructing socket");
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     SocketScriptContextExtension* ext =
@@ -512,7 +496,6 @@ namespace dss {
   } // tcpSocket_construct
 
   JSBool tcpSocket_connect(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    JSRequest req(cx);
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
     assert(pInst != NULL);
@@ -541,7 +524,6 @@ namespace dss {
   } // tcpSocket_connect
 
   JSBool tcpSocket_send(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    JSRequest req(cx);
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
     assert(pInst != NULL);

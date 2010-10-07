@@ -949,6 +949,7 @@ namespace dss {
       Logger::getInstance()->log("JS: global_event: (empty name)");
     } else {
       ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+      JSAutoLocalRootScope localRoot(cx);
 
       EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
       if(ext != NULL) {
@@ -995,6 +996,7 @@ namespace dss {
       Logger::getInstance()->log("JS: global_subscription: need three arguments: event-name, handler-name & parameter");
     } else {
       ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+      JSAutoLocalRootScope localRoot(cx);
 
       EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
       if(ext != NULL) {
@@ -1059,7 +1061,6 @@ namespace dss {
   JSBool event_raise(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     ScriptObject self(obj, *ctx);
-
     EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
     if(self.is("event")) {
       event_wrapper* eventWrapper = static_cast<event_wrapper*>(JS_GetPrivate(cx, obj));

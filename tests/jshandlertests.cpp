@@ -38,23 +38,29 @@ BOOST_AUTO_TEST_CASE(testSimpleObject) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ScriptObject obj(*ctx, &ctx->getRootObject());
-  //obj.addRoot();
-  obj.setProperty("testing", 1);
-  BOOST_CHECK_EQUAL(obj.getProperty<int>("testing"), 1);
-  ctx->getRootObject().setProperty("obj", &obj);
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  boost::shared_ptr<ScriptObject> obj;
+
+  {
+    JSContextThread req(ctx);
+    obj.reset(new ScriptObject(*ctx, &ctx->getRootObject()));
+    obj->setProperty("testing", 1);
+    BOOST_CHECK_EQUAL(obj->getProperty<int>("testing"), 1);
+    ctx->getRootObject().setProperty("obj", obj.get());
+  }
 
   BOOST_CHECK_EQUAL(ctx->evaluate<int>("obj.testing"), 1);
-  obj.setProperty("testing", 0);
+  {
+    JSContextThread req(ctx);
+    obj->setProperty("testing", 0);
+  }
   BOOST_CHECK_EQUAL(ctx->evaluate<int>("obj.testing"), 0);
 
-  Logger::getInstance()->log("setting property");
-  //JS_SetContextThread(ctx->getJSContext());
-  obj.setProperty("testing2", "test");
-  //JS_ClearContextThread(ctx->getJSContext());
-  Logger::getInstance()->log("done setting property");
-  BOOST_CHECK_EQUAL(obj.getProperty<std::string>("testing2"), "test");
+  {
+    JSContextThread req(ctx);
+    obj->setProperty("testing2", "test");
+    BOOST_CHECK_EQUAL(obj->getProperty<std::string>("testing2"), "test");
+  }
   BOOST_CHECK_EQUAL(ctx->evaluate<std::string>("obj.testing2"), "test");
 } // testSimpleObject
 
@@ -62,34 +68,34 @@ BOOST_AUTO_TEST_CASE(testCallingFunctions) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   jsval res = ctx->doEvaluate("dev = { func: function(a,b,c) { return { e: a, f: b, g: c }; } }; dev");
+  {
+    JSContextThread req(ctx);
+    BOOST_ASSERT(JSVAL_IS_OBJECT(res));
 
-  BOOST_ASSERT(JSVAL_IS_OBJECT(res));
+    ScriptObject obj(JSVAL_TO_OBJECT(res), *ctx);
 
-  //JS_SetContextThread(ctx->getJSContext());
-  ScriptObject obj(JSVAL_TO_OBJECT(res), *ctx);
+    ScriptFunctionParameterList list(*ctx);
+    list.add<const std::string&>(std::string("testing"));
+    list.add<int>(1);
+    list.add<bool>(false);
 
-  ScriptFunctionParameterList list(*ctx);
-  list.add<const std::string&>(std::string("testing"));
-  list.add<int>(1);
-  list.add<bool>(false);
+    res = obj.doCallFunctionByName("func", list);
 
-  res = obj.doCallFunctionByName("func", list);
-
-  BOOST_ASSERT(JSVAL_IS_OBJECT(res));
-  ScriptObject resObj(JSVAL_TO_OBJECT(res), *ctx);
-  BOOST_CHECK_EQUAL(resObj.getProperty<std::string>("e"), "testing");
-  BOOST_CHECK_EQUAL(resObj.getProperty<int>("f"), 1);
-  BOOST_CHECK_EQUAL(resObj.getProperty<bool>("g"), false);
-  //JS_ClearContextThread(ctx->getJSContext());
+    BOOST_ASSERT(JSVAL_IS_OBJECT(res));
+    ScriptObject resObj(JSVAL_TO_OBJECT(res), *ctx);
+    BOOST_CHECK_EQUAL(resObj.getProperty<std::string>("e"), "testing");
+    BOOST_CHECK_EQUAL(resObj.getProperty<int>("f"), 1);
+    BOOST_CHECK_EQUAL(resObj.getProperty<bool>("g"), false);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(testLongerScript) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("print('dummy.js, running');\n"
                       "\n"
                       "var pi = 3.14;\n"
@@ -107,7 +113,7 @@ BOOST_AUTO_TEST_CASE(testNonexistingScriptRaisesException) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   BOOST_CHECK_THROW(ctx->evaluateScript<void>("idontexistandneverwill.js"), ScriptException);
 } // testNonexistingScriptRaisesException
 
@@ -115,7 +121,7 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutNoFunction) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("var result = false; setTimeout(0);");
 } // testSetTimeoutNoFunction
 
@@ -123,11 +129,12 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutZeroDelay) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("var result = false; setTimeout(0, function() {  result = true; } );");
   while(ctx->hasAttachedObjects()) {
     sleepMS(1);
   }
+  JSContextThread thread(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
 } // testSetTimeoutZeroDelay
 
@@ -135,11 +142,13 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutNormalDelay) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("var result = false; setTimeout(10, function() {  result = true; } );");
   while(ctx->hasAttachedObjects()) {
     sleepMS(1);
   }
+  //boost::mutex::scoped_lock lock = ctx->getLock();
+  JSContextThread req(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
 } // testSetTimeoutNormalDelay
 
@@ -147,13 +156,15 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutGC) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("var result = false;\n"
                       "var obj = { func: function() { result = true; } };"
                       "setTimeout(10, function() { setTimeout(0, obj.func); } );");
   while(ctx->hasAttachedObjects()) {
     sleepMS(1);
   }
+  //boost::mutex::scoped_lock lock = ctx->getLock();
+  JSContextThread req(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
 }
 

@@ -97,8 +97,7 @@ BOOST_AUTO_TEST_CASE(testSendFrameWorksWithNoIncomingFrame) {
   ScriptExtension* ext = new DS485ScriptExtension(frameSender, bucketHolder);
   env->addExtension(ext);
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->getRootObject().setProperty<bool>("result", false);
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("var frame = new DS485Frame();\n"
                       "frame.functionID = 10;\n"
                       "frame.destination = 20;\n"
@@ -109,6 +108,7 @@ BOOST_AUTO_TEST_CASE(testSendFrameWorksWithNoIncomingFrame) {
     sleepMS(1);
   }
   BOOST_CHECK_EQUAL(frameSender.getCounter(), 1);
+  JSContextThread thread(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
 }
 
@@ -120,8 +120,7 @@ BOOST_AUTO_TEST_CASE(testSendFrameWorksWithIncomingFrame) {
   ScriptExtension* ext = new DS485ScriptExtension(frameSender, bucketHolder);
   env->addExtension(ext);
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->getRootObject().setProperty<bool>("result", false);
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("var frame = new DS485Frame();\n"
                       "frame.functionID = 10;\n"
                       "frame.destination = 20;\n"
@@ -137,6 +136,7 @@ BOOST_AUTO_TEST_CASE(testSendFrameWorksWithIncomingFrame) {
     sleepMS(1);
   }
   BOOST_CHECK_EQUAL(frameSender.getCounter(), 1);
+  JSContextThread thread(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
 }
 
@@ -148,9 +148,9 @@ BOOST_AUTO_TEST_CASE(testSendFrameWorksRepeatedlyWithIncomingFrame) {
   ScriptExtension* ext = new DS485ScriptExtension(frameSender, bucketHolder);
   env->addExtension(ext);
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->getRootObject().setProperty<int>("result", 0);
-  ctx->evaluate<void>("var frame = new DS485Frame();\n"
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("result = 0;\n"
+                      "var frame = new DS485Frame();\n"
                       "frame.functionID = 10;\n"
                       "frame.destination = 20;\n"
                       "frame.payload.push(0xaabb);\n"
@@ -166,6 +166,7 @@ BOOST_AUTO_TEST_CASE(testSendFrameWorksRepeatedlyWithIncomingFrame) {
     sleepMS(1);
   }
   BOOST_CHECK_EQUAL(frameSender.getCounter(), 1);
+  JSContextThread thread(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("result"), 2);
 }
 
@@ -177,9 +178,9 @@ BOOST_AUTO_TEST_CASE(testSetCallbackWorks) {
   ScriptExtension* ext = new DS485ScriptExtension(frameSender, bucketHolder);
   env->addExtension(ext);
 
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->getRootObject().setProperty<int>("result", 0);
-  ctx->evaluate<void>("DS485.setCallback(function(f) { result++; return (result < 2); }, 20, 15);");
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("result = 0;\n"
+                      "DS485.setCallback(function(f) { result++; return (result < 2); }, 20, 15);");
   sleepMS(20);
   boost::shared_ptr<DS485CommandFrame> frame(new DS485CommandFrame());
   frame->getHeader().setSource(20);
@@ -189,6 +190,7 @@ BOOST_AUTO_TEST_CASE(testSetCallbackWorks) {
   while(ctx->hasAttachedObjects()) {
     sleepMS(1);
   }
+  JSContextThread thread(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("result"), 2);
 }
 

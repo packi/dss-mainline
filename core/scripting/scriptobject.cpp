@@ -37,7 +37,6 @@ namespace dss {
   : m_pObject(NULL),
     m_Context(_context)
   {
-    AssertLocked objLock(&m_Context);
     JSObject* parentObj = NULL;
     if(_pParent != NULL) {
       parentObj = _pParent->m_pObject;
@@ -46,7 +45,6 @@ namespace dss {
   } // ctor
 
   jsval ScriptObject::doGetProperty(const std::string& _name) {
-    AssertLocked objLock(&m_Context);
     JSBool found;
     if(!JS_HasProperty(m_Context.getJSContext(), m_pObject, _name.c_str(), &found)) {
       throw ScriptException("Could not enumerate property");
@@ -137,7 +135,6 @@ namespace dss {
 
   jsval ScriptObject::doCallFunctionByName(const std::string& _functionName,
                                          ScriptFunctionParameterList& _parameter) {
-    AssertLocked objLock(&m_Context);
     int paramc = _parameter.size();
     jsval* paramv = (jsval*)malloc(sizeof(jsval) * paramc);
     for(int iParam = 0; iParam < paramc; iParam++) {
@@ -186,7 +183,6 @@ namespace dss {
 
   jsval ScriptObject::doCallFunctionByReference(jsval _function,
                                               ScriptFunctionParameterList& _parameter) {
-    AssertLocked objLock(&m_Context);
     int paramc = _parameter.size();
     jsval* paramv = (jsval*)malloc(sizeof(jsval) * paramc);
     for(int iParam = 0; iParam < paramc; iParam++) {

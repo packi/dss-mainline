@@ -86,10 +86,9 @@ namespace dss {
         bool hasFrame = _bucket->waitForFrame(_timeout);
         try {
           boost::shared_ptr<DS485CommandFrame> frame = _bucket->popFrame();
-          AssertLocked contextLock(getContext());
+          ScriptLock lock(getContext());
           Logger::getInstance()->log("waitForFrame: got frame, aquiring request");
-          //JS_SetContextThread(cx);
-          JSRequest req(cx);
+          JSContextThread req(getContext());
           Logger::getInstance()->log("waitForFrame: got frame, got request");
           {
             JSAutoLocalRootScope scope(cx);
@@ -119,16 +118,20 @@ namespace dss {
               paramList.addJSVal(JSVAL_NULL);
             }
             goOn = _callbackObject->callFunctionByReference<bool>(_function, paramList);
+            JS_MaybeGC(getContext()->getJSContext());
           }
-          JS_GC(cx);
-          req.endRequest();
-          //JS_ClearContextThread(cx);
         } catch(ScriptException& e) {
           Logger::getInstance()->log(std::string("DS485ScriptExtension::waitForFrame: Caught exception: ") + e.what(), lsError);
           goOn = false;
         }
       } while(goOn);
       m_pExtension->removeCallback(_bucket);
+      {
+        ScriptLock lock(getContext());
+        Logger::getInstance()->log("waitForFrame: got frame, aquiring request");
+        JSContextThread req(getContext());
+        _rootedFunction.reset();
+      }
       delete this;
     } // waitForFrame
 
@@ -179,7 +182,6 @@ namespace dss {
     DS485ScriptExtension* ext =
        dynamic_cast<DS485ScriptExtension*>(ctx->getEnvironment().getExtension(DS485ScriptExtensionName));
     assert(ext != NULL);
-    AssertLocked lock(ctx);
 
     if(argc >= 1) {
       try {
@@ -220,9 +222,8 @@ namespace dss {
 
   JSBool ds485_setCallback(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    AssertLocked lock(ctx);
     DS485ScriptExtension* ext =
-    dynamic_cast<DS485ScriptExtension*>(ctx->getEnvironment().getExtension(DS485ScriptExtensionName));
+      dynamic_cast<DS485ScriptExtension*>(ctx->getEnvironment().getExtension(DS485ScriptExtensionName));
     assert(ext != NULL);
 
     if(argc >= 2) {
@@ -272,7 +273,6 @@ namespace dss {
   JSBool DS485Frame_construct(JSContext *cx, JSObject *obj, uintN argc,
                               jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    AssertLocked lock(ctx);
     ScriptObject objWrapper(obj, *ctx);
     objWrapper.setProperty("source", -1);
     objWrapper.setProperty("broadcast", false);
