@@ -81,6 +81,7 @@ bool Thread::run() {
   }
 #ifndef WIN32
   pthread_create( &m_ThreadHandle, NULL, ThreadStarterHelperFunc, this );
+  pthread_detach(m_ThreadHandle);
 #else
   m_ThreadHandle = CreateThread( NULL, 0, &ThreadStarterHelperFunc, this, NULL, NULL );
 #endif
