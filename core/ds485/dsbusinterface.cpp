@@ -589,7 +589,7 @@ namespace dss {
     }
   }
   void DSBusInterface::undoScene(AddressableModelItem *pTarget)	{
-    Group *pGroup= dynamic_cast<Group*>(pTarget);
+    Group *pGroup = dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
     Zone *pZone =  dynamic_cast<Zone*>(pTarget);
 
@@ -714,7 +714,7 @@ namespace dss {
   }
 
   void DSBusInterface::handleBusCallSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID, 
-                                  uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID) {
+                                                  uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID) {
     
     static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID, _sceneID);
   }
