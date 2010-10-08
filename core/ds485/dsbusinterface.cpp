@@ -532,6 +532,13 @@ namespace dss {
     EventDeviceAccessibility_off_response_callback_t evDevAccessOff = DSBusInterface::eventDeviceAccessibilityOffCallback;
     DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT, EVENT_DEVICE_ACCESSIBILITY, 
                            EVENT_DEVICE_ACCESSIBILITY_OFF, (void*)evDevAccessOff, this);
+    
+    
+    ZoneGroupActionRequest_action_call_scene_request_callback_t handleBusCall = DSBusInterface::handleBusCallSceneCallback;
+    DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST, 
+                           ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_CALL_SCENE,
+                           (void*)handleBusCall, this);
+
     m_dsmApiReady = true;
   } // initialize
 
@@ -705,6 +712,19 @@ namespace dss {
 
     // Device 0x0000ffff (DeviceId: 3792 in Zone: 66) became active
     printf("Device 0x%08x (DeviceId: %d in Zone: %d) became active\n", _deviceDSID, _deviceID, _zoneID);
+  }
+  
+  
+  void DSBusInterface::handleBusCallScene(uint8_t _errorCode, dsid_t _sourceID, 
+                                          uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID) {
+    log("Scene called: sceneNr " + intToString(_sceneID) + " in zone " + intToString(_zoneID) + ", group " + 
+        intToString(_groupID) +  ", dsm " + dsid_helper::toString(_sourceID));
+  }
+
+  void DSBusInterface::handleBusCallSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID, 
+                                  uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID) {
+    
+    static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID, _sceneID);
   }
 
 
