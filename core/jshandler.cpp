@@ -270,7 +270,9 @@ namespace dss {
     m_LockedBy(0)
   {
     JS_SetOptions(m_pContext, JSOPTION_VAROBJFIX | JSOPTION_DONT_REPORT_UNCAUGHT);
+#ifdef JSVERSION_LATEST
     JS_SetVersion(m_pContext, JSVERSION_LATEST);
+#endif
     JS_SetErrorReporter(m_pContext, jsErrorHandler);
 
     /* Create the global object. */
