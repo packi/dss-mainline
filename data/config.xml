@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <properties version="1">
   <property name="config">
-    <property name="subsystems/DSBusInterface/rs485devicename" type="string">
-      <value>/dev/ttyUSB0</value>
+    <property name="subsystems/DSBusInterface/connectionURI" type="string">
+      <value>tcp://localhost:8442</value>
     </property>
     <property name="subsystems/DSSim/js-devices">
       <property name="example">

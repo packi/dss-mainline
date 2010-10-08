@@ -58,20 +58,18 @@ namespace dss {
     m_pDSSim(_pDSSim),
     m_dsmApiHandle(NULL),
     m_dsmApiReady(false),
-    m_connection("tcp://localhost:8442")
+    m_connectionURI("tcp://localhost:8442")
   {
     assert(_pModelMaintenance != NULL);
     
     SetBroadcastId(m_broadcastDSID);
     if(_pDSS != NULL) {
 
-#if 0
+      _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "connectionURI")
+            ->linkToProxy(PropertyProxyReference<std::string>(m_connectionURI, true));
+
       // TODO: libdsm
-
-      // read m_connection from config
-
-      _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "rs485devicename")
-            ->linkToProxy(PropertyProxyMemberFunction<DS485Controller, std::string>(m_DS485Controller, &DS485Controller::getRS485DeviceName, &DS485Controller::setRS485DeviceName));
+#if 0
       _pDSS->getPropertySystem().setBoolValue(getConfigPropertyBasePath() + "denyJoiningAsShortDevice", false, true, false);
 
       _pDSS->getPropertySystem().createProperty(getPropertyBasePath() + "tokensReceived")
@@ -492,15 +490,12 @@ namespace dss {
       return;
     }
 
-    // TODO: libdsm
-    m_connection = "tcp://192.168.2.124:8442";
-
-    int result = DsmApiOpen(m_dsmApiHandle, m_connection.c_str(), 0);
+    int result = DsmApiOpen(m_dsmApiHandle, m_connectionURI.c_str(), 0);
     if (result < 0) {
       log("Couldn't open dsmapi connection");
       return;
     }
-    log("Successfully connected to " + m_connection);
+    log("Successfully connected to " + m_connectionURI);
 
 
     // register callbacks

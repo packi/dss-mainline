@@ -78,15 +78,12 @@ namespace dss {
 
     DsmApiHandle_t m_dsmApiHandle;
     bool m_dsmApiReady;
-    std::string m_connection;
+    std::string m_connectionURI;
 
     dsid_t m_broadcastDSID;
 
     void checkResultCode(const int _resultCode);
     void busReady();
-
-    void setConnection(const std::string& _connection) { m_connection = _connection; }
-    const std::string& getConnection() const { return m_connection; }
 
     static void busChangeCallback(void* _userData, dsid_t *_id, int _flag);
     void handleBusChange(dsid_t *_id, int _flag);
