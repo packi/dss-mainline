@@ -938,40 +938,6 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="DeviceEnable">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="DeviceEnableResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="DeviceDisable">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="DeviceDisableResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
   <element name="DeviceStartDim">
    <complexType>
     <sequence>
@@ -2076,22 +2042,6 @@
  <part name="parameters" element="dss:DeviceDecreaseValueResponse"/>
 </message>
 
-<message name="DeviceEnableRequest">
- <part name="parameters" element="dss:DeviceEnable"/>
-</message>
-
-<message name="DeviceEnableResponse">
- <part name="parameters" element="dss:DeviceEnableResponse"/>
-</message>
-
-<message name="DeviceDisableRequest">
- <part name="parameters" element="dss:DeviceDisable"/>
-</message>
-
-<message name="DeviceDisableResponse">
- <part name="parameters" element="dss:DeviceDisableResponse"/>
-</message>
-
 <message name="DeviceStartDimRequest">
  <part name="parameters" element="dss:DeviceStartDim"/>
 </message>
@@ -2664,16 +2614,6 @@
   <documentation>Service definition of function dss__DeviceDecreaseValue</documentation>
   <input message="tns:DeviceDecreaseValueRequest"/>
   <output message="tns:DeviceDecreaseValueResponse"/>
- </operation>
- <operation name="DeviceEnable">
-  <documentation>Service definition of function dss__DeviceEnable</documentation>
-  <input message="tns:DeviceEnableRequest"/>
-  <output message="tns:DeviceEnableResponse"/>
- </operation>
- <operation name="DeviceDisable">
-  <documentation>Service definition of function dss__DeviceDisable</documentation>
-  <input message="tns:DeviceDisableRequest"/>
-  <output message="tns:DeviceDisableResponse"/>
  </operation>
  <operation name="DeviceStartDim">
   <documentation>Service definition of function dss__DeviceStartDim</documentation>
@@ -3334,24 +3274,6 @@
   </output>
  </operation>
  <operation name="DeviceDecreaseValue">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="DeviceEnable">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="DeviceDisable">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

@@ -546,13 +546,13 @@ int dss__SetSaveScene(struct soap *soap, int _token, char* _setSpec, int _sceneI
   return SOAP_OK;
 }
 
-int dss__SetUndoScene(struct soap *soap, int _token, char* _setSpec, int _sceneID, bool& result) {
+int dss__SetUndoScene(struct soap *soap, int _token, char* _setSpec, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  set.undoScene(_sceneID);
+  set.undoScene();
   result = true;
   return SOAP_OK;
 }
@@ -658,13 +658,13 @@ int dss__ApartmentSaveScene(struct soap *soap, int _token, int _groupID, int _sc
   return SOAP_OK;
 }
 
-int dss__ApartmentUndoScene(struct soap *soap, int _token, int _groupID, int _sceneID, bool& result) {
+int dss__ApartmentUndoScene(struct soap *soap, int _token, int _groupID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->undoScene(_sceneID);
+  group->undoScene();
   result = true;
   return SOAP_OK;
 }
@@ -771,13 +771,13 @@ int dss__ZoneSaveScene(struct soap *soap, int _token, int _zoneID, int _groupID,
   return SOAP_OK;
 }
 
-int dss__ZoneUndoScene(struct soap *soap, int _token, int _zoneID, int _groupID, int _sceneID, bool& result) {
+int dss__ZoneUndoScene(struct soap *soap, int _token, int _zoneID, int _groupID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->undoScene(_sceneID);
+  group->undoScene();
   result = true;
   return SOAP_OK;
 }
@@ -824,28 +824,6 @@ int dss__DeviceDecreaseValue(struct soap *soap, int _token, char* _deviceID, boo
     return getResult;
   }
   dev.decreaseValue();
-  result = true;
-  return SOAP_OK;
-}
-
-int dss__DeviceEnable(struct soap *soap, int _token, char* _deviceID, bool& result) {
-  dss::DeviceReference dev(dss::NullDSID, NULL);
-  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  dev.enable();
-  result = true;
-  return SOAP_OK;
-}
-
-int dss__DeviceDisable(struct soap *soap, int _token, char* _deviceID, bool& result) {
-  dss::DeviceReference dev(dss::NullDSID, NULL);
-  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  dev.disable();
   result = true;
   return SOAP_OK;
 }
@@ -905,13 +883,13 @@ int dss__DeviceSaveScene(struct soap *soap, int _token, char* _deviceID, int _sc
   return SOAP_OK;
 }
 
-int dss__DeviceUndoScene(struct soap *soap, int _token, char* _deviceID, int _sceneID, bool& result) {
+int dss__DeviceUndoScene(struct soap *soap, int _token, char* _deviceID, bool& result) {
   dss::DeviceReference device(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  device.undoScene(_sceneID);
+  device.undoScene();
   result = true;
   return SOAP_OK;
 }

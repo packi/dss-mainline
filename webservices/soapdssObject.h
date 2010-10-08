@@ -148,10 +148,6 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceIncreaseValue(struct soap*, int _token, cha
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceDecreaseValue(struct soap*, int _token, char *_deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceEnable(struct soap*, int _token, char *_deviceID, bool &result);
-
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceDisable(struct soap*, int _token, char *_deviceID, bool &result);
-
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceStartDim(struct soap*, int _token, char *_deviceID, bool _directionUp, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceEndDim(struct soap*, int _token, char *_deviceID, bool &result);

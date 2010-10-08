@@ -11,7 +11,7 @@
 #endif
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.15 2010-10-07 13:55:02 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.15 2010-10-08 07:36:34 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -183,10 +183,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__DeviceIncreaseValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceDecreaseValue"))
 		return soap_serve_dss__DeviceDecreaseValue(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:DeviceEnable"))
-		return soap_serve_dss__DeviceEnable(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:DeviceDisable"))
-		return soap_serve_dss__DeviceDisable(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceStartDim"))
 		return soap_serve_dss__DeviceStartDim(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceEndDim"))
@@ -2394,88 +2390,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceDecreaseValue(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__DeviceDecreaseValueResponse(soap, &soap_tmp_dss__DeviceDecreaseValueResponse, "dss:DeviceDecreaseValueResponse", NULL)
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceEnable(struct soap *soap)
-{	struct dss__DeviceEnable soap_tmp_dss__DeviceEnable;
-	struct dss__DeviceEnableResponse soap_tmp_dss__DeviceEnableResponse;
-	soap_default_dss__DeviceEnableResponse(soap, &soap_tmp_dss__DeviceEnableResponse);
-	soap_default_dss__DeviceEnable(soap, &soap_tmp_dss__DeviceEnable);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__DeviceEnable(soap, &soap_tmp_dss__DeviceEnable, "dss:DeviceEnable", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__DeviceEnable(soap, soap_tmp_dss__DeviceEnable._token, soap_tmp_dss__DeviceEnable._deviceID, soap_tmp_dss__DeviceEnableResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__DeviceEnableResponse(soap, &soap_tmp_dss__DeviceEnableResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__DeviceEnableResponse(soap, &soap_tmp_dss__DeviceEnableResponse, "dss:DeviceEnableResponse", NULL)
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__DeviceEnableResponse(soap, &soap_tmp_dss__DeviceEnableResponse, "dss:DeviceEnableResponse", NULL)
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceDisable(struct soap *soap)
-{	struct dss__DeviceDisable soap_tmp_dss__DeviceDisable;
-	struct dss__DeviceDisableResponse soap_tmp_dss__DeviceDisableResponse;
-	soap_default_dss__DeviceDisableResponse(soap, &soap_tmp_dss__DeviceDisableResponse);
-	soap_default_dss__DeviceDisable(soap, &soap_tmp_dss__DeviceDisable);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__DeviceDisable(soap, &soap_tmp_dss__DeviceDisable, "dss:DeviceDisable", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__DeviceDisable(soap, soap_tmp_dss__DeviceDisable._token, soap_tmp_dss__DeviceDisable._deviceID, soap_tmp_dss__DeviceDisableResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__DeviceDisableResponse(soap, &soap_tmp_dss__DeviceDisableResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__DeviceDisableResponse(soap, &soap_tmp_dss__DeviceDisableResponse, "dss:DeviceDisableResponse", NULL)
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__DeviceDisableResponse(soap, &soap_tmp_dss__DeviceDisableResponse, "dss:DeviceDisableResponse", NULL)
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

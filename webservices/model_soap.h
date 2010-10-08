@@ -174,10 +174,6 @@ int dss__DeviceTurnOff(int _token, char* _deviceID, bool& result);
 int dss__DeviceIncreaseValue(int _token, char* _deviceID, bool& result);
 /** Decreases the main value (e.g. brightness) on the device. */
 int dss__DeviceDecreaseValue(int _token, char* _deviceID, bool& result);
-/** Enables the device. */
-int dss__DeviceEnable(int _token, char* _deviceID, bool& result);
-/** Disables the device. */
-int dss__DeviceDisable(int _token, char* _deviceID, bool& result);
 /** Starts dimming the main parameter (e.g. brightness). If _directionUp is true, the dimming will increase
  * the parameter. */
 int dss__DeviceStartDim(int _token, char* _deviceID, bool _directionUp, bool& result);
