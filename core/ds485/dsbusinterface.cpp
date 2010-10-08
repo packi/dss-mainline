@@ -427,16 +427,9 @@ namespace dss {
   } // getPowerConsumption
 
   void DSBusInterface::requestPowerConsumption() {
-#if 0
-    // TODO: libdsm-api
-
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(0);
-    cmdFrame.getHeader().setBroadcast(true);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetPowerConsumption);
-    sendFrame(cmdFrame);
-#endif
+    uint32_t power;
+    int ret = CircuitEnergyMeterValue_get(m_dsmApiHandle, m_broadcastDSID, &power, NULL);
+    checkResultCode(ret);
   } // requestPowerConsumption
 
   unsigned long DSBusInterface::getEnergyMeterValue(const dsid_t& _dsMeterID) {
@@ -448,16 +441,9 @@ namespace dss {
   } // getEnergyMeterValue
 
   void DSBusInterface::requestEnergyMeterValue() {
-#if 0
-    // TODO: libdsm-api
-
-    DS485CommandFrame cmdFrame;
-    cmdFrame.getHeader().setDestination(0);
-    cmdFrame.getHeader().setBroadcast(true);
-    cmdFrame.setCommand(CommandRequest);
-    cmdFrame.getPayload().add<uint8_t>(FunctionDSMeterGetEnergyMeterValue);
-    sendFrame(cmdFrame);
-#endif
+    uint32_t energy;
+    int ret = CircuitEnergyMeterValue_get(m_dsmApiHandle, m_broadcastDSID, NULL, &energy);
+    checkResultCode(ret);
   } // requestEnergyMeterValue
 
   bool DSBusInterface::getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) {
@@ -533,6 +519,11 @@ namespace dss {
     DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST, 
                            ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_CALL_SCENE,
                            (void*)handleBusCall, this);
+    
+    // TODO: libdsm
+    // register callbacks for 
+    // - CircuitEnergyMeterValue_get
+    // - CircuitPowerMeterValue_get
 
     m_dsmApiReady = true;
   } // initialize
