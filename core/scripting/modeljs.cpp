@@ -700,7 +700,7 @@ namespace dss {
     {"decreaseValue", dev_decrease_value, 0, 0, 0},
     {"callScene", dev_call_scene, 1, 0, 0},
     {"saveScene", dev_save_scene, 1, 0, 0},
-    {"undoScene", dev_undo_scene, 1, 0, 0},
+    {"undoScene", dev_undo_scene, 0, 0, 0},
     {"getSensorValue", dev_get_sensor_value, 1, 0, 0},
     {NULL, NULL, 0, 0, 0}
   };
