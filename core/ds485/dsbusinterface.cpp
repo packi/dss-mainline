@@ -655,15 +655,14 @@ namespace dss {
     static_cast<DSBusInterface*>(_userData)->handleBusChange(_id, _flag);
   }
   void DSBusInterface::handleBusChange(dsid_t *_id, int _flag) {
-    std::string s = dsid_helper::toString(*_id);
+    ModelEvent::EventType eventType = ModelEvent::etNewDSMeter;
     if (_flag) {
-      s += "left";
+      eventType = ModelEvent::etLostDSMeter;
     }	else	{
-      s += "joined";
+      eventType = ModelEvent::etNewDSMeter;
     }
-    s += " bus";
-
-    log(s);
+    
+    m_pModelMaintenance->addModelEvent(new ModelEvent(eventType));
   }
 
   void DSBusInterface::eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData, dsid_t _dsMeterID,
