@@ -567,12 +567,9 @@ namespace dss {
     } else if (pDevice)	{
       dsid_t dsid;
       dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      
       DeviceActionRequest_action_call_scene(m_dsmApiHandle, dsid, pDevice->getShortAddress(), scene);
     } else if (pZone) {
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      ZoneGroupActionRequest_action_call_scene(m_dsmApiHandle, dsid, pGroup->getZoneID(), 0, scene);
+      ZoneGroupActionRequest_action_call_scene(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), 0, scene);
     }
 		}
 
