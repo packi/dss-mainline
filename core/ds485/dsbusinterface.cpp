@@ -684,16 +684,15 @@ namespace dss {
 
   void DSBusInterface::eventDeviceAccessibilityOn(uint8_t _errorCode, dsid_t _dsMeterID,
                                                   uint16_t _deviceID, uint16_t _zoneID, uint32_t _deviceDSID) {
-#if 0
-    ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etNewDevice, );
-    pEvent->addParameter(zoneID);
-    pEvent->addParameter(devID);
-    pEvent->addParameter(functionID);
-    raiseModelEvent(pEvent);
-#endif
-
-    // Device 0x0000ffff (DeviceId: 3792 in Zone: 66) became active
-    printf("Device 0x%08x (DeviceId: %d in Zone: %d) became active\n", _deviceDSID, _deviceID, _zoneID);
+    dss_dsid_t dsMeterID;
+    dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
+    DeviceSpec_t deviceSpec = deviceGetSpec(_deviceID, dsMeterID);
+    
+    ModelEvent* pEvent = new ModelEvent(ModelEvent::etNewDevice);
+    pEvent->addParameter(_zoneID);
+    pEvent->addParameter(_deviceDSID);
+    pEvent->addParameter(deviceSpec.get<0>());
+    m_pModelMaintenance->addModelEvent(pEvent);
   }
   
   
