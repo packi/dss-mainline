@@ -95,15 +95,17 @@ namespace dss {
     void handleBusState(bus_state_t _state);
 
     static void eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData,
+                                                    dsid_t _dsMeterID,
                                                     uint16_t _deviceID, uint16_t _zoneID,
                                                     uint32_t _deviceDSID );
-    void eventDeviceAccessibilityOff(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
-                                     uint32_t _deviceDSID);
+    void eventDeviceAccessibilityOff(uint8_t _errorCode, dsid_t _dsMeterID, uint16_t _deviceID, 
+                                     uint16_t _zoneID, uint32_t _deviceDSID);
     static void eventDeviceAccessibilityOnCallback(uint8_t _errorCode, void* _userData,
+                                                   dsid_t _dsMeterID,
                                                    uint16_t _deviceID, uint16_t _zoneID,
                                                    uint32_t _deviceDSID);
-    void eventDeviceAccessibilityOn(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
-                                    uint32_t _deviceDSID);
+    void eventDeviceAccessibilityOn(uint8_t _errorCode, dsid_t _dsMeterID, uint16_t _deviceID, 
+                                    uint16_t _zoneID, uint32_t _deviceDSID);
 
   protected:
     virtual void doStart();

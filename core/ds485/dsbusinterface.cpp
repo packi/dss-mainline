@@ -126,9 +126,9 @@ namespace dss {
     uint16_t functionId, productId, version;
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
-    int ret = DeviceInfo_by_device_id_sync(m_dsmApiHandle, dsmDSID, _id,
-                                           NULL, &functionId, &productId, &version,
-                                           NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    int ret = DeviceInfo_by_device_id(m_dsmApiHandle, dsmDSID, _id,
+                                      NULL, &functionId, &productId, &version,
+                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     checkResultCode(ret);
 
     DeviceSpec_t spec(functionId, productId, version, _id);
@@ -139,8 +139,7 @@ namespace dss {
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
 
-    int ret = DeviceProperties_set_locked_flag_sync(m_dsmApiHandle, dsmDSID,
-                                                    _device.getShortAddress(), _lock);
+    int ret = DeviceProperties_set_locked_flag(m_dsmApiHandle, dsmDSID, _device.getShortAddress(), _lock);
     checkResultCode(ret);
   } // lockOrUnlockDevice
 
@@ -149,9 +148,9 @@ namespace dss {
     uint8_t locked;
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(_device->getDSMeterDSID(), dsmDSID);
-    int ret = DeviceInfo_by_device_id_sync(m_dsmApiHandle, dsmDSID, _device->getShortAddress(),
-                                           NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                                           &locked, NULL, NULL, NULL, NULL);
+    int ret = DeviceInfo_by_device_id(m_dsmApiHandle, dsmDSID, _device->getShortAddress(),
+                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                                      &locked, NULL, NULL, NULL, NULL);
     checkResultCode(ret);
     return locked;
   } // isLocked
@@ -282,8 +281,7 @@ namespace dss {
     uint16_t apiVersion;
     uint8_t dsidBuf[DSID_LEN];
     uint8_t nameBuf[NAME_LEN];
-    int ret = dSMInfo_sync(m_dsmApiHandle, _dsMeterID,
-                           &hwVersion, &swVersion, &apiVersion, dsidBuf, nameBuf);
+    int ret = dSMInfo(m_dsmApiHandle, _dsMeterID, &hwVersion, &swVersion, &apiVersion, dsidBuf, nameBuf);
     checkResultCode(ret);
 
     // convert to std::string
@@ -299,8 +297,7 @@ namespace dss {
     uint8_t virtualZoneId, numberOfGroups;
     uint8_t name[NAME_LEN];
 
-    int ret = ZoneInfo_by_id_sync(m_dsmApiHandle, _dsMeterID, _zoneID,
-                                  &zoneId, &virtualZoneId, &numberOfGroups, name);
+    int ret = ZoneInfo_by_id(m_dsmApiHandle, _dsMeterID, _zoneID, &zoneId, &virtualZoneId, &numberOfGroups, name);
     checkResultCode(ret);
 
     // TODO: libdsm:
@@ -318,8 +315,7 @@ namespace dss {
 
     uint8_t groupId;
     for(int iGroup = 0; iGroup < numGroups; iGroup++) {
-      int ret = ZoneGroupInfo_by_index_sync(m_dsmApiHandle, _dsMeterID, _zoneID, iGroup,
-                                            &groupId, NULL, NULL);
+      int ret = ZoneGroupInfo_by_index(m_dsmApiHandle, _dsMeterID, _zoneID, iGroup, &groupId, NULL, NULL);
       checkResultCode(ret);
 
       result.push_back(groupId);
@@ -329,9 +325,8 @@ namespace dss {
 
   std::vector<int> DSBusInterface::getGroupsOfDevice(const dsid_t& _dsMeterID, const int _deviceID) {
     uint8_t groups[GROUPS_LEN];
-    int ret = DeviceInfo_by_device_id_sync(m_dsmApiHandle, _dsMeterID, _deviceID,
-                                           NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                                           groups, NULL, NULL, NULL);
+    int ret = DeviceInfo_by_device_id(m_dsmApiHandle, _dsMeterID, _deviceID, NULL, NULL, NULL, NULL, 
+                                      NULL, NULL, NULL, NULL, groups, NULL, NULL, NULL);
     checkResultCode(ret);
     std::vector<int> result;
     for (int iByte = 0; iByte < GROUPS_LEN; iByte++) {
@@ -347,7 +342,7 @@ namespace dss {
 
   int DSBusInterface::getZoneCount(const dsid_t& _dsMeterID) {
     uint8_t zoneCount;
-    int ret = ZoneCount_sync(m_dsmApiHandle, _dsMeterID, &zoneCount);
+    int ret = ZoneCount(m_dsmApiHandle, _dsMeterID, &zoneCount);
     checkResultCode(ret);
     return zoneCount;
   } // getZoneCount
@@ -360,7 +355,7 @@ namespace dss {
 
     uint16_t zoneId;
     for(int iZone = 0; iZone < numZones; iZone++) {
-      int ret = ZoneInfo_by_index_sync(m_dsmApiHandle, _dsMeterID, iZone,
+      int ret = ZoneInfo_by_index(m_dsmApiHandle, _dsMeterID, iZone,
                                        &zoneId, NULL, NULL, NULL);
     checkResultCode(ret);
 
@@ -373,7 +368,7 @@ namespace dss {
   int DSBusInterface::getDevicesCountInZone(const dsid_t& _dsMeterID, const int _zoneID) {
 
     uint16_t numberOfDevices;
-    int ret = ZoneDeviceCount_all_sync(m_dsmApiHandle, _dsMeterID, _zoneID, &numberOfDevices);
+    int ret = ZoneDeviceCount_all(m_dsmApiHandle, _dsMeterID, _zoneID, &numberOfDevices);
     checkResultCode(ret);
 
     return numberOfDevices;
@@ -387,8 +382,8 @@ namespace dss {
     log(std::string("Found ") + intToString(numDevices) + " devices in zone.");
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
       uint16_t deviceId;
-      int ret = DeviceInfo_by_index_sync(m_dsmApiHandle, _dsMeterID, _zoneID, iDevice, &deviceId,
-                                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+      int ret = DeviceInfo_by_index(m_dsmApiHandle, _dsMeterID, _zoneID, iDevice, &deviceId,
+                                    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
       checkResultCode(ret);
       result.push_back(deviceId);
     }
@@ -397,26 +392,25 @@ namespace dss {
 
   void DSBusInterface::setZoneID(const dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) {
 
-    int ret = DeviceProperties_set_zone_sync(m_dsmApiHandle, _dsMeterID, _deviceID, _zoneID);
+    int ret = DeviceProperties_set_zone(m_dsmApiHandle, _dsMeterID, _deviceID, _zoneID);
     checkResultCode(ret);
   } // setZoneID
 
   void DSBusInterface::createZone(const dsid_t& _dsMeterID, const int _zoneID) {
 
-    int ret = ZoneModify_add_sync(m_dsmApiHandle, _dsMeterID, _zoneID);
+    int ret = ZoneModify_add(m_dsmApiHandle, _dsMeterID, _zoneID);
     checkResultCode(ret);
   } // createZone
 
   void DSBusInterface::removeZone(const dsid_t& _dsMeterID, const int _zoneID) {
-    int ret = ZoneModify_remove_sync(m_dsmApiHandle, _dsMeterID, _zoneID);
+    int ret = ZoneModify_remove(m_dsmApiHandle, _dsMeterID, _zoneID);
     checkResultCode(ret);
   } // removeZone
 
   dss_dsid_t DSBusInterface::getDSIDOfDevice(const dsid_t& _dsMeterID, const int _deviceID) {
     dsid_t dsid;
-    int ret = DeviceInfo_by_device_id_sync(m_dsmApiHandle, _dsMeterID, _deviceID,
-                                           NULL, NULL, NULL, NULL,
-                                           NULL, NULL, NULL, NULL, NULL, NULL, NULL, dsid.id);
+    int ret = DeviceInfo_by_device_id(m_dsmApiHandle, _dsMeterID, _deviceID, NULL, NULL, NULL, NULL,
+                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, dsid.id);
     checkResultCode(ret);
 
     dss_dsid_t dss_dsid;
@@ -431,7 +425,7 @@ namespace dss {
 
   unsigned long DSBusInterface::getPowerConsumption(const dsid_t& _dsMeterID) {
     uint32_t power;
-    int ret = CircuitEnergyMeterValue_get_sync(m_dsmApiHandle, _dsMeterID, &power, NULL);
+    int ret = CircuitEnergyMeterValue_get(m_dsmApiHandle, _dsMeterID, &power, NULL);
     checkResultCode(ret);
 
     return power;
@@ -452,7 +446,7 @@ namespace dss {
 
   unsigned long DSBusInterface::getEnergyMeterValue(const dsid_t& _dsMeterID) {
     uint32_t energy;
-    int ret = CircuitEnergyMeterValue_get_sync(m_dsmApiHandle, _dsMeterID, NULL, &energy);
+    int ret = CircuitEnergyMeterValue_get(m_dsmApiHandle, _dsMeterID, NULL, &energy);
     checkResultCode(ret);
 
     return energy;
@@ -484,26 +478,27 @@ namespace dss {
   } // getSensorValue
 
   void DSBusInterface::addToGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
-    int ret = DeviceGroupMembershipModify_add_sync(m_dsmApiHandle, _dsMeterID, _deviceID, _groupID);
+    int ret = DeviceGroupMembershipModify_add(m_dsmApiHandle, _dsMeterID, _deviceID, _groupID);
     checkResultCode(ret);
   } // addToGroup
 
   void DSBusInterface::removeFromGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
-    int ret = DeviceGroupMembershipModify_remove_sync(m_dsmApiHandle, _dsMeterID, _deviceID, _groupID);
+    int ret = DeviceGroupMembershipModify_remove(m_dsmApiHandle, _dsMeterID, _deviceID, _groupID);
     checkResultCode(ret);
   } // removeFromGroup
 
   int DSBusInterface::addUserGroup(const int _dsMeterID) {
+    log("addUserGroup(): not implemented yet");
     return 0;
   } // addUserGroup
 
   void DSBusInterface::removeUserGroup(const int _dsMeterID, const int _groupID) {
-
+    log("removeUserGroup(): not implemented yet");
   } // removeUserGroup
 
   void DSBusInterface::removeInactiveDevices(const dsid_t& _dsMeterID) {
 
-    int ret = CircuitRemoveInactiveDevices_sync(m_dsmApiHandle, _dsMeterID);
+    int ret = CircuitRemoveInactiveDevices(m_dsmApiHandle, _dsMeterID);
     checkResultCode(ret);
   }
 
@@ -531,12 +526,12 @@ namespace dss {
     DsmApiRegisterBusStateCallback(m_dsmApiHandle, DSBusInterface::busStateCallback, this);
     DsmApiRegisterBusChangeCallback(m_dsmApiHandle, DSBusInterface::busChangeCallback, this);
 
-    EventDeviceAccessibility_off_callback_t evDevAccessOn = DSBusInterface::eventDeviceAccessibilityOnCallback;
-    DsmApiRegisterCallback(m_dsmApiHandle, EVENT_DEVICE_ACCESSIBILITY, EVENT_DEVICE_ACCESSIBILITY_ON,
-                           (void*)evDevAccessOn, this);
-    EventDeviceAccessibility_off_callback_t evDevAccessOff = DSBusInterface::eventDeviceAccessibilityOffCallback;
-    DsmApiRegisterCallback(m_dsmApiHandle, EVENT_DEVICE_ACCESSIBILITY, EVENT_DEVICE_ACCESSIBILITY_OFF,
-                           (void*)evDevAccessOff, this);
+    EventDeviceAccessibility_off_response_callback_t evDevAccessOn = DSBusInterface::eventDeviceAccessibilityOnCallback;
+    DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT, EVENT_DEVICE_ACCESSIBILITY, 
+                           EVENT_DEVICE_ACCESSIBILITY_ON, (void*)evDevAccessOn, this);
+    EventDeviceAccessibility_off_response_callback_t evDevAccessOff = DSBusInterface::eventDeviceAccessibilityOffCallback;
+    DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT, EVENT_DEVICE_ACCESSIBILITY, 
+                           EVENT_DEVICE_ACCESSIBILITY_OFF, (void*)evDevAccessOff, this);
     m_dsmApiReady = true;
   } // initialize
 
@@ -566,16 +561,16 @@ namespace dss {
     Zone *pZone =  dynamic_cast<Zone*>(pTarget);
 
     if (pGroup) {
-      ZoneGroupActionRequest_action_call_scene_sync(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
+      ZoneGroupActionRequest_action_call_scene(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
     } else if (pDevice)	{
       dsid_t dsid;
       dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
       
-      DeviceActionRequest_action_call_scene_sync(m_dsmApiHandle, dsid, pDevice->getShortAddress(), scene);
+      DeviceActionRequest_action_call_scene(m_dsmApiHandle, dsid, pDevice->getShortAddress(), scene);
     } else if (pZone) {
       dsid_t dsid;
       dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      ZoneGroupActionRequest_action_call_scene_sync(m_dsmApiHandle, dsid, pGroup->getZoneID(), 0, scene);
+      ZoneGroupActionRequest_action_call_scene(m_dsmApiHandle, dsid, pGroup->getZoneID(), 0, scene);
     }
 		}
 
@@ -585,13 +580,13 @@ namespace dss {
     Zone *pZone =  dynamic_cast<Zone*>(pTarget);
 
     if (pGroup) {
-      ZoneGroupActionRequest_action_call_scene_sync(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
+      ZoneGroupActionRequest_action_call_scene(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
     } else if (pDevice) {
       dsid_t dsid;
       dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      DeviceActionRequest_action_save_scene_sync(m_dsmApiHandle, dsid, pDevice->getShortAddress(), scene);
+      DeviceActionRequest_action_save_scene(m_dsmApiHandle, dsid, pDevice->getShortAddress(), scene);
     } else if (pZone) {
-      ZoneGroupActionRequest_action_call_scene_sync(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), 0, scene);
+      ZoneGroupActionRequest_action_call_scene(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), 0, scene);
     }
   }
   void DSBusInterface::undoScene(AddressableModelItem *pTarget)	{
@@ -600,13 +595,13 @@ namespace dss {
     Zone *pZone =  dynamic_cast<Zone*>(pTarget);
 
     if (pGroup) {
-      ZoneGroupActionRequest_action_undo_scene_sync(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), pGroup->getID());
+      ZoneGroupActionRequest_action_undo_scene(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), pGroup->getID());
     } else if (pDevice)	{
       dsid_t dsid;
       dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      DeviceActionRequest_action_undo_scene_sync(m_dsmApiHandle, dsid, pDevice->getShortAddress());
+      DeviceActionRequest_action_undo_scene(m_dsmApiHandle, dsid, pDevice->getShortAddress());
     } else if (pZone) {
-      ZoneGroupActionRequest_action_undo_scene_sync(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), 0);
+      ZoneGroupActionRequest_action_undo_scene(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), 0);
     }
   }
 
@@ -616,13 +611,13 @@ namespace dss {
     Zone *pZone =  dynamic_cast<Zone*>(pTarget);
 			
     if (pGroup) {
-      ZoneGroupActionRequest_action_blink_sync(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), pGroup->getID());
+      ZoneGroupActionRequest_action_blink(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), pGroup->getID());
     } else if (pDevice) {
       dsid_t dsid;
       dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      DeviceActionRequest_action_blink_sync(m_dsmApiHandle, dsid, pDevice->getShortAddress());
+      DeviceActionRequest_action_blink(m_dsmApiHandle, dsid, pDevice->getShortAddress());
     } else if (pZone) {
-      ZoneGroupActionRequest_action_blink_sync(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), 0);
+      ZoneGroupActionRequest_action_blink(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), 0);
     }
   }
 
@@ -681,25 +676,25 @@ namespace dss {
     log(s);
   }
 
-  void DSBusInterface::eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData,
-                                                       uint16_t _deviceID, uint16_t _zoneID,
-                                                       uint32_t _deviceDSID) {
-
-    static_cast<DSBusInterface*>(_userData)->eventDeviceAccessibilityOff(_errorCode, _deviceID, _zoneID, _deviceDSID);
+  void DSBusInterface::eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData, dsid_t _dsMeterID,
+                                                           uint16_t _deviceID, uint16_t _zoneID,uint32_t _deviceDSID) {
+    static_cast<DSBusInterface*>(_userData)->eventDeviceAccessibilityOff(_errorCode, _dsMeterID, _deviceID, 
+                                                                         _zoneID, _deviceDSID);
   }
 
-  void DSBusInterface::eventDeviceAccessibilityOff(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
-                                               uint32_t _deviceDSID) {
+  void DSBusInterface::eventDeviceAccessibilityOff(uint8_t _errorCode, dsid_t _dsMeterId, uint16_t _deviceID, 
+                                                   uint16_t _zoneID, uint32_t _deviceDSID) {
     printf("Device 0x%08x (DeviceId: %d in Zone: %d) became inactive\n", _deviceDSID, _deviceID, _zoneID);
   }
 
-  void DSBusInterface::eventDeviceAccessibilityOnCallback(uint8_t _errorCode, void* _userData, uint16_t _deviceID, uint16_t _zoneID,
-                                                      uint32_t _deviceDSID) {
-    static_cast<DSBusInterface*>(_userData)->eventDeviceAccessibilityOn(_errorCode, _deviceID, _zoneID, _deviceDSID);
+  void DSBusInterface::eventDeviceAccessibilityOnCallback(uint8_t _errorCode, void* _userData, dsid_t _dsMeterID, 
+                                                          uint16_t _deviceID, uint16_t _zoneID, uint32_t _deviceDSID) {
+    static_cast<DSBusInterface*>(_userData)->eventDeviceAccessibilityOn(_errorCode, _dsMeterID, _deviceID, 
+                                                                        _zoneID, _deviceDSID);
   }
 
-  void DSBusInterface::eventDeviceAccessibilityOn(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
-                                              uint32_t _deviceDSID) {
+  void DSBusInterface::eventDeviceAccessibilityOn(uint8_t _errorCode, dsid_t _dsMeterID,
+                                                  uint16_t _deviceID, uint16_t _zoneID, uint32_t _deviceDSID) {
 #if 0
     ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etNewDevice, );
     pEvent->addParameter(zoneID);
