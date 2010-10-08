@@ -87,22 +87,22 @@ namespace dss {
 
     void checkResultCode(const int _resultCode);
     void busReady();
-    
+
     void setConnection(const std::string& _connection) { m_connection = _connection; }
     const std::string& getConnection() const { return m_connection; }
-    
+
     static void busChangeCallback(void* _userData, dsid_t *_id, int _flag);
     void handleBusChange(dsid_t *_id, int _flag);
 
     static void busStateCallback(void* _userData, bus_state_t _state);
     void handleBusState(bus_state_t _state);
-    
+
     static void eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData,
-                                                    uint16_t _deviceID, uint16_t _zoneID, 
+                                                    uint16_t _deviceID, uint16_t _zoneID,
                                                     uint32_t _deviceDSID );
     void eventDeviceAccessibilityOff(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
                                      uint32_t _deviceDSID);
-    static void eventDeviceAccessibilityOnCallback(uint8_t _errorCode, void* _userData, 
+    static void eventDeviceAccessibilityOnCallback(uint8_t _errorCode, void* _userData,
                                                    uint16_t _deviceID, uint16_t _zoneID,
                                                    uint32_t _deviceDSID);
     void eventDeviceAccessibilityOn(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
@@ -164,15 +164,13 @@ namespace dss {
     virtual void requestEnergyMeterValue();
     virtual void requestPowerConsumption();
     virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper);
-    
+
     virtual void callScene(AddressableModelItem *pTarget, const uint16_t scene);
     virtual void saveScene(AddressableModelItem *pTarget, const uint16_t scene);
     virtual void undoScene(AddressableModelItem *pTarget);
     virtual void blink(AddressableModelItem *pTarget);
     virtual void increaseValue(AddressableModelItem *pTarget);
     virtual void decreaseValue(AddressableModelItem *pTarget);
-    virtual void startDim(AddressableModelItem *pTarget, const bool _directionUp);
-    virtual void endDim(AddressableModelItem *pTarget);
     virtual void setValue(AddressableModelItem *pTarget, const double _value);
 
     //------------------------------------------------ Device

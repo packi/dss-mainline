@@ -326,10 +326,6 @@ namespace dss {
             result->setCommand(boost::bind(&Set::turnOn, _1));
           } else if(typeName == "turnOff") {
             result->setCommand(boost::bind(&Set::turnOff, _1));
-          } else if(typeName == "dimUp") {
-            result->setCommand(boost::bind(&Set::startDim, _1, true));
-          } else if(typeName == "stopDim") {
-            result->setCommand(boost::bind(&Set::endDim, _1));
           } else if(typeName == "increaseValue") {
             result->setCommand(boost::bind(&Set::increaseValue, _1));
           } else if(typeName == "decreaseValue") {

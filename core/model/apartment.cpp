@@ -23,7 +23,6 @@
 #include "apartment.h"
 
 #include "core/businterface.h"
-#include "core/ds485const.h"
 #include "core/model/modelconst.h"
 #include "core/logger.h"
 #include "core/propertysystem.h"

@@ -32,8 +32,6 @@
 #include "core/dss.h"
 #include "core/propertysystem.h"
 
-#include "core/ds485const.h"
-
 #include "core/model/apartment.h"
 #include "core/model/device.h"
 

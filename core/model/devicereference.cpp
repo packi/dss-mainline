@@ -75,24 +75,12 @@ namespace dss {
     getDevice()->decreaseValue();
   } // decreaseValue
 
-  void DeviceReference::startDim(const bool _directionUp) {
-    getDevice()->startDim(_directionUp);
-  } // startDim
-
-  void DeviceReference::endDim() {
-    getDevice()->endDim();
-  } // endDim
-
   void DeviceReference::setValue(const double _value) {
     getDevice()->setValue(_value);
   } // setValue
 
   bool DeviceReference::isOn() const {
     return getDevice()->isOn();
-  }
-
-  bool DeviceReference::hasSwitch() const {
-    return getDevice()->hasSwitch();
   }
 
   void DeviceReference::callScene(const int _sceneNr) {

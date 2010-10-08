@@ -22,7 +22,6 @@
 
 #include "device.h"
 
-#include "core/ds485const.h"
 #include "core/model/modelconst.h"
 #include "core/propertysystem.h"
 #include "core/model/scenehelper.h"
@@ -106,10 +105,6 @@ namespace dss {
   void Device::setRevisionID(const int _value) {
     m_RevisionID = _value;
   } // setRevisionID
-
-  bool Device::hasSwitch() const {
-    return getFunctionID() == FunctionIDSwitch;
-  } // hasSwitch
 
   void Device::setRawValue(const uint16_t _value, const int _parameterNr, const int _size) {
     if(m_pApartment->getDeviceBusInterface() != NULL) {

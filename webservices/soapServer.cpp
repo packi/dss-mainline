@@ -11,7 +11,7 @@
 #endif
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.15 2010-10-08 07:36:34 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.15 2010-10-08 08:50:15 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -125,10 +125,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__SetIncreaseValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:SetDecreaseValue"))
 		return soap_serve_dss__SetDecreaseValue(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:SetStartDim"))
-		return soap_serve_dss__SetStartDim(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:SetEndDim"))
-		return soap_serve_dss__SetEndDim(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:SetSetValue"))
 		return soap_serve_dss__SetSetValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:SetCallScene"))
@@ -143,10 +139,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__ApartmentIncreaseValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentDecreaseValue"))
 		return soap_serve_dss__ApartmentDecreaseValue(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentStartDim"))
-		return soap_serve_dss__ApartmentStartDim(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentEndDim"))
-		return soap_serve_dss__ApartmentEndDim(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentSetValue"))
 		return soap_serve_dss__ApartmentSetValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ApartmentCallScene"))
@@ -165,10 +157,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__ZoneIncreaseValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ZoneDecreaseValue"))
 		return soap_serve_dss__ZoneDecreaseValue(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:ZoneStartDim"))
-		return soap_serve_dss__ZoneStartDim(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:ZoneEndDim"))
-		return soap_serve_dss__ZoneEndDim(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ZoneSetValue"))
 		return soap_serve_dss__ZoneSetValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:ZoneCallScene"))
@@ -183,10 +171,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__DeviceIncreaseValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceDecreaseValue"))
 		return soap_serve_dss__DeviceDecreaseValue(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:DeviceStartDim"))
-		return soap_serve_dss__DeviceStartDim(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:DeviceEndDim"))
-		return soap_serve_dss__DeviceEndDim(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceSetValue"))
 		return soap_serve_dss__DeviceSetValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetValue"))
@@ -1208,88 +1192,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetDecreaseValue(struct soap *soap)
 	return soap_closesock(soap);
 }
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetStartDim(struct soap *soap)
-{	struct dss__SetStartDim soap_tmp_dss__SetStartDim;
-	struct dss__SetStartDimResponse soap_tmp_dss__SetStartDimResponse;
-	soap_default_dss__SetStartDimResponse(soap, &soap_tmp_dss__SetStartDimResponse);
-	soap_default_dss__SetStartDim(soap, &soap_tmp_dss__SetStartDim);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__SetStartDim(soap, &soap_tmp_dss__SetStartDim, "dss:SetStartDim", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__SetStartDim(soap, soap_tmp_dss__SetStartDim._token, soap_tmp_dss__SetStartDim._setSpec, soap_tmp_dss__SetStartDim._directionUp, soap_tmp_dss__SetStartDimResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__SetStartDimResponse(soap, &soap_tmp_dss__SetStartDimResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__SetStartDimResponse(soap, &soap_tmp_dss__SetStartDimResponse, "dss:SetStartDimResponse", NULL)
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__SetStartDimResponse(soap, &soap_tmp_dss__SetStartDimResponse, "dss:SetStartDimResponse", NULL)
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetEndDim(struct soap *soap)
-{	struct dss__SetEndDim soap_tmp_dss__SetEndDim;
-	struct dss__SetEndDimResponse soap_tmp_dss__SetEndDimResponse;
-	soap_default_dss__SetEndDimResponse(soap, &soap_tmp_dss__SetEndDimResponse);
-	soap_default_dss__SetEndDim(soap, &soap_tmp_dss__SetEndDim);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__SetEndDim(soap, &soap_tmp_dss__SetEndDim, "dss:SetEndDim", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__SetEndDim(soap, soap_tmp_dss__SetEndDim._token, soap_tmp_dss__SetEndDim._setSpec, soap_tmp_dss__SetEndDimResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__SetEndDimResponse(soap, &soap_tmp_dss__SetEndDimResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__SetEndDimResponse(soap, &soap_tmp_dss__SetEndDimResponse, "dss:SetEndDimResponse", NULL)
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__SetEndDimResponse(soap, &soap_tmp_dss__SetEndDimResponse, "dss:SetEndDimResponse", NULL)
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__SetSetValue(struct soap *soap)
 {	struct dss__SetSetValue soap_tmp_dss__SetSetValue;
 	struct dss__SetSetValueResponse soap_tmp_dss__SetSetValueResponse;
@@ -1570,88 +1472,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentDecreaseValue(struct soap *so
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__ApartmentDecreaseValueResponse(soap, &soap_tmp_dss__ApartmentDecreaseValueResponse, "dss:ApartmentDecreaseValueResponse", NULL)
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentStartDim(struct soap *soap)
-{	struct dss__ApartmentStartDim soap_tmp_dss__ApartmentStartDim;
-	struct dss__ApartmentStartDimResponse soap_tmp_dss__ApartmentStartDimResponse;
-	soap_default_dss__ApartmentStartDimResponse(soap, &soap_tmp_dss__ApartmentStartDimResponse);
-	soap_default_dss__ApartmentStartDim(soap, &soap_tmp_dss__ApartmentStartDim);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__ApartmentStartDim(soap, &soap_tmp_dss__ApartmentStartDim, "dss:ApartmentStartDim", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__ApartmentStartDim(soap, soap_tmp_dss__ApartmentStartDim._token, soap_tmp_dss__ApartmentStartDim._groupID, soap_tmp_dss__ApartmentStartDim._directionUp, soap_tmp_dss__ApartmentStartDimResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__ApartmentStartDimResponse(soap, &soap_tmp_dss__ApartmentStartDimResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__ApartmentStartDimResponse(soap, &soap_tmp_dss__ApartmentStartDimResponse, "dss:ApartmentStartDimResponse", NULL)
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__ApartmentStartDimResponse(soap, &soap_tmp_dss__ApartmentStartDimResponse, "dss:ApartmentStartDimResponse", NULL)
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ApartmentEndDim(struct soap *soap)
-{	struct dss__ApartmentEndDim soap_tmp_dss__ApartmentEndDim;
-	struct dss__ApartmentEndDimResponse soap_tmp_dss__ApartmentEndDimResponse;
-	soap_default_dss__ApartmentEndDimResponse(soap, &soap_tmp_dss__ApartmentEndDimResponse);
-	soap_default_dss__ApartmentEndDim(soap, &soap_tmp_dss__ApartmentEndDim);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__ApartmentEndDim(soap, &soap_tmp_dss__ApartmentEndDim, "dss:ApartmentEndDim", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__ApartmentEndDim(soap, soap_tmp_dss__ApartmentEndDim._token, soap_tmp_dss__ApartmentEndDim._groupID, soap_tmp_dss__ApartmentEndDimResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__ApartmentEndDimResponse(soap, &soap_tmp_dss__ApartmentEndDimResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__ApartmentEndDimResponse(soap, &soap_tmp_dss__ApartmentEndDimResponse, "dss:ApartmentEndDimResponse", NULL)
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__ApartmentEndDimResponse(soap, &soap_tmp_dss__ApartmentEndDimResponse, "dss:ApartmentEndDimResponse", NULL)
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -2028,88 +1848,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneDecreaseValue(struct soap *soap)
 	return soap_closesock(soap);
 }
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneStartDim(struct soap *soap)
-{	struct dss__ZoneStartDim soap_tmp_dss__ZoneStartDim;
-	struct dss__ZoneStartDimResponse soap_tmp_dss__ZoneStartDimResponse;
-	soap_default_dss__ZoneStartDimResponse(soap, &soap_tmp_dss__ZoneStartDimResponse);
-	soap_default_dss__ZoneStartDim(soap, &soap_tmp_dss__ZoneStartDim);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__ZoneStartDim(soap, &soap_tmp_dss__ZoneStartDim, "dss:ZoneStartDim", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__ZoneStartDim(soap, soap_tmp_dss__ZoneStartDim._token, soap_tmp_dss__ZoneStartDim._zoneID, soap_tmp_dss__ZoneStartDim._groupID, soap_tmp_dss__ZoneStartDim._directionUp, soap_tmp_dss__ZoneStartDimResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__ZoneStartDimResponse(soap, &soap_tmp_dss__ZoneStartDimResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__ZoneStartDimResponse(soap, &soap_tmp_dss__ZoneStartDimResponse, "dss:ZoneStartDimResponse", NULL)
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__ZoneStartDimResponse(soap, &soap_tmp_dss__ZoneStartDimResponse, "dss:ZoneStartDimResponse", NULL)
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneEndDim(struct soap *soap)
-{	struct dss__ZoneEndDim soap_tmp_dss__ZoneEndDim;
-	struct dss__ZoneEndDimResponse soap_tmp_dss__ZoneEndDimResponse;
-	soap_default_dss__ZoneEndDimResponse(soap, &soap_tmp_dss__ZoneEndDimResponse);
-	soap_default_dss__ZoneEndDim(soap, &soap_tmp_dss__ZoneEndDim);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__ZoneEndDim(soap, &soap_tmp_dss__ZoneEndDim, "dss:ZoneEndDim", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__ZoneEndDim(soap, soap_tmp_dss__ZoneEndDim._token, soap_tmp_dss__ZoneEndDim._zoneID, soap_tmp_dss__ZoneEndDim._groupID, soap_tmp_dss__ZoneEndDimResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__ZoneEndDimResponse(soap, &soap_tmp_dss__ZoneEndDimResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__ZoneEndDimResponse(soap, &soap_tmp_dss__ZoneEndDimResponse, "dss:ZoneEndDimResponse", NULL)
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__ZoneEndDimResponse(soap, &soap_tmp_dss__ZoneEndDimResponse, "dss:ZoneEndDimResponse", NULL)
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__ZoneSetValue(struct soap *soap)
 {	struct dss__ZoneSetValue soap_tmp_dss__ZoneSetValue;
 	struct dss__ZoneSetValueResponse soap_tmp_dss__ZoneSetValueResponse;
@@ -2390,88 +2128,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceDecreaseValue(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || soap_put_dss__DeviceDecreaseValueResponse(soap, &soap_tmp_dss__DeviceDecreaseValueResponse, "dss:DeviceDecreaseValueResponse", NULL)
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceStartDim(struct soap *soap)
-{	struct dss__DeviceStartDim soap_tmp_dss__DeviceStartDim;
-	struct dss__DeviceStartDimResponse soap_tmp_dss__DeviceStartDimResponse;
-	soap_default_dss__DeviceStartDimResponse(soap, &soap_tmp_dss__DeviceStartDimResponse);
-	soap_default_dss__DeviceStartDim(soap, &soap_tmp_dss__DeviceStartDim);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__DeviceStartDim(soap, &soap_tmp_dss__DeviceStartDim, "dss:DeviceStartDim", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__DeviceStartDim(soap, soap_tmp_dss__DeviceStartDim._token, soap_tmp_dss__DeviceStartDim._deviceID, soap_tmp_dss__DeviceStartDim._directionUp, soap_tmp_dss__DeviceStartDimResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__DeviceStartDimResponse(soap, &soap_tmp_dss__DeviceStartDimResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__DeviceStartDimResponse(soap, &soap_tmp_dss__DeviceStartDimResponse, "dss:DeviceStartDimResponse", NULL)
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__DeviceStartDimResponse(soap, &soap_tmp_dss__DeviceStartDimResponse, "dss:DeviceStartDimResponse", NULL)
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap->error;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceEndDim(struct soap *soap)
-{	struct dss__DeviceEndDim soap_tmp_dss__DeviceEndDim;
-	struct dss__DeviceEndDimResponse soap_tmp_dss__DeviceEndDimResponse;
-	soap_default_dss__DeviceEndDimResponse(soap, &soap_tmp_dss__DeviceEndDimResponse);
-	soap_default_dss__DeviceEndDim(soap, &soap_tmp_dss__DeviceEndDim);
-	soap->encodingStyle = NULL;
-	if (!soap_get_dss__DeviceEndDim(soap, &soap_tmp_dss__DeviceEndDim, "dss:DeviceEndDim", NULL))
-		return soap->error;
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap->error;
-	soap->error = dss__DeviceEndDim(soap, soap_tmp_dss__DeviceEndDim._token, soap_tmp_dss__DeviceEndDim._deviceID, soap_tmp_dss__DeviceEndDimResponse.result);
-	if (soap->error)
-		return soap->error;
-	soap_serializeheader(soap);
-	soap_serialize_dss__DeviceEndDimResponse(soap, &soap_tmp_dss__DeviceEndDimResponse);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_dss__DeviceEndDimResponse(soap, &soap_tmp_dss__DeviceEndDimResponse, "dss:DeviceEndDimResponse", NULL)
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	};
-	if (soap_end_count(soap)
-	 || soap_response(soap, SOAP_OK)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_dss__DeviceEndDimResponse(soap, &soap_tmp_dss__DeviceEndDimResponse, "dss:DeviceEndDimResponse", NULL)
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

@@ -29,13 +29,13 @@
 
 #include "core/dss.h"
 #include "core/logger.h"
-#include "core/ds485const.h"
 #include "core/event.h"
 #include "core/propertysystem.h"
 #include "core/foreach.h"
 #include "core/dsidhelper.h"
 
 #include "core/model/modelevent.h"
+#include "core/model/modelconst.h"
 #include "core/model/device.h"
 #include "core/model/group.h"
 #include "core/model/zone.h"
@@ -118,6 +118,7 @@ namespace dss {
   } // isReady
 
   uint16_t DSBusInterface::deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterDSID, int _paramID) {
+    // TODO: libdsm
     log("deviceGetParameterValue: not implemented yet");
     return 0;
   } // deviceGetParameterValue
@@ -245,6 +246,7 @@ namespace dss {
   } // checkResultCode
 
   void DSBusInterface::setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) {
+    // TODO: libdsm
     log("Not implemented yet: setValueDevice()");
   } // setValueDevice
 
@@ -472,11 +474,13 @@ namespace dss {
   } // requestEnergyMeterValue
 
   bool DSBusInterface::getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) {
+    // TODO: libdsm
     log("getEnergyBorder(): not implemented yet");
     return false;
   } // getEnergyBorder
 
   int DSBusInterface::getSensorValue(const Device& _device, const int _sensorID) {
+    // TODO: libdsm
     log("getSensorValue(): not implemented yet");
     return 0;
   } // getSensorValue
@@ -558,7 +562,7 @@ namespace dss {
 
 
 
-		void DSBusInterface::callScene(AddressableModelItem *pTarget, const uint16_t scene) {
+  void DSBusInterface::callScene(AddressableModelItem *pTarget, const uint16_t scene) {
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
     Zone *pZone =  dynamic_cast<Zone*>(pTarget);
@@ -570,7 +574,7 @@ namespace dss {
     } else if (pDevice)	{
       dsid_t dsid;
       dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-
+      
       DeviceActionRequest_action_call_scene_sync(m_dsmApiHandle, dsid, pDevice->getShortAddress(), scene);
     } else if (pZone) {
       dsid_t dsid;
@@ -579,144 +583,71 @@ namespace dss {
     }
 		}
 
-		void DSBusInterface::saveScene(AddressableModelItem *pTarget, const uint16_t scene) {
-    #if 0
+  void DSBusInterface::saveScene(AddressableModelItem *pTarget, const uint16_t scene) {
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
     Zone *pZone =  dynamic_cast<Zone*>(pTarget);
+    dsid_t broadcastDSID;
+    SetBroadcastId(broadcastDSID);
 
     if (pGroup) {
-      ZoneGroupAction_SaveScene(dSIDBroadcast,pGroup->getZoneID(), pGroup->getID(),scene);
+      ZoneGroupActionRequest_action_call_scene_sync(m_dsmApiHandle, broadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
     } else if (pDevice) {
-      DeviceAction_SaveScene(getdsidTypeFromdsid_t(pDevice->getDSMeterID()), pDevice->getShortAddress(), scene);
+      dsid_t dsid;
+      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
+      DeviceActionRequest_action_save_scene_sync(m_dsmApiHandle, dsid, pDevice->getShortAddress(), scene);
     } else if (pZone) {
-      ZoneGroupAction_SaveScene(dSIDBroadcast,pGroup->getZoneID(), 0, scene);
+      ZoneGroupActionRequest_action_call_scene_sync(m_dsmApiHandle, broadcastDSID, pGroup->getZoneID(), 0, scene);
     }
-    #endif
-		}
-		void DSBusInterface::undoScene(AddressableModelItem *pTarget)	{
-    #if 0
+  }
+  void DSBusInterface::undoScene(AddressableModelItem *pTarget)	{
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
     Zone *pZone =  dynamic_cast<Zone*>(pTarget);
+    dsid_t broadcastDSID;
+    SetBroadcastId(broadcastDSID);
 
     if (pGroup) {
-      ZoneGroupAction_UndoScene(dSIDBroadcast, pGroup->getZoneID(), pGroup->getID());
+      ZoneGroupActionRequest_action_undo_scene_sync(m_dsmApiHandle, broadcastDSID, pGroup->getZoneID(), pGroup->getID());
     } else if (pDevice)	{
-      DeviceAction_UndoScene(getdsidTypeFromdsid_t(pDevice->getDSMeterID()),pDevice->getShortAddress());
+      dsid_t dsid;
+      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
+      DeviceActionRequest_action_undo_scene_sync(m_dsmApiHandle, dsid, pDevice->getShortAddress());
     } else if (pZone) {
-      ZoneGroupAction_UndoScene(dSIDBroadcast, pGroup->getZoneID(), 0);
+      ZoneGroupActionRequest_action_undo_scene_sync(m_dsmApiHandle, broadcastDSID, pGroup->getZoneID(), 0);
     }
-    #endif
-		}
+  }
 
-		void DSBusInterface::blink(AddressableModelItem *pTarget) {
-    #if 0
+  void DSBusInterface::blink(AddressableModelItem *pTarget) {
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
     Zone *pZone =  dynamic_cast<Zone*>(pTarget);
+    dsid_t broadcastDSID;
+    SetBroadcastId(broadcastDSID);
 			
     if (pGroup) {
-      ZoneGroupAction_Signal(dSIDBroadcast,pGroup->getZoneID(),pGroup->getID());
+      ZoneGroupActionRequest_action_blink_sync(m_dsmApiHandle, broadcastDSID, pGroup->getZoneID(), pGroup->getID());
     } else if (pDevice) {
-      DeviceAction_Signal(getdsidTypeFromdsid_t(pDevice->getDSMeterID()),pDevice->getShortAddress());
+      dsid_t dsid;
+      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
+      DeviceActionRequest_action_blink_sync(m_dsmApiHandle, dsid, pDevice->getShortAddress());
     } else if (pZone) {
-      ZoneGroupAction_Signal(dSIDBroadcast,pGroup->getZoneID(),0);
+      ZoneGroupActionRequest_action_blink_sync(m_dsmApiHandle, broadcastDSID, pGroup->getZoneID(), 0);
     }
-    #endif
-		}
+  }
 
-		void DSBusInterface::increaseValue(AddressableModelItem *pTarget) {
-    #if 0
-    Group *pGroup= dynamic_cast<Group*>(pTarget);
-    Device *pDevice = dynamic_cast<Device*>(pTarget);
-    Zone *pZone =  dynamic_cast<Zone*>(pTarget);
-    if (pGroup)	{
-      ZoneGroupAction_CallScene(dSIDBroadcast,pGroup->getZoneID(),pGroup->getID(),12);
-    } else	if (pDevice) {
-      DeviceAction_CallScene(getdsidTypeFromdsid_t(pDevice->getDSMeterID()),pDevice->getShortAddress(),12);
-    } else	if (pZone) {
-      ZoneGroupAction_CallScene(dSIDBroadcast,pGroup->getZoneID(),0,12);
-    }
-    #endif
-		}
+  void DSBusInterface::increaseValue(AddressableModelItem *pTarget) {
+    callScene(pTarget, SceneInc);
+  }
 
-		void DSBusInterface::decreaseValue(AddressableModelItem *pTarget) {
-    #if 0
-    Group *pGroup= dynamic_cast<Group*>(pTarget);
-    Device *pDevice = dynamic_cast<Device*>(pTarget);
-    Zone *pZone =  dynamic_cast<Zone*>(pTarget);
-    if (pGroup) {
-      ZoneGroupAction_CallScene(dSIDBroadcast,pGroup->getZoneID(),pGroup->getID(),11);
-    } else if (pDevice) {
-      DeviceAction_CallScene(getdsidTypeFromdsid_t(pDevice->getDSMeterID()),pDevice->getShortAddress(),11);
-    } else if (pZone) {
-      ZoneGroupAction_CallScene(dSIDBroadcast,pGroup->getZoneID(),0,11);
-    }
-    #endif
-		}
+  void DSBusInterface::decreaseValue(AddressableModelItem *pTarget) {
+    callScene(pTarget, SceneDec);
+  }
 
-		void DSBusInterface::startDim(AddressableModelItem *pTarget,const bool _directionUp){
-    #if 0
-    Group *pGroup= dynamic_cast<Group*>(pTarget);
-    Device *pDevice = dynamic_cast<Device*>(pTarget);
-    Zone *pZone =  dynamic_cast<Zone*>(pTarget);
-
-    if (pGroup) {
-      if (_directionUp) {
-        ZoneGroupAction_IncOutval(dSIDBroadcast,pGroup->getZoneID(),pGroup->getID(),0);
-      } else {
-        ZoneGroupAction_DecOutval(dSIDBroadcast,pGroup->getZoneID(),pGroup->getID(),0);
-      }
-    } else if (pDevice) {
-      if (_directionUp) {
-        DeviceAction_IncOutval(getdsidTypeFromdsid_t(pDevice->getDSMeterID()),pDevice->getShortAddress(),0);
-      } else {
-        DeviceAction_DecOutval(getdsidTypeFromdsid_t(pDevice->getDSMeterID()),pDevice->getShortAddress(),0);
-      }
-    } else if (pZone) {
-      if (_directionUp) {
-        ZoneGroupAction_IncOutval(dSIDBroadcast,pGroup->getZoneID(), 0, 0);
-      }
-      else {
-        ZoneGroupAction_DecOutval(dSIDBroadcast,pGroup->getZoneID(), 0, 0);
-      }
-    }
-    #endif
-		}
-
-		void DSBusInterface::endDim(AddressableModelItem *pTarget)	{
-    #if 0
-    Group *pGroup= dynamic_cast<Group*>(pTarget);
-    Device *pDevice = dynamic_cast<Device*>(pTarget);
-    Zone *pZone =  dynamic_cast<Zone*>(pTarget);
-
-    if (pGroup)	{
-      ZoneGroupAction_StopOutval(dSIDBroadcast,pGroup->getZoneID(),pGroup->getID(),0);
-    } else if (pDevice) {
-      DeviceAction_IncOutval(getdsidTypeFromdsid_t(pDevice->getDSMeterID()),pDevice->getShortAddress(),0);
-    } else if (pZone) {
-      ZoneGroupAction_IncOutval(dSIDBroadcast,pGroup->getZoneID(),0,0);
-    }
-    #endif
-		}
-
-		void DSBusInterface::setValue(AddressableModelItem *pTarget,const double _value) {
-    #if 0
-    Group *pGroup= dynamic_cast<Group*>(pTarget);
-    Device *pDevice = dynamic_cast<Device*>(pTarget);
-    Zone *pZone =  dynamic_cast<Zone*>(pTarget);
-    uint16_t value = (uint16_t)_value;
-
-    if (pGroup) {
-      ZoneGroupAction_SetOutval(dSIDBroadcast,pGroup->getZoneID(),pGroup->getID(),0,value);
-    } else if (pDevice) {
-      DeviceAction_SetOutval(getdsidTypeFromdsid_t(pDevice->getDSMeterID()),pDevice->getShortAddress(),0,value);
-    } else if (pZone) {
-      ZoneGroupAction_SetOutval(dSIDBroadcast,pGroup->getZoneID(),0,0,value);
-    }
-    #endif
-		}
+  void DSBusInterface::setValue(AddressableModelItem *pTarget,const double _value) {
+    // TODO: libdsm
+    log("DSBusInterface::setValue(): not implemented yet");
+  }
 
 
 

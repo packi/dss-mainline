@@ -47,17 +47,6 @@ namespace dss {
     } else if(_request.getMethod() == "decreaseValue") {
       _interface->decreaseValue();
       return success();
-    } else if(_request.getMethod() == "startDim") {
-      std::string direction = _request.getParameter("direction");
-      if(direction == "up") {
-        _interface->startDim(true);
-      } else {
-        _interface->startDim(false);
-      }
-      return success();
-    } else if(_request.getMethod() == "endDim") {
-      _interface->endDim();
-      return success();
     } else if(_request.getMethod() == "setValue") {
       std::string valueStr = _request.getParameter("value");
       int value = strToIntDef(valueStr, -1);

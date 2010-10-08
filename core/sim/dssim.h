@@ -24,7 +24,6 @@
 #define DSSIM_H_
 
 #include "core/ds485types.h"
-#include "core/ds485const.h"
 #include "core/model/modelconst.h"
 
 // TODO: libdsm
@@ -130,7 +129,7 @@ namespace dss {
     void loadZones(Poco::XML::Node* _node);
 
     DSIDInterface& lookupDevice(const devid_t _id);
-    
+
     // TODO: libdsm
     // boost::shared_ptr<DS485CommandFrame> createResponse(DS485CommandFrame& _request, uint8_t _functionID) const;
     // boost::shared_ptr<DS485CommandFrame> createAck(DS485CommandFrame& _request, uint8_t _functionID) const;

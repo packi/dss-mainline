@@ -43,20 +43,6 @@ namespace dss {
     }
   } // decreaseValue
 
-  void NonAddressableModelItem::startDim(const bool _directionUp) {
-    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
-    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
-      item->startDim(_directionUp);
-    }
-  } // startDim
-
-  void NonAddressableModelItem::endDim() {
-    std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
-    foreach(boost::shared_ptr<AddressableModelItem> item, items) {
-      item->endDim();
-    }
-  } // endDim
-
   void NonAddressableModelItem::setValue(const double _value) {
     std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
     foreach(boost::shared_ptr<AddressableModelItem> item, items) {

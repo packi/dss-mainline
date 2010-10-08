@@ -128,8 +128,6 @@ namespace dss {
     virtual void blink(AddressableModelItem *pTarget)= 0;
     virtual void increaseValue(AddressableModelItem *pTarget)= 0;
     virtual void decreaseValue(AddressableModelItem *pTarget)= 0;
-    virtual void startDim(AddressableModelItem *pTarget, const bool _directionUp)= 0;
-    virtual void endDim(AddressableModelItem *pTarget)= 0;
     virtual void setValue(AddressableModelItem *pTarget, const double _value)= 0;
   }; // ActionRequestInterface
 

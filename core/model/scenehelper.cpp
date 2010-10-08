@@ -25,7 +25,6 @@
 
 #include <cassert>
 
-#include "core/ds485const.h"
 #include "core/model/modelconst.h"
 
 namespace dss {

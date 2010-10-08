@@ -491,28 +491,6 @@ int dss__SetDecreaseValue(struct soap *soap, int _token, char* _setSpec, bool& r
   return SOAP_OK;
 }
 
-int dss__SetStartDim(struct soap *soap, int _token, char* _setSpec, bool _directionUp, bool& result) {
-  dss::Set set;
-  int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  set.startDim(_directionUp);
-  result = true;
-  return SOAP_OK;
-}
-
-int dss__SetEndDim(struct soap *soap, int _token, char* _setSpec, bool& result) {
-  dss::Set set;
-  int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  set.endDim();
-  result = true;
-  return SOAP_OK;
-}
-
 int dss__SetSetValue(struct soap *soap, int _token, char* _setSpec, double _value, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
@@ -599,28 +577,6 @@ int dss__ApartmentDecreaseValue(struct soap *soap, int _token, int _groupID, boo
     return getResult;
   }
   group->decreaseValue();
-  result = true;
-  return SOAP_OK;
-}
-
-int dss__ApartmentStartDim(struct soap *soap, int _token, int _groupID, bool _directionUp, bool& result) {
-  boost::shared_ptr<dss::Group> group;
-  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  group->startDim(_directionUp);
-  result = true;
-  return SOAP_OK;
-}
-
-int dss__ApartmentEndDim(struct soap *soap, int _token, int _groupID, bool& result) {
-  boost::shared_ptr<dss::Group> group;
-  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  group->endDim();
   result = true;
   return SOAP_OK;
 }
@@ -716,28 +672,6 @@ int dss__ZoneDecreaseValue(struct soap *soap, int _token, int _zoneID, int _grou
   return SOAP_OK;
 }
 
-int dss__ZoneStartDim(struct soap *soap, int _token, int _zoneID, int _groupID, bool _directionUp, bool& result) {
-  boost::shared_ptr<dss::Group> group;
-  int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  group->startDim(_directionUp);
-  result = true;
-  return SOAP_OK;
-}
-
-int dss__ZoneEndDim(struct soap *soap, int _token, int _zoneID, int _groupID, bool& result) {
-  boost::shared_ptr<dss::Group> group;
-  int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  group->endDim();
-  result = true;
-  return SOAP_OK;
-}
-
 int dss__ZoneSetValue(struct soap *soap, int _token, int _zoneID, int _groupID, double _value, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
@@ -824,28 +758,6 @@ int dss__DeviceDecreaseValue(struct soap *soap, int _token, char* _deviceID, boo
     return getResult;
   }
   dev.decreaseValue();
-  result = true;
-  return SOAP_OK;
-}
-
-int dss__DeviceStartDim(struct soap *soap, int _token, char* _deviceID, bool _directionUp, bool& result) {
-  dss::DeviceReference dev(dss::NullDSID, NULL);
-  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  dev.startDim(_directionUp);
-  result = true;
-  return SOAP_OK;
-}
-
-int dss__DeviceEndDim(struct soap *soap, int _token, char* _deviceID, bool& result) {
-  dss::DeviceReference dev(dss::NullDSID, NULL);
-  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  dev.endDim();
   result = true;
   return SOAP_OK;
 }

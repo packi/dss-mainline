@@ -61,7 +61,6 @@ namespace dss {
     /** Returns the function id.
      * @note This will lookup the device */
     int getFunctionID() const;
-    bool hasSwitch() const;
 
     /** Compares two device references.
      * Device references are considered equal if their DSID match. */
@@ -83,9 +82,6 @@ namespace dss {
      * got submetering data this should reflect the real state.
      */
     virtual bool isOn() const;
-
-    virtual void startDim(const bool _directionUp);
-    virtual void endDim();
 
     virtual void callScene(const int _sceneNr);
     virtual void saveScene(const int _sceneNr);

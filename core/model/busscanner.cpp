@@ -26,7 +26,6 @@
 
 #include "core/businterface.h"
 #include "core/foreach.h"
-#include "core/ds485const.h"
 #include "core/model/modelconst.h"
 #include "core/event.h"
 #include "core/dss.h"
@@ -120,7 +119,7 @@ namespace dss {
       dsid_helper::toDsmapiDsid(_dsMeter->getDSID(), dsmDSID);
       dsid = m_Interface.getDSIDOfDevice(dsmDSID, _shortAddress);
     } catch(BusApiError& e) {
-      log("scanDeviceOnBus: Error getting getDSIDOfDevice:" + std::string(e.what()) + " " + 
+      log("scanDeviceOnBus: Error getting getDSIDOfDevice:" + std::string(e.what()) + " " +
           dsid.toString() + " " + intToString(_shortAddress), lsFatal);
       return false;
     }

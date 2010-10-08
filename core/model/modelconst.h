@@ -23,6 +23,8 @@
 #ifndef DS485GROUPSCENECONST_H_
 #define DS485GROUPSCENECONST_H_
 
+#include <stdint.h>
+
 namespace dss {
 
   // Scene constants for devices

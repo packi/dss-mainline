@@ -92,7 +92,6 @@ namespace dss {
     int getFunctionID() const;
     /** Sets the functionID to \a _value */
     void setFunctionID(const int _value);
-    bool hasSwitch() const;
 
     /** Returns the Product ID of the device.
      * The Product ID identifies the manufacturer and type of device.
@@ -156,7 +155,7 @@ namespace dss {
     dss_dsid_t getDSID() const;
     /** Returns the DSID of the dsMeter the device is connected to */
     dss_dsid_t getDSMeterDSID() const;
-    
+
     const dss_dsid_t& getLastKnownDSMeterDSID() const;
     void setLastKnownDSMeterDSID(const dss_dsid_t& _value);
     void setDSMeter(boost::shared_ptr<DSMeter> _dsMeter);

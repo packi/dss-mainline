@@ -42,7 +42,6 @@ namespace dss {
 
     boost::shared_ptr<JSONObject> result(new JSONObject());
     result->addProperty("id", _device.getDSID().toString());
-    result->addProperty("isSwitch", _device.hasSwitch());
     result->addProperty("name", _device.getName());
     result->addProperty("functionID", _device.getFunctionID());
     result->addProperty("productRevision", _device.getDevice()->getRevisionID());

@@ -425,41 +425,6 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="SetStartDim">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="directionUp" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="SetStartDimResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="SetEndDim">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="setSpec" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="SetEndDimResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
   <element name="SetSetValue">
    <complexType>
     <sequence>
@@ -575,41 +540,6 @@
   </element>
   <!-- operation response element -->
   <element name="ApartmentDecreaseValueResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="ApartmentStartDim">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="directionUp" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="ApartmentStartDimResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="ApartmentEndDim">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="ApartmentEndDimResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -776,43 +706,6 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="ZoneStartDim">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="directionUp" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="ZoneStartDimResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="ZoneEndDim">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="ZoneEndDimResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
   <element name="ZoneSetValue">
    <complexType>
     <sequence>
@@ -931,41 +824,6 @@
   </element>
   <!-- operation response element -->
   <element name="DeviceDecreaseValueResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="DeviceStartDim">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="directionUp" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="DeviceStartDimResponse">
-   <complexType>
-    <sequence>
-     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation request element -->
-  <element name="DeviceEndDim">
-   <complexType>
-    <sequence>
-     <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-    </sequence>
-   </complexType>
-  </element>
-  <!-- operation response element -->
-  <element name="DeviceEndDimResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -1810,22 +1668,6 @@
  <part name="parameters" element="dss:SetDecreaseValueResponse"/>
 </message>
 
-<message name="SetStartDimRequest">
- <part name="parameters" element="dss:SetStartDim"/>
-</message>
-
-<message name="SetStartDimResponse">
- <part name="parameters" element="dss:SetStartDimResponse"/>
-</message>
-
-<message name="SetEndDimRequest">
- <part name="parameters" element="dss:SetEndDim"/>
-</message>
-
-<message name="SetEndDimResponse">
- <part name="parameters" element="dss:SetEndDimResponse"/>
-</message>
-
 <message name="SetSetValueRequest">
  <part name="parameters" element="dss:SetSetValue"/>
 </message>
@@ -1880,22 +1722,6 @@
 
 <message name="ApartmentDecreaseValueResponse">
  <part name="parameters" element="dss:ApartmentDecreaseValueResponse"/>
-</message>
-
-<message name="ApartmentStartDimRequest">
- <part name="parameters" element="dss:ApartmentStartDim"/>
-</message>
-
-<message name="ApartmentStartDimResponse">
- <part name="parameters" element="dss:ApartmentStartDimResponse"/>
-</message>
-
-<message name="ApartmentEndDimRequest">
- <part name="parameters" element="dss:ApartmentEndDim"/>
-</message>
-
-<message name="ApartmentEndDimResponse">
- <part name="parameters" element="dss:ApartmentEndDimResponse"/>
 </message>
 
 <message name="ApartmentSetValueRequest">
@@ -1970,22 +1796,6 @@
  <part name="parameters" element="dss:ZoneDecreaseValueResponse"/>
 </message>
 
-<message name="ZoneStartDimRequest">
- <part name="parameters" element="dss:ZoneStartDim"/>
-</message>
-
-<message name="ZoneStartDimResponse">
- <part name="parameters" element="dss:ZoneStartDimResponse"/>
-</message>
-
-<message name="ZoneEndDimRequest">
- <part name="parameters" element="dss:ZoneEndDim"/>
-</message>
-
-<message name="ZoneEndDimResponse">
- <part name="parameters" element="dss:ZoneEndDimResponse"/>
-</message>
-
 <message name="ZoneSetValueRequest">
  <part name="parameters" element="dss:ZoneSetValue"/>
 </message>
@@ -2040,22 +1850,6 @@
 
 <message name="DeviceDecreaseValueResponse">
  <part name="parameters" element="dss:DeviceDecreaseValueResponse"/>
-</message>
-
-<message name="DeviceStartDimRequest">
- <part name="parameters" element="dss:DeviceStartDim"/>
-</message>
-
-<message name="DeviceStartDimResponse">
- <part name="parameters" element="dss:DeviceStartDimResponse"/>
-</message>
-
-<message name="DeviceEndDimRequest">
- <part name="parameters" element="dss:DeviceEndDim"/>
-</message>
-
-<message name="DeviceEndDimResponse">
- <part name="parameters" element="dss:DeviceEndDimResponse"/>
 </message>
 
 <message name="DeviceSetValueRequest">
@@ -2470,16 +2264,6 @@
   <input message="tns:SetDecreaseValueRequest"/>
   <output message="tns:SetDecreaseValueResponse"/>
  </operation>
- <operation name="SetStartDim">
-  <documentation>Service definition of function dss__SetStartDim</documentation>
-  <input message="tns:SetStartDimRequest"/>
-  <output message="tns:SetStartDimResponse"/>
- </operation>
- <operation name="SetEndDim">
-  <documentation>Service definition of function dss__SetEndDim</documentation>
-  <input message="tns:SetEndDimRequest"/>
-  <output message="tns:SetEndDimResponse"/>
- </operation>
  <operation name="SetSetValue">
   <documentation>Service definition of function dss__SetSetValue</documentation>
   <input message="tns:SetSetValueRequest"/>
@@ -2514,16 +2298,6 @@
   <documentation>Service definition of function dss__ApartmentDecreaseValue</documentation>
   <input message="tns:ApartmentDecreaseValueRequest"/>
   <output message="tns:ApartmentDecreaseValueResponse"/>
- </operation>
- <operation name="ApartmentStartDim">
-  <documentation>Service definition of function dss__ApartmentStartDim</documentation>
-  <input message="tns:ApartmentStartDimRequest"/>
-  <output message="tns:ApartmentStartDimResponse"/>
- </operation>
- <operation name="ApartmentEndDim">
-  <documentation>Service definition of function dss__ApartmentEndDim</documentation>
-  <input message="tns:ApartmentEndDimRequest"/>
-  <output message="tns:ApartmentEndDimResponse"/>
  </operation>
  <operation name="ApartmentSetValue">
   <documentation>Service definition of function dss__ApartmentSetValue</documentation>
@@ -2570,16 +2344,6 @@
   <input message="tns:ZoneDecreaseValueRequest"/>
   <output message="tns:ZoneDecreaseValueResponse"/>
  </operation>
- <operation name="ZoneStartDim">
-  <documentation>Service definition of function dss__ZoneStartDim</documentation>
-  <input message="tns:ZoneStartDimRequest"/>
-  <output message="tns:ZoneStartDimResponse"/>
- </operation>
- <operation name="ZoneEndDim">
-  <documentation>Service definition of function dss__ZoneEndDim</documentation>
-  <input message="tns:ZoneEndDimRequest"/>
-  <output message="tns:ZoneEndDimResponse"/>
- </operation>
  <operation name="ZoneSetValue">
   <documentation>Service definition of function dss__ZoneSetValue</documentation>
   <input message="tns:ZoneSetValueRequest"/>
@@ -2614,16 +2378,6 @@
   <documentation>Service definition of function dss__DeviceDecreaseValue</documentation>
   <input message="tns:DeviceDecreaseValueRequest"/>
   <output message="tns:DeviceDecreaseValueResponse"/>
- </operation>
- <operation name="DeviceStartDim">
-  <documentation>Service definition of function dss__DeviceStartDim</documentation>
-  <input message="tns:DeviceStartDimRequest"/>
-  <output message="tns:DeviceStartDimResponse"/>
- </operation>
- <operation name="DeviceEndDim">
-  <documentation>Service definition of function dss__DeviceEndDim</documentation>
-  <input message="tns:DeviceEndDimRequest"/>
-  <output message="tns:DeviceEndDimResponse"/>
  </operation>
  <operation name="DeviceSetValue">
   <documentation>Service definition of function dss__DeviceSetValue</documentation>
@@ -3021,24 +2775,6 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="SetStartDim">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="SetEndDim">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
  <operation name="SetSetValue">
   <SOAP:operation soapAction=""/>
   <input>
@@ -3094,24 +2830,6 @@
   </output>
  </operation>
  <operation name="ApartmentDecreaseValue">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="ApartmentStartDim">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="ApartmentEndDim">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>
@@ -3201,24 +2919,6 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="ZoneStartDim">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="ZoneEndDim">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
  <operation name="ZoneSetValue">
   <SOAP:operation soapAction=""/>
   <input>
@@ -3274,24 +2974,6 @@
   </output>
  </operation>
  <operation name="DeviceDecreaseValue">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="DeviceStartDim">
-  <SOAP:operation soapAction=""/>
-  <input>
-     <SOAP:body parts="parameters" use="literal"/>
-  </input>
-  <output>
-     <SOAP:body parts="parameters" use="literal"/>
-  </output>
- </operation>
- <operation name="DeviceEndDim">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

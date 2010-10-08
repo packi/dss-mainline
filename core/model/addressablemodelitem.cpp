@@ -48,18 +48,6 @@ namespace dss {
     }
   }
 
-  void AddressableModelItem::startDim(const bool _directionUp) {
-    if (DSS::hasInstance()) {
-      DSS::getInstance()->getBusInterface().getActionRequestInterface()->startDim(this, _directionUp);
-    }
-  } // startDim
-
-  void AddressableModelItem::endDim() {
-    if (DSS::hasInstance()) {
-      DSS::getInstance()->getBusInterface().getActionRequestInterface()->endDim(this);
-    }
-  } // endDim
-
   void AddressableModelItem::setValue(const double _value) {
     if (DSS::hasInstance()) {
       DSS::getInstance()->getBusInterface().getActionRequestInterface()->setValue(this, _value);

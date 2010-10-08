@@ -31,7 +31,6 @@
 #include "core/event.h"
 #include "core/businterface.h"
 #include "core/propertysystem.h"
-#include "core/ds485const.h"
 #include "core/model/modelconst.h"
 #include "core/metering/metering.h"
 #include "core/dsidhelper.h"
@@ -166,7 +165,7 @@ namespace dss {
     if(!m_ModelEvents.empty()) {
       bool eraseEventFromList = true;
       ModelEvent& event = m_ModelEvents.front();
-      ModelEventWithDSID* pEventWithDSID =  
+      ModelEventWithDSID* pEventWithDSID =
         dynamic_cast<ModelEventWithDSID*>(&event);
       switch(event.getEventType()) {
       case ModelEvent::etNewDevice:
@@ -213,7 +212,7 @@ namespace dss {
         if(event.getParameterCount() != 0) {
           log("Expected exactly 0 parameter for ModelEvent::etDSMeterReady");
         } else {
-          ModelEventWithDSID* pEventWithDSID =  
+          ModelEventWithDSID* pEventWithDSID =
             dynamic_cast<ModelEventWithDSID*>(&event);
           assert(pEventWithDSID != NULL);
           dss_dsid_t meterID = pEventWithDSID->getDSID();
