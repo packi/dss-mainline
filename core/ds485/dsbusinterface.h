@@ -80,7 +80,7 @@ namespace dss {
     bool m_dsmApiReady;
     std::string m_connection;
 
-    static 
+    dsid_t m_broadcastDSID;
 
     void checkResultCode(const int _resultCode);
     void busReady();

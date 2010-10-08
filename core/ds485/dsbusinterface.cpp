@@ -66,6 +66,8 @@ namespace dss {
     m_connection("tcp://localhost:8442")
   {
     assert(_pModelMaintenance != NULL);
+    
+    SetBroadcastId(m_broadcastDSID);
     if(_pDSS != NULL) {
 
 #if 0
@@ -564,9 +566,7 @@ namespace dss {
     Zone *pZone =  dynamic_cast<Zone*>(pTarget);
 
     if (pGroup) {
-      dsid_t broadcastDSID;
-      SetBroadcastId(broadcastDSID);
-      ZoneGroupActionRequest_action_call_scene_sync(m_dsmApiHandle, broadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
+      ZoneGroupActionRequest_action_call_scene_sync(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
     } else if (pDevice)	{
       dsid_t dsid;
       dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
@@ -583,34 +583,30 @@ namespace dss {
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
     Zone *pZone =  dynamic_cast<Zone*>(pTarget);
-    dsid_t broadcastDSID;
-    SetBroadcastId(broadcastDSID);
 
     if (pGroup) {
-      ZoneGroupActionRequest_action_call_scene_sync(m_dsmApiHandle, broadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
+      ZoneGroupActionRequest_action_call_scene_sync(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
     } else if (pDevice) {
       dsid_t dsid;
       dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
       DeviceActionRequest_action_save_scene_sync(m_dsmApiHandle, dsid, pDevice->getShortAddress(), scene);
     } else if (pZone) {
-      ZoneGroupActionRequest_action_call_scene_sync(m_dsmApiHandle, broadcastDSID, pGroup->getZoneID(), 0, scene);
+      ZoneGroupActionRequest_action_call_scene_sync(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), 0, scene);
     }
   }
   void DSBusInterface::undoScene(AddressableModelItem *pTarget)	{
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
     Zone *pZone =  dynamic_cast<Zone*>(pTarget);
-    dsid_t broadcastDSID;
-    SetBroadcastId(broadcastDSID);
 
     if (pGroup) {
-      ZoneGroupActionRequest_action_undo_scene_sync(m_dsmApiHandle, broadcastDSID, pGroup->getZoneID(), pGroup->getID());
+      ZoneGroupActionRequest_action_undo_scene_sync(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), pGroup->getID());
     } else if (pDevice)	{
       dsid_t dsid;
       dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
       DeviceActionRequest_action_undo_scene_sync(m_dsmApiHandle, dsid, pDevice->getShortAddress());
     } else if (pZone) {
-      ZoneGroupActionRequest_action_undo_scene_sync(m_dsmApiHandle, broadcastDSID, pGroup->getZoneID(), 0);
+      ZoneGroupActionRequest_action_undo_scene_sync(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), 0);
     }
   }
 
@@ -618,17 +614,15 @@ namespace dss {
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
     Zone *pZone =  dynamic_cast<Zone*>(pTarget);
-    dsid_t broadcastDSID;
-    SetBroadcastId(broadcastDSID);
 			
     if (pGroup) {
-      ZoneGroupActionRequest_action_blink_sync(m_dsmApiHandle, broadcastDSID, pGroup->getZoneID(), pGroup->getID());
+      ZoneGroupActionRequest_action_blink_sync(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), pGroup->getID());
     } else if (pDevice) {
       dsid_t dsid;
       dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
       DeviceActionRequest_action_blink_sync(m_dsmApiHandle, dsid, pDevice->getShortAddress());
     } else if (pZone) {
-      ZoneGroupActionRequest_action_blink_sync(m_dsmApiHandle, broadcastDSID, pGroup->getZoneID(), 0);
+      ZoneGroupActionRequest_action_blink_sync(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), 0);
     }
   }
 
