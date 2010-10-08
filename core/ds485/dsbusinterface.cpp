@@ -671,9 +671,17 @@ namespace dss {
                                                                          _zoneID, _deviceDSID);
   }
 
-  void DSBusInterface::eventDeviceAccessibilityOff(uint8_t _errorCode, dsid_t _dsMeterId, uint16_t _deviceID, 
+  void DSBusInterface::eventDeviceAccessibilityOff(uint8_t _errorCode, dsid_t _dsMeterID, uint16_t _deviceID, 
                                                    uint16_t _zoneID, uint32_t _deviceDSID) {
-    printf("Device 0x%08x (DeviceId: %d in Zone: %d) became inactive\n", _deviceDSID, _deviceID, _zoneID);
+    dss_dsid_t dsMeterID;
+    dsid_helper::toDssDsid(_dsMeterID, dsMeterID);    
+    DeviceSpec_t deviceSpec = deviceGetSpec(_deviceID, dsMeterID);
+    
+    ModelEvent* pEvent = new ModelEvent(ModelEvent::etLostDevice);
+    pEvent->addParameter(_zoneID);
+    pEvent->addParameter(_deviceDSID);
+    pEvent->addParameter(deviceSpec.get<0>());
+    m_pModelMaintenance->addModelEvent(pEvent);
   }
 
   void DSBusInterface::eventDeviceAccessibilityOnCallback(uint8_t _errorCode, void* _userData, dsid_t _dsMeterID, 

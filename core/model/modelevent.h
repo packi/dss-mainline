@@ -38,6 +38,7 @@ namespace dss {
     typedef enum { etCallSceneGroup,  /**< A group has changed the scene. */
                    etCallSceneDevice, /**< A device has changed the scene (only raised from the simulation at the moment). */
                    etNewDevice,       /**< A new device has been detected */
+                   etLostDevice,       /**< A device became inactive */
                    etModelDirty,      /**< A parameter that will be stored in \c apartment.xml has been changed. */
                    etNewDSMeter, /**< A new dsMeter has joined the bus */
                    etLostDSMeter, /**< We've lost a dsMeter on the bus */

@@ -176,6 +176,14 @@ namespace dss {
           onAddDevice(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
         }
         break;
+      case ModelEvent::etLostDevice:
+        assert(pEventWithDSID != NULL);
+        if(event.getParameterCount() != 3) {
+          log("Expected exactly 3 parameter for ModelEvent::etLostDevice");
+        } else {
+          onRemoveDevice(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
+        }
+        break;
       case ModelEvent::etCallSceneDevice:
         assert(pEventWithDSID != NULL);
         if(event.getParameterCount() != 3) {
@@ -477,6 +485,18 @@ namespace dss {
     } catch(std::runtime_error& e) {
       log(std::string("Error scanning device: ") + e.what());
     }
+  } // onAddDevice
+
+  void ModelMaintenance::onRemoveDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID, const int _functionID) {
+    log("Device disappeared");
+    log("  DSMeter: " +  _dsMeterID.toString());
+    log("  Zone:      " + intToString(_zoneID));
+    log("  BusID:     " + intToString(_devID));
+    log("  FID:       " + intToString(_functionID));
+
+    boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByDSID(_dsMeterID);
+    boost::shared_ptr<Device> device = m_pApartment->getDeviceByShortAddress(dsMeter, _devID);
+    m_pApartment->removeDevice(device->getDSID());
   } // onAddDevice
 
   void ModelMaintenance::setApartment(Apartment* _value) {

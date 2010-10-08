@@ -74,6 +74,7 @@ namespace dss {
 
     void onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _sceneID);
     void onAddDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID, const int _functionID);
+    void onRemoveDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID, const int _functionID);
   private:
     bool m_IsInitializing;
 
