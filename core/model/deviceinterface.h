@@ -63,7 +63,7 @@ namespace dss {
     virtual void saveScene(const int _sceneNr) = 0;
     /** Restores the last set value of _sceneNr
      */
-    virtual void undoScene(const int _sceneNr) = 0;
+    virtual void undoScene() = 0;
 
     /** Returns the consumption in mW */
     virtual unsigned long getPowerConsumption() = 0;

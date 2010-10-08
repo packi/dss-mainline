@@ -247,18 +247,6 @@ const char* JSLogDirectory = "data/logs/";
     m_pBusInterface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this, m_pModelMaintenance.get(), m_pSimulation.get()));
     m_Subsystems.push_back(dynamic_cast<DS485Proxy*>(m_pBusInterface.get()));
 
-    // TODO: libdsm
-    // m_pBusDispatcher = boost::shared_ptr<DS485BusRequestDispatcher>(new DS485BusRequestDispatcher());
-    // m_pBusDispatcher->setFrameSender(m_pBusInterface->getFrameSenderInterface());
-
-    m_pApartment->setBusInterface(m_pBusInterface.get());
-    m_pApartment->setBusRequestDispatcher(m_pBusDispatcher.get());
-
-    // TODO: libdsm
-    // m_pBusInterfaceHandler = boost::shared_ptr<BusInterfaceHandler>(new BusInterfaceHandler(this, getModelMaintenance()));
-    // m_Subsystems.push_back(m_pBusInterfaceHandler.get());
-    // dynamic_cast<DS485Proxy*>(m_pBusInterface.get())->setBusInterfaceHandler(m_pBusInterfaceHandler.get());
-
     m_pWebServer = boost::shared_ptr<WebServer>(new WebServer(this));
     m_Subsystems.push_back(m_pWebServer.get());
 

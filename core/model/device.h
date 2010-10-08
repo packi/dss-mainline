@@ -74,9 +74,6 @@ namespace dss {
     Device(const dss_dsid_t _dsid, Apartment* _pApartment);
     virtual ~Device() {};
 
-    void enable();
-    void disable();
-
     /** @copydoc DeviceReference::isOn() */
     virtual bool isOn() const;
 

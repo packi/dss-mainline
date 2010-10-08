@@ -78,9 +78,6 @@ namespace dss {
     virtual void increaseValue();
     virtual void decreaseValue();
 
-    void enable();
-    void disable();
-
     /** Returns wheter the device is turned on.
      * @note The detection is soly based on the last called scene. As soon as we've
      * got submetering data this should reflect the real state.
@@ -92,7 +89,7 @@ namespace dss {
 
     virtual void callScene(const int _sceneNr);
     virtual void saveScene(const int _sceneNr);
-    virtual void undoScene(const int _sceneNr);
+    virtual void undoScene();
 
     virtual void nextScene();
     virtual void previousScene();

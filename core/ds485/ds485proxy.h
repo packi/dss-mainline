@@ -69,7 +69,8 @@ namespace dss {
                      public    DeviceBusInterface,
                      public    StructureQueryBusInterface,
                      public    MeteringBusInterface,
-                     public    StructureModifyingBusInterface {
+                     public    StructureModifyingBusInterface,
+                     public    ActionRequestInterface {
   private:
     bool isSimAddress(const uint8_t _addr);
 
@@ -121,6 +122,7 @@ namespace dss {
     virtual StructureQueryBusInterface* getStructureQueryBusInterface() { return this; }
     virtual MeteringBusInterface* getMeteringBusInterface() { return this; }
     virtual StructureModifyingBusInterface* getStructureModifyingBusInterface() { return this; }
+    virtual ActionRequestInterface* getActionRequestInterface() { return this; }
 
     virtual bool isReady();
 
@@ -162,6 +164,16 @@ namespace dss {
     virtual void requestEnergyMeterValue();
     virtual void requestPowerConsumption();
     virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper);
+    
+    virtual void callScene(AddressableModelItem *pTarget, const uint16_t scene);
+    virtual void saveScene(AddressableModelItem *pTarget, const uint16_t scene);
+    virtual void undoScene(AddressableModelItem *pTarget);
+    virtual void blink(AddressableModelItem *pTarget);
+    virtual void increaseValue(AddressableModelItem *pTarget);
+    virtual void decreaseValue(AddressableModelItem *pTarget);
+    virtual void startDim(AddressableModelItem *pTarget, const bool _directionUp);
+    virtual void endDim(AddressableModelItem *pTarget);
+    virtual void setValue(AddressableModelItem *pTarget, const double _value);
 
     //------------------------------------------------ Device
     virtual uint16_t deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterID, int _paramID);

@@ -86,13 +86,7 @@ namespace dss {
       }
       return success();
     } else if(_request.getMethod() == "undoScene") {
-      std::string sceneStr = _request.getParameter("sceneNumber");
-      int sceneID = strToIntDef(sceneStr, -1);
-      if(sceneID != -1) {
-        _interface->undoScene(sceneID);
-      } else {
-        return failure("Invalid sceneNumber: '" + sceneStr + "'");
-      }
+      _interface->undoScene();
       return success();
     } else if(_request.getMethod() == "getConsumption") {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());

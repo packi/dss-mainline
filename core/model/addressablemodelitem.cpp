@@ -24,8 +24,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "core/model/busrequest.h"
 #include "core/model/apartment.h"
+#include "core/dss.h"
 
 namespace dss {
 
@@ -37,66 +37,57 @@ namespace dss {
 
 
   void AddressableModelItem::increaseValue() {
-    boost::shared_ptr<IncreaseValueCommandBusRequest> request(new IncreaseValueCommandBusRequest());
-    request->setTarget(shared_from_this());
-    m_pApartment->dispatchRequest(request);
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getBusInterface().getActionRequestInterface()->increaseValue(this);
+    }
   }
 
   void AddressableModelItem::decreaseValue() {
-    boost::shared_ptr<DecreaseValueCommandBusRequest> request(new DecreaseValueCommandBusRequest());
-    request->setTarget(shared_from_this());
-    m_pApartment->dispatchRequest(request);
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getBusInterface().getActionRequestInterface()->decreaseValue(this);
+    }
   }
 
   void AddressableModelItem::startDim(const bool _directionUp) {
-    boost::shared_ptr<CommandBusRequest> request;
-    if(_directionUp) {
-      request.reset(new StartDimUpCommandBusRequest());
-    } else {
-      request.reset(new StartDimDownCommandBusRequest());
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getBusInterface().getActionRequestInterface()->startDim(this, _directionUp);
     }
-    request->setTarget(shared_from_this());
-    m_pApartment->dispatchRequest(request);
   } // startDim
 
   void AddressableModelItem::endDim() {
-    boost::shared_ptr<CommandBusRequest> request(new EndDimCommandBusRequest());
-    request->setTarget(shared_from_this());
-    m_pApartment->dispatchRequest(request);
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getBusInterface().getActionRequestInterface()->endDim(this);
+    }
   } // endDim
 
   void AddressableModelItem::setValue(const double _value) {
-    boost::shared_ptr<SetValueCommandBusRequest> request(new SetValueCommandBusRequest());
-    request->setTarget(shared_from_this());
-    request->setValue(int(_value));
-    m_pApartment->dispatchRequest(request);
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getBusInterface().getActionRequestInterface()->setValue(this, _value);
+    }
   } // setValue
 
   void AddressableModelItem::callScene(const int _sceneNr) {
-    boost::shared_ptr<CallSceneCommandBusRequest> request(new CallSceneCommandBusRequest());
-    request->setTarget(shared_from_this());
-    request->setSceneID(_sceneNr);
-    m_pApartment->dispatchRequest(request);
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getBusInterface().getActionRequestInterface()->callScene(this, _sceneNr);
+    }
   } // callScene
 
   void AddressableModelItem::saveScene(const int _sceneNr) {
-    boost::shared_ptr<SaveSceneCommandBusRequest> request(new SaveSceneCommandBusRequest());
-    request->setTarget(shared_from_this());
-    request->setSceneID(_sceneNr);
-    m_pApartment->dispatchRequest(request);
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getBusInterface().getActionRequestInterface()->saveScene(this, _sceneNr);
+    }
   } // saveScene
 
-  void AddressableModelItem::undoScene(const int _sceneNr) {
-    boost::shared_ptr<UndoSceneCommandBusRequest> request(new UndoSceneCommandBusRequest());
-    request->setTarget(shared_from_this());
-    request->setSceneID(_sceneNr);
-    m_pApartment->dispatchRequest(request);
+  void AddressableModelItem::undoScene() {
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getBusInterface().getActionRequestInterface()->undoScene(this);
+    }
   } // undoScene
 
   void AddressableModelItem::blink() {
-    boost::shared_ptr<BlinkCommandBusRequest> request(new BlinkCommandBusRequest());
-    request->setTarget(shared_from_this());
-    m_pApartment->dispatchRequest(request);
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getBusInterface().getActionRequestInterface()->blink(this);
+    }
   } // blink
 
 } // namespace dss

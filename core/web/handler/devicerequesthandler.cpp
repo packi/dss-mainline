@@ -166,12 +166,6 @@ namespace dss {
       std::vector<std::string> tags = pDevice->getTags();
       std::for_each(tags.begin(), tags.end(), boost::bind(&JSONArray<std::string>::add, tagsObj.get(), _1));
       return success(resultObj);
-    } else if(_request.getMethod() == "enable") {
-      pDevice->enable();
-      return success();
-    } else if(_request.getMethod() == "disable") {
-      pDevice->disable();
-      return success();
     } else if(_request.getMethod() == "lock") {
       if (!pDevice->isPresent()) {
         return failure("Device is not present");

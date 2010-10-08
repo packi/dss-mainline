@@ -75,14 +75,6 @@ namespace dss {
     getDevice()->decreaseValue();
   } // decreaseValue
 
-  void DeviceReference::enable() {
-    getDevice()->enable();
-  } // enable
-
-  void DeviceReference::disable() {
-    getDevice()->disable();
-  } // disable
-
   void DeviceReference::startDim(const bool _directionUp) {
     getDevice()->startDim(_directionUp);
   } // startDim
@@ -111,8 +103,8 @@ namespace dss {
     getDevice()->saveScene(_sceneNr);
   } // saveScene
 
-  void DeviceReference::undoScene(const int _sceneNr) {
-    getDevice()->undoScene(_sceneNr);
+  void DeviceReference::undoScene() {
+    getDevice()->undoScene();
   } // undoScene
 
   unsigned long DeviceReference::getPowerConsumption() {

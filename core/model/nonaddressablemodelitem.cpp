@@ -78,10 +78,10 @@ namespace dss {
     }
   } // saveScene
 
-  void NonAddressableModelItem::undoScene(const int _sceneNr) {
+  void NonAddressableModelItem::undoScene() {
     std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
     foreach(boost::shared_ptr<AddressableModelItem> item, items) {
-      item->undoScene(_sceneNr);
+      item->undoScene();
     }
   } // undoScene
 

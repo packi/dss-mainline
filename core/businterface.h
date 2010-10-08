@@ -38,6 +38,7 @@
 namespace dss {
 
   class Device;
+  class AddressableModelItem;
 
   typedef boost::tuple<dsid_t, int, int, int, std::string> DSMeterSpec_t; // bus-id, sw-version, hw-version, api version, name
   typedef boost::tuple<int, int, int, int> DeviceSpec_t; // function id, product id, revision, bus address
@@ -119,7 +120,21 @@ namespace dss {
     virtual ~StructureModifyingBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureModifyingBusInterface
 
-  class MeteringBusInterface {
+  class ActionRequestInterface {
+  public:
+    virtual void callScene(AddressableModelItem *pTarget, const uint16_t scene)= 0;
+    virtual void saveScene(AddressableModelItem *pTarget, const uint16_t scene)= 0;
+    virtual void undoScene(AddressableModelItem *pTarget)= 0;
+    virtual void blink(AddressableModelItem *pTarget)= 0;
+    virtual void increaseValue(AddressableModelItem *pTarget)= 0;
+    virtual void decreaseValue(AddressableModelItem *pTarget)= 0;
+    virtual void startDim(AddressableModelItem *pTarget, const bool _directionUp)= 0;
+    virtual void endDim(AddressableModelItem *pTarget)= 0;
+    virtual void setValue(AddressableModelItem *pTarget, const double _value)= 0;
+  }; // ActionRequestInterface
+
+
+class MeteringBusInterface {
   public:
     /** Returns the current power-consumption in mW */
     virtual unsigned long getPowerConsumption(const dsid_t& _dsMeterID) = 0;
@@ -135,15 +150,6 @@ namespace dss {
   }; // MeteringBusInterface
 
 
-// TODO: libdsm
-#if 0
-  class FrameSenderInterface {
-  public:
-    virtual void sendFrame(DS485CommandFrame& _frame) = 0;
-
-    virtual ~FrameSenderInterface() {}; // please the compiler (virtual dtor)
-  }; // FrameSender
-#endif
 
   /** Interface to be implemented by any implementation of the DS485 interface */
   class BusInterface {
@@ -154,9 +160,7 @@ namespace dss {
     virtual StructureQueryBusInterface* getStructureQueryBusInterface() = 0;
     virtual MeteringBusInterface* getMeteringBusInterface() = 0;
     virtual StructureModifyingBusInterface* getStructureModifyingBusInterface() = 0;
-
-    // TODO: libdsm
-    // virtual FrameSenderInterface* getFrameSenderInterface() = 0;
+    virtual ActionRequestInterface* getActionRequestInterface() = 0;
 
     /** Returns true when the interface is ready to transmit user generated BusPackets */
     virtual bool isReady() = 0;

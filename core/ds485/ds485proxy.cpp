@@ -37,7 +37,11 @@
 
 #include "core/model/modelevent.h"
 #include "core/model/device.h"
+#include "core/model/group.h"
+#include "core/model/zone.h"
 #include "core/model/modelmaintenance.h"
+
+
 
 // TODO: libdsm
 // #include "core/ds485/framebucketcollector.h"
@@ -551,6 +555,171 @@ namespace dss {
       m_dsmApiHandle = NULL;
     }
   }
+
+
+
+		void DS485Proxy::callScene(AddressableModelItem *pTarget, const uint16_t scene) {
+    Group *pGroup= dynamic_cast<Group*>(pTarget);
+    Device *pDevice = dynamic_cast<Device*>(pTarget);
+    Zone *pZone =  dynamic_cast<Zone*>(pTarget);
+
+    if (pGroup) {
+      dsid_t broadcastDSID;
+      SetBroadcastId(broadcastDSID);
+      ZoneGroupActionRequest_action_call_scene_sync(m_dsmApiHandle, broadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
+    } else if (pDevice)	{
+      dsid_t dsid;
+      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
+      
+      DeviceActionRequest_action_call_scene_sync(m_dsmApiHandle, dsid, pDevice->getShortAddress(), scene);
+    } else if (pZone) {
+      dsid_t dsid;
+      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
+      ZoneGroupActionRequest_action_call_scene_sync(m_dsmApiHandle, dsid, pGroup->getZoneID(), 0, scene);
+    }
+		}
+
+		void DS485Proxy::saveScene(AddressableModelItem *pTarget, const uint16_t scene) {
+    #if 0
+    Group *pGroup= dynamic_cast<Group*>(pTarget);
+    Device *pDevice = dynamic_cast<Device*>(pTarget);
+    Zone *pZone =  dynamic_cast<Zone*>(pTarget);
+    
+    if (pGroup) {
+      ZoneGroupAction_SaveScene(dSIDBroadcast,pGroup->getZoneID(), pGroup->getID(),scene);
+    } else if (pDevice) {
+      DeviceAction_SaveScene(getdsidTypeFromdsid_t(pDevice->getDSMeterID()), pDevice->getShortAddress(), scene);
+    } else if (pZone) {
+      ZoneGroupAction_SaveScene(dSIDBroadcast,pGroup->getZoneID(), 0, scene);
+    }
+    #endif
+		}
+		void DS485Proxy::undoScene(AddressableModelItem *pTarget)	{
+    #if 0
+    Group *pGroup= dynamic_cast<Group*>(pTarget);
+    Device *pDevice = dynamic_cast<Device*>(pTarget);
+    Zone *pZone =  dynamic_cast<Zone*>(pTarget);
+
+    if (pGroup) {
+      ZoneGroupAction_UndoScene(dSIDBroadcast, pGroup->getZoneID(), pGroup->getID());
+    } else if (pDevice)	{
+      DeviceAction_UndoScene(getdsidTypeFromdsid_t(pDevice->getDSMeterID()),pDevice->getShortAddress());
+    } else if (pZone) {
+      ZoneGroupAction_UndoScene(dSIDBroadcast, pGroup->getZoneID(), 0);
+    }
+    #endif
+		}
+
+		void DS485Proxy::blink(AddressableModelItem *pTarget) {
+    #if 0
+    Group *pGroup= dynamic_cast<Group*>(pTarget);
+    Device *pDevice = dynamic_cast<Device*>(pTarget);
+    Zone *pZone =  dynamic_cast<Zone*>(pTarget);
+			
+    if (pGroup) {
+      ZoneGroupAction_Signal(dSIDBroadcast,pGroup->getZoneID(),pGroup->getID());
+    } else if (pDevice) {
+      DeviceAction_Signal(getdsidTypeFromdsid_t(pDevice->getDSMeterID()),pDevice->getShortAddress());
+    } else if (pZone) {
+      ZoneGroupAction_Signal(dSIDBroadcast,pGroup->getZoneID(),0);
+    }
+    #endif
+		}
+
+		void DS485Proxy::increaseValue(AddressableModelItem *pTarget) {
+    #if 0
+    Group *pGroup= dynamic_cast<Group*>(pTarget);
+    Device *pDevice = dynamic_cast<Device*>(pTarget);
+    Zone *pZone =  dynamic_cast<Zone*>(pTarget);
+    if (pGroup)	{
+      ZoneGroupAction_CallScene(dSIDBroadcast,pGroup->getZoneID(),pGroup->getID(),12);
+    } else	if (pDevice) {
+      DeviceAction_CallScene(getdsidTypeFromdsid_t(pDevice->getDSMeterID()),pDevice->getShortAddress(),12);
+    } else	if (pZone) {
+      ZoneGroupAction_CallScene(dSIDBroadcast,pGroup->getZoneID(),0,12);
+    }
+    #endif
+		}
+
+		void DS485Proxy::decreaseValue(AddressableModelItem *pTarget) {
+    #if 0
+    Group *pGroup= dynamic_cast<Group*>(pTarget);
+    Device *pDevice = dynamic_cast<Device*>(pTarget);
+    Zone *pZone =  dynamic_cast<Zone*>(pTarget);
+    if (pGroup) {
+      ZoneGroupAction_CallScene(dSIDBroadcast,pGroup->getZoneID(),pGroup->getID(),11);
+    } else if (pDevice) {
+      DeviceAction_CallScene(getdsidTypeFromdsid_t(pDevice->getDSMeterID()),pDevice->getShortAddress(),11);
+    } else if (pZone) {
+      ZoneGroupAction_CallScene(dSIDBroadcast,pGroup->getZoneID(),0,11);
+    }
+    #endif
+		}
+
+		void DS485Proxy::startDim(AddressableModelItem *pTarget,const bool _directionUp){
+    #if 0
+    Group *pGroup= dynamic_cast<Group*>(pTarget);
+    Device *pDevice = dynamic_cast<Device*>(pTarget);
+    Zone *pZone =  dynamic_cast<Zone*>(pTarget);
+
+    if (pGroup) {
+      if (_directionUp) {
+        ZoneGroupAction_IncOutval(dSIDBroadcast,pGroup->getZoneID(),pGroup->getID(),0);
+      } else {
+        ZoneGroupAction_DecOutval(dSIDBroadcast,pGroup->getZoneID(),pGroup->getID(),0);
+      }
+    } else if (pDevice) {
+      if (_directionUp) {
+        DeviceAction_IncOutval(getdsidTypeFromdsid_t(pDevice->getDSMeterID()),pDevice->getShortAddress(),0);
+      } else {
+        DeviceAction_DecOutval(getdsidTypeFromdsid_t(pDevice->getDSMeterID()),pDevice->getShortAddress(),0);
+      }
+    } else if (pZone) {
+      if (_directionUp) {
+        ZoneGroupAction_IncOutval(dSIDBroadcast,pGroup->getZoneID(), 0, 0);
+      }
+      else {
+        ZoneGroupAction_DecOutval(dSIDBroadcast,pGroup->getZoneID(), 0, 0);
+      }
+    }
+    #endif
+		}
+
+		void DS485Proxy::endDim(AddressableModelItem *pTarget)	{
+    #if 0
+    Group *pGroup= dynamic_cast<Group*>(pTarget);
+    Device *pDevice = dynamic_cast<Device*>(pTarget);
+    Zone *pZone =  dynamic_cast<Zone*>(pTarget);
+
+    if (pGroup)	{
+      ZoneGroupAction_StopOutval(dSIDBroadcast,pGroup->getZoneID(),pGroup->getID(),0);
+    } else if (pDevice) {
+      DeviceAction_IncOutval(getdsidTypeFromdsid_t(pDevice->getDSMeterID()),pDevice->getShortAddress(),0);
+    } else if (pZone) {
+      ZoneGroupAction_IncOutval(dSIDBroadcast,pGroup->getZoneID(),0,0);
+    }
+    #endif
+		}
+
+		void DS485Proxy::setValue(AddressableModelItem *pTarget,const double _value) {
+    #if 0
+    Group *pGroup= dynamic_cast<Group*>(pTarget);
+    Device *pDevice = dynamic_cast<Device*>(pTarget);
+    Zone *pZone =  dynamic_cast<Zone*>(pTarget);
+    uint16_t value = (uint16_t)_value;
+    
+    if (pGroup) {
+      ZoneGroupAction_SetOutval(dSIDBroadcast,pGroup->getZoneID(),pGroup->getID(),0,value);
+    } else if (pDevice) {
+      DeviceAction_SetOutval(getdsidTypeFromdsid_t(pDevice->getDSMeterID()),pDevice->getShortAddress(),0,value);
+    } else if (pZone) {
+      ZoneGroupAction_SetOutval(dSIDBroadcast,pGroup->getZoneID(),0,0,value);
+    }
+    #endif
+		}
+
+
+
 
   void DS485Proxy::busStateCallback(void* _userData, bus_state_t _state) {
     static_cast<DS485Proxy*>(_userData)->handleBusState(_state);

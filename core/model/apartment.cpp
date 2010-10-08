@@ -30,9 +30,6 @@
 #include "core/event.h"
 #include "core/foreach.h"
 
-#include "core/busrequestdispatcher.h"
-#include "core/model/busrequest.h"
-
 #include "core/model/busscanner.h"
 #include "core/model/scenehelper.h"
 #include "core/model/modelevent.h"
@@ -51,7 +48,6 @@ namespace dss {
 
   Apartment::Apartment(DSS* _pDSS)
   : m_pBusInterface(NULL),
-    m_pBusRequestDispatcher(NULL),
     m_pModelMaintenance(NULL),
     m_pPropertySystem(NULL)
   {
@@ -318,14 +314,6 @@ namespace dss {
       }
     }
   } // removeDSMeter
-
-  void Apartment::dispatchRequest(boost::shared_ptr<BusRequest> _pRequest) {
-    if(m_pBusRequestDispatcher != NULL) {
-      m_pBusRequestDispatcher->dispatchRequest(_pRequest);
-    } else {
-      throw std::runtime_error("Apartment::dispatchRequest: m_pBusRequestDispatcher is NULL");
-    }
-  } // dispatchRequest
 
   DeviceBusInterface* Apartment::getDeviceBusInterface() {
     if(m_pBusInterface != NULL) {

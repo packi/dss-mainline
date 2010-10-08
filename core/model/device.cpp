@@ -77,20 +77,6 @@ namespace dss {
     }
   } // publishToPropertyTree
 
-  void Device::enable() {
-    boost::shared_ptr<EnableDeviceCommandBusRequest> request(new EnableDeviceCommandBusRequest());
-    boost::shared_ptr<AddressableModelItem> modelItem = shared_from_this();
-    request->setTarget(boost::dynamic_pointer_cast<Device>(modelItem));
-    m_pApartment->dispatchRequest(request);
-  } // enable
-
-  void Device::disable() {
-    boost::shared_ptr<DisableDeviceCommandBusRequest> request(new DisableDeviceCommandBusRequest());
-    boost::shared_ptr<AddressableModelItem> modelItem = shared_from_this();
-    request->setTarget(boost::dynamic_pointer_cast<Device>(modelItem));
-    m_pApartment->dispatchRequest(request);
-  } // disable
-
   bool Device::isOn() const {
     return (m_LastCalledScene != SceneOff) &&
            (m_LastCalledScene != SceneMin) &&

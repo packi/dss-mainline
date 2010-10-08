@@ -47,7 +47,6 @@ namespace dss {
   class Device;
   class Group;
   class Event;
-  class BusRequestDispatcher;
   class BusRequest;
   class ModelMaintenance;
   class PropertySystem;
@@ -66,7 +65,6 @@ namespace dss {
     std::vector<boost::shared_ptr<Device> > m_Devices;
 
     BusInterface* m_pBusInterface;
-    BusRequestDispatcher* m_pBusRequestDispatcher;
     PropertyNodePtr m_pPropertyNode;
     ModelMaintenance* m_pModelMaintenance;
     PropertySystem* m_pPropertySystem;
@@ -125,8 +123,6 @@ namespace dss {
   public:
     void setBusInterface(BusInterface* _value) { m_pBusInterface = _value; }
     DeviceBusInterface* getDeviceBusInterface();
-    void setBusRequestDispatcher(BusRequestDispatcher* _value) { m_pBusRequestDispatcher = _value; }
-    void dispatchRequest(boost::shared_ptr<BusRequest> _pRequest);
     /** Returns the root-node for the apartment tree */
     PropertyNodePtr getPropertyNode() { return m_pPropertyNode; }
     void setModelMaintenance(ModelMaintenance* _value) { m_pModelMaintenance = _value; }
