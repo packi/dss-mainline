@@ -36,9 +36,6 @@
 #include "eventinterpreterplugins.h"
 #include "core/ds485/ds485proxy.h"
 
-// TODO: libdsm
-// #include "core/ds485/businterfacehandler.h"
-#include "core/ds485/ds485busrequestdispatcher.h"
 #include "core/model/apartment.h"
 #include "core/model/modelmaintenance.h"
 
