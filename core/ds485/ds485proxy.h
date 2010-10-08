@@ -129,36 +129,36 @@ namespace dss {
 
     //------------------------------------------------ Specialized Commands (system)
     virtual std::vector<DSMeterSpec_t> getDSMeters();
-    virtual DSMeterSpec_t getDSMeterSpec(dsid_t _dsMeterID);
+    virtual DSMeterSpec_t getDSMeterSpec(const dsid_t& _dsMeterID);
 
-    virtual std::vector<int> getZones(dsid_t _dsMeterID);
-    virtual int getZoneCount(dsid_t _dsMeterID);
-    virtual std::vector<int> getDevicesInZone(dsid_t _dsMeterID, const int _zoneID);
-    virtual int getDevicesCountInZone(dsid_t _dsMeterID, const int _zoneID);
+    virtual std::vector<int> getZones(const dsid_t& _dsMeterID);
+    virtual int getZoneCount(const dsid_t& _dsMeterID);
+    virtual std::vector<int> getDevicesInZone(const dsid_t& _dsMeterID, const int _zoneID);
+    virtual int getDevicesCountInZone(const dsid_t& _dsMeterID, const int _zoneID);
 
-    virtual void setZoneID(dsid_t _dsMeterID, const devid_t _deviceID, const int _zoneID);
-    virtual void createZone(dsid_t _dsMeterID, const int _zoneID);
-    virtual void removeZone(dsid_t _dsMeterID, const int _zoneID);
+    virtual void setZoneID(const dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID);
+    virtual void createZone(const dsid_t& _dsMeterID, const int _zoneID);
+    virtual void removeZone(const dsid_t& _dsMeterID, const int _zoneID);
 
-    virtual int getGroupCount(dsid_t _dsMeterID, const int _zoneID);
-    virtual std::vector<int> getGroups(dsid_t _dsMeterID, const int _zoneID);
+    virtual int getGroupCount(const dsid_t& _dsMeterID, const int _zoneID);
+    virtual std::vector<int> getGroups(const dsid_t& _dsMeterID, const int _zoneID);
 
-    virtual std::vector<int> getGroupsOfDevice(dsid_t _dsMeterID, const int _deviceID);
+    virtual std::vector<int> getGroupsOfDevice(const dsid_t& _dsMeterID, const int _deviceID);
 
-    virtual void addToGroup(dsid_t _dsMeterID, const int _groupID, const int _deviceID);
-    virtual void removeFromGroup(dsid_t _dsMeterID, const int _groupID, const int _deviceID);
+    virtual void addToGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID);
+    virtual void removeFromGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID);
 
     virtual int addUserGroup(const int _dsMeterID);
     virtual void removeUserGroup(const int _dsMeterID, const int _groupID);
 
-    virtual void removeInactiveDevices(dsid_t _dsMeterID);
+    virtual void removeInactiveDevices(const dsid_t& _dsMeterID);
 
-    virtual dss_dsid_t getDSIDOfDevice(dsid_t, const int _deviceID);
+    virtual dss_dsid_t getDSIDOfDevice(const dsid_t&, const int _deviceID);
 
     virtual int getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID);
 
-    virtual unsigned long getPowerConsumption(dsid_t _dsMeterID);
-    virtual unsigned long getEnergyMeterValue(dsid_t _dsMeterID);
+    virtual unsigned long getPowerConsumption(const dsid_t& _dsMeterID);
+    virtual unsigned long getEnergyMeterValue(const dsid_t& _dsMeterID);
     virtual void requestEnergyMeterValue();
     virtual void requestPowerConsumption();
     virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper);

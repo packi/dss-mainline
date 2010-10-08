@@ -271,7 +271,7 @@ namespace dss {
     return result;
   } // getDSMeters
 
-  DSMeterSpec_t DS485Proxy::getDSMeterSpec(dsid_t _dsMeterID) {
+  DSMeterSpec_t DS485Proxy::getDSMeterSpec(const dsid_t& _dsMeterID) {
 
     uint32_t hwVersion;
     uint32_t swVersion;
@@ -289,7 +289,7 @@ namespace dss {
     return spec;
   } // getDSMeterSpec
 
-  int DS485Proxy::getGroupCount(dsid_t _dsMeterID, const int _zoneID) {
+  int DS485Proxy::getGroupCount(const dsid_t& _dsMeterID, const int _zoneID) {
 
     uint16_t zoneId;
     uint8_t virtualZoneId, numberOfGroups;
@@ -305,7 +305,7 @@ namespace dss {
     return numberOfGroups;
   } // getGroupCount
 
-  std::vector<int> DS485Proxy::getGroups(dsid_t _dsMeterID, const int _zoneID) {
+  std::vector<int> DS485Proxy::getGroups(const dsid_t& _dsMeterID, const int _zoneID) {
 
     std::vector<int> result;
 
@@ -323,7 +323,7 @@ namespace dss {
     return result;
   } // getGroups
 
-  std::vector<int> DS485Proxy::getGroupsOfDevice(dsid_t _dsMeterID, const int _deviceID) {
+  std::vector<int> DS485Proxy::getGroupsOfDevice(const dsid_t& _dsMeterID, const int _deviceID) {
     uint8_t groups[GROUPS_LEN];
     int ret = DeviceInfo_by_device_id_sync(m_dsmApiHandle, _dsMeterID, _deviceID,
                                            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -341,14 +341,14 @@ namespace dss {
     return result;
   } // getGroupsOfDevice
 
-  int DS485Proxy::getZoneCount(dsid_t _dsMeterID) {
+  int DS485Proxy::getZoneCount(const dsid_t& _dsMeterID) {
     uint8_t zoneCount;
     int ret = ZoneCount_sync(m_dsmApiHandle, _dsMeterID, &zoneCount);
     checkResultCode(ret);
     return zoneCount;
   } // getZoneCount
 
-  std::vector<int> DS485Proxy::getZones(dsid_t _dsMeterID) {
+  std::vector<int> DS485Proxy::getZones(const dsid_t& _dsMeterID) {
     std::vector<int> result;
 
     int numZones = getZoneCount(_dsMeterID);
@@ -366,7 +366,7 @@ namespace dss {
     return result;
   } // getZones
 
-  int DS485Proxy::getDevicesCountInZone(dsid_t _dsMeterID, const int _zoneID) {
+  int DS485Proxy::getDevicesCountInZone(const dsid_t& _dsMeterID, const int _zoneID) {
     
     uint16_t numberOfDevices;
     int ret = ZoneDeviceCount_all_sync(m_dsmApiHandle, _dsMeterID, _zoneID, &numberOfDevices);
@@ -375,7 +375,7 @@ namespace dss {
     return numberOfDevices;
   } // getDevicesCountInZone
 
-  std::vector<int> DS485Proxy::getDevicesInZone(dsid_t _dsMeterID, const int _zoneID) {
+  std::vector<int> DS485Proxy::getDevicesInZone(const dsid_t& _dsMeterID, const int _zoneID) {
 
     std::vector<int> result;
 
@@ -391,24 +391,24 @@ namespace dss {
     return result;
   } // getDevicesInZone
 
-  void DS485Proxy::setZoneID(dsid_t _dsMeterID, const devid_t _deviceID, const int _zoneID) {
+  void DS485Proxy::setZoneID(const dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) {
 
     int ret = DeviceProperties_set_zone_sync(m_dsmApiHandle, _dsMeterID, _deviceID, _zoneID);
     checkResultCode(ret);
   } // setZoneID
 
-  void DS485Proxy::createZone(dsid_t _dsMeterID, const int _zoneID) {
+  void DS485Proxy::createZone(const dsid_t& _dsMeterID, const int _zoneID) {
 
     int ret = ZoneModify_add_sync(m_dsmApiHandle, _dsMeterID, _zoneID);
     checkResultCode(ret);
   } // createZone
 
-  void DS485Proxy::removeZone(dsid_t _dsMeterID, const int _zoneID) {
+  void DS485Proxy::removeZone(const dsid_t& _dsMeterID, const int _zoneID) {
     int ret = ZoneModify_remove_sync(m_dsmApiHandle, _dsMeterID, _zoneID);
     checkResultCode(ret);
   } // removeZone
 
-  dss_dsid_t DS485Proxy::getDSIDOfDevice(dsid_t _dsMeterID, const int _deviceID) {
+  dss_dsid_t DS485Proxy::getDSIDOfDevice(const dsid_t& _dsMeterID, const int _deviceID) {
     dsid_t dsid;
     int ret = DeviceInfo_by_device_id_sync(m_dsmApiHandle, _dsMeterID, _deviceID,
                                            NULL, NULL, NULL, NULL,
@@ -425,7 +425,7 @@ namespace dss {
     return 42;
   } // getLastCalledScene
 
-  unsigned long DS485Proxy::getPowerConsumption(dsid_t _dsMeterID) {
+  unsigned long DS485Proxy::getPowerConsumption(const dsid_t& _dsMeterID) {
     uint32_t power;
     int ret = CircuitEnergyMeterValue_get_sync(m_dsmApiHandle, _dsMeterID, &power, NULL);
     checkResultCode(ret);
@@ -446,7 +446,7 @@ namespace dss {
 #endif
   } // requestPowerConsumption
 
-  unsigned long DS485Proxy::getEnergyMeterValue(dsid_t _dsMeterID) {
+  unsigned long DS485Proxy::getEnergyMeterValue(const dsid_t& _dsMeterID) {
     uint32_t energy;
     int ret = CircuitEnergyMeterValue_get_sync(m_dsmApiHandle, _dsMeterID, NULL, &energy);
     checkResultCode(ret);
@@ -477,12 +477,12 @@ namespace dss {
     return 0;
   } // getSensorValue
 
-  void DS485Proxy::addToGroup(dsid_t _dsMeterID, const int _groupID, const int _deviceID) {
+  void DS485Proxy::addToGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
     int ret = DeviceGroupMembershipModify_add_sync(m_dsmApiHandle, _dsMeterID, _deviceID, _groupID);
     checkResultCode(ret);
   } // addToGroup
 
-  void DS485Proxy::removeFromGroup(dsid_t _dsMeterID, const int _groupID, const int _deviceID) {
+  void DS485Proxy::removeFromGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
     int ret = DeviceGroupMembershipModify_remove_sync(m_dsmApiHandle, _dsMeterID, _deviceID, _groupID);
     checkResultCode(ret);
   } // removeFromGroup
@@ -495,7 +495,7 @@ namespace dss {
 
   } // removeUserGroup
 
-  void DS485Proxy::removeInactiveDevices(dsid_t _dsMeterID) {
+  void DS485Proxy::removeInactiveDevices(const dsid_t& _dsMeterID) {
 
     int ret = CircuitRemoveInactiveDevices_sync(m_dsmApiHandle, _dsMeterID);
     checkResultCode(ret);

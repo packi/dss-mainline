@@ -61,26 +61,26 @@ namespace dss {
     virtual std::vector<DSMeterSpec_t> getDSMeters() = 0;
 
     /** Returns the dsMeter-spec for a dsMeter */
-    virtual DSMeterSpec_t getDSMeterSpec(dsid_t _dsMeterID) = 0;
+    virtual DSMeterSpec_t getDSMeterSpec(const dsid_t& _dsMeterID) = 0;
 
     /** Returns a std::vector conatining the zone-ids of the specified dsMeter */
-    virtual std::vector<int> getZones(dsid_t _dsMeterID) = 0;
+    virtual std::vector<int> getZones(const dsid_t& _dsMeterID) = 0;
     /** Returns the count of the zones of the specified dsMeter */
-    virtual int getZoneCount(dsid_t _dsMeterID) = 0;
+    virtual int getZoneCount(const dsid_t& _dsMeterID) = 0;
     /** Returns the bus-ids of the devices present in the given zone of the specified dsMeter */
-    virtual std::vector<int> getDevicesInZone(dsid_t _dsMeterID, const int _zoneID) = 0;
+    virtual std::vector<int> getDevicesInZone(const dsid_t& _dsMeterID, const int _zoneID) = 0;
     /** Returns the count of devices present in the given zone of the specified dsMeter */
-    virtual int getDevicesCountInZone(dsid_t _dsMeterID, const int _zoneID) = 0;
+    virtual int getDevicesCountInZone(const dsid_t& _dsMeterID, const int _zoneID) = 0;
 
     /** Returns the count of groups present in the given zone of the specifid dsMeter */
-    virtual int getGroupCount(dsid_t _dsMeterID, const int _zoneID) = 0;
+    virtual int getGroupCount(const dsid_t& _dsMeterID, const int _zoneID) = 0;
     /** Returns the a std::vector containing the group-ids of the given zone on the specified dsMeter */
-    virtual std::vector<int> getGroups(dsid_t _dsMeterID, const int _zoneID) = 0;
+    virtual std::vector<int> getGroups(const dsid_t& _dsMeterID, const int _zoneID) = 0;
 
-    virtual std::vector<int> getGroupsOfDevice(dsid_t _dsMeterID, const int _deviceID) = 0;
+    virtual std::vector<int> getGroupsOfDevice(const dsid_t& _dsMeterID, const int _deviceID) = 0;
 
     /** Returns the DSID of a given device */
-    virtual dss_dsid_t getDSIDOfDevice(dsid_t _dsMeterID, const int _deviceID) = 0;
+    virtual dss_dsid_t getDSIDOfDevice(const dsid_t& _dsMeterID, const int _deviceID) = 0;
 
     virtual int getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID) = 0;
     virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) = 0;
@@ -95,18 +95,18 @@ namespace dss {
   class StructureModifyingBusInterface {
   public:
     /** Adds the given device to the specified zone. */
-    virtual void setZoneID(dsid_t _dsMeterID, const devid_t _deviceID, const int _zoneID) = 0;
+    virtual void setZoneID(const dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) = 0;
 
     /** Creates a new Zone on the given dsMeter */
-    virtual void createZone(dsid_t _dsMeterID, const int _zoneID) = 0;
+    virtual void createZone(const dsid_t& _dsMeterID, const int _zoneID) = 0;
 
     /** Removes the zone \a _zoneID on the dsMeter \a _dsMeterID */
-    virtual void removeZone(dsid_t _dsMeterID, const int _zoneID) = 0;
+    virtual void removeZone(const dsid_t& _dsMeterID, const int _zoneID) = 0;
 
     /** Adds a device to a given group */
-    virtual void addToGroup(dsid_t _dsMeterID, const int _groupID, const int _deviceID) = 0;
+    virtual void addToGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) = 0;
     /** Removes a device from a given group */
-    virtual void removeFromGroup(dsid_t _dsMeterID, const int _groupID, const int _deviceID) = 0;
+    virtual void removeFromGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) = 0;
 
     /** Adds a user group */
     virtual int addUserGroup(const int _dsMeterID) = 0;
@@ -114,7 +114,7 @@ namespace dss {
     virtual void removeUserGroup(const int _dsMeterID, const int _groupID) = 0;
 
     /** Removes all inactive (!isPresent) devices from the dSM */
-    virtual void removeInactiveDevices(dsid_t _dsMeterID) = 0;
+    virtual void removeInactiveDevices(const dsid_t& _dsMeterID) = 0;
 
     virtual ~StructureModifyingBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureModifyingBusInterface
@@ -122,12 +122,12 @@ namespace dss {
   class MeteringBusInterface {
   public:
     /** Returns the current power-consumption in mW */
-    virtual unsigned long getPowerConsumption(dsid_t _dsMeterID) = 0;
+    virtual unsigned long getPowerConsumption(const dsid_t& _dsMeterID) = 0;
     /** Sends a message to all devices to report their power consumption */
     virtual void requestPowerConsumption() = 0;
 
     /** Returns the meter value in Wh */
-    virtual unsigned long getEnergyMeterValue(dsid_t _dsMeterID) = 0;
+    virtual unsigned long getEnergyMeterValue(const dsid_t& _dsMeterID) = 0;
     /** Sends a message to all devices to report their energy value */
     virtual void requestEnergyMeterValue() = 0;
 
