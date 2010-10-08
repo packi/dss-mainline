@@ -178,10 +178,10 @@ namespace dss {
         break;
       case ModelEvent::etLostDevice:
         assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() != 3) {
-          log("Expected exactly 3 parameter for ModelEvent::etLostDevice");
+        if(event.getParameterCount() != 2) {
+          log("Expected exactly 2 parameter for ModelEvent::etLostDevice");
         } else {
-          onRemoveDevice(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
+          onRemoveDevice(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
         }
         break;
       case ModelEvent::etCallSceneDevice:
@@ -487,16 +487,25 @@ namespace dss {
     }
   } // onAddDevice
 
-  void ModelMaintenance::onRemoveDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID, const int _functionID) {
+  void ModelMaintenance::onRemoveDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID) {
     log("Device disappeared");
     log("  DSMeter: " +  _dsMeterID.toString());
     log("  Zone:      " + intToString(_zoneID));
     log("  BusID:     " + intToString(_devID));
-    log("  FID:       " + intToString(_functionID));
 
+    boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
     boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByDSID(_dsMeterID);
     boost::shared_ptr<Device> device = m_pApartment->getDeviceByShortAddress(dsMeter, _devID);
-    m_pApartment->removeDevice(device->getDSID());
+    DeviceReference devRef(device, m_pApartment);
+
+    if (_zoneID == 0) {
+      // TODO: remove zone from meter if it's the last device
+      // already handled in structuremanipulator
+      zone->removeDevice(devRef);
+    }  
+    dsMeter->removeDevice(devRef);
+    device->setIsPresent(true);
+
   } // onAddDevice
 
   void ModelMaintenance::setApartment(Apartment* _value) {

@@ -673,14 +673,9 @@ namespace dss {
 
   void DSBusInterface::eventDeviceAccessibilityOff(uint8_t _errorCode, dsid_t _dsMeterID, uint16_t _deviceID, 
                                                    uint16_t _zoneID, uint32_t _deviceDSID) {
-    dss_dsid_t dsMeterID;
-    dsid_helper::toDssDsid(_dsMeterID, dsMeterID);    
-    DeviceSpec_t deviceSpec = deviceGetSpec(_deviceID, dsMeterID);
-    
     ModelEvent* pEvent = new ModelEvent(ModelEvent::etLostDevice);
     pEvent->addParameter(_zoneID);
-    pEvent->addParameter(_deviceDSID);
-    pEvent->addParameter(deviceSpec.get<0>());
+    pEvent->addParameter(_deviceID);
     m_pModelMaintenance->addModelEvent(pEvent);
   }
 
