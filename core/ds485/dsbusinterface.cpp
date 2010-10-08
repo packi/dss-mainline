@@ -415,7 +415,7 @@ namespace dss {
 
   int DSBusInterface::getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID) {
     // TODO: libdsm-api
-    return 42;
+    return SceneOff;
   } // getLastCalledScene
 
   unsigned long DSBusInterface::getPowerConsumption(const dsid_t& _dsMeterID) {
