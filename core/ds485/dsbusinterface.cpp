@@ -59,14 +59,11 @@ namespace dss {
 
   DSBusInterface::DSBusInterface(DSS* _pDSS, ModelMaintenance* _pModelMaintenance, DSSim* _pDSSim)
   : Subsystem(_pDSS, "DSBusInterface"),
-    m_pBusInterfaceHandler(NULL),
     m_pModelMaintenance(_pModelMaintenance),
     m_pDSSim(_pDSSim),
-
     m_dsmApiHandle(NULL),
     m_dsmApiReady(false),
-    m_connection("tcp://localhost:8442"),
-    m_InitializeDS485Controller(true)
+    m_connection("tcp://localhost:8442")
   {
     assert(_pModelMaintenance != NULL);
     if(_pDSS != NULL) {
@@ -106,7 +103,6 @@ namespace dss {
 #if 0
     // TODO: libdsm
     bool simReady = (m_pDSSim != NULL) ? m_pDSSim->isReady() : true;
-    bool selfReady = (m_pBusInterfaceHandler != NULL) ? m_pBusInterfaceHandler->isRunning() : true;
     bool controllerReady =
       ((m_dsmApiController.getState() == csSlave) ||
        (m_dsmApiController.getState() == csDesignatedMaster) ||

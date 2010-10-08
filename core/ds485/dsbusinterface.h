@@ -60,7 +60,6 @@ namespace dss {
   class ModelEvent;
   class FrameBucketBase;
   class FrameBucketCollector;
-  class BusInterfaceHandler;
   class ModelMaintenance;
   class DSSim;
 
@@ -74,8 +73,6 @@ namespace dss {
   private:
     bool isSimAddress(const uint8_t _addr);
 
-    BusInterfaceHandler* m_pBusInterfaceHandler;
-    DsmApiHandle_t m_dsmApiController;
     ModelMaintenance* m_pModelMaintenance;
     DSSim* m_pDSSim;
 
@@ -83,7 +80,7 @@ namespace dss {
     bool m_dsmApiReady;
     std::string m_connection;
 
-    bool m_InitializeDS485Controller;
+    static 
 
     void checkResultCode(const int _resultCode);
     void busReady();
@@ -115,8 +112,6 @@ namespace dss {
     virtual ~DSBusInterface() {};
 
     virtual void shutdown();
-
-    void setBusInterfaceHandler(BusInterfaceHandler* _value) { m_pBusInterfaceHandler = _value; }
 
     virtual DeviceBusInterface* getDeviceBusInterface() { return this; }
     virtual StructureQueryBusInterface* getStructureQueryBusInterface() { return this; }
