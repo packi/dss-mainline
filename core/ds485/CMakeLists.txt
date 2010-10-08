@@ -1,1 +1,1 @@
-add_library(ds485 ds485proxy.cpp)
+add_library(ds485 dsbusinterface.cpp)

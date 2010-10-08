@@ -27,10 +27,7 @@
 
 #include "core/web/json.h"
 
-// TODO: libdsm
-// #include "core/ds485/ds485.h"
-// #include "core/ds485/framebucketcollector.h"
-#include "core/ds485/ds485proxy.h"
+#include "core/ds485/dsbusinterface.h"
 
 #include "core/dss.h"
 #include "core/propertysystem.h"

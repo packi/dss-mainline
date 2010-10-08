@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <properties version="1">
   <property name="config">
-    <property name="subsystems/DS485Proxy/rs485devicename" type="string">
+    <property name="subsystems/DSBusInterface/rs485devicename" type="string">
       <value>/dev/ttyUSB0</value>
     </property>
     <property name="subsystems/DSSim/js-devices">

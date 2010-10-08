@@ -20,8 +20,8 @@
 
 */
 
-#ifndef _DS485_PROXY_H_INCLUDED
-#define _DS485_PROXY_H_INCLUDED
+#ifndef _DSBUSINTERFACE_H_INCLUDED
+#define _DSBUSINTERFACE_H_INCLUDED
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -64,13 +64,13 @@ namespace dss {
   class ModelMaintenance;
   class DSSim;
 
-  class DS485Proxy : public    Subsystem,
-                     public    BusInterface,
-                     public    DeviceBusInterface,
-                     public    StructureQueryBusInterface,
-                     public    MeteringBusInterface,
-                     public    StructureModifyingBusInterface,
-                     public    ActionRequestInterface {
+  class DSBusInterface : public    Subsystem,
+                         public    BusInterface,
+                         public    DeviceBusInterface,
+                         public    StructureQueryBusInterface,
+                         public    MeteringBusInterface,
+                         public    StructureModifyingBusInterface,
+                         public    ActionRequestInterface {
   private:
     bool isSimAddress(const uint8_t _addr);
 
@@ -111,8 +111,8 @@ namespace dss {
   protected:
     virtual void doStart();
   public:
-    DS485Proxy(DSS* _pDSS, ModelMaintenance* _pModelMaintenance, DSSim* _pDSSim);
-    virtual ~DS485Proxy() {};
+    DSBusInterface(DSS* _pDSS, ModelMaintenance* _pModelMaintenance, DSSim* _pDSSim);
+    virtual ~DSBusInterface() {};
 
     virtual void shutdown();
 
@@ -183,7 +183,7 @@ namespace dss {
 
     void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size);
     virtual int getSensorValue(const Device& _device, const int _sensorID);
-  }; // DS485Proxy
+  }; // DSBusInterface
 
 } // namespace dss
 

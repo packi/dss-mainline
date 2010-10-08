@@ -20,7 +20,7 @@
 
 */
 
-#include "ds485proxy.h"
+#include "dsbusinterface.h"
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
@@ -57,12 +57,12 @@ namespace dss {
 
   const char* FunctionIDToString(const int _functionID); // internal forward declaration
 
-  DS485Proxy::DS485Proxy(DSS* _pDSS, ModelMaintenance* _pModelMaintenance, DSSim* _pDSSim)
-  : Subsystem(_pDSS, "DS485Proxy"),
+  DSBusInterface::DSBusInterface(DSS* _pDSS, ModelMaintenance* _pModelMaintenance, DSSim* _pDSSim)
+  : Subsystem(_pDSS, "DSBusInterface"),
     m_pBusInterfaceHandler(NULL),
     m_pModelMaintenance(_pModelMaintenance),
     m_pDSSim(_pDSSim),
-    
+
     m_dsmApiHandle(NULL),
     m_dsmApiReady(false),
     m_connection("tcp://localhost:8442"),
@@ -70,10 +70,10 @@ namespace dss {
   {
     assert(_pModelMaintenance != NULL);
     if(_pDSS != NULL) {
-      
+
 #if 0
       // TODO: libdsm
-      
+
       // read m_connection from config
 
       _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "rs485devicename")
@@ -102,7 +102,7 @@ namespace dss {
     }
   } // ctor
 
-  bool DS485Proxy::isReady() {
+  bool DSBusInterface::isReady() {
 #if 0
     // TODO: libdsm
     bool simReady = (m_pDSSim != NULL) ? m_pDSSim->isReady() : true;
@@ -117,12 +117,12 @@ namespace dss {
     return m_dsmApiReady;
   } // isReady
 
-  uint16_t DS485Proxy::deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterDSID, int _paramID) {
+  uint16_t DSBusInterface::deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterDSID, int _paramID) {
     log("deviceGetParameterValue: not implemented yet");
     return 0;
   } // deviceGetParameterValue
 
-  DeviceSpec_t DS485Proxy::deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID) {
+  DeviceSpec_t DSBusInterface::deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID) {
 
     uint16_t functionId, productId, version;
     dsid_t dsmDSID;
@@ -136,7 +136,7 @@ namespace dss {
     return spec;
   } // deviceGetSpec
 
-  void DS485Proxy::lockOrUnlockDevice(const Device& _device, const bool _lock) {
+  void DSBusInterface::lockOrUnlockDevice(const Device& _device, const bool _lock) {
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
 
@@ -145,7 +145,7 @@ namespace dss {
     checkResultCode(ret);
   } // lockOrUnlockDevice
 
-  bool DS485Proxy::isLocked(boost::shared_ptr<const Device> _device) {
+  bool DSBusInterface::isLocked(boost::shared_ptr<const Device> _device) {
 
     uint8_t locked;
     dsid_t dsmDSID;
@@ -157,7 +157,7 @@ namespace dss {
     return locked;
   } // isLocked
 
-  bool DS485Proxy::isSimAddress(const uint8_t _addr) {
+  bool DSBusInterface::isSimAddress(const uint8_t _addr) {
 #if 0
     // TODO: libdsm
     if(m_pDSSim != NULL) {
@@ -169,7 +169,7 @@ namespace dss {
     return false;
   } // isSimAddress
 
-  void DS485Proxy::checkResultCode(const int _resultCode) {
+  void DSBusInterface::checkResultCode(const int _resultCode) {
     if(_resultCode != ERROR_OK) {
       std::string message = "Unknown Error";
       switch(_resultCode) {
@@ -244,12 +244,12 @@ namespace dss {
     }
   } // checkResultCode
 
-  void DS485Proxy::setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) {
+  void DSBusInterface::setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) {
     log("Not implemented yet: setValueDevice()");
   } // setValueDevice
 
 
-  std::vector<DSMeterSpec_t> DS485Proxy::getDSMeters() {
+  std::vector<DSMeterSpec_t> DSBusInterface::getDSMeters() {
     std::vector<DSMeterSpec_t> result;
     dsid_t device_list[63];
     dsid_t ownDSID;
@@ -275,7 +275,7 @@ namespace dss {
     return result;
   } // getDSMeters
 
-  DSMeterSpec_t DS485Proxy::getDSMeterSpec(const dsid_t& _dsMeterID) {
+  DSMeterSpec_t DSBusInterface::getDSMeterSpec(const dsid_t& _dsMeterID) {
 
     uint32_t hwVersion;
     uint32_t swVersion;
@@ -293,7 +293,7 @@ namespace dss {
     return spec;
   } // getDSMeterSpec
 
-  int DS485Proxy::getGroupCount(const dsid_t& _dsMeterID, const int _zoneID) {
+  int DSBusInterface::getGroupCount(const dsid_t& _dsMeterID, const int _zoneID) {
 
     uint16_t zoneId;
     uint8_t virtualZoneId, numberOfGroups;
@@ -309,7 +309,7 @@ namespace dss {
     return numberOfGroups;
   } // getGroupCount
 
-  std::vector<int> DS485Proxy::getGroups(const dsid_t& _dsMeterID, const int _zoneID) {
+  std::vector<int> DSBusInterface::getGroups(const dsid_t& _dsMeterID, const int _zoneID) {
 
     std::vector<int> result;
 
@@ -327,7 +327,7 @@ namespace dss {
     return result;
   } // getGroups
 
-  std::vector<int> DS485Proxy::getGroupsOfDevice(const dsid_t& _dsMeterID, const int _deviceID) {
+  std::vector<int> DSBusInterface::getGroupsOfDevice(const dsid_t& _dsMeterID, const int _deviceID) {
     uint8_t groups[GROUPS_LEN];
     int ret = DeviceInfo_by_device_id_sync(m_dsmApiHandle, _dsMeterID, _deviceID,
                                            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -345,14 +345,14 @@ namespace dss {
     return result;
   } // getGroupsOfDevice
 
-  int DS485Proxy::getZoneCount(const dsid_t& _dsMeterID) {
+  int DSBusInterface::getZoneCount(const dsid_t& _dsMeterID) {
     uint8_t zoneCount;
     int ret = ZoneCount_sync(m_dsmApiHandle, _dsMeterID, &zoneCount);
     checkResultCode(ret);
     return zoneCount;
   } // getZoneCount
 
-  std::vector<int> DS485Proxy::getZones(const dsid_t& _dsMeterID) {
+  std::vector<int> DSBusInterface::getZones(const dsid_t& _dsMeterID) {
     std::vector<int> result;
 
     int numZones = getZoneCount(_dsMeterID);
@@ -370,16 +370,16 @@ namespace dss {
     return result;
   } // getZones
 
-  int DS485Proxy::getDevicesCountInZone(const dsid_t& _dsMeterID, const int _zoneID) {
-    
+  int DSBusInterface::getDevicesCountInZone(const dsid_t& _dsMeterID, const int _zoneID) {
+
     uint16_t numberOfDevices;
     int ret = ZoneDeviceCount_all_sync(m_dsmApiHandle, _dsMeterID, _zoneID, &numberOfDevices);
     checkResultCode(ret);
-    
+
     return numberOfDevices;
   } // getDevicesCountInZone
 
-  std::vector<int> DS485Proxy::getDevicesInZone(const dsid_t& _dsMeterID, const int _zoneID) {
+  std::vector<int> DSBusInterface::getDevicesInZone(const dsid_t& _dsMeterID, const int _zoneID) {
 
     std::vector<int> result;
 
@@ -395,24 +395,24 @@ namespace dss {
     return result;
   } // getDevicesInZone
 
-  void DS485Proxy::setZoneID(const dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) {
+  void DSBusInterface::setZoneID(const dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) {
 
     int ret = DeviceProperties_set_zone_sync(m_dsmApiHandle, _dsMeterID, _deviceID, _zoneID);
     checkResultCode(ret);
   } // setZoneID
 
-  void DS485Proxy::createZone(const dsid_t& _dsMeterID, const int _zoneID) {
+  void DSBusInterface::createZone(const dsid_t& _dsMeterID, const int _zoneID) {
 
     int ret = ZoneModify_add_sync(m_dsmApiHandle, _dsMeterID, _zoneID);
     checkResultCode(ret);
   } // createZone
 
-  void DS485Proxy::removeZone(const dsid_t& _dsMeterID, const int _zoneID) {
+  void DSBusInterface::removeZone(const dsid_t& _dsMeterID, const int _zoneID) {
     int ret = ZoneModify_remove_sync(m_dsmApiHandle, _dsMeterID, _zoneID);
     checkResultCode(ret);
   } // removeZone
 
-  dss_dsid_t DS485Proxy::getDSIDOfDevice(const dsid_t& _dsMeterID, const int _deviceID) {
+  dss_dsid_t DSBusInterface::getDSIDOfDevice(const dsid_t& _dsMeterID, const int _deviceID) {
     dsid_t dsid;
     int ret = DeviceInfo_by_device_id_sync(m_dsmApiHandle, _dsMeterID, _deviceID,
                                            NULL, NULL, NULL, NULL,
@@ -424,12 +424,12 @@ namespace dss {
     return dss_dsid;
   } // getDSIDOfDevice
 
-  int DS485Proxy::getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID) {
+  int DSBusInterface::getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID) {
     // TODO: libdsm-api
     return 42;
   } // getLastCalledScene
 
-  unsigned long DS485Proxy::getPowerConsumption(const dsid_t& _dsMeterID) {
+  unsigned long DSBusInterface::getPowerConsumption(const dsid_t& _dsMeterID) {
     uint32_t power;
     int ret = CircuitEnergyMeterValue_get_sync(m_dsmApiHandle, _dsMeterID, &power, NULL);
     checkResultCode(ret);
@@ -437,7 +437,7 @@ namespace dss {
     return power;
   } // getPowerConsumption
 
-  void DS485Proxy::requestPowerConsumption() {
+  void DSBusInterface::requestPowerConsumption() {
 #if 0
     // TODO: libdsm-api
 
@@ -450,7 +450,7 @@ namespace dss {
 #endif
   } // requestPowerConsumption
 
-  unsigned long DS485Proxy::getEnergyMeterValue(const dsid_t& _dsMeterID) {
+  unsigned long DSBusInterface::getEnergyMeterValue(const dsid_t& _dsMeterID) {
     uint32_t energy;
     int ret = CircuitEnergyMeterValue_get_sync(m_dsmApiHandle, _dsMeterID, NULL, &energy);
     checkResultCode(ret);
@@ -458,7 +458,7 @@ namespace dss {
     return energy;
   } // getEnergyMeterValue
 
-  void DS485Proxy::requestEnergyMeterValue() {
+  void DSBusInterface::requestEnergyMeterValue() {
 #if 0
     // TODO: libdsm-api
 
@@ -471,41 +471,41 @@ namespace dss {
 #endif
   } // requestEnergyMeterValue
 
-  bool DS485Proxy::getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) {
+  bool DSBusInterface::getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) {
     log("getEnergyBorder(): not implemented yet");
     return false;
   } // getEnergyBorder
 
-  int DS485Proxy::getSensorValue(const Device& _device, const int _sensorID) {
+  int DSBusInterface::getSensorValue(const Device& _device, const int _sensorID) {
     log("getSensorValue(): not implemented yet");
     return 0;
   } // getSensorValue
 
-  void DS485Proxy::addToGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
+  void DSBusInterface::addToGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
     int ret = DeviceGroupMembershipModify_add_sync(m_dsmApiHandle, _dsMeterID, _deviceID, _groupID);
     checkResultCode(ret);
   } // addToGroup
 
-  void DS485Proxy::removeFromGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
+  void DSBusInterface::removeFromGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
     int ret = DeviceGroupMembershipModify_remove_sync(m_dsmApiHandle, _dsMeterID, _deviceID, _groupID);
     checkResultCode(ret);
   } // removeFromGroup
 
-  int DS485Proxy::addUserGroup(const int _dsMeterID) {
+  int DSBusInterface::addUserGroup(const int _dsMeterID) {
     return 0;
   } // addUserGroup
 
-  void DS485Proxy::removeUserGroup(const int _dsMeterID, const int _groupID) {
+  void DSBusInterface::removeUserGroup(const int _dsMeterID, const int _groupID) {
 
   } // removeUserGroup
 
-  void DS485Proxy::removeInactiveDevices(const dsid_t& _dsMeterID) {
+  void DSBusInterface::removeInactiveDevices(const dsid_t& _dsMeterID) {
 
     int ret = CircuitRemoveInactiveDevices_sync(m_dsmApiHandle, _dsMeterID);
     checkResultCode(ret);
   }
 
-  void DS485Proxy::initialize() {
+  void DSBusInterface::initialize() {
     Subsystem::initialize();
 
     m_dsmApiHandle = DsmApiInitialize();
@@ -516,38 +516,38 @@ namespace dss {
 
     // TODO: libdsm
     m_connection = "tcp://192.168.2.124:8442";
-      
+
     int result = DsmApiOpen(m_dsmApiHandle, m_connection.c_str(), 0);
     if (result < 0) {
       log("Couldn't open dsmapi connection");
       return;
     }
     log("Successfully connected to " + m_connection);
-    
-   
-    // register callbacks
-    DsmApiRegisterBusStateCallback(m_dsmApiHandle, DS485Proxy::busStateCallback, this);
-    DsmApiRegisterBusChangeCallback(m_dsmApiHandle, DS485Proxy::busChangeCallback, this);
 
-    EventDeviceAccessibility_off_callback_t evDevAccessOn = DS485Proxy::eventDeviceAccessibilityOnCallback;
-    DsmApiRegisterCallback(m_dsmApiHandle, EVENT_DEVICE_ACCESSIBILITY, EVENT_DEVICE_ACCESSIBILITY_ON, 
+
+    // register callbacks
+    DsmApiRegisterBusStateCallback(m_dsmApiHandle, DSBusInterface::busStateCallback, this);
+    DsmApiRegisterBusChangeCallback(m_dsmApiHandle, DSBusInterface::busChangeCallback, this);
+
+    EventDeviceAccessibility_off_callback_t evDevAccessOn = DSBusInterface::eventDeviceAccessibilityOnCallback;
+    DsmApiRegisterCallback(m_dsmApiHandle, EVENT_DEVICE_ACCESSIBILITY, EVENT_DEVICE_ACCESSIBILITY_ON,
                            (void*)evDevAccessOn, this);
-    EventDeviceAccessibility_off_callback_t evDevAccessOff = DS485Proxy::eventDeviceAccessibilityOffCallback;
-    DsmApiRegisterCallback(m_dsmApiHandle, EVENT_DEVICE_ACCESSIBILITY, EVENT_DEVICE_ACCESSIBILITY_OFF, 
+    EventDeviceAccessibility_off_callback_t evDevAccessOff = DSBusInterface::eventDeviceAccessibilityOffCallback;
+    DsmApiRegisterCallback(m_dsmApiHandle, EVENT_DEVICE_ACCESSIBILITY, EVENT_DEVICE_ACCESSIBILITY_OFF,
                            (void*)evDevAccessOff, this);
     m_dsmApiReady = true;
   } // initialize
 
-  void DS485Proxy::doStart() {    
+  void DSBusInterface::doStart() {
     busReady();
   } // doStart
 
-  void DS485Proxy::busReady() {
+  void DSBusInterface::busReady() {
     ModelEvent* pEvent = new ModelEvent(ModelEvent::etBusReady);
     m_pModelMaintenance->addModelEvent(pEvent);
   } // busReady
 
-  void DS485Proxy::shutdown() {
+  void DSBusInterface::shutdown() {
     if (m_dsmApiReady) {
       DsmApiClose(m_dsmApiHandle);
       DsmApiCleanup(m_dsmApiHandle);
@@ -558,7 +558,7 @@ namespace dss {
 
 
 
-		void DS485Proxy::callScene(AddressableModelItem *pTarget, const uint16_t scene) {
+		void DSBusInterface::callScene(AddressableModelItem *pTarget, const uint16_t scene) {
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
     Zone *pZone =  dynamic_cast<Zone*>(pTarget);
@@ -570,7 +570,7 @@ namespace dss {
     } else if (pDevice)	{
       dsid_t dsid;
       dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      
+
       DeviceActionRequest_action_call_scene_sync(m_dsmApiHandle, dsid, pDevice->getShortAddress(), scene);
     } else if (pZone) {
       dsid_t dsid;
@@ -579,12 +579,12 @@ namespace dss {
     }
 		}
 
-		void DS485Proxy::saveScene(AddressableModelItem *pTarget, const uint16_t scene) {
+		void DSBusInterface::saveScene(AddressableModelItem *pTarget, const uint16_t scene) {
     #if 0
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
     Zone *pZone =  dynamic_cast<Zone*>(pTarget);
-    
+
     if (pGroup) {
       ZoneGroupAction_SaveScene(dSIDBroadcast,pGroup->getZoneID(), pGroup->getID(),scene);
     } else if (pDevice) {
@@ -594,7 +594,7 @@ namespace dss {
     }
     #endif
 		}
-		void DS485Proxy::undoScene(AddressableModelItem *pTarget)	{
+		void DSBusInterface::undoScene(AddressableModelItem *pTarget)	{
     #if 0
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
@@ -610,7 +610,7 @@ namespace dss {
     #endif
 		}
 
-		void DS485Proxy::blink(AddressableModelItem *pTarget) {
+		void DSBusInterface::blink(AddressableModelItem *pTarget) {
     #if 0
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
@@ -626,7 +626,7 @@ namespace dss {
     #endif
 		}
 
-		void DS485Proxy::increaseValue(AddressableModelItem *pTarget) {
+		void DSBusInterface::increaseValue(AddressableModelItem *pTarget) {
     #if 0
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
@@ -641,7 +641,7 @@ namespace dss {
     #endif
 		}
 
-		void DS485Proxy::decreaseValue(AddressableModelItem *pTarget) {
+		void DSBusInterface::decreaseValue(AddressableModelItem *pTarget) {
     #if 0
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
@@ -656,7 +656,7 @@ namespace dss {
     #endif
 		}
 
-		void DS485Proxy::startDim(AddressableModelItem *pTarget,const bool _directionUp){
+		void DSBusInterface::startDim(AddressableModelItem *pTarget,const bool _directionUp){
     #if 0
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
@@ -685,7 +685,7 @@ namespace dss {
     #endif
 		}
 
-		void DS485Proxy::endDim(AddressableModelItem *pTarget)	{
+		void DSBusInterface::endDim(AddressableModelItem *pTarget)	{
     #if 0
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
@@ -701,13 +701,13 @@ namespace dss {
     #endif
 		}
 
-		void DS485Proxy::setValue(AddressableModelItem *pTarget,const double _value) {
+		void DSBusInterface::setValue(AddressableModelItem *pTarget,const double _value) {
     #if 0
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
     Zone *pZone =  dynamic_cast<Zone*>(pTarget);
     uint16_t value = (uint16_t)_value;
-    
+
     if (pGroup) {
       ZoneGroupAction_SetOutval(dSIDBroadcast,pGroup->getZoneID(),pGroup->getID(),0,value);
     } else if (pDevice) {
@@ -721,11 +721,11 @@ namespace dss {
 
 
 
-  void DS485Proxy::busStateCallback(void* _userData, bus_state_t _state) {
-    static_cast<DS485Proxy*>(_userData)->handleBusState(_state);
+  void DSBusInterface::busStateCallback(void* _userData, bus_state_t _state) {
+    static_cast<DSBusInterface*>(_userData)->handleBusState(_state);
   }
 
-  void DS485Proxy::handleBusState(bus_state_t _state) {
+  void DSBusInterface::handleBusState(bus_state_t _state) {
     switch (_state) {
       case DS485_ISOLATED:
         log("STATE: ISOLATED");
@@ -745,10 +745,10 @@ namespace dss {
     }
   }
 
-  void DS485Proxy::busChangeCallback(void* _userData, dsid_t *_id, int _flag) {
-    static_cast<DS485Proxy*>(_userData)->handleBusChange(_id, _flag);
+  void DSBusInterface::busChangeCallback(void* _userData, dsid_t *_id, int _flag) {
+    static_cast<DSBusInterface*>(_userData)->handleBusChange(_id, _flag);
   }
-  void DS485Proxy::handleBusChange(dsid_t *_id, int _flag) {
+  void DSBusInterface::handleBusChange(dsid_t *_id, int _flag) {
     std::string s = dsid_helper::toString(*_id);
     if (_flag) {
       s += "left";
@@ -756,28 +756,28 @@ namespace dss {
       s += "joined";
     }
     s += " bus";
-    
+
     log(s);
   }
 
-  void DS485Proxy::eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData,
+  void DSBusInterface::eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData,
                                                        uint16_t _deviceID, uint16_t _zoneID,
                                                        uint32_t _deviceDSID) {
-    
-    static_cast<DS485Proxy*>(_userData)->eventDeviceAccessibilityOff(_errorCode, _deviceID, _zoneID, _deviceDSID);
+
+    static_cast<DSBusInterface*>(_userData)->eventDeviceAccessibilityOff(_errorCode, _deviceID, _zoneID, _deviceDSID);
   }
 
-  void DS485Proxy::eventDeviceAccessibilityOff(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
+  void DSBusInterface::eventDeviceAccessibilityOff(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
                                                uint32_t _deviceDSID) {
     printf("Device 0x%08x (DeviceId: %d in Zone: %d) became inactive\n", _deviceDSID, _deviceID, _zoneID);
   }
 
-  void DS485Proxy::eventDeviceAccessibilityOnCallback(uint8_t _errorCode, void* _userData, uint16_t _deviceID, uint16_t _zoneID,
+  void DSBusInterface::eventDeviceAccessibilityOnCallback(uint8_t _errorCode, void* _userData, uint16_t _deviceID, uint16_t _zoneID,
                                                       uint32_t _deviceDSID) {
-    static_cast<DS485Proxy*>(_userData)->eventDeviceAccessibilityOn(_errorCode, _deviceID, _zoneID, _deviceDSID);
+    static_cast<DSBusInterface*>(_userData)->eventDeviceAccessibilityOn(_errorCode, _deviceID, _zoneID, _deviceDSID);
   }
-  
-  void DS485Proxy::eventDeviceAccessibilityOn(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
+
+  void DSBusInterface::eventDeviceAccessibilityOn(uint8_t _errorCode, uint16_t _deviceID, uint16_t _zoneID,
                                               uint32_t _deviceDSID) {
 #if 0
     ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etNewDevice, );
@@ -786,7 +786,7 @@ namespace dss {
     pEvent->addParameter(functionID);
     raiseModelEvent(pEvent);
 #endif
-    
+
     // Device 0x0000ffff (DeviceId: 3792 in Zone: 66) became active
     printf("Device 0x%08x (DeviceId: %d in Zone: %d) became active\n", _deviceDSID, _deviceID, _zoneID);
   }

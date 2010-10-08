@@ -34,7 +34,7 @@
 #include "propertysystem.h"
 #include "scripting/modeljs.h"
 #include "eventinterpreterplugins.h"
-#include "core/ds485/ds485proxy.h"
+#include "core/ds485/dsbusinterface.h"
 
 #include "core/model/apartment.h"
 #include "core/model/modelmaintenance.h"
@@ -241,8 +241,8 @@ const char* JSLogDirectory = "data/logs/";
     m_Subsystems.push_back(m_pSimulation.get());
 #endif
 
-    m_pBusInterface = boost::shared_ptr<DS485Proxy>(new DS485Proxy(this, m_pModelMaintenance.get(), m_pSimulation.get()));
-    m_Subsystems.push_back(dynamic_cast<DS485Proxy*>(m_pBusInterface.get()));
+    m_pBusInterface = boost::shared_ptr<DSBusInterface>(new DSBusInterface(this, m_pModelMaintenance.get(), m_pSimulation.get()));
+    m_Subsystems.push_back(dynamic_cast<DSBusInterface*>(m_pBusInterface.get()));
 
     m_pWebServer = boost::shared_ptr<WebServer>(new WebServer(this));
     m_Subsystems.push_back(m_pWebServer.get());
