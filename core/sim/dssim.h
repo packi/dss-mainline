@@ -25,9 +25,6 @@
 
 #include "core/ds485types.h"
 #include "core/model/modelconst.h"
-
-// TODO: libdsm
-// #include "core/ds485/ds485.h"
 #include "core/subsystem.h"
 
 #include <map>

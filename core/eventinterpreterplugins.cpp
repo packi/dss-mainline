@@ -36,8 +36,6 @@
 #include "core/scripting/propertyscriptextension.h"
 #include "core/scripting/jssocket.h"
 #include "core/scripting/jslogger.h"
-// TODO: libdsm
-// #include "core/ds485/businterfacehandler.h"
 #include "core/foreach.h"
 #include "core/model/set.h"
 #include "core/model/zone.h"

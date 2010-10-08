@@ -24,8 +24,6 @@
 #define BUSINTERFACE_H_
 
 #include "ds485types.h"
-// TODO: libdsm
-// #include "core/ds485/ds485.h"
 
 #include <digitalSTROM/ds.h>
 #include "base.h"
@@ -122,13 +120,13 @@ namespace dss {
 
   class ActionRequestInterface {
   public:
-    virtual void callScene(AddressableModelItem *pTarget, const uint16_t scene)= 0;
-    virtual void saveScene(AddressableModelItem *pTarget, const uint16_t scene)= 0;
-    virtual void undoScene(AddressableModelItem *pTarget)= 0;
-    virtual void blink(AddressableModelItem *pTarget)= 0;
-    virtual void increaseValue(AddressableModelItem *pTarget)= 0;
-    virtual void decreaseValue(AddressableModelItem *pTarget)= 0;
-    virtual void setValue(AddressableModelItem *pTarget, const double _value)= 0;
+    virtual void callScene(AddressableModelItem *pTarget, const uint16_t scene) = 0;
+    virtual void saveScene(AddressableModelItem *pTarget, const uint16_t scene) = 0;
+    virtual void undoScene(AddressableModelItem *pTarget) = 0;
+    virtual void blink(AddressableModelItem *pTarget) = 0;
+    virtual void increaseValue(AddressableModelItem *pTarget) = 0;
+    virtual void decreaseValue(AddressableModelItem *pTarget) = 0;
+    virtual void setValue(AddressableModelItem *pTarget, const double _value) = 0;
   }; // ActionRequestInterface
 
 
