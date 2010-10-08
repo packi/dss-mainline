@@ -1241,7 +1241,7 @@
    <complexType>
     <sequence>
      <element name="token" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-     <element name="dsMeterID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="dsMeterID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
     </sequence>
    </complexType>
   </element>

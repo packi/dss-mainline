@@ -116,19 +116,6 @@ int AuthorizeAndGetDSMeter(struct soap *soap, const int _token, char* _dsMeterDS
   return SOAP_OK;
 } // authorizeAndGetDSMeter
 
-int AuthorizeAndGetDSMeterByBusID(struct soap *soap, const int _token, int _dsMeterID, boost::shared_ptr<dss::DSMeter>& result) {
-  if(!IsAuthorized(soap, _token)) {
-    return NotAuthorized(soap);
-  }
-  dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
-  try {
-    result = apt.getDSMeterByBusID(_dsMeterID);
-  } catch(dss::ItemNotFoundException& _ex) {
-    return soap_receiver_fault(soap, "DSMeter not found", NULL);
-  }
-  return SOAP_OK;
-} // authorizeAndGetDSMeterID
-
 int AuthorizeAndGetGroup(struct soap *soap, const int _token, const int _groupID, boost::shared_ptr<dss::Group>& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
@@ -1073,9 +1060,9 @@ int dss__DeviceGetIsLocked(struct soap *soap, int _token, char* _deviceID, bool&
 
 //==================================================== Information
 
-int dss__DSMeterGetPowerConsumption(struct soap *soap, int _token, int _dsMeterID, unsigned long& result) {
+int dss__DSMeterGetPowerConsumption(struct soap *soap, int _token, char* _dsMeterID, unsigned long& result) {
   boost::shared_ptr<dss::DSMeter> mod;
-  int getResult = AuthorizeAndGetDSMeterByBusID(soap, _token, _dsMeterID, mod);
+  int getResult = AuthorizeAndGetDSMeter(soap, _token, _dsMeterID, mod);
   if(getResult != SOAP_OK) {
     return getResult;
   }

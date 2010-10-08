@@ -214,7 +214,7 @@ int dss__DeviceGetIsLocked(int _token, char* _deviceID, bool& result);
 
 //==================================================== Information
 
-int dss__DSMeterGetPowerConsumption(int _token, int _dsMeterID, xsd__unsignedInt& result);
+int dss__DSMeterGetPowerConsumption(int _token, char* _dsMeterID, xsd__unsignedInt& result);
 
 //==================================================== Organization
 
