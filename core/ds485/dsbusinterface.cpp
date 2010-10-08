@@ -698,8 +698,11 @@ namespace dss {
   
   void DSBusInterface::handleBusCallScene(uint8_t _errorCode, dsid_t _sourceID, 
                                           uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID) {
-    log("Scene called: sceneNr " + intToString(_sceneID) + " in zone " + intToString(_zoneID) + ", group " + 
-        intToString(_groupID) +  ", dsm " + dsid_helper::toString(_sourceID));
+    ModelEvent* pEvent = new ModelEvent(ModelEvent::etCallSceneGroup);
+    pEvent->addParameter(_zoneID);
+    pEvent->addParameter(_groupID);
+    pEvent->addParameter(_sceneID);
+    m_pModelMaintenance->addModelEvent(pEvent);
   }
 
   void DSBusInterface::handleBusCallSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID, 
