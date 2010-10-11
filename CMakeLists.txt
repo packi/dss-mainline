@@ -8,6 +8,7 @@ project(DSS)
 ###   option(WITH_TESTS "Include test-suite" ON)
 ### endif(WIN32)
 option(WITH_GCOV "Compile coverage information into the dss" OFF)
+set(LIBDSM_PREFIX CACHE STRING "Location of libdsm-api")
 
 if(NOT WITH_DATADIR)
   set(WITH_DATADIR "${CMAKE_INSTALL_PREFIX}/share/dss/data" CACHE FILEPATH "Data directory")
@@ -197,6 +198,12 @@ set(TEST_LIB)
 ### endif(WITH_TESTS)
 
 # libdsm-api
+if(LIBDSM_PREFIX)
+  link_directories(${LIBDSM_PREFIX}/lib)
+  include_directories(${LIBDSM_PREFIX}/include)
+  include_directories(${LIBDSM_PREFIX}/include/digitalSTROM)
+endif()
+
 set(REQUIRED_LIBS ${REQUIRED_LIBS} dsm-api)
 
 
