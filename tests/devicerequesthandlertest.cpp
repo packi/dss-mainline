@@ -44,9 +44,9 @@ public:
     m_pPropertySystem.reset(new PropertySystem());
     m_pApartment->setPropertySystem(m_pPropertySystem.get());
     m_pHandler.reset(new DeviceRequestHandler(*m_pApartment));
-    m_ValidDSID = dsid_t(0, 0x1234);
+    m_ValidDSID = dss_dsid_t(0, 0x1234);
     m_ValidName = "device1";
-    m_InvalidDSID = dsid_t(0, 0xdeadbeef);
+    m_InvalidDSID = dss_dsid_t(0, 0xdeadbeef);
     m_InvalidName = "nonexisting";
     m_ValidZoneID = 2;
     m_ValidGroupID = 1;
@@ -68,8 +68,8 @@ protected:
   boost::shared_ptr<Apartment> m_pApartment;
   boost::shared_ptr<DeviceRequestHandler> m_pHandler;
   boost::shared_ptr<PropertySystem> m_pPropertySystem;
-  dsid_t m_ValidDSID;
-  dsid_t m_InvalidDSID;
+  dss_dsid_t m_ValidDSID;
+  dss_dsid_t m_InvalidDSID;
   std::string m_ValidName;
   std::string m_InvalidName;
   int m_ValidZoneID;

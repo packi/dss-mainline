@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_SUITE(DeviceTests)
 
 BOOST_AUTO_TEST_CASE(testGroups) {
   Apartment apt(NULL);
-  boost::shared_ptr<Device> dev = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev = apt.allocateDevice(dss_dsid_t(0,1));
   BOOST_CHECK_EQUAL(dev->getGroupsCount(), 0);
   dev->resetGroups();
   BOOST_CHECK_EQUAL(dev->getGroupsCount(), 0);

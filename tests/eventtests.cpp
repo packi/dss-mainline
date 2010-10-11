@@ -39,8 +39,6 @@
 #include "core/model/zone.h"
 #include "core/model/group.h"
 #include "core/model/set.h"
-#include "core/ds485/ds485proxy.h"
-#include "core/ds485/ds485busrequestdispatcher.h"
 
 using namespace dss;
 
@@ -196,6 +194,7 @@ BOOST_FIXTURE_TEST_CASE(testSubscriptionXML, Fixture) {
   boost::filesystem::remove_all(fileName);
 } // testSubscriptionXML
 
+/* TODO: libdsm
 BOOST_FIXTURE_TEST_CASE(testDS485Events, Fixture) {
   ModelMaintenance maintenance(NULL);
   Apartment apt(NULL);
@@ -263,7 +262,7 @@ BOOST_FIXTURE_TEST_CASE(testDS485Events, Fixture) {
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 1);
 } // testDS485Events
-
+*/
 BOOST_AUTO_TEST_CASE(testEventHandlerJavascriptDoesntLeakExceptionsWithNonexistingFile) {
   EventInterpreter interpreter(NULL);
   EventInterpreterPluginJavascript* plugin = new EventInterpreterPluginJavascript(&interpreter);

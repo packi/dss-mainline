@@ -53,12 +53,6 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
     virtual void decreaseValue()  {
       functionCalled("decreaseValue");
     }
-    virtual void startDim(const bool _directionUp)  {
-      functionCalled(std::string("startDim(") + (_directionUp ? "true)" : "false)"));
-    }
-    virtual void endDim()  {
-      functionCalled("endDim");
-    }
     virtual void setValue(const double _value)  {
       functionCalled("setValue(" + doubleToString(_value) + ")");
     }
@@ -68,8 +62,8 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
     virtual void saveScene(const int _sceneNr)  {
       functionCalled("saveScene(" + intToString(_sceneNr) + ")");
     }
-    virtual void undoScene(const int _sceneNr)  {
-      functionCalled("undoScene(" + intToString(_sceneNr) + ")");
+    virtual void undoScene()  {
+      functionCalled("undoScene");
     }
     virtual unsigned long getPowerConsumption()  {
       functionCalled("getConsumption");
@@ -156,18 +150,6 @@ BOOST_FIXTURE_TEST_CASE(testDecreaseValue, Fixture) {
   testFunction("decreaseValue");
 }
 
-BOOST_FIXTURE_TEST_CASE(testStartDimUp, Fixture) {
-  testFunction("startDim", "direction", "up", "startDim(true)");
-}
-
-BOOST_FIXTURE_TEST_CASE(testStartDimDown, Fixture) {
-  testFunction("startDim", "direction", "down", "startDim(false)");
-}
-
-BOOST_FIXTURE_TEST_CASE(testEndDim, Fixture) {
-  testFunction("endDim");
-}
-
 BOOST_FIXTURE_TEST_CASE(testSetValue, Fixture) {
   testFunction("setValue", "value", "5");
 }
@@ -181,7 +163,7 @@ BOOST_FIXTURE_TEST_CASE(testSaveScene, Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testUndoScene, Fixture) {
-  testFunction("undoScene", "sceneNumber", "5");
+  testFunction("undoScene");
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetPowerConsumption, Fixture) {
