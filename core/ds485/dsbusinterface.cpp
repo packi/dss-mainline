@@ -660,9 +660,10 @@ namespace dss {
     m_pModelMaintenance->addModelEvent(new ModelEvent(eventType));
   }
 
-  void DSBusInterface::eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData, dsid_t _dsMeterID,
+  void DSBusInterface::eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData,
+                                                           dsid_t _sourceDSMeterID, dsid_t _destinationDSMeterID,
                                                            uint16_t _deviceID, uint16_t _zoneID,uint32_t _deviceDSID) {
-    static_cast<DSBusInterface*>(_userData)->eventDeviceAccessibilityOff(_errorCode, _dsMeterID, _deviceID, 
+    static_cast<DSBusInterface*>(_userData)->eventDeviceAccessibilityOff(_errorCode, _sourceDSMeterID, _deviceID,
                                                                          _zoneID, _deviceDSID);
   }
 
@@ -674,9 +675,10 @@ namespace dss {
     m_pModelMaintenance->addModelEvent(pEvent);
   }
 
-  void DSBusInterface::eventDeviceAccessibilityOnCallback(uint8_t _errorCode, void* _userData, dsid_t _dsMeterID, 
+  void DSBusInterface::eventDeviceAccessibilityOnCallback(uint8_t _errorCode, void* _userData,
+                                                          dsid_t _sourceDSMeterID, dsid_t _destinationDSMeterID,
                                                           uint16_t _deviceID, uint16_t _zoneID, uint32_t _deviceDSID) {
-    static_cast<DSBusInterface*>(_userData)->eventDeviceAccessibilityOn(_errorCode, _dsMeterID, _deviceID, 
+    static_cast<DSBusInterface*>(_userData)->eventDeviceAccessibilityOn(_errorCode, _sourceDSMeterID, _deviceID,
                                                                         _zoneID, _deviceDSID);
   }
 
@@ -703,8 +705,9 @@ namespace dss {
     m_pModelMaintenance->addModelEvent(pEvent);
   }
 
-  void DSBusInterface::handleBusCallSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID, 
-                                                  uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID) {
+  void DSBusInterface::handleBusCallSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
+                                                  dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
+                                                  uint8_t _sceneID) {
     
     static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID, _sceneID);
   }
