@@ -36,6 +36,7 @@ namespace dss {
   {} // ctor
 
 
+  // TODO: don't access DSS::getInstance, this will fail all tests!!!
   void AddressableModelItem::increaseValue() {
     if (DSS::hasInstance()) {
       DSS::getInstance()->getBusInterface().getActionRequestInterface()->increaseValue(this);
