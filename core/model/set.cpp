@@ -221,7 +221,7 @@ namespace dss {
     const devid_t m_ID;
     const dss_dsid_t& m_DSMeterID;
   public:
-    ByIDSelector(const devid_t _id, const dss_dsid_t _dsMeterID)
+    ByIDSelector(const devid_t _id, const dss_dsid_t& _dsMeterID)
     : m_ID(_id), m_DSMeterID(_dsMeterID)
     {}
     virtual ~ByIDSelector() {};
