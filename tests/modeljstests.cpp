@@ -67,10 +67,9 @@ BOOST_AUTO_TEST_CASE(testBasics) {
 BOOST_AUTO_TEST_CASE(testSets) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsid_t(0,10));
-  meter->setBusID(1);
+  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dss_dsid_t(0,10));
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
   dev1->setShortAddress(1);
   dev1->setDSMeter(meter);
   dev1->addToGroup(1);
@@ -78,7 +77,7 @@ BOOST_AUTO_TEST_CASE(testSets) {
   dev1->setZoneID(1);
   dev1->setName("dev1");
   dev1->setFunctionID(1);
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
   dev2->setShortAddress(2);
   dev2->setDSMeter(meter);
   dev2->addToGroup(1);
@@ -114,7 +113,7 @@ BOOST_AUTO_TEST_CASE(testSets) {
   length = ctx->evaluate<int>("getDevices().byGroup('asdf').length()");
   BOOST_CHECK_EQUAL(0, length);
 
-  length = ctx->evaluate<int>("getDevices().byDSMeter(1).length()");
+  length = ctx->evaluate<int>("getDevices().byDSMeter('a').length()");
   BOOST_CHECK_EQUAL(2, length);
 
   length = ctx->evaluate<int>("getDevices().byPresence(false).length()");
@@ -151,13 +150,12 @@ BOOST_AUTO_TEST_CASE(testSetTags) {
   PropertySystem propSys;
   apt.setPropertySystem(&propSys);
 
-  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsid_t(0,10));
-  meter->setBusID(1);
+  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dss_dsid_t(0,10));
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
   dev1->addTag("dev1");
   dev1->addTag("device");
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
   dev2->addTag("dev2");
   dev2->addTag("device");
 
@@ -183,10 +181,10 @@ BOOST_AUTO_TEST_CASE(testSetTags) {
 BOOST_AUTO_TEST_CASE(testDevices) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
   dev1->setShortAddress(1);
   dev1->setName("dev1");
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
   dev2->setShortAddress(2);
   dev2->setName("dev2");
 
@@ -204,39 +202,12 @@ BOOST_AUTO_TEST_CASE(testDevices) {
                       "devs.perform(f)\n");
 } // testDevices
 
-BOOST_AUTO_TEST_CASE(testGlobalDSMeterGetByBusID) {
-  Apartment apt(NULL);
-
-  boost::shared_ptr<DSMeter> meter1 = apt.allocateDSMeter(dsid_t(0,10));
-  meter1->setBusID(1);
-  meter1->setName("meter1");
-  boost::shared_ptr<DSMeter> meter2 = apt.allocateDSMeter(dsid_t(0,11));
-  meter2->setBusID(2);
-  meter2->setName("meter2");
-
-  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
-  env->initialize();
-  ModelScriptContextExtension* ext = new ModelScriptContextExtension(apt);
-  env->addExtension(ext);
-
-  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  std::string name = ctx->evaluate<std::string>("getDSMeterByBusID(1).name");
-  BOOST_CHECK_EQUAL(name, meter1->getName());
-
-  name = ctx->evaluate<std::string>("getDSMeterByBusID(2).name");
-  BOOST_CHECK_EQUAL(name, meter2->getName());
-
-  ctx->evaluate<void>("getDSMeterByBusID(123)");
-} // testGlobalDSMeterGetByBusID
-
 BOOST_AUTO_TEST_CASE(testGlobalDSMeterGetByDSID) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<DSMeter> meter1 = apt.allocateDSMeter(dsid_t(0,0xa));
-  meter1->setBusID(1);
+  boost::shared_ptr<DSMeter> meter1 = apt.allocateDSMeter(dss_dsid_t(0,0xa));
   meter1->setName("meter1");
-  boost::shared_ptr<DSMeter> meter2 = apt.allocateDSMeter(dsid_t(0,0xb));
-  meter2->setBusID(2);
+  boost::shared_ptr<DSMeter> meter2 = apt.allocateDSMeter(dss_dsid_t(0,0xb));
   meter2->setName("meter2");
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
@@ -277,7 +248,7 @@ BOOST_AUTO_TEST_CASE(testSceneConstants) {
 BOOST_AUTO_TEST_CASE(testEvents) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<Device> dev = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev = apt.allocateDevice(dss_dsid_t(0,1));
   dev->setShortAddress(1);
   dev->setName("dev");
 
@@ -311,7 +282,7 @@ BOOST_AUTO_TEST_CASE(testEvents) {
 BOOST_AUTO_TEST_CASE(testSubscriptions) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<Device> dev = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev = apt.allocateDevice(dss_dsid_t(0,1));
   dev->setShortAddress(1);
   dev->setName("dev");
 

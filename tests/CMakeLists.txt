@@ -1,6 +1,7 @@
 set(files basetests.cpp  datetoolstests.cpp
         eventtests.cpp
-        #modeljstests.cpp  modeltests.cpp
+        modeljstests.cpp
+        #modeltests.cpp
         devicetests.cpp
         propertysystemtests.cpp  scriptstest.cpp  seriestests.cpp tests.cpp
         jsloggertests.cpp deviceinterfacerequesthandlertest.cpp jsontests.cpp
