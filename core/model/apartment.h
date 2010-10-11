@@ -83,8 +83,6 @@ namespace dss {
     boost::shared_ptr<Device> getDeviceByDSID(const dss_dsid_t _dsid);
     /** Returns a reference to the device with the name \a _name*/
     boost::shared_ptr<Device> getDeviceByName(const std::string& _name);
-    /** Returns a device by it's short-address and dsMeter */
-    boost::shared_ptr<Device> getDeviceByShortAddress(boost::shared_ptr<const DSMeter> _dsMeter, const devid_t _deviceID) const;
     std::vector<boost::shared_ptr<Device> > getDevicesVector() { return m_Devices; }
     /** Allocates a device and returns a reference to it. */
     boost::shared_ptr<Device> allocateDevice(const dss_dsid_t _dsid);

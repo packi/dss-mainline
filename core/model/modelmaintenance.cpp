@@ -495,7 +495,7 @@ namespace dss {
 
     boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
     boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByDSID(_dsMeterID);
-    boost::shared_ptr<Device> device = m_pApartment->getDeviceByShortAddress(dsMeter, _devID);
+    boost::shared_ptr<Device> device = dsMeter->getDevices().getByBusID(_devID, _dsMeterID).getDevice();
     DeviceReference devRef(device, m_pApartment);
 
     if (_zoneID == 0) {

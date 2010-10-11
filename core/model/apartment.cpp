@@ -116,17 +116,6 @@ namespace dss {
     throw ItemNotFoundException(_dsid.toString());
   } // getDeviceByShortAddress
 
-  boost::shared_ptr<Device> Apartment::getDeviceByShortAddress(boost::shared_ptr<const DSMeter> _dsMeter, const devid_t _deviceID) const {
-    AssertLocked lock(this);
-    foreach(boost::shared_ptr<Device> dev, m_Devices) {
-      if((dev->getShortAddress() == _deviceID) &&
-          (_dsMeter->getDSID() == dev->getDSMeterDSID())) {
-        return dev;
-      }
-    }
-    throw ItemNotFoundException(intToString(_deviceID));
-  } // getDeviceByShortAddress
-
   boost::shared_ptr<Device> Apartment::getDeviceByName(const std::string& _name) {
     AssertLocked lock(this);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
