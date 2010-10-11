@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 2.6)
 project(DSS)
 
-# TODO: libdsm
-### if(WIN32)
-###   option(WITH_TESTS "Include test-suite" OFF)
-### else(WIN32)  
-###   option(WITH_TESTS "Include test-suite" ON)
-### endif(WIN32)
+if(WIN32)
+  option(WITH_TESTS "Include test-suite" OFF)
+else(WIN32)
+  option(WITH_TESTS "Include test-suite" ON)
+endif(WIN32)
 option(WITH_GCOV "Compile coverage information into the dss" OFF)
 set(LIBDSM_PREFIX CACHE STRING "Location of libdsm-api")
 
@@ -35,7 +34,7 @@ if(UNIX)
 endif(UNIX)
 
 add_custom_target(build_info.h ALL
-	COMMAND ${DSS_GEN_VERSION_CMD} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+        COMMAND ${DSS_GEN_VERSION_CMD} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 add_definitions(-DHAVE_BUILD_INFO_H)
@@ -170,10 +169,9 @@ add_definitions(-DHAVE_CONFIG_H)
 set(BOOST_REQUIRED_LIBS thread filesystem system program_options)
 
 # check for Boost unit testing
-# TODO: libdsm
-### if(WITH_TESTS)
-###   set(BOOST_REQUIRED_LIBS unit_test_framework ${BOOST_REQUIRED_LIBS})
-### endif(WITH_TESTS)
+if(WITH_TESTS)
+  set(BOOST_REQUIRED_LIBS unit_test_framework ${BOOST_REQUIRED_LIBS})
+endif(WITH_TESTS)
 
 # check for Boost
 set(Boost_USE_MULTITHREADED ON)
@@ -188,15 +186,6 @@ if(CMAKE_HAVE_PTHREAD_CREATE)
   set(REQUIRED_LIBS ${REQUIRED_LIBS} pthread)
 endif(CMAKE_HAVE_PTHREAD_CREATE)
 
-#include test-directory if needed
-set(TEST_LIB)
-# TODO: libdsm
-### if(WITH_TESTS)
-###   set(TEST_LIB tests)
-###   add_subdirectory(tests)
-###   add_dependencies(dsstests build_info.h)
-### endif(WITH_TESTS)
-
 # libdsm-api
 if(LIBDSM_PREFIX)
   link_directories(${LIBDSM_PREFIX}/lib)
@@ -206,6 +195,13 @@ endif()
 
 set(REQUIRED_LIBS ${REQUIRED_LIBS} dsm-api)
 
+#include test-directory if needed
+set(TEST_LIB)
+if(WITH_TESTS)
+  set(TEST_LIB tests)
+  add_subdirectory(tests)
+  add_dependencies(dsstests build_info.h)
+endif(WITH_TESTS)
 
 add_subdirectory(core)
 add_subdirectory(unix)
@@ -214,15 +210,10 @@ add_subdirectory(external)
 add_subdirectory(doc)
 
 add_executable(dss main.cpp namespaces.cpp)
-			  
-IF(WIN32)
-    target_link_libraries(dss ${TEST_LIB} core ds485 model unix webservices core mongoose
-			  ${REQUIRED_LIBS})
-ELSE(WIN32)
-	target_link_libraries(dss ${TEST_LIB} core ds485 model unix webservices core mongoose
-			  ${REQUIRED_LIBS})
-ENDIF(WIN32)
-			  
+
+target_link_libraries(dss ${TEST_LIB} core ds485 model unix webservices core mongoose
+                          ${REQUIRED_LIBS})
+
 add_dependencies(dss build_info.h)
 
 ## -- install targets:
