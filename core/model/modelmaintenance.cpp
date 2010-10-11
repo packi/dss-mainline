@@ -130,7 +130,7 @@ namespace dss {
 
     waitForInterface();
 
-    log("Apartment::execute: Interface is ready, enumerating model", lsInfo);
+    log("ModelMaintenance::execute: Interface is ready, enumerating model", lsInfo);
     discoverDS485Devices();
 
     boost::shared_ptr<ApartmentTreeListener> treeListener
@@ -144,13 +144,15 @@ namespace dss {
 
 
   void ModelMaintenance::discoverDS485Devices() {
-    std::vector<DSMeterSpec_t> meters = m_pStructureQueryBusInterface->getDSMeters();
-    std::vector<DSMeterSpec_t>::iterator it = meters.begin();
-    for (; it != meters.end(); ++it) {
-      dss_dsid_t dsmDSID;
-      dsid_helper::toDssDsid(it->get<0>(), dsmDSID);
-      ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDS485DeviceDiscovered, dsmDSID);
-      addModelEvent(pEvent);
+    if(m_pStructureQueryBusInterface != NULL) {
+      std::vector<DSMeterSpec_t> meters = m_pStructureQueryBusInterface->getDSMeters();
+      std::vector<DSMeterSpec_t>::iterator it = meters.begin();
+      for (; it != meters.end(); ++it) {
+        dss_dsid_t dsmDSID;
+        dsid_helper::toDssDsid(it->get<0>(), dsmDSID);
+        ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDS485DeviceDiscovered, dsmDSID);
+        addModelEvent(pEvent);
+      }
     }
   } // discoverDS485Devices
 
@@ -498,7 +500,7 @@ namespace dss {
     boost::shared_ptr<Device> device = dsMeter->getDevices().getByBusID(_devID, _dsMeterID).getDevice();
     DeviceReference devRef(device, m_pApartment);
 
-    if (_zoneID == 0) {
+    if(_zoneID == 0) {
       // TODO: remove zone from meter if it's the last device
       // already handled in structuremanipulator
       zone->removeDevice(devRef);
