@@ -41,6 +41,7 @@ namespace dss {
     virtual void propertyAdded(PropertyNodePtr _parent, PropertyNodePtr _child);
 
     const std::string& getIdentifier() const { return m_Identifier; }
+    virtual void stop();
   private:
     void doOnChange(PropertyNodePtr _changedNode);
     void createScriptObject();

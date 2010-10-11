@@ -218,15 +218,28 @@ namespace dss {
     { }
 
     void timeout(int _timeoutMS, jsval _function, JSObject* _obj, boost::shared_ptr<ScriptFunctionRooter> _rooter) {
-      sleepMS(_timeoutMS);
-      ScriptLock lock(getContext());
-      JSContextThread req(getContext());
-      ScriptObject obj(_obj, *getContext());
-      ScriptFunctionParameterList params(*getContext());
-      obj.callFunctionByReference<void>(_function, params);
+      const int kSleepIntervalMS = 1000;
+      int toSleep = _timeoutMS;
+      while(!getIsStopped() && (toSleep > 0)) {
+        int toSleepNow = std::min(toSleep, kSleepIntervalMS);
+        sleepMS(toSleepNow);
+        toSleep -= toSleepNow;
+      }
 
-      _rooter.reset();
-      JS_MaybeGC(getContext()->getJSContext());
+      if(!getIsStopped()) {
+        ScriptLock lock(getContext());
+        JSContextThread req(getContext());
+        ScriptObject obj(_obj, *getContext());
+        ScriptFunctionParameterList params(*getContext());
+        obj.callFunctionByReference<void>(_function, params);
+        _rooter.reset();
+        JS_MaybeGC(getContext()->getJSContext());
+      } else {
+        ScriptLock lock(getContext());
+        JSContextThread req(getContext());
+        _rooter.reset();
+      }
+
       delete this;
     }
   };
@@ -332,6 +345,15 @@ namespace dss {
     }
     return NULL;
   } // getAttachedObjectByName
+
+  void ScriptContext::stop() {
+    boost::mutex::scoped_lock lock(m_AttachedObjectsMutex);
+    typedef std::vector<ScriptContextAttachedObject*>::iterator AttachedObjectIterator;
+    for(AttachedObjectIterator iObject = m_AttachedObjects.begin(), e = m_AttachedObjects.end();
+        iObject != e; ++iObject) {
+      (*iObject)->stop();
+    }
+  } // stop
 
   bool ScriptContext::raisePendingExceptions() {
     if(JS_IsExceptionPending(m_pContext)) {

@@ -136,6 +136,8 @@ namespace dss {
     void lock();
     void unlock();
     bool reentrantLock();
+
+    void stop();
   public:
 
     /** Helper function to convert a jsval to a t. */
@@ -213,14 +215,17 @@ namespace dss {
   class ScriptContextAttachedObject {
   public:
     ScriptContextAttachedObject(ScriptContext* _pContext)
-    : m_pContext(_pContext)
+    : m_pContext(_pContext),
+      m_IsStopped(false)
     {
       assert(m_pContext != NULL);
       m_pContext->attachObject(this);
     }
 
     ScriptContextAttachedObject(ScriptContext* _pContext, const std::string& _name)
-    : m_pContext(_pContext), m_Name(_name)
+    : m_pContext(_pContext),
+      m_Name(_name),
+      m_IsStopped(false)
     {
       assert(m_pContext != NULL);
       m_pContext->attachObject(this);
@@ -230,11 +235,18 @@ namespace dss {
       m_pContext->removeAttachedObject(this);
     }
 
+    virtual void stop() {
+      m_IsStopped = true;
+    }
+
     ScriptContext* getContext() { return m_pContext; }
     const std::string& getName() const { return m_Name; }
+  protected:
+    bool getIsStopped() const { return m_IsStopped; }
   private:
     ScriptContext* m_pContext;
     std::string m_Name;
+    bool m_IsStopped;
   }; // ScriptContextAttachedObject
 
   /** Adds a JS-function callback to the root GC set and thus

@@ -5,7 +5,7 @@ set(files basetests.cpp  datetoolstests.cpp
         devicetests.cpp
         propertysystemtests.cpp  scriptstest.cpp  seriestests.cpp tests.cpp
         jsloggertests.cpp deviceinterfacerequesthandlertest.cpp jsontests.cpp
-        restfulapitests.cpp jssockettests.cpp
+        restfulapitests.cpp jssockettests.cpp jshandlertests.cpp
         dssimtest.cpp
         devicerequesthandlertest.cpp circuitrequesthandlertest.cpp
         eventrequesthandlertest.cpp)

@@ -138,8 +138,8 @@ namespace dss {
     }
   private:
     void stopScript(bool _value) {
-      // TODO: implement
-      Logger::getInstance()->log("Script would be stopped if this would have been implemented");
+      Logger::getInstance()->log("Stop of script '" + m_pPropertyNode->getName() + "' requested.", lsInfo);
+      m_pContext->stop();
     }
   private:
     boost::shared_ptr<ScriptContext> m_pContext;

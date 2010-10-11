@@ -299,6 +299,9 @@ namespace dss {
   } // propertyAdded
 
   void PropertyScriptListener::doOnChange(PropertyNodePtr _changedNode) {
+    if(getIsStopped()) {
+      return;
+    }
     ScriptLock lock(getContext(), true);
     boost::shared_ptr<JSContextThread> req;
     if(lock.ownsLock()) {
@@ -315,5 +318,12 @@ namespace dss {
     }
     JS_MaybeGC(getContext()->getJSContext());
   } // doOnChange
+
+  void PropertyScriptListener::stop()  {
+    ScriptContextAttachedObject::stop();
+    ScriptLock lock(getContext());
+    boost::shared_ptr<JSContextThread> req;
+    delete this;
+  }
 
 }
