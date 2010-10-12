@@ -41,6 +41,7 @@
 #include "core/model/zone.h"
 #include "core/model/modelmaintenance.h"
 
+#include "dsactionrequest.h"
 
 // TODO: libdsm
 // #include "core/sim/dssim.h"
@@ -49,6 +50,8 @@
 
 
 namespace dss {
+
+  //================================================== DSBusInterface
 
   DSBusInterface::DSBusInterface(DSS* _pDSS, ModelMaintenance* _pModelMaintenance, DSSim* _pDSSim)
   : Subsystem(_pDSS, "DSBusInterface"),
@@ -470,6 +473,8 @@ namespace dss {
     }
     log("Successfully connected to " + m_connectionURI);
 
+    m_pActionRequestInterface.reset(new DSActionRequest(m_dsmApiHandle));
+
 
     // register callbacks
     DsmApiRegisterBusStateCallback(m_dsmApiHandle, DSBusInterface::busStateCallback, this);
@@ -511,62 +516,6 @@ namespace dss {
 
       m_dsmApiHandle = NULL;
     }
-  }
-
-  void DSBusInterface::callScene(AddressableModelItem *pTarget, const uint16_t scene) {
-    Group *pGroup= dynamic_cast<Group*>(pTarget);
-    Device *pDevice = dynamic_cast<Device*>(pTarget);
-
-    if(pGroup) {
-      ZoneGroupActionRequest_action_call_scene(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
-    } else if(pDevice)	{
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      DeviceActionRequest_action_call_scene(m_dsmApiHandle, dsid, pDevice->getShortAddress(), scene);
-    }
-  }
-
-  void DSBusInterface::saveScene(AddressableModelItem *pTarget, const uint16_t scene) {
-    Group *pGroup= dynamic_cast<Group*>(pTarget);
-    Device *pDevice = dynamic_cast<Device*>(pTarget);
-
-    if(pGroup) {
-      ZoneGroupActionRequest_action_call_scene(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
-    } else if(pDevice) {
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      DeviceActionRequest_action_save_scene(m_dsmApiHandle, dsid, pDevice->getShortAddress(), scene);
-    }
-  }
-  void DSBusInterface::undoScene(AddressableModelItem *pTarget)	{
-    Group *pGroup = dynamic_cast<Group*>(pTarget);
-    Device *pDevice = dynamic_cast<Device*>(pTarget);
-
-    if(pGroup) {
-      ZoneGroupActionRequest_action_undo_scene(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), pGroup->getID());
-    } else if(pDevice)	{
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      DeviceActionRequest_action_undo_scene(m_dsmApiHandle, dsid, pDevice->getShortAddress());
-    }
-  }
-
-  void DSBusInterface::blink(AddressableModelItem *pTarget) {
-    Group *pGroup= dynamic_cast<Group*>(pTarget);
-    Device *pDevice = dynamic_cast<Device*>(pTarget);
-
-    if(pGroup) {
-      ZoneGroupActionRequest_action_blink(m_dsmApiHandle, m_broadcastDSID, pGroup->getZoneID(), pGroup->getID());
-    } else if(pDevice) {
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      DeviceActionRequest_action_blink(m_dsmApiHandle, dsid, pDevice->getShortAddress());
-    }
-  }
-
-  void DSBusInterface::setValue(AddressableModelItem *pTarget,const double _value) {
-    // TODO: libdsm
-    log("DSBusInterface::setValue(): not implemented yet");
   }
 
   void DSBusInterface::busStateCallback(void* _userData, bus_state_t _state) {

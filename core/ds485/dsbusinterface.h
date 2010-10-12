@@ -51,8 +51,6 @@ using namespace __gnu_cxx;
 using namespace stdext;
 #endif
 
-#include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/ptr_container/ptr_map.hpp>
 #include <boost/shared_ptr.hpp>
 
 namespace dss {
@@ -68,9 +66,9 @@ namespace dss {
                          public    DeviceBusInterface,
                          public    StructureQueryBusInterface,
                          public    MeteringBusInterface,
-                         public    StructureModifyingBusInterface,
-                         public    ActionRequestInterface {
+                         public    StructureModifyingBusInterface {
   private:
+    boost::shared_ptr<ActionRequestInterface> m_pActionRequestInterface;
     bool isSimAddress(const uint8_t _addr);
 
     ModelMaintenance* m_pModelMaintenance;
@@ -105,7 +103,7 @@ namespace dss {
                                                    uint32_t _deviceDSID);
     void eventDeviceAccessibilityOn(uint8_t _errorCode, dsid_t _dsMeterID, uint16_t _deviceID, 
                                     uint16_t _zoneID, uint32_t _deviceDSID);
-    
+
     void handleBusCallScene(uint8_t _errorCode, dsid_t _sourceID, 
                             uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID);
     static void handleBusCallSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
@@ -124,7 +122,7 @@ namespace dss {
     virtual StructureQueryBusInterface* getStructureQueryBusInterface() { return this; }
     virtual MeteringBusInterface* getMeteringBusInterface() { return this; }
     virtual StructureModifyingBusInterface* getStructureModifyingBusInterface() { return this; }
-    virtual ActionRequestInterface* getActionRequestInterface() { return this; }
+    virtual ActionRequestInterface* getActionRequestInterface() { return m_pActionRequestInterface.get(); }
 
     virtual bool isReady();
 
@@ -166,12 +164,6 @@ namespace dss {
     virtual void requestEnergyMeterValue();
     virtual void requestPowerConsumption();
     virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper);
-
-    virtual void callScene(AddressableModelItem *pTarget, const uint16_t scene);
-    virtual void saveScene(AddressableModelItem *pTarget, const uint16_t scene);
-    virtual void undoScene(AddressableModelItem *pTarget);
-    virtual void blink(AddressableModelItem *pTarget);
-    virtual void setValue(AddressableModelItem *pTarget, const double _value);
 
     //------------------------------------------------ Device
     virtual uint16_t deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterID, int _paramID);
