@@ -26,6 +26,7 @@
 
 #include "core/model/apartment.h"
 #include "core/dss.h"
+#include "core/model/modelconst.h"
 
 namespace dss {
 
@@ -39,13 +40,13 @@ namespace dss {
   // TODO: don't access DSS::getInstance, this will fail all tests!!!
   void AddressableModelItem::increaseValue() {
     if (DSS::hasInstance()) {
-      DSS::getInstance()->getBusInterface().getActionRequestInterface()->increaseValue(this);
+      DSS::getInstance()->getBusInterface().getActionRequestInterface()->callScene(this, SceneInc);
     }
   }
 
   void AddressableModelItem::decreaseValue() {
     if (DSS::hasInstance()) {
-      DSS::getInstance()->getBusInterface().getActionRequestInterface()->decreaseValue(this);
+      DSS::getInstance()->getBusInterface().getActionRequestInterface()->callScene(this, SceneDec);
     }
   }
 

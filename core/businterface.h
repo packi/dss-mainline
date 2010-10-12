@@ -124,8 +124,6 @@ namespace dss {
     virtual void saveScene(AddressableModelItem *pTarget, const uint16_t scene) = 0;
     virtual void undoScene(AddressableModelItem *pTarget) = 0;
     virtual void blink(AddressableModelItem *pTarget) = 0;
-    virtual void increaseValue(AddressableModelItem *pTarget) = 0;
-    virtual void decreaseValue(AddressableModelItem *pTarget) = 0;
     virtual void setValue(AddressableModelItem *pTarget, const double _value) = 0;
   }; // ActionRequestInterface
 

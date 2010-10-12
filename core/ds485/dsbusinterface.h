@@ -171,8 +171,6 @@ namespace dss {
     virtual void saveScene(AddressableModelItem *pTarget, const uint16_t scene);
     virtual void undoScene(AddressableModelItem *pTarget);
     virtual void blink(AddressableModelItem *pTarget);
-    virtual void increaseValue(AddressableModelItem *pTarget);
-    virtual void decreaseValue(AddressableModelItem *pTarget);
     virtual void setValue(AddressableModelItem *pTarget, const double _value);
 
     //------------------------------------------------ Device
