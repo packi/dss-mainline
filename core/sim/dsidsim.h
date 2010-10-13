@@ -71,32 +71,6 @@ namespace dss {
     virtual std::string getConfigParameter(const std::string& _name) const;
   }; // DSIDSim
 
-
-  class DSIDSimSwitch : public DSIDSim {
-  private:
-    const int m_NumberOfButtons;
-    int m_DefaultColor;
-    bool m_IsBell;
-  public:
-    DSIDSimSwitch(const DSDSMeterSim& _simulator, const dss_dsid_t _dsid, const devid_t _shortAddress, const int _numButtons)
-    : DSIDSim(_simulator, _dsid, _shortAddress),
-      m_NumberOfButtons(_numButtons),
-      m_DefaultColor(GroupIDYellow),
-      m_IsBell(false)
-    {};
-    ~DSIDSimSwitch() {}
-
-    void pressKey(const ButtonPressKind _kind, const int _buttonNr);
-
-    const int getDefaultColor() const { return m_DefaultColor; }
-
-    const int getNumberOfButtons() const { return m_NumberOfButtons; }
-
-    bool isBell() const { return m_IsBell; }
-    void setIsBell(const bool _value) { m_IsBell = _value; }
-
-    virtual uint16_t getFunctionID() { return FunctionIDSwitch; }
-  }; // DSIDSimSwitch
 }
 
 #endif /* DSIDSIM_H_ */

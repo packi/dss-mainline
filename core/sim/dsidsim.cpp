@@ -144,7 +144,7 @@ namespace dss {
         return result;
       }
     }
-    return FunctionIDDevice;
+    return 0;
   } // getFunctionID
 
   void DSIDSim::setConfigParameter(const std::string& _name, const std::string& _value) {

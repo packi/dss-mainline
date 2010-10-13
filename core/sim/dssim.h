@@ -99,6 +99,7 @@ namespace dss {
     DSDSMeterSim& getDSMeter(const int _index) { return m_DSMeters[_index]; }
 
     static dss_dsid_t makeSimulatedDSID(const dss_dsid_t& _dsid);
+    static bool isSimulatedDSID(const dss_dsid_t& _dsid);
   }; // DSSim
 
   typedef std::map< const std::pair<const int, const int>,  std::vector<DSIDInterface*> > IntPairToDSIDSimVector;

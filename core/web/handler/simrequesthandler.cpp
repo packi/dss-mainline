@@ -22,7 +22,6 @@
 
 #include "simrequesthandler.h"
 
-#include "core/ds485const.h"
 #include "core/model/modelconst.h"
 #include "core/model/group.h"
 #include "core/model/zone.h"
@@ -105,11 +104,6 @@ namespace dss {
         }
         return success();
       }
-    } else if(_request.getMethod() == "addDevice") {
-      //std::string type = _parameter["type"];
-      //std::string dsidStr = _parameter["dsid"];
-      // TODO: not finished yet ;)
-      return failure("Not yet implemented");
     }
     throw std::runtime_error("Unhandled function");
   } // handleRequest

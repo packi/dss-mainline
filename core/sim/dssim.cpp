@@ -33,7 +33,6 @@
 #include <boost/thread.hpp>
 #include <boost/bind.hpp>
 
-#include "core/ds485const.h"
 #include "core/model/modelconst.h"
 #include "core/base.h"
 #include "core/logger.h"
@@ -84,20 +83,6 @@ namespace dss {
     }
   };
 
-  //================================================== DSIDSimCreator
-
-  class DSIDSimSwitchCreator : public DSIDCreator {
-  public:
-    DSIDSimSwitchCreator()
-    : DSIDCreator("standard.switch")
-    {}
-
-    virtual ~DSIDSimSwitchCreator() {};
-
-    virtual DSIDInterface* createDSID(const dss_dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
-      return new DSIDSimSwitch(_dsMeter, _dsid, _shortAddress, 9);
-    }
-  };
 
   //================================================== DSSim
 
@@ -108,7 +93,6 @@ namespace dss {
   void DSSim::initialize() {
     Subsystem::initialize();
     m_DSIDFactory.registerCreator(new DSIDSimCreator());
-    m_DSIDFactory.registerCreator(new DSIDSimSwitchCreator());
 
     if(DSS::hasInstance()) {
       PropertyNodePtr pNode = getDSS().getPropertySystem().getProperty(getConfigPropertyBasePath() + "js-devices");
@@ -270,9 +254,9 @@ namespace dss {
     }
   } // process
 
-  void DSSim::distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
-    DS485FrameProvider::distributeFrame(_frame);
-  } // distributeFrame
+//  void DSSim::distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) {
+//    DS485FrameProvider::distributeFrame(_frame);
+//  } // distributeFrame
 
   DSIDInterface* DSSim::getSimulatedDevice(const dss_dsid_t& _dsid) {
     DSIDInterface* result = NULL;
@@ -285,13 +269,22 @@ namespace dss {
     return result;
   } // getSimulatedDevice
 
+  const uint64_t DSIDHeader = 0x3504175FE0000000ll;
+  const uint32_t SimulationPrefix = 0xFFC00000;
+
   dss_dsid_t DSSim::makeSimulatedDSID(const dss_dsid_t& _dsid) {
     dss_dsid_t result = _dsid;
     result.upper = (result.upper & 0x000000000000000Fll) | DSIDHeader;
     result.lower = (result.lower & 0x002FFFFF) | SimulationPrefix;
     return result;
-  }
+  } // makeSimulatedDSID
 
+  bool DSSim::isSimulatedDSID(const dss_dsid_t& _dsid) {
+    dss_dsid_t temp = _dsid;
+    bool headerMatches = (temp.upper & DSIDHeader) == DSIDHeader;
+    bool prefixMatches = (temp.lower & SimulationPrefix) == SimulationPrefix;
+    return headerMatches && prefixMatches;
+  } // isSimulatedDSID
 
   //================================================== DSDSMeterSim
 
@@ -384,18 +377,6 @@ namespace dss {
           }
           m_DeviceZoneMapping[newDSID] = _zoneID;
           newDSID->setZoneID(_zoneID);
-
-          DSIDSimSwitch* sw = dynamic_cast<DSIDSimSwitch*>(newDSID);
-          if(sw != NULL) {
-            log("LoadDevices:   it's a switch");
-            if(elem->hasAttribute("bell")) {
-              sw->setIsBell(elem->getAttribute("bell") == "true");
-              if(sw->isBell()) {
-                log("LoadDevices:   switch is bell");
-              }
-            }
-          }
-
           newDSID->initialize();
           log("LoadDevices: found device");
         } else {
@@ -580,11 +561,12 @@ namespace dss {
     }
   } // groupSetValue
 
-  void DSDSMeterSim::sendDelayedResponse(boost::shared_ptr<DS485CommandFrame> _response, int _delayMS) {
-    sleepMS(_delayMS);
-    distributeFrame(_response);
-  }
+//  void DSDSMeterSim::sendDelayedResponse(boost::shared_ptr<DS485CommandFrame> _response, int _delayMS) {
+//    sleepMS(_delayMS);
+//    distributeFrame(_response);
+//  }
 
+/*
   void DSDSMeterSim::process(DS485Frame& _frame) {
     const uint8_t HeaderTypeToken = 0;
     const uint8_t HeaderTypeCommand = 1;
@@ -716,7 +698,7 @@ namespace dss {
                 uint16_t devID = pd.get<uint16_t>();
                 DSIDInterface& dev = lookupDevice(devID);
                 uint16_t parameterID = pd.get<uint16_t>();
-                /* uint16_t size = */ pd.get<uint16_t>();
+                pd.get<uint16_t>();
                 uint16_t value = pd.get<uint16_t>();
                 dev.setValue(value, parameterID);
                 response = createResponse(cmdFrame, cmdNr);
@@ -1093,19 +1075,6 @@ namespace dss {
     m_pSimulation->distributeFrame(_frame);
   } // distributeFrame
 
-  void DSDSMeterSim::dSLinkInterrupt(devid_t _shortAddress) const {
-    boost::shared_ptr<DS485CommandFrame> result(new DS485CommandFrame());
-    result->getHeader().setDestination(0);
-    result->getHeader().setSource(m_ID);
-    result->getHeader().setBroadcast(true);
-    result->getHeader().setCounter(0);
-    result->setCommand(CommandEvent);
-    result->getPayload().add<uint8_t>(EventDSLinkInterrupt);
-    result->getPayload().add<devid_t>(_shortAddress);
-    result->getPayload().add<uint16_t>(0); // priority
-    distributeFrame(result);
-  } // dSLinkInterrupt
-
   boost::shared_ptr<DS485CommandFrame> DSDSMeterSim::createReply(DS485CommandFrame& _request) const {
     boost::shared_ptr<DS485CommandFrame> result(new DS485CommandFrame());
     result->getHeader().setDestination(_request.getHeader().getSource());
@@ -1128,6 +1097,7 @@ namespace dss {
     result->getPayload().add(_functionID);
     return result;
   } // createResponse
+*/
 
   DSIDInterface& DSDSMeterSim::lookupDevice(const devid_t _shortAddress) {
     for(std::vector<DSIDInterface*>::iterator ipSimDev = m_SimulatedDevices.begin(); ipSimDev != m_SimulatedDevices.end(); ++ipSimDev) {
