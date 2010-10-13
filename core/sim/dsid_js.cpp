@@ -96,28 +96,6 @@ namespace dss {
       }
     } // undoScene
 
-    virtual void increaseValue(const int _parameterNr = -1) {
-      if(m_pSelf != NULL) {
-        try {
-          ScriptFunctionParameterList param(*m_pContext);
-          m_pSelf->callFunctionByName<void>("increaseValue", param);
-        } catch(ScriptException& e) {
-          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'increaseValue'") + e.what(), lsError);
-        }
-      }
-    } // increaseValue
-
-    virtual void decreaseValue(const int _parameterNr = -1) {
-      if(m_pSelf != NULL) {
-        try {
-          ScriptFunctionParameterList param(*m_pContext);
-          m_pSelf->callFunctionByName<void>("decreaseValue", param);
-        } catch(ScriptException& e) {
-          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'decreaseValue'") + e.what(), lsError);
-        }
-      }
-    } // decreaseValue
-
     virtual void enable() {
       if(m_pSelf != NULL) {
         try {
@@ -151,29 +129,6 @@ namespace dss {
       }
       return 0;
     } // getConsumption
-
-    virtual void startDim(bool _directionUp, const int _parameterNr = -1) {
-      if(m_pSelf != NULL) {
-        try {
-          ScriptFunctionParameterList param(*m_pContext);
-          param.add(_directionUp);
-          m_pSelf->callFunctionByName<void>("startDim", param);
-        } catch(ScriptException& e) {
-          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'startDim'") + e.what(), lsError);
-        }
-      }
-    } // startDim
-
-    virtual void endDim(const int _parameterNr = -1) {
-      if(m_pSelf != NULL) {
-        try {
-          ScriptFunctionParameterList param(*m_pContext);
-          m_pSelf->callFunctionByName<void>("endDim", param);
-        } catch(ScriptException& e) {
-          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'endDim'") + e.what(), lsError);
-        }
-      }
-    } // endDim
 
     virtual void setValue(const double _value, int _parameterNr = -1) {
       if(m_pSelf != NULL) {

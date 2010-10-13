@@ -65,14 +65,6 @@ public:
     functionCalled("undoScene", _sceneNr);
   }
 
-  virtual void increaseValue(const int _parameterNr = -1) {
-    functionCalled("increaseValue", _parameterNr);
-  }
-
-  virtual void decreaseValue(const int _parameterNr = -1) {
-    functionCalled("decreaseValue", _parameterNr);
-  }
-
   virtual void enable() {
     functionCalled("enable");
   }
@@ -84,14 +76,6 @@ public:
   virtual int getConsumption() {
     functionCalled("getConsumption");
     return 77;
-  }
-
-  virtual void startDim(bool _directionUp, const int _parameterNr = -1) {
-    functionCalled("startDim", _directionUp);
-  }
-
-  virtual void endDim(const int _parameterNr = -1) {
-    functionCalled("endDim");
   }
 
   virtual void setValue(const double _value, int _parameterNr = -1) {

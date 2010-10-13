@@ -51,16 +51,11 @@ namespace dss {
     virtual void saveScene(const int _sceneNr);
     virtual void undoScene(const int _sceneNr);
 
-    virtual void increaseValue(const int _parameterNr = -1);
-    virtual void decreaseValue(const int _parameterNr = -1);
-
     virtual void enable();
     virtual void disable();
 
     virtual int getConsumption();
 
-    virtual void startDim(bool _directionUp, const int _parameterNr = -1);
-    virtual void endDim(const int _parameterNr = -1);
     virtual void setValue(const double _value, int _parameterNr = -1);
 
     virtual double getValue(int _parameterNr = -1) const;

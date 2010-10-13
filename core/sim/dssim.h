@@ -116,9 +116,6 @@ namespace dss {
     virtual void saveScene(const int _sceneNr) = 0;
     virtual void undoScene(const int _sceneNr) = 0;
 
-    virtual void increaseValue(const int _parameterNr = -1) = 0;
-    virtual void decreaseValue(const int _parameterNr = -1) = 0;
-
     bool isTurnedOn() const {
       return getValue() > 0.0;
     }
@@ -128,8 +125,6 @@ namespace dss {
 
     virtual int getConsumption() = 0;
 
-    virtual void startDim(bool _directionUp, const int _parameterNr = -1) = 0;
-    virtual void endDim(const int _parameterNr = -1) = 0;
     virtual void setValue(const double _value, int _parameterNr = -1) = 0;
 
     virtual double getValue(int _parameterNr = -1) const = 0;
@@ -141,10 +136,6 @@ namespace dss {
 
     virtual void setZoneID(const int _value) { m_ZoneID = _value; }
     virtual int getZoneID() const { return m_ZoneID; }
-    virtual uint8_t dsLinkSend(uint8_t _value, uint8_t _flags, bool& _handled) {
-      _handled = false;
-      return 0;
-    }
 
     bool isLocked() const { return m_IsLocked; }
     void setIsLocked(const bool _value) { m_IsLocked = _value; }

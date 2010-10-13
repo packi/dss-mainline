@@ -93,8 +93,6 @@ namespace dss {
         || _request.getMethod() == "turnOff"
         || _request.getMethod() == "increaseValue"
         || _request.getMethod() == "decreaseValue"
-        || _request.getMethod() == "startDim"
-        || _request.getMethod() == "endDim"
         || _request.getMethod() == "setValue"
         || _request.getMethod() == "callScene"
         || _request.getMethod() == "saveScene"

@@ -78,10 +78,6 @@ namespace dss {
     void groupSaveScene(const int _zoneID, const int _groupID, const int _sceneID);
     void deviceUndoScene(const int _deviceID, const int _sceneID);
     void groupUndoScene(const int _zoneID, const int _groupID, const int _sceneID);
-    void groupStartDim(const int _zoneID, const int _groupID, bool _up, const int _parameterNr);
-    void groupEndDim(const int _zoneID, const int _groupID, const int _parameterNr);
-    void groupDecValue(const int _zoneID, const int _groupID, const int _parameterNr);
-    void groupIncValue(const int _zoneID, const int _groupID, const int _parameterNr);
     void groupSetValue(const int _zoneID, const int _groupID, const int _value);
   protected:
     virtual void doStart() {}

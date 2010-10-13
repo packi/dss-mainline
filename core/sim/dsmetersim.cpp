@@ -253,54 +253,6 @@ namespace dss {
     }
   } // groupUndoScene
 
-  void DSMeterSim::groupStartDim(const int _zoneID, const int _groupID, bool _up, int _parameterNr) {
-    std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
-    if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
-      std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
-      for(std::vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
-          iDSID != e; ++iDSID)
-      {
-        (*iDSID)->startDim(_up, _parameterNr);
-      }
-    }
-  } // groupStartDim
-
-  void DSMeterSim::groupEndDim(const int _zoneID, const int _groupID, const int _parameterNr) {
-    std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
-    if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
-      std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
-      for(std::vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
-          iDSID != e; ++iDSID)
-      {
-        (*iDSID)->endDim(_parameterNr);
-      }
-    }
-  } // groupEndDim
-
-  void DSMeterSim::groupDecValue(const int _zoneID, const int _groupID, const int _parameterNr) {
-    std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
-    if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
-      std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
-      for(std::vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
-          iDSID != e; ++iDSID)
-      {
-        (*iDSID)->decreaseValue(_parameterNr);
-      }
-    }
-  } // groupDecValue
-
-  void DSMeterSim::groupIncValue(const int _zoneID, const int _groupID, const int _parameterNr) {
-    std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
-    if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
-      std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
-      for(std::vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
-          iDSID != e; ++iDSID)
-      {
-        (*iDSID)->increaseValue(_parameterNr);
-      }
-    }
-  } // groupIncValue
-
   void DSMeterSim::groupSetValue(const int _zoneID, const int _groupID, const int _value) {
     std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {

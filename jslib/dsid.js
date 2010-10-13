@@ -9,18 +9,6 @@ function DSID() {
     }
   };
 
-  this.increaseValue = function() {
-    if(this.onIncreaseValue != undefined) {
-      this.onIncreaseValue();
-    }
-  };
-
-  this.decreaseValue = function() {
-    if(this.onDecreaseValue != undefined) {
-      this.onDecreaseValue();
-    }
-  };
-
   this.setConfigParameter = function(name, value) {
     if(this.onSetConfigParameter != undefined) {
       this.onSetConfigParameter(name, value);
@@ -37,7 +25,9 @@ function MediaDSID() {
     print("MediaDSID.onCallScene");
     // mask out local on/off
     var realScene = sceneID & 0x00ff;
-    var keepScene = (realScene != Scene.Bell);
+    var keepScene = (realScene != Scene.Bell) &&
+                    (realScene != Scene.Inc) &&
+                    (realScene != Scene.Dec);
     if(realScene == Scene.DeepOff || realScene == Scene.Panic || realScene == Scene.Alarm) {
       result.deepOff();
     } else if(realScene == Scene.Off || realScene == Scene.Min || realScene == Scene.StandBy) {
@@ -75,18 +65,14 @@ function MediaDSID() {
       } else {
         result.nextSong();
       }
+    } else if(realScene == Scene.Inc) {
+      result.volumeUp();
+    } else if(realScene == Scene.Dec) {
+      result.volumeDown();
     }
     if(keepScene) {
       result.lastSceneID = realScene;
     }
-  };
-
-  result.onIncreaseValue = function() {
-    result.volumeUp();
-  };
-
-  result.onDecreaseValue = function() {
-    result.volumeDown();
   };
 
   result.lastWasOff = function() {
