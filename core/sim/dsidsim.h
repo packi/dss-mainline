@@ -37,14 +37,14 @@ namespace dss {
     time_t m_DimmStartTime;
     bool m_DimmingUp;
     std::vector<int> m_Parameters;
-    DSDSMeterSim* m_DSMeter;
+    DSMeterSim* m_DSMeter;
     std::vector<uint8_t> m_ValuesForScene;
     uint8_t m_CurrentValue;
     int m_DimTimeMS;
     int m_SimpleConsumption;
     Properties m_ConfigParameter;
   public:
-    DSIDSim(const DSDSMeterSim& _simulator, const dss_dsid_t _dsid, const devid_t _shortAddress);
+    DSIDSim(const DSMeterSim& _simulator, const dss_dsid_t _dsid, const devid_t _shortAddress);
     virtual ~DSIDSim() {}
 
     virtual void callScene(const int _sceneNr);

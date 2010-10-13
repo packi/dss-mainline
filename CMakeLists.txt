@@ -211,7 +211,8 @@ add_subdirectory(doc)
 
 add_executable(dss main.cpp namespaces.cpp)
 
-target_link_libraries(dss ${TEST_LIB} core ds485 model unix webservices core mongoose
+target_link_libraries(dss ${TEST_LIB} core ds485 model unix webservices simulation core
+                          mongoose
                           ${REQUIRED_LIBS})
 
 add_dependencies(dss build_info.h)
