@@ -63,12 +63,12 @@ namespace dss {
 
   class DSBusInterface : public    Subsystem,
                          public    BusInterface,
-                         public    DeviceBusInterface,
                          public    StructureQueryBusInterface,
                          public    MeteringBusInterface,
                          public    StructureModifyingBusInterface {
   private:
     boost::shared_ptr<ActionRequestInterface> m_pActionRequestInterface;
+    boost::shared_ptr<DeviceBusInterface> m_pDeviceBusInterface;
     bool isSimAddress(const uint8_t _addr);
 
     ModelMaintenance* m_pModelMaintenance;
@@ -80,7 +80,6 @@ namespace dss {
 
     dsid_t m_broadcastDSID;
 
-    void checkResultCode(const int _resultCode);
     void busReady();
 
     static void busChangeCallback(void* _userData, dsid_t *_id, int _flag);
@@ -118,13 +117,14 @@ namespace dss {
 
     virtual void shutdown();
 
-    virtual DeviceBusInterface* getDeviceBusInterface() { return this; }
+    virtual DeviceBusInterface* getDeviceBusInterface() { return m_pDeviceBusInterface.get(); }
     virtual StructureQueryBusInterface* getStructureQueryBusInterface() { return this; }
     virtual MeteringBusInterface* getMeteringBusInterface() { return this; }
     virtual StructureModifyingBusInterface* getStructureModifyingBusInterface() { return this; }
     virtual ActionRequestInterface* getActionRequestInterface() { return m_pActionRequestInterface.get(); }
 
     virtual bool isReady();
+    static void checkResultCode(const int _resultCode);
 
     //------------------------------------------------ Handling
     virtual void initialize();
@@ -166,13 +166,8 @@ namespace dss {
     virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper);
 
     //------------------------------------------------ Device
-    virtual uint16_t deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterID, int _paramID);
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID);
-    virtual void lockOrUnlockDevice(const Device& _device, const bool _lock);
     virtual bool isLocked(boost::shared_ptr<const Device> _device);
-
-    void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size);
-    virtual int getSensorValue(const Device& _device, const int _sensorID);
   }; // DSBusInterface
 
 } // namespace dss

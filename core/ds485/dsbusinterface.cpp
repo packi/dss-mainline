@@ -42,6 +42,7 @@
 #include "core/model/modelmaintenance.h"
 
 #include "dsactionrequest.h"
+#include "dsdevicebusinterface.h"
 
 // TODO: libdsm
 // #include "core/sim/dssim.h"
@@ -85,12 +86,6 @@ namespace dss {
     return m_dsmApiReady;
   } // isReady
 
-  uint16_t DSBusInterface::deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterDSID, int _paramID) {
-    // TODO: libdsm
-    log("deviceGetParameterValue: not implemented yet");
-    return 0;
-  } // deviceGetParameterValue
-
   DeviceSpec_t DSBusInterface::deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID) {
 
     uint16_t functionId, productId, version;
@@ -104,14 +99,6 @@ namespace dss {
     DeviceSpec_t spec(functionId, productId, version, _id);
     return spec;
   } // deviceGetSpec
-
-  void DSBusInterface::lockOrUnlockDevice(const Device& _device, const bool _lock) {
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-
-    int ret = DeviceProperties_set_locked_flag(m_dsmApiHandle, dsmDSID, _device.getShortAddress(), _lock);
-    checkResultCode(ret);
-  } // lockOrUnlockDevice
 
   bool DSBusInterface::isLocked(boost::shared_ptr<const Device> _device) {
 
@@ -211,12 +198,6 @@ namespace dss {
       throw BusApiError(message);
     }
   } // checkResultCode
-
-  void DSBusInterface::setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) {
-    // TODO: libdsm
-    log("Not implemented yet: setValueDevice()");
-  } // setValueDevice
-
 
   std::vector<DSMeterSpec_t> DSBusInterface::getDSMeters() {
     std::vector<DSMeterSpec_t> result;
@@ -426,12 +407,6 @@ namespace dss {
     return false;
   } // getEnergyBorder
 
-  int DSBusInterface::getSensorValue(const Device& _device, const int _sensorID) {
-    // TODO: libdsm
-    log("getSensorValue(): not implemented yet");
-    return 0;
-  } // getSensorValue
-
   void DSBusInterface::addToGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
     int ret = DeviceGroupMembershipModify_add(m_dsmApiHandle, _dsMeterID, _deviceID, _groupID);
     checkResultCode(ret);
@@ -474,6 +449,7 @@ namespace dss {
     log("Successfully connected to " + m_connectionURI);
 
     m_pActionRequestInterface.reset(new DSActionRequest(m_dsmApiHandle));
+    m_pDeviceBusInterface.reset(new DSDeviceBusInterface(m_dsmApiHandle));
 
 
     // register callbacks
