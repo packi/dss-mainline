@@ -114,7 +114,7 @@ namespace dss {
 
     virtual void callScene(const int _sceneNr) = 0;
     virtual void saveScene(const int _sceneNr) = 0;
-    virtual void undoScene(const int _sceneNr) = 0;
+    virtual void undoScene() = 0;
 
     bool isTurnedOn() const {
       return getValue() > 0.0;

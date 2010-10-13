@@ -49,7 +49,7 @@ namespace dss {
 
     virtual void callScene(const int _sceneNr);
     virtual void saveScene(const int _sceneNr);
-    virtual void undoScene(const int _sceneNr);
+    virtual void undoScene();
 
     virtual void enable();
     virtual void disable();

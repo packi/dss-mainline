@@ -84,11 +84,10 @@ namespace dss {
       }
     } // saveScene
 
-    virtual void undoScene(const int _sceneNr) {
+    virtual void undoScene() {
       if(m_pSelf != NULL) {
         try {
           ScriptFunctionParameterList param(*m_pContext);
-          param.add(_sceneNr);
           m_pSelf->callFunctionByName<void>("undoScene", param);
         } catch(ScriptException& e) {
           Logger::getInstance()->log(std::string("DSIDJS: Error calling 'undoScene'") + e.what(), lsError);

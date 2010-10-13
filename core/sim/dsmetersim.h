@@ -63,21 +63,14 @@ namespace dss {
     void loadZones(Poco::XML::Node* _node);
 
     DSIDInterface& lookupDevice(const devid_t _id);
-
-    // TODO: libdsm
-    // boost::shared_ptr<DS485CommandFrame> createResponse(DS485CommandFrame& _request, uint8_t _functionID) const;
-    // boost::shared_ptr<DS485CommandFrame> createAck(DS485CommandFrame& _request, uint8_t _functionID) const;
-    // boost::shared_ptr<DS485CommandFrame> createReply(DS485CommandFrame& _request) const;
-    //
-    // void distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) const;
-    // void sendDelayedResponse(boost::shared_ptr<DS485CommandFrame> _response, int _delayMS);
-  private:
+  public:
     void deviceCallScene(const int _deviceID, const int _sceneID);
     void groupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
     void deviceSaveScene(const int _deviceID, const int _sceneID);
     void groupSaveScene(const int _zoneID, const int _groupID, const int _sceneID);
-    void deviceUndoScene(const int _deviceID, const int _sceneID);
-    void groupUndoScene(const int _zoneID, const int _groupID, const int _sceneID);
+    void deviceUndoScene(int _deviceID);
+    void groupUndoScene(const int _zoneID, const int _groupID);
+    void deviceSetValue(const int _deviceID, const int _value);
     void groupSetValue(const int _zoneID, const int _groupID, const int _value);
   protected:
     virtual void doStart() {}

@@ -237,18 +237,18 @@ namespace dss {
     }
   } // groupSaveScene
 
-  void DSMeterSim::deviceUndoScene(int _deviceID, const int _sceneID) {
-    lookupDevice(_deviceID).undoScene(_sceneID);
+  void DSMeterSim::deviceUndoScene(int _deviceID) {
+    lookupDevice(_deviceID).undoScene();
   } // deviceUndoScene
 
-  void DSMeterSim::groupUndoScene(const int _zoneID, const int _groupID, const int _sceneID) {
+  void DSMeterSim::groupUndoScene(const int _zoneID, const int _groupID) {
     std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
       std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(std::vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
-        (*iDSID)->undoScene(_sceneID);
+        (*iDSID)->undoScene();
       }
     }
   } // groupUndoScene
@@ -265,10 +265,9 @@ namespace dss {
     }
   } // groupSetValue
 
-//  void DSMeterSim::sendDelayedResponse(boost::shared_ptr<DS485CommandFrame> _response, int _delayMS) {
-//    sleepMS(_delayMS);
-//    distributeFrame(_response);
-//  }
+  void DSMeterSim::deviceSetValue(const int _deviceID, const int _value) {
+    lookupDevice(_deviceID).setValue(_value);
+  } // deviceSetValue
 
 /*
   void DSMeterSim::process(DS485Frame& _frame) {

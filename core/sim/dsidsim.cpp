@@ -79,9 +79,10 @@ namespace dss {
     }
   } // saveScene
 
-  void DSIDSim::undoScene(const int _sceneNr) {
+  void DSIDSim::undoScene() {
     if(m_Enabled) {
-      m_CurrentValue = m_ValuesForScene.at(_sceneNr);
+      // TODO: implement
+//      m_CurrentValue = m_ValuesForScene.at(_sceneNr);
     }
   } // undoScene
 

@@ -140,7 +140,7 @@ class MeteringBusInterface {
 
 
 
-  /** Interface to be implemented by any implementation of the DS485 interface */
+  /** Interface to be implemented by any bus interface provider */
   class BusInterface {
   public:
     virtual ~BusInterface() {};
