@@ -42,6 +42,7 @@
 #include "dsactionrequest.h"
 #include "dsdevicebusinterface.h"
 #include "dsmeteringbusinterface.h"
+#include "dsstructurequerybusinterface.h"
 
 // TODO: libdsm
 // #include "core/sim/dssim.h"
@@ -84,32 +85,6 @@ namespace dss {
 #endif
     return m_dsmApiReady;
   } // isReady
-
-  DeviceSpec_t DSBusInterface::deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID) {
-
-    uint16_t functionId, productId, version;
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
-    int ret = DeviceInfo_by_device_id(m_dsmApiHandle, dsmDSID, _id,
-                                      NULL, &functionId, &productId, &version,
-                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-    checkResultCode(ret);
-
-    DeviceSpec_t spec(functionId, productId, version, _id);
-    return spec;
-  } // deviceGetSpec
-
-  bool DSBusInterface::isLocked(boost::shared_ptr<const Device> _device) {
-
-    uint8_t locked;
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device->getDSMeterDSID(), dsmDSID);
-    int ret = DeviceInfo_by_device_id(m_dsmApiHandle, dsmDSID, _device->getShortAddress(),
-                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                                      &locked, NULL, NULL, NULL, NULL);
-    checkResultCode(ret);
-    return locked;
-  } // isLocked
 
   bool DSBusInterface::isSimAddress(const uint8_t _addr) {
 #if 0
@@ -198,147 +173,6 @@ namespace dss {
     }
   } // checkResultCode
 
-  std::vector<DSMeterSpec_t> DSBusInterface::getDSMeters() {
-    std::vector<DSMeterSpec_t> result;
-    dsid_t device_list[63];
-    dsid_t ownDSID;
-
-    // TODO: we could cache our own DSID
-    int ret = DsmApiGetOwnDSID(m_dsmApiHandle, &ownDSID);
-    checkResultCode(ret);
-
-    ret = DsmApiGetBusMembers(m_dsmApiHandle, device_list, 63);
-    if(ret < 0) {
-      // DsmApiGetBusMembers returns >= 0 on success
-      checkResultCode(ret);
-    }
-
-    for(int i = 0; i < ret; ++i) {
-      // don't include ourself
-      if(IsEqualId(device_list[i], ownDSID)) {
-        continue;
-      }
-      DSMeterSpec_t spec = getDSMeterSpec(device_list[i]);
-      result.push_back(spec);
-    }
-    return result;
-  } // getDSMeters
-
-  DSMeterSpec_t DSBusInterface::getDSMeterSpec(const dsid_t& _dsMeterID) {
-
-    uint32_t hwVersion;
-    uint32_t swVersion;
-    uint16_t apiVersion;
-    uint8_t dsidBuf[DSID_LEN];
-    uint8_t nameBuf[NAME_LEN];
-    int ret = dSMInfo(m_dsmApiHandle, _dsMeterID, &hwVersion, &swVersion, &apiVersion, dsidBuf, nameBuf);
-    checkResultCode(ret);
-
-    // convert to std::string
-    char nameStr[NAME_LEN];
-    memcpy(nameStr, nameBuf, NAME_LEN);
-    DSMeterSpec_t spec(_dsMeterID, swVersion, hwVersion, apiVersion, nameStr);
-    return spec;
-  } // getDSMeterSpec
-
-  int DSBusInterface::getGroupCount(const dsid_t& _dsMeterID, const int _zoneID) {
-
-    uint16_t zoneId;
-    uint8_t virtualZoneId, numberOfGroups;
-    uint8_t name[NAME_LEN];
-
-    int ret = ZoneInfo_by_id(m_dsmApiHandle, _dsMeterID, _zoneID, &zoneId, &virtualZoneId, &numberOfGroups, name);
-    checkResultCode(ret);
-
-    // TODO: libdsm:
-    // assert 0 <= numberOfGroups < GroupIDStandardMax
-
-    return numberOfGroups;
-  } // getGroupCount
-
-  std::vector<int> DSBusInterface::getGroups(const dsid_t& _dsMeterID, const int _zoneID) {
-
-    std::vector<int> result;
-
-    int numGroups = getGroupCount(_dsMeterID, _zoneID);
-    log(std::string("DSMeter has ") + intToString(numGroups) + " groups");
-
-    uint8_t groupId;
-    for(int iGroup = 0; iGroup < numGroups; iGroup++) {
-      int ret = ZoneGroupInfo_by_index(m_dsmApiHandle, _dsMeterID, _zoneID, iGroup, &groupId, NULL, NULL);
-      checkResultCode(ret);
-
-      result.push_back(groupId);
-    }
-    return result;
-  } // getGroups
-
-  std::vector<int> DSBusInterface::getGroupsOfDevice(const dsid_t& _dsMeterID, const int _deviceID) {
-    uint8_t groups[GROUPS_LEN];
-    int ret = DeviceInfo_by_device_id(m_dsmApiHandle, _dsMeterID, _deviceID, NULL, NULL, NULL, NULL, 
-                                      NULL, NULL, NULL, NULL, groups, NULL, NULL, NULL);
-    checkResultCode(ret);
-    std::vector<int> result;
-    for(int iByte = 0; iByte < GROUPS_LEN; iByte++) {
-      uint8_t byte = groups[iByte];
-      for(int iBit = 0; iBit < 8; iBit++) {
-        if(byte & (1 << iBit)) {
-          result.push_back((iByte * 8 + iBit) + 1);
-        }
-      }
-    }
-    return result;
-  } // getGroupsOfDevice
-
-  int DSBusInterface::getZoneCount(const dsid_t& _dsMeterID) {
-    uint8_t zoneCount;
-    int ret = ZoneCount(m_dsmApiHandle, _dsMeterID, &zoneCount);
-    checkResultCode(ret);
-    return zoneCount;
-  } // getZoneCount
-
-  std::vector<int> DSBusInterface::getZones(const dsid_t& _dsMeterID) {
-    std::vector<int> result;
-
-    int numZones = getZoneCount(_dsMeterID);
-    log(std::string("DSMeter has ") + intToString(numZones) + " zones");
-
-    uint16_t zoneId;
-    for(int iZone = 0; iZone < numZones; iZone++) {
-      int ret = ZoneInfo_by_index(m_dsmApiHandle, _dsMeterID, iZone,
-                                       &zoneId, NULL, NULL, NULL);
-    checkResultCode(ret);
-
-      result.push_back(zoneId);
-      log("received ZoneID: " + uintToString(zoneId));
-    }
-    return result;
-  } // getZones
-
-  int DSBusInterface::getDevicesCountInZone(const dsid_t& _dsMeterID, const int _zoneID) {
-
-    uint16_t numberOfDevices;
-    int ret = ZoneDeviceCount_all(m_dsmApiHandle, _dsMeterID, _zoneID, &numberOfDevices);
-    checkResultCode(ret);
-
-    return numberOfDevices;
-  } // getDevicesCountInZone
-
-  std::vector<int> DSBusInterface::getDevicesInZone(const dsid_t& _dsMeterID, const int _zoneID) {
-    std::vector<int> result;
-
-    int numDevices = getDevicesCountInZone(_dsMeterID, _zoneID);
-    log(std::string("Found ") + intToString(numDevices) + " devices in zone.");
-    for(int iDevice = 0; iDevice < numDevices; iDevice++) {
-      uint16_t deviceId;
-      int ret = DeviceInfo_by_index(m_dsmApiHandle, _dsMeterID, _zoneID, iDevice, &deviceId,
-                                    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-      checkResultCode(ret);
-      result.push_back(deviceId);
-    }
-    return result;
-  } // getDevicesInZone
-
   void DSBusInterface::setZoneID(const dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) {
 
     int ret = DeviceProperties_set_zone(m_dsmApiHandle, _dsMeterID, _deviceID, _zoneID);
@@ -356,28 +190,6 @@ namespace dss {
     checkResultCode(ret);
   } // removeZone
 
-  dss_dsid_t DSBusInterface::getDSIDOfDevice(const dsid_t& _dsMeterID, const int _deviceID) {
-    dsid_t dsid;
-    int ret = DeviceInfo_by_device_id(m_dsmApiHandle, _dsMeterID, _deviceID, NULL, NULL, NULL, NULL,
-                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, dsid.id);
-    checkResultCode(ret);
-
-    dss_dsid_t dss_dsid;
-    dsid_helper::toDssDsid(dsid, dss_dsid);
-    return dss_dsid;
-  } // getDSIDOfDevice
-
-  int DSBusInterface::getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID) {
-    // TODO: libdsm-api
-    return SceneOff;
-  } // getLastCalledScene
-
-  bool DSBusInterface::getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) {
-    // TODO: libdsm
-    log("getEnergyBorder(): not implemented yet");
-    return false;
-  } // getEnergyBorder
-
   void DSBusInterface::addToGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
     int ret = DeviceGroupMembershipModify_add(m_dsmApiHandle, _dsMeterID, _deviceID, _groupID);
     checkResultCode(ret);
@@ -387,15 +199,6 @@ namespace dss {
     int ret = DeviceGroupMembershipModify_remove(m_dsmApiHandle, _dsMeterID, _deviceID, _groupID);
     checkResultCode(ret);
   } // removeFromGroup
-
-  int DSBusInterface::addUserGroup(const int _dsMeterID) {
-    log("addUserGroup(): not implemented yet");
-    return 0;
-  } // addUserGroup
-
-  void DSBusInterface::removeUserGroup(const int _dsMeterID, const int _groupID) {
-    log("removeUserGroup(): not implemented yet");
-  } // removeUserGroup
 
   void DSBusInterface::removeInactiveDevices(const dsid_t& _dsMeterID) {
 
@@ -422,6 +225,7 @@ namespace dss {
     m_pActionRequestInterface.reset(new DSActionRequest(m_dsmApiHandle));
     m_pDeviceBusInterface.reset(new DSDeviceBusInterface(m_dsmApiHandle));
     m_pMeteringBusInterface.reset(new DSMeteringBusInterface(m_dsmApiHandle));
+    m_pStructureQueryBusInterface.reset(new DSStructureQueryBusInterface(m_dsmApiHandle));
 
 
     // register callbacks
@@ -532,12 +336,10 @@ namespace dss {
                                                   uint16_t _deviceID, uint16_t _zoneID, uint32_t _deviceDSID) {
     dss_dsid_t dsMeterID;
     dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
-    DeviceSpec_t deviceSpec = deviceGetSpec(_deviceID, dsMeterID);
 
     ModelEvent* pEvent = new ModelEvent(ModelEvent::etNewDevice);
     pEvent->addParameter(_zoneID);
     pEvent->addParameter(_deviceDSID);
-    pEvent->addParameter(deviceSpec.get<0>());
     m_pModelMaintenance->addModelEvent(pEvent);
   }
 

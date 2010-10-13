@@ -73,7 +73,7 @@ namespace dss {
     void raiseEvent(boost::shared_ptr<Event> _pEvent);
 
     void onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _sceneID);
-    void onAddDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID, const int _functionID);
+    void onAddDevice(const dss::dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID);
     void onRemoveDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID);
   private:
     bool m_IsInitializing;

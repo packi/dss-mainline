@@ -63,12 +63,12 @@ namespace dss {
 
   class DSBusInterface : public    Subsystem,
                          public    BusInterface,
-                         public    StructureQueryBusInterface,
                          public    StructureModifyingBusInterface {
   private:
     boost::shared_ptr<ActionRequestInterface> m_pActionRequestInterface;
     boost::shared_ptr<DeviceBusInterface> m_pDeviceBusInterface;
     boost::shared_ptr<MeteringBusInterface> m_pMeteringBusInterface;
+    boost::shared_ptr<StructureQueryBusInterface> m_pStructureQueryBusInterface;
     bool isSimAddress(const uint8_t _addr);
 
     ModelMaintenance* m_pModelMaintenance;
@@ -118,7 +118,7 @@ namespace dss {
     virtual void shutdown();
 
     virtual DeviceBusInterface* getDeviceBusInterface() { return m_pDeviceBusInterface.get(); }
-    virtual StructureQueryBusInterface* getStructureQueryBusInterface() { return this; }
+    virtual StructureQueryBusInterface* getStructureQueryBusInterface() { return m_pStructureQueryBusInterface.get(); }
     virtual MeteringBusInterface* getMeteringBusInterface() { return m_pMeteringBusInterface.get(); }
     virtual StructureModifyingBusInterface* getStructureModifyingBusInterface() { return this; }
     virtual ActionRequestInterface* getActionRequestInterface() { return m_pActionRequestInterface.get(); }
@@ -130,40 +130,14 @@ namespace dss {
     virtual void initialize();
 
     //------------------------------------------------ Specialized Commands (system)
-    virtual std::vector<DSMeterSpec_t> getDSMeters();
-    virtual DSMeterSpec_t getDSMeterSpec(const dsid_t& _dsMeterID);
-
-    virtual std::vector<int> getZones(const dsid_t& _dsMeterID);
-    virtual int getZoneCount(const dsid_t& _dsMeterID);
-    virtual std::vector<int> getDevicesInZone(const dsid_t& _dsMeterID, const int _zoneID);
-    virtual int getDevicesCountInZone(const dsid_t& _dsMeterID, const int _zoneID);
-
     virtual void setZoneID(const dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID);
     virtual void createZone(const dsid_t& _dsMeterID, const int _zoneID);
     virtual void removeZone(const dsid_t& _dsMeterID, const int _zoneID);
 
-    virtual int getGroupCount(const dsid_t& _dsMeterID, const int _zoneID);
-    virtual std::vector<int> getGroups(const dsid_t& _dsMeterID, const int _zoneID);
-
-    virtual std::vector<int> getGroupsOfDevice(const dsid_t& _dsMeterID, const int _deviceID);
-
     virtual void addToGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID);
     virtual void removeFromGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID);
 
-    virtual int addUserGroup(const int _dsMeterID);
-    virtual void removeUserGroup(const int _dsMeterID, const int _groupID);
-
     virtual void removeInactiveDevices(const dsid_t& _dsMeterID);
-
-    virtual dss_dsid_t getDSIDOfDevice(const dsid_t&, const int _deviceID);
-
-    virtual int getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID);
-
-    virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper);
-
-    //------------------------------------------------ Device
-    virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID);
-    virtual bool isLocked(boost::shared_ptr<const Device> _device);
   }; // DSBusInterface
 
 } // namespace dss

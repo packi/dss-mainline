@@ -175,7 +175,7 @@ namespace dss {
         if(event.getParameterCount() != 3) {
           log("Expected exactly 3 parameter for ModelEvent::etNewDevice");
         } else {
-          onAddDevice(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), event.getParameter(2));
+          onAddDevice(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
         }
         break;
       case ModelEvent::etLostDevice:
@@ -467,12 +467,11 @@ namespace dss {
     }
   } // onDeviceCallScene
 
-  void ModelMaintenance::onAddDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID, const int _functionID) {
+  void ModelMaintenance::onAddDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID) {
     log("New Device found");
     log("  DSMeter: " +  _dsMeterID.toString());
     log("  Zone:      " + intToString(_zoneID));
     log("  BusID:     " + intToString(_devID));
-    log("  FID:       " + intToString(_functionID));
 
     BusScanner
       scanner(

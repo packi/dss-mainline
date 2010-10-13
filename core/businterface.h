@@ -107,11 +107,6 @@ namespace dss {
     /** Removes a device from a given group */
     virtual void removeFromGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) = 0;
 
-    /** Adds a user group */
-    virtual int addUserGroup(const int _dsMeterID) = 0;
-    /** Removes a user group */
-    virtual void removeUserGroup(const int _dsMeterID, const int _groupID) = 0;
-
     /** Removes all inactive (!isPresent) devices from the dSM */
     virtual void removeInactiveDevices(const dsid_t& _dsMeterID) = 0;
 
