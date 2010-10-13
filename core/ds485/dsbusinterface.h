@@ -64,11 +64,11 @@ namespace dss {
   class DSBusInterface : public    Subsystem,
                          public    BusInterface,
                          public    StructureQueryBusInterface,
-                         public    MeteringBusInterface,
                          public    StructureModifyingBusInterface {
   private:
     boost::shared_ptr<ActionRequestInterface> m_pActionRequestInterface;
     boost::shared_ptr<DeviceBusInterface> m_pDeviceBusInterface;
+    boost::shared_ptr<MeteringBusInterface> m_pMeteringBusInterface;
     bool isSimAddress(const uint8_t _addr);
 
     ModelMaintenance* m_pModelMaintenance;
@@ -119,7 +119,7 @@ namespace dss {
 
     virtual DeviceBusInterface* getDeviceBusInterface() { return m_pDeviceBusInterface.get(); }
     virtual StructureQueryBusInterface* getStructureQueryBusInterface() { return this; }
-    virtual MeteringBusInterface* getMeteringBusInterface() { return this; }
+    virtual MeteringBusInterface* getMeteringBusInterface() { return m_pMeteringBusInterface.get(); }
     virtual StructureModifyingBusInterface* getStructureModifyingBusInterface() { return this; }
     virtual ActionRequestInterface* getActionRequestInterface() { return m_pActionRequestInterface.get(); }
 
@@ -159,10 +159,6 @@ namespace dss {
 
     virtual int getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID);
 
-    virtual unsigned long getPowerConsumption(const dsid_t& _dsMeterID);
-    virtual unsigned long getEnergyMeterValue(const dsid_t& _dsMeterID);
-    virtual void requestEnergyMeterValue();
-    virtual void requestPowerConsumption();
     virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper);
 
     //------------------------------------------------ Device

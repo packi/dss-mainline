@@ -37,12 +37,11 @@
 #include "core/model/modelevent.h"
 #include "core/model/modelconst.h"
 #include "core/model/device.h"
-#include "core/model/group.h"
-#include "core/model/zone.h"
 #include "core/model/modelmaintenance.h"
 
 #include "dsactionrequest.h"
 #include "dsdevicebusinterface.h"
+#include "dsmeteringbusinterface.h"
 
 // TODO: libdsm
 // #include "core/sim/dssim.h"
@@ -373,34 +372,6 @@ namespace dss {
     return SceneOff;
   } // getLastCalledScene
 
-  unsigned long DSBusInterface::getPowerConsumption(const dsid_t& _dsMeterID) {
-    uint32_t power;
-    int ret = CircuitEnergyMeterValue_get(m_dsmApiHandle, _dsMeterID, &power, NULL);
-    checkResultCode(ret);
-
-    return power;
-  } // getPowerConsumption
-
-  void DSBusInterface::requestPowerConsumption() {
-    uint32_t power;
-    int ret = CircuitEnergyMeterValue_get(m_dsmApiHandle, m_broadcastDSID, &power, NULL);
-    checkResultCode(ret);
-  } // requestPowerConsumption
-
-  unsigned long DSBusInterface::getEnergyMeterValue(const dsid_t& _dsMeterID) {
-    uint32_t energy;
-    int ret = CircuitEnergyMeterValue_get(m_dsmApiHandle, _dsMeterID, NULL, &energy);
-    checkResultCode(ret);
-
-    return energy;
-  } // getEnergyMeterValue
-
-  void DSBusInterface::requestEnergyMeterValue() {
-    uint32_t energy;
-    int ret = CircuitEnergyMeterValue_get(m_dsmApiHandle, m_broadcastDSID, NULL, &energy);
-    checkResultCode(ret);
-  } // requestEnergyMeterValue
-
   bool DSBusInterface::getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) {
     // TODO: libdsm
     log("getEnergyBorder(): not implemented yet");
@@ -450,6 +421,7 @@ namespace dss {
 
     m_pActionRequestInterface.reset(new DSActionRequest(m_dsmApiHandle));
     m_pDeviceBusInterface.reset(new DSDeviceBusInterface(m_dsmApiHandle));
+    m_pMeteringBusInterface.reset(new DSMeteringBusInterface(m_dsmApiHandle));
 
 
     // register callbacks
