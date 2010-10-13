@@ -25,26 +25,19 @@
 #include "dsidsim.h"
 #include "dsmetersim.h"
 
-#include <dlfcn.h>
-
 #include <string>
 #include <stdexcept>
-#include <iostream>
 
 #include <boost/filesystem.hpp>
-#include <boost/thread.hpp>
-#include <boost/bind.hpp>
 
 #include "core/model/modelconst.h"
 #include "core/base.h"
 #include "core/logger.h"
 #include "core/dss.h"
-#include "include/dsid_plugin.h"
 #include "core/businterface.h"
 #include "core/foreach.h"
 #include "core/propertysystem.h"
 #include "dsid_js.h"
-#include "dsid_plugin.h"
 
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
@@ -65,8 +58,6 @@ using Poco::XML::AutoPtr;
 using Poco::XML::DOMParser;
 using Poco::XML::InputSource;
 using Poco::XML::Node;
-
-namespace fs = boost::filesystem;
 
 namespace dss {
 
@@ -180,61 +171,6 @@ namespace dss {
       log("Error parsing file: " + _fileName + ". message: " + e.message());
     }
   } // loadFromConfig
-
-  void DSSim::loadPlugins() {
-    fs::directory_iterator end_iter;
-    try {
-      for ( fs::directory_iterator dir_itr(getDSS().getDataDirectory() + "plugins");
-            dir_itr != end_iter;
-            ++dir_itr) {
-        try {
-          if (fs::is_regular(dir_itr->status())) {
-            if(endsWith(dir_itr->filename(), ".so")) {
-              log("LoadPlugins: Trying to load '" + dir_itr->string() + "'", lsInfo);
-              void* handle = dlopen(dir_itr->string().c_str(), RTLD_LAZY);
-              if(handle == NULL) {
-                log("LoadPlugins: Could not load plugin \"" + dir_itr->filename() + "\" message: " + dlerror(), lsError);
-                continue;
-              }
-
-              dlerror();
-              int (*version)();
-              version = (int (*)())dlsym(handle, "dsid_getversion");
-              char* error;
-              if((error = dlerror()) != NULL) {
-                 log("LoadPlugins: Could not get symbol 'dsid_getversion' from plugin: \"" + dir_itr->filename() + "\":" + error, lsError);
-                 continue;
-              }
-
-              int ver = (*version)();
-              if(ver != DSID_PLUGIN_API_VERSION) {
-                log("LoadPlugins: Version mismatch (plugin: " + intToString(ver) + " api: " + intToString(DSID_PLUGIN_API_VERSION) + ")", lsError);
-                continue;
-              }
-
-              const char* (*get_name)();
-              get_name = (const char*(*)())dlsym(handle, "dsid_get_plugin_name");
-              if((error = dlerror()) != NULL) {
-                log("LoadPlugins: could get name from \"" + dir_itr->filename() + "\":" + error, lsError);
-                continue;
-              }
-              const char* pluginName = (*get_name)();
-              if(pluginName == NULL) {
-                log("LoadPlugins: could get name from \"" + dir_itr->filename() + "\":" + error, lsError);
-                continue;
-              }
-              log("LoadPlugins: Plugin provides " + std::string(pluginName), lsInfo);
-              m_DSIDFactory.registerCreator(new DSIDPluginCreator(handle, pluginName));
-            }
-          }
-        } catch (const std::exception & ex) {
-          log("LoadPlugins: Caught exception while loading " + dir_itr->filename() + " '" + ex.what() + "'", lsError);
-        }
-      }
-    } catch(const std::exception& ex) {
-      log(std::string("Error loading plugins: '") + ex.what() + "'");
-    }
-  } // loadPlugins
 
   bool DSSim::isReady() {
     return m_Initialized;
