@@ -99,7 +99,6 @@ namespace dss {
 
     DSIDInterface* getSimulatedDevice(const dss_dsid_t _dsid);
     void addSimulatedDevice(DSIDInterface* _device);
-    void dSLinkInterrupt(devid_t _shortAddress) const;
 
     void addDeviceToGroup(DSIDInterface* _device, int _groupID);
   }; // DSMeterSim

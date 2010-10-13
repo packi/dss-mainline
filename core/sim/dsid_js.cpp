@@ -239,24 +239,6 @@ namespace dss {
       return "";
     } // getConfigParameter
 
-    virtual uint8_t dsLinkSend(uint8_t _value, uint8_t _flags, bool& _handled) {
-      if(m_pSelf != NULL) {
-        try {
-          ScriptFunctionParameterList param(*m_pContext);
-          param.add(int(_value));
-          param.add(int(_flags));
-          int res = m_pSelf->callFunctionByName<int>("dSLinkSend", param);
-          _handled = true;
-          return res;
-        } catch(ScriptException& e) {
-          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'dSLinkSend'") + e.what(), lsError);
-        }
-        _handled = false;
-        return 0;
-      }
-      return 0;
-    } // dsLinkSend
-
   private:
 
     void createJSDevice() {
