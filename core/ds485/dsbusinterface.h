@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
@@ -62,13 +62,13 @@ namespace dss {
   class DSSim;
 
   class DSBusInterface : public    Subsystem,
-                         public    BusInterface,
-                         public    StructureModifyingBusInterface {
+                         public    BusInterface {
   private:
     boost::shared_ptr<ActionRequestInterface> m_pActionRequestInterface;
     boost::shared_ptr<DeviceBusInterface> m_pDeviceBusInterface;
     boost::shared_ptr<MeteringBusInterface> m_pMeteringBusInterface;
     boost::shared_ptr<StructureQueryBusInterface> m_pStructureQueryBusInterface;
+    boost::shared_ptr<StructureModifyingBusInterface> m_pStructureModifyingBusInterface;
     bool isSimAddress(const uint8_t _addr);
 
     ModelMaintenance* m_pModelMaintenance;
@@ -120,7 +120,7 @@ namespace dss {
     virtual DeviceBusInterface* getDeviceBusInterface() { return m_pDeviceBusInterface.get(); }
     virtual StructureQueryBusInterface* getStructureQueryBusInterface() { return m_pStructureQueryBusInterface.get(); }
     virtual MeteringBusInterface* getMeteringBusInterface() { return m_pMeteringBusInterface.get(); }
-    virtual StructureModifyingBusInterface* getStructureModifyingBusInterface() { return this; }
+    virtual StructureModifyingBusInterface* getStructureModifyingBusInterface() { return m_pStructureModifyingBusInterface.get(); }
     virtual ActionRequestInterface* getActionRequestInterface() { return m_pActionRequestInterface.get(); }
 
     virtual bool isReady();
@@ -128,16 +128,6 @@ namespace dss {
 
     //------------------------------------------------ Handling
     virtual void initialize();
-
-    //------------------------------------------------ Specialized Commands (system)
-    virtual void setZoneID(const dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID);
-    virtual void createZone(const dsid_t& _dsMeterID, const int _zoneID);
-    virtual void removeZone(const dsid_t& _dsMeterID, const int _zoneID);
-
-    virtual void addToGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID);
-    virtual void removeFromGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID);
-
-    virtual void removeInactiveDevices(const dsid_t& _dsMeterID);
   }; // DSBusInterface
 
 } // namespace dss

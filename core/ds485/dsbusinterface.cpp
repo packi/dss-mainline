@@ -43,6 +43,7 @@
 #include "dsdevicebusinterface.h"
 #include "dsmeteringbusinterface.h"
 #include "dsstructurequerybusinterface.h"
+#include "dsstructuremodifyingbusinterface.h"
 
 // TODO: libdsm
 // #include "core/sim/dssim.h"
@@ -173,39 +174,6 @@ namespace dss {
     }
   } // checkResultCode
 
-  void DSBusInterface::setZoneID(const dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) {
-
-    int ret = DeviceProperties_set_zone(m_dsmApiHandle, _dsMeterID, _deviceID, _zoneID);
-    checkResultCode(ret);
-  } // setZoneID
-
-  void DSBusInterface::createZone(const dsid_t& _dsMeterID, const int _zoneID) {
-
-    int ret = ZoneModify_add(m_dsmApiHandle, _dsMeterID, _zoneID);
-    checkResultCode(ret);
-  } // createZone
-
-  void DSBusInterface::removeZone(const dsid_t& _dsMeterID, const int _zoneID) {
-    int ret = ZoneModify_remove(m_dsmApiHandle, _dsMeterID, _zoneID);
-    checkResultCode(ret);
-  } // removeZone
-
-  void DSBusInterface::addToGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
-    int ret = DeviceGroupMembershipModify_add(m_dsmApiHandle, _dsMeterID, _deviceID, _groupID);
-    checkResultCode(ret);
-  } // addToGroup
-
-  void DSBusInterface::removeFromGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
-    int ret = DeviceGroupMembershipModify_remove(m_dsmApiHandle, _dsMeterID, _deviceID, _groupID);
-    checkResultCode(ret);
-  } // removeFromGroup
-
-  void DSBusInterface::removeInactiveDevices(const dsid_t& _dsMeterID) {
-
-    int ret = CircuitRemoveInactiveDevices(m_dsmApiHandle, _dsMeterID);
-    checkResultCode(ret);
-  } // removeInactiveDevices
-
   void DSBusInterface::initialize() {
     Subsystem::initialize();
 
@@ -226,6 +194,7 @@ namespace dss {
     m_pDeviceBusInterface.reset(new DSDeviceBusInterface(m_dsmApiHandle));
     m_pMeteringBusInterface.reset(new DSMeteringBusInterface(m_dsmApiHandle));
     m_pStructureQueryBusInterface.reset(new DSStructureQueryBusInterface(m_dsmApiHandle));
+    m_pStructureModifyingBusInterface.reset(new DSStructureModifyingBusInterface(m_dsmApiHandle));
 
 
     // register callbacks
