@@ -38,22 +38,22 @@ namespace dss {
     }
 
     virtual std::vector<DSMeterSpec_t> getDSMeters();
-    virtual DSMeterSpec_t getDSMeterSpec(const dsid_t& _dsMeterID);
-    virtual std::vector<int> getZones(const dsid_t& _dsMeterID);
-    virtual std::vector<int> getDevicesInZone(const dsid_t& _dsMeterID, const int _zoneID);
-    virtual int getDevicesCountInZone(const dsid_t& _dsMeterID, const int _zoneID);
-    virtual std::vector<int> getGroups(const dsid_t& _dsMeterID, const int _zoneID);
-    virtual std::vector<int> getGroupsOfDevice(const dsid_t& _dsMeterID, const int _deviceID);
-    virtual dss_dsid_t getDSIDOfDevice(const dsid_t& _dsMeterID, const int _deviceID);
+    virtual DSMeterSpec_t getDSMeterSpec(const dss_dsid_t& _dsMeterID);
+    virtual std::vector<int> getZones(const dss_dsid_t& _dsMeterID);
+    virtual std::vector<int> getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
+    virtual int getDevicesCountInZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
+    virtual std::vector<int> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID);
+    virtual std::vector<int> getGroupsOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID);
+    virtual dss_dsid_t getDSIDOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID);
     virtual int getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID);
     virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper);
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID);
     virtual bool isLocked(boost::shared_ptr<const Device> _device);
   private:
-    int getGroupCount(const dsid_t& _dsMeterID, const int _zoneID);
+    int getGroupCount(const dss_dsid_t& _dsMeterID, const int _zoneID);
   private:
     DsmApiHandle_t m_DSMApiHandle;
-    dsid_t m_BroadcastDSID;
+    dss_dsid_t m_BroadcastDSID;
   }; // DSStructureQueryBusInterface
 
 } // namespace dss

@@ -24,37 +24,51 @@
 
 #include "dsbusinterface.h"
 
+#include "core/dsidhelper.h"
+
 namespace dss {
 
   //================================================== DSStructureModifyingBusInterface
 
-  void DSStructureModifyingBusInterface::setZoneID(const dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) {
-    int ret = DeviceProperties_set_zone(m_DSMApiHandle, _dsMeterID, _deviceID, _zoneID);
+  void DSStructureModifyingBusInterface::setZoneID(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) {
+    dsid_t meterDSID;
+    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
+    int ret = DeviceProperties_set_zone(m_DSMApiHandle, meterDSID, _deviceID, _zoneID);
     DSBusInterface::checkResultCode(ret);
   } // setZoneID
 
-  void DSStructureModifyingBusInterface::createZone(const dsid_t& _dsMeterID, const int _zoneID) {
-    int ret = ZoneModify_add(m_DSMApiHandle, _dsMeterID, _zoneID);
+  void DSStructureModifyingBusInterface::createZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    dsid_t meterDSID;
+    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
+    int ret = ZoneModify_add(m_DSMApiHandle, meterDSID, _zoneID);
     DSBusInterface::checkResultCode(ret);
   } // createZone
 
-  void DSStructureModifyingBusInterface::removeZone(const dsid_t& _dsMeterID, const int _zoneID) {
-    int ret = ZoneModify_remove(m_DSMApiHandle, _dsMeterID, _zoneID);
+  void DSStructureModifyingBusInterface::removeZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    dsid_t meterDSID;
+    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
+    int ret = ZoneModify_remove(m_DSMApiHandle, meterDSID, _zoneID);
     DSBusInterface::checkResultCode(ret);
   } // removeZone
 
-  void DSStructureModifyingBusInterface::addToGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
-    int ret = DeviceGroupMembershipModify_add(m_DSMApiHandle, _dsMeterID, _deviceID, _groupID);
+  void DSStructureModifyingBusInterface::addToGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
+    dsid_t meterDSID;
+    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
+    int ret = DeviceGroupMembershipModify_add(m_DSMApiHandle, meterDSID, _deviceID, _groupID);
     DSBusInterface::checkResultCode(ret);
   } // addToGroup
 
-  void DSStructureModifyingBusInterface::removeFromGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
-    int ret = DeviceGroupMembershipModify_remove(m_DSMApiHandle, _dsMeterID, _deviceID, _groupID);
+  void DSStructureModifyingBusInterface::removeFromGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID) {
+    dsid_t meterDSID;
+    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
+    int ret = DeviceGroupMembershipModify_remove(m_DSMApiHandle, meterDSID, _deviceID, _groupID);
     DSBusInterface::checkResultCode(ret);
   } // removeFromGroup
 
-  void DSStructureModifyingBusInterface::removeInactiveDevices(const dsid_t& _dsMeterID) {
-    int ret = CircuitRemoveInactiveDevices(m_DSMApiHandle, _dsMeterID);
+  void DSStructureModifyingBusInterface::removeInactiveDevices(const dss_dsid_t& _dsMeterID) {
+    dsid_t meterDSID;
+    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
+    int ret = CircuitRemoveInactiveDevices(m_DSMApiHandle, meterDSID);
     DSBusInterface::checkResultCode(ret);
   } // removeInactiveDevices
 

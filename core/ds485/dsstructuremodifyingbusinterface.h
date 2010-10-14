@@ -35,14 +35,14 @@ namespace dss {
     : m_DSMApiHandle(_dsmApiHandle)
     { }
 
-    virtual void setZoneID(const dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID);
-    virtual void createZone(const dsid_t& _dsMeterID, const int _zoneID);
-    virtual void removeZone(const dsid_t& _dsMeterID, const int _zoneID);
+    virtual void setZoneID(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID);
+    virtual void createZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
+    virtual void removeZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
 
-    virtual void addToGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID);
-    virtual void removeFromGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID);
+    virtual void addToGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID);
+    virtual void removeFromGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID);
 
-    virtual void removeInactiveDevices(const dsid_t& _dsMeterID);
+    virtual void removeInactiveDevices(const dss_dsid_t& _dsMeterID);
   private:
     DsmApiHandle_t m_DSMApiHandle;
   }; // DSStructureModifyingBusInterface

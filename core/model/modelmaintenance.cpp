@@ -33,8 +33,6 @@
 #include "core/propertysystem.h"
 #include "core/model/modelconst.h"
 #include "core/metering/metering.h"
-#include "core/dsidhelper.h"
-
 
 #include "apartment.h"
 #include "zone.h"
@@ -142,15 +140,12 @@ namespace dss {
     }
   } // execute
 
-
   void ModelMaintenance::discoverDS485Devices() {
     if(m_pStructureQueryBusInterface != NULL) {
       std::vector<DSMeterSpec_t> meters = m_pStructureQueryBusInterface->getDSMeters();
       std::vector<DSMeterSpec_t>::iterator it = meters.begin();
       for (; it != meters.end(); ++it) {
-        dss_dsid_t dsmDSID;
-        dsid_helper::toDssDsid(it->get<0>(), dsmDSID);
-        ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDS485DeviceDiscovered, dsmDSID);
+        ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDS485DeviceDiscovered, it->get<0>());
         addModelEvent(pEvent);
       }
     }

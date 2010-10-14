@@ -25,7 +25,6 @@
 
 #include "ds485types.h"
 
-#include <digitalSTROM/ds.h>
 #include "base.h"
 
 #include <string>
@@ -38,7 +37,7 @@ namespace dss {
   class Device;
   class AddressableModelItem;
 
-  typedef boost::tuple<dsid_t, int, int, int, std::string> DSMeterSpec_t; // bus-id, sw-version, hw-version, api version, name
+  typedef boost::tuple<dss_dsid_t, int, int, int, std::string> DSMeterSpec_t; // bus-id, sw-version, hw-version, api version, name
   typedef boost::tuple<int, int, int, int> DeviceSpec_t; // function id, product id, revision, bus address
 
   class DeviceBusInterface {
@@ -60,22 +59,22 @@ namespace dss {
     virtual std::vector<DSMeterSpec_t> getDSMeters() = 0;
 
     /** Returns the dsMeter-spec for a dsMeter */
-    virtual DSMeterSpec_t getDSMeterSpec(const dsid_t& _dsMeterID) = 0;
+    virtual DSMeterSpec_t getDSMeterSpec(const dss_dsid_t& _dsMeterID) = 0;
 
     /** Returns a std::vector conatining the zone-ids of the specified dsMeter */
-    virtual std::vector<int> getZones(const dsid_t& _dsMeterID) = 0;
+    virtual std::vector<int> getZones(const dss_dsid_t& _dsMeterID) = 0;
     /** Returns the bus-ids of the devices present in the given zone of the specified dsMeter */
-    virtual std::vector<int> getDevicesInZone(const dsid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual std::vector<int> getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
     /** Returns the count of devices present in the given zone of the specified dsMeter */
-    virtual int getDevicesCountInZone(const dsid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual int getDevicesCountInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
 
     /** Returns the a std::vector containing the group-ids of the given zone on the specified dsMeter */
-    virtual std::vector<int> getGroups(const dsid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual std::vector<int> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
 
-    virtual std::vector<int> getGroupsOfDevice(const dsid_t& _dsMeterID, const int _deviceID) = 0;
+    virtual std::vector<int> getGroupsOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) = 0;
 
     /** Returns the DSID of a given device */
-    virtual dss_dsid_t getDSIDOfDevice(const dsid_t& _dsMeterID, const int _deviceID) = 0;
+    virtual dss_dsid_t getDSIDOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) = 0;
 
     virtual int getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID) = 0;
     virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) = 0;
@@ -90,21 +89,21 @@ namespace dss {
   class StructureModifyingBusInterface {
   public:
     /** Adds the given device to the specified zone. */
-    virtual void setZoneID(const dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) = 0;
+    virtual void setZoneID(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) = 0;
 
     /** Creates a new Zone on the given dsMeter */
-    virtual void createZone(const dsid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual void createZone(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
 
     /** Removes the zone \a _zoneID on the dsMeter \a _dsMeterID */
-    virtual void removeZone(const dsid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual void removeZone(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
 
     /** Adds a device to a given group */
-    virtual void addToGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) = 0;
+    virtual void addToGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID) = 0;
     /** Removes a device from a given group */
-    virtual void removeFromGroup(const dsid_t& _dsMeterID, const int _groupID, const int _deviceID) = 0;
+    virtual void removeFromGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID) = 0;
 
     /** Removes all inactive (!isPresent) devices from the dSM */
-    virtual void removeInactiveDevices(const dsid_t& _dsMeterID) = 0;
+    virtual void removeInactiveDevices(const dss_dsid_t& _dsMeterID) = 0;
 
     virtual ~StructureModifyingBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureModifyingBusInterface

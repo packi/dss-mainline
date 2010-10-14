@@ -52,13 +52,10 @@ namespace dss {
     _dsMeter->setIsPresent(true);
     _dsMeter->setIsValid(false);
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_dsMeter->getDSID(), dsmDSID);
-
     log("scanDSMeter: Start " + _dsMeter->getDSID().toString() , lsInfo);
     std::vector<int> zoneIDs;
     try {
-      zoneIDs = m_Interface.getZones(dsmDSID);
+      zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
     } catch(BusApiError& e) {
       log("scanDSMeter: Error getting ZoneIDs", lsFatal);
       return false;
@@ -67,7 +64,7 @@ namespace dss {
     // TODO: implement energy border handling
 
     try {
-      DSMeterSpec_t spec = m_Interface.getDSMeterSpec(dsmDSID);
+      DSMeterSpec_t spec = m_Interface.getDSMeterSpec(_dsMeter->getDSID());
       _dsMeter->setSoftwareVersion(spec.get<1>());
       _dsMeter->setHardwareVersion(spec.get<2>());
       _dsMeter->setApiVersion(spec.get<3>());
@@ -98,9 +95,7 @@ namespace dss {
   bool BusScanner::scanZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone) {
     std::vector<int> devices;
     try {
-      dsid_t dsmDSID;
-      dsid_helper::toDsmapiDsid(_dsMeter->getDSID(), dsmDSID);
-      devices = m_Interface.getDevicesInZone(dsmDSID, _zone->getID());
+      devices = m_Interface.getDevicesInZone(_dsMeter->getDSID(), _zone->getID());
     } catch(BusApiError& e) {
       log("scanDSMeter: Error getting getDevicesInZone", lsFatal);
       return false;
@@ -114,10 +109,8 @@ namespace dss {
 
   bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, devid_t _shortAddress) {
     dss_dsid_t dsid;
-    dsid_t dsmDSID;
     try {
-      dsid_helper::toDsmapiDsid(_dsMeter->getDSID(), dsmDSID);
-      dsid = m_Interface.getDSIDOfDevice(dsmDSID, _shortAddress);
+      dsid = m_Interface.getDSIDOfDevice(_dsMeter->getDSID(), _shortAddress);
     } catch(BusApiError& e) {
       log("scanDeviceOnBus: Error getting getDSIDOfDevice:" + std::string(e.what()) + " " +
           dsid.toString() + " " + intToString(_shortAddress), lsFatal);
@@ -180,9 +173,8 @@ namespace dss {
     }
 
     dev->resetGroups();
-    dsid_helper::toDsmapiDsid(_dsMeter->getDSID(), dsmDSID);
 
-    std::vector<int> groupIDsPerDevice = m_Interface.getGroupsOfDevice(dsmDSID, _shortAddress);
+    std::vector<int> groupIDsPerDevice = m_Interface.getGroupsOfDevice(_dsMeter->getDSID(), _shortAddress);
     foreach(int groupID, groupIDsPerDevice) {
       log(std::string("scanDeviceOnBus: adding device ") + intToString(_shortAddress) + " to group " + intToString(groupID));
       dev->addToGroup(groupID);
@@ -208,10 +200,7 @@ namespace dss {
   bool BusScanner::scanGroupsOfZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone) {
     std::vector<int> groupIDs;
     try {
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(_dsMeter->getDSID(), dsid);
-
-      groupIDs = m_Interface.getGroups(dsid, _zone->getID());
+      groupIDs = m_Interface.getGroups(_dsMeter->getDSID(), _zone->getID());
     } catch(BusApiError& e) {
       log("scanDSMeter: Error getting getGroups", lsFatal);
       return false;

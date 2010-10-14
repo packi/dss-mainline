@@ -29,7 +29,6 @@
 #include "core/model/modulator.h"
 #include "core/model/zone.h"
 #include "core/model/set.h"
-#include "core/dsidhelper.h"
 
 #include <stdexcept>
 
@@ -40,9 +39,7 @@ namespace dss {
     if(!_dsMeter->isPresent()) {
       throw std::runtime_error("Need dsMeter to be present");
     }
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_dsMeter->getDSID(), dsmDSID);
-    m_Interface.createZone(dsmDSID, _zone->getID());
+    m_Interface.createZone(_dsMeter->getDSID(), _zone->getID());
     _zone->addToDSMeter(_dsMeter);
     _zone->setIsPresent(true);
   } // createZone
@@ -58,9 +55,7 @@ namespace dss {
       createZone(targetDSMeter, _zone);
     }
 
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(targetDSMeter->getDSID(), dsmDSID);
-    m_Interface.setZoneID(dsmDSID, _device->getShortAddress(), _zone->getID());
+    m_Interface.setZoneID(targetDSMeter->getDSID(), _device->getShortAddress(), _zone->getID());
     _device->setZoneID(_zone->getID());
     DeviceReference ref(_device, &m_Apartment);
     _zone->addDevice(ref);
@@ -89,9 +84,7 @@ namespace dss {
     }
     if(_zone->getFirstZoneOnDSMeter() != _dsMeter->getDSID()) {
 
-      dsid_t dsmDSID;
-      dsid_helper::toDsmapiDsid(_dsMeter->getDSID(), dsmDSID);
-      m_Interface.removeZone(dsmDSID, _zone->getID());
+      m_Interface.removeZone(_dsMeter->getDSID(), _zone->getID());
       _zone->removeFromDSMeter(_dsMeter);
       if(_zone->isRegisteredOnAnyMeter()) {
         _zone->setIsPresent(false);
@@ -102,9 +95,7 @@ namespace dss {
   } // removeZoneOnDSMeter
 
   void StructureManipulator::removeInactiveDevices(boost::shared_ptr<DSMeter> _dsMeter) {
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_dsMeter->getDSID(), dsmDSID);
-    m_Interface.removeInactiveDevices(dsmDSID);
+    m_Interface.removeInactiveDevices(_dsMeter->getDSID());
   }
 
 } // namespace dss
