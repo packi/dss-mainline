@@ -826,6 +826,17 @@ namespace dss {
     return NULL;
   } // getSimulatedDevice
 
+  DSIDInterface* DSMeterSim::getSimulatedDevice(const uint16_t _shortAddress) {
+    for(std::vector<DSIDInterface*>::iterator iDSID = m_SimulatedDevices.begin(), e = m_SimulatedDevices.end();
+        iDSID != e; ++iDSID)
+    {
+      if((*iDSID)->getShortAddress() == _shortAddress) {
+        return *iDSID;
+      }
+    }
+    return NULL;
+  } // getSimulatedDevice
+
   void DSMeterSim::addSimulatedDevice(DSIDInterface* _device) {
     m_SimulatedDevices.push_back(_device);
   } // addSimulatedDevice

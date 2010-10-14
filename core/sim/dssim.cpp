@@ -191,6 +191,17 @@ namespace dss {
     return result;
   } // getSimulatedDevice
 
+  boost::shared_ptr<DSMeterSim> DSSim::getDSMeter(const dss_dsid_t& _dsid) {
+    boost::shared_ptr<DSMeterSim> result;
+    foreach(boost::shared_ptr<DSMeterSim> dsMeter, m_DSMeters) {
+      if(dsMeter->getDSID() == _dsid) {
+        result = dsMeter;
+        break;
+      }
+    }
+    return result;
+  } // getDSMeter
+
   const uint64_t DSIDHeader = 0x3504175FE0000000ll;
   const uint32_t SimulationPrefix = 0xFFC00000;
 

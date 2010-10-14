@@ -85,8 +85,10 @@ namespace dss {
     void setID(const int _value) { m_ID = _value; }
 
     void setDSID(const dss_dsid_t& _value) { m_DSMeterDSID = _value; }
+    const dss_dsid_t& getDSID() { return m_DSMeterDSID; }
 
     DSIDInterface* getSimulatedDevice(const dss_dsid_t _dsid);
+    DSIDInterface* getSimulatedDevice(const uint16_t _shortAddress);
     void addSimulatedDevice(DSIDInterface* _device);
 
     void addDeviceToGroup(DSIDInterface* _device, int _groupID);

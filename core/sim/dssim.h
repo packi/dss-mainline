@@ -81,12 +81,11 @@ namespace dss {
 
     DSIDFactory& getDSIDFactory() { return m_DSIDFactory; }
 
-    // TODO: libdsm
-    // void distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame);
     DSIDInterface* getSimulatedDevice(const dss_dsid_t& _dsid);
 
     int getDSMeterCount() const { return m_DSMeters.size(); }
     boost::shared_ptr<DSMeterSim> getDSMeter(const int _index) { return m_DSMeters[_index]; }
+    boost::shared_ptr<DSMeterSim> getDSMeter(const dss_dsid_t& _dsid);
 
     static dss_dsid_t makeSimulatedDSID(const dss_dsid_t& _dsid);
     static bool isSimulatedDSID(const dss_dsid_t& _dsid);

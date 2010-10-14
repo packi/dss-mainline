@@ -20,21 +20,29 @@
 
 */
 
-#include "simbusinterface.h"
+#ifndef SIMDEVICEBUSINTERFACE_H_
+#define SIMDEVICEBUSINTERFACE_H_
 
-#include "simactionrequestbusinterface.h"
-#include "simdevicebusinterface.h"
+#include "core/businterface.h"
 
 namespace dss {
 
-  //================================================== SimBusInterface
+  class DSSim;
 
-  SimBusInterface::SimBusInterface(boost::shared_ptr<DSSim> _pSimulation)
-  : m_pSimulation(_pSimulation)
-  {
-    m_pActionRequestInterface.reset(new SimActionRequestBusInterface(_pSimulation));
-    m_pDeviceBusInterface.reset(new SimDeviceBusInterface(m_pSimulation));
-  }
+  class SimDeviceBusInterface : public DeviceBusInterface {
+  public:
+    SimDeviceBusInterface(boost::shared_ptr<DSSim> _pSimulation)
+    : m_pSimulation(_pSimulation)
+    { }
+    virtual uint16_t deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterID, int _paramID);
+    virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size);
+    virtual int getSensorValue(const Device& _device, const int _sensorID);
+    /** Tells the dSM to lock the device if \a _lock is true. */
+    virtual void lockOrUnlockDevice(const Device& _device, const bool _lock);
+  private:
+    boost::shared_ptr<DSSim> m_pSimulation;
+  }; // SimDeviceBusInterface
 
+}
 
-} // namespace dss
+#endif
