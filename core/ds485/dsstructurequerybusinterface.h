@@ -40,10 +40,8 @@ namespace dss {
     virtual std::vector<DSMeterSpec_t> getDSMeters();
     virtual DSMeterSpec_t getDSMeterSpec(const dsid_t& _dsMeterID);
     virtual std::vector<int> getZones(const dsid_t& _dsMeterID);
-    virtual int getZoneCount(const dsid_t& _dsMeterID);
     virtual std::vector<int> getDevicesInZone(const dsid_t& _dsMeterID, const int _zoneID);
     virtual int getDevicesCountInZone(const dsid_t& _dsMeterID, const int _zoneID);
-    virtual int getGroupCount(const dsid_t& _dsMeterID, const int _zoneID);
     virtual std::vector<int> getGroups(const dsid_t& _dsMeterID, const int _zoneID);
     virtual std::vector<int> getGroupsOfDevice(const dsid_t& _dsMeterID, const int _deviceID);
     virtual dss_dsid_t getDSIDOfDevice(const dsid_t& _dsMeterID, const int _deviceID);
@@ -51,6 +49,8 @@ namespace dss {
     virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper);
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID);
     virtual bool isLocked(boost::shared_ptr<const Device> _device);
+  private:
+    int getGroupCount(const dsid_t& _dsMeterID, const int _zoneID);
   private:
     DsmApiHandle_t m_DSMApiHandle;
     dsid_t m_BroadcastDSID;

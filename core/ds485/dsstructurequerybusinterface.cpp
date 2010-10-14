@@ -125,22 +125,17 @@ namespace dss {
     return result;
   } // getGroupsOfDevice
 
-  int DSStructureQueryBusInterface::getZoneCount(const dsid_t& _dsMeterID) {
-    uint8_t zoneCount;
-    int ret = ZoneCount(m_DSMApiHandle, _dsMeterID, &zoneCount);
-    DSBusInterface::checkResultCode(ret);
-    return zoneCount;
-  } // getZoneCount
-
   std::vector<int> DSStructureQueryBusInterface::getZones(const dsid_t& _dsMeterID) {
     std::vector<int> result;
 
-    int numZones = getZoneCount(_dsMeterID);
+    uint8_t numZones;
+    int ret = ZoneCount(m_DSMApiHandle, _dsMeterID, &numZones);
+    DSBusInterface::checkResultCode(ret);
     Logger::getInstance()->log(std::string("DSMeter has ") + intToString(numZones) + " zones");
 
     uint16_t zoneId;
     for(int iZone = 0; iZone < numZones; iZone++) {
-      int ret = ZoneInfo_by_index(m_DSMApiHandle, _dsMeterID, iZone,
+      ret = ZoneInfo_by_index(m_DSMApiHandle, _dsMeterID, iZone,
                                        &zoneId, NULL, NULL, NULL);
       DSBusInterface::checkResultCode(ret);
 
