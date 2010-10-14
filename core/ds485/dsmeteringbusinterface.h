@@ -37,8 +37,8 @@ namespace dss {
       SetBroadcastId(m_BroadcastDSID);
     }
 
-    virtual unsigned long getPowerConsumption(const dsid_t& _dsMeterID);
-    virtual unsigned long getEnergyMeterValue(const dsid_t& _dsMeterID);
+    virtual unsigned long getPowerConsumption(const dss_dsid_t& _dsMeterID);
+    virtual unsigned long getEnergyMeterValue(const dss_dsid_t& _dsMeterID);
     virtual void requestEnergyMeterValue();
     virtual void requestPowerConsumption();
   private:

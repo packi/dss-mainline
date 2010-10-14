@@ -23,7 +23,9 @@
 #include "dsmetersim.h"
 
 #include "dssim.h"
+
 #include "core/base.h"
+#include "core/foreach.h"
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Node.h>
@@ -269,6 +271,18 @@ namespace dss {
     lookupDevice(_deviceID).setValue(_value);
   } // deviceSetValue
 
+  uint32_t DSMeterSim::getEnergyMeterValue() {
+    return 0;
+  }
+
+  uint32_t DSMeterSim::getPowerConsumption() {
+    uint32_t val = 0;
+    foreach(DSIDInterface* interface, m_SimulatedDevices) {
+      val += interface->getConsumption();
+    }
+    return val;
+  } // getPowerConsumption
+
 /*
   void DSMeterSim::process(DS485Frame& _frame) {
     const uint8_t HeaderTypeToken = 0;
@@ -289,96 +303,6 @@ namespace dss {
           int cmdNr = pd.get<uint8_t>();
           boost::shared_ptr<DS485CommandFrame> response;
           switch(cmdNr) {
-            case FunctionDeviceCallScene:
-              {
-                devid_t devID = pd.get<devid_t>();
-                int sceneID = pd.get<uint16_t>();
-                deviceCallScene(devID, sceneID);
-                distributeFrame(boost::shared_ptr<DS485CommandFrame>(createAck(cmdFrame, cmdNr)));
-              }
-              break;
-            case FunctionGroupCallScene:
-              {
-                uint16_t zoneID = pd.get<uint16_t>();
-                uint8_t groupID = pd.get<uint16_t>();
-                uint8_t sceneID = pd.get<uint16_t>();
-                groupCallScene(zoneID, groupID, sceneID);
-              }
-              break;
-            case FunctionDeviceSaveScene:
-              {
-                devid_t devID = pd.get<devid_t>();
-                int sceneID = pd.get<uint16_t>();
-                deviceSaveScene(devID, sceneID);
-                distributeFrame(boost::shared_ptr<DS485CommandFrame>(createAck(cmdFrame, cmdNr)));
-              }
-              break;
-            case FunctionGroupSaveScene:
-              {
-                uint16_t zoneID = pd.get<uint16_t>();
-                uint8_t groupID = pd.get<uint16_t>();
-                uint8_t sceneID = pd.get<uint16_t>();
-                groupSaveScene(zoneID, groupID, sceneID);
-              }
-              break;
-            case FunctionDeviceUndoScene:
-              {
-                devid_t devID = pd.get<devid_t>();
-                int sceneID = pd.get<uint16_t>();
-                deviceUndoScene(devID, sceneID);
-                distributeFrame(boost::shared_ptr<DS485CommandFrame>(createAck(cmdFrame, cmdNr)));
-              }
-              break;
-            case FunctionGroupUndoScene:
-              {
-                uint16_t zoneID = pd.get<uint16_t>();
-                uint16_t groupID = pd.get<uint16_t>();
-                uint16_t sceneID = pd.get<uint16_t>();
-                groupUndoScene(zoneID, groupID, sceneID);
-              }
-              break;
-            case FunctionGroupIncreaseValue:
-              {
-                uint16_t zoneID = pd.get<uint16_t>();
-                uint16_t groupID = pd.get<uint16_t>();
-                groupIncValue(zoneID, groupID, 0);
-              }
-              break;
-            case FunctionGroupDecreaseValue:
-              {
-                uint16_t zoneID = pd.get<uint16_t>();
-                uint16_t groupID = pd.get<uint16_t>();
-                groupDecValue(zoneID, groupID, 0);
-              }
-              break;
-            case FunctionGroupSetValue:
-              {
-                uint16_t zoneID = pd.get<uint16_t>();
-                uint16_t groupID = pd.get<uint16_t>();
-                uint16_t value = pd.get<uint16_t>();
-                groupSetValue(zoneID, groupID, value);
-              }
-              break;
-            case FunctionDeviceIncreaseValue:
-              {
-                uint16_t devID = pd.get<uint16_t>();
-                DSIDInterface& dev = lookupDevice(devID);
-                dev.increaseValue();
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(1);
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDeviceDecreaseValue:
-              {
-                uint16_t devID = pd.get<uint16_t>();
-                DSIDInterface& dev = lookupDevice(devID);
-                dev.decreaseValue();
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(1);
-                distributeFrame(response);
-              }
-              break;
             case FunctionDeviceGetFunctionID:
               {
                 devid_t devID = pd.get<devid_t>();
@@ -615,24 +539,6 @@ namespace dss {
                 int groupID = pd.get<uint16_t>();
                 addDeviceToGroup(&dev, groupID);
                 response->getPayload().add<uint16_t>(1);
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDSMeterGetPowerConsumption:
-              {
-                response = createResponse(cmdFrame, cmdNr);
-                uint32_t val = 0;
-                foreach(DSIDInterface* interface, m_SimulatedDevices) {
-                  val += interface->getConsumption();
-                }
-                response->getPayload().add<uint32_t>(val);
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDSMeterGetEnergyMeterValue:
-              {
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint32_t>(0);
                 distributeFrame(response);
               }
               break;

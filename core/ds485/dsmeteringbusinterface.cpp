@@ -22,15 +22,20 @@
 
 #include "dsmeteringbusinterface.h"
 
+#include "core/dsidhelper.h"
+
 #include "dsbusinterface.h"
 
 namespace dss {
 
   //================================================== DSMeteringBusInterface
 
-  unsigned long DSMeteringBusInterface::getPowerConsumption(const dsid_t& _dsMeterID) {
+  unsigned long DSMeteringBusInterface::getPowerConsumption(const dss_dsid_t& _dsMeterID) {
     uint32_t power;
-    int ret = CircuitEnergyMeterValue_get(m_DSMApiHandle, _dsMeterID, &power, NULL);
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
+
+    int ret = CircuitEnergyMeterValue_get(m_DSMApiHandle, dsmDSID, &power, NULL);
     DSBusInterface::checkResultCode(ret);
 
     return power;
@@ -42,9 +47,12 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
   } // requestPowerConsumption
 
-  unsigned long DSMeteringBusInterface::getEnergyMeterValue(const dsid_t& _dsMeterID) {
+  unsigned long DSMeteringBusInterface::getEnergyMeterValue(const dss_dsid_t& _dsMeterID) {
     uint32_t energy;
-    int ret = CircuitEnergyMeterValue_get(m_DSMApiHandle, _dsMeterID, NULL, &energy);
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
+
+    int ret = CircuitEnergyMeterValue_get(m_DSMApiHandle, dsmDSID, NULL, &energy);
     DSBusInterface::checkResultCode(ret);
 
     return energy;

@@ -72,6 +72,9 @@ namespace dss {
     void groupUndoScene(const int _zoneID, const int _groupID);
     void deviceSetValue(const int _deviceID, const int _value);
     void groupSetValue(const int _zoneID, const int _groupID, const int _value);
+  public:
+    uint32_t getPowerConsumption();
+    uint32_t getEnergyMeterValue();
   protected:
     virtual void doStart() {}
     void log(const std::string& _message, aLogSeverity _severity = lsDebug);

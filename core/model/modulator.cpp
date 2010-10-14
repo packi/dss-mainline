@@ -26,7 +26,6 @@
 #include "core/logger.h"
 #include "core/businterface.h"
 #include "core/propertysystem.h"
-#include "core/dsidhelper.h"
 #include "set.h"
 #include "apartment.h"
 
@@ -102,9 +101,7 @@ namespace dss {
   unsigned long DSMeter::getPowerConsumption() {
     DateTime now;
     if(!now.addSeconds(-1).before(m_PowerConsumptionTimeStamp)) {
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(m_DSID, dsid);
-      m_PowerConsumption =  DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getPowerConsumption(dsid);
+      m_PowerConsumption =  DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getPowerConsumption(m_DSID);
       m_PowerConsumptionTimeStamp = now;
     }
     return m_PowerConsumption;
@@ -113,9 +110,7 @@ namespace dss {
   unsigned long DSMeter::getEnergyMeterValue() {
     DateTime now;
     if(!now.addSeconds(-1).before(m_EnergyMeterValueTimeStamp)) {
-      dsid_t dsid;
-      dsid_helper::toDsmapiDsid(m_DSID, dsid);
-      m_EnergyMeterValue = DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getEnergyMeterValue(dsid);
+      m_EnergyMeterValue = DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getEnergyMeterValue(m_DSID);
       m_EnergyMeterValueTimeStamp = now;
     }
     return m_EnergyMeterValue;

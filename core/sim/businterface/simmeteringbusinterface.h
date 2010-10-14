@@ -20,23 +20,29 @@
 
 */
 
-#include "simbusinterface.h"
+#ifndef SIMMETERINGBUSINTERFACE_H_
+#define SIMMETERINGBUSINTERFACE_H_
 
-#include "simactionrequestbusinterface.h"
-#include "simdevicebusinterface.h"
-#include "simmeteringbusinterface.h"
+#include "core/businterface.h"
 
 namespace dss {
 
-  //================================================== SimBusInterface
+  class DSSim;
 
-  SimBusInterface::SimBusInterface(boost::shared_ptr<DSSim> _pSimulation)
-  : m_pSimulation(_pSimulation)
-  {
-    m_pActionRequestInterface.reset(new SimActionRequestBusInterface(_pSimulation));
-    m_pDeviceBusInterface.reset(new SimDeviceBusInterface(m_pSimulation));
-    m_pMeteringBusInterface.reset(new SimMeteringBusInterface(m_pSimulation));
-  }
+  class SimMeteringBusInterface : public MeteringBusInterface {
+  public:
+    SimMeteringBusInterface(boost::shared_ptr<DSSim> _pSimulation)
+    : m_pSimulation(_pSimulation)
+    { }
 
+    virtual unsigned long getPowerConsumption(const dss_dsid_t& _dsMeterID);
+    virtual void requestPowerConsumption();
+    virtual unsigned long getEnergyMeterValue(const dss_dsid_t& _dsMeterID);
+    virtual void requestEnergyMeterValue();
+  private:
+    boost::shared_ptr<DSSim> m_pSimulation;
+  }; // SimMeteringBusInterface
 
 } // namespace dss
+
+#endif
