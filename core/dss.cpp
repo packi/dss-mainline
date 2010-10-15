@@ -30,6 +30,9 @@
 
 
 #include "dss.h"
+
+#include <vector>
+
 #include "logger.h"
 #include "propertysystem.h"
 #include "scripting/modeljs.h"
@@ -44,8 +47,9 @@
   #include "bonjour.h"
 #endif
 
-// TODO: libdsm
-// #include "sim/dssim.h"
+#include "sim/dssim.h"
+#include "sim/businterface/simbusinterface.h"
+#include "sim/businterface/businterfaceadaptor.h"
 #include "webservices/webservices.h"
 #include "event.h"
 #include "metering/metering.h"
@@ -225,7 +229,7 @@ const char* JSLogDirectory = "data/logs/";
     return true;
   } // parseProperties
 
-  bool DSS::initialize(const vector<std::string>& _properties, const std::string& _configFile) {
+  bool DSS::initialize(const std::vector<std::string>& _properties, const std::string& _configFile) {
     m_State = ssCreatingSubsystems;
 
     m_pModelMaintenance = boost::shared_ptr<ModelMaintenance>(new ModelMaintenance(this));
@@ -235,14 +239,13 @@ const char* JSLogDirectory = "data/logs/";
     m_pApartment->setPropertySystem(m_pPropertySystem.get());
     m_pModelMaintenance->setApartment(m_pApartment.get());
 
-#if 0
-    // TODO: libdsm
     m_pSimulation = boost::shared_ptr<DSSim>(new DSSim(this));
     m_Subsystems.push_back(m_pSimulation.get());
-#endif
 
-    m_pBusInterface = boost::shared_ptr<DSBusInterface>(new DSBusInterface(this, m_pModelMaintenance.get(), m_pSimulation.get()));
-    m_Subsystems.push_back(dynamic_cast<DSBusInterface*>(m_pBusInterface.get()));
+    boost::shared_ptr<DSBusInterface> pDSBusInterface(new DSBusInterface(this, m_pModelMaintenance.get()));
+    boost::shared_ptr<SimBusInterface> pSimBusInterface(new SimBusInterface(m_pSimulation));
+
+    m_pBusInterface = boost::shared_ptr<BusInterface>(new BusInterfaceAdaptor(pDSBusInterface, m_pSimulation, pSimBusInterface));
 
     m_pWebServer = boost::shared_ptr<WebServer>(new WebServer(this));
     m_Subsystems.push_back(m_pWebServer.get());

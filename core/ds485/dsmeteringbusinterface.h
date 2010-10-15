@@ -24,16 +24,14 @@
 #define DSMETERINGBUSINTERFACE_H_
 
 #include "core/businterface.h"
-
-#include <digitalSTROM/dsm-api-v2/dsm-api.h>
+#include "dsbusinterfaceobj.h"
 
 namespace dss {
 
-  class DSMeteringBusInterface : public MeteringBusInterface {
+  class DSMeteringBusInterface : public DSBusInterfaceObj,
+                                 public MeteringBusInterface {
   public:
-    DSMeteringBusInterface(DsmApiHandle_t _dsmApiHandle)
-    : m_DSMApiHandle(_dsmApiHandle)
-    {
+    DSMeteringBusInterface() {
       SetBroadcastId(m_BroadcastDSID);
     }
 
@@ -42,7 +40,6 @@ namespace dss {
     virtual void requestEnergyMeterValue();
     virtual void requestPowerConsumption();
   private:
-    DsmApiHandle_t m_DSMApiHandle;
     dsid_t m_BroadcastDSID;
   }; // DSMeteringBusInterface
 

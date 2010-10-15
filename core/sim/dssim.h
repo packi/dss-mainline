@@ -64,8 +64,6 @@ namespace dss {
     bool m_Initialized;
     std::vector<boost::shared_ptr<DSMeterSim> > m_DSMeters;
   private:
-    void loadPlugins();
-
     void loadFromConfig();
     void createJSPluginFrom(PropertyNodePtr _node);
   protected:

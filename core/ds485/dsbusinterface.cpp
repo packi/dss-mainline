@@ -45,9 +45,6 @@
 #include "dsstructurequerybusinterface.h"
 #include "dsstructuremodifyingbusinterface.h"
 
-// TODO: libdsm
-// #include "core/sim/dssim.h"
-
 #include <sstream>
 
 
@@ -55,49 +52,30 @@ namespace dss {
 
   //================================================== DSBusInterface
 
-  DSBusInterface::DSBusInterface(DSS* _pDSS, ModelMaintenance* _pModelMaintenance, DSSim* _pDSSim)
+  DSBusInterface::DSBusInterface(DSS* _pDSS, ModelMaintenance* _pModelMaintenance)
   : Subsystem(_pDSS, "DSBusInterface"),
     m_pModelMaintenance(_pModelMaintenance),
-    m_pDSSim(_pDSSim),
     m_dsmApiHandle(NULL),
     m_dsmApiReady(false),
     m_connectionURI("tcp://localhost:8442")
   {
     assert(_pModelMaintenance != NULL);
 
-    SetBroadcastId(m_broadcastDSID);
     if(_pDSS != NULL) {
 
       _pDSS->getPropertySystem().createProperty(getConfigPropertyBasePath() + "connectionURI")
             ->linkToProxy(PropertyProxyReference<std::string>(m_connectionURI, true));
     }
+    m_pActionRequestInterface.reset(new DSActionRequest());
+    m_pDeviceBusInterface.reset(new DSDeviceBusInterface());
+    m_pMeteringBusInterface.reset(new DSMeteringBusInterface());
+    m_pStructureQueryBusInterface.reset(new DSStructureQueryBusInterface());
+    m_pStructureModifyingBusInterface.reset(new DSStructureModifyingBusInterface());
   } // ctor
 
   bool DSBusInterface::isReady() {
-#if 0
-    // TODO: libdsm
-    bool simReady = (m_pDSSim != NULL) ? m_pDSSim->isReady() : true;
-    bool controllerReady =
-      ((m_dsmApiController.getState() == csSlave) ||
-       (m_dsmApiController.getState() == csDesignatedMaster) ||
-       (m_dsmApiController.getState() == csError));
-
-    return simReady && selfReady && controllerReady;
-#endif
     return m_dsmApiReady;
   } // isReady
-
-  bool DSBusInterface::isSimAddress(const uint8_t _addr) {
-#if 0
-    // TODO: libdsm
-    if(m_pDSSim != NULL) {
-      return m_pDSSim->isSimAddress(_addr);
-    } else {
-      return false;
-    }
-#endif
-    return false;
-  } // isSimAddress
 
   void DSBusInterface::checkResultCode(const int _resultCode) {
     if(_resultCode != ERROR_OK) {
@@ -190,11 +168,11 @@ namespace dss {
     }
     log("Successfully connected to " + m_connectionURI);
 
-    m_pActionRequestInterface.reset(new DSActionRequest(m_dsmApiHandle));
-    m_pDeviceBusInterface.reset(new DSDeviceBusInterface(m_dsmApiHandle));
-    m_pMeteringBusInterface.reset(new DSMeteringBusInterface(m_dsmApiHandle));
-    m_pStructureQueryBusInterface.reset(new DSStructureQueryBusInterface(m_dsmApiHandle));
-    m_pStructureModifyingBusInterface.reset(new DSStructureModifyingBusInterface(m_dsmApiHandle));
+    m_pActionRequestInterface->setDSMApiHandle(m_dsmApiHandle);
+    m_pDeviceBusInterface->setDSMApiHandle(m_dsmApiHandle);
+    m_pMeteringBusInterface->setDSMApiHandle(m_dsmApiHandle);
+    m_pStructureQueryBusInterface->setDSMApiHandle(m_dsmApiHandle);
+    m_pStructureModifyingBusInterface->setDSMApiHandle(m_dsmApiHandle);
 
 
     // register callbacks
@@ -326,5 +304,26 @@ namespace dss {
                                                   uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID, _sceneID);
   }
+
+  DeviceBusInterface* DSBusInterface::getDeviceBusInterface() {
+    return m_pDeviceBusInterface.get();
+  } // getDeviceBusInterface
+
+  StructureQueryBusInterface* DSBusInterface::getStructureQueryBusInterface() {
+    return m_pStructureQueryBusInterface.get();
+  } // getStructureModifyingBusInterface
+
+  MeteringBusInterface* DSBusInterface::getMeteringBusInterface() {
+    return m_pMeteringBusInterface.get();
+  } // getMeteringBusInterface
+
+  StructureModifyingBusInterface* DSBusInterface::getStructureModifyingBusInterface() {
+    return m_pStructureModifyingBusInterface.get();
+  } // getStructureModifyingBusInterface
+
+  ActionRequestInterface* DSBusInterface::getActionRequestInterface() {
+    return m_pActionRequestInterface.get();
+  } // getActionRequestInterface
+
 
 } // namespace dss

@@ -22,7 +22,7 @@
 
 #include "simactionrequestbusinterface.h"
 
-#include "dssim.h"
+#include "core/sim/dssim.h"
 #include "core/sim/dsmetersim.h"
 
 #include "core/model/group.h"

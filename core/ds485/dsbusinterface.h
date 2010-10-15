@@ -29,56 +29,37 @@
 
 #include "core/ds485types.h"
 
-// TODO_ libdsm
 #include "core/businterface.h"
 #include "core/subsystem.h"
-#include "core/mutex.h"
-
-#include <map>
-#include <vector>
 
 #include <digitalSTROM/dsm-api-v2/dsm-api.h>
-
-#ifndef WIN32
-  #include <ext/hash_map>
-#else
-  #include <hash_map>
-#endif
-
-#ifndef WIN32
-using namespace __gnu_cxx;
-#else
-using namespace stdext;
-#endif
 
 #include <boost/shared_ptr.hpp>
 
 namespace dss {
 
   class ModelEvent;
-  class FrameBucketBase;
-  class FrameBucketCollector;
   class ModelMaintenance;
-  class DSSim;
+  class DSActionRequest;
+  class DSDeviceBusInterface;
+  class DSMeteringBusInterface;
+  class DSStructureQueryBusInterface;
+  class DSStructureModifyingBusInterface;
 
-  class DSBusInterface : public    Subsystem,
-                         public    BusInterface {
+  class DSBusInterface : public Subsystem,
+                         public BusInterface {
   private:
-    boost::shared_ptr<ActionRequestInterface> m_pActionRequestInterface;
-    boost::shared_ptr<DeviceBusInterface> m_pDeviceBusInterface;
-    boost::shared_ptr<MeteringBusInterface> m_pMeteringBusInterface;
-    boost::shared_ptr<StructureQueryBusInterface> m_pStructureQueryBusInterface;
-    boost::shared_ptr<StructureModifyingBusInterface> m_pStructureModifyingBusInterface;
-    bool isSimAddress(const uint8_t _addr);
+    boost::shared_ptr<DSActionRequest> m_pActionRequestInterface;
+    boost::shared_ptr<DSDeviceBusInterface> m_pDeviceBusInterface;
+    boost::shared_ptr<DSMeteringBusInterface> m_pMeteringBusInterface;
+    boost::shared_ptr<DSStructureQueryBusInterface> m_pStructureQueryBusInterface;
+    boost::shared_ptr<DSStructureModifyingBusInterface> m_pStructureModifyingBusInterface;
 
     ModelMaintenance* m_pModelMaintenance;
-    DSSim* m_pDSSim;
 
     DsmApiHandle_t m_dsmApiHandle;
     bool m_dsmApiReady;
     std::string m_connectionURI;
-
-    dsid_t m_broadcastDSID;
 
     void busReady();
 
@@ -112,16 +93,16 @@ namespace dss {
   protected:
     virtual void doStart();
   public:
-    DSBusInterface(DSS* _pDSS, ModelMaintenance* _pModelMaintenance, DSSim* _pDSSim);
+    DSBusInterface(DSS* _pDSS, ModelMaintenance* _pModelMaintenance);
     virtual ~DSBusInterface() {};
 
     virtual void shutdown();
 
-    virtual DeviceBusInterface* getDeviceBusInterface() { return m_pDeviceBusInterface.get(); }
-    virtual StructureQueryBusInterface* getStructureQueryBusInterface() { return m_pStructureQueryBusInterface.get(); }
-    virtual MeteringBusInterface* getMeteringBusInterface() { return m_pMeteringBusInterface.get(); }
-    virtual StructureModifyingBusInterface* getStructureModifyingBusInterface() { return m_pStructureModifyingBusInterface.get(); }
-    virtual ActionRequestInterface* getActionRequestInterface() { return m_pActionRequestInterface.get(); }
+    virtual DeviceBusInterface* getDeviceBusInterface();
+    virtual StructureQueryBusInterface* getStructureQueryBusInterface();
+    virtual MeteringBusInterface* getMeteringBusInterface();
+    virtual StructureModifyingBusInterface* getStructureModifyingBusInterface();
+    virtual ActionRequestInterface* getActionRequestInterface();
 
     virtual bool isReady();
     static void checkResultCode(const int _resultCode);

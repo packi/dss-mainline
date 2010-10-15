@@ -97,7 +97,6 @@ namespace dss {
 
       getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "configfile", getDSS().getConfigDirectory() + "sim.xml", true, false);
 
-      loadPlugins();
       loadFromConfig();
     }
 

@@ -31,6 +31,7 @@ namespace dss {
   class SimBusInterface;
 
   class BusInterfaceAdaptor : public BusInterface {
+  public:
     BusInterfaceAdaptor(boost::shared_ptr<BusInterface> _pInner,
                         boost::shared_ptr<DSSim> _pSimulation,
                         boost::shared_ptr<SimBusInterface> _pSimBusInterface);
@@ -39,6 +40,7 @@ namespace dss {
     virtual MeteringBusInterface* getMeteringBusInterface();
     virtual StructureModifyingBusInterface* getStructureModifyingBusInterface();
     virtual ActionRequestInterface* getActionRequestInterface();
+    virtual bool isReady();
   private:
     boost::shared_ptr<BusInterface> m_pInnerBusInterface;
     boost::shared_ptr<DSSim> m_pSimulation;

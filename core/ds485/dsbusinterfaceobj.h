@@ -20,30 +20,19 @@
 
 */
 
-#ifndef DSACTIONREQUEST_H_
-#define DSACTIONREQUEST_H_
+#ifndef DSBUSINTERFACEOBJ_H_
+#define DSBUSINTERFACEOBJ_H_
 
-#include "core/businterface.h"
-
-#include "dsbusinterfaceobj.h"
+#include <digitalSTROM/dsm-api-v2/dsm-api.h>
 
 namespace dss {
 
-  class DSActionRequest : public DSBusInterfaceObj,
-                          public ActionRequestInterface {
+  class DSBusInterfaceObj {
   public:
-    DSActionRequest() {
-      SetBroadcastId(m_BroadcastDSID);
-    }
-
-    virtual void callScene(AddressableModelItem *pTarget, const uint16_t scene);
-    virtual void saveScene(AddressableModelItem *pTarget, const uint16_t scene);
-    virtual void undoScene(AddressableModelItem *pTarget);
-    virtual void blink(AddressableModelItem *pTarget);
-    virtual void setValue(AddressableModelItem *pTarget, const double _value);
-  private:
-    dsid_t m_BroadcastDSID;
-  }; // DSActionRequest
+    void setDSMApiHandle(DsmApiHandle_t _value) { m_DSMApiHandle = _value; }
+  protected:
+    DsmApiHandle_t m_DSMApiHandle;
+  };
 
 } // namespace dss
 

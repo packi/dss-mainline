@@ -468,4 +468,9 @@ namespace dss {
     return m_pImplementation->getActionRequestInterface();
   } // getActionRequestInterface
 
+  bool BusInterfaceAdaptor::isReady() {
+    return m_pImplementation->isReady();
+  } // isReady
+
+
 } // namespace dss

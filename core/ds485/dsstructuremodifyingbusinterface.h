@@ -25,14 +25,14 @@
 
 #include "core/businterface.h"
 
-#include <digitalSTROM/dsm-api-v2/dsm-api.h>
+#include "dsbusinterfaceobj.h"
 
 namespace dss {
 
-  class DSStructureModifyingBusInterface : public StructureModifyingBusInterface {
+  class DSStructureModifyingBusInterface : public DSBusInterfaceObj,
+                                           public StructureModifyingBusInterface {
   public:
-    DSStructureModifyingBusInterface(DsmApiHandle_t _dsmApiHandle)
-    : m_DSMApiHandle(_dsmApiHandle)
+    DSStructureModifyingBusInterface()
     { }
 
     virtual void setZoneID(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID);
@@ -43,8 +43,6 @@ namespace dss {
     virtual void removeFromGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID);
 
     virtual void removeInactiveDevices(const dss_dsid_t& _dsMeterID);
-  private:
-    DsmApiHandle_t m_DSMApiHandle;
   }; // DSStructureModifyingBusInterface
 
 } // namespace dss

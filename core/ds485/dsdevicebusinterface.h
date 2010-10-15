@@ -25,22 +25,20 @@
 
 #include "core/businterface.h"
 
-#include <digitalSTROM/dsm-api-v2/dsm-api.h>
+#include "dsbusinterfaceobj.h"
 
 namespace dss {
 
-  class DSDeviceBusInterface : public DeviceBusInterface {
+  class DSDeviceBusInterface : public DSBusInterfaceObj,
+                               public DeviceBusInterface {
   public:
-    DSDeviceBusInterface(DsmApiHandle_t _dsmApiHandle)
-    : m_DSMApiHandle(_dsmApiHandle)
+    DSDeviceBusInterface()
     { }
 
     virtual uint16_t deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterID, int _paramID) ;
     virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) ;
     virtual int getSensorValue(const Device& _device, const int _sensorID);
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock);
-  private:
-    DsmApiHandle_t m_DSMApiHandle;
   }; // DSDeviceBusInterface
 
 

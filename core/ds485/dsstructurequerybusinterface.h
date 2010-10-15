@@ -25,15 +25,14 @@
 
 #include "core/businterface.h"
 
-#include <digitalSTROM/dsm-api-v2/dsm-api.h>
+#include "dsbusinterfaceobj.h"
 
 namespace dss {
 
-  class DSStructureQueryBusInterface : public StructureQueryBusInterface {
+  class DSStructureQueryBusInterface : public DSBusInterfaceObj,
+                                       public StructureQueryBusInterface {
   public:
-    DSStructureQueryBusInterface(DsmApiHandle_t _dsmApiHandle)
-    : m_DSMApiHandle(_dsmApiHandle)
-    {
+    DSStructureQueryBusInterface() {
       SetBroadcastId(m_BroadcastDSID);
     }
 
@@ -52,7 +51,6 @@ namespace dss {
     int getGroupCount(const dss_dsid_t& _dsMeterID, const int _zoneID);
     int getDevicesCountInZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
   private:
-    DsmApiHandle_t m_DSMApiHandle;
     dss_dsid_t m_BroadcastDSID;
   }; // DSStructureQueryBusInterface
 
