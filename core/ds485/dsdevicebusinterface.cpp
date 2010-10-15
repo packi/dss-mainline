@@ -51,6 +51,9 @@ namespace dss {
   } // getSensorValue
 
   void DSDeviceBusInterface::lockOrUnlockDevice(const Device& _device, const bool _lock) {
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
 

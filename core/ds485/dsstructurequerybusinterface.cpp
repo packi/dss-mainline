@@ -38,6 +38,9 @@ namespace dss {
 
   std::vector<DSMeterSpec_t> DSStructureQueryBusInterface::getDSMeters() {
     std::vector<DSMeterSpec_t> result;
+    if(m_DSMApiHandle == NULL) {
+      return result;
+    }
     dsid_t ownDSID;
 
     // TODO: we could cache our own DSID
@@ -65,6 +68,9 @@ namespace dss {
   } // getDSMeters
 
   DSMeterSpec_t DSStructureQueryBusInterface::getDSMeterSpec(const dss_dsid_t& _dsMeterID) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
     uint32_t hwVersion;
     uint32_t swVersion;
     uint16_t apiVersion;
@@ -82,6 +88,9 @@ namespace dss {
   } // getDSMeterSpec
 
   int DSStructureQueryBusInterface::getGroupCount(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
     uint16_t zoneId;
     uint8_t virtualZoneId, numberOfGroups;
     uint8_t name[NAME_LEN];
@@ -98,6 +107,9 @@ namespace dss {
   } // getGroupCount
 
   std::vector<int> DSStructureQueryBusInterface::getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
     std::vector<int> result;
 
     int numGroups = getGroupCount(_dsMeterID, _zoneID);
@@ -116,6 +128,9 @@ namespace dss {
   } // getGroups
 
   std::vector<int> DSStructureQueryBusInterface::getGroupsOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
     uint8_t groups[GROUPS_LEN];
     dsid_t dsid;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
@@ -135,6 +150,9 @@ namespace dss {
   } // getGroupsOfDevice
 
   std::vector<int> DSStructureQueryBusInterface::getZones(const dss_dsid_t& _dsMeterID) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
     std::vector<int> result;
 
     uint8_t numZones;
@@ -157,6 +175,9 @@ namespace dss {
   } // getZones
 
   int DSStructureQueryBusInterface::getDevicesCountInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
     uint16_t numberOfDevices;
     dsid_t dsid;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
@@ -167,6 +188,9 @@ namespace dss {
   } // getDevicesCountInZone
 
   std::vector<int> DSStructureQueryBusInterface::getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
     std::vector<int> result;
 
     int numDevices = getDevicesCountInZone(_dsMeterID, _zoneID);
@@ -184,6 +208,9 @@ namespace dss {
   } // getDevicesInZone
 
   dss_dsid_t DSStructureQueryBusInterface::getDSIDOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
     dsid_t dsid;
     dsid_t meterDSID;
     dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
@@ -209,6 +236,9 @@ namespace dss {
   } // getEnergyBorder
 
   DeviceSpec_t DSStructureQueryBusInterface::deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
     uint16_t functionId, productId, version;
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
@@ -222,6 +252,9 @@ namespace dss {
   } // deviceGetSpec
 
   bool DSStructureQueryBusInterface::isLocked(boost::shared_ptr<const Device> _device) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
     uint8_t locked;
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(_device->getDSMeterDSID(), dsmDSID);

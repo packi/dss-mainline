@@ -32,7 +32,9 @@ namespace dss {
   class DSStructureQueryBusInterface : public DSBusInterfaceObj,
                                        public StructureQueryBusInterface {
   public:
-    DSStructureQueryBusInterface() {
+    DSStructureQueryBusInterface()
+    : DSBusInterfaceObj()
+    {
       SetBroadcastId(m_BroadcastDSID);
     }
 

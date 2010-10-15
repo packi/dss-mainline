@@ -31,7 +31,9 @@ namespace dss {
   class DSMeteringBusInterface : public DSBusInterfaceObj,
                                  public MeteringBusInterface {
   public:
-    DSMeteringBusInterface() {
+    DSMeteringBusInterface()
+    : DSBusInterfaceObj()
+    {
       SetBroadcastId(m_BroadcastDSID);
     }
 

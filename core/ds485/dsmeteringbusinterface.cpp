@@ -31,6 +31,9 @@ namespace dss {
   //================================================== DSMeteringBusInterface
 
   unsigned long DSMeteringBusInterface::getPowerConsumption(const dss_dsid_t& _dsMeterID) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
     uint32_t power;
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
@@ -42,12 +45,18 @@ namespace dss {
   } // getPowerConsumption
 
   void DSMeteringBusInterface::requestPowerConsumption() {
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
     uint32_t power;
     int ret = CircuitEnergyMeterValue_get(m_DSMApiHandle, m_BroadcastDSID, &power, NULL);
     DSBusInterface::checkResultCode(ret);
   } // requestPowerConsumption
 
   unsigned long DSMeteringBusInterface::getEnergyMeterValue(const dss_dsid_t& _dsMeterID) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
     uint32_t energy;
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
@@ -59,6 +68,9 @@ namespace dss {
   } // getEnergyMeterValue
 
   void DSMeteringBusInterface::requestEnergyMeterValue() {
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
     uint32_t energy;
     int ret = CircuitEnergyMeterValue_get(m_DSMApiHandle, m_BroadcastDSID, NULL, &energy);
     DSBusInterface::checkResultCode(ret);

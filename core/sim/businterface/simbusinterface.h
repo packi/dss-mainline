@@ -47,10 +47,6 @@ namespace dss {
     virtual ActionRequestInterface* getActionRequestInterface() {
       return m_pActionRequestInterface.get();
     }
-
-    virtual bool isReady() {
-      return true;
-    }
   private:
     boost::shared_ptr<DSSim> m_pSimulation;
     boost::shared_ptr<DeviceBusInterface> m_pDeviceBusInterface;

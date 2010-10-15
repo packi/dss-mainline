@@ -143,9 +143,6 @@ namespace dss {
     virtual MeteringBusInterface* getMeteringBusInterface() = 0;
     virtual StructureModifyingBusInterface* getStructureModifyingBusInterface() = 0;
     virtual ActionRequestInterface* getActionRequestInterface() = 0;
-
-    /** Returns true when the interface is ready to transmit user generated BusPackets */
-    virtual bool isReady() = 0;
   };
 
   class BusApiError : public DSSException {

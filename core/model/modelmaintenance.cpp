@@ -99,6 +99,7 @@ namespace dss {
   } // start
 
   void ModelMaintenance::waitForInterface() {
+    /*
     if(DSS::hasInstance()) {
       BusInterface& interface = DSS::getInstance()->getBusInterface();
 
@@ -111,6 +112,7 @@ namespace dss {
 
     boost::shared_ptr<Event> readyEvent(new Event("interface_ready"));
     raiseEvent(readyEvent);
+    */
   } // waitForInterface
 
   void ModelMaintenance::execute() {

@@ -33,6 +33,7 @@ namespace dss {
                                public DeviceBusInterface {
   public:
     DSDeviceBusInterface()
+    : DSBusInterfaceObj()
     { }
 
     virtual uint16_t deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterID, int _paramID) ;

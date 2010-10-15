@@ -73,10 +73,6 @@ namespace dss {
     m_pStructureModifyingBusInterface.reset(new DSStructureModifyingBusInterface());
   } // ctor
 
-  bool DSBusInterface::isReady() {
-    return m_dsmApiReady;
-  } // isReady
-
   void DSBusInterface::checkResultCode(const int _resultCode) {
     if(_resultCode != ERROR_OK) {
       std::string message = "Unknown Error";

@@ -32,7 +32,9 @@ namespace dss {
   class DSActionRequest : public DSBusInterfaceObj,
                           public ActionRequestInterface {
   public:
-    DSActionRequest() {
+    DSActionRequest()
+    : DSBusInterfaceObj()
+    {
       SetBroadcastId(m_BroadcastDSID);
     }
 

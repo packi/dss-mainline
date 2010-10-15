@@ -33,6 +33,9 @@ namespace dss {
   //================================================== DSActionRequest
 
   void DSActionRequest::callScene(AddressableModelItem *pTarget, const uint16_t scene) {
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
@@ -46,6 +49,9 @@ namespace dss {
   }
 
   void DSActionRequest::saveScene(AddressableModelItem *pTarget, const uint16_t scene) {
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
@@ -59,6 +65,9 @@ namespace dss {
   }
 
   void DSActionRequest::undoScene(AddressableModelItem *pTarget) {
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
     Group *pGroup = dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
@@ -72,6 +81,9 @@ namespace dss {
   }
 
   void DSActionRequest::blink(AddressableModelItem *pTarget) {
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 

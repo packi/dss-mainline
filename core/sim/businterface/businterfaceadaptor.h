@@ -40,7 +40,6 @@ namespace dss {
     virtual MeteringBusInterface* getMeteringBusInterface();
     virtual StructureModifyingBusInterface* getStructureModifyingBusInterface();
     virtual ActionRequestInterface* getActionRequestInterface();
-    virtual bool isReady();
   private:
     boost::shared_ptr<BusInterface> m_pInnerBusInterface;
     boost::shared_ptr<DSSim> m_pSimulation;

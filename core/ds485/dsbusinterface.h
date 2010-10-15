@@ -104,7 +104,6 @@ namespace dss {
     virtual StructureModifyingBusInterface* getStructureModifyingBusInterface();
     virtual ActionRequestInterface* getActionRequestInterface();
 
-    virtual bool isReady();
     static void checkResultCode(const int _resultCode);
 
     //------------------------------------------------ Handling

@@ -422,10 +422,6 @@ namespace dss {
       return m_pActionRequestInterface.get();
     }
 
-    virtual bool isReady() {
-      return m_pSimBusInterface->isReady() && m_pInnerBusInterface->isReady();
-    }
-
   private:
     boost::shared_ptr<DSSim> m_pSimulation;
     boost::shared_ptr<BusInterface> m_pInnerBusInterface;
@@ -467,10 +463,6 @@ namespace dss {
   ActionRequestInterface* BusInterfaceAdaptor::getActionRequestInterface() {
     return m_pImplementation->getActionRequestInterface();
   } // getActionRequestInterface
-
-  bool BusInterfaceAdaptor::isReady() {
-    return m_pImplementation->isReady();
-  } // isReady
 
 
 } // namespace dss

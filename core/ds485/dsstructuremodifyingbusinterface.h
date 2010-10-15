@@ -33,6 +33,7 @@ namespace dss {
                                            public StructureModifyingBusInterface {
   public:
     DSStructureModifyingBusInterface()
+    : DSBusInterfaceObj()
     { }
 
     virtual void setZoneID(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID);
