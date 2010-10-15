@@ -61,8 +61,6 @@ namespace dss {
     void loadDevices(Poco::XML::Node* _node, const int _zoneID);
     void loadGroups(Poco::XML::Node* _node, const int _zoneID);
     void loadZones(Poco::XML::Node* _node);
-
-    DSIDInterface& lookupDevice(const devid_t _id);
   public:
     void deviceCallScene(const int _deviceID, const int _sceneID);
     void groupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
@@ -75,6 +73,11 @@ namespace dss {
   public:
     uint32_t getPowerConsumption();
     uint32_t getEnergyMeterValue();
+  public:
+    std::vector<int> getZones();
+    std::vector<DSIDInterface*> getDevicesOfZone(const int _zoneID);
+    std::vector<int> getGroupsOfZone(const int _zoneID);
+    std::vector<int> getGroupsOfDevice(const int _deviceID);
   protected:
     virtual void doStart() {}
     void log(const std::string& _message, aLogSeverity _severity = lsDebug);
@@ -92,6 +95,7 @@ namespace dss {
 
     DSIDInterface* getSimulatedDevice(const dss_dsid_t _dsid);
     DSIDInterface* getSimulatedDevice(const uint16_t _shortAddress);
+    DSIDInterface& lookupDevice(const devid_t _id);
     void addSimulatedDevice(DSIDInterface* _device);
 
     void addDeviceToGroup(DSIDInterface* _device, int _groupID);

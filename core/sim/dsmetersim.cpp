@@ -283,6 +283,37 @@ namespace dss {
     return val;
   } // getPowerConsumption
 
+  std::vector<int> DSMeterSim::getZones() {
+    std::vector<int> result;
+    typedef std::map< const int, std::vector<DSIDInterface*> >::iterator
+            ZoneIterator_t;
+    for(ZoneIterator_t it = m_Zones.begin(), e = m_Zones.end(); it != e; ++it) {
+      result.push_back(it->first);
+    }
+    return result;
+  } // getZones
+
+  std::vector<DSIDInterface*> DSMeterSim::getDevicesOfZone(const int _zoneID) {
+    return m_Zones[_zoneID];
+  } // getDevicesOfZone
+
+  std::vector<int> DSMeterSim::getGroupsOfZone(const int _zoneID) {
+    std::vector<int> result;
+    IntPairToDSIDSimVector::iterator it = m_DevicesOfGroupInZone.begin();
+    IntPairToDSIDSimVector::iterator end = m_DevicesOfGroupInZone.end();
+    while(it != end) {
+      if(it->first.first == _zoneID) {
+        result.push_back(it->first.second);
+      }
+      it++;
+    }
+    return result;
+  } // getGroupsOfZone
+
+  std::vector<int> DSMeterSim::getGroupsOfDevice(const int _deviceID) {
+    return m_GroupsPerDevice[_deviceID];
+  } // getGroupsOfDevice
+
 /*
   void DSMeterSim::process(DS485Frame& _frame) {
     const uint8_t HeaderTypeToken = 0;
@@ -303,235 +334,6 @@ namespace dss {
           int cmdNr = pd.get<uint8_t>();
           boost::shared_ptr<DS485CommandFrame> response;
           switch(cmdNr) {
-            case FunctionDeviceGetFunctionID:
-              {
-                devid_t devID = pd.get<devid_t>();
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(0x0001); // everything ok
-                response->getPayload().add<uint16_t>(lookupDevice(devID).getFunctionID());
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDeviceGetVersion:
-              {
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(0x0000); // revision
-                response->getPayload().add<uint16_t>(0x0000); // product
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDeviceSetParameterValue:
-              {
-                uint16_t devID = pd.get<uint16_t>();
-                DSIDInterface& dev = lookupDevice(devID);
-                uint16_t parameterID = pd.get<uint16_t>();
-                pd.get<uint16_t>();
-                uint16_t value = pd.get<uint16_t>();
-                dev.setValue(value, parameterID);
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(1);
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDeviceSetValue:
-              {
-                uint16_t devID = pd.get<uint16_t>();
-                DSIDInterface& dev = lookupDevice(devID);
-                uint16_t value = pd.get<uint16_t>();
-                dev.setValue(value);
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(1);
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDeviceGetParameterValue:
-              {
-                int devID = pd.get<uint16_t>();
-                int paramID = pd.get<uint16_t>();
-                double result = lookupDevice(devID).getValue(paramID);
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(static_cast<uint8_t>(result));
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDSMeterGetZonesSize:
-              {
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(m_Zones.size());
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDSMeterGetZoneIdForInd:
-              {
-                uint8_t index = pd.get<uint16_t>();
-                std::map< const int, std::vector<DSIDInterface*> >::iterator it = m_Zones.begin();
-                std::advance(it, index);
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(it->first);
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDSMeterCountDevInZone:
-              {
-                uint16_t index = pd.get<uint16_t>();
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(m_Zones[index].size());
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDSMeterDevKeyInZone:
-              {
-                uint16_t zoneID = pd.get<uint16_t>();
-                uint16_t deviceIndex = pd.get<devid_t>();
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(m_Zones[zoneID].at(deviceIndex)->getShortAddress());
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDSMeterGetGroupsSize:
-              {
-                response = createResponse(cmdFrame, cmdNr);
-                int zoneID = pd.get<uint16_t>();
-                IntPairToDSIDSimVector::iterator it = m_DevicesOfGroupInZone.begin();
-                IntPairToDSIDSimVector::iterator end = m_DevicesOfGroupInZone.end();
-                int result = 0;
-                while(it != end) {
-                  if(it->first.first == zoneID) {
-                    result++;
-                  }
-                  it++;
-                }
-                response->getPayload().add<uint16_t>(result);
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDSMeterGetDSID:
-              {
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<dss_dsid_t>(m_DSMeterDSID);
-                distributeFrame(response);
-              }
-              break;
-            case FunctionGroupGetDeviceCount:
-              {
-                response = createResponse(cmdFrame, cmdNr);
-                int zoneID = pd.get<uint16_t>();
-                int groupID = pd.get<uint16_t>();
-                int result = m_DevicesOfGroupInZone[std::pair<const int, const int>(zoneID, groupID)].size();
-                response->getPayload().add<uint16_t>(result);
-                distributeFrame(response);
-              }
-              break;
-            case FunctionGroupGetDevKeyForInd:
-              {
-                response = createResponse(cmdFrame, cmdNr);
-                int zoneID = pd.get<uint16_t>();
-                int groupID = pd.get<uint16_t>();
-                int index = pd.get<uint16_t>();
-                int result = m_DevicesOfGroupInZone[std::pair<const int, const int>(zoneID, groupID)].at(index)->getShortAddress();
-                response->getPayload().add<uint16_t>(result);
-                distributeFrame(response);
-              }
-              break;
-            case FunctionGroupGetLastCalledScene:
-              {
-                int zoneID = pd.get<uint16_t>();
-                int groupID = pd.get<uint16_t>();
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(m_LastCalledSceneForZoneAndGroup[std::make_pair(zoneID, groupID)]);
-                distributeFrame(response);
-              }
-              break;
-            case FunctionZoneGetGroupIdForInd:
-              {
-                response = createResponse(cmdFrame, cmdNr);
-                int zoneID = pd.get<uint16_t>();
-                int groupIndex= pd.get<uint16_t>();
-
-                IntPairToDSIDSimVector::iterator it = m_DevicesOfGroupInZone.begin();
-                IntPairToDSIDSimVector::iterator end = m_DevicesOfGroupInZone.end();
-                int result = -1;
-                while(it != end) {
-                  if(it->first.first == zoneID) {
-                    if(groupIndex == 0) {
-                      result = it->first.second; // yes, that's the group id
-                      break;
-                    }
-                    groupIndex--;
-                  }
-                  it++;
-                }
-                response->getPayload().add<uint16_t>(result);
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDeviceGetOnOff:
-              {
-                response = createResponse(cmdFrame, cmdNr);
-                int devID = pd.get<uint16_t>();
-                DSIDInterface& dev = lookupDevice(devID);
-                response->getPayload().add<uint16_t>(dev.isTurnedOn());
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDeviceGetDSID:
-              {
-                response = createResponse(cmdFrame, cmdNr);
-                int devID = pd.get<uint16_t>();
-                DSIDInterface& dev = lookupDevice(devID);
-                response->getPayload().add<uint16_t>(1); // return-code (device found, all well)
-                response->getPayload().add<dss_dsid_t>(dev.getDSID());
-                distributeFrame(response);
-              }
-              break;
-            case FunctionGetTypeRequest:
-              {
-                response = createResponse(cmdFrame, cmdNr);
-                // Type 2 bytes (high, low)
-                response->getPayload().add<uint8_t>(0x00);
-                response->getPayload().add<uint8_t>(0x01);
-                // HW-Version 2 bytes (high, low)
-                response->getPayload().add<uint8_t>(0x00);
-                response->getPayload().add<uint8_t>(0x01);
-                // SW-Version 2 bytes (high, low)
-                response->getPayload().add<uint8_t>(0x00);
-                response->getPayload().add<uint8_t>(0x01);
-                // free text
-                response->getPayload().add<uint8_t>('d');
-                response->getPayload().add<uint8_t>('S');
-                response->getPayload().add<uint8_t>('M');
-                response->getPayload().add<uint8_t>('S');
-                response->getPayload().add<uint8_t>('i');
-                response->getPayload().add<uint8_t>('m');
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDeviceGetGroups:
-              {
-                devid_t devID = pd.get<uint16_t>();
-                lookupDevice(devID);
-                std::vector<int>& groupsList = m_GroupsPerDevice[devID];
-
-
-                // format: (8,7,6,5,4,3,2,1) (16,15,14,13,12,11,10,9), etc...
-                unsigned char bytes[8];
-                memset(bytes, '\0', sizeof(bytes));
-                foreach(int groupID, groupsList) {
-                  if(groupID != 0) {
-                    int iBit = (groupID - 1) % 8;
-                    int iByte = (groupID -1) / 8;
-                    bytes[iByte] |= 1 << iBit;
-                  }
-                }
-
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(1);
-                for(int iByte = 0; iByte < 8; iByte++) {
-                  response->getPayload().add<uint8_t>(bytes[iByte]);
-                }
-                distributeFrame(response);
-              }
-              break;
             case FunctionDeviceAddToGroup:
               {
                 devid_t devID = pd.get<uint16_t>();
