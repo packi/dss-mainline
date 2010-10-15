@@ -26,6 +26,7 @@
 
 #include "core/model/apartment.h"
 #include "core/model/device.h"
+#include "core/model/group.h"
 
 #include "core/web/json.h"
 

@@ -36,6 +36,7 @@
 
 #include "apartment.h"
 #include "zone.h"
+#include "group.h"
 #include "device.h"
 #include "devicereference.h"
 #include "modulator.h"

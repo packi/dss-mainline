@@ -31,6 +31,7 @@
 #include "core/model/modulator.h"
 #include "core/model/devicereference.h"
 #include "core/model/zone.h"
+#include "core/model/group.h"
 #include "core/model/set.h"
 #include "core/setbuilder.h"
 #include "core/dss.h"

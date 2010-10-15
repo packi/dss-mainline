@@ -24,8 +24,9 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "core/model/apartment.h"
 #include "core/dss.h"
+#include "core/businterface.h"
+#include "core/model/apartment.h"
 #include "core/model/modelconst.h"
 
 namespace dss {

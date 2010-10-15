@@ -42,6 +42,7 @@
 #include "core/model/group.h"
 #include "core/model/modulator.h"
 #include "core/structuremanipulator.h"
+#include "core/businterface.h"
 
 inline dss::dss_dsid_t FromSOAP(const char* _dsid) {
   dss::dss_dsid_t result;

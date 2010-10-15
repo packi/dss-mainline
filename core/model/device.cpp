@@ -22,8 +22,10 @@
 
 #include "device.h"
 
-#include "core/model/modelconst.h"
+#include "core/businterface.h"
 #include "core/propertysystem.h"
+
+#include "core/model/modelconst.h"
 #include "core/model/scenehelper.h"
 #include "core/model/modelevent.h"
 #include "core/model/apartment.h"

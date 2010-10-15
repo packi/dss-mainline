@@ -24,6 +24,7 @@
 #include "zonerequesthandler.h"
 
 #include "core/model/zone.h"
+#include "core/model/group.h"
 #include "core/model/apartment.h"
 
 #include "core/web/json.h"

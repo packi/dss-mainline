@@ -31,13 +31,9 @@
 
 #include "devicecontainer.h"
 #include "modeltypes.h"
-#include "modelevent.h"
-#include "group.h"
 #include "core/subsystem.h"
 #include "core/mutex.h"
-#include "core/thread.h"
-#include "core/syncevent.h"
-#include "core/businterface.h"
+#include "core/base.h"
 
 namespace dss {
   class PropertyNode;
@@ -47,9 +43,10 @@ namespace dss {
   class Device;
   class Group;
   class Event;
-  class BusRequest;
   class ModelMaintenance;
   class PropertySystem;
+  class BusInterface;
+  class DeviceBusInterface;
 
   /** Represents an Apartment
     * This is the root of the datamodel of the dss. The Apartment is responsible for delivering

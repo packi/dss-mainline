@@ -30,6 +30,7 @@
 #include "core/propertysystem.h"
 #include "set.h"
 #include "device.h"
+#include "group.h"
 #include "apartment.h"
 #include "modulator.h"
 

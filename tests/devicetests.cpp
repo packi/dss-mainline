@@ -27,6 +27,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "core/model/device.h"
+#include "core/model/group.h"
 #include "core/model/apartment.h"
 
 using namespace dss;
