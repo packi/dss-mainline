@@ -74,8 +74,8 @@ namespace dss {
     /** Returns the DSID of a given device */
     virtual dss_dsid_t getDSIDOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) = 0;
 
-    virtual int getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID) = 0;
-    virtual bool getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) = 0;
+    virtual int getLastCalledScene(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _groupID) = 0;
+    virtual bool getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) = 0;
 
     /** Returns the function, product and revision id of the device. */
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID) = 0;

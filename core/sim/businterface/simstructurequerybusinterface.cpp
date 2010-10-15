@@ -93,11 +93,11 @@ namespace dss {
     return NullDSID;
   } // getDSIDOfDevice
 
-  int SimStructureQueryBusInterface::getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID) {
+  int SimStructureQueryBusInterface::getLastCalledScene(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _groupID) {
     return SceneOff; // TODO: implement if it gets implemented on the dSM11
   } // getLastCalledScene
 
-  bool SimStructureQueryBusInterface::getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) {
+  bool SimStructureQueryBusInterface::getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) {
     return false; // TODO: implement if it gets implemented on the dSM11
   } // getEnergyBorder
 

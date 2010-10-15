@@ -197,12 +197,12 @@ namespace dss {
     return dss_dsid;
   } // getDSIDOfDevice
 
-  int DSStructureQueryBusInterface::getLastCalledScene(const int _dsMeterID, const int _zoneID, const int _groupID) {
+  int DSStructureQueryBusInterface::getLastCalledScene(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _groupID) {
     // TODO: libdsm-api
     return SceneOff;
   } // getLastCalledScene
 
-  bool DSStructureQueryBusInterface::getEnergyBorder(const int _dsMeterID, int& _lower, int& _upper) {
+  bool DSStructureQueryBusInterface::getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) {
     // TODO: libdsm
     Logger::getInstance()->log("getEnergyBorder(): not implemented yet", lsInfo);
     return false;
