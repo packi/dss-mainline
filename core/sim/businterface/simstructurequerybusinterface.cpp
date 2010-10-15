@@ -90,7 +90,7 @@ namespace dss {
     if(pMeter != NULL) {
       result = pMeter->lookupDevice(_deviceID).getDSID();
     }
-    return NullDSID;
+    return result;
   } // getDSIDOfDevice
 
   int SimStructureQueryBusInterface::getLastCalledScene(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _groupID) {
