@@ -39,10 +39,10 @@ namespace dss {
   class DSSim;
   class DSIDInterface;
 
-  typedef std::map< const std::pair<const int, const int>,  std::vector<DSIDInterface*> > IntPairToDSIDSimVector;
-
   class DSMeterSim {
   private:
+    typedef std::map< const std::pair<const int, const int>,  std::vector<DSIDInterface*> > IntPairToDSIDSimVector;
+
     DSSim* m_pSimulation;
     int m_EnergyLevelOrange;
     int m_EnergyLevelRed;
@@ -78,6 +78,10 @@ namespace dss {
     std::vector<DSIDInterface*> getDevicesOfZone(const int _zoneID);
     std::vector<int> getGroupsOfZone(const int _zoneID);
     std::vector<int> getGroupsOfDevice(const int _deviceID);
+  public:
+    void moveDevice(const int _deviceID, const int _toZoneID);
+    void addZone(const int _zoneID);
+    void removeZone(const int _zoneID);
   protected:
     virtual void doStart() {}
     void log(const std::string& _message, aLogSeverity _severity = lsDebug);
@@ -99,6 +103,7 @@ namespace dss {
     void addSimulatedDevice(DSIDInterface* _device);
 
     void addDeviceToGroup(DSIDInterface* _device, int _groupID);
+    void removeDeviceFromGroup(DSIDInterface* _pDevice, int _groupID);
   }; // DSMeterSim
 
 }

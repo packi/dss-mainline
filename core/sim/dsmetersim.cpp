@@ -176,6 +176,25 @@ namespace dss {
     m_GroupsPerDevice[_device->getShortAddress()].push_back(_groupID);
   } // addDeviceToGroup
 
+  void DSMeterSim::removeDeviceFromGroup(DSIDInterface* _pDevice, int _groupID) {
+    std::pair<const int, const int> zoneGroupPair(_pDevice->getZoneID(), _groupID);
+    std::vector<DSIDInterface*>& interfaceVector =
+      m_DevicesOfGroupInZone[zoneGroupPair];
+    std::vector<DSIDInterface*>::iterator iDevice =
+      find(interfaceVector.begin(),
+           interfaceVector.end(),
+           _pDevice);
+    if(iDevice != interfaceVector.end()) {
+      interfaceVector.erase(iDevice);
+    }
+    std::vector<int>& groupsVector = m_GroupsPerDevice[_pDevice->getShortAddress()];
+    std::vector<int>::iterator iGroup =
+      find(groupsVector.begin(), groupsVector.end(), _groupID);
+    if(iGroup != groupsVector.end()) {
+      groupsVector.erase(iGroup);
+    }
+  } // removeDeviceFromGroup
+
   void DSMeterSim::loadZones(Node* _node) {
     Node* curNode = _node->firstChild();
     while(curNode != NULL) {
@@ -314,201 +333,36 @@ namespace dss {
     return m_GroupsPerDevice[_deviceID];
   } // getGroupsOfDevice
 
-/*
-  void DSMeterSim::process(DS485Frame& _frame) {
-    const uint8_t HeaderTypeToken = 0;
-    const uint8_t HeaderTypeCommand = 1;
+  void DSMeterSim::moveDevice(const int _deviceID, const int _toZoneID) {
+    DSIDInterface& dev = lookupDevice(_deviceID);
 
-    try {
-      DS485Header& header = _frame.getHeader();
-      if(!(header.getDestination() == m_ID || header.isBroadcast())) {
-        return;
-      }
-      if(header.getType() == HeaderTypeToken) {
-        // Transmit pending things
-      } else if(header.getType() == HeaderTypeCommand) {
-        DS485CommandFrame& cmdFrame = dynamic_cast<DS485CommandFrame&>(_frame);
-        PayloadDissector pd(cmdFrame.getPayload());
-        Logger::getInstance()->log("command is " + intToString(cmdFrame.getCommand()));
-        if((cmdFrame.getCommand() == CommandRequest) && !pd.isEmpty()) {
-          int cmdNr = pd.get<uint8_t>();
-          boost::shared_ptr<DS485CommandFrame> response;
-          switch(cmdNr) {
-            case FunctionDeviceAddToGroup:
-              {
-                devid_t devID = pd.get<uint16_t>();
-                DSIDInterface& dev = lookupDevice(devID);
-                int groupID = pd.get<uint16_t>();
-                addDeviceToGroup(&dev, groupID);
-                response->getPayload().add<uint16_t>(1);
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDSMeterAddZone:
-              {
-                uint16_t zoneID = pd.get<uint16_t>();
-                response = createResponse(cmdFrame, cmdNr);
-                bool isValid = true;
-                for(std::map< const int, std::vector<DSIDInterface*> >::iterator iZoneEntry = m_Zones.begin(), e = m_Zones.end();
-                    iZoneEntry != e; ++iZoneEntry)
-                {
-                  if(iZoneEntry->first == zoneID) {
-                    response->getPayload().add<uint16_t>(static_cast<uint16_t>(-7));
-                    isValid = false;
-                  }
-                }
-                if(isValid) {
-                  // make the zone visible in the map
-                  m_Zones[zoneID].size();
-                  response->getPayload().add<uint16_t>(1);
-                }
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDSMeterRemoveZone:
-              {
-                uint16_t zoneID = pd.get<uint16_t>();
-                response = createResponse(cmdFrame, cmdNr);
-                bool found;
-                for(std::map< const int, std::vector<DSIDInterface*> >::iterator iZoneEntry = m_Zones.begin(), e = m_Zones.end();
-                    iZoneEntry != e; ++iZoneEntry)
-                {
-                  if(iZoneEntry->first == zoneID) {
-                    if(iZoneEntry->second.empty()) {
-                      m_Zones.erase(iZoneEntry);
-                      response->getPayload().add<uint16_t>(1);
-                    } else {
-                      log("[DSMSim] Can't delete zone with id " + intToString(zoneID) + " as it still contains some devices.", lsError);
-                      response->getPayload().add<uint16_t>(static_cast<uint16_t>(-5));
-                    }
-                    found = true;
-                    break;
-                  }
-                }
-                if(!found) {
-                  response->getPayload().add<uint16_t>(static_cast<uint16_t>(-2));
-                }
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDeviceSetZoneID:
-              {
-                devid_t devID = pd.get<devid_t>();
-                uint16_t zoneID = pd.get<uint16_t>();
-                DSIDInterface& dev = lookupDevice(devID);
+    int oldZoneID = m_DeviceZoneMapping[&dev];
+    std::vector<DSIDInterface*>::iterator oldEntry = find(m_Zones[oldZoneID].begin(), m_Zones[oldZoneID].end(), &dev);
+    m_Zones[oldZoneID].erase(oldEntry);
+    m_Zones[_toZoneID].push_back(&dev);
+    m_DeviceZoneMapping[&dev] = _toZoneID;
+    dev.setZoneID(_toZoneID);
+  } // moveDevice
 
-                int oldZoneID = m_DeviceZoneMapping[&dev];
-                std::vector<DSIDInterface*>::iterator oldEntry = find(m_Zones[oldZoneID].begin(), m_Zones[oldZoneID].end(), &dev);
-                m_Zones[oldZoneID].erase(oldEntry);
-                m_Zones[zoneID].push_back(&dev);
-                m_DeviceZoneMapping[&dev] = zoneID;
-                dev.setZoneID(zoneID);
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(1);
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDSMeterGetEnergyLevel:
-              {
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(m_EnergyLevelOrange);
-                response->getPayload().add<uint16_t>(m_EnergyLevelRed);
-                distributeFrame(response);
-              }
-              break;
-            case FunctionDSLinkSendDevice:
-              {
-                devid_t devID = pd.get<devid_t>();
-                DSIDInterface& dev = lookupDevice(devID);
-                uint16_t valueToSend = pd.get<uint16_t>();
-                uint16_t flags = pd.get<uint16_t>();
+  void DSMeterSim::addZone(const int _zoneID) {
+    m_Zones[_zoneID].size(); // accessing a nonexisting entry creates one
+  } // addZone
 
-                bool handled = false;
-                uint8_t value = dev.dsLinkSend(valueToSend, flags, handled);
-                if(handled && ((flags & DSLinkSendWriteOnly) == 0)) {
-                  response = createReply(cmdFrame);
-                  response->setCommand(CommandRequest);
-                  response->getPayload().add<uint8_t>(FunctionDSLinkReceive);
-                  response->getPayload().add<devid_t>(0x00); // garbage
-                  response->getPayload().add<devid_t>(devID);
-                  response->getPayload().add<uint16_t>(value);
-                  distributeFrame(response);
-                }
-              }
-              break;
-            case FunctionDeviceGetTransmissionQuality:
-              {
-                Logger::getInstance()->log("###### Ping request received");
-                devid_t devID = pd.get<devid_t>();
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(1);
-                distributeFrame(response);
-                lookupDevice(devID);
-
-                // create delayed response
-                response = createResponse(cmdFrame, cmdNr);
-                response->getPayload().add<uint16_t>(2);
-                response->getPayload().add<uint16_t>(devID);
-                response->getPayload().add<uint16_t>(rand() % 255);
-                response->getPayload().add<uint16_t>(rand() % 255);
-                boost::thread(boost::bind(&DSMeterSim::sendDelayedResponse, this, response, rand() % 2000));
-              }
-              break;
-            case FunctionDeviceLock:
-              {
-                devid_t devID = pd.get<devid_t>();
-                response = createResponse(cmdFrame, cmdNr);
-                DSIDInterface& simDev = lookupDevice(devID);
-                response->getPayload().add<uint16_t>(1);
-
-                int action = pd.get<uint16_t>();
-                if(action == 2) {
-                  bool locked = simDev.isLocked();
-                  response->getPayload().add<uint16_t>(locked ? 1 : 0);
-                } else {
-                  bool doLock = pd.get<uint16_t>() == 1;
-                  simDev.setIsLocked(doLock);
-                }
-                distributeFrame(response);
-              }
-              break;
-            default:
-              Logger::getInstance()->log("Invalid function id for sim: " + intToString(cmdNr), lsError);
-          }
+  void DSMeterSim::removeZone(const int _zoneID) {
+    for(std::map< const int, std::vector<DSIDInterface*> >::iterator iZoneEntry = m_Zones.begin(), e = m_Zones.end();
+        iZoneEntry != e; ++iZoneEntry)
+    {
+      if(iZoneEntry->first == _zoneID) {
+        if(iZoneEntry->second.empty()) {
+          m_Zones.erase(iZoneEntry);
+        } else {
+          log("[DSMSim] Can't delete zone with id " + intToString(_zoneID) + " as it still contains some devices.", lsError);
+          // TODO: throw?
         }
+        break;
       }
-    } catch(std::runtime_error& e) {
-      Logger::getInstance()->log(std::string("DSMeterSim: Exeption while processing packet. Message: '") + e.what() + "'");
     }
-  } // process
-
-  void DSMeterSim::distributeFrame(boost::shared_ptr<DS485CommandFrame> _frame) const {
-    m_pSimulation->distributeFrame(_frame);
-  } // distributeFrame
-
-  boost::shared_ptr<DS485CommandFrame> DSMeterSim::createReply(DS485CommandFrame& _request) const {
-    boost::shared_ptr<DS485CommandFrame> result(new DS485CommandFrame());
-    result->getHeader().setDestination(_request.getHeader().getSource());
-    result->getHeader().setSource(m_ID);
-    result->getHeader().setBroadcast(false);
-    result->getHeader().setCounter(_request.getHeader().getCounter());
-    return result;
-  } // createReply
-
-  boost::shared_ptr<DS485CommandFrame> DSMeterSim::createAck(DS485CommandFrame& _request, uint8_t _functionID) const {
-    boost::shared_ptr<DS485CommandFrame> result = createReply(_request);
-    result->setCommand(CommandAck);
-    result->getPayload().add(_functionID);
-    return result;
-  } // createAck
-
-  boost::shared_ptr<DS485CommandFrame> DSMeterSim::createResponse(DS485CommandFrame& _request, uint8_t _functionID) const {
-    boost::shared_ptr<DS485CommandFrame> result = createReply(_request);
-    result->setCommand(CommandResponse);
-    result->getPayload().add(_functionID);
-    return result;
-  } // createResponse
-*/
+  } // removeZone
 
   DSIDInterface& DSMeterSim::lookupDevice(const devid_t _shortAddress) {
     for(std::vector<DSIDInterface*>::iterator ipSimDev = m_SimulatedDevices.begin(); ipSimDev != m_SimulatedDevices.end(); ++ipSimDev) {

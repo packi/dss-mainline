@@ -26,6 +26,7 @@
 #include "simdevicebusinterface.h"
 #include "simmeteringbusinterface.h"
 #include "simstructurequerybusinterface.h"
+#include "simstructuremodifyingbusinterface.h"
 
 namespace dss {
 
@@ -38,6 +39,7 @@ namespace dss {
     m_pDeviceBusInterface.reset(new SimDeviceBusInterface(m_pSimulation));
     m_pMeteringBusInterface.reset(new SimMeteringBusInterface(m_pSimulation));
     m_pStructureQueryBusInterface.reset(new SimStructureQueryBusInterface(m_pSimulation));
+    m_pStructureModifyingBusInterface.reset(new SimStructureModifyingBusInterface(m_pSimulation));
   }
 
 
