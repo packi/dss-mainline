@@ -65,8 +65,6 @@ namespace dss {
     virtual std::vector<int> getZones(const dss_dsid_t& _dsMeterID) = 0;
     /** Returns the bus-ids of the devices present in the given zone of the specified dsMeter */
     virtual std::vector<int> getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
-    /** Returns the count of devices present in the given zone of the specified dsMeter */
-    virtual int getDevicesCountInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
 
     /** Returns the a std::vector containing the group-ids of the given zone on the specified dsMeter */
     virtual std::vector<int> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
