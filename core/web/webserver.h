@@ -42,7 +42,6 @@ namespace dss {
 
   class IDeviceInterface;
   class PropertyNode;
-  class WebServerPlugin;
   class RestfulRequestHandler;
   class RestfulAPI;
 
@@ -52,24 +51,16 @@ namespace dss {
   private:
     struct mg_context* m_mgContext;
     int m_LastSessionID;
-    boost::ptr_vector<WebServerPlugin> m_Plugins;
     __gnu_cxx::hash_map<const std::string, RestfulRequestHandler*> m_Handlers;
     boost::shared_ptr<RestfulAPI> m_pAPI;
     boost::shared_ptr<SessionManager> m_SessionManager;
   private:
     void setupAPI();
-    void loadPlugin(PropertyNode& _node);
-    void loadPlugins();
     void instantiateHandlers();
     void publishJSLogfiles();
     boost::ptr_map<std::string, std::string> parseCookies(const char *cookies);
     std::string generateCookieString(boost::ptr_map<std::string, std::string> cookies);
   protected:
-    void pluginCalled(struct mg_connection* _connection,
-                      const struct mg_request_info* _info,
-                      WebServerPlugin& plugin,
-                      const std::string& _uri);
-
     static mg_error_t httpBrowseProperties(struct mg_connection* _connection,
                                    const struct mg_request_info* _info);
     static mg_error_t jsonHandler(struct mg_connection* _connection,

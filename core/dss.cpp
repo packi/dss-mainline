@@ -53,7 +53,6 @@
 #include "webservices/webservices.h"
 #include "event.h"
 #include "metering/metering.h"
-#include "metering/fake_meter.h"
 #include "foreach.h"
 #include "backtrace.h"
 
@@ -129,7 +128,6 @@ const char* JSLogDirectory = "data/logs/";
 
     m_pEventInterpreter.reset();
     m_pMetering.reset();
-    m_pFakeMeter.reset();
 
     m_pSimulation.reset();
 
@@ -260,9 +258,6 @@ const char* JSLogDirectory = "data/logs/";
     m_Subsystems.push_back(m_pMetering.get());
     m_pMetering->setMeteringBusInterface(m_pBusInterface->getMeteringBusInterface());
     m_pModelMaintenance->setMetering(m_pMetering.get());
-
-    m_pFakeMeter = boost::shared_ptr<FakeMeter>(new FakeMeter(this));
-    m_Subsystems.push_back(m_pFakeMeter.get());
 
     m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner);
     m_pEventQueue = boost::shared_ptr<EventQueue>(new EventQueue);

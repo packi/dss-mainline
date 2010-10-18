@@ -39,7 +39,6 @@
 #include "core/web/restful.h"
 #include "core/web/restfulapiwriter.h"
 #include "core/web/webrequests.h"
-#include "core/web/webserverplugin.h"
 
 #include "core/web/handler/debugrequesthandler.h"
 #include "core/web/handler/systemrequesthandler.h"
@@ -119,40 +118,6 @@ namespace dss {
     }
   } // publishJSLogfiles
 
-  void WebServer::loadPlugins() {
-    PropertyNodePtr pluginsNode = getDSS().getPropertySystem().getProperty(getConfigPropertyBasePath() + "plugins");
-    if(pluginsNode != NULL) {
-      log("Found plugins node, trying to loading plugins", lsInfo);
-      pluginsNode->foreachChildOf(*this, &WebServer::loadPlugin);
-    }
-  } // loadPlugins
-
-  void WebServer::loadPlugin(PropertyNode& _node) {
-    PropertyNodePtr pFileNode = _node.getProperty("file");
-    PropertyNodePtr pURINode = _node.getProperty("uri");
-
-    if(pFileNode == NULL) {
-      log("loadPlugin: Missing subnode name 'file' on node " + _node.getDisplayName(), lsError);
-      return;
-    }
-    if(pURINode == NULL) {
-      log("loadPlugin: Missing subnode 'uri on node " + _node.getDisplayName(), lsError);
-    }
-    WebServerPlugin* plugin = new WebServerPlugin(pURINode->getStringValue(), pFileNode->getStringValue());
-    try {
-      plugin->load();
-    } catch(std::runtime_error& e) {
-      delete plugin;
-      plugin = NULL;
-      log(std::string("Caught exception while loading: ") + e.what(), lsError);
-      return;
-    }
-
-    log("Registering " + pFileNode->getStringValue() + " for URI '" + pURINode->getStringValue() + "'");
-
-    m_Plugins.push_back(plugin);
-  } // loadPlugin
-
   void WebServer::setupAPI() {
     m_pAPI = WebServerAPI::createRestfulAPI();
     RestfulAPIWriter::writeToXML(*m_pAPI, "doc/json_api.xml");
@@ -168,8 +133,6 @@ namespace dss {
     mg_set_option(m_mgContext, "aliases", aliases.c_str());
 
     mg_set_callback(m_mgContext, MG_EVENT_NEW_REQUEST, &httpRequestCallback);
-
-    loadPlugins();
 
     log("Webserver started", lsInfo);
   } // start
@@ -249,28 +212,11 @@ namespace dss {
         getDSS().getModelMaintenance(),
         *getDSS().getBusInterface().getStructureModifyingBusInterface()
       );
-    // TODO: libdsm
-    // m_Handlers[kHandlerSim] = new SimRequestHandler(getDSS().getApartment());
+    m_Handlers[kHandlerSim] = new SimRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerDebug] = new DebugRequestHandler(getDSS());
     m_Handlers[kHandlerMetering] = new MeteringRequestHandler(getDSS().getApartment(), getDSS().getMetering());
     m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());
   } // instantiateHandlers
-
-  void WebServer::pluginCalled(struct mg_connection* _connection,
-                               const struct mg_request_info* _info,
-                               WebServerPlugin& plugin,
-                               const std::string& _uri) {
-    HashMapConstStringString paramMap = parseParameter(_info->query_string);
-
-    std::string result;
-    if(plugin.handleRequest(_uri, paramMap, getDSS(), result)) {
-      emitHTTPHeader(200, _connection, "text/plain");
-      mg_write(_connection, result.c_str(), result.length());
-    } else {
-      emitHTTPHeader(500, _connection, "text/plain");
-      mg_printf(_connection, "error");
-    }
-  } // pluginCalled
 
   boost::ptr_map<std::string, std::string> WebServer::parseCookies(const char *_cookies) {
       boost::ptr_map<std::string, std::string> result;
@@ -509,17 +455,6 @@ namespace dss {
       return jsonHandler(_connection, _info);
     } else if (uri.find("/download/") == 0) {
       return downloadHandler(_connection, _info);
-    } else {
-      WebServer& self = DSS::getInstance()->getWebServer();
-      if (self.m_Plugins.size() > 0) {
-        for (size_t i = 0; i < self.m_Plugins.size(); i++) {
-          if (uri.find(self.m_Plugins.at(i).getURI()) == 0) {
-            self.log("Plugin: Processing call to " + uri);
-            self.pluginCalled(_connection, _info, self.m_Plugins.at(i), uri);
-            return MG_SUCCESS;
-          }
-        } // for
-      }
     }
 
     return MG_NOT_FOUND;

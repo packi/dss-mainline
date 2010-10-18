@@ -9,9 +9,9 @@ add_library(core ${files} scripting/modeljs.cpp scripting/propertyscriptextensio
 scripting/jssocket.cpp scripting/scriptobject.cpp
 scripting/jslogger.cpp
 metering/metering.cpp metering/series.cpp metering/seriespersistence.cpp
-metering/fake_meter.cpp web/restful.cpp web/restfulapiwriter.cpp
+web/restful.cpp web/restfulapiwriter.cpp
 web/webserverapi.cpp web/webrequests.cpp
-web/webserverplugin.cpp web/webserver.cpp web/json.cpp
+web/webserver.cpp web/json.cpp
 web/handler/simrequesthandler.cpp web/handler/debugrequesthandler.cpp
 web/handler/systemrequesthandler.cpp web/handler/meteringrequesthandler.cpp
 web/handler/structurerequesthandler.cpp web/handler/eventrequesthandler.cpp

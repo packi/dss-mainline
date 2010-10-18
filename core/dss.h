@@ -40,14 +40,11 @@ namespace dss {
   class BusInterface;
   class PropertySystem;
   class Metering;
-  class FakeMeter;
   class EventRunner;
   class EventQueue;
   class EventInterpreter;
   class Apartment;
   class WebServices;
-  class DS485BusRequestDispatcher;
-  class BusInterfaceHandler;
   class ModelMaintenance;
   class DSSim;
 
@@ -79,9 +76,6 @@ namespace dss {
     boost::shared_ptr<EventInterpreter> m_pEventInterpreter;
     boost::shared_ptr<EventQueue> m_pEventQueue;
     boost::shared_ptr<Metering> m_pMetering;
-    boost::shared_ptr<FakeMeter> m_pFakeMeter;
-    boost::shared_ptr<DS485BusRequestDispatcher> m_pBusDispatcher;
-    boost::shared_ptr<BusInterfaceHandler> m_pBusInterfaceHandler;
     boost::shared_ptr<ModelMaintenance> m_pModelMaintenance;
     std::string m_dataDirectory;
     std::string m_configDirectory;
@@ -133,7 +127,6 @@ namespace dss {
     PropertySystem& getPropertySystem() { return *m_pPropertySystem; }
     WebServer& getWebServer() { return *m_pWebServer; }
     EventInterpreter& getEventInterpreter() { return *m_pEventInterpreter; }
-    BusInterfaceHandler& getBusInterfaceHandler() { return *m_pBusInterfaceHandler; }
     ModelMaintenance& getModelMaintenance() { return *m_pModelMaintenance; }
 
     const std::string& getDataDirectory() const { return m_dataDirectory; }
