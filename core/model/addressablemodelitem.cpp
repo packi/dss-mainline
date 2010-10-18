@@ -24,7 +24,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "core/dss.h"
 #include "core/businterface.h"
 #include "core/model/apartment.h"
 #include "core/model/modelconst.h"
@@ -37,48 +36,32 @@ namespace dss {
   : m_pApartment(_pApartment)
   {} // ctor
 
-
-  // TODO: don't access DSS::getInstance, this will fail all tests!!!
   void AddressableModelItem::increaseValue() {
-    if (DSS::hasInstance()) {
-      DSS::getInstance()->getBusInterface().getActionRequestInterface()->callScene(this, SceneInc);
-    }
-  }
+    m_pApartment->getActionRequestInterface()->callScene(this, SceneInc);
+  } // increaseValue
 
   void AddressableModelItem::decreaseValue() {
-    if (DSS::hasInstance()) {
-      DSS::getInstance()->getBusInterface().getActionRequestInterface()->callScene(this, SceneDec);
-    }
-  }
+    m_pApartment->getActionRequestInterface()->callScene(this, SceneDec);
+  } // decreaseValue
 
   void AddressableModelItem::setValue(const double _value) {
-    if (DSS::hasInstance()) {
-      DSS::getInstance()->getBusInterface().getActionRequestInterface()->setValue(this, _value);
-    }
+    m_pApartment->getActionRequestInterface()->setValue(this, _value);
   } // setValue
 
   void AddressableModelItem::callScene(const int _sceneNr) {
-    if (DSS::hasInstance()) {
-      DSS::getInstance()->getBusInterface().getActionRequestInterface()->callScene(this, _sceneNr);
-    }
+    m_pApartment->getActionRequestInterface()->callScene(this, _sceneNr);
   } // callScene
 
   void AddressableModelItem::saveScene(const int _sceneNr) {
-    if (DSS::hasInstance()) {
-      DSS::getInstance()->getBusInterface().getActionRequestInterface()->saveScene(this, _sceneNr);
-    }
+    m_pApartment->getActionRequestInterface()->saveScene(this, _sceneNr);
   } // saveScene
 
   void AddressableModelItem::undoScene() {
-    if (DSS::hasInstance()) {
-      DSS::getInstance()->getBusInterface().getActionRequestInterface()->undoScene(this);
-    }
+    m_pApartment->getActionRequestInterface()->undoScene(this);
   } // undoScene
 
   void AddressableModelItem::blink() {
-    if (DSS::hasInstance()) {
-      DSS::getInstance()->getBusInterface().getActionRequestInterface()->blink(this);
-    }
+    m_pApartment->getActionRequestInterface()->blink(this);
   } // blink
 
 } // namespace dss

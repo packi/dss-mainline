@@ -303,6 +303,13 @@ namespace dss {
     }
   } // removeDSMeter
 
+  ActionRequestInterface* Apartment::getActionRequestInterface() {
+    if(m_pBusInterface != NULL) {
+      return m_pBusInterface->getActionRequestInterface();
+    }
+    return NULL;
+  } // getActionRequestInterface
+
   DeviceBusInterface* Apartment::getDeviceBusInterface() {
     if(m_pBusInterface != NULL) {
       return m_pBusInterface->getDeviceBusInterface();

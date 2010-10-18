@@ -47,6 +47,7 @@ namespace dss {
   class PropertySystem;
   class BusInterface;
   class DeviceBusInterface;
+  class ActionRequestInterface;
 
   /** Represents an Apartment
     * This is the root of the datamodel of the dss. The Apartment is responsible for delivering
@@ -117,6 +118,7 @@ namespace dss {
     void removeDSMeter(dss_dsid_t _dsMeter);
   public:
     void setBusInterface(BusInterface* _value) { m_pBusInterface = _value; }
+    ActionRequestInterface* getActionRequestInterface(); 
     DeviceBusInterface* getDeviceBusInterface();
     /** Returns the root-node for the apartment tree */
     PropertyNodePtr getPropertyNode() { return m_pPropertyNode; }
