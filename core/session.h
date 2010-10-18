@@ -27,9 +27,9 @@
 #include "mutex.h"
 
 #include <string>
+#include <map>
 #include <boost/any.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/ptr_container/ptr_map.hpp>
 
 namespace dss {
   class Session {
@@ -43,8 +43,8 @@ namespace dss {
     void use();
     void unuse();
     void touch();
-    void addData(const std::string& _key, boost::shared_ptr<boost::any>& _value);
-    boost::shared_ptr<boost::any>& getData(const std::string& _key);
+    void addData(const std::string& _key, boost::shared_ptr<boost::any> _value);
+    boost::shared_ptr<boost::any> getData(const std::string& _key);
     bool removeData(const std::string& _key);
     Session& operator=(const Session& _other);
 
@@ -56,7 +56,7 @@ namespace dss {
     DateTime m_LastTouched;
 
     Mutex m_DataMapMutex;
-    boost::ptr_map<std::string, boost::shared_ptr<boost::any> > dataMap;
+    std::map<std::string, boost::shared_ptr<boost::any> > dataMap;
 
     int m_SessionTimeoutSec;
   }; // Session
