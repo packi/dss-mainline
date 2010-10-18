@@ -32,6 +32,8 @@
 #include "core/eventcollector.h"
 #include "core/setbuilder.h"
 #include "core/sim/dssim.h"
+#include "core/sim/dsmetersim.h"
+#include "core/sim/businterface/simbusinterface.h"
 #include "core/model/apartment.h"
 #include "core/model/modelmaintenance.h"
 #include "core/model/device.h"
@@ -194,38 +196,30 @@ BOOST_FIXTURE_TEST_CASE(testSubscriptionXML, Fixture) {
   boost::filesystem::remove_all(fileName);
 } // testSubscriptionXML
 
-/* TODO: libdsm
 BOOST_FIXTURE_TEST_CASE(testDS485Events, Fixture) {
-  ModelMaintenance maintenance(NULL);
   Apartment apt(NULL);
-  maintenance.setApartment(&apt);
-  DSDSMeterSim modSim(NULL);
-  DS485Proxy proxy(NULL, &maintenance, NULL);
-  apt.setBusInterface(&proxy);
-  DS485BusRequestDispatcher dispatcher;
-  dispatcher.setFrameSender(&proxy);
-  apt.setBusRequestDispatcher(&dispatcher);
+  DSMeterSim modSim(NULL);
+  boost::shared_ptr<DSSim> pSim(new DSSim(NULL));
+  boost::shared_ptr<SimBusInterface> busInterface(new SimBusInterface(pSim));
+  apt.setBusInterface(busInterface.get());
 
-
-  proxy.initialize();
-
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
   dev1->setName("dev1");
   dev1->setShortAddress(1);
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
   dev2->setName("dev2");
   dev2->setShortAddress(2);
-  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dsid_t(0,3));
+  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dss_dsid_t(0,3));
   dev3->setName("dev3");
   dev3->setShortAddress(3);
-  boost::shared_ptr<Device> dev4 = apt.allocateDevice(dsid_t(0,4));
+  boost::shared_ptr<Device> dev4 = apt.allocateDevice(dss_dsid_t(0,4));
   dev4->setName("dev4");
   dev4->setShortAddress(4);
 
 
   EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
   m_pEventInterpreter->addPlugin(plugin);
-  plugin = new EventInterpreterPluginDS485(apt, &proxy, m_pEventInterpreter.get());
+  plugin = new EventInterpreterPluginDS485(apt, busInterface.get(), m_pEventInterpreter.get());
   m_pEventInterpreter->addPlugin(plugin);
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 0);
@@ -262,7 +256,7 @@ BOOST_FIXTURE_TEST_CASE(testDS485Events, Fixture) {
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 1);
 } // testDS485Events
-*/
+
 BOOST_AUTO_TEST_CASE(testEventHandlerJavascriptDoesntLeakExceptionsWithNonexistingFile) {
   EventInterpreter interpreter(NULL);
   EventInterpreterPluginJavascript* plugin = new EventInterpreterPluginJavascript(&interpreter);
