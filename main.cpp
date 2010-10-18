@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009, 2010 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
@@ -18,8 +18,6 @@
     You should have received a copy of the GNU General Public License
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 
-    Last change $Date$
-    by $Author$
 */
 
 
@@ -30,9 +28,6 @@
 #include "core/base.h"
 #include "core/dss.h"
 #include "core/logger.h"
-// TODO: libdsm
-// #include "core/ds485client.h"
-// #include "core/ds485/ds485.h"
 #include "core/datetools.h"
 #ifdef WITH_TESTS
 #include "tests/tests.h"
@@ -62,11 +57,29 @@ pair<string, string> parse_prop(const string& s) {
     }
 } // parse_prop
 
-int main (int argc, char* argv[]) {
+void platformSpecificStartup() {
+#ifndef WIN32
+  srand((getpid() << 16) ^ getuid() ^ time(0));
+  // disable broken pipe signal
+  signal(SIGPIPE, SIG_IGN);
+  signal(SIGUSR1, dss::DSS::handleSignal);
+  signal(SIGTERM, dss::DSS::handleSignal);
+  signal(SIGINT, dss::DSS::handleSignal);
+  signal(SIGSEGV, dss::DSS::handleSignal);
+  signal(SIGABRT, dss::DSS::handleSignal);
+#else
+  srand( (int)time( (time_t)NULL ) );
+  WSAData dat;
+  WSAStartup( 0x1010, &dat );
+#endif
+} // platformSpecificStartup
 
+char* tzNameCopy;
+
+bool setupLocale() {
   if (!setlocale(LC_CTYPE, "")) {
     dss::Logger::getInstance()->log("Can't set the specified locale! Check LANG, LC_CTYPE, LC_ALL.", lsError);
-    return 1;
+    return false;
   }
 
   // make sure timezone gets set
@@ -86,47 +99,27 @@ int main (int argc, char* argv[]) {
 
   dss::DateTime::configureUTCOffset(time_offset);
 
-  char* tzNameCopy = strdup("GMT");
+  tzNameCopy = strdup("GMT");
   tzname[0] = tzname[1] = tzNameCopy;
   timezone = 0;
   daylight = 0;
 
   setenv("TZ", "UTC", 1);
+  return true;
+}
 
+int main (int argc, char* argv[]) {
 
-#ifndef WIN32
-  srand((getpid() << 16) ^ getuid() ^ time(0));
-  // disable broken pipe signal
-  signal(SIGPIPE, SIG_IGN);
-  signal(SIGUSR1, dss::DSS::handleSignal);
-  signal(SIGTERM, dss::DSS::handleSignal);
-  signal(SIGINT, dss::DSS::handleSignal);
-  signal(SIGSEGV, dss::DSS::handleSignal);
-  signal(SIGABRT, dss::DSS::handleSignal);
-#else
-  srand( (int)time( (time_t)NULL ) );
-  WSAData dat;
-  WSAStartup( 0x1010, &dat );
-#endif
-
+  if(!setupLocale()) {
+    return -1;
+  }
+  platformSpecificStartup();
 
   vector<string> properties;
-#ifdef USE_LIBXML
-  // let libXML initialize its parser
-  xmlInitParser();
-#endif
-
 
   po::options_description desc("Allowed options");
   desc.add_options()
       ("help", "produce help message")
-#ifdef WITH_TESTS
-      ("dont-runtests", po::value<bool>(), "if set, no tests will be run")
-      ("quit-after-tests", po::value<bool>(), "if set, the application will terminate after running its tests")
-#endif
-#ifndef __APPLE__
-      ("sniff,s", po::value<string>(), "start the ds485 sniffer")
-#endif
       ("prop", po::value<vector<string> >(), "sets a property")
       ("version,v", "print version information and exit")
       ("datadir,D", po::value<string>(), "set data directory")
@@ -156,16 +149,6 @@ int main (int argc, char* argv[]) {
   if (vm.count("version")) {
     std::cout << dss::DSS::versionString() << std::endl;
     return 1;
-  }
-
-  bool runTests = true;
-  if(vm.count("dont-runtests")) {
-    runTests = !vm["dont-runtests"].as<bool>();
-  }
-
-  bool quitAfterTests = false;
-  if(runTests && vm.count("quit-after-tests")) {
-    quitAfterTests = vm["quit-after-tests"].as<bool>();
   }
 
   if(vm.count("prop")) {
@@ -204,67 +187,27 @@ int main (int argc, char* argv[]) {
   bool daemonize = vm.count("daemonize") != 0;
 #endif
 
-#ifdef WITH_TESTS
-  cout << "compiled WITH_TESTS" << endl;
-  if(runTests) {
-    cout << "running tests" << endl;
-    dss::Tests::run();
-    cout << "done running tests" << endl;
-  }
-#endif
-
-  if(!quitAfterTests && startSniffer) {
-    
-#if 0 
-    // TODO: libdsm
+  // start DSS
+  if (dss::DSS::getInstance()->initialize(properties, config_file)) {
 #ifndef __APPLE__
-    dss::DS485FrameSniffer sniffer(snifferDev);
-    sniffer.run();
-    while(true) {
-      dss::sleepSeconds(10);
-    }
-#endif
-#endif /* 0 */
-  } else {
-    if(!quitAfterTests) {
-      // start DSS
-      if (dss::DSS::getInstance()->initialize(properties, config_file)) {
-#ifndef __APPLE__
-        if(daemonize) {
-          int result = daemon(1,0);
-          if(result != 0) {
-            perror("daemon()");
-            return 0;
-          }
-        }
-#endif
-        dss::DSS::getInstance()->run();
-      } else {
-        dss::Logger::getInstance()->log("Failed to initialize dss. Exiting", lsFatal);
+    if(daemonize) {
+      int result = daemon(1,0);
+      if(result != 0) {
+        perror("daemon()");
+        return 0;
       }
     }
-    if(dss::DSS::hasInstance()) {
-      dss::DSS::shutdown();
-    }
-    dss::Logger::shutdown();
+#endif
+    dss::DSS::getInstance()->run();
+  } else {
+    dss::Logger::getInstance()->log("Failed to initialize dss. Exiting", lsFatal);
   }
+  if(dss::DSS::hasInstance()) {
+    dss::DSS::shutdown();
+  }
+  dss::Logger::shutdown();
 
-#ifdef USE_LIBXML
-  // free some internal memory of libxml to make valgrind happy
-  // NOTE: this needs to be the last call in a process.
-  //       Trust me....
-  xmlCleanupParser();
-#endif
   free(tzNameCopy);
-
-
-#if 0
-  // TODO: libdsm
-
-  // force the DS485Client symbols to be contained in the dss binary
-  // Also see redmine ticket #54
-  dss::DS485Client* __attribute__ ((unused)) pClient = new dss::DS485Client();
-#endif
 
   return 0;
 }
