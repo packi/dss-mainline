@@ -57,7 +57,8 @@ namespace dss {
     m_pModelMaintenance(_pModelMaintenance),
     m_dsmApiHandle(NULL),
     m_dsmApiReady(false),
-    m_connectionURI("tcp://localhost:8442")
+    m_connectionURI("tcp://localhost:8442"),
+    m_pBusEventSink(NULL)
   {
     assert(_pModelMaintenance != NULL);
 
@@ -294,6 +295,11 @@ namespace dss {
     pEvent->addParameter(_groupID);
     pEvent->addParameter(_sceneID);
     m_pModelMaintenance->addModelEvent(pEvent);
+    if(m_pBusEventSink != NULL) {
+      dss_dsid_t dsMeterID;
+      dsid_helper::toDssDsid(_sourceID, dsMeterID);
+      m_pBusEventSink->onGroupCallScene(this, dsMeterID, _zoneID, _groupID, _sceneID);
+    }
   }
 
   void DSBusInterface::handleBusCallSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,

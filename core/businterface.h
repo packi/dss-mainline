@@ -36,6 +36,7 @@ namespace dss {
 
   class Device;
   class AddressableModelItem;
+  class BusInterface;
 
   typedef boost::tuple<dss_dsid_t, int, int, int, std::string> DSMeterSpec_t; // bus-id, sw-version, hw-version, api version, name
   typedef boost::tuple<int, int, int, int> DeviceSpec_t; // function id, product id, revision, bus address
@@ -131,7 +132,14 @@ namespace dss {
     virtual ~MeteringBusInterface() {}; // please the compiler (virtual dtor)
   }; // MeteringBusInterface
 
-
+  class BusEventSink {
+  public:
+    virtual void onGroupCallScene(BusInterface* _source,
+                                  const dss_dsid_t& _dsMeterID,
+                                  const int _zoneID,
+                                  const int _groupID,
+                                  const int _sceneID) = 0;
+  };
 
   /** Interface to be implemented by any bus interface provider */
   class BusInterface {
@@ -143,6 +151,8 @@ namespace dss {
     virtual MeteringBusInterface* getMeteringBusInterface() = 0;
     virtual StructureModifyingBusInterface* getStructureModifyingBusInterface() = 0;
     virtual ActionRequestInterface* getActionRequestInterface() = 0;
+
+    virtual void setBusEventSink(BusEventSink* _eventSink) = 0;
   };
 
   class BusApiError : public DSSException {

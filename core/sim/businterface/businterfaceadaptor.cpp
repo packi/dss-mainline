@@ -25,6 +25,7 @@
 #include "core/model/device.h"
 
 #include "core/sim/dssim.h"
+#include "core/sim/dsmetersim.h"
 #include "core/sim/businterface/simbusinterface.h"
 
 namespace dss {
@@ -370,6 +371,43 @@ namespace dss {
     MeteringBusInterface* m_pSimulationInterface;
   }; // MeteringBusInterface
 
+  class BusEventRelay : public BusEventSink {
+  public:
+
+    BusEventRelay(boost::shared_ptr<DSSim> _pSimulation,
+                  boost::shared_ptr<BusInterface> _pInnerBusInterface,
+                  boost::shared_ptr<BusInterface> _pSimBusInterface)
+    : m_pSimulation(_pSimulation),
+      m_pInnerBusInterface(_pInnerBusInterface),
+      m_pSimBusInterface(_pSimBusInterface)
+    {
+      m_pInnerBusInterface->setBusEventSink(this);
+      m_pSimBusInterface->setBusEventSink(this);
+    }
+
+    virtual ~BusEventRelay() {
+      m_pInnerBusInterface->setBusEventSink(NULL);
+      m_pSimBusInterface->setBusEventSink(NULL);
+    }
+
+    virtual void onGroupCallScene(BusInterface* _source,
+                                  const dss_dsid_t& _dsMeterID,
+                                  const int _zoneID,
+                                  const int _groupID,
+                                  const int _sceneID) {
+      boost::shared_ptr<BusInterface> target;
+      if(_source == m_pInnerBusInterface.get()) {
+        boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_dsMeterID);
+        if(pMeter != NULL) {
+          pMeter->groupCallScene(_zoneID, _groupID, _sceneID);
+        }
+      }
+    } // onGroupCallScene
+  private:
+    boost::shared_ptr<DSSim> m_pSimulation;
+    boost::shared_ptr<BusInterface> m_pInnerBusInterface;
+    boost::shared_ptr<BusInterface> m_pSimBusInterface;
+  }; // BusEventRelay
 
   class BusInterfaceAdaptor::Implementation : public BusInterface {
   public:
@@ -400,6 +438,11 @@ namespace dss {
         new MeteringAdaptor(m_pSimulation,
                             m_pInnerBusInterface->getMeteringBusInterface(),
                             m_pSimBusInterface->getMeteringBusInterface()));
+
+      m_pBusEventRelay.reset(
+        new BusEventRelay(m_pSimulation,
+                          m_pInnerBusInterface,
+                          m_pSimBusInterface));
     }
 
     virtual DeviceBusInterface* getDeviceBusInterface() {
@@ -422,6 +465,8 @@ namespace dss {
       return m_pActionRequestInterface.get();
     }
 
+    virtual void setBusEventSink(BusEventSink* _eventSink) { }
+
   private:
     boost::shared_ptr<DSSim> m_pSimulation;
     boost::shared_ptr<BusInterface> m_pInnerBusInterface;
@@ -431,6 +476,7 @@ namespace dss {
     boost::shared_ptr<StructureModifyingBusInterface> m_pStructureModifyingBusInterface;
     boost::shared_ptr<MeteringBusInterface> m_pMeteringBusInterface;
     boost::shared_ptr<ActionRequestInterface> m_pActionRequestInterface;
+    boost::shared_ptr<BusEventRelay> m_pBusEventRelay;
   }; // Implementation
 
   //================================================== BusInterfaceAdaptor

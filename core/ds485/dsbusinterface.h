@@ -60,6 +60,7 @@ namespace dss {
     DsmApiHandle_t m_dsmApiHandle;
     bool m_dsmApiReady;
     std::string m_connectionURI;
+    BusEventSink* m_pBusEventSink;
 
     void busReady();
 
@@ -104,9 +105,11 @@ namespace dss {
     virtual StructureModifyingBusInterface* getStructureModifyingBusInterface();
     virtual ActionRequestInterface* getActionRequestInterface();
 
+    virtual void setBusEventSink(BusEventSink* _eventSink) {
+      m_pBusEventSink = _eventSink;
+    }
     static void checkResultCode(const int _resultCode);
 
-    //------------------------------------------------ Handling
     virtual void initialize();
   }; // DSBusInterface
 
