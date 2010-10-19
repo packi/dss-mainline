@@ -142,7 +142,14 @@ namespace dss {
       uint8_t byte = groups[iByte];
       for(int iBit = 0; iBit < 8; iBit++) {
         if(byte & (1 << iBit)) {
-          result.push_back((iByte * 8 + iBit) + 1);
+          int groupID = (iByte * 8 + iBit) + 1;
+          if(groupID <= GroupIDMax) {
+            result.push_back(groupID);
+          } else {
+            Logger::getInstance()->log("Group ID out of bound (" + intToString(groupID) +
+                                       ") on dSMeter: " + _dsMeterID.toString() +
+                                       " deviceID " +intToString(_deviceID), lsWarning);
+          }
         }
       }
     }
