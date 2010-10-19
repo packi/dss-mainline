@@ -28,7 +28,7 @@
 #include "core/dss.h"
 #include "core/logger.h"
 #include "core/propertysystem.h"
-#include "core/DS485Interface.h"
+#include "core/businterface.h"
 #include "core/model/device.h"
 #include "core/model/devicereference.h"
 #include "core/model/apartment.h"
@@ -135,9 +135,9 @@ namespace dss {
     ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
     if(ext != NULL) {
       if(argc >= 1) {
-        dsid_t dsid = NullDSID;
+        dss_dsid_t dsid = NullDSID;
         try {
-          dsid =  dsid_t::fromString(ctx->convertTo<std::string>(argv[0]));
+          dsid =  dss_dsid_t::fromString(ctx->convertTo<std::string>(argv[0]));
         } catch(std::invalid_argument& e) {
           Logger::getInstance()->log(std::string("Error converting dsid string to dsid") + e.what(), lsError);
           return JS_FALSE;
@@ -157,35 +157,11 @@ namespace dss {
     return JS_FALSE;
   } // global_get_dsmeterbydsid
 
-  JSBool global_get_dsmeterbybusid(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    JSRequest req(ctx);
-
-    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
-    if(ext != NULL) {
-      if(argc >= 1) {
-        int busid =  ctx->convertTo<int>(argv[0]);
-        try {
-          boost::shared_ptr<DSMeter> meter = ext->getApartment().getDSMeterByBusID(busid);
-          JSObject* obj = ext->createJSMeter(*ctx, meter);
-          *rval = OBJECT_TO_JSVAL(obj);
-        } catch(ItemNotFoundException& e) {
-          *rval = JSVAL_NULL;
-        }
-
-
-        return JS_TRUE;
-      }
-    }
-    return JS_FALSE;
-  } // global_get_dsmeterbybusid
-
   JSFunctionSpec model_global_methods[] = {
     {"getName", global_get_name, 0, 0, 0},
     {"setName", global_set_name, 1, 0, 0},
     {"getDevices", global_get_devices, 0, 0, 0},
     {"getDSMeterByDSID", global_get_dsmeterbydsid, 1, 0, 0},
-    {"getDSMeterByBusID", global_get_dsmeterbybusid, 1, 0, 0},
     {"log", global_log, 1, 0, 0},
     {NULL},
   };
@@ -316,12 +292,17 @@ namespace dss {
             return JS_FALSE;
         }
 
-        int dsmeterID = JSVAL_TO_INT(argv[0]);
+        std::string dsmeterID = ctx->convertTo<std::string>(argv[0]);
         int busid = JSVAL_TO_INT(argv[1]);
-        DeviceReference result = set->getByBusID(busid, dsmeterID);
-        JSObject* resultObj = ext->createJSDevice(*ctx, result);
-        *rval = OBJECT_TO_JSVAL(resultObj);
-        return JS_TRUE;
+        try {
+          dss_dsid_t meterDSID = dss_dsid_t::fromString(dsmeterID);
+          DeviceReference result = set->getByBusID(busid, meterDSID);
+          JSObject* resultObj = ext->createJSDevice(*ctx, result);
+          *rval = OBJECT_TO_JSVAL(resultObj);
+          return JS_TRUE;
+        } catch(std::invalid_argument&) {
+          Logger::getInstance()->log("JS: Could not parse dsid '" + dsmeterID + "'", lsWarning);
+        }
       } catch(ItemNotFoundException&) {
           Logger::getInstance()->log("JS: set.byShortAddress: Device not found", lsWarning);
       }
@@ -342,7 +323,7 @@ namespace dss {
       if(str != NULL) {
         std::string dsid = JS_GetStringBytes(str);
         try {
-          DeviceReference result = set->getByDSID(dsid_t::fromString(dsid));
+          DeviceReference result = set->getByDSID(dss_dsid_t::fromString(dsid));
           JSObject* resultObj = ext->createJSDevice(*ctx, result);
           *rval = OBJECT_TO_JSVAL(resultObj);
           return JS_TRUE;
@@ -447,11 +428,16 @@ namespace dss {
     ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
     if((ext != NULL) && (set != NULL) && (argc >= 1)) {
       try {
-        int dsmeterID = ctx->convertTo<int>(argv[0]);
-        Set result = set->getByDSMeter(dsmeterID);
-        JSObject* resultObj = ext->createJSSet(*ctx, result);
-        *rval = OBJECT_TO_JSVAL(resultObj);
-        return JS_TRUE;
+        std::string dsmeterID = ctx->convertTo<std::string>(argv[0]);
+        try {
+          dss_dsid_t meterDSID = dss_dsid_t::fromString(dsmeterID);
+          Set result = set->getByDSMeter(meterDSID);
+          JSObject* resultObj = ext->createJSSet(*ctx, result);
+          *rval = OBJECT_TO_JSVAL(resultObj);
+          return JS_TRUE;
+        } catch(std::invalid_argument&) {
+          Logger::getInstance()->log("JS: Could not parse dsid '" + dsmeterID + "'", lsWarning);
+        }
       } catch(ScriptException& e) {
         Logger::getInstance()->log(std::string("JS: set_by_dsmeter: ") + e.what(), lsWarning);
       }
@@ -566,32 +552,6 @@ namespace dss {
     return JS_FALSE;
   }
 
-  JSBool dev_enable(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-
-    ScriptObject self(obj, *ctx);
-    if(self.is("device")) {
-      DeviceReference* dev = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
-      dev->enable();
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
-    }
-    return JS_FALSE;
-  }
-
-  JSBool dev_disable(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-
-    ScriptObject self(obj, *ctx);
-    if(self.is("device")) {
-      DeviceReference* dev = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
-      dev->disable();
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
-    }
-    return JS_FALSE;
-  }
-
   JSBool dev_increase_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
@@ -612,35 +572,6 @@ namespace dss {
     if(self.is("set") || self.is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
       intf->decreaseValue();
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
-    }
-    return JS_FALSE;
-  }
-
-  JSBool dev_start_dim(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-
-    ScriptObject self(obj, *ctx);
-    if(self.is("set") || self.is("device")) {
-      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      bool up = ctx->convertTo<bool>(argv[0]);
-      if(argc >= 1) {
-        intf->startDim(up);
-      }
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
-    }
-    return JS_FALSE;
-  }
-
-  JSBool dev_end_dim(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-
-    ScriptObject self(obj, *ctx);
-    if(self.is("set") || self.is("device")) {
-      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      intf->endDim();
       *rval = INT_TO_JSVAL(0);
       return JS_TRUE;
     }
@@ -685,9 +616,8 @@ namespace dss {
     ScriptObject self(obj, *ctx);
     if(self.is("set") || self.is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      int sceneNr = ctx->convertTo<int>(argv[0]);
       if(argc == 1) {
-        intf->undoScene(sceneNr);
+        intf->undoScene();
       }
       *rval = INT_TO_JSVAL(0);
       return JS_TRUE;
@@ -711,36 +641,6 @@ namespace dss {
     return JS_FALSE;
   } // dev_save_scene
 
-  JSBool dev_dslink_send(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-
-    ScriptObject self(obj, *ctx);
-    if(self.is("device")) {
-      DeviceReference* ref = static_cast<DeviceReference*>(JS_GetPrivate(cx, obj));
-      if(argc == 0) {
-        return JS_FALSE;
-      }
-      int value = ctx->convertTo<int>(argv[0]);
-      bool lastByte = false;
-      bool writeOnly = false;
-      if(argc > 1) {
-        lastByte = ctx->convertTo<bool>(argv[1]);
-      }
-      if(argc > 2) {
-        writeOnly = ctx->convertTo<bool>(argv[2]);
-      }
-      try {
-        value = ref->getDevice()->dsLinkSend(value, lastByte, writeOnly);
-        *rval = INT_TO_JSVAL(value);
-        return JS_TRUE;
-      } catch(std::runtime_error&) {
-        JS_ReportError(cx, "Error receiving value");
-        return JS_FALSE;
-      }
-    }
-    return JS_FALSE;
-  } // dev_dslink_send
-
   JSBool dev_get_sensor_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
@@ -752,7 +652,7 @@ namespace dss {
           int sensorValue = ctx->convertTo<int>(argv[0]);
           int retValue= (intf->getDevice()->getSensorValue(sensorValue));
           *rval = INT_TO_JSVAL(retValue);
-        } catch(const DS485ApiError&) {
+        } catch(const BusApiError&) {
           *rval = JSVAL_NULL;
         }
         return JS_TRUE;
@@ -764,17 +664,12 @@ namespace dss {
   JSFunctionSpec device_interface_methods[] = {
     {"turnOn", dev_turn_on, 0, 0, 0},
     {"turnOff", dev_turn_off, 0, 0, 0},
-    {"enable", dev_enable, 0, 0, 0},
-    {"disable", dev_disable, 0, 0, 0},
-    {"startDim", dev_start_dim, 1, 0, 0},
-    {"endDim", dev_end_dim, 0, 0, 0},
     {"setValue", dev_set_value, 0, 0, 0},
     {"increaseValue", dev_increase_value, 0, 0, 0},
     {"decreaseValue", dev_decrease_value, 0, 0, 0},
     {"callScene", dev_call_scene, 1, 0, 0},
     {"saveScene", dev_save_scene, 1, 0, 0},
-    {"undoScene", dev_undo_scene, 1, 0, 0},
-    {"dSLinkSend", dev_dslink_send, 3, 0, 0},
+    {"undoScene", dev_undo_scene, 0, 0, 0},
     {"getSensorValue", dev_get_sensor_value, 1, 0, 0},
     {NULL, NULL, 0, 0, 0}
   };
@@ -813,7 +708,10 @@ namespace dss {
           *rval = INT_TO_JSVAL(dev->getDevice()->getZoneID());
           return JS_TRUE;
         case 4:
-          *rval = INT_TO_JSVAL(dev->getDevice()->getDSMeterID());
+          {
+            std::string tmp = dev->getDevice()->getDSMeterDSID().toString();
+            *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, tmp.c_str()));
+          }
           return JS_TRUE;
         case 5:
           *rval = INT_TO_JSVAL(dev->getDevice()->getFunctionID());
@@ -908,9 +806,6 @@ namespace dss {
         case 2:
           *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, meter->getName().c_str()));
           return JS_TRUE;
-        case 3:
-          *rval = INT_TO_JSVAL(meter->getBusID());
-          return JS_TRUE;
       }
     }
     return JS_FALSE;
@@ -920,7 +815,6 @@ namespace dss {
     {"className", 0, 0, dsmeter_JSGet},
     {"dsid", 1, 0, dsmeter_JSGet},
     {"name", 2, 0, dsmeter_JSGet},
-    {"busID", 3, 0, dsmeter_JSGet},
     {NULL, 0, 0, NULL, NULL}
   };
 
@@ -1233,6 +1127,8 @@ namespace dss {
     {"Bell", SceneBell, 0, scene_JSGetStatic},
     {"Panic", ScenePanic, 0, scene_JSGetStatic},
     {"Alarm", SceneAlarm, 0, scene_JSGetStatic},
+    {"Inc", SceneInc, 0, scene_JSGetStatic},
+    {"Dec", SceneDec, 0, scene_JSGetStatic},
     {NULL, 0, 0, NULL, NULL}
   };
 

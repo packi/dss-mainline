@@ -34,7 +34,7 @@ namespace dss {
   class Zone;
   class Apartment;
   class Set;
-  
+
   class SetBuilder {
   private:
     std::string m_SetDescription;
@@ -45,7 +45,7 @@ namespace dss {
     void skipWhitespace(unsigned int& _index);
     std::string readParameter(unsigned int& _index);
     int readInt(unsigned int& _index);
-    dsid_t readDSID(unsigned int& _index);
+    dss_dsid_t readDSID(unsigned int& _index);
     std::string readString(unsigned int& _index);
     Set parseSet(unsigned int& _index, const Set& _set, boost::shared_ptr<const Zone> _context);
   public:

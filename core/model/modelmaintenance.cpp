@@ -29,15 +29,14 @@
 #include "core/base.h"
 #include "core/dss.h"
 #include "core/event.h"
-#include "core/DS485Interface.h"
+#include "core/businterface.h"
 #include "core/propertysystem.h"
-#include "core/ds485const.h"
 #include "core/model/modelconst.h"
 #include "core/metering/metering.h"
 
-
 #include "apartment.h"
 #include "zone.h"
+#include "group.h"
 #include "device.h"
 #include "devicereference.h"
 #include "modulator.h"
@@ -48,11 +47,11 @@
 
 namespace dss {
   //=============================================== ApartmentTreeListener
-  
+
   /** Raises a ModelDirty event if something below the apartment node gets changed. */
   class ApartmentTreeListener : public PropertyListener {
   public:
-    ApartmentTreeListener(ModelMaintenance* _pModelMaintenance, Apartment* _pApartment) 
+    ApartmentTreeListener(ModelMaintenance* _pModelMaintenance, Apartment* _pApartment)
     : m_pModelMaintenance(_pModelMaintenance),
       m_pApartment(_pApartment)
     {
@@ -60,7 +59,7 @@ namespace dss {
         m_pApartment->getPropertyNode()->addListener(this);
       }
     }
-    
+
   protected:
     virtual void propertyChanged(PropertyNodePtr _caller, PropertyNodePtr _changedNode) {
       if(_changedNode->hasFlag(PropertyNode::Archive)) {
@@ -72,17 +71,16 @@ namespace dss {
     ModelMaintenance* m_pModelMaintenance;
     Apartment* m_pApartment;
   }; // ApartmentTreeListener
- 
-  
+
+
  //=============================================== ModelMaintenance
- 
+
   ModelMaintenance::ModelMaintenance(DSS* _pDSS, const int _eventTimeoutMS)
   : ThreadedSubsystem(_pDSS, "Apartment"),
     m_IsInitializing(true),
     m_pApartment(NULL),
     m_pMetering(NULL),
-    m_EventTimeoutMS(_eventTimeoutMS),
-    m_pFrameSenderInterface(NULL)
+    m_EventTimeoutMS(_eventTimeoutMS)
   { }
 
   void ModelMaintenance::initialize() {
@@ -92,8 +90,7 @@ namespace dss {
     }
     if(DSS::hasInstance()) {
       DSS::getInstance()->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "configfile", getDSS().getDataDirectory() + "apartment.xml", true, false);
-      m_pFrameSenderInterface = DSS::getInstance()->getDS485Interface().getFrameSenderInterface();
-      m_pStructureQueryBusInterface = DSS::getInstance()->getDS485Interface().getStructureQueryBusInterface();
+      m_pStructureQueryBusInterface = DSS::getInstance()->getBusInterface().getStructureQueryBusInterface();
     }
   } // initialize
 
@@ -102,8 +99,9 @@ namespace dss {
   } // start
 
   void ModelMaintenance::waitForInterface() {
+    /*
     if(DSS::hasInstance()) {
-      DS485Interface& interface = DSS::getInstance()->getDS485Interface();
+      BusInterface& interface = DSS::getInstance()->getBusInterface();
 
       log("Apartment::execute: Waiting for interface to get ready", lsInfo);
 
@@ -114,6 +112,7 @@ namespace dss {
 
     boost::shared_ptr<Event> readyEvent(new Event("interface_ready"));
     raiseEvent(readyEvent);
+    */
   } // waitForInterface
 
   void ModelMaintenance::execute() {
@@ -132,10 +131,10 @@ namespace dss {
 
     waitForInterface();
 
-    log("Apartment::execute: Interface is ready, enumerating model", lsInfo);
+    log("ModelMaintenance::execute: Interface is ready, enumerating model", lsInfo);
     discoverDS485Devices();
-    
-    boost::shared_ptr<ApartmentTreeListener> treeListener 
+
+    boost::shared_ptr<ApartmentTreeListener> treeListener
       = boost::shared_ptr<ApartmentTreeListener>(
           new ApartmentTreeListener(this, m_pApartment));
 
@@ -144,21 +143,14 @@ namespace dss {
     }
   } // execute
 
-
   void ModelMaintenance::discoverDS485Devices() {
-    if(m_pFrameSenderInterface != NULL) {
-      // temporary mark all dsMeters as absent
-      foreach(boost::shared_ptr<DSMeter> pDSMeter, m_pApartment->getDSMeters()) {
-        pDSMeter->setIsPresent(false);
+    if(m_pStructureQueryBusInterface != NULL) {
+      std::vector<DSMeterSpec_t> meters = m_pStructureQueryBusInterface->getDSMeters();
+      std::vector<DSMeterSpec_t>::iterator it = meters.begin();
+      for (; it != meters.end(); ++it) {
+        ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDS485DeviceDiscovered, it->get<0>());
+        addModelEvent(pEvent);
       }
-
-      // Request the dsid of all dsMeters
-      DS485CommandFrame requestFrame;
-      requestFrame.getHeader().setBroadcast(true);
-      requestFrame.getHeader().setDestination(0);
-      requestFrame.setCommand(CommandRequest);
-      requestFrame.getPayload().add<uint8_t>(FunctionDSMeterGetDSID);
-      m_pFrameSenderInterface->sendFrame(requestFrame);
     }
   } // discoverDS485Devices
 
@@ -173,19 +165,31 @@ namespace dss {
     if(!m_ModelEvents.empty()) {
       bool eraseEventFromList = true;
       ModelEvent& event = m_ModelEvents.front();
+      ModelEventWithDSID* pEventWithDSID =
+        dynamic_cast<ModelEventWithDSID*>(&event);
       switch(event.getEventType()) {
       case ModelEvent::etNewDevice:
-        if(event.getParameterCount() != 4) {
-          log("Expected exactly 4 parameter for ModelEvent::etNewDevice");
+        assert(pEventWithDSID != NULL);
+        if(event.getParameterCount() != 3) {
+          log("Expected exactly 3 parameter for ModelEvent::etNewDevice");
         } else {
-          onAddDevice(event.getParameter(0), event.getParameter(1), event.getParameter(2), event.getParameter(3));
+          onAddDevice(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
+        }
+        break;
+      case ModelEvent::etLostDevice:
+        assert(pEventWithDSID != NULL);
+        if(event.getParameterCount() != 2) {
+          log("Expected exactly 2 parameter for ModelEvent::etLostDevice");
+        } else {
+          onRemoveDevice(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
         }
         break;
       case ModelEvent::etCallSceneDevice:
+        assert(pEventWithDSID != NULL);
         if(event.getParameterCount() != 3) {
           log("Expected exactly 3 parameter for ModelEvent::etCallSceneDevice");
         } else {
-          onDeviceCallScene(event.getParameter(0), event.getParameter(1), event.getParameter(2));
+          onDeviceCallScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
         }
         break;
       case ModelEvent::etCallSceneGroup:
@@ -200,13 +204,6 @@ namespace dss {
         eraseEventFromList = false;
         writeConfiguration();
         break;
-      case ModelEvent::etDSLinkInterrupt:
-        if(event.getParameterCount() != 3) {
-          log("Expected exactly 3 parameter for ModelEvent::etDSLinkInterrupt");
-        } else {
-          onDSLinkInterrupt(event.getParameter(0), event.getParameter(1), event.getParameter(2));
-        }
-        break;
       case ModelEvent::etNewDSMeter:
         eraseModelEventsFromQueue(ModelEvent::etNewDSMeter);
         eraseModelEventsFromQueue(ModelEvent::etLostDSMeter);
@@ -220,11 +217,15 @@ namespace dss {
         discoverDS485Devices();
         break;
       case ModelEvent::etDSMeterReady:
-        if(event.getParameterCount() != 1) {
-          log("Expected exactly 1 parameter for ModelEvent::etDSMeterReady");
+        if(event.getParameterCount() != 0) {
+          log("Expected exactly 0 parameter for ModelEvent::etDSMeterReady");
         } else {
+          ModelEventWithDSID* pEventWithDSID =
+            dynamic_cast<ModelEventWithDSID*>(&event);
+          assert(pEventWithDSID != NULL);
+          dss_dsid_t meterID = pEventWithDSID->getDSID();
           try{
-            boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByBusID(event.getParameter(0));
+            boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(meterID);
             mod->setIsPresent(true);
             mod->setIsValid(false);
           } catch(ItemNotFoundException& e) {
@@ -238,13 +239,14 @@ namespace dss {
         discoverDS485Devices();
         break;
       case ModelEvent::etPowerConsumption:
-        if(event.getParameterCount() != 2) {
-          log("Expected exactly 2 parameter for ModelEvent::etPowerConsumption");
+        if(event.getParameterCount() != 1) {
+          log("Expected exactly 1 parameter for ModelEvent::etPowerConsumption");
         } else {
-          int meterID = event.getParameter(0);
-          int value = event.getParameter(1);
+          assert(pEventWithDSID != NULL);
+          dss_dsid_t meterID = pEventWithDSID->getDSID();
+          int value = event.getParameter(0);
           try {
-            boost::shared_ptr<DSMeter> meter = m_pApartment->getDSMeterByBusID(meterID);
+            boost::shared_ptr<DSMeter> meter = m_pApartment->getDSMeterByDSID(meterID);
             meter->setPowerConsumption(value);
             m_pMetering->postConsumptionEvent(meter, value, DateTime());
           } catch(ItemNotFoundException& _e) {
@@ -253,13 +255,14 @@ namespace dss {
         }
         break;
       case ModelEvent::etEnergyMeterValue:
-        if(event.getParameterCount() != 2) {
-          log("Expected exactly 2 parameter for ModelEvent::etEnergyMeterValue");
+        if(event.getParameterCount() != 1) {
+          log("Expected exactly 1 parameter for ModelEvent::etEnergyMeterValue");
         } else {
-          int meterID = event.getParameter(0);
-          int value = event.getParameter(1);
+          assert(pEventWithDSID != NULL);
+          dss_dsid_t meterID = pEventWithDSID->getDSID();
+          int value = event.getParameter(0);
           try {
-            boost::shared_ptr<DSMeter> meter = m_pApartment->getDSMeterByBusID(meterID);
+            boost::shared_ptr<DSMeter> meter = m_pApartment->getDSMeterByDSID(meterID);
             meter->setEnergyMeterValue(value);
             m_pMetering->postEnergyEvent(meter, value, DateTime());
           } catch(ItemNotFoundException& _e) {
@@ -268,29 +271,21 @@ namespace dss {
         }
         break;
       case ModelEvent::etDS485DeviceDiscovered:
-        if(event.getParameterCount() != 7) {
-          log("Expected exactly 7 parameter for ModelEvent::etDS485DeviceDiscovered");
+        if(event.getParameterCount() != 0) {
+          log("Expected exactly 0 parameter for ModelEvent::etDS485DeviceDiscovered");
         } else {
-          int busID = event.getParameter(0);
-          uint64_t dsidUpper = (uint64_t(event.getParameter(1)) & 0x00ffff) << 48;
-          dsidUpper |= (uint64_t(event.getParameter(2)) & 0x00ffff) << 32;
-          dsidUpper |= (uint64_t(event.getParameter(3))  & 0x00ffff) << 16;
-          dsidUpper |= (uint64_t(event.getParameter(4)) & 0x00ffff);
-          dsid_t newDSID(dsidUpper,
-                         ((uint32_t(event.getParameter(5)) & 0x00ffff) << 16) | (uint32_t(event.getParameter(6)) & 0x00ffff));
-          log ("Discovered device with busID: " + intToString(busID) + " and dsid: " + newDSID.toString());
+          assert(pEventWithDSID != NULL);
+          dss_dsid_t newDSID = pEventWithDSID->getDSID();
+          log ("Discovered device with DSID: " + newDSID.toString());
           try{
-             m_pApartment->getDSMeterByDSID(newDSID)->setBusID(busID);
              log ("dSM present");
              m_pApartment->getDSMeterByDSID(newDSID)->setIsPresent(true);
           } catch(ItemNotFoundException& e) {
              log ("dSM not present");
              boost::shared_ptr<DSMeter> dsMeter = m_pApartment->allocateDSMeter(newDSID);
-             dsMeter->setBusID(busID);
              dsMeter->setIsPresent(true);
              dsMeter->setIsValid(false);
-             ModelEvent* pEvent = new ModelEvent(ModelEvent::etDSMeterReady);
-             pEvent->addParameter(busID);
+             ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDSMeterReady, newDSID);
              addModelEvent(pEvent);
           }
         }
@@ -311,7 +306,7 @@ namespace dss {
       foreach(boost::shared_ptr<DSMeter> pDSMeter, m_pApartment->getDSMeters()) {
         if(pDSMeter->isPresent()) {
           if(!pDSMeter->isValid()) {
-            dsMeterReady(pDSMeter->getBusID());
+            dsMeterReady(pDSMeter->getDSID());
             hadToUpdate = true;
             break;
           }
@@ -343,26 +338,25 @@ namespace dss {
     m_ModelEventsMutex.unlock();
   } // eraseModelEventsFromQueue
 
-  void ModelMaintenance::dsMeterReady(int _dsMeterBusID) {
-    log("DSMeter with id: " + intToString(_dsMeterBusID) + " is ready", lsInfo);
+  void ModelMaintenance::dsMeterReady(const dss_dsid_t& _dsMeterBusID) {
+    log("DSMeter with DSID: " + _dsMeterBusID.toString() + " is ready", lsInfo);
     try {
       try {
-        boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByBusID(_dsMeterBusID);
+        boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(_dsMeterBusID);
         BusScanner scanner(*m_pStructureQueryBusInterface, *m_pApartment, *this);
         if(scanner.scanDSMeter(mod)) {
           boost::shared_ptr<Event> dsMeterReadyEvent(new Event("dsMeter_ready"));
           dsMeterReadyEvent->setProperty("dsMeter", mod->getDSID().toString());
           raiseEvent(dsMeterReadyEvent);
         }
-      } catch(DS485ApiError& e) {
-        log(std::string("Exception caught while scanning dsMeter " + intToString(_dsMeterBusID) + " : ") + e.what(), lsFatal);
+      } catch(BusApiError& e) {
+        log(std::string("Exception caught while scanning dsMeter " + _dsMeterBusID.toString() + " : ") + e.what(), lsFatal);
 
-        ModelEvent* pEvent = new ModelEvent(ModelEvent::etDSMeterReady);
-        pEvent->addParameter(_dsMeterBusID);
+        ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDSMeterReady, _dsMeterBusID);
         addModelEvent(pEvent);
       }
     } catch(ItemNotFoundException& e) {
-      log("No dsMeter for bus-id (" + intToString(_dsMeterBusID) + ") found, re-discovering devices");
+      log("No dsMeter for bus-id (" + _dsMeterBusID.toString() + ") found, re-discovering devices");
       discoverDS485Devices();
     }
   } // dsMeterReady
@@ -450,33 +444,32 @@ namespace dss {
 
   } // onGroupCallScene
 
-  void ModelMaintenance::onDeviceCallScene(const int _dsMeterID, const int _deviceID, const int _sceneID) {
+  void ModelMaintenance::onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _sceneID) {
     try {
       if(_sceneID < 0 || _sceneID > MaxSceneNumber) {
-        log("onDeviceCallScene: _sceneID is out of bounds. dsMeter-id '" + intToString(_dsMeterID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID), lsError);
+        log("onDeviceCallScene: _sceneID is out of bounds. dsMeter-id '" + _dsMeterID.toString() + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID), lsError);
         return;
       }
-      boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByBusID(_dsMeterID);
+      boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(_dsMeterID);
       try {
-        log("OnDeviceCallScene: dsMeter-id '" + intToString(_dsMeterID) + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID));
+        log("OnDeviceCallScene: dsMeter-id '" + _dsMeterID.toString() + "' for device '" + intToString(_deviceID) + "' scene: " + intToString(_sceneID));
         DeviceReference devRef = mod->getDevices().getByBusID(_deviceID, _dsMeterID);
         if(SceneHelper::rememberScene(_sceneID & 0x00ff)) {
           devRef.getDevice()->setLastCalledScene(_sceneID & 0x00ff);
         }
       } catch(ItemNotFoundException& e) {
-        log("OnDeviceCallScene: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + intToString(_dsMeterID) + "' scene:" + intToString(_sceneID), lsError);
+        log("OnDeviceCallScene: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + _dsMeterID.toString() + "' scene:" + intToString(_sceneID), lsError);
       }
     } catch(ItemNotFoundException& e) {
-      log("OnDeviceCallScene: Could not find dsMeter with bus-id '" + intToString(_dsMeterID) + "'", lsError);
+      log("OnDeviceCallScene: Could not find dsMeter with bus-id '" + _dsMeterID.toString() + "'", lsError);
     }
   } // onDeviceCallScene
 
-  void ModelMaintenance::onAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID) {
+  void ModelMaintenance::onAddDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID) {
     log("New Device found");
-    log("  DSMeter: " + intToString(_modID));
+    log("  DSMeter: " +  _dsMeterID.toString());
     log("  Zone:      " + intToString(_zoneID));
     log("  BusID:     " + intToString(_devID));
-    log("  FID:       " + intToString(_functionID));
 
     BusScanner
       scanner(
@@ -485,7 +478,7 @@ namespace dss {
         *this
       );
     try {
-      boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByBusID(_modID);
+      boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByDSID(_dsMeterID);
       boost::shared_ptr<Zone> zone = m_pApartment->allocateZone(_zoneID);
       scanner.scanDeviceOnBus(dsMeter, zone, _devID);
     } catch(std::runtime_error& e) {
@@ -493,62 +486,26 @@ namespace dss {
     }
   } // onAddDevice
 
-  void ModelMaintenance::onDSLinkInterrupt(const int _modID, const int _devID, const int _priority) {
-    // get full dsid
-    log("dSLinkInterrupt:");
-    log("  DSMeter: " + intToString(_modID));
-    log("  DevID:     " + intToString(_devID));
-    log("  Priority:  " + intToString(_priority));
+  void ModelMaintenance::onRemoveDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID) {
+    log("Device disappeared");
+    log("  DSMeter: " +  _dsMeterID.toString());
+    log("  Zone:      " + intToString(_zoneID));
+    log("  BusID:     " + intToString(_devID));
 
-    try {
-      boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByBusID(_modID);
-      try {
-        boost::shared_ptr<Device> device = m_pApartment->getDeviceByShortAddress(dsMeter, _devID);
-        PropertyNodePtr deviceNode = device->getPropertyNode();
-        if(deviceNode == NULL) {
-          return;
-        }
-        PropertyNodePtr modeNode = deviceNode->getProperty("interrupt/mode");
-        if(modeNode == NULL) {
-          return;
-        }
-        std::string mode = modeNode->getStringValue();
-        if(mode == "ignore") {
-          log("ignoring interrupt");
-        } else if(mode == "raise_event") {
-          log("raising interrupt as event");
-          std::string eventName = "dslink_interrupt";
-          PropertyNodePtr eventNameNode = deviceNode->getProperty("interrupt/event/name");
-          if(eventNameNode == NULL) {
-            log("no node called 'interrupt/event' found, assuming name is 'dslink_interrupt'");
-          } else {
-            eventName = eventNameNode->getAsString();
-          }
+    boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
+    boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByDSID(_dsMeterID);
+    boost::shared_ptr<Device> device = dsMeter->getDevices().getByBusID(_devID, _dsMeterID).getDevice();
+    DeviceReference devRef(device, m_pApartment);
 
-          // create event to be raised
-          boost::shared_ptr<DeviceReference> devRef(new DeviceReference(device, m_pApartment));
-          boost::shared_ptr<Event> evt(new Event(eventName, devRef));
-          evt->setProperty("device", device->getDSID().toString());
-          std::string priorityString = "unknown";
-          if(_priority == 0) {
-            priorityString = "normal";
-          } else if(_priority == 1) {
-            priorityString = "high";
-          }
-          evt->setProperty("priority", priorityString);
-          raiseEvent(evt);
-        } else {
-          log("unknown interrupt mode '" + mode + "'", lsError);
-        }
-      } catch (ItemNotFoundException& ex) {
-        log("Apartment::onDSLinkInterrupt: Unknown device with ID " + intToString(_devID), lsFatal);
-        return;
-      }
-    } catch(ItemNotFoundException& ex) {
-      log("Apartment::onDSLinkInterrupt: Unknown DSMeter with ID " + intToString(_modID), lsFatal);
-      return;
-    }
-  } // onDSLinkInterrupt
+    if(_zoneID == 0) {
+      // TODO: remove zone from meter if it's the last device
+      // already handled in structuremanipulator
+      zone->removeDevice(devRef);
+    }  
+    dsMeter->removeDevice(devRef);
+    device->setIsPresent(true);
+
+  } // onAddDevice
 
   void ModelMaintenance::setApartment(Apartment* _value) {
     m_pApartment = _value;
@@ -560,10 +517,6 @@ namespace dss {
   void ModelMaintenance::setMetering(Metering* _value) {
     m_pMetering = _value;
   } // setMetering
-
-  void ModelMaintenance::setFrameSenderInterface(FrameSenderInterface* _value) {
-    m_pFrameSenderInterface = _value;
-  } // setFrameSenderInterface
 
   void ModelMaintenance::setStructureQueryBusInterface(StructureQueryBusInterface* _value) {
     m_pStructureQueryBusInterface = _value;

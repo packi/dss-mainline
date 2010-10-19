@@ -22,16 +22,12 @@
 
 #include "apartment.h"
 
-#include "core/DS485Interface.h"
-#include "core/ds485const.h"
+#include "core/businterface.h"
 #include "core/model/modelconst.h"
 #include "core/logger.h"
 #include "core/propertysystem.h"
 #include "core/event.h"
 #include "core/foreach.h"
-
-#include "core/busrequestdispatcher.h"
-#include "core/model/busrequest.h"
 
 #include "core/model/busscanner.h"
 #include "core/model/scenehelper.h"
@@ -50,8 +46,7 @@ namespace dss {
   //================================================== Apartment
 
   Apartment::Apartment(DSS* _pDSS)
-  : m_pDS485Interface(NULL),
-    m_pBusRequestDispatcher(NULL),
+  : m_pBusInterface(NULL),
     m_pModelMaintenance(NULL),
     m_pPropertySystem(NULL)
   {
@@ -101,7 +96,7 @@ namespace dss {
     _zone->addGroup(grp);
   } // addDefaultGroupsToZone
 
-  boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dsid_t _dsid) const {
+  boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dss_dsid_t _dsid) const {
     AssertLocked lock(this);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
       if(dev->getDSID() == _dsid) {
@@ -111,7 +106,7 @@ namespace dss {
     throw ItemNotFoundException(_dsid.toString());
   } // getDeviceByShortAddress const
 
-  boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dsid_t _dsid) {
+  boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dss_dsid_t _dsid) {
     AssertLocked lock(this);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
       if(dev->getDSID() == _dsid) {
@@ -119,17 +114,6 @@ namespace dss {
       }
     }
     throw ItemNotFoundException(_dsid.toString());
-  } // getDeviceByShortAddress
-
-  boost::shared_ptr<Device> Apartment::getDeviceByShortAddress(boost::shared_ptr<const DSMeter> _dsMeter, const devid_t _deviceID) const {
-    AssertLocked lock(this);
-    foreach(boost::shared_ptr<Device> dev, m_Devices) {
-      if((dev->getShortAddress() == _deviceID) &&
-          (_dsMeter->getBusID() == dev->getDSMeterID())) {
-        return dev;
-      }
-    }
-    throw ItemNotFoundException(intToString(_deviceID));
   } // getDeviceByShortAddress
 
   boost::shared_ptr<Device> Apartment::getDeviceByName(const std::string& _name) {
@@ -188,17 +172,7 @@ namespace dss {
     throw ItemNotFoundException(_modName);
   } // getDSMeter(name)
 
-  boost::shared_ptr<DSMeter> Apartment::getDSMeterByBusID(const int _busId) {
-    AssertLocked lock(this);
-    foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
-      if(dsMeter->getBusID() == _busId) {
-        return dsMeter;
-      }
-    }
-    throw ItemNotFoundException(intToString(_busId));
-  } // getDSMeterByBusID
-
-  boost::shared_ptr<DSMeter> Apartment::getDSMeterByDSID(const dsid_t _dsid) {
+  boost::shared_ptr<DSMeter> Apartment::getDSMeterByDSID(const dss_dsid_t _dsid) {
     AssertLocked lock(this);
     foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
       if(dsMeter->getDSID() == _dsid) {
@@ -231,7 +205,7 @@ namespace dss {
     throw ItemNotFoundException(intToString(_id));
   } // getGroup(id)
 
-  boost::shared_ptr<Device> Apartment::allocateDevice(const dsid_t _dsid) {
+  boost::shared_ptr<Device> Apartment::allocateDevice(const dss_dsid_t _dsid) {
     AssertLocked lock(this);
     boost::shared_ptr<Device> pResult;
     // search for existing device
@@ -253,7 +227,7 @@ namespace dss {
     return pResult;
   } // allocateDevice
 
-  boost::shared_ptr<DSMeter> Apartment::allocateDSMeter(const dsid_t _dsid) {
+  boost::shared_ptr<DSMeter> Apartment::allocateDSMeter(const dss_dsid_t _dsid) {
     AssertLocked lock(this);
     foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
       if((dsMeter)->getDSID() == _dsid) {
@@ -299,7 +273,7 @@ namespace dss {
     }
   } // removeZone
 
-  void Apartment::removeDevice(dsid_t _device) {
+  void Apartment::removeDevice(dss_dsid_t _device) {
     AssertLocked lock(this);
     for(std::vector<boost::shared_ptr<Device> >::iterator ipDevice = m_Devices.begin(), e = m_Devices.end();
         ipDevice != e; ++ipDevice) {
@@ -317,7 +291,7 @@ namespace dss {
     }
   } // removeDevice
 
-  void Apartment::removeDSMeter(dsid_t _dsMeter) {
+  void Apartment::removeDSMeter(dss_dsid_t _dsMeter) {
     AssertLocked lock(this);
     for(std::vector<boost::shared_ptr<DSMeter> >::iterator ipDSMeter = m_DSMeters.begin(), e = m_DSMeters.end();
         ipDSMeter != e; ++ipDSMeter) {
@@ -329,17 +303,16 @@ namespace dss {
     }
   } // removeDSMeter
 
-  void Apartment::dispatchRequest(boost::shared_ptr<BusRequest> _pRequest) {
-    if(m_pBusRequestDispatcher != NULL) {
-      m_pBusRequestDispatcher->dispatchRequest(_pRequest);
-    } else {
-      throw std::runtime_error("Apartment::dispatchRequest: m_pBusRequestDispatcher is NULL");
+  ActionRequestInterface* Apartment::getActionRequestInterface() {
+    if(m_pBusInterface != NULL) {
+      return m_pBusInterface->getActionRequestInterface();
     }
-  } // dispatchRequest
+    return NULL;
+  } // getActionRequestInterface
 
   DeviceBusInterface* Apartment::getDeviceBusInterface() {
-    if(m_pDS485Interface != NULL) {
-      return m_pDS485Interface->getDeviceBusInterface();
+    if(m_pBusInterface != NULL) {
+      return m_pBusInterface->getDeviceBusInterface();
     }
     return NULL;
   } // getDeviceBusInterface

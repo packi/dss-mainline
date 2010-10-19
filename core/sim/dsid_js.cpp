@@ -34,7 +34,7 @@ namespace dss {
 
   class DSIDJS : public DSIDInterface {
   public:
-    DSIDJS(const DSDSMeterSim& _simulator, dsid_t _dsid,
+    DSIDJS(const DSMeterSim& _simulator, dss_dsid_t _dsid,
            devid_t _shortAddress, boost::shared_ptr<ScriptContext> _pContext,
            const std::vector<std::string>& _fileNames)
     : DSIDInterface(_simulator, _dsid, _shortAddress),
@@ -84,39 +84,16 @@ namespace dss {
       }
     } // saveScene
 
-    virtual void undoScene(const int _sceneNr) {
+    virtual void undoScene() {
       if(m_pSelf != NULL) {
         try {
           ScriptFunctionParameterList param(*m_pContext);
-          param.add(_sceneNr);
           m_pSelf->callFunctionByName<void>("undoScene", param);
         } catch(ScriptException& e) {
           Logger::getInstance()->log(std::string("DSIDJS: Error calling 'undoScene'") + e.what(), lsError);
         }
       }
     } // undoScene
-
-    virtual void increaseValue(const int _parameterNr = -1) {
-      if(m_pSelf != NULL) {
-        try {
-          ScriptFunctionParameterList param(*m_pContext);
-          m_pSelf->callFunctionByName<void>("increaseValue", param);
-        } catch(ScriptException& e) {
-          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'increaseValue'") + e.what(), lsError);
-        }
-      }
-    } // increaseValue
-
-    virtual void decreaseValue(const int _parameterNr = -1) {
-      if(m_pSelf != NULL) {
-        try {
-          ScriptFunctionParameterList param(*m_pContext);
-          m_pSelf->callFunctionByName<void>("decreaseValue", param);
-        } catch(ScriptException& e) {
-          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'decreaseValue'") + e.what(), lsError);
-        }
-      }
-    } // decreaseValue
 
     virtual void enable() {
       if(m_pSelf != NULL) {
@@ -151,29 +128,6 @@ namespace dss {
       }
       return 0;
     } // getConsumption
-
-    virtual void startDim(bool _directionUp, const int _parameterNr = -1) {
-      if(m_pSelf != NULL) {
-        try {
-          ScriptFunctionParameterList param(*m_pContext);
-          param.add(_directionUp);
-          m_pSelf->callFunctionByName<void>("startDim", param);
-        } catch(ScriptException& e) {
-          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'startDim'") + e.what(), lsError);
-        }
-      }
-    } // startDim
-
-    virtual void endDim(const int _parameterNr = -1) {
-      if(m_pSelf != NULL) {
-        try {
-          ScriptFunctionParameterList param(*m_pContext);
-          m_pSelf->callFunctionByName<void>("endDim", param);
-        } catch(ScriptException& e) {
-          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'endDim'") + e.what(), lsError);
-        }
-      }
-    } // endDim
 
     virtual void setValue(const double _value, int _parameterNr = -1) {
       if(m_pSelf != NULL) {
@@ -239,24 +193,6 @@ namespace dss {
       return "";
     } // getConfigParameter
 
-    virtual uint8_t dsLinkSend(uint8_t _value, uint8_t _flags, bool& _handled) {
-      if(m_pSelf != NULL) {
-        try {
-          ScriptFunctionParameterList param(*m_pContext);
-          param.add(int(_value));
-          param.add(int(_flags));
-          int res = m_pSelf->callFunctionByName<int>("dSLinkSend", param);
-          _handled = true;
-          return res;
-        } catch(ScriptException& e) {
-          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'dSLinkSend'") + e.what(), lsError);
-        }
-        _handled = false;
-        return 0;
-      }
-      return 0;
-    } // dsLinkSend
-
   private:
 
     void createJSDevice() {
@@ -282,83 +218,6 @@ namespace dss {
     const std::vector<std::string>& m_FileNames;
   }; // DSIDJS
 
-
-  //================================================== DSIDScriptExtension
-
-  const char* DSIDScriptExtensionName = "dsidextension";
-
-  class DSIDScriptExtension : public ScriptExtension {
-  public:
-    DSIDScriptExtension(DSSim& _simulation)
-    : ScriptExtension(DSIDScriptExtensionName),
-      m_Simulation(_simulation)
-    { } // ctor
-
-    virtual ~DSIDScriptExtension() {}
-
-    virtual void extendContext(ScriptContext& _context);
-
-    void dSLinkInterrupt(const dsid_t& _dsid) {
-      DSIDInterface* intf = m_Simulation.getSimulatedDevice(_dsid);
-      if(intf != NULL) {
-        intf->dSLinkInterrupt();
-      }
-    } // dSLinkInterrupt
-
-  private:
-    DSSim& m_Simulation;
-  }; // PropertyScriptExtension
-
-  class DSLinkInterrupSender : public Thread {
-  public:
-    DSLinkInterrupSender(dsid_t _dsid, DSIDScriptExtension* _ext)
-    : Thread("DSLinkInterruptSender"),
-      m_DSID(_dsid), m_Ext(_ext)
-    {
-      setFreeAtTermination(true);
-    }
-    virtual void execute() {
-      sleepMS(rand() % 3000);
-      m_Ext->dSLinkInterrupt(m_DSID);
-    }
-  private:
-    dsid_t m_DSID;
-    DSIDScriptExtension* m_Ext;
-  };
-
-  JSBool global_dsid_dSLinkInterrupt(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    if(argc < 1) {
-      Logger::getInstance()->log("JS: glogal_dsid_dSLinkInterrupt: need argument dsid", lsError);
-    } else {
-      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-
-      DSIDScriptExtension* ext = dynamic_cast<DSIDScriptExtension*>(ctx->getEnvironment().getExtension(DSIDScriptExtensionName));
-      std::string dsidString = ctx->convertTo<std::string>(argv[0]);
-
-      try {
-        dsid_t dsid = dsid_t::fromString(dsidString);
-        DSLinkInterrupSender* sender = new DSLinkInterrupSender(dsid, ext);
-        sender->run();
-      } catch(std::invalid_argument&) {
-        Logger::getInstance()->log("Could not parse DSID");
-      }
-
-      *rval = JSVAL_TRUE;
-      return JS_TRUE;
-    }
-    return JS_FALSE;
-  } // global_prop_setListener
-
-  JSFunctionSpec dsid_global_methods[] = {
-    {"dSLinkInterrupt", global_dsid_dSLinkInterrupt, 1, 0, 0},
-    {NULL},
-  };
-
-  void DSIDScriptExtension::extendContext(ScriptContext& _context) {
-    JS_DefineFunctions(_context.getJSContext(), JS_GetGlobalObject(_context.getJSContext()), dsid_global_methods);
-  } // extendContext
-
-
   //================================================== DSIDJSCreator
 
   DSIDJSCreator::DSIDJSCreator(const std::vector<std::string>& _fileNames, const std::string& _pluginName, DSSim& _simulator)
@@ -369,12 +228,11 @@ namespace dss {
   {
     m_pScriptEnvironment->initialize();
     m_pScriptEnvironment->addExtension(new PropertyScriptExtension(DSS::getInstance()->getPropertySystem()));
-    m_pScriptEnvironment->addExtension(new DSIDScriptExtension(m_Simulator));
     m_pScriptEnvironment->addExtension(new ModelConstantsScriptExtension());
     m_pScriptEnvironment->addExtension(new SocketScriptContextExtension());
   } // ctor
 
-  DSIDInterface* DSIDJSCreator::createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
+  DSIDInterface* DSIDJSCreator::createDSID(const dss_dsid_t _dsid, const devid_t _shortAddress, const DSMeterSim& _dsMeter) {
     boost::shared_ptr<ScriptContext> pContext(m_pScriptEnvironment->getContext());
     DSIDJS* result = new DSIDJS(_dsMeter, _dsid, _shortAddress, pContext, m_FileNames);
     return result;

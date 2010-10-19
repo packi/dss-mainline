@@ -24,7 +24,7 @@
 
 #include "core/dss.h"
 #include "core/logger.h"
-#include "core/DS485Interface.h"
+#include "core/businterface.h"
 #include "core/propertysystem.h"
 #include "set.h"
 #include "apartment.h"
@@ -34,9 +34,8 @@ namespace dss {
 
   //================================================== DSMeter
 
-  DSMeter::DSMeter(const dsid_t _dsid, Apartment* _pApartment)
+  DSMeter::DSMeter(const dss_dsid_t _dsid, Apartment* _pApartment)
   : m_DSID(_dsid),
-    m_BusID(0xFF),
     m_PowerConsumption(0),
     m_EnergyMeterValue(0),
     m_IsValid(false),
@@ -50,8 +49,6 @@ namespace dss {
     if((m_pApartment != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
       m_pPropertyNode =
         m_pApartment->getPropertyNode()->createProperty("dSMeters/" + m_DSID.toString());
-      m_pPropertyNode->createProperty("busID")
-        ->linkToProxy(PropertyProxyReference<int>(m_BusID, false));
       m_pPropertyNode->createProperty("powerConsumption")
         ->linkToProxy(PropertyProxyReference<int>(m_PowerConsumption, false));
       m_pPropertyNode->createProperty("powerConsumptionAge")
@@ -68,8 +65,8 @@ namespace dss {
         ->linkToProxy(PropertyProxyReference<int>(m_HardwareVersion, false));
       m_pPropertyNode->createProperty("softwareVersion")
         ->linkToProxy(PropertyProxyReference<int>(m_SoftwareVersion, false));
-      m_pPropertyNode->createProperty("deviceType")
-        ->linkToProxy(PropertyProxyReference<int>(m_DeviceType, false));
+      m_pPropertyNode->createProperty("apiVersion")
+        ->linkToProxy(PropertyProxyReference<int>(m_ApiVersion, false));
       m_pPropertyNode->createProperty("hardwareName")
         ->linkToProxy(PropertyProxyReference<std::string>(m_HardwareName, false));
       m_pPropertyNode->createProperty("name")
@@ -85,7 +82,8 @@ namespace dss {
     if(!contains(m_ConnectedDevices, _device)) {
       m_ConnectedDevices.push_back(_device);
     } else {
-      Logger::getInstance()->log("DSMeter::addDevice: DUPLICATE DEVICE Detected dsMeter: " + intToString(m_BusID) + " device: " + _device.getDSID().toString(), lsFatal);
+      Logger::getInstance()->log("DSMeter::addDevice: DUPLICATE DEVICE Detected dsMeter: " + 
+                                 m_DSID.toString() + " device: " + _device.getDSID().toString(), lsFatal);
     }
   } // addDevice
 
@@ -96,22 +94,14 @@ namespace dss {
     }
   } // removeDevice
 
-  dsid_t DSMeter::getDSID() const {
+  dss_dsid_t DSMeter::getDSID() const {
     return m_DSID;
   } // getDSID
-
-  int DSMeter::getBusID() const {
-    return m_BusID;
-  } // getBusID
-
-  void DSMeter::setBusID(const int _busID) {
-    m_BusID = _busID;
-  } // setBusID
 
   unsigned long DSMeter::getPowerConsumption() {
     DateTime now;
     if(!now.addSeconds(-1).before(m_PowerConsumptionTimeStamp)) {
-      m_PowerConsumption =  DSS::getInstance()->getDS485Interface().getMeteringBusInterface()->getPowerConsumption(m_BusID);
+      m_PowerConsumption =  DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getPowerConsumption(m_DSID);
       m_PowerConsumptionTimeStamp = now;
     }
     return m_PowerConsumption;
@@ -120,7 +110,7 @@ namespace dss {
   unsigned long DSMeter::getEnergyMeterValue() {
     DateTime now;
     if(!now.addSeconds(-1).before(m_EnergyMeterValueTimeStamp)) {
-      m_EnergyMeterValue = DSS::getInstance()->getDS485Interface().getMeteringBusInterface()->getEnergyMeterValue(m_BusID);
+      m_EnergyMeterValue = DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getEnergyMeterValue(m_DSID);
       m_EnergyMeterValueTimeStamp = now;
     }
     return m_EnergyMeterValue;

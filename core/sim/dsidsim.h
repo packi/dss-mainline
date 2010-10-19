@@ -37,30 +37,25 @@ namespace dss {
     time_t m_DimmStartTime;
     bool m_DimmingUp;
     std::vector<int> m_Parameters;
-    DSDSMeterSim* m_DSMeter;
+    DSMeterSim* m_DSMeter;
     std::vector<uint8_t> m_ValuesForScene;
     uint8_t m_CurrentValue;
     int m_DimTimeMS;
     int m_SimpleConsumption;
     Properties m_ConfigParameter;
   public:
-    DSIDSim(const DSDSMeterSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress);
+    DSIDSim(const DSMeterSim& _simulator, const dss_dsid_t _dsid, const devid_t _shortAddress);
     virtual ~DSIDSim() {}
 
     virtual void callScene(const int _sceneNr);
     virtual void saveScene(const int _sceneNr);
-    virtual void undoScene(const int _sceneNr);
-
-    virtual void increaseValue(const int _parameterNr = -1);
-    virtual void decreaseValue(const int _parameterNr = -1);
+    virtual void undoScene();
 
     virtual void enable();
     virtual void disable();
 
     virtual int getConsumption();
 
-    virtual void startDim(bool _directionUp, const int _parameterNr = -1);
-    virtual void endDim(const int _parameterNr = -1);
     virtual void setValue(const double _value, int _parameterNr = -1);
 
     virtual double getValue(int _parameterNr = -1) const;
@@ -71,32 +66,6 @@ namespace dss {
     virtual std::string getConfigParameter(const std::string& _name) const;
   }; // DSIDSim
 
-
-  class DSIDSimSwitch : public DSIDSim {
-  private:
-    const int m_NumberOfButtons;
-    int m_DefaultColor;
-    bool m_IsBell;
-  public:
-    DSIDSimSwitch(const DSDSMeterSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress, const int _numButtons)
-    : DSIDSim(_simulator, _dsid, _shortAddress),
-      m_NumberOfButtons(_numButtons),
-      m_DefaultColor(GroupIDYellow),
-      m_IsBell(false)
-    {};
-    ~DSIDSimSwitch() {}
-
-    void pressKey(const ButtonPressKind _kind, const int _buttonNr);
-
-    const int getDefaultColor() const { return m_DefaultColor; }
-
-    const int getNumberOfButtons() const { return m_NumberOfButtons; }
-
-    bool isBell() const { return m_IsBell; }
-    void setIsBell(const bool _value) { m_IsBell = _value; }
-
-    virtual uint16_t getFunctionID() { return FunctionIDSwitch; }
-  }; // DSIDSimSwitch
 }
 
 #endif /* DSIDSIM_H_ */

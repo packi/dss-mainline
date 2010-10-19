@@ -124,7 +124,7 @@ namespace dss {
 
       elem = configElem->getChildElement("from_dsid");
       if(elem != NULL && elem->hasChildNodes()) {
-        result->setFromDSID(dsid_t::fromString(elem->firstChild()->getNodeValue()));
+        result->setFromDSID(dss_dsid_t::fromString(elem->firstChild()->getNodeValue()));
       }
 
       elem = configElem->getChildElement("unit");

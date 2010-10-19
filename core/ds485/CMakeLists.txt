@@ -1,2 +1,6 @@
-add_library(ds485 ds485busrequestdispatcher.cpp ds485.cpp ds485proxy.cpp
-	framebucketbase.cpp framebucketcollector.cpp businterfacehandler.cpp)
+set(files dsbusinterface.cpp
+          dsactionrequest.cpp dsdevicebusinterface.cpp
+          dsmeteringbusinterface.cpp dsstructurequerybusinterface.cpp
+          dsstructuremodifyingbusinterface.cpp)
+
+add_library(ds485 ${files})

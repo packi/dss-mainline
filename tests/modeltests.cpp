@@ -31,14 +31,11 @@
 #include "core/model/modulator.h"
 #include "core/model/devicereference.h"
 #include "core/model/zone.h"
+#include "core/model/group.h"
 #include "core/model/set.h"
 #include "core/setbuilder.h"
 #include "core/dss.h"
-#include "core/ds485const.h"
 #include "core/model/modelconst.h"
-#include "core/ds485/ds485proxy.h"
-#include "core/ds485/ds485busrequestdispatcher.h"
-#include "core/ds485/businterfacehandler.h"
 #include "core/model/modelmaintenance.h"
 #include "core/propertysystem.h"
 
@@ -49,64 +46,52 @@ BOOST_AUTO_TEST_SUITE(Model)
 BOOST_AUTO_TEST_CASE(testApartmentAllocateDeviceReturnsTheSameDeviceForDSID) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsid_t(0,10));
-  meter->setBusID(1);
+  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dss_dsid_t(0,10));
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
   dev1->setShortAddress(1);
   dev1->setName("dev1");
   dev1->setDSMeter(meter);
 
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,1));
   BOOST_CHECK_EQUAL(dev1->getShortAddress(), dev2->getShortAddress());
   BOOST_CHECK_EQUAL(dev1->getName(), dev2->getName());
-  BOOST_CHECK_EQUAL(dev1->getDSMeterID(), dev2->getDSMeterID());
+  BOOST_CHECK_EQUAL(dev1->getDSMeterDSID().toString(), dev2->getDSMeterDSID().toString());
 } // testApartmentAllocateDeviceReturnsTheSameDeviceForDSID
 
 BOOST_AUTO_TEST_CASE(testSetGetByBusID) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<DSMeter> meter1 = apt.allocateDSMeter(dsid_t(0,10));
-  meter1->setBusID(1);
-  boost::shared_ptr<DSMeter> meter2 = apt.allocateDSMeter(dsid_t(0,11));
-  meter2->setBusID(2);
+  dss_dsid_t meter1DSID = dss_dsid_t(0,10);
+  dss_dsid_t meter2DSID = dss_dsid_t(0,11);
+  boost::shared_ptr<DSMeter> meter1 = apt.allocateDSMeter(meter1DSID);
+  boost::shared_ptr<DSMeter> meter2 = apt.allocateDSMeter(meter2DSID);
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
   dev1->setShortAddress(1);
   dev1->setName("dev1");
   dev1->setDSMeter(meter1);
 
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
   dev2->setShortAddress(1);
   dev2->setName("dev2");
   dev2->setDSMeter(meter2);
 
-  boost::shared_ptr<DSMeter> mod1 = apt.allocateDSMeter(dsid_t(0,3));
-  mod1->setBusID(1);
+  BOOST_CHECK_EQUAL(apt.getDevices().getByBusID(1, meter1DSID).getName(), dev1->getName());
+  BOOST_CHECK_THROW(apt.getDevices().getByBusID(2, meter1DSID), ItemNotFoundException);
 
-  boost::shared_ptr<DSMeter> mod2 = apt.allocateDSMeter(dsid_t(0,4));
-  mod2->setBusID(2);
-  BOOST_CHECK_EQUAL(apt.getDevices().getByBusID(1, 1).getName(), dev1->getName());
-  BOOST_CHECK_THROW(apt.getDevices().getByBusID(2, 1), ItemNotFoundException);
-
-  BOOST_CHECK_EQUAL(apt.getDevices().getByBusID(1, mod1).getName(), dev1->getName());
-  BOOST_CHECK_THROW(apt.getDevices().getByBusID(2, mod1), ItemNotFoundException);
-
-  BOOST_CHECK_EQUAL(apt.getDevices().getByBusID(1, 2).getName(), dev2->getName());
-  BOOST_CHECK_THROW(apt.getDevices().getByBusID(2, 2), ItemNotFoundException);
-
-  BOOST_CHECK_EQUAL(apt.getDevices().getByBusID(1, mod2).getName(), dev2->getName());
-  BOOST_CHECK_THROW(apt.getDevices().getByBusID(2, mod2), ItemNotFoundException);
+  BOOST_CHECK_EQUAL(apt.getDevices().getByBusID(1, meter2DSID).getName(), dev2->getName());
+  BOOST_CHECK_THROW(apt.getDevices().getByBusID(2, meter2DSID), ItemNotFoundException);
 } // testSetGetByBusID
 
 BOOST_AUTO_TEST_CASE(testSetRemoveDevice) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
   dev1->setShortAddress(1);
   dev1->setName("dev1");
 
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
   dev2->setShortAddress(2);
   dev2->setName("dev2");
 
@@ -129,11 +114,11 @@ BOOST_AUTO_TEST_CASE(testSetTags) {
   PropertySystem propSys;
   apt.setPropertySystem(&propSys);
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
   dev1->addTag("dev1");
   dev1->addTag("device");
 
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
   dev2->addTag("dev2");
   dev2->addTag("device");
 
@@ -159,37 +144,23 @@ BOOST_AUTO_TEST_CASE(testSetTags) {
 BOOST_AUTO_TEST_CASE(testDeviceLastKnownDSMeterDSIDWorks) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsid_t(0,10));
-  mod->setBusID(1);
+  dss_dsid_t dsmeterDSID = dss_dsid_t(0,10);
+  boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsmeterDSID);
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
 
   BOOST_CHECK_EQUAL(dev1->getLastKnownDSMeterDSID().toString(), NullDSID.toString());
 
   dev1->setDSMeter(mod);
 
-  BOOST_CHECK_EQUAL(dev1->getDSMeterID(), 1);
-  BOOST_CHECK_EQUAL(dev1->getLastKnownDSMeterDSID().toString(), dsid_t(0,10).toString());
+  BOOST_CHECK_EQUAL(dev1->getDSMeterDSID().toString(), dsmeterDSID.toString());
+  BOOST_CHECK_EQUAL(dev1->getLastKnownDSMeterDSID().toString(), dsmeterDSID.toString());
 } // testDeviceLastKnownDSMeterDSIDWorks
-
-BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByShortAddress) {
-  Apartment apt(NULL);
-
-  boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsid_t(0,2));
-  mod->setBusID(1);
-
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  dev1->setName("dev1");
-  dev1->setDSMeter(mod);
-
-  BOOST_CHECK_EQUAL("dev1", apt.getDeviceByShortAddress(mod, 1)->getName());
-} // testApartmentGetDeviceByShortAddress
 
 BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByName) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
   dev1->setName("dev1");
 
   BOOST_CHECK_EQUAL("dev1", apt.getDeviceByName("dev1")->getName());
@@ -198,57 +169,31 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDeviceByName) {
 BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByName) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsid_t(0,2));
+  boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dss_dsid_t(0,2));
   mod->setName("mod1");
 
   BOOST_CHECK_EQUAL("mod1", apt.getDSMeter("mod1")->getName());
 } // testApartmentGetDSMeterByName
 
-BOOST_AUTO_TEST_CASE(testApartmentGetDSMeterByBusID) {
-  Apartment apt(NULL);
-
-  boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsid_t(0,2));
-  mod->setBusID(1);
-
-  BOOST_CHECK_EQUAL(1, apt.getDSMeterByBusID(1)->getBusID());
-} // testApartmentGetDSMeterByBusID
-
-BOOST_AUTO_TEST_CASE(testDeviceTracksMetersBusID) {
-  Apartment apt(NULL);
-
-  boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsid_t(0,10));
-  mod->setBusID(1);
-
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
-  dev1->setDSMeter(mod);
-
-  BOOST_CHECK_EQUAL(1, dev1->getDSMeterID());
-
-  mod->setBusID(2);
-
-  BOOST_CHECK_EQUAL(2, dev1->getDSMeterID());
-} // testDeviceTracksMeterID
-
 BOOST_AUTO_TEST_CASE(testZoneMoving) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsid_t(0,10));
-  meter->setBusID(1);
+  dss_dsid_t dsmeterDSID = dss_dsid_t(0,10);
+  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsmeterDSID);
 
-
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
   dev1->setShortAddress(1);
   dev1->setDSMeter(meter);
   DeviceReference devRef1(dev1, &apt);
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
   dev2->setShortAddress(2);
   dev2->setDSMeter(meter);
   DeviceReference devRef2(dev2, &apt);
-  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dsid_t(0,3));
+  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dss_dsid_t(0,3));
   dev3->setShortAddress(3);
   dev3->setDSMeter(meter);
   DeviceReference devRef3(dev3, &apt);
-  boost::shared_ptr<Device> dev4 = apt.allocateDevice(dsid_t(0,4));
+  boost::shared_ptr<Device> dev4 = apt.allocateDevice(dss_dsid_t(0,4));
   dev4->setShortAddress(4);
   dev4->setDSMeter(meter);
   DeviceReference devRef4(dev4, &apt);
@@ -261,10 +206,10 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
 
   Set allDevices = apt.getDevices();
 
-  BOOST_CHECK_EQUAL(dev1, allDevices.getByBusID(1, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev2, allDevices.getByBusID(2, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev3, allDevices.getByBusID(3, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev4, allDevices.getByBusID(4, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev1, allDevices.getByBusID(1, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev2, allDevices.getByBusID(2, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev3, allDevices.getByBusID(3, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev4, allDevices.getByBusID(4, dsmeterDSID).getDevice());
 
   BOOST_CHECK_EQUAL(4, zone1->getDevices().length());
 
@@ -277,12 +222,12 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
 
   // check that the devices are moved correctly in the zones datamodel
   Set zone1Devices = zone1->getDevices();
-  BOOST_CHECK_EQUAL(dev1, zone1Devices.getByBusID(1, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev3, zone1Devices.getByBusID(3, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev1, zone1Devices.getByBusID(1, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev3, zone1Devices.getByBusID(3, dsmeterDSID).getDevice());
 
   Set zone2Devices = zone2->getDevices();
-  BOOST_CHECK_EQUAL(dev2, zone2Devices.getByBusID(2, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev4, zone2Devices.getByBusID(4, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev2, zone2Devices.getByBusID(2, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev4, zone2Devices.getByBusID(4, dsmeterDSID).getDevice());
 
   // check the datamodel of the devices
   BOOST_CHECK_EQUAL(1, dev1->getZoneID());
@@ -294,39 +239,39 @@ BOOST_AUTO_TEST_CASE(testZoneMoving) {
   // check that the groups are set up correctly
   // (this should be the case if all test above passed)
   Set zone1Group0Devices = zone1->getGroup(GroupIDBroadcast)->getDevices();
-  BOOST_CHECK_EQUAL(dev1, zone1Group0Devices.getByBusID(1, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev3, zone1Group0Devices.getByBusID(3, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev1, zone1Group0Devices.getByBusID(1, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev3, zone1Group0Devices.getByBusID(3, dsmeterDSID).getDevice());
 
   Set zone2Group0Devices = zone2->getGroup(GroupIDBroadcast)->getDevices();
-  BOOST_CHECK_EQUAL(dev2, zone2Group0Devices.getByBusID(2, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev4, zone2Group0Devices.getByBusID(4, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev2, zone2Group0Devices.getByBusID(2, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev4, zone2Group0Devices.getByBusID(4, dsmeterDSID).getDevice());
 } // testZoneMoving
 
 BOOST_AUTO_TEST_CASE(testSet) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsid_t(0,10));
-  meter->setBusID(1);
+  dss_dsid_t dsmeterDSID = dss_dsid_t(0,10);
+  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsmeterDSID);
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
   dev1->setShortAddress(1);
   dev1->setDSMeter(meter);
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
   dev2->setShortAddress(2);
   dev2->setDSMeter(meter);
-  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dsid_t(0,3));
+  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dss_dsid_t(0,3));
   dev3->setShortAddress(3);
   dev3->setDSMeter(meter);
-  boost::shared_ptr<Device> dev4 = apt.allocateDevice(dsid_t(0,4));
+  boost::shared_ptr<Device> dev4 = apt.allocateDevice(dss_dsid_t(0,4));
   dev4->setShortAddress(4);
   dev4->setDSMeter(meter);
 
   Set allDevices = apt.getDevices();
 
-  BOOST_CHECK_EQUAL(dev1, allDevices.getByBusID(1, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev2, allDevices.getByBusID(2, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev3, allDevices.getByBusID(3, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev4, allDevices.getByBusID(4, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev1, allDevices.getByBusID(1, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev2, allDevices.getByBusID(2, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev3, allDevices.getByBusID(3, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev4, allDevices.getByBusID(4, dsmeterDSID).getDevice());
 
   Set setdev1 = Set(dev1);
 
@@ -336,30 +281,30 @@ BOOST_AUTO_TEST_CASE(testSet) {
 
   BOOST_CHECK_EQUAL(false, allMinusDev1.contains(dev1));
 
-  BOOST_CHECK_EQUAL(dev2, allMinusDev1.getByBusID(2, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev3, allMinusDev1.getByBusID(3, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev4, allMinusDev1.getByBusID(4, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev2, allMinusDev1.getByBusID(2, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev3, allMinusDev1.getByBusID(3, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev4, allMinusDev1.getByBusID(4, dsmeterDSID).getDevice());
 
   // check that the other sets are not afected by our operation
   BOOST_CHECK_EQUAL(1, setdev1.length());
-  BOOST_CHECK_EQUAL(dev1, setdev1.getByBusID(1, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev1, setdev1.getByBusID(1, dsmeterDSID).getDevice());
 
   BOOST_CHECK_EQUAL(4, allDevices.length());
-  BOOST_CHECK_EQUAL(dev1, allDevices.getByBusID(1, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev2, allDevices.getByBusID(2, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev3, allDevices.getByBusID(3, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev4, allDevices.getByBusID(4, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev1, allDevices.getByBusID(1, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev2, allDevices.getByBusID(2, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev3, allDevices.getByBusID(3, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev4, allDevices.getByBusID(4, dsmeterDSID).getDevice());
 
   Set allRecombined = allMinusDev1.combine(setdev1);
 
   BOOST_CHECK_EQUAL(4, allRecombined.length());
-  BOOST_CHECK_EQUAL(dev1, allRecombined.getByBusID(1, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev2, allRecombined.getByBusID(2, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev3, allRecombined.getByBusID(3, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev4, allRecombined.getByBusID(4, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev1, allRecombined.getByBusID(1, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev2, allRecombined.getByBusID(2, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev3, allRecombined.getByBusID(3, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev4, allRecombined.getByBusID(4, dsmeterDSID).getDevice());
 
   BOOST_CHECK_EQUAL(1, setdev1.length());
-  BOOST_CHECK_EQUAL(dev1, setdev1.getByBusID(1, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev1, setdev1.getByBusID(1, dsmeterDSID).getDevice());
 
   allRecombined = allRecombined.combine(setdev1);
   BOOST_CHECK_EQUAL(4, allRecombined.length());
@@ -369,31 +314,31 @@ BOOST_AUTO_TEST_CASE(testSet) {
 
   allRecombined = allRecombined.combine(allRecombined);
   BOOST_CHECK_EQUAL(4, allRecombined.length());
-  BOOST_CHECK_EQUAL(dev1, allRecombined.getByBusID(1, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev2, allRecombined.getByBusID(2, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev3, allRecombined.getByBusID(3, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev4, allRecombined.getByBusID(4, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev1, allRecombined.getByBusID(1, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev2, allRecombined.getByBusID(2, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev3, allRecombined.getByBusID(3, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev4, allRecombined.getByBusID(4, dsmeterDSID).getDevice());
 
   allMinusDev1 = allRecombined;
   allMinusDev1.removeDevice(dev1);
   BOOST_CHECK_EQUAL(3, allMinusDev1.length());
-  BOOST_CHECK_EQUAL(dev2, allMinusDev1.getByBusID(2, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev3, allMinusDev1.getByBusID(3, 1).getDevice());
-  BOOST_CHECK_EQUAL(dev4, allMinusDev1.getByBusID(4, 1).getDevice());
+  BOOST_CHECK_EQUAL(dev2, allMinusDev1.getByBusID(2, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev3, allMinusDev1.getByBusID(3, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev4, allMinusDev1.getByBusID(4, dsmeterDSID).getDevice());
 } // testSet
 
 BOOST_AUTO_TEST_CASE(testSetBuilder) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
   dev1->setShortAddress(1);
   dev1->getGroupBitmask().set(GroupIDYellow - 1);
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
   dev2->setShortAddress(2);
   dev2->getGroupBitmask().set(GroupIDCyan - 1);
-  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dsid_t(0,3));
+  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dss_dsid_t(0,3));
   dev3->setShortAddress(3);
-  boost::shared_ptr<Device> dev4 = apt.allocateDevice(dsid_t(0,4));
+  boost::shared_ptr<Device> dev4 = apt.allocateDevice(dss_dsid_t(0,4));
   dev4->setShortAddress(4);
 
   SetBuilder builder(apt);
@@ -516,13 +461,13 @@ BOOST_AUTO_TEST_CASE(testSetBuilderDeviceByName) {
 
   SetBuilder setBuilder(apt);
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
   dev1->setName("dev1");
   dev1->setShortAddress(1);
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
   dev2->setName("dev2");
   dev2->setShortAddress(2);
-  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dsid_t(0,3));
+  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dss_dsid_t(0,3));
   dev3->setName("dev3");
   dev3->setShortAddress(3);
 
@@ -545,10 +490,10 @@ BOOST_AUTO_TEST_CASE(testSetBuilderTag) {
 
   SetBuilder setBuilder(apt);
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
   dev1->addTag("dev1");
   dev1->addTag("device");
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
   dev2->addTag("dev2");
   dev2->addTag("device");
 
@@ -572,7 +517,7 @@ BOOST_AUTO_TEST_CASE(testSetBuilderTag) {
 BOOST_AUTO_TEST_CASE(testRemoval) {
   Apartment apt(NULL);
 
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
   dev1->setShortAddress(1);
   dev1->getGroupBitmask().set(GroupIDYellow - 1);
 
@@ -598,23 +543,23 @@ BOOST_AUTO_TEST_CASE(testRemoval) {
     BOOST_CHECK(true);
   }
 
-  apt.allocateDSMeter(dsid_t(1,0));
+  apt.allocateDSMeter(dss_dsid_t(1,0));
   try {
-    apt.getDSMeterByDSID(dsid_t(1,0));
+    apt.getDSMeterByDSID(dss_dsid_t(1,0));
     BOOST_CHECK(true);
   } catch(ItemNotFoundException&) {
     BOOST_CHECK_MESSAGE(false, "DSMeter not found");
   }
 
-  apt.removeDSMeter(dsid_t(1,0));
+  apt.removeDSMeter(dss_dsid_t(1,0));
   try {
-    apt.getDSMeterByDSID(dsid_t(1,0));
+    apt.getDSMeterByDSID(dss_dsid_t(1,0));
     BOOST_CHECK_MESSAGE(false, "DSMeter still exists");
   } catch(ItemNotFoundException&) {
     BOOST_CHECK(true);
   }
 } // testRemoval
-
+/* TODO: libdsm
 BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   Apartment apt(NULL);
 
@@ -637,21 +582,21 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
     sleepMS(2);
   }
 
-  boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dsid_t(0,3));
+  boost::shared_ptr<DSMeter> mod = apt.allocateDSMeter(dss_dsid_t(0,3));
   mod->setBusID(76);
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
   dev1->setName("dev1");
   dev1->setShortAddress(1);
   dev1->setDSMeter(mod);
   DeviceReference devRef1(dev1, &apt);
   mod->addDevice(devRef1);
-  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsid_t(0,2));
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
   dev2->setName("dev2");
   dev2->setShortAddress(2);
   dev2->setDSMeter(mod);
   DeviceReference devRef2(dev2, &apt);
   mod->addDevice(devRef2);
-  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dsid_t(0,3));
+  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dss_dsid_t(0,3));
   dev3->setName("dev3");
   dev3->setShortAddress(3);
   dev3->setDSMeter(mod);
@@ -679,25 +624,23 @@ BOOST_AUTO_TEST_CASE(testCallScenePropagation) {
   sleepMS(75);
   DSS::teardown();
 } // testCallScenePropagation
-
+*/
 
 BOOST_AUTO_TEST_CASE(testMeteringDataFromUnknownMeter) {
   Apartment apt(NULL);
 
-  DS485BusRequestDispatcher dispatcher;
   ModelMaintenance maintenance(NULL, 2);
   maintenance.setApartment(&apt);
   maintenance.initialize();
 
 
-  ModelEvent* pEvent = new ModelEvent(ModelEvent::etEnergyMeterValue);
-  pEvent->addParameter(55); // nonexisting modulator
+  dss_dsid_t nonexistingDSMeterDSID(0, 55);
+  ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etEnergyMeterValue, nonexistingDSMeterDSID);
   pEvent->addParameter(123); // meter value
 
   maintenance.addModelEvent(pEvent);
 
-  pEvent = new ModelEvent(ModelEvent::etPowerConsumption);
-  pEvent->addParameter(55); // nonexisting modulator
+  pEvent = new ModelEventWithDSID(ModelEvent::etPowerConsumption, nonexistingDSMeterDSID);
   pEvent->addParameter(123); // meter value
 
   maintenance.addModelEvent(pEvent);
@@ -709,408 +652,6 @@ BOOST_AUTO_TEST_CASE(testMeteringDataFromUnknownMeter) {
 
   sleepMS(5);
 } // testMeteringDataFromUnknownMeter
-
-
-class FrameSenderTester : public FrameSenderInterface {
-public:
-  int getLastFunctionID() const { return m_LastFunctionID; }
-  void setLastFunctionID(const int _value) { m_LastFunctionID = _value; }
-  int getParameter1() const { return m_Parameter1; }
-  int getParameter2() const { return m_Parameter2; }
-  int getParameter3() const { return m_Parameter3; }
-  virtual void sendFrame(DS485CommandFrame& _frame) {
-    PayloadDissector pd(_frame.getPayload());
-    m_LastFunctionID = pd.get<uint8_t>();
-    if(!pd.isEmpty()) {
-      m_Parameter1 = pd.get<uint16_t>();
-    } else {
-      m_Parameter1 = 0xffff;
-    }
-    if(!pd.isEmpty()) {
-      m_Parameter2 = pd.get<uint16_t>();
-    } else {
-      m_Parameter2 = 0xffff;
-    }
-    if(!pd.isEmpty()) {
-      m_Parameter3 = pd.get<uint16_t>();
-    } else {
-      m_Parameter3 = 0xffff;
-    }
-  }
-private:
-  int m_LastFunctionID;
-  uint16_t m_Parameter1;
-  uint16_t m_Parameter2;
-  uint16_t m_Parameter3;
-}; // FrameSenderTester
-
-class TestModelFixture {
-public:
-  TestModelFixture() {
-    m_pApartment.reset(new Apartment(NULL));
-    m_pFrameSender.reset(new FrameSenderTester());
-    m_pDispatcher.reset(new DS485BusRequestDispatcher());
-    m_pDispatcher->setFrameSender(m_pFrameSender.get());
-    m_pApartment->setBusRequestDispatcher(m_pDispatcher.get());
-    m_pFrameSender->setLastFunctionID(-1);
-  }
-
-  boost::scoped_ptr<Apartment> m_pApartment;
-  boost::scoped_ptr<FrameSenderTester> m_pFrameSender;
-  boost::scoped_ptr<DS485BusRequestDispatcher> m_pDispatcher;
-};
-
-BOOST_FIXTURE_TEST_CASE(testTurnOnDevice, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  dev1->turnOn();
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  BOOST_CHECK_EQUAL(SceneMax, m_pFrameSender->getParameter2());
-  m_pFrameSender->setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, m_pApartment.get());
-  devRef1.turnOn();
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  BOOST_CHECK_EQUAL(SceneMax, m_pFrameSender->getParameter2());
-}
-
-BOOST_FIXTURE_TEST_CASE(testTurnOnGroup, TestModelFixture) {
-  boost::shared_ptr<Group> group = m_pApartment->getGroup(1);
-  group->turnOn();
-  BOOST_CHECK_EQUAL(FunctionGroupCallScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter1()); // zone 0
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter2()); // group 1
-  BOOST_CHECK_EQUAL(SceneMax, m_pFrameSender->getParameter3());
-}
-
-BOOST_FIXTURE_TEST_CASE(testTurnOffDevice, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  dev1->turnOff();
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  BOOST_CHECK_EQUAL(SceneMin, m_pFrameSender->getParameter2());
-  m_pFrameSender->setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, m_pApartment.get());
-  devRef1.turnOff();
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  BOOST_CHECK_EQUAL(SceneMin, m_pFrameSender->getParameter2());
-}
-
-BOOST_FIXTURE_TEST_CASE(testTurnOffGroup, TestModelFixture) {
-  boost::shared_ptr<Group> group = m_pApartment->getGroup(1);
-  group->turnOff();
-  BOOST_CHECK_EQUAL(FunctionGroupCallScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter1()); // zone 0
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter2()); // group 1
-  BOOST_CHECK_EQUAL(SceneMin, m_pFrameSender->getParameter3());
-}
-
-BOOST_FIXTURE_TEST_CASE(testEnableDevice, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  dev1->enable();
-  BOOST_CHECK_EQUAL(FunctionDeviceEnable, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  m_pFrameSender->setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, m_pApartment.get());
-  devRef1.enable();
-  BOOST_CHECK_EQUAL(FunctionDeviceEnable, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-}
-
-BOOST_FIXTURE_TEST_CASE(testDisableDevice, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  dev1->disable();
-  BOOST_CHECK_EQUAL(FunctionDeviceDisable, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  m_pFrameSender->setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, m_pApartment.get());
-  devRef1.disable();
-  BOOST_CHECK_EQUAL(FunctionDeviceDisable, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-}
-
-BOOST_FIXTURE_TEST_CASE(testIncreaseValueDevice, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  dev1->increaseValue();
-  BOOST_CHECK_EQUAL(FunctionDeviceIncreaseValue, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  m_pFrameSender->setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, m_pApartment.get());
-  devRef1.increaseValue();
-  BOOST_CHECK_EQUAL(FunctionDeviceIncreaseValue, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-}
-
-BOOST_FIXTURE_TEST_CASE(testDecreaseValueDevice, TestModelFixture) {
-  m_pFrameSender->setLastFunctionID(-1);
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  dev1->decreaseValue();
-  BOOST_CHECK_EQUAL(FunctionDeviceDecreaseValue, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  m_pFrameSender->setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, m_pApartment.get());
-  devRef1.decreaseValue();
-  BOOST_CHECK_EQUAL(FunctionDeviceDecreaseValue, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-}
-
-BOOST_FIXTURE_TEST_CASE(testDecreaseValueZone, TestModelFixture) {
-  boost::shared_ptr<Zone> zone = m_pApartment->allocateZone(1);
-  zone->decreaseValue();
-  BOOST_CHECK_EQUAL(FunctionGroupDecreaseValue, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1()); // zone id
-  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter2()); // group id (broadcast)
-}
-
-BOOST_FIXTURE_TEST_CASE(testIncreaseValueZone, TestModelFixture) {
-  boost::shared_ptr<Zone> zone = m_pApartment->allocateZone(1);
-  zone->increaseValue();
-  BOOST_CHECK_EQUAL(FunctionGroupIncreaseValue, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1()); // zone id
-  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter2()); // group id (broadcast)
-}
-
-BOOST_FIXTURE_TEST_CASE(testStartDimUp, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  dev1->startDim(true);
-  BOOST_CHECK_EQUAL(FunctionDeviceStartDimInc, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  m_pFrameSender->setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, m_pApartment.get());
-  devRef1.startDim(true);
-  BOOST_CHECK_EQUAL(FunctionDeviceStartDimInc, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-}
-
-BOOST_FIXTURE_TEST_CASE(testStartDimDown, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  dev1->startDim(false);
-  BOOST_CHECK_EQUAL(FunctionDeviceStartDimDec, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  m_pFrameSender->setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, m_pApartment.get());
-  devRef1.startDim(false);
-  BOOST_CHECK_EQUAL(FunctionDeviceStartDimDec, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-}
-
-BOOST_FIXTURE_TEST_CASE(testEndDim, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  dev1->endDim();
-  BOOST_CHECK_EQUAL(FunctionDeviceEndDim, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  m_pFrameSender->setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, m_pApartment.get());
-  devRef1.endDim();
-  BOOST_CHECK_EQUAL(FunctionDeviceEndDim, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-}
-
-BOOST_FIXTURE_TEST_CASE(testCallSceneDevice, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  dev1->callScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
-  m_pFrameSender->setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, m_pApartment.get());
-  devRef1.callScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
-}
-
-BOOST_FIXTURE_TEST_CASE(testSaveSceneDevice, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  dev1->saveScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceSaveScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
-  m_pFrameSender->setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, m_pApartment.get());
-  devRef1.saveScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceSaveScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
-}
-
-BOOST_FIXTURE_TEST_CASE(testUndoSceneDevice, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  dev1->undoScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceUndoScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
-  m_pFrameSender->setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, m_pApartment.get());
-  devRef1.undoScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceUndoScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
-}
-
-BOOST_FIXTURE_TEST_CASE(testCallSceneGroup, TestModelFixture) {
-  boost::shared_ptr<Group> group = m_pApartment->getGroup(1);
-  group->callScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionGroupCallScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter1()); // zone 0
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter2()); // group 1
-  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter3());
-}
-
-BOOST_FIXTURE_TEST_CASE(testSaveSceneGroup, TestModelFixture) {
-  boost::shared_ptr<Group> group = m_pApartment->getGroup(1);
-  group->saveScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionGroupSaveScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter1()); // zone 0
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter2()); // group 1
-  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter3());
-}
-
-BOOST_FIXTURE_TEST_CASE(testUndoSceneGroup, TestModelFixture) {
-  boost::shared_ptr<Group> group = m_pApartment->getGroup(1);
-  group->undoScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionGroupUndoScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter1()); // zone 0
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter2()); // group 1
-  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter3());
-}
-
-BOOST_FIXTURE_TEST_CASE(testCallSceneZone, TestModelFixture) {
-  boost::shared_ptr<Zone> zone = m_pApartment->allocateZone(1);
-  zone->callScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionGroupCallScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1()); // zone 1
-  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter2()); // group 0
-  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter3());
-}
-
-BOOST_FIXTURE_TEST_CASE(testSaveSceneZone, TestModelFixture) {
-  boost::shared_ptr<Zone> zone = m_pApartment->allocateZone(1);
-  zone->saveScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionGroupSaveScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1()); // zone 1
-  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter2()); // group 0
-  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter3());
-}
-
-BOOST_FIXTURE_TEST_CASE(testUndoSceneZone, TestModelFixture) {
-  boost::shared_ptr<Zone> zone = m_pApartment->allocateZone(1);
-  zone->undoScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionGroupUndoScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1()); // zone 1
-  BOOST_CHECK_EQUAL(0x0, m_pFrameSender->getParameter2()); // group 0
-  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter3());
-}
-
-BOOST_FIXTURE_TEST_CASE(callUndoSceneSet, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  boost::shared_ptr<Device> dev2 = m_pApartment->allocateDevice(dsid_t(0,2));
-  dev2->setShortAddress(2);
-  Set set;
-  set.addDevice(dev1);
-  set.callScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
-  m_pFrameSender->setLastFunctionID(-1);
-}
-
-BOOST_FIXTURE_TEST_CASE(testSaveSceneSet, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  boost::shared_ptr<Device> dev2 = m_pApartment->allocateDevice(dsid_t(0,2));
-  dev2->setShortAddress(2);
-  Set set;
-  set.addDevice(dev1);
-  set.saveScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceSaveScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
-  m_pFrameSender->setLastFunctionID(-1);
-}
-
-BOOST_FIXTURE_TEST_CASE(testUndoSceneSet, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  boost::shared_ptr<Device> dev2 = m_pApartment->allocateDevice(dsid_t(0,2));
-  dev2->setShortAddress(2);
-  Set set;
-  set.addDevice(dev1);
-  set.undoScene(Scene1);
-  BOOST_CHECK_EQUAL(FunctionDeviceUndoScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  BOOST_CHECK_EQUAL(Scene1, m_pFrameSender->getParameter2());
-  m_pFrameSender->setLastFunctionID(-1);
-}
-
-BOOST_FIXTURE_TEST_CASE(testBlinkSet, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,2));
-  dev1->setShortAddress(2);
-  boost::shared_ptr<Device> dev2 = m_pApartment->allocateDevice(dsid_t(0,3));
-  dev2->setShortAddress(3);
-  Set set;
-  set.addDevice(dev1);
-  set.blink();
-  BOOST_CHECK_EQUAL(FunctionBlink, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  BOOST_CHECK_EQUAL(2, m_pFrameSender->getParameter2());
-  m_pFrameSender->setLastFunctionID(-1);
-}
-
-BOOST_FIXTURE_TEST_CASE(testNextSceneDevice, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  dev1->nextScene();
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  m_pFrameSender->setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, m_pApartment.get());
-  devRef1.nextScene();
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-}
-
-BOOST_FIXTURE_TEST_CASE(testPreviousSceneDevice, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(1);
-  dev1->previousScene();
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  m_pFrameSender->setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, m_pApartment.get());
-  devRef1.previousScene();
-  BOOST_CHECK_EQUAL(FunctionDeviceCallScene, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-}
-
-BOOST_FIXTURE_TEST_CASE(testBlinkDevice, TestModelFixture) {
-  boost::shared_ptr<Device> dev1 = m_pApartment->allocateDevice(dsid_t(0,1));
-  dev1->setShortAddress(2);
-  dev1->blink();
-  BOOST_CHECK_EQUAL(FunctionBlink, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  BOOST_CHECK_EQUAL(0x2, m_pFrameSender->getParameter2());
-  m_pFrameSender->setLastFunctionID(-1);
-  DeviceReference devRef1(dev1, m_pApartment.get());
-  devRef1.blink();
-  BOOST_CHECK_EQUAL(FunctionBlink, m_pFrameSender->getLastFunctionID());
-  BOOST_CHECK_EQUAL(0x1, m_pFrameSender->getParameter1());
-  BOOST_CHECK_EQUAL(0x2, m_pFrameSender->getParameter2());
-}
 
 BOOST_AUTO_TEST_CASE(testApartmentCreatesRootNode) {
   Apartment apt(NULL);
@@ -1130,7 +671,7 @@ BOOST_AUTO_TEST_CASE(testTags) {
   Apartment apt(NULL);
   PropertySystem syst;
   apt.setPropertySystem(&syst);
-  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsid_t(0,1));
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
 
   BOOST_CHECK_EQUAL(dev1->hasTag("aTag"), false);
 

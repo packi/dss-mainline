@@ -27,6 +27,8 @@
 
 namespace dss {
 
+  const dss_dsid_t NullDSID(0,0);
+
   std::string dsid::toString() const {
     std::stringstream sstream;
     sstream.fill('0');
@@ -37,8 +39,8 @@ namespace dss {
     return sstream.str();
   }
 
-  dsid_t dsid::fromString(const std::string& _string) {
-    dsid_t result;
+  dss_dsid_t dsid::fromString(const std::string& _string) {
+    dss_dsid_t result;
     std::string remainder = _string;
     result.upper = 0ll;
     result.lower = 0;

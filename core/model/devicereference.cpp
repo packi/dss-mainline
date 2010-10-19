@@ -35,7 +35,7 @@ namespace dss {
   {
   } // ctor(copy)
 
-  DeviceReference::DeviceReference(const dsid_t _dsid, const Apartment* _apartment)
+  DeviceReference::DeviceReference(const dss_dsid_t _dsid, const Apartment* _apartment)
   : m_DSID(_dsid),
     m_Apartment(_apartment)
   {
@@ -55,7 +55,7 @@ namespace dss {
     return m_Apartment->getDeviceByDSID(m_DSID);
   } // getDevice
 
-  dsid_t DeviceReference::getDSID() const {
+  dss_dsid_t DeviceReference::getDSID() const {
     return m_DSID;
   } // getID
 
@@ -75,32 +75,12 @@ namespace dss {
     getDevice()->decreaseValue();
   } // decreaseValue
 
-  void DeviceReference::enable() {
-    getDevice()->enable();
-  } // enable
-
-  void DeviceReference::disable() {
-    getDevice()->disable();
-  } // disable
-
-  void DeviceReference::startDim(const bool _directionUp) {
-    getDevice()->startDim(_directionUp);
-  } // startDim
-
-  void DeviceReference::endDim() {
-    getDevice()->endDim();
-  } // endDim
-
   void DeviceReference::setValue(const double _value) {
     getDevice()->setValue(_value);
   } // setValue
 
   bool DeviceReference::isOn() const {
     return getDevice()->isOn();
-  }
-
-  bool DeviceReference::hasSwitch() const {
-    return getDevice()->hasSwitch();
   }
 
   void DeviceReference::callScene(const int _sceneNr) {
@@ -111,8 +91,8 @@ namespace dss {
     getDevice()->saveScene(_sceneNr);
   } // saveScene
 
-  void DeviceReference::undoScene(const int _sceneNr) {
-    getDevice()->undoScene(_sceneNr);
+  void DeviceReference::undoScene() {
+    getDevice()->undoScene();
   } // undoScene
 
   unsigned long DeviceReference::getPowerConsumption() {

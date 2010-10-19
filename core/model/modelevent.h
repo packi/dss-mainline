@@ -26,6 +26,8 @@
 
 #include <vector>
 
+#include "core/ds485types.h"
+
 namespace dss {
 
   /** A Model event gets processed by the apartment asynchronously.
@@ -36,8 +38,8 @@ namespace dss {
     typedef enum { etCallSceneGroup,  /**< A group has changed the scene. */
                    etCallSceneDevice, /**< A device has changed the scene (only raised from the simulation at the moment). */
                    etNewDevice,       /**< A new device has been detected */
+                   etLostDevice,       /**< A device became inactive */
                    etModelDirty,      /**< A parameter that will be stored in \c apartment.xml has been changed. */
-                   etDSLinkInterrupt,  /**< An interrupt has occured */
                    etNewDSMeter, /**< A new dsMeter has joined the bus */
                    etLostDSMeter, /**< We've lost a dsMeter on the bus */
                    etDSMeterReady, /**< A dsMeter has completed its scanning cycle and is now ready */
@@ -54,6 +56,8 @@ namespace dss {
     ModelEvent(EventType _type)
     : m_EventType(_type)
     {}
+    
+    virtual ~ModelEvent() { }
 
     /** Adds an integer parameter. */
     void addParameter(const int _param) { m_Parameter.push_back(_param); }
@@ -65,6 +69,19 @@ namespace dss {
     /** Returns the type of the event. */
     EventType getEventType() { return m_EventType; }
   }; // ModelEvent
+
+  // TODO: use boost::any for values and remove this class
+  class ModelEventWithDSID : public ModelEvent {
+  public:
+    ModelEventWithDSID(EventType _type, const dss_dsid_t& _dsid) 
+    : ModelEvent(_type),
+      m_DSID(_dsid)
+    { }
+    
+    const dss_dsid_t& getDSID() { return m_DSID; }
+  private:
+    dss_dsid_t m_DSID;
+  }; // ModelEventWithDSID
 
 } // namespace dss
 

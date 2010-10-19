@@ -22,10 +22,10 @@
 
 #include "device.h"
 
-#include "core/ds485const.h"
-#include "core/model/modelconst.h"
-#include "core/model/busrequest.h"
+#include "core/businterface.h"
 #include "core/propertysystem.h"
+
+#include "core/model/modelconst.h"
 #include "core/model/scenehelper.h"
 #include "core/model/modelevent.h"
 #include "core/model/apartment.h"
@@ -38,7 +38,7 @@ namespace dss {
 
   const devid_t ShortAddressStaleDevice = 0xFFFF;
 
-  Device::Device(dsid_t _dsid, Apartment* _pApartment)
+  Device::Device(dss_dsid_t _dsid, Apartment* _pApartment)
   : AddressableModelItem(_pApartment),
     m_DSID(_dsid),
     m_ShortAddress(ShortAddressStaleDevice),
@@ -61,7 +61,8 @@ namespace dss {
       if(m_pApartment->getPropertyNode() != NULL) {
         m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/" + m_DSID.toString());
         m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
-        m_pPropertyNode->createProperty("DSMeterID")->linkToProxy(PropertyProxyMemberFunction<Device,int>(*this, &Device::getDSMeterID));
+        // TODO: bind meter dsid or create link to dsmeter
+//        m_pPropertyNode->createProperty("DSMeterID")->linkToProxy(PropertyProxyMemberFunction<Device,int>(*this, &Device::getDSMeterID));
         m_pPropertyNode->createProperty("ZoneID")->linkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
         if(m_pPropertyNode->getProperty("interrupt/mode") == NULL) {
           PropertyNodePtr interruptNode = m_pPropertyNode->createProperty("interrupt");
@@ -75,20 +76,6 @@ namespace dss {
       }
     }
   } // publishToPropertyTree
-
-  void Device::enable() {
-    boost::shared_ptr<EnableDeviceCommandBusRequest> request(new EnableDeviceCommandBusRequest());
-    boost::shared_ptr<AddressableModelItem> modelItem = shared_from_this();
-    request->setTarget(boost::dynamic_pointer_cast<Device>(modelItem));
-    m_pApartment->dispatchRequest(request);
-  } // enable
-
-  void Device::disable() {
-    boost::shared_ptr<DisableDeviceCommandBusRequest> request(new DisableDeviceCommandBusRequest());
-    boost::shared_ptr<AddressableModelItem> modelItem = shared_from_this();
-    request->setTarget(boost::dynamic_pointer_cast<Device>(modelItem));
-    m_pApartment->dispatchRequest(request);
-  } // disable
 
   bool Device::isOn() const {
     return (m_LastCalledScene != SceneOff) &&
@@ -121,10 +108,6 @@ namespace dss {
     m_RevisionID = _value;
   } // setRevisionID
 
-  bool Device::hasSwitch() const {
-    return getFunctionID() == FunctionIDSwitch;
-  } // hasSwitch
-
   void Device::setRawValue(const uint16_t _value, const int _parameterNr, const int _size) {
     if(m_pApartment->getDeviceBusInterface() != NULL) {
       m_pApartment->getDeviceBusInterface()->setValueDevice(*this, _value, _parameterNr, _size);
@@ -132,7 +115,7 @@ namespace dss {
   } // setRawValue
 
   double Device::getValue(const int _parameterNr) {
-    return m_pApartment->getDeviceBusInterface()->deviceGetParameterValue(m_ShortAddress, getDSMeterID(),  _parameterNr);
+    return m_pApartment->getDeviceBusInterface()->deviceGetParameterValue(m_ShortAddress, m_DSMeterDSID,  _parameterNr);
   } // getValue
 
   void Device::nextScene() {
@@ -176,23 +159,19 @@ namespace dss {
     m_LastDiscovered = DateTime();
   } // setShortAddress
 
-  dsid_t Device::getDSID() const {
+  dss_dsid_t Device::getDSID() const {
     return m_DSID;
   } // getDSID;
 
-  int Device::getDSMeterID() const {
-    if(m_DSMeterDSID != NullDSID) {
-      return m_pApartment->getDSMeterByDSID(m_DSMeterDSID)->getBusID();
-    } else {
-      return -1;
-    }
+  dss_dsid_t Device::getDSMeterDSID() const {
+    return m_DSMeterDSID;
   } // getDSMeterID
 
-  void Device::setLastKnownDSMeterDSID(const dsid_t& _value) {
+  void Device::setLastKnownDSMeterDSID(const dss_dsid_t& _value) {
     m_LastKnownMeterDSID = _value;
   } // setLastKnownDSMeterDSID
 
-  const dsid_t& Device::getLastKnownDSMeterDSID() const {
+  const dss_dsid_t& Device::getLastKnownDSMeterDSID() const {
     return m_LastKnownMeterDSID;
   } // getLastKnownDSMeterDSID
 
@@ -311,17 +290,6 @@ namespace dss {
   unsigned long Device::getPowerConsumption() {
     return m_Consumption;
   } // getPowerConsumption
-
-  uint8_t Device::dsLinkSend(uint8_t _value, bool _lastByte, bool _writeOnly) {
-    uint8_t flags = 0;
-    if(_lastByte) {
-      flags |= DSLinkSendLastByte;
-    }
-    if(_writeOnly) {
-      flags |= DSLinkSendWriteOnly;
-    }
-    return m_pApartment->getDeviceBusInterface()->dSLinkSend(getDSMeterID(), m_ShortAddress, _value, flags);
-  } // dsLinkSend
 
   int Device::getSensorValue(const int _sensorID) {
     return m_pApartment->getDeviceBusInterface()->getSensorValue(*this,_sensorID);

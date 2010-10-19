@@ -101,10 +101,10 @@ namespace dss {
     /** Returns a subset that contains all devices belonging to Zone \a _zoneName */
     Set getByZone(const std::string& _zoneName) const;
 
-    /** Returns a subset that contains all devices belonging to DSMeter \a _dsMeterID */
-    Set getByDSMeter(const int _dsMeterID) const;
     /** Returns a subset that contains all devices belonging to DSMeter \a _dsMeter */
     Set getByDSMeter(boost::shared_ptr<const DSMeter> _dsMeter) const;
+    /** Returns a subset that contains all devices belonging to DSMeter identified by \a _dsMeterDSID */
+    Set getByDSMeter(const dss_dsid_t& _dsMeterDSID) const;
 
     /** Returns a subset that contains all devices that have the presence state of \a _present */
     Set getByPresence(const bool _present) const;
@@ -115,11 +115,11 @@ namespace dss {
      */
     DeviceReference getByName(const std::string& _name) const;
     /** Returns the device indicated by \a _busid */
-    DeviceReference getByBusID(const devid_t _busid, const int _dsMeterID) const;
+    DeviceReference getByBusID(const devid_t _busid, const dss_dsid_t& _dsMeterID) const;
     DeviceReference getByBusID(const devid_t _busid, boost::shared_ptr<const DSMeter> _meter) const;
 
     /** Returns the device indicated by \a _dsid */
-    DeviceReference getByDSID(const dsid_t _dsid)  const;
+    DeviceReference getByDSID(const dss_dsid_t _dsid)  const;
 
     /** Returns the number of devices contained in this set */
     int length() const;

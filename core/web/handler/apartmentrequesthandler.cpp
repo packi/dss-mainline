@@ -23,7 +23,6 @@
 #include "apartmentrequesthandler.h"
 
 #include "core/foreach.h"
-#include "core/ds485const.h"
 #include "core/model/modelconst.h"
 
 #include "core/web/json.h"
@@ -43,7 +42,7 @@ namespace dss {
 
   //=========================================== ApartmentRequestHandler
 
-  ApartmentRequestHandler::ApartmentRequestHandler(Apartment& _apartment, 
+  ApartmentRequestHandler::ApartmentRequestHandler(Apartment& _apartment,
           ModelMaintenance& _modelMaintenance)
   : m_Apartment(_apartment), m_ModelMaintenance(_modelMaintenance)
   { }
@@ -67,14 +66,14 @@ namespace dss {
 
     return success();
   }
- 
+
   boost::shared_ptr<JSONObject> ApartmentRequestHandler::removeMeter(const RestfulRequest& _request) {
     std::string dsidStr = _request.getParameter("dsid");
     if(dsidStr.empty()) {
       return failure("Missing dsid");
     }
 
-    dsid_t meterID = dsid::fromString(dsidStr);
+    dss_dsid_t meterID = dsid::fromString(dsidStr);
 
     boost::shared_ptr<DSMeter> meter = DSS::getInstance()->getApartment().getDSMeterByDSID(meterID);
 
@@ -154,11 +153,10 @@ namespace dss {
           circuits->addElement("", circuit);
           circuit->addProperty("name", dsMeter->getName());
           circuit->addProperty("dsid", dsMeter->getDSID().toString());
-          circuit->addProperty("busID", dsMeter->getBusID());
           circuit->addProperty("hwVersion", dsMeter->getHardwareVersion());
           circuit->addProperty("swVersion", dsMeter->getSoftwareVersion());
+          circuit->addProperty("apiVersion", dsMeter->getApiVersion());
           circuit->addProperty("hwName", dsMeter->getHardwareName());
-          circuit->addProperty("deviceType", dsMeter->getDeviceType());
           circuit->addProperty("isPresent", dsMeter->isPresent());
         }
         return success(resultObj);

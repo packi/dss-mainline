@@ -36,7 +36,7 @@ namespace dss {
   class DSIDJSCreator : public DSIDCreator {
   public:
     DSIDJSCreator(const std::vector<std::string>& _fileNames, const std::string& _pluginName, DSSim& _simulator);
-    virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter);
+    virtual DSIDInterface* createDSID(const dss_dsid_t _dsid, const devid_t _shortAddress, const DSMeterSim& _dsMeter);
   private:
     boost::scoped_ptr<ScriptEnvironment> m_pScriptEnvironment;
     std::vector<std::string> m_FileNames;

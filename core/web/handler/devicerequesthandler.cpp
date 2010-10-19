@@ -26,6 +26,7 @@
 
 #include "core/model/apartment.h"
 #include "core/model/device.h"
+#include "core/model/group.h"
 
 #include "core/web/json.h"
 
@@ -61,7 +62,7 @@ namespace dss {
     std::string deviceDSIDString = _request.getParameter("dsid");
     if(!deviceDSIDString.empty()) {
       try {
-        dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
+        dss_dsid_t deviceDSID = dss_dsid_t::fromString(deviceDSIDString);
         try {
           result = m_Apartment.getDeviceByDSID(deviceDSID);
         } catch(std::runtime_error& e) {
@@ -166,12 +167,6 @@ namespace dss {
       std::vector<std::string> tags = pDevice->getTags();
       std::for_each(tags.begin(), tags.end(), boost::bind(&JSONArray<std::string>::add, tagsObj.get(), _1));
       return success(resultObj);
-    } else if(_request.getMethod() == "enable") {
-      pDevice->enable();
-      return success();
-    } else if(_request.getMethod() == "disable") {
-      pDevice->disable();
-      return success();
     } else if(_request.getMethod() == "lock") {
       if (!pDevice->isPresent()) {
         return failure("Device is not present");

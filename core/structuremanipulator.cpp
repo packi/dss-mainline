@@ -22,7 +22,7 @@
 
 #include "structuremanipulator.h"
 
-#include "DS485Interface.h"
+#include "businterface.h"
 #include "mutex.h"
 #include "core/model/device.h"
 #include "core/model/apartment.h"
@@ -39,7 +39,7 @@ namespace dss {
     if(!_dsMeter->isPresent()) {
       throw std::runtime_error("Need dsMeter to be present");
     }
-    m_Interface.createZone(_dsMeter->getBusID(), _zone->getID());
+    m_Interface.createZone(_dsMeter->getDSID(), _zone->getID());
     _zone->addToDSMeter(_dsMeter);
     _zone->setIsPresent(true);
   } // createZone
@@ -50,11 +50,12 @@ namespace dss {
       throw std::runtime_error("Need device to be present");
     }
     int oldZoneID = _device->getZoneID();
-    boost::shared_ptr<DSMeter> targetDSMeter = m_Apartment.getDSMeterByBusID(_device->getDSMeterID());
+    boost::shared_ptr<DSMeter> targetDSMeter = m_Apartment.getDSMeterByDSID(_device->getDSMeterDSID());
     if(!_zone->registeredOnDSMeter(targetDSMeter)) {
       createZone(targetDSMeter, _zone);
     }
-    m_Interface.setZoneID(targetDSMeter->getBusID(), _device->getShortAddress(), _zone->getID());
+
+    m_Interface.setZoneID(targetDSMeter->getDSID(), _device->getShortAddress(), _zone->getID());
     _device->setZoneID(_zone->getID());
     DeviceReference ref(_device, &m_Apartment);
     _zone->addDevice(ref);
@@ -81,8 +82,9 @@ namespace dss {
     if(presentDevicesInZoneOfDSMeter.length() != 0) {
       throw std::runtime_error("cannot delete zone if there are still devices present");
     }
-    if(_zone->getFirstZoneOnDSMeter() != _dsMeter->getBusID()) {
-      m_Interface.removeZone(_dsMeter->getBusID(), _zone->getID());
+    if(_zone->getFirstZoneOnDSMeter() != _dsMeter->getDSID()) {
+
+      m_Interface.removeZone(_dsMeter->getDSID(), _zone->getID());
       _zone->removeFromDSMeter(_dsMeter);
       if(_zone->isRegisteredOnAnyMeter()) {
         _zone->setIsPresent(false);
@@ -93,7 +95,7 @@ namespace dss {
   } // removeZoneOnDSMeter
 
   void StructureManipulator::removeInactiveDevices(boost::shared_ptr<DSMeter> _dsMeter) {
-    m_Interface.removeInactiveDevices(_dsMeter->getBusID());
+    m_Interface.removeInactiveDevices(_dsMeter->getDSID());
   }
 
 } // namespace dss

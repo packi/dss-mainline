@@ -43,12 +43,6 @@ namespace dss {
     /** Decreases the main value (e.g. brightness) */
     virtual void decreaseValue() = 0;
 
-    /** Starts dimming the given parameter.
-     * If _directionUp is true, the value gets increased over time. Else its getting decreased.
-     */
-    virtual void startDim(const bool _directionUp) = 0;
-    /** Stops the dimming */
-    virtual void endDim() = 0;
     /** Sets the value of the given parameter */
     virtual void setValue(const double _value) = 0;
 
@@ -63,7 +57,7 @@ namespace dss {
     virtual void saveScene(const int _sceneNr) = 0;
     /** Restores the last set value of _sceneNr
      */
-    virtual void undoScene(const int _sceneNr) = 0;
+    virtual void undoScene() = 0;
 
     /** Returns the consumption in mW */
     virtual unsigned long getPowerConsumption() = 0;

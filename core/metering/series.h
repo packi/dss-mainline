@@ -170,7 +170,7 @@ namespace dss {
     QueueType m_Values;
   private:
     std::string m_Comment;
-    dsid_t m_FromDSID;
+    dss_dsid_t m_FromDSID;
     std::string m_Unit;
     Properties m_Properties;
   public:
@@ -250,8 +250,8 @@ namespace dss {
 
     const std::string& getComment() const { return m_Comment; }
     void setComment(const std::string& _value) { m_Comment = _value; }
-    const dsid_t& getFromDSID() const { return m_FromDSID; }
-    void setFromDSID(const dsid_t& _value) { m_FromDSID = _value; }
+    const dss_dsid_t& getFromDSID() const { return m_FromDSID; }
+    void setFromDSID(const dss_dsid_t& _value) { m_FromDSID = _value; }
     const std::string getUnit() const { return m_Unit; }
     void setUnit(const std::string& _value) { m_Unit = _value; }
     bool has(const std::string& _key) const { return m_Properties.has(_key); }

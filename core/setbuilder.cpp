@@ -64,8 +64,8 @@ namespace dss {
     return strToInt(trim(readParameter(_index)));
   } // readInt
 
-  dsid_t SetBuilder::readDSID(unsigned int& _index) {
-    return dsid_t::fromString(trim(readParameter(_index)));
+  dss_dsid_t SetBuilder::readDSID(unsigned int& _index) {
+    return dss_dsid_t::fromString(trim(readParameter(_index)));
   } // readDSID
 
   std::string SetBuilder::readString(unsigned int& _index) {
@@ -90,7 +90,7 @@ namespace dss {
     Set result;
 
     if(_functionName == "dsid") {
-      dsid_t dsid = readDSID(_index);
+      dss_dsid_t dsid = readDSID(_index);
       result.addDevice(_set.getByDSID(dsid));
     } else if(_functionName == "zone") {
       if(m_SetDescription[_index] == '\'') {
@@ -132,7 +132,7 @@ namespace dss {
           std::string name = readString(_index);
           result.addDevice(m_Apartment.getDeviceByName(name));
         } else {
-          dsid_t dsid = readDSID(_index);
+          dss_dsid_t dsid = readDSID(_index);
           result.addDevice(m_Apartment.getDeviceByDSID(dsid));
         }
       } while(m_SetDescription[_index] == ',');

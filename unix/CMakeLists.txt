@@ -3,6 +3,6 @@ IF(WITH_GCOV)
 ENDIF(WITH_GCOV)
 
 
-file(GLOB files *.cpp)
+set(files thread.cpp systeminfo.cpp)
 
 add_library(unix ${files})

@@ -23,6 +23,8 @@
 #ifndef DS485GROUPSCENECONST_H_
 #define DS485GROUPSCENECONST_H_
 
+#include <stdint.h>
+
 namespace dss {
 
   // Scene constants for devices
@@ -70,7 +72,7 @@ namespace dss {
   const int GroupIDWhite = 9;
   const int GroupIDDisplay = 10;
   const int GroupIDStandardMax = GroupIDDisplay;
-  const int GroupIDMax = 64;
+  const int GroupIDMax = 63;
 
 } // namespace dss
 #endif

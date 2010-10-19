@@ -45,12 +45,12 @@ namespace dss {
                  public boost::noncopyable {
   private:
     std::string m_Name;
-    dsid_t m_DSID;
+    dss_dsid_t m_DSID;
     devid_t m_ShortAddress;
     int m_ZoneID;
     int m_LastKnownZoneID;
-    dsid_t m_DSMeterDSID;
-    dsid_t m_LastKnownMeterDSID;
+    dss_dsid_t m_DSMeterDSID;
+    dss_dsid_t m_LastKnownMeterDSID;
     std::bitset<63> m_GroupBitmask;
     std::vector<int> m_Groups;
     int m_FunctionID;
@@ -71,11 +71,8 @@ namespace dss {
     void dirty();
   public:
     /** Creates and initializes a device. */
-    Device(const dsid_t _dsid, Apartment* _pApartment);
+    Device(const dss_dsid_t _dsid, Apartment* _pApartment);
     virtual ~Device() {};
-
-    void enable();
-    void disable();
 
     /** @copydoc DeviceReference::isOn() */
     virtual bool isOn() const;
@@ -95,7 +92,6 @@ namespace dss {
     int getFunctionID() const;
     /** Sets the functionID to \a _value */
     void setFunctionID(const int _value);
-    bool hasSwitch() const;
 
     /** Returns the Product ID of the device.
      * The Product ID identifies the manufacturer and type of device.
@@ -156,11 +152,12 @@ namespace dss {
     /** Sets the short-address of the device. */
     void setShortAddress(const devid_t _shortAddress);
     /** Returns the DSID of the device */
-    dsid_t getDSID() const;
-    /** Returns the id of the dsMeter the device is connected to */
-    int getDSMeterID() const;
-    const dsid_t& getLastKnownDSMeterDSID() const;
-    void setLastKnownDSMeterDSID(const dsid_t& _value);
+    dss_dsid_t getDSID() const;
+    /** Returns the DSID of the dsMeter the device is connected to */
+    dss_dsid_t getDSMeterDSID() const;
+
+    const dss_dsid_t& getLastKnownDSMeterDSID() const;
+    void setLastKnownDSMeterDSID(const dss_dsid_t& _value);
     void setDSMeter(boost::shared_ptr<DSMeter> _dsMeter);
 
     /** Returns the zone ID the device resides in. */
@@ -178,9 +175,6 @@ namespace dss {
 
     virtual unsigned long getPowerConsumption();
 
-    /** Sends a byte to the device using dsLink. If \a _writeOnly is \c true,
-     * the result of the function is not defined. */
-    uint8_t dsLinkSend(uint8_t _value, bool _lastByte, bool _writeOnly);
     int getSensorValue(const int _sensorID);
 
     const PropertyNodePtr& getPropertyNode() const { return m_pPropertyNode; }

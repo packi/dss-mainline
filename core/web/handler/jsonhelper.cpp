@@ -42,12 +42,11 @@ namespace dss {
 
     boost::shared_ptr<JSONObject> result(new JSONObject());
     result->addProperty("id", _device.getDSID().toString());
-    result->addProperty("isSwitch", _device.hasSwitch());
     result->addProperty("name", _device.getName());
     result->addProperty("functionID", _device.getFunctionID());
     result->addProperty("productRevision", _device.getDevice()->getRevisionID());
     result->addProperty("productID", _device.getDevice()->getProductID());
-    result->addProperty("circuitID", _device.getDevice()->getDSMeterID());
+    result->addProperty("meterDSID", _device.getDevice()->getDSMeterDSID().toString());
     result->addProperty("busID", _device.getDevice()->getShortAddress());
     result->addProperty("isPresent", _device.getDevice()->isPresent());
 
@@ -92,8 +91,8 @@ namespace dss {
     result->addProperty("id", _zone.getID());
     result->addProperty("name", _zone.getName());
     result->addProperty("isPresent", _zone.isPresent());
-    if(_zone.getFirstZoneOnDSMeter() != -1) {
-      result->addProperty("firstZoneOnDSMeter", _zone.getFirstZoneOnDSMeter());
+    if(_zone.getFirstZoneOnDSMeter() != NullDSID) {
+      result->addProperty("firstZoneOnDSMeter", _zone.getFirstZoneOnDSMeter().toString());
     }
 
     if(_includeDevices) {

@@ -59,15 +59,6 @@ namespace dss {
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
       .withDocumentation("Disables all devices of the apartment.", "A disabled device will react only to an enable call. If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsApartment.addMethod("startDim")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withParameter("direction", "string", false)
-      .withDocumentation("Starts dimming the devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsApartment.addMethod("endDim")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Stops dimming the devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("setValue")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
@@ -145,15 +136,6 @@ namespace dss {
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
       .withDocumentation("Disables all devices in the zone.", "Disabled devices will react only to a enable call. If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsZone.addMethod("startDim")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withParameter("direction", "string", false)
-      .withDocumentation("Starts dimming the main value of all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
-    clsZone.addMethod("endDim")
-      .withParameter("groupID", "integer", false)
-      .withParameter("groupName", "string", false)
-      .withDocumentation("Stops dimming of all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("setValue")
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
@@ -206,11 +188,6 @@ namespace dss {
       .withDocumentation("Enables the device.");
     clsDevice.addMethod("disable")
       .withDocumentation("Disables the device.", "A disabled device will only react to enable calls.");
-    clsDevice.addMethod("startDim")
-      .withParameter("direction", "string", false)
-      .withDocumentation("Starts dimming the device.", "If direction equals 'up' it will dim up, otherwise down.");
-    clsDevice.addMethod("endDim")
-      .withDocumentation("Stops dimming.");
     clsDevice.addMethod("setValue")
       .withParameter("value", "double", true)
       .withDocumentation("Sets the output value of the device to value");
@@ -351,11 +328,6 @@ namespace dss {
         .withDocumentation("Enables all devices of the set.");
     clsSet.addMethod("disable")
         .withDocumentation("Disables all devices of the set.", "A disabled device will react only to an enable call.");
-    clsSet.addMethod("startDim")
-      .withParameter("direction", "string", false)
-      .withDocumentation("Starts dimming the devices of the set.");
-    clsSet.addMethod("endDim")
-      .withDocumentation("Stops dimming the devices of the set.");
     clsSet.addMethod("setValue")
       .withParameter("value", "integer", true)
       .withDocumentation("Sets the output value of all devices of the set to value.");

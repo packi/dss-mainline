@@ -27,12 +27,10 @@
 #include <boost/filesystem.hpp>
 
 #include "core/sim/dssim.h"
-#include "core/ds485/ds485proxy.h"
 #include "core/model/modelmaintenance.h"
 #include "core/model/apartment.h"
 #include "core/model/set.h"
-#include "core/ds485/businterfacehandler.h"
-#include "core/ds485/ds485busrequestdispatcher.h"
+#include "core/sim/businterface/simbusinterface.h"
 
 using namespace dss;
 
@@ -48,7 +46,7 @@ BOOST_AUTO_TEST_CASE(testConstruction) {
 
 class DummyDevice : public DSIDInterface {
 public:
-  DummyDevice(const DSDSMeterSim& _simulator, dsid_t _dsid, devid_t _shortAddress)
+  DummyDevice(const DSMeterSim& _simulator, dss_dsid_t _dsid, devid_t _shortAddress)
   : DSIDInterface(_simulator, _dsid, _shortAddress),
     m_Parameter(-2)
   { }
@@ -61,16 +59,8 @@ public:
     functionCalled("saveScene", _sceneNr);
   }
 
-  virtual void undoScene(const int _sceneNr) {
-    functionCalled("undoScene", _sceneNr);
-  }
-
-  virtual void increaseValue(const int _parameterNr = -1) {
-    functionCalled("increaseValue", _parameterNr);
-  }
-
-  virtual void decreaseValue(const int _parameterNr = -1) {
-    functionCalled("decreaseValue", _parameterNr);
+  virtual void undoScene() {
+    functionCalled("undoScene");
   }
 
   virtual void enable() {
@@ -84,14 +74,6 @@ public:
   virtual int getConsumption() {
     functionCalled("getConsumption");
     return 77;
-  }
-
-  virtual void startDim(bool _directionUp, const int _parameterNr = -1) {
-    functionCalled("startDim", _directionUp);
-  }
-
-  virtual void endDim(const int _parameterNr = -1) {
-    functionCalled("endDim");
   }
 
   virtual void setValue(const double _value, int _parameterNr = -1) {
@@ -143,7 +125,7 @@ public:
 
   virtual ~DummyCreator() {};
 
-  virtual DSIDInterface* createDSID(const dsid_t _dsid, const devid_t _shortAddress, const DSDSMeterSim& _dsMeter) {
+  virtual DSIDInterface* createDSID(const dss_dsid_t _dsid, const devid_t _shortAddress, const DSMeterSim& _dsMeter) {
     return new DummyDevice(_dsMeter, _dsid, _shortAddress);
   }
 };
@@ -158,20 +140,6 @@ public:
     m_pSimulation.reset(new DSSim(NULL));
     m_pSimulation->initialize();
     m_pSimulation->getDSIDFactory().registerCreator(new DummyCreator());
-
-    m_pBusInterfaceHandler.reset(new BusInterfaceHandler(NULL, *m_pModelMaintenance));
-    m_pBusInterfaceHandler->initialize();
-    m_pBusInterfaceHandler->start();
-
-    m_pDS485Proxy.reset(new DS485Proxy(NULL, m_pModelMaintenance.get(), m_pSimulation.get()));
-    m_pDS485Proxy->setInitializeDS485Controller(false);
-    m_pDS485Proxy->setBusInterfaceHandler(m_pBusInterfaceHandler.get());
-    m_pDS485Proxy->initialize();
-
-    m_pBusRequestDispatcher.reset(new DS485BusRequestDispatcher());
-    m_pBusRequestDispatcher->setFrameSender(m_pDS485Proxy->getFrameSenderInterface());
-
-    m_pApartment->setBusRequestDispatcher(m_pBusRequestDispatcher.get());
 
     std::string fileName = getTempDir() + "/sim.xml";
     std::ofstream ofs(fileName.c_str());
@@ -188,8 +156,10 @@ public:
     m_pSimulation->loadFromFile(fileName);
     fs::remove(fileName);
 
-    m_pModelMaintenance->setFrameSenderInterface(m_pDS485Proxy->getFrameSenderInterface());
-    m_pModelMaintenance->setStructureQueryBusInterface(m_pDS485Proxy->getStructureQueryBusInterface());
+    m_pBusInterface.reset(new SimBusInterface(m_pSimulation));
+    m_pApartment->setBusInterface(m_pBusInterface.get());
+
+    m_pModelMaintenance->setStructureQueryBusInterface(m_pBusInterface->getStructureQueryBusInterface());
     m_pModelMaintenance->initialize();
     m_pModelMaintenance->start();
 
@@ -199,11 +169,10 @@ public:
 
     sleepMS(100);
 
-    m_ValidDSID = DSSim::makeSimulatedDSID(dsid_t(0, 0x11));
+    m_ValidDSID = DSSim::makeSimulatedDSID(dss_dsid_t(0, 0x11));
   }
 
   ~Fixture() {
-    m_pBusInterfaceHandler->shutdown();
     m_pModelMaintenance->shutdown();
     sleepMS(60);
   }
@@ -211,10 +180,8 @@ protected:
   boost::shared_ptr<Apartment> m_pApartment;
   boost::shared_ptr<ModelMaintenance> m_pModelMaintenance;
   boost::shared_ptr<DSSim> m_pSimulation;
-  boost::shared_ptr<BusInterfaceHandler> m_pBusInterfaceHandler;
-  boost::shared_ptr<DS485Proxy> m_pDS485Proxy;
-  boost::shared_ptr<DS485BusRequestDispatcher> m_pBusRequestDispatcher;
-  dsid_t m_ValidDSID;
+  boost::shared_ptr<SimBusInterface> m_pBusInterface;
+  dss_dsid_t m_ValidDSID;
 };
 
 BOOST_FIXTURE_TEST_CASE(testFixtureWorks, Fixture) {

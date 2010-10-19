@@ -38,7 +38,6 @@ using namespace stdext;
 
 #include "core/logger.h"
 #include "core/foreach.h"
-#include "core/ds485const.h"
 #include "core/model/modelconst.h"
 
 #include "device.h"
@@ -152,18 +151,18 @@ namespace dss {
     }
   } // getByZone(name)
 
-  Set Set::getByDSMeter(const int _dsMeterID) const {
+  Set Set::getByDSMeter(boost::shared_ptr<const DSMeter> _dsMeter) const {
+    return getByDSMeter(_dsMeter->getDSID());
+  } // getByDSMeter
+
+  Set Set::getByDSMeter(const dss_dsid_t& _dsMeterDSID) const {
     Set result;
     foreach(const DeviceReference& dev, m_ContainedDevices) {
-      if(dev.getDevice()->getDSMeterID() == _dsMeterID) {
+      if(dev.getDevice()->getDSMeterDSID() == _dsMeterDSID) {
         result.addDevice(dev);
       }
     }
     return result;
-  } // getByDSMeter
-
-  Set Set::getByDSMeter(boost::shared_ptr<const DSMeter> _dsMeter) const {
-    return getByDSMeter(_dsMeter->      getBusID());
   } // getByDSMeter
 
   Set Set::getByFunctionID(const int _functionID) const {
@@ -220,21 +219,21 @@ namespace dss {
   class ByIDSelector : public IDeviceSelector {
   private:
     const devid_t m_ID;
-    const int m_DSMeterID;
+    const dss_dsid_t& m_DSMeterID;
   public:
-    ByIDSelector(const devid_t _id, const int _dsMeterID)
+    ByIDSelector(const devid_t _id, const dss_dsid_t& _dsMeterID)
     : m_ID(_id), m_DSMeterID(_dsMeterID)
     {}
     virtual ~ByIDSelector() {};
 
     virtual bool selectDevice(boost::shared_ptr<const Device> _device) const {
       return (_device->getShortAddress() == m_ID) &&
-             (_device->getDSMeterID() == m_DSMeterID);
+             (_device->getDSMeterDSID() == m_DSMeterID);
     }
   };
 
-  DeviceReference Set::getByBusID(const devid_t _id, const int _dsMeterID) const {
-    Set resultSet = getSubset(ByIDSelector(_id, _dsMeterID));
+  DeviceReference Set::getByBusID(const devid_t _id, const dss_dsid_t& _dsid) const {
+    Set resultSet = getSubset(ByIDSelector(_id, _dsid));
     if(resultSet.length() == 0) {
       throw ItemNotFoundException(std::string("with busid ") + intToString(_id));
     }
@@ -242,14 +241,14 @@ namespace dss {
   } // getByBusID
 
   DeviceReference Set::getByBusID(const devid_t _busid, boost::shared_ptr<const DSMeter> _meter) const {
-    return getByBusID(_busid, _meter->getBusID());
+    return getByBusID(_busid, _meter->getDSID());
   } // getByBusID
 
   class ByDSIDSelector : public IDeviceSelector {
   private:
-    const dsid_t m_ID;
+    const dss_dsid_t m_ID;
   public:
-    ByDSIDSelector(const dsid_t _id) : m_ID(_id) {}
+    ByDSIDSelector(const dss_dsid_t _id) : m_ID(_id) {}
     virtual ~ByDSIDSelector() {};
 
     virtual bool selectDevice(boost::shared_ptr<const Device> _device) const {
@@ -257,7 +256,7 @@ namespace dss {
     }
   };
 
-  DeviceReference Set::getByDSID(const dsid_t _dsid) const {
+  DeviceReference Set::getByDSID(const dss_dsid_t _dsid) const {
     Set resultSet = getSubset(ByDSIDSelector(_dsid));
     if(resultSet.length() == 0) {
       throw ItemNotFoundException("with dsid " + _dsid.toString());

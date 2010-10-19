@@ -24,7 +24,7 @@
 
 #include "core/web/json.h"
 
-#include "core/DS485Interface.h"
+#include "core/businterface.h"
 #include "core/structuremanipulator.h"
 
 #include "core/model/apartment.h"
@@ -38,7 +38,7 @@ namespace dss {
 
 
   //=========================================== StructureRequestHandler
-  
+
   StructureRequestHandler::StructureRequestHandler(Apartment& _apartment, ModelMaintenance& _modelMaintenance, StructureModifyingBusInterface& _interface)
   : m_Apartment(_apartment),
     m_ModelMaintenance(_modelMaintenance),
@@ -49,7 +49,7 @@ namespace dss {
     StructureManipulator manipulator(m_Interface, m_Apartment);
     std::string deviceIDStr = _request.getParameter("deviceID");
     if(!deviceIDStr.empty()) {
-      dsid_t deviceID = dsid::fromString(deviceIDStr);
+      dss_dsid_t deviceID = dsid::fromString(deviceIDStr);
 
       boost::shared_ptr<Device> dev = DSS::getInstance()->getApartment().getDeviceByDSID(deviceID);
       if(!dev->isPresent()) {
@@ -102,7 +102,7 @@ namespace dss {
     if(zoneID != -1) {
       try {
         boost::shared_ptr<Zone> zone = m_Apartment.getZone(zoneID);
-        if(zone->getFirstZoneOnDSMeter() != -1) {
+        if(zone->getFirstZoneOnDSMeter() != NullDSID) {
           return failure("Cannot delete a primary zone");
         }
         if(zone->getDevices().length() > 0) {
@@ -115,14 +115,14 @@ namespace dss {
         return failure("Could not find zone");
       }
     }
-  
+
     return failure("Missing parameter zoneID");
   }
 
   boost::shared_ptr<JSONObject> StructureRequestHandler::removeDevice(const RestfulRequest& _request) {
     std::string deviceIDStr = _request.getParameter("deviceID");
     if(!deviceIDStr.empty()) {
-      dsid_t deviceID = dsid::fromString(deviceIDStr);
+      dss_dsid_t deviceID = dsid::fromString(deviceIDStr);
 
       boost::shared_ptr<Device> dev = DSS::getInstance()->getApartment().getDeviceByDSID(deviceID);
       if(dev->isPresent()) {
@@ -144,7 +144,7 @@ namespace dss {
       return failure("Missing parameter id");
     }
 
-    dsid_t dID = dsid::fromString(id);
+    dss_dsid_t dID = dsid::fromString(id);
 
     boost::shared_ptr<DSMeter> dsMeter = m_Apartment.getDSMeterByDSID(dID);
 

@@ -35,7 +35,6 @@ namespace dss {
   class Apartment;
   class Event;
   class Metering;
-  class FrameSenderInterface;
   class StructureQueryBusInterface;
 
   class ModelMaintenance : public ThreadedSubsystem {
@@ -58,14 +57,13 @@ namespace dss {
     bool isInitializing() const { return m_IsInitializing; }
     void setApartment(Apartment* _value);
     void setMetering(Metering* _value);
-    void setFrameSenderInterface(FrameSenderInterface* _value);
     void setStructureQueryBusInterface(StructureQueryBusInterface* _value);
   protected:
     virtual void doStart();
   private:
     void handleModelEvents();
     void eraseModelEventsFromQueue(ModelEvent::EventType _type);
-    void dsMeterReady(int _dsMeterBusID);
+    void dsMeterReady(const dss_dsid_t& _dsMeterBusID);
     void discoverDS485Devices();
     void waitForInterface();
 
@@ -74,19 +72,18 @@ namespace dss {
 
     void raiseEvent(boost::shared_ptr<Event> _pEvent);
 
-    void onDeviceCallScene(const int _dsMeterID, const int _deviceID, const int _sceneID);
-    void onAddDevice(const int _modID, const int _zoneID, const int _devID, const int _functionID);
-    void onDSLinkInterrupt(const int _modID, const int _devID, const int _priority);
+    void onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _sceneID);
+    void onAddDevice(const dss::dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID);
+    void onRemoveDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID);
   private:
     bool m_IsInitializing;
-    
+
     boost::ptr_vector<ModelEvent> m_ModelEvents;
     Mutex m_ModelEventsMutex;
     SyncEvent m_NewModelEvent;
     Apartment* m_pApartment;
     Metering* m_pMetering;
     const int m_EventTimeoutMS;
-    FrameSenderInterface* m_pFrameSenderInterface;
     StructureQueryBusInterface* m_pStructureQueryBusInterface;
   }; // ModelMaintenance
 

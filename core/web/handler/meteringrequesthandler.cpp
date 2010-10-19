@@ -96,7 +96,7 @@ namespace dss {
     int resolution;
     bool energy;
     if(!deviceDSIDString.empty()) {
-      dsid_t deviceDSID = dsid_t::fromString(deviceDSIDString);
+      dss_dsid_t deviceDSID = dss_dsid_t::fromString(deviceDSIDString);
       if(!(deviceDSID == NullDSID)) {
         try {
           m_Apartment.getDSMeterByDSID(deviceDSID);
@@ -208,9 +208,9 @@ namespace dss {
           return failure("Invalid dsid in 'from' value: " + strId);
         }
 
-        dsid_t dsid;
+        dss_dsid_t dsid;
         try {
-          dsid = dsid_t::fromString(strId);
+          dsid = dss_dsid_t::fromString(strId);
         } catch(std::invalid_argument&) {
           return failure("Invalid dsid in 'from' value: " + strId);
         }

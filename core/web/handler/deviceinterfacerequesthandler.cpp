@@ -47,17 +47,6 @@ namespace dss {
     } else if(_request.getMethod() == "decreaseValue") {
       _interface->decreaseValue();
       return success();
-    } else if(_request.getMethod() == "startDim") {
-      std::string direction = _request.getParameter("direction");
-      if(direction == "up") {
-        _interface->startDim(true);
-      } else {
-        _interface->startDim(false);
-      }
-      return success();
-    } else if(_request.getMethod() == "endDim") {
-      _interface->endDim();
-      return success();
     } else if(_request.getMethod() == "setValue") {
       std::string valueStr = _request.getParameter("value");
       int value = strToIntDef(valueStr, -1);
@@ -86,13 +75,7 @@ namespace dss {
       }
       return success();
     } else if(_request.getMethod() == "undoScene") {
-      std::string sceneStr = _request.getParameter("sceneNumber");
-      int sceneID = strToIntDef(sceneStr, -1);
-      if(sceneID != -1) {
-        _interface->undoScene(sceneID);
-      } else {
-        return failure("Invalid sceneNumber: '" + sceneStr + "'");
-      }
+      _interface->undoScene();
       return success();
     } else if(_request.getMethod() == "getConsumption") {
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
@@ -110,8 +93,6 @@ namespace dss {
         || _request.getMethod() == "turnOff"
         || _request.getMethod() == "increaseValue"
         || _request.getMethod() == "decreaseValue"
-        || _request.getMethod() == "startDim"
-        || _request.getMethod() == "endDim"
         || _request.getMethod() == "setValue"
         || _request.getMethod() == "callScene"
         || _request.getMethod() == "saveScene"

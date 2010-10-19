@@ -42,9 +42,9 @@ namespace dss {
     if(idString.empty()) {
       return failure("Missing parameter id");
     }
-    dsid_t dsid = NullDSID;
+    dss_dsid_t dsid = NullDSID;
     try {
-      dsid = dsid_t::fromString(idString);
+      dsid = dss_dsid_t::fromString(idString);
     } catch(std::invalid_argument&) {
       return failure("Could not parse dsid");
     }

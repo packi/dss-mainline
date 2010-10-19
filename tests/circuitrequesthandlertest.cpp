@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_SUITE(WebCircuit)
 class Fixture : public WebFixture {
 public:
   Fixture() {
-    m_ValidDSID = dsid_t(0, 1);
+    m_ValidDSID = dss_dsid_t(0, 1);
     m_ValidName = "mod";
     m_BorderOrange = 55;
     m_BorderRed = 100;
@@ -56,7 +56,7 @@ protected:
   boost::shared_ptr<ModelMaintenance> m_pMaintenance;
   boost::shared_ptr<CircuitRequestHandler> m_pHandler;
   HashMapConstStringString m_Params;
-  dsid_t m_ValidDSID;
+  dss_dsid_t m_ValidDSID;
   std::string m_ValidName;
   int m_BorderOrange;
   int m_BorderRed;

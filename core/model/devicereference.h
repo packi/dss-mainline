@@ -40,12 +40,12 @@ namespace dss {
    */
   class DeviceReference : public IDeviceInterface {
   private:
-    dsid_t m_DSID;
+    dss_dsid_t m_DSID;
     const Apartment* m_Apartment;
   public:
     /** Copy constructor */
     DeviceReference(const DeviceReference& _copy);
-    DeviceReference(const dsid_t _dsid, const Apartment* _apartment);
+    DeviceReference(const dss_dsid_t _dsid, const Apartment* _apartment);
     DeviceReference(boost::shared_ptr<const Device> _device, const Apartment* _apartment);
     virtual ~DeviceReference() {};
 
@@ -56,12 +56,11 @@ namespace dss {
     /** @copydoc getDevice() */
     boost::shared_ptr<const Device> getDevice() const;
     /** Returns the DSID of the referenced device */
-    dsid_t getDSID() const;
+    dss_dsid_t getDSID() const;
 
     /** Returns the function id.
      * @note This will lookup the device */
     int getFunctionID() const;
-    bool hasSwitch() const;
 
     /** Compares two device references.
      * Device references are considered equal if their DSID match. */
@@ -78,21 +77,15 @@ namespace dss {
     virtual void increaseValue();
     virtual void decreaseValue();
 
-    void enable();
-    void disable();
-
     /** Returns wheter the device is turned on.
      * @note The detection is soly based on the last called scene. As soon as we've
      * got submetering data this should reflect the real state.
      */
     virtual bool isOn() const;
 
-    virtual void startDim(const bool _directionUp);
-    virtual void endDim();
-
     virtual void callScene(const int _sceneNr);
     virtual void saveScene(const int _sceneNr);
-    virtual void undoScene(const int _sceneNr);
+    virtual void undoScene();
 
     virtual void nextScene();
     virtual void previousScene();

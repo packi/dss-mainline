@@ -42,14 +42,11 @@ namespace dss {
     virtual void increaseValue();
     virtual void decreaseValue();
 
-    virtual void startDim(const bool _directionUp);
-    virtual void endDim();
-
     virtual void setValue(const double _value);
 
     virtual void callScene(const int _sceneNr);
     virtual void saveScene(const int _sceneNr);
-    virtual void undoScene(const int _sceneNr);
+    virtual void undoScene();
 
     virtual void blink();
   protected:

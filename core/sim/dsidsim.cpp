@@ -26,7 +26,7 @@
 namespace dss {
   //================================================== DSIDSim
 
-  DSIDSim::DSIDSim(const DSDSMeterSim& _simulator, const dsid_t _dsid, const devid_t _shortAddress)
+  DSIDSim::DSIDSim(const DSMeterSim& _simulator, const dss_dsid_t _dsid, const devid_t _shortAddress)
   : DSIDInterface(_simulator, _dsid, _shortAddress),
     m_Enabled(true),
     m_CurrentValue(0),
@@ -79,25 +79,12 @@ namespace dss {
     }
   } // saveScene
 
-  void DSIDSim::undoScene(const int _sceneNr) {
+  void DSIDSim::undoScene() {
     if(m_Enabled) {
-      m_CurrentValue = m_ValuesForScene.at(_sceneNr);
+      // TODO: implement
+//      m_CurrentValue = m_ValuesForScene.at(_sceneNr);
     }
   } // undoScene
-
-  void DSIDSim::increaseValue(const int _parameterNr) {
-    if(m_Enabled) {
-      m_CurrentValue += 10;
-      m_CurrentValue = std::min((uint8_t)0xff, m_CurrentValue);
-    }
-  } // increaseValue
-
-  void DSIDSim::decreaseValue(const int _parameterNr) {
-    if(m_Enabled) {
-      m_CurrentValue -= 10;
-      m_CurrentValue = std::max((uint8_t)0, m_CurrentValue);
-    }
-  } // decreaseValue
 
   void DSIDSim::enable() {
     m_Enabled = true;
@@ -106,26 +93,6 @@ namespace dss {
   void DSIDSim::disable() {
     m_Enabled = false;
   } // disable
-
-  void DSIDSim::startDim(bool _directionUp, const int _parameterNr) {
-    if(m_Enabled) {
-      m_DimmingUp = _directionUp;
-      m_Dimming = true;
-      time(&m_DimmStartTime);
-    }
-  } // startDim
-
-  void DSIDSim::endDim(const int _parameterNr) {
-    if(m_Enabled) {
-      time_t now;
-      time(&now);
-      if(m_DimmingUp) {
-        m_CurrentValue = int(std::max(m_CurrentValue + difftime(m_DimmStartTime, now) * 5, 255.0));
-      } else {
-        m_CurrentValue = int(std::min(m_CurrentValue - difftime(m_DimmStartTime, now) * 5, 255.0));
-      }
-    }
-  } // endDim
 
   void DSIDSim::setValue(const double _value, int _parameterNr) {
     if(m_Enabled) {
@@ -144,7 +111,7 @@ namespace dss {
         return result;
       }
     }
-    return FunctionIDDevice;
+    return 0;
   } // getFunctionID
 
   void DSIDSim::setConfigParameter(const std::string& _name, const std::string& _value) {
