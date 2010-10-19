@@ -150,6 +150,7 @@ namespace dss {
 
   void DSBusInterface::initialize() {
     Subsystem::initialize();
+    log("initializing DSBusInterface");
 
     m_dsmApiHandle = DsmApiInitialize();
     if(!m_dsmApiHandle) {
@@ -159,7 +160,7 @@ namespace dss {
 
     int result = DsmApiOpen(m_dsmApiHandle, m_connectionURI.c_str(), 0);
     if(result < 0) {
-      log("Couldn't open dsmapi connection");
+      log("Couldn't open dsmapi connection to '" + m_connectionURI + "' result: " + intToString(result));
       return;
     }
     log("Successfully connected to " + m_connectionURI);
