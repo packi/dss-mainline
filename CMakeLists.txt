@@ -190,7 +190,6 @@ endif(CMAKE_HAVE_PTHREAD_CREATE)
 if(LIBDSM_PREFIX)
   link_directories(${LIBDSM_PREFIX}/lib)
   include_directories(${LIBDSM_PREFIX}/include)
-  include_directories(${LIBDSM_PREFIX}/include/digitalSTROM)
 endif()
 
 set(REQUIRED_LIBS ${REQUIRED_LIBS} dsm-api-v2)
