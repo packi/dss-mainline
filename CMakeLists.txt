@@ -193,7 +193,7 @@ if(LIBDSM_PREFIX)
   include_directories(${LIBDSM_PREFIX}/include/digitalSTROM)
 endif()
 
-set(REQUIRED_LIBS ${REQUIRED_LIBS} dsm-api)
+set(REQUIRED_LIBS ${REQUIRED_LIBS} dsm-api-v2)
 
 #include test-directory if needed
 set(TEST_LIB)
