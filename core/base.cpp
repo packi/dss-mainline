@@ -145,19 +145,52 @@ namespace dss {
   std::vector<std::string> splitString(const std::string& _source, const char _delimiter, bool _trimEntries) {
     std::vector<std::string> result;
     std::string curString = _source;
+    std::string::size_type skip = 0;
     while(!curString.empty()) {
-      std::string::size_type delimPos = curString.find(_delimiter, 0);
-      if(_trimEntries) {
-        result.push_back(trim(curString.substr(0, delimPos)));
-      } else {
-        result.push_back(curString.substr(0, delimPos));
-      }
-      if(delimPos != std::string::npos) {
-        curString = curString.substr(delimPos+1, std::string::npos);
-        if(curString.size() == 0) {
-          result.push_back("");
+      std::string::size_type delimPos = curString.find(_delimiter, skip);
+      if ((delimPos != std::string::npos) && 
+          (delimPos > 0) && 
+          (curString.at(delimPos - 1) != '\\')) {
+        if(_trimEntries) {
+          result.push_back(trim(curString.substr(0, delimPos)));
+        } else {
+          result.push_back(curString.substr(0, delimPos));
+        }
+        if(delimPos != std::string::npos) {
+          curString = curString.substr(delimPos+1, std::string::npos);
+          skip = 0;
+          if(curString.size() == 0) {
+            result.push_back("");
+          }
+        } else {
+          break;
         }
       } else {
+        // remove escape character
+        if (delimPos != std::string::npos) { 
+          if (((delimPos - 1) >= 0) &&
+           (curString.at(delimPos - 1) == '\\')) {
+            curString.erase(delimPos - 1, 1);
+            delimPos--;
+            if (delimPos < 0) {
+              delimPos = 0;
+            }
+          }
+          if (delimPos < curString.size()) {
+              skip = delimPos + 1;
+          }
+        }
+      }
+      if(delimPos == std::string::npos) {
+        if(curString.size() > 0) {
+          if(_trimEntries) {
+            result.push_back(trim(curString));
+          } else {
+            result.push_back(curString);
+          }
+        } else {
+          result.push_back("");
+        }
         break;
       }
     }
