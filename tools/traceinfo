@@ -1,0 +1,19 @@
+#!/bin/bash
+
+echo "Make sure you are in the same directory from where you started the dSS."
+echo "Paste the backtrace now, hit ENTER to quit."
+echo
+
+while :
+do
+    read LINE
+    if [[ -z "$LINE" ]]; then
+        break
+    else
+        EXE=`echo $LINE | sed -r 's/^.*: //;s/\(.*\) .*//'`
+        ADDR=`echo $LINE | sed -r 's/^.*\[//g; s/]//'`
+        TRACE=`addr2line --demangle --basenames --functions --exe $EXE $ADDR`
+        TRACE=`echo $TRACE | sed -r 's/\n//g'`
+        echo $TRACE
+    fi
+done
