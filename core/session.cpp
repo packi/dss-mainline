@@ -68,15 +68,15 @@ namespace dss {
     }
     m_UseCountMutex.unlock();
   }
-  void Session::addData(const std::string& _key, boost::shared_ptr<boost::any>& _value) {
+  void Session::addData(const std::string& _key, boost::shared_ptr<boost::any> _value) {
     m_DataMapMutex.lock();
     dataMap[_key] = _value;
     m_DataMapMutex.unlock();
   }
 
-  boost::shared_ptr<boost::any>& Session::getData(const std::string& _key) {
+  boost::shared_ptr<boost::any> Session::getData(const std::string& _key) {
     m_DataMapMutex.lock();
-    boost::shared_ptr<boost::any>& rv = dataMap[_key];
+    boost::shared_ptr<boost::any> rv = dataMap[_key];
     m_DataMapMutex.unlock();
     return rv;
   }
@@ -84,7 +84,7 @@ namespace dss {
   bool Session::removeData(const std::string& _key) {
     bool result = false;
     m_DataMapMutex.lock();
-    boost::ptr_map<std::string, boost::shared_ptr<boost::any> >::iterator i = dataMap.find(_key);
+    std::map<std::string, boost::shared_ptr<boost::any> >::iterator i = dataMap.find(_key);
     if(i != dataMap.end()) {
       dataMap.erase(i);
       result = true;
