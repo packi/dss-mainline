@@ -307,10 +307,10 @@ namespace dss {
       JSContextThread req(&getContext());
       if(!error) {
         if(bytesTransfered == m_BytesToRead) {
-          endBlockingCall();
           std::string result(m_DataBuffer, m_BytesToRead);
-          callDataCallback(result);
           m_BytesToRead = 0;
+          endBlockingCall();
+          callDataCallback(result);
         }
       } else {
         endBlockingCall();
