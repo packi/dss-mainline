@@ -154,6 +154,20 @@ namespace dss {
   : EventInterpreterPlugin("javascript", _pInterpreter)
   { } // ctor
 
+  EventInterpreterPluginJavascript::~EventInterpreterPluginJavascript() {
+    Logger::getInstance()->log("Terminating all scripts...", lsInfo);
+    typedef std::vector<boost::shared_ptr<ScriptContextWrapper> >::iterator tScriptContextWrapperIterator;
+    tScriptContextWrapperIterator ipScriptContextWrapper = m_WrappedContexts.begin();
+    while(ipScriptContextWrapper != m_WrappedContexts.end()) {
+      (*ipScriptContextWrapper)->get()->stop();
+      while((*ipScriptContextWrapper)->get()->hasAttachedObjects()) {
+        sleepMS(10);
+      }
+      ipScriptContextWrapper = m_WrappedContexts.erase(ipScriptContextWrapper);
+    }
+    Logger::getInstance()->log("All scripts Terminated");
+  }
+
   void EventInterpreterPluginJavascript::handleEvent(Event& _event, const EventSubscription& _subscription) {
     if(_subscription.getOptions()->hasParameter("filename")) {
       std::string scriptName = _subscription.getOptions()->getParameter("filename");
