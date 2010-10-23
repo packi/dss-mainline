@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
@@ -257,6 +257,7 @@ namespace dss {
         Logger::getInstance()->log("cleanupTerminatedScripts: erasing script");
         ipScriptContextWrapper = m_WrappedContexts.erase(ipScriptContextWrapper);
       } else {
+        Logger::getInstance()->log("cleanupTerminatedScripts: still has objects " + intToString((*ipScriptContextWrapper)->get()->getAttachedObjectsCount()));
         ++ipScriptContextWrapper;
       }
     }

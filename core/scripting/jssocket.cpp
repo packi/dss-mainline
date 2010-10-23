@@ -48,9 +48,31 @@ namespace dss {
     JS_ConvertStub,  tcpSocket_finalize, JSCLASS_NO_OPTIONAL_MEMBERS
   }; // tcpSocket_class
 
+
+  class SocketHelperBase {
+  public:
+    virtual void stop() = 0;
+  };
+
+  //================================================== SocketAttachedObject
+
+  class SocketAttachedObject : public ScriptContextAttachedObject {
+  public:
+    SocketAttachedObject(ScriptContext* _pContext, SocketHelperBase* _pBase)
+    : ScriptContextAttachedObject(_pContext),
+      m_pBase(_pBase)
+    { }
+
+    virtual void stop() {
+      m_pBase->stop();
+    }
+  private:
+    SocketHelperBase* m_pBase;
+  }; // SocketAttachedObject
+
   //================================================== SocketHelper
 
-  class SocketHelper {
+  class SocketHelper : public SocketHelperBase {
   public:
     SocketHelper(SocketScriptContextExtension& _extension)
     : m_Extension(_extension),
@@ -58,10 +80,12 @@ namespace dss {
     { }
 
     ~SocketHelper() {
+      m_pASIOWork.reset();
       if(m_IOService != NULL) {
         m_IOService->stop();
       }
       m_IOServiceThread.join();
+      Logger::getInstance()->log("~SocketHelper()");
     }
 
     void setContext(ScriptContext* _value) {
@@ -90,7 +114,7 @@ namespace dss {
         boost::shared_ptr<ScriptFunctionRooter> functionRoot = m_pFunctionRooter;//(new ScriptFunctionRooter(m_pContext, callbackFunctionCopy));
         // clear callback objects before calling the callback, we might overwrite
         // data if we do that afterwards
-        //m_pFunctionRooter.reset();
+        m_pFunctionRooter.reset();
         m_pCallbackObject.reset();
         m_CallbackFunction = JSVAL_NULL;
         try {
@@ -111,15 +135,6 @@ namespace dss {
       return *m_pContext;
     }
 
-    void startIOThread() {
-      ensureIOServiceAvailable();
-      if(!m_IOServiceThread.joinable()) {
-        m_IOServiceThread = boost::thread(boost::bind(&boost::asio::io_service::run, m_IOService));
-      } else {
-        Logger::getInstance()->log("Not spawning a thread");
-      }
-    }
-
     boost::asio::io_service& getIOService() {
       ensureIOServiceAvailable();
       return *m_IOService;
@@ -135,7 +150,7 @@ namespace dss {
 
   protected:
     void startBlockingCall() {
-      m_pAttachedObject.reset(new ScriptContextAttachedObject(&getContext()));
+      m_pAttachedObject.reset(new SocketAttachedObject(&getContext(), this));
     }
 
     void endBlockingCall() {
@@ -147,11 +162,14 @@ namespace dss {
     void ensureIOServiceAvailable() {
       if(m_IOService == NULL) {
         m_IOService.reset(new boost::asio::io_service());
+        m_pASIOWork.reset(new boost::asio::io_service::work(*m_IOService));
+        m_IOServiceThread = boost::thread(boost::bind(&boost::asio::io_service::run, m_IOService));
       }
     }
   private:
     boost::shared_ptr<boost::asio::io_service> m_IOService;
     boost::thread m_IOServiceThread;
+    boost::shared_ptr<boost::asio::io_service::work> m_pASIOWork;
     ScriptContext* m_pContext;
     boost::shared_ptr<ScriptObject> m_pCallbackObject;
     boost::shared_ptr<ScriptFunctionRooter> m_pFunctionRooter;
@@ -192,7 +210,6 @@ namespace dss {
           boost::asio::placeholders::error,
           ++iterator));
       startBlockingCall();
-      startIOThread();
     }
 
     void send(const std::string& _data) {
@@ -207,7 +224,6 @@ namespace dss {
           boost::asio::placeholders::error,
           boost::asio::placeholders::bytes_transferred));
       startBlockingCall();
-      startIOThread();
     }
 
     void close() {
@@ -227,7 +243,6 @@ namespace dss {
                     boost::asio::placeholders::error,
                     boost::asio::placeholders::bytes_transferred));
       startBlockingCall();
-      startIOThread();
     }
 
     bool isConnected() {
@@ -254,9 +269,14 @@ namespace dss {
         createSocket();
         m_pAcceptor->async_accept(*m_pSocket, boost::bind(&SocketHelperInstance::acceptCallback, this, boost::asio::placeholders::error));
         startBlockingCall();
-        startIOThread();
       } else {
         Logger::getInstance()->log("SocketHelperInstance::accept: Please call bind first", lsFatal);
+      }
+    }
+
+    virtual void stop() {
+      if(m_pSocket != NULL) {
+        boost::thread(boost::bind(&SocketHelperInstance::close, this));
       }
     }
 
@@ -415,7 +435,6 @@ namespace dss {
       m_pSocket->async_connect(endpoint,
           boost::bind(&SocketHelperSendOneShot::handle_connect, this,
             boost::asio::placeholders::error, ++iterator));
-      startIOThread();
     }
 
     void write()
@@ -426,6 +445,13 @@ namespace dss {
             m_Data.size()),
           boost::bind(&SocketHelperSendOneShot::handle_write, this,
             boost::asio::placeholders::error));
+    }
+
+    virtual void stop() {
+      if(m_pSocket != NULL) {
+        do_close();
+      }
+      endBlockingCall();
     }
 
   private:
@@ -457,9 +483,7 @@ namespace dss {
         }
       }
       do_close();
-      Logger::getInstance()->log("SocketHelperSendOneShot::beforeRemoving");
-      m_Extension.removeSocketHelper(shared_from_this());
-      Logger::getInstance()->log("SocketHelperSendOneShot::afterRemoving");
+      boost::thread(boost::bind(&SocketScriptContextExtension::removeSocketHelper, &m_Extension, shared_from_this()));
     }
 
     void do_close() {

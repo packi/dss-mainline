@@ -64,6 +64,9 @@ public:
 
   virtual ~TestListener() {
     m_Acceptor.close();
+    if(m_Socket != NULL) {
+      m_Socket->close();
+    }
     m_IOServiceThread.join();
     Logger::getInstance()->log("~TestListener");
   }
@@ -153,6 +156,10 @@ BOOST_AUTO_TEST_CASE(testTcpSocketSendTo) {
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("TcpSocket.sendTo('127.0.0.1', 1234, 'hello');");
   sleepMS(250);
+  ctx->stop();
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
   BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
 } // testTcpSocketSendTo
 
@@ -176,6 +183,10 @@ BOOST_AUTO_TEST_CASE(testTcpSocketSendToRepeatability) {
     BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
     listener.m_DataReceived.clear();
     Logger::getInstance()->log("After run");
+  }
+  ctx->stop();
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
   }
 } // testRepeatbility
 
@@ -215,6 +226,10 @@ BOOST_AUTO_TEST_CASE(testSendSocketCallback) {
     callCount = newCount;
     listener.m_DataReceived.clear();
   }
+  ctx->stop();
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
 } // testSendSocketCallback
 
 BOOST_AUTO_TEST_CASE(testSocketConnect) {
@@ -239,6 +254,10 @@ BOOST_AUTO_TEST_CASE(testSocketConnect) {
   JSContextThread req(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
   BOOST_CHECK_EQUAL(listener.getConnectionCount(), 1);
+  ctx->stop();
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(testSocketConnectFailure) {
@@ -256,6 +275,10 @@ BOOST_AUTO_TEST_CASE(testSocketConnectFailure) {
   ScriptLock lock(ctx);
   JSContextThread req(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), false);
+  ctx->stop();
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(testSocketSend) {
@@ -285,6 +308,10 @@ BOOST_AUTO_TEST_CASE(testSocketSend) {
   JSContextThread req(ctx);
   BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("bytesSent"), 5);
+  ctx->stop();
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
 } // testSocketSend
 
 BOOST_AUTO_TEST_CASE(testSocketClose) {
@@ -311,6 +338,10 @@ BOOST_AUTO_TEST_CASE(testSocketClose) {
                       ");");
   sleepMS(250);
   BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
+  ctx->stop();
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
 } // testSocketClose
 
 BOOST_AUTO_TEST_CASE(testSocketReceive) {
@@ -349,6 +380,10 @@ BOOST_AUTO_TEST_CASE(testSocketReceive) {
   ScriptLock lock(ctx);
   JSContextThread req(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<std::string>("result"), "hello world");
+  ctx->stop();
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
 } // testSocketReceive
 
 
@@ -364,6 +399,10 @@ void runScript(const std::string& _script) {
   ScriptLock lock(ctx);
   JSContextThread req(ctx);
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<std::string>("result"), "hello world");
+  ctx->stop();
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(testSocketServer) {
