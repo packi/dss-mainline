@@ -247,6 +247,8 @@ const char* JSLogDirectory = "data/logs/";
 
     m_pBusInterface = boost::shared_ptr<BusInterface>(new BusInterfaceAdaptor(pDSBusInterface, m_pSimulation, pSimBusInterface));
 
+    m_pApartment->setBusInterface(m_pBusInterface.get());
+
     m_pWebServer = boost::shared_ptr<WebServer>(new WebServer(this));
     m_Subsystems.push_back(m_pWebServer.get());
 
