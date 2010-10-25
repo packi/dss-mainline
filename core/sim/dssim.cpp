@@ -97,6 +97,8 @@ namespace dss {
 
       getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "configfile", getDSS().getConfigDirectory() + "sim.xml", true, false);
 
+      boost::filesystem::path filename(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "configfile"));
+     
       loadFromConfig();
     }
 
@@ -139,6 +141,11 @@ namespace dss {
     const int theConfigFileVersion = 1;
     std::ifstream inFile(_fileName.c_str());
 
+    // file does not exist, this is allowed, ignore silently
+    if (!inFile.is_open()) {
+      return;
+    }
+
     try {
       InputSource input(inFile);
       DOMParser parser;
@@ -151,23 +158,21 @@ namespace dss {
           while(curNode != NULL) {
             if(curNode->localName() == "modulator") {
               boost::shared_ptr<DSMeterSim> dsMeter;
-              try {
-                dsMeter.reset(new DSMeterSim(this));
-                dsMeter->initializeFromNode(curNode);
-                m_DSMeters.push_back(dsMeter);
-              } catch(std::runtime_error& e) {
-                // TODO: abort loading and return with this error, see #316
-                log("Could not initialize from '" + _fileName + "'. message: " + e.what(), lsError);
-              }
+
+              dsMeter.reset(new DSMeterSim(this));
+              dsMeter->initializeFromNode(curNode);
+              m_DSMeters.push_back(dsMeter);
             }
             curNode = curNode->nextSibling();
           }
         }
       } else {
-        log(_fileName + " must have a root-node named 'simulation'", lsFatal);
+        throw std::runtime_error(_fileName +
+                " must have a root-node named 'simulation'");
       }
     } catch(Poco::XML::SAXParseException& e) {
-      log("Error parsing file: " + _fileName + ". message: " + e.message());
+      throw std::runtime_error("Error parsing file: " + _fileName + ": " +
+                               e.message());
     }
   } // loadFromConfig
 

@@ -47,10 +47,16 @@ namespace dss {
     run();
   } // doStart
 
-  void WebServices::execute() {
+  void WebServices::initialize() {
+    Subsystem::initialize();
+    log("initializing WebServices");
     int soapServerSocket = m_Service.bind(NULL, 8081, 10);
-    assert(soapServerSocket != SOAP_INVALID_SOCKET && "Could not bind to SOAP port");
+    if (soapServerSocket == SOAP_INVALID_SOCKET) {
+      throw std::runtime_error("Could not bind to SOAP port");
+    }
+  }
 
+  void WebServices::execute() {
     for(int iWorker = 0; iWorker < 4; iWorker++) {
       m_Workers.push_back(new WebServicesWorker(this));
       m_Workers.back().run();

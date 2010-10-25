@@ -80,6 +80,9 @@ namespace dss {
 
     log("Starting Webserver...");
     m_mgContext = mg_start();
+    if (m_mgContext == NULL) {
+      throw std::runtime_error("Could not start mongoose webserver!");
+    }
 
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "webroot", getDSS().getWebrootDirectory(), true, false);
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "ports", 8080, true, false);
@@ -113,8 +116,7 @@ namespace dss {
         }
       }
     } catch(std::exception& e) {
-      log("Directory for js logfiles does not exist: '" + logDir + "'", lsFatal);
-      abort(); // TODO: replace with a nice shutdown procedure but it's better to crash at startup than crashing at runtime
+      throw std::runtime_error("Directory for js logfiles does not exist: '" + logDir + "'");
     }
   } // publishJSLogfiles
 

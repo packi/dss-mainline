@@ -25,6 +25,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/filesystem.hpp>
 
 #include "core/subsystem.h"
 #include "core/thread.h"
@@ -85,6 +86,8 @@ namespace dss {
     Metering* m_pMetering;
     const int m_EventTimeoutMS;
     StructureQueryBusInterface* m_pStructureQueryBusInterface;
+
+    void checkConfigFile(boost::filesystem::path _filename);
   }; // ModelMaintenance
 
 }

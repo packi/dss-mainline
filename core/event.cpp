@@ -219,15 +219,6 @@ namespace dss {
     if(DSS::hasInstance()) {
       getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptionfile", getDSS().getConfigDirectory() + "subscriptions.xml", true, false);
       getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "subscriptiondir", getDSS().getConfigDirectory() + "subscriptions.d", true, false);
-    }
-  } // initialize
-
-  void EventInterpreter::addPlugin(EventInterpreterPlugin* _plugin) {
-    m_Plugins.push_back(_plugin);
-  } // addPlugin
-
-  void EventInterpreter::execute() {
-    if(DSS::hasInstance()) {
       loadFromXML(getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptionfile"));
       if (boost::filesystem::is_directory((getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "subscriptiondir")))) {
         boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
@@ -242,7 +233,13 @@ namespace dss {
         }
       }
     }
+  } // initialize
 
+  void EventInterpreter::addPlugin(EventInterpreterPlugin* _plugin) {
+    m_Plugins.push_back(_plugin);
+  } // addPlugin
+
+  void EventInterpreter::execute() {
     if(m_Queue == NULL) {
       Logger::getInstance()->log("EventInterpreter: No queue set. Can't work like that... exiting...", lsFatal);
       return;
@@ -380,7 +377,8 @@ namespace dss {
         log(_fileName + " must have a root-node named 'subscriptions'", lsFatal);
       }
     } catch(Poco::XML::SAXParseException& e) {
-      log("Error parsing file: " + _fileName + ". message: " + e.message(), lsFatal);
+      throw std::runtime_error("Error parsing file: " + _fileName + ": " +
+                                e.message());
     }
   } // loadFromXML
 

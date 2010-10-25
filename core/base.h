@@ -104,6 +104,9 @@ namespace dss {
   uint16_t crc16(unsigned const char* _data, const int _size);
   uint16_t update_crc(uint16_t _crc, const unsigned char& c);
 
+  //============================================= Filesystem helpers
+
+  bool rwAccess(const std::string& _filename);
 
   //============================================= Helper classes
 

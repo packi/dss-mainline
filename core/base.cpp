@@ -23,6 +23,7 @@
 #include "base.h"
 
 #include <sys/stat.h>
+#include <unistd.h>
 #include <cstring>
 #include <cstdio>
 #include <sstream>
@@ -290,6 +291,17 @@ namespace dss {
     }
     return result;
   } // cRC16
+
+  //================================================== Filesystem helpers
+  bool rwAccess(const std::string& _filename)
+  {
+    if (access(_filename.c_str(), R_OK | W_OK) == 0) {
+      return true;
+    }
+
+    return false;
+  }
+
 
   //================================================== System utilities
 

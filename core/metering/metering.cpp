@@ -46,7 +46,6 @@ namespace dss {
   : ThreadedSubsystem(_pDSS, "Metering"),
     m_pMeteringBusInterface(NULL)
   {
-    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "storageLocation", getDSS().getWebrootDirectory() + "metering/", true);
     m_ConfigConsumption.reset(new MeteringConfigChain(false, 1, "mW"));
     m_ConfigConsumption->setComment("Consumption in mW");
     m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_seconds",        2, 400)));
@@ -68,13 +67,28 @@ namespace dss {
     m_ConfigEnergy->running();
   } // metering
 
-  void Metering::doStart() {
+  void Metering::initialize() {
+    Subsystem::initialize();
+    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "storageLocation", getDSS().getWebrootDirectory() + "metering/", true);
     m_MeteringStorageLocation = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "storageLocation");
     m_MeteringStorageLocation = addTrailingBackslash(m_MeteringStorageLocation);
-    if(!boost::filesystem::is_directory(m_MeteringStorageLocation)) {
-      log("Metering directory (" + m_MeteringStorageLocation + ") does not seem exist, aborting...", lsFatal);
-      abort();
+
+    if(getDSS().getPropertySystem().getBoolValue(
+                                getConfigPropertyBasePath() + "enabled")) {
+      if(!boost::filesystem::is_directory(m_MeteringStorageLocation)) {
+        throw std::runtime_error("Metering directory " +
+                                 m_MeteringStorageLocation +
+                                 " does not exist!");
+      }
+
+      if(!rwAccess(m_MeteringStorageLocation)) {
+        throw std::runtime_error("Metering directory " +
+                                 m_MeteringStorageLocation +
+                                 " is not readable/writable!");
+      }
     }
+  }
+  void Metering::doStart() {
     log("Writing files to: " + m_MeteringStorageLocation);
     run();
   } // start

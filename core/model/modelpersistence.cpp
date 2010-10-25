@@ -22,6 +22,8 @@
 
 #include "modelpersistence.h"
 
+#include <stdexcept>
+
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Node.h>
@@ -70,6 +72,10 @@ namespace dss {
     m_Apartment.setName("dSS");
     std::ifstream inFile(_fileName.c_str());
 
+    if (!inFile.is_open()) {
+      return;
+    }
+
     InputSource input(inFile);
     DOMParser parser;
     AutoPtr<Document> pDoc;
@@ -78,10 +84,9 @@ namespace dss {
     } catch (Poco::XML::SAXParseException& spe) {
       // Note that we can hit this case both if it's invalid XML and
       // when the file doesn't exist at all
-      Logger::getInstance()->log(std::string("ModelPersistence::readConfigurationFromXML: "
-                                             "Parse error in Model configuration: ") +
-                                 _fileName + ": " + spe.message(), lsError);
-      return;
+      throw std::runtime_error("ModelPersistence::readConfigurationFromXML: "
+                               "Parse error in Model configuration: " +
+                               _fileName + ": " + spe.message());
     }
 
     Element* rootNode = pDoc->documentElement();

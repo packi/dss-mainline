@@ -375,6 +375,23 @@ const char* JSLogDirectory = "data/logs/";
   void StopSubsystem(Subsystem* _pSubsystem) {
     _pSubsystem->shutdown();
   }
+
+  bool DSS::initSubsystems() {
+    for (size_t i = 0; i < m_Subsystems.size(); i++) {
+      try {
+        InitializeSubsystem(m_Subsystems.at(i));
+      } catch(std::exception& e) {
+        Logger::getInstance()->log("Failed to initialize subsystem '" +
+                                   m_Subsystems.at(i)->getName() +
+                                   "': " + e.what(), lsFatal);
+        m_State = ssTerminating;
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   void DSS::run() {
     Logger::getInstance()->log("DSS starting up....", lsInfo);
     Logger::getInstance()->log(versionString(), lsInfo);
@@ -388,9 +405,12 @@ const char* JSLogDirectory = "data/logs/";
     info.collect();
 
     m_State = ssInitializingSubsystems;
-    std::for_each(m_Subsystems.begin(), m_Subsystems.end(), InitializeSubsystem);
 
     addDefaultInterpreterPlugins();
+
+    if (!initSubsystems()) {
+      return;
+    }
 
     m_State = ssStarting;
     std::for_each(m_Subsystems.begin(), m_Subsystems.end(), StartSubsystem);
@@ -401,6 +421,8 @@ const char* JSLogDirectory = "data/logs/";
 #endif
 
     m_State = ssRunning;
+    boost::shared_ptr<Event> runningEvent(new Event("running"));
+    m_pEventQueue->pushEvent(runningEvent);
 
     if (!m_ShutdownFlag) {
       // pass control to the eventrunner
