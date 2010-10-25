@@ -48,6 +48,8 @@ namespace dss {
 
     virtual void initialize() {
       if(m_pSelf != NULL) {
+        ScriptLock lock(m_pContext);
+        JSContextThread req(m_pContext);
         ScriptFunctionParameterList param(*m_pContext);
         param.add(getDSID().toString());
         param.add(getShortAddress());
@@ -63,6 +65,8 @@ namespace dss {
     virtual void callScene(const int _sceneNr) {
       if(m_pSelf != NULL) {
         try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
           ScriptFunctionParameterList param(*m_pContext);
           param.add(_sceneNr);
           m_pSelf->callFunctionByName<void>("callScene", param);
@@ -75,6 +79,8 @@ namespace dss {
     virtual void saveScene(const int _sceneNr) {
       if(m_pSelf != NULL) {
         try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
           ScriptFunctionParameterList param(*m_pContext);
           param.add(_sceneNr);
           m_pSelf->callFunctionByName<void>("saveScene", param);
@@ -87,6 +93,8 @@ namespace dss {
     virtual void undoScene() {
       if(m_pSelf != NULL) {
         try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
           ScriptFunctionParameterList param(*m_pContext);
           m_pSelf->callFunctionByName<void>("undoScene", param);
         } catch(ScriptException& e) {
@@ -98,6 +106,8 @@ namespace dss {
     virtual void enable() {
       if(m_pSelf != NULL) {
         try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
           ScriptFunctionParameterList param(*m_pContext);
           m_pSelf->callFunctionByName<void>("enable", param);
         } catch(ScriptException& e) {
@@ -109,6 +119,8 @@ namespace dss {
     virtual void disable() {
       if(m_pSelf != NULL) {
         try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
           ScriptFunctionParameterList param(*m_pContext);
           m_pSelf->callFunctionByName<void>("disable", param);
         } catch(ScriptException& e) {
@@ -120,6 +132,8 @@ namespace dss {
     virtual int getConsumption() {
       if(m_pSelf != NULL) {
         try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
           ScriptFunctionParameterList param(*m_pContext);
           return m_pSelf->callFunctionByName<int>("getConsumption", param);
         } catch(ScriptException& e) {
@@ -132,6 +146,8 @@ namespace dss {
     virtual void setValue(const double _value, int _parameterNr = -1) {
       if(m_pSelf != NULL) {
         try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
           ScriptFunctionParameterList param(*m_pContext);
           param.add(int(_value));
           param.add(_parameterNr);
@@ -145,6 +161,8 @@ namespace dss {
     virtual double getValue(int _parameterNr = -1) const {
       if(m_pSelf != NULL) {
         try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
           ScriptFunctionParameterList param(*m_pContext);
           param.add(_parameterNr);
           return m_pSelf->callFunctionByName<int>("getValue", param);
@@ -158,6 +176,8 @@ namespace dss {
     virtual uint16_t getFunctionID() {
       if(m_pSelf != NULL) {
         try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
           ScriptFunctionParameterList param(*m_pContext);
           return m_pSelf->callFunctionByName<int>("getFunctionID", param);
         } catch(ScriptException& e) {
@@ -170,6 +190,8 @@ namespace dss {
     virtual void setConfigParameter(const std::string& _name, const std::string& _value) {
       if(m_pSelf != NULL) {
         try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
           ScriptFunctionParameterList param(*m_pContext);
           param.add(_name);
           param.add(_value);
@@ -183,6 +205,8 @@ namespace dss {
     virtual std::string getConfigParameter(const std::string& _name) const {
       if(m_pSelf != NULL) {
         try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
           ScriptFunctionParameterList param(*m_pContext);
           param.add(_name);
           return m_pSelf->callFunctionByName<std::string>("getConfigParameter", param);
