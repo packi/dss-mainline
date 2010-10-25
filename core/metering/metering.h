@@ -71,6 +71,7 @@ namespace dss {
   private:
     void checkDSMeters(MeteringConfigChain* _pConfig);
 
+    virtual void initialize();
     virtual void execute();
   protected:
     virtual void doStart();

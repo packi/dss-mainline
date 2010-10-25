@@ -23,7 +23,7 @@
 
 #include "modelmaintenance.h"
 
-#include <stdexcept>
+#include <unistd.h>
 
 #include "core/foreach.h"
 #include "core/base.h"
@@ -83,14 +83,47 @@ namespace dss {
     m_EventTimeoutMS(_eventTimeoutMS)
   { }
 
+  void ModelMaintenance::checkConfigFile(boost::filesystem::path _filename) {
+    if (boost::filesystem::exists(_filename)) {
+      if (!rwAccess(_filename.string())) {
+        throw std::runtime_error("Apartment file " + _filename.string() +
+                                  " is not readable and writable!");
+      }
+    } else {
+      boost::filesystem::path dir = _filename.parent_path();
+      if (!boost::filesystem::is_directory(dir)) {
+        throw std::runtime_error("Path " + dir.string() +
+                                 " to apartment file is invalid!");
+      }
+
+      if (!rwAccess(dir.string())) {
+        throw std::runtime_error("Directory " + dir.string() +
+                                 " for apartment file is not readable and " +
+                                 " writable!");
+      }
+    }
+  }
+
   void ModelMaintenance::initialize() {
     Subsystem::initialize();
     if(m_pApartment == NULL) {
       throw std::runtime_error("Need apartment to work...");
     }
     if(DSS::hasInstance()) {
-      DSS::getInstance()->getPropertySystem().setStringValue(getConfigPropertyBasePath() + "configfile", getDSS().getDataDirectory() + "apartment.xml", true, false);
+      DSS::getInstance()->getPropertySystem().setStringValue(
+              getConfigPropertyBasePath() + "configfile", 
+              getDSS().getDataDirectory() + "apartment.xml", true, false);
+
+      boost::filesystem::path filename(
+              DSS::getInstance()->getPropertySystem().getStringValue(
+                                   getConfigPropertyBasePath() + "configfile"));
+
+      checkConfigFile(filename);
+
       m_pStructureQueryBusInterface = DSS::getInstance()->getBusInterface().getStructureQueryBusInterface();
+
+      // load devices/dsMeters/etc. from a config-file
+      readConfiguration();
     }
   } // initialize
 
@@ -116,18 +149,6 @@ namespace dss {
   } // waitForInterface
 
   void ModelMaintenance::execute() {
-    {
-      boost::shared_ptr<Event> runningEvent(new Event("running"));
-      raiseEvent(runningEvent);
-    }
-
-    // load devices/dsMeters/etc. from a config-file
-    readConfiguration();
-
-    {
-      boost::shared_ptr<Event> configReadEvent(new Event("config_read"));
-      raiseEvent(configReadEvent);
-    }
 
     waitForInterface();
 

@@ -87,6 +87,7 @@ namespace dss {
 
     bool isAuthorized(soap* _soapRequest, const int _token);
 
+    virtual void initialize();
     virtual void execute();
 
     struct soap* popPendingRequest();
