@@ -273,7 +273,7 @@ BOOST_AUTO_TEST_CASE(testEvents) {
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluate<void>("var evt = new event('test');\n"
+  ctx->evaluate<void>("var evt = new Event('test');\n"
                       "evt.raise()\n"
                       "\n");
   // TODO: add subscription to confirm the event actually got raised
@@ -307,7 +307,7 @@ BOOST_AUTO_TEST_CASE(testSubscriptions) {
   BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluate<void>("var s = new subscription('test', 'test', { 'param1': 1, 'param2': 2, 'string': 'string'} );\n"
+  ctx->evaluate<void>("var s = new Subscription('test', 'test', { 'param1': 1, 'param2': 2, 'string': 'string'} );\n"
                       "s.subscribe();\n"
                       "\n");
 

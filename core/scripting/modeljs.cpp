@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
@@ -837,10 +837,14 @@ namespace dss {
     m_Interpreter(_interpreter)
   { } // ctor
 
-  JSBool global_event(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+  struct event_wrapper {
+    boost::shared_ptr<Event> event;
+  };
+
+  JSBool event_construct(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     if (argc < 1) {
-      *rval = JSVAL_NULL;
       Logger::getInstance()->log("JS: global_event: (empty name)");
+      return JS_FALSE;
     } else {
       ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
       JSAutoLocalRootScope localRoot(cx);
@@ -876,81 +880,13 @@ namespace dss {
           }
         }
 
-        JSObject* obj = ext->createJSEvent(*ctx, newEvent);
-
-        *rval = OBJECT_TO_JSVAL(obj);
+        event_wrapper* evtWrapper = new event_wrapper();
+        evtWrapper->event = newEvent;
+        JS_SetPrivate(cx, obj, evtWrapper);
       }
     }
     return JS_TRUE;
   } // global_event
-
-  JSBool global_subscription(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    if (argc < 3) {
-      *rval = JSVAL_NULL;
-      Logger::getInstance()->log("JS: global_subscription: need three arguments: event-name, handler-name & parameter");
-    } else {
-      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-      JSAutoLocalRootScope localRoot(cx);
-
-      EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
-      if(ext != NULL) {
-        JSString *val = JS_ValueToString(cx, argv[0]);
-        char* eventName = JS_GetStringBytes(val);
-
-        val = JS_ValueToString(cx, argv[1]);
-        char* handlerName = JS_GetStringBytes(val);
-
-        JSObject* paramObj;
-
-        boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
-
-        if(JS_ValueToObject(cx, argv[2], &paramObj) == JS_TRUE) {
-          JSObject* propIter = JS_NewPropertyIterator(cx, paramObj);
-          jsid propID;
-          while(JS_NextProperty(cx, propIter, &propID) == JS_TRUE) {
-            if(propID == JSVAL_VOID) {
-              break;
-            }
-            JSObject* obj;
-            jsval vp;
-            JS_GetMethodById(cx, paramObj, propID, &obj, &vp);
-
-            jsval vp2;
-
-            val = JS_ValueToString(cx, vp);
-            char* propValue = JS_GetStringBytes(val);
-
-            JS_IdToValue(cx, propID, &vp2);
-            val = JS_ValueToString(cx, vp2);
-            char* propName = JS_GetStringBytes(val);
-
-            opts->setParameter(propName, propValue);
-          }
-
-        }
-
-        boost::shared_ptr<EventSubscription> subscription(new EventSubscription(eventName, handlerName, ext->getEventInterpreter(), opts));
-
-        JSObject* obj = ext->createJSSubscription(*ctx, subscription);
-        *rval = OBJECT_TO_JSVAL(obj);
-      }
-    }
-    return JS_TRUE;
-  } // global_subscription
-
-  JSFunctionSpec event_global_methods[] = {
-    {"event", global_event, 1, 0, 0},
-    {"subscription", global_subscription},
-    {NULL},
-  };
-
-  void EventScriptExtension::extendContext(ScriptContext& _context) {
-    JS_DefineFunctions(_context.getJSContext(), JS_GetGlobalObject(_context.getJSContext()), event_global_methods);
-  } // extendContext
-
-  struct event_wrapper {
-    boost::shared_ptr<Event> event;
-  };
 
   JSBool event_raise(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -989,7 +925,7 @@ namespace dss {
   } // finalize_dev
 
   static JSClass event_class = {
-    "event", JSCLASS_HAS_PRIVATE,
+    "Event", JSCLASS_HAS_PRIVATE,
     JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
     JS_EnumerateStandardClasses,
     JS_ResolveStub,
@@ -1006,17 +942,6 @@ namespace dss {
     {"raise", event_raise, 1, 0, 0},
     {NULL}
   };
-
-  JSObject* EventScriptExtension::createJSEvent(ScriptContext& _ctx, boost::shared_ptr<Event> _event) {
-    JSObject* result = JS_NewObject(_ctx.getJSContext(), &event_class, NULL, NULL);
-    JS_DefineFunctions(_ctx.getJSContext(), result, event_methods);
-    JS_DefineProperties(_ctx.getJSContext(), result, event_properties);
-
-    event_wrapper* evtWrapper = new event_wrapper();
-    evtWrapper->event = _event;
-    JS_SetPrivate(_ctx.getJSContext(), result, evtWrapper);
-    return result;
-  } // createJSEvent
 
   struct subscription_wrapper {
     boost::shared_ptr<EventSubscription> subscription;
@@ -1063,7 +988,7 @@ namespace dss {
   } // finalize_dev
 
   static JSClass subscription_class = {
-    "subscription", JSCLASS_HAS_PRIVATE,
+    "Subscription", JSCLASS_HAS_PRIVATE,
     JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
     JS_EnumerateStandardClasses,
     JS_ResolveStub,
@@ -1082,16 +1007,69 @@ namespace dss {
     {NULL}
   };
 
-  JSObject* EventScriptExtension::createJSSubscription(ScriptContext& _ctx, boost::shared_ptr<EventSubscription> _subscription) {
-    JSObject* result = JS_NewObject(_ctx.getJSContext(), &subscription_class, NULL, NULL);
-    JS_DefineFunctions(_ctx.getJSContext(), result, subscription_methods);
-    JS_DefineProperties(_ctx.getJSContext(), result, subscription_properties);
+  JSBool subscription_construct(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    if (argc < 3) {
+      Logger::getInstance()->log("JS: subscription_construct: need three arguments: event-name, handler-name & parameter");
+      return JS_FALSE;
+    } else {
+      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+      JSAutoLocalRootScope localRoot(cx);
 
-    subscription_wrapper* subscriptionWrapper = new subscription_wrapper();
-    subscriptionWrapper->subscription = _subscription;
-    JS_SetPrivate(_ctx.getJSContext(), result, subscriptionWrapper);
-    return result;
-  }
+      EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
+      if(ext != NULL) {
+        JSString *val = JS_ValueToString(cx, argv[0]);
+        char* eventName = JS_GetStringBytes(val);
+
+        val = JS_ValueToString(cx, argv[1]);
+        char* handlerName = JS_GetStringBytes(val);
+
+        JSObject* paramObj;
+
+        boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
+
+        if(JS_ValueToObject(cx, argv[2], &paramObj) == JS_TRUE) {
+          JSObject* propIter = JS_NewPropertyIterator(cx, paramObj);
+          jsid propID;
+          while(JS_NextProperty(cx, propIter, &propID) == JS_TRUE) {
+            if(propID == JSVAL_VOID) {
+              break;
+            }
+            JSObject* obj;
+            jsval vp;
+            JS_GetMethodById(cx, paramObj, propID, &obj, &vp);
+
+            jsval vp2;
+
+            val = JS_ValueToString(cx, vp);
+            char* propValue = JS_GetStringBytes(val);
+
+            JS_IdToValue(cx, propID, &vp2);
+            val = JS_ValueToString(cx, vp2);
+            char* propName = JS_GetStringBytes(val);
+
+            opts->setParameter(propName, propValue);
+          }
+
+        }
+
+        boost::shared_ptr<EventSubscription> subscription(new EventSubscription(eventName, handlerName, ext->getEventInterpreter(), opts));
+        subscription_wrapper* subscriptionWrapper = new subscription_wrapper();
+        subscriptionWrapper->subscription = subscription;
+        JS_SetPrivate(cx, obj, subscriptionWrapper);
+      }
+    }
+    return JS_TRUE;
+  } // global_subscription
+
+  void EventScriptExtension::extendContext(ScriptContext& _context) {
+    JSRequest req(&_context);
+    JS_InitClass(_context.getJSContext(), _context.getRootObject().getJSObject(),
+              NULL, &subscription_class, subscription_construct, 0, subscription_properties,
+              subscription_methods, NULL, NULL);
+    JS_InitClass(_context.getJSContext(), _context.getRootObject().getJSObject(),
+              NULL, &event_class, event_construct, 0, event_properties,
+              event_methods, NULL, NULL);
+  } // extendContext
 
   //================================================== ModelConstantsScriptExtension
 

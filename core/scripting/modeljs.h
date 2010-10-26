@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
@@ -90,9 +90,6 @@ namespace dss {
 
     EventInterpreter& getEventInterpreter() { return m_Interpreter; }
     const EventInterpreter& getEventInterpreter() const { return m_Interpreter; }
-
-    JSObject* createJSEvent(ScriptContext& _ctx, boost::shared_ptr<Event> _event);
-    JSObject* createJSSubscription(ScriptContext& _ctx, boost::shared_ptr<EventSubscription> _subscription);
   }; // EventScriptExtension
 
   class ModelConstantsScriptExtension : public ScriptExtension {
