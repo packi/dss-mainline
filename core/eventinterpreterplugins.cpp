@@ -48,6 +48,8 @@
 #include <Poco/DOM/Node.h>
 #include <Poco/Exception.h>
 
+#include <limits.h>
+
 using Poco::XML::Element;
 using Poco::XML::Node;
 
@@ -169,58 +171,78 @@ namespace dss {
   }
 
   void EventInterpreterPluginJavascript::handleEvent(Event& _event, const EventSubscription& _subscription) {
-    if(_subscription.getOptions()->hasParameter("filename")) {
-      std::string scriptName = _subscription.getOptions()->getParameter("filename");
+    if(_subscription.getOptions()->hasParameter("filename1")) {
 
       if(!m_Environment.isInitialized()) {
         initializeEnvironment();
       }
 
-      try {
-        boost::shared_ptr<ScriptContext> ctx(m_Environment.getContext());
-        std::string scriptID = _event.getPropertyByName("script_id");
-        if(scriptID.empty()) {
-          scriptID = _event.getName() + _subscription.getID();
-        }
-        boost::shared_ptr<ScriptContextWrapper> wrapper(new ScriptContextWrapper(ctx, m_pScriptRootNode, scriptID));
+      boost::shared_ptr<ScriptContext> ctx(m_Environment.getContext());
+      std::string scriptID = _event.getPropertyByName("script_id");
+      if(scriptID.empty()) {
+        scriptID = _event.getName() + _subscription.getID();
+      }
+      boost::shared_ptr<ScriptContextWrapper> wrapper(new ScriptContextWrapper(ctx, m_pScriptRootNode, scriptID));
+      {
+        JSContextThread th(ctx.get());
+
+        ScriptObject raisedEvent(*ctx, NULL);
+        raisedEvent.setProperty<const std::string&>("name", _event.getName());
+        ctx->getRootObject().setProperty("raisedEvent", &raisedEvent);
+
+        // add raisedEvent.parameter
+        ScriptObject param(*ctx, NULL);
+        const HashMapConstStringString& props =  _event.getProperties().getContainer();
+        for(HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end();
+            iParam != e; ++iParam)
         {
-          JSContextThread th(ctx.get());
-
-          ScriptObject raisedEvent(*ctx, NULL);
-          raisedEvent.setProperty<const std::string&>("name", _event.getName());
-          ctx->getRootObject().setProperty("raisedEvent", &raisedEvent);
-
-          // add raisedEvent.parameter
-          ScriptObject param(*ctx, NULL);
-          const HashMapConstStringString& props =  _event.getProperties().getContainer();
-          for(HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end();
-              iParam != e; ++iParam)
-          {
-            Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: setting parameter " + iParam->first +
-                                        " to " + iParam->second);
-            param.setProperty<const std::string&>(iParam->first, iParam->second);
-          }
-          raisedEvent.setProperty("parameter", &param);
-
-          // add raisedEvent.subscription
-          ScriptObject subscriptionObj(*ctx, NULL);
-          raisedEvent.setProperty("subscription", &subscriptionObj);
-          subscriptionObj.setProperty<const std::string&>("name", _subscription.getEventName());
-
-          wrapper->addFile(scriptName);
+          Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: setting parameter " + iParam->first +
+                                      " to " + iParam->second);
+          param.setProperty<const std::string&>(iParam->first, iParam->second);
         }
+        raisedEvent.setProperty("parameter", &param);
+
+        // add raisedEvent.subscription
+        ScriptObject subscriptionObj(*ctx, NULL);
+        raisedEvent.setProperty("subscription", &subscriptionObj);
+        subscriptionObj.setProperty<const std::string&>("name", _subscription.getEventName());
+      }
+
+      std::string scripts;
+
+      for (int i = 0; i < UCHAR_MAX; i++) {
+        std::string paramName = std::string("filename") + intToString(i + 1);
+        if (!_subscription.getOptions()->hasParameter(paramName)) {
+          break;
+        }
+        std::string scriptName = 
+            _subscription.getOptions()->getParameter(paramName);
+
+        wrapper->addFile(scriptName);
+        try {
+        Logger::getInstance()->log("EventInterpreterPluginJavascript::"
+                                   "handleEvent: running script " + scriptName);
+
         ctx->evaluateScript<void>(scriptName);
-
-        if(ctx->hasAttachedObjects()) {
-          m_WrappedContexts.push_back(wrapper);
-          Logger::getInstance()->log("EventInterpreterPluginJavascript::handleEvent: still has objects, keeping " + scriptName + " in memory", lsInfo);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(
+                  std::string("EventInterpreterPluginJavascript::handleEvent:"
+                              "Caught event while running/parsing script '")
+                          + scriptName + "'. Message: " + e.what(), lsError);
+          return;
         }
-      } catch(ScriptException& e) {
-        Logger::getInstance()->log(std::string("EventInterpreterPluginJavascript::handleEvent: Caught event while running/parsing script '")
-                            + scriptName + "'. Message: " + e.what(), lsError);
+
+        scripts = scripts + scriptName + " ";
+      }
+
+      if(ctx->hasAttachedObjects()) {
+        m_WrappedContexts.push_back(wrapper);
+        Logger::getInstance()->log("EventInterpreterPluginJavascript::"
+                                   "handleEvent: still has objects, keeping: " 
+                                   + scripts + " in memory", lsInfo);
       }
     } else {
-      throw std::runtime_error("EventInterpreteRPluginJavascript::handleEvent: missing argument filename");
+      throw std::runtime_error("EventInterpreteRPluginJavascript::handleEvent: missing argument filename1");
     }
   } // handleEvent
 

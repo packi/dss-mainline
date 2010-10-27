@@ -263,7 +263,7 @@ BOOST_AUTO_TEST_CASE(testEventHandlerJavascriptDoesntLeakExceptionsWithNonexisti
   interpreter.addPlugin(plugin);
 
   boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
-  opts->setParameter("filename", "idontexistandneverwill.js");
+  opts->setParameter("filename1", "idontexistandneverwill.js");
   EventSubscription subscription("testEvent", "javascript", interpreter, opts);
   Event evt("testEvent");
   plugin->handleEvent(evt, subscription);
