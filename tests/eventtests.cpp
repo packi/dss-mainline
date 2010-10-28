@@ -26,6 +26,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/bind.hpp>
 
+#include <iostream>
+
 #include "core/event.h"
 #include "core/eventinterpreterplugins.h"
 #include "core/internaleventrelaytarget.h"
@@ -613,5 +615,38 @@ BOOST_FIXTURE_TEST_CASE(testDefaultSetsDefault, RelayEventFixture) {
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
   BOOST_CHECK_EQUAL(m_Tester.getCoughtEvent()->getPropertyByName("test"), kTestValue);
 }
+
+// TODO: in case a script does not run through, the exception is caught in the
+// event interpreter and our test can not evaluate the result; figure out a way
+// to test
+BOOST_AUTO_TEST_CASE(testMultipleScriptFiles) {
+  std::string fileName1 = getTempDir() + "s1.js";
+  std::string fileName2 = getTempDir() + "s2.js";
+
+  std::ofstream ofs1(fileName1.c_str());
+  ofs1 << "function niceprint(text) { print('[NICE]: ' + text); }\n";
+  ofs1.close();
+
+  std::ofstream ofs2(fileName2.c_str());
+  ofs2 << "niceprint('kraaah!');\n";
+  ofs2.close();
+
+  EventInterpreter interpreter(NULL);
+  EventInterpreterPluginJavascript* plugin = new EventInterpreterPluginJavascript(&interpreter);
+  interpreter.addPlugin(plugin);
+
+  boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
+  opts->setParameter("filename1", fileName1);
+  opts->setParameter("filename2", fileName2);
+  EventSubscription subscription("testEvent", "javascript", interpreter, opts);
+  Event evt("testEvent");
+  plugin->handleEvent(evt, subscription);
+
+  sleepMS(10);
+
+  boost::filesystem::remove(fileName1);
+  boost::filesystem::remove(fileName2);
+} // testMultipleScriptFiles
+
 
 BOOST_AUTO_TEST_SUITE_END()
