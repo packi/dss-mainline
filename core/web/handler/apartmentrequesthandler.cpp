@@ -158,6 +158,7 @@ namespace dss {
           circuit->addProperty("apiVersion", dsMeter->getApiVersion());
           circuit->addProperty("hwName", dsMeter->getHardwareName());
           circuit->addProperty("isPresent", dsMeter->isPresent());
+          circuit->addProperty("isValid", dsMeter->isValid());
         }
         return success(resultObj);
       } else if(_request.getMethod() == "getName") {
