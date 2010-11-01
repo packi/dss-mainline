@@ -80,7 +80,8 @@ namespace dss {
     m_IsInitializing(true),
     m_pApartment(NULL),
     m_pMetering(NULL),
-    m_EventTimeoutMS(_eventTimeoutMS)
+    m_EventTimeoutMS(_eventTimeoutMS),
+    m_pStructureQueryBusInterface(NULL)
   { }
 
   void ModelMaintenance::checkConfigFile(boost::filesystem::path _filename) {
