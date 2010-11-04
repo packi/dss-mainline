@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(testProperties) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluate<void>("setProperty('/testing', 1)");
+  ctx->evaluate<void>("Property.setProperty('/testing', 1)");
 //  BOOST_CHECK_EQUAL(ctx->evaluate<int>("getProperty('/testing')"), 1);
 //  BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 1);
 
@@ -338,8 +338,8 @@ BOOST_AUTO_TEST_CASE(testPropertyListener) {
   env->addExtension(ext);
 
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluate<void>("setProperty('/testing', 1); setProperty('/triggered', false); "
-                      "var listener_ident = setListener('/testing', function(changedNode) { setProperty('/triggered', true); }); "
+  ctx->evaluate<void>("Property.setProperty('/testing', 1); Property.setProperty('/triggered', false); "
+                      "var listener_ident = Property.setListener('/testing', function(changedNode) { Property.setProperty('/triggered', true); }); "
       );
 
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
@@ -351,7 +351,7 @@ BOOST_AUTO_TEST_CASE(testPropertyListener) {
   BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 2);
 
   // check that removing works
-  ctx->evaluate<void>("removeListener(listener_ident);");
+  ctx->evaluate<void>("Property.removeListener(listener_ident);");
 
   propSys.setBoolValue("/triggered", false);
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
@@ -362,8 +362,8 @@ BOOST_AUTO_TEST_CASE(testPropertyListener) {
   BOOST_CHECK_EQUAL(propSys.getIntValue("/testing"), 2);
 
   // check that closures are working as expected
-  ctx->evaluate<void>("setProperty('/triggered', false); setProperty('/testing', 1); "
-                      "var ident = setListener('/testing', function(changedNode) { setProperty('/triggered', true); removeListener(ident); }); "
+  ctx->evaluate<void>("Property.setProperty('/triggered', false); Property.setProperty('/testing', 1); "
+                      "var ident = Property.setListener('/testing', function(changedNode) { Property.setProperty('/triggered', true); Property.removeListener(ident); }); "
       );
 
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/triggered"), false);
@@ -390,17 +390,17 @@ BOOST_AUTO_TEST_CASE(testReentrancy) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluate<void>("setProperty('/testing', 1); setProperty('/triggered', false); "
-                      "var other_ident = setListener('/triggered', function() { setProperty('/itWorks', true); } ); "
-                      "var listener_ident = setListener('/testing', function(changedNode) { setProperty('/triggered', true); }); "
+  ctx->evaluate<void>("Property.setProperty('/testing', 1); Property.setProperty('/triggered', false); "
+                      "var other_ident = Property.setListener('/triggered', function() { Property.setProperty('/itWorks', true); } ); "
+                      "var listener_ident = Property.setListener('/testing', function(changedNode) { Property.setProperty('/triggered', true); }); "
       );
 
   propSys.setBoolValue("/testing", true);
 
   BOOST_CHECK_EQUAL(propSys.getBoolValue("/itWorks"), true);
 
-  ctx->evaluate<void>("removeListener(other_ident); "
-                      "removeListener(listener_ident); "
+  ctx->evaluate<void>("Property.removeListener(other_ident); "
+                      "Property.removeListener(listener_ident); "
       );
 
 } // testReentrancy
@@ -432,9 +432,9 @@ BOOST_AUTO_TEST_CASE(testThreading) {
   env->addExtension(ext);
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluate<void>("setProperty('/testing1', 1); setProperty('/testing2', 1); "
-                      "var l1 = setListener('/testing1', function() { setProperty('/itworks', true); }); "
-                      "var l2 = setListener('/testing2', function() { setProperty('/itworks', true); }); "
+  ctx->evaluate<void>("Property.setProperty('/testing1', 1); Property.setProperty('/testing2', 1); "
+                      "var l1 = Property.setListener('/testing1', function() { Property.setProperty('/itworks', true); }); "
+                      "var l2 = Property.setListener('/testing2', function() { Property.setProperty('/itworks', true); }); "
       );
 
   PropertyNodePtr node1 = propSys.getProperty("/testing1");
@@ -470,7 +470,7 @@ BOOST_AUTO_TEST_CASE(testThreading) {
     sleepMS(100);
   }
 
-  ctx->evaluate<void>("removeListener(l1); removeListener(l2);");
+  ctx->evaluate<void>("Property.removeListener(l1); Property.removeListener(l2);");
 } // testThreading
 
 BOOST_AUTO_TEST_CASE(testPropertyFlags) {
@@ -483,20 +483,126 @@ BOOST_AUTO_TEST_CASE(testPropertyFlags) {
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
   PropertyNodePtr node1 = propSys.createProperty("/testing");
 
-  ctx->evaluate<void>("setFlag('/testing', 'ARCHIVE', true);");
+  ctx->evaluate<void>("Property.setFlag('/testing', 'ARCHIVE', true);");
   BOOST_CHECK_EQUAL(node1->hasFlag(PropertyNode::Archive), true);
-  bool res = ctx->evaluate<bool>("hasFlag('/testing', 'ARCHIVE')");
+  bool res = ctx->evaluate<bool>("Property.hasFlag('/testing', 'ARCHIVE')");
   BOOST_CHECK_EQUAL(res, true);
 
-  ctx->evaluate<void>("setFlag('/testing', 'READABLE', false);");
+  ctx->evaluate<void>("Property.setFlag('/testing', 'READABLE', false);");
   BOOST_CHECK_EQUAL(node1->hasFlag(PropertyNode::Readable), false);
-  res = ctx->evaluate<bool>("hasFlag('/testing', 'READABLE')");
+  res = ctx->evaluate<bool>("Property.hasFlag('/testing', 'READABLE')");
   BOOST_CHECK_EQUAL(res, false);
 
-  ctx->evaluate<void>("setFlag('/testing', 'WRITEABLE', false);");
+  ctx->evaluate<void>("Property.setFlag('/testing', 'WRITEABLE', false);");
   BOOST_CHECK_EQUAL(node1->hasFlag(PropertyNode::Writeable), false);
-  res = ctx->evaluate<bool>("hasFlag('/testing', 'WRITEABLE')");
+  res = ctx->evaluate<bool>("Property.hasFlag('/testing', 'WRITEABLE')");
   BOOST_CHECK_EQUAL(res, false);
 } // testPropertyFlags
+
+BOOST_AUTO_TEST_CASE(testPropertyObjExisting) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  PropertyNodePtr node1 = propSys.createProperty("/testing");
+
+  ctx->evaluate<void>("var prop = new Property('/testing');\n"
+                      "prop.setValue('test');\n"
+  );
+
+  BOOST_CHECK_EQUAL(node1->getStringValue(), "test");
+} // testPropertyObjExisting
+
+BOOST_AUTO_TEST_CASE(testPropertyObjNonExisting) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+
+  ctx->evaluate<void>("var prop = new Property('/testing');\n"
+                      "prop.setValue('test');\n"
+  );
+
+  PropertyNodePtr node1 = propSys.getProperty("/testing");
+  BOOST_CHECK_EQUAL(node1->getStringValue(), "test");
+} // testPropertyObjNonExisting
+
+BOOST_AUTO_TEST_CASE(testPropertyObjNonExistingInvalid) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+
+  BOOST_CHECK_THROW(ctx->evaluate<void>("var prop = new Property('testing');\n"), ScriptException);
+} // testPropertyObjNonExisting
+
+BOOST_AUTO_TEST_CASE(testPropertyGetNodeExisting) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  PropertyNodePtr node1 = propSys.createProperty("/testing");
+
+  ctx->evaluate<void>("var prop = Property.getNode('/testing');\n"
+                      "prop.setValue('test');\n"
+  );
+
+  BOOST_CHECK_EQUAL(node1->getStringValue(), "test");
+} // testPropertyGetNodeExisting
+
+BOOST_AUTO_TEST_CASE(testPropertyGetChild) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  PropertyNodePtr node1 = propSys.createProperty("/testing/bla");
+
+  ctx->evaluate<void>("var prop = Property.getNode('/testing');\n"
+                      "prop.getChild('bla').setValue('test');\n"
+  );
+
+  BOOST_CHECK_EQUAL(node1->getStringValue(), "test");
+} // testPropertyGetChild
+
+BOOST_AUTO_TEST_CASE(testPropertyStoreReturnsFalse) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  bool res = ctx->evaluate<bool>("Property.store()");
+
+  BOOST_CHECK_EQUAL(res, false);
+} // testPropertyStoreReturnsFalse
+
+BOOST_AUTO_TEST_CASE(testPropertyLoadReturnsFalse) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  bool res = ctx->evaluate<bool>("Property.load()");
+
+  BOOST_CHECK_EQUAL(res, false);
+} // testPropertyLoadReturnsFalse
 
 BOOST_AUTO_TEST_SUITE_END()

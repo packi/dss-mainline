@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
@@ -63,10 +63,17 @@ namespace dss {
 
     PropertySystem& getPropertySystem() { return m_PropertySystem; }
 
-    JSObject* createJSProperty(ScriptContext& _ctx, boost::shared_ptr<PropertyNode> _node);
     std::string produceListenerID();
     void addListener(PropertyScriptListener* _pListener);
     void removeListener(const std::string& _identifier, bool _destroy = true);
+
+    PropertyNodePtr getPropertyFromObj(ScriptContext* _context, JSObject* _obj);
+    virtual PropertyNodePtr getProperty(ScriptContext* _context, const std::string& _path);
+    virtual PropertyNodePtr createProperty(ScriptContext* _context, const std::string& _name);
+    JSObject* createJSProperty(ScriptContext& _ctx, PropertyNodePtr _node);
+    JSObject* createJSProperty(ScriptContext& _ctx, const std::string& _path);
+    virtual bool store(ScriptContext* _ctx);
+    virtual bool load(ScriptContext* _ctx);
   private:
     PropertySystem& m_PropertySystem;
     std::vector<PropertyScriptListener*> m_Listeners;
