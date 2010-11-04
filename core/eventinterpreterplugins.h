@@ -51,6 +51,7 @@ namespace dss {
   class EventInterpreterPluginJavascript : public EventInterpreterPlugin {
   private:
     ScriptEnvironment m_Environment;
+    boost::weak_ptr<ScriptContextWrapper> m_WrapperInAction;
     std::vector<boost::shared_ptr<ScriptContextWrapper> > m_WrappedContexts;
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;
     static const std::string kCleanupScriptsEventName;
@@ -65,6 +66,8 @@ namespace dss {
     ~EventInterpreterPluginJavascript();
 
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
+
+    boost::shared_ptr<ScriptContextWrapper> getContextWrapperForContext(ScriptContext* _pContext);
   }; // EventInterpreterPluginJavascript
 
   class BusInterface;

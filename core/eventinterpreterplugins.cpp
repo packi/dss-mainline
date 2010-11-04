@@ -138,6 +138,10 @@ namespace dss {
         m_pPropertyNode->createProperty("files/file+")->setStringValue(_name);
       }
     }
+
+    PropertyNodePtr getPropertyNode() {
+      return m_pPropertyNode;
+    }
   private:
     void stopScript(bool _value) {
       Logger::getInstance()->log("Stop of script '" + m_pPropertyNode->getName() + "' requested.", lsInfo);
@@ -149,6 +153,19 @@ namespace dss {
     std::vector<std::string> m_LoadedFiles;
     PropertyNodePtr m_pPropertyNode;
   };
+
+  class WrapperAwarePropertyScriptExtension : public PropertyScriptExtension {
+  public:
+    WrapperAwarePropertyScriptExtension(PropertySystem& _propertySystem)
+    : PropertyScriptExtension(_propertySystem)
+    { }
+
+    virtual PropertyNodePtr getProperty(ScriptContext* _context, const std::string& _path) {
+    }
+    virtual PropertyNodePtr createProperty(ScriptContext* _context, const std::string& _name);
+    virtual bool store(ScriptContext* _ctx);
+    virtual bool load(ScriptContext* _ctx);
+  }; // WrapperAwarePropertyScriptExtension
 
   //================================================== EventInterpreterPluginJavascript
 
@@ -255,7 +272,7 @@ namespace dss {
       m_Environment.addExtension(ext);
       ext = new EventScriptExtension(DSS::getInstance()->getEventQueue(), getEventInterpreter());
       m_Environment.addExtension(ext);
-      ext = new PropertyScriptExtension(DSS::getInstance()->getPropertySystem());
+      ext = new WrapperAwarePropertyScriptExtension(DSS::getInstance()->getPropertySystem());
       m_Environment.addExtension(ext);
       ext = new ModelConstantsScriptExtension();
       m_Environment.addExtension(ext);
