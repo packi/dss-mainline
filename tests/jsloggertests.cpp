@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(testLogger) {
 
   queue.shutdown();
   interpreter.terminate();
-  sleepMS(5);
+  sleepMS(60);
 }
 
 BOOST_AUTO_TEST_CASE(testLogrotate) {

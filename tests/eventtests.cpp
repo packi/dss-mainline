@@ -399,7 +399,7 @@ BOOST_FIXTURE_TEST_CASE(testEventCollector, Fixture) {
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(5);
+  sleepMS(15);
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 1);
 
@@ -411,7 +411,7 @@ BOOST_FIXTURE_TEST_CASE(testEventCollector, Fixture) {
   pEvent.reset(new Event("event2"));
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(5);
+  sleepMS(15);
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
 
@@ -422,7 +422,7 @@ BOOST_FIXTURE_TEST_CASE(testEventCollector, Fixture) {
   pEvent.reset(new Event("my_event"));
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(5);
+  sleepMS(15);
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 3);
 

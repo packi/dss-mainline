@@ -651,6 +651,8 @@ BOOST_AUTO_TEST_CASE(testMeteringDataFromUnknownMeter) {
   }
 
   sleepMS(5);
+  maintenance.shutdown();
+  sleepMS(60);
 } // testMeteringDataFromUnknownMeter
 
 BOOST_AUTO_TEST_CASE(testApartmentCreatesRootNode) {
