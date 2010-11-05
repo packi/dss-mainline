@@ -89,7 +89,6 @@ namespace dss {
 
     virtual void initialize();
     virtual void execute();
-    virtual void initialize();
 
     struct soap* popPendingRequest();
   }; // WebServices

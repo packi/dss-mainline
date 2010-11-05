@@ -22,6 +22,7 @@
 */
 
 #include "webservices.h"
+#include "core/propertysystem.h"
 
 #include <cassert>
 #include <cstdlib>
