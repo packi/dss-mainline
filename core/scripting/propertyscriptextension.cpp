@@ -307,6 +307,29 @@ namespace dss {
     return JS_TRUE;
   } // prop_getChild
 
+  JSBool prop_getChildren(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
+    assert(node != NULL);
+    std::string nodeName;
+
+    JSAutoLocalRootScope scope(cx);
+    JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
+    *rval = OBJECT_TO_JSVAL(resultObj);
+
+    for(int iChild = 0; iChild < node->getChildCount(); iChild++) {
+      jsval childJSVal = OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, node->getChild(iChild)));
+      JSBool res = JS_SetElement(cx, resultObj, iChild, &childJSVal);
+      if(!res) {
+        return JS_FALSE;
+      }
+    }
+
+    return JS_TRUE;
+  } // prop_getChildren
+
   JSBool prop_getNode(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
@@ -358,6 +381,7 @@ namespace dss {
     {"setListener", prop_setListener, 1, 0, 0},
     {"removeListener", prop_removeListener, 1, 0, 0},
     {"getChild", prop_getChild, 1, 0, 0},
+    {"getChildren", prop_getChildren, 0, 0, 0},
     {"setFlag", prop_setFlag, 2, 0, 0},
     {"hasFlag", prop_hasFlag, 1, 0, 0},
     {NULL, NULL, 0, 0, 0},
@@ -416,9 +440,30 @@ namespace dss {
     JS_ConvertStub,  property_finalize, JSCLASS_NO_OPTIONAL_MEMBERS
   }; // prop_class
 
+  JSBool prop_JSGet(JSContext *cx, JSObject *obj, jsval id, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
+    assert(node != NULL);
+
+    int opt = JSVAL_TO_INT(id);
+    if(opt == 0) {
+      std::string propName = node->getDisplayName();
+      *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, propName.c_str()));
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // prop_JSGet
+
+  static JSPropertySpec prop_properties[] = {
+    {"name", 0, 0, prop_JSGet},
+    {NULL}
+  };
+
   void PropertyScriptExtension::extendContext(ScriptContext& _context) {
     JS_InitClass(_context.getJSContext(), _context.getRootObject().getJSObject(),
-                 NULL, &prop_class, property_construct, 0, NULL /* prop_properties */,
+                 NULL, &prop_class, property_construct, 1, prop_properties,
                  prop_methods, NULL, prop_static_methods);
   } // extendContext
 
