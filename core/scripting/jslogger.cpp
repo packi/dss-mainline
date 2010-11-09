@@ -211,7 +211,7 @@ namespace dss {
     m_pExtension->removeLogger(m_logName);
   } // dtor
 
-  
+
   //================================================== ScriptLoggerExtension
 
   ScriptLoggerExtension::ScriptLoggerExtension(const std::string _directory, EventInterpreter& _eventInterpreter) 

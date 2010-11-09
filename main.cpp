@@ -126,6 +126,7 @@ int main (int argc, char* argv[]) {
       ("webrootdir,w", po::value<string>(), "set webroot directory")
       ("configdir,c", po::value<string>(), "set config directory")
       ("config,C", po::value<string>(), "set configuration file to use")
+      ("savedpropsdir,p", po::value<string>(), "set saved properties directory")
 #ifndef __APPLE__ // daemon() is marked as deprecated on OS X
       ("daemonize,d", "start as a daemon")
 #endif
@@ -173,6 +174,11 @@ int main (int argc, char* argv[]) {
   string config_file;
   if(vm.count("config")) {
     config_file = vm["config"].as<string>();
+  }
+
+  if(vm.count("savedpropsdir")) {
+    properties.push_back("/config/savedpropsdirectory=" +
+                         vm["savedpropsdir"].as<string>());
   }
 
   string snifferDev;

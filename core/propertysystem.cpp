@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
     Copyright (c) 2008 Patrick Staehlin <me@packi.ch>
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
@@ -122,7 +122,7 @@ namespace dss {
     return false;
   } // loadFromXML
 
-  bool PropertySystem::saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode) const {
+  bool PropertySystem::saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode, const int _flagsMask) const {
     AutoPtr<Document> pDoc = new Document;
 
     AutoPtr<ProcessingInstruction> pXMLHeader = pDoc->createProcessingInstruction("xml", "version='1.0' encoding='utf-8'");
@@ -136,7 +136,7 @@ namespace dss {
     if(root == NULL) {
       root = m_RootNode;
     }
-    root->saveAsXML(pDoc, pRoot, 0);
+    root->saveAsXML(pDoc, pRoot, _flagsMask);
 
     // TODO: factor those line into a function as it's a copy of
     //       model.cpp/seriespersistance.cpp/metering.cpp

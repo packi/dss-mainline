@@ -109,7 +109,8 @@ namespace dss {
   class ScriptContextWrapper {
   public:
     ScriptContextWrapper(boost::shared_ptr<ScriptContext> _pContext, PropertyNodePtr _pRootNode, const std::string& _identifier)
-    : m_pContext(_pContext)
+    : m_pContext(_pContext),
+      m_Identifier(_identifier)
     {
       if((_pRootNode != NULL) && !_identifier.empty()) {
         m_pPropertyNode = _pRootNode->createProperty(_identifier + "+");
@@ -142,6 +143,10 @@ namespace dss {
     PropertyNodePtr getPropertyNode() {
       return m_pPropertyNode;
     }
+
+    const std::string& getIdentifier() const {
+      return m_Identifier;
+    }
   private:
     void stopScript(bool _value) {
       Logger::getInstance()->log("Stop of script '" + m_pPropertyNode->getName() + "' requested.", lsInfo);
@@ -152,19 +157,58 @@ namespace dss {
     DateTime m_StartTime;
     std::vector<std::string> m_LoadedFiles;
     PropertyNodePtr m_pPropertyNode;
+    std::string m_Identifier;
   };
 
   class WrapperAwarePropertyScriptExtension : public PropertyScriptExtension {
   public:
-    WrapperAwarePropertyScriptExtension(PropertySystem& _propertySystem)
-    : PropertyScriptExtension(_propertySystem)
+    WrapperAwarePropertyScriptExtension(EventInterpreterPluginJavascript& _plugin, PropertySystem& _propertySystem,
+                                        const std::string& _storeDirectory)
+    : PropertyScriptExtension(_propertySystem),
+      m_Plugin(_plugin),
+      m_StoreDirectory(addTrailingBackslash(_storeDirectory))
     { }
 
     virtual PropertyNodePtr getProperty(ScriptContext* _context, const std::string& _path) {
+      if(beginsWith(_path, "/")) {
+        return PropertyScriptExtension::getProperty(_context, _path);
+      } else {
+        boost::shared_ptr<ScriptContextWrapper> wrapper = m_Plugin.getContextWrapperForContext(_context);
+        assert(wrapper != NULL);
+        return wrapper->getPropertyNode()->getProperty(_path);
+      }
     }
-    virtual PropertyNodePtr createProperty(ScriptContext* _context, const std::string& _name);
-    virtual bool store(ScriptContext* _ctx);
-    virtual bool load(ScriptContext* _ctx);
+
+    virtual PropertyNodePtr createProperty(ScriptContext* _context, const std::string& _name) {
+      if(beginsWith(_name, "/")) {
+        return PropertyScriptExtension::createProperty(_context, _name);
+      } else {
+        boost::shared_ptr<ScriptContextWrapper> wrapper = m_Plugin.getContextWrapperForContext(_context);
+        assert(wrapper != NULL);
+        return wrapper->getPropertyNode()->createProperty(_name);
+      }
+    }
+
+    virtual bool store(ScriptContext* _context) {
+      boost::shared_ptr<ScriptContextWrapper> wrapper = m_Plugin.getContextWrapperForContext(_context);
+      assert(wrapper != NULL);
+      // TODO: sanitize filename to prevent world-domination
+      return m_PropertySystem.saveToXML(
+                                m_StoreDirectory + wrapper->getIdentifier() + ".xml",
+                                wrapper->getPropertyNode(), PropertyNode::Archive);
+    }
+
+    virtual bool load(ScriptContext* _context) {
+      boost::shared_ptr<ScriptContextWrapper> wrapper = m_Plugin.getContextWrapperForContext(_context);
+      assert(wrapper != NULL);
+      // TODO: sanitize filename to prevent world-domination
+      return m_PropertySystem.loadFromXML(
+                                m_StoreDirectory + wrapper->getIdentifier() + ".xml",
+                                wrapper->getPropertyNode());
+    }
+  private:
+    EventInterpreterPluginJavascript& m_Plugin;
+    std::string m_StoreDirectory;
   }; // WrapperAwarePropertyScriptExtension
 
   //================================================== EventInterpreterPluginJavascript
@@ -200,6 +244,7 @@ namespace dss {
         scriptID = _event.getName() + _subscription.getID();
       }
       boost::shared_ptr<ScriptContextWrapper> wrapper(new ScriptContextWrapper(ctx, m_pScriptRootNode, scriptID));
+      m_WrapperInAction = wrapper;
       {
         JSContextThread th(ctx.get());
 
@@ -272,13 +317,15 @@ namespace dss {
       m_Environment.addExtension(ext);
       ext = new EventScriptExtension(DSS::getInstance()->getEventQueue(), getEventInterpreter());
       m_Environment.addExtension(ext);
-      ext = new WrapperAwarePropertyScriptExtension(DSS::getInstance()->getPropertySystem());
+      ext = new WrapperAwarePropertyScriptExtension(*this, DSS::getInstance()->getPropertySystem(),
+                                                    DSS::getInstance()->getSavedPropsDirectory());
       m_Environment.addExtension(ext);
       ext = new ModelConstantsScriptExtension();
       m_Environment.addExtension(ext);
       ext = new SocketScriptContextExtension();
       m_Environment.addExtension(ext);
-      ext = new ScriptLoggerExtension(DSS::getInstance()->getJSLogDirectory(), DSS::getInstance()->getEventInterpreter());
+      ext = new ScriptLoggerExtension(DSS::getInstance()->getJSLogDirectory(),
+                                      DSS::getInstance()->getEventInterpreter());
       m_Environment.addExtension(ext);
       setupCleanupEvent();
       m_pScriptRootNode = DSS::getInstance()->getPropertySystem().createProperty("/scripts");
@@ -322,6 +369,24 @@ namespace dss {
     pEvent->setProperty("time", "+" + intToString(20));
     getEventInterpreter().getQueue().pushEvent(pEvent);
   } // sendCleanupEvent
+
+  boost::shared_ptr<ScriptContextWrapper> EventInterpreterPluginJavascript::getContextWrapperForContext(ScriptContext* _pContext) {
+    boost::shared_ptr<ScriptContextWrapper> result;
+    if(!m_WrapperInAction.expired()) {
+      result = m_WrapperInAction.lock();
+      if(result->get().get() != _pContext) {
+        result.reset();
+      }
+    }
+    typedef std::vector<boost::shared_ptr<ScriptContextWrapper> >::iterator tScriptContextWrapperIterator;
+    tScriptContextWrapperIterator ipScriptContextWrapper = m_WrappedContexts.begin();
+    while(ipScriptContextWrapper != m_WrappedContexts.end()) {
+      if((*ipScriptContextWrapper)->get().get() == _pContext) {
+        result = (*ipScriptContextWrapper);
+      }
+    }
+    return result;
+  } // getContextWrapperForContext
 
 
   //================================================== EventInterpreterPluginDS485

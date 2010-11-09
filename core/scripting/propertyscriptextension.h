@@ -74,8 +74,9 @@ namespace dss {
     JSObject* createJSProperty(ScriptContext& _ctx, const std::string& _path);
     virtual bool store(ScriptContext* _ctx);
     virtual bool load(ScriptContext* _ctx);
-  private:
+  protected:
     PropertySystem& m_PropertySystem;
+  private:
     std::vector<PropertyScriptListener*> m_Listeners;
     int m_NextListenerID;
   }; // PropertyScriptExtension

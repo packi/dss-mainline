@@ -25,6 +25,10 @@ if(NOT WITH_JSLOGDIR)
   set(WITH_JSLOGDIR "${WITH_DATADIR}/logs" CACHE FILEPATH "JS Log directory")
 endif(NOT WITH_JSLOGDIR)
 
+if(NOT WITH_SAVEDPROPSDIR)
+  set(WITH_SAVEDPROPSDIR "${WITH_DATADIR}/savedprops" CACHE FILEPATH "Saved properties directory")
+endif(NOT WITH_SAVEDPROPSDIR)
+
 set(DSS_GEN_VERSION_CMD "")
 if(WIN32)
   set(DSS_GEN_VERSION_CMD "tools/dss_gen_version_win32.bat")

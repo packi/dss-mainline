@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
     Copyright (c) 2008 Patrick Staehlin <me@packi.ch>
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
@@ -87,7 +87,7 @@ namespace dss {
      * Everything in the XML has to be relative to _rootNode. */
     bool loadFromXML(const std::string& _fileName, PropertyNodePtr _rootNode);
     /** Saves a subtree to XML. */
-    bool saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode) const;
+    bool saveToXML(const std::string& _fileName, PropertyNodePtr _rootNode, const int _flagsMask = 0) const;
 
     /** Searches a property by path.
      * @return The node, or NULL if not found. */

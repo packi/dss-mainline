@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
@@ -81,6 +81,7 @@ namespace dss {
     std::string m_configDirectory;
     std::string m_webrootDirectory;
     std::string m_jsLogDirectory;
+    std::string m_savedPropsDirectory;
 
     aDSSState m_State;
     bool m_ShutdownFlag;
@@ -134,10 +135,12 @@ namespace dss {
     const std::string& getConfigDirectory() const { return m_configDirectory; }
     const std::string& getWebrootDirectory() const { return m_webrootDirectory; }
     const std::string& getJSLogDirectory() const { return m_jsLogDirectory; }
+    const std::string& getSavedPropsDirectory() const { return  m_savedPropsDirectory; }
     void setDataDirectory(const std::string& _value);
     void setConfigDirectory(const std::string& _value);
     void setWebrootDirectory(const std::string& _value);
     void setJSLogDirectory(const std::string& _value);
+    void setSavedPropsDirectory(const std::string& _value);
   }; // DSS
 
 }

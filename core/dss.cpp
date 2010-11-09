@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
@@ -97,6 +97,12 @@ const char* JSLogDirectory = WITH_JSLOGDIR;
 const char* JSLogDirectory = "data/logs/";
 #endif
 
+#ifdef WITH_SAVEDPROPSDIR
+const char* kSavedPropsDirectory = WITH_SAVEDPROPSDIR;
+#else
+const char* kSavedPropsDirectory = "data/savedprops/";
+#endif
+
   DSS::DSS()
   {
     m_ShutdownFlag = false;
@@ -115,6 +121,8 @@ const char* JSLogDirectory = "data/logs/";
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getWebrootDirectory, &DSS::setWebrootDirectory));
     m_pPropertySystem->createProperty("/config/jslogdirectory")->linkToProxy(
         PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getJSLogDirectory, &DSS::setJSLogDirectory));
+    m_pPropertySystem->createProperty("/config/savedpropsdirectory")->linkToProxy(
+        PropertyProxyMemberFunction<DSS,std::string>(*this, &DSS::getSavedPropsDirectory, &DSS::setSavedPropsDirectory));
   } // ctor
 
   DSS::~DSS() {
@@ -143,6 +151,7 @@ const char* JSLogDirectory = "data/logs/";
     char AppDataDir[259];
     char WebDir[259];
     char JSLogDir[259];
+    char SavedPropsDir[259];
     std::string aup = getenv("ALLUSERSPROFILE");
 	
     if (std::string::npos != aup.std::string::find("ProgramData")) {
@@ -156,16 +165,19 @@ const char* JSLogDirectory = "data/logs/";
 
     sprintf(WebDir, "%s\\webroot",AppDataDir);
     sprintf(JSLogDir, "%s\\logs",AppDataDir);
+    sprintf(SavedPropsDir, "%s\\savedprops", AppDataDir);
 
     setDataDirectory(AppDataDir);
     setConfigDirectory(AppDataDir);
     setWebrootDirectory(WebDir);
     setJSLogDirectory(JSLogDir);
+    setSavedPropsDirectory(SavedPropsDir);
 #else
     setDataDirectory(DataDirectory);
     setConfigDirectory(ConfigDirectory);
     setWebrootDirectory(WebrootDirectory);
     setJSLogDirectory(JSLogDirectory);
+    setSavedPropsDirectory(kSavedPropsDirectory);
 #endif
   } // setupDirectories
 
@@ -192,6 +204,10 @@ const char* JSLogDirectory = "data/logs/";
   void DSS::setJSLogDirectory(const std::string& _value) {
     m_jsLogDirectory = addTrailingBackslash(_value);
   } // setJSLogDirectory
+
+  void DSS::setSavedPropsDirectory(const std::string& _value) {
+    m_savedPropsDirectory = addTrailingBackslash(_value);
+  } // setSavedPropsDirectory
 
   bool DSS::parseProperties(const std::vector<std::string>& _properties) {
     foreach(std::string propLine, _properties) {
@@ -321,6 +337,11 @@ const char* JSLogDirectory = "data/logs/";
       Logger::getInstance()->log("Invalid js-log directory specified: '" + m_jsLogDirectory + "'", lsFatal);
       sane = false;
     }
+
+    if(!isSaneDirectory(m_savedPropsDirectory)) {
+      Logger::getInstance()->log("Invalid saved-props directory specified: '" + m_savedPropsDirectory + "'", lsFatal);
+      sane = false;
+    }
     return sane;
   } // checkDirectoriesExist
 
@@ -398,10 +419,11 @@ const char* JSLogDirectory = "data/logs/";
     Logger::getInstance()->log("DSS starting up....", lsInfo);
     Logger::getInstance()->log(versionString(), lsInfo);
     Logger::getInstance()->log("Configuration: ", lsInfo);
-    Logger::getInstance()->log("  data:   '" + getDataDirectory() + "'", lsInfo);
-    Logger::getInstance()->log("  config: '" + getConfigDirectory() + "'", lsInfo);
-    Logger::getInstance()->log("  webroot '" + getWebrootDirectory() + "'", lsInfo);
-    Logger::getInstance()->log("  log dir '" + getJSLogDirectory() + "'", lsInfo);
+    Logger::getInstance()->log("  data:      '" + getDataDirectory() + "'", lsInfo);
+    Logger::getInstance()->log("  config:    '" + getConfigDirectory() + "'", lsInfo);
+    Logger::getInstance()->log("  webroot:   '" + getWebrootDirectory() + "'", lsInfo);
+    Logger::getInstance()->log("  log dir:   '" + getJSLogDirectory() + "'", lsInfo);
+    Logger::getInstance()->log("  props dir: '" + getSavedPropsDirectory() + "'", lsInfo);
 
     SystemInfo info;
     info.collect();

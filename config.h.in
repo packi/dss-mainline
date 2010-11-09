@@ -17,6 +17,7 @@
 #cmakedefine WITH_CONFIGDIR "${WITH_CONFIGDIR}"
 #cmakedefine WITH_WEBROOTDIR "${WITH_WEBROOTDIR}"
 #cmakedefine WITH_JSLOGDIR "${WITH_JSLOGDIR}"
+#cmakedefine WITH_SAVEDPROPSDIR "${WITH_SAVEDPROPSDIR}"
 #cmakedefine WITH_BONJOUR
 #cmakedefine WITH_GCOV
 #cmakedefine HAVE_BACKTRACE
