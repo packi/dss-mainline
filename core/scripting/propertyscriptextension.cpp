@@ -358,6 +358,8 @@ namespace dss {
     {"setListener", prop_setListener, 1, 0, 0},
     {"removeListener", prop_removeListener, 1, 0, 0},
     {"getChild", prop_getChild, 1, 0, 0},
+    {"setFlag", prop_setFlag, 2, 0, 0},
+    {"hasFlag", prop_hasFlag, 1, 0, 0},
     {NULL, NULL, 0, 0, 0},
   };
 
