@@ -63,8 +63,10 @@ namespace dss {
         ->linkToProxy(PropertyProxyReference<int>(m_EnergyLevelOrange, false));
       m_pPropertyNode->createProperty("hardwareVersion")
         ->linkToProxy(PropertyProxyReference<int>(m_HardwareVersion, false));
-      m_pPropertyNode->createProperty("softwareVersion")
-        ->linkToProxy(PropertyProxyReference<int>(m_SoftwareVersion, false));
+      m_pPropertyNode->createProperty("armSoftwareVersion")
+        ->linkToProxy(PropertyProxyReference<int>(m_armSoftwareVersion, false));
+      m_pPropertyNode->createProperty("dspSoftwareVersion")
+        ->linkToProxy(PropertyProxyReference<int>(m_dspSoftwareVersion, false));
       m_pPropertyNode->createProperty("apiVersion")
         ->linkToProxy(PropertyProxyReference<int>(m_ApiVersion, false));
       m_pPropertyNode->createProperty("hardwareName")

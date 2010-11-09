@@ -65,10 +65,11 @@ namespace dss {
 
     try {
       DSMeterSpec_t spec = m_Interface.getDSMeterSpec(_dsMeter->getDSID());
-      _dsMeter->setSoftwareVersion(spec.get<1>());
-      _dsMeter->setHardwareVersion(spec.get<2>());
-      _dsMeter->setApiVersion(spec.get<3>());
-      _dsMeter->setHardwareName(spec.get<4>());
+      _dsMeter->setArmSoftwareVersion(spec.get<1>());
+      _dsMeter->setDspSoftwareVersion(spec.get<2>());
+      _dsMeter->setHardwareVersion(spec.get<3>());
+      _dsMeter->setApiVersion(spec.get<4>());
+      _dsMeter->setHardwareName(spec.get<5>());
     } catch(BusApiError& e) {
       log("scanDSMeter: Error getting dSMSpecs", lsFatal);
       return false;

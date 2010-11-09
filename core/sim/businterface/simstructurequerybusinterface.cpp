@@ -42,7 +42,7 @@ namespace dss {
   } // getDSMeters
 
   DSMeterSpec_t SimStructureQueryBusInterface::getDSMeterSpec(const dss_dsid_t& _dsMeterID) {
-    return DSMeterSpec_t(_dsMeterID, 0, 0, 0, "dSMSim11");
+    return DSMeterSpec_t(_dsMeterID, 0, 0, 0, 0, "dSMSim11");
   } // getDSMeterSpec
 
   std::vector<int> SimStructureQueryBusInterface::getZones(const dss_dsid_t& _dsMeterID) {

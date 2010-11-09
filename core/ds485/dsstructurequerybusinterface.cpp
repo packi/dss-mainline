@@ -72,18 +72,19 @@ namespace dss {
       throw BusApiError("Bus not ready");
     }
     uint32_t hwVersion;
-    uint32_t swVersion;
+    uint32_t armSwVersion;
+    uint32_t dspSwVersion;
     uint16_t apiVersion;
     uint8_t dsidBuf[DSID_LEN];
     uint8_t nameBuf[NAME_LEN];
     dsid_t dsid;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
-    int ret = dSMInfo(m_DSMApiHandle, dsid, &hwVersion, &swVersion, &apiVersion, dsidBuf, nameBuf);
+    int ret = dSMInfo(m_DSMApiHandle, dsid, &hwVersion, &armSwVersion, &dspSwVersion, &apiVersion, dsidBuf, nameBuf);
     DSBusInterface::checkResultCode(ret);
 
     char nameStr[NAME_LEN];
     memcpy(nameStr, nameBuf, NAME_LEN);
-    DSMeterSpec_t spec(_dsMeterID, swVersion, hwVersion, apiVersion, nameStr);
+    DSMeterSpec_t spec(_dsMeterID, armSwVersion, dspSwVersion, hwVersion, apiVersion, nameStr);
     return spec;
   } // getDSMeterSpec
 

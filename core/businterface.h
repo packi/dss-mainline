@@ -38,7 +38,7 @@ namespace dss {
   class AddressableModelItem;
   class BusInterface;
 
-  typedef boost::tuple<dss_dsid_t, int, int, int, std::string> DSMeterSpec_t; // bus-id, sw-version, hw-version, api version, name
+  typedef boost::tuple<dss_dsid_t, int, int, int, int, std::string> DSMeterSpec_t; // bus-id, arm-sw-version, dsp-sw-version, hw-version, api version, name
   typedef boost::tuple<int, int, int, int> DeviceSpec_t; // function id, product id, revision, bus address
 
   class DeviceBusInterface {

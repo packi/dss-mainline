@@ -52,7 +52,8 @@ namespace dss {
     int m_EnergyMeterValue;
     DateTime m_EnergyMeterValueTimeStamp;
     int m_HardwareVersion;
-    int m_SoftwareVersion;
+    int m_armSoftwareVersion;
+    int m_dspSoftwareVersion;
     int m_ApiVersion;
     std::string m_HardwareName;
     bool m_IsValid;
@@ -111,8 +112,10 @@ namespace dss {
 
     int getHardwareVersion() const { return m_HardwareVersion; }
     void setHardwareVersion(const int _value) { m_HardwareVersion = _value; }
-    int getSoftwareVersion() const { return m_SoftwareVersion; }
-    void setSoftwareVersion(const int _value) { m_SoftwareVersion = _value; }
+    int getArmSoftwareVersion() const { return m_armSoftwareVersion; }
+    void setArmSoftwareVersion(const int _value) { m_armSoftwareVersion = _value; }
+    int getDspSoftwareVersion() const { return m_dspSoftwareVersion; }
+    void setDspSoftwareVersion(const int _value) { m_dspSoftwareVersion = _value; }
     int getApiVersion() const { return m_ApiVersion; }
     void setApiVersion(const int _value) { m_ApiVersion = _value; }
     std::string getHardwareName() const { return m_HardwareName; }
