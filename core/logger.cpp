@@ -88,7 +88,8 @@ namespace dss {
   } // severityToString<const wstring>
 
   Logger::Logger()
-    : m_logTarget(boost::shared_ptr<LogTarget>(new CoutLogTarget()))
+    : m_logTarget(boost::shared_ptr<LogTarget>(new CoutLogTarget())),
+      m_defaultLogChannel(new LogChannel("System"))
   {}
 
   Logger* Logger::getInstance() {
@@ -108,30 +109,27 @@ namespace dss {
   }
 
   void Logger::log(const std::string& _message, const aLogSeverity _severity) {
-    std::string logMessage;
-
-    DateTime d = DateTime();
-
-    logMessage = "[" + d.fromUTC().toString() + "]"
-    	         + SeverityToString<const std::string>(_severity)
-    	         + " " + _message + "\n";
-
-    m_logTarget->outputStream() << logMessage; // only for backward compatibility
-
-    m_handlerListMutex.lock();
-    foreach(LogHandler *h,m_handlerList) {
-      h->handle(logMessage);
-    }
-    m_handlerListMutex.unlock();
-  } // log
-
-  void Logger::log(const char* _message, const aLogSeverity _severity) {
-    log(std::string(_message), _severity);
+    log(*m_defaultLogChannel, std::string(_message), _severity);
   } // log
 
   void Logger::log(const LogChannel& _channel, const std::string& _message, const aLogSeverity _severity) {
     if(_channel.maylog(_severity)) {
-      log(std::string("[") + _channel.getName() + "] " + _message, _severity);
+      std::string logMessage;
+
+      DateTime d = DateTime();
+
+      logMessage = "[" + d.fromUTC().toString() + "]"
+        + SeverityToString<const std::string>(_severity)
+        + "[" + _channel.getName() + "]"
+        + " " + _message + "\n";
+
+      m_logTarget->outputStream() << logMessage; // only for backward compatibility
+
+      m_handlerListMutex.lock();
+      foreach(LogHandler *h,m_handlerList) {
+        h->handle(logMessage);
+      }
+      m_handlerListMutex.unlock();
     }
   } // log
 

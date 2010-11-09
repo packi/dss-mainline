@@ -51,8 +51,6 @@ class LogHandler;
     static void shutdown();
 
     void log(const std::string& _message, const aLogSeverity _severity = lsDebug);
-    void log(const char* _message, const aLogSeverity _severity = lsDebug);
-
     void log(const LogChannel& _channel, const std::string& _message, const aLogSeverity _severity = lsDebug);
     
     bool setLogTarget(boost::shared_ptr<LogTarget>& _logTarget);
@@ -67,6 +65,7 @@ class LogHandler;
     static Logger* m_Instance;
     
     boost::shared_ptr<LogTarget> m_logTarget;
+    boost::shared_ptr<LogChannel> m_defaultLogChannel;
 
     static Mutex m_handlerListMutex;
     static std::list<LogHandler *> m_handlerList;
@@ -79,13 +78,7 @@ class LogHandler;
   public:
     LogChannel(const std::string& _name, aLogSeverity _minimumSeverity = lsDebug)
     : m_Name(_name), m_MinimumSeverity(_minimumSeverity)
-    {
-      Logger::getInstance()->log(*this, "Logchannel created");
-    }
-
-    ~LogChannel() {
-      Logger::getInstance()->log(*this, "Logchannel destroyed");
-    }
+    {}
 
     aLogSeverity getMinimumSeverity() const { return m_MinimumSeverity; }
     void setMinimumSeverity(aLogSeverity _value) { m_MinimumSeverity = _value; }
