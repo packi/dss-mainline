@@ -27,7 +27,6 @@
 
 #include "core/dss.h"
 #include "core/logger.h"
-#include "core/propertysystem.h"
 #include "core/businterface.h"
 #include "core/model/device.h"
 #include "core/model/devicereference.h"
