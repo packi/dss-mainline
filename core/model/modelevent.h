@@ -40,7 +40,6 @@ namespace dss {
                    etNewDevice,       /**< A new device has been detected */
                    etLostDevice,       /**< A device became inactive */
                    etModelDirty,      /**< A parameter that will be stored in \c apartment.xml has been changed. */
-                   etNewDSMeter, /**< A new dsMeter has joined the bus */
                    etLostDSMeter, /**< We've lost a dsMeter on the bus */
                    etDSMeterReady, /**< A dsMeter has completed its scanning cycle and is now ready */
                    etBusReady, /**< The bus transitioned into ready state */

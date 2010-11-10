@@ -226,17 +226,9 @@ namespace dss {
         eraseEventFromList = false;
         writeConfiguration();
         break;
-      case ModelEvent::etNewDSMeter:
-        eraseModelEventsFromQueue(ModelEvent::etNewDSMeter);
-        eraseModelEventsFromQueue(ModelEvent::etLostDSMeter);
-        eraseEventFromList = false;
-        discoverDS485Devices();
-        break;
       case ModelEvent::etLostDSMeter:
-        eraseModelEventsFromQueue(ModelEvent::etLostDSMeter);
-        eraseModelEventsFromQueue(ModelEvent::etNewDSMeter);
-        eraseEventFromList = false;
-        discoverDS485Devices();
+        assert(pEventWithDSID != NULL);
+        onLostDSMeter(pEventWithDSID->getDSID());
         break;
       case ModelEvent::etDSMeterReady:
         if(event.getParameterCount() != 0) {
@@ -528,6 +520,20 @@ namespace dss {
     device->setIsPresent(true);
 
   } // onAddDevice
+
+  void ModelMaintenance::onLostDSMeter(const dss_dsid_t& _dSMeterID) {
+    try {
+      boost::shared_ptr<DSMeter> meter =
+                              m_pApartment->getDSMeterByDSID(_dSMeterID);
+      meter->setIsPresent(false);
+      Set devices = meter->getDevices();
+      for (int i = 0; i < devices.length(); i++) {
+        devices[i].getDevice()->setIsPresent(false);
+      }
+    } catch(ItemNotFoundException& e) {
+      log("Lost dSM " + _dSMeterID.toString() + " was not in our list");
+    }
+  }
 
   void ModelMaintenance::setApartment(Apartment* _value) {
     m_pApartment = _value;
