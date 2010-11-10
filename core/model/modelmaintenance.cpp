@@ -291,17 +291,21 @@ namespace dss {
           assert(pEventWithDSID != NULL);
           dss_dsid_t newDSID = pEventWithDSID->getDSID();
           log ("Discovered device with DSID: " + newDSID.toString());
+          boost::shared_ptr<DSMeter> dsMeter;
+
           try{
              log ("dSM present");
-             m_pApartment->getDSMeterByDSID(newDSID)->setIsPresent(true);
+             dsMeter = m_pApartment->getDSMeterByDSID(newDSID);
           } catch(ItemNotFoundException& e) {
              log ("dSM not present");
-             boost::shared_ptr<DSMeter> dsMeter = m_pApartment->allocateDSMeter(newDSID);
-             dsMeter->setIsPresent(true);
-             dsMeter->setIsValid(false);
-             ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDSMeterReady, newDSID);
-             addModelEvent(pEvent);
+             dsMeter = m_pApartment->allocateDSMeter(newDSID);
           }
+
+          dsMeter->setIsPresent(true);
+          dsMeter->setIsValid(false);
+          ModelEventWithDSID* pEvent =
+                   new ModelEventWithDSID(ModelEvent::etDSMeterReady, newDSID);
+          addModelEvent(pEvent);
         }
         break;
       default:
