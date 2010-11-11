@@ -120,7 +120,7 @@ namespace dss {
 
   void WebServer::publishJSLogfiles() {
     // pre-create the property as the gui accesses it on startup and gets upset if the node's not there
-    getDSS().getPropertySystem().createProperty("/system/js/logsfiles/");
+    getDSS().getPropertySystem().createProperty("/system/js/logfiles/");
 
     std::string logDir = getDSS().getJSLogDirectory();
     try {
@@ -134,7 +134,7 @@ namespace dss {
              endsWith(dir_itr->filename(), ".LOG")) {
             std::string abspath = dir_itr->string();
             getDSS().getPropertySystem().setStringValue("/config/subsystems/WebServer/files/" + std::string(fileName), abspath, true, false);
-            getDSS().getPropertySystem().setStringValue("/system/js/logsfiles/" + std::string(fileName), abspath, true, false);
+            getDSS().getPropertySystem().setStringValue("/system/js/logfiles/" + std::string(fileName), abspath, true, false);
           }
         }
       }

@@ -166,7 +166,7 @@ namespace dss {
       throw std::runtime_error("Could not open file " + m_fileName + " for writing");
     }
     if(DSS::hasInstance()) {
-      DSS::getInstance()->getPropertySystem().setStringValue("/system/js/logsfiles/" + _filename, m_fileName, true, false);
+      DSS::getInstance()->getPropertySystem().setStringValue("/system/js/logfiles/" + _filename, m_fileName, true, false);
       DSS::getInstance()->getPropertySystem().setStringValue("/config/subsystems/WebServer/files/" + _filename, m_fileName, true, false);
     }
   } // ctor
