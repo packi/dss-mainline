@@ -95,10 +95,11 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
 
 class DeviceInterfaceRequestHandlerValid : public DeviceInterfaceRequestHandler {
 public:
-  virtual boost::shared_ptr<JSONObject> jsonHandleRequest(
+  virtual WebServerResponse jsonHandleRequest(
     const RestfulRequest& _request,
     boost::shared_ptr<Session> _session) {
-    return boost::shared_ptr<JSONObject>();
+    boost::shared_ptr<JSONObject> result;
+    return result;
   }
 };
 
@@ -125,7 +126,7 @@ private:
   void testFunction(const std::string& _functionName, const std::string& _functionNameWithParams, const HashMapConstStringString& _params) {
     boost::shared_ptr<DeviceInterfaceDummy> dummy(new DeviceInterfaceDummy);
     RestfulRequest req("bla/" + _functionName, _params);
-    boost::shared_ptr<JSONObject> response = m_RequestHandler.handleDeviceInterfaceRequest(req, dummy);
+    WebServerResponse response = m_RequestHandler.handleDeviceInterfaceRequest(req, dummy);
     BOOST_CHECK_EQUAL(dummy->getNumberOfCalls(), 1);
     BOOST_CHECK_EQUAL(dummy->getLastFunction(), _functionNameWithParams);
     testOkIs(response, true);

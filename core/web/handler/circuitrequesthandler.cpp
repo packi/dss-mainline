@@ -37,7 +37,7 @@ namespace dss {
   : m_Apartment(_apartment), m_ModelMaintenance(_modelMaintenance)
   { }
 
-  boost::shared_ptr<JSONObject> CircuitRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse CircuitRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::string idString = _request.getParameter("id");
     if(idString.empty()) {
       return failure("Missing parameter id");

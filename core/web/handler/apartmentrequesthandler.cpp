@@ -86,7 +86,7 @@ namespace dss {
     return success();
   }
 
-  boost::shared_ptr<JSONObject> ApartmentRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse ApartmentRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::string errorMessage;
     if(_request.getMethod() == "getConsumption") {
       int accumulatedConsumption = 0;
@@ -136,7 +136,7 @@ namespace dss {
         }
 
         return success(toJSON(devices));
-/* TODO: re-enable
+/*
       } else if(_request.getMethod() == "login") {
         int token = m_LastSessionID;
         m_Sessions[token] = Session(token);

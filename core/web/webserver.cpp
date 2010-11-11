@@ -231,8 +231,8 @@ namespace dss {
     m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());
   } // instantiateHandlers
 
-  boost::ptr_map<std::string, std::string> WebServer::parseCookies(const char *_cookies) {
-      boost::ptr_map<std::string, std::string> result;
+  HashMapConstStringString WebServer::parseCookies(const char* _cookies) {
+      HashMapConstStringString result;
 
       if ((_cookies == NULL) || (strlen(_cookies) == 0)) {
         return result;
@@ -272,15 +272,15 @@ namespace dss {
       return result;
   }
 
-  std::string WebServer::generateCookieString(boost::ptr_map<std::string, std::string> _cookies) {
+  std::string WebServer::generateCookieString(HashMapConstStringString _cookies) {
     std::string result = "";
 
-    boost::ptr_map<std::string, std::string>::iterator i;
+    HashMapConstStringString::iterator i;
     std::string path;
 
     for (i = _cookies.begin(); i != _cookies.end(); i++) {
       if (i->first == "path") {
-        path = *i->second;
+        path = i->second;
         continue;
       }
 
@@ -288,7 +288,7 @@ namespace dss {
         result = result + "; ";
       }
 
-      result = result + i->first + "=" + (*i->second);
+      result = result + i->first + "=" + (i->second);
     }
 
     if (!path.empty()) {
@@ -305,39 +305,34 @@ namespace dss {
   void *WebServer::jsonHandler(struct mg_connection* _connection,
                               const struct mg_request_info* _info) {
     const std::string urlid = "/json/";
-    const char  *cookie;
     std::string setCookie;
-    int token = -1;
-    boost::shared_ptr<Session> session;
 
     std::string uri = _info->uri;
     HashMapConstStringString paramMap = parseParameter(_info->query_string);
 
     std::string method = uri.substr(uri.find(urlid) + urlid.size());
 
-    RestfulRequest request(method, paramMap);
-
     WebServer& self = DSS::getInstance()->getWebServer();
+
+    const char* cookie = mg_get_header(_connection, "Cookie");
+    HashMapConstStringString cookies = self.parseCookies(cookie);
+    RestfulRequest request(method, paramMap, cookies);
+
     self.log("Processing call to " + method);
 
-    cookie = mg_get_header(_connection, "Cookie");
-
-    if (cookie != NULL) {
-      boost::ptr_map<std::string, std::string> cookies = self.parseCookies(cookie);
-      std::string& tokenStr = cookies["token"];
-      token = strToIntDef(tokenStr, -1);
-      if (token != -1) {
-        session = self.m_SessionManager->getSession(token);
-      }
+    boost::shared_ptr<Session> session;
+    std::string& tokenStr = cookies["token"];
+    int token = strToIntDef(tokenStr, -1);
+    if(token != -1) {
+      session = self.m_SessionManager->getSession(token);
     }
 
-    if ((cookie == NULL) || (token == -1) || (session == NULL)){
-
+    if((cookie == NULL) || (token == -1) || (session == NULL)) {
       token = self.m_SessionManager->registerSession();
       session = self.m_SessionManager->getSession(token);
       self.log("Registered new JSON session");
 
-      boost::ptr_map<std::string, std::string> cmap;
+      HashMapConstStringString cmap;
       cmap["token"] = intToString(token);
       cmap["path"] = "/";
       setCookie = self.generateCookieString(cmap);
@@ -348,7 +343,13 @@ namespace dss {
     std::string result;
     if(self.m_Handlers[request.getClass()] != NULL) {
       try {
-        result = self.m_Handlers[request.getClass()]->handleRequest(request, session);
+        WebServerResponse response = self.m_Handlers[request.getClass()]->jsonHandleRequest(request, session);
+        if(response.getResponse() != NULL) {
+          result = response.getResponse()->toString();
+        }
+        if(setCookie.empty()) {
+          setCookie = self.generateCookieString(response.getCookies());
+        }
         emitHTTPHeader(200, _connection, "application/json", setCookie);
       } catch(std::runtime_error& e) {
         emitHTTPHeader(500, _connection, "application/json", setCookie);

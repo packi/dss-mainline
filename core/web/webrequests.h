@@ -43,6 +43,28 @@ namespace dss {
     }
   }; // WebServerRequestHandler
 
+  class WebServerResponse {
+  public:
+    WebServerResponse(boost::shared_ptr<JSONObject> _response)
+    : m_Response(_response)
+    { }
+
+    void setCookie(const std::string& _key, const std::string& _value) {
+      m_Cookies[_key] = _value;
+    }
+
+    const HashMapConstStringString& getCookies() const {
+      return m_Cookies;
+    }
+
+    boost::shared_ptr<JSONObject> getResponse() {
+      return m_Response;
+    }
+  private:
+    boost::shared_ptr<JSONObject> m_Response;
+    HashMapConstStringString m_Cookies;
+  }; // WebServerResponse
+
   class WebServerRequestHandlerJSON : public WebServerRequestHandler {
   protected:
     boost::shared_ptr<JSONObject> success();
@@ -51,7 +73,7 @@ namespace dss {
     boost::shared_ptr<JSONObject> failure(const std::string& _message = "");
   public:
     virtual std::string handleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
-    virtual boost::shared_ptr<JSONObject> jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) = 0;
+    virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) = 0;
   }; // WebServerRequestHandlerJSON
 
 

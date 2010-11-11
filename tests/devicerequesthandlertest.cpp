@@ -82,7 +82,7 @@ protected:
 BOOST_FIXTURE_TEST_CASE(testNoParam, Fixture) {
   HashMapConstStringString params;
   RestfulRequest req("device/bla", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -90,7 +90,7 @@ BOOST_FIXTURE_TEST_CASE(testEmptyNameParam, Fixture) {
   HashMapConstStringString params;
   params["name"] = "";
   RestfulRequest req("device/bla", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -98,7 +98,7 @@ BOOST_FIXTURE_TEST_CASE(testInvalidNameParam, Fixture) {
   HashMapConstStringString params;
   params["name"] = m_InvalidName;
   RestfulRequest req("device/bla", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -106,7 +106,7 @@ BOOST_FIXTURE_TEST_CASE(testEmptyDSIDParam, Fixture) {
   HashMapConstStringString params;
   params["dsid"] = "";
   RestfulRequest req("device/bla", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -114,7 +114,7 @@ BOOST_FIXTURE_TEST_CASE(testInvalidDSIDParam, Fixture) {
   HashMapConstStringString params;
   params["dsid"] = "asdfasdf";
   RestfulRequest req("device/bla", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -122,7 +122,7 @@ BOOST_FIXTURE_TEST_CASE(testTooLongDSIDParam, Fixture) {
   HashMapConstStringString params;
   params["dsid"] = "3504175fe0000000ffc000113504175fe0000000ffc00011";
   RestfulRequest req("device/bla", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -137,7 +137,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetSpec, Fixture) {
   HashMapConstStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/getSpec", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   boost::shared_ptr<JSONObject> result = getResultObject(response);
   checkPropertyEquals("functionID", m_FunctionID, result);
   checkPropertyEquals("revisionID", m_RevisionID, result);
@@ -148,7 +148,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetGroups, Fixture) {
   HashMapConstStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/getGroups", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   boost::shared_ptr<JSONObject> result = getResultObject(response);
   boost::shared_ptr<JSONElement> groupsArr = result->getElementByName("groups");
   BOOST_CHECK_EQUAL(groupsArr->getElementCount(), 1);
@@ -162,7 +162,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetState, Fixture) {
   HashMapConstStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/getState", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   boost::shared_ptr<JSONObject> result = getResultObject(response);
   checkPropertyEquals("isOn", false, result);
 }
@@ -171,7 +171,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetName, Fixture) {
   HashMapConstStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/getName", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   boost::shared_ptr<JSONObject> result = getResultObject(response);
   checkPropertyEquals("name", m_ValidName, result);
 }
@@ -180,7 +180,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceSetNameMissingNewName, Fixture) {
   HashMapConstStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/setName", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -190,11 +190,11 @@ BOOST_FIXTURE_TEST_CASE(testDeviceSetName, Fixture) {
   params["dsid"] = m_ValidDSID.toString();
   params["newName"] = kNewName;
   RestfulRequest req("device/setName", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, true);
 
   RestfulRequest req2("device/getName", params);
-  boost::shared_ptr<JSONObject> response2 = m_pHandler->jsonHandleRequest(req2, boost::shared_ptr<Session>());
+  WebServerResponse response2 = m_pHandler->jsonHandleRequest(req2, boost::shared_ptr<Session>());
 
   boost::shared_ptr<JSONObject> result = getResultObject(response2);
   checkPropertyEquals("name", kNewName, result);
@@ -204,7 +204,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceAddTagMissingTag, Fixture) {
   HashMapConstStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/addTag", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -212,7 +212,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceHasTagMissingTag, Fixture) {
   HashMapConstStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/hasTag", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -220,7 +220,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceRemoveTagMissingTag, Fixture) {
   HashMapConstStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/removeTag", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -232,30 +232,29 @@ BOOST_FIXTURE_TEST_CASE(testDeviceTestTags, Fixture) {
   RestfulRequest reqHasTag("device/hasTag", params);
   RestfulRequest reqAddTag("device/addTag", params);
   RestfulRequest reqRemoveTag("device/removeTag", params);
-  boost::shared_ptr<JSONObject> response;
   boost::shared_ptr<JSONObject> result;
 
   // check that tag doesn't exist
-  response = m_pHandler->jsonHandleRequest(reqHasTag, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(reqHasTag, boost::shared_ptr<Session>());
   result = getResultObject(response);
   checkPropertyEquals("hasTag", false, result);
 
   // add tag
-  response = m_pHandler->jsonHandleRequest(reqAddTag, boost::shared_ptr<Session>());
-  testOkIs(response, true);
+  WebServerResponse response2 = m_pHandler->jsonHandleRequest(reqAddTag, boost::shared_ptr<Session>());
+  testOkIs(response2, true);
 
   // check that tag does exist
-  response = m_pHandler->jsonHandleRequest(reqHasTag, boost::shared_ptr<Session>());
-  result = getResultObject(response);
+  WebServerResponse response3 = m_pHandler->jsonHandleRequest(reqHasTag, boost::shared_ptr<Session>());
+  result = getResultObject(response3);
   checkPropertyEquals("hasTag", true, result);
 
   // remove tag
-  response = m_pHandler->jsonHandleRequest(reqRemoveTag, boost::shared_ptr<Session>());
-  testOkIs(response, true);
+  WebServerResponse response4 = m_pHandler->jsonHandleRequest(reqRemoveTag, boost::shared_ptr<Session>());
+  testOkIs(response4, true);
 
   // check that tag doesn't exist
-  response = m_pHandler->jsonHandleRequest(reqHasTag, boost::shared_ptr<Session>());
-  result = getResultObject(response);
+  WebServerResponse response5 = m_pHandler->jsonHandleRequest(reqHasTag, boost::shared_ptr<Session>());
+  result = getResultObject(response5);
   checkPropertyEquals("hasTag", false, result);
 }
 
@@ -263,7 +262,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetTagsNoTags, Fixture) {
   HashMapConstStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/getTags", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   boost::shared_ptr<JSONObject> result;
 
   result = getResultObject(response);  
@@ -278,7 +277,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetTagsOneTag, Fixture) {
   params["dsid"] = m_ValidDSID.toString();
   m_pApartment->getDeviceByDSID(m_ValidDSID)->addTag(kTagName);
   RestfulRequest req("device/getTags", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   boost::shared_ptr<JSONObject> result;
 
   result = getResultObject(response);
@@ -307,7 +306,7 @@ BOOST_FIXTURE_TEST_CASE(testLockNotPresent, Fixture) {
   HashMapConstStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/lock", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -316,7 +315,7 @@ BOOST_FIXTURE_TEST_CASE(testLockPresent, Fixture) {
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/lock", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, true);
 }
 
@@ -324,7 +323,7 @@ BOOST_FIXTURE_TEST_CASE(testUnlockNotPresent, Fixture) {
   HashMapConstStringString params;
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/unlock", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -333,7 +332,7 @@ BOOST_FIXTURE_TEST_CASE(testUnlockPresent, Fixture) {
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/unlock", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, true);
 }
 
@@ -342,7 +341,7 @@ BOOST_FIXTURE_TEST_CASE(testSetRawValueNoParams, Fixture) {
   m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
   params["dsid"] = m_ValidDSID.toString();
   RestfulRequest req("device/setRawValue", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -352,7 +351,7 @@ BOOST_FIXTURE_TEST_CASE(testSetRawValueInvalidValue, Fixture) {
   params["dsid"] = m_ValidDSID.toString();
   params["value"] = "asdf";
   RestfulRequest req("device/setRawValue", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -363,7 +362,7 @@ BOOST_FIXTURE_TEST_CASE(testSetRawValueInvalidParameterID, Fixture) {
   params["value"] = "1";
   params["parameterID"] = "asdf";
   RestfulRequest req("device/setRawValue", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -375,7 +374,7 @@ BOOST_FIXTURE_TEST_CASE(testSetRawValueInvalidSize, Fixture) {
   params["parameterID"] = "1";
   params["size"] = "asdf";
   RestfulRequest req("device/setRawValue", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -387,7 +386,7 @@ BOOST_FIXTURE_TEST_CASE(testSetRawValue, Fixture) {
   params["parameterID"] = "1";
   params["size"] = "1";
   RestfulRequest req("device/setRawValue", params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, true);
 }
 

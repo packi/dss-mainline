@@ -86,7 +86,7 @@ namespace dss {
     return result;
   } // getDeviceByName
 
-  boost::shared_ptr<JSONObject> DeviceRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse DeviceRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     boost::shared_ptr<Device> pDevice;
     try {
       pDevice = getDeviceFromRequest(_request);

@@ -32,9 +32,9 @@ namespace dss {
   //================================================== WebServerRequestHandlerJSON
 
   std::string WebServerRequestHandlerJSON::handleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
-    boost::shared_ptr<JSONObject> response = jsonHandleRequest(_request, _session);
-    if(response != NULL) {
-      return response->toString();
+    WebServerResponse response = jsonHandleRequest(_request, _session);
+    if(response.getResponse() != NULL) {
+      return response.getResponse()->toString();
     }
     return "";
   } // handleRequest

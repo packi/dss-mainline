@@ -32,7 +32,7 @@ namespace dss {
 
   //=========================================== SystemRequestHandler
 
-  boost::shared_ptr<JSONObject> SystemRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse SystemRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(_request.getMethod() == "version") {
       return success(DSS::getInstance()->versionString());
     } else if (_request.getMethod() == "time") {
