@@ -27,9 +27,17 @@
 
 namespace dss {
 
+  class SessionManager;
+
   class SystemRequestHandler : public WebServerRequestHandlerJSON {
   public:
+    SystemRequestHandler(boost::shared_ptr<SessionManager> _sessionManager)
+    : m_pSessionManager(_sessionManager)
+    { }
+
     virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+  private:
+    boost::shared_ptr<SessionManager> m_pSessionManager;
   }; // SystemRequestHandler
 
 } // namespace dss

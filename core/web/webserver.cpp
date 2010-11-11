@@ -218,7 +218,7 @@ namespace dss {
     m_Handlers[kHandlerSet] = new SetRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerProperty] = new PropertyRequestHandler(getDSS().getPropertySystem());
     m_Handlers[kHandlerEvent] = new EventRequestHandler(getDSS().getEventInterpreter());
-    m_Handlers[kHandlerSystem] = new SystemRequestHandler();
+    m_Handlers[kHandlerSystem] = new SystemRequestHandler(m_SessionManager);
     m_Handlers[kHandlerStructure] =
       new StructureRequestHandler(
         getDSS().getApartment(),
@@ -327,18 +327,9 @@ namespace dss {
       session = self.m_SessionManager->getSession(token);
     }
 
-    if((cookie == NULL) || (token == -1) || (session == NULL)) {
-      token = self.m_SessionManager->registerSession();
-      session = self.m_SessionManager->getSession(token);
-      self.log("Registered new JSON session");
-
-      HashMapConstStringString cmap;
-      cmap["token"] = intToString(token);
-      cmap["path"] = "/";
-      setCookie = self.generateCookieString(cmap);
+    if(session != NULL) {
+      session->touch();
     }
-
-    session->touch();
 
     std::string result;
     if(self.m_Handlers[request.getClass()] != NULL) {

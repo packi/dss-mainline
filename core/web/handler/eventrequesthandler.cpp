@@ -310,12 +310,12 @@ namespace dss {
   {
     createCollector();
 
-    if (m_parentSession != NULL) {
+    if(m_parentSession != NULL) {
       m_parentSession->use();
     }
     m_pEventCollector->waitForEvent(_timeoutMS);
 
-    if (m_parentSession != NULL) {
+    if(m_parentSession != NULL) {
       m_parentSession->unuse();
     }
 

@@ -56,7 +56,7 @@ namespace dss {
         m_pRelayTarget->setCallback(boost::bind(&SessionManager::cleanupSessions, this, _1, _2));
         this->sendCleanupEvent();
       }
-    } 
+    }
 
     boost::shared_ptr<Session> s(new Session(m_NextSessionID++));
     s->setTimeout(m_timeoutSecs);

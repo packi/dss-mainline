@@ -136,12 +136,6 @@ namespace dss {
         }
 
         return success(toJSON(devices));
-/*
-      } else if(_request.getMethod() == "login") {
-        int token = m_LastSessionID;
-        m_Sessions[token] = Session(token);
-        return "{" + toJSON("token") + ": " + toJSON(token) + "}";
-*/
       } else if(_request.getMethod() == "getCircuits") {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
         boost::shared_ptr<JSONArrayBase> circuits(new JSONArrayBase());
