@@ -245,14 +245,19 @@ namespace dss {
   }
 
   void DSBusInterface::handleBusChange(dsid_t *_id, int _flag) {
-    ModelEvent::EventType eventType = ModelEvent::etNewDSMeter;
+    ModelEvent::EventType eventType;
+
+    dss_dsid_t dSMeterID;
+    dsid_helper::toDssDsid(*_id, dSMeterID);
+
     if(_flag) {
       eventType = ModelEvent::etLostDSMeter;
-    }	else	{
-      eventType = ModelEvent::etNewDSMeter;
+    } else	{
+      eventType = ModelEvent::etDS485DeviceDiscovered;
     }
 
-    m_pModelMaintenance->addModelEvent(new ModelEvent(eventType));
+    m_pModelMaintenance->addModelEvent(new ModelEventWithDSID(eventType,
+                                                              dSMeterID));
   }
 
   void DSBusInterface::eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData,
@@ -264,7 +269,11 @@ namespace dss {
 
   void DSBusInterface::eventDeviceAccessibilityOff(uint8_t _errorCode, dsid_t _dsMeterID, uint16_t _deviceID, 
                                                    uint16_t _zoneID, uint32_t _deviceDSID) {
-    ModelEvent* pEvent = new ModelEvent(ModelEvent::etLostDevice);
+    dss_dsid_t dsMeterID;
+    dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
+
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etLostDevice,
+                                                dsMeterID);
     pEvent->addParameter(_zoneID);
     pEvent->addParameter(_deviceID);
     m_pModelMaintenance->addModelEvent(pEvent);
@@ -282,7 +291,8 @@ namespace dss {
     dss_dsid_t dsMeterID;
     dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
 
-    ModelEvent* pEvent = new ModelEvent(ModelEvent::etNewDevice);
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etNewDevice,
+                                                dsMeterID);
     pEvent->addParameter(_zoneID);
     pEvent->addParameter(_deviceDSID);
     m_pModelMaintenance->addModelEvent(pEvent);

@@ -700,4 +700,37 @@ BOOST_AUTO_TEST_CASE(testTags) {
   BOOST_CHECK_EQUAL(tags[1], "two");
 }
 
+BOOST_AUTO_TEST_CASE(testDeviceStateWhenRemovingMeter) {
+  Apartment apt(NULL);
+
+  ModelMaintenance maintenance(NULL, 2);
+  maintenance.setApartment(&apt);
+  maintenance.initialize();
+
+  dss_dsid_t meter1DSID = dss_dsid_t(0,10);
+  boost::shared_ptr<DSMeter> meter1 = apt.allocateDSMeter(meter1DSID);
+
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
+  dev1->setShortAddress(1);
+  dev1->setDSMeter(meter1);
+
+  ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etLostDSMeter,
+                                                      meter1DSID);
+
+  maintenance.addModelEvent(pEvent);
+
+  maintenance.start();
+  while(maintenance.isInitializing()) {
+    sleepMS(2);
+  }
+
+  sleepMS(5);
+
+  maintenance.shutdown();
+  sleepMS(60);
+
+  BOOST_CHECK_EQUAL(meter1->isPresent(), false);
+  BOOST_CHECK_EQUAL(dev1->isPresent(), false);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
