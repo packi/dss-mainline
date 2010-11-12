@@ -109,6 +109,7 @@ namespace dss {
       m_pBusEventSink = _eventSink;
     }
     static void checkResultCode(const int _resultCode);
+    static void checkBroadcastResultCode(const int _resultCode);
 
     virtual void initialize();
   }; // DSBusInterface

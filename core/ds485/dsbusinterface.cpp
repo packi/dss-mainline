@@ -47,6 +47,7 @@
 
 #include <sstream>
 
+const int kERROR_OK_ASYNC_CALL = -2;
 
 namespace dss {
 
@@ -76,7 +77,7 @@ namespace dss {
 
   void DSBusInterface::checkResultCode(const int _resultCode) {
     if(_resultCode != ERROR_OK) {
-      std::string message = "Unknown Error";
+      std::string message = "Unknown Error (" + intToString(_resultCode) + ")";
       switch(_resultCode) {
         case ERROR_WRONG_PARAMETER:
           message = "Wrong parameter";
@@ -148,6 +149,13 @@ namespace dss {
       throw BusApiError(message);
     }
   } // checkResultCode
+
+  void DSBusInterface::checkBroadcastResultCode(const int _resultCode) {
+    if(_resultCode == kERROR_OK_ASYNC_CALL) {
+        return;
+    }
+    checkResultCode(_resultCode);
+  } // checkBroadcastResultCode
 
   void DSBusInterface::initialize() {
     Subsystem::initialize();
