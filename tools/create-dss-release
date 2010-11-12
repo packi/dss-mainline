@@ -9,7 +9,6 @@ export PATH=$PATH:/var/lib/gems/1.8/bin/
 
 
 DSS_REPO=git://gitorious.digitalstrom.org/dss/dss-mainline.git
-WEBSRC_REPO=git://gitorious.digitalstrom.org/dss-websrc/dss-websrc-mainline.git
 
 if [ -z "$2" ]; then
 	echo "Usage: $(basename $0) <release version string> <git branch name>"
@@ -36,24 +35,10 @@ git branch|grep ^*|sed -e 's|^\*\s*||' > .dss_git_branch
 mkdir data/webroot
 cp webservices/dss.wsdl data/webroot
 
-
-
-# checkout websrc
-git clone --depth 1 $WEBSRC_REPO
-cd dss-websrc-mainline
-autoreconf -i
-./configure --prefix=$(pwd)/install
-make
-make install
-cp -r ./install/share/dss-web/webroot/* ../data/webroot
-cd .. # websrc
-
-cd .. # dss
+cd ..
 
 tar cvzf dss-$DSS_RELEASE_VERSION{.tar.gz,} \
-    --exclude=\*/.git\* \
-    --exclude=\*/dss-websrc-mainline\* \
-    --exclude=\*/websrc\*
+    --exclude=\*/.git\*
 
 
 
