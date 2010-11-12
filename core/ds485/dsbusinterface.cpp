@@ -47,8 +47,6 @@
 
 #include <sstream>
 
-const int kERROR_OK_ASYNC_CALL = -2;
-
 namespace dss {
 
   //================================================== DSBusInterface
@@ -151,6 +149,9 @@ namespace dss {
   } // checkResultCode
 
   void DSBusInterface::checkBroadcastResultCode(const int _resultCode) {
+    // to be replaced with include from libdsmapi
+    static const int kERROR_OK_ASYNC_CALL = -2; 
+
     if(_resultCode == kERROR_OK_ASYNC_CALL) {
         return;
     }
