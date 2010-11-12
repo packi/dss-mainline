@@ -50,7 +50,7 @@ namespace dss {
     }
     uint32_t power;
     int ret = CircuitEnergyMeterValue_get(m_DSMApiHandle, m_BroadcastDSID, &power, NULL);
-    DSBusInterface::checkResultCode(ret);
+    DSBusInterface::checkBroadcastResultCode(ret);
   } // requestPowerConsumption
 
   unsigned long DSMeteringBusInterface::getEnergyMeterValue(const dss_dsid_t& _dsMeterID) {
@@ -73,7 +73,7 @@ namespace dss {
     }
     uint32_t energy;
     int ret = CircuitEnergyMeterValue_get(m_DSMApiHandle, m_BroadcastDSID, NULL, &energy);
-    DSBusInterface::checkResultCode(ret);
+    DSBusInterface::checkBroadcastResultCode(ret);
   } // requestEnergyMeterValue
 
 } // namespace dss
