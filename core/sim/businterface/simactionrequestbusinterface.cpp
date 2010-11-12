@@ -45,7 +45,9 @@ namespace dss {
       if(pGroup != NULL) {
         pMeter->groupCallScene(pGroup->getZoneID(), pGroup->getID(), scene);
       } else {
-        pMeter->deviceCallScene(pDevice->getShortAddress(), scene);
+        if(pMeter->getDSID() == pDevice->getDSMeterDSID()) {
+          pMeter->deviceCallScene(pDevice->getShortAddress(), scene);
+        }
       }
     }
   } // callScene
@@ -59,7 +61,9 @@ namespace dss {
       if(pGroup != NULL) {
         pMeter->groupSaveScene(pGroup->getZoneID(), pGroup->getID(), scene);
       } else {
-        pMeter->deviceSaveScene(pDevice->getShortAddress(), scene);
+        if(pMeter->getDSID() == pDevice->getDSMeterDSID()) {
+          pMeter->deviceSaveScene(pDevice->getShortAddress(), scene);
+        }
       }
     }
   } // saveScene
@@ -72,7 +76,9 @@ namespace dss {
       if(pGroup != NULL) {
         pMeter->groupUndoScene(pGroup->getZoneID(), pGroup->getID());
       } else {
-        pMeter->deviceUndoScene(pDevice->getShortAddress());
+        if(pMeter->getDSID() == pDevice->getDSMeterDSID()) {
+          pMeter->deviceUndoScene(pDevice->getShortAddress());
+        }
       }
     }
   } // undoScene
@@ -86,7 +92,9 @@ namespace dss {
       if(pGroup != NULL) {
         pMeter->groupSetValue(pGroup->getZoneID(), pGroup->getID(), _value);
       } else {
-        pMeter->deviceSetValue(pDevice->getShortAddress(), _value);
+        if(pMeter->getDSID() == pDevice->getDSMeterDSID()) {
+          pMeter->deviceSetValue(pDevice->getShortAddress(), _value);
+        }
       }
     }
   } // setValue

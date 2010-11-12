@@ -30,6 +30,7 @@
 #include "core/model/modelmaintenance.h"
 #include "core/model/apartment.h"
 #include "core/model/set.h"
+#include "core/model/device.h"
 #include "core/sim/businterface/simbusinterface.h"
 
 using namespace dss;
@@ -130,9 +131,9 @@ public:
   }
 };
 
-class Fixture {
+class FixtureBase {
 public:
-  Fixture() {
+  FixtureBase(const std::string& _apartmentXMLString) {
     Apartment apt(NULL);
     m_pApartment.reset(new Apartment(NULL));
     m_pModelMaintenance.reset(new ModelMaintenance(NULL, 2));
@@ -143,14 +144,7 @@ public:
 
     std::string fileName = getTempDir() + "/sim.xml";
     std::ofstream ofs(fileName.c_str());
-    ofs << "<?xml version=\"1.0\"?>\n"
-          "<simulation version=\"1\">\n"
-          "  <modulator busid=\"71\" dsid=\"13\">\n"
-          "    <zone id=\"4\">\n"
-          "      <device dsid=\"11\" busid=\"11\" type=\"dummy\"/>\n"
-          "    </zone>\n"
-          "  </modulator>\n"
-          "</simulation>\n";
+    ofs << _apartmentXMLString;
     ofs.close();
 
     m_pSimulation->loadFromFile(fileName);
@@ -169,10 +163,9 @@ public:
 
     sleepMS(100);
 
-    m_ValidDSID = DSSim::makeSimulatedDSID(dss_dsid_t(0, 0x11));
   }
 
-  ~Fixture() {
+  ~FixtureBase() {
     m_pModelMaintenance->shutdown();
     sleepMS(60);
   }
@@ -181,6 +174,23 @@ protected:
   boost::shared_ptr<ModelMaintenance> m_pModelMaintenance;
   boost::shared_ptr<DSSim> m_pSimulation;
   boost::shared_ptr<SimBusInterface> m_pBusInterface;
+};
+
+class Fixture : public FixtureBase {
+public:
+  Fixture()
+  : FixtureBase("<?xml version=\"1.0\"?>\n"
+                "<simulation version=\"1\">\n"
+                "  <modulator busid=\"71\" dsid=\"13\">\n"
+                "    <zone id=\"4\">\n"
+                "      <device dsid=\"11\" busid=\"11\" type=\"dummy\"/>\n"
+                "    </zone>\n"
+                "  </modulator>\n"
+                "</simulation>\n")
+  {
+        m_ValidDSID = DSSim::makeSimulatedDSID(dss_dsid_t(0, 0x11));
+  }
+protected:
   dss_dsid_t m_ValidDSID;
 };
 
@@ -195,6 +205,41 @@ BOOST_FIXTURE_TEST_CASE(testCallSceneReachesDevice, Fixture) {
 
   const int kSceneNumber = 10;
   m_pApartment->getDevices().callScene(kSceneNumber);
+  sleepMS(2);
+
+  BOOST_CHECK_EQUAL(dev->getCalledFunction(), "callScene");
+  BOOST_CHECK_EQUAL(dev->getParameter(), kSceneNumber);
+}
+
+class FixtureTwoModulators : public FixtureBase {
+public:
+  FixtureTwoModulators()
+  : FixtureBase("<?xml version=\"1.0\"?>\n"
+                "<simulation version=\"1\">\n"
+                "  <modulator busid=\"71\" dsid=\"13\">\n"
+                "    <zone id=\"4\">\n"
+                "      <device dsid=\"12\" busid=\"12\" type=\"dummy\"/>\n"
+                "    </zone>\n"
+                "  </modulator>\n"
+                "  <modulator busid=\"72\" dsid=\"14\">\n"
+                "    <zone id=\"4\">\n"
+                "      <device dsid=\"11\" busid=\"11\" type=\"dummy\"/>\n"
+                "    </zone>\n"
+                "  </modulator>\n"
+                "</simulation>\n")
+  {
+    m_ValidDSID = DSSim::makeSimulatedDSID(dss_dsid_t(0, 0x11));
+  }
+protected:
+  dss_dsid_t m_ValidDSID;
+};
+
+BOOST_FIXTURE_TEST_CASE(testCallSceneDeviceReachesOnlyDesignatedMeter, FixtureTwoModulators) {
+  DummyDevice* dev = dynamic_cast<DummyDevice*>(m_pSimulation->getSimulatedDevice(m_ValidDSID));
+  BOOST_ASSERT(dev != NULL);
+
+  const int kSceneNumber = 10;
+  m_pApartment->getDeviceByDSID(m_ValidDSID)->callScene(kSceneNumber);
   sleepMS(2);
 
   BOOST_CHECK_EQUAL(dev->getCalledFunction(), "callScene");
