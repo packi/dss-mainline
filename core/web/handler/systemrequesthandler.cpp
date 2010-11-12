@@ -41,11 +41,14 @@ namespace dss {
 
   WebServerResponse SystemRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(_request.getMethod() == "version") {
-      return success(DSS::getInstance()->versionString());
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("version", DSS::getInstance()->versionString());
+      return success(resultObj);
     } else if (_request.getMethod() == "time") {
-      std::stringstream s;
-      s << DateTime().secondsSinceEpoch();
-      return success(s.str());
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("time",
+              static_cast<long unsigned int>(DateTime().secondsSinceEpoch()));
+      return success(resultObj);
     } else if(_request.getMethod() == "login") {
       std::string userRaw = _request.getParameter("user");
       std::string user;
