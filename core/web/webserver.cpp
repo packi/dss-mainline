@@ -305,7 +305,6 @@ namespace dss {
   void *WebServer::jsonHandler(struct mg_connection* _connection,
                               const struct mg_request_info* _info) {
     const std::string urlid = "/json/";
-    std::string setCookie;
 
     std::string uri = _info->uri;
     HashMapConstStringString paramMap = parseParameter(_info->query_string);
@@ -338,19 +337,17 @@ namespace dss {
         if(response.getResponse() != NULL) {
           result = response.getResponse()->toString();
         }
-        if(setCookie.empty()) {
-          setCookie = self.generateCookieString(response.getCookies());
-        }
-        emitHTTPHeader(200, _connection, "application/json", setCookie);
+        std::string cookies = self.generateCookieString(response.getCookies());
+        emitHTTPHeader(200, _connection, "application/json", cookies);
       } catch(std::runtime_error& e) {
-        emitHTTPHeader(500, _connection, "application/json", setCookie);
+        emitHTTPHeader(500, _connection, "application/json");
         JSONObject resultObj;
         resultObj.addProperty("ok", false);
         resultObj.addProperty("message", e.what());
         result = resultObj.toString();
       }
     } else {
-      emitHTTPHeader(404, _connection, "application/json", setCookie);
+      emitHTTPHeader(404, _connection, "application/json");
       std::ostringstream sstream;
       sstream << "{" << "\"ok\"" << ":" << "false" << ",";
       sstream << "\"message\"" << ":" << "\"Call to unknown function\"";
