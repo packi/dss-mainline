@@ -74,6 +74,14 @@ namespace dss {
       response.setCookie("path", "/");
       response.setCookie("token", token);
       return response;
+    } else if(_request.getMethod() == "logout") {
+      if(_session != NULL) {
+        m_pSessionManager->removeSession(_session->getID());
+      }
+      WebServerResponse response(success());
+      response.setCookie("path", "/");
+      response.setCookie("token", "");
+      return response;
     }
     throw std::runtime_error("Unhandled function");
   } // handleRequest
