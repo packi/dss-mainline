@@ -45,7 +45,7 @@ namespace dss {
   : m_DSS(_dss)
   { }
 
-  boost::shared_ptr<JSONObject> DebugRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse DebugRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::ostringstream logSStream;
     
     if(_request.getMethod() == "pingDevice") {

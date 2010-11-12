@@ -32,8 +32,6 @@
 
 #include <string>
 
-#include <boost/ptr_container/ptr_map.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/shared_ptr.hpp>
 
 #define WEB_SESSION_TIMEOUT_MINUTES 15
@@ -42,8 +40,8 @@ namespace dss {
 
   class IDeviceInterface;
   class PropertyNode;
-  class RestfulRequestHandler;
   class RestfulAPI;
+  class WebServerRequestHandlerJSON;
 
   typedef boost::ptr_map<const int, Session> SessionByID;
 
@@ -51,16 +49,15 @@ namespace dss {
   private:
     struct mg_context* m_mgContext;
     int m_LastSessionID;
-    __gnu_cxx::hash_map<const std::string, RestfulRequestHandler*> m_Handlers;
+    __gnu_cxx::hash_map<const std::string, WebServerRequestHandlerJSON*> m_Handlers;
     boost::shared_ptr<RestfulAPI> m_pAPI;
     boost::shared_ptr<SessionManager> m_SessionManager;
-
   private:
     void setupAPI();
     void instantiateHandlers();
     void publishJSLogfiles();
-    boost::ptr_map<std::string, std::string> parseCookies(const char *cookies);
-    std::string generateCookieString(boost::ptr_map<std::string, std::string> cookies);
+    HashMapConstStringString parseCookies(const char* _cookies);
+    std::string generateCookieString(HashMapConstStringString _cookies);
   protected:
     static void *httpBrowseProperties(struct mg_connection* _connection,
                                    const struct mg_request_info* _info);

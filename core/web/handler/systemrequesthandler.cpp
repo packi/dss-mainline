@@ -21,10 +21,17 @@
 */
 
 #include "systemrequesthandler.h"
+
+#include <locale>
+
+#include <boost/bind.hpp>
+#include <boost/lambda/lambda.hpp>
+
 #include "core/datetools.h"
 
 #include "core/web/json.h"
 #include "core/dss.h"
+#include "core/sessionmanager.h"
 
 #include <sstream>
 
@@ -32,13 +39,49 @@ namespace dss {
 
   //=========================================== SystemRequestHandler
 
-  boost::shared_ptr<JSONObject> SystemRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse SystemRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(_request.getMethod() == "version") {
       return success(DSS::getInstance()->versionString());
     } else if (_request.getMethod() == "time") {
       std::stringstream s;
       s << DateTime().secondsSinceEpoch();
       return success(s.str());
+    } else if(_request.getMethod() == "login") {
+      std::string userRaw = _request.getParameter("user");
+      std::string user;
+      std::locale locl;
+      std::remove_copy_if(userRaw.begin(), userRaw.end(), std::back_inserter(user),
+        !boost::bind(&std::isalnum<char>, _1, locl)
+       );
+
+      std::string password = _request.getParameter("password");
+
+      if(user.empty()) {
+        return failure("Missing parameter 'user'");
+      }
+      if(password.empty()) {
+        return failure("Missing parameter 'password'");
+      }
+
+      std::string token = intToString(m_pSessionManager->registerSession(), true)
+                            .substr(2);
+      log("Registered new JSON session");
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("token", token);
+
+      WebServerResponse response(success(resultObj));
+      response.setCookie("path", "/");
+      response.setCookie("token", token);
+      return response;
+    } else if(_request.getMethod() == "logout") {
+      if(_session != NULL) {
+        m_pSessionManager->removeSession(_session->getID());
+      }
+      WebServerResponse response(success());
+      response.setCookie("path", "/");
+      response.setCookie("token", "");
+      return response;
     }
     throw std::runtime_error("Unhandled function");
   } // handleRequest

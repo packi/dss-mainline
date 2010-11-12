@@ -36,7 +36,7 @@ namespace dss {
   : m_EventInterpreter(_interpreter)
   { }
 
-  boost::shared_ptr<JSONObject> SubscriptionRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse SubscriptionRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(_request.getMethod() == "list") {
       return list(_request, _session);
     } else if(_request.getMethod() == "remove") {

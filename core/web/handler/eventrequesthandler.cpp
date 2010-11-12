@@ -256,7 +256,7 @@ namespace dss {
     return success(session->getEvents(timeout));
   }
 
-  boost::shared_ptr<JSONObject> EventRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse EventRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(_request.getMethod() == "raise") {
       return raise(_request);
     } else if(_request.getMethod() == "subscribe") {
@@ -310,12 +310,12 @@ namespace dss {
   {
     createCollector();
 
-    if (m_parentSession != NULL) {
+    if(m_parentSession != NULL) {
       m_parentSession->use();
     }
     m_pEventCollector->waitForEvent(_timeoutMS);
 
-    if (m_parentSession != NULL) {
+    if(m_parentSession != NULL) {
       m_parentSession->unuse();
     }
 

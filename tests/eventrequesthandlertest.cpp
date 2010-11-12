@@ -78,7 +78,7 @@ BOOST_FIXTURE_TEST_CASE(testInvalidFunction, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testRaiseMissingEventName, Fixture) {
   RestfulRequest req("event/raise", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
@@ -90,7 +90,7 @@ BOOST_FIXTURE_TEST_CASE(testRaise, Fixture) {
   m_Params["location"] = kEventLocation;
   m_Params["context"] = kEventContext;
   RestfulRequest req("event/raise", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, true);
 
   boost::shared_ptr<Event> pEvent = m_pQueue->popEvent();
@@ -110,7 +110,7 @@ BOOST_FIXTURE_TEST_CASE(testRaiseWithParams, Fixture) {
   m_Params["name"] = kEventName;
   m_Params["parameter"] = kParamName + "=" + kParamValue;
   RestfulRequest req("event/raise", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, true);
 
   boost::shared_ptr<Event> pEvent = m_pQueue->popEvent();
@@ -128,7 +128,7 @@ BOOST_FIXTURE_TEST_CASE(testRaiseWithParamsNoValue, Fixture) {
   m_Params["name"] = kEventName;
   m_Params["parameter"] = kParamName;
   RestfulRequest req("event/raise", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 
   boost::shared_ptr<Event> pEvent = m_pQueue->popEvent();
@@ -142,7 +142,7 @@ BOOST_FIXTURE_TEST_CASE(testRaiseWithParamsEmptyName, Fixture) {
   m_Params["name"] = kEventName;
   m_Params["parameter"] = kParamName + "=" + kParamValue;
   RestfulRequest req("event/raise", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 
   boost::shared_ptr<Event> pEvent = m_pQueue->popEvent();
@@ -156,7 +156,7 @@ BOOST_FIXTURE_TEST_CASE(testRaiseWithParamsEmptyValue, Fixture) {
   m_Params["name"] = kEventName;
   m_Params["parameter"] = kParamName + "=" + kParamValue;
   RestfulRequest req("event/raise", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 
   boost::shared_ptr<Event> pEvent = m_pQueue->popEvent();
@@ -172,7 +172,7 @@ BOOST_FIXTURE_TEST_CASE(testRaiseWithParamsAndEqualSigns, Fixture) {
   m_Params["name"] = kEventName;
   m_Params["parameter"] = kParamName1 + "=" + kParamValue1 + ";" + kParamName2 + "=" + kParamValue2;
   RestfulRequest req("event/raise", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, true);
 
   boost::shared_ptr<Event> pEvent = m_pQueue->popEvent();
@@ -187,13 +187,13 @@ BOOST_FIXTURE_TEST_CASE(testRaiseWithParamsAndEqualSigns, Fixture) {
 
 BOOST_FIXTURE_TEST_CASE(testSubscribeNoSession, Fixture) {
   RestfulRequest req("event/subscribe", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
 BOOST_FIXTURE_TEST_CASE(testSubscribeNoName, Fixture) {
   RestfulRequest req("event/subscribe", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, m_pSession);
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, m_pSession);
   testOkIs(response, false);
 }
 
@@ -201,7 +201,7 @@ BOOST_FIXTURE_TEST_CASE(testSubscribeNoSubscriptionID, Fixture) {
   const std::string kEventName = "someEvent";
   m_Params["name"] = kEventName;
   RestfulRequest req("event/subscribe", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, m_pSession);
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, m_pSession);
   testOkIs(response, false);
 }
 
@@ -211,7 +211,7 @@ BOOST_FIXTURE_TEST_CASE(testSubscribeInvalidSubscriptionID, Fixture) {
   m_Params["name"] = kEventName;
   m_Params["subscriptionID"] = kSubscriptionID;
   RestfulRequest req("event/subscribe", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, m_pSession);
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, m_pSession);
   testOkIs(response, false);
 }
 
@@ -221,19 +221,19 @@ BOOST_FIXTURE_TEST_CASE(testSubscribe, Fixture) {
   m_Params["name"] = kEventName;
   m_Params["subscriptionID"] = kSubscriptionID;
   RestfulRequest req("event/subscribe", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, m_pSession);
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, m_pSession);
   testOkIs(response, true);
 }
 
 BOOST_FIXTURE_TEST_CASE(testUnsubscribeNoSession, Fixture) {
   RestfulRequest req("event/unsubscribe", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
 BOOST_FIXTURE_TEST_CASE(testUnsubscribeNoName, Fixture) {
   RestfulRequest req("event/unsubscribe", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, m_pSession);
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, m_pSession);
   testOkIs(response, false);
 }
 
@@ -241,7 +241,7 @@ BOOST_FIXTURE_TEST_CASE(testUnubscribeNoSubscriptionID, Fixture) {
   const std::string kEventName = "someEvent";
   m_Params["name"] = kEventName;
   RestfulRequest req("event/unsubscribe", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, m_pSession);
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, m_pSession);
   testOkIs(response, false);
 }
 
@@ -251,19 +251,19 @@ BOOST_FIXTURE_TEST_CASE(testUnsubscribeInvalidSubscriptionID, Fixture) {
   m_Params["name"] = kEventName;
   m_Params["subscriptionID"] = kSubscriptionID;
   RestfulRequest req("event/unsubscribe", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, m_pSession);
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, m_pSession);
   testOkIs(response, false);
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetNoSession, Fixture) {
   RestfulRequest req("event/get", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   testOkIs(response, false);
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetNoName, Fixture) {
   RestfulRequest req("event/get", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, m_pSession);
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, m_pSession);
   testOkIs(response, false);
 }
 
@@ -271,7 +271,7 @@ BOOST_FIXTURE_TEST_CASE(testgetNoSubscriptionID, Fixture) {
   const std::string kEventName = "someEvent";
   m_Params["name"] = kEventName;
   RestfulRequest req("event/get", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, m_pSession);
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, m_pSession);
   testOkIs(response, false);
 }
 
@@ -281,7 +281,7 @@ BOOST_FIXTURE_TEST_CASE(testGetInvalidSubscriptionID, Fixture) {
   m_Params["name"] = kEventName;
   m_Params["subscriptionID"] = kSubscriptionID;
   RestfulRequest req("event/get", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(req, m_pSession);
+  WebServerResponse response = m_pHandler->jsonHandleRequest(req, m_pSession);
   testOkIs(response, false);
 }
 
@@ -292,7 +292,7 @@ BOOST_FIXTURE_TEST_CASE(testSubscriptionsWork, FixtureRunning) {
   m_Params["subscriptionID"] = kSubscriptionID;
   m_Params["timeout"] = "5";
   RestfulRequest reqSubscribe("event/subscribe", m_Params);
-  boost::shared_ptr<JSONObject> response = m_pHandler->jsonHandleRequest(reqSubscribe, m_pSession);
+  WebServerResponse response = m_pHandler->jsonHandleRequest(reqSubscribe, m_pSession);
   testOkIs(response, true);
 
   boost::shared_ptr<Event> pUnrelatedEvent(new Event("asdfasdf"));

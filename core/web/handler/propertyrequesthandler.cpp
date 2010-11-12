@@ -35,7 +35,7 @@ namespace dss {
   : m_PropertySystem(_propertySystem)
   { }
 
-  boost::shared_ptr<JSONObject> PropertyRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+  WebServerResponse PropertyRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::string propName = _request.getParameter("path");
     if(propName.empty()) {
       return failure("Need parameter 'path' for property operations");

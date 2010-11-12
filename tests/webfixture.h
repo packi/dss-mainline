@@ -27,14 +27,15 @@
 #include <boost/assert.hpp>
 
 #include "core/web/json.h"
+#include "core/web/webrequests.h"
 
 namespace dss {
 
   class WebFixture {
   public:
 
-    void testOkIs(boost::shared_ptr<JSONObject> _response, bool _value) {
-      boost::shared_ptr<JSONElement> okElem = _response->getElementByName("ok");
+    void testOkIs(WebServerResponse& _response, bool _value) {
+      boost::shared_ptr<JSONElement> okElem = _response.getResponse()->getElementByName("ok");
       if(okElem == NULL) {
         BOOST_ASSERT(false);
         return;
@@ -57,9 +58,9 @@ namespace dss {
       return result;
     }
 
-    boost::shared_ptr<JSONObject> getResultObject(boost::shared_ptr<JSONObject> _response) {
+    boost::shared_ptr<JSONObject> getResultObject(WebServerResponse& _response) {
       testOkIs(_response, true);
-      boost::shared_ptr<JSONObject> result = getSubObject("result", _response);
+      boost::shared_ptr<JSONObject> result = getSubObject("result", _response.getResponse());
       BOOST_ASSERT(result != NULL);
       return result;
     }
