@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
     Copyright (c) 2008 Patrick Staehlin <me@packi.ch>
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
@@ -401,5 +401,16 @@ BOOST_AUTO_TEST_CASE(testAddChildMovesNode) {
 
   BOOST_CHECK_EQUAL(propSys.getProperty("/target/source"), source);
 } // testAddChildMovesNode
+
+BOOST_AUTO_TEST_CASE(testIndicesWorkCorrectly) {
+  PropertySystem propSys;
+  PropertyNodePtr prop1 = propSys.createProperty("/prop");
+  PropertyNodePtr prop2 = propSys.createProperty("/prop+");
+  PropertyNodePtr prop3 = propSys.createProperty("/prop+");
+
+  BOOST_CHECK_EQUAL(propSys.getProperty("/prop[0]"), prop1);
+  BOOST_CHECK_EQUAL(propSys.getProperty("/prop[1]"), prop2);
+  BOOST_CHECK_EQUAL(propSys.getProperty("/prop[2]"), prop3);
+}
 
 BOOST_AUTO_TEST_SUITE_END()
