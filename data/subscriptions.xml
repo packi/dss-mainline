@@ -25,16 +25,6 @@
   <subscription event-name="brighter" handler-name="bus_handler">
     <send type="increaseValue" />
   </subscription>
-  <subscription event-name="ping" handler-name="javascript">
-    <parameter>
-      <parameter name="filename">data/ping.js</parameter>
-    </parameter>
-  </subscription>
-  <subscription event-name="running" handler-name="javascript">
-    <parameter>
-      <parameter name="filename">data/ping.js</parameter>
-    </parameter>
-  </subscription>
   <subscription event-name="abell" handler-name="raise_event">
     <parameter>
       <parameter name="event_name">blink</parameter>
