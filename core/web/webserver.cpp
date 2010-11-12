@@ -322,6 +322,9 @@ namespace dss {
     boost::shared_ptr<Session> session;
     std::string& tokenStr = cookies["token"];
     int token = strToIntDef(tokenStr, -1);
+    if(token == -1) {
+      token = strToIntDef(paramMap["token"], -1);
+    }
     if(token != -1) {
       session = self.m_SessionManager->getSession(token);
     }
