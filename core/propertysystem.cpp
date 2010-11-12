@@ -357,6 +357,13 @@ namespace dss {
         _childNode->m_ParentNode->removeChild(_childNode);
       }
       _childNode->m_ParentNode = this;
+      int maxIndex = -1;
+      for(unsigned int iChild = 0; iChild < m_ChildNodes.size(); iChild++) {
+        if(m_ChildNodes[iChild]->getName() == _childNode->getName()) {
+          maxIndex = std::max(m_ChildNodes[iChild]->m_Index, maxIndex);
+        }
+      }
+      _childNode->m_Index = maxIndex + 1;
       m_ChildNodes.push_back(_childNode);
       childAdded(_childNode);
     }
@@ -426,7 +433,6 @@ namespace dss {
       std::string propName = _name;
       index = getAndRemoveIndexFromPropertyName(propName);
 
-      int curIndex = 0;
       int lastMatch = -1;
       int numItem = 0;
       for(PropertyList::iterator it = m_ChildNodes.begin();
@@ -434,10 +440,9 @@ namespace dss {
         numItem++;
         PropertyNodePtr cur = *it;
         if(cur->m_Name == propName) {
-          if(curIndex == index) {
+          if(cur->m_Index == index) {
             return cur;
           }
-          curIndex++;
           lastMatch = numItem - 1;
         }
       }
