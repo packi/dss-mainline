@@ -555,12 +555,12 @@ const char* kSavedPropsDirectory = "data/savedprops/";
       break;
       case SIGSEGV:
         terminating = true;
-        Logger::getInstance()->log("Cought SIGSEGV", lsFatal);
+        Logger::getInstance()->log("Caught SIGSEGV", lsFatal);
         Backtrace::logBacktrace();
         exit(EXIT_FAILURE);
       case SIGABRT:
         terminating = true;
-        Logger::getInstance()->log("Cought SIGABRT", lsFatal);
+        Logger::getInstance()->log("Caught SIGABRT", lsFatal);
         Backtrace::logBacktrace();
         exit(EXIT_FAILURE);
       default: {
