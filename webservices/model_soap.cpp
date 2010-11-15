@@ -61,25 +61,25 @@ int NotAuthorized(struct soap *soap) {
   return soap_receiver_fault(soap, "Not Authorized", NULL);
 } // notAuthorized
 
-bool IsAuthorized(struct soap *soap, const int _token) {
+bool IsAuthorized(struct soap *soap, const char* _token) {
   bool result = dss::DSS::getInstance()->getWebServices().isAuthorized(soap, _token);
   if(result) {
-    dss::Logger::getInstance()->log(std::string("User with token '") + dss::intToString(_token) + "' is authorized");
+    dss::Logger::getInstance()->log(std::string("User with token '") + _token + "' is authorized");
   } else {
-    dss::Logger::getInstance()->log(std::string("User with token '") + dss::intToString(_token) + "' is *not* authorized", lsWarning);
+    dss::Logger::getInstance()->log(std::string("User with token '") + _token + "' is *not* authorized", lsWarning);
   }
   return result;
 } // isAuthorized
 
-int AuthorizeAndGetSession(struct soap *soap, const int _token, dss::WebServiceSession** result) {
+int AuthorizeAndGetSession(struct soap *soap, const char* _token, dss::Session** result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
-  *result = &dss::DSS::getInstance()->getWebServices().getSession(soap, _token);
+  *result = dss::DSS::getInstance()->getWebServices().getSession(soap, _token).get();
   return SOAP_OK;
 } // AuthorizeAndGetSession
 
-int AuthorizeAndGetSet(struct soap *soap, const int _token, const char* _setSpec, dss::Set& result) {
+int AuthorizeAndGetSet(struct soap *soap, const char* _token, const char* _setSpec, dss::Set& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -89,7 +89,7 @@ int AuthorizeAndGetSet(struct soap *soap, const int _token, const char* _setSpec
   return SOAP_OK;
 } // authorizeAndGetSet
 
-int AuthorizeAndGetDevice(struct soap *soap, const int _token, char* _devID, dss::DeviceReference& result) {
+int AuthorizeAndGetDevice(struct soap *soap, const char* _token, char* _devID, dss::DeviceReference& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -104,7 +104,7 @@ int AuthorizeAndGetDevice(struct soap *soap, const int _token, char* _devID, dss
   return SOAP_OK;
 } // authorizeAndGetDevice
 
-int AuthorizeAndGetDSMeter(struct soap *soap, const int _token, char* _dsMeterDSID, boost::shared_ptr<dss::DSMeter>& result) {
+int AuthorizeAndGetDSMeter(struct soap *soap, const char* _token, char* _dsMeterDSID, boost::shared_ptr<dss::DSMeter>& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -117,7 +117,7 @@ int AuthorizeAndGetDSMeter(struct soap *soap, const int _token, char* _dsMeterDS
   return SOAP_OK;
 } // authorizeAndGetDSMeter
 
-int AuthorizeAndGetGroup(struct soap *soap, const int _token, const int _groupID, boost::shared_ptr<dss::Group>& result) {
+int AuthorizeAndGetGroup(struct soap *soap, const char* _token, const int _groupID, boost::shared_ptr<dss::Group>& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -130,7 +130,7 @@ int AuthorizeAndGetGroup(struct soap *soap, const int _token, const int _groupID
   return SOAP_OK;
 } // authorizeAndGetGroup
 
-int AuthorizeAndGetGroupOfZone(struct soap *soap, const int _token, const int _zoneID, const int _groupID, boost::shared_ptr<dss::Group>& result) {
+int AuthorizeAndGetGroupOfZone(struct soap *soap, const char* _token, const int _zoneID, const int _groupID, boost::shared_ptr<dss::Group>& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -150,12 +150,12 @@ int AuthorizeAndGetGroupOfZone(struct soap *soap, const int _token, const int _z
 
 //==================================================== Callbacks
 
-int dss__Authenticate(struct soap *soap, char* _userName, char* _password, int& token) {
-  dss::DSS::getInstance()->getWebServices().newSession(soap, token);
+int dss__Authenticate(struct soap *soap, char* _userName, char* _password, std::string& token) {
+  token = dss::DSS::getInstance()->getWebServices().newSession(soap);
   return SOAP_OK;
 } // dss__Authenticate
 
-int dss__SignOff(struct soap *soap, int _token, int& result) {
+int dss__SignOff(struct soap *soap, char* _token, int& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -163,7 +163,7 @@ int dss__SignOff(struct soap *soap, int _token, int& result) {
   return SOAP_OK;
 } // dss__SignOff
 
-int dss__ApartmentCreateSetFromGroup(struct soap *soap, int _token, char* _groupName, std::string& result) {
+int dss__ApartmentCreateSetFromGroup(struct soap *soap, char* _token, char* _groupName, std::string& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -177,7 +177,7 @@ int dss__ApartmentCreateSetFromGroup(struct soap *soap, int _token, char* _group
   return SOAP_OK;
 } // dss__ApartmentCreateSetFromGroup
 
-int dss__ApartmentCreateSetFromDeviceIDs(struct soap *soap, int _token, std::vector<std::string> _ids, std::string& result) {
+int dss__ApartmentCreateSetFromDeviceIDs(struct soap *soap, char* _token, std::vector<std::string> _ids, std::string& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -197,7 +197,7 @@ int dss__ApartmentCreateSetFromDeviceIDs(struct soap *soap, int _token, std::vec
   return SOAP_OK;
 } // dss__ApartmentCreateSetFromDeviceIDs
 
-int dss__ApartmentCreateSetFromDeviceNames(struct soap *soap, int _token,  std::vector<std::string> _names, std::string& result) {
+int dss__ApartmentCreateSetFromDeviceNames(struct soap *soap, char* _token,  std::vector<std::string> _names, std::string& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -218,7 +218,7 @@ int dss__ApartmentCreateSetFromDeviceNames(struct soap *soap, int _token,  std::
   return SOAP_OK;
 } // dss__ApartmentCreateSetFromDeviceNames
 
-int dss__ApartmentGetDevices(struct soap *soap, int _token, std::string& result) {
+int dss__ApartmentGetDevices(struct soap *soap, char* _token, std::string& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -226,7 +226,7 @@ int dss__ApartmentGetDevices(struct soap *soap, int _token, std::string& result)
   return SOAP_OK;
 } // dss__ApartmenGetDevices
 
-int dss__ApartmentGetDeviceIDByName(struct soap *soap, int _token,  char* _deviceName, std::string& deviceID) {
+int dss__ApartmentGetDeviceIDByName(struct soap *soap, char* _token,  char* _deviceName, std::string& deviceID) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -241,7 +241,7 @@ int dss__ApartmentGetDeviceIDByName(struct soap *soap, int _token,  char* _devic
   return SOAP_OK;
 }
 
-int dss__ApartmentGetName(struct soap *soap, int _token, std::string& result) {
+int dss__ApartmentGetName(struct soap *soap, char* _token, std::string& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -250,7 +250,7 @@ int dss__ApartmentGetName(struct soap *soap, int _token, std::string& result) {
   return SOAP_OK;
 } // dss__ApartmentGetName
 
-int dss__ApartmentSetName(struct soap *soap, int _token, char* _name, bool& result) {
+int dss__ApartmentSetName(struct soap *soap, char* _token, char* _name, bool& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -263,7 +263,7 @@ int dss__ApartmentSetName(struct soap *soap, int _token, char* _name, bool& resu
 
 //==================================================== Set
 
-int dss__SetAddDeviceByName(struct soap *soap, int _token, char* _setSpec, char* _name, std::string& result) {
+int dss__SetAddDeviceByName(struct soap *soap, char* _token, char* _setSpec, char* _name, std::string& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -281,7 +281,7 @@ int dss__SetAddDeviceByName(struct soap *soap, int _token, char* _setSpec, char*
   return SOAP_OK;
 } // dss__SetAddDeviceByName
 
-int dss__SetAddDeviceByID(struct soap *soap, int _token, char* _setSpec, char* _deviceID, std::string& result) {
+int dss__SetAddDeviceByID(struct soap *soap, char* _token, char* _setSpec, char* _deviceID, std::string& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -299,7 +299,7 @@ int dss__SetAddDeviceByID(struct soap *soap, int _token, char* _setSpec, char* _
   return SOAP_OK;
 } // dss__SetAddDeviceByID
 
-int dss__SetRemoveDevice(struct soap *soap, int _token, char* _setSpec, char* _deviceID, std::string& result) {
+int dss__SetRemoveDevice(struct soap *soap, char* _token, char* _setSpec, char* _deviceID, std::string& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -314,7 +314,7 @@ int dss__SetRemoveDevice(struct soap *soap, int _token, char* _setSpec, char* _d
   return SOAP_OK;
 } // dss__SetRemoveDevice
 
-int dss__SetCombine(struct soap *soap, int _token, char* _setSpec1, char* _setSpec2, std::string& result) {
+int dss__SetCombine(struct soap *soap, char* _token, char* _setSpec1, char* _setSpec2, std::string& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -325,7 +325,7 @@ int dss__SetCombine(struct soap *soap, int _token, char* _setSpec1, char* _setSp
   return SOAP_OK;
 } // dss_SetCombine
 
-int dss__SetRemove(struct soap *soap, int _token, char* _setSpec, char* _setSpecToRemove, std::string& result) {
+int dss__SetRemove(struct soap *soap, char* _token, char* _setSpec, char* _setSpecToRemove, std::string& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -336,7 +336,7 @@ int dss__SetRemove(struct soap *soap, int _token, char* _setSpec, char* _setSpec
   return SOAP_OK;
 } // dss__SetRemove
 
-int dss__SetByGroup(struct soap *soap, int _token, char* _setSpec, int _groupID, std::string& result) {
+int dss__SetByGroup(struct soap *soap, char* _token, char* _setSpec, int _groupID, std::string& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -345,7 +345,7 @@ int dss__SetByGroup(struct soap *soap, int _token, char* _setSpec, int _groupID,
   return SOAP_OK;
 } // dss__SetByGroup
 
-int dss__SetGetContainedDevices(struct soap* soap, int _token, char* _setSpec, std::vector<std::string>& deviceIDs) {
+int dss__SetGetContainedDevices(struct soap* soap, char* _token, char* _setSpec, std::vector<std::string>& deviceIDs) {
   dss::Set set;
   int res = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(res != SOAP_OK) {
@@ -363,7 +363,7 @@ int dss__SetGetContainedDevices(struct soap* soap, int _token, char* _setSpec, s
 
 //==================================================== Apartment
 
-int dss__ApartmentGetGroupByName(struct soap *soap, int _token, char* _groupName, int& groupID) {
+int dss__ApartmentGetGroupByName(struct soap *soap, char* _token, char* _groupName, int& groupID) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -376,7 +376,7 @@ int dss__ApartmentGetGroupByName(struct soap *soap, int _token, char* _groupName
   return SOAP_OK;
 }
 
-int dss__ApartmentGetZoneByName(struct soap *soap, int _token,  char* _zoneName, int& zoneID) {
+int dss__ApartmentGetZoneByName(struct soap *soap, char* _token,  char* _zoneName, int& zoneID) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -389,7 +389,7 @@ int dss__ApartmentGetZoneByName(struct soap *soap, int _token,  char* _zoneName,
   return SOAP_OK;
 }
 
-int dss__ApartmentGetZoneIDs(struct soap *soap, int _token, std::vector<int>& zoneIDs) {
+int dss__ApartmentGetZoneIDs(struct soap *soap, char* _token, std::vector<int>& zoneIDs) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -405,7 +405,7 @@ int dss__ApartmentGetZoneIDs(struct soap *soap, int _token, std::vector<int>& zo
   return SOAP_OK;
 } // dss__ApartmentGetZoneIDs
 
-int dss__ApartmentRescan(struct soap *soap, int _token, bool& result) {
+int dss__ApartmentRescan(struct soap *soap, char* _token, bool& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -421,7 +421,7 @@ int dss__ApartmentRescan(struct soap *soap, int _token, bool& result) {
 
 //==================================================== Circuit
 
-int dss__CircuitRescan(struct soap *soap, int _token, char* _dsid, bool& result) {
+int dss__CircuitRescan(struct soap *soap, char* _token, char* _dsid, bool& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -448,7 +448,7 @@ int dss__CircuitRescan(struct soap *soap, int _token, char* _dsid, bool& result)
 
 //--------------------------- Set
 
-int dss__SetTurnOn(struct soap *soap, int _token, char* _setSpec, bool& result) {
+int dss__SetTurnOn(struct soap *soap, char* _token, char* _setSpec, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(getResult != SOAP_OK) {
@@ -459,7 +459,7 @@ int dss__SetTurnOn(struct soap *soap, int _token, char* _setSpec, bool& result) 
   return SOAP_OK;
 }
 
-int dss__SetTurnOff(struct soap *soap, int _token, char* _setSpec, bool& result) {
+int dss__SetTurnOff(struct soap *soap, char* _token, char* _setSpec, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(getResult != SOAP_OK) {
@@ -470,7 +470,7 @@ int dss__SetTurnOff(struct soap *soap, int _token, char* _setSpec, bool& result)
   return SOAP_OK;
 }
 
-int dss__SetIncreaseValue(struct soap *soap, int _token, char* _setSpec, bool& result) {
+int dss__SetIncreaseValue(struct soap *soap, char* _token, char* _setSpec, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(getResult != SOAP_OK) {
@@ -481,7 +481,7 @@ int dss__SetIncreaseValue(struct soap *soap, int _token, char* _setSpec, bool& r
   return SOAP_OK;
 }
 
-int dss__SetDecreaseValue(struct soap *soap, int _token, char* _setSpec, bool& result) {
+int dss__SetDecreaseValue(struct soap *soap, char* _token, char* _setSpec, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(getResult != SOAP_OK) {
@@ -492,7 +492,7 @@ int dss__SetDecreaseValue(struct soap *soap, int _token, char* _setSpec, bool& r
   return SOAP_OK;
 }
 
-int dss__SetSetValue(struct soap *soap, int _token, char* _setSpec, double _value, bool& result) {
+int dss__SetSetValue(struct soap *soap, char* _token, char* _setSpec, double _value, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(getResult != SOAP_OK) {
@@ -503,7 +503,7 @@ int dss__SetSetValue(struct soap *soap, int _token, char* _setSpec, double _valu
   return SOAP_OK;
 }
 
-int dss__SetCallScene(struct soap *soap, int _token, char* _setSpec, int _sceneID, bool& result) {
+int dss__SetCallScene(struct soap *soap, char* _token, char* _setSpec, int _sceneID, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(getResult != SOAP_OK) {
@@ -514,7 +514,7 @@ int dss__SetCallScene(struct soap *soap, int _token, char* _setSpec, int _sceneI
   return SOAP_OK;
 }
 
-int dss__SetSaveScene(struct soap *soap, int _token, char* _setSpec, int _sceneID, bool& result) {
+int dss__SetSaveScene(struct soap *soap, char* _token, char* _setSpec, int _sceneID, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(getResult != SOAP_OK) {
@@ -525,7 +525,7 @@ int dss__SetSaveScene(struct soap *soap, int _token, char* _setSpec, int _sceneI
   return SOAP_OK;
 }
 
-int dss__SetUndoScene(struct soap *soap, int _token, char* _setSpec, bool& result) {
+int dss__SetUndoScene(struct soap *soap, char* _token, char* _setSpec, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(getResult != SOAP_OK) {
@@ -538,7 +538,7 @@ int dss__SetUndoScene(struct soap *soap, int _token, char* _setSpec, bool& resul
 
 //---------------------------------- Apartment
 
-int dss__ApartmentTurnOn(struct soap *soap, int _token, int _groupID, bool& result) {
+int dss__ApartmentTurnOn(struct soap *soap, char* _token, int _groupID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -549,7 +549,7 @@ int dss__ApartmentTurnOn(struct soap *soap, int _token, int _groupID, bool& resu
   return SOAP_OK;
 }
 
-int dss__ApartmentTurnOff(struct soap *soap, int _token, int _groupID, bool& result) {
+int dss__ApartmentTurnOff(struct soap *soap, char* _token, int _groupID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -560,7 +560,7 @@ int dss__ApartmentTurnOff(struct soap *soap, int _token, int _groupID, bool& res
   return SOAP_OK;
 }
 
-int dss__ApartmentIncreaseValue(struct soap *soap, int _token, int _groupID, bool& result) {
+int dss__ApartmentIncreaseValue(struct soap *soap, char* _token, int _groupID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -571,7 +571,7 @@ int dss__ApartmentIncreaseValue(struct soap *soap, int _token, int _groupID, boo
   return SOAP_OK;
 }
 
-int dss__ApartmentDecreaseValue(struct soap *soap, int _token, int _groupID, bool& result) {
+int dss__ApartmentDecreaseValue(struct soap *soap, char* _token, int _groupID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -582,7 +582,7 @@ int dss__ApartmentDecreaseValue(struct soap *soap, int _token, int _groupID, boo
   return SOAP_OK;
 }
 
-int dss__ApartmentSetValue(struct soap *soap, int _token, int _groupID, double _value, bool& result) {
+int dss__ApartmentSetValue(struct soap *soap, char* _token, int _groupID, double _value, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -593,7 +593,7 @@ int dss__ApartmentSetValue(struct soap *soap, int _token, int _groupID, double _
   return SOAP_OK;
 }
 
-int dss__ApartmentCallScene(struct soap *soap, int _token, int _groupID, int _sceneID, bool& result) {
+int dss__ApartmentCallScene(struct soap *soap, char* _token, int _groupID, int _sceneID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -604,7 +604,7 @@ int dss__ApartmentCallScene(struct soap *soap, int _token, int _groupID, int _sc
   return SOAP_OK;
 }
 
-int dss__ApartmentSaveScene(struct soap *soap, int _token, int _groupID, int _sceneID, bool& result) {
+int dss__ApartmentSaveScene(struct soap *soap, char* _token, int _groupID, int _sceneID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -615,7 +615,7 @@ int dss__ApartmentSaveScene(struct soap *soap, int _token, int _groupID, int _sc
   return SOAP_OK;
 }
 
-int dss__ApartmentUndoScene(struct soap *soap, int _token, int _groupID, bool& result) {
+int dss__ApartmentUndoScene(struct soap *soap, char* _token, int _groupID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -629,7 +629,7 @@ int dss__ApartmentUndoScene(struct soap *soap, int _token, int _groupID, bool& r
 
 //---------------------------------- Zone
 
-int dss__ZoneTurnOn(struct soap *soap, int _token, int _zoneID, int _groupID, bool& result) {
+int dss__ZoneTurnOn(struct soap *soap, char* _token, int _zoneID, int _groupID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -640,7 +640,7 @@ int dss__ZoneTurnOn(struct soap *soap, int _token, int _zoneID, int _groupID, bo
   return SOAP_OK;
 }
 
-int dss__ZoneTurnOff(struct soap *soap, int _token, int _zoneID, int _groupID, bool& result) {
+int dss__ZoneTurnOff(struct soap *soap, char* _token, int _zoneID, int _groupID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -651,7 +651,7 @@ int dss__ZoneTurnOff(struct soap *soap, int _token, int _zoneID, int _groupID, b
   return SOAP_OK;
 }
 
-int dss__ZoneIncreaseValue(struct soap *soap, int _token, int _zoneID, int _groupID, bool& result) {
+int dss__ZoneIncreaseValue(struct soap *soap, char* _token, int _zoneID, int _groupID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -662,7 +662,7 @@ int dss__ZoneIncreaseValue(struct soap *soap, int _token, int _zoneID, int _grou
   return SOAP_OK;
 }
 
-int dss__ZoneDecreaseValue(struct soap *soap, int _token, int _zoneID, int _groupID, bool& result) {
+int dss__ZoneDecreaseValue(struct soap *soap, char* _token, int _zoneID, int _groupID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -673,7 +673,7 @@ int dss__ZoneDecreaseValue(struct soap *soap, int _token, int _zoneID, int _grou
   return SOAP_OK;
 }
 
-int dss__ZoneSetValue(struct soap *soap, int _token, int _zoneID, int _groupID, double _value, bool& result) {
+int dss__ZoneSetValue(struct soap *soap, char* _token, int _zoneID, int _groupID, double _value, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -684,7 +684,7 @@ int dss__ZoneSetValue(struct soap *soap, int _token, int _zoneID, int _groupID, 
   return SOAP_OK;
 }
 
-int dss__ZoneCallScene(struct soap *soap, int _token, int _zoneID, int _groupID, int _sceneID, bool& result) {
+int dss__ZoneCallScene(struct soap *soap, char* _token, int _zoneID, int _groupID, int _sceneID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -695,7 +695,7 @@ int dss__ZoneCallScene(struct soap *soap, int _token, int _zoneID, int _groupID,
   return SOAP_OK;
 }
 
-int dss__ZoneSaveScene(struct soap *soap, int _token, int _zoneID, int _groupID, int _sceneID, bool& result) {
+int dss__ZoneSaveScene(struct soap *soap, char* _token, int _zoneID, int _groupID, int _sceneID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -706,7 +706,7 @@ int dss__ZoneSaveScene(struct soap *soap, int _token, int _zoneID, int _groupID,
   return SOAP_OK;
 }
 
-int dss__ZoneUndoScene(struct soap *soap, int _token, int _zoneID, int _groupID, bool& result) {
+int dss__ZoneUndoScene(struct soap *soap, char* _token, int _zoneID, int _groupID, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -719,7 +719,7 @@ int dss__ZoneUndoScene(struct soap *soap, int _token, int _zoneID, int _groupID,
 
 //---------------------------------- Device
 
-int dss__DeviceTurnOn(struct soap *soap, int _token, char* _deviceID, bool& result) {
+int dss__DeviceTurnOn(struct soap *soap, char* _token, char* _deviceID, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -730,7 +730,7 @@ int dss__DeviceTurnOn(struct soap *soap, int _token, char* _deviceID, bool& resu
   return SOAP_OK;
 }
 
-int dss__DeviceTurnOff(struct soap *soap, int _token, char* _deviceID, bool& result) {
+int dss__DeviceTurnOff(struct soap *soap, char* _token, char* _deviceID, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -741,7 +741,7 @@ int dss__DeviceTurnOff(struct soap *soap, int _token, char* _deviceID, bool& res
   return SOAP_OK;
 }
 
-int dss__DeviceIncreaseValue(struct soap *soap, int _token, char* _deviceID, bool& result) {
+int dss__DeviceIncreaseValue(struct soap *soap, char* _token, char* _deviceID, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -752,7 +752,7 @@ int dss__DeviceIncreaseValue(struct soap *soap, int _token, char* _deviceID, boo
   return SOAP_OK;
 }
 
-int dss__DeviceDecreaseValue(struct soap *soap, int _token, char* _deviceID, bool& result) {
+int dss__DeviceDecreaseValue(struct soap *soap, char* _token, char* _deviceID, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -763,7 +763,7 @@ int dss__DeviceDecreaseValue(struct soap *soap, int _token, char* _deviceID, boo
   return SOAP_OK;
 }
 
-int dss__DeviceSetValue(struct soap *soap, int _token, char* _deviceID, double _value, bool& result) {
+int dss__DeviceSetValue(struct soap *soap, char* _token, char* _deviceID, double _value, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -774,7 +774,7 @@ int dss__DeviceSetValue(struct soap *soap, int _token, char* _deviceID, double _
   return SOAP_OK;
 }
 
-int dss__DeviceCallScene(struct soap *soap, int _token, char* _deviceID, int _sceneID, bool& result) {
+int dss__DeviceCallScene(struct soap *soap, char* _token, char* _deviceID, int _sceneID, bool& result) {
   dss::DeviceReference device(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
   if(getResult != SOAP_OK) {
@@ -785,7 +785,7 @@ int dss__DeviceCallScene(struct soap *soap, int _token, char* _deviceID, int _sc
   return SOAP_OK;
 }
 
-int dss__DeviceSaveScene(struct soap *soap, int _token, char* _deviceID, int _sceneID, bool& result) {
+int dss__DeviceSaveScene(struct soap *soap, char* _token, char* _deviceID, int _sceneID, bool& result) {
   dss::DeviceReference device(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
   if(getResult != SOAP_OK) {
@@ -796,7 +796,7 @@ int dss__DeviceSaveScene(struct soap *soap, int _token, char* _deviceID, int _sc
   return SOAP_OK;
 }
 
-int dss__DeviceUndoScene(struct soap *soap, int _token, char* _deviceID, bool& result) {
+int dss__DeviceUndoScene(struct soap *soap, char* _token, char* _deviceID, bool& result) {
   dss::DeviceReference device(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
   if(getResult != SOAP_OK) {
@@ -807,7 +807,7 @@ int dss__DeviceUndoScene(struct soap *soap, int _token, char* _deviceID, bool& r
   return SOAP_OK;
 }
 
-int dss__DeviceGetValue(struct soap *soap, int _token, char* _deviceID, int _paramID, double& result) {
+int dss__DeviceGetValue(struct soap *soap, char* _token, char* _deviceID, int _paramID, double& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -817,7 +817,7 @@ int dss__DeviceGetValue(struct soap *soap, int _token, char* _deviceID, int _par
   return SOAP_OK;
 }
 
-int dss__DeviceGetName(struct soap *soap, int _token, char* _deviceID, char** result) {
+int dss__DeviceGetName(struct soap *soap, char* _token, char* _deviceID, char** result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -827,7 +827,7 @@ int dss__DeviceGetName(struct soap *soap, int _token, char* _deviceID, char** re
   return SOAP_OK;
 } // dss__DeviceGetName
 
-int dss__DeviceSetName(struct soap *soap, int _token, char* _deviceID, char* _name, bool& result) {
+int dss__DeviceSetName(struct soap *soap, char* _token, char* _deviceID, char* _name, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -838,7 +838,7 @@ int dss__DeviceSetName(struct soap *soap, int _token, char* _deviceID, char* _na
   return SOAP_OK;
 } // dss__DeviceSetName
 
-int dss__DeviceGetFunctionID(struct soap *soap, int _token, char* _deviceID, int& result) {
+int dss__DeviceGetFunctionID(struct soap *soap, char* _token, char* _deviceID, int& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -848,7 +848,7 @@ int dss__DeviceGetFunctionID(struct soap *soap, int _token, char* _deviceID, int
   return SOAP_OK;
 } // dss__DeviceGetFunctionID
 
-int dss__DeviceGetZoneID(struct soap *soap, int _token, char* _deviceID, int& result) {
+int dss__DeviceGetZoneID(struct soap *soap, char* _token, char* _deviceID, int& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -859,7 +859,7 @@ int dss__DeviceGetZoneID(struct soap *soap, int _token, char* _deviceID, int& re
   return SOAP_OK;
 } // dss__DeviceGetZoneID
 
-int dss__DeviceAddTag(struct soap *soap, int _token, char* _deviceID, char* _tag, bool& result) {
+int dss__DeviceAddTag(struct soap *soap, char* _token, char* _deviceID, char* _tag, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -871,7 +871,7 @@ int dss__DeviceAddTag(struct soap *soap, int _token, char* _deviceID, char* _tag
   return SOAP_OK;
 } // dss__DeviceAddTag
 
-int dss__DeviceRemoveTag(struct soap *soap, int _token, char* _deviceID, char* _tag, bool& result) {
+int dss__DeviceRemoveTag(struct soap *soap, char* _token, char* _deviceID, char* _tag, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -883,7 +883,7 @@ int dss__DeviceRemoveTag(struct soap *soap, int _token, char* _deviceID, char* _
   return SOAP_OK;
 } // dss__DeviceRemoveTag
 
-int dss__DeviceHasTag(struct soap *soap, int _token, char* _deviceID, char* _tag, bool& result) {
+int dss__DeviceHasTag(struct soap *soap, char* _token, char* _deviceID, char* _tag, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -894,7 +894,7 @@ int dss__DeviceHasTag(struct soap *soap, int _token, char* _deviceID, char* _tag
   return SOAP_OK;
 } // dss__DeviceHasTag
 
-int dss__DeviceGetTags(struct soap *soap, int _token, char* _deviceID, std::vector<std::string>& result) {
+int dss__DeviceGetTags(struct soap *soap, char* _token, char* _deviceID, std::vector<std::string>& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -905,7 +905,7 @@ int dss__DeviceGetTags(struct soap *soap, int _token, char* _deviceID, std::vect
   return SOAP_OK;
 } // dss__DeviceGetTags
 
-int dss__DeviceLock(struct soap *soap, int _token, char* _deviceID, bool& result) {
+int dss__DeviceLock(struct soap *soap, char* _token, char* _deviceID, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -921,7 +921,7 @@ int dss__DeviceLock(struct soap *soap, int _token, char* _deviceID, bool& result
   return SOAP_OK;
 } // dss__DeviceLock
 
-int dss__DeviceUnlock(struct soap *soap, int _token, char* _deviceID, bool& result) {
+int dss__DeviceUnlock(struct soap *soap, char* _token, char* _deviceID, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -937,7 +937,7 @@ int dss__DeviceUnlock(struct soap *soap, int _token, char* _deviceID, bool& resu
   return SOAP_OK;
 } // dss__DeviceUnlock
 
-int dss__DeviceGetIsLocked(struct soap *soap, int _token, char* _deviceID, bool& result) {
+int dss__DeviceGetIsLocked(struct soap *soap, char* _token, char* _deviceID, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
@@ -951,7 +951,7 @@ int dss__DeviceGetIsLocked(struct soap *soap, int _token, char* _deviceID, bool&
 
 //==================================================== Information
 
-int dss__DSMeterGetPowerConsumption(struct soap *soap, int _token, char* _dsMeterID, unsigned long& result) {
+int dss__DSMeterGetPowerConsumption(struct soap *soap, char* _token, char* _dsMeterID, unsigned long& result) {
   boost::shared_ptr<dss::DSMeter> mod;
   int getResult = AuthorizeAndGetDSMeter(soap, _token, _dsMeterID, mod);
   if(getResult != SOAP_OK) {
@@ -967,7 +967,7 @@ int dss__DSMeterGetPowerConsumption(struct soap *soap, int _token, char* _dsMete
 
 //These calls may be restricted to privileged users.
 
-int dss__ApartmentGetDSMeterIDs(struct soap *soap, int _token, std::vector<std::string>& ids) {
+int dss__ApartmentGetDSMeterIDs(struct soap *soap, char* _token, std::vector<std::string>& ids) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -983,7 +983,7 @@ int dss__ApartmentGetDSMeterIDs(struct soap *soap, int _token, std::vector<std::
   return SOAP_OK;
 }
 
-int dss__DSMeterGetName(struct soap *soap, int _token, char* _dsMeterID, std::string& name) {
+int dss__DSMeterGetName(struct soap *soap, char* _token, char* _dsMeterID, std::string& name) {
   boost::shared_ptr<dss::DSMeter> mod;
   int getResult = AuthorizeAndGetDSMeter(soap, _token, _dsMeterID, mod);
   if(getResult != SOAP_OK) {
@@ -994,7 +994,7 @@ int dss__DSMeterGetName(struct soap *soap, int _token, char* _dsMeterID, std::st
   return SOAP_OK;
 } // dss__DSMeterGetName
 
-int dss__DSMeterSetName(struct soap *soap, int _token, char* _dsMeterID, char*  _name, bool& result) {
+int dss__DSMeterSetName(struct soap *soap, char* _token, char* _dsMeterID, char*  _name, bool& result) {
   boost::shared_ptr<dss::DSMeter> mod;
   int getResult = AuthorizeAndGetDSMeter(soap, _token, _dsMeterID, mod);
   if(getResult != SOAP_OK) {
@@ -1006,15 +1006,15 @@ int dss__DSMeterSetName(struct soap *soap, int _token, char* _dsMeterID, char*  
   return SOAP_OK;
 } // dss__DSMeterSetName
 
-int dss__ApartmentAllocateZone(struct soap *soap, int _token, int& zoneID) {
+int dss__ApartmentAllocateZone(struct soap *soap, char* _token, int& zoneID) {
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
-int dss__ApartmentDeleteZone(struct soap *soap, int _token, int _zoneID, int& result) {
+int dss__ApartmentDeleteZone(struct soap *soap, char* _token, int _zoneID, int& result) {
   return soap_sender_fault(soap, "Not yet implemented", NULL);
 }
 
-int dss__ZoneSetName(struct soap *soap, int _token, int _zoneID, char* _name, bool& result) {
+int dss__ZoneSetName(struct soap *soap, char* _token, int _zoneID, char* _name, bool& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -1028,7 +1028,7 @@ int dss__ZoneSetName(struct soap *soap, int _token, int _zoneID, char* _name, bo
   return SOAP_OK;
 } // dss__ZoneSetName
 
-int dss__ZoneGetName(struct soap *soap, int _token, int _zoneID, std::string& result) {
+int dss__ZoneGetName(struct soap *soap, char* _token, int _zoneID, std::string& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -1042,7 +1042,7 @@ int dss__ZoneGetName(struct soap *soap, int _token, int _zoneID, std::string& re
   return SOAP_OK;
 } // dss__ZoneGetName
 
-int dss__GroupSetName(struct soap *soap, int _token, int _zoneID, int _groupID, char* _name, bool& result) {
+int dss__GroupSetName(struct soap *soap, char* _token, int _zoneID, int _groupID, char* _name, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -1053,7 +1053,7 @@ int dss__GroupSetName(struct soap *soap, int _token, int _zoneID, int _groupID, 
   return SOAP_OK;
 } // dss__GroupSetName
 
-int dss__GroupGetName(struct soap *soap, int _token, int _zoneID, int _groupID, std::string& result) {
+int dss__GroupGetName(struct soap *soap, char* _token, int _zoneID, int _groupID, std::string& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -1065,7 +1065,7 @@ int dss__GroupGetName(struct soap *soap, int _token, int _zoneID, int _groupID, 
 
 //==================================================== Events
 
-int dss__EventRaise(struct soap *soap, int _token, char* _eventName, char* _context, char* _parameter, char* _location, bool& result) {
+int dss__EventRaise(struct soap *soap, char* _token, char* _eventName, char* _context, char* _parameter, char* _location, bool& result) {
   if(!IsAuthorized(soap, _token)) {
     result = false;
     return NotAuthorized(soap);
@@ -1102,17 +1102,18 @@ int dss__EventRaise(struct soap *soap, int _token, char* _eventName, char* _cont
   return SOAP_OK;
 } // dss__EventRaise
 
-int dss__EventWaitFor(struct soap *soap, int _token, int _timeout, std::vector<dss__Event>& result) {
-  dss::WebServiceSession* session;
+int dss__EventWaitFor(struct soap *soap, char* _token, int _timeout, std::vector<dss__Event>& result) {
+  dss::Session* session;
   int getResult = AuthorizeAndGetSession(soap, _token, &session);
   if(getResult != SOAP_OK) {
     return getResult;
   }
 
-  session->waitForEvent(_timeout, soap);
+  dss::WebServices* pServices = &dss::DSS::getInstance()->getWebServices();
+  pServices->waitForEvent(session, _timeout, soap);
 
-  while(session->hasEvent()) {
-    dss::Event origEvent = session->popEvent();
+  while(pServices->hasEvent(session)) {
+    dss::Event origEvent = pServices->popEvent(session);
     dss__Event evt;
     evt.name = origEvent.getName();
     const dss::HashMapConstStringString& props =  origEvent.getProperties().getContainer();
@@ -1128,14 +1129,14 @@ int dss__EventWaitFor(struct soap *soap, int _token, int _timeout, std::vector<d
   return SOAP_OK;
 } // dss__EventWaitFor
 
-int dss__EventSubscribeTo(struct soap *soap, int _token, std::string _name, std::string& result) {
-  dss::WebServiceSession* session;
+int dss__EventSubscribeTo(struct soap *soap, char* _token, std::string _name, std::string& result) {
+  dss::Session* session;
   int getResult = AuthorizeAndGetSession(soap, _token, &session);
   if(getResult != SOAP_OK) {
     return getResult;
   }
 
-  result = session->subscribeTo(_name);
+  result = dss::DSS::getInstance()->getWebServices().subscribeTo(session, _name);
 
   return SOAP_OK;
 } // dss__EventSubscribeTo
@@ -1143,7 +1144,7 @@ int dss__EventSubscribeTo(struct soap *soap, int _token, std::string _name, std:
 
 //==================================================== Properties
 
-int dss__PropertyGetType(struct soap *soap, int _token, std::string _propertyName, std::string& result) {
+int dss__PropertyGetType(struct soap *soap, char* _token, std::string _propertyName, std::string& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -1158,7 +1159,7 @@ int dss__PropertyGetType(struct soap *soap, int _token, std::string _propertyNam
   return SOAP_OK;
 } // dss__PropertyGetType
 
-int dss__PropertySetInt(struct soap *soap, int _token, std::string _propertyName, int _value, bool _mayCreate, bool& result) {
+int dss__PropertySetInt(struct soap *soap, char* _token, std::string _propertyName, int _value, bool _mayCreate, bool& result) {
   if(!IsAuthorized(soap, _token)) {
     result = false;
     return NotAuthorized(soap);
@@ -1174,7 +1175,7 @@ int dss__PropertySetInt(struct soap *soap, int _token, std::string _propertyName
   return SOAP_OK;
 } // dss__PropertySetInt
 
-int dss__PropertySetString(struct soap *soap, int _token, std::string _propertyName, char* _value, bool _mayCreate, bool& result) {
+int dss__PropertySetString(struct soap *soap, char* _token, std::string _propertyName, char* _value, bool _mayCreate, bool& result) {
   if(!IsAuthorized(soap, _token)) {
     result = false;
     return NotAuthorized(soap);
@@ -1190,7 +1191,7 @@ int dss__PropertySetString(struct soap *soap, int _token, std::string _propertyN
   return SOAP_OK;
 } // dss__PropertySetString
 
-int dss__PropertySetBool(struct soap *soap, int _token, std::string _propertyName, bool _value, bool _mayCreate, bool& result) {
+int dss__PropertySetBool(struct soap *soap, char* _token, std::string _propertyName, bool _value, bool _mayCreate, bool& result) {
   if(!IsAuthorized(soap, _token)) {
     result = false;
     return NotAuthorized(soap);
@@ -1206,7 +1207,7 @@ int dss__PropertySetBool(struct soap *soap, int _token, std::string _propertyNam
   return SOAP_OK;
 } // dss__PropertySetBool
 
-int dss__PropertyGetInt(struct soap *soap, int _token, std::string _propertyName, int& result) {
+int dss__PropertyGetInt(struct soap *soap, char* _token, std::string _propertyName, int& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -1221,7 +1222,7 @@ int dss__PropertyGetInt(struct soap *soap, int _token, std::string _propertyName
   return SOAP_OK;
 } // dss__PropertyGetInt
 
-int dss__PropertyGetString(struct soap *soap, int _token, std::string _propertyName, std::string& result) {
+int dss__PropertyGetString(struct soap *soap, char* _token, std::string _propertyName, std::string& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -1236,7 +1237,7 @@ int dss__PropertyGetString(struct soap *soap, int _token, std::string _propertyN
   return SOAP_OK;
 } // dss__PropertyGetString
 
-int dss__PropertyGetBool(struct soap *soap, int _token, std::string _propertyName, bool& result) {
+int dss__PropertyGetBool(struct soap *soap, char* _token, std::string _propertyName, bool& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -1251,7 +1252,7 @@ int dss__PropertyGetBool(struct soap *soap, int _token, std::string _propertyNam
   return SOAP_OK;
 } // dss__PropertyGetBool
 
-int dss__PropertyGetChildren(struct soap *soap, int _token, std::string _propertyName, std::vector<std::string>& result) {
+int dss__PropertyGetChildren(struct soap *soap, char* _token, std::string _propertyName, std::vector<std::string>& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }
@@ -1269,7 +1270,7 @@ int dss__PropertyGetChildren(struct soap *soap, int _token, std::string _propert
   return SOAP_OK;
 } // dss__PropertyGetChildren
 
-int dss__StructureAddDeviceToZone(struct soap *soap, int _token, char* _deviceID, int _zoneID, bool& result) {
+int dss__StructureAddDeviceToZone(struct soap *soap, char* _token, char* _deviceID, int _zoneID, bool& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
   }

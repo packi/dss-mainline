@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
@@ -27,70 +27,56 @@
 #include "core/thread.h"
 #include "core/datetools.h"
 #include "core/subsystem.h"
-#include "core/session.h"
 #include "core/mutex.h"
 #include "core/syncevent.h"
 #include "core/event.h"
-#include "core/eventcollector.h"
-#include "core/eventinterpreterplugins.h"
 
 #include <deque>
 
+#include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 namespace dss {
 
   class WebServicesWorker;
-
-  class WebServiceSession : public Session {
-  protected:
-    uint32_t m_OriginatorIP;
-    boost::shared_ptr<EventCollector> m_pEventListener;
-  private:
-    void createCollector();
-  public:
-    WebServiceSession() {}
-    WebServiceSession(const int _tokenID, soap* _soapRequest);
-    virtual ~WebServiceSession();
-
-    bool isOwner(soap* _soapRequest);
-
-    WebServiceSession& operator=(const WebServiceSession& _other);
-    bool waitForEvent(const int _timeoutMS, soap* _soapRequest);
-    Event popEvent();
-    bool hasEvent();
-
-    std::string subscribeTo(const std::string& _eventName);
-  }; // WebServiceSession
-
-  typedef boost::ptr_map<const int, WebServiceSession> WebServiceSessionByID;
+  class SessionManager;
+  class Session;
 
   class WebServices : public ThreadedSubsystem {
   private:
     dssSSLService m_Service;
-    int m_LastSessionID;
-    WebServiceSessionByID m_SessionByID;
     boost::ptr_vector<WebServicesWorker> m_Workers;
     std::deque<struct soap*> m_PendingRequests;
     Mutex m_RequestsMutex;
     SyncEvent m_RequestArrived;
+    boost::shared_ptr<SessionManager> m_pSessionManager;
   protected:
     virtual void doStart();
   public:
     WebServices(DSS* _pDSS);
     virtual ~WebServices();
 
-    WebServiceSession& newSession(soap* _soapRequest, int& token);
-    void deleteSession(soap* _soapRequest, const int _token);
-    WebServiceSession& getSession(soap* _soapRequest, const int _token);
+    std::string newSession(soap* _soapRequest);
+    void deleteSession(soap* _soapRequest, const std::string& _token);
+    boost::shared_ptr<Session> getSession(soap* _soapRequest, const std::string& _token);
 
-    bool isAuthorized(soap* _soapRequest, const int _token);
+    bool isAuthorized(soap* _soapRequest, const std::string& _token);
 
     virtual void initialize();
     virtual void execute();
 
+    void setSessionManager(boost::shared_ptr<SessionManager> _value) {
+      m_pSessionManager = _value;
+    }
+
     struct soap* popPendingRequest();
+
+    bool waitForEvent(Session* _session, const int _timeoutMS, soap* _soapRequest);
+    Event popEvent(Session* _session);
+    bool hasEvent(Session* _session);
+
+    std::string subscribeTo(Session* _session, const std::string& _eventName);
   }; // WebServices
 
   class WebServicesWorker : public Thread {

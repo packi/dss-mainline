@@ -38,18 +38,22 @@
 
 #endif
 
+#if 0 /* volatile type: do not redeclare here */
+
+#endif
+
 #ifndef SOAP_TYPE_dss__AuthenticateResponse
-#define SOAP_TYPE_dss__AuthenticateResponse (20)
+#define SOAP_TYPE_dss__AuthenticateResponse (21)
 /* dss:AuthenticateResponse */
 struct dss__AuthenticateResponse
 {
 public:
-	int token;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:int */
+	std::string token;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:string */
 };
 #endif
 
 #ifndef SOAP_TYPE_dss__Authenticate
-#define SOAP_TYPE_dss__Authenticate (21)
+#define SOAP_TYPE_dss__Authenticate (22)
 /* dss:Authenticate */
 struct dss__Authenticate
 {
@@ -60,7 +64,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SignOffResponse
-#define SOAP_TYPE_dss__SignOffResponse (23)
+#define SOAP_TYPE_dss__SignOffResponse (25)
 /* dss:SignOffResponse */
 struct dss__SignOffResponse
 {
@@ -70,17 +74,13 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_dss__SignOff
-#define SOAP_TYPE_dss__SignOff (24)
+#define SOAP_TYPE_dss__SignOff (26)
 /* dss:SignOff */
 struct dss__SignOff
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 };
-#endif
-
-#if 0 /* volatile type: do not redeclare here */
-
 #endif
 
 #ifndef SOAP_TYPE_dss__ApartmentCreateSetFromGroupResponse
@@ -99,7 +99,7 @@ public:
 struct dss__ApartmentCreateSetFromGroup
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_groupName;	/* optional element of type xsd:string */
 };
 #endif
@@ -120,7 +120,7 @@ public:
 struct dss__ApartmentCreateSetFromDeviceIDs
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	std::vector<std::string >_ids;	/* required element of type xsd:string */
 };
 #endif
@@ -141,7 +141,7 @@ public:
 struct dss__ApartmentCreateSetFromDeviceNames
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	std::vector<std::string >_names;	/* required element of type xsd:string */
 };
 #endif
@@ -162,7 +162,7 @@ public:
 struct dss__ApartmentGetDevices
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 };
 #endif
 
@@ -182,7 +182,7 @@ public:
 struct dss__ApartmentGetDeviceIDByName
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceName;	/* optional element of type xsd:string */
 };
 #endif
@@ -203,7 +203,7 @@ public:
 struct dss__ApartmentGetName
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 };
 #endif
 
@@ -223,7 +223,7 @@ public:
 struct dss__ApartmentSetName
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_name;	/* optional element of type xsd:string */
 };
 #endif
@@ -244,7 +244,7 @@ public:
 struct dss__SetAddDeviceByName
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_setSpec;	/* optional element of type xsd:string */
 	char *_name;	/* optional element of type xsd:string */
 };
@@ -266,7 +266,7 @@ public:
 struct dss__SetAddDeviceByID
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_setSpec;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 };
@@ -288,7 +288,7 @@ public:
 struct dss__SetRemoveDevice
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_setSpec;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 };
@@ -310,7 +310,7 @@ public:
 struct dss__SetCombine
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_setSpec1;	/* optional element of type xsd:string */
 	char *_setSpec2;	/* optional element of type xsd:string */
 };
@@ -332,7 +332,7 @@ public:
 struct dss__SetRemove
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_setSpec;	/* optional element of type xsd:string */
 	char *_setSpecToRemove;	/* optional element of type xsd:string */
 };
@@ -354,7 +354,7 @@ public:
 struct dss__SetByGroup
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_setSpec;	/* optional element of type xsd:string */
 	int _groupID;	/* required element of type xsd:int */
 };
@@ -376,7 +376,7 @@ public:
 struct dss__SetGetContainedDevices
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_setSpec;	/* optional element of type xsd:string */
 };
 #endif
@@ -397,7 +397,7 @@ public:
 struct dss__ApartmentGetGroupByName
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_groupName;	/* optional element of type xsd:string */
 };
 #endif
@@ -418,7 +418,7 @@ public:
 struct dss__ApartmentGetZoneByName
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_zoneName;	/* optional element of type xsd:string */
 };
 #endif
@@ -439,7 +439,7 @@ public:
 struct dss__ApartmentGetZoneIDs
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 };
 #endif
 
@@ -459,7 +459,7 @@ public:
 struct dss__SetTurnOn
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_setSpec;	/* optional element of type xsd:string */
 };
 #endif
@@ -480,7 +480,7 @@ public:
 struct dss__SetTurnOff
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_setSpec;	/* optional element of type xsd:string */
 };
 #endif
@@ -501,7 +501,7 @@ public:
 struct dss__SetIncreaseValue
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_setSpec;	/* optional element of type xsd:string */
 };
 #endif
@@ -522,7 +522,7 @@ public:
 struct dss__SetDecreaseValue
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_setSpec;	/* optional element of type xsd:string */
 };
 #endif
@@ -543,7 +543,7 @@ public:
 struct dss__SetSetValue
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_setSpec;	/* optional element of type xsd:string */
 	double _value;	/* required element of type xsd:double */
 };
@@ -565,7 +565,7 @@ public:
 struct dss__SetCallScene
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_setSpec;	/* optional element of type xsd:string */
 	int _sceneNr;	/* required element of type xsd:int */
 };
@@ -587,7 +587,7 @@ public:
 struct dss__SetSaveScene
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_setSpec;	/* optional element of type xsd:string */
 	int _sceneNr;	/* required element of type xsd:int */
 };
@@ -609,7 +609,7 @@ public:
 struct dss__ApartmentTurnOn
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _groupID;	/* required element of type xsd:int */
 };
 #endif
@@ -630,7 +630,7 @@ public:
 struct dss__ApartmentTurnOff
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _groupID;	/* required element of type xsd:int */
 };
 #endif
@@ -651,7 +651,7 @@ public:
 struct dss__ApartmentIncreaseValue
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _groupID;	/* required element of type xsd:int */
 };
 #endif
@@ -672,7 +672,7 @@ public:
 struct dss__ApartmentDecreaseValue
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _groupID;	/* required element of type xsd:int */
 };
 #endif
@@ -693,7 +693,7 @@ public:
 struct dss__ApartmentSetValue
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _groupID;	/* required element of type xsd:int */
 	double _value;	/* required element of type xsd:double */
 };
@@ -715,7 +715,7 @@ public:
 struct dss__ApartmentCallScene
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _groupID;	/* required element of type xsd:int */
 	int _sceneNr;	/* required element of type xsd:int */
 };
@@ -737,7 +737,7 @@ public:
 struct dss__ApartmentSaveScene
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _groupID;	/* required element of type xsd:int */
 	int _sceneNr;	/* required element of type xsd:int */
 };
@@ -759,7 +759,7 @@ public:
 struct dss__ApartmentRescan
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 };
 #endif
 
@@ -779,7 +779,7 @@ public:
 struct dss__CircuitRescan
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_dsid;	/* optional element of type xsd:string */
 };
 #endif
@@ -800,7 +800,7 @@ public:
 struct dss__ZoneTurnOn
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _zoneID;	/* required element of type xsd:int */
 	int _groupID;	/* required element of type xsd:int */
 };
@@ -822,7 +822,7 @@ public:
 struct dss__ZoneTurnOff
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _zoneID;	/* required element of type xsd:int */
 	int _groupID;	/* required element of type xsd:int */
 };
@@ -844,7 +844,7 @@ public:
 struct dss__ZoneIncreaseValue
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _zoneID;	/* required element of type xsd:int */
 	int _groupID;	/* required element of type xsd:int */
 };
@@ -866,7 +866,7 @@ public:
 struct dss__ZoneDecreaseValue
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _zoneID;	/* required element of type xsd:int */
 	int _groupID;	/* required element of type xsd:int */
 };
@@ -888,7 +888,7 @@ public:
 struct dss__ZoneSetValue
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _zoneID;	/* required element of type xsd:int */
 	int _groupID;	/* required element of type xsd:int */
 	double _value;	/* required element of type xsd:double */
@@ -911,7 +911,7 @@ public:
 struct dss__ZoneCallScene
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _zoneID;	/* required element of type xsd:int */
 	int _groupID;	/* required element of type xsd:int */
 	int _sceneNr;	/* required element of type xsd:int */
@@ -934,7 +934,7 @@ public:
 struct dss__ZoneSaveScene
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _zoneID;	/* required element of type xsd:int */
 	int _groupID;	/* required element of type xsd:int */
 	int _sceneNr;	/* required element of type xsd:int */
@@ -957,7 +957,7 @@ public:
 struct dss__DeviceTurnOn
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
@@ -978,7 +978,7 @@ public:
 struct dss__DeviceTurnOff
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
@@ -999,7 +999,7 @@ public:
 struct dss__DeviceIncreaseValue
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
@@ -1020,7 +1020,7 @@ public:
 struct dss__DeviceDecreaseValue
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
@@ -1041,7 +1041,7 @@ public:
 struct dss__DeviceSetValue
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 	double _value;	/* required element of type xsd:double */
 };
@@ -1063,7 +1063,7 @@ public:
 struct dss__DeviceGetValue
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 	int _paramID;	/* required element of type xsd:int */
 };
@@ -1085,7 +1085,7 @@ public:
 struct dss__DeviceCallScene
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 	int _sceneNr;	/* required element of type xsd:int */
 };
@@ -1107,7 +1107,7 @@ public:
 struct dss__DeviceSaveScene
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 	int _sceneNr;	/* required element of type xsd:int */
 };
@@ -1129,7 +1129,7 @@ public:
 struct dss__DeviceGetName
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
@@ -1150,7 +1150,7 @@ public:
 struct dss__DeviceSetName
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 	char *_name;	/* optional element of type xsd:string */
 };
@@ -1172,7 +1172,7 @@ public:
 struct dss__DeviceGetZoneID
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
@@ -1193,7 +1193,7 @@ public:
 struct dss__DeviceAddTag
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 	char *_tag;	/* optional element of type xsd:string */
 };
@@ -1215,7 +1215,7 @@ public:
 struct dss__DeviceRemoveTag
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 	char *_tag;	/* optional element of type xsd:string */
 };
@@ -1237,7 +1237,7 @@ public:
 struct dss__DeviceHasTag
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 	char *_tag;	/* optional element of type xsd:string */
 };
@@ -1259,7 +1259,7 @@ public:
 struct dss__DeviceGetTags
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
@@ -1280,7 +1280,7 @@ public:
 struct dss__DeviceLock
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
@@ -1301,7 +1301,7 @@ public:
 struct dss__DeviceUnlock
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
@@ -1322,7 +1322,7 @@ public:
 struct dss__DeviceGetIsLocked
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
@@ -1343,7 +1343,7 @@ public:
 struct dss__DSMeterGetPowerConsumption
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_dsMeterID;	/* optional element of type xsd:string */
 };
 #endif
@@ -1364,7 +1364,7 @@ public:
 struct dss__ApartmentGetDSMeterIDs
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 };
 #endif
 
@@ -1384,7 +1384,7 @@ public:
 struct dss__DSMeterGetName
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_dsMeterID;	/* optional element of type xsd:string */
 };
 #endif
@@ -1405,7 +1405,7 @@ public:
 struct dss__DSMeterSetName
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_dsMeterID;	/* optional element of type xsd:string */
 	char *_name;	/* optional element of type xsd:string */
 };
@@ -1427,7 +1427,7 @@ public:
 struct dss__ApartmentAllocateZone
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 };
 #endif
 
@@ -1447,7 +1447,7 @@ public:
 struct dss__ApartmentDeleteZone
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _zoneID;	/* required element of type xsd:int */
 };
 #endif
@@ -1468,7 +1468,7 @@ public:
 struct dss__ZoneSetName
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _zoneID;	/* required element of type xsd:int */
 	char *_name;	/* optional element of type xsd:string */
 };
@@ -1490,7 +1490,7 @@ public:
 struct dss__ZoneGetName
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _zoneID;	/* required element of type xsd:int */
 };
 #endif
@@ -1511,7 +1511,7 @@ public:
 struct dss__GroupSetName
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _zoneID;	/* required element of type xsd:int */
 	int _groupID;	/* required element of type xsd:int */
 	char *_name;	/* optional element of type xsd:string */
@@ -1534,7 +1534,7 @@ public:
 struct dss__GroupGetName
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _zoneID;	/* required element of type xsd:int */
 	int _groupID;	/* required element of type xsd:int */
 };
@@ -1556,7 +1556,7 @@ public:
 struct dss__DeviceGetFunctionID
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 };
 #endif
@@ -1598,7 +1598,7 @@ public:
 struct dss__EventRaise
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_eventName;	/* optional element of type xsd:string */
 	char *_context;	/* optional element of type xsd:string */
 	char *_parameter;	/* optional element of type xsd:string */
@@ -1622,7 +1622,7 @@ public:
 struct dss__EventWaitFor
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	int _timeout;	/* required element of type xsd:int */
 };
 #endif
@@ -1643,7 +1643,7 @@ public:
 struct dss__EventSubscribeTo
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	std::string _name;	/* required element of type xsd:string */
 };
 #endif
@@ -1664,7 +1664,7 @@ public:
 struct dss__PropertyGetType
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	std::string _propertyName;	/* required element of type xsd:string */
 };
 #endif
@@ -1685,7 +1685,7 @@ public:
 struct dss__PropertySetInt
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	std::string _propertyName;	/* required element of type xsd:string */
 	int _value;	/* required element of type xsd:int */
 	bool _mayCreate;	/* required element of type xsd:boolean */
@@ -1708,7 +1708,7 @@ public:
 struct dss__PropertySetString
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	std::string _propertyName;	/* required element of type xsd:string */
 	char *_value;	/* optional element of type xsd:string */
 	bool _mayCreate;	/* required element of type xsd:boolean */
@@ -1731,7 +1731,7 @@ public:
 struct dss__PropertySetBool
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	std::string _propertyName;	/* required element of type xsd:string */
 	bool _value;	/* required element of type xsd:boolean */
 	bool _mayCreate;	/* required element of type xsd:boolean */
@@ -1754,7 +1754,7 @@ public:
 struct dss__PropertyGetInt
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	std::string _propertyName;	/* required element of type xsd:string */
 };
 #endif
@@ -1775,7 +1775,7 @@ public:
 struct dss__PropertyGetString
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	std::string _propertyName;	/* required element of type xsd:string */
 };
 #endif
@@ -1796,7 +1796,7 @@ public:
 struct dss__PropertyGetBool
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	std::string _propertyName;	/* required element of type xsd:string */
 };
 #endif
@@ -1817,7 +1817,7 @@ public:
 struct dss__PropertyGetChildren
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	std::string _propertyName;	/* required element of type xsd:string */
 };
 #endif
@@ -1838,7 +1838,7 @@ public:
 struct dss__StructureAddDeviceToZone
 {
 public:
-	int _token;	/* required element of type xsd:int */
+	char *_token;	/* optional element of type xsd:string */
 	char *_deviceID;	/* optional element of type xsd:string */
 	int _zoneID;	/* required element of type xsd:int */
 };
@@ -1948,171 +1948,171 @@ typedef ULONG64 xsd__unsignedLong;
 \******************************************************************************/
 
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__Authenticate(struct soap*, char *_userName, char *_password, int &token);
+SOAP_FMAC5 int SOAP_FMAC6 dss__Authenticate(struct soap*, char *_userName, char *_password, std::string &token);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SignOff(struct soap*, int _token, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SignOff(struct soap*, char *_token, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCreateSetFromGroup(struct soap*, int _token, char *_groupName, std::string &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCreateSetFromGroup(struct soap*, char *_token, char *_groupName, std::string &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCreateSetFromDeviceIDs(struct soap*, int _token, std::vector<std::string >_ids, std::string &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCreateSetFromDeviceIDs(struct soap*, char *_token, std::vector<std::string >_ids, std::string &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCreateSetFromDeviceNames(struct soap*, int _token, std::vector<std::string >_names, std::string &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCreateSetFromDeviceNames(struct soap*, char *_token, std::vector<std::string >_names, std::string &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetDevices(struct soap*, int _token, std::string &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetDevices(struct soap*, char *_token, std::string &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetDeviceIDByName(struct soap*, int _token, char *_deviceName, std::string &deviceID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetDeviceIDByName(struct soap*, char *_token, char *_deviceName, std::string &deviceID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetName(struct soap*, int _token, std::string &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetName(struct soap*, char *_token, std::string &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentSetName(struct soap*, int _token, char *_name, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentSetName(struct soap*, char *_token, char *_name, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetAddDeviceByName(struct soap*, int _token, char *_setSpec, char *_name, std::string &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetAddDeviceByName(struct soap*, char *_token, char *_setSpec, char *_name, std::string &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetAddDeviceByID(struct soap*, int _token, char *_setSpec, char *_deviceID, std::string &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetAddDeviceByID(struct soap*, char *_token, char *_setSpec, char *_deviceID, std::string &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetRemoveDevice(struct soap*, int _token, char *_setSpec, char *_deviceID, std::string &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetRemoveDevice(struct soap*, char *_token, char *_setSpec, char *_deviceID, std::string &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetCombine(struct soap*, int _token, char *_setSpec1, char *_setSpec2, std::string &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetCombine(struct soap*, char *_token, char *_setSpec1, char *_setSpec2, std::string &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetRemove(struct soap*, int _token, char *_setSpec, char *_setSpecToRemove, std::string &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetRemove(struct soap*, char *_token, char *_setSpec, char *_setSpecToRemove, std::string &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetByGroup(struct soap*, int _token, char *_setSpec, int _groupID, std::string &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetByGroup(struct soap*, char *_token, char *_setSpec, int _groupID, std::string &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetGetContainedDevices(struct soap*, int _token, char *_setSpec, std::vector<std::string >&deviceIDs);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetGetContainedDevices(struct soap*, char *_token, char *_setSpec, std::vector<std::string >&deviceIDs);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetGroupByName(struct soap*, int _token, char *_groupName, int &groupID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetGroupByName(struct soap*, char *_token, char *_groupName, int &groupID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetZoneByName(struct soap*, int _token, char *_zoneName, int &zoneID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetZoneByName(struct soap*, char *_token, char *_zoneName, int &zoneID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetZoneIDs(struct soap*, int _token, std::vector<int >&zoneIDs);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetZoneIDs(struct soap*, char *_token, std::vector<int >&zoneIDs);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetTurnOn(struct soap*, int _token, char *_setSpec, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetTurnOn(struct soap*, char *_token, char *_setSpec, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetTurnOff(struct soap*, int _token, char *_setSpec, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetTurnOff(struct soap*, char *_token, char *_setSpec, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetIncreaseValue(struct soap*, int _token, char *_setSpec, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetIncreaseValue(struct soap*, char *_token, char *_setSpec, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetDecreaseValue(struct soap*, int _token, char *_setSpec, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetDecreaseValue(struct soap*, char *_token, char *_setSpec, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetSetValue(struct soap*, int _token, char *_setSpec, double _value, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetSetValue(struct soap*, char *_token, char *_setSpec, double _value, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetCallScene(struct soap*, int _token, char *_setSpec, int _sceneNr, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetCallScene(struct soap*, char *_token, char *_setSpec, int _sceneNr, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetSaveScene(struct soap*, int _token, char *_setSpec, int _sceneNr, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetSaveScene(struct soap*, char *_token, char *_setSpec, int _sceneNr, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentTurnOn(struct soap*, int _token, int _groupID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentTurnOn(struct soap*, char *_token, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentTurnOff(struct soap*, int _token, int _groupID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentTurnOff(struct soap*, char *_token, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentIncreaseValue(struct soap*, int _token, int _groupID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentIncreaseValue(struct soap*, char *_token, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentDecreaseValue(struct soap*, int _token, int _groupID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentDecreaseValue(struct soap*, char *_token, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentSetValue(struct soap*, int _token, int _groupID, double _value, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentSetValue(struct soap*, char *_token, int _groupID, double _value, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCallScene(struct soap*, int _token, int _groupID, int _sceneNr, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCallScene(struct soap*, char *_token, int _groupID, int _sceneNr, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentSaveScene(struct soap*, int _token, int _groupID, int _sceneNr, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentSaveScene(struct soap*, char *_token, int _groupID, int _sceneNr, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentRescan(struct soap*, int _token, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentRescan(struct soap*, char *_token, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__CircuitRescan(struct soap*, int _token, char *_dsid, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__CircuitRescan(struct soap*, char *_token, char *_dsid, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneTurnOn(struct soap*, int _token, int _zoneID, int _groupID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneTurnOn(struct soap*, char *_token, int _zoneID, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneTurnOff(struct soap*, int _token, int _zoneID, int _groupID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneTurnOff(struct soap*, char *_token, int _zoneID, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneIncreaseValue(struct soap*, int _token, int _zoneID, int _groupID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneIncreaseValue(struct soap*, char *_token, int _zoneID, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneDecreaseValue(struct soap*, int _token, int _zoneID, int _groupID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneDecreaseValue(struct soap*, char *_token, int _zoneID, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSetValue(struct soap*, int _token, int _zoneID, int _groupID, double _value, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSetValue(struct soap*, char *_token, int _zoneID, int _groupID, double _value, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneCallScene(struct soap*, int _token, int _zoneID, int _groupID, int _sceneNr, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneCallScene(struct soap*, char *_token, int _zoneID, int _groupID, int _sceneNr, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSaveScene(struct soap*, int _token, int _zoneID, int _groupID, int _sceneNr, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSaveScene(struct soap*, char *_token, int _zoneID, int _groupID, int _sceneNr, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceTurnOn(struct soap*, int _token, char *_deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceTurnOn(struct soap*, char *_token, char *_deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceTurnOff(struct soap*, int _token, char *_deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceTurnOff(struct soap*, char *_token, char *_deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceIncreaseValue(struct soap*, int _token, char *_deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceIncreaseValue(struct soap*, char *_token, char *_deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceDecreaseValue(struct soap*, int _token, char *_deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceDecreaseValue(struct soap*, char *_token, char *_deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSetValue(struct soap*, int _token, char *_deviceID, double _value, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSetValue(struct soap*, char *_token, char *_deviceID, double _value, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetValue(struct soap*, int _token, char *_deviceID, int _paramID, double &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetValue(struct soap*, char *_token, char *_deviceID, int _paramID, double &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceCallScene(struct soap*, int _token, char *_deviceID, int _sceneNr, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceCallScene(struct soap*, char *_token, char *_deviceID, int _sceneNr, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSaveScene(struct soap*, int _token, char *_deviceID, int _sceneNr, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSaveScene(struct soap*, char *_token, char *_deviceID, int _sceneNr, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetName(struct soap*, int _token, char *_deviceID, char **result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetName(struct soap*, char *_token, char *_deviceID, char **result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSetName(struct soap*, int _token, char *_deviceID, char *_name, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSetName(struct soap*, char *_token, char *_deviceID, char *_name, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetZoneID(struct soap*, int _token, char *_deviceID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetZoneID(struct soap*, char *_token, char *_deviceID, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceAddTag(struct soap*, int _token, char *_deviceID, char *_tag, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceAddTag(struct soap*, char *_token, char *_deviceID, char *_tag, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceRemoveTag(struct soap*, int _token, char *_deviceID, char *_tag, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceRemoveTag(struct soap*, char *_token, char *_deviceID, char *_tag, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceHasTag(struct soap*, int _token, char *_deviceID, char *_tag, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceHasTag(struct soap*, char *_token, char *_deviceID, char *_tag, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetTags(struct soap*, int _token, char *_deviceID, std::vector<std::string >&result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetTags(struct soap*, char *_token, char *_deviceID, std::vector<std::string >&result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceLock(struct soap*, int _token, char *_deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceLock(struct soap*, char *_token, char *_deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceUnlock(struct soap*, int _token, char *_deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceUnlock(struct soap*, char *_token, char *_deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetIsLocked(struct soap*, int _token, char *_deviceID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetIsLocked(struct soap*, char *_token, char *_deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterGetPowerConsumption(struct soap*, int _token, char *_dsMeterID, unsigned long &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterGetPowerConsumption(struct soap*, char *_token, char *_dsMeterID, unsigned long &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetDSMeterIDs(struct soap*, int _token, std::vector<std::string >&ids);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetDSMeterIDs(struct soap*, char *_token, std::vector<std::string >&ids);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterGetName(struct soap*, int _token, char *_dsMeterID, std::string &name);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterGetName(struct soap*, char *_token, char *_dsMeterID, std::string &name);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterSetName(struct soap*, int _token, char *_dsMeterID, char *_name, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterSetName(struct soap*, char *_token, char *_dsMeterID, char *_name, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentAllocateZone(struct soap*, int _token, int &zoneID);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentAllocateZone(struct soap*, char *_token, int &zoneID);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentDeleteZone(struct soap*, int _token, int _zoneID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentDeleteZone(struct soap*, char *_token, int _zoneID, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSetName(struct soap*, int _token, int _zoneID, char *_name, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSetName(struct soap*, char *_token, int _zoneID, char *_name, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneGetName(struct soap*, int _token, int _zoneID, std::string &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneGetName(struct soap*, char *_token, int _zoneID, std::string &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__GroupSetName(struct soap*, int _token, int _zoneID, int _groupID, char *_name, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__GroupSetName(struct soap*, char *_token, int _zoneID, int _groupID, char *_name, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__GroupGetName(struct soap*, int _token, int _zoneID, int _groupID, std::string &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__GroupGetName(struct soap*, char *_token, int _zoneID, int _groupID, std::string &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetFunctionID(struct soap*, int _token, char *_deviceID, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetFunctionID(struct soap*, char *_token, char *_deviceID, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__EventRaise(struct soap*, int _token, char *_eventName, char *_context, char *_parameter, char *_location, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__EventRaise(struct soap*, char *_token, char *_eventName, char *_context, char *_parameter, char *_location, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__EventWaitFor(struct soap*, int _token, int _timeout, std::vector<dss__Event >&result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__EventWaitFor(struct soap*, char *_token, int _timeout, std::vector<dss__Event >&result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__EventSubscribeTo(struct soap*, int _token, std::string _name, std::string &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__EventSubscribeTo(struct soap*, char *_token, std::string _name, std::string &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetType(struct soap*, int _token, std::string _propertyName, std::string &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetType(struct soap*, char *_token, std::string _propertyName, std::string &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__PropertySetInt(struct soap*, int _token, std::string _propertyName, int _value, bool _mayCreate, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertySetInt(struct soap*, char *_token, std::string _propertyName, int _value, bool _mayCreate, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__PropertySetString(struct soap*, int _token, std::string _propertyName, char *_value, bool _mayCreate, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertySetString(struct soap*, char *_token, std::string _propertyName, char *_value, bool _mayCreate, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__PropertySetBool(struct soap*, int _token, std::string _propertyName, bool _value, bool _mayCreate, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertySetBool(struct soap*, char *_token, std::string _propertyName, bool _value, bool _mayCreate, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetInt(struct soap*, int _token, std::string _propertyName, int &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetInt(struct soap*, char *_token, std::string _propertyName, int &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetString(struct soap*, int _token, std::string _propertyName, std::string &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetString(struct soap*, char *_token, std::string _propertyName, std::string &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetBool(struct soap*, int _token, std::string _propertyName, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetBool(struct soap*, char *_token, std::string _propertyName, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetChildren(struct soap*, int _token, std::string _propertyName, std::vector<std::string >&result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetChildren(struct soap*, char *_token, std::string _propertyName, std::vector<std::string >&result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__StructureAddDeviceToZone(struct soap*, int _token, char *_deviceID, int _zoneID, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__StructureAddDeviceToZone(struct soap*, char *_token, char *_deviceID, int _zoneID, bool &result);
 
 /******************************************************************************\
  *                                                                            *

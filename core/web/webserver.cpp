@@ -111,12 +111,16 @@ namespace dss {
     log("Webserver started", lsInfo);
 
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "sessionTimeoutMinutes", WEB_SESSION_TIMEOUT_MINUTES, true, false);
-    m_SessionManager = boost::shared_ptr<SessionManager>(new SessionManager(getDSS().getEventQueue(), getDSS().getEventInterpreter(), getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "sessionTimeoutMinutes")*60));
+    m_SessionManager->setTimeout(getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "sessionTimeoutMinutes")*60);
 
     publishJSLogfiles();
     setupAPI();
     instantiateHandlers();
   } // initialize
+
+  void WebServer::setSessionManager(boost::shared_ptr<SessionManager> _pSessionManager) {
+    m_SessionManager = _pSessionManager;
+  } // setSessionManager
 
   void WebServer::publishJSLogfiles() {
     // pre-create the property as the gui accesses it on startup and gets upset if the node's not there
@@ -320,12 +324,11 @@ namespace dss {
     self.log("Processing call to " + method);
 
     boost::shared_ptr<Session> session;
-    std::string& tokenStr = cookies["token"];
-    int token = strToIntDef(tokenStr, -1);
-    if(token == -1) {
-      token = strToIntDef(paramMap["token"], -1);
+    std::string token = cookies["token"];
+    if(token.empty()) {
+      token = paramMap["token"];
     }
-    if(token != -1) {
+    if(!token.empty()) {
       session = self.m_SessionManager->getSession(token);
     }
 

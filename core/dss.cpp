@@ -55,6 +55,7 @@
 #include "metering/metering.h"
 #include "foreach.h"
 #include "backtrace.h"
+#include "core/sessionmanager.h"
 
 #include "unix/systeminfo.h"
 
@@ -281,6 +282,12 @@ const char* kSavedPropsDirectory = "data/savedprops/";
 
     m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner);
     m_pEventQueue = boost::shared_ptr<EventQueue>(new EventQueue);
+
+    m_pSessionManager.reset(
+      new SessionManager(getEventQueue(),
+                         getEventInterpreter()));
+    m_pWebServer->setSessionManager(m_pSessionManager);
+    m_pWebServices->setSessionManager(m_pSessionManager);
 
     parseProperties(_properties);
 

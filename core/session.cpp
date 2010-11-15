@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
@@ -24,7 +24,7 @@
 
 namespace dss {
 
-  Session::Session(const int _tokenID)
+  Session::Session(const std::string& _tokenID)
   : m_Token(_tokenID)
   {
     m_LastTouched = DateTime();
@@ -39,13 +39,6 @@ namespace dss {
   bool Session::isStillValid() {
     return (m_LastTouched.addSeconds(m_SessionTimeoutSec).after(DateTime()) && (!isUsed()));
   } // isStillValid
-
-  Session& Session::operator=(const Session& _other) {
-    m_Token = _other.m_Token;
-    m_LastTouched = _other.m_LastTouched;
-
-    return *this;
-  }
 
   bool Session::isUsed() {
     m_UseCountMutex.lock();
@@ -94,7 +87,7 @@ namespace dss {
     return result;
   }
 
-  int Session::getID() {
+  const std::string& Session::getID() const {
     return m_Token;
   }
 

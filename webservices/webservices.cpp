@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009, 2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
 
     Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
              Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
@@ -23,6 +23,8 @@
 
 #include "webservices.h"
 #include "core/propertysystem.h"
+#include "core/sessionmanager.h"
+#include "core/eventcollector.h"
 
 #include <cassert>
 #include <cstdlib>
@@ -30,6 +32,8 @@
 #include <boost/foreach.hpp>
 
 #include "core/dss.h"
+#include "core/eventsubscriptionsession.h"
+#include "core/session.h"
 
 namespace dss {
   //================================================== WebServices
@@ -37,11 +41,9 @@ namespace dss {
   WebServices::WebServices(DSS* _pDSS)
   : ThreadedSubsystem(_pDSS, "WebServices")
   {
-
   } // ctor
 
   WebServices::~WebServices() {
-
   } // dtor
 
   void WebServices::doStart() {
@@ -125,60 +127,30 @@ namespace dss {
     return result;
   } // popPendingRequest
 
-  WebServiceSession& WebServices::newSession(soap* _soapRequest, int& token) {
-    token = ++m_LastSessionID;
-    m_SessionByID[token] = WebServiceSession(token, _soapRequest);
-    return m_SessionByID[token];
+  std::string WebServices::newSession(soap* _soapRequest) {
+    return m_pSessionManager->registerSession();
   } // newSession
 
-  void WebServices::deleteSession(soap* _soapRequest, const int _token) {
-    WebServiceSessionByID::iterator iEntry = m_SessionByID.find(_token);
-    if(iEntry != m_SessionByID.end()) {
-      if(iEntry->second->isOwner(_soapRequest)) {
-        m_SessionByID.erase(iEntry);
-      }
-    }
+  void WebServices::deleteSession(soap* _soapRequest, const std::string& _token) {
+    m_pSessionManager->removeSession(_token);
   } // deleteSession
 
-  bool WebServices::isAuthorized(soap* _soapRequest, const int _token) {
-    WebServiceSessionByID::iterator iEntry = m_SessionByID.find(_token);
-    if(iEntry != m_SessionByID.end()) {
-      if(iEntry->second->isOwner(_soapRequest)) {
-        if(iEntry->second->isStillValid()) {
-          return true;
-        }
-      }
-    }
-    return false;
+  bool WebServices::isAuthorized(soap* _soapRequest, const std::string& _token) {
+    boost::shared_ptr<Session> session = m_pSessionManager->getSession(_token);
+    return (session != NULL ? session->isStillValid() : false);
   } // isAuthorized
 
-  WebServiceSession& WebServices::getSession(soap* _soapRequest, const int _token) {
-    return m_SessionByID[_token];
+  boost::shared_ptr<Session> WebServices::getSession(soap* _soapRequest, const std::string& _token) {
+    return m_pSessionManager->getSession(_token);
   }
 
-  //================================================== WebServiceSession
+  boost::shared_ptr<EventCollector> extractFromSession(Session* _session) {
+    const std::string kDataIdentifier = "eventCollectorWebServices";
+    boost::shared_ptr<boost::any> a = _session->getData(kDataIdentifier);
+    boost::shared_ptr<EventCollector> result;
 
-  WebServiceSession::WebServiceSession(const int _tokenID, soap* _soapRequest)
-  : Session(_tokenID),
-    m_OriginatorIP(_soapRequest->ip)
-  { } // ctor
-
-  WebServiceSession::~WebServiceSession() {
-  } // dtor
-
-  bool WebServiceSession::isOwner(soap* _soapRequest) {
-    return _soapRequest->ip == m_OriginatorIP;
-  } // isOwner
-
-  WebServiceSession& WebServiceSession::operator=(const WebServiceSession& _other) {
-    Session::operator=(_other);
-    m_OriginatorIP = _other.m_OriginatorIP;
-
-    return *this;
-  } // operator=
-
-  void WebServiceSession::createCollector() {
-    if(m_pEventListener == NULL) {
+    if((a == NULL) || (a->empty())) {
+      boost::shared_ptr<boost::any> b(new boost::any());
       EventInterpreterInternalRelay* pPlugin =
           dynamic_cast<EventInterpreterInternalRelay*>(
               DSS::getInstance()->getEventInterpreter().getPluginByName(
@@ -188,30 +160,39 @@ namespace dss {
       if(pPlugin == NULL) {
         throw std::runtime_error("Need EventInterpreterInternalRelay to be registered");
       }
-      m_pEventListener.reset(new EventCollector(*pPlugin));
+      result.reset(new EventCollector(*pPlugin));
+      *b = result;
+      _session->addData(std::string("eventSubscriptionIDs"), b);
+    } else {
+      try {
+        result = boost::any_cast<boost::shared_ptr<EventCollector> >(*a);
+      } catch (boost::bad_any_cast& e) {
+        Logger::getInstance()->log("Fatal error: unexpected data type stored in session!", lsFatal);
+        assert(0);
+      }
     }
-    assert(m_pEventListener != NULL);
-  } // createCollector
+    return result;
+  }
 
-  bool WebServiceSession::waitForEvent(const int _timeoutMS, soap* _soapRequest) {
-    createCollector();
+  bool WebServices::waitForEvent(Session* _session, const int _timeoutMS, soap* _soapRequest) {
     const int kSocketDisconnectTimeoutMS = 200;
     bool timedOut = false;
     bool result = false;
     int timeoutMSLeft = _timeoutMS;
-    use();
+    _session->use();
+    boost::shared_ptr<EventCollector> subscriptionSession = extractFromSession(_session);
     while(!timedOut && !result) {
       // check if we're still connected
       uint8_t tmp;
       int res = recv(_soapRequest->socket, &tmp, 1,  MSG_PEEK | MSG_DONTWAIT);
       if(res == -1) {
         if((errno != EAGAIN) && (errno != EINTR) && (errno != EWOULDBLOCK)) {
-          Logger::getInstance()->log("WebServiceSession::waitForEvent: lost connection", lsInfo);
+          Logger::getInstance()->log("WebServices::waitForEvent: lost connection", lsInfo);
           break;
         }
       } else if(res == 0) {
         // if we were still connected, recv would return -1 with an errno listed above or 1
-        Logger::getInstance()->log("WebServiceSession::waitForEvent: lost connection", lsInfo);
+        Logger::getInstance()->log("WebServices::waitForEvent: lost connection", lsInfo);
         break;
       }
       // calculate the length of our wait
@@ -228,24 +209,25 @@ namespace dss {
         timedOut = false;
       }
       // wait for the event
-      result = m_pEventListener->waitForEvent(waitTime);
+      result = subscriptionSession->waitForEvent(waitTime);
     }
-    unuse();
+    _session->unuse();
     return result;
   } // waitForEvent
 
-  Event WebServiceSession::popEvent() {
-    createCollector();
-    return m_pEventListener->popEvent();
+  Event WebServices::popEvent(Session* _session) {
+    boost::shared_ptr<EventCollector> subscriptionSession = extractFromSession(_session);
+    return subscriptionSession->popEvent();
   } // popEvent
 
-  std::string WebServiceSession::subscribeTo(const std::string& _eventName) {
-    return m_pEventListener->subscribeTo(_eventName);
+  std::string WebServices::subscribeTo(Session* _session, const std::string& _eventName) {
+    boost::shared_ptr<EventCollector> subscriptionSession = extractFromSession(_session);
+    return subscriptionSession->subscribeTo(_eventName);
   } // subscribeTo
 
-  bool WebServiceSession::hasEvent() {
-    createCollector();
-    return m_pEventListener->hasEvent();
+  bool WebServices::hasEvent(Session* _session) {
+    boost::shared_ptr<EventCollector> subscriptionSession = extractFromSession(_session);
+    return subscriptionSession->hasEvent();
   } // hasEvent
 
 

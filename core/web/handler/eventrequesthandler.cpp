@@ -33,6 +33,7 @@
 #include "core/event.h"
 #include "core/eventcollector.h"
 #include "core/eventinterpreterplugins.h"
+#include "core/eventsubscriptionsession.h"
 
 namespace dss {
 
@@ -125,7 +126,7 @@ namespace dss {
 
     EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(token);
     if(entry == eventSessions->end()){
-        boost::shared_ptr<EventSubscriptionSession> session(new EventSubscriptionSession(m_EventInterpreter, token, _session));
+        boost::shared_ptr<EventSubscriptionSession> session(new EventSubscriptionSession(m_EventInterpreter, _session));
       (*eventSessions)[token] = session;
     }
 
@@ -269,92 +270,4 @@ namespace dss {
     throw std::runtime_error("Unhandled function");
   } // handleRequest
 
-  EventSubscriptionSession::EventSubscriptionSession(EventInterpreter& _eventInterpreter,
-                                                     boost::shared_ptr<Session> _parentSession)
-  : Session(),
-    m_parentSession(_parentSession),
-    m_EventInterpreter(_eventInterpreter)
-  { }
-
-  EventSubscriptionSession::EventSubscriptionSession(EventInterpreter& _eventInterpreter,
-                                                     const int _tokenID,
-                                                     boost::shared_ptr<Session> _parentSession)
-  : Session(_tokenID),
-    m_parentSession(_parentSession),
-    m_EventInterpreter(_eventInterpreter)
-  { }
-
-  void EventSubscriptionSession::subscribe(const std::string& _eventName) {
-    createCollector();
-    // we do not want any double subscriptions here
-    try {
-      unsubscribe(_eventName);
-    } catch(std::runtime_error& err) {}
-
-    m_subscriptionMap[_eventName] = m_pEventCollector->subscribeTo(_eventName);
-  }
-
-  void EventSubscriptionSession::unsubscribe(const std::string& _eventName) {
-    createCollector();
-    std::map<std::string,std::string>::iterator entry = m_subscriptionMap.find(_eventName);
-    if(entry != m_subscriptionMap.end()){
-      m_pEventCollector->unsubscribeFrom(m_subscriptionMap[_eventName]);
-    } else {
-      throw std::runtime_error("Event " + _eventName + " is not subscribed in this session");
-    }
-
-    m_subscriptionMap.erase(_eventName);
-  }
-
-  boost::shared_ptr<JSONObject> EventSubscriptionSession::getEvents(const int _timeoutMS)
-  {
-    createCollector();
-
-    if(m_parentSession != NULL) {
-      m_parentSession->use();
-    }
-    m_pEventCollector->waitForEvent(_timeoutMS);
-
-    if(m_parentSession != NULL) {
-      m_parentSession->unuse();
-    }
-
-    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-    boost::shared_ptr<JSONArrayBase> eventsArray(new JSONArrayBase);
-    resultObj->addElement("events", eventsArray);
-
-    while(m_pEventCollector->hasEvent()) {
-      Event evt = m_pEventCollector->popEvent();
-      boost::shared_ptr<JSONObject> evtObj(new JSONObject());
-      eventsArray->addElement("event", evtObj);
-
-      evtObj->addProperty("name", evt.getName());
-      boost::shared_ptr<JSONObject> evtprops(new JSONObject());
-      evtObj->addElement("properties", evtprops);
-
-      const dss::HashMapConstStringString& props =  evt.getProperties().getContainer();
-      for(dss::HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam)
-      {
-        evtprops->addProperty(iParam->first, iParam->second);
-      }
-    }
-
-    return resultObj;
-  }
-
-  void EventSubscriptionSession::createCollector() {
-    if(m_pEventCollector == NULL) {
-      EventInterpreterInternalRelay* pPlugin =
-          dynamic_cast<EventInterpreterInternalRelay*>(
-              m_EventInterpreter.getPluginByName(
-                std::string(EventInterpreterInternalRelay::getPluginName())
-              )
-          );
-      if(pPlugin == NULL) {
-        throw std::runtime_error("Need EventInterpreterInternalRelay to be registered");
-      }
-      m_pEventCollector.reset(new EventCollector(*pPlugin));
-    }
-    assert(m_pEventCollector != NULL);
-  }
 } // namespace dss

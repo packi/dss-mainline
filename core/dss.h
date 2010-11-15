@@ -47,6 +47,7 @@ namespace dss {
   class WebServices;
   class ModelMaintenance;
   class DSSim;
+  class SessionManager;
 
   typedef enum {
     ssInvalid,
@@ -77,6 +78,7 @@ namespace dss {
     boost::shared_ptr<EventQueue> m_pEventQueue;
     boost::shared_ptr<Metering> m_pMetering;
     boost::shared_ptr<ModelMaintenance> m_pModelMaintenance;
+    boost::shared_ptr<SessionManager> m_pSessionManager;
     std::string m_dataDirectory;
     std::string m_configDirectory;
     std::string m_webrootDirectory;
@@ -130,6 +132,7 @@ namespace dss {
     WebServer& getWebServer() { return *m_pWebServer; }
     EventInterpreter& getEventInterpreter() { return *m_pEventInterpreter; }
     ModelMaintenance& getModelMaintenance() { return *m_pModelMaintenance; }
+    SessionManager& getSessionManager() { return *m_pSessionManager; }
 
     const std::string& getDataDirectory() const { return m_dataDirectory; }
     const std::string& getConfigDirectory() const { return m_configDirectory; }

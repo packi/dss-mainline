@@ -44,7 +44,7 @@ public:
     m_pInterpreter->setEventRunner(m_pRunner.get());
     m_pInterpreter->addPlugin(new EventInterpreterInternalRelay(m_pInterpreter.get()));
 
-    m_pSession.reset(new Session(1));
+    m_pSession.reset(new Session("1"));
     m_pHandler.reset(new EventRequestHandler(*m_pInterpreter));
   }
 
