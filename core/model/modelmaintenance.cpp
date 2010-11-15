@@ -521,9 +521,9 @@ namespace dss {
       zone->removeDevice(devRef);
     }  
     dsMeter->removeDevice(devRef);
-    device->setIsPresent(true);
+    device->setIsPresent(false);
 
-  } // onAddDevice
+  } // onRemoveDevice
 
   void ModelMaintenance::onLostDSMeter(const dss_dsid_t& _dSMeterID) {
     try {
