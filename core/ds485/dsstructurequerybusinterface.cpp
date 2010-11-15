@@ -189,7 +189,7 @@ namespace dss {
     uint16_t numberOfDevices;
     dsid_t dsid;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
-    int ret = ZoneDeviceCount_all(m_DSMApiHandle, dsid, _zoneID, &numberOfDevices);
+    int ret = ZoneDeviceCount_only_active(m_DSMApiHandle, dsid, _zoneID, &numberOfDevices);
     DSBusInterface::checkResultCode(ret);
 
     return numberOfDevices;
@@ -207,7 +207,7 @@ namespace dss {
     dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
       uint16_t deviceId;
-      int ret = DeviceInfo_by_index(m_DSMApiHandle, dsid, _zoneID, iDevice, &deviceId,
+      int ret = DeviceInfo_by_index_only_active(m_DSMApiHandle, dsid, _zoneID, iDevice, &deviceId,
                                     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
       DSBusInterface::checkResultCode(ret);
       result.push_back(deviceId);
