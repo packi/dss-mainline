@@ -186,7 +186,7 @@ namespace dss {
     DsmApiRegisterBusStateCallback(m_dsmApiHandle, DSBusInterface::busStateCallback, this);
     DsmApiRegisterBusChangeCallback(m_dsmApiHandle, DSBusInterface::busChangeCallback, this);
 
-    EventDeviceAccessibility_off_response_callback_t evDevAccessOn = DSBusInterface::eventDeviceAccessibilityOnCallback;
+    EventDeviceAccessibility_on_response_callback_t evDevAccessOn = DSBusInterface::eventDeviceAccessibilityOnCallback;
     DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT, EVENT_DEVICE_ACCESSIBILITY, 
                            EVENT_DEVICE_ACCESSIBILITY_ON, (void*)evDevAccessOn, this);
     EventDeviceAccessibility_off_response_callback_t evDevAccessOff = DSBusInterface::eventDeviceAccessibilityOffCallback;
