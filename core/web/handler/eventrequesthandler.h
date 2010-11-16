@@ -38,27 +38,9 @@ namespace dss {
   class Event;
   class EventInterpreter;
   class EventCollector;
+  class EventSubscriptionSession;
 
-  class EventSubscriptionSession : public Session {
-  public:
-    EventSubscriptionSession(EventInterpreter& _eventInterpreter, boost::shared_ptr<Session> _parentSession);
-    EventSubscriptionSession(EventInterpreter& _eventInterpreter, const int _tokenID, boost::shared_ptr<Session> _parentSession);
-
-    void subscribe(const std::string& _eventName);
-    void unsubscribe(const std::string& _eventName);
-    // blocks if no events are available
-    boost::shared_ptr<JSONObject> getEvents(const int _timeoutMS = 0);
-  private:
-    boost::shared_ptr<Session> m_parentSession;
-    std::deque<Event> m_events;
-    boost::shared_ptr<EventCollector> m_pEventCollector;
-    void createCollector();
-    // name, subscriptionID
-    std::map <std::string, std::string> m_subscriptionMap;
-    EventInterpreter& m_EventInterpreter;
-  };
-
-  typedef boost::ptr_map<const int, boost::shared_ptr<EventSubscriptionSession> > EventSubscriptionSessionByTokenID;
+  typedef std::map<const int, boost::shared_ptr<EventSubscriptionSession> > EventSubscriptionSessionByTokenID;
 
   class EventRequestHandler : public WebServerRequestHandlerJSON {
   public:

@@ -24,43 +24,54 @@
 #define __SESSION_MANAGER_H__
 
 #include "core/mutex.h"
-#include "core/event.h"
-#include "core/session.h"
-#include "core/eventinterpreterplugins.h"
-#include "core/internaleventrelaytarget.h"
 
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
 
 namespace dss {
+
+  class EventQueue;
+  class EventInterpreter;
+  class InternalEventRelayTarget;
+  class Session;
+  class Event;
+  class EventSubscription;
+
   class SessionManager {
   public:
     /// \param Specifies how long a session can remain idle before it gets
     /// removed, value of 0 means - never remove.
-    SessionManager(EventQueue& _EventQueue, EventInterpreter& _eventInterpreter, const int _timeout = 0);
+    SessionManager(EventQueue& _EventQueue, EventInterpreter& _eventInterpreter, const std::string _salt = "");
     /// \brief Registers a new session, creates a new Session object
     /// \return session identifier
-    int registerSession();
+    std::string registerSession();
 
     /// \brief Returns the session object with the given id
-    boost::shared_ptr<Session>& getSession(const int _id);
+    boost::shared_ptr<Session>& getSession(const std::string& _id);
 
     /// \brief Removes session with the given id
-    void removeSession(const int _id);
+    void removeSession(const std::string& _id);
 
     /// \brief Updates idle status of a session
-    void touchSession(const int _id);
+    void touchSession(const std::string& _id);
 
     void cleanupSessions(Event& _event, const EventSubscription& _subscription);
 
+    void setTimeout(const int _timeoutSeconds) {
+      m_timeoutSecs = _timeoutSeconds;
+    }
+  private:
+    std::string generateToken();
   protected:
-    int m_NextSessionID;
+    unsigned int m_NextSessionID;
     EventQueue& m_EventQueue;
     EventInterpreter& m_EventInterpreter;
     int m_timeoutSecs;
+    std::string m_Salt;
+    std::string m_VersionInfo;
 
-    boost::ptr_map<const int, boost::shared_ptr<Session> > m_Sessions;
+    boost::ptr_map<const std::string, boost::shared_ptr<Session> > m_Sessions;
     Mutex m_MapMutex;
 
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;

@@ -34,10 +34,10 @@
 namespace dss {
   class Session {
   public:
-    Session(const int _tokenID = -1);
+    Session(const std::string& _id);
 
     void setTimeout(const int _timeout);
-    int getID();
+    const std::string& getID() const;
     virtual bool isStillValid();
     bool isUsed();
     void use();
@@ -46,10 +46,8 @@ namespace dss {
     void addData(const std::string& _key, boost::shared_ptr<boost::any> _value);
     boost::shared_ptr<boost::any> getData(const std::string& _key);
     bool removeData(const std::string& _key);
-    Session& operator=(const Session& _other);
-
   protected:
-    int m_Token;
+    const std::string m_Token;
     Mutex m_UseCountMutex;
     int m_UsageCount;
 

@@ -240,7 +240,7 @@ SOAP_FMAC1 dss__Event * SOAP_FMAC2 soap_instantiate_dss__Event(struct soap*, int
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Event(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_std__string
-#define SOAP_TYPE_std__string (25)
+#define SOAP_TYPE_std__string (18)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__string(struct soap*, std::string *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__string(struct soap*, const std::string *);
@@ -4460,7 +4460,7 @@ SOAP_FMAC1 struct dss__ApartmentCreateSetFromGroupResponse * SOAP_FMAC2 soap_ins
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__ApartmentCreateSetFromGroupResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__SignOff
-#define SOAP_TYPE_dss__SignOff (24)
+#define SOAP_TYPE_dss__SignOff (26)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__SignOff(struct soap*, struct dss__SignOff *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__SignOff(struct soap*, const struct dss__SignOff *);
@@ -4485,7 +4485,7 @@ SOAP_FMAC1 struct dss__SignOff * SOAP_FMAC2 soap_instantiate_dss__SignOff(struct
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__SignOff(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__SignOffResponse
-#define SOAP_TYPE_dss__SignOffResponse (23)
+#define SOAP_TYPE_dss__SignOffResponse (25)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__SignOffResponse(struct soap*, struct dss__SignOffResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__SignOffResponse(struct soap*, const struct dss__SignOffResponse *);
@@ -4510,7 +4510,7 @@ SOAP_FMAC1 struct dss__SignOffResponse * SOAP_FMAC2 soap_instantiate_dss__SignOf
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__SignOffResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__Authenticate
-#define SOAP_TYPE_dss__Authenticate (21)
+#define SOAP_TYPE_dss__Authenticate (22)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__Authenticate(struct soap*, struct dss__Authenticate *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__Authenticate(struct soap*, const struct dss__Authenticate *);
@@ -4535,7 +4535,7 @@ SOAP_FMAC1 struct dss__Authenticate * SOAP_FMAC2 soap_instantiate_dss__Authentic
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_dss__Authenticate(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_dss__AuthenticateResponse
-#define SOAP_TYPE_dss__AuthenticateResponse (20)
+#define SOAP_TYPE_dss__AuthenticateResponse (21)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__AuthenticateResponse(struct soap*, struct dss__AuthenticateResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__AuthenticateResponse(struct soap*, const struct dss__AuthenticateResponse *);

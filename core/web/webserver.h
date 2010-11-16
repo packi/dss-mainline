@@ -78,7 +78,7 @@ namespace dss {
     ~WebServer();
 
     virtual void initialize();
-
+    void setSessionManager(boost::shared_ptr<SessionManager> _pSessionManager);
   }; // WebServer
 
 }

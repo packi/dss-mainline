@@ -32,6 +32,7 @@
 #include "core/web/json.h"
 #include "core/dss.h"
 #include "core/sessionmanager.h"
+#include "core/session.h"
 
 #include <sstream>
 
@@ -66,8 +67,7 @@ namespace dss {
         return failure("Missing parameter 'password'");
       }
 
-      std::string token = intToString(m_pSessionManager->registerSession(), true)
-                            .substr(2);
+      std::string token = m_pSessionManager->registerSession();
       log("Registered new JSON session");
 
       boost::shared_ptr<JSONObject> resultObj(new JSONObject());
