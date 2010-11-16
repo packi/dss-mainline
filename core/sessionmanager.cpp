@@ -1,7 +1,8 @@
 /*
     Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
 
-    Authos: Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
+    Authors: Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
+             Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
     This file is part of digitalSTROM Server.
 
@@ -33,13 +34,13 @@
 #include <boost/bind.hpp>
 #include <vector>
 #include <sstream>
-#include <openssl/sha.h>
 
 #include "core/logger.h"
 #include "core/event.h"
 #include "core/session.h"
 #include "core/eventinterpreterplugins.h"
 #include "core/internaleventrelaytarget.h"
+#include "core/hasher.h"
 
 
 namespace dss {
@@ -95,26 +96,16 @@ namespace dss {
   }
 
   std::string SessionManager::generateToken() {
-    SHA256_CTX ctx;
-    SHA256_Init(&ctx);
+    Hasher hasher;
     if(!m_Salt.empty()) {
-      SHA256_Update(&ctx, m_Salt.c_str(), m_Salt.length());
+      hasher.add(m_Salt);
     } else {
       Logger::getInstance()->log("SessionManager: No salt specified, sessions ids might not be secure", lsWarning);
     }
-    SHA256_Update(&ctx, m_VersionInfo.c_str(), m_VersionInfo.length());
-    SHA256_Update(&ctx, &m_NextSessionID, sizeof(m_NextSessionID));
+    hasher.add(m_VersionInfo);
+    hasher.add(m_NextSessionID);
     m_NextSessionID++;
-    unsigned char digest[SHA256_DIGEST_LENGTH];
-    SHA256_Final(digest, &ctx);
-    std::ostringstream sstr;
-    sstr << std::hex;
-    sstr.fill('0');
-    for(int iByte = 0; iByte < SHA256_DIGEST_LENGTH; iByte++) {
-      sstr.width(2);
-      sstr << static_cast<unsigned int>(digest[iByte] & 0x0ff);
-    }
-    return sstr.str();
+    return hasher.str();
   }
 
   boost::shared_ptr<Session>& SessionManager::getSession(const std::string& _id) {

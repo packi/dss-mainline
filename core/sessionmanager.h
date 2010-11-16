@@ -1,7 +1,8 @@
 /*
     Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
 
-    Authos: Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
+    Authors: Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
+             Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
     This file is part of digitalSTROM Server.
 
