@@ -267,6 +267,10 @@ namespace dss {
 
   void DSBusInterface::handleBusChange(dsid_t *_id, int _flag) {
     ModelEvent::EventType eventType;
+    
+    if (IsEqualId(_id, m_ownDSID)) {
+      return;
+    }
 
     dss_dsid_t dSMeterID;
     dsid_helper::toDssDsid(*_id, dSMeterID);
