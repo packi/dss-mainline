@@ -25,9 +25,12 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <iostream>
+#include <boost/filesystem.hpp>
 
-using namespace std;
+#include <iostream>
+#include <fstream>
+
+#include "core/base.h"
 
 int testGetter() {
 #ifdef VERBOSE_TESTS
@@ -411,6 +414,26 @@ BOOST_AUTO_TEST_CASE(testIndicesWorkCorrectly) {
   BOOST_CHECK_EQUAL(propSys.getProperty("/prop[0]"), prop1);
   BOOST_CHECK_EQUAL(propSys.getProperty("/prop[1]"), prop2);
   BOOST_CHECK_EQUAL(propSys.getProperty("/prop[2]"), prop3);
+}
+
+BOOST_AUTO_TEST_CASE(testLoadingEmptyNodesWorks) {
+  PropertySystem propSys;
+  
+  std::string fileName = getTempDir() + "/testconfig.xml";
+  std::ofstream ofs(fileName.c_str());
+  ofs <<
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+    "<properties version=\"1\">\n"
+    "  <property name=\"config\">\n"
+    "    <property name=\"crasher\" type=\"string\">\n"
+    "      <value/>\n"
+    "    </property>\n"
+    "  </property>\n"
+    "</properties>";
+  ofs.close();
+
+  propSys.loadFromXML(fileName, propSys.createProperty("/config"));
+  boost::filesystem::remove_all(fileName);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

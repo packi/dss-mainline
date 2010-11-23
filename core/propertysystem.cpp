@@ -819,7 +819,7 @@ namespace dss {
         aValueType valueType = getValueTypeFromString(elem->getAttribute("type").c_str());
         if(valueType != vTypeNone) {
           Element* valueNode = elem->getChildElement("value");
-          if(valueNode != NULL) {
+          if((valueNode != NULL) && valueNode->hasChildNodes()) {
             switch(valueType) {
               case vTypeString:
                 setStringValue(valueNode->firstChild()->getNodeValue());
