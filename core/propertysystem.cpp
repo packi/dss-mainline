@@ -58,6 +58,10 @@ using Poco::XML::InputSource;
 #include "core/foreach.h"
 #include "core/logger.h"
 
+#include "core/security/privilege.h"
+#include "core/security/security.h"
+#include "core/security/user.h"
+
 namespace dss {
   
   const int PROPERTY_FORMAT_VERSION = 1;
@@ -281,11 +285,15 @@ namespace dss {
       (*it)->unregisterProperty(this);
       it = m_Listeners.erase(it);
     }
+    
+    // clear privileges as they hold a shared_ptr on us
+    m_pPrivileges.reset();
 
     // tell our parent node that we're gone
     if(m_ParentNode != NULL) {
       m_ParentNode->removeChild(shared_from_this());
     }
+
     // un-alias our aliases
     for(std::vector<PropertyNode*>::iterator it = m_AliasedBy.begin();
         it != m_AliasedBy.end();)
@@ -346,6 +354,7 @@ namespace dss {
   }
 
   void PropertyNode::addChild(PropertyNodePtr _childNode) {
+    checkWriteAccess();
     if(m_Aliased) {
       m_AliasTarget->removeChild(_childNode);
     } else {
@@ -383,6 +392,7 @@ namespace dss {
   } // getDisplayName
 
   PropertyNodePtr PropertyNode::getProperty(const std::string& _propPath) {
+    checkReadAccess();
     if(m_Aliased) {
       return m_AliasTarget->getProperty(_propPath);
     } else {
@@ -428,6 +438,7 @@ namespace dss {
   } // getAndRemoveIndexFromPropertyName
 
   PropertyNodePtr PropertyNode::getPropertyByName(const std::string& _name) {
+    checkReadAccess();
     if(m_Aliased) {
       return m_AliasTarget->getPropertyByName(_name);
     } else {
@@ -458,6 +469,7 @@ namespace dss {
   } // getPropertyName
 
   int PropertyNode::count(const std::string& _propertyName) {
+    checkReadAccess();
     if(m_Aliased) {
       return m_AliasTarget->count(_propertyName);
     } else {
@@ -473,7 +485,8 @@ namespace dss {
     }
   } // count
 
-  int PropertyNode::size() const {
+  int PropertyNode::size() {
+    checkReadAccess();
     return m_ChildNodes.size();
   } // size
 
@@ -485,6 +498,7 @@ namespace dss {
   } // clearValue
 
   void PropertyNode::setStringValue(const char* _value) {
+    checkWriteAccess();
     if(m_Aliased) {
       m_AliasTarget->setStringValue(_value);
     } else {
@@ -511,6 +525,7 @@ namespace dss {
   } // setStringValue
 
   void PropertyNode::setIntegerValue(const int _value) {
+    checkWriteAccess();
     if(m_Aliased) {
       m_AliasTarget->setIntegerValue(_value);
     } else {
@@ -531,6 +546,7 @@ namespace dss {
   } // setIntegerValue
 
   void PropertyNode::setBooleanValue(const bool _value) {
+    checkWriteAccess();
     if(m_Aliased) {
       m_AliasTarget->setBooleanValue(_value);
     } else {
@@ -551,6 +567,7 @@ namespace dss {
   } // setBooleanValue
 
   std::string PropertyNode::getStringValue() {
+    checkReadAccess();
     if(m_Aliased) {
       return m_AliasTarget->getStringValue();
     } else {
@@ -568,6 +585,7 @@ namespace dss {
   } // getStringValue
 
   int PropertyNode::getIntegerValue() {
+    checkReadAccess();
     if(m_Aliased) {
       return m_AliasTarget->getIntegerValue();
     } else {
@@ -585,6 +603,7 @@ namespace dss {
   } // getIntegerValue
 
   bool PropertyNode::getBoolValue() {
+    checkReadAccess();
     if(m_Aliased) {
       return m_AliasTarget->getBoolValue();
     } else {
@@ -602,6 +621,7 @@ namespace dss {
   } // getBoolValue
 
   void PropertyNode::alias(PropertyNodePtr _target) {
+    checkWriteAccess();
     if(m_ChildNodes.size() > 0) {
       throw std::runtime_error("Cannot alias node if it has children");
     }
@@ -691,6 +711,7 @@ namespace dss {
   } // getValueType
 
   void PropertyNode::setFlag(Flag _flag, bool _value) { 
+    checkWriteAccess();
     int oldFlags = m_Flags;
     _value ? m_Flags |= _flag : m_Flags &= ~_flag; 
     if(oldFlags != m_Flags) {
@@ -699,6 +720,7 @@ namespace dss {
   } // setFlag
 
   std::string PropertyNode::getAsString() {
+    checkReadAccess();
     if(m_Aliased) {
       return m_AliasTarget->getAsString();
     } else {
@@ -726,11 +748,13 @@ namespace dss {
   } // getAsString
 
   void PropertyNode::addListener(PropertyListener* _listener) {
+    checkReadAccess();
     _listener->registerProperty(this);
     m_Listeners.push_back(_listener);
   } // addListener
 
   void PropertyNode::removeListener(PropertyListener* _listener) {
+    checkReadAccess();
     std::vector<PropertyListener*>::iterator it = std::find(m_Listeners.begin(), m_Listeners.end(), _listener);
     if(it != m_Listeners.end()) {
       m_Listeners.erase(it);
@@ -739,6 +763,7 @@ namespace dss {
   } // removeListener
 
   PropertyNodePtr PropertyNode::createProperty(const std::string& _propPath) {
+    checkWriteAccess();
     if(m_Aliased) {
       return m_AliasTarget->createProperty(_propPath);
     } else {
@@ -767,6 +792,7 @@ namespace dss {
   } // createProperty
 
   bool PropertyNode::saveAsXML(AutoPtr<Document>& _doc, AutoPtr<Element>& _parent, const int _flagsMask) {
+    checkReadAccess();
     AutoPtr<Element> elem = _doc->createElement("property");
     _parent->appendChild(elem);
 
@@ -793,6 +819,7 @@ namespace dss {
   } // saveAsXML
 
   bool PropertyNode::saveChildrenAsXML(Poco::AutoPtr<Poco::XML::Document>& _doc, Poco::AutoPtr<Poco::XML::Element>& _parent, const int _flagsMask) {
+    checkReadAccess();
     for(PropertyList::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end(); ++it) {
       if((_flagsMask == Flag(0)) || (*it)->hasFlag(Flag(_flagsMask))) {
@@ -805,6 +832,7 @@ namespace dss {
   } // saveChildrenAsXML
 
   bool PropertyNode::loadFromNode(Node* _pNode) {
+    checkWriteAccess();
     Element* elem = dynamic_cast<Element*>(_pNode);
 
     if(elem->hasAttribute("name")) {
@@ -851,6 +879,7 @@ namespace dss {
   } // loadFromNode
 
   bool PropertyNode::loadChildrenFromNode(Poco::XML::Node* _node) {
+    checkWriteAccess();
     Node* curNode = _node->firstChild();
     while(curNode != NULL) {
       if(curNode->localName() == "property") {
@@ -901,6 +930,40 @@ namespace dss {
       prop->notifyListeners(_callback, _node);
     }
   } // notifyListeners
+
+  void PropertyNode::checkReadAccess() {
+    boost::shared_ptr<Privilege> pPrivilege = searchForPrivilege();
+    if(pPrivilege != NULL) {
+      if(!pPrivilege->hasRight(Privilege::Read)) {
+        throw SecurityException("Read access denied");
+      }
+    }
+  } // checkReadAccess
+
+  void PropertyNode::checkWriteAccess() {
+    boost::shared_ptr<Privilege> pPrivilege = searchForPrivilege();
+    if(pPrivilege != NULL) {
+      if(!pPrivilege->hasRight(Privilege::Write)) {
+        throw SecurityException("Write access denied");
+      }
+    }
+  } // checkWriteAccess
+
+  boost::shared_ptr<Privilege> PropertyNode::searchForPrivilege() {
+    boost::shared_ptr<Privilege> result;
+    if(m_pPrivileges != NULL) {
+      User* pUser = Security::getCurrentlyLoggedInUser();
+      PropertyNodePtr pRole;
+      if(pUser != NULL) {
+        pRole = pUser->getRole();
+      }
+      result = m_pPrivileges->getPrivilegeForRole(pRole);
+    }
+    if((result == NULL) && (m_ParentNode != NULL)) {
+      result = m_ParentNode->searchForPrivilege();
+    }
+    return result;
+  } // searchForPrivilege
 
 
   //=============================================== PropertyListener

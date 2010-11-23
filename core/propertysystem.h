@@ -333,6 +333,8 @@ namespace dss {
 
 
   typedef std::vector<PropertyNodePtr> PropertyList;
+  class NodePrivileges;
+  class Privilege;
 
   /** The heart of the PropertySystem. */
   class PropertyNode : public boost::enable_shared_from_this<PropertyNode> {
@@ -360,6 +362,7 @@ namespace dss {
     PropertyNode* m_AliasTarget;
     int m_Index;
     int m_Flags;
+    boost::shared_ptr<NodePrivileges> m_pPrivileges;
   private:
     void clearValue();
 
@@ -368,6 +371,10 @@ namespace dss {
     void childAdded(PropertyNodePtr _child);
     void childRemoved(PropertyNodePtr _child);
     void notifyListeners(void(PropertyListener::*_callback)(PropertyNodePtr, PropertyNodePtr), PropertyNodePtr _node);
+    void checkReadAccess();
+    void checkWriteAccess();
+
+    boost::shared_ptr<Privilege> searchForPrivilege();
   public:
     PropertyNode(const char* _name, int _index = 0);
     ~PropertyNode();
@@ -384,7 +391,7 @@ namespace dss {
      * @return The child or NULL if not found */
     PropertyNodePtr getProperty(const std::string& _propPath);
     int count(const std::string& _propertyName);
-    int size() const;
+    int size();
 
     /** Sets the value as string. */
     void setStringValue(const char* _value);
@@ -452,9 +459,13 @@ namespace dss {
     /** Returns the parent node of this node.
         @note Don't store this node anywhere */
     PropertyNode* getParentNode() { return m_ParentNode; }
+    PropertyNode* getAliasTarget() { return m_AliasTarget; }
 
     /** Notifies all listeners that the value of this property has changed */
     void propertyChanged();
+
+    boost::shared_ptr<NodePrivileges> getPrivileges() { return m_pPrivileges; }
+    void setPrivileges(boost::shared_ptr<NodePrivileges> _value) { m_pPrivileges = _value; }
 
     /** Performs \a _callback for each child node (non-recursive) */
     void foreachChildOf(void(*_callback)(PropertyNode&)) {
