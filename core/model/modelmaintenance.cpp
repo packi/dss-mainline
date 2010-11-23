@@ -510,19 +510,23 @@ namespace dss {
     log("  Zone:      " + intToString(_zoneID));
     log("  BusID:     " + intToString(_devID));
 
-    boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
-    boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByDSID(_dsMeterID);
-    boost::shared_ptr<Device> device = dsMeter->getDevices().getByBusID(_devID, _dsMeterID).getDevice();
-    DeviceReference devRef(device, m_pApartment);
+    try {
+      boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
+      boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByDSID(_dsMeterID);
+      boost::shared_ptr<Device> device = dsMeter->getDevices().getByBusID(_devID, _dsMeterID).getDevice();
+      DeviceReference devRef(device, m_pApartment);
 
-    if(_zoneID == 0) {
-      // TODO: remove zone from meter if it's the last device
-      // already handled in structuremanipulator
-      zone->removeDevice(devRef);
-    }  
-    dsMeter->removeDevice(devRef);
-    device->setIsPresent(false);
+      if(_zoneID == 0) {
+        // TODO: remove zone from meter if it's the last device
+        // already handled in structuremanipulator
+        zone->removeDevice(devRef);
+      }
 
+      dsMeter->removeDevice(devRef);
+      device->setIsPresent(false);
+    } catch(ItemNotFoundException& e) {
+      log("Removed device " + _dsMeterID.toString() + " is not known to us");
+    }
   } // onRemoveDevice
 
   void ModelMaintenance::onLostDSMeter(const dss_dsid_t& _dSMeterID) {
