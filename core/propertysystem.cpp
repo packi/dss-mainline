@@ -274,6 +274,14 @@ namespace dss {
   } // ctor
 
   PropertyNode::~PropertyNode() {
+    // remove listeners
+    for(std::vector<PropertyListener*>::iterator it = m_Listeners.begin();
+        it != m_Listeners.end();)
+    {
+      (*it)->unregisterProperty(this);
+      it = m_Listeners.erase(it);
+    }
+
     // tell our parent node that we're gone
     if(m_ParentNode != NULL) {
       m_ParentNode->removeChild(shared_from_this());
@@ -319,13 +327,7 @@ namespace dss {
       (*it)->m_ParentNode = NULL; // prevent the child-node from calling removeChild
       it = m_ChildNodes.erase(it);
     }
-    // remove listeners
-    for(std::vector<PropertyListener*>::iterator it = m_Listeners.begin();
-        it != m_Listeners.end();)
-    {
-      (*it)->unregisterProperty(this);
-      it = m_Listeners.erase(it);
-    }
+
     clearValue();
   } // dtor
 

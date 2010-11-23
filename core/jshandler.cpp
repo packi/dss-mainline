@@ -46,8 +46,10 @@ namespace dss {
   } // ctor
 
   ScriptEnvironment::~ScriptEnvironment() {
-    JS_DestroyRuntime(m_pRuntime);
-    m_pRuntime = NULL;
+    if (m_pRuntime != NULL) {
+      JS_DestroyRuntime(m_pRuntime);
+      m_pRuntime = NULL;
+    }
   } // dtor
 
   void ScriptEnvironment::initialize() {
