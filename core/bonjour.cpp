@@ -27,6 +27,7 @@
 #include "core/base.h"
 #include "core/logger.h"
 #include "core/model/apartment.h"
+#include "core/security/security.h"
 
 #include <arpa/inet.h>
 
@@ -239,7 +240,7 @@ static void client_callback(AvahiClient *c, AvahiClientState state, AVAHI_GCC_UN
   }
 
   void BonjourHandler::execute() {
-
+    DSS::getInstance()->getSecurity().loginAsSystemUser("Bonjour needs system rights");
 #ifdef USE_AVAHI
     AvahiClient *client = NULL;
     int error;

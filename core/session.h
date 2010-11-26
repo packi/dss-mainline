@@ -32,9 +32,13 @@
 #include <boost/shared_ptr.hpp>
 
 namespace dss {
+
+  class User;
+
   class Session {
   public:
     Session(const std::string& _id);
+    ~Session();
 
     void setTimeout(const int _timeout);
     const std::string& getID() const;
@@ -46,6 +50,9 @@ namespace dss {
     void addData(const std::string& _key, boost::shared_ptr<boost::any> _value);
     boost::shared_ptr<boost::any> getData(const std::string& _key);
     bool removeData(const std::string& _key);
+
+    void inheritUserFromSecurity();
+    User* getUser() { return m_pUser; }
   protected:
     const std::string m_Token;
     Mutex m_UseCountMutex;
@@ -57,6 +64,7 @@ namespace dss {
     std::map<std::string, boost::shared_ptr<boost::any> > dataMap;
 
     int m_SessionTimeoutSec;
+    User* m_pUser;
   }; // Session
 
 

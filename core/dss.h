@@ -48,6 +48,7 @@ namespace dss {
   class ModelMaintenance;
   class DSSim;
   class SessionManager;
+  class Security;
 
   typedef enum {
     ssInvalid,
@@ -79,6 +80,7 @@ namespace dss {
     boost::shared_ptr<Metering> m_pMetering;
     boost::shared_ptr<ModelMaintenance> m_pModelMaintenance;
     boost::shared_ptr<SessionManager> m_pSessionManager;
+    boost::shared_ptr<Security> m_pSecurity;
     std::string m_dataDirectory;
     std::string m_configDirectory;
     std::string m_webrootDirectory;
@@ -101,6 +103,7 @@ namespace dss {
     bool checkDirectoriesExist();
     void setupDirectories();
     bool initSubsystems();
+    bool initSecurity();
   public:
     ~DSS();
     bool initialize(const std::vector<std::string>& _properties, const std::string& _configFile);
@@ -133,6 +136,7 @@ namespace dss {
     EventInterpreter& getEventInterpreter() { return *m_pEventInterpreter; }
     ModelMaintenance& getModelMaintenance() { return *m_pModelMaintenance; }
     SessionManager& getSessionManager() { return *m_pSessionManager; }
+    Security& getSecurity() { return *m_pSecurity; }
 
     const std::string& getDataDirectory() const { return m_dataDirectory; }
     const std::string& getConfigDirectory() const { return m_configDirectory; }

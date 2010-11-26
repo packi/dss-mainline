@@ -22,15 +22,24 @@
 
 #include "session.h"
 
+#include "core/security/security.h"
+#include "core/security/user.h"
+
 namespace dss {
 
   Session::Session(const std::string& _tokenID)
-  : m_Token(_tokenID)
+  : m_Token(_tokenID),
+    m_pUser(NULL)
   {
     m_LastTouched = DateTime();
     m_UsageCount = 0;
     m_SessionTimeoutSec = 30;
   } // ctor
+
+  Session::~Session() {
+    delete m_pUser;
+    m_pUser = NULL;
+  }
 
   void Session::setTimeout(const int _timeout) {
     m_SessionTimeoutSec = _timeout;
@@ -93,6 +102,17 @@ namespace dss {
 
   void Session::touch() {
     m_LastTouched = DateTime();
+  }
+
+  void Session::inheritUserFromSecurity() {
+    if(m_pUser != NULL) {
+      delete m_pUser;
+      m_pUser = NULL;
+    }
+    User* loggedInUser = Security::getCurrentlyLoggedInUser();
+    if(loggedInUser != NULL) {
+      m_pUser = new User(*loggedInUser);
+    }
   }
 
 } // namespace dss

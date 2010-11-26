@@ -36,6 +36,7 @@ namespace dss {
   class EventInterpreter;
   class InternalEventRelayTarget;
   class Session;
+  class Security;
   class Event;
   class EventSubscription;
 
@@ -43,7 +44,8 @@ namespace dss {
   public:
     /// \param Specifies how long a session can remain idle before it gets
     /// removed, value of 0 means - never remove.
-    SessionManager(EventQueue& _EventQueue, EventInterpreter& _eventInterpreter, const std::string _salt = "");
+    SessionManager(EventQueue& _EventQueue, EventInterpreter& _eventInterpreter,
+                   boost::shared_ptr<Security> _pSecurity, const std::string _salt = "");
     /// \brief Registers a new session, creates a new Session object
     /// \return session identifier
     std::string registerSession();
@@ -62,14 +64,19 @@ namespace dss {
     void setTimeout(const int _timeoutSeconds) {
       m_timeoutSecs = _timeoutSeconds;
     }
+
+    boost::shared_ptr<Security> getSecurity() {
+      return m_pSecurity;
+    }
   private:
     std::string generateToken();
-  protected:
-    unsigned int m_NextSessionID;
+  private:
     EventQueue& m_EventQueue;
     EventInterpreter& m_EventInterpreter;
-    int m_timeoutSecs;
+    boost::shared_ptr<Security> m_pSecurity;
     std::string m_Salt;
+    int m_timeoutSecs;
+    unsigned int m_NextSessionID;
     std::string m_VersionInfo;
 
     boost::ptr_map<const std::string, boost::shared_ptr<Session> > m_Sessions;

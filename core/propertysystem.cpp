@@ -935,7 +935,12 @@ namespace dss {
     boost::shared_ptr<Privilege> pPrivilege = searchForPrivilege();
     if(pPrivilege != NULL) {
       if(!pPrivilege->hasRight(Privilege::Read)) {
-        throw SecurityException("Read access denied");
+        User* pUser = Security::getCurrentlyLoggedInUser();
+        std::string userName = "(nobody)";
+        if(pUser != NULL) {
+          userName = pUser->getName();
+        }
+        throw SecurityException("Read access denied for user " + userName);
       }
     }
   } // checkReadAccess
@@ -944,7 +949,12 @@ namespace dss {
     boost::shared_ptr<Privilege> pPrivilege = searchForPrivilege();
     if(pPrivilege != NULL) {
       if(!pPrivilege->hasRight(Privilege::Write)) {
-        throw SecurityException("Write access denied");
+        User* pUser = Security::getCurrentlyLoggedInUser();
+        std::string userName = "(nobody)";
+        if(pUser != NULL) {
+          userName = pUser->getName();
+        }
+        throw SecurityException("Write access denied for user " + userName);
       }
     }
   } // checkWriteAccess

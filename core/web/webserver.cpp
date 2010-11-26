@@ -36,6 +36,9 @@
 #include "core/logger.h"
 #include "core/dss.h"
 #include "core/propertysystem.h"
+
+#include "core/security/security.h"
+
 #include "core/web/restful.h"
 #include "core/web/restfulapiwriter.h"
 #include "core/web/webrequests.h"
@@ -309,13 +312,14 @@ namespace dss {
   void *WebServer::jsonHandler(struct mg_connection* _connection,
                               const struct mg_request_info* _info) {
     const std::string urlid = "/json/";
+    WebServer& self = DSS::getInstance()->getWebServer();
+    self.m_SessionManager->getSecurity()->signOff();
 
     std::string uri = _info->uri;
     HashMapConstStringString paramMap = parseParameter(_info->query_string);
 
     std::string method = uri.substr(uri.find(urlid) + urlid.size());
 
-    WebServer& self = DSS::getInstance()->getWebServer();
 
     const char* cookie = mg_get_header(_connection, "Cookie");
     HashMapConstStringString cookies = self.parseCookies(cookie);
@@ -334,6 +338,7 @@ namespace dss {
 
     if(session != NULL) {
       session->touch();
+      self.m_SessionManager->getSecurity()->authenticate(session);
     }
 
     std::string result;
@@ -361,6 +366,7 @@ namespace dss {
       result = sstream.str();
       self.log("Unknown function '" + method + "'", lsError);
     }
+    self.m_SessionManager->getSecurity()->signOff();
     mg_write(_connection, result.c_str(), result.length());
     return _connection;
   } // jsonHandler

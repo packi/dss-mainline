@@ -35,6 +35,7 @@ namespace dss {
   {
     assert(m_pUserNode != NULL);
     m_pRoleNode = m_pUserNode->getProperty("role");
+    assert(m_pRoleNode != NULL);
   } // ctor
 
   const std::string& User::getName() {

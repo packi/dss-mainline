@@ -33,6 +33,7 @@
 #include "core/propertysystem.h"
 #include "core/model/modelconst.h"
 #include "core/metering/metering.h"
+#include "core/security/security.h"
 
 #include "apartment.h"
 #include "zone.h"
@@ -150,6 +151,9 @@ namespace dss {
   } // waitForInterface
 
   void ModelMaintenance::execute() {
+   if(DSS::hasInstance()) {
+     DSS::getInstance()->getSecurity().loginAsSystemUser("ModelMaintenance needs system-rights");
+   }
 
     waitForInterface();
 

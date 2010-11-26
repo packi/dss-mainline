@@ -31,7 +31,7 @@ namespace dss {
 
   class Session;
   class User;
-
+  class PropertySystem;
   class PropertyNode;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
@@ -41,13 +41,25 @@ namespace dss {
     : m_pRootNode(_pRootNode)
     { }
 
+    Security(PropertyNodePtr _pRootNode,
+             boost::shared_ptr<PropertySystem> _pPropertySystem)
+    : m_pRootNode(_pRootNode),
+      m_pPropertySystem(_pPropertySystem)
+    { }
+
     ~Security() {
       m_LoggedInUser.release();
     }
 
     bool authenticate(const std::string& _user, const std::string& _password);
-    bool authenticate(Session* _session);
+    bool authenticate(boost::shared_ptr<Session> _session);
     void signOff();
+
+    bool loadFromXML(const std::string& _fileName);
+    void setSystemUser(User* _value) {
+      m_pSystemUser = _value;
+    }
+    void loginAsSystemUser(const std::string& _reason);
 
     static User* getCurrentlyLoggedInUser() {
       return m_LoggedInUser.get();
@@ -55,6 +67,8 @@ namespace dss {
   private:
     static boost::thread_specific_ptr<User> m_LoggedInUser;
     PropertyNodePtr m_pRootNode;
+    User* m_pSystemUser;
+    boost::shared_ptr<PropertySystem> m_pPropertySystem;
   }; // Security
 
   class SecurityException : public DSSException {

@@ -44,8 +44,15 @@
 
 
 namespace dss {
-  SessionManager::SessionManager(EventQueue& _EventQueue, EventInterpreter& _eventInterpreter, const std::string _salt)
-  : m_EventQueue(_EventQueue), m_EventInterpreter(_eventInterpreter), m_timeoutSecs(60), m_Salt(_salt)
+  SessionManager::SessionManager(EventQueue& _EventQueue,
+                                 EventInterpreter& _eventInterpreter,
+                                 boost::shared_ptr<Security> _pSecurity,
+                                 const std::string _salt)
+  : m_EventQueue(_EventQueue),
+    m_EventInterpreter(_eventInterpreter),
+    m_pSecurity(_pSecurity),
+    m_Salt(_salt),
+    m_timeoutSecs(60)
   {
     m_NextSessionID = rand();
     std::ostringstream ostr;
