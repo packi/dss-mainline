@@ -29,7 +29,44 @@
 #include "core/security/user.h"
 #include "core/session.h"
 
+#include <boost/thread/mutex.hpp>
+
 namespace dss {
+
+  //================================================== SecurityTreeListener
+
+  class SecurityTreeListener : public PropertyListener {
+  public:
+    SecurityTreeListener(boost::shared_ptr<PropertySystem> _pPropertySystem,
+                         PropertyNodePtr _pSecurityNode,
+                         const std::string _path)
+    : m_pPropertySystem(_pPropertySystem),
+      m_pSecurityNode(_pSecurityNode),
+      m_Path(_path)
+    {
+      assert(_pPropertySystem != NULL);
+      assert(_pSecurityNode != NULL);
+      assert(!_path.empty());
+      m_pSecurityNode->addListener(this);
+    }
+
+  protected:
+    virtual void propertyChanged(PropertyNodePtr _caller,
+                                 PropertyNodePtr _changedNode) {
+      if(_changedNode->hasFlag(PropertyNode::Archive)) {
+        boost::mutex::scoped_lock lock(m_WriteXMLMutex);
+        m_pPropertySystem->saveToXML(m_Path, m_pSecurityNode, PropertyNode::Archive);
+      }
+    }
+  private:
+    boost::shared_ptr<PropertySystem> m_pPropertySystem;
+    PropertyNodePtr m_pSecurityNode;
+    boost::mutex m_WriteXMLMutex;
+    const std::string m_Path;
+  }; // SecurityTreeListener
+
+
+  //================================================== Security
 
   bool Security::authenticate(const std::string& _user, const std::string& _password) {
     signOff();
@@ -63,10 +100,10 @@ namespace dss {
     m_LoggedInUser.release();
   } // signOff
 
-  bool Security::loadFromXML(const std::string& _fileName) {
+  bool Security::loadFromXML() {
     bool result = false;
     if(m_pPropertySystem != NULL) {
-      result = m_pPropertySystem->loadFromXML(_fileName, m_pRootNode);
+      result = m_pPropertySystem->loadFromXML(m_FileName, m_pRootNode);
     }
     return result;
   } // loadFromXML
@@ -79,6 +116,10 @@ namespace dss {
       Logger::getInstance()->log("Failed to login as system-user (" + _reason + ")", lsFatal);
     }
   } // loginAsSystemUser
+
+  void Security::startListeningForChanges() {
+    m_pTreeListener.reset(new SecurityTreeListener(m_pPropertySystem, m_pRootNode, m_FileName));
+  } // startListeningForChanges
 
   boost::thread_specific_ptr<User> Security::m_LoggedInUser;
 

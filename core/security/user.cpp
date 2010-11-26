@@ -53,8 +53,12 @@ namespace dss {
     hasher.add(salt);
     hasher.add(m_pUserNode->getDisplayName());
     hasher.add(_password);
-    m_pUserNode->createProperty("salt")->setStringValue(salt);
-    m_pUserNode->createProperty("password")->setStringValue(hasher.str());
+    PropertyNodePtr saltNode = m_pUserNode->createProperty("salt");
+    PropertyNodePtr userNode = m_pUserNode->createProperty("password");
+    saltNode->setStringValue(salt);
+    userNode->setStringValue(hasher.str());
+    saltNode->setFlag(PropertyNode::Archive, true);
+    userNode->setFlag(PropertyNode::Archive, true);
   } // setPassword
 
 } // namespace dss

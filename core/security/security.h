@@ -29,6 +29,7 @@
 
 namespace dss {
 
+  class SecurityTreeListener;
   class Session;
   class User;
   class PropertySystem;
@@ -55,7 +56,7 @@ namespace dss {
     bool authenticate(boost::shared_ptr<Session> _session);
     void signOff();
 
-    bool loadFromXML(const std::string& _fileName);
+    bool loadFromXML();
     void setSystemUser(User* _value) {
       m_pSystemUser = _value;
     }
@@ -64,11 +65,18 @@ namespace dss {
     static User* getCurrentlyLoggedInUser() {
       return m_LoggedInUser.get();
     }
+
+    void startListeningForChanges();
+    void setFileName(const std::string& _value) {
+      m_FileName = _value;
+    }
   private:
     static boost::thread_specific_ptr<User> m_LoggedInUser;
     PropertyNodePtr m_pRootNode;
     User* m_pSystemUser;
+    boost::shared_ptr<SecurityTreeListener> m_pTreeListener;
     boost::shared_ptr<PropertySystem> m_pPropertySystem;
+    std::string m_FileName;
   }; // Security
 
   class SecurityException : public DSSException {
