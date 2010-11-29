@@ -323,6 +323,14 @@ namespace dss {
                          "This method returns the version std::string of the dss");
     clsSystem.addMethod("time")
       .withDocumentation("Returns the dSS time in UTC seconds since epoch");
+    clsSystem.addMethod("login")
+      .withParameter("username", "string", true)
+      .withParameter("password", "string", true)
+      .withDocumentation("Creates a new session using the credentials provided");
+    clsSystem.addMethod("logout")
+      .withDocumentation("Destroys the session and signs out the user");
+    clsSystem.addMethod("loggedInUser")
+      .withDocumentation("Returns the name of the currently logged in user");
 
     RestfulClass& clsSet = api->addClass("set")
         .withInstanceParameter("self", "string", false);
