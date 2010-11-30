@@ -262,10 +262,6 @@ const char* kSavedPropsDirectory = "data/savedprops/";
 
     boost::shared_ptr<SimBusInterface> pSimBusInterface(new SimBusInterface(m_pSimulation));
 
-    m_pBusInterface = boost::shared_ptr<BusInterface>(new BusInterfaceAdaptor(pDSBusInterface, m_pSimulation, pSimBusInterface));
-
-    m_pApartment->setBusInterface(m_pBusInterface.get());
-
     m_pWebServer = boost::shared_ptr<WebServer>(new WebServer(this));
     m_Subsystems.push_back(m_pWebServer.get());
 
@@ -274,6 +270,13 @@ const char* kSavedPropsDirectory = "data/savedprops/";
 
     m_pEventInterpreter = boost::shared_ptr<EventInterpreter>(new EventInterpreter(this));
     m_Subsystems.push_back(m_pEventInterpreter.get());
+
+    m_pBusInterface = boost::shared_ptr<BusInterface>(
+      new BusInterfaceAdaptor(pDSBusInterface, m_pSimulation,
+                              pSimBusInterface, m_pModelMaintenance,
+                              m_pApartment, m_pEventInterpreter));
+
+    m_pApartment->setBusInterface(m_pBusInterface.get());
 
     m_pMetering = boost::shared_ptr<Metering>(new Metering(this));
     m_Subsystems.push_back(m_pMetering.get());
