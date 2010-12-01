@@ -35,8 +35,16 @@ namespace dss {
     return 0;
   } // getPowerConsumption
 
-  void SimMeteringBusInterface::requestPowerConsumption() {
-    // TODO: send power-consumption via callback for each meter
+  void SimMeteringBusInterface::requestMeterData() {
+    if(m_pEventSink != NULL) {
+      for(int iMeter = 0; iMeter < m_pSimulation->getDSMeterCount(); iMeter++) {
+        boost::shared_ptr<DSMeterSim>
+          pMeter = m_pSimulation->getDSMeter(iMeter);
+        m_pEventSink->onMeteringEvent(NULL, pMeter->getDSID(),
+                                      pMeter->getPowerConsumption(),
+                                      pMeter->getEnergyMeterValue());
+      }
+    }
   } // requestPowerConsumption
 
   unsigned long SimMeteringBusInterface::getEnergyMeterValue(const dss_dsid_t& _dsMeterID) {
@@ -47,8 +55,8 @@ namespace dss {
     return 0;
   } // getEnergyMeterValue
 
-  void SimMeteringBusInterface::requestEnergyMeterValue() {
-    // TODO: send meter-value via callback for each meter
-  } // requestEnergyMeterValue
+  void SimMeteringBusInterface::setBusEventSink(BusEventSink* _value) {
+    m_pEventSink = _value;
+  }
 
 } // namespace dss

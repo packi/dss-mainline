@@ -633,14 +633,9 @@ BOOST_AUTO_TEST_CASE(testMeteringDataFromUnknownMeter) {
   maintenance.setApartment(&apt);
   maintenance.initialize();
 
-
   dss_dsid_t nonexistingDSMeterDSID(0, 55);
-  ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etEnergyMeterValue, nonexistingDSMeterDSID);
-  pEvent->addParameter(123); // meter value
-
-  maintenance.addModelEvent(pEvent);
-
-  pEvent = new ModelEventWithDSID(ModelEvent::etPowerConsumption, nonexistingDSMeterDSID);
+  ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etMeteringValues, nonexistingDSMeterDSID);
+  pEvent->addParameter(123); // power
   pEvent->addParameter(123); // meter value
 
   maintenance.addModelEvent(pEvent);

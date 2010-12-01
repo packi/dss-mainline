@@ -32,15 +32,18 @@ namespace dss {
   class SimMeteringBusInterface : public MeteringBusInterface {
   public:
     SimMeteringBusInterface(boost::shared_ptr<DSSim> _pSimulation)
-    : m_pSimulation(_pSimulation)
+    : m_pSimulation(_pSimulation),
+      m_pEventSink(NULL)
     { }
 
+    virtual void requestMeterData();
     virtual unsigned long getPowerConsumption(const dss_dsid_t& _dsMeterID);
-    virtual void requestPowerConsumption();
     virtual unsigned long getEnergyMeterValue(const dss_dsid_t& _dsMeterID);
-    virtual void requestEnergyMeterValue();
+
+    void setBusEventSink(BusEventSink* _value);
   private:
     boost::shared_ptr<DSSim> m_pSimulation;
+    BusEventSink* m_pEventSink;
   }; // SimMeteringBusInterface
 
 } // namespace dss

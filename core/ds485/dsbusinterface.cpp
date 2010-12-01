@@ -198,10 +198,10 @@ namespace dss {
                            ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_CALL_SCENE,
                            (void*)handleBusCall, this);
 
-    // TODO: libdsm
-    // register callbacks for 
-    // - CircuitEnergyMeterValue_get
-    // - CircuitPowerMeterValue_get
+    CircuitEnergyMeterValue_get_response_callback_t meteringCallback = DSBusInterface::handleCircuitEnergyDataCallback;
+    DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_RESPONSE,
+                           CIRCUIT_ENERGY_METER_VALUE, CIRCUIT_ENERGY_METER_VALUE_GET,
+                           (void*)meteringCallback, this);
 
     m_dsmApiReady = true;
   } // initialize
@@ -326,6 +326,27 @@ namespace dss {
                                                   uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID, _sceneID);
   }
+
+  void DSBusInterface::handleCircuitEnergyData(uint8_t _errorCode,
+                                               dsid_t _sourceID, dsid_t _destinationID,
+                                               uint32_t _powerW, uint32_t _energyWh) {
+    dss_dsid_t dsMeterID;
+    dsid_helper::toDssDsid(_sourceID, dsMeterID);
+    m_pBusEventSink->onMeteringEvent(this, dsMeterID, _powerW, _energyWh);
+  } // handleCircuitEnergyData
+
+  void DSBusInterface::handleCircuitEnergyDataCallback(uint8_t _errorCode,
+                                                void* _userData,
+                                                dsid_t _sourceID,
+                                                dsid_t _destinationID,
+                                                uint32_t _powerW,
+                                                uint32_t _energyWh) {
+    static_cast<DSBusInterface*>(_userData)->
+      handleCircuitEnergyData(_errorCode,
+                              _sourceID, _destinationID,
+                              _powerW, _energyWh);
+  } // handleCircuitEnergyDataCallback
+
 
   DeviceBusInterface* DSBusInterface::getDeviceBusInterface() {
     return m_pDeviceBusInterface.get();

@@ -357,6 +357,11 @@ namespace dss {
       m_pSimulationInterface(_pSimulationInterface)
     { }
 
+    virtual void requestMeterData() {
+      m_pInner->requestMeterData();
+      m_pSimulationInterface->requestMeterData();
+    } // requestMeterData
+
     virtual unsigned long getPowerConsumption(const dss_dsid_t& _dsMeterID) {
       if(isHandledBySimulation(_dsMeterID)) {
         return m_pSimulationInterface->getPowerConsumption(_dsMeterID);
@@ -364,11 +369,6 @@ namespace dss {
         return m_pInner->getPowerConsumption(_dsMeterID);
       }
     } // getPowerConsumption
-
-    virtual void requestPowerConsumption() {
-      m_pInner->requestPowerConsumption();
-      m_pSimulationInterface->requestPowerConsumption();
-    } // requestPowerConsumption
 
     virtual unsigned long getEnergyMeterValue(const dss_dsid_t& _dsMeterID) {
       if(isHandledBySimulation(_dsMeterID)) {
@@ -378,10 +378,6 @@ namespace dss {
       }
     } // getEnergyMeterValue
 
-    virtual void requestEnergyMeterValue() {
-      m_pInner->requestEnergyMeterValue();
-      m_pSimulationInterface->requestEnergyMeterValue();
-    } // requestEnergyMeterValue
   private:
     MeteringBusInterface* m_pInner;
     MeteringBusInterface* m_pSimulationInterface;
@@ -438,6 +434,18 @@ namespace dss {
       pHEvent->setProperty("sceneID", intToString(_sceneID));
       m_pEventInterpreter->getQueue().pushEvent(pHEvent);
     } // onGroupCallScene
+
+    virtual void onMeteringEvent(BusInterface* _source,
+                                 const dss_dsid_t& _dsMeterID,
+                                 const int _powerW,
+                                 const int _energyWh) {
+      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etMeteringValues,
+                                                  _dsMeterID);
+      pEvent->addParameter(_powerW);
+      pEvent->addParameter(_energyWh);
+      m_pModelMaintenance->addModelEvent(pEvent);
+    }
+
   private:
     boost::shared_ptr<DSSim> m_pSimulation;
     boost::shared_ptr<BusInterface> m_pInnerBusInterface;

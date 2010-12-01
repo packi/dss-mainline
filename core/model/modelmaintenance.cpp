@@ -252,33 +252,20 @@ namespace dss {
         log("Got bus ready event.", lsInfo);
         discoverDS485Devices();
         break;
-      case ModelEvent::etPowerConsumption:
-        if(event.getParameterCount() != 1) {
-          log("Expected exactly 1 parameter for ModelEvent::etPowerConsumption");
+      case ModelEvent::etMeteringValues:
+        if(event.getParameterCount() != 2) {
+          log("Expected exactly 1 parameter for ModelEvent::etMeteringValues");
         } else {
           assert(pEventWithDSID != NULL);
           dss_dsid_t meterID = pEventWithDSID->getDSID();
-          int value = event.getParameter(0);
+          int power = event.getParameter(0);
+          int energy = event.getParameter(1);
           try {
             boost::shared_ptr<DSMeter> meter = m_pApartment->getDSMeterByDSID(meterID);
-            meter->setPowerConsumption(value);
-            m_pMetering->postConsumptionEvent(meter, value, DateTime());
-          } catch(ItemNotFoundException& _e) {
-            log("Received metering data for unknown meter, discarding", lsWarning);
-          }
-        }
-        break;
-      case ModelEvent::etEnergyMeterValue:
-        if(event.getParameterCount() != 1) {
-          log("Expected exactly 1 parameter for ModelEvent::etEnergyMeterValue");
-        } else {
-          assert(pEventWithDSID != NULL);
-          dss_dsid_t meterID = pEventWithDSID->getDSID();
-          int value = event.getParameter(0);
-          try {
-            boost::shared_ptr<DSMeter> meter = m_pApartment->getDSMeterByDSID(meterID);
-            meter->setEnergyMeterValue(value);
-            m_pMetering->postEnergyEvent(meter, value, DateTime());
+            meter->setPowerConsumption(power);
+            meter->setEnergyMeterValue(energy);
+            m_pMetering->postEnergyEvent(meter, energy, DateTime());
+            m_pMetering->postConsumptionEvent(meter, power, DateTime());
           } catch(ItemNotFoundException& _e) {
             log("Received metering data for unknown meter, discarding", lsWarning);
           }

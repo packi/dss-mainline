@@ -69,7 +69,7 @@ namespace dss {
     void processValue(MeteringValue _value, boost::shared_ptr<MeteringConfigChain> _config);
     void processValues(std::vector<MeteringValue>& _values, boost::shared_ptr<MeteringConfigChain> _config);
   private:
-    void checkDSMeters(MeteringConfigChain* _pConfig);
+    void checkDSMeters();
 
     virtual void initialize();
     virtual void execute();
@@ -107,19 +107,16 @@ namespace dss {
   private:
     bool m_IsEnergy;
     int m_CheckIntervalSeconds;
-    DateTime m_LastRun;
     std::string m_Unit;
     std::string m_Comment;
     std::vector<boost::shared_ptr<MeteringConfig> > m_Chain;
   public:
     MeteringConfigChain(bool _isEnergy, int _checkIntervalSeconds, const std::string& _unit)
     : m_IsEnergy(_isEnergy), m_CheckIntervalSeconds(_checkIntervalSeconds),
-      m_LastRun(DateTime()), m_Unit(_unit)
+      m_Unit(_unit)
     { }
 
     void addConfig(boost::shared_ptr<MeteringConfig> _config);
-    bool needsRun() const;
-    void running();
 
     const int size() const { return m_Chain.size(); }
 

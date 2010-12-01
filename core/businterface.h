@@ -119,15 +119,14 @@ namespace dss {
 
   class MeteringBusInterface {
   public:
+    /** Sends a message to all devices to report their meter-data */
+    virtual void requestMeterData() = 0;
+
     /** Returns the current power-consumption in mW */
     virtual unsigned long getPowerConsumption(const dss_dsid_t& _dsMeterID) = 0;
-    /** Sends a message to all devices to report their power consumption */
-    virtual void requestPowerConsumption() = 0;
 
     /** Returns the meter value in Wh */
     virtual unsigned long getEnergyMeterValue(const dss_dsid_t& _dsMeterID) = 0;
-    /** Sends a message to all devices to report their energy value */
-    virtual void requestEnergyMeterValue() = 0;
 
     virtual ~MeteringBusInterface() {}; // please the compiler (virtual dtor)
   }; // MeteringBusInterface
@@ -139,6 +138,10 @@ namespace dss {
                                   const int _zoneID,
                                   const int _groupID,
                                   const int _sceneID) = 0;
+    virtual void onMeteringEvent(BusInterface* _source,
+                                 const dss_dsid_t& _dsMeterID,
+                                 const int _powerW,
+                                 const int _energyWh) = 0;
   };
 
   /** Interface to be implemented by any bus interface provider */

@@ -44,12 +44,11 @@ namespace dss {
     return power;
   } // getPowerConsumption
 
-  void DSMeteringBusInterface::requestPowerConsumption() {
+  void DSMeteringBusInterface::requestMeterData() {
     if(m_DSMApiHandle == NULL) {
       return;
     }
-    uint32_t power;
-    int ret = CircuitEnergyMeterValue_get(m_DSMApiHandle, m_BroadcastDSID, &power, NULL);
+    int ret = CircuitEnergyMeterValue_get(m_DSMApiHandle, m_BroadcastDSID, NULL, NULL);
     DSBusInterface::checkBroadcastResultCode(ret);
   } // requestPowerConsumption
 
@@ -66,14 +65,5 @@ namespace dss {
 
     return energy;
   } // getEnergyMeterValue
-
-  void DSMeteringBusInterface::requestEnergyMeterValue() {
-    if(m_DSMApiHandle == NULL) {
-      return;
-    }
-    uint32_t energy;
-    int ret = CircuitEnergyMeterValue_get(m_DSMApiHandle, m_BroadcastDSID, NULL, &energy);
-    DSBusInterface::checkBroadcastResultCode(ret);
-  } // requestEnergyMeterValue
 
 } // namespace dss

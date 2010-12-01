@@ -91,6 +91,15 @@ namespace dss {
                                            dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                            uint8_t _sceneID);
 
+    void handleCircuitEnergyData(uint8_t _errorCode,
+                                 dsid_t _sourceId, dsid_t _destinationId,
+                                 uint32_t _powerW, uint32_t _energyWh);
+    static void handleCircuitEnergyDataCallback(uint8_t _errorCode,
+                                                void* _userData,
+                                                dsid_t _sourceId,
+                                                dsid_t _destinationId,
+                                                uint32_t _powerW,
+                                                uint32_t _energyWh);
   protected:
     virtual void doStart();
   public:
