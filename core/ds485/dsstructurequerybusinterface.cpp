@@ -75,11 +75,11 @@ namespace dss {
     uint32_t armSwVersion;
     uint32_t dspSwVersion;
     uint16_t apiVersion;
-    uint8_t dsidBuf[DSID_LEN];
-    uint8_t nameBuf[NAME_LEN];
     dsid_t dsid;
+    uint8_t nameBuf[NAME_LEN];
+    dsid_t dsidRet;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
-    int ret = dSMInfo(m_DSMApiHandle, dsid, &hwVersion, &armSwVersion, &dspSwVersion, &apiVersion, dsidBuf, nameBuf);
+    int ret = dSMInfo(m_DSMApiHandle, dsid, &hwVersion, &armSwVersion, &dspSwVersion, &apiVersion, &dsidRet, nameBuf);
     DSBusInterface::checkResultCode(ret);
 
     char nameStr[NAME_LEN];
@@ -119,8 +119,9 @@ namespace dss {
     dsid_t dsid;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
     uint8_t groupId;
+    uint8_t groupTargetId;
     for(int iGroup = 0; iGroup < numGroups; iGroup++) {
-      int ret = ZoneGroupInfo_by_index(m_DSMApiHandle, dsid, _zoneID, iGroup, &groupId, NULL, NULL);
+      int ret = ZoneGroupInfo_by_index(m_DSMApiHandle, dsid, _zoneID, iGroup, &groupId, &groupTargetId, NULL, NULL);
       DSBusInterface::checkResultCode(ret);
 
       result.push_back(groupId);
@@ -136,7 +137,7 @@ namespace dss {
     dsid_t dsid;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, dsid, _deviceID, NULL, NULL, NULL, NULL,
-                                      NULL, NULL, NULL, NULL, groups, NULL, NULL, NULL);
+                                      NULL, NULL, NULL, NULL, NULL, groups, NULL, NULL, NULL, NULL);
     DSBusInterface::checkResultCode(ret);
     std::vector<int> result;
     for(int iByte = 0; iByte < GROUPS_LEN; iByte++) {
@@ -208,7 +209,7 @@ namespace dss {
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
       uint16_t deviceId;
       int ret = DeviceInfo_by_index_only_active(m_DSMApiHandle, dsid, _zoneID, iDevice, &deviceId,
-                                    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
       DSBusInterface::checkResultCode(ret);
       result.push_back(deviceId);
     }
@@ -224,7 +225,7 @@ namespace dss {
     dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
 
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, meterDSID, _deviceID, NULL, NULL, NULL, NULL,
-                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, dsid.id);
+                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &dsid);
     DSBusInterface::checkResultCode(ret);
 
     dss_dsid_t dss_dsid;
@@ -252,7 +253,8 @@ namespace dss {
     dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, dsmDSID, _id,
                                       NULL, &functionId, &productId, &version,
-                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+                                      NULL, NULL, NULL);
     DSBusInterface::checkResultCode(ret);
 
     DeviceSpec_t spec(functionId, productId, version, _id);
@@ -268,7 +270,7 @@ namespace dss {
     dsid_helper::toDsmapiDsid(_device->getDSMeterDSID(), dsmDSID);
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, dsmDSID, _device->getShortAddress(),
                                       NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                                      &locked, NULL, NULL, NULL, NULL);
+                                      &locked, NULL, NULL, NULL, NULL, NULL, NULL);
     DSBusInterface::checkResultCode(ret);
     return locked;
   } // isLocked
