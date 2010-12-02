@@ -42,5 +42,9 @@ namespace dss {
     m_pStructureModifyingBusInterface.reset(new SimStructureModifyingBusInterface(m_pSimulation));
   }
 
+  void SimBusInterface::setBusEventSink(BusEventSink* _eventSink) {
+    boost::shared_dynamic_cast<SimMeteringBusInterface>(m_pMeteringBusInterface)->setBusEventSink(_eventSink);
+  }
+
 
 } // namespace dss

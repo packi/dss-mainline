@@ -29,12 +29,18 @@ namespace dss {
 
   class DSSim;
   class SimBusInterface;
+  class ModelMaintenance;
+  class EventInterpreter;
+  class Apartment;
 
   class BusInterfaceAdaptor : public BusInterface {
   public:
     BusInterfaceAdaptor(boost::shared_ptr<BusInterface> _pInner,
                         boost::shared_ptr<DSSim> _pSimulation,
-                        boost::shared_ptr<SimBusInterface> _pSimBusInterface);
+                        boost::shared_ptr<SimBusInterface> _pSimBusInterface,
+                        boost::shared_ptr<ModelMaintenance> _pMaintenance,
+                        boost::shared_ptr<Apartment> _pApartment,
+                        boost::shared_ptr<EventInterpreter> _pEventInterpreter);
     virtual DeviceBusInterface* getDeviceBusInterface();
     virtual StructureQueryBusInterface* getStructureQueryBusInterface();
     virtual MeteringBusInterface* getMeteringBusInterface();

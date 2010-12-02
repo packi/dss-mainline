@@ -46,8 +46,8 @@ namespace dss {
   : ThreadedSubsystem(_pDSS, "Metering"),
     m_pMeteringBusInterface(NULL)
   {
-    m_ConfigConsumption.reset(new MeteringConfigChain(false, 1, "mW"));
-    m_ConfigConsumption->setComment("Consumption in mW");
+    m_ConfigConsumption.reset(new MeteringConfigChain(false, 1, "W"));
+    m_ConfigConsumption->setComment("Consumption in W");
     m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_seconds",        2, 400)));
     m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_10seconds",     10, 400)));
     m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_5minutely", 5 * 60, 400)));
@@ -55,7 +55,6 @@ namespace dss {
     m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_2hourly", 2 * 60*60, 400)));
     m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_daily",  24 * 60*60, 400)));
     m_Config.push_back(m_ConfigConsumption.get());
-    m_ConfigConsumption->running();
 
     m_ConfigEnergy.reset(new MeteringConfigChain(true, 60, "Wh"));
     m_ConfigEnergy->setComment("Energymeter value");
@@ -64,7 +63,6 @@ namespace dss {
     m_ConfigEnergy->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("energy_hourly",   60 * 60, 400)));
     m_ConfigEnergy->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("energy_daily", 24 * 60*60, 400)));
     m_Config.push_back(m_ConfigEnergy.get());
-    m_ConfigEnergy->running();
   } // metering
 
   void Metering::initialize() {
@@ -99,7 +97,6 @@ namespace dss {
     SeriesReader<CurrentValue> reader;
     SeriesWriter<CurrentValue> writer;
 
-    _config->running();
     #ifdef LOG_TIMING
     std::ostringstream logSStream;
     #endif
@@ -196,13 +193,8 @@ namespace dss {
     #endif
   } // processValue
 
-  void Metering::checkDSMeters(MeteringConfigChain* _pConfig) {
-    if(_pConfig->isConsumption()) {
-      m_pMeteringBusInterface->requestPowerConsumption();
-    } else {
-      m_pMeteringBusInterface->requestEnergyMeterValue();
-    }
-    _pConfig->running();
+  void Metering::checkDSMeters() {
+    m_pMeteringBusInterface->requestMeterData();
   } // checkDSMeters
 
   //#undef LOG_TIMING
@@ -218,10 +210,8 @@ namespace dss {
     while(!m_Terminated) {
       int sleepTimeMSec = 60000 * 1000;
 
+      checkDSMeters();
       for(unsigned int iConfig = 0; iConfig < m_Config.size(); iConfig++) {
-        if(m_Config[iConfig]->needsRun()) {
-          checkDSMeters(m_Config[iConfig]);
-        }
         sleepTimeMSec = std::min(sleepTimeMSec, 1000 * m_Config[iConfig]->getCheckIntervalSeconds());
       }
       DateTime startedSleeping;
@@ -261,14 +251,5 @@ namespace dss {
   void MeteringConfigChain::addConfig(boost::shared_ptr<MeteringConfig> _config) {
     m_Chain.push_back(_config);
   } // addConfig
-
-  bool MeteringConfigChain::needsRun() const {
-    return DateTime().difference(m_LastRun) >= m_CheckIntervalSeconds;
-  }
-
-  void MeteringConfigChain::running() {
-    m_LastRun = DateTime();
-  }
-
 
 } // namespace dss
