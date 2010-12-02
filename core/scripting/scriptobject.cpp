@@ -164,6 +164,18 @@ namespace dss {
   } // callFunctionByName<int>
 
   template<>
+  uint8_t ScriptObject::callFunctionByName(const std::string& _functionName,
+                                                ScriptFunctionParameterList& _parameter) {
+    return m_Context.convertTo<int>(doCallFunctionByName(_functionName, _parameter));
+  } // callFunctionByName<uint8_t>
+
+  template<>
+  uint16_t ScriptObject::callFunctionByName(const std::string& _functionName,
+                                                ScriptFunctionParameterList& _parameter) {
+    return m_Context.convertTo<int>(doCallFunctionByName(_functionName, _parameter));
+  } // callFunctionByName<uint16_t>
+
+  template<>
   double ScriptObject::callFunctionByName(const std::string& _functionName,
                                                 ScriptFunctionParameterList& _parameter) {
     return m_Context.convertTo<double>(doCallFunctionByName(_functionName, _parameter));

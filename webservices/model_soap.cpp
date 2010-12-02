@@ -763,17 +763,6 @@ int dss__DeviceDecreaseValue(struct soap *soap, char* _token, char* _deviceID, b
   return SOAP_OK;
 }
 
-int dss__DeviceSetValue(struct soap *soap, char* _token, char* _deviceID, double _value, bool& result) {
-  dss::DeviceReference dev(dss::NullDSID, NULL);
-  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
-  if(getResult != SOAP_OK) {
-    return getResult;
-  }
-  dev.setValue(_value);
-  result = true;
-  return SOAP_OK;
-}
-
 int dss__DeviceCallScene(struct soap *soap, char* _token, char* _deviceID, int _sceneID, bool& result) {
   dss::DeviceReference device(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
@@ -807,13 +796,53 @@ int dss__DeviceUndoScene(struct soap *soap, char* _token, char* _deviceID, bool&
   return SOAP_OK;
 }
 
-int dss__DeviceGetValue(struct soap *soap, char* _token, char* _deviceID, int _paramID, double& result) {
+int dss__DeviceGetConfig(struct soap *soap, char* _token, char* _deviceID, 
+                        uint8_t _configClass, uint8_t _configIndex, 
+                        uint8_t& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  result = dev.getDevice()->getValue(_paramID);
+  result = dev.getDevice()->getConfig(_configClass, _configIndex);
+  return SOAP_OK;
+}
+
+int dss__DeviceGetConfigWord(struct soap *soap, char* _token, char* _deviceID, 
+                             uint8_t _configClass,
+                             uint8_t _configIndex, uint16_t& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  result = dev.getDevice()->getConfigWord(_configClass, _configIndex);
+  return SOAP_OK;
+}
+
+int dss__DeviceSetConfig(struct soap *soap, char* _token, char* _deviceID, 
+                         uint8_t _configClass, uint8_t _configIndex, 
+                         uint8_t _value, bool& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  dev.getDevice()->setConfig(_configClass, _configIndex, _value);
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__DeviceSetValue(struct soap *soap, char* _token, char* _deviceID, 
+                        uint8_t _value, bool& result)
+{
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  dev.getDevice()->setOutputValue(_value);
+  result = true;
   return SOAP_OK;
 }
 

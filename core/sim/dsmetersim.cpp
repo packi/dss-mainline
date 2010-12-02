@@ -281,13 +281,13 @@ namespace dss {
       for(std::vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
-        (*iDSID)->setValue(_value);
+        (*iDSID)->setOutputValue(_value);
       }
     }
   } // groupSetValue
 
   void DSMeterSim::deviceSetValue(const int _deviceID, const int _value) {
-    lookupDevice(_deviceID).setValue(_value);
+    lookupDevice(_deviceID).setOutputValue(_value);
   } // deviceSetValue
 
   uint32_t DSMeterSim::getEnergyMeterValue() {

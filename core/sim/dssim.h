@@ -113,19 +113,22 @@ namespace dss {
     virtual void saveScene(const int _sceneNr) = 0;
     virtual void undoScene() = 0;
 
-    bool isTurnedOn() const {
-      return getValue() > 0.0;
-    }
-
     virtual void enable() = 0;
     virtual void disable() = 0;
 
     virtual int getConsumption() = 0;
 
-    virtual void setValue(const double _value, int _parameterNr = -1) = 0;
+    virtual void setDeviceConfig(const uint8_t _configClass,
+                                 const uint8_t _configIndex,
+                                 const uint8_t _value) = 0;
 
-    virtual double getValue(int _parameterNr = -1) const = 0;
+    virtual uint8_t getDeviceConfig(const uint8_t _configClass,
+                                    const uint8_t _configIndex) = 0;
 
+    virtual uint16_t getDeviceConfigWord(const uint8_t _configClass,
+                                         const uint8_t _configIndex) = 0;
+
+    virtual void setOutputValue(const uint8_t value) = 0;
     virtual uint16_t getFunctionID() = 0;
 
     virtual void setConfigParameter(const std::string& _name, const std::string& _value) = 0;

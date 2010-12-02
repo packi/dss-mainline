@@ -77,10 +77,13 @@ namespace dss {
     /** @copydoc DeviceReference::isOn() */
     virtual bool isOn() const;
 
-    void setRawValue(const uint16_t _value, const int _parameterNr, const int _size);
-    /** Returns the value of _parameterNr.
-     * @note not yet implemented */
-    double getValue(const int _parameterNr = -1);
+    void setConfig(uint8_t _configClass, uint8_t _configIndex, uint8_t _value);
+    /** Returns device configuration value */
+    uint8_t getConfig(uint8_t _configIndex, uint8_t _value);
+    uint16_t getConfigWord(uint8_t _configIndex, uint8_t _value);
+
+    /** Set device output value */
+    void setOutputValue(uint8_t _value);
 
     virtual void nextScene();
     virtual void previousScene();

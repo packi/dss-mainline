@@ -77,13 +77,26 @@ public:
     return 77;
   }
 
-  virtual void setValue(const double _value, int _parameterNr = -1) {
-    functionCalled("setValue");
+  virtual void setDeviceConfig(const uint8_t _configClass,
+                               const uint8_t _configIndex,
+                               const uint8_t _value) {
+    functionCalled("setDeviceConfig");
   }
 
-  virtual double getValue(int _parameterNr = -1) const {
-    functionCalled("getValue", _parameterNr);
-    return 0.0;
+  virtual uint8_t getDeviceConfig(const uint8_t _configClass,
+                                  const uint8_t _configIndex) {
+    functionCalled("getDeviceConfig");
+    return 8;
+  }
+
+  virtual uint16_t getDeviceConfigWord(const uint8_t _configClass,
+                                  const uint8_t _configIndex) {
+    functionCalled("getDeviceConfigWord");
+    return 16;
+  }
+
+  virtual void setOutputValue(const uint8_t _value) {
+    functionCalled("setOutputValue");
   }
 
   virtual uint16_t getFunctionID() {
