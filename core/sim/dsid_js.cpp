@@ -143,35 +143,73 @@ namespace dss {
       return 0;
     } // getConsumption
 
-    virtual void setValue(const double _value, int _parameterNr = -1) {
+    virtual void setOutputValue(uint8_t _value) {
       if(m_pSelf != NULL) {
         try {
           ScriptLock lock(m_pContext);
           JSContextThread req(m_pContext);
           ScriptFunctionParameterList param(*m_pContext);
           param.add(int(_value));
-          param.add(_parameterNr);
-          m_pSelf->callFunctionByName<void>("setValue", param);
+          m_pSelf->callFunctionByName<void>("setOutputValue", param);
         } catch(ScriptException& e) {
-          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'setValue'") + e.what(), lsError);
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'setOutputValue'") + e.what(), lsError);
         }
       }
     } // setValue
 
-    virtual double getValue(int _parameterNr = -1) const {
+    virtual void setDeviceConfig(uint8_t _configClass, uint8_t _configIndex,
+                                 uint8_t _value) {
       if(m_pSelf != NULL) {
         try {
           ScriptLock lock(m_pContext);
           JSContextThread req(m_pContext);
           ScriptFunctionParameterList param(*m_pContext);
-          param.add(_parameterNr);
-          return m_pSelf->callFunctionByName<int>("getValue", param);
+          param.add(int(_configClass));
+          param.add(int(_configIndex));
+          param.add(int(_value));
+          m_pSelf->callFunctionByName<void>("setDeviceConfig", param);
         } catch(ScriptException& e) {
-          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'getValue'") + e.what(), lsError);
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'setDeviceConfig'") + e.what(), lsError);
+        }
+      }
+    } // setValue
+
+
+    virtual uint8_t getDeviceConfig(uint8_t _configClass,
+                              uint8_t _configIndex) {
+      if(m_pSelf != NULL) {
+        try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
+          ScriptFunctionParameterList param(*m_pContext);
+          param.add(_configClass);
+          param.add(_configIndex);
+          return m_pSelf->callFunctionByName<uint8_t>("getDeviceConfig", param);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'getDeviceConfig'") + e.what(), lsError);
         }
       }
       return 0;
-    } // getValue
+    } // getConfig
+
+    virtual uint16_t getDeviceConfigWord(uint8_t _configClass,
+                                       uint8_t _configIndex) {
+      if(m_pSelf != NULL) {
+        try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
+          ScriptFunctionParameterList param(*m_pContext);
+          param.add(_configClass);
+          param.add(_configIndex);
+          return m_pSelf->callFunctionByName<uint16_t>("getDeviceConfigWord",
+                                                      param);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'getDeviceConfigWord'") + e.what(), lsError);
+        }
+      }
+      return 0;
+    } // getConfigWord
+
 
     virtual uint16_t getFunctionID() {
       if(m_pSelf != NULL) {

@@ -44,9 +44,19 @@ namespace dss {
   class DeviceBusInterface {
   public:
     //------------------------------------------------ Device manipulation
-    virtual uint16_t deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterID, int _paramID) = 0;
+    virtual uint8_t getDeviceConfig(const Device& _device,
+                                    uint8_t _configClass,
+                                    uint8_t _configIndex) = 0;
 
-    virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) = 0;
+    virtual uint16_t getDeviceConfigWord(const Device& _device,
+                                       uint8_t _configClass,
+                                       uint8_t _configIndex) = 0;
+
+    virtual void setDeviceConfig(const Device& _device, uint8_t _configClass,
+                                 uint8_t _configIndex, uint8_t _value) = 0;
+
+    virtual void setOutputValue(const Device& _device, uint8_t _value) = 0;
+
     virtual int getSensorValue(const Device& _device, const int _sensorID) = 0;
     /** Tells the dSM to lock the device if \a _lock is true. */
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock) = 0;

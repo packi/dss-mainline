@@ -108,15 +108,39 @@ namespace dss {
     m_RevisionID = _value;
   } // setRevisionID
 
-  void Device::setRawValue(const uint16_t _value, const int _parameterNr, const int _size) {
+  void Device::setConfig(uint8_t _configClass, uint8_t _configIndex,
+                         uint8_t _value) {
     if(m_pApartment->getDeviceBusInterface() != NULL) {
-      m_pApartment->getDeviceBusInterface()->setValueDevice(*this, _value, _parameterNr, _size);
+      m_pApartment->getDeviceBusInterface()->setDeviceConfig(*this,
+                                                             _configClass,
+                                                             _configIndex,
+                                                             _value);
     }
-  } // setRawValue
+  } // setConfig
 
-  double Device::getValue(const int _parameterNr) {
-    return m_pApartment->getDeviceBusInterface()->deviceGetParameterValue(m_ShortAddress, m_DSMeterDSID,  _parameterNr);
+  uint8_t Device::getConfig(uint8_t _configClass, uint8_t _configIndex) {
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      return m_pApartment->getDeviceBusInterface()->getDeviceConfig(*this,
+                                                                  _configClass,
+                                                                  _configIndex);
+    }
+    throw std::runtime_error("Bus interface not available");
   } // getValue
+
+  uint16_t Device::getConfigWord(uint8_t _configClass, uint8_t _configIndex) {
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      return m_pApartment->getDeviceBusInterface()->getDeviceConfigWord(*this,
+                                                                  _configClass,
+                                                                  _configIndex);
+    }
+    throw std::runtime_error("Bus interface not available");
+  } // getValue
+
+  void Device::setOutputValue(uint8_t _value) {
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      m_pApartment->getDeviceBusInterface()->setOutputValue(*this, _value);
+    }
+  } // setOutputValue
 
   void Device::nextScene() {
     callScene(SceneHelper::getNextScene(m_LastCalledScene));

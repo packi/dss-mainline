@@ -1,7 +1,8 @@
 /*
     Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -36,8 +37,19 @@ namespace dss {
     : DSBusInterfaceObj()
     { }
 
-    virtual uint16_t deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterID, int _paramID) ;
-    virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) ;
+    virtual uint8_t getDeviceConfig(const Device& _device,
+                                    uint8_t _configClass,
+                                    uint8_t _configIndex);
+
+    virtual uint16_t getDeviceConfigWord(const Device& _device,
+                                       uint8_t _configClass,
+                                       uint8_t _configIndex);
+
+    virtual void setDeviceConfig(const Device& _device, uint8_t _configClass,
+                                 uint8_t _configIndex, uint8_t _value);
+
+    virtual void setOutputValue(const Device& _device, uint8_t _value);
+
     virtual int getSensorValue(const Device& _device, const int _sensorID);
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock);
   }; // DSDeviceBusInterface

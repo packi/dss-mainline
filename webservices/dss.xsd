@@ -820,7 +820,7 @@
     <sequence>
      <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="value" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+     <element name="value" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -833,20 +833,60 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="DeviceGetValue">
+  <element name="DeviceSetConfig">
    <complexType>
     <sequence>
      <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="configClass" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+     <element name="configIndex" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+     <element name="value" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="DeviceGetValueResponse">
+  <element name="DeviceSetConfigResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceGetConfig">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="configClass" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+     <element name="configIndex" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceGetConfigResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceGetConfigWord">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="configClass" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+     <element name="configIndex" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceGetConfigWordResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:unsignedShort" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>

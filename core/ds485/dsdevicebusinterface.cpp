@@ -1,7 +1,8 @@
 /*
     Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -33,16 +34,88 @@ namespace dss {
 
   //================================================== DSDeviceBusInterface
 
-  uint16_t DSDeviceBusInterface::deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterDSID, int _paramID) {
-    // TODO: libdsm
-    Logger::getInstance()->log("deviceGetParameterValue: not implemented yet", lsInfo);
-    return 0;
-  } // deviceGetParameterValue
+  // default timeout for synchronous calls to dsm api
+  static const int kDSM_API_TIMEOUT = 5;
 
-  void DSDeviceBusInterface::setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) {
-    // TODO: libdsm
-    Logger::getInstance()->log("Not implemented yet: setValueDevice()", lsInfo);
-  } // setValueDevice
+  uint8_t DSDeviceBusInterface::getDeviceConfig(const Device& _device,
+                                                uint8_t _configClass,
+                                                uint8_t _configIndex) {
+    if(m_DSMApiHandle == NULL) {
+      throw std::runtime_error("Invalid libdsm api handle");
+    }
+
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+
+    uint8_t retVal;
+
+    int ret = DeviceConfig_get_sync_8(m_DSMApiHandle, dsmDSID,
+                                      _device.getShortAddress(),
+                                      _configClass,
+                                      _configIndex,
+                                      kDSM_API_TIMEOUT,
+                                      &retVal);
+    DSBusInterface::checkResultCode(ret);
+
+    return retVal;
+  } // getDeviceConfig
+
+  uint16_t DSDeviceBusInterface::getDeviceConfigWord(const Device& _device,
+                                                 uint8_t _configClass,
+                                                 uint8_t _configIndex) {
+    if(m_DSMApiHandle == NULL) {
+      throw std::runtime_error("Invalid libdsm api handle");
+    }
+
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+
+    uint16_t retVal;
+
+    int ret = DeviceConfig_get_sync_16(m_DSMApiHandle, dsmDSID,
+                                       _device.getShortAddress(),
+                                       _configClass,
+                                       _configIndex,
+                                       kDSM_API_TIMEOUT,
+                                       &retVal);
+    DSBusInterface::checkResultCode(ret);
+
+    return retVal;
+  } // getDeviceConfigWord
+
+
+  void DSDeviceBusInterface::setDeviceConfig(const Device& _device,
+                                             uint8_t _configClass,
+                                             uint8_t _configIndex,
+                                             uint8_t _value) {
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
+
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+
+    int ret = DeviceConfig_set(m_DSMApiHandle, dsmDSID,
+                               _device.getShortAddress(), _configClass,
+                               _configIndex, _value);
+    DSBusInterface::checkResultCode(ret);
+  } // setDeviceConfig
+
+  void DSDeviceBusInterface::setOutputValue(const Device& _device,
+                                            uint8_t _value) {
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
+
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+
+    int ret = DeviceActionRequest_action_set_outval(m_DSMApiHandle, dsmDSID,
+                                                    _device.getShortAddress(),
+                                                    _value);
+    DSBusInterface::checkResultCode(ret);
+  } // setOutputValue
+
 
   int DSDeviceBusInterface::getSensorValue(const Device& _device, const int _sensorID) {
     // TODO: libdsm
