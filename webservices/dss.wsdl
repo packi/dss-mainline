@@ -836,7 +836,7 @@
     <sequence>
      <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="value" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+     <element name="value" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -849,20 +849,60 @@
    </complexType>
   </element>
   <!-- operation request element -->
-  <element name="DeviceGetValue">
+  <element name="DeviceSetConfig">
    <complexType>
     <sequence>
      <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
-     <element name="paramID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="configClass" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+     <element name="configIndex" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+     <element name="value" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
   <!-- operation response element -->
-  <element name="DeviceGetValueResponse">
+  <element name="DeviceSetConfigResponse">
    <complexType>
     <sequence>
-     <element name="result" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceGetConfig">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="configClass" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+     <element name="configIndex" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceGetConfigResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceGetConfigWord">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="configClass" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+     <element name="configIndex" type="xsd:unsignedByte" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceGetConfigWordResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:unsignedShort" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -1860,12 +1900,28 @@
  <part name="parameters" element="dss:DeviceSetValueResponse"/>
 </message>
 
-<message name="DeviceGetValueRequest">
- <part name="parameters" element="dss:DeviceGetValue"/>
+<message name="DeviceSetConfigRequest">
+ <part name="parameters" element="dss:DeviceSetConfig"/>
 </message>
 
-<message name="DeviceGetValueResponse">
- <part name="parameters" element="dss:DeviceGetValueResponse"/>
+<message name="DeviceSetConfigResponse">
+ <part name="parameters" element="dss:DeviceSetConfigResponse"/>
+</message>
+
+<message name="DeviceGetConfigRequest">
+ <part name="parameters" element="dss:DeviceGetConfig"/>
+</message>
+
+<message name="DeviceGetConfigResponse">
+ <part name="parameters" element="dss:DeviceGetConfigResponse"/>
+</message>
+
+<message name="DeviceGetConfigWordRequest">
+ <part name="parameters" element="dss:DeviceGetConfigWord"/>
+</message>
+
+<message name="DeviceGetConfigWordResponse">
+ <part name="parameters" element="dss:DeviceGetConfigWordResponse"/>
 </message>
 
 <message name="DeviceCallSceneRequest">
@@ -2384,10 +2440,20 @@
   <input message="tns:DeviceSetValueRequest"/>
   <output message="tns:DeviceSetValueResponse"/>
  </operation>
- <operation name="DeviceGetValue">
-  <documentation>Service definition of function dss__DeviceGetValue</documentation>
-  <input message="tns:DeviceGetValueRequest"/>
-  <output message="tns:DeviceGetValueResponse"/>
+ <operation name="DeviceSetConfig">
+  <documentation>Service definition of function dss__DeviceSetConfig</documentation>
+  <input message="tns:DeviceSetConfigRequest"/>
+  <output message="tns:DeviceSetConfigResponse"/>
+ </operation>
+ <operation name="DeviceGetConfig">
+  <documentation>Service definition of function dss__DeviceGetConfig</documentation>
+  <input message="tns:DeviceGetConfigRequest"/>
+  <output message="tns:DeviceGetConfigResponse"/>
+ </operation>
+ <operation name="DeviceGetConfigWord">
+  <documentation>Service definition of function dss__DeviceGetConfigWord</documentation>
+  <input message="tns:DeviceGetConfigWordRequest"/>
+  <output message="tns:DeviceGetConfigWordResponse"/>
  </operation>
  <operation name="DeviceCallScene">
   <documentation>Service definition of function dss__DeviceCallScene</documentation>
@@ -2991,7 +3057,25 @@
      <SOAP:body parts="parameters" use="literal"/>
   </output>
  </operation>
- <operation name="DeviceGetValue">
+ <operation name="DeviceSetConfig">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="DeviceGetConfig">
+  <SOAP:operation soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal"/>
+  </output>
+ </operation>
+ <operation name="DeviceGetConfigWord">
   <SOAP:operation soapAction=""/>
   <input>
      <SOAP:body parts="parameters" use="literal"/>

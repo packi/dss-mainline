@@ -1,7 +1,8 @@
 /*
     Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -23,6 +24,7 @@
 #include "devicerequesthandler.h"
 
 #include <boost/bind.hpp>
+#include <limits.h>
 
 #include "core/model/apartment.h"
 #include "core/model/device.h"
@@ -78,6 +80,9 @@ namespace dss {
   boost::shared_ptr<Device> DeviceRequestHandler::getDeviceByName(const RestfulRequest& _request) {
     boost::shared_ptr<Device> result;
     std::string deviceName = _request.getParameter("name");
+    if (deviceName.empty()) {
+      return result;
+    }
     try {
       result = m_Apartment.getDeviceByName(deviceName);
     } catch(std::runtime_error&  e) {
@@ -179,22 +184,68 @@ namespace dss {
       }
       pDevice->unlock();
       return success();
-    } else if(_request.getMethod() == "setRawValue") {
+    } else if(_request.getMethod() == "setConfig") {
       int value = strToIntDef(_request.getParameter("value"), -1);
-      if(value == -1) {
+      if((value  < 0) || (value > UCHAR_MAX)) {
         return failure("Invalid or missing parameter 'value'");
       }
-      int parameterID = strToIntDef(_request.getParameter("parameterID"), -1);
-      if(parameterID == -1) {
-        return failure("Invalid or missing parameter 'parameterID'");
+
+      int configClass = strToIntDef(_request.getParameter("class"), -1);
+      if((configClass < 0) || (configClass > UCHAR_MAX)) {
+        return failure("Invalid or missing parameter 'class'");
       }
-      int size = strToIntDef(_request.getParameter("size"), -1);
-      if(size == -1) {
-        return failure("Invalid or missing parameter 'size'");
+      int configIndex = strToIntDef(_request.getParameter("index"), -1);
+      if((configIndex < 0) || (configIndex > UCHAR_MAX)) {
+        return failure("Invalid or missing parameter 'index'");
       }
 
-      pDevice->setRawValue(value, parameterID, size);
+      pDevice->setConfig(configClass, configIndex, value);
       return success();
+    } else if(_request.getMethod() == "getConfig") {
+      int configClass = strToIntDef(_request.getParameter("class"), -1);
+      if((configClass < 0) || (configClass > UCHAR_MAX)) {
+        return failure("Invalid or missing parameter 'class'");
+      }
+      int configIndex = strToIntDef(_request.getParameter("index"), -1);
+      if((configIndex < 0) || (configIndex > UCHAR_MAX)) {
+        return failure("Invalid or missing parameter 'index'");
+      }
+
+      uint8_t value = pDevice->getConfig(configClass, configIndex);
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("class", configClass);
+      resultObj->addProperty("index", configIndex);
+      resultObj->addProperty("value", value);
+
+      return success(resultObj);
+    } else if(_request.getMethod() == "getConfigWord") {
+      int configClass = strToIntDef(_request.getParameter("class"), -1);
+      if((configClass < 0) || (configClass > UCHAR_MAX)) {
+        return failure("Invalid or missing parameter 'class'");
+      }
+      int configIndex = strToIntDef(_request.getParameter("index"), -1);
+      if((configIndex < 0) || (configIndex > UCHAR_MAX)) {
+        return failure("Invalid or missing parameter 'index'");
+      }
+
+      uint16_t value = pDevice->getConfigWord(configClass, configIndex);
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("class", configClass);
+      resultObj->addProperty("index", configIndex);
+      resultObj->addProperty("value", value);
+
+      return success(resultObj);
+    } else if(_request.getMethod() == "setOutputValue") {
+      int value = strToIntDef(_request.getParameter("value"), -1);
+      if((value  < 0) || (value > UCHAR_MAX)) {
+        return failure("Invalid or missing parameter 'value'");
+      }
+
+      pDevice->setOutputValue(value);
+      return success();
+
     } else {
       throw std::runtime_error("Unhandled function");
     }

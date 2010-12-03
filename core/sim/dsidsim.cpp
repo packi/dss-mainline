@@ -94,15 +94,29 @@ namespace dss {
     m_Enabled = false;
   } // disable
 
-  void DSIDSim::setValue(const double _value, int _parameterNr) {
+  void DSIDSim::setDeviceConfig(const uint8_t _configClass,
+                                const uint8_t _configIndex,
+                                const uint8_t _value) {
+    if(m_Enabled) {
+      m_DeviceConfig[_configClass][_configIndex] = int(_value);
+    }
+  } // setDeviceConfig
+
+  uint8_t DSIDSim::getDeviceConfig(const uint8_t _configClass,
+                                   const uint8_t _configIndex) {
+    return static_cast<uint8_t>(m_DeviceConfig[_configClass][_configIndex]);
+  } // getValue
+
+  uint16_t DSIDSim::getDeviceConfigWord(const uint8_t _configClass,
+                                   const uint8_t _configIndex) {
+    return static_cast<uint16_t>(m_DeviceConfig[_configClass][_configIndex]);
+  } // getValue
+
+  void DSIDSim::setOutputValue(const uint8_t _value) {
     if(m_Enabled) {
       m_CurrentValue = int(_value);
     }
-  } // setValue
-
-  double DSIDSim::getValue(int _parameterNr) const {
-    return static_cast<double>(m_CurrentValue);
-  } // getValue
+  } // setOutputValue
 
   uint16_t DSIDSim::getFunctionID() {
     if(m_ConfigParameter.has("functionID")) {

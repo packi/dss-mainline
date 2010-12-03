@@ -188,14 +188,24 @@ namespace dss {
       .withDocumentation("Enables the device.");
     clsDevice.addMethod("disable")
       .withDocumentation("Disables the device.", "A disabled device will only react to enable calls.");
-    clsDevice.addMethod("setValue")
-      .withParameter("value", "double", true)
-      .withDocumentation("Sets the output value of the device to value");
-    clsDevice.addMethod("setRawValue")
+    clsDevice.addMethod("setOutputValue")
       .withParameter("value", "integer", true)
-      .withParameter("parameterID", "integer", true)
-      .withParameter("size", "integer", true)
-      .withDocumentation("Sets the value of register parameterID to value");
+      .withDocumentation("Sets the output value of the device to value, allowed range is 0-255");
+    clsDevice.addMethod("setConfig")
+      .withParameter("value", "integer", true)
+      .withParameter("class", "integer", true)
+      .withParameter("index", "integer", true)
+      .withDocumentation("Sets the value of config class at offset index to value");
+    clsDevice.addMethod("getConfig")
+      .withParameter("value", "integer", true)
+      .withParameter("class", "integer", true)
+      .withParameter("index", "integer", true)
+      .withDocumentation("Gets the value of config class at offset index");
+    clsDevice.addMethod("getConfigWord")
+      .withParameter("value", "integer", true)
+      .withParameter("class", "integer", true)
+      .withParameter("index", "integer", true)
+      .withDocumentation("Gets the value of config class at offset index");
     clsDevice.addMethod("callScene")
       .withParameter("sceneNumber", "integer", true)
       .withDocumentation("Calls scene sceneNumber on the device.");

@@ -20,18 +20,19 @@
 
 class dssService : public soap
 {    public:
-  dssService()
-  { static const struct Namespace namespaces[] =
+	dssService()
+	{ static const struct Namespace namespaces[] =
 {
-  {"SOAP-ENV", "http://schemas.xmlsoap.org/soap/envelope/", "http://www.w3.org/*/soap-envelope", NULL},
-  {"SOAP-ENC", "http://schemas.xmlsoap.org/soap/encoding/", "http://www.w3.org/*/soap-encoding", NULL},
-  {"xsi", "http://www.w3.org/2001/XMLSchema-instance", "http://www.w3.org/*/XMLSchema-instance", NULL},
-  {"xsd", "http://www.w3.org/2001/XMLSchema", "http://www.w3.org/*/XMLSchema", NULL},
-  {"dss", "urn:dss:1.0", NULL, NULL},
-  {NULL, NULL, NULL, NULL}
+	{"SOAP-ENV", "http://schemas.xmlsoap.org/soap/envelope/", "http://www.w3.org/*/soap-envelope", NULL},
+	{"SOAP-ENC", "http://schemas.xmlsoap.org/soap/encoding/", "http://www.w3.org/*/soap-encoding", NULL},
+	{"xsi", "http://www.w3.org/2001/XMLSchema-instance", "http://www.w3.org/*/XMLSchema-instance", NULL},
+	{"xsd", "http://www.w3.org/2001/XMLSchema", "http://www.w3.org/*/XMLSchema", NULL},
+	{"dss", "urn:dss:1.0", NULL, NULL},
+	{NULL, NULL, NULL, NULL}
 };
-          bind_flags = SO_REUSEADDR;
-          accept_timeout = SOAP_ACCEPT_TIMEOUT; // seconds
+
+    bind_flags = SO_REUSEADDR;
+    accept_timeout = SOAP_ACCEPT_TIMEOUT; // seconds
 	if (!this->namespaces) this->namespaces = namespaces; };
 	virtual ~dssService() { };
 	/// Bind service to port (returns master socket or SOAP_INVALID_SOCKET)
@@ -141,9 +142,13 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceIncreaseValue(struct soap*, char *_token, c
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceDecreaseValue(struct soap*, char *_token, char *_deviceID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSetValue(struct soap*, char *_token, char *_deviceID, double _value, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSetValue(struct soap*, char *_token, char *_deviceID, unsigned char _value, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetValue(struct soap*, char *_token, char *_deviceID, int _paramID, double &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSetConfig(struct soap*, char *_token, char *_deviceID, unsigned char _configClass, unsigned char _configIndex, unsigned char _value, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetConfig(struct soap*, char *_token, char *_deviceID, unsigned char _configClass, unsigned char _configIndex, unsigned char &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetConfigWord(struct soap*, char *_token, char *_deviceID, unsigned char _configClass, unsigned char _configIndex, unsigned short &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceCallScene(struct soap*, char *_token, char *_deviceID, int _sceneNr, bool &result);
 

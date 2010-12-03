@@ -36,10 +36,10 @@ namespace dss {
     bool m_Dimming;
     time_t m_DimmStartTime;
     bool m_DimmingUp;
-    std::vector<int> m_Parameters;
     DSMeterSim* m_DSMeter;
     std::vector<uint8_t> m_ValuesForScene;
     uint8_t m_CurrentValue;
+    std::map<int, std::map<int, int> > m_DeviceConfig;
     int m_DimTimeMS;
     int m_SimpleConsumption;
     Properties m_ConfigParameter;
@@ -56,9 +56,17 @@ namespace dss {
 
     virtual int getConsumption();
 
-    virtual void setValue(const double _value, int _parameterNr = -1);
+    virtual void setDeviceConfig(const uint8_t _configClass,
+                                 const uint8_t _configIndex,
+                                 const uint8_t _value);
 
-    virtual double getValue(int _parameterNr = -1) const;
+    virtual uint8_t getDeviceConfig(const uint8_t _configClass,
+                                    const uint8_t _configIndex);
+
+    virtual uint16_t getDeviceConfigWord(const uint8_t _configClass,
+                                       const uint8_t _configIndex);
+
+    virtual void setOutputValue(const uint8_t _value);
 
     virtual uint16_t getFunctionID();
     void setSimpleConsumption(const int _value) { m_SimpleConsumption = _value; }

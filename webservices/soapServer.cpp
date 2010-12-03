@@ -11,7 +11,7 @@
 #endif
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.15 2010-11-12 14:07:06 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.15 2010-12-03 15:42:46 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -173,8 +173,12 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_dss__DeviceDecreaseValue(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceSetValue"))
 		return soap_serve_dss__DeviceSetValue(soap);
-	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetValue"))
-		return soap_serve_dss__DeviceGetValue(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceSetConfig"))
+		return soap_serve_dss__DeviceSetConfig(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetConfig"))
+		return soap_serve_dss__DeviceGetConfig(soap);
+	if (!soap_match_tag(soap, soap->tag, "dss:DeviceGetConfigWord"))
+		return soap_serve_dss__DeviceGetConfigWord(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceCallScene"))
 		return soap_serve_dss__DeviceCallScene(soap);
 	if (!soap_match_tag(soap, soap->tag, "dss:DeviceSaveScene"))
@@ -2176,30 +2180,30 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceSetValue(struct soap *soap)
 	return soap_closesock(soap);
 }
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetValue(struct soap *soap)
-{	struct dss__DeviceGetValue soap_tmp_dss__DeviceGetValue;
-	struct dss__DeviceGetValueResponse soap_tmp_dss__DeviceGetValueResponse;
-	soap_default_dss__DeviceGetValueResponse(soap, &soap_tmp_dss__DeviceGetValueResponse);
-	soap_default_dss__DeviceGetValue(soap, &soap_tmp_dss__DeviceGetValue);
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceSetConfig(struct soap *soap)
+{	struct dss__DeviceSetConfig soap_tmp_dss__DeviceSetConfig;
+	struct dss__DeviceSetConfigResponse soap_tmp_dss__DeviceSetConfigResponse;
+	soap_default_dss__DeviceSetConfigResponse(soap, &soap_tmp_dss__DeviceSetConfigResponse);
+	soap_default_dss__DeviceSetConfig(soap, &soap_tmp_dss__DeviceSetConfig);
 	soap->encodingStyle = NULL;
-	if (!soap_get_dss__DeviceGetValue(soap, &soap_tmp_dss__DeviceGetValue, "dss:DeviceGetValue", NULL))
+	if (!soap_get_dss__DeviceSetConfig(soap, &soap_tmp_dss__DeviceSetConfig, "dss:DeviceSetConfig", NULL))
 		return soap->error;
 	if (soap_body_end_in(soap)
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap->error;
-	soap->error = dss__DeviceGetValue(soap, soap_tmp_dss__DeviceGetValue._token, soap_tmp_dss__DeviceGetValue._deviceID, soap_tmp_dss__DeviceGetValue._paramID, soap_tmp_dss__DeviceGetValueResponse.result);
+	soap->error = dss__DeviceSetConfig(soap, soap_tmp_dss__DeviceSetConfig._token, soap_tmp_dss__DeviceSetConfig._deviceID, soap_tmp_dss__DeviceSetConfig._configClass, soap_tmp_dss__DeviceSetConfig._configIndex, soap_tmp_dss__DeviceSetConfig._value, soap_tmp_dss__DeviceSetConfigResponse.result);
 	if (soap->error)
 		return soap->error;
 	soap_serializeheader(soap);
-	soap_serialize_dss__DeviceGetValueResponse(soap, &soap_tmp_dss__DeviceGetValueResponse);
+	soap_serialize_dss__DeviceSetConfigResponse(soap, &soap_tmp_dss__DeviceSetConfigResponse);
 	if (soap_begin_count(soap))
 		return soap->error;
 	if (soap->mode & SOAP_IO_LENGTH)
 	{	if (soap_envelope_begin_out(soap)
 		 || soap_putheader(soap)
 		 || soap_body_begin_out(soap)
-		 || soap_put_dss__DeviceGetValueResponse(soap, &soap_tmp_dss__DeviceGetValueResponse, "dss:DeviceGetValueResponse", NULL)
+		 || soap_put_dss__DeviceSetConfigResponse(soap, &soap_tmp_dss__DeviceSetConfigResponse, "dss:DeviceSetConfigResponse", NULL)
 		 || soap_body_end_out(soap)
 		 || soap_envelope_end_out(soap))
 			 return soap->error;
@@ -2209,7 +2213,89 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetValue(struct soap *soap)
 	 || soap_envelope_begin_out(soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
-	 || soap_put_dss__DeviceGetValueResponse(soap, &soap_tmp_dss__DeviceGetValueResponse, "dss:DeviceGetValueResponse", NULL)
+	 || soap_put_dss__DeviceSetConfigResponse(soap, &soap_tmp_dss__DeviceSetConfigResponse, "dss:DeviceSetConfigResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetConfig(struct soap *soap)
+{	struct dss__DeviceGetConfig soap_tmp_dss__DeviceGetConfig;
+	struct dss__DeviceGetConfigResponse soap_tmp_dss__DeviceGetConfigResponse;
+	soap_default_dss__DeviceGetConfigResponse(soap, &soap_tmp_dss__DeviceGetConfigResponse);
+	soap_default_dss__DeviceGetConfig(soap, &soap_tmp_dss__DeviceGetConfig);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DeviceGetConfig(soap, &soap_tmp_dss__DeviceGetConfig, "dss:DeviceGetConfig", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DeviceGetConfig(soap, soap_tmp_dss__DeviceGetConfig._token, soap_tmp_dss__DeviceGetConfig._deviceID, soap_tmp_dss__DeviceGetConfig._configClass, soap_tmp_dss__DeviceGetConfig._configIndex, soap_tmp_dss__DeviceGetConfigResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DeviceGetConfigResponse(soap, &soap_tmp_dss__DeviceGetConfigResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DeviceGetConfigResponse(soap, &soap_tmp_dss__DeviceGetConfigResponse, "dss:DeviceGetConfigResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DeviceGetConfigResponse(soap, &soap_tmp_dss__DeviceGetConfigResponse, "dss:DeviceGetConfigResponse", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_dss__DeviceGetConfigWord(struct soap *soap)
+{	struct dss__DeviceGetConfigWord soap_tmp_dss__DeviceGetConfigWord;
+	struct dss__DeviceGetConfigWordResponse soap_tmp_dss__DeviceGetConfigWordResponse;
+	soap_default_dss__DeviceGetConfigWordResponse(soap, &soap_tmp_dss__DeviceGetConfigWordResponse);
+	soap_default_dss__DeviceGetConfigWord(soap, &soap_tmp_dss__DeviceGetConfigWord);
+	soap->encodingStyle = NULL;
+	if (!soap_get_dss__DeviceGetConfigWord(soap, &soap_tmp_dss__DeviceGetConfigWord, "dss:DeviceGetConfigWord", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = dss__DeviceGetConfigWord(soap, soap_tmp_dss__DeviceGetConfigWord._token, soap_tmp_dss__DeviceGetConfigWord._deviceID, soap_tmp_dss__DeviceGetConfigWord._configClass, soap_tmp_dss__DeviceGetConfigWord._configIndex, soap_tmp_dss__DeviceGetConfigWordResponse.result);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_dss__DeviceGetConfigWordResponse(soap, &soap_tmp_dss__DeviceGetConfigWordResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_dss__DeviceGetConfigWordResponse(soap, &soap_tmp_dss__DeviceGetConfigWordResponse, "dss:DeviceGetConfigWordResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_dss__DeviceGetConfigWordResponse(soap, &soap_tmp_dss__DeviceGetConfigWordResponse, "dss:DeviceGetConfigWordResponse", NULL)
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

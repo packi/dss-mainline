@@ -30,26 +30,56 @@ namespace dss {
 
   //================================================== SimDeviceBusInterface
 
-  uint16_t SimDeviceBusInterface::deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterID, int _paramID) {
-    boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_dsMeterID);
+  uint8_t SimDeviceBusInterface::getDeviceConfig(const Device& _device,
+                                                 const uint8_t _configClass,
+                                                 const uint8_t _configIndex) {
+    boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_device.getDSMeterDSID());
     if(pMeter != NULL) {
-      DSIDInterface* pDevice = pMeter->getSimulatedDevice(_id);
+      DSIDInterface* pDevice = pMeter->getSimulatedDevice(_device.getShortAddress());
       if(pDevice != NULL) {
-        return pDevice->getValue(_paramID);
+        return pDevice->getDeviceConfig(_configClass, _configIndex);
+      }
+    }
+    return 0xFF;
+  } // deviceGetParameterValue
+
+  uint16_t SimDeviceBusInterface::getDeviceConfigWord(const Device& _device,
+                                                   const uint8_t _configClass,
+                                                   const uint8_t _configIndex) {
+    boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_device.getDSMeterDSID());
+    if(pMeter != NULL) {
+      DSIDInterface* pDevice = pMeter->getSimulatedDevice(_device.getShortAddress());
+      if(pDevice != NULL) {
+        return pDevice->getDeviceConfigWord(_configClass, _configIndex);
       }
     }
     return 0xFFFF;
   } // deviceGetParameterValue
 
-  void SimDeviceBusInterface::setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) {
+  void SimDeviceBusInterface::setDeviceConfig(const Device& _device,
+                                              const uint8_t _configClass,
+                                              const uint8_t _configIndex,
+                                              const uint8_t _value) {
     boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_device.getDSMeterDSID());
     if(pMeter != NULL) {
       DSIDInterface* pDevice = pMeter->getSimulatedDevice(_device.getShortAddress());
       if(pDevice != NULL) {
-        pDevice->setValue(_value, _parameterID);
+        pDevice->setDeviceConfig(_configClass, _configIndex, _value);
       }
     }
   } // setValueDevice
+
+  void SimDeviceBusInterface::setOutputValue(const Device& _device,
+                                             const uint8_t _value) {
+    boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_device.getDSMeterDSID());
+    if(pMeter != NULL) {
+      DSIDInterface* pDevice = pMeter->getSimulatedDevice(_device.getShortAddress());
+      if(pDevice != NULL) {
+        pDevice->setOutputValue(_value);
+      }
+    }
+  } // setValueDevice
+
 
   int SimDeviceBusInterface::getSensorValue(const Device& _device, const int _sensorID) {
     return 0;

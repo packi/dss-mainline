@@ -159,13 +159,15 @@ int dss__DeviceTurnOff(char* _token, char* _deviceID, bool& result);
 int dss__DeviceIncreaseValue(char* _token, char* _deviceID, bool& result);
 /** Decreases the main value (e.g. brightness) on the device. */
 int dss__DeviceDecreaseValue(char* _token, char* _deviceID, bool& result);
-/** Sets the value of the parameter _paramID to _value. If _paramID == -1 the default parameter
- * will be set. */
-int dss__DeviceSetValue(char* _token, char* _deviceID, double _value, bool& result);
-/** Returns the value of the parameter _paramID. If _paramID == -1 the value of the default parameter
- * will be returned. */
-int dss__DeviceGetValue(char* _token, char* _deviceID, int _paramID, double& result);
+/** Set main value (e.g. brightness) on the device. */
+int dss__DeviceSetValue(char* _token, char* _deviceID, unsigned char _value, bool& result);
+/** Sets the configuration value of the given config class and config index */
+int dss__DeviceSetConfig(char* _token, char* _deviceID, unsigned char _configClass, unsigned char _configIndex, unsigned char _value, bool& result);
+/** Returns configuration value of the given config class and config index */
+int dss__DeviceGetConfig(char* _token, char* _deviceID, unsigned char _configClass, unsigned char _configIndex, unsigned char& result);
 
+/** Returns configuration value of the given config class and config index */
+int dss__DeviceGetConfigWord(char* _token, char* _deviceID, unsigned char _configClass, unsigned char _configIndex, unsigned short int& result);
 
 /** Calls the scene _sceneNr on the device identified by _deviceID. */
 int dss__DeviceCallScene(char* _token, char* _deviceID, int _sceneNr, bool& result);

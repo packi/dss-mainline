@@ -63,19 +63,45 @@ namespace dss {
       m_pSimulationInterface(_pSimulationInterface)
     { }
 
-    virtual uint16_t deviceGetParameterValue(devid_t _id, const dss_dsid_t& _dsMeterID, int _paramID) {
-      if(isHandledBySimulation(_dsMeterID)) {
-        return m_pSimulationInterface->deviceGetParameterValue(_id, _dsMeterID, _paramID);
+    virtual uint8_t getDeviceConfig(const Device& _device,
+                                    uint8_t _configClass,
+                                    uint8_t _configIndex) {
+      if(isHandledBySimulation(_device.getDSMeterDSID())) {
+        return m_pSimulationInterface->getDeviceConfig(_device, _configClass,
+                                                       _configIndex);
       } else {
-        return m_pInner->deviceGetParameterValue(_id, _dsMeterID, _paramID);
+        return m_pInner->getDeviceConfig(_device, _configClass, _configIndex);
       }
     }
 
-    virtual void setValueDevice(const Device& _device, const uint16_t _value, const uint16_t _parameterID, const int _size) {
+    virtual uint16_t getDeviceConfigWord(const Device& _device,
+                                    uint8_t _configClass,
+                                    uint8_t _configIndex) {
       if(isHandledBySimulation(_device.getDSMeterDSID())) {
-        m_pSimulationInterface->setValueDevice(_device, _value,  _parameterID, _size);
+        return m_pSimulationInterface->getDeviceConfigWord(_device,
+                                                           _configClass,
+                                                           _configIndex);
       } else {
-        m_pInner->setValueDevice(_device, _value, _parameterID, _size);
+        return m_pInner->getDeviceConfigWord(_device, _configClass,
+                                             _configIndex);
+      }
+    }
+
+    virtual void setDeviceConfig(const Device& _device, uint8_t _configClass,
+                                 uint8_t _configIndex, uint8_t _value) {
+      if(isHandledBySimulation(_device.getDSMeterDSID())) {
+        m_pSimulationInterface->setDeviceConfig(_device, _configClass,
+                                                _configIndex, _value);
+      } else {
+        m_pInner->setDeviceConfig(_device, _configClass, _configIndex, _value);
+      }
+    }
+
+    virtual void setOutputValue(const Device& _device, uint8_t _value) {
+      if(isHandledBySimulation(_device.getDSMeterDSID())) {
+        m_pSimulationInterface->setOutputValue(_device, _value);
+      } else {
+        m_pInner->setOutputValue(_device, _value);
       }
     }
 

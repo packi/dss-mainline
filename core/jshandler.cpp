@@ -507,6 +507,11 @@ namespace dss {
   } // add<int>
 
   template<>
+  void ScriptFunctionParameterList::add(uint8_t _value) {
+    m_Parameter.push_back(INT_TO_JSVAL(_value));
+  } // add<uint8_t>
+
+  template<>
   void ScriptFunctionParameterList::add(unsigned short _value) {
     m_Parameter.push_back(INT_TO_JSVAL(_value));
   } // add<unsigned short>
