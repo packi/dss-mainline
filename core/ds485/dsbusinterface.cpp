@@ -173,13 +173,25 @@ namespace dss {
       log("Couldn't open dsmapi connection to '" + m_connectionURI + "' result: " + intToString(result));
       return;
     }
-    log("Successfully connected to " + m_connectionURI);
+
+    // read out own dsid
+    int ret = DsmApiGetOwnDSID(m_dsmApiHandle, &m_ownDSID);
+    DSBusInterface::checkResultCode(ret);
+
+    log("Successfully connected to " + m_connectionURI + 
+        " [ " + dsid_helper::toString(m_ownDSID) + "]");
 
     m_pActionRequestInterface->setDSMApiHandle(m_dsmApiHandle);
     m_pDeviceBusInterface->setDSMApiHandle(m_dsmApiHandle);
     m_pMeteringBusInterface->setDSMApiHandle(m_dsmApiHandle);
     m_pStructureQueryBusInterface->setDSMApiHandle(m_dsmApiHandle);
     m_pStructureModifyingBusInterface->setDSMApiHandle(m_dsmApiHandle);
+
+    m_pActionRequestInterface->setOwnDSID(m_ownDSID);
+    m_pDeviceBusInterface->setOwnDSID(m_ownDSID);
+    m_pMeteringBusInterface->setOwnDSID(m_ownDSID);
+    m_pStructureQueryBusInterface->setOwnDSID(m_ownDSID);
+    m_pStructureModifyingBusInterface->setOwnDSID(m_ownDSID);
 
 
     // register callbacks
@@ -255,6 +267,10 @@ namespace dss {
 
   void DSBusInterface::handleBusChange(dsid_t *_id, int _flag) {
     ModelEvent::EventType eventType;
+    
+    if (IsEqualId(_id, m_ownDSID)) {
+      return;
+    }
 
     dss_dsid_t dSMeterID;
     dsid_helper::toDssDsid(*_id, dSMeterID);

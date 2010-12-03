@@ -41,14 +41,9 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       return result;
     }
-    dsid_t ownDSID;
-
-    // TODO: we could cache our own DSID
-    int ret = DsmApiGetOwnDSID(m_DSMApiHandle, &ownDSID);
-    DSBusInterface::checkResultCode(ret);
 
     dsid_t device_list[63]; // TODO: constant for 63?
-    ret = DsmApiGetBusMembers(m_DSMApiHandle, device_list, 63);
+    int ret = DsmApiGetBusMembers(m_DSMApiHandle, device_list, 63);
     if(ret < 0) {
       // DsmApiGetBusMembers returns >= 0 on success
       DSBusInterface::checkResultCode(ret);
@@ -56,7 +51,7 @@ namespace dss {
 
     for(int i = 0; i < ret; ++i) {
       // don't include ourself
-      if(IsEqualId(device_list[i], ownDSID)) {
+      if(IsEqualId(device_list[i], m_ownDSID)) {
         continue;
       }
       dss_dsid_t dsid;
