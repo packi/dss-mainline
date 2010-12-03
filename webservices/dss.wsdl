@@ -3402,7 +3402,7 @@
 </binding>
 
 <service name="dss">
- <documentation>gSOAP 2.7.16 generated service definition</documentation>
+ <documentation>gSOAP 2.7.15 generated service definition</documentation>
  <port name="dss" binding="tns:dss">
   <SOAP:address location="https://localhost:8081"/>
  </port>
