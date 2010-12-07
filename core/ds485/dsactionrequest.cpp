@@ -63,7 +63,7 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_call_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
+      ret = ZoneGroupActionRequest_action_save_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice) {
       dsid_t dsid;
