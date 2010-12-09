@@ -121,6 +121,14 @@ namespace dss {
       }
     }
 
+    virtual std::pair<uint8_t, uint16_t> getTransmissionQuality(const Device& _device) {
+      if(isHandledBySimulation(_device.getDSMeterDSID())) {
+        return m_pSimulationInterface->getTransmissionQuality(_device);
+      } else {
+        return m_pInner->getTransmissionQuality(_device);
+      }
+    }
+
   private:
     DeviceBusInterface* m_pInner;
     DeviceBusInterface* m_pSimulationInterface;

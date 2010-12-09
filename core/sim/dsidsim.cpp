@@ -112,6 +112,12 @@ namespace dss {
     return static_cast<uint16_t>(m_DeviceConfig[_configClass][_configIndex]);
   } // getValue
 
+  std::pair<uint8_t, uint16_t> DSIDSim::getTransmissionQuality() {
+    uint8_t down = rand() % 255;
+    uint8_t up = rand() % 255;
+    return std::make_pair(down, up);
+  }
+
   void DSIDSim::setOutputValue(const uint8_t _value) {
     if(m_Enabled) {
       m_CurrentValue = int(_value);

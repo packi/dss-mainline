@@ -246,6 +246,15 @@ namespace dss {
       pDevice->setOutputValue(value);
       return success();
 
+    } else if(_request.getMethod() == "getTransmissionQuality") {
+      std::pair<uint8_t, uint16_t> p = pDevice->getTransmissionQuality();
+      uint8_t down = p.first;
+      uint16_t up = p.second;
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("upstream", up);
+      resultObj->addProperty("downstream", down);
+      return success(resultObj);
+
     } else {
       throw std::runtime_error("Unhandled function");
     }

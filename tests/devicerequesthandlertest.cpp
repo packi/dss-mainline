@@ -459,4 +459,13 @@ BOOST_FIXTURE_TEST_CASE(testGetConfigWord, Fixture) {
   BOOST_CHECK_THROW(m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>()), std::runtime_error);
 }
 
+BOOST_FIXTURE_TEST_CASE(testGetTransmissionQuality, Fixture) {
+  HashMapConstStringString params;
+  m_pApartment->getDeviceByDSID(m_ValidDSID)->setIsPresent(true);
+  params["dsid"] = m_ValidDSID.toString();
+  RestfulRequest req("device/getTransmissionQuality", params);
+  // TODO: setup bus interface
+  BOOST_CHECK_THROW(m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>()), std::runtime_error);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

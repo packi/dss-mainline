@@ -25,6 +25,7 @@
 
 #include <iosfwd>
 #include <bitset>
+#include <utility>
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
@@ -82,6 +83,7 @@ namespace dss {
     uint8_t getConfig(uint8_t _configIndex, uint8_t _value);
     uint16_t getConfigWord(uint8_t _configIndex, uint8_t _value);
 
+    std::pair<uint8_t, uint16_t> getTransmissionQuality();
     /** Set device output value */
     void setOutputValue(uint8_t _value);
 
