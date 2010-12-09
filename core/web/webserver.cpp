@@ -40,7 +40,6 @@
 #include "core/web/restfulapiwriter.h"
 #include "core/web/webrequests.h"
 
-#include "core/web/handler/debugrequesthandler.h"
 #include "core/web/handler/systemrequesthandler.h"
 #include "core/web/handler/simrequesthandler.h"
 #include "core/web/handler/meteringrequesthandler.h"
@@ -208,7 +207,6 @@ namespace dss {
   const char* kHandlerSystem = "system";
   const char* kHandlerStructure = "structure";
   const char* kHandlerSim = "sim";
-  const char* kHandlerDebug = "debug";
   const char* kHandlerMetering = "metering";
   const char* kHandlerSubscription = "subscription";
 
@@ -230,7 +228,6 @@ namespace dss {
         *getDSS().getBusInterface().getStructureModifyingBusInterface()
       );
     m_Handlers[kHandlerSim] = new SimRequestHandler(getDSS().getApartment());
-    m_Handlers[kHandlerDebug] = new DebugRequestHandler(getDSS());
     m_Handlers[kHandlerMetering] = new MeteringRequestHandler(getDSS().getApartment(), getDSS().getMetering());
     m_Handlers[kHandlerSubscription] = new SubscriptionRequestHandler(getDSS().getEventInterpreter());
   } // instantiateHandlers
