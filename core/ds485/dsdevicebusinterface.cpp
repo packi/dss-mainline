@@ -134,4 +134,22 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
   } // lockOrUnlockDevice
 
+  std::pair<uint8_t, uint16_t> DSDeviceBusInterface::getTransmissionQuality(const Device& _device) {
+    if(m_DSMApiHandle == NULL) {
+      throw std::runtime_error("Invalid libdsm api handle");
+    }
+
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
+
+    uint8_t downstream;
+    uint16_t upstream;
+
+    int ret = TestTransmissionQuality_get_sync(m_DSMApiHandle, dsmDSID,
+                                               _device.getShortAddress(),
+                                               kDSM_API_TIMEOUT,
+                                               &downstream, &upstream);
+    DSBusInterface::checkResultCode(ret);
+    return std::make_pair(downstream, upstream);
+  }
 } // namespace dss

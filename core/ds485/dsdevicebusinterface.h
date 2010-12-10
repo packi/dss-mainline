@@ -52,6 +52,8 @@ namespace dss {
 
     virtual int getSensorValue(const Device& _device, const int _sensorID);
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock);
+
+    virtual std::pair<uint8_t, uint16_t> getTransmissionQuality(const Device& _device);
   }; // DSDeviceBusInterface
 
 

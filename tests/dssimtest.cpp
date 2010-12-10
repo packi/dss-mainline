@@ -22,6 +22,8 @@
 
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_DYN_LINK
+
+#include <utility>
 #include <boost/test/unit_test.hpp>
 
 #include <boost/filesystem.hpp>
@@ -111,6 +113,13 @@ public:
   virtual std::string getConfigParameter(const std::string& _name) const {
     functionCalled("getConfigParameter");
     return "nothing";
+  }
+
+  virtual std::pair<uint8_t, uint16_t> getTransmissionQuality() {
+    functionCalled("getTransmissionQuality");
+    uint8_t down = rand() % 255;
+    uint16_t up = rand() % 255;
+    return std::make_pair(down, up);
   }
 
   const std::string& getCalledFunction() const {

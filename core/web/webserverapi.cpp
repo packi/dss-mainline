@@ -206,6 +206,8 @@ namespace dss {
       .withParameter("class", "integer", true)
       .withParameter("index", "integer", true)
       .withDocumentation("Gets the value of config class at offset index");
+    clsDevice.addMethod("getTransmissionQuality")
+      .withDocumentation("Request upstream and downstream quality information");
     clsDevice.addMethod("callScene")
       .withParameter("sceneNumber", "integer", true)
       .withDocumentation("Calls scene sceneNumber on the device.");

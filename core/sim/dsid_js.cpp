@@ -210,6 +210,9 @@ namespace dss {
       return 0;
     } // getConfigWord
 
+    virtual std::pair<uint8_t, uint16_t> getTransmissionQuality() {
+        return std::make_pair(rand() % 255, rand() % 255);
+    } // getTransmissionQuality
 
     virtual uint16_t getFunctionID() {
       if(m_pSelf != NULL) {

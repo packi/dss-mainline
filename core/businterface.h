@@ -29,6 +29,7 @@
 
 #include <string>
 #include <vector>
+#include <utility>
 #include <boost/tuple/tuple.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -60,6 +61,10 @@ namespace dss {
     virtual int getSensorValue(const Device& _device, const int _sensorID) = 0;
     /** Tells the dSM to lock the device if \a _lock is true. */
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock) = 0;
+
+    /** Tests transmission quality to a device, where the first returned
+      value is the DownstreamQuality and the second value the UpstreamQuality */
+    virtual std::pair<uint8_t, uint16_t> getTransmissionQuality(const Device& _device) = 0;
 
     virtual ~DeviceBusInterface() {}; // please the compiler (virtual dtor)
   }; // DeviceBusInterface

@@ -12,7 +12,7 @@ metering/metering.cpp metering/series.cpp metering/seriespersistence.cpp
 web/restful.cpp web/restfulapiwriter.cpp
 web/webserverapi.cpp web/webrequests.cpp
 web/webserver.cpp web/json.cpp
-web/handler/simrequesthandler.cpp web/handler/debugrequesthandler.cpp
+web/handler/simrequesthandler.cpp
 web/handler/systemrequesthandler.cpp web/handler/meteringrequesthandler.cpp
 web/handler/structurerequesthandler.cpp web/handler/eventrequesthandler.cpp
 web/handler/propertyrequesthandler.cpp web/handler/deviceinterfacerequesthandler.cpp
