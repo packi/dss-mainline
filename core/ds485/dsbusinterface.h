@@ -72,22 +72,30 @@ namespace dss {
     static void busStateCallback(void* _userData, bus_state_t _state);
     void handleBusState(bus_state_t _state);
 
-    static void eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData,
+    static void eventDeviceAccessibilityOffCallback(uint8_t _errorCode,
+                                                    void* _userData,
+                                                    dsid_t _sourceDSMeterID,
+                                                   dsid_t _destinationDSMeterID,
+                                                    uint16_t _deviceID,
+                                                    uint16_t _zoneID,
+                                                    uint16_t _vendorID,
+                                                    uint32_t _deviceDSID);
+    void eventDeviceAccessibilityOff(uint8_t _errorCode, dsid_t _dsMeterID,
+                                     uint16_t _deviceID, uint16_t _zoneID,
+                                     uint16_t _vendorID, uint32_t _deviceDSID);
+    static void eventDeviceAccessibilityOnCallback(uint8_t _errorCode,
+                                                   void* _userData,
                                                    dsid_t _sourceDSMeterID,
                                                    dsid_t _destinationDSMeterID,
-                                                    uint16_t _deviceID, uint16_t _zoneID,
-                                                    uint32_t _deviceDSID );
-    void eventDeviceAccessibilityOff(uint8_t _errorCode, dsid_t _dsMeterID, uint16_t _deviceID, 
-                                     uint16_t _zoneID, uint32_t _deviceDSID);
-    static void eventDeviceAccessibilityOnCallback(uint8_t _errorCode, void* _userData,
-                                                   dsid_t _sourceDSMeterID,
-                                                   dsid_t _destinationDSMeterID,
-                                                   uint16_t _deviceID, uint16_t _zoneID,
+                                                   uint16_t _deviceID,
+                                                   uint16_t _zoneID,
+                                                   uint16_t _vendorID,
                                                    uint32_t _deviceDSID);
-    void eventDeviceAccessibilityOn(uint8_t _errorCode, dsid_t _dsMeterID, uint16_t _deviceID, 
-                                    uint16_t _zoneID, uint32_t _deviceDSID);
+    void eventDeviceAccessibilityOn(uint8_t _errorCode, dsid_t _dsMeterID,
+                                    uint16_t _deviceID, uint16_t _zoneID,
+                                    uint16_t _vendorID, uint32_t _deviceDSID);
 
-    void handleBusCallScene(uint8_t _errorCode, dsid_t _sourceID, 
+    void handleBusCallScene(uint8_t _errorCode, dsid_t _sourceID,
                             uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID);
     static void handleBusCallSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
                                            dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,

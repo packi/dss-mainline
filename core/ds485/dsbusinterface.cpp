@@ -287,13 +287,13 @@ namespace dss {
 
   void DSBusInterface::eventDeviceAccessibilityOffCallback(uint8_t _errorCode, void* _userData,
                                                            dsid_t _sourceDSMeterID, dsid_t _destinationDSMeterID,
-                                                           uint16_t _deviceID, uint16_t _zoneID,uint32_t _deviceDSID) {
+                                                           uint16_t _deviceID, uint16_t _zoneID, uint16_t _vendorID, uint32_t _deviceDSID) {
     static_cast<DSBusInterface*>(_userData)->eventDeviceAccessibilityOff(_errorCode, _sourceDSMeterID, _deviceID,
-                                                                         _zoneID, _deviceDSID);
+                                                                         _zoneID, _vendorID, _deviceDSID);
   }
 
   void DSBusInterface::eventDeviceAccessibilityOff(uint8_t _errorCode, dsid_t _dsMeterID, uint16_t _deviceID, 
-                                                   uint16_t _zoneID, uint32_t _deviceDSID) {
+                                                   uint16_t _zoneID, uint16_t _vendorID, uint32_t _deviceDSID) {
     dss_dsid_t dsMeterID;
     dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
 
@@ -306,13 +306,13 @@ namespace dss {
 
   void DSBusInterface::eventDeviceAccessibilityOnCallback(uint8_t _errorCode, void* _userData,
                                                           dsid_t _sourceDSMeterID, dsid_t _destinationDSMeterID,
-                                                          uint16_t _deviceID, uint16_t _zoneID, uint32_t _deviceDSID) {
+                                                          uint16_t _deviceID, uint16_t _zoneID, uint16_t _vendorID, uint32_t _deviceDSID) {
     static_cast<DSBusInterface*>(_userData)->eventDeviceAccessibilityOn(_errorCode, _sourceDSMeterID, _deviceID,
-                                                                        _zoneID, _deviceDSID);
+                                                                        _zoneID, _vendorID, _deviceDSID);
   }
 
   void DSBusInterface::eventDeviceAccessibilityOn(uint8_t _errorCode, dsid_t _dsMeterID,
-                                                  uint16_t _deviceID, uint16_t _zoneID, uint32_t _deviceDSID) {
+                                                  uint16_t _deviceID, uint16_t _zoneID, uint16_t _vendorID, uint32_t _deviceDSID) {
     dss_dsid_t dsMeterID;
     dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
 

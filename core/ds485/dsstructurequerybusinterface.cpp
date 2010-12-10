@@ -218,10 +218,29 @@ namespace dss {
     dsid_t dsid;
     dsid_t meterDSID;
     dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
+    uint32_t serialNumber;
 
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, meterDSID, _deviceID, NULL, NULL, NULL, NULL,
-                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &dsid);
+                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &serialNumber);
     DSBusInterface::checkResultCode(ret);
+
+    // this temporary code will be removed once the dsm library returns us
+    // the dsid again (or provides a convenience function)
+    SetNullId(dsid);
+    unsigned char *pdsid = (unsigned char *)&dsid;
+    unsigned char *pser = (unsigned char *)&serialNumber;
+    pdsid[0] = 0x35;
+    pdsid[1] = 0x04;
+    pdsid[2] = 0x17;
+    pdsid[3] = 0x5F;
+    pdsid[4] = 0xE0;
+    pdsid[5] = 0x00;
+    pdsid[6] = 0x00;
+    pdsid[7] = 0x00;
+    pdsid[8] =  pser[1];
+    pdsid[9] =  pser[0];
+    pdsid[10] = pser[3];
+    pdsid[11] = pser[2];
 
     dss_dsid_t dss_dsid;
     dsid_helper::toDssDsid(dsid, dss_dsid);
