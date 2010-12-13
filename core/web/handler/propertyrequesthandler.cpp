@@ -25,6 +25,7 @@
 #include "core/propertysystem.h"
 
 #include "core/web/json.h"
+#include "core/propertyquery.h"
 
 namespace dss {
 
@@ -36,6 +37,15 @@ namespace dss {
   { }
 
   WebServerResponse PropertyRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
+    if(_request.getMethod() == "query") {
+      std::string query = _request.getParameter("query");
+      if(query.empty()) {
+        return failure("Need parameter 'query'");
+      }
+      PropertyQuery propertyQuery(m_PropertySystem.getRootNode(), query);
+      return success(propertyQuery.run());
+    }
+
     std::string propName = _request.getParameter("path");
     if(propName.empty()) {
       return failure("Need parameter 'path' for property operations");

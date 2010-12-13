@@ -279,6 +279,11 @@ namespace dss {
         .withDocumentation("Sets flag to a given value, supported flags are READABLE, WRITEABLE and ARCHIVE");
     clsProp.addMethod("getFlags")
         .withDocumentation("Returns an array of flags and their values");
+    clsProp.addMethod("query")
+        .withParameter("query", "string", true)
+        .withDocumentation("Returns a part of the tree specified by query. All queries start from the root. "
+                           "The properties to be included have to be put in parentheses. A query to get all "
+                           "device from zone4 would look like this: '/apartment/zones/zone4/*(ZoneID,name)'");
 
     RestfulClass& clsEvent = api->addClass("event");
     clsEvent.addMethod("raise")
