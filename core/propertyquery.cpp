@@ -64,7 +64,7 @@ namespace dss {
         obj->addProperty(subprop, node->getAsString());
       }
     }
-    _parentElement->addElement(_part.name, obj);
+    _parentElement->addElement(_node->getName(), obj);
     return obj;
   } // addProperties
 
@@ -75,12 +75,16 @@ namespace dss {
     part_t& part = m_PartList[_partIndex];
     bool hasSubpart = m_PartList.size() > (_partIndex + 1);
     if(!part.properties.empty()) {
-      boost::shared_ptr<JSONArrayBase> array(new JSONArrayBase());
-      _parentElement->addElement(part.name, array);
+      boost::shared_ptr<JSONElement> container(new JSONArrayBase());
+      if(part.name == "*") {
+        _parentElement->addElement(_parentNode->getName(), container);
+      } else {
+        _parentElement->addElement(part.name, container);
+      }
       for(int iChild = 0; iChild < _parentNode->getChildCount(); iChild++) {
         PropertyNodePtr childNode = _parentNode->getChild(iChild);
-        if(childNode->getName() == part.name) {
-          boost::shared_ptr<JSONElement> elem = addProperties(part, array, childNode);
+        if((part.name == "*") || (childNode->getName() == part.name)) {
+          boost::shared_ptr<JSONElement> elem = addProperties(part, container, childNode);
           if(hasSubpart) {
             runFor(childNode, _partIndex + 1, elem);
           }
@@ -89,7 +93,7 @@ namespace dss {
     } else if(hasSubpart) {
       for(int iChild = 0; iChild < _parentNode->getChildCount(); iChild++) {
         PropertyNodePtr childNode = _parentNode->getChild(iChild);
-        if(childNode->getName() == part.name) {
+        if((part.name == "*") || (childNode->getName() == part.name)) {
           runFor(childNode, _partIndex + 1, _parentElement);
         }
       }
