@@ -289,4 +289,18 @@ namespace dss {
     return locked;
   } // isLocked
 
+  bool DSStructureQueryBusInterface::outputHasLoad(boost::shared_ptr<const Device> _device) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    uint8_t outputHasLoad;
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_device->getDSMeterDSID(), dsmDSID);
+    int ret = DeviceInfo_by_device_id(m_DSMApiHandle, dsmDSID, _device->getShortAddress(),
+                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                                      NULL, &outputHasLoad, NULL, NULL, NULL, NULL,
+                                      NULL);
+    DSBusInterface::checkResultCode(ret);
+    return outputHasLoad;
+  } // outputHasLoad
 } // namespace dss

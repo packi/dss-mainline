@@ -173,6 +173,15 @@ namespace dss {
       log(std::string("scanDeviceOnBus: Error getting devices lock state, not aborting scan (") + e.what() + ")", lsWarning);
     }
 
+    try {
+      bool hasLoad = m_Interface.outputHasLoad(dev);
+      dev->setOutputHasLoad(hasLoad);
+
+      log(std::string("scanDeviceOnBus:   Device ") + (hasLoad ? "has" : "has no") + " output load");
+    } catch(BusApiError& e) {
+      log(std::string("scanDeviceOnBus: Error getting devices output load state, not aborting scan (") + e.what() + ")", lsWarning);
+    }
+
     dev->resetGroups();
 
     std::vector<int> groupIDsPerDevice = m_Interface.getGroupsOfDevice(_dsMeter->getDSID(), _shortAddress);

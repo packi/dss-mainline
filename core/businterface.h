@@ -98,6 +98,7 @@ namespace dss {
 
     virtual ~StructureQueryBusInterface() {}; // please the compiler (virtual dtor)
     virtual bool isLocked(boost::shared_ptr<const Device> _device) = 0;
+    virtual bool outputHasLoad(boost::shared_ptr<const Device> _device) = 0;
   }; // StructureQueryBusInterface
 
   class StructureModifyingBusInterface {
