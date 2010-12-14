@@ -61,6 +61,7 @@ namespace dss {
     virtual int getSensorValue(const Device& _device, const int _sensorID) = 0;
     /** Tells the dSM to lock the device if \a _lock is true. */
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock) = 0;
+    virtual void setOutputLoad(const Device& _device, const bool _load) = 0;
 
     /** Tests transmission quality to a device, where the first returned
       value is the DownstreamQuality and the second value the UpstreamQuality */

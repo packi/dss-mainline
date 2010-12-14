@@ -334,6 +334,13 @@ namespace dss {
     m_OutputHasLoad = _value;
   } // setOutputHasLoad
 
+  void Device::setOutputLoad(const bool _load) {
+    if(m_pApartment->getDeviceBusInterface() != NULL) {
+      m_pApartment->getDeviceBusInterface()->setOutputLoad(*this, _load);
+      m_OutputHasLoad = _load;
+    }
+  } // setOutputLoad
+
   void Device::lock() {
     if(m_pApartment->getDeviceBusInterface() != NULL) {
       m_pApartment->getDeviceBusInterface()->lockOrUnlockDevice(*this, true);
