@@ -377,6 +377,15 @@ namespace dss {
         return m_pInner->isLocked(_device);
       }
     }
+
+    virtual bool outputHasLoad(boost::shared_ptr<const Device> _device) {
+      if(isHandledBySimulation(_device->getDSMeterDSID())) {
+        return m_pSimulationInterface->outputHasLoad(_device);
+      } else {
+        return m_pInner->outputHasLoad(_device);
+      }
+    }
+
   private:
     StructureQueryBusInterface* m_pInner;
     StructureQueryBusInterface* m_pSimulationInterface;

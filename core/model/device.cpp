@@ -330,6 +330,10 @@ namespace dss {
     m_IsLockedInDSM = _value;
   } // setIsLockedInDSM
 
+  void Device::setOutputHasLoad(const bool _value) {
+    m_OutputHasLoad = _value;
+  } // setOutputHasLoad
+
   void Device::lock() {
     if(m_pApartment->getDeviceBusInterface() != NULL) {
       m_pApartment->getDeviceBusInterface()->lockOrUnlockDevice(*this, true);

@@ -96,10 +96,11 @@ namespace dss {
     const DSMeterSim& m_Simulator;
     int m_ZoneID;
     bool m_IsLocked;
+    bool m_OutputHasLoad;
   public:
     DSIDInterface(const DSMeterSim& _simulator, dss_dsid_t _dsid, devid_t _shortAddress)
     : m_DSID(_dsid), m_ShortAddress(_shortAddress), m_Simulator(_simulator),
-      m_IsLocked(false) {}
+      m_IsLocked(false), m_OutputHasLoad(false) {}
 
     virtual ~DSIDInterface() {}
 
@@ -141,6 +142,8 @@ namespace dss {
 
     bool isLocked() const { return m_IsLocked; }
     void setIsLocked(const bool _value) { m_IsLocked = _value; }
+
+    bool outputHasLoad() const { return m_OutputHasLoad; }
   }; // DSIDInterface
 
 
