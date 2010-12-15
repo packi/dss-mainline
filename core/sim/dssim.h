@@ -142,6 +142,7 @@ namespace dss {
 
     bool isLocked() const { return m_IsLocked; }
     void setIsLocked(const bool _value) { m_IsLocked = _value; }
+    void setOutputLoad(const bool _value) { m_OutputHasLoad = _value; }
 
     bool outputHasLoad() const { return m_OutputHasLoad; }
   }; // DSIDInterface

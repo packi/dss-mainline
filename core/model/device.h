@@ -197,6 +197,7 @@ namespace dss {
 
     bool getOutputHasLoad() const { return m_OutputHasLoad; }
     void setOutputHasLoad(const bool _value);
+    void setOutputLoad(const bool _load);
 
     /** Tells the dSM to never forget a device. */
     void lock();
