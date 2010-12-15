@@ -23,6 +23,8 @@
 #ifndef GROUP_H
 #define GROUP_H
 
+#include <map>
+
 #include "modeltypes.h"
 #include "devicecontainer.h"
 #include "addressablemodelitem.h"
@@ -36,6 +38,7 @@ namespace dss {
     int m_ZoneID;
     int m_GroupID;
     int m_LastCalledScene;
+    std::map<uint8_t, std::string> m_SceneNames;
   public:
     /** Constructs a group with the given id belonging to \a _zoneID. */
     Group(const int _id, const int _zoneID, Apartment& _apartment);
@@ -59,6 +62,8 @@ namespace dss {
     void setLastCalledScene(const int _value) { m_LastCalledScene = _value; }
 
     Group& operator=(const Group& _other);
+    void setSceneName(int _sceneNumber, const std::string& _name);
+    const std::string& getSceneName(int _sceneNumber);
   }; // Group
 
 

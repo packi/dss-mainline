@@ -284,6 +284,11 @@ namespace dss {
         m_pInner->removeInactiveDevices(_dsMeterID);
       }
     }
+
+    virtual void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) {
+      m_pSimulationInterface->sceneSetName(_zoneID, _groupID, _sceneNumber, _name);
+      m_pInner->sceneSetName(_zoneID, _groupID, _sceneNumber, _name);
+    }
   private:
     StructureModifyingBusInterface* m_pInner;
     StructureModifyingBusInterface* m_pSimulationInterface;

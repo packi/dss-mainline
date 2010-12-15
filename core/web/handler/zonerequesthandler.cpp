@@ -26,6 +26,7 @@
 #include "core/model/zone.h"
 #include "core/model/group.h"
 #include "core/model/apartment.h"
+#include "core/structuremanipulator.h"
 
 #include "core/web/json.h"
 
@@ -34,8 +35,10 @@ namespace dss {
 
   //=========================================== ZoneRequestHandler
 
-  ZoneRequestHandler::ZoneRequestHandler(Apartment& _apartment)
-  : m_Apartment(_apartment)
+  ZoneRequestHandler::ZoneRequestHandler(Apartment& _apartment,
+                                         StructureModifyingBusInterface* _pBusInterface)
+  : m_Apartment(_apartment),
+    m_pStructureBusInterface(_pBusInterface)
   { }
 
 
@@ -133,6 +136,16 @@ namespace dss {
           return success(resultObj);
         } else if(_request.getMethod() == "setName") {
           pZone->setName(_request.getParameter("newName"));
+          return success();
+        } else if(_request.getMethod() == "sceneSetName") {
+          int sceneNumber = strToIntDef(_request.getParameter("sceneNumber"), -1);
+          if(sceneNumber == -1) {
+            return failure("Need valid parameter 'sceneNumber'");
+          }
+          std::string name = _request.getParameter("newName");
+          pGroup->setSceneName(sceneNumber, name);
+          StructureManipulator manipulator(*m_pStructureBusInterface, m_Apartment);
+          manipulator.sceneSetName(pGroup, sceneNumber, name);
           return success();
         } else {
           throw std::runtime_error("Unhandled function");

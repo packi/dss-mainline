@@ -90,4 +90,14 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
   } // removeInactiveDevices
 
+  void DSStructureModifyingBusInterface::sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    uint8_t name[20];
+    strncpy(reinterpret_cast<char*>(name), _name.c_str(), 20);
+    int ret = ZoneGroupSceneProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, _sceneNumber, name);
+    DSBusInterface::checkBroadcastResultCode(ret);
+  } // sceneSetName
+
 } // namespace dss

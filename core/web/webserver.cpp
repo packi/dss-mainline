@@ -212,7 +212,10 @@ namespace dss {
 
   void WebServer::instantiateHandlers() {
     m_Handlers[kHandlerApartment] = new ApartmentRequestHandler(getDSS().getApartment(), getDSS().getModelMaintenance());
-    m_Handlers[kHandlerZone] = new ZoneRequestHandler(getDSS().getApartment());
+    m_Handlers[kHandlerZone] =
+      new ZoneRequestHandler(
+        getDSS().getApartment(),
+        getDSS().getBusInterface().getStructureModifyingBusInterface());
     m_Handlers[kHandlerDevice] = new DeviceRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerCircuit] = new CircuitRequestHandler(
             getDSS().getApartment(),

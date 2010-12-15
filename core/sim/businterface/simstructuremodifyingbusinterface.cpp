@@ -71,4 +71,8 @@ namespace dss {
     // nop
   } // removeInactiveDevices
 
+  void SimStructureModifyingBusInterface::sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) {
+    // nop
+  }
+
 } // namespace dss

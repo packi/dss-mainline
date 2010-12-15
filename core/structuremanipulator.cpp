@@ -29,6 +29,7 @@
 #include "core/model/modulator.h"
 #include "core/model/zone.h"
 #include "core/model/set.h"
+#include "core/model/group.h"
 
 #include <stdexcept>
 
@@ -96,6 +97,10 @@ namespace dss {
 
   void StructureManipulator::removeInactiveDevices(boost::shared_ptr<DSMeter> _dsMeter) {
     m_Interface.removeInactiveDevices(_dsMeter->getDSID());
-  }
+  } // removeInactiveDevices
+
+  void StructureManipulator::sceneSetName(boost::shared_ptr<Group> _group, int _sceneNumber, const std::string& _name) {
+    m_Interface.sceneSetName(_group->getZoneID(), _group->getID(), _sceneNumber, _name);
+  } // sceneSetName
 
 } // namespace dss

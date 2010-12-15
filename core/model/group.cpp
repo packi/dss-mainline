@@ -78,4 +78,12 @@ namespace dss {
     callScene(SceneHelper::getPreviousScene(m_LastCalledScene));
   } // previousScene
 
+  void Group::setSceneName(int _sceneNumber, const std::string& _name) {
+    m_SceneNames[_sceneNumber] = _name;
+  } // setSceneName
+
+  const std::string& Group::getSceneName(int _sceneNumber) {
+    return m_SceneNames[_sceneNumber];
+  } // getSceneName
+
 } // namespace dss

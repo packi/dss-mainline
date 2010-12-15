@@ -34,7 +34,9 @@ namespace dss {
   public:
     DSStructureModifyingBusInterface()
     : DSBusInterfaceObj()
-    { }
+    {
+      SetBroadcastId(m_BroadcastDSID);
+    }
 
     virtual void setZoneID(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID);
     virtual void createZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
@@ -44,6 +46,10 @@ namespace dss {
     virtual void removeFromGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID);
 
     virtual void removeInactiveDevices(const dss_dsid_t& _dsMeterID);
+
+    virtual void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name);
+  private:
+    dsid_t m_BroadcastDSID;
   }; // DSStructureModifyingBusInterface
 
 } // namespace dss
