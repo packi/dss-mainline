@@ -106,6 +106,7 @@ namespace dss {
 
     bool registeredOnDSMeter(boost::shared_ptr<const DSMeter> _dsMeter) const;
     bool isRegisteredOnAnyMeter() const;
+    std::vector<boost::shared_ptr<const DSMeter> > getDSMeters() { return m_DSMeters; }
 
     virtual void nextScene();
     virtual void previousScene();

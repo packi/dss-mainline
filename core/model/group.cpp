@@ -35,7 +35,8 @@ namespace dss {
   : AddressableModelItem(&_apartment),
     m_ZoneID(_zoneID),
     m_GroupID(_id),
-    m_LastCalledScene(SceneOff)
+    m_LastCalledScene(SceneOff),
+    m_IsInitializedFromBus(false)
   {
   } // ctor
 

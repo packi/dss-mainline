@@ -89,6 +89,7 @@ namespace dss {
     StructureQueryBusInterface* m_pStructureQueryBusInterface;
 
     void checkConfigFile(boost::filesystem::path _filename);
+    void readSceneNames();
   }; // ModelMaintenance
 
 }

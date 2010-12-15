@@ -39,6 +39,7 @@ namespace dss {
     int m_GroupID;
     int m_LastCalledScene;
     std::map<uint8_t, std::string> m_SceneNames;
+    bool m_IsInitializedFromBus;
   public:
     /** Constructs a group with the given id belonging to \a _zoneID. */
     Group(const int _id, const int _zoneID, Apartment& _apartment);
@@ -64,6 +65,8 @@ namespace dss {
     Group& operator=(const Group& _other);
     void setSceneName(int _sceneNumber, const std::string& _name);
     const std::string& getSceneName(int _sceneNumber);
+    bool isInitializedFromBus() { return m_IsInitializedFromBus; }
+    void setIsInitializedFromBus(bool _value) { m_IsInitializedFromBus = _value; }
   }; // Group
 
 
