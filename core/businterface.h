@@ -38,6 +38,7 @@ namespace dss {
   class Device;
   class AddressableModelItem;
   class BusInterface;
+  class Group;
 
   typedef boost::tuple<dss_dsid_t, int, int, int, int, std::string> DSMeterSpec_t; // bus-id, arm-sw-version, dsp-sw-version, hw-version, api version, name
   typedef boost::tuple<int, int, int, int> DeviceSpec_t; // function id, product id, revision, bus address
@@ -100,6 +101,7 @@ namespace dss {
     virtual ~StructureQueryBusInterface() {}; // please the compiler (virtual dtor)
     virtual bool isLocked(boost::shared_ptr<const Device> _device) = 0;
     virtual bool outputHasLoad(boost::shared_ptr<const Device> _device) = 0;
+    virtual std::string getSceneName(dss_dsid_t _dsMeterID, boost::shared_ptr<Group> _group, const uint8_t _sceneNumber) = 0;
   }; // StructureQueryBusInterface
 
   class StructureModifyingBusInterface {

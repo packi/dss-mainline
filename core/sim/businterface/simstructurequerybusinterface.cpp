@@ -137,4 +137,11 @@ namespace dss {
     return false;
   } // outputHasLoad
 
+  std::string SimStructureQueryBusInterface::getSceneName(dss_dsid_t _dsMeterID,
+                                  boost::shared_ptr<Group> _group,
+                                  const uint8_t _sceneNumber) {
+    // TODO: implement on DSMeterSim
+    return "Scene" + intToString(_sceneNumber);
+  }
+
 } // namespace dss

@@ -399,6 +399,17 @@ namespace dss {
       }
     }
 
+    virtual std::string getSceneName(dss_dsid_t _dsMeterID,
+                                     boost::shared_ptr<Group> _group,
+                                     const uint8_t _sceneNumber) {
+      if(isHandledBySimulation(_dsMeterID)) {
+        return m_pSimulationInterface->getSceneName(_dsMeterID, _group, _sceneNumber);
+      } else {
+        return m_pInner->getSceneName(_dsMeterID, _group, _sceneNumber);
+      }
+    } // getSceneName
+
+
   private:
     StructureQueryBusInterface* m_pInner;
     StructureQueryBusInterface* m_pSimulationInterface;
