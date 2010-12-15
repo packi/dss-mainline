@@ -147,6 +147,15 @@ namespace dss {
           StructureManipulator manipulator(*m_pStructureBusInterface, m_Apartment);
           manipulator.sceneSetName(pGroup, sceneNumber, name);
           return success();
+        } else if(_request.getMethod() == "sceneGetName") {
+          int sceneNumber = strToIntDef(_request.getParameter("sceneNumber"), -1);
+          if(sceneNumber == -1) {
+            return failure("Need valid parameter 'sceneNumber'");
+          }
+          std::string sceneName = pGroup->getSceneName(sceneNumber);
+          boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+          resultObj->addProperty("name", sceneName);
+          return success(resultObj);
         } else {
           throw std::runtime_error("Unhandled function");
         }
