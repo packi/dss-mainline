@@ -49,7 +49,6 @@ namespace dss {
     virtual bool getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper);
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID);
     virtual bool isLocked(boost::shared_ptr<const Device> _device);
-    virtual bool outputHasLoad(boost::shared_ptr<const Device> _device);
   private:
     int getGroupCount(const dss_dsid_t& _dsMeterID, const int _zoneID);
     int getDevicesCountInZone(const dss_dsid_t& _dsMeterID, const int _zoneID);

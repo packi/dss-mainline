@@ -50,7 +50,6 @@ namespace dss {
     virtual int getSensorValue(const Device& _device, const int _sensorID);
     /** Tells the dSM to lock the device if \a _lock is true. */
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock);
-    virtual void setOutputLoad(const Device& _device, const bool _load);
 
     virtual std::pair<uint8_t, uint16_t> getTransmissionQuality(const Device& _device);
   private:

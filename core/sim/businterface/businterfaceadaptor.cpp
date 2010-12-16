@@ -121,14 +121,6 @@ namespace dss {
       }
     }
 
-    virtual void setOutputLoad(const Device& _device, const bool _load) {
-      if(isHandledBySimulation(_device.getDSMeterDSID())) {
-        m_pSimulationInterface->setOutputLoad(_device, _load);
-      } else {
-        m_pInner->setOutputLoad(_device, _load);
-      }
-    }
-
     virtual std::pair<uint8_t, uint16_t> getTransmissionQuality(const Device& _device) {
       if(isHandledBySimulation(_device.getDSMeterDSID())) {
         return m_pSimulationInterface->getTransmissionQuality(_device);
@@ -385,15 +377,6 @@ namespace dss {
         return m_pInner->isLocked(_device);
       }
     }
-
-    virtual bool outputHasLoad(boost::shared_ptr<const Device> _device) {
-      if(isHandledBySimulation(_device->getDSMeterDSID())) {
-        return m_pSimulationInterface->outputHasLoad(_device);
-      } else {
-        return m_pInner->outputHasLoad(_device);
-      }
-    }
-
   private:
     StructureQueryBusInterface* m_pInner;
     StructureQueryBusInterface* m_pSimulationInterface;

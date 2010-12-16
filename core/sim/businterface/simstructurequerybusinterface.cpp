@@ -126,15 +126,4 @@ namespace dss {
     return false;
   } // isLocked
 
-  bool SimStructureQueryBusInterface::outputHasLoad(boost::shared_ptr<const Device> _device) {
-    boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_device->getDSMeterDSID());
-    if(pMeter != NULL) {
-      DSIDInterface* pDevice = pMeter->getSimulatedDevice(_device->getDSID());
-      if(pDevice != NULL) {
-        return pDevice->outputHasLoad();
-      }
-    }
-    return false;
-  } // outputHasLoad
-
 } // namespace dss
