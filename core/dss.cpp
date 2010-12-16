@@ -283,7 +283,8 @@ const char* kSavedPropsDirectory = "data/savedprops/";
     m_pMetering->setMeteringBusInterface(m_pBusInterface->getMeteringBusInterface());
     m_pModelMaintenance->setMetering(m_pMetering.get());
 
-    m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner);
+    PropertyNodePtr eventMonitor = m_pPropertySystem->createProperty("/system/EventInterpreter/ScheduledEvents");
+    m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner(eventMonitor));
     m_pEventQueue = boost::shared_ptr<EventQueue>(new EventQueue);
 
     m_pSessionManager.reset(

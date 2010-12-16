@@ -507,7 +507,8 @@ namespace dss {
 
   EventQueue::EventQueue(const int _eventTimeoutMS)
   : m_EventRunner(NULL),
-    m_EventTimeoutMS(_eventTimeoutMS)
+    m_EventTimeoutMS(_eventTimeoutMS),
+    m_ScheduledEventCounter(0)
   { } // ctor
 
   boost::shared_ptr<Schedule> EventQueue::scheduleFromEvent(boost::shared_ptr<Event> _event) {
@@ -555,7 +556,7 @@ namespace dss {
     Logger::getInstance()->log(std::string("EventQueue: New event '") + _event->getName() + "' in queue...", lsInfo);
     boost::shared_ptr<Schedule> schedule = scheduleFromEvent(_event);
     if(schedule != NULL) {
-      ScheduledEvent* scheduledEvent = new ScheduledEvent(_event, schedule);
+      ScheduledEvent* scheduledEvent = new ScheduledEvent(_event, schedule, m_ScheduledEventCounter++);
       assert(m_EventRunner != NULL);
       m_EventRunner->addEvent(scheduledEvent);
     } else {
@@ -609,36 +610,82 @@ namespace dss {
 
   const bool DebugEventRunner = true;
 
-  EventRunner::EventRunner()
-  : m_EventQueue(NULL), m_ShutdownFlag(false)
-  { } // ctor
+  EventRunner::EventRunner(PropertyNodePtr _monitorNode)
+  : m_EventQueue(NULL), m_ShutdownFlag(false), m_MonitorNode(_monitorNode)
+  {
+    if (_monitorNode != NULL) {
+      _monitorNode->addListener(this);
+    }
+  } // ctor
 
   void EventRunner::shutdown() {
     m_ShutdownFlag = true;
     m_NewItem.broadcast();
   }
-  int EventRunner::getSize() const {
+
+  size_t EventRunner::getSize() const {
+    boost::mutex::scoped_lock lock(m_EventsMutex);
     return m_ScheduledEvents.size();
   } // getSize
 
-  const ScheduledEvent& EventRunner::getEvent(const int _idx) const {
-    return m_ScheduledEvents.at(_idx);
-  } // getEvent
+  void EventRunner::propertyRemoved(PropertyNodePtr _parent,
+                                    PropertyNodePtr _child) {
+    removeEventInternal(_child->getName());
+  }
 
-  void EventRunner::removeEvent(const int _idx) {
-    boost::mutex::scoped_lock lock(m_EventsMutex);
-    boost::ptr_vector<ScheduledEvent>::iterator it = m_ScheduledEvents.begin();
-    advance(it, _idx);
-    m_ScheduledEvents.erase(it);
+  void EventRunner::removeEvent(const std::string& _eventID) {
+    if (m_MonitorNode != NULL) {
+      PropertyNodePtr child = m_MonitorNode->getProperty(_eventID);
+      if (child != NULL) {
+          m_MonitorNode->removeChild(child);
+      } else {
+        removeEventInternal(_eventID);
+      }
+    } else {
+      removeEventInternal(_eventID);
+    }
   } // removeEvent
 
+  void EventRunner::removeEventInternal(const std::string& _eventID) {
+    boost::mutex::scoped_lock lock(m_EventsMutex);
+    boost::ptr_vector<ScheduledEvent>::iterator it;
+    for (it = m_ScheduledEvents.begin(); it != m_ScheduledEvents.end(); it++) {
+      if (it->getID() == _eventID) {
+        m_ScheduledEvents.erase(it);
+        break;
+     }
+    }
+  } // removeEventInternal
+
+  const ScheduledEvent& EventRunner::getEvent(const std::string& _eventID) const {
+    boost::mutex::scoped_lock lock(m_EventsMutex);
+    for (size_t i = 0; i < m_ScheduledEvents.size(); i++) {
+      if (m_ScheduledEvents.at(i).getID() == _eventID) {
+        return m_ScheduledEvents.at(i);
+      }
+    }
+    throw std::runtime_error("Event with id '" + _eventID + "' not found");
+  } // getEvent
+
+  std::vector<std::string> EventRunner::getEventIDs() const {
+    std::vector<std::string> ids;
+    boost::mutex::scoped_lock lock(m_EventsMutex);
+    for (size_t i = 0; i < m_ScheduledEvents.size(); i++) {
+      ids.push_back(m_ScheduledEvents.at(i).getID());
+    }
+    return ids;
+  }
+
   void EventRunner::addEvent(ScheduledEvent* _scheduledEvent) {
+    std::string id = _scheduledEvent->getID();
+
     boost::mutex::scoped_lock lock(m_EventsMutex);
     bool addToQueue = true;
     if(!_scheduledEvent->getEvent()->getPropertyByName("unique").empty()) {
       foreach(ScheduledEvent& scheduledEvent, m_ScheduledEvents) {
         if(_scheduledEvent->getEvent()->isReplacementFor(*scheduledEvent.getEvent())) {
           scheduledEvent.getEvent()->setProperties(_scheduledEvent->getEvent()->getProperties());
+          id = scheduledEvent.getID();
           if(_scheduledEvent->getEvent()->hasPropertySet("time")) {
             scheduledEvent.getEvent()->setTime(_scheduledEvent->getEvent()->getPropertyByName("time"));
           }
@@ -648,6 +695,12 @@ namespace dss {
       }
     }
     if(addToQueue) {
+      if (m_MonitorNode != NULL) {
+        m_MonitorNode->createProperty(id + "/id")->setStringValue(id);
+        m_MonitorNode->createProperty(id + "/name")->setStringValue(
+                                    _scheduledEvent->getEvent()->getName());
+      }
+
       m_ScheduledEvents.push_back(_scheduledEvent);
     } else {
       delete _scheduledEvent;
@@ -659,14 +712,16 @@ namespace dss {
   DateTime EventRunner::getNextOccurence() {
     DateTime now;
     DateTime result = now.addYear(10);
+    std::vector<std::string> removeIDs;
+    boost::mutex::scoped_lock lock(m_EventsMutex);
     if(DebugEventRunner) {
       Logger::getInstance()->log("EventRunner: *********");
-      Logger::getInstance()->log("number in queue: " + intToString(getSize()));
+      Logger::getInstance()->log("number in queue: " +
+                                 intToString(m_ScheduledEvents.size()));
     }
 
-    boost::mutex::scoped_lock lock(m_EventsMutex);
     for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin();
-        ipSchedEvt != m_ScheduledEvents.end(); )
+        ipSchedEvt != m_ScheduledEvents.end(); ipSchedEvt++)
     {
       DateTime next = ipSchedEvt->getSchedule().getNextOccurence(now);
       if(DebugEventRunner) {
@@ -675,14 +730,17 @@ namespace dss {
       }
       if(next == DateTime::NullDate) {
         Logger::getInstance()->log("EventRunner: Removing event");
-        ipSchedEvt = m_ScheduledEvents.erase(ipSchedEvt);
+        removeIDs.push_back(ipSchedEvt->getID());
         continue;
       }
       result = std::min(result, next);
       if(DebugEventRunner) {
         Logger::getInstance()->log(std::string("chosen: ") + (std::string)result);
       }
-      ++ipSchedEvt;
+    }
+    lock.unlock();
+    for (size_t i = 0; i < removeIDs.size(); i++) {
+      removeEvent(removeIDs.at(i));
     }
     return result;
   } // getNextOccurence
@@ -694,10 +752,13 @@ namespace dss {
   } // run
 
   bool EventRunner::runOnce() {
+    boost::mutex::scoped_lock lock(m_EventsMutex);
     if(m_ScheduledEvents.empty()) {
+      lock.unlock();
       m_NewItem.waitFor(1000);
       return false;
     } else {
+      lock.unlock();
       DateTime now;
       m_WakeTime = getNextOccurence();
       int sleepSeconds = m_WakeTime.difference(now);
@@ -898,6 +959,17 @@ namespace dss {
     return !_event.hasPropertySet(getPropertyName());
   } // matches
 
+  //================================================= ScheduledEvent
+
+  ScheduledEvent::ScheduledEvent(boost::shared_ptr<Event> _pEvt,
+                                 boost::shared_ptr<Schedule> _pSchedule,
+                                 unsigned long int _counterID) :
+                                    m_Event(_pEvt),
+                                    m_Schedule(_pSchedule)
+                                 {
+    m_EventID = uintToString(_counterID) + "-" +
+                uintToString(static_cast<long unsigned int>(DateTime().secondsSinceEpoch())) + '_' + _pEvt->getName();
+  } // ScheduledEvent
 
   //================================================== External consts
 

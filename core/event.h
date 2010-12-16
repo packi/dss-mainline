@@ -28,6 +28,7 @@
 #include "thread.h"
 #include "syncevent.h"
 #include "subsystem.h"
+#include "propertysystem.h"
 
 #include <string>
 #include <deque>
@@ -249,6 +250,9 @@ namespace dss {
     EventRunner* m_EventRunner;
     boost::shared_ptr<Schedule> scheduleFromEvent(boost::shared_ptr<Event> _event);
     const int m_EventTimeoutMS;
+
+    unsigned long int m_ScheduledEventCounter;
+
   public:
     EventQueue(const int _eventTimeoutMS = 1000);
     void pushEvent(boost::shared_ptr<Event> _event);
@@ -263,32 +267,39 @@ namespace dss {
 
   //-------------------------------------------------- EventRunner
 
-  class EventRunner {
+  class EventRunner : public PropertyListener {
   private:
     boost::ptr_vector<ScheduledEvent> m_ScheduledEvents;
-
     DateTime getNextOccurence();
     DateTime m_WakeTime;
     SyncEvent m_NewItem;
     EventQueue* m_EventQueue;
-    boost::mutex m_EventsMutex;
+    mutable boost::mutex m_EventsMutex;
     bool m_ShutdownFlag;
+    PropertyNodePtr m_MonitorNode;
+
   public:
-    EventRunner();
+    EventRunner(PropertyNodePtr _monitorNode = PropertyNodePtr());
 
     void addEvent(ScheduledEvent* _scheduledEvent);
 
+    size_t getSize() const;
+    std::vector<std::string> getEventIDs() const;
+    const ScheduledEvent& getEvent(const std::string& _eventID) const;
+
     bool raisePendingEvents(DateTime& _from, int _deltaSeconds);
 
-    int getSize() const;
-    const ScheduledEvent& getEvent(const int _idx) const;
-    void removeEvent(const int _idx);
+    void removeEvent(const std::string& _eventID);
 
     void run();
     bool runOnce();
     void shutdown();
 
     void setEventQueue(EventQueue* _value) { m_EventQueue = _value; }
+  protected:
+    virtual void propertyRemoved(PropertyNodePtr _parent,
+                                 PropertyNodePtr _child);
+    void removeEventInternal(const std::string& _eventID);
   }; // EventRunner
 
 
@@ -348,9 +359,11 @@ namespace dss {
     boost::shared_ptr<Event> m_Event;
     boost::shared_ptr<Schedule> m_Schedule;
     std::string m_Name;
+    std::string m_EventID;
   public:
-    ScheduledEvent(boost::shared_ptr<Event> _pEvt, boost::shared_ptr<Schedule> _pSchedule)
-    : m_Event(_pEvt), m_Schedule(_pSchedule) {};
+    ScheduledEvent(boost::shared_ptr<Event> _pEvt,
+                   boost::shared_ptr<Schedule> _pSchedule,
+                   unsigned long int _counterID);
 
     /** Returns the event that will be raised */
     boost::shared_ptr<Event> getEvent() { return m_Event; }
@@ -361,6 +374,8 @@ namespace dss {
     const std::string& getName() const { return m_Name; }
     /** Sets the name of this ScheduledEvent */
     void setName(const std::string& _value) { m_Name = _value; }
+    /** Returns the event ID */
+    const std::string& getID() const { return m_EventID; }
   }; // ScheduledEvent
 
 
