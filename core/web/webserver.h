@@ -59,12 +59,15 @@ namespace dss {
     HashMapConstStringString parseCookies(const char* _cookies);
     std::string generateCookieString(HashMapConstStringString _cookies);
   protected:
-    static void *httpBrowseProperties(struct mg_connection* _connection,
-                                   const struct mg_request_info* _info);
-    static void *jsonHandler(struct mg_connection* _connection,
-                           const struct mg_request_info* _info);
-    static void *downloadHandler(struct mg_connection* _connection,
+    void *httpBrowseProperties(struct mg_connection* _connection,
                                const struct mg_request_info* _info);
+    void *jsonHandler(struct mg_connection* _connection,
+                      const struct mg_request_info* _info,
+                      HashMapConstStringString _parameter,
+                      HashMapConstStringString _cookies,
+                      boost::shared_ptr<Session> _session);
+    void *downloadHandler(struct mg_connection* _connection,
+                          const struct mg_request_info* _info);
     static void *httpRequestCallback(enum mg_event event, 
                                      struct mg_connection* _connection,
                                      const struct mg_request_info* _info);

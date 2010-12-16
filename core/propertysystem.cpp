@@ -469,7 +469,6 @@ namespace dss {
   } // getPropertyName
 
   int PropertyNode::count(const std::string& _propertyName) {
-    checkReadAccess();
     if(m_Aliased) {
       return m_AliasTarget->count(_propertyName);
     } else {
