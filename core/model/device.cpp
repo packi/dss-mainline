@@ -60,6 +60,7 @@ namespace dss {
     if(m_pPropertyNode == NULL) {
       if(m_pApartment->getPropertyNode() != NULL) {
         m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/" + m_DSID.toString());
+        m_pPropertyNode->createProperty("dSID")->setStringValue(m_DSID.toString());
         m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
         // TODO: bind meter dsid or create link to dsmeter
 //        m_pPropertyNode->createProperty("DSMeterID")->linkToProxy(PropertyProxyMemberFunction<Device,int>(*this, &Device::getDSMeterID));
