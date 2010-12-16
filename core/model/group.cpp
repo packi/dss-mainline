@@ -31,9 +31,9 @@ namespace dss {
 
     //============================================= Group
 
-  Group::Group(const int _id, const int _zoneID, Apartment& _apartment)
+  Group::Group(const int _id, boost::shared_ptr<Zone> _pZone, Apartment& _apartment)
   : AddressableModelItem(&_apartment),
-    m_ZoneID(_zoneID),
+    m_ZoneID(_pZone->getID()),
     m_GroupID(_id),
     m_LastCalledScene(SceneOff),
     m_IsInitializedFromBus(false)

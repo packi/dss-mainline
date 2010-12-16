@@ -31,6 +31,8 @@
 
 namespace dss {
 
+  class Zone;
+
   /** Represents a predefined group */
   class Group : public DeviceContainer,
                 public AddressableModelItem {
@@ -42,7 +44,7 @@ namespace dss {
     bool m_IsInitializedFromBus;
   public:
     /** Constructs a group with the given id belonging to \a _zoneID. */
-    Group(const int _id, const int _zoneID, Apartment& _apartment);
+    Group(const int _id, boost::shared_ptr<Zone> _pZone, Apartment& _apartment);
     virtual ~Group() {};
     virtual Set getDevices() const;
 

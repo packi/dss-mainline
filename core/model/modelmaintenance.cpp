@@ -356,18 +356,23 @@ namespace dss {
               }
             }
           }
-          if(meterToAsk != NULL) {
-            log("Getting scene-names data from " + meterToAsk->getDSID().toString());
-            for(unsigned int sceneNumber = 0; sceneNumber < MaxSceneNumber; sceneNumber++) {
-              std::string sceneName =
-                m_pStructureQueryBusInterface->getSceneName(
-                  meterToAsk->getDSID(),
-                  group,
-                  sceneNumber);
-              log("Scene " + intToString(sceneNumber) + ": '" + sceneName + "'");
-              group->setSceneName(sceneNumber, sceneName);
+          try {
+            if(meterToAsk != NULL) {
+              log("Getting scene-names data from " + meterToAsk->getDSID().toString());
+              for(unsigned int sceneNumber = 0; sceneNumber < MaxSceneNumber; sceneNumber++) {
+                std::string sceneName =
+                  m_pStructureQueryBusInterface->getSceneName(
+                    meterToAsk->getDSID(),
+                    group,
+                    sceneNumber);
+                log("Scene " + intToString(sceneNumber) + ": '" + sceneName + "'");
+                group->setSceneName(sceneNumber, sceneName);
+              }
+              group->setIsInitializedFromBus(true);
             }
-            group->setIsInitializedFromBus(true);
+          } catch(BusApiError& _err) {
+            log("Error reading scene values from " + meterToAsk->getDSID().toString() +
+                ". message: '" + _err.what() + "'", lsError);
           }
         }
       }
