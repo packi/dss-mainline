@@ -52,7 +52,18 @@ namespace dss {
     }
     PropertyNodePtr node = m_PropertySystem.getProperty(propName);
 
-    if(_request.getMethod() == "getString") {
+    if(_request.getMethod() == "remove") {
+      if(node == NULL) {
+        return failure("Could not find node named '" + propName + "'");
+      }
+      try {
+        PropertyNode* parent = node->getParentNode();
+        parent->removeChild(node);
+        return success();
+      } catch (...) {
+        return failure(std::string("Error removing node '") + propName + "'");
+      }
+    } else if(_request.getMethod() == "getString") {
       if(node == NULL) {
         return failure("Could not find node named '" + propName + "'");
       }
