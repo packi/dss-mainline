@@ -237,15 +237,6 @@ namespace dss {
       resultObj->addProperty("value", value);
 
       return success(resultObj);
-    } else if(_request.getMethod() == "setOutputValue") {
-      int value = strToIntDef(_request.getParameter("value"), -1);
-      if((value  < 0) || (value > UCHAR_MAX)) {
-        return failure("Invalid or missing parameter 'value'");
-      }
-
-      pDevice->setOutputValue(value);
-      return success();
-
     } else if(_request.getMethod() == "getTransmissionQuality") {
       std::pair<uint8_t, uint16_t> p = pDevice->getTransmissionQuality();
       uint8_t down = p.first;

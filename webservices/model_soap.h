@@ -95,7 +95,7 @@ int dss__SetDecreaseValue(char* _token, char* _setSpec, bool& result);
 
 /** Sets the parameter specified by _paramID to _value. If _paramID == -1 the default parameter
  * will be set. */
-int dss__SetSetValue(char* _token, char* _setSpec, double _value, bool& result);
+int dss__SetSetValue(char* _token, char* _setSpec, unsigned char _value, bool& result);
 
 /** Calls the scene _sceneNr on all devices contained int the set _setID. */
 int dss__SetCallScene(char* _token, char* _setSpec, int _sceneNr, bool& result);
@@ -115,7 +115,7 @@ int dss__ApartmentDecreaseValue(char* _token, int _groupID, bool& result);
 
 /** Sets the parameter specified by _paramID to _value. If _paramID == -1 the default parameter
  * will be set. */
-int dss__ApartmentSetValue(char* _token, int _groupID, double _value, bool& result);
+int dss__ApartmentSetValue(char* _token, int _groupID, unsigned char _value, bool& result);
 
 /** Calls the scene _sceneNr on all devices contained int the group _groupID. */
 int dss__ApartmentCallScene(char* _token, int _groupID, int _sceneNr, bool& result);
@@ -142,7 +142,7 @@ int dss__ZoneDecreaseValue(char* _token, int _zoneID, int _groupID, bool& result
 
 /** Sets the parameter specified by _paramID to _value. If _paramID == -1 the default parameter
  * will be set. */
-int dss__ZoneSetValue(char* _token, int _zoneID, int _groupID, double _value, bool& result);
+int dss__ZoneSetValue(char* _token, int _zoneID, int _groupID, unsigned char _value, bool& result);
 
 /** Calls the scene _sceneNr on all devices contained int the zone/group _groupID. */
 int dss__ZoneCallScene(char* _token, int _zoneID, int _groupID, int _sceneNr, bool& result);

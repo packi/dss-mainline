@@ -113,9 +113,24 @@ namespace dss {
     }
   }
 
-  void DSActionRequest::setValue(AddressableModelItem *pTarget,const double _value) {
-    // TODO: libdsm
-    Logger::getInstance()->log("DSBusInterface::setValue(): not implemented yet", lsInfo);
+  void DSActionRequest::setValue(AddressableModelItem *pTarget, const uint8_t _value) {
+    int ret;
+
+    if(m_DSMApiHandle == NULL) {
+      return;
+    }
+    Group *pGroup= dynamic_cast<Group*>(pTarget);
+    Device *pDevice = dynamic_cast<Device*>(pTarget);
+
+    if(pGroup) {
+      ret = ZoneGroupActionRequest_action_set_outval(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), _value);
+      DSBusInterface::checkBroadcastResultCode(ret);
+    } else if(pDevice) {
+      dsid_t dsid;
+      dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
+      ret = DeviceActionRequest_action_set_outval(m_DSMApiHandle, dsid, pDevice->getShortAddress(), _value);
+      DSBusInterface::checkResultCode(ret);
+    }
   }
 
 } // namespace dss

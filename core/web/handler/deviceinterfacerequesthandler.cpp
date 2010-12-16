@@ -22,6 +22,7 @@
 
 #include "deviceinterfacerequesthandler.h"
 
+#include <limits.h>
 #include <stdexcept>
 
 #include "core/web/json.h"
@@ -50,7 +51,7 @@ namespace dss {
     } else if(_request.getMethod() == "setValue") {
       std::string valueStr = _request.getParameter("value");
       int value = strToIntDef(valueStr, -1);
-      if(value == -1) {
+      if((value  < 0) || (value > UCHAR_MAX)) {
         return failure("Invalid or missing parameter value: '" + valueStr + "'");
       } else {
         _interface->setValue(value);

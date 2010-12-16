@@ -85,7 +85,7 @@ namespace dss {
 
     std::pair<uint8_t, uint16_t> getTransmissionQuality();
     /** Set device output value */
-    void setOutputValue(uint8_t _value);
+    void setValue(uint8_t _value);
 
     virtual void nextScene();
     virtual void previousScene();

@@ -12,7 +12,7 @@
 
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.15 2010-12-03 15:42:46 GMT")
+SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.15 2010-12-22 16:25:39 GMT")
 
 
 #ifndef WITH_NOGLOBAL
@@ -172,8 +172,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_long(soap, NULL, NULL, "xsd:long");
 	case SOAP_TYPE_LONG64:
 		return soap_in_LONG64(soap, NULL, NULL, "xsd:long");
-	case SOAP_TYPE_double:
-		return soap_in_double(soap, NULL, NULL, "xsd:double");
 	case SOAP_TYPE_unsignedByte:
 		return soap_in_unsignedByte(soap, NULL, NULL, "xsd:unsignedByte");
 	case SOAP_TYPE_unsignedShort:
@@ -577,10 +575,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		if (!soap_match_tag(soap, t, "xsd:long"))
 		{	*type = SOAP_TYPE_LONG64;
 			return soap_in_LONG64(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "xsd:double"))
-		{	*type = SOAP_TYPE_double;
-			return soap_in_double(soap, NULL, NULL, NULL);
 		}
 		if (!soap_match_tag(soap, t, "xsd:unsignedByte"))
 		{	*type = SOAP_TYPE_unsignedByte;
@@ -1382,8 +1376,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_long(soap, tag, id, (const long *)ptr, "xsd:long");
 	case SOAP_TYPE_LONG64:
 		return soap_out_LONG64(soap, tag, id, (const LONG64 *)ptr, "xsd:long");
-	case SOAP_TYPE_double:
-		return soap_out_double(soap, tag, id, (const double *)ptr, "xsd:double");
 	case SOAP_TYPE_unsignedByte:
 		return soap_out_unsignedByte(soap, tag, id, (const unsigned char *)ptr, "xsd:unsignedByte");
 	case SOAP_TYPE_unsignedShort:
@@ -3978,42 +3970,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_LONG64(struct soap *soap, const LONG64 *a, co
 SOAP_FMAC3 LONG64 * SOAP_FMAC4 soap_get_LONG64(struct soap *soap, LONG64 *p, const char *tag, const char *type)
 {
 	if ((p = soap_in_LONG64(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_double(struct soap *soap, double *a)
-{	(void)soap; /* appease -Wall -Werror */
-#ifdef SOAP_DEFAULT_double
-	*a = SOAP_DEFAULT_double;
-#else
-	*a = (double)0;
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_double(struct soap *soap, const char *tag, int id, const double *a, const char *type)
-{
-	return soap_outdouble(soap, tag, id, a, type, SOAP_TYPE_double);
-}
-
-SOAP_FMAC3 double * SOAP_FMAC4 soap_in_double(struct soap *soap, const char *tag, double *a, const char *type)
-{	double *p;
-	p = soap_indouble(soap, tag, a, type, SOAP_TYPE_double);
-	return p;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_double(struct soap *soap, const double *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_double);
-	if (soap_out_double(soap, tag?tag:"double", id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 double * SOAP_FMAC4 soap_get_double(struct soap *soap, double *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_double(soap, tag, p, type)))
 		if (soap_getindependent(soap))
 			return NULL;
 	return p;
@@ -15516,7 +15472,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ZoneSetValue(struct soap *soap, str
 	soap_default_string(soap, &a->_token);
 	soap_default_int(soap, &a->_zoneID);
 	soap_default_int(soap, &a->_groupID);
-	soap_default_double(soap, &a->_value);
+	soap_default_unsignedByte(soap, &a->_value);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ZoneSetValue(struct soap *soap, const struct dss__ZoneSetValue *a)
@@ -15535,7 +15491,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ZoneSetValue(struct soap *soap, const ch
 		return soap->error;
 	if (soap_out_int(soap, "groupID", -1, &a->_groupID, ""))
 		return soap->error;
-	if (soap_out_double(soap, "value", -1, &a->_value, ""))
+	if (soap_out_unsignedByte(soap, "value", -1, &a->_value, ""))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
@@ -15572,7 +15528,7 @@ SOAP_FMAC3 struct dss__ZoneSetValue * SOAP_FMAC4 soap_in_dss__ZoneSetValue(struc
 					continue;
 				}
 			if (soap_flag__value && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_double(soap, NULL, &a->_value, "xsd:double"))
+				if (soap_in_unsignedByte(soap, NULL, &a->_value, "xsd:unsignedByte"))
 				{	soap_flag__value--;
 					continue;
 				}
@@ -17587,7 +17543,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__ApartmentSetValue(struct soap *soap
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_string(soap, &a->_token);
 	soap_default_int(soap, &a->_groupID);
-	soap_default_double(soap, &a->_value);
+	soap_default_unsignedByte(soap, &a->_value);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__ApartmentSetValue(struct soap *soap, const struct dss__ApartmentSetValue *a)
@@ -17604,7 +17560,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__ApartmentSetValue(struct soap *soap, con
 		return soap->error;
 	if (soap_out_int(soap, "groupID", -1, &a->_groupID, ""))
 		return soap->error;
-	if (soap_out_double(soap, "value", -1, &a->_value, ""))
+	if (soap_out_unsignedByte(soap, "value", -1, &a->_value, ""))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
@@ -17635,7 +17591,7 @@ SOAP_FMAC3 struct dss__ApartmentSetValue * SOAP_FMAC4 soap_in_dss__ApartmentSetV
 					continue;
 				}
 			if (soap_flag__value && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_double(soap, NULL, &a->_value, "xsd:double"))
+				if (soap_in_unsignedByte(soap, NULL, &a->_value, "xsd:unsignedByte"))
 				{	soap_flag__value--;
 					continue;
 				}
@@ -19184,7 +19140,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_dss__SetSetValue(struct soap *soap, stru
 	(void)soap; (void)a; /* appease -Wall -Werror */
 	soap_default_string(soap, &a->_token);
 	soap_default_string(soap, &a->_setSpec);
-	soap_default_double(soap, &a->_value);
+	soap_default_unsignedByte(soap, &a->_value);
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_dss__SetSetValue(struct soap *soap, const struct dss__SetSetValue *a)
@@ -19202,7 +19158,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_dss__SetSetValue(struct soap *soap, const cha
 		return soap->error;
 	if (soap_out_string(soap, "setSpec", -1, &a->_setSpec, ""))
 		return soap->error;
-	if (soap_out_double(soap, "value", -1, &a->_value, ""))
+	if (soap_out_unsignedByte(soap, "value", -1, &a->_value, ""))
 		return soap->error;
 	return soap_element_end_out(soap, tag);
 }
@@ -19233,7 +19189,7 @@ SOAP_FMAC3 struct dss__SetSetValue * SOAP_FMAC4 soap_in_dss__SetSetValue(struct 
 					continue;
 				}
 			if (soap_flag__value && soap->error == SOAP_TAG_MISMATCH)
-				if (soap_in_double(soap, NULL, &a->_value, "xsd:double"))
+				if (soap_in_unsignedByte(soap, NULL, &a->_value, "xsd:unsignedByte"))
 				{	soap_flag__value--;
 					continue;
 				}

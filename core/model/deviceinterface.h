@@ -23,6 +23,8 @@
 #ifndef DEVICEINTERFACE_H
 #define DEVICEINTERFACE_H
 
+#include <stdint.h>
+
 namespace dss {
 
   /** Interface to a single or multiple devices.
@@ -43,10 +45,8 @@ namespace dss {
     /** Decreases the main value (e.g. brightness) */
     virtual void decreaseValue() = 0;
 
-    /** Sets the value of the given parameter */
-    virtual void setValue(const double _value) = 0;
-
-
+    /** Sets the output value */
+    virtual void setValue(const uint8_t _value) = 0;
     /** Sets the scene on the device.
      * The output value will be set according to the scene lookup table in the device.
      */

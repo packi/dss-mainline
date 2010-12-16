@@ -57,7 +57,7 @@ namespace dss {
     virtual void setDeviceConfig(const Device& _device, uint8_t _configClass,
                                  uint8_t _configIndex, uint8_t _value) = 0;
 
-    virtual void setOutputValue(const Device& _device, uint8_t _value) = 0;
+    virtual void setValue(const Device& _device, uint8_t _value) = 0;
 
     virtual int getSensorValue(const Device& _device, const int _sensorID) = 0;
     /** Tells the dSM to lock the device if \a _lock is true. */
@@ -133,7 +133,7 @@ namespace dss {
     virtual void saveScene(AddressableModelItem *pTarget, const uint16_t scene) = 0;
     virtual void undoScene(AddressableModelItem *pTarget) = 0;
     virtual void blink(AddressableModelItem *pTarget) = 0;
-    virtual void setValue(AddressableModelItem *pTarget, const double _value) = 0;
+    virtual void setValue(AddressableModelItem *pTarget, const uint8_t _value) = 0;
   }; // ActionRequestInterface
 
 

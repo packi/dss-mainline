@@ -66,7 +66,7 @@ namespace dss {
     virtual uint16_t getDeviceConfigWord(const uint8_t _configClass,
                                        const uint8_t _configIndex);
 
-    virtual void setOutputValue(const uint8_t _value);
+    virtual void setValue(const uint8_t _value);
 
     virtual std::pair<uint8_t, uint16_t> getTransmissionQuality();
 

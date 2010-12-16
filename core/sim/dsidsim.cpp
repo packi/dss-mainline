@@ -118,11 +118,11 @@ namespace dss {
     return std::make_pair(down, up);
   }
 
-  void DSIDSim::setOutputValue(const uint8_t _value) {
+  void DSIDSim::setValue(const uint8_t _value) {
     if(m_Enabled) {
       m_CurrentValue = int(_value);
     }
-  } // setOutputValue
+  } // setValue
 
   uint16_t DSIDSim::getFunctionID() {
     if(m_ConfigParameter.has("functionID")) {

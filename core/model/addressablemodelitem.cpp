@@ -44,7 +44,7 @@ namespace dss {
     m_pApartment->getActionRequestInterface()->callScene(this, SceneDec);
   } // decreaseValue
 
-  void AddressableModelItem::setValue(const double _value) {
+  void AddressableModelItem::setValue(const uint8_t _value) {
     m_pApartment->getActionRequestInterface()->setValue(this, _value);
   } // setValue
 

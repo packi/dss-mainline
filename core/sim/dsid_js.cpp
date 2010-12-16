@@ -143,16 +143,16 @@ namespace dss {
       return 0;
     } // getConsumption
 
-    virtual void setOutputValue(uint8_t _value) {
+    virtual void setValue(uint8_t _value) {
       if(m_pSelf != NULL) {
         try {
           ScriptLock lock(m_pContext);
           JSContextThread req(m_pContext);
           ScriptFunctionParameterList param(*m_pContext);
           param.add(int(_value));
-          m_pSelf->callFunctionByName<void>("setOutputValue", param);
+          m_pSelf->callFunctionByName<void>("setValue", param);
         } catch(ScriptException& e) {
-          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'setOutputValue'") + e.what(), lsError);
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'setValue'") + e.what(), lsError);
         }
       }
     } // setValue
@@ -172,7 +172,7 @@ namespace dss {
           Logger::getInstance()->log(std::string("DSIDJS: Error calling 'setDeviceConfig'") + e.what(), lsError);
         }
       }
-    } // setValue
+    } // setDeviceConfig
 
 
     virtual uint8_t getDeviceConfig(uint8_t _configClass,

@@ -584,7 +584,7 @@ namespace dss {
     if(self.is("set") || self.is("device")) {
       IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
       if(argc >= 1) {
-        double value = ctx->convertTo<double>(argv[0]);
+        uint8_t value = ctx->convertTo<uint8_t>(argv[0]);
         intf->setValue(value);
       }
       *rval = INT_TO_JSVAL(0);

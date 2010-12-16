@@ -492,7 +492,7 @@ int dss__SetDecreaseValue(struct soap *soap, char* _token, char* _setSpec, bool&
   return SOAP_OK;
 }
 
-int dss__SetSetValue(struct soap *soap, char* _token, char* _setSpec, double _value, bool& result) {
+int dss__SetSetValue(struct soap *soap, char* _token, char* _setSpec, uint8_t _value, bool& result) {
   dss::Set set;
   int getResult = AuthorizeAndGetSet(soap, _token, _setSpec, set);
   if(getResult != SOAP_OK) {
@@ -582,7 +582,7 @@ int dss__ApartmentDecreaseValue(struct soap *soap, char* _token, int _groupID, b
   return SOAP_OK;
 }
 
-int dss__ApartmentSetValue(struct soap *soap, char* _token, int _groupID, double _value, bool& result) {
+int dss__ApartmentSetValue(struct soap *soap, char* _token, int _groupID, uint8_t _value, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -673,7 +673,7 @@ int dss__ZoneDecreaseValue(struct soap *soap, char* _token, int _zoneID, int _gr
   return SOAP_OK;
 }
 
-int dss__ZoneSetValue(struct soap *soap, char* _token, int _zoneID, int _groupID, double _value, bool& result) {
+int dss__ZoneSetValue(struct soap *soap, char* _token, int _zoneID, int _groupID, uint8_t _value, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
@@ -841,7 +841,7 @@ int dss__DeviceSetValue(struct soap *soap, char* _token, char* _deviceID,
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  dev.getDevice()->setOutputValue(_value);
+  dev.getDevice()->setValue(_value);
   result = true;
   return SOAP_OK;
 }

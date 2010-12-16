@@ -146,6 +146,20 @@ namespace dss {
     throw ScriptException("Value is not of type double");
   }
 
+  template<>
+  uint8_t ScriptContext::convertTo(const jsval& _val) {
+    if(JSVAL_IS_NUMBER(_val)) {
+      uint16 result;
+      if(JS_ValueToUint16(m_pContext, _val, &result)) {
+        if (result > UCHAR_MAX) {
+            throw ScriptException("Value out of range");
+        }
+        return result;
+      }
+    }
+    throw ScriptException("Value is not of type double");
+  }
+
   void ScriptContext::jsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er) {
     char *pointer=NULL;
     char *line=NULL;

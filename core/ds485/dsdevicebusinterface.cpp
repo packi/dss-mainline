@@ -101,7 +101,7 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
   } // setDeviceConfig
 
-  void DSDeviceBusInterface::setOutputValue(const Device& _device,
+  void DSDeviceBusInterface::setValue(const Device& _device,
                                             uint8_t _value) {
     if(m_DSMApiHandle == NULL) {
       return;
@@ -114,7 +114,7 @@ namespace dss {
                                                     _device.getShortAddress(),
                                                     _value);
     DSBusInterface::checkResultCode(ret);
-  } // setOutputValue
+  } // setValue
 
 
   int DSDeviceBusInterface::getSensorValue(const Device& _device, const int _sensorID) {

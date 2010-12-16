@@ -97,11 +97,11 @@ namespace dss {
       }
     }
 
-    virtual void setOutputValue(const Device& _device, uint8_t _value) {
+    virtual void setValue(const Device& _device, uint8_t _value) {
       if(isHandledBySimulation(_device.getDSMeterDSID())) {
-        m_pSimulationInterface->setOutputValue(_device, _value);
+        m_pSimulationInterface->setValue(_device, _value);
       } else {
-        m_pInner->setOutputValue(_device, _value);
+        m_pInner->setValue(_device, _value);
       }
     }
 
@@ -188,7 +188,7 @@ namespace dss {
       }
     }
 
-    virtual void setValue(AddressableModelItem *pTarget, const double _value) {
+    virtual void setValue(AddressableModelItem *pTarget, const uint8_t _value) {
       if(targetIsSim(pTarget)) {
         m_pSimulationInterface->setValue(pTarget, _value);
       }
@@ -196,6 +196,7 @@ namespace dss {
         m_pInner->setValue(pTarget, _value);
       }
     }
+
   private:
 
     bool targetIsSim(AddressableModelItem* _pTarget) {

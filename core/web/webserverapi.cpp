@@ -195,9 +195,6 @@ namespace dss {
       .withDocumentation("Enables the device.");
     clsDevice.addMethod("disable")
       .withDocumentation("Disables the device.", "A disabled device will only react to enable calls.");
-    clsDevice.addMethod("setOutputValue")
-      .withParameter("value", "integer", true)
-      .withDocumentation("Sets the output value of the device to value, allowed range is 0-255");
     clsDevice.addMethod("setConfig")
       .withParameter("value", "integer", true)
       .withParameter("class", "integer", true)

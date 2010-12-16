@@ -96,7 +96,7 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__SetIncreaseValue(struct soap*, char *_token, char
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__SetDecreaseValue(struct soap*, char *_token, char *_setSpec, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__SetSetValue(struct soap*, char *_token, char *_setSpec, double _value, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__SetSetValue(struct soap*, char *_token, char *_setSpec, unsigned char _value, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__SetCallScene(struct soap*, char *_token, char *_setSpec, int _sceneNr, bool &result);
 
@@ -110,7 +110,7 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentIncreaseValue(struct soap*, char *_token
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentDecreaseValue(struct soap*, char *_token, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentSetValue(struct soap*, char *_token, int _groupID, double _value, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentSetValue(struct soap*, char *_token, int _groupID, unsigned char _value, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCallScene(struct soap*, char *_token, int _groupID, int _sceneNr, bool &result);
 
@@ -128,7 +128,7 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneIncreaseValue(struct soap*, char *_token, int
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneDecreaseValue(struct soap*, char *_token, int _zoneID, int _groupID, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSetValue(struct soap*, char *_token, int _zoneID, int _groupID, double _value, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSetValue(struct soap*, char *_token, int _zoneID, int _groupID, unsigned char _value, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneCallScene(struct soap*, char *_token, int _zoneID, int _groupID, int _sceneNr, bool &result);
 

@@ -39,7 +39,7 @@ namespace dss {
     virtual void saveScene(AddressableModelItem *pTarget, const uint16_t scene);
     virtual void undoScene(AddressableModelItem *pTarget);
     virtual void blink(AddressableModelItem *pTarget);
-    virtual void setValue(AddressableModelItem *pTarget, const double _value);
+    virtual void setValue(AddressableModelItem *pTarget, const uint8_t _value);
   private:
     boost::shared_ptr<DSSim> m_pSimulation;
   }; // SimActionRequestBusInterface

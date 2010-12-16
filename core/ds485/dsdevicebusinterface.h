@@ -48,7 +48,7 @@ namespace dss {
     virtual void setDeviceConfig(const Device& _device, uint8_t _configClass,
                                  uint8_t _configIndex, uint8_t _value);
 
-    virtual void setOutputValue(const Device& _device, uint8_t _value);
+    virtual void setValue(const Device& _device, uint8_t _value);
 
     virtual int getSensorValue(const Device& _device, const int _sensorID);
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock);

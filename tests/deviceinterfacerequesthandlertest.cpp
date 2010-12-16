@@ -53,8 +53,8 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
     virtual void decreaseValue()  {
       functionCalled("decreaseValue");
     }
-    virtual void setValue(const double _value)  {
-      functionCalled("setValue(" + doubleToString(_value) + ")");
+    virtual void setValue(const uint8_t _value)  {
+      functionCalled("setValue(" + intToString(_value) + ")");
     }
     virtual void callScene(const int _sceneNr)  {
       functionCalled("callScene(" + intToString(_sceneNr) + ")");

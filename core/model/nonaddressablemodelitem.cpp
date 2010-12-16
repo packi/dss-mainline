@@ -43,7 +43,7 @@ namespace dss {
     }
   } // decreaseValue
 
-  void NonAddressableModelItem::setValue(const double _value) {
+  void NonAddressableModelItem::setValue(const uint8_t _value) {
     std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
     foreach(boost::shared_ptr<AddressableModelItem> item, items) {
       item->setValue(_value);

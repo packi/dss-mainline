@@ -83,8 +83,9 @@ namespace dss {
     }
   } // undoScene
 
-  void SimActionRequestBusInterface::setValue(AddressableModelItem *pTarget,
-                                              const double _value) {
+  void SimActionRequestBusInterface::setValue(
+                                                AddressableModelItem *pTarget,
+                                                const uint8_t _value) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
     Device* pDevice = dynamic_cast<Device*>(pTarget);
     for(int iMeter =  0; iMeter < m_pSimulation->getDSMeterCount(); iMeter++) {

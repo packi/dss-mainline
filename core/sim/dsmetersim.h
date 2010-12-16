@@ -68,8 +68,8 @@ namespace dss {
     void groupSaveScene(const int _zoneID, const int _groupID, const int _sceneID);
     void deviceUndoScene(int _deviceID);
     void groupUndoScene(const int _zoneID, const int _groupID);
-    void deviceSetValue(const int _deviceID, const int _value);
-    void groupSetValue(const int _zoneID, const int _groupID, const int _value);
+    void deviceSetValue(const int _deviceID, const uint8_t _value);
+    void groupSetValue(const int _zoneID, const int _groupID, const uint8_t _value);
   public:
     uint32_t getPowerConsumption();
     uint32_t getEnergyMeterValue();

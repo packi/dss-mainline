@@ -129,7 +129,7 @@ namespace dss {
 
     virtual std::pair<uint8_t, uint16_t> getTransmissionQuality() = 0;
 
-    virtual void setOutputValue(const uint8_t value) = 0;
+    virtual void setValue(const uint8_t _value) = 0;
     virtual uint16_t getFunctionID() = 0;
 
     virtual void setConfigParameter(const std::string& _name, const std::string& _value) = 0;

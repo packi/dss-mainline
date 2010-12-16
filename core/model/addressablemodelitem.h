@@ -42,7 +42,7 @@ namespace dss {
     virtual void increaseValue();
     virtual void decreaseValue();
 
-    virtual void setValue(const double _value);
+    virtual void setValue(const uint8_t _value);
 
     virtual void callScene(const int _sceneNr);
     virtual void saveScene(const int _sceneNr);

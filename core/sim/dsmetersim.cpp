@@ -274,20 +274,20 @@ namespace dss {
     }
   } // groupUndoScene
 
-  void DSMeterSim::groupSetValue(const int _zoneID, const int _groupID, const int _value) {
+  void DSMeterSim::groupSetValue(const int _zoneID, const int _groupID, const uint8_t _value) {
     std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
     if(m_DevicesOfGroupInZone.find(zonesGroup) != m_DevicesOfGroupInZone.end()) {
       std::vector<DSIDInterface*> dsids = m_DevicesOfGroupInZone[zonesGroup];
       for(std::vector<DSIDInterface*>::iterator iDSID = dsids.begin(), e = dsids.end();
           iDSID != e; ++iDSID)
       {
-        (*iDSID)->setOutputValue(_value);
+        (*iDSID)->setValue(_value);
       }
     }
   } // groupSetValue
 
-  void DSMeterSim::deviceSetValue(const int _deviceID, const int _value) {
-    lookupDevice(_deviceID).setOutputValue(_value);
+  void DSMeterSim::deviceSetValue(const int _deviceID, const uint8_t _value) {
+    lookupDevice(_deviceID).setValue(_value);
   } // deviceSetValue
 
   uint32_t DSMeterSim::getEnergyMeterValue() {

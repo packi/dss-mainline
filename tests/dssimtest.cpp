@@ -97,8 +97,8 @@ public:
     return 16;
   }
 
-  virtual void setOutputValue(const uint8_t _value) {
-    functionCalled("setOutputValue");
+  virtual void setValue(const uint8_t _value) {
+    functionCalled("setValue");
   }
 
   virtual uint16_t getFunctionID() {

@@ -75,7 +75,7 @@ namespace dss {
     getDevice()->decreaseValue();
   } // decreaseValue
 
-  void DeviceReference::setValue(const double _value) {
+  void DeviceReference::setValue(const uint8_t _value) {
     getDevice()->setValue(_value);
   } // setValue
 

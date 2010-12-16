@@ -144,11 +144,11 @@ namespace dss {
     throw std::runtime_error("Bus interface not available");
   }
 
-  void Device::setOutputValue(uint8_t _value) {
+  void Device::setValue(uint8_t _value) {
     if(m_pApartment->getDeviceBusInterface() != NULL) {
-      m_pApartment->getDeviceBusInterface()->setOutputValue(*this, _value);
+      m_pApartment->getDeviceBusInterface()->setValue(*this, _value);
     }
-  } // setOutputValue
+  } // setValue
 
   void Device::nextScene() {
     callScene(SceneHelper::getNextScene(m_LastCalledScene));

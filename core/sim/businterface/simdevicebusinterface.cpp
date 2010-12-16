@@ -67,7 +67,7 @@ namespace dss {
         pDevice->setDeviceConfig(_configClass, _configIndex, _value);
       }
     }
-  } // setValueDevice
+  } // setDeviceConfig
 
   std::pair<uint8_t, uint16_t> SimDeviceBusInterface::getTransmissionQuality(const Device& _device) {
     boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_device.getDSMeterDSID());
@@ -80,16 +80,16 @@ namespace dss {
     return std::make_pair(0, 0);
   } // getTransmissionQuality
 
-  void SimDeviceBusInterface::setOutputValue(const Device& _device,
+  void SimDeviceBusInterface::setValue(const Device& _device,
                                              const uint8_t _value) {
     boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_device.getDSMeterDSID());
     if(pMeter != NULL) {
       DSIDInterface* pDevice = pMeter->getSimulatedDevice(_device.getShortAddress());
       if(pDevice != NULL) {
-        pDevice->setOutputValue(_value);
+        pDevice->setValue(_value);
       }
     }
-  } // setValueDevice
+  } // setValue
 
 
   int SimDeviceBusInterface::getSensorValue(const Device& _device, const int _sensorID) {
