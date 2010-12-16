@@ -138,6 +138,9 @@ namespace dss {
           pZone->setName(_request.getParameter("newName"));
           return success();
         } else if(_request.getMethod() == "sceneSetName") {
+          if(pGroup == NULL) {
+            return failure("Need group to work");
+          }
           int sceneNumber = strToIntDef(_request.getParameter("sceneNumber"), -1);
           if(sceneNumber == -1) {
             return failure("Need valid parameter 'sceneNumber'");
@@ -148,6 +151,9 @@ namespace dss {
           manipulator.sceneSetName(pGroup, sceneNumber, name);
           return success();
         } else if(_request.getMethod() == "sceneGetName") {
+          if(pGroup == NULL) {
+            return failure("Need group to work");
+          }
           int sceneNumber = strToIntDef(_request.getParameter("sceneNumber"), -1);
           if(sceneNumber == -1) {
             return failure("Need valid parameter 'sceneNumber'");
