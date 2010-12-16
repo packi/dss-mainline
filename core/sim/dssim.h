@@ -86,7 +86,6 @@ namespace dss {
     boost::shared_ptr<DSMeterSim> getDSMeter(const dss_dsid_t& _dsid);
 
     static dss_dsid_t makeSimulatedDSID(const dss_dsid_t& _dsid);
-    static bool isSimulatedDSID(const dss_dsid_t& _dsid);
   }; // DSSim
 
   class DSIDInterface {

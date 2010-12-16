@@ -206,22 +206,12 @@ namespace dss {
     return result;
   } // getDSMeter
 
-  const uint64_t DSIDHeader = 0x3504175FE0000000ll;
-  const uint32_t SimulationPrefix = 0xFFC00000;
-
   dss_dsid_t DSSim::makeSimulatedDSID(const dss_dsid_t& _dsid) {
     dss_dsid_t result = _dsid;
     result.upper = (result.upper & 0x000000000000000Fll) | DSIDHeader;
     result.lower = (result.lower & 0x002FFFFF) | SimulationPrefix;
     return result;
   } // makeSimulatedDSID
-
-  bool DSSim::isSimulatedDSID(const dss_dsid_t& _dsid) {
-    dss_dsid_t temp = _dsid;
-    bool headerMatches = (temp.upper & DSIDHeader) == DSIDHeader;
-    bool prefixMatches = (temp.lower & SimulationPrefix) == SimulationPrefix;
-    return headerMatches && prefixMatches;
-  } // isSimulatedDSID
 
 
   //================================================== DSIDCreator

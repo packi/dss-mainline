@@ -284,6 +284,11 @@ namespace dss {
         m_pInner->removeInactiveDevices(_dsMeterID);
       }
     }
+
+    virtual void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) {
+      m_pSimulationInterface->sceneSetName(_zoneID, _groupID, _sceneNumber, _name);
+      m_pInner->sceneSetName(_zoneID, _groupID, _sceneNumber, _name);
+    }
   private:
     StructureModifyingBusInterface* m_pInner;
     StructureModifyingBusInterface* m_pSimulationInterface;
@@ -393,6 +398,17 @@ namespace dss {
         return m_pInner->outputHasLoad(_device);
       }
     }
+
+    virtual std::string getSceneName(dss_dsid_t _dsMeterID,
+                                     boost::shared_ptr<Group> _group,
+                                     const uint8_t _sceneNumber) {
+      if(isHandledBySimulation(_dsMeterID)) {
+        return m_pSimulationInterface->getSceneName(_dsMeterID, _group, _sceneNumber);
+      } else {
+        return m_pInner->getSceneName(_dsMeterID, _group, _sceneNumber);
+      }
+    } // getSceneName
+
 
   private:
     StructureQueryBusInterface* m_pInner;

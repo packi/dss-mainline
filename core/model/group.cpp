@@ -31,11 +31,12 @@ namespace dss {
 
     //============================================= Group
 
-  Group::Group(const int _id, const int _zoneID, Apartment& _apartment)
+  Group::Group(const int _id, boost::shared_ptr<Zone> _pZone, Apartment& _apartment)
   : AddressableModelItem(&_apartment),
-    m_ZoneID(_zoneID),
+    m_ZoneID(_pZone->getID()),
     m_GroupID(_id),
-    m_LastCalledScene(SceneOff)
+    m_LastCalledScene(SceneOff),
+    m_IsInitializedFromBus(false)
   {
   } // ctor
 
@@ -77,5 +78,13 @@ namespace dss {
   void Group::previousScene() {
     callScene(SceneHelper::getPreviousScene(m_LastCalledScene));
   } // previousScene
+
+  void Group::setSceneName(int _sceneNumber, const std::string& _name) {
+    m_SceneNames[_sceneNumber] = _name;
+  } // setSceneName
+
+  const std::string& Group::getSceneName(int _sceneNumber) {
+    return m_SceneNames[_sceneNumber];
+  } // getSceneName
 
 } // namespace dss

@@ -21,9 +21,11 @@
 */
 
 #include "ds485types.h"
-#include "base.h"
 
 #include <sstream>
+
+#include "core/base.h"
+#include "core/model/modelconst.h"
 
 namespace dss {
 
@@ -69,5 +71,12 @@ namespace dss {
 
     return result;
   }
+
+  bool dss_dsid_t::isSimulated() {
+    bool headerMatches = (upper & DSIDHeader) == DSIDHeader;
+    bool prefixMatches = (lower & SimulationPrefix) == SimulationPrefix;
+    return headerMatches && prefixMatches;
+  } // isSimulatedDSID
+
 
 }

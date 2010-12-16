@@ -48,6 +48,9 @@ namespace dss {
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID);
     virtual bool isLocked(boost::shared_ptr<const Device> _device);
     virtual bool outputHasLoad(boost::shared_ptr<const Device> _device);
+    virtual std::string getSceneName(dss_dsid_t _dsMeterID,
+                                     boost::shared_ptr<Group> _group,
+                                     const uint8_t _sceneNumber);
   private:
     boost::shared_ptr< DSSim > m_pSimulation;
   }; // SimStructureQueryBusInterface

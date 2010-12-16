@@ -29,6 +29,7 @@
 
 #include "core/model/modelconst.h"
 #include "core/model/device.h"
+#include "core/model/group.h"
 
 #include "dsbusinterface.h"
 
@@ -303,4 +304,16 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
     return outputHasLoad;
   } // outputHasLoad
+
+  std::string DSStructureQueryBusInterface::getSceneName(dss_dsid_t _dsMeterID, boost::shared_ptr<Group> _group, const uint8_t _sceneNumber) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    dsid_t dsmDSID;
+    dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
+    uint8_t name[20];
+    int ret = ZoneGroupSceneInfo(m_DSMApiHandle, dsmDSID, _group->getZoneID(), _group->getID(), _sceneNumber, name);
+    DSBusInterface::checkResultCode(ret);
+    return std::string(reinterpret_cast<char*>(&name));
+  }
 } // namespace dss

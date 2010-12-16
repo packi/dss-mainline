@@ -26,15 +26,18 @@
 #include "deviceinterfacerequesthandler.h"
 
 namespace dss {
-  
+
   class Apartment;
+  class StructureModifyingBusInterface;
 
   class ZoneRequestHandler : public DeviceInterfaceRequestHandler {
   public:
-    ZoneRequestHandler(Apartment& _apartment);
+    ZoneRequestHandler(Apartment& _apartment,
+                       StructureModifyingBusInterface* _pBusInterface);
     virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
   private:
     Apartment& m_Apartment;
+    StructureModifyingBusInterface* m_pStructureBusInterface;
   }; // ZoneRequestHandler
 
 }

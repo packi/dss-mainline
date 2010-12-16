@@ -160,6 +160,13 @@ namespace dss {
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
       .withDocumentation("Returns the consumption of all devices in the zone in mW.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
+    clsZone.addMethod("sceneSetName")
+      .withParameter("sceneNumber", "integer", true)
+      .withParameter("newName", "string", true)
+      .withDocumentation("Sets the name of the scene on the given group");
+    clsZone.addMethod("sceneGetName")
+      .withParameter("sceneNumber", "integer", true)
+      .withDocumentation("Returns the name of the scene on the given group");
 
     RestfulClass& clsDevice = api->addClass("device")
         .withInstanceParameter("dsid", "integer", false)

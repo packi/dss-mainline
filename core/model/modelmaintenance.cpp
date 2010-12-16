@@ -162,6 +162,7 @@ namespace dss {
 
     while(!m_Terminated) {
       handleModelEvents();
+      readSceneNames();
     }
   } // execute
 
@@ -330,6 +331,53 @@ namespace dss {
       }
     }
   } // handleModelEvents
+
+  void ModelMaintenance::readSceneNames() {
+    if(m_IsInitializing) {
+      return;
+    }
+    std::vector<boost::shared_ptr<Zone>  > zones = m_pApartment->getZones();
+    foreach(boost::shared_ptr<Zone> zone, zones) {
+      // skip broadcast zone
+      if(zone->getID() == 0) {
+        continue;
+      }
+      foreach(boost::shared_ptr<Group> group, zone->getGroups()) {
+        if(!group->isInitializedFromBus() && group->isPresent()) {
+          log("Reading scene-names of Zone " + intToString(group->getZoneID()) +
+              " Group " + intToString(group->getID()));
+          // ask the first non-simulated meter
+          boost::shared_ptr<const DSMeter> meterToAsk;
+          foreach(boost::shared_ptr<const DSMeter> meter, zone->getDSMeters()) {
+            if(meter->isPresent()) {
+              meterToAsk = meter;
+              if(!meter->getDSID().isSimulated()) {
+                break;
+              }
+            }
+          }
+          try {
+            if(meterToAsk != NULL) {
+              log("Getting scene-names data from " + meterToAsk->getDSID().toString());
+              for(unsigned int sceneNumber = 0; sceneNumber < MaxSceneNumber; sceneNumber++) {
+                std::string sceneName =
+                  m_pStructureQueryBusInterface->getSceneName(
+                    meterToAsk->getDSID(),
+                    group,
+                    sceneNumber);
+                log("Scene " + intToString(sceneNumber) + ": '" + sceneName + "'");
+                group->setSceneName(sceneNumber, sceneName);
+              }
+              group->setIsInitializedFromBus(true);
+            }
+          } catch(BusApiError& _err) {
+            log("Error reading scene values from " + meterToAsk->getDSID().toString() +
+                ". message: '" + _err.what() + "'", lsError);
+          }
+        }
+      }
+    }
+  } // readSceneNames
 
   void ModelMaintenance::eraseModelEventsFromQueue(ModelEvent::EventType _type) {
     m_ModelEventsMutex.lock();

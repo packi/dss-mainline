@@ -25,6 +25,7 @@
 #define MODELPERSISTENCE_H_
 
 #include <iosfwd>
+#include <boost/shared_ptr.hpp>
 
 namespace Poco {
   namespace XML {
@@ -35,6 +36,8 @@ namespace Poco {
 namespace dss {
 
   class Apartment;
+  class Zone;
+  class Group;
 
   class ModelPersistence {
   public:
@@ -47,6 +50,11 @@ namespace dss {
     void loadDevices(Poco::XML::Node* _node);
     void loadDSMeters(Poco::XML::Node* _node);
     void loadZones(Poco::XML::Node* _node);
+    void loadZone(Poco::XML::Node* _node);
+    void loadGroups(Poco::XML::Node* _node, boost::shared_ptr<Zone> _pZone);
+    void loadGroup(Poco::XML::Node* _node, boost::shared_ptr<Zone> _pZone);
+    void loadScenes(Poco::XML::Node* _node, boost::shared_ptr<dss::Group> _pGroup);
+    void loadScene(Poco::XML::Node* _node, boost::shared_ptr<dss::Group> _pGroup);
   private:
     Apartment& m_Apartment;
   }; // ModelPersistence

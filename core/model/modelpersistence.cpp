@@ -44,6 +44,8 @@
 #include "core/model/device.h"
 #include "core/model/zone.h"
 #include "core/model/modulator.h"
+#include "core/model/group.h"
+#include "core/model/modelconst.h"
 
 using Poco::XML::Document;
 using Poco::XML::Element;
@@ -186,23 +188,105 @@ namespace dss {
     }
   } // loadDSMeters
 
+  void ModelPersistence::loadZone(Poco::XML::Node* _node) {
+    Element* elem = dynamic_cast<Element*>(_node);
+    if((elem != NULL) && elem->hasAttribute("id")) {
+      int id = strToInt(elem->getAttribute("id"));
+      std::string name;
+      Element* nameElem = elem->getChildElement("name");
+      if((nameElem != NULL) && nameElem->hasChildNodes()) {
+        name = nameElem->firstChild()->nodeValue();
+      }
+      boost::shared_ptr<Zone> newZone = m_Apartment.allocateZone(id);
+      if(!name.empty()) {
+        newZone->setName(name);
+      }
+      Node* groupsNode = elem->getChildElement("groups");
+      if(groupsNode != NULL) {
+        loadGroups(groupsNode, newZone);
+      }
+    }
+  } // loadZone
+
+  void ModelPersistence::loadGroups(Node* _node, boost::shared_ptr<Zone> _pZone) {
+    Node* curNode = _node->firstChild();
+    while(curNode != NULL) {
+      if(curNode->localName() == "group") {
+        loadGroup(curNode, _pZone);
+      }
+      curNode = curNode->nextSibling();
+    }
+  } // loadGroups
+
+  void ModelPersistence::loadGroup(Poco::XML::Node* _node, boost::shared_ptr<Zone> _pZone) {
+    Element* elem = dynamic_cast<Element*>(_node);
+    if(elem != NULL && elem->hasAttribute("id")) {
+      int groupID = strToIntDef(elem->getAttribute("id"), -1);
+      Node* curNode = _node->firstChild();
+      Node* scenesNode = NULL;
+      std::string name;
+      while(curNode != NULL) {
+        if(curNode->hasChildNodes()) {
+          if(curNode->localName() == "name") {
+            name = curNode->firstChild()->nodeValue();
+          } else if(curNode->localName() == "scenes") {
+            scenesNode = curNode;
+          }
+        }
+        curNode = curNode->nextSibling();
+      }
+      if(groupID != -1) {
+        boost::shared_ptr<Group> pGroup = _pZone->getGroup(groupID);
+        if(pGroup == NULL) {
+          pGroup.reset(new Group(groupID, _pZone, m_Apartment));
+          _pZone->addGroup(pGroup);
+        }
+        if(!name.empty()) {
+          pGroup->setName(name);
+        }
+        if(scenesNode != NULL) {
+          loadScenes(scenesNode, pGroup);
+        }
+        pGroup->setIsInitializedFromBus(true);
+      }
+    }
+  } // loadGroup
+
+  void ModelPersistence::loadScenes(Poco::XML::Node* _node, boost::shared_ptr<dss::Group> _pGroup) {
+    Node* curNode = _node->firstChild();
+    while(curNode != NULL) {
+      if(curNode->localName() == "scene") {
+        loadScene(curNode, _pGroup);
+      }
+      curNode = curNode->nextSibling();
+    }
+  } // loadScenes
+
+  void ModelPersistence::loadScene(Poco::XML::Node* _node, boost::shared_ptr<dss::Group> _pGroup) {
+    Element* elem = dynamic_cast<Element*>(_node);
+    if(elem != NULL && elem->hasAttribute("id")) {
+      std::string name;
+      int sceneNumber = strToIntDef(elem->getAttribute("id"), -1);
+      Node* curNode = _node->firstChild();
+      while(curNode != NULL) {
+        if(curNode->hasChildNodes()) {
+          if(curNode->localName() == "name") {
+            name = curNode->firstChild()->nodeValue();
+          }
+        }
+        curNode = curNode->nextSibling();
+      }
+      if((sceneNumber != -1) && !name.empty()) {
+        _pGroup->setSceneName(sceneNumber, name);
+      }
+    }
+  } // loadScene
+
   void ModelPersistence::loadZones(Node* _node) {
     Node* curNode = _node->firstChild();
     while(curNode != NULL) {
       if(curNode->localName() == "zone") {
-        Element* elem = dynamic_cast<Element*>(curNode);
-        if((elem != NULL) && elem->hasAttribute("id")) {
-          int id = strToInt(elem->getAttribute("id"));
-          std::string name;
-          Element* nameElem = elem->getChildElement("name");
-          if((nameElem != NULL) && nameElem->hasChildNodes()) {
-            name = nameElem->firstChild()->nodeValue();
-          }
-          boost::shared_ptr<Zone> newZone = m_Apartment.allocateZone(id);
-          if(!name.empty()) {
-            newZone->setName(name);
-          }
-        }
+        loadZone(curNode);
       }
       curNode = curNode->nextSibling();
     }
@@ -233,7 +317,35 @@ namespace dss {
     _parentNode->appendChild(pDeviceNode);
   } // deviceToXML
 
-  void zoneToXML(boost::shared_ptr<const Zone> _pZone, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
+  void groupToXML(boost::shared_ptr<Group> _pGroup, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
+    AutoPtr<Element> pGroupNode = _pDocument->createElement("group");
+    pGroupNode->setAttribute("id", intToString(_pGroup->getID()));
+    if(!_pGroup->getName().empty()) {
+      AutoPtr<Element> pNameNode = _pDocument->createElement("name");
+      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pGroup->getName());
+      pNameNode->appendChild(txtNode);
+      pGroupNode->appendChild(pNameNode);
+    }
+    if(_pGroup->isInitializedFromBus()) {
+      AutoPtr<Element> pScenesNode = _pDocument->createElement("scenes");
+      for(int iScene = 0; iScene < MaxSceneNumber; iScene++) {
+        std::string name = _pGroup->getSceneName(iScene);
+        if(!name.empty()) {
+          AutoPtr<Element> pSceneNode = _pDocument->createElement("scene");
+          pSceneNode->setAttribute("id", intToString(iScene));
+          AutoPtr<Element> pNameNode = _pDocument->createElement("name");
+          AutoPtr<Text> txtNode = _pDocument->createTextNode(name);
+          pNameNode->appendChild(txtNode);
+          pSceneNode->appendChild(pNameNode);
+          pScenesNode->appendChild(pSceneNode);
+        }
+      }
+      pGroupNode->appendChild(pScenesNode);
+    }
+    _parentNode->appendChild(pGroupNode);
+  } // groupToXML
+
+  void zoneToXML(boost::shared_ptr<Zone> _pZone, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
     AutoPtr<Element> pZoneNode = _pDocument->createElement("zone");
     pZoneNode->setAttribute("id", intToString(_pZone->getID()));
     if(!_pZone->getName().empty()) {
@@ -242,11 +354,15 @@ namespace dss {
       pNameNode->appendChild(txtNode);
       pZoneNode->appendChild(pNameNode);
     }
+    AutoPtr<Element> pGroupsNode = _pDocument->createElement("groups");
+    pZoneNode->appendChild(pGroupsNode);
+    foreach(boost::shared_ptr<Group> pGroup, _pZone->getGroups()) {
+      groupToXML(pGroup, pGroupsNode, _pDocument);
+    }
     _parentNode->appendChild(pZoneNode);
   } // zoneToXML
 
-
-void dsMeterToXML(const boost::shared_ptr<DSMeter> _pDSMeter, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
+ void dsMeterToXML(const boost::shared_ptr<DSMeter> _pDSMeter, AutoPtr<Element>& _parentNode, AutoPtr<Document>& _pDocument) {
     AutoPtr<Element> pDSMeterNode = _pDocument->createElement("dsMeter");
     pDSMeterNode->setAttribute("id", _pDSMeter->getDSID().toString());
     if(!_pDSMeter->getName().empty()) {

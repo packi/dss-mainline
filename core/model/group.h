@@ -23,11 +23,15 @@
 #ifndef GROUP_H
 #define GROUP_H
 
+#include <map>
+
 #include "modeltypes.h"
 #include "devicecontainer.h"
 #include "addressablemodelitem.h"
 
 namespace dss {
+
+  class Zone;
 
   /** Represents a predefined group */
   class Group : public DeviceContainer,
@@ -36,9 +40,11 @@ namespace dss {
     int m_ZoneID;
     int m_GroupID;
     int m_LastCalledScene;
+    std::map<uint8_t, std::string> m_SceneNames;
+    bool m_IsInitializedFromBus;
   public:
     /** Constructs a group with the given id belonging to \a _zoneID. */
-    Group(const int _id, const int _zoneID, Apartment& _apartment);
+    Group(const int _id, boost::shared_ptr<Zone> _pZone, Apartment& _apartment);
     virtual ~Group() {};
     virtual Set getDevices() const;
 
@@ -59,6 +65,10 @@ namespace dss {
     void setLastCalledScene(const int _value) { m_LastCalledScene = _value; }
 
     Group& operator=(const Group& _other);
+    void setSceneName(int _sceneNumber, const std::string& _name);
+    const std::string& getSceneName(int _sceneNumber);
+    bool isInitializedFromBus() { return m_IsInitializedFromBus; }
+    void setIsInitializedFromBus(bool _value) { m_IsInitializedFromBus = _value; }
   }; // Group
 
 

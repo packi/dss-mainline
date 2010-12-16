@@ -59,9 +59,9 @@ namespace dss {
     }
 
     std::string toString() const;
-
-    
     static dsid fromString(const std::string& _string);
+
+    bool isSimulated();
   } dss_dsid_t;
 
 

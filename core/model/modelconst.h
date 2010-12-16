@@ -74,5 +74,8 @@ namespace dss {
   const int GroupIDStandardMax = GroupIDDisplay;
   const int GroupIDMax = 63;
 
+  const uint64_t DSIDHeader = 0x3504175FE0000000ll;
+  const uint32_t SimulationPrefix = 0xFFC00000;
+
 } // namespace dss
 #endif

@@ -59,39 +59,37 @@ namespace dss {
   } // dtor
 
   void Apartment::addDefaultGroupsToZone(boost::shared_ptr<Zone> _zone) {
-    int zoneID = _zone->getID();
-
-    boost::shared_ptr<Group> grp(new Group(GroupIDBroadcast, zoneID, *this));
+    boost::shared_ptr<Group> grp(new Group(GroupIDBroadcast, _zone, *this));
     grp->setName("broadcast");
     _zone->addGroup(grp);
-    grp.reset(new Group(GroupIDYellow, zoneID, *this));
+    grp.reset(new Group(GroupIDYellow, _zone, *this));
     grp->setName("yellow");
     _zone->addGroup(grp);
-    grp.reset(new Group(GroupIDGray, zoneID, *this));
+    grp.reset(new Group(GroupIDGray, _zone, *this));
     grp->setName("gray");
     _zone->addGroup(grp);
-    grp.reset(new Group(GroupIDBlue, zoneID, *this));
+    grp.reset(new Group(GroupIDBlue, _zone, *this));
     grp->setName("blue");
     _zone->addGroup(grp);
-    grp.reset(new Group(GroupIDCyan, zoneID, *this));
+    grp.reset(new Group(GroupIDCyan, _zone, *this));
     grp->setName("cyan");
     _zone->addGroup(grp);
-    grp.reset(new Group(GroupIDRed, zoneID, *this));
+    grp.reset(new Group(GroupIDRed, _zone, *this));
     grp->setName("red");
     _zone->addGroup(grp);
-    grp.reset(new Group(GroupIDViolet, zoneID, *this));
+    grp.reset(new Group(GroupIDViolet, _zone, *this));
     grp->setName("magenta");
     _zone->addGroup(grp);
-    grp.reset(new Group(GroupIDGreen, zoneID, *this));
+    grp.reset(new Group(GroupIDGreen, _zone, *this));
     grp->setName("green");
     _zone->addGroup(grp);
-    grp.reset(new Group(GroupIDBlack, zoneID, *this));
+    grp.reset(new Group(GroupIDBlack, _zone, *this));
     grp->setName("black");
     _zone->addGroup(grp);
-    grp.reset(new Group(GroupIDWhite, zoneID, *this));
+    grp.reset(new Group(GroupIDWhite, _zone, *this));
     grp->setName("white");
     _zone->addGroup(grp);
-    grp.reset(new Group(GroupIDDisplay, zoneID, *this));
+    grp.reset(new Group(GroupIDDisplay, _zone, *this));
     grp->setName("display");
     _zone->addGroup(grp);
   } // addDefaultGroupsToZone

@@ -50,6 +50,7 @@ namespace dss {
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID);
     virtual bool isLocked(boost::shared_ptr<const Device> _device);
     virtual bool outputHasLoad(boost::shared_ptr<const Device> _device);
+    virtual std::string getSceneName(dss_dsid_t _dsMeterID, boost::shared_ptr< dss::Group > _group, const uint8_t _sceneNumber);
   private:
     int getGroupCount(const dss_dsid_t& _dsMeterID, const int _zoneID);
     int getDevicesCountInZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
