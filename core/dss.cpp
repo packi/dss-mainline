@@ -582,6 +582,8 @@ const char* kSavedPropsDirectory = "data/savedprops/";
   }
 
   void DSS::shutdown() {
+    DSS::getInstance()->getSecurity().
+      loginAsSystemUser("Shutdown needs to be as system user");
     DSS* inst = m_Instance;
     m_Instance = NULL;
     delete inst;
