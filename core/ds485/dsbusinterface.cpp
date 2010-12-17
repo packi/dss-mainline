@@ -319,7 +319,7 @@ namespace dss {
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etNewDevice,
                                                 dsMeterID);
     pEvent->addParameter(_zoneID);
-    pEvent->addParameter(_deviceDSID);
+    pEvent->addParameter(_deviceID);
     m_pModelMaintenance->addModelEvent(pEvent);
   }
 

@@ -193,8 +193,8 @@ namespace dss {
       switch(event.getEventType()) {
       case ModelEvent::etNewDevice:
         assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() != 3) {
-          log("Expected exactly 3 parameter for ModelEvent::etNewDevice");
+        if(event.getParameterCount() != 2) {
+          log("Expected exactly 2 parameter for ModelEvent::etNewDevice");
         } else {
           onAddDevice(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
         }
