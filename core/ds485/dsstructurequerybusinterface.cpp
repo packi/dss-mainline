@@ -238,10 +238,10 @@ namespace dss {
     pdsid[5] = 0x00;
     pdsid[6] = 0x00;
     pdsid[7] = 0x00;
-    pdsid[8] =  pser[1];
-    pdsid[9] =  pser[0];
-    pdsid[10] = pser[3];
-    pdsid[11] = pser[2];
+    pdsid[8] =  pser[3];
+    pdsid[9] =  pser[2];
+    pdsid[10] = pser[1];
+    pdsid[11] = pser[0];
 
     dss_dsid_t dss_dsid;
     dsid_helper::toDssDsid(dsid, dss_dsid);
