@@ -100,4 +100,12 @@ namespace dss {
     DSBusInterface::checkBroadcastResultCode(ret);
   } // sceneSetName
 
+  void DSStructureModifyingBusInterface::createGroup(uint16_t _zoneID, uint8_t _groupID) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    int ret = ZoneGroupModify_add(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, 0);
+    DSBusInterface::checkBroadcastResultCode(ret);
+  } // createGroup
+
 } // namespace dss

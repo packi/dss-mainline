@@ -30,6 +30,7 @@
 #include "core/model/zone.h"
 #include "core/model/set.h"
 #include "core/model/group.h"
+#include "core/model/modelconst.h"
 
 #include <stdexcept>
 
@@ -102,5 +103,43 @@ namespace dss {
   void StructureManipulator::sceneSetName(boost::shared_ptr<Group> _group, int _sceneNumber, const std::string& _name) {
     m_Interface.sceneSetName(_group->getZoneID(), _group->getID(), _sceneNumber, _name);
   } // sceneSetName
+
+  int StructureManipulator::persistSet(Set& _set) {
+    // find next empty user-group
+    int idFound = -1;
+    for(int groupID = GroupIDUserGroupStart; groupID <= GroupIDMax; groupID++) {
+      try {
+        m_Apartment.getGroup(groupID);
+      } catch(ItemNotFoundException&) {
+        idFound = groupID;
+        break;
+      }
+    }
+    if(idFound != -1) {
+      return persistSet(_set, idFound);
+    }
+    return -1;
+  } // persistSet
+
+  int StructureManipulator::persistSet(Set& _set, int _groupNumber) {
+    boost::shared_ptr<Group> pGroup;
+    try {
+      pGroup = m_Apartment.getGroup(_groupNumber);
+    } catch(ItemNotFoundException&) {
+      pGroup = boost::shared_ptr<Group>(
+        new Group(_groupNumber, m_Apartment.getZone(0), m_Apartment));
+      m_Apartment.getZone(0)->addGroup(pGroup);
+      m_Interface.createGroup(0, _groupNumber);
+    }
+    Logger::getInstance()->log("creating new group " + intToString(_groupNumber));
+    assert(pGroup != NULL);
+    for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
+      boost::shared_ptr<Device> pDevice = _set.get(iDevice).getDevice();
+      pDevice->addToGroup(_groupNumber);
+      m_Interface.addToGroup(pDevice->getDSMeterDSID(), _groupNumber, pDevice->getShortAddress());
+    }
+    return _groupNumber;
+  }
+
 
 } // namespace dss

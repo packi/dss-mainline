@@ -176,6 +176,10 @@ namespace dss {
     m_GroupsPerDevice[_device->getShortAddress()].push_back(_groupID);
   } // addDeviceToGroup
 
+  void DSMeterSim::addGroup(uint16_t _zoneID, uint8_t _groupID) {
+    m_DevicesOfGroupInZone[std::pair<const int, const int>(_zoneID, _groupID)];
+  } // addGroup
+
   void DSMeterSim::removeDeviceFromGroup(DSIDInterface* _pDevice, int _groupID) {
     std::pair<const int, const int> zoneGroupPair(_pDevice->getZoneID(), _groupID);
     std::vector<DSIDInterface*>& interfaceVector =

@@ -104,6 +104,7 @@ namespace dss {
 
     void addDeviceToGroup(DSIDInterface* _device, int _groupID);
     void removeDeviceFromGroup(DSIDInterface* _pDevice, int _groupID);
+    void addGroup(uint16_t _zoneID, uint8_t _groupID);
   }; // DSMeterSim
 
 }
