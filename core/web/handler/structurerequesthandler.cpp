@@ -26,6 +26,7 @@
 
 #include "core/businterface.h"
 #include "core/structuremanipulator.h"
+#include "core/setbuilder.h"
 
 #include "core/model/apartment.h"
 #include "core/model/zone.h"
@@ -176,6 +177,32 @@ namespace dss {
     return success();
   }
 
+  boost::shared_ptr<JSONObject> StructureRequestHandler::persistSet(const RestfulRequest& _request) {
+    std::string setStr = _request.getParameter("set");
+    bool hasGroupID = _request.hasParameter("groupID");
+    int groupID = -1;
+    if(hasGroupID) {
+      std::string groupIDStr = _request.getParameter("groupID");
+      groupID = strToIntDef(groupIDStr, -1);
+      if(groupID == -1) {
+        return failure("Invalid value for parameter groupID : '" + groupIDStr + "'");
+      }
+    }
+    SetBuilder builder(m_Apartment);
+    Set set = builder.buildSet(setStr, boost::shared_ptr<Zone>());
+    StructureManipulator manipulator(m_Interface, m_Apartment);
+    if(hasGroupID) {
+      manipulator.persistSet(set, groupID);
+    } else {
+      groupID = manipulator.persistSet(set);
+    }
+    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+
+    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+    resultObj->addProperty("groupID", groupID);
+    return success(resultObj);
+  } // persistSet
+
   WebServerResponse StructureRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(_request.getMethod() == "zoneAddDevice") {
       return zoneAddDevice(_request);
@@ -187,6 +214,8 @@ namespace dss {
       return removeZone(_request);
     } else if (_request.getMethod() == "removeInactiveDevices") {
       return removeInactiveDevices(_request);
+    } else if(_request.getMethod() == "persistSet") {
+      return persistSet(_request);
     } else {
       throw std::runtime_error("Unhandled function");
     }
