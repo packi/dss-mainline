@@ -52,6 +52,7 @@ namespace dss {
     void sceneSetName(boost::shared_ptr<Group> _group, int _sceneNumber, const std::string& _name);
     int persistSet(Set& _set, const std::string& _originalSet);
     int persistSet(Set& _set, const std::string& _originalSet, int _groupNumber);
+    void unpersistSet(std::string _setDescription);
   }; // StructureManipulator
 
 

@@ -79,7 +79,7 @@ namespace dss {
 
   } // addGroup
 
-  void Zone::removeGroup(boost::shared_ptr<UserGroup> _group) {
+  void Zone::removeGroup(boost::shared_ptr<Group> _group) {
     std::vector<boost::shared_ptr<Group> >::iterator it = find(m_Groups.begin(), m_Groups.end(), _group);
     if(it != m_Groups.end()) {
       m_Groups.erase(it);

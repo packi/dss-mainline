@@ -108,4 +108,12 @@ namespace dss {
     DSBusInterface::checkBroadcastResultCode(ret);
   } // createGroup
 
+  void DSStructureModifyingBusInterface::removeGroup(uint16_t _zoneID, uint8_t _groupID) {
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    int ret = ZoneGroupModify_remove(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID);
+    DSBusInterface::checkBroadcastResultCode(ret);
+  } // removeGroup
+
 } // namespace dss

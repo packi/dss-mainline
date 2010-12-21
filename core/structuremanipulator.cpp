@@ -140,7 +140,28 @@ namespace dss {
       m_Interface.addToGroup(pDevice->getDSMeterDSID(), _groupNumber, pDevice->getShortAddress());
     }
     return _groupNumber;
-  }
+  } // persistSet
 
+  void StructureManipulator::unpersistSet(std::string _setDescription) {
+    std::vector<boost::shared_ptr<Group> > groups = m_Apartment.getZone(0)->getGroups();
+    boost::shared_ptr<Group> pGroup;
+    for(std::size_t iGroup = 0; iGroup < groups.size(); iGroup++) {
+      if(groups[iGroup]->getAssociatedSet() == _setDescription) {
+        pGroup = groups[iGroup];
+        break;
+      }
+    }
+    if(pGroup != NULL) {
+      Set devs = pGroup->getDevices();
+      int groupID = pGroup->getID();
+      for(int iDevice = 0; iDevice < devs.length(); iDevice++) {
+        boost::shared_ptr<Device> pDevice = devs.get(iDevice).getDevice();
+        pDevice->removeFromGroup(groupID);
+        m_Interface.removeFromGroup(pDevice->getDSMeterDSID(), groupID, pDevice->getShortAddress());
+      }
+      m_Interface.removeGroup(pGroup->getZoneID(), groupID);
+      m_Apartment.getZone(0)->removeGroup(pGroup);
+    }
+  } // unpersistSet
 
 } // namespace dss

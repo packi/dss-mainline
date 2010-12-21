@@ -180,6 +180,14 @@ namespace dss {
     m_DevicesOfGroupInZone[std::pair<const int, const int>(_zoneID, _groupID)];
   } // addGroup
 
+  void DSMeterSim::removeGroup(uint16_t _zoneID, uint8_t _groupID) {
+    std::pair<const int, const int> zonesGroup(_zoneID, _groupID);
+    IntPairToDSIDSimVector::iterator it = m_DevicesOfGroupInZone.find(zonesGroup);
+    if(it != m_DevicesOfGroupInZone.end()) {
+      m_DevicesOfGroupInZone.erase(it);
+    }
+  } // removeGroup
+
   void DSMeterSim::removeDeviceFromGroup(DSIDInterface* _pDevice, int _groupID) {
     std::pair<const int, const int> zoneGroupPair(_pDevice->getZoneID(), _groupID);
     std::vector<DSIDInterface*>& interfaceVector =

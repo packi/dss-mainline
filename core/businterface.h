@@ -125,6 +125,7 @@ namespace dss {
     virtual void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) = 0;
 
     virtual void createGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
+    virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
 
     virtual ~StructureModifyingBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureModifyingBusInterface

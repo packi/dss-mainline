@@ -748,6 +748,8 @@ public:
   }
   virtual void createGroup(uint16_t _zoneID, uint8_t _groupID) {
   }
+  virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) {
+  }
 };
 
 class DummyActionRequestInterface : public ActionRequestInterface {
@@ -861,6 +863,60 @@ BOOST_AUTO_TEST_CASE(testPersistSet) {
   set.callScene(5);
 
   BOOST_CHECK_EQUAL(actionInterface.getLog(), "callScene(0,16,5)");
+}
+
+BOOST_AUTO_TEST_CASE(testUnPersistSet) {
+  Apartment apt(NULL);
+
+  dss_dsid_t meter1DSID = dss_dsid_t(0,10);
+  boost::shared_ptr<DSMeter> meter1 = apt.allocateDSMeter(meter1DSID);
+  boost::shared_ptr<Zone> zone1 = apt.allocateZone(1);
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dss_dsid_t(0,1));
+  dev1->setShortAddress(1);
+  dev1->setDSMeter(meter1);
+  dev1->setZoneID(1);
+  dev1->addToGroup(1);
+  DeviceReference devRef1 = DeviceReference(dev1, &apt);
+  zone1->addDevice(devRef1);
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dss_dsid_t(0,2));
+  dev2->setShortAddress(2);
+  dev2->setDSMeter(meter1);
+  dev2->setZoneID(1);
+  dev2->addToGroup(1);
+  DeviceReference devRef2 = DeviceReference(dev2, &apt);
+  zone1->addDevice(devRef2);
+  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dss_dsid_t(0,3));
+  dev3->setShortAddress(3);
+  dev3->setDSMeter(meter1);
+  dev3->setZoneID(1);
+  dev3->addToGroup(1);
+  DeviceReference devRef3 = DeviceReference(dev3, &apt);
+  zone1->addDevice(devRef3);
+
+  DummyStructureModifyingInterface interface;
+  DummyActionRequestInterface actionInterface;
+  DummyBusInterface busInterface(&interface, &actionInterface);
+
+  StructureManipulator manipulator(interface, apt);
+  apt.setBusInterface(&busInterface);
+
+  Set set;
+  set.addDevice(dev1);
+  set.addDevice(dev2);
+
+  set.callScene(5);
+  BOOST_CHECK_EQUAL(actionInterface.getLog(), "callScene(1,5)callScene(2,5)");
+
+  std::string setDescription = "addDevices(1,2)";
+  manipulator.persistSet(set, setDescription);
+  actionInterface.clearLog();
+  set.callScene(5);
+  BOOST_CHECK_EQUAL(actionInterface.getLog(), "callScene(0,16,5)");
+
+  manipulator.unpersistSet(setDescription);
+  actionInterface.clearLog();
+  set.callScene(5);
+  BOOST_CHECK_EQUAL(actionInterface.getLog(), "callScene(1,5)callScene(2,5)");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

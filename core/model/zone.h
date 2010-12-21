@@ -90,7 +90,7 @@ namespace dss {
     /** Adds a group to the zone */
     void addGroup(boost::shared_ptr<Group> _group);
     /** Removes a group from the zone */
-    void removeGroup(boost::shared_ptr<UserGroup> _group);
+    void removeGroup(boost::shared_ptr<Group> _group);
 
     /** Returns the zones id */
     int getID() const;
