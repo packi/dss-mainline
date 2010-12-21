@@ -50,8 +50,8 @@ namespace dss {
     void removeInactiveDevices(boost::shared_ptr<DSMeter> _dsMeter);
 
     void sceneSetName(boost::shared_ptr<Group> _group, int _sceneNumber, const std::string& _name);
-    int persistSet(Set& _set);
-    int persistSet(Set& _set, int _groupNumber);
+    int persistSet(Set& _set, const std::string& _originalSet);
+    int persistSet(Set& _set, const std::string& _originalSet, int _groupNumber);
   }; // StructureManipulator
 
 

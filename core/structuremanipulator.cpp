@@ -104,7 +104,7 @@ namespace dss {
     m_Interface.sceneSetName(_group->getZoneID(), _group->getID(), _sceneNumber, _name);
   } // sceneSetName
 
-  int StructureManipulator::persistSet(Set& _set) {
+  int StructureManipulator::persistSet(Set& _set, const std::string& _originalSet) {
     // find next empty user-group
     int idFound = -1;
     for(int groupID = GroupIDUserGroupStart; groupID <= GroupIDMax; groupID++) {
@@ -116,12 +116,12 @@ namespace dss {
       }
     }
     if(idFound != -1) {
-      return persistSet(_set, idFound);
+      return persistSet(_set, _originalSet, idFound);
     }
     return -1;
   } // persistSet
 
-  int StructureManipulator::persistSet(Set& _set, int _groupNumber) {
+  int StructureManipulator::persistSet(Set& _set, const std::string& _originalSet, int _groupNumber) {
     boost::shared_ptr<Group> pGroup;
     try {
       pGroup = m_Apartment.getGroup(_groupNumber);
@@ -130,6 +130,7 @@ namespace dss {
         new Group(_groupNumber, m_Apartment.getZone(0), m_Apartment));
       m_Apartment.getZone(0)->addGroup(pGroup);
       m_Interface.createGroup(0, _groupNumber);
+      pGroup->setAssociatedSet(_originalSet);
     }
     Logger::getInstance()->log("creating new group " + intToString(_groupNumber));
     assert(pGroup != NULL);

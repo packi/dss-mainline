@@ -856,7 +856,7 @@ BOOST_AUTO_TEST_CASE(testPersistSet) {
   set.callScene(5);
   BOOST_CHECK_EQUAL(actionInterface.getLog(), "callScene(1,5)callScene(2,5)");
 
-  manipulator.persistSet(set);
+  manipulator.persistSet(set, "");
   actionInterface.clearLog();
   set.callScene(5);
 

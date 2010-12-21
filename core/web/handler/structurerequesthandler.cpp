@@ -192,9 +192,9 @@ namespace dss {
     Set set = builder.buildSet(setStr, boost::shared_ptr<Zone>());
     StructureManipulator manipulator(m_Interface, m_Apartment);
     if(hasGroupID) {
-      manipulator.persistSet(set, groupID);
+      manipulator.persistSet(set, setStr, groupID);
     } else {
-      groupID = manipulator.persistSet(set);
+      groupID = manipulator.persistSet(set, setStr);
     }
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
 
