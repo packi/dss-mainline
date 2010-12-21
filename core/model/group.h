@@ -32,6 +32,8 @@
 namespace dss {
 
   class Zone;
+  class PropertyNode;
+  typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   /** Represents a predefined group */
   class Group : public DeviceContainer,
@@ -42,6 +44,7 @@ namespace dss {
     int m_LastCalledScene;
     std::map<uint8_t, std::string> m_SceneNames;
     bool m_IsInitializedFromBus;
+    PropertyNodePtr m_pPropertyNode;
   public:
     /** Constructs a group with the given id belonging to \a _zoneID. */
     Group(const int _id, boost::shared_ptr<Zone> _pZone, Apartment& _apartment);
@@ -69,6 +72,7 @@ namespace dss {
     const std::string& getSceneName(int _sceneNumber);
     bool isInitializedFromBus() { return m_IsInitializedFromBus; }
     void setIsInitializedFromBus(bool _value) { m_IsInitializedFromBus = _value; }
+    void publishToPropertyTree();
   }; // Group
 
 
