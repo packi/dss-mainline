@@ -25,6 +25,7 @@
 #include "scenehelper.h"
 #include "set.h"
 #include "apartment.h"
+#include "core/propertysystem.h"
 
 #include "core/model/modelconst.h"
 namespace dss {
@@ -81,10 +82,31 @@ namespace dss {
 
   void Group::setSceneName(int _sceneNumber, const std::string& _name) {
     m_SceneNames[_sceneNumber] = _name;
+    if (m_pPropertyNode != NULL) {
+      PropertyNodePtr scene = m_pPropertyNode->createProperty("scenes/scene" +
+        intToString(_sceneNumber));
+
+      scene->createProperty("scene")->setIntegerValue(_sceneNumber);
+      scene->createProperty("name")->setStringValue(_name);
+    }
   } // setSceneName
 
   const std::string& Group::getSceneName(int _sceneNumber) {
     return m_SceneNames[_sceneNumber];
   } // getSceneName
+
+  void Group::publishToPropertyTree() {
+    if(m_pPropertyNode == NULL) {
+      if(m_pApartment->getPropertyNode() != NULL) {
+        m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone" + intToString(m_ZoneID) + "/groups/group" + intToString(m_GroupID));
+        m_pPropertyNode->createProperty("group")->setIntegerValue(m_GroupID);
+        m_pPropertyNode->createProperty("name")
+          ->linkToProxy(PropertyProxyMemberFunction<Group, std::string>(*this, &Group::getName, &Group::setName));
+        m_pPropertyNode->createProperty("lastCalledScene")
+          ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getLastCalledScene));
+        m_pPropertyNode->createProperty("scenes");
+      }
+    }
+  } // publishToPropertyTree
 
 } // namespace dss

@@ -74,10 +74,9 @@ namespace dss {
     }
     m_Groups.push_back(_group);
     if(m_pPropertyNode != NULL) {
-      PropertyNodePtr groupNode = m_pPropertyNode->createProperty("groups/" + intToString(_group->getID()));
-      groupNode->createProperty("lastCalledScene")
-        ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*_group, &Group::getLastCalledScene));
+      _group->publishToPropertyTree();
     }
+
   } // addGroup
 
   void Zone::removeGroup(boost::shared_ptr<UserGroup> _group) {
@@ -181,6 +180,7 @@ namespace dss {
     if(m_pPropertyNode == NULL) {
       if(m_pApartment->getPropertyNode() != NULL) {
         m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone" + intToString(m_ZoneID));
+        m_pPropertyNode->createProperty("ZoneID")->setIntegerValue(m_ZoneID);
         m_pPropertyNode->createProperty("name")
           ->linkToProxy(PropertyProxyMemberFunction<Zone, std::string>(*this, &Zone::getName, &Zone::setName));
       }
