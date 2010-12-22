@@ -61,7 +61,19 @@ namespace dss {
     foreach(std::string subprop, _part.properties) {
       PropertyNodePtr node = _node->getPropertyByName(subprop);
       if(node != NULL) {
-        obj->addProperty(subprop, node->getAsString());
+        switch (node->getValueType()) {
+          case vTypeInteger:
+            obj->addProperty(subprop, node->getIntegerValue());
+            break;
+          case vTypeBoolean:
+            obj->addProperty(subprop, node->getBoolValue());
+            break;
+          case vTypeNone:
+          case vTypeString:
+          default:
+            obj->addProperty(subprop, node->getAsString());
+            break;
+        }
       }
     }
     _parentElement->addElement(_node->getName(), obj);
