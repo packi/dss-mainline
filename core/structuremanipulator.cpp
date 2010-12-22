@@ -96,10 +96,6 @@ namespace dss {
     }
   } // removeZoneOnDSMeter
 
-  void StructureManipulator::removeInactiveDevices(boost::shared_ptr<DSMeter> _dsMeter) {
-    m_Interface.removeInactiveDevices(_dsMeter->getDSID());
-  } // removeInactiveDevices
-
   void StructureManipulator::sceneSetName(boost::shared_ptr<Group> _group, int _sceneNumber, const std::string& _name) {
     m_Interface.sceneSetName(_group->getZoneID(), _group->getID(), _sceneNumber, _name);
   } // sceneSetName

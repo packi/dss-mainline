@@ -389,9 +389,6 @@ namespace dss {
     clsStructure.addMethod("removeDevice")
         .withParameter("deviceID", "integer", true)
         .withDocumentation("Removes a device.", "Only devices that are no longer present (isPresent flag is not set) can be removed.");
-    clsStructure.addMethod("removeInactiveDevices")
-       .withParameter("id", "dsid", true)
-       .withDocumentation("Removed all inactive devices from a modulator");
     clsStructure.addMethod("persistSet")
        .withParameter("set", "string", true)
        .withParameter("groupID", "integer", false)
