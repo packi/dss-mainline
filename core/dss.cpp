@@ -538,6 +538,8 @@ const char* kSavedPropsDirectory = "data/savedprops/";
       return;
     }
 
+    m_pSecurity->loginAsSystemUser("Main thread needs system privileges");
+
     m_State = ssStarting;
     std::for_each(m_Subsystems.begin(), m_Subsystems.end(), StartSubsystem);
 
