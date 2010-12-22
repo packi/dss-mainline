@@ -26,6 +26,7 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+#include <climits>
 
 #include <boost/thread.hpp>
 #include <boost/bind.hpp>
