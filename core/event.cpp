@@ -31,6 +31,7 @@
 #include "core/model/device.h"
 #include "core/model/devicereference.h"
 #include "core/model/set.h"
+#include "core/security/security.h"
 
 #include <set>
 #include <iostream>
@@ -240,6 +241,10 @@ namespace dss {
   } // addPlugin
 
   void EventInterpreter::execute() {
+    if(DSS::hasInstance()) {
+      getDSS().getSecurity().loginAsSystemUser(
+        "EventInterpreter needs to run as system user (for now)");
+    }
     if(m_Queue == NULL) {
       Logger::getInstance()->log("EventInterpreter: No queue set. Can't work like that... exiting...", lsFatal);
       return;
