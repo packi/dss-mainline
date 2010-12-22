@@ -22,6 +22,7 @@
 
 #include "simstructuremodifyingbusinterface.h"
 
+#include "core/base.h"
 #include "core/sim/dssim.h"
 #include "core/sim/dsmetersim.h"
 
@@ -73,6 +74,28 @@ namespace dss {
 
   void SimStructureModifyingBusInterface::sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) {
     // nop
+  } // sceneSetName
+
+  void SimStructureModifyingBusInterface::createGroup(uint16_t _zoneID, uint8_t _groupID) {
+    int numMeters = m_pSimulation->getDSMeterCount();
+    for(int iMeter = 0; iMeter < numMeters; iMeter++) {
+      boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(iMeter);
+      if(contains<int>(pMeter->getZones(), _zoneID)) {
+        pMeter->addGroup(_zoneID, _groupID);
+      }
+    }
+  } // createGroup
+
+  void SimStructureModifyingBusInterface::removeGroup(uint16_t _zoneID, uint8_t _groupID) {
+    int numMeters = m_pSimulation->getDSMeterCount();
+    for(int iMeter = 0; iMeter < numMeters; iMeter++) {
+      boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(iMeter);
+      if(contains<int>(pMeter->getZones(), _zoneID)) {
+        if(contains<int>(pMeter->getGroupsOfZone(_zoneID), _groupID)) {
+          pMeter->removeGroup(_zoneID, _groupID);
+        }
+      }
+    }
   }
 
 } // namespace dss

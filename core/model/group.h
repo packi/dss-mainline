@@ -45,6 +45,7 @@ namespace dss {
     std::map<uint8_t, std::string> m_SceneNames;
     bool m_IsInitializedFromBus;
     PropertyNodePtr m_pPropertyNode;
+    std::string m_AssociatedSet;
   public:
     /** Constructs a group with the given id belonging to \a _zoneID. */
     Group(const int _id, boost::shared_ptr<Zone> _pZone, Apartment& _apartment);
@@ -73,6 +74,8 @@ namespace dss {
     bool isInitializedFromBus() { return m_IsInitializedFromBus; }
     void setIsInitializedFromBus(bool _value) { m_IsInitializedFromBus = _value; }
     void publishToPropertyTree();
+    void setAssociatedSet(const std::string& _value) { m_AssociatedSet = _value; }
+    const std::string& getAssociatedSet() const { return m_AssociatedSet; }
   }; // Group
 
 

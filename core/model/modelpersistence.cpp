@@ -225,12 +225,15 @@ namespace dss {
       Node* curNode = _node->firstChild();
       Node* scenesNode = NULL;
       std::string name;
+      std::string associatedSet;
       while(curNode != NULL) {
         if(curNode->hasChildNodes()) {
           if(curNode->localName() == "name") {
             name = curNode->firstChild()->nodeValue();
           } else if(curNode->localName() == "scenes") {
             scenesNode = curNode;
+          } else if(curNode->localName() == "associatedSet") {
+            associatedSet = curNode->firstChild()->nodeValue();
           }
         }
         curNode = curNode->nextSibling();
@@ -246,6 +249,9 @@ namespace dss {
         }
         if(scenesNode != NULL) {
           loadScenes(scenesNode, pGroup);
+        }
+        if(!associatedSet.empty()) {
+          pGroup->setAssociatedSet(associatedSet);
         }
         pGroup->setIsInitializedFromBus(true);
       }
@@ -323,6 +329,12 @@ namespace dss {
     if(!_pGroup->getName().empty()) {
       AutoPtr<Element> pNameNode = _pDocument->createElement("name");
       AutoPtr<Text> txtNode = _pDocument->createTextNode(_pGroup->getName());
+      pNameNode->appendChild(txtNode);
+      pGroupNode->appendChild(pNameNode);
+    }
+    if(!_pGroup->getAssociatedSet().empty()) {
+      AutoPtr<Element> pNameNode = _pDocument->createElement("associatedSet");
+      AutoPtr<Text> txtNode = _pDocument->createTextNode(_pGroup->getAssociatedSet());
       pNameNode->appendChild(txtNode);
       pGroupNode->appendChild(pNameNode);
     }

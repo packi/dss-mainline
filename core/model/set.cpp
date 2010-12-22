@@ -389,6 +389,13 @@ namespace dss {
         std::copy(resultPart.begin(), resultPart.end(), insertionIterator);
       }
 
+      if(result.size() > 1) {
+        ModelItemVector partZoneZero = bestFit(*_set.get(0).getDevice()->getApartment().getZone(0), _set);
+        if(partZoneZero.size() < result.size()) {
+          result = partZoneZero;
+        }
+      }
+
       return result;
     } // bestFit(const Set&)
 
@@ -426,7 +433,7 @@ namespace dss {
           workingCopy.removeDevice(ref);
 
           if(OptimizerDebug) {
-            Logger::getInstance()->log("Working with device " + ref.getDSID().toString());
+            Logger::getInstance()->log("Working with device " + ref.getDSID().toString() + " groups: " + intToString(ref.getDevice()->getGroupsCount()));
           }
 
           bool foundGroup = false;

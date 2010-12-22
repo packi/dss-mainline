@@ -45,6 +45,8 @@ namespace dss {
     boost::shared_ptr<JSONObject> addZone(const RestfulRequest& _request);
     boost::shared_ptr<JSONObject> removeZone(const RestfulRequest& _request);
     boost::shared_ptr<JSONObject> removeInactiveDevices(const RestfulRequest& _request);
+    boost::shared_ptr<JSONObject> persistSet(const RestfulRequest& _request);
+    boost::shared_ptr<JSONObject> unpersistSet(const RestfulRequest& _request);
   }; // StructureRequestHandler
 
 } // namespace dss

@@ -282,6 +282,16 @@ namespace dss {
       m_pSimulationInterface->sceneSetName(_zoneID, _groupID, _sceneNumber, _name);
       m_pInner->sceneSetName(_zoneID, _groupID, _sceneNumber, _name);
     }
+
+    virtual void createGroup(uint16_t _zoneID, uint8_t _groupID) {
+      m_pSimulationInterface->createGroup(_zoneID, _groupID);
+      m_pInner->createGroup(_zoneID, _groupID);
+    }
+
+    virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) {
+      m_pSimulationInterface->removeGroup(_zoneID, _groupID);
+      m_pInner->removeGroup(_zoneID, _groupID);
+    }
   private:
     StructureModifyingBusInterface* m_pInner;
     StructureModifyingBusInterface* m_pSimulationInterface;
