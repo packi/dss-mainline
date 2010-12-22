@@ -1,4 +1,4 @@
-set(files basetests.cpp  datetoolstests.cpp
+set(files basetests.cpp  datetoolstests.cpp securitytests.cpp
         eventtests.cpp
         modeljstests.cpp
         modeltests.cpp
@@ -17,6 +17,7 @@ add_executable(dsstests EXCLUDE_FROM_ALL
               ${files})
 
 target_link_libraries(dsstests core ds485 unix webservices simulation model mongoose
+                               security
                                ${REQUIRED_LIBS})
 
 add_custom_target(test

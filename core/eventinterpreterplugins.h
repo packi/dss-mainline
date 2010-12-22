@@ -51,7 +51,7 @@ namespace dss {
 
   class EventInterpreterPluginJavascript : public EventInterpreterPlugin {
   private:
-    ScriptEnvironment m_Environment;
+    boost::shared_ptr<ScriptEnvironment> m_pEnvironment;
     boost::weak_ptr<ScriptContextWrapper> m_WrapperInAction;
     std::vector<boost::shared_ptr<ScriptContextWrapper> > m_WrappedContexts;
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;

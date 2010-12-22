@@ -36,6 +36,9 @@
 #include "core/logger.h"
 #include "core/dss.h"
 #include "core/propertysystem.h"
+
+#include "core/security/security.h"
+
 #include "core/web/restful.h"
 #include "core/web/restfulapiwriter.h"
 #include "core/web/webrequests.h"
@@ -307,43 +310,28 @@ namespace dss {
   }
 
   void *WebServer::jsonHandler(struct mg_connection* _connection,
-                              const struct mg_request_info* _info) {
+                               const struct mg_request_info* _info,
+                               HashMapConstStringString _parameter,
+                               HashMapConstStringString _cookies,
+                               boost::shared_ptr<Session> _session) {
     const std::string urlid = "/json/";
 
     std::string uri = _info->uri;
-    HashMapConstStringString paramMap = parseParameter(_info->query_string);
-
     std::string method = uri.substr(uri.find(urlid) + urlid.size());
 
-    WebServer& self = DSS::getInstance()->getWebServer();
+    RestfulRequest request(method, _parameter, _cookies);
 
-    const char* cookie = mg_get_header(_connection, "Cookie");
-    HashMapConstStringString cookies = self.parseCookies(cookie);
-    RestfulRequest request(method, paramMap, cookies);
-
-    self.log("Processing call to " + method);
-
-    boost::shared_ptr<Session> session;
-    std::string token = cookies["token"];
-    if(token.empty()) {
-      token = paramMap["token"];
-    }
-    if(!token.empty()) {
-      session = self.m_SessionManager->getSession(token);
-    }
-
-    if(session != NULL) {
-      session->touch();
-    }
+    log("Processing call to " + method);
 
     std::string result;
-    if(self.m_Handlers[request.getClass()] != NULL) {
+    if(m_Handlers[request.getClass()] != NULL) {
       try {
-        WebServerResponse response = self.m_Handlers[request.getClass()]->jsonHandleRequest(request, session);
+        WebServerResponse response =
+          m_Handlers[request.getClass()]->jsonHandleRequest(request, _session);
         if(response.getResponse() != NULL) {
           result = response.getResponse()->toString();
         }
-        std::string cookies = self.generateCookieString(response.getCookies());
+        std::string cookies = generateCookieString(response.getCookies());
         emitHTTPHeader(200, _connection, "application/json", cookies);
       } catch(std::runtime_error& e) {
         emitHTTPHeader(500, _connection, "application/json");
@@ -359,7 +347,7 @@ namespace dss {
       sstream << "\"message\"" << ":" << "\"Call to unknown function\"";
       sstream << "}";
       result = sstream.str();
-      self.log("Unknown function '" + method + "'", lsError);
+      log("Unknown function '" + method + "'", lsError);
     }
     mg_write(_connection, result.c_str(), result.length());
     return _connection;
@@ -372,14 +360,13 @@ namespace dss {
 
     std::string givenFileName = uri.substr(uri.find(kURLID) + kURLID.size());
 
-    WebServer& self = DSS::getInstance()->getWebServer();
-    self.log("Processing call to download/" + givenFileName);
+    log("Processing call to download/" + givenFileName);
 
     // TODO: make the files-node readonly as this might pose a security threat
     //       (you could download any file on the disk if you add it as a subnode
     //        of files)
-    PropertyNodePtr filesNode = self.getDSS().getPropertySystem().getProperty(
-                                    self.getConfigPropertyBasePath() + "files"
+    PropertyNodePtr filesNode = getDSS().getPropertySystem().getProperty(
+                                  getConfigPropertyBasePath() + "files"
                                 );
     std::string fileName;
     if(filesNode != NULL) {
@@ -388,7 +375,7 @@ namespace dss {
         fileName = fileNode->getStringValue();
       }
     }
-    self.log("Using local file: " + fileName);
+    log("Using local file: " + fileName);
     if (boost::filesystem::exists(fileName)) {
         FILE *fp = fopen(fileName.c_str(), "r");
         if (fp != NULL)
@@ -417,7 +404,12 @@ namespace dss {
     std::ostringstream stream;
     stream << "<h1>" << path << "</h1>";
     stream << "<ul>";
-    PropertyNodePtr node = DSS::getInstance()->getPropertySystem().getProperty(path);
+    PropertyNodePtr node;
+    try {
+      node = DSS::getInstance()->getPropertySystem().getProperty(path);
+    } catch(SecurityException&) {
+      stream << "Access denied";
+    }
     if(node != NULL) {
       for(int iNode = 0; iNode < node->getChildCount(); iNode++) {
         PropertyNodePtr cnode = node->getChild(iNode);
@@ -430,20 +422,24 @@ namespace dss {
         }
         stream << " : ";
         stream << getValueTypeAsString(cnode->getValueType()) << " : ";
-        switch(cnode->getValueType()) {
-        case vTypeBoolean:
-          stream << cnode->getBoolValue();
-          break;
-        case vTypeInteger:
-          stream << cnode->getIntegerValue();
-          break;
-        case vTypeNone:
-          break;
-        case vTypeString:
-          stream << cnode->getStringValue();
-          break;
-        default:
-          stream << "unknown value";
+        try {
+          switch(cnode->getValueType()) {
+          case vTypeBoolean:
+            stream << cnode->getBoolValue();
+            break;
+          case vTypeInteger:
+            stream << cnode->getIntegerValue();
+            break;
+          case vTypeNone:
+            break;
+          case vTypeString:
+            stream << cnode->getStringValue();
+            break;
+          default:
+            stream << "unknown value";
+          }
+        } catch(SecurityException& ex) {
+          stream << "access denied";
         }
       }
     }
@@ -462,12 +458,33 @@ namespace dss {
     }
     std::string uri = _info->uri;
 
+    WebServer& self = DSS::getInstance()->getWebServer();
+    self.m_SessionManager->getSecurity()->signOff();
+
+    HashMapConstStringString paramMap = parseParameter(_info->query_string);
+    const char* cookie = mg_get_header(_connection, "Cookie");
+    HashMapConstStringString cookies = self.parseCookies(cookie);
+
+    boost::shared_ptr<Session> session;
+    std::string token = cookies["token"];
+    if(token.empty()) {
+      token = paramMap["token"];
+    }
+    if(!token.empty()) {
+      session = self.m_SessionManager->getSession(token);
+    }
+
+    if(session != NULL) {
+      session->touch();
+      self.m_SessionManager->getSecurity()->authenticate(session);
+    }
+
     if (uri.find("/browse/") == 0) {
-      return httpBrowseProperties(_connection, _info);
+      return self.httpBrowseProperties(_connection, _info);
     } else if (uri.find("/json/") == 0) {
-      return jsonHandler(_connection, _info);
+      return self.jsonHandler(_connection, _info, paramMap, cookies, session);
     } else if (uri.find("/download/") == 0) {
-      return downloadHandler(_connection, _info);
+      return self.downloadHandler(_connection, _info);
     }
 
     return NULL;

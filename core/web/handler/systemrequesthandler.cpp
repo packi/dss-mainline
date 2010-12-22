@@ -34,6 +34,9 @@
 #include "core/sessionmanager.h"
 #include "core/session.h"
 
+#include "core/security/user.h"
+#include "core/security/security.h"
+
 #include <sstream>
 
 namespace dss {
@@ -67,17 +70,25 @@ namespace dss {
         return failure("Missing parameter 'password'");
       }
 
-      std::string token = m_pSessionManager->registerSession();
-      log("Registered new JSON session");
+      m_pSessionManager->getSecurity()->signOff();
+      if(m_pSessionManager->getSecurity()->authenticate(user, password)) {
+        std::string token = m_pSessionManager->registerSession();
+        m_pSessionManager->getSession(token)->inheritUserFromSecurity();
+        log("Registered new JSON session");
 
-      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-      resultObj->addProperty("token", token);
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        resultObj->addProperty("token", token);
 
-      WebServerResponse response(success(resultObj));
-      response.setCookie("path", "/");
-      response.setCookie("token", token);
-      return response;
+        WebServerResponse response(success(resultObj));
+        response.setCookie("path", "/");
+        response.setCookie("token", token);
+        return response;
+      } else {
+        log("Authentication failed for user '" + user + "'", lsError);
+        return failure("Authentication failed");
+      }
     } else if(_request.getMethod() == "logout") {
+      m_pSessionManager->getSecurity()->signOff();
       if(_session != NULL) {
         m_pSessionManager->removeSession(_session->getID());
       }
@@ -85,6 +96,30 @@ namespace dss {
       response.setCookie("path", "/");
       response.setCookie("token", "");
       return response;
+    } else if(_request.getMethod() == "loggedInUser") {
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      User* pUser = m_pSessionManager->getSecurity()->getCurrentlyLoggedInUser();
+      if(pUser != NULL) {
+        resultObj->addProperty("name", pUser->getName());
+      }
+      return success(resultObj);
+    } else if(_request.getMethod() == "setPassword") {
+      if(_session == NULL) {
+        return failure("Need to be logged in to change password");
+      }
+
+      std::string password = _request.getParameter("password");
+      if(password.empty()) {
+        return failure("Missing parameter 'password'");
+      }
+
+      User* pUser = m_pSessionManager->getSecurity()->getCurrentlyLoggedInUser();
+      if(pUser != NULL) {
+        pUser->setPassword(password);
+        return success("Password changed, have a nice day!");
+      } else {
+        return failure("You've got a session but no user, strange... not doing anything for you sir.");
+      }
     }
     throw std::runtime_error("Unhandled function");
   } // handleRequest

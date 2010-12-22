@@ -35,13 +35,17 @@
 
 #include "core/dss.h"
 #include "core/propertysystem.h"
+#include "core/security/user.h"
+#include "core/security/security.h"
+#include "session.h"
 
 namespace dss {
 
   //============================================= ScriptEnvironment
 
-  ScriptEnvironment::ScriptEnvironment()
-  : m_pRuntime(NULL)
+  ScriptEnvironment::ScriptEnvironment(Security* _pSecurity)
+  : m_pRuntime(NULL),
+    m_pSecurity(_pSecurity)
   {
   } // ctor
 
@@ -230,8 +234,17 @@ namespace dss {
   class SessionAttachedTimeoutObject : public ScriptContextAttachedObject {
   public:
     SessionAttachedTimeoutObject(ScriptContext* _pContext)
-    : ScriptContextAttachedObject(_pContext)
-    { }
+    : ScriptContextAttachedObject(_pContext),
+      m_pRunAsUser(NULL)
+    {
+      if(Security::getCurrentlyLoggedInUser() != NULL) {
+        m_pRunAsUser = new User(*Security::getCurrentlyLoggedInUser());
+      }
+    }
+
+    virtual ~SessionAttachedTimeoutObject() {
+      delete m_pRunAsUser;
+    }
 
     void timeout(int _timeoutMS, jsval _function, JSObject* _obj, boost::shared_ptr<ScriptFunctionRooter> _rooter) {
       const int kSleepIntervalMS = 1000;
@@ -243,6 +256,12 @@ namespace dss {
       }
 
       if(!getIsStopped()) {
+        if(m_pRunAsUser != NULL) {
+          Security* pSecurity = getContext()->getEnvironment().getSecurity();
+          if(pSecurity != NULL) {
+            pSecurity->signIn(m_pRunAsUser);
+          }
+        }
         ScriptLock lock(getContext());
         JSContextThread req(getContext());
         ScriptObject obj(_obj, *getContext());
@@ -258,6 +277,8 @@ namespace dss {
 
       delete this;
     }
+  private:
+    User* m_pRunAsUser;
   };
 
   JSBool global_setTimeout(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {

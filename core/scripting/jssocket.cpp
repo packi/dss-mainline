@@ -33,6 +33,8 @@
 
 using boost::asio::ip::tcp;
 
+#include "core/security/security.h"
+#include "core/security/user.h"
 #include "core/scripting/scriptobject.h"
 
 namespace dss {
@@ -159,11 +161,25 @@ namespace dss {
   protected:
     SocketScriptContextExtension& m_Extension;
   private:
+    void runIOService(User* _pUser) {
+      if(_pUser != NULL) {
+        Security* pSecurity = m_pContext->getEnvironment().getSecurity();
+        if(pSecurity != NULL) {
+          pSecurity->signIn(_pUser);
+        }
+        delete _pUser;
+      }
+      m_IOService->run();
+    }
     void ensureIOServiceAvailable() {
       if(m_IOService == NULL) {
         m_IOService.reset(new boost::asio::io_service());
         m_pASIOWork.reset(new boost::asio::io_service::work(*m_IOService));
-        m_IOServiceThread = boost::thread(boost::bind(&boost::asio::io_service::run, m_IOService));
+        User* pUser = NULL;
+        if(Security::getCurrentlyLoggedInUser() != NULL) {
+          pUser = new User(*Security::getCurrentlyLoggedInUser());
+        }
+        m_IOServiceThread = boost::thread(boost::bind(&SocketHelper::runIOService, this, pUser));
       }
     }
   private:

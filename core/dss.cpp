@@ -57,6 +57,10 @@
 #include "backtrace.h"
 #include "core/sessionmanager.h"
 
+#include "core/security/user.h"
+#include "core/security/security.h"
+#include "core/security/privilege.h"
+
 #include "unix/systeminfo.h"
 
 #include <cassert>
@@ -287,9 +291,13 @@ const char* kSavedPropsDirectory = "data/savedprops/";
     m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner(eventMonitor));
     m_pEventQueue = boost::shared_ptr<EventQueue>(new EventQueue);
 
+    m_pSecurity.reset(
+        new Security(m_pPropertySystem->createProperty("/system/security"),
+                     m_pPropertySystem));
     m_pSessionManager.reset(
       new SessionManager(getEventQueue(),
-                         getEventInterpreter()));
+                         getEventInterpreter(),
+                         m_pSecurity));
     m_pWebServer->setSessionManager(m_pSessionManager);
     m_pWebServices->setSessionManager(m_pSessionManager);
 
@@ -426,6 +434,83 @@ const char* kSavedPropsDirectory = "data/savedprops/";
     return true;
   }
 
+  bool DSS::initSecurity() {
+    m_pSecurity->setFileName(getDataDirectory() + "security.xml");
+    m_pSecurity->loadFromXML();
+    PropertyNodePtr pSecurityNode = m_pPropertySystem->getProperty("/system/security");
+    pSecurityNode->setFlag(PropertyNode::Archive, true);
+    pSecurityNode->createProperty("users")->setFlag(PropertyNode::Archive, true);
+
+    // setup system user
+    PropertyNodePtr pSystemNode = pSecurityNode->getProperty("users/system");
+    if(pSystemNode == NULL) {
+      PropertyNodePtr pSystemNode = pSecurityNode->createProperty("users/system");
+      PropertyNodePtr pRoleNode = pSecurityNode->getProperty("roles/system");
+      if(pRoleNode == NULL) {
+        pRoleNode = pSecurityNode->createProperty("roles/system");
+      }
+      pSystemNode->createProperty("role")->alias(pRoleNode);
+      // set username/password to a dummy-value so nobody's able to log in
+      pSystemNode->createProperty("salt")->setStringValue("dummyvalue");
+      pSystemNode->createProperty("password")->setStringValue("dummyvalue");
+    }
+    m_pSecurity->setSystemUser(new User(pSecurityNode->getProperty("users/system")));
+
+    // setup owner user
+    PropertyNodePtr pOwnerNode = pSecurityNode->getProperty("users/dssadmin");
+    if(pOwnerNode == NULL) {
+      pOwnerNode = pSecurityNode->createProperty("users/dssadmin");
+      pOwnerNode->setFlag(PropertyNode::Archive, true);
+    }
+    PropertyNodePtr pRoleOwnerNode = pSecurityNode->getProperty("roles/owner");
+    if(pRoleOwnerNode == NULL) {
+      pRoleOwnerNode = pSecurityNode->createProperty("roles/owner");
+    }
+    pOwnerNode->createProperty("role")->alias(pRoleOwnerNode);
+    if(pOwnerNode->getProperty("password") == NULL) {
+      boost::shared_ptr<User> user(new User(pOwnerNode));
+      user->setPassword("dssadmin"); // default password for dssadmin
+    }
+
+    boost::shared_ptr<Privilege>
+      privilegeSystem(
+        new Privilege(
+          pSecurityNode->getProperty("roles/system")));
+    privilegeSystem->addRight(Privilege::Read);
+    privilegeSystem->addRight(Privilege::Write);
+    privilegeSystem->addRight(Privilege::Security);
+
+    boost::shared_ptr<Privilege>
+      privilegeOwner(
+        new Privilege(
+          pSecurityNode->getProperty("roles/owner")));
+
+    privilegeOwner->addRight(Privilege::Read);
+    privilegeOwner->addRight(Privilege::Write);
+
+    boost::shared_ptr<Privilege>
+      privilegeNobody(
+        new Privilege(
+          PropertyNodePtr()));
+    boost::shared_ptr<NodePrivileges> privileges(new NodePrivileges());
+    privileges->addPrivilege(privilegeSystem);
+    privileges->addPrivilege(privilegeOwner);
+    privileges->addPrivilege(privilegeNobody);
+    m_pPropertySystem->getProperty("/")->setPrivileges(privileges);
+
+    boost::shared_ptr<Privilege>
+      privilegeNobodySecurityNode(
+        new Privilege(
+          PropertyNodePtr()));
+    privilegeNobodySecurityNode->addRight(Privilege::Read);
+    boost::shared_ptr<NodePrivileges> privilegesSecurityNode(new NodePrivileges());
+    privilegesSecurityNode->addPrivilege(privilegeNobodySecurityNode);
+    pSecurityNode->setPrivileges(privilegesSecurityNode);
+
+    m_pSecurity->startListeningForChanges();
+    return true;
+  } // initSecurity
+
   void DSS::run() {
     Logger::getInstance()->log("DSS starting up....", lsInfo);
     Logger::getInstance()->log(versionString(), lsInfo);
@@ -444,8 +529,16 @@ const char* kSavedPropsDirectory = "data/savedprops/";
     addDefaultInterpreterPlugins();
 
     if (!initSubsystems()) {
+      Logger::getInstance()->log("Failed to initialize subsystems, exiting...", lsFatal);
       return;
     }
+
+    if (!initSecurity()) {
+      Logger::getInstance()->log("Failed to initialize security, exiting...", lsFatal);
+      return;
+    }
+
+    m_pSecurity->loginAsSystemUser("Main thread needs system privileges");
 
     m_State = ssStarting;
     std::for_each(m_Subsystems.begin(), m_Subsystems.end(), StartSubsystem);
@@ -491,6 +584,8 @@ const char* kSavedPropsDirectory = "data/savedprops/";
   }
 
   void DSS::shutdown() {
+    DSS::getInstance()->getSecurity().
+      loginAsSystemUser("Shutdown needs to be as system user");
     DSS* inst = m_Instance;
     m_Instance = NULL;
     delete inst;
