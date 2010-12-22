@@ -241,9 +241,6 @@ namespace dss {
       .withDocumentation("Tells the dSM to never forget this device even if it's not found on the bus.");
     clsDevice.addMethod("unlock")
       .withDocumentation("Tells the dSM to that it's okay forget this device.");
-    clsDevice.addMethod("setOutputLoad")
-      .withParameter("hasLoad", "boolean", true)
-      .withDocumentation("Defines if the device has an output load or not. In the latter case it will get ignored by the dSM in programming mode.");
 
     RestfulClass& clsCircuit = api->addClass("circuit")
        .withInstanceParameter("id", "dsid", true);

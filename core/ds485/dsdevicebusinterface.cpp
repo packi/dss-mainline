@@ -134,17 +134,6 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
   } // lockOrUnlockDevice
 
-  void DSDeviceBusInterface::setOutputLoad(const Device& _device, const bool _load) {
-    if(m_DSMApiHandle == NULL) {
-      return;
-    }
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device.getDSMeterDSID(), dsmDSID);
-
-    int ret = DeviceProperties_set_output_load(m_DSMApiHandle, dsmDSID, _device.getShortAddress(), _load);
-    DSBusInterface::checkResultCode(ret);
-  } // setOutputLoad
-
   std::pair<uint8_t, uint16_t> DSDeviceBusInterface::getTransmissionQuality(const Device& _device) {
     if(m_DSMApiHandle == NULL) {
       throw std::runtime_error("Invalid libdsm api handle");

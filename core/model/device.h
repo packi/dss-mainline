@@ -62,7 +62,6 @@ namespace dss {
     DateTime m_LastDiscovered;
     DateTime m_FirstSeen;
     bool m_IsLockedInDSM;
-    bool m_OutputHasLoad;
 
     PropertyNodePtr m_pPropertyNode;
     PropertyNodePtr m_pAliasNode;
@@ -194,11 +193,6 @@ namespace dss {
         this device (cached value) */
     bool getIsLockedInDSM() const { return m_IsLockedInDSM; }
     void setIsLockedInDSM(const bool _value);
-
-    bool getOutputHasLoad() const { return m_OutputHasLoad; }
-    void setOutputHasLoad(const bool _value);
-    void setOutputLoad(const bool _load);
-
     /** Tells the dSM to never forget a device. */
     void lock();
     /** Tells the dSM that it may forget a device if it's not present. */

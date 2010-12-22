@@ -290,21 +290,6 @@ namespace dss {
     return locked;
   } // isLocked
 
-  bool DSStructureQueryBusInterface::outputHasLoad(boost::shared_ptr<const Device> _device) {
-    if(m_DSMApiHandle == NULL) {
-      throw BusApiError("Bus not ready");
-    }
-    uint8_t outputHasLoad;
-    dsid_t dsmDSID;
-    dsid_helper::toDsmapiDsid(_device->getDSMeterDSID(), dsmDSID);
-    int ret = DeviceInfo_by_device_id(m_DSMApiHandle, dsmDSID, _device->getShortAddress(),
-                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                                      NULL, &outputHasLoad, NULL, NULL, NULL, NULL,
-                                      NULL);
-    DSBusInterface::checkResultCode(ret);
-    return outputHasLoad;
-  } // outputHasLoad
-
   std::string DSStructureQueryBusInterface::getSceneName(dss_dsid_t _dsMeterID, boost::shared_ptr<Group> _group, const uint8_t _sceneNumber) {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
@@ -316,4 +301,5 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
     return std::string(reinterpret_cast<char*>(&name));
   }
+
 } // namespace dss

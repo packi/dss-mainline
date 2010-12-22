@@ -184,14 +184,6 @@ namespace dss {
       }
       pDevice->unlock();
       return success();
-    } else if(_request.getMethod() == "setOutputLoad") {
-      if (_request.getParameter("hasLoad").empty()) {
-        return failure("Missing parameter 'hasLoad'");
-      }
-
-      int value = strToIntDef(_request.getParameter("hasLoad"), -1);
-      pDevice->setOutputLoad(value);
-      return success();
     } else if(_request.getMethod() == "setConfig") {
       int value = strToIntDef(_request.getParameter("value"), -1);
       if((value  < 0) || (value > UCHAR_MAX)) {
