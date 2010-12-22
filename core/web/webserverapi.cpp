@@ -396,6 +396,9 @@ namespace dss {
        .withParameter("set", "string", true)
        .withParameter("groupID", "integer", false)
        .withDocumentation("Creates a group containing all devices contained in the set");
+    clsStructure.addMethod("unpersistSet")
+       .withParameter("set", "string", true)
+       .withDocumentation("Removes the group associated with the set");
 
     RestfulClass& clsMetering = api->addClass("metering");
     clsMetering.addMethod("getResolutions")

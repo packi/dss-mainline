@@ -203,6 +203,22 @@ namespace dss {
     return success(resultObj);
   } // persistSet
 
+  boost::shared_ptr<JSONObject> StructureRequestHandler::unpersistSet(const RestfulRequest& _request) {
+    if(_request.hasParameter("set")) {
+      std::string setStr = _request.getParameter("set");
+      if(!setStr.empty()) {
+        StructureManipulator manipulator(m_Interface, m_Apartment);
+        manipulator.unpersistSet(setStr);
+        m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+        return success();
+      } else {
+        return failure("Need non-empty parameter 'set'");
+      }
+    } else {
+      return failure("Need parameter 'set'");
+    }
+  } // persistSet
+
   WebServerResponse StructureRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     if(_request.getMethod() == "zoneAddDevice") {
       return zoneAddDevice(_request);
@@ -216,6 +232,8 @@ namespace dss {
       return removeInactiveDevices(_request);
     } else if(_request.getMethod() == "persistSet") {
       return persistSet(_request);
+    } else if(_request.getMethod() == "unpersistSet") {
+      return unpersistSet(_request);
     } else {
       throw std::runtime_error("Unhandled function");
     }
