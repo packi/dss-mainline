@@ -58,6 +58,7 @@ namespace dss {
   class ScriptExtension;
   class ScriptObject;
   class ScriptContextAttachedObject;
+  class Security;
 
   /** Wrapper for a script runtime environment. The ScriptEnvironment
     * is also responsible for creating Contexts and enhancing them with
@@ -66,10 +67,10 @@ namespace dss {
   private:
     JSRuntime* m_pRuntime;
     boost::ptr_vector<ScriptExtension> m_Extensions;
+    Security* m_pSecurity;
   public:
-    ScriptEnvironment();
+    ScriptEnvironment(Security* _pSecurity = NULL);
     virtual ~ScriptEnvironment();
-
     void initialize();
 
     /** Adds a ScriptExtension to the extension list. The ScriptEnvironment
@@ -82,6 +83,7 @@ namespace dss {
 
     /** Creates a new ScriptContext with all registered extensions present */
     ScriptContext* getContext();
+    Security* getSecurity() { return m_pSecurity; }
 
     bool isInitialized();
   };

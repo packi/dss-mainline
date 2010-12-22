@@ -96,6 +96,11 @@ namespace dss {
     return result;
   } // authenticate
 
+  bool Security::signIn(User* _pUser) {
+    m_LoggedInUser.reset(new User(*_pUser));
+    return true;
+  } // signIn
+
   void Security::signOff() {
     m_LoggedInUser.release();
   } // signOff

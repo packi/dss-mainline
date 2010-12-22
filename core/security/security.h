@@ -54,6 +54,7 @@ namespace dss {
 
     bool authenticate(const std::string& _user, const std::string& _password);
     bool authenticate(boost::shared_ptr<Session> _session);
+    bool signIn(User* _pUser);
     void signOff();
 
     bool loadFromXML();

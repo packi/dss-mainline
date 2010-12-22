@@ -234,11 +234,11 @@ namespace dss {
   void EventInterpreterPluginJavascript::handleEvent(Event& _event, const EventSubscription& _subscription) {
     if(_subscription.getOptions()->hasParameter("filename1")) {
 
-      if(!m_Environment.isInitialized()) {
+      if(m_pEnvironment == NULL) {
         initializeEnvironment();
       }
 
-      boost::shared_ptr<ScriptContext> ctx(m_Environment.getContext());
+      boost::shared_ptr<ScriptContext> ctx(m_pEnvironment->getContext());
       std::string scriptID = _event.getPropertyByName("script_id");
       if(scriptID.empty()) {
         scriptID = _event.getName() + _subscription.getID();
@@ -311,24 +311,28 @@ namespace dss {
   const std::string EventInterpreterPluginJavascript::kCleanupScriptsEventName = "EventInterpreteRPluginJavascript_cleanupScripts";
 
   void EventInterpreterPluginJavascript::initializeEnvironment() {
-    m_Environment.initialize();
     if(DSS::hasInstance()) {
+      m_pEnvironment.reset(new ScriptEnvironment(&DSS::getInstance()->getSecurity()));
+      m_pEnvironment->initialize();
       ScriptExtension* ext = new ModelScriptContextExtension(DSS::getInstance()->getApartment());
-      m_Environment.addExtension(ext);
+      m_pEnvironment->addExtension(ext);
       ext = new EventScriptExtension(DSS::getInstance()->getEventQueue(), getEventInterpreter());
-      m_Environment.addExtension(ext);
+      m_pEnvironment->addExtension(ext);
       ext = new WrapperAwarePropertyScriptExtension(*this, DSS::getInstance()->getPropertySystem(),
                                                     DSS::getInstance()->getSavedPropsDirectory());
-      m_Environment.addExtension(ext);
+      m_pEnvironment->addExtension(ext);
       ext = new ModelConstantsScriptExtension();
-      m_Environment.addExtension(ext);
+      m_pEnvironment->addExtension(ext);
       ext = new SocketScriptContextExtension();
-      m_Environment.addExtension(ext);
+      m_pEnvironment->addExtension(ext);
       ext = new ScriptLoggerExtension(DSS::getInstance()->getJSLogDirectory(),
                                       DSS::getInstance()->getEventInterpreter());
-      m_Environment.addExtension(ext);
+      m_pEnvironment->addExtension(ext);
       setupCleanupEvent();
       m_pScriptRootNode = DSS::getInstance()->getPropertySystem().createProperty("/scripts");
+    } else {
+      m_pEnvironment.reset(new ScriptEnvironment());
+      m_pEnvironment->initialize();
     }
   } // initializeEnvironment
 
