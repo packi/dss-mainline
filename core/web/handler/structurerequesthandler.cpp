@@ -138,45 +138,6 @@ namespace dss {
     return failure("Missing deviceID");
   }
 
-  boost::shared_ptr<JSONObject> StructureRequestHandler::removeInactiveDevices(const RestfulRequest& _request) {
-    StructureManipulator manipulator(m_Interface, m_Apartment);
-    std::string id = _request.getParameter("id");
-    if(id.empty()) {
-      return failure("Missing parameter id");
-    }
-
-    dss_dsid_t dID = dsid::fromString(id);
-
-    boost::shared_ptr<DSMeter> dsMeter = m_Apartment.getDSMeterByDSID(dID);
-
-    manipulator.removeInactiveDevices(dsMeter);
-
-    Set all = m_Apartment.getDevices();
-
-    if(all.length() <= 0) {
-      return success();
-    }
-
-    Set byMeter = all.getByDSMeter(dsMeter);
-    if (byMeter.length() <= 0) {
-      return success();
-    }
-
-    Set notPresent = byMeter.getByPresence(false);
-    if(notPresent.length() <= 0) {
-      return success();
-    }
-
-    for(int i = 0; i < notPresent.length(); i++) {
-      const DeviceReference& d = notPresent.get(i);
-      m_Apartment.removeDevice(d.getDSID());
-    }
-
-    m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
-
-    return success();
-  }
-
   boost::shared_ptr<JSONObject> StructureRequestHandler::persistSet(const RestfulRequest& _request) {
     std::string setStr = _request.getParameter("set");
     bool hasGroupID = _request.hasParameter("groupID");
@@ -228,8 +189,6 @@ namespace dss {
       return addZone(_request);
     } else if(_request.getMethod() == "removeZone") {
       return removeZone(_request);
-    } else if (_request.getMethod() == "removeInactiveDevices") {
-      return removeInactiveDevices(_request);
     } else if(_request.getMethod() == "persistSet") {
       return persistSet(_request);
     } else if(_request.getMethod() == "unpersistSet") {

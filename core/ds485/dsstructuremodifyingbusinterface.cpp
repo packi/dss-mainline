@@ -80,16 +80,6 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
   } // removeFromGroup
 
-  void DSStructureModifyingBusInterface::removeInactiveDevices(const dss_dsid_t& _dsMeterID) {
-    if(m_DSMApiHandle == NULL) {
-      throw BusApiError("Bus not ready");
-    }
-    dsid_t meterDSID;
-    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
-    int ret = CircuitRemoveInactiveDevices(m_DSMApiHandle, meterDSID);
-    DSBusInterface::checkResultCode(ret);
-  } // removeInactiveDevices
-
   void DSStructureModifyingBusInterface::sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");

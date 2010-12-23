@@ -47,7 +47,6 @@ namespace dss {
     void createZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone);
     void addDeviceToZone(boost::shared_ptr<Device> _device, boost::shared_ptr<Zone> _zone);
     void removeZoneOnDSMeter(boost::shared_ptr<Zone> _zone, boost::shared_ptr<DSMeter> _dsMeter);
-    void removeInactiveDevices(boost::shared_ptr<DSMeter> _dsMeter);
 
     void sceneSetName(boost::shared_ptr<Group> _group, int _sceneNumber, const std::string& _name);
     int persistSet(Set& _set, const std::string& _originalSet);

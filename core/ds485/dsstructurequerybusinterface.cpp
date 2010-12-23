@@ -133,7 +133,7 @@ namespace dss {
     dsid_t dsid;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, dsid, _deviceID, NULL, NULL, NULL, NULL,
-                                      NULL, NULL, NULL, NULL, NULL, groups, NULL, NULL, NULL, NULL);
+                                      NULL, NULL, NULL, NULL, NULL, NULL, groups, NULL, NULL, NULL, NULL);
     DSBusInterface::checkResultCode(ret);
     std::vector<int> result;
     for(int iByte = 0; iByte < GROUPS_LEN; iByte++) {
@@ -205,7 +205,7 @@ namespace dss {
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
       uint16_t deviceId;
       int ret = DeviceInfo_by_index_only_active(m_DSMApiHandle, dsid, _zoneID, iDevice, &deviceId,
-                                    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
       DSBusInterface::checkResultCode(ret);
       result.push_back(deviceId);
     }
@@ -222,7 +222,7 @@ namespace dss {
     uint32_t serialNumber;
 
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, meterDSID, _deviceID, NULL, NULL, NULL, NULL,
-                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &serialNumber);
+                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &serialNumber);
     DSBusInterface::checkResultCode(ret);
 
     // this temporary code will be removed once the dsm library returns us
@@ -267,9 +267,9 @@ namespace dss {
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, dsmDSID, _id,
-                                      NULL, &functionId, &productId, &version,
+                                      NULL, NULL, NULL, &functionId, &productId, &version,
                                       NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
-                                      NULL, NULL, NULL);
+                                      NULL, NULL);
     DSBusInterface::checkResultCode(ret);
 
     DeviceSpec_t spec(functionId, productId, version, _id);
@@ -284,7 +284,7 @@ namespace dss {
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(_device->getDSMeterDSID(), dsmDSID);
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, dsmDSID, _device->getShortAddress(),
-                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                                       &locked, NULL, NULL, NULL, NULL, NULL, NULL);
     DSBusInterface::checkResultCode(ret);
     return locked;
