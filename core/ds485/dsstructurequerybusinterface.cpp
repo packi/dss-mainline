@@ -267,9 +267,10 @@ namespace dss {
     dsid_t dsmDSID;
     dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, dsmDSID, _id,
-                                      NULL, NULL, NULL, &functionId, &productId, &version,
+                                      NULL, NULL, &productId, &functionId,
+                                      &version,
                                       NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
-                                      NULL, NULL);
+                                      NULL, NULL, NULL);
     DSBusInterface::checkResultCode(ret);
 
     DeviceSpec_t spec(functionId, productId, version, _id);
