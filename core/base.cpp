@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <cstdio>
+#include <cassert>
 #include <sstream>
 
 #include "foreach.h"
@@ -226,7 +227,66 @@ namespace dss {
       result += end;
     }
     return result;
-  }
+  } // urlDecode
+
+  std::string truncateUTF8String(const std::string& _in, int _maxBytes) {
+    assert(_maxBytes >= 0);
+    char* buffer = static_cast<char*>(malloc(_maxBytes));
+    strncpy(buffer, _in.c_str(), _maxBytes);
+    buffer[_maxBytes] = '\0';
+    int len = strlen(buffer);
+    if(len == _maxBytes) {
+      char* pos = buffer + (_maxBytes - 1);
+      if((*pos & 0x80) == 0x80) {
+        // go backwards through the string until we've found the start-byte
+        // (MSB and MSB+1 set)
+        while((pos > buffer) && (*pos & 0xC0) == 0x80) {
+          pos--;
+        }
+        int skippedBytes = len - (pos - buffer);
+        unsigned char mask = 0xFF;
+        unsigned char compareTo = 0xFF;
+        // a start byte always looks like:
+        // 1(1)*0xxxxxx, where the number of ones on the left correspond to the
+        // number of bytes in the character followed by a zero. We're creating
+        // a mask that includes the ones and the zero and compare that to the
+        // expected bit-pattern.
+        switch(skippedBytes) {
+        case 6:
+          mask = 0xFE;
+          compareTo = 0xFC;
+          break;
+        case 5:
+          mask = 0xFC;
+          compareTo = 0xF8;
+          break;
+        case 4:
+          mask = 0xF8;
+          compareTo = 0xF0;
+          break;
+        case 3:
+          mask = 0xF0;
+          compareTo = 0xE0;
+          break;
+        case 2:
+          mask = 0xE0;
+          compareTo = 0xC0;
+          break;
+        }
+        if(mask != 0xFF) {
+          // if the mask doesn't match we've found a broken character
+          if((*pos & mask) != compareTo) {
+            *pos = '\0';
+          }
+        } else {
+          // if we haven't found a mask, the character is invalid anyway
+          *pos = '\0';
+        }
+      }
+    }
+    std::string result(buffer);
+    return result;
+  } // truncateUTF8String
 
   bool endsWith( const std::string& str, const std::string& searchString ) {
     std::string::size_type lenStr = str.length();
