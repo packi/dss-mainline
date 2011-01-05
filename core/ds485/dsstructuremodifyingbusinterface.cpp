@@ -84,8 +84,9 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
+    std::string nameStr = truncateUTF8String(_name, 19);
     uint8_t name[20];
-    strncpy(reinterpret_cast<char*>(name), _name.c_str(), 20);
+    strncpy(reinterpret_cast<char*>(name), nameStr.c_str(), 20);
     int ret = ZoneGroupSceneProperties_set_name(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID, _sceneNumber, name);
     DSBusInterface::checkBroadcastResultCode(ret);
   } // sceneSetName
