@@ -99,6 +99,8 @@ namespace dss {
 
   std::string urlDecode(const std::string& _in);
 
+  std::string truncateUTF8String(const std::string& _in, int _maxBytes);
+
   //============================================= Encoding helpers
 
   uint16_t crc16(unsigned const char* _data, const int _size);

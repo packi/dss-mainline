@@ -276,4 +276,24 @@ BOOST_AUTO_TEST_CASE(testSplitIntoKeyValue) {
   BOOST_CHECK_EQUAL(value, "equals=success");
 }
 
+BOOST_AUTO_TEST_CASE(testTruncateUTF8String) {
+  BOOST_CHECK_EQUAL(truncateUTF8String("a", 2), "a");
+  BOOST_CHECK_EQUAL(truncateUTF8String("a", 1), "a");
+  BOOST_CHECK(truncateUTF8String("a", 0).empty());
+  BOOST_CHECK(truncateUTF8String("", 0).empty());
+  BOOST_CHECK(truncateUTF8String("", 1).empty());
+  BOOST_CHECK(truncateUTF8String("", 2).empty());
+  BOOST_CHECK_EQUAL(truncateUTF8String("ab", 1), "a");
+  BOOST_CHECK_EQUAL(truncateUTF8String("ab", 2), "ab");
+  // three-byte character
+  BOOST_CHECK_EQUAL(truncateUTF8String("aaか", 3), "aa");
+  BOOST_CHECK_EQUAL(truncateUTF8String("aaか", 4), "aa");
+  BOOST_CHECK_EQUAL(truncateUTF8String("aaか", 5), "aaか");
+  BOOST_CHECK_EQUAL(truncateUTF8String("aaか", 6), "aaか");
+  // two-byte character
+  BOOST_CHECK_EQUAL(truncateUTF8String("bbä", 2), "bb");
+  BOOST_CHECK_EQUAL(truncateUTF8String("bbä", 3), "bb");
+  BOOST_CHECK_EQUAL(truncateUTF8String("bbä", 4), "bbä");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
