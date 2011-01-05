@@ -40,6 +40,7 @@
 #include "core/propertysystem.h"
 #include "core/structuremanipulator.h"
 #include "core/businterface.h"
+#include "core/model/scenehelper.h"
 
 using namespace dss;
 
@@ -917,6 +918,12 @@ BOOST_AUTO_TEST_CASE(testUnPersistSet) {
   actionInterface.clearLog();
   set.callScene(5);
   BOOST_CHECK_EQUAL(actionInterface.getLog(), "callScene(1,5)callScene(2,5)");
+}
+
+BOOST_AUTO_TEST_CASE(testSceneHelperBounds) {
+  BOOST_CHECK_EQUAL(SceneHelper::rememberScene(SceneBell), false);
+  BOOST_CHECK_EQUAL(SceneHelper::rememberScene(Scene1), true);
+  BOOST_CHECK_EQUAL(SceneHelper::rememberScene(MaxSceneNumber + 1), false);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

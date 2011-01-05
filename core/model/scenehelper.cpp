@@ -70,7 +70,7 @@ namespace dss {
   } // getPreviousScene
 
   bool SceneHelper::m_Initialized = false;
-  std::bitset<64> SceneHelper::m_ZonesToIgnore;
+  std::bitset<MaxSceneNumber + 1> SceneHelper::m_ZonesToIgnore;
 
   void SceneHelper::initialize() {
     m_Initialized = true;
@@ -97,7 +97,10 @@ namespace dss {
       initialize();
       assert(m_Initialized);
     }
-    return !m_ZonesToIgnore.test(_scene);
+    if(_scene <= MaxSceneNumber) {
+      return !m_ZonesToIgnore.test(_scene);
+    }
+    return false;
   } // rememberScene
 
 }
