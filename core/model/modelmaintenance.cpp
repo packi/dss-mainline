@@ -172,11 +172,15 @@ namespace dss {
 
   void ModelMaintenance::discoverDS485Devices() {
     if(m_pStructureQueryBusInterface != NULL) {
-      std::vector<DSMeterSpec_t> meters = m_pStructureQueryBusInterface->getDSMeters();
-      std::vector<DSMeterSpec_t>::iterator it = meters.begin();
-      for (; it != meters.end(); ++it) {
-        ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDS485DeviceDiscovered, it->get<0>());
-        addModelEvent(pEvent);
+      try {
+        std::vector<DSMeterSpec_t> meters = m_pStructureQueryBusInterface->getDSMeters();
+        std::vector<DSMeterSpec_t>::iterator it = meters.begin();
+        for (; it != meters.end(); ++it) {
+          ModelEventWithDSID* pEvent = new ModelEventWithDSID(ModelEvent::etDS485DeviceDiscovered, it->get<0>());
+          addModelEvent(pEvent);
+        }
+      } catch(BusApiError& e) {
+        log("Failed to discover ds485 devices", lsError);
       }
     }
   } // discoverDS485Devices
