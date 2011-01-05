@@ -200,8 +200,8 @@ namespace dss {
         break;
       case ModelEvent::etCallSceneDevice:
         assert(pEventWithDSID != NULL);
-        if(event.getParameterCount() != 3) {
-          log("Expected exactly 3 parameter for ModelEvent::etCallSceneDevice");
+        if(event.getParameterCount() != 2) {
+          log("Expected exactly 2 parameter for ModelEvent::etCallSceneDevice");
         } else {
           onDeviceCallScene(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
         }
