@@ -146,8 +146,10 @@ namespace dss {
           new ApartmentTreeListener(this, m_pApartment));
 
     while(!m_Terminated) {
-      handleModelEvents();
-      readSceneNames();
+      if(!handleModelEvents()) {
+        readOutPendingMeter();
+        readSceneNames();
+      }
     }
   } // execute
 
@@ -173,7 +175,7 @@ namespace dss {
     }
   } // writeConfiguration
 
-  void ModelMaintenance::handleModelEvents() {
+  bool ModelMaintenance::handleModelEvents() {
     if(!m_ModelEvents.empty()) {
       bool eraseEventFromList = true;
       ModelEvent& event = m_ModelEvents.front();
@@ -295,31 +297,35 @@ namespace dss {
         m_ModelEvents.erase(m_ModelEvents.begin());
         m_ModelEventsMutex.unlock();
       }
+      return true;
     } else {
-      m_NewModelEvent.waitFor(m_EventTimeoutMS);
-      bool hadToUpdate = false;
-      foreach(boost::shared_ptr<DSMeter> pDSMeter, m_pApartment->getDSMeters()) {
-        if(pDSMeter->isPresent()) {
-          if(!pDSMeter->isValid()) {
-            dsMeterReady(pDSMeter->getDSID());
-            hadToUpdate = true;
-            break;
-          }
-        }
-      }
+      return m_NewModelEvent.waitFor(m_EventTimeoutMS);
+    }
+  } // handleModelEvents
 
-      // If we didn't have to update for one cycle, assume that we're done
-      if(!hadToUpdate && m_IsInitializing) {
-        log("******** Finished loading model from dSM(s)...", lsInfo);
-        m_IsInitializing = false;
-
-        {
-          boost::shared_ptr<Event> readyEvent(new Event("model_ready"));
-          raiseEvent(readyEvent);
+  void ModelMaintenance::readOutPendingMeter() {
+    bool hadToUpdate = false;
+    foreach(boost::shared_ptr<DSMeter> pDSMeter, m_pApartment->getDSMeters()) {
+      if(pDSMeter->isPresent()) {
+        if(!pDSMeter->isValid()) {
+          dsMeterReady(pDSMeter->getDSID());
+          hadToUpdate = true;
+          break;
         }
       }
     }
-  } // handleModelEvents
+
+    // If we didn't have to update for one cycle, assume that we're done
+    if(!hadToUpdate && m_IsInitializing) {
+      log("******** Finished loading model from dSM(s)...", lsInfo);
+      m_IsInitializing = false;
+
+      {
+        boost::shared_ptr<Event> readyEvent(new Event("model_ready"));
+        raiseEvent(readyEvent);
+      }
+    }
+  } // readOutPendingMeter
 
   void ModelMaintenance::readSceneNames() {
     if(m_IsInitializing) {
