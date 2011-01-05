@@ -133,31 +133,12 @@ namespace dss {
     run();
   } // start
 
-  void ModelMaintenance::waitForInterface() {
-    /*
-    if(DSS::hasInstance()) {
-      BusInterface& interface = DSS::getInstance()->getBusInterface();
-
-      log("Apartment::execute: Waiting for interface to get ready", lsInfo);
-
-      while(!interface.isReady() && !m_Terminated) {
-        sleepMS(1000);
-      }
-    }
-
-    boost::shared_ptr<Event> readyEvent(new Event("interface_ready"));
-    raiseEvent(readyEvent);
-    */
-  } // waitForInterface
-
   void ModelMaintenance::execute() {
    if(DSS::hasInstance()) {
      DSS::getInstance()->getSecurity().loginAsSystemUser("ModelMaintenance needs system-rights");
    }
 
-    waitForInterface();
-
-    log("ModelMaintenance::execute: Interface is ready, enumerating model", lsInfo);
+    log("ModelMaintenance::execute: Enumerating model", lsInfo);
     discoverDS485Devices();
 
     boost::shared_ptr<ApartmentTreeListener> treeListener

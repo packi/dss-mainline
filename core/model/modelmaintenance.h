@@ -66,7 +66,6 @@ namespace dss {
     void eraseModelEventsFromQueue(ModelEvent::EventType _type);
     void dsMeterReady(const dss_dsid_t& _dsMeterBusID);
     void discoverDS485Devices();
-    void waitForInterface();
 
     void readConfiguration();
     void writeConfiguration();
