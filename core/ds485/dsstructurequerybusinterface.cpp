@@ -52,7 +52,7 @@ namespace dss {
 
     for(int i = 0; i < ret; ++i) {
       // don't include ourself
-      if(IsEqualId(device_list[i], m_ownDSID)) {
+      if(!DsmApiIsdSM(device_list[i])) {
         continue;
       }
       dss_dsid_t dsid;

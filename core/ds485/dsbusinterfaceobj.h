@@ -30,10 +30,8 @@ namespace dss {
   class DSBusInterfaceObj {
   public:
     void setDSMApiHandle(DsmApiHandle_t _value) { m_DSMApiHandle = _value; }
-    void setOwnDSID(dsid_t _value) { m_ownDSID = _value; }
   protected:
     DsmApiHandle_t m_DSMApiHandle;
-    dsid_t m_ownDSID;
   };
 
 } // namespace dss
