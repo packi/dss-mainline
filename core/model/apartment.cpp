@@ -74,11 +74,11 @@ namespace dss {
     grp.reset(new Group(GroupIDCyan, _zone, *this));
     grp->setName("cyan");
     _zone->addGroup(grp);
-    grp.reset(new Group(GroupIDRed, _zone, *this));
-    grp->setName("red");
-    _zone->addGroup(grp);
     grp.reset(new Group(GroupIDViolet, _zone, *this));
     grp->setName("magenta");
+    _zone->addGroup(grp);
+    grp.reset(new Group(GroupIDRed, _zone, *this));
+    grp->setName("red");
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDGreen, _zone, *this));
     grp->setName("green");
