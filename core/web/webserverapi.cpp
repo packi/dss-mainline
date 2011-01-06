@@ -325,6 +325,9 @@ namespace dss {
       .withDocumentation("Destroys the session and signs out the user");
     clsSystem.addMethod("loggedInUser")
       .withDocumentation("Returns the name of the currently logged in user");
+    clsSystem.addMethod("setPassword")
+      .withParameter("password", "string", true)
+      .withDocumentation("Changes the currently logged in users password");
 
     RestfulClass& clsSet = api->addClass("set")
         .withInstanceParameter("self", "string", false);
