@@ -278,7 +278,7 @@ const char* kSavedPropsDirectory = "data/savedprops/";
     m_pBusInterface = boost::shared_ptr<BusInterface>(
       new BusInterfaceAdaptor(pDSBusInterface, m_pSimulation,
                               pSimBusInterface, m_pModelMaintenance,
-                              m_pApartment, m_pEventInterpreter));
+                              m_pApartment));
 
     m_pApartment->setBusInterface(m_pBusInterface.get());
 

@@ -482,6 +482,10 @@ namespace dss {
               }
             }
           }
+          boost::shared_ptr<Event> pEvent;
+          pEvent.reset(new Event("callScene", zone));
+          pEvent->setProperty("sceneID", intToString(_sceneID));
+          raiseEvent(pEvent);
         }
       } else {
         log("OnGroupCallScene: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'", lsError);
@@ -505,6 +509,10 @@ namespace dss {
         if(SceneHelper::rememberScene(_sceneID & 0x00ff)) {
           devRef.getDevice()->setLastCalledScene(_sceneID & 0x00ff);
         }
+        boost::shared_ptr<DeviceReference> pDevRev(new DeviceReference(devRef));
+        boost::shared_ptr<Event> event(new Event("callScene", pDevRev));
+        event->setProperty("sceneID", intToString(_sceneID));
+        raiseEvent(event);
       } catch(ItemNotFoundException& e) {
         log("OnDeviceCallScene: Could not find device with bus-id '" + intToString(_deviceID) + "' on dsMeter '" + _dsMeterID.toString() + "' scene:" + intToString(_sceneID), lsError);
       }

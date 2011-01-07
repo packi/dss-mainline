@@ -22,8 +22,6 @@
 
 #include "businterfaceadaptor.h"
 
-#include "core/event.h"
-
 #include "core/model/device.h"
 #include "core/model/group.h"
 #include "core/model/apartment.h"
@@ -442,13 +440,11 @@ namespace dss {
                   boost::shared_ptr<BusInterface> _pInnerBusInterface,
                   boost::shared_ptr<BusInterface> _pSimBusInterface,
                   boost::shared_ptr<Apartment> _pApartment,
-                  boost::shared_ptr<EventInterpreter> _pEventInterpreter,
                   boost::shared_ptr<ModelMaintenance> _pModelMaintenance)
     : m_pSimulation(_pSimulation),
       m_pInnerBusInterface(_pInnerBusInterface),
       m_pSimBusInterface(_pSimBusInterface),
       m_pApartment(_pApartment),
-      m_pEventInterpreter(_pEventInterpreter),
       m_pModelMaintenance(_pModelMaintenance)
     {
       m_pInnerBusInterface->setBusEventSink(this);
@@ -477,14 +473,6 @@ namespace dss {
       pEvent->addParameter(_groupID);
       pEvent->addParameter(_sceneID);
       m_pModelMaintenance->addModelEvent(pEvent);
-      boost::shared_ptr<Event> pHEvent;
-      try {
-        pHEvent.reset(new Event("callScene", m_pApartment->getZone(_zoneID)));
-      } catch(ItemNotFoundException&) {
-        pHEvent.reset(new Event("callScene"));
-      }
-      pHEvent->setProperty("sceneID", intToString(_sceneID));
-      m_pEventInterpreter->getQueue().pushEvent(pHEvent);
     } // onGroupCallScene
 
     virtual void onMeteringEvent(BusInterface* _source,
@@ -503,7 +491,6 @@ namespace dss {
     boost::shared_ptr<BusInterface> m_pInnerBusInterface;
     boost::shared_ptr<BusInterface> m_pSimBusInterface;
     boost::shared_ptr<Apartment> m_pApartment;
-    boost::shared_ptr<EventInterpreter> m_pEventInterpreter;
     boost::shared_ptr<ModelMaintenance> m_pModelMaintenance;
   }; // BusEventRelay
 
@@ -513,8 +500,7 @@ namespace dss {
                    boost::shared_ptr<BusInterface> _pInner,
                    boost::shared_ptr<SimBusInterface> _pSimBusInterface,
                    boost::shared_ptr<ModelMaintenance> _pModelMaintenance,
-                   boost::shared_ptr<Apartment> _pApartment,
-                   boost::shared_ptr<EventInterpreter> _pEventInterpreter)
+                   boost::shared_ptr<Apartment> _pApartment)
     : m_pSimulation(_pSimulation),
       m_pInnerBusInterface(_pInner),
       m_pSimBusInterface(_pSimBusInterface)
@@ -524,7 +510,6 @@ namespace dss {
       assert(_pSimBusInterface != NULL);
       assert(_pModelMaintenance != NULL);
       assert(_pApartment != NULL);
-      assert(_pEventInterpreter != NULL);
       m_pDeviceBusInterface.reset(
         new DeviceAdaptor(m_pSimulation,
                           m_pInnerBusInterface->getDeviceBusInterface(),
@@ -547,7 +532,6 @@ namespace dss {
                           m_pInnerBusInterface,
                           m_pSimBusInterface,
                           _pApartment,
-                          _pEventInterpreter,
                           _pModelMaintenance));
       m_pActionRequestInterface.reset(
         new DeviceActionAdaptor(m_pSimulation,
@@ -596,14 +580,13 @@ namespace dss {
                                            boost::shared_ptr<DSSim> _pSimulation,
                                            boost::shared_ptr<SimBusInterface> _pSimBusInterface,
                                            boost::shared_ptr<ModelMaintenance> _pModelMaintenance,
-                                           boost::shared_ptr<Apartment> _pApartment,
-                                           boost::shared_ptr<EventInterpreter> _pEventInterpreter)
+                                           boost::shared_ptr<Apartment> _pApartment)
   : m_pInnerBusInterface(_pInner),
     m_pSimulation(_pSimulation),
     m_pSimBusInterface(_pSimBusInterface),
     m_pImplementation(new Implementation(m_pSimulation, m_pInnerBusInterface,
                                          m_pSimBusInterface, _pModelMaintenance,
-                                         _pApartment, _pEventInterpreter))
+                                         _pApartment))
   { }
 
   DeviceBusInterface* BusInterfaceAdaptor::getDeviceBusInterface() {
