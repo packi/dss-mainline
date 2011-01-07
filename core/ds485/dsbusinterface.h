@@ -107,6 +107,11 @@ namespace dss {
                                         uint16_t _deviceID, uint16_t _zoneID,
                                         uint8_t _state);
 
+    void handleDeviceCallScene(dsid_t _destinationID, uint16_t _deviceID, uint8_t _sceneID);
+    static void handleDeviceCallSceneCallback(uint8_t _errorCode, void* _userData,
+                                       dsid_t _sourceID, dsid_t _destinationID,
+                                       uint16_t _deviceID, uint8_t _sceneID);
+
     void handleCircuitEnergyData(uint8_t _errorCode,
                                  dsid_t _sourceId, dsid_t _destinationId,
                                  uint32_t _powerW, uint32_t _energyWh);
