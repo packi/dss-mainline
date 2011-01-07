@@ -25,8 +25,6 @@
 
 #include <cassert>
 
-#include "core/model/modelconst.h"
-
 namespace dss {
 
   //================================================== Utils
@@ -80,14 +78,6 @@ namespace dss {
     m_ZonesToIgnore.set(SceneStop);
     m_ZonesToIgnore.set(SceneBell);
     m_ZonesToIgnore.set(SceneEnergyOverload);
-    m_ZonesToIgnore.set(SceneEnergyHigh);
-    m_ZonesToIgnore.set(SceneEnergyMiddle);
-    m_ZonesToIgnore.set(SceneEnergyLow);
-    m_ZonesToIgnore.set(SceneEnergyClassA);
-    m_ZonesToIgnore.set(SceneEnergyClassB);
-    m_ZonesToIgnore.set(SceneEnergyClassC);
-    m_ZonesToIgnore.set(SceneEnergyClassD);
-    m_ZonesToIgnore.set(SceneEnergyClassE);
     m_ZonesToIgnore.set(SceneLocalOff);
     m_ZonesToIgnore.set(SceneLocalOn);
   }

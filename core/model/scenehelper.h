@@ -26,12 +26,14 @@
 
 #include <bitset>
 
+#include "core/model/modelconst.h"
+
 namespace dss {
 
   /** Helper functions for scene management. */
   class SceneHelper {
   private:
-    static std::bitset<64> m_ZonesToIgnore;
+    static std::bitset<MaxSceneNumber + 1> m_ZonesToIgnore;
     static bool m_Initialized;
 
     static void initialize();
