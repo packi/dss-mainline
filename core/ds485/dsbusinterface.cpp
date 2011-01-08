@@ -204,6 +204,16 @@ namespace dss {
                            ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_CALL_SCENE,
                            (void*)handleBusCall, this);
 
+    EventDeviceLocalAction_event_callback_t localActionCallback = DSBusInterface::handleDeviceLocalActionCallback;
+    DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
+                           EVENT_DEVICE_LOCAL_ACTION, 0,
+                           (void*)localActionCallback, this);
+
+    DeviceActionRequest_action_call_scene_request_callback_t deviceCallSceneCallback = DSBusInterface::handleDeviceCallSceneCallback;
+    DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                           DEVICE_ACTION_REQUEST, DEVICE_ACTION_REQUEST_ACTION_CALL_SCENE,
+                           (void*)deviceCallSceneCallback, this);
+
     CircuitEnergyMeterValue_get_response_callback_t meteringCallback = DSBusInterface::handleCircuitEnergyDataCallback;
     DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_RESPONSE,
                            CIRCUIT_ENERGY_METER_VALUE, CIRCUIT_ENERGY_METER_VALUE_GET,
@@ -335,6 +345,41 @@ namespace dss {
                                                   dsid_t _targetID, uint16_t _zoneID, uint8_t _groupID,
                                                   uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID, _sceneID);
+  }
+
+  void DSBusInterface::handleDeviceLocalAction(dsid_t _sourceID, uint16_t _deviceID, uint8_t _state) {
+    dss_dsid_t dsmDSID;
+    dsid_helper::toDssDsid(_sourceID, dsmDSID);
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneDevice, dsmDSID);
+    pEvent->addParameter(_deviceID);
+    if(_state == 0) {
+      pEvent->addParameter(SceneLocalOff);
+    } else {
+      pEvent->addParameter(SceneLocalOn);
+    }
+    m_pModelMaintenance->addModelEvent(pEvent);
+  }
+
+  void DSBusInterface::handleDeviceLocalActionCallback(uint8_t _errorCode, void* _userData,
+                                                       dsid_t _sourceID, dsid_t _destinationID,
+                                                       uint16_t _deviceID, uint16_t _zoneID,
+                                                       uint8_t _state) {
+    static_cast<DSBusInterface*>(_userData)->handleDeviceLocalAction(_sourceID, _deviceID, _state);
+  }
+
+  void DSBusInterface::handleDeviceCallScene(dsid_t _destinationID, uint16_t _deviceID, uint8_t _sceneID) {
+    dss_dsid_t dsmDSID;
+    dsid_helper::toDssDsid(_destinationID, dsmDSID);
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etCallSceneDevice, dsmDSID);
+    pEvent->addParameter(_deviceID);
+    pEvent->addParameter(_sceneID);
+    m_pModelMaintenance->addModelEvent(pEvent);
+  }
+
+  void DSBusInterface::handleDeviceCallSceneCallback(uint8_t _errorCode, void* _userData,
+                                                     dsid_t _sourceID, dsid_t _destinationID,
+                                                     uint16_t _deviceID, uint8_t _sceneID) {
+    static_cast<DSBusInterface*>(_userData)->handleDeviceCallScene(_destinationID, _deviceID, _sceneID);
   }
 
   void DSBusInterface::handleCircuitEnergyData(uint8_t _errorCode,
