@@ -39,6 +39,12 @@ using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(SecurityTests)
 
+BOOST_AUTO_TEST_CASE(testSystemUserIsInitialized) {
+  PropertySystem propertysystem;
+  Security security(propertysystem.createProperty("/system/security"));
+  security.loginAsSystemUser("Some reason");
+}
+
 class FixtureTestUserTest {
 public:
   FixtureTestUserTest() {
