@@ -39,13 +39,15 @@ namespace dss {
   class Security {
   public:
     Security(PropertyNodePtr _pRootNode)
-    : m_pRootNode(_pRootNode)
+    : m_pRootNode(_pRootNode),
+      m_pSystemUser(NULL)
     { }
 
     Security(PropertyNodePtr _pRootNode,
              boost::shared_ptr<PropertySystem> _pPropertySystem)
     : m_pRootNode(_pRootNode),
-      m_pPropertySystem(_pPropertySystem)
+      m_pPropertySystem(_pPropertySystem),
+      m_pSystemUser(NULL)
     { }
 
     ~Security() {
@@ -74,9 +76,9 @@ namespace dss {
   private:
     static boost::thread_specific_ptr<User> m_LoggedInUser;
     PropertyNodePtr m_pRootNode;
-    User* m_pSystemUser;
     boost::shared_ptr<SecurityTreeListener> m_pTreeListener;
     boost::shared_ptr<PropertySystem> m_pPropertySystem;
+    User* m_pSystemUser;
     std::string m_FileName;
   }; // Security
 
