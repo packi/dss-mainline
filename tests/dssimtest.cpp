@@ -106,6 +106,16 @@ public:
     return 1;
   }
 
+  virtual uint16_t getProductID() {
+    functionCalled("getProductID");
+    return 1;
+  }
+
+  virtual uint16_t getProductRevision() {
+    functionCalled("getProductRevision");
+    return 1;
+  }
+
   virtual void setConfigParameter(const std::string& _name, const std::string& _value) {
     functionCalled("setConfigParameter");
   }

@@ -228,6 +228,34 @@ namespace dss {
       return 0;
     } // getFunctionID
 
+    virtual uint16_t getProductID() {
+      if(m_pSelf != NULL) {
+        try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
+          ScriptFunctionParameterList param(*m_pContext);
+          return m_pSelf->callFunctionByName<int>("getProductID", param);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'getProductID'") + e.what(), lsError);
+        }
+      }
+      return 0;
+    } // getProductID
+
+    virtual uint16_t getProductRevision() {
+      if(m_pSelf != NULL) {
+        try {
+          ScriptLock lock(m_pContext);
+          JSContextThread req(m_pContext);
+          ScriptFunctionParameterList param(*m_pContext);
+          return m_pSelf->callFunctionByName<int>("getProductRevision", param);
+        } catch(ScriptException& e) {
+          Logger::getInstance()->log(std::string("DSIDJS: Error calling 'getProductRevision'") + e.what(), lsError);
+        }
+      }
+      return 0;
+    } // getProductID
+
     virtual void setConfigParameter(const std::string& _name, const std::string& _value) {
       if(m_pSelf != NULL) {
         try {

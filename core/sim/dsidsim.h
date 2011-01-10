@@ -71,6 +71,9 @@ namespace dss {
     virtual std::pair<uint8_t, uint16_t> getTransmissionQuality();
 
     virtual uint16_t getFunctionID();
+    virtual uint16_t getProductID();
+    virtual uint16_t getProductRevision();
+
     void setSimpleConsumption(const int _value) { m_SimpleConsumption = _value; }
     virtual void setConfigParameter(const std::string& _name, const std::string& _value);
     virtual std::string getConfigParameter(const std::string& _name) const;

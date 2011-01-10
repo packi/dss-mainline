@@ -110,6 +110,8 @@ namespace dss {
     if(pMeter != NULL) {
       DSIDInterface& device = pMeter->lookupDevice(_id);
       functionID = device.getFunctionID();
+      productID = device.getProductID();
+      revision = device.getProductRevision();
       busAddress = device.getShortAddress();
     }
     return DeviceSpec_t(functionID, productID, revision, busAddress);
