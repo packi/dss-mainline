@@ -354,7 +354,9 @@ namespace dss {
           try {
             if(meterToAsk != NULL) {
               log("Getting scene-names data from " + meterToAsk->getDSID().toString());
-              for(unsigned int sceneNumber = 0; sceneNumber < MaxSceneNumber; sceneNumber++) {
+              // TODO: Temporary workaround to be removed with dSM FW 0.8.0
+              const unsigned int MaxSceneNumberToRead = 0x3F;
+              for(unsigned int sceneNumber = 0; sceneNumber <= MaxSceneNumberToRead /*MaxSceneNumber*/; sceneNumber++) {
                 std::string sceneName =
                   m_pStructureQueryBusInterface->getSceneName(
                     meterToAsk->getDSID(),
