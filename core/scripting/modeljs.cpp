@@ -1106,6 +1106,10 @@ namespace dss {
     {"Alarm", SceneAlarm, 0, scene_JSGetStatic},
     {"Inc", SceneInc, 0, scene_JSGetStatic},
     {"Dec", SceneDec, 0, scene_JSGetStatic},
+    {"Present", ScenePresent, 0, scene_JSGetStatic},
+    {"Absent", SceneAbsent, 0, scene_JSGetStatic},
+    {"Sleeping", SceneSleeping, 0, scene_JSGetStatic},
+    {"WakeUp", SceneWakeUp, 0, scene_JSGetStatic},
     {NULL, 0, 0, NULL, NULL}
   };
 

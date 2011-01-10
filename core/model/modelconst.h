@@ -1,4 +1,4 @@
-  /*
+/*
     Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
@@ -33,30 +33,28 @@ namespace dss {
   const uint8_t Scene2 = 0x11;
   const uint8_t Scene3 = 0x12;
   const uint8_t Scene4 = 0x13;
-  const uint8_t SceneStandBy = 0x30;
-  const uint8_t SceneDeepOff = 0x31;
   const uint8_t SceneDec = 0x0B;
   const uint8_t SceneInc = 0x0C;
   const uint8_t SceneMin = 0x0D;
   const uint8_t SceneMax = 0x0E;
   const uint8_t SceneStop = 0x0F;
-  const uint8_t SceneBell = 0x29;
-  const uint8_t SceneAlarm = 0x2A;
-  const uint8_t ScenePanic = 0x2B;
-  const uint8_t SceneEnergyOverload = 0x2C;
-  const uint8_t SceneEnergyHigh = 0x2D;
-  const uint8_t SceneEnergyMiddle = 0x2E;
-  const uint8_t SceneEnergyLow = 0x2F;
-  const uint8_t SceneEnergyClassA = 0x32;
-  const uint8_t SceneEnergyClassB = 0x33;
-  const uint8_t SceneEnergyClassC = 0x34;
-  const uint8_t SceneEnergyClassD = 0x35;
-  const uint8_t SceneEnergyClassE = 0x36;
-  const uint8_t SceneEnergyClassF = 0x37;
   const uint8_t SceneLocalOff = 0x3D;
   const uint8_t SceneLocalOn = 0x3E;
 
-  const uint8_t MaxSceneNumber = 0x3F;
+  // Apartment Scenes
+  const uint8_t SceneAutoStandBy = 0x40;
+  const uint8_t ScenePanic = 0x41;
+  const uint8_t SceneEnergyOverload = 0x42;
+  const uint8_t SceneStandBy = 0x43;
+  const uint8_t SceneDeepOff = 0x44;
+  const uint8_t SceneSleeping = 0x45;
+  const uint8_t SceneWakeUp = 0x46;
+  const uint8_t ScenePresent = 0x47;
+  const uint8_t SceneAbsent = 0x48;
+  const uint8_t SceneBell = 0x49;
+  const uint8_t SceneAlarm = 0x4A;
+
+  const uint8_t MaxSceneNumber = 0xFF;
 
   const uint16_t SceneFlagLocalOff = 0x0100;
 
