@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(testGroups) {
   BOOST_CHECK_EQUAL(dev->getGroupByIndex(1)->getID(), 2);
   BOOST_CHECK(dev->getGroupBitmask().test(0));
   BOOST_CHECK(dev->getGroupBitmask().test(1));
-  
+
   dev->removeFromGroup(1);
   BOOST_CHECK_EQUAL(dev->getGroupsCount(), 1);
   BOOST_CHECK_EQUAL(dev->getGroupIdByIndex(0), 2);
