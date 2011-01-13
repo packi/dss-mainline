@@ -29,6 +29,7 @@
 #include "core/model/device.h"
 #include "core/model/group.h"
 #include "core/model/apartment.h"
+#include "core/model/modelconst.h"
 
 using namespace dss;
 
@@ -60,13 +61,21 @@ BOOST_AUTO_TEST_CASE(testGroups) {
   BOOST_CHECK_EQUAL(dev->getGroupByIndex(1)->getID(), 2);
   BOOST_CHECK(dev->getGroupBitmask().test(0));
   BOOST_CHECK(dev->getGroupBitmask().test(1));
-  
+
   dev->removeFromGroup(1);
   BOOST_CHECK_EQUAL(dev->getGroupsCount(), 1);
   BOOST_CHECK_EQUAL(dev->getGroupIdByIndex(0), 2);
   BOOST_CHECK_EQUAL(dev->getGroupByIndex(0)->getID(), 2);
   BOOST_CHECK(!dev->getGroupBitmask().test(0));
   BOOST_CHECK(dev->getGroupBitmask().test(1));
+}
+
+BOOST_AUTO_TEST_CASE(testGroupBoundaries) {
+  Apartment apt(NULL);
+  boost::shared_ptr<Device> dev = apt.allocateDevice(dss_dsid_t(0,1));
+  BOOST_CHECK_EQUAL(dev->getGroupsCount(), 0);
+  dev->addToGroup(-1);
+  dev->addToGroup(GroupIDMax + 1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

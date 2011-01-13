@@ -278,19 +278,27 @@ namespace dss {
   } // getGroupByIndex
 
   void Device::addToGroup(const int _groupID) {
-    m_GroupBitmask.set(_groupID-1);
-    if(find(m_Groups.begin(), m_Groups.end(), _groupID) == m_Groups.end()) {
-      m_Groups.push_back(_groupID);
+    if((_groupID > 0) && (_groupID <= GroupIDMax)) {
+      m_GroupBitmask.set(_groupID-1);
+      if(find(m_Groups.begin(), m_Groups.end(), _groupID) == m_Groups.end()) {
+        m_Groups.push_back(_groupID);
+      } else {
+        Logger::getInstance()->log("Device " + m_DSID.toString() + " (bus: " + intToString(m_ShortAddress) + ", zone: " + intToString(m_ZoneID) + ") is already in group " + intToString(_groupID));
+      }
     } else {
-      Logger::getInstance()->log("Device " + m_DSID.toString() + " (bus: " + intToString(m_ShortAddress) + ", zone: " + intToString(m_ZoneID) + ") is already in group " + intToString(_groupID));
+      Logger::getInstance()->log("Group ID out of bounds: " + intToString(_groupID), lsError);
     }
   } // addToGroup
 
   void Device::removeFromGroup(const int _groupID) {
-    m_GroupBitmask.reset(_groupID-1);
-    std::vector<int>::iterator it = find(m_Groups.begin(), m_Groups.end(), _groupID);
-    if(it != m_Groups.end()) {
-      m_Groups.erase(it);
+    if((_groupID > 0) && (_groupID <= GroupIDMax)) {
+      m_GroupBitmask.reset(_groupID-1);
+      std::vector<int>::iterator it = find(m_Groups.begin(), m_Groups.end(), _groupID);
+      if(it != m_Groups.end()) {
+        m_Groups.erase(it);
+      }
+    } else {
+      Logger::getInstance()->log("Group ID out of bounds: " + intToString(_groupID), lsError);
     }
   } // removeFromGroup
 
@@ -312,7 +320,16 @@ namespace dss {
   } // getGroupBitmask
 
   bool Device::isInGroup(const int _groupID) const {
-    return (_groupID == 0) || m_GroupBitmask.test(_groupID - 1);
+    bool result = false;
+    if(_groupID == 0) {
+      result = true;
+    } else if((_groupID < 0) || (_groupID > GroupIDMax)) {
+      result = false;
+      Logger::getInstance()->log("Group ID out of bounds: " + intToString(_groupID), lsError);
+    } else {
+      result = m_GroupBitmask.test(_groupID - 1);
+    }
+    return result;
   } // isInGroup
 
   Apartment& Device::getApartment() const {
