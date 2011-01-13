@@ -108,24 +108,43 @@ namespace dss {
 
   class ScriptContextWrapper {
   public:
-    ScriptContextWrapper(boost::shared_ptr<ScriptContext> _pContext, PropertyNodePtr _pRootNode, const std::string& _identifier)
+    ScriptContextWrapper(boost::shared_ptr<ScriptContext> _pContext,
+                         PropertyNodePtr _pRootNode,
+                         const std::string& _identifier,
+                         bool _uniqueNode
+                        )
     : m_pContext(_pContext),
-      m_Identifier(_identifier)
+      m_Identifier(_identifier),
+      m_UniqueNode(_uniqueNode)
     {
       if((_pRootNode != NULL) && !_identifier.empty()) {
-        m_pPropertyNode = _pRootNode->createProperty(_identifier + "+");
-        m_pPropertyNode->createProperty("stopScript")->linkToProxy(
+        if(_uniqueNode) {
+          m_pPropertyNode = _pRootNode->createProperty(_identifier + "+");
+        } else {
+          m_pPropertyNode = _pRootNode->createProperty(_identifier);
+        }
+        m_StopNode = m_pPropertyNode->createProperty("stopScript+");
+        m_StopNode->linkToProxy(
           PropertyProxyMemberFunction<ScriptContextWrapper,bool>(*this, NULL, &ScriptContextWrapper::stopScript));
-        m_pPropertyNode->createProperty("startedAt")->linkToProxy(
+        m_StartedAtNode = m_pPropertyNode->createProperty("startedAt+");
+        m_StartedAtNode->linkToProxy(
           PropertyProxyMemberFunction<DateTime, std::string, false>(m_StartTime, &DateTime::toString));
-        m_pPropertyNode->createProperty("attachedObjects")->linkToProxy(
+        m_AttachedObjectsNode = m_pPropertyNode->createProperty("attachedObjects+");
+        m_AttachedObjectsNode->linkToProxy(
           PropertyProxyMemberFunction<ScriptContext,int>(*m_pContext, &ScriptContext::getAttachedObjectsCount));
       }
     }
 
     ~ScriptContextWrapper() {
-      if ((m_pPropertyNode != NULL) && (m_pPropertyNode->getParentNode() != NULL)) {
-        m_pPropertyNode->getParentNode()->removeChild(m_pPropertyNode);
+      if((m_pPropertyNode != NULL) && (m_pPropertyNode->getParentNode() != NULL)) {
+        if(m_UniqueNode) {
+          m_pPropertyNode->getParentNode()->removeChild(m_pPropertyNode);
+        } else {
+          m_pPropertyNode->removeChild(m_StartedAtNode);
+          m_pPropertyNode->removeChild(m_StopNode);
+          m_pPropertyNode->removeChild(m_AttachedObjectsNode);
+          m_pPropertyNode->removeChild(m_FilesNode);
+        }
       }
     }
 
@@ -134,9 +153,12 @@ namespace dss {
     }
 
     void addFile(const std::string& _name) {
-      m_LoadedFiles.push_back(_name);
+      m_LoadedFiles.push_back(_name);      
       if(m_pPropertyNode != NULL) {
-        m_pPropertyNode->createProperty("files/file+")->setStringValue(_name);
+        if(m_FilesNode == NULL) {
+          m_FilesNode = m_pPropertyNode->createProperty("files+");
+        }
+        m_FilesNode->createProperty("file+")->setStringValue(_name);
       }
     }
 
@@ -157,8 +179,13 @@ namespace dss {
     DateTime m_StartTime;
     std::vector<std::string> m_LoadedFiles;
     PropertyNodePtr m_pPropertyNode;
+    PropertyNodePtr m_StopNode;
+    PropertyNodePtr m_StartedAtNode;
+    PropertyNodePtr m_FilesNode;
+    PropertyNodePtr m_AttachedObjectsNode;
     std::string m_Identifier;
-  };
+    bool m_UniqueNode;
+  }; // ScriptContextWrapper
 
   class WrapperAwarePropertyScriptExtension : public PropertyScriptExtension {
   public:
@@ -239,11 +266,17 @@ namespace dss {
       }
 
       boost::shared_ptr<ScriptContext> ctx(m_pEnvironment->getContext());
-      std::string scriptID = _event.getPropertyByName("script_id");
+      std::string scriptID;
+      if(_subscription.getOptions()->hasParameter("script_id")) {
+        scriptID = _subscription.getOptions()->getParameter("script_id");
+      }
+      bool uniqueNode = false;
       if(scriptID.empty()) {
+        uniqueNode = true;
         scriptID = _event.getName() + _subscription.getID();
       }
-      boost::shared_ptr<ScriptContextWrapper> wrapper(new ScriptContextWrapper(ctx, m_pScriptRootNode, scriptID));
+      boost::shared_ptr<ScriptContextWrapper> wrapper(
+        new ScriptContextWrapper(ctx, m_pScriptRootNode, scriptID, uniqueNode));
       m_WrapperInAction = wrapper;
       {
         JSContextThread th(ctx.get());
