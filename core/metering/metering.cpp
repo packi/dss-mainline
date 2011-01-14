@@ -67,7 +67,7 @@ namespace dss {
 
   void Metering::initialize() {
     Subsystem::initialize();
-    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "storageLocation", getDSS().getWebrootDirectory() + "metering/", true);
+    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "storageLocation", getDSS().getDataDirectory() + "metering/", true, false);
     m_MeteringStorageLocation = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "storageLocation");
     m_MeteringStorageLocation = addTrailingBackslash(m_MeteringStorageLocation);
 
