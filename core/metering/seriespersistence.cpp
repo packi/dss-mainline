@@ -181,16 +181,6 @@ namespace dss {
       pConfig->appendChild(elem);
     }
 
-    for(HashMapConstStringString::const_iterator iProperty = _series.getProperties().getContainer().begin(),
-    	end = _series.getProperties().getContainer().end(); iProperty != end; ++iProperty)
-    {
-      AutoPtr<Element> elem = pDoc->createElement(iProperty->first);
-      AutoPtr<Text> txt = pDoc->createTextNode(iProperty->second);
-      elem->appendChild(txt);
-      pConfig->appendChild(elem);
-    }
-
-
     // metering/values
     AutoPtr<Element> pValues = pDoc->createElement("values");
     pValues->setAttribute("resolution", intToString(_series.getResolution()));

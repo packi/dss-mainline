@@ -172,7 +172,6 @@ namespace dss {
     std::string m_Comment;
     dss_dsid_t m_FromDSID;
     std::string m_Unit;
-    Properties m_Properties;
   public:
 #ifdef WITH_GCOV
     Series();
@@ -254,15 +253,11 @@ namespace dss {
     void setFromDSID(const dss_dsid_t& _value) { m_FromDSID = _value; }
     const std::string getUnit() const { return m_Unit; }
     void setUnit(const std::string& _value) { m_Unit = _value; }
-    bool has(const std::string& _key) const { return m_Properties.has(_key); }
-    void set(const std::string& _key, const std::string& _value)  { return m_Properties.set(_key, _value); }
-    const std::string& get(const std::string& _key) const { return m_Properties.get(_key); }
-    const Properties& getProperties() const { return m_Properties; }
-    
+
     boost::shared_ptr<std::deque<value_type> > getExpandedValues() {
       boost::shared_ptr<std::deque<value_type> > result(new std::deque<value_type>);
       std::deque<value_type>* expandedQueue = result.get();
-      
+
       typename QueueType::iterator iValue = m_Values.begin(), e = m_Values.end();
 
       DateTime iCurrentTimeStamp;
