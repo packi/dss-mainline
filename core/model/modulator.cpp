@@ -53,11 +53,15 @@ namespace dss {
       m_pPropertyNode->createProperty("powerConsumption")
         ->linkToProxy(PropertyProxyReference<int>(m_PowerConsumption, false));
       m_pPropertyNode->createProperty("powerConsumptionAge")
-      ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_PowerConsumptionTimeStamp, &DateTime::toString));
+        ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_PowerConsumptionTimeStamp, &DateTime::toString));
       m_pPropertyNode->createProperty("energyMeterValue")
         ->linkToProxy(PropertyProxyReference<int>(m_EnergyMeterValue, false));
+      m_pPropertyNode->createProperty("energyMeterAge")
+        ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_EnergyMeterValueTimeStamp, &DateTime::toString));
       m_pPropertyNode->createProperty("isValid")
         ->linkToProxy(PropertyProxyReference<bool>(m_IsValid, false));
+      m_pPropertyNode->createProperty("present")
+        ->linkToProxy(PropertyProxyMemberFunction<DSMeter, bool, false>(*this, &DSMeter::isPresent));
       m_pPropertyNode->createProperty("energyLevelRed")
         ->linkToProxy(PropertyProxyReference<int>(m_EnergyLevelRed, false));
       m_pPropertyNode->createProperty("energyLevelOrange")

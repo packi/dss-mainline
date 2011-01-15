@@ -61,17 +61,29 @@ namespace dss {
       if(m_pApartment->getPropertyNode() != NULL) {
         m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/" + m_DSID.toString());
         m_pPropertyNode->createProperty("dSID")->setStringValue(m_DSID.toString());
-        m_pPropertyNode->createProperty("name")->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
-        // TODO: bind meter dsid or create link to dsmeter
-//        m_pPropertyNode->createProperty("DSMeterID")->linkToProxy(PropertyProxyMemberFunction<Device,int>(*this, &Device::getDSMeterID));
+        m_pPropertyNode->createProperty("present")
+          ->linkToProxy(PropertyProxyMemberFunction<Device, bool>(*this, &Device::isPresent));
+        m_pPropertyNode->createProperty("name")
+          ->linkToProxy(PropertyProxyMemberFunction<Device, std::string>(*this, &Device::getName, &Device::setName));
+        m_pPropertyNode->createProperty("DSMeterDSID")
+          ->linkToProxy(PropertyProxyMemberFunction<dss_dsid_t, std::string, false>(m_DSMeterDSID, &dss_dsid_t::toString));
         m_pPropertyNode->createProperty("ZoneID")->linkToProxy(PropertyProxyReference<int>(m_ZoneID, false));
-        if(m_pPropertyNode->getProperty("interrupt/mode") == NULL) {
-          PropertyNodePtr interruptNode = m_pPropertyNode->createProperty("interrupt");
-          interruptNode->setFlag(PropertyNode::Archive, true);
-          PropertyNodePtr interruptModeNode = interruptNode->createProperty("mode");
-          interruptModeNode->setStringValue("ignore");
-          interruptModeNode->setFlag(PropertyNode::Archive, true);
-        }
+        m_pPropertyNode->createProperty("functionID")
+          ->linkToProxy(PropertyProxyReference<int>(m_FunctionID, false));
+        m_pPropertyNode->createProperty("revisionID")
+          ->linkToProxy(PropertyProxyReference<int>(m_RevisionID, false));
+        m_pPropertyNode->createProperty("productID")
+          ->linkToProxy(PropertyProxyReference<int>(m_ProductID, false));
+        m_pPropertyNode->createProperty("lastKnownZoneID")
+          ->linkToProxy(PropertyProxyReference<int>(m_LastKnownZoneID, false));
+        m_pPropertyNode->createProperty("lastKnownMeterDSID")
+          ->linkToProxy(PropertyProxyMemberFunction<dss_dsid_t, std::string, false>(m_LastKnownMeterDSID, &dss_dsid_t::toString));
+        m_pPropertyNode->createProperty("firstSeen")
+          ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_FirstSeen, &DateTime::toString));
+        m_pPropertyNode->createProperty("lastDiscovered")
+          ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_LastDiscovered, &DateTime::toString));
+        m_pPropertyNode->createProperty("locked")
+          ->linkToProxy(PropertyProxyReference<bool>(m_IsLockedInDSM, false));
         m_TagsNode = m_pPropertyNode->createProperty("tags");
         m_TagsNode->setFlag(PropertyNode::Archive, true);
       }
