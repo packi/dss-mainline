@@ -421,6 +421,7 @@ namespace dss {
       if((*ipScriptContextWrapper)->get().get() == _pContext) {
         result = (*ipScriptContextWrapper);
       }
+      ++ipScriptContextWrapper;
     }
     return result;
   } // getContextWrapperForContext
