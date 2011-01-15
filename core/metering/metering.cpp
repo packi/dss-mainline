@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2010 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
@@ -23,6 +23,8 @@
 #include "metering.h"
 
 #include <boost/filesystem.hpp>
+#include <boost/bind.hpp>
+#include <boost/thread.hpp>
 
 #include "core/dss.h"
 #include "core/logger.h"
@@ -33,6 +35,7 @@
 #include "core/model/modulator.h"
 #include "core/model/apartment.h"
 #include "core/model/modelmaintenance.h"
+#include "core/security/security.h"
 
 #ifdef LOG_TIMING
   #include <sstream>
@@ -48,21 +51,20 @@ namespace dss {
   {
     m_ConfigConsumption.reset(new MeteringConfigChain(false, 1, "W"));
     m_ConfigConsumption->setComment("Consumption in W");
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_seconds",        2, 400)));
-    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_10seconds",     10, 400)));
+    m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_seconds",        2, 400, false)));
     m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_5minutely", 5 * 60, 400)));
     m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_halfhourly",30 * 60, 400)));
     m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_2hourly", 2 * 60*60, 400)));
     m_ConfigConsumption->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("consumption_daily",  24 * 60*60, 400)));
-    m_Config.push_back(m_ConfigConsumption.get());
+    m_Config.push_back(m_ConfigConsumption);
 
     m_ConfigEnergy.reset(new MeteringConfigChain(true, 60, "Wh"));
     m_ConfigEnergy->setComment("Energymeter value");
-    m_ConfigEnergy->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("energy_minutely",  1 * 60, 400)));
+    m_ConfigEnergy->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("energy_minutely",  1 * 60, 400, false)));
     m_ConfigEnergy->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("energy_5minutely", 5 * 60, 400)));
     m_ConfigEnergy->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("energy_hourly",   60 * 60, 400)));
     m_ConfigEnergy->addConfig(boost::shared_ptr<MeteringConfig>(new MeteringConfig("energy_daily", 24 * 60*60, 400)));
-    m_Config.push_back(m_ConfigEnergy.get());
+    m_Config.push_back(m_ConfigEnergy);
   } // metering
 
   void Metering::initialize() {
@@ -70,6 +72,8 @@ namespace dss {
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "storageLocation", getDSS().getDataDirectory() + "metering/", true, false);
     m_MeteringStorageLocation = getDSS().getPropertySystem().getStringValue(getConfigPropertyBasePath() + "storageLocation");
     m_MeteringStorageLocation = addTrailingBackslash(m_MeteringStorageLocation);
+    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "diffTimeMinSeconds", 20, true, false);
+    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "cycleTimeSeconds", 300, true, false);
 
     if(getDSS().getPropertySystem().getBoolValue(
                                 getConfigPropertyBasePath() + "enabled")) {
@@ -91,122 +95,178 @@ namespace dss {
     run();
   } // start
 
-//#define LOG_TIMING
-
-  void Metering::processValue(MeteringValue _value, boost::shared_ptr<MeteringConfigChain> _config) {
-    SeriesReader<CurrentValue> reader;
-    SeriesWriter<CurrentValue> writer;
-
-    #ifdef LOG_TIMING
-    std::ostringstream logSStream;
-    #endif
-
-    #ifdef LOG_TIMING
-    Timestamp checkingDSMeter;
-    Timestamp startedLoading;
-    #endif
-    std::vector<boost::shared_ptr<Series<CurrentValue> > > series;
-    for(int iConfig = 0; iConfig < _config->size(); iConfig++) {
-      // Load series from file
-      std::string fileName = m_MeteringStorageLocation + _value.getDSMeter()->getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
-      log("Metering::processValue: Trying to load series from '" + fileName + "'");
-      #ifdef LOG_TIMING
-      Timestamp startedLoadingSingle;
-      #endif
-      boost::shared_ptr<Series<CurrentValue> > s = boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(fileName));
-      if(s != NULL) {
-        #ifdef LOG_TIMING
-        logSStream << "loading single: " << Timestamp().getDifference(startedLoadingSingle);
-        log(logSStream.str());
-        logSStream.str("");
-        #endif
-        series.push_back(s);
-      } else {
-        log("Metering::processValue: Failed to load series, creating a new one", lsWarning);
-        boost::shared_ptr<Series<CurrentValue> > newSeries((new Series<CurrentValue>(_config->getResolution(iConfig), _config->getNumberOfValues(iConfig))));
-        newSeries->setUnit(_config->getUnit());
-        newSeries->setComment(_config->getComment());
-        newSeries->setFromDSID(_value.getDSMeter()->getDSID());
-        series.push_back(newSeries);
-      }
-    }
-    #ifdef LOG_TIMING
-    logSStream << "loading: " << Timestamp().getDifference(startedLoading);
-    log(logMessage.str());
-    logSStream.str("");
-    #endif
-
-    // stitch up chain
-    for(std::vector<boost::shared_ptr<Series<CurrentValue> > >::reverse_iterator iSeries = series.rbegin(), e = series.rend();
-    iSeries != e; ++iSeries)
-    {
-      if(iSeries != series.rbegin()) {
-        (*iSeries)->setNextSeries(boost::prior(iSeries)->get());
-      }
-    }
-    if(series.empty()) {
-      log("Metering::processValue: No series configured, check your config");
-    } else {
-      log("Metering::processValue: Series loaded, updating");
-
-      // Update series
-      #ifdef LOG_TIMING
-      Timestamp startedAddingValue;
-      #endif
-      series[0]->addValue(_value.getValue(), _value.getSampledAt());
-      #ifdef LOG_TIMING
-      logSStream << "adding value: " << Timestamp().getDifference(startedAddingValue);
-      log(logSStream.str());
-      logSStream.str("");
-      #endif
-
-      #ifdef LOG_TIMING
-      Timestamp startedWriting;
-      #endif
-      // Store series
-      log("Metering::processValue: Writing series back...");
-      for(int iConfig = 0; iConfig < _config->size(); iConfig++) {
-        #ifdef LOG_TIMING
-        Timestamp startedWritingSingle;
-        #endif
-        // Write series to file
-        std::string fileName = m_MeteringStorageLocation + _value.getDSMeter()->getDSID().toString() + "_" + _config->getFilenameSuffix(iConfig) + ".xml";
-        Series<CurrentValue>* s = series[iConfig].get();
-        log("Metering::processValue: Trying to save series to '" + fileName + "'");
-        writer.writeToXML(*s, fileName);
-        #ifdef LOG_TIMING
-        logSStream << "writing single: " << Timestamp().getDifference(startedWritingSingle) << endl;
-        log(logSStream.str());
-        logSStream.str("");
-        #endif
-      }
-      #ifdef LOG_TIMING
-      logSStream << "writing: " << Timestamp().getDifference(startedWriting) << endl;
-      log(logSStream.str());
-      logSStream.str("");
-      #endif
-    }
-    #ifdef LOG_TIMING
-    logSStream << "checkingDSMeter: " << Timestamp().getDifference(checkingDSMeter) << endl;
-    log(logSStream.str());
-    logSStream.str("");
-    #endif
-  } // processValue
-
   void Metering::checkDSMeters() {
     m_pMeteringBusInterface->requestMeterData();
   } // checkDSMeters
 
-  //#undef LOG_TIMING
+  boost::shared_ptr<Series<CurrentValue> > Metering::createSeriesFromChain(
+      boost::shared_ptr<MeteringConfigChain> _pChain,
+      int _index,
+      boost::shared_ptr<DSMeter> _pMeter) {
+    boost::shared_ptr<Series<CurrentValue> > result(
+      new Series<CurrentValue>(_pChain->getResolution(_index),
+                               _pChain->getNumberOfValues(_index)));
+    result->setUnit(_pChain->getUnit());
+    result->setComment(_pChain->getComment());
+    result->setFromDSID(_pMeter->getDSID());
+    return result;
+  } // createSeriesFromChain
+
+  boost::shared_ptr<Series<CurrentValue> > Metering::getSeries(
+                boost::shared_ptr<MeteringConfigChain> _pChain,
+                int _index,
+                boost::shared_ptr<DSMeter> _pMeter) {
+    assert(_pChain != NULL);
+    assert(_pChain->size() > _index);
+
+    boost::shared_ptr<Series<CurrentValue> > result;
+    boost::shared_ptr<MeteringConfig> config = _pChain->get(_index);
+    if(config->isStored()) {
+
+      std::string fileName = m_MeteringStorageLocation + _pMeter->getDSID().toString() + "_" + _pChain->getFilenameSuffix(_index) + ".xml";
+      log("Metering::getSeries: Trying to load series from '" + fileName + "'");
+
+      SeriesReader<CurrentValue> reader;
+      result =
+        boost::shared_ptr<Series<CurrentValue> >(reader.readFromXML(fileName));
+      if(result == NULL) {
+        log("Metering::getSeries: Failed to load series, creating a new one", lsDebug);
+        result = createSeriesFromChain(_pChain, _index, _pMeter);
+      }
+    } else {
+      result = createSeriesFromChain(_pChain, _index, _pMeter);
+      m_ValuesMutex.lock();
+      CachedSeriesMap::iterator ipSeries = m_CachedSeries.find(_pMeter);
+      if(ipSeries != m_CachedSeries.end()) {
+        if(_pChain->isConsumption()) {
+          result->getValues() = ipSeries->second.first->getSeries()->getValues();
+        } else {
+          result->getValues() = ipSeries->second.second->getSeries()->getValues();
+        }
+      }
+      m_ValuesMutex.unlock();
+    }
+    return result;
+  } // getSeries
+
+  void Metering::writeBackValuesOf(boost::shared_ptr<MeteringConfigChain> _pChain,
+                                   std::deque<CurrentValue>& _values,
+                                   DateTime& _lastStored,
+                                   boost::shared_ptr<DSMeter> _pMeter) {
+    typedef
+    std::vector<boost::shared_ptr<Series<CurrentValue> > > SeriesVector;
+    SeriesVector series;
+    for(int iConfig = 1; iConfig < _pChain->size(); iConfig++) {
+      series.push_back(getSeries(_pChain, iConfig, _pMeter));
+    }
+
+    log("Metering::processValue: Series loaded, updating");
+
+    // stitch up chain
+    for(SeriesVector::reverse_iterator iSeries = series.rbegin(),
+        e = series.rend();
+        iSeries != e;
+        ++iSeries)  {
+      if(iSeries != series.rbegin()) {
+        (*iSeries)->setNextSeries(boost::prior(iSeries)->get());
+      }
+    }
+
+    // Update series
+    for(std::deque<CurrentValue>::iterator iValue = _values.begin(),
+        e = _values.end();
+        iValue != e; ++iValue) {
+      if(iValue->getTimeStamp().after(_lastStored)) {
+        series[0]->addValue(*iValue);
+      }
+    }
+
+    // Store series
+    log("Metering::processValue: Writing series back...");
+    SeriesWriter<CurrentValue> writer;
+    for(int iConfig = 1; iConfig < _pChain->size(); iConfig++) {
+      // Write series to file
+      std::string fileName = m_MeteringStorageLocation + _pMeter->getDSID().toString() + "_" + _pChain->getFilenameSuffix(iConfig) + ".xml";
+      Series<CurrentValue>* s = series[iConfig-1].get();
+      log("Metering::processValue: Trying to save series to '" + fileName + "'");
+      writer.writeToXML(*s, fileName);
+    }
+  } // writeBackValues
+
+  void Metering::writeBackValues() {
+    // todo: bind properties to values
+    DSS::getInstance()->getSecurity().loginAsSystemUser("Metering needs to get config values");
+    while(!m_Terminated) {
+      m_ValuesMutex.lock();
+      unsigned int numSeriesInCycle = m_CachedSeries.size() * 2;
+      m_ValuesMutex.unlock();
+
+      int cycleTimeSeconds =
+        getDSS().getPropertySystem().
+          getIntValue(getConfigPropertyBasePath() + "cycleTimeSeconds");
+      int diffTimeMinSeconds =
+        getDSS().getPropertySystem().
+          getIntValue(getConfigPropertyBasePath() + "diffTimeMinSeconds");
+
+      if(numSeriesInCycle == 0) {
+        sleepMS(400);
+        continue;
+      }
+
+      int sleepTimeMS = std::max<int>(cycleTimeSeconds / numSeriesInCycle, diffTimeMinSeconds) * 1000;
+      unsigned int currentCycle = 0;
+      while((currentCycle < numSeriesInCycle) && !m_Terminated) {
+        m_ValuesMutex.lock();
+        if(currentCycle >= (m_CachedSeries.size() * 2)) {
+          // the cycle map got smaller -> restart the cycle
+          break;
+        }
+        CachedSeriesMap::iterator iCachedSeries = m_CachedSeries.begin();
+        std::advance(iCachedSeries, currentCycle / 2);
+        boost::shared_ptr<CachedSeries> series;
+        if((currentCycle % 2) == 0) {
+          series = iCachedSeries->second.first;
+        } else {
+          series = iCachedSeries->second.second;
+        }
+        // copy values so we can remove the lock
+        bool touched = series->isTouched();
+        DateTime lastStored;
+        boost::shared_ptr<MeteringConfigChain> pChain;
+        boost::shared_ptr<DSMeter> pMeter;
+        std::deque<CurrentValue> values;
+        if(touched) {
+          lastStored = series->getLastStored();
+          pChain = series->getChain();
+          pMeter = iCachedSeries->first;
+          values = series->getSeries()->getValues();
+          series->markAsStored();
+        }
+        m_ValuesMutex.unlock();
+
+        if(touched) {
+          writeBackValuesOf(pChain, values, lastStored, pMeter);
+        }
+
+        currentCycle++;
+        int cycleSleepTimeMS = sleepTimeMS;
+        while((cycleSleepTimeMS > 0) && !m_Terminated) {
+          const int kMaxSleeptimeMS = 400;
+          sleepMS(std::min(kMaxSleeptimeMS, cycleSleepTimeMS));
+          cycleSleepTimeMS -= kMaxSleeptimeMS;
+        }
+      }
+    }
+  } // writeBackValues
 
   void Metering::execute() {
-    if(m_pMeteringBusInterface == NULL) {
-      throw std::runtime_error("Missing bus interface");
-    }
-    // check dsMeters periodically
+    assert(m_pMeteringBusInterface != NULL);
     while(DSS::getInstance()->getModelMaintenance().isInitializing()) {
       sleepSeconds(1);
     }
+    // spawn metering-data writing thread
+    boost::thread th(boost::bind(&Metering::writeBackValues, this));
+    // check dsMeters periodically
     while(!m_Terminated) {
       int sleepTimeMSec = 60000 * 1000;
 
@@ -214,35 +274,61 @@ namespace dss {
       for(unsigned int iConfig = 0; iConfig < m_Config.size(); iConfig++) {
         sleepTimeMSec = std::min(sleepTimeMSec, 1000 * m_Config[iConfig]->getCheckIntervalSeconds());
       }
-      DateTime startedSleeping;
-      DateTime doneSleepingBy = DateTime().addSeconds(sleepTimeMSec / 1000);
-      do {
-        processValues(m_EnergyValues, m_ConfigEnergy);
-        processValues(m_ConsumptionValues, m_ConfigConsumption);
-        sleepMS(100); // wait roughly one token hold-time for new events
-      } while(DateTime().before(doneSleepingBy));
+      while(!m_Terminated && (sleepTimeMSec > 0)) {
+        const int kMinSleepTimeMS = 100;
+        sleepMS(std::min(sleepTimeMSec, kMinSleepTimeMS));
+        sleepTimeMSec -= kMinSleepTimeMS;
+      }
     }
+    th.join();
   } // execute
 
-  void Metering::processValues(std::vector<MeteringValue>& _values, boost::shared_ptr<MeteringConfigChain> _config) {
-    while(!_values.empty()) {
-      m_ValuesMutex.lock();
-      MeteringValue value = _values.front();
-      _values.erase(_values.begin());
-      m_ValuesMutex.unlock();
-      processValue(value, _config);
+  boost::shared_ptr<CachedSeries> Metering::getOrCreateCachedSeries(
+        boost::shared_ptr<MeteringConfigChain> _pChain,
+        boost::shared_ptr<DSMeter> _pMeter) {
+    if(m_CachedSeries.find(_pMeter) == m_CachedSeries.end()) {
+      boost::shared_ptr<Series<CurrentValue> > pSeriesConsumption(
+        new Series<CurrentValue>(
+          m_ConfigConsumption->getResolution(0),
+          m_ConfigConsumption->getNumberOfValues(0)));
+      pSeriesConsumption->setUnit(m_ConfigConsumption->getUnit());
+      pSeriesConsumption->setComment(m_ConfigConsumption->getComment());
+      pSeriesConsumption->setFromDSID(_pMeter->getDSID());
+      boost::shared_ptr<CachedSeries> pCacheSeriesConsumption(
+        new CachedSeries(pSeriesConsumption, m_ConfigConsumption));
+      boost::shared_ptr<Series<CurrentValue> > pSeriesEnergy(
+        new Series<CurrentValue>(
+          m_ConfigEnergy->getResolution(0),
+          m_ConfigEnergy->getNumberOfValues(0)));
+      pSeriesEnergy->setUnit(m_ConfigEnergy->getUnit());
+      pSeriesEnergy->setComment(m_ConfigEnergy->getComment());
+      pSeriesEnergy->setFromDSID(_pMeter->getDSID());
+      boost::shared_ptr<CachedSeries> pCacheSeriesEnergy(
+        new CachedSeries(pSeriesEnergy, m_ConfigEnergy));
+      m_CachedSeries[_pMeter] = std::make_pair(pCacheSeriesConsumption, pCacheSeriesEnergy);
     }
-  } // processValues
+    if(_pChain->isConsumption()) {
+      return m_CachedSeries[_pMeter].first;
+    } else {
+      return m_CachedSeries[_pMeter].second;
+    }
+  } // getOrCreateCachedSeries
 
-  void Metering::postConsumptionEvent(boost::shared_ptr<DSMeter> _meter, int _value, DateTime _sampledAt) {
+  void Metering::postConsumptionEvent(boost::shared_ptr<DSMeter> _meter,
+                                      int _value,
+                                      DateTime _sampledAt) {
     m_ValuesMutex.lock();
-    m_ConsumptionValues.push_back(MeteringValue(_meter, _value, _sampledAt));
+    boost::shared_ptr<CachedSeries> pSeries = getOrCreateCachedSeries(m_ConfigConsumption, _meter);
+    pSeries->touch();
+    pSeries->getSeries()->addValue(_value, _sampledAt);
     m_ValuesMutex.unlock();
   } // postConsumptionEvent
 
   void Metering::postEnergyEvent(boost::shared_ptr<DSMeter> _meter, int _value, DateTime _sampledAt) {
     m_ValuesMutex.lock();
-    m_EnergyValues.push_back(MeteringValue(_meter, _value, _sampledAt));
+    boost::shared_ptr<CachedSeries> pSeries = getOrCreateCachedSeries(m_ConfigEnergy, _meter);
+    pSeries->touch();
+    pSeries->getSeries()->addValue(_value, _sampledAt);
     m_ValuesMutex.unlock();
   } // postEnergyEvent
 
