@@ -49,6 +49,7 @@ namespace dss {
     if((m_pApartment != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
       m_pPropertyNode =
         m_pApartment->getPropertyNode()->createProperty("dSMeters/" + m_DSID.toString());
+      m_pPropertyNode->createProperty("dSID")->setStringValue(m_DSID.toString());
       m_pPropertyNode->createProperty("powerConsumption")
         ->linkToProxy(PropertyProxyReference<int>(m_PowerConsumption, false));
       m_pPropertyNode->createProperty("powerConsumptionAge")
