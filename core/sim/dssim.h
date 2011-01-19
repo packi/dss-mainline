@@ -131,6 +131,8 @@ namespace dss {
 
     virtual void setValue(const uint8_t _value) = 0;
     virtual uint16_t getFunctionID() = 0;
+    virtual uint16_t getProductID() = 0;
+    virtual uint16_t getProductRevision() = 0;
 
     virtual void setConfigParameter(const std::string& _name, const std::string& _value) = 0;
     virtual std::string getConfigParameter(const std::string& _name) const = 0;

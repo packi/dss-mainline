@@ -134,6 +134,26 @@ namespace dss {
     return 0;
   } // getFunctionID
 
+  uint16_t DSIDSim::getProductID() {
+    if(m_ConfigParameter.has("productID")) {
+      int result = strToIntDef(m_ConfigParameter.get("productID"), -1);
+      if(result != -1) {
+        return result;
+      }
+    }
+    return 0;
+  } // getProductID
+
+  uint16_t DSIDSim::getProductRevision() {
+    if(m_ConfigParameter.has("productRevision")) {
+      int result = strToIntDef(m_ConfigParameter.get("productRevision"), -1);
+      if(result != -1) {
+        return result;
+      }
+    }
+    return 0;
+  } // getProductRevision
+
   void DSIDSim::setConfigParameter(const std::string& _name, const std::string& _value) {
     m_ConfigParameter.set(_name, _value);
   } // setConfigParameter
