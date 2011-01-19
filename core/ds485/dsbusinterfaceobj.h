@@ -29,6 +29,9 @@ namespace dss {
 
   class DSBusInterfaceObj {
   public:
+    DSBusInterfaceObj()
+    : m_DSMApiHandle(NULL)
+    { }
     void setDSMApiHandle(DsmApiHandle_t _value) { m_DSMApiHandle = _value; }
   protected:
     DsmApiHandle_t m_DSMApiHandle;
