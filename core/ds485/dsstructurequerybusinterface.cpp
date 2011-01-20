@@ -39,12 +39,14 @@ namespace dss {
 
   std::vector<DSMeterSpec_t> DSStructureQueryBusInterface::getDSMeters() {
     std::vector<DSMeterSpec_t> result;
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       return result;
     }
 
     dsid_t device_list[63]; // TODO: constant for 63?
     int ret = DsmApiGetBusMembers(m_DSMApiHandle, device_list, 63);
+    lock.unlock();
     if(ret < 0) {
       // DsmApiGetBusMembers returns >= 0 on success
       DSBusInterface::checkResultCode(ret);
@@ -64,6 +66,7 @@ namespace dss {
   } // getDSMeters
 
   DSMeterSpec_t DSStructureQueryBusInterface::getDSMeterSpec(const dss_dsid_t& _dsMeterID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
@@ -85,6 +88,7 @@ namespace dss {
   } // getDSMeterSpec
 
   int DSStructureQueryBusInterface::getGroupCount(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
@@ -104,6 +108,7 @@ namespace dss {
   } // getGroupCount
 
   std::vector<int> DSStructureQueryBusInterface::getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
@@ -126,6 +131,7 @@ namespace dss {
   } // getGroups
 
   std::vector<int> DSStructureQueryBusInterface::getGroupsOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
@@ -155,6 +161,7 @@ namespace dss {
   } // getGroupsOfDevice
 
   std::vector<int> DSStructureQueryBusInterface::getZones(const dss_dsid_t& _dsMeterID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
@@ -180,6 +187,7 @@ namespace dss {
   } // getZones
 
   int DSStructureQueryBusInterface::getDevicesCountInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
@@ -193,6 +201,7 @@ namespace dss {
   } // getDevicesCountInZone
 
   std::vector<int> DSStructureQueryBusInterface::getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
@@ -213,6 +222,7 @@ namespace dss {
   } // getDevicesInZone
 
   dss_dsid_t DSStructureQueryBusInterface::getDSIDOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
@@ -245,6 +255,7 @@ namespace dss {
   } // getEnergyBorder
 
   DeviceSpec_t DSStructureQueryBusInterface::deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
@@ -263,6 +274,7 @@ namespace dss {
   } // deviceGetSpec
 
   bool DSStructureQueryBusInterface::isLocked(boost::shared_ptr<const Device> _device) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
@@ -277,6 +289,7 @@ namespace dss {
   } // isLocked
 
   std::string DSStructureQueryBusInterface::getSceneName(dss_dsid_t _dsMeterID, boost::shared_ptr<Group> _group, const uint8_t _sceneNumber) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }

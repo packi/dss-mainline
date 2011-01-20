@@ -36,6 +36,7 @@ namespace dss {
   void DSActionRequest::callScene(AddressableModelItem *pTarget, const uint16_t scene) {
     int ret;
 
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       return;
     }
@@ -56,6 +57,7 @@ namespace dss {
   void DSActionRequest::saveScene(AddressableModelItem *pTarget, const uint16_t scene) {
     int ret;
 
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       return;
     }
@@ -76,6 +78,7 @@ namespace dss {
   void DSActionRequest::undoScene(AddressableModelItem *pTarget) {
     int ret;
 
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       return;
     }
@@ -96,6 +99,7 @@ namespace dss {
   void DSActionRequest::blink(AddressableModelItem *pTarget) {
     int ret;
 
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       return;
     }
@@ -116,6 +120,7 @@ namespace dss {
   void DSActionRequest::setValue(AddressableModelItem *pTarget, const uint8_t _value) {
     int ret;
 
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       return;
     }

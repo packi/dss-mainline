@@ -31,6 +31,7 @@ namespace dss {
   //================================================== DSMeteringBusInterface
 
   unsigned long DSMeteringBusInterface::getPowerConsumption(const dss_dsid_t& _dsMeterID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
@@ -45,6 +46,7 @@ namespace dss {
   } // getPowerConsumption
 
   void DSMeteringBusInterface::requestMeterData() {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       return;
     }
@@ -53,6 +55,7 @@ namespace dss {
   } // requestPowerConsumption
 
   unsigned long DSMeteringBusInterface::getEnergyMeterValue(const dss_dsid_t& _dsMeterID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }

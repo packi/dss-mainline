@@ -40,6 +40,7 @@ namespace dss {
   uint8_t DSDeviceBusInterface::getDeviceConfig(const Device& _device,
                                                 uint8_t _configClass,
                                                 uint8_t _configIndex) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw std::runtime_error("Invalid libdsm api handle");
     }
@@ -63,6 +64,7 @@ namespace dss {
   uint16_t DSDeviceBusInterface::getDeviceConfigWord(const Device& _device,
                                                  uint8_t _configClass,
                                                  uint8_t _configIndex) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw std::runtime_error("Invalid libdsm api handle");
     }
@@ -88,6 +90,7 @@ namespace dss {
                                              uint8_t _configClass,
                                              uint8_t _configIndex,
                                              uint8_t _value) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       return;
     }
@@ -103,6 +106,7 @@ namespace dss {
 
   void DSDeviceBusInterface::setValue(const Device& _device,
                                             uint8_t _value) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       return;
     }
@@ -124,6 +128,7 @@ namespace dss {
   } // getSensorValue
 
   void DSDeviceBusInterface::lockOrUnlockDevice(const Device& _device, const bool _lock) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       return;
     }
@@ -135,6 +140,7 @@ namespace dss {
   } // lockOrUnlockDevice
 
   std::pair<uint8_t, uint16_t> DSDeviceBusInterface::getTransmissionQuality(const Device& _device) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw std::runtime_error("Invalid libdsm api handle");
     }

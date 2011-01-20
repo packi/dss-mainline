@@ -1,7 +1,8 @@
 /*
-    Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2011 digitalSTROM.org, Zurich, Switzerland
 
-    Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+    Authors: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
+             Sergey 'Jin' Bostandzhyan <jin@dev.digitalstrom.org>
 
     This file is part of digitalSTROM Server.
 
@@ -20,24 +21,18 @@
 
 */
 
-#ifndef DSBUSINTERFACEOBJ_H_
-#define DSBUSINTERFACEOBJ_H_
-
-#include <digitalSTROM/dsm-api-v2/dsm-api.h>
-#include <boost/thread/recursive_mutex.hpp>
+#include "dsbusinterfaceobj.h"
 
 namespace dss {
 
-  class DSBusInterfaceObj {
-  public:
-    DSBusInterfaceObj();
-    void setDSMApiHandle(DsmApiHandle_t _value);
+  boost::recursive_mutex DSBusInterfaceObj::m_DSMApiHandleMutex;
 
-  protected:
-    static boost::recursive_mutex m_DSMApiHandleMutex;
-    DsmApiHandle_t m_DSMApiHandle;
-  };
+  DSBusInterfaceObj::DSBusInterfaceObj() : m_DSMApiHandle(NULL) { }
 
+  void DSBusInterfaceObj::setDSMApiHandle(DsmApiHandle_t _value) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    m_DSMApiHandle = _value;
+  }
+    
 } // namespace dss
 
-#endif

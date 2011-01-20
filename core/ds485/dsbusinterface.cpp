@@ -233,6 +233,12 @@ namespace dss {
 
   void DSBusInterface::shutdown() {
     if(m_dsmApiReady) {
+      m_pActionRequestInterface->setDSMApiHandle(NULL);
+      m_pDeviceBusInterface->setDSMApiHandle(NULL);
+      m_pMeteringBusInterface->setDSMApiHandle(NULL);
+      m_pStructureQueryBusInterface->setDSMApiHandle(NULL);
+      m_pStructureModifyingBusInterface->setDSMApiHandle(NULL);
+        
       DsmApiClose(m_dsmApiHandle);
       DsmApiCleanup(m_dsmApiHandle);
 

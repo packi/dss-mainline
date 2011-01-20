@@ -1,4 +1,4 @@
-set(files dsbusinterface.cpp
+set(files dsbusinterface.cpp dsbusinterfaceobj.cpp
           dsactionrequest.cpp dsdevicebusinterface.cpp
           dsmeteringbusinterface.cpp dsstructurequerybusinterface.cpp
           dsstructuremodifyingbusinterface.cpp)
