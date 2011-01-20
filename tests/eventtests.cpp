@@ -683,4 +683,29 @@ BOOST_AUTO_TEST_CASE(testMultipleScriptFiles) {
 } // testMultipleScriptFiles
 
 
+// TODO: we need assertions in javascript sometime to make this test useful
+BOOST_AUTO_TEST_CASE(testEventSourceGetsPassed) {
+  std::string fileName1 = getTempDir() + "testeventsourcegetspassed.js";
+
+  std::ofstream ofs1(fileName1.c_str());
+  ofs1 << "print('isZone:      ' + raisedEvent.source.isZone);\n";
+  ofs1 << "print('isDevice:    ' + raisedEvent.source.isDevice);\n";
+  ofs1 << "print('isApartment: ' + raisedEvent.source.isApartment);\n";
+  ofs1.close();
+
+  EventInterpreter interpreter(NULL);
+  EventInterpreterPluginJavascript* plugin = new EventInterpreterPluginJavascript(&interpreter);
+  interpreter.addPlugin(plugin);
+
+  boost::shared_ptr<SubscriptionOptions> opts(new SubscriptionOptions());
+  opts->setParameter("filename1", fileName1);
+  EventSubscription subscription("testEvent", "javascript", interpreter, opts);
+  Event evt("testEvent");
+  plugin->handleEvent(evt, subscription);
+
+  sleepMS(10);
+
+  boost::filesystem::remove(fileName1);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

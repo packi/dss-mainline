@@ -284,6 +284,30 @@ namespace dss {
         ScriptObject raisedEvent(*ctx, NULL);
         raisedEvent.setProperty<const std::string&>("name", _event.getName());
         ctx->getRootObject().setProperty("raisedEvent", &raisedEvent);
+        if(_event.hasPropertySet(EventPropertyLocation)) {
+          raisedEvent.setProperty<const std::string&>("location", _event.getPropertyByName(EventPropertyLocation));
+        }
+        EventRaiseLocation raiseLocation = _event.getRaiseLocation();
+        ScriptObject source(*ctx, NULL);
+        if((raiseLocation == erlZone) || (raiseLocation == erlApartment)) {
+          if(DSS::hasInstance()) {
+            boost::shared_ptr<const Zone> zone =
+              _event.getRaisedAtZone(DSS::getInstance()->getApartment());
+            source.setProperty("set", ".zone(" + intToString(zone->getID()));
+            source.setProperty("zoneID", zone->getID());
+            source.setProperty("isApartment", raiseLocation == erlApartment);
+            source.setProperty("isZone", raiseLocation == erlZone);
+            source.setProperty("isDevice", false);
+          }
+        } else {
+          boost::shared_ptr<const DeviceReference> device = _event.getRaisedAtDevice();
+          source.setProperty("set", "dsid(" + device->getDSID().toString() + ")");
+          source.setProperty("dsid", device->getDSID().toString());
+          source.setProperty("isApartment", false);
+          source.setProperty("isZone", false);
+          source.setProperty("isDevice", true);
+        }
+        raisedEvent.setProperty("source", &source);
 
         // add raisedEvent.parameter
         ScriptObject param(*ctx, NULL);
@@ -513,12 +537,12 @@ namespace dss {
       SetBuilder builder(m_Apartment);
       Set to;
       if(_event.hasPropertySet(EventPropertyLocation)) {
-        to = builder.buildSet(_event.getPropertyByName(EventPropertyLocation), _event.getRaisedAtZone());
+        to = builder.buildSet(_event.getPropertyByName(EventPropertyLocation), _event.getRaisedAtZone(m_Apartment));
       } else {
         if(_subscription.getOptions()->hasParameter(EventPropertyLocation)) {
           to = builder.buildSet(_subscription.getOptions()->getParameter(EventPropertyLocation), boost::shared_ptr<Zone>());
         } else {
-          to = _event.getRaisedAtZone()->getDevices();
+          to = _event.getRaisedAtZone(m_Apartment)->getDevices();
         }
       }
       options->execute(to);

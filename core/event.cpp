@@ -165,15 +165,14 @@ namespace dss {
     return false;
   }
 
-  boost::shared_ptr<const Zone> Event::getRaisedAtZone() const {
+  boost::shared_ptr<const Zone> Event::getRaisedAtZone(Apartment& _apartment) const {
     if(m_RaiseLocation == erlZone) {
       return m_RaisedAtZone;
     } else if(m_RaiseLocation == erlDevice) {
       boost::shared_ptr<const Device> dev = m_RaisedAtDevice->getDevice();
       return dev->getApartment().getZone(dev->getZoneID());
     } else {
-      // TODO: We should really try to get the apartment from elsewhere...
-      return DSS::getInstance()->getApartment().getZone(0);
+      return _apartment.getZone(0);
     }
   } // getRaisedAtZone
 

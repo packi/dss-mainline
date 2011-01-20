@@ -94,13 +94,18 @@ namespace dss {
     JSRequest req(&m_Context);
     JSString* str = JS_NewStringCopyN(m_Context.getJSContext(), _value.c_str(), _value.size());
     doSetProperty(_name, STRING_TO_JSVAL(str));
-  } // setProperty<std::string>
+  } // setProperty<const std::string>
 
   template<>
   void ScriptObject::setProperty(const std::string& _name, const char* _value) {
     std::string str(_value);
     setProperty<const std::string&>(_name, str);
   } // setProperty<const char*>
+
+  template<>
+  void ScriptObject::setProperty(const std::string& _name, std::string _value) {
+    setProperty<const std::string&>(_name, _value);
+  } // setProperty<std::string>
 
   template<>
   void ScriptObject::setProperty(const std::string& _name, bool _value) {
