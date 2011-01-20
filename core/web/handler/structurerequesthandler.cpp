@@ -61,7 +61,13 @@ namespace dss {
       if(!zoneIDStr.empty()) {
         try {
           int zoneID = strToInt(zoneIDStr);
+          if (zoneID < 1) {
+            return failure("Could not move device: invalid zone id given!");
+          }
           DeviceReference devRef(dev, &DSS::getInstance()->getApartment());
+          if (dev->getZoneID() == zoneID) {
+            return failure("Device is already in zone " + zoneIDStr);
+          }
           try {
             boost::shared_ptr<Zone> zone = m_Apartment.getZone(zoneID);
             manipulator.addDeviceToZone(dev, zone);
@@ -71,6 +77,8 @@ namespace dss {
         } catch(std::runtime_error& err) {
           return failure(err.what());
         }
+      } else {
+        return failure("Need parameter 'zone'");
       }
       return success();
     }
