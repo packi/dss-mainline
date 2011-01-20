@@ -59,7 +59,7 @@ namespace dss {
   void Device::publishToPropertyTree() {
     if(m_pPropertyNode == NULL) {
       if(m_pApartment->getPropertyNode() != NULL) {
-        m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/" + m_DSID.toString());
+        m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone0/devices/" + m_DSID.toString());
         m_pPropertyNode->createProperty("dSID")->setStringValue(m_DSID.toString());
         m_pPropertyNode->createProperty("present")
           ->linkToProxy(PropertyProxyMemberFunction<Device, bool>(*this, &Device::isPresent));
@@ -249,7 +249,8 @@ namespace dss {
       }
       m_ZoneID = _value;
       if((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
-        std::string basePath = "zones/zone" + intToString(m_ZoneID);
+        std::string basePath = "zones/zone" + intToString(m_ZoneID) +
+                               "/devices";
         if(m_pAliasNode == NULL) {
           PropertyNodePtr node = m_pApartment->getPropertyNode()->getProperty(basePath + "/" + m_DSID.toString());
           if(node != NULL) {
