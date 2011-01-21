@@ -162,6 +162,7 @@ namespace dss {
     SocketScriptContextExtension& m_Extension;
   private:
     void runIOService(User* _pUser) {
+      assert(m_pContext != NULL);
       if(_pUser != NULL) {
         Security* pSecurity = m_pContext->getEnvironment().getSecurity();
         if(pSecurity != NULL) {
@@ -173,6 +174,7 @@ namespace dss {
     }
     void ensureIOServiceAvailable() {
       if(m_IOService == NULL) {
+        assert(m_pContext != NULL);
         m_IOService.reset(new boost::asio::io_service());
         m_pASIOWork.reset(new boost::asio::io_service::work(*m_IOService));
         User* pUser = NULL;
@@ -424,11 +426,13 @@ namespace dss {
   class SocketHelperSendOneShot : public SocketHelper,
                                   public boost::enable_shared_from_this<SocketHelperSendOneShot> {
   public:
-    SocketHelperSendOneShot(SocketScriptContextExtension& _extension)
-    : SocketHelper(_extension),
-      m_pSocket(new tcp::socket(getIOService()))
+    SocketHelperSendOneShot(SocketScriptContextExtension& _extension,
+                            ScriptContext* _pContext)
+    : SocketHelper(_extension)
     {
       Logger::getInstance()->log("Creating SocketHelperSendOneShot");
+      setContext(_pContext);
+      m_pSocket.reset(new tcp::socket(getIOService()));
     }
 
     ~SocketHelperSendOneShot() {
@@ -451,6 +455,7 @@ namespace dss {
       m_pSocket->async_connect(endpoint,
           boost::bind(&SocketHelperSendOneShot::handle_connect, this,
             boost::asio::placeholders::error, ++iterator));
+      startBlockingCall();
     }
 
     void write()
@@ -483,6 +488,9 @@ namespace dss {
         m_pSocket->async_connect(endpoint,
             boost::bind(&SocketHelperSendOneShot::handle_connect, this,
               boost::asio::placeholders::error, ++endpoint_iterator));
+      } else {
+        do_close();
+        boost::thread(boost::bind(&SocketScriptContextExtension::removeSocketHelper, &m_Extension, shared_from_this()));
       }
     }
 
@@ -504,6 +512,7 @@ namespace dss {
 
     void do_close() {
       m_pSocket->close();
+      endBlockingCall();
     }
   private:
     boost::shared_ptr<tcp::socket> m_pSocket;
@@ -710,9 +719,8 @@ namespace dss {
         int port = ctx->convertTo<int>(argv[1]);
         std::string data = ctx->convertTo<std::string>(argv[2]);
 
-        boost::shared_ptr<SocketHelperSendOneShot> helper(new SocketHelperSendOneShot(*ext));
+        boost::shared_ptr<SocketHelperSendOneShot> helper(new SocketHelperSendOneShot(*ext, ctx));
         ext->addSocketHelper(helper);
-        helper->setContext(ctx);
 
         // check if we've been given a callback
         if(argc > 3) {
