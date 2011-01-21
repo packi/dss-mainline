@@ -351,6 +351,53 @@ namespace dss {
     return JS_TRUE;
   } // prop_getNode
 
+  JSBool prop_getParent(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
+    assert(node != NULL);
+
+    PropertyNode* parentNode = node->getParentNode();
+    if(parentNode != NULL) {
+      *rval = OBJECT_TO_JSVAL(ext->createJSProperty(*ctx, parentNode));
+    } else {
+      *rval = JSVAL_NULL;
+    }
+    return JS_TRUE;
+  } // prop_getChild
+
+  JSBool prop_removeChild(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
+
+    PropertyNodePtr node = ext->getPropertyFromObj(ctx, obj);
+    assert(node != NULL);
+
+    PropertyNodePtr childNode;
+    if(argc >= 1) {
+      if(JSVAL_IS_OBJECT(argv[0])) {
+        childNode = ext->getPropertyFromObj(ctx, JSVAL_TO_OBJECT(argv[0]));
+      }
+      if(childNode == NULL) {
+        try {
+          childNode = node->getProperty(ctx->convertTo<std::string>(argv[0]));
+        } catch(ScriptException& ex) {
+        }
+      }
+    } else {
+      Logger::getInstance()->log("Need one argument (node) in removeChild", lsWarning);
+    }
+
+    if(childNode != NULL) {
+      node->removeChild(childNode);
+      *rval = JSVAL_TRUE;
+    } else {
+      *rval = JSVAL_FALSE;
+    }
+    return JS_TRUE;
+  } // prop_getChild
+
   JSBool prop_store(JSContext* cx, JSObject* obj, uintN argc, jsval* argv, jsval* rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     PropertyScriptExtension* ext = dynamic_cast<PropertyScriptExtension*>(ctx->getEnvironment().getExtension(PropertyScriptExtensionName));
@@ -382,6 +429,8 @@ namespace dss {
     {"removeListener", prop_removeListener, 1, 0, 0},
     {"getChild", prop_getChild, 1, 0, 0},
     {"getChildren", prop_getChildren, 0, 0, 0},
+    {"removeChild", prop_removeChild, 1, 0, 0},
+    {"getParent", prop_getParent, 0, 0, 0},
     {"setFlag", prop_setFlag, 2, 0, 0},
     {"hasFlag", prop_hasFlag, 1, 0, 0},
     {NULL, NULL, 0, 0, 0},
@@ -468,6 +517,10 @@ namespace dss {
   } // extendContext
 
   JSObject* PropertyScriptExtension::createJSProperty(ScriptContext& _ctx, PropertyNodePtr _node) {
+    return createJSProperty(_ctx, _node.get());
+  }
+
+  JSObject* PropertyScriptExtension::createJSProperty(ScriptContext& _ctx, PropertyNode* _node) {
     std::string fullName = _node->getDisplayName();
     PropertyNode* nextNode = _node->getParentNode();
     while(nextNode != NULL) {

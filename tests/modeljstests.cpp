@@ -605,4 +605,40 @@ BOOST_AUTO_TEST_CASE(testPropertyLoadReturnsFalse) {
   BOOST_CHECK_EQUAL(res, false);
 } // testPropertyLoadReturnsFalse
 
+BOOST_AUTO_TEST_CASE(testPropertyRemoveChild) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("Property.setProperty('/test/subnode', 'test');");
+
+  BOOST_CHECK(propSys.getProperty("/test/subnode") != NULL);
+
+  ctx->evaluate<void>("var node = Property.getNode('/test');\n"
+                      "node.removeChild('subnode');");
+
+  BOOST_CHECK(propSys.getProperty("/test/subnode") == NULL);
+} // testPropertyRemoveChild
+
+BOOST_AUTO_TEST_CASE(testPropertyGetParent) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("Property.setProperty('/test/subnode', 'test');");
+
+  BOOST_CHECK(propSys.getProperty("/test/subnode") != NULL);
+
+  ctx->evaluate<void>("var subnode = Property.getNode('/test/subnode');\n"
+                      "subnode.getParent().removeChild(subnode);");
+
+  BOOST_CHECK(propSys.getProperty("/test/subnode") == NULL);
+} // testPropertyGetParent
+
 BOOST_AUTO_TEST_SUITE_END()

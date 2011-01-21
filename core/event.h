@@ -53,6 +53,7 @@ namespace dss {
   class EventRunner;
   class Zone;
   class DeviceReference;
+  class Apartment;
 
   //================================================== Class definitions
 
@@ -99,8 +100,9 @@ namespace dss {
     void setContext(const std::string& _value) { m_Context = _value; m_ContextSet = true; }
     void setTime(const std::string& _value) { m_Time = _value; m_TimeSet = true; }
 
-    boost::shared_ptr<const Zone> getRaisedAtZone() const;
-    const DeviceReference& getRaisedAtDevice() const { return *m_RaisedAtDevice; }
+    boost::shared_ptr<const Zone> getRaisedAtZone(Apartment& _apartment) const;
+    boost::shared_ptr<const DeviceReference> getRaisedAtDevice() const { return m_RaisedAtDevice; }
+    EventRaiseLocation getRaiseLocation() { return m_RaiseLocation; }
 
     const Properties& getProperties() const { return m_Properties; }
     void setProperties(const Properties& _value) { m_Properties = _value; }

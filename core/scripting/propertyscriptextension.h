@@ -70,6 +70,7 @@ namespace dss {
     PropertyNodePtr getPropertyFromObj(ScriptContext* _context, JSObject* _obj);
     virtual PropertyNodePtr getProperty(ScriptContext* _context, const std::string& _path);
     virtual PropertyNodePtr createProperty(ScriptContext* _context, const std::string& _name);
+    JSObject* createJSProperty(ScriptContext& _ctx, PropertyNode* _node);
     JSObject* createJSProperty(ScriptContext& _ctx, PropertyNodePtr _node);
     JSObject* createJSProperty(ScriptContext& _ctx, const std::string& _path);
     virtual bool store(ScriptContext* _ctx);
