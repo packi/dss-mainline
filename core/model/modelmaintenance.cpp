@@ -484,18 +484,17 @@ namespace dss {
               }
             }
           }
-          boost::shared_ptr<Event> pEvent;
-          pEvent.reset(new Event("callScene", zone));
-          pEvent->setProperty("sceneID", intToString(_sceneID));
-          raiseEvent(pEvent);
         }
+        boost::shared_ptr<Event> pEvent;
+        pEvent.reset(new Event("callScene", zone));
+        pEvent->setProperty("sceneID", intToString(_sceneID));
+        raiseEvent(pEvent);
       } else {
         log("OnGroupCallScene: Could not find group with id '" + intToString(_groupID) + "' in Zone '" + intToString(_zoneID) + "'", lsError);
       }
     } catch(ItemNotFoundException& e) {
       log("OnGroupCallScene: Could not find zone with id '" + intToString(_zoneID) + "'", lsError);
     }
-
   } // onGroupCallScene
 
   void ModelMaintenance::onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _sceneID) {
