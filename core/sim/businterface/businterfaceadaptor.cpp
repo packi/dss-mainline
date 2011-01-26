@@ -24,6 +24,7 @@
 
 #include "core/model/device.h"
 #include "core/model/group.h"
+#include "core/model/zone.h"
 #include "core/model/apartment.h"
 #include "core/model/modelmaintenance.h"
 
@@ -463,9 +464,11 @@ namespace dss {
                                   const int _sceneID) {
       boost::shared_ptr<BusInterface> target;
       if(_source == m_pInnerBusInterface.get()) {
-        boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_dsMeterID);
-        if(pMeter != NULL) {
-          pMeter->groupCallScene(_zoneID, _groupID, _sceneID);
+        try {
+          boost::shared_ptr<Zone> pZone = m_pApartment->getZone(_zoneID);
+          boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
+          m_pSimBusInterface->getActionRequestInterface()->callScene(pGroup.get(), _sceneID);
+        } catch(std::runtime_error& e) {
         }
       }
       ModelEvent* pEvent = new ModelEvent(ModelEvent::etCallSceneGroup);
