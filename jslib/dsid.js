@@ -38,9 +38,9 @@ function MediaDSID() {
       setTimeout(0,
         function() {
           if(!result.lastWasOff()) {
-            result.turnOff();
+            result.powerOff();
             setTimeout(3000, function() {
-              result.turnOn();
+              result.powerOn();
             });
           }
         }
