@@ -298,6 +298,7 @@ namespace dss {
         if(JSVAL_IS_OBJECT(res)) {
           m_pJSThis = JSVAL_TO_OBJECT(res);
           m_pSelf.reset(new ScriptObject(m_pJSThis, *m_pContext));
+          m_pSelf->addRoot();
         }
       } catch(ScriptException& e) {
         Logger::getInstance()->log(std::string("DSIDJS: Could not get 'self' object: ") + e.what());

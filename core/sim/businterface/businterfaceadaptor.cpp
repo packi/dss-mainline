@@ -198,7 +198,7 @@ namespace dss {
   private:
 
     bool targetIsSim(AddressableModelItem* _pTarget) {
-      Device* pDevice = static_cast<Device*>(_pTarget);
+      Device* pDevice = dynamic_cast<Device*>(_pTarget);
       if(pDevice != NULL) {
         return isHandledBySimulation(pDevice->getDSMeterDSID());
       }
@@ -206,7 +206,7 @@ namespace dss {
     }
 
     bool targetIsInner(AddressableModelItem* _pTarget) {
-      Device* pDevice = static_cast<Device*>(_pTarget);
+      Device* pDevice = dynamic_cast<Device*>(_pTarget);
       if(pDevice != NULL) {
         return !isHandledBySimulation(pDevice->getDSMeterDSID());
       }
