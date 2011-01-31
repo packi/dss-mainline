@@ -281,6 +281,27 @@ BOOST_AUTO_TEST_CASE(testSocketConnectFailure) {
   }
 }
 
+BOOST_AUTO_TEST_CASE(testSocketConnectResolveFailure) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new SocketScriptContextExtension();
+  env->addExtension(ext);
+
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("socket = new TcpSocket();\n"
+                      "socket.connect('hurz.dev.digitalstrom.org', 1234,\n"
+                      "  function(success) { result = success; }\n"
+                      ");");
+  sleepMS(250);
+  ScriptLock lock(ctx);
+  JSContextThread req(ctx);
+  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), false);
+  ctx->stop();
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
+}
+
 BOOST_AUTO_TEST_CASE(testSocketSend) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();

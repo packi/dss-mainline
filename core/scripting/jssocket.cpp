@@ -216,18 +216,24 @@ namespace dss {
     void connectTo(const std::string& _host, int _port) {
       tcp::resolver resolver(getIOService());
       tcp::resolver::query query(_host, intToString(_port));
-      tcp::resolver::iterator iterator = resolver.resolve(query);
+      try {
+        tcp::resolver::iterator iterator = resolver.resolve(query);
 
-      tcp::endpoint endpoint = *iterator;
-      m_pSocket.reset(new tcp::socket(getIOService()));
-      m_pSocket->async_connect(
-        endpoint,
-        boost::bind(
-          &SocketHelperInstance::connectionCallback,
-          this,
-          boost::asio::placeholders::error,
-          ++iterator));
-      startBlockingCall();
+        tcp::endpoint endpoint = *iterator;
+        m_pSocket.reset(new tcp::socket(getIOService()));
+        m_pSocket->async_connect(
+          endpoint,
+          boost::bind(
+            &SocketHelperInstance::connectionCallback,
+            this,
+            boost::asio::placeholders::error,
+            ++iterator));
+        startBlockingCall();
+      } catch(boost::system::system_error&) {
+        Logger::getInstance()
+          ->log("JS: connectTo: Could not resolve host '" + _host, lsWarning);
+        failure();
+      }
     }
 
     void send(const std::string& _data) {
@@ -465,7 +471,8 @@ namespace dss {
           boost::asio::buffer(m_Data.c_str(),
             m_Data.size()),
           boost::bind(&SocketHelperSendOneShot::handle_write, this,
-            boost::asio::placeholders::error));
+            boost::asio::placeholders::error,
+            boost::asio::placeholders::bytes_transferred));
     }
 
     virtual void stop() {
@@ -494,23 +501,34 @@ namespace dss {
       }
     }
 
-    void handle_write(const boost::system::error_code& error) {
+    void handle_write(const boost::system::error_code& error, std::size_t bytesTransfered) {
       Logger::getInstance()->log("SocketHelperSendOneShot::handle_write");
-      if(hasCallback()) {
-        ScriptLock lock(&getContext());
-        JSContextThread req(&getContext());
-        ScriptFunctionParameterList params(getContext());
-        params.add<bool>(!error);
-        callCallbackWithArguments(params);
-        if(error) {
-          Logger::getInstance()->log("SocketHelperSendOneShot::handle_write: " + error.message());
+      bool finished = false;
+      if(!error) {
+        if(bytesTransfered == m_Data.size()) {
+          finished = true;
+        } else {
+          return;
         }
+      } else {
+        Logger::getInstance()->log("SocketHelperSendOneShot::handle_write: " + error.message());
+        finished = true;
       }
-      do_close();
-      boost::thread(boost::bind(&SocketScriptContextExtension::removeSocketHelper, &m_Extension, shared_from_this()));
+      if(finished) {
+        if(hasCallback()) {
+          ScriptLock lock(&getContext());
+          JSContextThread req(&getContext());
+          ScriptFunctionParameterList params(getContext());
+          params.add<bool>(!error);
+          callCallbackWithArguments(params);
+        }
+        do_close();
+        boost::thread(boost::bind(&SocketScriptContextExtension::removeSocketHelper, &m_Extension, shared_from_this()));
+      }
     }
 
     void do_close() {
+      m_pSocket->shutdown(boost::asio::socket_base::shutdown_both);
       m_pSocket->close();
       endBlockingCall();
     }
@@ -527,10 +545,14 @@ namespace dss {
   : ScriptExtension(SocketScriptExtensionName)
   { }
 
+  void delayedDestroy(SocketHelperInstance* _inst) {
+    delete _inst;
+  }
+
   void tcpSocket_finalize(JSContext *cx, JSObject *obj) {
     SocketHelperInstance* pInstance = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
     JS_SetPrivate(cx, obj, NULL);
-    delete pInstance;
+    boost::thread(boost::bind(&delayedDestroy, pInstance));
   } // tcpSocket_finalize
 
   JSBool tcpSocket_construct(JSContext *cx, JSObject *obj, uintN argc,
