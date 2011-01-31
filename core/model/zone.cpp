@@ -183,6 +183,7 @@ namespace dss {
         m_pPropertyNode->createProperty("ZoneID")->setIntegerValue(m_ZoneID);
         m_pPropertyNode->createProperty("name")
           ->linkToProxy(PropertyProxyMemberFunction<Zone, std::string>(*this, &Zone::getName, &Zone::setName));
+        m_pPropertyNode->createProperty("devices/");
       }
     }
   } // publishToPropertyTree
