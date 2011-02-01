@@ -24,6 +24,7 @@
 #define GROUP_H
 
 #include <map>
+#include <boost/thread/mutex.hpp>
 
 #include "modeltypes.h"
 #include "devicecontainer.h"
@@ -43,6 +44,7 @@ namespace dss {
     int m_GroupID;
     int m_LastCalledScene;
     std::map<uint8_t, std::string> m_SceneNames;
+    static boost::mutex m_SceneNameMutex;
     bool m_IsInitializedFromBus;
     PropertyNodePtr m_pPropertyNode;
     std::string m_AssociatedSet;
