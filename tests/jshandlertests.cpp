@@ -152,6 +152,19 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutNormalDelay) {
   BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
 } // testSetTimeoutNormalDelay
 
+BOOST_AUTO_TEST_CASE(testSetTimeoutInvalidFunction) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("var a = 1; var result = false; setTimeout(0, a);");
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
+  JSContextThread req(ctx);
+  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), false);
+} // testSetTimeoutInvalidFunction
+
 BOOST_AUTO_TEST_CASE(testSetTimeoutGC) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();

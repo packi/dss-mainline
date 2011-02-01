@@ -267,7 +267,13 @@ namespace dss {
         JSContextThread req(getContext());
         ScriptObject obj(_obj, *getContext());
         ScriptFunctionParameterList params(*getContext());
-        obj.callFunctionByReference<void>(_function, params);
+        try {
+          obj.callFunctionByReference<void>(_function, params);
+        } catch(ScriptException& e) {
+          Logger::getInstance()
+            ->log("JS: setTimeout: Error calling callback: '" +
+                  std::string(e.what()) + "'", lsError);
+        }
         _rooter.reset();
         JS_MaybeGC(getContext()->getJSContext());
       } else {
