@@ -37,6 +37,7 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Node.h>
 #include <Poco/SAX/InputSource.h>
+#include <Poco/SAX/SAXException.h>
 
 #include <iostream>
 #include <fstream>
@@ -78,7 +79,14 @@ namespace dss {
     InputSource input(inFile);
     Series<T>* result = NULL;
     DOMParser parser;
-    AutoPtr<Document> pDoc = parser.parse(&input);
+    AutoPtr<Document> pDoc;
+    try {
+      pDoc = parser.parse(&input);
+    } catch(Poco::XML::SAXParseException& e) {
+      Logger::getInstance()->log("SeriesReader::readFromXML: error parsing '"
+                                 + _fileName + "': " + e.what() , lsError);
+      return NULL;
+    }
     Element* rootNode = pDoc->documentElement();
     if(rootNode->localName() != "metering") {
       Logger::getInstance()->log("SeriesReader::readFromXML: root node must be named metering, got: '" + rootNode->localName() + "'");

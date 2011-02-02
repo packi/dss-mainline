@@ -24,7 +24,9 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
+
 #include <math.h>
+#include <fstream>
 
 #include "core/metering/series.h"
 #include "core/metering/seriespersistence.h"
@@ -517,6 +519,20 @@ BOOST_AUTO_TEST_CASE(testReadingNonexistentFile) {
   SeriesReader<CurrentValue> reader;
   Series<CurrentValue>* series = reader.readFromXML("idontexistandneverwill.xml");
   BOOST_CHECK(series == NULL);
+}
+
+BOOST_AUTO_TEST_CASE(testReadingCorruptFile) {
+  std::string fileName = getTempDir() + "/tempseries.xml";
+  std::ofstream ofs(fileName.c_str());
+  ofs << "<?xml version='1.0' encoding='utf-8'?>\n";
+  ofs << "<metering version=\"1\">\n";
+  ofs << "      <con\n";
+  ofs.close();
+
+  SeriesReader<CurrentValue> reader;
+  Series<CurrentValue>* series = reader.readFromXML(fileName);
+  BOOST_CHECK(series == NULL);
+  boost::filesystem::remove_all(fileName);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
