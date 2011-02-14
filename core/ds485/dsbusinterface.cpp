@@ -52,7 +52,7 @@ namespace dss {
   //================================================== DSBusInterface
 
   DSBusInterface::DSBusInterface(DSS* _pDSS, ModelMaintenance* _pModelMaintenance)
-  : Subsystem(_pDSS, "DSBusInterface"),
+  : ThreadedSubsystem(_pDSS, "DSBusInterface"),
     m_pModelMaintenance(_pModelMaintenance),
     m_dsmApiHandle(NULL),
     m_dsmApiReady(false),
@@ -168,63 +168,85 @@ namespace dss {
       return;
     }
 
-    int result = DsmApiOpen(m_dsmApiHandle, m_connectionURI.c_str(), 0);
-    if(result < 0) {
-      log("Couldn't open dsmapi connection to '" + m_connectionURI + "' result: " + intToString(result));
-      return;
-    }
-
-    // read out own dsid
-    dsid_t ownDSID;
-    int ret = DsmApiGetOwnDSID(m_dsmApiHandle, &ownDSID);
-    DSBusInterface::checkResultCode(ret);
-
-    log("Successfully connected to " + m_connectionURI +
-        " [ " + dsid_helper::toString(ownDSID) + "]");
-
-    m_pActionRequestInterface->setDSMApiHandle(m_dsmApiHandle);
-    m_pDeviceBusInterface->setDSMApiHandle(m_dsmApiHandle);
-    m_pMeteringBusInterface->setDSMApiHandle(m_dsmApiHandle);
-    m_pStructureQueryBusInterface->setDSMApiHandle(m_dsmApiHandle);
-    m_pStructureModifyingBusInterface->setDSMApiHandle(m_dsmApiHandle);
-
-    // register callbacks
-    DsmApiRegisterBusStateCallback(m_dsmApiHandle, DSBusInterface::busStateCallback, this);
-    DsmApiRegisterBusChangeCallback(m_dsmApiHandle, DSBusInterface::busChangeCallback, this);
-
-    EventDeviceAccessibility_on_event_callback_t evDevAccessOn = DSBusInterface::eventDeviceAccessibilityOnCallback;
-    DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT, EVENT_DEVICE_ACCESSIBILITY, 
-                           EVENT_DEVICE_ACCESSIBILITY_ON, (void*)evDevAccessOn, this);
-    EventDeviceAccessibility_off_event_callback_t evDevAccessOff = DSBusInterface::eventDeviceAccessibilityOffCallback;
-    DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT, EVENT_DEVICE_ACCESSIBILITY, 
-                           EVENT_DEVICE_ACCESSIBILITY_OFF, (void*)evDevAccessOff, this);
-
-    ZoneGroupActionRequest_action_call_scene_request_callback_t handleBusCall = DSBusInterface::handleBusCallSceneCallback;
-    DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST, 
-                           ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_CALL_SCENE,
-                           (void*)handleBusCall, this);
-
-    EventDeviceLocalAction_event_callback_t localActionCallback = DSBusInterface::handleDeviceLocalActionCallback;
-    DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
-                           EVENT_DEVICE_LOCAL_ACTION, 0,
-                           (void*)localActionCallback, this);
-
-    DeviceActionRequest_action_call_scene_request_callback_t deviceCallSceneCallback = DSBusInterface::handleDeviceCallSceneCallback;
-    DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
-                           DEVICE_ACTION_REQUEST, DEVICE_ACTION_REQUEST_ACTION_CALL_SCENE,
-                           (void*)deviceCallSceneCallback, this);
-
-    CircuitEnergyMeterValue_get_response_callback_t meteringCallback = DSBusInterface::handleCircuitEnergyDataCallback;
-    DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_RESPONSE,
-                           CIRCUIT_ENERGY_METER_VALUE, CIRCUIT_ENERGY_METER_VALUE_GET,
-                           (void*)meteringCallback, this);
-
-    m_dsmApiReady = true;
+    connectToDS485D();
   } // initialize
 
+  void DSBusInterface::connectToDS485D() {
+    if(!m_dsmApiReady) {
+      int result = DsmApiOpen(m_dsmApiHandle, m_connectionURI.c_str(), 0);
+      if(result < 0) {
+        log("Couldn't open dsmapi connection to '" + m_connectionURI + "' result: " + intToString(result));
+        return;
+      }
+
+      // read out own dsid
+      dsid_t ownDSID;
+      int ret = DsmApiGetOwnDSID(m_dsmApiHandle, &ownDSID);
+      DSBusInterface::checkResultCode(ret);
+
+      log("Successfully connected to " + m_connectionURI +
+          " [ " + dsid_helper::toString(ownDSID) + "]");
+
+      m_pActionRequestInterface->setDSMApiHandle(m_dsmApiHandle);
+      m_pDeviceBusInterface->setDSMApiHandle(m_dsmApiHandle);
+      m_pMeteringBusInterface->setDSMApiHandle(m_dsmApiHandle);
+      m_pStructureQueryBusInterface->setDSMApiHandle(m_dsmApiHandle);
+      m_pStructureModifyingBusInterface->setDSMApiHandle(m_dsmApiHandle);
+
+      // register callbacks
+      DsmApiRegisterBusStateCallback(m_dsmApiHandle, DSBusInterface::busStateCallback, this);
+      DsmApiRegisterBusChangeCallback(m_dsmApiHandle, DSBusInterface::busChangeCallback, this);
+
+      EventDeviceAccessibility_on_event_callback_t evDevAccessOn = DSBusInterface::eventDeviceAccessibilityOnCallback;
+      DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT, EVENT_DEVICE_ACCESSIBILITY,
+                            EVENT_DEVICE_ACCESSIBILITY_ON, (void*)evDevAccessOn, this);
+      EventDeviceAccessibility_off_event_callback_t evDevAccessOff = DSBusInterface::eventDeviceAccessibilityOffCallback;
+      DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT, EVENT_DEVICE_ACCESSIBILITY,
+                            EVENT_DEVICE_ACCESSIBILITY_OFF, (void*)evDevAccessOff, this);
+
+      ZoneGroupActionRequest_action_call_scene_request_callback_t handleBusCall = DSBusInterface::handleBusCallSceneCallback;
+      DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                            ZONE_GROUP_ACTION_REQUEST, ZONE_GROUP_ACTION_REQUEST_ACTION_CALL_SCENE,
+                            (void*)handleBusCall, this);
+
+      EventDeviceLocalAction_event_callback_t localActionCallback = DSBusInterface::handleDeviceLocalActionCallback;
+      DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
+                            EVENT_DEVICE_LOCAL_ACTION, 0,
+                            (void*)localActionCallback, this);
+
+      DeviceActionRequest_action_call_scene_request_callback_t deviceCallSceneCallback = DSBusInterface::handleDeviceCallSceneCallback;
+      DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                            DEVICE_ACTION_REQUEST, DEVICE_ACTION_REQUEST_ACTION_CALL_SCENE,
+                            (void*)deviceCallSceneCallback, this);
+
+      CircuitEnergyMeterValue_get_response_callback_t meteringCallback = DSBusInterface::handleCircuitEnergyDataCallback;
+      DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_RESPONSE,
+                            CIRCUIT_ENERGY_METER_VALUE, CIRCUIT_ENERGY_METER_VALUE_GET,
+                            (void*)meteringCallback, this);
+
+      m_dsmApiReady = true;
+    }
+  }
+
   void DSBusInterface::doStart() {
-    busReady();
+    run();
   } // doStart
+
+  void DSBusInterface::execute() {
+    const int kSleepTimeBetweenConnectsMS = 200;
+    while(!m_Terminated && !m_dsmApiReady) {
+      try {
+        connectToDS485D();
+      } catch(BusApiError& e) {
+        log(std::string("Cought exception while connecting: ") + e.what(),
+            lsError);
+        sleepMS(kSleepTimeBetweenConnectsMS);
+      }
+    }
+    if(m_dsmApiReady) {
+      busReady();
+    }
+  }
 
   void DSBusInterface::busReady() {
     ModelEvent* pEvent = new ModelEvent(ModelEvent::etBusReady);
