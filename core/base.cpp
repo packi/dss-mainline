@@ -23,6 +23,7 @@
 #include "base.h"
 
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <cstring>
 #include <cstdio>
@@ -386,6 +387,16 @@ namespace dss {
     }
     return _path;
   } // addTrailingBackslash
+
+  bool syncFile(const std::string& _path) {
+    int fd = open(_path.c_str(), O_APPEND);
+    if(fd != -1) {
+      fsync(fd);
+      close(fd);
+      return true;
+    }
+    return false;
+  } // syncFile
 
 
   //================================================== Properties

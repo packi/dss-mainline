@@ -230,6 +230,8 @@ namespace dss {
 
       ofs.close();
 
+      syncFile(tmpOut);
+
 #ifdef LOG_TIMING
       logSStream << "writing xml: " << Timestamp().getDifference(writingXML);
       Logger::getInstance()->log(logSStream.str());
