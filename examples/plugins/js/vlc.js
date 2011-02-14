@@ -2,19 +2,54 @@
 function VLC() {
   var result = new MediaDSID();
   result.remotePort = 4212;
-  result.remoteHost = "127.0.0.1";
+  result.remoteHost = "localhost";
 
   result.sendCommand = function(command) {
     print("before sending: " + command, " to ", result.remoteHost, ":", result.remotePort);
-    TcpSocket.sendTo(result.remoteHost, result.remotePort, command + "\r\n", // logout\n
-      function(success) {
-        if(success) {
-          print("sending ", command, " success");
-        } else {
-          print("*** FAILED: sending ", command);
-        }
+    var socket = new TcpSocket();
+    function onConnect(state) {
+      if(state) {
+        print("Connected");
+        socket.send(command + '\r\n', onWritten);
+      } else {
+        print("Connection failed");
       }
-    );
+    }
+
+    function onWritten(numBytes) {
+      if(numBytes > 0) {
+        print('Sent request');
+        readLine();
+      } else {
+        print('Write failed');
+      }
+    }
+
+    function readLine() {
+      var line = "";
+
+      var doRead = function() {
+        socket.receive(1,
+          function(data) {
+            if(data.length == 1) {
+              if(data == "\n") {
+                print('got line: ' + line);
+                socket.close();
+              } else {
+                line += data;
+                doRead();
+              }
+            } else {
+              print('invalid data received "' + data + '"');
+            }
+          }
+        );
+      }
+
+      doRead();
+    }
+
+    socket.connect('localhost', 4212, onConnect);
     print("done sending");
   };
 
