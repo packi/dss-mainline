@@ -155,6 +155,8 @@ namespace dss {
 
       ofs.close();
 
+      syncFile(tmpOut);
+
       // move it to the desired location
       rename(tmpOut.c_str(), _fileName.c_str());
     } else {

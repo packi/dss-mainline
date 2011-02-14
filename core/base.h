@@ -140,6 +140,7 @@ namespace dss {
 
   std::string addTrailingBackslash(const std::string& _path);
   std::string getTempDir();
+  bool syncFile(const std::string& _path);
 
   //============================================= Exception
 

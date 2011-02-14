@@ -46,7 +46,7 @@ namespace dss {
   class DSStructureQueryBusInterface;
   class DSStructureModifyingBusInterface;
 
-  class DSBusInterface : public Subsystem,
+  class DSBusInterface : public ThreadedSubsystem,
                          public BusInterface {
   private:
     boost::shared_ptr<DSActionRequest> m_pActionRequestInterface;
@@ -61,10 +61,12 @@ namespace dss {
     bool m_dsmApiReady;
     std::string m_connectionURI;
     BusEventSink* m_pBusEventSink;
-    
+
     dsid_t m_ownDSID;
 
     void busReady();
+    virtual void execute();
+    void connectToDS485D();
 
     static void busChangeCallback(void* _userData, dsid_t *_id, int _flag);
     void handleBusChange(dsid_t *_id, int _flag);

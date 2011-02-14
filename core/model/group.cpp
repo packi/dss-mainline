@@ -81,6 +81,7 @@ namespace dss {
   } // previousScene
 
   void Group::setSceneName(int _sceneNumber, const std::string& _name) {
+    boost::mutex::scoped_lock lock(m_SceneNameMutex);
     m_SceneNames[_sceneNumber] = _name;
     if (m_pPropertyNode != NULL) {
       PropertyNodePtr scene = m_pPropertyNode->createProperty("scenes/scene" +
@@ -92,6 +93,7 @@ namespace dss {
   } // setSceneName
 
   const std::string& Group::getSceneName(int _sceneNumber) {
+    boost::mutex::scoped_lock lock(m_SceneNameMutex);
     return m_SceneNames[_sceneNumber];
   } // getSceneName
 
@@ -108,5 +110,7 @@ namespace dss {
       }
     }
   } // publishToPropertyTree
+
+  boost::mutex Group::m_SceneNameMutex;
 
 } // namespace dss
