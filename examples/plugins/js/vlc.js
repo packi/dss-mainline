@@ -26,27 +26,14 @@ function VLC() {
     }
 
     function readLine() {
-      var line = "";
-
-      var doRead = function() {
-        socket.receive(1,
-          function(data) {
-            if(data.length == 1) {
-              if(data == "\n") {
-                print('got line: ' + line);
-                socket.close();
-              } else {
-                line += data;
-                doRead();
-              }
-            } else {
-              print('invalid data received "' + data + '"');
-            }
-          }
-        );
-      }
-
-      doRead();
+      socket.receiveLine(
+        100,
+        function(line) {
+          print('got line: ' + line);
+          socket.close();
+        },
+        '\n'
+      );
     }
 
     socket.connect('localhost', 4212, onConnect);
