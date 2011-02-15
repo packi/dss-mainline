@@ -269,6 +269,20 @@ namespace dss {
       startBlockingCall();
     }
 
+    void receiveLine(const int _maxBytes, const std::string& _delimiter) {
+      m_BytesToRead = std::min(_maxBytes, int(kMaxDataLength));
+      boost::asio::async_read_until(
+        *m_pSocket,
+        m_LineBuffer,
+        _delimiter,
+        boost::bind(&SocketHelperInstance::receiveLineCallback,
+                    this,
+                    boost::asio::placeholders::error,
+                    boost::asio::placeholders::bytes_transferred,
+                    _delimiter));
+      startBlockingCall();
+    }
+
     bool isConnected() {
       return (m_pSocket != NULL) && m_pSocket->is_open();
     }
@@ -363,6 +377,27 @@ namespace dss {
       }
     }
 
+    void receiveLineCallback(const boost::system::error_code& _error, std::size_t _bytesTransfered, std::string _delimiter) {
+      ScriptLock lock(&getContext());
+      JSContextThread req(&getContext());
+      if(!_error) {
+        boost::asio::streambuf::const_buffers_type bufs = m_LineBuffer.data();
+        std::string line(
+            boost::asio::buffers_begin(bufs),
+            boost::asio::buffers_begin(bufs) + _bytesTransfered);
+        if(endsWith(line, _delimiter)) {
+          line.erase(line.size() - _delimiter.size());
+        }
+        m_LineBuffer.consume(_bytesTransfered);
+        endBlockingCall();
+        callDataCallback(line);
+      } else {
+        endBlockingCall();
+        Logger::getInstance()->log("SocketHelperInstance::receiveLineCallback: error: " + _error.message());
+        callDataCallback("");
+      }
+    }
+
     void acceptCallback(const boost::system::error_code& error) {
       ScriptLock lock(&getContext());
       JSContextThread req(&getContext());
@@ -427,6 +462,7 @@ namespace dss {
     char m_DataBuffer[kMaxDataLength];
     std::size_t m_BytesToRead;
     boost::shared_ptr<tcp::acceptor> m_pAcceptor;
+    boost::asio::streambuf m_LineBuffer;
   }; // SocketHelperInstance
 
   class SocketHelperSendOneShot : public SocketHelper,
@@ -657,6 +693,43 @@ namespace dss {
     return JS_FALSE;
   } // tcpSocket_receive
 
+  JSBool tcpSocket_receiveLine(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    JSRequest req(cx);
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    SocketHelperInstance* pInst = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
+    assert(pInst != NULL);
+    if(pInst->isConnected()) {
+      if(argc >= 1) {
+        try {
+          int size = ctx->convertTo<int>(argv[0]);
+          std::string delimiter = "\r\n";
+
+          pInst->setContext(ctx);
+
+          // check if we've been given a callback
+          if(argc >= 2) {
+            boost::shared_ptr<ScriptObject> scriptObj(new ScriptObject(obj, *ctx));
+            pInst->setCallbackObject(scriptObj);
+            pInst->setCallbackFunction(argv[1]);
+          }
+
+          if(argc >= 3) {
+            delimiter = ctx->convertTo<std::string>(argv[2]);
+          }
+
+          pInst->receiveLine(size, delimiter);
+          *rval = JSVAL_TRUE;
+          return JS_TRUE;
+        } catch(const ScriptException& e) {
+          Logger::getInstance()->log(std::string("tcpSocket_receiveLine: Caught script exception: ") + e.what());
+        }
+      }
+    } else {
+      Logger::getInstance()->log("tcpSocket_receiveLine: not connected, please call connect first", lsError);
+    }
+    return JS_FALSE;
+  } // tcpSocket_receiveLine
+
   JSBool tcpSocket_bind(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     JSRequest req(cx);
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -722,6 +795,7 @@ namespace dss {
     {"send", tcpSocket_send, 2, 0, 0},
     {"connect", tcpSocket_connect, 3, 0, 0},
     {"receive", tcpSocket_receive, 2, 0, 0},
+    {"receiveLine", tcpSocket_receiveLine, 2, 0, 0},
     {"bind", tcpSocket_bind, 2, 0, 0},
     {"accept", tcpSocket_accept, 1, 0, 0},
     {"close", tcpSocket_close, 0, 0, 0},
