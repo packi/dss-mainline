@@ -408,30 +408,52 @@ BOOST_AUTO_TEST_CASE(testSocketReceive) {
 } // testSocketReceive
 
 
-void runScript(const std::string& _script) {
+void runScript(const std::string& _script, const std::string& _input, const std::string& _expectedResult) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
   ScriptExtension* ext = new SocketScriptContextExtension();
   env->addExtension(ext);
 
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  {
+    ScriptLock lock(ctx);
+    JSContextThread req(ctx);
+    ctx->getRootObject().setProperty<std::string>("input", _input);
+  }
+
   ctx->evaluate<void>(_script);
   sleepMS(500);
   ScriptLock lock(ctx);
   JSContextThread req(ctx);
-  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<std::string>("result"), "hello world");
+  std::string result = ctx->getRootObject().getProperty<std::string>("result");
+  BOOST_CHECK_EQUAL(result, _expectedResult);
   ctx->stop();
   while(ctx->hasAttachedObjects()) {
     sleepMS(1);
   }
 }
 
+const  std::string genericSenderScript =
+    "var connected = function(success) {\n"
+    "  if(success === true) {\n"
+    "    socket.send(input,\n"
+    "      function() {\n"
+    "        result = input;\n"
+    "        socket.close();\n"
+    "      }\n"
+    "    );\n"
+    "  }\n"
+    "}\n"
+    "socket = new TcpSocket();\n"
+    "socket.connect('localhost', 1234, connected);\n";
+
+
+
 BOOST_AUTO_TEST_CASE(testSocketServer) {
   std::string serverScript =
     "var handleIncomingSocket = function(incomingSocket) {\n"
     "  incomingSocket.receive(11,\n"
     "    function(line) {\n"
-    "      print('received: ', line);\n"
     "      result = line;"
     "    }\n"
     "  );\n"
@@ -446,25 +468,64 @@ BOOST_AUTO_TEST_CASE(testSocketServer) {
     "    }\n"
     "  }\n"
     ");\n";
-  std::string clientScript =
-    "var connected = function(success) {\n"
-    "  if(success === true) {\n"
-    "    socket.send('hello world',\n"
-    "      function() {\n"
-    "        result = 'hello world';\n"
-    "        socket.close();\n"
-    "      }\n"
-    "    );\n"
-    "  }\n"
-    "}\n"
-    "socket = new TcpSocket();\n"
-    "socket.connect('localhost', 1234, connected);\n";
-
-  boost::thread serverThread = boost::thread(boost::bind(&runScript, serverScript));
+  boost::thread serverThread = boost::thread(boost::bind(&runScript, serverScript, "hello world", "hello world"));
   sleepMS(250);
-  boost::thread clientThread = boost::thread(boost::bind(&runScript, clientScript));
+  boost::thread clientThread = boost::thread(boost::bind(&runScript, genericSenderScript, "hello world", "hello world"));
   clientThread.join();
   serverThread.join();
 } // testSocketServer
+
+const  std::string lineReaderServerScript =
+    "var count = parseInt(input);\n"
+    "var result = ''\n"
+    "var handleIncomingSocket = function(incomingSocket) {\n"
+    "  function readLine() {\n"
+    "    incomingSocket.receiveLine(100,\n"
+    "      function(line) {\n"
+    "        result += line;\n"
+    "        count--;\n"
+    "        if(count > 0) {\n"
+    "          readLine();\n"
+    "        }\n"
+    "      }\n"
+    "    );\n"
+    "  }\n"
+    "  readLine();\n"
+    "};\n"
+    "\n"
+    "socket = new TcpSocket();\n"
+    "socket.bind(\n"
+    "  1234,\n"
+    "  function(success) {\n"
+    "    if(success === true) {\n"
+    "      socket.accept(handleIncomingSocket);\n"
+    "    }\n"
+    "  }\n"
+    ");\n";
+
+
+BOOST_AUTO_TEST_CASE(testSocketReadLine) {
+  boost::thread serverThread = boost::thread(boost::bind(&runScript, lineReaderServerScript, "1", "hello world"));
+  sleepMS(250);
+  boost::thread clientThread = boost::thread(boost::bind(&runScript, genericSenderScript, "hello world\r\n", "hello world\r\n"));
+  clientThread.join();
+  serverThread.join();
+}
+
+BOOST_AUTO_TEST_CASE(testSocketReadLineOnlyOnce) {
+  boost::thread serverThread = boost::thread(boost::bind(&runScript, lineReaderServerScript, "1", "hello world"));
+  sleepMS(250);
+  boost::thread clientThread = boost::thread(boost::bind(&runScript, genericSenderScript, "hello world\r\ntl;dr\r\n", "hello world\r\ntl;dr\r\n"));
+  clientThread.join();
+  serverThread.join();
+}
+
+BOOST_AUTO_TEST_CASE(testSocketReadLineTwice) {
+  boost::thread serverThread = boost::thread(boost::bind(&runScript, lineReaderServerScript, "2", "hello worldtl;dr"));
+  sleepMS(250);
+  boost::thread clientThread = boost::thread(boost::bind(&runScript, genericSenderScript, "hello world\r\ntl;dr\r\n", "hello world\r\ntl;dr\r\n"));
+  clientThread.join();
+  serverThread.join();
+}
 
 BOOST_AUTO_TEST_SUITE_END()
