@@ -385,6 +385,9 @@ namespace dss {
       ext = new ScriptLoggerExtension(DSS::getInstance()->getJSLogDirectory(),
                                       DSS::getInstance()->getEventInterpreter());
       m_pEnvironment->addExtension(ext);
+      ext = new MeteringScriptExtension(DSS::getInstance()->getApartment(),
+                                        DSS::getInstance()->getMetering());
+      m_pEnvironment->addExtension(ext);
       setupCleanupEvent();
       m_pScriptRootNode = DSS::getInstance()->getPropertySystem().createProperty("/scripts");
     } else {

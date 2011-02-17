@@ -37,6 +37,7 @@ namespace dss {
   class Device;
   class Apartment;
   class DSMeter;
+  class Metering;
 
   /** This class extends a ScriptContext to contain the JS-API of the Apartment */
   class ModelScriptContextExtension : public ScriptExtension {
@@ -99,6 +100,20 @@ namespace dss {
 
     virtual void extendContext(ScriptContext& _context);
   }; // ModelConstantsScriptExtension
+
+  class MeteringScriptExtension : public ScriptExtension {
+  public:
+    MeteringScriptExtension(Apartment& _apartment, Metering& _metering);
+    virtual ~MeteringScriptExtension() {}
+
+    virtual void extendContext(ScriptContext& _context);
+
+    Apartment& getApartment() { return m_Apartment; }
+    Metering& getMetering() { return m_Metering; }
+  private:
+    Apartment& m_Apartment;
+    Metering& m_Metering;
+  }; // MeteringScriptExtension
 
 }
 
