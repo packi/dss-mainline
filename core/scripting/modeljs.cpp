@@ -551,6 +551,19 @@ namespace dss {
     return JS_FALSE;
   }
 
+  JSBool dev_blink(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ScriptObject self(obj, *ctx);
+    if(self.is("set") || self.is("device")) {
+      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+      intf->blink();
+      *rval = INT_TO_JSVAL(0);
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  }
+
   JSBool dev_increase_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
@@ -663,6 +676,7 @@ namespace dss {
   JSFunctionSpec device_interface_methods[] = {
     {"turnOn", dev_turn_on, 0, 0, 0},
     {"turnOff", dev_turn_off, 0, 0, 0},
+    {"blink", dev_blink, 0, 0, 0},
     {"setValue", dev_set_value, 0, 0, 0},
     {"increaseValue", dev_increase_value, 0, 0, 0},
     {"decreaseValue", dev_decrease_value, 0, 0, 0},
