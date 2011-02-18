@@ -34,6 +34,7 @@
 #include "core/model/device.h"
 #include "core/model/modulator.h"
 #include "core/model/modelconst.h"
+#include "core/metering/metering.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <memory>
@@ -694,5 +695,52 @@ BOOST_AUTO_TEST_CASE(testPropertyGetParent) {
 
   BOOST_CHECK(propSys.getProperty("/test/subnode") == NULL);
 } // testPropertyGetParent
+
+BOOST_AUTO_TEST_CASE(testMeteringGetSeries) {
+  Apartment apt(NULL);
+  apt.allocateDSMeter(dss_dsid_t(0,13));
+  Metering metering(NULL);
+
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new MeteringScriptExtension(apt, metering);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  int num = ctx->evaluate<int>("Metering.getSeries().length");
+  BOOST_CHECK_EQUAL(num, 2);
+} // testPropertyGetSeries
+
+BOOST_AUTO_TEST_CASE(testMeteringGetResolutions) {
+  Apartment apt(NULL);
+  apt.allocateDSMeter(dss_dsid_t(0,13));
+  Metering metering(NULL);
+
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new MeteringScriptExtension(apt, metering);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  int num = ctx->evaluate<int>("Metering.getResolutions().length");
+  BOOST_CHECK_EQUAL(num, 9);
+} // testPropertyGetResolutions
+
+BOOST_AUTO_TEST_CASE(testMeteringGetValues) {
+  Apartment apt(NULL);
+  apt.allocateDSMeter(dss_dsid_t(0,0x13));
+  Metering metering(NULL);
+
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new MeteringScriptExtension(apt, metering);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  int num = ctx->evaluate<int>("Metering.getValues('13',"
+                               "                   'consumption',"
+                               "                   2).length");
+  BOOST_CHECK_EQUAL(num, 0);
+} // testPropertyGetValues
 
 BOOST_AUTO_TEST_SUITE_END()

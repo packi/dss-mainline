@@ -28,12 +28,14 @@
 #include "core/dss.h"
 #include "core/logger.h"
 #include "core/businterface.h"
+#include "core/foreach.h"
 #include "core/model/device.h"
 #include "core/model/devicereference.h"
 #include "core/model/apartment.h"
 #include "core/model/set.h"
 #include "core/model/modulator.h"
 #include "core/model/modelconst.h"
+#include "core/metering/metering.h"
 #include "core/scripting/scriptobject.h"
 
 
@@ -156,17 +158,69 @@ namespace dss {
     return JS_FALSE;
   } // global_get_dsmeterbydsid
 
-  JSFunctionSpec model_global_methods[] = {
+  JSBool global_getEnergyMeterValue(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if(ext != NULL) {
+      uint32_t result = 0;
+      foreach(boost::shared_ptr<DSMeter> pDSMeter, ext->getApartment().getDSMeters()) {
+        result += pDSMeter->getPowerConsumption();
+      }
+      *rval = INT_TO_JSVAL(result);
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // global_getEnergyMeterValue
+
+  JSBool global_getConsumption(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if(ext != NULL) {
+      uint32_t result = 0;
+      foreach(boost::shared_ptr<DSMeter> pDSMeter, ext->getApartment().getDSMeters()) {
+        result += pDSMeter->getEnergyMeterValue();
+      }
+      *rval = INT_TO_JSVAL(result);
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // global_getConsumption
+
+  JSFunctionSpec apartment_static_methods[] = {
     {"getName", global_get_name, 0, 0, 0},
     {"setName", global_set_name, 1, 0, 0},
     {"getDevices", global_get_devices, 0, 0, 0},
     {"getDSMeterByDSID", global_get_dsmeterbydsid, 1, 0, 0},
+    {"getConsumption", global_getConsumption, 0, 0, 0},
+    {"getEnergyMeterValue", global_getEnergyMeterValue, 0, 0, 0},
+    {NULL},
+  };
+
+  JSBool apartment_construct(JSContext *cx, JSObject *obj, uintN argc,
+                        jsval *argv, jsval *rval) {
+    return JS_FALSE;
+  } // apartment_construct
+
+  static JSClass apartment_class = {
+    "Apartment", JSCLASS_HAS_PRIVATE,
+    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
+    JS_EnumerateStandardClasses,
+    JS_ResolveStub,
+    JS_ConvertStub,  JS_FinalizeStub, JSCLASS_NO_OPTIONAL_MEMBERS
+  }; // apartment_class
+
+  JSFunctionSpec model_global_methods[] = {
     {"log", global_log, 1, 0, 0},
     {NULL},
   };
 
   void ModelScriptContextExtension::extendContext(ScriptContext& _context) {
     JS_DefineFunctions(_context.getJSContext(), JS_GetGlobalObject(_context.getJSContext()), model_global_methods);
+    JS_DefineFunctions(_context.getJSContext(), JS_GetGlobalObject(_context.getJSContext()), apartment_static_methods);
+    JS_InitClass(_context.getJSContext(), JS_GetGlobalObject(_context.getJSContext()), NULL,
+                 &apartment_class, &apartment_construct, 0, NULL, NULL, NULL, apartment_static_methods);
   } // extendedJSContext
 
   void finalize_set(JSContext *cx, JSObject *obj) {
@@ -817,9 +871,68 @@ namespace dss {
     {NULL, 0, 0, NULL, NULL}
   };
 
+  JSBool dsmeter_getPowerConsumption(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    boost::shared_ptr<DSMeter> meter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, obj))->pMeter;
+
+    if(meter != NULL) {
+      *rval = INT_TO_JSVAL(meter->getPowerConsumption());
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // dsmeter_getPowerConsumption
+
+  JSBool dsmeter_getCachedPowerConsumption(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    boost::shared_ptr<DSMeter> meter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, obj))->pMeter;
+
+    if(meter != NULL) {
+      JSAutoLocalRootScope localRoot(cx);
+      ScriptObject obj(*ctx, NULL);
+      *rval = OBJECT_TO_JSVAL(obj.getJSObject());
+      obj.setProperty<std::string>("timestamp", meter->getCachedPowerConsumptionTimeStamp().toString());
+      obj.setProperty<int>("value", meter->getCachedPowerConsumption());
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // dsmeter_getCachedPowerConsumption
+
+  JSBool dsmeter_getEnergyMeterValue(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    boost::shared_ptr<DSMeter> meter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, obj))->pMeter;
+
+    if(meter != NULL) {
+      *rval = INT_TO_JSVAL(meter->getEnergyMeterValue());
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // dsmeter_getEnergyMeterValue
+
+  JSBool dsmeter_getCachedEnergyMeterValue(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    boost::shared_ptr<DSMeter> meter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, obj))->pMeter;
+
+    if(meter != NULL) {
+      JSAutoLocalRootScope localRoot(cx);
+      ScriptObject obj(*ctx, NULL);
+      *rval = OBJECT_TO_JSVAL(obj.getJSObject());
+      obj.setProperty<std::string>("timestamp", meter->getCachedEnergyMeterTimeStamp().toString());
+      obj.setProperty<int>("value", meter->getCachedEnergyMeterValue());
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // dsmeter_getCachedEnergyMeterValue
+
+  JSFunctionSpec dsmeter_methods[] = {
+    {"getPowerConsumption", dsmeter_getPowerConsumption, 0, 0, 0},
+    {"getEnergyMeterValue", dsmeter_getEnergyMeterValue, 0, 0, 0},
+    {"getCachedPowerConsumption", dsmeter_getCachedPowerConsumption, 0, 0, 0},
+    {"getCachedEnergyMeterValue", dsmeter_getCachedEnergyMeterValue, 0, 0, 0},
+    {NULL, NULL, 0, 0, 0}
+  };
+
   JSObject* ModelScriptContextExtension::createJSMeter(ScriptContext& _ctx, boost::shared_ptr<DSMeter> _pMeter) {
     JSObject* result = JS_NewObject(_ctx.getJSContext(), &dsmeter_class, NULL, NULL);
     JS_DefineProperties(_ctx.getJSContext(), result, dsmeter_properties);
+    JS_DefineFunctions(_ctx.getJSContext(), result, dsmeter_methods);
     struct meter_wrapper* wrapper = new meter_wrapper;
     wrapper->pMeter = _pMeter;
     JS_SetPrivate(_ctx.getJSContext(), result, wrapper);
@@ -1196,6 +1309,190 @@ namespace dss {
   void ModelConstantsScriptExtension::extendContext(ScriptContext& _context) {
     JS_InitClass(_context.getJSContext(), JS_GetGlobalObject(_context.getJSContext()), NULL,
                  &scene_class, &scene_construct, 0, NULL, NULL, scene_properties, NULL);
+  } // extendedJSContext
+
+  //================================================== MeteringScriptExtension
+
+  const std::string MeteringScriptExtensionName = "meteringextension";
+
+  MeteringScriptExtension::MeteringScriptExtension(Apartment& _apartment,
+                                                   Metering& _metering)
+  : ScriptExtension(MeteringScriptExtensionName),
+    m_Apartment(_apartment),
+    m_Metering(_metering)
+  { }
+
+  static JSClass metering_class = {
+    "Metering", JSCLASS_HAS_PRIVATE,
+    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
+    JS_EnumerateStandardClasses,
+    JS_ResolveStub,
+    JS_ConvertStub,  JS_FinalizeStub, JSCLASS_NO_OPTIONAL_MEMBERS
+  }; // metering_class
+
+  JSBool metering_construct(JSContext *cx, JSObject *obj, uintN argc,
+                        jsval *argv, jsval *rval) {
+    return JS_FALSE;
+  } // metering_construct
+
+  JSBool metering_getSeries(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    MeteringScriptExtension* ext = dynamic_cast<MeteringScriptExtension*>(ctx->getEnvironment().getExtension(MeteringScriptExtensionName));
+    JSAutoLocalRootScope scope(cx);
+    JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
+    *rval = OBJECT_TO_JSVAL(resultObj);
+
+    int iMeter = 0;
+    std::vector<boost::shared_ptr<DSMeter> > dsMeters = ext->getApartment().getDSMeters();
+    foreach(boost::shared_ptr<DSMeter> dsMeter, dsMeters) {
+      ScriptObject objEnergy(*ctx, NULL);
+      objEnergy.setProperty<std::string>("dsid", dsMeter->getDSID().toString());
+      objEnergy.setProperty<std::string>("type", "energy");
+      jsval childJSVal = OBJECT_TO_JSVAL(objEnergy.getJSObject());
+      JSBool res = JS_SetElement(cx, resultObj, iMeter, &childJSVal);
+      if(!res) {
+        return JS_FALSE;
+      }
+      iMeter++;
+      ScriptObject objConsumption(*ctx, NULL);
+      objConsumption.setProperty<std::string>("dsid", dsMeter->getDSID().toString());
+      objConsumption.setProperty<std::string>("type", "consumption");
+      childJSVal = OBJECT_TO_JSVAL(objConsumption.getJSObject());
+      res = JS_SetElement(cx, resultObj, iMeter, &childJSVal);
+      if(!res) {
+        return JS_FALSE;
+      }
+    }
+
+    return JS_TRUE;
+  } // metering_getSeries
+
+  JSBool metering_getResolutions(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    MeteringScriptExtension* ext = dynamic_cast<MeteringScriptExtension*>(ctx->getEnvironment().getExtension(MeteringScriptExtensionName));
+    JSAutoLocalRootScope scope(cx);
+    JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
+    *rval = OBJECT_TO_JSVAL(resultObj);
+
+
+    std::vector<boost::shared_ptr<MeteringConfigChain> >
+      meteringConfig = ext->getMetering().getConfig();
+    int iResolution = 0;
+    foreach(boost::shared_ptr<MeteringConfigChain> pChain, meteringConfig) {
+      for(int iConfig = 0; iConfig < pChain->size(); iConfig++) {
+        ScriptObject resolution(*ctx, NULL);
+
+        resolution.setProperty<std::string>("type", pChain->isEnergy() ? "energy" : "consumption");
+        resolution.setProperty<std::string>("unit", pChain->getUnit());
+        resolution.setProperty<int>("resolution", pChain->getResolution(iConfig));
+        jsval childJSVal = OBJECT_TO_JSVAL(resolution.getJSObject());
+        JSBool res = JS_SetElement(cx, resultObj, iResolution, &childJSVal);
+        if(!res) {
+          return JS_FALSE;
+        }
+        iResolution++;
+      }
+    }
+
+    return JS_TRUE;
+  } // metering_getResolutions
+
+  JSBool metering_getValues(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    MeteringScriptExtension* ext = dynamic_cast<MeteringScriptExtension*>(ctx->getEnvironment().getExtension(MeteringScriptExtensionName));
+    JSAutoLocalRootScope scope(cx);
+
+    if(argc < 3) {
+      Logger::getInstance()->log("JS: metering_getValues: need three parameters: (dsid, type, resolution)", lsError);
+      return JS_FALSE;
+    }
+
+    try {
+      std::string dsid = ctx->convertTo<std::string>(argv[0]);
+      std::string type = ctx->convertTo<std::string>(argv[1]);
+      int resolution = ctx->convertTo<int>(argv[2]);
+
+
+      boost::shared_ptr<DSMeter> pMeter;
+      try {
+        dss_dsid_t deviceDSID = dss_dsid_t::fromString(dsid);
+        pMeter = ext->getApartment().getDSMeterByDSID(deviceDSID);
+      } catch(std::runtime_error& e) {
+        Logger::getInstance()->log("Error getting device '" + dsid + "'", lsWarning);
+        *rval = JSVAL_NULL;
+        return JS_TRUE;
+      }
+      bool energy;
+      if(type == "consumption") {
+        energy = false;
+      } else if(type == "energy") {
+        energy = true;
+      } else {
+        Logger::getInstance()->log("JS: metering_getValues: Invalid type '" +
+                                   type + "'", lsError);
+        return JS_FALSE;
+      }
+      std::vector<boost::shared_ptr<MeteringConfigChain> > meteringConfig = ext->getMetering().getConfig();
+      boost::shared_ptr<Series<CurrentValue> > pSeries;
+      foreach(boost::shared_ptr<MeteringConfigChain> pChain, meteringConfig) {
+        if(pChain->isEnergy() != energy) {
+          continue;
+        }
+        for(int iConfig = 0; iConfig < pChain->size(); iConfig++) {
+          if(pChain->getResolution(iConfig) == resolution) {
+            pSeries = ext->getMetering().getSeries(pChain, iConfig, pMeter);
+            break;
+          }
+        }
+      }
+      if(pSeries != NULL) {
+        boost::shared_ptr<std::deque<CurrentValue> > values = pSeries->getExpandedValues();
+
+        int valueNumber = 0;
+        JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
+        *rval = OBJECT_TO_JSVAL(resultObj);
+        for(std::deque<CurrentValue>::iterator iValue = values->begin(),
+            e = values->end();
+            iValue != e;
+            ++iValue)
+        {
+          ScriptObject valuePair(*ctx, NULL);
+          DateTime tmp_date = iValue->getTimeStamp();
+          valuePair.setProperty<std::string>("timestamp", tmp_date.toString());
+          valuePair.setProperty<int>("value", iValue->getValue());
+          jsval childJSVal = OBJECT_TO_JSVAL(valuePair.getJSObject());
+          JSBool res = JS_SetElement(cx, resultObj, valueNumber, &childJSVal);
+          if(!res) {
+            return JS_FALSE;
+          }
+          valueNumber++;
+        }
+
+      } else {
+        Logger::getInstance()->log("JS: metering_getValues: Could not find data for '" + type +
+                                   "' and resolution '" + intToString(resolution) + "'", lsWarning);
+      }
+      return JS_TRUE;
+    } catch(ScriptException& e) {
+      Logger::getInstance()->log(std::string("JS: metering_getValues: error converting value: ") + e.what(), lsError);
+    }
+    return JS_FALSE;
+  } // metering_getValues
+
+
+  JSFunctionSpec metering_static_methods[] = {
+    {"getSeries", metering_getSeries, 0, 0, 0},
+    {"getResolutions", metering_getResolutions, 0, 0, 0},
+    {"getValues", metering_getValues, 3, 0, 0},
+    {NULL}
+  };
+
+  void MeteringScriptExtension::extendContext(ScriptContext& _context) {
+    JS_InitClass(_context.getJSContext(), JS_GetGlobalObject(_context.getJSContext()), NULL,
+                 &metering_class, &metering_construct, 0, NULL, NULL, NULL, metering_static_methods);
   } // extendedJSContext
 
 } // namespace
