@@ -637,6 +637,36 @@ namespace dss {
     return JS_FALSE;
   } // dev_undo_scene
 
+  JSBool dev_next_scene(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ScriptObject self(obj, *ctx);
+    if(self.is("set") || self.is("device")) {
+      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+      if(argc == 1) {
+        intf->nextScene();
+      }
+      *rval = INT_TO_JSVAL(0);
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // dev_next_scene
+
+  JSBool dev_previous_scene(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ScriptObject self(obj, *ctx);
+    if(self.is("set") || self.is("device")) {
+      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+      if(argc == 1) {
+        intf->previousScene();
+      }
+      *rval = INT_TO_JSVAL(0);
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // dev_previous_scene
+
   JSBool dev_save_scene(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
@@ -683,6 +713,8 @@ namespace dss {
     {"callScene", dev_call_scene, 1, 0, 0},
     {"saveScene", dev_save_scene, 1, 0, 0},
     {"undoScene", dev_undo_scene, 0, 0, 0},
+    {"nextScene", dev_next_scene, 0, 0, 0},
+    {"previousScene", dev_previous_scene, 0, 0, 0},
     {"getSensorValue", dev_get_sensor_value, 1, 0, 0},
     {NULL, NULL, 0, 0, 0}
   };
