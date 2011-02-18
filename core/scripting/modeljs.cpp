@@ -605,6 +605,19 @@ namespace dss {
     return JS_FALSE;
   }
 
+  JSBool dev_blink(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ScriptObject self(obj, *ctx);
+    if(self.is("set") || self.is("device")) {
+      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+      intf->blink();
+      *rval = INT_TO_JSVAL(0);
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  }
+
   JSBool dev_increase_value(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
@@ -678,6 +691,36 @@ namespace dss {
     return JS_FALSE;
   } // dev_undo_scene
 
+  JSBool dev_next_scene(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ScriptObject self(obj, *ctx);
+    if(self.is("set") || self.is("device")) {
+      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+      if(argc == 1) {
+        intf->nextScene();
+      }
+      *rval = INT_TO_JSVAL(0);
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // dev_next_scene
+
+  JSBool dev_previous_scene(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ScriptObject self(obj, *ctx);
+    if(self.is("set") || self.is("device")) {
+      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+      if(argc == 1) {
+        intf->previousScene();
+      }
+      *rval = INT_TO_JSVAL(0);
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // dev_previous_scene
+
   JSBool dev_save_scene(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
@@ -717,12 +760,15 @@ namespace dss {
   JSFunctionSpec device_interface_methods[] = {
     {"turnOn", dev_turn_on, 0, 0, 0},
     {"turnOff", dev_turn_off, 0, 0, 0},
+    {"blink", dev_blink, 0, 0, 0},
     {"setValue", dev_set_value, 0, 0, 0},
     {"increaseValue", dev_increase_value, 0, 0, 0},
     {"decreaseValue", dev_decrease_value, 0, 0, 0},
     {"callScene", dev_call_scene, 1, 0, 0},
     {"saveScene", dev_save_scene, 1, 0, 0},
     {"undoScene", dev_undo_scene, 0, 0, 0},
+    {"nextScene", dev_next_scene, 0, 0, 0},
+    {"previousScene", dev_previous_scene, 0, 0, 0},
     {"getSensorValue", dev_get_sensor_value, 1, 0, 0},
     {NULL, NULL, 0, 0, 0}
   };
