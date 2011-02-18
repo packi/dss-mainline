@@ -588,6 +588,19 @@ namespace dss {
     }
   } // pushEvent
 
+  std::string EventQueue::pushTimedEvent(boost::shared_ptr<Event> _event) {
+    Logger::getInstance()->log("EventQueue: New timed-event '" + _event->getName() + "' in queue...", lsInfo);
+    boost::shared_ptr<Schedule> schedule = scheduleFromEvent(_event);
+    if(schedule != NULL) {
+      ScheduledEvent* scheduledEvent = new ScheduledEvent(_event, schedule, m_ScheduledEventCounter++);
+      std::string result = scheduledEvent->getID();
+      m_EventRunner->addEvent(scheduledEvent);
+      return result;
+    } else {
+      throw std::runtime_error("Unable to get schedule from event '" + _event->getName() + "'");
+    }
+  } // pushTimedEvent
+
   boost::shared_ptr<Event> EventQueue::popEvent() {
     boost::mutex::scoped_lock lock(m_QueueMutex);
     boost::shared_ptr<Event> result;

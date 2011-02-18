@@ -279,6 +279,60 @@ BOOST_AUTO_TEST_CASE(testEvents) {
   // TODO: add subscription to confirm the event actually got raised
 } // testEvents
 
+BOOST_AUTO_TEST_CASE(testTimedEvents) {
+  Apartment apt(NULL);
+
+  EventQueue queue;
+  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+  interpreter.setEventQueue(&queue);
+  interpreter.setEventRunner(&runner);
+  queue.setEventRunner(&runner);
+  runner.setEventQueue(&queue);
+
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new EventScriptExtension(queue, interpreter);
+  env->addExtension(ext);
+
+  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
+  interpreter.addPlugin(plugin);
+
+  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  std::string id = ctx->evaluate<std::string>("var evt = new TimedEvent('test', '+1');\n"
+                                              "evt.raise()\n");
+  BOOST_CHECK(!id.empty());
+  BOOST_CHECK(id.find("test") != std::string::npos);
+} // testTimedEvents
+
+BOOST_AUTO_TEST_CASE(testTimedEventsNoTimeParam) {
+  Apartment apt(NULL);
+
+  EventQueue queue;
+  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+  interpreter.setEventQueue(&queue);
+  interpreter.setEventRunner(&runner);
+  queue.setEventRunner(&runner);
+  runner.setEventQueue(&queue);
+
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new EventScriptExtension(queue, interpreter);
+  env->addExtension(ext);
+
+  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
+  interpreter.addPlugin(plugin);
+
+  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  BOOST_CHECK_THROW(ctx->evaluate<void>("var evt = new TimedEvent('test');\n"),
+                    ScriptException);
+} // testTimedEventsNoTimeParam
+
 BOOST_AUTO_TEST_CASE(testSubscriptions) {
   Apartment apt(NULL);
 

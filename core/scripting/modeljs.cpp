@@ -840,52 +840,98 @@ namespace dss {
     boost::shared_ptr<Event> event;
   };
 
-  JSBool event_construct(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    if (argc < 1) {
-      Logger::getInstance()->log("JS: global_event: (empty name)");
-      return JS_FALSE;
-    } else {
-      ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-      JSAutoLocalRootScope localRoot(cx);
-
-      EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
-      if(ext != NULL) {
-        JSString *val = JS_ValueToString(cx, argv[0]);
-        char* name = JS_GetStringBytes(val);
-
-        boost::shared_ptr<Event> newEvent(new Event(name));
-
-        JSObject* paramObj;
-        if((argc >= 2) && (JS_ValueToObject(cx, argv[1], &paramObj) == JS_TRUE)) {
-          JSObject* propIter = JS_NewPropertyIterator(cx, paramObj);
-          jsid propID;
-          while(JS_NextProperty(cx, propIter, &propID) == JS_TRUE) {
-            if(propID == JSVAL_VOID) {
-              break;
-            }
-            JSObject* obj;
-            jsval vp;
-            JS_GetMethodById(cx, paramObj, propID, &obj, &vp);
-
-            val = JS_ValueToString(cx, vp);
-            char* propValue = JS_GetStringBytes(val);
-
-            jsval vp2;
-            JS_IdToValue(cx, propID, &vp2);
-            val = JS_ValueToString(cx, vp2);
-            char* propName = JS_GetStringBytes(val);
-
-            newEvent->setProperty(propName, propValue);
-          }
+  void readEventPropertiesFrom(JSContext *cx, jsval _props, boost::shared_ptr<Event> _pEvent) {
+    JSObject* paramObj;
+    if(JS_ValueToObject(cx, _props, &paramObj) == JS_TRUE) {
+      JSObject* propIter = JS_NewPropertyIterator(cx, paramObj);
+      jsid propID;
+      while(JS_NextProperty(cx, propIter, &propID) == JS_TRUE) {
+        if(propID == JSVAL_VOID) {
+          break;
         }
+        JSObject* obj;
+        jsval vp;
+        JS_GetMethodById(cx, paramObj, propID, &obj, &vp);
 
-        event_wrapper* evtWrapper = new event_wrapper();
-        evtWrapper->event = newEvent;
-        JS_SetPrivate(cx, obj, evtWrapper);
+        JSString *val = JS_ValueToString(cx, vp);
+        char* propValue = JS_GetStringBytes(val);
+
+        jsval vp2;
+        JS_IdToValue(cx, propID, &vp2);
+        val = JS_ValueToString(cx, vp2);
+        char* propName = JS_GetStringBytes(val);
+
+        _pEvent->setProperty(propName, propValue);
       }
     }
-    return JS_TRUE;
-  } // global_event
+  }
+
+  JSBool event_construct(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    if (argc < 1) {
+      Logger::getInstance()->log("JS: event_construct: (empty name)", lsError);
+      return JS_FALSE;
+    }
+
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    JSAutoLocalRootScope localRoot(cx);
+
+    try {
+      std::string name = ctx->convertTo<std::string>(argv[0]);
+
+      boost::shared_ptr<Event> newEvent(new Event(name));
+
+      if(argc >= 2) {
+        readEventPropertiesFrom(cx, argv[1], newEvent);
+      }
+
+      event_wrapper* evtWrapper = new event_wrapper();
+      evtWrapper->event = newEvent;
+      JS_SetPrivate(cx, obj, evtWrapper);
+      return JS_TRUE;
+    } catch(ScriptException& e) {
+      Logger::getInstance()->log(std::string("JS: event_construct: error converting string: ") + e.what(), lsError);
+    }
+    return JS_FALSE;
+  } // event_construct
+
+  JSBool timedEvent_construct(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    if (argc < 2) {
+      Logger::getInstance()->log("JS: timedEvent_construct: empty name, no time", lsError);
+      return JS_FALSE;
+    }
+
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    JSAutoLocalRootScope localRoot(cx);
+
+    try {
+      std::string name = ctx->convertTo<std::string>(argv[0]);
+
+      if(name.empty()) {
+        Logger::getInstance()->log("JS: timedEvent_construct: empty name not allowed", lsError);
+        return JS_FALSE;
+      }
+      std::string time = ctx->convertTo<std::string>(argv[1]);
+      if(time.empty()) {
+        Logger::getInstance()->log("JS: timedEvent_construct: empty time not allowed", lsError);
+      }
+
+      boost::shared_ptr<Event> newEvent(new Event(name));
+
+      if(argc >= 3) {
+        readEventPropertiesFrom(cx, argv[2], newEvent);
+      }
+
+      newEvent->setProperty(EventPropertyTime, time);
+
+      event_wrapper* evtWrapper = new event_wrapper();
+      evtWrapper->event = newEvent;
+      JS_SetPrivate(cx, obj, evtWrapper);
+      return JS_TRUE;
+    } catch(ScriptException& e) {
+      Logger::getInstance()->log(std::string("JS: event_construct: error converting string: ") + e.what(), lsError);
+    }
+    return JS_FALSE;
+  } // timedEvent_construct
 
   JSBool event_raise(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -899,6 +945,19 @@ namespace dss {
     }
     return JS_FALSE;
   } // event_raise
+
+  JSBool timedEvent_raise(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    ScriptObject self(obj, *ctx);
+    EventScriptExtension* ext = dynamic_cast<EventScriptExtension*>(ctx->getEnvironment().getExtension(EventScriptExtensionName));
+    if(self.is("event")) {
+      event_wrapper* eventWrapper = static_cast<event_wrapper*>(JS_GetPrivate(cx, obj));
+      std::string id = ext->getEventQueue().pushTimedEvent(eventWrapper->event);
+      *rval = STRING_TO_JSVAL(JS_NewStringCopyZ(cx, id.c_str()));
+      return JS_TRUE;
+    }
+    return JS_FALSE;
+  } // timedEvent_raise
 
   JSBool event_JSGet(JSContext *cx, JSObject *obj, jsval id, jsval *rval) {
     event_wrapper* eventWrapper = static_cast<event_wrapper*>(JS_GetPrivate(cx, obj));
@@ -939,6 +998,19 @@ namespace dss {
 
   JSFunctionSpec event_methods[] = {
     {"raise", event_raise, 1, 0, 0},
+    {NULL}
+  };
+
+  static JSClass timedEvent_class = {
+    "TimedEvent", JSCLASS_HAS_PRIVATE,
+    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
+    JS_EnumerateStandardClasses,
+    JS_ResolveStub,
+    JS_ConvertStub,  finalize_event, JSCLASS_NO_OPTIONAL_MEMBERS
+  };
+
+  JSFunctionSpec timedEvent_methods[] = {
+    {"raise", timedEvent_raise, 1, 0, 0},
     {NULL}
   };
 
@@ -1068,6 +1140,9 @@ namespace dss {
     JS_InitClass(_context.getJSContext(), _context.getRootObject().getJSObject(),
               NULL, &event_class, event_construct, 0, event_properties,
               event_methods, NULL, NULL);
+    JS_InitClass(_context.getJSContext(), _context.getRootObject().getJSObject(),
+              NULL, &timedEvent_class, timedEvent_construct, 0, event_properties,
+              timedEvent_methods, NULL, NULL);
   } // extendContext
 
   //================================================== ModelConstantsScriptExtension

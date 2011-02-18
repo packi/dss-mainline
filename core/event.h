@@ -258,6 +258,7 @@ namespace dss {
   public:
     EventQueue(const int _eventTimeoutMS = 1000);
     void pushEvent(boost::shared_ptr<Event> _event);
+    std::string pushTimedEvent(boost::shared_ptr<Event> _event);
     boost::shared_ptr<Event> popEvent();
     bool waitForEvent();
 
