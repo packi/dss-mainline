@@ -25,14 +25,15 @@
 #include <vector>
 
 #include "core/base.h"
+#include "core/foreach.h"
 #include "core/logger.h"
 #include "core/model/modelconst.h"
 #include "core/propertysystem.h"
-#include "set.h"
-#include "device.h"
-#include "group.h"
-#include "apartment.h"
-#include "modulator.h"
+#include "core/model/set.h"
+#include "core/model/device.h"
+#include "core/model/group.h"
+#include "core/model/apartment.h"
+#include "core/model/modulator.h"
 
 namespace dss {
 
@@ -184,6 +185,9 @@ namespace dss {
         m_pPropertyNode->createProperty("name")
           ->linkToProxy(PropertyProxyMemberFunction<Zone, std::string>(*this, &Zone::getName, &Zone::setName));
         m_pPropertyNode->createProperty("devices/");
+        foreach(boost::shared_ptr<Group> pGroup, m_Groups) {
+          pGroup->publishToPropertyTree();
+        }
       }
     }
   } // publishToPropertyTree

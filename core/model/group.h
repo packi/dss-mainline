@@ -33,8 +33,6 @@
 namespace dss {
 
   class Zone;
-  class PropertyNode;
-  typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   /** Represents a predefined group */
   class Group : public DeviceContainer,
@@ -46,7 +44,6 @@ namespace dss {
     std::map<uint8_t, std::string> m_SceneNames;
     static boost::mutex m_SceneNameMutex;
     bool m_IsInitializedFromBus;
-    PropertyNodePtr m_pPropertyNode;
     std::string m_AssociatedSet;
   public:
     /** Constructs a group with the given id belonging to \a _zoneID. */

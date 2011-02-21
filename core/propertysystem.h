@@ -371,8 +371,6 @@ namespace dss {
     void childAdded(PropertyNodePtr _child);
     void childRemoved(PropertyNodePtr _child);
     void notifyListeners(void(PropertyListener::*_callback)(PropertyNodePtr, PropertyNodePtr), PropertyNodePtr _node);
-    void checkReadAccess();
-    void checkWriteAccess();
 
     boost::shared_ptr<Privilege> searchForPrivilege();
   public:
@@ -466,6 +464,9 @@ namespace dss {
 
     boost::shared_ptr<NodePrivileges> getPrivileges() { return m_pPrivileges; }
     void setPrivileges(boost::shared_ptr<NodePrivileges> _value) { m_pPrivileges = _value; }
+
+    void checkReadAccess();
+    void checkWriteAccess();
 
     /** Performs \a _callback for each child node (non-recursive) */
     void foreachChildOf(void(*_callback)(PropertyNode&)) {
