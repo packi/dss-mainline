@@ -39,7 +39,7 @@ namespace dss {
   /** Represents a predefined group */
   class Group : public DeviceContainer,
                 public AddressableModelItem {
-  protected:
+  private:
     int m_ZoneID;
     int m_GroupID;
     int m_LastCalledScene;
@@ -79,21 +79,6 @@ namespace dss {
     void setAssociatedSet(const std::string& _value) { m_AssociatedSet = _value; }
     const std::string& getAssociatedSet() const { return m_AssociatedSet; }
   }; // Group
-
-
-  /** Represents a user-defined-group */
-  class UserGroup : public Group {
-  private:
-  public:
-    /** Adds a device to the group.
-     * This will permanently add the device to the group.
-     */
-    virtual void addDevice(const Device& _device);
-    /** Removes a device from the group.
-     * This will permanently remove the device from the group.
-     */
-    virtual void removeDevice(const Device& _device);
-  }; // UserGroup
 
 } // namespace dss
 
