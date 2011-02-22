@@ -138,6 +138,8 @@ namespace dss {
         return failure("Cannot remove present device");
       }
 
+      StructureManipulator manipulator(m_Interface, m_Apartment);
+      manipulator.removeDeviceFromDSMeter(dev);
       m_Apartment.removeDevice(deviceID);
       m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
       return success();

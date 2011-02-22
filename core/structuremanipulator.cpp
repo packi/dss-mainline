@@ -31,8 +31,10 @@
 #include "core/model/set.h"
 #include "core/model/group.h"
 #include "core/model/modelconst.h"
+#include "core/dsidhelper.h"
 
 #include <stdexcept>
+#include <digitalSTROM/ds.h>
 
 namespace dss {
 
@@ -95,6 +97,17 @@ namespace dss {
       Logger::getInstance()->log("Not removing zone as it's a primary zone on this meter", lsInfo);
     }
   } // removeZoneOnDSMeter
+
+  void StructureManipulator::removeDeviceFromDSMeter(boost::shared_ptr<Device> _device) {
+    dsid_t dsm_api_dsid;
+    dss_dsid_t dsm_dsid = _device->getDSMeterDSID();
+
+    dsid_helper::toDsmapiDsid(_device->getDSMeterDSID(), dsm_api_dsid);
+    if (IsNullId(dsm_api_dsid)) {
+      dsm_dsid = _device->getLastKnownDSMeterDSID();
+    }
+    m_Interface.removeDeviceFromDSMeter(dsm_dsid, _device->getShortAddress());
+  } // removeDevice
 
   void StructureManipulator::sceneSetName(boost::shared_ptr<Group> _group, int _sceneNumber, const std::string& _name) {
     m_Interface.sceneSetName(_group->getZoneID(), _group->getID(), _sceneNumber, _name);

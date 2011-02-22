@@ -118,6 +118,8 @@ namespace dss {
     /** Removes a device from a given group */
     virtual void removeFromGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID) = 0;
 
+    /** Removes the device from the dSM data model **/
+    virtual void removeDeviceFromDSMeter(const dss_dsid_t& _dsMeterID, const int _deviceID) = 0;
     /** Sets the name of a scene */
     virtual void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) = 0;
 
