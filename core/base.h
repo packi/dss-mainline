@@ -70,6 +70,7 @@ namespace dss {
 
   unsigned int strToUInt(const std::string& _strValue);
   int strToIntDef(const std::string& _strValue, const int _default);
+  unsigned int strToUIntDef(const std::string& _strValue, const unsigned int _default);
 
   std::string intToString(const int _int, const bool _hex = false);
   std::string uintToString(unsigned long int _int);
