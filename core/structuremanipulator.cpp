@@ -31,10 +31,8 @@
 #include "core/model/set.h"
 #include "core/model/group.h"
 #include "core/model/modelconst.h"
-#include "core/dsidhelper.h"
 
 #include <stdexcept>
-#include <digitalSTROM/ds.h>
 
 namespace dss {
 
@@ -99,14 +97,26 @@ namespace dss {
   } // removeZoneOnDSMeter
 
   void StructureManipulator::removeDeviceFromDSMeter(boost::shared_ptr<Device> _device) {
-    dsid_t dsm_api_dsid;
-    dss_dsid_t dsm_dsid = _device->getDSMeterDSID();
 
-    dsid_helper::toDsmapiDsid(_device->getDSMeterDSID(), dsm_api_dsid);
-    if (IsNullId(dsm_api_dsid)) {
-      dsm_dsid = _device->getLastKnownDSMeterDSID();
+    if (_device->getDSID().isSimulated()) {
+      return;
     }
-    m_Interface.removeDeviceFromDSMeter(dsm_dsid, _device->getShortAddress());
+
+    dss_dsid_t dsmDsid = _device->getDSMeterDSID();
+    devid_t shortAddr = _device->getShortAddress();
+
+    if (dsmDsid == NullDSID) {
+      dsmDsid = _device->getLastKnownDSMeterDSID();
+    }
+    if (shortAddr == ShortAddressStaleDevice) {
+      shortAddr = _device->getLastKnownShortAddress();
+    }
+
+    if ((dsmDsid == NullDSID) || (shortAddr == ShortAddressStaleDevice)) {
+      throw std::runtime_error("Not enough data to delete device on dSM");
+    }
+
+    m_Interface.removeDeviceFromDSMeter(dsmDsid, shortAddr);
   } // removeDevice
 
   void StructureManipulator::sceneSetName(boost::shared_ptr<Group> _group, int _sceneNumber, const std::string& _name) {
