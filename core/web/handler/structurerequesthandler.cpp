@@ -139,7 +139,12 @@ namespace dss {
       }
 
       StructureManipulator manipulator(m_Interface, m_Apartment);
-      manipulator.removeDeviceFromDSMeter(dev);
+      try {
+        manipulator.removeDeviceFromDSMeter(dev);
+      } catch (std::runtime_error& e) {
+        Logger::getInstance()->log(std::string("Could not remove device from"
+                                   "dSM: ") + e.what(), lsError);
+      }
       m_Apartment.removeDevice(deviceID);
       m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
       return success();
