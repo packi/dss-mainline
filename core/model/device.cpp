@@ -24,6 +24,7 @@
 
 #include "core/businterface.h"
 #include "core/propertysystem.h"
+#include "core/ds485types.h"
 
 #include "core/model/modelconst.h"
 #include "core/model/scenehelper.h"
@@ -36,12 +37,11 @@ namespace dss {
 
   //================================================== Device
 
-  const devid_t ShortAddressStaleDevice = 0xFFFF;
-
   Device::Device(dss_dsid_t _dsid, Apartment* _pApartment)
   : AddressableModelItem(_pApartment),
     m_DSID(_dsid),
     m_ShortAddress(ShortAddressStaleDevice),
+    m_LastKnownShortAddress(ShortAddressStaleDevice),
     m_ZoneID(0),
     m_LastKnownZoneID(0),
     m_DSMeterDSID(NullDSID),
@@ -76,6 +76,10 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<int>(m_ProductID, false));
         m_pPropertyNode->createProperty("lastKnownZoneID")
           ->linkToProxy(PropertyProxyReference<int>(m_LastKnownZoneID, false));
+        m_pPropertyNode->createProperty("shortAddress")
+          ->linkToProxy(PropertyProxyReference<int, uint16_t>(m_ShortAddress, false));
+        m_pPropertyNode->createProperty("lastKnownShortAddress")
+          ->linkToProxy(PropertyProxyReference<int, uint16_t>(m_LastKnownShortAddress, false));
         m_pPropertyNode->createProperty("lastKnownMeterDSID")
           ->linkToProxy(PropertyProxyMemberFunction<dss_dsid_t, std::string, false>(m_LastKnownMeterDSID, &dss_dsid_t::toString));
         m_pPropertyNode->createProperty("firstSeen")
@@ -199,9 +203,18 @@ namespace dss {
 
   void Device::setShortAddress(const devid_t _shortAddress) {
     m_ShortAddress = _shortAddress;
+    m_LastKnownShortAddress = _shortAddress;
     publishToPropertyTree();
     m_LastDiscovered = DateTime();
   } // setShortAddress
+
+  devid_t Device::getLastKnownShortAddress() const {
+    return m_LastKnownShortAddress;
+  } // getLastKnownShortAddress
+
+  void Device::setLastKnownShortAddress(const devid_t _shortAddress) {
+    m_LastKnownShortAddress = _shortAddress;
+  } // setLastKnownShortAddress
 
   dss_dsid_t Device::getDSID() const {
     return m_DSID;

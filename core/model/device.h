@@ -48,6 +48,7 @@ namespace dss {
     std::string m_Name;
     dss_dsid_t m_DSID;
     devid_t m_ShortAddress;
+    devid_t m_LastKnownShortAddress;
     int m_ZoneID;
     int m_LastKnownZoneID;
     dss_dsid_t m_DSMeterDSID;
@@ -156,6 +157,9 @@ namespace dss {
     devid_t getShortAddress() const;
     /** Sets the short-address of the device. */
     void setShortAddress(const devid_t _shortAddress);
+
+    devid_t getLastKnownShortAddress() const;
+    void setLastKnownShortAddress(const devid_t _shortAddress);
     /** Returns the DSID of the device */
     dss_dsid_t getDSID() const;
     /** Returns the DSID of the dsMeter the device is connected to */

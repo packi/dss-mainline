@@ -32,6 +32,8 @@ namespace dss {
   /** Bus id of a device */
   typedef uint16_t devid_t;
 
+  const devid_t ShortAddressStaleDevice = 0xFFFF;
+
   /** DSID of a device/dsMeter */
 
   typedef struct dsid{
