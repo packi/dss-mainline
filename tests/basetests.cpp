@@ -88,6 +88,14 @@ BOOST_AUTO_TEST_CASE(testStrToUInt) {
   BOOST_CHECK_THROW(strToUInt(" "), std::invalid_argument);
 }
 
+BOOST_AUTO_TEST_CASE(testStrToUIntDef) {
+  BOOST_CHECK_EQUAL(5, strToUIntDef("", 5));
+  BOOST_CHECK_EQUAL(5, strToUIntDef(" ", 5));
+  BOOST_CHECK_EQUAL(5, strToUIntDef("gfdfg", 5));
+  BOOST_CHECK_EQUAL(1, strToUIntDef("1", 5));
+} // testStrToUIntDef
+
+
 BOOST_AUTO_TEST_CASE(testStrToDouble) {
   BOOST_CHECK_EQUAL(0.0, strToDouble("0.0"));
   BOOST_CHECK_EQUAL(-1.0, strToDouble("asdf", -1.0));

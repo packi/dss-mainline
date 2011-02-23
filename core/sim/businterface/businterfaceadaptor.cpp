@@ -269,6 +269,14 @@ namespace dss {
       }
     }
 
+    virtual void removeDeviceFromDSMeter(const dss_dsid_t& _dsMeterID, const int _deviceID) {
+      if(isHandledBySimulation(_dsMeterID)) {
+        m_pSimulationInterface->removeDeviceFromDSMeter(_dsMeterID, _deviceID);
+      } else {
+        m_pInner->removeDeviceFromDSMeter(_dsMeterID, _deviceID);
+      }
+    }
+
     virtual void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) {
       m_pSimulationInterface->sceneSetName(_zoneID, _groupID, _sceneNumber, _name);
       m_pInner->sceneSetName(_zoneID, _groupID, _sceneNumber, _name);

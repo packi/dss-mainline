@@ -44,6 +44,7 @@ namespace dss {
 
     virtual void addToGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID);
     virtual void removeFromGroup(const dss_dsid_t& _dsMeterID, const int _groupID, const int _deviceID);
+    virtual void removeDeviceFromDSMeter(const dss_dsid_t& _dsMeterID, const int _deviceID);
 
     virtual void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name);
     virtual void createGroup(uint16_t _zoneID, uint8_t _groupID);

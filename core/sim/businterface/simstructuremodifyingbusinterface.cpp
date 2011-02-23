@@ -68,6 +68,10 @@ namespace dss {
     }
   } // removeFromGroup
 
+  void SimStructureModifyingBusInterface::removeDeviceFromDSMeter(const dss_dsid_t& _dsMeterID, const int _deviceID) {
+    // nop
+  } // removeDevice
+
   void SimStructureModifyingBusInterface::sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) {
     // nop
   } // sceneSetName

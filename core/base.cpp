@@ -78,6 +78,17 @@ namespace dss {
     throw std::invalid_argument(std::string("strToUInt: Could not parse value: '") + _strValue + "'");
   } // strToUInt
 
+  unsigned int strToUIntDef(const std::string& _strValue, const unsigned int _default) {
+    if(!_strValue.empty()) {
+      char* endp;
+      unsigned int result = strtoul(_strValue.c_str(), &endp, 0);
+      if(*endp == '\0') {
+        return result;
+      }
+    }
+    return _default;
+  } // strToUIntDef
+
   double strToDouble(const std::string& _strValue) {
     if(!_strValue.empty()) {
       char* endp;

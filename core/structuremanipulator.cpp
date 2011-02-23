@@ -96,6 +96,29 @@ namespace dss {
     }
   } // removeZoneOnDSMeter
 
+  void StructureManipulator::removeDeviceFromDSMeter(boost::shared_ptr<Device> _device) {
+
+    if (_device->getDSID().isSimulated()) {
+      return;
+    }
+
+    dss_dsid_t dsmDsid = _device->getDSMeterDSID();
+    devid_t shortAddr = _device->getShortAddress();
+
+    if (dsmDsid == NullDSID) {
+      dsmDsid = _device->getLastKnownDSMeterDSID();
+    }
+    if (shortAddr == ShortAddressStaleDevice) {
+      shortAddr = _device->getLastKnownShortAddress();
+    }
+
+    if ((dsmDsid == NullDSID) || (shortAddr == ShortAddressStaleDevice)) {
+      throw std::runtime_error("Not enough data to delete device on dSM");
+    }
+
+    m_Interface.removeDeviceFromDSMeter(dsmDsid, shortAddr);
+  } // removeDevice
+
   void StructureManipulator::sceneSetName(boost::shared_ptr<Group> _group, int _sceneNumber, const std::string& _name) {
     m_Interface.sceneSetName(_group->getZoneID(), _group->getID(), _sceneNumber, _name);
   } // sceneSetName

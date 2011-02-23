@@ -161,32 +161,32 @@ namespace dss {
 
 
   /** PropertyProxy that is links to a reference of a variable. */
-  template<class T>
+  template<class T, class ReferenceType = T>
   class PropertyProxyReference : public PropertyProxy<T> {
   private:
-    T& m_Reference;
+    ReferenceType& m_Reference;
     bool m_Writeable;
   public:
     /** Constructs a PropertyProxyReference.
      * @param _reference The reference it gets linked to
      * @param _writeable If \c true (default) values will get written back to _reference*/
-    PropertyProxyReference(T& _reference, bool _writeable = true)
+    PropertyProxyReference(ReferenceType& _reference, bool _writeable = true)
     : m_Reference(_reference),
       m_Writeable(_writeable)
     { }
 
     virtual ~PropertyProxyReference() { }
 
-    virtual T getValue() const { return m_Reference; }
+    virtual T getValue() const { return static_cast<T>(m_Reference); }
 
     virtual void setValue(T _value) {
       if(m_Writeable) {
-        m_Reference = _value;
+        m_Reference = static_cast<ReferenceType>(_value);
       }
     }
 
     virtual PropertyProxyReference* clone() const {
-      return new PropertyProxyReference<T>(m_Reference, m_Writeable);
+      return new PropertyProxyReference<T, ReferenceType>(m_Reference, m_Writeable);
     }
   };
 
