@@ -40,6 +40,7 @@
 #include "core/foreach.h"
 #include "core/base.h"
 #include "core/propertysystem.h"
+#include "core/ds485types.h"
 #include "core/model/apartment.h"
 #include "core/model/device.h"
 #include "core/model/zone.h"
@@ -149,6 +150,12 @@ namespace dss {
             lastKnownZoneID = strToIntDef("lastKnownZoneID", 0);
           }
 
+          devid_t lastKnownShortAddress = ShortAddressStaleDevice;
+          if(elem->hasAttribute("lastKnownShortAddress")) {
+            lastKnownShortAddress = strToUIntDef("lastKnownShortAddress",
+                                                ShortAddressStaleDevice);
+          }
+
           boost::shared_ptr<Device> newDevice = m_Apartment.allocateDevice(dsid);
           if(!name.empty()) {
             newDevice->setName(name);
@@ -156,6 +163,7 @@ namespace dss {
           newDevice->setFirstSeen(firstSeen);
           newDevice->setLastKnownDSMeterDSID(lastKnownDsMeter);
           newDevice->setLastKnownZoneID(lastKnownZoneID);
+          newDevice->setLastKnownShortAddress(lastKnownShortAddress);
           Element* propertiesElem = elem->getChildElement("properties");
           if(propertiesElem != NULL) {
             newDevice->getPropertyNode()->loadChildrenFromNode(propertiesElem);
@@ -314,6 +322,11 @@ namespace dss {
     if(_pDevice->getLastKnownZoneID() != 0) {
       pDeviceNode->setAttribute("lastKnownZoneID", intToString(_pDevice->getLastKnownZoneID()));
     }
+
+    if(_pDevice->getLastKnownShortAddress() != ShortAddressStaleDevice) {
+      pDeviceNode->setAttribute("lastKnownShortAddress", intToString(_pDevice->getLastKnownShortAddress()));
+    }
+
     if(_pDevice->getPropertyNode() != NULL) {
       AutoPtr<Element> pPropertiesNode = _pDocument->createElement("properties");
       pDeviceNode->appendChild(pPropertiesNode);
