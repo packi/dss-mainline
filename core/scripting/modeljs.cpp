@@ -165,7 +165,7 @@ namespace dss {
     if(ext != NULL) {
       uint32_t result = 0;
       foreach(boost::shared_ptr<DSMeter> pDSMeter, ext->getApartment().getDSMeters()) {
-        result += pDSMeter->getPowerConsumption();
+        result += pDSMeter->getEnergyMeterValue();
       }
       *rval = INT_TO_JSVAL(result);
       return JS_TRUE;
@@ -180,7 +180,7 @@ namespace dss {
     if(ext != NULL) {
       uint32_t result = 0;
       foreach(boost::shared_ptr<DSMeter> pDSMeter, ext->getApartment().getDSMeters()) {
-        result += pDSMeter->getEnergyMeterValue();
+        result += pDSMeter->getPowerConsumption();
       }
       *rval = INT_TO_JSVAL(result);
       return JS_TRUE;
