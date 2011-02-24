@@ -112,6 +112,7 @@ namespace dss {
     virtual void previousScene();
 
     void publishToPropertyTree();
+    PropertyNodePtr getPropertyNode() {  return m_pPropertyNode; }
 
     virtual unsigned long getPowerConsumption();
     /** Returns a vector of groups present on the zone. */

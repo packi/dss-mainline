@@ -22,8 +22,9 @@
 
 #include "structuremanipulator.h"
 
-#include "businterface.h"
-#include "mutex.h"
+#include "core/businterface.h"
+#include "core/mutex.h"
+#include "core/propertysystem.h"
 #include "core/model/device.h"
 #include "core/model/apartment.h"
 #include "core/model/modulator.h"
@@ -37,6 +38,9 @@
 namespace dss {
 
   void StructureManipulator::createZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone) {
+    if(m_Apartment.getPropertyNode() != NULL) {
+      m_Apartment.getPropertyNode()->checkWriteAccess();
+    }
     AssertLocked apartmentLocked(&m_Apartment);
     if(!_dsMeter->isPresent()) {
       throw std::runtime_error("Need dsMeter to be present");
@@ -47,6 +51,12 @@ namespace dss {
   } // createZone
 
   void StructureManipulator::addDeviceToZone(boost::shared_ptr<Device> _device, boost::shared_ptr<Zone> _zone) {
+    if(_zone->getPropertyNode() != NULL) {
+      _zone->getPropertyNode()->checkWriteAccess();
+    }
+    if(_device->getPropertyNode() != NULL) {
+      _device->getPropertyNode()->checkWriteAccess();
+    }
     AssertLocked apartmentLocked(&m_Apartment);
     if(!_device->isPresent()) {
       throw std::runtime_error("Need device to be present");
@@ -141,6 +151,9 @@ namespace dss {
   } // persistSet
 
   int StructureManipulator::persistSet(Set& _set, const std::string& _originalSet, int _groupNumber) {
+    if(m_Apartment.getPropertyNode() != NULL) {
+      m_Apartment.getPropertyNode()->checkWriteAccess();
+    }
     boost::shared_ptr<Group> pGroup;
     try {
       pGroup = m_Apartment.getGroup(_groupNumber);
@@ -162,6 +175,9 @@ namespace dss {
   } // persistSet
 
   void StructureManipulator::unpersistSet(std::string _setDescription) {
+    if(m_Apartment.getPropertyNode() != NULL) {
+      m_Apartment.getPropertyNode()->checkWriteAccess();
+    }
     std::vector<boost::shared_ptr<Group> > groups = m_Apartment.getZone(0)->getGroups();
     boost::shared_ptr<Group> pGroup;
     for(std::size_t iGroup = 0; iGroup < groups.size(); iGroup++) {

@@ -25,6 +25,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "core/businterface.h"
+#include "core/propertysystem.h"
 #include "core/model/apartment.h"
 #include "core/model/modelconst.h"
 
@@ -37,30 +38,51 @@ namespace dss {
   {} // ctor
 
   void AddressableModelItem::increaseValue() {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
     m_pApartment->getActionRequestInterface()->callScene(this, SceneInc);
   } // increaseValue
 
   void AddressableModelItem::decreaseValue() {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
     m_pApartment->getActionRequestInterface()->callScene(this, SceneDec);
   } // decreaseValue
 
   void AddressableModelItem::setValue(const uint8_t _value) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
     m_pApartment->getActionRequestInterface()->setValue(this, _value);
   } // setValue
 
   void AddressableModelItem::callScene(const int _sceneNr) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
     m_pApartment->getActionRequestInterface()->callScene(this, _sceneNr);
   } // callScene
 
   void AddressableModelItem::saveScene(const int _sceneNr) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
     m_pApartment->getActionRequestInterface()->saveScene(this, _sceneNr);
   } // saveScene
 
   void AddressableModelItem::undoScene() {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
     m_pApartment->getActionRequestInterface()->undoScene(this);
   } // undoScene
 
   void AddressableModelItem::blink() {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
     m_pApartment->getActionRequestInterface()->blink(this);
   } // blink
 

@@ -127,6 +127,9 @@ namespace dss {
 
   void Device::setConfig(uint8_t _configClass, uint8_t _configIndex,
                          uint8_t _value) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
     if(m_pApartment->getDeviceBusInterface() != NULL) {
       m_pApartment->getDeviceBusInterface()->setDeviceConfig(*this,
                                                              _configClass,
@@ -136,6 +139,9 @@ namespace dss {
   } // setConfig
 
   uint8_t Device::getConfig(uint8_t _configClass, uint8_t _configIndex) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkReadAccess();
+    }
     if(m_pApartment->getDeviceBusInterface() != NULL) {
       return m_pApartment->getDeviceBusInterface()->getDeviceConfig(*this,
                                                                   _configClass,
@@ -145,6 +151,9 @@ namespace dss {
   } // getValue
 
   uint16_t Device::getConfigWord(uint8_t _configClass, uint8_t _configIndex) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkReadAccess();
+    }
     if(m_pApartment->getDeviceBusInterface() != NULL) {
       return m_pApartment->getDeviceBusInterface()->getDeviceConfigWord(*this,
                                                                   _configClass,
@@ -161,6 +170,9 @@ namespace dss {
   }
 
   void Device::setValue(uint8_t _value) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
     if(m_pApartment->getDeviceBusInterface() != NULL) {
       m_pApartment->getDeviceBusInterface()->setValue(*this, _value);
     }
@@ -179,6 +191,9 @@ namespace dss {
   } // getName
 
   void Device::setName(const std::string& _name) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkWriteAccess();
+    }
     if(m_Name != _name) {
       m_Name = _name;
       dirty();
@@ -367,6 +382,9 @@ namespace dss {
   } // getPowerConsumption
 
   int Device::getSensorValue(const int _sensorID) {
+    if(m_pPropertyNode) {
+      m_pPropertyNode->checkReadAccess();
+    }
     return m_pApartment->getDeviceBusInterface()->getSensorValue(*this,_sensorID);
   } // getSensorValue
 

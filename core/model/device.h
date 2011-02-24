@@ -36,8 +36,6 @@
 
 namespace dss {
 
-  class PropertyNode;
-  typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
   class Group;
   class DSMeter;
 
@@ -64,7 +62,6 @@ namespace dss {
     DateTime m_FirstSeen;
     bool m_IsLockedInDSM;
 
-    PropertyNodePtr m_pPropertyNode;
     PropertyNodePtr m_pAliasNode;
     PropertyNodePtr m_TagsNode;
   protected:

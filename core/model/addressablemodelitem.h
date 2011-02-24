@@ -32,6 +32,8 @@
 namespace dss {
 
   class Apartment;
+  class PropertyNode;
+  typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   class AddressableModelItem : public PhysicalModelItem,
                                public IDeviceInterface,
@@ -51,6 +53,7 @@ namespace dss {
     virtual void blink();
   protected:
     Apartment* m_pApartment;
+    PropertyNodePtr m_pPropertyNode;
   }; // AddressableModelItem
 
 }
