@@ -333,6 +333,12 @@ namespace dss {
         }
         std::string cookies = generateCookieString(response.getCookies());
         emitHTTPHeader(200, _connection, "application/json", cookies);
+      } catch(SecurityException& e) {
+        emitHTTPHeader(403, _connection, "application/json");
+        JSONObject resultObj;
+        resultObj.addProperty("ok", false);
+        resultObj.addProperty("message", e.what());
+        result = resultObj.toString();
       } catch(std::runtime_error& e) {
         emitHTTPHeader(500, _connection, "application/json");
         JSONObject resultObj;
