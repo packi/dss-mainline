@@ -51,7 +51,7 @@ namespace dss {
     std::string registerSession();
 
     /// \brief Returns the session object with the given id
-    boost::shared_ptr<Session>& getSession(const std::string& _id);
+    boost::shared_ptr<Session> getSession(const std::string& _id);
 
     /// \brief Removes session with the given id
     void removeSession(const std::string& _id);
@@ -79,7 +79,7 @@ namespace dss {
     unsigned int m_NextSessionID;
     std::string m_VersionInfo;
 
-    boost::ptr_map<const std::string, boost::shared_ptr<Session> > m_Sessions;
+    std::map<const std::string, boost::shared_ptr<Session> > m_Sessions;
     Mutex m_MapMutex;
 
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;

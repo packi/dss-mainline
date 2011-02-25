@@ -115,16 +115,16 @@ namespace dss {
     return hasher.str();
   }
 
-  boost::shared_ptr<Session>& SessionManager::getSession(const std::string& _id) {
+  boost::shared_ptr<Session> SessionManager::getSession(const std::string& _id) {
     m_MapMutex.lock();
-    boost::shared_ptr<Session>& rv = m_Sessions[_id];
+    boost::shared_ptr<Session> rv = m_Sessions[_id];
     m_MapMutex.unlock();
     return rv;
   }
 
   void SessionManager::removeSession(const std::string& _id) {
     m_MapMutex.lock();
-    boost::ptr_map<const std::string, boost::shared_ptr<Session> >::iterator i = m_Sessions.find(_id);
+    std::map<const std::string, boost::shared_ptr<Session> >::iterator i = m_Sessions.find(_id);
     if(i != m_Sessions.end()) {
       m_Sessions.erase(i);
     } else {
@@ -135,7 +135,7 @@ namespace dss {
 
   void SessionManager::touchSession(const std::string& _id) {
     m_MapMutex.lock();
-    boost::ptr_map<const std::string, boost::shared_ptr<Session> >::iterator i = m_Sessions.find(_id);
+    std::map<const std::string, boost::shared_ptr<Session> >::iterator i = m_Sessions.find(_id);
     if(i != m_Sessions.end()) {
       m_Sessions[_id]->touch();
     }
@@ -144,10 +144,10 @@ namespace dss {
 
   void SessionManager::cleanupSessions(Event& _event, const EventSubscription& _subscription) {
     m_MapMutex.lock();
-    boost::ptr_map<const std::string, boost::shared_ptr<Session> >::iterator i;
+    std::map<const std::string, boost::shared_ptr<Session> >::iterator i;
     for (i = m_Sessions.begin(); i != m_Sessions.end(); i++) {
       if (i != m_Sessions.end()) {
-        boost::shared_ptr<Session>& s = m_Sessions[i->first];
+        boost::shared_ptr<Session> s = m_Sessions[i->first];
         if (s != NULL) {
           if (!s->isStillValid()) {
             m_Sessions.erase(i->first);
