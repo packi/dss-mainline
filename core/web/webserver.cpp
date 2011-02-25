@@ -82,12 +82,16 @@ namespace dss {
     Subsystem::initialize();
 
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "webroot", getDSS().getWebrootDirectory(), true, false);
+    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "bindip", "0.0.0.0", true, false);
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "ports", 8080, true, false);
+    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "announcedport", DSS::getInstance()->getPropertySystem().getIntValue(getConfigPropertyBasePath() + "ports"), true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "files/apartment.xml", getDSS().getDataDirectory() + "apartment.xml", true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "sslcert", getDSS().getPropertySystem().getStringValue("/config/configdirectory") + "dsscert.pem" , true, false);
 
-    std::string configPorts = intToString(DSS::getInstance()->getPropertySystem().getIntValue(getConfigPropertyBasePath() + "ports")) + "s";
-    log("Webserver: Listening on port(s) " + configPorts, lsInfo);
+    std::string configPorts = 
+      DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "bindip") + ":" +
+      intToString(DSS::getInstance()->getPropertySystem().getIntValue(getConfigPropertyBasePath() + "ports")) + "s";
+    log("Webserver: Listening on " + configPorts, lsInfo);
 
     std::string configAliases = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "webroot");
     log("Webserver: Configured webroot: " + configAliases, lsInfo);
