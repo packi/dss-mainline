@@ -29,7 +29,8 @@ namespace dss {
 
   Session::Session(const std::string& _tokenID)
   : m_Token(_tokenID),
-    m_pUser(NULL)
+    m_pUser(NULL),
+    m_IsApplicationSession(false)
   {
     m_LastTouched = DateTime();
     m_UsageCount = 0;
@@ -70,6 +71,11 @@ namespace dss {
     }
     m_UseCountMutex.unlock();
   }
+
+  void Session::markAsApplicationSession() {
+    m_IsApplicationSession = true;
+  }
+
   void Session::addData(const std::string& _key, boost::shared_ptr<boost::any> _value) {
     m_DataMapMutex.lock();
     dataMap[_key] = _value;

@@ -87,6 +87,37 @@ namespace dss {
         log("Authentication failed for user '" + user + "'", lsError);
         return failure("Authentication failed");
       }
+    } else if(_request.getMethod() == "loginApplication") {
+      std::string loginTokenRaw = _request.getParameter("loginToken");
+      std::string loginToken;
+      std::locale locl;
+      std::remove_copy_if(loginTokenRaw.begin(),
+                          loginTokenRaw.end(),
+                          std::back_inserter(loginToken),
+        !boost::bind(&std::isalnum<char>, _1, locl)
+       );
+
+      if(loginToken.empty()) {
+        return failure("Missing parameter 'loginToken'");
+      }
+
+      m_pSessionManager->getSecurity()->signOff();
+      if(m_pSessionManager->getSecurity()->authenticateApplication(loginToken)) {
+        std::string token = m_pSessionManager->registerApplicationSession();
+        m_pSessionManager->getSession(token)->inheritUserFromSecurity();
+        log("Registered new JSON-Application session");
+
+        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+        resultObj->addProperty("token", token);
+
+        WebServerResponse response(success(resultObj));
+        response.setCookie("path", "/");
+        response.setCookie("token", token);
+        return response;
+      } else {
+        log("Application-Authentication failed", lsError);
+        return failure("Applicatio-Authentication failed");
+      }
     } else if(_request.getMethod() == "logout") {
       m_pSessionManager->getSecurity()->signOff();
       if(_session != NULL) {
@@ -119,6 +150,69 @@ namespace dss {
         return success("Password changed, have a nice day!");
       } else {
         return failure("You've got a session but no user, strange... not doing anything for you sir.");
+      }
+    } else if(_request.getMethod() == "requestApplicationToken") {
+      if(_session != NULL) {
+        return failure("Must not be logged-in to request a token");
+      }
+
+      // TODO: filter characters in applicationName
+      std::string applicationName = _request.getParameter("applicationName");
+      if(applicationName.empty()) {
+        return failure("Need parameter 'applicationName'");
+      }
+
+      std::string applicationToken =  m_pSessionManager->generateToken();
+      m_pSessionManager->getSecurity()->loginAsSystemUser("Temporary access to create token");
+      m_pSessionManager->getSecurity()->createApplicationToken(applicationName,
+                                                               applicationToken);
+
+      boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+      resultObj->addProperty("applicationToken", applicationToken);
+      return success(resultObj);
+    } else if(_request.getMethod() == "enableToken") {
+      if(_session == NULL) {
+        return failure("Must be logged-in");
+      }
+
+      if(_session->isApplicationSession()) {
+        return failure("Please let the user validate your tokens");
+      }
+
+      User* pUser = m_pSessionManager->getSecurity()->getCurrentlyLoggedInUser();
+      if(pUser == NULL) {
+        return failure("You've got a session but no user, strange... not doing anything for you sir.");
+      }
+
+      std::string applicationToken = _request.getParameter("applicationToken");
+      if(applicationToken.empty()) {
+        return failure("Need parameter 'applicationToken'");
+      }
+
+      // create a copy since logging in as system will invalidate our pointer
+      User userCopy(*pUser);
+      pUser = NULL;
+      m_pSessionManager->getSecurity()->loginAsSystemUser("Temporary access to grant token");
+      if(m_pSessionManager->getSecurity()->enableToken(applicationToken, &userCopy)) {
+        return success();
+      } else {
+        return failure("Unknown token");
+      }
+    } else if(_request.getMethod() == "revokeToken") {
+      if(_session == NULL) {
+        return failure("Must be logged-in");
+      }
+
+      std::string applicationToken = _request.getParameter("applicationToken");
+      if(applicationToken.empty()) {
+        return failure("Need parameter 'applicationToken'");
+      }
+
+      m_pSessionManager->getSecurity()->loginAsSystemUser("Temporary access to revoke token");
+      if(m_pSessionManager->getSecurity()->revokeToken(applicationToken)) {
+        return success();
+      } else {
+        return failure("Unknown token");
       }
     }
     throw std::runtime_error("Unhandled function");

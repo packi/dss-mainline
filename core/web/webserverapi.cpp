@@ -328,6 +328,15 @@ namespace dss {
     clsSystem.addMethod("setPassword")
       .withParameter("password", "string", true)
       .withDocumentation("Changes the currently logged in users password");
+    clsSystem.addMethod("requestApplicationToken")
+      .withParameter("applicationName", "string", true)
+      .withDocumentation("Returns a token for paswordless login. The token will need to be approved by a user first. The caller must not be logged in.");
+    clsSystem.addMethod("enableToken")
+      .withParameter("applicationToken", "string", true)
+      .withDocumentation("Enables a application token.");
+    clsSystem.addMethod("revokeToken")
+      .withParameter("applicationToken", "string", true)
+      .withDocumentation("Revokes an application token");
 
     RestfulClass& clsSet = api->addClass("set")
         .withInstanceParameter("self", "string", false);

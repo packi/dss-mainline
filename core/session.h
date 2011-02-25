@@ -47,12 +47,14 @@ namespace dss {
     void use();
     void unuse();
     void touch();
+    void markAsApplicationSession();
     void addData(const std::string& _key, boost::shared_ptr<boost::any> _value);
     boost::shared_ptr<boost::any> getData(const std::string& _key);
     bool removeData(const std::string& _key);
 
     void inheritUserFromSecurity();
     User* getUser() { return m_pUser; }
+    bool isApplicationSession() { return m_IsApplicationSession; }
   protected:
     const std::string m_Token;
     Mutex m_UseCountMutex;
@@ -65,6 +67,7 @@ namespace dss {
 
     int m_SessionTimeoutSec;
     User* m_pUser;
+    bool m_IsApplicationSession;
   }; // Session
 
 

@@ -56,6 +56,7 @@ namespace dss {
 
     bool authenticate(const std::string& _user, const std::string& _password);
     bool authenticate(boost::shared_ptr<Session> _session);
+    bool authenticateApplication(const std::string& _applicationToken);
     bool signIn(User* _pUser);
     void signOff();
 
@@ -73,6 +74,10 @@ namespace dss {
     void setFileName(const std::string& _value) {
       m_FileName = _value;
     }
+    void createApplicationToken(const std::string& _applicationName,
+                                const std::string& _token);
+    bool enableToken(const std::string& _token, User* _pUser);
+    bool revokeToken(const std::string& _token);
   private:
     static boost::thread_specific_ptr<User> m_LoggedInUser;
     PropertyNodePtr m_pRootNode;
