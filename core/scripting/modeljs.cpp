@@ -1072,6 +1072,7 @@ namespace dss {
       std::string time = ctx->convertTo<std::string>(argv[1]);
       if(time.empty()) {
         Logger::getInstance()->log("JS: timedEvent_construct: empty time not allowed", lsError);
+        return JS_FALSE;
       }
 
       boost::shared_ptr<Event> newEvent(new Event(name));
@@ -1091,6 +1092,53 @@ namespace dss {
     }
     return JS_FALSE;
   } // timedEvent_construct
+
+  JSBool timedICalEvent_construct(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    if (argc < 3) {
+      Logger::getInstance()->log("JS: timedICalEvent_construct: empty name, no start-time, no rrule", lsError);
+      return JS_FALSE;
+    }
+
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    JSAutoLocalRootScope localRoot(cx);
+
+    try {
+      std::string name = ctx->convertTo<std::string>(argv[0]);
+
+      if(name.empty()) {
+        Logger::getInstance()->log("JS: timedICalEvent_construct: empty name not allowed", lsError);
+        return JS_FALSE;
+      }
+      std::string time = ctx->convertTo<std::string>(argv[1]);
+      if(time.empty()) {
+        Logger::getInstance()->log("JS: timedICalEvent_construct: empty start-time not allowed", lsError);
+        return JS_FALSE;
+      }
+      // TODO: validate rrule
+      std::string rrule = ctx->convertTo<std::string>(argv[2]);
+      if(rrule.empty()) {
+        Logger::getInstance()->log("JS: timedICalEvent_construct: empty rrule not allowed", lsError);
+        return JS_FALSE;
+      }
+
+      boost::shared_ptr<Event> newEvent(new Event(name));
+
+      if(argc >= 4) {
+        readEventPropertiesFrom(cx, argv[3], newEvent);
+      }
+
+      newEvent->setProperty(EventPropertyICalStartTime, time);
+      newEvent->setProperty(EventPropertyICalRRule, rrule);
+
+      event_wrapper* evtWrapper = new event_wrapper();
+      evtWrapper->event = newEvent;
+      JS_SetPrivate(cx, obj, evtWrapper);
+      return JS_TRUE;
+    } catch(ScriptException& e) {
+      Logger::getInstance()->log(std::string("JS: timedICalEvent_construct: error converting string: ") + e.what(), lsError);
+    }
+    return JS_FALSE;
+  } // timedICalEvent_construct
 
   JSBool event_raise(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -1171,6 +1219,14 @@ namespace dss {
   JSFunctionSpec timedEvent_methods[] = {
     {"raise", timedEvent_raise, 1, 0, 0},
     {NULL}
+  };
+
+  static JSClass timedICalEvent_class = {
+    "TimedICalEvent", JSCLASS_HAS_PRIVATE,
+    JS_PropertyStub,  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
+    JS_EnumerateStandardClasses,
+    JS_ResolveStub,
+    JS_ConvertStub,  finalize_event, JSCLASS_NO_OPTIONAL_MEMBERS
   };
 
   struct subscription_wrapper {
@@ -1301,6 +1357,9 @@ namespace dss {
               event_methods, NULL, NULL);
     JS_InitClass(_context.getJSContext(), _context.getRootObject().getJSObject(),
               NULL, &timedEvent_class, timedEvent_construct, 0, event_properties,
+              timedEvent_methods, NULL, NULL);
+    JS_InitClass(_context.getJSContext(), _context.getRootObject().getJSObject(),
+              NULL, &timedICalEvent_class, timedICalEvent_construct, 0, event_properties,
               timedEvent_methods, NULL, NULL);
   } // extendContext
 
