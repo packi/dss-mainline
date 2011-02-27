@@ -187,11 +187,11 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutIsStoppable) {
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("result = true;\n"
                       "setTimeout(100000, function() { result = false; });");
-  ctx->stop();
   BOOST_CHECK_EQUAL(ctx->getAttachedObjectsCount(), 1);
+  ctx->stop();
 
   // check that we're terminating soon-ish after issuing the stop command
-  for(int i = 0; i < 20; i++) {
+  for(int i = 0; i < 21; i++) {
     if(ctx->getAttachedObjectsCount() == 0) {
       break;
     }

@@ -248,7 +248,7 @@ namespace dss {
     }
 
     void timeout(int _timeoutMS, jsval _function, JSObject* _obj, boost::shared_ptr<ScriptFunctionRooter> _rooter) {
-      const int kSleepIntervalMS = 1000;
+      const int kSleepIntervalMS = 500;
       int toSleep = _timeoutMS;
       while(!getIsStopped() && (toSleep > 0)) {
         int toSleepNow = std::min(toSleep, kSleepIntervalMS);
