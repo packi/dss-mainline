@@ -131,7 +131,6 @@ namespace dss {
 
   JSBool global_get_dsmeterbydsid(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
-    JSRequest req(ctx);
 
     ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
     if(ext != NULL) {
@@ -157,6 +156,28 @@ namespace dss {
     }
     return JS_FALSE;
   } // global_get_dsmeterbydsid
+  
+  
+  JSBool global_getDSMeters(JSContext* cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    JSAutoLocalRootScope scope(cx);
+    JSObject* resultObj = JS_NewArrayObject(cx, 0, NULL);
+    *rval = OBJECT_TO_JSVAL(resultObj);
+
+    std::vector<boost::shared_ptr<DSMeter> > meters = ext->getApartment().getDSMeters();
+    for(std::size_t iMeter = 0; iMeter < meters.size(); iMeter++) {
+      JSObject* meterObj = ext->createJSMeter(*ctx, meters[iMeter]);
+      jsval meterJSVal = OBJECT_TO_JSVAL(meterObj);
+      JSBool res = JS_SetElement(cx, resultObj, iMeter, &meterJSVal);
+      if(!res) {
+        return JS_FALSE;
+      }
+    }
+    return JS_TRUE;
+  } // global_getDSMeters
+
 
   JSBool global_getEnergyMeterValue(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval){
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -195,6 +216,7 @@ namespace dss {
     {"getDSMeterByDSID", global_get_dsmeterbydsid, 1, 0, 0},
     {"getConsumption", global_getConsumption, 0, 0, 0},
     {"getEnergyMeterValue", global_getEnergyMeterValue, 0, 0, 0},
+    {"getDSMeters", global_getDSMeters, 0, 0, 0},
     {NULL},
   };
 
@@ -1292,7 +1314,6 @@ namespace dss {
   } // global_subscription
 
   void EventScriptExtension::extendContext(ScriptContext& _context) {
-    JSRequest req(&_context);
     JS_InitClass(_context.getJSContext(), _context.getRootObject().getJSObject(),
               NULL, &subscription_class, subscription_construct, 0, subscription_properties,
               subscription_methods, NULL, NULL);
