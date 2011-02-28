@@ -73,8 +73,7 @@ namespace dss {
     m_EventQueue.pushEvent(pEvent);
   }
 
-  std::string SessionManager::registerSession() {
-    m_MapMutex.lock();
+  void SessionManager::setupCleanupEventRelayTarget() {
     if (m_pRelayTarget == NULL) {
       EventInterpreterInternalRelay* pRelay =
         dynamic_cast<EventInterpreterInternalRelay*>(m_EventInterpreter.getPluginByName(EventInterpreterInternalRelay::getPluginName()));
@@ -93,11 +92,33 @@ namespace dss {
         this->sendCleanupEvent();
       }
     }
+  }
 
-    boost::shared_ptr<Session> s(new Session(generateToken()));
-    s->setTimeout(m_timeoutSecs);
-    std::string id = s->getID();
-    m_Sessions[id] = s;
+  boost::shared_ptr<Session> SessionManager::createSession() {
+    setupCleanupEventRelayTarget();
+
+    boost::shared_ptr<Session> result(new Session(generateToken()));
+    result->setTimeout(m_timeoutSecs);
+    return result;
+  }
+
+  std::string SessionManager::registerSession() {
+    m_MapMutex.lock();
+
+    boost::shared_ptr<Session> session = createSession();
+    std::string id = session->getID();
+    m_Sessions[id] = session;
+    m_MapMutex.unlock();
+    return id;
+  }
+
+  std::string SessionManager::registerApplicationSession() {
+    m_MapMutex.lock();
+
+    boost::shared_ptr<Session> session = createSession();
+    session->markAsApplicationSession();
+    std::string id = session->getID();
+    m_Sessions[id] = session;
     m_MapMutex.unlock();
     return id;
   }
@@ -111,20 +132,24 @@ namespace dss {
     }
     hasher.add(m_VersionInfo);
     hasher.add(m_NextSessionID);
+    hasher.add(DateTime().toString());
     m_NextSessionID++;
-    return hasher.str();
+    std::string tmp = hasher.str();
+    Hasher stage2;
+    stage2.add(tmp);
+    return stage2.str();
   }
 
-  boost::shared_ptr<Session>& SessionManager::getSession(const std::string& _id) {
+  boost::shared_ptr<Session> SessionManager::getSession(const std::string& _id) {
     m_MapMutex.lock();
-    boost::shared_ptr<Session>& rv = m_Sessions[_id];
+    boost::shared_ptr<Session> rv = m_Sessions[_id];
     m_MapMutex.unlock();
     return rv;
   }
 
   void SessionManager::removeSession(const std::string& _id) {
     m_MapMutex.lock();
-    boost::ptr_map<const std::string, boost::shared_ptr<Session> >::iterator i = m_Sessions.find(_id);
+    std::map<const std::string, boost::shared_ptr<Session> >::iterator i = m_Sessions.find(_id);
     if(i != m_Sessions.end()) {
       m_Sessions.erase(i);
     } else {
@@ -135,7 +160,7 @@ namespace dss {
 
   void SessionManager::touchSession(const std::string& _id) {
     m_MapMutex.lock();
-    boost::ptr_map<const std::string, boost::shared_ptr<Session> >::iterator i = m_Sessions.find(_id);
+    std::map<const std::string, boost::shared_ptr<Session> >::iterator i = m_Sessions.find(_id);
     if(i != m_Sessions.end()) {
       m_Sessions[_id]->touch();
     }
@@ -144,10 +169,10 @@ namespace dss {
 
   void SessionManager::cleanupSessions(Event& _event, const EventSubscription& _subscription) {
     m_MapMutex.lock();
-    boost::ptr_map<const std::string, boost::shared_ptr<Session> >::iterator i;
+    std::map<const std::string, boost::shared_ptr<Session> >::iterator i;
     for (i = m_Sessions.begin(); i != m_Sessions.end(); i++) {
       if (i != m_Sessions.end()) {
-        boost::shared_ptr<Session>& s = m_Sessions[i->first];
+        boost::shared_ptr<Session> s = m_Sessions[i->first];
         if (s != NULL) {
           if (!s->isStillValid()) {
             m_Sessions.erase(i->first);

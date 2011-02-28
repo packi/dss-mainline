@@ -50,8 +50,10 @@ namespace dss {
     /// \return session identifier
     std::string registerSession();
 
+    std::string registerApplicationSession();
+
     /// \brief Returns the session object with the given id
-    boost::shared_ptr<Session>& getSession(const std::string& _id);
+    boost::shared_ptr<Session> getSession(const std::string& _id);
 
     /// \brief Removes session with the given id
     void removeSession(const std::string& _id);
@@ -61,6 +63,8 @@ namespace dss {
 
     void cleanupSessions(Event& _event, const EventSubscription& _subscription);
 
+    std::string generateToken();
+
     void setTimeout(const int _timeoutSeconds) {
       m_timeoutSecs = _timeoutSeconds;
     }
@@ -69,7 +73,8 @@ namespace dss {
       return m_pSecurity;
     }
   private:
-    std::string generateToken();
+    boost::shared_ptr<Session> createSession();
+    void setupCleanupEventRelayTarget();
   private:
     EventQueue& m_EventQueue;
     EventInterpreter& m_EventInterpreter;
@@ -79,7 +84,7 @@ namespace dss {
     unsigned int m_NextSessionID;
     std::string m_VersionInfo;
 
-    boost::ptr_map<const std::string, boost::shared_ptr<Session> > m_Sessions;
+    std::map<const std::string, boost::shared_ptr<Session> > m_Sessions;
     Mutex m_MapMutex;
 
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;

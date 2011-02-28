@@ -50,14 +50,19 @@ namespace dss {
       m_pSecurityNode->addListener(this);
     }
 
+  public:
+    void writeXML() {
+      boost::mutex::scoped_lock lock(m_WriteXMLMutex);
+      m_pPropertySystem->saveToXML(m_Path, m_pSecurityNode, PropertyNode::Archive);
+    }
   protected:
     virtual void propertyChanged(PropertyNodePtr _caller,
                                  PropertyNodePtr _changedNode) {
       if(_changedNode->hasFlag(PropertyNode::Archive)) {
-        boost::mutex::scoped_lock lock(m_WriteXMLMutex);
-        m_pPropertySystem->saveToXML(m_Path, m_pSecurityNode, PropertyNode::Archive);
+        writeXML();
       }
     }
+
   private:
     boost::shared_ptr<PropertySystem> m_pPropertySystem;
     PropertyNodePtr m_pSecurityNode;
@@ -96,6 +101,22 @@ namespace dss {
     return result;
   } // authenticate
 
+  bool Security::authenticateApplication(const std::string& _applicationToken) {
+    signOff();
+    PropertyNodePtr pTokenNode = m_pRootNode->getProperty("applicationTokens/" + _applicationToken);
+    if(pTokenNode != NULL) {
+      PropertyNodePtr pUserNameNode = pTokenNode->getProperty("user");
+      if(pUserNameNode != NULL) {
+        PropertyNodePtr pUserNode = m_pRootNode->getProperty("users/" + pUserNameNode->getStringValue());
+        if(pUserNode != NULL) {
+          m_LoggedInUser.reset(new User(pUserNode));
+          return true;
+        }
+      }
+    }
+    return false;
+  } // authenticateApplication
+
   bool Security::signIn(User* _pUser) {
     m_LoggedInUser.reset(new User(*_pUser));
     return true;
@@ -125,6 +146,54 @@ namespace dss {
   void Security::startListeningForChanges() {
     m_pTreeListener.reset(new SecurityTreeListener(m_pPropertySystem, m_pRootNode, m_FileName));
   } // startListeningForChanges
+
+  void Security::createApplicationToken(const std::string& _applicationName,
+                                        const std::string& _token) {
+    PropertyNodePtr pPendingTokens =
+      m_pRootNode->createProperty("applicationTokens/pending");
+    if(pPendingTokens->getProperty(_token) == NULL) {
+      PropertyNodePtr pToken = pPendingTokens->createProperty(_token);
+      pToken->createProperty("token")->setStringValue(_token);
+      pToken->createProperty("applicationName")->setStringValue(_applicationName);
+    }
+  } // createApplicationToken
+
+  bool Security::enableToken(const std::string& _token, User* _pUser) {
+    PropertyNodePtr pTokensNode = m_pRootNode->createProperty("applicationTokens");
+    PropertyNodePtr pPendingTokens = pTokensNode->createProperty("pending");
+    PropertyNodePtr pToken = pPendingTokens->getProperty(_token);
+    if(pToken != NULL) {
+      pTokensNode->setFlag(PropertyNode::Archive, true);
+      PropertyNodePtr pRealToken = pTokensNode->createProperty(_token);
+      pRealToken->setFlag(PropertyNode::Archive, true);
+      PropertyNodePtr pTokenNode = pRealToken->createProperty("token");
+      pTokenNode->setStringValue(_token);
+      pTokenNode->setFlag(PropertyNode::Archive, true);
+      PropertyNodePtr pApplicationNameNode = pRealToken->createProperty("applicationName");
+      pApplicationNameNode->setStringValue(
+        pToken->getProperty("applicationName")->getStringValue());
+      pApplicationNameNode->setFlag(PropertyNode::Archive, true);
+      PropertyNodePtr pUserNode = pRealToken->createProperty("user");
+      pUserNode->setFlag(PropertyNode::Archive, true);
+      pUserNode->setStringValue(_pUser->getName());
+      pPendingTokens->removeChild(pToken);
+      return true;
+    }
+    return false;
+  } // enableToken
+
+  bool Security::revokeToken(const std::string& _token) {
+    PropertyNodePtr pTokens = m_pRootNode->createProperty("applicationTokens/");
+    PropertyNodePtr pToken = m_pRootNode->getProperty("applicationTokens/" + _token);
+    if(pToken != NULL) {
+      pTokens->removeChild(pToken);
+      if(m_pTreeListener != NULL) {
+        m_pTreeListener->writeXML();
+      }
+      return true;
+    }
+    return false;
+  } // revokeToken
 
   boost::thread_specific_ptr<User> Security::m_LoggedInUser;
 
