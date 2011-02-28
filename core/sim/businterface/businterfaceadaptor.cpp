@@ -291,6 +291,12 @@ namespace dss {
       m_pSimulationInterface->removeGroup(_zoneID, _groupID);
       m_pInner->removeGroup(_zoneID, _groupID);
     }
+
+    virtual void setApartmentID(uint8_t _apartmentID) {
+      m_pSimulationInterface->setApartmentID(_apartmentID);
+      m_pInner->setApartmentID(_apartmentID);
+    }
+
   private:
     StructureModifyingBusInterface* m_pInner;
     StructureModifyingBusInterface* m_pSimulationInterface;
