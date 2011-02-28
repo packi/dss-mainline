@@ -38,6 +38,18 @@
   </property>
 
 <!--
+    <property name="subsystems/WebServer/announcedPort" type="integer">
+      <value>80</value>
+    </property>
+    <property name="subsystems/WebServer/ports" type="integer">
+      <value>8080</value>
+    </property>
+    <property name="subsystems/WebServer/bindip" type="string">
+      <value>127.0.0.1</value>
+    </property>
+-->
+
+<!--
     <property name="logfile" type="string">
 	<value>/var/log/dss/dss.log</value>
     </property>
