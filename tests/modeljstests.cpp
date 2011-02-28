@@ -334,6 +334,34 @@ BOOST_AUTO_TEST_CASE(testTimedEventsNoTimeParam) {
                     ScriptException);
 } // testTimedEventsNoTimeParam
 
+BOOST_AUTO_TEST_CASE(testTimedICalEvent) {
+  Apartment apt(NULL);
+
+  EventQueue queue;
+  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+  interpreter.setEventQueue(&queue);
+  interpreter.setEventRunner(&runner);
+  queue.setEventRunner(&runner);
+  runner.setEventQueue(&queue);
+
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new EventScriptExtension(queue, interpreter);
+  env->addExtension(ext);
+
+  EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(&interpreter);
+  interpreter.addPlugin(plugin);
+
+  BOOST_CHECK_EQUAL(interpreter.getNumberOfSubscriptions(), 0);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  std::string id = ctx->evaluate<std::string>("var evt = new TimedICalEvent('test', '20110227T081600Z','FREQ=MINUTELY;INTERVAL=2');\n"
+                                              "evt.raise()\n");
+  BOOST_CHECK(!id.empty());
+  BOOST_CHECK(id.find("test") != std::string::npos);
+} // testTimedICalEvent
+
 BOOST_AUTO_TEST_CASE(testSubscriptions) {
   Apartment apt(NULL);
 
