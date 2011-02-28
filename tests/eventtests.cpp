@@ -67,26 +67,12 @@ protected:
   boost::shared_ptr<EventInterpreter> m_pEventInterpreter;
 };
 
-class Fixture : public NonRunningFixture {
-public:
-  Fixture() {
-    m_pEventInterpreter->run();
-  }
-
-  ~Fixture() {
-    m_pQueue->shutdown();
-    m_pEventInterpreter->terminate();
-    sleepMS(5);
-  }
-};
-
-
-BOOST_FIXTURE_TEST_CASE(testSimpleEvent, Fixture) {
+BOOST_FIXTURE_TEST_CASE(testSimpleEvent, NonRunningFixture) {
   boost::shared_ptr<Event> pEvent(new Event("event1"));
 
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(5);
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 1);
 
@@ -94,12 +80,12 @@ BOOST_FIXTURE_TEST_CASE(testSimpleEvent, Fixture) {
 
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(5);
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
 } // testSimpleEvent
 
-BOOST_FIXTURE_TEST_CASE(testSubscription, Fixture) {
+BOOST_FIXTURE_TEST_CASE(testSubscription, NonRunningFixture) {
   EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
   m_pEventInterpreter->addPlugin(plugin);
 
@@ -114,7 +100,8 @@ BOOST_FIXTURE_TEST_CASE(testSubscription, Fixture) {
 
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(5);
+  m_pEventInterpreter->executePendingEvent();
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
 
@@ -122,7 +109,7 @@ BOOST_FIXTURE_TEST_CASE(testSubscription, Fixture) {
 
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(5);
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 3);
 } // testSubscription
@@ -152,7 +139,7 @@ BOOST_FIXTURE_TEST_CASE(testNonExistingXML, NonRunningFixture) {
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getNumberOfSubscriptions(), 0);
 } // testNonExistingXML
 
-BOOST_FIXTURE_TEST_CASE(testSubscriptionXML, Fixture) {
+BOOST_FIXTURE_TEST_CASE(testSubscriptionXML, NonRunningFixture) {
   EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
   m_pEventInterpreter->addPlugin(plugin);
 
@@ -187,18 +174,20 @@ BOOST_FIXTURE_TEST_CASE(testSubscriptionXML, Fixture) {
   boost::shared_ptr<Event> evt(new Event("event1"));
   m_pQueue->pushEvent(evt);
 
-  sleepMS(5);
+  m_pEventInterpreter->executePendingEvent();
 
   m_pRunner->runOnce();
 
   sleepMS(1200);
+
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
 
   boost::filesystem::remove_all(fileName);
 } // testSubscriptionXML
 
-BOOST_FIXTURE_TEST_CASE(testDS485Events, Fixture) {
+BOOST_FIXTURE_TEST_CASE(testDS485Events, NonRunningFixture) {
   Apartment apt(NULL);
   DSMeterSim modSim(NULL);
   boost::shared_ptr<DSSim> pSim(new DSSim(NULL));
@@ -246,15 +235,11 @@ BOOST_FIXTURE_TEST_CASE(testDS485Events, Fixture) {
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 0);
 
-  sleepMS(5);
-
-  BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 0);
-
   boost::shared_ptr<Event> evt(new Event("brighter", apt.getZone(0)));
   evt->setLocation("dev1");
   m_pQueue->pushEvent(evt);
 
-  sleepMS(5);
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 1);
 } // testDS485Events
@@ -271,7 +256,7 @@ BOOST_AUTO_TEST_CASE(testEventHandlerJavascriptDoesntLeakExceptionsWithNonexisti
   plugin->handleEvent(evt, subscription);
 } // testEventHandlerJavascriptDoesntLeakExceptionsWithNonexistingFile
 
-BOOST_FIXTURE_TEST_CASE(testRemovingSubscription, Fixture) {
+BOOST_FIXTURE_TEST_CASE(testRemovingSubscription, NonRunningFixture) {
   EventInterpreterPlugin* plugin = new EventInterpreterPluginRaiseEvent(m_pEventInterpreter.get());
   m_pEventInterpreter->addPlugin(plugin);
 
@@ -284,7 +269,8 @@ BOOST_FIXTURE_TEST_CASE(testRemovingSubscription, Fixture) {
 
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(5);
+  m_pEventInterpreter->executePendingEvent();
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
 
@@ -292,7 +278,8 @@ BOOST_FIXTURE_TEST_CASE(testRemovingSubscription, Fixture) {
 
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(5);
+  m_pEventInterpreter->executePendingEvent();
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 3);
 } // testRemovingSubscription
@@ -423,7 +410,7 @@ BOOST_AUTO_TEST_CASE(testRemoveAndGetEvents) {
   BOOST_CHECK_EQUAL(runner.getSize(), 0);
 } // testUniqueEventsOverwritesTimeProperty
 
-BOOST_FIXTURE_TEST_CASE(testEventCollector, Fixture) {
+BOOST_FIXTURE_TEST_CASE(testEventCollector, NonRunningFixture) {
   EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(m_pEventInterpreter.get());
   m_pEventInterpreter->addPlugin(relay);
 
@@ -433,7 +420,7 @@ BOOST_FIXTURE_TEST_CASE(testEventCollector, Fixture) {
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(15);
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 1);
 
@@ -445,7 +432,7 @@ BOOST_FIXTURE_TEST_CASE(testEventCollector, Fixture) {
   pEvent.reset(new Event("event2"));
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(15);
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
 
@@ -456,7 +443,7 @@ BOOST_FIXTURE_TEST_CASE(testEventCollector, Fixture) {
   pEvent.reset(new Event("my_event"));
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(15);
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 3);
 
@@ -484,7 +471,7 @@ private:
   int m_Counter;
 }; // InternalEventRelayTester
 
-BOOST_FIXTURE_TEST_CASE(testInternalEventRelay, Fixture) {
+BOOST_FIXTURE_TEST_CASE(testInternalEventRelay, NonRunningFixture) {
   EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(m_pEventInterpreter.get());
   m_pEventInterpreter->addPlugin(relay);
 
@@ -512,14 +499,14 @@ BOOST_FIXTURE_TEST_CASE(testInternalEventRelay, Fixture) {
   boost::shared_ptr<Event> pEvent(new Event("one"));
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(10);
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 1);
   BOOST_CHECK_EQUAL(tester.getCounter(), 1);
 
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(10);
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
   BOOST_CHECK_EQUAL(tester.getCounter(), 2);
@@ -527,7 +514,7 @@ BOOST_FIXTURE_TEST_CASE(testInternalEventRelay, Fixture) {
   pEvent.reset(new Event("two"));
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(10);
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 3);
   BOOST_CHECK_EQUAL(tester.getCounter(), 4);
@@ -548,7 +535,7 @@ private:
   boost::shared_ptr<Event> m_pCoughtEvent;
 }; // InternalEventRelayTester
 
-class RelayEventFixture : public Fixture {
+class RelayEventFixture : public NonRunningFixture {
 public:
   static const std::string kReraisedName;
 
@@ -589,7 +576,8 @@ BOOST_FIXTURE_TEST_CASE(testOverrideOnlyOverrides, RelayEventFixture) {
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(10);
+  m_pEventInterpreter->executePendingEvent();
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
   BOOST_CHECK(m_Tester.getCoughtEvent()->getPropertyByName("test").empty());
@@ -607,7 +595,8 @@ BOOST_FIXTURE_TEST_CASE(testOverrideOverrides, RelayEventFixture) {
   pEvent->setProperty("test", "bla");
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(10);
+  m_pEventInterpreter->executePendingEvent();
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
   BOOST_CHECK_EQUAL(m_Tester.getCoughtEvent()->getPropertyByName("test"), kTestValue);
@@ -626,7 +615,8 @@ BOOST_FIXTURE_TEST_CASE(testDefaultDoesntOverride, RelayEventFixture) {
   pEvent->setProperty("test", kOriginalValue);
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(10);
+  m_pEventInterpreter->executePendingEvent();
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
   BOOST_CHECK_EQUAL(m_Tester.getCoughtEvent()->getPropertyByName("test"), kOriginalValue);
@@ -644,7 +634,8 @@ BOOST_FIXTURE_TEST_CASE(testDefaultSetsDefault, RelayEventFixture) {
   const std::string kOriginalValue = "bla";
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(10);
+  m_pEventInterpreter->executePendingEvent();
+  m_pEventInterpreter->executePendingEvent();
 
   BOOST_CHECK_EQUAL(m_pEventInterpreter->getEventsProcessed(), 2);
   BOOST_CHECK_EQUAL(m_Tester.getCoughtEvent()->getPropertyByName("test"), kTestValue);
@@ -676,8 +667,6 @@ BOOST_AUTO_TEST_CASE(testMultipleScriptFiles) {
   Event evt("testEvent");
   plugin->handleEvent(evt, subscription);
 
-  sleepMS(10);
-
   boost::filesystem::remove(fileName1);
   boost::filesystem::remove(fileName2);
 } // testMultipleScriptFiles
@@ -702,8 +691,6 @@ BOOST_AUTO_TEST_CASE(testEventSourceGetsPassed) {
   EventSubscription subscription("testEvent", "javascript", interpreter, opts);
   Event evt("testEvent");
   plugin->handleEvent(evt, subscription);
-
-  sleepMS(10);
 
   boost::filesystem::remove(fileName1);
 }

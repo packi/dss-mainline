@@ -332,6 +332,7 @@ namespace dss {
     virtual void initialize();
 
     virtual void execute();
+    void executePendingEvent();
 
     void addPlugin(EventInterpreterPlugin* _plugin);
     EventInterpreterPlugin* getPluginByName(const std::string& _name);
