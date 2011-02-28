@@ -112,6 +112,13 @@ namespace dss {
               if(nameElem->hasChildNodes()) {
                 m_Apartment.setName(nameElem->firstChild()->nodeValue());
               }
+              Element* idElem = elem->getChildElement("id");
+              if((idElem != NULL) && idElem->hasChildNodes()) {
+                int id = strToIntDef(idElem->firstChild()->nodeValue(), -1);
+                if((id >= 0) && (id <= 7)) {
+                  m_Apartment.setID((uint8_t)id);
+                }
+              }
             }
           }
           curNode = curNode->nextSibling();
@@ -417,6 +424,11 @@ namespace dss {
     AutoPtr<Text> pApartmentNameText = pDoc->createTextNode(m_Apartment.getName());
     pApartmentName->appendChild(pApartmentNameText);
     pApartment->appendChild(pApartmentName);
+
+    AutoPtr<Element> pApartmentID = pDoc->createElement("id");
+    AutoPtr<Text> pApartmentIDText = pDoc->createTextNode(uintToString(m_Apartment.getID()));
+    pApartmentID->appendChild(pApartmentIDText);
+    pApartment->appendChild(pApartmentID);
 
     // devices
     AutoPtr<Element> pDevices = pDoc->createElement("devices");

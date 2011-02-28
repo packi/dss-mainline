@@ -242,6 +242,11 @@ namespace dss {
         break;
       case ModelEvent::etBusReady:
         log("Got bus ready event.", lsInfo);
+        try {
+          m_pApartment->initID();
+        } catch (std::runtime_error& e) {
+          log(std::string("Could not send apartment ID") + e.what());
+        }
         discoverDS485Devices();
         break;
       case ModelEvent::etMeteringValues:
