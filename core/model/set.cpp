@@ -359,10 +359,7 @@ namespace dss {
 
     static ModelItemVector splitUp(Set& _set) {
       ModelItemVector result;
-      if(_set.length() == 1) {
-        log("Optimization: Set contains only one device");
-        result.push_back(_set.get(0).getDevice());
-      } else if(_set.length() > 0) {
+      if(_set.length() > 0) {
         Apartment& apt = _set.get(0).getDevice()->getApartment();
         if(_set.length() == apt.getDevices().length()) {
           log("Optimization: Set contains all devices of apartment");
