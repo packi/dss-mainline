@@ -254,53 +254,57 @@ namespace dss {
       return;
     }
     while(!m_Terminated) {
-      if(m_Queue->waitForEvent()) {
-        boost::shared_ptr<Event> toProcess = m_Queue->popEvent();
-        if(toProcess != NULL) {
-
-          Logger::getInstance()->log(std::string("EventInterpreter: Got event from queue: '") + toProcess->getName() + "'", lsInfo);
-          for(HashMapConstStringString::const_iterator iParam = toProcess->getProperties().getContainer().begin(), e = toProcess->getProperties().getContainer().end();
-              iParam != e; ++iParam)
-          {
-            Logger::getInstance()->log("EventInterpreter:  Parameter '" + iParam->first + "' = '" + iParam->second + "'");
-          }
-
-          SubscriptionVector subscriptionsCopy;
-          {
-            boost::mutex::scoped_lock lock(m_SubscriptionsMutex);
-            subscriptionsCopy = m_Subscriptions;
-          }
-          for(SubscriptionVector::iterator ipSubscription = subscriptionsCopy.begin(), e = subscriptionsCopy.end();
-              ipSubscription != e; ++ipSubscription)
-          {
-            if((*ipSubscription)->matches(*toProcess)) {
-              bool called = false;
-              Logger::getInstance()->log(std::string("EventInterpreter: Subscription '") + (*ipSubscription)->getID() + "' matches event");
-
-              EventInterpreterPlugin* plugin = getPluginByName((*ipSubscription)->getHandlerName());
-              if(plugin != NULL) {
-                Logger::getInstance()->log("EventInterpreter: Found handler '" + plugin->getName() + "' calling...");
-                try {
-                  plugin->handleEvent(*toProcess, **ipSubscription);
-                } catch(std::runtime_error& e) {
-                  Logger::getInstance()->log(std::string("Caught exception while handling event: ") + e.what(), lsError);
-                }
-                called = true;
-                Logger::getInstance()->log("EventInterpreter: called.");
-              }
-              if(!called) {
-                Logger::getInstance()->log(std::string("EventInterpreter: Could not find handler '") + (*ipSubscription)->getHandlerName(), lsInfo);
-              }
-
-            }
-          }
-
-          m_EventsProcessed++;
-          Logger::getInstance()->log(std::string("EventInterpreter: Done processing event '") + toProcess->getName() + "'", lsInfo);
-        }
-      }
+      executePendingEvent();
     }
   } // execute
+
+  void EventInterpreter::executePendingEvent() {
+    if(m_Queue->waitForEvent()) {
+      boost::shared_ptr<Event> toProcess = m_Queue->popEvent();
+      if(toProcess != NULL) {
+
+        Logger::getInstance()->log(std::string("EventInterpreter: Got event from queue: '") + toProcess->getName() + "'", lsInfo);
+        for(HashMapConstStringString::const_iterator iParam = toProcess->getProperties().getContainer().begin(), e = toProcess->getProperties().getContainer().end();
+            iParam != e; ++iParam)
+        {
+          Logger::getInstance()->log("EventInterpreter:  Parameter '" + iParam->first + "' = '" + iParam->second + "'");
+        }
+
+        SubscriptionVector subscriptionsCopy;
+        {
+          boost::mutex::scoped_lock lock(m_SubscriptionsMutex);
+          subscriptionsCopy = m_Subscriptions;
+        }
+        for(SubscriptionVector::iterator ipSubscription = subscriptionsCopy.begin(), e = subscriptionsCopy.end();
+            ipSubscription != e; ++ipSubscription)
+        {
+          if((*ipSubscription)->matches(*toProcess)) {
+            bool called = false;
+            Logger::getInstance()->log(std::string("EventInterpreter: Subscription '") + (*ipSubscription)->getID() + "' matches event");
+
+            EventInterpreterPlugin* plugin = getPluginByName((*ipSubscription)->getHandlerName());
+            if(plugin != NULL) {
+              Logger::getInstance()->log("EventInterpreter: Found handler '" + plugin->getName() + "' calling...");
+              try {
+                plugin->handleEvent(*toProcess, **ipSubscription);
+              } catch(std::runtime_error& e) {
+                Logger::getInstance()->log(std::string("Caught exception while handling event: ") + e.what(), lsError);
+              }
+              called = true;
+              Logger::getInstance()->log("EventInterpreter: called.");
+            }
+            if(!called) {
+              Logger::getInstance()->log(std::string("EventInterpreter: Could not find handler '") + (*ipSubscription)->getHandlerName(), lsInfo);
+            }
+
+          }
+        }
+
+        m_EventsProcessed++;
+        Logger::getInstance()->log(std::string("EventInterpreter: Done processing event '") + toProcess->getName() + "'", lsInfo);
+      }
+    }
+  } // executePendingEvent
 
   EventInterpreterPlugin* EventInterpreter::getPluginByName(const std::string& _name) {
     for(std::vector<EventInterpreterPlugin*>::iterator ipPlugin = m_Plugins.begin(), e = m_Plugins.end();

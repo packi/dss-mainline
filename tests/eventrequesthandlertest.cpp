@@ -57,20 +57,6 @@ protected:
   HashMapConstStringString m_Params;
 }; // Fixture
 
-class FixtureRunning : public Fixture {
-public:
-  FixtureRunning()
-  : Fixture() {
-    m_pInterpreter->run();
-  }
-
-  ~FixtureRunning() {
-    m_pQueue->shutdown();
-    m_pInterpreter->terminate();
-    sleepMS(5);
-  }
-}; // FixtureRunning
-
 BOOST_FIXTURE_TEST_CASE(testInvalidFunction, Fixture) {
   RestfulRequest req("event/asdf", m_Params);
   BOOST_CHECK_THROW(m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>()), std::runtime_error);
@@ -285,7 +271,7 @@ BOOST_FIXTURE_TEST_CASE(testGetInvalidSubscriptionID, Fixture) {
   testOkIs(response, false);
 }
 
-BOOST_FIXTURE_TEST_CASE(testSubscriptionsWork, FixtureRunning) {
+BOOST_FIXTURE_TEST_CASE(testSubscriptionsWork, Fixture) {
   const std::string kEventName = "someEvent";
   const std::string kSubscriptionID = "2";
   m_Params["name"] = kEventName;
@@ -300,7 +286,8 @@ BOOST_FIXTURE_TEST_CASE(testSubscriptionsWork, FixtureRunning) {
   boost::shared_ptr<Event> pEvent(new Event(kEventName));
   m_pQueue->pushEvent(pEvent);
 
-  sleepMS(5);
+  m_pInterpreter->executePendingEvent();
+  m_pInterpreter->executePendingEvent();
 
   RestfulRequest reqGet("event/get", m_Params);
   response = m_pHandler->jsonHandleRequest(reqGet, m_pSession);
