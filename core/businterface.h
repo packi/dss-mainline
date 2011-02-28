@@ -125,6 +125,7 @@ namespace dss {
 
     virtual void createGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
+    virtual void setApartmentID(uint8_t _apartmentID) = 0;
 
     virtual ~StructureModifyingBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureModifyingBusInterface

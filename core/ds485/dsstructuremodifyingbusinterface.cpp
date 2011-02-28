@@ -130,4 +130,13 @@ namespace dss {
     DSBusInterface::checkBroadcastResultCode(ret);
   } // removeGroup
 
+  void DSStructureModifyingBusInterface::setApartmentID(uint8_t _apartmentID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    int ret = dSMProperties_set_apartment_id(m_DSMApiHandle, m_BroadcastDSID,
+                                             _apartmentID);
+    DSBusInterface::checkBroadcastResultCode(ret);
+  }
 } // namespace dss

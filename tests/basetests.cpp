@@ -78,6 +78,8 @@ BOOST_AUTO_TEST_CASE(testStrToIntDef) {
   BOOST_CHECK_EQUAL(-1, strToIntDef(" ", -1));
   BOOST_CHECK_EQUAL(-1, strToIntDef("gfdfg", -1));
   BOOST_CHECK_EQUAL(1, strToIntDef("1", -1));
+  BOOST_CHECK_EQUAL(10, strToIntDef("0xa", -1));
+  BOOST_CHECK_EQUAL(-1, strToIntDef("0xqq", -1));
 } // testStrToIntDef
 
 BOOST_AUTO_TEST_CASE(testStrToUInt) {

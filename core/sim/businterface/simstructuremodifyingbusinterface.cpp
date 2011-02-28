@@ -98,4 +98,8 @@ namespace dss {
     }
   }
 
+  void SimStructureModifyingBusInterface::setApartmentID(uint8_t _apartmentID) {
+    // nop
+  } // setApartmentID
+
 } // namespace dss

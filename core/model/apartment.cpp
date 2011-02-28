@@ -48,7 +48,9 @@ namespace dss {
   Apartment::Apartment(DSS* _pDSS)
   : m_pBusInterface(NULL),
     m_pModelMaintenance(NULL),
-    m_pPropertySystem(NULL)
+    m_pPropertySystem(NULL),
+    m_ApartmentID(0),
+    m_IdIsSet(false)
   {
     // create default (broadcast) zone
     boost::shared_ptr<Zone> zoneZero = allocateZone(0);
@@ -322,7 +324,60 @@ namespace dss {
       foreach(boost::shared_ptr<Zone> pZone, m_Zones) {
         pZone->publishToPropertyTree();
       }
+
+      m_pPropertyNode->createProperty("id")
+        ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_ApartmentID, false));
     }
   } // setPropertySystem
 
+  void Apartment::initID() {
+    if (m_IdIsSet) {
+      setID(m_ApartmentID);
+      return;
+    }
+
+    if (m_pPropertyNode == NULL) {
+      Logger::getInstance()->log("Can not setup Apartment ID, property system not initialized");
+      return;
+    }
+
+    PropertyNodePtr interfaces = m_pPropertySystem->getProperty("/system/host/interfaces");
+    if(interfaces != NULL) {
+      std::string mac;
+      int count = interfaces->getChildCount();
+      // find first non-loopback interface
+      for (int i = 0; i < count; i++) {
+        PropertyNodePtr interface = interfaces->getChild(i);
+        if (interface->getName() != "lo") {
+          mac = interface->getPropertyByName("mac")->getAsString();
+          break;
+        }
+      }
+      if (!mac.empty()) {
+        std::string last = mac.substr(mac.rfind(':') + 1);
+        if (!last.empty()) {
+          int aID = strToIntDef("0x" + last, -1);
+          if (aID >= 0) {
+            setID((uint8_t)(aID & 7));
+          }
+        }
+      }
+    }//interfaces != NULL
+  }
+
+  void Apartment::setID(uint8_t _apartmentID) {
+    m_ApartmentID = _apartmentID;
+    m_IdIsSet = true;
+    try {
+      m_pBusInterface->getStructureModifyingBusInterface()->setApartmentID(m_ApartmentID);
+    } catch (std::runtime_error& e) {
+      Logger::getInstance()->log(std::string("Can not send apartment ID: ") +
+                                 e.what());
+
+    }
+  }
+
+  uint8_t Apartment::getID() {
+    return m_ApartmentID;
+  }
 } // namespace dss
