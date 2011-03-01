@@ -420,6 +420,9 @@ const char* kSavedPropsDirectory = "data/savedprops/";
 
   bool DSS::initSubsystems() {
     for (size_t i = 0; i < m_Subsystems.size(); i++) {
+      if(m_ShutdownFlag) {
+        return false;
+      }
       try {
         InitializeSubsystem(m_Subsystems.at(i));
       } catch(std::exception& e) {
@@ -548,11 +551,11 @@ const char* kSavedPropsDirectory = "data/savedprops/";
     bonjour.run();
 #endif
 
-    m_State = ssRunning;
-    boost::shared_ptr<Event> runningEvent(new Event("running"));
-    m_pEventQueue->pushEvent(runningEvent);
-
     if (!m_ShutdownFlag) {
+      m_State = ssRunning;
+      boost::shared_ptr<Event> runningEvent(new Event("running"));
+      m_pEventQueue->pushEvent(runningEvent);
+
       // pass control to the eventrunner
       m_pEventRunner->run();
     }

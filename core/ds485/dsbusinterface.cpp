@@ -254,6 +254,7 @@ namespace dss {
   } // busReady
 
   void DSBusInterface::shutdown() {
+    ThreadedSubsystem::shutdown();
     if(m_dsmApiReady) {
       m_pActionRequestInterface->setDSMApiHandle(NULL);
       m_pDeviceBusInterface->setDSMApiHandle(NULL);
