@@ -133,9 +133,11 @@ namespace dss {
 
   void ScriptLogger_finalize(JSContext *cx, JSObject *obj) {
     ScriptLoggerContextWrapper* pWrapper = static_cast<ScriptLoggerContextWrapper*>(JS_GetPrivate(cx, obj));
-    Logger::getInstance()->log("Finalizing ScriptLogger");
-    JS_SetPrivate(cx, obj, NULL);
-    delete pWrapper;
+    if(pWrapper != NULL) {
+      Logger::getInstance()->log("Finalizing ScriptLogger");
+      JS_SetPrivate(cx, obj, NULL);
+      delete pWrapper;
+    }
   } // finalize_set
 
   static JSClass ScriptLogger_class = {
