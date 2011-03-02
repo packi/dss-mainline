@@ -99,33 +99,35 @@ namespace dss {
 
   JSBool ScriptLogger_construct(JSContext *cx, JSObject *obj, uintN argc,
                                 jsval *argv, jsval *rval) {
-    JSString *str;
     ScriptContext *ctx = static_cast<ScriptContext *>(JS_GetContextPrivate(cx));
     JSRequest req(ctx);
     ScriptLoggerExtension *ext = dynamic_cast<ScriptLoggerExtension*>(ctx->getEnvironment().getExtension(ScriptLoggerExtensionName));
     assert(ext != NULL);
 
     if(argc >=1) {
+      std::string logFileName;
       try {
-        if (!JSVAL_IS_STRING(argv[0])) {
-          Logger::getInstance()->log("Expected log file name (string) as constructor parameter");
+        logFileName = ctx->convertTo<std::string>(argv[0]);
+      } catch(std::invalid_argument& e) {
+          Logger::getInstance()->log(std::string("Expected log file name (string) as constructor parameter") + e.what(), lsError);
           return JS_FALSE;
-        }
-        str = JS_ValueToString(cx, argv[0]);
-        if (!str) {
-          Logger::getInstance()->log("Expected log file name (string) as constructor parameter");
+      }
+      try {
+        if (!endsWith(logFileName, ".log")) {
+          Logger::getInstance()->log("Log file name must have .log extension",
+                                     lsError);
           return JS_FALSE;
         }
 
-        boost::shared_ptr<ScriptLogger> pLogger = ext->getLogger(JS_GetStringBytes(str));
+        boost::shared_ptr<ScriptLogger> pLogger = ext->getLogger(logFileName);
         ScriptLoggerContextWrapper* wrapper = new ScriptLoggerContextWrapper(pLogger);
         JS_SetPrivate(cx, obj, wrapper);
         return JS_TRUE;
       } catch(const ScriptException& e) {
-        Logger::getInstance()->log(std::string("ScriptLogger: Caught script exception: ") + e.what());
+        Logger::getInstance()->log(std::string("ScriptLogger: Caught script exception: ") + e.what(), lsError);
       }
     } else {
-      Logger::getInstance()->log("Expected log file name (string) as constructor parameter");
+      Logger::getInstance()->log("Expected log file name (string) as constructor parameter", lsError);
     }
 
     return JS_FALSE;
