@@ -242,10 +242,10 @@ namespace dss {
     int signal = strToIntDef( _event.getPropertyByName("signum"), -1);
     if (signal == SIGUSR1) {
       m_MapMutex.lock();
-      boost::ptr_map<const std::string, boost::weak_ptr<ScriptLogger> >::iterator i;
+      std::map<const std::string, boost::weak_ptr<ScriptLogger> >::iterator i;
       for (i = m_Loggers.begin(); i != m_Loggers.end(); i++) {
-        if (!i->second->expired()) {
-          i->second->lock()->reopenLogfile();
+        if (!i->second.expired()) {
+          i->second.lock()->reopenLogfile();
         }
       }
       m_MapMutex.unlock();
@@ -255,15 +255,15 @@ namespace dss {
   void ScriptLoggerExtension::extendContext(ScriptContext& _context) {
     JS_InitClass(_context.getJSContext(),
                  _context.getRootObject().getJSObject(),
-                NULL, &ScriptLogger_class, ScriptLogger_construct, 1, NULL,
-                ScriptLogger_methods, NULL, NULL);
+                 NULL, &ScriptLogger_class, ScriptLogger_construct, 1, NULL,
+                 ScriptLogger_methods, NULL, NULL);
 
   } // extendContext
 
   boost::shared_ptr<ScriptLogger> ScriptLoggerExtension::getLogger(const std::string& _filename) {
     boost::shared_ptr<ScriptLogger> result;
     m_MapMutex.lock();
-    boost::ptr_map<const std::string, boost::weak_ptr<ScriptLogger> >::iterator i = m_Loggers.find(_filename);
+    std::map<const std::string, boost::weak_ptr<ScriptLogger> >::iterator i = m_Loggers.find(_filename);
     if(i == m_Loggers.end()) {
       result.reset(new ScriptLogger(m_Directory, _filename, this));
       boost::weak_ptr<ScriptLogger> loggerWeakPtr(result);
@@ -277,7 +277,7 @@ namespace dss {
 
   void ScriptLoggerExtension::removeLogger(const std::string& _filename) {
     m_MapMutex.lock();
-    boost::ptr_map<const std::string, boost::weak_ptr<ScriptLogger> >::iterator i = m_Loggers.find(_filename);
+    std::map<const std::string, boost::weak_ptr<ScriptLogger> >::iterator i = m_Loggers.find(_filename);
     if(i != m_Loggers.end()) {
       m_Loggers.erase(i);
     } else {

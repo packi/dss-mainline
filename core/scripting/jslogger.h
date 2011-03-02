@@ -32,7 +32,6 @@ along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 
 #include <string>
 #include <boost/shared_ptr.hpp>
-#include <boost/ptr_container/ptr_map.hpp>
 
 namespace dss {
 
@@ -70,7 +69,7 @@ namespace dss {
     void reopenLogfiles(Event& _event, const EventSubscription& _subscription);
 
   private:
-    boost::ptr_map<const std::string, boost::weak_ptr<ScriptLogger> > m_Loggers;
+    std::map<const std::string, boost::weak_ptr<ScriptLogger> > m_Loggers;
     Mutex m_MapMutex;
     const std::string m_Directory;
     boost::shared_ptr<InternalEventRelayTarget> m_pRelayTarget;
