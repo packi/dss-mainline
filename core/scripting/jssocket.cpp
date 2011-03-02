@@ -107,13 +107,19 @@ namespace dss {
       return (m_pCallbackObject != NULL) && (m_CallbackFunction != JSVAL_NULL);
     }
 
+    void releaseCallbackObjects() {
+      m_pFunctionRooter.reset();
+      m_pCallbackObject.reset();
+      m_CallbackFunction = JSVAL_NULL;
+    }
+
     void callCallbackWithArguments(ScriptFunctionParameterList& _list) {
       if(hasCallback()) {
         JSAutoLocalRootScope rootScope(getContext().getJSContext());
         // copy callback data so we can clear the originals
         boost::shared_ptr<ScriptObject> pCallbackObjectCopy = m_pCallbackObject;
         jsval callbackFunctionCopy = m_CallbackFunction;
-        boost::shared_ptr<ScriptFunctionRooter> functionRoot = m_pFunctionRooter;//(new ScriptFunctionRooter(m_pContext, callbackFunctionCopy));
+        boost::shared_ptr<ScriptFunctionRooter> functionRoot = m_pFunctionRooter;
         // clear callback objects before calling the callback, we might overwrite
         // data if we do that afterwards
         m_pFunctionRooter.reset();
@@ -587,8 +593,12 @@ namespace dss {
 
   void tcpSocket_finalize(JSContext *cx, JSObject *obj) {
     SocketHelperInstance* pInstance = static_cast<SocketHelperInstance*>(JS_GetPrivate(cx, obj));
-    JS_SetPrivate(cx, obj, NULL);
-    boost::thread(boost::bind(&delayedDestroy, pInstance));
+    if(pInstance != NULL) {
+      Logger::getInstance()->log("Finalizing Socket");
+      JS_SetPrivate(cx, obj, NULL);
+      pInstance->releaseCallbackObjects();
+      boost::thread(boost::bind(&delayedDestroy, pInstance));
+    }
   } // tcpSocket_finalize
 
   JSBool tcpSocket_construct(JSContext *cx, JSObject *obj, uintN argc,
