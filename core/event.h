@@ -52,6 +52,7 @@ namespace dss {
   class ScheduledEvent;
   class EventRunner;
   class Zone;
+  class Group;
   class DeviceReference;
   class Apartment;
 
@@ -60,7 +61,7 @@ namespace dss {
   //-------------------------------------------------- Event
 
   typedef enum {
-    erlZone,
+    erlGroup,
     erlDevice,
     erlApartment
   } EventRaiseLocation;
@@ -75,13 +76,14 @@ namespace dss {
     std::string m_Time;
     bool m_TimeSet;
     EventRaiseLocation m_RaiseLocation;
-    boost::shared_ptr<Zone> m_RaisedAtZone;
+    boost::shared_ptr<Group> m_RaisedAtGroup;
     boost::shared_ptr<DeviceReference> m_RaisedAtDevice;
 
     Properties m_Properties;
   private:
     void reset();
   public:
+    Event(const std::string& _name, boost::shared_ptr<Group> _context);
     Event(const std::string& _name, boost::shared_ptr<Zone> _context);
     Event(const std::string& _name, boost::shared_ptr<DeviceReference> _ref);
     Event(const std::string& _name);
@@ -100,7 +102,7 @@ namespace dss {
     void setContext(const std::string& _value) { m_Context = _value; m_ContextSet = true; }
     void setTime(const std::string& _value) { m_Time = _value; m_TimeSet = true; }
 
-    boost::shared_ptr<const Zone> getRaisedAtZone(Apartment& _apartment) const;
+    boost::shared_ptr<const Group> getRaisedAtGroup(Apartment& _apartment) const;
     boost::shared_ptr<const DeviceReference> getRaisedAtDevice() const { return m_RaisedAtDevice; }
     EventRaiseLocation getRaiseLocation() { return m_RaiseLocation; }
 

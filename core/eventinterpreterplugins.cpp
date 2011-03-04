@@ -39,6 +39,8 @@
 #include "core/foreach.h"
 #include "core/model/set.h"
 #include "core/model/zone.h"
+#include "core/model/group.h"
+#include "core/model/device.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/function.hpp>
@@ -289,22 +291,25 @@ namespace dss {
         }
         EventRaiseLocation raiseLocation = _event.getRaiseLocation();
         ScriptObject source(*ctx, NULL);
-        if((raiseLocation == erlZone) || (raiseLocation == erlApartment)) {
+        if((raiseLocation == erlGroup) || (raiseLocation == erlApartment)) {
           if(DSS::hasInstance()) {
-            boost::shared_ptr<const Zone> zone =
-              _event.getRaisedAtZone(DSS::getInstance()->getApartment());
-            source.setProperty("set", ".zone(" + intToString(zone->getID()));
-            source.setProperty("zoneID", zone->getID());
+            boost::shared_ptr<const Group> group =
+              _event.getRaisedAtGroup(DSS::getInstance()->getApartment());
+            source.setProperty("set", ".zone(" + intToString(group->getZoneID()) +
+                               ").group(" + intToString(group->getID()) + ")");
+            source.setProperty("groupID", group->getID());
+            source.setProperty("zoneID", group->getZoneID());
             source.setProperty("isApartment", raiseLocation == erlApartment);
-            source.setProperty("isZone", raiseLocation == erlZone);
+            source.setProperty("isGroup", raiseLocation == erlGroup);
             source.setProperty("isDevice", false);
           }
         } else {
           boost::shared_ptr<const DeviceReference> device = _event.getRaisedAtDevice();
           source.setProperty("set", "dsid(" + device->getDSID().toString() + ")");
           source.setProperty("dsid", device->getDSID().toString());
+          source.setProperty("zoneID", device->getDevice()->getZoneID());
           source.setProperty("isApartment", false);
-          source.setProperty("isZone", false);
+          source.setProperty("isGroup", false);
           source.setProperty("isDevice", true);
         }
         raisedEvent.setProperty("source", &source);
@@ -540,12 +545,12 @@ namespace dss {
       SetBuilder builder(m_Apartment);
       Set to;
       if(_event.hasPropertySet(EventPropertyLocation)) {
-        to = builder.buildSet(_event.getPropertyByName(EventPropertyLocation), _event.getRaisedAtZone(m_Apartment));
+        to = builder.buildSet(_event.getPropertyByName(EventPropertyLocation), _event.getRaisedAtGroup(m_Apartment));
       } else {
         if(_subscription.getOptions()->hasParameter(EventPropertyLocation)) {
-          to = builder.buildSet(_subscription.getOptions()->getParameter(EventPropertyLocation), boost::shared_ptr<Zone>());
+          to = builder.buildSet(_subscription.getOptions()->getParameter(EventPropertyLocation), boost::shared_ptr<Group>());
         } else {
-          to = _event.getRaisedAtZone(m_Apartment)->getDevices();
+          to = _event.getRaisedAtGroup(m_Apartment)->getDevices();
         }
       }
       options->execute(to);

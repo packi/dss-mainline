@@ -31,8 +31,9 @@
 
 namespace dss {
 
-  class Zone;
+  class Group;
   class Apartment;
+  class Zone;
   class Set;
 
   class SetBuilder {
@@ -40,17 +41,18 @@ namespace dss {
     std::string m_SetDescription;
     Apartment& m_Apartment;
   protected:
-    Set restrictBy(const std::string& _identifier, const Set& _set, boost::shared_ptr<const Zone> _zone);
-    Set restrictByFunction(const std::string& _functionName, unsigned int& _index, const Set& _set, boost::shared_ptr<const Zone> _zone);
+    Set restrictBy(const std::string& _identifier, const Set& _set, boost::shared_ptr<const Group> _group);
+    Set restrictByFunction(const std::string& _functionName, unsigned int& _index, const Set& _set, boost::shared_ptr<const Group> _group);
     void skipWhitespace(unsigned int& _index);
     std::string readParameter(unsigned int& _index);
     int readInt(unsigned int& _index);
     dss_dsid_t readDSID(unsigned int& _index);
     std::string readString(unsigned int& _index);
-    Set parseSet(unsigned int& _index, const Set& _set, boost::shared_ptr<const Zone> _context);
+    Set parseSet(unsigned int& _index, const Set& _set, boost::shared_ptr<const Group> _context);
   public:
     SetBuilder(Apartment& _apartment);
 
+    Set buildSet(const std::string& _setDescription, boost::shared_ptr<const Group> _context);
     Set buildSet(const std::string& _setDescription, boost::shared_ptr<const Zone> _context);
   }; // SetBuilder
 
