@@ -161,8 +161,10 @@ namespace dss {
       m_pAttachedObject.reset(new SocketAttachedObject(&getContext(), this));
     }
 
-    void endBlockingCall() {
+    boost::shared_ptr<ScriptContextAttachedObject> endBlockingCall() {
+      boost::shared_ptr<ScriptContextAttachedObject> result = m_pAttachedObject;
       m_pAttachedObject.reset();
+      return result;
     }
   protected:
     SocketScriptContextExtension& m_Extension;
@@ -330,7 +332,7 @@ namespace dss {
       Logger::getInstance()->log("*** Connection callback");
       ScriptLock lock(&getContext());
       JSContextThread req(&getContext());
-      endBlockingCall();
+      boost::shared_ptr<ScriptContextAttachedObject> delayFreeing = endBlockingCall();
 
       if (!error) {
         success();
@@ -353,7 +355,7 @@ namespace dss {
       Logger::getInstance()->log("*** Send callback");
       ScriptLock lock(&getContext());
       JSContextThread req(&getContext());
-      endBlockingCall();
+      boost::shared_ptr<ScriptContextAttachedObject> delayFreeing = endBlockingCall();
       if(!error) {
         if(bytesTransfered == m_Data.size()) {
           m_Data.clear();
@@ -373,11 +375,11 @@ namespace dss {
         if(bytesTransfered == m_BytesToRead) {
           std::string result(m_DataBuffer, m_BytesToRead);
           m_BytesToRead = 0;
-          endBlockingCall();
+          boost::shared_ptr<ScriptContextAttachedObject> delayFreeing = endBlockingCall();
           callDataCallback(result);
         }
       } else {
-        endBlockingCall();
+        boost::shared_ptr<ScriptContextAttachedObject> delayFreeing = endBlockingCall();
         Logger::getInstance()->log("SocketHelperInstance::readCallback: error: " + error.message());
         callDataCallback("");
       }
@@ -395,10 +397,10 @@ namespace dss {
           line.erase(line.size() - _delimiter.size());
         }
         m_LineBuffer.consume(_bytesTransfered);
-        endBlockingCall();
+        boost::shared_ptr<ScriptContextAttachedObject> delayFreeing = endBlockingCall();
         callDataCallback(line);
       } else {
-        endBlockingCall();
+        boost::shared_ptr<ScriptContextAttachedObject> delayFreeing = endBlockingCall();
         Logger::getInstance()->log("SocketHelperInstance::receiveLineCallback: error: " + _error.message());
         callDataCallback("");
       }
@@ -407,7 +409,7 @@ namespace dss {
     void acceptCallback(const boost::system::error_code& error) {
       ScriptLock lock(&getContext());
       JSContextThread req(&getContext());
-      endBlockingCall();
+      boost::shared_ptr<ScriptContextAttachedObject> delayFreeing = endBlockingCall();
       if(!error) {
         if(hasCallback()) {
           JSObject* socketObj = JS_ConstructObject(getContext().getJSContext(), &tcpSocket_class, NULL, NULL);
