@@ -31,6 +31,7 @@
 #include "core/model/zone.h"
 #include "core/model/apartment.h"
 #include "core/model/group.h"
+#include "core/model/modelconst.h"
 
 using std::vector;
 
@@ -81,7 +82,7 @@ namespace dss {
     throw std::runtime_error("String should be enclosed by \"'\"");
   } // readString
 
-  Set SetBuilder::restrictByFunction(const std::string& _functionName, unsigned int& _index, const Set& _set, boost::shared_ptr<const Zone> _zone) {
+  Set SetBuilder::restrictByFunction(const std::string& _functionName, unsigned int& _index, const Set& _set, boost::shared_ptr<const Group> _group) {
     if(_index >= m_SetDescription.size()) {
       throw std::range_error("_index is out of bounds");
     }
@@ -115,10 +116,10 @@ namespace dss {
       std::string tagName = readString(_index);
       result = _set.getByTag(tagName);
     } else if(_functionName == "add") {
-      Set inner = parseSet(_index, _zone->getDevices(), _zone);
+      Set inner = parseSet(_index, _group->getDevices(), _group);
       result = _set.combine(inner);
     } else if(_functionName == "remove") {
-      Set inner = parseSet(_index, _zone->getDevices(), _zone);
+      Set inner = parseSet(_index, _group->getDevices(), _group);
       result = _set.remove(inner);
     } else if(_functionName == "empty") {
       // nop
@@ -146,21 +147,14 @@ namespace dss {
     return result;
   }
 
-  Set SetBuilder::restrictBy(const std::string& _identifier, const Set& _set, boost::shared_ptr<const Zone> _zone) {
+  Set SetBuilder::restrictBy(const std::string& _identifier, const Set& _set, boost::shared_ptr<const Group> _group) {
 
     try {
-      DeviceReference ref = _zone->getDevices().getByName(_identifier);
+      DeviceReference ref = _group->getDevices().getByName(_identifier);
       Set result;
       result.addDevice(ref);
       return result;
     } catch(ItemNotFoundException&) {
-    }
-
-    // check for a local group
-    boost::shared_ptr<Group> grp = _zone->getGroup(_identifier);
-    if(grp != NULL) {
-      Set result = _set.getByGroup(grp);
-      return result;
     }
 
     // check for a global group
@@ -181,7 +175,7 @@ namespace dss {
   } // restrictBy
 
 
-  Set SetBuilder::parseSet(unsigned int& _index, const Set& _set, boost::shared_ptr<const Zone> _context) {
+  Set SetBuilder::parseSet(unsigned int& _index, const Set& _set, boost::shared_ptr<const Group> _context) {
     skipWhitespace(_index);
     if(_index >= m_SetDescription.size()) {
       return _set;
@@ -232,18 +226,26 @@ namespace dss {
   }
 
   Set SetBuilder::buildSet(const std::string& _setDescription, boost::shared_ptr<const Zone> _context) {
+    if(_context != NULL) {
+      return buildSet(_setDescription, _context->getGroup(GroupIDBroadcast));
+    } else {
+      return buildSet(_setDescription, boost::shared_ptr<const Group>());
+    }
+  }
+
+  Set SetBuilder::buildSet(const std::string& _setDescription, boost::shared_ptr<const Group> _context) {
     Set result;
     m_SetDescription = _setDescription;
-    boost::shared_ptr<const Zone> context = _context;
+    boost::shared_ptr<const Group> context = _context;
     unsigned int index = 0;
     if(beginsWith(_setDescription, ".")) {
-      context = m_Apartment.getZone(0);
+      context = m_Apartment.getZone(0)->getGroup(GroupIDBroadcast);
       result = context->getDevices();
       index = 1;
     } else if(_context != NULL) {
       result = _context->getDevices();
     } else {
-      context = m_Apartment.getZone(0);
+      context = m_Apartment.getZone(0)->getGroup(GroupIDBroadcast);
     }
     result = parseSet(index, result, context);
 

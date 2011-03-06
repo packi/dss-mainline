@@ -489,7 +489,7 @@ namespace dss {
           }
         }
         boost::shared_ptr<Event> pEvent;
-        pEvent.reset(new Event("callScene", zone));
+        pEvent.reset(new Event("callScene", group));
         pEvent->setProperty("sceneID", intToString(_sceneID));
         raiseEvent(pEvent);
       } else {

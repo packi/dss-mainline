@@ -85,7 +85,7 @@ int AuthorizeAndGetSet(struct soap *soap, const char* _token, const char* _setSp
   }
   dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
   dss::SetBuilder builder(apt);
-  result = builder.buildSet(_setSpec, boost::shared_ptr<dss::Zone>());
+  result = builder.buildSet(_setSpec, boost::shared_ptr<dss::Group>());
   return SOAP_OK;
 } // authorizeAndGetSet
 

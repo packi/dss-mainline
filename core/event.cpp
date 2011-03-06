@@ -28,6 +28,8 @@
 
 #include "foreach.h"
 #include "core/model/apartment.h"
+#include "core/model/zone.h"
+#include "core/model/modelconst.h"
 #include "core/model/device.h"
 #include "core/model/devicereference.h"
 #include "core/model/set.h"
@@ -76,8 +78,16 @@ namespace dss {
 
   Event::Event(const std::string& _name, boost::shared_ptr<Zone> _zone)
   : m_Name(_name),
-    m_RaiseLocation(erlZone),
-    m_RaisedAtZone(_zone)
+    m_RaiseLocation(erlGroup),
+    m_RaisedAtGroup(_zone->getGroup(GroupIDBroadcast))
+  {
+    reset();
+  } // ctor
+
+  Event::Event(const std::string& _name, boost::shared_ptr<Group> _group)
+  : m_Name(_name),
+    m_RaiseLocation(erlGroup),
+    m_RaisedAtGroup(_group)
   {
     reset();
   } // ctor
@@ -165,14 +175,14 @@ namespace dss {
     return false;
   }
 
-  boost::shared_ptr<const Zone> Event::getRaisedAtZone(Apartment& _apartment) const {
-    if(m_RaiseLocation == erlZone) {
-      return m_RaisedAtZone;
+  boost::shared_ptr<const Group> Event::getRaisedAtGroup(Apartment& _apartment) const {
+    if(m_RaiseLocation == erlGroup) {
+      return m_RaisedAtGroup;
     } else if(m_RaiseLocation == erlDevice) {
       boost::shared_ptr<const Device> dev = m_RaisedAtDevice->getDevice();
-      return dev->getApartment().getZone(dev->getZoneID());
+      return dev->getApartment().getZone(dev->getZoneID())->getGroup(dev->getGroupIdByIndex(0));
     } else {
-      return _apartment.getZone(0);
+      return _apartment.getZone(0)->getGroup(GroupIDBroadcast);
     }
   } // getRaisedAtZone
 
