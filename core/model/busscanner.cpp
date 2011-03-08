@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2010 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2010,2011 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
@@ -53,25 +53,25 @@ namespace dss {
     _dsMeter->setIsValid(false);
 
     log("scanDSMeter: Start " + _dsMeter->getDSID().toString() , lsInfo);
+    // TODO: implement energy border handling
+
+    try {
+      DSMeterSpec_t spec = m_Interface.getDSMeterSpec(_dsMeter->getDSID());
+      _dsMeter->setArmSoftwareVersion(spec.SoftwareRevisionARM);
+      _dsMeter->setDspSoftwareVersion(spec.SoftwareRevisionDSP);
+      _dsMeter->setHardwareVersion(spec.HardwareVersion);
+      _dsMeter->setApiVersion(spec.APIVersion);
+      _dsMeter->setHardwareName(spec.Name);
+    } catch(BusApiError& e) {
+      log("scanDSMeter: Error getting dSMSpecs", lsFatal);
+      return false;
+    }
+
     std::vector<int> zoneIDs;
     try {
       zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
     } catch(BusApiError& e) {
       log("scanDSMeter: Error getting ZoneIDs", lsFatal);
-      return false;
-    }
-
-    // TODO: implement energy border handling
-
-    try {
-      DSMeterSpec_t spec = m_Interface.getDSMeterSpec(_dsMeter->getDSID());
-      _dsMeter->setArmSoftwareVersion(spec.get<1>());
-      _dsMeter->setDspSoftwareVersion(spec.get<2>());
-      _dsMeter->setHardwareVersion(spec.get<3>());
-      _dsMeter->setApiVersion(spec.get<4>());
-      _dsMeter->setHardwareName(spec.get<5>());
-    } catch(BusApiError& e) {
-      log("scanDSMeter: Error getting dSMSpecs", lsFatal);
       return false;
     }
 
@@ -94,50 +94,34 @@ namespace dss {
   } // scanDSMeter
 
   bool BusScanner::scanZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone) {
-    std::vector<int> devices;
+    std::vector<DeviceSpec_t> devices;
     try {
       devices = m_Interface.getDevicesInZone(_dsMeter->getDSID(), _zone->getID());
     } catch(BusApiError& e) {
       log("scanDSMeter: Error getting getDevicesInZone", lsFatal);
       return false;
     }
-    foreach(int devID, devices) {
-      scanDeviceOnBus(_dsMeter, _zone, devID);
+    foreach(DeviceSpec_t& spec, devices) {
+      initializeDeviceFromSpec(_dsMeter, _zone, spec);
     }
 
     return scanGroupsOfZone(_dsMeter, _zone);
   } // scanZone
 
   bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, devid_t _shortAddress) {
-    dss_dsid_t dsid;
-    try {
-      dsid = m_Interface.getDSIDOfDevice(_dsMeter->getDSID(), _shortAddress);
-    } catch(BusApiError& e) {
-      log("scanDeviceOnBus: Error getting getDSIDOfDevice:" + std::string(e.what()) + " " +
-          dsid.toString() + " " + intToString(_shortAddress), lsFatal);
-      return false;
-    }
+    DeviceSpec_t spec = m_Interface.deviceGetSpec(_shortAddress, _dsMeter->getDSID());
+    return initializeDeviceFromSpec(_dsMeter, _zone, spec);
+  } // scanDeviceOnBus
 
-    int functionID = 0;
-    int productID = 0;
-    int revisionID = 0;
-    try {
-      DeviceSpec_t spec = m_Interface.deviceGetSpec(_shortAddress, _dsMeter->getDSID());
-      functionID = spec.get<0>();
-      productID = spec.get<1>();
-      revisionID = spec.get<2>();
-    } catch(BusApiError& e) {
-      log(std::string("scanDSMeter: Error getting device spec ") + e.what(), lsFatal);
-      return false;
-    }
-    log("scanDeviceOnBus:    Found device with address: " + intToString(_shortAddress));
-    log("scanDeviceOnBus:    DSID:        " + dsid.toString());
-    log("scanDeviceOnBus:    Function-ID: " + unsignedLongIntToHexString(functionID) +
-        ", Product-ID: " + unsignedLongIntToHexString(productID) +
-        ", Revision-ID: " + unsignedLongIntToHexString(revisionID)
+  bool BusScanner::initializeDeviceFromSpec(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, DeviceSpec_t& _spec) {
+    log("scanDeviceOnBus:    Found device with address: " + intToString(_spec.ShortAddress));
+    log("scanDeviceOnBus:    DSID:        " + _spec.DSID.toString());
+    log("scanDeviceOnBus:    Function-ID: " + unsignedLongIntToHexString(_spec.FunctionID) +
+        ", Product-ID: " + unsignedLongIntToHexString(_spec.ProductID) +
+        ", Revision-ID: " + unsignedLongIntToHexString(_spec.Version)
         );
 
-    boost::shared_ptr<Device> dev = m_Apartment.allocateDevice(dsid);
+    boost::shared_ptr<Device> dev = m_Apartment.allocateDevice(_spec.DSID);
     DeviceReference devRef(dev, &m_Apartment);
 
     // remove from old dsMeter
@@ -157,27 +141,18 @@ namespace dss {
       }
     }
 
-    dev->setShortAddress(_shortAddress);
+    dev->setShortAddress(_spec.ShortAddress);
     dev->setDSMeter(_dsMeter);
     dev->setZoneID(_zone->getID());
-    dev->setFunctionID(functionID);
-    dev->setProductID(productID);
-    dev->setRevisionID(revisionID);
-
-    try {
-      bool locked = m_Interface.isLocked(dev);
-      dev->setIsLockedInDSM(locked);
-
-      log(std::string("scanDeviceOnBus:   Device is ") + (locked ? "locked" : "unlocked"));
-    } catch(BusApiError& e) {
-      log(std::string("scanDeviceOnBus: Error getting devices lock state, not aborting scan (") + e.what() + ")", lsWarning);
-    }
-
+    dev->setFunctionID(_spec.FunctionID);
+    dev->setProductID(_spec.ProductID);
+    dev->setRevisionID(_spec.Version);
+    dev->setIsLockedInDSM(_spec.Locked);
+    dev->setHasOutputLoad(_spec.OutputHasLoad);
     dev->resetGroups();
 
-    std::vector<int> groupIDsPerDevice = m_Interface.getGroupsOfDevice(_dsMeter->getDSID(), _shortAddress);
-    foreach(int groupID, groupIDsPerDevice) {
-      log(std::string("scanDeviceOnBus: adding device ") + intToString(_shortAddress) + " to group " + intToString(groupID));
+    foreach(int groupID, _spec.Groups) {
+      log(std::string("scanDeviceOnBus: adding device ") + intToString(_spec.ShortAddress) + " to group " + intToString(groupID));
       dev->addToGroup(groupID);
     }
 
@@ -188,7 +163,7 @@ namespace dss {
 
     {
       boost::shared_ptr<Event> readyEvent(new Event("new_device"));
-      readyEvent->setProperty("device", dsid.toString());
+      readyEvent->setProperty("device", _spec.DSID.toString());
       readyEvent->setProperty("zone", intToString(_zone->getID()));
       if(DSS::hasInstance()) {
         DSS::getInstance()->getEventQueue().pushEvent(readyEvent);

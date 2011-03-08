@@ -41,14 +41,11 @@ namespace dss {
     virtual std::vector<DSMeterSpec_t> getDSMeters();
     virtual DSMeterSpec_t getDSMeterSpec(const dss_dsid_t& _dsMeterID);
     virtual std::vector<int> getZones(const dss_dsid_t& _dsMeterID);
-    virtual std::vector<int> getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
+    virtual std::vector<DeviceSpec_t> getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
     virtual std::vector<int> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID);
-    virtual std::vector<int> getGroupsOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID);
-    virtual dss_dsid_t getDSIDOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID);
     virtual int getLastCalledScene(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _groupID);
     virtual bool getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper);
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID);
-    virtual bool isLocked(boost::shared_ptr<const Device> _device);
     virtual std::string getSceneName(dss_dsid_t _dsMeterID, boost::shared_ptr< dss::Group > _group, const uint8_t _sceneNumber);
   private:
     int getGroupCount(const dss_dsid_t& _dsMeterID, const int _zoneID);

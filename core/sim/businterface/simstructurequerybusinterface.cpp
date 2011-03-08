@@ -42,7 +42,14 @@ namespace dss {
   } // getDSMeters
 
   DSMeterSpec_t SimStructureQueryBusInterface::getDSMeterSpec(const dss_dsid_t& _dsMeterID) {
-    return DSMeterSpec_t(_dsMeterID, 0, 0, 0, 0, "dSMSim11");
+    DSMeterSpec_t result;
+    result.APIVersion = 0;
+    result.DSID = _dsMeterID;
+    result.HardwareVersion = 0;
+    result.Name = "DSMSim11";
+    result.SoftwareRevisionARM = 0;
+    result.SoftwareRevisionDSP = 0;
+    return result;
   } // getDSMeterSpec
 
   std::vector<int> SimStructureQueryBusInterface::getZones(const dss_dsid_t& _dsMeterID) {
@@ -54,13 +61,23 @@ namespace dss {
     return result;
   } // getZones
 
-  std::vector<int> SimStructureQueryBusInterface::getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
-    std::vector<int> result;
+  std::vector<DeviceSpec_t> SimStructureQueryBusInterface::getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    std::vector<DeviceSpec_t> result;
     boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_dsMeterID);
     if(pMeter != NULL) {
       std::vector<DSIDInterface*> devices = pMeter->getDevicesOfZone(_zoneID);
       foreach(DSIDInterface* pDevice, devices) {
-        result.push_back(pDevice->getShortAddress());
+        DeviceSpec_t spec;
+        spec.FunctionID = pDevice->getFunctionID();
+        spec.ProductID = pDevice->getProductID();
+        spec.Version = pDevice->getProductRevision();
+        spec.ShortAddress = pDevice->getShortAddress();
+        spec.Locked = pDevice->isLocked();
+        spec.OutputHasLoad = true;
+        spec.DSID = pDevice->getDSID();
+        spec.SerialNumber = 0;
+        spec.Groups = pMeter->getGroupsOfDevice(pDevice->getShortAddress());
+        result.push_back(spec);
       }
     }
     return result;
@@ -75,24 +92,6 @@ namespace dss {
     return result;
   } // getGroups
 
-  std::vector<int> SimStructureQueryBusInterface::getGroupsOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) {
-    std::vector<int> result;
-    boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_dsMeterID);
-    if(pMeter != NULL) {
-      result = pMeter->getGroupsOfDevice(_deviceID);
-    }
-    return result;
-  } // getGroupsOfDevice
-
-  dss_dsid_t SimStructureQueryBusInterface::getDSIDOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) {
-    dss_dsid_t result = NullDSID;
-    boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_dsMeterID);
-    if(pMeter != NULL) {
-      result = pMeter->lookupDevice(_deviceID).getDSID();
-    }
-    return result;
-  } // getDSIDOfDevice
-
   int SimStructureQueryBusInterface::getLastCalledScene(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _groupID) {
     return SceneOff; // TODO: implement if it gets implemented on the dSM11
   } // getLastCalledScene
@@ -103,30 +102,21 @@ namespace dss {
 
   DeviceSpec_t SimStructureQueryBusInterface::deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID) {
     boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_dsMeterID);
-    int functionID = 0;
-    int productID = 0;
-    int revision = 0;
-    int busAddress = 0;
+    DeviceSpec_t result;
     if(pMeter != NULL) {
       DSIDInterface& device = pMeter->lookupDevice(_id);
-      functionID = device.getFunctionID();
-      productID = device.getProductID();
-      revision = device.getProductRevision();
-      busAddress = device.getShortAddress();
+      result.FunctionID = device.getFunctionID();
+      result.ProductID = device.getProductID();
+      result.Version = device.getProductRevision();
+      result.ShortAddress = device.getShortAddress();
+      result.Locked = device.isLocked();
+      result.OutputHasLoad = true;
+      result.DSID = device.getDSID();
+      result.SerialNumber = 0;
+      result.Groups = pMeter->getGroupsOfDevice(device.getShortAddress());
     }
-    return DeviceSpec_t(functionID, productID, revision, busAddress);
+    return result;
   } // deviceGetSpec
-
-  bool SimStructureQueryBusInterface::isLocked(boost::shared_ptr<const Device> _device) {
-    boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_device->getDSMeterDSID());
-    if(pMeter != NULL) {
-      DSIDInterface* pDevice = pMeter->getSimulatedDevice(_device->getDSID());
-      if(pDevice != NULL) {
-        return pDevice->isLocked();
-      }
-    }
-    return false;
-  } // isLocked
 
   std::string SimStructureQueryBusInterface::getSceneName(dss_dsid_t _dsMeterID,
                                   boost::shared_ptr<Group> _group,

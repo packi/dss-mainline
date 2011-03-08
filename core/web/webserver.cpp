@@ -32,6 +32,7 @@
 #include <string.h>
 
 #include <boost/filesystem.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include "core/logger.h"
 #include "core/dss.h"

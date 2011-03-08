@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2009 digitalSTROM.org, Zurich, Switzerland
+    Copyright (c) 2009,2011 digitalSTROM.org, Zurich, Switzerland
 
     Author: Patrick Staehlin, futureLAB AG <pstaehlin@futurelab.ch>
 
@@ -29,8 +29,6 @@
 
 #include <string>
 #include <vector>
-#include <utility>
-#include <boost/tuple/tuple.hpp>
 #include <boost/shared_ptr.hpp>
 
 namespace dss {
@@ -40,8 +38,27 @@ namespace dss {
   class BusInterface;
   class Group;
 
-  typedef boost::tuple<dss_dsid_t, int, int, int, int, std::string> DSMeterSpec_t; // bus-id, arm-sw-version, dsp-sw-version, hw-version, api version, name
-  typedef boost::tuple<int, int, int, int> DeviceSpec_t; // function id, product id, revision, bus address
+  typedef struct {
+    dss_dsid_t DSID;
+    uint32_t SoftwareRevisionARM;
+    uint32_t SoftwareRevisionDSP;
+    uint32_t HardwareVersion;
+    uint16_t APIVersion;
+    std::string Name;
+  } DSMeterSpec_t;
+
+  typedef struct {
+    devid_t ShortAddress;
+    uint16_t FunctionID;
+    uint16_t ProductID;
+    uint16_t VendorID;
+    uint16_t Version;
+    uint32_t SerialNumber;
+    bool Locked;
+    bool OutputHasLoad;
+    std::vector<int> Groups;
+    dss_dsid_t DSID;
+  } DeviceSpec_t;
 
   class DeviceBusInterface {
   public:
@@ -81,15 +98,10 @@ namespace dss {
     /** Returns a std::vector conatining the zone-ids of the specified dsMeter */
     virtual std::vector<int> getZones(const dss_dsid_t& _dsMeterID) = 0;
     /** Returns the bus-ids of the devices present in the given zone of the specified dsMeter */
-    virtual std::vector<int> getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
+    virtual std::vector<DeviceSpec_t> getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
 
     /** Returns the a std::vector containing the group-ids of the given zone on the specified dsMeter */
     virtual std::vector<int> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) = 0;
-
-    virtual std::vector<int> getGroupsOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) = 0;
-
-    /** Returns the DSID of a given device */
-    virtual dss_dsid_t getDSIDOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) = 0;
 
     virtual int getLastCalledScene(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _groupID) = 0;
     virtual bool getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) = 0;
@@ -98,7 +110,6 @@ namespace dss {
     virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID) = 0;
 
     virtual ~StructureQueryBusInterface() {}; // please the compiler (virtual dtor)
-    virtual bool isLocked(boost::shared_ptr<const Device> _device) = 0;
     virtual std::string getSceneName(dss_dsid_t _dsMeterID, boost::shared_ptr<Group> _group, const uint8_t _sceneNumber) = 0;
   }; // StructureQueryBusInterface
 
