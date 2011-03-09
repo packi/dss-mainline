@@ -359,7 +359,11 @@ namespace dss {
           try {
             if(meterToAsk != NULL) {
               log("Getting scene-names data from " + meterToAsk->getDSID().toString());
-              for(unsigned int sceneNumber = 0; sceneNumber <= MaxSceneNumber; sceneNumber++) {
+              const int MaxSceneNumberOutsideZoneZero = 63;
+              const int sceneNumbersToRead =
+                (zone->getID() == 0 ? MaxSceneNumber :
+                                      MaxSceneNumberOutsideZoneZero);
+              for(unsigned int sceneNumber = 0; sceneNumber <= sceneNumbersToRead; sceneNumber++) {
                 std::string sceneName =
                   m_pStructureQueryBusInterface->getSceneName(
                     meterToAsk->getDSID(),
