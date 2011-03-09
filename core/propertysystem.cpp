@@ -823,7 +823,7 @@ namespace dss {
     checkReadAccess();
     for(PropertyList::iterator it = m_ChildNodes.begin();
          it != m_ChildNodes.end(); ++it) {
-      if((_flagsMask == Flag(0)) || (*it)->hasFlag(Flag(_flagsMask))) {
+      if((_flagsMask == Flag(0)) || (*it)->searchForFlag(Flag(_flagsMask))) {
         if(!(*it)->saveAsXML(_doc, _parent, _flagsMask)) {
           return false;
         }
@@ -831,6 +831,18 @@ namespace dss {
     }
     return true;
   } // saveChildrenAsXML
+
+  bool PropertyNode::searchForFlag(Flag _flag) {
+    if(!hasFlag(_flag)) {
+      foreach(PropertyNodePtr pChild, m_ChildNodes) {
+        if(pChild->searchForFlag(_flag)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    return true;
+  } // searchForFlag
 
   bool PropertyNode::loadFromNode(Node* _pNode) {
     checkWriteAccess();
