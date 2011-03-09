@@ -821,10 +821,9 @@ namespace dss {
 
   bool PropertyNode::saveChildrenAsXML(Poco::AutoPtr<Poco::XML::Document>& _doc, Poco::AutoPtr<Poco::XML::Element>& _parent, const int _flagsMask) {
     checkReadAccess();
-    for(PropertyList::iterator it = m_ChildNodes.begin();
-         it != m_ChildNodes.end(); ++it) {
-      if((_flagsMask == Flag(0)) || (*it)->searchForFlag(Flag(_flagsMask))) {
-        if(!(*it)->saveAsXML(_doc, _parent, _flagsMask)) {
+    foreach(PropertyNodePtr pChild, m_ChildNodes) {
+      if((_flagsMask == Flag(0)) || pChild->searchForFlag(Flag(_flagsMask))) {
+        if(!pChild->saveAsXML(_doc, _parent, _flagsMask)) {
           return false;
         }
       }
