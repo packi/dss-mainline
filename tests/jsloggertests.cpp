@@ -63,40 +63,40 @@ BOOST_AUTO_TEST_CASE(testOneLoggerGetsCleanedUp) {
   ScriptLoggerExtension* ext = new ScriptLoggerExtension(getTempDir(), interpreter);
   env->addExtension(ext);
 
-  fs::remove(getTempDir() + "blalog");
-  fs::remove(getTempDir() + "blalog2");
+  fs::remove(getTempDir() + "blalog.log");
+  fs::remove(getTempDir() + "blalog2.log");
 
   {
     boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-    ctx->evaluate<void>("var logger = new Logger('blalog');\n");
+    ctx->evaluate<void>("var logger = new Logger('blalog.log');\n");
     BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 1); 
   }
-  
-  BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 0); 
-  
-  {
-    boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-    ctx->evaluate<void>("var logger = new Logger('blalog');\n");
-    BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 1); 
-    ctx->evaluate<void>("var logger2 = new Logger('blalog');\n");
-    BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 1); 
-  }
-  
-  BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 0); 
+
+  BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 0);
 
   {
     boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-    ctx->evaluate<void>("var logger = new Logger('blalog');\n");
+    ctx->evaluate<void>("var logger = new Logger('blalog.log');\n");
     BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 1); 
-    ctx->evaluate<void>("var logger2 = new Logger('blalog2');\n");
+    ctx->evaluate<void>("var logger2 = new Logger('blalog.log');\n");
+    BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 1); 
+  }
+
+  BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 0);
+
+  {
+    boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+    ctx->evaluate<void>("var logger = new Logger('blalog.log');\n");
+    BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 1); 
+    ctx->evaluate<void>("var logger2 = new Logger('blalog2.log');\n");
 
     BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 2); 
   }
-  
+
   BOOST_CHECK_EQUAL(ext->getNumberOfLoggers(), 0);
 
-  fs::remove(getTempDir() + "blalog");
-  fs::remove(getTempDir() + "blalog2");
+  fs::remove(getTempDir() + "blalog.log");
+  fs::remove(getTempDir() + "blalog2.log");
 
   queue.shutdown();
   interpreter.terminate();
@@ -115,29 +115,29 @@ BOOST_AUTO_TEST_CASE(testLogger) {
   interpreter.addPlugin(relay);
 
   interpreter.run();
-    
+
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
   ScriptLoggerExtension* ext = new ScriptLoggerExtension(getTempDir(), interpreter);
   env->addExtension(ext);
 
-  fs::remove(getTempDir() + "blalog");
+  fs::remove(getTempDir() + "blalog.log");
 
   {
     boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-    ctx->evaluate<void>("var logger = new Logger('blalog');\n"
+    ctx->evaluate<void>("var logger = new Logger('blalog.log');\n"
                         "logger.log('kraah');\n");
   }
-  
-  BOOST_CHECK(fs::exists(getTempDir() + "blalog"));
+
+  BOOST_CHECK(fs::exists(getTempDir() + "blalog.log"));
 
 
   std::string line;
   std::string text;
 
 
-  if (fs::exists(getTempDir() + "blalog")) {
-    ifstream blalog(std::string(getTempDir() + "blalog").c_str());
+  if (fs::exists(getTempDir() + "blalog.log")) {
+    ifstream blalog(std::string(getTempDir() + "blalog.log").c_str());
     if (blalog.is_open()) {
       while (!blalog.eof()) {
         getline(blalog, line);
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(testLogger) {
 
   BOOST_CHECK(text.find("kraah") != std::string::npos);
 
-  fs::remove(getTempDir() + "blalog");
+  fs::remove(getTempDir() + "blalog.log");
 
   queue.shutdown();
   interpreter.terminate();
@@ -167,25 +167,25 @@ BOOST_AUTO_TEST_CASE(testLogrotate) {
   interpreter.addPlugin(relay);
 
   interpreter.run();
-    
+
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
   ScriptLoggerExtension* ext = new ScriptLoggerExtension(getTempDir(), interpreter);
   env->addExtension(ext);
 
-  fs::remove(getTempDir() + "blalog");
+  fs::remove(getTempDir() + "blalog.log");
 
   {
     boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-    ctx->evaluate<void>("var logger = new Logger('blalog');\n"
+    ctx->evaluate<void>("var logger = new Logger('blalog.log');\n"
                         "logger.log('kraah');\n");
   }
-  
-  BOOST_CHECK(fs::exists(getTempDir() + "blalog"));
 
-  fs::remove(getTempDir() + "blalog1");
-  fs::copy_file(getTempDir() + "blalog", getTempDir() + "blalog1");
-  fs::remove(getTempDir() + "blalog");
+  BOOST_CHECK(fs::exists(getTempDir() + "blalog.log"));
+
+  fs::remove(getTempDir() + "blalog1.log");
+  fs::copy_file(getTempDir() + "blalog.log", getTempDir() + "blalog1.log");
+  fs::remove(getTempDir() + "blalog.log");
 
   boost::shared_ptr<Event> pEvent(new Event("SIGNAL"));
   pEvent->setProperty("signum", intToString(SIGUSR1));
@@ -195,14 +195,14 @@ BOOST_AUTO_TEST_CASE(testLogrotate) {
 
   {
     boost::scoped_ptr<ScriptContext> ctx(env->getContext());
-    ctx->evaluate<void>("var logger = new Logger('blalog');\n"
+    ctx->evaluate<void>("var logger = new Logger('blalog.log');\n"
                         "logger.log('kraah');\n");
   }
-  
-  BOOST_CHECK(fs::exists(getTempDir() + "blalog"));
- 
-  fs::remove(getTempDir() + "blalog");
-  fs::remove(getTempDir() + "blalog1");
+
+  BOOST_CHECK(fs::exists(getTempDir() + "blalog.log"));
+
+  fs::remove(getTempDir() + "blalog.log");
+  fs::remove(getTempDir() + "blalog1.log");
 
   queue.shutdown();
   interpreter.terminate();
