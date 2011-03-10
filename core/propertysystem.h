@@ -424,6 +424,7 @@ namespace dss {
     aValueType getValueType();
 
     bool hasFlag(Flag _flag) const { return (m_Flags & _flag) == _flag; }
+    bool searchForFlag(Flag _flag);
     void setFlag(Flag _flag, bool _value);
 
     void alias(PropertyNodePtr _target);

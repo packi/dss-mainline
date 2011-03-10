@@ -363,6 +363,31 @@ BOOST_AUTO_TEST_CASE(testFlags) {
   BOOST_CHECK(node->hasFlag(PropertyNode::Archive));
 } // testFlags
 
+BOOST_AUTO_TEST_CASE(testSearchForFlag) {
+  boost::scoped_ptr<PropertySystem> propSys(new PropertySystem());
+  PropertyNodePtr node = propSys->createProperty("/testing");
+
+  BOOST_CHECK(!node->hasFlag(PropertyNode::Archive));
+  BOOST_CHECK(!node->searchForFlag(PropertyNode::Archive));
+
+  PropertyNodePtr subNode = node->createProperty("subnode");
+  subNode->setFlag(PropertyNode::Archive, true);
+
+  BOOST_CHECK(!node->hasFlag(PropertyNode::Archive));
+
+  node->setFlag(PropertyNode::Archive, false);
+
+  BOOST_CHECK(!node->hasFlag(PropertyNode::Archive));
+  BOOST_CHECK(subNode->hasFlag(PropertyNode::Archive));
+  BOOST_CHECK(node->searchForFlag(PropertyNode::Archive));
+
+  node->setFlag(PropertyNode::Archive, true);
+
+  BOOST_CHECK(node->hasFlag(PropertyNode::Archive));
+  BOOST_CHECK(subNode->hasFlag(PropertyNode::Archive));
+  BOOST_CHECK(node->searchForFlag(PropertyNode::Archive));
+} // testSearchForFlag
+
 BOOST_AUTO_TEST_CASE(testPropertyNodeGetAsString) {
   PropertySystem propSys;
 
