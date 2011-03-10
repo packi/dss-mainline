@@ -359,7 +359,6 @@ namespace dss {
           try {
             if(meterToAsk != NULL) {
               log("Getting scene-names data from " + meterToAsk->getDSID().toString());
-              const int MaxSceneNumberOutsideZoneZero = 63;
               const int sceneNumbersToRead =
                 (zone->getID() == 0 ? MaxSceneNumber :
                                       MaxSceneNumberOutsideZoneZero);

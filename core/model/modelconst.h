@@ -55,6 +55,7 @@ namespace dss {
   const uint8_t SceneAlarm = 0x4A;
 
   const uint8_t MaxSceneNumber = 0xFF;
+  const uint8_t MaxSceneNumberOutsideZoneZero = 0x3f;
 
   const uint16_t SceneFlagLocalOff = 0x0100;
 
