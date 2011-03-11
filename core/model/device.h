@@ -61,6 +61,7 @@ namespace dss {
     DateTime m_LastDiscovered;
     DateTime m_FirstSeen;
     bool m_IsLockedInDSM;
+    bool m_HasOutputLoad;
 
     PropertyNodePtr m_pAliasNode;
     PropertyNodePtr m_TagsNode;
@@ -198,6 +199,9 @@ namespace dss {
     void lock();
     /** Tells the dSM that it may forget a device if it's not present. */
     void unlock();
+
+    bool getHasOutputLoad() const { return m_HasOutputLoad; }
+    void setHasOutputLoad(const bool _value) { m_HasOutputLoad = _value; }
 
     bool hasTag(const std::string& _tagName) const;
     void addTag(const std::string& _tagName);

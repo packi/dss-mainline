@@ -88,6 +88,8 @@ namespace dss {
           ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_LastDiscovered, &DateTime::toString));
         m_pPropertyNode->createProperty("locked")
           ->linkToProxy(PropertyProxyReference<bool>(m_IsLockedInDSM, false));
+        m_pPropertyNode->createProperty("hasOutputLoad")
+          ->linkToProxy(PropertyProxyReference<bool>(m_HasOutputLoad, false));
         m_TagsNode = m_pPropertyNode->createProperty("tags");
         m_TagsNode->setFlag(PropertyNode::Archive, true);
       }

@@ -335,7 +335,7 @@ namespace dss {
       }
     }
 
-    virtual std::vector<int> getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    virtual std::vector<DeviceSpec_t> getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
       if(isHandledBySimulation(_dsMeterID)) {
         return m_pSimulationInterface->getDevicesInZone(_dsMeterID, _zoneID);
       } else {
@@ -348,22 +348,6 @@ namespace dss {
         return m_pSimulationInterface->getGroups(_dsMeterID, _zoneID);
       } else {
         return m_pInner->getGroups(_dsMeterID, _zoneID);
-      }
-    }
-
-    virtual std::vector<int> getGroupsOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) {
-      if(isHandledBySimulation(_dsMeterID)) {
-        return m_pSimulationInterface->getGroupsOfDevice(_dsMeterID, _deviceID);
-      } else {
-        return m_pInner->getGroupsOfDevice(_dsMeterID, _deviceID);
-      }
-    }
-
-    virtual dss_dsid_t getDSIDOfDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) {
-      if(isHandledBySimulation(_dsMeterID)) {
-        return m_pSimulationInterface->getDSIDOfDevice(_dsMeterID, _deviceID);
-      } else {
-        return m_pInner->getDSIDOfDevice(_dsMeterID, _deviceID);
       }
     }
 
@@ -388,14 +372,6 @@ namespace dss {
         return m_pSimulationInterface->deviceGetSpec(_id, _dsMeterID);
       } else {
         return m_pInner->deviceGetSpec(_id, _dsMeterID);
-      }
-    }
-
-    virtual bool isLocked(boost::shared_ptr<const Device> _device) {
-      if(isHandledBySimulation(_device->getDSMeterDSID())) {
-        return m_pSimulationInterface->isLocked(_device);
-      } else {
-        return m_pInner->isLocked(_device);
       }
     }
 
