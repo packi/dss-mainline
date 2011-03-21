@@ -60,11 +60,15 @@ TARGET_DIR=$PWD/../dss-$DSS_RELEASE_VERSION-doc
 rm -rf $TARGET_DIR
 mkdir $TARGET_DIR
 
+cd ../dss-$DSS_RELEASE_VERSION/data
+../tools/create_cert.sh
+cd -
+
 # JSON
 echo "Running the dss now to generate json_api.xml"
 ./dss -w ../dss-$DSS_RELEASE_VERSION/data/webroot/ &
 DSS_PID=$!
-sleep 1
+sleep 15
 kill $DSS_PID
 
 cd doc
