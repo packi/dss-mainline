@@ -66,8 +66,6 @@ namespace dss {
     PropertyNodePtr m_pPropertyNode;
     ModelMaintenance* m_pModelMaintenance;
     PropertySystem* m_pPropertySystem;
-    uint8_t m_ApartmentID;
-    bool m_IdIsSet;
   private:
     void addDefaultGroupsToZone(boost::shared_ptr<Zone> _zone);
   public:
@@ -118,9 +116,6 @@ namespace dss {
     void removeZone(int _zoneID);
     void removeDevice(dss_dsid_t _device);
     void removeDSMeter(dss_dsid_t _dsMeter);
-    void setID(uint8_t _apartmentID);
-    uint8_t getID();
-    void initID();
   public:
     void setBusInterface(BusInterface* _value) { m_pBusInterface = _value; }
     ActionRequestInterface* getActionRequestInterface(); 

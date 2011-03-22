@@ -753,8 +753,6 @@ public:
   }
   virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) {
   }
-  virtual void setApartmentID(uint8_t _apartmentID) {
-  }
 };
 
 class DummyActionRequestInterface : public ActionRequestInterface {

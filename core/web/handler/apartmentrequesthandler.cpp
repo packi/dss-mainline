@@ -163,24 +163,6 @@ namespace dss {
       } else if(_request.getMethod() == "setName") {
         m_Apartment.setName(_request.getParameter("newName"));
         return success();
-      } else if(_request.getMethod() == "setID") {
-        if(_request.getParameter("id").empty()) {
-          return failure("Missing parameter 'id'");
-        }
-        int id = strToIntDef(_request.getParameter("id"), -1);
-        if((id < 0) || (id > 7)) {
-          return failure("Invalid parameter 'id'");
-        }
-        uint8_t old = m_Apartment.getID();
-        m_Apartment.setID((uint8_t)id);
-        if (old != ((uint8_t)id)) {
-          m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
-        }
-        return success();
-      } else if(_request.getMethod() == "getID") {
-        boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        resultObj->addProperty("apartmentID", m_Apartment.getID());
-        return success(resultObj);
       } else if(_request.getMethod() == "rescan") {
         std::vector<boost::shared_ptr<DSMeter> > mods = m_Apartment.getDSMeters();
         foreach(boost::shared_ptr<DSMeter> pDSMeter, mods) {
