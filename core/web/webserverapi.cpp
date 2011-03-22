@@ -325,7 +325,7 @@ namespace dss {
     clsSystem.addMethod("time")
       .withDocumentation("Returns the dSS time in UTC seconds since epoch");
     clsSystem.addMethod("login")
-      .withParameter("username", "string", true)
+      .withParameter("user", "string", true)
       .withParameter("password", "string", true)
       .withDocumentation("Creates a new session using the credentials provided");
     clsSystem.addMethod("logout")
