@@ -97,7 +97,7 @@ namespace dss {
       .withDocumentation("Rescans all circuits of the apartment");
 
     clsApartment.addMethod("removeMeter")
-      .withParameter("dsid", "integer", true)
+      .withParameter("dsid", "dsid", true)
       .withDocumentation("Removes non present dSMs from the dSS.");
 
     clsApartment.addMethod("removeInactiveMeters")
@@ -169,7 +169,7 @@ namespace dss {
       .withDocumentation("Returns the name of the scene on the given group");
 
     RestfulClass& clsDevice = api->addClass("device")
-        .withInstanceParameter("dsid", "integer", false)
+        .withInstanceParameter("dsid", "dsid", false)
         .withInstanceParameter("name", "string", false)
         .requireOneOf("dsid", "name");
     clsDevice.addMethod("getName")
@@ -318,7 +318,7 @@ namespace dss {
     clsSystem.addMethod("time")
       .withDocumentation("Returns the dSS time in UTC seconds since epoch");
     clsSystem.addMethod("login")
-      .withParameter("username", "string", true)
+      .withParameter("user", "string", true)
       .withParameter("password", "string", true)
       .withDocumentation("Creates a new session using the credentials provided");
     clsSystem.addMethod("logout")
