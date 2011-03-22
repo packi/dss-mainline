@@ -97,7 +97,7 @@ namespace dss {
       .withDocumentation("Rescans all circuits of the apartment");
 
     clsApartment.addMethod("removeMeter")
-      .withParameter("dsid", "integer", true)
+      .withParameter("dsid", "dsid", true)
       .withDocumentation("Removes non present dSMs from the dSS.");
 
     clsApartment.addMethod("removeInactiveMeters")
@@ -176,7 +176,7 @@ namespace dss {
       .withDocumentation("Returns the name of the scene on the given group");
 
     RestfulClass& clsDevice = api->addClass("device")
-        .withInstanceParameter("dsid", "integer", false)
+        .withInstanceParameter("dsid", "dsid", false)
         .withInstanceParameter("name", "string", false)
         .requireOneOf("dsid", "name");
     clsDevice.addMethod("getName")
