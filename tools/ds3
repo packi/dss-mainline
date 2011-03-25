@@ -109,10 +109,10 @@ case "$command" in
 	;;
     "zone_callScene")
         [ -z "$3" ] && fatal_usage "<zoneid> <scene#> <group id>"
-        call_dss "$target" "$target_command" "id=$1" "sceneNr=$2" "groupID=$3"
+        call_dss "$target" "$target_command" "id=$1" "sceneNumber=$2" "groupID=$3"
 	;;
     "zone_getConsumption")
-        PRINT_RESULT="yes" call_dss "$target" "$target_command" "id=$1" "sceneNr=$2"
+        PRINT_RESULT="yes" call_dss "$target" "$target_command" "id=$1" "sceneNumber=$2"
 	;;
 
     ###
@@ -124,7 +124,7 @@ case "$command" in
 	;;
     "apartment_callScene")
         [ -z "$2" ] && fatal_usage "<scene#> <group id>"
-        call_dss "$target" "$target_command" "sceneNr=$1" "groupID=$2"
+        call_dss "$target" "$target_command" "sceneNumber=$1" "groupID=$2"
 	;;
     "apartment_getName"|"apartment_getConsumption"|\
     "apartment_increaseValue"|"apartment_decreaseValue"|\
