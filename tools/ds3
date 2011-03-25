@@ -8,9 +8,9 @@ APPNAME=$(basename $0)
 # target, commands, args
 call_dss() {
     if [ -z "$DSS_HOST" ]; then
-	DSS_HOST=localhost
+	DSS_HOST=localhost:8080
     fi
-    URL=https://$DSS_HOST:8080/json/$1/$2
+    URL=https://$DSS_HOST/json/$1/$2
     shift; shift
 
     if [ -n "$1" ]; then
