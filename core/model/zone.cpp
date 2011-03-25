@@ -192,4 +192,11 @@ namespace dss {
     }
   } // publishToPropertyTree
 
+  void Zone::removeFromPropertyTree() {
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->getParentNode()->removeChild(m_pPropertyNode);
+      m_pPropertyNode.reset();
+    }
+  } // removeFromPropertyTree
+
 } // namespace dss
