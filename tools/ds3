@@ -5,12 +5,54 @@
 
 APPNAME=$(basename $0)
 
+# dss (json) login credentials
+DSS_USER=dssadmin
+DSS_PASS=dssadmin
+
+# optional web server credetials, as used on the dSS11
+HTTP_USER=dssadmin
+HTTP_PASS=dssadmin
+
+get_json() {
+    local URL=$1
+    local WRITE_COOKIES=$2
+    local SILENT=$3
+    local COOKIE_FILE=$4
+
+    if [ $WRITE_COOKIES -eq 1 ]; then
+	OPT="-c $COOKIE_FILE"
+    else
+	OPT="-b $COOKIE_FILE"
+    fi
+
+    result=$(curl $OPT -u $HTTP_USER:$HTTP_PASS -s -k $URL --digest)
+    if [ $? != 0 ]; then
+	echo "Could not connect to $DSS_HOST"
+	exit 1
+    fi
+
+    if [ -n "$(echo $result|grep '"ok":false')" ]; then
+	echo $result|sed -e 's|.*message\":\"||g' -e 's|\"}$||g'
+	exit 1
+    else
+	if [ $SILENT -eq 1 ]; then
+	     echo -n ""
+	elif [ -n "$PRINT_RESULT" ]; then
+	    echo $result|sed -e 's|.*,\s*||' -e 's|\s*}$|}|'
+	elif [ -n "$PRINT_RAW" ]; then
+	    echo $result
+	fi
+    fi
+    return 0
+}
+
 # target, commands, args
 call_dss() {
     if [ -z "$DSS_HOST" ]; then
 	DSS_HOST=localhost:8080
     fi
-    URL=https://$DSS_HOST/json/$1/$2
+    local URL=https://$DSS_HOST/json/$1/$2
+    local LOGIN_URL=https://$DSS_HOST/json/system
     shift; shift
 
     if [ -n "$1" ]; then
@@ -21,24 +63,13 @@ call_dss() {
 	URL="$URL&$1"
 	shift
     done
-    
-    result=$(curl -s -k $URL)
-    if [ $? != 0 ]; then
-	echo "Could not connect to $DSS_HOST"
-	exit 1
-    fi
 
-    if [ -n "$(echo $result|grep '"ok":false')" ]; then
-	echo $result|sed -e 's|.*message\":\"||g' -e 's|\"}$||g'
-	exit 1
-    else
-	if [ -n "$PRINT_RESULT" ]; then
-	    echo $result|sed -e 's|.*,\s*||' -e 's|\s*}$|}|'
-	elif [ -n "$PRINT_RAW" ]; then
-	    echo $result
-	fi
-    fi
-    return 0
+    local COOKIE_FILE=$(mktemp)
+    get_json "$LOGIN_URL/login?user=$DSS_USER&password=$DSS_PASS" 1 1 $COOKIE_FILE
+    get_json $URL 0 0 $COOKIE_FILE
+    get_json "$LOGIN_URL/logout" 0 1 $COOKIE_FILE
+
+    rm $COOKIE_FILE
 }
 
 usage() {
