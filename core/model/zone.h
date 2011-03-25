@@ -112,6 +112,7 @@ namespace dss {
     virtual void previousScene();
 
     void publishToPropertyTree();
+    void removeFromPropertyTree();
     PropertyNodePtr getPropertyNode() {  return m_pPropertyNode; }
 
     virtual unsigned long getPowerConsumption();

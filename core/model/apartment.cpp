@@ -265,6 +265,7 @@ namespace dss {
         ipZone != e; ++ipZone) {
       boost::shared_ptr<Zone> pZone = *ipZone;
       if(pZone->getID() == _zoneID) {
+        pZone->removeFromPropertyTree();
         m_Zones.erase(ipZone);
         return;
       }
