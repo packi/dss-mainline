@@ -240,7 +240,6 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data/
 		  )
 
 
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data/webroot/ DESTINATION ${WITH_WEBROOTDIR})
 install(FILES
           ${CMAKE_CURRENT_SOURCE_DIR}/data/config.xml
           ${CMAKE_CURRENT_SOURCE_DIR}/data/subscriptions.xml
