@@ -28,6 +28,7 @@
 #include "core/web/json.h"
 #include "core/model/deviceinterface.h"
 #include "core/model/modelconst.h"
+#include "core/model/scenehelper.h"
 
 namespace dss {
 
@@ -62,7 +63,7 @@ namespace dss {
       std::string sceneStr = _request.getParameter("sceneNumber");
       int sceneID = strToIntDef(sceneStr, -1);
       if(sceneID != -1) {
-        if((sceneID >= 0) && (sceneID <= MaxSceneNumber)) {
+        if(SceneHelper::isInRange(sceneID, 0)) {
           _interface->callScene(sceneID);
         } else {
           return failure("Parameter 'sceneNumber' out of bounds ('" + sceneStr + "')");

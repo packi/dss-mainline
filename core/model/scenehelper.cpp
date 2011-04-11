@@ -92,5 +92,16 @@ namespace dss {
     }
     return false;
   } // rememberScene
+  
+  bool SceneHelper::isInRange(const int _sceneNumber, const int _zoneNumber) {
+    bool aboveZero = (_sceneNumber >= 0);
+    bool validForZone;
+    if(_zoneNumber == 0) {
+      validForZone = (_sceneNumber <= MaxSceneNumber);
+    } else {
+      validForZone = (_sceneNumber <= MaxSceneNumberOutsideZoneZero);
+    }
+    return aboveZero && validForZone;
+  }
 
 }

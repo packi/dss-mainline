@@ -26,6 +26,7 @@
 #include "core/model/zone.h"
 #include "core/model/group.h"
 #include "core/model/apartment.h"
+#include "core/model/scenehelper.h"
 #include "core/structuremanipulator.h"
 
 #include "core/web/json.h"
@@ -145,6 +146,10 @@ namespace dss {
           if(sceneNumber == -1) {
             return failure("Need valid parameter 'sceneNumber'");
           }
+          if(!SceneHelper::isInRange(sceneNumber, pGroup->getZoneID())) {
+            return failure("Parameter 'sceneNumber' out of bounds ('" + intToString(sceneNumber) + "')");
+          }
+        
           std::string name = _request.getParameter("newName");
           pGroup->setSceneName(sceneNumber, name);
           StructureManipulator manipulator(*m_pStructureBusInterface, m_Apartment);
@@ -158,6 +163,10 @@ namespace dss {
           if(sceneNumber == -1) {
             return failure("Need valid parameter 'sceneNumber'");
           }
+          if(!SceneHelper::isInRange(sceneNumber, pGroup->getZoneID())) {
+            return failure("Parameter 'sceneNumber' out of bounds ('" + intToString(sceneNumber) + "')");
+          }
+          
           std::string sceneName = pGroup->getSceneName(sceneNumber);
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           resultObj->addProperty("name", sceneName);

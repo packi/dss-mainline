@@ -52,6 +52,7 @@ namespace dss {
      * \param _currentScene Scene now active.
      */
     static unsigned int getPreviousScene(const unsigned int _currentScene);
+    static bool isInRange(const int _sceneNumber, const int _zoneNumber);
   }; // SceneHelper
 
 } // namespace dss
