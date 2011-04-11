@@ -358,11 +358,6 @@ namespace dss {
 
   void DSBusInterface::handleBusCallScene(uint8_t _errorCode, dsid_t _sourceID, 
                                           uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID) {
-    ModelEvent* pEvent = new ModelEvent(ModelEvent::etCallSceneGroup);
-    pEvent->addParameter(_zoneID);
-    pEvent->addParameter(_groupID);
-    pEvent->addParameter(_sceneID);
-    m_pModelMaintenance->addModelEvent(pEvent);
     if(m_pBusEventSink != NULL) {
       dss_dsid_t dsMeterID;
       dsid_helper::toDssDsid(_sourceID, dsMeterID);
