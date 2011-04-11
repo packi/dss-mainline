@@ -76,7 +76,11 @@ namespace dss {
       std::string sceneStr = _request.getParameter("sceneNumber");
       int sceneID = strToIntDef(sceneStr, -1);
       if(sceneID != -1) {
-        _interface->saveScene(sceneID);
+        if(SceneHelper::isInRange(sceneID, 0)) {
+          _interface->saveScene(sceneID);
+        } else {
+          return failure("Parameter 'sceneNumber' out of bounds ('" + sceneStr + "')");
+        }
       } else {
         return failure("Invalid sceneNumber: '" + sceneStr + "'");
       }
