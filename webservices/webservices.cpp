@@ -104,8 +104,8 @@ namespace dss {
       }
     }
 
-    for (size_t i = 0; i < m_Workers.size(); i++) {
-      m_Workers.at(i).terminate();
+    while(!m_Workers.empty()) {
+      m_Workers.erase(m_Workers.begin());
     }
   } // execute
 

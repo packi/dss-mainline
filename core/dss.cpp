@@ -145,7 +145,7 @@ const char* kSavedPropsDirectory = "data/savedprops/";
     m_pSimulation.reset();
 
     m_pBusInterface.reset();
-
+    m_pModelMaintenance.reset();
 
     m_pApartment.reset();
   }
