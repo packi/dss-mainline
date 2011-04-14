@@ -64,7 +64,7 @@ call_dss() {
 	shift
     done
 
-    local COOKIE_FILE=$(mktemp)
+    local COOKIE_FILE=$(mktemp -t ds3XXX)
     get_json "$LOGIN_URL/login?user=$DSS_USER&password=$DSS_PASS" 1 1 $COOKIE_FILE
     get_json $URL 0 0 $COOKIE_FILE
     get_json "$LOGIN_URL/logout" 0 1 $COOKIE_FILE
