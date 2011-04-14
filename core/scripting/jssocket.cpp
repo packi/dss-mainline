@@ -166,6 +166,22 @@ namespace dss {
       m_pAttachedObject.reset();
       return result;
     }
+
+    void success() {
+      callCallback(true);
+    }
+    
+    void failure() {
+      callCallback(false);
+    }
+    
+    void callCallback(bool _result) {
+      JSAutoLocalRootScope rootScope(getContext().getJSContext());
+      ScriptFunctionParameterList param(getContext());
+      param.add<bool>(_result);
+      callCallbackWithArguments(param);
+    }
+    
   protected:
     SocketScriptContextExtension& m_Extension;
   private:
@@ -435,21 +451,6 @@ namespace dss {
       m_pSocket.reset(new tcp::socket(getIOService()));
     }
 
-    void success() {
-      callCallback(true);
-    }
-
-    void failure() {
-      callCallback(false);
-    }
-
-    void callCallback(bool _result) {
-      JSAutoLocalRootScope rootScope(getContext().getJSContext());
-      ScriptFunctionParameterList param(getContext());
-      param.add<bool>(_result);
-      callCallbackWithArguments(param);
-    }
-
     void callSizeCallback(int _result) {
       JSAutoLocalRootScope rootScope(getContext().getJSContext());
       ScriptFunctionParameterList param(getContext());
@@ -499,13 +500,19 @@ namespace dss {
       m_Data = _data;
       tcp::resolver resolver(getIOService());
       tcp::resolver::query query(_host, intToString(_port));
-      tcp::resolver::iterator iterator = resolver.resolve(query);
+      try {
+        tcp::resolver::iterator iterator = resolver.resolve(query);
 
-      tcp::endpoint endpoint = *iterator;
-      m_pSocket->async_connect(endpoint,
-          boost::bind(&SocketHelperSendOneShot::handle_connect, this,
-            boost::asio::placeholders::error, ++iterator));
-      startBlockingCall();
+        tcp::endpoint endpoint = *iterator;
+        m_pSocket->async_connect(endpoint,
+            boost::bind(&SocketHelperSendOneShot::handle_connect, this,
+              boost::asio::placeholders::error, ++iterator));
+        startBlockingCall();
+      } catch(boost::system::system_error&) {
+        Logger::getInstance()
+        ->log("JS: sendTo: Could not resolve host '" + _host, lsWarning);
+        failure();
+      }
     }
 
     void write()
@@ -540,7 +547,7 @@ namespace dss {
             boost::bind(&SocketHelperSendOneShot::handle_connect, this,
               boost::asio::placeholders::error, ++endpoint_iterator));
       } else {
-        do_close();
+        do_close(false);
         boost::thread(boost::bind(&SocketScriptContextExtension::removeSocketHelper, &m_Extension, shared_from_this()));
       }
     }
@@ -562,17 +569,17 @@ namespace dss {
         if(hasCallback()) {
           ScriptLock lock(&getContext());
           JSContextThread req(&getContext());
-          ScriptFunctionParameterList params(getContext());
-          params.add<bool>(!error);
-          callCallbackWithArguments(params);
+          callCallback(!error);
         }
         do_close();
         boost::thread(boost::bind(&SocketScriptContextExtension::removeSocketHelper, &m_Extension, shared_from_this()));
       }
     }
 
-    void do_close() {
-      m_pSocket->shutdown(boost::asio::socket_base::shutdown_both);
+    void do_close(bool _shutdown = true) {
+      if(_shutdown) {
+        m_pSocket->shutdown(boost::asio::socket_base::shutdown_both);
+      }
       m_pSocket->close();
       endBlockingCall();
     }

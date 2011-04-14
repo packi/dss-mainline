@@ -163,6 +163,36 @@ BOOST_AUTO_TEST_CASE(testTcpSocketSendTo) {
   BOOST_CHECK_EQUAL(listener.m_DataReceived, "hello");
 } // testTcpSocketSendTo
 
+BOOST_AUTO_TEST_CASE(testTcpSocketSendToUnconnected) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new SocketScriptContextExtension();
+  env->addExtension(ext);
+  
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("TcpSocket.sendTo('localhost', 1234, 'h');");
+  sleepMS(250);
+  ctx->stop();
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
+} // testTcpSocketSendToUnconnected
+
+BOOST_AUTO_TEST_CASE(testTcpSocketSendToNonResolvable) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new SocketScriptContextExtension();
+  env->addExtension(ext);
+  
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("TcpSocket.sendTo('hurz.dev.digitalstrom.org', 1234, 'h');");
+  sleepMS(250);
+  ctx->stop();
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
+} // testTcpSocketSendToNonResolvable
+
 BOOST_AUTO_TEST_CASE(testTcpSocketSendToRepeatability) {
   const int kRuns = 3;
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
