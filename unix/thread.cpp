@@ -20,8 +20,9 @@
 
 */
 
-#include "../core/thread.h"
-#include "../core/logger.h"
+#include "core/thread.h"
+#include "core/logger.h"
+#include "core/base.h"
 
 #include <cassert>
 
@@ -36,7 +37,7 @@ void*
 #else
 DWORD WINAPI
 #endif
-ThreadStarterHelperFunc( void* _pThreadObj ) {
+Thread::ThreadStarterHelperFunc( void* _pThreadObj ) {
   Thread* thObj = static_cast<Thread*>(_pThreadObj);
 
   std::string message = thObj->getThreadIdentifier();
@@ -47,12 +48,12 @@ ThreadStarterHelperFunc( void* _pThreadObj ) {
   }
 
   thObj->execute();
-
+  thObj->m_Running = false;
+  pthread_detach(thObj->m_ThreadHandle);
+  thObj->m_ThreadHandle = 0;
+  
   Logger::getInstance()->log(message);
 
-  if( static_cast<Thread*>(_pThreadObj)->getFreeAtTerimnation() ) {
-    delete static_cast<Thread*>(_pThreadObj);
-  }
   return NULL;
 } // threadStarterHelpFunc
 
@@ -60,13 +61,12 @@ ThreadStarterHelperFunc( void* _pThreadObj ) {
 Thread::Thread(const std::string& _name )
   : m_ThreadHandle( 0 ),
     m_Name( _name ),
-    m_FreeAtTermination( false ),
     m_Running( false ),
     m_Terminated( false )
 { } // ctor
 
 Thread::~Thread() {
-  if( !m_Terminated && (m_ThreadHandle != 0) ) {
+  if(m_ThreadHandle != 0) {
     m_Terminated = true;
 #ifndef WIN32
     pthread_join( m_ThreadHandle, NULL );
@@ -84,7 +84,6 @@ bool Thread::run() {
   }
 #ifndef WIN32
   pthread_create( &m_ThreadHandle, NULL, ThreadStarterHelperFunc, this );
-  pthread_detach(m_ThreadHandle);
 #else
   m_ThreadHandle = CreateThread( NULL, 0, &ThreadStarterHelperFunc, this, NULL, NULL );
 #endif
@@ -106,7 +105,10 @@ bool Thread::terminate() {
   if( !m_Terminated && (m_ThreadHandle != 0) ) {
     m_Terminated = true;
 #ifndef WIN32
-    pthread_join( m_ThreadHandle, NULL );
+    int ret = pthread_join( m_ThreadHandle, NULL );
+    if(ret != 0) {
+      Logger::getInstance()->log("Error stopping thread: " + intToString(ret), lsError);
+    }
 #else
     WaitForSingleObject( m_ThreadHandle, INFINITE );
 #endif

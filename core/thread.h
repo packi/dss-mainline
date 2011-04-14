@@ -44,8 +44,14 @@ private:
   HANDLE m_ThreadHandle;
 #endif
   std::string m_Name;
-  bool m_FreeAtTermination;
   bool m_Running;
+
+  #ifndef WIN32
+  static void*
+  #else
+  static DWORD WINAPI
+  #endif
+  ThreadStarterHelperFunc( void* _pThreadObj );
 protected:
   bool m_Terminated;
 public:
@@ -63,12 +69,6 @@ public:
     bool stop();
     /** Terminates the thread */
     bool terminate();
-    /** Sets whether the thread should be freed after it finishes running.
-     * The destructor has to make sure that no dangling references are
-     * left.*/
-    void setFreeAtTermination( bool _value ) { m_FreeAtTermination = _value; }
-    /** Returns whether the thread gets freed after finishing. */
-    bool getFreeAtTerimnation() { return m_FreeAtTermination; }
 
     /** Returns whether the Thread is running or not*/
     bool isRunning() const { return m_Running; }
