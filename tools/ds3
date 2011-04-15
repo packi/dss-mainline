@@ -9,7 +9,7 @@ APPNAME=$(basename $0)
 DSS_USER=dssadmin
 DSS_PASS=dssadmin
 
-# optional web server credetials, as used on the dSS11
+# optional web server credentials, as used on the dSS11
 HTTP_USER=dssadmin
 HTTP_PASS=dssadmin
 
