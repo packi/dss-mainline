@@ -706,6 +706,49 @@ BOOST_AUTO_TEST_CASE(testPropertyRemoveChild) {
   BOOST_CHECK(propSys.getProperty("/test/subnode") == NULL);
 } // testPropertyRemoveChild
 
+BOOST_AUTO_TEST_CASE(testPropertyRemoveChildNonexisting) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("Property.setProperty('/test', 'test');");
+
+  ctx->evaluate<void>("var node = Property.getNode('/test');\n"
+                      "node.removeChild('asdf');");
+} // testPropertyRemoveChildNonexisting
+
+BOOST_AUTO_TEST_CASE(testPropertyRemoveChildUndefined) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("Property.setProperty('/test', 'test');");
+
+  ctx->evaluate<void>("var node = Property.getNode('/test');\n"
+                      "var nonexistingNode = node.getChild('testing');\n"
+                      "node.removeChild(nonexistingNode);");
+} // testPropertyRemoveChildUndefined
+
+BOOST_AUTO_TEST_CASE(testPropertyRemoveChildNull) {
+  PropertySystem propSys;
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new PropertyScriptExtension(propSys);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("Property.setProperty('/test', 'test');");
+
+  ctx->evaluate<void>("var node = Property.getNode('/test');\n"
+                      "node.removeChild(null);");
+} // testPropertyRemoveChildNull
+
 BOOST_AUTO_TEST_CASE(testPropertyGetParent) {
   PropertySystem propSys;
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
