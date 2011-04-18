@@ -97,7 +97,6 @@ namespace dss {
     PropertyNodePtr getRootNode() const {
       return m_RootNode;
     }
-    ;
 
     /** Creates a property and the path to it. */
     PropertyNodePtr createProperty(const std::string& _propPath);
