@@ -33,6 +33,7 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 
 namespace Poco {
   namespace XML {
@@ -97,7 +98,6 @@ namespace dss {
     PropertyNodePtr getRootNode() const {
       return m_RootNode;
     }
-    ;
 
     /** Creates a property and the path to it. */
     PropertyNodePtr createProperty(const std::string& _propPath);
@@ -363,6 +363,7 @@ namespace dss {
     int m_Index;
     int m_Flags;
     boost::shared_ptr<NodePrivileges> m_pPrivileges;
+    static boost::recursive_mutex m_GlobalMutex;
   private:
     void clearValue();
 
