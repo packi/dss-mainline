@@ -281,13 +281,14 @@ namespace dss {
 
   PropertyNode::~PropertyNode() {
     // remove listeners
+    boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
     for(std::vector<PropertyListener*>::iterator it = m_Listeners.begin();
         it != m_Listeners.end();)
     {
       (*it)->unregisterProperty(this);
       it = m_Listeners.erase(it);
     }
-    
+
     // clear privileges as they hold a shared_ptr on us
     m_pPrivileges.reset();
 
@@ -345,10 +346,12 @@ namespace dss {
     if(m_Aliased) {
       return m_AliasTarget->removeChild(_childNode);
     } else {
+      boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
       PropertyList::iterator it = std::find(m_ChildNodes.begin(), m_ChildNodes.end(), _childNode);
       if(it != m_ChildNodes.end()) {
         m_ChildNodes.erase(it);
       }
+      lock.unlock();
       _childNode->m_ParentNode = NULL;
       childRemoved(_childNode);
       return _childNode;
@@ -377,7 +380,9 @@ namespace dss {
         }
       }
       _childNode->m_Index = maxIndex + 1;
+      boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
       m_ChildNodes.push_back(_childNode);
+      lock.unlock();
       childAdded(_childNode);
     }
   } // addChild
@@ -450,6 +455,7 @@ namespace dss {
 
       int lastMatch = -1;
       int numItem = 0;
+      boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
       for(PropertyList::iterator it = m_ChildNodes.begin();
            it != m_ChildNodes.end(); it++) {
         numItem++;
@@ -475,6 +481,7 @@ namespace dss {
       return m_AliasTarget->count(_propertyName);
     } else {
       int result = 0;
+      boost::recursive_mutex::scoped_lock lock(m_GlobalMutex);
       for(PropertyList::iterator it = m_ChildNodes.begin();
            it != m_ChildNodes.end(); it++) {
         PropertyNodePtr cur = *it;
@@ -986,6 +993,8 @@ namespace dss {
     }
     return result;
   } // searchForPrivilege
+
+  boost::recursive_mutex PropertyNode::m_GlobalMutex;
 
 
   //=============================================== PropertyListener
