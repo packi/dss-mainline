@@ -76,6 +76,7 @@ namespace dss {
     std::ifstream inFile(_fileName.c_str());
 
     if (!inFile.is_open()) {
+      Logger::getInstance()->log("Failed to open " + _fileName, lsInfo);
       return;
     }
 
