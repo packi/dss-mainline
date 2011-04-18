@@ -87,11 +87,13 @@ namespace dss {
 
   void ModelMaintenance::checkConfigFile(boost::filesystem::path _filename) {
     if (boost::filesystem::exists(_filename)) {
+      log("Found " + _filename.string(), lsInfo);
       if (!rwAccess(_filename.string())) {
         throw std::runtime_error("Apartment file " + _filename.string() +
                                   " is not readable and writable!");
       }
     } else {
+      log("Could not find " + _filename.string(), lsWarning);
       boost::filesystem::path dir = _filename.parent_path();
       if (!boost::filesystem::is_directory(dir)) {
         throw std::runtime_error("Path " + dir.string() +
