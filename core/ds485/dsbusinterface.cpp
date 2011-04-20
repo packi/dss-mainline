@@ -219,6 +219,11 @@ namespace dss {
                             DEVICE_ACTION_REQUEST, DEVICE_ACTION_REQUEST_ACTION_CALL_SCENE,
                             (void*)deviceCallSceneCallback, this);
 
+      DeviceProperties_set_name_request_callback_t deviceSetNameCallback = DSBusInterface::handleDeviceSetNameCallback;
+      DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                             DEVICE_PROPERTIES, DEVICE_PROPERTIES_SET_NAME,
+                             (void*)deviceSetNameCallback, this);
+
       CircuitEnergyMeterValue_get_response_callback_t meteringCallback = DSBusInterface::handleCircuitEnergyDataCallback;
       DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_RESPONSE,
                             CIRCUIT_ENERGY_METER_VALUE, CIRCUIT_ENERGY_METER_VALUE_GET,
@@ -370,6 +375,30 @@ namespace dss {
                                                   uint8_t _sceneID) {
     static_cast<DSBusInterface*>(_userData)->handleBusCallScene(_errorCode, _sourceID, _zoneID, _groupID, _sceneID);
   }
+
+  void DSBusInterface::handleDeviceSetName(dsid_t _destinationID, 
+                                           uint16_t _deviceID, 
+                                           std::string _name) {
+    dss_dsid_t dsMeterID;
+    dsid_helper::toDssDsid(_destinationID, dsMeterID);
+    m_pModelMaintenance->onDeviceNameChanged(dsMeterID, _deviceID, _name);
+  } // handleDeviceSetName
+  
+  void DSBusInterface::handleDeviceSetNameCallback(uint8_t _errorCode, 
+                                                   void* _userData, 
+                                                   dsid_t _sourceID, 
+                                                   dsid_t _destinationID, 
+                                                   uint16_t _deviceID, 
+                                                   const uint8_t* _name) {
+    const char* name = reinterpret_cast<const char*>(_name);
+    std::string nameStr;
+    if(name != NULL) {
+      nameStr = name;
+    }
+    static_cast<DSBusInterface*>(_userData)->handleDeviceSetName(_destinationID, 
+                                                                 _deviceID, 
+                                                                 nameStr);
+  } // handleDeviceSetNameCallback
 
   void DSBusInterface::handleDeviceLocalAction(dsid_t _sourceID, uint16_t _deviceID, uint8_t _state) {
     dss_dsid_t dsmDSID;
