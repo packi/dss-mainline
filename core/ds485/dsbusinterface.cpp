@@ -26,6 +26,7 @@
 #include <boost/bind.hpp>
 
 #include <digitalSTROM/dsm-api-v2/dsm-api-const.h>
+#include <digitalSTROM/ds485-client-interface.h>
 
 #include "core/dss.h"
 #include "core/logger.h"
@@ -77,6 +78,7 @@ namespace dss {
     if(_resultCode != ERROR_OK) {
       std::string message = "Unknown Error (" + intToString(_resultCode) + ")";
       switch(_resultCode) {
+        // bus errors
         case ERROR_WRONG_PARAMETER:
           message = "Wrong parameter";
           break;
@@ -143,6 +145,50 @@ namespace dss {
         case ERROR_REQUEST_CAN_NOT_BE_EXECUTED:
           message = "request can't be executed";
           break;
+
+        // libdsm errors
+        case ERROR_RESPONSE_TIMEOUT:
+          message = "request can't be executed";
+          break;
+        case ERROR_INVALID_HANDLE:
+          message = "invalid handl";
+          break;
+        case ERROR_INVALID_CONNSPEC:
+          message = "invalid connection spec";
+          break;
+        case ERROR_NO_PORT_FOUND:
+          message = "no port found";
+          break;
+        case ERROR_INVALID_ADDRESS:
+          message = "invalid address";
+          break;
+        case ERROR_CREATE_SOCKET:
+          message = "error while creating the socket";
+          break;
+        case ERROR_SOCKET_OPTIONS:
+          message = "error while setting socket options";
+          break;
+        case ERROR_SOCKET_CONNECT:
+          message = "error during socket connect";
+          break;
+        case ERROR_SOCKET_FULL:
+          message = "socket full";
+          break;
+        case ERROR_SOCKET_FAILED:
+          message = "socket failed";
+          break;
+        case ERROR_SOCKET_VANISHED:
+          message = "socket vanished";
+          break;
+        case ERROR_SOCKET_UNKNOWN:
+          message = "request can't be executed";
+          break;
+        case ERROR_INVALID_FD:
+          message = "invalid file descriptor";
+          break;
+        case ERROR_INVALID_PARAMETER:
+          message = "invalid parameter";
+          break;
       }
       throw BusApiError(message);
     }
@@ -150,7 +196,7 @@ namespace dss {
 
   void DSBusInterface::checkBroadcastResultCode(const int _resultCode) {
     // to be replaced with include from libdsmapi
-    static const int kERROR_OK_ASYNC_CALL = -2; 
+    static const int kERROR_OK_ASYNC_CALL = NOTICE_CALL_TO_BROADCAST;
 
     if(_resultCode == kERROR_OK_ASYNC_CALL) {
         return;
