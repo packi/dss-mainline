@@ -29,6 +29,7 @@
 #include "core/model/apartment.h"
 #include "core/model/device.h"
 #include "core/model/group.h"
+#include "core/structuremanipulator.h"
 
 #include "core/web/json.h"
 
@@ -37,8 +38,10 @@ namespace dss {
 
   //=========================================== DeviceRequestHandler
 
-  DeviceRequestHandler::DeviceRequestHandler(Apartment& _apartment)
-  : m_Apartment(_apartment)
+  DeviceRequestHandler::DeviceRequestHandler(Apartment& _apartment,
+                                             StructureModifyingBusInterface* _pStructureBusInterface)
+  : m_Apartment(_apartment),
+    m_pStructureBusInterface(_pStructureBusInterface)
   { }
 
   class DeviceNotFoundException : public std::runtime_error {
@@ -138,7 +141,12 @@ namespace dss {
       return success(resultObj);
     } else if(_request.getMethod() == "setName") {
       if(_request.hasParameter("newName")) {
-        pDevice->setName(_request.getParameter("newName"));
+        std::string name = _request.getParameter("newName");
+        pDevice->setName(name);
+
+        StructureManipulator manipulator(*m_pStructureBusInterface, m_Apartment);
+        manipulator.deviceSetName(pDevice, name);
+        
         return success();
       } else {
         return failure("missing parameter 'name'");

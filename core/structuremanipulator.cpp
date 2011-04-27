@@ -129,9 +129,18 @@ namespace dss {
     m_Interface.removeDeviceFromDSMeter(dsmDsid, shortAddr);
   } // removeDevice
 
-  void StructureManipulator::sceneSetName(boost::shared_ptr<Group> _group, int _sceneNumber, const std::string& _name) {
-    m_Interface.sceneSetName(_group->getZoneID(), _group->getID(), _sceneNumber, _name);
+  void StructureManipulator::sceneSetName(boost::shared_ptr<Group> _group, 
+                                          int _sceneNumber, 
+                                          const std::string& _name) {
+    m_Interface.sceneSetName(_group->getZoneID(), _group->getID(), _sceneNumber, 
+                             _name);
   } // sceneSetName
+  
+  void StructureManipulator::deviceSetName(boost::shared_ptr<Device> _pDevice, 
+                                           const std::string& _name) {
+    m_Interface.deviceSetName(_pDevice->getDSMeterDSID(), 
+                              _pDevice->getShortAddress(), _name);
+  } // deviceSetName
 
   int StructureManipulator::persistSet(Set& _set, const std::string& _originalSet) {
     // find next empty user-group

@@ -149,6 +149,9 @@ namespace dss {
     dev->setRevisionID(_spec.Version);
     dev->setIsLockedInDSM(_spec.Locked);
     dev->setHasOutputLoad(_spec.OutputHasLoad);
+    if(dev->getName().empty()) {
+      dev->setName(_spec.Name);
+    }
     dev->resetGroups();
 
     foreach(int groupID, _spec.Groups) {
