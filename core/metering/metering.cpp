@@ -270,7 +270,11 @@ namespace dss {
     while(!m_Terminated) {
       int sleepTimeMSec = 60000 * 1000;
 
-      checkDSMeters();
+      try {
+        checkDSMeters();
+      } catch (dss::BusApiError& apiError) {
+        log("Metering::execute: Couldn't get metering data: " + std::string(apiError.what()));
+      }
       for(unsigned int iConfig = 0; iConfig < m_Config.size(); iConfig++) {
         sleepTimeMSec = std::min(sleepTimeMSec, 1000 * m_Config[iConfig]->getCheckIntervalSeconds());
       }
