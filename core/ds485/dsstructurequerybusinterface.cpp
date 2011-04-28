@@ -205,15 +205,17 @@ namespace dss {
       uint8_t locked;
       uint8_t outputHasLoad;
       uint8_t groups[GROUPS_LEN];
+      uint8_t name[NAME_LEN];
       int ret = DeviceInfo_by_index_only_active(m_DSMApiHandle, dsid, _zoneID, iDevice,
                                                 &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
                                                 &spec.Version,
-                                                NULL, NULL, NULL, &locked, &outputHasLoad, groups, NULL,
+                                                NULL, NULL, NULL, &locked, &outputHasLoad, groups, name,
                                                 NULL, NULL, &spec.SerialNumber);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
       spec.OutputHasLoad = (outputHasLoad != 0);
       spec.Groups = extractGroupIDs(groups);
+      spec.Name = std::string(reinterpret_cast<char*>(name));
       dsid_t dsid;
       ret = DsmApiExpandDeviceDSID(spec.VendorID, spec.SerialNumber, &dsid);
       DSBusInterface::checkResultCode(ret);
@@ -234,16 +236,18 @@ namespace dss {
     uint8_t outputHasLoad;
     dsid_t dsmDSID;
     uint8_t groups[GROUPS_LEN];
+    uint8_t name[NAME_LEN];
     dsid_helper::toDsmapiDsid(_dsMeterID, dsmDSID);
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, dsmDSID, _id,
                                       &result.ShortAddress, &result.VendorID, &result.ProductID, &result.FunctionID,
                                       &result.Version,
-                                      NULL, NULL, NULL, &locked, &outputHasLoad, groups, NULL,
+                                      NULL, NULL, NULL, &locked, &outputHasLoad, groups, name,
                                       NULL, NULL, &result.SerialNumber);
     DSBusInterface::checkResultCode(ret);
     result.Locked = (locked != 0);
     result.OutputHasLoad = (outputHasLoad != 0);
     result.Groups = extractGroupIDs(groups);
+    result.Name = std::string(reinterpret_cast<char*>(name));
     dsid_t dsid;
     ret = DsmApiExpandDeviceDSID(result.VendorID, result.SerialNumber, &dsid);
     DSBusInterface::checkResultCode(ret);

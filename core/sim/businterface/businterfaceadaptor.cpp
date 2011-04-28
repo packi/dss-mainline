@@ -282,6 +282,11 @@ namespace dss {
       m_pInner->sceneSetName(_zoneID, _groupID, _sceneNumber, _name);
     }
 
+    virtual void deviceSetName(dss_dsid_t _meterDSID, devid_t _deviceID, const std::string& _name) {
+      m_pSimulationInterface->deviceSetName(_meterDSID, _deviceID, _name);
+      m_pInner->deviceSetName(_meterDSID, _deviceID, _name);
+    }
+
     virtual void createGroup(uint16_t _zoneID, uint8_t _groupID) {
       m_pSimulationInterface->createGroup(_zoneID, _groupID);
       m_pInner->createGroup(_zoneID, _groupID);

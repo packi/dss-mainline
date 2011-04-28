@@ -224,7 +224,10 @@ namespace dss {
       new ZoneRequestHandler(
         getDSS().getApartment(),
         getDSS().getBusInterface().getStructureModifyingBusInterface());
-    m_Handlers[kHandlerDevice] = new DeviceRequestHandler(getDSS().getApartment());
+    m_Handlers[kHandlerDevice] = 
+      new DeviceRequestHandler(
+        getDSS().getApartment(), 
+        getDSS().getBusInterface().getStructureModifyingBusInterface());
     m_Handlers[kHandlerCircuit] = new CircuitRequestHandler(
             getDSS().getApartment(),
             getDSS().getModelMaintenance());

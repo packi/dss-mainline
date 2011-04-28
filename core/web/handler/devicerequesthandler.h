@@ -28,10 +28,12 @@
 namespace dss {
 
   class Device;
+  class StructureModifyingBusInterface;
 
   class DeviceRequestHandler : public DeviceInterfaceRequestHandler {
   public:
-    DeviceRequestHandler(Apartment& _apartment);
+    DeviceRequestHandler(Apartment& _apartment, 
+                         StructureModifyingBusInterface* _pStructureBusInterface);
     virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
   private:
     boost::shared_ptr<Device> getDeviceFromRequest(const RestfulRequest& _request);
@@ -39,6 +41,7 @@ namespace dss {
     boost::shared_ptr<Device> getDeviceByDSID(const RestfulRequest& _request);
   private:
     Apartment& m_Apartment;
+    StructureModifyingBusInterface* m_pStructureBusInterface;
   }; // DeviceRequestHandler
 
 }

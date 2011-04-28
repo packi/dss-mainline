@@ -113,7 +113,15 @@ namespace dss {
     static void handleDeviceCallSceneCallback(uint8_t _errorCode, void* _userData,
                                        dsid_t _sourceID, dsid_t _destinationID,
                                        uint16_t _deviceID, uint8_t _sceneID);
-
+    
+    void handleDeviceSetName(dsid_t _destinationID, uint16_t _deviceID, 
+                             std::string _name);
+    static void handleDeviceSetNameCallback(uint8_t _errorCode, void* _userData, 
+                                            dsid_t _sourceID, 
+                                            dsid_t _destinationID, 
+                                            uint16_t _deviceID, 
+                                            const uint8_t* _name);
+    
     void handleCircuitEnergyData(uint8_t _errorCode,
                                  dsid_t _sourceId, dsid_t _destinationId,
                                  uint32_t _powerW, uint32_t _energyWh);
