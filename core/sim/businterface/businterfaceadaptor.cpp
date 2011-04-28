@@ -407,9 +407,9 @@ namespace dss {
 
     virtual unsigned long getEnergyMeterValue(const dss_dsid_t& _dsMeterID) {
       if(isHandledBySimulation(_dsMeterID)) {
-        return m_pSimulationInterface->getPowerConsumption(_dsMeterID);
+        return m_pSimulationInterface->getEnergyMeterValue(_dsMeterID);
       } else {
-        return m_pInner->getPowerConsumption(_dsMeterID);
+        return m_pInner->getEnergyMeterValue(_dsMeterID);
       }
     } // getEnergyMeterValue
 
