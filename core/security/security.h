@@ -59,6 +59,7 @@ namespace dss {
     bool authenticateApplication(const std::string& _applicationToken);
     bool signIn(User* _pUser);
     void signOff();
+    bool impersonate(const std::string& _user);
 
     bool loadFromXML();
     void setSystemUser(User* _value) {

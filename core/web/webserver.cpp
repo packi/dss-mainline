@@ -37,6 +37,7 @@
 #include "core/logger.h"
 #include "core/dss.h"
 #include "core/propertysystem.h"
+#include "core/foreach.h"
 
 #include "core/security/security.h"
 
@@ -69,7 +70,8 @@ namespace dss {
   //============================================= WebServer
 
   WebServer::WebServer(DSS* _pDSS)
-    : Subsystem(_pDSS, "WebServer"), m_mgContext(0), m_LastSessionID(0)
+    : Subsystem(_pDSS, "WebServer"), m_mgContext(0), m_LastSessionID(0),
+      m_TrustedPort(0)
   {
   } // ctor
 
@@ -84,15 +86,26 @@ namespace dss {
 
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "webroot", getDSS().getWebrootDirectory(), true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "bindip", "0.0.0.0", true, false);
-    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "ports", 8080, true, false);
+    getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "listen", "8080", true, false);
+    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "trustedPort", 0, true, false);
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "announcedport", DSS::getInstance()->getPropertySystem().getIntValue(getConfigPropertyBasePath() + "ports"), true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "files/apartment.xml", getDSS().getDataDirectory() + "apartment.xml", true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "sslcert", getDSS().getPropertySystem().getStringValue("/config/configdirectory") + "dsscert.pem" , true, false);
 
-    std::string configPorts = 
-      DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "bindip") + ":" +
-      intToString(DSS::getInstance()->getPropertySystem().getIntValue(getConfigPropertyBasePath() + "ports")) + "s";
+    std::vector<std::string> portList = splitString(DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "listen"), ',', true);
+    std::string configPorts;
+    std::string bindIP = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "bindip");
+    foreach(std::string port, portList) {
+      if(port.find(":") == std::string::npos) {
+        configPorts += bindIP + ":" + port;
+      } else {
+        configPorts += port;
+      }
+      configPorts += "s,";
+    }
+    configPorts.erase(configPorts.length() - 1);
     log("Webserver: Listening on " + configPorts, lsInfo);
+    m_TrustedPort = getDSS().getPropertySystem().getIntValue(getConfigPropertyBasePath() + "trustedPort");
 
     std::string configAliases = DSS::getInstance()->getPropertySystem().getStringValue(getConfigPropertyBasePath() + "webroot");
     log("Webserver: Configured webroot: " + configAliases, lsInfo);
@@ -321,6 +334,7 @@ namespace dss {
                                const struct mg_request_info* _info,
                                HashMapConstStringString _parameter,
                                HashMapConstStringString _cookies,
+                               HashMapConstStringString _injectedCookies,
                                boost::shared_ptr<Session> _session) {
     const std::string urlid = "/json/";
 
@@ -339,7 +353,12 @@ namespace dss {
         if(response.getResponse() != NULL) {
           result = response.getResponse()->toString();
         }
-        std::string cookies = generateCookieString(response.getCookies());
+        std::string cookies;
+        if(response.getCookies().empty()) {
+          cookies = generateCookieString(_injectedCookies);
+        } else {
+          cookies = generateCookieString(response.getCookies());
+        }
         emitHTTPHeader(200, _connection, "application/json", cookies);
       } catch(SecurityException& e) {
         emitHTTPHeader(403, _connection, "application/json");
@@ -487,6 +506,31 @@ namespace dss {
     if(!token.empty()) {
       session = self.m_SessionManager->getSession(token);
     }
+    HashMapConstStringString injectedCookies;
+    
+    // if we're coming from a trusted port, impersonate that user and start
+    // a new session on his behalf
+    if((session == NULL) && (_info->local_port == self.m_TrustedPort)) {
+      const char* digestCString = mg_get_header(_connection, "Authorization");
+      if(digestCString > 0) {
+        std::string digest = digestCString;
+        const std::string userNamePrefix = "username=\"";
+        std::string::size_type userNamePos = digest.find(userNamePrefix);
+        std::string::size_type userNameEnd = 
+          digest.find("\"", userNamePos + userNamePrefix.size() - 1);
+        if((userNamePos != std::string::npos) && 
+           (userNameEnd != std::string::npos)) {
+          std::string userName = digest.substr(userNamePos + userNamePrefix.size(), 
+                                               userNameEnd - userNamePos - 1);
+          self.log("Logging-in from a trusted port as '" + userName + "'");
+          self.m_SessionManager->getSecurity()->impersonate(userName);
+          std::string newToken = self.m_SessionManager->registerSession();
+          self.m_SessionManager->getSession(newToken)->inheritUserFromSecurity();
+          injectedCookies["path"] = "/";
+          injectedCookies["token"] = newToken;           
+        }
+      }
+    }
 
     if(session != NULL) {
       session->touch();
@@ -496,7 +540,8 @@ namespace dss {
     if (uri.find("/browse/") == 0) {
       return self.httpBrowseProperties(_connection, _info);
     } else if (uri.find("/json/") == 0) {
-      return self.jsonHandler(_connection, _info, paramMap, cookies, session);
+      return self.jsonHandler(_connection, _info, paramMap, cookies, 
+                              injectedCookies, session);
     } else if (uri.find("/download/") == 0) {
       return self.downloadHandler(_connection, _info);
     }
