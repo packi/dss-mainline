@@ -123,7 +123,7 @@ namespace dss {
     dsid_t meterDSID;
     dsid_helper::toDsmapiDsid(_meterDSID, meterDSID);
     int ret = DeviceProperties_set_name(m_DSMApiHandle, meterDSID, _deviceID, name);
-    DSBusInterface::checkBroadcastResultCode(ret);
+    DSBusInterface::checkResultCode(ret);
   } // deviceSetName
 
   void DSStructureModifyingBusInterface::meterSetName(dss_dsid_t _meterDSID, const std::string& _name) {
