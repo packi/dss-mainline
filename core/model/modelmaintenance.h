@@ -56,6 +56,7 @@ namespace dss {
     void onGroupCallScene(const int _zoneID, const int _groupID, const int _sceneID);
     void onDeviceNameChanged(dss_dsid_t _meterID, const devid_t _deviceID, 
                              const std::string& _name);
+    void onDsmNameChanged(dss_dsid_t _meterID, const std::string& _name);
 
     bool isInitializing() const { return m_IsInitializing; }
     void setApartment(Apartment* _value);
