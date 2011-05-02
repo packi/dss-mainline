@@ -230,7 +230,8 @@ namespace dss {
         getDSS().getBusInterface().getStructureModifyingBusInterface());
     m_Handlers[kHandlerCircuit] = new CircuitRequestHandler(
             getDSS().getApartment(),
-            getDSS().getModelMaintenance());
+            getDSS().getModelMaintenance(),
+            getDSS().getBusInterface().getStructureModifyingBusInterface());
     m_Handlers[kHandlerSet] = new SetRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerProperty] = new PropertyRequestHandler(getDSS().getPropertySystem());
     m_Handlers[kHandlerEvent] = new EventRequestHandler(getDSS().getEventInterpreter());

@@ -79,6 +79,9 @@ namespace dss {
   void SimStructureModifyingBusInterface::deviceSetName(dss_dsid_t _meterDSID, devid_t _deviceID, const std::string& _name) {
   } // deviceSetName
 
+  void SimStructureModifyingBusInterface::meterSetName(dss_dsid_t _meterDSID, const std::string& _name) {
+  } // meterSetName
+
   void SimStructureModifyingBusInterface::createGroup(uint16_t _zoneID, uint8_t _groupID) {
     int numMeters = m_pSimulation->getDSMeterCount();
     for(int iMeter = 0; iMeter < numMeters; iMeter++) {

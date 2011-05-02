@@ -61,7 +61,7 @@ namespace dss {
       _dsMeter->setDspSoftwareVersion(spec.SoftwareRevisionDSP);
       _dsMeter->setHardwareVersion(spec.HardwareVersion);
       _dsMeter->setApiVersion(spec.APIVersion);
-      _dsMeter->setHardwareName(spec.Name);
+      _dsMeter->setName(spec.Name);
     } catch(BusApiError& e) {
       log("scanDSMeter: Error getting dSMSpecs", lsFatal);
       return false;

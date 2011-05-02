@@ -287,6 +287,11 @@ namespace dss {
       m_pInner->deviceSetName(_meterDSID, _deviceID, _name);
     }
 
+    virtual void meterSetName(dss_dsid_t _meterDSID, const std::string& _name) {
+      m_pSimulationInterface->meterSetName(_meterDSID, _name);
+      m_pInner->meterSetName(_meterDSID, _name);
+    }
+
     virtual void createGroup(uint16_t _zoneID, uint8_t _groupID) {
       m_pSimulationInterface->createGroup(_zoneID, _groupID);
       m_pInner->createGroup(_zoneID, _groupID);
