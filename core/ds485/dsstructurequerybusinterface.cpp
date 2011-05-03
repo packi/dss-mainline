@@ -219,12 +219,22 @@ namespace dss {
       DSBusInterface::checkResultCode(ret);
       dsid_helper::toDssDsid(dsid, spec.DSID);
 
-      uint8_t setsLocalPriority;
-      ret = DeviceButtonInfo_by_device(m_DSMApiHandle, dsid, spec.ShortAddress, &spec.ButtonID, 
-                                       &spec.GroupMembership, &spec.ActiveGroup, 
-                                       &setsLocalPriority);
-      DSBusInterface::checkResultCode(ret);
-      spec.SetsLocalPriority = (setsLocalPriority == 1);
+      try {
+        uint8_t setsLocalPriority;
+        ret = DeviceButtonInfo_by_device(m_DSMApiHandle, dsid, spec.ShortAddress, &spec.ButtonID, 
+                                        &spec.GroupMembership, &spec.ActiveGroup, 
+                                        &setsLocalPriority);
+        DSBusInterface::checkResultCode(ret);
+        spec.SetsLocalPriority = (setsLocalPriority == 1);
+      } catch(BusApiError& e) {
+        Logger::getInstance()->log("Error reading device-button-info: '" + 
+                                   std::string(e.what()) + 
+                                   "'. Are your dSMs out of date?", lsWarning);
+        spec.ButtonID = 0xff;
+        spec.ActiveGroup = 0xff;
+        spec.GroupMembership = 0xff;
+        spec.SetsLocalPriority = false;
+      }
       
       result.push_back(spec);
     }
@@ -255,14 +265,24 @@ namespace dss {
     ret = DsmApiExpandDeviceDSID(result.VendorID, result.SerialNumber, &dsid);
     DSBusInterface::checkResultCode(ret);
     dsid_helper::toDssDsid(dsid, result.DSID);
-    
-    uint8_t setsLocalPriority;
-    ret = DeviceButtonInfo_by_device(m_DSMApiHandle, dsmDSID, _id, &result.ButtonID, 
-                                     &result.GroupMembership, &result.ActiveGroup, 
-                                     &setsLocalPriority);
-    DSBusInterface::checkResultCode(ret);
-    result.SetsLocalPriority = (setsLocalPriority == 1);
 
+    try {
+      uint8_t setsLocalPriority;
+      ret = DeviceButtonInfo_by_device(m_DSMApiHandle, dsmDSID, _id, &result.ButtonID, 
+                                       &result.GroupMembership, &result.ActiveGroup, 
+                                       &setsLocalPriority);
+      DSBusInterface::checkResultCode(ret);
+      result.SetsLocalPriority = (setsLocalPriority == 1);
+    } catch(BusApiError& e) {
+      Logger::getInstance()->log("Error reading device-button-info: '" + 
+                                 std::string(e.what()) + 
+                                 "'. Are your dSMs out of date?", lsWarning);
+      result.ButtonID = 0xff;
+      result.ActiveGroup = 0xff;
+      result.GroupMembership = 0xff;
+      result.SetsLocalPriority = false;
+    }
+    
     return result;
   } // deviceGetSpec
 
