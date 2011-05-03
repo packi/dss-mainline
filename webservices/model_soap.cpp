@@ -41,6 +41,9 @@
 #include "core/model/zone.h"
 #include "core/model/group.h"
 #include "core/model/modulator.h"
+#include "core/session.h"
+#include "core/sessionmanager.h"
+#include "core/security/security.h"
 #include "core/structuremanipulator.h"
 #include "core/businterface.h"
 
@@ -62,9 +65,13 @@ int NotAuthorized(struct soap *soap) {
 } // notAuthorized
 
 bool IsAuthorized(struct soap *soap, const char* _token) {
+  dss::DSS::getInstance()->getSecurity().signOff();
   bool result = dss::DSS::getInstance()->getWebServices().isAuthorized(soap, _token);
   if(result) {
     dss::Logger::getInstance()->log(std::string("User with token '") + _token + "' is authorized");
+    boost::shared_ptr<dss::Session> session = dss::DSS::getInstance()->getWebServices().getSession(soap, _token);
+    session->touch();
+    dss::DSS::getInstance()->getSecurity().authenticate(session);
   } else {
     dss::Logger::getInstance()->log(std::string("User with token '") + _token + "' is *not* authorized", lsWarning);
   }
@@ -151,8 +158,15 @@ int AuthorizeAndGetGroupOfZone(struct soap *soap, const char* _token, const int 
 //==================================================== Callbacks
 
 int dss__Authenticate(struct soap *soap, char* _userName, char* _password, std::string& token) {
-  token = dss::DSS::getInstance()->getWebServices().newSession(soap);
-  return SOAP_OK;
+  dss::SessionManager& manager = dss::DSS::getInstance()->getSessionManager();
+  manager.getSecurity()->signOff();
+  if(manager.getSecurity()->authenticate(_userName, _password)) {
+    token = dss::DSS::getInstance()->getWebServices().newSession(soap);
+    manager.getSession(token)->inheritUserFromSecurity();
+    return SOAP_OK;
+  } else {
+    return soap_sender_fault(soap, "Invalid username or password", NULL);
+  }    
 } // dss__Authenticate
 
 int dss__SignOff(struct soap *soap, char* _token, int& result) {
