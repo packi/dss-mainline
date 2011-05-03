@@ -77,6 +77,10 @@ namespace dss {
         spec.DSID = pDevice->getDSID();
         spec.SerialNumber = 0;
         spec.Groups = pMeter->getGroupsOfDevice(pDevice->getShortAddress());
+        spec.ActiveGroup = 0;
+        spec.ButtonID = 0;
+        spec.GroupMembership = 0;
+        spec.SetsLocalPriority = 0;
         result.push_back(spec);
       }
     }
@@ -113,6 +117,10 @@ namespace dss {
       result.OutputHasLoad = true;
       result.DSID = device.getDSID();
       result.SerialNumber = 0;
+      result.ActiveGroup = 0;
+      result.ButtonID = 0;
+      result.GroupMembership = 0;
+      result.SetsLocalPriority = 0;
       result.Groups = pMeter->getGroupsOfDevice(device.getShortAddress());
     }
     return result;

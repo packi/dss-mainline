@@ -58,6 +58,7 @@ namespace dss {
 
     result->addProperty("on", _device.getDevice()->isOn());
     result->addProperty("locked", _device.getDevice()->getIsLockedInDSM());
+    result->addProperty("buttonID", _device.getDevice()->getButtonID());
     return result;
   } // toJSON(DeviceReference)
 

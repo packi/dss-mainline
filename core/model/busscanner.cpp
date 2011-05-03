@@ -149,6 +149,10 @@ namespace dss {
     dev->setRevisionID(_spec.Version);
     dev->setIsLockedInDSM(_spec.Locked);
     dev->setHasOutputLoad(_spec.OutputHasLoad);
+    dev->setButtonActiveGroup(_spec.ActiveGroup);
+    dev->setButtonGroupMembership(_spec.GroupMembership);
+    dev->setButtonSetsLocalPriority(_spec.SetsLocalPriority);
+    dev->setButtonID(_spec.ButtonID);
     if(dev->getName().empty()) {
       dev->setName(_spec.Name);
     }

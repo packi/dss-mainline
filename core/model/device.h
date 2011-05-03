@@ -62,6 +62,10 @@ namespace dss {
     DateTime m_FirstSeen;
     bool m_IsLockedInDSM;
     bool m_HasOutputLoad;
+    bool m_ButtonSetsLocalPriority;
+    int m_ButtonGroupMembership;
+    int m_ButtonActiveGroup;
+    int m_ButtonID;
 
     PropertyNodePtr m_pAliasNode;
     PropertyNodePtr m_TagsNode;
@@ -199,6 +203,16 @@ namespace dss {
     void lock();
     /** Tells the dSM that it may forget a device if it's not present. */
     void unlock();
+    
+    void setButtonSetsLocalPriority(const bool _value) { m_ButtonSetsLocalPriority = _value; }
+    bool getButtonSetsLocalPriority() const { return m_ButtonSetsLocalPriority; }
+    void setButtonGroupMembership(const int _value) { m_ButtonGroupMembership = _value; }
+    int getButtonGroupMembership() const { return m_ButtonGroupMembership; }
+    void setButtonActiveGroup(const int _value) { m_ButtonActiveGroup = _value; }
+    int getButtonActiveGroup() const { return m_ButtonActiveGroup; }
+    void setButtonID(const int _value) { m_ButtonID = _value; }
+    int getButtonID() const { return m_ButtonID; }
+    
 
     bool getHasOutputLoad() const { return m_HasOutputLoad; }
     void setHasOutputLoad(const bool _value) { m_HasOutputLoad = _value; }
