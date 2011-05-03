@@ -49,6 +49,7 @@ namespace dss {
   private:
     struct mg_context* m_mgContext;
     int m_LastSessionID;
+    int m_TrustedPort;
     __gnu_cxx::hash_map<const std::string, WebServerRequestHandlerJSON*> m_Handlers;
     boost::shared_ptr<RestfulAPI> m_pAPI;
     boost::shared_ptr<SessionManager> m_SessionManager;
@@ -65,6 +66,7 @@ namespace dss {
                       const struct mg_request_info* _info,
                       HashMapConstStringString _parameter,
                       HashMapConstStringString _cookies,
+                      HashMapConstStringString _injectedCookies,
                       boost::shared_ptr<Session> _session);
     void *downloadHandler(struct mg_connection* _connection,
                           const struct mg_request_info* _info);

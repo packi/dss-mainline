@@ -54,38 +54,48 @@ namespace dss {
               static_cast<long unsigned int>(DateTime().secondsSinceEpoch()));
       return success(resultObj);
     } else if(_request.getMethod() == "login") {
-      std::string userRaw = _request.getParameter("user");
-      std::string user;
-      std::locale locl;
-      std::remove_copy_if(userRaw.begin(), userRaw.end(), std::back_inserter(user),
-        !boost::bind(&std::isalnum<char>, _1, locl)
-       );
-
-      std::string password = _request.getParameter("password");
-
-      if(user.empty()) {
-        return failure("Missing parameter 'user'");
-      }
-      if(password.empty()) {
-        return failure("Missing parameter 'password'");
-      }
-
-      m_pSessionManager->getSecurity()->signOff();
-      if(m_pSessionManager->getSecurity()->authenticate(user, password)) {
-        std::string token = m_pSessionManager->registerSession();
-        m_pSessionManager->getSession(token)->inheritUserFromSecurity();
-        log("Registered new JSON session");
-
+      if(_session != NULL) {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-        resultObj->addProperty("token", token);
-
+        resultObj->addProperty("token", _session->getID());
+        
         WebServerResponse response(success(resultObj));
         response.setCookie("path", "/");
-        response.setCookie("token", token);
+        response.setCookie("token", _session->getID());
         return response;
       } else {
-        log("Authentication failed for user '" + user + "'", lsError);
-        return failure("Authentication failed");
+        std::string userRaw = _request.getParameter("user");
+        std::string user;
+        std::locale locl;
+        std::remove_copy_if(userRaw.begin(), userRaw.end(), std::back_inserter(user),
+          !boost::bind(&std::isalnum<char>, _1, locl)
+        );
+
+        std::string password = _request.getParameter("password");
+
+        if(user.empty()) {
+          return failure("Missing parameter 'user'");
+        }
+        if(password.empty()) {
+          return failure("Missing parameter 'password'");
+        }
+
+        m_pSessionManager->getSecurity()->signOff();
+        if(m_pSessionManager->getSecurity()->authenticate(user, password)) {
+          std::string token = m_pSessionManager->registerSession();
+          m_pSessionManager->getSession(token)->inheritUserFromSecurity();
+          log("Registered new JSON session");
+
+          boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+          resultObj->addProperty("token", token);
+
+          WebServerResponse response(success(resultObj));
+          response.setCookie("path", "/");
+          response.setCookie("token", token);
+          return response;
+        } else {
+          log("Authentication failed for user '" + user + "'", lsError);
+          return failure("Authentication failed");
+        }
       }
     } else if(_request.getMethod() == "loginApplication") {
       std::string loginTokenRaw = _request.getParameter("loginToken");

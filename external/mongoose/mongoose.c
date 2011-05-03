@@ -3825,6 +3825,7 @@ static void worker_thread(struct mg_context *ctx) {
     // error handler would have the corresponding info.
     // Thanks to Johannes Winkelmann for the patch.
     conn->request_info.remote_port = ntohs(conn->client.rsa.u.sin.sin_port);
+    conn->request_info.local_port = ntohs(conn->client.lsa.u.sin.sin_port);
     memcpy(&conn->request_info.remote_ip,
            &conn->client.rsa.u.sin.sin_addr.s_addr, 4);
     conn->request_info.remote_ip = ntohl(conn->request_info.remote_ip);

@@ -101,6 +101,16 @@ namespace dss {
     return result;
   } // authenticate
 
+  bool Security::impersonate(const std::string& _user) {
+    signOff();
+    PropertyNodePtr pUserNode = m_pRootNode->getProperty("users/" + _user);
+    if(pUserNode != NULL) {
+      m_LoggedInUser.reset(new User(pUserNode));
+      return true;
+    }
+    return false;
+  } // impersonate
+
   bool Security::authenticateApplication(const std::string& _applicationToken) {
     signOff();
     PropertyNodePtr pTokenNode = m_pRootNode->getProperty("applicationTokens/" + _applicationToken);
