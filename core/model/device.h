@@ -61,7 +61,7 @@ namespace dss {
     DateTime m_LastDiscovered;
     DateTime m_FirstSeen;
     bool m_IsLockedInDSM;
-    bool m_HasOutputLoad;
+    uint8_t m_OutputMode;
     bool m_ButtonSetsLocalPriority;
     int m_ButtonGroupMembership;
     int m_ButtonActiveGroup;
@@ -214,8 +214,8 @@ namespace dss {
     int getButtonID() const { return m_ButtonID; }
     
 
-    bool getHasOutputLoad() const { return m_HasOutputLoad; }
-    void setHasOutputLoad(const bool _value) { m_HasOutputLoad = _value; }
+    bool getOutputMode() const { return m_OutputMode; }
+    void setOutputMode(const int _value) { m_OutputMode = _value; }
 
     bool hasTag(const std::string& _tagName) const;
     void addTag(const std::string& _tagName);

@@ -54,7 +54,7 @@ namespace dss {
     m_LastDiscovered(DateTime::NullDate),
     m_FirstSeen(DateTime::NullDate),
     m_IsLockedInDSM(false),
-    m_HasOutputLoad(false),
+    m_OutputMode(0),
     m_ButtonSetsLocalPriority(false),
     m_ButtonGroupMembership(0),
     m_ButtonActiveGroup(0),
@@ -93,8 +93,8 @@ namespace dss {
           ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_LastDiscovered, &DateTime::toString));
         m_pPropertyNode->createProperty("locked")
           ->linkToProxy(PropertyProxyReference<bool>(m_IsLockedInDSM, false));
-        m_pPropertyNode->createProperty("hasOutputLoad")
-          ->linkToProxy(PropertyProxyReference<bool>(m_HasOutputLoad, false));
+        m_pPropertyNode->createProperty("outputMode")
+          ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_OutputMode, false));
         m_pPropertyNode->createProperty("button/id")
           ->linkToProxy(PropertyProxyReference<int>(m_ButtonID, false));
         m_pPropertyNode->createProperty("button/activeGroup")
