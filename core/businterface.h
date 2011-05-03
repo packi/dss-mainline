@@ -135,6 +135,7 @@ namespace dss {
     /** Sets the name of a scene */
     virtual void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) = 0;
     virtual void deviceSetName(dss_dsid_t _meterDSID, devid_t _deviceID, const std::string& _name) = 0;
+    virtual void meterSetName(dss_dsid_t _meterDSID, const std::string& _name) = 0;
 
     virtual void createGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) = 0;

@@ -121,6 +121,12 @@ namespace dss {
                                             dsid_t _destinationID, 
                                             uint16_t _deviceID, 
                                             const uint8_t* _name);
+
+    void handleDsmSetName(dsid_t _destinationID, std::string _name);
+    static void handleDsmSetNameCallback(uint8_t _errorCode,
+                                         void *_userData, dsid_t _sourceID,
+                                         dsid_t _destinationID,
+                                         const uint8_t *_name);
     
     void handleCircuitEnergyData(uint8_t _errorCode,
                                  dsid_t _sourceId, dsid_t _destinationId,

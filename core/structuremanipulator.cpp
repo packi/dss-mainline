@@ -142,6 +142,10 @@ namespace dss {
                               _pDevice->getShortAddress(), _name);
   } // deviceSetName
 
+  void StructureManipulator::meterSetName(boost::shared_ptr<DSMeter> _pMeter, const std::string& _name) {
+    m_Interface.meterSetName(_pMeter->getDSID(), _name);
+  } // meterSetName
+
   int StructureManipulator::persistSet(Set& _set, const std::string& _originalSet) {
     // find next empty user-group
     int idFound = -1;

@@ -143,10 +143,12 @@ namespace dss {
       if(_request.hasParameter("newName")) {
         std::string name = _request.getParameter("newName");
         pDevice->setName(name);
-
-        StructureManipulator manipulator(*m_pStructureBusInterface, m_Apartment);
-        manipulator.deviceSetName(pDevice, name);
         
+        if (m_pStructureBusInterface != NULL) {
+          StructureManipulator manipulator(*m_pStructureBusInterface,
+                                           m_Apartment);
+          manipulator.deviceSetName(pDevice, name);
+        }
         return success();
       } else {
         return failure("missing parameter 'name'");

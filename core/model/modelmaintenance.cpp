@@ -517,6 +517,20 @@ namespace dss {
     }
   } // onDeviceNameChanged
 
+  void ModelMaintenance::onDsmNameChanged(dss_dsid_t _meterID,
+                                          const std::string& _name)
+  {
+      log("dSM name changed on the bus. Meter: " + _meterID.toString(), lsInfo);
+      try {
+        boost::shared_ptr<DSMeter> pMeter =
+          m_pApartment->getDSMeterByDSID(_meterID);
+        pMeter->setName(_name);
+
+      } catch(ItemNotFoundException& e) {
+        log("onDsmNameChanged: Item not found: " + std::string(e.what()));
+      }
+  }
+
   void ModelMaintenance::onDeviceCallScene(const dss_dsid_t& _dsMeterID, const int _deviceID, const int _sceneID) {
     try {
       if(_sceneID < 0 || _sceneID > MaxSceneNumber) {

@@ -123,8 +123,22 @@ namespace dss {
     dsid_t meterDSID;
     dsid_helper::toDsmapiDsid(_meterDSID, meterDSID);
     int ret = DeviceProperties_set_name(m_DSMApiHandle, meterDSID, _deviceID, name);
-    DSBusInterface::checkBroadcastResultCode(ret);
+    DSBusInterface::checkResultCode(ret);
   } // deviceSetName
+
+  void DSStructureModifyingBusInterface::meterSetName(dss_dsid_t _meterDSID, const std::string& _name) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    std::string nameStr = truncateUTF8String(_name, 19);
+    uint8_t name[20];
+    strncpy(reinterpret_cast<char*>(name), nameStr.c_str(), 20);
+    dsid_t meterDSID;
+    dsid_helper::toDsmapiDsid(_meterDSID, meterDSID);
+    int ret = dSMProperties_set_name(m_DSMApiHandle, meterDSID, name);
+    DSBusInterface::checkResultCode(ret);
+  } // meterSetName
 
   void DSStructureModifyingBusInterface::createGroup(uint16_t _zoneID, uint8_t _groupID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);

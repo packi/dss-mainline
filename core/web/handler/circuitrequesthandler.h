@@ -29,14 +29,16 @@ namespace dss {
 
   class Apartment;
   class ModelMaintenance;
+  class StructureModifyingBusInterface;
 
   class CircuitRequestHandler : public WebServerRequestHandlerJSON {
   public:
-    CircuitRequestHandler(Apartment& _apartment, ModelMaintenance& _modelMaintenance);
+    CircuitRequestHandler(Apartment& _apartment, ModelMaintenance& _modelMaintenance, StructureModifyingBusInterface* _pStructureBusInterface);
     virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
   private:
     Apartment& m_Apartment;
     ModelMaintenance& m_ModelMaintenance;
+    StructureModifyingBusInterface* m_pStructureBusInterface;
   }; // CircuitRequestHandler
 
 } // namespace dss

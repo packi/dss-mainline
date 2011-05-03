@@ -270,6 +270,11 @@ namespace dss {
                              DEVICE_PROPERTIES, DEVICE_PROPERTIES_SET_NAME,
                              (void*)deviceSetNameCallback, this);
 
+      dSMProperties_set_name_request_callback_t dSMSetNameCallback = DSBusInterface::handleDsmSetNameCallback;
+      DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
+                             DSM_PROPERTIES, DSM_PROPERTIES_SET_NAME,
+                             (void*)dSMSetNameCallback, this);
+
       CircuitEnergyMeterValue_get_response_callback_t meteringCallback = DSBusInterface::handleCircuitEnergyDataCallback;
       DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_RESPONSE,
                             CIRCUIT_ENERGY_METER_VALUE, CIRCUIT_ENERGY_METER_VALUE_GET,
@@ -445,6 +450,27 @@ namespace dss {
                                                                  _deviceID, 
                                                                  nameStr);
   } // handleDeviceSetNameCallback
+
+  void DSBusInterface::handleDsmSetName(dsid_t _destinationID,
+                                        std::string _name) {
+    dss_dsid_t dsMeterID;
+    dsid_helper::toDssDsid(_destinationID, dsMeterID);
+    m_pModelMaintenance->onDsmNameChanged(dsMeterID, _name);
+  } //handleDsmSetName
+
+  void DSBusInterface::handleDsmSetNameCallback(uint8_t _errorCode,
+                                                void *_userData,
+                                                dsid_t _sourceID,
+                                                dsid_t _destinationID,
+                                                const uint8_t *_name) {
+    const char* name = reinterpret_cast<const char*>(_name);
+    std::string nameStr;
+    if(name != NULL) {
+      nameStr = name;
+    }
+    static_cast<DSBusInterface*>(_userData)->handleDsmSetName(_destinationID,
+                                                              nameStr);
+  } // handleDsmSetNameCallback
 
   void DSBusInterface::handleDeviceLocalAction(dsid_t _sourceID, uint16_t _deviceID, uint8_t _state) {
     dss_dsid_t dsmDSID;
