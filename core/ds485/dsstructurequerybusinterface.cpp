@@ -203,17 +203,15 @@ namespace dss {
     for(int iDevice = 0; iDevice < numDevices; iDevice++) {
       DeviceSpec_t spec;
       uint8_t locked;
-      uint8_t outputHasLoad;
       uint8_t groups[GROUPS_LEN];
       uint8_t name[NAME_LEN];
       int ret = DeviceInfo_by_index_only_active(m_DSMApiHandle, dsid, _zoneID, iDevice,
                                                 &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
                                                 &spec.Version,
-                                                NULL, NULL, NULL, &locked, &outputHasLoad, groups, name,
+                                                NULL, NULL, NULL, &locked, &spec.OutputMode, groups, name,
                                                 NULL, NULL, &spec.SerialNumber);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
-      spec.OutputHasLoad = (outputHasLoad != 0);
       spec.Groups = extractGroupIDs(groups);
       spec.Name = std::string(reinterpret_cast<char*>(name));
       dsid_t dsid;
@@ -221,6 +219,23 @@ namespace dss {
       DSBusInterface::checkResultCode(ret);
       dsid_helper::toDssDsid(dsid, spec.DSID);
 
+      try {
+        uint8_t setsLocalPriority;
+        ret = DeviceButtonInfo_by_device(m_DSMApiHandle, dsid, spec.ShortAddress, &spec.ButtonID, 
+                                        &spec.GroupMembership, &spec.ActiveGroup, 
+                                        &setsLocalPriority);
+        DSBusInterface::checkResultCode(ret);
+        spec.SetsLocalPriority = (setsLocalPriority == 1);
+      } catch(BusApiError& e) {
+        Logger::getInstance()->log("Error reading device-button-info: '" + 
+                                   std::string(e.what()) + 
+                                   "'. Are your dSMs out of date?", lsWarning);
+        spec.ButtonID = 0xff;
+        spec.ActiveGroup = 0xff;
+        spec.GroupMembership = 0xff;
+        spec.SetsLocalPriority = false;
+      }
+      
       result.push_back(spec);
     }
     return result;
@@ -233,7 +248,6 @@ namespace dss {
     }
     DeviceSpec_t result;
     uint8_t locked;
-    uint8_t outputHasLoad;
     dsid_t dsmDSID;
     uint8_t groups[GROUPS_LEN];
     uint8_t name[NAME_LEN];
@@ -241,11 +255,10 @@ namespace dss {
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, dsmDSID, _id,
                                       &result.ShortAddress, &result.VendorID, &result.ProductID, &result.FunctionID,
                                       &result.Version,
-                                      NULL, NULL, NULL, &locked, &outputHasLoad, groups, name,
+                                      NULL, NULL, NULL, &locked, &result.OutputMode, groups, name,
                                       NULL, NULL, &result.SerialNumber);
     DSBusInterface::checkResultCode(ret);
     result.Locked = (locked != 0);
-    result.OutputHasLoad = (outputHasLoad != 0);
     result.Groups = extractGroupIDs(groups);
     result.Name = std::string(reinterpret_cast<char*>(name));
     dsid_t dsid;
@@ -253,6 +266,23 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
     dsid_helper::toDssDsid(dsid, result.DSID);
 
+    try {
+      uint8_t setsLocalPriority;
+      ret = DeviceButtonInfo_by_device(m_DSMApiHandle, dsmDSID, _id, &result.ButtonID, 
+                                       &result.GroupMembership, &result.ActiveGroup, 
+                                       &setsLocalPriority);
+      DSBusInterface::checkResultCode(ret);
+      result.SetsLocalPriority = (setsLocalPriority == 1);
+    } catch(BusApiError& e) {
+      Logger::getInstance()->log("Error reading device-button-info: '" + 
+                                 std::string(e.what()) + 
+                                 "'. Are your dSMs out of date?", lsWarning);
+      result.ButtonID = 0xff;
+      result.ActiveGroup = 0xff;
+      result.GroupMembership = 0xff;
+      result.SetsLocalPriority = false;
+    }
+    
     return result;
   } // deviceGetSpec
 

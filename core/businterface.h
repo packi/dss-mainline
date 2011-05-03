@@ -55,9 +55,13 @@ namespace dss {
     uint16_t Version;
     uint32_t SerialNumber;
     bool Locked;
-    bool OutputHasLoad;
+    uint8_t OutputMode;
     std::vector<int> Groups;
     dss_dsid_t DSID;
+    uint8_t ButtonID;
+    uint8_t GroupMembership;
+    uint8_t ActiveGroup;
+    bool SetsLocalPriority;
     std::string Name;
   } DeviceSpec_t;
 

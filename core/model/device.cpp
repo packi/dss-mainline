@@ -53,7 +53,12 @@ namespace dss {
     m_Consumption(0),
     m_LastDiscovered(DateTime::NullDate),
     m_FirstSeen(DateTime::NullDate),
-    m_IsLockedInDSM(false)
+    m_IsLockedInDSM(false),
+    m_OutputMode(0),
+    m_ButtonSetsLocalPriority(false),
+    m_ButtonGroupMembership(0),
+    m_ButtonActiveGroup(0),
+    m_ButtonID(0)
   { } // ctor
 
   void Device::publishToPropertyTree() {
@@ -88,8 +93,16 @@ namespace dss {
           ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_LastDiscovered, &DateTime::toString));
         m_pPropertyNode->createProperty("locked")
           ->linkToProxy(PropertyProxyReference<bool>(m_IsLockedInDSM, false));
-        m_pPropertyNode->createProperty("hasOutputLoad")
-          ->linkToProxy(PropertyProxyReference<bool>(m_HasOutputLoad, false));
+        m_pPropertyNode->createProperty("outputMode")
+          ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_OutputMode, false));
+        m_pPropertyNode->createProperty("button/id")
+          ->linkToProxy(PropertyProxyReference<int>(m_ButtonID, false));
+        m_pPropertyNode->createProperty("button/activeGroup")
+          ->linkToProxy(PropertyProxyReference<int>(m_ButtonActiveGroup, false));
+        m_pPropertyNode->createProperty("button/groupMembership")
+          ->linkToProxy(PropertyProxyReference<int>(m_ButtonGroupMembership, false));
+        m_pPropertyNode->createProperty("button/setsLocalPrio")
+          ->linkToProxy(PropertyProxyReference<bool>(m_ButtonSetsLocalPriority, false));
         m_TagsNode = m_pPropertyNode->createProperty("tags");
         m_TagsNode->setFlag(PropertyNode::Archive, true);
       }

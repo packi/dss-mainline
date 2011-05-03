@@ -73,10 +73,14 @@ namespace dss {
         spec.Version = pDevice->getProductRevision();
         spec.ShortAddress = pDevice->getShortAddress();
         spec.Locked = pDevice->isLocked();
-        spec.OutputHasLoad = true;
+        spec.OutputMode = 0;
         spec.DSID = pDevice->getDSID();
         spec.SerialNumber = 0;
         spec.Groups = pMeter->getGroupsOfDevice(pDevice->getShortAddress());
+        spec.ActiveGroup = 0;
+        spec.ButtonID = 0;
+        spec.GroupMembership = 0;
+        spec.SetsLocalPriority = 0;
         result.push_back(spec);
       }
     }
@@ -110,9 +114,13 @@ namespace dss {
       result.Version = device.getProductRevision();
       result.ShortAddress = device.getShortAddress();
       result.Locked = device.isLocked();
-      result.OutputHasLoad = true;
+      result.OutputMode = 0;
       result.DSID = device.getDSID();
       result.SerialNumber = 0;
+      result.ActiveGroup = 0;
+      result.ButtonID = 0;
+      result.GroupMembership = 0;
+      result.SetsLocalPriority = 0;
       result.Groups = pMeter->getGroupsOfDevice(device.getShortAddress());
     }
     return result;
