@@ -214,8 +214,8 @@ namespace dss {
     int getButtonID() const { return m_ButtonID; }
     
 
-    bool getOutputMode() const { return m_OutputMode; }
-    void setOutputMode(const int _value) { m_OutputMode = _value; }
+    uint8_t getOutputMode() const { return m_OutputMode; }
+    void setOutputMode(const uint8_t _value) { m_OutputMode = _value; }
 
     bool hasTag(const std::string& _tagName) const;
     void addTag(const std::string& _tagName);
