@@ -262,7 +262,8 @@ namespace dss {
         if(!associatedSet.empty()) {
           pGroup->setAssociatedSet(associatedSet);
         }
-        pGroup->setIsInitializedFromBus(true);
+        bool readSuccessfully = !name.empty() && scenesNode && scenesNode->hasChildNodes();
+        pGroup->setIsInitializedFromBus(readSuccessfully);
       }
     }
   } // loadGroup
