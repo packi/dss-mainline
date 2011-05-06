@@ -686,14 +686,18 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
     ScriptObject self(obj, *ctx);
-    if(self.is("set") || self.is("device")) {
-      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      int sceneNr = ctx->convertTo<int>(argv[0]);
-      if(argc == 1) {
-        intf->callScene(sceneNr);
+    try {
+      if(self.is("set") || self.is("device")) {
+        IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+        int sceneNr = ctx->convertTo<int>(argv[0]);
+        if(argc == 1) {
+          intf->callScene(sceneNr);
+        }
+        *rval = INT_TO_JSVAL(0);
+        return JS_TRUE;
       }
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
+    } catch(ScriptException& e) {
+      Logger::getInstance()->log(std::string("Invalid type for parameter 'sceneNr'. ") + e.what());
     }
     return JS_FALSE;
   } // dev_call_scene
@@ -747,14 +751,18 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
     ScriptObject self(obj, *ctx);
-    if(self.is("set") || self.is("device")) {
-      IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
-      int sceneNr = ctx->convertTo<int>(argv[0]);
-      if(argc == 1) {
-        intf->saveScene(sceneNr);
+    try {
+      if(self.is("set") || self.is("device")) {
+        IDeviceInterface* intf = static_cast<IDeviceInterface*>(JS_GetPrivate(cx, obj));
+        int sceneNr = ctx->convertTo<int>(argv[0]);
+        if(argc == 1) {
+          intf->saveScene(sceneNr);
+        }
+        *rval = INT_TO_JSVAL(0);
+        return JS_TRUE;
       }
-      *rval = INT_TO_JSVAL(0);
-      return JS_TRUE;
+    } catch(ScriptException& e) {
+      Logger::getInstance()->log(std::string("Invalid type for parameter 'sceneNr'. ") + e.what());
     }
     return JS_FALSE;
   } // dev_save_scene
