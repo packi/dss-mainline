@@ -15,6 +15,10 @@ function DSID() {
     }
   };
 
+  this.getConsumption = function() {
+    return 0;
+  };
+
   return this;
 }
 
