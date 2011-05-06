@@ -582,9 +582,11 @@ namespace dss {
 
   PropertyNodePtr PropertyScriptExtension::getPropertyFromObj(ScriptContext* _context, JSObject* _obj) {
     PropertyNodePtr result;
-    if(JS_InstanceOf(_context->getJSContext(), _obj, &prop_class, NULL) == JS_TRUE) {
-      prop_wrapper* pWrapper = static_cast<prop_wrapper*>(JS_GetPrivate(_context->getJSContext(), _obj));
-      result = pWrapper->pNode;
+    if(_obj != NULL) {
+      if(JS_InstanceOf(_context->getJSContext(), _obj, &prop_class, NULL) == JS_TRUE) {
+        prop_wrapper* pWrapper = static_cast<prop_wrapper*>(JS_GetPrivate(_context->getJSContext(), _obj));
+        result = pWrapper->pNode;
+      }
     }
     return result;
   } // getPropertyFromObj
