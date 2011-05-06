@@ -111,9 +111,6 @@ namespace dss {
     if(zoneID != -1) {
       try {
         boost::shared_ptr<Zone> zone = m_Apartment.getZone(zoneID);
-        if(zone->getFirstZoneOnDSMeter() != NullDSID) {
-          return failure("Cannot delete a primary zone");
-        }
         if(zone->getDevices().length() > 0) {
           return failure("Cannot delete a non-empty zone");
         }
