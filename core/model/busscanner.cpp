@@ -77,16 +77,11 @@ namespace dss {
       return false;
     }
 
-    bool firstZone = true;
     foreach(int zoneID, zoneIDs) {
       log("scanDSMeter:  Found zone with id: " + intToString(zoneID));
       boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
       zone->addToDSMeter(_dsMeter);
       zone->setIsPresent(true);
-      if(firstZone) {
-        zone->setFirstZoneOnDSMeter(_dsMeter->getDSID());
-        firstZone = false;
-      }
       if(!scanZone(_dsMeter, zone)) {
         return false;
       }

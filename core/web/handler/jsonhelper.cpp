@@ -93,9 +93,6 @@ namespace dss {
     result->addProperty("id", _zone.getID());
     result->addProperty("name", _zone.getName());
     result->addProperty("isPresent", _zone.isPresent());
-    if(_zone.getFirstZoneOnDSMeter() != NullDSID) {
-      result->addProperty("firstZoneOnDSMeter", _zone.getFirstZoneOnDSMeter().toString());
-    }
 
     if(_includeDevices) {
       result->addElement("devices", toJSON(_zone.getDevices()));
