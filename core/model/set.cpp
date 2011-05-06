@@ -436,6 +436,11 @@ namespace dss {
           bool foundGroup = false;
           for(int iGroup = 0; iGroup < ref.getDevice()->getGroupsCount(); iGroup++) {
             boost::shared_ptr<Group> g = ref.getDevice()->getGroupByIndex(iGroup);
+            
+            boost::shared_ptr<Group> groupOfZone = _zone.getGroup(g->getID());
+            if(groupOfZone != NULL) {
+              g = groupOfZone;
+            }
 
             if(OptimizerDebug) {
               Logger::getInstance()->log("  Checking Group " + intToString(g->getID()));
