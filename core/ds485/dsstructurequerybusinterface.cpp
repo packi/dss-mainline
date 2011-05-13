@@ -214,26 +214,29 @@ namespace dss {
       spec.Locked = (locked != 0);
       spec.Groups = extractGroupIDs(groups);
       spec.Name = std::string(reinterpret_cast<char*>(name));
-      dsid_t dsid;
-      ret = DsmApiExpandDeviceDSID(spec.VendorID, spec.SerialNumber, &dsid);
+      dsid_t devdsid;
+      ret = DsmApiExpandDeviceDSID(spec.VendorID, spec.SerialNumber, &devdsid);
       DSBusInterface::checkResultCode(ret);
-      dsid_helper::toDssDsid(dsid, spec.DSID);
+      dsid_helper::toDssDsid(devdsid, spec.DSID);
 
+      spec.ButtonID = 0xff;
+      spec.ActiveGroup = 0xff;
+      spec.GroupMembership = 0xff;
+      spec.SetsLocalPriority = false;
       try {
         uint8_t setsLocalPriority;
         ret = DeviceButtonInfo_by_device(m_DSMApiHandle, dsid, spec.ShortAddress, &spec.ButtonID, 
                                         &spec.GroupMembership, &spec.ActiveGroup, 
                                         &setsLocalPriority);
-        DSBusInterface::checkResultCode(ret);
-        spec.SetsLocalPriority = (setsLocalPriority == 1);
+        if (ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
+          Logger::getInstance()->log("Unsupported message-id DeviceButtonInfo" + lsWarning);
+        } else {
+          DSBusInterface::checkResultCode(ret);
+          spec.SetsLocalPriority = (setsLocalPriority == 1);
+        }
       } catch(BusApiError& e) {
-        Logger::getInstance()->log("Error reading device-button-info: '" + 
-                                   std::string(e.what()) + 
-                                   "'. Are your dSMs out of date?", lsWarning);
-        spec.ButtonID = 0xff;
-        spec.ActiveGroup = 0xff;
-        spec.GroupMembership = 0xff;
-        spec.SetsLocalPriority = false;
+        Logger::getInstance()->log("Error reading DeviceButtonInfo: " + 
+                                   std::string(e.what()), lsWarning);
       }
       
       result.push_back(spec);
@@ -261,26 +264,29 @@ namespace dss {
     result.Locked = (locked != 0);
     result.Groups = extractGroupIDs(groups);
     result.Name = std::string(reinterpret_cast<char*>(name));
-    dsid_t dsid;
-    ret = DsmApiExpandDeviceDSID(result.VendorID, result.SerialNumber, &dsid);
+    dsid_t devdsid;
+    ret = DsmApiExpandDeviceDSID(result.VendorID, result.SerialNumber, &devdsid);
     DSBusInterface::checkResultCode(ret);
-    dsid_helper::toDssDsid(dsid, result.DSID);
+    dsid_helper::toDssDsid(devdsid, result.DSID);
 
+    result.ButtonID = 0xff;
+    result.ActiveGroup = 0xff;
+    result.GroupMembership = 0xff;
+    result.SetsLocalPriority = false;
     try {
       uint8_t setsLocalPriority;
       ret = DeviceButtonInfo_by_device(m_DSMApiHandle, dsmDSID, _id, &result.ButtonID, 
                                        &result.GroupMembership, &result.ActiveGroup, 
                                        &setsLocalPriority);
-      DSBusInterface::checkResultCode(ret);
-      result.SetsLocalPriority = (setsLocalPriority == 1);
+      if (ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
+        Logger::getInstance()->log("Unsupported message-id DeviceButtonInfo" + lsWarning);
+      } else {
+        DSBusInterface::checkResultCode(ret);
+        result.SetsLocalPriority = (setsLocalPriority == 1);
+      }
     } catch(BusApiError& e) {
-      Logger::getInstance()->log("Error reading device-button-info: '" + 
-                                 std::string(e.what()) + 
-                                 "'. Are your dSMs out of date?", lsWarning);
-      result.ButtonID = 0xff;
-      result.ActiveGroup = 0xff;
-      result.GroupMembership = 0xff;
-      result.SetsLocalPriority = false;
+      Logger::getInstance()->log("Error reading DeviceButtonInfo: " + 
+                                 std::string(e.what()), lsWarning);
     }
     
     return result;
