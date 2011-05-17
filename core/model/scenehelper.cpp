@@ -57,7 +57,7 @@ namespace dss {
     case Scene1:
       return Scene4;
     case Scene2:
-      return Scene4;
+      return Scene1;
     case Scene3:
       return Scene2;
     case Scene4:
