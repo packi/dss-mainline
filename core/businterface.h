@@ -63,6 +63,7 @@ namespace dss {
     uint8_t ActiveGroup;
     bool SetsLocalPriority;
     std::string Name;
+    uint16_t ZoneID;
   } DeviceSpec_t;
 
   class DeviceBusInterface {

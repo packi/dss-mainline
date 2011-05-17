@@ -40,6 +40,7 @@ namespace dss {
     BusScanner(StructureQueryBusInterface& _interface, Apartment& _apartment, ModelMaintenance& _maintenance);
     bool scanDSMeter(boost::shared_ptr<DSMeter> _dsMeter);
     bool scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, devid_t _shortAddress);
+    bool scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, devid_t _shortAddress);
   private:
     bool scanZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone);
     bool scanGroupsOfZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone);

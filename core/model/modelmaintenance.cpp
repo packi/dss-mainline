@@ -202,6 +202,14 @@ namespace dss {
           onRemoveDevice(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
         }
         break;
+      case ModelEvent::etDeviceChanged:
+        assert(pEventWithDSID != NULL);
+        if(event.getParameterCount() != 1) {
+          log("Expected exactly 1 parameter for ModelEvent::etDeviceChanged");
+        } else {
+          rescanDevice(pEventWithDSID->getDSID(), event.getParameter(0));
+        }
+        break;
       case ModelEvent::etCallSceneDevice:
         assert(pEventWithDSID != NULL);
         if(event.getParameterCount() != 2) {
@@ -562,19 +570,7 @@ namespace dss {
     log("  Zone:      " + intToString(_zoneID));
     log("  BusID:     " + intToString(_devID));
 
-    BusScanner
-      scanner(
-        *m_pStructureQueryBusInterface,
-        *m_pApartment,
-        *this
-      );
-    try {
-      boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByDSID(_dsMeterID);
-      boost::shared_ptr<Zone> zone = m_pApartment->allocateZone(_zoneID);
-      scanner.scanDeviceOnBus(dsMeter, zone, _devID);
-    } catch(std::runtime_error& e) {
-      log(std::string("Error scanning device: ") + e.what());
-    }
+    rescanDevice(_dsMeterID, _devID);
   } // onAddDevice
 
   void ModelMaintenance::onRemoveDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID) {
@@ -615,6 +611,20 @@ namespace dss {
       log("Lost dSM " + _dSMeterID.toString() + " was not in our list");
     }
   }
+  
+  void ModelMaintenance::rescanDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) {
+    BusScanner
+      scanner(
+        *m_pStructureQueryBusInterface,
+        *m_pApartment,
+        *this);
+    try {
+      boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByDSID(_dsMeterID);
+      scanner.scanDeviceOnBus(dsMeter, _deviceID);
+    } catch(std::runtime_error& e) {
+      log(std::string("Error scanning device: ") + e.what());
+    }
+  } // rescanDevice
 
   void ModelMaintenance::setApartment(Apartment* _value) {
     m_pApartment = _value;

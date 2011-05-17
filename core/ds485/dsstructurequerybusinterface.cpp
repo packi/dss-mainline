@@ -208,7 +208,7 @@ namespace dss {
       int ret = DeviceInfo_by_index_only_active(m_DSMApiHandle, dsid, _zoneID, iDevice,
                                                 &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
                                                 &spec.Version,
-                                                NULL, NULL, NULL, &locked, &spec.OutputMode, groups, name,
+                                                &spec.ZoneID, NULL, NULL, &locked, &spec.OutputMode, groups, name,
                                                 NULL, NULL, &spec.SerialNumber);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
@@ -258,7 +258,7 @@ namespace dss {
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, dsmDSID, _id,
                                       &result.ShortAddress, &result.VendorID, &result.ProductID, &result.FunctionID,
                                       &result.Version,
-                                      NULL, NULL, NULL, &locked, &result.OutputMode, groups, name,
+                                      &result.ZoneID, NULL, NULL, &locked, &result.OutputMode, groups, name,
                                       NULL, NULL, &result.SerialNumber);
     DSBusInterface::checkResultCode(ret);
     result.Locked = (locked != 0);
