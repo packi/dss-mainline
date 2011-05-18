@@ -252,6 +252,9 @@ namespace dss {
       EventDeviceModelChanged_event_callback_t evDevModelChanged = DSBusInterface::eventDataModelChangedCallback;
       DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT, EVENT_DEVICE_MODEL_CHANGED, 
                              0, (void*)evDevModelChanged, this);
+      DeviceConfig_set_request_callback_t evDevConfigSet = DSBusInterface::deviceConfigSetCallback;
+      DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST, DEVICE_CONFIG, 
+                             DEVICE_CONFIG_SET, (void*)evDevConfigSet, this);
 
       ZoneGroupActionRequest_action_call_scene_request_callback_t handleBusCall = DSBusInterface::handleBusCallSceneCallback;
       DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_REQUEST,
@@ -282,6 +285,8 @@ namespace dss {
       DsmApiRegisterCallback(m_dsmApiHandle, DS485_CONTAINER_RESPONSE,
                             CIRCUIT_ENERGY_METER_VALUE, CIRCUIT_ENERGY_METER_VALUE_GET,
                             (void*)meteringCallback, this);
+      
+      
 
       m_dsmApiReady = true;
     }
@@ -431,7 +436,31 @@ namespace dss {
                                                 dsMeterID);
     pEvent->addParameter(_shortAddress);
     m_pModelMaintenance->addModelEvent(pEvent);
-  }  
+  }
+  
+  void DSBusInterface::deviceConfigSetCallback(uint8_t _errorCode, void* _userData, 
+                                               dsid_t _sourceID, dsid_t _destinationID, 
+                                               uint16_t _deviceID, uint8_t _configClass, 
+                                               uint8_t _configIndex, uint8_t _value) {
+    static_cast<DSBusInterface*>(_userData)->deviceConfigSet(_destinationID, _deviceID,
+                                                             _configClass, _configIndex, _value);
+  } // deviceConfigSetCallback
+  
+  void DSBusInterface::deviceConfigSet(dsid_t _dsMeterID, uint16_t _deviceID, 
+                                       uint8_t _configClass, uint8_t _configIndex, 
+                                       uint8_t _value) {
+    dss_dsid_t dsMeterID;
+    dsid_helper::toDssDsid(_dsMeterID, dsMeterID);
+    
+    ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceConfigChanged,
+                                                dsMeterID);
+    pEvent->addParameter(_deviceID);
+    pEvent->addParameter(_configClass);
+    pEvent->addParameter(_configIndex);
+    pEvent->addParameter(_value);    
+    m_pModelMaintenance->addModelEvent(pEvent);
+  } // deviceConfigSet
+  
 
   void DSBusInterface::handleBusCallScene(uint8_t _errorCode, dsid_t _sourceID, 
                                           uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID) {

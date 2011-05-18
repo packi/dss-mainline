@@ -233,6 +233,15 @@ namespace dss {
           rescanDevice(pEventWithDSID->getDSID(), event.getParameter(0));
         }
         break;
+      case ModelEvent::etDeviceConfigChanged:
+        assert(pEventWithDSID != NULL);
+        if(event.getParameterCount() != 4) {
+          log("Expected exactly 4 parameter for ModelEvent::etDeviceConfigChanged");
+        } else {
+          onDeviceConfigChanged(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), 
+                                                           event.getParameter(2), event.getParameter(3));
+        }
+        break;
       case ModelEvent::etCallSceneDevice:
         assert(pEventWithDSID != NULL);
         if(event.getParameterCount() != 2) {
@@ -634,6 +643,22 @@ namespace dss {
       log("Lost dSM " + _dSMeterID.toString() + " was not in our list");
     }
   }
+  
+  void ModelMaintenance::onDeviceConfigChanged(const dss_dsid_t& _dsMeterID, int _deviceID, 
+                                               int _configClass, int _configIndex, int _value) {
+    try {
+      DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
+      if(_configClass == 3) {
+        if(_configIndex == 0) {
+          devRef.getDevice()->setOutputMode(_value);
+        } else if(_configIndex == 1) {
+          devRef.getDevice()->setButtonID(_value);
+        }
+      }
+    } catch(std::runtime_error& e) {
+      log(std::string("Error updating config of device: ") + e.what());
+    }
+  } // onDeviceConfigChanged
   
   void ModelMaintenance::rescanDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) {
     BusScanner

@@ -102,6 +102,13 @@ namespace dss {
                                               dsid_t _destinationID, 
                                               uint16_t _shortAddress);
     void eventDataModelChanged(dsid_t _dsMeterID, uint16_t _shortAddress);
+    static void deviceConfigSetCallback(uint8_t _errorCode, void* _userData, 
+                                        dsid_t _sourceID, dsid_t _destinationID, 
+                                        uint16_t _deviceID, uint8_t _configClass, 
+                                        uint8_t _configIndex, uint8_t _value);
+    void deviceConfigSet(dsid_t _dsMeterID, uint16_t _deviceID, 
+                         uint8_t _configClass, uint8_t _configIndex, 
+                         uint8_t _value);
     void handleBusCallScene(uint8_t _errorCode, dsid_t _sourceID,
                             uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneID);
     static void handleBusCallSceneCallback(uint8_t _errorCode, void *_userData, dsid_t _sourceID,
