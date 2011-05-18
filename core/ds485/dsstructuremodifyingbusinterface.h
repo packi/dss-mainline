@@ -51,6 +51,8 @@ namespace dss {
     virtual void meterSetName(dss_dsid_t _meterDSID, const std::string& _name);
     virtual void createGroup(uint16_t _zoneID, uint8_t _groupID);
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID);
+
+    virtual void setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority);
   private:
     dsid_t m_BroadcastDSID;
   }; // DSStructureModifyingBusInterface

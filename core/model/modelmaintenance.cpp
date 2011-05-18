@@ -67,6 +67,29 @@ namespace dss {
         ModelEvent* pEvent = new ModelEvent(ModelEvent::etModelDirty);
         m_pModelMaintenance->addModelEvent(pEvent);
       }
+      if((_changedNode->getName() == "setsLocalPriority") &&
+         (_changedNode->getValueType() == vTypeBoolean)) {
+        handleLocalPriority(_changedNode);
+      }
+    }
+  
+  private:
+    void handleLocalPriority(PropertyNodePtr _changedNode) {
+      if((_changedNode->getParentNode() != NULL) &&
+         (_changedNode->getParentNode()->getParentNode() != NULL)) {
+        PropertyNode* deviceNode = 
+          _changedNode->getParentNode()->getParentNode();
+        boost::shared_ptr<Device> dev = 
+          m_pApartment->getDeviceByDSID(dss_dsid_t::fromString(deviceNode->getName()));
+        bool value = _changedNode->getBoolValue();
+        if(DSS::hasInstance()) {
+          StructureModifyingBusInterface* pInterface;
+          pInterface = DSS::getInstance()->getBusInterface().getStructureModifyingBusInterface();
+          pInterface->setButtonSetsLocalPriority(dev->getDSMeterDSID(), 
+                                                 dev->getShortAddress(), 
+                                                 value);
+        }
+      }
     }
   private:
     ModelMaintenance* m_pModelMaintenance;

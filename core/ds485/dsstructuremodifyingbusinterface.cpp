@@ -157,5 +157,16 @@ namespace dss {
     int ret = ZoneGroupModify_remove(m_DSMApiHandle, m_BroadcastDSID, _zoneID, _groupID);
     DSBusInterface::checkBroadcastResultCode(ret);
   } // removeGroup
+  
+  void DSStructureModifyingBusInterface::setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    dsid_t meterDSID;
+    dsid_helper::toDsmapiDsid(_dsMeterID, meterDSID);
+    int ret = DeviceProperties_set_button_set_local_priority(m_DSMApiHandle, meterDSID, _deviceID, _setsPriority ? 1 : 0);
+    DSBusInterface::checkBroadcastResultCode(ret);
+  } // setButtonSetsLocalPriority
 
 } // namespace dss

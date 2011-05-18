@@ -144,6 +144,8 @@ namespace dss {
 
     virtual void createGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
+    
+    virtual void setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) = 0;
 
     virtual ~StructureModifyingBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureModifyingBusInterface

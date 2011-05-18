@@ -101,8 +101,8 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<int>(m_ButtonActiveGroup, false));
         m_pPropertyNode->createProperty("button/groupMembership")
           ->linkToProxy(PropertyProxyReference<int>(m_ButtonGroupMembership, false));
-        m_pPropertyNode->createProperty("button/setsLocalPrio")
-          ->linkToProxy(PropertyProxyReference<bool>(m_ButtonSetsLocalPriority, false));
+        m_pPropertyNode->createProperty("button/setsLocalPriority")
+          ->linkToProxy(PropertyProxyReference<bool>(m_ButtonSetsLocalPriority));
         m_TagsNode = m_pPropertyNode->createProperty("tags");
         m_TagsNode->setFlag(PropertyNode::Archive, true);
       }
