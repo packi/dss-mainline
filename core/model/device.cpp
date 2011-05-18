@@ -101,8 +101,8 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<int>(m_ButtonActiveGroup, false));
         m_pPropertyNode->createProperty("button/groupMembership")
           ->linkToProxy(PropertyProxyReference<int>(m_ButtonGroupMembership, false));
-        m_pPropertyNode->createProperty("button/setsLocalPrio")
-          ->linkToProxy(PropertyProxyReference<bool>(m_ButtonSetsLocalPriority, false));
+        m_pPropertyNode->createProperty("button/setsLocalPriority")
+          ->linkToProxy(PropertyProxyReference<bool>(m_ButtonSetsLocalPriority));
         m_TagsNode = m_pPropertyNode->createProperty("tags");
         m_TagsNode->setFlag(PropertyNode::Archive, true);
       }
@@ -150,6 +150,16 @@ namespace dss {
                                                              _configClass,
                                                              _configIndex,
                                                              _value);
+      
+      if((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
+        ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceConfigChanged,
+                                                    m_DSMeterDSID);
+        pEvent->addParameter(m_ShortAddress);
+        pEvent->addParameter(_configClass);
+        pEvent->addParameter(_configIndex);
+        pEvent->addParameter(_value);    
+        m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
+      }      
     }
   } // setConfig
 

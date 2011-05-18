@@ -81,6 +81,7 @@ namespace dss {
         spec.ButtonID = 0;
         spec.GroupMembership = 0;
         spec.SetsLocalPriority = 0;
+        spec.ZoneID = pDevice->getZoneID();
         result.push_back(spec);
       }
     }
@@ -122,6 +123,7 @@ namespace dss {
       result.GroupMembership = 0;
       result.SetsLocalPriority = 0;
       result.Groups = pMeter->getGroupsOfDevice(device.getShortAddress());
+      result.ZoneID = device.getZoneID();
     }
     return result;
   } // deviceGetSpec

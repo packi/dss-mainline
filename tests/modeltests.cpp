@@ -757,6 +757,8 @@ public:
   }
   virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) {
   }
+  virtual void setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) {
+  }
 };
 
 class DummyActionRequestInterface : public ActionRequestInterface {

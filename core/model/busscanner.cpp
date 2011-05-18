@@ -104,10 +104,16 @@ namespace dss {
 
     return scanGroupsOfZone(_dsMeter, _zone);
   } // scanZone
-
+  
   bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, devid_t _shortAddress) {
     DeviceSpec_t spec = m_Interface.deviceGetSpec(_shortAddress, _dsMeter->getDSID());
     return initializeDeviceFromSpec(_dsMeter, _zone, spec);
+  } // scanDeviceOnBus
+
+  bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, devid_t _shortAddress) {
+    DeviceSpec_t spec = m_Interface.deviceGetSpec(_shortAddress, _dsMeter->getDSID());
+    boost::shared_ptr<Zone> pZone = m_Apartment.allocateZone(spec.ZoneID);
+    return initializeDeviceFromSpec(_dsMeter, pZone, spec);
   } // scanDeviceOnBus
 
   bool BusScanner::initializeDeviceFromSpec(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, DeviceSpec_t& _spec) {

@@ -67,6 +67,29 @@ namespace dss {
         ModelEvent* pEvent = new ModelEvent(ModelEvent::etModelDirty);
         m_pModelMaintenance->addModelEvent(pEvent);
       }
+      if((_changedNode->getName() == "setsLocalPriority") &&
+         (_changedNode->getValueType() == vTypeBoolean)) {
+        handleLocalPriority(_changedNode);
+      }
+    }
+  
+  private:
+    void handleLocalPriority(PropertyNodePtr _changedNode) {
+      if((_changedNode->getParentNode() != NULL) &&
+         (_changedNode->getParentNode()->getParentNode() != NULL)) {
+        PropertyNode* deviceNode = 
+          _changedNode->getParentNode()->getParentNode();
+        boost::shared_ptr<Device> dev = 
+          m_pApartment->getDeviceByDSID(dss_dsid_t::fromString(deviceNode->getName()));
+        bool value = _changedNode->getBoolValue();
+        if(DSS::hasInstance()) {
+          StructureModifyingBusInterface* pInterface;
+          pInterface = DSS::getInstance()->getBusInterface().getStructureModifyingBusInterface();
+          pInterface->setButtonSetsLocalPriority(dev->getDSMeterDSID(), 
+                                                 dev->getShortAddress(), 
+                                                 value);
+        }
+      }
     }
   private:
     ModelMaintenance* m_pModelMaintenance;
@@ -200,6 +223,23 @@ namespace dss {
           log("Expected exactly 2 parameter for ModelEvent::etLostDevice");
         } else {
           onRemoveDevice(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1));
+        }
+        break;
+      case ModelEvent::etDeviceChanged:
+        assert(pEventWithDSID != NULL);
+        if(event.getParameterCount() != 1) {
+          log("Expected exactly 1 parameter for ModelEvent::etDeviceChanged");
+        } else {
+          rescanDevice(pEventWithDSID->getDSID(), event.getParameter(0));
+        }
+        break;
+      case ModelEvent::etDeviceConfigChanged:
+        assert(pEventWithDSID != NULL);
+        if(event.getParameterCount() != 4) {
+          log("Expected exactly 4 parameter for ModelEvent::etDeviceConfigChanged");
+        } else {
+          onDeviceConfigChanged(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), 
+                                                           event.getParameter(2), event.getParameter(3));
         }
         break;
       case ModelEvent::etCallSceneDevice:
@@ -562,19 +602,7 @@ namespace dss {
     log("  Zone:      " + intToString(_zoneID));
     log("  BusID:     " + intToString(_devID));
 
-    BusScanner
-      scanner(
-        *m_pStructureQueryBusInterface,
-        *m_pApartment,
-        *this
-      );
-    try {
-      boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByDSID(_dsMeterID);
-      boost::shared_ptr<Zone> zone = m_pApartment->allocateZone(_zoneID);
-      scanner.scanDeviceOnBus(dsMeter, zone, _devID);
-    } catch(std::runtime_error& e) {
-      log(std::string("Error scanning device: ") + e.what());
-    }
+    rescanDevice(_dsMeterID, _devID);
   } // onAddDevice
 
   void ModelMaintenance::onRemoveDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID) {
@@ -615,6 +643,36 @@ namespace dss {
       log("Lost dSM " + _dSMeterID.toString() + " was not in our list");
     }
   }
+  
+  void ModelMaintenance::onDeviceConfigChanged(const dss_dsid_t& _dsMeterID, int _deviceID, 
+                                               int _configClass, int _configIndex, int _value) {
+    try {
+      DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
+      if(_configClass == 3) {
+        if(_configIndex == 0) {
+          devRef.getDevice()->setOutputMode(_value);
+        } else if(_configIndex == 1) {
+          devRef.getDevice()->setButtonID(_value);
+        }
+      }
+    } catch(std::runtime_error& e) {
+      log(std::string("Error updating config of device: ") + e.what());
+    }
+  } // onDeviceConfigChanged
+  
+  void ModelMaintenance::rescanDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) {
+    BusScanner
+      scanner(
+        *m_pStructureQueryBusInterface,
+        *m_pApartment,
+        *this);
+    try {
+      boost::shared_ptr<DSMeter> dsMeter = m_pApartment->getDSMeterByDSID(_dsMeterID);
+      scanner.scanDeviceOnBus(dsMeter, _deviceID);
+    } catch(std::runtime_error& e) {
+      log(std::string("Error scanning device: ") + e.what());
+    }
+  } // rescanDevice
 
   void ModelMaintenance::setApartment(Apartment* _value) {
     m_pApartment = _value;

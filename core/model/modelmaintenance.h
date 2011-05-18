@@ -80,6 +80,9 @@ namespace dss {
     void onAddDevice(const dss::dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID);
     void onRemoveDevice(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _devID);
     void onLostDSMeter(const dss_dsid_t& _dsMeterID);
+    void onDeviceConfigChanged(const dss_dsid_t& _dsMeterID, int _deviceID, 
+                               int _configClass, int _configIndex, int _value);
+    void rescanDevice(const dss_dsid_t& _dsMeterID, const int _deviceID);
   private:
     bool m_IsInitializing;
 

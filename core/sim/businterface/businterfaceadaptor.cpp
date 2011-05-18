@@ -301,6 +301,19 @@ namespace dss {
       m_pSimulationInterface->removeGroup(_zoneID, _groupID);
       m_pInner->removeGroup(_zoneID, _groupID);
     }
+    
+    virtual void setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, 
+                                            const devid_t _deviceID, 
+                                            bool _setsPriority) {
+      if(isHandledBySimulation(_dsMeterID)) {
+        m_pSimulationInterface->setButtonSetsLocalPriority(_dsMeterID,
+                                                           _deviceID,
+                                                           _setsPriority);
+      } else {
+        m_pInner->setButtonSetsLocalPriority(_dsMeterID, _deviceID, 
+                                             _setsPriority);
+      }
+    }
   private:
     StructureModifyingBusInterface* m_pInner;
     StructureModifyingBusInterface* m_pSimulationInterface;
