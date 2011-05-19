@@ -63,7 +63,7 @@ using Poco::XML::InputSource;
 #include "core/security/user.h"
 
 namespace dss {
-  
+
   const int PROPERTY_FORMAT_VERSION = 1;
 
   //=============================================== PropertySystem
@@ -390,7 +390,7 @@ namespace dss {
   const std::string& PropertyNode::getDisplayName() const {
     if(m_ParentNode && (m_ParentNode->count(m_Name) > 1)) {
       std::stringstream sstr;
-      sstr << getName() << "[" << m_Index << "]" << std::endl;
+      sstr << getName() << "[" << m_Index << "]";
       m_DisplayName = sstr.str();
       return m_DisplayName;
     } else {
@@ -718,10 +718,10 @@ namespace dss {
     return m_Aliased ? m_AliasTarget->m_PropVal.valueType : m_PropVal.valueType;
   } // getValueType
 
-  void PropertyNode::setFlag(Flag _flag, bool _value) { 
+  void PropertyNode::setFlag(Flag _flag, bool _value) {
     checkWriteAccess();
     int oldFlags = m_Flags;
-    _value ? m_Flags |= _flag : m_Flags &= ~_flag; 
+    _value ? m_Flags |= _flag : m_Flags &= ~_flag;
     if(oldFlags != m_Flags) {
       propertyChanged();
     }
