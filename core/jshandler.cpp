@@ -293,14 +293,14 @@ namespace dss {
     if(argc >= 2) {
       int timeoutMS;
       try {
-        timeoutMS = ctx->convertTo<int>(argv[0]);
+        timeoutMS = ctx->convertTo<int>(argv[1]);
       } catch(ScriptException& e) {
-        Logger::getInstance()->log("Parameter timeoutMS is not of type int");
+        Logger::getInstance()->log("Parameter timeoutMS is not of type int", lsError);
         return JS_FALSE;
       }
-      boost::shared_ptr<ScriptFunctionRooter> functionRoot(new ScriptFunctionRooter(ctx, obj, argv[1]));
+      boost::shared_ptr<ScriptFunctionRooter> functionRoot(new ScriptFunctionRooter(ctx, obj, argv[0]));
       SessionAttachedTimeoutObject* pTimeoutObj = new SessionAttachedTimeoutObject(ctx);
-      boost::thread(boost::bind(&SessionAttachedTimeoutObject::timeout, pTimeoutObj, timeoutMS, argv[1], obj, functionRoot));
+      boost::thread(boost::bind(&SessionAttachedTimeoutObject::timeout, pTimeoutObj, timeoutMS, argv[0], obj, functionRoot));
     }
     return JS_TRUE;
   } // global_setTimeout
