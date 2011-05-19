@@ -152,7 +152,7 @@ namespace dss {
         boost::shared_ptr<JSONObject> prop(new JSONObject());
         resultObj->addElement("", prop);
         PropertyNodePtr cnode = node->getChild(iChild);
-        prop->addProperty("name", cnode->getName());
+        prop->addProperty("name", cnode->getDisplayName());
         prop->addProperty("type", getValueTypeAsString(cnode->getValueType()));
       }
       return success(resultObj);

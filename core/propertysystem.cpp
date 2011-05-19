@@ -390,7 +390,7 @@ namespace dss {
   const std::string& PropertyNode::getDisplayName() const {
     if(m_ParentNode && (m_ParentNode->count(m_Name) > 1)) {
       std::stringstream sstr;
-      sstr << getName() << "[" << m_Index << "]" << std::endl;
+      sstr << getName() << "[" << m_Index << "]";
       m_DisplayName = sstr.str();
       return m_DisplayName;
     } else {
