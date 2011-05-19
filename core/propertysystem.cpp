@@ -63,7 +63,7 @@ using Poco::XML::InputSource;
 #include "core/security/user.h"
 
 namespace dss {
-  
+
   const int PROPERTY_FORMAT_VERSION = 1;
 
   //=============================================== PropertySystem
@@ -718,10 +718,10 @@ namespace dss {
     return m_Aliased ? m_AliasTarget->m_PropVal.valueType : m_PropVal.valueType;
   } // getValueType
 
-  void PropertyNode::setFlag(Flag _flag, bool _value) { 
+  void PropertyNode::setFlag(Flag _flag, bool _value) {
     checkWriteAccess();
     int oldFlags = m_Flags;
-    _value ? m_Flags |= _flag : m_Flags &= ~_flag; 
+    _value ? m_Flags |= _flag : m_Flags &= ~_flag;
     if(oldFlags != m_Flags) {
       propertyChanged();
     }

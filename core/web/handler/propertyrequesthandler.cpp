@@ -31,7 +31,7 @@ namespace dss {
 
 
   //=========================================== PropertyRequestHandler
-  
+
   PropertyRequestHandler::PropertyRequestHandler(PropertySystem& _propertySystem)
   : m_PropertySystem(_propertySystem)
   { }
