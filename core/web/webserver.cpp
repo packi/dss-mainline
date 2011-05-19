@@ -88,7 +88,7 @@ namespace dss {
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "bindip", "0.0.0.0", true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "listen", "8080", true, false);
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "trustedPort", 0, true, false);
-    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "announcedport", DSS::getInstance()->getPropertySystem().getIntValue(getConfigPropertyBasePath() + "ports"), true, false);
+    getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "announcedport", 8080, true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "files/apartment.xml", getDSS().getDataDirectory() + "apartment.xml", true, false);
     getDSS().getPropertySystem().setStringValue(getConfigPropertyBasePath() + "sslcert", getDSS().getPropertySystem().getStringValue("/config/configdirectory") + "dsscert.pem" , true, false);
 
@@ -237,9 +237,9 @@ namespace dss {
       new ZoneRequestHandler(
         getDSS().getApartment(),
         getDSS().getBusInterface().getStructureModifyingBusInterface());
-    m_Handlers[kHandlerDevice] = 
+    m_Handlers[kHandlerDevice] =
       new DeviceRequestHandler(
-        getDSS().getApartment(), 
+        getDSS().getApartment(),
         getDSS().getBusInterface().getStructureModifyingBusInterface());
     m_Handlers[kHandlerCircuit] = new CircuitRequestHandler(
             getDSS().getApartment(),
@@ -508,7 +508,7 @@ namespace dss {
       session = self.m_SessionManager->getSession(token);
     }
     HashMapConstStringString injectedCookies;
-    
+
     // if we're coming from a trusted port, impersonate that user and start
     // a new session on his behalf
     if((session == NULL) && (_info->local_port == self.m_TrustedPort)) {
@@ -517,18 +517,18 @@ namespace dss {
         std::string digest = digestCString;
         const std::string userNamePrefix = "username=\"";
         std::string::size_type userNamePos = digest.find(userNamePrefix);
-        std::string::size_type userNameEnd = 
+        std::string::size_type userNameEnd =
           digest.find("\"", userNamePos + userNamePrefix.size() - 1);
-        if((userNamePos != std::string::npos) && 
+        if((userNamePos != std::string::npos) &&
            (userNameEnd != std::string::npos)) {
-          std::string userName = digest.substr(userNamePos + userNamePrefix.size(), 
+          std::string userName = digest.substr(userNamePos + userNamePrefix.size(),
                                                userNameEnd - userNamePos - 1);
           self.log("Logging-in from a trusted port as '" + userName + "'");
           self.m_SessionManager->getSecurity()->impersonate(userName);
           std::string newToken = self.m_SessionManager->registerSession();
           self.m_SessionManager->getSession(newToken)->inheritUserFromSecurity();
           injectedCookies["path"] = "/";
-          injectedCookies["token"] = newToken;           
+          injectedCookies["token"] = newToken;
         }
       }
     }
@@ -541,7 +541,7 @@ namespace dss {
     if (uri.find("/browse/") == 0) {
       return self.httpBrowseProperties(_connection, _info);
     } else if (uri.find("/json/") == 0) {
-      return self.jsonHandler(_connection, _info, paramMap, cookies, 
+      return self.jsonHandler(_connection, _info, paramMap, cookies,
                               injectedCookies, session);
     } else if (uri.find("/download/") == 0) {
       return self.downloadHandler(_connection, _info);
