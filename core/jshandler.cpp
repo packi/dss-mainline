@@ -292,15 +292,22 @@ namespace dss {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
     if(argc >= 2) {
       int timeoutMS;
+      jsval* functionVal = &argv[0];
       try {
-        timeoutMS = ctx->convertTo<int>(argv[0]);
+        timeoutMS = ctx->convertTo<int>(argv[1]);
       } catch(ScriptException& e) {
-        Logger::getInstance()->log("Parameter timeoutMS is not of type int");
-        return JS_FALSE;
+        Logger::getInstance()->log("Parameter timeoutMS is not of type int, trying other (deprecated parameter order)", lsError);
+        // TODO: remove this temporay compatibility hack
+        try {
+          timeoutMS = ctx->convertTo<int>(argv[0]);
+          functionVal = &argv[1];
+        } catch(ScriptException& e) {
+          return JS_FALSE;
+        }
       }
-      boost::shared_ptr<ScriptFunctionRooter> functionRoot(new ScriptFunctionRooter(ctx, obj, argv[1]));
+      boost::shared_ptr<ScriptFunctionRooter> functionRoot(new ScriptFunctionRooter(ctx, obj, *functionVal));
       SessionAttachedTimeoutObject* pTimeoutObj = new SessionAttachedTimeoutObject(ctx);
-      boost::thread(boost::bind(&SessionAttachedTimeoutObject::timeout, pTimeoutObj, timeoutMS, argv[1], obj, functionRoot));
+      boost::thread(boost::bind(&SessionAttachedTimeoutObject::timeout, pTimeoutObj, timeoutMS, *functionVal, obj, functionRoot));
     }
     return JS_TRUE;
   } // global_setTimeout
@@ -515,7 +522,7 @@ namespace dss {
     m_Locked = true;
     m_LockDataMutex.unlock();
   } // lock
-  
+
   void ScriptContext::unlock() {
     m_LockDataMutex.lock();
     assert(m_Locked);

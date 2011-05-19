@@ -117,20 +117,12 @@ BOOST_AUTO_TEST_CASE(testNonexistingScriptRaisesException) {
   BOOST_CHECK_THROW(ctx->evaluateScript<void>("idontexistandneverwill.js"), ScriptException);
 } // testNonexistingScriptRaisesException
 
-BOOST_AUTO_TEST_CASE(testSetTimeoutNoFunction) {
-  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
-  env->initialize();
-
-  boost::shared_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluate<void>("var result = false; setTimeout(0);");
-} // testSetTimeoutNoFunction
-
 BOOST_AUTO_TEST_CASE(testSetTimeoutZeroDelay) {
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
 
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluate<void>("var result = false; setTimeout(0, function() {  result = true; } );");
+  ctx->evaluate<void>("var result = false; setTimeout(function() {  result = true; }, 0);");
   while(ctx->hasAttachedObjects()) {
     sleepMS(1);
   }
@@ -143,7 +135,7 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutNormalDelay) {
   env->initialize();
 
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluate<void>("var result = false; setTimeout(10, function() {  result = true; } );");
+  ctx->evaluate<void>("var result = false; setTimeout(function() {  result = true; }, 10);");
   while(ctx->hasAttachedObjects()) {
     sleepMS(1);
   }
@@ -157,7 +149,7 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutInvalidFunction) {
   env->initialize();
 
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
-  ctx->evaluate<void>("var a = 1; var result = false; setTimeout(0, a);");
+  ctx->evaluate<void>("var a = 1; var result = false; setTimeout(a, 0);");
   while(ctx->hasAttachedObjects()) {
     sleepMS(1);
   }
@@ -172,7 +164,7 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutGC) {
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("var result = false;\n"
                       "var obj = { func: function() { result = true; } };"
-                      "setTimeout(10, function() { setTimeout(0, obj.func); } );");
+                      "setTimeout(function() { setTimeout(obj.func, 0); }, 10);");
   while(ctx->hasAttachedObjects()) {
     sleepMS(1);
   }
@@ -186,7 +178,7 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutIsStoppable) {
 
   boost::shared_ptr<ScriptContext> ctx(env->getContext());
   ctx->evaluate<void>("result = true;\n"
-                      "setTimeout(100000, function() { result = false; });");
+                      "setTimeout(function() { result = false; }, 100000);");
   BOOST_CHECK_EQUAL(ctx->getAttachedObjectsCount(), 1);
   ctx->stop();
 
@@ -199,5 +191,19 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutIsStoppable) {
   } 
   BOOST_CHECK_EQUAL(ctx->getAttachedObjectsCount(), 0);
 }
+
+BOOST_AUTO_TEST_CASE(testSetTimeoutStillWorksWithSwappedParams) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("var result = false; setTimeout(10, function() {  result = true; });");
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
+  JSContextThread req(ctx);
+  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
+} // testSetTimeoutStillWorksWithSwappedParams
+
 
 BOOST_AUTO_TEST_SUITE_END()
