@@ -192,4 +192,18 @@ BOOST_AUTO_TEST_CASE(testSetTimeoutIsStoppable) {
   BOOST_CHECK_EQUAL(ctx->getAttachedObjectsCount(), 0);
 }
 
+BOOST_AUTO_TEST_CASE(testSetTimeoutStillWorksWithSwappedParams) {
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+  ctx->evaluate<void>("var result = false; setTimeout(10, function() {  result = true; });");
+  while(ctx->hasAttachedObjects()) {
+    sleepMS(1);
+  }
+  JSContextThread req(ctx);
+  BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<bool>("result"), true);
+} // testSetTimeoutStillWorksWithSwappedParams
+
+
 BOOST_AUTO_TEST_SUITE_END()
