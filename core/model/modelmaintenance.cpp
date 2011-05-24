@@ -72,21 +72,21 @@ namespace dss {
         handleLocalPriority(_changedNode);
       }
     }
-  
+
   private:
     void handleLocalPriority(PropertyNodePtr _changedNode) {
       if((_changedNode->getParentNode() != NULL) &&
          (_changedNode->getParentNode()->getParentNode() != NULL)) {
-        PropertyNode* deviceNode = 
+        PropertyNode* deviceNode =
           _changedNode->getParentNode()->getParentNode();
-        boost::shared_ptr<Device> dev = 
+        boost::shared_ptr<Device> dev =
           m_pApartment->getDeviceByDSID(dss_dsid_t::fromString(deviceNode->getName()));
         bool value = _changedNode->getBoolValue();
         if(DSS::hasInstance()) {
           StructureModifyingBusInterface* pInterface;
           pInterface = DSS::getInstance()->getBusInterface().getStructureModifyingBusInterface();
-          pInterface->setButtonSetsLocalPriority(dev->getDSMeterDSID(), 
-                                                 dev->getShortAddress(), 
+          pInterface->setButtonSetsLocalPriority(dev->getDSMeterDSID(),
+                                                 dev->getShortAddress(),
                                                  value);
         }
       }
@@ -138,7 +138,7 @@ namespace dss {
     }
     if(DSS::hasInstance()) {
       DSS::getInstance()->getPropertySystem().setStringValue(
-              getConfigPropertyBasePath() + "configfile", 
+              getConfigPropertyBasePath() + "configfile",
               getDSS().getDataDirectory() + "apartment.xml", true, false);
 
       boost::filesystem::path filename(
@@ -238,7 +238,7 @@ namespace dss {
         if(event.getParameterCount() != 4) {
           log("Expected exactly 4 parameter for ModelEvent::etDeviceConfigChanged");
         } else {
-          onDeviceConfigChanged(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1), 
+          onDeviceConfigChanged(pEventWithDSID->getDSID(), event.getParameter(0), event.getParameter(1),
                                                            event.getParameter(2), event.getParameter(3));
         }
         break;
@@ -549,13 +549,13 @@ namespace dss {
     }
   } // onGroupCallScene
 
-  void ModelMaintenance::onDeviceNameChanged(dss_dsid_t _meterID, 
-                                             const devid_t _deviceID, 
+  void ModelMaintenance::onDeviceNameChanged(dss_dsid_t _meterID,
+                                             const devid_t _deviceID,
                                              const std::string& _name) {
-    log("Device name changed on the bus. Meter: " + _meterID.toString() + 
+    log("Device name changed on the bus. Meter: " + _meterID.toString() +
         " bus-id: " + intToString(_deviceID), lsInfo);
     try {
-      boost::shared_ptr<DSMeter> pMeter = 
+      boost::shared_ptr<DSMeter> pMeter =
         m_pApartment->getDSMeterByDSID(_meterID);
       DeviceReference ref = pMeter->getDevices().getByBusID(_deviceID, pMeter);
       ref.getDevice()->setName(_name);
@@ -650,8 +650,8 @@ namespace dss {
       log("Lost dSM " + _dSMeterID.toString() + " was not in our list");
     }
   }
-  
-  void ModelMaintenance::onDeviceConfigChanged(const dss_dsid_t& _dsMeterID, int _deviceID, 
+
+  void ModelMaintenance::onDeviceConfigChanged(const dss_dsid_t& _dsMeterID, int _deviceID,
                                                int _configClass, int _configIndex, int _value) {
     try {
       DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
@@ -666,7 +666,7 @@ namespace dss {
       log(std::string("Error updating config of device: ") + e.what());
     }
   } // onDeviceConfigChanged
-  
+
   void ModelMaintenance::rescanDevice(const dss_dsid_t& _dsMeterID, const int _deviceID) {
     BusScanner
       scanner(
