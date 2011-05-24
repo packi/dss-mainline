@@ -375,6 +375,8 @@ namespace dss {
     if(m_IsInitializing) {
       return;
     }
+    static bool readOutLastTime = false;
+    bool readOutZone = false;
     std::vector<boost::shared_ptr<Zone>  > zones = m_pApartment->getZones();
     foreach(boost::shared_ptr<Zone> zone, zones) {
       // skip broadcast zone
@@ -383,6 +385,7 @@ namespace dss {
       }
       foreach(boost::shared_ptr<Group> group, zone->getGroups()) {
         if(!group->isInitializedFromBus() && group->isPresent()) {
+          readOutZone = true;
           log("Reading scene-names of Zone " + intToString(group->getZoneID()) +
               " Group " + intToString(group->getID()));
           // ask the first non-simulated meter
@@ -419,6 +422,10 @@ namespace dss {
         }
       }
     }
+    if(!readOutZone && readOutLastTime) {
+      addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    }
+    readOutLastTime = readOutZone;
   } // readSceneNames
 
   void ModelMaintenance::eraseModelEventsFromQueue(ModelEvent::EventType _type) {
