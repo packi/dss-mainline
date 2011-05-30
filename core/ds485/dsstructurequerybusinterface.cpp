@@ -189,6 +189,28 @@ namespace dss {
     return numberOfDevices;
   } // getDevicesCountInZone
 
+  void DSStructureQueryBusInterface::updateButtonGroupFromMeter(dsid_t _dsMeterID, DeviceSpec_t _spec) {
+    _spec.ButtonID = 0xff;
+    _spec.ActiveGroup = 0xff;
+    _spec.GroupMembership = 0xff;
+    _spec.SetsLocalPriority = false;
+    try {
+      uint8_t setsLocalPriority;
+      int ret = DeviceButtonInfo_by_device(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, &_spec.ButtonID,
+                                           &_spec.GroupMembership, &_spec.ActiveGroup,
+                                           &setsLocalPriority);
+      if(ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
+        Logger::getInstance()->log("Unsupported message-id DeviceButtonInfo" + lsWarning);
+      } else {
+        DSBusInterface::checkResultCode(ret);
+        _spec.SetsLocalPriority = (setsLocalPriority == 1);
+      }
+    } catch(BusApiError& e) {
+      Logger::getInstance()->log("Error reading DeviceButtonInfo: " +
+      std::string(e.what()), lsWarning);
+    }
+  } // updateButtonGroupFromMeter
+
   std::vector<DeviceSpec_t> DSStructureQueryBusInterface::getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
@@ -219,26 +241,8 @@ namespace dss {
       DSBusInterface::checkResultCode(ret);
       dsid_helper::toDssDsid(devdsid, spec.DSID);
 
-      spec.ButtonID = 0xff;
-      spec.ActiveGroup = 0xff;
-      spec.GroupMembership = 0xff;
-      spec.SetsLocalPriority = false;
-      try {
-        uint8_t setsLocalPriority;
-        ret = DeviceButtonInfo_by_device(m_DSMApiHandle, dsid, spec.ShortAddress, &spec.ButtonID, 
-                                        &spec.GroupMembership, &spec.ActiveGroup, 
-                                        &setsLocalPriority);
-        if (ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
-          Logger::getInstance()->log("Unsupported message-id DeviceButtonInfo" + lsWarning);
-        } else {
-          DSBusInterface::checkResultCode(ret);
-          spec.SetsLocalPriority = (setsLocalPriority == 1);
-        }
-      } catch(BusApiError& e) {
-        Logger::getInstance()->log("Error reading DeviceButtonInfo: " + 
-                                   std::string(e.what()), lsWarning);
-      }
-      
+      updateButtonGroupFromMeter(dsid, spec);
+
       result.push_back(spec);
     }
     return result;
@@ -269,26 +273,8 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
     dsid_helper::toDssDsid(devdsid, result.DSID);
 
-    result.ButtonID = 0xff;
-    result.ActiveGroup = 0xff;
-    result.GroupMembership = 0xff;
-    result.SetsLocalPriority = false;
-    try {
-      uint8_t setsLocalPriority;
-      ret = DeviceButtonInfo_by_device(m_DSMApiHandle, dsmDSID, _id, &result.ButtonID, 
-                                       &result.GroupMembership, &result.ActiveGroup, 
-                                       &setsLocalPriority);
-      if (ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
-        Logger::getInstance()->log("Unsupported message-id DeviceButtonInfo" + lsWarning);
-      } else {
-        DSBusInterface::checkResultCode(ret);
-        result.SetsLocalPriority = (setsLocalPriority == 1);
-      }
-    } catch(BusApiError& e) {
-      Logger::getInstance()->log("Error reading DeviceButtonInfo: " + 
-                                 std::string(e.what()), lsWarning);
-    }
-    
+    updateButtonGroupFromMeter(dsmDSID, result);
+
     return result;
   } // deviceGetSpec
 
