@@ -31,7 +31,7 @@ namespace dss {
 
 
   //=========================================== SimRequestHandler
-  
+
   SimRequestHandler::SimRequestHandler(Apartment& _apartment)
   : m_Apartment(_apartment)
   { }
@@ -81,17 +81,17 @@ namespace dss {
           case 5:
             {
               if(groupID == GroupIDGreen) {
-                m_Apartment.getGroup(0)->callScene(SceneBell);
+                m_Apartment.getGroup(0)->callScene(SceneBell, false);
               } else if(groupID == GroupIDRed){
-                m_Apartment.getGroup(0)->callScene(SceneAlarm);
+                m_Apartment.getGroup(0)->callScene(SceneAlarm, false);
               } else {
                 const int lastScene = pGroup->getLastCalledScene();
                 if(lastScene == SceneOff || lastScene == SceneDeepOff ||
                   lastScene == SceneStandBy || lastScene == ScenePanic)
                 {
-                  pGroup->callScene(Scene1);
+                  pGroup->callScene(Scene1, false);
                 } else {
-                  pGroup->callScene(SceneOff);
+                  pGroup->callScene(SceneOff, false);
                 }
               }
             }

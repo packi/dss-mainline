@@ -37,7 +37,8 @@ namespace dss {
   } // blink
 
   void SimActionRequestBusInterface::callScene(AddressableModelItem *pTarget,
-                                               const uint16_t scene) {
+                                               const uint16_t scene,
+                                               const bool _force) {
     Group* pGroup = dynamic_cast<Group*>(pTarget);
     Device* pDevice = dynamic_cast<Device*>(pTarget);
     for(int iMeter =  0; iMeter < m_pSimulation->getDSMeterCount(); iMeter++) {

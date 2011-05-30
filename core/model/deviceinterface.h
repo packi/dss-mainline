@@ -50,7 +50,7 @@ namespace dss {
     /** Sets the scene on the device.
      * The output value will be set according to the scene lookup table in the device.
      */
-    virtual void callScene(const int _sceneNr) = 0;
+    virtual void callScene(const int _sceneNr, const bool _force = false) = 0;
     /** Stores the current output value into the scene lookup table.
      * The next time scene _sceneNr gets called the output will be set according to the lookup table.
      */

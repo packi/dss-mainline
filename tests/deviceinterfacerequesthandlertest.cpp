@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
     virtual void setValue(const uint8_t _value)  {
       functionCalled("setValue(" + intToString(_value) + ")");
     }
-    virtual void callScene(const int _sceneNr)  {
+    virtual void callScene(const int _sceneNr, const bool _force)  {
       functionCalled("callScene(" + intToString(_sceneNr) + ")");
     }
     virtual void saveScene(const int _sceneNr)  {

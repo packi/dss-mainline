@@ -41,14 +41,14 @@ namespace dss {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    m_pApartment->getActionRequestInterface()->callScene(this, SceneInc);
+    m_pApartment->getActionRequestInterface()->callScene(this, SceneInc, false);
   } // increaseValue
 
   void AddressableModelItem::decreaseValue() {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    m_pApartment->getActionRequestInterface()->callScene(this, SceneDec);
+    m_pApartment->getActionRequestInterface()->callScene(this, SceneDec, false);
   } // decreaseValue
 
   void AddressableModelItem::setValue(const uint8_t _value) {
@@ -58,11 +58,11 @@ namespace dss {
     m_pApartment->getActionRequestInterface()->setValue(this, _value);
   } // setValue
 
-  void AddressableModelItem::callScene(const int _sceneNr) {
+  void AddressableModelItem::callScene(const int _sceneNr, const bool _force) {
     if(m_pPropertyNode) {
       m_pPropertyNode->checkWriteAccess();
     }
-    m_pApartment->getActionRequestInterface()->callScene(this, _sceneNr);
+    m_pApartment->getActionRequestInterface()->callScene(this, _sceneNr, _force);
   } // callScene
 
   void AddressableModelItem::saveScene(const int _sceneNr) {

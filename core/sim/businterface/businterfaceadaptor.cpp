@@ -146,17 +146,17 @@ namespace dss {
       m_pEventSink(_pEventSink)
     { }
 
-    virtual void callScene(AddressableModelItem *pTarget, const uint16_t scene) {
+    virtual void callScene(AddressableModelItem *pTarget, const uint16_t scene, const bool _force) {
       if(targetIsSim(pTarget)) {
-        m_pSimulationInterface->callScene(pTarget, scene);
+        m_pSimulationInterface->callScene(pTarget, scene, _force);
       }
       if(targetIsInner(pTarget)) {
-        m_pInner->callScene(pTarget, scene);
+        m_pInner->callScene(pTarget, scene, _force);
       }
       Group* pGroup = dynamic_cast<Group*>(pTarget);
       if(pGroup != NULL) {
         m_pEventSink->onGroupCallScene(NULL, NullDSID, pGroup->getZoneID(),
-                                       pGroup->getID(), scene);
+                                       pGroup->getID(), scene, _force);
       }
     }
 
@@ -301,16 +301,16 @@ namespace dss {
       m_pSimulationInterface->removeGroup(_zoneID, _groupID);
       m_pInner->removeGroup(_zoneID, _groupID);
     }
-    
-    virtual void setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, 
-                                            const devid_t _deviceID, 
+
+    virtual void setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID,
+                                            const devid_t _deviceID,
                                             bool _setsPriority) {
       if(isHandledBySimulation(_dsMeterID)) {
         m_pSimulationInterface->setButtonSetsLocalPriority(_dsMeterID,
                                                            _deviceID,
                                                            _setsPriority);
       } else {
-        m_pInner->setButtonSetsLocalPriority(_dsMeterID, _deviceID, 
+        m_pInner->setButtonSetsLocalPriority(_dsMeterID, _deviceID,
                                              _setsPriority);
       }
     }
@@ -468,13 +468,14 @@ namespace dss {
                                   const dss_dsid_t& _dsMeterID,
                                   const int _zoneID,
                                   const int _groupID,
-                                  const int _sceneID) {
+                                  const int _sceneID,
+                                  const bool _force) {
       boost::shared_ptr<BusInterface> target;
       if(_source == m_pInnerBusInterface.get()) {
         try {
           boost::shared_ptr<Zone> pZone = m_pApartment->getZone(_zoneID);
           boost::shared_ptr<Group> pGroup = pZone->getGroup(_groupID);
-          m_pSimBusInterface->getActionRequestInterface()->callScene(pGroup.get(), _sceneID);
+          m_pSimBusInterface->getActionRequestInterface()->callScene(pGroup.get(), _sceneID, _force);
         } catch(std::runtime_error& e) {
         }
       }

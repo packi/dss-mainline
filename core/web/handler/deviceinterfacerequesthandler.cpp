@@ -62,9 +62,10 @@ namespace dss {
     } else if(_request.getMethod() == "callScene") {
       std::string sceneStr = _request.getParameter("sceneNumber");
       int sceneID = strToIntDef(sceneStr, -1);
+      bool force = _request.getParameter("force") == "true";
       if(sceneID != -1) {
         if(SceneHelper::isInRange(sceneID, 0)) {
-          _interface->callScene(sceneID);
+          _interface->callScene(sceneID, force);
         } else {
           return failure("Parameter 'sceneNumber' out of bounds ('" + sceneStr + "')");
         }

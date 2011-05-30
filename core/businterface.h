@@ -144,7 +144,7 @@ namespace dss {
 
     virtual void createGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
-    
+
     virtual void setButtonSetsLocalPriority(const dss_dsid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) = 0;
 
     virtual ~StructureModifyingBusInterface() {}; // please the compiler (virtual dtor)
@@ -152,7 +152,7 @@ namespace dss {
 
   class ActionRequestInterface {
   public:
-    virtual void callScene(AddressableModelItem *pTarget, const uint16_t scene) = 0;
+    virtual void callScene(AddressableModelItem *pTarget, const uint16_t scene, const bool _force) = 0;
     virtual void saveScene(AddressableModelItem *pTarget, const uint16_t scene) = 0;
     virtual void undoScene(AddressableModelItem *pTarget) = 0;
     virtual void blink(AddressableModelItem *pTarget) = 0;
@@ -180,7 +180,8 @@ namespace dss {
                                   const dss_dsid_t& _dsMeterID,
                                   const int _zoneID,
                                   const int _groupID,
-                                  const int _sceneID) = 0;
+                                  const int _sceneID,
+                                  const bool _force) = 0;
     virtual void onMeteringEvent(BusInterface* _source,
                                  const dss_dsid_t& _dsMeterID,
                                  const int _powerW,
