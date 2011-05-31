@@ -46,7 +46,7 @@ namespace dss {
 
     virtual void setValue(const uint8_t _value);
 
-    virtual void callScene(const int _sceneNr);
+    virtual void callScene(const int _sceneNr, const bool _force);
     virtual void saveScene(const int _sceneNr);
     virtual void undoScene();
 

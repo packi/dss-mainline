@@ -150,16 +150,16 @@ namespace dss {
                                                              _configClass,
                                                              _configIndex,
                                                              _value);
-      
+
       if((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
         ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceConfigChanged,
                                                     m_DSMeterDSID);
         pEvent->addParameter(m_ShortAddress);
         pEvent->addParameter(_configClass);
         pEvent->addParameter(_configIndex);
-        pEvent->addParameter(_value);    
+        pEvent->addParameter(_value);
         m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
-      }      
+      }
     }
   } // setConfig
 
@@ -204,11 +204,11 @@ namespace dss {
   } // setValue
 
   void Device::nextScene() {
-    callScene(SceneHelper::getNextScene(m_LastCalledScene));
+    callScene(SceneHelper::getNextScene(m_LastCalledScene), false);
   } // nextScene
 
   void Device::previousScene() {
-    callScene(SceneHelper::getNextScene(m_LastCalledScene));
+    callScene(SceneHelper::getNextScene(m_LastCalledScene), false);
   } // previousScene
 
   const std::string& Device::getName() const {

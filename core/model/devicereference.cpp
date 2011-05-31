@@ -83,8 +83,8 @@ namespace dss {
     return getDevice()->isOn();
   }
 
-  void DeviceReference::callScene(const int _sceneNr) {
-    getDevice()->callScene(_sceneNr);
+  void DeviceReference::callScene(const int _sceneNr, const bool _force) {
+    getDevice()->callScene(_sceneNr, _force);
   } // callScene
 
   void DeviceReference::saveScene(const int _sceneNr) {

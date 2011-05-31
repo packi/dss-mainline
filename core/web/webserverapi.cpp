@@ -68,6 +68,7 @@ namespace dss {
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
       .withParameter("sceneNumber", "integer", true)
+      .withParameter("force", "boolean", false)
       .withDocumentation("Calls the scene sceneNumber on all devices of the apartment.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsApartment.addMethod("saveScene")
       .withParameter("groupID", "integer", false)
@@ -145,6 +146,7 @@ namespace dss {
       .withParameter("groupID", "integer", false)
       .withParameter("groupName", "string", false)
       .withParameter("sceneNumber", "integer", true)
+      .withParameter("force", "boolean", false)
       .withDocumentation("Sets the scene sceneNumber on all devices in the zone.", "If groupID or groupName are specified, only devices contained in this group will be addressed");
     clsZone.addMethod("saveScene")
       .withParameter("groupID", "integer", false)
@@ -214,6 +216,7 @@ namespace dss {
       .withDocumentation("Request upstream and downstream quality information");
     clsDevice.addMethod("callScene")
       .withParameter("sceneNumber", "integer", true)
+      .withParameter("force", "boolean", false)
       .withDocumentation("Calls scene sceneNumber on the device.");
     clsDevice.addMethod("saveScene")
       .withParameter("sceneNumber", "integer", true)
@@ -376,6 +379,7 @@ namespace dss {
       .withDocumentation("Sets the output value of all devices of the set to value.");
     clsSet.addMethod("callScene")
       .withParameter("sceneNumber", "integer", true)
+      .withParameter("force", "boolean", false)
       .withDocumentation("Calls the scene sceneNumber on all devices of the set.");
     clsSet.addMethod("saveScene")
       .withParameter("sceneNumber", "integer", true)

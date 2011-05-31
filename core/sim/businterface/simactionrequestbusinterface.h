@@ -35,7 +35,7 @@ namespace dss {
     : m_pSimulation(_pSimulation)
     { }
 
-    virtual void callScene(AddressableModelItem *pTarget, const uint16_t scene);
+    virtual void callScene(AddressableModelItem *pTarget, const uint16_t scene, const bool _force);
     virtual void saveScene(AddressableModelItem *pTarget, const uint16_t scene);
     virtual void undoScene(AddressableModelItem *pTarget);
     virtual void blink(AddressableModelItem *pTarget);

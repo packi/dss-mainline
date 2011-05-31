@@ -33,7 +33,7 @@ namespace dss {
 
   //================================================== DSActionRequest
 
-  void DSActionRequest::callScene(AddressableModelItem *pTarget, const uint16_t scene) {
+  void DSActionRequest::callScene(AddressableModelItem *pTarget, const uint16_t scene, const bool _force) {
     int ret;
 
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
@@ -44,12 +44,20 @@ namespace dss {
     Device *pDevice = dynamic_cast<Device*>(pTarget);
 
     if(pGroup) {
-      ret = ZoneGroupActionRequest_action_call_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
+      if(_force) {
+        ret = ZoneGroupActionRequest_action_force_call_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
+      } else {
+        ret = ZoneGroupActionRequest_action_call_scene(m_DSMApiHandle, m_BroadcastDSID, pGroup->getZoneID(), pGroup->getID(), scene);
+      }
       DSBusInterface::checkBroadcastResultCode(ret);
     } else if(pDevice)  {
       dsid_t dsid;
       dsid_helper::toDsmapiDsid(pDevice->getDSMeterDSID(), dsid);
-      ret = DeviceActionRequest_action_call_scene(m_DSMApiHandle, dsid, pDevice->getShortAddress(), scene);
+      if(_force) {
+        ret = DeviceActionRequest_action_force_call_scene(m_DSMApiHandle, dsid, pDevice->getShortAddress(), scene);
+      } else {
+        ret = DeviceActionRequest_action_call_scene(m_DSMApiHandle, dsid, pDevice->getShortAddress(), scene);
+      }
       DSBusInterface::checkResultCode(ret);
     }
   }

@@ -55,7 +55,7 @@ namespace dss {
     int getID() const;
     int getZoneID() const;
 
-    virtual void callScene(const int _sceneNr);
+    virtual void callScene(const int _sceneNr, const bool _force);
 
     virtual void nextScene();
     virtual void previousScene();

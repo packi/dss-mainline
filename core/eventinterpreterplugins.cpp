@@ -155,7 +155,7 @@ namespace dss {
     }
 
     void addFile(const std::string& _name) {
-      m_LoadedFiles.push_back(_name);      
+      m_LoadedFiles.push_back(_name);
       if(m_pPropertyNode != NULL) {
         if(m_FilesNode == NULL) {
           m_FilesNode = m_pPropertyNode->createProperty("files+");
@@ -339,7 +339,7 @@ namespace dss {
         if (!_subscription.getOptions()->hasParameter(paramName)) {
           break;
         }
-        std::string scriptName = 
+        std::string scriptName =
             _subscription.getOptions()->getParameter(paramName);
 
         wrapper->addFile(scriptName);
@@ -362,7 +362,7 @@ namespace dss {
       if(ctx->hasAttachedObjects()) {
         m_WrappedContexts.push_back(wrapper);
         Logger::getInstance()->log("EventInterpreterPluginJavascript::"
-                                   "handleEvent: still has objects, keeping: " 
+                                   "handleEvent: still has objects, keeping: "
                                    + scripts + " in memory", lsInfo);
       }
     } else {
@@ -519,13 +519,13 @@ namespace dss {
             result->setCommand(boost::bind(&Set::decreaseValue, _1));
           } else if(typeName == "callScene") {
             int sceneNr = strToInt(getParameter(curNode, "scene"));
-            result->setCommand(boost::bind(&Set::callScene, _1, sceneNr));
+            result->setCommand(boost::bind(&Set::callScene, _1, sceneNr, false));
           } else if(typeName == "saveScene") {
             int sceneNr = strToInt(getParameter(curNode, "scene"));
-            result->setCommand(boost::bind(&Set::callScene, _1, sceneNr));
+            result->setCommand(boost::bind(&Set::callScene, _1, sceneNr, false));
           } else if(typeName == "undoScene") {
             int sceneNr = strToInt(getParameter(curNode, "scene"));
-            result->setCommand(boost::bind(&Set::callScene, _1, sceneNr));
+            result->setCommand(boost::bind(&Set::callScene, _1, sceneNr, false));
           } else {
             Logger::getInstance()->log(std::string("unknown command: ") + typeName);
             return boost::shared_ptr<SubscriptionOptions>();

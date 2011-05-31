@@ -50,10 +50,10 @@ namespace dss {
     }
   } // setValue
 
-  void NonAddressableModelItem::callScene(const int _sceneNr) {
+  void NonAddressableModelItem::callScene(const int _sceneNr, const bool _force) {
     std::vector<boost::shared_ptr<AddressableModelItem> > items = splitIntoAddressableItems();
     foreach(boost::shared_ptr<AddressableModelItem> item, items) {
-      item->callScene(_sceneNr);
+      item->callScene(_sceneNr, _force);
     }
   } // callScene
 

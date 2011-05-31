@@ -83,7 +83,7 @@ namespace dss {
      */
     virtual bool isOn() const;
 
-    virtual void callScene(const int _sceneNr);
+    virtual void callScene(const int _sceneNr, const bool _force);
     virtual void saveScene(const int _sceneNr);
     virtual void undoScene();
 
