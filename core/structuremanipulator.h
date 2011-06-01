@@ -29,6 +29,7 @@ namespace dss {
 
   class Apartment;
   class StructureModifyingBusInterface;
+  class StructureQueryBusInterface;
   class DSMeter;
   class Device;
   class Zone;
@@ -39,9 +40,11 @@ namespace dss {
   private:
     Apartment& m_Apartment;
     StructureModifyingBusInterface& m_Interface;
+    class StructureQueryBusInterface& m_QueryInterface;
   public:
-    StructureManipulator(StructureModifyingBusInterface& _interface, Apartment& _apartment)
-    : m_Apartment(_apartment), m_Interface(_interface)
+    StructureManipulator(StructureModifyingBusInterface& _interface,
+                         StructureQueryBusInterface& _queryInterface , Apartment& _apartment)
+    : m_Apartment(_apartment), m_Interface(_interface), m_QueryInterface(_queryInterface)
     { } // ctor
 
     void createZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone);

@@ -43,7 +43,7 @@ public:
     m_pApartment.reset(new Apartment(NULL));
     m_pPropertySystem.reset(new PropertySystem());
     m_pApartment->setPropertySystem(m_pPropertySystem.get());
-    m_pHandler.reset(new DeviceRequestHandler(*m_pApartment, NULL));
+    m_pHandler.reset(new DeviceRequestHandler(*m_pApartment, NULL, NULL));
     m_ValidDSID = dss_dsid_t(0, 0x1234);
     m_ValidName = "device1";
     m_InvalidDSID = dss_dsid_t(0, 0xdeadbeef);
@@ -265,7 +265,7 @@ BOOST_FIXTURE_TEST_CASE(testDeviceGetTagsNoTags, Fixture) {
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
   boost::shared_ptr<JSONObject> result;
 
-  result = getResultObject(response);  
+  result = getResultObject(response);
   boost::shared_ptr<JSONElement> tagsArray = result->getElementByName("tags");
   BOOST_CHECK(tagsArray != NULL);
   BOOST_CHECK_EQUAL(tagsArray->getElementCount(), 0);

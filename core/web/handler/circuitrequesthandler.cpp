@@ -35,9 +35,11 @@ namespace dss {
   //=========================================== CircuitRequestHandler
 
   CircuitRequestHandler::CircuitRequestHandler(Apartment& _apartment, ModelMaintenance& _modelMaintenance,
-  StructureModifyingBusInterface* _pStructureBusInterface)
+                                               StructureModifyingBusInterface* _pStructureBusInterface,
+                                               StructureQueryBusInterface* _pStructureQueryBusInterface)
   : m_Apartment(_apartment), m_ModelMaintenance(_modelMaintenance),
-    m_pStructureBusInterface(_pStructureBusInterface)
+    m_pStructureBusInterface(_pStructureBusInterface),
+    m_pStructureQueryBusInterface(_pStructureQueryBusInterface)
   { }
 
   WebServerResponse CircuitRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
@@ -63,7 +65,8 @@ namespace dss {
           dsMeter->setName(nameStr);
           if (m_pStructureBusInterface != NULL) {
             StructureManipulator manipulator(*m_pStructureBusInterface,
-                                           m_Apartment);
+                                             *m_pStructureQueryBusInterface,
+                                             m_Apartment);
             manipulator.meterSetName(dsMeter, nameStr);
           }
           return success();

@@ -42,6 +42,7 @@ namespace dss {
     virtual DSMeterSpec_t getDSMeterSpec(const dss_dsid_t& _dsMeterID);
     virtual std::vector<int> getZones(const dss_dsid_t& _dsMeterID);
     virtual std::vector<DeviceSpec_t> getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
+    virtual std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
     virtual std::vector<int> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID);
     virtual int getLastCalledScene(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _groupID);
     virtual bool getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper);
@@ -50,6 +51,7 @@ namespace dss {
   private:
     int getGroupCount(const dss_dsid_t& _dsMeterID, const int _zoneID);
     int getDevicesCountInZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
+    void updateButtonGroupFromMeter(dsid_t _dsMeterID, DeviceSpec_t _spec);
   private:
     dss_dsid_t m_BroadcastDSID;
   }; // DSStructureQueryBusInterface

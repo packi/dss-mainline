@@ -1324,6 +1324,7 @@ int dss__StructureAddDeviceToZone(struct soap *soap, char* _token, char* _device
     boost::shared_ptr<dss::Device> dev = aptRef.getDeviceByDSID(dss::dss_dsid_t::fromString(_deviceID));
     boost::shared_ptr<dss::Zone> zone = aptRef.getZone(_zoneID);
     dss::StructureManipulator manipulator(*dssRef.getBusInterface().getStructureModifyingBusInterface(),
+                                          *dssRef.getBusInterface().getStructureQueryBusInterface(),
                                           aptRef);
     manipulator.addDeviceToZone(dev, zone);
   } catch(std::runtime_error& _ex) {

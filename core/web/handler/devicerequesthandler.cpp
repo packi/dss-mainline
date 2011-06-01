@@ -39,9 +39,11 @@ namespace dss {
   //=========================================== DeviceRequestHandler
 
   DeviceRequestHandler::DeviceRequestHandler(Apartment& _apartment,
-                                             StructureModifyingBusInterface* _pStructureBusInterface)
+                                             StructureModifyingBusInterface* _pStructureBusInterface,
+                                             StructureQueryBusInterface* _pStructureQueryBusInterface)
   : m_Apartment(_apartment),
-    m_pStructureBusInterface(_pStructureBusInterface)
+    m_pStructureBusInterface(_pStructureBusInterface),
+    m_pStructureQueryBusInterface(_pStructureQueryBusInterface)
   { }
 
   class DeviceNotFoundException : public std::runtime_error {
@@ -143,9 +145,10 @@ namespace dss {
       if(_request.hasParameter("newName")) {
         std::string name = _request.getParameter("newName");
         pDevice->setName(name);
-        
+
         if (m_pStructureBusInterface != NULL) {
           StructureManipulator manipulator(*m_pStructureBusInterface,
+                                           *m_pStructureQueryBusInterface,
                                            m_Apartment);
           manipulator.deviceSetName(pDevice, name);
         }

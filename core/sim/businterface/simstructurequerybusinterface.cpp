@@ -88,6 +88,10 @@ namespace dss {
     return result;
   } // getDevicesInZone
 
+  std::vector<DeviceSpec_t> SimStructureQueryBusInterface::getInactiveDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    return std::vector<DeviceSpec_t>();
+  } // getInactiveDevicesInZone
+
   std::vector<int> SimStructureQueryBusInterface::getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) {
     std::vector<int> result;
     boost::shared_ptr<DSMeterSim> pMeter = m_pSimulation->getDSMeter(_dsMeterID);
