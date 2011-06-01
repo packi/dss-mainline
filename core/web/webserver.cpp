@@ -236,15 +236,18 @@ namespace dss {
     m_Handlers[kHandlerZone] =
       new ZoneRequestHandler(
         getDSS().getApartment(),
-        getDSS().getBusInterface().getStructureModifyingBusInterface());
+        getDSS().getBusInterface().getStructureModifyingBusInterface(),
+        getDSS().getBusInterface().getStructureQueryBusInterface());
     m_Handlers[kHandlerDevice] =
       new DeviceRequestHandler(
         getDSS().getApartment(),
-        getDSS().getBusInterface().getStructureModifyingBusInterface());
+        getDSS().getBusInterface().getStructureModifyingBusInterface(),
+        getDSS().getBusInterface().getStructureQueryBusInterface());
     m_Handlers[kHandlerCircuit] = new CircuitRequestHandler(
             getDSS().getApartment(),
             getDSS().getModelMaintenance(),
-            getDSS().getBusInterface().getStructureModifyingBusInterface());
+            getDSS().getBusInterface().getStructureModifyingBusInterface(),
+            getDSS().getBusInterface().getStructureQueryBusInterface());
     m_Handlers[kHandlerSet] = new SetRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerProperty] = new PropertyRequestHandler(getDSS().getPropertySystem());
     m_Handlers[kHandlerEvent] = new EventRequestHandler(getDSS().getEventInterpreter());
@@ -253,7 +256,8 @@ namespace dss {
       new StructureRequestHandler(
         getDSS().getApartment(),
         getDSS().getModelMaintenance(),
-        *getDSS().getBusInterface().getStructureModifyingBusInterface()
+        *getDSS().getBusInterface().getStructureModifyingBusInterface(),
+        *getDSS().getBusInterface().getStructureQueryBusInterface()
       );
     m_Handlers[kHandlerSim] = new SimRequestHandler(getDSS().getApartment());
     m_Handlers[kHandlerMetering] = new MeteringRequestHandler(getDSS().getApartment(), getDSS().getMetering());

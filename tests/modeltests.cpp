@@ -761,6 +761,42 @@ public:
   }
 };
 
+class DummyStructureQueryBusInterface: public StructureQueryBusInterface {
+public:
+  virtual std::vector<DSMeterSpec_t> getDSMeters() {
+    return std::vector<DSMeterSpec_t>();
+  }
+  virtual DSMeterSpec_t getDSMeterSpec(const dss_dsid_t& _dsMeterID) {
+    return DSMeterSpec_t();
+  }
+  virtual std::vector<int> getZones(const dss_dsid_t& _dsMeterID) {
+    return std::vector<int>();
+  }
+  virtual std::vector<DeviceSpec_t> getDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    return std::vector<DeviceSpec_t>();
+  }
+  virtual std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    return std::vector<DeviceSpec_t>();
+  }
+  virtual std::vector<int> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    return std::vector<int>();
+  }
+  virtual int getLastCalledScene(const dss_dsid_t& _dsMeterID, const int _zoneID, const int _groupID) {
+    return 0;
+  }
+  virtual bool getEnergyBorder(const dss_dsid_t& _dsMeterID, int& _lower, int& _upper) {
+    _lower = 0;
+    _upper = 0;
+    return false;
+  }
+  virtual DeviceSpec_t deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID) {
+    return DeviceSpec_t();
+  }
+  virtual std::string getSceneName(dss_dsid_t _dsMeterID, boost::shared_ptr<Group> _group, const uint8_t _sceneNumber) {
+    return "";
+  }
+}; // DummyStructureQueryBusInterface
+
 class DummyActionRequestInterface : public ActionRequestInterface {
 public:
   virtual void callScene(AddressableModelItem *pTarget, const uint16_t scene, const bool _force) {
@@ -797,8 +833,10 @@ private:
 class DummyBusInterface : public BusInterface {
 public:
   DummyBusInterface(StructureModifyingBusInterface* _pStructureModifier,
+                    StructureQueryBusInterface* _pStructureQuery,
                     ActionRequestInterface* _pActionRequest)
   : m_pStructureModifier(_pStructureModifier),
+    m_pStructureQuery(_pStructureQuery),
     m_pActionRequest(_pActionRequest)
   { }
 
@@ -822,6 +860,7 @@ public:
   }
 private:
   StructureModifyingBusInterface* m_pStructureModifier;
+  StructureQueryBusInterface* m_pStructureQuery;
   ActionRequestInterface* m_pActionRequest;
 };
 
@@ -853,11 +892,12 @@ BOOST_AUTO_TEST_CASE(testPersistSet) {
   DeviceReference devRef3 = DeviceReference(dev3, &apt);
   zone1->addDevice(devRef3);
 
-  DummyStructureModifyingInterface interface;
+  DummyStructureModifyingInterface modifyingInterface;
+  DummyStructureQueryBusInterface queryInterface;
   DummyActionRequestInterface actionInterface;
-  DummyBusInterface busInterface(&interface, &actionInterface);
+  DummyBusInterface busInterface(&modifyingInterface, &queryInterface, &actionInterface);
 
-  StructureManipulator manipulator(interface, apt);
+  StructureManipulator manipulator(modifyingInterface, queryInterface, apt);
   apt.setBusInterface(&busInterface);
 
   Set set;
@@ -902,11 +942,12 @@ BOOST_AUTO_TEST_CASE(testUnPersistSet) {
   DeviceReference devRef3 = DeviceReference(dev3, &apt);
   zone1->addDevice(devRef3);
 
-  DummyStructureModifyingInterface interface;
+  DummyStructureModifyingInterface modifyingInterface;
+  DummyStructureQueryBusInterface queryInterface;
   DummyActionRequestInterface actionInterface;
-  DummyBusInterface busInterface(&interface, &actionInterface);
+  DummyBusInterface busInterface(&modifyingInterface, &queryInterface, &actionInterface);
 
-  StructureManipulator manipulator(interface, apt);
+  StructureManipulator manipulator(modifyingInterface, queryInterface, apt);
   apt.setBusInterface(&busInterface);
 
   Set set;

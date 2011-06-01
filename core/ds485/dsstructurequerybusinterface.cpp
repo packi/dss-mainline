@@ -248,6 +248,44 @@ namespace dss {
     return result;
   } // getDevicesInZone
 
+  std::vector<DeviceSpec_t> DSStructureQueryBusInterface::getInactiveDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if(m_DSMApiHandle == NULL) {
+      throw BusApiError("Bus not ready");
+    }
+    std::vector<DeviceSpec_t> result;
+    uint16_t numberOfDevices;
+    dsid_t dsid;
+    dsid_helper::toDsmapiDsid(_dsMeterID, dsid);
+    int ret = ZoneDeviceCount_only_inactive(m_DSMApiHandle, dsid, _zoneID, &numberOfDevices);
+    DSBusInterface::checkResultCode(ret);
+
+    for(int iDevice = 0; iDevice < numberOfDevices; iDevice++) {
+      DeviceSpec_t spec;
+      uint8_t locked;
+      uint8_t groups[GROUPS_LEN];
+      uint8_t name[NAME_LEN];
+      int ret = DeviceInfo_by_index_only_inactive(m_DSMApiHandle, dsid, _zoneID, iDevice,
+                                                  &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
+                                                  &spec.Version,
+                                                  &spec.ZoneID, NULL, NULL, &locked, &spec.OutputMode, groups, name,
+                                                  NULL, NULL, &spec.SerialNumber);
+      DSBusInterface::checkResultCode(ret);
+      spec.Locked = (locked != 0);
+      spec.Groups = extractGroupIDs(groups);
+      spec.Name = std::string(reinterpret_cast<char*>(name));
+      dsid_t devdsid;
+      ret = DsmApiExpandDeviceDSID(spec.VendorID, spec.SerialNumber, &devdsid);
+      DSBusInterface::checkResultCode(ret);
+      dsid_helper::toDssDsid(devdsid, spec.DSID);
+
+      updateButtonGroupFromMeter(dsid, spec);
+
+      result.push_back(spec);
+    }
+    return result;
+  } // getInactiveDevicesInZone
+
   DeviceSpec_t DSStructureQueryBusInterface::deviceGetSpec(devid_t _id, dss_dsid_t _dsMeterID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {

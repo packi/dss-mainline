@@ -37,9 +37,11 @@ namespace dss {
   //=========================================== ZoneRequestHandler
 
   ZoneRequestHandler::ZoneRequestHandler(Apartment& _apartment,
-                                         StructureModifyingBusInterface* _pBusInterface)
+                                         StructureModifyingBusInterface* _pBusInterface,
+                                         StructureQueryBusInterface* _pQueryBusInterface)
   : m_Apartment(_apartment),
-    m_pStructureBusInterface(_pBusInterface)
+    m_pStructureBusInterface(_pBusInterface),
+    m_pStructureQueryBusInterface(_pQueryBusInterface)
   { }
 
 
@@ -149,10 +151,10 @@ namespace dss {
           if(!SceneHelper::isInRange(sceneNumber, pGroup->getZoneID())) {
             return failure("Parameter 'sceneNumber' out of bounds ('" + intToString(sceneNumber) + "')");
           }
-        
+
           std::string name = _request.getParameter("newName");
           pGroup->setSceneName(sceneNumber, name);
-          StructureManipulator manipulator(*m_pStructureBusInterface, m_Apartment);
+          StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
           manipulator.sceneSetName(pGroup, sceneNumber, name);
           return success();
         } else if(_request.getMethod() == "sceneGetName") {
@@ -166,7 +168,7 @@ namespace dss {
           if(!SceneHelper::isInRange(sceneNumber, pGroup->getZoneID())) {
             return failure("Parameter 'sceneNumber' out of bounds ('" + intToString(sceneNumber) + "')");
           }
-          
+
           std::string sceneName = pGroup->getSceneName(sceneNumber);
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           resultObj->addProperty("name", sceneName);

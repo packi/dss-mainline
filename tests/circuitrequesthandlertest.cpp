@@ -50,7 +50,7 @@ public:
     mod->setEnergyLevelRed(m_BorderRed);
     m_pMaintenance.reset(new ModelMaintenance(NULL));
     m_pHandler.reset(new CircuitRequestHandler(*m_pApartment, *m_pMaintenance,
-                                               NULL));
+                                               NULL, NULL));
   }
 protected:
   boost::shared_ptr<Apartment> m_pApartment;

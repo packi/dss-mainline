@@ -22,6 +22,7 @@
 
 #include "structuremanipulator.h"
 
+#include "core/foreach.h"
 #include "core/businterface.h"
 #include "core/mutex.h"
 #include "core/propertysystem.h"
@@ -95,6 +96,23 @@ namespace dss {
       throw std::runtime_error("cannot delete zone if there are still devices present");
     }
 
+    std::vector<DeviceSpec_t> inactiveDevices =
+      m_QueryInterface.getInactiveDevicesInZone(_dsMeter->getDSID(), _zone->getID());
+
+    foreach(const DeviceSpec_t& inactiveDevice, inactiveDevices) {
+      boost::shared_ptr<Device> dev;
+      try {
+        dev = m_Apartment.getDeviceByDSID(inactiveDevice.DSID);
+      } catch(ItemNotFoundException&) {
+        throw std::runtime_error("Inactive device '" + inactiveDevice.DSID.toString() + "' not known here.");
+      }
+      if(dev->getLastKnownDSMeterDSID() != _dsMeter->getDSID()) {
+        m_Interface.removeDeviceFromDSMeter(_dsMeter->getDSID(), inactiveDevice.ShortAddress);
+      } else {
+        throw std::runtime_error("Inactive device '" + inactiveDevice.DSID.toString() + "' only known on this meter, can't remove it.");
+      }
+    }
+
     try {
       m_Interface.removeZone(_dsMeter->getDSID(), _zone->getID());
       _zone->removeFromDSMeter(_dsMeter);
@@ -102,8 +120,8 @@ namespace dss {
         _zone->setIsPresent(false);
       }
     } catch(BusApiError& e) {
-      Logger::getInstance()->log("Can't remove zone " + 
-                                 intToString(_zone->getID()) + " from meter: " 
+      Logger::getInstance()->log("Can't remove zone " +
+                                 intToString(_zone->getID()) + " from meter: "
                                  + _dsMeter->getDSID().toString() + ". '" +
                                  e.what() + "'", lsWarning);
     }
@@ -132,16 +150,16 @@ namespace dss {
     m_Interface.removeDeviceFromDSMeter(dsmDsid, shortAddr);
   } // removeDevice
 
-  void StructureManipulator::sceneSetName(boost::shared_ptr<Group> _group, 
-                                          int _sceneNumber, 
+  void StructureManipulator::sceneSetName(boost::shared_ptr<Group> _group,
+                                          int _sceneNumber,
                                           const std::string& _name) {
-    m_Interface.sceneSetName(_group->getZoneID(), _group->getID(), _sceneNumber, 
+    m_Interface.sceneSetName(_group->getZoneID(), _group->getID(), _sceneNumber,
                              _name);
   } // sceneSetName
-  
-  void StructureManipulator::deviceSetName(boost::shared_ptr<Device> _pDevice, 
+
+  void StructureManipulator::deviceSetName(boost::shared_ptr<Device> _pDevice,
                                            const std::string& _name) {
-    m_Interface.deviceSetName(_pDevice->getDSMeterDSID(), 
+    m_Interface.deviceSetName(_pDevice->getDSMeterDSID(),
                               _pDevice->getShortAddress(), _name);
   } // deviceSetName
 

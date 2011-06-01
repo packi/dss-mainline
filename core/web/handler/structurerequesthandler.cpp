@@ -40,14 +40,17 @@ namespace dss {
 
   //=========================================== StructureRequestHandler
 
-  StructureRequestHandler::StructureRequestHandler(Apartment& _apartment, ModelMaintenance& _modelMaintenance, StructureModifyingBusInterface& _interface)
+  StructureRequestHandler::StructureRequestHandler(Apartment& _apartment, ModelMaintenance& _modelMaintenance,
+                                                   StructureModifyingBusInterface& _interface,
+                                                   StructureQueryBusInterface& _queryInterface)
   : m_Apartment(_apartment),
     m_ModelMaintenance(_modelMaintenance),
-    m_Interface(_interface)
+    m_Interface(_interface),
+    m_QueryInterface(_queryInterface)
   { }
 
   boost::shared_ptr<JSONObject> StructureRequestHandler::zoneAddDevice(const RestfulRequest& _request) {
-    StructureManipulator manipulator(m_Interface, m_Apartment);
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
     std::string deviceIDStr = _request.getParameter("deviceID");
     if(!deviceIDStr.empty()) {
       dss_dsid_t deviceID = dsid::fromString(deviceIDStr);
@@ -135,7 +138,7 @@ namespace dss {
         return failure("Cannot remove present device");
       }
 
-      StructureManipulator manipulator(m_Interface, m_Apartment);
+      StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
       try {
         manipulator.removeDeviceFromDSMeter(dev);
       } catch (std::runtime_error& e) {
@@ -163,7 +166,7 @@ namespace dss {
     }
     SetBuilder builder(m_Apartment);
     Set set = builder.buildSet(setStr, boost::shared_ptr<Zone>());
-    StructureManipulator manipulator(m_Interface, m_Apartment);
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
     if(hasGroupID) {
       manipulator.persistSet(set, setStr, groupID);
     } else {
@@ -180,7 +183,7 @@ namespace dss {
     if(_request.hasParameter("set")) {
       std::string setStr = _request.getParameter("set");
       if(!setStr.empty()) {
-        StructureManipulator manipulator(m_Interface, m_Apartment);
+        StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
         manipulator.unpersistSet(setStr);
         m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
         return success();

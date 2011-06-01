@@ -360,6 +360,14 @@ namespace dss {
       }
     }
 
+    virtual std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dss_dsid_t& _dsMeterID, const int _zoneID) {
+      if(isHandledBySimulation(_dsMeterID)) {
+        return m_pSimulationInterface->getInactiveDevicesInZone(_dsMeterID, _zoneID);
+      } else {
+        return m_pInner->getInactiveDevicesInZone(_dsMeterID, _zoneID);
+      }
+    }
+
     virtual std::vector<int> getGroups(const dss_dsid_t& _dsMeterID, const int _zoneID) {
       if(isHandledBySimulation(_dsMeterID)) {
         return m_pSimulationInterface->getGroups(_dsMeterID, _zoneID);

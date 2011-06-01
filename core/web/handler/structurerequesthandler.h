@@ -30,15 +30,19 @@ namespace dss {
   class Apartment;
   class ModelMaintenance;
   class StructureModifyingBusInterface;
+  class StructureQueryBusInterface;
 
   class StructureRequestHandler : public WebServerRequestHandlerJSON {
   public:
-    StructureRequestHandler(Apartment& _apartment, ModelMaintenance& _modelMaintenance, StructureModifyingBusInterface& _interface);
+    StructureRequestHandler(Apartment& _apartment, ModelMaintenance& _modelMaintenance,
+                            StructureModifyingBusInterface& _interface,
+                            StructureQueryBusInterface& _queryInterface);
     virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
   private:
     Apartment& m_Apartment;
     ModelMaintenance& m_ModelMaintenance;
     StructureModifyingBusInterface& m_Interface;
+    StructureQueryBusInterface& m_QueryInterface;
 
     boost::shared_ptr<JSONObject> zoneAddDevice(const RestfulRequest& _request);
     boost::shared_ptr<JSONObject> removeDevice(const RestfulRequest& _request);
