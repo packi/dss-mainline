@@ -189,7 +189,7 @@ namespace dss {
     return numberOfDevices;
   } // getDevicesCountInZone
 
-  void DSStructureQueryBusInterface::updateButtonGroupFromMeter(dsid_t _dsMeterID, DeviceSpec_t _spec) {
+  void DSStructureQueryBusInterface::updateButtonGroupFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec) {
     _spec.ButtonID = 0xff;
     _spec.ActiveGroup = 0xff;
     _spec.GroupMembership = 0xff;
