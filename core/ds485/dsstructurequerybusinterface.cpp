@@ -162,7 +162,7 @@ namespace dss {
       uint8_t byte = _groups[iByte];
       for(int iBit = 0; iBit < 8; iBit++) {
         if(byte & (1 << iBit)) {
-          int groupID = (iByte * 8 + iBit) + 1;
+          int groupID = (iByte * 8 + iBit);
           if(groupID <= GroupIDMax) {
             result.push_back(groupID);
           } else {
