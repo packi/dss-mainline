@@ -51,7 +51,7 @@ namespace dss {
   private:
     int getGroupCount(const dss_dsid_t& _dsMeterID, const int _zoneID);
     int getDevicesCountInZone(const dss_dsid_t& _dsMeterID, const int _zoneID);
-    void updateButtonGroupFromMeter(dsid_t _dsMeterID, DeviceSpec_t _spec);
+    void updateButtonGroupFromMeter(dsid_t _dsMeterID, DeviceSpec_t& _spec);
   private:
     dss_dsid_t m_BroadcastDSID;
   }; // DSStructureQueryBusInterface
