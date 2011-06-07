@@ -642,7 +642,10 @@ namespace dss {
   const bool DebugEventRunner = false;
 
   EventRunner::EventRunner(PropertyNodePtr _monitorNode)
-  : m_EventQueue(NULL), m_ShutdownFlag(false), m_MonitorNode(_monitorNode)
+  : m_EventQueue(NULL),
+    m_ShutdownFlag(false),
+    m_MonitorNode(_monitorNode),
+    m_ListDirty(false)
   {
     if (_monitorNode != NULL) {
       _monitorNode->addListener(this);
@@ -683,6 +686,7 @@ namespace dss {
     for (it = m_ScheduledEvents.begin(); it != m_ScheduledEvents.end(); it++) {
       if (it->getID() == _eventID) {
         m_ScheduledEvents.erase(it);
+        m_ListDirty = true;
         break;
      }
     }
@@ -736,6 +740,7 @@ namespace dss {
       }
 
       m_ScheduledEvents.push_back(_scheduledEvent);
+      m_ListDirty = true;
     } else {
       delete _scheduledEvent;
     }
@@ -793,6 +798,7 @@ namespace dss {
       m_NewItem.waitFor(1000);
       return false;
     } else {
+      m_ListDirty = false;
       lock.unlock();
       DateTime now;
       m_WakeTime = getNextOccurence();
@@ -808,11 +814,15 @@ namespace dss {
         return false;
       }
 
-      if(!m_NewItem.waitFor(sleepSeconds * 1000)) {
+      if(!m_ListDirty && !m_NewItem.waitFor(sleepSeconds * 1000)) {
         if (m_ShutdownFlag) {
           return false;
         }
         return raisePendingEvents(m_WakeTime, 2);
+      } else {
+        if(DebugEventRunner) {
+          Logger::getInstance()->log("New event in queue, aborting wait");
+        }
       }
     }
     return false;

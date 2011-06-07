@@ -282,7 +282,7 @@ namespace dss {
     mutable boost::mutex m_EventsMutex;
     bool m_ShutdownFlag;
     PropertyNodePtr m_MonitorNode;
-
+    bool m_ListDirty;
   public:
     EventRunner(PropertyNodePtr _monitorNode = PropertyNodePtr());
 
