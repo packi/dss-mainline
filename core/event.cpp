@@ -639,7 +639,7 @@ namespace dss {
 
   //================================================== EventRunner
 
-  const bool DebugEventRunner = true;
+  const bool DebugEventRunner = false;
 
   EventRunner::EventRunner(PropertyNodePtr _monitorNode)
   : m_EventQueue(NULL), m_ShutdownFlag(false), m_MonitorNode(_monitorNode)
@@ -721,6 +721,9 @@ namespace dss {
             scheduledEvent.getEvent()->setTime(_scheduledEvent->getEvent()->getPropertyByName("time"));
           }
           addToQueue = false;
+          if(DebugEventRunner) {
+            Logger::getInstance()->log("Found target for unique event, not adding it to the queue");
+          }
           break;
         }
       }
@@ -756,11 +759,12 @@ namespace dss {
     {
       DateTime next = ipSchedEvt->getSchedule().getNextOccurence(now);
       if(DebugEventRunner) {
+        Logger::getInstance()->log("checking event: " + ipSchedEvt->getID());
         Logger::getInstance()->log(std::string("next:   ") + (std::string)next);
         Logger::getInstance()->log(std::string("result: ") + (std::string)result);
       }
       if(next == DateTime::NullDate) {
-        Logger::getInstance()->log("EventRunner: Removing event");
+        Logger::getInstance()->log("EventRunner: Removing event " + ipSchedEvt->getID());
         removeIDs.push_back(ipSchedEvt->getID());
         continue;
       }
@@ -793,6 +797,10 @@ namespace dss {
       DateTime now;
       m_WakeTime = getNextOccurence();
       int sleepSeconds = m_WakeTime.difference(now);
+
+      if(DebugEventRunner) {
+        Logger::getInstance()->log("Will be sleeping for " + intToString(sleepSeconds));
+      }
 
       // Prevent loops when a cycle takes less than 1s
       if(sleepSeconds <= 0) {
