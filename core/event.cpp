@@ -639,10 +639,13 @@ namespace dss {
 
   //================================================== EventRunner
 
-  const bool DebugEventRunner = true;
+  const bool DebugEventRunner = false;
 
   EventRunner::EventRunner(PropertyNodePtr _monitorNode)
-  : m_EventQueue(NULL), m_ShutdownFlag(false), m_MonitorNode(_monitorNode)
+  : m_EventQueue(NULL),
+    m_ShutdownFlag(false),
+    m_MonitorNode(_monitorNode),
+    m_ListDirty(false)
   {
     if (_monitorNode != NULL) {
       _monitorNode->addListener(this);
@@ -683,6 +686,7 @@ namespace dss {
     for (it = m_ScheduledEvents.begin(); it != m_ScheduledEvents.end(); it++) {
       if (it->getID() == _eventID) {
         m_ScheduledEvents.erase(it);
+        m_ListDirty = true;
         break;
      }
     }
@@ -721,6 +725,9 @@ namespace dss {
             scheduledEvent.getEvent()->setTime(_scheduledEvent->getEvent()->getPropertyByName("time"));
           }
           addToQueue = false;
+          if(DebugEventRunner) {
+            Logger::getInstance()->log("Found target for unique event, not adding it to the queue");
+          }
           break;
         }
       }
@@ -733,6 +740,7 @@ namespace dss {
       }
 
       m_ScheduledEvents.push_back(_scheduledEvent);
+      m_ListDirty = true;
     } else {
       delete _scheduledEvent;
     }
@@ -756,11 +764,12 @@ namespace dss {
     {
       DateTime next = ipSchedEvt->getSchedule().getNextOccurence(now);
       if(DebugEventRunner) {
+        Logger::getInstance()->log("checking event: " + ipSchedEvt->getID());
         Logger::getInstance()->log(std::string("next:   ") + (std::string)next);
         Logger::getInstance()->log(std::string("result: ") + (std::string)result);
       }
       if(next == DateTime::NullDate) {
-        Logger::getInstance()->log("EventRunner: Removing event");
+        Logger::getInstance()->log("EventRunner: Removing event " + ipSchedEvt->getID());
         removeIDs.push_back(ipSchedEvt->getID());
         continue;
       }
@@ -789,10 +798,15 @@ namespace dss {
       m_NewItem.waitFor(1000);
       return false;
     } else {
+      m_ListDirty = false;
       lock.unlock();
       DateTime now;
       m_WakeTime = getNextOccurence();
       int sleepSeconds = m_WakeTime.difference(now);
+
+      if(DebugEventRunner) {
+        Logger::getInstance()->log("Will be sleeping for " + intToString(sleepSeconds));
+      }
 
       // Prevent loops when a cycle takes less than 1s
       if(sleepSeconds <= 0) {
@@ -800,11 +814,15 @@ namespace dss {
         return false;
       }
 
-      if(!m_NewItem.waitFor(sleepSeconds * 1000)) {
+      if(!m_ListDirty && !m_NewItem.waitFor(sleepSeconds * 1000)) {
         if (m_ShutdownFlag) {
           return false;
         }
         return raisePendingEvents(m_WakeTime, 2);
+      } else {
+        if(DebugEventRunner) {
+          Logger::getInstance()->log("New event in queue, aborting wait");
+        }
       }
     }
     return false;
