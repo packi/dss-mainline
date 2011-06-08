@@ -148,13 +148,13 @@ namespace dss {
 
           int lastKnownZoneID = 0;
           if(elem->hasAttribute("lastKnownZoneID")) {
-            lastKnownZoneID = strToIntDef("lastKnownZoneID", 0);
+            lastKnownZoneID = strToIntDef(elem->getAttribute("lastKnownZoneID"), 0);
           }
 
           devid_t lastKnownShortAddress = ShortAddressStaleDevice;
           if(elem->hasAttribute("lastKnownShortAddress")) {
-            lastKnownShortAddress = strToUIntDef("lastKnownShortAddress",
-                                                ShortAddressStaleDevice);
+            lastKnownShortAddress = strToUIntDef(elem->getAttribute("lastKnownShortAddress"),
+                                                 ShortAddressStaleDevice);
           }
 
           boost::shared_ptr<Device> newDevice = m_Apartment.allocateDevice(dsid);
@@ -164,6 +164,10 @@ namespace dss {
           newDevice->setFirstSeen(firstSeen);
           newDevice->setLastKnownDSMeterDSID(lastKnownDsMeter);
           newDevice->setLastKnownZoneID(lastKnownZoneID);
+          if(lastKnownZoneID != 0) {
+            DeviceReference devRef(newDevice, &m_Apartment);
+            m_Apartment.allocateZone(lastKnownZoneID)->addDevice(devRef);
+          }
           newDevice->setLastKnownShortAddress(lastKnownShortAddress);
           Element* propertiesElem = elem->getChildElement("properties");
           if(propertiesElem != NULL) {
