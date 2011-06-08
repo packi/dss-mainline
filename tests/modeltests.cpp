@@ -975,4 +975,9 @@ BOOST_AUTO_TEST_CASE(testSceneHelperBounds) {
   BOOST_CHECK_EQUAL(SceneHelper::rememberScene(MaxSceneNumber + 1), false);
 }
 
+BOOST_AUTO_TEST_CASE(testSceneHelperReachableScenes) {
+  BOOST_CHECK(SceneHelper::getReachableScenesBitmapForButtonID(0) == 0x0E0001uLL);
+  BOOST_CHECK_EQUAL(SceneHelper::getReachableScenesBitmapForButtonID(-1), 0);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

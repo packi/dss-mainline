@@ -92,7 +92,7 @@ namespace dss {
     }
     return false;
   } // rememberScene
-  
+
   bool SceneHelper::isInRange(const int _sceneNumber, const int _zoneNumber) {
     bool aboveZero = (_sceneNumber >= 0);
     bool validForZone;
@@ -103,5 +103,62 @@ namespace dss {
     }
     return aboveZero && validForZone;
   }
+
+  uint64_t SceneHelper::getReachableScenesBitmapForButtonID(const int _buttonID) {
+    const uint64_t Scene0Bitset = (1uLL << 0);
+    const uint64_t Scene1Bitset = (1uLL << 1);
+    const uint64_t Scene2Bitset = (1uLL << 2);
+    const uint64_t Scene3Bitset = (1uLL << 3);
+    const uint64_t Scene4Bitset = (1uLL << 4);
+    const uint64_t Scene5Bitset = (1uLL << 5);
+    const uint64_t Scene6Bitset = (1uLL << 6);
+    const uint64_t Scene7Bitset = (1uLL << 7);
+    const uint64_t Scene8Bitset = (1uLL << 8);
+    const uint64_t Scene9Bitset = (1uLL << 9);
+    const uint64_t Scene17Bitset = (1uLL << 17);
+    const uint64_t Scene18Bitset = (1uLL << 18);
+    const uint64_t Scene19Bitset = (1uLL << 19);
+    const uint64_t Scene20Bitset = (1uLL << 20);
+    const uint64_t Scene21Bitset = (1uLL << 21);
+    const uint64_t Scene22Bitset = (1uLL << 22);
+    const uint64_t Scene23Bitset = (1uLL << 23);
+    const uint64_t Scene24Bitset = (1uLL << 24);
+    const uint64_t Scene25Bitset = (1uLL << 25);
+    const uint64_t Scene26Bitset = (1uLL << 26);
+    const uint64_t Scene27Bitset = (1uLL << 27);
+    const uint64_t Scene28Bitset = (1uLL << 28);
+    const uint64_t Scene29Bitset = (1uLL << 29);
+    const uint64_t Scene30Bitset = (1uLL << 30);
+    const uint64_t Scene31Bitset = (1uLL << 31);
+    const uint64_t Scene32Bitset = (1uLL << 32);
+    const uint64_t Scene33Bitset = (1uLL << 33);
+    const uint64_t Scene34Bitset = (1uLL << 34);
+    const uint64_t Scene35Bitset = (1uLL << 35);
+    const uint64_t Scene36Bitset = (1uLL << 36);
+    const uint64_t Scene37Bitset = (1uLL << 37);
+    const uint64_t Scene38Bitset = (1uLL << 38);
+    const uint64_t Scene39Bitset = (1uLL << 39);
+
+    const uint64_t reachableZonesPerButtonID[] = {
+      Scene0Bitset | Scene17Bitset | Scene18Bitset | Scene19Bitset, // 0
+      Scene0Bitset | Scene1Bitset | Scene6Bitset | Scene17Bitset | Scene18Bitset | Scene19Bitset, // 1
+      Scene0Bitset | Scene2Bitset | Scene7Bitset | Scene17Bitset | Scene18Bitset | Scene19Bitset, // 2
+      Scene0Bitset | Scene3Bitset | Scene8Bitset | Scene17Bitset | Scene18Bitset | Scene19Bitset, // 3
+      Scene0Bitset | Scene4Bitset | Scene9Bitset | Scene17Bitset | Scene18Bitset | Scene19Bitset, // 4
+      Scene0Bitset | Scene5Bitset | Scene17Bitset | Scene18Bitset | Scene19Bitset, // 5
+      Scene0Bitset | Scene32Bitset | Scene33Bitset | Scene20Bitset | Scene21Bitset | Scene22Bitset, // 6
+      Scene0Bitset | Scene34Bitset | Scene35Bitset | Scene23Bitset | Scene24Bitset | Scene25Bitset, // 7
+      Scene0Bitset | Scene36Bitset | Scene37Bitset | Scene26Bitset | Scene27Bitset | Scene28Bitset, // 8
+      Scene0Bitset | Scene38Bitset | Scene39Bitset | Scene29Bitset | Scene30Bitset | Scene31Bitset, // 9
+      Scene0Bitset | Scene1Bitset | Scene6Bitset | Scene20Bitset | Scene21Bitset | Scene22Bitset, // 10
+      Scene0Bitset | Scene2Bitset | Scene7Bitset | Scene23Bitset | Scene24Bitset | Scene25Bitset, // 11
+      Scene0Bitset | Scene3Bitset | Scene8Bitset | Scene26Bitset | Scene27Bitset | Scene28Bitset, // 12
+      Scene0Bitset | Scene4Bitset | Scene9Bitset | Scene29Bitset | Scene30Bitset | Scene31Bitset, // 13
+    };
+    if((_buttonID >= 0) && (_buttonID <= 13)) {
+      return reachableZonesPerButtonID[_buttonID];
+    }
+    return 0uLL;
+  } // getReachableScenesBitmapForButtonID
 
 }
