@@ -25,6 +25,8 @@
 
 #include "core/model/zone.h"
 #include "core/model/group.h"
+#include "core/model/set.h"
+#include "core/model/device.h"
 #include "core/model/apartment.h"
 #include "core/model/scenehelper.h"
 #include "core/structuremanipulator.h"
@@ -172,6 +174,27 @@ namespace dss {
           std::string sceneName = pGroup->getSceneName(sceneNumber);
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           resultObj->addProperty("name", sceneName);
+          return success(resultObj);
+        } else if(_request.getMethod() == "getReachableScenes") {
+          if(pGroup != NULL) {
+            return failure("Can't take group into account");
+          }
+
+          uint64_t reachableScenes = 0uLL;
+          Set devicesInZone = pZone->getDevices();
+          for(int iDevice = 0; iDevice < devicesInZone.length(); iDevice++) {
+            DeviceReference& ref = devicesInZone.get(iDevice);
+            int buttonID = ref.getDevice()->getButtonID();
+            reachableScenes |= SceneHelper::getReachableScenesBitmapForButtonID(buttonID);
+          }
+          boost::shared_ptr<JSONObject> resultObj(new JSONObject());
+          boost::shared_ptr<JSONArray<int> > reachableArray(new JSONArray<int>());
+          resultObj->addElement("reachableScenes", reachableArray);
+          for(int iBit = 0; iBit < 63; iBit++) {
+            if((reachableScenes & (1uLL << iBit)) != 0uLL) {
+              reachableArray->add(iBit);
+            }
+          }
           return success(resultObj);
         } else {
           throw std::runtime_error("Unhandled function");
