@@ -65,7 +65,7 @@ namespace dss {
          << " (" << DSS_BUILD_USER << "@" << DSS_BUILD_HOST << ")";
 #endif
     m_VersionInfo = ostr.str();
-  } 
+  }
 
   void SessionManager::sendCleanupEvent() {
     boost::shared_ptr<Event> pEvent(new Event("webSessionCleanup"));
@@ -170,18 +170,12 @@ namespace dss {
   void SessionManager::cleanupSessions(Event& _event, const EventSubscription& _subscription) {
     m_MapMutex.lock();
     std::map<const std::string, boost::shared_ptr<Session> >::iterator i;
-    for (i = m_Sessions.begin(); i != m_Sessions.end(); i++) {
-      if (i != m_Sessions.end()) {
-        boost::shared_ptr<Session> s = m_Sessions[i->first];
-        if (s != NULL) {
-          if (!s->isStillValid()) {
-            m_Sessions.erase(i->first);
-          }
-        } else {
-          // when the session, for some reason, is NULL, we can get rid of
-          // the entry in the map anyway
-          m_Sessions.erase(i->first);
-        }
+    for(i = m_Sessions.begin(); i != m_Sessions.end(); ) {
+      boost::shared_ptr<Session> s = i->second;
+      if((s == NULL) || (!s->isStillValid())) {
+        m_Sessions.erase(i++);
+      } else {
+        ++i;
       }
     }
 
