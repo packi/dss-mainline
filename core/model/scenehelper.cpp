@@ -42,7 +42,7 @@ namespace dss {
     case Scene3:
       return Scene4;
     case Scene4:
-      return Scene2;
+      return Scene1;
     default:
       return Scene1;
     }
