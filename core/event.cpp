@@ -814,16 +814,17 @@ namespace dss {
         return false;
       }
 
-      if(!m_ListDirty && !m_NewItem.waitFor(sleepSeconds * 1000)) {
-        if (m_ShutdownFlag) {
-          return false;
-        }
-        return raisePendingEvents(m_WakeTime, 2);
-      } else {
-        if(DebugEventRunner) {
-          Logger::getInstance()->log("New event in queue, aborting wait");
+      while(DateTime().before(m_WakeTime) && !m_ShutdownFlag && !m_ListDirty) {
+        if(m_NewItem.waitFor(1000)) {
+          if(DebugEventRunner) {
+            Logger::getInstance()->log("New event in queue, aborting wait");
+            break;
+          }
         }
       }
+    }
+    if(!m_ListDirty && !m_ShutdownFlag) {
+      return raisePendingEvents(m_WakeTime, 2);
     }
     return false;
   } // runOnce
