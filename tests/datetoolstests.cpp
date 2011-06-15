@@ -33,15 +33,7 @@ BOOST_AUTO_TEST_SUITE(DateTools)
 BOOST_AUTO_TEST_CASE(testSimpleDates) {
   DateTime dt;
   dt.clear();
-  BOOST_CHECK_EQUAL(dt.getDay(), 1);
-  BOOST_CHECK_EQUAL(dt.getMonth(), 0);
-  BOOST_CHECK_EQUAL(dt.getYear(), 1900);
-  BOOST_CHECK_EQUAL(dt.getSecond(), 0);
-  BOOST_CHECK_EQUAL(dt.getMinute(), 0);
-  BOOST_CHECK_EQUAL(dt.getHour(), 0);
-
   dt.setDate(1, January, 2008);
-  dt.validate();
 
   BOOST_CHECK_EQUAL(dt.getWeekday(), Tuesday);
 

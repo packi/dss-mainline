@@ -238,7 +238,6 @@ BOOST_AUTO_TEST_CASE(testProperties) {
 }
 
 BOOST_AUTO_TEST_CASE(testISODate) {
-  char c = 'C';
   struct tm inst;
   time_t now;
   time( &now );
@@ -247,7 +246,6 @@ BOOST_AUTO_TEST_CASE(testISODate) {
 
   std::string asString = dateToISOString<std::string>(&inst);
   struct tm parsed = dateFromISOString(asString.c_str());
-  parsed.tm_zone = &c;
 
   DateTime instObj(inst);
   DateTime parsedObj(parsed);

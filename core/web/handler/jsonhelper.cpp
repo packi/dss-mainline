@@ -56,10 +56,10 @@ namespace dss {
     result->addProperty("isPresent", _device.getDevice()->isPresent());
 
     tmp_date = _device.getDevice()->getLastDiscovered();
-    result->addProperty("lastDiscovered", tmp_date.fromUTC());
+    result->addProperty("lastDiscovered", tmp_date);
 
     tmp_date = _device.getDevice()->getFirstSeen();
-    result->addProperty("firstSeen", tmp_date.fromUTC());
+    result->addProperty("firstSeen", tmp_date);
 
     result->addProperty("on", _device.getDevice()->isOn());
     result->addProperty("locked", _device.getDevice()->getIsLockedInDSM());

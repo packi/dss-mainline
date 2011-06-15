@@ -153,6 +153,8 @@ namespace dss {
     struct tm result;
     memset(&result, '\0', sizeof(result));
     strptime( _dateTimeAsString, theISOFormatString, &result );
+    result.tm_isdst = -1;
+    mktime(&result);
     return result;
   } // dateFromISOString
 

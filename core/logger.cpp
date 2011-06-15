@@ -118,7 +118,7 @@ namespace dss {
 
       DateTime d = DateTime();
 
-      logMessage = "[" + d.fromUTC().toString() + "]"
+      logMessage = "[" + d.toString() + "]"
         + SeverityToString<const std::string>(_severity)
         + "[" + _channel.getName() + "]"
         + " " + _message + "\n";

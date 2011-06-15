@@ -147,7 +147,7 @@ namespace dss {
         boost::shared_ptr<JSONArrayBase> valuePair(new JSONArrayBase());
         valuesArray->addElement("", valuePair);
         DateTime tmp_date = iValue->getTimeStamp();
-        boost::shared_ptr<JSONValue<int> > timeVal(new JSONValue<int>(tmp_date.fromUTC().secondsSinceEpoch()));
+        boost::shared_ptr<JSONValue<int> > timeVal(new JSONValue<int>(tmp_date.secondsSinceEpoch()));
         boost::shared_ptr<JSONValue<double> > valueVal(new JSONValue<double>(iValue->getValue()));
         valuePair->addElement("", timeVal);
         valuePair->addElement("", valueVal);
@@ -227,7 +227,7 @@ namespace dss {
         modulator->addProperty("value", isEnergy ? dsMeter->getCachedEnergyMeterValue() : dsMeter->getCachedPowerConsumption());
 
         DateTime temp_date = isEnergy ? dsMeter->getCachedEnergyMeterTimeStamp() : dsMeter->getCachedPowerConsumptionTimeStamp();
-        modulator->addProperty("date", temp_date.fromUTC().toString());
+        modulator->addProperty("date", temp_date.toString());
 
         modulators->addElement("", modulator);
       } catch (std::runtime_error&) {

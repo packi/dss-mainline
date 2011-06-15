@@ -38,31 +38,7 @@ namespace dss {
   static void _init(void) __attribute__ ((constructor));
   static void _init(void) {
     printf("Testing...\n");
-    // make sure timezone gets set
-    tzset();
 
-    long int time_offset = timezone;
-#if defined(__linux__)
-    time_t now;
-    struct tm t;
-    time(&now);
-    localtime_r(&now, &t);
-    mktime(&t);
-    // gmtoff is east of UTC, however timezone is west of UTC
-    time_offset = t.tm_gmtoff * (-1);
-#endif
-
-    dss::DateTime::configureUTCOffset(time_offset);
-
-
-    char* tzNameCopy = strdup("GMT");
-    tzname[0] = tzname[1] = tzNameCopy;
-    timezone = 0;
-    daylight = 0;
-
-    setenv("TZ", "UTC", 1);
   }
-
-
 
 }

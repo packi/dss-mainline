@@ -351,7 +351,8 @@ BOOST_AUTO_TEST_CASE(ImNotExactlySureWhatItestAtThisMoment) {
     BOOST_CHECK_EQUAL( ts.getYear(), insertedDate.getYear() );
     BOOST_CHECK_EQUAL( ts.getMonth(), insertedDate.getMonth() );
     BOOST_CHECK_EQUAL( ts.getDay(), insertedDate.getDay() );
-    BOOST_CHECK_EQUAL( 0, insertedDate.getHour() );
+    /* It is not guaranteed that the hour is zero because of local time offset */
+    //BOOST_CHECK_EQUAL( 0, insertedDate.getHour() );
     BOOST_CHECK_EQUAL( 0, insertedDate.getMinute() );
     BOOST_CHECK_EQUAL( 0, insertedDate.getSecond() );
   }

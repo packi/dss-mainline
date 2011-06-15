@@ -26,20 +26,16 @@
 
 namespace dss {
 
-  long int DateTime::kGMTOffset = 0;
-
   //================================================== DateTime
 
   DateTime::DateTime() {
     time_t now;
     time( &now );
     localtime_r(&now, &m_DateTime);
-    mktime(&m_DateTime);
   } // ctor
 
   DateTime::DateTime(time_t _time) {
     localtime_r(&_time, &m_DateTime);
-    mktime(&m_DateTime);
   } // ctor(time_t)
 
   DateTime::DateTime(const DateTime& _copy)
@@ -48,11 +44,13 @@ namespace dss {
 
   DateTime::DateTime(const struct tm& _tm) {
     m_DateTime = _tm;
-    validate();
   }
 
   void DateTime::validate() {
-    mktime(&m_DateTime);
+    time_t t0 = mktime(&m_DateTime);
+    if (t0 == -1) {
+      throw DSSException("Invalid time");
+    }
   } // validate
 
   DateTime DateTime::addHour(const int _hours) const {
@@ -132,48 +130,50 @@ namespace dss {
 
   void DateTime::setDay(const int _value) {
     m_DateTime.tm_mday = _value;
+    validate();
   } // setDay
 
   void DateTime::setMonth(const int _value) {
     m_DateTime.tm_mon = _value;
+    validate();
   } // setMonth
 
   void DateTime::setYear(const int _value) {
     m_DateTime.tm_year = _value - 1900;
+    validate();
   } // setYear
 
   void DateTime::setHour(const int _value) {
     m_DateTime.tm_hour = _value;
+    validate();
   } // setHour
 
   void DateTime::setMinute(const int _value) {
     m_DateTime.tm_min = _value;
+    validate();
   } // setMinute
 
   void DateTime::setSecond(const int _value) {
     m_DateTime.tm_sec = _value;
+    validate();
   } // setSecond
 
   void DateTime::setDate(int _day, int _month, int _year) {
     m_DateTime.tm_mday = _day;
     m_DateTime.tm_mon = _month;
     m_DateTime.tm_year = _year - 1900;
-#if defined(__linux__)
-    m_DateTime.tm_gmtoff = 0;
-#endif
-    m_DateTime.tm_isdst = -1;
-    mktime(&m_DateTime);
+    validate();
   } // setDate
 
   void DateTime::setTime(int _hour, int _minute, int _second) {
     m_DateTime.tm_hour = _hour;
     m_DateTime.tm_min = _minute;
     m_DateTime.tm_sec = _second;
-    mktime(&m_DateTime);
+    validate();
   } // setTime
 
   void DateTime::clearDate() {
-    setDate(1, 0, 1900);
+    setDate(1, 0, 1970);
   } // clearDate
 
   void DateTime::clearTime() {
@@ -181,8 +181,8 @@ namespace dss {
   } // clearTime
 
   void DateTime::clear() {
-    clearDate();
-    clearTime();
+    DateTime t0(0);
+    m_DateTime = t0.m_DateTime;
   } // clear
 
   bool DateTime::before(const DateTime& _other) const {
@@ -209,7 +209,7 @@ namespace dss {
     return difference(_other) < 0;
   } // operator<
 
-	bool DateTime::operator>(const DateTime& _other) const {
+  bool DateTime::operator>(const DateTime& _other) const {
     return difference(_other) > 0;
   } // operator>
 
@@ -302,32 +302,19 @@ namespace dss {
 
     // if string ends with "Z" it is in UTC, otherwise it is considered to
     // be in local time
-    if(_isoStr.at(_isoStr.size()-1) != 'Z') {
-      return DateTime::toUTC(mktime(&tm));
-    } else {
-      return DateTime(tm);
+    time_t t0;
+    t0 = mktime(&tm);
+
+    if(_isoStr.at(_isoStr.size()-1) == 'Z') {
+      t0 += tm.tm_gmtoff;
+      tm.tm_isdst = 0;
+      tm.tm_gmtoff = 0;
+      printf("corrected t0 with %ld\n", tm.tm_gmtoff);
     }
+
+    DateTime d(tm);
+    return d;
   } // fromISO
-
-  DateTime DateTime::fromUTC(const time_t& _time) {
-    return DateTime(_time - kGMTOffset);
-  } // fromUTC
-
-  DateTime DateTime::toUTC(const time_t& _time) {
-    return DateTime(_time + kGMTOffset);
-  } // toUTC
-
-  DateTime DateTime::fromUTC() {
-    return DateTime(mktime(&m_DateTime) - kGMTOffset);
-  }
-
-  DateTime DateTime::toUTC() {
-    return DateTime(mktime(&m_DateTime) + kGMTOffset);
-  }
-
-  void DateTime::configureUTCOffset(long int _offset) {
-    kGMTOffset = _offset;
-  }
 
   DateTime DateTime::NullDate(0);
 
