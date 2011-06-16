@@ -387,7 +387,7 @@ namespace dss {
     clsSet.addMethod("undoScene")
       .withParameter("sceneNumber", "integer", true)
       .withDocumentation("Undoes setting the value of sceneNumber.");
-    clsApartment.addMethod("getConsumption")
+    clsSet.addMethod("getConsumption")
       .withDocumentation("Returns the consumption of all devices in the set in mW.");
 
     RestfulClass& clsStructure = api->addClass("structure");
