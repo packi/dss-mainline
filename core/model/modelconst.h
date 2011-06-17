@@ -38,8 +38,8 @@ namespace dss {
   const uint8_t SceneMin = 0x0D;
   const uint8_t SceneMax = 0x0E;
   const uint8_t SceneStop = 0x0F;
-  const uint8_t SceneLocalOff = 0x3D;
-  const uint8_t SceneLocalOn = 0x3E;
+  const uint8_t SceneLocalOff = 0x32;
+  const uint8_t SceneLocalOn = 0x33;
 
   // Apartment Scenes
   const uint8_t SceneAutoStandBy = 0x40;
