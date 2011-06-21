@@ -751,7 +751,6 @@ namespace dss {
   DateTime EventRunner::getNextOccurence() {
     DateTime now;
     DateTime result = now.addYear(10);
-    std::vector<std::string> removeIDs;
     boost::mutex::scoped_lock lock(m_EventsMutex);
     if(DebugEventRunner) {
       Logger::getInstance()->log("EventRunner: *********");
@@ -769,18 +768,12 @@ namespace dss {
         Logger::getInstance()->log(std::string("result: ") + (std::string)result);
       }
       if(next == DateTime::NullDate) {
-        Logger::getInstance()->log("EventRunner: Removing event " + ipSchedEvt->getID());
-        removeIDs.push_back(ipSchedEvt->getID());
         continue;
       }
       result = std::min(result, next);
       if(DebugEventRunner) {
         Logger::getInstance()->log(std::string("chosen: ") + (std::string)result);
       }
-    }
-    lock.unlock();
-    for (size_t i = 0; i < removeIDs.size(); i++) {
-      removeEvent(removeIDs.at(i));
     }
     return result;
   } // getNextOccurence
@@ -823,8 +816,10 @@ namespace dss {
         }
       }
     }
-    if(!m_ListDirty && !m_ShutdownFlag) {
-      return raisePendingEvents(m_WakeTime, 2);
+    if(!m_ShutdownFlag) {
+      if(!DateTime().before(m_WakeTime)) {
+        return raisePendingEvents(m_WakeTime, 2);
+      }
     }
     return false;
   } // runOnce
@@ -839,6 +834,7 @@ namespace dss {
       logSStream.str("");
     }
 
+    std::vector<std::string> removeIDs;
     boost::mutex::scoped_lock lock(m_EventsMutex);
     for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
         ipSchedEvt != e; ++ipSchedEvt)
@@ -849,6 +845,11 @@ namespace dss {
                    << "diff:    " << nextOccurence.difference(virtualNow);
         Logger::getInstance()->log(logSStream.str());
         logSStream.str("");
+      }
+      if(nextOccurence == DateTime::NullDate) {
+        Logger::getInstance()->log("EventRunner: Removing event " + ipSchedEvt->getID());
+        removeIDs.push_back(ipSchedEvt->getID());
+        continue;
       }
       if(abs(nextOccurence.difference(virtualNow)) <= _deltaSeconds/2) {
         result = true;
@@ -868,6 +869,10 @@ namespace dss {
           Logger::getInstance()->log("EventRunner: Cannot push event back to queue because the Queue is NULL", lsFatal);
         }
       }
+    }
+    lock.unlock();
+    for(size_t iID = 0; iID < removeIDs.size(); iID++) {
+      removeEvent(removeIDs.at(iID));
     }
     return result;
   } // raisePendingEvents
