@@ -179,7 +179,7 @@ namespace dss {
       } else if(strFlag == "ARCHIVE") {
         flag = PropertyNode::Archive;
       } else {
-        return failure("Expected 'READABLE', 'WRITABLE' or 'ARCHIVE' for parameter 'flag' but got: '" + strFlag + "'");
+        return failure("Expected 'READABLE', 'WRITEABLE' or 'ARCHIVE' for parameter 'flag' but got: '" + strFlag + "'");
       }
 
       std::string strValue = _request.getParameter("value");
