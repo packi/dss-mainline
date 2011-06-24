@@ -825,9 +825,11 @@ namespace dss {
   } // runOnce
 
   bool EventRunner::raisePendingEvents(DateTime& _from, int _deltaSeconds) {
+    const int kSlackTimeSeconds = 5;
     bool result = false;
     std::ostringstream logSStream;
     DateTime virtualNow = _from.addSeconds(-_deltaSeconds/2);
+    DateTime virtualNowWithSlack = _from.addSeconds(-_deltaSeconds/2 -  kSlackTimeSeconds);
     if(DebugEventRunner) {
       logSStream << "vNow:    " << virtualNow;
       Logger::getInstance()->log(logSStream.str());
@@ -839,7 +841,7 @@ namespace dss {
     for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
         ipSchedEvt != e; ++ipSchedEvt)
     {
-      DateTime nextOccurence = ipSchedEvt->getSchedule().getNextOccurence(virtualNow);
+      DateTime nextOccurence = ipSchedEvt->getSchedule().getNextOccurence(virtualNowWithSlack);
       if(DebugEventRunner) {
         logSStream << "nextOcc: " << nextOccurence << "; "
                    << "diff:    " << nextOccurence.difference(virtualNow);
@@ -851,7 +853,11 @@ namespace dss {
         removeIDs.push_back(ipSchedEvt->getID());
         continue;
       }
-      if(abs(nextOccurence.difference(virtualNow)) <= _deltaSeconds/2) {
+      if(nextOccurence.before(virtualNow)) {
+        Logger::getInstance()->log("EventRunner: Removing event but still raising it: " + ipSchedEvt->getID());
+        removeIDs.push_back(ipSchedEvt->getID());
+      }
+      if(nextOccurence.before(virtualNow) || (abs(nextOccurence.difference(virtualNow)) <= _deltaSeconds/2)) {
         result = true;
         if(m_EventQueue != NULL) {
           boost::shared_ptr<Event> evt = ipSchedEvt->getEvent();
