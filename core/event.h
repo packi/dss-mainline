@@ -275,14 +275,12 @@ namespace dss {
   class EventRunner : public PropertyListener {
   private:
     boost::ptr_vector<ScheduledEvent> m_ScheduledEvents;
-    DateTime getNextOccurence();
     DateTime m_WakeTime;
     SyncEvent m_NewItem;
     EventQueue* m_EventQueue;
     mutable boost::mutex m_EventsMutex;
     bool m_ShutdownFlag;
     PropertyNodePtr m_MonitorNode;
-    bool m_ListDirty;
   public:
     EventRunner(PropertyNodePtr _monitorNode = PropertyNodePtr());
 
@@ -292,12 +290,11 @@ namespace dss {
     std::vector<std::string> getEventIDs() const;
     const ScheduledEvent& getEvent(const std::string& _eventID) const;
 
-    bool raisePendingEvents(DateTime& _from, int _deltaSeconds);
+    bool raisePendingEvents();
 
     void removeEvent(const std::string& _eventID);
 
     void run();
-    bool runOnce();
     void shutdown();
 
     void setEventQueue(EventQueue* _value) { m_EventQueue = _value; }

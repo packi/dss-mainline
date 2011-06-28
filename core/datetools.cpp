@@ -334,7 +334,7 @@ namespace dss {
   //================================================== StaticSchedule
 
   DateTime StaticSchedule::getNextOccurence(const DateTime& _from) {
-    if(_from.before(m_When)) {
+    if(_from.before(m_When) || (_from == m_When)) {
       return m_When;
     }
     return DateTime::NullDate;

@@ -644,8 +644,7 @@ namespace dss {
   EventRunner::EventRunner(PropertyNodePtr _monitorNode)
   : m_EventQueue(NULL),
     m_ShutdownFlag(false),
-    m_MonitorNode(_monitorNode),
-    m_ListDirty(false)
+    m_MonitorNode(_monitorNode)
   {
     if (_monitorNode != NULL) {
       _monitorNode->addListener(this);
@@ -686,7 +685,6 @@ namespace dss {
     for (it = m_ScheduledEvents.begin(); it != m_ScheduledEvents.end(); it++) {
       if (it->getID() == _eventID) {
         m_ScheduledEvents.erase(it);
-        m_ListDirty = true;
         break;
      }
     }
@@ -740,7 +738,6 @@ namespace dss {
       }
 
       m_ScheduledEvents.push_back(_scheduledEvent);
-      m_ListDirty = true;
     } else {
       delete _scheduledEvent;
     }
@@ -748,116 +745,35 @@ namespace dss {
     m_NewItem.signal();
   } // addEvent
 
-  DateTime EventRunner::getNextOccurence() {
-    DateTime now;
-    DateTime result = now.addYear(10);
-    boost::mutex::scoped_lock lock(m_EventsMutex);
-    if(DebugEventRunner) {
-      Logger::getInstance()->log("EventRunner: *********");
-      Logger::getInstance()->log("number in queue: " +
-                                 intToString(m_ScheduledEvents.size()));
-    }
-
-    for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin();
-        ipSchedEvt != m_ScheduledEvents.end(); ipSchedEvt++)
-    {
-      DateTime next = ipSchedEvt->getSchedule().getNextOccurence(now);
-      if(DebugEventRunner) {
-        Logger::getInstance()->log("checking event: " + ipSchedEvt->getID());
-        Logger::getInstance()->log(std::string("next:   ") + (std::string)next);
-        Logger::getInstance()->log(std::string("result: ") + (std::string)result);
-      }
-      if(next == DateTime::NullDate) {
-        continue;
-      }
-      result = std::min(result, next);
-      if(DebugEventRunner) {
-        Logger::getInstance()->log(std::string("chosen: ") + (std::string)result);
-      }
-    }
-    return result;
-  } // getNextOccurence
-
   void EventRunner::run() {
     while(!m_ShutdownFlag) {
-      runOnce();
+      raisePendingEvents();
+      m_NewItem.waitFor(500);
     }
   } // run
 
-  bool EventRunner::runOnce() {
-    boost::mutex::scoped_lock lock(m_EventsMutex);
-    if(m_ScheduledEvents.empty()) {
-      lock.unlock();
-      m_NewItem.waitFor(1000);
-      return false;
-    } else {
-      m_ListDirty = false;
-      lock.unlock();
-      DateTime now;
-      m_WakeTime = getNextOccurence();
-      int sleepSeconds = m_WakeTime.difference(now);
-
-      if(DebugEventRunner) {
-        Logger::getInstance()->log("Will be sleeping for " + intToString(sleepSeconds));
-      }
-
-      // Prevent loops when a cycle takes less than 1s
-      if(sleepSeconds <= 0) {
-        m_NewItem.waitFor(1000);
-        return false;
-      }
-
-      while(DateTime().before(m_WakeTime) && !m_ShutdownFlag && !m_ListDirty) {
-        if(m_NewItem.waitFor(1000)) {
-          if(DebugEventRunner) {
-            Logger::getInstance()->log("New event in queue, aborting wait");
-            break;
-          }
-        }
-      }
-    }
-    if(!m_ShutdownFlag) {
-      if(!DateTime().before(m_WakeTime)) {
-        return raisePendingEvents(m_WakeTime, 2);
-      }
-    }
-    return false;
-  } // runOnce
-
-  bool EventRunner::raisePendingEvents(DateTime& _from, int _deltaSeconds) {
-    const int kSlackTimeSeconds = 5;
+  bool EventRunner::raisePendingEvents() {
     bool result = false;
-    std::ostringstream logSStream;
-    DateTime virtualNow = _from.addSeconds(-_deltaSeconds/2);
-    DateTime virtualNowWithSlack = _from.addSeconds(-_deltaSeconds/2 -  kSlackTimeSeconds);
-    if(DebugEventRunner) {
-      logSStream << "vNow:    " << virtualNow;
-      Logger::getInstance()->log(logSStream.str());
-      logSStream.str("");
-    }
+    DateTime now;
+    DateTime nextSecond = now.addSeconds(1);
 
     std::vector<std::string> removeIDs;
     boost::mutex::scoped_lock lock(m_EventsMutex);
     for(boost::ptr_vector<ScheduledEvent>::iterator ipSchedEvt = m_ScheduledEvents.begin(), e = m_ScheduledEvents.end();
         ipSchedEvt != e; ++ipSchedEvt)
     {
-      DateTime nextOccurence = ipSchedEvt->getSchedule().getNextOccurence(virtualNowWithSlack);
+      DateTime nextOccurence = ipSchedEvt->getSchedule().getNextOccurence(now);
       if(DebugEventRunner) {
-        logSStream << "nextOcc: " << nextOccurence << "; "
-                   << "diff:    " << nextOccurence.difference(virtualNow);
-        Logger::getInstance()->log(logSStream.str());
-        logSStream.str("");
+        Logger::getInstance()->log("Event:   " + ipSchedEvt->getID());
+        Logger::getInstance()->log("nextOcc: " + nextOccurence.toString() + "; " +
+                                   "diff:    " + intToString(nextOccurence.difference(now)));
       }
       if(nextOccurence == DateTime::NullDate) {
         Logger::getInstance()->log("EventRunner: Removing event " + ipSchedEvt->getID());
         removeIDs.push_back(ipSchedEvt->getID());
         continue;
       }
-      if(nextOccurence.before(virtualNow)) {
-        Logger::getInstance()->log("EventRunner: Removing event but still raising it: " + ipSchedEvt->getID());
-        removeIDs.push_back(ipSchedEvt->getID());
-      }
-      if(nextOccurence.before(virtualNow) || (abs(nextOccurence.difference(virtualNow)) <= _deltaSeconds/2)) {
+      if(nextOccurence.before(now) || (nextOccurence == now)) {
         result = true;
         if(m_EventQueue != NULL) {
           boost::shared_ptr<Event> evt = ipSchedEvt->getEvent();
@@ -871,6 +787,11 @@ namespace dss {
             evt->unsetProperty(EventPropertyICalRRule);
           }
           m_EventQueue->pushEvent(evt);
+
+          // check if the event will be raised again
+          if(ipSchedEvt->getSchedule().getNextOccurence(nextSecond) == DateTime::NullDate) {
+            removeIDs.push_back(ipSchedEvt->getID());
+          }
         } else {
           Logger::getInstance()->log("EventRunner: Cannot push event back to queue because the Queue is NULL", lsFatal);
         }
