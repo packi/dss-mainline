@@ -39,6 +39,7 @@
 #include "core/model/zone.h"
 #include "core/model/group.h"
 #include "core/model/modulator.h"
+#include "core/metering/metering.h"
 
 namespace dss {
 
@@ -48,7 +49,8 @@ namespace dss {
   Apartment::Apartment(DSS* _pDSS)
   : m_pBusInterface(NULL),
     m_pModelMaintenance(NULL),
-    m_pPropertySystem(NULL)
+    m_pPropertySystem(NULL),
+    m_pMetering(NULL)
   {
     // create default (broadcast) zone
     boost::shared_ptr<Zone> zoneZero = allocateZone(0);
@@ -235,6 +237,18 @@ namespace dss {
 
     boost::shared_ptr<DSMeter> pResult(new DSMeter(_dsid, this));
     m_DSMeters.push_back(pResult);
+
+    // set initial meter value from metering subsystem
+    if(m_pMetering != NULL) {
+      boost::shared_ptr<Series<CurrentValue> > pSeries =
+        m_pMetering->getSeries(m_pMetering->getEnergyConfigChain(), 1, pResult);
+      if(!pSeries->getValues().empty()) {
+        pResult->initializeEnergyMeterValue(pSeries->getValues().front().getValue());
+      } else {
+        Logger::getInstance()->log("No initial metering value found for meter " + _dsid.toString());
+      }
+    }
+
     return pResult;
   } // allocateDSMeter
 

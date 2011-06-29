@@ -38,6 +38,8 @@ namespace dss {
   : m_DSID(_dsid),
     m_PowerConsumption(0),
     m_EnergyMeterValue(0),
+    m_LastReportedEnergyMeterValue(0),
+    m_ReceivedMeterValue(false),
     m_IsValid(false),
     m_pApartment(_pApartment)
   {
@@ -89,13 +91,13 @@ namespace dss {
     if(!contains(m_ConnectedDevices, _device)) {
       m_ConnectedDevices.push_back(_device);
     } else {
-      Logger::getInstance()->log("DSMeter::addDevice: DUPLICATE DEVICE Detected dsMeter: " + 
+      Logger::getInstance()->log("DSMeter::addDevice: DUPLICATE DEVICE Detected dsMeter: " +
                                  m_DSID.toString() + " device: " + _device.getDSID().toString(), lsFatal);
     }
   } // addDevice
 
   void DSMeter::removeDevice(const DeviceReference& _device) {
-    DeviceIterator pos = find(m_ConnectedDevices.begin(), m_ConnectedDevices.end(), _device);
+    DeviceIterator pos = std::find(m_ConnectedDevices.begin(), m_ConnectedDevices.end(), _device);
     if(pos != m_ConnectedDevices.end()) {
       m_ConnectedDevices.erase(pos);
     }
@@ -117,25 +119,33 @@ namespace dss {
   unsigned long DSMeter::getEnergyMeterValue() {
     DateTime now;
     if(!now.addSeconds(-1).before(m_EnergyMeterValueTimeStamp)) {
-      m_EnergyMeterValue = DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getEnergyMeterValue(m_DSID);
-      m_EnergyMeterValueTimeStamp = now;
+      unsigned long newValue = DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getEnergyMeterValue(m_DSID);
+      updateEnergyMeterValue(newValue);
     }
     return m_EnergyMeterValue;
   } // getEnergyMeterValue
 
-  /** set the consumption in mW */
   void DSMeter::setPowerConsumption(unsigned long _value) {
     DateTime now;
     m_PowerConsumptionTimeStamp = now;
     m_PowerConsumption = _value;
   }
 
-  /** set the meter value in Wh */
-  void DSMeter::setEnergyMeterValue(unsigned long _value)  {
+  void DSMeter::updateEnergyMeterValue(unsigned long _value)  {
     DateTime now;
+    if(!m_ReceivedMeterValue && (m_EnergyMeterValue != 0)) {
+      // Do nothing, the first value is just to set a baseline
+    } else if(_value >= m_LastReportedEnergyMeterValue) {
+      m_EnergyMeterValue += _value - m_LastReportedEnergyMeterValue;
+    }
+    m_ReceivedMeterValue = true;
+    m_LastReportedEnergyMeterValue = _value;
     m_EnergyMeterValueTimeStamp = now;
-    m_EnergyMeterValue = _value;
   }
+
+  void DSMeter::initializeEnergyMeterValue(unsigned long _value) {
+    m_EnergyMeterValue = _value;
+  } // initializeEnergyMeterValue
 
   unsigned long DSMeter::getCachedPowerConsumption() {
     return m_PowerConsumption;
