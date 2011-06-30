@@ -176,9 +176,10 @@ BOOST_FIXTURE_TEST_CASE(testSubscriptionXML, NonRunningFixture) {
 
   m_pEventInterpreter->executePendingEvent();
 
-  m_pRunner->runOnce();
-
-  sleepMS(1200);
+  sleepMS(501);
+  m_pRunner->raisePendingEvents();
+  sleepMS(500);
+  m_pRunner->raisePendingEvents();
 
   m_pEventInterpreter->executePendingEvent();
 
@@ -363,7 +364,7 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsOverwritesTimeProperty) {
 
   queue.pushEvent(pEvent);
   BOOST_CHECK_EQUAL(runner.getSize(), 1);
- 
+
   boost::shared_ptr<Event> pEvent2(new Event("my_event"));
   pEvent2->setProperty("unique", "yes");
   pEvent2->setProperty("time", "+2");
