@@ -31,6 +31,8 @@
 
 #include <boost/foreach.hpp>
 
+#include <openssl/ssl.h>
+
 #include "core/dss.h"
 #include "core/eventsubscriptionsession.h"
 #include "core/session.h"
@@ -55,7 +57,7 @@ namespace dss {
     log("initializing WebServices");
     getDSS().getPropertySystem().setIntValue(getConfigPropertyBasePath() + "port", 8081, true, false);
     getDSS().getPropertySystem().setStringValue(
-       getConfigPropertyBasePath() + "sslcert", 
+       getConfigPropertyBasePath() + "sslcert",
          getDSS().getPropertySystem().getStringValue("/config/configdirectory")
             + "dsscert.pem" , true, false);
     std::string sslcert = getDSS().getPropertySystem().getStringValue(
@@ -174,6 +176,35 @@ namespace dss {
     return result;
   }
 
+  bool WebServices::soapConnectionAlive(soap* _soapRequest) {
+    uint8_t tmp;
+    bool result = true;
+    if(_soapRequest->ssl != NULL) {
+      SSL* ssl = static_cast<SSL*>(_soapRequest->ssl);
+      int sslRet = SSL_peek(ssl, &tmp, 1);
+      if(sslRet <= 0) {
+        int err = SSL_get_error(ssl, sslRet);
+        if((err != SSL_ERROR_WANT_READ) && (err != SSL_ERROR_WANT_WRITE)) {
+          Logger::getInstance()->log("WebServices::waitForEvent: received ssl-error, connection dropped " + intToString(err), lsInfo);
+          result  = false;
+        }
+      }
+    } else {
+      int res = recv(_soapRequest->socket, &tmp, 1,  MSG_PEEK | MSG_DONTWAIT);
+      if(res == -1) {
+        if((errno != EAGAIN) && (errno != EINTR) && (errno != EWOULDBLOCK)) {
+          Logger::getInstance()->log("WebServices::waitForEvent: lost connection", lsInfo);
+          result = false;
+        }
+      } else if(res == 0) {
+        // if we were still connected, recv would return -1 with an errno listed above or 1
+        Logger::getInstance()->log("WebServices::waitForEvent: lost connection", lsInfo);
+        result = false;
+      }
+    }
+    return result;
+  } // soapConnectionAlive
+
   bool WebServices::waitForEvent(Session* _session, const int _timeoutMS, soap* _soapRequest) {
     const int kSocketDisconnectTimeoutMS = 200;
     bool timedOut = false;
@@ -183,16 +214,7 @@ namespace dss {
     boost::shared_ptr<EventCollector> subscriptionSession = extractFromSession(_session);
     while(!timedOut && !result) {
       // check if we're still connected
-      uint8_t tmp;
-      int res = recv(_soapRequest->socket, &tmp, 1,  MSG_PEEK | MSG_DONTWAIT);
-      if(res == -1) {
-        if((errno != EAGAIN) && (errno != EINTR) && (errno != EWOULDBLOCK)) {
-          Logger::getInstance()->log("WebServices::waitForEvent: lost connection", lsInfo);
-          break;
-        }
-      } else if(res == 0) {
-        // if we were still connected, recv would return -1 with an errno listed above or 1
-        Logger::getInstance()->log("WebServices::waitForEvent: lost connection", lsInfo);
+      if(!soapConnectionAlive(_soapRequest)) {
         break;
       }
       // calculate the length of our wait

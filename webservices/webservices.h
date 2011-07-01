@@ -51,6 +51,7 @@ namespace dss {
     Mutex m_RequestsMutex;
     SyncEvent m_RequestArrived;
     boost::shared_ptr<SessionManager> m_pSessionManager;
+    bool soapConnectionAlive(soap* _soapRequest);
   protected:
     virtual void doStart();
   public:
