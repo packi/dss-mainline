@@ -47,7 +47,7 @@ namespace dss {
   }
 
   bool Session::isStillValid() {
-    return (m_LastTouched.addSeconds(m_SessionTimeoutSec).after(DateTime()) && (!isUsed()));
+    return isUsed() || m_LastTouched.addSeconds(m_SessionTimeoutSec).after(DateTime());
   } // isStillValid
 
   bool Session::isUsed() {
@@ -70,6 +70,7 @@ namespace dss {
       m_UsageCount = 0;
     }
     m_UseCountMutex.unlock();
+    touch();
   }
 
   void Session::markAsApplicationSession() {
