@@ -299,8 +299,8 @@ namespace dss {
           try {
             boost::shared_ptr<DSMeter> meter = m_pApartment->getDSMeterByDSID(meterID);
             meter->setPowerConsumption(power);
-            meter->setEnergyMeterValue(energy);
-            m_pMetering->postEnergyEvent(meter, energy, DateTime());
+            meter->updateEnergyMeterValue(energy);
+            m_pMetering->postEnergyEvent(meter, meter->getEnergyMeterValue(), DateTime());
             m_pMetering->postConsumptionEvent(meter, power, DateTime());
           } catch(ItemNotFoundException& _e) {
             log("Received metering data for unknown meter, discarding", lsWarning);

@@ -127,6 +127,7 @@ namespace dss {
       boost::shared_ptr<DSMeter> _pMeter);
 
     const std::vector<boost::shared_ptr<MeteringConfigChain> > getConfig() const { return m_Config; }
+    boost::shared_ptr<MeteringConfigChain> getEnergyConfigChain() { return m_ConfigEnergy; }
     const std::string& getStorageLocation() const { return m_MeteringStorageLocation; }
     void postConsumptionEvent(boost::shared_ptr<DSMeter> _meter, int _value, DateTime _sampledAt);
     void postEnergyEvent(boost::shared_ptr<DSMeter> _meter, int _value, DateTime _sampledAt);

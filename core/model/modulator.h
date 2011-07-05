@@ -50,6 +50,8 @@ namespace dss {
     int m_PowerConsumption;
     DateTime m_PowerConsumptionTimeStamp;
     int m_EnergyMeterValue;
+    unsigned long m_LastReportedEnergyMeterValue;
+    bool m_ReceivedMeterValue;
     DateTime m_EnergyMeterValueTimeStamp;
     int m_HardwareVersion;
     int m_armSoftwareVersion;
@@ -85,7 +87,8 @@ namespace dss {
     /** set the consumption in mW */
     void setPowerConsumption(unsigned long _value);
     /** set the meter value in Wh */
-    void setEnergyMeterValue(unsigned long _value);
+    void updateEnergyMeterValue(unsigned long _value);
+    void initializeEnergyMeterValue(unsigned long _value);
 
     /** Returns the last consumption in mW returned from dS485 Bus, but never request it*/
     unsigned long getCachedPowerConsumption();

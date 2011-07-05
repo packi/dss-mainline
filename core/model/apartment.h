@@ -46,6 +46,7 @@ namespace dss {
   class ModelMaintenance;
   class PropertySystem;
   class BusInterface;
+  class Metering;
   class DeviceBusInterface;
   class ActionRequestInterface;
 
@@ -66,6 +67,7 @@ namespace dss {
     PropertyNodePtr m_pPropertyNode;
     ModelMaintenance* m_pModelMaintenance;
     PropertySystem* m_pPropertySystem;
+    Metering* m_pMetering;
   private:
     void addDefaultGroupsToZone(boost::shared_ptr<Zone> _zone);
   public:
@@ -118,12 +120,13 @@ namespace dss {
     void removeDSMeter(dss_dsid_t _dsMeter);
   public:
     void setBusInterface(BusInterface* _value) { m_pBusInterface = _value; }
-    ActionRequestInterface* getActionRequestInterface(); 
+    ActionRequestInterface* getActionRequestInterface();
     DeviceBusInterface* getDeviceBusInterface();
     /** Returns the root-node for the apartment tree */
     PropertyNodePtr getPropertyNode() { return m_pPropertyNode; }
     void setModelMaintenance(ModelMaintenance* _value) { m_pModelMaintenance = _value; }
     ModelMaintenance* getModelMaintenance() { return m_pModelMaintenance; }
+    void setMetering(Metering* _value) { m_pMetering = _value; }
     void setPropertySystem(PropertySystem* _value);
     PropertySystem* getPropertySystem() { return m_pPropertySystem; }
   }; // Apartment

@@ -133,7 +133,7 @@ namespace dss {
 
     virtual void mergeWith(const Value& _other) {
       Value::mergeWith(_other);
-      m_Value = _other.getValue();
+      m_Value = std::max(_other.getValue(), m_Value);
     }
   };
 

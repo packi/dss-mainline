@@ -158,7 +158,7 @@ const char* kSavedPropsDirectory = "data/savedprops/";
     char JSLogDir[259];
     char SavedPropsDir[259];
     std::string aup = getenv("ALLUSERSPROFILE");
-	
+
     if (std::string::npos != aup.std::string::find("ProgramData")) {
       sprintf(AppDataDir, "%s\\digitalSTROM\\DssData", aup.c_str());
     } else {
@@ -251,6 +251,9 @@ const char* kSavedPropsDirectory = "data/savedprops/";
   bool DSS::initialize(const std::vector<std::string>& _properties, const std::string& _configFile) {
     m_State = ssCreatingSubsystems;
 
+    m_pMetering = boost::shared_ptr<Metering>(new Metering(this));
+    m_Subsystems.push_back(m_pMetering.get());
+
     m_pModelMaintenance = boost::shared_ptr<ModelMaintenance>(new ModelMaintenance(this));
     m_Subsystems.push_back(m_pModelMaintenance.get());
 
@@ -282,10 +285,9 @@ const char* kSavedPropsDirectory = "data/savedprops/";
 
     m_pApartment->setBusInterface(m_pBusInterface.get());
 
-    m_pMetering = boost::shared_ptr<Metering>(new Metering(this));
-    m_Subsystems.push_back(m_pMetering.get());
     m_pMetering->setMeteringBusInterface(m_pBusInterface->getMeteringBusInterface());
     m_pModelMaintenance->setMetering(m_pMetering.get());
+    m_pApartment->setMetering(m_pMetering.get());
 
     PropertyNodePtr eventMonitor = m_pPropertySystem->createProperty("/system/EventInterpreter/ScheduledEvents");
     m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner(eventMonitor));

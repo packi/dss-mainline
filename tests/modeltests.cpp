@@ -653,6 +653,36 @@ BOOST_AUTO_TEST_CASE(testMeteringDataFromUnknownMeter) {
   sleepMS(60);
 } // testMeteringDataFromUnknownMeter
 
+BOOST_AUTO_TEST_CASE(testEnergyMeterZero) {
+  Apartment apt(NULL);
+
+  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dss_dsid_t(0,10));
+  meter->initializeEnergyMeterValue(0);
+  meter->updateEnergyMeterValue(50);
+  BOOST_CHECK_EQUAL(50, meter->getEnergyMeterValue());
+}
+
+BOOST_AUTO_TEST_CASE(testEnergyMeterWithMeteringData) {
+  Apartment apt(NULL);
+
+  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dss_dsid_t(0,10));
+  meter->initializeEnergyMeterValue(50);
+  meter->updateEnergyMeterValue(11);
+  meter->updateEnergyMeterValue(12);
+  BOOST_CHECK_EQUAL(51, meter->getEnergyMeterValue());
+}
+
+BOOST_AUTO_TEST_CASE(testEnergyMeterDropout) {
+  Apartment apt(NULL);
+
+  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dss_dsid_t(0,10));
+  meter->initializeEnergyMeterValue(50);
+  meter->updateEnergyMeterValue(11);
+  meter->updateEnergyMeterValue(0);
+  meter->updateEnergyMeterValue(1);
+  BOOST_CHECK_EQUAL(51, meter->getEnergyMeterValue());
+}
+
 BOOST_AUTO_TEST_CASE(testApartmentCreatesRootNode) {
   Apartment apt(NULL);
   PropertySystem syst;
