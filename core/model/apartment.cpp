@@ -99,6 +99,9 @@ namespace dss {
 
   boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dss_dsid_t _dsid) const {
     AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkReadAccess();
+    }
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
       if(dev->getDSID() == _dsid) {
         return dev;
@@ -109,6 +112,9 @@ namespace dss {
 
   boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dss_dsid_t _dsid) {
     AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkReadAccess();
+    }
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
       if(dev->getDSID() == _dsid) {
         return dev;
@@ -119,6 +125,9 @@ namespace dss {
 
   boost::shared_ptr<Device> Apartment::getDeviceByName(const std::string& _name) {
     AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkReadAccess();
+    }
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
       if(dev->getName() == _name) {
         return dev;
@@ -129,6 +138,9 @@ namespace dss {
 
   Set Apartment::getDevices() const {
     DeviceVector devs;
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkReadAccess();
+    }
     AssertLocked lock(this);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
       devs.push_back(DeviceReference(dev, this));
@@ -139,6 +151,9 @@ namespace dss {
 
   boost::shared_ptr<Zone> Apartment::getZone(const std::string& _zoneName) {
     AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkReadAccess();
+    }
     foreach(boost::shared_ptr<Zone> zone, m_Zones) {
       if(zone->getName() == _zoneName) {
         return zone;
@@ -149,6 +164,9 @@ namespace dss {
 
   boost::shared_ptr<Zone> Apartment::getZone(const int _id) {
     AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkReadAccess();
+    }
     foreach(boost::shared_ptr<Zone> zone, m_Zones) {
       if(zone->getID() == _id) {
         return zone;
@@ -159,12 +177,18 @@ namespace dss {
 
   std::vector<boost::shared_ptr<Zone> > Apartment::getZones() {
     AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkReadAccess();
+    }
     std::vector<boost::shared_ptr<Zone> > result = m_Zones;
     return result;
   } // getZones
 
   boost::shared_ptr<DSMeter> Apartment::getDSMeter(const std::string& _modName) {
     AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkReadAccess();
+    }
     foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
       if(dsMeter->getName() == _modName) {
         return dsMeter;
@@ -175,6 +199,9 @@ namespace dss {
 
   boost::shared_ptr<DSMeter> Apartment::getDSMeterByDSID(const dss_dsid_t _dsid) {
     AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkReadAccess();
+    }
     foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
       if(dsMeter->getDSID() == _dsid) {
         return dsMeter;
@@ -185,6 +212,9 @@ namespace dss {
 
   std::vector<boost::shared_ptr<DSMeter> > Apartment::getDSMeters() {
     AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkReadAccess();
+    }
     std::vector<boost::shared_ptr<DSMeter> > result = m_DSMeters;
     return result;
   } // getDSMeters
@@ -230,6 +260,9 @@ namespace dss {
 
   boost::shared_ptr<DSMeter> Apartment::allocateDSMeter(const dss_dsid_t _dsid) {
     AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkReadAccess();
+    }
     foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
       if((dsMeter)->getDSID() == _dsid) {
         return dsMeter;
@@ -255,6 +288,9 @@ namespace dss {
 
   boost::shared_ptr<Zone> Apartment::allocateZone(int _zoneID) {
     AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkWriteAccess();
+    }
     boost::shared_ptr<Zone> result;
     foreach(boost::shared_ptr<Zone> zone, m_Zones) {
       if(zone->getID() == _zoneID) {
@@ -276,6 +312,9 @@ namespace dss {
 
   void Apartment::removeZone(int _zoneID) {
     AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkWriteAccess();
+    }
     for(std::vector<boost::shared_ptr<Zone> >::iterator ipZone = m_Zones.begin(), e = m_Zones.end();
         ipZone != e; ++ipZone) {
       boost::shared_ptr<Zone> pZone = *ipZone;
@@ -289,6 +328,9 @@ namespace dss {
 
   void Apartment::removeDevice(dss_dsid_t _device) {
     AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkWriteAccess();
+    }
     for(std::vector<boost::shared_ptr<Device> >::iterator ipDevice = m_Devices.begin(), e = m_Devices.end();
         ipDevice != e; ++ipDevice) {
       boost::shared_ptr<Device> pDevice = *ipDevice;
@@ -307,6 +349,9 @@ namespace dss {
 
   void Apartment::removeDSMeter(dss_dsid_t _dsMeter) {
     AssertLocked lock(this);
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->checkWriteAccess();
+    }
     for(std::vector<boost::shared_ptr<DSMeter> >::iterator ipDSMeter = m_DSMeters.begin(), e = m_DSMeters.end();
         ipDSMeter != e; ++ipDSMeter) {
       boost::shared_ptr<DSMeter> pDSMeter = *ipDSMeter;
