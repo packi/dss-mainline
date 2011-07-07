@@ -216,6 +216,7 @@ void mg_md5(char *buf, ...);
 
 void mg_send_file(struct mg_connection *conn, FILE *fp, int64_t len);
 
+int mg_connection_active(struct mg_connection *conn);
 
 #ifdef __cplusplus
 }
