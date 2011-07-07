@@ -198,6 +198,60 @@ namespace dss {
     return success();
   }
 
+  boost::shared_ptr<EventSubscriptionSession> EventRequestHandler::getSubscriptionSession(int _token, boost::shared_ptr<Session> _session) {
+    boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
+
+    m_eventsMutex.lock();
+
+    boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
+
+    if((a == NULL) || (a->empty())) {
+      m_eventsMutex.unlock();
+      throw std::runtime_error("Invalid session!");
+    } else {
+      try {
+        eventSessions = boost::any_cast<boost::shared_ptr<EventSubscriptionSessionByTokenID> >(*a);
+      } catch (boost::bad_any_cast& e) {
+        Logger::getInstance()->log("Fatal error: unexpected data type stored in session!", lsFatal);
+        assert(false);
+      }
+    }
+
+    EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(_token);
+    if(entry == eventSessions->end()) {
+      m_eventsMutex.unlock();
+      throw std::runtime_error("Subscription id not found!");
+    }
+
+    boost::shared_ptr<EventSubscriptionSession> result = (*eventSessions)[_token];
+    m_eventsMutex.unlock();
+
+    return result;
+  } // getSubscriptionSession
+
+  boost::shared_ptr<JSONObject> EventRequestHandler::buildEventResponse(boost::shared_ptr<EventSubscriptionSession> _subscriptionSession) {
+    boost::shared_ptr<JSONObject> result(new JSONObject());
+    boost::shared_ptr<JSONArrayBase> eventsArray(new JSONArrayBase);
+    result->addElement("events", eventsArray);
+
+    while(_subscriptionSession->hasEvent()) {
+      Event evt = _subscriptionSession->popEvent();
+      boost::shared_ptr<JSONObject> evtObj(new JSONObject());
+      eventsArray->addElement("event", evtObj);
+
+      evtObj->addProperty("name", evt.getName());
+      boost::shared_ptr<JSONObject> evtprops(new JSONObject());
+      evtObj->addElement("properties", evtprops);
+
+      const dss::HashMapConstStringString& props =  evt.getProperties().getContainer();
+      for(dss::HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
+        evtprops->addProperty(iParam->first, iParam->second);
+      }
+    }
+
+    return result;
+  } // buildEventResponse
+
   // sid=SubscriptionID&timeout=0
   boost::shared_ptr<JSONObject> EventRequestHandler::get(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {
     std::string tokenStr = _request.getParameter("subscriptionID");
@@ -227,34 +281,45 @@ namespace dss {
       }
     }
 
-    boost::shared_ptr<EventSubscriptionSessionByTokenID> eventSessions;
+    boost::shared_ptr<EventSubscriptionSession> subscriptionSession;
+    try {
+      subscriptionSession = getSubscriptionSession(token, _session);
+    } catch(std::runtime_error& e) {
+      return failure(e.what());
+    }
 
-    m_eventsMutex.lock();
+    _session->use();
 
-    boost::shared_ptr<boost::any> a = _session->getData("eventSubscriptionIDs");
-
-    if((a == NULL) || (a->empty())) {
-      m_eventsMutex.unlock();
-      return failure("Invalid session!");
-    } else {
-      try {
-        eventSessions = boost::any_cast<boost::shared_ptr<EventSubscriptionSessionByTokenID> >(*a);
-      } catch (boost::bad_any_cast& e) {
-        Logger::getInstance()->log("Fatal error: unexpected data type stored in session!", lsFatal);
-        assert(0);
+    bool haveEvents = false;
+    bool timedOut = false;
+    const int kSocketDisconnectTimeoutMS = 200;
+    int timeoutMSLeft = timeout;
+    while(!timedOut && !haveEvents) {
+      // check if we're still connected
+      if(!_request.isActive()) {
+        Logger::getInstance()->log("EventRequestHanler::get: connection dropped");
+        break;
       }
+      // calculate the length of our wait
+      int waitTime;
+      if(timeout == -1) {
+        timedOut = true;
+        waitTime = -1;
+      } else if(timeout != 0) {
+        waitTime = std::min(timeoutMSLeft, kSocketDisconnectTimeoutMS);
+        timeoutMSLeft -= waitTime;
+        timedOut = (timeoutMSLeft == 0);
+      } else {
+        waitTime = kSocketDisconnectTimeoutMS;
+        timedOut = false;
+      }
+      // wait for the event
+      haveEvents = subscriptionSession->waitForEvent(waitTime);
     }
 
-    EventSubscriptionSessionByTokenID::iterator entry = eventSessions->find(token);
-    if(entry == eventSessions->end()) {
-      m_eventsMutex.unlock();
-      return failure("Subscription id not found!");
-    }
+    _session->unuse();
 
-    boost::shared_ptr<EventSubscriptionSession> session = (*eventSessions)[token];
-    m_eventsMutex.unlock();
-
-    return success(session->getEvents(timeout));
+    return success(buildEventResponse(subscriptionSession));
   }
 
   WebServerResponse EventRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) {

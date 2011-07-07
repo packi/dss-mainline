@@ -48,8 +48,6 @@ namespace dss {
     bool hasEvent();
     bool waitForEvent(const int _timeoutMS);
     // blocks if no events are available
-    // TODO: remove JSON generation and return a vector of events...
-    boost::shared_ptr<JSONObject> getEvents(const int _timeoutMS = 0);
   private:
     boost::shared_ptr<Session> m_parentSession;
     std::deque<Event> m_events;

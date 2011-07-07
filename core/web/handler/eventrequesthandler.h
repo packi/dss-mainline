@@ -58,6 +58,8 @@ namespace dss {
     boost::shared_ptr<JSONObject> subscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
     boost::shared_ptr<JSONObject> unsubscribe(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
     boost::shared_ptr<JSONObject> get(const RestfulRequest& _request, boost::shared_ptr<Session> _session);
+    boost::shared_ptr<JSONObject> buildEventResponse(boost::shared_ptr<EventSubscriptionSession> _subscriptionSession);
+    boost::shared_ptr<EventSubscriptionSession> getSubscriptionSession(int _token, boost::shared_ptr<Session> _session);
   }; // StructureRequestHandler
 
 } // namespace dss

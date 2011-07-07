@@ -59,41 +59,6 @@ namespace dss {
     m_subscriptionMap.erase(_eventName);
   }
 
-  boost::shared_ptr<JSONObject> EventSubscriptionSession::getEvents(const int _timeoutMS)  {
-    createCollector();
-
-    if(m_parentSession != NULL) {
-      m_parentSession->use();
-    }
-    m_pEventCollector->waitForEvent(_timeoutMS);
-
-    if(m_parentSession != NULL) {
-      m_parentSession->unuse();
-    }
-
-    boost::shared_ptr<JSONObject> resultObj(new JSONObject());
-    boost::shared_ptr<JSONArrayBase> eventsArray(new JSONArrayBase);
-    resultObj->addElement("events", eventsArray);
-
-    while(m_pEventCollector->hasEvent()) {
-      Event evt = m_pEventCollector->popEvent();
-      boost::shared_ptr<JSONObject> evtObj(new JSONObject());
-      eventsArray->addElement("event", evtObj);
-
-      evtObj->addProperty("name", evt.getName());
-      boost::shared_ptr<JSONObject> evtprops(new JSONObject());
-      evtObj->addElement("properties", evtprops);
-
-      const dss::HashMapConstStringString& props =  evt.getProperties().getContainer();
-      for(dss::HashMapConstStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam)
-      {
-        evtprops->addProperty(iParam->first, iParam->second);
-      }
-    }
-
-    return resultObj;
-  }
-
   void EventSubscriptionSession::createCollector() {
     if(m_pEventCollector == NULL) {
       EventInterpreterInternalRelay* pPlugin =
@@ -111,14 +76,17 @@ namespace dss {
   }
 
   Event EventSubscriptionSession::popEvent() {
+    createCollector();
     return m_pEventCollector->popEvent();
   }
 
   bool EventSubscriptionSession::hasEvent() {
+    createCollector();
     return m_pEventCollector->hasEvent();
   }
 
   bool EventSubscriptionSession::waitForEvent(const int _timeoutMS) {
+    createCollector();
     return m_pEventCollector->waitForEvent(_timeoutMS);
   }
 
