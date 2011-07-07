@@ -347,6 +347,7 @@ namespace dss {
     std::string method = uri.substr(uri.find(urlid) + urlid.size());
 
     RestfulRequest request(method, _parameter, _cookies);
+    request.setActiveCallback(boost::bind(&mg_connection_active, _connection));
 
     log("Processing call to " + method);
 

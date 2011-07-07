@@ -30,6 +30,7 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
 
 namespace dss {
 
@@ -147,7 +148,7 @@ namespace dss {
     boost::ptr_vector<RestfulClass> m_Classes;
   public:
     bool checkRequest(const std::string& _uri, const Properties& _parameter);
-    
+
     RestfulClass& addClass(const std::string& _className) {
       RestfulClass* result = new RestfulClass(_className, *this);
       m_Classes.push_back(result);
@@ -242,6 +243,17 @@ namespace dss {
         return kEmptyString;
       }
     }
+
+    bool isActive() const {
+      if(m_ActiveCallback) {
+        return m_ActiveCallback();
+      }
+      return true;
+    }
+
+    void setActiveCallback(boost::function<bool()> _value) {
+      m_ActiveCallback = _value;
+    }
   private:
     void splitIntoMethodAndClass(const std::string& _request) {
       size_t pos = _request.find('/');
@@ -253,10 +265,11 @@ namespace dss {
     std::string m_Method;
     HashMapConstStringString m_Parameter;
     HashMapConstStringString m_Cookies;
+    boost::function<bool()> m_ActiveCallback;
   };
 
   class Session;
-  
+
   class RestfulRequestHandler {
   public:
     virtual std::string handleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session) = 0;
