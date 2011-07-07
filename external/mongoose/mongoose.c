@@ -2453,7 +2453,7 @@ static void send_file_data(struct mg_connection *conn, FILE *fp, int64_t len) {
 }
 
 void mg_send_file(struct mg_connection *conn, FILE *fp, int64_t len) {
-  send_file_data(conn, fp, len);    
+  send_file_data(conn, fp, len);
 }
 
 int mg_connection_active(struct mg_connection *conn) {
@@ -3723,7 +3723,7 @@ static void handle_proxy_request(struct mg_connection *conn) {
     }
     conn->peer->client.is_ssl = is_ssl;
   }
-  
+
   // Forward client's request to the target
   mg_printf(conn->peer, "%s %s HTTP/%s\r\n", ri->request_method, ri->uri + len,
             ri->http_version);
