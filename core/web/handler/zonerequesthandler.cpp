@@ -29,6 +29,7 @@
 #include "core/model/device.h"
 #include "core/model/apartment.h"
 #include "core/model/scenehelper.h"
+#include "core/model/modelmaintenance.h"
 #include "core/structuremanipulator.h"
 
 #include "core/web/json.h"
@@ -158,6 +159,8 @@ namespace dss {
           pGroup->setSceneName(sceneNumber, name);
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
           manipulator.sceneSetName(pGroup, sceneNumber, name);
+          // raise ModelDirty to force rewrite of model data to apartment.xml
+          DSS::getInstance()->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
           return success();
         } else if(_request.getMethod() == "sceneGetName") {
           if(pGroup == NULL) {
