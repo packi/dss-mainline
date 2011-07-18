@@ -193,7 +193,7 @@ namespace dss {
           boost::shared_ptr<JSONObject> resultObj(new JSONObject());
           boost::shared_ptr<JSONArray<int> > reachableArray(new JSONArray<int>());
           resultObj->addElement("reachableScenes", reachableArray);
-          for(int iBit = 0; iBit < 63; iBit++) {
+          for(int iBit = 0; iBit < 64; iBit++) {
             if((reachableScenes & (1uLL << iBit)) != 0uLL) {
               reachableArray->add(iBit);
             }
