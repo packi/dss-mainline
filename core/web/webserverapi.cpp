@@ -184,7 +184,7 @@ namespace dss {
     clsDevice.addMethod("getGroups")
       .withDocumentation("Returns an array of groups the device is in");
     clsDevice.addMethod("getState")
-      .withDocumentation("Returns the state of the device");
+      .withDocumentation("Returns true if the device is on", "Meaning that the last called scene was not: SceneOff, SceneMin, SceneDeepOff, or SceneStandBy");
     clsDevice.addMethod("turnOn")
       .withDocumentation("Turns on the device.", "This will call SceneMax on the device.");
     clsDevice.addMethod("turnOff")
