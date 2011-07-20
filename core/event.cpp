@@ -255,12 +255,12 @@ namespace dss {
         "EventInterpreter needs to run as system user (for now)");
     }
     if(m_Queue == NULL) {
-      Logger::getInstance()->log("EventInterpreter: No queue set. Can't work like that... exiting...", lsFatal);
+      log("No queue set. Can't work like that... exiting...", lsFatal);
       return;
     }
 
     if(m_EventRunner == NULL) {
-      Logger::getInstance()->log("EventInterpreter: No runner set. exiting...", lsFatal);
+      log("No runner set. exiting...", lsFatal);
       return;
     }
     while(!m_Terminated) {
@@ -273,11 +273,11 @@ namespace dss {
       boost::shared_ptr<Event> toProcess = m_Queue->popEvent();
       if(toProcess != NULL) {
 
-        Logger::getInstance()->log(std::string("EventInterpreter: Got event from queue: '") + toProcess->getName() + "'", lsInfo);
+        log(std::string("Got event from queue: '") + toProcess->getName() + "'", lsInfo);
         for(HashMapConstStringString::const_iterator iParam = toProcess->getProperties().getContainer().begin(), e = toProcess->getProperties().getContainer().end();
             iParam != e; ++iParam)
         {
-          Logger::getInstance()->log("EventInterpreter:  Parameter '" + iParam->first + "' = '" + iParam->second + "'");
+          log("Parameter '" + iParam->first + "' = '" + iParam->second + "'");
         }
 
         SubscriptionVector subscriptionsCopy;
@@ -290,28 +290,28 @@ namespace dss {
         {
           if((*ipSubscription)->matches(*toProcess)) {
             bool called = false;
-            Logger::getInstance()->log(std::string("EventInterpreter: Subscription '") + (*ipSubscription)->getID() + "' matches event");
+            log(std::string("Subscription '") + (*ipSubscription)->getID() + "' matches event");
 
             EventInterpreterPlugin* plugin = getPluginByName((*ipSubscription)->getHandlerName());
             if(plugin != NULL) {
-              Logger::getInstance()->log("EventInterpreter: Found handler '" + plugin->getName() + "' calling...");
+              log("Found handler '" + plugin->getName() + "' calling...");
               try {
                 plugin->handleEvent(*toProcess, **ipSubscription);
               } catch(std::runtime_error& e) {
-                Logger::getInstance()->log(std::string("Caught exception while handling event: ") + e.what(), lsError);
+                log(std::string("Caught exception while handling event: ") + e.what(), lsError);
               }
               called = true;
-              Logger::getInstance()->log("EventInterpreter: called.");
+              log("called.");
             }
             if(!called) {
-              Logger::getInstance()->log(std::string("EventInterpreter: Could not find handler '") + (*ipSubscription)->getHandlerName(), lsInfo);
+              log(std::string("Could not find handler '") + (*ipSubscription)->getHandlerName(), lsInfo);
             }
 
           }
         }
 
         m_EventsProcessed++;
-        Logger::getInstance()->log(std::string("EventInterpreter: Done processing event '") + toProcess->getName() + "'", lsInfo);
+        log(std::string("Done processing event '") + toProcess->getName() + "'", lsInfo);
       }
     }
   } // executePendingEvent
@@ -371,7 +371,7 @@ namespace dss {
 
   void EventInterpreter::loadFromXML(const std::string& _fileName) {
     const int eventConfigVersion = 1;
-    Logger::getInstance()->log(std::string("EventInterpreter: Loading subscriptions from '") + _fileName + "'");
+    log(std::string("Loading subscriptions from '") + _fileName + "'");
 
     std::ifstream inFile(_fileName.c_str());
 
@@ -441,7 +441,7 @@ namespace dss {
         propertyName = elem->getAttribute("property");
       }
       if(filterType.empty() || propertyName.empty()) {
-        Logger::getInstance()->log("EventInterpreter::loadProperty: Missing type and/or property-name", lsFatal);
+        log("EventInterpreter::loadProperty: Missing type and/or property-name", lsFatal);
       } else {
         if(filterType == "exists") {
           filter = new EventPropertyExistsFilter(propertyName);
@@ -454,7 +454,7 @@ namespace dss {
           }
           filter = new EventPropertyMatchFilter(propertyName, matchValue);
         } else {
-          Logger::getInstance()->log("Unknown property-filter type", lsError);
+          log("Unknown property-filter type", lsError);
         }
       }
       if(filter != NULL) {
@@ -476,12 +476,12 @@ namespace dss {
       }
 
       if(evtName.size() == 0) {
-        Logger::getInstance()->log("EventInterpreter::loadSubscription: empty event-name, skipping this subscription", lsWarning);
+        log("EventInterpreter::loadSubscription: empty event-name, skipping this subscription", lsWarning);
         return;
       }
 
       if(handlerName.size() == 0) {
-        Logger::getInstance()->log("EventInterpreter::loadSubscription: empty handler-name, skipping this subscription", lsWarning);
+        log("EventInterpreter::loadSubscription: empty handler-name, skipping this subscription", lsWarning);
         return;
       }
 
@@ -490,8 +490,8 @@ namespace dss {
 
       EventInterpreterPlugin* plugin = getPluginByName(handlerName);
       if(plugin == NULL) {
-        Logger::getInstance()->log(std::string("EventInterpreter::loadSubscription: could not find plugin for handler-name '") + handlerName + "'", lsWarning);
-        Logger::getInstance()->log(       "EventInterpreter::loadSubscription: Still generating a subscription but w/o inner parameter", lsWarning);
+        log(std::string("EventInterpreter::loadSubscription: could not find plugin for handler-name '") + handlerName + "'", lsWarning);
+        log(       "EventInterpreter::loadSubscription: Still generating a subscription but w/o inner parameter", lsWarning);
       } else {
         opts = plugin->createOptionsFromXML(_node);
         hadOpts = true;
