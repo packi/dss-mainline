@@ -32,6 +32,7 @@
 #include "core/model/busscanner.h"
 #include "core/model/scenehelper.h"
 #include "core/model/modelevent.h"
+#include "core/model/modelmaintenance.h"
 
 #include "core/model/set.h"
 #include "core/model/device.h"
@@ -315,6 +316,22 @@ namespace dss {
       }
     }
   } // removeDSMeter
+
+  void Apartment::removeInactiveMeters() {
+    std::vector<boost::shared_ptr<DSMeter> > dsMeters = getDSMeters();
+
+    bool dirtyFlag = false;
+    foreach(boost::shared_ptr<DSMeter> dsMeter, dsMeters) {
+      if(!dsMeter->isPresent()) {
+        removeDSMeter(dsMeter->getDSID());
+        dirtyFlag = true;
+      }
+    }
+
+    if(dirtyFlag) {
+      m_pModelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    }
+  } // removeInactiveMeters
 
   ActionRequestInterface* Apartment::getActionRequestInterface() {
     if(m_pBusInterface != NULL) {

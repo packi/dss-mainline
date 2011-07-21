@@ -118,6 +118,7 @@ namespace dss {
     void removeZone(int _zoneID);
     void removeDevice(dss_dsid_t _device);
     void removeDSMeter(dss_dsid_t _dsMeter);
+    void removeInactiveMeters();
   public:
     void setBusInterface(BusInterface* _value) { m_pBusInterface = _value; }
     ActionRequestInterface* getActionRequestInterface();
