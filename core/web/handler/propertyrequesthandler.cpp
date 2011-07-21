@@ -58,8 +58,12 @@ namespace dss {
       }
       try {
         PropertyNode* parent = node->getParentNode();
-        parent->removeChild(node);
-        return success();
+        if(parent != NULL) {
+          parent->removeChild(node);
+          return success();
+        } else {
+          return failure("Can't remove root node");
+        }
       } catch (...) {
         return failure(std::string("Error removing node '") + propName + "'");
       }
