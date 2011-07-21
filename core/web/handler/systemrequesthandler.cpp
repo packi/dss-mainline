@@ -57,7 +57,7 @@ namespace dss {
       if(_session != NULL) {
         boost::shared_ptr<JSONObject> resultObj(new JSONObject());
         resultObj->addProperty("token", _session->getID());
-        
+
         WebServerResponse response(success(resultObj));
         response.setCookie("path", "/");
         response.setCookie("token", _session->getID());
@@ -126,7 +126,7 @@ namespace dss {
         return response;
       } else {
         log("Application-Authentication failed", lsError);
-        return failure("Applicatio-Authentication failed");
+        return failure("Application-Authentication failed");
       }
     } else if(_request.getMethod() == "logout") {
       m_pSessionManager->getSecurity()->signOff();

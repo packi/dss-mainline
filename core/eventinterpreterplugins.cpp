@@ -370,7 +370,7 @@ namespace dss {
     }
   } // handleEvent
 
-  const std::string EventInterpreterPluginJavascript::kCleanupScriptsEventName = "EventInterpreteRPluginJavascript_cleanupScripts";
+  const std::string EventInterpreterPluginJavascript::kCleanupScriptsEventName = "EventInterpreterPluginJavascript_cleanupScripts";
 
   void EventInterpreterPluginJavascript::initializeEnvironment() {
     if(DSS::hasInstance()) {
