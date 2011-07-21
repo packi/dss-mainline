@@ -33,6 +33,38 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="AuthenticateAsApplication">
+   <complexType>
+    <sequence>
+     <element name="applicationToken" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="AuthenticateAsApplicationResponse">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="RequestApplicationToken">
+   <complexType>
+    <sequence>
+     <element name="applicationName" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="RequestApplicationTokenResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="SignOff">
    <complexType>
     <sequence>
@@ -585,6 +617,23 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="ApartmentBlink">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ApartmentBlinkResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="ApartmentRescan">
    <complexType>
     <sequence>
@@ -716,6 +765,7 @@
      <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
      <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="force" type="xsd:boolean" minOccurs="1" maxOccurs="1" default="false"/>
     </sequence>
    </complexType>
   </element>
@@ -740,6 +790,41 @@
   </element>
   <!-- operation response element -->
   <element name="ZoneSaveSceneResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ZoneBlink">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="zoneID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="groupID" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ZoneBlinkResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="DeviceBlink">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DeviceBlinkResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
@@ -897,6 +982,7 @@
      <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
      <element name="sceneNr" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="force" type="xsd:boolean" minOccurs="1" maxOccurs="1" default="false"/>
     </sequence>
    </complexType>
   </element>
@@ -1101,6 +1187,24 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="DeviceGetTransmissionQuality">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="deviceID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="TransmissionQuality">
+   <complexType>
+    <sequence>
+     <element name="upstream" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="downstream" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="DSMeterGetPowerConsumption">
    <complexType>
     <sequence>
@@ -1198,6 +1302,55 @@
    <complexType>
     <sequence>
      <element name="result" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ApartmentRemoveMeter">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="dsMeterID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ApartmentRemoveMeterResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ApartmentRemoveInactiveMeters">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ApartmentRemoveInactiveMetersResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ApartmentGetPowerConsumption">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ApartmentGetPowerConsumptionResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
@@ -1483,6 +1636,23 @@
    <complexType>
     <sequence>
      <element name="result" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="PropertyRemove">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="propertyName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="PropertyRemoveResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
   </element>
