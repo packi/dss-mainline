@@ -80,7 +80,7 @@ enum mg_event {
 typedef void * (*mg_callback_t)(enum mg_event event,
                                 struct mg_connection *conn,
                                 const struct mg_request_info *request_info);
-  
+
 
 // Start web server.
 //
@@ -140,7 +140,7 @@ const char **mg_get_valid_option_names(void);
 //
 // Return:
 //   1 on success, 0 on error.
-int mg_modify_passwords_file(struct mg_context *ctx, 
+int mg_modify_passwords_file(struct mg_context *ctx,
     const char *passwords_file_name, const char *user, const char *password);
 
 // Send data to the client.
@@ -216,6 +216,7 @@ void mg_md5(char *buf, ...);
 
 void mg_send_file(struct mg_connection *conn, FILE *fp, int64_t len);
 
+int mg_connection_active(struct mg_connection *conn);
 
 #ifdef __cplusplus
 }

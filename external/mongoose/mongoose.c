@@ -42,6 +42,7 @@
 #include <limits.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <errno.h>
 
 #if defined(_WIN32)  // Windows specific #includes and #defines
 #define _WIN32_WINNT 0x0400 // To make it link in VS2005
@@ -251,6 +252,7 @@ extern int SSL_read(SSL *, void *, int);
 extern int SSL_write(SSL *, const void *, int);
 extern int SSL_get_error(const SSL *, int);
 extern int SSL_set_fd(SSL *, int);
+extern int SSL_peek(SSL *ssl,void *buf,int num);
 extern SSL *SSL_new(SSL_CTX *);
 extern SSL_CTX *SSL_CTX_new(SSL_METHOD *);
 extern SSL_METHOD *SSLv23_server_method(void);
@@ -278,7 +280,7 @@ struct ssl_func {
 #define SSL_connect (* (int (*)(SSL *)) ssl_sw[2].ptr)
 #define SSL_read (* (int (*)(SSL *, void *, int)) ssl_sw[3].ptr)
 #define SSL_write (* (int (*)(SSL *, const void *,int)) ssl_sw[4].ptr)
-#define SSL_get_error (* (int (*)(SSL *, int)) ssl_sw[5])
+#define SSL_get_error (* (int (*)(SSL *, int)) ssl_sw[5].ptr)
 #define SSL_set_fd (* (int (*)(SSL *, SOCKET)) ssl_sw[6].ptr)
 #define SSL_new (* (SSL * (*)(SSL_CTX *)) ssl_sw[7].ptr)
 #define SSL_CTX_new (* (SSL_CTX * (*)(SSL_METHOD *)) ssl_sw[8].ptr)
@@ -294,6 +296,7 @@ struct ssl_func {
 #define SSL_load_error_strings (* (void (*)(void)) ssl_sw[15].ptr)
 #define SSL_CTX_use_certificate_chain_file \
   (* (int (*)(SSL_CTX *, const char *)) ssl_sw[16].ptr)
+#define SSL_peek (* (int (*)(SSL *,void *,int)) ssl_sw[17].ptr)
 
 #define CRYPTO_num_locks (* (int (*)(void)) crypto_sw[0].ptr)
 #define CRYPTO_set_locking_callback \
@@ -325,6 +328,7 @@ static struct ssl_func ssl_sw[] = {
   {"SSL_CTX_free",  NULL},
   {"SSL_load_error_strings", NULL},
   {"SSL_CTX_use_certificate_chain_file", NULL},
+  {"SSL_peek", NULL},
   {NULL,    NULL}
 };
 
@@ -1162,8 +1166,8 @@ static pid_t spawn_process(struct mg_connection *conn, const char *prog,
 }
 #endif /* !NO_CGI */
 
-static int set_non_blocking_mode(SOCKET sock) {
-  unsigned long on = 1;
+static int set_blocking_mode(SOCKET sock, int block) {
+  unsigned long on = block;
   return ioctlsocket(sock, FIONBIO, &on);
 }
 
@@ -1253,11 +1257,15 @@ static pid_t spawn_process(struct mg_connection *conn, const char *prog,
 }
 #endif // !NO_CGI
 
-static int set_non_blocking_mode(SOCKET sock) {
+static int set_blocking_mode(SOCKET sock, int block) {
   int flags;
 
   flags = fcntl(sock, F_GETFL, 0);
-  (void) fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+  if(block) {
+    (void) fcntl(sock, F_SETFL, flags & ~O_NONBLOCK);
+  } else {
+    (void) fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+  }
 
   return 0;
 }
@@ -2445,7 +2453,33 @@ static void send_file_data(struct mg_connection *conn, FILE *fp, int64_t len) {
 }
 
 void mg_send_file(struct mg_connection *conn, FILE *fp, int64_t len) {
-  send_file_data(conn, fp, len);    
+  send_file_data(conn, fp, len);
+}
+
+int mg_connection_active(struct mg_connection *conn) {
+  int tmp, res, err;
+  if (conn->ssl) {
+    set_blocking_mode(conn->client.sock, 0);
+    res = SSL_peek(conn->ssl, &tmp, 1);
+    set_blocking_mode(conn->client.sock, 1);
+    if (res <= 0) {
+      err = SSL_get_error(conn->ssl, res);
+      if ((err != SSL_ERROR_WANT_READ) && (err != SSL_ERROR_WANT_WRITE)) {
+        return 0;
+      }
+    }
+  } else {
+    res = recv(conn->client.sock, &tmp, 1,  MSG_PEEK | MSG_DONTWAIT);
+    if (res == -1) {
+      if ((errno != EAGAIN) && (errno != EINTR) && (errno != EWOULDBLOCK)) {
+        return 0;
+      }
+    } else if (res == 0) {
+      // if we were still connected, recv would return -1 with an errno listed above or 1
+      return 0;
+    }
+  }
+  return 1;
 }
 
 static int parse_range_header(const char *header, int64_t *a, int64_t *b) {
@@ -3604,7 +3638,7 @@ static void close_socket_gracefully(SOCKET sock) {
 
   // Send FIN to the client
   (void) shutdown(sock, SHUT_WR);
-  set_non_blocking_mode(sock);
+  set_blocking_mode(sock, 0);
 
   // Read and discard pending data. If we do not do that and close the
   // socket, the data in the send buffer may be discarded. This
@@ -3689,7 +3723,7 @@ static void handle_proxy_request(struct mg_connection *conn) {
     }
     conn->peer->client.is_ssl = is_ssl;
   }
-  
+
   // Forward client's request to the target
   mg_printf(conn->peer, "%s %s HTTP/%s\r\n", ri->request_method, ri->uri + len,
             ri->http_version);

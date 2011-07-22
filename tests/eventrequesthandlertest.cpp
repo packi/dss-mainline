@@ -24,6 +24,8 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
+#include <boost/lambda/lambda.hpp>
+
 #include "webfixture.h"
 
 #include "core/event.h"
@@ -309,6 +311,44 @@ BOOST_FIXTURE_TEST_CASE(testSubscriptionsWork, Fixture) {
 
   response = m_pHandler->jsonHandleRequest(reqGet, m_pSession);
   testOkIs(response, false);
+}
+
+BOOST_FIXTURE_TEST_CASE(testGetReturnsIfConnectionIsInterrupted, Fixture) {
+  const std::string kEventName = "someEvent";
+  const std::string kSubscriptionID = "2";
+  m_Params["name"] = kEventName;
+  m_Params["subscriptionID"] = kSubscriptionID;
+  m_Params["timeout"] = "50000";
+  RestfulRequest reqSubscribe("event/subscribe", m_Params);
+  WebServerResponse response = m_pHandler->jsonHandleRequest(reqSubscribe, m_pSession);
+  testOkIs(response, true);
+
+  DateTime reqStarted;
+  RestfulRequest reqGet("event/get", m_Params);
+  reqGet.setActiveCallback(boost::lambda::constant(false));
+  response = m_pHandler->jsonHandleRequest(reqGet, m_pSession);
+  testOkIs(response, true);
+  DateTime reqEnded;
+  BOOST_CHECK(reqEnded.difference(reqStarted) <= 2);
+}
+
+BOOST_FIXTURE_TEST_CASE(testGetDoesntReturnIfConnectionIsNotInterrupted, Fixture) {
+  const std::string kEventName = "someEvent";
+  const std::string kSubscriptionID = "2";
+  m_Params["name"] = kEventName;
+  m_Params["subscriptionID"] = kSubscriptionID;
+  m_Params["timeout"] = "1000";
+  RestfulRequest reqSubscribe("event/subscribe", m_Params);
+  WebServerResponse response = m_pHandler->jsonHandleRequest(reqSubscribe, m_pSession);
+  testOkIs(response, true);
+
+  DateTime reqStarted;
+  RestfulRequest reqGet("event/get", m_Params);
+  reqGet.setActiveCallback(boost::lambda::constant(true));
+  response = m_pHandler->jsonHandleRequest(reqGet, m_pSession);
+  testOkIs(response, true);
+  DateTime reqEnded;
+  BOOST_CHECK(reqEnded.difference(reqStarted) <= 1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
