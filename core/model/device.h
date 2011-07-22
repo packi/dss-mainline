@@ -76,7 +76,7 @@ namespace dss {
   public:
     /** Creates and initializes a device. */
     Device(const dss_dsid_t _dsid, Apartment* _pApartment);
-    virtual ~Device() {};
+    virtual ~Device();
 
     /** @copydoc DeviceReference::isOn() */
     virtual bool isOn() const;
@@ -203,7 +203,7 @@ namespace dss {
     void lock();
     /** Tells the dSM that it may forget a device if it's not present. */
     void unlock();
-    
+
     void setButtonSetsLocalPriority(const bool _value) { m_ButtonSetsLocalPriority = _value; }
     bool getButtonSetsLocalPriority() const { return m_ButtonSetsLocalPriority; }
     void setButtonGroupMembership(const int _value) { m_ButtonGroupMembership = _value; }
@@ -212,7 +212,7 @@ namespace dss {
     int getButtonActiveGroup() const { return m_ButtonActiveGroup; }
     void setButtonID(const int _value) { m_ButtonID = _value; }
     int getButtonID() const { return m_ButtonID; }
-    
+
 
     uint8_t getOutputMode() const { return m_OutputMode; }
     void setOutputMode(const uint8_t _value) { m_OutputMode = _value; }

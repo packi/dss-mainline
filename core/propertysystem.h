@@ -439,7 +439,7 @@ namespace dss {
     /** @copydoc linkToProxy */
     bool linkToProxy(const PropertyProxy<std::string>& _proxy);
     /** Unlinks from a proxy */
-    bool unlinkProxy();
+    bool unlinkProxy(bool _recurse = false);
 
     /** Adds a listener. */
     void addListener(PropertyListener* _listener);

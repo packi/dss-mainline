@@ -689,7 +689,12 @@ namespace dss {
     return true;
   } // linkToProxy
 
-  bool PropertyNode::unlinkProxy() {
+  bool PropertyNode::unlinkProxy(bool _recurse) {
+    if(_recurse) {
+      foreach(PropertyNodePtr pChild, m_ChildNodes) {
+        pChild->unlinkProxy(_recurse);
+      }
+    }
     if(m_LinkedToProxy) {
       switch(getValueType()) {
         case vTypeString:
