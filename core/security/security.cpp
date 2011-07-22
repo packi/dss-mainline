@@ -75,13 +75,10 @@ namespace dss {
 
   bool Security::authenticate(const std::string& _user, const std::string& _password) {
     signOff();
+    assert(m_pPasswordChecker != NULL);
     PropertyNodePtr pUserNode = m_pRootNode->getProperty("users/" + _user);
     if(pUserNode != NULL) {
-      Hasher hasher;
-      hasher.add(pUserNode->getProperty("salt")->getStringValue());
-      hasher.add(pUserNode->getDisplayName());
-      hasher.add(_password);
-      if(hasher.str() == pUserNode->getProperty("password")->getStringValue()) {
+      if(m_pPasswordChecker->checkPassword(pUserNode, _password)) {
         m_LoggedInUser.reset(new User(pUserNode));
         return true;
       }
@@ -206,5 +203,52 @@ namespace dss {
   } // revokeToken
 
   boost::thread_specific_ptr<User> Security::m_LoggedInUser;
+
+
+  //================================================== BuiltinPasswordChecker
+
+  bool BuiltinPasswordChecker::checkPassword(PropertyNodePtr _pUser, const std::string& _password) {
+    Hasher hasher;
+    hasher.add(_pUser->getProperty("salt")->getStringValue());
+    hasher.add(_pUser->getDisplayName());
+    hasher.add(_password);
+    return hasher.str() == _pUser->getProperty("password")->getStringValue();
+  } // checkPassword
+
+
+  //================================================== HTDigestPasswordChecker
+
+  HTDigestPasswordChecker::HTDigestPasswordChecker(const std::string& _passwordFile)
+  : m_PasswordFile(_passwordFile)
+  { }
+
+  bool HTDigestPasswordChecker::checkPassword(PropertyNodePtr _pUser, const std::string& _password) {
+    std::string hashFromFile = readHashFromFile(_pUser->getDisplayName());
+    std::vector<std::string> splittedString = splitString(hashFromFile, ':');
+    if(splittedString.size() != 3) {
+      Logger::getInstance()->log("HTDigestPasswordChecker: File looks bogous, bailing out", lsError);
+      return false;
+    }
+    HasherMD5 hasher;
+    hasher.add(_pUser->getDisplayName() + ":" + splittedString[1] + ":" + _password);
+    return hasher.str() == splittedString[2];
+  } // checkPassword
+
+  std::string HTDigestPasswordChecker::readHashFromFile(std::string _userName) {
+    std::ifstream hashFile;
+    hashFile.open(m_PasswordFile.c_str(), std::ios::in);
+    if(hashFile.is_open()) {
+      while(hashFile.good()) {
+        char line[256];
+        hashFile.getline(line, sizeof(line) - 1);
+        if(beginsWith(line, _userName + ":")) {
+          return line;
+        }
+      }
+    } else {
+      Logger::getInstance()->log("HTDigestPasswordChecker: Could not open file for reading '" + m_PasswordFile + "'", lsError);
+    }
+    return std::string();
+  } // readHashFromFile
 
 } // namespace dss

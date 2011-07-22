@@ -24,7 +24,9 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
+#include <fstream>
 #include <boost/thread.hpp>
+#include <boost/filesystem.hpp>
 
 #include "core/foreach.h"
 
@@ -48,8 +50,10 @@ BOOST_AUTO_TEST_CASE(testSystemUserIsInitialized) {
 class FixtureTestUserTest {
 public:
   FixtureTestUserTest() {
-    Security security(m_PropertySystem.createProperty("/system/security"));
-    security.signOff();
+    m_pSecurity.reset(new Security(m_PropertySystem.createProperty("/system/security")));
+    boost::shared_ptr<PasswordChecker> checker(new BuiltinPasswordChecker());
+    m_pSecurity->setPasswordChecker(checker);
+    m_pSecurity->signOff();
     m_pNobodyRole = m_PropertySystem.createProperty("/system/security/roles/nobody");
     m_pSystemRole = m_PropertySystem.createProperty("/system/security/roles/system");
     m_pUserRole = m_PropertySystem.createProperty("/system/security/roles/user");
@@ -60,6 +64,7 @@ public:
   }
 
 protected:
+  boost::shared_ptr<Security> m_pSecurity;
   PropertySystem m_PropertySystem;
   boost::shared_ptr<User> m_pUser;
   PropertyNodePtr m_pUserNode;
@@ -78,36 +83,30 @@ BOOST_FIXTURE_TEST_CASE(testPasswordIsNotPlaintext, FixtureTestUserTest) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testAuthenticate, FixtureTestUserTest) {
-  Security security(m_PropertySystem.getProperty("/system/security"));
-  BOOST_CHECK(security.authenticate("testuser", "test"));
+  BOOST_CHECK(m_pSecurity->authenticate("testuser", "test"));
 }
 
 BOOST_FIXTURE_TEST_CASE(testAuthenticateWrongPassword, FixtureTestUserTest) {
-  Security security(m_PropertySystem.getProperty("/system/security"));
-  BOOST_CHECK(!security.authenticate("testuser", "test2"));
+  BOOST_CHECK(!m_pSecurity->authenticate("testuser", "test2"));
 }
 
 BOOST_FIXTURE_TEST_CASE(testAuthenticateWrongUser, FixtureTestUserTest) {
-  Security security(m_PropertySystem.getProperty("/system/security"));
-  BOOST_CHECK(!security.authenticate("testuser2", "test"));
+  BOOST_CHECK(!m_pSecurity->authenticate("testuser2", "test"));
 }
 
 BOOST_FIXTURE_TEST_CASE(testChangingPasswordWorks, FixtureTestUserTest) {
-  Security security(m_PropertySystem.getProperty("/system/security"));
-  BOOST_CHECK(security.authenticate("testuser", "test"));
+  BOOST_CHECK(m_pSecurity->authenticate("testuser", "test"));
   m_pUser->setPassword("test2");
-  BOOST_CHECK(security.authenticate("testuser", "test2"));
+  BOOST_CHECK(m_pSecurity->authenticate("testuser", "test2"));
 }
 
 BOOST_FIXTURE_TEST_CASE(testLoggingInSetsLoggedInUser, FixtureTestUserTest) {
-  Security security(m_PropertySystem.getProperty("/system/security"));
-  BOOST_CHECK(security.authenticate("testuser", "test"));
+  BOOST_CHECK(m_pSecurity->authenticate("testuser", "test"));
   BOOST_CHECK(Security::getCurrentlyLoggedInUser() != NULL);
 }
 
 BOOST_FIXTURE_TEST_CASE(testLoggingInSetsRightUser, FixtureTestUserTest) {
-  Security security(m_PropertySystem.getProperty("/system/security"));
-  BOOST_CHECK(security.authenticate("testuser", "test"));
+  BOOST_CHECK(m_pSecurity->authenticate("testuser", "test"));
   BOOST_CHECK(Security::getCurrentlyLoggedInUser()->getName() == "testuser");
 }
 
@@ -121,8 +120,7 @@ public:
 };
 
 BOOST_FIXTURE_TEST_CASE(testLoginDoesnLeakToOtherThread, FixtureTestUserTest) {
-  Security security(m_PropertySystem.getProperty("/system/security"));
-  BOOST_CHECK(security.authenticate("testuser", "test"));
+  BOOST_CHECK(m_pSecurity->authenticate("testuser", "test"));
   BOOST_CHECK(Security::getCurrentlyLoggedInUser()->getName() == "testuser");
 
   boost::shared_ptr<OtherThread> threadObj(new OtherThread);
@@ -150,7 +148,6 @@ protected:
 BOOST_FIXTURE_TEST_CASE(testRolesWork, FixtureTwoUsers) {
   PropertyNodePtr pNode = m_PropertySystem.createProperty("/test");
   pNode->setStringValue("not modified");
-  Security security(m_PropertySystem.getProperty("/system/security"));
   boost::shared_ptr<Privilege>
     privilegeSystem(
       new Privilege(
@@ -184,13 +181,30 @@ BOOST_FIXTURE_TEST_CASE(testRolesWork, FixtureTwoUsers) {
   BOOST_CHECK_THROW(pNode->setStringValue("Test"), SecurityException);
   BOOST_CHECK_EQUAL(pNode->getStringValue(), "not modified");
 
-  BOOST_CHECK(security.authenticate("system", "secret"));
+  BOOST_CHECK(m_pSecurity->authenticate("system", "secret"));
   pNode->setStringValue("Test");
   BOOST_CHECK_EQUAL(pNode->getStringValue(), "Test");
 
-  security.signOff();
+  m_pSecurity->signOff();
 
-  security.authenticate("testuser", "test");
+  m_pSecurity->authenticate("testuser", "test");
+}
+
+BOOST_AUTO_TEST_CASE(testDigestPasswords) {
+  std::string fileName = getTempDir() + "/digest_test_file";
+  std::ofstream ofs(fileName.c_str());
+  ofs << "dssadmin:dSS11:79f2e01bf54e8a0626f04b139a1decc2";
+  ofs.close();
+
+  PropertySystem propertySystem;
+  PropertyNodePtr userNode = propertySystem.createProperty("/dssadmin");
+
+  boost::shared_ptr<HTDigestPasswordChecker> checker(new HTDigestPasswordChecker(fileName));
+  BOOST_CHECK_EQUAL(checker->checkPassword(userNode, "dssadmin"), true);
+  BOOST_CHECK_EQUAL(checker->checkPassword(userNode, "asfd"), false);
+  BOOST_CHECK_EQUAL(checker->checkPassword(userNode, ""), false);
+
+  boost::filesystem::remove_all(fileName);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
