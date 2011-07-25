@@ -37,9 +37,10 @@ BOOST_AUTO_TEST_SUITE(WebEvent)
 class Fixture : public WebFixture {
 public:
   Fixture() {
-    m_pQueue.reset(new EventQueue(2));
-    m_pRunner.reset(new EventRunner());
     m_pInterpreter.reset(new EventInterpreter(NULL));
+    m_pInterpreter->initialize();
+    m_pQueue.reset(new EventQueue(m_pInterpreter.get(), 2));
+    m_pRunner.reset(new EventRunner(m_pInterpreter.get()));
     m_pInterpreter->setEventQueue(m_pQueue.get());
     m_pInterpreter->setEventRunner(m_pRunner.get());
     m_pInterpreter->addPlugin(new EventInterpreterInternalRelay(m_pInterpreter.get()));

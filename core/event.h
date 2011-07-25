@@ -251,6 +251,7 @@ namespace dss {
     SyncEvent m_EntryInQueueEvt;
     boost::mutex m_QueueMutex;
 
+    Subsystem* m_Subsystem;
     EventRunner* m_EventRunner;
     boost::shared_ptr<Schedule> scheduleFromEvent(boost::shared_ptr<Event> _event);
     const int m_EventTimeoutMS;
@@ -258,15 +259,15 @@ namespace dss {
     unsigned long int m_ScheduledEventCounter;
 
   public:
-    EventQueue(const int _eventTimeoutMS = 1000);
+    EventQueue(Subsystem* _subsystem, const int _eventTimeoutMS = 1000);
     void pushEvent(boost::shared_ptr<Event> _event);
     std::string pushTimedEvent(boost::shared_ptr<Event> _event);
     boost::shared_ptr<Event> popEvent();
     bool waitForEvent();
 
     void shutdown();
-
     void setEventRunner(EventRunner* _value) { m_EventRunner = _value; }
+    void log(const std::string& _message, aLogSeverity _severity = lsDebug);
   };
 
 
@@ -277,12 +278,13 @@ namespace dss {
     boost::ptr_vector<ScheduledEvent> m_ScheduledEvents;
     DateTime m_WakeTime;
     SyncEvent m_NewItem;
+    Subsystem* m_Subsystem;
     EventQueue* m_EventQueue;
     mutable boost::mutex m_EventsMutex;
     bool m_ShutdownFlag;
     PropertyNodePtr m_MonitorNode;
   public:
-    EventRunner(PropertyNodePtr _monitorNode = PropertyNodePtr());
+    EventRunner(Subsystem* _subsystem, PropertyNodePtr _monitorNode = PropertyNodePtr());
 
     void addEvent(ScheduledEvent* _scheduledEvent);
 
@@ -296,6 +298,7 @@ namespace dss {
 
     void run();
     void shutdown();
+    void log(const std::string& _message, aLogSeverity _severity = lsDebug);
 
     void setEventQueue(EventQueue* _value) { m_EventQueue = _value; }
   protected:

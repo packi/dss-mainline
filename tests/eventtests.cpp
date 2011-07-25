@@ -51,9 +51,9 @@ BOOST_AUTO_TEST_SUITE(Events)
 class NonRunningFixture {
 public:
   NonRunningFixture() {
-    m_pQueue.reset(new EventQueue(2));
-    m_pRunner.reset(new EventRunner());
     m_pEventInterpreter.reset(new EventInterpreter(NULL));
+    m_pQueue.reset(new EventQueue(m_pEventInterpreter.get(), 2));
+    m_pRunner.reset(new EventRunner(m_pEventInterpreter.get()));
     m_pEventInterpreter->setEventQueue(m_pQueue.get());
     m_pEventInterpreter->setEventRunner(m_pRunner.get());
     m_pQueue->setEventRunner(m_pRunner.get());
@@ -286,7 +286,9 @@ BOOST_FIXTURE_TEST_CASE(testRemovingSubscription, NonRunningFixture) {
 } // testRemovingSubscription
 
 BOOST_AUTO_TEST_CASE(testUniqueEventsWork) {
-  EventQueue queue;
+  EventInterpreter interpreter(NULL);
+  EventQueue queue(&interpreter);
+  interpreter.initialize();
 
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
 
@@ -302,7 +304,9 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsWork) {
 } // testUniqueEventsWork
 
 BOOST_AUTO_TEST_CASE(testUniqueEventsDontBreakRegularOnes) {
-  EventQueue queue;
+  EventInterpreter interpreter(NULL);
+  EventQueue queue(&interpreter);
+  interpreter.initialize();
 
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
 
@@ -318,7 +322,9 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsDontBreakRegularOnes) {
 } // testUniqueEventsDontBreakRegularOnes
 
 BOOST_AUTO_TEST_CASE(testUniqueEventsCopyProperties) {
-  EventQueue queue;
+  EventInterpreter interpreter(NULL);
+  EventQueue queue(&interpreter);
+  interpreter.initialize();
 
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
 
@@ -335,7 +341,9 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsCopyProperties) {
 } // testUniqueEventsCopyProperties
 
 BOOST_AUTO_TEST_CASE(testUniqueEventsOverwriteProperties) {
-  EventQueue queue;
+  EventInterpreter interpreter(NULL);
+  EventQueue queue(&interpreter);
+  interpreter.initialize();
 
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
   pEvent->setProperty("aProperty", "SomeValue");
@@ -355,8 +363,10 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsOverwriteProperties) {
 } // testUniqueEventsOverwriteProperties
 
 BOOST_AUTO_TEST_CASE(testUniqueEventsOverwritesTimeProperty) {
-  EventQueue queue;
-  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+  EventQueue queue(&interpreter);
+  EventRunner runner(&interpreter);
+  interpreter.initialize();
   queue.setEventRunner(&runner);
 
   boost::shared_ptr<Event> pEvent(new Event("my_event"));
@@ -381,8 +391,10 @@ BOOST_AUTO_TEST_CASE(testUniqueEventsOverwritesTimeProperty) {
 } // testUniqueEventsOverwritesTimeProperty
 
 BOOST_AUTO_TEST_CASE(testRemoveAndGetEvents) {
-  EventQueue queue;
-  EventRunner runner;
+  EventInterpreter interpreter(NULL);
+  EventQueue queue(&interpreter);
+  EventRunner runner(&interpreter);
+  interpreter.initialize();
   queue.setEventRunner(&runner);
 
   boost::shared_ptr<Event> pEvent(new Event("my_event"));

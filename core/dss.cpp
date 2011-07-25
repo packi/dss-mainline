@@ -290,8 +290,8 @@ const char* kSavedPropsDirectory = "data/savedprops/";
     m_pApartment->setMetering(m_pMetering.get());
 
     PropertyNodePtr eventMonitor = m_pPropertySystem->createProperty("/system/EventInterpreter/ScheduledEvents");
-    m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner(eventMonitor));
-    m_pEventQueue = boost::shared_ptr<EventQueue>(new EventQueue);
+    m_pEventRunner = boost::shared_ptr<EventRunner>(new EventRunner(m_pEventInterpreter.get(), eventMonitor));
+    m_pEventQueue = boost::shared_ptr<EventQueue>(new EventQueue(m_pEventInterpreter.get()));
 
     m_pSecurity.reset(
         new Security(m_pPropertySystem->createProperty("/system/security"),
