@@ -253,9 +253,11 @@ BOOST_AUTO_TEST_CASE(testEvents) {
   dev->setShortAddress(1);
   dev->setName("dev");
 
-  EventQueue queue;
-  EventRunner runner;
   EventInterpreter interpreter(NULL);
+  EventQueue queue(&interpreter);
+  EventRunner runner(&interpreter);
+
+  interpreter.initialize();
   interpreter.setEventQueue(&queue);
   interpreter.setEventRunner(&runner);
   queue.setEventRunner(&runner);
@@ -283,9 +285,11 @@ BOOST_AUTO_TEST_CASE(testEvents) {
 BOOST_AUTO_TEST_CASE(testTimedEvents) {
   Apartment apt(NULL);
 
-  EventQueue queue;
-  EventRunner runner;
   EventInterpreter interpreter(NULL);
+  EventQueue queue(&interpreter);
+  EventRunner runner(&interpreter);
+
+  interpreter.initialize();
   interpreter.setEventQueue(&queue);
   interpreter.setEventRunner(&runner);
   queue.setEventRunner(&runner);
@@ -311,9 +315,11 @@ BOOST_AUTO_TEST_CASE(testTimedEvents) {
 BOOST_AUTO_TEST_CASE(testTimedEventsNoTimeParam) {
   Apartment apt(NULL);
 
-  EventQueue queue;
-  EventRunner runner;
   EventInterpreter interpreter(NULL);
+  EventQueue queue(&interpreter);
+  EventRunner runner(&interpreter);
+
+  interpreter.initialize();
   interpreter.setEventQueue(&queue);
   interpreter.setEventRunner(&runner);
   queue.setEventRunner(&runner);
@@ -337,9 +343,11 @@ BOOST_AUTO_TEST_CASE(testTimedEventsNoTimeParam) {
 BOOST_AUTO_TEST_CASE(testTimedICalEvent) {
   Apartment apt(NULL);
 
-  EventQueue queue;
-  EventRunner runner;
   EventInterpreter interpreter(NULL);
+  EventQueue queue(&interpreter);
+  EventRunner runner(&interpreter);
+
+  interpreter.initialize();
   interpreter.setEventQueue(&queue);
   interpreter.setEventRunner(&runner);
   queue.setEventRunner(&runner);
@@ -369,9 +377,11 @@ BOOST_AUTO_TEST_CASE(testSubscriptions) {
   dev->setShortAddress(1);
   dev->setName("dev");
 
-  EventQueue queue;
-  EventRunner runner;
   EventInterpreter interpreter(NULL);
+  EventQueue queue(&interpreter);
+  EventRunner runner(&interpreter);
+
+  interpreter.initialize();
   interpreter.setEventQueue(&queue);
   interpreter.setEventRunner(&runner);
   queue.setEventRunner(&runner);

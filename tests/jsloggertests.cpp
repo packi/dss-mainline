@@ -47,10 +47,11 @@ namespace fs = boost::filesystem;
 BOOST_AUTO_TEST_SUITE(JSLogger)
 
 BOOST_AUTO_TEST_CASE(testOneLoggerGetsCleanedUp) {
-  EventQueue queue(2);
-  EventRunner runner;
   EventInterpreter interpreter(NULL);
+  EventQueue queue(&interpreter, 2);
+  EventRunner runner(&interpreter);
 
+  interpreter.initialize();
   interpreter.setEventQueue(&queue);
   interpreter.setEventRunner(&runner);
   EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(&interpreter);
@@ -105,10 +106,11 @@ BOOST_AUTO_TEST_CASE(testOneLoggerGetsCleanedUp) {
 
 
 BOOST_AUTO_TEST_CASE(testLogger) {
-  EventQueue queue(2);
-  EventRunner runner;
   EventInterpreter interpreter(NULL);
+  EventQueue queue(&interpreter, 2);
+  EventRunner runner(&interpreter);
 
+  interpreter.initialize();
   interpreter.setEventQueue(&queue);
   interpreter.setEventRunner(&runner);
   EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(&interpreter);
@@ -157,10 +159,11 @@ BOOST_AUTO_TEST_CASE(testLogger) {
 }
 
 BOOST_AUTO_TEST_CASE(testLogrotate) {
-  EventQueue queue(2);
-  EventRunner runner;
   EventInterpreter interpreter(NULL);
+  EventQueue queue(&interpreter, 2);
+  EventRunner runner(&interpreter);
 
+  interpreter.initialize();
   interpreter.setEventQueue(&queue);
   interpreter.setEventRunner(&runner);
   EventInterpreterInternalRelay* relay = new EventInterpreterInternalRelay(&interpreter);
