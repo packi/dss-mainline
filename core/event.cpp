@@ -273,7 +273,7 @@ namespace dss {
       boost::shared_ptr<Event> toProcess = m_Queue->popEvent();
       if(toProcess != NULL) {
 
-        log(std::string("Got event from queue: '") + toProcess->getName() + "'", lsInfo);
+        log(std::string("Got event from queue: '") + toProcess->getName() + "'", lsDebug);
         for(HashMapConstStringString::const_iterator iParam = toProcess->getProperties().getContainer().begin(), e = toProcess->getProperties().getContainer().end();
             iParam != e; ++iParam)
         {
@@ -304,14 +304,14 @@ namespace dss {
               log("called.");
             }
             if(!called) {
-              log(std::string("Could not find handler '") + (*ipSubscription)->getHandlerName(), lsInfo);
+              log(std::string("Could not find handler '") + (*ipSubscription)->getHandlerName(), lsDebug);
             }
 
           }
         }
 
         m_EventsProcessed++;
-        log(std::string("Done processing event '") + toProcess->getName() + "'", lsInfo);
+        log(std::string("Done processing event '") + toProcess->getName() + "'", lsDebug);
       }
     }
   } // executePendingEvent
