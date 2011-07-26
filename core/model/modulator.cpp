@@ -110,8 +110,11 @@ namespace dss {
   unsigned long DSMeter::getPowerConsumption() {
     DateTime now;
     if(!now.addSeconds(-1).before(m_PowerConsumptionTimeStamp)) {
-      m_PowerConsumption =  DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getPowerConsumption(m_DSID);
-      m_PowerConsumptionTimeStamp = now;
+      unsigned long newvalue = 0;
+      if(isPresent()) {
+        newvalue = DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getPowerConsumption(m_DSID);
+      }
+      setPowerConsumption(newvalue);
     }
     return m_PowerConsumption;
   } // getPowerConsumption
@@ -119,8 +122,11 @@ namespace dss {
   unsigned long DSMeter::getEnergyMeterValue() {
     DateTime now;
     if(!now.addSeconds(-1).before(m_EnergyMeterValueTimeStamp)) {
-      unsigned long newValue = DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getEnergyMeterValue(m_DSID);
-      updateEnergyMeterValue(newValue);
+      unsigned long newValue;
+      if(isPresent()) {
+        newValue = DSS::getInstance()->getBusInterface().getMeteringBusInterface()->getEnergyMeterValue(m_DSID);
+        updateEnergyMeterValue(newValue);
+      }
     }
     return m_EnergyMeterValue;
   } // getEnergyMeterValue

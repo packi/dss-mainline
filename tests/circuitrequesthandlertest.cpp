@@ -142,12 +142,20 @@ BOOST_FIXTURE_TEST_CASE(testCircuitRescan, Fixture) {
 BOOST_FIXTURE_TEST_CASE(testGetPowerConsumption, Fixture) {
   m_Params["id"] = m_ValidDSID.toString();
   const long unsigned int kConsumption = 77;
+  const long unsigned int kNullConsumption = 0;
   m_pApartment->getDSMeterByDSID(m_ValidDSID)->setPowerConsumption(kConsumption);
+
   RestfulRequest req("circuit/getConsumption", m_Params);
   WebServerResponse response = m_pHandler->jsonHandleRequest(req, boost::shared_ptr<Session>());
-
   boost::shared_ptr<JSONObject> result = getResultObject(response);
   checkPropertyEquals("consumption", kConsumption, result);
+
+  // verify that power consumption for inactive devices is zero
+  sleep(2);
+  RestfulRequest req2("circuit/getConsumption", m_Params);
+  WebServerResponse response2 = m_pHandler->jsonHandleRequest(req2, boost::shared_ptr<Session>());
+  boost::shared_ptr<JSONObject> result2 = getResultObject(response2);
+  checkPropertyEquals("consumption", kNullConsumption, result2);
 }
 
 BOOST_FIXTURE_TEST_CASE(testGetEnergyMeterValue, Fixture) {
