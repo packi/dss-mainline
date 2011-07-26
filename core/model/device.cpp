@@ -61,6 +61,17 @@ namespace dss {
     m_ButtonID(0)
   { } // ctor
 
+  Device::~Device() {
+    if(m_pPropertyNode != NULL) {
+      m_pPropertyNode->unlinkProxy(true);
+      m_pPropertyNode->getParentNode()->removeChild(m_pPropertyNode);
+    }
+    if(m_pAliasNode != NULL) {
+      m_pAliasNode->alias(PropertyNodePtr());
+      m_pAliasNode->getParentNode()->removeChild(m_pAliasNode);
+    }
+  }
+
   void Device::publishToPropertyTree() {
     if(m_pPropertyNode == NULL) {
       if(m_pApartment->getPropertyNode() != NULL) {
