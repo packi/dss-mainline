@@ -440,6 +440,19 @@ const char* kSavedPropsDirectory = "data/savedprops/";
   }
 
   bool DSS::initSecurity() {
+    PropertyNodePtr pDigestFile = getPropertySystem().getProperty("/config/digestfile");
+    boost::shared_ptr<PasswordChecker> checker;
+    if(pDigestFile != NULL) {
+      Logger::getInstance()->log("Using digest file: '" +
+    		  pDigestFile->getStringValue() +
+    		  "' for authentication.", lsInfo);
+	  checker.reset(new HTDigestPasswordChecker(pDigestFile->getStringValue()));
+	} else {
+	  Logger::getInstance()->log("Using internal authentication mechanism.", lsInfo);
+	  checker.reset(new BuiltinPasswordChecker());
+	}
+	m_pSecurity->setPasswordChecker(checker);
+
     m_pSecurity->setFileName(getDataDirectory() + "security.xml");
     m_pSecurity->loadFromXML();
     PropertyNodePtr pSecurityNode = m_pPropertySystem->getProperty("/system/security");
@@ -511,19 +524,6 @@ const char* kSavedPropsDirectory = "data/savedprops/";
     boost::shared_ptr<NodePrivileges> privilegesSecurityNode(new NodePrivileges());
     privilegesSecurityNode->addPrivilege(privilegeNobodySecurityNode);
     pSecurityNode->setPrivileges(privilegesSecurityNode);
-
-    PropertyNodePtr pDigestFile = pSecurityNode->getProperty("digestfile");
-    boost::shared_ptr<PasswordChecker> checker;
-    if(pDigestFile != NULL) {
-      Logger::getInstance()->log("Using digest file: '" +
-                                 pDigestFile->getStringValue() +
-                                 "' for authentication.", lsInfo);
-      checker.reset(new HTDigestPasswordChecker(pDigestFile->getStringValue()));
-    } else {
-      Logger::getInstance()->log("Using internal authentication mechanism.", lsInfo);
-      checker.reset(new BuiltinPasswordChecker());
-    }
-    m_pSecurity->setPasswordChecker(checker);
 
     m_pSecurity->startListeningForChanges();
     return true;
