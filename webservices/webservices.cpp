@@ -129,10 +129,6 @@ namespace dss {
     return result;
   } // popPendingRequest
 
-  std::string WebServices::newSession(soap* _soapRequest) {
-    return m_pSessionManager->registerSession();
-  } // newSession
-
   void WebServices::deleteSession(soap* _soapRequest, const std::string& _token) {
     m_pSessionManager->removeSession(_token);
   } // deleteSession

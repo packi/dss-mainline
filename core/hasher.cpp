@@ -26,6 +26,8 @@
 
 namespace dss {
 
+  //============================================= Hasher
+
   Hasher::Hasher()
   : m_Finalized(false)
   {
@@ -58,6 +60,40 @@ namespace dss {
     }
     return sstr.str();
   } // str
-  
-  
+
+  //============================================= HasherMD5
+
+  HasherMD5::HasherMD5()
+  : m_Finalized(false)
+  {
+    MD5_Init(&m_Context);
+  } // ctor
+
+  template<>
+  void HasherMD5::add<std::string>(const std::string& _t) {
+    assert(m_Finalized == false);
+    MD5_Update(&m_Context, _t.c_str(), _t.length());
+  } // add<std::string>
+
+  template<>
+  void HasherMD5::add<unsigned int>(const unsigned int& _t) {
+    assert(m_Finalized == false);
+    MD5_Update(&m_Context, &_t, sizeof(_t));
+  }
+
+  std::string HasherMD5::str() {
+    assert(m_Finalized == false);
+    m_Finalized = true;
+    unsigned char digest[MD5_DIGEST_LENGTH];
+    MD5_Final(digest, &m_Context);
+    std::ostringstream sstr;
+    sstr << std::hex;
+    sstr.fill('0');
+    for(int iByte = 0; iByte < MD5_DIGEST_LENGTH; iByte++) {
+      sstr.width(2);
+      sstr << static_cast<unsigned int>(digest[iByte] & 0x0ff);
+    }
+    return sstr.str();
+  } // str
+
 } // namespace dss

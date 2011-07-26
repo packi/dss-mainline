@@ -34,6 +34,7 @@ namespace dss {
   class User;
   class PropertySystem;
   class PropertyNode;
+  class PasswordChecker;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
 
   class Security {
@@ -75,6 +76,9 @@ namespace dss {
     void setFileName(const std::string& _value) {
       m_FileName = _value;
     }
+    void setPasswordChecker(boost::shared_ptr<PasswordChecker> _value) {
+      m_pPasswordChecker = _value;
+    }
     void createApplicationToken(const std::string& _applicationName,
                                 const std::string& _token);
     bool enableToken(const std::string& _token, User* _pUser);
@@ -84,9 +88,30 @@ namespace dss {
     PropertyNodePtr m_pRootNode;
     boost::shared_ptr<SecurityTreeListener> m_pTreeListener;
     boost::shared_ptr<PropertySystem> m_pPropertySystem;
+    boost::shared_ptr<PasswordChecker> m_pPasswordChecker;
     User* m_pSystemUser;
     std::string m_FileName;
   }; // Security
+
+  class PasswordChecker {
+  public:
+    virtual bool checkPassword(PropertyNodePtr _pUser, const std::string& _password) = 0;
+  }; // PasswordChecker
+
+  class BuiltinPasswordChecker : public PasswordChecker {
+  public:
+    virtual bool checkPassword(PropertyNodePtr _pUser, const std::string& _password);
+  }; // BuiltinPasswordChecker
+
+  class HTDigestPasswordChecker : public PasswordChecker {
+  public:
+    HTDigestPasswordChecker(const std::string& _passwordFile);
+    virtual bool checkPassword(PropertyNodePtr _pUser, const std::string& _password);
+  private:
+    std::string readHashFromFile(std::string _userName);
+  private:
+    std::string m_PasswordFile;
+  }; // HTDigestPasswordChecker
 
   class SecurityException : public DSSException {
   public:

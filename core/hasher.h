@@ -21,6 +21,7 @@
 */
 
 #include <openssl/sha.h>
+#include <openssl/md5.h>
 
 #include <string>
 
@@ -37,6 +38,19 @@ namespace dss {
   private:
     SHA256_CTX m_Context;
     bool m_Finalized;
-  };
+  }; // Hasher
+
+  class HasherMD5 {
+  public:
+    HasherMD5();
+
+    template <class t>
+    void add(const t& _t);
+
+    std::string str();
+  private:
+    MD5_CTX m_Context;
+    bool m_Finalized;
+  }; // HasherMD5
 
 } // namespace dss

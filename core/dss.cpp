@@ -512,6 +512,19 @@ const char* kSavedPropsDirectory = "data/savedprops/";
     privilegesSecurityNode->addPrivilege(privilegeNobodySecurityNode);
     pSecurityNode->setPrivileges(privilegesSecurityNode);
 
+    PropertyNodePtr pDigestFile = pSecurityNode->getProperty("digestfile");
+    boost::shared_ptr<PasswordChecker> checker;
+    if(pDigestFile != NULL) {
+      Logger::getInstance()->log("Using digest file: '" +
+                                 pDigestFile->getStringValue() +
+                                 "' for authentication.", lsInfo);
+      checker.reset(new HTDigestPasswordChecker(pDigestFile->getStringValue()));
+    } else {
+      Logger::getInstance()->log("Using internal authentication mechanism.", lsInfo);
+      checker.reset(new BuiltinPasswordChecker());
+    }
+    m_pSecurity->setPasswordChecker(checker);
+
     m_pSecurity->startListeningForChanges();
     return true;
   } // initSecurity

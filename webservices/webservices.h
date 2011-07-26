@@ -58,7 +58,6 @@ namespace dss {
     WebServices(DSS* _pDSS);
     virtual ~WebServices();
 
-    std::string newSession(soap* _soapRequest);
     void deleteSession(soap* _soapRequest, const std::string& _token);
     boost::shared_ptr<Session> getSession(soap* _soapRequest, const std::string& _token);
 
@@ -69,6 +68,10 @@ namespace dss {
 
     void setSessionManager(boost::shared_ptr<SessionManager> _value) {
       m_pSessionManager = _value;
+    }
+
+    boost::shared_ptr<SessionManager> getSessionManager() {
+      return m_pSessionManager;
     }
 
     struct soap* popPendingRequest();

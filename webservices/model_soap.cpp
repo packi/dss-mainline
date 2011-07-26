@@ -161,13 +161,35 @@ int dss__Authenticate(struct soap *soap, char* _userName, char* _password, std::
   dss::SessionManager& manager = dss::DSS::getInstance()->getSessionManager();
   manager.getSecurity()->signOff();
   if(manager.getSecurity()->authenticate(_userName, _password)) {
-    token = dss::DSS::getInstance()->getWebServices().newSession(soap);
+    token = dss::DSS::getInstance()->getWebServices().getSessionManager()->registerSession();
     manager.getSession(token)->inheritUserFromSecurity();
     return SOAP_OK;
   } else {
     return soap_sender_fault(soap, "Invalid username or password", NULL);
   }
 } // dss__Authenticate
+
+int dss__AuthenticateAsApplication(struct soap *soap, char* _applicationToken, std::string& token) {
+  dss::SessionManager& manager = dss::DSS::getInstance()->getSessionManager();
+  manager.getSecurity()->signOff();
+  if(manager.getSecurity()->authenticateApplication(_applicationToken)) {
+    token = dss::DSS::getInstance()->getWebServices().getSessionManager()->registerApplicationSession();
+    manager.getSession(token)->inheritUserFromSecurity();
+    return SOAP_OK;
+  } else {
+    return soap_sender_fault(soap, "Invalid application token", NULL);
+  }
+} // dss__Authenticate
+
+int dss__RequestApplicationToken(struct soap *soap, char* _applicationName, std::string& result) {
+  dss::SessionManager& manager = dss::DSS::getInstance()->getSessionManager();
+  std::string applicationToken = manager.generateToken();
+  manager.getSecurity()->loginAsSystemUser("Temporary access to create token");
+  manager.getSecurity()->createApplicationToken(_applicationName,
+                                                applicationToken);
+  result = applicationToken;
+  return SOAP_OK;
+} // dss__RequestApplicationToken
 
 int dss__SignOff(struct soap *soap, char* _token, int& result) {
   if(!IsAuthorized(soap, _token)) {
@@ -274,6 +296,40 @@ int dss__ApartmentSetName(struct soap *soap, char* _token, char* _name, bool& re
   return SOAP_OK;
 } // dss__ApartmentSetName
 
+int dss__ApartmentRemoveMeter(struct soap *soap, char* _token, char* _dsMeterID, bool& result) {
+  boost::shared_ptr<dss::DSMeter> mod;
+  int getResult = AuthorizeAndGetDSMeter(soap, _token, _dsMeterID, mod);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  dss::DSS::getInstance()->getApartment().removeDSMeter(FromSOAP(_dsMeterID));
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__ApartmentRemoveInactiveMeters(struct soap *soap, char* _token, bool& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+  dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
+  apt.removeInactiveMeters();
+  result = true;
+  return SOAP_OK;
+}
+
+int dss__ApartmentGetPowerConsumption(struct soap *soap, char* _token, unsigned long& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+  dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
+  int accumulatedConsumption = 0;
+  foreach(boost::shared_ptr<dss::DSMeter> pDSMeter, apt.getDSMeters()) {
+    accumulatedConsumption += pDSMeter->getPowerConsumption();
+  }
+  result = accumulatedConsumption;
+  return SOAP_OK;
+}
 
 //==================================================== Set
 
@@ -640,6 +696,17 @@ int dss__ApartmentUndoScene(struct soap *soap, char* _token, int _groupID, bool&
   return SOAP_OK;
 }
 
+int dss__ApartmentBlink(struct soap *soap, char* _token, int _groupID, bool& result) {
+  boost::shared_ptr<dss::Group> group;
+  int getResult = AuthorizeAndGetGroup(soap, _token, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group->blink();
+  result = true;
+  return SOAP_OK;
+}
+
 
 //---------------------------------- Zone
 
@@ -698,13 +765,13 @@ int dss__ZoneSetValue(struct soap *soap, char* _token, int _zoneID, int _groupID
   return SOAP_OK;
 }
 
-int dss__ZoneCallScene(struct soap *soap, char* _token, int _zoneID, int _groupID, int _sceneID, bool& result) {
+int dss__ZoneCallScene(struct soap *soap, char* _token, int _zoneID, int _groupID, int _sceneID, bool _force, bool& result) {
   boost::shared_ptr<dss::Group> group;
   int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  group->callScene(_sceneID, false);
+  group->callScene(_sceneID, _force);
   result = true;
   return SOAP_OK;
 }
@@ -731,7 +798,30 @@ int dss__ZoneUndoScene(struct soap *soap, char* _token, int _zoneID, int _groupI
   return SOAP_OK;
 }
 
+int dss__ZoneBlink(struct soap *soap, char* _token, int _zoneID, int _groupID, bool& result) {
+  boost::shared_ptr<dss::Group> group;
+  int getResult = AuthorizeAndGetGroupOfZone(soap, _token, _zoneID, _groupID, group);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  group->blink();
+  result = true;
+  return SOAP_OK;
+}
+
 //---------------------------------- Device
+
+
+int dss__DeviceBlink(struct soap *soap, char* _token, char* _deviceID, bool& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+  dev.blink();
+  result = true;
+  return SOAP_OK;
+}
 
 int dss__DeviceTurnOn(struct soap *soap, char* _token, char* _deviceID, bool& result) {
   dss::DeviceReference dev(dss::NullDSID, NULL);
@@ -777,13 +867,13 @@ int dss__DeviceDecreaseValue(struct soap *soap, char* _token, char* _deviceID, b
   return SOAP_OK;
 }
 
-int dss__DeviceCallScene(struct soap *soap, char* _token, char* _deviceID, int _sceneID, bool& result) {
+int dss__DeviceCallScene(struct soap *soap, char* _token, char* _deviceID, int _sceneID, bool _force, bool& result) {
   dss::DeviceReference device(dss::NullDSID, NULL);
   int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, device);
   if(getResult != SOAP_OK) {
     return getResult;
   }
-  device.callScene(_sceneID, false);
+  device.callScene(_sceneID, _force);
   result = true;
   return SOAP_OK;
 }
@@ -991,6 +1081,18 @@ int dss__DeviceGetIsLocked(struct soap *soap, char* _token, char* _deviceID, boo
   return SOAP_OK;
 } // dss__DeviceGetIsLocked
 
+int dss__DeviceGetTransmissionQuality(struct soap *soap, char* _token, char* _deviceID, dss__TransmissionQuality& result) {
+  dss::DeviceReference dev(dss::NullDSID, NULL);
+  int getResult = AuthorizeAndGetDevice(soap, _token, _deviceID, dev);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  std::pair<uint8_t, uint16_t> p = dev.getDevice()->getTransmissionQuality();
+  result.downstream = p.first;
+  result.upstream = p.second;
+  return SOAP_OK;
+}
 
 //==================================================== Information
 
@@ -1312,6 +1414,28 @@ int dss__PropertyGetChildren(struct soap *soap, char* _token, std::string _prope
 
   return SOAP_OK;
 } // dss__PropertyGetChildren
+
+int dss__PropertyRemove(struct soap *soap, char* _token, std::string _propertyName, bool& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+
+  dss::PropertySystem& propSys = dss::DSS::getInstance()->getPropertySystem();
+  dss::PropertyNodePtr node = propSys.getProperty(_propertyName);
+  if(node == NULL) {
+    return soap_sender_fault(soap, "Property does not exist", NULL);
+  }
+
+  dss::PropertyNode* pParentNode = node->getParentNode();
+  if(pParentNode != NULL) {
+    pParentNode->removeChild(node);
+  } else {
+    return soap_sender_fault(soap, "Can't remove root node", NULL);
+  }
+
+  result = true;
+  return SOAP_OK;
+} // dss__PropertyRemove
 
 int dss__StructureAddDeviceToZone(struct soap *soap, char* _token, char* _deviceID, int _zoneID, bool& result) {
   if(!IsAuthorized(soap, _token)) {

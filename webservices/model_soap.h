@@ -37,6 +37,8 @@ typedef unsigned long long xsd__unsignedLong;
  * The token received will be used in any subsequent call. The ip/token pair
  * identifies a session. A Session will time out after n minutes of no activity (default 5).*/
 int dss__Authenticate(char* _userName, char* _password, std::string& token);
+int dss__AuthenticateAsApplication(char* _applicationToken, std::string& token);
+int dss__RequestApplicationToken(char* _applicationName, std::string& result);
 /** Terminates a session. All resources allocate by the session will be
  * released. */
 int dss__SignOff(char* _token, int& result);
@@ -121,6 +123,7 @@ int dss__ApartmentSetValue(char* _token, int _groupID, unsigned char _value, boo
 int dss__ApartmentCallScene(char* _token, int _groupID, int _sceneNr, bool& result);
 /** Saves the scene _sceneNr on all devices contained int the group _groupID. */
 int dss__ApartmentSaveScene(char* _token, int _groupID, int _sceneNr, bool& result);
+int dss__ApartmentBlink(char* _token, int _groupID, bool& result);
 
 /** Rescans the bus for new devices/circuits */
 int dss__ApartmentRescan(char* _token, bool& result);
@@ -145,12 +148,16 @@ int dss__ZoneDecreaseValue(char* _token, int _zoneID, int _groupID, bool& result
 int dss__ZoneSetValue(char* _token, int _zoneID, int _groupID, unsigned char _value, bool& result);
 
 /** Calls the scene _sceneNr on all devices contained int the zone/group _groupID. */
-int dss__ZoneCallScene(char* _token, int _zoneID, int _groupID, int _sceneNr, bool& result);
+int dss__ZoneCallScene(char* _token, int _zoneID, int _groupID, int _sceneNr, bool _force = false, bool& result);
 /** Saves the scene _sceneNr on all devices contained int the zone/group _groupID. */
 int dss__ZoneSaveScene(char* _token, int _zoneID, int _groupID, int _sceneNr, bool& result);
 
+int dss__ZoneBlink(char* _token, int _zoneID, int _groupID, bool& result);
+
 //--------------------------- Device
 
+/** Sends a blink command to the device. */
+int dss__DeviceBlink(char* _token, char* _deviceID, bool& result);
 /** Sends a turn on command to the device. */
 int dss__DeviceTurnOn(char* _token, char* _deviceID, bool& result);
 /** Sends a turn off command to the device. */
@@ -170,7 +177,7 @@ int dss__DeviceGetConfig(char* _token, char* _deviceID, unsigned char _configCla
 int dss__DeviceGetConfigWord(char* _token, char* _deviceID, unsigned char _configClass, unsigned char _configIndex, unsigned short int& result);
 
 /** Calls the scene _sceneNr on the device identified by _deviceID. */
-int dss__DeviceCallScene(char* _token, char* _deviceID, int _sceneNr, bool& result);
+int dss__DeviceCallScene(char* _token, char* _deviceID, int _sceneNr, bool _force = false, bool& result);
 /** Saves the scene _sceneNr on the device identified by _devicdID. */
 int dss__DeviceSaveScene(char* _token, char* _deviceID, int _sceneNr, bool& result);
 
@@ -190,6 +197,14 @@ int dss__DeviceLock(char* _token, char* _deviceID, bool& result);
 int dss__DeviceUnlock(char* _token, char* _deviceID, bool& result);
 int dss__DeviceGetIsLocked(char* _token, char* _deviceID, bool& result);
 
+class dss__TransmissionQuality {
+public:
+  int upstream;
+  int downstream;
+};
+
+int dss__DeviceGetTransmissionQuality(char* _token, char* _deviceID, dss__TransmissionQuality& result);
+
 //==================================================== Information
 
 int dss__DSMeterGetPowerConsumption(char* _token, char* _dsMeterID, xsd__unsignedInt& result);
@@ -208,6 +223,9 @@ int dss__DSMeterSetName(char* _token, char* _dsMeterID, char*  _name, bool& resu
 int dss__ApartmentAllocateZone(char* _token, int& zoneID);
 /** Deletes a previously allocated zone. */
 int dss__ApartmentDeleteZone(char* _token, int _zoneID, int& result);
+int dss__ApartmentRemoveMeter(char* _token, char* _dsMeterID, bool& result);
+int dss__ApartmentRemoveInactiveMeters(char* _token, bool& result);
+int dss__ApartmentGetPowerConsumption(char* _token, xsd__unsignedInt& result);
 /** Sets the name of a zone to _name */
 int dss__ZoneSetName(char* _token, int _zoneID, char* _name, bool& result);
 /** Returns the name of a zone */
@@ -245,6 +263,7 @@ int dss__PropertyGetString(char* _token, std::string _propertyName, std::string&
 int dss__PropertyGetBool(char* _token, std::string _propertyName, bool& result);
 
 int dss__PropertyGetChildren(char* _token, std::string _propertyName, std::vector<std::string>& result);
+int dss__PropertyRemove(char* _token, std::string _propertyName, bool& result);
 
 
 //==================================================== Structure

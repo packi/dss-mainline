@@ -30,9 +30,8 @@ class dssService : public soap
 	{"dss", "urn:dss:1.0", NULL, NULL},
 	{NULL, NULL, NULL, NULL}
 };
-
-    bind_flags = SO_REUSEADDR;
-    accept_timeout = SOAP_ACCEPT_TIMEOUT; // seconds
+        bind_flags = SO_REUSEADDR;
+        accept_timeout = SOAP_ACCEPT_TIMEOUT; // seconds
 	if (!this->namespaces) this->namespaces = namespaces; };
 	virtual ~dssService() { };
 	/// Bind service to port (returns master socket or SOAP_INVALID_SOCKET)
@@ -51,6 +50,10 @@ class dssService : public soap
 
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__Authenticate(struct soap*, char *_userName, char *_password, std::string &token);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__AuthenticateAsApplication(struct soap*, char *_applicationToken, std::string &token);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__RequestApplicationToken(struct soap*, char *_applicationName, std::string &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__SignOff(struct soap*, char *_token, int &result);
 
@@ -116,6 +119,8 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentCallScene(struct soap*, char *_token, in
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentSaveScene(struct soap*, char *_token, int _groupID, int _sceneNr, bool &result);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentBlink(struct soap*, char *_token, int _groupID, bool &result);
+
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentRescan(struct soap*, char *_token, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__CircuitRescan(struct soap*, char *_token, char *_dsid, bool &result);
@@ -130,9 +135,13 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneDecreaseValue(struct soap*, char *_token, int
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSetValue(struct soap*, char *_token, int _zoneID, int _groupID, unsigned char _value, bool &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneCallScene(struct soap*, char *_token, int _zoneID, int _groupID, int _sceneNr, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneCallScene(struct soap*, char *_token, int _zoneID, int _groupID, int _sceneNr, bool _force, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSaveScene(struct soap*, char *_token, int _zoneID, int _groupID, int _sceneNr, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneBlink(struct soap*, char *_token, int _zoneID, int _groupID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceBlink(struct soap*, char *_token, char *_deviceID, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceTurnOn(struct soap*, char *_token, char *_deviceID, bool &result);
 
@@ -150,7 +159,7 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetConfig(struct soap*, char *_token, char 
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetConfigWord(struct soap*, char *_token, char *_deviceID, unsigned char _configClass, unsigned char _configIndex, unsigned short &result);
 
-SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceCallScene(struct soap*, char *_token, char *_deviceID, int _sceneNr, bool &result);
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceCallScene(struct soap*, char *_token, char *_deviceID, int _sceneNr, bool _force, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceSaveScene(struct soap*, char *_token, char *_deviceID, int _sceneNr, bool &result);
 
@@ -174,6 +183,8 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceUnlock(struct soap*, char *_token, char *_d
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetIsLocked(struct soap*, char *_token, char *_deviceID, bool &result);
 
+SOAP_FMAC5 int SOAP_FMAC6 dss__DeviceGetTransmissionQuality(struct soap*, char *_token, char *_deviceID, dss__TransmissionQuality &result);
+
 SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterGetPowerConsumption(struct soap*, char *_token, char *_dsMeterID, unsigned long &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetDSMeterIDs(struct soap*, char *_token, std::vector<std::string >&ids);
@@ -185,6 +196,12 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__DSMeterSetName(struct soap*, char *_token, char *
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentAllocateZone(struct soap*, char *_token, int &zoneID);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentDeleteZone(struct soap*, char *_token, int _zoneID, int &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentRemoveMeter(struct soap*, char *_token, char *_dsMeterID, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentRemoveInactiveMeters(struct soap*, char *_token, bool &result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__ApartmentGetPowerConsumption(struct soap*, char *_token, unsigned long &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__ZoneSetName(struct soap*, char *_token, int _zoneID, char *_name, bool &result);
 
@@ -217,6 +234,8 @@ SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetString(struct soap*, char *_token, std
 SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetBool(struct soap*, char *_token, std::string _propertyName, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyGetChildren(struct soap*, char *_token, std::string _propertyName, std::vector<std::string >&result);
+
+SOAP_FMAC5 int SOAP_FMAC6 dss__PropertyRemove(struct soap*, char *_token, std::string _propertyName, bool &result);
 
 SOAP_FMAC5 int SOAP_FMAC6 dss__StructureAddDeviceToZone(struct soap*, char *_token, char *_deviceID, int _zoneID, bool &result);
 
