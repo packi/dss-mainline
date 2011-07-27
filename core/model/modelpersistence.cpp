@@ -138,7 +138,12 @@ namespace dss {
 
           DateTime firstSeen;
           if(elem->hasAttribute("firstSeen")) {
-            firstSeen = DateTime(dateFromISOString(elem->getAttribute("firstSeen").c_str()));
+            try {
+              time_t timestamp = strToUInt(elem->getAttribute("firstSeen"));
+              firstSeen = DateTime(timestamp);
+            } catch(std::invalid_argument&) {
+              firstSeen = DateTime(dateFromISOString(elem->getAttribute("firstSeen").c_str()));
+            }
           }
 
           dss_dsid_t lastKnownDsMeter = NullDSID;
@@ -321,7 +326,7 @@ namespace dss {
       pNameNode->appendChild(txtNode);
       pDeviceNode->appendChild(pNameNode);
     }
-    pDeviceNode->setAttribute("firstSeen", _pDevice->getFirstSeen());
+    pDeviceNode->setAttribute("firstSeen", intToString(_pDevice->getFirstSeen().secondsSinceEpoch()));
     if(_pDevice->getLastKnownDSMeterDSID() != NullDSID) {
       pDeviceNode->setAttribute("lastKnownDSMeter", _pDevice->getLastKnownDSMeterDSID().toString());
     }

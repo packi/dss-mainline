@@ -23,6 +23,7 @@
 #ifndef SERIES_H_INCLUDED
 #define SERIES_H_INCLUDED
 
+#include "core/base.h"
 #include "core/datetools.h"
 #include "core/ds485types.h"
 
@@ -85,14 +86,19 @@ namespace dss {
     virtual void readFromXMLNode(Node* _node) {
       Element* elem = dynamic_cast<Element*>(_node);
 
-      m_TimeStamp = DateTime(dateFromISOString(elem->getAttribute("timestamp").c_str()));
+      try {
+        time_t timestamp = strToUInt(elem->getAttribute("timestamp"));
+        m_TimeStamp = DateTime(timestamp);
+      } catch(std::invalid_argument&) {
+        m_TimeStamp = DateTime(dateFromISOString(elem->getAttribute("timestamp").c_str()));
+      }
       m_Min = strToDouble(elem->getChildElement("min")->firstChild()->getNodeValue());
       m_Max = strToDouble(elem->getChildElement("max")->firstChild()->getNodeValue());
       m_Value = strToDouble(elem->getChildElement("value")->firstChild()->getNodeValue());
     } // readFromXMLNode
 
     virtual void writeToXMLNode(AutoPtr<Document>& _doc, AutoPtr<Element>& _elem) const {
-      _elem->setAttribute("timestamp", (std::string)m_TimeStamp);
+      _elem->setAttribute("timestamp", intToString(m_TimeStamp.secondsSinceEpoch()));
 
       AutoPtr<Element> elem = _doc->createElement("min");
       AutoPtr<Text> txt = _doc->createTextNode(doubleToString(m_Min));
