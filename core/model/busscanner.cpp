@@ -104,7 +104,7 @@ namespace dss {
 
     return scanGroupsOfZone(_dsMeter, _zone);
   } // scanZone
-  
+
   bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, devid_t _shortAddress) {
     DeviceSpec_t spec = m_Interface.deviceGetSpec(_shortAddress, _dsMeter->getDSID());
     return initializeDeviceFromSpec(_dsMeter, _zone, spec);
