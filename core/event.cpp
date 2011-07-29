@@ -565,7 +565,7 @@ namespace dss {
     } else if(_event->hasPropertySet(EventPropertyICalStartTime) && _event->hasPropertySet(EventPropertyICalRRule)) {
       std::string timeStr = _event->getPropertyByName(EventPropertyICalStartTime);
       std::string rRuleStr = _event->getPropertyByName(EventPropertyICalRRule);
-      log(std::string("Queue::scheduleFromEvent: Event has a ICalRule rescheduling at ") + timeStr + " with Rule " + rRuleStr, lsDebug);
+      log(std::string("Queue::scheduleFromEvent: Event \"" + _event->getName() + "\" has a ICalRule rescheduling at ") + timeStr + " with Rule " + rRuleStr, lsDebug);
       result.reset(new ICalSchedule(rRuleStr, timeStr));
     }
     return result;
@@ -771,9 +771,9 @@ namespace dss {
     {
       DateTime nextOccurence = ipSchedEvt->getSchedule().getNextOccurence(now);
       if(DebugEventRunner) {
-        log("Runner: Event:   " + ipSchedEvt->getID());
-        log("Runner: nextOcc: " + nextOccurence.toString() + "; " +
-                                   "diff:    " + intToString(nextOccurence.difference(now)));
+        log("Runner: Event:   " + ipSchedEvt->getID() +
+           ", nextOcc: " + nextOccurence.toString() +
+           ", diff:    " + intToString(nextOccurence.difference(now)));
       }
       if(nextOccurence == DateTime::NullDate) {
         log("Runner: Removing event " + ipSchedEvt->getID());
