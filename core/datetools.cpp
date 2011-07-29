@@ -350,14 +350,21 @@ namespace dss {
 
   void ical_to_tm(const icaltimetype& icalTime, struct tm& tm) {
     memset(&tm, '\0', sizeof(tm));
-    if(!icalTime.is_date) {
-      tm.tm_sec = icalTime.second;
-      tm.tm_min = icalTime.minute;
-      tm.tm_hour = icalTime.hour;
+    if (icalTime.is_utc) {
+      time_t t0 = icaltime_as_timet(icalTime);
+      localtime_r(&t0, &tm);
+    } else {
+      if(!icalTime.is_date) {
+        tm.tm_sec = icalTime.second;
+        tm.tm_min = icalTime.minute;
+        tm.tm_hour = icalTime.hour;
+      }
+      tm.tm_mday = icalTime.day;
+      tm.tm_mon = icalTime.month - 1;
+      tm.tm_year = icalTime.year - 1900;
+      tm.tm_isdst = -1;
+      (void) mktime(&tm);
     }
-    tm.tm_mday = icalTime.day;
-    tm.tm_mon = icalTime.month - 1;
-    tm.tm_year = icalTime.year - 1900;
   } // ical_to_tm
 
   DateTime ICalSchedule::getNextOccurence(const DateTime& _from) {
