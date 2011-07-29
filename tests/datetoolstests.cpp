@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(testAddingMonth) {
 } // testAddingMonth
 
 BOOST_AUTO_TEST_CASE(testISODate) {
-  DateTime dt = DateTime::fromISO("20080506T080102Z");
+  DateTime dt = DateTime::fromISO("20080506T080102");
   BOOST_CHECK_EQUAL(2008, dt.getYear());
   BOOST_CHECK_EQUAL(4, dt.getMonth()); // zero based
   BOOST_CHECK_EQUAL(6, dt.getDay());
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(testISODate) {
 } // testISODate
 
 BOOST_AUTO_TEST_CASE(testTooshortISODate) {
-  BOOST_CHECK_THROW(DateTime::fromISO("20080506T080102"), std::invalid_argument);
+  BOOST_CHECK_THROW(DateTime::fromISO("20080506T08010"), std::invalid_argument);
 } // testISODate
 
 BOOST_AUTO_TEST_CASE(testMonthOutOfRange) {
