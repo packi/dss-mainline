@@ -104,7 +104,7 @@ namespace dss {
 
     return scanGroupsOfZone(_dsMeter, _zone);
   } // scanZone
-  
+
   bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, devid_t _shortAddress) {
     DeviceSpec_t spec = m_Interface.deviceGetSpec(_shortAddress, _dsMeter->getDSID());
     return initializeDeviceFromSpec(_dsMeter, _zone, spec);
@@ -208,19 +208,18 @@ namespace dss {
         _zone->addGroup(groupOnZone);
       }
       groupOnZone->setIsPresent(true);
+      // TODO: get last called scene
+      groupOnZone->setLastCalledScene(SceneOff);
+      boost::shared_ptr<Group> pGroup;
       try {
-        boost::shared_ptr<Group> group = m_Apartment.getGroup(groupID);
-        group->setIsPresent(true);
+        pGroup = m_Apartment.getGroup(groupID);
       } catch(ItemNotFoundException&) {
         boost::shared_ptr<Zone> zoneBroadcast = m_Apartment.getZone(0);
-        boost::shared_ptr<Group> pGroup(new Group(groupID, zoneBroadcast, m_Apartment));
+        pGroup.reset(new Group(groupID, zoneBroadcast, m_Apartment));
         zoneBroadcast->addGroup(pGroup);
-        pGroup->setIsPresent(true);
         log("scanDSMeter:     Adding new group to zone 0");
       }
-
-      // TODO: get last called scene
-      m_Maintenance.onGroupCallScene(_zone->getID(), groupID, SceneOff);
+      pGroup->setIsPresent(true);
     }
     return true;
   } // scanGroupsOfZone
