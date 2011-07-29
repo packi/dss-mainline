@@ -262,8 +262,8 @@ namespace dss {
   DateTime DateTime::fromISO(const std::string& _isoStr) {
     DateTime result;
 
-    if(_isoStr.size() < 8 /*date*/ + 6 /*time*/ + 2 /* 'T', 'Z' */) {
-      throw std::invalid_argument("_isoStr is shorter than expected");
+    if(_isoStr.size() < 8 /*date*/ + 6 /*time*/ + 1 /* 'T', 'Z' is optional */) {
+      throw std::invalid_argument("string is shorter than expected YYMMDD'T'HHMMSS[Z]");
     }
 
     int year = strToInt(EraseLeadingZeros(_isoStr.substr(0, 4)));
@@ -274,7 +274,7 @@ namespace dss {
     int day = strToInt(EraseLeadingZeros(_isoStr.substr(6, 2)));
 
     if(_isoStr.at(8) != 'T') {
-      throw std::invalid_argument("_isoStr should have a 'T' at position 8");
+      throw std::invalid_argument("string should have a 'T' at position 8");
     }
 
     int hour = strToInt(EraseLeadingZeros(_isoStr.substr(9,2)));
@@ -302,17 +302,12 @@ namespace dss {
 
     // if string ends with "Z" it is in UTC, otherwise it is considered to
     // be in local time
-    time_t t0;
-    t0 = mktime(&tm);
-
+    time_t t0 = mktime(&tm);
     if(_isoStr.at(_isoStr.size()-1) == 'Z') {
       t0 += tm.tm_gmtoff;
-      tm.tm_isdst = 0;
-      tm.tm_gmtoff = 0;
-      printf("corrected t0 with %ld\n", tm.tm_gmtoff);
     }
 
-    DateTime d(tm);
+    DateTime d(t0);
     return d;
   } // fromISO
 
@@ -350,14 +345,21 @@ namespace dss {
 
   void ical_to_tm(const icaltimetype& icalTime, struct tm& tm) {
     memset(&tm, '\0', sizeof(tm));
-    if(!icalTime.is_date) {
-      tm.tm_sec = icalTime.second;
-      tm.tm_min = icalTime.minute;
-      tm.tm_hour = icalTime.hour;
+    if (icalTime.is_utc) {
+      time_t t0 = icaltime_as_timet(icalTime);
+      localtime_r(&t0, &tm);
+    } else {
+      if(!icalTime.is_date) {
+        tm.tm_sec = icalTime.second;
+        tm.tm_min = icalTime.minute;
+        tm.tm_hour = icalTime.hour;
+      }
+      tm.tm_mday = icalTime.day;
+      tm.tm_mon = icalTime.month - 1;
+      tm.tm_year = icalTime.year - 1900;
+      tm.tm_isdst = -1;
+      (void) mktime(&tm);
     }
-    tm.tm_mday = icalTime.day;
-    tm.tm_mon = icalTime.month - 1;
-    tm.tm_year = icalTime.year - 1900;
   } // ical_to_tm
 
   DateTime ICalSchedule::getNextOccurence(const DateTime& _from) {
