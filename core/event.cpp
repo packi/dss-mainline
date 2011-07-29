@@ -611,9 +611,9 @@ namespace dss {
       std::string result = scheduledEvent->getID();
       m_EventRunner->addEvent(scheduledEvent);
       return result;
-    } else {
-      throw std::runtime_error("Unable to get schedule from event '" + _event->getName() + "'");
     }
+    log("Queue: Failed to schedule timed-event '" + _event->getName(), lsError);
+    return std::string();
   } // pushTimedEvent
 
   boost::shared_ptr<Event> EventQueue::popEvent() {
