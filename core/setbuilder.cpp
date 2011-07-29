@@ -252,4 +252,57 @@ namespace dss {
     return result;
   } // buildSet
 
+
+  //================================================== MeterSetBuilder
+
+  MeterSetBuilder::MeterSetBuilder(Apartment& _apartment)
+  : m_Apartment(_apartment)
+  {
+  } // ctor
+
+  std::vector<boost::shared_ptr<DSMeter> > MeterSetBuilder::buildSet(const std::string& _setDescription) {
+    std::vector<boost::shared_ptr<DSMeter> > result;
+    std::string from = _setDescription;
+    if(from.find(".meters(") == 0) {
+      from = from.substr(8);
+    } else {
+      throw std::runtime_error("Expected '.meters(' at the start of the description");
+    }
+
+    if((from.length() > 0) && (from.at(from.length()-1) == ')')) {
+      from = from.substr(0, from.length()-1);
+    } else {
+      throw std::runtime_error("No closing ')' found");
+    }
+
+    if(from == "all") {
+      result = m_Apartment.getDSMeters();
+    } else {
+      std::vector<std::string> dsids = dss::splitString(from, ',', true);
+      for(size_t i = 0; i < dsids.size(); i++) {
+        std::string strId = dsids.at(i);
+        if(strId.empty()) {
+          throw std::runtime_error("Invalid dsid in description: " + strId);
+        }
+
+        dss_dsid_t dsid;
+        try {
+          dsid = dss_dsid_t::fromString(strId);
+        } catch(std::invalid_argument&) {
+          throw std::runtime_error("Invalid dsid in description: " + strId);
+        }
+
+        try {
+          boost::shared_ptr<DSMeter> dsMeter = m_Apartment.getDSMeterByDSID(dsid);
+          result.push_back(dsMeter);
+        } catch (std::runtime_error&) {
+          throw std::runtime_error("Could not find dsMeter with given dsid.");
+        }
+
+      }
+    }
+    return result;
+  } // buildSet
+
+
 } // namespace dss

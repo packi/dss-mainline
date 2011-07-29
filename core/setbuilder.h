@@ -24,6 +24,7 @@
 #define SETBUILDER_H_
 
 #include <string>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 
@@ -35,6 +36,7 @@ namespace dss {
   class Apartment;
   class Zone;
   class Set;
+  class DSMeter;
 
   class SetBuilder {
   private:
@@ -55,6 +57,14 @@ namespace dss {
     Set buildSet(const std::string& _setDescription, boost::shared_ptr<const Group> _context);
     Set buildSet(const std::string& _setDescription, boost::shared_ptr<const Zone> _context);
   }; // SetBuilder
+
+  class MeterSetBuilder {
+  public:
+    MeterSetBuilder(Apartment& _apartment);
+    std::vector<boost::shared_ptr<DSMeter> > buildSet(const std::string& _setDescription);
+  private:
+    Apartment& m_Apartment;
+  };
 
 } // namespace dss
 

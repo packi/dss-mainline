@@ -32,6 +32,7 @@
 
 #include "core/model/modulator.h"
 #include "core/model/apartment.h"
+#include "core/setbuilder.h"
 
 
 #include "core/web/json.h"
@@ -171,45 +172,12 @@ namespace dss {
       return failure("Missing 'from' parameter");
     }
 
-    if(from.find(".meters(") == 0) {
-      from = from.substr(8);
-    } else {
-      return failure("Invalid 'from' value");
-    }
-
-    if((from.length() > 0) && (from.at(from.length()-1) == ')')) {
-      from = from.substr(0, from.length()-1);
-    } else {
-      return failure("Invalid 'from' value");
-    }
-
+    MeterSetBuilder builder(m_Apartment);
     std::vector<boost::shared_ptr<DSMeter> > meters;
-
-    if(from == "all") {
-      meters = m_Apartment.getDSMeters();
-    } else {
-      std::vector<std::string> dsids = dss::splitString(from, ',', true);
-      for(size_t i = 0; i < dsids.size(); i++) {
-        std::string strId = dsids.at(i);
-        if(strId.empty()) {
-          return failure("Invalid dsid in 'from' value: " + strId);
-        }
-
-        dss_dsid_t dsid;
-        try {
-          dsid = dss_dsid_t::fromString(strId);
-        } catch(std::invalid_argument&) {
-          return failure("Invalid dsid in 'from' value: " + strId);
-        }
-
-        try {
-          boost::shared_ptr<DSMeter> dsMeter = m_Apartment.getDSMeterByDSID(dsid);
-          meters.push_back(dsMeter);
-        } catch (std::runtime_error&) {
-          return failure("Could not find dsMeter with given dsid.");
-        }
-
-      }//for
+    try {
+      meters = builder.buildSet(from);
+    } catch(std::runtime_error& e) {
+      return failure(std::string("Couldn't parse parameter 'from': '") + e.what() + "'");
     }
 
     boost::shared_ptr<JSONObject> resultObj(new JSONObject());
