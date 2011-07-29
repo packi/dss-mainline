@@ -31,6 +31,7 @@
 #include "webservices/webservices.h"
 #include "core/sim/dssim.h"
 #include "core/propertysystem.h"
+#include "core/propertyquery.h"
 #include "core/setbuilder.h"
 #include "core/foreach.h"
 #include "core/model/apartment.h"
@@ -46,6 +47,8 @@
 #include "core/security/security.h"
 #include "core/structuremanipulator.h"
 #include "core/businterface.h"
+#include "core/metering/metering.h"
+#include "core/web/json.h"
 
 inline dss::dss_dsid_t FromSOAP(const char* _dsid) {
   dss::dss_dsid_t result;
@@ -328,6 +331,19 @@ int dss__ApartmentGetPowerConsumption(struct soap *soap, char* _token, unsigned 
     accumulatedConsumption += pDSMeter->getPowerConsumption();
   }
   result = accumulatedConsumption;
+  return SOAP_OK;
+}
+
+int dss__ApartmentGetEnergyMeterValue(struct soap *soap, char* _token, unsigned long& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+  dss::Apartment& apt = dss::DSS::getInstance()->getApartment();
+  int accumulatedMeterValue = 0;
+  foreach(boost::shared_ptr<dss::DSMeter> pDSMeter, apt.getDSMeters()) {
+    accumulatedMeterValue += pDSMeter->getEnergyMeterValue();
+  }
+  result = accumulatedMeterValue;
   return SOAP_OK;
 }
 
@@ -1107,6 +1123,17 @@ int dss__DSMeterGetPowerConsumption(struct soap *soap, char* _token, char* _dsMe
   return SOAP_OK;
 } // dss__DSMeterGetPowerConsumption
 
+int dss__DSMeterGetEnergyMeterValue(struct soap *soap, char* _token, char* _dsMeterID, unsigned long& result) {
+  boost::shared_ptr<dss::DSMeter> mod;
+  int getResult = AuthorizeAndGetDSMeter(soap, _token, _dsMeterID, mod);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  result = mod->getEnergyMeterValue();
+  return SOAP_OK;
+}
+
 
 //==================================================== Organization
 
@@ -1437,6 +1464,58 @@ int dss__PropertyRemove(struct soap *soap, char* _token, std::string _propertyNa
   return SOAP_OK;
 } // dss__PropertyRemove
 
+void transformJSONResult(std::string _name, boost::shared_ptr<dss::JSONElement> _element, dss__PropertyQueryEntry& _parent) {
+  boost::shared_ptr<dss::JSONArrayBase> array = boost::dynamic_pointer_cast<dss::JSONArrayBase>(_element);
+  boost::shared_ptr<dss::JSONObject> object = boost::dynamic_pointer_cast<dss::JSONObject>(_element);
+  if(array != NULL) {
+    dss__PropertyQueryEntry result;
+    result.name = _name;
+    for(int iElement = 0; iElement < array->getElementCount(); iElement++) {
+      transformJSONResult("", array->getElement(iElement), result);
+    }
+    _parent.results.push_back(result);
+  } else if(object != NULL) {
+    dss__PropertyQueryEntry result;
+    result.name = _name;
+    for(int iElement = 0; iElement < object->getElementCount(); iElement++) {
+      transformJSONResult(object->getElementName(iElement), object->getElement(iElement), result);
+    }
+    _parent.results.push_back(result);
+  } else {
+    dss__Property prop;
+    prop.name = _name;
+    boost::shared_ptr<dss::JSONValue<int> > intValue = boost::dynamic_pointer_cast<dss::JSONValue<int> >(_element);
+    boost::shared_ptr<dss::JSONValue<bool> > boolValue = boost::dynamic_pointer_cast<dss::JSONValue<bool> >(_element);
+    boost::shared_ptr<dss::JSONValue<std::string> > stringValue = boost::dynamic_pointer_cast<dss::JSONValue<std::string> >(_element);
+    if(intValue != NULL) {
+      prop.type = "int";
+      prop.value = dss::intToString(intValue->getValue());
+    } else if(boolValue != NULL) {
+      prop.type = "bool";
+      prop.value = boolValue->getValue() ? "true" : "false";
+    } else if(stringValue != NULL) {
+      prop.type = "string";
+      prop.value = stringValue->getValue();
+    }
+    _parent.properties.push_back(prop);
+  }
+}
+
+int dss__PropertyQuery(struct soap *soap, char* _token, std::string _query, dss__PropertyQueryEntry& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+
+  dss::PropertySystem& propSys = dss::DSS::getInstance()->getPropertySystem();
+  dss::PropertyQuery propertyQuery(propSys.getRootNode(), _query);
+  boost::shared_ptr<dss::JSONObject> jsonResult = boost::shared_dynamic_cast<dss::JSONObject>(propertyQuery.run());
+
+  result.name = "root";
+  transformJSONResult("", jsonResult, result);
+
+  return SOAP_OK;
+} // dss__PropertyQuery
+
 int dss__StructureAddDeviceToZone(struct soap *soap, char* _token, char* _deviceID, int _zoneID, bool& result) {
   if(!IsAuthorized(soap, _token)) {
     return NotAuthorized(soap);
@@ -1457,3 +1536,125 @@ int dss__StructureAddDeviceToZone(struct soap *soap, char* _token, char* _device
   return SOAP_OK;
 } // dss__StructureAddDeviceToZone
 
+
+//==================================================== Metering
+
+int dss__MeteringGetResolutions(struct soap *soap, char* _token, std::vector<dss__MeteringResolutions>& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+  dss::Metering& metering = dss::DSS::getInstance()->getMetering();
+  std::vector<boost::shared_ptr<dss::MeteringConfigChain> > meteringConfig = metering.getConfig();
+
+  foreach(boost::shared_ptr<dss::MeteringConfigChain> pChain, meteringConfig) {
+    for(int iConfig = 0; iConfig < pChain->size(); iConfig++) {
+      dss__MeteringResolutions resolution;
+      resolution.type = pChain->isEnergy() ? "energy" : "consumption";
+      resolution.unit = pChain->getUnit();
+      resolution.resolution = pChain->getResolution(iConfig);
+      result.push_back(resolution);
+    }
+  }
+  return SOAP_OK;
+}
+
+int dss__MeteringGetSeries(struct soap *soap, char* _token, std::vector<dss__MeteringSeries>& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+  std::vector<boost::shared_ptr<dss::DSMeter> > dsMeters = dss::DSS::getInstance()->getApartment().getDSMeters();
+  foreach(boost::shared_ptr<dss::DSMeter> dsMeter, dsMeters) {
+    dss__MeteringSeries seriesEnergy;
+    seriesEnergy.dsid = dsMeter->getDSID().toString();
+    seriesEnergy.type = "energy";
+    result.push_back(seriesEnergy);
+    dss__MeteringSeries seriesConsumption;
+    seriesConsumption.dsid = dsMeter->getDSID().toString();
+    seriesConsumption.type = "consumption";
+    result.push_back(seriesConsumption);
+  }
+  return SOAP_OK;
+}
+
+int dss__MeteringGetValues(struct soap *soap, char* _token, char* _dsMeterID,
+                           std::string _type, int _resolution, std::vector<dss__MeteringValue>& result) {
+  boost::shared_ptr<dss::DSMeter> pMeter;
+  int getResult = AuthorizeAndGetDSMeter(soap, _token, _dsMeterID, pMeter);
+  if(getResult != SOAP_OK) {
+    return getResult;
+  }
+
+  bool isEnergy = false;
+  if(_type == "energy") {
+    isEnergy = true;
+  } else {
+    if(_type != "consumption") {
+      return soap_sender_fault(soap, "Expected 'energy' or 'consumption' for parameter 'type'", NULL);
+    }
+  }
+
+  dss::Metering& metering = dss::DSS::getInstance()->getMetering();
+  std::vector<boost::shared_ptr<dss::MeteringConfigChain> > meteringConfig = metering.getConfig();
+  boost::shared_ptr<dss::Series<dss::CurrentValue> > pSeries;
+  foreach(boost::shared_ptr<dss::MeteringConfigChain> pChain, meteringConfig) {
+    if(pChain->isEnergy() != isEnergy) {
+      continue;
+    }
+    for(int iConfig = 0; iConfig < pChain->size(); iConfig++) {
+      if(pChain->getResolution(iConfig) == _resolution) {
+        pSeries = metering.getSeries(pChain, iConfig, pMeter);
+        break;
+      }
+    }
+  }
+  if(pSeries != NULL) {
+    boost::shared_ptr<std::deque<dss::CurrentValue> > values = pSeries->getExpandedValues();
+
+    for(std::deque<dss::CurrentValue>::iterator iValue = values->begin(),
+        e = values->end();
+        iValue != e;
+        ++iValue)
+    {
+      dss__MeteringValue value;
+      value.timestamp = iValue->getTimeStamp().secondsSinceEpoch();
+      value.value = iValue->getValue();
+      result.push_back(value);
+    }
+  } else {
+    std::string faultMessage = "Could not find data for '" + _type + "' and resolution '" + dss::intToString(_resolution) + "'";
+    return soap_sender_fault(soap, faultMessage.c_str(), NULL);
+  }
+  return SOAP_OK;
+}
+
+int dss__MeteringGetLastest(struct soap *soap, char* _token, std::string _from, std::string _type, std::vector<dss__MeteringValuePerDevice>& result) {
+  if(!IsAuthorized(soap, _token)) {
+    return NotAuthorized(soap);
+  }
+  dss::Apartment& apartment = dss::DSS::getInstance()->getApartment();
+
+  if(_type.empty() || ((_type != "consumption") && (_type != "energy"))) {
+    return soap_sender_fault(soap, "Invalid or missing type parameter", NULL);
+  }
+
+  dss::MeterSetBuilder builder(apartment);
+  std::vector<boost::shared_ptr<dss::DSMeter> > meters;
+  try {
+    meters = builder.buildSet(_from);
+  } catch(std::runtime_error& e) {
+    std::string failureMessage = std::string("Couldn't parse parameter 'from': '") + e.what() + "'";
+    return soap_sender_fault(soap, failureMessage.c_str(), NULL);
+  }
+
+  bool isEnergy = (_type == "energy");
+
+  foreach(boost::shared_ptr<dss::DSMeter> dsMeter, meters) {
+    dss__MeteringValuePerDevice value;
+    value.dsid = dsMeter->getDSID().toString();
+    dss::DateTime temp_date = isEnergy ? dsMeter->getCachedEnergyMeterTimeStamp() : dsMeter->getCachedPowerConsumptionTimeStamp();
+    value.timestamp = temp_date.secondsSinceEpoch();
+    value.value = isEnergy ? dsMeter->getCachedEnergyMeterValue() : dsMeter->getCachedPowerConsumption();
+    result.push_back(value);
+  }
+  return SOAP_OK;
+}

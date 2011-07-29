@@ -170,4 +170,12 @@ BOOST_AUTO_TEST_CASE(testGetElementByNameReturnsNull) {
   BOOST_CHECK_EQUAL(parent->getElementByName(kElementName), boost::shared_ptr<JSONElement>());
 }
 
+BOOST_AUTO_TEST_CASE(testGetElementName) {
+  const std::string kElementName = "child";
+  boost::shared_ptr<JSONElement> parent(new JSONObject());
+  boost::shared_ptr<JSONElement> child(new JSONObject());
+  parent->addElement(kElementName, child);
+  BOOST_CHECK_EQUAL(parent->getElementName(0), kElementName);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -15,6 +15,39 @@
      <element name="parameter" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
    </sequence>
   </complexType>
+  <complexType name="Property">
+   <sequence>
+     <element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+     <element name="value" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+     <element name="type" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+   </sequence>
+  </complexType>
+  <complexType name="MeteringResolutions">
+   <sequence>
+     <element name="type" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+     <element name="unit" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+     <element name="resolution" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+   </sequence>
+  </complexType>
+  <complexType name="MeteringSeries">
+   <sequence>
+     <element name="dsid" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+     <element name="type" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+   </sequence>
+  </complexType>
+  <complexType name="MeteringValue">
+   <sequence>
+     <element name="timestamp" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="value" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+   </sequence>
+  </complexType>
+  <complexType name="MeteringValuePerDevice">
+   <sequence>
+     <element name="dsid" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+     <element name="timestamp" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+     <element name="value" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+   </sequence>
+  </complexType>
   <!-- operation request element -->
   <element name="Authenticate">
    <complexType>
@@ -1222,6 +1255,23 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="DSMeterGetEnergyMeterValue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="dsMeterID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="DSMeterGetEnergyMeterValueResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="ApartmentGetDSMeterIDs">
    <complexType>
     <sequence>
@@ -1348,6 +1398,22 @@
   </element>
   <!-- operation response element -->
   <element name="ApartmentGetPowerConsumptionResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="ApartmentGetEnergyMeterValue">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="ApartmentGetEnergyMeterValueResponse">
    <complexType>
     <sequence>
      <element name="result" type="xsd:unsignedInt" minOccurs="1" maxOccurs="1"/>
@@ -1657,6 +1723,25 @@
    </complexType>
   </element>
   <!-- operation request element -->
+  <element name="PropertyQuery">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="query" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="PropertyQueryEntry">
+   <complexType>
+    <sequence>
+     <element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+     <element name="properties" type="dss:Property" minOccurs="0" maxOccurs="unbounded"/>
+     <element name="results" type="dss:PropertyQueryEntry" minOccurs="0" maxOccurs="unbounded"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
   <element name="StructureAddDeviceToZone">
    <complexType>
     <sequence>
@@ -1671,6 +1756,75 @@
    <complexType>
     <sequence>
      <element name="result" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="MeteringGetResolutions">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="MeteringGetResolutionsResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="dss:MeteringResolutions" minOccurs="1" maxOccurs="unbounded"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="MeteringGetSeries">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="MeteringGetSeriesResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="dss:MeteringSeries" minOccurs="1" maxOccurs="unbounded"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="MeteringGetValues">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="dsMeterID" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="type" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+     <element name="resolution" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="MeteringGetValuesResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="dss:MeteringValue" minOccurs="1" maxOccurs="unbounded"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation request element -->
+  <element name="MeteringGetLastest">
+   <complexType>
+    <sequence>
+     <element name="token" type="xsd:string" minOccurs="0" maxOccurs="1" nillable="true"/>
+     <element name="from" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+     <element name="type" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+    </sequence>
+   </complexType>
+  </element>
+  <!-- operation response element -->
+  <element name="MeteringGetLastestResponse">
+   <complexType>
+    <sequence>
+     <element name="result" type="dss:MeteringValuePerDevice" minOccurs="1" maxOccurs="unbounded"/>
     </sequence>
    </complexType>
   </element>

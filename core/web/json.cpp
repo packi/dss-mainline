@@ -81,6 +81,10 @@ namespace dss {
     return m_Elements.at(_index).second;
   } // getElement
 
+  const std::string& JSONElement::getElementName(const int _index) {
+    return m_Elements.at(_index).first;
+  } // getElementName
+
   int JSONElement::getElementCount() const {
     return m_Elements.size();
   } // getElementCount
