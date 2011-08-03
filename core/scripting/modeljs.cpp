@@ -186,7 +186,11 @@ namespace dss {
     if(ext != NULL) {
       uint32_t result = 0;
       foreach(boost::shared_ptr<DSMeter> pDSMeter, ext->getApartment().getDSMeters()) {
-        result += pDSMeter->getEnergyMeterValue();
+        try {
+          result += pDSMeter->getEnergyMeterValue();
+        } catch(BusApiError& e) {
+          Logger::getInstance()->log(std::string("Error requesting energy meter value from dSM: ") + e.what(), lsError);
+        }
       }
       *rval = INT_TO_JSVAL(result);
       return JS_TRUE;
@@ -201,7 +205,11 @@ namespace dss {
     if(ext != NULL) {
       uint32_t result = 0;
       foreach(boost::shared_ptr<DSMeter> pDSMeter, ext->getApartment().getDSMeters()) {
-        result += pDSMeter->getPowerConsumption();
+        try {
+          result += pDSMeter->getPowerConsumption();
+        } catch(BusApiError& e) {
+          Logger::getInstance()->log(std::string("Error requesting energy consumption from dSM: ") + e.what(), lsError);
+        }
       }
       *rval = INT_TO_JSVAL(result);
       return JS_TRUE;
@@ -951,8 +959,12 @@ namespace dss {
     boost::shared_ptr<DSMeter> meter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, obj))->pMeter;
 
     if(meter != NULL) {
-      *rval = INT_TO_JSVAL(meter->getPowerConsumption());
-      return JS_TRUE;
+      try {
+        *rval = INT_TO_JSVAL(meter->getPowerConsumption());
+        return JS_TRUE;
+      } catch (BusApiError& e) {
+        *rval = JSVAL_NULL;
+      }
     }
     return JS_FALSE;
   } // dsmeter_getPowerConsumption
@@ -976,8 +988,12 @@ namespace dss {
     boost::shared_ptr<DSMeter> meter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, obj))->pMeter;
 
     if(meter != NULL) {
-      *rval = INT_TO_JSVAL(meter->getEnergyMeterValue());
-      return JS_TRUE;
+      try {
+        *rval = INT_TO_JSVAL(meter->getEnergyMeterValue());
+        return JS_TRUE;
+      } catch (BusApiError& e) {
+        *rval = JSVAL_NULL;
+      }
     }
     return JS_FALSE;
   } // dsmeter_getEnergyMeterValue
