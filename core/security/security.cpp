@@ -110,7 +110,7 @@ namespace dss {
 
   bool Security::authenticateApplication(const std::string& _applicationToken) {
     signOff();
-    PropertyNodePtr pTokenNode = m_pRootNode->getProperty("applicationTokens/" + _applicationToken);
+    PropertyNodePtr pTokenNode = m_pRootNode->getProperty("applicationTokens/enabled/" + _applicationToken);
     if(pTokenNode != NULL) {
       PropertyNodePtr pUserNameNode = pTokenNode->getProperty("user");
       if(pUserNameNode != NULL) {
@@ -168,10 +168,11 @@ namespace dss {
   bool Security::enableToken(const std::string& _token, User* _pUser) {
     PropertyNodePtr pTokensNode = m_pRootNode->createProperty("applicationTokens");
     PropertyNodePtr pPendingTokens = pTokensNode->createProperty("pending");
+    PropertyNodePtr pEnabledTokens = pTokensNode->createProperty("enabled");
     PropertyNodePtr pToken = pPendingTokens->getProperty(_token);
     if(pToken != NULL) {
       pTokensNode->setFlag(PropertyNode::Archive, true);
-      PropertyNodePtr pRealToken = pTokensNode->createProperty(_token);
+      PropertyNodePtr pRealToken = pEnabledTokens->createProperty(_token);
       pRealToken->setFlag(PropertyNode::Archive, true);
       PropertyNodePtr pTokenNode = pRealToken->createProperty("token");
       pTokenNode->setStringValue(_token);
@@ -190,8 +191,8 @@ namespace dss {
   } // enableToken
 
   bool Security::revokeToken(const std::string& _token) {
-    PropertyNodePtr pTokens = m_pRootNode->createProperty("applicationTokens/");
-    PropertyNodePtr pToken = m_pRootNode->getProperty("applicationTokens/" + _token);
+    PropertyNodePtr pTokens = m_pRootNode->createProperty("applicationTokens/enabled");
+    PropertyNodePtr pToken = m_pRootNode->getProperty("applicationTokens/enabled/" + _token);
     if(pToken != NULL) {
       pTokens->removeChild(pToken);
       if(m_pTreeListener != NULL) {
