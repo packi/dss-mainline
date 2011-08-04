@@ -395,9 +395,11 @@ namespace dss {
           callDataCallback(result);
         }
       } else {
-        boost::shared_ptr<ScriptContextAttachedObject> delayFreeing = endBlockingCall();
         Logger::getInstance()->log("SocketHelperInstance::readCallback: error: " + error.message());
-        callDataCallback("");
+        m_BytesToRead = 0;
+        std::string result(m_DataBuffer, bytesTransfered);
+        boost::shared_ptr<ScriptContextAttachedObject> delayFreeing = endBlockingCall();
+        callDataCallback(result);
       }
     }
 
