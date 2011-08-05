@@ -83,7 +83,11 @@ namespace dss {
   } // getPropertyBasePath
 
   void Subsystem::log(const std::string& _message, aLogSeverity _severity) {
-    Logger::getInstance()->log(*m_pLogChannel, _message, _severity);
+    if(m_pLogChannel != NULL) {
+      Logger::getInstance()->log(*m_pLogChannel, _message, _severity);
+    } else {
+      Logger::getInstance()->log(m_Name + ": " + _message, _severity);
+    }
   }
 
   int Subsystem::getLogSeverity() const {
